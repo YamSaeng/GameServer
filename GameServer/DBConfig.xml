@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DBConfig>
+  <DB name="AccountDB">
+    <Option ConnectionString=""/>
+  </DB>
+  <DB name="GameDB">
+    <Option ConnectionString=""/>
+  </DB>
+</DBConfig>

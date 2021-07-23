@@ -245,6 +245,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <Xml Include="DBConfig.xml" />
     <Xml Include="MainDB.xml" />
     <Xml Include="ServerConfig.xml" />
   </ItemGroup>

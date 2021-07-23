@@ -197,7 +197,6 @@ void CGameServer::PacketProcReqLogin(int64 SessionID, CMessage* Message)
 		//}
 
 		// AccountDB 접근해서 세션키를 이용해서 Account를 찾은 후 찾았으면 로그인 처리				
-		G_DBConnectionPool->Connect(1, L"");
 
 		//AccountNo 셋팅
 		Client->AccountNo = AccountNo;

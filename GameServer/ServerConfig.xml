@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ServerOption>
+<ServerConfig>
   <Server name="NetworkLib">
     <Option IP="0.0.0.0" PORT="12002"/>    
   </Server>
-</ServerOption>
+</ServerConfig>

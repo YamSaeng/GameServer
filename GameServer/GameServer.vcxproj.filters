@@ -163,5 +163,8 @@
     <Xml Include="ServerConfig.xml">
       <Filter>Util\설정 파일</Filter>
     </Xml>
+    <Xml Include="DBConfig.xml">
+      <Filter>Util\설정 파일</Filter>
+    </Xml>
   </ItemGroup>
 </Project>

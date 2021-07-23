@@ -9,6 +9,8 @@ struct st_ServerInfo
 	int Port;
 };
 
+CGameServer G_GameServer;
+
 vector<st_ServerInfo> ServerConfigParser(const wchar_t* FileName)
 {
 	vector<st_ServerInfo> ServerInfos;
@@ -22,7 +24,7 @@ vector<st_ServerInfo> ServerConfigParser(const wchar_t* FileName)
 	}
 
 	vector<CXmlNode> Servers = Root.FindChildren(L"Server");
-	for (int i = 0; i < Servers.size(); i++)
+	for (int32 i = 0; i < Servers.size(); i++)
 	{
 		st_ServerInfo ServerInfo;
 		wstring ServerName = Servers[i].GetStringAttr(L"name");
@@ -38,12 +40,11 @@ vector<st_ServerInfo> ServerConfigParser(const wchar_t* FileName)
 	return ServerInfos;
 }
 
-CGameServer G_GameServer;
-
-int main()
+void ServerInfoInit()
 {
+	// 서버 초기화
 	vector<st_ServerInfo> ServerInfos = ServerConfigParser(L"ServerConfig.xml");
-	
+
 	for (int32 i = 0; i < ServerInfos.size(); i++)
 	{
 		if (ServerInfos[i].ServerName == L"NetworkLib")
@@ -51,6 +52,13 @@ int main()
 			G_GameServer.Start(ServerInfos[i].IP.c_str(), ServerInfos[i].Port);
 		}
 	}
+
+	// DB 초기화
+}
+
+int main()
+{
+	ServerInfoInit();	
 
 	SYSTEMTIME NowTime;
 	GetLocalTime(&NowTime);
