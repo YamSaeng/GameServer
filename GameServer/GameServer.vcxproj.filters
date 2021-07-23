@@ -1,0 +1,167 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Util">
+      <UniqueIdentifier>{f47daaaf-30c4-4c4d-906e-2103ea43d0f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util\XMLParser">
+      <UniqueIdentifier>{d0223182-400f-4cda-a3c4-5cd82c8b08e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util\Log">
+      <UniqueIdentifier>{fa39c304-71d7-4be5-aa95-cbf00aa028f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util\LockFree">
+      <UniqueIdentifier>{6cf0e3ab-6bb2-457e-b18f-e2c108c3627f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util\Memory">
+      <UniqueIdentifier>{b4b925dc-315d-4216-beec-c8fe3a82b3fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Message">
+      <UniqueIdentifier>{10de2a4e-5600-451b-aa2d-34c45b6fd9d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ServerCore">
+      <UniqueIdentifier>{6f18b3bc-19da-4ffa-abee-1cfae23f2fe9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DB">
+      <UniqueIdentifier>{6a3dd1a1-0865-414b-bec4-ee23b71b2eff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ContentServer">
+      <UniqueIdentifier>{56bdcf25-ea3b-43fa-b708-d881b96d45e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DB\XML">
+      <UniqueIdentifier>{04e8660f-ce6f-4f2b-96e2-54c85471f69d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util\File">
+      <UniqueIdentifier>{b9b07ab4-ce0c-4b0a-9c37-bcda4302be5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util\설정 파일">
+      <UniqueIdentifier>{b3023991-54a2-4ae7-9aa4-811f2eb02c1c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Type.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="DBConnection.h">
+      <Filter>DB</Filter>
+    </ClInclude>
+    <ClInclude Include="DBModel.h">
+      <Filter>DB</Filter>
+    </ClInclude>
+    <ClInclude Include="DBConnectionPool.h">
+      <Filter>DB</Filter>
+    </ClInclude>
+    <ClInclude Include="GameServer.h">
+      <Filter>ContentServer</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkLib.h">
+      <Filter>ServerCore</Filter>
+    </ClInclude>
+    <ClInclude Include="SessionInfo.h">
+      <Filter>ServerCore</Filter>
+    </ClInclude>
+    <ClInclude Include="RingBuffer.h">
+      <Filter>ServerCore</Filter>
+    </ClInclude>
+    <ClInclude Include="Message.h">
+      <Filter>ServerCore</Filter>
+    </ClInclude>
+    <ClInclude Include="LockFreeQue.h">
+      <Filter>Util\LockFree</Filter>
+    </ClInclude>
+    <ClInclude Include="LockFreeStack.h">
+      <Filter>Util\LockFree</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectPoolFreeList.h">
+      <Filter>Util\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryPoolTLS.h">
+      <Filter>Util\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="Log.h">
+      <Filter>Util\Log</Filter>
+    </ClInclude>
+    <ClInclude Include="DBSynchronizer.h">
+      <Filter>DB</Filter>
+    </ClInclude>
+    <ClInclude Include="DBBind.h">
+      <Filter>DB</Filter>
+    </ClInclude>
+    <ClInclude Include="rapidxml.hpp">
+      <Filter>Util\XMLParser</Filter>
+    </ClInclude>
+    <ClInclude Include="rapidxml_iterators.hpp">
+      <Filter>Util\XMLParser</Filter>
+    </ClInclude>
+    <ClInclude Include="rapidxml_print.hpp">
+      <Filter>Util\XMLParser</Filter>
+    </ClInclude>
+    <ClInclude Include="rapidxml_utils.hpp">
+      <Filter>Util\XMLParser</Filter>
+    </ClInclude>
+    <ClInclude Include="XmlParser.h">
+      <Filter>Util\XMLParser</Filter>
+    </ClInclude>
+    <ClInclude Include="FileUtils.h">
+      <Filter>Util\File</Filter>
+    </ClInclude>
+    <ClInclude Include="Macro.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="GameServerInfo.h">
+      <Filter>ContentServer</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonProtocol.h">
+      <Filter>ContentServer</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="DBConnection.cpp">
+      <Filter>DB</Filter>
+    </ClCompile>
+    <ClCompile Include="DBModel.cpp">
+      <Filter>DB</Filter>
+    </ClCompile>
+    <ClCompile Include="DBConnectionPool.cpp">
+      <Filter>DB</Filter>
+    </ClCompile>
+    <ClCompile Include="GameServer.cpp">
+      <Filter>ContentServer</Filter>
+    </ClCompile>
+    <ClCompile Include="NetworkLib.cpp">
+      <Filter>ServerCore</Filter>
+    </ClCompile>
+    <ClCompile Include="Message.cpp">
+      <Filter>ServerCore</Filter>
+    </ClCompile>
+    <ClCompile Include="Log.cpp">
+      <Filter>Util\Log</Filter>
+    </ClCompile>
+    <ClCompile Include="DBSynchronizer.cpp">
+      <Filter>DB</Filter>
+    </ClCompile>
+    <ClCompile Include="XmlParser.cpp">
+      <Filter>Util\XMLParser</Filter>
+    </ClCompile>
+    <ClCompile Include="FileUtils.cpp">
+      <Filter>Util\File</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="MainDB.xml">
+      <Filter>DB\XML</Filter>
+    </Xml>
+    <Xml Include="ServerConfig.xml">
+      <Filter>Util\설정 파일</Filter>
+    </Xml>
+  </ItemGroup>
+</Project>
