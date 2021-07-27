@@ -1,0 +1,43 @@
+{
+  "Weapons": [
+    {
+      "DataSheetId": 1,
+      "Name": "°ß½À»ýÀÇ °Ë",
+      "WeaponType": "Sword",
+      "Damage": 10,
+      "ImageFilePath": "Textures/Weapon & Tool/Knife"
+    },
+    {
+      "DataSheetId": 2,
+      "Name": "°ß½À»ýÀÇ È°",
+      "WeaponType": "Bow",
+      "Damage": 5,
+      "ImageFilePath": "Textures/Weapon & Tool/Bow"
+    }
+  ],
+  "Armors": [
+    {
+      "DataSheetId": 100,
+      "Name": "»À °©¿Ê",
+      "ArmorType": "Armor",
+      "Defence": 15,
+      "ImageFilePath": "Textures/Equipment/Leather Armor"
+    },
+    {
+      "DataSheetId": 101,
+      "Name": "»À Åõ±¸",
+      "ArmorType": "Helmet",
+      "Defence": 5,
+      "ImageFilePath": "Textures/Equipment/Leather Helmet"
+    }
+  ],
+  "Consumables": [
+    {
+      "DataSheetId": 200,
+      "Name": "Potion",
+      "ConsumableType": "Potion",
+      "MaxCount": 10,
+      "ImageFilePath": "Textures/Potion/Red Potion"
+    }
+  ]
+} 

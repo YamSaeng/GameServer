@@ -1,32 +1,32 @@
 #include "pch.h"
 #include "FileUtils.h"
-#include <filesystem>
-#include <fstream>
 
-/*-----------------
-	FileUtils
-------------------*/
-
-namespace FS = std::filesystem;
-
-vector<BYTE> FileUtils::ReadFile(const WCHAR* path)
+// 파일 읽어서 안에 있는 내용 반환 
+char* FileUtils::LoadFile(const wchar_t* Path)
 {
-	vector<BYTE> Ret;
-	
-	// File Path 설정
-	FS::path FilePath{ path };
+	char RetBuf[100000];
+	memset(RetBuf, 0, sizeof(RetBuf));
 
-	// FileSize 구하기
-	const uint32 FileSize = static_cast<uint32>(FS::file_size(FilePath));
-	// FileSize 만큼 vector크기 설정
-	Ret.resize(FileSize);
+	DWORD ReadSize;
 
-	// FilePath에 있는 파일 내용을 읽어서
-	// vector Ret에 저장
-	basic_ifstream<BYTE> InputStream{ FilePath };
-	InputStream.read(&Ret[0], FileSize);
+	HANDLE File = CreateFile(Path, GENERIC_READ, 0, NULL, OPEN_EXISTING, 0, NULL);
+	if (File == INVALID_HANDLE_VALUE)
+	{
+		printf("파일 안열림");
+	}
 
-	return Ret;
+	int DataSize = GetFileSize(File, NULL);
+
+	ReadFile(File, RetBuf, DataSize, &ReadSize, NULL);
+	if (ReadSize != DataSize)
+	{
+		CloseHandle(File);
+		return nullptr;
+	}
+
+	CloseHandle(File);
+
+	return RetBuf;
 }
 
 wstring FileUtils::Convert(string str)

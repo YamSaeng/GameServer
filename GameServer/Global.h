@@ -2,3 +2,4 @@
 
 extern class CDBConnectionPool* G_DBConnectionPool;
 extern class CLog* G_Logger;
+extern class CDataManager* G_Datamanager;

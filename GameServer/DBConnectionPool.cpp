@@ -4,11 +4,12 @@
 
 CDBConnectionPool::CDBConnectionPool()
 {
-
+	InitializeCriticalSection(&_CS);
 }
 
 CDBConnectionPool::~CDBConnectionPool()
 {
+	DeleteCriticalSection(&_CS);
 	Clear();
 }
 
@@ -40,7 +41,7 @@ bool CDBConnectionPool::Init(int32 ConnectionCount)
 	{
 		wstring DBName = DBs[i].GetStringAttr(L"name");
 		if (DBName == L"AccountDB")
-		{ 
+		{
 			CXmlNode Option = DBs[i].FindChild(L"Option");
 			wstring ConnectionString = Option.GetStringAttr(L"ConnectionString");
 
@@ -112,6 +113,8 @@ CDBConnection* CDBConnectionPool::Pop(en_DBConnect ConnectDBName)
 {
 	CDBConnection* DBConnection = nullptr;
 
+	EnterCriticalSection(&_CS);
+
 	switch (ConnectDBName)
 	{
 	case en_DBConnect::ACCOUNT:
@@ -122,7 +125,7 @@ CDBConnection* CDBConnectionPool::Pop(en_DBConnect ConnectDBName)
 
 		DBConnection = _AccountDBConnections.back();
 		_AccountDBConnections.pop_back();
-		return DBConnection;
+		break;
 	case en_DBConnect::GAME:
 		if (_GameDBConnections.empty() == true)
 		{
@@ -131,14 +134,18 @@ CDBConnection* CDBConnectionPool::Pop(en_DBConnect ConnectDBName)
 
 		DBConnection = _GameDBConnections.back();
 		_GameDBConnections.pop_back();
-		return DBConnection;
-	}	
-		
+		break;
+	}
+
+	LeaveCriticalSection(&_CS);
+
 	return DBConnection;
 }
 
 void CDBConnectionPool::Push(en_DBConnect InputConnectDBName, CDBConnection* DBConnection)
 {
+	EnterCriticalSection(&_CS);
+
 	switch (InputConnectDBName)
 	{
 	case en_DBConnect::ACCOUNT:
@@ -148,4 +155,6 @@ void CDBConnectionPool::Push(en_DBConnect InputConnectDBName, CDBConnection* DBC
 		_GameDBConnections.push_back(DBConnection);
 		break;
 	}
+
+	LeaveCriticalSection(&_CS);
 }

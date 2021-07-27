@@ -37,6 +37,18 @@
     <Filter Include="Util\설정 파일">
       <UniqueIdentifier>{b3023991-54a2-4ae7-9aa4-811f2eb02c1c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ContentServer\Content">
+      <UniqueIdentifier>{4cae6cf0-7bb7-4aa8-8506-398ba31b83af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ContentServer\Content\Channel">
+      <UniqueIdentifier>{0404a1cf-87de-4b63-b5b7-3537ea3d5247}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ContentServer\Content\Item">
+      <UniqueIdentifier>{f0da3aa8-0024-476a-a36f-d688c4ba180e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ContentServer\Content\Data">
+      <UniqueIdentifier>{12807dfe-17f2-4046-865b-c8efb38536d7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Type.h">
@@ -118,6 +130,18 @@
     <ClInclude Include="CommonProtocol.h">
       <Filter>ContentServer</Filter>
     </ClInclude>
+    <ClInclude Include="Channel.h">
+      <Filter>ContentServer\Content\Channel</Filter>
+    </ClInclude>
+    <ClInclude Include="Item.h">
+      <Filter>ContentServer\Content\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="DataManager.h">
+      <Filter>ContentServer\Content\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Data.h">
+      <Filter>ContentServer\Content\Data</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -155,6 +179,18 @@
     <ClCompile Include="Global.cpp">
       <Filter>Util</Filter>
     </ClCompile>
+    <ClCompile Include="Channel.cpp">
+      <Filter>ContentServer\Content\Channel</Filter>
+    </ClCompile>
+    <ClCompile Include="Item.cpp">
+      <Filter>ContentServer\Content\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="DataManager.cpp">
+      <Filter>ContentServer\Content\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="Data.cpp">
+      <Filter>ContentServer\Content\Data</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="MainDB.xml">
@@ -166,5 +202,10 @@
     <Xml Include="DBConfig.xml">
       <Filter>Util\설정 파일</Filter>
     </Xml>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ItemData.json">
+      <Filter>ContentServer\Content\Data</Filter>
+    </None>
   </ItemGroup>
 </Project>
