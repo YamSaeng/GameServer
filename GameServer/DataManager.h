@@ -85,7 +85,7 @@ public:
 			_Items->insert(pair<int32, st_ArmorData*>(ArmorData->_DataSheetId, ArmorData));
 		}
 
-		for (auto& Filed : Document["Armors"].GetArray())
+		for (auto& Filed : Document["Consumables"].GetArray())
 		{
 			int DataSheetId = Filed["DataSheetId"].GetInt();
 			string ItemName = Filed["Name"].GetString();

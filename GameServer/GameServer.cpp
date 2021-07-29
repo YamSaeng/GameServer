@@ -103,6 +103,10 @@ void CGameServer::CreateNewClient(int64 SessionID)
 	NewClient->RecvPacketTime = timeGetTime();
 
 	_ClientMap.insert(pair<int64, st_CLIENT*>(NewClient->SessionID, NewClient));
+
+	CMessage* ResClientConnectedMessage = MakePacketResClientConnected();	
+	SendPacket(NewClient->SessionID, ResClientConnectedMessage);
+	ResClientConnectedMessage->Free();
 }
 
 void CGameServer::DeleteClient(int64 SessionID)
@@ -115,7 +119,7 @@ void CGameServer::DeleteClient(int64 SessionID)
 	{
 		Client = (*ClientFindIterator).second;
 
-		if (Client->SectorY != -1 && Client->SectorY != -1)
+		if (Client->SectorX != -1 && Client->SectorY != -1)
 		{
 			_SectorList[Client->SectorY][Client->SectorX].remove(Client->SessionID);
 		}
@@ -136,16 +140,19 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 
 	switch (MessageType)
 	{
-	case en_PACKET_CS_CHAT_REQ_LOGIN:
+	case en_PACKET_CS_GAME_REQ_LOGIN:
 		PacketProcReqLogin(SessionID, Message);
 		break;
-	case en_PACKET_CS_CHAT_REQ_SECTOR_MOVE:
+	case en_PACKET_C2S_GAME_LOGIN:
+		PacketProcReqLoginTest(SessionID, Message);
+		break;
+	case en_PACKET_CS_GAME_REQ_SECTOR_MOVE:
 		PacketProcReqSectorMove(SessionID, Message);
 		break;
-	case en_PACKET_CS_CHAT_REQ_MESSAGE:
+	case en_PACKET_CS_GAME_REQ_MESSAGE:
 		PacketProcReqMessage(SessionID, Message);
 		break;
-	case en_PACKET_CS_CHAT_REQ_HEARTBEAT:
+	case en_PACKET_CS_GAME_REQ_HEARTBEAT:
 		PacketProcReqHeartBeat(SessionID, Message);
 		break;
 	default:
@@ -218,6 +225,54 @@ void CGameServer::PacketProcReqLogin(int64 SessionID, CMessage* Message)
 	CMessage* LoginMessage = MakePacketResLogin(Client->AccountNo, Status);
 	SendPacket(Client->SessionID, LoginMessage);
 	LoginMessage->Free();
+}
+
+//----------------------------------------------------------------------------
+// 로그인 요청
+// int AccountID
+// int Token
+//----------------------------------------------------------------------------
+void CGameServer::PacketProcReqLoginTest(int64 SessionID, CMessage* Message)
+{
+	st_CLIENT* Client = FindClient(SessionID);
+
+	int32 AccountID;
+	int32 Token;
+
+	*Message >> AccountID;
+	*Message >> Token;
+
+	if (Client != nullptr)
+	{
+		if (Client->AccountNo != 0 && Client->AccountNo != AccountID)
+		{
+			Disconnect(Client->SessionID);
+			return;
+		}
+
+		Client->AccountNo = AccountID;
+		CDBConnection* DBConnection = G_DBConnectionPool->Pop(en_DBConnect::ACCOUNT);		
+		const wchar_t* AccountTokenGet = L"{CALL dbo.spInsertGold(?,?,?)}";
+		//CDBBind(CDBConnection & DBConnection, const WCHAR * Query)
+		CDBBind<0, 2> DBBind(*DBConnection,AccountTokenGet);
+		DBBind.BindParam<int32>(0, AccountID);
+
+		int OutAccountId;
+		DBBind.BindCol<int32>(0, OutAccountId);
+		int OutToken;
+		DBBind.BindCol<int32>(1, OutToken);
+
+		DBBind.Execute();
+
+
+	}
+	else
+	{
+
+	}
+
+
+	// DB 접근해서 Token 확인해야함	
 }
 
 //---------------------------------------------------------------------------------
@@ -341,6 +396,21 @@ void CGameServer::PacketProcReqHeartBeat(int64 SessionID, CMessage* Message)
 	Client->RecvPacketTime = timeGetTime();
 }
 
+CMessage* CGameServer::MakePacketResClientConnected()
+{
+	CMessage* ClientConnetedMessage = CMessage::Alloc();
+	if (ClientConnetedMessage == nullptr)
+	{
+		CRASH("ClientConnectdMessage가 nullptr");
+	}
+
+	ClientConnetedMessage->Clear();
+
+	*ClientConnetedMessage << (uint16)en_PACKET_S2C_GAME_CLIENT_CONNECTED;	
+
+	return ClientConnetedMessage;
+}
+
 //---------------------------------------------------------------
 //로그인 요청 응답 패킷 만들기 함수
 //WORD Type
@@ -357,7 +427,7 @@ CMessage* CGameServer::MakePacketResLogin(int64 AccountNo, BYTE Status)
 
 	LoginMessage->Clear();
 
-	*LoginMessage << (WORD)en_PACKET_CS_CHAT_RES_LOGIN;
+	*LoginMessage << (WORD)en_PACKET_CS_GAME_RES_LOGIN;
 	*LoginMessage << Status;
 	*LoginMessage << AccountNo;
 
@@ -381,7 +451,7 @@ CMessage* CGameServer::MakePacketResSectorMove(int64 AccountNo, WORD SectorX, WO
 
 	SectorMoveMessage->Clear();
 
-	*SectorMoveMessage << (WORD)en_PACKET_CS_CHAT_RES_SECTOR_MOVE;
+	*SectorMoveMessage << (WORD)en_PACKET_CS_GAME_RES_SECTOR_MOVE;
 	*SectorMoveMessage << AccountNo;
 	*SectorMoveMessage << SectorX;
 	*SectorMoveMessage << SectorY;
@@ -408,7 +478,7 @@ CMessage* CGameServer::MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* N
 
 	ChattingMessage->Clear();
 
-	*ChattingMessage << (WORD)en_PACKET_CS_CHAT_RES_MESSAGE;
+	*ChattingMessage << (WORD)en_PACKET_CS_GAME_RES_MESSAGE;
 	*ChattingMessage << AccountNo;
 	ChattingMessage->InsertData(ID, sizeof(WCHAR) * 20);
 	ChattingMessage->InsertData(NickName, sizeof(WCHAR) * 20);

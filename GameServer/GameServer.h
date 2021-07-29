@@ -35,15 +35,18 @@ private:
 	//4. 하트비트
 	//----------------------------------------------------------------
 	void PacketProcReqLogin(int64 SessionID, CMessage* Message);
+	void PacketProcReqLoginTest(int64 SessionID, CMessage* Message);
 	void PacketProcReqSectorMove(int64 SessionID, CMessage* Message);
 	void PacketProcReqMessage(int64 SessionID, CMessage* Message);
 	void PacketProcReqHeartBeat(int64 SessionID, CMessage* Message);
 	//----------------------------------------------------------------
 	//패킷조합 함수
-	//1. 로그인 요청 응답
-	//2. 섹터 이동 요청 응답
-	//3. 채팅 보내기 요청 응답
+	//1. 클라이언트 접속 응답
+	//2. 로그인 요청 응답
+	//3. 섹터 이동 요청 응답
+	//4. 채팅 보내기 요청 응답
 	//----------------------------------------------------------------
+	CMessage* MakePacketResClientConnected();
 	CMessage* MakePacketResLogin(int64 AccountNo, BYTE Status);
 	CMessage* MakePacketResSectorMove(int64 AccountNo, WORD SectorX, WORD SectorY);
 	CMessage* MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* NickName, WORD MessageLen, WCHAR* Message);

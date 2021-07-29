@@ -22,6 +22,10 @@
 
 #pragma endregion
 
+#pragma region Lock 관련
+
+#pragma endregion
+
 // 변수 사이즈 구하기
 #define size16(val)	static_cast<int16>(sizeof(val))
 #define size32(val)	static_cast<int32>(sizeof(val))

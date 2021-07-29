@@ -400,8 +400,7 @@ bool CMessage::Encode()
 
 bool CMessage::Decode()
 {
-	DWORD Sum = 0;
-	int32 EncondeCount = 1;
+	DWORD Sum = 0;	
 	int32 P1 = 0;
 	int32 E1 = 0;
 
