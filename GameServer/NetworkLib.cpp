@@ -243,6 +243,13 @@ void CNetworkLib::RecvNotifyComplete(st_SESSION* RecvCompleteSession, const DWOR
 		WSARecv를 다시 건다.
 	*/
 
+	if (RecvCompleteSession->RecvRingBuf.GetUseSize() < Transferred)
+	{
+		CRASH("RecvRingBuf에 들어가 있는 데이터보다 Transfereed가 더 큼");
+		Disconnect(RecvCompleteSession->SessionID);
+		return;
+	}
+
 	CMessage::st_ENCODE_HEADER EncodeHeader;
 	RecvCompleteSession->RecvRingBuf.MoveRear(Transferred);
 	CMessage* Packet = CMessage::Alloc();
@@ -290,7 +297,8 @@ void CNetworkLib::RecvNotifyComplete(st_SESSION* RecvCompleteSession, const DWOR
 		OnRecv(RecvCompleteSession->SessionID, Packet);
 	}
 
-	Packet->Free(); //패킷 반납
+	// 패킷 반납
+	Packet->Free(); 
 
 	if (!RecvCompleteSession->IsCancelIO)
 	{
