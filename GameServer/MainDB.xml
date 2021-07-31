@@ -1,54 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
  <!-- utf8로 사용 더욱이 영어를 주로 사용하기 때문에 -->
 <GameDB>
-  <Table name="Gold" desc="Gold Table">
-    <Column name="id" type="int" notnull="true" identity="1,1"/>
-    <Column name="gold" type="int" notnull="true"/>    
-    <Column name="name" type="nvarchar(50)" notnull="false"/>
-    <Column name="createDate" type="datetime" notnull="false"/>
-    <Index type="clustered">
-      <PrimaryKey/>
-      <Column name="id"/>      
-    </Index>
-  </Table>
-
-  <Table name="Account" desc="Account Table">
-    <Column name="accountId" type="int" notnull="true" identity="1,1"/>
-    <Column name="accountName" type="int" notnull="false"/>
-    <Index type="clustered">
-      <PrimaryKey/>
-      <Column name="accountId"/>
-    </Index>
-  </Table>
-  
-  <Table name="Item" desc="Item Table">
-    <Column name="ItemId" type="int" notnull="true" identity="1,1"/>    
-    <Index type="clustered">
-      <PrimaryKey/>
-      <Column name="ItemId"/>
-    </Index>
-  </Table>
- 
-  <Procedure name="spInsertGold">
-    <Param name="@gold" type="int"/>
-    <Param name="@name" type="nvarchar(50)"/>
-    <Param name="@createDate" type="datetime"/>
-    <Body>
-        <![CDATA[
-        INSERT INTO [dbo].[Gold]([gold],[name],[createDate]) VALUES(@gold,@name,@createDate)
-        ]]>
-    </Body>
-  </Procedure>
-
-  <Procedure name="spGetGold">
-    <Param name="@gold" type="int"/>
+  <Procedure name="spGetAccountToken">
+    <Param name="@AccountId" type="int"/>
     <Body>
       <![CDATA[
-        SELECT id, gold, name, createDate FROM [dbo].[Gold] WHERE gold = (@gold)
-        ]]>
+        SELECT AccountDBId, Token FROM [dbo].[ToKen] WHERE AccountDBId = (@AccountId)
+      ]]>
     </Body>
-  </Procedure>
-
-  <RemovedTable name="Item2"/>
-  <RemovedTable name="Item3"/>
+  </Procedure> 
 </GameDB>
