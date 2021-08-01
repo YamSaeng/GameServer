@@ -5,7 +5,7 @@
     <Param name="@AccountId" type="int"/>
     <Body>
       <![CDATA[
-        SELECT AccountDBId, Token FROM [dbo].[ToKen] WHERE AccountDBId = (@AccountId)
+        SELECT Token FROM [dbo].[ToKen] WHERE AccountDBId = (@AccountId)
       ]]>
     </Body>
   </Procedure> 

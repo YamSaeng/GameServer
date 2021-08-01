@@ -14,20 +14,22 @@ enum en_MESSAGE_TYPE
 
 	LOGIN_SUCCESS = 1,
 	LOGIN_FAIL = 0,
+
+	DATA_BASE_ACCOUNT_CHECK = 100,
 };
 
 struct st_CLIENT
 {
-	__int64 AccountNo;
-	__int64 SessionID;
+	int64 AccountID;
+	int64 SessionID;
 
 	WCHAR ClientID[20];
 	WCHAR NickName[20];
 
-	short SectorX;
-	short SectorY;
+	int16 SectorX;
+	int16 SectorY;
 
-	char SessionKey[64];
+	int32 Token;
 
 	bool IsLogin;
 
@@ -36,20 +38,20 @@ struct st_CLIENT
 
 struct st_SECTOR_POSITION
 {
-	int X;
-	int Y;
+	int32 X;
+	int32 Y;
 };
 
 struct st_SECTOR_AROUND
 {
-	int Count;
+	int32 Count;
 	st_SECTOR_POSITION Around[9];
 };
 
 struct st_JOB
 {
 	WORD Type;
-	__int64 SessionID;
+	int64 SessionID;
 	CMessage* Message;
 };
 

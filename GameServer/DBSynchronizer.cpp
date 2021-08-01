@@ -699,7 +699,7 @@ void DBSynchronizer::CompareTables(CTable* dbTable, CTable* xmlTable)
 			_updateQueries[UpdateStep::CreateIndex].push_back(DBModel::Helpers::Format(L"ALTER TABLE [dbo].[%s] ADD CONSTRAINT [%s] %s %s (%s)",
 				dbTable->_name.c_str(), xmlIndex->CreateName(dbTable->_name).c_str(), xmlIndex->GetKeyText().c_str(), xmlIndex->GetTypeText().c_str(), xmlIndex->CreateColumnsText().c_str()));
 		}
-		else
+		else 
 		{
 			// 그 외에는 Index를 생성하는 쿼리문 조합 후 예약한다.
 			_updateQueries[UpdateStep::CreateIndex].push_back(DBModel::Helpers::Format(L"CREATE %s INDEX [%s] ON [dbo].[%s] (%s)",

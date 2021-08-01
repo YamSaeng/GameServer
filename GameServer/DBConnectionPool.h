@@ -10,7 +10,8 @@
 enum class en_DBConnect :int32
 {
 	ACCOUNT,
-	GAME
+	GAME,
+	TOKEN
 };
 
 class CDBConnectionPool
@@ -22,6 +23,7 @@ private:
 	// DB 연결단위인 DBConnection을 저장해둘 배열
 	vector<CDBConnection*> _AccountDBConnections; // AccountDB
 	vector<CDBConnection*> _GameDBConnections;	  // GameDB
+	vector<CDBConnection*> _TokenDBConnections;	  // TokenDB
 
 	CRITICAL_SECTION _CS;
 public:
@@ -37,6 +39,6 @@ public:
 	// DBConnection배열에서 DBConnection하나를 꺼내옴
 	CDBConnection* Pop(en_DBConnect ConnectDBName);
 	// 사용했던 DBConnection을 배열에 다시 저장
-	void Push(en_DBConnect InputConnectDBName, CDBConnection* DBConnection);
+	void Push(en_DBConnect InputConnectDBName, CDBConnection* DBConnection);	
 };
 

@@ -40,11 +40,12 @@ bool CDBConnectionPool::Init(int32 ConnectionCount)
 	for (int32 i = 0; i < DBs.size(); i++)
 	{
 		wstring DBName = DBs[i].GetStringAttr(L"name");
+
+		CXmlNode Option = DBs[i].FindChild(L"Option");
+		wstring ConnectionString = Option.GetStringAttr(L"ConnectionString");
+
 		if (DBName == L"AccountDB")
 		{
-			CXmlNode Option = DBs[i].FindChild(L"Option");
-			wstring ConnectionString = Option.GetStringAttr(L"ConnectionString");
-
 			// 입력받은 ConnectionCount만큼 DB Connection생성
 			for (int32 i = 0; i < ConnectionCount; i++)
 			{
@@ -63,9 +64,6 @@ bool CDBConnectionPool::Init(int32 ConnectionCount)
 		}
 		else if (DBName == L"GameDB")
 		{
-			CXmlNode Option = DBs[i].FindChild(L"Option");
-			wstring ConnectionString = Option.GetStringAttr(L"ConnectionString");
-
 			for (int32 i = 0; i < ConnectionCount; i++)
 			{
 				CDBConnection* Connection = new CDBConnection();
@@ -77,6 +75,21 @@ bool CDBConnectionPool::Init(int32 ConnectionCount)
 
 				// GameDB 배열에 저장
 				_GameDBConnections.push_back(Connection);
+			}
+		}
+		else if (DBName == L"SharedDB")
+		{
+			for (int32 i = 0; i < ConnectionCount; i++)
+			{
+				CDBConnection* Connection = new CDBConnection();
+
+				if (Connection->Connect(_SqlEnvironment, ConnectionString.c_str()) == false)
+				{
+					return false;
+				}
+
+				// GameDB 배열에 저장
+				_TokenDBConnections.push_back(Connection);
 			}
 		}
 	}
@@ -135,6 +148,15 @@ CDBConnection* CDBConnectionPool::Pop(en_DBConnect ConnectDBName)
 		DBConnection = _GameDBConnections.back();
 		_GameDBConnections.pop_back();
 		break;
+	case en_DBConnect::TOKEN:
+		if (_TokenDBConnections.empty() == true)
+		{
+			break;
+		}
+
+		DBConnection = _TokenDBConnections.back();
+		_TokenDBConnections.pop_back();
+		break;
 	}
 
 	LeaveCriticalSection(&_CS);
@@ -153,6 +175,9 @@ void CDBConnectionPool::Push(en_DBConnect InputConnectDBName, CDBConnection* DBC
 		break;
 	case en_DBConnect::GAME:
 		_GameDBConnections.push_back(DBConnection);
+		break;
+	case en_DBConnect::TOKEN:
+		_TokenDBConnections.push_back(DBConnection);
 		break;
 	}
 

@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <DBConfig>
   <DB name="AccountDB">
-    <Option ConnectionString=""/>
+    <Option ConnectionString="Driver={SQL Server Native Client 11.0};Server=(localdb)\MSSQLLocalDB;Database=AccountDB;Trusted_Connection=Yes;"/>
   </DB>
   <DB name="GameDB">
-    <Option ConnectionString=""/>
+    <Option ConnectionString="Driver={SQL Server Native Client 11.0};Server=(localdb)\MSSQLLocalDB;Database=GameServerDB;Trusted_Connection=Yes;"/>
+  </DB>
+  <DB name="SharedDB">
+    <Option ConnectionString="Driver={SQL Server Native Client 11.0};Server=(localdb)\MSSQLLocalDB;Database=SharedDB;Trusted_Connection=Yes;"/>
   </DB>
 </DBConfig>

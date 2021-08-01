@@ -241,8 +241,10 @@ void CNetworkLib::RecvNotifyComplete(st_SESSION* RecvCompleteSession, const DWOR
 		RecvRingBuf의 Rear값을 완료 통지 받은 Transferred 값만큼 뒤로 민다.
 		Recv 완료통지를 받으면 메세지 단위로 뽑아내어 한번에 다 처리해주고
 		WSARecv를 다시 건다.
-	*/
+	*/	
 
+	RecvCompleteSession->RecvRingBuf.MoveRear(Transferred);
+	
 	if (RecvCompleteSession->RecvRingBuf.GetUseSize() < Transferred)
 	{
 		CRASH("RecvRingBuf에 들어가 있는 데이터보다 Transfereed가 더 큼");
@@ -251,7 +253,6 @@ void CNetworkLib::RecvNotifyComplete(st_SESSION* RecvCompleteSession, const DWOR
 	}
 
 	CMessage::st_ENCODE_HEADER EncodeHeader;
-	RecvCompleteSession->RecvRingBuf.MoveRear(Transferred);
 	CMessage* Packet = CMessage::Alloc();
 
 	for (;;)

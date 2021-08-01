@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "GameServer.h"
 #include "XmlParser.h"
+#include "DBConnectionPool.h"
+#include "DBSynchronizer.h"
 
 struct st_ServerInfo
 {
@@ -54,11 +56,17 @@ void ServerInfoInit()
 	}
 
 	// DB 초기화
+	// DBConnection 하나를 뽑아오고
+	CDBConnection* DBConnection = G_DBConnectionPool->Pop(en_DBConnect::TOKEN);
+	// DBConnection을 저장후
+	DBSynchronizer DBSync(*DBConnection);
+	// xml에 기록되어 있는 것을 기준으로 DB를 업데이트 시켜준다.
+	DBSync.Synchronize(L"MainDB.xml");
 }
 
 int main()
-{
-	ServerInfoInit();	
+{		
+	ServerInfoInit();		
 
 	SYSTEMTIME NowTime;
 	GetLocalTime(&NowTime);
@@ -84,7 +92,7 @@ int main()
 		G_Logger->WriteStdOut(en_Color::WHITE, L"PlayerCount		: [%d]\n", G_GameServer._ClientMap.size()); // 채팅서버 클라 개수
 		G_Logger->WriteStdOut(en_Color::WHITE, L"ChatServerJobPool Alloc	: [%d]\n", G_GameServer._JobMemoryPool->GetAllocCount()); //채팅서버 잡 메모리풀 Alloc
 		G_Logger->WriteStdOut(en_Color::WHITE, L"ChatServerJobPool Use	: [%d]\n", G_GameServer._JobMemoryPool->GetUseCount());
-		G_Logger->WriteStdOut(en_Color::WHITE, L"ChatServerJobQue Size	: [%d]\n", G_GameServer._ChatServerMessageQue.GetUseSize()); //채팅서버 잡큐에 몇개 들어있는지
+		G_Logger->WriteStdOut(en_Color::WHITE, L"ChatServerJobQue Size	: [%d]\n", G_GameServer._GameServerCommonMessageQue.GetUseSize()); //채팅서버 잡큐에 몇개 들어있는지
 		G_Logger->WriteStdOut(en_Color::WHITE, L"UpdateThread TPS	: [%d]\n", G_GameServer._UpdateTPS); //채팅서버 업데이트 쓰레드 TPS
 		G_Logger->WriteStdOut(en_Color::WHITE, L"UpdateThread Wake Count : [%d]\n", G_GameServer._UpdateWakeCount); //채팅서버 업데이트 쓰레드가 몇번 일어났는지
 		G_Logger->WriteStdOut(en_Color::WHITE, L"\n================================================\n\n");

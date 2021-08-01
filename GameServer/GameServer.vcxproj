@@ -161,6 +161,7 @@
     <ClInclude Include="DBConnection.h" />
     <ClInclude Include="DBConnectionPool.h" />
     <ClInclude Include="DBModel.h" />
+    <ClInclude Include="DBStoreProcedure.h" />
     <ClInclude Include="DBSynchronizer.h" />
     <ClInclude Include="FileUtils.h" />
     <ClInclude Include="GameServer.h" />
