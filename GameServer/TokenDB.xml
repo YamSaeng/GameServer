@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
  <!-- utf8로 사용 더욱이 영어를 주로 사용하기 때문에 -->
-<GameDB>
+<GameDB> 
   <Procedure name="spGetAccountToken">
     <Param name="@AccountId" type="int"/>
     <Body>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<GameServerDB>
+  <Table name="Player" desc="Player Table">
+    <Column name="PlayerDBId" type="int" notnull="true" identity="1,1"/>
+    <Column name="AccountDBId" type="int" notnull="true"/>
+    <Column name="PlayerName" type="nvarchar(20)" notnull="true"/>
+    <Column name="Level" type="int" notnull="true"/>
+    <Column name="CurrentHP" type="int" notnull="true"/>
+    <Column name="MaxHP" type="int" notnull="true"/>
+    <Column name="Attack" type="int" notnull="true"/>
+    <Column name="Speed" type="int" notnull="true"/>
+    <Index type="clustered">
+      <PrimaryKey/>
+      <Column name="PlayerDBId"/>
+    </Index>
+    <Index type="nonclustered">
+      <UniqueKey/>
+      <Column name="AccountDBId"/>
+    </Index>
+    <Index type="nonclustered">
+      <UniqueKey/>
+      <Column name="PlayerName"/>
+    </Index>
+  </Table>
+</GameServerDB>
