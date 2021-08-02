@@ -49,6 +49,9 @@
     <Filter Include="ContentServer\Content\Data">
       <UniqueIdentifier>{12807dfe-17f2-4046-865b-c8efb38536d7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ContentServer\Content\Player">
+      <UniqueIdentifier>{ae04998f-66c9-4da1-8bfd-9f8523536e46}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Type.h">
@@ -145,6 +148,12 @@
     <ClInclude Include="DBStoreProcedure.h">
       <Filter>DB</Filter>
     </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>ContentServer\Content\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>ContentServer\Content\Player</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -194,9 +203,15 @@
     <ClCompile Include="Data.cpp">
       <Filter>ContentServer\Content\Data</Filter>
     </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>ContentServer\Content\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>ContentServer\Content\Player</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="MainDB.xml">
+    <Xml Include="TokenDB.xml">
       <Filter>DB\XML</Filter>
     </Xml>
     <Xml Include="ServerConfig.xml">
@@ -204,6 +219,9 @@
     </Xml>
     <Xml Include="DBConfig.xml">
       <Filter>Util\설정 파일</Filter>
+    </Xml>
+    <Xml Include="GameServerDB.xml">
+      <Filter>DB\XML</Filter>
     </Xml>
   </ItemGroup>
   <ItemGroup>

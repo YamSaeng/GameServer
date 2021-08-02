@@ -14,31 +14,48 @@ private:
 	list<int64> _SectorList[SECTOR_Y_MAX][SECTOR_X_MAX];
 
 	HANDLE _UpdateThread;
-	HANDLE _UpdateWakeEvent;
+	HANDLE _DataBaseThread;
 
-	//WorkerThread 종료용 변수
-	bool _WorkThreadEnd;
+	HANDLE _UpdateWakeEvent;
+	HANDLE _DataBaseWakeEvent;
+
+	// WorkerThread 종료용 변수
+	bool _UpdateThreadEnd;
+	// DataBaseThread 종료용 변수
+	bool _DataBaseThreadEnd;
+
+	// 게임서버에서 생성되는 오브젝트들의 아이디
+	int64 _GameObjectId;
 
 	static unsigned __stdcall UpdateThreadProc(void* Argument);
+	static unsigned __stdcall DataBaseThreadProc(void* Argument);
 	static unsigned __stdcall HeartBeatCheckThreadProc(void* Argument);
 
 	void CreateNewClient(int64 SessionID);
 	void DeleteClient(int64 SessionID);
 
 	void PacketProc(int64 SessionID, CMessage* Message);
-
+	
 	//----------------------------------------------------------------
 	//패킷처리 함수
 	//1. 로그인 요청
-	//2. 섹터 이동 요청
-	//3. 채팅 보내기 요청
-	//4. 하트비트
-	//----------------------------------------------------------------
+	//2. 캐릭터 생성 요청 
+	//3. 섹터 이동 요청
+	//4. 채팅 보내기 요청
+	//5. 하트비트
+	//----------------------------------------------------------------	
 	void PacketProcReqLogin(int64 SessionID, CMessage* Message);
-	void PacketProcReqLoginTest(int64 SessionID, CMessage* Message);
+	void PacketProcReqCreateCharacter(int64 SessionID, CMessage* Message);
 	void PacketProcReqSectorMove(int64 SessionID, CMessage* Message);
 	void PacketProcReqMessage(int64 SessionID, CMessage* Message);
 	void PacketProcReqHeartBeat(int64 SessionID, CMessage* Message);
+
+	//----------------------------------------------------------------
+	// DB 요청 처리 함수
+	//----------------------------------------------------------------
+	void PacketProcReqAccountCheck(int64 SessionID, CMessage* Message);
+	void PacketProcReqCreateCharacterNameCheck(int64 SessionID, CMessage* Message);
+
 	//----------------------------------------------------------------
 	//패킷조합 함수
 	//1. 클라이언트 접속 응답
@@ -47,7 +64,7 @@ private:
 	//4. 채팅 보내기 요청 응답
 	//----------------------------------------------------------------
 	CMessage* MakePacketResClientConnected();
-	CMessage* MakePacketResLogin(int64 AccountNo, BYTE Status);
+	CMessage* MakePacketResLogin(bool Status, int32 PlayerCount, st_PlayerObjectInfo* Players);
 	CMessage* MakePacketResSectorMove(int64 AccountNo, WORD SectorX, WORD SectorY);
 	CMessage* MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* NickName, WORD MessageLen, WCHAR* Message);
 
@@ -66,13 +83,17 @@ public:
 	//------------------------------------
 	// Job 큐
 	//------------------------------------
-	CLockFreeQue<st_JOB*> _ChatServerMessageQue;
+	CLockFreeQue<st_JOB*> _GameServerCommonMessageQue;
+	CLockFreeQue<st_JOB*> _GameServerDataBaseMessageQue;
 
 	// 채팅서버 접속한 클라
 	unordered_map<int64, st_CLIENT*> _ClientMap;
 
 	int64 _UpdateWakeCount; // Update 쓰레드가 일어난 횟수	
 	int64 _UpdateTPS; // Update 쓰레드가 1초에 작업한 처리량
+
+	int64 _DataBaseThreadWakeCount;
+	int64 _DataBaseThreadTPS;
 
 	CGameServer();
 	~CGameServer();

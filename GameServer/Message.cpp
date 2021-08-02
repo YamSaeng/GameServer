@@ -298,6 +298,14 @@ int CMessage::InsertData(wchar_t* Src, int32 Size)
 	return Size;
 }
 
+int CMessage::InsertData(st_PlayerObjectInfo* Src, int32 Size)
+{
+	memcpy(&_MessageBuf[_Rear], Src, Size);
+	_Rear += Size;
+	_UseBufferSize += Size;
+	return 0;
+}
+
 void CMessage::SetHeader(char* Header, char Size)
 {
 	if (Size == 2)

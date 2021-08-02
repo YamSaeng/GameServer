@@ -27,6 +27,7 @@
 #include <time.h>
 
 #include "MemoryPoolTLS.h"
+#include "GameObject.h"
 
 //-------------------------------------------------------------------------------------
 //데이터를 바이트 단위로 내부에서 관리하는 버퍼에 넣는다.
@@ -131,6 +132,7 @@ public:
 
 	int InsertData(char* Src, int32 Size);
 	int InsertData(wchar_t* Src, int32 Size);
+	int InsertData(st_PlayerObjectInfo* Src, int32 Size);	
 #pragma endregion
 
 	/*
