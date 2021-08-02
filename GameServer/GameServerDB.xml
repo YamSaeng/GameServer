@@ -9,7 +9,7 @@
     <Column name="CurrentHP" type="int" notnull="true"/>
     <Column name="MaxHP" type="int" notnull="true"/>
     <Column name="Attack" type="int" notnull="true"/>
-    <Column name="Speed" type="int" notnull="true"/>
+    <Column name="Speed" type="float" notnull="true"/>
     <Index type="clustered">
       <PrimaryKey/>
       <Column name="PlayerDBId"/>
@@ -23,4 +23,13 @@
       <Column name="PlayerName"/>
     </Index>
   </Table>
+
+  <Procedure name="spGetPlayers">
+    <Param name="@AccountId" type="int"/>
+    <Body>
+      <![CDATA[
+        SELECT PlayerDBId, PlayerName, Level, CurrentHP, MaxHP, Attack, Speed FROM [dbo].[Player] WHERE AccountDBId = (@AccountId)
+      ]]>
+    </Body>
+  </Procedure>
 </GameServerDB>
