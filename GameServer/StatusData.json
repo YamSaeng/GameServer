@@ -1,0 +1,22 @@
+{
+  "Status": [
+    {
+      "Level": 1,
+      "MaxHp": 200,
+      "Attack": 20,
+      "Speed": 8.0,
+    },
+    {
+      "Level": 2,
+      "MaxHp": 250,
+      "Attack": 25,
+      "Speed": 8.0
+    },
+    {
+      "Level": 3,
+      "MaxHp": 300,
+      "Attack": 30,
+      "Speed": 8.0
+    }
+  ]
+}

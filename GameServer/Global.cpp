@@ -20,7 +20,8 @@ public:
 		G_DBConnectionPool->Init(50);
 		G_Logger = new CLog();
 		G_Datamanager = new CDataManager();
-		G_Datamanager->LoadData(L"ItemData.json");
+		G_Datamanager->LoadDataItem(L"ItemData.json");
+		G_Datamanager->LoadDataStatus(L"StatusData.json");
 	}
 
 	~CGlobal()

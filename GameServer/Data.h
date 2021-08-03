@@ -24,3 +24,12 @@ struct st_ConsumableData : public st_ItemData
 {
 	int32 _MaxCount;
 };
+
+struct st_StatusData
+{
+	int32 Level;
+	int32 HP;
+	int32 MaxHP;
+	int32 Attack;
+	float Speed;
+};
