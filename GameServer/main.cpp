@@ -57,11 +57,18 @@ void ServerInfoInit()
 
 	// DB 초기화
 	// DBConnection 하나를 뽑아오고
-	CDBConnection* DBConnection = G_DBConnectionPool->Pop(en_DBConnect::TOKEN);
+	CDBConnection* TokenDBConnection = G_DBConnectionPool->Pop(en_DBConnect::TOKEN);
 	// DBConnection을 저장후
-	DBSynchronizer DBSync(*DBConnection);
+	DBSynchronizer TokenDBSync(*TokenDBConnection);
 	// xml에 기록되어 있는 것을 기준으로 DB를 업데이트 시켜준다.
-	DBSync.Synchronize(L"MainDB.xml");
+	TokenDBSync.Synchronize(L"TokenDB.xml");
+
+	CDBConnection* GameServerDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+	DBSynchronizer GameServerDBSync(*GameServerDBConnection);
+	GameServerDBSync.Synchronize(L"GameServerDB.xml");
+
+	G_DBConnectionPool->Push(en_DBConnect::TOKEN, TokenDBConnection);
+	G_DBConnectionPool->Push(en_DBConnect::GAME, GameServerDBConnection);
 }
 
 int main()
