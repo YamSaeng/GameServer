@@ -114,6 +114,14 @@ CMessage& CMessage::operator<<(char Value)
 	return *(this);
 }
 
+CMessage& CMessage::operator<<(bool Value)
+{
+	memcpy(&_MessageBuf[_Rear], &Value, sizeof(bool));
+	_Rear += sizeof(bool);
+	_UseBufferSize += sizeof(bool);
+	return *(this);
+}
+
 CMessage& CMessage::operator<<(int16 Value)
 {
 	memcpy(&_MessageBuf[_Rear], &Value, sizeof(int16));
@@ -199,6 +207,14 @@ CMessage& CMessage::operator>>(char& Value)
 	memcpy(&Value, &_MessageBuf[_Front], sizeof(char));
 	_Front += sizeof(char);
 	_UseBufferSize -= sizeof(char);
+	return *(this);
+}
+
+CMessage& CMessage::operator>>(bool& Value)
+{
+	memcpy(&Value, &_MessageBuf[_Front], sizeof(bool));
+	_Front += sizeof(bool);
+	_UseBufferSize -= sizeof(bool);
 	return *(this);
 }
 
@@ -308,10 +324,10 @@ int CMessage::InsertData(wchar_t* Src, int32 Size)
 
 int CMessage::InsertData(st_PlayerObjectInfo* Src, int32 Size)
 {
-	memcpy(&_MessageBuf[_Rear], Src, Size);
-	_Rear += Size;
-	_UseBufferSize += Size;
-	return 0;
+	memcpy(&_MessageBuf[_Rear], Src, sizeof(st_PlayerObjectInfo) * Size);
+	_Rear += (sizeof(st_PlayerObjectInfo) * Size);
+	_UseBufferSize += (sizeof(st_PlayerObjectInfo) * Size);
+	return (sizeof(st_PlayerObjectInfo) * Size);
 }
 
 void CMessage::SetHeader(char* Header, char Size)

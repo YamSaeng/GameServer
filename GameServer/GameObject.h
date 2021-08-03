@@ -48,10 +48,11 @@ struct st_PlayerObjectInfo : public st_GameObjectInfo
 class CGameObject
 {
 private:
-protected:
+protected:	
+public:
 	st_GameObjectInfo _GameObjectInfo;
 	CChannel _Channel;
-public:
+
 	CGameObject() {};
 	CGameObject(st_GameObjectInfo GameObjectInfo);
 	~CGameObject();

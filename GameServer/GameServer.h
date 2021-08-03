@@ -46,6 +46,7 @@ private:
 	//----------------------------------------------------------------	
 	void PacketProcReqLogin(int64 SessionID, CMessage* Message);
 	void PacketProcReqCreateCharacter(int64 SessionID, CMessage* Message);
+	void PacketProcReqEnterGame(int64 SessionID, CMessage* Message);
 	void PacketProcReqSectorMove(int64 SessionID, CMessage* Message);
 	void PacketProcReqMessage(int64 SessionID, CMessage* Message);
 	void PacketProcReqHeartBeat(int64 SessionID, CMessage* Message);
@@ -64,7 +65,7 @@ private:
 	//4. 채팅 보내기 요청 응답
 	//----------------------------------------------------------------
 	CMessage* MakePacketResClientConnected();
-	CMessage* MakePacketResLogin(bool Status, int32 PlayerCount, st_PlayerObjectInfo* Players);
+	CMessage* MakePacketResLogin(bool Status, int32 PlayerCount, wstring PlayersName);
 	CMessage* MakePacketResCreateCharacter(int32 PlayerDBID, wstring PlayerName);
 	CMessage* MakePacketResSectorMove(int64 AccountNo, WORD SectorX, WORD SectorY);
 	CMessage* MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* NickName, WORD MessageLen, WCHAR* Message);

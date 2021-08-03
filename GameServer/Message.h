@@ -99,6 +99,7 @@ public:
 	CMessage& operator = (CMessage& Message);
 	CMessage& operator << (BYTE Value);
 	CMessage& operator << (char Value);
+	CMessage& operator << (bool Value);
 
 	CMessage& operator << (int16 Value);
 	CMessage& operator << (uint16 Value);
@@ -118,6 +119,7 @@ public:
 #pragma region µ¥ÀÌÅÍ »©±â	
 	CMessage& operator >> (BYTE& Value);
 	CMessage& operator >> (char& Value);
+	CMessage& operator >> (bool& Value);
 
 	CMessage& operator >> (int16& Value);
 	CMessage& operator >> (WORD& Value);

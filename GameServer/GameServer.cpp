@@ -188,6 +188,9 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 	case en_PACKET_C2S_GAME_CREATE_CHARACTER:
 		PacketProcReqCreateCharacter(SessionID, Message);
 		break;
+	case en_PACKET_C2S_GAME_ENTER:
+		PacketProcReqEnterGame(SessionID, Message);
+		break;
 	case en_PACKET_CS_GAME_REQ_SECTOR_MOVE:
 		PacketProcReqSectorMove(SessionID, Message);
 		break;
@@ -302,6 +305,48 @@ void CGameServer::PacketProcReqCreateCharacter(int64 SessionID, CMessage* Messag
 	else
 	{
 
+	}
+}
+
+void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
+{
+	st_CLIENT* Client = FindClient(SessionID);
+
+	if (Client)
+	{
+		// 로그인 중이 아니면 나간다.
+		if (!Client->IsLogin)
+		{
+			Disconnect(Client->SessionID);
+			return;
+		}
+
+		int64 AccountNo;
+		*Message >> AccountNo;
+
+		if (Client->AccountID != AccountNo)
+		{
+			Disconnect(Client->SessionID);
+			return;
+		}
+
+		int32 EnterGameCharacterNameLen;
+		*Message >> EnterGameCharacterNameLen;
+
+		WCHAR EnterGameCharacterName[20];
+		Message->GetData(EnterGameCharacterName, EnterGameCharacterNameLen);
+				
+		// 클라가 가지고 있는 캐릭 중에 패킷으로 받은 캐릭터가 있는지 확인한다.
+		for (int i = 0; i < 5; i++)
+		{
+			if (Client->MyPlayers[i]._GameObjectInfo.ObjectName == EnterGameCharacterName)
+			{
+				Client->MyPlayer = Client->MyPlayers[i];
+				break;
+			}
+		}
+
+		// 채널 입장
 	}
 }
 
@@ -461,6 +506,7 @@ void CGameServer::PacketProcReqAccountCheck(int64 SessionID, CMessage* Message)
 		// DB 토큰과 클라로부터 온 토큰이 같으면 로그인 최종성공
 		if (Token == DBToken)
 		{
+			Client->IsLogin = true;
 			// 클라가 소유하고 있는 플레이어들을 DB로부터 긁어온다.
 			CDBConnection* GameServerDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 			
@@ -501,12 +547,12 @@ void CGameServer::PacketProcReqAccountCheck(int64 SessionID, CMessage* Message)
 
 				// 플레이어 정보 토대로 캐릭터 생성 후 저장
 				CPlayer Player(PlayerInfos[PlayerCount]);
-				Client->MyPlayers[PlayerCount] = Player;
+				Client->MyPlayers[PlayerCount] = Player;				
 				PlayerCount++;
 			}							
 			
 			// 클라에게 로그인 응답 패킷 보냄
-			CMessage* ResLoginMessage = MakePacketResLogin(Status, PlayerCount, PlayerInfos);
+			CMessage* ResLoginMessage = MakePacketResLogin(Status, PlayerCount, PlayerInfos[0].ObjectName);
 			SendPacket(Client->SessionID, ResLoginMessage);
 			ResLoginMessage->Free();
 
@@ -514,6 +560,7 @@ void CGameServer::PacketProcReqAccountCheck(int64 SessionID, CMessage* Message)
 		}
 		else
 		{
+			Client->IsLogin = false;
 			Disconnect(SessionID);
 		}					
 	}
@@ -609,7 +656,7 @@ CMessage* CGameServer::MakePacketResClientConnected()
 //BYTE Status  //0 : 실패  1 : 성공
 //CPlayer Players
 //---------------------------------------------------------------
-CMessage* CGameServer::MakePacketResLogin(bool Status, int32 PlayerCount, st_PlayerObjectInfo* Players)
+CMessage* CGameServer::MakePacketResLogin(bool Status, int32 PlayerCount, wstring PlayersName)
 {
 	CMessage* LoginMessage = CMessage::Alloc();
 	if (LoginMessage == nullptr)
@@ -625,7 +672,9 @@ CMessage* CGameServer::MakePacketResLogin(bool Status, int32 PlayerCount, st_Pla
 
 	if (PlayerCount != 0)
 	{
-		LoginMessage->InsertData(Players, PlayerCount);
+		int32 PlayerNameLen = PlayersName.length() * 2;
+		*LoginMessage << PlayerNameLen;
+		LoginMessage->InsertData(PlayersName.c_str(), PlayerNameLen);
 	}
 
 	return LoginMessage;
