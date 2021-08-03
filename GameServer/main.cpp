@@ -56,11 +56,10 @@ void ServerInfoInit()
 	}
 
 	// DB 초기화
-	// DBConnection 하나를 뽑아오고
-	CDBConnection* TokenDBConnection = G_DBConnectionPool->Pop(en_DBConnect::TOKEN);
-	// DBConnection을 저장후
-	DBSynchronizer TokenDBSync(*TokenDBConnection);
 	// xml에 기록되어 있는 것을 기준으로 DB를 업데이트 시켜준다.
+	// 현재 토큰을 관리하는 서버는 c#에서 모델링을 하고 있어서 해당 서버의 저장 프로시저만 이곳에서 우선 관리한다.
+	CDBConnection* TokenDBConnection = G_DBConnectionPool->Pop(en_DBConnect::TOKEN);
+	DBSynchronizer TokenDBSync(*TokenDBConnection);	
 	TokenDBSync.Synchronize(L"TokenDB.xml");
 
 	CDBConnection* GameServerDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);

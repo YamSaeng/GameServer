@@ -228,5 +228,8 @@
     <None Include="ItemData.json">
       <Filter>ContentServer\Content\Data</Filter>
     </None>
+    <None Include="StatusData.json">
+      <Filter>ContentServer\Content\Data</Filter>
+    </None>
   </ItemGroup>
 </Project>

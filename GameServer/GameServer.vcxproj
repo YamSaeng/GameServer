@@ -287,6 +287,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ItemData.json" />
+    <None Include="StatusData.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

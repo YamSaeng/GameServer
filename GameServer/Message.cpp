@@ -290,6 +290,14 @@ int CMessage::InsertData(char* Src, int32 Size)
 	return Size;
 }
 
+int CMessage::InsertData(const wchar_t* Src, int32 Size)
+{
+	memcpy(&_MessageBuf[_Rear], Src, Size);
+	_Rear += Size;
+	_UseBufferSize += Size;
+	return Size;
+}
+
 int CMessage::InsertData(wchar_t* Src, int32 Size)
 {
 	memcpy(&_MessageBuf[_Rear], Src, Size);

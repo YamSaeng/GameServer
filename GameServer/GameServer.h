@@ -65,6 +65,7 @@ private:
 	//----------------------------------------------------------------
 	CMessage* MakePacketResClientConnected();
 	CMessage* MakePacketResLogin(bool Status, int32 PlayerCount, st_PlayerObjectInfo* Players);
+	CMessage* MakePacketResCreateCharacter(int32 PlayerDBID, wstring PlayerName);
 	CMessage* MakePacketResSectorMove(int64 AccountNo, WORD SectorX, WORD SectorY);
 	CMessage* MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* NickName, WORD MessageLen, WCHAR* Message);
 

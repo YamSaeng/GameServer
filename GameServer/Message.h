@@ -110,7 +110,7 @@ public:
 	CMessage& operator << (int64 Value);
 	CMessage& operator << (double Value);
 	CMessage& operator << (uint32 Value);
-	CMessage& operator << (uint64 Value);
+	CMessage& operator << (uint64 Value);	
 
 	int32 GetData(char* Dest, int32 Size);
 	int32 GetData(wchar_t* Dest, int32 Size);
@@ -131,6 +131,7 @@ public:
 	CMessage& operator >> (uint64& Value);
 
 	int InsertData(char* Src, int32 Size);
+	int InsertData(const wchar_t* src, int32 Size);
 	int InsertData(wchar_t* Src, int32 Size);
 	int InsertData(st_PlayerObjectInfo* Src, int32 Size);	
 #pragma endregion

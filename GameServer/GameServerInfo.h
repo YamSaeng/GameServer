@@ -2,6 +2,7 @@
 #include <winnt.h>
 #include <minwindef.h>
 #include "Message.h"
+#include "Player.h"
 
 enum en_MESSAGE_TYPE
 {
@@ -16,6 +17,7 @@ enum en_MESSAGE_TYPE
 	LOGIN_FAIL = 0,
 
 	DATA_BASE_ACCOUNT_CHECK = 100,
+	DATA_BASE_CHARACTER_CHECK,
 };
 
 struct st_CLIENT
@@ -24,7 +26,7 @@ struct st_CLIENT
 	int64 SessionID;
 
 	WCHAR ClientID[20];
-	WCHAR NickName[20];
+	wstring CreateCharacterName;
 
 	int16 SectorX;
 	int16 SectorY;
@@ -34,6 +36,8 @@ struct st_CLIENT
 	bool IsLogin;
 
 	DWORD RecvPacketTime;
+	
+	CPlayer MyPlayers[5];
 };
 
 struct st_SECTOR_POSITION

@@ -4,6 +4,7 @@
 #include "DBConnection.h"
 #include "DBConnectionPool.h"
 #include "DBStoreProcedure.h"
+#include "DataManager.h"
 #include <process.h>
 
 CGameServer::CGameServer()
@@ -110,6 +111,7 @@ unsigned __stdcall CGameServer::DataBaseThreadProc(void* Argument)
 				Instance->PacketProcReqAccountCheck(Job->SessionID, Job->Message);
 				break;	
 			case DATA_BASE_CHARACTER_CHECK:
+				Instance->PacketProcReqCreateCharacterNameCheck(Job->SessionID, Job->Message);
 				break;
 			}
 
@@ -484,8 +486,9 @@ void CGameServer::PacketProcReqAccountCheck(int64 SessionID, CMessage* Message)
 			ClientPlayersGet.Execute();
 
 			int PlayerCount = 0;
-			st_PlayerObjectInfo PlayerInfos[5];
-			while (AccountTokenGet.Fetch())
+			st_PlayerObjectInfo PlayerInfos[5];		
+			
+			while (ClientPlayersGet.Fetch())
 			{								
 				// 플레이어 정보 셋팅
 				PlayerInfos[PlayerCount].ObjectId = PlayerID;
@@ -518,16 +521,71 @@ void CGameServer::PacketProcReqAccountCheck(int64 SessionID, CMessage* Message)
 	{
 		// 클라 접속 끊겻을 경우
 	}
-		
-	if (Message != nullptr)
-	{
-		Message->Free();
-	}
 }
 
 void CGameServer::PacketProcReqCreateCharacterNameCheck(int64 SessionID, CMessage* Message)
 {
+	int32 PlayerDBID;
 	st_CLIENT* Client = FindClient(SessionID);
+
+	if (Client)
+	{
+		wstring CreateCharacterName = Client->CreateCharacterName;
+
+		CDBConnection* FindCharacterNameGameServerDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+
+		SP::CDBGameServerCharacterNameGet CharacterNameGet(*FindCharacterNameGameServerDBConnection);
+		CharacterNameGet.InCharacterName(CreateCharacterName);
+
+		CharacterNameGet.Execute();
+
+		bool CharacterNameFind = CharacterNameGet.Fetch();
+
+		G_DBConnectionPool->Push(en_DBConnect::GAME, FindCharacterNameGameServerDBConnection);
+
+		if (!CharacterNameFind)
+		{
+			// 레벨 1에 해당하는 캐릭터 정보 읽어옴
+			auto FindStatus = G_Datamanager->_Status.find(1);
+			st_StatusData NewCharacterStatus = *(*FindStatus).second;
+
+			CDBConnection* NewCharacterPushDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+
+			SP::CDBGameServerCreateCharacterPush NewCharacterPush(*NewCharacterPushDBConnection);
+			NewCharacterPush.InAccountID(Client->AccountID);
+			NewCharacterPush.InCharacterName(Client->CreateCharacterName);
+			NewCharacterPush.InLevel(NewCharacterStatus.Level);
+			NewCharacterPush.InCurrentHP(NewCharacterStatus.MaxHP);
+			NewCharacterPush.InMaxHP(NewCharacterStatus.MaxHP);
+			NewCharacterPush.InAttack(NewCharacterStatus.Attack);
+			NewCharacterPush.InSpeed(NewCharacterStatus.Speed);
+
+			NewCharacterPush.Execute();
+
+			G_DBConnectionPool->Push(en_DBConnect::GAME, NewCharacterPushDBConnection);
+
+			CDBConnection* PlayerDBIDGetDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+			SP::CDBGameServerPlayerDBIDGet PlayerDBIDGet(*PlayerDBIDGetDBConnection);
+			PlayerDBIDGet.OutPlayerDBID(PlayerDBID);
+
+			PlayerDBIDGet.Execute();
+
+			PlayerDBIDGet.Fetch();
+
+			Client->MyPlayers[0]._PlayerDBId = PlayerDBID;
+			Client->MyPlayers[0]._PlayerName = Client->CreateCharacterName;
+
+			G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerDBIDGetDBConnection);
+		}		
+
+		CMessage* ResCreateCharacterMessage = MakePacketResCreateCharacter(PlayerDBID, Client->CreateCharacterName);
+		SendPacket(Client->SessionID, ResCreateCharacterMessage);
+		ResCreateCharacterMessage->Free();
+	}
+	else
+	{
+
+	}
 }
 
 CMessage* CGameServer::MakePacketResClientConnected()
@@ -571,6 +629,26 @@ CMessage* CGameServer::MakePacketResLogin(bool Status, int32 PlayerCount, st_Pla
 	}
 
 	return LoginMessage;
+}
+
+CMessage* CGameServer::MakePacketResCreateCharacter(int32 PlayerDBID, wstring PlayerName)
+{
+	CMessage* ResCreateCharacter = CMessage::Alloc();
+	if (ResCreateCharacter == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResCreateCharacter->Clear();
+
+	*ResCreateCharacter << (WORD)en_PACKET_S2C_GAME_CREATE_CHARACTER;
+	*ResCreateCharacter << PlayerDBID;
+	
+	int32 PlayerNameLen = PlayerName.length() * 2;
+	*ResCreateCharacter << PlayerNameLen;
+	ResCreateCharacter->InsertData(PlayerName.c_str(), PlayerNameLen);
+
+	return ResCreateCharacter;
 }
 
 //-----------------------------------------------------------------

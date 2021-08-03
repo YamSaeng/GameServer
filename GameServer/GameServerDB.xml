@@ -32,4 +32,37 @@
       ]]>
     </Body>
   </Procedure>
+
+  <Procedure name="spGetCharacterName">
+    <Param name="@CharacterName" type="nvarchar(20)"/>
+    <Body>
+      <![CDATA[
+        SELECT * FROM [dbo].[Player] WHERE EXISTS (SELECT PlayerName FROM [dbo].[Player] WHERE PlayerName = (@CharacterName))
+      ]]>
+    </Body>
+  </Procedure>
+
+  <Procedure name="spNewCharacterPush">
+    <Param name="@AccountId" type="int"/>
+    <Param name="@CharacterName" type="nvarchar(20)"/>
+    <Param name="@Level" type="int"/>
+    <Param name="@CurrentHP" type="int"/>
+    <Param name="@MaxHP" type="int"/>
+    <Param name="@Attack" type="int"/>
+    <Param name="@Speed" type="float"/>
+    <Body>
+      <![CDATA[
+        INSERT INTO [dbo].[Player] VALUES ((@AccountId),(@CharacterName),(@Level),(@CurrentHP),(@MaxHP),(@Attack),(@Speed))        
+      ]]>
+    </Body>
+  </Procedure>
+
+  <Procedure name="spPlayerDBIDGet">
+    <Param name="@AccountId" type="int"/>
+    <Body>
+      <![CDATA[
+        SELECT PlayerDBId FROM [dbo].[Player] WHERE AccountDBId = (@AccountId)
+      ]]>
+    </Body>
+  </Procedure>
 </GameServerDB>
