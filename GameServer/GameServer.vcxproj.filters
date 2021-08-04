@@ -28,9 +28,6 @@
     <Filter Include="ContentServer">
       <UniqueIdentifier>{56bdcf25-ea3b-43fa-b708-d881b96d45e0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="DB\XML">
-      <UniqueIdentifier>{04e8660f-ce6f-4f2b-96e2-54c85471f69d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Util\File">
       <UniqueIdentifier>{b9b07ab4-ce0c-4b0a-9c37-bcda4302be5f}</UniqueIdentifier>
     </Filter>
@@ -51,6 +48,15 @@
     </Filter>
     <Filter Include="ContentServer\Content\Player">
       <UniqueIdentifier>{ae04998f-66c9-4da1-8bfd-9f8523536e46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util\설정 파일\DB">
+      <UniqueIdentifier>{78adbdab-1584-4001-a3cc-f094d3e8fdcd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util\설정 파일\Server">
+      <UniqueIdentifier>{333fc71e-1d3d-4fb3-b966-5cc1ddef8388}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util\설정 파일\Data">
+      <UniqueIdentifier>{39bd25db-55f2-4eb9-af34-6bad1c71c5bf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -154,6 +160,12 @@
     <ClInclude Include="GameObject.h">
       <Filter>ContentServer\Content\Player</Filter>
     </ClInclude>
+    <ClInclude Include="Sector.h">
+      <Filter>ContentServer\Content\Channel</Filter>
+    </ClInclude>
+    <ClInclude Include="Map.h">
+      <Filter>ContentServer\Content\Channel</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -209,27 +221,33 @@
     <ClCompile Include="GameObject.cpp">
       <Filter>ContentServer\Content\Player</Filter>
     </ClCompile>
+    <ClCompile Include="Sector.cpp">
+      <Filter>ContentServer\Content\Channel</Filter>
+    </ClCompile>
+    <ClCompile Include="Map.cpp">
+      <Filter>ContentServer\Content\Channel</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <Xml Include="DBConfig.xml">
+      <Filter>Util\설정 파일\DB</Filter>
+    </Xml>
     <Xml Include="TokenDB.xml">
-      <Filter>DB\XML</Filter>
+      <Filter>Util\설정 파일\DB</Filter>
     </Xml>
     <Xml Include="ServerConfig.xml">
-      <Filter>Util\설정 파일</Filter>
-    </Xml>
-    <Xml Include="DBConfig.xml">
-      <Filter>Util\설정 파일</Filter>
+      <Filter>Util\설정 파일\Server</Filter>
     </Xml>
     <Xml Include="GameServerDB.xml">
-      <Filter>DB\XML</Filter>
+      <Filter>Util\설정 파일\Server</Filter>
     </Xml>
   </ItemGroup>
   <ItemGroup>
     <None Include="ItemData.json">
-      <Filter>ContentServer\Content\Data</Filter>
+      <Filter>Util\설정 파일\Data</Filter>
     </None>
     <None Include="StatusData.json">
-      <Filter>ContentServer\Content\Data</Filter>
+      <Filter>Util\설정 파일\Data</Filter>
     </None>
   </ItemGroup>
 </Project>

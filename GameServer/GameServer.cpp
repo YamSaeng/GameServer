@@ -144,6 +144,9 @@ void CGameServer::CreateNewClient(int64 SessionID)
 
 	NewClient->RecvPacketTime = timeGetTime();	
 
+	memset(NewClient->MyPlayers, 0, sizeof(CPlayer*) * 5);
+	NewClient->MyPlayer = nullptr;
+
 	_ClientMap.insert(pair<int64, st_CLIENT*>(NewClient->SessionID, NewClient));
 
 	CMessage* ResClientConnectedMessage = MakePacketResClientConnected();	
@@ -339,7 +342,7 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 		// 클라가 가지고 있는 캐릭 중에 패킷으로 받은 캐릭터가 있는지 확인한다.
 		for (int i = 0; i < 5; i++)
 		{
-			if (Client->MyPlayers[i]._GameObjectInfo.ObjectName == EnterGameCharacterName)
+			if (Client->MyPlayers[i]->_GameObjectInfo.ObjectName == EnterGameCharacterName)
 			{
 				Client->MyPlayer = Client->MyPlayers[i];
 				break;
@@ -546,7 +549,7 @@ void CGameServer::PacketProcReqAccountCheck(int64 SessionID, CMessage* Message)
 				PlayerInfos[PlayerCount].ObjectStatInfo.Speed = PlayerSpeed;
 
 				// 플레이어 정보 토대로 캐릭터 생성 후 저장
-				CPlayer Player(PlayerInfos[PlayerCount]);
+				CPlayer* Player = new CPlayer(PlayerInfos[PlayerCount]);
 				Client->MyPlayers[PlayerCount] = Player;				
 				PlayerCount++;
 			}							
@@ -619,8 +622,8 @@ void CGameServer::PacketProcReqCreateCharacterNameCheck(int64 SessionID, CMessag
 
 			PlayerDBIDGet.Fetch();
 
-			Client->MyPlayers[0]._PlayerDBId = PlayerDBID;
-			Client->MyPlayers[0]._PlayerName = Client->CreateCharacterName;
+			Client->MyPlayers[0]->_PlayerDBId = PlayerDBID;
+			Client->MyPlayers[0]->_PlayerName = Client->CreateCharacterName;
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerDBIDGetDBConnection);
 		}		
