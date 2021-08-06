@@ -106,7 +106,7 @@ CMessage& CMessage::operator<<(BYTE Value)
 	return *(this);
 }
 
-CMessage& CMessage::operator<<(char Value)
+CMessage& CMessage::operator<<(int8 Value)
 {
 	memcpy(&_MessageBuf[_Rear], &Value, sizeof(char));
 	_Rear += sizeof(char);
@@ -202,7 +202,7 @@ CMessage& CMessage::operator>>(BYTE& Value)
 	return *(this);
 }
 
-CMessage& CMessage::operator>>(char& Value)
+CMessage& CMessage::operator>>(int8& Value)
 {
 	memcpy(&Value, &_MessageBuf[_Front], sizeof(char));
 	_Front += sizeof(char);
@@ -294,7 +294,27 @@ int CMessage::GetData(wchar_t* Dest, int32 Size)
 {
 	memcpy(Dest, &_MessageBuf[_Front], Size);
 	_Front += Size;
+	_UseBufferSize -= Size;	
+	return Size;
+}
+
+int32 CMessage::GetData(wstring& Dest, int32 Size)
+{
+	// 유니코드 문자열 생성후 wstring에 넣어서 반환
+	WCHAR StringToWCHAR[20];
+	memcpy(StringToWCHAR, &_MessageBuf[_Front], Size);
+	wstring RetWString = StringToWCHAR;
+	Dest = RetWString;
+	_Front += Size;
 	_UseBufferSize -= Size;
+	return Size;	
+}
+
+int CMessage::InsertData(const char* Src, int32 Size)
+{
+	memcpy(&_MessageBuf[_Rear], Src, Size);
+	_Rear += Size;
+	_UseBufferSize += Size;
 	return Size;
 }
 
@@ -322,12 +342,12 @@ int CMessage::InsertData(wchar_t* Src, int32 Size)
 	return Size;
 }
 
-int CMessage::InsertData(st_PlayerObjectInfo* Src, int32 Size)
+int CMessage::InsertData(st_GameObjectInfo* Src, int32 Size)
 {
-	memcpy(&_MessageBuf[_Rear], Src, sizeof(st_PlayerObjectInfo) * Size);
-	_Rear += (sizeof(st_PlayerObjectInfo) * Size);
-	_UseBufferSize += (sizeof(st_PlayerObjectInfo) * Size);
-	return (sizeof(st_PlayerObjectInfo) * Size);
+	memcpy(&_MessageBuf[_Rear], Src, Size);
+	_Rear += sizeof(st_GameObjectInfo);
+	_UseBufferSize += sizeof(st_GameObjectInfo);
+	return Size;
 }
 
 void CMessage::SetHeader(char* Header, char Size)

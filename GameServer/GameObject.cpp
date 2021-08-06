@@ -1,6 +1,11 @@
 #include "pch.h"
 #include "GameObject.h"
 
+CGameObject::CGameObject()
+{
+	_Channel = nullptr;
+}
+
 CGameObject::CGameObject(st_GameObjectInfo GameObjectInfo)
 {
 	_GameObjectInfo = GameObjectInfo;	

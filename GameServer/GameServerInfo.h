@@ -22,10 +22,10 @@ enum en_MESSAGE_TYPE
 
 struct st_CLIENT
 {
-	int64 AccountID;
-	int64 SessionID;
+	int64 AccountId;
+	int64 SessionId;
 
-	WCHAR ClientID[20];
+	wstring ClientId;
 	wstring CreateCharacterName;
 
 	int16 SectorX;
@@ -37,7 +37,8 @@ struct st_CLIENT
 
 	DWORD RecvPacketTime;
 	
-	CPlayer MyPlayers[5];
+	CPlayer* MyPlayers[5];
+	CPlayer* MyPlayer;
 };
 
 struct st_SECTOR_POSITION

@@ -2,11 +2,14 @@
 #include "Global.h"
 #include "DBConnectionPool.h"
 #include "DataManager.h"
+#include "ChannelManager.h"
 
 
 CDBConnectionPool* G_DBConnectionPool = nullptr;
 CLog* G_Logger = nullptr;
 CDataManager* G_Datamanager = nullptr;
+CChannelManager* G_ChannelManager = nullptr;
+
 //------------------------------------------------
 // 각종 전역 클래스 (Manager) 관리
 // 전역 클래스의 생성 및 삭제를 순서대로 관리한다.
@@ -22,6 +25,9 @@ public:
 		G_Datamanager = new CDataManager();
 		G_Datamanager->LoadDataItem(L"ItemData.json");
 		G_Datamanager->LoadDataStatus(L"StatusData.json");
+		
+		G_ChannelManager = new CChannelManager();	
+		G_ChannelManager->Add(1);
 	}
 
 	~CGlobal()

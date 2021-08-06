@@ -85,9 +85,6 @@
     <ClInclude Include="RingBuffer.h">
       <Filter>ServerCore</Filter>
     </ClInclude>
-    <ClInclude Include="Message.h">
-      <Filter>ServerCore</Filter>
-    </ClInclude>
     <ClInclude Include="LockFreeQue.h">
       <Filter>Util\LockFree</Filter>
     </ClInclude>
@@ -166,6 +163,12 @@
     <ClInclude Include="Map.h">
       <Filter>ContentServer\Content\Channel</Filter>
     </ClInclude>
+    <ClInclude Include="ChannelManager.h">
+      <Filter>ContentServer\Content\Channel</Filter>
+    </ClInclude>
+    <ClInclude Include="Message.h">
+      <Filter>Message</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -183,9 +186,6 @@
       <Filter>ContentServer</Filter>
     </ClCompile>
     <ClCompile Include="NetworkLib.cpp">
-      <Filter>ServerCore</Filter>
-    </ClCompile>
-    <ClCompile Include="Message.cpp">
       <Filter>ServerCore</Filter>
     </ClCompile>
     <ClCompile Include="Log.cpp">
@@ -227,6 +227,12 @@
     <ClCompile Include="Map.cpp">
       <Filter>ContentServer\Content\Channel</Filter>
     </ClCompile>
+    <ClCompile Include="ChannelManager.cpp">
+      <Filter>ContentServer\Content\Channel</Filter>
+    </ClCompile>
+    <ClCompile Include="Message.cpp">
+      <Filter>Message</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="DBConfig.xml">
@@ -249,5 +255,10 @@
     <None Include="StatusData.json">
       <Filter>Util\설정 파일\Data</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="MapData.txt">
+      <Filter>Util\설정 파일\Data</Filter>
+    </Text>
   </ItemGroup>
 </Project>

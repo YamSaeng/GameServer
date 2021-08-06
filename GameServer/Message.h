@@ -98,7 +98,7 @@ public:
 #pragma region 데이터 넣기	
 	CMessage& operator = (CMessage& Message);
 	CMessage& operator << (BYTE Value);
-	CMessage& operator << (char Value);
+	CMessage& operator << (int8 Value);
 	CMessage& operator << (bool Value);
 
 	CMessage& operator << (int16 Value);
@@ -115,10 +115,11 @@ public:
 
 	int32 GetData(char* Dest, int32 Size);
 	int32 GetData(wchar_t* Dest, int32 Size);
+	int32 GetData(wstring& Dest, int32 Size);
 #pragma endregion
 #pragma region 데이터 빼기	
 	CMessage& operator >> (BYTE& Value);
-	CMessage& operator >> (char& Value);
+	CMessage& operator >> (int8& Value);
 	CMessage& operator >> (bool& Value);
 
 	CMessage& operator >> (int16& Value);
@@ -131,11 +132,12 @@ public:
 	CMessage& operator >> (int64& Value);
 	CMessage& operator >> (double& Value);
 	CMessage& operator >> (uint64& Value);
-
+		
+	int InsertData(const char* Src, int32 Size);
 	int InsertData(char* Src, int32 Size);
 	int InsertData(const wchar_t* src, int32 Size);
 	int InsertData(wchar_t* Src, int32 Size);
-	int InsertData(st_PlayerObjectInfo* Src, int32 Size);	
+	int InsertData(st_GameObjectInfo* Src, int32 Size);
 #pragma endregion
 
 	/*

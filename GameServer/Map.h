@@ -1,4 +1,5 @@
 #pragma once
+#include "FileUtils.h"
 
 class CGameObject;
 
@@ -7,6 +8,7 @@ struct st_Vector2Int
 	int32 _X;
 	int32 _Y;
 
+	st_Vector2Int() {};
 	st_Vector2Int(int X, int Y)
 	{
 		_X = X;
@@ -41,10 +43,26 @@ public:
 	int32 _SizeX;
 	int32 _SizeY;
 	
-	bool* _CollisionMapInfo;	
-	CGameObject* _ObjectsInfo;
+	bool** _CollisionMapInfo;	
+	CGameObject** _ObjectsInfo;
 
 	CMap(int MapId);
 	
+	//-------------------------------------------
+	// 좌표 위치에 있는 오브젝트 반환
+	//-------------------------------------------
+	CGameObject* Find(st_Vector2Int& CellPosition);
+	
+	//---------------------------------------------------------------
+	// 위치로 갈 수 있는지 확인
+	//---------------------------------------------------------------
+	bool Cango(st_Vector2Int& CellPosition, bool CheckObjects = true);
+
+	//------------------------------------------------------------------------------------------------------------------------
+	// 목적지 좌표값을 받아서 해당 좌표로 갈 수 있는지 없는지 판단
+	// CheckObject = 벽을 제외한 오브젝트를 충돌 대상으로 여길 것인지에 대한 여부
+	// ApplyCollision = 해당 함수를 호출 해준 오브젝트를 충돌 대상으로 여길 것인지에 대한 여부
+	//------------------------------------------------------------------------------------------------------------------------
+	bool ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool CheckObject = true, bool Applycollision = true);
 };
 

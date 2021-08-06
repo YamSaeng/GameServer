@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Channel.h"
+
 enum en_GameObjectType
 {
 	NORMAL,
@@ -16,8 +17,17 @@ enum en_MoveDir
 	RIGHT
 };
 
+enum en_CreatureState
+{
+	IDLE,
+	MOVING,
+	ATTACK,
+	DEAD,
+};
+
 struct st_PositionInfo
 {
+	en_CreatureState State;
 	int32 PositionX;
 	int32 PositionY;
 	en_MoveDir MoveDir;
@@ -38,6 +48,7 @@ struct st_GameObjectInfo
 	wstring ObjectName;
 	st_PositionInfo ObjectPositionInfo;
 	st_StatInfo ObjectStatInfo;
+	en_GameObjectType ObjectType;
 };
 
 struct st_PlayerObjectInfo : public st_GameObjectInfo
@@ -51,9 +62,9 @@ private:
 protected:	
 public:
 	st_GameObjectInfo _GameObjectInfo;
-	CChannel _Channel;
+	CChannel* _Channel;	
 
-	CGameObject() {};
+	CGameObject();
 	CGameObject(st_GameObjectInfo GameObjectInfo);
 	~CGameObject();
 
