@@ -3,8 +3,7 @@
 
 class CPlayer : public CGameObject
 {
-public:
-	int32 _PlayerDBId;
+public:	
 	wstring _PlayerName;
 
 	CPlayer();

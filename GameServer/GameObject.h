@@ -44,8 +44,7 @@ struct st_StatInfo
 
 struct st_GameObjectInfo
 {
-	int64 ObjectId;
-	wstring ObjectName;
+	int64 ObjectId;	
 	st_PositionInfo ObjectPositionInfo;
 	st_StatInfo ObjectStatInfo;
 	en_GameObjectType ObjectType;

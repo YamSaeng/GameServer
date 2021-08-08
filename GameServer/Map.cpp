@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Map.h"
 #include "GameObject.h"
+#include "Player.h"
 
 CMap::CMap(int MapId)
 {
@@ -80,6 +81,9 @@ CMap::CMap(int MapId)
 		}
 		ConvertP += 2;
 	}
+
+	_SizeX = _Right - _Left + 1;
+	_SizeY = _Down - _Up + 1;
 }
 
 CGameObject* CMap::Find(st_Vector2Int& CellPosition)
@@ -118,8 +122,8 @@ bool CMap::Cango(st_Vector2Int& CellPosition, bool CheckObjects)
 
 	int X = CellPosition._X - _Left;
 	int Y = _Down - CellPosition._Y;
-
-	return !_CollisionMapInfo[Y][X];
+	
+	return !_CollisionMapInfo[Y][X] && (!CheckObjects || _ObjectsInfo[Y, X]->_GameObjectInfo.ObjectType == en_GameObjectType::NORMAL);
 }
 
 bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool CheckObject, bool Applycollision)
@@ -151,8 +155,8 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	// 호출해준 대상을 충돌체로 여긴다면
 	if (Applycollision == true)
 	{
-		int X = PositionInfo.PositionX = _Left;
-		int Y = _Down = PositionInfo.PositionY;
+		int X = PositionInfo.PositionX - _Left;
+		int Y = _Down - PositionInfo.PositionY;
 
 		// 기존위치 데이터는 날리고
 		if (&_ObjectsInfo[Y][X] == GameObject)
@@ -169,10 +173,8 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 
 	// 섹터 작업
 	switch (GameObject->_GameObjectInfo.ObjectType)
-	{
-	case NORMAL:
-		break;
-	case PLAYER:		
+	{	
+	case PLAYER:			
 		break;
 	case MONSTER:
 		break;
@@ -180,4 +182,9 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 		CRASH("ApplyMove GameObject Type 이상한 값")
 		break;
 	}
+
+	GameObject->_GameObjectInfo.ObjectPositionInfo.PositionX = DestPosition._X;
+	GameObject->_GameObjectInfo.ObjectPositionInfo.PositionY = DestPosition._Y;	
+
+	return true;
 }

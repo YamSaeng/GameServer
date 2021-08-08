@@ -55,7 +55,7 @@ namespace SP
 	{
 	public:
 		CDBGameServerPlayerDBIDGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spPlayerDBIDGet(?)}") {}	
-		void InAccountID(int32& AccountId) { BindCol(0, AccountId); }
+		void InAccountID(int64& AccountId) { BindParam(0, AccountId); }
 		void OutPlayerDBID(int32& PlayerDBId) { BindCol(0, PlayerDBId); }
 	};
 }

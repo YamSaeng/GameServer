@@ -660,6 +660,7 @@ void CNetworkLib::ReleaseSession(st_SESSION* ReleaseSession)
 		이미 closesocket 작업을 한 것인지 아닌지 판단
 		1로 바꾸려 햇는데 0이면 closesocket작업을 하지 않은 것이므로 closesocket실행
 	*/
+	
 	if (InterlockedExchange(&ReleaseSession->IsCloseSocket, CLOSE_SOCKET_DO) == CLOSE_SOCKET_DO_NOT)
 	{
 		InterlockedExchange(&ReleaseSession->ClientSock, INVALID_SOCKET);

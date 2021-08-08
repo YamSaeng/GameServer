@@ -5,6 +5,12 @@
 #include "GameServerInfo.h"
 #include "MemoryPoolTLS.h"
 
+// 기본 메세지 처리 쓰레드와
+// DB 질의 처리 쓰레드가 2개 존재
+// 따라서 기본 메세지 처리에서 st_Client가 사라지면
+// DB 질의 처리 쓰레드에서 사라진 st_Client를 대상으로 DB처리 해줄 수 있다.
+// 처리 고민 해야함
+
 class CGameServer : public CNetworkLib
 {
 private:
@@ -40,20 +46,25 @@ private:
 	//패킷처리 함수
 	//1. 로그인 요청
 	//2. 캐릭터 생성 요청 
-	//3. 섹터 이동 요청
-	//4. 채팅 보내기 요청
-	//5. 하트비트
+	//3. 게임 입장 요청
+	//4. 움직임 요청
+	//5. 공격 요청
+	//6. 하트비트
 	//----------------------------------------------------------------	
 	void PacketProcReqLogin(int64 SessionID, CMessage* Message);
 	void PacketProcReqCreateCharacter(int64 SessionID, CMessage* Message);
 	void PacketProcReqEnterGame(int64 SessionID, CMessage* Message);
+	void PacketProcReqMove(int64 SessionID, CMessage* Message);	
+	void PacketProcReqAttack(int64 SessionID, CMessage* Message);
 	void PacketProcReqSectorMove(int64 SessionID, CMessage* Message);
 	void PacketProcReqMessage(int64 SessionID, CMessage* Message);
 	void PacketProcReqHeartBeat(int64 SessionID, CMessage* Message);
 
-	//----------------------------------------------------------------
+	//-----------------------------------------------------------------------------------------------
 	// DB 요청 처리 함수
-	//----------------------------------------------------------------
+	// 1. 로그인 요청에서 추가로 AccountServer에 입력받은 Account가 있는지 확인하고 최종 로그인 검사	
+	// 2. 캐릭터 생성 요청에서 추가로 DB에 입력한 해당 캐릭터가 있는지 확인
+	//-----------------------------------------------------------------------------------------------
 	void PacketProcReqAccountCheck(int64 SessionID, CMessage* Message);
 	void PacketProcReqCreateCharacterNameCheck(int64 SessionID, CMessage* Message);
 
@@ -61,12 +72,16 @@ private:
 	//패킷조합 함수
 	//1. 클라이언트 접속 응답
 	//2. 로그인 요청 응답
-	//3. 섹터 이동 요청 응답
-	//4. 채팅 보내기 요청 응답
+	//3. 게임 입장 요청 응답
+	//4. 움직임 요청 응답
+	//5. 공격 요청 응답
 	//----------------------------------------------------------------
 	CMessage* MakePacketResClientConnected();
-	CMessage* MakePacketResLogin(bool Status, int32 PlayerCount, wstring PlayersName);
-	CMessage* MakePacketResCreateCharacter(int32 PlayerDBID, wstring PlayerName);
+	CMessage* MakePacketResLogin(bool Status, int32 PlayerCount, int32 PlayerDBId, wstring PlayersName);
+	CMessage* MakePacketResCreateCharacter(bool IsSuccess, int32 PlayerDBId, wstring PlayerName);
+	CMessage* MakePacketResEnterGame(int64 AccountId, int32 PlayerDBId, wstring EnterPlayerName, st_GameObjectInfo ObjectInfo);
+	CMessage* MakePacketResMove(int64 AccountId, int32 PlayerDBId,bool Cango,st_PositionInfo PositionInfo);
+	CMessage* MakePacketResAttack(int64 AccountId, int32 PlayerDBId, en_MoveDir Dir);
 	CMessage* MakePacketResSectorMove(int64 AccountNo, WORD SectorX, WORD SectorY);
 	CMessage* MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* NickName, WORD MessageLen, WCHAR* Message);
 

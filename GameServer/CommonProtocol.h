@@ -126,22 +126,58 @@ enum en_PACKET_TYPE
 	//------------------------------------------------------------
 	// 게임서버 캐릭터 생성 요청 응답
 	// int32 PlayerDBId
+	// bool IsSuccess
 	// wstring PlayerName
 	//------------------------------------------------------------
 	en_PACKET_S2C_GAME_CREATE_CHARACTER,
 
 	//------------------------------------------------------------
 	// 게임서버 캐릭터 입장
+	// int64 AccoountId
+	// int8 EnterGameCharacterNameLen
+	// wstring EnterGameCharacterName
 	//------------------------------------------------------------
 	en_PACKET_C2S_GAME_ENTER,
 
 	//------------------------------------------------------------
 	// 게임서버 캐릭터 입장 요청 응답
+	// int64 AccountId
+	// int32 PlaterDBId
+	// wstring EnterCharaceterName
+	// st_GameObjectInfo ObjectInfo
 	//------------------------------------------------------------
 	en_PACKET_S2C_GAME_ENTER,
 
 	//------------------------------------------------------------
-	// 게임서버 움직이기 패킷 
+	// 게임서버 캐릭터 움직이기 요청
+	// int64 AccountId
+	// int32 PlayerDBId
+	// int8 Dir
 	//------------------------------------------------------------
-	en_PACKET_CS_GAME_REQ_MOVE = 1000,
+	en_PACKET_C2S_MOVE,
+
+	//------------------------------------------------------------
+	// 게임서버 캐릭터 움직이기 요청
+	// int64 AccountId
+	// int32 PlayerDBId
+	// bool CanGo
+	// st_PositionInfo PositionInfo
+	//------------------------------------------------------------
+	en_PACKET_S2C_MOVE,
+	
+	//------------------------------------------------------------
+	// 게임서버 캐릭터 공격 요청
+	// int64 AccountId
+	// int32 PlayerDBId
+	// int8 Dir
+	//------------------------------------------------------------	
+	en_PACKET_C2S_ATTACK,
+
+	//------------------------------------------------------------
+	// 게임서버 캐릭터 공격 요청 응답
+	// int64 AccountId
+	// int32 PlayerDBId
+	// int8 Dir
+	//------------------------------------------------------------	
+	en_PACKET_S2C_ATTACK,
 };
