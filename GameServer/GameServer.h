@@ -84,8 +84,7 @@ private:
 	CMessage* MakePacketResMove(int64 AccountId, int32 PlayerDBId,bool Cango,st_PositionInfo PositionInfo);
 	CMessage* MakePacketResAttack(int64 AccountId, int32 PlayerDBId, en_MoveDir Dir);
 	CMessage* MakePacketResSpawn(int64 AccountId, int32 PlayerDBId, int32 ObjectInfosCount, wstring* SpawnObjectName, st_GameObjectInfo* ObjectInfos);
-
-	CMessage* MakePacketResSectorMove(int64 AccountNo, WORD SectorX, WORD SectorY);
+	CMessage* MakePacketResDeSpawn(int64 AccountId, int32 PlayerDBId);
 	CMessage* MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* NickName, WORD MessageLen, WCHAR* Message);
 
 	st_CLIENT* FindClient(int64 SessionID);

@@ -199,6 +199,8 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 
 		// ¸Ê¿¡¼­µµ ÅðÀå
 		_Map->ApplyLeave(LeaveChannelGameObject);
+
+		LeaveChannelGameObject->_Channel = nullptr;
 		break;
 	case en_GameObjectType::MONSTER:
 		break;	

@@ -173,7 +173,12 @@ void CGameServer::DeleteClient(int64 SessionID)
 		}
 
 		CChannel* Channel =  G_ChannelManager->Find(1);
-		Channel->LeaveChannel(Client->MyPlayer);		
+		Channel->LeaveChannel(Client->MyPlayer);	
+		
+		// 나간 대상 제외하고 주위 섹터 플레이어들한테 해당 클라가 나갓다고 알림
+		CMessage* ResLeaveGame = MakePacketResDeSpawn(Client->AccountId, Client->MyPlayer->_GameObjectInfo.ObjectId);		
+		SendPacketSector(Client, ResLeaveGame);
+		ResLeaveGame->Free();
 		
 		for (int i = 0; i < 5; i++)
 		{
@@ -571,10 +576,14 @@ void CGameServer::PacketProcReqAttack(int64 SessionID, CMessage* Message)
 		Client->MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = MoveDir;
 
 		// 공격 처리 해야함
-
 		CMessage* ResAttackPacket = MakePacketResAttack(Client->AccountId, Client->MyPlayer->_GameObjectInfo.ObjectId, MoveDir);
 		SendPacket(Client->SessionId, ResAttackPacket);
 		ResAttackPacket->Free();
+
+		// 주위 섹터 들에게 내가 지금 공격하고 있다고 알려줌
+		CMessage* ResMyAttackOtherPacket = MakePacketResAttack(Client->AccountId, Client->MyPlayer->_GameObjectInfo.ObjectId, MoveDir);
+		SendPacketSector(Client, ResMyAttackOtherPacket);
+		ResMyAttackOtherPacket->Free();
 	}
 }
 
@@ -630,9 +639,9 @@ void CGameServer::PacketProcReqSectorMove(int64 SessionID, CMessage* Message)
 
 		_SectorList[Client->SectorY][Client->SectorX].push_back(Client->SessionId);
 
-		CMessage* SectorMoveResMessage = MakePacketResSectorMove(Client->AccountId, Client->SectorX, Client->SectorY);
+		/*CMessage* SectorMoveResMessage = MakePacketResSectorMove(Client->AccountId, Client->SectorX, Client->SectorY);
 		SendPacket(Client->SessionId, SectorMoveResMessage);
-		SectorMoveResMessage->Free();
+		SectorMoveResMessage->Free();*/
 	}	
 	else
 	{
@@ -1110,29 +1119,23 @@ CMessage* CGameServer::MakePacketResSpawn(int64 AccountId, int32 PlayerDBId, int
 	return ResSpawnPacket;
 }
 
-//-----------------------------------------------------------------
-//섹터 이동 요청 응답 패킷 만들기 함수
-//WORD Type
-//INT64 AccountNo
-//WORD SectorX
-//WORD SectorY
-//-----------------------------------------------------------------
-CMessage* CGameServer::MakePacketResSectorMove(int64 AccountNo, WORD SectorX, WORD SectorY)
+// int64 AccountId
+// int32 PlayerDBId
+CMessage* CGameServer::MakePacketResDeSpawn(int64 AccountId, int32 PlayerDBId)
 {
-	CMessage* SectorMoveMessage = CMessage::Alloc();
-	if (SectorMoveMessage == nullptr)
+	CMessage* ResDeSpawnPacket = CMessage::Alloc();
+	if (ResDeSpawnPacket == nullptr)
 	{
 		return nullptr;
 	}
 
-	SectorMoveMessage->Clear();
+	ResDeSpawnPacket->Clear();
 
-	*SectorMoveMessage << (WORD)en_PACKET_CS_GAME_RES_SECTOR_MOVE;
-	*SectorMoveMessage << AccountNo;
-	*SectorMoveMessage << SectorX;
-	*SectorMoveMessage << SectorY;
+	*ResDeSpawnPacket << (WORD)en_PACKET_S2C_DESPAWN;
+	*ResDeSpawnPacket << AccountId;
+	*ResDeSpawnPacket << PlayerDBId;
 
-	return SectorMoveMessage;
+	return ResDeSpawnPacket;
 }
 
 //-------------------------------------------------------
