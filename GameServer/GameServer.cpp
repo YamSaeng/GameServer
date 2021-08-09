@@ -172,6 +172,9 @@ void CGameServer::DeleteClient(int64 SessionID)
 			_SectorList[Client->SectorY][Client->SectorX].remove(Client->SessionId);
 		}
 
+		CChannel* Channel =  G_ChannelManager->Find(1);
+		Channel->LeaveChannel(Client->MyPlayer);		
+		
 		for (int i = 0; i < 5; i++)
 		{
 			delete Client->MyPlayers[i];
@@ -369,13 +372,40 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 		}
 				
 		// 입장할 채널을 찾고
-		CChannel* Channel = G_ChannelManager->Find(1);		
+		CChannel* Channel = G_ChannelManager->Find(1);				
 		// 채널 입장
 		Channel->EnterChannel(Client->MyPlayer);
 
-		CMessage* ResEnterGame = MakePacketResEnterGame(Client->AccountId, Client->MyPlayer->_GameObjectInfo.ObjectId, Client->MyPlayer->_PlayerName, Client->MyPlayer->_GameObjectInfo);
-		SendPacket(Client->SessionId, ResEnterGame);
-		ResEnterGame->Free();		
+		CMessage* ResEnterGamePacket = MakePacketResEnterGame(Client->AccountId, Client->MyPlayer->_GameObjectInfo.ObjectId, Client->MyPlayer->_PlayerName, Client->MyPlayer->_GameObjectInfo);
+		SendPacket(Client->SessionId, ResEnterGamePacket);
+		ResEnterGamePacket->Free();	
+					
+		// 다른 플레이어들한테 나를 생성하라고 알려줌
+		CMessage* ResSpawnPacket = MakePacketResSpawn(Client->AccountId, Client->MyPlayer->_GameObjectInfo.ObjectId, 1, &Client->MyPlayer->_PlayerName, &Client->MyPlayer->_GameObjectInfo);
+		SendPacketSector(Client, ResSpawnPacket);
+		ResSpawnPacket->Free();				
+		
+		// 나한테 다른 오브젝트들을 생성하라고 알려줌				
+		wstring* SpawnObjectNames;
+		st_GameObjectInfo* SpawnGameObjectInfos;
+
+		vector<CPlayer*> AroundPlayers = Channel->GetAroundPlayer(Client->MyPlayer, 10);
+		
+		if (AroundPlayers.size() > 0)
+		{
+			SpawnObjectNames = new wstring[AroundPlayers.size()];
+			SpawnGameObjectInfos = new st_GameObjectInfo[AroundPlayers.size()];
+
+			for (int i = 0; i < AroundPlayers.size(); i++)
+			{
+				SpawnObjectNames[i] = AroundPlayers[i]->_PlayerName;
+				SpawnGameObjectInfos[i] = AroundPlayers[i]->_GameObjectInfo;
+			}
+
+			CMessage* ResOtherObjectSpawnPacket = MakePacketResSpawn(Client->AccountId, Client->MyPlayer->_GameObjectInfo.ObjectId, AroundPlayers.size(), SpawnObjectNames, SpawnGameObjectInfos);
+			SendPacket(Client->SessionId, ResOtherObjectSpawnPacket);
+			ResOtherObjectSpawnPacket->Free();
+		}		
 	}
 	else
 	{
@@ -401,7 +431,7 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 		int64 AccountId;
 		*Message >> AccountId;
 
-		if (Client->AccountId != AccountId)
+ 		if (Client->AccountId != AccountId)
 		{
 			Disconnect(Client->SessionId);
 			return;
@@ -462,9 +492,10 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 		st_Vector2Int CheckPosition = PlayerPosition + DirVector2Int;
 
 		bool IsCanGo = Channel->_Map->Cango(CheckPosition);
+		bool ApplyMoveExe;
 		if (IsCanGo == true)
 		{
-			bool ApplyMoveExe = Channel->_Map->ApplyMove(MyPlayer, CheckPosition);
+			 ApplyMoveExe = Channel->_Map->ApplyMove(MyPlayer, CheckPosition);
 
 			//G_Logger->WriteStdOut(en_Color::WHITE, L"Y : %d X : %d To Move \n\n", MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY, MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX);
 		}		
@@ -473,10 +504,16 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 			//G_Logger->WriteStdOut(en_Color::RED, L"Cant Move\n");
 		}
 
-		CMessage* ResMovePacket = MakePacketResMove(Client->AccountId, Client->MyPlayer->_GameObjectInfo.ObjectId, IsCanGo, Client->MyPlayer->_GameObjectInfo.ObjectPositionInfo);
-		SendPacket(Client->SessionId, ResMovePacket);
-		ResMovePacket->Free();
+		// 나한테 움직임 결과 보냄
+		CMessage* ResMyMoveMePacket = MakePacketResMove(Client->AccountId, MyPlayer->_GameObjectInfo.ObjectId, IsCanGo, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
+		SendPacket(Client->SessionId, ResMyMoveMePacket);
+		ResMyMoveMePacket->Free();
 		
+		// 내가 움직인 것을 내 주위 플레이어들에게 알려야함
+		CMessage* ResMyMoveOtherPacket = MakePacketResMove(Client->AccountId, MyPlayer->_GameObjectInfo.ObjectId, IsCanGo, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
+		SendPacketSector(Client, ResMyMoveOtherPacket);
+		ResMyMoveOtherPacket->Free();
+
 		MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 	}
 	else
@@ -654,7 +691,6 @@ void CGameServer::PacketProcReqMessage(int64 SessionID, CMessage* Message)
 
 	CMessage* ChattingResMessage = nullptr;
 	//ChattingResMessage = MakePacketResMessage(Client->AccountID, Client->ClientID, Client->NickName, CSMessageLen, CSMessage);
-	SendPacketAround(Client, ChattingResMessage, true);
 	ChattingResMessage->Free();
 }
 
@@ -742,7 +778,8 @@ void CGameServer::PacketProcReqAccountCheck(int64 SessionID, CMessage* Message)
 				Client->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectStatInfo.Attack = PlayerAttack;
 				Client->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectStatInfo.Speed = PlayerSpeed;
 				Client->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-				Client->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;				
+				Client->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;		
+				Client->MyPlayers[PlayerCount]->_SessionId = Client->SessionId;
 							
 				PlayerCount++;
 			}							
@@ -833,6 +870,7 @@ void CGameServer::PacketProcReqCreateCharacterNameCheck(int64 SessionID, CMessag
 			Client->MyPlayers[0]->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
 			Client->MyPlayers[0]->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 			Client->MyPlayers[0]->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
+			Client->MyPlayers[0]->_SessionId = Client->SessionId;
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerDBIDGetDBConnection);
 		}		
@@ -1022,6 +1060,56 @@ CMessage* CGameServer::MakePacketResAttack(int64 AccountId, int32 PlayerDBId, en
 	return ResAttackMessage;
 }
 
+// int64 AccountId
+// int32 PlayerDBId
+// st_GameObjectInfo GameObjectInfo
+CMessage* CGameServer::MakePacketResSpawn(int64 AccountId, int32 PlayerDBId, int32 ObjectInfosCount, wstring* SpawnObjectName, st_GameObjectInfo* ObjectInfos)
+{
+	CMessage* ResSpawnPacket = CMessage::Alloc();
+	if (ResSpawnPacket == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResSpawnPacket->Clear();
+
+	*ResSpawnPacket << (WORD)en_PACKET_S2C_SPAWN;
+	*ResSpawnPacket << AccountId;
+	*ResSpawnPacket << PlayerDBId;
+
+	// Spawn 오브젝트 개수
+	*ResSpawnPacket << ObjectInfosCount;
+
+	for (int i = 0; i < ObjectInfosCount; i++)
+	{
+		// SpawnObjectId
+		*ResSpawnPacket << ObjectInfos[i].ObjectId;
+
+		// SpawnObjectName
+		int8 SpawnObjectNameLen = (int8)(SpawnObjectName[i].length() * 2);
+		*ResSpawnPacket << SpawnObjectNameLen;
+		ResSpawnPacket->InsertData(SpawnObjectName[i].c_str(), SpawnObjectNameLen);
+
+		// st_PositionInfo
+		*ResSpawnPacket << (int8)ObjectInfos[i].ObjectPositionInfo.State;
+		*ResSpawnPacket << ObjectInfos[i].ObjectPositionInfo.PositionX;
+		*ResSpawnPacket << ObjectInfos[i].ObjectPositionInfo.PositionY;
+		*ResSpawnPacket << (int8)ObjectInfos[i].ObjectPositionInfo.MoveDir;
+
+		// st_StatInfo
+		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.Level;
+		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.HP;
+		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.MaxHP;
+		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.Attack;
+		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.Speed;
+
+		// ObjectType
+		*ResSpawnPacket << (int8)ObjectInfos[i].ObjectType;
+	}	
+
+	return ResSpawnPacket;
+}
+
 //-----------------------------------------------------------------
 //섹터 이동 요청 응답 패킷 만들기 함수
 //WORD Type
@@ -1090,34 +1178,6 @@ st_CLIENT* CGameServer::FindClient(int64 SessionID)
 	}
 }
 
-void CGameServer::GetSectorAround(int16 SectorX, int16 SectorY, st_SECTOR_AROUND* SectorAround)
-{
-	//왼쪽 위 지점부터 구하기 위해 좌표 변경
-	SectorX--;
-	SectorY--;
-
-	SectorAround->Count = 0;
-
-	for (int32 Y = 0; Y < 3; Y++)
-	{
-		if (SectorY + Y < 0 || SectorY + Y >= SECTOR_Y_MAX)
-		{
-			continue;
-		}
-
-		for (int32 X = 0; X < 3; X++)
-		{
-			if (SectorX + X < 0 || SectorX + X >= SECTOR_X_MAX)
-			{
-				continue;
-			}
-
-			SectorAround->Around[SectorAround->Count].X = SectorX + X;
-			SectorAround->Around[SectorAround->Count].Y = SectorY + Y;
-			SectorAround->Count++;
-		}
-	}
-}
 
 void CGameServer::OnClientJoin(int64 SessionID)
 {
@@ -1159,34 +1219,30 @@ bool CGameServer::OnConnectionRequest(const wchar_t ClientIP, int32 Port)
 	return false;
 }
 
-//클라 중심으로 9방향 클라들에게 메세지를 뿌린다.
-void CGameServer::SendPacketAround(st_CLIENT* Client, CMessage* Message, bool SendMe)
+void CGameServer::SendPacketSector(st_CLIENT* Client, CMessage* Message, bool SendMe)
 {
-	st_SECTOR_AROUND AroundSector;
-	GetSectorAround(Client->SectorX, Client->SectorY, &AroundSector);
-
-	list<int64>::iterator SectorIterator;
-	for (int32 i = 0; i < AroundSector.Count; i++)
+	CChannel* Channel = G_ChannelManager->Find(1);
+	vector<CSector*> Sectors = Channel->GetAroundSectors(Client->MyPlayer, 10);
+	
+	for (CSector* Sector : Sectors)
 	{
-		for (SectorIterator = _SectorList[AroundSector.Around[i].Y][AroundSector.Around[i].X].begin();
-			SectorIterator != _SectorList[AroundSector.Around[i].Y][AroundSector.Around[i].X].end();
-			++SectorIterator)
+		for (CPlayer* Player : Sector->GetPlayers())
 		{
 			if (SendMe == true)
 			{
-				SendPacket((*SectorIterator), Message);
+				SendPacket(Player->_SessionId, Message);				
 			}
 			else
 			{
-				if (Client->SessionId != (*SectorIterator))
+				if (Client->SessionId != Player->_SessionId)
 				{
-					SendPacket((*SectorIterator), Message);
+					SendPacket(Player->_SessionId, Message);
 				}
-			}
+			}			
 		}
 	}
-
 }
+
 
 void CGameServer::SendPacketBroadcast(CMessage* Message)
 {

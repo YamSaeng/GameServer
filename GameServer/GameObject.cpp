@@ -35,3 +35,8 @@ st_PositionInfo CGameObject::GetPositionInfo()
 {
 	return _GameObjectInfo.ObjectPositionInfo;
 }
+
+st_Vector2Int CGameObject::GetCellPosition()
+{
+	return st_Vector2Int(_GameObjectInfo.ObjectPositionInfo.PositionX,_GameObjectInfo.ObjectPositionInfo.PositionY);
+}

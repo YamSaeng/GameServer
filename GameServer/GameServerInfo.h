@@ -41,18 +41,6 @@ struct st_CLIENT
 	CPlayer* MyPlayer;
 };
 
-struct st_SECTOR_POSITION
-{
-	int32 X;
-	int32 Y;
-};
-
-struct st_SECTOR_AROUND
-{
-	int32 Count;
-	st_SECTOR_POSITION Around[9];
-};
-
 struct st_JOB
 {
 	WORD Type;

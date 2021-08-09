@@ -75,6 +75,7 @@ private:
 	//3. 게임 입장 요청 응답
 	//4. 움직임 요청 응답
 	//5. 공격 요청 응답
+	//6. 오브젝트 스폰 
 	//----------------------------------------------------------------
 	CMessage* MakePacketResClientConnected();
 	CMessage* MakePacketResLogin(bool Status, int32 PlayerCount, int32 PlayerDBId, wstring PlayersName);
@@ -82,12 +83,12 @@ private:
 	CMessage* MakePacketResEnterGame(int64 AccountId, int32 PlayerDBId, wstring EnterPlayerName, st_GameObjectInfo ObjectInfo);
 	CMessage* MakePacketResMove(int64 AccountId, int32 PlayerDBId,bool Cango,st_PositionInfo PositionInfo);
 	CMessage* MakePacketResAttack(int64 AccountId, int32 PlayerDBId, en_MoveDir Dir);
+	CMessage* MakePacketResSpawn(int64 AccountId, int32 PlayerDBId, int32 ObjectInfosCount, wstring* SpawnObjectName, st_GameObjectInfo* ObjectInfos);
+
 	CMessage* MakePacketResSectorMove(int64 AccountNo, WORD SectorX, WORD SectorY);
 	CMessage* MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* NickName, WORD MessageLen, WCHAR* Message);
 
 	st_CLIENT* FindClient(int64 SessionID);
-
-	void GetSectorAround(int16 SectorX, int16 SectorY, st_SECTOR_AROUND* SectorAround);
 public:
 	//------------------------------------
 	// Job 메모리풀
@@ -122,11 +123,12 @@ public:
 	virtual void OnClientLeave(int64 SessionID) override;
 	virtual bool OnConnectionRequest(const wchar_t ClientIP, int32 Port) override;
 
+	void SendPacketSector(st_CLIENT* Client, CMessage* Message, bool SendMe = false);
+
 	//------------------------------------------------------------------------------
 	//자신 주위 8섹터들에게 메세지를 전달한다.
 	//SendMe = false 나에게는 보내지 않는다.
 	//SendMe = true 나에게도 보낸다.
 	//------------------------------------------------------------------------------
-	void SendPacketAround(st_CLIENT* Client, CMessage* Message, bool SendMe = false);
 	void SendPacketBroadcast(CMessage* Message);
 };

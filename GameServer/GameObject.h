@@ -72,5 +72,7 @@ public:
 	virtual void OnDead(CGameObject Killer);
 
 	st_PositionInfo GetPositionInfo();
+
+	st_Vector2Int GetCellPosition();
 };
 

@@ -180,4 +180,13 @@ enum en_PACKET_TYPE
 	// int8 Dir
 	//------------------------------------------------------------	
 	en_PACKET_S2C_ATTACK,
+
+	//------------------------------------------------------------
+	// 게임서버 캐릭터 스폰 요청
+	// int64 AccountId
+	// int32 PlayerDBId
+	// wstring SpawnObjectName
+	// st_GameObjectInfo GameObjectInfo
+	//------------------------------------------------------------	
+	en_PACKET_S2C_SPAWN,
 };

@@ -44,7 +44,7 @@ public:
 	int32 _SizeY;
 	
 	bool** _CollisionMapInfo;	
-	CGameObject** _ObjectsInfo;
+	CGameObject*** _ObjectsInfo;
 
 	CMap(int MapId);
 	
@@ -66,5 +66,10 @@ public:
 	// ApplyCollision = 해당 함수를 호출 해준 오브젝트를 충돌 대상으로 여길 것인지에 대한 여부
 	//------------------------------------------------------------------------------------------------------------------------
 	bool ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool CheckObject = true, bool Applycollision = true);
+
+	//---------------------------------------
+	// 맵에서 오브젝트 퇴장
+	//---------------------------------------
+	bool ApplyLeave(CGameObject* GameObject);
 };
 

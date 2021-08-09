@@ -46,9 +46,6 @@
     <Filter Include="ContentServer\Content\Data">
       <UniqueIdentifier>{12807dfe-17f2-4046-865b-c8efb38536d7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ContentServer\Content\Player">
-      <UniqueIdentifier>{ae04998f-66c9-4da1-8bfd-9f8523536e46}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Util\설정 파일\DB">
       <UniqueIdentifier>{78adbdab-1584-4001-a3cc-f094d3e8fdcd}</UniqueIdentifier>
     </Filter>
@@ -57,6 +54,15 @@
     </Filter>
     <Filter Include="Util\설정 파일\Data">
       <UniqueIdentifier>{39bd25db-55f2-4eb9-af34-6bad1c71c5bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ContentServer\Content\GameObject">
+      <UniqueIdentifier>{821a2af2-60a7-4c19-8f19-590f7bfe1ef6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ContentServer\Content\GameObject\Player">
+      <UniqueIdentifier>{ae04998f-66c9-4da1-8bfd-9f8523536e46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ContentServer\Content\GameObject\Monster">
+      <UniqueIdentifier>{33925b0f-ac21-4ddd-875e-de847e8abf20}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -152,10 +158,7 @@
       <Filter>DB</Filter>
     </ClInclude>
     <ClInclude Include="Player.h">
-      <Filter>ContentServer\Content\Player</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject.h">
-      <Filter>ContentServer\Content\Player</Filter>
+      <Filter>ContentServer\Content\GameObject\Player</Filter>
     </ClInclude>
     <ClInclude Include="Sector.h">
       <Filter>ContentServer\Content\Channel</Filter>
@@ -168,6 +171,12 @@
     </ClInclude>
     <ClInclude Include="Message.h">
       <Filter>Message</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>ContentServer\Content\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Monster.h">
+      <Filter>ContentServer\Content\GameObject\Monster</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -216,10 +225,7 @@
       <Filter>ContentServer\Content\Data</Filter>
     </ClCompile>
     <ClCompile Include="Player.cpp">
-      <Filter>ContentServer\Content\Player</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject.cpp">
-      <Filter>ContentServer\Content\Player</Filter>
+      <Filter>ContentServer\Content\GameObject\Player</Filter>
     </ClCompile>
     <ClCompile Include="Sector.cpp">
       <Filter>ContentServer\Content\Channel</Filter>
@@ -232,6 +238,12 @@
     </ClCompile>
     <ClCompile Include="Message.cpp">
       <Filter>Message</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>ContentServer\Content\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Monster.cpp">
+      <Filter>ContentServer\Content\GameObject\Monster</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
