@@ -195,5 +195,13 @@ enum en_PACKET_TYPE
 	// int64 AccountId
 	// int32 PlayerDBId
 	//------------------------------------------------------------
-	en_PACKET_S2C_DESPAWN
+	en_PACKET_S2C_DESPAWN,
+
+	//------------------------------------------------------------
+	// 게임서버 HP 변경
+	// int64 AccountId
+	// int32 PlayerDBId
+	// int32 HP
+	//------------------------------------------------------------
+	en_PACKET_S2C_CHANGE_HP
 };

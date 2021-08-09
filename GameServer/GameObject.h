@@ -68,11 +68,19 @@ public:
 	~CGameObject();
 
 	virtual void Update();
-	virtual void OnDamaged(CGameObject Attacker, int32 Damage);
-	virtual void OnDead(CGameObject Killer);
+	virtual void OnDamaged(CGameObject* Attacker, int32 Damage);
+	virtual void OnDead(CGameObject* Killer);
 
 	st_PositionInfo GetPositionInfo();
 
+	//--------------------------------------------
+	// 현재 좌표 기준으로 st_Vector2Int를 반환한다.
+	//--------------------------------------------
 	st_Vector2Int GetCellPosition();
+
+	//------------------------------------------------
+	// 방향값을 받아서 앞쪽에 있는 위치를 반환한다.
+	//------------------------------------------------
+	st_Vector2Int GetFrontCellPosition(en_MoveDir Dir);
 };
 

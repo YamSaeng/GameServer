@@ -163,6 +163,7 @@ void CGameServer::DeleteClient(int64 SessionID)
 	st_CLIENT* Client = nullptr;
 	unordered_map<int64, st_CLIENT*>::iterator ClientFindIterator;
 	ClientFindIterator = _ClientMap.find(SessionID);
+
 	if (ClientFindIterator != _ClientMap.end())
 	{
 		Client = (*ClientFindIterator).second;
@@ -508,15 +509,10 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 		{
 			//G_Logger->WriteStdOut(en_Color::RED, L"Cant Move\n");
 		}
-
-		// 나한테 움직임 결과 보냄
-		CMessage* ResMyMoveMePacket = MakePacketResMove(Client->AccountId, MyPlayer->_GameObjectInfo.ObjectId, IsCanGo, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
-		SendPacket(Client->SessionId, ResMyMoveMePacket);
-		ResMyMoveMePacket->Free();
-		
+			
 		// 내가 움직인 것을 내 주위 플레이어들에게 알려야함
 		CMessage* ResMyMoveOtherPacket = MakePacketResMove(Client->AccountId, MyPlayer->_GameObjectInfo.ObjectId, IsCanGo, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
-		SendPacketSector(Client, ResMyMoveOtherPacket);
+		SendPacketSector(Client, ResMyMoveOtherPacket, true);
 		ResMyMoveOtherPacket->Free();
 
 		MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
@@ -568,22 +564,32 @@ void CGameServer::PacketProcReqAttack(int64 SessionID, CMessage* Message)
 			}
 		}
 
+		CPlayer* MyPlayer = Client->MyPlayer;
+
 		char ReqMoveDir;
 		*Message >> ReqMoveDir;
 
-		en_MoveDir MoveDir = (en_MoveDir)ReqMoveDir;	
+		en_MoveDir MoveDir = (en_MoveDir)ReqMoveDir;			
+		MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = MoveDir;
+
+		st_Vector2Int FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir);
+		CGameObject* Target = MyPlayer->_Channel->_Map->Find(FrontCell);		
 		
-		Client->MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = MoveDir;
-
-		// 공격 처리 해야함
-		CMessage* ResAttackPacket = MakePacketResAttack(Client->AccountId, Client->MyPlayer->_GameObjectInfo.ObjectId, MoveDir);
-		SendPacket(Client->SessionId, ResAttackPacket);
-		ResAttackPacket->Free();
-
 		// 주위 섹터 들에게 내가 지금 공격하고 있다고 알려줌
-		CMessage* ResMyAttackOtherPacket = MakePacketResAttack(Client->AccountId, Client->MyPlayer->_GameObjectInfo.ObjectId, MoveDir);
-		SendPacketSector(Client, ResMyAttackOtherPacket);
+		CMessage* ResMyAttackOtherPacket = MakePacketResAttack(Client->AccountId, MyPlayer->_GameObjectInfo.ObjectId, MoveDir);
+		SendPacketSector(Client, ResMyAttackOtherPacket,true);
 		ResMyAttackOtherPacket->Free();
+
+		if (Target != nullptr)
+		{
+			Target->OnDamaged(MyPlayer, 10);
+
+			G_Logger->WriteStdOut(en_Color::YELLOW, L"Attack");
+			
+			CMessage* ResChangeHPPacket = MakePacketResChangeHP(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectStatInfo.HP);
+			SendPacketSector(Client, ResChangeHPPacket, true);
+			ResChangeHPPacket->Free();
+		}
 	}
 }
 
@@ -1136,6 +1142,27 @@ CMessage* CGameServer::MakePacketResDeSpawn(int64 AccountId, int32 PlayerDBId)
 	*ResDeSpawnPacket << PlayerDBId;
 
 	return ResDeSpawnPacket;
+}
+
+// int64 AccountId
+// int32 PlayerDBId
+// int32 HP
+CMessage* CGameServer::MakePacketResChangeHP(int32 PlayerDBId, int32 HP)
+{
+	CMessage* ResChangeHPPacket = CMessage::Alloc();
+	if (ResChangeHPPacket == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResChangeHPPacket->Clear();
+
+	*ResChangeHPPacket << (WORD)en_PACKET_S2C_CHANGE_HP;
+	*ResChangeHPPacket << PlayerDBId;
+
+	*ResChangeHPPacket << HP;
+
+	return ResChangeHPPacket;
 }
 
 //-------------------------------------------------------

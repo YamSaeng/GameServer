@@ -76,6 +76,8 @@ private:
 	//4. 움직임 요청 응답
 	//5. 공격 요청 응답
 	//6. 오브젝트 스폰 
+	//7. 오브젝트 디스폰
+	//8. HP 변경
 	//----------------------------------------------------------------
 	CMessage* MakePacketResClientConnected();
 	CMessage* MakePacketResLogin(bool Status, int32 PlayerCount, int32 PlayerDBId, wstring PlayersName);
@@ -85,6 +87,7 @@ private:
 	CMessage* MakePacketResAttack(int64 AccountId, int32 PlayerDBId, en_MoveDir Dir);
 	CMessage* MakePacketResSpawn(int64 AccountId, int32 PlayerDBId, int32 ObjectInfosCount, wstring* SpawnObjectName, st_GameObjectInfo* ObjectInfos);
 	CMessage* MakePacketResDeSpawn(int64 AccountId, int32 PlayerDBId);
+	CMessage* MakePacketResChangeHP(int32 PlayerDBId, int32 HP);
 	CMessage* MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* NickName, WORD MessageLen, WCHAR* Message);
 
 	st_CLIENT* FindClient(int64 SessionID);
