@@ -210,9 +210,9 @@ vector<CXmlNode> CXmlNode::FindChildren(const WCHAR* key)
 bool CXmlParser::ParseFromFile(const WCHAR* Path, OUT CXmlNode& Root)
 {
 	// 경로에 있는 파일을 읽어서 배열에 저장
-	vector<BYTE> Bytes = FileUtils::ReadFile(Path);
+	char* FileStr = FileUtils::LoadFile(Path);
 	// wstring으로 변환해서 _Data에 저장
-	_Data = FileUtils::Convert(string(Bytes.begin(), Bytes.end()));
+	_Data = FileUtils::Convert(string(FileStr));
 
 	// 데이터가 없으면 false
 	if (_Data.empty())

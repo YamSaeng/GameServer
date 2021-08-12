@@ -220,6 +220,9 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 	case en_PACKET_C2S_ATTACK:
 		PacketProcReqAttack(SessionID, Message);
 		break;
+	case en_PACKET_C2S_MOUSE_POSITION_OBJECT_INFO:
+		PacketProcReqMousePositionObjectInfo(SessionID, Message);
+		break;
 	case en_PACKET_CS_GAME_REQ_SECTOR_MOVE:
 		PacketProcReqSectorMove(SessionID, Message);
 		break;
@@ -586,9 +589,76 @@ void CGameServer::PacketProcReqAttack(int64 SessionID, CMessage* Message)
 
 			G_Logger->WriteStdOut(en_Color::YELLOW, L"Attack");
 			
-			CMessage* ResChangeHPPacket = MakePacketResChangeHP(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectStatInfo.HP);
+			CMessage* ResChangeHPPacket = MakePacketResChangeHP(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectStatInfo.HP, Target->_GameObjectInfo.ObjectStatInfo.MaxHP);
 			SendPacketSector(Client, ResChangeHPPacket, true);
 			ResChangeHPPacket->Free();
+		}
+	}
+}
+
+// int64 AccountId
+// int32 PlayerDBId
+// int32 X
+// int32 Y
+void CGameServer::PacketProcReqMousePositionObjectInfo(int64 SessionID, CMessage* Message)
+{
+	st_CLIENT* Client = FindClient(SessionID);
+	int64 AccountId;
+	int32 PlayerDBId;
+
+	if (Client)
+	{
+		if (!Client->IsLogin)
+		{
+			Disconnect(Client->SessionId);
+			return;
+		}
+
+		*Message >> AccountId;
+
+		if (Client->AccountId != AccountId)
+		{
+			Disconnect(Client->SessionId);
+			return;
+		}
+
+		*Message >> PlayerDBId;
+
+		if (Client->MyPlayer == nullptr)
+		{
+			Disconnect(Client->SessionId);
+			return;
+		}
+		else
+		{
+			if (Client->MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+			{
+				Disconnect(Client->SessionId);
+				return;
+			}
+		}
+
+		int X;
+		int Y;
+
+		*Message >> X;
+		*Message >> Y;
+
+		CChannel* Channel =  G_ChannelManager->Find(1);
+
+		st_Vector2Int FindPosition;
+		FindPosition._X = X;
+		FindPosition._Y = Y;
+
+		CGameObject* FindObject =  Channel->_Map->Find(FindPosition);
+
+		if (FindObject != nullptr)
+		{
+			CPlayer* Player = (CPlayer*)FindObject;
+
+			CMessage* ResMousePositionObjectInfo = MakePacketMousePositionObjectInfo(Client->AccountId, Player->_GameObjectInfo.ObjectId, Player->_PlayerName, Player->_GameObjectInfo);
+			SendPacket(Client->SessionId, ResMousePositionObjectInfo);
+			ResMousePositionObjectInfo->Free();
 		}
 	}
 }
@@ -1147,7 +1217,7 @@ CMessage* CGameServer::MakePacketResDeSpawn(int64 AccountId, int32 PlayerDBId)
 // int64 AccountId
 // int32 PlayerDBId
 // int32 HP
-CMessage* CGameServer::MakePacketResChangeHP(int32 PlayerDBId, int32 HP)
+CMessage* CGameServer::MakePacketResChangeHP(int32 PlayerDBId, int32 CurrentHP, int32 MaxHP)
 {
 	CMessage* ResChangeHPPacket = CMessage::Alloc();
 	if (ResChangeHPPacket == nullptr)
@@ -1160,9 +1230,54 @@ CMessage* CGameServer::MakePacketResChangeHP(int32 PlayerDBId, int32 HP)
 	*ResChangeHPPacket << (WORD)en_PACKET_S2C_CHANGE_HP;
 	*ResChangeHPPacket << PlayerDBId;
 
-	*ResChangeHPPacket << HP;
+	*ResChangeHPPacket << CurrentHP;
+	*ResChangeHPPacket << MaxHP;
 
 	return ResChangeHPPacket;
+}
+
+// int64 AccountId
+// int32 PlayerDBId
+// st_GameObjectInfo ObjectInfo
+CMessage* CGameServer::MakePacketMousePositionObjectInfo(int64 AccountId, int32 PlayerDBId, wstring ObjectName, st_GameObjectInfo ObjectInfo)
+{
+	CMessage* ResEnterGamePacket = CMessage::Alloc();
+	if (ResEnterGamePacket == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResEnterGamePacket->Clear();
+
+	*ResEnterGamePacket << (WORD)en_PACKET_S2C_MOUSE_POSITION_OBJECT_INFO;
+	*ResEnterGamePacket << AccountId;
+	*ResEnterGamePacket << PlayerDBId;
+
+	// ObjectId
+	*ResEnterGamePacket << ObjectInfo.ObjectId;
+
+	// EnterPlayerName
+	int8 ObjectNameLen = ObjectName.length() * 2;
+	*ResEnterGamePacket << ObjectNameLen;
+	ResEnterGamePacket->InsertData(ObjectName.c_str(), ObjectNameLen);
+
+	// st_PositionInfo
+	*ResEnterGamePacket << (int8)ObjectInfo.ObjectPositionInfo.State;
+	*ResEnterGamePacket << ObjectInfo.ObjectPositionInfo.PositionX;
+	*ResEnterGamePacket << ObjectInfo.ObjectPositionInfo.PositionY;
+	*ResEnterGamePacket << (int8)ObjectInfo.ObjectPositionInfo.MoveDir;
+
+	// st_StatInfo
+	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.Level;
+	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.HP;
+	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.MaxHP;
+	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.Attack;
+	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.Speed;
+
+	// ObjectType
+	*ResEnterGamePacket << (int8)ObjectInfo.ObjectType;
+
+	return ResEnterGamePacket;
 }
 
 //-------------------------------------------------------

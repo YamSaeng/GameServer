@@ -58,7 +58,11 @@ CMap::CMap(int MapId)
 
 	for (int i = 0; i < YCount; i++)
 	{
-		_ObjectsInfo[i] = new CGameObject*[XCount];			
+		_ObjectsInfo[i] = new CGameObject*[XCount];	
+		for (int j = 0; j < XCount; j++)
+		{
+			_ObjectsInfo[i][j] = nullptr;
+		}
 	}
 
 	for (int Y = 0; Y < YCount; Y++)
@@ -102,7 +106,7 @@ CGameObject* CMap::Find(st_Vector2Int& CellPosition)
 
 	int X = CellPosition._X - _Left;
 	int Y = _Down - CellPosition._Y;
-
+	
 	return _ObjectsInfo[Y][X];
 }
 
@@ -121,8 +125,10 @@ bool CMap::Cango(st_Vector2Int& CellPosition, bool CheckObjects)
 	}
 
 	int X = CellPosition._X - _Left;
-	int Y = _Down - CellPosition._Y;
+	int Y = _Down - CellPosition._Y;	
 	
+	//G_Logger->WriteStdOut(en_Color::RED, L"Y : %d X : %d\n", Y, X);
+
 	return !_CollisionMapInfo[Y][X] && (!CheckObjects || _ObjectsInfo[Y][X] == nullptr);
 }
 

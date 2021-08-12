@@ -201,7 +201,25 @@ enum en_PACKET_TYPE
 	// 게임서버 HP 변경
 	// int64 AccountId
 	// int32 PlayerDBId
-	// int32 HP
+	// int32 CurrentHP
+	// int32 MaxHP
 	//------------------------------------------------------------
-	en_PACKET_S2C_CHANGE_HP
+	en_PACKET_S2C_CHANGE_HP,
+	
+	//------------------------------------------------------------
+	// 게임서버 마우스 위치 캐릭터 정보 요청	
+    // int64 AccountId
+    // int32 PlayerDBId
+    // int32 X
+    // int32 Y
+    //------------------------------------------------------------
+	en_PACKET_C2S_MOUSE_POSITION_OBJECT_INFO,
+
+	//------------------------------------------------------------
+	// 게임서버 마우스 위치 캐릭터 정보 요청 응답
+	// int64 AccountId
+	// int32 PlayerDBId
+	// st_GameObjectInfo ObjectInfo
+	//------------------------------------------------------------
+	en_PACKET_S2C_MOUSE_POSITION_OBJECT_INFO
 };

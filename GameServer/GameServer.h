@@ -56,6 +56,7 @@ private:
 	void PacketProcReqEnterGame(int64 SessionID, CMessage* Message);
 	void PacketProcReqMove(int64 SessionID, CMessage* Message);	
 	void PacketProcReqAttack(int64 SessionID, CMessage* Message);
+	void PacketProcReqMousePositionObjectInfo(int64 SessionID, CMessage* Message);
 	void PacketProcReqSectorMove(int64 SessionID, CMessage* Message);
 	void PacketProcReqMessage(int64 SessionID, CMessage* Message);
 	void PacketProcReqHeartBeat(int64 SessionID, CMessage* Message);
@@ -87,7 +88,8 @@ private:
 	CMessage* MakePacketResAttack(int64 AccountId, int32 PlayerDBId, en_MoveDir Dir);
 	CMessage* MakePacketResSpawn(int64 AccountId, int32 PlayerDBId, int32 ObjectInfosCount, wstring* SpawnObjectName, st_GameObjectInfo* ObjectInfos);
 	CMessage* MakePacketResDeSpawn(int64 AccountId, int32 PlayerDBId);
-	CMessage* MakePacketResChangeHP(int32 PlayerDBId, int32 HP);
+	CMessage* MakePacketResChangeHP(int32 PlayerDBId, int32 CurrentHP, int32 MaxHP);
+	CMessage* MakePacketMousePositionObjectInfo(int64 AccountId, int32 PlayerDBId, wstring ObjectName, st_GameObjectInfo ObjectInfo);
 	CMessage* MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* NickName, WORD MessageLen, WCHAR* Message);
 
 	st_CLIENT* FindClient(int64 SessionID);

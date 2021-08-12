@@ -13,7 +13,7 @@ struct st_Vector2Int
 	{
 		_X = X;
 		_Y = Y;
-	}	
+	}
 
 	// πÊ«‚ ∫§≈Õ
 	static st_Vector2Int Up() { return st_Vector2Int(0, 1); }
@@ -29,7 +29,7 @@ struct st_Vector2Int
 	st_Vector2Int operator -(st_Vector2Int& Vector)
 	{
 		return st_Vector2Int(_X - Vector._X, _Y - Vector._Y);
-	}
+	}		
 };
 
 class CMap

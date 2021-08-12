@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <list>
 #include <set>
+#include <queue>
 
 #include "Type.h"
 #include "Macro.h"
