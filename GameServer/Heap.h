@@ -68,7 +68,7 @@ void CHeap<KEY, DATA>::InsertHeap(KEY Key, DATA InsertData)
 		int ParentIndex = (Now - 1) / 2;
 
 		//부모 값이 삽입한 위치 값보다 크다면 나감
-		if (_HeapArray[ParentIndex].Key > _HeapArray[Now].Key)
+		if (_HeapArray[ParentIndex].Key < _HeapArray[Now].Key)
 		{
 			break;
 		}
@@ -110,7 +110,7 @@ DATA CHeap<KEY, DATA>::PopHeap()
 
 		//왼쪽 자식 위치가 현재 사용중인 사이즈 (_UseSize보다 작거나 같고)
 		//왼쪽 자식의 기준이 되는 값이 부모보다 크다면
-		if (_UseSize >= LeftPosition && _HeapArray[LeftPosition].Key > _HeapArray[NowParent].Key)
+		if (_UseSize >= LeftPosition && _HeapArray[LeftPosition].Key < _HeapArray[NowParent].Key)
 		{
 			//값을 바꿔주기 위해 NowParent의 값을 왼쪽 자식 위치로 잡아줌
 			NowParent = LeftPosition;
@@ -118,7 +118,7 @@ DATA CHeap<KEY, DATA>::PopHeap()
 
 		//오른쪽 자식 위치가 현재 사용중인 사이즈 (_UseSize보다 작거나 같고)
 		//오른쪽 자식의 기준이 되는 값이 부모보다 크다면
-		if (_UseSize >= RightPosition && _HeapArray[RightPosition].Key > _HeapArray[NowParent].Key)
+		if (_UseSize >= RightPosition && _HeapArray[RightPosition].Key < _HeapArray[NowParent].Key)
 		{
 			//값을 바꿔주기 위해 NowParent의 값을 오른쪽 자식 위치로 잡아준다.
 			NowParent = RightPosition;

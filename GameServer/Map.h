@@ -29,7 +29,51 @@ struct st_Vector2Int
 	st_Vector2Int operator -(st_Vector2Int& Vector)
 	{
 		return st_Vector2Int(_X - Vector._X, _Y - Vector._Y);
-	}		
+	}	
+
+	int CellDistanceFromZero()
+	{
+		return abs(_X) + abs(_Y);
+	}
+};
+
+struct st_Position
+{
+	int32 _Y;
+	int32 _X;
+
+	st_Position() {}
+
+	st_Position(int Y, int X)
+	{
+		_Y = Y;
+		_X = X;
+	}	
+
+	bool operator ==(st_Position& Position)
+	{
+		return (_Y == Position._Y) && (_X == Position._X);
+	}
+};
+
+struct st_AStarNode
+{
+	int32 _F;
+	int32 _G;
+	st_Position _Position;
+
+	int32 _X;
+	int32 _Y;
+	
+	st_AStarNode() {}
+
+	st_AStarNode(int32 F, int32 G, int32 X, int32 Y)
+	{
+		_F = F;
+		_G = G;
+		_Position._X = X;
+		_Position._Y = Y;		
+	}	
 };
 
 class CMap
@@ -44,7 +88,7 @@ public:
 	int32 _SizeY;
 	
 	bool** _CollisionMapInfo;	
-	CGameObject*** _ObjectsInfo;
+	CGameObject*** _ObjectsInfo;	
 
 	CMap(int MapId);
 	
@@ -70,6 +114,11 @@ public:
 	//---------------------------------------
 	// ∏ ø°º≠ ø¿∫Í¡ß∆Æ ≈¿Â
 	//---------------------------------------
-	bool ApplyLeave(CGameObject* GameObject);
-};
+	bool ApplyLeave(CGameObject* GameObject);	
+	
+	st_Position CellToPosition(st_Vector2Int CellPosition);
+	st_Vector2Int PositionToCell(st_Position Position);
 
+	vector<st_Position> FindPath(st_Vector2Int StartCellPosition, st_Vector2Int DestCellPostion, bool CheckObjects = true, int32 MaxDistance = 10);	
+	vector<st_Position> CompletePath(st_Position** Parents, int32 DestX, int32 DestY);
+;};

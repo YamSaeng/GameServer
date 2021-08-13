@@ -2,6 +2,7 @@
 #include "Map.h"
 #include "GameObject.h"
 #include "Player.h"
+#include "Heap.h"
 
 CMap::CMap(int MapId)
 {
@@ -68,11 +69,7 @@ CMap::CMap(int MapId)
 	for (int Y = 0; Y < YCount; Y++)
 	{
 		for (int X = 0; X < XCount; X++)
-		{
-			if (X == XCount - 1)
-			{
-				int a = 0;
-			}
+		{		
 			if (*ConvertP == '\r')
 			{
 				
@@ -254,4 +251,189 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 	}
 
 	return true;
+}
+
+st_Position CMap::CellToPosition(st_Vector2Int CellPosition)
+{
+	return st_Position(_Down - CellPosition._Y, CellPosition._X - _Left);
+}
+
+st_Vector2Int CMap::PositionToCell(st_Position Position)
+{
+	return st_Vector2Int(Position._X + _Left, _Down - Position._Y);
+}
+
+vector<st_Position> CMap::FindPath(st_Vector2Int StartCellPosition, st_Vector2Int DestCellPostion, bool CheckObjects , int32 MaxDistance)
+{
+	int32 DeltaY[4] = { 1, -1, 0, 0 };
+	int32 DeltaX[4] = { 0, 0, -1, 1 };
+	int32 Cost[4] = { 10,10,10,10 };
+	
+	// 시작점 도착점 좌표변환
+	st_Position StartPosition = CellToPosition(StartCellPosition);
+	st_Position DestPosition = CellToPosition(DestCellPostion);
+
+	// 닫힌노드 검사배열
+	bool** CloseList = (bool**)malloc(sizeof(bool) * _SizeY * _SizeX);
+	for (int32 i = 0; i < _SizeY; i++)
+	{
+		CloseList[i] = (bool*)malloc(sizeof(bool) * _SizeX);
+		memset(CloseList[i], false, sizeof(bool) * _SizeX);
+	}
+
+	// 열린노드 검사배열
+	int** OpenList = (int**)malloc(sizeof(int) * _SizeY * _SizeX);
+	for (int32 i = 0; i < _SizeY; i++)
+	{
+		OpenList[i] = (int*)malloc(sizeof(int) * _SizeX);
+		memset(OpenList[i], 0, sizeof(int) * _SizeX);
+	}
+
+	// 부모 위치 배열
+	st_Position** Parents = (st_Position**)malloc(sizeof(st_Position*) * _SizeY * _SizeX);
+	for (int i = 0; i < _SizeY; i++)
+	{
+		Parents[i] = (st_Position*)malloc(sizeof(st_Position) * _SizeX);
+		memset(Parents[i], 0, sizeof(st_Position) * _SizeX);
+	}
+
+	// 우선순위 큐 생성
+	CHeap<int32, st_AStarNode> OpenListQue(_SizeY * _SizeX);
+
+	// 열린노드에 처음 F 값 기록
+	OpenList[StartPosition._Y][StartPosition._X] = abs(DestPosition._Y - StartPosition._Y) + abs(DestPosition._X - StartPosition._X);
+
+	// AStar Node 생성
+	st_AStarNode StartNode(abs(DestPosition._Y - StartPosition._Y) + abs(DestPosition._X - StartPosition._X), 0, StartPosition._X, StartPosition._Y);
+	// 큐에 삽입
+	OpenListQue.InsertHeap(StartNode._F, StartNode);
+	
+	// 처음 위치 첫 부모로 설정
+	Parents[StartPosition._Y][StartPosition._X]._Y = StartPosition._Y;
+	Parents[StartPosition._Y][StartPosition._X]._X = StartPosition._X;
+
+	// 오픈리스트 큐가 비워질때까지 반복
+	while (OpenListQue.GetUseSize() > 0)
+	{
+		// 오픈리스트 큐에서 노드 하나 뽑음
+		st_AStarNode AStarNode = OpenListQue.PopHeap();
+		// 해당 위치를 방문했엇는지 확인
+		if (CloseList[AStarNode._Position._Y][AStarNode._Position._X] == true)
+		{
+			continue;
+		}
+
+		// 해당 위치를 방문했다고 기록
+		CloseList[AStarNode._Position._Y][AStarNode._Position._X] = true;
+
+		// 뽑은 노드의 위치가 목적지라면 나간다
+		if (AStarNode._Position._Y == DestPosition._Y && AStarNode._Position._X == DestPosition._X)
+		{
+			break;
+		}
+
+		// 뽑은 노드를 기준으로 해서 상 하 좌 우 노드를 검사하고 오픈리스트 큐에 넣는다.
+		for (int32 i = 0; i < 4; i++)
+		{
+			// 다음 위치를 알아낸다.
+			st_Position NextPosition(AStarNode._Position._Y + DeltaY[i], AStarNode._Position._X + DeltaX[i]);
+			
+			// 다음 위치가 목적지 좌표가 아닐 경우, 해당 위치로 갈 수 있는지 검사한다.
+			if (NextPosition._Y != DestPosition._Y || NextPosition._X != DestPosition._X)
+			{
+				st_Vector2Int NextPositionVector = PositionToCell(NextPosition);
+
+				// 갈 수 없으면 다음 위치를 검사한다.
+				if (Cango(NextPositionVector, CheckObjects) == false)
+				{
+					continue;
+				}
+			}
+
+			// 상 하 좌 우 위치가 이미 방문 했었는지 확인한다.
+			if (CloseList[NextPosition._Y][NextPosition._X] == true)
+			{
+				continue;
+			}
+
+			// G 값을 계산한다.
+			int G = AStarNode._G + Cost[i];
+			// 다음 위치와 목적지 위치를 계산한다.
+			int H = abs(DestPosition._Y - NextPosition._Y) + abs(DestPosition._X - NextPosition._X);
+
+			// 새로 계산한 F 값이 원래 있었던 F 값보다 작을 경우 새로 계산한다.
+			if (G + H > OpenList[NextPosition._Y][NextPosition._X])
+			{
+				continue;
+			}
+
+			// 삽입할 노드를 준비하고
+			st_AStarNode InsertAStartNode;
+			// 앞서 구한 값들을 이용해 F값을 구한후 저장한다.
+			OpenList[NextPosition._Y][NextPosition._X] = G + H;
+
+			// 삽입할 노드를 초기화 한 후에
+			InsertAStartNode._F = G + H;
+			InsertAStartNode._G = G;
+			InsertAStartNode._Position._X = NextPosition._X;
+			InsertAStartNode._Position._Y = NextPosition._Y;
+
+			// 우선순위 큐에 넣는다.
+			OpenListQue.InsertHeap(InsertAStartNode._F, InsertAStartNode);
+			// 부모 목록에 뽑은 노드 위치를 기록한다.
+			Parents[NextPosition._Y][NextPosition._X]._Y = AStarNode._Position._Y;
+			Parents[NextPosition._Y][NextPosition._X]._X = AStarNode._Position._X;
+		}
+	}	
+
+	// 위에서 할당한 메모리를 삭제한다.
+	for (int32 i = 0; i < _SizeY; i++)
+	{
+		free(CloseList[i]);
+		free(OpenList[i]);
+		free(Parents[i]);
+	}
+
+	free(CloseList);
+	free(OpenList);
+	free(Parents);
+		
+	return CompletePath(Parents, DestCellPostion._X, DestCellPostion._Y);
+}
+
+vector<st_Position> CMap::CompletePath(st_Position** Parents, int32 DestX, int32 DestY)
+{
+	// 반환해줄 배열
+	vector<st_Position> Cells;
+	
+	st_Vector2Int DestCellPosition(DestX, DestY);
+	st_Position DestPosition = CellToPosition(DestCellPosition);
+
+	int32 X = DestPosition._X;
+	int32 Y = DestPosition._Y;
+
+	st_Position Point;
+
+	while (Parents[Y][X]._Y != Y || Parents[Y][X]._X != X)
+	{
+		Point._X = X;
+		Point._Y = Y;
+
+		// 매개변수로 받은 부모 위치 담기
+		Cells.push_back(Point);
+
+		st_Position Position = Parents[Y][X];
+		Y = Position._Y;
+		X = Position._X;
+	}
+
+	Point._X = X;
+	Point._Y = Y;
+		
+	Cells.push_back(Point);
+
+	// 부모 위치 담은 배열 거꾸로 뒤집어서 반환
+	reverse(Cells.begin(), Cells.end());
+
+	return Cells;
 }
