@@ -1,0 +1,29 @@
+{
+  "Monsters": [
+    {
+      "MonsterDataId": 1,
+      "Name": "ΩΩ∂Û¿”",
+      "MonsterStatInfo": [
+        {
+          "Level": 1,
+          "MaxHP": 20,
+          "Attack": 5,
+          "Speed": 5.0,
+          "TotalExp": 10
+        }
+      ],
+      "DropData": [
+        {
+          "Probability": 10,
+          "ItemDataId": 200,
+          "Count": 2
+        },
+        {
+          "Probability": 10,
+          "ItemDataId": 100,
+          "Count": 1
+        }
+      ]
+    }
+  ]
+}

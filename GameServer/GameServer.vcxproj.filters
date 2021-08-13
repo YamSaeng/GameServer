@@ -178,6 +178,7 @@
     <ClInclude Include="Monster.h">
       <Filter>ContentServer\Content\GameObject\Monster</Filter>
     </ClInclude>
+    <ClInclude Include="Heap.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -265,6 +266,9 @@
       <Filter>Util\설정 파일\Data</Filter>
     </None>
     <None Include="StatusData.json">
+      <Filter>Util\설정 파일\Data</Filter>
+    </None>
+    <None Include="MonsterData.json">
       <Filter>Util\설정 파일\Data</Filter>
     </None>
   </ItemGroup>

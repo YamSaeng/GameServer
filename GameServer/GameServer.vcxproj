@@ -169,6 +169,7 @@
     <ClInclude Include="GameServer.h" />
     <ClInclude Include="GameServerInfo.h" />
     <ClInclude Include="Global.h" />
+    <ClInclude Include="Heap.h" />
     <ClInclude Include="Item.h" />
     <ClInclude Include="LockFreeQue.h" />
     <ClInclude Include="LockFreeStack.h" />
@@ -295,6 +296,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ItemData.json" />
+    <None Include="MonsterData.json" />
     <None Include="StatusData.json" />
   </ItemGroup>
   <ItemGroup>

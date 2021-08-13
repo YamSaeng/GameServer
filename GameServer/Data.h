@@ -33,3 +33,18 @@ struct st_StatusData
 	int32 Attack;
 	float Speed;
 };
+
+struct st_DropData
+{
+	int32 _Probability;
+	int32 _ItemDataId;
+	int32 _Count;
+};
+
+struct st_MonsterData
+{	
+	int32 _MonsterDataId; // 몬스터 번호
+	string _MonsterName;  // 몬스터 이름
+	st_StatusData _MonsterStatInfo; // 몬스터 스탯 정보
+	vector<st_DropData> _DropItems; // 몬스터가 드랍하는 아이템 정보
+};

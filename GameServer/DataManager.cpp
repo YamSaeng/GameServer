@@ -109,3 +109,52 @@ void CDataManager::LoadDataStatus(wstring LoadFileName)
 		_Status.insert(pair<int32, st_StatusData*>(StatusData->Level, StatusData));		
 	}
 }
+
+void CDataManager::LoadDataMonster(wstring LoadFileName)
+{
+	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());
+
+	rapidjson::Document Document;
+	Document.Parse(FileStr);
+
+	for (auto& Filed : Document["Monsters"].GetArray())
+	{		
+		st_MonsterData* MonsterData = new st_MonsterData();
+		
+		int MonsterDataId = Filed["MonsterDataId"].GetInt();
+		string Name = Filed["Name"].GetString();
+				
+		MonsterData->_MonsterDataId = MonsterDataId;
+		MonsterData->_MonsterName = Name;									
+
+		for (auto& MonsterStatInfoFiled : Filed["MonsterStatInfo"].GetArray())
+		{
+			int Level = MonsterStatInfoFiled["Level"].GetInt();
+			int MaxHP = MonsterStatInfoFiled["MaxHP"].GetInt();
+			int Attack = MonsterStatInfoFiled["Attack"].GetInt();
+			float Speed = MonsterStatInfoFiled["Speed"].GetFloat();
+			int TotalExp = MonsterStatInfoFiled["TotalExp"].GetInt();
+
+			MonsterData->_MonsterStatInfo.Level = Level;
+			MonsterData->_MonsterStatInfo.MaxHP = MaxHP;
+			MonsterData->_MonsterStatInfo.Attack = Attack;
+			MonsterData->_MonsterStatInfo.Speed = Speed;
+		}
+
+		for (auto& DropDataFiled : Filed["DropData"].GetArray())
+		{
+			int Probability = DropDataFiled["Probability"].GetInt();
+			int ItemDataSheetId = DropDataFiled["ItemDataId"].GetInt();
+			int Count = DropDataFiled["Count"].GetInt();
+						
+			st_DropData DropData;
+			DropData._Probability = Probability;
+			DropData._ItemDataId = ItemDataSheetId;
+			DropData._Count = Count;
+
+			MonsterData->_DropItems.push_back(DropData);
+		}	
+
+		_Monsters.insert(pair<int32, st_MonsterData*>(MonsterData->_MonsterDataId,MonsterData));
+	}
+}

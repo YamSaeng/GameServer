@@ -10,6 +10,7 @@ class CDataManager
 public:
 	map<int32, st_ItemData*> _Items;
 	map<int32, st_StatusData*> _Status;
+	map<int32, st_MonsterData*> _Monsters;
 
 	CDataManager()
 	{
@@ -23,5 +24,6 @@ public:
 
 	void LoadDataItem(wstring LoadFileName);
 	void LoadDataStatus(wstring LoadFileName);	
+	void LoadDataMonster(wstring LoadFileName);
 };
 
