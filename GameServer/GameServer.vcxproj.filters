@@ -179,6 +179,9 @@
       <Filter>ContentServer\Content\GameObject\Monster</Filter>
     </ClInclude>
     <ClInclude Include="Heap.h" />
+    <ClInclude Include="ObjectManager.h">
+      <Filter>ContentServer\Content\GameObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -245,6 +248,9 @@
     </ClCompile>
     <ClCompile Include="Monster.cpp">
       <Filter>ContentServer\Content\GameObject\Monster</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectManager.cpp">
+      <Filter>ContentServer\Content\GameObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

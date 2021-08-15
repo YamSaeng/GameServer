@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Sector.h"
 #include "Player.h"
+#include "Monster.h"
 
 CSector::CSector(int32 SectorY, int32 SectorX)
 {
@@ -16,6 +17,7 @@ void CSector::Insert(CGameObject* InsertGameObject)
 		_Players.insert((CPlayer*)InsertGameObject);
 		break;
 	case en_GameObjectType::MONSTER:
+		_Monsters.insert((CMonster*)InsertGameObject);
 		break;
 	default:
 		break;
@@ -30,6 +32,7 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 		_Players.erase((CPlayer*)RemoveGameObject);
 		break;
 	case en_GameObjectType::MONSTER:
+		_Monsters.erase((CMonster*)RemoveGameObject);
 		break;
 	}
 }
@@ -37,4 +40,9 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 set<CPlayer*> CSector::GetPlayers()
 {
 	return _Players;
+}
+
+set<CMonster*> CSector::GetMonsters()
+{
+	return _Monsters;
 }

@@ -2,11 +2,14 @@
 #include "Sector.h"
 #include "Map.h"
 
+class CMonster;
+
 class CChannel
 {
 public:	
 	int32 _ChannelId;	
 	map<int64, CPlayer*> _Players;
+	map<int64, CMonster*> _Monsters;
 	
 	CMap* _Map;
 
@@ -31,21 +34,26 @@ public:
 	// 내 주위 섹터 반환
 	//-----------------------------------------------------------------
 	vector<CSector*> GetAroundSectors(CGameObject* Object, int32 Range);
-	vector<CGameObject*> GetAroundObjects(CGameObject* Object, int32 Range);
+	vector<CGameObject*> GetAroundObjects(CGameObject* Object, int32 Range, bool ExceptMe = true);
 	
 	//--------------------------------------------------------------------------------------
 	// 내 주위 플레이어 반환
 	//--------------------------------------------------------------------------------------
 	vector<CPlayer*> GetAroundPlayer(CGameObject* Object, int32 Range, bool ExceptMe = true);
+	CPlayer* FindNearPlayer(CGameObject* Object, int32 Range);
 
 	void Update();
 
 	//----------------------------------------------------
 	// 채널 입장
+	// - Object를 채널에 입장시키면서 자료구조에 저장한 후
+	// - Map에도 해당 오브젝트의 위치를 기록한다.
 	//----------------------------------------------------
 	void EnterChannel(CGameObject* EnterChannelGameObject);
 	//----------------------------------------------------
 	// 채널 나가기
+	// - Object를 채널에 퇴장시키면서 자료구조에 제거한 후
+	// - Map에도 해당 오브젝트의 위치를 제거한다.
 	//----------------------------------------------------
 	void LeaveChannel(CGameObject* LeaveChannelGameObject);	
 };

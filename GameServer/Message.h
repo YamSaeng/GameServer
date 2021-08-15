@@ -137,7 +137,6 @@ public:
 	int InsertData(char* Src, int32 Size);
 	int InsertData(const wchar_t* src, int32 Size);
 	int InsertData(wchar_t* Src, int32 Size);
-	int InsertData(st_GameObjectInfo* Src, int32 Size);
 #pragma endregion
 
 	/*

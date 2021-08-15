@@ -2,6 +2,7 @@
 #include "Channel.h"
 #include "Player.h"
 #include "Message.h"
+#include "Monster.h"
 
 CChannel::~CChannel()
 {
@@ -40,6 +41,7 @@ void CChannel::Init(int MapId, int SectorSize)
 			_Sectors[Y][X] = CSector(Y, X);
 		}
 	}
+
 }
 
 CSector* CChannel::GetSector(st_Vector2Int CellPosition)
@@ -109,12 +111,37 @@ vector<CSector*> CChannel::GetAroundSectors(CGameObject* Object, int32 Range)
 	return Sectors;
 }
 
-vector<CGameObject*> CChannel::GetAroundObjects(CGameObject* Object, int32 Range)
+vector<CGameObject*> CChannel::GetAroundObjects(CGameObject* Object, int32 Range, bool ExceptMe)
 {
 	vector<CGameObject*> GameObjects;
 
 	vector<CSector*> Sectors = GetAroundSectors(Object, Range);	
+		
+	for (CSector* Sector : Sectors)
+	{
+		// 주변 섹터 플레이어 정보
+		for (CPlayer* Player : Sector->GetPlayers())
+		{
+			if (ExceptMe == true)
+			{
+				if (Object->_GameObjectInfo.ObjectId != Player->_GameObjectInfo.ObjectId)
+				{
+					GameObjects.push_back(Player);
+				}
+			}
+			else
+			{
+				GameObjects.push_back(Player);
+			}		
+		}
 
+		// 주변 섹터 몬스터 정보
+		for (CMonster* Monster : Sector->GetMonsters())
+		{
+			GameObjects.push_back(Monster);
+		}
+	}	
+	
 	return GameObjects;
 }
 
@@ -144,9 +171,34 @@ vector<CPlayer*> CChannel::GetAroundPlayer(CGameObject* Object, int32 Range, boo
 	return Players;
 }
 
+CPlayer* CChannel::FindNearPlayer(CGameObject* Object, int32 Range)
+{
+	vector<CPlayer*> Players = GetAroundPlayer(Object, Range);	
+
+	for (int32 i = 0; i < Players.size(); i++)
+	{
+		CPlayer* Player = Players[i];
+		vector<st_Position> Path = _Map->FindPath(Object->GetCellPosition(), Player->GetCellPosition());
+		if (Path.size() < 2 || Path.size() > Range)
+		{
+			continue;
+		}
+
+		return Player;
+	}
+
+	return nullptr;
+}
+
 void CChannel::Update()
 {
+	// 소유하고 있는 몬스터 업데이트
+	for (auto MonsterIteraotr : _Monsters)
+	{
+		CMonster* Monster = MonsterIteraotr.second;
 
+		Monster->Update();
+	}
 }
 
 void CChannel::EnterChannel(CGameObject* EnterChannelGameObject)
@@ -164,7 +216,6 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject)
 	case en_GameObjectType::PLAYER:
 		{
 			CPlayer* EnterChannelPlayer = (CPlayer*)EnterChannelGameObject;
-
 			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY = SpawnPosition._Y;
 			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX = SpawnPosition._X;
 
@@ -180,11 +231,28 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject)
 
 			CSector* EnterSector = GetSector(EnterChannelPlayerPosition);
 			//G_Logger->WriteStdOut(en_Color::GREEN, L"EnterSector Y : (%d) X : (%d) \n", EnterSector->_SectorY, EnterSector->_SectorX);
-			EnterSector->Insert(EnterChannelPlayer);
-			
+			EnterSector->Insert(EnterChannelPlayer);			
 		}
 		break;
 	case en_GameObjectType::MONSTER:
+		{
+			CMonster* EnterChannelMonster = (CMonster*)EnterChannelGameObject;
+			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.PositionY = 2;
+			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.PositionX = 2;
+
+			_Monsters.insert(pair<int64,CMonster*>(EnterChannelMonster->_GameObjectInfo.ObjectId,EnterChannelMonster));
+
+			EnterChannelMonster->_Channel = this;
+
+			st_Vector2Int EnterChannelMonsterPosition;
+			EnterChannelMonsterPosition._X = EnterChannelMonster->GetPositionInfo().PositionX;
+			EnterChannelMonsterPosition._Y = EnterChannelMonster->GetPositionInfo().PositionY;
+
+			_Map->ApplyMove(EnterChannelMonster, EnterChannelMonsterPosition);
+
+			CSector* EnterSector = GetSector(EnterChannelMonsterPosition);
+			EnterSector->Insert(EnterChannelMonster);												
+		}
 		break;
 	}
 }
@@ -196,13 +264,17 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 	case en_GameObjectType::PLAYER:
 		// 컨테이너에서 제거
 		_Players.erase(LeaveChannelGameObject->_GameObjectInfo.ObjectId);
-
-		// 맵에서도 퇴장
+		
 		_Map->ApplyLeave(LeaveChannelGameObject);
-
+		
 		LeaveChannelGameObject->_Channel = nullptr;
 		break;
 	case en_GameObjectType::MONSTER:
+		_Monsters.erase(LeaveChannelGameObject->_GameObjectInfo.ObjectId);
+
+		_Map->ApplyLeave(LeaveChannelGameObject);
+		
+		LeaveChannelGameObject->_Channel = nullptr;
 		break;	
-	}
+	}	
 }

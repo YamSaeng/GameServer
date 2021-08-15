@@ -9,7 +9,7 @@ CPlayer::CPlayer()
 CPlayer::CPlayer(st_GameObjectInfo _PlayerInfo)
 {
 	_GameObjectInfo = _PlayerInfo;		
-	_GameObjectInfo.ObjectType = en_GameObjectType::PLAYER;
+	_GameObjectInfo.ObjectType = en_GameObjectType::PLAYER;	
 }
 
 CPlayer::~CPlayer()

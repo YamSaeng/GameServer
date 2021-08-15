@@ -45,14 +45,10 @@ struct st_StatInfo
 struct st_GameObjectInfo
 {
 	int64 ObjectId;	
+	wstring ObjectName;
 	st_PositionInfo ObjectPositionInfo;
 	st_StatInfo ObjectStatInfo;
 	en_GameObjectType ObjectType;
-};
-
-struct st_PlayerObjectInfo : public st_GameObjectInfo
-{
-
 };
 
 class CGameObject
@@ -82,5 +78,7 @@ public:
 	// 방향값을 받아서 앞쪽에 있는 위치를 반환한다.
 	//------------------------------------------------
 	st_Vector2Int GetFrontCellPosition(en_MoveDir Dir);
+
+	en_MoveDir GetDirectionFromVector(st_Vector2Int DirectionVector);
 };
 

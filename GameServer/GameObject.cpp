@@ -49,6 +49,7 @@ st_Vector2Int CGameObject::GetCellPosition()
 st_Vector2Int CGameObject::GetFrontCellPosition(en_MoveDir Dir)
 {
 	st_Vector2Int FrontPosition = GetCellPosition();
+
 	st_Vector2Int DirVector;
 	switch (Dir)
 	{
@@ -69,4 +70,24 @@ st_Vector2Int CGameObject::GetFrontCellPosition(en_MoveDir Dir)
 	FrontPosition = FrontPosition + DirVector;
 
 	return FrontPosition;
+}
+
+en_MoveDir CGameObject::GetDirectionFromVector(st_Vector2Int DirectionVector)
+{
+	if (DirectionVector._X > 0)
+	{
+		return en_MoveDir::RIGHT;
+	}
+	else if (DirectionVector._X < 0)
+	{
+		return en_MoveDir::LEFT;
+	}
+	else if (DirectionVector._Y > 0)
+	{
+		return en_MoveDir::UP;
+	}
+	else
+	{
+		return en_MoveDir::DOWN;
+	}
 }

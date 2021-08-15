@@ -286,7 +286,7 @@ vector<st_Position> CMap::FindPath(st_Vector2Int StartCellPosition, st_Vector2In
 	for (int32 i = 0; i < _SizeY; i++)
 	{
 		OpenList[i] = (int*)malloc(sizeof(int) * _SizeX);
-		memset(OpenList[i], 0, sizeof(int) * _SizeX);
+		memset(OpenList[i], 1, sizeof(int) * _SizeX);
 	}
 
 	// 부모 위치 배열

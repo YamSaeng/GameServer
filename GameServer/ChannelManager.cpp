@@ -2,7 +2,7 @@
 #include "ChannelManager.h"
 
 CChannelManager::CChannelManager()
-{
+{	
 	_ChannelId = 1;
 }
 
@@ -46,5 +46,10 @@ CChannel* CChannelManager::Find(int32 ChannelId)
 
 void CChannelManager::Update()
 {
+	for (auto ChannelIterator : _Channels)
+	{
+		CChannel* Channel = ChannelIterator.second;
 
+		Channel->Update();
+	}
 }

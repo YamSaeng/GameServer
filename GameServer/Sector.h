@@ -1,12 +1,14 @@
 #pragma once
 
-class CPlayer;
 class CGameObject;
+class CPlayer;
+class CMonster;
 
 class CSector
 {
 private:
 	set<CPlayer*> _Players;
+	set<CMonster*> _Monsters;
 public:
 	int32 _SectorY;
 	int32 _SectorX;	
@@ -18,5 +20,6 @@ public:
 	void Remove(CGameObject* RemoveGameObject);
 	
 	set<CPlayer*> GetPlayers();	
+	set<CMonster*> GetMonsters();
 };
 
