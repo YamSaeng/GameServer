@@ -118,7 +118,7 @@ public:
 	
 	st_Position CellToPosition(st_Vector2Int CellPosition);
 	st_Vector2Int PositionToCell(st_Position Position);
-
-	vector<st_Position> FindPath(st_Vector2Int StartCellPosition, st_Vector2Int DestCellPostion, bool CheckObjects = true, int32 MaxDistance = 10);	
-	vector<st_Position> CompletePath(st_Position** Parents, int32 DestX, int32 DestY);
+		
+	vector<st_Vector2Int> FindPath(st_Vector2Int StartCellPosition, st_Vector2Int DestCellPostion, bool CheckObjects = true, int32 MaxDistance = 10);
+	vector<st_Vector2Int> CompletePath(st_Position** Parents, int32 DestX, int32 DestY);
 ;};

@@ -2,6 +2,7 @@
 #include "Map.h"
 #include "GameObject.h"
 #include "Player.h"
+#include "Monster.h"
 #include "Heap.h"
 
 CMap::CMap(int MapId)
@@ -188,12 +189,28 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 		{
 			//G_Logger->WriteStdOut(en_Color::GREEN, L"LeaveSector Y (%d) X (%d) EnterSector Y (%d) X (%d) \n", CurrentSector->_SectorY, CurrentSector->_SectorX, NextSector->_SectorY, NextSector->_SectorX);			
 
-			CurrentSector->Remove(Player);	
-			NextSector->Insert(Player);			
+			// 현재 섹터에서 플레이어 제거
+			CurrentSector->Remove(Player);
+			// 이동한 섹터에 플레이어 추가
+			NextSector->Insert(Player);	
 		}
 	}
 		break;
 	case MONSTER:
+	{
+		CMonster* Monster = (CMonster*)GameObject;
+
+		CSector* CurrentSector = GameObject->_Channel->GetSector(Monster->GetCellPosition());
+		CSector* NextSector = GameObject->_Channel->GetSector(DestPosition);
+
+		if (CurrentSector != NextSector)
+		{
+			// 현재 섹터에서 몬스터 제거
+			CurrentSector->Remove(Monster);
+			// 이동한 섹터에 몬스터 추가
+			NextSector->Insert(Monster);
+		}
+	}
 		break;
 	default:
 		CRASH("ApplyMove GameObject Type 이상한 값")
@@ -263,7 +280,7 @@ st_Vector2Int CMap::PositionToCell(st_Position Position)
 	return st_Vector2Int(Position._X + _Left, _Down - Position._Y);
 }
 
-vector<st_Position> CMap::FindPath(st_Vector2Int StartCellPosition, st_Vector2Int DestCellPostion, bool CheckObjects , int32 MaxDistance)
+vector<st_Vector2Int> CMap::FindPath(st_Vector2Int StartCellPosition, st_Vector2Int DestCellPostion, bool CheckObjects , int32 MaxDistance)
 {
 	int32 DeltaY[4] = { 1, -1, 0, 0 };
 	int32 DeltaX[4] = { 0, 0, -1, 1 };
@@ -401,10 +418,10 @@ vector<st_Position> CMap::FindPath(st_Vector2Int StartCellPosition, st_Vector2In
 	return CompletePath(Parents, DestCellPostion._X, DestCellPostion._Y);
 }
 
-vector<st_Position> CMap::CompletePath(st_Position** Parents, int32 DestX, int32 DestY)
+vector<st_Vector2Int> CMap::CompletePath(st_Position** Parents, int32 DestX, int32 DestY)
 {
 	// 반환해줄 배열
-	vector<st_Position> Cells;
+	vector<st_Vector2Int> Cells;
 	
 	st_Vector2Int DestCellPosition(DestX, DestY);
 	st_Position DestPosition = CellToPosition(DestCellPosition);
@@ -419,8 +436,8 @@ vector<st_Position> CMap::CompletePath(st_Position** Parents, int32 DestX, int32
 		Point._X = X;
 		Point._Y = Y;
 
-		// 매개변수로 받은 부모 위치 담기
-		Cells.push_back(Point);
+		// 매개변수로 받은 부모 위치 담기		
+		Cells.push_back(PositionToCell(Point));
 
 		st_Position Position = Parents[Y][X];
 		Y = Position._Y;
@@ -430,7 +447,7 @@ vector<st_Position> CMap::CompletePath(st_Position** Parents, int32 DestX, int32
 	Point._X = X;
 	Point._Y = Y;
 		
-	Cells.push_back(Point);
+	Cells.push_back(PositionToCell(Point));
 
 	// 부모 위치 담은 배열 거꾸로 뒤집어서 반환
 	reverse(Cells.begin(), Cells.end());

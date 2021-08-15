@@ -12,6 +12,8 @@ private:
 
 	CMemoryPoolTLS<CPlayer>* _PlayerMemoryPool;
 	CMemoryPoolTLS<CMonster>* _MonsterMemoryPool;	
+
+	int32 _MonsterId;
 public:
 	CGameServer* GameServer;
 	

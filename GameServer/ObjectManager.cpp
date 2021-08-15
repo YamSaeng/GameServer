@@ -5,6 +5,8 @@ CObjectManager::CObjectManager()
 {
 	_PlayerMemoryPool = new CMemoryPoolTLS<CPlayer>(0);
 	_MonsterMemoryPool = new CMemoryPoolTLS<CMonster>(0);	
+
+	_MonsterId = 10000;
 }
 
 void CObjectManager::Add(CGameObject* AddObject, int32 ChannelId)
@@ -91,7 +93,7 @@ void CObjectManager::MonsterSpawn(int32 MonsterCount, int32 ChannelId)
 	for (int32 i = 0; i < MonsterCount; i++)
 	{
 		CMonster* NewMonster = (CMonster*)ObjectCreate(en_GameObjectType::MONSTER);
-		
+		NewMonster->_GameObjectInfo.ObjectId = _MonsterId++;		
 		Add(NewMonster, ChannelId);
 	}	
 }

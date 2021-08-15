@@ -178,7 +178,7 @@ CPlayer* CChannel::FindNearPlayer(CGameObject* Object, int32 Range)
 	for (int32 i = 0; i < Players.size(); i++)
 	{
 		CPlayer* Player = Players[i];
-		vector<st_Position> Path = _Map->FindPath(Object->GetCellPosition(), Player->GetCellPosition());
+		vector<st_Vector2Int> Path = _Map->FindPath(Object->GetCellPosition(), Player->GetCellPosition());
 		if (Path.size() < 2 || Path.size() > Range)
 		{
 			continue;
