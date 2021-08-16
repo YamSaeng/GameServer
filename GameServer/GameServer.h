@@ -21,6 +21,7 @@ private:
 
 	HANDLE _UpdateThread;
 	HANDLE _DataBaseThread;
+	HANDLE _GameLogicThread;
 
 	HANDLE _UpdateWakeEvent;
 	HANDLE _DataBaseWakeEvent;
@@ -29,12 +30,15 @@ private:
 	bool _UpdateThreadEnd;
 	// DataBaseThread 종료용 변수
 	bool _DataBaseThreadEnd;
+	// LogicThread 종료용 변수
+	bool _LogicThreadEnd;
 
 	// 게임서버에서 생성되는 오브젝트들의 아이디
 	int64 _GameObjectId;
 
 	static unsigned __stdcall UpdateThreadProc(void* Argument);
 	static unsigned __stdcall DataBaseThreadProc(void* Argument);
+	static unsigned __stdcall GameLogicThreadProc(void* Argument);
 	static unsigned __stdcall HeartBeatCheckThreadProc(void* Argument);
 
 	void CreateNewClient(int64 SessionID);
@@ -83,16 +87,18 @@ private:
 	CMessage* MakePacketResClientConnected();
 	CMessage* MakePacketResLogin(bool Status, int32 PlayerCount, int32 PlayerDBId, wstring PlayersName);
 	CMessage* MakePacketResCreateCharacter(bool IsSuccess, int32 PlayerDBId, wstring PlayerName);
-	CMessage* MakePacketResEnterGame(int64 AccountId, int32 PlayerDBId, wstring EnterPlayerName, st_GameObjectInfo ObjectInfo);
-	CMessage* MakePacketResMove(int64 AccountId, int32 PlayerDBId,bool Cango,st_PositionInfo PositionInfo);
-	CMessage* MakePacketResAttack(int64 AccountId, int32 PlayerDBId, en_MoveDir Dir);
-	CMessage* MakePacketResSpawn(int64 AccountId, int32 PlayerDBId, int32 ObjectInfosCount, wstring* SpawnObjectName, st_GameObjectInfo* ObjectInfos);
-	CMessage* MakePacketResDeSpawn(int64 AccountId, int32 PlayerDBId);
-	CMessage* MakePacketResChangeHP(int32 PlayerDBId, int32 CurrentHP, int32 MaxHP);
-	CMessage* MakePacketMousePositionObjectInfo(int64 AccountId, int32 PlayerDBId, wstring ObjectName, st_GameObjectInfo ObjectInfo);
+	CMessage* MakePacketResEnterGame(st_GameObjectInfo ObjectInfo);	
+	CMessage* MakePacketResAttack(int64 AccountId, int32 PlayerDBId, en_MoveDir Dir);	
+	CMessage* MakePacketMousePositionObjectInfo(int64 AccountId, int32 PlayerDBId, st_GameObjectInfo ObjectInfo);
 	CMessage* MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* NickName, WORD MessageLen, WCHAR* Message);
 
 	st_CLIENT* FindClient(int64 SessionID);
+public:
+	CMessage* MakePacketResChangeHP(int32 PlayerDBId, int32 CurrentHP, int32 MaxHP);
+	CMessage* MakePacketResObjectState(int32 ObjectId,en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState);
+	CMessage* MakePacketResMove(int64 AccountId, int32 ObjectId, en_GameObjectType ObjectType, st_PositionInfo PositionInfo);
+	CMessage* MakePacketResSpawn(int32 ObjectInfosCount, st_GameObjectInfo* ObjectInfos);
+	CMessage* MakePacketResDeSpawn(int32 ObjectId);
 public:
 	//------------------------------------
 	// Job 메모리풀
@@ -127,6 +133,7 @@ public:
 	virtual void OnClientLeave(int64 SessionID) override;
 	virtual bool OnConnectionRequest(const wchar_t ClientIP, int32 Port) override;
 
+	void SendPacketSector(CGameObject* Object, CMessage* Message);
 	void SendPacketSector(st_CLIENT* Client, CMessage* Message, bool SendMe = false);
 
 	//------------------------------------------------------------------------------
