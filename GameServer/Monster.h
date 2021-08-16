@@ -25,14 +25,19 @@ private:
 	//-----------------
 	int32 _AttackRange;
 
-	//-----------------------------------
+	//------------------------------------
 	// Idle 상태에서 Search를 실행할 Tick
-	//-----------------------------------
+	//------------------------------------
 	int64 _NextSearchTick;
-	//-----------------------------------
+	//-------------------------------------
 	// Moving 상태에서 Chase를 실행할 Tick
-	//-----------------------------------
+	//-------------------------------------
 	int64 _NextMoveTick;
+
+	//--------------------------------------
+	// Attack 상태에서 Attack을 실행할 Tick
+	//--------------------------------------
+	int64 _AttackTick;
 protected:
 	//------------------------
 	// Idle 상태 Update
@@ -63,6 +68,6 @@ public:
 	virtual void OnDamaged(CGameObject* Attacker, int32 Damage) override;
 	virtual void OnDead(CGameObject* Killer) override;
 	
-	void BroadCastMove();
+	void BroadCastPacket(en_PACKET_TYPE PacketType);
 };
 

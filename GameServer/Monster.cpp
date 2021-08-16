@@ -23,8 +23,9 @@ CMonster::CMonster()
 	_GameObjectInfo.ObjectStatInfo.Level = MonsterData._MonsterStatInfo.Level;
 	_GameObjectInfo.ObjectStatInfo.Speed = MonsterData._MonsterStatInfo.Speed;
 
-	_SearchCellDistance = 10;
-	_ChaseCellDistance = 10;
+	_SearchCellDistance = MonsterData._MonsterStatInfo.SearchCellDistance;
+	_ChaseCellDistance = MonsterData._MonsterStatInfo.ChaseCellDistance;
+	_AttackRange = MonsterData._MonsterStatInfo.AttackRange;
 }
 
 CMonster::~CMonster()
@@ -50,6 +51,7 @@ void CMonster::Update()
 		UpdateMoving();
 		break;
 	case en_CreatureState::ATTACK:
+		UpdateAttack();
 		break;
 	case en_CreatureState::DEAD:
 		break;
@@ -88,14 +90,14 @@ void CMonster::UpdateMoving()
 	int MoveTick = (int)(1000 / _GameObjectInfo.ObjectStatInfo.Speed);
 	_NextMoveTick = GetTickCount64() + MoveTick;
 
-	G_Logger->WriteStdOut(en_Color::RED, L"UpdateMoving Func CAll\n");
+	//G_Logger->WriteStdOut(en_Color::RED, L"UpdateMoving Func CAll\n");
 
 	// 타겟이 없거나 나와 다른 채널에 있을 경우 Idle 상태로 전환한다.
 	if (_Target == nullptr || _Target->_Channel != _Channel)
 	{
 		_Target = nullptr;
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;		
-		BroadCastMove();
+		BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);		
 		return;
 	}
 
@@ -110,44 +112,112 @@ void CMonster::UpdateMoving()
 	if (Distance == 0 || Distance > _ChaseCellDistance)
 	{
 		_Target = nullptr;
-		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-		BroadCastMove();
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;		
+		BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
 		return;
 	}
 
-	vector<st_Vector2Int> Path = _Channel->_Map->FindPath(MonsterPosition, TargetPosition);
+	vector<st_Vector2Int> Path = _Channel->_Map->FindPath(MonsterPosition, TargetPosition);	
+	// 추격중에 플레이어한테 다가갈수 없거나 추격거리를 벗어나면 멈춘다.
 	if (Path.size() < 2 || Path.size() > _ChaseCellDistance)
 	{
 		_Target = nullptr;
-		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-		BroadCastMove();
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;		
+		BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
 		return;
 	}
 
+	if (Distance <= _AttackRange && (Direction._X == 0 || Direction._Y == 0))
+	{
+		_AttackTick = 0;
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;
+		_GameObjectInfo.ObjectPositionInfo.MoveDir = GetDirectionFromVector(Direction);	
+		BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
+		return;
+	}
+	
 	_GameObjectInfo.ObjectPositionInfo.MoveDir = GetDirectionFromVector(Path[1] - MonsterPosition);
 	_Channel->_Map->ApplyMove(this, Path[1]);
-	BroadCastMove();
+
+	BroadCastPacket(en_PACKET_S2C_MOVE);	
 }
 
 void CMonster::UpdateAttack()
 {
+	if (_AttackTick == 0)
+	{
+		G_Logger->WriteStdOut(en_Color::RED, L"Monster Attack\n");
+		// 타겟이 사라지거나 채널이 달라질 경우 타겟을 해제
+		if (_Target == nullptr || _Target->_Channel != _Channel)
+		{
+			_Target = nullptr;
+			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
+			return;
+		}
+
+		// 공격이 가능한지 확인
+		st_Vector2Int TargetCellPosition = _Target->GetCellPosition();
+		st_Vector2Int MyCellPosition = GetCellPosition();
+		st_Vector2Int Direction = TargetCellPosition - MyCellPosition;
+
+		int32 Distance = Direction.CellDistanceFromZero();
+		// 타겟과의 거리가 공격 범위 안에 속하고 X==0 || Y ==0 일때( 대각선은 제한) 공격
+		bool CanUseAttack = (Distance <= _AttackRange && (Direction._X == 0 || Direction._Y == 0));
+		if (CanUseAttack == false)
+		{
+			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
+			return;
+		}
+
+		// 데미지 적용
+		_Target->OnDamaged(this, _GameObjectInfo.ObjectStatInfo.Attack);
+		// 주위 플레이어들에게 데미지 적용 결과 전송
+		BroadCastPacket(en_PACKET_S2C_CHANGE_HP);
+
+		// 0.5초마다 공격
+		_AttackTick = GetTickCount64() + 500;
+	}	
+
+	if (_AttackTick > GetTickCount64())
+	{
+		return;
+	}
+
+	_AttackTick = 0;
 }
 
 void CMonster::UpdateDead()
 {
+
 }
 
 void CMonster::OnDamaged(CGameObject* Attacker, int32 Damage)
 {
+
 }
 
 void CMonster::OnDead(CGameObject* Killer)
 {
 }
 
-void CMonster::BroadCastMove()
-{
-	CMessage* ResMovePacket = G_ObjectManager->GameServer->MakePacketResMove(-1, this->_GameObjectInfo.ObjectId, this->_GameObjectInfo.ObjectType, this->_GameObjectInfo.ObjectPositionInfo);
-	G_ObjectManager->GameServer->SendPacketSector(this, ResMovePacket);
-	ResMovePacket->Free();
+void CMonster::BroadCastPacket(en_PACKET_TYPE PacketType)
+{	
+	CMessage* ResPacket = nullptr;
+	switch (PacketType)
+	{
+	case en_PACKET_S2C_MOVE:
+		ResPacket = G_ObjectManager->GameServer->MakePacketResMove(-1, _GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType, _GameObjectInfo.ObjectPositionInfo);
+		break;
+	case en_PACKET_S2C_OBJECT_STATE_CHANGE:		
+		ResPacket = G_ObjectManager->GameServer->MakePacketResObjectState(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo.MoveDir, _GameObjectInfo.ObjectType, _GameObjectInfo.ObjectPositionInfo.State);
+		break;
+	case en_PACKET_S2C_CHANGE_HP:
+		ResPacket = G_ObjectManager->GameServer->MakePacketResChangeHP(_Target->_GameObjectInfo.ObjectId, _Target->_GameObjectInfo.ObjectStatInfo.HP, _Target->_GameObjectInfo.ObjectStatInfo.MaxHP);
+		break;
+	default:
+		break;
+	}
+
+	G_ObjectManager->GameServer->SendPacketSector(this, ResPacket);
+	ResPacket->Free();
 }

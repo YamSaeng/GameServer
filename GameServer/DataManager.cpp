@@ -133,12 +133,18 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			int MaxHP = MonsterStatInfoFiled["MaxHP"].GetInt();
 			int Attack = MonsterStatInfoFiled["Attack"].GetInt();
 			float Speed = MonsterStatInfoFiled["Speed"].GetFloat();
+			int SearchCellDistance = MonsterStatInfoFiled["SearchCellDistance"].GetInt();
+			int ChaseCellDistance = MonsterStatInfoFiled["ChaseCellDistance"].GetInt();
+			int AttackRange = MonsterStatInfoFiled["AttackRange"].GetInt();
 			int TotalExp = MonsterStatInfoFiled["TotalExp"].GetInt();
 
 			MonsterData->_MonsterStatInfo.Level = Level;
 			MonsterData->_MonsterStatInfo.MaxHP = MaxHP;
 			MonsterData->_MonsterStatInfo.Attack = Attack;
 			MonsterData->_MonsterStatInfo.Speed = Speed;
+			MonsterData->_MonsterStatInfo.SearchCellDistance = SearchCellDistance;
+			MonsterData->_MonsterStatInfo.ChaseCellDistance = ChaseCellDistance;
+			MonsterData->_MonsterStatInfo.AttackRange = AttackRange;
 		}
 
 		for (auto& DropDataFiled : Filed["DropData"].GetArray())

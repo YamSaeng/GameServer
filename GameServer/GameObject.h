@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Channel.h"
+#include "CommonProtocol.h"
 
 enum en_GameObjectType
 {

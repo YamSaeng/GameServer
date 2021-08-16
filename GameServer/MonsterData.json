@@ -9,6 +9,9 @@
           "MaxHP": 20,
           "Attack": 5,
           "Speed": 5.0,
+          "SearchCellDistance": 10,
+          "ChaseCellDistance": 10,
+          "AttackRange": 1,
           "TotalExp": 10
         }
       ],

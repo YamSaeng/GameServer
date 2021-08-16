@@ -32,6 +32,9 @@ struct st_StatusData
 	int32 MaxHP;
 	int32 Attack;
 	float Speed;
+	int32 SearchCellDistance;
+	int32 ChaseCellDistance;
+	int32 AttackRange;
 };
 
 struct st_DropData
@@ -45,6 +48,6 @@ struct st_MonsterData
 {	
 	int32 _MonsterDataId; // 몬스터 번호
 	string _MonsterName;  // 몬스터 이름
-	st_StatusData _MonsterStatInfo; // 몬스터 스탯 정보
+	st_StatusData _MonsterStatInfo; // 몬스터 스탯 정보	
 	vector<st_DropData> _DropItems; // 몬스터가 드랍하는 아이템 정보
 };

@@ -209,7 +209,15 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject)
 		return;
 	}	
 
-	st_Vector2Int SpawnPosition(0, 0);
+	srand(time(NULL));
+	st_Vector2Int SpawnPosition;
+
+	while (true)
+	{
+		
+	}
+	
+	int SpawnX = rand() % 100;
 
 	switch (EnterChannelGameObject->_GameObjectInfo.ObjectType)
 	{
