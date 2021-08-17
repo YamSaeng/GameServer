@@ -42,6 +42,11 @@ void CMonster::Init(int32 DataSheetId)
 
 void CMonster::Update()
 {
+	if (_Target && _Target->_NetworkState == en_ObjectNetworkState::LEAVE)
+	{
+		_Target = nullptr;		
+	}
+
 	switch (_GameObjectInfo.ObjectPositionInfo.State)
 	{
 	case en_CreatureState::IDLE:
@@ -70,8 +75,7 @@ void CMonster::UpdateIdle()
 
 	_NextSearchTick = GetTickCount64() + 1000;
 
-	CPlayer* Target = _Channel->FindNearPlayer(this, _SearchCellDistance);
-
+	CPlayer* Target = _Channel->FindNearPlayer(this, _SearchCellDistance);	
 	if (Target == nullptr)
 	{
 		return;

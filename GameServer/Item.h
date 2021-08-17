@@ -1,4 +1,5 @@
 #pragma once
+#include "GameObject.h"
 
 struct st_ItemInfo
 {
@@ -23,8 +24,11 @@ enum en_ItemType
 	ITEM_TYPE_CONSUMABLE_POTION
 };
 
-class CItem
+class CItem : CGameObject
 {
 public:	
+	st_ItemInfo _ItemInfo;
+
+	CItem();
 };
 

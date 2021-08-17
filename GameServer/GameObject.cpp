@@ -3,12 +3,14 @@
 
 CGameObject::CGameObject()
 {
+	_NetworkState = en_ObjectNetworkState::READY;
 	_Channel = nullptr;
 }
 
 CGameObject::CGameObject(st_GameObjectInfo GameObjectInfo)
 {
 	_GameObjectInfo = GameObjectInfo;	
+	_NetworkState = en_ObjectNetworkState::READY;
 }
 
 CGameObject::~CGameObject()

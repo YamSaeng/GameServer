@@ -19,15 +19,15 @@ private:
 	//---------------------------------------------------
 	list<int64> _SectorList[SECTOR_Y_MAX][SECTOR_X_MAX];
 
-	HANDLE _UpdateThread;
+	HANDLE _NetworkThread;
 	HANDLE _DataBaseThread;
 	HANDLE _GameLogicThread;
 
-	HANDLE _UpdateWakeEvent;
+	HANDLE _NetworkThreadWakeEvent;
 	HANDLE _DataBaseWakeEvent;
 
 	// WorkerThread 종료용 변수
-	bool _UpdateThreadEnd;
+	bool _NetworkThreadEnd;
 	// DataBaseThread 종료용 변수
 	bool _DataBaseThreadEnd;
 	// LogicThread 종료용 변수
@@ -36,7 +36,7 @@ private:
 	// 게임서버에서 생성되는 오브젝트들의 아이디
 	int64 _GameObjectId;
 
-	static unsigned __stdcall UpdateThreadProc(void* Argument);
+	static unsigned __stdcall NetworkThreadProc(void* Argument);
 	static unsigned __stdcall DataBaseThreadProc(void* Argument);
 	static unsigned __stdcall GameLogicThreadProc(void* Argument);
 	static unsigned __stdcall HeartBeatCheckThreadProc(void* Argument);
@@ -118,8 +118,8 @@ public:
 	// 채팅서버 접속한 클라
 	unordered_map<int64, st_CLIENT*> _ClientMap;
 
-	int64 _UpdateWakeCount; // Update 쓰레드가 일어난 횟수	
-	int64 _UpdateTPS; // Update 쓰레드가 1초에 작업한 처리량
+	int64 _NetworkThreadWakeCount; // Update 쓰레드가 일어난 횟수	
+	int64 _NetworkThreadTPS; // Update 쓰레드가 1초에 작업한 처리량
 
 	int64 _DataBaseThreadWakeCount;
 	int64 _DataBaseThreadTPS;

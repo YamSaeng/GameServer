@@ -60,6 +60,8 @@ bool CObjectManager::Remove(CGameObject* RemoveObject, int32 _ChannelId)
 		_Monsters.erase(RemoveObject->_GameObjectInfo.ObjectId);
 		break;
 	}
+
+	return RemoveSuccess;
 }
 
 CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
@@ -85,6 +87,7 @@ void CObjectManager::ObjectReturn(en_GameObjectType ObjectType, CGameObject* Ret
 	{	
 	case PLAYER:
 		_PlayerMemoryPool->Free((CPlayer*)ReturnObject);
+		Remove(ReturnObject, 1);
 		break;
 	case MONSTER:
 		_MonsterMemoryPool->Free((CMonster*)ReturnObject);

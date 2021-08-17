@@ -3,15 +3,25 @@
 
 CPlayer::CPlayer()
 {
-	_GameObjectInfo.ObjectType = en_GameObjectType::PLAYER;
+	_GameObjectInfo.ObjectType = en_GameObjectType::PLAYER;	
 }
 
 CPlayer::CPlayer(st_GameObjectInfo _PlayerInfo)
 {
 	_GameObjectInfo = _PlayerInfo;		
-	_GameObjectInfo.ObjectType = en_GameObjectType::PLAYER;	
+	_GameObjectInfo.ObjectType = en_GameObjectType::PLAYER;		
 }
 
 CPlayer::~CPlayer()
+{
+}
+
+void CPlayer::OnDamaged(CGameObject* Attacker, int32 Damage)
+{
+	//CGameObject::OnDamaged(Attacker, Damage);
+
+}
+
+void CPlayer::OnDead(CGameObject* Killer)
 {
 }

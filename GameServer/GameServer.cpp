@@ -12,29 +12,29 @@
 CGameServer::CGameServer()
 {
 	//timeBeginPeriod(1);
-	_UpdateThread = nullptr;
+	_NetworkThread = nullptr;
 	_DataBaseThread = nullptr;
 	
 	// Nonsignaled상태 자동리셋
-	_UpdateWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	_NetworkThreadWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	_DataBaseWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
-	_UpdateThreadEnd = false;
+	_NetworkThreadEnd = false;
 	_DataBaseThreadEnd = false;	
 	_LogicThreadEnd = false;
 
 	_JobMemoryPool = new CMemoryPoolTLS<st_JOB>(0);
 	_ClientMemoryPool = new CMemoryPoolTLS<st_CLIENT>(0);
 
-	_UpdateTPS = 0;
-	_UpdateWakeCount = 0;
+	_NetworkThreadTPS = 0;
+	_NetworkThreadWakeCount = 0;
 
 	_GameObjectId = 0;
 }
 
 CGameServer::~CGameServer()
 {
-	CloseHandle(_UpdateWakeEvent);
+	CloseHandle(_NetworkThreadWakeEvent);
 	//timeEndPeriod(1);
 }
 
@@ -42,27 +42,27 @@ void CGameServer::Start(const WCHAR* OpenIP, int32 Port)
 {
 	CNetworkLib::Start(OpenIP, Port);
 
-	G_ObjectManager->MonsterSpawn(150, 1);
+	G_ObjectManager->MonsterSpawn(300, 1);
 	G_ObjectManager->GameServer = this;
 
-	_UpdateThread = (HANDLE)_beginthreadex(NULL, 0, UpdateThreadProc, this, 0, NULL);
+	_NetworkThread = (HANDLE)_beginthreadex(NULL, 0, NetworkThreadProc, this, 0, NULL);
 	_DataBaseThread = (HANDLE)_beginthreadex(NULL, 0, DataBaseThreadProc, this, 0, NULL);		
 
 	_GameLogicThread = (HANDLE)_beginthreadex(NULL, 0, GameLogicThreadProc, this, 0, NULL);
 
-	CloseHandle(_UpdateThread);
+	CloseHandle(_NetworkThread);
 	CloseHandle(_DataBaseThread);
 }
 
-unsigned __stdcall CGameServer::UpdateThreadProc(void* Argument)
+unsigned __stdcall CGameServer::NetworkThreadProc(void* Argument)
 {
 	CGameServer* Instance = (CGameServer*)Argument;
 
-	while (!Instance->_UpdateThreadEnd)
+	while (!Instance->_NetworkThreadEnd)
 	{
-		WaitForSingleObject(Instance->_UpdateWakeEvent, INFINITE);
+		WaitForSingleObject(Instance->_NetworkThreadWakeEvent, INFINITE);
 
-		Instance->_UpdateWakeCount++;
+		Instance->_NetworkThreadWakeCount++;
 
 		while (!Instance->_GameServerCommonMessageQue.IsEmpty())
 		{
@@ -89,7 +89,7 @@ unsigned __stdcall CGameServer::UpdateThreadProc(void* Argument)
 				break;
 			}
 
-			Instance->_UpdateTPS++;
+			Instance->_NetworkThreadTPS++;
 			Instance->_JobMemoryPool->Free(Job);		
 		}		
 	}
@@ -196,7 +196,7 @@ void CGameServer::DeleteClient(int64 SessionID)
 		}
 
 		if (Client->MyPlayer != nullptr)
-		{
+		{			
 			CChannel* Channel = G_ChannelManager->Find(1);
 			Channel->LeaveChannel(Client->MyPlayer);
 
@@ -211,6 +211,7 @@ void CGameServer::DeleteClient(int64 SessionID)
 		for (int i = 0; i < 5; i++)
 		{
 			G_ObjectManager->ObjectReturn(en_GameObjectType::PLAYER, Client->MyPlayers[i]);
+			Client->MyPlayers[i]->_NetworkState = en_ObjectNetworkState::LEAVE;
 			Client->MyPlayers[i] = nullptr;
 		}
 
@@ -403,6 +404,7 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 			if (Client->MyPlayers[i]->_GameObjectInfo.ObjectName == EnterGameCharacterName)
 			{
 				Client->MyPlayer = Client->MyPlayers[i];
+				Client->MyPlayer->_NetworkState = en_ObjectNetworkState::LIVE;
 				break;
 			}
 		}
@@ -1392,7 +1394,7 @@ void CGameServer::OnClientJoin(int64 SessionID)
 	ClientJoinJob->SessionID = SessionID;
 	ClientJoinJob->Message = nullptr;
 	_GameServerCommonMessageQue.Enqueue(ClientJoinJob);
-	SetEvent(_UpdateWakeEvent);
+	SetEvent(_NetworkThreadWakeEvent);
 }
 
 void CGameServer::OnRecv(int64 SessionID, CMessage* Packet)
@@ -1407,7 +1409,7 @@ void CGameServer::OnRecv(int64 SessionID, CMessage* Packet)
 	NewMessageJob->SessionID = SessionID;
 	NewMessageJob->Message = JobMessage;
 	_GameServerCommonMessageQue.Enqueue(NewMessageJob);
-	SetEvent(_UpdateWakeEvent);
+	SetEvent(_NetworkThreadWakeEvent);
 }
 
 void CGameServer::OnClientLeave(int64 SessionID)
@@ -1417,7 +1419,7 @@ void CGameServer::OnClientLeave(int64 SessionID)
 	ClientLeaveJob->SessionID = SessionID;
 	ClientLeaveJob->Message = nullptr;
 	_GameServerCommonMessageQue.Enqueue(ClientLeaveJob);
-	SetEvent(_UpdateWakeEvent);
+	SetEvent(_NetworkThreadWakeEvent);
 }
 
 bool CGameServer::OnConnectionRequest(const wchar_t ClientIP, int32 Port)

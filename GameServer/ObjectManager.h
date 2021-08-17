@@ -30,6 +30,6 @@ public:
 	CGameObject* ObjectCreate(en_GameObjectType ObjectType);
 	void ObjectReturn(en_GameObjectType ObjectType, CGameObject* ReturnObject);
 
-	void MonsterSpawn(int32 MonsterCount, int32 ChannelId);
+	void MonsterSpawn(int32 MonsterCount, int32 ChannelId);	
 };
 

@@ -52,11 +52,19 @@ struct st_GameObjectInfo
 	en_GameObjectType ObjectType;
 };
 
+enum en_ObjectNetworkState
+{
+	READY,
+	LIVE,
+	LEAVE
+};
+
 class CGameObject
 {
 private:
 protected:	
 public:
+	en_ObjectNetworkState _NetworkState;
 	st_GameObjectInfo _GameObjectInfo;
 	CChannel* _Channel;	
 

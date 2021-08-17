@@ -8,6 +8,9 @@ public:
 
 	CPlayer();
 	CPlayer(st_GameObjectInfo _PlayerInfo);
-	~CPlayer();
+	~CPlayer();		
+
+	virtual void OnDamaged(CGameObject* Attacker, int32 Damage) override;
+	virtual void OnDead(CGameObject* Killer) override;
 };
 

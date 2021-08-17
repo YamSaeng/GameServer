@@ -412,12 +412,8 @@ bool CNetworkLib::Start(const WCHAR* OpenIP, int Port)
 	HANDLE hAcceptThread = (HANDLE)_beginthreadex(NULL, 0, AcceptThreadProc, this, 0, NULL);
 	CloseHandle(hAcceptThread);
 
-	//모니터링 변수 출력용 쓰레드
-	//HANDLE hServerStatePrintThread = (HANDLE)_beginthreadex(NULL, 0, ServerStatePrintProc, this, 0, NULL);
-	//CloseHandle(hServerStatePrintThread);
-
-	//워커 쓰레드 생성
-	for (int i = 0; i < (int)SI.dwNumberOfProcessors * 2; i++)
+	// 워커 쓰레드 생성 코어 개수 만큼
+	for (int i = 0; i < (int)SI.dwNumberOfProcessors; i++)
 	{
 		HANDLE hWorkerThread = (HANDLE)_beginthreadex(NULL, 0, WorkerThreadProc, this, 0, NULL);
 		CloseHandle(hWorkerThread);
@@ -675,7 +671,7 @@ void CNetworkLib::ReleaseSession(st_SESSION* ReleaseSession)
 	InterlockedDecrement64(&_SessionCount);
 	if (ReleaseSessionId != ReleaseSession->SessionID)
 	{
-		//wprintf(L"ReleaseSession SessionID Different !! ReleaseSessionID %d ReleaseSession->SessionID %d\n", ReleaseSessionId, ReleaseSession->SessionID);
+		wprintf(L"ReleaseSession SessionID Different !! ReleaseSessionID %d ReleaseSession->SessionID %d\n", ReleaseSessionId, ReleaseSession->SessionID);
 	}
 }
 #pragma endregion

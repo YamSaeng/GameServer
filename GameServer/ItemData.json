@@ -40,4 +40,12 @@
       "ImageFilePath": "Textures/Potion/Red Potion"
     }
   ]
+  "Matter": [
+    {
+      "DataSheetId": 1000,
+      "Name": "Wood",
+      "MaxCount": 10,
+      "ImageFilePath": "Textures/"
+    }
+  ]
 } 
