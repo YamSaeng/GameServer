@@ -33,7 +33,7 @@ public:
 	//-----------------------------------------------------------------
 	// 내 주위 섹터 반환
 	//-----------------------------------------------------------------
-	vector<CSector*> GetAroundSectors(CGameObject* Object, int32 Range);
+	vector<CSector*> GetAroundSectors(st_Vector2Int CellPosition, int32 Range);
 	vector<CGameObject*> GetAroundObjects(CGameObject* Object, int32 Range, bool ExceptMe = true);
 	
 	//--------------------------------------------------------------------------------------

@@ -146,7 +146,6 @@ void CMonster::UpdateAttack()
 {
 	if (_AttackTick == 0)
 	{
-		G_Logger->WriteStdOut(en_Color::RED, L"Monster Attack\n");
 		// 타겟이 사라지거나 채널이 달라질 경우 타겟을 해제
 		if (_Target == nullptr || _Target->_Channel != _Channel)
 		{
@@ -218,6 +217,6 @@ void CMonster::BroadCastPacket(en_PACKET_TYPE PacketType)
 		break;
 	}
 
-	G_ObjectManager->GameServer->SendPacketSector(this, ResPacket);
+	G_ObjectManager->GameServer->SendPacketAroundSector(this->GetCellPosition(), ResPacket);
 	ResPacket->Free();
 }

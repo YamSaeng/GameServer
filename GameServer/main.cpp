@@ -89,15 +89,15 @@ int main()
 		G_Logger->WriteStdOut(en_Color::WHITE, L"RecvPacket TPS   : [%d]\n", G_GameServer._RecvPacketTPS);  // Recv TPS
 		G_Logger->WriteStdOut(en_Color::WHITE, L"SendPacket TPS   : [%d]\n", G_GameServer._SendPacketTPS);  // Send TPS
 		G_Logger->WriteStdOut(en_Color::WHITE, L"PacketPool Alloc : [%d]\n", CMessage::_ObjectPoolFreeList.GetAllocCount());  // 패킷풀 Alloc
-		G_Logger->WriteStdOut(en_Color::WHITE, L"PacketPool Use   : [%d]\n", CMessage::_ObjectPoolFreeList.GetUseCount());    // 사용중인 패킷 횟수
+		G_Logger->WriteStdOut(en_Color::WHITE, L"PacketPool Remain : [%d]\n", CMessage::_ObjectPoolFreeList.GetUseCount());    
 		G_Logger->WriteStdOut(en_Color::WHITE, L"PacketPool Return : [%d]\n", CMessage::_ObjectPoolFreeList.ReturnCount()); // 패킷반납 회수	
 		G_Logger->WriteStdOut(en_Color::WHITE, L"================================================\n\n");
 		G_Logger->WriteStdOut(en_Color::YELLOW, L"ChattingServer\n");
 		G_Logger->WriteStdOut(en_Color::WHITE, L"PlayerPool Alloc	: [%d]\n", G_GameServer._ClientMemoryPool->GetAllocCount()); //채팅서버 클라 메모리풀 Alloc
 		G_Logger->WriteStdOut(en_Color::WHITE, L"PlayerPool Use		: [%d]\n", G_GameServer._ClientMemoryPool->GetUseCount());
 		G_Logger->WriteStdOut(en_Color::WHITE, L"PlayerCount		: [%d]\n", G_GameServer._ClientMap.size()); // 채팅서버 클라 개수
-		G_Logger->WriteStdOut(en_Color::WHITE, L"ChatServerJobPool Alloc	: [%d]\n", G_GameServer._JobMemoryPool->GetAllocCount()); //채팅서버 잡 메모리풀 Alloc
-		G_Logger->WriteStdOut(en_Color::WHITE, L"ChatServerJobPool Use	: [%d]\n", G_GameServer._JobMemoryPool->GetUseCount());
+		G_Logger->WriteStdOut(en_Color::WHITE, L"ChatServerJobPool Alloc  : [%d]\n", G_GameServer._JobMemoryPool->GetAllocCount()); //채팅서버 잡 메모리풀 Alloc
+		G_Logger->WriteStdOut(en_Color::WHITE, L"ChatServerJobPool Remain : [%d]\n", G_GameServer._JobMemoryPool->GetUseCount());
 		G_Logger->WriteStdOut(en_Color::WHITE, L"ChatServerJobQue Size	: [%d]\n", G_GameServer._GameServerCommonMessageQue.GetUseSize()); //채팅서버 잡큐에 몇개 들어있는지
 		G_Logger->WriteStdOut(en_Color::WHITE, L"UpdateThread TPS	: [%d]\n", G_GameServer._UpdateTPS); //채팅서버 업데이트 쓰레드 TPS
 		G_Logger->WriteStdOut(en_Color::WHITE, L"UpdateThread Wake Count : [%d]\n", G_GameServer._UpdateWakeCount); //채팅서버 업데이트 쓰레드가 몇번 일어났는지

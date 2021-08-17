@@ -31,12 +31,16 @@ void CObjectManager::Add(CGameObject* AddObject, int32 ChannelId)
 	break;
 	case en_GameObjectType::MONSTER:
 	{
+		vector<st_GameObjectInfo> SpawnMonster;
+
 		CMonster* Monster = (CMonster*)AddObject;
 		_Monsters.insert(pair<int64, CMonster*>(AddObject->_GameObjectInfo.ObjectId, Monster));
 
+		SpawnMonster.push_back(Monster->_GameObjectInfo);
+
 		// 몬스터 추가하면 몬스터 주위 플레이어들에게 몬스터를 소환하라고 알림
-		CMessage* ResSpawnPacket = GameServer->MakePacketResSpawn(1, &Monster->_GameObjectInfo);
-		GameServer->SendPacketSector(Monster,ResSpawnPacket);
+		CMessage* ResSpawnPacket = GameServer->MakePacketResSpawn(1, SpawnMonster);
+		GameServer->SendPacketAroundSector(Monster->GetCellPosition(),ResSpawnPacket);
 		ResSpawnPacket->Free();
 	}
 	break;
@@ -92,7 +96,7 @@ void CObjectManager::MonsterSpawn(int32 MonsterCount, int32 ChannelId)
 {
 	for (int32 i = 0; i < MonsterCount; i++)
 	{
-		CMonster* NewMonster = (CMonster*)ObjectCreate(en_GameObjectType::MONSTER);
+		CMonster* NewMonster = (CMonster*)ObjectCreate(en_GameObjectType::MONSTER);		
 		NewMonster->_GameObjectInfo.ObjectId = _MonsterId++;		
 		Add(NewMonster, ChannelId);
 	}	

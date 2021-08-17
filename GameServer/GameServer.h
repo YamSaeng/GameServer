@@ -97,8 +97,8 @@ public:
 	CMessage* MakePacketResChangeHP(int32 PlayerDBId, int32 CurrentHP, int32 MaxHP);
 	CMessage* MakePacketResObjectState(int32 ObjectId,en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState);
 	CMessage* MakePacketResMove(int64 AccountId, int32 ObjectId, en_GameObjectType ObjectType, st_PositionInfo PositionInfo);
-	CMessage* MakePacketResSpawn(int32 ObjectInfosCount, st_GameObjectInfo* ObjectInfos);
-	CMessage* MakePacketResDeSpawn(int32 ObjectId);
+	CMessage* MakePacketResSpawn(int32 ObjectInfosCount, vector<st_GameObjectInfo> ObjectInfos);
+	CMessage* MakePacketResDeSpawn(int32 DeSpawnObjectCount, vector<int64> DeSpawnObjectIds);
 public:
 	//------------------------------------
 	// Job 메모리풀
@@ -132,9 +132,10 @@ public:
 	virtual void OnRecv(int64 SessionID, CMessage* Packet) override;
 	virtual void OnClientLeave(int64 SessionID) override;
 	virtual bool OnConnectionRequest(const wchar_t ClientIP, int32 Port) override;
-
-	void SendPacketSector(CGameObject* Object, CMessage* Message);
-	void SendPacketSector(st_CLIENT* Client, CMessage* Message, bool SendMe = false);
+		
+	void SendPacketSector(CSector* Sector, CMessage* Message);
+	void SendPacketAroundSector(st_Vector2Int CellPosition, CMessage* Message);
+	void SendPacketAroundSector(st_CLIENT* Client, CMessage* Message, bool SendMe = false);
 
 	//------------------------------------------------------------------------------
 	//자신 주위 8섹터들에게 메세지를 전달한다.

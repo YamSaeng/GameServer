@@ -10,6 +10,7 @@
 #include <list>
 #include <set>
 #include <queue>
+#include <random>
 
 #include "Type.h"
 #include "Macro.h"

@@ -4,6 +4,7 @@
 #include "Player.h"
 #include "Monster.h"
 #include "Heap.h"
+#include "ObjectManager.h"
 
 CMap::CMap(int MapId)
 {
@@ -152,7 +153,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	// 목적지로 갈 수 있는지 검사한다.
 	if (Cango(DestPosition, CheckObject) == false)
 	{
-		G_Logger->WriteStdOut(en_Color::RED, L"Cant Go ApplyMove Y (%d) X (%d) ",DestPosition._Y,DestPosition._X);
+		//G_Logger->WriteStdOut(en_Color::RED, L"Cant Go ApplyMove Y (%d) X (%d) ",DestPosition._Y,DestPosition._X);
 		return false;
 	}
 
@@ -180,35 +181,145 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	{	
 	case PLAYER:		
 	{
-		CPlayer* Player = (CPlayer*)GameObject;		
+		CPlayer* MovePlayer = (CPlayer*)GameObject;
 
-		CSector* CurrentSector = GameObject->_Channel->GetSector(Player->GetCellPosition());		
+		CSector* CurrentSector = GameObject->_Channel->GetSector(MovePlayer->GetCellPosition());
 		CSector* NextSector = GameObject->_Channel->GetSector(DestPosition);		
 
 		if (CurrentSector != NextSector)
 		{
-			//G_Logger->WriteStdOut(en_Color::GREEN, L"LeaveSector Y (%d) X (%d) EnterSector Y (%d) X (%d) \n", CurrentSector->_SectorY, CurrentSector->_SectorX, NextSector->_SectorY, NextSector->_SectorX);			
-
 			// 현재 섹터에서 플레이어 제거
-			CurrentSector->Remove(Player);
+			CurrentSector->Remove(MovePlayer);
+			
+			//G_Logger->WriteStdOut(en_Color::GREEN, L"LeaveSector Y (%d) X (%d) EnterSector Y (%d) X (%d) \n", CurrentSector->_SectorY, CurrentSector->_SectorX, NextSector->_SectorY, NextSector->_SectorX);						
+
+			vector<CSector*> CurrentSectors =  GameObject->_Channel->GetAroundSectors(MovePlayer->GetCellPosition(), 10);
+			vector<CSector*> NextSectors =  GameObject->_Channel->GetAroundSectors(DestPosition, 10);			
+
+			// 나를 제거할 섹터를 찾는 작업
+			// Current - Next;
+			// 현재 섹터들에서 내가 이동할 섹터를 제거한 차집합 섹터를 얻는다.
+			vector<CSector*> DeSpawnSectors = CurrentSectors;
+			for (int32 i = 0; i < DeSpawnSectors.size(); i++)
+			{
+				for (int32 j = 0; j < NextSectors.size(); j++)
+				{
+					if (DeSpawnSectors[i]->_SectorY == NextSectors[j]->_SectorY && DeSpawnSectors[i]->_SectorX == NextSectors[j]->_SectorX)
+					{
+						DeSpawnSectors.erase(DeSpawnSectors.begin() + i);
+					}
+				}
+			}
+			
+			vector<int64> DeSpawnSectorObjectIds;
+			DeSpawnSectorObjectIds.push_back(MovePlayer->_GameObjectInfo.ObjectId);
+			// 나를 제외하라는 메시지를 생성 후 
+			CMessage* ResSectorDespawnPlayer = G_ObjectManager->GameServer->MakePacketResDeSpawn(1, DeSpawnSectorObjectIds);
+			// 해당 섹터 플레이어들에게 전송한다.
+			for (int32 i = 0; i < DeSpawnSectors.size(); i++)
+			{
+				for (CPlayer* Player : DeSpawnSectors[i]->GetPlayers())
+				{
+					G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSectorDespawnPlayer);
+				}				
+			}
+			ResSectorDespawnPlayer->Free();			
+			
+			DeSpawnSectorObjectIds.clear();
+
+			// 반대로 위에서 전송한 DeSpawnSector에 있는 오브젝트들을 담아서 나한테서 제거한다.
+			for (CSector* Sector : DeSpawnSectors)
+			{
+				for (CPlayer* DeSpawnPlayer : Sector->GetPlayers())
+				{
+					DeSpawnSectorObjectIds.push_back(DeSpawnPlayer->_GameObjectInfo.ObjectId);
+				}
+
+				for (CMonster* DeSpawnMonster : Sector->GetMonsters())
+				{
+					DeSpawnSectorObjectIds.push_back(DeSpawnMonster->_GameObjectInfo.ObjectId);
+				}
+			}	
+			
+			if (DeSpawnSectorObjectIds.size() > 0)
+			{
+				CMessage* ResSectorDespawnOtherPlayer = G_ObjectManager->GameServer->MakePacketResDeSpawn(DeSpawnSectorObjectIds.size(), DeSpawnSectorObjectIds);
+				G_ObjectManager->GameServer->SendPacket(MovePlayer->_SessionId, ResSectorDespawnOtherPlayer);
+				ResSectorDespawnOtherPlayer->Free();
+			}			
+
 			// 이동한 섹터에 플레이어 추가
-			NextSector->Insert(Player);	
+			NextSector->Insert(MovePlayer);
+			// 나를 스폰할 섹터를 찾는 작업
+			// Next - Current;
+			// 이동할 섹터에서 현재 섹터를 제거한 차집합 섹터를 찾는다.
+			vector<CSector*> SpawnSectors = NextSectors;
+			for (int32 i = 0; i < SpawnSectors.size(); i++)
+			{
+				for (int32 j = 0; j < CurrentSectors.size(); j++)
+				{
+					if (SpawnSectors[i]->_SectorY == CurrentSectors[j]->_SectorY && SpawnSectors[i]->_SectorX == CurrentSectors[j]->_SectorX)
+					{
+						SpawnSectors.erase(SpawnSectors.begin() + i);
+					}
+				}
+			}					
+		
+			// 스폰할 대상배열
+			vector<st_GameObjectInfo> SpawnObjectInfos;
+			// 나의 정보를 담고
+			SpawnObjectInfos.push_back(MovePlayer->_GameObjectInfo);
+
+			// 나를 소환하라고 앞서 얻어준 섹터 플레이어들에게 패킷을 전송한다.
+			CMessage* ResSectorSpawnPlayer = G_ObjectManager->GameServer->MakePacketResSpawn(1, SpawnObjectInfos);
+			for (int32 i = 0; i < SpawnSectors.size(); i++)
+			{
+				for (CPlayer* Player : SpawnSectors[i]->GetPlayers())
+				{
+					G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSectorSpawnPlayer);					
+				}
+			}			
+			ResSectorSpawnPlayer->Free();			
+
+			SpawnObjectInfos.clear();
+						
+			// 반대로 스폰 섹터에 있는 플레이어들을 담아서
+			for (CSector* Sector : SpawnSectors)
+			{
+				for (CPlayer* ExistPlayer : Sector->GetPlayers())
+				{
+					SpawnObjectInfos.push_back(ExistPlayer->_GameObjectInfo);
+				}
+
+				for (CMonster* ExistMonster : Sector->GetMonsters())
+				{
+					SpawnObjectInfos.push_back(ExistMonster->_GameObjectInfo);
+				}
+			}			
+	
+			// 나에게 전송하여 스폰 섹터에 있는 플레이어들을 스폰 시킨다.
+			if (SpawnObjectInfos.size() > 0)
+			{
+				CMessage* ResOtherObjectSpawnPacket = G_ObjectManager->GameServer->MakePacketResSpawn(SpawnObjectInfos.size(), SpawnObjectInfos);
+				G_ObjectManager->GameServer->SendPacket(MovePlayer->_SessionId, ResOtherObjectSpawnPacket);
+				ResOtherObjectSpawnPacket->Free();
+			}			
 		}
 	}
 		break;
 	case MONSTER:
 	{
-		CMonster* Monster = (CMonster*)GameObject;
+		CMonster* MoveMonster = (CMonster*)GameObject;
 
-		CSector* CurrentSector = GameObject->_Channel->GetSector(Monster->GetCellPosition());
+		CSector* CurrentSector = GameObject->_Channel->GetSector(MoveMonster->GetCellPosition());
 		CSector* NextSector = GameObject->_Channel->GetSector(DestPosition);
 
 		if (CurrentSector != NextSector)
 		{
 			// 현재 섹터에서 몬스터 제거
-			CurrentSector->Remove(Monster);
+			CurrentSector->Remove(MoveMonster);		
 			// 이동한 섹터에 몬스터 추가
-			NextSector->Insert(Monster);
+			NextSector->Insert(MoveMonster);			
 		}
 	}
 		break;
@@ -306,7 +417,7 @@ vector<st_Vector2Int> CMap::FindPath(st_Vector2Int StartCellPosition, st_Vector2
 		memset(OpenList[i], 1, sizeof(int) * _SizeX);
 	}
 
-	// 부모 위치 배열
+	// 부모 위치 배열			
 	st_Position** Parents = (st_Position**)malloc(sizeof(st_Position*) * _SizeY * _SizeX);
 	for (int i = 0; i < _SizeY; i++)
 	{
@@ -327,7 +438,7 @@ vector<st_Vector2Int> CMap::FindPath(st_Vector2Int StartCellPosition, st_Vector2
 	
 	// 처음 위치 첫 부모로 설정
 	Parents[StartPosition._Y][StartPosition._X]._Y = StartPosition._Y;
-	Parents[StartPosition._Y][StartPosition._X]._X = StartPosition._X;
+	Parents[StartPosition._Y][StartPosition._X]._X = StartPosition._X;	
 
 	// 오픈리스트 큐가 비워질때까지 반복
 	while (OpenListQue.GetUseSize() > 0)
@@ -353,7 +464,7 @@ vector<st_Vector2Int> CMap::FindPath(st_Vector2Int StartCellPosition, st_Vector2
 		for (int32 i = 0; i < 4; i++)
 		{
 			// 다음 위치를 알아낸다.
-			st_Position NextPosition(AStarNode._Position._Y + DeltaY[i], AStarNode._Position._X + DeltaX[i]);
+			st_Position NextPosition(AStarNode._Position._Y + DeltaY[i], AStarNode._Position._X + DeltaX[i]);			
 			
 			// 다음 위치가 목적지 좌표가 아닐 경우, 해당 위치로 갈 수 있는지 검사한다.
 			if (NextPosition._Y != DestPosition._Y || NextPosition._X != DestPosition._X)
@@ -407,13 +518,11 @@ vector<st_Vector2Int> CMap::FindPath(st_Vector2Int StartCellPosition, st_Vector2
 	for (int32 i = 0; i < _SizeY; i++)
 	{
 		free(CloseList[i]);
-		free(OpenList[i]);
-		free(Parents[i]);
+		free(OpenList[i]);		
 	}
 
 	free(CloseList);
-	free(OpenList);
-	free(Parents);
+	free(OpenList);	
 		
 	return CompletePath(Parents, DestCellPostion._X, DestCellPostion._Y);
 }
@@ -429,7 +538,7 @@ vector<st_Vector2Int> CMap::CompletePath(st_Position** Parents, int32 DestX, int
 	int32 X = DestPosition._X;
 	int32 Y = DestPosition._Y;
 
-	st_Position Point;
+	st_Position Point;	
 
 	while (Parents[Y][X]._Y != Y || Parents[Y][X]._X != X)
 	{
@@ -441,7 +550,7 @@ vector<st_Vector2Int> CMap::CompletePath(st_Position** Parents, int32 DestX, int
 
 		st_Position Position = Parents[Y][X];
 		Y = Position._Y;
-		X = Position._X;
+		X = Position._X;		
 	}
 
 	Point._X = X;
@@ -451,6 +560,13 @@ vector<st_Vector2Int> CMap::CompletePath(st_Position** Parents, int32 DestX, int
 
 	// 부모 위치 담은 배열 거꾸로 뒤집어서 반환
 	reverse(Cells.begin(), Cells.end());
+
+	for (int32 i = 0; i < _SizeY; i++)
+	{
+		free(Parents[i]);
+	}
+
+	free(Parents);
 
 	return Cells;
 }

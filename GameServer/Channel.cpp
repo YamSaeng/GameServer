@@ -67,14 +67,14 @@ CSector* CChannel::GetSector(int32 IndexY, int32 IndexX)
 	return &_Sectors[IndexY][IndexX];
 }
 
-vector<CSector*> CChannel::GetAroundSectors(CGameObject* Object, int32 Range)
+vector<CSector*> CChannel::GetAroundSectors(st_Vector2Int CellPosition, int32 Range)
 {
 	vector<CSector*> Sectors;
 
-	int MaxY = Object->GetCellPosition()._Y + Range;
-	int MinY = Object->GetCellPosition()._Y - Range;
-	int MaxX = Object->GetCellPosition()._X + Range;
-	int MinX = Object->GetCellPosition()._X - Range;
+	int MaxY = CellPosition._Y + Range;
+	int MinY = CellPosition._Y - Range;
+	int MaxX = CellPosition._X + Range;
+	int MinX = CellPosition._X - Range;
 
 	// 좌측 상단 섹터 얻기
 	st_Vector2Int LeftTop;
@@ -92,7 +92,7 @@ vector<CSector*> CChannel::GetAroundSectors(CGameObject* Object, int32 Range)
 	int MaxIndexY = (_Map->_Down - RightBottom._Y) / _SectorSize;
 	int MaxIndexX = (RightBottom._X - _Map->_Left) / _SectorSize;
 
-	CSector* NowSector = GetSector(Object->GetCellPosition());
+	CSector* NowSector = GetSector(CellPosition);
 
 	for (int X = MinIndexX; X <= MaxIndexX; X++)
 	{
@@ -115,7 +115,7 @@ vector<CGameObject*> CChannel::GetAroundObjects(CGameObject* Object, int32 Range
 {
 	vector<CGameObject*> GameObjects;
 
-	vector<CSector*> Sectors = GetAroundSectors(Object, Range);	
+	vector<CSector*> Sectors = GetAroundSectors(Object->GetCellPosition(), Range);
 		
 	for (CSector* Sector : Sectors)
 	{
@@ -147,7 +147,7 @@ vector<CGameObject*> CChannel::GetAroundObjects(CGameObject* Object, int32 Range
 
 vector<CPlayer*> CChannel::GetAroundPlayer(CGameObject* Object, int32 Range, bool ExceptMe)
 {
-	vector<CSector*> Sectors = GetAroundSectors(Object, Range);
+	vector<CSector*> Sectors = GetAroundSectors(Object->GetCellPosition(), Range);
 	vector<CPlayer*> Players;
 
 	for (CSector* Sector : Sectors)
@@ -209,14 +209,26 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject)
 		return;
 	}	
 
-	srand(time(NULL));
+	random_device RD;
+	mt19937 Gen(RD());
+
 	st_Vector2Int SpawnPosition;
 
 	while (true)
 	{
-		
+		uniform_int_distribution<int> RandomXPosition(-10, 54);
+		uniform_int_distribution<int> RandomYPosition(-4, 40);
+
+		SpawnPosition._X = RandomXPosition(Gen);
+		SpawnPosition._Y = RandomYPosition(Gen);
+
+		if (_Map->Find(SpawnPosition) == nullptr)
+		{
+			break;
+		}
 	}
 	
+	G_Logger->WriteStdOut(en_Color::RED, L"SpawnPosition Y : %d X : %d \n", SpawnPosition._Y, SpawnPosition._X);
 	int SpawnX = rand() % 100;
 
 	switch (EnterChannelGameObject->_GameObjectInfo.ObjectType)
@@ -224,8 +236,8 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject)
 	case en_GameObjectType::PLAYER:
 		{
 			CPlayer* EnterChannelPlayer = (CPlayer*)EnterChannelGameObject;
-			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY = SpawnPosition._Y;
-			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX = SpawnPosition._X;
+			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY = SpawnPosition._X;
+			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX = SpawnPosition._Y;
 
 			_Players.insert(pair<int64, CPlayer*>(EnterChannelPlayer->_GameObjectInfo.ObjectId, EnterChannelPlayer));
 			
@@ -245,8 +257,8 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject)
 	case en_GameObjectType::MONSTER:
 		{
 			CMonster* EnterChannelMonster = (CMonster*)EnterChannelGameObject;
-			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.PositionY = 2;
-			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.PositionX = 2;
+			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.PositionY = SpawnPosition._X;
+			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.PositionX = SpawnPosition._Y;
 
 			_Monsters.insert(pair<int64,CMonster*>(EnterChannelMonster->_GameObjectInfo.ObjectId,EnterChannelMonster));
 
