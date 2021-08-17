@@ -41,11 +41,12 @@ CGameServer::~CGameServer()
 void CGameServer::Start(const WCHAR* OpenIP, int32 Port)
 {
 	CNetworkLib::Start(OpenIP, Port);
-	_UpdateThread = (HANDLE)_beginthreadex(NULL, 0, UpdateThreadProc, this, 0, NULL);
-	_DataBaseThread = (HANDLE)_beginthreadex(NULL, 0, DataBaseThreadProc, this, 0, NULL);	
 
-	G_ObjectManager->MonsterSpawn(100, 1);
+	G_ObjectManager->MonsterSpawn(150, 1);
 	G_ObjectManager->GameServer = this;
+
+	_UpdateThread = (HANDLE)_beginthreadex(NULL, 0, UpdateThreadProc, this, 0, NULL);
+	_DataBaseThread = (HANDLE)_beginthreadex(NULL, 0, DataBaseThreadProc, this, 0, NULL);		
 
 	_GameLogicThread = (HANDLE)_beginthreadex(NULL, 0, GameLogicThreadProc, this, 0, NULL);
 
@@ -89,8 +90,8 @@ unsigned __stdcall CGameServer::UpdateThreadProc(void* Argument)
 			}
 
 			Instance->_UpdateTPS++;
-			Instance->_JobMemoryPool->Free(Job);
-		}
+			Instance->_JobMemoryPool->Free(Job);		
+		}		
 	}
 	return 0;
 }
@@ -139,8 +140,6 @@ unsigned __stdcall CGameServer::GameLogicThreadProc(void* Argument)
 	{
 		// 채널 목록 돌면서 업데이트
 		G_ChannelManager->Update();
-
-
 	}
 
 	return 0;
@@ -1368,6 +1367,22 @@ CMessage* CGameServer::MakePacketResDeSpawn(int32 DeSpawnObjectCount, vector<int
 	}
 
 	return ResDeSpawnPacket;
+}
+
+CMessage* CGameServer::MakePacketResDie(int64 DieObjectId)
+{
+	CMessage* ResDiePacket = CMessage::Alloc();
+	if (ResDiePacket == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResDiePacket->Clear();
+
+	*ResDiePacket << (WORD)en_PACKET_S2C_DIE;
+	*ResDiePacket << DieObjectId;
+
+	return ResDiePacket;
 }
 
 void CGameServer::OnClientJoin(int64 SessionID)

@@ -54,6 +54,16 @@ struct st_Position
 	{
 		return (_Y == Position._Y) && (_X == Position._X);
 	}
+
+	bool operator !=(st_Position& Position)
+	{
+		return !((*this) == Position);
+	}
+
+	bool operator <(const st_Position& Position) const
+	{
+		return _X < Position._X || (_X == Position._X && _Y < Position._Y);
+	}
 };
 
 struct st_AStarNode
@@ -120,5 +130,5 @@ public:
 	st_Vector2Int PositionToCell(st_Position Position);
 		
 	vector<st_Vector2Int> FindPath(st_Vector2Int StartCellPosition, st_Vector2Int DestCellPostion, bool CheckObjects = true, int32 MaxDistance = 10);
-	vector<st_Vector2Int> CompletePath(st_Position** Parents, int32 DestX, int32 DestY);
+	vector<st_Vector2Int> CompletePath(map<st_Position,st_Position> Parents, st_Position DestPosition);
 ;};

@@ -99,6 +99,7 @@ public:
 	CMessage* MakePacketResMove(int64 AccountId, int32 ObjectId, en_GameObjectType ObjectType, st_PositionInfo PositionInfo);
 	CMessage* MakePacketResSpawn(int32 ObjectInfosCount, vector<st_GameObjectInfo> ObjectInfos);
 	CMessage* MakePacketResDeSpawn(int32 DeSpawnObjectCount, vector<int64> DeSpawnObjectIds);
+	CMessage* MakePacketResDie(int64 DieObjectId);
 public:
 	//------------------------------------
 	// Job 메모리풀

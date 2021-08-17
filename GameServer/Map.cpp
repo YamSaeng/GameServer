@@ -174,7 +174,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 		Y = _Down - DestPosition._Y;
 		// 목적지에 넣어준다.
 		_ObjectsInfo[Y][X] = GameObject;
-	}	
+	}		
 
 	// 섹터 작업
 	switch (GameObject->_GameObjectInfo.ObjectType)
@@ -318,8 +318,72 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 		{
 			// 현재 섹터에서 몬스터 제거
 			CurrentSector->Remove(MoveMonster);		
+
+			vector<CSector*> CurrentSectors = GameObject->_Channel->GetAroundSectors(MoveMonster->GetCellPosition(), 10);
+			vector<CSector*> NextSectors = GameObject->_Channel->GetAroundSectors(DestPosition, 10);
+
+			// 나를 제거할 섹터를 찾는 작업
+			// Current - Next;
+			// 현재 섹터들에서 내가 이동할 섹터를 제거한 차집합 섹터를 얻는다.
+			vector<CSector*> DeSpawnSectors = CurrentSectors;
+			for (int32 i = 0; i < DeSpawnSectors.size(); i++)
+			{
+				for (int32 j = 0; j < NextSectors.size(); j++)
+				{
+					if (DeSpawnSectors[i]->_SectorY == NextSectors[j]->_SectorY && DeSpawnSectors[i]->_SectorX == NextSectors[j]->_SectorX)
+					{
+						DeSpawnSectors.erase(DeSpawnSectors.begin() + i);
+					}
+				}
+			}
+
+			vector<int64> DeSpawnSectorObjectIds;
+			DeSpawnSectorObjectIds.push_back(MoveMonster->_GameObjectInfo.ObjectId);
+			// 나를 제외하라는 메시지를 생성 후 
+			CMessage* ResSectorDespawnPlayer = G_ObjectManager->GameServer->MakePacketResDeSpawn(1, DeSpawnSectorObjectIds);
+			// 해당 섹터 플레이어들에게 전송한다.
+			for (int32 i = 0; i < DeSpawnSectors.size(); i++)
+			{
+				for (CPlayer* Player : DeSpawnSectors[i]->GetPlayers())
+				{
+					G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSectorDespawnPlayer);
+				}
+			}
+			ResSectorDespawnPlayer->Free();
+
+
 			// 이동한 섹터에 몬스터 추가
-			NextSector->Insert(MoveMonster);			
+			NextSector->Insert(MoveMonster);
+			// 나를 스폰할 섹터를 찾는 작업
+			// Next - Current;
+			// 이동할 섹터에서 현재 섹터를 제거한 차집합 섹터를 찾는다.
+			vector<CSector*> SpawnSectors = NextSectors;
+			for (int32 i = 0; i < SpawnSectors.size(); i++)
+			{
+				for (int32 j = 0; j < CurrentSectors.size(); j++)
+				{
+					if (SpawnSectors[i]->_SectorY == CurrentSectors[j]->_SectorY && SpawnSectors[i]->_SectorX == CurrentSectors[j]->_SectorX)
+					{
+						SpawnSectors.erase(SpawnSectors.begin() + i);
+					}
+				}
+			}
+
+			// 스폰할 대상배열
+			vector<st_GameObjectInfo> SpawnObjectInfos;
+			// 나의 정보를 담고
+			SpawnObjectInfos.push_back(MoveMonster->_GameObjectInfo);
+
+			// 나를 소환하라고 앞서 얻어준 섹터 플레이어들에게 패킷을 전송한다.
+			CMessage* ResSectorSpawnPlayer = G_ObjectManager->GameServer->MakePacketResSpawn(1, SpawnObjectInfos);
+			for (int32 i = 0; i < SpawnSectors.size(); i++)
+			{
+				for (CPlayer* Player : SpawnSectors[i]->GetPlayers())
+				{
+					G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSectorSpawnPlayer);
+				}
+			}
+			ResSectorSpawnPlayer->Free();
 		}
 	}
 		break;
@@ -417,13 +481,8 @@ vector<st_Vector2Int> CMap::FindPath(st_Vector2Int StartCellPosition, st_Vector2
 		memset(OpenList[i], 1, sizeof(int) * _SizeX);
 	}
 
-	// 부모 위치 배열			
-	st_Position** Parents = (st_Position**)malloc(sizeof(st_Position*) * _SizeY * _SizeX);
-	for (int i = 0; i < _SizeY; i++)
-	{
-		Parents[i] = (st_Position*)malloc(sizeof(st_Position) * _SizeX);
-		memset(Parents[i], 0, sizeof(st_Position) * _SizeX);
-	}
+	// 자식, 부모 맵
+	map<st_Position, st_Position> Parents;	
 
 	// 우선순위 큐 생성
 	CHeap<int32, st_AStarNode> OpenListQue(_SizeY * _SizeX);
@@ -437,8 +496,7 @@ vector<st_Vector2Int> CMap::FindPath(st_Vector2Int StartCellPosition, st_Vector2
 	OpenListQue.InsertHeap(StartNode._F, StartNode);
 	
 	// 처음 위치 첫 부모로 설정
-	Parents[StartPosition._Y][StartPosition._X]._Y = StartPosition._Y;
-	Parents[StartPosition._Y][StartPosition._X]._X = StartPosition._X;	
+	Parents.insert(pair<st_Position, st_Position>(StartPosition, StartPosition));
 
 	// 오픈리스트 큐가 비워질때까지 반복
 	while (OpenListQue.GetUseSize() > 0)
@@ -466,6 +524,12 @@ vector<st_Vector2Int> CMap::FindPath(st_Vector2Int StartCellPosition, st_Vector2
 			// 다음 위치를 알아낸다.
 			st_Position NextPosition(AStarNode._Position._Y + DeltaY[i], AStarNode._Position._X + DeltaX[i]);			
 			
+			// 다음으로 뽑아낸 위치가 시작점으로 지정해준 값보다 너무 멀다면 해당 좌표는 무시한다.
+			if (abs(StartPosition._Y - NextPosition._Y) + abs(StartPosition._X - NextPosition._X) > MaxDistance)
+			{
+				continue;
+			}
+
 			// 다음 위치가 목적지 좌표가 아닐 경우, 해당 위치로 갈 수 있는지 검사한다.
 			if (NextPosition._Y != DestPosition._Y || NextPosition._X != DestPosition._X)
 			{
@@ -508,9 +572,18 @@ vector<st_Vector2Int> CMap::FindPath(st_Vector2Int StartCellPosition, st_Vector2
 
 			// 우선순위 큐에 넣는다.
 			OpenListQue.InsertHeap(InsertAStartNode._F, InsertAStartNode);
-			// 부모 목록에 뽑은 노드 위치를 기록한다.
-			Parents[NextPosition._Y][NextPosition._X]._Y = AStarNode._Position._Y;
-			Parents[NextPosition._Y][NextPosition._X]._X = AStarNode._Position._X;
+			// 부모 목록에 다음 위치가 있는지 확인
+			auto ChildFind = Parents.find(NextPosition);
+			if (ChildFind == Parents.end())
+			{
+				//찾지 못햇으면 넣어주고
+				Parents.insert(pair<st_Position, st_Position>(NextPosition, AStarNode._Position));
+			}
+			else
+			{
+				//이미 있었으면 부모 노드를 바꿔준다.
+				(*ChildFind).second = AStarNode._Position;
+			}
 		}
 	}	
 
@@ -524,49 +597,52 @@ vector<st_Vector2Int> CMap::FindPath(st_Vector2Int StartCellPosition, st_Vector2
 	free(CloseList);
 	free(OpenList);	
 		
-	return CompletePath(Parents, DestCellPostion._X, DestCellPostion._Y);
+	return CompletePath(Parents, DestPosition);
 }
 
-vector<st_Vector2Int> CMap::CompletePath(st_Position** Parents, int32 DestX, int32 DestY)
+vector<st_Vector2Int> CMap::CompletePath(map<st_Position, st_Position> Parents, st_Position DestPosition)
 {
 	// 반환해줄 배열
-	vector<st_Vector2Int> Cells;
-	
-	st_Vector2Int DestCellPosition(DestX, DestY);
-	st_Position DestPosition = CellToPosition(DestCellPosition);
+	vector<st_Vector2Int> Cells;	
 
 	int32 X = DestPosition._X;
 	int32 Y = DestPosition._Y;
 
-	st_Position Point;	
+	st_Position Point;			
 
-	while (Parents[Y][X]._Y != Y || Parents[Y][X]._X != X)
-	{
-		Point._X = X;
-		Point._Y = Y;
+	// 부모 목록 중에서 목적지가 없으면
+	if (Parents.find(DestPosition) == Parents.end())
+	{			
+		st_Position BestPosition;
+		int32 BestDistance;
+		memset(&BestDistance, 1, sizeof(int32));
 
-		// 매개변수로 받은 부모 위치 담기		
-		Cells.push_back(PositionToCell(Point));
+		// 가지고 있는 위치 중에서 가장 가까운 위치를 찾고
+		// 해당 위치를 목적지로 삼는다.
+		for (auto Start = Parents.begin(); Start != Parents.end(); ++Start)
+		{
+			int32 Distance = abs(DestPosition._X - (*Start).first._X) + abs(DestPosition._Y - (*Start).first._Y);
+			if (BestDistance > Distance)
+			{
+				BestPosition = (*Start).first;
+				BestDistance = Distance;
+			}
+		}
 
-		st_Position Position = Parents[Y][X];
-		Y = Position._Y;
-		X = Position._X;		
+		DestPosition = BestPosition;
 	}
 
-	Point._X = X;
-	Point._Y = Y;
-		
-	Cells.push_back(PositionToCell(Point));
+	st_Position Position = DestPosition;
+	while ((*Parents.find(Position)).second != Position)
+	{
+		Cells.push_back(PositionToCell(Position));
+		Position = (*Parents.find(Position)).second;
+	}
 
+	// 시작점 담기
+	Cells.push_back(PositionToCell(Position));
 	// 부모 위치 담은 배열 거꾸로 뒤집어서 반환
-	reverse(Cells.begin(), Cells.end());
-
-	for (int32 i = 0; i < _SizeY; i++)
-	{
-		free(Parents[i]);
-	}
-
-	free(Parents);
+	reverse(Cells.begin(), Cells.end());	
 
 	return Cells;
 }

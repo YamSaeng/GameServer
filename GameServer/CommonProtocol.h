@@ -228,5 +228,11 @@ enum en_PACKET_TYPE
 	// int32 ObjectId
 	// en_CreatureState ObjectState
 	//------------------------------------------------------------
-	en_PACKET_S2C_OBJECT_STATE_CHANGE
+	en_PACKET_S2C_OBJECT_STATE_CHANGE,
+
+	//------------------------------------------------------------
+	// 게임서버 오브젝트 죽음 응답
+	// int32 ObjectId
+	//------------------------------------------------------------
+	en_PACKET_S2C_DIE,
 };

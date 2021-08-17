@@ -54,6 +54,7 @@ void CMonster::Update()
 		UpdateAttack();
 		break;
 	case en_CreatureState::DEAD:
+		UpdateDead();
 		break;
 	default:
 		break;
@@ -187,16 +188,34 @@ void CMonster::UpdateAttack()
 
 void CMonster::UpdateDead()
 {
-
+	
 }
 
 void CMonster::OnDamaged(CGameObject* Attacker, int32 Damage)
 {
-
+	CGameObject::OnDamaged(Attacker, Damage);
+	
+	if (_GameObjectInfo.ObjectStatInfo.HP == 0)
+	{
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
+		OnDead(Attacker);
+	}
 }
 
 void CMonster::OnDead(CGameObject* Killer)
 {
+	BroadCastPacket(en_PACKET_S2C_DIE);
+	BroadCastPacket(en_PACKET_S2C_DESPAWN);
+
+	CChannel* Channel = _Channel;
+	Channel->LeaveChannel(this);
+
+	_GameObjectInfo.ObjectStatInfo.HP = _GameObjectInfo.ObjectStatInfo.MaxHP;
+	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+	_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
+
+	Channel->EnterChannel(this);
+	BroadCastPacket(en_PACKET_S2C_SPAWN);
 }
 
 void CMonster::BroadCastPacket(en_PACKET_TYPE PacketType)
@@ -212,6 +231,23 @@ void CMonster::BroadCastPacket(en_PACKET_TYPE PacketType)
 		break;
 	case en_PACKET_S2C_CHANGE_HP:
 		ResPacket = G_ObjectManager->GameServer->MakePacketResChangeHP(_Target->_GameObjectInfo.ObjectId, _Target->_GameObjectInfo.ObjectStatInfo.HP, _Target->_GameObjectInfo.ObjectStatInfo.MaxHP);
+		break;
+	case en_PACKET_S2C_DIE:
+		ResPacket = G_ObjectManager->GameServer->MakePacketResDie(this->_GameObjectInfo.ObjectId);
+		break;
+	case en_PACKET_S2C_SPAWN:
+	{
+		vector<st_GameObjectInfo> SpawnObjectIds;
+		SpawnObjectIds.push_back(_GameObjectInfo);
+		ResPacket = G_ObjectManager->GameServer->MakePacketResSpawn(1, SpawnObjectIds);
+	}		
+		break;
+	case en_PACKET_S2C_DESPAWN:
+	{
+		vector<int64> DeSpawnObjectIds;
+		DeSpawnObjectIds.push_back(_GameObjectInfo.ObjectId);
+		ResPacket = G_ObjectManager->GameServer->MakePacketResDeSpawn(1, DeSpawnObjectIds);
+	}		
 		break;
 	default:
 		break;

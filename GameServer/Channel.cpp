@@ -236,8 +236,8 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject)
 	case en_GameObjectType::PLAYER:
 		{
 			CPlayer* EnterChannelPlayer = (CPlayer*)EnterChannelGameObject;
-			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY = SpawnPosition._X;
-			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX = SpawnPosition._Y;
+			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY = SpawnPosition._Y;
+			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX = SpawnPosition._X;
 
 			_Players.insert(pair<int64, CPlayer*>(EnterChannelPlayer->_GameObjectInfo.ObjectId, EnterChannelPlayer));
 			
@@ -257,8 +257,8 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject)
 	case en_GameObjectType::MONSTER:
 		{
 			CMonster* EnterChannelMonster = (CMonster*)EnterChannelGameObject;
-			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.PositionY = SpawnPosition._X;
-			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.PositionX = SpawnPosition._Y;
+			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.PositionY = SpawnPosition._Y;
+			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.PositionX = SpawnPosition._X;
 
 			_Monsters.insert(pair<int64,CMonster*>(EnterChannelMonster->_GameObjectInfo.ObjectId,EnterChannelMonster));
 
@@ -285,16 +285,12 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 		// 컨테이너에서 제거
 		_Players.erase(LeaveChannelGameObject->_GameObjectInfo.ObjectId);
 		
-		_Map->ApplyLeave(LeaveChannelGameObject);
-		
-		LeaveChannelGameObject->_Channel = nullptr;
+		_Map->ApplyLeave(LeaveChannelGameObject);		
 		break;
 	case en_GameObjectType::MONSTER:
 		_Monsters.erase(LeaveChannelGameObject->_GameObjectInfo.ObjectId);
 
-		_Map->ApplyLeave(LeaveChannelGameObject);
-		
-		LeaveChannelGameObject->_Channel = nullptr;
+		_Map->ApplyLeave(LeaveChannelGameObject);		
 		break;	
 	}	
 }
