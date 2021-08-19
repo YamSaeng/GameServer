@@ -23,7 +23,7 @@ CGameServer::CGameServer()
 	_DataBaseThreadEnd = false;	
 	_LogicThreadEnd = false;
 
-	_JobMemoryPool = new CMemoryPoolTLS<st_JOB>(0);
+	_JobMemoryPool = new CMemoryPoolTLS<st_Job>(0);
 	_ClientMemoryPool = new CMemoryPoolTLS<st_CLIENT>(0);
 
 	_NetworkThreadTPS = 0;
@@ -45,13 +45,13 @@ void CGameServer::Start(const WCHAR* OpenIP, int32 Port)
 	G_ObjectManager->MonsterSpawn(300, 1);
 	G_ObjectManager->GameServer = this;
 
-	_NetworkThread = (HANDLE)_beginthreadex(NULL, 0, NetworkThreadProc, this, 0, NULL);
-	_DataBaseThread = (HANDLE)_beginthreadex(NULL, 0, DataBaseThreadProc, this, 0, NULL);		
-
+	_NetworkThread   = (HANDLE)_beginthreadex(NULL, 0, NetworkThreadProc, this, 0, NULL);
+	_DataBaseThread  = (HANDLE)_beginthreadex(NULL, 0, DataBaseThreadProc, this, 0, NULL);
 	_GameLogicThread = (HANDLE)_beginthreadex(NULL, 0, GameLogicThreadProc, this, 0, NULL);
 
 	CloseHandle(_NetworkThread);
 	CloseHandle(_DataBaseThread);
+	CloseHandle(_GameLogicThread);
 }
 
 unsigned __stdcall CGameServer::NetworkThreadProc(void* Argument)
@@ -66,7 +66,7 @@ unsigned __stdcall CGameServer::NetworkThreadProc(void* Argument)
 
 		while (!Instance->_GameServerCommonMessageQue.IsEmpty())
 		{
-			st_JOB* Job = nullptr;
+			st_Job* Job = nullptr;
 
 			if (!Instance->_GameServerCommonMessageQue.Dequeue(&Job))
 			{
@@ -75,10 +75,10 @@ unsigned __stdcall CGameServer::NetworkThreadProc(void* Argument)
 
 			switch (Job->Type)
 			{
-			case NEW_CLIENT_JOIN:
+			case AUTH_NEW_CLIENT_JOIN:
 				Instance->CreateNewClient(Job->SessionID);
 				break;
-			case DISCONNECT_CLIENT:
+			case AUTH_DISCONNECT_CLIENT:
 				Instance->DeleteClient(Job->SessionID);
 				break;
 			case MESSAGE:
@@ -108,7 +108,7 @@ unsigned __stdcall CGameServer::DataBaseThreadProc(void* Argument)
 
 		while (!Instance->_GameServerDataBaseMessageQue.IsEmpty())
 		{
-			st_JOB* Job = nullptr;
+			st_Job* Job = nullptr;
 
 			if (!Instance->_GameServerDataBaseMessageQue.Dequeue(&Job))
 			{
@@ -151,7 +151,7 @@ unsigned __stdcall CGameServer::HeartBeatCheckThreadProc(void* Argument)
 }
 
 void CGameServer::CreateNewClient(int64 SessionID)
-{
+{	
 	st_CLIENT* NewClient = _ClientMemoryPool->Alloc();
 	NewClient->SessionId = SessionID;
 	NewClient->AccountId = 0;
@@ -323,7 +323,7 @@ void CGameServer::PacketProcReqLogin(int64 SessionID, CMessage* Message)
 		//	}
 		//}		
 
-		st_JOB* DBAccountCheckJob = _JobMemoryPool->Alloc();
+		st_Job* DBAccountCheckJob = _JobMemoryPool->Alloc();
 		DBAccountCheckJob->Type = DATA_BASE_ACCOUNT_CHECK;
 		DBAccountCheckJob->SessionID = Client->SessionId;
 		DBAccountCheckJob->Message = nullptr;
@@ -355,7 +355,7 @@ void CGameServer::PacketProcReqCreateCharacter(int64 SessionID, CMessage* Messag
 		// 캐릭터 이름 셋팅
 		Client->CreateCharacterName = CharacterName;
 
-		st_JOB* DBCharacterCheckJob = _JobMemoryPool->Alloc();		
+		st_Job* DBCharacterCheckJob = _JobMemoryPool->Alloc();		
 		DBCharacterCheckJob->Type = DATA_BASE_CHARACTER_CHECK;
 		DBCharacterCheckJob->SessionID = Client->SessionId;
 		DBCharacterCheckJob->Message = nullptr;
@@ -441,7 +441,7 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 				SpawnObjectInfo.push_back(AroundObjects[i]->_GameObjectInfo);
 			}
 
-			CMessage* ResOtherObjectSpawnPacket = MakePacketResSpawn(AroundObjects.size(), SpawnObjectInfo);
+			CMessage* ResOtherObjectSpawnPacket = MakePacketResSpawn((int32)AroundObjects.size(), SpawnObjectInfo);
 			SendPacket(Client->SessionId, ResOtherObjectSpawnPacket);
 			ResOtherObjectSpawnPacket->Free();
 		
@@ -463,24 +463,29 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 
 	if (Client)
 	{
+		// 클라가 로그인중인지 확인
 		if (!Client->IsLogin)
 		{
 			Disconnect(Client->SessionId);
 			return;
 		}
 
+		// AccountId를 뽑고
 		int64 AccountId;
 		*Message >> AccountId;
 
+		// 클라에 들어있는 AccountId와 뽑은 AccoountId가 다른지 확인
  		if (Client->AccountId != AccountId)
 		{
 			Disconnect(Client->SessionId);
 			return;
 		}
 
+		// PlayerDBId를 뽑는다.
 		int32 PlayerDBId;
 		*Message >> PlayerDBId;
 
+		// 클라가 조종중인 캐릭터가 있는지 확인
 		if (Client->MyPlayer == nullptr)
 		{
 			Disconnect(Client->SessionId);
@@ -488,6 +493,7 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 		}
 		else
 		{
+			// 조종중인 캐릭터가 있으면 ObjectId가 다른지 확인
 			if (Client->MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
 			{
 				Disconnect(Client->SessionId);
@@ -495,11 +501,12 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 			}
 		}
 				
+		// 클라가 전송해준 방향값을 뽑는다.
 		char ReqMoveDir;
 		*Message >> ReqMoveDir;
 
-		en_MoveDir MoveDir = (en_MoveDir)ReqMoveDir;
-		
+		// 방향값에 따라 노말벡터 값을 뽑아온다.
+		en_MoveDir MoveDir = (en_MoveDir)ReqMoveDir;		
 		st_Vector2Int DirVector2Int;
 
 		switch (MoveDir)
@@ -522,35 +529,31 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 		MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = MoveDir;
 		MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
 
+		// 플레이어의 현재 위치를 읽어온다.
 		st_Vector2Int PlayerPosition;
 		PlayerPosition._X = MyPlayer->GetPositionInfo().PositionX;
 		PlayerPosition._Y = MyPlayer->GetPositionInfo().PositionY;
-		
-		//G_Logger->WriteStdOut(en_Color::WHITE, L"MoveReq Y : %d X : %d Dir : %d \n", MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY, MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX, MoveDir);
-
+	
 		CChannel* Channel = G_ChannelManager->Find(1);				
 
+		// 움직일 위치를 얻는다.	
 		st_Vector2Int CheckPosition = PlayerPosition + DirVector2Int;
 
+		// 움직일 위치로 갈수 있는지 확인
 		bool IsCanGo = Channel->_Map->Cango(CheckPosition);
 		bool ApplyMoveExe;
 		if (IsCanGo == true)
 		{
-			ApplyMoveExe = Channel->_Map->ApplyMove(MyPlayer, CheckPosition);
-
-			//G_Logger->WriteStdOut(en_Color::YELLOW, L"Y : %d X : %d To Move \n\n", MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY, MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX);
-		}		
-		else
-		{
-			//G_Logger->WriteStdOut(en_Color::RED, L"Cant Move\n");
-		}
+			// 갈 수 있으면 플레이어 위치 적용
+			ApplyMoveExe = Channel->_Map->ApplyMove(MyPlayer, CheckPosition);		
+		}				
 			
 		// 내가 움직인 것을 내 주위 플레이어들에게 알려야함
 		CMessage* ResMyMoveOtherPacket = MakePacketResMove(Client->AccountId, MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
 		SendPacketAroundSector(Client, ResMyMoveOtherPacket, true);
 		ResMyMoveOtherPacket->Free();
 
-		MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+		MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;		
 	}
 	else
 	{
@@ -1046,7 +1049,7 @@ CMessage* CGameServer::MakePacketResLogin(bool Status, int32 PlayerCount, int32 
 
 	if (PlayerCount != 0)
 	{			
-		int8 PlayerNameLen = PlayersName.length() * 2;		
+		int8 PlayerNameLen = (int8)(PlayersName.length() * 2);		
 		*LoginMessage << PlayerNameLen;
 		LoginMessage->InsertData(PlayersName.c_str(), PlayerNameLen);
 	}
@@ -1071,7 +1074,7 @@ CMessage* CGameServer::MakePacketResCreateCharacter(bool IsSuccess, int32 Player
 	*ResCreateCharacter << IsSuccess;
 	*ResCreateCharacter << PlayerDBId;
 	
-	int8 PlayerNameLen = PlayerName.length() * 2;
+	int8 PlayerNameLen = (int8)(PlayerName.length() * 2);
 	*ResCreateCharacter << PlayerNameLen;
 	ResCreateCharacter->InsertData(PlayerName.c_str(), PlayerNameLen);
 
@@ -1094,7 +1097,7 @@ CMessage* CGameServer::MakePacketResEnterGame(st_GameObjectInfo ObjectInfo)
 	*ResEnterGamePacket << ObjectInfo.ObjectId;
 
 	// EnterPlayerName
-	int8 EnterPlayerNameLen = ObjectInfo.ObjectName.length() * 2;
+	int8 EnterPlayerNameLen = (int8)(ObjectInfo.ObjectName.length() * 2);
 	*ResEnterGamePacket << EnterPlayerNameLen;
 	ResEnterGamePacket->InsertData(ObjectInfo.ObjectName.c_str(), EnterPlayerNameLen);
 
@@ -1159,7 +1162,7 @@ CMessage* CGameServer::MakePacketMousePositionObjectInfo(int64 AccountId, int32 
 	*ResEnterGamePacket << ObjectInfo.ObjectId;
 
 	// EnterPlayerName
-	int8 ObjectNameLen = ObjectInfo.ObjectName.length() * 2;
+	int8 ObjectNameLen = (int8)(ObjectInfo.ObjectName.length() * 2);
 	*ResEnterGamePacket << ObjectNameLen;
 	ResEnterGamePacket->InsertData(ObjectInfo.ObjectName.c_str(), ObjectNameLen);
 
@@ -1389,8 +1392,8 @@ CMessage* CGameServer::MakePacketResDie(int64 DieObjectId)
 
 void CGameServer::OnClientJoin(int64 SessionID)
 {
-	st_JOB* ClientJoinJob = _JobMemoryPool->Alloc();
-	ClientJoinJob->Type = NEW_CLIENT_JOIN;
+	st_Job* ClientJoinJob = _JobMemoryPool->Alloc();
+	ClientJoinJob->Type = AUTH_NEW_CLIENT_JOIN;
 	ClientJoinJob->SessionID = SessionID;
 	ClientJoinJob->Message = nullptr;
 	_GameServerCommonMessageQue.Enqueue(ClientJoinJob);
@@ -1399,7 +1402,7 @@ void CGameServer::OnClientJoin(int64 SessionID)
 
 void CGameServer::OnRecv(int64 SessionID, CMessage* Packet)
 {
-	st_JOB* NewMessageJob = _JobMemoryPool->Alloc();
+	st_Job* NewMessageJob = _JobMemoryPool->Alloc();
 	CMessage* JobMessage = CMessage::Alloc();
 	JobMessage->Clear();
 	JobMessage->SetHeader(Packet->GetBufferPtr(), sizeof(CMessage::st_ENCODE_HEADER));
@@ -1414,8 +1417,8 @@ void CGameServer::OnRecv(int64 SessionID, CMessage* Packet)
 
 void CGameServer::OnClientLeave(int64 SessionID)
 {
-	st_JOB* ClientLeaveJob = _JobMemoryPool->Alloc();
-	ClientLeaveJob->Type = DISCONNECT_CLIENT;
+	st_Job* ClientLeaveJob = _JobMemoryPool->Alloc();
+	ClientLeaveJob->Type = AUTH_DISCONNECT_CLIENT;
 	ClientLeaveJob->SessionID = SessionID;
 	ClientLeaveJob->Message = nullptr;
 	_GameServerCommonMessageQue.Enqueue(ClientLeaveJob);

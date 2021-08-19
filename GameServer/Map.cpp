@@ -189,9 +189,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 		if (CurrentSector != NextSector)
 		{
 			// 현재 섹터에서 플레이어 제거
-			CurrentSector->Remove(MovePlayer);
-			
-			//G_Logger->WriteStdOut(en_Color::GREEN, L"LeaveSector Y (%d) X (%d) EnterSector Y (%d) X (%d) \n", CurrentSector->_SectorY, CurrentSector->_SectorX, NextSector->_SectorY, NextSector->_SectorX);						
+			CurrentSector->Remove(MovePlayer);		
 
 			vector<CSector*> CurrentSectors =  GameObject->_Channel->GetAroundSectors(MovePlayer->GetCellPosition(), 10);
 			vector<CSector*> NextSectors =  GameObject->_Channel->GetAroundSectors(DestPosition, 10);			
@@ -243,7 +241,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 			
 			if (DeSpawnSectorObjectIds.size() > 0)
 			{
-				CMessage* ResSectorDespawnOtherPlayer = G_ObjectManager->GameServer->MakePacketResDeSpawn(DeSpawnSectorObjectIds.size(), DeSpawnSectorObjectIds);
+				CMessage* ResSectorDespawnOtherPlayer = G_ObjectManager->GameServer->MakePacketResDeSpawn((int32)DeSpawnSectorObjectIds.size(), DeSpawnSectorObjectIds);
 				G_ObjectManager->GameServer->SendPacket(MovePlayer->_SessionId, ResSectorDespawnOtherPlayer);
 				ResSectorDespawnOtherPlayer->Free();
 			}			
@@ -300,7 +298,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 			// 나에게 전송하여 스폰 섹터에 있는 플레이어들을 스폰 시킨다.
 			if (SpawnObjectInfos.size() > 0)
 			{
-				CMessage* ResOtherObjectSpawnPacket = G_ObjectManager->GameServer->MakePacketResSpawn(SpawnObjectInfos.size(), SpawnObjectInfos);
+				CMessage* ResOtherObjectSpawnPacket = G_ObjectManager->GameServer->MakePacketResSpawn((int32)SpawnObjectInfos.size(), SpawnObjectInfos);
 				G_ObjectManager->GameServer->SendPacket(MovePlayer->_SessionId, ResOtherObjectSpawnPacket);
 				ResOtherObjectSpawnPacket->Free();
 			}			

@@ -169,9 +169,6 @@
     <ClInclude Include="ChannelManager.h">
       <Filter>ContentServer\Content\Channel</Filter>
     </ClInclude>
-    <ClInclude Include="Message.h">
-      <Filter>Message</Filter>
-    </ClInclude>
     <ClInclude Include="GameObject.h">
       <Filter>ContentServer\Content\GameObject</Filter>
     </ClInclude>
@@ -181,6 +178,9 @@
     <ClInclude Include="Heap.h" />
     <ClInclude Include="ObjectManager.h">
       <Filter>ContentServer\Content\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Message.h">
+      <Filter>Message</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -240,9 +240,6 @@
     <ClCompile Include="ChannelManager.cpp">
       <Filter>ContentServer\Content\Channel</Filter>
     </ClCompile>
-    <ClCompile Include="Message.cpp">
-      <Filter>Message</Filter>
-    </ClCompile>
     <ClCompile Include="GameObject.cpp">
       <Filter>ContentServer\Content\GameObject</Filter>
     </ClCompile>
@@ -251,6 +248,9 @@
     </ClCompile>
     <ClCompile Include="ObjectManager.cpp">
       <Filter>ContentServer\Content\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Message.cpp">
+      <Filter>Message</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

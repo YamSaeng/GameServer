@@ -44,7 +44,7 @@ private:
 	void CreateNewClient(int64 SessionID);
 	void DeleteClient(int64 SessionID);
 
-	void PacketProc(int64 SessionID, CMessage* Message);
+	void PacketProc(int64 SessionId, CMessage* Message);
 	
 	//----------------------------------------------------------------
 	//패킷처리 함수
@@ -104,7 +104,7 @@ public:
 	//------------------------------------
 	// Job 메모리풀
 	//------------------------------------
-	CMemoryPoolTLS<st_JOB>* _JobMemoryPool;
+	CMemoryPoolTLS<st_Job>* _JobMemoryPool;
 	//------------------------------------
 	//접속한 클라이언트를 관리할 메모리풀
 	//------------------------------------
@@ -112,8 +112,8 @@ public:
 	//------------------------------------
 	// Job 큐
 	//------------------------------------
-	CLockFreeQue<st_JOB*> _GameServerCommonMessageQue;
-	CLockFreeQue<st_JOB*> _GameServerDataBaseMessageQue;
+	CLockFreeQue<st_Job*> _GameServerCommonMessageQue;
+	CLockFreeQue<st_Job*> _GameServerDataBaseMessageQue;
 
 	// 채팅서버 접속한 클라
 	unordered_map<int64, st_CLIENT*> _ClientMap;

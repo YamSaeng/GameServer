@@ -28,16 +28,16 @@ private:
 	//------------------------------------
 	// Idle 상태에서 Search를 실행할 Tick
 	//------------------------------------
-	int64 _NextSearchTick;
+	uint64 _NextSearchTick;
 	//-------------------------------------
 	// Moving 상태에서 Chase를 실행할 Tick
 	//-------------------------------------
-	int64 _NextMoveTick;
+	uint64 _NextMoveTick;
 
 	//--------------------------------------
 	// Attack 상태에서 Attack을 실행할 Tick
 	//--------------------------------------
-	int64 _AttackTick;
+	uint64 _AttackTick;
 protected:
 	//------------------------
 	// Idle 상태 Update

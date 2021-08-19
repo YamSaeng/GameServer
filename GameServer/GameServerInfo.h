@@ -6,9 +6,11 @@
 
 enum en_MESSAGE_TYPE
 {
-	NEW_CLIENT_JOIN = 0,
-	DISCONNECT_CLIENT = 1,
-	MESSAGE = 2,
+	AUTH_NEW_CLIENT_JOIN = 0,
+	AUTH_DISCONNECT_CLIENT = 1,
+	AUTH_MESSAGE = 2,
+
+	MESSAGE = 3,
 
 	SECTOR_X_MAX = 50,
 	SECTOR_Y_MAX = 50,
@@ -41,7 +43,7 @@ struct st_CLIENT
 	CPlayer* MyPlayer;
 };
 
-struct st_JOB
+struct st_Job
 {
 	WORD Type;
 	int64 SessionID;

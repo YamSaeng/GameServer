@@ -112,11 +112,6 @@ void CNetworkLib::SendPost(st_SESSION* SendSession)
 		}
 	} while (0);
 
-	if (SendSession->IsExit == 1)
-	{
-		return;
-	}
-
 	SendSession->SendPacketCount = SendBufCount = SendRingBufUseSize;
 
 	for (int i = 0; i < SendBufCount; i++)
@@ -192,11 +187,6 @@ void CNetworkLib::RecvPost(st_SESSION* RecvSession, bool IsAcceptRecvPost)
 		RecvBuf[0].len = DirectEnqueSize;
 	}
 
-	if (RecvSession->IsExit == true)
-	{
-		return;
-	}
-
 	memset(&RecvSession->RecvOverlapped, 0, sizeof(OVERLAPPED));
 
 	/*
@@ -248,7 +238,7 @@ void CNetworkLib::RecvNotifyComplete(st_SESSION* RecvCompleteSession, const DWOR
 	if (RecvCompleteSession->RecvRingBuf.GetUseSize() < Transferred)
 	{
 		CRASH("RecvRingBuf에 들어가 있는 데이터보다 Transfereed가 더 큼");
-		Disconnect(RecvCompleteSession->SessionID);
+		Disconnect(RecvCompleteSession->SessionId);
 		return;
 	}
 
@@ -271,7 +261,7 @@ void CNetworkLib::RecvNotifyComplete(st_SESSION* RecvCompleteSession, const DWOR
 		{
 			if (EncodeHeader.PacketCode != 119)
 			{
-				Disconnect(RecvCompleteSession->SessionID);
+				Disconnect(RecvCompleteSession->SessionId);
 				break;
 			}
 			else
@@ -291,11 +281,11 @@ void CNetworkLib::RecvNotifyComplete(st_SESSION* RecvCompleteSession, const DWOR
 		//디코딩시 에러가 나면 해당 세션 종료
 		if (!Packet->Decode())
 		{
-			Disconnect(RecvCompleteSession->SessionID);
+			Disconnect(RecvCompleteSession->SessionId);
 			break;
 		}
 
-		OnRecv(RecvCompleteSession->SessionID, Packet);
+		OnRecv(RecvCompleteSession->SessionId, Packet);
 	}
 
 	// 패킷 반납
@@ -356,7 +346,6 @@ void CNetworkLib::Disconnect(__int64 SessionID)
 	else
 	{
 		DisconnectSession->ClientSock = INVALID_SOCKET;
-		DisconnectSession->IsExit = true;
 		CancelIoEx((HANDLE)DisconnectSession->CloseSock, NULL);
 	}
 
@@ -543,14 +532,13 @@ unsigned __stdcall CNetworkLib::AcceptThreadProc(void* Argument)
 			memset(&NewSession->SendOverlapped, 0, sizeof(OVERLAPPED));
 			//memset(&NewSession->DebugArray, 0, sizeof(NewSession->DebugArray));
 			//NewSession->DebugArrayCount = 0;
-			NewSession->SessionID = ADD_SESSIONID_INDEX(Instance->_SessionID, NewSessionIndex);
+			NewSession->SessionId = ADD_SESSIONID_INDEX(Instance->_SessionID, NewSessionIndex);
 			NewSession->ClientAddr = ClientAddr;
 			NewSession->ClientSock = ClientSock;
 			NewSession->CloseSock = ClientSock;
 			NewSession->IsCloseSocket = CLOSE_SOCKET_DO_NOT;
 			NewSession->IsSend = SENDING_DO_NOT;
 			NewSession->IsCancelIO = 0;
-			NewSession->IsExit = 0;
 			NewSession->IsSend = SENDING_DO_NOT;
 
 			//Instance->_SessionArray[NewSessionIndex]->SendPacketCount = 0;
@@ -568,7 +556,7 @@ unsigned __stdcall CNetworkLib::AcceptThreadProc(void* Argument)
 
 			Instance->_SessionID++;
 			//Instance->OnConnectionRequest(*ClientIP,ClientAddr.sin_port);
-			Instance->OnClientJoin(NewSession->SessionID);
+			Instance->OnClientJoin(NewSession->SessionId);
 			//memcpy(&NewSession->DebugArray[NewSession->DebugArrayCount], "ACCJ ", 5);
 			//NewSession->DebugArrayCount += 5;
 			// 위에서 IOCount를 증가시켜 줫으므로 Accepct에 한해 Recv를 걸때 IOCount를 증가시키지 않는다.
@@ -587,7 +575,7 @@ unsigned __stdcall CNetworkLib::AcceptThreadProc(void* Argument)
 #pragma region 세션 할당 해제
 void CNetworkLib::ReleaseSession(st_SESSION* ReleaseSession)
 {
-	__int64 ReleaseSessionId = ReleaseSession->SessionID;
+	__int64 ReleaseSessionId = ReleaseSession->SessionId;
 	char* pRecvOverlapped = (char*)&ReleaseSession->RecvOverlapped;
 	char* pSendOverlapped = (char*)&ReleaseSession->SendOverlapped;
 	int ReleaseSessionIOcount = ReleaseSession->IOBlock->IOCount;
@@ -663,15 +651,15 @@ void CNetworkLib::ReleaseSession(st_SESSION* ReleaseSession)
 		closesocket(ReleaseSession->CloseSock);
 	}
 
-	OnClientLeave(ReleaseSession->SessionID);
+	OnClientLeave(ReleaseSession->SessionId);
 
-	__int64 Index = GET_SESSIONINDEX(ReleaseSession->SessionID);
-	_SessionArrayIndexs.Push(GET_SESSIONINDEX(ReleaseSession->SessionID));
+	int64 Index = GET_SESSIONINDEX(ReleaseSession->SessionId);
+	_SessionArrayIndexs.Push(GET_SESSIONINDEX(ReleaseSession->SessionId));
 
 	InterlockedDecrement64(&_SessionCount);
-	if (ReleaseSessionId != ReleaseSession->SessionID)
+	if (ReleaseSessionId != ReleaseSession->SessionId)
 	{
-		wprintf(L"ReleaseSession SessionID Different !! ReleaseSessionID %d ReleaseSession->SessionID %d\n", ReleaseSessionId, ReleaseSession->SessionID);
+		wprintf(L"ReleaseSession SessionID Different !! ReleaseSessionID %d ReleaseSession->SessionID %d\n", ReleaseSessionId, ReleaseSession->SessionId);
 	}
 }
 #pragma endregion
@@ -709,7 +697,7 @@ st_SESSION* CNetworkLib::FindSession(__int64 SessionID)
 	/*
 		찾을 세션의 세션 아이디가 입력받은 SessionID와 다르다면
 	*/
-	if (SessionID != _SessionArray[SessionIndex]->SessionID)
+	if (SessionID != _SessionArray[SessionIndex]->SessionId)
 	{
 		if (InterlockedDecrement64(&_SessionArray[SessionIndex]->IOBlock->IOCount) == 0)
 		{
