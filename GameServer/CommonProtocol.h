@@ -170,6 +170,8 @@ enum en_PACKET_TYPE
 	// int64 AccountId
 	// int32 PlayerDBId
 	// int8 Dir
+	// en_AttackRange RangeAttack;
+	// int8 RangeDistance;
 	//------------------------------------------------------------	
 	en_PACKET_C2S_ATTACK,
 	

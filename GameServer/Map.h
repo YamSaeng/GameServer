@@ -31,6 +31,11 @@ struct st_Vector2Int
 		return st_Vector2Int(_X - Vector._X, _Y - Vector._Y);
 	}	
 
+	st_Vector2Int operator *(int8 Value)
+	{
+		return st_Vector2Int(_X * Value, _Y * Value);
+	}
+
 	int CellDistanceFromZero()
 	{
 		return abs(_X) + abs(_Y);

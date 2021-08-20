@@ -26,6 +26,13 @@ enum en_CreatureState
 	DEAD,
 };
 
+enum en_AttackRange
+{
+	NORMAL_ATTACK,			
+	FORWARD_ATTACK,
+	AROUND_ONE_ATTACK
+};
+
 struct st_PositionInfo
 {
 	en_CreatureState State;
@@ -86,7 +93,9 @@ public:
 	//------------------------------------------------
 	// 방향값을 받아서 앞쪽에 있는 위치를 반환한다.
 	//------------------------------------------------
-	st_Vector2Int GetFrontCellPosition(en_MoveDir Dir);
+	st_Vector2Int GetFrontCellPosition(en_MoveDir Dir,int8 Distance);
+
+	vector<st_Vector2Int> GetAroundCellPosition(st_Vector2Int CellPosition, int8 Distance);
 
 	en_MoveDir GetDirectionFromVector(st_Vector2Int DirectionVector);
 };
