@@ -16,7 +16,7 @@ void CSector::Insert(CGameObject* InsertGameObject)
 	case en_GameObjectType::PLAYER:
 		_Players.insert((CPlayer*)InsertGameObject);
 		break;
-	case en_GameObjectType::MONSTER:
+	case en_GameObjectType::SLIME:
 		_Monsters.insert((CMonster*)InsertGameObject);
 		break;
 	default:
@@ -31,7 +31,7 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 	case en_GameObjectType::PLAYER:
 		_Players.erase((CPlayer*)RemoveGameObject);
 		break;
-	case en_GameObjectType::MONSTER:
+	case en_GameObjectType::SLIME:
 		_Monsters.erase((CMonster*)RemoveGameObject);
 		break;
 	}

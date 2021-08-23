@@ -5,7 +5,7 @@ class CPlayer;
 
 class CMonster : public CGameObject
 {
-private:
+protected:
 	//---------------
 	// 타겟
 	//---------------
@@ -38,29 +38,29 @@ private:
 	// Attack 상태에서 Attack을 실행할 Tick
 	//--------------------------------------
 	uint64 _AttackTick;
-protected:
+
 	//------------------------
 	// Idle 상태 Update
 	//------------------------
-	virtual void UpdateIdle();
+	virtual void UpdateIdle() = 0;
 	//------------------------
 	// Moving 상태 Update
 	//------------------------
-	virtual void UpdateMoving();
+	virtual void UpdateMoving() = 0;
 	//------------------------
 	// Attack 상태 Update
 	//------------------------
-	virtual void UpdateAttack();
+	virtual void UpdateAttack() = 0;
 	//------------------------
 	// Dead 상태 Update
 	//------------------------
-	virtual void UpdateDead();
+	virtual void UpdateDead() = 0;
 public:
 	// 몬스터 데이터 시트 Id
 	int32 _DataSheetId;
 
 	CMonster();
-	~CMonster();
+	virtual ~CMonster();
 
 	void Init(int32 DataSheetId);
 

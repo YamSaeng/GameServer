@@ -1,16 +1,18 @@
 #include "pch.h"
 #include "ObjectManager.h"
 
+
 CObjectManager::CObjectManager()
 {
 	_PlayerMemoryPool = new CMemoryPoolTLS<CPlayer>(0);
-	_MonsterMemoryPool = new CMemoryPoolTLS<CMonster>(0);	
+	_SlimeMemoryPool = new CMemoryPoolTLS<CSlime>(0);
+	_BearMemoryPool = new CMemoryPoolTLS<CBear>(0);
 
 	_MonsterId = 10000;
 }
 
 void CObjectManager::Add(CGameObject* AddObject, int32 ChannelId)
-{		
+{
 	// 채널 찾는다.
 	CChannel* EnterChannel = G_ChannelManager->Find(ChannelId);
 	if (EnterChannel == nullptr)
@@ -26,10 +28,10 @@ void CObjectManager::Add(CGameObject* AddObject, int32 ChannelId)
 	case en_GameObjectType::PLAYER:
 	{
 		CPlayer* Player = (CPlayer*)AddObject;
-		_Players.insert(pair<int64, CPlayer*>(AddObject->_GameObjectInfo.ObjectId, Player));					
+		_Players.insert(pair<int64, CPlayer*>(AddObject->_GameObjectInfo.ObjectId, Player));
 	}
 	break;
-	case en_GameObjectType::MONSTER:
+	case en_GameObjectType::SLIME:
 	{
 		vector<st_GameObjectInfo> SpawnMonster;
 
@@ -40,11 +42,11 @@ void CObjectManager::Add(CGameObject* AddObject, int32 ChannelId)
 
 		// 몬스터 추가하면 몬스터 주위 플레이어들에게 몬스터를 소환하라고 알림
 		CMessage* ResSpawnPacket = GameServer->MakePacketResSpawn(1, SpawnMonster);
-		GameServer->SendPacketAroundSector(Monster->GetCellPosition(),ResSpawnPacket);
+		GameServer->SendPacketAroundSector(Monster->GetCellPosition(), ResSpawnPacket);
 		ResSpawnPacket->Free();
 	}
 	break;
-	}	
+	}
 }
 
 bool CObjectManager::Remove(CGameObject* RemoveObject, int32 _ChannelId)
@@ -56,8 +58,10 @@ bool CObjectManager::Remove(CGameObject* RemoveObject, int32 _ChannelId)
 	case en_GameObjectType::PLAYER:
 		_Players.erase(RemoveObject->_GameObjectInfo.ObjectId);
 		break;;
-	case en_GameObjectType::MONSTER:
+	case en_GameObjectType::SLIME:
 		_Monsters.erase(RemoveObject->_GameObjectInfo.ObjectId);
+		break;
+	case en_GameObjectType::BEAR:
 		break;
 	}
 
@@ -69,13 +73,15 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 	CGameObject* NewObject = nullptr;
 
 	switch (ObjectType)
-	{	
-	case PLAYER:		
+	{
+	case en_GameObjectType::PLAYER:
 		NewObject = _PlayerMemoryPool->Alloc();
 		break;
-	case MONSTER:
-		NewObject = _MonsterMemoryPool->Alloc();
-		break;	
+	case en_GameObjectType::SLIME:
+		NewObject = _SlimeMemoryPool->Alloc();
+		break;
+	case en_GameObjectType::BEAR:
+		break;
 	}
 
 	return NewObject;
@@ -84,23 +90,35 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 void CObjectManager::ObjectReturn(en_GameObjectType ObjectType, CGameObject* ReturnObject)
 {
 	switch (ObjectType)
-	{	
-	case PLAYER:
+	{
+	case en_GameObjectType::PLAYER:
 		_PlayerMemoryPool->Free((CPlayer*)ReturnObject);
 		Remove(ReturnObject, 1);
 		break;
-	case MONSTER:
-		_MonsterMemoryPool->Free((CMonster*)ReturnObject);
-		break;	
+	case en_GameObjectType::SLIME:
+		_SlimeMemoryPool->Free((CSlime*)ReturnObject);
+		Remove(ReturnObject, 1);
+		break;
+	case en_GameObjectType::BEAR:
+		break;
 	}
 }
 
-void CObjectManager::MonsterSpawn(int32 MonsterCount, int32 ChannelId)
+void CObjectManager::MonsterSpawn(int32 MonsterCount, int32 ChannelId, en_GameObjectType MonsterType)
 {
 	for (int32 i = 0; i < MonsterCount; i++)
 	{
-		CMonster* NewMonster = (CMonster*)ObjectCreate(en_GameObjectType::MONSTER);		
-		NewMonster->_GameObjectInfo.ObjectId = _MonsterId++;		
+		CMonster* NewMonster = nullptr;
+		switch (MonsterType)
+		{
+		case SLIME:
+			NewMonster = (CSlime*)ObjectCreate(en_GameObjectType::SLIME);
+			break;
+		case BEAR:
+			break;		
+		}
+
+		NewMonster->_GameObjectInfo.ObjectId = _MonsterId++;
 		Add(NewMonster, ChannelId);
-	}	
+	}
 }

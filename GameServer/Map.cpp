@@ -179,7 +179,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	// 섹터 작업
 	switch (GameObject->_GameObjectInfo.ObjectType)
 	{	
-	case PLAYER:		
+	case en_GameObjectType::PLAYER:		
 	{
 		CPlayer* MovePlayer = (CPlayer*)GameObject;
 
@@ -305,7 +305,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 		}
 	}
 		break;
-	case MONSTER:
+	case en_GameObjectType::SLIME:
 	{
 		CMonster* MoveMonster = (CMonster*)GameObject;
 

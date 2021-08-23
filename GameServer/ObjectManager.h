@@ -1,7 +1,8 @@
 #pragma once
 #include "ChannelManager.h"
 #include "Player.h"
-#include "Monster.h"
+#include "Bear.h"
+#include "Slime.h"
 #include "GameServer.h"
 
 class CObjectManager
@@ -10,8 +11,9 @@ private:
 	map<int64, CPlayer*> _Players;
 	map<int64, CMonster*> _Monsters;
 
-	CMemoryPoolTLS<CPlayer>* _PlayerMemoryPool;
-	CMemoryPoolTLS<CMonster>* _MonsterMemoryPool;	
+	CMemoryPoolTLS<CPlayer>* _PlayerMemoryPool;		
+	CMemoryPoolTLS<CSlime>* _SlimeMemoryPool;
+	CMemoryPoolTLS<CBear>* _BearMemoryPool;
 
 	int32 _MonsterId;
 public:
@@ -30,6 +32,6 @@ public:
 	CGameObject* ObjectCreate(en_GameObjectType ObjectType);
 	void ObjectReturn(en_GameObjectType ObjectType, CGameObject* ReturnObject);
 
-	void MonsterSpawn(int32 MonsterCount, int32 ChannelId);	
+	void MonsterSpawn(int32 MonsterCount, int32 ChannelId, en_GameObjectType MonsterType);
 };
 

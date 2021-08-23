@@ -32,7 +32,7 @@ private:
 	// WorkerThread 종료용 변수
 	bool _NetworkThreadEnd;
 	// DataBaseThread 종료용 변수
-	bool _DataBaseThreadEnd;	
+	bool _DataBaseThreadEnd;
 
 	// 게임서버에서 생성되는 오브젝트들의 아이디
 	int64 _GameObjectId;
@@ -46,7 +46,7 @@ private:
 	void DeleteClient(st_SESSION* Session);
 
 	void PacketProc(int64 SessionId, CMessage* Message);
-	
+
 	//----------------------------------------------------------------
 	//패킷처리 함수
 	//1. 로그인 요청
@@ -59,7 +59,7 @@ private:
 	void PacketProcReqLogin(int64 SessionID, CMessage* Message);
 	void PacketProcReqCreateCharacter(int64 SessionID, CMessage* Message);
 	void PacketProcReqEnterGame(int64 SessionID, CMessage* Message);
-	void PacketProcReqMove(int64 SessionID, CMessage* Message);	
+	void PacketProcReqMove(int64 SessionID, CMessage* Message);
 	void PacketProcReqAttack(int64 SessionID, CMessage* Message);
 	void PacketProcReqMousePositionObjectInfo(int64 SessionID, CMessage* Message);
 	void PacketProcReqChattingMessage(int64 SessionId, CMessage* Message);
@@ -89,19 +89,18 @@ private:
 	CMessage* MakePacketResClientConnected();
 	CMessage* MakePacketResLogin(bool Status, int32 PlayerCount, int32 PlayerDBId, wstring PlayersName);
 	CMessage* MakePacketResCreateCharacter(bool IsSuccess, int32 PlayerDBId, wstring PlayerName);
-	CMessage* MakePacketResEnterGame(st_GameObjectInfo ObjectInfo);	
-	CMessage* MakePacketResAttack(int64 AccountId, int32 PlayerDBId, en_MoveDir Dir);	
+	CMessage* MakePacketResEnterGame(st_GameObjectInfo ObjectInfo);
+	CMessage* MakePacketResAttack(int64 AccountId, int32 PlayerDBId, en_MoveDir Dir);
 	CMessage* MakePacketMousePositionObjectInfo(int64 AccountId, int32 PlayerDBId, st_GameObjectInfo ObjectInfo);
-	CMessage* MakePacketResChattingMessage(int32 PlayerDBId, wstring ChattingMessage);
 	CMessage* MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* NickName, WORD MessageLen, WCHAR* Message);
-
 public:
-	CMessage* MakePacketResChangeHP(int32 PlayerDBId, int32 CurrentHP, int32 MaxHP);
-	CMessage* MakePacketResObjectState(int32 ObjectId,en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState);
+	CMessage* MakePacketResChangeHP(int32 PlayerDBId, int32 Damage, int32 CurrentHP, int32 MaxHP);
+	CMessage* MakePacketResObjectState(int32 ObjectId, en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState);
 	CMessage* MakePacketResMove(int64 AccountId, int32 ObjectId, en_GameObjectType ObjectType, st_PositionInfo PositionInfo);
 	CMessage* MakePacketResSpawn(int32 ObjectInfosCount, vector<st_GameObjectInfo> ObjectInfos);
 	CMessage* MakePacketResDeSpawn(int32 DeSpawnObjectCount, vector<int64> DeSpawnObjectIds);
 	CMessage* MakePacketResDie(int64 DieObjectId);
+	CMessage* MakePacketResChattingMessage(int32 PlayerDBId, en_MessageType MessageType, wstring ChattingMessage);
 public:
 	//------------------------------------
 	// Job 메모리풀
@@ -112,7 +111,7 @@ public:
 	//------------------------------------
 	CLockFreeQue<st_Job*> _GameServerAuthThreadMessageQue;
 	CLockFreeQue<st_Job*> _GameServerNetworkThreadMessageQue;
-	CLockFreeQue<st_Job*> _GameServerDataBaseThreadMessageQue;	
+	CLockFreeQue<st_Job*> _GameServerDataBaseThreadMessageQue;
 
 	int64 _AuthThreadWakeCount;
 	int64 _AuthThreadTPS;
@@ -131,7 +130,7 @@ public:
 	virtual void OnRecv(int64 SessionID, CMessage* Packet) override;
 	virtual void OnClientLeave(st_SESSION* LeaveSession) override;
 	virtual bool OnConnectionRequest(const wchar_t ClientIP, int32 Port) override;
-		
+
 	void SendPacketSector(CSector* Sector, CMessage* Message);
 	void SendPacketAroundSector(st_Vector2Int CellPosition, CMessage* Message);
 	void SendPacketAroundSector(st_SESSION* Session, CMessage* Message, bool SendMe = false);

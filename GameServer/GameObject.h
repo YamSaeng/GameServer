@@ -7,7 +7,8 @@ enum en_GameObjectType
 {
 	NORMAL,
 	PLAYER,
-	MONSTER,
+	SLIME,
+	BEAR
 };
 
 enum en_MoveDir
@@ -31,6 +32,12 @@ enum en_AttackRange
 	NORMAL_ATTACK,			
 	FORWARD_ATTACK,
 	AROUND_ONE_ATTACK
+};
+
+enum en_MessageType
+{
+	CHATTING,
+	SYSTEM
 };
 
 struct st_PositionInfo
