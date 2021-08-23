@@ -46,6 +46,7 @@ void CGameServer::Start(const WCHAR* OpenIP, int32 Port)
 	CNetworkLib::Start(OpenIP, Port);
 
 	G_ObjectManager->MonsterSpawn(30, 1, en_GameObjectType::SLIME);
+	G_ObjectManager->MonsterSpawn(30, 1, en_GameObjectType::BEAR);
 
 	G_ObjectManager->GameServer = this;
 
@@ -1273,27 +1274,6 @@ CMessage* CGameServer::MakePacketResEnterGame(st_GameObjectInfo ObjectInfo)
 
 // int64 AccountId
 // int32 PlayerDBId
-// char Dir
-CMessage* CGameServer::MakePacketResAttack(int64 AccountId, int32 PlayerDBId, en_MoveDir Dir)
-{
-	CMessage* ResAttackMessage = CMessage::Alloc();
-	if (ResAttackMessage == nullptr)
-	{
-		return nullptr;
-	}
-
-	ResAttackMessage->Clear();
-
-	*ResAttackMessage << (WORD)en_PACKET_S2C_ATTACK;
-	*ResAttackMessage << AccountId;
-	*ResAttackMessage << PlayerDBId;
-	*ResAttackMessage << (int8)Dir;
-
-	return ResAttackMessage;
-}
-
-// int64 AccountId
-// int32 PlayerDBId
 // st_GameObjectInfo ObjectInfo
 CMessage* CGameServer::MakePacketMousePositionObjectInfo(int64 AccountId, int32 PlayerDBId, st_GameObjectInfo ObjectInfo)
 {
@@ -1363,6 +1343,27 @@ CMessage* CGameServer::MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* N
 	ChattingMessage->InsertData(Message, sizeof(WCHAR) * (MessageLen / 2));
 
 	return ChattingMessage;
+}
+
+// int64 AccountId
+// int32 PlayerDBId
+// char Dir
+CMessage* CGameServer::MakePacketResAttack(int64 AccountId, int32 PlayerDBId, en_MoveDir Dir)
+{
+	CMessage* ResAttackMessage = CMessage::Alloc();
+	if (ResAttackMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResAttackMessage->Clear();
+
+	*ResAttackMessage << (WORD)en_PACKET_S2C_ATTACK;
+	*ResAttackMessage << AccountId;
+	*ResAttackMessage << PlayerDBId;
+	*ResAttackMessage << (int8)Dir;
+
+	return ResAttackMessage;
 }
 
 // int64 AccountId

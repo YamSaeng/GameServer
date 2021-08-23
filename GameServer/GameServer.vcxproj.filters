@@ -64,6 +64,9 @@
     <Filter Include="ContentServer\Content\GameObject\Monster">
       <UniqueIdentifier>{33925b0f-ac21-4ddd-875e-de847e8abf20}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ContentServer\Content\Inventory">
+      <UniqueIdentifier>{d1d4b5ab-ae77-4157-93ab-b949d6eda307}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Type.h">

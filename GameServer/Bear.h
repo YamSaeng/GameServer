@@ -11,5 +11,7 @@ protected:
 public:
 	CBear();
 	~CBear();
+
+	void Init(int32 DataSheetId);
 };
 

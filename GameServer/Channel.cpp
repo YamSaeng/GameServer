@@ -255,6 +255,7 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject)
 		}
 		break;
 	case en_GameObjectType::SLIME:
+	case en_GameObjectType::BEAR:
 		{
 			CMonster* EnterChannelMonster = (CMonster*)EnterChannelGameObject;
 			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.PositionY = SpawnPosition._Y;
@@ -288,6 +289,7 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 		_Map->ApplyLeave(LeaveChannelGameObject);		
 		break;
 	case en_GameObjectType::SLIME:
+	case en_GameObjectType::BEAR:
 		_Monsters.erase(LeaveChannelGameObject->_GameObjectInfo.ObjectId);
 
 		_Map->ApplyLeave(LeaveChannelGameObject);		

@@ -131,6 +131,8 @@ void CSlime::UpdateAttack()
 		st_Vector2Int MyCellPosition = GetCellPosition();
 		st_Vector2Int Direction = TargetCellPosition - MyCellPosition;
 
+		_GameObjectInfo.ObjectPositionInfo.MoveDir = GetDirectionFromVector(Direction);
+
 		int32 Distance = Direction.CellDistanceFromZero();
 		// 타겟과의 거리가 공격 범위 안에 속하고 X==0 || Y ==0 일때( 대각선은 제한) 공격
 		bool CanUseAttack = (Distance <= _AttackRange && (Direction._X == 0 || Direction._Y == 0));
@@ -142,6 +144,7 @@ void CSlime::UpdateAttack()
 
 		// 데미지 적용
 		_Target->OnDamaged(this, _GameObjectInfo.ObjectStatInfo.Attack);
+		BroadCastPacket(en_PACKET_S2C_ATTACK);
 		// 주위 플레이어들에게 데미지 적용 결과 전송
 		BroadCastPacket(en_PACKET_S2C_CHANGE_HP);
 

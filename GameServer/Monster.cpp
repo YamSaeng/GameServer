@@ -50,6 +50,8 @@ void CMonster::OnDamaged(CGameObject* Attacker, int32 Damage)
 {
 	CGameObject::OnDamaged(Attacker, Damage);
 	
+	_Target = (CPlayer*)Attacker;	
+
 	if (_GameObjectInfo.ObjectStatInfo.HP == 0)
 	{
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
@@ -84,6 +86,9 @@ void CMonster::BroadCastPacket(en_PACKET_TYPE PacketType)
 		break;
 	case en_PACKET_S2C_OBJECT_STATE_CHANGE:		
 		ResPacket = G_ObjectManager->GameServer->MakePacketResObjectState(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo.MoveDir, _GameObjectInfo.ObjectType, _GameObjectInfo.ObjectPositionInfo.State);
+		break;
+	case en_PACKET_S2C_ATTACK:
+		ResPacket = G_ObjectManager->GameServer->MakePacketResAttack(-1, _GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo.MoveDir);
 		break;
 	case en_PACKET_S2C_CHANGE_HP:
 		ResPacket = G_ObjectManager->GameServer->MakePacketResChangeHP(_Target->_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectStatInfo.Attack, _Target->_GameObjectInfo.ObjectStatInfo.HP, _Target->_GameObjectInfo.ObjectStatInfo.MaxHP);

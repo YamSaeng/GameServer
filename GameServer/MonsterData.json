@@ -27,6 +27,34 @@
           "Count": 1
         }
       ]
+    },
+    {
+      "MonsterDataId": 2,
+      "Name": "Bear",
+      "MonsterStatInfo": [
+        {
+          "Level": 1,
+          "MaxHP": 100,
+          "Attack": 15,
+          "Speed": 2.0,
+          "SearchCellDistance": 15,
+          "ChaseCellDistance": 15,
+          "AttackRange": 1,
+          "TotalExp": 20
+        }
+      ],
+      "DropData": [
+        {
+          "Probability": 10,
+          "ItemDataId": 200,
+          "Count": 2
+        },
+        {
+          "Probability": 10,
+          "ItemDataId": 100,
+          "Count": 1
+        }
+      ]
     }
   ]
 }

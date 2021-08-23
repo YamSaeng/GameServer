@@ -306,6 +306,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	}
 		break;
 	case en_GameObjectType::SLIME:
+	case en_GameObjectType::BEAR:
 	{
 		CMonster* MoveMonster = (CMonster*)GameObject;
 
@@ -384,7 +385,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 			ResSectorSpawnPlayer->Free();
 		}
 	}
-		break;
+		break;	
 	default:
 		CRASH("ApplyMove GameObject Type 이상한 값")
 		break;
