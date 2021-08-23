@@ -22,32 +22,12 @@ enum en_MESSAGE_TYPE
 	DATA_BASE_CHARACTER_CHECK,
 };
 
-struct st_CLIENT
-{
-	int64 AccountId;
-	int64 SessionId;
-
-	wstring ClientId;
-	wstring CreateCharacterName;
-
-	int16 SectorX;
-	int16 SectorY;
-
-	int32 Token;
-
-	bool IsLogin;
-
-	DWORD RecvPacketTime;
-	
-	CPlayer* MyPlayers[5];
-	CPlayer* MyPlayer;
-};
-
 struct st_Job
 {
 	WORD Type;
 	int64 SessionID;
 	CMessage* Message;
+	st_SESSION* Session;
 };
 
 

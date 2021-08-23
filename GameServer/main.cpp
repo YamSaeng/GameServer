@@ -93,20 +93,21 @@ int main()
 		G_Logger->WriteStdOut(en_Color::WHITE, L"PacketPool Return : [%d]\n", CMessage::_ObjectPoolFreeList.ReturnCount()); // 패킷반납 회수	
 		G_Logger->WriteStdOut(en_Color::WHITE, L"================================================\n\n");
 		G_Logger->WriteStdOut(en_Color::YELLOW, L"GameServer\n");
-		G_Logger->WriteStdOut(en_Color::WHITE, L"PlayerPool Alloc	: [%d]\n", G_GameServer._ClientMemoryPool->GetAllocCount()); //게임서버 클라 메모리풀 Alloc
-		G_Logger->WriteStdOut(en_Color::WHITE, L"PlayerPool Use		: [%d]\n", G_GameServer._ClientMemoryPool->GetUseCount());
-		G_Logger->WriteStdOut(en_Color::WHITE, L"PlayerCount		: [%d]\n", G_GameServer._ClientMap.size()); // 게임서버 클라 개수
-		G_Logger->WriteStdOut(en_Color::WHITE, L"ChatServerJobPool Alloc  : [%d]\n", G_GameServer._JobMemoryPool->GetAllocCount()); //게임서버 잡 메모리풀 Alloc
-		G_Logger->WriteStdOut(en_Color::WHITE, L"ChatServerJobPool Remain : [%d]\n", G_GameServer._JobMemoryPool->GetUseCount());
-		G_Logger->WriteStdOut(en_Color::WHITE, L"ChatServerJobQue Size	: [%d]\n", G_GameServer._GameServerCommonMessageQue.GetUseSize()); //게임서버 잡큐에 몇개 들어있는지
-		G_Logger->WriteStdOut(en_Color::WHITE, L"NetworkThread TPS	: [%d]\n", G_GameServer._NetworkThreadTPS); //게임서버 업데이트 쓰레드 TPS
-		G_Logger->WriteStdOut(en_Color::WHITE, L"NetworkThread Wake Count : [%d]\n", G_GameServer._NetworkThreadWakeCount); //게임서버 업데이트 쓰레드가 몇번 일어났는지
+		G_Logger->WriteStdOut(en_Color::WHITE, L"GameServerJobPool Alloc  : [%d]\n", G_GameServer._JobMemoryPool->GetAllocCount()); //게임서버 잡 메모리풀 Alloc
+		G_Logger->WriteStdOut(en_Color::WHITE, L"GameServerJobPool Remain : [%d]\n", G_GameServer._JobMemoryPool->GetUseCount());
+		G_Logger->WriteStdOut(en_Color::WHITE, L"GameServerJobPool Return : [%d]\n", G_GameServer._JobMemoryPool->ReturnCount());
+		G_Logger->WriteStdOut(en_Color::WHITE, L"NetworkThread Que Size	:  [%d]\n", G_GameServer._GameServerNetworkThreadMessageQue.GetUseSize()); //게임서버 잡큐에 몇개 들어있는지
+		G_Logger->WriteStdOut(en_Color::WHITE, L"NetworkThread TPS	:  [%d]\n", G_GameServer._NetworkThreadTPS); //게임서버 Network 쓰레드 TPS
+		G_Logger->WriteStdOut(en_Color::WHITE, L"AuthThread Que Size :      [%d]\n", G_GameServer._GameServerAuthThreadMessageQue.GetUseSize());
+		G_Logger->WriteStdOut(en_Color::WHITE, L"AuthThread TPS :	   [%d]\n", G_GameServer._AuthThreadTPS);
+		G_Logger->WriteStdOut(en_Color::WHITE, L"AuthThread WakeCount :     [%d]\n", G_GameServer._AuthThreadWakeCount);
 		G_Logger->WriteStdOut(en_Color::WHITE, L"\n================================================\n\n");
 
 		G_GameServer._AcceptTPS = 0;
 		G_GameServer._RecvPacketTPS = 0;
 		G_GameServer._SendPacketTPS = 0;
 		G_GameServer._NetworkThreadTPS = 0;
+		G_GameServer._AuthThreadTPS = 0;
 
 		Sleep(1000);
 	}

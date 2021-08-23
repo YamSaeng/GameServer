@@ -36,6 +36,57 @@ CNetworkLib::~CNetworkLib()
 
 }
 
+st_SESSION* CNetworkLib::FindSession(__int64 SessionID)
+{
+	//세션 ID를 이용해 세션이 저장되어 있는 세션 인덱스를 가져온다.
+	int SessionIndex = GET_SESSIONINDEX(SessionID);
+
+	// 이미 릴리즈 작업중이거나 작업중일 예정인 세션이라면 그냥 나간다.
+	if (_SessionArray[SessionIndex]->IOBlock->IsRelease == true ||
+		_SessionArray[SessionIndex]->IsCancelIO == true)
+	{		
+		return nullptr;
+	}
+
+	/*
+		안전하게 증가를 시켰는데 IOCount의 값이 1이라면 릴리즈 작업중이거나 릴리즈를 작업할 예정인 세션(0에서 증가 한 것이니까)이므로
+		확인 작업을 해준다. 위에서 Increment로 증가시켜줬으니까 1을 다시 감소시켜서 그값이 0이라면 ReleaseSession을 호출해준다.
+	*/
+	if (InterlockedIncrement64(&_SessionArray[SessionIndex]->IOBlock->IOCount) == 1)
+	{
+		if (InterlockedDecrement64(&_SessionArray[SessionIndex]->IOBlock->IOCount) == 0)
+		{
+			//LOG(L"ERROR", en_LOG_LEVEL::LEVEL_ERROR, L"IOCount is 0!!!!!!");
+			ReleaseSession(_SessionArray[SessionIndex]);
+		}
+
+		return nullptr;
+	}
+
+	/*
+		찾을 세션의 세션 아이디가 입력받은 SessionID와 다르다면
+	*/
+	if (SessionID != _SessionArray[SessionIndex]->SessionId)
+	{
+		if (InterlockedDecrement64(&_SessionArray[SessionIndex]->IOBlock->IOCount) == 0)
+		{
+			ReleaseSession(_SessionArray[SessionIndex]);
+		}
+
+		return nullptr;
+	}
+
+	return _SessionArray[SessionIndex];
+}
+
+void CNetworkLib::ReturnSession(st_SESSION* Session)
+{
+	if (InterlockedDecrement64(&Session->IOBlock->IOCount) == 0)
+	{
+		ReleaseSession(Session);
+	}
+}
+
 void CNetworkLib::SendPacket(__int64 SessionID, CMessage* Packet)
 {
 	// FindSession을 통해 현재 세션을 사용하고 있다는 표시로 IOCount를 증가시켜주고
@@ -80,7 +131,6 @@ void CNetworkLib::SendPost(st_SESSION* SendSession)
 				DirectDequeSize를 먼저 구하게 되면
 			*/
 
-			//DirectDequeSize = SendSession->SendRingBuf.GetDirectDequeueSize();
 			SendRingBufUseSize = SendSession->SendRingBuf.GetUseSize();
 			/*
 				보내려고 왓는데 다른 쓰레드에서 한꺼번에 보내버려서 보낼것이 없으면
@@ -92,7 +142,7 @@ void CNetworkLib::SendPost(st_SESSION* SendSession)
 				원래대로 돌아와도 ( Send할 데이터가 큐잉 되었지만 ) 그냥 빠져나가게 된다.
 				따라서 한번더 데이터를 확인해주고 있으면 다시 올라가서 데이터를 보내게 해준다.
 			*/
-			if (SendRingBufUseSize /*DirectDequeSize */ == 0)
+			if (SendRingBufUseSize == 0)
 			{
 				InterlockedExchange(&SendSession->IsSend, SENDING_DO_NOT);
 
@@ -133,12 +183,7 @@ void CNetworkLib::SendPost(st_SESSION* SendSession)
 	memset(&SendSession->SendOverlapped, 0, sizeof(OVERLAPPED));
 
 	InterlockedIncrement64(&SendSession->IOBlock->IOCount);
-
-	if (SendSession->ClientSock == INVALID_SOCKET)
-	{
-		//wprintf(L"SendPost ClientSocket is INVALID_SOCKET!! IOCount %d SendSession IsExit %d \n",SendSession->IOCount,SendSession->IsExit);		
-	}
-
+	
 	int WSASendRetval = WSASend(SendSession->ClientSock, SendBuf, SendBufCount, NULL, 0, (LPWSAOVERLAPPED)&SendSession->SendOverlapped, NULL);
 	if (WSASendRetval == SOCKET_ERROR)
 	{
@@ -227,20 +272,11 @@ void CNetworkLib::RecvPost(st_SESSION* RecvSession, bool IsAcceptRecvPost)
 
 void CNetworkLib::RecvNotifyComplete(st_SESSION* RecvCompleteSession, const DWORD& Transferred)
 {
-	/*
-		RecvRingBuf의 Rear값을 완료 통지 받은 Transferred 값만큼 뒤로 민다.
-		Recv 완료통지를 받으면 메세지 단위로 뽑아내어 한번에 다 처리해주고
-		WSARecv를 다시 건다.
-	*/	
-
-	RecvCompleteSession->RecvRingBuf.MoveRear(Transferred);
-	
-	if (RecvCompleteSession->RecvRingBuf.GetUseSize() < Transferred)
-	{
-		CRASH("RecvRingBuf에 들어가 있는 데이터보다 Transfereed가 더 큼");
-		Disconnect(RecvCompleteSession->SessionId);
-		return;
-	}
+	// ---------------------------------------------------------------------------------------
+	// RecvRingBuf의 Rear값을 완료 통지 받은 Transferred 값만큼 뒤로 민다.
+	// Recv 완료통지를 받으면 메세지 단위로 뽑아내어 한번에 다 처리해주고 WSARecv를 다시 건다.		
+	// ---------------------------------------------------------------------------------------
+	RecvCompleteSession->RecvRingBuf.MoveRear(Transferred);	
 
 	CMessage::st_ENCODE_HEADER EncodeHeader;
 	CMessage* Packet = CMessage::Alloc();
@@ -299,12 +335,11 @@ void CNetworkLib::RecvNotifyComplete(st_SESSION* RecvCompleteSession, const DWOR
 
 void CNetworkLib::SendNotifyComplete(st_SESSION* SendCompleteSession)
 {
-	/*
-		//완료 통지된 패킷 정리//
-		해당 세션이 보낸 패킷의 개수를 뽑아두고 나서
-		Send링버퍼에서 직렬화버퍼의 주소를 뽑아낸 후에 삭제시키고
-		개수를 1씩 차감하면서 반복한다.
-	*/
+	//-------------------------------------------------------------
+	//	완료 통지된 패킷 정리
+	//	해당 세션이 보낸 패킷의 개수만큼
+	//  메모리풀로 반납한다.	
+	//-------------------------------------------------------------
 	for (int i = 0; i < SendCompleteSession->SendPacketCount; i++)
 	{
 		SendCompleteSession->SendPacket[i]->Free();
@@ -312,11 +347,14 @@ void CNetworkLib::SendNotifyComplete(st_SESSION* SendCompleteSession)
 
 	SendCompleteSession->SendPacketCount = 0;
 
-	/*
-		SendFlag를 false로 바꿔서 WSASend를 걸수 있게 해준다.
-	*/
+	//-------------------------------------------------------------
+	//	SendFlag를 false로 바꿔서 WSASend를 걸수 있게 해준다.
+	//-------------------------------------------------------------
 	InterlockedExchange(&SendCompleteSession->IsSend, SENDING_DO_NOT);
-
+	//-----------------------------------------------------
+	// Send 버퍼의 크기가 0보다 크다면 
+	// WSASend를 걸어준다.
+	//-----------------------------------------------------
 	if (SendCompleteSession->SendRingBuf.GetUseSize() > 0)
 	{
 		SendPost(SendCompleteSession);
@@ -345,8 +383,7 @@ void CNetworkLib::Disconnect(__int64 SessionID)
 	}
 	else
 	{
-		DisconnectSession->ClientSock = INVALID_SOCKET;
-		CancelIoEx((HANDLE)DisconnectSession->CloseSock, NULL);
+		CancelIoEx((HANDLE)DisconnectSession->ClientSock, NULL);
 	}
 
 	ReturnSession(DisconnectSession);
@@ -434,34 +471,24 @@ unsigned __stdcall CNetworkLib::WorkerThreadProc(void* Argument)
 			do
 			{
 				CompleteRet = GetQueuedCompletionStatus(Instance->_HCP, &Transferred, (PULONG_PTR)&NotifyCompleteSession, (LPOVERLAPPED*)&MyOverlapped, INFINITE);
-
-				/*
-					MyOverlapped가 nullptr일때는 내부적으로 IOCP의 에러가 난것으로
-					Error값을 확인하고 워커 쓰레드를 종료해준다.
-				*/
-				if (CompleteRet == 0)
-				{
-					GQCSError = WSAGetLastError();
-				}
+							
+				// MyOverlapped가 nullptr일때는 내부적으로 IOCP의 에러가 난것으로
+				// Error값을 확인하고 워커 쓰레드를 종료해준다.
 				if (MyOverlapped == nullptr)
 				{
 					DWORD Error = WSAGetLastError();
 					wprintf(L"MyOverlapped Null %d\n", Error);
 					return -1;
 				}
-
-				/*
-					Transferred가 0이라는 것은 클라쪽에서 FIN( 종료 패킷 )을 보냇다는 것으로 처음에는 closesocket을 호출하였으나,
-					소켓 재사용 문제로 인하여 의도치 않은 에러가 발생했다. 이후에 shutdown을 호출해서 소켓 재사용을 막으려 했지만, shutdown을 사용한다면
-					만약 상대방이 먹통이거나 반응 할 수 없는 경우 WSARecv가 걸려있을때 FIN이 오지 않기 때문에 해당 세션이 유령 세션으로 남을 수 있게 된다.
-					그렇기 때문에 소켓의 재사용을 막으면서 완료통지도 받게 하려면 우선 IO가 걸려있는것을 모두 다 취소해주고
-					do while을 빠져나가서 WSASend WSARecv작업을 안걸게 해주며 IOCount가 0이되게 유도해서 ReleaseSession을 호출해 closesocket이 한번만 호출 되도록 유도하는 방법을 사용한다.
-				*/
+				
+				//---------------------------------------------------------------------------
+				// Transferred가 0이 왔다는 것은 클라에서 FIN 패킷을 보냈다는 것을 의미하므로
+				// 우선 ClientSocket을 INVALID_SOCKET으로 바꿔서 send를 막고
+				// 예약되어 있었던 IO 작업들에 대해 CancelIoEx를 이용해 모두 취소시킨다.
+				//---------------------------------------------------------------------------
 				if (Transferred == 0)
-				{
-					// 우선 0이 온 세션 소켓에 INVALID_SOCKET를 넣어서 send, recv를 막아준 후
-					// 이전에 예약되어 있었던 IO 작업들에 대해 CancelIo를 호출하여 취소시킨다.
-					InterlockedExchange(&NotifyCompleteSession->ClientSock, INVALID_SOCKET);
+				{					
+					NotifyCompleteSession->ClientSock = INVALID_SOCKET;
 					CancelIoEx((HANDLE)NotifyCompleteSession->CloseSock, NULL);
 					break;
 				}
@@ -536,10 +563,8 @@ unsigned __stdcall CNetworkLib::AcceptThreadProc(void* Argument)
 			NewSession->ClientAddr = ClientAddr;
 			NewSession->ClientSock = ClientSock;
 			NewSession->CloseSock = ClientSock;
-			NewSession->IsCloseSocket = CLOSE_SOCKET_DO_NOT;
 			NewSession->IsSend = SENDING_DO_NOT;
 			NewSession->IsCancelIO = 0;
-			NewSession->IsSend = SENDING_DO_NOT;
 
 			//Instance->_SessionArray[NewSessionIndex]->SendPacketCount = 0;
 
@@ -551,18 +576,33 @@ unsigned __stdcall CNetworkLib::AcceptThreadProc(void* Argument)
 
 			HANDLE SocketIORet = CreateIoCompletionPort((HANDLE)NewSession->ClientSock, Instance->_HCP, (ULONG_PTR)NewSession, 0);
 
+			//------------------------------------------------------------------------------------------------------------------------------
+			// IOCount를 증가시켜주고 RecvPost를 건다.
+			// IOCount를 증가시키지 않고 RecvPost를 걸면 새로 할당 받은 Session에 대해 Closesocket을 할 가능성이 생긴다.
+			// 상황은 다음과 같다.
+			// 우선 하나의 세션에 대해서 ReleaseSession이 호출되어서 IOCount와 IsRelease를 검사하는 부분에서 쓰레드 소유권이 넘어가서 멈추고
+			// 컨텐츠에서 FindSession을 이용해 해당 Session을 찾아 냈을 경우에 진입하여 IOCount를 증가시키지만 이전 값이 0이기 때문에 
+			// ReleaseSession을 한번 더 호출하게 된다.
+			// 즉, A 라는 Session에 대해 ReleaseSession이 2번 호출된 상황인데, 
+			// 첫번째 호출한 쓰레드에서는 현재 IOCount와 IsRelease를 검사하는 부분에서 멈춰있고,
+			// 두번째 호출한 쓰레드에서 A Session에 대해 Release를 진행하고, Index를 계산해서 해당 Session을 반납까지 진행 한다.
+			//
+			// 이때 새로운 클라가 접속을 하면 해당 Index를 빼내서 초기화 작업을 하고 IsRelease가 0이 되는 순간,
+			// 새로운 클라가 할당 받은 Session과 첫번째 호출한 쓰레드가 소유하고 있는 Session은 같은 위치를 바라보고 있는 상황이고,
+			// 이와 같은 상황에서 첫번째 호출한 쓰레드로 소유권이 넘어가서 실행을 하게 되면,
+			// IOCount와 IsRelease가 둘다 0 이기 때문에 통과해서 Release를 진행하고 해당 Session을 반납까지 하게 되는 상황이 생긴다.
+			// 따라서 IsRelease를 0으로 초기화 하기 전에 IOCount를 1 증가시켜서, 다른 쓰레드에서 해당 Session에 대해 Release 대기 하고 잇더라도
+			// IOCount가 1 이기때문에 Release를 방지할 수 있도록 한다.
+			//---------------------------------------------------------------------------------------------------------------------------------
+
 			Instance->_SessionArray[NewSessionIndex]->IOBlock->IOCount++;
 			Instance->_SessionArray[NewSessionIndex]->IOBlock->IsRelease = 0;
 
 			Instance->_SessionID++;
 			//Instance->OnConnectionRequest(*ClientIP,ClientAddr.sin_port);
-			Instance->OnClientJoin(NewSession->SessionId);
-			//memcpy(&NewSession->DebugArray[NewSession->DebugArrayCount], "ACCJ ", 5);
-			//NewSession->DebugArrayCount += 5;
+			Instance->OnClientJoin(NewSession->SessionId);			
 			// 위에서 IOCount를 증가시켜 줫으므로 Accepct에 한해 Recv를 걸때 IOCount를 증가시키지 않는다.
-			Instance->RecvPost(NewSession, true);
-			//memcpy(&NewSession->DebugArray[NewSession->DebugArrayCount], "ACRP ", 5);
-			//NewSession->DebugArrayCount += 5;
+			Instance->RecvPost(NewSession, true);			
 
 			InterlockedIncrement64(&Instance->_SessionCount);
 		}
@@ -638,83 +678,10 @@ void CNetworkLib::ReleaseSession(st_SESSION* ReleaseSession)
 			ReleaseSession->SendRingBuf.Dequeue(&DeletePacket);
 			DeletePacket->Free();
 		}
-	}
+	}	
 
-	/*
-		이미 closesocket 작업을 한 것인지 아닌지 판단
-		1로 바꾸려 햇는데 0이면 closesocket작업을 하지 않은 것이므로 closesocket실행
-	*/
-	
-	if (InterlockedExchange(&ReleaseSession->IsCloseSocket, CLOSE_SOCKET_DO) == CLOSE_SOCKET_DO_NOT)
-	{
-		InterlockedExchange(&ReleaseSession->ClientSock, INVALID_SOCKET);
-		closesocket(ReleaseSession->CloseSock);
-	}
+	OnClientLeave(ReleaseSession);	
 
-	OnClientLeave(ReleaseSession->SessionId);
-
-	int64 Index = GET_SESSIONINDEX(ReleaseSession->SessionId);
-	_SessionArrayIndexs.Push(GET_SESSIONINDEX(ReleaseSession->SessionId));
-
-	InterlockedDecrement64(&_SessionCount);
-	if (ReleaseSessionId != ReleaseSession->SessionId)
-	{
-		wprintf(L"ReleaseSession SessionID Different !! ReleaseSessionID %d ReleaseSession->SessionID %d\n", ReleaseSessionId, ReleaseSession->SessionId);
-	}
+	InterlockedDecrement64(&_SessionCount);	
 }
 #pragma endregion
-
-st_SESSION* CNetworkLib::FindSession(__int64 SessionID)
-{
-	//세션 ID를 이용해 세션이 저장되어 있는 세션 인덱스를 가져온다.
-	int SessionIndex = GET_SESSIONINDEX(SessionID);
-
-	/*
-		이미 릴리즈 작업중이거나 작업중일 예정인 세션이라면 그냥 나간다.
-	*/
-	if (_SessionArray[SessionIndex]->IOBlock->IsRelease == true ||
-		_SessionArray[SessionIndex]->IsCancelIO == true)
-	{
-		//LOG(L"ERROR", en_LOG_LEVEL::LEVEL_ERROR, L"Func SendPacket SendSession is Release!!!!!!");
-		return nullptr;
-	}
-
-	/*
-		안전하게 증가를 시켰는데 IOCount의 값이 1이라면 릴리즈 작업중이거나 릴리즈를 작업할 예정인 세션(0에서 증가 한 것이니까)이므로
-		확인 작업을 해준다. 위에서 Increment로 증가시켜줬으니까 1을 다시 감소시켜서 그값이 0이라면 ReleaseSession을 호출해준다.
-	*/
-	if (InterlockedIncrement64(&_SessionArray[SessionIndex]->IOBlock->IOCount) == 1)
-	{
-		if (InterlockedDecrement64(&_SessionArray[SessionIndex]->IOBlock->IOCount) == 0)
-		{
-			//LOG(L"ERROR", en_LOG_LEVEL::LEVEL_ERROR, L"IOCount is 0!!!!!!");
-			ReleaseSession(_SessionArray[SessionIndex]);
-		}
-
-		return nullptr;
-	}
-
-	/*
-		찾을 세션의 세션 아이디가 입력받은 SessionID와 다르다면
-	*/
-	if (SessionID != _SessionArray[SessionIndex]->SessionId)
-	{
-		if (InterlockedDecrement64(&_SessionArray[SessionIndex]->IOBlock->IOCount) == 0)
-		{
-			ReleaseSession(_SessionArray[SessionIndex]);
-		}
-
-		return nullptr;
-	}
-
-	return _SessionArray[SessionIndex];
-}
-
-void CNetworkLib::ReturnSession(st_SESSION* ReturnSession)
-{
-	if (InterlockedDecrement64(&ReturnSession->IOBlock->IOCount) == 0)
-	{
-		ReleaseSession(ReturnSession);
-	}
-}
-

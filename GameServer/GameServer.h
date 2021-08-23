@@ -19,30 +19,31 @@ private:
 	//---------------------------------------------------
 	list<int64> _SectorList[SECTOR_Y_MAX][SECTOR_X_MAX];
 
+	HANDLE _AuthThread;
 	HANDLE _NetworkThread;
 	HANDLE _DataBaseThread;
 	HANDLE _GameLogicThread;
 
+	HANDLE _AuthThreadWakeEvent;
 	HANDLE _NetworkThreadWakeEvent;
 	HANDLE _DataBaseWakeEvent;
 
+	bool _AuthThreadEnd;
 	// WorkerThread 종료용 변수
 	bool _NetworkThreadEnd;
 	// DataBaseThread 종료용 변수
-	bool _DataBaseThreadEnd;
-	// LogicThread 종료용 변수
-	bool _LogicThreadEnd;
+	bool _DataBaseThreadEnd;	
 
 	// 게임서버에서 생성되는 오브젝트들의 아이디
 	int64 _GameObjectId;
 
+	static unsigned __stdcall AuthThreadProc(void* Argument);
 	static unsigned __stdcall NetworkThreadProc(void* Argument);
 	static unsigned __stdcall DataBaseThreadProc(void* Argument);
-	static unsigned __stdcall GameLogicThreadProc(void* Argument);
 	static unsigned __stdcall HeartBeatCheckThreadProc(void* Argument);
 
-	void CreateNewClient(int64 SessionID);
-	void DeleteClient(int64 SessionID);
+	void CreateNewClient(int64 SessionId);
+	void DeleteClient(st_SESSION* Session);
 
 	void PacketProc(int64 SessionId, CMessage* Message);
 	
@@ -61,6 +62,7 @@ private:
 	void PacketProcReqMove(int64 SessionID, CMessage* Message);	
 	void PacketProcReqAttack(int64 SessionID, CMessage* Message);
 	void PacketProcReqMousePositionObjectInfo(int64 SessionID, CMessage* Message);
+	void PacketProcReqChattingMessage(int64 SessionId, CMessage* Message);
 	void PacketProcReqSectorMove(int64 SessionID, CMessage* Message);
 	void PacketProcReqMessage(int64 SessionID, CMessage* Message);
 	void PacketProcReqHeartBeat(int64 SessionID, CMessage* Message);
@@ -90,9 +92,9 @@ private:
 	CMessage* MakePacketResEnterGame(st_GameObjectInfo ObjectInfo);	
 	CMessage* MakePacketResAttack(int64 AccountId, int32 PlayerDBId, en_MoveDir Dir);	
 	CMessage* MakePacketMousePositionObjectInfo(int64 AccountId, int32 PlayerDBId, st_GameObjectInfo ObjectInfo);
+	CMessage* MakePacketResChattingMessage(int32 PlayerDBId, wstring ChattingMessage);
 	CMessage* MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* NickName, WORD MessageLen, WCHAR* Message);
 
-	st_CLIENT* FindClient(int64 SessionID);
 public:
 	CMessage* MakePacketResChangeHP(int32 PlayerDBId, int32 CurrentHP, int32 MaxHP);
 	CMessage* MakePacketResObjectState(int32 ObjectId,en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState);
@@ -106,19 +108,15 @@ public:
 	//------------------------------------
 	CMemoryPoolTLS<st_Job>* _JobMemoryPool;
 	//------------------------------------
-	//접속한 클라이언트를 관리할 메모리풀
-	//------------------------------------
-	CMemoryPoolTLS<st_CLIENT>* _ClientMemoryPool;
-	//------------------------------------
 	// Job 큐
 	//------------------------------------
-	CLockFreeQue<st_Job*> _GameServerCommonMessageQue;
-	CLockFreeQue<st_Job*> _GameServerDataBaseMessageQue;
+	CLockFreeQue<st_Job*> _GameServerAuthThreadMessageQue;
+	CLockFreeQue<st_Job*> _GameServerNetworkThreadMessageQue;
+	CLockFreeQue<st_Job*> _GameServerDataBaseThreadMessageQue;	
 
-	// 채팅서버 접속한 클라
-	unordered_map<int64, st_CLIENT*> _ClientMap;
+	int64 _AuthThreadWakeCount;
+	int64 _AuthThreadTPS;
 
-	int64 _NetworkThreadWakeCount; // Update 쓰레드가 일어난 횟수	
 	int64 _NetworkThreadTPS; // Update 쓰레드가 1초에 작업한 처리량
 
 	int64 _DataBaseThreadWakeCount;
@@ -131,17 +129,10 @@ public:
 
 	virtual void OnClientJoin(int64 SessionID) override;
 	virtual void OnRecv(int64 SessionID, CMessage* Packet) override;
-	virtual void OnClientLeave(int64 SessionID) override;
+	virtual void OnClientLeave(st_SESSION* LeaveSession) override;
 	virtual bool OnConnectionRequest(const wchar_t ClientIP, int32 Port) override;
 		
 	void SendPacketSector(CSector* Sector, CMessage* Message);
 	void SendPacketAroundSector(st_Vector2Int CellPosition, CMessage* Message);
-	void SendPacketAroundSector(st_CLIENT* Client, CMessage* Message, bool SendMe = false);
-
-	//------------------------------------------------------------------------------
-	//자신 주위 8섹터들에게 메세지를 전달한다.
-	//SendMe = false 나에게는 보내지 않는다.
-	//SendMe = true 나에게도 보낸다.
-	//------------------------------------------------------------------------------
-	void SendPacketBroadcast(CMessage* Message);
+	void SendPacketAroundSector(st_SESSION* Session, CMessage* Message, bool SendMe = false);
 };

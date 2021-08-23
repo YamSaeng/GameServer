@@ -134,7 +134,7 @@ void CMonster::UpdateMoving()
 
 	if (Distance <= _AttackRange && (Direction._X == 0 || Direction._Y == 0))
 	{
-		_AttackTick = 0;
+		_AttackTick = GetTickCount64() + 500;
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;
 		_GameObjectInfo.ObjectPositionInfo.MoveDir = GetDirectionFromVector(Direction);	
 		BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
@@ -178,8 +178,8 @@ void CMonster::UpdateAttack()
 		// 주위 플레이어들에게 데미지 적용 결과 전송
 		BroadCastPacket(en_PACKET_S2C_CHANGE_HP);
 
-		// 0.5초마다 공격
-		_AttackTick = GetTickCount64() + 500;
+		// 0.8초마다 공격
+		_AttackTick = GetTickCount64() + 800;
 	}	
 
 	if (_AttackTick > GetTickCount64())

@@ -301,7 +301,9 @@ int CMessage::GetData(wchar_t* Dest, int32 Size)
 int32 CMessage::GetData(wstring& Dest, int32 Size)
 {
 	// 유니코드 문자열 생성후 wstring에 넣어서 반환
-	WCHAR StringToWCHAR[20];
+	WCHAR StringToWCHAR[256];
+	memset(StringToWCHAR, 0, sizeof(StringToWCHAR));
+
 	memcpy(StringToWCHAR, &_MessageBuf[_Front], Size);
 	wstring RetWString = StringToWCHAR;
 	Dest = RetWString;

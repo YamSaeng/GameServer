@@ -12,22 +12,25 @@
 CGameServer::CGameServer()
 {
 	//timeBeginPeriod(1);
+	_AuthThread = nullptr;
 	_NetworkThread = nullptr;
 	_DataBaseThread = nullptr;
 	
 	// Nonsignaled상태 자동리셋
+	_AuthThreadWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	_NetworkThreadWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	_DataBaseWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
+	_AuthThreadEnd = false;
 	_NetworkThreadEnd = false;
 	_DataBaseThreadEnd = false;	
-	_LogicThreadEnd = false;
 
 	_JobMemoryPool = new CMemoryPoolTLS<st_Job>(0);
-	_ClientMemoryPool = new CMemoryPoolTLS<st_CLIENT>(0);
+
+	_AuthThreadTPS = 0;
+	_AuthThreadWakeCount = 0;
 
 	_NetworkThreadTPS = 0;
-	_NetworkThreadWakeCount = 0;
 
 	_GameObjectId = 0;
 }
@@ -42,33 +45,33 @@ void CGameServer::Start(const WCHAR* OpenIP, int32 Port)
 {
 	CNetworkLib::Start(OpenIP, Port);
 
-	G_ObjectManager->MonsterSpawn(300, 1);
+	G_ObjectManager->MonsterSpawn(50, 1);
 	G_ObjectManager->GameServer = this;
 
+	_AuthThread = (HANDLE)_beginthreadex(NULL, 0, AuthThreadProc, this, 0, NULL);
 	_NetworkThread   = (HANDLE)_beginthreadex(NULL, 0, NetworkThreadProc, this, 0, NULL);
 	_DataBaseThread  = (HANDLE)_beginthreadex(NULL, 0, DataBaseThreadProc, this, 0, NULL);
-	_GameLogicThread = (HANDLE)_beginthreadex(NULL, 0, GameLogicThreadProc, this, 0, NULL);
 
-	CloseHandle(_NetworkThread);
+	CloseHandle(_AuthThread);
+	CloseHandle(_NetworkThread);	
 	CloseHandle(_DataBaseThread);
-	CloseHandle(_GameLogicThread);
 }
 
-unsigned __stdcall CGameServer::NetworkThreadProc(void* Argument)
+unsigned __stdcall CGameServer::AuthThreadProc(void* Argument)
 {
 	CGameServer* Instance = (CGameServer*)Argument;
 
-	while (!Instance->_NetworkThreadEnd)
+	while (!Instance->_AuthThreadEnd)
 	{
-		WaitForSingleObject(Instance->_NetworkThreadWakeEvent, INFINITE);
+		WaitForSingleObject(Instance->_AuthThreadWakeEvent, INFINITE);
 
-		Instance->_NetworkThreadWakeCount++;
+		Instance->_AuthThreadWakeCount++;
 
-		while (!Instance->_GameServerCommonMessageQue.IsEmpty())
+		while (!Instance->_GameServerAuthThreadMessageQue.IsEmpty())
 		{
 			st_Job* Job = nullptr;
 
-			if (!Instance->_GameServerCommonMessageQue.Dequeue(&Job))
+			if (!Instance->_GameServerAuthThreadMessageQue.Dequeue(&Job))
 			{
 				break;
 			}
@@ -79,8 +82,39 @@ unsigned __stdcall CGameServer::NetworkThreadProc(void* Argument)
 				Instance->CreateNewClient(Job->SessionID);
 				break;
 			case AUTH_DISCONNECT_CLIENT:
-				Instance->DeleteClient(Job->SessionID);
+				Instance->DeleteClient(Job->Session);
 				break;
+			case AUTH_MESSAGE:
+				break;
+			default:
+				Instance->Disconnect(Job->SessionID);
+				break;
+			}
+
+			Instance->_AuthThreadTPS++;
+			Instance->_JobMemoryPool->Free(Job);
+		}				
+	}
+	return 0;
+}
+
+unsigned __stdcall CGameServer::NetworkThreadProc(void* Argument)
+{
+	CGameServer* Instance = (CGameServer*)Argument;
+
+	while (!Instance->_NetworkThreadEnd)
+	{
+		while (!Instance->_GameServerNetworkThreadMessageQue.IsEmpty())
+		{
+			st_Job* Job = nullptr;
+
+			if (!Instance->_GameServerNetworkThreadMessageQue.Dequeue(&Job))
+			{
+				break;
+			}
+
+			switch (Job->Type)
+			{			
 			case MESSAGE:
 				Instance->PacketProc(Job->SessionID, Job->Message);
 				break;
@@ -91,7 +125,9 @@ unsigned __stdcall CGameServer::NetworkThreadProc(void* Argument)
 
 			Instance->_NetworkThreadTPS++;
 			Instance->_JobMemoryPool->Free(Job);		
-		}		
+		}	
+
+		G_ChannelManager->Update();
 	}
 	return 0;
 }
@@ -106,11 +142,11 @@ unsigned __stdcall CGameServer::DataBaseThreadProc(void* Argument)
 
 		Instance->_DataBaseThreadWakeCount++;
 
-		while (!Instance->_GameServerDataBaseMessageQue.IsEmpty())
+		while (!Instance->_GameServerDataBaseThreadMessageQue.IsEmpty())
 		{
 			st_Job* Job = nullptr;
 
-			if (!Instance->_GameServerDataBaseMessageQue.Dequeue(&Job))
+			if (!Instance->_GameServerDataBaseThreadMessageQue.Dequeue(&Job))
 			{
 				break;
 			}
@@ -132,98 +168,72 @@ unsigned __stdcall CGameServer::DataBaseThreadProc(void* Argument)
 	return 0;
 }
 
-unsigned __stdcall CGameServer::GameLogicThreadProc(void* Argument)
-{
-	CGameServer* Instance = (CGameServer*)Argument;
-
-	while (!Instance->_LogicThreadEnd)
-	{
-		// 채널 목록 돌면서 업데이트
-		G_ChannelManager->Update();
-	}
-
-	return 0;
-}
-
 unsigned __stdcall CGameServer::HeartBeatCheckThreadProc(void* Argument)
 {
 	return 0;
 }
 
-void CGameServer::CreateNewClient(int64 SessionID)
+void CGameServer::CreateNewClient(int64 SessionId)
 {	
-	st_CLIENT* NewClient = _ClientMemoryPool->Alloc();
-	NewClient->SessionId = SessionID;
-	NewClient->AccountId = 0;
+	st_SESSION* Session = FindSession(SessionId);
+	Session->AccountId = 0;	
+	
+	Session->SectorX = -1;
+	Session->SectorY = -1;
+	
+	Session->IsLogin = false;
 
-	NewClient->SectorX = -1;
-	NewClient->SectorY = -1;
+	Session->Token = 0;
 
-	NewClient->IsLogin = false;
-
-	NewClient->Token = 0;
-
-	NewClient->RecvPacketTime = timeGetTime();	
+	Session->RecvPacketTime = timeGetTime();
 
 	for (int i = 0; i < 5; i++)
 	{
-		NewClient->MyPlayers[i] = (CPlayer*)G_ObjectManager->ObjectCreate(en_GameObjectType::PLAYER);
+		Session->MyPlayers[i] = (CPlayer*)G_ObjectManager->ObjectCreate(en_GameObjectType::PLAYER);		
 	}
 
-	NewClient->MyPlayer = nullptr;
-
-	_ClientMap.insert(pair<int64, st_CLIENT*>(NewClient->SessionId, NewClient));
+	Session->MyPlayer = nullptr;
 
 	CMessage* ResClientConnectedMessage = MakePacketResClientConnected();	
-	SendPacket(NewClient->SessionId, ResClientConnectedMessage);
+	SendPacket(Session->SessionId, ResClientConnectedMessage);
 	ResClientConnectedMessage->Free();
+
+	ReturnSession(Session);
 }
 
-void CGameServer::DeleteClient(int64 SessionID)
-{
-	// 받은 세션 아이디로 클라이언트 찾아서 메모리풀에 반환 및 맵에서 삭제
-	st_CLIENT* Client = nullptr;
-	unordered_map<int64, st_CLIENT*>::iterator ClientFindIterator;
-	ClientFindIterator = _ClientMap.find(SessionID);
-
-	if (ClientFindIterator != _ClientMap.end())
+void CGameServer::DeleteClient(st_SESSION* Session)
+{	
+	if (Session == nullptr)
 	{
-		Client = (*ClientFindIterator).second;
+		return;
+	}
 
-		if (Client->SectorX != -1 && Client->SectorY != -1)
-		{
-			_SectorList[Client->SectorY][Client->SectorX].remove(Client->SessionId);
-		}
+	if (Session->MyPlayer != nullptr)
+	{
+		CChannel* Channel = G_ChannelManager->Find(1);
+		Channel->LeaveChannel(Session->MyPlayer);
 
-		if (Client->MyPlayer != nullptr)
-		{			
-			CChannel* Channel = G_ChannelManager->Find(1);
-			Channel->LeaveChannel(Client->MyPlayer);
+		vector<int64> DeSpawnObjectIds;
+		DeSpawnObjectIds.push_back(Session->MyPlayer->_GameObjectInfo.ObjectId);
+		CMessage* ResLeaveGame = MakePacketResDeSpawn(1, DeSpawnObjectIds);
+		SendPacketAroundSector(Session, ResLeaveGame);
+		ResLeaveGame->Free();
 
-			vector<int64> DeSpawnObjectIds;
-			// 나간 대상 제외하고 주위 섹터 플레이어들한테 해당 클라가 나갓다고 알림
-			DeSpawnObjectIds.push_back(Client->MyPlayer->_GameObjectInfo.ObjectId);
-			CMessage* ResLeaveGame = MakePacketResDeSpawn(1, DeSpawnObjectIds);
-			SendPacketAroundSector(Client, ResLeaveGame);
-			ResLeaveGame->Free();
-		}		
-		
 		for (int i = 0; i < 5; i++)
 		{
-			G_ObjectManager->ObjectReturn(en_GameObjectType::PLAYER, Client->MyPlayers[i]);
-			Client->MyPlayers[i]->_NetworkState = en_ObjectNetworkState::LEAVE;
-			Client->MyPlayers[i] = nullptr;
+			G_ObjectManager->ObjectReturn(en_GameObjectType::PLAYER, Session->MyPlayers[i]);
+			Session->MyPlayers[i]->_NetworkState = en_ObjectNetworkState::LEAVE;
+			Session->MyPlayers[i] = nullptr;
 		}
+	}	
 
-		Client->MyPlayer = nullptr;
+	Session->MyPlayer = nullptr;
 
-		_ClientMemoryPool->Free(Client);
-		_ClientMap.erase(ClientFindIterator);
-	}
-	else
-	{
+	Session->ClientSock = INVALID_SOCKET;
+	closesocket(Session->CloseSock);
 
-	}
+	int64 Index = GET_SESSIONINDEX(Session->SessionId);
+	_SessionArrayIndexs.Push(GET_SESSIONINDEX(Session->SessionId));
 }
 
 void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
@@ -251,6 +261,9 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 	case en_PACKET_C2S_MOUSE_POSITION_OBJECT_INFO:
 		PacketProcReqMousePositionObjectInfo(SessionID, Message);
 		break;
+	case en_PACKET_C2S_MESSAGE:
+		PacketProcReqChattingMessage(SessionID, Message);
+		break;
 	case en_PACKET_CS_GAME_REQ_SECTOR_MOVE:
 		PacketProcReqSectorMove(SessionID, Message);
 		break;
@@ -277,16 +290,29 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 //----------------------------------------------------------------------------
 void CGameServer::PacketProcReqLogin(int64 SessionID, CMessage* Message)
 {
-	st_CLIENT* Client = FindClient(SessionID);
+	st_SESSION* Session = FindSession(SessionID);
 
-	int64 AccountID;
+	int64 AccountId;
 	int32 Token;
 
-	if (Client != nullptr)
+	if (Session != nullptr)
 	{
 		// AccountID 셋팅
-		*Message >> AccountID;
-		Client->AccountId = AccountID;
+		*Message >> AccountId;
+
+		// 중복 로그인 확인
+		for (st_SESSION* FindSession : _SessionArray)
+		{
+			if (FindSession->AccountId == AccountId)
+			{					
+				// 새로 접속한 중복 되는 유저 연결 끊음
+				Disconnect(Session->SessionId);
+				ReturnSession(Session);
+				return;
+			}
+		}		
+
+		Session->AccountId = AccountId;
 
 		int8 IdLen;
 		*Message >> IdLen;
@@ -295,40 +321,27 @@ void CGameServer::PacketProcReqLogin(int64 SessionID, CMessage* Message)
 		memset(ClientId, 0, sizeof(WCHAR) * 20);
 		Message->GetData(ClientId, IdLen);
 		
-		Client->ClientId = ClientId;
+		Session->LoginId = ClientId;
 
 		// 토큰 셋팅
 		*Message >> Token;
-		Client->Token = Token;
+		Session->Token = Token;
 
-		if (Client->AccountId != 0 && Client->AccountId != AccountID)
+		if (Session->AccountId != 0 && Session->AccountId != AccountId)
 		{
-			Disconnect(Client->SessionId);
+			Disconnect(Session->SessionId);
 			return;
-		}
+		}				
 		
-		////중복 로그인 확인
-		//map<int64, st_CLIENT*>::iterator ClientFindIterator;	
-
-		//for (ClientFindIterator = _ClientMap.begin(); ClientFindIterator != _ClientMap.end(); ++ClientFindIterator)
-		//{
-		//	//중복 로그인 판단되면 끊어버리기
-		//	if ((*ClientFindIterator).second->AccountNo == AccountNo)
-		//	{				
-		//		if ((*ClientFindIterator).second->SessionID != SessionID)
-		//		{
-		//			Disconnect((*ClientFindIterator).second->SessionID);
-		//			break;
-		//		}				
-		//	}
-		//}		
+		// DB 큐에 요청하기 전 IOCount를 증가시켜서 Session이 반납 안되도록 막음
+		Session->IOBlock->IOCount++;
 
 		st_Job* DBAccountCheckJob = _JobMemoryPool->Alloc();
 		DBAccountCheckJob->Type = DATA_BASE_ACCOUNT_CHECK;
-		DBAccountCheckJob->SessionID = Client->SessionId;
+		DBAccountCheckJob->SessionID = Session->SessionId;
 		DBAccountCheckJob->Message = nullptr;
 
-		_GameServerDataBaseMessageQue.Enqueue(DBAccountCheckJob);		
+		_GameServerDataBaseThreadMessageQue.Enqueue(DBAccountCheckJob);		
 		SetEvent(_DataBaseWakeEvent);	
 	}
 	else
@@ -336,13 +349,15 @@ void CGameServer::PacketProcReqLogin(int64 SessionID, CMessage* Message)
 		// 해당 클라가 없음
 		bool Status = LOGIN_FAIL;		
 	}	
+
+	ReturnSession(Session);
 }
 
 void CGameServer::PacketProcReqCreateCharacter(int64 SessionID, CMessage* Message)
 {
-	st_CLIENT* Client = FindClient(SessionID);
+	st_SESSION* Session = FindSession(SessionID);
 
-	if (Client)
+	if (Session)
 	{
 		// 캐릭터 이름 길이
 		int8 CharacterNameLen;
@@ -353,41 +368,45 @@ void CGameServer::PacketProcReqCreateCharacter(int64 SessionID, CMessage* Messag
 		Message->GetData(CharacterName, CharacterNameLen);
 
 		// 캐릭터 이름 셋팅
-		Client->CreateCharacterName = CharacterName;
+		Session->CreateCharacterName = CharacterName;
+
+		Session->IOBlock->IOCount++;
 
 		st_Job* DBCharacterCheckJob = _JobMemoryPool->Alloc();		
 		DBCharacterCheckJob->Type = DATA_BASE_CHARACTER_CHECK;
-		DBCharacterCheckJob->SessionID = Client->SessionId;
+		DBCharacterCheckJob->SessionID = Session->SessionId;
 		DBCharacterCheckJob->Message = nullptr;
 
-		_GameServerDataBaseMessageQue.Enqueue(DBCharacterCheckJob);
+		_GameServerDataBaseThreadMessageQue.Enqueue(DBCharacterCheckJob);
 		SetEvent(_DataBaseWakeEvent);
 	}
 	else
 	{
 
 	}
+
+	ReturnSession(Session);
 }
 
 void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 {
-	st_CLIENT* Client = FindClient(SessionID);
+	st_SESSION* Session = FindSession(SessionID);
 
-	if (Client)
+	if (Session)
 	{
 		// 로그인 중이 아니면 나간다.
-		if (!Client->IsLogin)
+		if (!Session->IsLogin)
 		{
-			Disconnect(Client->SessionId);
+			Disconnect(Session->SessionId);
 			return;
 		}
 
 		int64 AccountId;
 		*Message >> AccountId;
 
-		if (Client->AccountId != AccountId)
+		if (Session->AccountId != AccountId)
 		{
-			Disconnect(Client->SessionId);
+			Disconnect(Session->SessionId);
 			return;
 		}
 
@@ -401,28 +420,28 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 		// 클라가 가지고 있는 캐릭 중에 패킷으로 받은 캐릭터가 있는지 확인한다.
 		for (int i = 0; i < 5; i++)
 		{
-			if (Client->MyPlayers[i]->_GameObjectInfo.ObjectName == EnterGameCharacterName)
+			if (Session->MyPlayers[i]->_GameObjectInfo.ObjectName == EnterGameCharacterName)
 			{
-				Client->MyPlayer = Client->MyPlayers[i];
-				Client->MyPlayer->_NetworkState = en_ObjectNetworkState::LIVE;
+				Session->MyPlayer = Session->MyPlayers[i];
+				Session->MyPlayer->_NetworkState = en_ObjectNetworkState::LIVE;
 				break;
 			}
 		}
 						
 		// ObjectManager에 플레이어 추가 및 패킷 전송
-		G_ObjectManager->Add(Client->MyPlayer, 1);		
+		G_ObjectManager->Add(Session->MyPlayer, 1);
 
 		// 나한테 나 생성하라고 알려줌
-		CMessage* ResEnterGamePacket = MakePacketResEnterGame(Client->MyPlayer->_GameObjectInfo);
-		SendPacket(Client->SessionId, ResEnterGamePacket);
+		CMessage* ResEnterGamePacket = MakePacketResEnterGame(Session->MyPlayer->_GameObjectInfo);
+		SendPacket(Session->SessionId, ResEnterGamePacket);
 		ResEnterGamePacket->Free();	
 					
 		vector<st_GameObjectInfo> SpawnObjectInfo;
-		SpawnObjectInfo.push_back(Client->MyPlayer->_GameObjectInfo);
+		SpawnObjectInfo.push_back(Session->MyPlayer->_GameObjectInfo);
 
 		// 다른 플레이어들한테 나를 생성하라고 알려줌
 		CMessage* ResSpawnPacket = MakePacketResSpawn(1, SpawnObjectInfo);
-		SendPacketAroundSector(Client, ResSpawnPacket);
+		SendPacketAroundSector(Session, ResSpawnPacket);
 		ResSpawnPacket->Free();				
 		
 		SpawnObjectInfo.clear();
@@ -430,7 +449,7 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 		// 나한테 다른 오브젝트들을 생성하라고 알려줌						
 		st_GameObjectInfo* SpawnGameObjectInfos;
 
-		vector<CGameObject*> AroundObjects = G_ChannelManager->Find(1)->GetAroundObjects(Client->MyPlayer, 10);
+		vector<CGameObject*> AroundObjects = G_ChannelManager->Find(1)->GetAroundObjects(Session->MyPlayer, 10);
 		
 		if (AroundObjects.size() > 0)
 		{			
@@ -442,7 +461,7 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 			}
 
 			CMessage* ResOtherObjectSpawnPacket = MakePacketResSpawn((int32)AroundObjects.size(), SpawnObjectInfo);
-			SendPacket(Client->SessionId, ResOtherObjectSpawnPacket);
+			SendPacket(Session->SessionId, ResOtherObjectSpawnPacket);
 			ResOtherObjectSpawnPacket->Free();
 		
 			delete[] SpawnGameObjectInfos;
@@ -452,6 +471,8 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 	{
 
 	}
+
+	ReturnSession(Session);
 }
 
 // int64 AccountId
@@ -459,14 +480,14 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 // char Dir
 void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 {	
-	st_CLIENT* Client = FindClient(SessionID);
+	st_SESSION* Session = FindSession(SessionID);
 
-	if (Client)
+	if (Session)
 	{
 		// 클라가 로그인중인지 확인
-		if (!Client->IsLogin)
+		if (!Session->IsLogin)
 		{
-			Disconnect(Client->SessionId);
+			Disconnect(Session->SessionId);
 			return;
 		}
 
@@ -475,9 +496,9 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 		*Message >> AccountId;
 
 		// 클라에 들어있는 AccountId와 뽑은 AccoountId가 다른지 확인
- 		if (Client->AccountId != AccountId)
+ 		if (Session->AccountId != AccountId)
 		{
-			Disconnect(Client->SessionId);
+			Disconnect(Session->SessionId);
 			return;
 		}
 
@@ -486,17 +507,17 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 		*Message >> PlayerDBId;
 
 		// 클라가 조종중인 캐릭터가 있는지 확인
-		if (Client->MyPlayer == nullptr)
+		if (Session->MyPlayer == nullptr)
 		{
-			Disconnect(Client->SessionId);
+			Disconnect(Session->SessionId);
 			return;
 		}
 		else
 		{
 			// 조종중인 캐릭터가 있으면 ObjectId가 다른지 확인
-			if (Client->MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+			if (Session->MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
 			{
-				Disconnect(Client->SessionId);
+				Disconnect(Session->SessionId);
 				return;
 			}
 		}
@@ -525,7 +546,7 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 			break;
 		}
 		
-		CPlayer* MyPlayer = Client->MyPlayer;		
+		CPlayer* MyPlayer = Session->MyPlayer;
 		MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = MoveDir;
 		MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
 
@@ -549,8 +570,8 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 		}				
 			
 		// 내가 움직인 것을 내 주위 플레이어들에게 알려야함
-		CMessage* ResMyMoveOtherPacket = MakePacketResMove(Client->AccountId, MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
-		SendPacketAroundSector(Client, ResMyMoveOtherPacket, true);
+		CMessage* ResMyMoveOtherPacket = MakePacketResMove(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
+		SendPacketAroundSector(Session, ResMyMoveOtherPacket, true);
 		ResMyMoveOtherPacket->Free();
 
 		MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;		
@@ -559,6 +580,8 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 	{
 
 	}
+
+	ReturnSession(Session);
 }
 
 // int64 AccountId
@@ -566,69 +589,112 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 // char Dir
 void CGameServer::PacketProcReqAttack(int64 SessionID, CMessage* Message)
 {
-	st_CLIENT* Client = FindClient(SessionID);
+	st_SESSION* Session = FindSession(SessionID);
+
 	int64 AccountId;
 	int32 PlayerDBId;
 
-	if (Client)
+	if (Session)
 	{
-		if (!Client->IsLogin)
+		if (!Session->IsLogin)
 		{
-			Disconnect(Client->SessionId);
+			Disconnect(Session->SessionId);
 			return;
 		}
 
 		*Message >> AccountId;
 
-		if (Client->AccountId != AccountId)
+		if (Session->AccountId != AccountId)
 		{
-			Disconnect(Client->SessionId);
+			Disconnect(Session->SessionId);
 			return;
 		}
 
 		*Message >> PlayerDBId;
 		
-		if (Client->MyPlayer == nullptr)
+		if (Session->MyPlayer == nullptr)
 		{
-			Disconnect(Client->SessionId);
+			Disconnect(Session->SessionId);
 			return;
 		}
 		else
 		{
-			if (Client->MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+			if (Session->MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
 			{
-				Disconnect(Client->SessionId);
+				Disconnect(Session->SessionId);
 				return;
 			}
 		}
 
-		CPlayer* MyPlayer = Client->MyPlayer;
+		CPlayer* MyPlayer = Session->MyPlayer;
 
-		char ReqMoveDir;
+		int8 ReqMoveDir;
 		*Message >> ReqMoveDir;
+		
+		int16 ReqAttackRange;
+		*Message >> ReqAttackRange;
+
+		int8 Distance;
+		*Message >> Distance;
 
 		en_MoveDir MoveDir = (en_MoveDir)ReqMoveDir;			
 		MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = MoveDir;
 
-		st_Vector2Int FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir);
-		CGameObject* Target = MyPlayer->_Channel->_Map->Find(FrontCell);		
+		en_AttackRange AttackRange = (en_AttackRange)ReqAttackRange;
+		
+		st_Vector2Int FrontCell;
+		vector<CGameObject*> Targets;		
+
+		switch (AttackRange)
+		{
+		case NORMAL_ATTACK:
+		case FORWARD_ATTACK:
+			{
+				FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, Distance);
+
+				CGameObject* Target = MyPlayer->_Channel->_Map->Find(FrontCell);
+				if (Target != nullptr)
+				{
+					Targets.push_back(Target);
+				}
+			}			
+			break;
+		case AROUND_ONE_ATTACK:
+			{
+				vector<st_Vector2Int> TargetPositions;
+
+				TargetPositions = MyPlayer->GetAroundCellPosition(MyPlayer->GetCellPosition(), Distance);
+				for (st_Vector2Int TargetPosition : TargetPositions)
+				{
+					CGameObject* Target = MyPlayer->_Channel->_Map->Find(TargetPosition);
+					if (Target != nullptr)
+					{
+						Targets.push_back(Target);
+					}
+				}
+			}
+			break;
+		}
 		
 		// 주위 섹터 들에게 내가 지금 공격하고 있다고 알려줌
-		CMessage* ResMyAttackOtherPacket = MakePacketResAttack(Client->AccountId, MyPlayer->_GameObjectInfo.ObjectId, MoveDir);
-		SendPacketAroundSector(Client, ResMyAttackOtherPacket,true);
+		CMessage* ResMyAttackOtherPacket = MakePacketResAttack(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, MoveDir);
+		SendPacketAroundSector(Session, ResMyAttackOtherPacket,true);
 		ResMyAttackOtherPacket->Free();
 
-		if (Target != nullptr)
+		if (Targets.size() > 0)
 		{
-			Target->OnDamaged(MyPlayer, 10);
-
-			G_Logger->WriteStdOut(en_Color::YELLOW, L"Attack");
-			
-			CMessage* ResChangeHPPacket = MakePacketResChangeHP(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectStatInfo.HP, Target->_GameObjectInfo.ObjectStatInfo.MaxHP);
-			SendPacketAroundSector(Client, ResChangeHPPacket, true);
-			ResChangeHPPacket->Free();
-		}
+			for (CGameObject* Target : Targets)
+			{
+				Target->OnDamaged(MyPlayer, 10);
+				
+				CMessage* ResChangeHPPacket = MakePacketResChangeHP(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectStatInfo.HP, Target->_GameObjectInfo.ObjectStatInfo.MaxHP);
+				SendPacketAroundSector(Session, ResChangeHPPacket, true);
+				ResChangeHPPacket->Free();
+			}
+		}	
 	}
+
+	ReturnSession(Session);
 }
 
 // int64 AccountId
@@ -637,38 +703,39 @@ void CGameServer::PacketProcReqAttack(int64 SessionID, CMessage* Message)
 // int32 Y
 void CGameServer::PacketProcReqMousePositionObjectInfo(int64 SessionID, CMessage* Message)
 {
-	st_CLIENT* Client = FindClient(SessionID);
+	st_SESSION* Session = FindSession(SessionID);
+
 	int64 AccountId;
 	int32 PlayerDBId;
 
-	if (Client)
+	if (Session)
 	{
-		if (!Client->IsLogin)
+		if (!Session->IsLogin)
 		{
-			Disconnect(Client->SessionId);
+			Disconnect(Session->SessionId);
 			return;
 		}
 
 		*Message >> AccountId;
 
-		if (Client->AccountId != AccountId)
+		if (Session->AccountId != AccountId)
 		{
-			Disconnect(Client->SessionId);
+			Disconnect(Session->SessionId);
 			return;
 		}
 
 		*Message >> PlayerDBId;
 
-		if (Client->MyPlayer == nullptr)
+		if (Session->MyPlayer == nullptr)
 		{
-			Disconnect(Client->SessionId);
+			Disconnect(Session->SessionId);
 			return;
 		}
 		else
 		{
-			if (Client->MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+			if (Session->MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
 			{
-				Disconnect(Client->SessionId);
+				Disconnect(Session->SessionId);
 				return;
 			}
 		}
@@ -691,11 +758,74 @@ void CGameServer::PacketProcReqMousePositionObjectInfo(int64 SessionID, CMessage
 		{
 			CPlayer* Player = (CPlayer*)FindObject;
 
-			CMessage* ResMousePositionObjectInfo = MakePacketMousePositionObjectInfo(Client->AccountId, Player->_GameObjectInfo.ObjectId, Player->_GameObjectInfo);
-			SendPacket(Client->SessionId, ResMousePositionObjectInfo);
+			CMessage* ResMousePositionObjectInfo = MakePacketMousePositionObjectInfo(Session->AccountId, Player->_GameObjectInfo.ObjectId, Player->_GameObjectInfo);
+			SendPacket(Session->SessionId, ResMousePositionObjectInfo);
 			ResMousePositionObjectInfo->Free();
 		}
 	}
+
+	ReturnSession(Session);
+}
+
+// int32 ObjectId
+// string Message
+void CGameServer::PacketProcReqChattingMessage(int64 SessionId, CMessage* Message)
+{
+	st_SESSION* Session = FindSession(SessionId);
+
+	int64 AccountId;
+	int32 PlayerDBId;	
+
+	if (Session)
+	{
+		if (!Session->IsLogin)
+		{
+			Disconnect(Session->SessionId);
+			return;
+		}
+
+		*Message >> AccountId;
+
+		if (Session->AccountId != AccountId)
+		{
+			Disconnect(Session->SessionId);
+			return;
+		}
+
+		*Message >> PlayerDBId;
+
+		if (Session->MyPlayer == nullptr)
+		{
+			Disconnect(Session->SessionId);
+			return;
+		}
+		else
+		{
+			if (Session->MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+			{
+				Disconnect(Session->SessionId);
+				return;
+			}
+		}
+
+		int8 ChattingMessageLen;
+		*Message >> ChattingMessageLen;
+				
+		wstring ChattingMessage;
+		Message->GetData(ChattingMessage, ChattingMessageLen);		
+
+		CChannel* Channel = G_ChannelManager->Find(1);
+		vector<CPlayer*> Players = Channel->GetAroundPlayer(Session->MyPlayer, 10, false);
+
+		for (CPlayer* Player : Players)
+		{			
+			CMessage* ResChattingMessage = MakePacketResChattingMessage(PlayerDBId, ChattingMessage);
+			SendPacket(Player->_SessionId,ResChattingMessage);
+			ResChattingMessage->Free();
+		}
+	}
+
+	ReturnSession(Session);
 }
 
 //---------------------------------------------------------------------------------
@@ -707,25 +837,26 @@ void CGameServer::PacketProcReqMousePositionObjectInfo(int64 SessionID, CMessage
 //---------------------------------------------------------------------------------
 void CGameServer::PacketProcReqSectorMove(int64 SessionID, CMessage* Message)
 {
-	st_CLIENT* Client = FindClient(SessionID);
+	st_SESSION* Session = FindSession(SessionID);
+
 	int64 AccountNo;
 	WORD SectorX;
 	WORD SectorY;
 
-	if (Client)
+	if (Session)
 	{
 		//클라가 로그인 중인지 판단
-		if (!Client->IsLogin)
+		if (!Session->IsLogin)
 		{
-			Disconnect(Client->SessionId);
+			Disconnect(Session->SessionId);
 			return;
 		}
 
 		*Message >> AccountNo;
 
-		if (Client->AccountId != AccountNo)
+		if (Session->AccountId != AccountNo)
 		{
-			Disconnect(Client->SessionId);
+			Disconnect(Session->SessionId);
 			return;
 		}
 
@@ -735,20 +866,20 @@ void CGameServer::PacketProcReqSectorMove(int64 SessionID, CMessage* Message)
 		//섹터 X Y 좌표 범위 검사
 		if (SectorX < 0 || SectorX >= SECTOR_X_MAX || SectorY < 0 || SectorY >= SECTOR_Y_MAX)
 		{
-			Disconnect(Client->SessionId);
+			Disconnect(Session->SessionId);
 			return;
 		}
 
 		//기존 섹터에서 클라 제거
-		if (Client->SectorX != -1 && Client->SectorY != -1)
+		if (Session->SectorX != -1 && Session->SectorY != -1)
 		{
-			_SectorList[Client->SectorY][Client->SectorX].remove(Client->SessionId);
+			_SectorList[Session->SectorY][Session->SectorX].remove(Session->SessionId);
 		}
 
-		Client->SectorY = SectorY;
-		Client->SectorX = SectorX;
+		Session->SectorY = SectorY;
+		Session->SectorX = SectorX;
 
-		_SectorList[Client->SectorY][Client->SectorX].push_back(Client->SessionId);
+		_SectorList[Session->SectorY][Session->SectorX].push_back(Session->SessionId);
 
 		/*CMessage* SectorMoveResMessage = MakePacketResSectorMove(Client->AccountId, Client->SectorX, Client->SectorY);
 		SendPacket(Client->SessionId, SectorMoveResMessage);
@@ -758,6 +889,8 @@ void CGameServer::PacketProcReqSectorMove(int64 SessionID, CMessage* Message)
 	{
 
 	}
+
+	ReturnSession(Session);
 }
 
 //---------------------------------------------------------------------------------
@@ -769,7 +902,8 @@ void CGameServer::PacketProcReqSectorMove(int64 SessionID, CMessage* Message)
 //---------------------------------------------------------------------------------
 void CGameServer::PacketProcReqMessage(int64 SessionID, CMessage* Message)
 {
-	st_CLIENT* Client = FindClient(SessionID);
+	st_SESSION* Session = FindSession(SessionID);
+
 	int64 AccountNo;
 	int MessageLen = 0;
 	WORD CSMessageLen;
@@ -777,16 +911,16 @@ void CGameServer::PacketProcReqMessage(int64 SessionID, CMessage* Message)
 
 	memset(CSMessage, 0, sizeof(CSMessage));
 
-	if (!Client->IsLogin)
+	if (!Session->IsLogin)
 	{
-		Disconnect(Client->SessionId);
+		Disconnect(Session->SessionId);
 		return;
 	}
 
 	*Message >> AccountNo;
-	if (Client->AccountId != AccountNo)
+	if (Session->AccountId != AccountNo)
 	{
-		Disconnect(Client->SessionId);
+		Disconnect(Session->SessionId);
 		return;
 	}
 
@@ -794,24 +928,26 @@ void CGameServer::PacketProcReqMessage(int64 SessionID, CMessage* Message)
 	MessageLen = Message->GetData(CSMessage, CSMessageLen);
 	if (MessageLen != CSMessageLen)
 	{
-		Disconnect(Client->SessionId);
+		Disconnect(Session->SessionId);
 		return;
 	}
 
-	/**Message >> CSMessageLen;
+	*Message >> CSMessageLen;
 	int MessageUseBufSize = Message->GetUseBufferSize();
 
-	if (MessageUseBufSize - 5 != CSMessageLen)
+	if (MessageUseBufSize - sizeof(CMessage::st_ENCODE_HEADER) != CSMessageLen)
 	{
-		Disconnect(Client->SessionID);
+		Disconnect(Session->SessionId);
 		return;
 	}
 
-	Message->GetData(CSMessage, CSMessageLen);	*/
+	Message->GetData(CSMessage, CSMessageLen);	
 
 	CMessage* ChattingResMessage = nullptr;
 	//ChattingResMessage = MakePacketResMessage(Client->AccountID, Client->ClientID, Client->NickName, CSMessageLen, CSMessage);
 	ChattingResMessage->Free();
+
+	ReturnSession(Session);
 }
 
 //---------------------------------------------------------------------------------
@@ -820,20 +956,26 @@ void CGameServer::PacketProcReqMessage(int64 SessionID, CMessage* Message)
 //---------------------------------------------------------------------------------
 void CGameServer::PacketProcReqHeartBeat(int64 SessionID, CMessage* Message)
 {
-	st_CLIENT* Client = FindClient(SessionID);
+	st_SESSION* Session = FindSession(SessionID);
 
-	Client->RecvPacketTime = timeGetTime();	
+	Session->RecvPacketTime = timeGetTime();
+
+	ReturnSession(Session);
 }
 
 void CGameServer::PacketProcReqAccountCheck(int64 SessionID, CMessage* Message)
 {
-	st_CLIENT* Client = FindClient(SessionID);
+	st_SESSION* Session = FindSession(SessionID);
+
+	// DB에서 요청하기 전에 증가시켰던 IOCount를 감소
+	Session->IOBlock->IOCount--;
+
 	bool Status = LOGIN_SUCCESS;
 
-	if (Client)
+	if (Session)
 	{
-		__int64 ClientAccountId = Client->AccountId;
-		int Token = Client->Token;
+		int64 ClientAccountId = Session->AccountId;
+		int32 Token = Session->Token;
 
 		// AccountServer에 입력받은 AccountID가 있는지 확인한다.
 	
@@ -860,7 +1002,7 @@ void CGameServer::PacketProcReqAccountCheck(int64 SessionID, CMessage* Message)
 		// DB 토큰과 클라로부터 온 토큰이 같으면 로그인 최종성공
 		if (Token == DBToken)
 		{
-			Client->IsLogin = true;
+			Session->IsLogin = true;
 			// 클라가 소유하고 있는 플레이어들을 DB로부터 긁어온다.
 			CDBConnection* GameServerDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 			
@@ -890,48 +1032,54 @@ void CGameServer::PacketProcReqAccountCheck(int64 SessionID, CMessage* Message)
 			while (ClientPlayersGet.Fetch())
 			{								
 				// 플레이어 정보 셋팅
-				Client->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectId = PlayerId;				
-				Client->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectName = PlayerName;				
-				Client->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectStatInfo.Level = PlayerLevel;
-				Client->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectStatInfo.HP = PlayerCurrentHP;
-				Client->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectStatInfo.MaxHP = PlayerMaxHP;
-				Client->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectStatInfo.Attack = PlayerAttack;
-				Client->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectStatInfo.Speed = PlayerSpeed;
-				Client->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-				Client->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;		
-				Client->MyPlayers[PlayerCount]->_SessionId = Client->SessionId;
+				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectId = PlayerId;				
+				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectName = PlayerName;				
+				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectStatInfo.Level = PlayerLevel;
+				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectStatInfo.HP = PlayerCurrentHP;
+				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectStatInfo.MaxHP = PlayerMaxHP;
+				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectStatInfo.Attack = PlayerAttack;
+				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectStatInfo.Speed = PlayerSpeed;
+				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;		
+				Session->MyPlayers[PlayerCount]->_SessionId = Session->SessionId;
 							
 				PlayerCount++;
 			}							
 			
 			// 클라에게 로그인 응답 패킷 보냄
-			CMessage* ResLoginMessage = MakePacketResLogin(Status, PlayerCount, Client->MyPlayers[0]->_GameObjectInfo.ObjectId, Client->MyPlayers[0]->_GameObjectInfo.ObjectName);
-			SendPacket(Client->SessionId, ResLoginMessage);
+			CMessage* ResLoginMessage = MakePacketResLogin(Status, PlayerCount, Session->MyPlayers[0]->_GameObjectInfo.ObjectId, Session->MyPlayers[0]->_GameObjectInfo.ObjectName);
+			SendPacket(Session->SessionId, ResLoginMessage);
 			ResLoginMessage->Free();
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, GameServerDBConnection);
 		}
 		else
 		{
-			Client->IsLogin = false;
+			Session->IsLogin = false;
 			Disconnect(SessionID);
 		}					
+
+		ReturnSession(Session);
 	}
 	else
 	{
 		// 클라 접속 끊겻을 경우
-	}
+	}	
 }
 
 void CGameServer::PacketProcReqCreateCharacterNameCheck(int64 SessionID, CMessage* Message)
 {
 	int32 PlayerDBId;
-	st_CLIENT* Client = FindClient(SessionID);
 
-	if (Client)
+	st_SESSION* Session = FindSession(SessionID);
+
+	// DB에서 요청하기 전에 증가시켰던 IOCount를 감소
+	Session->IOBlock->IOCount--;
+
+	if (Session)
 	{
 		// 요청한 클라의 생성할 캐릭터의 이름을 가져온다.
-		wstring CreateCharacterName = Client->CreateCharacterName;
+		wstring CreateCharacterName = Session->CreateCharacterName;
 
 		// GameServerDB에 해당 캐릭터가 이미 있는지 확인한다.
 		CDBConnection* FindCharacterNameGameServerDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
@@ -955,8 +1103,8 @@ void CGameServer::PacketProcReqCreateCharacterNameCheck(int64 SessionID, CMessag
 			CDBConnection* NewCharacterPushDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 
 			SP::CDBGameServerCreateCharacterPush NewCharacterPush(*NewCharacterPushDBConnection);
-			NewCharacterPush.InAccountID(Client->AccountId);
-			NewCharacterPush.InCharacterName(Client->CreateCharacterName);
+			NewCharacterPush.InAccountID(Session->AccountId);
+			NewCharacterPush.InCharacterName(Session->CreateCharacterName);
 			NewCharacterPush.InLevel(NewCharacterStatus.Level);
 			NewCharacterPush.InCurrentHP(NewCharacterStatus.MaxHP);
 			NewCharacterPush.InMaxHP(NewCharacterStatus.MaxHP);
@@ -970,7 +1118,7 @@ void CGameServer::PacketProcReqCreateCharacterNameCheck(int64 SessionID, CMessag
 			// 앞서 저장한 캐릭터의 DBId를 AccountId를 이용해 얻어온다.
 			CDBConnection* PlayerDBIDGetDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 			SP::CDBGameServerPlayerDBIDGet PlayerDBIDGet(*PlayerDBIDGetDBConnection);
-			PlayerDBIDGet.InAccountID(Client->AccountId);
+			PlayerDBIDGet.InAccountID(Session->AccountId);
 
 			PlayerDBIDGet.OutPlayerDBID(PlayerDBId);
 
@@ -979,36 +1127,38 @@ void CGameServer::PacketProcReqCreateCharacterNameCheck(int64 SessionID, CMessag
 			PlayerDBIDGet.Fetch();
 
 			// DB에서 읽어온 DBId를 저장
-			Client->MyPlayers[0]->_GameObjectInfo.ObjectId = PlayerDBId;			
+			Session->MyPlayers[0]->_GameObjectInfo.ObjectId = PlayerDBId;
 			// 캐릭터의 이름도 저장
-			Client->MyPlayers[0]->_GameObjectInfo.ObjectName = Client->CreateCharacterName;
+			Session->MyPlayers[0]->_GameObjectInfo.ObjectName = Session->CreateCharacterName;
 			
-			Client->MyPlayers[0]->_GameObjectInfo.ObjectStatInfo.Level = NewCharacterStatus.Level;
-			Client->MyPlayers[0]->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
-			Client->MyPlayers[0]->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
-			Client->MyPlayers[0]->_GameObjectInfo.ObjectStatInfo.Attack = NewCharacterStatus.Attack;
-			Client->MyPlayers[0]->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
-			Client->MyPlayers[0]->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-			Client->MyPlayers[0]->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
-			Client->MyPlayers[0]->_SessionId = Client->SessionId;
+			Session->MyPlayers[0]->_GameObjectInfo.ObjectStatInfo.Level = NewCharacterStatus.Level;
+			Session->MyPlayers[0]->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
+			Session->MyPlayers[0]->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
+			Session->MyPlayers[0]->_GameObjectInfo.ObjectStatInfo.Attack = NewCharacterStatus.Attack;
+			Session->MyPlayers[0]->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
+			Session->MyPlayers[0]->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+			Session->MyPlayers[0]->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
+			Session->MyPlayers[0]->_SessionId = Session->SessionId;
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerDBIDGetDBConnection);
 		}		
 		else
 		{
 			// 캐릭터가 이미 DB에 있는 경우
-			PlayerDBId = Client->MyPlayers[0]->_GameObjectInfo.ObjectId;			
+			PlayerDBId = Session->MyPlayers[0]->_GameObjectInfo.ObjectId;
 		}
 
 		// 캐릭터 생성 응답 보냄
-		CMessage* ResCreateCharacterMessage = MakePacketResCreateCharacter(!CharacterNameFind, PlayerDBId, Client->CreateCharacterName);
-		SendPacket(Client->SessionId, ResCreateCharacterMessage);
+		CMessage* ResCreateCharacterMessage = MakePacketResCreateCharacter(!CharacterNameFind, PlayerDBId, Session->CreateCharacterName);
+		SendPacket(Session->SessionId, ResCreateCharacterMessage);
 		ResCreateCharacterMessage->Free();
 	}
 	else
 	{
 
 	}
+
+	ReturnSession(Session);
 }
 
 CMessage* CGameServer::MakePacketResClientConnected()
@@ -1185,6 +1335,28 @@ CMessage* CGameServer::MakePacketMousePositionObjectInfo(int64 AccountId, int32 
 	return ResEnterGamePacket;
 }
 
+// int32 PlayerDBId
+// wstring ChattingMessage
+CMessage* CGameServer::MakePacketResChattingMessage(int32 PlayerDBId, wstring ChattingMessage)
+{
+	CMessage* ResChattingMessage = CMessage::Alloc();
+	if (ResChattingMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResChattingMessage->Clear();
+
+	*ResChattingMessage << (WORD)en_PACKET_S2C_MESSAGE;
+	*ResChattingMessage << PlayerDBId;
+
+	int8 PlayerNameLen = (int8)(ChattingMessage.length() * 2);
+	*ResChattingMessage << PlayerNameLen;
+	ResChattingMessage->InsertData(ChattingMessage.c_str(), PlayerNameLen);
+
+	return ResChattingMessage;
+}
+
 //-------------------------------------------------------
 //채팅 보내기 요청 응답 패킷 만들기 함수
 //WORD	Type
@@ -1214,20 +1386,6 @@ CMessage* CGameServer::MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* N
 	return ChattingMessage;
 }
 
-st_CLIENT* CGameServer::FindClient(int64 SessionID)
-{
-	unordered_map<int64, st_CLIENT*>::iterator ClientFindIterator;
-	ClientFindIterator = _ClientMap.find(SessionID);
-	if (ClientFindIterator != _ClientMap.end())
-	{
-		return (*ClientFindIterator).second;
-	}
-	else
-	{
-		return nullptr;
-	}
-}
-
 // int64 AccountId
 // int32 PlayerDBId
 // int32 HP
@@ -1240,7 +1398,7 @@ CMessage* CGameServer::MakePacketResChangeHP(int32 PlayerDBId, int32 CurrentHP, 
 	}
 
 	ResChangeHPPacket->Clear();
-
+		
 	*ResChangeHPPacket << (WORD)en_PACKET_S2C_CHANGE_HP;
 	*ResChangeHPPacket << PlayerDBId;
 
@@ -1396,8 +1554,8 @@ void CGameServer::OnClientJoin(int64 SessionID)
 	ClientJoinJob->Type = AUTH_NEW_CLIENT_JOIN;
 	ClientJoinJob->SessionID = SessionID;
 	ClientJoinJob->Message = nullptr;
-	_GameServerCommonMessageQue.Enqueue(ClientJoinJob);
-	SetEvent(_NetworkThreadWakeEvent);
+	_GameServerAuthThreadMessageQue.Enqueue(ClientJoinJob);
+	SetEvent(_AuthThreadWakeEvent);
 }
 
 void CGameServer::OnRecv(int64 SessionID, CMessage* Packet)
@@ -1411,18 +1569,20 @@ void CGameServer::OnRecv(int64 SessionID, CMessage* Packet)
 	NewMessageJob->Type = MESSAGE;
 	NewMessageJob->SessionID = SessionID;
 	NewMessageJob->Message = JobMessage;
-	_GameServerCommonMessageQue.Enqueue(NewMessageJob);
+	_GameServerNetworkThreadMessageQue.Enqueue(NewMessageJob);
 	SetEvent(_NetworkThreadWakeEvent);
 }
 
-void CGameServer::OnClientLeave(int64 SessionID)
+void CGameServer::OnClientLeave(st_SESSION* LeaveSession)
 {
 	st_Job* ClientLeaveJob = _JobMemoryPool->Alloc();
 	ClientLeaveJob->Type = AUTH_DISCONNECT_CLIENT;
-	ClientLeaveJob->SessionID = SessionID;
+	ClientLeaveJob->SessionID = LeaveSession->SessionId;
+	ClientLeaveJob->Session = LeaveSession;
 	ClientLeaveJob->Message = nullptr;
-	_GameServerCommonMessageQue.Enqueue(ClientLeaveJob);
-	SetEvent(_NetworkThreadWakeEvent);
+
+	_GameServerAuthThreadMessageQue.Enqueue(ClientLeaveJob);
+	SetEvent(_AuthThreadWakeEvent);
 }
 
 bool CGameServer::OnConnectionRequest(const wchar_t ClientIP, int32 Port)
@@ -1452,10 +1612,10 @@ void CGameServer::SendPacketAroundSector(st_Vector2Int CellPosition, CMessage* M
 	}
 }
 
-void CGameServer::SendPacketAroundSector(st_CLIENT* Client, CMessage* Message, bool SendMe)
+void CGameServer::SendPacketAroundSector(st_SESSION* Session, CMessage* Message, bool SendMe)
 {
 	CChannel* Channel = G_ChannelManager->Find(1);
-	vector<CSector*> Sectors = Channel->GetAroundSectors(Client->MyPlayer->GetCellPosition(), 10);
+	vector<CSector*> Sectors = Channel->GetAroundSectors(Session->MyPlayer->GetCellPosition(), 10);
 	
 	for (CSector* Sector : Sectors)
 	{
@@ -1467,23 +1627,11 @@ void CGameServer::SendPacketAroundSector(st_CLIENT* Client, CMessage* Message, b
 			}
 			else
 			{
-				if (Client->SessionId != Player->_SessionId)
+				if (Session->SessionId != Player->_SessionId)
 				{
 					SendPacket(Player->_SessionId, Message);
 				}
 			}			
 		}
-	}
-}
-
-
-void CGameServer::SendPacketBroadcast(CMessage* Message)
-{
-	st_CLIENT* Client = nullptr;
-	unordered_map<int64, st_CLIENT*>::iterator ClientIterator;
-
-	for (ClientIterator = _ClientMap.begin(); ClientIterator != _ClientMap.end(); ++ClientIterator)
-	{
-		SendPacket((*ClientIterator).first, Message);
 	}
 }
