@@ -385,7 +385,22 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 			ResSectorSpawnPlayer->Free();
 		}
 	}
-		break;	
+		break;
+	case en_GameObjectType::SLIME_GEL:
+	case en_GameObjectType::BRONZE_COIN:
+	{
+		CItem* MoveItem = (CItem*)GameObject;
+
+		CSector* CurrentSector = GameObject->_Channel->GetSector(MoveItem->GetCellPosition());
+		CSector* NextSector = GameObject->_Channel->GetSector(DestPosition);
+
+		if (CurrentSector != NextSector)
+		{
+			CurrentSector->Remove(MoveItem);
+			NextSector->Insert(MoveItem);
+		}
+	}
+		break;
 	default:
 		CRASH("ApplyMove GameObject Type 이상한 값")
 		break;

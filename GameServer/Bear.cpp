@@ -17,7 +17,7 @@ CBear::CBear()
 	_GameObjectInfo.ObjectStatInfo.MaxHP = MonsterData._MonsterStatInfo.MaxHP;
 	_GameObjectInfo.ObjectStatInfo.HP = MonsterData._MonsterStatInfo.MaxHP;
 	_GameObjectInfo.ObjectStatInfo.Level = MonsterData._MonsterStatInfo.Level;
-	_GameObjectInfo.ObjectStatInfo.Speed = MonsterData._MonsterStatInfo.Speed;
+	_GameObjectInfo.ObjectStatInfo.Speed = MonsterData._MonsterStatInfo.Speed;	
 
 	_SearchCellDistance = MonsterData._MonsterStatInfo.SearchCellDistance;
 	_ChaseCellDistance = MonsterData._MonsterStatInfo.ChaseCellDistance;
@@ -26,6 +26,7 @@ CBear::CBear()
 
 CBear::~CBear()
 {
+	
 }
 
 void CBear::Init(int32 DataSheetId)
@@ -41,7 +42,7 @@ void CBear::UpdateIdle()
 	}
 
 	_NextSearchTick = GetTickCount64() + 1000;
-
+		
 	CPlayer* Target = _Channel->FindNearPlayer(this, _SearchCellDistance);
 	if (Target == nullptr)
 	{
@@ -163,4 +164,45 @@ void CBear::UpdateAttack()
 
 void CBear::UpdateDead()
 {
+
+}
+
+void CBear::GetRandomDropItem(CGameObject* Killer)
+{
+	auto FindMonsterDropItem = G_Datamanager->_Monsters.find(2);
+	st_MonsterData MonsterData = *(*FindMonsterDropItem).second;
+
+	random_device RD;
+	mt19937 Gen(RD());
+
+	uniform_int_distribution<int> RandomXPosition(0, 31);
+	int32 Random = RandomXPosition(Gen);
+
+	int32 Sum = 0;
+
+	for (st_DropData DropItem : MonsterData._DropItems)
+	{
+		Sum += DropItem._Probability;
+
+		if (Sum >= Random)
+		{			
+			return;
+		}
+	}	
+}
+
+void CBear::OnDead(CGameObject* Killer)
+{
+	BroadCastPacket(en_PACKET_S2C_DIE);
+	BroadCastPacket(en_PACKET_S2C_DESPAWN);
+
+	CChannel* Channel = _Channel;
+	Channel->LeaveChannel(this);
+
+	_GameObjectInfo.ObjectStatInfo.HP = _GameObjectInfo.ObjectStatInfo.MaxHP;
+	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+	_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
+
+	Channel->EnterChannel(this);
+	BroadCastPacket(en_PACKET_S2C_SPAWN);
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject.h"
+#include "Data.h"
 
 class CPlayer;
 
@@ -55,6 +56,7 @@ protected:
 	// Dead 상태 Update
 	//------------------------
 	virtual void UpdateDead() = 0;
+	virtual void GetRandomDropItem(CGameObject* Killer) = 0;
 public:
 	// 몬스터 데이터 시트 Id
 	int32 _DataSheetId;
@@ -66,8 +68,7 @@ public:
 
 	virtual void Update() override;
 	virtual void OnDamaged(CGameObject* Attacker, int32 Damage) override;
-	virtual void OnDead(CGameObject* Killer) override;
-	
+
 	void BroadCastPacket(en_PACKET_TYPE PacketType);
 };
 

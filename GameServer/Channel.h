@@ -3,6 +3,7 @@
 #include "Map.h"
 
 class CMonster;
+class CItem;
 
 class CChannel
 {
@@ -10,6 +11,7 @@ public:
 	int32 _ChannelId;	
 	map<int64, CPlayer*> _Players;
 	map<int64, CMonster*> _Monsters;
+	map<int64, CItem*> _Items;
 	
 	CMap* _Map;
 
@@ -49,7 +51,7 @@ public:
 	// - Object를 채널에 입장시키면서 자료구조에 저장한 후
 	// - Map에도 해당 오브젝트의 위치를 기록한다.
 	//----------------------------------------------------
-	void EnterChannel(CGameObject* EnterChannelGameObject);
+	void EnterChannel(CGameObject* EnterChannelGameObject,st_Vector2Int* ObjectSpawnPosition = nullptr);
 	//----------------------------------------------------
 	// 채널 나가기
 	// - Object를 채널에 퇴장시키면서 자료구조에 제거한 후

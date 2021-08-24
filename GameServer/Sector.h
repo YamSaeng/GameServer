@@ -3,12 +3,14 @@
 class CGameObject;
 class CPlayer;
 class CMonster;
+class CItem;
 
 class CSector
 {
 private:
 	set<CPlayer*> _Players;
 	set<CMonster*> _Monsters;
+	set<CItem*> _Items;
 public:
 	int32 _SectorY;
 	int32 _SectorX;	

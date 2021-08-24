@@ -2,6 +2,7 @@
 #include "Sector.h"
 #include "Player.h"
 #include "Monster.h"
+#include "Item.h"
 
 CSector::CSector(int32 SectorY, int32 SectorX)
 {
@@ -20,6 +21,10 @@ void CSector::Insert(CGameObject* InsertGameObject)
 	case en_GameObjectType::BEAR:
 		_Monsters.insert((CMonster*)InsertGameObject);
 		break;
+	case en_GameObjectType::SLIME_GEL:
+	case en_GameObjectType::BRONZE_COIN:
+		_Items.insert((CItem*)InsertGameObject);
+		break;
 	default:
 		break;
 	}
@@ -35,6 +40,10 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 	case en_GameObjectType::SLIME:
 	case en_GameObjectType::BEAR:
 		_Monsters.erase((CMonster*)RemoveGameObject);
+		break;
+	case en_GameObjectType::SLIME_GEL:
+	case en_GameObjectType::BRONZE_COIN:
+		_Items.erase((CItem*)RemoveGameObject);
 		break;
 	}
 }

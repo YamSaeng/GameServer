@@ -171,6 +171,7 @@
     <ClInclude Include="GameServerInfo.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="Heap.h" />
+    <ClInclude Include="Inventory.h" />
     <ClInclude Include="Item.h" />
     <ClInclude Include="LockFreeQue.h" />
     <ClInclude Include="LockFreeStack.h" />
@@ -255,6 +256,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Global.cpp" />
+    <ClCompile Include="Inventory.cpp" />
     <ClCompile Include="Item.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>

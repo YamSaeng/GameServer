@@ -8,7 +8,11 @@ enum en_GameObjectType
 	NORMAL,
 	PLAYER,
 	SLIME,
-	BEAR
+	BEAR,
+	WEAPON,
+	SLIME_GEL,
+	LEATHER,
+	BRONZE_COIN
 };
 
 enum en_MoveDir
@@ -64,6 +68,7 @@ struct st_GameObjectInfo
 	st_PositionInfo ObjectPositionInfo;
 	st_StatInfo ObjectStatInfo;
 	en_GameObjectType ObjectType;
+	int64 OwnerObjectId;
 };
 
 enum en_ObjectNetworkState

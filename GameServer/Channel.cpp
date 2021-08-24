@@ -3,6 +3,7 @@
 #include "Player.h"
 #include "Message.h"
 #include "Monster.h"
+#include "Item.h"
 
 CChannel::~CChannel()
 {
@@ -201,7 +202,7 @@ void CChannel::Update()
 	}
 }
 
-void CChannel::EnterChannel(CGameObject* EnterChannelGameObject)
+void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* ObjectSpawnPosition)
 {
 	if (EnterChannelGameObject == nullptr)
 	{
@@ -211,21 +212,28 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject)
 
 	random_device RD;
 	mt19937 Gen(RD());
-
+		
 	st_Vector2Int SpawnPosition;
 
-	while (true)
+	if (ObjectSpawnPosition == nullptr)
 	{
-		uniform_int_distribution<int> RandomXPosition(-10, 54);
-		uniform_int_distribution<int> RandomYPosition(-4, 40);
-
-		SpawnPosition._X = RandomXPosition(Gen);
-		SpawnPosition._Y = RandomYPosition(Gen);
-
-		if (_Map->Find(SpawnPosition) == nullptr)
+		while (true)
 		{
-			break;
+			uniform_int_distribution<int> RandomXPosition(-10, 54);
+			uniform_int_distribution<int> RandomYPosition(-4, 40);
+
+			SpawnPosition._X = RandomXPosition(Gen);
+			SpawnPosition._Y = RandomYPosition(Gen);
+
+			if (_Map->Find(SpawnPosition) == nullptr)
+			{
+				break;
+			}
 		}
+	}
+	else
+	{
+		SpawnPosition = *ObjectSpawnPosition;
 	}
 	
 	G_Logger->WriteStdOut(en_Color::RED, L"SpawnPosition Y : %d X : %d \n", SpawnPosition._Y, SpawnPosition._X);
@@ -241,16 +249,11 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject)
 
 			_Players.insert(pair<int64, CPlayer*>(EnterChannelPlayer->_GameObjectInfo.ObjectId, EnterChannelPlayer));
 			
-			EnterChannelPlayer->_Channel = this;
+			EnterChannelPlayer->_Channel = this;		
 
-			st_Vector2Int EnterChannelPlayerPosition;
-			EnterChannelPlayerPosition._X = EnterChannelPlayer->GetPositionInfo().PositionX;
-			EnterChannelPlayerPosition._Y = EnterChannelPlayer->GetPositionInfo().PositionY;
+			_Map->ApplyMove(EnterChannelPlayer, SpawnPosition);
 
-			_Map->ApplyMove(EnterChannelPlayer, EnterChannelPlayerPosition);
-
-			CSector* EnterSector = GetSector(EnterChannelPlayerPosition);
-			//G_Logger->WriteStdOut(en_Color::GREEN, L"EnterSector Y : (%d) X : (%d) \n", EnterSector->_SectorY, EnterSector->_SectorX);
+			CSector* EnterSector = GetSector(SpawnPosition);			
 			EnterSector->Insert(EnterChannelPlayer);			
 		}
 		break;
@@ -263,16 +266,29 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject)
 
 			_Monsters.insert(pair<int64,CMonster*>(EnterChannelMonster->_GameObjectInfo.ObjectId,EnterChannelMonster));
 
-			EnterChannelMonster->_Channel = this;
+			EnterChannelMonster->_Channel = this;		
 
-			st_Vector2Int EnterChannelMonsterPosition;
-			EnterChannelMonsterPosition._X = EnterChannelMonster->GetPositionInfo().PositionX;
-			EnterChannelMonsterPosition._Y = EnterChannelMonster->GetPositionInfo().PositionY;
+			_Map->ApplyMove(EnterChannelMonster, SpawnPosition);
 
-			_Map->ApplyMove(EnterChannelMonster, EnterChannelMonsterPosition);
-
-			CSector* EnterSector = GetSector(EnterChannelMonsterPosition);
+			CSector* EnterSector = GetSector(SpawnPosition);
 			EnterSector->Insert(EnterChannelMonster);												
+		}
+		break;
+	case en_GameObjectType::SLIME_GEL:
+	case en_GameObjectType::BRONZE_COIN:
+		{
+			CItem* EnterChannelItem = (CItem*)EnterChannelGameObject;
+			EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.PositionY = SpawnPosition._Y;
+			EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.PositionX = SpawnPosition._X;
+
+			_Items.insert(pair<int64, CItem*>(EnterChannelItem->_GameObjectInfo.ObjectId,EnterChannelItem));
+
+			EnterChannelItem->_Channel = this;			
+
+			_Map->ApplyMove(EnterChannelItem, SpawnPosition, false, false);
+
+			CSector* EnterSector = GetSector(SpawnPosition);
+			EnterSector->Insert(EnterChannelItem);
 		}
 		break;
 	}

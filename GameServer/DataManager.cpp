@@ -14,6 +14,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 		string ItemName = Filed["Name"].GetString();
 		string Type = Filed["WeaponType"].GetString();
 		int Damage = Filed["Damage"].GetInt();
+		bool IsEquipped = Filed["IsEquipped"].GetBool();
 		string ImageFilePath = Filed["ImageFilePath"].GetString();
 
 		st_WeaponData* WeaponData = new st_WeaponData();
@@ -23,11 +24,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 		if (Type == "Sword")
 		{
 			WeaponData->_ItemType = en_ItemType::ITEM_TYPE_WEAPON_SWORD;
-		}
-		else if (Type == "Bow")
-		{
-			WeaponData->_ItemType = en_ItemType::ITEM_TYPE_WEAPON_BOW;
-		}
+		}		
 
 		WeaponData->_ImagePath = ImageFilePath;
 		WeaponData->_Damage = Damage;
@@ -41,6 +38,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 		string ItemName = Filed["Name"].GetString();
 		string Type = Filed["ArmorType"].GetString();
 		int Defence = Filed["Defence"].GetInt();
+		bool IsEquipped = Filed["IsEquipped"].GetBool();
 		string ImageFilePath = Filed["ImageFilePath"].GetString();
 
 		st_ArmorData* ArmorData = new st_ArmorData();
@@ -68,6 +66,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 		string ItemName = Filed["Name"].GetString();
 		string Type = Filed["ConsumableType"].GetString();
 		int MaxCount = Filed["MaxCount"].GetInt();
+		bool IsEquipped = Filed["IsEquipped"].GetBool();
 		string ImageFilePath = Filed["ImageFilePath"].GetString();
 
 		st_ConsumableData* ConsumableData = new st_ConsumableData();
@@ -83,6 +82,38 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 		ConsumableData->_MaxCount = MaxCount;
 
 		_Items.insert(pair<int32, st_ConsumableData*>(ConsumableData->_DataSheetId, ConsumableData));
+	}
+
+	for (auto& Filed : Document["Material"].GetArray())
+	{
+		int DataSheetId = Filed["DataSheetId"].GetInt();
+		string ItemName = Filed["Name"].GetString();		
+		int MaxCount = Filed["MaxCount"].GetInt();
+		bool IsEquipped = Filed["IsEquipped"].GetBool();
+		string ImageFilePath = Filed["ImageFilePath"].GetString();
+
+		st_MaterialData* MaterialData = new st_MaterialData();
+		MaterialData->_DataSheetId = DataSheetId;
+		MaterialData->_Name = ItemName;
+
+		ItemName.assign(MaterialData->_Name.begin(), MaterialData->_Name.end());
+		if (ItemName == "Leather")
+		{
+			MaterialData->_ItemType = en_ItemType::ITEM_TYPE_LEATHER;
+		}
+		else if (ItemName == "SlimeGel")
+		{
+			MaterialData->_ItemType = en_ItemType::ITEM_TYPE_SLIMEGEL;
+		}
+		else if (ItemName == "BronzeCoin")
+		{
+			MaterialData->_ItemType = en_ItemType::ITEM_TYPE_BRONZE_COIN;
+		}
+
+		MaterialData->_ImagePath = ImageFilePath;
+		MaterialData->_MaxCount = MaxCount;
+
+		_Items.insert(pair<int32, st_MaterialData*>(MaterialData->_DataSheetId, MaterialData));
 	}
 }
 
@@ -150,12 +181,12 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 		for (auto& DropDataFiled : Filed["DropData"].GetArray())
 		{
 			int Probability = DropDataFiled["Probability"].GetInt();
-			int ItemDataSheetId = DropDataFiled["ItemDataId"].GetInt();
+			int ItemDataSheetId = DropDataFiled["ItemDataSheetId"].GetInt();
 			int Count = DropDataFiled["Count"].GetInt();
 						
 			st_DropData DropData;
 			DropData._Probability = Probability;
-			DropData._ItemDataId = ItemDataSheetId;
+			DropData._ItemDataSheetId = ItemDataSheetId;
 			DropData._Count = Count;
 
 			MonsterData->_DropItems.push_back(DropData);

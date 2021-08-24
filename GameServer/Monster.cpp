@@ -59,22 +59,6 @@ void CMonster::OnDamaged(CGameObject* Attacker, int32 Damage)
 	}
 }
 
-void CMonster::OnDead(CGameObject* Killer)
-{
-	BroadCastPacket(en_PACKET_S2C_DIE);
-	BroadCastPacket(en_PACKET_S2C_DESPAWN);
-
-	CChannel* Channel = _Channel;
-	Channel->LeaveChannel(this);
-
-	_GameObjectInfo.ObjectStatInfo.HP = _GameObjectInfo.ObjectStatInfo.MaxHP;
-	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-	_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
-
-	Channel->EnterChannel(this);
-	BroadCastPacket(en_PACKET_S2C_SPAWN);
-}
-
 void CMonster::BroadCastPacket(en_PACKET_TYPE PacketType)
 {	
 	CMessage* ResPacket = nullptr;

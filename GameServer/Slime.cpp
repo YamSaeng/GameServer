@@ -2,9 +2,10 @@
 #include "Slime.h"
 #include "DataManager.h"
 #include "Player.h"
+#include "ObjectManager.h"
 
 CSlime::CSlime()
-{
+{	
 	_GameObjectInfo.ObjectType = en_GameObjectType::SLIME;
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
@@ -165,3 +166,88 @@ void CSlime::UpdateDead()
 {
 
 }
+
+void CSlime::GetRandomDropItem(CGameObject* Killer)
+{
+	bool Find = false;
+	int64 KillerId = Killer->_GameObjectInfo.ObjectId;
+	// 드랍 아이템 정보 읽어오기
+	auto FindMonsterDropItem = G_Datamanager->_Monsters.find(1);
+	st_MonsterData MonsterData = *(*FindMonsterDropItem).second;
+
+	random_device RD;
+	mt19937 Gen(RD());
+
+	uniform_int_distribution<int> RandomXPosition(0, 60);
+	int32 Random = RandomXPosition(Gen);
+
+	int32 Sum = 0;
+
+	st_ItemData DropItemData;
+
+	for (st_DropData DropItem : MonsterData._DropItems)
+	{
+		Sum += DropItem._Probability;
+
+		if (Sum >= Random)
+		{
+			Find = true;
+			// 드랍 확정 되면 해당 아이템 읽어오기
+			auto FindDropItemInfo = G_Datamanager->_Items.find(DropItem._ItemDataSheetId);
+			if (FindDropItemInfo == G_Datamanager->_Items.end())
+			{
+				CRASH("DropItemInfo를 찾지 못함");
+			}
+
+			DropItemData = *(*FindDropItemInfo).second;
+			DropItemData.Count = DropItem._Count;
+			break;
+		}
+	}
+
+	if (Find == true)
+	{
+		st_ItemInfo NewItemInfo;
+
+		NewItemInfo.ItemDBId = -1;
+		NewItemInfo.DataSheetId = DropItemData._DataSheetId;
+		NewItemInfo.Count = DropItemData.Count;
+		NewItemInfo.SlotNumber = -1;
+		NewItemInfo.IsEquipped = DropItemData.IsEquipped;
+		NewItemInfo.ItemName.assign(DropItemData._Name.begin(), DropItemData._Name.end());
+		en_GameObjectType GameObjectType;
+
+		switch (DropItemData._ItemType)
+		{
+		case en_ItemType::ITEM_TYPE_SLIMEGEL:
+			GameObjectType = en_GameObjectType::SLIME_GEL;
+			break;
+		case en_ItemType::ITEM_TYPE_BRONZE_COIN:
+			GameObjectType = en_GameObjectType::BRONZE_COIN;
+			break;
+		default:
+			break;
+		}
+		
+		G_ObjectManager->ItemSpawn(1, GetCellPosition(), KillerId, NewItemInfo, GameObjectType);
+	}	
+}
+
+void CSlime::OnDead(CGameObject* Killer)
+{
+	BroadCastPacket(en_PACKET_S2C_DIE);
+	BroadCastPacket(en_PACKET_S2C_DESPAWN);
+
+	CChannel* Channel = _Channel;
+	Channel->LeaveChannel(this);
+
+	_GameObjectInfo.ObjectStatInfo.HP = _GameObjectInfo.ObjectStatInfo.MaxHP;
+	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+	_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
+	
+	GetRandomDropItem(Killer);	
+
+	Channel->EnterChannel(this);
+	BroadCastPacket(en_PACKET_S2C_SPAWN);
+}
+

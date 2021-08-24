@@ -6,3 +6,8 @@ CItem::CItem()
 {
 	
 }
+
+CMaterial::CMaterial()
+{	
+	
+}

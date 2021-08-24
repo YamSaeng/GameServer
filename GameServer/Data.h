@@ -7,6 +7,8 @@ struct st_ItemData
 	string _Name;
 	en_ItemType _ItemType;
 	string _ImagePath;
+	bool IsEquipped;
+	int32 Count;
 };
 
 struct st_WeaponData : public st_ItemData
@@ -21,6 +23,11 @@ struct st_ArmorData : public st_ItemData
 };
 
 struct st_ConsumableData : public st_ItemData
+{
+	int32 _MaxCount;
+};
+
+struct st_MaterialData : public st_ItemData
 {
 	int32 _MaxCount;
 };
@@ -40,7 +47,14 @@ struct st_StatusData
 struct st_DropData
 {
 	int32 _Probability;
-	int32 _ItemDataId;
+	int32 _ItemDataSheetId;
+	int32 _Count;
+};
+
+struct st_MonsterDropItemData
+{
+	int32 _Probability;
+	int32 _ItemDataSheetId;
 	int32 _Count;
 };
 

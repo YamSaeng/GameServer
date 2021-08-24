@@ -45,8 +45,8 @@ void CGameServer::Start(const WCHAR* OpenIP, int32 Port)
 {
 	CNetworkLib::Start(OpenIP, Port);
 
-	G_ObjectManager->MonsterSpawn(30, 1, en_GameObjectType::SLIME);
-	G_ObjectManager->MonsterSpawn(30, 1, en_GameObjectType::BEAR);
+	G_ObjectManager->MonsterSpawn(400, 1, en_GameObjectType::SLIME);
+	//G_ObjectManager->MonsterSpawn(50, 1, en_GameObjectType::BEAR);
 
 	G_ObjectManager->GameServer = this;
 
@@ -1043,7 +1043,8 @@ void CGameServer::PacketProcReqAccountCheck(int64 SessionID, CMessage* Message)
 				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectStatInfo.Speed = PlayerSpeed;
 				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
-				Session->MyPlayers[PlayerCount]->_SessionId = Session->SessionId;
+				Session->MyPlayers[PlayerCount]->_GameObjectInfo.OwnerObjectId = 0;
+				Session->MyPlayers[PlayerCount]->_SessionId = Session->SessionId;				
 
 				PlayerCount++;
 			}
@@ -1485,6 +1486,7 @@ CMessage* CGameServer::MakePacketResSpawn(int32 ObjectInfosCount, vector<st_Game
 
 		// ObjectType
 		*ResSpawnPacket << (int8)ObjectInfos[i].ObjectType;
+		*ResSpawnPacket << ObjectInfos[i].OwnerObjectId;
 	}
 
 	return ResSpawnPacket;

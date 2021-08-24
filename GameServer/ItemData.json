@@ -5,14 +5,8 @@
       "Name": "°ß½À»ýÀÇ °Ë",
       "WeaponType": "Sword",
       "Damage": 10,
+      "IsEquipped": true,
       "ImageFilePath": "Textures/Weapon & Tool/Knife"
-    },
-    {
-      "DataSheetId": 2,
-      "Name": "°ß½À»ýÀÇ È°",
-      "WeaponType": "Bow",
-      "Damage": 5,
-      "ImageFilePath": "Textures/Weapon & Tool/Bow"
     }
   ],
   "Armors": [
@@ -21,6 +15,7 @@
       "Name": "»À °©¿Ê",
       "ArmorType": "Armor",
       "Defence": 15,
+      "IsEquipped": true,
       "ImageFilePath": "Textures/Equipment/Leather Armor"
     },
     {
@@ -28,6 +23,7 @@
       "Name": "»À Åõ±¸",
       "ArmorType": "Helmet",
       "Defence": 5,
+      "IsEquipped": true,
       "ImageFilePath": "Textures/Equipment/Leather Helmet"
     }
   ],
@@ -37,15 +33,31 @@
       "Name": "Potion",
       "ConsumableType": "Potion",
       "MaxCount": 10,
+      "IsEquipped": false,
       "ImageFilePath": "Textures/Potion/Red Potion"
     }
-  ]
-  "Matter": [
+  ],
+  "Material": [
     {
-      "DataSheetId": 1000,
-      "Name": "Wood",
-      "MaxCount": 10,
-      "ImageFilePath": "Textures/"
+      "DataSheetId": 2000,
+      "Name": "Leather",
+      "MaxCount": 99,
+      "IsEquipped": false,
+      "ImageFilePath": "Textures/Material/Leather"
+    },
+    {
+      "DataSheetId": 2001,
+      "Name": "SlimeGel",
+      "MaxCount": 99,
+      "IsEquipped": false,
+      "ImageFilePath": "Textures/MonsterPart/SlimeGel"
+    },
+    {
+      "DataSheetId": 2002,
+      "Name": "BronzeCoin",
+      "MaxCount": 99,
+      "IsEquipped": false,
+      "ImageFilePath": ""
     }
   ]
 } 

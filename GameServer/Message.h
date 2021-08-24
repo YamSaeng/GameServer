@@ -57,7 +57,7 @@ public:
 protected:
 	enum en_PACKET
 	{
-		BUFFER_DEFAULT = 10000
+		BUFFER_DEFAULT = 20000
 	};
 	char _MessageBuf[BUFFER_DEFAULT];
 

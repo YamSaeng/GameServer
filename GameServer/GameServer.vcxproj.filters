@@ -191,6 +191,9 @@
     <ClInclude Include="Bear.h">
       <Filter>ContentServer\Content\GameObject\Monster</Filter>
     </ClInclude>
+    <ClInclude Include="Inventory.h">
+      <Filter>ContentServer\Content\Inventory</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -266,6 +269,9 @@
     </ClCompile>
     <ClCompile Include="Bear.cpp">
       <Filter>ContentServer\Content\GameObject\Monster</Filter>
+    </ClCompile>
+    <ClCompile Include="Inventory.cpp">
+      <Filter>ContentServer\Content\Inventory</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
