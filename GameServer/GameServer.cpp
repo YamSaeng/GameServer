@@ -1372,6 +1372,7 @@ CMessage* CGameServer::MakePacketResEnterGame(st_GameObjectInfo ObjectInfo)
 	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.HP;
 	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.MaxHP;
 	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.Attack;
+	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.CriticalPoint;
 	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.Speed;
 
 	// ObjectType
@@ -1416,6 +1417,7 @@ CMessage* CGameServer::MakePacketMousePositionObjectInfo(int64 AccountId, int32 
 	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.HP;
 	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.MaxHP;
 	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.Attack;
+	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.CriticalPoint;
 	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.Speed;
 
 	// ObjectType
@@ -1590,6 +1592,7 @@ CMessage* CGameServer::MakePacketResSpawn(int32 ObjectInfosCount, vector<st_Game
 		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.HP;
 		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.MaxHP;
 		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.Attack;
+		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.CriticalPoint;
 		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.Speed;
 
 		// ObjectType
