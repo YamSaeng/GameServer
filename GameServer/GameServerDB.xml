@@ -9,6 +9,7 @@
     <Column name="CurrentHP" type="int" notnull="true"/>
     <Column name="MaxHP" type="int" notnull="true"/>
     <Column name="Attack" type="int" notnull="true"/>
+    <Column name="CriticalPoint" type="int" notnull="true"/>
     <Column name="Speed" type="float" notnull="true"/>
     <Index type="clustered">
       <PrimaryKey/>
@@ -28,7 +29,7 @@
     <Param name="@AccountId" type="int"/>
     <Body>
       <![CDATA[
-        SELECT PlayerDBId, PlayerName, Level, CurrentHP, MaxHP, Attack, Speed FROM [dbo].[Player] WHERE AccountDBId = (@AccountId)
+        SELECT PlayerDBId, PlayerName, Level, CurrentHP, MaxHP, Attack, CriticalPoint, Speed FROM [dbo].[Player] WHERE AccountDBId = (@AccountId)
       ]]>
     </Body>
   </Procedure>
@@ -49,10 +50,11 @@
     <Param name="@CurrentHP" type="int"/>
     <Param name="@MaxHP" type="int"/>
     <Param name="@Attack" type="int"/>
+    <Param name="@CriticalPoint" type="int"/>
     <Param name="@Speed" type="float"/>
     <Body>
       <![CDATA[
-        INSERT INTO [dbo].[Player] VALUES ((@AccountId),(@CharacterName),(@Level),(@CurrentHP),(@MaxHP),(@Attack),(@Speed))        
+        INSERT INTO [dbo].[Player] VALUES ((@AccountId),(@CharacterName),(@Level),(@CurrentHP),(@MaxHP),(@Attack),(@CriticalPoint),(@Speed))        
       ]]>
     </Body>
   </Procedure>

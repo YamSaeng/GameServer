@@ -129,12 +129,14 @@ void CDataManager::LoadDataStatus(wstring LoadFileName)
 		int Level = Filed["Level"].GetInt();
 		int MaxHP = Filed["MaxHP"].GetInt();
 		int Attack = Filed["Attack"].GetInt();
+		int CriticalPoint = Filed["CriticalPoint"].GetInt();
 		float Speed = Filed["Speed"].GetFloat();		
 
 		st_StatusData* StatusData = new st_StatusData();
 		StatusData->Level = Level;
 		StatusData->MaxHP = MaxHP;
 		StatusData->Attack = Attack;
+		StatusData->CriticalPoint = CriticalPoint;
 		StatusData->Speed = Speed;
 
 		_Status.insert(pair<int32, st_StatusData*>(StatusData->Level, StatusData));		

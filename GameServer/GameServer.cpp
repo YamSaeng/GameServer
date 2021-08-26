@@ -1120,6 +1120,7 @@ void CGameServer::PacketProcReqAccountCheck(int64 SessionID, CMessage* Message)
 			int32 PlayerCurrentHP;
 			int32 PlayerMaxHP;
 			int32 PlayerAttack;
+			int32 PlayerCriticalPoint;
 			float PlayerSpeed;
 
 			ClientPlayersGet.OutPlayerDBID(PlayerId);
@@ -1128,6 +1129,7 @@ void CGameServer::PacketProcReqAccountCheck(int64 SessionID, CMessage* Message)
 			ClientPlayersGet.OutCurrentHP(PlayerCurrentHP);
 			ClientPlayersGet.OutMaxHP(PlayerMaxHP);
 			ClientPlayersGet.OutAttack(PlayerAttack);
+			ClientPlayersGet.OutCriticalPoint(PlayerCriticalPoint);
 			ClientPlayersGet.OutSpeed(PlayerSpeed);
 
 			ClientPlayersGet.Execute();
@@ -1143,6 +1145,7 @@ void CGameServer::PacketProcReqAccountCheck(int64 SessionID, CMessage* Message)
 				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectStatInfo.HP = PlayerCurrentHP;
 				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectStatInfo.MaxHP = PlayerMaxHP;
 				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectStatInfo.Attack = PlayerAttack;
+				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectStatInfo.CriticalPoint = PlayerCriticalPoint;
 				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectStatInfo.Speed = PlayerSpeed;
 				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
@@ -1215,6 +1218,7 @@ void CGameServer::PacketProcReqCreateCharacterNameCheck(int64 SessionID, CMessag
 			NewCharacterPush.InCurrentHP(NewCharacterStatus.MaxHP);
 			NewCharacterPush.InMaxHP(NewCharacterStatus.MaxHP);
 			NewCharacterPush.InAttack(NewCharacterStatus.Attack);
+			NewCharacterPush.InCriticalPoint(NewCharacterStatus.CriticalPoint);
 			NewCharacterPush.InSpeed(NewCharacterStatus.Speed);
 
 			NewCharacterPush.Execute();

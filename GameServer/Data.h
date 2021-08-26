@@ -38,6 +38,7 @@ struct st_StatusData
 	int32 HP;
 	int32 MaxHP;
 	int32 Attack;
+	int32 CriticalPoint;
 	float Speed;
 	int32 SearchCellDistance;
 	int32 ChaseCellDistance;

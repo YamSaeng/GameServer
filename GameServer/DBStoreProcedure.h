@@ -14,7 +14,7 @@ namespace SP
 	};
 
 	// AccountID를 기준으로 클라가 소유하고 있는 캐릭터를 찾는다.
-	class CDBGameServerPlayersGet : public CDBBind<1, 7>
+	class CDBGameServerPlayersGet : public CDBBind<1, 8>
 	{	
 	public:
 		CDBGameServerPlayersGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetPlayers(?)}") { }
@@ -25,7 +25,8 @@ namespace SP
 		void OutCurrentHP(int32& CurrentHP) { BindCol(3, CurrentHP); }
 		void OutMaxHP(int32& MaxHP) { BindCol(4, MaxHP); }
 		void OutAttack(int32& Attack) { BindCol(5, Attack); }
-		void OutSpeed(float& Speed) { BindCol(6, Speed); }
+		void OutCriticalPoint(int32& CriticalPoint) { BindCol(6, CriticalPoint); }
+		void OutSpeed(float& Speed) { BindCol(7, Speed); }
 	};
 
 	// DB에 입력한 해당 캐릭터가 있는지 확인
@@ -37,17 +38,18 @@ namespace SP
 	};
 
 	// DB에 새로운 캐릭 저장
-	class CDBGameServerCreateCharacterPush : public CDBBind<7, 0>
+	class CDBGameServerCreateCharacterPush : public CDBBind<8, 0>
 	{	
 	public:		
-		CDBGameServerCreateCharacterPush(CDBConnection& DBConnection) : CDBBind(DBConnection,L"{CALL dbo.spNewCharacterPush(?,?,?,?,?,?,?)}") {}
+		CDBGameServerCreateCharacterPush(CDBConnection& DBConnection) : CDBBind(DBConnection,L"{CALL dbo.spNewCharacterPush(?,?,?,?,?,?,?,?)}") {}
 		void InAccountID(int64& AccountID) { BindParam(0, AccountID); }
 		void InCharacterName(wstring& CharacterName) { BindParam(1, CharacterName.c_str()); }
 		void InLevel(int32& Level)  { BindParam(2, Level); }
 		void InCurrentHP(int32& CurrentHP) { BindParam(3, CurrentHP); }
 		void InMaxHP(int32& MaxHP) { BindParam(4, MaxHP); }
 		void InAttack(int32& Attack) { BindParam(5, Attack); }
-		void InSpeed(float Speed) { BindParam(6, Speed); }		
+		void InCriticalPoint(int32& CriticalPoint) { BindParam(6, CriticalPoint); }
+		void InSpeed(float Speed) { BindParam(7, Speed); }
 	};
 
 	// 캐릭터 DBid 얻기
