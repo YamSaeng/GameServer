@@ -38,7 +38,7 @@
           "Attack": 15,
           "Speed": 2.0,
           "SearchCellDistance": 15,
-          "ChaseCellDistance": 22,
+          "ChaseCellDistance": 28,
           "AttackRange": 1,
           "TotalExp": 20
         }
