@@ -445,6 +445,13 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 
 	int X = PositionInfo.PositionX - _Left;
 	int Y = _Down - PositionInfo.PositionY;
+	
+	if (GameObject->_GameObjectInfo.ObjectType == SLIME_GEL 
+		|| GameObject->_GameObjectInfo.ObjectType == LEATHER
+		|| GameObject->_GameObjectInfo.ObjectType == BRONZE_COIN)
+	{
+		return true;
+	}
 
 	// ¸Ê¿¡¼­ Á¦°Å
 	if (_ObjectsInfo[Y][X] == GameObject)

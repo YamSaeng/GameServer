@@ -7,6 +7,7 @@
 #include "DataManager.h"
 #include "ChannelManager.h"
 #include "ObjectManager.h"
+#include "Inventory.h"
 #include <process.h>
 
 CGameServer::CGameServer()
@@ -45,8 +46,8 @@ void CGameServer::Start(const WCHAR* OpenIP, int32 Port)
 {
 	CNetworkLib::Start(OpenIP, Port);
 
-	G_ObjectManager->MonsterSpawn(400, 1, en_GameObjectType::SLIME);
-	//G_ObjectManager->MonsterSpawn(50, 1, en_GameObjectType::BEAR);
+	G_ObjectManager->MonsterSpawn(300, 1, en_GameObjectType::SLIME);
+	G_ObjectManager->MonsterSpawn(10, 1, en_GameObjectType::BEAR);
 
 	G_ObjectManager->GameServer = this;
 
@@ -223,7 +224,7 @@ void CGameServer::DeleteClient(st_SESSION* Session)
 
 		for (int i = 0; i < 5; i++)
 		{
-			G_ObjectManager->ObjectReturn(en_GameObjectType::PLAYER, Session->MyPlayers[i]);
+			G_ObjectManager->Remove(Session->MyPlayers[i], 1);			
 			Session->MyPlayers[i]->_NetworkState = en_ObjectNetworkState::LEAVE;
 			Session->MyPlayers[i] = nullptr;
 		}
@@ -238,7 +239,7 @@ void CGameServer::DeleteClient(st_SESSION* Session)
 	_SessionArrayIndexs.Push(GET_SESSIONINDEX(Session->SessionId));
 }
 
-void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
+void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 {
 	WORD MessageType;
 	*Message >> MessageType;
@@ -246,37 +247,40 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 	switch (MessageType)
 	{
 	case en_PACKET_C2S_GAME_REQ_LOGIN:
-		PacketProcReqLogin(SessionID, Message);
+		PacketProcReqLogin(SessionId, Message);
 		break;
 	case en_PACKET_C2S_GAME_CREATE_CHARACTER:
-		PacketProcReqCreateCharacter(SessionID, Message);
+		PacketProcReqCreateCharacter(SessionId, Message);
 		break;
 	case en_PACKET_C2S_GAME_ENTER:
-		PacketProcReqEnterGame(SessionID, Message);
+		PacketProcReqEnterGame(SessionId, Message);
 		break;
 	case en_PACKET_C2S_MOVE:
-		PacketProcReqMove(SessionID, Message);
+		PacketProcReqMove(SessionId, Message);
 		break;
 	case en_PACKET_C2S_ATTACK:
-		PacketProcReqAttack(SessionID, Message);
+		PacketProcReqAttack(SessionId, Message);
 		break;
 	case en_PACKET_C2S_MOUSE_POSITION_OBJECT_INFO:
-		PacketProcReqMousePositionObjectInfo(SessionID, Message);
+		PacketProcReqMousePositionObjectInfo(SessionId, Message);
 		break;
 	case en_PACKET_C2S_MESSAGE:
-		PacketProcReqChattingMessage(SessionID, Message);
+		PacketProcReqChattingMessage(SessionId, Message);
+		break;
+	case en_PACKET_C2S_ITEM_TO_INVENTORY:
+		PacketProcReqItemToInventory(SessionId, Message);
 		break;
 	case en_PACKET_CS_GAME_REQ_SECTOR_MOVE:
-		PacketProcReqSectorMove(SessionID, Message);
+		PacketProcReqSectorMove(SessionId, Message);
 		break;
 	case en_PACKET_CS_GAME_REQ_MESSAGE:
-		PacketProcReqMessage(SessionID, Message);
+		PacketProcReqMessage(SessionId, Message);
 		break;
 	case en_PACKET_CS_GAME_REQ_HEARTBEAT:
-		PacketProcReqHeartBeat(SessionID, Message);
+		PacketProcReqHeartBeat(SessionId, Message);
 		break;
 	default:
-		Disconnect(SessionID);
+		Disconnect(SessionId);
 		break;
 	}
 
@@ -646,12 +650,14 @@ void CGameServer::PacketProcReqAttack(int64 SessionID, CMessage* Message)
 
 		st_Vector2Int FrontCell;
 		vector<CGameObject*> Targets;
-
+		en_AttackType AttackType = NONE_ATTACK;
 		switch (AttackRange)
 		{
 		case NORMAL_ATTACK:
 		case FORWARD_ATTACK:
 		{
+			AttackType = PLAYER_NORMAL_ATTACK;
+
 			FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, Distance);
 
 			CGameObject* Target = MyPlayer->_Channel->_Map->Find(FrontCell);
@@ -663,6 +669,8 @@ void CGameServer::PacketProcReqAttack(int64 SessionID, CMessage* Message)
 		break;
 		case AROUND_ONE_ATTACK:
 		{
+			AttackType = PLAYER_RANGE_ATTACK;
+
 			vector<st_Vector2Int> TargetPositions;
 
 			TargetPositions = MyPlayer->GetAroundCellPosition(MyPlayer->GetCellPosition(), Distance);
@@ -679,7 +687,7 @@ void CGameServer::PacketProcReqAttack(int64 SessionID, CMessage* Message)
 		}
 
 		// 주위 섹터 들에게 내가 지금 공격하고 있다고 알려줌
-		CMessage* ResMyAttackOtherPacket = MakePacketResAttack(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, MoveDir);
+		CMessage* ResMyAttackOtherPacket = MakePacketResAttack(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, MoveDir, AttackType);
 		SendPacketAroundSector(Session, ResMyAttackOtherPacket, true);
 		ResMyAttackOtherPacket->Free();
 
@@ -773,6 +781,7 @@ void CGameServer::PacketProcReqMousePositionObjectInfo(int64 SessionID, CMessage
 // string Message
 void CGameServer::PacketProcReqChattingMessage(int64 SessionId, CMessage* Message)
 {
+	// 세션 얻기
 	st_SESSION* Session = FindSession(SessionId);
 
 	int64 AccountId;
@@ -780,6 +789,7 @@ void CGameServer::PacketProcReqChattingMessage(int64 SessionId, CMessage* Messag
 
 	if (Session)
 	{
+		// 로그인 중인지 확인
 		if (!Session->IsLogin)
 		{
 			Disconnect(Session->SessionId);
@@ -788,6 +798,7 @@ void CGameServer::PacketProcReqChattingMessage(int64 SessionId, CMessage* Messag
 
 		*Message >> AccountId;
 
+		// AccountId가 맞는지 확인
 		if (Session->AccountId != AccountId)
 		{
 			Disconnect(Session->SessionId);
@@ -796,6 +807,7 @@ void CGameServer::PacketProcReqChattingMessage(int64 SessionId, CMessage* Messag
 
 		*Message >> PlayerDBId;
 
+		// 조종하고 있는 플레이어가 있는지 확인 
 		if (Session->MyPlayer == nullptr)
 		{
 			Disconnect(Session->SessionId);
@@ -803,6 +815,7 @@ void CGameServer::PacketProcReqChattingMessage(int64 SessionId, CMessage* Messag
 		}
 		else
 		{
+			// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
 			if (Session->MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
 			{
 				Disconnect(Session->SessionId);
@@ -810,15 +823,20 @@ void CGameServer::PacketProcReqChattingMessage(int64 SessionId, CMessage* Messag
 			}
 		}
 
+		// 채팅 메세지 길이 
 		int8 ChattingMessageLen;
 		*Message >> ChattingMessageLen;
 
+		// 채팅 메세지 얻어오기
 		wstring ChattingMessage;
 		Message->GetData(ChattingMessage, ChattingMessageLen);
 
+		// 채널 찾고
 		CChannel* Channel = G_ChannelManager->Find(1);
+		// 주위 플레이어 반환
 		vector<CPlayer*> Players = Channel->GetAroundPlayer(Session->MyPlayer, 10, false);
 
+		// 주위 플레이어에게 채팅 메세지 전송
 		for (CPlayer* Player : Players)
 		{
 			CMessage* ResChattingMessage = MakePacketResChattingMessage(PlayerDBId, en_MessageType::CHATTING, ChattingMessage);
@@ -827,7 +845,92 @@ void CGameServer::PacketProcReqChattingMessage(int64 SessionId, CMessage* Messag
 		}
 	}
 
+	// 세션 반납
 	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Message)
+{
+	st_SESSION* Session = FindSession(SessionId);
+	
+	do
+	{
+		if (Session)
+		{
+			int64 AccountId;
+			int64 ItemId;
+
+			// 로그인 중인지 확인
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountId;
+
+			// AccountId 확인
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			// ItemId와 ObjectType을 읽는다.
+			*Message >> ItemId;
+
+			int8 ObjectType;
+
+			*Message >> ObjectType;
+
+			// 아이템이 ObjectManager에 있는지 확인한다.
+			CItem* Item = (CItem*)(G_ObjectManager->Find(ItemId, (en_GameObjectType)ObjectType));			
+			if (Item != nullptr)
+			{
+				int64 TargetObjectId;
+
+				*Message >> TargetObjectId;
+
+				CPlayer* TargetPlayer = (CPlayer*)(G_ObjectManager->Find(TargetObjectId, en_GameObjectType::PLAYER));
+				if (TargetPlayer == nullptr)
+				{
+					break;
+				}
+								
+				int32 EmptySlot = 0;
+
+				// 아이템이 이미 존재 하는지 확인한다.
+				// 존재 하면 개수를 1 증가시킨다.
+				bool IsExistItem = TargetPlayer->_Inventory.IsExistItem(Item->_ItemInfo.ItemType);
+
+				// 존재 하지 않을 경우
+				if (IsExistItem == false)
+				{
+					// 빈 슬롯번호를 얻어와서 인벤토리에 추가한다.
+					if (TargetPlayer->_Inventory.GetEmptySlot(&EmptySlot))
+					{
+						Item->_ItemInfo.ItemDBId = Item->_GameObjectInfo.ObjectId;
+						Item->_ItemInfo.SlotNumber = EmptySlot;
+						TargetPlayer->_Inventory.Add(Item);
+					}
+				}				
+
+				// 아이템이 중복되어 있으면 앞서 아이템의 Count를 1 증가시켰을 테니 해당 아이템을 반납하고,
+				// 그 외의 경우에는 반납하지 않는다.
+				G_ObjectManager->Remove(Item, 1, IsExistItem);
+
+				CMessage* ResItemToInventoryPacket = MakePacketResItemToInventory(TargetPlayer->_GameObjectInfo.ObjectId, Item->_ItemInfo);
+				SendPacket(TargetPlayer->_SessionId, ResItemToInventoryPacket);
+				ResItemToInventoryPacket->Free();
+			}
+			else
+			{
+				CRASH("해당 아이템이 G_ObjectManager에 없음");
+			}
+		}
+	} while (0);
+
+	ReturnSession(Session);	
 }
 
 //---------------------------------------------------------------------------------
@@ -1349,7 +1452,7 @@ CMessage* CGameServer::MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* N
 // int64 AccountId
 // int32 PlayerDBId
 // char Dir
-CMessage* CGameServer::MakePacketResAttack(int64 AccountId, int32 PlayerDBId, en_MoveDir Dir)
+CMessage* CGameServer::MakePacketResAttack(int64 AccountId, int32 PlayerDBId, en_MoveDir Dir, en_AttackType AttackType)
 {
 	CMessage* ResAttackMessage = CMessage::Alloc();
 	if (ResAttackMessage == nullptr)
@@ -1363,6 +1466,7 @@ CMessage* CGameServer::MakePacketResAttack(int64 AccountId, int32 PlayerDBId, en
 	*ResAttackMessage << AccountId;
 	*ResAttackMessage << PlayerDBId;
 	*ResAttackMessage << (int8)Dir;
+	*ResAttackMessage << (int8)AttackType;
 
 	return ResAttackMessage;
 }
@@ -1552,6 +1656,33 @@ CMessage* CGameServer::MakePacketResChattingMessage(int32 PlayerDBId, en_Message
 	ResChattingMessage->InsertData(ChattingMessage.c_str(), PlayerNameLen);
 
 	return ResChattingMessage;
+}
+
+CMessage* CGameServer::MakePacketResItemToInventory(int64 TargetObjectId, st_ItemInfo ItemInfo)
+{
+	CMessage* ResItemToInventoryMessage = CMessage::Alloc();
+	if (ResItemToInventoryMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	*ResItemToInventoryMessage << (WORD)en_PACKET_S2C_ITEM_TO_INVENTORY;
+	*ResItemToInventoryMessage << TargetObjectId;
+	*ResItemToInventoryMessage << ItemInfo.ItemDBId;
+	*ResItemToInventoryMessage << ItemInfo.Count;
+	*ResItemToInventoryMessage << ItemInfo.SlotNumber;
+	*ResItemToInventoryMessage << ItemInfo.IsEquipped;
+	*ResItemToInventoryMessage << (int16)ItemInfo.ItemType;
+
+	int8 ItemNameLen = (int8)(ItemInfo.ItemName.length() * 2);
+	*ResItemToInventoryMessage << ItemNameLen;
+	ResItemToInventoryMessage->InsertData(ItemInfo.ItemName.c_str(), ItemNameLen);
+
+	int8 ThumbnailImagePathLen = (int)(ItemInfo.ThumbnailImagePath.length() * 2);
+	*ResItemToInventoryMessage << ThumbnailImagePathLen;
+	ResItemToInventoryMessage->InsertData(ItemInfo.ThumbnailImagePath.c_str(), ThumbnailImagePathLen);
+
+	return ResItemToInventoryMessage;
 }
 
 void CGameServer::OnClientJoin(int64 SessionID)

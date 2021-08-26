@@ -7,24 +7,41 @@ class CItem;
 
 class CChannel
 {
-public:	
-	int32 _ChannelId;	
+private:
+	//-------------------------------------------
+	// 채널에서 관리중인 플레이어, 몬스터, 아이템
+	//-------------------------------------------
 	map<int64, CPlayer*> _Players;
 	map<int64, CMonster*> _Monsters;
 	map<int64, CItem*> _Items;
-	
-	CMap* _Map;
 
+	//-----------------
+	// 섹터 목록
+	//-----------------
 	CSector** _Sectors;
+public:	
+	int32 _ChannelId;		
 	
+	CMap* _Map;	
+	
+	//----------------
+	// 섹터 크기
+	//----------------
 	int32 _SectorSize;
+
+	//------------------
+	// 섹터 X, Y 개수
+	//------------------
 	int32 _SectorCountX;
 	int32 _SectorCountY;
 
 	CChannel() {};
 	~CChannel();	
 
-	void Init(int MapId, int SectorSize);
+	//---------------------------------------
+	// 채널 초기화
+	//---------------------------------------
+	void Init(int32 MapId, int32 SectorSize);	
 
 	//---------------------------------------------
 	// 좌표 기준 섹터 얻어오기
@@ -42,10 +59,17 @@ public:
 	// 내 주위 플레이어 반환
 	//--------------------------------------------------------------------------------------
 	vector<CPlayer*> GetAroundPlayer(CGameObject* Object, int32 Range, bool ExceptMe = true);
+
+	//-------------------------------------------------------
+	// 내 근처 플레이어 반환
+	//-------------------------------------------------------
 	CPlayer* FindNearPlayer(CGameObject* Object, int32 Range);
 
+	//------------------------------
+	// 소유하고 있는 몬스터 업데이트
+	//------------------------------
 	void Update();
-
+	
 	//----------------------------------------------------
 	// 채널 입장
 	// - Object를 채널에 입장시키면서 자료구조에 저장한 후

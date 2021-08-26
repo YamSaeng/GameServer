@@ -48,13 +48,14 @@ private:
 	void PacketProc(int64 SessionId, CMessage* Message);
 
 	//----------------------------------------------------------------
-	//패킷처리 함수
-	//1. 로그인 요청
-	//2. 캐릭터 생성 요청 
-	//3. 게임 입장 요청
-	//4. 움직임 요청
-	//5. 공격 요청
-	//6. 하트비트
+	// 패킷처리 함수
+	// 1. 로그인 요청
+	// 2. 캐릭터 생성 요청 
+	// 3. 게임 입장 요청
+	// 4. 움직임 요청
+	// 6. 마우스 위치 오브젝트 정보 요청
+	// 7. 채팅 요청
+	// 8. 아이템 인벤토리 넣기 요청
 	//----------------------------------------------------------------	
 	void PacketProcReqLogin(int64 SessionID, CMessage* Message);
 	void PacketProcReqCreateCharacter(int64 SessionID, CMessage* Message);
@@ -63,6 +64,7 @@ private:
 	void PacketProcReqAttack(int64 SessionID, CMessage* Message);
 	void PacketProcReqMousePositionObjectInfo(int64 SessionID, CMessage* Message);
 	void PacketProcReqChattingMessage(int64 SessionId, CMessage* Message);
+	void PacketProcReqItemToInventory(int64 SessionId, CMessage* Message);
 	void PacketProcReqSectorMove(int64 SessionID, CMessage* Message);
 	void PacketProcReqMessage(int64 SessionID, CMessage* Message);
 	void PacketProcReqHeartBeat(int64 SessionID, CMessage* Message);
@@ -79,8 +81,9 @@ private:
 	//패킷조합 함수
 	//1. 클라이언트 접속 응답
 	//2. 로그인 요청 응답
-	//3. 게임 입장 요청 응답
-	//4. 움직임 요청 응답
+	//3. 캐릭터 생성 요청 응답
+	//4. 게임 입장 요청 응답
+	//5. 마우스 위치 오브젝트 정보 요청 응답
 	//5. 공격 요청 응답
 	//6. 오브젝트 스폰 
 	//7. 오브젝트 디스폰
@@ -93,7 +96,7 @@ private:
 	CMessage* MakePacketMousePositionObjectInfo(int64 AccountId, int32 PlayerDBId, st_GameObjectInfo ObjectInfo);
 	CMessage* MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* NickName, WORD MessageLen, WCHAR* Message);
 public:
-	CMessage* MakePacketResAttack(int64 AccountId, int32 PlayerDBId, en_MoveDir Dir);
+	CMessage* MakePacketResAttack(int64 AccountId, int32 PlayerDBId, en_MoveDir Dir, en_AttackType AttackType);
 	CMessage* MakePacketResChangeHP(int32 PlayerDBId, int32 Damage, int32 CurrentHP, int32 MaxHP);
 	CMessage* MakePacketResObjectState(int32 ObjectId, en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState);
 	CMessage* MakePacketResMove(int64 AccountId, int32 ObjectId, en_GameObjectType ObjectType, st_PositionInfo PositionInfo);
@@ -101,6 +104,7 @@ public:
 	CMessage* MakePacketResDeSpawn(int32 DeSpawnObjectCount, vector<int64> DeSpawnObjectIds);
 	CMessage* MakePacketResDie(int64 DieObjectId);
 	CMessage* MakePacketResChattingMessage(int32 PlayerDBId, en_MessageType MessageType, wstring ChattingMessage);
+	CMessage* MakePacketResItemToInventory(int64 TargetObjectId, st_ItemInfo ItemInfo);
 public:
 	//------------------------------------
 	// Job 메모리풀
@@ -113,12 +117,16 @@ public:
 	CLockFreeQue<st_Job*> _GameServerNetworkThreadMessageQue;
 	CLockFreeQue<st_Job*> _GameServerDataBaseThreadMessageQue;
 
+	// 인증 쓰레드 활성화된 횟수
 	int64 _AuthThreadWakeCount;
+	// 인증 쓰레드 TPS
 	int64 _AuthThreadTPS;
+	// Network 쓰레드 TPS
+	int64 _NetworkThreadTPS; 
 
-	int64 _NetworkThreadTPS; // Update 쓰레드가 1초에 작업한 처리량
-
+	// DB 쓰레드 활성화된 횟수
 	int64 _DataBaseThreadWakeCount;
+	// DB 쓰레드 TPS
 	int64 _DataBaseThreadTPS;
 
 	CGameServer();

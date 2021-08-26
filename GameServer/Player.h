@@ -1,10 +1,13 @@
-#pragma once
+	#pragma once
 #include "GameObject.h"
+#include "Inventory.h"
 
 class CPlayer : public CGameObject
 {
 public:	
 	int64 _SessionId;
+
+	CInventory _Inventory;
 
 	CPlayer();
 	CPlayer(st_GameObjectInfo _PlayerInfo);

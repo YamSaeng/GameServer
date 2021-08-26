@@ -57,7 +57,7 @@
       "Name": "BronzeCoin",
       "MaxCount": 99,
       "IsEquipped": false,
-      "ImageFilePath": ""
+      "ImageFilePath": "Textures/Misc/CopperCoin"
     }
   ]
 } 

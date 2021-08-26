@@ -194,6 +194,9 @@
     <ClInclude Include="Inventory.h">
       <Filter>ContentServer\Content\Inventory</Filter>
     </ClInclude>
+    <ClInclude Include="GameObjectInfo.h">
+      <Filter>ContentServer\Content\GameObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

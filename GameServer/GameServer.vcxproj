@@ -167,6 +167,7 @@
     <ClInclude Include="DBSynchronizer.h" />
     <ClInclude Include="FileUtils.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="GameObjectInfo.h" />
     <ClInclude Include="GameServer.h" />
     <ClInclude Include="GameServerInfo.h" />
     <ClInclude Include="Global.h" />

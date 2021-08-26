@@ -269,13 +269,19 @@ enum en_PACKET_TYPE
 
 	//------------------------------------------------------------
 	// 게임서버 아이템 인벤토리 저장 요청
-	// int32 ObjectId
+	// int64 AccountId
+	// int64 ObjectId
+	// int8 ObjectType
+	// int32 ObjectPositionX
+	// int32 ObjectPositionY
+	// int64 TargetObjectId
 	//------------------------------------------------------------
 	en_PACKET_C2S_ITEM_TO_INVENTORY,
     
 	//------------------------------------------------------------
 	// 게임서버 아이템 인벤토리 저장 요청 응답
-	// int32 ObjectId
+	// int64 TargetObjectId
+	// st_ItemInfo ItemInfo
 	//------------------------------------------------------------
 	en_PACKET_S2C_ITEM_TO_INVENTORY
 };

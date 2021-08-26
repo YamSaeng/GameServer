@@ -71,10 +71,12 @@ void CObjectManager::Add(CGameObject* AddObject, int32 ChannelId)
 	}
 }
 
-bool CObjectManager::Remove(CGameObject* RemoveObject, int32 _ChannelId)
+bool CObjectManager::Remove(CGameObject* RemoveObject, int32 _ChannelId, bool IsObjectReturn)
 {
 	bool RemoveSuccess = false;
 
+	// 타입에 따라 관리당하고 있는 자료구조에서 자신을 삭제
+	// 채널에서 삭제
 	switch (RemoveObject->_GameObjectInfo.ObjectType)
 	{
 	case en_GameObjectType::PLAYER:
@@ -88,10 +90,55 @@ bool CObjectManager::Remove(CGameObject* RemoveObject, int32 _ChannelId)
 	case en_GameObjectType::SLIME_GEL:
 	case en_GameObjectType::BRONZE_COIN:
 		_Items.erase(RemoveObject->_GameObjectInfo.ObjectId);
+
+		RemoveObject->_Channel->LeaveChannel(RemoveObject);
 		break;
 	}
 
+	if (IsObjectReturn == true)
+	{
+		// 오브젝트 메모리 풀에 반환
+		ObjectReturn(RemoveObject->_GameObjectInfo.ObjectType, RemoveObject);
+	}
+
 	return RemoveSuccess;
+}
+
+CGameObject* CObjectManager::Find(int64 ObjectId, en_GameObjectType GameObjectType)
+{	
+	switch (GameObjectType)
+	{	
+	case PLAYER:
+	{
+		auto FindIterator = _Players.find(ObjectId);
+		if (FindIterator == _Players.end())
+		{
+			return nullptr;
+		}
+
+		return (*FindIterator).second;
+	}
+		break;
+	case SLIME:
+		break;
+	case BEAR:
+		break;
+	case WEAPON:		
+	case SLIME_GEL:		
+	case LEATHER:
+	case BRONZE_COIN:	
+	{
+		auto FindIterator = _Items.find(ObjectId);
+		if (FindIterator == _Items.end())
+		{
+			return nullptr;
+		}
+
+		return (*FindIterator).second;
+	}		
+	default:
+		return nullptr;
+	}
 }
 
 CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
@@ -139,11 +186,10 @@ void CObjectManager::ObjectReturn(en_GameObjectType ObjectType, CGameObject* Ret
 		break;
 	case en_GameObjectType::SLIME_GEL:
 	case en_GameObjectType::BRONZE_COIN:
+	case en_GameObjectType::LEATHER:
 		_MaterialMemoryPool->Free((CMaterial*)ReturnObject);
 		break;
-	}
-
-	Remove(ReturnObject, 1);
+	}		
 }
 
 void CObjectManager::MonsterSpawn(int32 MonsterCount, int32 ChannelId, en_GameObjectType MonsterType)

@@ -183,8 +183,7 @@ void CSlime::GetRandomDropItem(CGameObject* Killer)
 
 	int32 Sum = 0;
 
-	st_ItemData DropItemData;
-
+	st_ItemData DropItemData;	
 	for (st_DropData DropItem : MonsterData._DropItems)
 	{
 		Sum += DropItem._Probability;
@@ -200,7 +199,7 @@ void CSlime::GetRandomDropItem(CGameObject* Killer)
 			}
 
 			DropItemData = *(*FindDropItemInfo).second;
-			DropItemData.Count = DropItem._Count;
+			DropItemData.Count = DropItem._Count;			
 			break;
 		}
 	}
@@ -210,14 +209,15 @@ void CSlime::GetRandomDropItem(CGameObject* Killer)
 		st_ItemInfo NewItemInfo;
 
 		NewItemInfo.ItemDBId = -1;
-		NewItemInfo.DataSheetId = DropItemData._DataSheetId;
 		NewItemInfo.Count = DropItemData.Count;
 		NewItemInfo.SlotNumber = -1;
 		NewItemInfo.IsEquipped = DropItemData.IsEquipped;
+		NewItemInfo.ItemType = DropItemData._ItemType;
+		NewItemInfo.ThumbnailImagePath.assign(DropItemData._ImagePath.begin(), DropItemData._ImagePath.end());
 		NewItemInfo.ItemName.assign(DropItemData._Name.begin(), DropItemData._Name.end());
 		en_GameObjectType GameObjectType;
 
-		switch (DropItemData._ItemType)
+		switch (NewItemInfo.ItemType)
 		{
 		case en_ItemType::ITEM_TYPE_SLIMEGEL:
 			GameObjectType = en_GameObjectType::SLIME_GEL;

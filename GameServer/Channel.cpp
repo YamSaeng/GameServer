@@ -16,7 +16,7 @@ CChannel::~CChannel()
 	delete _Sectors;
 }
 
-void CChannel::Init(int MapId, int SectorSize)
+void CChannel::Init(int32 MapId, int32 SectorSize)
 {
 	_Map = new CMap(MapId);
 
@@ -29,20 +29,19 @@ void CChannel::Init(int MapId, int SectorSize)
 	// 앞서 구한 가로 세로 개수를 토대로 동적할당 
 	_Sectors = new CSector * [_SectorCountY];
 
-	for (int i = 0; i < _SectorCountY; i++)
+	for (int32 i = 0; i < _SectorCountY; i++)
 	{
 		_Sectors[i] = new CSector[_SectorCountX];
 	}
 
-	for (int Y = 0; Y < _SectorCountY; Y++)
+	for (int32 Y = 0; Y < _SectorCountY; Y++)
 	{
-		for (int X = 0; X < _SectorCountX; X++)
+		for (int32 X = 0; X < _SectorCountX; X++)
 		{
 			// 섹터 저장
 			_Sectors[Y][X] = CSector(Y, X);
 		}
 	}
-
 }
 
 CSector* CChannel::GetSector(st_Vector2Int CellPosition)
@@ -93,8 +92,7 @@ vector<CSector*> CChannel::GetAroundSectors(st_Vector2Int CellPosition, int32 Ra
 	int MaxIndexY = (_Map->_Down - RightBottom._Y) / _SectorSize;
 	int MaxIndexX = (RightBottom._X - _Map->_Left) / _SectorSize;
 
-	CSector* NowSector = GetSector(CellPosition);
-
+	// 좌측 상단 섹터 부터 우측 하단 섹터 얻어서 저장후 반환
 	for (int X = MinIndexX; X <= MaxIndexX; X++)
 	{
 		for (int Y = MinIndexY; Y <= MaxIndexY; Y++)
@@ -123,6 +121,7 @@ vector<CGameObject*> CChannel::GetAroundObjects(CGameObject* Object, int32 Range
 		// 주변 섹터 플레이어 정보
 		for (CPlayer* Player : Sector->GetPlayers())
 		{
+			// 함수 호출한 오브젝트를 포함할 것인지에 대한 여부 true면 제외 false면 포함
 			if (ExceptMe == true)
 			{
 				if (Object->_GameObjectInfo.ObjectId != Player->_GameObjectInfo.ObjectId)
@@ -148,9 +147,12 @@ vector<CGameObject*> CChannel::GetAroundObjects(CGameObject* Object, int32 Range
 
 vector<CPlayer*> CChannel::GetAroundPlayer(CGameObject* Object, int32 Range, bool ExceptMe)
 {
+	// 주위 섹터 얻어오고
 	vector<CSector*> Sectors = GetAroundSectors(Object->GetCellPosition(), Range);
 	vector<CPlayer*> Players;
 
+	// 섹터에 있는 플레이어를 담아서 반환
+	// ExceptMe가 true면 제외 false면 포함
 	for (CSector* Sector : Sectors)
 	{
 		for (CPlayer* Player : Sector->GetPlayers())
@@ -174,8 +176,10 @@ vector<CPlayer*> CChannel::GetAroundPlayer(CGameObject* Object, int32 Range, boo
 
 CPlayer* CChannel::FindNearPlayer(CGameObject* Object, int32 Range)
 {
+	// 주위 플레이어 정보 받아와서
 	vector<CPlayer*> Players = GetAroundPlayer(Object, Range);	
 
+	// 플레이어 목록 돌면서 길찾기로 찾아보고 갈 수 있으면 해당 플레이어반환
 	for (int32 i = 0; i < Players.size(); i++)
 	{
 		CPlayer* Player = Players[i];
@@ -204,6 +208,7 @@ void CChannel::Update()
 
 void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* ObjectSpawnPosition)
 {
+	// 채널 입장
 	if (EnterChannelGameObject == nullptr)
 	{
 		CRASH("GameObject가 nullptr");
@@ -215,6 +220,7 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 		
 	st_Vector2Int SpawnPosition;
 
+	// 스폰 포지션을 따로 지정해 주지 않았으면 랜덤 스폰 좌표 얻음
 	if (ObjectSpawnPosition == nullptr)
 	{
 		while (true)
@@ -236,23 +242,28 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 		SpawnPosition = *ObjectSpawnPosition;
 	}
 	
-	G_Logger->WriteStdOut(en_Color::RED, L"SpawnPosition Y : %d X : %d \n", SpawnPosition._Y, SpawnPosition._X);
-	int SpawnX = rand() % 100;
+	G_Logger->WriteStdOut(en_Color::RED, L"SpawnPosition Y : %d X : %d \n", SpawnPosition._Y, SpawnPosition._X);	
 
+	// 입장한 오브젝트의 타입에 따라
 	switch (EnterChannelGameObject->_GameObjectInfo.ObjectType)
 	{
 	case en_GameObjectType::PLAYER:
 		{
+			// 플레이어로 형변환
 			CPlayer* EnterChannelPlayer = (CPlayer*)EnterChannelGameObject;
 			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY = SpawnPosition._Y;
 			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX = SpawnPosition._X;
 
+			// 플레이어 자료구조에 저장
 			_Players.insert(pair<int64, CPlayer*>(EnterChannelPlayer->_GameObjectInfo.ObjectId, EnterChannelPlayer));
 			
+			// 채널 저장
 			EnterChannelPlayer->_Channel = this;		
 
+			// 맵에 적용
 			_Map->ApplyMove(EnterChannelPlayer, SpawnPosition);
 
+			// 섹터 얻어서 해당 섹터에도 저장
 			CSector* EnterSector = GetSector(SpawnPosition);			
 			EnterSector->Insert(EnterChannelPlayer);			
 		}
@@ -260,16 +271,21 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	case en_GameObjectType::SLIME:
 	case en_GameObjectType::BEAR:
 		{
+			// 몬스터로 형변환
 			CMonster* EnterChannelMonster = (CMonster*)EnterChannelGameObject;
 			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.PositionY = SpawnPosition._Y;
 			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.PositionX = SpawnPosition._X;
 
+			// 몬스터 자료구조에 저장
 			_Monsters.insert(pair<int64,CMonster*>(EnterChannelMonster->_GameObjectInfo.ObjectId,EnterChannelMonster));
 
+			// 채널 저장
 			EnterChannelMonster->_Channel = this;		
 
+			// 맵에 적용
 			_Map->ApplyMove(EnterChannelMonster, SpawnPosition);
 
+			// 섹터 얻어서 해당 섹터에도 저장
 			CSector* EnterSector = GetSector(SpawnPosition);
 			EnterSector->Insert(EnterChannelMonster);												
 		}
@@ -277,6 +293,7 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	case en_GameObjectType::SLIME_GEL:
 	case en_GameObjectType::BRONZE_COIN:
 		{
+			// 아이템으로 형변환
 			CItem* EnterChannelItem = (CItem*)EnterChannelGameObject;
 			EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.PositionY = SpawnPosition._Y;
 			EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.PositionX = SpawnPosition._X;
@@ -284,9 +301,11 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			_Items.insert(pair<int64, CItem*>(EnterChannelItem->_GameObjectInfo.ObjectId,EnterChannelItem));
 
 			EnterChannelItem->_Channel = this;			
-
+			
+			// 맵에 적용 아이템의 경우는 충돌체로 인식하지 않게 한다.
 			_Map->ApplyMove(EnterChannelItem, SpawnPosition, false, false);
 
+			// 섹터 얻어서 해당 섹터에도 저장
 			CSector* EnterSector = GetSector(SpawnPosition);
 			EnterSector->Insert(EnterChannelItem);
 		}
@@ -296,6 +315,7 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 
 void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 {	
+	// 채널 퇴장
 	switch (LeaveChannelGameObject->_GameObjectInfo.ObjectType)
 	{
 	case en_GameObjectType::PLAYER:
@@ -310,5 +330,12 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 
 		_Map->ApplyLeave(LeaveChannelGameObject);		
 		break;	
+	case en_GameObjectType::SLIME_GEL:
+	case en_GameObjectType::BRONZE_COIN:
+	case en_GameObjectType::LEATHER:
+		_Items.erase(LeaveChannelGameObject->_GameObjectInfo.ObjectId);
+
+		_Map->ApplyLeave(LeaveChannelGameObject);
+		break;
 	}	
 }
