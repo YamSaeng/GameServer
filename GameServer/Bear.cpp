@@ -2,6 +2,7 @@
 #include "Bear.h"
 #include "DataManager.h"
 #include "Player.h"
+#include "ObjectManager.h"
 
 CBear::CBear()
 {
@@ -185,24 +186,24 @@ void CBear::GetRandomDropItem(CGameObject* Killer)
 		Sum += DropItem._Probability;
 
 		if (Sum >= Random)
-		{			
+		{
 			return;
 		}
-	}	
+	}
 }
 
 void CBear::OnDead(CGameObject* Killer)
 {
-	BroadCastPacket(en_PACKET_S2C_DIE);
-	BroadCastPacket(en_PACKET_S2C_DESPAWN);
+	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
 
-	CChannel* Channel = _Channel;
-	Channel->LeaveChannel(this);
+	BroadCastPacket(en_PACKET_S2C_DIE);		
 
-	_GameObjectInfo.ObjectStatInfo.HP = _GameObjectInfo.ObjectStatInfo.MaxHP;
+	G_ObjectManager->Remove(this, 1);	
+
+	/*_GameObjectInfo.ObjectStatInfo.HP = _GameObjectInfo.ObjectStatInfo.MaxHP;
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 	_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
 
 	Channel->EnterChannel(this);
-	BroadCastPacket(en_PACKET_S2C_SPAWN);
+	BroadCastPacket(en_PACKET_S2C_SPAWN);*/
 }

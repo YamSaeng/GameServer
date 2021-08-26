@@ -235,19 +235,19 @@ void CSlime::GetRandomDropItem(CGameObject* Killer)
 
 void CSlime::OnDead(CGameObject* Killer)
 {
-	BroadCastPacket(en_PACKET_S2C_DIE);
-	BroadCastPacket(en_PACKET_S2C_DESPAWN);
+	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
 
-	CChannel* Channel = _Channel;
-	Channel->LeaveChannel(this);
+	GetRandomDropItem(Killer);
 
-	_GameObjectInfo.ObjectStatInfo.HP = _GameObjectInfo.ObjectStatInfo.MaxHP;
+	BroadCastPacket(en_PACKET_S2C_DIE);		
+
+	G_ObjectManager->Remove(this, 1);	
+
+	/*_GameObjectInfo.ObjectStatInfo.HP = _GameObjectInfo.ObjectStatInfo.MaxHP;
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-	_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
-	
-	GetRandomDropItem(Killer);	
+	_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;	
 
 	Channel->EnterChannel(this);
-	BroadCastPacket(en_PACKET_S2C_SPAWN);
+	BroadCastPacket(en_PACKET_S2C_SPAWN);*/
 }
 

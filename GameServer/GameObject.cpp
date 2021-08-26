@@ -37,7 +37,7 @@ void CGameObject::OnDamaged(CGameObject* Attacker, int32 Damage)
 
 void CGameObject::OnDead(CGameObject* Killer)
 {
-
+	
 }
 
 st_PositionInfo CGameObject::GetPositionInfo()
