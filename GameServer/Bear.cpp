@@ -168,33 +168,11 @@ void CBear::UpdateDead()
 
 }
 
-void CBear::GetRandomDropItem(CGameObject* Killer)
-{
-	auto FindMonsterDropItem = G_Datamanager->_Monsters.find(2);
-	st_MonsterData MonsterData = *(*FindMonsterDropItem).second;
-
-	random_device RD;
-	mt19937 Gen(RD());
-
-	uniform_int_distribution<int> RandomXPosition(0, 31);
-	int32 Random = RandomXPosition(Gen);
-
-	int32 Sum = 0;
-
-	for (st_DropData DropItem : MonsterData._DropItems)
-	{
-		Sum += DropItem._Probability;
-
-		if (Sum >= Random)
-		{
-			return;
-		}
-	}
-}
-
 void CBear::OnDead(CGameObject* Killer)
 {
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
+
+	GetRandomDropItem(Killer,en_MonsterDataType::BEAR_DATA);
 
 	BroadCastPacket(en_PACKET_S2C_DIE);		
 

@@ -20,6 +20,77 @@ void CMonster::Init(int32 DataSheetId)
 	_DataSheetId = DataSheetId;
 }
 
+void CMonster::GetRandomDropItem(CGameObject* Killer, en_MonsterDataType MonsterDataType)
+{
+	bool Find = false;
+	int64 KillerId = Killer->_GameObjectInfo.ObjectId;
+
+	auto FindMonsterDropItem = G_Datamanager->_Monsters.find(MonsterDataType);
+	st_MonsterData MonsterData = *(*FindMonsterDropItem).second;
+
+	random_device RD;
+	mt19937 Gen(RD());
+
+	uniform_int_distribution<int> RandomDropPoint(0, 60);
+	int32 RandomPoint = RandomDropPoint(Gen);
+
+	int32 Sum = 0;
+
+	st_ItemData DropItemData;
+	for (st_DropData DropItem : MonsterData._DropItems)
+	{
+		Sum += DropItem.Probability;
+
+		if (Sum >= RandomPoint)
+		{
+			Find = true;
+			// 드랍 확정 되면 해당 아이템 읽어오기
+			auto FindDropItemInfo = G_Datamanager->_Items.find(DropItem.ItemDataSheetId);
+			if (FindDropItemInfo == G_Datamanager->_Items.end())
+			{
+				CRASH("DropItemInfo를 찾지 못함");
+			}
+
+			DropItemData = *(*FindDropItemInfo).second;
+
+			uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
+			DropItemData.Count = RandomDropItemCount(Gen);
+			break;
+		}
+	}
+
+	if (Find == true)
+	{
+		st_ItemInfo NewItemInfo;
+
+		NewItemInfo.ItemDBId = -1;
+		NewItemInfo.Count = DropItemData.Count;
+		NewItemInfo.SlotNumber = -1;
+		NewItemInfo.IsEquipped = DropItemData.IsEquipped;
+		NewItemInfo.ItemType = DropItemData._ItemType;
+		NewItemInfo.ThumbnailImagePath.assign(DropItemData._ImagePath.begin(), DropItemData._ImagePath.end());
+		NewItemInfo.ItemName.assign(DropItemData._Name.begin(), DropItemData._Name.end());
+
+		en_GameObjectType GameObjectType;
+		switch (NewItemInfo.ItemType)
+		{
+		case en_ItemType::ITEM_TYPE_SLIMEGEL:
+			GameObjectType = en_GameObjectType::SLIME_GEL;
+			break;
+		case en_ItemType::ITEM_TYPE_LEATHER:
+			GameObjectType = en_GameObjectType::LEATHER;
+			break;
+		case en_ItemType::ITEM_TYPE_BRONZE_COIN:
+			GameObjectType = en_GameObjectType::BRONZE_COIN;
+			break;		
+		default:
+			break;
+		}
+
+		G_ObjectManager->ItemSpawn(1, GetCellPosition(), KillerId, NewItemInfo, GameObjectType);
+	}
+}
+
 void CMonster::Update()
 {
 	if (_Target && _Target->_NetworkState == en_ObjectNetworkState::LEAVE)

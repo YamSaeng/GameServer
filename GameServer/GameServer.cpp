@@ -46,8 +46,8 @@ void CGameServer::Start(const WCHAR* OpenIP, int32 Port)
 {
 	CNetworkLib::Start(OpenIP, Port);
 
-	G_ObjectManager->MonsterSpawn(100, 1, en_GameObjectType::SLIME);
-	G_ObjectManager->MonsterSpawn(20, 1, en_GameObjectType::BEAR);
+	G_ObjectManager->MonsterSpawn(200, 1, en_GameObjectType::SLIME);
+	G_ObjectManager->MonsterSpawn(200, 1, en_GameObjectType::BEAR);
 
 	G_ObjectManager->GameServer = this;
 
@@ -950,7 +950,7 @@ void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Messag
 				else
 				{
 					// 그 외 아이템이라면 
-					int32 EmptySlot = 0;
+ 					int32 EmptySlot = 0;
 
 					// 아이템이 이미 존재 하는지 확인한다.
 					// 존재 하면 개수를 1 증가시킨다.

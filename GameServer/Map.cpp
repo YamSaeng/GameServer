@@ -388,6 +388,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 		break;
 	case en_GameObjectType::SLIME_GEL:
 	case en_GameObjectType::BRONZE_COIN:
+	case en_GameObjectType::LEATHER:
 	{
 		CItem* MoveItem = (CItem*)GameObject;
 

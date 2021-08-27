@@ -9,7 +9,6 @@ protected:
 	virtual void UpdateMoving() override;
 	virtual void UpdateAttack() override;
 	virtual void UpdateDead() override;
-	virtual void GetRandomDropItem(CGameObject* Killer) override;
 public:
 	CSlime();
 	~CSlime();

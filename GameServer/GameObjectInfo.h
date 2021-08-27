@@ -9,7 +9,9 @@ enum en_GameObjectType
 	WEAPON,
 	SLIME_GEL,
 	LEATHER,
-	BRONZE_COIN
+	BRONZE_COIN,
+	SLIVER_COIN,
+	GOLD_COIN
 };
 
 enum en_MoveDir

@@ -1,6 +1,12 @@
 #pragma once
 #include "Item.h"
 
+enum en_MonsterDataType
+{
+	SLIME_DATA = 1,
+	BEAR_DATA
+};
+
 struct st_ItemData
 {
 	int32 _DataSheetId;

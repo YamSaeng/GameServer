@@ -292,6 +292,7 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 		break;
 	case en_GameObjectType::SLIME_GEL:
 	case en_GameObjectType::BRONZE_COIN:
+	case en_GameObjectType::LEATHER:
 		{
 			// 아이템으로 형변환
 			CItem* EnterChannelItem = (CItem*)EnterChannelGameObject;
