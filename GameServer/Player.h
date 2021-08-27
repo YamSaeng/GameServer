@@ -6,6 +6,7 @@ class CPlayer : public CGameObject
 {
 public:	
 	int64 _SessionId;
+	int64 _AccountId;
 
 	CInventory _Inventory;
 

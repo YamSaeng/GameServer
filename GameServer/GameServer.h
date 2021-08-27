@@ -76,6 +76,8 @@ private:
 	//-----------------------------------------------------------------------------------------------
 	void PacketProcReqAccountCheck(int64 SessionID, CMessage* Message);
 	void PacketProcReqCreateCharacterNameCheck(int64 SessionID, CMessage* Message);
+	void PacketProcReqDBItemToInventorySave(int64 SessionId, CMessage* Message);
+	void PacketProcReqGoldSave(int64 SessionId, CMessage* Message);
 
 	//----------------------------------------------------------------
 	//패킷조합 함수
@@ -94,6 +96,7 @@ private:
 	CMessage* MakePacketResCreateCharacter(bool IsSuccess, int32 PlayerDBId, wstring PlayerName);
 	CMessage* MakePacketResEnterGame(st_GameObjectInfo ObjectInfo);	
 	CMessage* MakePacketMousePositionObjectInfo(int64 AccountId, int32 PlayerDBId, st_GameObjectInfo ObjectInfo);
+	CMessage* MakePacketGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int8 SliverCount, int8 BronzeCount);
 	CMessage* MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* NickName, WORD MessageLen, WCHAR* Message);
 public:
 	CMessage* MakePacketResAttack(int64 AccountId, int32 PlayerDBId, en_MoveDir Dir, en_AttackType AttackType, bool IsCritical);

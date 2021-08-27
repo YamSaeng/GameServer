@@ -91,33 +91,16 @@ CItem* CInventory::Get(int32 _ItemDBId)
 	return Item;
 }
 
-bool CInventory::IsExistItem(en_ItemType ItemType)
+bool CInventory::IsExistItem(en_ItemType ItemType, int32* Count, int32* SlotIndex)
 {
 	for (int32 i = 0; i < INVENTORY_SIZE; i++)
 	{
 		if(_Items[i] != nullptr && _Items[i]->_ItemInfo.ItemType == ItemType)
-		{
-			switch (ItemType)
-			{			
-			case ITEM_TYPE_WEAPON_SWORD:
-				break;
-			case ITEM_TYPE_ARMOR_ARMOR:
-				break;
-			case ITEM_TYPE_ARMOR_HELMET:
-				break;
-			case ITEM_TYPE_CONSUMABLE_POTION:
-				break;
-			case ITEM_TYPE_LEATHER:
-				break;
-			case ITEM_TYPE_SLIMEGEL:
-				break;			
-			default:
-				CRASH("이상한 ItemType");
-				break;
-			}	
-
+		{			
 			// 최대 갯수 넘어가면 새로 생성해줘야함
 			_Items[i]->_ItemInfo.Count += 1;
+			*Count = _Items[i]->_ItemInfo.Count;
+			*SlotIndex = i;
 
 			return true;
 		}

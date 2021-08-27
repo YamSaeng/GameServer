@@ -15,15 +15,15 @@ private:
 	//------------------------------------
 	// 인벤토리 빈슬롯을 보관할 스택
 	//------------------------------------	
-	CLockFreeStack<int32> _ItemsSlotIndex;	
-
+	CLockFreeStack<int32> _ItemsSlotIndex;		
+public:
 	//-------------------
 	// 보유하고 있는 동전
 	//-------------------
 	int8 _BronzeCoinCount;
 	int8 _SliverCoinCount;
 	int64 _GoldCoinCount;
-public:
+
 	CInventory();
 	~CInventory();
 	
@@ -43,7 +43,7 @@ public:
 	//-------------------------------------
 	// 인벤토리에 이미 아이템이 있는지 확인
 	//-------------------------------------
-	bool IsExistItem(en_ItemType ItemType);
+	bool IsExistItem(en_ItemType ItemType, int32* Count, int32* SlotIndex);
 	//----------------------------------
 	// 비어 있는 슬롯 반환
 	//----------------------------------

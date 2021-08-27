@@ -283,5 +283,15 @@ enum en_PACKET_TYPE
 	// int64 TargetObjectId
 	// st_ItemInfo ItemInfo
 	//------------------------------------------------------------
-	en_PACKET_S2C_ITEM_TO_INVENTORY
+	en_PACKET_S2C_ITEM_TO_INVENTORY,
+
+	//------------------------------------------------------------
+	// 게임서버 아이템 인벤토리 저장 요청 응답
+	// int64 AccountId
+	// int64 ObjectId
+	// int64 GoldCount
+	// int8 SliverCount
+	// int8 BronzeCount
+	//------------------------------------------------------------
+	en_PACKET_S2C_GOLD_SAVE
 };

@@ -20,12 +20,14 @@ enum en_MESSAGE_TYPE
 
 	DATA_BASE_ACCOUNT_CHECK = 100,
 	DATA_BASE_CHARACTER_CHECK,
+	DATA_BASE_ITEM_INVENTORY_SAVE,
+	DATA_BASE_GOLD_SAVE
 };
 
 struct st_Job
 {
 	WORD Type;
-	int64 SessionID;
+	int64 SessionId;
 	CMessage* Message;
 	st_SESSION* Session;
 };
