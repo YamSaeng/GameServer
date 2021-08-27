@@ -37,6 +37,17 @@
       <Column name="ItemDBId"/>
     </Index>    
   </Table>
+
+  <Table name="Gold" desc="Gold Table">
+    <Column name="AccountDBId" type="Bigint" notnull="true"/>
+    <Column name="GoldCoin" type="Bigint" notnull="true"/>
+    <Column name="SliverCoin" type="TinyInt" notnull="true"/>
+    <Column name="BronzeCoin" type="TinyInt" notnull="true"/>
+    <Index type="clustered">
+      <PrimaryKey/>
+      <Column name="AccountDBId"/>
+    </Index>
+  </Table>
   
   <Procedure name="spGetPlayers">
     <Param name="@AccountId" type="int"/>
