@@ -207,9 +207,8 @@ wstring Helpers::RemoveWhiteSpace(const wstring& str)
 }
 
 DataType Helpers::WStringToDataType(const WCHAR* str, OUT int32& maxLen)
-{
-	// L"(\\d+),(\\d+)"
-	std::wregex reg(L"([a-z]+)(\\((max|\\d+)\\))?");
+{	
+	std::wregex reg(L"([a-zA-Z]+)(\\((max|\\d+)\\))?");
 	std::wcmatch ret;
 
 	if (std::regex_match(str, OUT ret, reg) == false)
