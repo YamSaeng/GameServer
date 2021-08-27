@@ -25,6 +25,19 @@
     </Index>
   </Table>
 
+  <Table name="Item" desc="Item Table">
+    <Column name="ItemDBId" type="int" notnull="true" identity="1,1"/>
+    <Column name="DataSheetId" type="int" notnull="true"/>
+    <Column name="Count" type="int" notnull="true"/>
+    <Column name="SlotIndex" type="int" notnull="true"/>
+    <Column name="OwnerAccountId" type="int" notnull="true"/>    
+    <Column name="IsEquipped" type="bit"/>
+    <Index type="clustered">
+      <PrimaryKey/>
+      <Column name="ItemDBId"/>
+    </Index>    
+  </Table>
+  
   <Procedure name="spGetPlayers">
     <Param name="@AccountId" type="int"/>
     <Body>
