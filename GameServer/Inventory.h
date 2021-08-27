@@ -2,6 +2,8 @@
 #include "Item.h"
 #include "LockFreeStack.h"
 
+#define INVENTORY_SIZE 20
+
 class CInventory
 {
 private:
@@ -14,15 +16,25 @@ private:
 	// 인벤토리 빈슬롯을 보관할 스택
 	//------------------------------------	
 	CLockFreeStack<int32> _ItemsSlotIndex;	
-	int32 _Money;
+
+	//-------------------
+	// 보유하고 있는 동전
+	//-------------------
+	int8 _BronzeCoinCount;
+	int8 _SliverCoinCount;
+	int64 _GoldCoinCount;
 public:
 	CInventory();
 	~CInventory();
 	
-	//--------------------
-	// 인벤토리에 Item추가
-	//--------------------
-	void Add(CItem* Item);	
+	//------------------------
+	// 인벤토리에 Item 추가
+	//------------------------
+	void AddItem(CItem* Item);	
+	//------------------------
+	// 인벤토리에 Coin 추가
+	//------------------------
+	void AddCoin(CItem* Item);
 	//--------------------------
 	// 아이템 반환
 	//--------------------------

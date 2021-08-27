@@ -186,20 +186,22 @@ void CSlime::GetRandomDropItem(CGameObject* Killer)
 	st_ItemData DropItemData;	
 	for (st_DropData DropItem : MonsterData._DropItems)
 	{
-		Sum += DropItem._Probability;
+		Sum += DropItem.Probability;
 
 		if (Sum >= Random)
 		{
 			Find = true;
 			// 드랍 확정 되면 해당 아이템 읽어오기
-			auto FindDropItemInfo = G_Datamanager->_Items.find(DropItem._ItemDataSheetId);
+			auto FindDropItemInfo = G_Datamanager->_Items.find(DropItem.ItemDataSheetId);
 			if (FindDropItemInfo == G_Datamanager->_Items.end())
 			{
 				CRASH("DropItemInfo를 찾지 못함");
 			}
 
 			DropItemData = *(*FindDropItemInfo).second;
-			DropItemData.Count = DropItem._Count;			
+
+			uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
+			DropItemData.Count = RandomDropItemCount(Gen);
 			break;
 		}
 	}
@@ -215,8 +217,8 @@ void CSlime::GetRandomDropItem(CGameObject* Killer)
 		NewItemInfo.ItemType = DropItemData._ItemType;
 		NewItemInfo.ThumbnailImagePath.assign(DropItemData._ImagePath.begin(), DropItemData._ImagePath.end());
 		NewItemInfo.ItemName.assign(DropItemData._Name.begin(), DropItemData._Name.end());
-		en_GameObjectType GameObjectType;
 
+		en_GameObjectType GameObjectType;
 		switch (NewItemInfo.ItemType)
 		{
 		case en_ItemType::ITEM_TYPE_SLIMEGEL:

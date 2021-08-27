@@ -184,12 +184,14 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 		{
 			int Probability = DropDataFiled["Probability"].GetInt();
 			int ItemDataSheetId = DropDataFiled["ItemDataSheetId"].GetInt();
-			int Count = DropDataFiled["Count"].GetInt();
+			int MinCount = DropDataFiled["MinCount"].GetInt();
+			int MaxCount = DropDataFiled["MaxCount"].GetInt();
 						
 			st_DropData DropData;
-			DropData._Probability = Probability;
-			DropData._ItemDataSheetId = ItemDataSheetId;
-			DropData._Count = Count;
+			DropData.Probability = Probability;
+			DropData.ItemDataSheetId = ItemDataSheetId;
+			DropData.MinCount = MinCount;
+			DropData.MaxCount = MaxCount;
 
 			MonsterData->_DropItems.push_back(DropData);
 		}	

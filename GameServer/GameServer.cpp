@@ -936,22 +936,34 @@ void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Messag
 				{
 					break;
 				}
-								
-				int32 EmptySlot = 0;
+					
+				bool IsExistItem = false;
 
-				// 아이템이 이미 존재 하는지 확인한다.
-				// 존재 하면 개수를 1 증가시킨다.
-				bool IsExistItem = TargetPlayer->_Inventory.IsExistItem(Item->_ItemInfo.ItemType);
-
-				// 존재 하지 않을 경우
-				if (IsExistItem == false)
+				// 아이템 정보가 코인이라면 
+				if (Item->_ItemInfo.ItemType == en_ItemType::ITEM_TYPE_BRONZE_COIN
+					|| Item->_ItemInfo.ItemType == en_ItemType::ITEM_TYPE_SLIVER_COIN
+					|| Item->_ItemInfo.ItemType == en_ItemType::ITEM_TYPE_GOLD_COIN)
+				{					
+					// 코인 저장
+					TargetPlayer->_Inventory.AddCoin(Item);					
+				}
+				else
 				{
-					// 빈 슬롯번호를 얻어와서 인벤토리에 추가한다.
-					if (TargetPlayer->_Inventory.GetEmptySlot(&EmptySlot))
+					// 그 외 아이템이라면 
+					int32 EmptySlot = 0;
+
+					// 아이템이 이미 존재 하는지 확인한다.
+					// 존재 하면 개수를 1 증가시킨다.
+					IsExistItem = TargetPlayer->_Inventory.IsExistItem(Item->_ItemInfo.ItemType);
+
+					// 존재 하지 않을 경우
+					if (IsExistItem == false)
 					{
-						Item->_ItemInfo.ItemDBId = Item->_GameObjectInfo.ObjectId;
-						Item->_ItemInfo.SlotNumber = EmptySlot;
-						TargetPlayer->_Inventory.Add(Item);
+						if (TargetPlayer->_Inventory.GetEmptySlot(&EmptySlot))
+						{
+							Item->_ItemInfo.SlotNumber = EmptySlot;
+							TargetPlayer->_Inventory.AddItem(Item);
+						}
 					}
 				}				
 

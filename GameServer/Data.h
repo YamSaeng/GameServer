@@ -47,16 +47,10 @@ struct st_StatusData
 
 struct st_DropData
 {
-	int32 _Probability;
-	int32 _ItemDataSheetId;
-	int32 _Count;
-};
-
-struct st_MonsterDropItemData
-{
-	int32 _Probability;
-	int32 _ItemDataSheetId;
-	int32 _Count;
+	int32 Probability;
+	int32 ItemDataSheetId;
+	int32 MinCount;
+	int32 MaxCount;
 };
 
 struct st_MonsterData
