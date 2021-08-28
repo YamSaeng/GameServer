@@ -22,8 +22,9 @@ enum en_ItemType
 struct st_ItemInfo
 {
 	int64 ItemDBId;				// 아이템 DB에 저장되어 있는 ID		
-	int32 Count;				// 개수
-	int32 SlotNumber;			// 슬롯 번호
+	int16 DataSheetId;			// DataSheetId
+	int16 ItemCount;			// 개수
+	int8 SlotIndex;				// 슬롯 번호
 	bool IsEquipped;			// 아이템을 착용할 수 있는지
 	en_ItemType ItemType;		// 아이템 타입
 	wstring ItemName;			// 아이템 이름

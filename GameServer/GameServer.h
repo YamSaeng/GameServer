@@ -73,11 +73,15 @@ private:
 	// DB 요청 처리 함수
 	// 1. 로그인 요청에서 추가로 AccountServer에 입력받은 Account가 있는지 확인하고 최종 로그인 검사	
 	// 2. 캐릭터 생성 요청에서 추가로 DB에 입력한 해당 캐릭터가 있는지 확인
+	// 3. 캐릭터 인벤토리에 있는 Item을 DB에 저장
+	// 4. 캐릭터 인벤토리에 있는 Gold를 DB에 저장
+	// 5. 캐릭터 정보 클라에게 전송
 	//-----------------------------------------------------------------------------------------------
 	void PacketProcReqAccountCheck(int64 SessionID, CMessage* Message);
 	void PacketProcReqCreateCharacterNameCheck(int64 SessionID, CMessage* Message);
 	void PacketProcReqDBItemToInventorySave(int64 SessionId, CMessage* Message);
 	void PacketProcReqGoldSave(int64 SessionId, CMessage* Message);
+	void PacketProcReqCharacterInfoSend(int64 SessionId, CMessage* Message);
 
 	//----------------------------------------------------------------
 	//패킷조합 함수
@@ -92,21 +96,21 @@ private:
 	//8. HP 변경
 	//----------------------------------------------------------------
 	CMessage* MakePacketResClientConnected();
-	CMessage* MakePacketResLogin(bool Status, int32 PlayerCount, int32 PlayerDBId, wstring PlayersName);
-	CMessage* MakePacketResCreateCharacter(bool IsSuccess, int32 PlayerDBId, wstring PlayerName);
+	CMessage* MakePacketResLogin(bool Status, int32 PlayerCount, int64 PlayerDBId, wstring PlayersName);
+	CMessage* MakePacketResCreateCharacter(bool IsSuccess, int64 PlayerDBId, wstring PlayerName);
 	CMessage* MakePacketResEnterGame(st_GameObjectInfo ObjectInfo);	
-	CMessage* MakePacketMousePositionObjectInfo(int64 AccountId, int32 PlayerDBId, st_GameObjectInfo ObjectInfo);
+	CMessage* MakePacketMousePositionObjectInfo(int64 AccountId, int64 PlayerDBId, st_GameObjectInfo ObjectInfo);
 	CMessage* MakePacketGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int8 SliverCount, int8 BronzeCount);
 	CMessage* MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* NickName, WORD MessageLen, WCHAR* Message);
 public:
-	CMessage* MakePacketResAttack(int64 AccountId, int32 PlayerDBId, en_MoveDir Dir, en_AttackType AttackType, bool IsCritical);
-	CMessage* MakePacketResChangeHP(int32 PlayerDBId, int32 Damage, int32 CurrentHP, int32 MaxHP, bool IsCritical, int32 TargetPositionX, int32 TargetPositionY);
-	CMessage* MakePacketResObjectState(int32 ObjectId, en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState);
-	CMessage* MakePacketResMove(int64 AccountId, int32 ObjectId, en_GameObjectType ObjectType, st_PositionInfo PositionInfo);
+	CMessage* MakePacketResAttack(int64 AccountId, int64 PlayerDBId, en_MoveDir Dir, en_AttackType AttackType, bool IsCritical);
+	CMessage* MakePacketResChangeHP(int64 PlayerDBId, int32 Damage, int32 CurrentHP, int32 MaxHP, bool IsCritical, int32 TargetPositionX, int32 TargetPositionY);
+	CMessage* MakePacketResObjectState(int64 ObjectId, en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState);
+	CMessage* MakePacketResMove(int64 AccountId, int64 ObjectId, en_GameObjectType ObjectType, st_PositionInfo PositionInfo);
 	CMessage* MakePacketResSpawn(int32 ObjectInfosCount, vector<st_GameObjectInfo> ObjectInfos);
 	CMessage* MakePacketResDeSpawn(int32 DeSpawnObjectCount, vector<int64> DeSpawnObjectIds);
 	CMessage* MakePacketResDie(int64 DieObjectId);
-	CMessage* MakePacketResChattingMessage(int32 PlayerDBId, en_MessageType MessageType, wstring ChattingMessage);
+	CMessage* MakePacketResChattingMessage(int64 PlayerDBId, en_MessageType MessageType, wstring ChattingMessage);
 	CMessage* MakePacketResItemToInventory(int64 TargetObjectId, st_ItemInfo ItemInfo);
 public:
 	//------------------------------------

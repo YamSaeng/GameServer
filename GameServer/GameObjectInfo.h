@@ -66,7 +66,7 @@ struct st_StatInfo
 	int32 HP;
 	int32 MaxHP;
 	int32 Attack;
-	int32 CriticalPoint;
+	int16 CriticalPoint;
 	float Speed;
 };
 

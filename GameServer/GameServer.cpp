@@ -168,6 +168,9 @@ unsigned __stdcall CGameServer::DataBaseThreadProc(void* Argument)
 			case DATA_BASE_GOLD_SAVE:
 				Instance->PacketProcReqGoldSave(Job->SessionId, Job->Message);
 				break;
+			case DATA_BASE_CHARACTER_INFO_SEND:
+				Instance->PacketProcReqCharacterInfoSend(Job->SessionId, Job->Message);
+				break;
 			}
 
 			Instance->_DataBaseThreadTPS++;
@@ -404,85 +407,107 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 {
 	st_SESSION* Session = FindSession(SessionID);
 
-	if (Session)
+	do
 	{
-		// 로그인 중이 아니면 나간다.
-		if (!Session->IsLogin)
+		if (Session)
 		{
-			Disconnect(Session->SessionId);
-			return;
-		}
-
-		int64 AccountId;
-		*Message >> AccountId;
-
-		if (Session->AccountId != AccountId)
-		{
-			Disconnect(Session->SessionId);
-			return;
-		}
-
-		int8 EnterGameCharacterNameLen;
-		*Message >> EnterGameCharacterNameLen;
-
-		WCHAR EnterGameCharacterName[20];
-		memset(EnterGameCharacterName, 0, sizeof(WCHAR) * 20);
-		Message->GetData(EnterGameCharacterName, EnterGameCharacterNameLen);
-
-		// 클라가 가지고 있는 캐릭 중에 패킷으로 받은 캐릭터가 있는지 확인한다.
-		for (int i = 0; i < 5; i++)
-		{
-			if (Session->MyPlayers[i]->_GameObjectInfo.ObjectName == EnterGameCharacterName)
+			// 로그인 중이 아니면 나간다.
+			if (!Session->IsLogin)
 			{
-				Session->MyPlayer = Session->MyPlayers[i];
-				Session->MyPlayer->_NetworkState = en_ObjectNetworkState::LIVE;
+				Disconnect(Session->SessionId);
 				break;
 			}
-		}
 
-		// ObjectManager에 플레이어 추가 및 패킷 전송
-		G_ObjectManager->Add(Session->MyPlayer, 1);
+			int64 AccountId;
+			*Message >> AccountId;
 
-		// 나한테 나 생성하라고 알려줌
-		CMessage* ResEnterGamePacket = MakePacketResEnterGame(Session->MyPlayer->_GameObjectInfo);
-		SendPacket(Session->SessionId, ResEnterGamePacket);
-		ResEnterGamePacket->Free();
-
-		vector<st_GameObjectInfo> SpawnObjectInfo;
-		SpawnObjectInfo.push_back(Session->MyPlayer->_GameObjectInfo);
-
-		// 다른 플레이어들한테 나를 생성하라고 알려줌
-		CMessage* ResSpawnPacket = MakePacketResSpawn(1, SpawnObjectInfo);
-		SendPacketAroundSector(Session, ResSpawnPacket);
-		ResSpawnPacket->Free();
-
-		SpawnObjectInfo.clear();
-
-		// 나한테 다른 오브젝트들을 생성하라고 알려줌						
-		st_GameObjectInfo* SpawnGameObjectInfos;
-
-		vector<CGameObject*> AroundObjects = G_ChannelManager->Find(1)->GetAroundObjects(Session->MyPlayer, 10);
-
-		if (AroundObjects.size() > 0)
-		{
-			SpawnGameObjectInfos = new st_GameObjectInfo[AroundObjects.size()];
-
-			for (int32 i = 0; i < AroundObjects.size(); i++)
+			if (Session->AccountId != AccountId)
 			{
-				SpawnObjectInfo.push_back(AroundObjects[i]->_GameObjectInfo);
+				Disconnect(Session->SessionId);
+				break;				
 			}
 
-			CMessage* ResOtherObjectSpawnPacket = MakePacketResSpawn((int32)AroundObjects.size(), SpawnObjectInfo);
-			SendPacket(Session->SessionId, ResOtherObjectSpawnPacket);
-			ResOtherObjectSpawnPacket->Free();
+			int8 EnterGameCharacterNameLen;
+			*Message >> EnterGameCharacterNameLen;
 
-			delete[] SpawnGameObjectInfos;
+			WCHAR EnterGameCharacterName[20];
+			memset(EnterGameCharacterName, 0, sizeof(WCHAR) * 20);
+			Message->GetData(EnterGameCharacterName, EnterGameCharacterNameLen);
+
+			bool FindName = false;
+			// 클라가 가지고 있는 캐릭 중에 패킷으로 받은 캐릭터가 있는지 확인한다.
+			for (int i = 0; i < 5; i++)
+			{
+				if (Session->MyPlayers[i]->_GameObjectInfo.ObjectName == EnterGameCharacterName)
+				{
+					FindName = true;
+					Session->MyPlayer = Session->MyPlayers[i];
+					Session->MyPlayer->_NetworkState = en_ObjectNetworkState::LIVE;
+					break;
+				}
+			}
+
+			if (FindName == false)
+			{
+				CRASH("클라가 가지고 있는 캐릭 중 패킷으로 받은 캐릭터가 없음");
+				break;
+			}
+
+			// ObjectManager에 플레이어 추가 및 패킷 전송
+			G_ObjectManager->Add(Session->MyPlayer, 1);
+
+			// 나한테 나 생성하라고 알려줌
+			CMessage* ResEnterGamePacket = MakePacketResEnterGame(Session->MyPlayer->_GameObjectInfo);
+			SendPacket(Session->SessionId, ResEnterGamePacket);
+			ResEnterGamePacket->Free();
+
+			vector<st_GameObjectInfo> SpawnObjectInfo;
+			SpawnObjectInfo.push_back(Session->MyPlayer->_GameObjectInfo);
+
+			// 다른 플레이어들한테 나를 생성하라고 알려줌
+			CMessage* ResSpawnPacket = MakePacketResSpawn(1, SpawnObjectInfo);
+			SendPacketAroundSector(Session, ResSpawnPacket);
+			ResSpawnPacket->Free();
+
+			SpawnObjectInfo.clear();
+
+			// 나한테 다른 오브젝트들을 생성하라고 알려줌						
+			st_GameObjectInfo* SpawnGameObjectInfos;
+
+			vector<CGameObject*> AroundObjects = G_ChannelManager->Find(1)->GetAroundObjects(Session->MyPlayer, 10);
+
+			if (AroundObjects.size() > 0)
+			{
+				SpawnGameObjectInfos = new st_GameObjectInfo[AroundObjects.size()];
+
+				for (int32 i = 0; i < AroundObjects.size(); i++)
+				{
+					SpawnObjectInfo.push_back(AroundObjects[i]->_GameObjectInfo);
+				}
+
+				CMessage* ResOtherObjectSpawnPacket = MakePacketResSpawn((int32)AroundObjects.size(), SpawnObjectInfo);
+				SendPacket(Session->SessionId, ResOtherObjectSpawnPacket);
+				ResOtherObjectSpawnPacket->Free();
+
+				delete[] SpawnGameObjectInfos;
+			}
+
+			// DB 큐에 요청하기 전 IOCount를 증가시켜서 Session이 반납 안되도록 막음
+			InterlockedIncrement64(&Session->IOBlock->IOCount);
+
+			st_Job* DBCharacterInfoSendJob = _JobMemoryPool->Alloc();
+			DBCharacterInfoSendJob->Type = DATA_BASE_CHARACTER_INFO_SEND;
+			DBCharacterInfoSendJob->SessionId = Session->SessionId;
+			DBCharacterInfoSendJob->Message = nullptr;
+
+			_GameServerDataBaseThreadMessageQue.Enqueue(DBCharacterInfoSendJob);
+			SetEvent(_DataBaseWakeEvent);
 		}
-	}
-	else
-	{
-
-	}
+		else
+		{
+			break;
+		}
+	} while (0);	
 
 	ReturnSession(Session);
 }
@@ -711,7 +736,7 @@ void CGameServer::PacketProcReqAttack(int64 SessionID, CMessage* Message)
 			mt19937 Gen(RD());			
 
 			uniform_int_distribution<int> CriticalPointCreate(0, 100);
-			int32 CriticalPoint = CriticalPointCreate(Gen);			
+			int16 CriticalPoint = CriticalPointCreate(Gen);			
 
 			// 내 캐릭터의 크리티컬 포인트보다 값이 작으면 크리티컬로 판단한다.
 			bool IsCritical = false;			
@@ -976,8 +1001,8 @@ void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Messag
 				else
 				{
 					// 그 외 아이템이라면 
- 					int32 SlotIndex = 0;
-					int32 ItemCount = 0;
+ 					int8 SlotIndex = 0;
+					int16 ItemCount = 0;
 
 					// 아이템이 이미 존재 하는지 확인한다.
 					// 존재 하면 개수를 1 증가시킨다.
@@ -988,7 +1013,7 @@ void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Messag
 					{
 						if (TargetPlayer->_Inventory.GetEmptySlot(&SlotIndex))
 						{
-							Item->_ItemInfo.SlotNumber = SlotIndex;
+							Item->_ItemInfo.SlotIndex = SlotIndex;
 							TargetPlayer->_Inventory.AddItem(Item);
 
 							ItemCount = 1;
@@ -1009,6 +1034,8 @@ void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Messag
 					*DBSaveMessage << TargetPlayer->_GameObjectInfo.ObjectId;
 					// 아이템 DBId
 					*DBSaveMessage << Item->_ItemInfo.ItemDBId;
+					// DataSheetId;
+					*DBSaveMessage << Item->_ItemInfo.DataSheetId;
 					// 아이템 개수
 					*DBSaveMessage << ItemCount;
 					// 아이템 슬롯 번호
@@ -1239,7 +1266,7 @@ void CGameServer::PacketProcReqAccountCheck(int64 SessionID, CMessage* Message)
 			int32 PlayerCurrentHP;
 			int32 PlayerMaxHP;
 			int32 PlayerAttack;
-			int32 PlayerCriticalPoint;
+			int16 PlayerCriticalPoint;
 			float PlayerSpeed;
 
 			ClientPlayersGet.OutPlayerDBID(PlayerId);
@@ -1298,7 +1325,7 @@ void CGameServer::PacketProcReqAccountCheck(int64 SessionID, CMessage* Message)
 
 void CGameServer::PacketProcReqCreateCharacterNameCheck(int64 SessionID, CMessage* Message)
 {
-	int32 PlayerDBId;
+	int64 PlayerDBId;
 
 	st_SESSION* Session = FindSession(SessionID);
 	
@@ -1372,11 +1399,21 @@ void CGameServer::PacketProcReqCreateCharacterNameCheck(int64 SessionID, CMessag
 			Session->MyPlayers[0]->_AccountId = Session->AccountId;
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerDBIDGetDBConnection);
+
+			// Gold Table 생성
+			CDBConnection* DBGoldTableCreateConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+			SP::CDBGameServerGoldTableCreatePush GoldTableCreate(*DBGoldTableCreateConnection);
+			GoldTableCreate.InAccountDBId(Session->MyPlayers[0]->_AccountId);
+			GoldTableCreate.InPlayerDBId(Session->MyPlayers[0]->_GameObjectInfo.ObjectId);
+
+			GoldTableCreate.Execute();
+
+			G_DBConnectionPool->Push(en_DBConnect::GAME, DBGoldTableCreateConnection);
 		}
 		else
 		{
 			// 캐릭터가 이미 DB에 있는 경우
-			PlayerDBId = Session->MyPlayers[0]->_GameObjectInfo.ObjectId;
+			PlayerDBId = Session->MyPlayers[0]->_GameObjectInfo.ObjectId;		
 		}
 
 		// 캐릭터 생성 응답 보냄
@@ -1415,10 +1452,13 @@ void CGameServer::PacketProcReqDBItemToInventorySave(int64 SessionId, CMessage* 
 		int64 ItemDBId;
 		*Message >> ItemDBId;
 
-		int32 Count;
-		*Message >> Count;
+		int16 DataSheetId;
+		*Message >> DataSheetId;
+		
+		int16 ItemCount;
+		*Message >> ItemCount;
 
-		int32 SlotIndex;
+		int8 SlotIndex;
 		*Message >> SlotIndex;
 
 		bool IsEquipped;
@@ -1439,9 +1479,11 @@ void CGameServer::PacketProcReqDBItemToInventorySave(int64 SessionId, CMessage* 
 		if (IsExistItem == true)
 		{
 			SP::CDBGameServerItemRefreshPush ItemRefreshPush(*ItemToInventorySaveDBConnection);
+			ItemRefreshPush.InAccountDBId(OwnerAccountId);
+			ItemRefreshPush.InPlayerDBId(TargetObjectId);
 			ItemRefreshPush.InItemType(ItemTypeValue);
-			ItemRefreshPush.InCount(Count);
-			ItemRefreshPush.InSlotIndex(SlotIndex);
+			ItemRefreshPush.InCount(ItemCount);
+			ItemRefreshPush.InSlotIndex(SlotIndex);			
 
 			ItemRefreshPush.Execute();
 		}
@@ -1449,10 +1491,12 @@ void CGameServer::PacketProcReqDBItemToInventorySave(int64 SessionId, CMessage* 
 		{
 			// 새로운 아이템 생성 후 DB 넣기			
 			SP::CDBGameServerItemToInventoryPush ItemToInventoryPush(*ItemToInventorySaveDBConnection);
+			ItemToInventoryPush.InDataSheetId(DataSheetId);
 			ItemToInventoryPush.InItemType(ItemTypeValue);
-			ItemToInventoryPush.InCount(Count);
+			ItemToInventoryPush.InCount(ItemCount);
 			ItemToInventoryPush.InSlotIndex(SlotIndex);
 			ItemToInventoryPush.InOwnerAccountId(OwnerAccountId);
+			ItemToInventoryPush.InOwnerPlayerId(TargetObjectId);
 			ItemToInventoryPush.InIsEquipped(IsEquipped);
 
 			ItemToInventoryPush.Execute();
@@ -1461,11 +1505,12 @@ void CGameServer::PacketProcReqDBItemToInventorySave(int64 SessionId, CMessage* 
 		G_DBConnectionPool->Push(en_DBConnect::GAME, ItemToInventorySaveDBConnection);
 
 		st_ItemInfo ItemInfo;
-		ItemInfo.Count = Count;
-		ItemInfo.IsEquipped = IsEquipped;
-		ItemInfo.ItemDBId = ItemDBId;
-		ItemInfo.ItemType = ItemType;
-		ItemInfo.SlotNumber = SlotIndex;	
+		ItemInfo.DataSheetId = DataSheetId;
+		ItemInfo.ItemType = ItemType;		
+		ItemInfo.ItemCount = ItemCount;
+		ItemInfo.SlotIndex = SlotIndex;		
+		ItemInfo.ItemDBId = ItemDBId;	
+		ItemInfo.IsEquipped = IsEquipped;	
 
 		int8 ItemNameLen;
 		*Message >> ItemNameLen;
@@ -1517,6 +1562,7 @@ void CGameServer::PacketProcReqGoldSave(int64 SessionId, CMessage* Message)
 		CDBConnection* GoldSaveDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 		SP::CDBGameServerGoldPush GoldSavePush(*GoldSaveDBConnection);
 		GoldSavePush.InAccoountId(AccountId);
+		GoldSavePush.InPlayerDBId(TargetId);
 		GoldSavePush.InGoldCoin(GoldCoinCount);
 		GoldSavePush.InSliverCoin(SliverCoinCount);
 		GoldSavePush.InBronzeCoin(BronzeCoinCount);
@@ -1529,6 +1575,121 @@ void CGameServer::PacketProcReqGoldSave(int64 SessionId, CMessage* Message)
 		CMessage* ResGoldSaveMeesage = MakePacketGoldSave(AccountId, TargetId, GoldCoinCount, SliverCoinCount, BronzeCoinCount);
 		SendPacket(Session->SessionId, ResGoldSaveMeesage);
 		ResGoldSaveMeesage->Free();
+	}
+
+	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcReqCharacterInfoSend(int64 SessionId, CMessage* Message)
+{
+	st_SESSION* Session = FindSession(SessionId);
+
+	if (Session)
+	{
+		InterlockedDecrement64(&Session->IOBlock->IOCount);
+
+		int64 GoldCoin = 0;
+		int8 SliverCoin = 0;
+		int8 BronzeCoin = 0;
+
+		// 캐릭터가 소유하고 있었던 골드 정보를 GoldTable에서 읽어온다.
+		CDBConnection* DBCharacterGoldGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+		SP::CDBGameServerGoldGet CharacterGoldGet(*DBCharacterGoldGetConnection);
+		CharacterGoldGet.InAccountDBId(Session->MyPlayers[0]->_AccountId);
+		CharacterGoldGet.InPlayerDBId(Session->MyPlayers[0]->_GameObjectInfo.ObjectId);
+
+		CharacterGoldGet.OutGoldCoin(GoldCoin);
+		CharacterGoldGet.OutSliverCoin(SliverCoin);
+		CharacterGoldGet.OutBronzeCoin(BronzeCoin);
+
+		CharacterGoldGet.Execute();
+
+		if (CharacterGoldGet.Fetch())
+		{
+			// DB에서 읽어온 Gold를 Inventory에 저장한다.
+			Session->MyPlayers[0]->_Inventory._GoldCoinCount = GoldCoin;
+			Session->MyPlayers[0]->_Inventory._SliverCoinCount = SliverCoin;
+			Session->MyPlayers[0]->_Inventory._BronzeCoinCount = BronzeCoin;
+
+			// DBConnection 반납하고
+			G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterGoldGetConnection);
+						
+			// 클라에게 골드 정보를 보내준다.
+			CMessage* ResGoldSaveMeesage = MakePacketGoldSave(Session->MyPlayers[0]->_AccountId, Session->MyPlayers[0]->_GameObjectInfo.ObjectId, GoldCoin, SliverCoin, BronzeCoin);
+			SendPacket(Session->SessionId, ResGoldSaveMeesage);
+			ResGoldSaveMeesage->Free();
+		}		
+
+		// 캐릭터가 소유하고 있었던 Item 정보를 ItemTable에서 읽어온다.
+		CDBConnection* DBCharacterInventoryItemGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);		
+		SP::CDBGameServerInventoryItemGet CharacterInventoryItemGet(*DBCharacterInventoryItemGetConnection);
+		CharacterInventoryItemGet.InAccountDBId(Session->MyPlayers[0]->_AccountId);
+		CharacterInventoryItemGet.InPlayerDBId(Session->MyPlayers[0]->_GameObjectInfo.ObjectId);
+
+		int16 DataSheetId;
+		int16 ItemType;
+		int16 ItemCount;
+		int8 SlotIndex;
+		bool IsEquipped;
+
+		CharacterInventoryItemGet.OutDataSheetId(DataSheetId);
+		CharacterInventoryItemGet.OutItemType(ItemType);
+		CharacterInventoryItemGet.OutItemCount(ItemCount);
+		CharacterInventoryItemGet.OutSlotIndex(SlotIndex);
+		CharacterInventoryItemGet.OutIsEquipped(IsEquipped);
+
+		CharacterInventoryItemGet.Execute();
+
+		while (CharacterInventoryItemGet.Fetch())
+		{
+			// 읽어온 데이터를 이용해서 ItemInfo를 조립
+			st_ItemInfo ItemInfo;
+			ItemInfo.ItemCount = ItemCount;
+			ItemInfo.IsEquipped = IsEquipped;
+			ItemInfo.ItemDBId = ItemType;
+			ItemInfo.ItemType = (en_ItemType)ItemType;
+			ItemInfo.SlotIndex = SlotIndex;
+
+			// DataSheetId를 이용해서 Item의 이름과 Item의 썸네일이미지 경로를 알아낸다.
+			auto FindItemIterator = G_Datamanager->_Items.find(DataSheetId);
+			if (FindItemIterator == G_Datamanager->_Items.end())
+			{
+				CRASH("PacketProcReqCharacterInfoSend 아이템 발견하지 못함");
+			}
+
+			st_ItemData* FindItemData = (*FindItemIterator).second;
+			ItemInfo.ItemName.assign(FindItemData->ItemName.begin(), FindItemData->ItemName.end());
+			ItemInfo.ThumbnailImagePath.assign(FindItemData->ThumbnailImagePath.begin(), FindItemData->ThumbnailImagePath.end());
+			
+			// ItemType에 따라 아이템을 생성하고
+			CItem* NewItem = nullptr;
+			switch (ItemInfo.ItemType)
+			{
+			case en_ItemType::ITEM_TYPE_SLIMEGEL:
+				NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::SLIME_GEL));
+				break;
+			case en_ItemType::ITEM_TYPE_LEATHER:
+				NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::LEATHER));
+				break;
+			default:
+				CRASH("의도치 않은 ItemType");
+				break;
+			}
+			
+			// 위에서 조립한 ItemInfo를 셋팅한다.
+			NewItem->_ItemInfo = ItemInfo;
+			// 인벤토리에 아이템을 추가하고
+			Session->MyPlayer->_Inventory.AddItem(NewItem);
+
+			// 수정해야함
+			int8 SlotIndex;
+			Session->MyPlayer->_Inventory.GetEmptySlot(&SlotIndex);			
+
+			// 클라에게 아이템 정보를 보내준다.
+			CMessage* ResItemToInventoryPacket = MakePacketResItemToInventory(Session->MyPlayers[0]->_GameObjectInfo.ObjectId, ItemInfo);
+			SendPacket(Session->SessionId, ResItemToInventoryPacket);
+			ResItemToInventoryPacket->Free();
+		}	
 	}
 
 	ReturnSession(Session);
@@ -1555,7 +1716,7 @@ CMessage* CGameServer::MakePacketResClientConnected()
 //BYTE Status  //0 : 실패  1 : 성공
 //CPlayer Players
 //---------------------------------------------------------------
-CMessage* CGameServer::MakePacketResLogin(bool Status, int32 PlayerCount, int32 PlayerDBId, wstring PlayersName)
+CMessage* CGameServer::MakePacketResLogin(bool Status, int32 PlayerCount, int64 PlayerDBId, wstring PlayersName)
 {
 	CMessage* LoginMessage = CMessage::Alloc();
 	if (LoginMessage == nullptr)
@@ -1583,7 +1744,7 @@ CMessage* CGameServer::MakePacketResLogin(bool Status, int32 PlayerCount, int32 
 // int32 PlayerDBId
 // bool IsSuccess
 // wstring PlayerName
-CMessage* CGameServer::MakePacketResCreateCharacter(bool IsSuccess, int32 PlayerDBId, wstring PlayerName)
+CMessage* CGameServer::MakePacketResCreateCharacter(bool IsSuccess, int64 PlayerDBId, wstring PlayerName)
 {
 	CMessage* ResCreateCharacter = CMessage::Alloc();
 	if (ResCreateCharacter == nullptr)
@@ -1647,7 +1808,7 @@ CMessage* CGameServer::MakePacketResEnterGame(st_GameObjectInfo ObjectInfo)
 // int64 AccountId
 // int32 PlayerDBId
 // st_GameObjectInfo ObjectInfo
-CMessage* CGameServer::MakePacketMousePositionObjectInfo(int64 AccountId, int32 PlayerDBId, st_GameObjectInfo ObjectInfo)
+CMessage* CGameServer::MakePacketMousePositionObjectInfo(int64 AccountId, int64 PlayerDBId, st_GameObjectInfo ObjectInfo)
 {
 	CMessage* ResEnterGamePacket = CMessage::Alloc();
 	if (ResEnterGamePacket == nullptr)
@@ -1741,7 +1902,7 @@ CMessage* CGameServer::MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* N
 // int64 AccountId
 // int32 PlayerDBId
 // char Dir
-CMessage* CGameServer::MakePacketResAttack(int64 AccountId, int32 PlayerDBId, en_MoveDir Dir, en_AttackType AttackType, bool IsCritical)
+CMessage* CGameServer::MakePacketResAttack(int64 AccountId, int64 PlayerDBId, en_MoveDir Dir, en_AttackType AttackType, bool IsCritical)
 {
 	CMessage* ResAttackMessage = CMessage::Alloc();
 	if (ResAttackMessage == nullptr)
@@ -1764,7 +1925,7 @@ CMessage* CGameServer::MakePacketResAttack(int64 AccountId, int32 PlayerDBId, en
 // int64 AccountId
 // int32 PlayerDBId
 // int32 HP
-CMessage* CGameServer::MakePacketResChangeHP(int32 PlayerDBId, int32 Damage, int32 CurrentHP, int32 MaxHP, bool IsCritical, int32 TargetPositionX, int32 TargetPositionY)
+CMessage* CGameServer::MakePacketResChangeHP(int64 PlayerDBId, int32 Damage, int32 CurrentHP, int32 MaxHP, bool IsCritical, int32 TargetPositionX, int32 TargetPositionY)
 {
 	CMessage* ResChangeHPPacket = CMessage::Alloc();
 	if (ResChangeHPPacket == nullptr)
@@ -1787,7 +1948,7 @@ CMessage* CGameServer::MakePacketResChangeHP(int32 PlayerDBId, int32 Damage, int
 	return ResChangeHPPacket;
 }
 
-CMessage* CGameServer::MakePacketResObjectState(int32 ObjectId, en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState)
+CMessage* CGameServer::MakePacketResObjectState(int64 ObjectId, en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState)
 {
 	CMessage* ResObjectStatePacket = CMessage::Alloc();
 	if (ResObjectStatePacket == nullptr)
@@ -1810,7 +1971,7 @@ CMessage* CGameServer::MakePacketResObjectState(int32 ObjectId, en_MoveDir Direc
 // int32 PlayerDBId
 // bool CanGo
 // st_PositionInfo PositionInfo
-CMessage* CGameServer::MakePacketResMove(int64 AccountId, int32 ObjectId, en_GameObjectType ObjectType, st_PositionInfo PositionInfo)
+CMessage* CGameServer::MakePacketResMove(int64 AccountId, int64 ObjectId, en_GameObjectType ObjectType, st_PositionInfo PositionInfo)
 {
 	CMessage* ResMoveMessage = CMessage::Alloc();
 	if (ResMoveMessage == nullptr)
@@ -1931,7 +2092,7 @@ CMessage* CGameServer::MakePacketResDie(int64 DieObjectId)
 
 // int32 PlayerDBId
 // wstring ChattingMessage
-CMessage* CGameServer::MakePacketResChattingMessage(int32 PlayerDBId, en_MessageType MessageType, wstring ChattingMessage)
+CMessage* CGameServer::MakePacketResChattingMessage(int64 PlayerDBId, en_MessageType MessageType, wstring ChattingMessage)
 {
 	CMessage* ResChattingMessage = CMessage::Alloc();
 	if (ResChattingMessage == nullptr)
@@ -1960,11 +2121,13 @@ CMessage* CGameServer::MakePacketResItemToInventory(int64 TargetObjectId, st_Ite
 		return nullptr;
 	}
 
+	ResItemToInventoryMessage->Clear();
+
 	*ResItemToInventoryMessage << (WORD)en_PACKET_S2C_ITEM_TO_INVENTORY;
 	*ResItemToInventoryMessage << TargetObjectId;
 	*ResItemToInventoryMessage << ItemInfo.ItemDBId;
-	*ResItemToInventoryMessage << ItemInfo.Count;
-	*ResItemToInventoryMessage << ItemInfo.SlotNumber;
+	*ResItemToInventoryMessage << ItemInfo.ItemCount;
+	*ResItemToInventoryMessage << ItemInfo.SlotIndex;
 	*ResItemToInventoryMessage << ItemInfo.IsEquipped;
 	*ResItemToInventoryMessage << (int16)ItemInfo.ItemType;
 

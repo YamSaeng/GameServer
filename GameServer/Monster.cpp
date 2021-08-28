@@ -55,6 +55,7 @@ void CMonster::GetRandomDropItem(CGameObject* Killer, en_MonsterDataType Monster
 
 			uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
 			DropItemData.Count = RandomDropItemCount(Gen);
+			DropItemData.DataSheetId = DropItem.ItemDataSheetId;
 			break;
 		}
 	}
@@ -64,12 +65,13 @@ void CMonster::GetRandomDropItem(CGameObject* Killer, en_MonsterDataType Monster
 		st_ItemInfo NewItemInfo;
 
 		NewItemInfo.ItemDBId = -1;
-		NewItemInfo.Count = DropItemData.Count;
-		NewItemInfo.SlotNumber = -1;
+		NewItemInfo.DataSheetId = DropItemData.DataSheetId;
+		NewItemInfo.ItemCount = DropItemData.Count;
+		NewItemInfo.SlotIndex = -1;
 		NewItemInfo.IsEquipped = DropItemData.IsEquipped;
-		NewItemInfo.ItemType = DropItemData._ItemType;
-		NewItemInfo.ThumbnailImagePath.assign(DropItemData._ImagePath.begin(), DropItemData._ImagePath.end());
-		NewItemInfo.ItemName.assign(DropItemData._Name.begin(), DropItemData._Name.end());
+		NewItemInfo.ItemType = DropItemData.ItemType;
+		NewItemInfo.ThumbnailImagePath.assign(DropItemData.ThumbnailImagePath.begin(), DropItemData.ThumbnailImagePath.end());
+		NewItemInfo.ItemName.assign(DropItemData.ItemName.begin(), DropItemData.ItemName.end());
 
 		en_GameObjectType GameObjectType;
 		switch (NewItemInfo.ItemType)
@@ -137,7 +139,7 @@ void CMonster::BroadCastPacket(en_PACKET_TYPE PacketType)
 	switch (PacketType)
 	{
 	case en_PACKET_S2C_MOVE:
-		ResPacket = G_ObjectManager->GameServer->MakePacketResMove(-1, _GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType, _GameObjectInfo.ObjectPositionInfo);
+		ResPacket = G_ObjectManager->GameServer->MakePacketResMove((int64)-1, _GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType, _GameObjectInfo.ObjectPositionInfo);
 		break;
 	case en_PACKET_S2C_OBJECT_STATE_CHANGE:		
 		ResPacket = G_ObjectManager->GameServer->MakePacketResObjectState(_GameObjectInfo.ObjectId,
@@ -146,7 +148,7 @@ void CMonster::BroadCastPacket(en_PACKET_TYPE PacketType)
 			_GameObjectInfo.ObjectPositionInfo.State);
 		break;
 	case en_PACKET_S2C_ATTACK:
-		ResPacket = G_ObjectManager->GameServer->MakePacketResAttack(-1, _GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo.MoveDir, en_AttackType::BEAR_NORMAL_ATTACK, false);
+		ResPacket = G_ObjectManager->GameServer->MakePacketResAttack((int64)-1, _GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo.MoveDir, en_AttackType::BEAR_NORMAL_ATTACK, false);
 		break;
 	case en_PACKET_S2C_CHANGE_HP:
 		ResPacket = G_ObjectManager->GameServer->MakePacketResChangeHP(_Target->_GameObjectInfo.ObjectId,

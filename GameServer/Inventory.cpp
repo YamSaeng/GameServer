@@ -29,7 +29,7 @@ void CInventory::AddItem(CItem* Item)
 		return;
 	}
 
-	_Items[Item->_ItemInfo.SlotNumber] = Item;
+	_Items[Item->_ItemInfo.SlotIndex] = Item;
 }
 
 void CInventory::AddCoin(CItem* Item)
@@ -41,7 +41,7 @@ void CInventory::AddCoin(CItem* Item)
 	switch (Item->_ItemInfo.ItemType)
 	{
 	case en_ItemType::ITEM_TYPE_BRONZE_COIN:
-		_BronzeCoinCount += (byte)(Item->_ItemInfo.Count);
+		_BronzeCoinCount += (byte)(Item->_ItemInfo.ItemCount);
 		SliverCoinCount = (byte)(_BronzeCoinCount / 100);
 
 		if (SliverCoinCount > 0)
@@ -56,7 +56,7 @@ void CInventory::AddCoin(CItem* Item)
 		_SliverCoinCount += SliverCoinCount;
 		break;
 	case en_ItemType::ITEM_TYPE_SLIVER_COIN:
-		_SliverCoinCount += (byte)(Item->_ItemInfo.Count);
+		_SliverCoinCount += (byte)(Item->_ItemInfo.ItemCount);
 		GoldCoinCount = (byte)(_SliverCoinCount / 100);
 
 		if (GoldCoinCount > 0)
@@ -71,7 +71,7 @@ void CInventory::AddCoin(CItem* Item)
 		_GoldCoinCount += GoldCoinCount;
 		break;
 	case en_ItemType::ITEM_TYPE_GOLD_COIN:
-		_GoldCoinCount += Item->_ItemInfo.Count;
+		_GoldCoinCount += Item->_ItemInfo.ItemCount;
 		break;
 	}
 }
@@ -91,15 +91,15 @@ CItem* CInventory::Get(int32 _ItemDBId)
 	return Item;
 }
 
-bool CInventory::IsExistItem(en_ItemType ItemType, int32* Count, int32* SlotIndex)
+bool CInventory::IsExistItem(en_ItemType ItemType, int16* Count, int8* SlotIndex)
 {
 	for (int32 i = 0; i < INVENTORY_SIZE; i++)
 	{
 		if(_Items[i] != nullptr && _Items[i]->_ItemInfo.ItemType == ItemType)
 		{			
 			// 최대 갯수 넘어가면 새로 생성해줘야함
-			_Items[i]->_ItemInfo.Count += 1;
-			*Count = _Items[i]->_ItemInfo.Count;
+			_Items[i]->_ItemInfo.ItemCount += 1;
+			*Count = _Items[i]->_ItemInfo.ItemCount;
 			*SlotIndex = i;
 
 			return true;
@@ -109,7 +109,7 @@ bool CInventory::IsExistItem(en_ItemType ItemType, int32* Count, int32* SlotInde
 	return false;
 }
 
-bool CInventory::GetEmptySlot(int32* SlotIndex)
+bool CInventory::GetEmptySlot(int8* SlotIndex)
 {
 	return _ItemsSlotIndex.Pop(SlotIndex);	
 }

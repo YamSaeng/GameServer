@@ -101,6 +101,9 @@ int main()
 		G_Logger->WriteStdOut(en_Color::WHITE, L"AuthThread Que Size :      [%d]\n", G_GameServer._GameServerAuthThreadMessageQue.GetUseSize());
 		G_Logger->WriteStdOut(en_Color::WHITE, L"AuthThread TPS :	   [%d]\n", G_GameServer._AuthThreadTPS);
 		G_Logger->WriteStdOut(en_Color::WHITE, L"AuthThread WakeCount :     [%d]\n", G_GameServer._AuthThreadWakeCount);
+		G_Logger->WriteStdOut(en_Color::WHITE, L"DataBaseThread Que Size :  [%d]\n", G_GameServer._GameServerDataBaseThreadMessageQue.GetUseSize());
+		G_Logger->WriteStdOut(en_Color::WHITE, L"DataBaseThread TPS :       [%d]\n", G_GameServer._DataBaseThreadTPS);
+		G_Logger->WriteStdOut(en_Color::WHITE, L"DataBaseThread WakeCount : [%d]\n", G_GameServer._DataBaseThreadWakeCount);		
 		G_Logger->WriteStdOut(en_Color::WHITE, L"\n================================================\n\n");
 
 		G_GameServer._AcceptTPS = 0;
@@ -108,6 +111,7 @@ int main()
 		G_GameServer._SendPacketTPS = 0;
 		G_GameServer._NetworkThreadTPS = 0;
 		G_GameServer._AuthThreadTPS = 0;
+		G_GameServer._DataBaseThreadTPS = 0;
 
 		Sleep(1000);
 	}

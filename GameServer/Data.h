@@ -9,10 +9,10 @@ enum en_MonsterDataType
 
 struct st_ItemData
 {
-	int32 _DataSheetId;
-	string _Name;
-	en_ItemType _ItemType;
-	string _ImagePath;
+	int32 DataSheetId;
+	string ItemName;
+	en_ItemType ItemType; 
+	string ThumbnailImagePath;
 	bool IsEquipped;
 	int32 Count;
 };
@@ -44,7 +44,7 @@ struct st_StatusData
 	int32 HP;
 	int32 MaxHP;
 	int32 Attack;
-	int32 CriticalPoint;
+	int16 CriticalPoint;
 	float Speed;
 	int32 SearchCellDistance;
 	int32 ChaseCellDistance;
@@ -55,8 +55,8 @@ struct st_DropData
 {
 	int32 Probability;
 	int32 ItemDataSheetId;
-	int32 MinCount;
-	int32 MaxCount;
+	int8 MinCount;
+	int16 MaxCount;
 };
 
 struct st_MonsterData
