@@ -30,7 +30,8 @@
     <Column name="ItemType" type="SmallInt" notnull="true"/>
     <Column name="ItemCount" type="int" notnull="true"/>
     <Column name="SlotIndex" type="int" notnull="true"/>
-    <Column name="OwnerAccountId" type="BigInt" notnull="true"/>    
+    <Column name="OwnerAccountDBId" type="BigInt" notnull="true"/>
+    <Column name="OwnerPlayerDBId" type="BigInt" notnull="true"/>
     <Column name="IsEquipped" type="bit"/>
     <Index type="clustered">
       <PrimaryKey/>
@@ -40,6 +41,7 @@
 
   <Table name="Gold" desc="Gold Table">
     <Column name="AccountDBId" type="BigInt" notnull="true"/>
+    <Column name="PlayerDBId" type="BigInt" notnull="true"/>
     <Column name="GoldCoin" type="BigInt" notnull="true"/>
     <Column name="SliverCoin" type="TinyInt" notnull="true"/>
     <Column name="BronzeCoin" type="TinyInt" notnull="true"/>
@@ -95,12 +97,13 @@
   <!-- GoldTable에 Gold 저장 -->
   <Procedure name="spGoldSave">
     <Param name="@AccountDBId" type="BigInt"/>
+    <Param name="@PlayerDBId" type="BigInt"/>    
     <Param name="@GoldCount" type="BigInt"/>
     <Param name="@SliverCount" type="TinyInt"/>
     <Param name="@BronzeCount" type="TinyInt"/>
     <Body>
       <![CDATA[
-        UPDATE [dbo].[Gold] SET GoldCoin = (@GoldCount), SliverCoin = (@SliverCount), BronzeCoin = (@BronzeCount) WHERE AccountDBId = (@AccountDBId)
+        UPDATE [dbo].[Gold] SET GoldCoin = (@GoldCount), SliverCoin = (@SliverCount), BronzeCoin = (@BronzeCount) WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
     </Body>    
   </Procedure>
@@ -111,22 +114,25 @@
     <Param name="@ItemCount" type="int"/>
     <Param name="@SlotIndex" type="int"/>
     <Param name="@OwnerAccountId" type="BigInt"/>
+    <Param name="@OwnerPlayerId" type="BigInt"/>
     <Param name="@IsEquipped" type="bit"/>
     <Body>
       <![CDATA[
-        INSERT INTO [dbo].[Item] VALUES ((@ItemType),(@ItemCount),(@SlotIndex),(@OwnerAccountId),(@IsEquipped))
+        INSERT INTO [dbo].[Item] VALUES ((@ItemType),(@ItemCount),(@SlotIndex),(@OwnerAccountId),(@OwnerPlayerId),(@IsEquipped))
       ]]>
     </Body>
   </Procedure> 
   
   <!-- ItemTable에 아이템 갱신 -->
   <Procedure name="spItemRefreshCount">
+    <Param name="@OwnerAccountDBId" type="BigInt"/>
+    <Param name="@OwnerPlayerDBId" type="BigInt"/>
     <Param name="@ItemType" type="SmallInt"/>
     <Param name="@ItemCount" type="int"/>
     <Param name="@SlotIndex" type="int"/>
     <Body>
       <![CDATA[
-        UPDATE [dbo].[Item] SET ItemCount = (@ItemCount) WHERE ItemType = (@ItemType) AND SlotIndex = (@SlotIndex)
+        UPDATE [dbo].[Item] SET ItemCount = (@ItemCount) WHERE ItemType = (@ItemType) AND SlotIndex = (@SlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
       ]]>
     </Body>
   </Procedure>  
