@@ -2,14 +2,14 @@
 
 <GameServerDB>
   <Table name="Player" desc="Player Table">
-    <Column name="PlayerDBId" type="int" notnull="true" identity="1,1"/>
-    <Column name="AccountDBId" type="int" notnull="true"/>
+    <Column name="PlayerDBId" type="BigInt" notnull="true" identity="1,1"/>
+    <Column name="AccountDBId" type="BigInt" notnull="true"/>
     <Column name="PlayerName" type="nvarchar(20)" notnull="true"/>
     <Column name="Level" type="int" notnull="true"/>
     <Column name="CurrentHP" type="int" notnull="true"/>
     <Column name="MaxHP" type="int" notnull="true"/>
     <Column name="Attack" type="int" notnull="true"/>
-    <Column name="CriticalPoint" type="int" notnull="true"/>
+    <Column name="CriticalPoint" type="SmallInt" notnull="true"/>
     <Column name="Speed" type="float" notnull="true"/>
     <Index type="clustered">
       <PrimaryKey/>
@@ -26,10 +26,11 @@
   </Table>
 
   <Table name="Item" desc="Item Table">
-    <Column name="ItemDBId" type="int" notnull="true" identity="1,1"/>
+    <Column name="ItemDBId" type="BigInt" notnull="true" identity="1,1"/>
+    <Column name="DataSheetId" type="SmallInt" notnull="true"/>
     <Column name="ItemType" type="SmallInt" notnull="true"/>
-    <Column name="ItemCount" type="int" notnull="true"/>
-    <Column name="SlotIndex" type="int" notnull="true"/>
+    <Column name="ItemCount" type="SmallInt" notnull="true"/>
+    <Column name="SlotIndex" type="TinyInt" notnull="true"/>
     <Column name="OwnerAccountDBId" type="BigInt" notnull="true"/>
     <Column name="OwnerPlayerDBId" type="BigInt" notnull="true"/>
     <Column name="IsEquipped" type="bit"/>
@@ -52,7 +53,7 @@
   </Table>
   
   <Procedure name="spGetPlayers">
-    <Param name="@AccountId" type="int"/>
+    <Param name="@AccountId" type="BigInt"/>
     <Body>
       <![CDATA[
         SELECT PlayerDBId, PlayerName, Level, CurrentHP, MaxHP, Attack, CriticalPoint, Speed FROM [dbo].[Player] WHERE AccountDBId = (@AccountId)
@@ -71,13 +72,13 @@
 
   <!-- 새로운 캐릭터 DB에 넣기 -->
   <Procedure name="spNewCharacterPush">
-    <Param name="@AccountId" type="int"/>
+    <Param name="@AccountId" type="BigInt"/>
     <Param name="@CharacterName" type="nvarchar(20)"/>
     <Param name="@Level" type="int"/>
     <Param name="@CurrentHP" type="int"/>
     <Param name="@MaxHP" type="int"/>
     <Param name="@Attack" type="int"/>
-    <Param name="@CriticalPoint" type="int"/>
+    <Param name="@CriticalPoint" type="SmallInt"/>
     <Param name="@Speed" type="float"/>
     <Body>
       <![CDATA[
@@ -88,10 +89,10 @@
 
   <!-- 만든 캐릭터 DBId 가져오기 -->
   <Procedure name="spPlayerDBIdGet">
-    <Param name="@AccountId" type="int"/>
+    <Param name="@AccountDBId" type="BigInt"/>
     <Body>
       <![CDATA[
-        SELECT PlayerDBId FROM [dbo].[Player] WHERE AccountDBId = (@AccountId)
+        SELECT PlayerDBId FROM [dbo].[Player] WHERE AccountDBId = (@AccountDBId)
       ]]>
     </Body>
   </Procedure>
@@ -121,17 +122,29 @@
     </Body>    
   </Procedure>
 
+  <!-- GoldTable에 저장되어 있는 정보 긁어오기 -->
+  <Procedure name="spGetGoldTableInfoToInventory">
+    <Param name="@AccountDBId" type="BigInt"/>
+    <Param name="@PlayerDBId" type="BigInt"/>
+    <Body>
+      <![CDATA[
+        SELECT GoldCoin, SliverCoin, BronzeCoin FROM [dbo].[Gold] WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
+      ]]>
+    </Body>
+  </Procedure>
+  
   <!-- ItemTable에 새로운 아이템 저장 -->
   <Procedure name="spItemToInventorySave">
+    <Param name="@DataSheetId" type="SmallInt"/>
     <Param name="@ItemType" type="SmallInt"/>
-    <Param name="@ItemCount" type="int"/>
-    <Param name="@SlotIndex" type="int"/>
+    <Param name="@ItemCount" type="SmallInt"/>
+    <Param name="@SlotIndex" type="TinyInt"/>
     <Param name="@OwnerAccountId" type="BigInt"/>
     <Param name="@OwnerPlayerId" type="BigInt"/>
     <Param name="@IsEquipped" type="bit"/>
     <Body>
       <![CDATA[
-        INSERT INTO [dbo].[Item] VALUES ((@ItemType),(@ItemCount),(@SlotIndex),(@OwnerAccountId),(@OwnerPlayerId),(@IsEquipped))
+        INSERT INTO [dbo].[Item] VALUES ((@DataSheetId),(@ItemType),(@ItemCount),(@SlotIndex),(@OwnerAccountId),(@OwnerPlayerId),(@IsEquipped))
       ]]>
     </Body>
   </Procedure> 
@@ -141,12 +154,23 @@
     <Param name="@OwnerAccountDBId" type="BigInt"/>
     <Param name="@OwnerPlayerDBId" type="BigInt"/>
     <Param name="@ItemType" type="SmallInt"/>
-    <Param name="@ItemCount" type="int"/>
-    <Param name="@SlotIndex" type="int"/>
+    <Param name="@ItemCount" type="SmallInt"/>
+    <Param name="@SlotIndex" type="TinyInt"/>
     <Body>
       <![CDATA[
         UPDATE [dbo].[Item] SET ItemCount = (@ItemCount) WHERE ItemType = (@ItemType) AND SlotIndex = (@SlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
       ]]>
     </Body>
   </Procedure>  
+  
+  <!-- ItemTable에 있는 아이템 가지고 옴-->
+  <Procedure name="spGetItemTableInfoToInventory">
+    <Param name="@AccountDBId" type="BigInt"/>
+    <Param name="@PlayerDBId" type="BigInt"/>
+    <Body>
+      <![CDATA[
+        SELECT DataSheetId, ItemType, ItemCount, SlotIndex, IsEquipped FROM [dbo].[Item] WHERE OwnerAccountDBId = (@AccountDBId) AND OwnerPlayerDBId = (@PlayerDBId)
+      ]]>
+    </Body>
+  </Procedure>
 </GameServerDB>
