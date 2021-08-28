@@ -69,6 +69,7 @@
     </Body>
   </Procedure>
 
+  <!-- 새로운 캐릭터 DB에 넣기 -->
   <Procedure name="spNewCharacterPush">
     <Param name="@AccountId" type="int"/>
     <Param name="@CharacterName" type="nvarchar(20)"/>
@@ -85,7 +86,8 @@
     </Body>
   </Procedure>
 
-  <Procedure name="spPlayerDBIDGet">
+  <!-- 만든 캐릭터 DBId 가져오기 -->
+  <Procedure name="spPlayerDBIdGet">
     <Param name="@AccountId" type="int"/>
     <Body>
       <![CDATA[
@@ -94,6 +96,17 @@
     </Body>
   </Procedure>
 
+  <!-- GoldTable 생성-->
+  <Procedure name="spGoldTableCreate">
+    <Param name="@AccountDBId" type="BigInt"/>
+    <Param name="@PlayerDBId" type="BigInt"/>    
+    <Body>
+      <![CDATA[
+        INSERT INTO [dbo].[Gold] VALUES ((@AccountDBId),(@PlayerDBId),(0),(0),(0))
+      ]]>
+    </Body>
+  </Procedure>
+  
   <!-- GoldTable에 Gold 저장 -->
   <Procedure name="spGoldSave">
     <Param name="@AccountDBId" type="BigInt"/>

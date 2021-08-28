@@ -56,41 +56,58 @@ namespace SP
 	class CDBGameServerPlayerDBIDGet : public CDBBind<1, 1>
 	{
 	public:
-		CDBGameServerPlayerDBIDGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spPlayerDBIDGet(?)}") {}	
+		CDBGameServerPlayerDBIDGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spPlayerDBIdGet(?)}") {}	
 		void InAccountID(int64& AccountId) { BindParam(0, AccountId); }
 		void OutPlayerDBID(int32& PlayerDBId) { BindCol(0, PlayerDBId); }
 	};
 
-	// ItemTable에 Item 저장
-	class CDBGameServerItemToInventoryPush : public CDBBind<5, 0>
+	// ItemTable에 새로운 Item 저장
+	class CDBGameServerItemToInventoryPush : public CDBBind<6, 0>
 	{
 	public:
-		CDBGameServerItemToInventoryPush(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spItemToInventorySave(?,?,?,?,?)}") {}		
+		CDBGameServerItemToInventoryPush(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spItemToInventorySave(?,?,?,?,?,?)}") {}		
 		void InItemType(int16& ItemType) { BindParam(0, ItemType); }
 		void InSlotIndex(int32& SlotIndex) { BindParam(1, SlotIndex); }
 		void InOwnerAccountId(int64& OwnerAccountId) { BindParam(2, OwnerAccountId); }
-		void InIsEquipped(bool& IsEquipped) { BindParam(3, IsEquipped); }
-		void InCount(int32& Count) { BindParam(4, Count); }	
+		void InOwnerPlayerId(int64& OwnerPlayerId) { BindParam(3, OwnerPlayerId); }
+		void InIsEquipped(bool& IsEquipped) { BindParam(4, IsEquipped); }
+		void InCount(int32& Count) { BindParam(5, Count); }	
 	};
 
 	// ItemTable에 Item 개수 갱신
-	class CDBGameServerItemRefreshPush : public CDBBind<3, 0>
+	class CDBGameServerItemRefreshPush : public CDBBind<5, 0>
 	{
 	public:
-		CDBGameServerItemRefreshPush(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spItemRefreshCount(?,?,?)}") {}
-		void InItemType(int16& ItemType) { BindParam(0, ItemType); }
-		void InCount(int32& Count) { BindParam(1, Count); }
-		void InSlotIndex(int32& SlotIndex) { BindParam(2, SlotIndex); }
+		CDBGameServerItemRefreshPush(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spItemRefreshCount(?,?,?,?,?)}") {}
+		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
+		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
+		void InItemType(int16& ItemType) { BindParam(2, ItemType); }
+		void InCount(int32& Count) { BindParam(3, Count); }
+		void InSlotIndex(int32& SlotIndex) { BindParam(4, SlotIndex); }
+	};
+
+	// GoldTable 생성
+	class CDBGameServerGoldTableCreatePush : public CDBBind<2, 0>
+	{
+	public:
+		CDBGameServerGoldTableCreatePush(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGoldTableCreate(?,?)}") {}
+		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
+		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
 	};
 
 	// GoldTable에 Gold 저장
-	class CDBGameServerGoldPush : public CDBBind<4, 0>
+	class CDBGameServerGoldPush : public CDBBind<5, 0>
 	{
 	public:
-		CDBGameServerGoldPush(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGoldSave(?,?,?,?)}") {}
+		CDBGameServerGoldPush(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGoldSave(?,?,?,?,?)}") {}
 		void InAccoountId(int64& AccountId) { BindParam(0, AccountId); }
-		void InGoldCoin(int64& GoldCoin) { BindParam(1, GoldCoin); }
-		void InSliverCoin(int8& SliverCoin) { BindParam(2, SliverCoin); }
-		void InBronzeCoin(int8& BronzeCoin) { BindParam(3, BronzeCoin); }
+		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
+		void InGoldCoin(int64& GoldCoin) { BindParam(2, GoldCoin); }
+		void InSliverCoin(int8& SliverCoin) { BindParam(3, SliverCoin); }
+		void InBronzeCoin(int8& BronzeCoin) { BindParam(4, BronzeCoin); }
 	};
+
+	// ItemTable에 있는 AccountId가 소유하고 있는 Item 모두 긁어옴
+
+
 }
