@@ -247,7 +247,8 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	// 입장한 오브젝트의 타입에 따라
 	switch (EnterChannelGameObject->_GameObjectInfo.ObjectType)
 	{
-	case en_GameObjectType::PLAYER:
+	case en_GameObjectType::MELEE_PLAYER:
+	case en_GameObjectType::MAGIC_PLAYER:
 		{
 			// 플레이어로 형변환
 			CPlayer* EnterChannelPlayer = (CPlayer*)EnterChannelGameObject;
@@ -319,7 +320,8 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 	// 채널 퇴장
 	switch (LeaveChannelGameObject->_GameObjectInfo.ObjectType)
 	{
-	case en_GameObjectType::PLAYER:
+	case en_GameObjectType::MELEE_PLAYER:
+	case en_GameObjectType::MAGIC_PLAYER:
 		// 컨테이너에서 제거
 		_Players.erase(LeaveChannelGameObject->_GameObjectInfo.ObjectId);
 		
