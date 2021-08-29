@@ -3,7 +3,8 @@
 enum en_GameObjectType
 {
 	NORMAL,
-	PLAYER,
+	MELEE_PLAYER,
+	MAGIC_PLAYER,
 	SLIME,
 	BEAR,
 	WEAPON,
@@ -78,6 +79,7 @@ struct st_GameObjectInfo
 	st_StatInfo ObjectStatInfo;
 	en_GameObjectType ObjectType;
 	int64 OwnerObjectId;
+	int8 PlayerSlotIndex;
 };
 
 enum en_ObjectNetworkState

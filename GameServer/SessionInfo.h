@@ -4,6 +4,8 @@
 #include "Message.h"
 #include "pch.h"
 
+#define SESSION_CHARACTER_MAX 3
+
 class CPlayer;
 
 struct st_IO_BLOCK
@@ -44,7 +46,7 @@ struct st_SESSION
 
 	DWORD RecvPacketTime;
 
-	CPlayer* MyPlayers[5];
+	CPlayer* MyPlayers[SESSION_CHARACTER_MAX];
 	CPlayer* MyPlayer;
 
 	//char DebugArray[100000];
