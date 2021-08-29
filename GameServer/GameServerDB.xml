@@ -5,6 +5,8 @@
     <Column name="PlayerDBId" type="BigInt" notnull="true" identity="1,1"/>
     <Column name="AccountDBId" type="BigInt" notnull="true"/>
     <Column name="PlayerName" type="nvarchar(20)" notnull="true"/>
+    <Column name="PlayerType" type="SmallInt" notnull="true"/>
+    <Column name="PlayerIndex" type="TinyInt" notnull="true"/>
     <Column name="Level" type="int" notnull="true"/>
     <Column name="CurrentHP" type="int" notnull="true"/>
     <Column name="MaxHP" type="int" notnull="true"/>
@@ -14,11 +16,7 @@
     <Index type="clustered">
       <PrimaryKey/>
       <Column name="PlayerDBId"/>
-    </Index>
-    <Index type="nonclustered">
-      <UniqueKey/>
-      <Column name="AccountDBId"/>
-    </Index>
+    </Index>    
     <Index type="nonclustered">
       <UniqueKey/>
       <Column name="PlayerName"/>
@@ -56,7 +54,7 @@
     <Param name="@AccountId" type="BigInt"/>
     <Body>
       <![CDATA[
-        SELECT PlayerDBId, PlayerName, Level, CurrentHP, MaxHP, Attack, CriticalPoint, Speed FROM [dbo].[Player] WHERE AccountDBId = (@AccountId)
+        SELECT PlayerDBId, PlayerName, PlayerIndex, Level, CurrentHP, MaxHP, Attack, CriticalPoint, Speed, PlayerType FROM [dbo].[Player] WHERE AccountDBId = (@AccountId)
       ]]>
     </Body>
   </Procedure>
@@ -73,7 +71,9 @@
   <!-- 새로운 캐릭터 DB에 넣기 -->
   <Procedure name="spNewCharacterPush">
     <Param name="@AccountId" type="BigInt"/>
-    <Param name="@CharacterName" type="nvarchar(20)"/>
+    <Param name="@PlayerName" type="nvarchar(20)"/>
+    <Param name="@PlayerType" type="TinyInt"/>
+    <Param name="@PlayerIndex" type="TinyInt"/>
     <Param name="@Level" type="int"/>
     <Param name="@CurrentHP" type="int"/>
     <Param name="@MaxHP" type="int"/>
@@ -82,7 +82,7 @@
     <Param name="@Speed" type="float"/>
     <Body>
       <![CDATA[
-        INSERT INTO [dbo].[Player] VALUES ((@AccountId),(@CharacterName),(@Level),(@CurrentHP),(@MaxHP),(@Attack),(@CriticalPoint),(@Speed))        
+        INSERT INTO [dbo].[Player] VALUES ((@AccountId),(@PlayerName),(@PlayerType),(@PlayerIndex),(@Level),(@CurrentHP),(@MaxHP),(@Attack),(@CriticalPoint),(@Speed))        
       ]]>
     </Body>
   </Procedure>
@@ -90,9 +90,10 @@
   <!-- 만든 캐릭터 DBId 가져오기 -->
   <Procedure name="spPlayerDBIdGet">
     <Param name="@AccountDBId" type="BigInt"/>
+    <Param name="@PlayerIndex" type="TinyInt"/>
     <Body>
       <![CDATA[
-        SELECT PlayerDBId FROM [dbo].[Player] WHERE AccountDBId = (@AccountDBId)
+        SELECT PlayerDBId FROM [dbo].[Player] WHERE AccountDBId = (@AccountDBId) AND PlayerIndex = (@PlayerIndex)
       ]]>
     </Body>
   </Procedure>
