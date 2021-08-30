@@ -204,6 +204,13 @@ void CChannel::Update()
 
 		Monster->Update();
 	}
+
+	for (auto PlayerIterator : _Players)
+	{
+		CPlayer* Player = PlayerIterator.second;
+
+		Player->Update();
+	}
 }
 
 void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* ObjectSpawnPosition)

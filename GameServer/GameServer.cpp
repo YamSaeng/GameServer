@@ -699,6 +699,10 @@ void CGameServer::PacketProcReqAttack(int64 SessionID, CMessage* Message)
 			int16 ReqAttackRange;
 			*Message >> ReqAttackRange;
 
+			// 공격 타입
+			int16 ReqAttackType;
+			*Message >> ReqAttackType;
+
 			// 공격 거리
 			int8 Distance;
 			*Message >> Distance;
@@ -713,12 +717,12 @@ void CGameServer::PacketProcReqAttack(int64 SessionID, CMessage* Message)
 			st_Vector2Int FrontCell;
 			vector<CGameObject*> Targets;
 			
-			en_AttackType AttackType;
+			en_AttackType AttackType = (en_AttackType)ReqAttackType;
+
 			switch (AttackRange)
 			{
 			case en_AttackRange::NORMAL_ATTACK:
-			{
-				AttackType = PLAYER_NORMAL_ATTACK;
+			{				
 				FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, Distance);
 				CGameObject* Target = MyPlayer->_Channel->_Map->Find(FrontCell);
 				if (Target != nullptr)
@@ -728,8 +732,7 @@ void CGameServer::PacketProcReqAttack(int64 SessionID, CMessage* Message)
 			}
 				break;
 			case en_AttackRange::FORWARD_ATTACK:
-			{
-				AttackType = PLAYER_FORWARD_ATTACK;
+			{				
 				FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, Distance);
 				CGameObject* Target = MyPlayer->_Channel->_Map->Find(FrontCell);
 				if (Target != nullptr)
@@ -740,8 +743,6 @@ void CGameServer::PacketProcReqAttack(int64 SessionID, CMessage* Message)
 			break;
 			case en_AttackRange::AROUND_ONE_ATTACK:
 			{
-				AttackType = PLAYER_RANGE_ATTACK;
-
 				vector<st_Vector2Int> TargetPositions;
 
 				TargetPositions = MyPlayer->GetAroundCellPosition(MyPlayer->GetCellPosition(), Distance);
@@ -757,48 +758,102 @@ void CGameServer::PacketProcReqAttack(int64 SessionID, CMessage* Message)
 			break;
 			}
 
-			bool IsCritical = false;
+			// 0.5 초후에 Idle 상태로 변경
+			MyPlayer->_AttackTick = GetTickCount64() + 500;
+			MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;
+			
+			// 공격 상태로 바뀌었다고 주위 섹터 플레이어들에게 알림
+			CMessage* ResMyAttacStateChangePacket = MakePacketResObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
+			SendPacketAroundSector(Session, ResMyAttacStateChangePacket, true);
+			ResMyAttacStateChangePacket->Free();
 
-			if (Targets.size() > 0)
+			// 타겟이 1개 있으면
+			if (Targets.size() == 1)
+			{
+				st_Vector2Int FrontCellPosition;
+				CMessage* ResSyncPosition = nullptr;
+
+				switch (AttackType)
+				{				
+				case PLAYER_NORMAL_ATTACK:
+					break;
+				case PLAYER_CHOHONE_ATTACK:
+					// 내 앞쪽 위치를 구한다.
+					FrontCellPosition = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
+					// 타겟을 내 앞쪽 위치로 이동시킨다.
+					MyPlayer->_Channel->_Map->ApplyMove(Targets[0], FrontCellPosition);
+
+					// 타겟의 위치를 조정하기 위해 SyncPosition 패킷을 보낸다.
+					ResSyncPosition = MakePacketResSyncPosition(Targets[0]->_GameObjectInfo.ObjectId, Targets[0]->_GameObjectInfo.ObjectPositionInfo);
+					SendPacketAroundSector(Session, ResSyncPosition, true);
+					ResSyncPosition->Free();
+					break;				
+				case PLAYER_SHAEHONE_ATTACK:
+					// 내 앞쪽 3칸 위치를 구한다.
+					FrontCellPosition = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 3);
+					// 나를 3칸 앞으로 이동시킨다.
+					MyPlayer->_Channel->_Map->ApplyMove(MyPlayer, FrontCellPosition);
+
+					// 나의 위치를 조정하기 위해 SyncPosition 패킷을 보낸다.
+					ResSyncPosition = MakePacketResSyncPosition(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
+					SendPacketAroundSector(Session, ResSyncPosition,true);
+					ResSyncPosition->Free();
+					break;
+				}					
+
+				CMessage* ResMyAttackOtherPacket = MakePacketResAttack(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, Targets[0]->_GameObjectInfo.ObjectId, AttackType, true);
+				SendPacketAroundSector(Session, ResMyAttackOtherPacket, true);
+				ResMyAttackOtherPacket->Free();
+			}
+			else if (Targets.size() > 1)
 			{
 				// 크리티컬 판단
 				random_device RD;
 				mt19937 Gen(RD());
 
 				uniform_int_distribution<int> CriticalPointCreate(0, 100);
-				int16 CriticalPoint = CriticalPointCreate(Gen);
+				bool IsCritical = false;
 
-				// 내 캐릭터의 크리티컬 포인트보다 값이 작으면 크리티컬로 판단한다.				
-				if (CriticalPoint < MyPlayer->_GameObjectInfo.ObjectStatInfo.CriticalPoint)
-				{
-					IsCritical = true;
-				}
-			}		
-					
-			// 주위 섹터 들에게 내가 지금 공격하고 있다고 알려줌
-			CMessage* ResMyAttackOtherPacket = MakePacketResAttack(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, MoveDir, AttackType, IsCritical);
-			SendPacketAroundSector(Session, ResMyAttackOtherPacket, true);
-			ResMyAttackOtherPacket->Free();
-
-			if (Targets.size() > 0)
-			{
 				for (CGameObject* Target : Targets)
-				{
-					st_Vector2Int PreviousTargetPosition = Target->GetCellPosition();
-					Target->OnDamaged(MyPlayer, IsCritical ? MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack * 2 : MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack);
+				{					
+					int16 CriticalPoint = CriticalPointCreate(Gen);
 
-					CMessage* ResChangeHPPacket = MakePacketResChangeHP(Target->_GameObjectInfo.ObjectId,
-						IsCritical ? MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack * 2 : MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack,
-						Target->_GameObjectInfo.ObjectStatInfo.HP,
-						Target->_GameObjectInfo.ObjectStatInfo.MaxHP,
-						IsCritical,
-						PreviousTargetPosition._X,
-						PreviousTargetPosition._Y
-					);
-					SendPacketAroundSector(Session, ResChangeHPPacket, true);
-					ResChangeHPPacket->Free();
+					// 내 캐릭터의 크리티컬 포인트보다 값이 작으면 크리티컬로 판단한다.				
+					if (CriticalPoint < MyPlayer->_GameObjectInfo.ObjectStatInfo.CriticalPoint)
+					{
+						IsCritical = true;
+					}
+
+					CMessage* ResMyAttackOtherPacket = MakePacketResAttack(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectId, AttackType, IsCritical);
+					SendPacketAroundSector(Session, ResMyAttackOtherPacket, true);
+					ResMyAttackOtherPacket->Free();
 				}
 			}
+			
+			//// 주위 섹터 들에게 내가 지금 공격하고 있다고 알려줌
+			//CMessage* ResMyAttackOtherPacket = MakePacketResAttack(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, MoveDir, AttackType, IsCritical);
+			//SendPacketAroundSector(Session, ResMyAttackOtherPacket, true);
+			//ResMyAttackOtherPacket->Free();
+
+			//if (Targets.size() > 0)
+			//{
+			//	for (CGameObject* Target : Targets)
+			//	{
+			//		st_Vector2Int PreviousTargetPosition = Target->GetCellPosition();
+			//		Target->OnDamaged(MyPlayer, IsCritical ? MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack * 2 : MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack);
+
+			//		CMessage* ResChangeHPPacket = MakePacketResChangeHP(Target->_GameObjectInfo.ObjectId,
+			//			IsCritical ? MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack * 2 : MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack,
+			//			Target->_GameObjectInfo.ObjectStatInfo.HP,
+			//			Target->_GameObjectInfo.ObjectStatInfo.MaxHP,
+			//			IsCritical,
+			//			PreviousTargetPosition._X,
+			//			PreviousTargetPosition._Y
+			//		);
+			//		SendPacketAroundSector(Session, ResChangeHPPacket, true);
+			//		ResChangeHPPacket->Free();
+			//	}
+			//}
 		}
 	} while (0);	
 
@@ -2070,7 +2125,7 @@ CMessage* CGameServer::MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* N
 // int64 AccountId
 // int32 PlayerDBId
 // char Dir
-CMessage* CGameServer::MakePacketResAttack(int64 AccountId, int64 PlayerDBId, en_MoveDir Dir, en_AttackType AttackType, bool IsCritical)
+CMessage* CGameServer::MakePacketResAttack(int64 AccountId, int64 PlayerDBId, int64 TargetId, en_AttackType AttackType, bool IsCritical)
 {
 	CMessage* ResAttackMessage = CMessage::Alloc();
 	if (ResAttackMessage == nullptr)
@@ -2083,7 +2138,7 @@ CMessage* CGameServer::MakePacketResAttack(int64 AccountId, int64 PlayerDBId, en
 	*ResAttackMessage << (WORD)en_PACKET_S2C_ATTACK;
 	*ResAttackMessage << AccountId;
 	*ResAttackMessage << PlayerDBId;
-	*ResAttackMessage << (int8)Dir;
+	*ResAttackMessage << TargetId;
 	*ResAttackMessage << (int8)AttackType;
 	*ResAttackMessage << IsCritical;
 
@@ -2310,6 +2365,32 @@ CMessage* CGameServer::MakePacketResItemToInventory(int64 TargetObjectId, st_Ite
 	ResItemToInventoryMessage->InsertData(ItemInfo.ThumbnailImagePath.c_str(), ThumbnailImagePathLen);
 
 	return ResItemToInventoryMessage;
+}
+
+CMessage* CGameServer::MakePacketResSyncPosition(int64 TargetObjectId, st_PositionInfo SyncPosition)
+{
+	CMessage* ResSyncPositionMessage = CMessage::Alloc();
+	if (ResSyncPositionMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResSyncPositionMessage->Clear();
+
+	*ResSyncPositionMessage << (short)en_PACKET_S2C_SYNC_OBJECT_POSITION;
+	*ResSyncPositionMessage << TargetObjectId;
+
+	// State
+	*ResSyncPositionMessage << (int8)SyncPosition.State;
+
+	// int32 PositionX, PositionY
+	*ResSyncPositionMessage << SyncPosition.PositionX;
+	*ResSyncPositionMessage << SyncPosition.PositionY;
+
+	// MoveDir
+	*ResSyncPositionMessage << (int8)SyncPosition.MoveDir;
+
+	return ResSyncPositionMessage;
 }
 
 void CGameServer::OnClientJoin(int64 SessionID)

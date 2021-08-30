@@ -104,7 +104,7 @@ private:
 	CMessage* MakePacketGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int8 SliverCount, int8 BronzeCount);
 	CMessage* MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* NickName, WORD MessageLen, WCHAR* Message);
 public:
-	CMessage* MakePacketResAttack(int64 AccountId, int64 PlayerDBId, en_MoveDir Dir, en_AttackType AttackType, bool IsCritical);
+	CMessage* MakePacketResAttack(int64 AccountId, int64 PlayerDBId, int64 TargetId, en_AttackType AttackType, bool IsCritical);
 	CMessage* MakePacketResChangeHP(int64 PlayerDBId, int32 Damage, int32 CurrentHP, int32 MaxHP, bool IsCritical, int32 TargetPositionX, int32 TargetPositionY);
 	CMessage* MakePacketResObjectState(int64 ObjectId, en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState);
 	CMessage* MakePacketResMove(int64 AccountId, int64 ObjectId, en_GameObjectType ObjectType, st_PositionInfo PositionInfo);
@@ -113,6 +113,7 @@ public:
 	CMessage* MakePacketResDie(int64 DieObjectId);
 	CMessage* MakePacketResChattingMessage(int64 PlayerDBId, en_MessageType MessageType, wstring ChattingMessage);
 	CMessage* MakePacketResItemToInventory(int64 TargetObjectId, st_ItemInfo ItemInfo);
+	CMessage* MakePacketResSyncPosition(int64 TargetObjectId, st_PositionInfo SyncPosition);
 public:
 	//------------------------------------
 	// Job 메모리풀
