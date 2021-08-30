@@ -163,7 +163,7 @@ enum en_PACKET_TYPE
 	// bool CanGo
 	// st_PositionInfo PositionInfo
 	//------------------------------------------------------------
-	en_PACKET_S2C_MOVE,
+	en_PACKET_S2C_MOVE,	
 	
 	//------------------------------------------------------------
 	// 게임서버 캐릭터 공격 요청
@@ -226,7 +226,15 @@ enum en_PACKET_TYPE
 	en_PACKET_S2C_MOUSE_POSITION_OBJECT_INFO,
 	
 	//------------------------------------------------------------
-	// 게임서버 오브젝트 상태 변경
+	// 게임서버 오브젝트 상태 변경 요청
+	// int64 AccountId
+	// int64 ObjectId
+	// en_CreatureState ObjectState
+	//------------------------------------------------------------
+	en_PACKET_C2S_OBJECT_STATE_CHANGE,
+
+	//------------------------------------------------------------
+	// 게임서버 오브젝트 상태 변경 요청 응답
 	// int32 ObjectId
 	// en_CreatureState ObjectState
 	//------------------------------------------------------------

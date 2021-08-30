@@ -42,6 +42,7 @@ enum en_AttackType
 {
 	NONE_ATTACK = -1,
 	PLAYER_NORMAL_ATTACK,
+	PLAYER_FORWARD_ATTACK,
 	PLAYER_RANGE_ATTACK,
 	SLIME_NORMAL_ATTACK,
 	BEAR_NORMAL_ATTACK
@@ -51,6 +52,11 @@ enum en_MessageType
 {
 	CHATTING,
 	SYSTEM
+};
+
+enum en_StateChange
+{
+	MOVE_TO_STOP
 };
 
 struct st_PositionInfo

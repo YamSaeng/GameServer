@@ -63,6 +63,7 @@ private:
 	void PacketProcReqMove(int64 SessionID, CMessage* Message);
 	void PacketProcReqAttack(int64 SessionID, CMessage* Message);
 	void PacketProcReqMousePositionObjectInfo(int64 SessionID, CMessage* Message);
+	void PacketProcReqObjectStateChange(int64 SessionId, CMessage* Message);
 	void PacketProcReqChattingMessage(int64 SessionId, CMessage* Message);
 	void PacketProcReqItemToInventory(int64 SessionId, CMessage* Message);
 	void PacketProcReqSectorMove(int64 SessionID, CMessage* Message);
@@ -96,10 +97,10 @@ private:
 	//8. HP º¯°æ
 	//----------------------------------------------------------------
 	CMessage* MakePacketResClientConnected();
-	CMessage* MakePacketResLogin(bool Status, int32 PlayerCount, int64 PlayerDBId, wstring PlayersName);
-	CMessage* MakePacketResCreateCharacter(bool IsSuccess, int64 PlayerDBId, wstring PlayerName);
+	CMessage* MakePacketResLogin(bool Status, int8 PlayerCount, CGameObject** MyPlayersInfo);
+	CMessage* MakePacketResCreateCharacter(bool IsSuccess, st_GameObjectInfo CreateCharacterObjectInfo);
 	CMessage* MakePacketResEnterGame(st_GameObjectInfo ObjectInfo);	
-	CMessage* MakePacketMousePositionObjectInfo(int64 AccountId, int64 PlayerDBId, st_GameObjectInfo ObjectInfo);
+	CMessage* MakePacketMousePositionObjectInfo(int64 AccountId, st_GameObjectInfo ObjectInfo);
 	CMessage* MakePacketGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int8 SliverCount, int8 BronzeCount);
 	CMessage* MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* NickName, WORD MessageLen, WCHAR* Message);
 public:

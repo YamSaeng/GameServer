@@ -46,8 +46,8 @@ void CGameServer::Start(const WCHAR* OpenIP, int32 Port)
 {
 	CNetworkLib::Start(OpenIP, Port);
 
-	G_ObjectManager->MonsterSpawn(200, 1, en_GameObjectType::SLIME);
-	G_ObjectManager->MonsterSpawn(200, 1, en_GameObjectType::BEAR);
+	//G_ObjectManager->MonsterSpawn(200, 1, en_GameObjectType::SLIME);
+	//G_ObjectManager->MonsterSpawn(200, 1, en_GameObjectType::BEAR);
 
 	G_ObjectManager->GameServer = this;
 
@@ -198,10 +198,10 @@ void CGameServer::CreateNewClient(int64 SessionId)
 	Session->Token = 0;
 
 	Session->RecvPacketTime = timeGetTime();
-
-	for (int i = 0; i < 5; i++)
+		
+	for (int i = 0; i < SESSION_CHARACTER_MAX; i++)
 	{
-		Session->MyPlayers[i] = (CPlayer*)G_ObjectManager->ObjectCreate(en_GameObjectType::PLAYER);
+		Session->MyPlayers[i] = (CPlayer*)G_ObjectManager->ObjectCreate(en_GameObjectType::MELEE_PLAYER);
 	}
 
 	Session->MyPlayer = nullptr;
@@ -231,7 +231,7 @@ void CGameServer::DeleteClient(st_SESSION* Session)
 		SendPacketAroundSector(Session, ResLeaveGame);
 		ResLeaveGame->Free();
 
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i < SESSION_CHARACTER_MAX; i++)
 		{
 			Session->MyPlayers[i]->_NetworkState = en_ObjectNetworkState::LEAVE;
 			G_ObjectManager->Remove(Session->MyPlayers[i], 1);
@@ -240,6 +240,7 @@ void CGameServer::DeleteClient(st_SESSION* Session)
 	}
 
 	Session->MyPlayer = nullptr;
+	Session->AccountId = 0;
 
 	Session->ClientSock = INVALID_SOCKET;
 	closesocket(Session->CloseSock);
@@ -272,6 +273,9 @@ void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 		break;
 	case en_PACKET_C2S_MOUSE_POSITION_OBJECT_INFO:
 		PacketProcReqMousePositionObjectInfo(SessionId, Message);
+		break;
+	case en_PACKET_C2S_OBJECT_STATE_CHANGE:
+		PacketProcReqObjectStateChange(SessionId, Message);
 		break;
 	case en_PACKET_C2S_MESSAGE:
 		PacketProcReqChattingMessage(SessionId, Message);
@@ -374,6 +378,10 @@ void CGameServer::PacketProcReqCreateCharacter(int64 SessionID, CMessage* Messag
 
 	if (Session)
 	{
+		// 클라에서 선택한 플레이어 오브젝트 타입
+		int16 ReqGameObjectType;
+		*Message >> ReqGameObjectType;		
+
 		// 캐릭터 이름 길이
 		int8 CharacterNameLen;
 		*Message >> CharacterNameLen;
@@ -385,12 +393,22 @@ void CGameServer::PacketProcReqCreateCharacter(int64 SessionID, CMessage* Messag
 		// 캐릭터 이름 셋팅
 		Session->CreateCharacterName = CharacterName;
 
+		// 클라에서 선택한 플레이어 인덱스
+		byte CharacterCreateSlotIndex;
+		*Message >> CharacterCreateSlotIndex;		
+
 		InterlockedIncrement64(&Session->IOBlock->IOCount);
+
+		CMessage* DBReqChatacerCreateMessage = CMessage::Alloc();
+		DBReqChatacerCreateMessage->Clear();
+
+		*DBReqChatacerCreateMessage << ReqGameObjectType;
+		*DBReqChatacerCreateMessage << CharacterCreateSlotIndex;
 
 		st_Job* DBCharacterCheckJob = _JobMemoryPool->Alloc();
 		DBCharacterCheckJob->Type = DATA_BASE_CHARACTER_CHECK;
 		DBCharacterCheckJob->SessionId = Session->SessionId;
-		DBCharacterCheckJob->Message = nullptr;
+		DBCharacterCheckJob->Message = DBReqChatacerCreateMessage;
 
 		_GameServerDataBaseThreadMessageQue.Enqueue(DBCharacterCheckJob);
 		SetEvent(_DataBaseWakeEvent);
@@ -436,7 +454,7 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 
 			bool FindName = false;
 			// 클라가 가지고 있는 캐릭 중에 패킷으로 받은 캐릭터가 있는지 확인한다.
-			for (int i = 0; i < 5; i++)
+			for (int i = 0; i < SESSION_CHARACTER_MAX; i++)
 			{
 				if (Session->MyPlayers[i]->_GameObjectInfo.ObjectName == EnterGameCharacterName)
 				{
@@ -542,7 +560,7 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 			}
 
 			// PlayerDBId를 뽑는다.
-			int32 PlayerDBId;
+			int64 PlayerDBId;
 			*Message >> PlayerDBId;
 
 			// 클라가 조종중인 캐릭터가 있는지 확인
@@ -612,8 +630,7 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 			CMessage* ResMyMoveOtherPacket = MakePacketResMove(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
 			SendPacketAroundSector(Session, ResMyMoveOtherPacket, true);
 			ResMyMoveOtherPacket->Free();
-
-			MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+			
 		}
 		else
 		{
@@ -695,16 +712,25 @@ void CGameServer::PacketProcReqAttack(int64 SessionID, CMessage* Message)
 
 			st_Vector2Int FrontCell;
 			vector<CGameObject*> Targets;
-			en_AttackType AttackType = NONE_ATTACK;
+			
+			en_AttackType AttackType;
 			switch (AttackRange)
 			{
-			case NORMAL_ATTACK:
-			case FORWARD_ATTACK:
+			case en_AttackRange::NORMAL_ATTACK:
 			{
 				AttackType = PLAYER_NORMAL_ATTACK;
-
 				FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, Distance);
-
+				CGameObject* Target = MyPlayer->_Channel->_Map->Find(FrontCell);
+				if (Target != nullptr)
+				{
+					Targets.push_back(Target);
+				}
+			}
+				break;
+			case en_AttackRange::FORWARD_ATTACK:
+			{
+				AttackType = PLAYER_FORWARD_ATTACK;
+				FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, Distance);
 				CGameObject* Target = MyPlayer->_Channel->_Map->Find(FrontCell);
 				if (Target != nullptr)
 				{
@@ -712,7 +738,7 @@ void CGameServer::PacketProcReqAttack(int64 SessionID, CMessage* Message)
 				}
 			}
 			break;
-			case AROUND_ONE_ATTACK:
+			case en_AttackRange::AROUND_ONE_ATTACK:
 			{
 				AttackType = PLAYER_RANGE_ATTACK;
 
@@ -731,20 +757,24 @@ void CGameServer::PacketProcReqAttack(int64 SessionID, CMessage* Message)
 			break;
 			}
 
-			// 크리티컬 판단
-			random_device RD;
-			mt19937 Gen(RD());			
+			bool IsCritical = false;
 
-			uniform_int_distribution<int> CriticalPointCreate(0, 100);
-			int16 CriticalPoint = CriticalPointCreate(Gen);			
-
-			// 내 캐릭터의 크리티컬 포인트보다 값이 작으면 크리티컬로 판단한다.
-			bool IsCritical = false;			
-			if (CriticalPoint < MyPlayer->_GameObjectInfo.ObjectStatInfo.CriticalPoint)
+			if (Targets.size() > 0)
 			{
-				IsCritical = true;			
-			}
+				// 크리티컬 판단
+				random_device RD;
+				mt19937 Gen(RD());
 
+				uniform_int_distribution<int> CriticalPointCreate(0, 100);
+				int16 CriticalPoint = CriticalPointCreate(Gen);
+
+				// 내 캐릭터의 크리티컬 포인트보다 값이 작으면 크리티컬로 판단한다.				
+				if (CriticalPoint < MyPlayer->_GameObjectInfo.ObjectStatInfo.CriticalPoint)
+				{
+					IsCritical = true;
+				}
+			}		
+					
 			// 주위 섹터 들에게 내가 지금 공격하고 있다고 알려줌
 			CMessage* ResMyAttackOtherPacket = MakePacketResAttack(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, MoveDir, AttackType, IsCritical);
 			SendPacketAroundSector(Session, ResMyAttackOtherPacket, true);
@@ -838,7 +868,7 @@ void CGameServer::PacketProcReqMousePositionObjectInfo(int64 SessionID, CMessage
 			{
 				CPlayer* Player = (CPlayer*)FindObject;
 
-				CMessage* ResMousePositionObjectInfo = MakePacketMousePositionObjectInfo(Session->AccountId, Player->_GameObjectInfo.ObjectId, Player->_GameObjectInfo);
+				CMessage* ResMousePositionObjectInfo = MakePacketMousePositionObjectInfo(Session->AccountId, Player->_GameObjectInfo);
 				SendPacket(Session->SessionId, ResMousePositionObjectInfo);
 				ResMousePositionObjectInfo->Free();
 			}
@@ -846,6 +876,81 @@ void CGameServer::PacketProcReqMousePositionObjectInfo(int64 SessionID, CMessage
 	} while (0);	
 
 	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcReqObjectStateChange(int64 SessionId, CMessage* Message)
+{
+	// 세션 얻기
+	st_SESSION* Session = FindSession(SessionId);
+
+	int64 AccountId;
+	int64 PlayerDBId;
+	int16 StateChange;
+
+	if (Session)
+	{
+		do
+		{
+			// 로그인 중인지 확인
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				return;
+			}
+
+			*Message >> AccountId;
+
+			// AccountId가 맞는지 확인
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				return;
+			}
+
+			*Message >> PlayerDBId;
+
+			// 조종하고 있는 플레이어가 있는지 확인 
+			if (Session->MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				return;
+			}
+			else
+			{
+				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
+				if (Session->MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				{
+					Disconnect(Session->SessionId);
+					return;
+				}
+			}
+
+			*Message >> StateChange;
+
+			switch ((en_StateChange)StateChange)
+			{
+			case MOVE_TO_STOP:
+				if (Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::MOVING)
+				{
+					Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+
+					CMessage* ResMoveStopPakcet = MakePacketResObjectState(Session->MyPlayer->_GameObjectInfo.ObjectId, Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, Session->MyPlayer->_GameObjectInfo.ObjectType, Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
+					SendPacketAroundSector(Session, ResMoveStopPakcet, true);
+					ResMoveStopPakcet->Free();
+				}
+				else
+				{
+					Disconnect(Session->SessionId);
+					goto error;
+				}
+				break;
+			default:
+				break;
+			}
+		} while (0);
+error:
+		ReturnSession(Session);
+	}
 }
 
 // int32 ObjectId
@@ -964,7 +1069,8 @@ void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Messag
 
 				*Message >> TargetObjectId;
 
-				CPlayer* TargetPlayer = (CPlayer*)(G_ObjectManager->Find(TargetObjectId, en_GameObjectType::PLAYER));
+				// 수정 해야함 Magic Player어 경우에도 받을 수 잇또록
+				CPlayer* TargetPlayer = (CPlayer*)(G_ObjectManager->Find(TargetObjectId, en_GameObjectType::MELEE_PLAYER));
 				if (TargetPlayer == nullptr)
 				{
 					break;
@@ -1262,48 +1368,54 @@ void CGameServer::PacketProcReqAccountCheck(int64 SessionID, CMessage* Message)
 
 			int64 PlayerId;
 			WCHAR PlayerName[100];
+			int8 PlayerIndex;
 			int32 PlayerLevel;
 			int32 PlayerCurrentHP;
 			int32 PlayerMaxHP;
 			int32 PlayerAttack;
 			int16 PlayerCriticalPoint;
 			float PlayerSpeed;
+			int16 PlayerObjectType;
 
 			ClientPlayersGet.OutPlayerDBID(PlayerId);
 			ClientPlayersGet.OutPlayerName(PlayerName);
+			ClientPlayersGet.OutPlayerIndex(PlayerIndex);
 			ClientPlayersGet.OutLevel(PlayerLevel);
 			ClientPlayersGet.OutCurrentHP(PlayerCurrentHP);
 			ClientPlayersGet.OutMaxHP(PlayerMaxHP);
 			ClientPlayersGet.OutAttack(PlayerAttack);
 			ClientPlayersGet.OutCriticalPoint(PlayerCriticalPoint);
 			ClientPlayersGet.OutSpeed(PlayerSpeed);
+			ClientPlayersGet.OutPlayerObjectType(PlayerObjectType);
 
-			ClientPlayersGet.Execute();
+			ClientPlayersGet.Execute();			
 
-			int PlayerCount = 0;
+			int8 PlayerCount = 0;
 
 			while (ClientPlayersGet.Fetch())
 			{
 				// 플레이어 정보 셋팅
-				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectId = PlayerId;
-				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectName = PlayerName;
-				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectStatInfo.Level = PlayerLevel;
-				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectStatInfo.HP = PlayerCurrentHP;
-				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectStatInfo.MaxHP = PlayerMaxHP;
-				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectStatInfo.Attack = PlayerAttack;
-				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectStatInfo.CriticalPoint = PlayerCriticalPoint;
-				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectStatInfo.Speed = PlayerSpeed;
-				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-				Session->MyPlayers[PlayerCount]->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
-				Session->MyPlayers[PlayerCount]->_GameObjectInfo.OwnerObjectId = 0;
-				Session->MyPlayers[PlayerCount]->_SessionId = Session->SessionId;		
-				Session->MyPlayers[PlayerCount]->_AccountId = Session->AccountId;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectId = PlayerId;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectName = PlayerName;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.Level = PlayerLevel;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.HP = PlayerCurrentHP;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MaxHP = PlayerMaxHP;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.Attack = PlayerAttack;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.CriticalPoint = PlayerCriticalPoint;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.Speed = PlayerSpeed;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectType = (en_GameObjectType)PlayerObjectType;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.OwnerObjectId = 0;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.PlayerSlotIndex = PlayerIndex;
+				Session->MyPlayers[PlayerIndex]->_SessionId = Session->SessionId;		
+				Session->MyPlayers[PlayerIndex]->_AccountId = Session->AccountId;
 
 				PlayerCount++;
 			}
 
 			// 클라에게 로그인 응답 패킷 보냄
-			CMessage* ResLoginMessage = MakePacketResLogin(Status, PlayerCount, Session->MyPlayers[0]->_GameObjectInfo.ObjectId, Session->MyPlayers[0]->_GameObjectInfo.ObjectName);
+			CMessage* ResLoginMessage = MakePacketResLogin(Status, PlayerCount, (CGameObject**)Session->MyPlayers);
 			SendPacket(Session->SessionId, ResLoginMessage);
 			ResLoginMessage->Free();
 
@@ -1331,6 +1443,14 @@ void CGameServer::PacketProcReqCreateCharacterNameCheck(int64 SessionID, CMessag
 	
 	if (Session)
 	{
+		int16 ReqGameObjectType;
+		*Message >> ReqGameObjectType;
+		
+		int8 ReqCharacterCreateSlotIndex;
+		*Message >> ReqCharacterCreateSlotIndex;
+
+		en_GameObjectType GameObjectType = (en_GameObjectType)ReqGameObjectType;
+
 		InterlockedDecrement64(&Session->IOBlock->IOCount);
 
 		// 요청한 클라의 생성할 캐릭터의 이름을 가져온다.
@@ -1351,7 +1471,7 @@ void CGameServer::PacketProcReqCreateCharacterNameCheck(int64 SessionID, CMessag
 		if (!CharacterNameFind)
 		{
 			// 레벨 1에 해당하는 캐릭터 정보 읽어옴
-			auto FindStatus = G_Datamanager->_Status.find(1);
+			auto FindStatus = G_Datamanager->_Status.find(ReqGameObjectType);
 			st_StatusData NewCharacterStatus = *(*FindStatus).second;
 
 			// 앞서 읽어온 캐릭터 정보를 토대로 DB에 저장
@@ -1359,7 +1479,9 @@ void CGameServer::PacketProcReqCreateCharacterNameCheck(int64 SessionID, CMessag
 
 			SP::CDBGameServerCreateCharacterPush NewCharacterPush(*NewCharacterPushDBConnection);
 			NewCharacterPush.InAccountID(Session->AccountId);
-			NewCharacterPush.InCharacterName(Session->CreateCharacterName);
+			NewCharacterPush.InPlayerName(Session->CreateCharacterName);
+			NewCharacterPush.InPlayerType(ReqGameObjectType);
+			NewCharacterPush.InPlayerIndex(ReqCharacterCreateSlotIndex);
 			NewCharacterPush.InLevel(NewCharacterStatus.Level);
 			NewCharacterPush.InCurrentHP(NewCharacterStatus.MaxHP);
 			NewCharacterPush.InMaxHP(NewCharacterStatus.MaxHP);
@@ -1375,6 +1497,7 @@ void CGameServer::PacketProcReqCreateCharacterNameCheck(int64 SessionID, CMessag
 			CDBConnection* PlayerDBIDGetDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 			SP::CDBGameServerPlayerDBIDGet PlayerDBIDGet(*PlayerDBIDGetDBConnection);
 			PlayerDBIDGet.InAccountID(Session->AccountId);
+			PlayerDBIDGet.InPlayerSlotIndex(ReqCharacterCreateSlotIndex);
 
 			PlayerDBIDGet.OutPlayerDBID(PlayerDBId);
 
@@ -1383,20 +1506,23 @@ void CGameServer::PacketProcReqCreateCharacterNameCheck(int64 SessionID, CMessag
 			PlayerDBIDGet.Fetch();
 
 			// DB에서 읽어온 DBId를 저장
-			Session->MyPlayers[0]->_GameObjectInfo.ObjectId = PlayerDBId;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectId = PlayerDBId;
 			// 캐릭터의 이름도 저장
-			Session->MyPlayers[0]->_GameObjectInfo.ObjectName = Session->CreateCharacterName;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectName = Session->CreateCharacterName;
 
-			Session->MyPlayers[0]->_GameObjectInfo.ObjectStatInfo.Level = NewCharacterStatus.Level;
-			Session->MyPlayers[0]->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
-			Session->MyPlayers[0]->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
-			Session->MyPlayers[0]->_GameObjectInfo.ObjectStatInfo.Attack = NewCharacterStatus.Attack;
-			Session->MyPlayers[0]->_GameObjectInfo.ObjectStatInfo.CriticalPoint = NewCharacterStatus.CriticalPoint;
-			Session->MyPlayers[0]->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
-			Session->MyPlayers[0]->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-			Session->MyPlayers[0]->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
-			Session->MyPlayers[0]->_SessionId = Session->SessionId;
-			Session->MyPlayers[0]->_AccountId = Session->AccountId;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.Level = NewCharacterStatus.Level;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.Attack = NewCharacterStatus.Attack;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.CriticalPoint = NewCharacterStatus.CriticalPoint;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectType = GameObjectType;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.OwnerObjectId = -1;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.PlayerSlotIndex = ReqCharacterCreateSlotIndex; // 캐릭터가 속한 슬롯
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_SessionId = Session->SessionId;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_AccountId = Session->AccountId;
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerDBIDGetDBConnection);
 
@@ -1417,7 +1543,7 @@ void CGameServer::PacketProcReqCreateCharacterNameCheck(int64 SessionID, CMessag
 		}
 
 		// 캐릭터 생성 응답 보냄
-		CMessage* ResCreateCharacterMessage = MakePacketResCreateCharacter(!CharacterNameFind, PlayerDBId, Session->CreateCharacterName);
+		CMessage* ResCreateCharacterMessage = MakePacketResCreateCharacter(!CharacterNameFind, Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo);
 		SendPacket(Session->SessionId, ResCreateCharacterMessage);
 		ResCreateCharacterMessage->Free();
 	}
@@ -1705,7 +1831,7 @@ CMessage* CGameServer::MakePacketResClientConnected()
 
 	ClientConnetedMessage->Clear();
 
-	*ClientConnetedMessage << (uint16)en_PACKET_S2C_GAME_CLIENT_CONNECTED;
+	*ClientConnetedMessage << (uint16)en_PACKET_S2C_GAME_CLIENT_CONNECTED;	
 
 	return ClientConnetedMessage;
 }
@@ -1716,7 +1842,7 @@ CMessage* CGameServer::MakePacketResClientConnected()
 //BYTE Status  //0 : 실패  1 : 성공
 //CPlayer Players
 //---------------------------------------------------------------
-CMessage* CGameServer::MakePacketResLogin(bool Status, int32 PlayerCount, int64 PlayerDBId, wstring PlayersName)
+CMessage* CGameServer::MakePacketResLogin(bool Status, int8 PlayerCount, CGameObject** MyPlayersInfo)
 {
 	CMessage* LoginMessage = CMessage::Alloc();
 	if (LoginMessage == nullptr)
@@ -1729,14 +1855,33 @@ CMessage* CGameServer::MakePacketResLogin(bool Status, int32 PlayerCount, int64 
 	*LoginMessage << (WORD)en_PACKET_S2C_GAME_RES_LOGIN;
 	*LoginMessage << Status;
 	*LoginMessage << PlayerCount;
-	*LoginMessage << PlayerDBId;
-
-	if (PlayerCount != 0)
+	
+	if (PlayerCount > 0)
 	{
-		int8 PlayerNameLen = (int8)(PlayersName.length() * 2);
-		*LoginMessage << PlayerNameLen;
-		LoginMessage->InsertData(PlayersName.c_str(), PlayerNameLen);
-	}
+		for (int32 i = 0; i < PlayerCount; i++)
+		{
+			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectId;
+
+			int8 ObjectNameLen = (int8)(MyPlayersInfo[i]->_GameObjectInfo.ObjectName.length() * 2);
+			*LoginMessage << ObjectNameLen;
+			LoginMessage->InsertData(MyPlayersInfo[i]->_GameObjectInfo.ObjectName.c_str(), ObjectNameLen);
+
+			*LoginMessage << (int8)(MyPlayersInfo[i]->_GameObjectInfo.ObjectPositionInfo.State);
+			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectPositionInfo.PositionX;
+			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectPositionInfo.PositionY;
+			*LoginMessage << (int8)(MyPlayersInfo[i]->_GameObjectInfo.ObjectPositionInfo.MoveDir);
+
+			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectStatInfo.Level;
+			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectStatInfo.HP;
+			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectStatInfo.MaxHP;
+			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectStatInfo.Attack;
+			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectStatInfo.CriticalPoint;
+			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectStatInfo.Speed;
+			*LoginMessage << (int8)(MyPlayersInfo[i]->_GameObjectInfo.ObjectType);
+			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.OwnerObjectId;
+			*LoginMessage << (int8)(MyPlayersInfo[i]->_GameObjectInfo.PlayerSlotIndex);
+		}
+	}	
 
 	return LoginMessage;
 }
@@ -1744,7 +1889,7 @@ CMessage* CGameServer::MakePacketResLogin(bool Status, int32 PlayerCount, int64 
 // int32 PlayerDBId
 // bool IsSuccess
 // wstring PlayerName
-CMessage* CGameServer::MakePacketResCreateCharacter(bool IsSuccess, int64 PlayerDBId, wstring PlayerName)
+CMessage* CGameServer::MakePacketResCreateCharacter(bool IsSuccess, st_GameObjectInfo CreateCharacterObjectInfo)
 {
 	CMessage* ResCreateCharacter = CMessage::Alloc();
 	if (ResCreateCharacter == nullptr)
@@ -1756,11 +1901,27 @@ CMessage* CGameServer::MakePacketResCreateCharacter(bool IsSuccess, int64 Player
 
 	*ResCreateCharacter << (WORD)en_PACKET_S2C_GAME_CREATE_CHARACTER;
 	*ResCreateCharacter << IsSuccess;
-	*ResCreateCharacter << PlayerDBId;
 
-	int8 PlayerNameLen = (int8)(PlayerName.length() * 2);
-	*ResCreateCharacter << PlayerNameLen;
-	ResCreateCharacter->InsertData(PlayerName.c_str(), PlayerNameLen);
+	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectId;
+
+	int8 CreateCharacterObjectNameLen = (int8)(CreateCharacterObjectInfo.ObjectName.length() * 2);
+	*ResCreateCharacter << CreateCharacterObjectNameLen;
+	ResCreateCharacter->InsertData(CreateCharacterObjectInfo.ObjectName.c_str(), CreateCharacterObjectNameLen);
+
+	*ResCreateCharacter << (int8)(CreateCharacterObjectInfo.ObjectPositionInfo.State);
+	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectPositionInfo.PositionX;
+	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectPositionInfo.PositionY;
+	*ResCreateCharacter << (int8)(CreateCharacterObjectInfo.ObjectPositionInfo.MoveDir);
+
+	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectStatInfo.Level;
+	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectStatInfo.HP;
+	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectStatInfo.MaxHP;
+	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectStatInfo.Attack;
+	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectStatInfo.CriticalPoint;
+	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectStatInfo.Speed;
+	*ResCreateCharacter << (int8)(CreateCharacterObjectInfo.ObjectType);
+	*ResCreateCharacter << CreateCharacterObjectInfo.OwnerObjectId;
+	*ResCreateCharacter << (int8)(CreateCharacterObjectInfo.PlayerSlotIndex);
 
 	return ResCreateCharacter;
 }
@@ -1801,6 +1962,10 @@ CMessage* CGameServer::MakePacketResEnterGame(st_GameObjectInfo ObjectInfo)
 
 	// ObjectType
 	*ResEnterGamePacket << (int8)ObjectInfo.ObjectType;
+	
+	*ResEnterGamePacket << ObjectInfo.OwnerObjectId;
+
+	*ResEnterGamePacket << (int8)ObjectInfo.PlayerSlotIndex;
 
 	return ResEnterGamePacket;
 }
@@ -1808,46 +1973,49 @@ CMessage* CGameServer::MakePacketResEnterGame(st_GameObjectInfo ObjectInfo)
 // int64 AccountId
 // int32 PlayerDBId
 // st_GameObjectInfo ObjectInfo
-CMessage* CGameServer::MakePacketMousePositionObjectInfo(int64 AccountId, int64 PlayerDBId, st_GameObjectInfo ObjectInfo)
+CMessage* CGameServer::MakePacketMousePositionObjectInfo(int64 AccountId, st_GameObjectInfo ObjectInfo)
 {
-	CMessage* ResEnterGamePacket = CMessage::Alloc();
-	if (ResEnterGamePacket == nullptr)
+	CMessage* ResMousePositionObjectInfoPacket = CMessage::Alloc();
+	if (ResMousePositionObjectInfoPacket == nullptr)
 	{
 		return nullptr;
 	}
 
-	ResEnterGamePacket->Clear();
+	ResMousePositionObjectInfoPacket->Clear();
 
-	*ResEnterGamePacket << (WORD)en_PACKET_S2C_MOUSE_POSITION_OBJECT_INFO;
-	*ResEnterGamePacket << AccountId;
-	*ResEnterGamePacket << PlayerDBId;
+	*ResMousePositionObjectInfoPacket << (WORD)en_PACKET_S2C_MOUSE_POSITION_OBJECT_INFO;
+	*ResMousePositionObjectInfoPacket << AccountId;	
 
 	// ObjectId
-	*ResEnterGamePacket << ObjectInfo.ObjectId;
+	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectId;
 
 	// EnterPlayerName
 	int8 ObjectNameLen = (int8)(ObjectInfo.ObjectName.length() * 2);
-	*ResEnterGamePacket << ObjectNameLen;
-	ResEnterGamePacket->InsertData(ObjectInfo.ObjectName.c_str(), ObjectNameLen);
+	*ResMousePositionObjectInfoPacket << ObjectNameLen;
+	ResMousePositionObjectInfoPacket->InsertData(ObjectInfo.ObjectName.c_str(), ObjectNameLen);
 
 	// st_PositionInfo
-	*ResEnterGamePacket << (int8)ObjectInfo.ObjectPositionInfo.State;
-	*ResEnterGamePacket << ObjectInfo.ObjectPositionInfo.PositionX;
-	*ResEnterGamePacket << ObjectInfo.ObjectPositionInfo.PositionY;
-	*ResEnterGamePacket << (int8)ObjectInfo.ObjectPositionInfo.MoveDir;
+	*ResMousePositionObjectInfoPacket << (int8)ObjectInfo.ObjectPositionInfo.State;
+	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectPositionInfo.PositionX;
+	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectPositionInfo.PositionY;
+	*ResMousePositionObjectInfoPacket << (int8)ObjectInfo.ObjectPositionInfo.MoveDir;
 
 	// st_StatInfo
-	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.Level;
-	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.HP;
-	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.MaxHP;
-	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.Attack;
-	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.CriticalPoint;
-	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.Speed;
+	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectStatInfo.Level;
+	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectStatInfo.HP;
+	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectStatInfo.MaxHP;
+	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectStatInfo.Attack;
+	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectStatInfo.CriticalPoint;
+	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectStatInfo.Speed;
 
 	// ObjectType
-	*ResEnterGamePacket << (int8)ObjectInfo.ObjectType;
+	*ResMousePositionObjectInfoPacket << (int8)ObjectInfo.ObjectType;
+	
+	*ResMousePositionObjectInfoPacket << ObjectInfo.OwnerObjectId;
+	
+	*ResMousePositionObjectInfoPacket << (int8)ObjectInfo.PlayerSlotIndex;
 
-	return ResEnterGamePacket;
+	return ResMousePositionObjectInfoPacket;
 }
 
 CMessage* CGameServer::MakePacketGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int8 SliverCount, int8 BronzeCount)
@@ -2046,6 +2214,8 @@ CMessage* CGameServer::MakePacketResSpawn(int32 ObjectInfosCount, vector<st_Game
 		// ObjectType
 		*ResSpawnPacket << (int8)ObjectInfos[i].ObjectType;
 		*ResSpawnPacket << ObjectInfos[i].OwnerObjectId;
+		*ResSpawnPacket << ObjectInfos[i].PlayerSlotIndex;
+		
 	}
 
 	return ResSpawnPacket;
