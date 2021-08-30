@@ -766,6 +766,13 @@ void CGameServer::PacketProcReqAttack(int64 SessionID, CMessage* Message)
 			CMessage* ResMyAttacStateChangePacket = MakePacketResObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
 			SendPacketAroundSector(Session, ResMyAttacStateChangePacket, true);
 			ResMyAttacStateChangePacket->Free();
+			
+			// 크리티컬 판단 준비
+			random_device RD;
+			mt19937 Gen(RD());
+
+			uniform_int_distribution<int> CriticalPointCreate(0, 100);
+			bool IsCritical = false;
 
 			// 타겟이 1개 있으면
 			if (Targets.size() == 1)
@@ -801,19 +808,26 @@ void CGameServer::PacketProcReqAttack(int64 SessionID, CMessage* Message)
 					break;
 				}					
 
-				CMessage* ResMyAttackOtherPacket = MakePacketResAttack(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, Targets[0]->_GameObjectInfo.ObjectId, AttackType, true);
+				int16 CriticalPoint = CriticalPointCreate(Gen);
+
+				// 내 캐릭터의 크리티컬 포인트보다 값이 작으면 크리티컬로 판단한다.				
+				if (CriticalPoint < MyPlayer->_GameObjectInfo.ObjectStatInfo.CriticalPoint)
+				{
+					IsCritical = true;
+				}
+
+				Targets[0]->OnDamaged(MyPlayer, IsCritical ? MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack * 2 : MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack);
+
+				CMessage* ResMyAttackOtherPacket = MakePacketResAttack(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, Targets[0]->_GameObjectInfo.ObjectId, AttackType, IsCritical ? MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack * 2 : MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack, IsCritical);
 				SendPacketAroundSector(Session, ResMyAttackOtherPacket, true);
 				ResMyAttackOtherPacket->Free();
+
+				CMessage* ResChangeHPPacket = MakePacketResChangeHP(Targets[0]->_GameObjectInfo.ObjectId, Targets[0]->_GameObjectInfo.ObjectStatInfo.HP, Targets[0]->_GameObjectInfo.ObjectStatInfo.MaxHP);
+				SendPacketAroundSector(Session, ResChangeHPPacket, true);
+				ResChangeHPPacket->Free();
 			}
 			else if (Targets.size() > 1)
 			{
-				// 크리티컬 판단
-				random_device RD;
-				mt19937 Gen(RD());
-
-				uniform_int_distribution<int> CriticalPointCreate(0, 100);
-				bool IsCritical = false;
-
 				for (CGameObject* Target : Targets)
 				{					
 					int16 CriticalPoint = CriticalPointCreate(Gen);
@@ -824,16 +838,17 @@ void CGameServer::PacketProcReqAttack(int64 SessionID, CMessage* Message)
 						IsCritical = true;
 					}
 
-					CMessage* ResMyAttackOtherPacket = MakePacketResAttack(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectId, AttackType, IsCritical);
+					Target->OnDamaged(MyPlayer, IsCritical ? MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack * 2 : MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack);
+
+					CMessage* ResMyAttackOtherPacket = MakePacketResAttack(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectId, AttackType, IsCritical ? MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack * 2 : MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack, IsCritical);
 					SendPacketAroundSector(Session, ResMyAttackOtherPacket, true);
 					ResMyAttackOtherPacket->Free();
+
+					CMessage* ResChangeHPPacket = MakePacketResChangeHP(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectStatInfo.HP, Target->_GameObjectInfo.ObjectStatInfo.MaxHP);
+					SendPacketAroundSector(Session, ResChangeHPPacket, true);
+					ResChangeHPPacket->Free();
 				}
-			}
-			
-			//// 주위 섹터 들에게 내가 지금 공격하고 있다고 알려줌
-			//CMessage* ResMyAttackOtherPacket = MakePacketResAttack(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, MoveDir, AttackType, IsCritical);
-			//SendPacketAroundSector(Session, ResMyAttackOtherPacket, true);
-			//ResMyAttackOtherPacket->Free();
+			}		
 
 			//if (Targets.size() > 0)
 			//{
@@ -2125,7 +2140,7 @@ CMessage* CGameServer::MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* N
 // int64 AccountId
 // int32 PlayerDBId
 // char Dir
-CMessage* CGameServer::MakePacketResAttack(int64 AccountId, int64 PlayerDBId, int64 TargetId, en_AttackType AttackType, bool IsCritical)
+CMessage* CGameServer::MakePacketResAttack(int64 AccountId, int64 PlayerDBId, int64 TargetId, en_AttackType AttackType, int32 Damage, bool IsCritical)
 {
 	CMessage* ResAttackMessage = CMessage::Alloc();
 	if (ResAttackMessage == nullptr)
@@ -2140,6 +2155,7 @@ CMessage* CGameServer::MakePacketResAttack(int64 AccountId, int64 PlayerDBId, in
 	*ResAttackMessage << PlayerDBId;
 	*ResAttackMessage << TargetId;
 	*ResAttackMessage << (int8)AttackType;
+	*ResAttackMessage << Damage;
 	*ResAttackMessage << IsCritical;
 
 	return ResAttackMessage;
@@ -2148,7 +2164,7 @@ CMessage* CGameServer::MakePacketResAttack(int64 AccountId, int64 PlayerDBId, in
 // int64 AccountId
 // int32 PlayerDBId
 // int32 HP
-CMessage* CGameServer::MakePacketResChangeHP(int64 PlayerDBId, int32 Damage, int32 CurrentHP, int32 MaxHP, bool IsCritical, int32 TargetPositionX, int32 TargetPositionY)
+CMessage* CGameServer::MakePacketResChangeHP(int64 ObjectId, int32 CurrentHP, int32 MaxHP)
 {
 	CMessage* ResChangeHPPacket = CMessage::Alloc();
 	if (ResChangeHPPacket == nullptr)
@@ -2159,14 +2175,10 @@ CMessage* CGameServer::MakePacketResChangeHP(int64 PlayerDBId, int32 Damage, int
 	ResChangeHPPacket->Clear();
 
 	*ResChangeHPPacket << (WORD)en_PACKET_S2C_CHANGE_HP;
-	*ResChangeHPPacket << PlayerDBId;
-
-	*ResChangeHPPacket << Damage;
+	*ResChangeHPPacket << ObjectId;
+		
 	*ResChangeHPPacket << CurrentHP;
-	*ResChangeHPPacket << MaxHP;
-	*ResChangeHPPacket << IsCritical;
-	*ResChangeHPPacket << TargetPositionX;
-	*ResChangeHPPacket << TargetPositionY;
+	*ResChangeHPPacket << MaxHP;	
 
 	return ResChangeHPPacket;
 }
