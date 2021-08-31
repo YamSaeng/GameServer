@@ -43,11 +43,7 @@
     <Column name="PlayerDBId" type="BigInt" notnull="true"/>
     <Column name="GoldCoin" type="BigInt" notnull="true"/>
     <Column name="SliverCoin" type="TinyInt" notnull="true"/>
-    <Column name="BronzeCoin" type="TinyInt" notnull="true"/>
-    <Index type="clustered">
-      <PrimaryKey/>
-      <Column name="AccountDBId"/>
-    </Index>
+    <Column name="BronzeCoin" type="TinyInt" notnull="true"/>    
   </Table>
   
   <Procedure name="spGetPlayers">
