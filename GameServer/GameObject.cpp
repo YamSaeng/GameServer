@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "GameObject.h"
+#include "ObjectManager.h"
 
 CGameObject::CGameObject()
 {
@@ -120,4 +121,56 @@ en_MoveDir CGameObject::GetDirectionFromVector(st_Vector2Int DirectionVector)
 	{
 		return en_MoveDir::DOWN;
 	}
+}
+
+void CGameObject::BroadCastPacket(en_PACKET_TYPE PacketType)
+{
+	CMessage* ResPacket = nullptr;
+
+	switch (PacketType)
+	{
+	case en_PACKET_TYPE::en_PACKET_S2C_MOVE:
+		ResPacket = G_ObjectManager->GameServer->MakePacketResMove((int64)-1, _GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType, _GameObjectInfo.ObjectPositionInfo);
+		break;
+	case en_PACKET_TYPE::en_PACKET_S2C_OBJECT_STATE_CHANGE:
+		ResPacket = G_ObjectManager->GameServer->MakePacketResObjectState(_GameObjectInfo.ObjectId,
+			_GameObjectInfo.ObjectPositionInfo.MoveDir,
+			_GameObjectInfo.ObjectType,
+			_GameObjectInfo.ObjectPositionInfo.State);
+		break;
+	case en_PACKET_TYPE::en_PACKET_S2C_ATTACK:
+		ResPacket = G_ObjectManager->GameServer->MakePacketResAttack(_GameObjectInfo.ObjectId, _Target->_GameObjectInfo.ObjectId, en_AttackType::BEAR_NORMAL_ATTACK, _GameObjectInfo.ObjectStatInfo.Attack, false);
+		break;
+	case en_PACKET_TYPE::en_PACKET_S2C_MAGIC_ATTACK:
+		ResPacket = G_ObjectManager->GameServer->MakePacketResMagic(_GameObjectInfo.ObjectId);
+		break;
+	case en_PACKET_TYPE::en_PACKET_S2C_CHANGE_HP:
+		ResPacket = G_ObjectManager->GameServer->MakePacketResChangeHP(_Target->_GameObjectInfo.ObjectId,
+			_Target->_GameObjectInfo.ObjectStatInfo.HP,
+			_Target->_GameObjectInfo.ObjectStatInfo.MaxHP);
+		break;
+	case en_PACKET_TYPE::en_PACKET_S2C_DIE:
+		ResPacket = G_ObjectManager->GameServer->MakePacketResDie(this->_GameObjectInfo.ObjectId);
+		break;
+	case en_PACKET_TYPE::en_PACKET_S2C_SPAWN:
+	{
+		vector<st_GameObjectInfo> SpawnObjectIds;
+		SpawnObjectIds.push_back(_GameObjectInfo);
+		ResPacket = G_ObjectManager->GameServer->MakePacketResSpawn(1, SpawnObjectIds);
+	}
+	break;
+	case en_PACKET_TYPE::en_PACKET_S2C_DESPAWN:
+	{
+		vector<int64> DeSpawnObjectIds;
+		DeSpawnObjectIds.push_back(_GameObjectInfo.ObjectId);
+		ResPacket = G_ObjectManager->GameServer->MakePacketResDeSpawn(1, DeSpawnObjectIds);
+	}
+	break;	
+	default:
+		CRASH("Monster BroadCast PacketType Error");
+		break;
+	}
+
+	G_ObjectManager->GameServer->SendPacketAroundSector(this->GetCellPosition(), ResPacket);
+	ResPacket->Free();
 }

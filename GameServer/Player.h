@@ -6,6 +6,7 @@ class CPlayer : public CGameObject
 {
 public:	
 	uint64 _AttackTick;
+	en_AttackType _AttackType;
 
 	int64 _SessionId;
 	int64 _AccountId;
@@ -20,9 +21,11 @@ public:
 
 	virtual void OnDamaged(CGameObject* Attacker, int32 Damage) override;
 	virtual void OnDead(CGameObject* Killer) override;	
+
+	void SetAttackMeleeType(en_AttackType AttackType, vector<CGameObject*> Targets);
+	void SetAttackMagicType(en_AttackType AttackType, vector<CGameObject*> Targets);
 protected:
 	virtual void UpdateAttack();
-private:
-	void BroadCastPacket(en_PACKET_TYPE PacketType);
+	virtual void UpdateSpell();
 };
 

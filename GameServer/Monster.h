@@ -7,11 +7,6 @@ class CPlayer;
 class CMonster : public CGameObject
 {
 protected:
-	//---------------
-	// 타겟
-	//---------------
-	CPlayer* _Target;
-
 	//--------------------------
 	// Idle 상태에서 Search 거리
 	//--------------------------	
@@ -72,7 +67,5 @@ public:
 
 	virtual void Update() override;
 	virtual void OnDamaged(CGameObject* Attacker, int32 Damage) override;
-
-	void BroadCastPacket(en_PACKET_TYPE PacketType);
 };
 

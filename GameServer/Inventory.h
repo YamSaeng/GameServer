@@ -2,7 +2,7 @@
 #include "Item.h"
 #include "LockFreeStack.h"
 
-#define INVENTORY_SIZE 20
+#define INVENTORY_SIZE 30
 
 class CInventory
 {

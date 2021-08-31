@@ -151,7 +151,15 @@ void CSlime::UpdateAttack()
 
 		// 0.8초마다 공격
 		_AttackTick = GetTickCount64() + 800;
-		BroadCastPacket(en_PACKET_S2C_MESSAGE);
+		
+		wchar_t SlimeAttackMessage[64] = L"0";
+		wsprintf(SlimeAttackMessage, L"%s이 일반 공격을 사용해 %s에게 %d의 데미지를 줬습니다", _GameObjectInfo.ObjectName.c_str(), _Target->_GameObjectInfo.ObjectName.c_str(), _GameObjectInfo.ObjectStatInfo.Attack);
+		
+		wstring SlimeAttackString = SlimeAttackMessage;
+
+		CMessage* ResSlimeSystemMessage = G_ObjectManager->GameServer->MakePacketResChattingMessage(_Target->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, SlimeAttackString);
+		G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResSlimeSystemMessage);
+		ResSlimeSystemMessage->Free();
 	}
 
 	if (_AttackTick > GetTickCount64())

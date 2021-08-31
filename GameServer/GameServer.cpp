@@ -46,8 +46,8 @@ void CGameServer::Start(const WCHAR* OpenIP, int32 Port)
 {
 	CNetworkLib::Start(OpenIP, Port);
 
-	//G_ObjectManager->MonsterSpawn(200, 1, en_GameObjectType::SLIME);
-	//G_ObjectManager->MonsterSpawn(200, 1, en_GameObjectType::BEAR);
+	G_ObjectManager->MonsterSpawn(200, 1, en_GameObjectType::SLIME);
+	G_ObjectManager->MonsterSpawn(50, 1, en_GameObjectType::BEAR);
 
 	G_ObjectManager->GameServer = this;
 
@@ -269,7 +269,10 @@ void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 		PacketProcReqMove(SessionId, Message);
 		break;
 	case en_PACKET_C2S_ATTACK:
-		PacketProcReqAttack(SessionId, Message);
+		PacketProcReqMeleeAttack(SessionId, Message);
+		break;
+	case en_PACKET_C2S_MAGIC_ATTACK:
+		PacketProcReqMagic(SessionId, Message);
 		break;
 	case en_PACKET_C2S_MOUSE_POSITION_OBJECT_INFO:
 		PacketProcReqMousePositionObjectInfo(SessionId, Message);
@@ -644,7 +647,7 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 // int64 AccountId
 // int32 PlayerDBId
 // char Dir
-void CGameServer::PacketProcReqAttack(int64 SessionID, CMessage* Message)
+void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 {
 	st_SESSION* Session = FindSession(SessionID);
 
@@ -710,29 +713,17 @@ void CGameServer::PacketProcReqAttack(int64 SessionID, CMessage* Message)
 			// 공격 방향 캐스팅
 			en_MoveDir MoveDir = (en_MoveDir)ReqMoveDir;
 			MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = MoveDir;
-
-			// 공격 종류 캐스팅
-			en_AttackRange AttackRange = (en_AttackRange)ReqAttackRange;
-
-			st_Vector2Int FrontCell;
-			vector<CGameObject*> Targets;
 			
-			en_AttackType AttackType = (en_AttackType)ReqAttackType;
+			st_Vector2Int FrontCell;
+			vector<CGameObject*> Targets;			
 
-			switch (AttackRange)
+			// 공격종류 확인
+			switch ((en_AttackRange)ReqAttackRange)
 			{
 			case en_AttackRange::NORMAL_ATTACK:
-			{				
-				FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, Distance);
-				CGameObject* Target = MyPlayer->_Channel->_Map->Find(FrontCell);
-				if (Target != nullptr)
-				{
-					Targets.push_back(Target);
-				}
-			}
-				break;
 			case en_AttackRange::FORWARD_ATTACK:
-			{				
+			case en_AttackRange::MAGIC_ATTACK:
+			{
 				FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, Distance);
 				CGameObject* Target = MyPlayer->_Channel->_Map->Find(FrontCell);
 				if (Target != nullptr)
@@ -758,121 +749,125 @@ void CGameServer::PacketProcReqAttack(int64 SessionID, CMessage* Message)
 			break;
 			}
 
-			// 0.5 초후에 Idle 상태로 변경
-			MyPlayer->_AttackTick = GetTickCount64() + 500;
-			MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;
-			
-			// 공격 상태로 바뀌었다고 주위 섹터 플레이어들에게 알림
-			CMessage* ResMyAttacStateChangePacket = MakePacketResObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
-			SendPacketAroundSector(Session, ResMyAttacStateChangePacket, true);
-			ResMyAttacStateChangePacket->Free();
-			
-			// 크리티컬 판단 준비
-			random_device RD;
-			mt19937 Gen(RD());
-
-			uniform_int_distribution<int> CriticalPointCreate(0, 100);
-			bool IsCritical = false;
-
-			// 타겟이 1개 있으면
-			if (Targets.size() == 1)
-			{
-				st_Vector2Int FrontCellPosition;
-				CMessage* ResSyncPosition = nullptr;
-
-				switch (AttackType)
-				{				
-				case PLAYER_NORMAL_ATTACK:
-					break;
-				case PLAYER_CHOHONE_ATTACK:
-					// 내 앞쪽 위치를 구한다.
-					FrontCellPosition = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
-					// 타겟을 내 앞쪽 위치로 이동시킨다.
-					MyPlayer->_Channel->_Map->ApplyMove(Targets[0], FrontCellPosition);
-
-					// 타겟의 위치를 조정하기 위해 SyncPosition 패킷을 보낸다.
-					ResSyncPosition = MakePacketResSyncPosition(Targets[0]->_GameObjectInfo.ObjectId, Targets[0]->_GameObjectInfo.ObjectPositionInfo);
-					SendPacketAroundSector(Session, ResSyncPosition, true);
-					ResSyncPosition->Free();
-					break;				
-				case PLAYER_SHAEHONE_ATTACK:
-					// 내 앞쪽 3칸 위치를 구한다.
-					FrontCellPosition = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 3);
-					// 나를 3칸 앞으로 이동시킨다.
-					MyPlayer->_Channel->_Map->ApplyMove(MyPlayer, FrontCellPosition);
-
-					// 나의 위치를 조정하기 위해 SyncPosition 패킷을 보낸다.
-					ResSyncPosition = MakePacketResSyncPosition(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
-					SendPacketAroundSector(Session, ResSyncPosition,true);
-					ResSyncPosition->Free();
-					break;
-				}					
-
-				int16 CriticalPoint = CriticalPointCreate(Gen);
-
-				// 내 캐릭터의 크리티컬 포인트보다 값이 작으면 크리티컬로 판단한다.				
-				if (CriticalPoint < MyPlayer->_GameObjectInfo.ObjectStatInfo.CriticalPoint)
-				{
-					IsCritical = true;
-				}
-
-				Targets[0]->OnDamaged(MyPlayer, IsCritical ? MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack * 2 : MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack);
-
-				CMessage* ResMyAttackOtherPacket = MakePacketResAttack(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, Targets[0]->_GameObjectInfo.ObjectId, AttackType, IsCritical ? MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack * 2 : MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack, IsCritical);
-				SendPacketAroundSector(Session, ResMyAttackOtherPacket, true);
-				ResMyAttackOtherPacket->Free();
-
-				CMessage* ResChangeHPPacket = MakePacketResChangeHP(Targets[0]->_GameObjectInfo.ObjectId, Targets[0]->_GameObjectInfo.ObjectStatInfo.HP, Targets[0]->_GameObjectInfo.ObjectStatInfo.MaxHP);
-				SendPacketAroundSector(Session, ResChangeHPPacket, true);
-				ResChangeHPPacket->Free();
-			}
-			else if (Targets.size() > 1)
-			{
-				for (CGameObject* Target : Targets)
-				{					
-					int16 CriticalPoint = CriticalPointCreate(Gen);
-
-					// 내 캐릭터의 크리티컬 포인트보다 값이 작으면 크리티컬로 판단한다.				
-					if (CriticalPoint < MyPlayer->_GameObjectInfo.ObjectStatInfo.CriticalPoint)
-					{
-						IsCritical = true;
-					}
-
-					Target->OnDamaged(MyPlayer, IsCritical ? MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack * 2 : MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack);
-
-					CMessage* ResMyAttackOtherPacket = MakePacketResAttack(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectId, AttackType, IsCritical ? MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack * 2 : MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack, IsCritical);
-					SendPacketAroundSector(Session, ResMyAttackOtherPacket, true);
-					ResMyAttackOtherPacket->Free();
-
-					CMessage* ResChangeHPPacket = MakePacketResChangeHP(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectStatInfo.HP, Target->_GameObjectInfo.ObjectStatInfo.MaxHP);
-					SendPacketAroundSector(Session, ResChangeHPPacket, true);
-					ResChangeHPPacket->Free();
-				}
+			switch ((en_AttackType)ReqAttackType)
+			{			
+			case MELEE_PLAYER_NORMAL_ATTACK:
+			case MELEE_PLAYER_CHOHONE_ATTACK:
+			case MELEE_PLAYER_SHAEHONE_ATTACK:
+			case MELEE_PLAYER_RANGE_ATTACK:
+			case MAGIC_PLAYER_NORMAL_ATTACK:
+				MyPlayer->SetAttackMeleeType((en_AttackType)ReqAttackType, Targets);
+				break;			
+			default:
+				CRASH("ReqAttack AttackType Error");
+				break;
 			}		
-
-			//if (Targets.size() > 0)
-			//{
-			//	for (CGameObject* Target : Targets)
-			//	{
-			//		st_Vector2Int PreviousTargetPosition = Target->GetCellPosition();
-			//		Target->OnDamaged(MyPlayer, IsCritical ? MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack * 2 : MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack);
-
-			//		CMessage* ResChangeHPPacket = MakePacketResChangeHP(Target->_GameObjectInfo.ObjectId,
-			//			IsCritical ? MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack * 2 : MyPlayer->_GameObjectInfo.ObjectStatInfo.Attack,
-			//			Target->_GameObjectInfo.ObjectStatInfo.HP,
-			//			Target->_GameObjectInfo.ObjectStatInfo.MaxHP,
-			//			IsCritical,
-			//			PreviousTargetPosition._X,
-			//			PreviousTargetPosition._Y
-			//		);
-			//		SendPacketAroundSector(Session, ResChangeHPPacket, true);
-			//		ResChangeHPPacket->Free();
-			//	}
-			//}
 		}
 	} while (0);	
 
 	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
+{
+	st_SESSION* Session = FindSession(SessionId);
+
+	if (Session)
+	{
+		do
+		{
+			int64 AccountId;
+			int32 ObjectId;
+
+			// 로그인중인지 확인
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountId;
+
+			// AccountId 확인
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> ObjectId;
+
+			// 조종하고 잇는 캐릭이 있는지 확인
+			if (Session->MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				// 조종하고 있는 캐릭의 ObjectId와 클라가 전송한 ObjectId가 같은지 확인
+				if (Session->MyPlayer->_GameObjectInfo.ObjectId != ObjectId)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			CPlayer* MyPlayer = Session->MyPlayer;
+
+			// 공격한 방향
+			int8 ReqMoveDir;
+			*Message >> ReqMoveDir;
+
+			// 공격 종류
+			int16 ReqAttackRange;
+			*Message >> ReqAttackRange;
+
+			// 공격 타입
+			int16 ReqAttackType;
+			*Message >> ReqAttackType;
+
+			// 공격 거리
+			int8 Distance;
+			*Message >> Distance;
+
+			// 타겟 ObjectId
+			int64 TargetObjectId;
+			*Message >> TargetObjectId;
+			
+			vector<CGameObject*> Targets;
+			
+			// 공격 종류 확인
+			switch ((en_AttackRange)ReqAttackRange)
+			{
+			case en_AttackRange::MAGIC_ATTACK:
+				// 타겟이 ObjectManager에 존재하는지 확인
+				CPlayer* FindGameObject = (CPlayer*)G_ObjectManager->Find(TargetObjectId, en_GameObjectType::MELEE_PLAYER);
+				if (FindGameObject != nullptr)
+				{
+					Targets.push_back(FindGameObject);
+				}
+				else
+				{
+					// 타겟을 찾을 수 없음
+				}				
+				break;
+			}
+
+			// 공격 타입 확인하고 공격 타입 셋팅
+			switch ((en_AttackType)ReqAttackType)
+			{			
+			case MAGIC_PLAYER_FIRE_ATTACK:
+				MyPlayer->SetAttackMagicType((en_AttackType)ReqAttackType, Targets);
+				break;
+			default:
+				CRASH("ReqAttack AttackType Error");
+				break;
+			}
+		} while (0);
+
+		ReturnSession(Session);
+	}	
 }
 
 // int64 AccountId
@@ -997,6 +992,8 @@ void CGameServer::PacketProcReqObjectStateChange(int64 SessionId, CMessage* Mess
 
 			*Message >> StateChange;
 
+			CMessage* ResObjectStatePakcet = nullptr;
+
 			switch ((en_StateChange)StateChange)
 			{
 			case MOVE_TO_STOP:
@@ -1004,9 +1001,25 @@ void CGameServer::PacketProcReqObjectStateChange(int64 SessionId, CMessage* Mess
 				{
 					Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
-					CMessage* ResMoveStopPakcet = MakePacketResObjectState(Session->MyPlayer->_GameObjectInfo.ObjectId, Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, Session->MyPlayer->_GameObjectInfo.ObjectType, Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
-					SendPacketAroundSector(Session, ResMoveStopPakcet, true);
-					ResMoveStopPakcet->Free();
+					ResObjectStatePakcet = MakePacketResObjectState(Session->MyPlayer->_GameObjectInfo.ObjectId, Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, Session->MyPlayer->_GameObjectInfo.ObjectType, Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
+					SendPacketAroundSector(Session, ResObjectStatePakcet, true);
+					ResObjectStatePakcet->Free();
+				}
+				else
+				{
+					Disconnect(Session->SessionId);
+					goto error;
+				}
+				break;
+			case en_StateChange::SPELL_TO_IDLE:
+				if (Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::ATTACK
+					|| Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::SPELL)
+				{
+					Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+
+					ResObjectStatePakcet = MakePacketResObjectState(Session->MyPlayer->_GameObjectInfo.ObjectId, Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, Session->MyPlayer->_GameObjectInfo.ObjectType, Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
+					SendPacketAroundSector(Session, ResObjectStatePakcet, true);
+					ResObjectStatePakcet->Free();
 				}
 				else
 				{
@@ -1134,13 +1147,15 @@ void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Messag
 			// 아이템이 ObjectManager에 있는지 확인한다.
 			CItem* Item = (CItem*)(G_ObjectManager->Find(ItemId, (en_GameObjectType)ObjectType));			
 			if (Item != nullptr)
-			{
+			{				
 				int64 TargetObjectId;
-
 				*Message >> TargetObjectId;
+			
+				int8 TargetObjectType;
+				*Message >> TargetObjectType;
 
 				// 수정 해야함 Magic Player어 경우에도 받을 수 잇또록
-				CPlayer* TargetPlayer = (CPlayer*)(G_ObjectManager->Find(TargetObjectId, en_GameObjectType::MELEE_PLAYER));
+				CPlayer* TargetPlayer = (CPlayer*)(G_ObjectManager->Find(TargetObjectId, (en_GameObjectType)TargetObjectType));
 				if (TargetPlayer == nullptr)
 				{
 					break;
@@ -1507,8 +1522,8 @@ void CGameServer::PacketProcReqAccountCheck(int64 SessionID, CMessage* Message)
 
 void CGameServer::PacketProcReqCreateCharacterNameCheck(int64 SessionID, CMessage* Message)
 {
-	int64 PlayerDBId;
-
+	int64 PlayerDBId = 0;
+	
 	st_SESSION* Session = FindSession(SessionID);
 	
 	if (Session)
@@ -1599,8 +1614,8 @@ void CGameServer::PacketProcReqCreateCharacterNameCheck(int64 SessionID, CMessag
 			// Gold Table 생성
 			CDBConnection* DBGoldTableCreateConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 			SP::CDBGameServerGoldTableCreatePush GoldTableCreate(*DBGoldTableCreateConnection);
-			GoldTableCreate.InAccountDBId(Session->MyPlayers[0]->_AccountId);
-			GoldTableCreate.InPlayerDBId(Session->MyPlayers[0]->_GameObjectInfo.ObjectId);
+			GoldTableCreate.InAccountDBId(Session->MyPlayers[ReqCharacterCreateSlotIndex]->_AccountId);
+			GoldTableCreate.InPlayerDBId(Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectId);
 
 			GoldTableCreate.Execute();
 
@@ -1791,8 +1806,8 @@ void CGameServer::PacketProcReqCharacterInfoSend(int64 SessionId, CMessage* Mess
 		// 캐릭터가 소유하고 있었던 골드 정보를 GoldTable에서 읽어온다.
 		CDBConnection* DBCharacterGoldGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 		SP::CDBGameServerGoldGet CharacterGoldGet(*DBCharacterGoldGetConnection);
-		CharacterGoldGet.InAccountDBId(Session->MyPlayers[0]->_AccountId);
-		CharacterGoldGet.InPlayerDBId(Session->MyPlayers[0]->_GameObjectInfo.ObjectId);
+		CharacterGoldGet.InAccountDBId(Session->MyPlayer->_AccountId);
+		CharacterGoldGet.InPlayerDBId(Session->MyPlayer->_GameObjectInfo.ObjectId);
 
 		CharacterGoldGet.OutGoldCoin(GoldCoin);
 		CharacterGoldGet.OutSliverCoin(SliverCoin);
@@ -1803,15 +1818,15 @@ void CGameServer::PacketProcReqCharacterInfoSend(int64 SessionId, CMessage* Mess
 		if (CharacterGoldGet.Fetch())
 		{
 			// DB에서 읽어온 Gold를 Inventory에 저장한다.
-			Session->MyPlayers[0]->_Inventory._GoldCoinCount = GoldCoin;
-			Session->MyPlayers[0]->_Inventory._SliverCoinCount = SliverCoin;
-			Session->MyPlayers[0]->_Inventory._BronzeCoinCount = BronzeCoin;
+			Session->MyPlayer->_Inventory._GoldCoinCount = GoldCoin;
+			Session->MyPlayer->_Inventory._SliverCoinCount = SliverCoin;
+			Session->MyPlayer->_Inventory._BronzeCoinCount = BronzeCoin;
 
 			// DBConnection 반납하고
 			G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterGoldGetConnection);
 						
 			// 클라에게 골드 정보를 보내준다.
-			CMessage* ResGoldSaveMeesage = MakePacketGoldSave(Session->MyPlayers[0]->_AccountId, Session->MyPlayers[0]->_GameObjectInfo.ObjectId, GoldCoin, SliverCoin, BronzeCoin);
+			CMessage* ResGoldSaveMeesage = MakePacketGoldSave(Session->MyPlayer->_AccountId, Session->MyPlayer->_GameObjectInfo.ObjectId, GoldCoin, SliverCoin, BronzeCoin);
 			SendPacket(Session->SessionId, ResGoldSaveMeesage);
 			ResGoldSaveMeesage->Free();
 		}		
@@ -1819,8 +1834,8 @@ void CGameServer::PacketProcReqCharacterInfoSend(int64 SessionId, CMessage* Mess
 		// 캐릭터가 소유하고 있었던 Item 정보를 ItemTable에서 읽어온다.
 		CDBConnection* DBCharacterInventoryItemGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);		
 		SP::CDBGameServerInventoryItemGet CharacterInventoryItemGet(*DBCharacterInventoryItemGetConnection);
-		CharacterInventoryItemGet.InAccountDBId(Session->MyPlayers[0]->_AccountId);
-		CharacterInventoryItemGet.InPlayerDBId(Session->MyPlayers[0]->_GameObjectInfo.ObjectId);
+		CharacterInventoryItemGet.InAccountDBId(Session->MyPlayer->_AccountId);
+		CharacterInventoryItemGet.InPlayerDBId(Session->MyPlayer->_GameObjectInfo.ObjectId);
 
 		int16 DataSheetId;
 		int16 ItemType;
@@ -2140,7 +2155,7 @@ CMessage* CGameServer::MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* N
 // int64 AccountId
 // int32 PlayerDBId
 // char Dir
-CMessage* CGameServer::MakePacketResAttack(int64 AccountId, int64 PlayerDBId, int64 TargetId, en_AttackType AttackType, int32 Damage, bool IsCritical)
+CMessage* CGameServer::MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_AttackType AttackType, int32 Damage, bool IsCritical)
 {
 	CMessage* ResAttackMessage = CMessage::Alloc();
 	if (ResAttackMessage == nullptr)
@@ -2151,7 +2166,6 @@ CMessage* CGameServer::MakePacketResAttack(int64 AccountId, int64 PlayerDBId, in
 	ResAttackMessage->Clear();
 
 	*ResAttackMessage << (WORD)en_PACKET_S2C_ATTACK;
-	*ResAttackMessage << AccountId;
 	*ResAttackMessage << PlayerDBId;
 	*ResAttackMessage << TargetId;
 	*ResAttackMessage << (int8)AttackType;
@@ -2159,6 +2173,22 @@ CMessage* CGameServer::MakePacketResAttack(int64 AccountId, int64 PlayerDBId, in
 	*ResAttackMessage << IsCritical;
 
 	return ResAttackMessage;
+}
+
+CMessage* CGameServer::MakePacketResMagic(int64 ObjectId)
+{
+	CMessage* ResMagicMessage = CMessage::Alloc();
+	if (ResMagicMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResMagicMessage->Clear();
+
+	*ResMagicMessage << (WORD)en_PACKET_S2C_MAGIC_ATTACK;
+	*ResMagicMessage << ObjectId;
+
+	return ResMagicMessage;
 }
 
 // int64 AccountId

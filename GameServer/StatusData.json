@@ -9,9 +9,9 @@
     },
     {
       "Level": 2,
-      "MaxHP": 250,
-      "Attack": 25,
-      "CriticalPoint": 25,
+      "MaxHP": 300,
+      "Attack": 10,
+      "CriticalPoint": 30,
       "Speed": 6.0
     },
     {

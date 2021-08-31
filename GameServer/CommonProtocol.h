@@ -184,6 +184,24 @@ enum en_PACKET_TYPE
 	en_PACKET_S2C_ATTACK,
 	
 	//------------------------------------------------------------
+	// 게임서버 캐릭터 마법 요청
+	// int64 AccountId
+	// int64 PlayerDBId
+	// int8 Dir
+	// en_AttackRange RangeAttack;
+	// int8 RangeDitance;
+	//------------------------------------------------------------
+	en_PACKET_C2S_MAGIC_ATTACK,
+	
+	//------------------------------------------------------------
+	// 게임서버 캐릭터 마법 요청 응답
+	// int64 AccountId
+	// int64 PlayerDBId
+	// int8 Dir	
+	//------------------------------------------------------------
+	en_PACKET_S2C_MAGIC_ATTACK,
+
+	//------------------------------------------------------------
 	// 게임서버 캐릭터 스폰
 	// int64 AccountId
 	// int32 PlayerDBId
@@ -264,10 +282,9 @@ enum en_PACKET_TYPE
 	// 게임서버 아이템 인벤토리 저장 요청
 	// int64 AccountId
 	// int64 ObjectId
-	// int8 ObjectType
-	// int32 ObjectPositionX
-	// int32 ObjectPositionY
+	// int8 ObjectType	
 	// int64 TargetObjectId
+	// int8 TargetObjectType
 	//------------------------------------------------------------
 	en_PACKET_C2S_ITEM_TO_INVENTORY,
     

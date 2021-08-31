@@ -61,7 +61,8 @@ private:
 	void PacketProcReqCreateCharacter(int64 SessionID, CMessage* Message);
 	void PacketProcReqEnterGame(int64 SessionID, CMessage* Message);
 	void PacketProcReqMove(int64 SessionID, CMessage* Message);
-	void PacketProcReqAttack(int64 SessionID, CMessage* Message);
+	void PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message);
+	void PacketProcReqMagic(int64 SessionId, CMessage* Message);
 	void PacketProcReqMousePositionObjectInfo(int64 SessionID, CMessage* Message);
 	void PacketProcReqObjectStateChange(int64 SessionId, CMessage* Message);
 	void PacketProcReqChattingMessage(int64 SessionId, CMessage* Message);
@@ -104,7 +105,8 @@ private:
 	CMessage* MakePacketGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int8 SliverCount, int8 BronzeCount);
 	CMessage* MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* NickName, WORD MessageLen, WCHAR* Message);
 public:
-	CMessage* MakePacketResAttack(int64 AccountId, int64 PlayerDBId, int64 TargetId, en_AttackType AttackType, int32 Damage, bool IsCritical);
+	CMessage* MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_AttackType AttackType, int32 Damage, bool IsCritical);
+	CMessage* MakePacketResMagic(int64 ObjectId);
 	CMessage* MakePacketResChangeHP(int64 ObjectId, int32 CurrentHP, int32 MaxHP);
 	CMessage* MakePacketResObjectState(int64 ObjectId, en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState);
 	CMessage* MakePacketResMove(int64 AccountId, int64 ObjectId, en_GameObjectType ObjectType, st_PositionInfo PositionInfo);

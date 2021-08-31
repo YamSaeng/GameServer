@@ -7,7 +7,6 @@
 class CGameObject
 {
 private:
-protected:	
 public:
 	en_ObjectNetworkState _NetworkState;
 	st_GameObjectInfo _GameObjectInfo;
@@ -36,5 +35,14 @@ public:
 	vector<st_Vector2Int> GetAroundCellPosition(st_Vector2Int CellPosition, int8 Distance);
 
 	en_MoveDir GetDirectionFromVector(st_Vector2Int DirectionVector);
+
+protected:
+	//---------------
+	// Å¸°Ù
+	//---------------
+	vector<CGameObject*> _Targets;
+	CGameObject* _Target;
+
+	void BroadCastPacket(en_PACKET_TYPE PacketType);
 };
 
