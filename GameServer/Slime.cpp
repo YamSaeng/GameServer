@@ -157,7 +157,7 @@ void CSlime::UpdateAttack()
 		
 		wstring SlimeAttackString = SlimeAttackMessage;
 
-		CMessage* ResSlimeSystemMessage = G_ObjectManager->GameServer->MakePacketResChattingMessage(_Target->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, SlimeAttackString);
+		CMessage* ResSlimeSystemMessage = G_ObjectManager->GameServer->MakePacketResChattingMessage(_Target->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, st_Color::Red(), SlimeAttackString);
 		G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResSlimeSystemMessage);
 		ResSlimeSystemMessage->Free();
 	}

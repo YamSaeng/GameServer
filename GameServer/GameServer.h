@@ -113,8 +113,8 @@ public:
 	CMessage* MakePacketResSpawn(int32 ObjectInfosCount, vector<st_GameObjectInfo> ObjectInfos);
 	CMessage* MakePacketResDeSpawn(int32 DeSpawnObjectCount, vector<int64> DeSpawnObjectIds);
 	CMessage* MakePacketResDie(int64 DieObjectId);
-	CMessage* MakePacketResChattingMessage(int64 PlayerDBId, en_MessageType MessageType, wstring ChattingMessage);
-	CMessage* MakePacketResItemToInventory(int64 TargetObjectId, st_ItemInfo ItemInfo);
+	CMessage* MakePacketResChattingMessage(int64 PlayerDBId, en_MessageType MessageType, st_Color Color, wstring ChattingMessage);
+	CMessage* MakePacketResItemToInventory(int64 TargetObjectId, st_ItemInfo ItemInfo,int16 ItemEach, bool ItemGainPrint = true);
 	CMessage* MakePacketResSyncPosition(int64 TargetObjectId, st_PositionInfo SyncPosition);
 public:
 	//------------------------------------

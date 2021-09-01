@@ -86,12 +86,12 @@ void CPlayer::SetAttackMeleeType(en_AttackType AttackType, vector<CGameObject*> 
 
 		switch (_AttackType)
 		{
-		case MELEE_PLAYER_NORMAL_ATTACK:
-		case MAGIC_PLAYER_NORMAL_ATTACK:
+		case en_AttackType::MELEE_PLAYER_NORMAL_ATTACK:
+		case en_AttackType::MAGIC_PLAYER_NORMAL_ATTACK:
 			wsprintf(AttackTypeMessage, L"%s가 일반공격을 사용해 %s를 ", _GameObjectInfo.ObjectName.c_str(), _Targets[0]->_GameObjectInfo.ObjectName.c_str());
 			AttackTypeString = AttackTypeMessage;
 			break;
-		case MELEE_PLAYER_CHOHONE_ATTACK:
+		case en_AttackType::MELEE_PLAYER_CHOHONE_ATTACK:
 			wsprintf(AttackTypeMessage, L"%s가 초혼비무를 사용해 %s를 ", _GameObjectInfo.ObjectName.c_str(), _Targets[0]->_GameObjectInfo.ObjectName.c_str());
 			AttackTypeString = AttackTypeMessage;
 			// 내 앞쪽 위치를 구한다.
@@ -104,7 +104,7 @@ void CPlayer::SetAttackMeleeType(en_AttackType AttackType, vector<CGameObject*> 
 			G_ObjectManager->GameServer->SendPacketAroundSector(_Targets[0]->GetCellPosition(), ResSyncPosition);
 			ResSyncPosition->Free();
 			break;
-		case MELEE_PLAYER_SHAEHONE_ATTACK:
+		case en_AttackType::MELEE_PLAYER_SHAEHONE_ATTACK:
 			wsprintf(AttackTypeMessage, L"%s가 쇄혼비무를 사용해 %s를 ", _GameObjectInfo.ObjectName.c_str(), _Targets[0]->_GameObjectInfo.ObjectName.c_str());
 			AttackTypeString = AttackTypeMessage;
 
@@ -115,7 +115,7 @@ void CPlayer::SetAttackMeleeType(en_AttackType AttackType, vector<CGameObject*> 
 			ResSyncPosition = G_ObjectManager->GameServer->MakePacketResSyncPosition(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo);
 			G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResSyncPosition);
 			ResSyncPosition->Free();
-			break;
+			break;		
 		default:
 			CRASH("플레이어 공격 타입 셋팅 Error");
 			break;
@@ -129,7 +129,7 @@ void CPlayer::SetAttackMeleeType(en_AttackType AttackType, vector<CGameObject*> 
 
 		AttackMeleeSystemString = AttackTypeString + AttackDamageString;
 
-		CMessage* ResAttackMeleeSystemMessagePacket = G_ObjectManager->GameServer->MakePacketResChattingMessage(_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, AttackMeleeSystemString);
+		CMessage* ResAttackMeleeSystemMessagePacket = G_ObjectManager->GameServer->MakePacketResChattingMessage(_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, st_Color::Red(), AttackMeleeSystemString);
 		G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResAttackMeleeSystemMessagePacket);
 		ResAttackMeleeSystemMessagePacket->Free();
 
@@ -142,7 +142,7 @@ void CPlayer::SetAttackMeleeType(en_AttackType AttackType, vector<CGameObject*> 
 		ResChangeHPPacket->Free();
 	}	
 	else if (_Targets.size() > 1)
-	{
+	{		
 		for (CGameObject* Target : _Targets)
 		{
 			int16 CriticalPoint = CriticalPointCreate(Gen);
@@ -209,7 +209,7 @@ void CPlayer::UpdateAttack()
 		case en_AttackType::MELEE_PLAYER_NORMAL_ATTACK:			
 		case en_AttackType::MELEE_PLAYER_CHOHONE_ATTACK:			
 		case en_AttackType::MELEE_PLAYER_SHAEHONE_ATTACK:			
-		case en_AttackType::MELEE_PLAYER_RANGE_ATTACK:
+		case en_AttackType::MELEE_PLAYER_AROUND_ATTACK:
 		case en_AttackType::MAGIC_PLAYER_NORMAL_ATTACK:
 			// Idle 상태로 바꾸고 주위 섹터 플레이어들에게 알려준다.
 			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
@@ -283,7 +283,7 @@ void CPlayer::UpdateSpell()
 
 		AttackMagicSystemString = AttackTypeMessage + AttackDamageString;
 
-		CMessage* ResAttackMagicSystemMessagePacket = G_ObjectManager->GameServer->MakePacketResChattingMessage(_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, AttackMagicSystemString);
+		CMessage* ResAttackMagicSystemMessagePacket = G_ObjectManager->GameServer->MakePacketResChattingMessage(_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, st_Color::Red(), AttackMagicSystemString);
 		G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResAttackMagicSystemMessagePacket);
 		ResAttackMagicSystemMessagePacket->Free();		
 	}

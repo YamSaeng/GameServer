@@ -38,6 +38,11 @@ public:
 	st_Vector2Int _OwnerPosition;
 
 	CItem();
+
+	virtual void Update() override;
+	void SetDestoryTime(int32 DestoryTime);
+protected:
+	int64 _DestroyTime;
 };
 
 class CWeapon : public CItem

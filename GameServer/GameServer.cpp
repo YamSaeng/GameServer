@@ -46,8 +46,8 @@ void CGameServer::Start(const WCHAR* OpenIP, int32 Port)
 {
 	CNetworkLib::Start(OpenIP, Port);
 
-	G_ObjectManager->MonsterSpawn(200, 1, en_GameObjectType::SLIME);
-	G_ObjectManager->MonsterSpawn(50, 1, en_GameObjectType::BEAR);
+	//G_ObjectManager->MonsterSpawn(200, 1, en_GameObjectType::SLIME);
+	G_ObjectManager->MonsterSpawn(30, 1, en_GameObjectType::BEAR);
 
 	G_ObjectManager->GameServer = this;
 
@@ -754,7 +754,7 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 			case MELEE_PLAYER_NORMAL_ATTACK:
 			case MELEE_PLAYER_CHOHONE_ATTACK:
 			case MELEE_PLAYER_SHAEHONE_ATTACK:
-			case MELEE_PLAYER_RANGE_ATTACK:
+			case MELEE_PLAYER_AROUND_ATTACK:
 			case MAGIC_PLAYER_NORMAL_ATTACK:
 				MyPlayer->SetAttackMeleeType((en_AttackType)ReqAttackType, Targets);
 				break;			
@@ -1094,11 +1094,11 @@ void CGameServer::PacketProcReqChattingMessage(int64 SessionId, CMessage* Messag
 		CChannel* Channel = G_ChannelManager->Find(1);
 		// 주위 플레이어 반환
 		vector<CPlayer*> Players = Channel->GetAroundPlayer(Session->MyPlayer, 10, false);
-
+				
 		// 주위 플레이어에게 채팅 메세지 전송
-		for (CPlayer* Player : Players)
-		{
-			CMessage* ResChattingMessage = MakePacketResChattingMessage(PlayerDBId, en_MessageType::CHATTING, ChattingMessage);
+		for (CPlayer* Player : Players)	
+		{			
+			CMessage* ResChattingMessage = MakePacketResChattingMessage(PlayerDBId, en_MessageType::CHATTING, st_Color::White(), ChattingMessage);
 			SendPacket(Player->_SessionId, ResChattingMessage);
 			ResChattingMessage->Free();
 		}
@@ -1153,8 +1153,7 @@ void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Messag
 			
 				int8 TargetObjectType;
 				*Message >> TargetObjectType;
-
-				// 수정 해야함 Magic Player어 경우에도 받을 수 잇또록
+								
 				CPlayer* TargetPlayer = (CPlayer*)(G_ObjectManager->Find(TargetObjectId, (en_GameObjectType)TargetObjectType));
 				if (TargetPlayer == nullptr)
 				{
@@ -1229,6 +1228,8 @@ void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Messag
 					*DBSaveMessage << Item->_ItemInfo.DataSheetId;
 					// 아이템 개수
 					*DBSaveMessage << ItemCount;
+					// 아이템 추가한 개수
+					*DBSaveMessage << (int16)1;
 					// 아이템 슬롯 번호
 					*DBSaveMessage << SlotIndex;
 					// 아이템 착용 여부
@@ -1263,7 +1264,7 @@ void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Messag
 			}
 			else
 			{
-				CRASH("해당 아이템이 G_ObjectManager에 없음");
+				
 			}
 		}
 	} while (0);
@@ -1669,6 +1670,9 @@ void CGameServer::PacketProcReqDBItemToInventorySave(int64 SessionId, CMessage* 
 		int16 ItemCount;
 		*Message >> ItemCount;
 
+		int16 ItemEach;
+		*Message >> ItemEach;
+
 		int8 SlotIndex;
 		*Message >> SlotIndex;
 
@@ -1681,8 +1685,7 @@ void CGameServer::PacketProcReqDBItemToInventorySave(int64 SessionId, CMessage* 
 		int64 OwnerAccountId;
 		*Message >> OwnerAccountId;
 
-		en_ItemType ItemType = (en_ItemType)(ItemTypeValue);			
-		
+		en_ItemType ItemType = (en_ItemType)(ItemTypeValue);	
 
 		CDBConnection* ItemToInventorySaveDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 
@@ -1737,7 +1740,7 @@ void CGameServer::PacketProcReqDBItemToInventorySave(int64 SessionId, CMessage* 
 
 		Message->Free();
 
-		CMessage* ResItemToInventoryPacket = MakePacketResItemToInventory(TargetObjectId, ItemInfo);
+		CMessage* ResItemToInventoryPacket = MakePacketResItemToInventory(TargetObjectId, ItemInfo, ItemEach);
 		SendPacket(Session->SessionId, ResItemToInventoryPacket);
 		ResItemToInventoryPacket->Free();
 	}	
@@ -1897,7 +1900,7 @@ void CGameServer::PacketProcReqCharacterInfoSend(int64 SessionId, CMessage* Mess
 			Session->MyPlayer->_Inventory.GetEmptySlot(&SlotIndex);			
 
 			// 클라에게 아이템 정보를 보내준다.
-			CMessage* ResItemToInventoryPacket = MakePacketResItemToInventory(Session->MyPlayers[0]->_GameObjectInfo.ObjectId, ItemInfo);
+			CMessage* ResItemToInventoryPacket = MakePacketResItemToInventory(Session->MyPlayer->_GameObjectInfo.ObjectId, ItemInfo, ItemInfo.ItemCount, false);
 			SendPacket(Session->SessionId, ResItemToInventoryPacket);
 			ResItemToInventoryPacket->Free();
 		}	
@@ -2359,7 +2362,7 @@ CMessage* CGameServer::MakePacketResDie(int64 DieObjectId)
 
 // int32 PlayerDBId
 // wstring ChattingMessage
-CMessage* CGameServer::MakePacketResChattingMessage(int64 PlayerDBId, en_MessageType MessageType, wstring ChattingMessage)
+CMessage* CGameServer::MakePacketResChattingMessage(int64 PlayerDBId, en_MessageType MessageType, st_Color Color, wstring ChattingMessage)
 {
 	CMessage* ResChattingMessage = CMessage::Alloc();
 	if (ResChattingMessage == nullptr)
@@ -2373,6 +2376,10 @@ CMessage* CGameServer::MakePacketResChattingMessage(int64 PlayerDBId, en_Message
 	*ResChattingMessage << PlayerDBId;
 	*ResChattingMessage << (WORD)MessageType;
 
+	*ResChattingMessage << Color._Red;
+	*ResChattingMessage << Color._Green;
+	*ResChattingMessage << Color._Blue;
+
 	int8 PlayerNameLen = (int8)(ChattingMessage.length() * 2);
 	*ResChattingMessage << PlayerNameLen;
 	ResChattingMessage->InsertData(ChattingMessage.c_str(), PlayerNameLen);
@@ -2380,7 +2387,7 @@ CMessage* CGameServer::MakePacketResChattingMessage(int64 PlayerDBId, en_Message
 	return ResChattingMessage;
 }
 
-CMessage* CGameServer::MakePacketResItemToInventory(int64 TargetObjectId, st_ItemInfo ItemInfo)
+CMessage* CGameServer::MakePacketResItemToInventory(int64 TargetObjectId, st_ItemInfo ItemInfo, int16 ItemEach, bool ItemGainPrint)
 {
 	CMessage* ResItemToInventoryMessage = CMessage::Alloc();
 	if (ResItemToInventoryMessage == nullptr)
@@ -2389,11 +2396,11 @@ CMessage* CGameServer::MakePacketResItemToInventory(int64 TargetObjectId, st_Ite
 	}
 
 	ResItemToInventoryMessage->Clear();
-
+	
 	*ResItemToInventoryMessage << (WORD)en_PACKET_S2C_ITEM_TO_INVENTORY;
 	*ResItemToInventoryMessage << TargetObjectId;
 	*ResItemToInventoryMessage << ItemInfo.ItemDBId;
-	*ResItemToInventoryMessage << ItemInfo.ItemCount;
+	*ResItemToInventoryMessage << ItemInfo.ItemCount;	
 	*ResItemToInventoryMessage << ItemInfo.SlotIndex;
 	*ResItemToInventoryMessage << ItemInfo.IsEquipped;
 	*ResItemToInventoryMessage << (int16)ItemInfo.ItemType;
@@ -2405,6 +2412,9 @@ CMessage* CGameServer::MakePacketResItemToInventory(int64 TargetObjectId, st_Ite
 	int8 ThumbnailImagePathLen = (int)(ItemInfo.ThumbnailImagePath.length() * 2);
 	*ResItemToInventoryMessage << ThumbnailImagePathLen;
 	ResItemToInventoryMessage->InsertData(ItemInfo.ThumbnailImagePath.c_str(), ThumbnailImagePathLen);
+
+	*ResItemToInventoryMessage << ItemEach;
+	*ResItemToInventoryMessage << ItemGainPrint;
 
 	return ResItemToInventoryMessage;
 }

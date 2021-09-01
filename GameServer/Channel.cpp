@@ -211,6 +211,13 @@ void CChannel::Update()
 
 		Player->Update();
 	}
+
+	for (auto ItemIterator : _Items)
+	{
+		CItem* Item = ItemIterator.second;
+
+		Item->Update();
+	}
 }
 
 void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* ObjectSpawnPosition)

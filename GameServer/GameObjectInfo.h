@@ -46,7 +46,7 @@ enum en_AttackType
 	MELEE_PLAYER_NORMAL_ATTACK,
 	MELEE_PLAYER_CHOHONE_ATTACK,
 	MELEE_PLAYER_SHAEHONE_ATTACK,
-	MELEE_PLAYER_RANGE_ATTACK,
+	MELEE_PLAYER_AROUND_ATTACK,
 	MAGIC_PLAYER_NORMAL_ATTACK,
 	MAGIC_PLAYER_FIRE_ATTACK,
 	SLIME_NORMAL_ATTACK,
@@ -63,6 +63,13 @@ enum en_StateChange
 {
 	MOVE_TO_STOP,
 	SPELL_TO_IDLE,
+};
+
+enum en_ObjectNetworkState
+{
+	READY,
+	LIVE,
+	LEAVE
 };
 
 struct st_PositionInfo
@@ -94,9 +101,22 @@ struct st_GameObjectInfo
 	int8 PlayerSlotIndex;
 };
 
-enum en_ObjectNetworkState
+struct st_Color
 {
-	READY,
-	LIVE,
-	LEAVE
+	int8 _Red;
+	int8 _Green;
+	int8 _Blue;
+
+	st_Color() {}
+	st_Color(int8 Red, int8 Green, int8 Blue)
+	{
+		_Red = Red;
+		_Green = Green;
+		_Blue = Blue;
+	}
+
+	static st_Color Red() { return st_Color(127, 0, 0); }
+	static st_Color Green() { return st_Color(0, 127, 0); }
+	static st_Color Blue() { return st_Color(0, 0, 127); }
+	static st_Color White() { return st_Color(127, 127, 127); }
 };

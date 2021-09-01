@@ -158,7 +158,7 @@ void CBear::UpdateAttack()
 
 		wstring BearAttackString = BearAttackMessage;
 
-		CMessage* ResSlimeSystemMessage = G_ObjectManager->GameServer->MakePacketResChattingMessage(_Target->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, BearAttackString);
+		CMessage* ResSlimeSystemMessage = G_ObjectManager->GameServer->MakePacketResChattingMessage(_Target->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, st_Color::Red(), BearAttackString);
 		G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResSlimeSystemMessage);
 		ResSlimeSystemMessage->Free();		
 	}
