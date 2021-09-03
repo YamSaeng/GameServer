@@ -26,12 +26,14 @@
   <Table name="Item" desc="Item Table">
     <Column name="ItemDBId" type="BigInt" notnull="true" identity="1,1"/>
     <Column name="DataSheetId" type="SmallInt" notnull="true"/>
-    <Column name="ItemType" type="SmallInt" notnull="true"/>
     <Column name="ItemCount" type="SmallInt" notnull="true"/>
     <Column name="SlotIndex" type="TinyInt" notnull="true"/>
-    <Column name="OwnerAccountDBId" type="BigInt" notnull="true"/>
-    <Column name="OwnerPlayerDBId" type="BigInt" notnull="true"/>
     <Column name="IsEquipped" type="bit"/>
+    <Column name="ItemType" type="SmallInt" notnull="true"/>
+    <Column name="ItemName" type="nvarchar(20)" notnull="true"/>
+    <Column name="ThumbnailImagePath" type="nvarchar(100)" notnull="true"/>
+    <Column name="OwnerAccountDBId" type="BigInt" notnull="true"/>
+    <Column name="OwnerPlayerDBId" type="BigInt" notnull="true"/>    
     <Index type="clustered">
       <PrimaryKey/>
       <Column name="ItemDBId"/>
@@ -133,15 +135,17 @@
   <!-- ItemTable에 새로운 아이템 저장 -->
   <Procedure name="spItemToInventorySave">
     <Param name="@DataSheetId" type="SmallInt"/>
-    <Param name="@ItemType" type="SmallInt"/>
     <Param name="@ItemCount" type="SmallInt"/>
     <Param name="@SlotIndex" type="TinyInt"/>
-    <Param name="@OwnerAccountId" type="BigInt"/>
-    <Param name="@OwnerPlayerId" type="BigInt"/>
     <Param name="@IsEquipped" type="bit"/>
+    <Param name="@ItemType" type="SmallInt"/>
+    <Param name="@ItemName" type="nvarchar(20)"/>
+    <Param name="@ThumbnailImagePath" type="nvarchar(100)"/>
+    <Param name="@OwnerAccountId" type="BigInt"/>
+    <Param name="@OwnerPlayerId" type="BigInt"/>    
     <Body>
       <![CDATA[
-        INSERT INTO [dbo].[Item] VALUES ((@DataSheetId),(@ItemType),(@ItemCount),(@SlotIndex),(@OwnerAccountId),(@OwnerPlayerId),(@IsEquipped))
+        INSERT INTO [dbo].[Item] VALUES ((@DataSheetId),(@ItemCount),(@SlotIndex),(@IsEquipped),(@ItemType),(@ItemName),(@ThumbnailImagePath),(@OwnerAccountId),(@OwnerPlayerId))
       ]]>
     </Body>
   </Procedure> 
@@ -159,6 +163,32 @@
       ]]>
     </Body>
   </Procedure>  
+  
+  <!-- ItemTable에 아이템 있는지 확인 -->
+  <Procedure name="spItemCheck">
+    <Param name="@AccountDBId" type="BigInt"/>
+    <Param name="@PlayerDbId" type="BigInt"/>
+    <Param name="@SlotIndex" type="TinyInt"/>
+    <Body>      
+      <![CDATA[
+        SELECT ItemType, ItemCount FROM [dbo].[Item] WHERE OwnerAccountDBId = (@AccountDBId) AND OwnerPlayerDBId = (@PlayerDBId) AND SlotIndex = (@SlotIndex)
+      ]]>
+    </Body>    
+  </Procedure>
+  
+  <!-- Item Swap -->
+  <Procedure name="spItemSwap">
+    <Param name="@OwnerAccountDBId" type="BigInt"/>
+    <Param name="@OwnerPlayerDBId" type="BigInt"/>    
+    <Param name="@ItemType" type="SmallInt"/>
+    <Param name="@ItemCount" type="SmallInt"/>
+    <Param name="@SlotIndex" type="TinyInt"/>
+    <Body>
+      <![CDATA[
+        UPDATE [dbo].[Item] SET ItemCount = (@ItemCount), ItemType = (@ItemType), DataSheetId = (@ItemType) WHERE SlotIndex = (@SlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
+      ]]>
+    </Body>
+  </Procedure>
   
   <!-- ItemTable에 있는 아이템 가지고 옴-->
   <Procedure name="spGetItemTableInfoToInventory">
