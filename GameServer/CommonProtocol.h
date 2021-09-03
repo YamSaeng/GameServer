@@ -296,7 +296,23 @@ enum en_PACKET_TYPE
 	en_PACKET_S2C_ITEM_TO_INVENTORY,
 
 	//------------------------------------------------------------
-	// 게임서버 아이템 인벤토리 저장 요청 응답
+	// 게임서버 아이템 스왑 요청
+	// int64 AccountId
+	// int64 ObjectId
+	// int8 SwapIndexA
+	// int8 SwapIndexB
+	//------------------------------------------------------------
+	en_PACKET_C2S_ITEM_SWAP,
+	
+	//------------------------------------------------------------
+	// int64 ObjectId
+	// st_ItemInfo SwapAItem
+	// st_ItemInfo SwapBItem
+	//------------------------------------------------------------
+	en_PACKET_S2C_ITEM_SWAP,
+
+	//------------------------------------------------------------
+	// 게임서버 골드 인벤토리 저장 요청 응답
 	// int64 AccountId
 	// int64 ObjectId
 	// int64 GoldCount

@@ -3,6 +3,7 @@
 #include "DataManager.h"
 #include "Player.h"
 #include "ObjectManager.h"
+#include <atlbase.h>
 
 CBear::CBear()
 {
@@ -12,8 +13,8 @@ CBear::CBear()
 	auto FindMonsterStat = G_Datamanager->_Monsters.find(2);
 	st_MonsterData MonsterData = *(*FindMonsterStat).second;
 
-	// ½ºÅÈ ¼ÂÆÃ
-	_GameObjectInfo.ObjectName.assign(MonsterData._MonsterName.begin(), MonsterData._MonsterName.end());
+	// ½ºÅÈ ¼ÂÆÃ		
+	_GameObjectInfo.ObjectName = (LPWSTR)CA2W(MonsterData._MonsterName.c_str());
 	_GameObjectInfo.ObjectStatInfo.Attack = MonsterData._MonsterStatInfo.Attack;
 	_GameObjectInfo.ObjectStatInfo.MaxHP = MonsterData._MonsterStatInfo.MaxHP;
 	_GameObjectInfo.ObjectStatInfo.HP = MonsterData._MonsterStatInfo.MaxHP;

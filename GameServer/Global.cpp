@@ -20,6 +20,7 @@ class CGlobal
 public:
 	CGlobal()
 	{
+		setlocale(LC_ALL, "Korean");		
 		G_DBConnectionPool = new CDBConnectionPool();
 		G_DBConnectionPool->Init(50);
 		G_Logger = new CLog();

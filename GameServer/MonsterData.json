@@ -2,13 +2,13 @@
   "Monsters": [
     {
       "MonsterDataId": 1,
-      "Name": "Slime",
+      "Name": "ΩΩ∂Û¿”",
       "MonsterStatInfo": [
         {
           "Level": 1,
-          "MaxHP": 20,
+          "MaxHP": 50,
           "Attack": 5,
-          "Speed": 5.0,
+          "Speed": 4.0,
           "SearchCellDistance": 10,
           "ChaseCellDistance": 10,
           "AttackRange": 1,
@@ -32,11 +32,11 @@
     },
     {
       "MonsterDataId": 2,
-      "Name": "Bear",
+      "Name": "∞ı",
       "MonsterStatInfo": [
         {
           "Level": 1,
-          "MaxHP": 50,
+          "MaxHP": 100,
           "Attack": 10,
           "Speed": 2.0,
           "SearchCellDistance": 15,

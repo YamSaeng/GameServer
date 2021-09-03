@@ -5,21 +5,21 @@
       "MaxHP": 200,
       "Attack": 20,
       "CriticalPoint": 20,
-      "Speed": 6.0
+      "Speed": 5.0
     },
     {
       "Level": 2,
       "MaxHP": 300,
       "Attack": 10,
       "CriticalPoint": 30,
-      "Speed": 6.0
+      "Speed": 5.0
     },
     {
       "Level": 3,
       "MaxHP": 300,
       "Attack": 30,
       "CriticalPoint": 30,
-      "Speed": 6.0
+      "Speed": 5.0
     }
   ]
 }
