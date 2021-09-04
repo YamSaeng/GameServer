@@ -66,17 +66,39 @@ namespace SP
 		void OutPlayerDBID(int64& PlayerDBId) { BindCol(0, PlayerDBId); }
 	};
 
-	// ItemTable俊 货肺款 Item 历厘
+	// ItemTable俊 货肺款 Item 积己
+	class CDBGameServerCreateItem : public CDBBind<6, 0>
+	{
+	public:
+		CDBGameServerCreateItem(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spItemCreate(?,?,?,?,?,?)}") {}
+		void InItemObjectId(int64& ItemObjectId) { BindParam(0, ItemObjectId); }
+		void InItemType(int16& ItemType) { BindParam(1, ItemType); }
+		void InItemName(wstring& ItemName) { BindParam(2, ItemName.c_str()); }
+		void InItemCount(int16& ItemCount) { BindParam(3, ItemCount); }
+		void InIsEquipped(bool& IsEquipped) { BindParam(4, IsEquipped); }
+		void InThumbnailImagePath(wstring& ThumbnailImagePath) { BindParam(5, ThumbnailImagePath.c_str()); }
+	};
+
+	// ItemDBId 掘扁
+	class CDBGameServerItemDBIdGet : public CDBBind<1, 1>
+	{
+	public:
+		CDBGameServerItemDBIdGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spItemDBIdGet(?,?)}") {}
+		void InItemObjectId(int64& ObjectId) { BindParam(0, ObjectId); }
+		void OutItemDBId(int64& ItemDBId) { BindCol(0, ItemDBId); }
+	};
+
+	// InventoryTable俊 货肺款 Item 历厘
 	class CDBGameServerItemToInventoryPush : public CDBBind<9, 0>
 	{
 	public:
-		CDBGameServerItemToInventoryPush(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spItemToInventorySave(?,?,?,?,?,?,?,?,?)}") {}		
-		void InDataSheetId(int16& DataSheetId) { BindParam(0, DataSheetId); }
-		void InCount(int16& Count) { BindParam(1, Count); }
-		void InSlotIndex(int8& SlotIndex) { BindParam(2, SlotIndex); }
-		void InIsEquipped(bool& IsEquipped) { BindParam(3, IsEquipped); }
-		void InItemType(int16& ItemType) { BindParam(4, ItemType); }			
-		void InItemName(wstring& ItemName) { BindParam(5, ItemName.c_str()); }
+		CDBGameServerItemToInventoryPush(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spItemToInventorySave(?,?,?,?,?,?,?,?,?)}") {}				
+		void InItemDBId(int64& ItemDBId) { BindParam(0, ItemDBId); }
+		void InItemType(int16& ItemType) { BindParam(1, ItemType); }
+		void InItemName(wstring& ItemName) { BindParam(2, ItemName.c_str()); }
+		void InItemCount(int16& ItemCount) { BindParam(3, ItemCount); }
+		void InSlotIndex(int8& SlotIndex) { BindParam(4, SlotIndex); }
+		void InIsEquipped(bool& IsEquipped) { BindParam(5, IsEquipped); }		
 		void InThumbnailImagePath(wstring& ThumbnailImagePath) { BindParam(6, ThumbnailImagePath.c_str()); }
 		void InOwnerAccountId(int64& OwnerAccountId) { BindParam(7, OwnerAccountId); }
 		void InOwnerPlayerId(int64& OwnerPlayerId) { BindParam(8, OwnerPlayerId); }		
