@@ -80,11 +80,10 @@ namespace SP
 	};
 
 	// ItemDBId ¾ò±â
-	class CDBGameServerItemDBIdGet : public CDBBind<1, 1>
+	class CDBGameServerItemDBIdGet : public CDBBind<0, 1>
 	{
 	public:
-		CDBGameServerItemDBIdGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spItemDBIdGet(?,?)}") {}
-		void InItemObjectId(int64& ObjectId) { BindParam(0, ObjectId); }
+		CDBGameServerItemDBIdGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spItemDBIdGet()}") {}
 		void OutItemDBId(int64& ItemDBId) { BindCol(0, ItemDBId); }
 	};
 

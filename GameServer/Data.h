@@ -14,7 +14,7 @@ struct st_ItemData
 	en_ItemType ItemType; 
 	string ThumbnailImagePath;
 	bool IsEquipped;
-	int32 Count;
+	int16 ItemCount;
 };
 
 struct st_WeaponData : public st_ItemData
