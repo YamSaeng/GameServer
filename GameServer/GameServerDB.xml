@@ -157,35 +157,34 @@
     <Param name ="@ThumbnailImagePath" type="nvarchar(100)"/>
     <Body>
       <![CDATA[
-        INSERT INTO [dbo].[Item] VALUES ((@ItemObjectId),(@ItemType),(@ItemName),(@ItemCount),(@IsEquipped),(@ThumbnailImagePath))
-      ]]>
+         INSERT INTO [dbo].[Item] VALUES ((@ItemObjectId),(@ItemType),(@ItemName),(@ItemCount),(@IsEquipped),(@ThumbnailImagePath))
+       ]]>
     </Body>    
   </Procedure>
 
   <!-- 만든 아이템 DBId 가져오기 -->
   <Procedure name="spItemDBIdGet">
-    <Param name="@ItemObjectId" type="BigInt"/>    
     <Body>
       <![CDATA[
-        SELECT ItemDBId FROM [dbo].[Item] WHERE ItemObjectId = (@ItemObjectId)
+        SELECT IDENT_CURRENT('Item')
       ]]>
     </Body>
   </Procedure>
   
   <!-- InventoryTable에 새로운 아이템 저장 -->
   <Procedure name="spItemToInventorySave">
-    <Param name="@DataSheetId" type="SmallInt"/>
-    <Param name="@ItemCount" type="SmallInt"/>
-    <Param name="@SlotIndex" type="TinyInt"/>
-    <Param name="@IsEquipped" type="bit"/>
+    <Param name="@ItemDBId" type="SmallInt"/>
     <Param name="@ItemType" type="SmallInt"/>
     <Param name="@ItemName" type="nvarchar(20)"/>
+    <Param name="@ItemCount" type="SmallInt"/>    
+    <Param name="@SlotIndex" type="TinyInt"/>
+    <Param name="@IsEquipped" type="bit"/>        
     <Param name="@ThumbnailImagePath" type="nvarchar(100)"/>
-    <Param name="@OwnerAccountId" type="BigInt"/>
-    <Param name="@OwnerPlayerId" type="BigInt"/>    
+    <Param name="@OwnerAccountDBId" type="BigInt"/>
+    <Param name="@OwnerPlayerDBId" type="BigInt"/>    
     <Body>
       <![CDATA[
-        INSERT INTO [dbo].[Inventory] VALUES ((@DataSheetId),(@ItemCount),(@SlotIndex),(@IsEquipped),(@ItemType),(@ItemName),(@ThumbnailImagePath),(@OwnerAccountId),(@OwnerPlayerId))
+        INSERT INTO [dbo].[Inventory] VALUES ((@ItemDBId),(@ItemType),(@ItemName),(@ItemCount),(@SlotIndex),(@IsEquipped),(@ThumbnailImagePath),(@OwnerAccountDBId),(@OwnerPlayerDBId))
       ]]>
     </Body>
   </Procedure> 
@@ -236,7 +235,7 @@
     <Param name="@PlayerDBId" type="BigInt"/>
     <Body>
       <![CDATA[
-        SELECT DataSheetId, ItemType, ItemCount, SlotIndex, IsEquipped FROM [dbo].[Item] WHERE OwnerAccountDBId = (@AccountDBId) AND OwnerPlayerDBId = (@PlayerDBId)
+        SELECT ItemType, ItemCount, SlotIndex, IsEquipped FROM [dbo].[Inventory] WHERE OwnerAccountDBId = (@AccountDBId) AND OwnerPlayerDBId = (@PlayerDBId)
       ]]>
     </Body>
   </Procedure>
