@@ -180,8 +180,8 @@ void CSlime::OnDead(CGameObject* Killer)
 {
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
 
-	GetRandomDropItem(Killer,en_MonsterDataType::SLIME_DATA);
-
+	G_ObjectManager->ItemSpawn(Killer->_GameObjectInfo.ObjectId, GetCellPosition(), en_MonsterDataType::SLIME_DATA);
+	
 	BroadCastPacket(en_PACKET_S2C_DIE);		
 
 	G_ObjectManager->Remove(this, 1);	

@@ -24,6 +24,7 @@ void CSector::Insert(CGameObject* InsertGameObject)
 		break;
 	case en_GameObjectType::SLIME_GEL:
 	case en_GameObjectType::BRONZE_COIN:
+	case en_GameObjectType::LEATHER:
 		_Items.insert((CItem*)InsertGameObject);
 		break;
 	default:
@@ -45,6 +46,7 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 		break;
 	case en_GameObjectType::SLIME_GEL:
 	case en_GameObjectType::BRONZE_COIN:
+	case en_GameObjectType::LEATHER:
 		_Items.erase((CItem*)RemoveGameObject);
 		break;
 	}
@@ -58,4 +60,9 @@ set<CPlayer*> CSector::GetPlayers()
 set<CMonster*> CSector::GetMonsters()
 {
 	return _Monsters;
+}
+
+set<CItem*> CSector::GetItems()
+{
+	return _Items;
 }

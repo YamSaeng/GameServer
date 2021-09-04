@@ -51,11 +51,7 @@ protected:
 	// Dead 상태 Update
 	//------------------------
 	virtual void UpdateDead() = 0;
-
-	//--------------------------------------------------------------------------------------
-	// 랜덤하게 아이템 떨구기
-	//--------------------------------------------------------------------------------------
-	virtual void GetRandomDropItem(CGameObject* Killer, en_MonsterDataType MonsterDataType);
+	
 public:
 	// 몬스터 데이터 시트 Id
 	int32 _DataSheetId;

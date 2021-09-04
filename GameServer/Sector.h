@@ -27,5 +27,6 @@ public:
 	
 	set<CPlayer*> GetPlayers();	
 	set<CMonster*> GetMonsters();
+	set<CItem*> GetItems();
 };
 

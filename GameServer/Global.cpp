@@ -22,7 +22,7 @@ public:
 	{
 		setlocale(LC_ALL, "Korean");		
 		G_DBConnectionPool = new CDBConnectionPool();
-		G_DBConnectionPool->Init(50);
+		G_DBConnectionPool->Init(100);
 		G_Logger = new CLog();
 		G_Datamanager = new CDataManager();
 		G_Datamanager->LoadDataItem(L"ItemData.json");
