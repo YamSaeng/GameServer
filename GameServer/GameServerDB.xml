@@ -39,8 +39,7 @@
   </Table>
   
   <!-- 인벤토리 아이템 테이블 -->
-  <Table name="Inventory" desc="Inventory Table">
-    <Column name="ItemDBId" type="BigInt" notnull="true"/>
+  <Table name="Inventory" desc="Inventory Table">    
     <Column name="ItemType" type="SmallInt" notnull="true"/>
     <Column name="ItemName" type="nvarchar(20)" notnull="true"/>
     <Column name="ItemCount" type="SmallInt" notnull="true"/>
@@ -168,8 +167,7 @@
   </Procedure>
   
   <!-- InventoryTable에 새로운 아이템 저장 -->
-  <Procedure name="spItemToInventorySave">
-    <Param name="@ItemDBId" type="SmallInt"/>
+  <Procedure name="spItemToInventorySave">    
     <Param name="@ItemType" type="SmallInt"/>
     <Param name="@ItemName" type="nvarchar(20)"/>
     <Param name="@ItemCount" type="SmallInt"/>    
@@ -180,7 +178,7 @@
     <Param name="@OwnerPlayerDBId" type="BigInt"/>    
     <Body>
       <![CDATA[
-        INSERT INTO [dbo].[Inventory] VALUES ((@ItemDBId),(@ItemType),(@ItemName),(@ItemCount),(@SlotIndex),(@IsEquipped),(@ThumbnailImagePath),(@OwnerAccountDBId),(@OwnerPlayerDBId))
+        INSERT INTO [dbo].[Inventory] VALUES ((@ItemType),(@ItemName),(@ItemCount),(@SlotIndex),(@IsEquipped),(@ThumbnailImagePath),(@OwnerAccountDBId),(@OwnerPlayerDBId))
       ]]>
     </Body>
   </Procedure> 
@@ -200,32 +198,42 @@
   </Procedure>  
   
   <!-- Inventory에 아이템 있는지 확인 -->
-  <Procedure name="spItemCheck">
+  <Procedure name="spInventoryItemCheck">
     <Param name="@AccountDBId" type="BigInt"/>
     <Param name="@PlayerDbId" type="BigInt"/>
     <Param name="@SlotIndex" type="TinyInt"/>
     <Body>      
       <![CDATA[
-        SELECT ItemType, ItemCount FROM [dbo].[Inventory] WHERE OwnerAccountDBId = (@AccountDBId) AND OwnerPlayerDBId = (@PlayerDBId) AND SlotIndex = (@SlotIndex)
+        SELECT ItemType, ItemName, ItemCount, IsEquipped, ThumbnailImagePath FROM [dbo].[Inventory] WHERE OwnerAccountDBId = (@AccountDBId) AND OwnerPlayerDBId = (@PlayerDBId) AND SlotIndex = (@SlotIndex)
       ]]>
     </Body>    
   </Procedure>
   
-  <!-- Item Swap -->
-  <Procedure name="spItemSwap">
+  <!-- InventoryItem Swap -->
+  <Procedure name="spInventoryItemSwap">
     <Param name="@OwnerAccountDBId" type="BigInt"/>
     <Param name="@OwnerPlayerDBId" type="BigInt"/>    
-    <Param name="@ItemType" type="SmallInt"/>
-    <Param name="@ItemCount" type="SmallInt"/>
-    <Param name="@SlotIndex" type="TinyInt"/>
+    <Param name="@AItemType" type="SmallInt"/>
+    <Param name="@AItemName" type="nvarchar(20)"/>
+    <Param name="@AItemCount" type="SmallInt"/>
+    <Param name="@AItemIsEquipped" type="bit"/>
+    <Param name="@AItemThumbnailImagePath" type="nvarchar(100)"/>
+    <Param name="@AItemSlotIndex" type="TinyInt"/>    
+    <Param name="@BItemType" type="SmallInt"/>
+    <Param name="@BItemName" type="nvarchar(20)"/>
+    <Param name="@BItemCount" type="SmallInt"/>
+    <Param name="@BItemIsEquipped" type="bit"/>
+    <Param name="@BItemThumbnailImagePath" type="nvarchar(100)"/>
+    <Param name="@BItemSlotIndex" type="TinyInt"/>
     <Body>
       <![CDATA[
-        UPDATE [dbo].[Item] SET ItemCount = (@ItemCount), ItemType = (@ItemType), DataSheetId = (@ItemType) WHERE SlotIndex = (@SlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
+        UPDATE [dbo].[Inventory] SET ItemType = (@AItemType), ItemName = (@AItemName), ItemCount = (@AItemCount), IsEquipped = (@AItemIsEquipped), ThumbnailImagePath = (@AItemThumbnailImagePath)  WHERE SlotIndex = (@AItemSlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
+        UPDATE [dbo].[Inventory] SET ItemType = (@BItemType), ItemName = (@BItemName), ItemCount = (@BItemCount), IsEquipped = (@BItemIsEquipped), ThumbnailImagePath = (@BItemThumbnailImagePath)  WHERE SlotIndex = (@BItemSlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
       ]]>
     </Body>
   </Procedure>
   
-  <!-- ItemTable에 있는 아이템 가지고 옴-->
+  <!-- InventoryTable에 있는 아이템 가지고 옴-->
   <Procedure name="spGetItemTableInfoToInventory">
     <Param name="@AccountDBId" type="BigInt"/>
     <Param name="@PlayerDBId" type="BigInt"/>
