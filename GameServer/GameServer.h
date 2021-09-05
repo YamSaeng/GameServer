@@ -25,8 +25,7 @@ private:
 	HANDLE _GameLogicThread;
 
 	HANDLE _AuthThreadWakeEvent;
-	HANDLE _NetworkThreadWakeEvent;
-	HANDLE _DataBaseWakeEvent;
+	HANDLE _NetworkThreadWakeEvent;	
 
 	bool _AuthThreadEnd;
 	// WorkerThread 종료용 변수
@@ -67,6 +66,7 @@ private:
 	void PacketProcReqObjectStateChange(int64 SessionId, CMessage* Message);
 	void PacketProcReqChattingMessage(int64 SessionId, CMessage* Message);
 	void PacketProcReqItemToInventory(int64 SessionId, CMessage* Message);
+	void PacketProcReqItemSwap(int64 SessionId, CMessage* Message);
 	void PacketProcReqSectorMove(int64 SessionID, CMessage* Message);
 	void PacketProcReqMessage(int64 SessionID, CMessage* Message);
 	void PacketProcReqHeartBeat(int64 SessionID, CMessage* Message);
@@ -79,11 +79,13 @@ private:
 	// 4. 캐릭터 인벤토리에 있는 Gold를 DB에 저장
 	// 5. 캐릭터 정보 클라에게 전송
 	//-----------------------------------------------------------------------------------------------
-	void PacketProcReqAccountCheck(int64 SessionID, CMessage* Message);
-	void PacketProcReqCreateCharacterNameCheck(int64 SessionID, CMessage* Message);
+	void PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message);
+	void PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMessage* Message);
+	void PacketProcReqDBItemCreate(CMessage* Message);
 	void PacketProcReqDBItemToInventorySave(int64 SessionId, CMessage* Message);
-	void PacketProcReqGoldSave(int64 SessionId, CMessage* Message);
-	void PacketProcReqCharacterInfoSend(int64 SessionId, CMessage* Message);
+	void PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message);
+	void PacketProcReqDBGoldSave(int64 SessionId, CMessage* Message);
+	void PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Message);
 
 	//----------------------------------------------------------------
 	//패킷조합 함수
@@ -102,8 +104,9 @@ private:
 	CMessage* MakePacketResCreateCharacter(bool IsSuccess, st_GameObjectInfo CreateCharacterObjectInfo);
 	CMessage* MakePacketResEnterGame(st_GameObjectInfo ObjectInfo);	
 	CMessage* MakePacketMousePositionObjectInfo(int64 AccountId, st_GameObjectInfo ObjectInfo);
-	CMessage* MakePacketGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int8 SliverCount, int8 BronzeCount);
+	CMessage* MakePacketGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int8 SliverCount, int8 BronzeCount, int16 ItemCount, int16 ItemType, bool ItemGainPrint = true);
 	CMessage* MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* NickName, WORD MessageLen, WCHAR* Message);
+	CMessage* MakePacketResItemSwap(int64 AccountId, int64 ObjectId, st_ItemInfo SwapAItemInfo, st_ItemInfo SwapBItemInfo);
 public:
 	CMessage* MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_AttackType AttackType, int32 Damage, bool IsCritical);
 	CMessage* MakePacketResMagic(int64 ObjectId);
@@ -113,9 +116,9 @@ public:
 	CMessage* MakePacketResSpawn(int32 ObjectInfosCount, vector<st_GameObjectInfo> ObjectInfos);
 	CMessage* MakePacketResDeSpawn(int32 DeSpawnObjectCount, vector<int64> DeSpawnObjectIds);
 	CMessage* MakePacketResDie(int64 DieObjectId);
-	CMessage* MakePacketResChattingMessage(int64 PlayerDBId, en_MessageType MessageType, st_Color Color, wstring ChattingMessage);
+	CMessage* MakePacketResChattingMessage(int64 PlayerDBId, en_MessageType MessageType, st_Color Color, wstring ChattingMessage);		
 	CMessage* MakePacketResItemToInventory(int64 TargetObjectId, st_ItemInfo ItemInfo,int16 ItemEach, bool ItemGainPrint = true);
-	CMessage* MakePacketResSyncPosition(int64 TargetObjectId, st_PositionInfo SyncPosition);
+	CMessage* MakePacketResSyncPosition(int64 TargetObjectId, st_PositionInfo SyncPosition);	
 public:
 	//------------------------------------
 	// Job 메모리풀
@@ -139,6 +142,8 @@ public:
 	int64 _DataBaseThreadWakeCount;
 	// DB 쓰레드 TPS
 	int64 _DataBaseThreadTPS;
+
+	HANDLE _DataBaseWakeEvent;
 
 	CGameServer();
 	~CGameServer();
