@@ -51,7 +51,7 @@ public:
 	bool BindCol(int32 ColumnIndex, int16* Value, SQLLEN* Index);
 	bool BindCol(int32 ColumnIndex, int32* Value, SQLLEN* Index);
 	bool BindCol(int32 ColumnIndex, int64* Value, SQLLEN* Index);
-	bool BindCol(int32 ColumnIndex, TIMESTAMP_STRUCT* Value, SQLLEN* Index);
+	bool BindCol(int32 ColumnIndex, TIMESTAMP_STRUCT* Value, SQLLEN* Index);	
 	bool BindCol(int32 ColumnIndex, WCHAR* Str, int32 Size, SQLLEN* Index);
 	bool BindCol(int32 ColumnIndex, BYTE* Binary, int32 Size, SQLLEN* Index);
 

@@ -149,7 +149,7 @@ public:
 	{
 		_DBConnection.BindCol(Index + 1, Value, Length - 1, &_ColumnIndex[Index]);
 		_ColumnFlag |= (1LL << Index);
-	}
+	}	
 
 	// 일반적인 배열 
 	template<typename T, int32 N>
