@@ -4,19 +4,19 @@
 #include "Message.h"
 #include "Player.h"
 
-enum en_MESSAGE_TYPE
+#define SECTOR_X_MAX 50
+#define SECTOR_Y_MAX 50
+
+#define LOGIN_SUCCESS 1
+#define LOGIN_FAIL 0
+
+enum class en_MESSAGE_TYPE : int16
 {
 	AUTH_NEW_CLIENT_JOIN = 0,
 	AUTH_DISCONNECT_CLIENT = 1,
 	AUTH_MESSAGE = 2,
 
-	MESSAGE = 3,
-
-	SECTOR_X_MAX = 50,
-	SECTOR_Y_MAX = 50,
-
-	LOGIN_SUCCESS = 1,
-	LOGIN_FAIL = 0,
+	NETWORK_MESSAGE = 3,	
 
 	DATA_BASE_ACCOUNT_CHECK = 100,
 	DATA_BASE_CHARACTER_CHECK,	
@@ -29,7 +29,7 @@ enum en_MESSAGE_TYPE
 
 struct st_Job
 {
-	WORD Type;
+	en_MESSAGE_TYPE Type;
 	int64 SessionId;
 	CMessage* Message;
 	st_SESSION* Session;

@@ -180,7 +180,7 @@ void CSlime::OnDead(CGameObject* Killer)
 {
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
 
-	G_ObjectManager->ItemSpawn(Killer->_GameObjectInfo.ObjectId, GetCellPosition(), en_MonsterDataType::SLIME_DATA);
+	G_ObjectManager->ItemSpawn(Killer->_GameObjectInfo.ObjectId, Killer->_GameObjectInfo.ObjectType, GetCellPosition(), en_MonsterDataType::SLIME_DATA);
 	
 	BroadCastPacket(en_PACKET_S2C_DIE);		
 

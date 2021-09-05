@@ -181,7 +181,7 @@ void CBear::OnDead(CGameObject* Killer)
 {
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
 
-	G_ObjectManager->ItemSpawn(Killer->_GameObjectInfo.ObjectId, GetCellPosition(), en_MonsterDataType::BEAR_DATA);
+	G_ObjectManager->ItemSpawn(Killer->_GameObjectInfo.ObjectId, Killer->_GameObjectInfo.ObjectType, GetCellPosition(), en_MonsterDataType::BEAR_DATA);
 	
 	BroadCastPacket(en_PACKET_S2C_DIE);		
 

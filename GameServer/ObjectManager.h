@@ -19,8 +19,7 @@ private:
 	CMemoryPoolTLS<CWeapon>* _WeaponMemoryPool;
 	CMemoryPoolTLS<CMaterial>* _MaterialMemoryPool;
 
-	int64 _MonsterId;
-	int64 _ItemId;
+	int64 _MonsterObjectId;	
 public:
 	CGameServer* GameServer;
 	
@@ -55,6 +54,6 @@ public:
 	//-------------
 	// 아이템 스폰
 	//-------------
-	void ItemSpawn(int32 ChannelId, st_Vector2Int OwnerPosition, int64 KillerId,st_ItemInfo ItemInfo, en_GameObjectType ItemType);
+	void ItemSpawn(int64 KillerId, en_GameObjectType KillerObjectType, st_Vector2Int SpawnPosition, en_MonsterDataType MonsterDataType);	
 };
 

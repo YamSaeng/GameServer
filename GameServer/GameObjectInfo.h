@@ -1,6 +1,6 @@
 #pragma once
 
-enum en_GameObjectType
+enum class en_GameObjectType : int16
 {
 	NORMAL,
 	MELEE_PLAYER,
@@ -15,7 +15,7 @@ enum en_GameObjectType
 	GOLD_COIN
 };
 
-enum en_MoveDir
+enum class en_MoveDir : int8
 {
 	UP,
 	DOWN,
@@ -23,7 +23,7 @@ enum en_MoveDir
 	RIGHT
 };
 
-enum en_CreatureState
+enum class en_CreatureState : int8
 {
 	IDLE,
 	MOVING,
@@ -32,7 +32,7 @@ enum en_CreatureState
 	DEAD,
 };
 
-enum en_AttackRange
+enum class en_AttackRange : int8
 {
 	NORMAL_ATTACK,
 	FORWARD_ATTACK,
@@ -40,7 +40,7 @@ enum en_AttackRange
 	MAGIC_ATTACK,
 };
 
-enum en_AttackType
+enum class en_AttackType : int16
 {
 	NONE_ATTACK = -1,
 	MELEE_PLAYER_NORMAL_ATTACK,
@@ -53,19 +53,19 @@ enum en_AttackType
 	BEAR_NORMAL_ATTACK
 };
 
-enum en_MessageType
+enum class en_MessageType : int8
 {
 	CHATTING,
 	SYSTEM
 };
 
-enum en_StateChange
+enum class en_StateChange : int16
 {
 	MOVE_TO_STOP,
 	SPELL_TO_IDLE,
 };
 
-enum en_ObjectNetworkState
+enum class en_ObjectNetworkState : int8
 {
 	READY,
 	LIVE,
@@ -98,6 +98,7 @@ struct st_GameObjectInfo
 	st_StatInfo ObjectStatInfo;
 	en_GameObjectType ObjectType;
 	int64 OwnerObjectId;
+	en_GameObjectType OwnerObjectType;
 	int8 PlayerSlotIndex;
 };
 

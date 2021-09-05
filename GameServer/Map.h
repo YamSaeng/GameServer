@@ -36,6 +36,16 @@ struct st_Vector2Int
 		return st_Vector2Int(_X * Value, _Y * Value);
 	}
 
+	bool operator == (st_Vector2Int CellPosition)
+	{
+		if (_X == CellPosition._X && _Y == CellPosition._Y)
+		{
+			return true;
+		}
+
+		return false;
+	}	
+
 	int CellDistanceFromZero()
 	{
 		return abs(_X) + abs(_Y);
@@ -121,7 +131,7 @@ public:
 
 	//------------------------------------------------------------------------------------------------------------------------
 	// 목적지 좌표값을 받아서 해당 좌표로 갈 수 있는지 없는지 판단
-	// CheckObject = 벽을 제외한 오브젝트를 충돌 대상으로 여길 것인지에 대한 여부
+	// CheckObject = 벽을 제외한 해당 위치에 있는 오브젝트를 충돌 대상으로 여길 것인지에 대한 여부
 	// ApplyCollision = 해당 함수를 호출 해준 오브젝트를 충돌 대상으로 여길 것인지에 대한 여부
 	//------------------------------------------------------------------------------------------------------------------------
 	bool ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool CheckObject = true, bool Applycollision = true);
