@@ -3,14 +3,12 @@
 
 CInventory::CInventory()
 {
-	_Items = (CItem**)malloc(sizeof(CItem*) * INVENTORY_SIZE);		
-	memset(_Items, 0, sizeof(CItem*) * INVENTORY_SIZE);
-
-	for (int32 SlotIndex = INVENTORY_SIZE - 1; SlotIndex >= 0; SlotIndex--)
+	// INVENTORY_SIZE 만큼 할당
+	for (int8 SlotIndex = 0; SlotIndex < INVENTORY_SIZE; SlotIndex++)
 	{
-		_ItemsSlotIndex.Push(SlotIndex);
+		_Items.insert(pair<byte, CItem*>(SlotIndex,nullptr));
 	}	
-
+	
 	_BronzeCoinCount = 0;
 	_SliverCoinCount = 0;
 	_GoldCoinCount = 0;
@@ -21,7 +19,7 @@ CInventory::~CInventory()
 
 }
 
-void CInventory::AddItem(CItem* Item)
+void CInventory::AddItem(int8 SlotIndex, CItem* Item)
 {
 	if (Item == nullptr)
 	{
@@ -29,7 +27,13 @@ void CInventory::AddItem(CItem* Item)
 		return;
 	}
 
-	_Items[Item->_ItemInfo.SlotIndex] = Item;
+	auto FindSlotIterator = _Items.find(SlotIndex);
+	if (FindSlotIterator == _Items.end())
+	{
+		return;
+	}
+
+	(*FindSlotIterator).second = Item;	
 }
 
 void CInventory::AddCoin(CItem* Item)
@@ -76,32 +80,28 @@ void CInventory::AddCoin(CItem* Item)
 	}
 }
 
-CItem* CInventory::Get(int32 _ItemDBId)
+CItem* CInventory::Get(int8 _SlotIndex)
 {
-	CItem* Item = nullptr;
+	auto FindItemIterator = _Items.find(_SlotIndex);
+	if (FindItemIterator == _Items.end())
+	{
+		return nullptr;
+	}
 
-	for (int32 i = 0; i < INVENTORY_SIZE; i++)
-	{		
-		if (_Items[i] != nullptr && _Items[i]->_GameObjectInfo.ObjectId == _ItemDBId)
-		{
-			Item = _Items[i];
-		}
-	}	
-
-	return Item;
+	return (*FindItemIterator).second;
 }
 
 bool CInventory::IsExistItem(en_ItemType ItemType, int16* Count, int8* SlotIndex)
 {
-	for (int32 i = 0; i < INVENTORY_SIZE; i++)
+	for (auto ItemIteraotr : _Items)
 	{
-		if(_Items[i] != nullptr && _Items[i]->_ItemInfo.ItemType == ItemType)
-		{			
-			// 최대 갯수 넘어가면 새로 생성해줘야함
-			_Items[i]->_ItemInfo.ItemCount += 1;
-			*Count = _Items[i]->_ItemInfo.ItemCount;
-			*SlotIndex = i;
+		CItem* Item = ItemIteraotr.second;
 
+		if (Item != nullptr && Item->_ItemInfo.ItemType == ItemType)
+		{
+			Item->_ItemInfo.ItemCount += 1;
+			*Count = Item->_ItemInfo.ItemCount;
+			*SlotIndex = ItemIteraotr.first;
 			return true;
 		}
 	}
@@ -111,5 +111,31 @@ bool CInventory::IsExistItem(en_ItemType ItemType, int16* Count, int8* SlotIndex
 
 bool CInventory::GetEmptySlot(int8* SlotIndex)
 {
-	return _ItemsSlotIndex.Pop(SlotIndex);	
+	for (auto ItemIteraotr : _Items)
+	{
+		CItem* Item = ItemIteraotr.second;
+
+		if (Item == nullptr)
+		{
+			*SlotIndex = ItemIteraotr.first;
+			return true;
+		}		
+	}		
+
+	return false;
+}
+
+void CInventory::SwapItem(st_ItemInfo& SwapAItemInfo, st_ItemInfo& SwapBItemInfo)
+{
+	auto FindSwapAItem = _Items.find(SwapAItemInfo.SlotIndex);
+	if (FindSwapAItem != _Items.end())
+	{		
+		(*FindSwapAItem).second->_ItemInfo = SwapAItemInfo;
+	}
+
+	auto FindSwapBItem = _Items.find(SwapBItemInfo.SlotIndex);
+	if (FindSwapBItem != _Items.end())
+	{
+		(*FindSwapBItem).second->_ItemInfo = SwapBItemInfo;
+	}
 }
