@@ -26,7 +26,7 @@
   <!-- 아이템 테이블 -->
   <Table name="Item" desc="Item Table">
     <Column name="ItemDBId" type="BigInt" notnull="true" identity="1,1"/>
-    <Column name="ItemObjectId" type="BigInt" notnull="true"/>    
+    <Column name="ItemUse" type="bit" notnull="true"/>        
     <Column name="ItemType" type="SmallInt" notnull="true"/>
     <Column name="ItemName" type="nvarchar(20)" notnull="true"/>    
     <Column name="ItemCount" type="SmallInt" notnull="true"/>
@@ -35,11 +35,7 @@
     <Index type="clustered">
       <PrimaryKey/>
       <Column name="ItemDBId"/>
-    </Index>
-    <Index type="nonclustered">
-      <UniqueKey/>
-      <Column name="ItemObjectId"/>
-    </Index>
+    </Index>    
   </Table>
   
   <!-- 인벤토리 아이템 테이블 -->
@@ -149,7 +145,7 @@
   
   <!-- ItemTable에 새로운 아이템 생성 -->
   <Procedure name="spItemCreate">
-    <Param name ="@ItemObjectId" type="BigInt"/>
+    <Param name ="@ItemUse" type="bit"/>
     <Param name ="@ItemType" type="SmallInt"/>
     <Param name ="@ItemName" type="nvarchar(20)"/>
     <Param name ="@ItemCount" type="SmallInt"/>
@@ -157,7 +153,7 @@
     <Param name ="@ThumbnailImagePath" type="nvarchar(100)"/>
     <Body>
       <![CDATA[
-         INSERT INTO [dbo].[Item] VALUES ((@ItemObjectId),(@ItemType),(@ItemName),(@ItemCount),(@IsEquipped),(@ThumbnailImagePath))
+         INSERT INTO [dbo].[Item] VALUES ((@ItemUse),(@ItemType),(@ItemName),(@ItemCount),(@IsEquipped),(@ThumbnailImagePath))
        ]]>
     </Body>    
   </Procedure>
@@ -236,6 +232,17 @@
     <Body>
       <![CDATA[
         SELECT ItemType, ItemCount, SlotIndex, IsEquipped FROM [dbo].[Inventory] WHERE OwnerAccountDBId = (@AccountDBId) AND OwnerPlayerDBId = (@PlayerDBId)
+      ]]>
+    </Body>
+  </Procedure>
+  
+  <!-- ItemTable에 있는 아이템 삭제 -->
+  <Procedure name="spItemDelete">
+    <Param name="@ItemDBId" type="BigInt"/>
+    <Param name="@ItemUse" type="bit"/>
+    <Body>
+      <![CDATA[
+        UPDATE [dbo].[Item] SET ItemUse = (@ItemUse) WHERE ItemDBId = (@ItemDBId)
       ]]>
     </Body>
   </Procedure>
