@@ -87,6 +87,21 @@ namespace SP
 		void OutItemDBId(int64& ItemDBId) { BindCol(0, ItemDBId); }
 	};
 
+	// 인벤토리 초기화 할때 빈껍데기 생성해서 넣는 프로시저 클래스
+	class CDBGameServerItemCreateToInventory : public CDBBind<8, 0>
+	{
+	public:
+		CDBGameServerItemCreateToInventory(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spItemToInventoryInit(?,?,?,?,?,?,?,?)}") {}
+		void InItemType(int16& ItemType) { BindParam(0, ItemType); }
+		void InItemName(wstring& ItemName) { BindParam(1, ItemName.c_str()); }
+		void InItemCount(int16& ItemCount) { BindParam(2, ItemCount); }
+		void InSlotIndex(int8& SlotIndex) { BindParam(3, SlotIndex); }
+		void InIsEquipped(bool& IsEquipped) { BindParam(4, IsEquipped); }
+		void InThumbnailImagePath(wstring& ThumbnailImagePath) { BindParam(5, ThumbnailImagePath.c_str()); }
+		void InOwnerAccountId(int64& OwnerAccountId) { BindParam(6, OwnerAccountId); }
+		void InOwnerPlayerId(int64& OwnerPlayerId) { BindParam(7, OwnerPlayerId); }
+	};
+
 	// InventoryTable에 새로운 Item 저장
 	class CDBGameServerItemToInventoryPush : public CDBBind<8, 0>
 	{
@@ -190,23 +205,26 @@ namespace SP
 	public:
 		CDBGameServerGoldGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetGoldTableInfoToInventory(?,?)}") {}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
-		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }		
+		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
+
 		void OutGoldCoin(int64& GoldCoin) { BindCol(0, GoldCoin); }
 		void OutSliverCoin(int8& SliverCoin) { BindCol(1, SliverCoin); }
 		void OutBronzeCoin(int8& BronzeCoin) { BindCol(2, BronzeCoin); }
 	};
 	
 	// ItemTable에 있는 Item 모두 긁어옴
-	class CDBGameServerInventoryItemGet : public CDBBind<2, 5>
+	class CDBGameServerInventoryItemGet : public CDBBind<2, 6>
 	{
 	public:
 		CDBGameServerInventoryItemGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetItemTableInfoToInventory(?,?)}") {}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
-		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
-		void OutDataSheetId(int16& DataSheetId) { BindCol(0, DataSheetId); }
-		void OutItemType(int16& ItemType) { BindCol(1, ItemType); }
+		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }		
+
+		void OutItemType(int16& ItemType) { BindCol(0, ItemType); }
+		template<int8 Length> void OutItemName(WCHAR(&ItemName)[Length]) { BindCol(1, ItemName); }
 		void OutItemCount(int16& itemCount) { BindCol(2, itemCount); }
 		void OutSlotIndex(int8& SlotIndex) { BindCol(3, SlotIndex); }		
-		void OutIsEquipped(bool& IsEquipped) { BindCol(4, IsEquipped); }
+		void OutIsEquipped(bool& IsEquipped) { BindCol(4, IsEquipped); }				
+		template<int16 Length> void OutItemThumbnailImagePath(WCHAR(&ItemThumbnailImagePath)[Length]) { BindCol(5, ItemThumbnailImagePath); }
 	};
 }

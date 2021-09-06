@@ -91,7 +91,7 @@ public:
 	}
 
 #pragma region BindParam
-	// 각종 BindParam 함수
+	// 각종 BindParam 함수	
 
 	// 일반 변수 넣기
 	template<typename T>

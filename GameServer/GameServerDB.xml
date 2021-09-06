@@ -166,6 +166,23 @@
     </Body>
   </Procedure>
   
+  <!-- InventoryTable 빈껍데기 아이템 정보 저장-->  
+  <Procedure name="spItemToInventoryInit">    
+    <Param name="@ItemType" type="SmallInt"/>
+    <Param name="@ItemName" type="nvarchar(20)"/>
+    <Param name="@ItemCount" type="SmallInt"/>    
+    <Param name="@SlotIndex" type="TinyInt"/>
+    <Param name="@IsEquipped" type="bit"/>        
+    <Param name="@ThumbnailImagePath" type="nvarchar(100)"/>
+    <Param name="@OwnerAccountDBId" type="BigInt"/>
+    <Param name="@OwnerPlayerDBId" type="BigInt"/>    
+    <Body>
+      <![CDATA[
+        INSERT INTO [dbo].[Inventory] VALUES ((@ItemType),(@ItemName),(@ItemCount),(@SlotIndex),(@IsEquipped),(@ThumbnailImagePath),(@OwnerAccountDBId),(@OwnerPlayerDBId))
+      ]]>
+    </Body>
+  </Procedure> 
+  
   <!-- InventoryTable에 새로운 아이템 저장 -->
   <Procedure name="spItemToInventorySave">    
     <Param name="@ItemType" type="SmallInt"/>
@@ -178,7 +195,7 @@
     <Param name="@OwnerPlayerDBId" type="BigInt"/>    
     <Body>
       <![CDATA[
-        INSERT INTO [dbo].[Inventory] VALUES ((@ItemType),(@ItemName),(@ItemCount),(@SlotIndex),(@IsEquipped),(@ThumbnailImagePath),(@OwnerAccountDBId),(@OwnerPlayerDBId))
+        UPDATE [dbo].[Inventory] SET ItemType = (@ItemType), ItemName = (@ItemName), ItemCount = (@ItemCount), IsEquipped = (@IsEquipped), ThumbnailImagePath = (@ThumbnailImagePath) WHERE SlotIndex = (@SlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)        
       ]]>
     </Body>
   </Procedure> 
@@ -239,7 +256,7 @@
     <Param name="@PlayerDBId" type="BigInt"/>
     <Body>
       <![CDATA[
-        SELECT ItemType, ItemCount, SlotIndex, IsEquipped FROM [dbo].[Inventory] WHERE OwnerAccountDBId = (@AccountDBId) AND OwnerPlayerDBId = (@PlayerDBId)
+        SELECT ItemType, ItemName, ItemCount, SlotIndex, IsEquipped, ThumbnailImagePath FROM [dbo].[Inventory] WHERE OwnerAccountDBId = (@AccountDBId) AND OwnerPlayerDBId = (@PlayerDBId)
       ]]>
     </Body>
   </Procedure>
