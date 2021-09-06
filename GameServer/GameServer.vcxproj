@@ -194,6 +194,7 @@
     <ClInclude Include="RingBuffer.h" />
     <ClInclude Include="Sector.h" />
     <ClInclude Include="SessionInfo.h" />
+    <ClInclude Include="SkillBox.h" />
     <ClInclude Include="Slime.h" />
     <ClInclude Include="Type.h" />
     <ClInclude Include="XmlParser.h" />
@@ -289,6 +290,7 @@
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Sector.cpp" />
+    <ClCompile Include="SkillBox.cpp" />
     <ClCompile Include="Slime.cpp" />
     <ClCompile Include="XmlParser.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

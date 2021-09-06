@@ -67,6 +67,9 @@
     <Filter Include="ContentServer\Content\Inventory">
       <UniqueIdentifier>{d1d4b5ab-ae77-4157-93ab-b949d6eda307}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ContentServer\Content\SkillBox">
+      <UniqueIdentifier>{269e145b-6171-4f6c-8ef8-8cbf73eb6a3b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Type.h">
@@ -197,6 +200,9 @@
     <ClInclude Include="GameObjectInfo.h">
       <Filter>ContentServer\Content\GameObject</Filter>
     </ClInclude>
+    <ClInclude Include="SkillBox.h">
+      <Filter>ContentServer\Content\SkillBox</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -275,6 +281,9 @@
     </ClCompile>
     <ClCompile Include="Inventory.cpp">
       <Filter>ContentServer\Content\Inventory</Filter>
+    </ClCompile>
+    <ClCompile Include="SkillBox.cpp">
+      <Filter>ContentServer\Content\SkillBox</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1716,7 +1716,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.PlayerSlotIndex = ReqCharacterCreateSlotIndex; // 캐릭터가 속한 슬롯
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_SessionId = Session->SessionId;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_AccountId = Session->AccountId;
-
+			
 			G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerDBIDGetDBConnection);
 
 			// Gold Table 생성
@@ -1728,6 +1728,37 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			GoldTableCreate.Execute();
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, DBGoldTableCreateConnection);
+		
+			// 캐릭터 인벤토리 생성
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_Inventory.Init();
+			
+			// DB에 인벤토리 생성
+			for (int8 SlotIndex = 0; SlotIndex < (int8)en_Inventory::INVENTORY_SIZE; SlotIndex++)
+			{
+				CDBConnection* DBItemToInventoryConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerItemCreateToInventory ItemToInventory(*DBItemToInventoryConnection);
+				st_ItemInfo NewItem;
+				NewItem.ItemDBId = 0;
+				NewItem.ItemType = en_ItemType::ITEM_TYPE_NONE;
+				NewItem.ItemName = L"";
+				NewItem.ItemCount = 0;
+				NewItem.SlotIndex = SlotIndex;
+				NewItem.IsEquipped = false;
+				NewItem.ThumbnailImagePath = L"";				
+
+				int16 ItemType = (int16)NewItem.ItemType;
+
+				ItemToInventory.InItemType(ItemType);
+				ItemToInventory.InItemName(NewItem.ItemName);
+				ItemToInventory.InItemCount(NewItem.ItemCount);
+				ItemToInventory.InSlotIndex(SlotIndex);
+				ItemToInventory.InIsEquipped(NewItem.IsEquipped);
+				ItemToInventory.InThumbnailImagePath(NewItem.ThumbnailImagePath);
+				ItemToInventory.InOwnerAccountId(Session->AccountId);
+				ItemToInventory.InOwnerPlayerId(PlayerDBId);
+
+				ItemToInventory.Execute();
+			}			
 		}
 		else
 		{
@@ -2039,10 +2070,10 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		ADBItemCheck.InSlotIndex(SwapAIndex);
 
 		int16 ADBItemType = -1;
-		WCHAR AItemName[50];
+		WCHAR AItemName[20] = { 0 };
 		int16 AItemCount = -1;
 		bool AItemEquipped = false;
-		WCHAR AItemThumbnailImagePath[100];
+		WCHAR AItemThumbnailImagePath[100] = { 0 };
 		ADBItemCheck.OutItemType(ADBItemType);
 		ADBItemCheck.OutItemName(AItemName);
 		ADBItemCheck.OutItemCount(AItemCount);
@@ -2066,25 +2097,25 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 
 		// 스왑 요청한 B 아이템이 Inventory에 있는지 확인한다.
 		CDBConnection* BItemCheckDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-		SP::CDBGameServerItemCheck BDBItemCheck(*BItemCheckDBConnection);
-		BDBItemCheck.InAccountDBId(AccountId);
-		BDBItemCheck.InPlayerDBId(PlayerDBId);
-		BDBItemCheck.InSlotIndex(SwapBIndex);
+		SP::CDBGameServerItemCheck DBItemCheck(*BItemCheckDBConnection);
+		DBItemCheck.InAccountDBId(AccountId);
+		DBItemCheck.InPlayerDBId(PlayerDBId);
+		DBItemCheck.InSlotIndex(SwapBIndex);
 
 		int16 BDBItemType = -1;
-		WCHAR BItemName[50];
+		WCHAR BItemName[20] = { 0 };
 		int16 BItemCount = -1;
-		bool BItemEquipped = false;
-		WCHAR BItemThumbnailImagePath[100];
-		BDBItemCheck.OutItemType(BDBItemType);
-		BDBItemCheck.OutItemName(BItemName);
-		BDBItemCheck.OutItemCount(BItemCount);
-		BDBItemCheck.OutItemIsEquipped(BItemEquipped);
-		BDBItemCheck.OutItemThumbnailImagePath(BItemThumbnailImagePath);
+		bool BItemEquipped = false;		
+		WCHAR BItemThumbnailImagePath[100] = { 0 };
+		DBItemCheck.OutItemType(BDBItemType);
+		DBItemCheck.OutItemName(BItemName);
+		DBItemCheck.OutItemCount(BItemCount);
+		DBItemCheck.OutItemIsEquipped(BItemEquipped);
+		DBItemCheck.OutItemThumbnailImagePath(BItemThumbnailImagePath);
 
-		BDBItemCheck.Execute();
+		DBItemCheck.Execute();
 
-		BDBItemCheck.Fetch();
+		DBItemCheck.Fetch();		
 
 		// 스왑 요청할 B 아이템 정보 셋팅
 		st_ItemInfo SwapBItemInfo;
@@ -2160,6 +2191,8 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 
 		G_DBConnectionPool->Push(en_DBConnect::GAME, ItemSwapConnection);
 	}
+
+	ReturnSession(Session);
 }
 
 void CGameServer::PacketProcReqDBGoldSave(int64 SessionId, CMessage* Message)
@@ -2195,7 +2228,7 @@ void CGameServer::PacketProcReqDBGoldSave(int64 SessionId, CMessage* Message)
 		*Message >> ItemType;
 
 		Message->Free();
-
+		
 		CDBConnection* GoldSaveDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 		SP::CDBGameServerGoldPush GoldSavePush(*GoldSaveDBConnection);
 		GoldSavePush.InAccoountId(AccountId);
@@ -2242,113 +2275,110 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 
 	if (Session)
 	{
-		InterlockedDecrement64(&Session->IOBlock->IOCount);
-
-		int64 GoldCoin = 0;
-		int8 SliverCoin = 0;
-		int8 BronzeCoin = 0;
-
-		// 캐릭터가 소유하고 있었던 골드 정보를 GoldTable에서 읽어온다.
-		CDBConnection* DBCharacterGoldGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-		SP::CDBGameServerGoldGet CharacterGoldGet(*DBCharacterGoldGetConnection);
-		CharacterGoldGet.InAccountDBId(Session->MyPlayer->_AccountId);
-		CharacterGoldGet.InPlayerDBId(Session->MyPlayer->_GameObjectInfo.ObjectId);
-
-		CharacterGoldGet.OutGoldCoin(GoldCoin);
-		CharacterGoldGet.OutSliverCoin(SliverCoin);
-		CharacterGoldGet.OutBronzeCoin(BronzeCoin);
-
-		CharacterGoldGet.Execute();
-
-		if (CharacterGoldGet.Fetch())
+		do
 		{
-			// DB에서 읽어온 Gold를 Inventory에 저장한다.
-			Session->MyPlayer->_Inventory._GoldCoinCount = GoldCoin;
-			Session->MyPlayer->_Inventory._SliverCoinCount = SliverCoin;
-			Session->MyPlayer->_Inventory._BronzeCoinCount = BronzeCoin;
+			InterlockedDecrement64(&Session->IOBlock->IOCount);
 
-			// DBConnection 반납하고
-			G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterGoldGetConnection);
+			int64 GoldCoin = 0;
+			int8 SliverCoin = 0;
+			int8 BronzeCoin = 0;
 
-			// 클라에게 골드 정보를 보내준다.
-			CMessage* ResGoldSaveMeesage = MakePacketGoldSave(Session->MyPlayer->_AccountId, Session->MyPlayer->_GameObjectInfo.ObjectId, GoldCoin, SliverCoin, BronzeCoin, 0, 0, false);
-			SendPacket(Session->SessionId, ResGoldSaveMeesage);
-			ResGoldSaveMeesage->Free();
-		}
+			// 캐릭터가 소유하고 있었던 골드 정보를 GoldTable에서 읽어온다.
+			CDBConnection* DBCharacterGoldGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+			SP::CDBGameServerGoldGet CharacterGoldGet(*DBCharacterGoldGetConnection);
+			CharacterGoldGet.InAccountDBId(Session->MyPlayer->_AccountId);
+			CharacterGoldGet.InPlayerDBId(Session->MyPlayer->_GameObjectInfo.ObjectId);
 
-		// 캐릭터가 소유하고 있었던 Item 정보를 ItemTable에서 읽어온다.
-		CDBConnection* DBCharacterInventoryItemGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-		SP::CDBGameServerInventoryItemGet CharacterInventoryItemGet(*DBCharacterInventoryItemGetConnection);
-		CharacterInventoryItemGet.InAccountDBId(Session->MyPlayer->_AccountId);
-		CharacterInventoryItemGet.InPlayerDBId(Session->MyPlayer->_GameObjectInfo.ObjectId);
+			CharacterGoldGet.OutGoldCoin(GoldCoin);
+			CharacterGoldGet.OutSliverCoin(SliverCoin);
+			CharacterGoldGet.OutBronzeCoin(BronzeCoin);			
 
-		int16 DataSheetId;
-		int16 ItemType;
-		int16 ItemCount;
-		int8 SlotIndex;
-		bool IsEquipped;
-
-		CharacterInventoryItemGet.OutDataSheetId(DataSheetId);
-		CharacterInventoryItemGet.OutItemType(ItemType);
-		CharacterInventoryItemGet.OutItemCount(ItemCount);
-		CharacterInventoryItemGet.OutSlotIndex(SlotIndex);
-		CharacterInventoryItemGet.OutIsEquipped(IsEquipped);
-
-		CharacterInventoryItemGet.Execute();
-
-		while (CharacterInventoryItemGet.Fetch())
-		{
-			// 읽어온 데이터를 이용해서 ItemInfo를 조립
-			st_ItemInfo ItemInfo;
-			ItemInfo.ItemCount = ItemCount;
-			ItemInfo.IsEquipped = IsEquipped;
-			ItemInfo.ItemDBId = ItemType;
-			ItemInfo.ItemType = (en_ItemType)ItemType;
-			ItemInfo.SlotIndex = SlotIndex;
-
-			// DataSheetId를 이용해서 Item의 이름과 Item의 썸네일이미지 경로를 알아낸다.
-			auto FindItemIterator = G_Datamanager->_Items.find(DataSheetId);
-			if (FindItemIterator == G_Datamanager->_Items.end())
+			if (CharacterGoldGet.Execute() && CharacterGoldGet.Fetch())
 			{
-				CRASH("PacketProcReqCharacterInfoSend 아이템 발견하지 못함");
-			}
+				// DB에서 읽어온 Gold를 Inventory에 저장한다.
+				Session->MyPlayer->_Inventory._GoldCoinCount = GoldCoin;
+				Session->MyPlayer->_Inventory._SliverCoinCount = SliverCoin;
+				Session->MyPlayer->_Inventory._BronzeCoinCount = BronzeCoin;
 
-			st_ItemData* FindItemData = (*FindItemIterator).second;
-			ItemInfo.ItemName.assign(FindItemData->ItemName.begin(), FindItemData->ItemName.end());
-			ItemInfo.ThumbnailImagePath.assign(FindItemData->ThumbnailImagePath.begin(), FindItemData->ThumbnailImagePath.end());
+				// DBConnection 반납하고
+				G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterGoldGetConnection);
 
-			// ItemType에 따라 아이템을 생성하고
-			CItem* NewItem = nullptr;
-			switch (ItemInfo.ItemType)
-			{
-			case en_ItemType::ITEM_TYPE_SLIMEGEL:
-				NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::SLIME_GEL));
-				break;
-			case en_ItemType::ITEM_TYPE_LEATHER:
-				NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::LEATHER));
-				break;
-			default:
-				CRASH("의도치 않은 ItemType");
-				break;
-			}
+				// 클라에게 골드 정보를 보내준다.
+				CMessage* ResGoldSaveMeesage = MakePacketGoldSave(Session->MyPlayer->_AccountId, Session->MyPlayer->_GameObjectInfo.ObjectId, GoldCoin, SliverCoin, BronzeCoin, 0, 0, false);
+				SendPacket(Session->SessionId, ResGoldSaveMeesage);
+				ResGoldSaveMeesage->Free();
+			}			
 
-			// 위에서 조립한 ItemInfo를 셋팅한다.
-			NewItem->_ItemInfo = ItemInfo;
-			// 인벤토리에 아이템을 추가하고
-			Session->MyPlayer->_Inventory.AddItem(NewItem->_ItemInfo.SlotIndex, NewItem);
+			Session->MyPlayer->_Inventory.Init();
 
-			// 수정해야함
+			// 캐릭터가 소유하고 있었던 Item 정보를 InventoryTable에서 읽어온다.
+			CDBConnection* DBCharacterInventoryItemGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+			SP::CDBGameServerInventoryItemGet CharacterInventoryItemGet(*DBCharacterInventoryItemGetConnection);
+			CharacterInventoryItemGet.InAccountDBId(Session->MyPlayer->_AccountId);
+			CharacterInventoryItemGet.InPlayerDBId(Session->MyPlayer->_GameObjectInfo.ObjectId);
+			
+			int16 ItemType;
+			WCHAR ItemName[20] = { 0 };
+			int16 ItemCount;
 			int8 SlotIndex;
-			Session->MyPlayer->_Inventory.GetEmptySlot(&SlotIndex);
+			bool IsEquipped;
+			WCHAR ItemThumbnailImagePath[100] = { 0 };
+			
+			CharacterInventoryItemGet.OutItemType(ItemType);
+			CharacterInventoryItemGet.OutItemName(ItemName);
+			CharacterInventoryItemGet.OutItemCount(ItemCount);
+			CharacterInventoryItemGet.OutSlotIndex(SlotIndex);
+			CharacterInventoryItemGet.OutIsEquipped(IsEquipped);
+			CharacterInventoryItemGet.OutItemThumbnailImagePath(ItemThumbnailImagePath);
 
-			// 클라에게 아이템 정보를 보내준다.
-			CMessage* ResItemToInventoryPacket = MakePacketResItemToInventory(Session->MyPlayer->_GameObjectInfo.ObjectId, ItemInfo, ItemInfo.ItemCount, false);
-			SendPacket(Session->SessionId, ResItemToInventoryPacket);
-			ResItemToInventoryPacket->Free();
-		}
+			CharacterInventoryItemGet.Execute();
+
+			while (CharacterInventoryItemGet.Fetch())
+			{
+				// 읽어온 데이터를 이용해서 ItemInfo를 조립
+				st_ItemInfo ItemInfo;
+				ItemInfo.ItemDBId = 0;
+				ItemInfo.ItemType = (en_ItemType)ItemType;
+				ItemInfo.ItemName = ItemName;
+				ItemInfo.ItemCount = ItemCount;
+				ItemInfo.SlotIndex = SlotIndex;
+				ItemInfo.IsEquipped = IsEquipped;
+				ItemInfo.ThumbnailImagePath = ItemThumbnailImagePath;
+
+				// ItemType에 따라 아이템을 생성하고
+				CItem* NewItem = nullptr;
+				switch (ItemInfo.ItemType)
+				{
+				case en_ItemType::ITEM_TYPE_NONE:
+					break;
+				case en_ItemType::ITEM_TYPE_SLIMEGEL:
+					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::SLIME_GEL));
+					break;
+				case en_ItemType::ITEM_TYPE_LEATHER:
+					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::LEATHER));
+					break;
+				default:
+					CRASH("의도치 않은 ItemType");
+					break;
+				}
+
+				if (ItemInfo.ItemType != en_ItemType::ITEM_TYPE_NONE)
+				{
+					// 위에서 조립한 ItemInfo를 셋팅한다.
+					NewItem->_ItemInfo = ItemInfo;
+					// 인벤토리에 아이템을 추가하고
+					Session->MyPlayer->_Inventory.AddItem(NewItem->_ItemInfo.SlotIndex, NewItem);
+
+					// 클라에게 아이템 정보를 보내준다.
+					CMessage* ResItemToInventoryPacket = MakePacketResItemToInventory(Session->MyPlayer->_GameObjectInfo.ObjectId, ItemInfo, ItemInfo.ItemCount, false);
+					SendPacket(Session->SessionId, ResItemToInventoryPacket);
+					ResItemToInventoryPacket->Free();
+				}				
+			}
+		} while (0);
+
+		ReturnSession(Session);
 	}
-
-	ReturnSession(Session);
 }
 
 CMessage* CGameServer::MakePacketResClientConnected()
