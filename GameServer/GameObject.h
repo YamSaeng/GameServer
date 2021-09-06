@@ -14,7 +14,7 @@ public:
 
 	CGameObject();
 	CGameObject(st_GameObjectInfo GameObjectInfo);
-	~CGameObject();
+	virtual ~CGameObject();
 
 	virtual void Update();
 	virtual void OnDamaged(CGameObject* Attacker, int32 Damage);
