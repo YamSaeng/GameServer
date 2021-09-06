@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <GameServerDB>
+  <!-- 플레이어 테이블 -->
   <Table name="Player" desc="Player Table">
     <Column name="PlayerDBId" type="BigInt" notnull="true" identity="1,1"/>
     <Column name="AccountDBId" type="BigInt" notnull="true"/>
@@ -50,12 +51,28 @@
     <Column name="OwnerPlayerDBId" type="BigInt" notnull="true"/>        
   </Table>
 
+  <!-- 골드 테이블 -->
   <Table name="Gold" desc="Gold Table">
     <Column name="AccountDBId" type="BigInt" notnull="true"/>
     <Column name="PlayerDBId" type="BigInt" notnull="true"/>
     <Column name="GoldCoin" type="BigInt" notnull="true"/>
     <Column name="SliverCoin" type="TinyInt" notnull="true"/>
-    <Column name="BronzeCoin" type="TinyInt" notnull="true"/>    
+    <Column name="BronzeCoin" type="TinyInt" notnull="true"/>
+    <Index type="clustered">
+      <PrimaryKey/>
+      <Column name="PlayerDBId"/>
+    </Index>
+  </Table>
+
+  <Table name="SKill" desc="Skill Table">
+    <Column name="AccountDBId" type="BigInt" notnull ="true"/>
+    <Column name="PlayerDBId" type="BigInt" notnull ="true"/>
+    <Column name="SkillType" type="SmallInt" notnull ="true"/>
+    <Column name="SkillLevel" type="TinyInt" notnull ="true"/>
+    <Column name="SkillName" type="nvarchar(20)" notnull ="true"/>
+    <Column name="SkillCoolTime" type="int" notnull ="true"/>
+    <Column name="SlotIndex" type="TinyInt" notnull="true"/>
+    <Column name="SkillImagePath" type="nvarchar(100)" notnull="true"/>
   </Table>
   
   <Procedure name="spGetPlayers">
