@@ -6,7 +6,7 @@
       "MonsterStatInfo": [
         {
           "Level": 1,
-          "MaxHP": 50,
+          "MaxHP": 25,
           "Attack": 5,
           "Speed": 4.0,
           "SearchCellDistance": 10,
@@ -26,7 +26,7 @@
           "Probability": 10,
           "ItemDataSheetId": 2002,
           "MinCount": 1,
-          "MaxCount": 20
+          "MaxCount": 10
         }
       ]
     },
@@ -36,7 +36,7 @@
       "MonsterStatInfo": [
         {
           "Level": 1,
-          "MaxHP": 100,
+          "MaxHP": 40,
           "Attack": 10,
           "Speed": 2.0,
           "SearchCellDistance": 15,
@@ -47,11 +47,17 @@
       ],
       "DropData": [
         {
-          "Probability": 20,
+          "Probability": 10,
           "ItemDataSheetId": 2000,
           "MinCount": 1,
           "MaxCount": 1
-        }        
+        },
+        {
+          "Probability": 10,
+          "ItemDataSheetId": 2002,
+          "MinCount": 5,
+          "MaxCount": 20
+        }
       ]
     }
   ]

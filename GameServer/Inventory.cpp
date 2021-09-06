@@ -107,9 +107,9 @@ void CInventory::AddCoin(CItem* Item)
 	}
 }
 
-st_ItemInfo* CInventory::Get(int8 _SlotIndex)
+st_ItemInfo* CInventory::Get(int8 SlotIndex)
 {
-	auto FindItemIterator = _Items.find(_SlotIndex);
+	auto FindItemIterator = _Items.find(SlotIndex);
 	if (FindItemIterator == _Items.end())
 	{
 		return nullptr;

@@ -194,6 +194,7 @@
     <ClInclude Include="RingBuffer.h" />
     <ClInclude Include="Sector.h" />
     <ClInclude Include="SessionInfo.h" />
+    <ClInclude Include="Skill.h" />
     <ClInclude Include="SkillBox.h" />
     <ClInclude Include="Slime.h" />
     <ClInclude Include="Type.h" />
@@ -290,6 +291,7 @@
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Sector.cpp" />
+    <ClCompile Include="Skill.cpp" />
     <ClCompile Include="SkillBox.cpp" />
     <ClCompile Include="Slime.cpp" />
     <ClCompile Include="XmlParser.cpp">
@@ -308,6 +310,7 @@
   <ItemGroup>
     <None Include="ItemData.json" />
     <None Include="MonsterData.json" />
+    <None Include="SkillData.json" />
     <None Include="StatusData.json" />
   </ItemGroup>
   <ItemGroup>

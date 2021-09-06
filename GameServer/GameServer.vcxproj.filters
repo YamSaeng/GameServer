@@ -70,6 +70,9 @@
     <Filter Include="ContentServer\Content\SkillBox">
       <UniqueIdentifier>{269e145b-6171-4f6c-8ef8-8cbf73eb6a3b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ContentServer\Content\SkillBox\Skill">
+      <UniqueIdentifier>{55129a4d-d01c-4121-b387-47d63fac084d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Type.h">
@@ -203,6 +206,9 @@
     <ClInclude Include="SkillBox.h">
       <Filter>ContentServer\Content\SkillBox</Filter>
     </ClInclude>
+    <ClInclude Include="Skill.h">
+      <Filter>ContentServer\Content\SkillBox\Skill</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -285,6 +291,9 @@
     <ClCompile Include="SkillBox.cpp">
       <Filter>ContentServer\Content\SkillBox</Filter>
     </ClCompile>
+    <ClCompile Include="Skill.cpp">
+      <Filter>ContentServer\Content\SkillBox\Skill</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="DBConfig.xml">
@@ -308,6 +317,9 @@
       <Filter>Util\설정 파일\Data</Filter>
     </None>
     <None Include="MonsterData.json">
+      <Filter>Util\설정 파일\Data</Filter>
+    </None>
+    <None Include="SkillData.json">
       <Filter>Util\설정 파일\Data</Filter>
     </None>
   </ItemGroup>

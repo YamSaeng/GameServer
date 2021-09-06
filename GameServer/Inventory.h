@@ -1,6 +1,5 @@
 #pragma once
 #include "Item.h"
-#include "LockFreeStack.h"
 
 class CInventory
 {
@@ -33,7 +32,7 @@ public:
 	//--------------------------
 	// 아이템 반환
 	//--------------------------
-	st_ItemInfo* Get(int8 _SlotIndex);
+	st_ItemInfo* Get(int8 SlotIndex);
 	
 	//-------------------------------------
 	// 인벤토리에 이미 아이템이 있는지 확인

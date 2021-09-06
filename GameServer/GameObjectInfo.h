@@ -77,6 +77,32 @@ enum class en_Inventory : int8
 	INVENTORY_SIZE = 30
 };
 
+enum class en_ItemType : int16
+{
+	ITEM_TYPE_NONE = 0,
+
+	ITEM_TYPE_WEAPON_SWORD = 1,
+
+	ITEM_TYPE_ARMOR_ARMOR = 100,
+	ITEM_TYPE_ARMOR_HELMET = 101,
+
+	ITEM_TYPE_CONSUMABLE_POTION = 200,
+
+	ITEM_TYPE_LEATHER = 2000,
+	ITEM_TYPE_SLIMEGEL = 2001,
+	ITEM_TYPE_BRONZE_COIN = 2002,
+	ITEM_TYPE_SLIVER_COIN = 2003,
+	ITEM_TYPE_GOLD_COIN = 2004
+};
+
+
+enum class en_SkillType : int16
+{
+	KNIGHT_CHOHONE_ATTACK,
+	KNIGHT_SHAEHONE_ATTACK,
+	SHAMAN_FIRE_ATTACK	
+};
+
 struct st_PositionInfo
 {
 	en_CreatureState State;
@@ -125,4 +151,25 @@ struct st_Color
 	static st_Color Green() { return st_Color(0, 127, 0); }
 	static st_Color Blue() { return st_Color(0, 0, 127); }
 	static st_Color White() { return st_Color(127, 127, 127); }
+};
+
+struct st_ItemInfo
+{
+	int64 ItemDBId;				// 아이템 DB에 저장되어 있는 ID		
+	en_ItemType ItemType;		// 아이템 타입
+	wstring ItemName;			// 아이템 이름
+	int16 ItemCount;			// 개수
+	wstring ThumbnailImagePath; // 이미지 경로
+	bool IsEquipped;			// 아이템을 착용할 수 있는지	
+	int8 SlotIndex;				// 슬롯 번호
+};
+
+struct st_SkillInfo
+{
+	en_SkillType _SkillType; // 스킬 종류
+	int8 _SkillLevel;		 // 스킬 레벨
+	wstring _SkillName;		 // 스킬 이름
+	int32 _SkillCoolTime;	 // 스킬 쿨타임
+	int8 SlotIndex;			 // 스킬이 등록되어 있는 슬롯 번호
+	wstring _SkillImagePath; // 스킬 이미지 경로
 };
