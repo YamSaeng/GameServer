@@ -4,7 +4,7 @@
 
 CItem::CItem()
 {
-
+	
 }
 
 void CItem::Update()

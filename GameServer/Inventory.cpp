@@ -1,22 +1,43 @@
 #include "pch.h"
 #include "Inventory.h"
+#include "ObjectManager.h"
 
 CInventory::CInventory()
 {
-	// INVENTORY_SIZE 만큼 할당
-	for (int8 SlotIndex = 0; SlotIndex < INVENTORY_SIZE; SlotIndex++)
-	{
-		_Items.insert(pair<byte, CItem*>(SlotIndex,nullptr));
-	}	
-	
-	_BronzeCoinCount = 0;
-	_SliverCoinCount = 0;
-	_GoldCoinCount = 0;
+
 }
 
 CInventory::~CInventory()
 {
+	for (auto ItemIteraotr : _Items)
+	{
+		st_ItemInfo* Item = ItemIteraotr.second;
+		delete Item;		
+	}
+}
 
+void CInventory::Init()
+{
+	// INVENTORY_SIZE 만큼 할당
+	for (int8 SlotIndex = 0; SlotIndex < (int8)en_Inventory::INVENTORY_SIZE; SlotIndex++)
+	{
+		// 빈껍데기 정보 생성
+		st_ItemInfo* InitItemInfo = new st_ItemInfo();
+		InitItemInfo->ItemDBId = 0;
+		InitItemInfo->ItemType = en_ItemType::ITEM_TYPE_NONE;
+		InitItemInfo->ItemName = L"";
+		InitItemInfo->ItemCount = 0;
+		InitItemInfo->ThumbnailImagePath = L"";
+		InitItemInfo->IsEquipped = false;
+		InitItemInfo->SlotIndex = SlotIndex;
+
+		InitItemInfo->IsEquipped = false;
+		_Items.insert(pair<byte, st_ItemInfo*>(SlotIndex, InitItemInfo));
+	}
+
+	_BronzeCoinCount = 0;
+	_SliverCoinCount = 0;
+	_GoldCoinCount = 0;
 }
 
 void CInventory::AddItem(int8 SlotIndex, CItem* Item)
@@ -33,7 +54,13 @@ void CInventory::AddItem(int8 SlotIndex, CItem* Item)
 		return;
 	}
 
-	(*FindSlotIterator).second = Item;	
+	(*FindSlotIterator).second->ItemDBId = Item->_ItemInfo.ItemDBId;
+	(*FindSlotIterator).second->ItemType = Item->_ItemInfo.ItemType;
+	(*FindSlotIterator).second->ItemName = Item->_ItemInfo.ItemName;
+	(*FindSlotIterator).second->ItemCount = Item->_ItemInfo.ItemCount;
+	(*FindSlotIterator).second->ThumbnailImagePath = Item->_ItemInfo.ThumbnailImagePath;
+	(*FindSlotIterator).second->IsEquipped = Item->_ItemInfo.IsEquipped;
+	(*FindSlotIterator).second->SlotIndex = Item->_ItemInfo.SlotIndex;
 }
 
 void CInventory::AddCoin(CItem* Item)
@@ -80,7 +107,7 @@ void CInventory::AddCoin(CItem* Item)
 	}
 }
 
-CItem* CInventory::Get(int8 _SlotIndex)
+st_ItemInfo* CInventory::Get(int8 _SlotIndex)
 {
 	auto FindItemIterator = _Items.find(_SlotIndex);
 	if (FindItemIterator == _Items.end())
@@ -95,12 +122,12 @@ bool CInventory::IsExistItem(en_ItemType ItemType, int16* Count, int8* SlotIndex
 {
 	for (auto ItemIteraotr : _Items)
 	{
-		CItem* Item = ItemIteraotr.second;
+		st_ItemInfo* Item = ItemIteraotr.second;
 
-		if (Item != nullptr && Item->_ItemInfo.ItemType == ItemType)
+		if (Item != nullptr && Item->ItemType == ItemType)
 		{
-			Item->_ItemInfo.ItemCount += 1;
-			*Count = Item->_ItemInfo.ItemCount;
+			Item->ItemCount += 1;
+			*Count = Item->ItemCount;
 			*SlotIndex = ItemIteraotr.first;
 			return true;
 		}
@@ -113,9 +140,9 @@ bool CInventory::GetEmptySlot(int8* SlotIndex)
 {
 	for (auto ItemIteraotr : _Items)
 	{
-		CItem* Item = ItemIteraotr.second;
+		st_ItemInfo* Item = ItemIteraotr.second;
 
-		if (Item == nullptr)
+		if (Item->ItemType == en_ItemType::ITEM_TYPE_NONE)
 		{
 			*SlotIndex = ItemIteraotr.first;
 			return true;
@@ -130,12 +157,24 @@ void CInventory::SwapItem(st_ItemInfo& SwapAItemInfo, st_ItemInfo& SwapBItemInfo
 	auto FindSwapAItem = _Items.find(SwapAItemInfo.SlotIndex);
 	if (FindSwapAItem != _Items.end())
 	{		
-		(*FindSwapAItem).second->_ItemInfo = SwapAItemInfo;
+		(*FindSwapAItem).second->ItemDBId = SwapAItemInfo.ItemDBId;
+		(*FindSwapAItem).second->ItemType = SwapAItemInfo.ItemType;
+		(*FindSwapAItem).second->ItemName = SwapAItemInfo.ItemName;
+		(*FindSwapAItem).second->ItemCount = SwapAItemInfo.ItemCount;
+		(*FindSwapAItem).second->ThumbnailImagePath = SwapAItemInfo.ThumbnailImagePath;
+		(*FindSwapAItem).second->IsEquipped = SwapAItemInfo.IsEquipped;
+		(*FindSwapAItem).second->SlotIndex = SwapAItemInfo.SlotIndex;		
 	}
 
 	auto FindSwapBItem = _Items.find(SwapBItemInfo.SlotIndex);
 	if (FindSwapBItem != _Items.end())
 	{
-		(*FindSwapBItem).second->_ItemInfo = SwapBItemInfo;
+		(*FindSwapBItem).second->ItemDBId = SwapBItemInfo.ItemDBId;
+		(*FindSwapBItem).second->ItemType = SwapBItemInfo.ItemType;
+		(*FindSwapBItem).second->ItemName = SwapBItemInfo.ItemName;
+		(*FindSwapBItem).second->ItemCount = SwapBItemInfo.ItemCount;
+		(*FindSwapBItem).second->ThumbnailImagePath = SwapBItemInfo.ThumbnailImagePath;
+		(*FindSwapBItem).second->IsEquipped = SwapBItemInfo.IsEquipped;
+		(*FindSwapBItem).second->SlotIndex = SwapBItemInfo.SlotIndex;
 	}
 }

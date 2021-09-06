@@ -6,7 +6,7 @@ enum class en_GameObjectType : int16
 	MELEE_PLAYER,
 	MAGIC_PLAYER,
 	SLIME,
-	BEAR,
+	BEAR,	
 	WEAPON,
 	SLIME_GEL,
 	LEATHER,
@@ -70,6 +70,11 @@ enum class en_ObjectNetworkState : int8
 	READY,
 	LIVE,
 	LEAVE
+};
+
+enum class en_Inventory : int8
+{
+	INVENTORY_SIZE = 30
 };
 
 struct st_PositionInfo

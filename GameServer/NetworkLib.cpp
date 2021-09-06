@@ -476,8 +476,8 @@ unsigned __stdcall CNetworkLib::WorkerThreadProc(void* Argument)
 				// Error값을 확인하고 워커 쓰레드를 종료해준다.
 				if (MyOverlapped == nullptr)
 				{
-					DWORD Error = WSAGetLastError();
-					wprintf(L"MyOverlapped Null %d\n", Error);
+					DWORD GQCSError = WSAGetLastError();
+					wprintf(L"MyOverlapped Null %d\n", GQCSError);
 					return -1;
 				}
 				

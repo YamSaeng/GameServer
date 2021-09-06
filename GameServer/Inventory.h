@@ -2,17 +2,15 @@
 #include "Item.h"
 #include "LockFreeStack.h"
 
-#define INVENTORY_SIZE 30
-
 class CInventory
 {
 private:
 	//---------------------------------------------
 	// 인벤토리가 소유중인 아이템 ( 포인터로 관리 )
 	//---------------------------------------------
-	map<byte, CItem*> _Items;		
-	
-public:
+	map<byte, st_ItemInfo*> _Items;			
+public:	
+
 	//-------------------
 	// 보유하고 있는 동전
 	//-------------------
@@ -23,6 +21,7 @@ public:
 	CInventory();
 	~CInventory();
 	
+	void Init();
 	//------------------------
 	// 인벤토리에 Item 추가
 	//------------------------
@@ -34,7 +33,7 @@ public:
 	//--------------------------
 	// 아이템 반환
 	//--------------------------
-	CItem* Get(int8 _SlotIndex);
+	st_ItemInfo* Get(int8 _SlotIndex);
 	
 	//-------------------------------------
 	// 인벤토리에 이미 아이템이 있는지 확인
