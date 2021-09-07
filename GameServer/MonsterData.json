@@ -23,7 +23,7 @@
           "MaxCount": 1
         },
         {
-          "Probability": 10,
+          "Probability": 20,
           "ItemDataSheetId": 2002,
           "MinCount": 1,
           "MaxCount": 10
@@ -53,7 +53,7 @@
           "MaxCount": 1
         },
         {
-          "Probability": 10,
+          "Probability": 20,
           "ItemDataSheetId": 2002,
           "MinCount": 5,
           "MaxCount": 20

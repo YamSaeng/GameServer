@@ -1803,11 +1803,10 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 	auto FindMonsterDropItem = G_Datamanager->_Monsters.find(MonsterDataType);
 	st_MonsterData MonsterData = *(*FindMonsterDropItem).second;
 
-	random_device RD;
-	mt19937 Gen(RD());
-
-	uniform_int_distribution<int> RandomDropPoint(0, 60);
-	int32 RandomPoint = RandomDropPoint(Gen);
+	random_device RD;	
+	mt19937 Gen(RD());	
+	uniform_real_distribution<float> RandomDropPoint(0, 1); // 0.0 ~ 1.0	
+	float RandomPoint = 100 * RandomDropPoint(Gen);
 
 	int32 Sum = 0;
 
