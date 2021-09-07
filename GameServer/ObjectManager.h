@@ -18,6 +18,7 @@ private:
 	CMemoryPoolTLS<CBear>* _BearMemoryPool;
 	CMemoryPoolTLS<CWeapon>* _WeaponMemoryPool;
 	CMemoryPoolTLS<CMaterial>* _MaterialMemoryPool;
+	CMemoryPoolTLS<CConsumable>* _ConsumableMemoryPool;
 
 	int64 _MonsterObjectId;	
 public:

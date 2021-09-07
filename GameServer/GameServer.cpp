@@ -27,7 +27,7 @@ CGameServer::CGameServer()
 	_NetworkThreadEnd = false;
 	_DataBaseThreadEnd = false;
 
-	_JobMemoryPool = new CMemoryPoolTLS<st_Job>(0);
+	_JobMemoryPool = new CMemoryPoolTLS<st_Job>();
 
 	_AuthThreadTPS = 0;
 	_AuthThreadWakeCount = 0;
@@ -47,7 +47,7 @@ void CGameServer::Start(const WCHAR* OpenIP, int32 Port)
 {
 	CNetworkLib::Start(OpenIP, Port);
 
-	G_ObjectManager->MonsterSpawn(200, 1, en_GameObjectType::SLIME);
+	//G_ObjectManager->MonsterSpawn(200, 1, en_GameObjectType::SLIME);
 	G_ObjectManager->MonsterSpawn(200, 1, en_GameObjectType::BEAR);
 
 	G_ObjectManager->GameServer = this;
@@ -1251,7 +1251,8 @@ void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Messag
 					*DBSaveMessage << Item->_ItemInfo.IsEquipped;
 					// 아이템 타입
 					*DBSaveMessage << (int16)Item->_ItemInfo.ItemType;
-
+					// 아이템 소비 타입
+					*DBSaveMessage << (int16)Item->_ItemInfo.ItemConsumableType;
 					// AccoountId
 					*DBSaveMessage << TargetPlayer->_AccountId;
 
@@ -1738,8 +1739,9 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 				CDBConnection* DBItemToInventoryConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 				SP::CDBGameServerItemCreateToInventory ItemToInventory(*DBItemToInventoryConnection);
 				st_ItemInfo NewItem;
-				NewItem.ItemDBId = 0;
+				NewItem.ItemDBId = 0;				
 				NewItem.ItemType = en_ItemType::ITEM_TYPE_NONE;
+				NewItem.ItemConsumableType = en_ConsumableType::NONE;
 				NewItem.ItemName = L"";
 				NewItem.ItemCount = 0;
 				NewItem.SlotIndex = SlotIndex;
@@ -1747,8 +1749,10 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 				NewItem.ThumbnailImagePath = L"";				
 
 				int16 ItemType = (int16)NewItem.ItemType;
+				int16 ItemConsumableType = (int16)NewItem.ItemConsumableType;
 
 				ItemToInventory.InItemType(ItemType);
+				ItemToInventory.InItemConsumableType(ItemConsumableType);
 				ItemToInventory.InItemName(NewItem.ItemName);
 				ItemToInventory.InItemCount(NewItem.ItemCount);
 				ItemToInventory.InSlotIndex(SlotIndex);
@@ -1838,7 +1842,8 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 	{
 		st_ItemInfo NewItemInfo;
 
-		NewItemInfo.ItemType = DropItemData.ItemType;
+		NewItemInfo.ItemType = DropItemData.ItemType;		
+		NewItemInfo.ItemConsumableType = DropItemData.ItemConsumableType;
 		NewItemInfo.ItemName = (LPWSTR)CA2W(DropItemData.ItemName.c_str());
 		NewItemInfo.ItemCount = DropItemData.ItemCount;
 		NewItemInfo.IsEquipped = false;
@@ -1851,9 +1856,12 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 		SP::CDBGameServerCreateItem CreateItem(*DBCreateItemConnection);
 
 		int16 ItemType = (int16)NewItemInfo.ItemType;
+		int16 ItemConsumableeType = (int16)NewItemInfo.ItemConsumableType;
+
 		bool ItemUse = false;
 		CreateItem.InItemUse(ItemUse);
 		CreateItem.InItemType(ItemType);
+		CreateItem.InItemConsumableType(ItemConsumableeType);
 		CreateItem.InItemName(NewItemInfo.ItemName);
 		CreateItem.InItemCount(NewItemInfo.ItemCount);
 		CreateItem.InIsEquipped(NewItemInfo.IsEquipped);
@@ -1890,6 +1898,9 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 					break;
 				case en_ItemType::ITEM_TYPE_BRONZE_COIN:
 					GameObjectType = en_GameObjectType::BRONZE_COIN;
+					break;
+				case en_ItemType::ITEM_TYPE_SKILL_BOOK:
+					GameObjectType = en_GameObjectType::SKILL_BOOK;
 					break;
 				default:
 					break;
@@ -1955,11 +1966,15 @@ void CGameServer::PacketProcReqDBItemToInventorySave(int64 SessionId, CMessage* 
 		int16 ItemType;
 		*Message >> ItemType;
 
+		int16 ItemConsumableType;
+		*Message >> ItemConsumableType;
+
 		int64 OwnerAccountId;
 		*Message >> OwnerAccountId;
 
 		st_ItemInfo ItemInfo;
 		ItemInfo.ItemType = (en_ItemType)(ItemType);
+		ItemInfo.ItemConsumableType = (en_ConsumableType)(ItemConsumableType);
 		ItemInfo.ItemCount = ItemCount;
 		ItemInfo.SlotIndex = SlotIndex;
 		ItemInfo.ItemDBId = ItemDBId;
@@ -1998,6 +2013,7 @@ void CGameServer::PacketProcReqDBItemToInventorySave(int64 SessionId, CMessage* 
 			// 새로운 아이템 생성 후 Inventory DB 넣기			
 			SP::CDBGameServerItemToInventoryPush ItemToInventoryPush(*ItemToInventorySaveDBConnection);
 			ItemToInventoryPush.InItemType(ItemType);
+			ItemToInventoryPush.InItemConsumableType(ItemConsumableType);
 			ItemToInventoryPush.InItemName(ItemName);
 			ItemToInventoryPush.InItemCount(ItemCount);
 			ItemToInventoryPush.InSlotIndex(SlotIndex);
@@ -2069,11 +2085,13 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		ADBItemCheck.InSlotIndex(SwapAIndex);
 
 		int16 ADBItemType = -1;
+		int16 ADBItemConsumableType = -1;
 		WCHAR AItemName[20] = { 0 };
 		int16 AItemCount = -1;
 		bool AItemEquipped = false;
 		WCHAR AItemThumbnailImagePath[100] = { 0 };
 		ADBItemCheck.OutItemType(ADBItemType);
+		ADBItemCheck.OutItemConsumableType(ADBItemConsumableType);
 		ADBItemCheck.OutItemName(AItemName);
 		ADBItemCheck.OutItemCount(AItemCount);
 		ADBItemCheck.OutItemIsEquipped(AItemEquipped);
@@ -2087,6 +2105,7 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		st_ItemInfo SwapAItemInfo;
 		SwapAItemInfo.SlotIndex = SwapAIndex;
 		SwapAItemInfo.ItemType = (en_ItemType)ADBItemType;
+		SwapAItemInfo.ItemConsumableType = (en_ConsumableType)ADBItemConsumableType;
 		SwapAItemInfo.ItemName = AItemName;
 		SwapAItemInfo.ItemCount = AItemCount;
 		SwapAItemInfo.IsEquipped = AItemEquipped;
@@ -2102,11 +2121,14 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		DBItemCheck.InSlotIndex(SwapBIndex);
 
 		int16 BDBItemType = -1;
+		int16 BDBItemConsumableType = -1;
 		WCHAR BItemName[20] = { 0 };
 		int16 BItemCount = -1;
 		bool BItemEquipped = false;		
 		WCHAR BItemThumbnailImagePath[100] = { 0 };
+
 		DBItemCheck.OutItemType(BDBItemType);
+		DBItemCheck.OutItemConsumableType(BDBItemConsumableType);
 		DBItemCheck.OutItemName(BItemName);
 		DBItemCheck.OutItemCount(BItemCount);
 		DBItemCheck.OutItemIsEquipped(BItemEquipped);
@@ -2120,6 +2142,7 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		st_ItemInfo SwapBItemInfo;
 		SwapBItemInfo.SlotIndex = SwapBIndex;
 		SwapBItemInfo.ItemType = (en_ItemType)BDBItemType;
+		SwapBItemInfo.ItemConsumableType = (en_ConsumableType)BDBItemConsumableType;
 		SwapBItemInfo.ItemName = BItemName;
 		SwapBItemInfo.ItemCount = BItemCount;
 		SwapBItemInfo.IsEquipped = BItemEquipped;
@@ -2130,6 +2153,7 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		// 스왑 하기 위해서 임시 Temp 변수 생성
 		st_ItemInfo Temp;
 		Temp.ItemType = SwapAItemInfo.ItemType;
+		Temp.ItemConsumableType = SwapAItemInfo.ItemConsumableType;
 		Temp.ItemName = SwapAItemInfo.ItemName;
 		Temp.ItemCount = SwapAItemInfo.ItemCount;
 		Temp.IsEquipped = SwapAItemInfo.IsEquipped;
@@ -2138,6 +2162,7 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		// 데이터 스왑
 		SwapAItemInfo.ItemDBId = 0;
 		SwapAItemInfo.ItemType = SwapBItemInfo.ItemType;
+		SwapAItemInfo.ItemConsumableType = SwapBItemInfo.ItemConsumableType;
 		SwapAItemInfo.ItemName = SwapBItemInfo.ItemName;
 		SwapAItemInfo.ItemCount = SwapBItemInfo.ItemCount;
 		SwapAItemInfo.IsEquipped = SwapBItemInfo.IsEquipped;
@@ -2145,6 +2170,7 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 
 		SwapBItemInfo.ItemDBId = 0;
 		SwapBItemInfo.ItemType = Temp.ItemType;
+		SwapBItemInfo.ItemConsumableType = Temp.ItemConsumableType;
 		SwapBItemInfo.ItemName = Temp.ItemName;
 		SwapBItemInfo.ItemCount = Temp.ItemCount;
 		SwapBItemInfo.IsEquipped = Temp.IsEquipped;
@@ -2160,6 +2186,7 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		ItemSwap.InPlayerDBId(PlayerDBId);
 
 		ItemSwap.InAItemType(AItemType);
+		ItemSwap.InAItemConsumableType(ADBItemConsumableType);
 		ItemSwap.InAItemName(SwapAItemInfo.ItemName);
 		ItemSwap.InAItemCount(SwapAItemInfo.ItemCount);
 		ItemSwap.InAItemIsEquipped(SwapAItemInfo.IsEquipped);
@@ -2167,6 +2194,7 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		ItemSwap.InAItemSlotIndex(SwapAItemInfo.SlotIndex);
 
 		ItemSwap.InBItemType(BItemType);
+		ItemSwap.InBItemConsumableType(BDBItemConsumableType);
 		ItemSwap.InBItemName(SwapBItemInfo.ItemName);
 		ItemSwap.InBItemCount(SwapBItemInfo.ItemCount);
 		ItemSwap.InBItemIsEquipped(SwapBItemInfo.IsEquipped);
@@ -2317,6 +2345,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			CharacterInventoryItemGet.InPlayerDBId(Session->MyPlayer->_GameObjectInfo.ObjectId);
 			
 			int16 ItemType;
+			int16 ItemConsumableType;
 			WCHAR ItemName[20] = { 0 };
 			int16 ItemCount;
 			int8 SlotIndex;
@@ -2324,6 +2353,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			WCHAR ItemThumbnailImagePath[100] = { 0 };
 			
 			CharacterInventoryItemGet.OutItemType(ItemType);
+			CharacterInventoryItemGet.OutItemConsumableType(ItemConsumableType);
 			CharacterInventoryItemGet.OutItemName(ItemName);
 			CharacterInventoryItemGet.OutItemCount(ItemCount);
 			CharacterInventoryItemGet.OutSlotIndex(SlotIndex);
@@ -2355,6 +2385,9 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					break;
 				case en_ItemType::ITEM_TYPE_LEATHER:
 					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::LEATHER));
+					break;
+				case en_ItemType::ITEM_TYPE_SKILL_BOOK:
+					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::SKILL_BOOK));
 					break;
 				default:
 					CRASH("의도치 않은 ItemType");
@@ -2653,11 +2686,12 @@ CMessage* CGameServer::MakePacketResItemSwap(int64 AccountId, int64 ObjectId, st
 	*ResItemSwapMessage << ObjectId;
 
 	// AItemInfo	
-	*ResItemSwapMessage << SwapAItemInfo.ItemDBId;
+	*ResItemSwapMessage << SwapAItemInfo.ItemDBId;	
+	*ResItemSwapMessage << (int16)SwapAItemInfo.ItemType;
+	*ResItemSwapMessage << (int16)SwapAItemInfo.ItemConsumableType;
 	*ResItemSwapMessage << SwapAItemInfo.ItemCount;
 	*ResItemSwapMessage << SwapAItemInfo.SlotIndex;
-	*ResItemSwapMessage << SwapAItemInfo.IsEquipped;
-	*ResItemSwapMessage << (int16)SwapAItemInfo.ItemType;
+	*ResItemSwapMessage << SwapAItemInfo.IsEquipped;	
 
 	// AItem 이름
 	int8 AItemNameLen = (int8)(SwapAItemInfo.ItemName.length() * 2);
@@ -2671,10 +2705,11 @@ CMessage* CGameServer::MakePacketResItemSwap(int64 AccountId, int64 ObjectId, st
 
 	// BItemInfo	
 	*ResItemSwapMessage << SwapBItemInfo.ItemDBId;
+	*ResItemSwapMessage << (int16)SwapBItemInfo.ItemType;
+	*ResItemSwapMessage << (int16)SwapBItemInfo.ItemConsumableType;
 	*ResItemSwapMessage << SwapBItemInfo.ItemCount;
 	*ResItemSwapMessage << SwapBItemInfo.SlotIndex;
-	*ResItemSwapMessage << SwapBItemInfo.IsEquipped;
-	*ResItemSwapMessage << (int16)SwapBItemInfo.ItemType;
+	*ResItemSwapMessage << SwapBItemInfo.IsEquipped;	
 
 	// BItem 이름
 	int8 BItemNameLen = (int8)(SwapBItemInfo.ItemName.length() * 2);
@@ -2935,10 +2970,11 @@ CMessage* CGameServer::MakePacketResItemToInventory(int64 TargetObjectId, st_Ite
 	*ResItemToInventoryMessage << TargetObjectId;
 	// ItemInfo
 	*ResItemToInventoryMessage << ItemInfo.ItemDBId;
+	*ResItemToInventoryMessage << (int16)ItemInfo.ItemType;
+	*ResItemToInventoryMessage << (int16)ItemInfo.ItemConsumableType;
 	*ResItemToInventoryMessage << ItemInfo.ItemCount;
 	*ResItemToInventoryMessage << ItemInfo.SlotIndex;
-	*ResItemToInventoryMessage << ItemInfo.IsEquipped;
-	*ResItemToInventoryMessage << (int16)ItemInfo.ItemType;
+	*ResItemToInventoryMessage << ItemInfo.IsEquipped;	
 
 	// Item 이름
 	int8 ItemNameLen = (int8)(ItemInfo.ItemName.length() * 2);

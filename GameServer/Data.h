@@ -12,6 +12,7 @@ struct st_ItemData
 	int32 DataSheetId;
 	string ItemName;
 	en_ItemType ItemType; 
+	en_ConsumableType ItemConsumableType;
 	string ThumbnailImagePath;
 	bool IsEquipped;
 	int16 ItemCount;

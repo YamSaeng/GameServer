@@ -35,6 +35,14 @@
       "MaxCount": 10,
       "IsEquipped": false,
       "ImageFilePath": "Textures/Potion/Red Potion"
+    },
+    {
+      "DataSheetId": 300,
+      "Name": "초혼비무 스킬책",
+      "ConsumableType": "SkillBook",
+      "MaxCount": 1,
+      "IsEquipped": false,
+      "ImageFilePath": "Textures/SkillBook/ChoHoneSkillBook"
     }
   ],
   "Material": [

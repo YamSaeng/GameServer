@@ -400,6 +400,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	case en_GameObjectType::SLIME_GEL:
 	case en_GameObjectType::BRONZE_COIN:
 	case en_GameObjectType::LEATHER:
+	case en_GameObjectType::SKILL_BOOK:
 	{
 		CItem* MoveItem = (CItem*)GameObject;
 
@@ -526,7 +527,8 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 	
 	if (GameObject->_GameObjectInfo.ObjectType == en_GameObjectType::SLIME_GEL 
 		|| GameObject->_GameObjectInfo.ObjectType == en_GameObjectType::LEATHER
-		|| GameObject->_GameObjectInfo.ObjectType == en_GameObjectType::BRONZE_COIN)
+		|| GameObject->_GameObjectInfo.ObjectType == en_GameObjectType::BRONZE_COIN
+		|| GameObject->_GameObjectInfo.ObjectType == en_GameObjectType::SKILL_BOOK)
 	{
 		return true;
 	}

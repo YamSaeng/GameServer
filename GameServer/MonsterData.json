@@ -6,8 +6,9 @@
       "MonsterStatInfo": [
         {
           "Level": 1,
-          "MaxHP": 25,
+          "MaxHP": 40,
           "Attack": 5,
+          "CriticalPoint": 50,
           "Speed": 4.0,
           "SearchCellDistance": 10,
           "ChaseCellDistance": 10,
@@ -36,8 +37,9 @@
       "MonsterStatInfo": [
         {
           "Level": 1,
-          "MaxHP": 40,
+          "MaxHP": 80,
           "Attack": 10,
+          "CriticalPoint": 100,
           "Speed": 2.0,
           "SearchCellDistance": 15,
           "ChaseCellDistance": 28,
@@ -57,6 +59,12 @@
           "ItemDataSheetId": 2002,
           "MinCount": 5,
           "MaxCount": 20
+        },
+        {
+          "Probability": 1,
+          "ItemDataSheetId": 300,
+          "MinCount": 1,
+          "MaxCount": 1
         }
       ]
     }

@@ -25,6 +25,7 @@ void CInventory::Init()
 		st_ItemInfo* InitItemInfo = new st_ItemInfo();
 		InitItemInfo->ItemDBId = 0;
 		InitItemInfo->ItemType = en_ItemType::ITEM_TYPE_NONE;
+		InitItemInfo->ItemConsumableType = en_ConsumableType::NONE;
 		InitItemInfo->ItemName = L"";
 		InitItemInfo->ItemCount = 0;
 		InitItemInfo->ThumbnailImagePath = L"";
@@ -159,6 +160,7 @@ void CInventory::SwapItem(st_ItemInfo& SwapAItemInfo, st_ItemInfo& SwapBItemInfo
 	{		
 		(*FindSwapAItem).second->ItemDBId = SwapAItemInfo.ItemDBId;
 		(*FindSwapAItem).second->ItemType = SwapAItemInfo.ItemType;
+		(*FindSwapAItem).second->ItemConsumableType = SwapAItemInfo.ItemConsumableType;
 		(*FindSwapAItem).second->ItemName = SwapAItemInfo.ItemName;
 		(*FindSwapAItem).second->ItemCount = SwapAItemInfo.ItemCount;
 		(*FindSwapAItem).second->ThumbnailImagePath = SwapAItemInfo.ThumbnailImagePath;
@@ -171,6 +173,7 @@ void CInventory::SwapItem(st_ItemInfo& SwapAItemInfo, st_ItemInfo& SwapBItemInfo
 	{
 		(*FindSwapBItem).second->ItemDBId = SwapBItemInfo.ItemDBId;
 		(*FindSwapBItem).second->ItemType = SwapBItemInfo.ItemType;
+		(*FindSwapBItem).second->ItemConsumableType = SwapBItemInfo.ItemConsumableType;
 		(*FindSwapBItem).second->ItemName = SwapBItemInfo.ItemName;
 		(*FindSwapBItem).second->ItemCount = SwapBItemInfo.ItemCount;
 		(*FindSwapBItem).second->ThumbnailImagePath = SwapBItemInfo.ThumbnailImagePath;

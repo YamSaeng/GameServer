@@ -12,7 +12,8 @@ enum class en_GameObjectType : int16
 	LEATHER,
 	BRONZE_COIN,
 	SLIVER_COIN,
-	GOLD_COIN
+	GOLD_COIN,
+	SKILL_BOOK
 };
 
 enum class en_MoveDir : int8
@@ -87,6 +88,7 @@ enum class en_ItemType : int16
 	ITEM_TYPE_ARMOR_HELMET = 101,
 
 	ITEM_TYPE_CONSUMABLE_POTION = 200,
+	ITEM_TYPE_SKILL_BOOK = 300,
 
 	ITEM_TYPE_LEATHER = 2000,
 	ITEM_TYPE_SLIMEGEL = 2001,
@@ -95,12 +97,18 @@ enum class en_ItemType : int16
 	ITEM_TYPE_GOLD_COIN = 2004
 };
 
-
 enum class en_SkillType : int16
 {
 	KNIGHT_CHOHONE_ATTACK,
 	KNIGHT_SHAEHONE_ATTACK,
 	SHAMAN_FIRE_ATTACK	
+};
+
+enum class en_ConsumableType : int16
+{
+	NONE,
+	POTION,
+	SKILL_BOOK
 };
 
 struct st_PositionInfo
@@ -135,28 +143,30 @@ struct st_GameObjectInfo
 
 struct st_Color
 {
-	int8 _Red;
-	int8 _Green;
-	int8 _Blue;
+	int16 _Red;
+	int16 _Green;
+	int16 _Blue;
 
 	st_Color() {}
-	st_Color(int8 Red, int8 Green, int8 Blue)
+	st_Color(int16 Red, int16 Green, int16 Blue)
 	{
 		_Red = Red;
 		_Green = Green;
 		_Blue = Blue;
 	}
 
-	static st_Color Red() { return st_Color(127, 0, 0); }
-	static st_Color Green() { return st_Color(0, 127, 0); }
-	static st_Color Blue() { return st_Color(0, 0, 127); }
-	static st_Color White() { return st_Color(127, 127, 127); }
+	static st_Color Red() { return st_Color(255, 0, 0); }
+	static st_Color Green() { return st_Color(0, 255, 0); }
+	static st_Color Blue() { return st_Color(0, 0, 255); }
+	static st_Color Yellow() { return st_Color(255, 212, 255); }
+	static st_Color White() { return st_Color(255, 255, 255); }
 };
 
 struct st_ItemInfo
 {
 	int64 ItemDBId;				// 아이템 DB에 저장되어 있는 ID		
 	en_ItemType ItemType;		// 아이템 타입
+	en_ConsumableType ItemConsumableType;	// 소비용 아이템인지
 	wstring ItemName;			// 아이템 이름
 	int16 ItemCount;			// 개수
 	wstring ThumbnailImagePath; // 이미지 경로

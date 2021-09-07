@@ -16,6 +16,7 @@ CSlime::CSlime()
 	// 스탯 셋팅	
 	_GameObjectInfo.ObjectName = (LPWSTR)CA2W(MonsterData._MonsterName.c_str());
 	_GameObjectInfo.ObjectStatInfo.Attack = MonsterData._MonsterStatInfo.Attack;
+	_GameObjectInfo.ObjectStatInfo.CriticalPoint = MonsterData._MonsterStatInfo.CriticalPoint;
 	_GameObjectInfo.ObjectStatInfo.MaxHP = MonsterData._MonsterStatInfo.MaxHP;
 	_GameObjectInfo.ObjectStatInfo.HP = MonsterData._MonsterStatInfo.MaxHP;
 	_GameObjectInfo.ObjectStatInfo.Level = MonsterData._MonsterStatInfo.Level;
@@ -144,9 +145,21 @@ void CSlime::UpdateAttack()
 			return;
 		}
 
-		// 데미지 적용
-		_Target->OnDamaged(this, _GameObjectInfo.ObjectStatInfo.Attack);
-		BroadCastPacket(en_PACKET_S2C_ATTACK);
+		// 데미지 적용		
+		random_device Seed;
+		default_random_engine Eng(Seed());
+
+		float CriticalPoint = _GameObjectInfo.ObjectStatInfo.CriticalPoint / 1000.0f;
+		bernoulli_distribution CriticalCheck(CriticalPoint);
+		bool IsCritical = CriticalCheck(Eng);
+
+		int32 Damage = IsCritical ? _GameObjectInfo.ObjectStatInfo.Attack * 2 : _GameObjectInfo.ObjectStatInfo.Attack;
+		_Target->OnDamaged(this, Damage);
+
+		CMessage* ResSlimeAttackPacket = G_ObjectManager->GameServer->MakePacketResAttack(_GameObjectInfo.ObjectId, _Target->_GameObjectInfo.ObjectId, en_AttackType::SLIME_NORMAL_ATTACK, Damage, IsCritical);
+		G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResSlimeAttackPacket);
+		ResSlimeAttackPacket->Free();
+
 		// 주위 플레이어들에게 데미지 적용 결과 전송
 		BroadCastPacket(en_PACKET_S2C_CHANGE_HP);
 
@@ -158,7 +171,7 @@ void CSlime::UpdateAttack()
 		
 		wstring SlimeAttackString = SlimeAttackMessage;
 
-		CMessage* ResSlimeSystemMessage = G_ObjectManager->GameServer->MakePacketResChattingMessage(_Target->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, st_Color::Red(), SlimeAttackString);
+		CMessage* ResSlimeSystemMessage = G_ObjectManager->GameServer->MakePacketResChattingMessage(_Target->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, IsCritical ? st_Color::Red() : st_Color::White(), IsCritical ? L"치명타! " + SlimeAttackString : SlimeAttackString);
 		G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResSlimeSystemMessage);
 		ResSlimeSystemMessage->Free();
 	}

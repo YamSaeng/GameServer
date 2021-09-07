@@ -138,9 +138,6 @@ void CGameObject::BroadCastPacket(en_PACKET_TYPE PacketType)
 			_GameObjectInfo.ObjectType,
 			_GameObjectInfo.ObjectPositionInfo.State);
 		break;
-	case en_PACKET_TYPE::en_PACKET_S2C_ATTACK:
-		ResPacket = G_ObjectManager->GameServer->MakePacketResAttack(_GameObjectInfo.ObjectId, _Target->_GameObjectInfo.ObjectId, en_AttackType::BEAR_NORMAL_ATTACK, _GameObjectInfo.ObjectStatInfo.Attack, false);
-		break;
 	case en_PACKET_TYPE::en_PACKET_S2C_MAGIC_ATTACK:
 		ResPacket = G_ObjectManager->GameServer->MakePacketResMagic(_GameObjectInfo.ObjectId);
 		break;

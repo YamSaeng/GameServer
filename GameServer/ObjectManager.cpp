@@ -3,14 +3,14 @@
 
 CObjectManager::CObjectManager()
 {
-	_PlayerMemoryPool = new CMemoryPoolTLS<CPlayer>(0);
-	_SlimeMemoryPool = new CMemoryPoolTLS<CSlime>(0);
-	_BearMemoryPool = new CMemoryPoolTLS<CBear>(0);
-	_WeaponMemoryPool = new CMemoryPoolTLS<CWeapon>(0);
-	_MaterialMemoryPool = new CMemoryPoolTLS<CMaterial>(0);
+	_PlayerMemoryPool = new CMemoryPoolTLS<CPlayer>();
+	_SlimeMemoryPool = new CMemoryPoolTLS<CSlime>();
+	_BearMemoryPool = new CMemoryPoolTLS<CBear>();
+	_WeaponMemoryPool = new CMemoryPoolTLS<CWeapon>();
+	_MaterialMemoryPool = new CMemoryPoolTLS<CMaterial>();
+	_ConsumableMemoryPool = new CMemoryPoolTLS<CConsumable>();
 
-	_MonsterId = 10000;
-	_ItemId = 100000;
+	_MonsterObjectId = 10000;	
 }
 
 void CObjectManager::Add(CGameObject* AddObject, int32 ChannelId)
@@ -24,7 +24,8 @@ void CObjectManager::Add(CGameObject* AddObject, int32 ChannelId)
 	
 	switch (AddObject->_GameObjectInfo.ObjectType)
 	{
-		case en_GameObjectType::PLAYER:
+		case en_GameObjectType::MELEE_PLAYER:
+		case en_GameObjectType::MAGIC_PLAYER:
 			{
 				CPlayer* Player = (CPlayer*)AddObject;
 				// 채널 입장
@@ -52,19 +53,23 @@ void CObjectManager::Add(CGameObject* AddObject, int32 ChannelId)
 			break;		
 		case en_GameObjectType::SLIME_GEL:
 		case en_GameObjectType::BRONZE_COIN:
+		case en_GameObjectType::LEATHER:
+		case en_GameObjectType::SKILL_BOOK:
 			{
 				vector<st_GameObjectInfo> SpawnItem;
 				
-				CItem* Item = (CItem*)AddObject;
-
-				EnterChannel->EnterChannel(AddObject, &Item->_OwnerPosition);
+				CItem* Item = (CItem*)AddObject;								
+				EnterChannel->EnterChannel(AddObject, &Item->_SpawnPosition);
 
 				_Items.insert(pair<int64, CItem*>(AddObject->_GameObjectInfo.ObjectId,Item));
 
 				SpawnItem.push_back(Item->_GameObjectInfo);
 
+				Item->SetDestoryTime(1800);
+				Item->ItemSetTarget(Item->_GameObjectInfo.OwnerObjectType, Item->_GameObjectInfo.OwnerObjectId);
+
 				CMessage* ResSpawnPacket = GameServer->MakePacketResSpawn(1, SpawnItem);
-				GameServer->SendPacketAroundSector(Item->_OwnerPosition, ResSpawnPacket);
+				GameServer->SendPacketAroundSector(Item->GetCellPosition(), ResSpawnPacket);
 				ResSpawnPacket->Free();
 			}
 			break;
@@ -74,21 +79,26 @@ void CObjectManager::Add(CGameObject* AddObject, int32 ChannelId)
 bool CObjectManager::Remove(CGameObject* RemoveObject, int32 _ChannelId, bool IsObjectReturn)
 {
 	bool RemoveSuccess = false;
-
+	
 	// 타입에 따라 관리당하고 있는 자료구조에서 자신을 삭제
 	// 채널에서 삭제
 	switch (RemoveObject->_GameObjectInfo.ObjectType)
 	{
-	case en_GameObjectType::PLAYER:
+	case en_GameObjectType::MELEE_PLAYER:
+	case en_GameObjectType::MAGIC_PLAYER:
 		_Players.erase(RemoveObject->_GameObjectInfo.ObjectId);
 		break;;
 	case en_GameObjectType::SLIME:
 	case en_GameObjectType::BEAR:
-		_Monsters.erase(RemoveObject->_GameObjectInfo.ObjectId);			
+		_Monsters.erase(RemoveObject->_GameObjectInfo.ObjectId);
+
+		RemoveObject->_Channel->LeaveChannel(RemoveObject);
 		break;	
 	case en_GameObjectType::WEAPON:
 	case en_GameObjectType::SLIME_GEL:
 	case en_GameObjectType::BRONZE_COIN:
+	case en_GameObjectType::LEATHER:
+	case en_GameObjectType::SKILL_BOOK:
 		_Items.erase(RemoveObject->_GameObjectInfo.ObjectId);
 
 		RemoveObject->_Channel->LeaveChannel(RemoveObject);
@@ -107,8 +117,9 @@ bool CObjectManager::Remove(CGameObject* RemoveObject, int32 _ChannelId, bool Is
 CGameObject* CObjectManager::Find(int64 ObjectId, en_GameObjectType GameObjectType)
 {	
 	switch (GameObjectType)
-	{	
-	case PLAYER:
+	{
+	case en_GameObjectType::MELEE_PLAYER:
+	case en_GameObjectType::MAGIC_PLAYER:
 	{
 		auto FindIterator = _Players.find(ObjectId);
 		if (FindIterator == _Players.end())
@@ -118,15 +129,22 @@ CGameObject* CObjectManager::Find(int64 ObjectId, en_GameObjectType GameObjectTy
 
 		return (*FindIterator).second;
 	}
-		break;
-	case SLIME:
-		break;
-	case BEAR:
-		break;
-	case WEAPON:		
-	case SLIME_GEL:		
-	case LEATHER:
-	case BRONZE_COIN:	
+	case en_GameObjectType::SLIME:
+	case en_GameObjectType::BEAR:
+	{
+		auto FindIterator = _Monsters.find(ObjectId);
+		if (FindIterator == _Monsters.end())
+		{
+			return nullptr;
+		}
+
+		return (*FindIterator).second;
+	}
+	case en_GameObjectType::WEAPON:
+	case en_GameObjectType::SLIME_GEL:
+	case en_GameObjectType::LEATHER:
+	case en_GameObjectType::BRONZE_COIN:
+	case en_GameObjectType::SKILL_BOOK:
 	{
 		auto FindIterator = _Items.find(ObjectId);
 		if (FindIterator == _Items.end())
@@ -135,7 +153,7 @@ CGameObject* CObjectManager::Find(int64 ObjectId, en_GameObjectType GameObjectTy
 		}
 
 		return (*FindIterator).second;
-	}		
+	}	
 	default:
 		return nullptr;
 	}
@@ -147,7 +165,8 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 
 	switch (ObjectType)
 	{
-	case en_GameObjectType::PLAYER:
+	case en_GameObjectType::MELEE_PLAYER:
+	case en_GameObjectType::MAGIC_PLAYER:
 		NewObject = _PlayerMemoryPool->Alloc();
 		break;
 	case en_GameObjectType::SLIME:
@@ -161,7 +180,11 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 		break;
 	case en_GameObjectType::SLIME_GEL:
 	case en_GameObjectType::BRONZE_COIN:
+	case en_GameObjectType::LEATHER:
 		NewObject = _MaterialMemoryPool->Alloc();
+		break;
+	case en_GameObjectType::SKILL_BOOK:
+		NewObject = _ConsumableMemoryPool->Alloc();
 		break;
 	}
 
@@ -172,7 +195,8 @@ void CObjectManager::ObjectReturn(en_GameObjectType ObjectType, CGameObject* Ret
 {
 	switch (ObjectType)
 	{
-	case en_GameObjectType::PLAYER:
+	case en_GameObjectType::MELEE_PLAYER:
+	case en_GameObjectType::MAGIC_PLAYER:
 		_PlayerMemoryPool->Free((CPlayer*)ReturnObject);
 		break;
 	case en_GameObjectType::SLIME:
@@ -189,6 +213,9 @@ void CObjectManager::ObjectReturn(en_GameObjectType ObjectType, CGameObject* Ret
 	case en_GameObjectType::LEATHER:
 		_MaterialMemoryPool->Free((CMaterial*)ReturnObject);
 		break;
+	case en_GameObjectType::SKILL_BOOK:
+		_ConsumableMemoryPool->Free((CConsumable*)ReturnObject);
+		break;
 	}		
 }
 
@@ -199,43 +226,38 @@ void CObjectManager::MonsterSpawn(int32 MonsterCount, int32 ChannelId, en_GameOb
 		CMonster* NewMonster = nullptr;
 		switch (MonsterType)
 		{
-		case SLIME:
+		case en_GameObjectType::SLIME:
 			NewMonster = (CSlime*)ObjectCreate(en_GameObjectType::SLIME);
 			break;
-		case BEAR:
+		case en_GameObjectType::BEAR:
 			NewMonster = (CBear*)ObjectCreate(en_GameObjectType::BEAR);
 			break;		
 		}
 
-		NewMonster->_GameObjectInfo.ObjectId = _MonsterId++;
+		NewMonster->_GameObjectInfo.ObjectId = _MonsterObjectId++;
 		Add(NewMonster, ChannelId);
 	}
 }
 
-void CObjectManager::ItemSpawn(int32 ChannelId, st_Vector2Int OwnerPosition, int64 KillerId, st_ItemInfo ItemInfo, en_GameObjectType ItemType)
+void CObjectManager::ItemSpawn(int64 KillerId, en_GameObjectType KillerObjectType, st_Vector2Int SpawnPosition, en_MonsterDataType MonsterDataType)
 {
-	for (int32 i = 0; i < ItemInfo.Count; i++)
-	{
-		CItem* NewItem = nullptr;
-		switch (ItemType)
-		{		
-		case en_GameObjectType::WEAPON:
-			break;
-		case en_GameObjectType::SLIME_GEL:
-			NewItem = (CItem*)ObjectCreate(en_GameObjectType::SLIME_GEL);
-			break;		
-		case en_GameObjectType::BRONZE_COIN:
-			NewItem = (CItem*)ObjectCreate(en_GameObjectType::BRONZE_COIN);
-			break;
-		}
-			
-		NewItem->_ItemInfo = ItemInfo;		
-		NewItem->_GameObjectInfo.ObjectType = ItemType;		
-		NewItem->_GameObjectInfo.ObjectId = _ItemId++;		
-		NewItem->_GameObjectInfo.ObjectName = ItemInfo.ItemName;
-		NewItem->_GameObjectInfo.OwnerObjectId = KillerId;
+	// 아이템 생성 메세지 생성
+	CMessage* ReqItemCreateMessage = CMessage::Alloc();
 
-		NewItem->_OwnerPosition = OwnerPosition;
-		Add(NewItem, ChannelId);
-	}
+	ReqItemCreateMessage->Clear();
+
+	*ReqItemCreateMessage << KillerId;
+	*ReqItemCreateMessage << (int16)KillerObjectType;
+	*ReqItemCreateMessage << SpawnPosition._X;
+	*ReqItemCreateMessage << SpawnPosition._Y;
+	*ReqItemCreateMessage << (int32)MonsterDataType;
+
+	st_Job* ReqDBaseItemCreateJob = GameServer->_JobMemoryPool->Alloc();
+	ReqDBaseItemCreateJob->Type = en_MESSAGE_TYPE::DATA_BASE_ITEM_CREATE;
+	ReqDBaseItemCreateJob->SessionId = -1;
+	ReqDBaseItemCreateJob->Session = nullptr;
+	ReqDBaseItemCreateJob->Message = ReqItemCreateMessage;
+
+	GameServer->_GameServerDataBaseThreadMessageQue.Enqueue(ReqDBaseItemCreateJob);
+	SetEvent(GameServer->_DataBaseWakeEvent);	
 }

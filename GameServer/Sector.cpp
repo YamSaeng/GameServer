@@ -25,6 +25,7 @@ void CSector::Insert(CGameObject* InsertGameObject)
 	case en_GameObjectType::SLIME_GEL:
 	case en_GameObjectType::BRONZE_COIN:
 	case en_GameObjectType::LEATHER:
+	case en_GameObjectType::SKILL_BOOK:
 		_Items.insert((CItem*)InsertGameObject);
 		break;
 	default:
@@ -47,6 +48,7 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 	case en_GameObjectType::SLIME_GEL:
 	case en_GameObjectType::BRONZE_COIN:
 	case en_GameObjectType::LEATHER:
+	case en_GameObjectType::SKILL_BOOK:
 		_Items.erase((CItem*)RemoveGameObject);
 		break;
 	}

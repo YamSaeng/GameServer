@@ -25,6 +25,8 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 		{
 			WeaponData->ItemType = en_ItemType::ITEM_TYPE_WEAPON_SWORD;
 		}		
+		
+		WeaponData->ItemConsumableType = en_ConsumableType::NONE;
 
 		WeaponData->ThumbnailImagePath = ImageFilePath;
 		WeaponData->_Damage = Damage;
@@ -54,6 +56,8 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			ArmorData->ItemType = en_ItemType::ITEM_TYPE_ARMOR_HELMET;
 		}
 
+		ArmorData->ItemConsumableType = en_ConsumableType::NONE;
+
 		ArmorData->ThumbnailImagePath = ImageFilePath;
 		ArmorData->_Defence = Defence;
 
@@ -77,7 +81,14 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 		if (Type == "Potion")
 		{
 			ConsumableData->ItemType = en_ItemType::ITEM_TYPE_CONSUMABLE_POTION;
+			ConsumableData->ItemConsumableType = en_ConsumableType::POTION;
 		}
+		else if (Type == "SkillBook")
+		{
+			ConsumableData->ItemType = en_ItemType::ITEM_TYPE_SKILL_BOOK;
+			ConsumableData->ItemConsumableType = en_ConsumableType::SKILL_BOOK;
+		}
+
 		ConsumableData->ThumbnailImagePath = ImageFilePath;
 		ConsumableData->_MaxCount = MaxCount;
 
@@ -109,6 +120,8 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 		{
 			MaterialData->ItemType = en_ItemType::ITEM_TYPE_BRONZE_COIN;
 		}
+
+		MaterialData->ItemConsumableType = en_ConsumableType::NONE;		
 
 		MaterialData->ThumbnailImagePath = ImageFilePath;
 		MaterialData->_MaxCount = MaxCount;
@@ -165,6 +178,7 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			int Level = MonsterStatInfoFiled["Level"].GetInt();
 			int MaxHP = MonsterStatInfoFiled["MaxHP"].GetInt();
 			int Attack = MonsterStatInfoFiled["Attack"].GetInt();
+			int CriticalPoint = MonsterStatInfoFiled["CriticalPoint"].GetInt();
 			float Speed = MonsterStatInfoFiled["Speed"].GetFloat();
 			int SearchCellDistance = MonsterStatInfoFiled["SearchCellDistance"].GetInt();
 			int ChaseCellDistance = MonsterStatInfoFiled["ChaseCellDistance"].GetInt();
@@ -174,6 +188,7 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			MonsterData->_MonsterStatInfo.Level = Level;
 			MonsterData->_MonsterStatInfo.MaxHP = MaxHP;
 			MonsterData->_MonsterStatInfo.Attack = Attack;
+			MonsterData->_MonsterStatInfo.CriticalPoint = CriticalPoint;
 			MonsterData->_MonsterStatInfo.Speed = Speed;
 			MonsterData->_MonsterStatInfo.SearchCellDistance = SearchCellDistance;
 			MonsterData->_MonsterStatInfo.ChaseCellDistance = ChaseCellDistance;

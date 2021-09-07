@@ -308,6 +308,7 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	case en_GameObjectType::SLIME_GEL:
 	case en_GameObjectType::BRONZE_COIN:
 	case en_GameObjectType::LEATHER:
+	case en_GameObjectType::SKILL_BOOK:
 		{
 			// 아이템으로 형변환
 			CItem* EnterChannelItem = (CItem*)EnterChannelGameObject;
@@ -350,6 +351,7 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 	case en_GameObjectType::SLIME_GEL:
 	case en_GameObjectType::BRONZE_COIN:
 	case en_GameObjectType::LEATHER:
+	case en_GameObjectType::SKILL_BOOK:
 		_Items.erase(LeaveChannelGameObject->_GameObjectInfo.ObjectId);
 
 		_Map->ApplyLeave(LeaveChannelGameObject);

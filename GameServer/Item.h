@@ -26,6 +26,11 @@ class CWeapon : public CItem
 
 };
 
+class CConsumable : public CItem
+{
+	
+};
+
 class CMaterial : public CItem
 {
 public:

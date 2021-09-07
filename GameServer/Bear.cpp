@@ -16,6 +16,7 @@ CBear::CBear()
 	// 스탯 셋팅		
 	_GameObjectInfo.ObjectName = (LPWSTR)CA2W(MonsterData._MonsterName.c_str());
 	_GameObjectInfo.ObjectStatInfo.Attack = MonsterData._MonsterStatInfo.Attack;
+	_GameObjectInfo.ObjectStatInfo.CriticalPoint = MonsterData._MonsterStatInfo.CriticalPoint;
 	_GameObjectInfo.ObjectStatInfo.MaxHP = MonsterData._MonsterStatInfo.MaxHP;
 	_GameObjectInfo.ObjectStatInfo.HP = MonsterData._MonsterStatInfo.MaxHP;
 	_GameObjectInfo.ObjectStatInfo.Level = MonsterData._MonsterStatInfo.Level;
@@ -145,21 +146,33 @@ void CBear::UpdateAttack()
 			return;
 		}
 
-		// 데미지 적용
-		_Target->OnDamaged(this, _GameObjectInfo.ObjectStatInfo.Attack);
-		BroadCastPacket(en_PACKET_S2C_ATTACK);
+		// 데미지 적용		
+		random_device Seed;
+		default_random_engine Eng(Seed());
+
+		float CriticalPoint = _GameObjectInfo.ObjectStatInfo.CriticalPoint / 1000.0f;
+		bernoulli_distribution CriticalCheck(CriticalPoint);
+		bool IsCritical = CriticalCheck(Eng);
+
+		int32 Damage = IsCritical ? _GameObjectInfo.ObjectStatInfo.Attack * 2 : _GameObjectInfo.ObjectStatInfo.Attack;
+		_Target->OnDamaged(this, Damage);
+		
+		CMessage* ResBearAttackPacket = G_ObjectManager->GameServer->MakePacketResAttack(_GameObjectInfo.ObjectId, _Target->_GameObjectInfo.ObjectId, en_AttackType::BEAR_NORMAL_ATTACK, Damage, IsCritical);
+		G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResBearAttackPacket);
+		ResBearAttackPacket->Free();
+
 		// 주위 플레이어들에게 데미지 적용 결과 전송
 		BroadCastPacket(en_PACKET_S2C_CHANGE_HP);
 
-		// 0.8초마다 공격
+		// 1.2초마다 공격
 		_AttackTick = GetTickCount64() + 1200;
 
 		wchar_t BearAttackMessage[64] = L"0";
-		wsprintf(BearAttackMessage, L"%s이 일반 공격을 사용해 %s에게 %d의 데미지를 줬습니다", _GameObjectInfo.ObjectName.c_str(), _Target->_GameObjectInfo.ObjectName.c_str(), _GameObjectInfo.ObjectStatInfo.Attack);
+		wsprintf(BearAttackMessage, L"%s이 일반 공격을 사용해 %s에게 %d의 데미지를 줬습니다", _GameObjectInfo.ObjectName.c_str(), _Target->_GameObjectInfo.ObjectName.c_str(), Damage);
 
 		wstring BearAttackString = BearAttackMessage;
 
-		CMessage* ResSlimeSystemMessage = G_ObjectManager->GameServer->MakePacketResChattingMessage(_Target->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, st_Color::Red(), BearAttackString);
+		CMessage* ResSlimeSystemMessage = G_ObjectManager->GameServer->MakePacketResChattingMessage(_Target->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, IsCritical ? st_Color::Red() : st_Color::White(), IsCritical ? L"치명타! " + BearAttackString : BearAttackString);
 		G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResSlimeSystemMessage);
 		ResSlimeSystemMessage->Free();		
 	}
