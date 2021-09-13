@@ -15,7 +15,8 @@ CBear::CBear()
 
 	// 스탯 셋팅		
 	_GameObjectInfo.ObjectName = (LPWSTR)CA2W(MonsterData._MonsterName.c_str());
-	_GameObjectInfo.ObjectStatInfo.Attack = MonsterData._MonsterStatInfo.Attack;
+	_GameObjectInfo.ObjectStatInfo.MinAttackDamage = MonsterData._MonsterStatInfo.MinAttackDamage;
+	_GameObjectInfo.ObjectStatInfo.MaxAttackDamage = MonsterData._MonsterStatInfo.MaxAttackDamage;
 	_GameObjectInfo.ObjectStatInfo.CriticalPoint = MonsterData._MonsterStatInfo.CriticalPoint;
 	_GameObjectInfo.ObjectStatInfo.MaxHP = MonsterData._MonsterStatInfo.MaxHP;
 	_GameObjectInfo.ObjectStatInfo.HP = MonsterData._MonsterStatInfo.MaxHP;
@@ -146,18 +147,23 @@ void CBear::UpdateAttack()
 			return;
 		}
 
-		// 데미지 적용		
+		// 크리티컬 판단		
 		random_device Seed;
 		default_random_engine Eng(Seed());
 
 		float CriticalPoint = _GameObjectInfo.ObjectStatInfo.CriticalPoint / 1000.0f;
 		bernoulli_distribution CriticalCheck(CriticalPoint);
 		bool IsCritical = CriticalCheck(Eng);
-
-		int32 Damage = IsCritical ? _GameObjectInfo.ObjectStatInfo.Attack * 2 : _GameObjectInfo.ObjectStatInfo.Attack;
-		_Target->OnDamaged(this, Damage);
+				
+		// 데미지 판단
+		mt19937 Gen(Seed());
+		uniform_int_distribution<int> DamageChoiceRandom(_GameObjectInfo.ObjectStatInfo.MinAttackDamage, _GameObjectInfo.ObjectStatInfo.MaxAttackDamage);
+		int32 ChoiceDamage = DamageChoiceRandom(Gen);
+		int32 FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
 		
-		CMessage* ResBearAttackPacket = G_ObjectManager->GameServer->MakePacketResAttack(_GameObjectInfo.ObjectId, _Target->_GameObjectInfo.ObjectId, en_AttackType::BEAR_NORMAL_ATTACK, Damage, IsCritical);
+		_Target->OnDamaged(this, FinalDamage);
+		
+		CMessage* ResBearAttackPacket = G_ObjectManager->GameServer->MakePacketResAttack(_GameObjectInfo.ObjectId, _Target->_GameObjectInfo.ObjectId, en_AttackType::BEAR_NORMAL_ATTACK, FinalDamage, IsCritical);
 		G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResBearAttackPacket);
 		ResBearAttackPacket->Free();
 
@@ -168,7 +174,7 @@ void CBear::UpdateAttack()
 		_AttackTick = GetTickCount64() + 1200;
 
 		wchar_t BearAttackMessage[64] = L"0";
-		wsprintf(BearAttackMessage, L"%s이 일반 공격을 사용해 %s에게 %d의 데미지를 줬습니다", _GameObjectInfo.ObjectName.c_str(), _Target->_GameObjectInfo.ObjectName.c_str(), Damage);
+		wsprintf(BearAttackMessage, L"%s이 일반 공격을 사용해 %s에게 %d의 데미지를 줬습니다", _GameObjectInfo.ObjectName.c_str(), _Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
 
 		wstring BearAttackString = BearAttackMessage;
 

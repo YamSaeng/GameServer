@@ -47,8 +47,8 @@ void CGameServer::Start(const WCHAR* OpenIP, int32 Port)
 {
 	CNetworkLib::Start(OpenIP, Port);
 
-	//G_ObjectManager->MonsterSpawn(200, 1, en_GameObjectType::SLIME);
-	G_ObjectManager->MonsterSpawn(200, 1, en_GameObjectType::BEAR);
+	G_ObjectManager->MonsterSpawn(200, 1, en_GameObjectType::SLIME);
+	G_ObjectManager->MonsterSpawn(100, 1, en_GameObjectType::BEAR);
 
 	G_ObjectManager->GameServer = this;
 
@@ -663,7 +663,7 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 	do
 	{
 		int64 AccountId;
-		int32 ObjectId;
+		int64 ObjectId;
 
 		if (Session)
 		{
@@ -786,7 +786,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 		do
 		{
 			int64 AccountId;
-			int32 ObjectId;
+			int64 ObjectId;
 
 			// 로그인중인지 확인
 			if (!Session->IsLogin)
@@ -896,7 +896,7 @@ void CGameServer::PacketProcReqMousePositionObjectInfo(int64 SessionID, CMessage
 		if (Session)
 		{
 			int64 AccountId;
-			int32 ObjectId;
+			int64 ObjectId;
 
 			if (!Session->IsLogin)
 			{
@@ -1058,7 +1058,7 @@ void CGameServer::PacketProcReqChattingMessage(int64 SessionId, CMessage* Messag
 	st_SESSION* Session = FindSession(SessionId);
 
 	int64 AccountId;
-	int32 PlayerDBId;
+	int64 PlayerDBId;
 
 	if (Session)
 	{
@@ -1553,7 +1553,8 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 			int32 PlayerLevel;
 			int32 PlayerCurrentHP;
 			int32 PlayerMaxHP;
-			int32 PlayerAttack;
+			int32 PlayerMinAttack;
+			int32 PlayerMaxAttack;
 			int16 PlayerCriticalPoint;
 			float PlayerSpeed;
 			int16 PlayerObjectType;
@@ -1564,7 +1565,8 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 			ClientPlayersGet.OutLevel(PlayerLevel);
 			ClientPlayersGet.OutCurrentHP(PlayerCurrentHP);
 			ClientPlayersGet.OutMaxHP(PlayerMaxHP);
-			ClientPlayersGet.OutAttack(PlayerAttack);
+			ClientPlayersGet.OutMinAttack(PlayerMinAttack);
+			ClientPlayersGet.OutMaxAttack(PlayerMaxAttack);			
 			ClientPlayersGet.OutCriticalPoint(PlayerCriticalPoint);
 			ClientPlayersGet.OutSpeed(PlayerSpeed);
 			ClientPlayersGet.OutPlayerObjectType(PlayerObjectType);
@@ -1581,7 +1583,8 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.Level = PlayerLevel;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.HP = PlayerCurrentHP;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MaxHP = PlayerMaxHP;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.Attack = PlayerAttack;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MinAttackDamage = PlayerMinAttack;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MaxAttackDamage = PlayerMaxAttack;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.CriticalPoint = PlayerCriticalPoint;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.Speed = PlayerSpeed;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
@@ -1674,7 +1677,8 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			NewCharacterPush.InLevel(NewCharacterStatus.Level);
 			NewCharacterPush.InCurrentHP(NewCharacterStatus.MaxHP);
 			NewCharacterPush.InMaxHP(NewCharacterStatus.MaxHP);
-			NewCharacterPush.InAttack(NewCharacterStatus.Attack);
+			NewCharacterPush.InMinAttack(NewCharacterStatus.MinAttackDamage);
+			NewCharacterPush.InMaxAttack(NewCharacterStatus.MaxAttackDamage);			
 			NewCharacterPush.InCriticalPoint(NewCharacterStatus.CriticalPoint);
 			NewCharacterPush.InSpeed(NewCharacterStatus.Speed);
 
@@ -1706,7 +1710,8 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.Level = NewCharacterStatus.Level;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.Attack = NewCharacterStatus.Attack;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MinAttackDamage = NewCharacterStatus.MinAttackDamage;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MaxAttackDamage = NewCharacterStatus.MaxAttackDamage;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.CriticalPoint = NewCharacterStatus.CriticalPoint;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
@@ -2466,7 +2471,8 @@ CMessage* CGameServer::MakePacketResLogin(bool Status, int8 PlayerCount, CGameOb
 			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectStatInfo.Level;
 			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectStatInfo.HP;
 			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectStatInfo.MaxHP;
-			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectStatInfo.Attack;
+			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectStatInfo.MinAttackDamage;
+			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectStatInfo.MaxAttackDamage;
 			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectStatInfo.CriticalPoint;
 			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectStatInfo.Speed;
 			*LoginMessage << (int16)(MyPlayersInfo[i]->_GameObjectInfo.ObjectType);
@@ -2511,7 +2517,8 @@ CMessage* CGameServer::MakePacketResCreateCharacter(bool IsSuccess, st_GameObjec
 	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectStatInfo.Level;
 	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectStatInfo.HP;
 	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectStatInfo.MaxHP;
-	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectStatInfo.Attack;
+	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectStatInfo.MinAttackDamage;
+	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectStatInfo.MaxAttackDamage;
 	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectStatInfo.CriticalPoint;
 	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectStatInfo.Speed;
 
@@ -2553,7 +2560,8 @@ CMessage* CGameServer::MakePacketResEnterGame(st_GameObjectInfo ObjectInfo)
 	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.Level;
 	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.HP;
 	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.MaxHP;
-	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.Attack;
+	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.MinAttackDamage;
+	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.MaxAttackDamage;
 	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.CriticalPoint;
 	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.Speed;
 
@@ -2603,7 +2611,8 @@ CMessage* CGameServer::MakePacketMousePositionObjectInfo(int64 AccountId, st_Gam
 	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectStatInfo.Level;
 	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectStatInfo.HP;
 	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectStatInfo.MaxHP;
-	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectStatInfo.Attack;
+	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectStatInfo.MinAttackDamage;
+	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectStatInfo.MaxAttackDamage;
 	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectStatInfo.CriticalPoint;
 	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectStatInfo.Speed;
 
@@ -2876,7 +2885,8 @@ CMessage* CGameServer::MakePacketResSpawn(int32 ObjectInfosCount, vector<st_Game
 		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.Level;
 		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.HP;
 		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.MaxHP;
-		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.Attack;
+		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.MinAttackDamage;
+		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.MaxAttackDamage;
 		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.CriticalPoint;
 		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.Speed;
 

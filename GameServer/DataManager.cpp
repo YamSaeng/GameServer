@@ -141,14 +141,16 @@ void CDataManager::LoadDataStatus(wstring LoadFileName)
 	{
 		int Level = Filed["Level"].GetInt();
 		int MaxHP = Filed["MaxHP"].GetInt();
-		int Attack = Filed["Attack"].GetInt();
+		int MinAttackDamage = Filed["MinAttackDamage"].GetInt();
+		int MaxAttackDamage = Filed["MaxAttackDamage"].GetInt();
 		int16 CriticalPoint = (int16)(Filed["CriticalPoint"].GetInt());
 		float Speed = Filed["Speed"].GetFloat();		
 
 		st_StatusData* StatusData = new st_StatusData();
 		StatusData->Level = Level;
 		StatusData->MaxHP = MaxHP;
-		StatusData->Attack = Attack;
+		StatusData->MinAttackDamage = MinAttackDamage;
+		StatusData->MaxAttackDamage = MaxAttackDamage;
 		StatusData->CriticalPoint = CriticalPoint;
 		StatusData->Speed = Speed;
 
@@ -177,7 +179,8 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 		{
 			int Level = MonsterStatInfoFiled["Level"].GetInt();
 			int MaxHP = MonsterStatInfoFiled["MaxHP"].GetInt();
-			int Attack = MonsterStatInfoFiled["Attack"].GetInt();
+			int MinAttackDamage = MonsterStatInfoFiled["MinAttackDamage"].GetInt();
+			int MaxAttackDamage = MonsterStatInfoFiled["MaxAttackDamage"].GetInt();
 			int CriticalPoint = MonsterStatInfoFiled["CriticalPoint"].GetInt();
 			float Speed = MonsterStatInfoFiled["Speed"].GetFloat();
 			int SearchCellDistance = MonsterStatInfoFiled["SearchCellDistance"].GetInt();
@@ -187,7 +190,8 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 
 			MonsterData->_MonsterStatInfo.Level = Level;
 			MonsterData->_MonsterStatInfo.MaxHP = MaxHP;
-			MonsterData->_MonsterStatInfo.Attack = Attack;
+			MonsterData->_MonsterStatInfo.MinAttackDamage = MinAttackDamage;
+			MonsterData->_MonsterStatInfo.MaxAttackDamage = MaxAttackDamage;
 			MonsterData->_MonsterStatInfo.CriticalPoint = CriticalPoint;
 			MonsterData->_MonsterStatInfo.Speed = Speed;
 			MonsterData->_MonsterStatInfo.SearchCellDistance = SearchCellDistance;

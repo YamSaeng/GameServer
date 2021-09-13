@@ -3,14 +3,16 @@
     {
       "Level": 1,
       "MaxHP": 200,
-      "Attack": 20,
+      "MinAttackDamage": 5,
+      "MaxAttackDamage": 20,      
       "CriticalPoint": 200,
       "Speed": 5.0
     },
     {
       "Level": 2,
       "MaxHP": 300,
-      "Attack": 10,
+      "MinAttackDamage": 1,
+      "MaxAttackDamage": 10,
       "CriticalPoint": 300,
       "Speed": 5.0
     },

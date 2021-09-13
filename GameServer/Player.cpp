@@ -34,7 +34,7 @@ void CPlayer::Update()
 
 void CPlayer::OnDamaged(CGameObject* Attacker, int32 Damage)
 {
-	CGameObject::OnDamaged(Attacker, Damage);
+	//CGameObject::OnDamaged(Attacker, Damage);
 
 }
 
@@ -65,34 +65,18 @@ void CPlayer::SetAttackMeleeType(en_AttackType AttackType, vector<CGameObject*> 
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;
 
 	BroadCastPacket(en_PACKET_TYPE::en_PACKET_S2C_OBJECT_STATE_CHANGE);
-
-	// 크리티컬 판단 준비
-	random_device RD;
-	mt19937 Gen(RD());
-
-	uniform_int_distribution<int> CriticalPointCreate(0, 100);
-	
-	bool IsCritical = false;
-
-	if (_Targets.size() == 1)
+		
+	if (_Targets.size() >= 1)
 	{
-		int16 CriticalPoint = CriticalPointCreate(Gen);
-
-		// 내 캐릭터의 크리티컬 포인트보다 값이 작으면 크리티컬로 판단한다.				
-		if (CriticalPoint < _GameObjectInfo.ObjectStatInfo.CriticalPoint)
-		{
-			IsCritical = true;
-		}
-
 		switch (_AttackType)
 		{
 		case en_AttackType::MELEE_PLAYER_NORMAL_ATTACK:
 		case en_AttackType::MAGIC_PLAYER_NORMAL_ATTACK:
-			wsprintf(AttackTypeMessage, L"%s가 일반공격을 사용해 %s를 ", _GameObjectInfo.ObjectName.c_str(), _Targets[0]->_GameObjectInfo.ObjectName.c_str());
+			wsprintf(AttackTypeMessage, L"%s가 일반공격을 사용해 %s에게 ", _GameObjectInfo.ObjectName.c_str(), _Targets[0]->_GameObjectInfo.ObjectName.c_str());
 			AttackTypeString = AttackTypeMessage;
 			break;
 		case en_AttackType::MELEE_PLAYER_CHOHONE_ATTACK:
-			wsprintf(AttackTypeMessage, L"%s가 초혼비무를 사용해 %s를 ", _GameObjectInfo.ObjectName.c_str(), _Targets[0]->_GameObjectInfo.ObjectName.c_str());
+			wsprintf(AttackTypeMessage, L"%s가 초혼비무를 사용해 %s에게 ", _GameObjectInfo.ObjectName.c_str(), _Targets[0]->_GameObjectInfo.ObjectName.c_str());
 			AttackTypeString = AttackTypeMessage;
 			// 내 앞쪽 위치를 구한다.
 			SpellCellPosition = GetFrontCellPosition(_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
@@ -105,7 +89,7 @@ void CPlayer::SetAttackMeleeType(en_AttackType AttackType, vector<CGameObject*> 
 			ResSyncPosition->Free();
 			break;
 		case en_AttackType::MELEE_PLAYER_SHAEHONE_ATTACK:
-			wsprintf(AttackTypeMessage, L"%s가 쇄혼비무를 사용해 %s를 ", _GameObjectInfo.ObjectName.c_str(), _Targets[0]->_GameObjectInfo.ObjectName.c_str());
+			wsprintf(AttackTypeMessage, L"%s가 쇄혼비무를 사용해 %s에게 ", _GameObjectInfo.ObjectName.c_str(), _Targets[0]->_GameObjectInfo.ObjectName.c_str());
 			AttackTypeString = AttackTypeMessage;
 
 			// 내 앞쪽 3칸 위치를 구한다.
@@ -116,55 +100,49 @@ void CPlayer::SetAttackMeleeType(en_AttackType AttackType, vector<CGameObject*> 
 			G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResSyncPosition);
 			ResSyncPosition->Free();
 			break;		
+		case en_AttackType::MELEE_PLAYER_AROUND_ATTACK:				
+			break;
 		default:
 			CRASH("플레이어 공격 타입 셋팅 Error");
 			break;
 		}
 
-		int32 Damage = IsCritical ? _GameObjectInfo.ObjectStatInfo.Attack * 2 : _GameObjectInfo.ObjectStatInfo.Attack;
-		Targets[0]->OnDamaged(this, Damage);
-
-		wsprintf(AttackDamageMessage, L"%d의 데미지를 줬습니다.", Damage);
-		AttackDamageString = AttackDamageMessage;
-
-		AttackMeleeSystemString = AttackTypeString + AttackDamageString;
-
-		CMessage* ResAttackMeleeSystemMessagePacket = G_ObjectManager->GameServer->MakePacketResChattingMessage(_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, st_Color::Red(), AttackMeleeSystemString);
-		G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResAttackMeleeSystemMessagePacket);
-		ResAttackMeleeSystemMessagePacket->Free();
-
-		CMessage* ResMyAttackOtherPacket = G_ObjectManager->GameServer->MakePacketResAttack(_GameObjectInfo.ObjectId, Targets[0]->_GameObjectInfo.ObjectId, AttackType, Damage, IsCritical);
-		G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResMyAttackOtherPacket);
-		ResMyAttackOtherPacket->Free();
-
-		CMessage* ResChangeHPPacket = G_ObjectManager->GameServer->MakePacketResChangeHP(Targets[0]->_GameObjectInfo.ObjectId, Targets[0]->_GameObjectInfo.ObjectStatInfo.HP, Targets[0]->_GameObjectInfo.ObjectStatInfo.MaxHP);
-		G_ObjectManager->GameServer->SendPacketAroundSector(_Targets[0]->GetCellPosition(), ResChangeHPPacket);
-		ResChangeHPPacket->Free();
-	}	
-	else if (_Targets.size() > 1)
-	{		
 		for (CGameObject* Target : _Targets)
 		{
-			int16 CriticalPoint = CriticalPointCreate(Gen);
+			random_device Seed;
+			default_random_engine Eng(Seed());	
 
-			if (CriticalPoint < _GameObjectInfo.ObjectStatInfo.CriticalPoint)
-			{
-				IsCritical = true;
-			}
+			float CriticalPoint = _GameObjectInfo.ObjectStatInfo.CriticalPoint / 1000.0f;			
+			bernoulli_distribution CriticalCheck(CriticalPoint);
+			bool IsCritical = CriticalCheck(Eng);					
+			
+			mt19937 Gen(Seed());
+			uniform_int_distribution<int> DamageChoiceRandom(_GameObjectInfo.ObjectStatInfo.MinAttackDamage, _GameObjectInfo.ObjectStatInfo.MaxAttackDamage);
+			int32 ChoiceDamage = DamageChoiceRandom(Gen);
+			int32 FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
 
-			int32 Damage = IsCritical ? _GameObjectInfo.ObjectStatInfo.Attack * 2 : _GameObjectInfo.ObjectStatInfo.Attack;
+			Target->OnDamaged(this, FinalDamage);
 
-			Target->OnDamaged(this, Damage);
+			wsprintf(AttackDamageMessage, L"%d의 데미지를 줬습니다.", FinalDamage);
+			AttackDamageString = AttackDamageMessage;			
 
-			CMessage* ResMyAttackOtherPacket = G_ObjectManager->GameServer->MakePacketResAttack(_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectId, AttackType, Damage, IsCritical);
+			AttackMeleeSystemString = IsCritical ? L"치명타! " + AttackTypeString + AttackDamageString : AttackTypeString + AttackDamageString;
+
+			st_Color MessageColor(255, 192, 203);
+
+			CMessage* ResAttackMeleeSystemMessagePacket = G_ObjectManager->GameServer->MakePacketResChattingMessage(_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, IsCritical ? st_Color::Red() : st_Color::White(), AttackMeleeSystemString);
+			G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResAttackMeleeSystemMessagePacket);
+			ResAttackMeleeSystemMessagePacket->Free();
+
+			CMessage* ResMyAttackOtherPacket = G_ObjectManager->GameServer->MakePacketResAttack(_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectId, AttackType, FinalDamage, IsCritical);
 			G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResMyAttackOtherPacket);
 			ResMyAttackOtherPacket->Free();
 
-			CMessage* ResChangeHPPacket = G_ObjectManager->GameServer->MakePacketResChangeHP(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectStatInfo.HP, Target->_GameObjectInfo.ObjectStatInfo.MaxHP);
-			G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResChangeHPPacket);
+			CMessage* ResChangeHPPacket = G_ObjectManager->GameServer->MakePacketResChangeHP(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectStatInfo.HP, Targets[0]->_GameObjectInfo.ObjectStatInfo.MaxHP);
+			G_ObjectManager->GameServer->SendPacketAroundSector(_Targets[0]->GetCellPosition(), ResChangeHPPacket);
 			ResChangeHPPacket->Free();
 		}
-	}
+	}		
 }
 
 void CPlayer::SetAttackMagicType(en_AttackType AttackType, vector<CGameObject*> Targets)
@@ -186,7 +164,7 @@ void CPlayer::SetAttackMagicType(en_AttackType AttackType, vector<CGameObject*> 
 
 		switch (_AttackType)
 		{
-		case MAGIC_PLAYER_FIRE_ATTACK:			
+		case en_AttackType::MAGIC_PLAYER_FIRE_ATTACK:			
 			_AttackTick = GetTickCount64() + 1500;
 			break;
 		default:
@@ -251,17 +229,19 @@ void CPlayer::UpdateSpell()
 			IsCritical = true;
 		}
 
-		// 데미지 판정
-		int32 Damage = IsCritical ? _GameObjectInfo.ObjectStatInfo.Attack * 2 : _GameObjectInfo.ObjectStatInfo.Attack;
+		uniform_int_distribution<int> DamageChoiceRandom(_GameObjectInfo.ObjectStatInfo.MinAttackDamage, _GameObjectInfo.ObjectStatInfo.MaxAttackDamage);
+		int32 ChoiceDamage = DamageChoiceRandom(Gen);
+		int32 FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
+		
 		// 데미지 처리
-		_Targets[0]->OnDamaged(this, Damage);
+		_Targets[0]->OnDamaged(this, FinalDamage);
 
 		// 공격 응답
 		CMessage* ResAttackMagicPacket = G_ObjectManager->GameServer->MakePacketResAttack(
 			_GameObjectInfo.ObjectId,
 			_Targets[0]->_GameObjectInfo.ObjectId,
 			_AttackType,
-			50,
+			FinalDamage,
 			true);
 		G_ObjectManager->GameServer->SendPacketAroundSector(_Targets[0]->GetCellPosition(), ResAttackMagicPacket);
 		ResAttackMagicPacket->Free();				
@@ -278,13 +258,19 @@ void CPlayer::UpdateSpell()
 			break;
 		}				
 
-		wsprintf(AttackDamageMessage, L"%d의 데미지를 줬습니다.", Damage);
+		wsprintf(AttackDamageMessage, L"%d의 데미지를 줬습니다.", FinalDamage);
 		AttackDamageString = AttackDamageMessage;
 
 		AttackMagicSystemString = AttackTypeMessage + AttackDamageString;
 
+		// 메세지 전송
 		CMessage* ResAttackMagicSystemMessagePacket = G_ObjectManager->GameServer->MakePacketResChattingMessage(_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, st_Color::Red(), AttackMagicSystemString);
 		G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResAttackMagicSystemMessagePacket);
-		ResAttackMagicSystemMessagePacket->Free();		
+		ResAttackMagicSystemMessagePacket->Free();	
+		
+		// HP 변경 전송
+		CMessage* ResChangeHPPacket = G_ObjectManager->GameServer->MakePacketResChangeHP(_Targets[0]->_GameObjectInfo.ObjectId, _Targets[0]->_GameObjectInfo.ObjectStatInfo.HP, _Targets[0]->_GameObjectInfo.ObjectStatInfo.MaxHP);
+		G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResChangeHPPacket);
+		ResChangeHPPacket->Free();
 	}
 }
