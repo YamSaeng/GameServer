@@ -73,6 +73,9 @@
     <Filter Include="ContentServer\Content\SkillBox\Skill">
       <UniqueIdentifier>{55129a4d-d01c-4121-b387-47d63fac084d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ContentServer\Content\GameObject\Environment">
+      <UniqueIdentifier>{4abef9f1-ac7f-43fc-86d5-a4cadaaadce3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Type.h">
@@ -209,6 +212,9 @@
     <ClInclude Include="Skill.h">
       <Filter>ContentServer\Content\SkillBox\Skill</Filter>
     </ClInclude>
+    <ClInclude Include="Environment.h">
+      <Filter>ContentServer\Content\GameObject\Environment</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -293,6 +299,9 @@
     </ClCompile>
     <ClCompile Include="Skill.cpp">
       <Filter>ContentServer\Content\SkillBox\Skill</Filter>
+    </ClCompile>
+    <ClCompile Include="Environment.cpp">
+      <Filter>ContentServer\Content\GameObject\Environment</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

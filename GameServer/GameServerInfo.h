@@ -10,7 +10,7 @@
 #define LOGIN_SUCCESS 1
 #define LOGIN_FAIL 0
 
-enum class en_MESSAGE_TYPE : int16
+enum class en_JobType : int16
 {
 	AUTH_NEW_CLIENT_JOIN = 0,
 	AUTH_DISCONNECT_CLIENT = 1,
@@ -24,17 +24,13 @@ enum class en_MESSAGE_TYPE : int16
 	DATA_BASE_ITEM_INVENTORY_SAVE,
 	DATA_BASE_ITEM_SWAP,
 	DATA_BASE_GOLD_SAVE,
-	DATA_BASE_CHARACTER_INFO_SEND
+	DATA_BASE_CHARACTER_INFO_SEND	
 };
 
 struct st_Job
 {
-	en_MESSAGE_TYPE Type;
+	en_JobType Type;
 	int64 SessionId;
 	CMessage* Message;
-	st_SESSION* Session;
+	st_Session* Session;
 };
-
-
-//논블락소켓 셀렉트로 랜클라이언트 구현
-//

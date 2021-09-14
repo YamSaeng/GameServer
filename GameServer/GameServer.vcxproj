@@ -165,6 +165,7 @@
     <ClInclude Include="DBModel.h" />
     <ClInclude Include="DBStoreProcedure.h" />
     <ClInclude Include="DBSynchronizer.h" />
+    <ClInclude Include="Environment.h" />
     <ClInclude Include="FileUtils.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameObjectInfo.h" />
@@ -245,6 +246,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Environment.cpp" />
     <ClCompile Include="FileUtils.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

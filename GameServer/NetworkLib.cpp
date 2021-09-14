@@ -11,12 +11,11 @@ CNetworkLib::CNetworkLib()
 		DWORD Error = WSAGetLastError();
 		wprintf(L"WSAStartup Error %d\n", Error);
 	}
-	//SYSLOG_DIRECTORY(L"NetWorkLibLog");
-	//SYSLOG_LEVEL(LOG::LEVEL_ERROR);
+
 	for (int SessionCount = SERVER_SESSION_MAX - 1; SessionCount >= 0; SessionCount--)
 	{
-		_SessionArray[SessionCount] = new st_SESSION;
-		_SessionArray[SessionCount]->IOBlock = (st_IO_BLOCK*)_aligned_malloc(sizeof(st_IO_BLOCK), 16);
+		_SessionArray[SessionCount] = new st_Session;
+		_SessionArray[SessionCount]->IOBlock = (st_IOBlock*)_aligned_malloc(sizeof(st_IOBlock), 16);
 		memset(&_SessionArray[SessionCount]->SendPacket, 0, sizeof(CMessage*) * 500);
 		_SessionArray[SessionCount]->IOBlock->IOCount = 0;
 		_SessionArray[SessionCount]->SendPacketCount = 0;
@@ -36,14 +35,13 @@ CNetworkLib::~CNetworkLib()
 
 }
 
-st_SESSION* CNetworkLib::FindSession(__int64 SessionID)
+st_Session* CNetworkLib::FindSession(__int64 SessionID)
 {
 	//세션 ID를 이용해 세션이 저장되어 있는 세션 인덱스를 가져온다.
 	int SessionIndex = GET_SESSIONINDEX(SessionID);
 
 	// 이미 릴리즈 작업중이거나 작업중일 예정인 세션이라면 그냥 나간다.
-	if (_SessionArray[SessionIndex]->IOBlock->IsRelease == true ||
-		_SessionArray[SessionIndex]->IsCancelIO == true)
+	if (_SessionArray[SessionIndex]->IOBlock->IsRelease == true)
 	{		
 		return nullptr;
 	}
@@ -79,7 +77,7 @@ st_SESSION* CNetworkLib::FindSession(__int64 SessionID)
 	return _SessionArray[SessionIndex];
 }
 
-void CNetworkLib::ReturnSession(st_SESSION* Session)
+void CNetworkLib::ReturnSession(st_Session* Session)
 {
 	if (InterlockedDecrement64(&Session->IOBlock->IOCount) == 0)
 	{
@@ -91,7 +89,7 @@ void CNetworkLib::SendPacket(__int64 SessionID, CMessage* Packet)
 {
 	// FindSession을 통해 현재 세션을 사용하고 있다는 표시로 IOCount를 증가시켜주고
 	// 함수 나가기전에 감소시켜준다.
-	st_SESSION* SendSession = FindSession(SessionID);
+	st_Session* SendSession = FindSession(SessionID);
 	// 만약에 찾은 세션이 없다면 그냥 나간다.
 	if (SendSession == nullptr)
 	{
@@ -111,7 +109,7 @@ void CNetworkLib::SendPacket(__int64 SessionID, CMessage* Packet)
 	ReturnSession(SendSession);
 }
 
-void CNetworkLib::SendPost(st_SESSION* SendSession)
+void CNetworkLib::SendPost(st_Session* SendSession)
 {
 	int SendRingBufUseSize;
 	int SendBufCount = 0;
@@ -126,11 +124,6 @@ void CNetworkLib::SendPost(st_SESSION* SendSession)
 		*/
 		if (InterlockedExchange(&SendSession->IsSend, SENDING_DO) == SENDING_DO_NOT)
 		{
-			/*
-				UseBufferSize를 먼저 구한 후 DirectDequeSize를 구한다.
-				DirectDequeSize를 먼저 구하게 되면
-			*/
-
 			SendRingBufUseSize = SendSession->SendRingBuf.GetUseSize();
 			/*
 				보내려고 왓는데 다른 쓰레드에서 한꺼번에 보내버려서 보낼것이 없으면
@@ -208,7 +201,7 @@ void CNetworkLib::SendPost(st_SESSION* SendSession)
 	}
 }
 
-void CNetworkLib::RecvPost(st_SESSION* RecvSession, bool IsAcceptRecvPost)
+void CNetworkLib::RecvPost(st_Session* RecvSession, bool IsAcceptRecvPost)
 {
 	int RecvBufCount = 0;
 	WSABUF RecvBuf[2];
@@ -270,7 +263,7 @@ void CNetworkLib::RecvPost(st_SESSION* RecvSession, bool IsAcceptRecvPost)
 	}
 }
 
-void CNetworkLib::RecvNotifyComplete(st_SESSION* RecvCompleteSession, const DWORD& Transferred)
+void CNetworkLib::RecvNotifyComplete(st_Session* RecvCompleteSession, const DWORD& Transferred)
 {
 	// ---------------------------------------------------------------------------------------
 	// RecvRingBuf의 Rear값을 완료 통지 받은 Transferred 값만큼 뒤로 민다.
@@ -295,23 +288,29 @@ void CNetworkLib::RecvNotifyComplete(st_SESSION* RecvCompleteSession, const DWOR
 		RecvCompleteSession->RecvRingBuf.Peek((char*)&EncodeHeader, sizeof(CMessage::st_ENCODE_HEADER));
 		if (EncodeHeader.PacketLen + sizeof(CMessage::st_ENCODE_HEADER) > RecvCompleteSession->RecvRingBuf.GetUseSize())
 		{
+			// 패킷코드 확인
 			if (EncodeHeader.PacketCode != 119)
 			{
 				Disconnect(RecvCompleteSession->SessionId);
 				break;
 			}
 			else
-			{
+			{				
+				// 패킷코드는 맞는데 PacketLen의 크기를 의도적으로 이상하게 보낼 경우 
+				// 다시 크기 정해줌
 				EncodeHeader.PacketLen = RecvCompleteSession->RecvRingBuf.GetUseSize();
 			}
 		}
 
 		InterlockedIncrement(&_RecvPacketTPS);
 
+		// 헤더 크기 만큼 RecvRingBuf _Front 움직이기 ( 헤더 확인 했으므로 )
 		RecvCompleteSession->RecvRingBuf.MoveFront(sizeof(CMessage::st_ENCODE_HEADER));
-
+		// 패킷 길이 만큼 RecvRingBuf에서 뽑아서 Packet에 넣기
 		RecvCompleteSession->RecvRingBuf.Dequeue(Packet->GetRearBufferPtr(), EncodeHeader.PacketLen);
+		// 헤더 셋팅해주기
 		Packet->SetHeader((char*)&EncodeHeader, sizeof(CMessage::st_ENCODE_HEADER));
+		// _Rear 움직여주기
 		Packet->MoveWritePosition(EncodeHeader.PacketLen);
 
 		//디코딩시 에러가 나면 해당 세션 종료
@@ -327,13 +326,11 @@ void CNetworkLib::RecvNotifyComplete(st_SESSION* RecvCompleteSession, const DWOR
 	// 패킷 반납
 	Packet->Free(); 
 
-	if (!RecvCompleteSession->IsCancelIO)
-	{
-		RecvPost(RecvCompleteSession);
-	}
+	// WSARecv 걸기
+	RecvPost(RecvCompleteSession);
 }
 
-void CNetworkLib::SendNotifyComplete(st_SESSION* SendCompleteSession)
+void CNetworkLib::SendNotifyComplete(st_Session* SendCompleteSession)
 {
 	//-------------------------------------------------------------
 	//	완료 통지된 패킷 정리
@@ -363,19 +360,12 @@ void CNetworkLib::SendNotifyComplete(st_SESSION* SendCompleteSession)
 
 void CNetworkLib::Disconnect(__int64 SessionID)
 {
-	st_SESSION* DisconnectSession = FindSession(SessionID);
-
+	st_Session* DisconnectSession = FindSession(SessionID);
 	if (DisconnectSession == nullptr)
-	{
-		return;
-	}
-
-	//Disconnect 진행중인 것을 확인
-	if (InterlockedExchange(&DisconnectSession->IsCancelIO, 1) != 0)
 	{
 		ReturnSession(DisconnectSession);
 		return;
-	}
+	}		
 
 	if (DisconnectSession->IOBlock->IOCount == 0)
 	{
@@ -460,7 +450,7 @@ unsigned __stdcall CNetworkLib::WorkerThreadProc(void* Argument)
 
 	if (Instance)
 	{
-		st_SESSION* NotifyCompleteSession = nullptr;
+		st_Session* NotifyCompleteSession = nullptr;
 		for (;;)
 		{
 			DWORD Transferred = 0;
@@ -550,7 +540,7 @@ unsigned __stdcall CNetworkLib::AcceptThreadProc(void* Argument)
 			//wprintf(L"Connet Client IP : %s Port %d\n", ClientIP, ntohs(ClientAddr.sin_port));
 
 			//오버랩 초기화 
-			st_SESSION* NewSession;
+			st_Session* NewSession;
 			int NewSessionIndex;
 
 			Instance->_SessionArrayIndexs.Pop(&NewSessionIndex);
@@ -564,7 +554,6 @@ unsigned __stdcall CNetworkLib::AcceptThreadProc(void* Argument)
 			NewSession->ClientSock = ClientSock;
 			NewSession->CloseSock = ClientSock;
 			NewSession->IsSend = SENDING_DO_NOT;
-			NewSession->IsCancelIO = 0;
 
 			//Instance->_SessionArray[NewSessionIndex]->SendPacketCount = 0;
 
@@ -613,14 +602,14 @@ unsigned __stdcall CNetworkLib::AcceptThreadProc(void* Argument)
 #pragma endregion
 
 #pragma region 세션 할당 해제
-void CNetworkLib::ReleaseSession(st_SESSION* ReleaseSession)
+void CNetworkLib::ReleaseSession(st_Session* ReleaseSession)
 {
 	__int64 ReleaseSessionId = ReleaseSession->SessionId;
 	char* pRecvOverlapped = (char*)&ReleaseSession->RecvOverlapped;
 	char* pSendOverlapped = (char*)&ReleaseSession->SendOverlapped;
 	int ReleaseSessionIOcount = ReleaseSession->IOBlock->IOCount;
 
-	st_IO_BLOCK CompareBlock;
+	st_IOBlock CompareBlock;
 	CompareBlock.IOCount = 0;
 	CompareBlock.IsRelease = 0;
 

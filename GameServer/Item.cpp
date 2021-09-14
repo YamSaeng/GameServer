@@ -60,7 +60,7 @@ void CItem::UpdateIdle()
 
 		// Item 牢亥配府 历厘 夸没 Job 积己
 		st_Job* ReqItemToInventoryJob = G_ObjectManager->GameServer->_JobMemoryPool->Alloc();
-		ReqItemToInventoryJob->Type = en_MESSAGE_TYPE::NETWORK_MESSAGE;
+		ReqItemToInventoryJob->Type = en_JobType::NETWORK_MESSAGE;
 		ReqItemToInventoryJob->SessionId = Player->_SessionId;
 		ReqItemToInventoryJob->Session = nullptr;
 

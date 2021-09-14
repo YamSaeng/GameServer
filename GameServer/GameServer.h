@@ -42,7 +42,7 @@ private:
 	static unsigned __stdcall HeartBeatCheckThreadProc(void* Argument);
 
 	void CreateNewClient(int64 SessionId);
-	void DeleteClient(st_SESSION* Session);
+	void DeleteClient(st_Session* Session);
 
 	void PacketProc(int64 SessionId, CMessage* Message);
 
@@ -75,9 +75,11 @@ private:
 	// DB 요청 처리 함수
 	// 1. 로그인 요청에서 추가로 AccountServer에 입력받은 Account가 있는지 확인하고 최종 로그인 검사	
 	// 2. 캐릭터 생성 요청에서 추가로 DB에 입력한 해당 캐릭터가 있는지 확인
-	// 3. 캐릭터 인벤토리에 있는 Item을 DB에 저장
-	// 4. 캐릭터 인벤토리에 있는 Gold를 DB에 저장
-	// 5. 캐릭터 정보 클라에게 전송
+	// 3. 아이템 생성
+	// 4. 캐릭터 인벤토리에 있는 Item을 DB에 저장
+	// 5. 캐릭터 인벤토리에서 아이템 Swap
+	// 6. 캐릭터 인벤토리에 있는 Gold를 DB에 저장
+	// 7. 캐릭터 정보 클라에게 전송
 	//-----------------------------------------------------------------------------------------------
 	void PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message);
 	void PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMessage* Message);
@@ -94,10 +96,19 @@ private:
 	//3. 캐릭터 생성 요청 응답
 	//4. 게임 입장 요청 응답
 	//5. 마우스 위치 오브젝트 정보 요청 응답
-	//5. 공격 요청 응답
-	//6. 오브젝트 스폰 
-	//7. 오브젝트 디스폰
-	//8. HP 변경
+	//6. 골드 저장 요청 응답 
+	//7. 아이템 스왑 요청 응답
+	//8. 공격 요청 응답 
+	//9. 마법 공격 요청 응답
+	//10. HP 변경 요청 응답
+	//11. 오브젝트 상태 변경 요청 응답
+	//12. 이동 요청 응답
+	//13. 오브젝트 스폰 요청 응답
+	//14. 오브젝트 디스폰 요청 응답	
+	//15. 오브젝트 죽음 응답
+	//16. 채팅 요청 응답
+	//17. 아이템 저장 요청 응답
+	//18. 오브젝트 위치 조정
 	//----------------------------------------------------------------
 	CMessage* MakePacketResClientConnected();
 	CMessage* MakePacketResLogin(bool Status, int8 PlayerCount, CGameObject** MyPlayersInfo);
@@ -152,10 +163,10 @@ public:
 
 	virtual void OnClientJoin(int64 SessionID) override;
 	virtual void OnRecv(int64 SessionID, CMessage* Packet) override;
-	virtual void OnClientLeave(st_SESSION* LeaveSession) override;
+	virtual void OnClientLeave(st_Session* LeaveSession) override;
 	virtual bool OnConnectionRequest(const wchar_t ClientIP, int32 Port) override;
 
 	void SendPacketSector(CSector* Sector, CMessage* Message);
 	void SendPacketAroundSector(st_Vector2Int CellPosition, CMessage* Message);
-	void SendPacketAroundSector(st_SESSION* Session, CMessage* Message, bool SendMe = false);
+	void SendPacketAroundSector(st_Session* Session, CMessage* Message, bool SendMe = false);
 };

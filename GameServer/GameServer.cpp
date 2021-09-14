@@ -47,8 +47,8 @@ void CGameServer::Start(const WCHAR* OpenIP, int32 Port)
 {
 	CNetworkLib::Start(OpenIP, Port);
 
-	G_ObjectManager->MonsterSpawn(200, 1, en_GameObjectType::SLIME);
-	G_ObjectManager->MonsterSpawn(100, 1, en_GameObjectType::BEAR);
+	//G_ObjectManager->MonsterSpawn(200, 1, en_GameObjectType::SLIME);
+	G_ObjectManager->MonsterSpawn(5, 1, en_GameObjectType::BEAR);
 
 	G_ObjectManager->GameServer = this;
 
@@ -82,13 +82,13 @@ unsigned __stdcall CGameServer::AuthThreadProc(void* Argument)
 
 			switch (Job->Type)
 			{
-			case en_MESSAGE_TYPE::AUTH_NEW_CLIENT_JOIN:
+			case en_JobType::AUTH_NEW_CLIENT_JOIN:
 				Instance->CreateNewClient(Job->SessionId);
 				break;
-			case en_MESSAGE_TYPE::AUTH_DISCONNECT_CLIENT:
+			case en_JobType::AUTH_DISCONNECT_CLIENT:
 				Instance->DeleteClient(Job->Session);
 				break;
-			case en_MESSAGE_TYPE::AUTH_MESSAGE:
+			case en_JobType::AUTH_MESSAGE:
 				break;
 			default:
 				Instance->Disconnect(Job->SessionId);
@@ -119,7 +119,7 @@ unsigned __stdcall CGameServer::NetworkThreadProc(void* Argument)
 
 			switch (Job->Type)
 			{
-			case en_MESSAGE_TYPE::NETWORK_MESSAGE:
+			case en_JobType::NETWORK_MESSAGE:
 				Instance->PacketProc(Job->SessionId, Job->Message);
 				break;
 			default:
@@ -157,25 +157,25 @@ unsigned __stdcall CGameServer::DataBaseThreadProc(void* Argument)
 
 			switch (Job->Type)
 			{
-			case en_MESSAGE_TYPE::DATA_BASE_ACCOUNT_CHECK:
+			case en_JobType::DATA_BASE_ACCOUNT_CHECK:
 				Instance->PacketProcReqDBAccountCheck(Job->SessionId, Job->Message);
 				break;
-			case en_MESSAGE_TYPE::DATA_BASE_CHARACTER_CHECK:
+			case en_JobType::DATA_BASE_CHARACTER_CHECK:
 				Instance->PacketProcReqDBCreateCharacterNameCheck(Job->SessionId, Job->Message);
 				break;
-			case en_MESSAGE_TYPE::DATA_BASE_ITEM_CREATE:
+			case en_JobType::DATA_BASE_ITEM_CREATE:
 				Instance->PacketProcReqDBItemCreate(Job->Message);
 				break;
-			case en_MESSAGE_TYPE::DATA_BASE_ITEM_INVENTORY_SAVE:
+			case en_JobType::DATA_BASE_ITEM_INVENTORY_SAVE:
 				Instance->PacketProcReqDBItemToInventorySave(Job->SessionId, Job->Message);
 				break;
-			case en_MESSAGE_TYPE::DATA_BASE_ITEM_SWAP:
+			case en_JobType::DATA_BASE_ITEM_SWAP:
 				Instance->PacketProcReqDBItemSwap(Job->SessionId, Job->Message);
 				break;
-			case en_MESSAGE_TYPE::DATA_BASE_GOLD_SAVE:
+			case en_JobType::DATA_BASE_GOLD_SAVE:
 				Instance->PacketProcReqDBGoldSave(Job->SessionId, Job->Message);
 				break;
-			case en_MESSAGE_TYPE::DATA_BASE_CHARACTER_INFO_SEND:
+			case en_JobType::DATA_BASE_CHARACTER_INFO_SEND:
 				Instance->PacketProcReqDBCharacterInfoSend(Job->SessionId, Job->Message);
 				break;
 			}
@@ -195,7 +195,7 @@ unsigned __stdcall CGameServer::HeartBeatCheckThreadProc(void* Argument)
 void CGameServer::CreateNewClient(int64 SessionId)
 {
 	// 세션 찾기
-	st_SESSION* Session = FindSession(SessionId);
+	st_Session* Session = FindSession(SessionId);
 
 	// 기본 정보 셋팅
 	Session->AccountId = 0;
@@ -218,7 +218,7 @@ void CGameServer::CreateNewClient(int64 SessionId)
 	ReturnSession(Session);
 }
 
-void CGameServer::DeleteClient(st_SESSION* Session)
+void CGameServer::DeleteClient(st_Session* Session)
 {
 	if (Session == nullptr)
 	{
@@ -320,7 +320,7 @@ void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 //----------------------------------------------------------------------------
 void CGameServer::PacketProcReqLogin(int64 SessionID, CMessage* Message)
 {
-	st_SESSION* Session = FindSession(SessionID);
+	st_Session* Session = FindSession(SessionID);
 
 	int64 AccountId;
 	int32 Token;
@@ -331,7 +331,7 @@ void CGameServer::PacketProcReqLogin(int64 SessionID, CMessage* Message)
 		*Message >> AccountId;
 
 		// 중복 로그인 확인
-		for (st_SESSION* FindSession : _SessionArray)
+		for (st_Session* FindSession : _SessionArray)
 		{
 			if (FindSession->AccountId == AccountId)
 			{
@@ -368,7 +368,7 @@ void CGameServer::PacketProcReqLogin(int64 SessionID, CMessage* Message)
 		InterlockedIncrement64(&Session->IOBlock->IOCount);
 
 		st_Job* DBAccountCheckJob = _JobMemoryPool->Alloc();
-		DBAccountCheckJob->Type = en_MESSAGE_TYPE::DATA_BASE_ACCOUNT_CHECK;
+		DBAccountCheckJob->Type = en_JobType::DATA_BASE_ACCOUNT_CHECK;
 		DBAccountCheckJob->SessionId = Session->SessionId;
 		DBAccountCheckJob->Message = nullptr;
 
@@ -386,7 +386,7 @@ void CGameServer::PacketProcReqLogin(int64 SessionID, CMessage* Message)
 
 void CGameServer::PacketProcReqCreateCharacter(int64 SessionID, CMessage* Message)
 {
-	st_SESSION* Session = FindSession(SessionID);
+	st_Session* Session = FindSession(SessionID);
 
 	if (Session)
 	{
@@ -418,7 +418,7 @@ void CGameServer::PacketProcReqCreateCharacter(int64 SessionID, CMessage* Messag
 		*DBReqChatacerCreateMessage << CharacterCreateSlotIndex;
 
 		st_Job* DBCharacterCheckJob = _JobMemoryPool->Alloc();
-		DBCharacterCheckJob->Type = en_MESSAGE_TYPE::DATA_BASE_CHARACTER_CHECK;
+		DBCharacterCheckJob->Type = en_JobType::DATA_BASE_CHARACTER_CHECK;
 		DBCharacterCheckJob->SessionId = Session->SessionId;
 		DBCharacterCheckJob->Message = DBReqChatacerCreateMessage;
 
@@ -435,7 +435,7 @@ void CGameServer::PacketProcReqCreateCharacter(int64 SessionID, CMessage* Messag
 
 void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 {
-	st_SESSION* Session = FindSession(SessionID);
+	st_Session* Session = FindSession(SessionID);
 
 	do
 	{
@@ -526,7 +526,7 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 			InterlockedIncrement64(&Session->IOBlock->IOCount);
 
 			st_Job* DBCharacterInfoSendJob = _JobMemoryPool->Alloc();
-			DBCharacterInfoSendJob->Type = en_MESSAGE_TYPE::DATA_BASE_CHARACTER_INFO_SEND;
+			DBCharacterInfoSendJob->Type = en_JobType::DATA_BASE_CHARACTER_INFO_SEND;
 			DBCharacterInfoSendJob->SessionId = Session->SessionId;
 			DBCharacterInfoSendJob->Message = nullptr;
 
@@ -547,7 +547,7 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 // char Dir
 void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 {
-	st_SESSION* Session = FindSession(SessionID);
+	st_Session* Session = FindSession(SessionID);
 
 	do
 	{
@@ -658,7 +658,7 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 // char Dir
 void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 {
-	st_SESSION* Session = FindSession(SessionID);
+	st_Session* Session = FindSession(SessionID);
 
 	do
 	{
@@ -779,7 +779,7 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 
 void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 {
-	st_SESSION* Session = FindSession(SessionId);
+	st_Session* Session = FindSession(SessionId);
 
 	if (Session)
 	{
@@ -889,7 +889,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 // int32 Y
 void CGameServer::PacketProcReqMousePositionObjectInfo(int64 SessionID, CMessage* Message)
 {
-	st_SESSION* Session = FindSession(SessionID);
+	st_Session* Session = FindSession(SessionID);
 
 	do
 	{
@@ -959,7 +959,7 @@ void CGameServer::PacketProcReqMousePositionObjectInfo(int64 SessionID, CMessage
 void CGameServer::PacketProcReqObjectStateChange(int64 SessionId, CMessage* Message)
 {
 	// 세션 얻기
-	st_SESSION* Session = FindSession(SessionId);
+	st_Session* Session = FindSession(SessionId);
 
 	int64 AccountId;
 	int64 PlayerDBId;
@@ -1055,7 +1055,7 @@ void CGameServer::PacketProcReqObjectStateChange(int64 SessionId, CMessage* Mess
 void CGameServer::PacketProcReqChattingMessage(int64 SessionId, CMessage* Message)
 {
 	// 세션 얻기
-	st_SESSION* Session = FindSession(SessionId);
+	st_Session* Session = FindSession(SessionId);
 
 	int64 AccountId;
 	int64 PlayerDBId;
@@ -1124,7 +1124,7 @@ void CGameServer::PacketProcReqChattingMessage(int64 SessionId, CMessage* Messag
 
 void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Message)
 {
-	st_SESSION* Session = FindSession(SessionId);
+	st_Session* Session = FindSession(SessionId);
 
 	do
 	{
@@ -1185,7 +1185,7 @@ void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Messag
 					TargetPlayer->_Inventory.AddCoin(Item);
 
 					st_Job* DBGoldSaveJob = _JobMemoryPool->Alloc();
-					DBGoldSaveJob->Type = en_MESSAGE_TYPE::DATA_BASE_GOLD_SAVE;
+					DBGoldSaveJob->Type = en_JobType::DATA_BASE_GOLD_SAVE;
 					DBGoldSaveJob->SessionId = TargetPlayer->_SessionId;
 
 					CMessage* DBGoldSaveMessage = CMessage::Alloc();
@@ -1228,7 +1228,7 @@ void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Messag
 					}
 
 					st_Job* DBInventorySaveJob = _JobMemoryPool->Alloc();
-					DBInventorySaveJob->Type = en_MESSAGE_TYPE::DATA_BASE_ITEM_INVENTORY_SAVE;
+					DBInventorySaveJob->Type = en_JobType::DATA_BASE_ITEM_INVENTORY_SAVE;
 					DBInventorySaveJob->SessionId = Session->SessionId;
 
 					CMessage* DBSaveMessage = CMessage::Alloc();
@@ -1294,7 +1294,7 @@ void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Messag
 // int8 SwapIndexB
 void CGameServer::PacketProcReqItemSwap(int64 SessionId, CMessage* Message)
 {
-	st_SESSION* Session = FindSession(SessionId);
+	st_Session* Session = FindSession(SessionId);
 
 	if (Session)
 	{
@@ -1345,7 +1345,7 @@ void CGameServer::PacketProcReqItemSwap(int64 SessionId, CMessage* Message)
 			*Message >> SwapIndexB;
 
 			st_Job* DBItemSwapJob = _JobMemoryPool->Alloc();
-			DBItemSwapJob->Type = en_MESSAGE_TYPE::DATA_BASE_ITEM_SWAP;
+			DBItemSwapJob->Type = en_JobType::DATA_BASE_ITEM_SWAP;
 			DBItemSwapJob->SessionId = Session->MyPlayer->_SessionId;
 
 			CMessage* DBItemSwapMessage = CMessage::Alloc();
@@ -1376,7 +1376,7 @@ void CGameServer::PacketProcReqItemSwap(int64 SessionId, CMessage* Message)
 //---------------------------------------------------------------------------------
 void CGameServer::PacketProcReqSectorMove(int64 SessionID, CMessage* Message)
 {
-	st_SESSION* Session = FindSession(SessionID);
+	st_Session* Session = FindSession(SessionID);
 
 	int64 AccountNo;
 	WORD SectorX;
@@ -1441,7 +1441,7 @@ void CGameServer::PacketProcReqSectorMove(int64 SessionID, CMessage* Message)
 //---------------------------------------------------------------------------------
 void CGameServer::PacketProcReqMessage(int64 SessionID, CMessage* Message)
 {
-	st_SESSION* Session = FindSession(SessionID);
+	st_Session* Session = FindSession(SessionID);
 
 	int64 AccountNo;
 	int MessageLen = 0;
@@ -1495,7 +1495,7 @@ void CGameServer::PacketProcReqMessage(int64 SessionID, CMessage* Message)
 //---------------------------------------------------------------------------------
 void CGameServer::PacketProcReqHeartBeat(int64 SessionID, CMessage* Message)
 {
-	st_SESSION* Session = FindSession(SessionID);
+	st_Session* Session = FindSession(SessionID);
 
 	Session->RecvPacketTime = timeGetTime();
 
@@ -1504,7 +1504,7 @@ void CGameServer::PacketProcReqHeartBeat(int64 SessionID, CMessage* Message)
 
 void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message)
 {
-	st_SESSION* Session = FindSession(SessionID);
+	st_Session* Session = FindSession(SessionID);
 
 	bool Status = LOGIN_SUCCESS;
 
@@ -1566,7 +1566,7 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 			ClientPlayersGet.OutCurrentHP(PlayerCurrentHP);
 			ClientPlayersGet.OutMaxHP(PlayerMaxHP);
 			ClientPlayersGet.OutMinAttack(PlayerMinAttack);
-			ClientPlayersGet.OutMaxAttack(PlayerMaxAttack);			
+			ClientPlayersGet.OutMaxAttack(PlayerMaxAttack);
 			ClientPlayersGet.OutCriticalPoint(PlayerCriticalPoint);
 			ClientPlayersGet.OutSpeed(PlayerSpeed);
 			ClientPlayersGet.OutPlayerObjectType(PlayerObjectType);
@@ -1622,7 +1622,7 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 
 void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMessage* Message)
 {
-	st_SESSION* Session = FindSession(SessionID);
+	st_Session* Session = FindSession(SessionID);
 
 	int64 PlayerDBId = 0;
 
@@ -1678,7 +1678,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			NewCharacterPush.InCurrentHP(NewCharacterStatus.MaxHP);
 			NewCharacterPush.InMaxHP(NewCharacterStatus.MaxHP);
 			NewCharacterPush.InMinAttack(NewCharacterStatus.MinAttackDamage);
-			NewCharacterPush.InMaxAttack(NewCharacterStatus.MaxAttackDamage);			
+			NewCharacterPush.InMaxAttack(NewCharacterStatus.MaxAttackDamage);
 			NewCharacterPush.InCriticalPoint(NewCharacterStatus.CriticalPoint);
 			NewCharacterPush.InSpeed(NewCharacterStatus.Speed);
 
@@ -1722,7 +1722,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.PlayerSlotIndex = ReqCharacterCreateSlotIndex; // 캐릭터가 속한 슬롯
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_SessionId = Session->SessionId;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_AccountId = Session->AccountId;
-			
+
 			G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerDBIDGetDBConnection);
 
 			// Gold Table 생성
@@ -1734,24 +1734,24 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			GoldTableCreate.Execute();
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, DBGoldTableCreateConnection);
-		
+
 			// 캐릭터 인벤토리 생성
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_Inventory.Init();
-			
+
 			// DB에 인벤토리 생성
 			for (int8 SlotIndex = 0; SlotIndex < (int8)en_Inventory::INVENTORY_SIZE; SlotIndex++)
 			{
 				CDBConnection* DBItemToInventoryConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 				SP::CDBGameServerItemCreateToInventory ItemToInventory(*DBItemToInventoryConnection);
 				st_ItemInfo NewItem;
-				NewItem.ItemDBId = 0;				
+				NewItem.ItemDBId = 0;
 				NewItem.ItemType = en_ItemType::ITEM_TYPE_NONE;
 				NewItem.ItemConsumableType = en_ConsumableType::NONE;
 				NewItem.ItemName = L"";
 				NewItem.ItemCount = 0;
 				NewItem.SlotIndex = SlotIndex;
 				NewItem.IsEquipped = false;
-				NewItem.ThumbnailImagePath = L"";				
+				NewItem.ThumbnailImagePath = L"";
 
 				int16 ItemType = (int16)NewItem.ItemType;
 				int16 ItemConsumableType = (int16)NewItem.ItemConsumableType;
@@ -1767,7 +1767,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 				ItemToInventory.InOwnerPlayerId(PlayerDBId);
 
 				ItemToInventory.Execute();
-			}			
+			}
 		}
 		else
 		{
@@ -1812,8 +1812,8 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 	auto FindMonsterDropItem = G_Datamanager->_Monsters.find(MonsterDataType);
 	st_MonsterData MonsterData = *(*FindMonsterDropItem).second;
 
-	random_device RD;	
-	mt19937 Gen(RD());	
+	random_device RD;
+	mt19937 Gen(RD());
 	uniform_real_distribution<float> RandomDropPoint(0, 1); // 0.0 ~ 1.0	
 	float RandomPoint = 100 * RandomDropPoint(Gen);
 
@@ -1847,7 +1847,7 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 	{
 		st_ItemInfo NewItemInfo;
 
-		NewItemInfo.ItemType = DropItemData.ItemType;		
+		NewItemInfo.ItemType = DropItemData.ItemType;
 		NewItemInfo.ItemConsumableType = DropItemData.ItemConsumableType;
 		NewItemInfo.ItemName = (LPWSTR)CA2W(DropItemData.ItemName.c_str());
 		NewItemInfo.ItemCount = DropItemData.ItemCount;
@@ -1941,7 +1941,7 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 
 void CGameServer::PacketProcReqDBItemToInventorySave(int64 SessionId, CMessage* Message)
 {
-	st_SESSION* Session = FindSession(SessionId);
+	st_Session* Session = FindSession(SessionId);
 
 	if (Session)
 	{
@@ -2062,7 +2062,7 @@ void CGameServer::PacketProcReqDBItemToInventorySave(int64 SessionId, CMessage* 
 
 void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 {
-	st_SESSION* Session = FindSession(SessionId);
+	st_Session* Session = FindSession(SessionId);
 
 	if (Session)
 	{
@@ -2129,7 +2129,7 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		int16 BDBItemConsumableType = -1;
 		WCHAR BItemName[20] = { 0 };
 		int16 BItemCount = -1;
-		bool BItemEquipped = false;		
+		bool BItemEquipped = false;
 		WCHAR BItemThumbnailImagePath[100] = { 0 };
 
 		DBItemCheck.OutItemType(BDBItemType);
@@ -2141,7 +2141,7 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 
 		DBItemCheck.Execute();
 
-		DBItemCheck.Fetch();		
+		DBItemCheck.Fetch();
 
 		// 스왑 요청할 B 아이템 정보 셋팅
 		st_ItemInfo SwapBItemInfo;
@@ -2229,7 +2229,7 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 
 void CGameServer::PacketProcReqDBGoldSave(int64 SessionId, CMessage* Message)
 {
-	st_SESSION* Session = FindSession(SessionId);
+	st_Session* Session = FindSession(SessionId);
 
 	if (Session)
 	{
@@ -2260,7 +2260,7 @@ void CGameServer::PacketProcReqDBGoldSave(int64 SessionId, CMessage* Message)
 		*Message >> ItemType;
 
 		Message->Free();
-		
+
 		CDBConnection* GoldSaveDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 		SP::CDBGameServerGoldPush GoldSavePush(*GoldSaveDBConnection);
 		GoldSavePush.InAccoountId(AccountId);
@@ -2303,7 +2303,7 @@ void CGameServer::PacketProcReqDBGoldSave(int64 SessionId, CMessage* Message)
 
 void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Message)
 {
-	st_SESSION* Session = FindSession(SessionId);
+	st_Session* Session = FindSession(SessionId);
 
 	if (Session)
 	{
@@ -2323,7 +2323,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 
 			CharacterGoldGet.OutGoldCoin(GoldCoin);
 			CharacterGoldGet.OutSliverCoin(SliverCoin);
-			CharacterGoldGet.OutBronzeCoin(BronzeCoin);			
+			CharacterGoldGet.OutBronzeCoin(BronzeCoin);
 
 			if (CharacterGoldGet.Execute() && CharacterGoldGet.Fetch())
 			{
@@ -2339,7 +2339,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				CMessage* ResGoldSaveMeesage = MakePacketGoldSave(Session->MyPlayer->_AccountId, Session->MyPlayer->_GameObjectInfo.ObjectId, GoldCoin, SliverCoin, BronzeCoin, 0, 0, false);
 				SendPacket(Session->SessionId, ResGoldSaveMeesage);
 				ResGoldSaveMeesage->Free();
-			}			
+			}
 
 			Session->MyPlayer->_Inventory.Init();
 
@@ -2348,7 +2348,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			SP::CDBGameServerInventoryItemGet CharacterInventoryItemGet(*DBCharacterInventoryItemGetConnection);
 			CharacterInventoryItemGet.InAccountDBId(Session->MyPlayer->_AccountId);
 			CharacterInventoryItemGet.InPlayerDBId(Session->MyPlayer->_GameObjectInfo.ObjectId);
-			
+
 			int16 ItemType;
 			int16 ItemConsumableType;
 			WCHAR ItemName[20] = { 0 };
@@ -2356,7 +2356,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			int8 SlotIndex;
 			bool IsEquipped;
 			WCHAR ItemThumbnailImagePath[100] = { 0 };
-			
+
 			CharacterInventoryItemGet.OutItemType(ItemType);
 			CharacterInventoryItemGet.OutItemConsumableType(ItemConsumableType);
 			CharacterInventoryItemGet.OutItemName(ItemName);
@@ -2410,7 +2410,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					CMessage* ResItemToInventoryPacket = MakePacketResItemToInventory(Session->MyPlayer->_GameObjectInfo.ObjectId, ItemInfo, ItemInfo.ItemCount, false);
 					SendPacket(Session->SessionId, ResItemToInventoryPacket);
 					ResItemToInventoryPacket->Free();
-				}				
+				}
 			}
 		} while (0);
 
@@ -2695,12 +2695,12 @@ CMessage* CGameServer::MakePacketResItemSwap(int64 AccountId, int64 ObjectId, st
 	*ResItemSwapMessage << ObjectId;
 
 	// AItemInfo	
-	*ResItemSwapMessage << SwapAItemInfo.ItemDBId;	
+	*ResItemSwapMessage << SwapAItemInfo.ItemDBId;
 	*ResItemSwapMessage << (int16)SwapAItemInfo.ItemType;
 	*ResItemSwapMessage << (int16)SwapAItemInfo.ItemConsumableType;
 	*ResItemSwapMessage << SwapAItemInfo.ItemCount;
 	*ResItemSwapMessage << SwapAItemInfo.SlotIndex;
-	*ResItemSwapMessage << SwapAItemInfo.IsEquipped;	
+	*ResItemSwapMessage << SwapAItemInfo.IsEquipped;
 
 	// AItem 이름
 	int8 AItemNameLen = (int8)(SwapAItemInfo.ItemName.length() * 2);
@@ -2718,7 +2718,7 @@ CMessage* CGameServer::MakePacketResItemSwap(int64 AccountId, int64 ObjectId, st
 	*ResItemSwapMessage << (int16)SwapBItemInfo.ItemConsumableType;
 	*ResItemSwapMessage << SwapBItemInfo.ItemCount;
 	*ResItemSwapMessage << SwapBItemInfo.SlotIndex;
-	*ResItemSwapMessage << SwapBItemInfo.IsEquipped;	
+	*ResItemSwapMessage << SwapBItemInfo.IsEquipped;
 
 	// BItem 이름
 	int8 BItemNameLen = (int8)(SwapBItemInfo.ItemName.length() * 2);
@@ -2984,7 +2984,7 @@ CMessage* CGameServer::MakePacketResItemToInventory(int64 TargetObjectId, st_Ite
 	*ResItemToInventoryMessage << (int16)ItemInfo.ItemConsumableType;
 	*ResItemToInventoryMessage << ItemInfo.ItemCount;
 	*ResItemToInventoryMessage << ItemInfo.SlotIndex;
-	*ResItemToInventoryMessage << ItemInfo.IsEquipped;	
+	*ResItemToInventoryMessage << ItemInfo.IsEquipped;
 
 	// Item 이름
 	int8 ItemNameLen = (int8)(ItemInfo.ItemName.length() * 2);
@@ -3034,7 +3034,7 @@ CMessage* CGameServer::MakePacketResSyncPosition(int64 TargetObjectId, st_Positi
 void CGameServer::OnClientJoin(int64 SessionID)
 {
 	st_Job* ClientJoinJob = _JobMemoryPool->Alloc();
-	ClientJoinJob->Type = en_MESSAGE_TYPE::AUTH_NEW_CLIENT_JOIN;
+	ClientJoinJob->Type = en_JobType::AUTH_NEW_CLIENT_JOIN;
 	ClientJoinJob->SessionId = SessionID;
 	ClientJoinJob->Message = nullptr;
 	_GameServerAuthThreadMessageQue.Enqueue(ClientJoinJob);
@@ -3049,17 +3049,17 @@ void CGameServer::OnRecv(int64 SessionID, CMessage* Packet)
 	JobMessage->SetHeader(Packet->GetBufferPtr(), sizeof(CMessage::st_ENCODE_HEADER));
 	JobMessage->InsertData(Packet->GetFrontBufferPtr(), Packet->GetUseBufferSize() - sizeof(CMessage::st_ENCODE_HEADER));
 
-	NewMessageJob->Type = en_MESSAGE_TYPE::NETWORK_MESSAGE;
+	NewMessageJob->Type = en_JobType::NETWORK_MESSAGE;
 	NewMessageJob->SessionId = SessionID;
 	NewMessageJob->Message = JobMessage;
 	_GameServerNetworkThreadMessageQue.Enqueue(NewMessageJob);
 	SetEvent(_NetworkThreadWakeEvent);
 }
 
-void CGameServer::OnClientLeave(st_SESSION* LeaveSession)
+void CGameServer::OnClientLeave(st_Session* LeaveSession)
 {
 	st_Job* ClientLeaveJob = _JobMemoryPool->Alloc();
-	ClientLeaveJob->Type = en_MESSAGE_TYPE::AUTH_DISCONNECT_CLIENT;
+	ClientLeaveJob->Type = en_JobType::AUTH_DISCONNECT_CLIENT;
 	ClientLeaveJob->SessionId = LeaveSession->SessionId;
 	ClientLeaveJob->Session = LeaveSession;
 	ClientLeaveJob->Message = nullptr;
@@ -3095,7 +3095,7 @@ void CGameServer::SendPacketAroundSector(st_Vector2Int CellPosition, CMessage* M
 	}
 }
 
-void CGameServer::SendPacketAroundSector(st_SESSION* Session, CMessage* Message, bool SendMe)
+void CGameServer::SendPacketAroundSector(st_Session* Session, CMessage* Message, bool SendMe)
 {
 	CChannel* Channel = G_ChannelManager->Find(1);
 	vector<CSector*> Sectors = Channel->GetAroundSectors(Session->MyPlayer->GetCellPosition(), 10);

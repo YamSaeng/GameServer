@@ -45,26 +45,26 @@ private:
 	// 연결 끊어졌을때 세션반납
 	// IOCount 확인 Release 중인지 확인
 	//---------------------------------------------------------
-	void ReleaseSession(st_SESSION* ReleaseSession);	
+	void ReleaseSession(st_Session* ReleaseSession);	
 
 	//------------------------------------
 	// WSASend를 예약한다.
 	//------------------------------------
-	void SendPost(st_SESSION* SendSession);
+	void SendPost(st_Session* SendSession);
 
 	//-------------------------------------------------------------------
 	// WSARecv를 예약한다.
 	//-------------------------------------------------------------------
-	void RecvPost(st_SESSION* RecvSession, bool IsAcceptRecvPost = false);
+	void RecvPost(st_Session* RecvSession, bool IsAcceptRecvPost = false);
 
 	//--------------------------------------------------------------------------------
 	// Recv완료시 호출하는 함수
 	//--------------------------------------------------------------------------------
-	void RecvNotifyComplete(st_SESSION* RecvCompleteSession, const DWORD& Transferred);
+	void RecvNotifyComplete(st_Session* RecvCompleteSession, const DWORD& Transferred);
 	//--------------------------------------------------------------------------------
 	// Send완료시 호출하는 함수
 	//--------------------------------------------------------------------------------
-	void SendNotifyComplete(st_SESSION* SendCompleteSession);
+	void SendNotifyComplete(st_Session* SendCompleteSession);
 
 	//-----------------------------------------------------------------
 	// 클라 접속시 Accept 호출하고 접속한 클라를 대상으로 호출하는 함수
@@ -81,7 +81,7 @@ private:
 	// ReleaseSession 안에서 호출 
 	// 반납되는 세션을 기준으로 IOCount가 0이 될때 호출
 	//-------------------------------------------------
-	virtual void OnClientLeave(st_SESSION *LeaveSession) = 0;
+	virtual void OnClientLeave(st_Session *LeaveSession) = 0;
 
 	virtual bool OnConnectionRequest(const wchar_t ClientIP, int Port) = 0;
 
@@ -89,7 +89,7 @@ protected:
 	//--------------------------------------------
 	// 세션 포인터 배열
 	//--------------------------------------------
-	st_SESSION* _SessionArray[SERVER_SESSION_MAX];
+	st_Session* _SessionArray[SERVER_SESSION_MAX];
 
 	//------------------------------------------------
 	// 세션 포인트 배열 인덱스를 스택형식으로 보관해둠
@@ -99,12 +99,12 @@ protected:
 	//-----------------------------------------
 	// 세션ID를 통해 세션 인덱스를 찾고 배열에서 세션을 가져온다.
 	//-----------------------------------------
-	st_SESSION* FindSession(__int64 SessionID);
+	st_Session* FindSession(__int64 SessionID);
 
 	//---------------------------------------------------------------------------------------------------------------
 	// 증가시켜준 IOCount를 감소시켜주는 함수 ( 사용한다는 의미인 IOCount를 1 줄여줌으로써 반납 한다는 의미를 갖는다)
 	//---------------------------------------------------------------------------------------------------------------
-	void ReturnSession(st_SESSION* Session);
+	void ReturnSession(st_Session* Session);
 public:
 	//-------------------------
 	// 연결되어 있는 세션 개수
