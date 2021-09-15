@@ -297,4 +297,15 @@
       ]]>
     </Body>
   </Procedure>
+  
+  <!-- SkillTable에 있는 Skill 가지고 오기-->
+  <Procedure name="spGetSkill">
+    <Param name="@AccountDBId" type="BigInt"/>
+    <Param name="@PlayerDBId" type="BigInt"/>
+    <Body>
+      <![CDATA[
+        SELECT SkillType, SkillLevel, SkillName, SkillCoolTime, SlotIndex, SkillImagePath FROM [dbo].[Skill] WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
+      ]]>
+    </Body>
+  </Procedure>  
 </GameServerDB>
