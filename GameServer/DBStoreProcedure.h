@@ -238,7 +238,7 @@ namespace SP
 	};
 
 	// SkillTable¿¡ ÀÖ´Â Skill ¸ðµÎ ±Ü¾î¿È
-	class CDBGameServerSkillGet : public CDBBind<2, 5>
+	class CDBGameServerSkillGet : public CDBBind<2, 6>
 	{
 	public:
 		CDBGameServerSkillGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetSkill(?,?)}") {}
@@ -248,8 +248,8 @@ namespace SP
 		void OutSkillType(int16& SkillType) { BindCol(0, SkillType); }
 		void OutSkillLevel(int8& SkillLevel) { BindCol(1, SkillLevel); }
 		template<int8 Length> void OutSkillName(WCHAR(&SkillName)[Length]) { BindCol(2, SkillName); }
-		void SkillCoolTime(int32& SkillCoolTime) { BindCol(3, SkillCoolTime); }
-		void SkillSlotIndex(int8& SlotIndex) { BindCol(4, SlotIndex); }
+		void OutSkillCoolTime(int32& SkillCoolTime) { BindCol(3, SkillCoolTime); }
+		void OutSkillSlotIndex(int8& SlotIndex) { BindCol(4, SlotIndex); }
 		template<int8 Length> void OutSkillThumbnailImagePath(WCHAR(&SkillThumbnailImagePath)[Length]) { BindCol(5, SkillThumbnailImagePath); }
 	};
 }
