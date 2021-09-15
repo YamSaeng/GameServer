@@ -253,7 +253,7 @@ void CObjectManager::ItemSpawn(int64 KillerId, en_GameObjectType KillerObjectTyp
 	*ReqItemCreateMessage << (int32)MonsterDataType;
 
 	st_Job* ReqDBaseItemCreateJob = GameServer->_JobMemoryPool->Alloc();
-	ReqDBaseItemCreateJob->Type = en_MESSAGE_TYPE::DATA_BASE_ITEM_CREATE;
+	ReqDBaseItemCreateJob->Type = en_JobType::DATA_BASE_ITEM_CREATE;
 	ReqDBaseItemCreateJob->SessionId = -1;
 	ReqDBaseItemCreateJob->Session = nullptr;
 	ReqDBaseItemCreateJob->Message = ReqItemCreateMessage;

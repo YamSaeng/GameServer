@@ -19,7 +19,7 @@ private:
 	CMemoryPoolTLS<CWeapon>* _WeaponMemoryPool;
 	CMemoryPoolTLS<CMaterial>* _MaterialMemoryPool;
 	CMemoryPoolTLS<CConsumable>* _ConsumableMemoryPool;
-
+	
 	int64 _MonsterObjectId;	
 public:
 	CGameServer* GameServer;
