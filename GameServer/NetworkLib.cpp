@@ -12,6 +12,7 @@ CNetworkLib::CNetworkLib()
 		wprintf(L"WSAStartup Error %d\n", Error);
 	}
 
+	// SessionArray 미리 준비
 	for (int SessionCount = SERVER_SESSION_MAX - 1; SessionCount >= 0; SessionCount--)
 	{
 		_SessionArray[SessionCount] = new st_Session;
@@ -19,6 +20,7 @@ CNetworkLib::CNetworkLib()
 		memset(&_SessionArray[SessionCount]->SendPacket, 0, sizeof(CMessage*) * 500);
 		_SessionArray[SessionCount]->IOBlock->IOCount = 0;
 		_SessionArray[SessionCount]->SendPacketCount = 0;
+		// 미리 준비되어 있는 세션의 Index를 넣어줌
 		_SessionArrayIndexs.Push(SessionCount);
 	}
 
@@ -41,7 +43,7 @@ st_Session* CNetworkLib::FindSession(__int64 SessionID)
 	int SessionIndex = GET_SESSIONINDEX(SessionID);
 
 	// 이미 릴리즈 작업중이거나 작업중일 예정인 세션이라면 그냥 나간다.
-	if (_SessionArray[SessionIndex]->IOBlock->IsRelease == true)
+	if (_SessionArray[SessionIndex]->IOBlock->IsRelease == 1)
 	{		
 		return nullptr;
 	}
@@ -155,8 +157,10 @@ void CNetworkLib::SendPost(st_Session* SendSession)
 		}
 	} while (0);
 
+	// 해당 세션이 보내야할 패킷의 개수를 지정한다.
 	SendSession->SendPacketCount = SendBufCount = SendRingBufUseSize;
 
+	// 보내야할 패킷의 개수만큼 SendRingBuf에서 뽑아내서 WSABuf에 담는다.
 	for (int i = 0; i < SendBufCount; i++)
 	{
 		CMessage* Packet = nullptr;
@@ -165,16 +169,20 @@ void CNetworkLib::SendPost(st_Session* SendSession)
 			break;
 		}
 
+		// 패킷의 개수만큼 TPS 기록
 		InterlockedIncrement(&_SendPacketTPS);
 
 		SendBuf[i].buf = Packet->GetHeaderBufferPtr();
 		SendBuf[i].len = Packet->GetUseBufferSize();
 
+		// Send완료되면 반납하기위해 보낼 패킷을 보관해둔다.
 		SendSession->SendPacket[i] = Packet;
 	}
 
+	// Send걸기전에 SendOverlapped를 초기화해준다.
 	memset(&SendSession->SendOverlapped, 0, sizeof(OVERLAPPED));
 
+	// IO Count를 증가시켜준다.
 	InterlockedIncrement64(&SendSession->IOBlock->IOCount);
 	
 	int WSASendRetval = WSASend(SendSession->ClientSock, SendBuf, SendBufCount, NULL, 0, (LPWSAOVERLAPPED)&SendSession->SendOverlapped, NULL);
@@ -206,25 +214,35 @@ void CNetworkLib::RecvPost(st_Session* RecvSession, bool IsAcceptRecvPost)
 	int RecvBufCount = 0;
 	WSABUF RecvBuf[2];
 
+	// 현재 RecvRingBuf에서 한번에 넣을수 있는 사이즈를 읽는다.
 	int DirectEnqueSize = RecvSession->RecvRingBuf.GetDirectEnqueueSize();
+	// 남아 있는 RecvRingBuf의 공간 사이즈를 읽는다.
 	int RecvRingBufFreeSize = RecvSession->RecvRingBuf.GetFreeSize();
 
+	// 만약 남아 있는 RecvRingBuf의 공간 사이즈가 한번에 넣을 수 있는 사이즈 보다 크다면
+	// 현재 RecvRingBuf가 2개의 공간으로 나뉘어 있음을 확인 할 수 잇다.
 	if (RecvRingBufFreeSize > DirectEnqueSize)
 	{
+		// WSARecvBuf의 개수를 2개로 삼고
+		// 첫번째 Buf는 RecvRingBuf의 Rear주소 시작점과 DirectEnqueSize를
 		RecvBufCount = 2;
 		RecvBuf[0].buf = RecvSession->RecvRingBuf.GetRearBufferPtr();
 		RecvBuf[0].len = DirectEnqueSize;
-
+		
+		// 두번째 Buf는 RecvRing의 처음 주소와 DirectEnqueSize를 뺀 값
+		// 즉 앞 부분부터 시작되는 남은 공간의길이를 담아준다.
 		RecvBuf[1].buf = RecvSession->RecvRingBuf.GetBufferPtr();
 		RecvBuf[1].len = RecvRingBufFreeSize - DirectEnqueSize;
 	}
 	else
-	{
+	{		
+		// 그 외의 경우에는 Rear주소 시작점과 DirectEnqueSize를 넣는다.
 		RecvBufCount = 1;
 		RecvBuf[0].buf = RecvSession->RecvRingBuf.GetRearBufferPtr();
 		RecvBuf[0].len = DirectEnqueSize;
 	}
 
+	// Recv걸기 전에 RecvOverlapped를 초기화 시켜준다.
 	memset(&RecvSession->RecvOverlapped, 0, sizeof(OVERLAPPED));
 
 	/*
