@@ -2412,10 +2412,55 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					ResItemToInventoryPacket->Free();
 				}
 			}
-		} while (0);
 
-		ReturnSession(Session);
+			G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterInventoryItemGetConnection);
+
+			// 캐릭터가 소유하고 있는 스킬 정보를 DB로부터 읽어온다.
+			CDBConnection* DBCharacterSkillGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+			SP::CDBGameServerSkillGet CharacterSkillGet(*DBCharacterSkillGetConnection);
+			CharacterSkillGet.InAccountDBId(Session->MyPlayer->_AccountId);
+			CharacterSkillGet.InPlayerDBId(Session->MyPlayer->_GameObjectInfo.ObjectId);
+
+			int16 SkillType;
+			int8 SkillLevel;
+			WCHAR SkillName[20] = { 0 };
+			int32 SkillCoolTime;
+			int8 SkillSlotIndex;
+			WCHAR SkillThumbnailImagePath[100] = { 0 };
+
+			CharacterSkillGet.OutSkillType(SkillType);
+			CharacterSkillGet.OutSkillLevel(SkillLevel);
+			CharacterSkillGet.OutSkillName(SkillName);
+			CharacterSkillGet.OutSkillCoolTime(SkillCoolTime);
+			CharacterSkillGet.OutSkillSlotIndex(SkillSlotIndex);
+			CharacterSkillGet.OutSkillThumbnailImagePath(SkillThumbnailImagePath);
+
+			CharacterSkillGet.Execute();
+
+			while (CharacterSkillGet.Fetch())
+			{
+				st_SkillInfo SkillInfo;
+				SkillInfo._SkillType = (en_SkillType)SkillType;
+				SkillInfo._SkillLevel = SkillLevel;
+				SkillInfo._SkillName = SkillName;
+				SkillInfo._SkillCoolTime = SkillCoolTime;
+				SkillInfo._SlotIndex = SkillSlotIndex;
+				SkillInfo._SkillImagePath = SkillThumbnailImagePath;
+
+				Session->MyPlayer->_SkillBox.AddSkill(SkillInfo);
+
+				// 클라에게 스킬 정보를 보내준다.
+				CMessage* ResSkillToSkillBoxPacket = MakePacketResSkillToSkillBox(Session->MyPlayer->_GameObjectInfo.ObjectId, SkillInfo);
+				SendPacket(Session->SessionId, ResSkillToSkillBoxPacket);
+				ResSkillToSkillBoxPacket->Free();
+			}
+
+			G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterSkillGetConnection);
+
+		} while (0);		
 	}
+
+	ReturnSession(Session);
 }
 
 CMessage* CGameServer::MakePacketResClientConnected()
@@ -3029,6 +3074,42 @@ CMessage* CGameServer::MakePacketResSyncPosition(int64 TargetObjectId, st_Positi
 	*ResSyncPositionMessage << (int8)SyncPosition.MoveDir;
 
 	return ResSyncPositionMessage;
+}
+
+CMessage* CGameServer::MakePacketResSkillToSkillBox(int64 TargetObjectId, st_SkillInfo SkillInfo)
+{
+	CMessage* ResSkillToSkillBoxMessage = CMessage::Alloc();
+	if (ResSkillToSkillBoxMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResSkillToSkillBoxMessage->Clear();
+
+	*ResSkillToSkillBoxMessage << (int16)en_PACKET_S2C_SKILL_TO_SKILLBOX;
+	*ResSkillToSkillBoxMessage << TargetObjectId;
+
+	// 스킬타입
+	*ResSkillToSkillBoxMessage << (int16)SkillInfo._SkillType;
+	// 스킬레벨
+	*ResSkillToSkillBoxMessage << SkillInfo._SkillLevel;
+	
+	// 스킬이름
+	int8 SkillNameLen = (int8)(SkillInfo._SkillName.length() * 2);
+	*ResSkillToSkillBoxMessage << SkillNameLen;
+	ResSkillToSkillBoxMessage->InsertData(SkillInfo._SkillName.c_str(), SkillNameLen);
+
+	// 스킬 쿨타임
+	*ResSkillToSkillBoxMessage << SkillInfo._SkillCoolTime;
+
+	// 스킬 슬롯 번호
+	*ResSkillToSkillBoxMessage << SkillInfo._SlotIndex;
+
+	int8 SkillImagePathLen = (int8)(SkillInfo._SkillImagePath.length() * 2);
+	*ResSkillToSkillBoxMessage << SkillImagePathLen;
+	ResSkillToSkillBoxMessage->InsertData(SkillInfo._SkillImagePath.c_str(), SkillImagePathLen);
+
+	return ResSkillToSkillBoxMessage;
 }
 
 void CGameServer::OnClientJoin(int64 SessionID)

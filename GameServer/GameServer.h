@@ -130,6 +130,7 @@ public:
 	CMessage* MakePacketResChattingMessage(int64 PlayerDBId, en_MessageType MessageType, st_Color Color, wstring ChattingMessage);		
 	CMessage* MakePacketResItemToInventory(int64 TargetObjectId, st_ItemInfo ItemInfo,int16 ItemEach, bool ItemGainPrint = true);
 	CMessage* MakePacketResSyncPosition(int64 TargetObjectId, st_PositionInfo SyncPosition);	
+	CMessage* MakePacketResSkillToSkillBox(int64 TargetObjectId, st_SkillInfo SkillInfo);
 public:
 	//------------------------------------
 	// Job 메모리풀
