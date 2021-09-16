@@ -75,7 +75,8 @@
     <Column name="SkillLevel" type="TinyInt" notnull ="true"/>
     <Column name="SkillName" type="nvarchar(20)" notnull ="true"/>
     <Column name="SkillCoolTime" type="int" notnull ="true"/>
-    <Column name="SlotIndex" type="TinyInt" notnull="true"/>
+    <Column name="QuickSlotBarIndex" type="TinyInt" notnull ="true"/>
+    <Column name="QuickSlotBarItemIndex" type="TinyInt" notnull ="true"/>    
     <Column name="SkillImagePath" type="nvarchar(100)" notnull="true"/>
   </Table>
   
@@ -318,7 +319,7 @@
     <Param name="@PlayerDBId" type="BigInt"/>
     <Body>
       <![CDATA[
-        SELECT SkillType, SkillLevel, SkillName, SkillCoolTime, SlotIndex, SkillImagePath FROM [dbo].[Skill] WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
+        SELECT SkillType, SkillLevel, SkillName, SkillCoolTime, QuickSlotBarIndex, QuickSlotBarItemIndex, SkillImagePath FROM [dbo].[Skill] WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
     </Body>
   </Procedure>  
