@@ -67,6 +67,7 @@
     </Index>
   </Table>
 
+  <!-- 보유중인 스킬 목록 테이블 -->
   <Table name="SKill" desc="Skill Table">
     <Column name="AccountDBId" type="BigInt" notnull ="true"/>
     <Column name="PlayerDBId" type="BigInt" notnull ="true"/>
@@ -77,6 +78,19 @@
     <Column name="SlotIndex" type="TinyInt" notnull="true"/>
     <Column name="SkillImagePath" type="nvarchar(100)" notnull="true"/>
   </Table>
+  
+  <!-- 보유중인 퀵슬롯바 목록 테이블 -->
+  <Table name="QuickSlotBar" desc="QuickSlotBar Table">
+    <Column name="AccountDBId" type="BigInt" notnull ="true"/>
+    <Column name="PlayerDBId" type="BigInt" notnull ="true"/>
+    <Column name="QuickSlotBarIndex" type="TinyInt" notnull ="true"/>
+    <Column name="QuickSlotBarItemIndex" type="TinyInt" notnull ="true"/>
+    <Column name="SkillType" type="SmallInt" notnull ="true"/>
+    <Column name="SkillLevel" type="TinyInt" notnull ="true"/>
+    <Column name="SkillName" type="nvarchar(20)" notnull ="true"/>
+    <Column name="SkillCoolTime" type="int" notnull ="true"/>    
+    <Column name="SkillImagePath" type="nvarchar(100)" notnull="true"/>    
+  </Table> 
   
   <Procedure name="spGetPlayers">
     <Param name="@AccountId" type="BigInt"/>
