@@ -13,7 +13,7 @@ enum class en_GameObjectType : int16
 	BRONZE_COIN,
 	SLIVER_COIN,
 	GOLD_COIN,
-	SKILL_BOOK
+	SKILL_BOOK	
 };
 
 enum class en_MoveDir : int8
@@ -99,9 +99,10 @@ enum class en_ItemType : int16
 
 enum class en_SkillType : int16
 {
-	KNIGHT_CHOHONE_ATTACK,
-	KNIGHT_SHAEHONE_ATTACK,
-	SHAMAN_FIRE_ATTACK	
+	SKILL_TYPE_NONE = 0,	
+	SKILL_KNIGHT_CHOHONE,
+	SKILL_KNIGHT_SHAEHONE,
+	SKILL_SHAMAN_FIRE	
 };
 
 enum class en_ConsumableType : int16
@@ -181,6 +182,7 @@ struct st_SkillInfo
 	int8 _SkillLevel;		 // 스킬 레벨
 	wstring _SkillName;		 // 스킬 이름
 	int32 _SkillCoolTime;	 // 스킬 쿨타임
-	int8 SlotIndex;			 // 스킬이 등록되어 있는 슬롯 번호
+	int8 _QuickSlotBarIndex; // 퀵슬롯바 인덱스 ( 어떤 퀵슬롯바 인지 )
+	int8 _QuickSlotBarItemIndex; // 퀵슬롯바 아이템 인덱스 ( 퀵슬롯바의 몇번째에 속하는지 )
 	wstring _SkillImagePath; // 스킬 이미지 경로
 };

@@ -47,8 +47,8 @@ void CGameServer::Start(const WCHAR* OpenIP, int32 Port)
 {
 	CNetworkLib::Start(OpenIP, Port);
 
-	//G_ObjectManager->MonsterSpawn(200, 1, en_GameObjectType::SLIME);
-	G_ObjectManager->MonsterSpawn(5, 1, en_GameObjectType::BEAR);
+	G_ObjectManager->MonsterSpawn(200, 1, en_GameObjectType::SLIME);
+	G_ObjectManager->MonsterSpawn(50, 1, en_GameObjectType::BEAR);
 
 	G_ObjectManager->GameServer = this;
 
@@ -1221,7 +1221,7 @@ void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Messag
 						if (TargetPlayer->_Inventory.GetEmptySlot(&SlotIndex))
 						{
 							Item->_ItemInfo.SlotIndex = SlotIndex;
-							TargetPlayer->_Inventory.AddItem(SlotIndex, Item);
+							TargetPlayer->_Inventory.AddItem(Item->_ItemInfo);
 
 							ItemCount = 1;
 						}
@@ -2373,6 +2373,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				st_ItemInfo ItemInfo;
 				ItemInfo.ItemDBId = 0;
 				ItemInfo.ItemType = (en_ItemType)ItemType;
+				ItemInfo.ItemConsumableType = (en_ConsumableType)ItemConsumableType;
 				ItemInfo.ItemName = ItemName;
 				ItemInfo.ItemCount = ItemCount;
 				ItemInfo.SlotIndex = SlotIndex;
@@ -2404,7 +2405,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					// 위에서 조립한 ItemInfo를 셋팅한다.
 					NewItem->_ItemInfo = ItemInfo;
 					// 인벤토리에 아이템을 추가하고
-					Session->MyPlayer->_Inventory.AddItem(NewItem->_ItemInfo.SlotIndex, NewItem);
+					Session->MyPlayer->_Inventory.AddItem(ItemInfo);
 
 					// 클라에게 아이템 정보를 보내준다.
 					CMessage* ResItemToInventoryPacket = MakePacketResItemToInventory(Session->MyPlayer->_GameObjectInfo.ObjectId, ItemInfo, ItemInfo.ItemCount, false);
@@ -2425,14 +2426,16 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			int8 SkillLevel;
 			WCHAR SkillName[20] = { 0 };
 			int32 SkillCoolTime;
-			int8 SkillSlotIndex;
+			int8 QuickSlotBarIndex;
+			int8 QuickSlotBarItemIndex;
 			WCHAR SkillThumbnailImagePath[100] = { 0 };
 
 			CharacterSkillGet.OutSkillType(SkillType);
 			CharacterSkillGet.OutSkillLevel(SkillLevel);
 			CharacterSkillGet.OutSkillName(SkillName);
 			CharacterSkillGet.OutSkillCoolTime(SkillCoolTime);
-			CharacterSkillGet.OutSkillSlotIndex(SkillSlotIndex);
+			CharacterSkillGet.OutQuickSlotBarIndex(QuickSlotBarIndex);
+			CharacterSkillGet.OutQuickSlotBarItemIndex(QuickSlotBarItemIndex);
 			CharacterSkillGet.OutSkillThumbnailImagePath(SkillThumbnailImagePath);
 
 			CharacterSkillGet.Execute();
@@ -2444,7 +2447,8 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				SkillInfo._SkillLevel = SkillLevel;
 				SkillInfo._SkillName = SkillName;
 				SkillInfo._SkillCoolTime = SkillCoolTime;
-				SkillInfo._SlotIndex = SkillSlotIndex;
+				SkillInfo._QuickSlotBarIndex = QuickSlotBarIndex;
+				SkillInfo._QuickSlotBarItemIndex = QuickSlotBarItemIndex;
 				SkillInfo._SkillImagePath = SkillThumbnailImagePath;
 
 				Session->MyPlayer->_SkillBox.AddSkill(SkillInfo);
