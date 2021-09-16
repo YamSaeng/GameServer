@@ -41,27 +41,21 @@ void CInventory::Init()
 	_GoldCoinCount = 0;
 }
 
-void CInventory::AddItem(int8 SlotIndex, CItem* Item)
+void CInventory::AddItem(st_ItemInfo& ItemInfo)
 {
-	if (Item == nullptr)
+	if (ItemInfo.ItemType == en_ItemType::ITEM_TYPE_NONE)
 	{
 		CRASH("Inventory Item is null");
 		return;
 	}
 
-	auto FindSlotIterator = _Items.find(SlotIndex);
+	auto FindSlotIterator = _Items.find(ItemInfo.SlotIndex);
 	if (FindSlotIterator == _Items.end())
 	{
 		return;
 	}
 
-	(*FindSlotIterator).second->ItemDBId = Item->_ItemInfo.ItemDBId;
-	(*FindSlotIterator).second->ItemType = Item->_ItemInfo.ItemType;
-	(*FindSlotIterator).second->ItemName = Item->_ItemInfo.ItemName;
-	(*FindSlotIterator).second->ItemCount = Item->_ItemInfo.ItemCount;
-	(*FindSlotIterator).second->ThumbnailImagePath = Item->_ItemInfo.ThumbnailImagePath;
-	(*FindSlotIterator).second->IsEquipped = Item->_ItemInfo.IsEquipped;
-	(*FindSlotIterator).second->SlotIndex = Item->_ItemInfo.SlotIndex;
+	*(*FindSlotIterator).second = ItemInfo;	
 }
 
 void CInventory::AddCoin(CItem* Item)

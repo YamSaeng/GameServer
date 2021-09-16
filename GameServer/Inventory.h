@@ -24,7 +24,7 @@ public:
 	//------------------------
 	// 인벤토리에 Item 추가
 	//------------------------
-	void AddItem(int8 SlotIndex, CItem* Item);	
+	void AddItem(st_ItemInfo& ItemInfo);	
 	//------------------------
 	// 인벤토리에 Coin 추가
 	//------------------------
