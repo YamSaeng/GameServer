@@ -178,6 +178,9 @@ unsigned __stdcall CGameServer::DataBaseThreadProc(void* Argument)
 			case en_JobType::DATA_BASE_CHARACTER_INFO_SEND:
 				Instance->PacketProcReqDBCharacterInfoSend(Job->SessionId, Job->Message);
 				break;
+			case en_JobType::DATA_BASE_QUICK_SLOT_SAVE:
+				Instance->PacketProcReqDBQuickSlotBarSlotSave(Job->SessionId, Job->Message);
+				break;
 			}
 
 			Instance->_DataBaseThreadTPS++;
@@ -293,6 +296,9 @@ void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 		break;
 	case en_PACKET_TYPE::en_PACKET_C2S_ITEM_SWAP:
 		PacketProcReqItemSwap(SessionId, Message);
+		break;
+	case en_PACKET_TYPE::en_PACKET_C2S_QUICKSLOT_SAVE:
+		PacketProcReqQuickSlotSave(SessionId, Message);
 		break;
 	case en_PACKET_TYPE::en_PACKET_CS_GAME_REQ_SECTOR_MOVE:
 		PacketProcReqSectorMove(SessionId, Message);
@@ -1361,10 +1367,83 @@ void CGameServer::PacketProcReqItemSwap(int64 SessionId, CMessage* Message)
 			_GameServerDataBaseThreadMessageQue.Enqueue(DBItemSwapJob);
 			SetEvent(_DataBaseWakeEvent);
 
-		} while (0);
-
-		ReturnSession(Session);
+		} while (0);		
 	}
+
+	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcReqQuickSlotSave(int64 SessionId, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionId);
+
+	if (Session)
+	{
+		InterlockedIncrement64(&Session->IOBlock->IOCount);
+
+		int64 AccountId;
+		int64 PlayerDBId;
+
+		do
+		{
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountId;
+
+			// AccountId가 맞는지 확인
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> PlayerDBId;
+
+			// 조종하고 있는 플레이어가 있는지 확인 
+			if (Session->MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
+				if (Session->MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}			
+
+			bool IsQuickSlotUse;
+			int16 SkillType;
+			int8 SkillLevel;			
+
+			st_Job* DBQuickSlotSaveJob = _JobMemoryPool->Alloc();
+			DBQuickSlotSaveJob->Type = en_JobType::DATA_BASE_QUICK_SLOT_SAVE;
+			DBQuickSlotSaveJob->SessionId = Session->MyPlayer->_SessionId;
+
+			CMessage* DBQuickSlotSaveMessage = CMessage::Alloc();
+			DBQuickSlotSaveMessage->Clear();
+
+			*DBQuickSlotSaveMessage << AccountId;
+			*DBQuickSlotSaveMessage << PlayerDBId;
+			DBQuickSlotSaveMessage->InsertData(Message->GetFrontBufferPtr(), Message->GetUseBufferSize());
+			Message->MoveReadPosition(Message->GetUseBufferSize());
+
+			DBQuickSlotSaveJob->Message = DBQuickSlotSaveMessage;
+
+			_GameServerDataBaseThreadMessageQue.Enqueue(DBQuickSlotSaveJob);
+			SetEvent(_DataBaseWakeEvent);
+
+		} while (0);
+	}
+
+	ReturnSession(Session);
 }
 
 //---------------------------------------------------------------------------------
@@ -1736,10 +1815,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			GoldTableCreate.Execute();
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, DBGoldTableCreateConnection);
-
-			// 캐릭터 인벤토리 생성
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_Inventory.Init();
-
+			
 			// DB에 인벤토리 생성
 			for (int8 SlotIndex = 0; SlotIndex < (int8)en_Inventory::INVENTORY_SIZE; SlotIndex++)
 			{
@@ -1772,6 +1848,40 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 				ItemToInventory.InOwnerPlayerId(PlayerDBId);
 
 				ItemToInventory.Execute();
+			}			
+
+			// DB에 퀵슬롯바 생성
+			for (int8 SlotIndex = 0; SlotIndex < (int8)en_QuickSlotBar::QUICK_SLOT_BAR_SIZE; ++SlotIndex)
+			{
+				CDBConnection* DBQuickSlotCreateConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerQuickSlotBarSlotCreate QuickSlotBarSlotCreate(*DBQuickSlotCreateConnection);
+				
+				int64 AccountDBId = Session->AccountId;
+				int64 PlayerDBId = Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectId;
+				int8 QuickSlotBarIndex = SlotIndex;
+				int8 QuickSlotBarSlotIndex;
+				int16 SkillType = (int16)(en_SkillType::SKILL_TYPE_NONE);
+				int8 SkillLevel = 0;
+				wstring SkillName;
+				int32 SkillCoolTime = 0;
+				wstring SkillThumbnailImagePath;
+								
+				for (int8 i = 0; i < (int8)en_QuickSlotBar::QUICK_SLOT_BAR_SLOT_SIZE; ++i)
+				{
+					QuickSlotBarSlotIndex = i;
+
+					QuickSlotBarSlotCreate.InAccountDBId(AccountDBId);
+					QuickSlotBarSlotCreate.InPlayerDBId(PlayerDBId);
+					QuickSlotBarSlotCreate.InQuickSlotBarIndex(SlotIndex);
+					QuickSlotBarSlotCreate.InQuickSlotBarSlotIndex(QuickSlotBarSlotIndex);
+					QuickSlotBarSlotCreate.InSkillType(SkillType);
+					QuickSlotBarSlotCreate.InSkillLevel(SkillLevel);
+					QuickSlotBarSlotCreate.InSkillName(SkillName);
+					QuickSlotBarSlotCreate.InSkillCoolTime(SkillCoolTime);
+					QuickSlotBarSlotCreate.InSkillThumbnailImagePath(SkillThumbnailImagePath);
+
+					QuickSlotBarSlotCreate.Execute();
+				}
 			}
 		}
 		else
@@ -2495,6 +2605,89 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 #pragma endregion
 
 		} while (0);		
+	}
+
+	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionId);
+
+	if (Session)
+	{
+		do
+		{
+			InterlockedDecrement64(&Session->IOBlock->IOCount);
+
+			int64 AccountId;
+			*Message >> AccountId;
+
+			int64 PlayerId;
+			*Message >> PlayerId;
+
+			int16 SkillType;
+			*Message >> SkillType;
+
+			int8 SkillLevel;
+			*Message >> SkillLevel;
+
+			int8 SkillNameLen;
+			*Message >> SkillNameLen;
+
+			wstring SkillName;
+			Message->GetData(SkillName, SkillNameLen);
+
+			int32 SkillCoolTime;
+			*Message >> SkillCoolTime;
+
+			int8 QuickSlotBarIndex;
+			*Message >> QuickSlotBarIndex;
+
+			int8 QuickSlotBarSlotIndex;
+			*Message >> QuickSlotBarSlotIndex;
+
+			int8 SkillImagePathLen;
+			*Message >> SkillImagePathLen;
+
+			wstring SkillImagePath;
+			Message->GetData(SkillImagePath, SkillImagePathLen);
+
+			// 캐릭터가 해당 스킬을 가지고 있는지 확인
+			if (Session->MyPlayer->_SkillBox.FindSkill((en_SkillType)SkillType) == true)
+			{
+				st_QuickSlotBarSlotInfo QuickSlotBarSlotInfo;
+				QuickSlotBarSlotInfo.AccountDBId = AccountId;
+				QuickSlotBarSlotInfo.PlayerDBId = PlayerId;
+				QuickSlotBarSlotInfo.QuickSlotBarIndex = QuickSlotBarIndex;
+				QuickSlotBarSlotInfo.QuickSlotBarSlotIndex = QuickSlotBarSlotIndex;
+				QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillType = (en_SkillType)SkillType;
+				QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillLevel = SkillLevel;
+				QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillName = SkillName;
+				QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillCoolTime = SkillCoolTime;
+				QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillImagePath = SkillImagePath;
+				QuickSlotBarSlotInfo.QuickBarSkillInfo._QuickSlotBarIndex = QuickSlotBarIndex;
+				QuickSlotBarSlotInfo.QuickBarSkillInfo._QuickSlotBarItemIndex = QuickSlotBarSlotIndex;
+
+				Session->MyPlayer->_QuickSlotManager.AddQuickSlotBarSlot(QuickSlotBarSlotInfo);
+
+				CDBConnection* DBQuickSlotUpdateConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerQuickSlotBarSlotUpdate QuickSlotUpdate(*DBQuickSlotUpdateConnection);
+				QuickSlotUpdate.InAccountDBId(AccountId);
+				QuickSlotUpdate.InPlayerDBId(PlayerId);
+				QuickSlotUpdate.InQuickSlotBarIndex(QuickSlotBarIndex);
+				QuickSlotUpdate.InQuickSlotBarSlotIndex(QuickSlotBarSlotIndex);
+				QuickSlotUpdate.InSkillType(SkillType);
+				QuickSlotUpdate.InSkillLevel(SkillLevel);
+				QuickSlotUpdate.InSkillName(SkillName);
+				QuickSlotUpdate.InSkillCoolTime(SkillCoolTime);
+				QuickSlotUpdate.InSkillThumbnailImagePath(SkillImagePath);
+
+				QuickSlotUpdate.Execute();
+
+				G_DBConnectionPool->Push(en_DBConnect::GAME, DBQuickSlotUpdateConnection);
+			}
+		} while (0);
 	}
 
 	ReturnSession(Session);

@@ -340,5 +340,21 @@ enum en_PACKET_TYPE
 	// int64 TargetObjectId
 	// st_SkillInfo SkillInfo
 	//------------------------------------------------------------
-	en_PACKET_S2C_SKILL_TO_SKILLBOX
+	en_PACKET_S2C_SKILL_TO_SKILLBOX,
+	
+	//------------------------------------------------------------
+	// 게임서버 스킬 저장 요청 응답
+	// int64 AccountId
+	// int64 PlayerId 
+	// st_SkillInfo SkillInfo
+	//------------------------------------------------------------
+	en_PACKET_C2S_QUICKSLOT_SAVE,
+
+	//-----------------------------------------------------------
+	// 게임서버 스킬 저장 요청 응답
+	// int64 AccountId
+	// int64 PlayerId 
+	// st_SkillInfo SkillInfo
+	//------------------------------------------------------------
+	en_PACKET_S2C_QUICKSLOT_SAVE
 };

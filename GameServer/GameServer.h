@@ -67,6 +67,7 @@ private:
 	void PacketProcReqChattingMessage(int64 SessionId, CMessage* Message);
 	void PacketProcReqItemToInventory(int64 SessionId, CMessage* Message);
 	void PacketProcReqItemSwap(int64 SessionId, CMessage* Message);
+	void PacketProcReqQuickSlotSave(int64 SessionId, CMessage* Message);
 	void PacketProcReqSectorMove(int64 SessionID, CMessage* Message);
 	void PacketProcReqMessage(int64 SessionID, CMessage* Message);
 	void PacketProcReqHeartBeat(int64 SessionID, CMessage* Message);
@@ -88,6 +89,7 @@ private:
 	void PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message);
 	void PacketProcReqDBGoldSave(int64 SessionId, CMessage* Message);
 	void PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Message);
+	void PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CMessage* Message);
 
 	//----------------------------------------------------------------
 	//패킷조합 함수

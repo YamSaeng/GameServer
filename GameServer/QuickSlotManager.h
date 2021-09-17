@@ -13,7 +13,7 @@ public:
 	void Init();
 
 	// Äü½½·Ô¹Ù¿¡ Äü½½·Ô µî·Ï
-	void AddQuickSlotBarSlot(st_QuickSlotBarSlotInfo* QuickSlotBarSlotInfo);
+	void AddQuickSlotBarSlot(st_QuickSlotBarSlotInfo& QuickSlotBarSlotInfo);
 private:
 	// Äü½½·Ô¹Ù 
 	map<int8, CQuickSlotBar*> _QuickSlotBars;

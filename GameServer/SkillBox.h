@@ -9,7 +9,7 @@ private:
 	//------------------------------
 	// 스킬박스가 소유중인 스킬 목록
 	//------------------------------
-	map<byte, st_SkillInfo*> _Skills;
+	vector<st_SkillInfo*> _Skills;	
 public:
 
 	CSkillBox();
@@ -18,8 +18,10 @@ public:
 	void Init();
 	
 	// 스킬 추가
-	void AddSkill(st_SkillInfo SkillInfo);
+	void AddSkill(st_SkillInfo& SkillInfo);
 	// 스킬 얻기
 	st_SkillInfo* Get(int8 SlotIndex);
+	// 스킬 찾기
+	bool FindSkill(en_SkillType FindSkillType);
 };
 

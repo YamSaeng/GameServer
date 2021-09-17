@@ -7,11 +7,10 @@ CSkillBox::CSkillBox()
 
 CSkillBox::~CSkillBox()
 {
-    for (auto SkillInfoIterator : _Skills)
-    {
-        st_SkillInfo* Skilinfo = SkillInfoIterator.second;
-        delete Skilinfo;
-    }    
+	for (auto SkillInfoIterator : _Skills)
+	{
+		delete SkillInfoIterator;
+	}
 }
 
 void CSkillBox::Init()
@@ -19,15 +18,28 @@ void CSkillBox::Init()
 
 }
 
-void CSkillBox::AddSkill(st_SkillInfo SkillInfo)
+void CSkillBox::AddSkill(st_SkillInfo& SkillInfo)
 {
-    st_SkillInfo* NewSkillInfo = new st_SkillInfo();
-    *NewSkillInfo = SkillInfo;
+	st_SkillInfo* NewSkillInfo = new st_SkillInfo();
+	*NewSkillInfo = SkillInfo;
 
-    _Skills.insert(pair<byte, st_SkillInfo*>(SkillInfo._SlotIndex, NewSkillInfo));     
+	_Skills.push_back(NewSkillInfo);
 }
 
 st_SkillInfo* CSkillBox::Get(int8 SlotIndex)
 {
-    return nullptr;
+	return nullptr;
+}
+
+bool CSkillBox::FindSkill(en_SkillType FindSkillType)
+{
+	for (int SlotIndex = 0; SlotIndex < _Skills.size(); SlotIndex++)
+	{
+		if (_Skills[SlotIndex]->_SkillType == FindSkillType)
+		{
+			return true;
+		}
+	}
+
+	return false;
 }

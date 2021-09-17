@@ -20,15 +20,16 @@ void CQuickSlotManager::Init()
 	for (int8 SlotIndex = 0; SlotIndex < (int8)en_QuickSlotBar::QUICK_SLOT_BAR_SIZE; ++SlotIndex)
 	{
 		CQuickSlotBar* QuickSlotBar = new CQuickSlotBar();	
-		QuickSlotBar->_Index = SlotIndex;
+		QuickSlotBar->_QuickSlotBarIndex = SlotIndex;
+		QuickSlotBar->Init();
 
 		_QuickSlotBars.insert(pair<int8, CQuickSlotBar*>(SlotIndex, QuickSlotBar));
 	}
 }
 
-void CQuickSlotManager::AddQuickSlotBarSlot(st_QuickSlotBarSlotInfo* QuickSlotBarSlotInfo)
+void CQuickSlotManager::AddQuickSlotBarSlot(st_QuickSlotBarSlotInfo& QuickSlotBarSlotInfo)
 {
-	auto FindQuickSlotBarIterator = _QuickSlotBars.find(QuickSlotBarSlotInfo->QuickSlotBarIndex);
+	auto FindQuickSlotBarIterator = _QuickSlotBars.find(QuickSlotBarSlotInfo.QuickSlotBarIndex);
 	if (FindQuickSlotBarIterator == _QuickSlotBars.end())
 	{
 		CRASH("AddQuickSlotBar Äü½½·Ô Ã£Áö ¸øÇÔ");
