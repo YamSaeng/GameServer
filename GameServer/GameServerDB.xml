@@ -28,6 +28,7 @@
   <!-- 아이템 테이블 -->
   <Table name="Item" desc="Item Table">
     <Column name="ItemDBId" type="BigInt" notnull="true" identity="1,1"/>
+    <Column name="IsQuickSlotUse" type="bit"/>
     <Column name="ItemUse" type="bit" notnull="true"/>        
     <Column name="ItemType" type="SmallInt" notnull="true"/>
     <Column name="ItemConsumableType" type="SmallInt" notnull="true"/>>
@@ -42,7 +43,8 @@
   </Table>
   
   <!-- 인벤토리 아이템 테이블 -->
-  <Table name="Inventory" desc="Inventory Table">    
+  <Table name="Inventory" desc="Inventory Table">
+    <Column name="IsQuickSlotUse" type="bit"/>
     <Column name="ItemType" type="SmallInt" notnull="true"/>
     <Column name="ItemConsumableType" type="SmallInt" notnull="true"/>>
     <Column name="ItemName" type="nvarchar(20)" notnull="true"/>
@@ -68,7 +70,7 @@
   </Table>
 
   <!-- 보유중인 스킬 목록 테이블 -->
-  <Table name="SKill" desc="Skill Table">
+  <Table name="Skill" desc="Skill Table">
     <Column name="AccountDBId" type="BigInt" notnull ="true"/>
     <Column name="PlayerDBId" type="BigInt" notnull ="true"/>
     <Column name="SkillType" type="SmallInt" notnull ="true"/>
@@ -77,7 +79,7 @@
     <Column name="SkillCoolTime" type="int" notnull ="true"/>
     <Column name="QuickSlotBarIndex" type="TinyInt" notnull ="true"/>
     <Column name="QuickSlotBarItemIndex" type="TinyInt" notnull ="true"/>    
-    <Column name="SkillImagePath" type="nvarchar(100)" notnull="true"/>
+    <Column name="SkillImagePath" type="nvarchar(100)" notnull="true"/>    
   </Table>
   
   <!-- 보유중인 퀵슬롯바 목록 테이블 -->
@@ -85,7 +87,7 @@
     <Column name="AccountDBId" type="BigInt" notnull ="true"/>
     <Column name="PlayerDBId" type="BigInt" notnull ="true"/>
     <Column name="QuickSlotBarIndex" type="TinyInt" notnull ="true"/>
-    <Column name="QuickSlotBarItemIndex" type="TinyInt" notnull ="true"/>
+    <Column name="QuickSlotBarItemIndex" type="TinyInt" notnull ="true"/>    
     <Column name="SkillType" type="SmallInt" notnull ="true"/>
     <Column name="SkillLevel" type="TinyInt" notnull ="true"/>
     <Column name="SkillName" type="nvarchar(20)" notnull ="true"/>
@@ -181,6 +183,7 @@
   <!-- ItemTable에 새로운 아이템 생성 -->
   <Procedure name="spItemCreate">
     <Param name ="@ItemUse" type="bit"/>
+    <Param name ="@IsQuickSlotUse" type="bit"/>
     <Param name ="@ItemType" type="SmallInt"/>
     <Param name ="@ItemConsumableType" type="SmallInt"/>
     <Param name ="@ItemName" type="nvarchar(20)"/>
@@ -189,7 +192,7 @@
     <Param name ="@ThumbnailImagePath" type="nvarchar(100)"/>
     <Body>
       <![CDATA[
-         INSERT INTO [dbo].[Item] VALUES ((@ItemUse),(@ItemType),(@ItemConsumableType),(@ItemName),(@ItemCount),(@IsEquipped),(@ThumbnailImagePath))
+         INSERT INTO [dbo].[Item] VALUES ((@ItemUse),(@IsQuickSlotUse),(@ItemType),(@ItemConsumableType),(@ItemName),(@ItemCount),(@IsEquipped),(@ThumbnailImagePath))
        ]]>
     </Body>    
   </Procedure>
@@ -204,7 +207,8 @@
   </Procedure>
   
   <!-- InventoryTable 빈껍데기 아이템 정보 저장-->  
-  <Procedure name="spItemToInventoryInit">    
+  <Procedure name="spItemToInventoryInit">
+    <Param name="@IsQuickSlotUse" type="bit"/>
     <Param name="@ItemType" type="SmallInt"/>
     <Param name="@ItemConsumableType" type="SmallInt"/>
     <Param name="@ItemName" type="nvarchar(20)"/>
@@ -216,13 +220,14 @@
     <Param name="@OwnerPlayerDBId" type="BigInt"/>    
     <Body>
       <![CDATA[
-        INSERT INTO [dbo].[Inventory] VALUES ((@ItemType),(@ItemConsumableType),(@ItemName),(@ItemCount),(@SlotIndex),(@IsEquipped),(@ThumbnailImagePath),(@OwnerAccountDBId),(@OwnerPlayerDBId))
+        INSERT INTO [dbo].[Inventory] VALUES ((@IsQuickSlotUse),(@ItemType),(@ItemConsumableType),(@ItemName),(@ItemCount),(@SlotIndex),(@IsEquipped),(@ThumbnailImagePath),(@OwnerAccountDBId),(@OwnerPlayerDBId))
       ]]>
     </Body>
   </Procedure> 
   
   <!-- InventoryTable에 새로운 아이템 저장 -->
-  <Procedure name="spItemToInventorySave">    
+  <Procedure name="spItemToInventorySave">
+    <Param name="@IsQuickSlotUse" type="bit"/>
     <Param name="@ItemType" type="SmallInt"/>
     <Param name="@ItemConsumableType" type="SmallInt"/>
     <Param name="@ItemName" type="nvarchar(20)"/>
@@ -234,7 +239,7 @@
     <Param name="@OwnerPlayerDBId" type="BigInt"/>    
     <Body>
       <![CDATA[
-        UPDATE [dbo].[Inventory] SET ItemType = (@ItemType), ItemConsumableType = (@ItemConsumableType), ItemName = (@ItemName), ItemCount = (@ItemCount), IsEquipped = (@IsEquipped), ThumbnailImagePath = (@ThumbnailImagePath) WHERE SlotIndex = (@SlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)        
+        UPDATE [dbo].[Inventory] SET IsQuickSlotUse = (@IsQuickSlotUse), ItemType = (@ItemType), ItemConsumableType = (@ItemConsumableType), ItemName = (@ItemName), ItemCount = (@ItemCount), IsEquipped = (@IsEquipped), ThumbnailImagePath = (@ThumbnailImagePath) WHERE SlotIndex = (@SlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)        
       ]]>
     </Body>
   </Procedure> 
@@ -260,7 +265,7 @@
     <Param name="@SlotIndex" type="TinyInt"/>
     <Body>      
       <![CDATA[
-        SELECT ItemType, ItemConsumableType, ItemName, ItemCount, IsEquipped, ThumbnailImagePath FROM [dbo].[Inventory] WHERE OwnerAccountDBId = (@AccountDBId) AND OwnerPlayerDBId = (@PlayerDBId) AND SlotIndex = (@SlotIndex)
+        SELECT IsQuickSlotUse, ItemType, ItemConsumableType, ItemName, ItemCount, IsEquipped, ThumbnailImagePath FROM [dbo].[Inventory] WHERE OwnerAccountDBId = (@AccountDBId) AND OwnerPlayerDBId = (@PlayerDBId) AND SlotIndex = (@SlotIndex)
       ]]>
     </Body>    
   </Procedure>
@@ -268,14 +273,16 @@
   <!-- InventoryItem Swap -->
   <Procedure name="spInventoryItemSwap">
     <Param name="@OwnerAccountDBId" type="BigInt"/>
-    <Param name="@OwnerPlayerDBId" type="BigInt"/>    
+    <Param name="@OwnerPlayerDBId" type="BigInt"/>
+    <Param name="@AIsQuickSlotUse" type="bit"/>
     <Param name="@AItemType" type="SmallInt"/>
     <Param name="@AItemConsumableType" type="SmallInt"/>
     <Param name="@AItemName" type="nvarchar(20)"/>
     <Param name="@AItemCount" type="SmallInt"/>
     <Param name="@AItemIsEquipped" type="bit"/>
     <Param name="@AItemThumbnailImagePath" type="nvarchar(100)"/>
-    <Param name="@AItemSlotIndex" type="TinyInt"/>    
+    <Param name="@AItemSlotIndex" type="TinyInt"/>
+    <Param name="@BIsQuickSlotUse" type="bit"/>
     <Param name="@BItemType" type="SmallInt"/>
     <Param name="@BItemConsumableType" type="SmallInt"/>
     <Param name="@BItemName" type="nvarchar(20)"/>
@@ -285,8 +292,8 @@
     <Param name="@BItemSlotIndex" type="TinyInt"/>
     <Body>
       <![CDATA[
-        UPDATE [dbo].[Inventory] SET ItemType = (@AItemType), ItemConsumableType = (@AItemConsumableType), ItemName = (@AItemName), ItemCount = (@AItemCount), IsEquipped = (@AItemIsEquipped), ThumbnailImagePath = (@AItemThumbnailImagePath)  WHERE SlotIndex = (@AItemSlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
-        UPDATE [dbo].[Inventory] SET ItemType = (@BItemType), ItemConsumableType = (@BItemConsumableType), ItemName = (@BItemName), ItemCount = (@BItemCount), IsEquipped = (@BItemIsEquipped), ThumbnailImagePath = (@BItemThumbnailImagePath)  WHERE SlotIndex = (@BItemSlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
+        UPDATE [dbo].[Inventory] SET IsQuickSlotUse = (@AIsQuickSlotUse), ItemType = (@AItemType), ItemConsumableType = (@AItemConsumableType), ItemName = (@AItemName), ItemCount = (@AItemCount), IsEquipped = (@AItemIsEquipped), ThumbnailImagePath = (@AItemThumbnailImagePath)  WHERE SlotIndex = (@AItemSlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
+        UPDATE [dbo].[Inventory] SET IsQuickSlotUse = (@BIsQuickSlotUse), ItemType = (@BItemType), ItemConsumableType = (@BItemConsumableType), ItemName = (@BItemName), ItemCount = (@BItemCount), IsEquipped = (@BItemIsEquipped), ThumbnailImagePath = (@BItemThumbnailImagePath)  WHERE SlotIndex = (@BItemSlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
       ]]>
     </Body>
   </Procedure>
@@ -322,5 +329,5 @@
         SELECT SkillType, SkillLevel, SkillName, SkillCoolTime, QuickSlotBarIndex, QuickSlotBarItemIndex, SkillImagePath FROM [dbo].[Skill] WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
     </Body>
-  </Procedure>  
+  </Procedure>    
 </GameServerDB>
