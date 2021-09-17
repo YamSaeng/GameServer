@@ -188,6 +188,8 @@
     <ClInclude Include="ObjectPoolFreeList.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="QuickSlotBar.h" />
+    <ClInclude Include="QuickSlotManager.h" />
     <ClInclude Include="rapidxml.hpp" />
     <ClInclude Include="rapidxml_iterators.hpp" />
     <ClInclude Include="rapidxml_print.hpp" />
@@ -292,6 +294,8 @@
     <ClCompile Include="ObjectManager.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="QuickSlotBar.cpp" />
+    <ClCompile Include="QuickSlotManager.cpp" />
     <ClCompile Include="Sector.cpp" />
     <ClCompile Include="Skill.cpp" />
     <ClCompile Include="SkillBox.cpp" />

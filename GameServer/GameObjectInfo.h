@@ -78,6 +78,12 @@ enum class en_Inventory : int8
 	INVENTORY_SIZE = 30
 };
 
+enum class en_QuickSlotBar : int8
+{
+	QUICK_SLOT_BAR_SIZE = 3,
+	QUICK_SLOT_BAR_SLOT_SIZE = 5
+};
+
 enum class en_ItemType : int16
 {
 	ITEM_TYPE_NONE = 0,
@@ -110,6 +116,13 @@ enum class en_ConsumableType : int16
 	NONE,
 	POTION,
 	SKILL_BOOK
+};
+
+enum class en_QuickSlotBarSaveType : int8
+{
+	NONE,
+	ITEM,
+	SKILL
 };
 
 struct st_PositionInfo
@@ -166,6 +179,7 @@ struct st_Color
 
 struct st_ItemInfo
 {
+	bool _IsQuickSlotUse;
 	int64 ItemDBId;				// 아이템 DB에 저장되어 있는 ID		
 	en_ItemType ItemType;		// 아이템 타입
 	en_ConsumableType ItemConsumableType;	// 소비용 아이템인지
@@ -178,11 +192,21 @@ struct st_ItemInfo
 
 struct st_SkillInfo
 {
+	bool _IsQuickSlotUse;    // 퀵슬롯에 등록되어 있는지 여부
 	en_SkillType _SkillType; // 스킬 종류
 	int8 _SkillLevel;		 // 스킬 레벨
 	wstring _SkillName;		 // 스킬 이름
-	int32 _SkillCoolTime;	 // 스킬 쿨타임
+	int32 _SkillCoolTime;	 // 스킬 쿨타임	
 	int8 _QuickSlotBarIndex; // 퀵슬롯바 인덱스 ( 어떤 퀵슬롯바 인지 )
 	int8 _QuickSlotBarItemIndex; // 퀵슬롯바 아이템 인덱스 ( 퀵슬롯바의 몇번째에 속하는지 )
 	wstring _SkillImagePath; // 스킬 이미지 경로
+};
+
+struct st_QuickSlotBarSlotInfo
+{
+	int64 AccountDBId;
+	int64 PlayerDBId;	
+	int8 QuickSlotBarIndex;
+	INT8 QuickSlotBarItemIndex;
+	st_SkillInfo QuickBarSkillInfo;	
 };

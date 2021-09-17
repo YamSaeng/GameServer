@@ -76,12 +76,14 @@
     <Filter Include="ContentServer\Content\GameObject\Environment">
       <UniqueIdentifier>{4abef9f1-ac7f-43fc-86d5-a4cadaaadce3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ContentServer\Content\QuickSlotBar">
+      <UniqueIdentifier>{f784ae9e-5bca-4c1e-8f88-545e6f15b532}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Type.h">
       <Filter>Util</Filter>
     </ClInclude>
-    <ClInclude Include="pch.h" />
     <ClInclude Include="DBConnection.h">
       <Filter>DB</Filter>
     </ClInclude>
@@ -215,6 +217,13 @@
     <ClInclude Include="Environment.h">
       <Filter>ContentServer\Content\GameObject\Environment</Filter>
     </ClInclude>
+    <ClInclude Include="QuickSlotManager.h">
+      <Filter>ContentServer\Content\QuickSlotBar</Filter>
+    </ClInclude>
+    <ClInclude Include="QuickSlotBar.h">
+      <Filter>ContentServer\Content\QuickSlotBar</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -302,6 +311,12 @@
     </ClCompile>
     <ClCompile Include="Environment.cpp">
       <Filter>ContentServer\Content\GameObject\Environment</Filter>
+    </ClCompile>
+    <ClCompile Include="QuickSlotManager.cpp">
+      <Filter>ContentServer\Content\QuickSlotBar</Filter>
+    </ClCompile>
+    <ClCompile Include="QuickSlotBar.cpp">
+      <Filter>ContentServer\Content\QuickSlotBar</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
