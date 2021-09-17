@@ -13,6 +13,7 @@ CChannel::~CChannel()
 		_Sectors[i] = nullptr;
 	}
 
+	delete _Map;
 	delete _Sectors;
 }
 

@@ -8,6 +8,10 @@ CChannelManager::CChannelManager()
 
 CChannelManager::~CChannelManager()
 {
+	for (auto ChannelIterator : _Channels)
+	{
+		delete ChannelIterator.second;
+	}
 }
 
 CChannel* CChannelManager::Add(int32 MapId)
