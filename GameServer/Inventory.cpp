@@ -152,26 +152,12 @@ void CInventory::SwapItem(st_ItemInfo& SwapAItemInfo, st_ItemInfo& SwapBItemInfo
 	auto FindSwapAItem = _Items.find(SwapAItemInfo.SlotIndex);
 	if (FindSwapAItem != _Items.end())
 	{		
-		(*FindSwapAItem).second->ItemDBId = SwapAItemInfo.ItemDBId;
-		(*FindSwapAItem).second->ItemType = SwapAItemInfo.ItemType;
-		(*FindSwapAItem).second->ItemConsumableType = SwapAItemInfo.ItemConsumableType;
-		(*FindSwapAItem).second->ItemName = SwapAItemInfo.ItemName;
-		(*FindSwapAItem).second->ItemCount = SwapAItemInfo.ItemCount;
-		(*FindSwapAItem).second->ThumbnailImagePath = SwapAItemInfo.ThumbnailImagePath;
-		(*FindSwapAItem).second->IsEquipped = SwapAItemInfo.IsEquipped;
-		(*FindSwapAItem).second->SlotIndex = SwapAItemInfo.SlotIndex;		
+		*(*FindSwapAItem).second = SwapAItemInfo;		
 	}
 
 	auto FindSwapBItem = _Items.find(SwapBItemInfo.SlotIndex);
 	if (FindSwapBItem != _Items.end())
 	{
-		(*FindSwapBItem).second->ItemDBId = SwapBItemInfo.ItemDBId;
-		(*FindSwapBItem).second->ItemType = SwapBItemInfo.ItemType;
-		(*FindSwapBItem).second->ItemConsumableType = SwapBItemInfo.ItemConsumableType;
-		(*FindSwapBItem).second->ItemName = SwapBItemInfo.ItemName;
-		(*FindSwapBItem).second->ItemCount = SwapBItemInfo.ItemCount;
-		(*FindSwapBItem).second->ThumbnailImagePath = SwapBItemInfo.ThumbnailImagePath;
-		(*FindSwapBItem).second->IsEquipped = SwapBItemInfo.IsEquipped;
-		(*FindSwapBItem).second->SlotIndex = SwapBItemInfo.SlotIndex;
+		*(*FindSwapBItem).second = SwapBItemInfo;		
 	}
 }
