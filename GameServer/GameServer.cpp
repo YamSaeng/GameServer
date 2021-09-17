@@ -1640,6 +1640,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 
 		Message->Free();
 
+#pragma region 생성할 캐릭터가 DB에 있는지 확인
 		// 요청한 클라의 생성할 캐릭터의 이름을 가져온다.
 		wstring CreateCharacterName = Session->CreateCharacterName;
 
@@ -1657,7 +1658,8 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 
 		// DBConnection 반납
 		G_DBConnectionPool->Push(en_DBConnect::GAME, FindCharacterNameGameServerDBConnection);
-
+#pragma endregion		
+#pragma region 캐릭터 생성 후 클라에 캐릭터 생성 응답 보내기
 		// 캐릭터가 존재하지 않을 경우
 		if (!CharacterNameFind)
 		{
@@ -1744,7 +1746,9 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 				CDBConnection* DBItemToInventoryConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 				SP::CDBGameServerItemCreateToInventory ItemToInventory(*DBItemToInventoryConnection);
 				st_ItemInfo NewItem;
+
 				NewItem.ItemDBId = 0;
+				NewItem.IsQuickSlotUse = false;
 				NewItem.ItemType = en_ItemType::ITEM_TYPE_NONE;
 				NewItem.ItemConsumableType = en_ConsumableType::NONE;
 				NewItem.ItemName = L"";
@@ -1755,7 +1759,8 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 
 				int16 ItemType = (int16)NewItem.ItemType;
 				int16 ItemConsumableType = (int16)NewItem.ItemConsumableType;
-
+								
+				ItemToInventory.InQuickSlotUse(NewItem.IsQuickSlotUse);
 				ItemToInventory.InItemType(ItemType);
 				ItemToInventory.InItemConsumableType(ItemConsumableType);
 				ItemToInventory.InItemName(NewItem.ItemName);
@@ -1779,6 +1784,8 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 		CMessage* ResCreateCharacterMessage = MakePacketResCreateCharacter(!CharacterNameFind, Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo);
 		SendPacket(Session->SessionId, ResCreateCharacterMessage);
 		ResCreateCharacterMessage->Free();
+#pragma endregion
+
 	}
 	else
 	{
@@ -1847,6 +1854,7 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 	{
 		st_ItemInfo NewItemInfo;
 
+		NewItemInfo.IsQuickSlotUse = false;
 		NewItemInfo.ItemType = DropItemData.ItemType;
 		NewItemInfo.ItemConsumableType = DropItemData.ItemConsumableType;
 		NewItemInfo.ItemName = (LPWSTR)CA2W(DropItemData.ItemName.c_str());
@@ -1863,8 +1871,9 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 		int16 ItemType = (int16)NewItemInfo.ItemType;
 		int16 ItemConsumableeType = (int16)NewItemInfo.ItemConsumableType;
 
-		bool ItemUse = false;
+		bool ItemUse = false;		
 		CreateItem.InItemUse(ItemUse);
+		CreateItem.InIsQuickSlotUse(NewItemInfo.IsQuickSlotUse);
 		CreateItem.InItemType(ItemType);
 		CreateItem.InItemConsumableType(ItemConsumableeType);
 		CreateItem.InItemName(NewItemInfo.ItemName);
@@ -1915,7 +1924,7 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 				st_Vector2Int SpawnPosition(SpawnPositionX, SpawnPositionY);
 
 				// 생성할 아이템 정보 셋팅
-				CItem* NewItem = (CItem*)G_ObjectManager->ObjectCreate(GameObjectType);
+				CItem* NewItem = (CItem*)G_ObjectManager->ObjectCreate(GameObjectType);				
 				NewItem->_ItemInfo = NewItemInfo;
 				NewItem->_GameObjectInfo.ObjectType = GameObjectType;
 				NewItem->_GameObjectInfo.ObjectId = NewItem->_ItemInfo.ItemDBId;
@@ -1978,6 +1987,7 @@ void CGameServer::PacketProcReqDBItemToInventorySave(int64 SessionId, CMessage* 
 		*Message >> OwnerAccountId;
 
 		st_ItemInfo ItemInfo;
+		ItemInfo.IsQuickSlotUse = false;
 		ItemInfo.ItemType = (en_ItemType)(ItemType);
 		ItemInfo.ItemConsumableType = (en_ConsumableType)(ItemConsumableType);
 		ItemInfo.ItemCount = ItemCount;
@@ -2017,6 +2027,7 @@ void CGameServer::PacketProcReqDBItemToInventorySave(int64 SessionId, CMessage* 
 		{
 			// 새로운 아이템 생성 후 Inventory DB 넣기			
 			SP::CDBGameServerItemToInventoryPush ItemToInventoryPush(*ItemToInventorySaveDBConnection);
+			ItemToInventoryPush.InIsQuickSlotUse(ItemInfo.IsQuickSlotUse);
 			ItemToInventoryPush.InItemType(ItemType);
 			ItemToInventoryPush.InItemConsumableType(ItemConsumableType);
 			ItemToInventoryPush.InItemName(ItemName);
@@ -2089,12 +2100,14 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		ADBItemCheck.InPlayerDBId(PlayerDBId);
 		ADBItemCheck.InSlotIndex(SwapAIndex);
 
+		bool AIsQuickSlotUse = false;
 		int16 ADBItemType = -1;
 		int16 ADBItemConsumableType = -1;
 		WCHAR AItemName[20] = { 0 };
 		int16 AItemCount = -1;
 		bool AItemEquipped = false;
-		WCHAR AItemThumbnailImagePath[100] = { 0 };
+		WCHAR AItemThumbnailImagePath[100] = { 0 };	
+		ADBItemCheck.OutIsQuickSlotUse(AIsQuickSlotUse);
 		ADBItemCheck.OutItemType(ADBItemType);
 		ADBItemCheck.OutItemConsumableType(ADBItemConsumableType);
 		ADBItemCheck.OutItemName(AItemName);
@@ -2107,8 +2120,9 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		ADBItemCheck.Fetch();
 
 		// 스왑 요청할 A 아이템 정보 셋팅
-		st_ItemInfo SwapAItemInfo;
+		st_ItemInfo SwapAItemInfo;		
 		SwapAItemInfo.SlotIndex = SwapAIndex;
+		SwapAItemInfo.IsQuickSlotUse = AIsQuickSlotUse;
 		SwapAItemInfo.ItemType = (en_ItemType)ADBItemType;
 		SwapAItemInfo.ItemConsumableType = (en_ConsumableType)ADBItemConsumableType;
 		SwapAItemInfo.ItemName = AItemName;
@@ -2125,6 +2139,7 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		DBItemCheck.InPlayerDBId(PlayerDBId);
 		DBItemCheck.InSlotIndex(SwapBIndex);
 
+		bool BIsQuickSlotUse = false;
 		int16 BDBItemType = -1;
 		int16 BDBItemConsumableType = -1;
 		WCHAR BItemName[20] = { 0 };
@@ -2132,6 +2147,7 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		bool BItemEquipped = false;
 		WCHAR BItemThumbnailImagePath[100] = { 0 };
 
+		DBItemCheck.OutIsQuickSlotUse(BIsQuickSlotUse);
 		DBItemCheck.OutItemType(BDBItemType);
 		DBItemCheck.OutItemConsumableType(BDBItemConsumableType);
 		DBItemCheck.OutItemName(BItemName);
@@ -2144,8 +2160,9 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		DBItemCheck.Fetch();
 
 		// 스왑 요청할 B 아이템 정보 셋팅
-		st_ItemInfo SwapBItemInfo;
+		st_ItemInfo SwapBItemInfo;		
 		SwapBItemInfo.SlotIndex = SwapBIndex;
+		SwapBItemInfo.IsQuickSlotUse = BIsQuickSlotUse;
 		SwapBItemInfo.ItemType = (en_ItemType)BDBItemType;
 		SwapBItemInfo.ItemConsumableType = (en_ConsumableType)BDBItemConsumableType;
 		SwapBItemInfo.ItemName = BItemName;
@@ -2157,6 +2174,7 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 
 		// 스왑 하기 위해서 임시 Temp 변수 생성
 		st_ItemInfo Temp;
+		Temp.IsQuickSlotUse = SwapAItemInfo.IsQuickSlotUse;
 		Temp.ItemType = SwapAItemInfo.ItemType;
 		Temp.ItemConsumableType = SwapAItemInfo.ItemConsumableType;
 		Temp.ItemName = SwapAItemInfo.ItemName;
@@ -2166,6 +2184,7 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 
 		// 데이터 스왑
 		SwapAItemInfo.ItemDBId = 0;
+		SwapAItemInfo.IsQuickSlotUse = SwapBItemInfo.IsQuickSlotUse;
 		SwapAItemInfo.ItemType = SwapBItemInfo.ItemType;
 		SwapAItemInfo.ItemConsumableType = SwapBItemInfo.ItemConsumableType;
 		SwapAItemInfo.ItemName = SwapBItemInfo.ItemName;
@@ -2174,6 +2193,7 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		SwapAItemInfo.ThumbnailImagePath = SwapBItemInfo.ThumbnailImagePath;
 
 		SwapBItemInfo.ItemDBId = 0;
+		SwapBItemInfo.IsQuickSlotUse = Temp.IsQuickSlotUse;
 		SwapBItemInfo.ItemType = Temp.ItemType;
 		SwapBItemInfo.ItemConsumableType = Temp.ItemConsumableType;
 		SwapBItemInfo.ItemName = Temp.ItemName;
@@ -2190,6 +2210,7 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		ItemSwap.InAccountDBId(AccountId);
 		ItemSwap.InPlayerDBId(PlayerDBId);
 
+		ItemSwap.InAIsQuickSlotUse(SwapAItemInfo.IsQuickSlotUse);
 		ItemSwap.InAItemType(AItemType);
 		ItemSwap.InAItemConsumableType(ADBItemConsumableType);
 		ItemSwap.InAItemName(SwapAItemInfo.ItemName);
@@ -2198,6 +2219,7 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		ItemSwap.InAItemThumbnailImagePath(SwapAItemInfo.ThumbnailImagePath);
 		ItemSwap.InAItemSlotIndex(SwapAItemInfo.SlotIndex);
 
+		ItemSwap.InBIsQuickSlotUse(SwapBItemInfo.IsQuickSlotUse);
 		ItemSwap.InBItemType(BItemType);
 		ItemSwap.InBItemConsumableType(BDBItemConsumableType);
 		ItemSwap.InBItemName(SwapBItemInfo.ItemName);
@@ -2261,6 +2283,7 @@ void CGameServer::PacketProcReqDBGoldSave(int64 SessionId, CMessage* Message)
 
 		Message->Free();
 
+#pragma region 골드 테이블에 골드 저장
 		CDBConnection* GoldSaveDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 		SP::CDBGameServerGoldPush GoldSavePush(*GoldSaveDBConnection);
 		GoldSavePush.InAccoountId(AccountId);
@@ -2296,6 +2319,7 @@ void CGameServer::PacketProcReqDBGoldSave(int64 SessionId, CMessage* Message)
 		GoldItemDelete.Execute();
 
 		G_DBConnectionPool->Push(en_DBConnect::GAME, GoldItemDeleteDBConnection);
+#pragma endregion		
 	}
 
 	ReturnSession(Session);
@@ -2315,6 +2339,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			int8 SliverCoin = 0;
 			int8 BronzeCoin = 0;
 
+#pragma region 골드 정보 읽어오기
 			// 캐릭터가 소유하고 있었던 골드 정보를 GoldTable에서 읽어온다.
 			CDBConnection* DBCharacterGoldGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 			SP::CDBGameServerGoldGet CharacterGoldGet(*DBCharacterGoldGetConnection);
@@ -2340,7 +2365,10 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				SendPacket(Session->SessionId, ResGoldSaveMeesage);
 				ResGoldSaveMeesage->Free();
 			}
+#pragma endregion			
+			Session->MyPlayer->_QuickSlotManager.Init();
 
+#pragma region 가방 아이템 정보 읽어오기
 			Session->MyPlayer->_Inventory.Init();
 
 			// 캐릭터가 소유하고 있었던 Item 정보를 InventoryTable에서 읽어온다.
@@ -2415,7 +2443,8 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			}
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterInventoryItemGetConnection);
-
+#pragma endregion
+#pragma region 스킬 정보 읽어오기
 			// 캐릭터가 소유하고 있는 스킬 정보를 DB로부터 읽어온다.
 			CDBConnection* DBCharacterSkillGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 			SP::CDBGameServerSkillGet CharacterSkillGet(*DBCharacterSkillGetConnection);
@@ -2453,13 +2482,17 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 
 				Session->MyPlayer->_SkillBox.AddSkill(SkillInfo);
 
-				// 클라에게 스킬 정보를 보내준다.
+				// 클라가 소유하고 있는 스킬 정보를 보내준다.
 				CMessage* ResSkillToSkillBoxPacket = MakePacketResSkillToSkillBox(Session->MyPlayer->_GameObjectInfo.ObjectId, SkillInfo);
 				SendPacket(Session->SessionId, ResSkillToSkillBoxPacket);
 				ResSkillToSkillBoxPacket->Free();
 			}
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterSkillGetConnection);
+#pragma endregion
+#pragma region 스킬 퀵바 정보 읽어오기
+			
+#pragma endregion
 
 		} while (0);		
 	}
@@ -2745,6 +2778,7 @@ CMessage* CGameServer::MakePacketResItemSwap(int64 AccountId, int64 ObjectId, st
 
 	// AItemInfo	
 	*ResItemSwapMessage << SwapAItemInfo.ItemDBId;
+	*ResItemSwapMessage << SwapAItemInfo.IsQuickSlotUse;
 	*ResItemSwapMessage << (int16)SwapAItemInfo.ItemType;
 	*ResItemSwapMessage << (int16)SwapAItemInfo.ItemConsumableType;
 	*ResItemSwapMessage << SwapAItemInfo.ItemCount;
@@ -2761,8 +2795,9 @@ CMessage* CGameServer::MakePacketResItemSwap(int64 AccountId, int64 ObjectId, st
 	*ResItemSwapMessage << AItemThumbnailImagePathLen;
 	ResItemSwapMessage->InsertData(SwapAItemInfo.ThumbnailImagePath.c_str(), AItemThumbnailImagePathLen);
 
-	// BItemInfo	
+	// BItemInfo		
 	*ResItemSwapMessage << SwapBItemInfo.ItemDBId;
+	*ResItemSwapMessage << SwapBItemInfo.IsQuickSlotUse;
 	*ResItemSwapMessage << (int16)SwapBItemInfo.ItemType;
 	*ResItemSwapMessage << (int16)SwapBItemInfo.ItemConsumableType;
 	*ResItemSwapMessage << SwapBItemInfo.ItemCount;
@@ -3029,6 +3064,7 @@ CMessage* CGameServer::MakePacketResItemToInventory(int64 TargetObjectId, st_Ite
 	*ResItemToInventoryMessage << TargetObjectId;
 	// ItemInfo
 	*ResItemToInventoryMessage << ItemInfo.ItemDBId;
+	*ResItemToInventoryMessage << ItemInfo.IsQuickSlotUse;
 	*ResItemToInventoryMessage << (int16)ItemInfo.ItemType;
 	*ResItemToInventoryMessage << (int16)ItemInfo.ItemConsumableType;
 	*ResItemToInventoryMessage << ItemInfo.ItemCount;
@@ -3106,8 +3142,10 @@ CMessage* CGameServer::MakePacketResSkillToSkillBox(int64 TargetObjectId, st_Ski
 	// 스킬 쿨타임
 	*ResSkillToSkillBoxMessage << SkillInfo._SkillCoolTime;
 
-	// 스킬 슬롯 번호
-	*ResSkillToSkillBoxMessage << SkillInfo._SlotIndex;
+	// 스킬이 위치한 퀵슬롯 인덱스
+	*ResSkillToSkillBoxMessage << SkillInfo._QuickSlotBarIndex;
+	// 퀵슬롯에서 해당 스킬이 위치한 인덱스
+	*ResSkillToSkillBoxMessage << SkillInfo._QuickSlotBarItemIndex;
 
 	int8 SkillImagePathLen = (int8)(SkillInfo._SkillImagePath.length() * 2);
 	*ResSkillToSkillBoxMessage << SkillImagePathLen;

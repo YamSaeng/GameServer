@@ -118,13 +118,6 @@ enum class en_ConsumableType : int16
 	SKILL_BOOK
 };
 
-enum class en_QuickSlotBarSaveType : int8
-{
-	NONE,
-	ITEM,
-	SKILL
-};
-
 struct st_PositionInfo
 {
 	en_CreatureState State;
@@ -178,9 +171,9 @@ struct st_Color
 };
 
 struct st_ItemInfo
-{
-	bool _IsQuickSlotUse;
+{	
 	int64 ItemDBId;				// 아이템 DB에 저장되어 있는 ID		
+	bool IsQuickSlotUse;       // 퀵슬롯에 등록되어 있는지 여부 
 	en_ItemType ItemType;		// 아이템 타입
 	en_ConsumableType ItemConsumableType;	// 소비용 아이템인지
 	wstring ItemName;			// 아이템 이름
@@ -204,9 +197,9 @@ struct st_SkillInfo
 
 struct st_QuickSlotBarSlotInfo
 {
-	int64 AccountDBId;
-	int64 PlayerDBId;	
-	int8 QuickSlotBarIndex;
-	INT8 QuickSlotBarItemIndex;
-	st_SkillInfo QuickBarSkillInfo;	
+	int64 AccountDBId; // 퀵슬롯 슬롯 소유한 Account
+	int64 PlayerDBId;  // 퀵슬롯 슬롯 소유한 Player
+	int8 QuickSlotBarIndex; // 퀵슬롯 Index
+	INT8 QuickSlotBarSlotIndex; // 퀵슬롯 슬롯 Index
+	st_SkillInfo QuickBarSkillInfo;	// 퀵슬롯에 등록할 스킬 정보
 };

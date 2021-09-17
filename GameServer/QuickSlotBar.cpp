@@ -19,7 +19,7 @@ void CQuickSlotBar::Init()
 	{
 		st_QuickSlotBarSlotInfo* QuickSlotBarSlotInfo = new st_QuickSlotBarSlotInfo();
 		QuickSlotBarSlotInfo->QuickSlotBarIndex = _Index;
-		QuickSlotBarSlotInfo->QuickSlotBarItemIndex = SlotIndex;
+		QuickSlotBarSlotInfo->QuickSlotBarSlotIndex = SlotIndex;
 
 		_QuickSlotBarSlotInfos.insert(pair<int8, st_QuickSlotBarSlotInfo*>(SlotIndex, QuickSlotBarSlotInfo));
 	}
@@ -27,7 +27,7 @@ void CQuickSlotBar::Init()
 
 void CQuickSlotBar::AddQuickSlotBarSlot(st_QuickSlotBarSlotInfo* QuickSlotBarSlotInfo)
 {
-	auto FindQuickSlotBarSlotIterator = _QuickSlotBarSlotInfos.find(QuickSlotBarSlotInfo->QuickSlotBarItemIndex);
+	auto FindQuickSlotBarSlotIterator = _QuickSlotBarSlotInfos.find(QuickSlotBarSlotInfo->QuickSlotBarSlotIndex);
 	if (FindQuickSlotBarSlotIterator == _QuickSlotBarSlotInfos.end())
 	{
 		CRASH("AddQuickSlotBarSlot 퀵슬롯아이템 찾지 못함");
