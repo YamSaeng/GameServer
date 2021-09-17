@@ -1,12 +1,38 @@
 #include "pch.h"
 #include "QuickSlotBar.h"
 
-void CQuickSlotBar::AddQuickSlotSkill(int8 QuickSlotBarSkillSlotIndex, st_SkillInfo* QuickSlotSkillInfo)
+CQuickSlotBar::CQuickSlotBar()
 {
-	_QuickSlotSkillInfos.insert(pair<int8,st_SkillInfo*>(QuickSlotBarSkillSlotIndex, QuickSlotSkillInfo));
 }
 
-void CQuickSlotBar::AddQuickSlotItem(int8 QuickSlotBarItemSlotIndex, st_ItemInfo* QuickSlotItemInfo)
+CQuickSlotBar::~CQuickSlotBar()
 {
-	_QuickSlotItemInfos.insert(pair<int8, st_ItemInfo*>(QuickSlotBarItemSlotIndex, QuickSlotItemInfo));
+	for (auto QuickSlotBarSlot : _QuickSlotBarSlotInfos)
+	{
+		delete QuickSlotBarSlot.second;
+	}
+}
+
+void CQuickSlotBar::Init()
+{
+	for (int8 SlotIndex = 0; SlotIndex < (int8)en_QuickSlotBar::QUICK_SLOT_BAR_SLOT_SIZE; ++SlotIndex)
+	{
+		st_QuickSlotBarSlotInfo* QuickSlotBarSlotInfo = new st_QuickSlotBarSlotInfo();
+		QuickSlotBarSlotInfo->QuickSlotBarIndex = _Index;
+		QuickSlotBarSlotInfo->QuickSlotBarItemIndex = SlotIndex;
+
+		_QuickSlotBarSlotInfos.insert(pair<int8, st_QuickSlotBarSlotInfo*>(SlotIndex, QuickSlotBarSlotInfo));
+	}
+}
+
+void CQuickSlotBar::AddQuickSlotBarSlot(st_QuickSlotBarSlotInfo* QuickSlotBarSlotInfo)
+{
+	auto FindQuickSlotBarSlotIterator = _QuickSlotBarSlotInfos.find(QuickSlotBarSlotInfo->QuickSlotBarItemIndex);
+	if (FindQuickSlotBarSlotIterator == _QuickSlotBarSlotInfos.end())
+	{
+		CRASH("AddQuickSlotBarSlot 퀵슬롯아이템 찾지 못함");
+		return;
+	}
+
+	(*FindQuickSlotBarSlotIterator).second = QuickSlotBarSlotInfo;
 }

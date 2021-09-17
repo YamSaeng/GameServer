@@ -4,13 +4,17 @@
 class CQuickSlotBar
 {
 public:
+	// 퀵슬롯 바 인덱스
+	int8 _Index;
+
+	CQuickSlotBar();
+	~CQuickSlotBar();
+
+	void Init();
+
 	// QuickSlot에 스킬 저장
-	void AddQuickSlotSkill(int8 QuickSlotBarSkillSlotIndex, st_SkillInfo* QuickSlotSkillInfo);
-	// QuickSlot에 아이템 저장
-	void AddQuickSlotItem(int8 QuickSlotBarItemSlotIndex, st_ItemInfo* QuickSlotItemInfo);
+	void AddQuickSlotBarSlot(st_QuickSlotBarSlotInfo* QuickSlotBarSlotInfo);
 private:
-	// 퀵슬롯에 저장해둘 Skill, Item
-	map<int8, st_SkillInfo*> _QuickSlotSkillInfos;
-	map<int8, st_ItemInfo*> _QuickSlotItemInfos;
+	map<int8, st_QuickSlotBarSlotInfo*> _QuickSlotBarSlotInfos;	
 };
 
