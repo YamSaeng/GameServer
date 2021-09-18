@@ -2476,9 +2476,12 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				ResGoldSaveMeesage->Free();
 			}
 #pragma endregion			
+
+			// 퀵슬롯 정보 초기화
 			Session->MyPlayer->_QuickSlotManager.Init();
 
 #pragma region 가방 아이템 정보 읽어오기
+			// 인벤토리 초기화
 			Session->MyPlayer->_Inventory.Init();
 
 			// 캐릭터가 소유하고 있었던 Item 정보를 InventoryTable에서 읽어온다.
@@ -2516,7 +2519,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				ItemInfo.ItemCount = ItemCount;
 				ItemInfo.SlotIndex = SlotIndex;
 				ItemInfo.IsEquipped = IsEquipped;
-				ItemInfo.ThumbnailImagePath = ItemThumbnailImagePath;
+				ItemInfo.ThumbnailImagePath = ItemThumbnailImagePath;				
 
 				// ItemType에 따라 아이템을 생성하고
 				CItem* NewItem = nullptr;
@@ -2561,20 +2564,18 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			CharacterSkillGet.InAccountDBId(Session->MyPlayer->_AccountId);
 			CharacterSkillGet.InPlayerDBId(Session->MyPlayer->_GameObjectInfo.ObjectId);
 
+			bool IsQuickSlotUse;
 			int16 SkillType;
 			int8 SkillLevel;
 			WCHAR SkillName[20] = { 0 };
 			int32 SkillCoolTime;
-			int8 QuickSlotBarIndex;
-			int8 QuickSlotBarItemIndex;
 			WCHAR SkillThumbnailImagePath[100] = { 0 };
 
+			CharacterSkillGet.OutIsQuickSlotUse(IsQuickSlotUse);
 			CharacterSkillGet.OutSkillType(SkillType);
 			CharacterSkillGet.OutSkillLevel(SkillLevel);
 			CharacterSkillGet.OutSkillName(SkillName);
 			CharacterSkillGet.OutSkillCoolTime(SkillCoolTime);
-			CharacterSkillGet.OutQuickSlotBarIndex(QuickSlotBarIndex);
-			CharacterSkillGet.OutQuickSlotBarItemIndex(QuickSlotBarItemIndex);
 			CharacterSkillGet.OutSkillThumbnailImagePath(SkillThumbnailImagePath);
 
 			CharacterSkillGet.Execute();
@@ -2582,12 +2583,11 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			while (CharacterSkillGet.Fetch())
 			{
 				st_SkillInfo SkillInfo;
+				SkillInfo._IsQuickSlotUse = IsQuickSlotUse;
 				SkillInfo._SkillType = (en_SkillType)SkillType;
 				SkillInfo._SkillLevel = SkillLevel;
 				SkillInfo._SkillName = SkillName;
 				SkillInfo._SkillCoolTime = SkillCoolTime;
-				SkillInfo._QuickSlotBarIndex = QuickSlotBarIndex;
-				SkillInfo._QuickSlotBarItemIndex = QuickSlotBarItemIndex;
 				SkillInfo._SkillImagePath = SkillThumbnailImagePath;
 
 				Session->MyPlayer->_SkillBox.AddSkill(SkillInfo);
@@ -2596,14 +2596,50 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				CMessage* ResSkillToSkillBoxPacket = MakePacketResSkillToSkillBox(Session->MyPlayer->_GameObjectInfo.ObjectId, SkillInfo);
 				SendPacket(Session->SessionId, ResSkillToSkillBoxPacket);
 				ResSkillToSkillBoxPacket->Free();
+
+				// 소유하고 있는 해당 스킬이 퀵슬롯에 등록되어 있는지 확인한다.
+				if (SkillInfo._IsQuickSlotUse == true)
+				{
+					// 퀵슬롯 테이블 접근해서 해당 스킬이 등록되어 있는 모든 퀵슬롯 번호 가지고옴
+					CDBConnection* DBQuickSlotBarGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+					SP::CDBGameServerQuickSlotBarGet QuickSlotBarGet(*DBQuickSlotBarGetConnection);
+					QuickSlotBarGet.InAccountDBId(Session->MyPlayer->_AccountId);
+					QuickSlotBarGet.InPlayerDBId(Session->MyPlayer->_GameObjectInfo.ObjectId);
+					QuickSlotBarGet.InSkillType(SkillType);
+
+					int8 QuickSlotBarIndex;
+					int8 QuickSlotBarSlotIndex;
+
+					QuickSlotBarGet.OutQuickSlotBarIndex(QuickSlotBarIndex);
+					QuickSlotBarGet.OutQuickSlotBarItemIndex(QuickSlotBarSlotIndex);					
+
+					QuickSlotBarGet.Execute();
+
+					// 해당 스킬이 퀵슬롯에 등록되어 있는 모든 위치값을 가져온다.
+					while (QuickSlotBarGet.Fetch())
+					{
+						st_QuickSlotBarSlotInfo NewQuickSlotBarSlot;
+						NewQuickSlotBarSlot.AccountDBId = Session->MyPlayer->_AccountId;
+						NewQuickSlotBarSlot.PlayerDBId = Session->MyPlayer->_GameObjectInfo.ObjectId;
+						NewQuickSlotBarSlot.QuickSlotBarIndex = QuickSlotBarIndex;
+						NewQuickSlotBarSlot.QuickSlotBarSlotIndex = QuickSlotBarSlotIndex;
+						NewQuickSlotBarSlot.QuickBarSkillInfo = SkillInfo;
+
+						// 퀵슬롯에 등록한다.
+						Session->MyPlayer->_QuickSlotManager.AddQuickSlotBarSlot(NewQuickSlotBarSlot);
+
+						// 클라에게 정보를 보내준다.
+						CMessage* ResQuickSlotBarSlotMessage = MakePacketResQuickSlotBarSlot(Session->MyPlayer->_AccountId, Session->MyPlayer->_GameObjectInfo.ObjectId, QuickSlotBarIndex, QuickSlotBarSlotIndex, NewQuickSlotBarSlot.QuickBarSkillInfo);
+						SendPacket(Session->SessionId, ResQuickSlotBarSlotMessage);
+						ResQuickSlotBarSlotMessage->Free();
+					}
+
+					G_DBConnectionPool->Push(en_DBConnect::GAME, DBQuickSlotBarGetConnection);					
+				}
 			}
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterSkillGetConnection);
 #pragma endregion
-#pragma region 스킬 퀵바 정보 읽어오기
-			
-#pragma endregion
-
 		} while (0);		
 	}
 
@@ -2653,9 +2689,12 @@ void CGameServer::PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CMessage*
 			wstring SkillImagePath;
 			Message->GetData(SkillImagePath, SkillImagePathLen);
 
+			st_SkillInfo* FindSkill = Session->MyPlayer->_SkillBox.FindSkill((en_SkillType)SkillType);
 			// 캐릭터가 해당 스킬을 가지고 있는지 확인
-			if (Session->MyPlayer->_SkillBox.FindSkill((en_SkillType)SkillType) == true)
+			if (FindSkill != nullptr)
 			{
+				FindSkill->_IsQuickSlotUse = true;
+
 				st_QuickSlotBarSlotInfo QuickSlotBarSlotInfo;
 				QuickSlotBarSlotInfo.AccountDBId = AccountId;
 				QuickSlotBarSlotInfo.PlayerDBId = PlayerId;
@@ -2666,11 +2705,10 @@ void CGameServer::PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CMessage*
 				QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillName = SkillName;
 				QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillCoolTime = SkillCoolTime;
 				QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillImagePath = SkillImagePath;
-				QuickSlotBarSlotInfo.QuickBarSkillInfo._QuickSlotBarIndex = QuickSlotBarIndex;
-				QuickSlotBarSlotInfo.QuickBarSkillInfo._QuickSlotBarItemIndex = QuickSlotBarSlotIndex;
 
 				Session->MyPlayer->_QuickSlotManager.AddQuickSlotBarSlot(QuickSlotBarSlotInfo);
 
+				// DB에 퀵슬롯 정보 저장
 				CDBConnection* DBQuickSlotUpdateConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 				SP::CDBGameServerQuickSlotBarSlotUpdate QuickSlotUpdate(*DBQuickSlotUpdateConnection);
 				QuickSlotUpdate.InAccountDBId(AccountId);
@@ -2685,7 +2723,7 @@ void CGameServer::PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CMessage*
 
 				QuickSlotUpdate.Execute();
 
-				G_DBConnectionPool->Push(en_DBConnect::GAME, DBQuickSlotUpdateConnection);
+				G_DBConnectionPool->Push(en_DBConnect::GAME, DBQuickSlotUpdateConnection);				
 			}
 		} while (0);
 	}
@@ -3008,6 +3046,42 @@ CMessage* CGameServer::MakePacketResItemSwap(int64 AccountId, int64 ObjectId, st
 	ResItemSwapMessage->InsertData(SwapBItemInfo.ThumbnailImagePath.c_str(), BItemThumbnailImagePathLen);
 
 	return ResItemSwapMessage;
+}
+
+CMessage* CGameServer::MakePacketResQuickSlotBarSlot(int64 AccountId, int64 ObjectId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, st_SkillInfo SkillInfo)
+{
+	CMessage* ResQuickSlotBarSlotMessage = CMessage::Alloc();
+	if (ResQuickSlotBarSlotMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResQuickSlotBarSlotMessage->Clear();
+
+	*ResQuickSlotBarSlotMessage << (int16)en_PACKET_S2C_QUICKSLOT_SAVE;
+	*ResQuickSlotBarSlotMessage << AccountId;
+	*ResQuickSlotBarSlotMessage << ObjectId;
+	*ResQuickSlotBarSlotMessage << QuickSlotBarIndex;
+	*ResQuickSlotBarSlotMessage << QuickSlotBarSlotIndex;
+
+	// 스킬타입
+	*ResQuickSlotBarSlotMessage << (int16)SkillInfo._SkillType;
+	// 스킬레벨
+	*ResQuickSlotBarSlotMessage << SkillInfo._SkillLevel;
+
+	// 스킬이름
+	int8 SkillNameLen = (int8)(SkillInfo._SkillName.length() * 2);
+	*ResQuickSlotBarSlotMessage << SkillNameLen;
+	ResQuickSlotBarSlotMessage->InsertData(SkillInfo._SkillName.c_str(), SkillNameLen);
+
+	// 스킬 쿨타임
+	*ResQuickSlotBarSlotMessage << SkillInfo._SkillCoolTime;	
+
+	int8 SkillImagePathLen = (int8)(SkillInfo._SkillImagePath.length() * 2);
+	*ResQuickSlotBarSlotMessage << SkillImagePathLen;
+	ResQuickSlotBarSlotMessage->InsertData(SkillInfo._SkillImagePath.c_str(), SkillImagePathLen);
+
+	return ResQuickSlotBarSlotMessage;
 }
 
 // int64 AccountId
@@ -3333,12 +3407,7 @@ CMessage* CGameServer::MakePacketResSkillToSkillBox(int64 TargetObjectId, st_Ski
 	ResSkillToSkillBoxMessage->InsertData(SkillInfo._SkillName.c_str(), SkillNameLen);
 
 	// 스킬 쿨타임
-	*ResSkillToSkillBoxMessage << SkillInfo._SkillCoolTime;
-
-	// 스킬이 위치한 퀵슬롯 인덱스
-	*ResSkillToSkillBoxMessage << SkillInfo._QuickSlotBarIndex;
-	// 퀵슬롯에서 해당 스킬이 위치한 인덱스
-	*ResSkillToSkillBoxMessage << SkillInfo._QuickSlotBarItemIndex;
+	*ResSkillToSkillBoxMessage << SkillInfo._SkillCoolTime;	
 
 	int8 SkillImagePathLen = (int8)(SkillInfo._SkillImagePath.length() * 2);
 	*ResSkillToSkillBoxMessage << SkillImagePathLen;

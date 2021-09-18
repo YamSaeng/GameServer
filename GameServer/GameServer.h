@@ -120,6 +120,7 @@ private:
 	CMessage* MakePacketGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int8 SliverCount, int8 BronzeCount, int16 ItemCount, int16 ItemType, bool ItemGainPrint = true);
 	CMessage* MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* NickName, WORD MessageLen, WCHAR* Message);
 	CMessage* MakePacketResItemSwap(int64 AccountId, int64 ObjectId, st_ItemInfo SwapAItemInfo, st_ItemInfo SwapBItemInfo);
+	CMessage* MakePacketResQuickSlotBarSlot(int64 AccountId, int64 ObjectId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, st_SkillInfo SkillInfo);
 public:
 	CMessage* MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_AttackType AttackType, int32 Damage, bool IsCritical);
 	CMessage* MakePacketResMagic(int64 ObjectId);
