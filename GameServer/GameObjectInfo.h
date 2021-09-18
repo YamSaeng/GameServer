@@ -190,15 +190,13 @@ struct st_SkillInfo
 	int8 _SkillLevel;		 // 스킬 레벨
 	wstring _SkillName;		 // 스킬 이름
 	int32 _SkillCoolTime;	 // 스킬 쿨타임	
-	int8 _QuickSlotBarIndex; // 퀵슬롯바 인덱스 ( 어떤 퀵슬롯바 인지 )
-	int8 _QuickSlotBarItemIndex; // 퀵슬롯바 아이템 인덱스 ( 퀵슬롯바의 몇번째에 속하는지 )
 	wstring _SkillImagePath; // 스킬 이미지 경로
 };
 
 struct st_QuickSlotBarSlotInfo
 {
 	int64 AccountDBId; // 퀵슬롯 슬롯 소유한 Account
-	int64 PlayerDBId;  // 퀵슬롯 슬롯 소유한 Player
+	int64 PlayerDBId;  // 퀵슬롯 슬롯 소유한 Player	
 	int8 QuickSlotBarIndex; // 퀵슬롯 Index
 	INT8 QuickSlotBarSlotIndex; // 퀵슬롯 슬롯 Index
 	st_SkillInfo QuickBarSkillInfo;	// 퀵슬롯에 등록할 스킬 정보
