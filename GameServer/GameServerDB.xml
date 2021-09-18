@@ -72,13 +72,12 @@
   <!-- 보유중인 스킬 목록 테이블 -->
   <Table name="Skill" desc="Skill Table">
     <Column name="AccountDBId" type="BigInt" notnull ="true"/>
-    <Column name="PlayerDBId" type="BigInt" notnull ="true"/>
+    <Column name="PlayerDBId" type="BigInt"  notnull ="true"/>
+    <Column name="IsQuickSlotUse" type="bit" notnull ="true"/>
     <Column name="SkillType" type="SmallInt" notnull ="true"/>
     <Column name="SkillLevel" type="TinyInt" notnull ="true"/>
     <Column name="SkillName" type="nvarchar(20)" notnull ="true"/>
     <Column name="SkillCoolTime" type="int" notnull ="true"/>
-    <Column name="QuickSlotBarIndex" type="TinyInt" notnull ="true"/>
-    <Column name="QuickSlotBarItemIndex" type="TinyInt" notnull ="true"/>    
     <Column name="SkillImagePath" type="nvarchar(100)" notnull="true"/>    
   </Table>
   
@@ -326,7 +325,7 @@
     <Param name="@PlayerDBId" type="BigInt"/>
     <Body>
       <![CDATA[
-        SELECT SkillType, SkillLevel, SkillName, SkillCoolTime, QuickSlotBarIndex, QuickSlotBarItemIndex, SkillImagePath FROM [dbo].[Skill] WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
+        SELECT IsQuickSlotUse, SkillType, SkillLevel, SkillName, SkillCoolTime, SkillImagePath FROM [dbo].[Skill] WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
     </Body>
   </Procedure>  
@@ -364,6 +363,18 @@
       <![CDATA[
         UPDATE [dbo].[QuickSlotBar] SET SkillType = (@SkillType), SkillLevel = (@SkillLevel), SkillName = (@SkillName), SkillCoolTime = (@SkillCoolTime), SkillImagePath = (@SkillImagePath) 
         WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)        
+      ]]>
+    </Body>
+  </Procedure>
+  
+  <!-- QuickSlotBarTable에 있는 퀵슬롯 정보 가져오기 -->
+  <Procedure name="spGetQuickSlotBarSlot">
+    <Param name="@AccountDBId" type="BigInt"/>
+    <Param name="@PlayerDBId" type="BigInt"/>
+    <Param name="@SkillType" type="SmallInt"/>
+    <Body>
+      <![CDATA[
+        SELECT QuickSlotBarIndex, QuickSlotBarSlotIndex FROM [dbo].[QuickSlotBar] WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId) AND SkillType = (@SkillType)
       ]]>
     </Body>
   </Procedure>

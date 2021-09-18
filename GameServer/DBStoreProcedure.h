@@ -244,20 +244,19 @@ namespace SP
 	};
 
 	// SkillTable에 있는 Skill 모두 긁어옴
-	class CDBGameServerSkillGet : public CDBBind<2, 7>
+	class CDBGameServerSkillGet : public CDBBind<2, 6>
 	{
 	public:
 		CDBGameServerSkillGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetSkill(?,?)}") {}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
 
-		void OutSkillType(int16& SkillType) { BindCol(0, SkillType); }
-		void OutSkillLevel(int8& SkillLevel) { BindCol(1, SkillLevel); }
-		template<int8 Length> void OutSkillName(WCHAR(&SkillName)[Length]) { BindCol(2, SkillName); }
-		void OutSkillCoolTime(int32& SkillCoolTime) { BindCol(3, SkillCoolTime); }
-		void OutQuickSlotBarIndex(int8& QuickSlotBarIndex) { BindCol(4, QuickSlotBarIndex); }
-		void OutQuickSlotBarItemIndex(int8& OutQuickSlotBarItemIndex) { BindCol(5, OutQuickSlotBarItemIndex); }
-		template<int8 Length> void OutSkillThumbnailImagePath(WCHAR(&SkillThumbnailImagePath)[Length]) { BindCol(6, SkillThumbnailImagePath); }
+		void OutIsQuickSlotUse(bool& OutIsQuickSlotUse) { BindCol(0, OutIsQuickSlotUse); }
+		void OutSkillType(int16& SkillType) { BindCol(1, SkillType); }
+		void OutSkillLevel(int8& SkillLevel) { BindCol(2, SkillLevel); }
+		template<int8 Length> void OutSkillName(WCHAR(&SkillName)[Length]) { BindCol(3, SkillName); }
+		void OutSkillCoolTime(int32& SkillCoolTime) { BindCol(4, SkillCoolTime); }
+		template<int8 Length> void OutSkillThumbnailImagePath(WCHAR(&SkillThumbnailImagePath)[Length]) { BindCol(5, SkillThumbnailImagePath); }
 	};
 
 	// QuickSlotBarSlot정보 새로 생성
@@ -295,19 +294,15 @@ namespace SP
 	};
 
 	// QuickSlotBarTable에 있는 QuickSlotBar 정보 모두 긁어온다.
-	class CDBGameServerQuickSlotBarGet : public CDBBind<2, 7>
+	class CDBGameServerQuickSlotBarGet : public CDBBind<3, 2>
 	{
 	public:
-		CDBGameServerQuickSlotBarGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spQuickSlotBarSlotSave(?,?)}") {}
+		CDBGameServerQuickSlotBarGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetQuickSlotBarSlot(?,?,?)}") {}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
+		void InSkillType(int16& SkillType) { BindParam(2, SkillType); }
 
-		void OutQuickSlotBarIndex(int8& SlotBarIndex) { BindCol(1, SlotBarIndex); }
-		void OutQuickSlotBarItemIndex(int8& SlotBarItemIndex) { BindCol(2, SlotBarItemIndex); }
-		void OutSkillType(int16& SkillType) { BindCol(3, SkillType); }
-		void OutSkillLevel(int8& SkillLevel) { BindCol(4, SkillLevel); }
-		template<int8 Length> void OutSkillName(WCHAR(&SkillName)[Length]) { BindCol(5, SkillName); }
-		void OutSkillCoolTime(int32& SkillCoolTime) { BindCol(6, SkillCoolTime); }
-		template<int8 Length> void OutSkillThumbnailImagePath(WCHAR(&SkillThumbnailImagePath)[Length]) { BindCol(6, SkillThumbnailImagePath); }
+		void OutQuickSlotBarIndex(int8& SlotBarIndex) { BindCol(0, SlotBarIndex); }
+		void OutQuickSlotBarItemIndex(int8& SlotBarItemIndex) { BindCol(1, SlotBarItemIndex); }		
 	};
 }
