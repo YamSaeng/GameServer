@@ -22,6 +22,6 @@ public:
 	// 스킬 얻기
 	st_SkillInfo* Get(int8 SlotIndex);
 	// 스킬 찾기
-	bool FindSkill(en_SkillType FindSkillType);
+	st_SkillInfo* FindSkill(en_SkillType FindSkillType);
 };
 

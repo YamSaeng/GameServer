@@ -31,15 +31,15 @@ st_SkillInfo* CSkillBox::Get(int8 SlotIndex)
 	return nullptr;
 }
 
-bool CSkillBox::FindSkill(en_SkillType FindSkillType)
+st_SkillInfo* CSkillBox::FindSkill(en_SkillType FindSkillType)
 {
 	for (int SlotIndex = 0; SlotIndex < _Skills.size(); SlotIndex++)
 	{
 		if (_Skills[SlotIndex]->_SkillType == FindSkillType)
 		{
-			return true;
+			return _Skills[SlotIndex];
 		}
 	}
 
-	return false;
+	return nullptr;
 }
