@@ -990,7 +990,7 @@ void CGameServer::PacketProcReqMousePositionObjectInfo(int64 SessionID, CMessage
 		if (Session)
 		{
 			int64 AccountId;
-			int64 ObjectId;
+			int64 PlayerId;
 
 			if (!Session->IsLogin)
 			{
@@ -1006,7 +1006,7 @@ void CGameServer::PacketProcReqMousePositionObjectInfo(int64 SessionID, CMessage
 				break;
 			}
 
-			*Message >> ObjectId;
+			*Message >> PlayerId;
 
 			if (Session->MyPlayer == nullptr)
 			{
@@ -1015,32 +1015,23 @@ void CGameServer::PacketProcReqMousePositionObjectInfo(int64 SessionID, CMessage
 			}
 			else
 			{
-				if (Session->MyPlayer->_GameObjectInfo.ObjectId != ObjectId)
+				if (Session->MyPlayer->_GameObjectInfo.ObjectId != PlayerId)
 				{
 					Disconnect(Session->SessionId);
 					break;
 				}
 			}
 
-			int32 X;
-			int32 Y;
+			int64 ObjectId;
+			*Message >> ObjectId;
 
-			*Message >> X;
-			*Message >> Y;
+			int16 ObjectType;
+			*Message >> ObjectType;
 
-			CChannel* Channel = G_ChannelManager->Find(1);
-
-			st_Vector2Int FindPosition;
-			FindPosition._X = X;
-			FindPosition._Y = Y;
-
-			CGameObject* FindObject = Channel->_Map->Find(FindPosition);
-
+			CGameObject* FindObject = G_ObjectManager->Find(ObjectId, (en_GameObjectType)ObjectType);
 			if (FindObject != nullptr)
 			{
-				CPlayer* Player = (CPlayer*)FindObject;
-
-				CMessage* ResMousePositionObjectInfo = MakePacketMousePositionObjectInfo(Session->AccountId, Player->_GameObjectInfo);
+				CMessage* ResMousePositionObjectInfo = MakePacketMousePositionObjectInfo(Session->AccountId, FindObject->_GameObjectInfo);
 				SendPacket(Session->SessionId, ResMousePositionObjectInfo);
 				ResMousePositionObjectInfo->Free();
 			}
