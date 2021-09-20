@@ -163,7 +163,7 @@ void CBear::UpdateAttack()
 		
 		_Target->OnDamaged(this, FinalDamage);
 		
-		CMessage* ResBearAttackPacket = G_ObjectManager->GameServer->MakePacketResAttack(_GameObjectInfo.ObjectId, _Target->_GameObjectInfo.ObjectId, en_AttackType::BEAR_NORMAL_ATTACK, FinalDamage, IsCritical);
+		CMessage* ResBearAttackPacket = G_ObjectManager->GameServer->MakePacketResAttack(_GameObjectInfo.ObjectId, _Target->_GameObjectInfo.ObjectId, en_SkillType::SKILL_BEAR_NORMAL, FinalDamage, IsCritical);
 		G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResBearAttackPacket);
 		ResBearAttackPacket->Free();
 

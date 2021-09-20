@@ -162,7 +162,7 @@ void CSlime::UpdateAttack()
 
 		_Target->OnDamaged(this, FinalDamage);
 
-		CMessage* ResSlimeAttackPacket = G_ObjectManager->GameServer->MakePacketResAttack(_GameObjectInfo.ObjectId, _Target->_GameObjectInfo.ObjectId, en_AttackType::SLIME_NORMAL_ATTACK, FinalDamage, IsCritical);
+		CMessage* ResSlimeAttackPacket = G_ObjectManager->GameServer->MakePacketResAttack(_GameObjectInfo.ObjectId, _Target->_GameObjectInfo.ObjectId, en_SkillType::SKILL_SLIME_NORMAL, FinalDamage, IsCritical);
 		G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResSlimeAttackPacket);
 		ResSlimeAttackPacket->Free();
 

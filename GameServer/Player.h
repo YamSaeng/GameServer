@@ -8,7 +8,7 @@ class CPlayer : public CGameObject
 {
 public:	
 	uint64 _AttackTick;
-	en_AttackType _AttackType;
+	en_SkillType _SkillType;
 
 	int64 _SessionId;
 	int64 _AccountId;
@@ -26,8 +26,7 @@ public:
 	virtual void OnDamaged(CGameObject* Attacker, int32 Damage) override;
 	virtual void OnDead(CGameObject* Killer) override;	
 
-	void SetAttackMeleeType(en_AttackType AttackType, vector<CGameObject*> Targets);
-	void SetAttackMagicType(en_AttackType AttackType, vector<CGameObject*> Targets);
+	void SetAttackMagicType(en_SkillType SkillType, vector<CGameObject*> Targets);
 protected:
 	virtual void UpdateAttack();
 	virtual void UpdateSpell();

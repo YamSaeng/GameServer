@@ -122,7 +122,7 @@ private:
 	CMessage* MakePacketResItemSwap(int64 AccountId, int64 ObjectId, st_ItemInfo SwapAItemInfo, st_ItemInfo SwapBItemInfo);
 	CMessage* MakePacketResQuickSlotBarSlot(int64 AccountId, int64 ObjectId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, st_SkillInfo SkillInfo);
 public:
-	CMessage* MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_AttackType AttackType, int32 Damage, bool IsCritical);
+	CMessage* MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_SkillType SkillType, int32 Damage, bool IsCritical);
 	CMessage* MakePacketResMagic(int64 ObjectId);
 	CMessage* MakePacketResChangeHP(int64 ObjectId, int32 CurrentHP, int32 MaxHP);
 	CMessage* MakePacketResObjectState(int64 ObjectId, en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState);

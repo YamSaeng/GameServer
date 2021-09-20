@@ -713,17 +713,9 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 			int8 ReqMoveDir;
 			*Message >> ReqMoveDir;
 
-			// 공격 종류
-			int16 ReqAttackRange;
-			*Message >> ReqAttackRange;
-
-			// 공격 타입
-			int16 ReqAttackType;
-			*Message >> ReqAttackType;
-
-			// 공격 거리
-			int8 Distance;
-			*Message >> Distance;
+			// 스킬 종류
+			int16 ReqSkillType;
+			*Message >> ReqSkillType;					
 
 			// 공격 방향 캐스팅
 			en_MoveDir MoveDir = (en_MoveDir)ReqMoveDir;
@@ -731,27 +723,74 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 
 			st_Vector2Int FrontCell;
 			vector<CGameObject*> Targets;
+			CGameObject* Target = nullptr;
+			CMessage* ResSyncPosition = nullptr;
 
-			// 공격종류 확인
-			switch ((en_AttackRange)ReqAttackRange)
+			MyPlayer->_SkillType = (en_SkillType)ReqSkillType;
+			MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;			
+			MyPlayer->_AttackTick = GetTickCount64() + 500;
+
+			CMessage* ResObjectStateChangePacket = MakePacketResObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
+			SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateChangePacket);
+			ResObjectStateChangePacket->Free();
+	
+			// 타겟 위치 확인
+			switch ((en_SkillType)ReqSkillType)
 			{
-			case en_AttackRange::NORMAL_ATTACK:
-			case en_AttackRange::FORWARD_ATTACK:
-			case en_AttackRange::MAGIC_ATTACK:
-			{
-				FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, Distance);
-				CGameObject* Target = MyPlayer->_Channel->_Map->Find(FrontCell);
+			case en_SkillType::SKILL_TYPE_NONE:
+				break;
+			case en_SkillType::SKILL_KNIGHT_NORMAL:
+			case en_SkillType::SKILL_SHAMAN_NORMAL:				
+				FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
+				Target = MyPlayer->_Channel->_Map->Find(FrontCell);
 				if (Target != nullptr)
 				{
 					Targets.push_back(Target);
 				}
-			}
-			break;
-			case en_AttackRange::AROUND_ONE_ATTACK:
+				break;
+			case en_SkillType::SKILL_KNIGHT_CHOHONE:	
+			{
+				// 내 앞쪽 4칸 위치 구하기
+				FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 4);
+				Target = MyPlayer->_Channel->_Map->Find(FrontCell);
+				if (Target != nullptr)
+				{
+					Targets.push_back(Target);
+
+					st_Vector2Int MyFrontCellPotision = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
+
+					MyPlayer->_Channel->_Map->ApplyMove(Target, MyFrontCellPotision);
+					ResSyncPosition = MakePacketResSyncPosition(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectPositionInfo);
+					SendPacketAroundSector(Target->GetCellPosition(), ResSyncPosition);
+					ResSyncPosition->Free();
+				}
+			}				
+				break;
+			case en_SkillType::SKILL_KNIGHT_SHAEHONE:
+			{
+				// 내 앞쪽 4칸 위치 구하기
+				FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 4);
+				Target = MyPlayer->_Channel->_Map->Find(FrontCell);
+				if (Target != nullptr)
+				{
+					Targets.push_back(Target);
+
+					st_Vector2Int MyFrontCellPotision = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 3);
+
+					// 나를 위에서 구한 위치로 이동시키기
+					MyPlayer->_Channel->_Map->ApplyMove(MyPlayer, MyFrontCellPotision);
+
+					ResSyncPosition = MakePacketResSyncPosition(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
+					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResSyncPosition);
+					ResSyncPosition->Free();
+				}
+			}				
+				break;
+			case en_SkillType::SKILL_KNIGHT_AROUND_ONE_ATTACK:
 			{
 				vector<st_Vector2Int> TargetPositions;
 
-				TargetPositions = MyPlayer->GetAroundCellPosition(MyPlayer->GetCellPosition(), Distance);
+				TargetPositions = MyPlayer->GetAroundCellPosition(MyPlayer->GetCellPosition(), 1);
 				for (st_Vector2Int TargetPosition : TargetPositions)
 				{
 					CGameObject* Target = MyPlayer->_Channel->_Map->Find(TargetPosition);
@@ -761,22 +800,82 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 					}
 				}
 			}
-			break;
-			}
-
-			switch ((en_AttackType)ReqAttackType)
-			{
-			case en_AttackType::MELEE_PLAYER_NORMAL_ATTACK:
-			case en_AttackType::MELEE_PLAYER_CHOHONE_ATTACK:
-			case en_AttackType::MELEE_PLAYER_SHAEHONE_ATTACK:
-			case en_AttackType::MELEE_PLAYER_AROUND_ATTACK:
-			case en_AttackType::MAGIC_PLAYER_NORMAL_ATTACK:
-				MyPlayer->SetAttackMeleeType((en_AttackType)ReqAttackType, Targets);
+				break;		
+			case en_SkillType::SKILL_SHAMAN_FIRE:
 				break;
 			default:
-				CRASH("ReqAttack AttackType Error");
 				break;
-			}
+			}			
+
+			wstring SkillTypeString;
+			wchar_t SkillTypeMessage[64] = L"0";
+			wchar_t SkillDamageMessage[64] = L"0";
+
+			// 타겟 데미지 적용
+			for (CGameObject* Target : Targets)
+			{
+				// 크리티컬 판단
+				random_device Seed;
+				default_random_engine Eng(Seed());
+
+				float CriticalPoint = MyPlayer->_GameObjectInfo.ObjectStatInfo.CriticalPoint / 1000.0f;
+				bernoulli_distribution CriticalCheck(CriticalPoint);
+				bool IsCritical = CriticalCheck(Eng);
+
+				// 데미지 판단
+				mt19937 Gen(Seed());
+				uniform_int_distribution<int> DamageChoiceRandom(MyPlayer->_GameObjectInfo.ObjectStatInfo.MinAttackDamage, MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxAttackDamage);
+				int32 ChoiceDamage = DamageChoiceRandom(Gen);
+				int32 FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
+
+				Target->OnDamaged(MyPlayer, FinalDamage);
+
+				// 데미지 시스템 메세지 생성
+				switch ((en_SkillType)ReqSkillType)
+				{
+				case en_SkillType::SKILL_TYPE_NONE:					
+					CRASH("SkillType None");
+					break;
+				case en_SkillType::SKILL_KNIGHT_NORMAL:
+					wsprintf(SkillTypeMessage, L"%s가 일반공격을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+					break;
+				case en_SkillType::SKILL_KNIGHT_CHOHONE:
+					wsprintf(SkillTypeMessage, L"%s가 초혼비무를 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+					break;
+				case en_SkillType::SKILL_KNIGHT_SHAEHONE:
+					wsprintf(SkillTypeMessage, L"%s가 쇄혼비무를 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+					break;
+				case en_SkillType::SKILL_KNIGHT_AROUND_ONE_ATTACK:
+					wsprintf(SkillTypeMessage, L"%s가 분쇄파동을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+					break;
+				case en_SkillType::SKILL_SHAMAN_NORMAL:
+					wsprintf(SkillTypeMessage, L"%s가 일반공격을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+					break;
+				case en_SkillType::SKILL_SHAMAN_FIRE:
+					wsprintf(SkillTypeMessage, L"%s가 불꽃작살을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+					break;
+				default:
+					break;
+				}
+
+				SkillTypeString = SkillTypeMessage;
+				SkillTypeString = IsCritical ? L"치명타! " + SkillTypeString : SkillTypeString;
+
+				// 데미지 시스템 메세지 전송
+				CMessage* ResSkillSystemMessagePacket = MakePacketResChattingMessage(MyPlayer->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, IsCritical ? st_Color::Red() : st_Color::White(), SkillTypeString);
+				SendPacketAroundSector(MyPlayer->GetCellPosition(), ResSkillSystemMessagePacket);
+				ResSkillSystemMessagePacket->Free();
+
+				// 공격 응답 메세지 전송
+				CMessage* ResMyAttackOtherPacket = MakePacketResAttack(MyPlayer->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectId, (en_SkillType)ReqSkillType, FinalDamage, IsCritical);
+				G_ObjectManager->GameServer->SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMyAttackOtherPacket);
+				ResMyAttackOtherPacket->Free();
+
+				// HP 변경 메세지 전송
+				CMessage* ResChangeHPPacket = G_ObjectManager->GameServer->MakePacketResChangeHP(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectStatInfo.HP, Target->_GameObjectInfo.ObjectStatInfo.MaxHP);
+				G_ObjectManager->GameServer->SendPacketAroundSector(Target->GetCellPosition(), ResChangeHPPacket);
+				ResChangeHPPacket->Free();
+			}			
 		}
 	} while (0);
 
@@ -857,9 +956,9 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 			vector<CGameObject*> Targets;
 
 			// 공격 종류 확인
-			switch ((en_AttackRange)ReqAttackRange)
+			switch ((en_SkillType)ReqAttackRange)
 			{
-			case en_AttackRange::MAGIC_ATTACK:
+			case en_SkillType::SKILL_SHAMAN_FIRE:
 				// 타겟이 ObjectManager에 존재하는지 확인
 				CGameObject* FindGameObject = G_ObjectManager->Find(TargetObjectId, (en_GameObjectType)TargetObjectType);
 				if (FindGameObject != nullptr)
@@ -871,18 +970,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 					// 타겟을 찾을 수 없음
 				}
 				break;
-			}
-
-			// 공격 타입 확인하고 공격 타입 셋팅
-			switch ((en_AttackType)ReqAttackType)
-			{
-			case en_AttackType::MAGIC_PLAYER_FIRE_ATTACK:
-				MyPlayer->SetAttackMagicType((en_AttackType)ReqAttackType, Targets);
-				break;
-			default:
-				CRASH("ReqAttack AttackType Error");
-				break;
-			}
+			}			
 		} while (0);
 
 		ReturnSession(Session);
@@ -3087,7 +3175,7 @@ CMessage* CGameServer::MakePacketResQuickSlotBarSlot(int64 AccountId, int64 Obje
 // int64 AccountId
 // int32 PlayerDBId
 // char Dir
-CMessage* CGameServer::MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_AttackType AttackType, int32 Damage, bool IsCritical)
+CMessage* CGameServer::MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_SkillType SkillType, int32 Damage, bool IsCritical)
 {
 	CMessage* ResAttackMessage = CMessage::Alloc();
 	if (ResAttackMessage == nullptr)
@@ -3100,7 +3188,7 @@ CMessage* CGameServer::MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_
 	*ResAttackMessage << (WORD)en_PACKET_S2C_ATTACK;
 	*ResAttackMessage << PlayerDBId;
 	*ResAttackMessage << TargetId;
-	*ResAttackMessage << (int16)AttackType;
+	*ResAttackMessage << (int16)SkillType;
 	*ResAttackMessage << Damage;
 	*ResAttackMessage << IsCritical;
 

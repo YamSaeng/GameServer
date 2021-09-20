@@ -43,115 +43,13 @@ void CPlayer::OnDead(CGameObject* Killer)
 
 }
 
-void CPlayer::SetAttackMeleeType(en_AttackType AttackType, vector<CGameObject*> Targets)
-{
-	wstring AttackMeleeSystemString;
-	wstring AttackTypeString;
-	wstring AttackDamageString;
-
-	wchar_t AttackTypeMessage[64] = L"0";
-	wchar_t AttackDamageMessage[64] = L"0";
-
-	_Targets.clear();
-
-	_Targets = Targets;
-
-	_AttackType = AttackType;	
-
-	st_Vector2Int SpellCellPosition;
-	CMessage* ResSyncPosition = nullptr;
-
-	_AttackTick = GetTickCount64() + 500;
-	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;
-
-	BroadCastPacket(en_PACKET_TYPE::en_PACKET_S2C_OBJECT_STATE_CHANGE);
-		
-	if (_Targets.size() >= 1)
-	{
-		switch (_AttackType)
-		{
-		case en_AttackType::MELEE_PLAYER_NORMAL_ATTACK:
-		case en_AttackType::MAGIC_PLAYER_NORMAL_ATTACK:
-			wsprintf(AttackTypeMessage, L"%s가 일반공격을 사용해 %s에게 ", _GameObjectInfo.ObjectName.c_str(), _Targets[0]->_GameObjectInfo.ObjectName.c_str());
-			AttackTypeString = AttackTypeMessage;
-			break;
-		case en_AttackType::MELEE_PLAYER_CHOHONE_ATTACK:
-			wsprintf(AttackTypeMessage, L"%s가 초혼비무를 사용해 %s에게 ", _GameObjectInfo.ObjectName.c_str(), _Targets[0]->_GameObjectInfo.ObjectName.c_str());
-			AttackTypeString = AttackTypeMessage;
-			// 내 앞쪽 위치를 구한다.
-			SpellCellPosition = GetFrontCellPosition(_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
-			// 타겟을 내 앞쪽 위치로 이동시킨다.
-			_Channel->_Map->ApplyMove(_Targets[0], SpellCellPosition);
-
-			// 타겟의 위치를 조정하기 위해 SyncPosition 패킷을 보낸다.
-			ResSyncPosition = G_ObjectManager->GameServer->MakePacketResSyncPosition(Targets[0]->_GameObjectInfo.ObjectId, Targets[0]->_GameObjectInfo.ObjectPositionInfo);
-			G_ObjectManager->GameServer->SendPacketAroundSector(_Targets[0]->GetCellPosition(), ResSyncPosition);
-			ResSyncPosition->Free();
-			break;
-		case en_AttackType::MELEE_PLAYER_SHAEHONE_ATTACK:
-			wsprintf(AttackTypeMessage, L"%s가 쇄혼비무를 사용해 %s에게 ", _GameObjectInfo.ObjectName.c_str(), _Targets[0]->_GameObjectInfo.ObjectName.c_str());
-			AttackTypeString = AttackTypeMessage;
-
-			// 내 앞쪽 3칸 위치를 구한다.
-			SpellCellPosition = GetFrontCellPosition(_GameObjectInfo.ObjectPositionInfo.MoveDir, 3);
-			_Channel->_Map->ApplyMove(this, SpellCellPosition);
-
-			ResSyncPosition = G_ObjectManager->GameServer->MakePacketResSyncPosition(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo);
-			G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResSyncPosition);
-			ResSyncPosition->Free();
-			break;		
-		case en_AttackType::MELEE_PLAYER_AROUND_ATTACK:				
-			break;
-		default:
-			CRASH("플레이어 공격 타입 셋팅 Error");
-			break;
-		}
-
-		for (CGameObject* Target : _Targets)
-		{
-			random_device Seed;
-			default_random_engine Eng(Seed());	
-
-			float CriticalPoint = _GameObjectInfo.ObjectStatInfo.CriticalPoint / 1000.0f;			
-			bernoulli_distribution CriticalCheck(CriticalPoint);
-			bool IsCritical = CriticalCheck(Eng);					
-			
-			mt19937 Gen(Seed());
-			uniform_int_distribution<int> DamageChoiceRandom(_GameObjectInfo.ObjectStatInfo.MinAttackDamage, _GameObjectInfo.ObjectStatInfo.MaxAttackDamage);
-			int32 ChoiceDamage = DamageChoiceRandom(Gen);
-			int32 FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
-
-			Target->OnDamaged(this, FinalDamage);
-
-			wsprintf(AttackDamageMessage, L"%d의 데미지를 줬습니다.", FinalDamage);
-			AttackDamageString = AttackDamageMessage;			
-
-			AttackMeleeSystemString = IsCritical ? L"치명타! " + AttackTypeString + AttackDamageString : AttackTypeString + AttackDamageString;
-
-			st_Color MessageColor(255, 192, 203);
-
-			CMessage* ResAttackMeleeSystemMessagePacket = G_ObjectManager->GameServer->MakePacketResChattingMessage(_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, IsCritical ? st_Color::Red() : st_Color::White(), AttackMeleeSystemString);
-			G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResAttackMeleeSystemMessagePacket);
-			ResAttackMeleeSystemMessagePacket->Free();
-
-			CMessage* ResMyAttackOtherPacket = G_ObjectManager->GameServer->MakePacketResAttack(_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectId, AttackType, FinalDamage, IsCritical);
-			G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResMyAttackOtherPacket);
-			ResMyAttackOtherPacket->Free();
-
-			CMessage* ResChangeHPPacket = G_ObjectManager->GameServer->MakePacketResChangeHP(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectStatInfo.HP, Targets[0]->_GameObjectInfo.ObjectStatInfo.MaxHP);
-			G_ObjectManager->GameServer->SendPacketAroundSector(_Targets[0]->GetCellPosition(), ResChangeHPPacket);
-			ResChangeHPPacket->Free();
-		}
-	}		
-}
-
-void CPlayer::SetAttackMagicType(en_AttackType AttackType, vector<CGameObject*> Targets)
+void CPlayer::SetAttackMagicType(en_SkillType SkillType, vector<CGameObject*> Targets)
 {
 	_Targets.clear();
 
 	_Targets = Targets;
 
-	_AttackType = AttackType;	
+	_SkillType = SkillType;
 
 	if (_Targets.size() >= 1)
 	{		
@@ -162,9 +60,9 @@ void CPlayer::SetAttackMagicType(en_AttackType AttackType, vector<CGameObject*> 
 		// CastringBar 출력
 		BroadCastPacket(en_PACKET_S2C_MAGIC_ATTACK);
 
-		switch (_AttackType)
+		switch (_SkillType)
 		{
-		case en_AttackType::MAGIC_PLAYER_FIRE_ATTACK:			
+		case en_SkillType::SKILL_SHAMAN_FIRE:			
 			_AttackTick = GetTickCount64() + 1500;
 			break;
 		default:
@@ -182,16 +80,17 @@ void CPlayer::UpdateAttack()
 	// 지정한 AttackTick시간이 될경우
 	if (_AttackTick < GetTickCount64())
 	{		
-		switch (_AttackType)
+		switch (_SkillType)
 		{
-		case en_AttackType::MELEE_PLAYER_NORMAL_ATTACK:			
-		case en_AttackType::MELEE_PLAYER_CHOHONE_ATTACK:			
-		case en_AttackType::MELEE_PLAYER_SHAEHONE_ATTACK:			
-		case en_AttackType::MELEE_PLAYER_AROUND_ATTACK:
-		case en_AttackType::MAGIC_PLAYER_NORMAL_ATTACK:
+		case en_SkillType::SKILL_KNIGHT_NORMAL:
+		case en_SkillType::SKILL_KNIGHT_CHOHONE:
+		case en_SkillType::SKILL_KNIGHT_SHAEHONE:
+		case en_SkillType::SKILL_KNIGHT_AROUND_ONE_ATTACK:
+		case en_SkillType::SKILL_SHAMAN_NORMAL:
 			// Idle 상태로 바꾸고 주위 섹터 플레이어들에게 알려준다.
 			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 			BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
+			_SkillType = en_SkillType::SKILL_TYPE_NONE;
 			break;		
 		default:
 			break;
@@ -240,16 +139,16 @@ void CPlayer::UpdateSpell()
 		CMessage* ResAttackMagicPacket = G_ObjectManager->GameServer->MakePacketResAttack(
 			_GameObjectInfo.ObjectId,
 			_Targets[0]->_GameObjectInfo.ObjectId,
-			_AttackType,
+			_SkillType,
 			FinalDamage,
 			true);
 		G_ObjectManager->GameServer->SendPacketAroundSector(_Targets[0]->GetCellPosition(), ResAttackMagicPacket);
 		ResAttackMagicPacket->Free();				
 
 		// 공격 메세지 생성
-		switch (_AttackType)
+		switch (_SkillType)
 		{
-		case en_AttackType::MAGIC_PLAYER_FIRE_ATTACK:	
+		case en_SkillType::SKILL_SHAMAN_FIRE:
 			wsprintf(AttackTypeMessage, L"%s가 화염공격을 사용해 %s를 ", _GameObjectInfo.ObjectName.c_str(), _Targets[0]->_GameObjectInfo.ObjectName.c_str());
 			AttackTypeString = AttackTypeMessage;			
 			
