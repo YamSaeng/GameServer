@@ -218,3 +218,30 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 		_Monsters.insert(pair<int32, st_MonsterData*>(MonsterData->_MonsterDataId,MonsterData));
 	}
 }
+
+void CDataManager::LoadDataSkill(wstring LoadFileName)
+{
+	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());
+
+	rapidjson::Document Document;
+	Document.Parse(FileStr);
+
+	for (auto& Filed : Document["Skills"].GetArray())
+	{
+		st_SkillData* SkillData = new st_SkillData();
+
+		int SkillDataSheetId = Filed["SkillDataSheetId"].GetInt();
+		string SkillName = Filed["SkillName"].GetString();
+		float SkillCoolTime = Filed["SkillCoolTime"].GetFloat();
+		float SkillCastingTime = Filed["SkillCastingTime"].GetFloat();
+		string SkillImagePath = Filed["SkillThumbnailImagePath"].GetString();
+
+		SkillData->SkillDataId = SkillDataSheetId;
+		SkillData->SkillName = SkillName;
+		SkillData->SkillCoolTime = SkillCoolTime;
+		SkillData->SkillCastingTime = SkillCastingTime;
+		SkillData->SkillThumbnailImagePath = SkillImagePath;
+
+		_Skills.insert(pair<int32, st_SkillData*>(SkillDataSheetId, SkillData));
+	}
+}

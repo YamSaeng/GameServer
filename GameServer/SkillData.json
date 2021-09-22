@@ -1,0 +1,60 @@
+{
+  "Skills": [
+    {
+      "SkillDataSheetId": 1,
+      "SkillName": "맹렬한일격",
+      "SkillCoolTime": 2.0,
+      "SkillCastingTime": 0,
+      "SkillThumbnailImagePath": "Textures/SkillBook/맹렬한일격"
+    },
+    {
+      "SkillDataSheetId": 2,
+      "SkillName": "회심의일격",
+      "SkillCoolTime": 1.0,
+      "SkillCastingTime": 0,
+      "SkillThumbnailImagePath": "Textures/SkillBook/회심의일격"
+    },
+    {
+      "SkillDataSheetId": 3,
+      "SkillName": "돌격자세",
+      "SkillCoolTime": 180.0,
+      "SkillCastingTime": 0,
+      "SkillThumbnailImagePath": "Textures/SkillBook/돌격자세"
+    },
+    {
+      "SkillDataSheetId": 4,
+      "SkillName": "쇄혼비무",
+      "SkillCoolTime": 10.0,
+      "SkillCastingTime": 0,
+      "SkillThumbnailImagePath": "Textures/SkillBook/쇄혼비무"
+    },
+    {
+      "SkillDataSheetId": 5,
+      "SkillName": "초혼비무",
+      "SkillCoolTime": 10.0,
+      "SkillCastingTime": 0,
+      "SkillThumbnailImagePath": "Textures/Spell/Icon/초혼비무"
+    },
+    {
+      "SkillDataSheetId": 6,
+      "SkillName": "불꽃작살",
+      "SkillCoolTime": 0,
+      "SkillCastingTime": 1.0,
+      "SkillThumbnailImagePath": "Textures/SkillBook/불꽃작살"
+    },
+    {
+      "SkillDataSheetId": 7,
+      "SkillName": "치유의빛",
+      "SkillCoolTime": 0,
+      "SkillCastingTime": 2.0,
+      "SkillThumbnailImagePath": "Textures/SkillBook/치유의빛"
+    },
+    {
+      "SkillDataSheetId": 6,
+      "SkillName": "치유의바람",
+      "SkillCoolTime": 0,
+      "SkillCastingTime": 3.0,
+      "SkillThumbnailImagePath": "Textures/SkillBook/치유의바람"
+    }
+  ]
+}

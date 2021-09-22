@@ -68,3 +68,12 @@ struct st_MonsterData
 	st_StatusData _MonsterStatInfo; // 몬스터 스탯 정보	
 	vector<st_DropData> _DropItems; // 몬스터가 드랍하는 아이템 정보
 };
+
+struct st_SkillData
+{
+	int32 SkillDataId;
+	string SkillName;
+	float SkillCoolTime;
+	float SkillCastingTime;
+	string SkillThumbnailImagePath;
+};
