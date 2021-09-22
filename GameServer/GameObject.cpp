@@ -115,26 +115,6 @@ vector<st_Vector2Int> CGameObject::GetAroundCellPosition(st_Vector2Int CellPosit
 	return AroundPosition;
 }
 
-en_MoveDir CGameObject::GetDirectionFromVector(st_Vector2Int DirectionVector)
-{
-	if (DirectionVector._X > 0)
-	{
-		return en_MoveDir::RIGHT;
-	}
-	else if (DirectionVector._X < 0)
-	{
-		return en_MoveDir::LEFT;
-	}
-	else if (DirectionVector._Y > 0)
-	{
-		return en_MoveDir::UP;
-	}
-	else
-	{
-		return en_MoveDir::DOWN;
-	}
-}
-
 void CGameObject::SetTarget(CGameObject* Target)
 {
 	_Target = Target;

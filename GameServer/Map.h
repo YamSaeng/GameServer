@@ -1,5 +1,6 @@
 #pragma once
 #include "FileUtils.h"
+#include "GameObjectInfo.h"
 
 class CGameObject;
 
@@ -49,6 +50,35 @@ struct st_Vector2Int
 	int CellDistanceFromZero()
 	{
 		return abs(_X) + abs(_Y);
+	}
+	
+	// 거리 구하기
+	static int Distance(st_Vector2Int TargetCellPosition, st_Vector2Int MyCellPosition)
+	{
+		return (int)sqrt(pow(TargetCellPosition._X - MyCellPosition._X, 2) + pow(TargetCellPosition._Y - MyCellPosition._Y, 2));
+	}
+
+	//--------------------------------------------------------------
+	// 위치값 정보를 받아서 방향값을 반환한다.
+	//--------------------------------------------------------------
+	static en_MoveDir GetDirectionFromVector(st_Vector2Int DirectionVector)
+	{
+		if (DirectionVector._X > 0)
+		{
+			return en_MoveDir::RIGHT;
+		}
+		else if (DirectionVector._X < 0)
+		{
+			return en_MoveDir::LEFT;
+		}
+		else if (DirectionVector._Y > 0)
+		{
+			return en_MoveDir::UP;
+		}
+		else
+		{
+			return en_MoveDir::DOWN;
+		}
 	}
 };
 

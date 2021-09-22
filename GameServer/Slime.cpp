@@ -83,7 +83,7 @@ void CSlime::UpdateMoving()
 	// 방향값 구한다.
 	st_Vector2Int Direction = TargetPosition - MonsterPosition;
 	// 타겟과 몬스터의 거리를 잰다.
-	int32 Distance = Direction.CellDistanceFromZero();
+	int32 Distance = st_Vector2Int::Distance(TargetPosition, MonsterPosition);
 	// 타겟과의 거리가 0 또는 추격거리 보다 멀어지면
 	if (Distance == 0 || Distance > _ChaseCellDistance)
 	{
@@ -107,12 +107,12 @@ void CSlime::UpdateMoving()
 	{
 		_AttackTick = GetTickCount64() + 500;
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;
-		_GameObjectInfo.ObjectPositionInfo.MoveDir = GetDirectionFromVector(Direction);
+		_GameObjectInfo.ObjectPositionInfo.MoveDir = st_Vector2Int::GetDirectionFromVector(Direction);
 		BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
 		return;
 	}
 
-	_GameObjectInfo.ObjectPositionInfo.MoveDir = GetDirectionFromVector(Path[1] - MonsterPosition);
+	_GameObjectInfo.ObjectPositionInfo.MoveDir = st_Vector2Int::GetDirectionFromVector(Path[1] - MonsterPosition);
 	_Channel->_Map->ApplyMove(this, Path[1]);
 
 	BroadCastPacket(en_PACKET_S2C_MOVE);
@@ -135,7 +135,7 @@ void CSlime::UpdateAttack()
 		st_Vector2Int MyCellPosition = GetCellPosition();
 		st_Vector2Int Direction = TargetCellPosition - MyCellPosition;
 
-		_GameObjectInfo.ObjectPositionInfo.MoveDir = GetDirectionFromVector(Direction);
+		_GameObjectInfo.ObjectPositionInfo.MoveDir = st_Vector2Int::GetDirectionFromVector(Direction);
 
 		int32 Distance = Direction.CellDistanceFromZero();
 		// 타겟과의 거리가 공격 범위 안에 속하고 X==0 || Y ==0 일때( 대각선은 제한) 공격
