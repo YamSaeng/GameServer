@@ -26,7 +26,6 @@ public:
 	virtual void OnDamaged(CGameObject* Attacker, int32 Damage) override;
 	virtual void OnDead(CGameObject* Killer) override;	
 
-	void SetAttackMagicType(en_SkillType SkillType, vector<CGameObject*> Targets);
 protected:
 	virtual void UpdateAttack();
 	virtual void UpdateSpell();

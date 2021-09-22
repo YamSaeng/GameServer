@@ -34,45 +34,13 @@ void CPlayer::Update()
 
 void CPlayer::OnDamaged(CGameObject* Attacker, int32 Damage)
 {
-	//CGameObject::OnDamaged(Attacker, Damage);
+	CGameObject::OnDamaged(Attacker, Damage);
 
 }
 
 void CPlayer::OnDead(CGameObject* Killer)
 {
 
-}
-
-void CPlayer::SetAttackMagicType(en_SkillType SkillType, vector<CGameObject*> Targets)
-{
-	_Targets.clear();
-
-	_Targets = Targets;
-
-	_SkillType = SkillType;
-
-	if (_Targets.size() >= 1)
-	{		
-		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPELL;
-
-		// Magic 준비 모션으로 출력
-		BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
-		// CastringBar 출력
-		BroadCastPacket(en_PACKET_S2C_MAGIC_ATTACK);
-
-		switch (_SkillType)
-		{
-		case en_SkillType::SKILL_SHAMAN_FIRE:			
-			_AttackTick = GetTickCount64() + 1500;
-			break;
-		default:
-			break;
-		}
-	}
-	else if (_Targets.size() == 0)
-	{
-		
-	}
 }
 
 void CPlayer::UpdateAttack()
@@ -104,12 +72,9 @@ void CPlayer::UpdateSpell()
 	// 마법 공격 요청시에는 현재 틱이 AttackTick보다 커지게 되면 공격판정 한다
 	if (_AttackTick < GetTickCount64())
 	{
-		wstring AttackMagicSystemString;
-		wstring AttackTypeString;
-		wstring AttackDamageString;
+		wstring MagicSystemString;
 
-		wchar_t AttackTypeMessage[64] = L"0";
-		wchar_t AttackDamageMessage[64] = L"0";
+		wchar_t SpellMessage[64] = L"0";
 
 		// 크리티컬 판단 준비
 		random_device RD;
@@ -120,7 +85,6 @@ void CPlayer::UpdateSpell()
 		bool IsCritical = false;
 
 		int16 CriticalPoint = CriticalPointCreate(Gen);
-
 		// 크리티컬 판정
 		// 내 캐릭터의 크리티컬 포인트보다 값이 작으면 크리티컬로 판단한다.				
 		if (CriticalPoint < _GameObjectInfo.ObjectStatInfo.CriticalPoint)
@@ -128,48 +92,64 @@ void CPlayer::UpdateSpell()
 			IsCritical = true;
 		}
 
-		uniform_int_distribution<int> DamageChoiceRandom(_GameObjectInfo.ObjectStatInfo.MinAttackDamage, _GameObjectInfo.ObjectStatInfo.MaxAttackDamage);
-		int32 ChoiceDamage = DamageChoiceRandom(Gen);
-		int32 FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
-		
-		// 데미지 처리
-		_Targets[0]->OnDamaged(this, FinalDamage);
+		int32 FinalDamage = 0;
+
+		switch (_SkillType)
+		{
+		case en_SkillType::SKILL_SHAMAN_FIRE:
+		{
+			uniform_int_distribution<int> DamageChoiceRandom(_GameObjectInfo.ObjectStatInfo.MinAttackDamage, _GameObjectInfo.ObjectStatInfo.MaxAttackDamage);
+			int32 ChoiceDamage = DamageChoiceRandom(Gen);
+			FinalDamage = 40;// IsCritical ? ChoiceDamage * 2 : ChoiceDamage
+								   
+			// 데미지 처리
+			_Target->OnDamaged(this, FinalDamage);		
+
+			wsprintf(SpellMessage, L"%s가 화염공격을 사용해 %s를 %d의 데미지를 줬습니다.", _GameObjectInfo.ObjectName.c_str(), _Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+
+			MagicSystemString = SpellMessage;
+		}
+			break;
+		case en_SkillType::SKILL_SHAMAN_HEAL:
+		{
+			FinalDamage = 10;
+			_Target->OnHeal(this, FinalDamage);
+
+			wsprintf(SpellMessage, L"%s가 치유의빛을 사용해 %s를 %d만큼 회복했습니다.", _GameObjectInfo.ObjectName.c_str(), _Target->_GameObjectInfo.ObjectName.c_str(), 10);
+			MagicSystemString = SpellMessage;
+		}
+			break;
+		default:
+			break;
+		}					
 
 		// 공격 응답
 		CMessage* ResAttackMagicPacket = G_ObjectManager->GameServer->MakePacketResAttack(
 			_GameObjectInfo.ObjectId,
-			_Targets[0]->_GameObjectInfo.ObjectId,
+			_Target->_GameObjectInfo.ObjectId,
 			_SkillType,
 			FinalDamage,
-			true);
-		G_ObjectManager->GameServer->SendPacketAroundSector(_Targets[0]->GetCellPosition(), ResAttackMagicPacket);
-		ResAttackMagicPacket->Free();				
+			false);
+		G_ObjectManager->GameServer->SendPacketAroundSector(_Target->GetCellPosition(), ResAttackMagicPacket);
+		ResAttackMagicPacket->Free();
 
-		// 공격 메세지 생성
-		switch (_SkillType)
-		{
-		case en_SkillType::SKILL_SHAMAN_FIRE:
-			wsprintf(AttackTypeMessage, L"%s가 화염공격을 사용해 %s를 ", _GameObjectInfo.ObjectName.c_str(), _Targets[0]->_GameObjectInfo.ObjectName.c_str());
-			AttackTypeString = AttackTypeMessage;			
-			
-			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;			
-			BroadCastPacket(en_PACKET_TYPE::en_PACKET_S2C_OBJECT_STATE_CHANGE);
-			break;
-		}				
+		// Idle로 상태 변경 후 주위섹터에 전송
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+		BroadCastPacket(en_PACKET_TYPE::en_PACKET_S2C_OBJECT_STATE_CHANGE);
 
-		wsprintf(AttackDamageMessage, L"%d의 데미지를 줬습니다.", FinalDamage);
-		AttackDamageString = AttackDamageMessage;
-
-		AttackMagicSystemString = AttackTypeMessage + AttackDamageString;
-
-		// 메세지 전송
-		CMessage* ResAttackMagicSystemMessagePacket = G_ObjectManager->GameServer->MakePacketResChattingMessage(_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, st_Color::Red(), AttackMagicSystemString);
+		// 시스템 메세지 전송
+		CMessage* ResAttackMagicSystemMessagePacket = G_ObjectManager->GameServer->MakePacketResChattingMessage(_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, st_Color::White(), MagicSystemString);
 		G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResAttackMagicSystemMessagePacket);
 		ResAttackMagicSystemMessagePacket->Free();	
 		
 		// HP 변경 전송
-		CMessage* ResChangeHPPacket = G_ObjectManager->GameServer->MakePacketResChangeHP(_Targets[0]->_GameObjectInfo.ObjectId, _Targets[0]->_GameObjectInfo.ObjectStatInfo.HP, _Targets[0]->_GameObjectInfo.ObjectStatInfo.MaxHP);
+		CMessage* ResChangeHPPacket = G_ObjectManager->GameServer->MakePacketResChangeHP(_Target->_GameObjectInfo.ObjectId, _Target->_GameObjectInfo.ObjectStatInfo.HP, _Target->_GameObjectInfo.ObjectStatInfo.MaxHP);
 		G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResChangeHPPacket);
-		ResChangeHPPacket->Free();
+		ResChangeHPPacket->Free();	
+
+		// 스펠창 끝
+		CMessage* ResMagicPacket = G_ObjectManager->GameServer->MakePacketResMagic(_GameObjectInfo.ObjectId, false);
+		G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResMagicPacket);
+		ResMagicPacket->Free();
 	}
 }

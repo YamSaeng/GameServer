@@ -116,14 +116,14 @@ private:
 	CMessage* MakePacketResLogin(bool Status, int8 PlayerCount, CGameObject** MyPlayersInfo);
 	CMessage* MakePacketResCreateCharacter(bool IsSuccess, st_GameObjectInfo CreateCharacterObjectInfo);
 	CMessage* MakePacketResEnterGame(st_GameObjectInfo ObjectInfo);	
-	CMessage* MakePacketMousePositionObjectInfo(int64 AccountId, st_GameObjectInfo ObjectInfo);
+	CMessage* MakePacketMousePositionObjectInfo(int64 AccountId, int64 PreviousChoiceObjectId, st_GameObjectInfo ObjectInfo);
 	CMessage* MakePacketGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int8 SliverCount, int8 BronzeCount, int16 ItemCount, int16 ItemType, bool ItemGainPrint = true);
 	CMessage* MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* NickName, WORD MessageLen, WCHAR* Message);
 	CMessage* MakePacketResItemSwap(int64 AccountId, int64 ObjectId, st_ItemInfo SwapAItemInfo, st_ItemInfo SwapBItemInfo);
 	CMessage* MakePacketResQuickSlotBarSlot(int64 AccountId, int64 ObjectId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, st_SkillInfo SkillInfo);
 public:
 	CMessage* MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_SkillType SkillType, int32 Damage, bool IsCritical);
-	CMessage* MakePacketResMagic(int64 ObjectId);
+	CMessage* MakePacketResMagic(int64 ObjectId, bool SpellStart, en_SkillType SkillType = en_SkillType::SKILL_TYPE_NONE, float SpellTime = 0.0f);
 	CMessage* MakePacketResChangeHP(int64 ObjectId, int32 CurrentHP, int32 MaxHP);
 	CMessage* MakePacketResObjectState(int64 ObjectId, en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState);
 	CMessage* MakePacketResMove(int64 AccountId, int64 ObjectId, en_GameObjectType ObjectType, st_PositionInfo PositionInfo);

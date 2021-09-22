@@ -279,7 +279,7 @@ void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 	case en_PACKET_TYPE::en_PACKET_C2S_ATTACK:
 		PacketProcReqMeleeAttack(SessionId, Message);
 		break;
-	case en_PACKET_TYPE::en_PACKET_C2S_MAGIC_ATTACK:
+	case en_PACKET_TYPE::en_PACKET_C2S_MAGIC:
 		PacketProcReqMagic(SessionId, Message);
 		break;
 	case en_PACKET_TYPE::en_PACKET_C2S_MOUSE_POSITION_OBJECT_INFO:
@@ -926,51 +926,77 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 					break;
 				}
 			}
-
+						
 			CPlayer* MyPlayer = Session->MyPlayer;
-
-			// 공격한 방향
-			int8 ReqMoveDir;
-			*Message >> ReqMoveDir;
-
-			// 공격 종류
-			int16 ReqAttackRange;
-			*Message >> ReqAttackRange;
-
-			// 공격 타입
-			int16 ReqAttackType;
-			*Message >> ReqAttackType;
-
-			// 공격 거리
-			int8 Distance;
-			*Message >> Distance;
-
-			// 타겟 ObjectId
-			int64 TargetObjectId;
-			*Message >> TargetObjectId;
-
-			// 타겟 ObjectType
-			int8 TargetObjectType;
-			*Message >> TargetObjectType;
-
-			vector<CGameObject*> Targets;
-
-			// 공격 종류 확인
-			switch ((en_SkillType)ReqAttackRange)
+			if (MyPlayer->_ChoiceTarget != nullptr)
 			{
-			case en_SkillType::SKILL_SHAMAN_FIRE:
-				// 타겟이 ObjectManager에 존재하는지 확인
-				CGameObject* FindGameObject = G_ObjectManager->Find(TargetObjectId, (en_GameObjectType)TargetObjectType);
-				if (FindGameObject != nullptr)
+				// 공격한 방향
+				int8 ReqMoveDir;
+				*Message >> ReqMoveDir;
+
+				int16 SkillType;
+				*Message >> SkillType;
+
+				vector<CGameObject*> Targets;
+
+				CGameObject* FindGameObject = nullptr;				
+
+				float SpellTime = 0.0f;
+
+				// 스킬 타입 확인
+				switch ((en_SkillType)SkillType)
 				{
-					Targets.push_back(FindGameObject);
+				case en_SkillType::SKILL_SHAMAN_FIRE:
+					MyPlayer->_AttackTick = GetTickCount64() + 500;
+					SpellTime = 500.0f / 1000.0f;
+
+					// 타겟이 ObjectManager에 존재하는지 확인
+					FindGameObject = G_ObjectManager->Find(MyPlayer->_ChoiceTarget->_GameObjectInfo.ObjectId, MyPlayer->_ChoiceTarget->_GameObjectInfo.ObjectType);
+					if (FindGameObject != nullptr)
+					{
+						Targets.push_back(FindGameObject);
+					}
+					break;
+				case en_SkillType::SKILL_SHAMAN_HEAL:
+					MyPlayer->_AttackTick = GetTickCount64() + 1000;
+					
+					SpellTime = 1000.0f / 1000.0f;
+
+					FindGameObject = G_ObjectManager->Find(MyPlayer->_ChoiceTarget->_GameObjectInfo.ObjectId, MyPlayer->_ChoiceTarget->_GameObjectInfo.ObjectType);
+					if (FindGameObject != nullptr)
+					{
+						Targets.push_back(FindGameObject);
+					}
+					break;
+				}
+				
+				// 스펠창 시작
+				CMessage* ResMagicPacket = G_ObjectManager->GameServer->MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId, true, (en_SkillType)SkillType, SpellTime);
+				G_ObjectManager->GameServer->SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMagicPacket);
+				ResMagicPacket->Free();
+
+				MyPlayer->_SkillType = (en_SkillType)SkillType;
+
+				if (Targets.size() >= 1)
+				{
+					MyPlayer->SetTarget(Targets[0]);
+					
+					MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPELL;
+
+					// 상태 변경 응답 알림
+					CMessage* ResObjectStateChangePacket = MakePacketResObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
+					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateChangePacket);
+					ResObjectStateChangePacket->Free();
 				}
 				else
 				{
-					// 타겟을 찾을 수 없음
+					// 선택한 대상이 없다고 클라에게 알려줘야함
 				}
-				break;
-			}			
+			}
+			else
+			{
+				CRASH("선택한 대상이 없는데 스킬 요청");
+			}
 		} while (0);
 
 		ReturnSession(Session);
@@ -1031,7 +1057,16 @@ void CGameServer::PacketProcReqMousePositionObjectInfo(int64 SessionID, CMessage
 			CGameObject* FindObject = G_ObjectManager->Find(ObjectId, (en_GameObjectType)ObjectType);
 			if (FindObject != nullptr)
 			{
-				CMessage* ResMousePositionObjectInfo = MakePacketMousePositionObjectInfo(Session->AccountId, FindObject->_GameObjectInfo);
+				int64 PreviousChoiceObject = 0;
+
+				if (Session->MyPlayer->_ChoiceTarget != nullptr)
+				{
+					PreviousChoiceObject = Session->MyPlayer->_ChoiceTarget->_GameObjectInfo.ObjectId;
+				}				
+
+				Session->MyPlayer->_ChoiceTarget = FindObject;
+
+				CMessage* ResMousePositionObjectInfo = MakePacketMousePositionObjectInfo(Session->AccountId, PreviousChoiceObject, FindObject->_GameObjectInfo);
 				SendPacket(Session->SessionId, ResMousePositionObjectInfo);
 				ResMousePositionObjectInfo->Free();
 			}
@@ -1496,11 +1531,7 @@ void CGameServer::PacketProcReqQuickSlotSave(int64 SessionId, CMessage* Message)
 					Disconnect(Session->SessionId);
 					break;
 				}
-			}			
-
-			bool IsQuickSlotUse;
-			int16 SkillType;
-			int8 SkillLevel;			
+			}						
 
 			st_Job* DBQuickSlotSaveJob = _JobMemoryPool->Alloc();
 			DBQuickSlotSaveJob->Type = en_JobType::DATA_BASE_QUICK_SLOT_SAVE;
@@ -2972,7 +3003,7 @@ CMessage* CGameServer::MakePacketResEnterGame(st_GameObjectInfo ObjectInfo)
 // int64 AccountId
 // int32 PlayerDBId
 // st_GameObjectInfo ObjectInfo
-CMessage* CGameServer::MakePacketMousePositionObjectInfo(int64 AccountId, st_GameObjectInfo ObjectInfo)
+CMessage* CGameServer::MakePacketMousePositionObjectInfo(int64 AccountId, int64 PreviousChoiceObjectId, st_GameObjectInfo FindObjectInfo)
 {
 	CMessage* ResMousePositionObjectInfoPacket = CMessage::Alloc();
 	if (ResMousePositionObjectInfoPacket == nullptr)
@@ -2984,38 +3015,39 @@ CMessage* CGameServer::MakePacketMousePositionObjectInfo(int64 AccountId, st_Gam
 
 	*ResMousePositionObjectInfoPacket << (WORD)en_PACKET_S2C_MOUSE_POSITION_OBJECT_INFO;
 	*ResMousePositionObjectInfoPacket << AccountId;
+	*ResMousePositionObjectInfoPacket << PreviousChoiceObjectId;
 
 	// ObjectId
-	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectId;
+	*ResMousePositionObjectInfoPacket << FindObjectInfo.ObjectId;
 
 	// EnterPlayerName
-	int8 ObjectNameLen = (int8)(ObjectInfo.ObjectName.length() * 2);
+	int8 ObjectNameLen = (int8)(FindObjectInfo.ObjectName.length() * 2);
 	*ResMousePositionObjectInfoPacket << ObjectNameLen;
-	ResMousePositionObjectInfoPacket->InsertData(ObjectInfo.ObjectName.c_str(), ObjectNameLen);
+	ResMousePositionObjectInfoPacket->InsertData(FindObjectInfo.ObjectName.c_str(), ObjectNameLen);
 
 	// st_PositionInfo
-	*ResMousePositionObjectInfoPacket << (int8)ObjectInfo.ObjectPositionInfo.State;
-	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectPositionInfo.PositionX;
-	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectPositionInfo.PositionY;
-	*ResMousePositionObjectInfoPacket << (int8)ObjectInfo.ObjectPositionInfo.MoveDir;
+	*ResMousePositionObjectInfoPacket << (int8)FindObjectInfo.ObjectPositionInfo.State;
+	*ResMousePositionObjectInfoPacket << FindObjectInfo.ObjectPositionInfo.PositionX;
+	*ResMousePositionObjectInfoPacket << FindObjectInfo.ObjectPositionInfo.PositionY;
+	*ResMousePositionObjectInfoPacket << (int8)FindObjectInfo.ObjectPositionInfo.MoveDir;
 
 	// st_StatInfo
-	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectStatInfo.Level;
-	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectStatInfo.HP;
-	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectStatInfo.MaxHP;
-	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectStatInfo.MinAttackDamage;
-	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectStatInfo.MaxAttackDamage;
-	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectStatInfo.CriticalPoint;
-	*ResMousePositionObjectInfoPacket << ObjectInfo.ObjectStatInfo.Speed;
+	*ResMousePositionObjectInfoPacket << FindObjectInfo.ObjectStatInfo.Level;
+	*ResMousePositionObjectInfoPacket << FindObjectInfo.ObjectStatInfo.HP;
+	*ResMousePositionObjectInfoPacket << FindObjectInfo.ObjectStatInfo.MaxHP;
+	*ResMousePositionObjectInfoPacket << FindObjectInfo.ObjectStatInfo.MinAttackDamage;
+	*ResMousePositionObjectInfoPacket << FindObjectInfo.ObjectStatInfo.MaxAttackDamage;
+	*ResMousePositionObjectInfoPacket << FindObjectInfo.ObjectStatInfo.CriticalPoint;
+	*ResMousePositionObjectInfoPacket << FindObjectInfo.ObjectStatInfo.Speed;
 
 	// ObjectType
-	*ResMousePositionObjectInfoPacket << (int16)ObjectInfo.ObjectType;
+	*ResMousePositionObjectInfoPacket << (int16)FindObjectInfo.ObjectType;
 
 	// OwnerObjectId, OwnerObjectType
-	*ResMousePositionObjectInfoPacket << ObjectInfo.OwnerObjectId;
-	*ResMousePositionObjectInfoPacket << (int16)ObjectInfo.OwnerObjectType;
+	*ResMousePositionObjectInfoPacket << FindObjectInfo.OwnerObjectId;
+	*ResMousePositionObjectInfoPacket << (int16)FindObjectInfo.OwnerObjectType;
 
-	*ResMousePositionObjectInfoPacket << (int8)ObjectInfo.PlayerSlotIndex;
+	*ResMousePositionObjectInfoPacket << (int8)FindObjectInfo.PlayerSlotIndex;
 
 	return ResMousePositionObjectInfoPacket;
 }
@@ -3186,7 +3218,7 @@ CMessage* CGameServer::MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_
 	return ResAttackMessage;
 }
 
-CMessage* CGameServer::MakePacketResMagic(int64 ObjectId)
+CMessage* CGameServer::MakePacketResMagic(int64 ObjectId, bool SpellStart, en_SkillType SkillType, float SpellTime)
 {
 	CMessage* ResMagicMessage = CMessage::Alloc();
 	if (ResMagicMessage == nullptr)
@@ -3196,8 +3228,11 @@ CMessage* CGameServer::MakePacketResMagic(int64 ObjectId)
 
 	ResMagicMessage->Clear();
 
-	*ResMagicMessage << (WORD)en_PACKET_S2C_MAGIC_ATTACK;
+	*ResMagicMessage << (short)en_PACKET_S2C_MAGIC;
 	*ResMagicMessage << ObjectId;
+	*ResMagicMessage << SpellStart;
+	*ResMagicMessage << (short)SkillType;
+	*ResMagicMessage << SpellTime;
 
 	return ResMagicMessage;
 }
