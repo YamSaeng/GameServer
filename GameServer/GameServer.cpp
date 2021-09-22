@@ -928,7 +928,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 			}
 						
 			CPlayer* MyPlayer = Session->MyPlayer;
-			if (MyPlayer->_ChoiceTarget != nullptr)
+			if (MyPlayer->_SelectTarget != nullptr)
 			{
 				// 공격한 방향
 				int8 ReqMoveDir;
@@ -951,7 +951,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 					SpellTime = 500.0f / 1000.0f;
 
 					// 타겟이 ObjectManager에 존재하는지 확인
-					FindGameObject = G_ObjectManager->Find(MyPlayer->_ChoiceTarget->_GameObjectInfo.ObjectId, MyPlayer->_ChoiceTarget->_GameObjectInfo.ObjectType);
+					FindGameObject = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType);
 					if (FindGameObject != nullptr)
 					{
 						Targets.push_back(FindGameObject);
@@ -962,7 +962,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 					
 					SpellTime = 1000.0f / 1000.0f;
 
-					FindGameObject = G_ObjectManager->Find(MyPlayer->_ChoiceTarget->_GameObjectInfo.ObjectId, MyPlayer->_ChoiceTarget->_GameObjectInfo.ObjectType);
+					FindGameObject = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType);
 					if (FindGameObject != nullptr)
 					{
 						Targets.push_back(FindGameObject);
@@ -1059,12 +1059,12 @@ void CGameServer::PacketProcReqMousePositionObjectInfo(int64 SessionID, CMessage
 			{
 				int64 PreviousChoiceObject = 0;
 
-				if (Session->MyPlayer->_ChoiceTarget != nullptr)
+				if (Session->MyPlayer->_SelectTarget != nullptr)
 				{
-					PreviousChoiceObject = Session->MyPlayer->_ChoiceTarget->_GameObjectInfo.ObjectId;
+					PreviousChoiceObject = Session->MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId;
 				}				
 
-				Session->MyPlayer->_ChoiceTarget = FindObject;
+				Session->MyPlayer->_SelectTarget = FindObject;
 
 				CMessage* ResMousePositionObjectInfo = MakePacketMousePositionObjectInfo(Session->AccountId, PreviousChoiceObject, FindObject->_GameObjectInfo);
 				SendPacket(Session->SessionId, ResMousePositionObjectInfo);

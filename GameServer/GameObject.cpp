@@ -7,6 +7,8 @@ CGameObject::CGameObject()
 	_NetworkState = en_ObjectNetworkState::READY;
 	_GameObjectInfo.OwnerObjectId = 0;
 	_Channel = nullptr;
+	_Target = nullptr;
+	_SelectTarget = nullptr;
 }
 
 CGameObject::CGameObject(st_GameObjectInfo GameObjectInfo)
@@ -26,13 +28,23 @@ void CGameObject::Update()
 
 }
 
-void CGameObject::OnDamaged(CGameObject* Attacker, int32 Damage)
+void CGameObject::OnDamaged(CGameObject* Attacker, int32 DamagePoint)
 {
-	_GameObjectInfo.ObjectStatInfo.HP -= Damage;
+	_GameObjectInfo.ObjectStatInfo.HP -= DamagePoint;
 
 	if (_GameObjectInfo.ObjectStatInfo.HP <= 0)
 	{
 		_GameObjectInfo.ObjectStatInfo.HP = 0;
+	}
+}
+
+void CGameObject::OnHeal(CGameObject* Healer, int32 HealPoint)
+{
+	_GameObjectInfo.ObjectStatInfo.HP += HealPoint;
+
+	if (_GameObjectInfo.ObjectStatInfo.HP >= _GameObjectInfo.ObjectStatInfo.MaxHP)
+	{
+		_GameObjectInfo.ObjectStatInfo.HP = _GameObjectInfo.ObjectStatInfo.MaxHP;
 	}
 }
 
@@ -123,6 +135,11 @@ en_MoveDir CGameObject::GetDirectionFromVector(st_Vector2Int DirectionVector)
 	}
 }
 
+void CGameObject::SetTarget(CGameObject* Target)
+{
+	_Target = Target;
+}
+
 void CGameObject::BroadCastPacket(en_PACKET_TYPE PacketType)
 {
 	CMessage* ResPacket = nullptr;
@@ -137,10 +154,7 @@ void CGameObject::BroadCastPacket(en_PACKET_TYPE PacketType)
 			_GameObjectInfo.ObjectPositionInfo.MoveDir,
 			_GameObjectInfo.ObjectType,
 			_GameObjectInfo.ObjectPositionInfo.State);
-		break;
-	case en_PACKET_TYPE::en_PACKET_S2C_MAGIC_ATTACK:
-		ResPacket = G_ObjectManager->GameServer->MakePacketResMagic(_GameObjectInfo.ObjectId);
-		break;
+		break;	
 	case en_PACKET_TYPE::en_PACKET_S2C_CHANGE_HP:
 		ResPacket = G_ObjectManager->GameServer->MakePacketResChangeHP(_Target->_GameObjectInfo.ObjectId,
 			_Target->_GameObjectInfo.ObjectStatInfo.HP,

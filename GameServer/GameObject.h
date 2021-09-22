@@ -12,12 +12,16 @@ public:
 	st_GameObjectInfo _GameObjectInfo;
 	CChannel* _Channel;	
 
+	// 선택한 대상
+	CGameObject* _SelectTarget;
+
 	CGameObject();
 	CGameObject(st_GameObjectInfo GameObjectInfo);
 	virtual ~CGameObject();
 
 	virtual void Update();
-	virtual void OnDamaged(CGameObject* Attacker, int32 Damage);
+	virtual void OnDamaged(CGameObject* Attacker, int32 DamagePoint);
+	virtual void OnHeal(CGameObject* Healer, int32 HealPoint);
 	virtual void OnDead(CGameObject* Killer);
 
 	st_PositionInfo GetPositionInfo();
@@ -36,12 +40,13 @@ public:
 
 	en_MoveDir GetDirectionFromVector(st_Vector2Int DirectionVector);
 
+	void SetTarget(CGameObject* Target);
 protected:
 	//---------------
 	// 타겟
 	//---------------
 	vector<CGameObject*> _Targets;
-	CGameObject* _Target;
+	CGameObject* _Target;	
 
 	void BroadCastPacket(en_PACKET_TYPE PacketType);
 };
