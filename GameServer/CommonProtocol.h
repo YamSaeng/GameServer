@@ -191,7 +191,7 @@ enum en_PACKET_TYPE
 	// en_AttackRange RangeAttack;
 	// int8 RangeDitance;
 	//------------------------------------------------------------
-	en_PACKET_C2S_MAGIC_ATTACK,
+	en_PACKET_C2S_MAGIC,
 	
 	//------------------------------------------------------------
 	// 게임서버 캐릭터 마법 요청 응답
@@ -199,7 +199,7 @@ enum en_PACKET_TYPE
 	// int64 PlayerDBId
 	// int8 Dir	
 	//------------------------------------------------------------
-	en_PACKET_S2C_MAGIC_ATTACK,
+	en_PACKET_S2C_MAGIC,
 
 	//------------------------------------------------------------
 	// 게임서버 캐릭터 스폰
