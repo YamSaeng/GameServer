@@ -234,12 +234,14 @@ void CDataManager::LoadDataSkill(wstring LoadFileName)
 		string SkillName = Filed["SkillName"].GetString();
 		float SkillCoolTime = Filed["SkillCoolTime"].GetFloat();
 		float SkillCastingTime = Filed["SkillCastingTime"].GetFloat();
+		int SkillDistance = Filed["SkillDistance"].GetInt();
 		string SkillImagePath = Filed["SkillThumbnailImagePath"].GetString();
 
 		SkillData->SkillDataId = SkillDataSheetId;
 		SkillData->SkillName = SkillName;
 		SkillData->SkillCoolTime = SkillCoolTime;
 		SkillData->SkillCastingTime = SkillCastingTime;
+		SkillData->SkillDistance = SkillDistance;
 		SkillData->SkillThumbnailImagePath = SkillImagePath;
 
 		_Skills.insert(pair<int32, st_SkillData*>(SkillDataSheetId, SkillData));
