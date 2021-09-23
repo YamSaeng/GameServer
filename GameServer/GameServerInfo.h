@@ -38,7 +38,8 @@ struct st_Job
 
 enum class en_TimerJobType : int16
 {
-
+	TIMER_ATTACK_END,
+	TIMER_SPELL_END
 };
 
 struct st_TimerJob
@@ -47,4 +48,5 @@ struct st_TimerJob
 	int64 SessionId;
 	CMessage* Message = nullptr;
 	st_Session* Session = nullptr;
+	int64 ExecTick;
 };
