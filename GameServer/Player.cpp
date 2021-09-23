@@ -48,7 +48,7 @@ void CPlayer::UpdateAttack()
 	// 지정한 AttackTick시간이 될경우
 	if (_AttackTick < GetTickCount64())
 	{		
-		switch (_SkillType)
+  		switch (_SkillType)
 		{
 		case en_SkillType::SKILL_KNIGHT_NORMAL:
 		case en_SkillType::SKILL_KNIGHT_CHOHONE:
@@ -119,6 +119,15 @@ void CPlayer::UpdateSpell()
 			MagicSystemString = SpellMessage;
 		}
 			break;
+		case en_SkillType::SKILL_SHAMAN_HEALING_WIND:
+		{
+			FinalDamage = 200;
+			_Target->OnHeal(this, FinalDamage);
+			
+			wsprintf(SpellMessage, L"%s가 치유의바람을 사용해 %s를 %d만큼 회복했습니다.", _GameObjectInfo.ObjectName.c_str(), _Target->_GameObjectInfo.ObjectName.c_str(), 10);
+			MagicSystemString = SpellMessage;
+		}
+		break;
 		default:
 			break;
 		}					

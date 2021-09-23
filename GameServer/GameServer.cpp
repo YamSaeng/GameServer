@@ -725,6 +725,12 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 			vector<CGameObject*> Targets;
 			CGameObject* Target = nullptr;
 			CMessage* ResSyncPosition = nullptr;
+					
+			// 퀵바에 등록되지 않은 스킬을 요청했을 경우
+			if ((en_SkillType)ReqSkillType == en_SkillType::SKILL_TYPE_NONE)
+			{
+				break;
+			}
 
 			MyPlayer->_SkillType = (en_SkillType)ReqSkillType;
 			MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;			
@@ -985,12 +991,14 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 				// 스킬 타입 확인
 				switch ((en_SkillType)SkillType)
 				{
+					// 돌격 자세
 				case en_SkillType::SKILL_KNIGHT_CHARGE_POSE:
 					MyPlayer->_AttackTick = GetTickCount() + 100;
 					SpellTime = 100.0f / 1000.0f;
 
 					Targets.push_back(MyPlayer);
 					break;
+					// 불꽃 작살
 				case en_SkillType::SKILL_SHAMNA_FLAME_HARPOON:
 					MyPlayer->_AttackTick = GetTickCount64() + 500;
 					SpellTime = 500.0f / 1000.0f;
@@ -1002,10 +1010,23 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 						Targets.push_back(FindGameObject);
 					}
 					break;
+					// 치유의 빛
 				case en_SkillType::SKILL_SHAMAN_HEALING_LIGHT:
 					MyPlayer->_AttackTick = GetTickCount64() + 1000;
 					
 					SpellTime = 1000.0f / 1000.0f;
+
+					FindGameObject = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType);
+					if (FindGameObject != nullptr)
+					{
+						Targets.push_back(FindGameObject);
+					}
+					break;
+					// 치유의 바람
+				case en_SkillType::SKILL_SHAMAN_HEALING_WIND:
+					MyPlayer->_AttackTick = GetTickCount64() + 1500;
+
+					SpellTime = 1500.0f / 1000.0f;
 
 					FindGameObject = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType);
 					if (FindGameObject != nullptr)
