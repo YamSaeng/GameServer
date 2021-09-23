@@ -53,7 +53,7 @@ void CPlayer::UpdateAttack()
 		case en_SkillType::SKILL_KNIGHT_NORMAL:
 		case en_SkillType::SKILL_KNIGHT_CHOHONE:
 		case en_SkillType::SKILL_KNIGHT_SHAEHONE:
-		case en_SkillType::SKILL_KNIGHT_AROUND_ONE_ATTACK:
+		case en_SkillType::SKILL_KNIGHT_SMASH_WAVE:
 		case en_SkillType::SKILL_SHAMAN_NORMAL:
 			// Idle 상태로 바꾸고 주위 섹터 플레이어들에게 알려준다.
 			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
@@ -96,7 +96,7 @@ void CPlayer::UpdateSpell()
 
 		switch (_SkillType)
 		{
-		case en_SkillType::SKILL_SHAMAN_FIRE:
+		case en_SkillType::SKILL_SHAMNA_FLAME_HARPOON:
 		{
 			uniform_int_distribution<int> DamageChoiceRandom(_GameObjectInfo.ObjectStatInfo.MinAttackDamage, _GameObjectInfo.ObjectStatInfo.MaxAttackDamage);
 			int32 ChoiceDamage = DamageChoiceRandom(Gen);
@@ -105,14 +105,14 @@ void CPlayer::UpdateSpell()
 			// 데미지 처리
 			_Target->OnDamaged(this, FinalDamage);		
 
-			wsprintf(SpellMessage, L"%s가 화염공격을 사용해 %s를 %d의 데미지를 줬습니다.", _GameObjectInfo.ObjectName.c_str(), _Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+			wsprintf(SpellMessage, L"%s가 불꽃작살을 사용해 %s에게 %d의 데미지를 줬습니다.", _GameObjectInfo.ObjectName.c_str(), _Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
 
 			MagicSystemString = SpellMessage;
 		}
 			break;
-		case en_SkillType::SKILL_SHAMAN_HEAL:
+		case en_SkillType::SKILL_SHAMAN_HEALING_LIGHT:
 		{
-			FinalDamage = 10;
+			FinalDamage = 100;
 			_Target->OnHeal(this, FinalDamage);
 
 			wsprintf(SpellMessage, L"%s가 치유의빛을 사용해 %s를 %d만큼 회복했습니다.", _GameObjectInfo.ObjectName.c_str(), _Target->_GameObjectInfo.ObjectName.c_str(), 10);

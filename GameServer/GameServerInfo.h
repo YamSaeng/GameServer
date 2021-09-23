@@ -32,6 +32,19 @@ struct st_Job
 {
 	en_JobType Type;
 	int64 SessionId;
-	CMessage* Message;
-	st_Session* Session;
+	CMessage* Message = nullptr;
+	st_Session* Session = nullptr;
+};
+
+enum class en_TimerJobType : int16
+{
+
+};
+
+struct st_TimerJob
+{
+	en_TimerJobType Type;
+	int64 SessionId;
+	CMessage* Message = nullptr;
+	st_Session* Session = nullptr;
 };

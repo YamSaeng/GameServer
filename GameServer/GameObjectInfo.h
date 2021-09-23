@@ -86,12 +86,16 @@ enum class en_SkillType : int16
 {
 	SKILL_TYPE_NONE = 0,
 	SKILL_KNIGHT_NORMAL,
-	SKILL_KNIGHT_CHOHONE,
+	SKILL_KNIGHT_FIERCE_ATTACK,
+	SKILL_KNIGHT_CONVERSION_ATTACK,
+	SKILL_KNIGHT_CHARGE_POSE,
 	SKILL_KNIGHT_SHAEHONE,
-	SKILL_KNIGHT_AROUND_ONE_ATTACK,
+	SKILL_KNIGHT_CHOHONE,	
+	SKILL_KNIGHT_SMASH_WAVE,
 	SKILL_SHAMAN_NORMAL,
-	SKILL_SHAMAN_FIRE,
-	SKILL_SHAMAN_HEAL,
+	SKILL_SHAMNA_FLAME_HARPOON,
+	SKILL_SHAMAN_HEALING_LIGHT,
+	SKILL_SHAMAN_HEALING_WIND,	
 	SKILL_SLIME_NORMAL,
 	SKILL_BEAR_NORMAL
 };
@@ -172,9 +176,9 @@ struct st_SkillInfo
 {
 	bool _IsQuickSlotUse;    // 퀵슬롯에 등록되어 있는지 여부
 	en_SkillType _SkillType; // 스킬 종류
-	int8 _SkillLevel;		 // 스킬 레벨
+	int8 _SkillLevel = 0;		 // 스킬 레벨
 	wstring _SkillName;		 // 스킬 이름
-	int32 _SkillCoolTime;	 // 스킬 쿨타임	
+	int32 _SkillCoolTime = 0;	 // 스킬 쿨타임	
 	wstring _SkillImagePath; // 스킬 이미지 경로
 };
 
@@ -183,6 +187,8 @@ struct st_QuickSlotBarSlotInfo
 	int64 AccountDBId; // 퀵슬롯 슬롯 소유한 Account
 	int64 PlayerDBId;  // 퀵슬롯 슬롯 소유한 Player	
 	int8 QuickSlotBarIndex; // 퀵슬롯 Index
-	INT8 QuickSlotBarSlotIndex; // 퀵슬롯 슬롯 Index
+	int8 QuickSlotBarSlotIndex; // 퀵슬롯 슬롯 Index
+	wstring QuickSlotKey;   // 퀵슬롯에 연동된 키값
 	st_SkillInfo QuickBarSkillInfo;	// 퀵슬롯에 등록할 스킬 정보
+	bool CanQuickSlotUse = true; // 퀵슬롯을 사용할 수 있는지 없는지
 };
