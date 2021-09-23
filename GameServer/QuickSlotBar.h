@@ -13,7 +13,9 @@ public:
 	void Init();
 
 	// QuickSlot에 스킬 저장
-	void AddQuickSlotBarSlot(st_QuickSlotBarSlotInfo& QuickSlotBarSlotInfo);
+	void UpdateQuickSlotBarSlot(st_QuickSlotBarSlotInfo& QuickSlotBarSlotInfo);
+
+	bool CanQuickSlotBarSlotuse(st_QuickSlotBarSlotInfo& FindQuickSlotBarSlotInfo);
 private:
 	map<int8, st_QuickSlotBarSlotInfo*> _QuickSlotBarSlotInfos;	
 };

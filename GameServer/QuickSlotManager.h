@@ -13,7 +13,9 @@ public:
 	void Init();
 
 	// Äü½½·Ô¹Ù¿¡ Äü½½·Ô µî·Ï
-	void AddQuickSlotBarSlot(st_QuickSlotBarSlotInfo& QuickSlotBarSlotInfo);
+	void UpdateQuickSlotBar(st_QuickSlotBarSlotInfo& QuickSlotBarSlotInfo);
+
+	bool CanQuickSlotBarUse(st_QuickSlotBarSlotInfo& FindQuickSlotBarSlotInfo);
 private:
 	// Äü½½·Ô¹Ù 
 	map<int8, CQuickSlotBar*> _QuickSlotBars;

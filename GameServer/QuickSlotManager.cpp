@@ -27,14 +27,26 @@ void CQuickSlotManager::Init()
 	}
 }
 
-void CQuickSlotManager::AddQuickSlotBarSlot(st_QuickSlotBarSlotInfo& QuickSlotBarSlotInfo)
+void CQuickSlotManager::UpdateQuickSlotBar(st_QuickSlotBarSlotInfo& QuickSlotBarSlotInfo)
 {
 	auto FindQuickSlotBarIterator = _QuickSlotBars.find(QuickSlotBarSlotInfo.QuickSlotBarIndex);
 	if (FindQuickSlotBarIterator == _QuickSlotBars.end())
 	{
-		CRASH("AddQuickSlotBar Äü½½·Ô Ã£Áö ¸øÇÔ");
+		CRASH("UpdateQuickSlotBarSlot Äü½½·Ô Ã£Áö ¸øÇÔ");
 		return;
 	}
 
-	(*FindQuickSlotBarIterator).second->AddQuickSlotBarSlot(QuickSlotBarSlotInfo);
+	(*FindQuickSlotBarIterator).second->UpdateQuickSlotBarSlot(QuickSlotBarSlotInfo);
+}
+
+bool CQuickSlotManager::CanQuickSlotBarUse(st_QuickSlotBarSlotInfo& FindQuickSlotBarSlotInfo)
+{
+	auto FindQuickSlotBarIterator = _QuickSlotBars.find(FindQuickSlotBarSlotInfo.QuickSlotBarIndex);
+	if (FindQuickSlotBarIterator == _QuickSlotBars.end())
+	{
+		CRASH("IsQuickSlotUse Äü½½·Ô Ã£Áö ¸øÇÔ");
+		return false;
+	}
+
+	return (*FindQuickSlotBarIterator).second->CanQuickSlotBarSlotuse(FindQuickSlotBarSlotInfo);	
 }
