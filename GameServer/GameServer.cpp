@@ -202,10 +202,10 @@ unsigned __stdcall CGameServer::TimerJobThreadProc(void* Argument)
 	CGameServer* Instance = (CGameServer*)Argument;
 
 	while (!Instance->_TimerJobThreadEnd)
-	{		
-		AcquireSRWLockExclusive(&Instance->_TimerJobLock);
+	{			
 		while (Instance->_TimerHeapJob->GetUseSize() != 0)
 		{			
+			AcquireSRWLockExclusive(&Instance->_TimerJobLock);
 			// 맨 위 데이터의 시간을 확인한다.
 			st_TimerJob* TimerJob = Instance->_TimerHeapJob->Peek();
 
@@ -236,8 +236,8 @@ unsigned __stdcall CGameServer::TimerJobThreadProc(void* Argument)
 			{
 				break;
 			}
-		}	
-		ReleaseSRWLockExclusive(&Instance->_TimerJobLock);
+			ReleaseSRWLockExclusive(&Instance->_TimerJobLock);
+		}			
 	
 		Sleep(0);
 	}
