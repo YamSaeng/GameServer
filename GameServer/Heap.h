@@ -22,6 +22,7 @@ public:
 
 	void InsertHeap(KEY Key, DATA InsertData);
 	DATA PopHeap();
+	DATA Peek();
 
 	int GetUseSize();
 	int GetHeapSize();
@@ -140,6 +141,12 @@ DATA CHeap<KEY, DATA>::PopHeap()
 	}
 
 	return ReturnData;
+}
+
+template<typename KEY, typename DATA>
+DATA CHeap<KEY, DATA>::Peek()
+{
+	return _HeapArray[0].Data;
 }
 
 template<typename KEY, typename DATA>
