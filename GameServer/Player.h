@@ -8,6 +8,7 @@ class CPlayer : public CGameObject
 {
 public:	
 	uint64 _AttackTick;
+	uint64 _SpellTick;
 	en_SkillType _SkillType;
 
 	int64 _SessionId;

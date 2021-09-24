@@ -120,6 +120,11 @@ void CGameObject::SetTarget(CGameObject* Target)
 	_Target = Target;
 }
 
+CGameObject* CGameObject::GetTarget()
+{
+	return _Target;
+}
+
 void CGameObject::BroadCastPacket(en_PACKET_TYPE PacketType)
 {
 	CMessage* ResPacket = nullptr;

@@ -21,20 +21,25 @@ CGameServer::CGameServer()
 	// Nonsignaled상태 자동리셋
 	_AuthThreadWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	_NetworkThreadWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	_DataBaseWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	_DataBaseWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);	
 
 	_AuthThreadEnd = false;
 	_NetworkThreadEnd = false;
 	_DataBaseThreadEnd = false;
+	_TimerJobThreadEnd = false;
+
+	InitializeSRWLock(&_TimerJobLock);
 
 	_JobMemoryPool = new CMemoryPoolTLS<st_Job>();
+	_TimerJobMemoryPool = new CMemoryPoolTLS<st_TimerJob>();
+
+	_TimerHeapJob = new CHeap<int64, st_TimerJob*>(1000);
 
 	_AuthThreadTPS = 0;
 	_AuthThreadWakeCount = 0;
 
 	_NetworkThreadTPS = 0;
-
-	_GameObjectId = 0;
+	
 }
 
 CGameServer::~CGameServer()
@@ -55,10 +60,12 @@ void CGameServer::Start(const WCHAR* OpenIP, int32 Port)
 	_AuthThread = (HANDLE)_beginthreadex(NULL, 0, AuthThreadProc, this, 0, NULL);
 	_NetworkThread = (HANDLE)_beginthreadex(NULL, 0, NetworkThreadProc, this, 0, NULL);
 	_DataBaseThread = (HANDLE)_beginthreadex(NULL, 0, DataBaseThreadProc, this, 0, NULL);
+	_TimerJobThread = (HANDLE)_beginthreadex(NULL, 0, TimerJobThreadProc, this, 0, NULL);
 
 	CloseHandle(_AuthThread);
 	CloseHandle(_NetworkThread);
 	CloseHandle(_DataBaseThread);
+	CloseHandle(_TimerJobThread);
 }
 
 unsigned __stdcall CGameServer::AuthThreadProc(void* Argument)
@@ -186,6 +193,53 @@ unsigned __stdcall CGameServer::DataBaseThreadProc(void* Argument)
 			Instance->_DataBaseThreadTPS++;
 			Instance->_JobMemoryPool->Free(Job);
 		}
+	}
+	return 0;
+}
+
+unsigned __stdcall CGameServer::TimerJobThreadProc(void* Argument)
+{
+	CGameServer* Instance = (CGameServer*)Argument;
+
+	while (!Instance->_TimerJobThreadEnd)
+	{		
+		AcquireSRWLockExclusive(&Instance->_TimerJobLock);
+		while (Instance->_TimerHeapJob->GetUseSize() != 0)
+		{			
+			// 맨 위 데이터의 시간을 확인한다.
+			st_TimerJob* TimerJob = Instance->_TimerHeapJob->Peek();
+
+			// 현재 시간을 구한다.
+			int64 NowTick = GetTickCount64();
+
+			// TimerJob에 기록되어 있는 시간 보다 현재 시간이 클 경우
+			// 즉, 시간이 경과 되었으면
+			if (TimerJob->ExecTick <= NowTick)
+			{
+				// TimerJob을 뽑고
+				st_TimerJob* TimerJob = Instance->_TimerHeapJob->PopHeap();
+
+				// Type에 따라 실행한다.
+				switch (TimerJob->Type)
+				{
+				case en_TimerJobType::TIMER_ATTACK_END:
+					Instance->PacketProcTimerAttackEnd(TimerJob->SessionId, TimerJob->Message);
+					break;
+				case en_TimerJobType::TIMER_SPELL_END:
+					Instance->PacketProcTimerSpellEnd(TimerJob->SessionId, TimerJob->Message);
+					break;
+				default:
+					break;
+				}
+			}
+			else
+			{
+				break;
+			}
+		}	
+		ReleaseSRWLockExclusive(&Instance->_TimerJobLock);
+	
+		Sleep(0);
 	}
 	return 0;
 }
@@ -732,14 +786,25 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 				break;
 			}
 
+			// 스킬 지정
 			MyPlayer->_SkillType = (en_SkillType)ReqSkillType;
-			MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;			
-			MyPlayer->_AttackTick = GetTickCount64() + 500;
-
+			// 공격 상태로 변경
+			MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;									
+			// 클라에게 알려줘서 공격 애니메이션 출력
 			CMessage* ResObjectStateChangePacket = MakePacketResObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
 			SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateChangePacket);
 			ResObjectStateChangePacket->Free();
-	
+			
+			// 0.5초 후에 Idle상태로 바꾸기 위해 TimerJob 등록
+			st_TimerJob* TimerJob = _TimerJobMemoryPool->Alloc();
+			TimerJob->ExecTick = GetTickCount64() + 500;
+			TimerJob->SessionId = MyPlayer->_SessionId;
+			TimerJob->Type = en_TimerJobType::TIMER_ATTACK_END;
+		
+			AcquireSRWLockExclusive(&_TimerJobLock);
+			_TimerHeapJob->InsertHeap(TimerJob->ExecTick, TimerJob);			
+			ReleaseSRWLockExclusive(&_TimerJobLock);
+
 			// 타겟 위치 확인
 			switch ((en_SkillType)ReqSkillType)
 			{
@@ -993,14 +1058,14 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 				{
 					// 돌격 자세
 				case en_SkillType::SKILL_KNIGHT_CHARGE_POSE:
-					MyPlayer->_AttackTick = GetTickCount() + 100;
+					MyPlayer->_SpellTick = GetTickCount() + 100;
 					SpellTime = 100.0f / 1000.0f;
 
 					Targets.push_back(MyPlayer);
 					break;
 					// 불꽃 작살
 				case en_SkillType::SKILL_SHAMNA_FLAME_HARPOON:
-					MyPlayer->_AttackTick = GetTickCount64() + 500;
+					MyPlayer->_SpellTick = GetTickCount64() + 500;
 					SpellTime = 500.0f / 1000.0f;
 
 					// 타겟이 ObjectManager에 존재하는지 확인
@@ -1012,7 +1077,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 					break;
 					// 치유의 빛
 				case en_SkillType::SKILL_SHAMAN_HEALING_LIGHT:
-					MyPlayer->_AttackTick = GetTickCount64() + 1000;
+					MyPlayer->_SpellTick = GetTickCount64() + 1000;
 					
 					SpellTime = 1000.0f / 1000.0f;
 
@@ -1024,7 +1089,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 					break;
 					// 치유의 바람
 				case en_SkillType::SKILL_SHAMAN_HEALING_WIND:
-					MyPlayer->_AttackTick = GetTickCount64() + 1500;
+					MyPlayer->_SpellTick = GetTickCount64() + 1500;
 
 					SpellTime = 1500.0f / 1000.0f;
 
@@ -1044,15 +1109,25 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 				MyPlayer->_SkillType = (en_SkillType)SkillType;
 
 				if (Targets.size() >= 1)
-				{
+				{					
 					MyPlayer->SetTarget(Targets[0]);
 					
 					MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPELL;
 
-					// 상태 변경 응답 알림
+					// 마법 스킬 모션 출력
 					CMessage* ResObjectStateChangePacket = MakePacketResObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
 					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateChangePacket);
-					ResObjectStateChangePacket->Free();
+					ResObjectStateChangePacket->Free();					
+
+					// TimerJob 등록
+					st_TimerJob* TimerJob = _TimerJobMemoryPool->Alloc();
+					TimerJob->ExecTick = MyPlayer->_SpellTick;
+					TimerJob->SessionId = MyPlayer->_SessionId;
+					TimerJob->Type = en_TimerJobType::TIMER_SPELL_END;		
+
+					AcquireSRWLockExclusive(&_TimerJobLock);
+					_TimerHeapJob->InsertHeap(TimerJob->ExecTick, TimerJob);
+					ReleaseSRWLockExclusive(&_TimerJobLock);					
 				}
 				else
 				{
@@ -2936,6 +3011,126 @@ void CGameServer::PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CMessage*
 	}
 
 	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcTimerAttackEnd(int64 SessionId, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionId);
+
+	if (Session)
+	{
+		CPlayer* MyPlayer = Session->MyPlayer;
+		
+		MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+		MyPlayer->_SkillType = en_SkillType::SKILL_TYPE_NONE;
+
+		CMessage* ResObjectStateMessage = MakePacketResObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
+		SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateMessage);
+		ResObjectStateMessage->Free();
+	}
+
+	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionId);
+
+	if (Session)
+	{
+		CPlayer* MyPlayer = Session->MyPlayer;
+				
+		wstring MagicSystemString;
+
+		wchar_t SpellMessage[64] = L"0";
+
+		// 크리티컬 판단 준비
+		random_device RD;
+		mt19937 Gen(RD());
+
+		uniform_int_distribution<int> CriticalPointCreate(0, 100);
+
+		bool IsCritical = false;
+
+		int16 CriticalPoint = CriticalPointCreate(Gen);
+		// 크리티컬 판정
+		// 내 캐릭터의 크리티컬 포인트보다 값이 작으면 크리티컬로 판단한다.				
+		if (CriticalPoint < MyPlayer->_GameObjectInfo.ObjectStatInfo.CriticalPoint)
+		{
+			IsCritical = true;
+		}
+
+		int32 FinalDamage = 0;
+
+		switch (MyPlayer->_SkillType)
+		{
+		case en_SkillType::SKILL_SHAMNA_FLAME_HARPOON:
+		{
+			uniform_int_distribution<int> DamageChoiceRandom(MyPlayer->_GameObjectInfo.ObjectStatInfo.MinAttackDamage, MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxAttackDamage);
+			int32 ChoiceDamage = DamageChoiceRandom(Gen);
+			FinalDamage = 40;// IsCritical ? ChoiceDamage * 2 : ChoiceDamage
+
+			// 데미지 처리
+			MyPlayer->GetTarget()->OnDamaged(MyPlayer, FinalDamage);
+
+			wsprintf(SpellMessage, L"%s가 불꽃작살을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), MyPlayer->GetTarget()->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+
+			MagicSystemString = SpellMessage;
+		}
+		break;
+		case en_SkillType::SKILL_SHAMAN_HEALING_LIGHT:
+		{
+			FinalDamage = 100;
+			MyPlayer->GetTarget()->OnHeal(MyPlayer, FinalDamage);
+
+			wsprintf(SpellMessage, L"%s가 치유의빛을 사용해 %s를 %d만큼 회복했습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), MyPlayer->GetTarget()->_GameObjectInfo.ObjectName.c_str(), 10);
+			MagicSystemString = SpellMessage;
+		}
+		break;
+		case en_SkillType::SKILL_SHAMAN_HEALING_WIND:
+		{
+			FinalDamage = 200;
+			MyPlayer->GetTarget()->OnHeal(MyPlayer, FinalDamage);
+
+			wsprintf(SpellMessage, L"%s가 치유의바람을 사용해 %s를 %d만큼 회복했습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), MyPlayer->GetTarget()->_GameObjectInfo.ObjectName.c_str(), 10);
+			MagicSystemString = SpellMessage;
+		}
+		break;
+		default:
+			break;
+		}
+
+		// 공격 응답
+		CMessage* ResAttackMagicPacket = G_ObjectManager->GameServer->MakePacketResAttack(
+			MyPlayer->_GameObjectInfo.ObjectId,
+			MyPlayer->GetTarget()->_GameObjectInfo.ObjectId,
+			MyPlayer->_SkillType,
+			FinalDamage,
+			false);
+		G_ObjectManager->GameServer->SendPacketAroundSector(MyPlayer->GetTarget()->GetCellPosition(), ResAttackMagicPacket);
+		ResAttackMagicPacket->Free();
+
+		// Idle로 상태 변경 후 주위섹터에 전송
+		MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+		CMessage* ResObjectStateChangePacket = MakePacketResObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
+		SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateChangePacket);
+		ResObjectStateChangePacket->Free();
+
+		// 시스템 메세지 전송
+		CMessage* ResAttackMagicSystemMessagePacket = MakePacketResChattingMessage(MyPlayer->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, st_Color::White(), MagicSystemString);
+		SendPacketAroundSector(MyPlayer->GetCellPosition(), ResAttackMagicSystemMessagePacket);
+		ResAttackMagicSystemMessagePacket->Free();
+
+		// HP 변경 전송
+		CMessage* ResChangeHPPacket = MakePacketResChangeHP(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, MyPlayer->GetTarget()->_GameObjectInfo.ObjectStatInfo.HP, MyPlayer->GetTarget()->_GameObjectInfo.ObjectStatInfo.MaxHP);
+		SendPacketAroundSector(MyPlayer->GetTarget()->GetCellPosition(), ResChangeHPPacket);
+		ResChangeHPPacket->Free();
+
+		// 스펠창 끝
+		CMessage* ResMagicPacket = MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId, false);
+		SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMagicPacket);
+		ResMagicPacket->Free();
+	}
 }
 
 CMessage* CGameServer::MakePacketResClientConnected()

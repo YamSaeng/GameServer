@@ -4,6 +4,7 @@
 #include "CommonProtocol.h"
 #include "GameServerInfo.h"
 #include "MemoryPoolTLS.h"
+#include "Heap.h"
 
 // 기본 메세지 처리 쓰레드와
 // DB 질의 처리 쓰레드가 2개 존재
@@ -22,23 +23,27 @@ private:
 	HANDLE _AuthThread;
 	HANDLE _NetworkThread;
 	HANDLE _DataBaseThread;
-	HANDLE _GameLogicThread;
+	HANDLE _TimerJobThread;
 
 	HANDLE _AuthThreadWakeEvent;
-	HANDLE _NetworkThreadWakeEvent;	
+	HANDLE _NetworkThreadWakeEvent;		
 
+	// AuthThread 종료용 변수
 	bool _AuthThreadEnd;
 	// WorkerThread 종료용 변수
 	bool _NetworkThreadEnd;
 	// DataBaseThread 종료용 변수
 	bool _DataBaseThreadEnd;
+	// TimerJobThread 종료용 변수
+	bool _TimerJobThreadEnd;
 
-	// 게임서버에서 생성되는 오브젝트들의 아이디
-	int64 _GameObjectId;
+	// TimerJobThread 전용 Lock
+	SRWLOCK _TimerJobLock;
 
 	static unsigned __stdcall AuthThreadProc(void* Argument);
 	static unsigned __stdcall NetworkThreadProc(void* Argument);
 	static unsigned __stdcall DataBaseThreadProc(void* Argument);
+	static unsigned __stdcall TimerJobThreadProc(void* Argument);
 	static unsigned __stdcall HeartBeatCheckThreadProc(void* Argument);
 
 	void CreateNewClient(int64 SessionId);
@@ -91,6 +96,10 @@ private:
 	void PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Message);
 	void PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CMessage* Message);
 
+
+	void PacketProcTimerAttackEnd(int64 SessionId, CMessage* Message);
+	void PacketProcTimerSpellEnd(int64 SessionId, CMessage* Message);
+
 	//----------------------------------------------------------------
 	//패킷조합 함수
 	//1. 클라이언트 접속 응답
@@ -140,12 +149,22 @@ public:
 	// Job 메모리풀
 	//------------------------------------
 	CMemoryPoolTLS<st_Job>* _JobMemoryPool;
+
+	//------------------------------------
+	// TimerJob 메모리풀
+	//------------------------------------
+	CMemoryPoolTLS<st_TimerJob>* _TimerJobMemoryPool;
 	//------------------------------------
 	// Job 큐
 	//------------------------------------
 	CLockFreeQue<st_Job*> _GameServerAuthThreadMessageQue;
 	CLockFreeQue<st_Job*> _GameServerNetworkThreadMessageQue;
 	CLockFreeQue<st_Job*> _GameServerDataBaseThreadMessageQue;
+
+	//--------------------------------------
+	// TimerJob 우선순위 큐
+	//--------------------------------------
+	CHeap<int64,st_TimerJob*>* _TimerHeapJob;
 
 	// 인증 쓰레드 활성화된 횟수
 	int64 _AuthThreadWakeCount;

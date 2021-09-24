@@ -42,11 +42,11 @@ public:
 	vector<st_Vector2Int> GetAroundCellPosition(st_Vector2Int CellPosition, int8 Distance);
 	
 	void SetTarget(CGameObject* Target);
+	CGameObject* GetTarget();
 protected:
 	//---------------
 	// Å¸°Ù
 	//---------------
-	vector<CGameObject*> _Targets;
 	CGameObject* _Target;	
 
 	void BroadCastPacket(en_PACKET_TYPE PacketType);
