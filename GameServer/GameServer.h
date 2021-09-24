@@ -26,7 +26,8 @@ private:
 	HANDLE _TimerJobThread;
 
 	HANDLE _AuthThreadWakeEvent;
-	HANDLE _NetworkThreadWakeEvent;		
+	HANDLE _NetworkThreadWakeEvent;	
+	HANDLE _TimerThreadWakeEvent;
 
 	// AuthThread 종료용 변수
 	bool _AuthThreadEnd;
@@ -179,7 +180,7 @@ public:
 	int64 _DataBaseThreadTPS;
 
 	HANDLE _DataBaseWakeEvent;
-
+	
 	CGameServer();
 	~CGameServer();
 

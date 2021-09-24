@@ -22,6 +22,7 @@ CGameServer::CGameServer()
 	_AuthThreadWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	_NetworkThreadWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	_DataBaseWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);	
+	_TimerThreadWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
 	_AuthThreadEnd = false;
 	_NetworkThreadEnd = false;
@@ -203,9 +204,12 @@ unsigned __stdcall CGameServer::TimerJobThreadProc(void* Argument)
 
 	while (!Instance->_TimerJobThreadEnd)
 	{			
+		WaitForSingleObject(Instance->_TimerThreadWakeEvent, INFINITE);
+
+		AcquireSRWLockExclusive(&Instance->_TimerJobLock);
 		while (Instance->_TimerHeapJob->GetUseSize() != 0)
 		{			
-			AcquireSRWLockExclusive(&Instance->_TimerJobLock);
+			
 			// 맨 위 데이터의 시간을 확인한다.
 			st_TimerJob* TimerJob = Instance->_TimerHeapJob->Peek();
 
@@ -231,15 +235,9 @@ unsigned __stdcall CGameServer::TimerJobThreadProc(void* Argument)
 				default:
 					break;
 				}
-			}
-			else
-			{
-				break;
-			}
-			ReleaseSRWLockExclusive(&Instance->_TimerJobLock);
-		}			
-	
-		Sleep(0);
+			}					
+		}	
+		ReleaseSRWLockExclusive(&Instance->_TimerJobLock);	
 	}
 	return 0;
 }
@@ -805,6 +803,8 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 			_TimerHeapJob->InsertHeap(TimerJob->ExecTick, TimerJob);			
 			ReleaseSRWLockExclusive(&_TimerJobLock);
 
+			SetEvent(_TimerThreadWakeEvent);
+
 			// 타겟 위치 확인
 			switch ((en_SkillType)ReqSkillType)
 			{
@@ -1127,7 +1127,9 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 
 					AcquireSRWLockExclusive(&_TimerJobLock);
 					_TimerHeapJob->InsertHeap(TimerJob->ExecTick, TimerJob);
-					ReleaseSRWLockExclusive(&_TimerJobLock);					
+					ReleaseSRWLockExclusive(&_TimerJobLock);
+
+					SetEvent(_TimerThreadWakeEvent);
 				}
 				else
 				{
