@@ -361,5 +361,40 @@ enum en_PACKET_TYPE
 	// int64 PlayerId 
 	// st_SkillInfo SkillInfo
 	//------------------------------------------------------------
-	en_PACKET_S2C_QUICKSLOT_SAVE
+	en_PACKET_S2C_QUICKSLOT_SAVE,
+
+	//-----------------------------------------------------------
+	// 게임서버 쿨타임 스타트
+	// int64 PlayerId
+	// int8 QuickSlotBarIndex;
+	// int8 QuickSlotBarSlotIndex;
+	// float SkillCoolTime;
+	// float SkillCoolTimeSpeed;
+	//-----------------------------------------------------------
+	en_PACKET_S2C_COOLTIME_START,
+
+	//------------------------------------------------------------
+	// 게임서버 아이템 스왑 요청
+	// int64 AccountId
+	// int64 ObjectId
+	// int8 SwapQuickSlotBarIndexA
+	// int8 SwapQuickSlotBarSlotIndexA
+	// int8 SwapQuickSlotBarIndexB
+	// int8 SwapQuickSlotBarSlotIndexB
+	//------------------------------------------------------------
+	en_PACKET_C2S_QUICKSLOT_SWAP,
+
+	//------------------------------------------------------------
+	// int64 ObjectId
+	// st_QuickSlotInfo SwapQuickSlotAItem
+	// st_QuickSlotInfo SwapQuickSlotBItem
+	//------------------------------------------------------------
+	en_PACKET_S2C_QUICKSLOT_SWAP,
+
+	//-----------------------------------------------------------
+	// 게임서버 에러 전송	
+	// int64 PlayerId
+	// en_ErrorType ErrorType
+	//-----------------------------------------------------------
+	en_PACKET_S2C_ERROR
 };
