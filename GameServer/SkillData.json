@@ -2,8 +2,8 @@
   "Skills": [
     {
       "SkillDataSheetId": 1,
-      "SkillName": "기사일반공격",
-      "SkillCoolTime": 0.5,
+      "SkillName": "일반공격",
+      "SkillCoolTime": 500,
       "SkillCastingTime": 0,
       "SkillDistance": 1,
       "SkillThumbnailImagePath": ""
@@ -11,7 +11,7 @@
     {
       "SkillDataSheetId": 2,
       "SkillName": "맹렬한일격",
-      "SkillCoolTime": 2.0,
+      "SkillCoolTime": 2000,
       "SkillCastingTime": 0,
       "SkillDistance": 1,
       "SkillThumbnailImagePath": "Textures/SkillBook/맹렬한일격"
@@ -19,7 +19,7 @@
     {
       "SkillDataSheetId": 3,
       "SkillName": "회심의일격",
-      "SkillCoolTime": 1.0,
+      "SkillCoolTime": 1000,
       "SkillCastingTime": 0,
       "SkillDistance": 1,
       "SkillThumbnailImagePath": "Textures/SkillBook/회심의일격"
@@ -27,7 +27,7 @@
     {
       "SkillDataSheetId": 4,
       "SkillName": "돌격자세",
-      "SkillCoolTime": 180.0,
+      "SkillCoolTime": 10000,
       "SkillCastingTime": 0,
       "SkillDistance": 0,
       "SkillThumbnailImagePath": "Textures/SkillBook/돌격자세"
@@ -35,7 +35,7 @@
     {
       "SkillDataSheetId": 5,
       "SkillName": "쇄혼비무",
-      "SkillCoolTime": 10.0,
+      "SkillCoolTime": 5000,
       "SkillCastingTime": 0,
       "SkillDistance": 4,
       "SkillThumbnailImagePath": "Textures/SkillBook/쇄혼비무"
@@ -43,7 +43,7 @@
     {
       "SkillDataSheetId": 6,
       "SkillName": "초혼비무",
-      "SkillCoolTime": 10.0,
+      "SkillCoolTime": 5000,
       "SkillCastingTime": 0,
       "SkillDistance": 4,
       "SkillThumbnailImagePath": "Textures/SkillBook/초혼비무"
@@ -51,21 +51,13 @@
     {
       "SkillDataSheetId": 7,
       "SkillName": "분쇄파동",
-      "SkillCoolTime": 3.0,
+      "SkillCoolTime": 2000,
       "SkillCastingTime": 0,
       "SkillDistance": 1,
       "SkillThumbnailImagePath": "Textures/Spell/Icon/분쇄파동"
-    },
+    },    
     {
       "SkillDataSheetId": 8,
-      "SkillName": "주술사일반공격",
-      "SkillCoolTime": 0.5,
-      "SkillCastingTime": 0,
-      "SkillDistance": 1,
-      "SkillThumbnailImagePath": ""
-    },
-    {
-      "SkillDataSheetId": 9,
       "SkillName": "불꽃작살",
       "SkillCoolTime": 0,
       "SkillCastingTime": 1.0,
@@ -73,33 +65,33 @@
       "SkillThumbnailImagePath": "Textures/Spell/Icon/불꽃작살"
     },
     {
-      "SkillDataSheetId": 10,
+      "SkillDataSheetId": 9,
       "SkillName": "치유의빛",
       "SkillCoolTime": 0,
       "SkillCastingTime": 2.0,
       "SkillDistance": 6,
-      "SkillThumbnailImagePath": "Textures/SkillBook/치유의빛"
+      "SkillThumbnailImagePath": "Textures/Spell/Icon/치유의빛"
     },
     {
-      "SkillDataSheetId": 11,
+      "SkillDataSheetId": 10,
       "SkillName": "치유의바람",
       "SkillCoolTime": 0,
       "SkillCastingTime": 3.0,
       "SkillDistance": 6,
-      "SkillThumbnailImagePath": "Textures/SkillBook/치유의바람"
+      "SkillThumbnailImagePath": "Textures/Spell/Icon/치유의바람"
     },
     {
-      "SkillDataSheetId": 12,
+      "SkillDataSheetId": 11,
       "SkillName": "슬라임일반공격",
-      "SkillCoolTime": 0.8,
+      "SkillCoolTime": 800,
       "SkillCastingTime": 0,
       "SkillDistance": 1,
       "SkillThumbnailImagePath": ""
     },
     {
-      "SkillDataSheetId": 13,
+      "SkillDataSheetId": 12,
       "SkillName": "곰일반공격",
-      "SkillCoolTime": 1.2,
+      "SkillCoolTime": 1200,
       "SkillCastingTime": 0,
       "SkillDistance": 1,
       "SkillThumbnailImagePath": ""

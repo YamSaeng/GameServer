@@ -232,7 +232,7 @@ void CDataManager::LoadDataSkill(wstring LoadFileName)
 
 		int SkillDataSheetId = Filed["SkillDataSheetId"].GetInt();
 		string SkillName = Filed["SkillName"].GetString();
-		float SkillCoolTime = Filed["SkillCoolTime"].GetFloat();
+		int SkillCoolTime = Filed["SkillCoolTime"].GetInt();
 		float SkillCastingTime = Filed["SkillCastingTime"].GetFloat();
 		int SkillDistance = Filed["SkillDistance"].GetInt();
 		string SkillImagePath = Filed["SkillThumbnailImagePath"].GetString();
