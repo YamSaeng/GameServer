@@ -59,7 +59,7 @@ enum class en_Inventory : int8
 
 enum class en_QuickSlotBar : int8
 {
-	QUICK_SLOT_BAR_SIZE = 3,
+	QUICK_SLOT_BAR_SIZE = 2,
 	QUICK_SLOT_BAR_SLOT_SIZE = 5
 };
 
@@ -98,6 +98,12 @@ enum class en_SkillType : int16
 	SKILL_SHAMAN_HEALING_WIND,	
 	SKILL_SLIME_NORMAL,
 	SKILL_BEAR_NORMAL
+};
+
+enum class en_ErrorType : int16
+{
+	ERROR_SKILL_COOLTIME,
+	ERROR_NON_SELECT_OBJECT
 };
 
 enum class en_ConsumableType : int16
@@ -180,6 +186,7 @@ struct st_SkillInfo
 	wstring _SkillName;		 // 스킬 이름
 	int32 _SkillCoolTime = 0;	 // 스킬 쿨타임	
 	wstring _SkillImagePath; // 스킬 이미지 경로
+	bool CanSkillUse = true; // 스킬을 사용 할 수 있는지 여부
 };
 
 struct st_QuickSlotBarSlotInfo
