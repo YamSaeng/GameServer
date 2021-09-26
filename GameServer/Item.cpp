@@ -45,6 +45,8 @@ void CItem::UpdateIdle()
 	if (_Target && _Target->GetCellPosition() == GetCellPosition())
 	{
 		G_Logger->WriteStdOut(en_Color::GREEN, L"플레이어와 부딪힘");
+
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;		
 				
 		CPlayer* Player = nullptr;
 
