@@ -389,7 +389,7 @@
     <Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
     <Body>
       <![CDATA[
-        SELECT SkillType, SkillLevel, SkillName, SkillCoolTime, SkillImagePath FROM [dbo].[QuickSlotBar] WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId) AND QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex)
+        SELECT QuickSlotKey, SkillType, SkillLevel, SkillName, SkillCoolTime, SkillImagePath FROM [dbo].[QuickSlotBar] WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId) AND QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex)
       ]]>
     </Body>
   </Procedure>

@@ -314,7 +314,7 @@ namespace SP
 
 	// Swap 요청한 아이템이 QuickSlot에 있는지 확인하고
 	// 요청한 퀵슬롯 정보 반환
-	class CDBGameServerQuickSlotCheck : public CDBBind<4, 5>
+	class CDBGameServerQuickSlotCheck : public CDBBind<4, 6>
 	{
 	public:
 		CDBGameServerQuickSlotCheck(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spQuickSlotCheck(?,?,?,?)}") {}
@@ -323,11 +323,12 @@ namespace SP
 		void InQuickSlotBarIndex(int8& QuickSlotBarIndex) { BindParam(2, QuickSlotBarIndex); }
 		void InQuickSlotBarSlotIndex(int8& QuickSlotBarSlotIndex) { BindParam(3, QuickSlotBarSlotIndex); }
 		
-		void OutQuickSlotSkillType(int16& SkillType) { BindCol(0, SkillType); }
-		void OutQuickSlotSkillLevel(int8& SkillLevel) { BindCol(1, SkillLevel); }
-		template<int8 Length> void OutQuickSlotSkillName(WCHAR(&QuickSlotSkillName)[Length]) { BindCol(2, QuickSlotSkillName); }
-		void OutQuickSlotSkillCoolTime(int32& SkillCoolTime) { BindCol(3, SkillCoolTime); }
-		template<int8 Length> void OutQuickSlotSkillThumbnailImagePath(WCHAR(&SkillThumbnailImagePath)[Length]) { BindCol(4, SkillThumbnailImagePath); }
+		template<int8 Length> void OutQuickSlotKey(WCHAR(&QuickSlotKey)[Length]) { BindCol(0, QuickSlotKey); }
+		void OutQuickSlotSkillType(int16& SkillType) { BindCol(1, SkillType); }
+		void OutQuickSlotSkillLevel(int8& SkillLevel) { BindCol(2, SkillLevel); }
+		template<int8 Length> void OutQuickSlotSkillName(WCHAR(&QuickSlotSkillName)[Length]) { BindCol(3, QuickSlotSkillName); }
+		void OutQuickSlotSkillCoolTime(int32& SkillCoolTime) { BindCol(4, SkillCoolTime); }
+		template<int8 Length> void OutQuickSlotSkillThumbnailImagePath(WCHAR(&SkillThumbnailImagePath)[Length]) { BindCol(5, SkillThumbnailImagePath); }
 	};
 
 	// QuickSlot Swap
