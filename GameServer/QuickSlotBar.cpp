@@ -21,7 +21,7 @@ void CQuickSlotBar::Init()
 	{
 		st_QuickSlotBarSlotInfo* QuickSlotBarSlotInfo = new st_QuickSlotBarSlotInfo();
 		QuickSlotBarSlotInfo->QuickSlotBarIndex = _QuickSlotBarIndex;
-		QuickSlotBarSlotInfo->QuickSlotBarSlotIndex = SlotIndex;	
+		QuickSlotBarSlotInfo->QuickSlotBarSlotIndex = SlotIndex;
 
 		wsprintf(QuickSlotBarKeyString, L"%d", SlotIndex + 1);
 		QuickSlotBarSlotInfo->QuickSlotKey = QuickSlotBarKeyString;
@@ -40,16 +40,4 @@ void CQuickSlotBar::UpdateQuickSlotBarSlot(st_QuickSlotBarSlotInfo& QuickSlotBar
 	}
 
 	*(*FindQuickSlotBarSlotIterator).second = QuickSlotBarSlotInfo;
-}
-
-bool CQuickSlotBar::CanQuickSlotBarSlotuse(st_QuickSlotBarSlotInfo& FindQuickSlotBarSlotInfo)
-{
-	auto FindQuickSlotBarSlotIterator = _QuickSlotBarSlotInfos.find(FindQuickSlotBarSlotInfo.QuickSlotBarSlotIndex);
-	if (FindQuickSlotBarSlotIterator == _QuickSlotBarSlotInfos.end())
-	{
-		CRASH("AddQuickSlotBarSlot Äü½½·Ô¾ÆÀÌÅÛ Ã£Áö ¸øÇÔ");
-		return false;
-	}
-
-	return (*FindQuickSlotBarSlotIterator).second->CanQuickSlotUse;	
 }

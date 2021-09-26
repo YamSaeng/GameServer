@@ -9,7 +9,7 @@ CQuickSlotManager::CQuickSlotManager()
 CQuickSlotManager::~CQuickSlotManager()
 {
 	for (auto QuickSlotBar : _QuickSlotBars)
-	{		
+	{
 		delete QuickSlotBar.second;
 	}
 }
@@ -19,7 +19,7 @@ void CQuickSlotManager::Init()
 	// Äü½½·Ô¹Ù »ý¼º
 	for (int8 SlotIndex = 0; SlotIndex < (int8)en_QuickSlotBar::QUICK_SLOT_BAR_SIZE; ++SlotIndex)
 	{
-		CQuickSlotBar* QuickSlotBar = new CQuickSlotBar();	
+		CQuickSlotBar* QuickSlotBar = new CQuickSlotBar();
 		QuickSlotBar->_QuickSlotBarIndex = SlotIndex;
 		QuickSlotBar->Init();
 
@@ -39,14 +39,17 @@ void CQuickSlotManager::UpdateQuickSlotBar(st_QuickSlotBarSlotInfo& QuickSlotBar
 	(*FindQuickSlotBarIterator).second->UpdateQuickSlotBarSlot(QuickSlotBarSlotInfo);
 }
 
-bool CQuickSlotManager::CanQuickSlotBarUse(st_QuickSlotBarSlotInfo& FindQuickSlotBarSlotInfo)
+void CQuickSlotManager::SwapQuickSlot(st_QuickSlotBarSlotInfo& SwapAQuickSlotInfo, st_QuickSlotBarSlotInfo& SwapBQuickSlotInfo)
 {
-	auto FindQuickSlotBarIterator = _QuickSlotBars.find(FindQuickSlotBarSlotInfo.QuickSlotBarIndex);
-	if (FindQuickSlotBarIterator == _QuickSlotBars.end())
+	auto FindSwapAItemIterator = _QuickSlotBars.find(SwapAQuickSlotInfo.QuickSlotBarIndex);
+	if (FindSwapAItemIterator != _QuickSlotBars.end())
 	{
-		CRASH("IsQuickSlotUse Äü½½·Ô Ã£Áö ¸øÇÔ");
-		return false;
+		(*FindSwapAItemIterator).second->UpdateQuickSlotBarSlot(SwapAQuickSlotInfo);
 	}
 
-	return (*FindQuickSlotBarIterator).second->CanQuickSlotBarSlotuse(FindQuickSlotBarSlotInfo);	
+	auto FindSwapBItemIterator = _QuickSlotBars.find(SwapBQuickSlotInfo.QuickSlotBarIndex);
+	if (FindSwapBItemIterator != _QuickSlotBars.end())
+	{
+		(*FindSwapBItemIterator).second->UpdateQuickSlotBarSlot(SwapBQuickSlotInfo);
+	}
 }

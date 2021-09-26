@@ -15,9 +15,8 @@ public:
 	// Äü½½·Ô¹Ù¿¡ Äü½½·Ô µî·Ï
 	void UpdateQuickSlotBar(st_QuickSlotBarSlotInfo& QuickSlotBarSlotInfo);
 
-	bool CanQuickSlotBarUse(st_QuickSlotBarSlotInfo& FindQuickSlotBarSlotInfo);
+	void SwapQuickSlot(st_QuickSlotBarSlotInfo& SwapAQuickSlotInfo, st_QuickSlotBarSlotInfo& SwapBQuickSlotInfo);
 private:
 	// Äü½½·Ô¹Ù 
 	map<int8, CQuickSlotBar*> _QuickSlotBars;
 };
-
