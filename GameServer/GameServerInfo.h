@@ -25,7 +25,8 @@ enum class en_JobType : int16
 	DATA_BASE_ITEM_SWAP,
 	DATA_BASE_GOLD_SAVE,
 	DATA_BASE_CHARACTER_INFO_SEND,
-	DATA_BASE_QUICK_SLOT_SAVE
+	DATA_BASE_QUICK_SLOT_SAVE,
+	DATA_BASE_QUICK_SWAP
 };
 
 struct st_Job
@@ -39,7 +40,8 @@ struct st_Job
 enum class en_TimerJobType : int16
 {
 	TIMER_ATTACK_END,
-	TIMER_SPELL_END
+	TIMER_SPELL_END,
+	TIMER_SKILL_COOLTIME_END
 };
 
 struct st_TimerJob
