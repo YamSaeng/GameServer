@@ -17,16 +17,19 @@ CGameServer::CGameServer()
 	_AuthThread = nullptr;
 	_NetworkThread = nullptr;
 	_DataBaseThread = nullptr;
+	_TimerJobThread = nullptr;
+	_LogicThread = nullptr;
 
 	// Nonsignaled상태 자동리셋
 	_AuthThreadWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	_NetworkThreadWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	_DataBaseWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);	
-	_TimerThreadWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	_TimerThreadWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);	
 
 	_AuthThreadEnd = false;
 	_NetworkThreadEnd = false;
 	_DataBaseThreadEnd = false;
+	_LogicThreadEnd = false;
 	_TimerJobThreadEnd = false;
 
 	InitializeSRWLock(&_TimerJobLock);
@@ -54,7 +57,7 @@ void CGameServer::Start(const WCHAR* OpenIP, int32 Port)
 	CNetworkLib::Start(OpenIP, Port);
 
 	G_ObjectManager->MonsterSpawn(200, 1, en_GameObjectType::SLIME);
-	G_ObjectManager->MonsterSpawn(50, 1, en_GameObjectType::BEAR);
+	G_ObjectManager->MonsterSpawn(20, 1, en_GameObjectType::BEAR);
 
 	G_ObjectManager->GameServer = this;
 
@@ -62,6 +65,7 @@ void CGameServer::Start(const WCHAR* OpenIP, int32 Port)
 	_NetworkThread = (HANDLE)_beginthreadex(NULL, 0, NetworkThreadProc, this, 0, NULL);
 	_DataBaseThread = (HANDLE)_beginthreadex(NULL, 0, DataBaseThreadProc, this, 0, NULL);
 	_TimerJobThread = (HANDLE)_beginthreadex(NULL, 0, TimerJobThreadProc, this, 0, NULL);
+	_LogicThread = (HANDLE)_beginthreadex(NULL, 0, LogicThreadProc, this, 0, NULL);
 
 	CloseHandle(_AuthThread);
 	CloseHandle(_NetworkThread);
@@ -116,6 +120,8 @@ unsigned __stdcall CGameServer::NetworkThreadProc(void* Argument)
 
 	while (!Instance->_NetworkThreadEnd)
 	{
+		WaitForSingleObject(Instance->_NetworkThreadWakeEvent, INFINITE);
+
 		while (!Instance->_GameServerNetworkThreadMessageQue.IsEmpty())
 		{
 			st_Job* Job = nullptr;
@@ -137,9 +143,7 @@ unsigned __stdcall CGameServer::NetworkThreadProc(void* Argument)
 
 			Instance->_NetworkThreadTPS++;
 			Instance->_JobMemoryPool->Free(Job);
-		}
-
-		G_ChannelManager->Update();
+		}		
 	}
 	return 0;
 }
@@ -189,6 +193,9 @@ unsigned __stdcall CGameServer::DataBaseThreadProc(void* Argument)
 			case en_JobType::DATA_BASE_QUICK_SLOT_SAVE:
 				Instance->PacketProcReqDBQuickSlotBarSlotSave(Job->SessionId, Job->Message);
 				break;
+			case en_JobType::DATA_BASE_QUICK_SWAP:
+				Instance->PacketProcReqDBQuickSlotSwap(Job->SessionId, Job->Message);
+				break;
 			}
 
 			Instance->_DataBaseThreadTPS++;
@@ -205,11 +212,9 @@ unsigned __stdcall CGameServer::TimerJobThreadProc(void* Argument)
 	while (!Instance->_TimerJobThreadEnd)
 	{			
 		WaitForSingleObject(Instance->_TimerThreadWakeEvent, INFINITE);
-
-		AcquireSRWLockExclusive(&Instance->_TimerJobLock);
+				
 		while (Instance->_TimerHeapJob->GetUseSize() != 0)
-		{			
-			
+		{						
 			// 맨 위 데이터의 시간을 확인한다.
 			st_TimerJob* TimerJob = Instance->_TimerHeapJob->Peek();
 
@@ -221,7 +226,9 @@ unsigned __stdcall CGameServer::TimerJobThreadProc(void* Argument)
 			if (TimerJob->ExecTick <= NowTick)
 			{
 				// TimerJob을 뽑고
+				AcquireSRWLockExclusive(&Instance->_TimerJobLock);
 				st_TimerJob* TimerJob = Instance->_TimerHeapJob->PopHeap();
+				ReleaseSRWLockExclusive(&Instance->_TimerJobLock);
 
 				// Type에 따라 실행한다.
 				switch (TimerJob->Type)
@@ -231,14 +238,29 @@ unsigned __stdcall CGameServer::TimerJobThreadProc(void* Argument)
 					break;
 				case en_TimerJobType::TIMER_SPELL_END:
 					Instance->PacketProcTimerSpellEnd(TimerJob->SessionId, TimerJob->Message);
+					break;				
+				case en_TimerJobType::TIMER_SKILL_COOLTIME_END:
+					Instance->PacketProcTimerCoolTimeEnd(TimerJob->SessionId, TimerJob->Message);
 					break;
 				default:
 					break;
 				}
 			}					
 		}	
-		ReleaseSRWLockExclusive(&Instance->_TimerJobLock);	
+		
 	}
+	return 0;
+}
+
+unsigned __stdcall CGameServer::LogicThreadProc(void* Argument)
+{
+	CGameServer* Instance = (CGameServer*)Argument;
+
+	while (!Instance->_LogicThreadEnd)
+	{
+		G_ChannelManager->Update();
+	}
+
 	return 0;
 }
 
@@ -252,23 +274,26 @@ void CGameServer::CreateNewClient(int64 SessionId)
 	// 세션 찾기
 	st_Session* Session = FindSession(SessionId);
 
-	// 기본 정보 셋팅
-	Session->AccountId = 0;
-	Session->IsLogin = false;
-	Session->Token = 0;
-	Session->RecvPacketTime = timeGetTime();
-
-	for (int i = 0; i < SESSION_CHARACTER_MAX; i++)
+	if (Session)
 	{
-		Session->MyPlayers[i] = (CPlayer*)G_ObjectManager->ObjectCreate(en_GameObjectType::MELEE_PLAYER);
-	}
+		// 기본 정보 셋팅
+		Session->AccountId = 0;
+		Session->IsLogin = false;
+		Session->Token = 0;
+		Session->RecvPacketTime = timeGetTime();
 
-	Session->MyPlayer = nullptr;
+		for (int i = 0; i < SESSION_CHARACTER_MAX; i++)
+		{
+			Session->MyPlayers[i] = (CPlayer*)G_ObjectManager->ObjectCreate(en_GameObjectType::MELEE_PLAYER);
+		}
 
-	// 게임 서버 접속 성공을 클라에게 알려준다.
-	CMessage* ResClientConnectedMessage = MakePacketResClientConnected();
-	SendPacket(Session->SessionId, ResClientConnectedMessage);
-	ResClientConnectedMessage->Free();
+		Session->MyPlayer = nullptr;
+
+		// 게임 서버 접속 성공을 클라에게 알려준다.
+		CMessage* ResClientConnectedMessage = MakePacketResClientConnected();
+		SendPacket(Session->SessionId, ResClientConnectedMessage);
+		ResClientConnectedMessage->Free();
+	}	
 
 	ReturnSession(Session);
 }
@@ -351,6 +376,9 @@ void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 		break;
 	case en_PACKET_TYPE::en_PACKET_C2S_QUICKSLOT_SAVE:
 		PacketProcReqQuickSlotSave(SessionId, Message);
+		break;
+	case en_PACKET_TYPE::en_PACKET_C2S_QUICKSLOT_SWAP:
+		PacketProcReqQuickSlotSwap(SessionId, Message);
 		break;
 	case en_PACKET_TYPE::en_PACKET_CS_GAME_REQ_SECTOR_MOVE:
 		PacketProcReqSectorMove(SessionId, Message);
@@ -716,7 +744,7 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 // char Dir
 void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 {
-	st_Session* Session = FindSession(SessionID);
+	st_Session* Session = FindSession(SessionID);	
 
 	do
 	{
@@ -761,9 +789,15 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 
 			CPlayer* MyPlayer = Session->MyPlayer;
 
+			int8 QuickSlotBarindex;
+			*Message >> QuickSlotBarindex;
+
+			int8 QuickSlotBarSlotIndex;
+			*Message >> QuickSlotBarSlotIndex;
+
 			// 공격한 방향
 			int8 ReqMoveDir;
-			*Message >> ReqMoveDir;
+			*Message >> ReqMoveDir;			
 
 			// 스킬 종류
 			int16 ReqSkillType;
@@ -782,209 +816,255 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 			if ((en_SkillType)ReqSkillType == en_SkillType::SKILL_TYPE_NONE)
 			{
 				break;
-			}
-
-			// 스킬 지정
-			MyPlayer->_SkillType = (en_SkillType)ReqSkillType;
-			// 공격 상태로 변경
-			MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;									
-			// 클라에게 알려줘서 공격 애니메이션 출력
-			CMessage* ResObjectStateChangePacket = MakePacketResObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
-			SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateChangePacket);
-			ResObjectStateChangePacket->Free();
+			}			
 			
-			// 0.5초 후에 Idle상태로 바꾸기 위해 TimerJob 등록
-			st_TimerJob* TimerJob = _TimerJobMemoryPool->Alloc();
-			TimerJob->ExecTick = GetTickCount64() + 500;
-			TimerJob->SessionId = MyPlayer->_SessionId;
-			TimerJob->Type = en_TimerJobType::TIMER_ATTACK_END;
-		
-			AcquireSRWLockExclusive(&_TimerJobLock);
-			_TimerHeapJob->InsertHeap(TimerJob->ExecTick, TimerJob);			
-			ReleaseSRWLockExclusive(&_TimerJobLock);
-
-			SetEvent(_TimerThreadWakeEvent);
-
-			// 타겟 위치 확인
-			switch ((en_SkillType)ReqSkillType)
+			// 평타 스킬 예외처리 해야함
+			// 요청한 스킬이 스킬창에 있는지 확인
+			st_SkillInfo* FindSkill = MyPlayer->_SkillBox.FindSkill((en_SkillType)ReqSkillType);
+			if (FindSkill->CanSkillUse == true)
 			{
-			case en_SkillType::SKILL_TYPE_NONE:
-				break;
-			case en_SkillType::SKILL_KNIGHT_NORMAL:
-			case en_SkillType::SKILL_SHAMAN_NORMAL:				
-				FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
-				Target = MyPlayer->_Channel->_Map->Find(FrontCell);
-				if (Target != nullptr)
+				// 스킬 지정
+				MyPlayer->_SkillType = (en_SkillType)ReqSkillType;
+				// 공격 상태로 변경
+				MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;
+				// 클라에게 알려줘서 공격 애니메이션 출력
+				CMessage* ResObjectStateChangePacket = MakePacketResObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
+				SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateChangePacket);
+				ResObjectStateChangePacket->Free();
+
+				// 타겟 위치 확인
+				switch ((en_SkillType)ReqSkillType)
 				{
-					Targets.push_back(Target);
-				}
-				break;
-			case en_SkillType::SKILL_KNIGHT_CHOHONE:	
-			{				
-				if (MyPlayer->_SelectTarget != nullptr)
-				{
-					st_Vector2Int TargetPosition = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType)->GetCellPosition();
-					st_Vector2Int MyPosition = MyPlayer->GetCellPosition();
-					st_Vector2Int Direction = TargetPosition - MyPosition;
-
-					int32 Distance = st_Vector2Int::Distance(TargetPosition, MyPosition);
-
-					if (Distance <= 4)
-					{
-						Target = MyPlayer->_Channel->_Map->Find(TargetPosition);
-						if (Target != nullptr)
-						{
-							Targets.push_back(Target);
-
-							st_Vector2Int MyFrontCellPotision = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
-
-							MyPlayer->_Channel->_Map->ApplyMove(Target, MyFrontCellPotision);
-							ResSyncPosition = MakePacketResSyncPosition(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectPositionInfo);
-							SendPacketAroundSector(Target->GetCellPosition(), ResSyncPosition);
-							ResSyncPosition->Free();
-						}
-					}
-				}							
-			}				
-				break;
-			case en_SkillType::SKILL_KNIGHT_SHAEHONE:
-			{
-				if (MyPlayer->_SelectTarget != nullptr)
-				{
-					st_Vector2Int TargetPosition = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType)->GetCellPosition();
-					st_Vector2Int MyPosition = MyPlayer->GetCellPosition();
-					st_Vector2Int Direction = TargetPosition - MyPosition;
-
-					// 타겟이 어느 방향에 있는지 확인한다.
-					en_MoveDir Dir = st_Vector2Int::GetDirectionFromVector(Direction);
-					// 타겟과의 거리를 구한다.
-					int32 Distance = st_Vector2Int::Distance(TargetPosition, MyPosition);
-
-					G_Logger->WriteStdOut(en_Color::YELLOW, L"Distance %d\n", Distance);
-					if (Distance <= 4)
-					{
-						Target = MyPlayer->_Channel->_Map->Find(TargetPosition);
-						st_Vector2Int MovePosition;
-						if (Target != nullptr)
-						{
-							Targets.push_back(Target);
-
-							switch (Dir)
-							{
-							case en_MoveDir::UP:
-								MovePosition = Target->GetFrontCellPosition(en_MoveDir::DOWN, 1);
-								MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::UP;
-								break;
-							case en_MoveDir::DOWN:
-								MovePosition = Target->GetFrontCellPosition(en_MoveDir::UP, 1);
-								MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
-								break;
-							case en_MoveDir::LEFT:
-								MovePosition = Target->GetFrontCellPosition(en_MoveDir::RIGHT, 1);
-								MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::LEFT;
-								break;
-							case en_MoveDir::RIGHT:
-								MovePosition = Target->GetFrontCellPosition(en_MoveDir::LEFT, 1);
-								MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::RIGHT;
-								break;
-							default:
-								break;
-							}
-
-							MyPlayer->_Channel->_Map->ApplyMove(MyPlayer, MovePosition);
-
-							ResSyncPosition = MakePacketResSyncPosition(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
-							SendPacketAroundSector(MyPlayer->GetCellPosition(), ResSyncPosition);
-							ResSyncPosition->Free();
-						}
-					}				
-				}				
-			}				
-				break;
-			case en_SkillType::SKILL_KNIGHT_SMASH_WAVE:
-			{
-				vector<st_Vector2Int> TargetPositions;
-
-				TargetPositions = MyPlayer->GetAroundCellPosition(MyPlayer->GetCellPosition(), 1);
-				for (st_Vector2Int TargetPosition : TargetPositions)
-				{
-					CGameObject* Target = MyPlayer->_Channel->_Map->Find(TargetPosition);
+				case en_SkillType::SKILL_TYPE_NONE:
+					break;
+				case en_SkillType::SKILL_KNIGHT_NORMAL:
+				case en_SkillType::SKILL_SHAMAN_NORMAL:
+					FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
+					Target = MyPlayer->_Channel->_Map->Find(FrontCell);
 					if (Target != nullptr)
 					{
 						Targets.push_back(Target);
 					}
-				}
-			}
-				break;					
-			default:
-				break;
-			}			
-
-			wstring SkillTypeString;
-			wchar_t SkillTypeMessage[64] = L"0";
-			wchar_t SkillDamageMessage[64] = L"0";
-
-			// 타겟 데미지 적용
-			for (CGameObject* Target : Targets)
-			{
-				// 크리티컬 판단
-				random_device Seed;
-				default_random_engine Eng(Seed());
-
-				float CriticalPoint = MyPlayer->_GameObjectInfo.ObjectStatInfo.CriticalPoint / 1000.0f;
-				bernoulli_distribution CriticalCheck(CriticalPoint);
-				bool IsCritical = CriticalCheck(Eng);
-
-				// 데미지 판단
-				mt19937 Gen(Seed());
-				uniform_int_distribution<int> DamageChoiceRandom(MyPlayer->_GameObjectInfo.ObjectStatInfo.MinAttackDamage, MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxAttackDamage);
-				int32 ChoiceDamage = DamageChoiceRandom(Gen);
-				int32 FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
-
-				Target->OnDamaged(MyPlayer, FinalDamage);
-
-				// 데미지 시스템 메세지 생성
-				switch ((en_SkillType)ReqSkillType)
-				{
-				case en_SkillType::SKILL_TYPE_NONE:					
-					CRASH("SkillType None");
-					break;
-				case en_SkillType::SKILL_KNIGHT_NORMAL:
-					wsprintf(SkillTypeMessage, L"%s가 일반공격을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
 					break;
 				case en_SkillType::SKILL_KNIGHT_CHOHONE:
-					wsprintf(SkillTypeMessage, L"%s가 초혼비무를 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
-					break;
+				{
+					if (MyPlayer->_SelectTarget != nullptr)
+					{
+						st_Vector2Int TargetPosition = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType)->GetCellPosition();
+						st_Vector2Int MyPosition = MyPlayer->GetCellPosition();
+						st_Vector2Int Direction = TargetPosition - MyPosition;
+
+						int32 Distance = st_Vector2Int::Distance(TargetPosition, MyPosition);
+
+						if (Distance <= 4)
+						{
+							Target = MyPlayer->_Channel->_Map->Find(TargetPosition);
+							if (Target != nullptr)
+							{
+								Targets.push_back(Target);
+
+								st_Vector2Int MyFrontCellPotision = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
+
+								MyPlayer->_Channel->_Map->ApplyMove(Target, MyFrontCellPotision);
+								ResSyncPosition = MakePacketResSyncPosition(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectPositionInfo);
+								SendPacketAroundSector(Target->GetCellPosition(), ResSyncPosition);
+								ResSyncPosition->Free();
+							}
+						}
+					}
+				}
+				break;
 				case en_SkillType::SKILL_KNIGHT_SHAEHONE:
-					wsprintf(SkillTypeMessage, L"%s가 쇄혼비무를 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
-					break;
+				{
+					if (MyPlayer->_SelectTarget != nullptr)
+					{
+						st_Vector2Int TargetPosition = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType)->GetCellPosition();
+						st_Vector2Int MyPosition = MyPlayer->GetCellPosition();
+						st_Vector2Int Direction = TargetPosition - MyPosition;
+
+						// 타겟이 어느 방향에 있는지 확인한다.
+						en_MoveDir Dir = st_Vector2Int::GetDirectionFromVector(Direction);
+						// 타겟과의 거리를 구한다.
+						int32 Distance = st_Vector2Int::Distance(TargetPosition, MyPosition);
+
+						G_Logger->WriteStdOut(en_Color::YELLOW, L"Distance %d\n", Distance);
+						if (Distance <= 4)
+						{
+							Target = MyPlayer->_Channel->_Map->Find(TargetPosition);
+							st_Vector2Int MovePosition;
+							if (Target != nullptr)
+							{
+								Targets.push_back(Target);
+
+								switch (Dir)
+								{
+								case en_MoveDir::UP:
+									MovePosition = Target->GetFrontCellPosition(en_MoveDir::DOWN, 1);
+									MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::UP;
+									break;
+								case en_MoveDir::DOWN:
+									MovePosition = Target->GetFrontCellPosition(en_MoveDir::UP, 1);
+									MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
+									break;
+								case en_MoveDir::LEFT:
+									MovePosition = Target->GetFrontCellPosition(en_MoveDir::RIGHT, 1);
+									MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::LEFT;
+									break;
+								case en_MoveDir::RIGHT:
+									MovePosition = Target->GetFrontCellPosition(en_MoveDir::LEFT, 1);
+									MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::RIGHT;
+									break;
+								default:
+									break;
+								}
+
+								MyPlayer->_Channel->_Map->ApplyMove(MyPlayer, MovePosition);
+
+								ResSyncPosition = MakePacketResSyncPosition(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
+								SendPacketAroundSector(MyPlayer->GetCellPosition(), ResSyncPosition);
+								ResSyncPosition->Free();
+							}
+						}
+					}
+				}
+				break;
 				case en_SkillType::SKILL_KNIGHT_SMASH_WAVE:
-					wsprintf(SkillTypeMessage, L"%s가 분쇄파동을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
-					break;
-				case en_SkillType::SKILL_SHAMAN_NORMAL:
-					wsprintf(SkillTypeMessage, L"%s가 일반공격을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
-					break;				
+				{
+					vector<st_Vector2Int> TargetPositions;
+
+					TargetPositions = MyPlayer->GetAroundCellPosition(MyPlayer->GetCellPosition(), 1);
+					for (st_Vector2Int TargetPosition : TargetPositions)
+					{
+						CGameObject* Target = MyPlayer->_Channel->_Map->Find(TargetPosition);
+						if (Target != nullptr)
+						{
+							Targets.push_back(Target);
+						}
+					}
+				}
+				break;
 				default:
 					break;
 				}
 
-				SkillTypeString = SkillTypeMessage;
-				SkillTypeString = IsCritical ? L"치명타! " + SkillTypeString : SkillTypeString;
+				wstring SkillTypeString;
+				wchar_t SkillTypeMessage[64] = L"0";
+				wchar_t SkillDamageMessage[64] = L"0";
 
-				// 데미지 시스템 메세지 전송
-				CMessage* ResSkillSystemMessagePacket = MakePacketResChattingMessage(MyPlayer->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, IsCritical ? st_Color::Red() : st_Color::White(), SkillTypeString);
-				SendPacketAroundSector(MyPlayer->GetCellPosition(), ResSkillSystemMessagePacket);
-				ResSkillSystemMessagePacket->Free();
+				// 타겟 데미지 적용
+				for (CGameObject* Target : Targets)
+				{
+					// 크리티컬 판단
+					random_device Seed;
+					default_random_engine Eng(Seed());
 
-				// 공격 응답 메세지 전송
-				CMessage* ResMyAttackOtherPacket = MakePacketResAttack(MyPlayer->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectId, (en_SkillType)ReqSkillType, FinalDamage, IsCritical);
-				G_ObjectManager->GameServer->SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMyAttackOtherPacket);
-				ResMyAttackOtherPacket->Free();
+					float CriticalPoint = MyPlayer->_GameObjectInfo.ObjectStatInfo.CriticalPoint / 1000.0f;
+					bernoulli_distribution CriticalCheck(CriticalPoint);
+					bool IsCritical = CriticalCheck(Eng);
 
-				// HP 변경 메세지 전송
-				CMessage* ResChangeHPPacket = G_ObjectManager->GameServer->MakePacketResChangeHP(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectStatInfo.HP, Target->_GameObjectInfo.ObjectStatInfo.MaxHP);
-				G_ObjectManager->GameServer->SendPacketAroundSector(Target->GetCellPosition(), ResChangeHPPacket);
-				ResChangeHPPacket->Free();
+					// 데미지 판단
+					mt19937 Gen(Seed());
+					uniform_int_distribution<int> DamageChoiceRandom(MyPlayer->_GameObjectInfo.ObjectStatInfo.MinAttackDamage, MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxAttackDamage);
+					int32 ChoiceDamage = DamageChoiceRandom(Gen);
+					int32 FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
+
+					Target->OnDamaged(MyPlayer, FinalDamage);
+
+					// 데미지 시스템 메세지 생성
+					switch ((en_SkillType)ReqSkillType)
+					{
+					case en_SkillType::SKILL_TYPE_NONE:
+						CRASH("SkillType None");
+						break;
+					case en_SkillType::SKILL_KNIGHT_NORMAL:
+						wsprintf(SkillTypeMessage, L"%s가 일반공격을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+						break;
+					case en_SkillType::SKILL_KNIGHT_CHOHONE:
+						wsprintf(SkillTypeMessage, L"%s가 초혼비무를 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+						break;
+					case en_SkillType::SKILL_KNIGHT_SHAEHONE:
+						wsprintf(SkillTypeMessage, L"%s가 쇄혼비무를 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+						break;
+					case en_SkillType::SKILL_KNIGHT_SMASH_WAVE:
+						wsprintf(SkillTypeMessage, L"%s가 분쇄파동을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+						break;
+					case en_SkillType::SKILL_SHAMAN_NORMAL:
+						wsprintf(SkillTypeMessage, L"%s가 일반공격을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+						break;
+					default:
+						break;
+					}
+
+					SkillTypeString = SkillTypeMessage;
+					SkillTypeString = IsCritical ? L"치명타! " + SkillTypeString : SkillTypeString;
+
+					// 데미지 시스템 메세지 전송
+					CMessage* ResSkillSystemMessagePacket = MakePacketResChattingMessage(MyPlayer->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, IsCritical ? st_Color::Red() : st_Color::White(), SkillTypeString);
+					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResSkillSystemMessagePacket);
+					ResSkillSystemMessagePacket->Free();
+
+					// 공격 응답 메세지 전송
+					CMessage* ResMyAttackOtherPacket = MakePacketResAttack(MyPlayer->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectId, (en_SkillType)ReqSkillType, FinalDamage, IsCritical);
+					G_ObjectManager->GameServer->SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMyAttackOtherPacket);
+					ResMyAttackOtherPacket->Free();
+
+					// HP 변경 메세지 전송
+					CMessage* ResChangeHPPacket = G_ObjectManager->GameServer->MakePacketResChangeHP(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectStatInfo.HP, Target->_GameObjectInfo.ObjectStatInfo.MaxHP);
+					G_ObjectManager->GameServer->SendPacketAroundSector(Target->GetCellPosition(), ResChangeHPPacket);
+					ResChangeHPPacket->Free();
+				}
+
+				// 스킬 모션 끝 판단
+				// 0.5초 후에 Idle상태로 바꾸기 위해 TimerJob 등록
+				st_TimerJob* TimerJob = _TimerJobMemoryPool->Alloc();
+				TimerJob->ExecTick = GetTickCount64() + 500;
+				TimerJob->SessionId = MyPlayer->_SessionId;
+				TimerJob->Type = en_TimerJobType::TIMER_ATTACK_END;
+								
+				AcquireSRWLockExclusive(&_TimerJobLock);
+				_TimerHeapJob->InsertHeap(TimerJob->ExecTick, TimerJob);				
+				ReleaseSRWLockExclusive(&_TimerJobLock);
+
+				SetEvent(_TimerThreadWakeEvent);
+
+				float SkillCoolTimee = FindSkill->_SkillCoolTime / 1000.0f;
+
+				// 클라에게 쿨타임 표시
+				CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(MyPlayer->_GameObjectInfo.ObjectId, QuickSlotBarindex, QuickSlotBarSlotIndex, SkillCoolTimee, 1.0f);
+				SendPacket(MyPlayer->_SessionId, ResCoolTimeStartPacket);
+				ResCoolTimeStartPacket->Free();
+
+				// 쿨타임 시간 동안 스킬 사용 못하게 막음
+				FindSkill->CanSkillUse = false;
+
+				// 스킬 쿨타임 얻어옴
+				auto FindSkilliterator = G_Datamanager->_Skills.find(ReqSkillType);
+				st_SkillData* ReqSkillData = (*FindSkilliterator).second;
+
+				// 스킬 쿨타임 스킬쿨타임 잡 등록
+				st_TimerJob* SkillCoolTimeTimerJob = _TimerJobMemoryPool->Alloc();
+				SkillCoolTimeTimerJob->ExecTick = GetTickCount64() + ReqSkillData->SkillCoolTime;
+				SkillCoolTimeTimerJob->SessionId = MyPlayer->_SessionId;
+				SkillCoolTimeTimerJob->Type = en_TimerJobType::TIMER_SKILL_COOLTIME_END;
+				
+				CMessage* ResCoolTimeEndMessage = CMessage::Alloc();
+				ResCoolTimeEndMessage->Clear();
+
+				*ResCoolTimeEndMessage << ReqSkillType;
+				SkillCoolTimeTimerJob->Message = ResCoolTimeEndMessage;
+
+				AcquireSRWLockExclusive(&_TimerJobLock);
+				_TimerHeapJob->InsertHeap(SkillCoolTimeTimerJob->ExecTick, SkillCoolTimeTimerJob);
+				ReleaseSRWLockExclusive(&_TimerJobLock);
+
+				SetEvent(_TimerThreadWakeEvent);				
+			}
+			else
+			{
+				CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_SKILL_COOLTIME);
+				SendPacket(MyPlayer->_SessionId, ResErrorPacket);
+				ResErrorPacket->Free();
+				break;
 			}			
 		}
 	} while (0);
@@ -1040,12 +1120,19 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 			CPlayer* MyPlayer = Session->MyPlayer;
 			if (MyPlayer->_SelectTarget != nullptr)
 			{
+				int8 QuickSlotBarindex;
+				*Message >> QuickSlotBarindex;
+
+				int8 QuickSlotBarSlotIndex;
+				*Message >> QuickSlotBarSlotIndex;
+
 				// 공격한 방향
 				int8 ReqMoveDir;
 				*Message >> ReqMoveDir;
 
-				int16 SkillType;
-				*Message >> SkillType;
+				// 스킬 종류
+				int16 ReqSkillType;
+				*Message >> ReqSkillType;
 
 				vector<CGameObject*> Targets;
 
@@ -1054,7 +1141,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 				float SpellTime = 0.0f;				
 
 				// 스킬 타입 확인
-				switch ((en_SkillType)SkillType)
+				switch ((en_SkillType)ReqSkillType)
 				{
 					// 돌격 자세
 				case en_SkillType::SKILL_KNIGHT_CHARGE_POSE:
@@ -1102,11 +1189,11 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 				}
 				
 				// 스펠창 시작
-				CMessage* ResMagicPacket = G_ObjectManager->GameServer->MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId, true, (en_SkillType)SkillType, SpellTime);
+				CMessage* ResMagicPacket = G_ObjectManager->GameServer->MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId, true, (en_SkillType)ReqSkillType, SpellTime);
 				G_ObjectManager->GameServer->SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMagicPacket);
 				ResMagicPacket->Free();
 
-				MyPlayer->_SkillType = (en_SkillType)SkillType;
+				MyPlayer->_SkillType = (en_SkillType)ReqSkillType;
 
 				if (Targets.size() >= 1)
 				{					
@@ -1138,12 +1225,13 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 			}
 			else
 			{
-				CRASH("선택한 대상이 없는데 스킬 요청");
+				CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId,en_ErrorType::ERROR_NON_SELECT_OBJECT);
+				ResErrorPacket->Free();
 			}
-		} while (0);
-
-		ReturnSession(Session);
+		} while (0);		
 	}
+
+	ReturnSession(Session);
 }
 
 // int64 AccountId
@@ -1285,7 +1373,7 @@ void CGameServer::PacketProcReqObjectStateChange(int64 SessionId, CMessage* Mess
 				else
 				{
 					Disconnect(Session->SessionId);
-					goto error;
+					break;
 				}
 				break;
 			case en_StateChange::SPELL_TO_IDLE:
@@ -1301,16 +1389,16 @@ void CGameServer::PacketProcReqObjectStateChange(int64 SessionId, CMessage* Mess
 				else
 				{
 					Disconnect(Session->SessionId);
-					goto error;
+					break;
 				}
 				break;
 			default:
 				break;
 			}
-		} while (0);
-	error:
-		ReturnSession(Session);
+		} while (0);	
 	}
+
+	ReturnSession(Session);
 }
 
 // int32 ObjectId
@@ -1699,6 +1787,80 @@ void CGameServer::PacketProcReqQuickSlotSave(int64 SessionId, CMessage* Message)
 	ReturnSession(Session);
 }
 
+// int64 AccountId
+// int64 ObjectId
+// int8 SwapQuickSlotBarIndexA
+// int8 SwapQuickSlotBarSlotIndexA
+// int8 SwapQuickSlotBarIndexB
+// int8 SwapQuickSlotBarSlotIndexB
+void CGameServer::PacketProcReqQuickSlotSwap(int64 SessionId, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionId);
+
+	if (Session)
+	{
+		InterlockedIncrement64(&Session->IOBlock->IOCount);
+
+		int64 AccountId;
+		int64 PlayerDBId;
+
+		do
+		{
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountId;
+
+			// AccountId가 맞는지 확인
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> PlayerDBId;
+
+			// 조종하고 있는 플레이어가 있는지 확인 
+			if (Session->MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
+				if (Session->MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			st_Job* DBQuickSlotSwapJob = _JobMemoryPool->Alloc();
+			DBQuickSlotSwapJob->Type = en_JobType::DATA_BASE_QUICK_SWAP;
+			DBQuickSlotSwapJob->SessionId = Session->MyPlayer->_SessionId;
+
+			CMessage* DBQuickSlotSwapMessage = CMessage::Alloc();
+			DBQuickSlotSwapMessage->Clear();
+
+			*DBQuickSlotSwapMessage << AccountId;
+			*DBQuickSlotSwapMessage << PlayerDBId;
+			DBQuickSlotSwapMessage->InsertData(Message->GetFrontBufferPtr(), Message->GetUseBufferSize());
+			Message->MoveReadPosition(Message->GetUseBufferSize());
+
+			DBQuickSlotSwapJob->Message = DBQuickSlotSwapMessage;
+
+			_GameServerDataBaseThreadMessageQue.Enqueue(DBQuickSlotSwapJob);
+			SetEvent(_DataBaseWakeEvent);
+		} while (0);
+	}
+
+	ReturnSession(Session);
+}
+
 //---------------------------------------------------------------------------------
 //섹터 이동 요청
 //WORD Type
@@ -1942,14 +2104,14 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 		{
 			Session->IsLogin = false;
 			Disconnect(SessionID);
-		}
-
-		ReturnSession(Session);
+		}		
 	}
 	else
 	{
 		// 클라 접속 끊겻을 경우
 	}
+
+	ReturnSession(Session);
 }
 
 void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMessage* Message)
@@ -2490,7 +2652,7 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 
 		// 스왑 요청할 A 아이템 정보 셋팅
 		st_ItemInfo SwapAItemInfo;		
-		SwapAItemInfo.SlotIndex = SwapAIndex;
+		SwapAItemInfo.SlotIndex = SwapBIndex;
 		SwapAItemInfo.IsQuickSlotUse = AIsQuickSlotUse;
 		SwapAItemInfo.ItemType = (en_ItemType)ADBItemType;
 		SwapAItemInfo.ItemConsumableType = (en_ConsumableType)ADBItemConsumableType;
@@ -2530,7 +2692,7 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 
 		// 스왑 요청할 B 아이템 정보 셋팅
 		st_ItemInfo SwapBItemInfo;		
-		SwapBItemInfo.SlotIndex = SwapBIndex;
+		SwapBItemInfo.SlotIndex = SwapAIndex;
 		SwapBItemInfo.IsQuickSlotUse = BIsQuickSlotUse;
 		SwapBItemInfo.ItemType = (en_ItemType)BDBItemType;
 		SwapBItemInfo.ItemConsumableType = (en_ConsumableType)BDBItemConsumableType;
@@ -2539,36 +2701,7 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		SwapBItemInfo.IsEquipped = BItemEquipped;
 		SwapBItemInfo.ThumbnailImagePath = BItemThumbnailImagePath;
 
-		G_DBConnectionPool->Push(en_DBConnect::GAME, BItemCheckDBConnection);
-
-		// 스왑 하기 위해서 임시 Temp 변수 생성
-		st_ItemInfo Temp;
-		Temp.IsQuickSlotUse = SwapAItemInfo.IsQuickSlotUse;
-		Temp.ItemType = SwapAItemInfo.ItemType;
-		Temp.ItemConsumableType = SwapAItemInfo.ItemConsumableType;
-		Temp.ItemName = SwapAItemInfo.ItemName;
-		Temp.ItemCount = SwapAItemInfo.ItemCount;
-		Temp.IsEquipped = SwapAItemInfo.IsEquipped;
-		Temp.ThumbnailImagePath = SwapAItemInfo.ThumbnailImagePath;
-
-		// 데이터 스왑
-		SwapAItemInfo.ItemDBId = 0;
-		SwapAItemInfo.IsQuickSlotUse = SwapBItemInfo.IsQuickSlotUse;
-		SwapAItemInfo.ItemType = SwapBItemInfo.ItemType;
-		SwapAItemInfo.ItemConsumableType = SwapBItemInfo.ItemConsumableType;
-		SwapAItemInfo.ItemName = SwapBItemInfo.ItemName;
-		SwapAItemInfo.ItemCount = SwapBItemInfo.ItemCount;
-		SwapAItemInfo.IsEquipped = SwapBItemInfo.IsEquipped;
-		SwapAItemInfo.ThumbnailImagePath = SwapBItemInfo.ThumbnailImagePath;
-
-		SwapBItemInfo.ItemDBId = 0;
-		SwapBItemInfo.IsQuickSlotUse = Temp.IsQuickSlotUse;
-		SwapBItemInfo.ItemType = Temp.ItemType;
-		SwapBItemInfo.ItemConsumableType = Temp.ItemConsumableType;
-		SwapBItemInfo.ItemName = Temp.ItemName;
-		SwapBItemInfo.ItemCount = Temp.ItemCount;
-		SwapBItemInfo.IsEquipped = Temp.IsEquipped;
-		SwapBItemInfo.ThumbnailImagePath = Temp.ThumbnailImagePath;
+		G_DBConnectionPool->Push(en_DBConnect::GAME, BItemCheckDBConnection);	
 
 		int16 AItemType = (int16)SwapAItemInfo.ItemType;
 		int16 BItemType = (int16)SwapBItemInfo.ItemType;
@@ -2579,23 +2712,23 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		ItemSwap.InAccountDBId(AccountId);
 		ItemSwap.InPlayerDBId(PlayerDBId);
 
-		ItemSwap.InAIsQuickSlotUse(SwapAItemInfo.IsQuickSlotUse);
-		ItemSwap.InAItemType(AItemType);
-		ItemSwap.InAItemConsumableType(ADBItemConsumableType);
-		ItemSwap.InAItemName(SwapAItemInfo.ItemName);
-		ItemSwap.InAItemCount(SwapAItemInfo.ItemCount);
-		ItemSwap.InAItemIsEquipped(SwapAItemInfo.IsEquipped);
-		ItemSwap.InAItemThumbnailImagePath(SwapAItemInfo.ThumbnailImagePath);
-		ItemSwap.InAItemSlotIndex(SwapAItemInfo.SlotIndex);
+		ItemSwap.InAIsQuickSlotUse(SwapBItemInfo.IsQuickSlotUse);
+		ItemSwap.InAItemType(BItemType);
+		ItemSwap.InAItemConsumableType(BDBItemConsumableType);
+		ItemSwap.InAItemName(SwapBItemInfo.ItemName);
+		ItemSwap.InAItemCount(SwapBItemInfo.ItemCount);
+		ItemSwap.InAItemIsEquipped(SwapBItemInfo.IsEquipped);
+		ItemSwap.InAItemThumbnailImagePath(SwapBItemInfo.ThumbnailImagePath);
+		ItemSwap.InAItemSlotIndex(SwapBItemInfo.SlotIndex);
 
-		ItemSwap.InBIsQuickSlotUse(SwapBItemInfo.IsQuickSlotUse);
-		ItemSwap.InBItemType(BItemType);
-		ItemSwap.InBItemConsumableType(BDBItemConsumableType);
-		ItemSwap.InBItemName(SwapBItemInfo.ItemName);
-		ItemSwap.InBItemCount(SwapBItemInfo.ItemCount);
-		ItemSwap.InBItemIsEquipped(SwapBItemInfo.IsEquipped);
-		ItemSwap.InBItemThumbnailImagePath(SwapBItemInfo.ThumbnailImagePath);
-		ItemSwap.InBItemSlotIndex(SwapBItemInfo.SlotIndex);
+		ItemSwap.InBIsQuickSlotUse(SwapAItemInfo.IsQuickSlotUse);
+		ItemSwap.InBItemType(AItemType);
+		ItemSwap.InBItemConsumableType(ADBItemConsumableType);
+		ItemSwap.InBItemName(SwapAItemInfo.ItemName);
+		ItemSwap.InBItemCount(SwapAItemInfo.ItemCount);
+		ItemSwap.InBItemIsEquipped(SwapAItemInfo.IsEquipped);
+		ItemSwap.InBItemThumbnailImagePath(SwapAItemInfo.ThumbnailImagePath);
+		ItemSwap.InBItemSlotIndex(SwapAItemInfo.SlotIndex);
 
 		// Item Swap 성공
 		bool SwapSuccess = ItemSwap.Execute();
@@ -2604,10 +2737,10 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 			CPlayer* TargetPlayer = (CPlayer*)G_ObjectManager->Find(PlayerDBId, en_GameObjectType::MELEE_PLAYER);
 
 			// Swap 요청한 플레이어의 인벤토리에서 아이템 Swap
-			TargetPlayer->_Inventory.SwapItem(SwapAItemInfo, SwapBItemInfo);
+			TargetPlayer->_Inventory.SwapItem(SwapBItemInfo, SwapAItemInfo);
 
 			// Swap 요청 응답 보내기
-			CMessage* ResItemSwapPacket = MakePacketResItemSwap(AccountId, PlayerDBId, SwapAItemInfo, SwapBItemInfo);
+			CMessage* ResItemSwapPacket = MakePacketResItemSwap(AccountId, PlayerDBId, SwapBItemInfo, SwapAItemInfo);
 			SendPacket(Session->SessionId, ResItemSwapPacket);
 			ResItemSwapPacket->Free();
 		}
@@ -2967,6 +3100,8 @@ void CGameServer::PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CMessage*
 			wstring SkillImagePath;
 			Message->GetData(SkillImagePath, SkillImagePathLen);
 
+			Message->Free();
+
 			st_SkillInfo* FindSkill = Session->MyPlayer->_SkillBox.FindSkill((en_SkillType)SkillType);
 			// 캐릭터가 해당 스킬을 가지고 있는지 확인
 			if (FindSkill != nullptr)
@@ -3010,6 +3145,165 @@ void CGameServer::PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CMessage*
 				ResQuickSlotUpdateMessage->Free();
 			}
 		} while (0);
+	}
+
+	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionId);
+
+	if (Session)
+	{
+		do
+		{
+			InterlockedDecrement64(&Session->IOBlock->IOCount);
+
+			int64 AccountId;
+			*Message >> AccountId;
+
+			int64 PlayerId;
+			*Message >> PlayerId;
+
+			int8 QuickSlotBarSwapIndexA;
+			*Message >> QuickSlotBarSwapIndexA;
+			int8 QuickSlotBarSlotSwapIndexA;
+			*Message >> QuickSlotBarSlotSwapIndexA;
+
+			int8 QuickSlotBarSwapIndexB;
+			*Message >> QuickSlotBarSwapIndexB;
+			int8 QuickSlotBarSlotSwapIndexB;
+			*Message >> QuickSlotBarSlotSwapIndexB;
+
+			Message->Free();
+
+			CPlayer* MyPlayer = Session->MyPlayer;
+
+#pragma region 퀵슬롯 A가 DB에 있는지 확인
+			// 해당 퀵슬롯 위치에 정보가 있는지 DB에서 확인
+			CDBConnection* DBQuickSlotACheckConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+			SP::CDBGameServerQuickSlotCheck QuickSlotACheck(*DBQuickSlotACheckConnection);
+			QuickSlotACheck.InAccountDBId(AccountId);
+			QuickSlotACheck.InPlayerDBId(PlayerId);
+			QuickSlotACheck.InQuickSlotBarIndex(QuickSlotBarSwapIndexA);
+			QuickSlotACheck.InQuickSlotBarSlotIndex(QuickSlotBarSlotSwapIndexA);
+						
+			WCHAR QuickSlotAKey[20] = { 0 };
+			int16 QuickSlotASkillType;
+			int8 QuickSlotASkillLevel;			
+			WCHAR QuickSlotASkillName[20] = { 0 };
+			int32 QuickSlotASkillCoolTime;
+			WCHAR QuickSlotASkillImagePath[100] = { 0 };
+			
+			QuickSlotACheck.OutQuickSlotKey(QuickSlotAKey);
+			QuickSlotACheck.OutQuickSlotSkillType(QuickSlotASkillType);
+			QuickSlotACheck.OutQuickSlotSkillLevel(QuickSlotASkillLevel);
+			QuickSlotACheck.OutQuickSlotSkillName(QuickSlotASkillName);
+			QuickSlotACheck.OutQuickSlotSkillCoolTime(QuickSlotASkillCoolTime);
+			QuickSlotACheck.OutQuickSlotSkillThumbnailImagePath(QuickSlotASkillImagePath);
+
+			QuickSlotACheck.Execute();
+
+			bool QuickSlotAFind = QuickSlotACheck.Fetch();
+
+			G_DBConnectionPool->Push(en_DBConnect::GAME, DBQuickSlotACheckConnection);
+			
+			// 스왑 요청 A 정보 셋팅
+			st_QuickSlotBarSlotInfo SwapAQuickSlotBarInfo;
+			SwapAQuickSlotBarInfo.AccountDBId = AccountId;
+			SwapAQuickSlotBarInfo.PlayerDBId = PlayerId;
+			SwapAQuickSlotBarInfo.QuickSlotBarIndex = QuickSlotBarSwapIndexB;
+			SwapAQuickSlotBarInfo.QuickSlotBarSlotIndex = QuickSlotBarSlotSwapIndexB;			
+			SwapAQuickSlotBarInfo.QuickBarSkillInfo._SkillType = (en_SkillType)QuickSlotASkillType;
+			SwapAQuickSlotBarInfo.QuickBarSkillInfo._SkillLevel = QuickSlotASkillLevel;
+			SwapAQuickSlotBarInfo.QuickBarSkillInfo._SkillName = QuickSlotASkillName;
+			SwapAQuickSlotBarInfo.QuickBarSkillInfo._SkillCoolTime = QuickSlotASkillCoolTime;
+			SwapAQuickSlotBarInfo.QuickBarSkillInfo._SkillImagePath = QuickSlotASkillImagePath;
+#pragma endregion
+#pragma region 퀵슬롯 B가 DB에 있는지 확인
+			// 해당 퀵슬롯 위치에 정보가 있는지 DB에서 확인
+			CDBConnection* DBQuickSlotBCheckConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+			SP::CDBGameServerQuickSlotCheck QuickSlotBCheck(*DBQuickSlotBCheckConnection);
+			QuickSlotBCheck.InAccountDBId(AccountId);
+			QuickSlotBCheck.InPlayerDBId(PlayerId);
+			QuickSlotBCheck.InQuickSlotBarIndex(QuickSlotBarSwapIndexB);
+			QuickSlotBCheck.InQuickSlotBarSlotIndex(QuickSlotBarSlotSwapIndexB);
+
+			WCHAR QuickSlotBKey[20] = { 0 };
+			int16 QuickSlotBSkillType;
+			int8 QuickSlotBSkillLevel;
+			WCHAR QuickSlotBSkillName[20] = { 0 };
+			int32 QuickSlotBSkillCoolTime;
+			WCHAR QuickSlotBSkillImagePath[100] = { 0 };
+
+			QuickSlotBCheck.OutQuickSlotKey(QuickSlotBKey);
+			QuickSlotBCheck.OutQuickSlotSkillType(QuickSlotBSkillType);
+			QuickSlotBCheck.OutQuickSlotSkillLevel(QuickSlotBSkillLevel);
+			QuickSlotBCheck.OutQuickSlotSkillName(QuickSlotBSkillName);
+			QuickSlotBCheck.OutQuickSlotSkillCoolTime(QuickSlotBSkillCoolTime);
+			QuickSlotBCheck.OutQuickSlotSkillThumbnailImagePath(QuickSlotBSkillImagePath);
+
+			QuickSlotBCheck.Execute();
+
+			bool QuickSlotBFind = QuickSlotBCheck.Fetch();
+
+			G_DBConnectionPool->Push(en_DBConnect::GAME, DBQuickSlotBCheckConnection);
+			
+			// 스왑 요청 B 정보 셋팅
+			st_QuickSlotBarSlotInfo SwapBQuickSlotBarInfo;
+			SwapBQuickSlotBarInfo.AccountDBId = AccountId;
+			SwapBQuickSlotBarInfo.PlayerDBId = PlayerId;
+			SwapBQuickSlotBarInfo.QuickSlotBarIndex = QuickSlotBarSwapIndexA;
+			SwapBQuickSlotBarInfo.QuickSlotBarSlotIndex = QuickSlotBarSlotSwapIndexA;			
+			SwapBQuickSlotBarInfo.QuickBarSkillInfo._SkillType = (en_SkillType)QuickSlotBSkillType;
+			SwapBQuickSlotBarInfo.QuickBarSkillInfo._SkillLevel = QuickSlotBSkillLevel;
+			SwapBQuickSlotBarInfo.QuickBarSkillInfo._SkillName = QuickSlotBSkillName;
+			SwapBQuickSlotBarInfo.QuickBarSkillInfo._SkillCoolTime = QuickSlotBSkillCoolTime;
+			SwapBQuickSlotBarInfo.QuickBarSkillInfo._SkillImagePath = QuickSlotBSkillImagePath;
+
+			SwapAQuickSlotBarInfo.QuickSlotKey = QuickSlotBKey;
+			SwapBQuickSlotBarInfo.QuickSlotKey = QuickSlotAKey;
+#pragma endregion
+
+#pragma region DB에서 퀵슬롯 스왑
+			int16 ASkillType = (int16)SwapAQuickSlotBarInfo.QuickBarSkillInfo._SkillType;
+			int16 BSkillType = (int16)SwapBQuickSlotBarInfo.QuickBarSkillInfo._SkillType;
+
+			CDBConnection* DBQuickSlotSwapConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+			SP::CDBGameServerQuickSlotSwap QuickSlotSwap(*DBQuickSlotSwapConnection);
+			QuickSlotSwap.InAccountDBId(AccountId);
+			QuickSlotSwap.InPlayerDBId(PlayerId);
+			
+			QuickSlotSwap.InAQuickSlotBarIndex(SwapBQuickSlotBarInfo.QuickSlotBarIndex);
+			QuickSlotSwap.InAQuickSlotBarSlotIndex(SwapBQuickSlotBarInfo.QuickSlotBarSlotIndex);
+			QuickSlotSwap.InAQuickSlotSkillType(BSkillType);
+			QuickSlotSwap.InAQuickSlotSkillLevel(SwapBQuickSlotBarInfo.QuickBarSkillInfo._SkillLevel);
+			QuickSlotSwap.InAQuickSlotSKillName(SwapBQuickSlotBarInfo.QuickBarSkillInfo._SkillName);
+			QuickSlotSwap.InAQuickSlotSkillCoolTime(SwapBQuickSlotBarInfo.QuickBarSkillInfo._SkillCoolTime);
+			QuickSlotSwap.InAQuickSlotSKillImagePath(SwapBQuickSlotBarInfo.QuickBarSkillInfo._SkillImagePath);
+
+			QuickSlotSwap.InBQuickSlotBarIndex(SwapAQuickSlotBarInfo.QuickSlotBarIndex);
+			QuickSlotSwap.InBQuickSlotBarSlotIndex(SwapAQuickSlotBarInfo.QuickSlotBarSlotIndex);
+			QuickSlotSwap.InBQuickSlotSkillType(ASkillType);
+			QuickSlotSwap.InBQuickSlotSkillLevel(SwapAQuickSlotBarInfo.QuickBarSkillInfo._SkillLevel);
+			QuickSlotSwap.InBQuickSlotSKillName(SwapAQuickSlotBarInfo.QuickBarSkillInfo._SkillName);
+			QuickSlotSwap.InBQuickSlotSkillCoolTime(SwapAQuickSlotBarInfo.QuickBarSkillInfo._SkillCoolTime);
+			QuickSlotSwap.InBQuickSlotSKillImagePath(SwapAQuickSlotBarInfo.QuickBarSkillInfo._SkillImagePath);
+
+			bool QuickSlotSwapSuccess = QuickSlotSwap.Execute();
+			if (QuickSlotSwapSuccess == true)
+			{
+				// 캐릭터에서 퀵슬롯 스왑
+				MyPlayer->_QuickSlotManager.SwapQuickSlot(SwapBQuickSlotBarInfo, SwapAQuickSlotBarInfo);
+				
+				// 클라에게 결과 전송
+				CMessage* ResQuickSlotSwapPacket = MakePacketResQuickSlotSwap(AccountId, PlayerId, SwapBQuickSlotBarInfo, SwapAQuickSlotBarInfo);
+				SendPacket(MyPlayer->_SessionId, ResQuickSlotSwapPacket);
+				ResQuickSlotSwapPacket->Free();
+			}
+#pragma endregion			
+		} while (0);		
 	}
 
 	ReturnSession(Session);
@@ -3133,6 +3427,26 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CMessage* Message)
 		SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMagicPacket);
 		ResMagicPacket->Free();
 	}
+
+	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcTimerCoolTimeEnd(int64 SessionId, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionId);
+
+	if (Session)
+	{
+		int16 SkillType;
+		*Message >> SkillType;
+
+		Message->Free();
+
+		st_SkillInfo* SkillInfo = Session->MyPlayer->_SkillBox.FindSkill((en_SkillType)SkillType);
+		SkillInfo->CanSkillUse = true;
+	}
+
+	ReturnSession(Session);
 }
 
 CMessage* CGameServer::MakePacketResClientConnected()
@@ -3541,9 +3855,118 @@ CMessage* CGameServer::MakePacketQuickSlotCreate(int8 QuickSlotBarSize, int8 Qui
 	return ResQuickSlotCreateMessage;
 }
 
-// int64 AccountId
-// int32 PlayerDBId
-// char Dir
+CMessage* CGameServer::MakePacketError(int64 PlayerId, en_ErrorType ErrorType)
+{
+	CMessage* ResErrorMessage = CMessage::Alloc();
+	if (ResErrorMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResErrorMessage->Clear();
+
+	*ResErrorMessage << (int16)en_PACKET_S2C_ERROR;
+	*ResErrorMessage << PlayerId;
+	*ResErrorMessage << (int16)ErrorType;
+
+	return ResErrorMessage;
+}
+
+CMessage* CGameServer::MakePacketCoolTime(int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, float SkillCoolTime, float SkillCoolTimeSpeed)
+{
+	CMessage* ResCoolTimeMessage = CMessage::Alloc();
+	if (ResCoolTimeMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResCoolTimeMessage->Clear();
+
+	*ResCoolTimeMessage << (int16)en_PACKET_S2C_COOLTIME_START;
+	*ResCoolTimeMessage << PlayerId;
+	*ResCoolTimeMessage << QuickSlotBarIndex;
+	*ResCoolTimeMessage << QuickSlotBarSlotIndex;
+	*ResCoolTimeMessage << SkillCoolTime;
+	*ResCoolTimeMessage << SkillCoolTimeSpeed;
+
+	return ResCoolTimeMessage;
+}
+
+CMessage* CGameServer::MakePacketResQuickSlotSwap(int64 AccountId, int64 PlayerId, st_QuickSlotBarSlotInfo SwapAQuickSlotInfo, st_QuickSlotBarSlotInfo SwapBQuickSlotInfo)
+{
+	CMessage* ResQuickSlotSwapMessage = CMessage::Alloc();
+	if (ResQuickSlotSwapMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResQuickSlotSwapMessage->Clear();
+
+	*ResQuickSlotSwapMessage << (short)en_PACKET_S2C_QUICKSLOT_SWAP;
+	*ResQuickSlotSwapMessage << AccountId;
+	*ResQuickSlotSwapMessage << PlayerId;
+	
+	// AQuickSlotInfo
+	*ResQuickSlotSwapMessage << AccountId;
+	*ResQuickSlotSwapMessage << PlayerId;
+	
+	*ResQuickSlotSwapMessage << SwapAQuickSlotInfo.QuickSlotBarIndex;
+	*ResQuickSlotSwapMessage << SwapAQuickSlotInfo.QuickSlotBarSlotIndex;
+
+	// 퀵슬롯에 연동된 키
+	int8 AQuickSlotKeyLen = (int8)(SwapAQuickSlotInfo.QuickSlotKey.length() * 2);
+	*ResQuickSlotSwapMessage << AQuickSlotKeyLen;
+	ResQuickSlotSwapMessage->InsertData(SwapAQuickSlotInfo.QuickSlotKey.c_str(), AQuickSlotKeyLen);
+
+	// 스킬타입
+	*ResQuickSlotSwapMessage << (int16)SwapAQuickSlotInfo.QuickBarSkillInfo._SkillType;
+	// 스킬레벨
+	*ResQuickSlotSwapMessage << SwapAQuickSlotInfo.QuickBarSkillInfo._SkillLevel;
+
+	// 스킬이름
+	int8 AQuickSlotSkillNameLen = (int8)(SwapAQuickSlotInfo.QuickBarSkillInfo._SkillName.length() * 2);
+	*ResQuickSlotSwapMessage << AQuickSlotSkillNameLen;
+	ResQuickSlotSwapMessage->InsertData(SwapAQuickSlotInfo.QuickBarSkillInfo._SkillName.c_str(), AQuickSlotSkillNameLen);
+
+	// 스킬 쿨타임
+	*ResQuickSlotSwapMessage << SwapAQuickSlotInfo.QuickBarSkillInfo._SkillCoolTime;
+
+	int8 AQuickSlotSkillImagePathLen = (int8)(SwapAQuickSlotInfo.QuickBarSkillInfo._SkillImagePath.length() * 2);
+	*ResQuickSlotSwapMessage << AQuickSlotSkillImagePathLen;
+	ResQuickSlotSwapMessage->InsertData(SwapAQuickSlotInfo.QuickBarSkillInfo._SkillImagePath.c_str(), AQuickSlotSkillImagePathLen);
+
+	// BQuickSlotInfo
+	*ResQuickSlotSwapMessage << AccountId;
+	*ResQuickSlotSwapMessage << PlayerId;
+
+	*ResQuickSlotSwapMessage << SwapBQuickSlotInfo.QuickSlotBarIndex;
+	*ResQuickSlotSwapMessage << SwapBQuickSlotInfo.QuickSlotBarSlotIndex;
+
+	// 퀵슬롯에 연동된 키
+	int8 BQuickSlotKeyLen = (int8)(SwapBQuickSlotInfo.QuickSlotKey.length() * 2);
+	*ResQuickSlotSwapMessage << BQuickSlotKeyLen;
+	ResQuickSlotSwapMessage->InsertData(SwapBQuickSlotInfo.QuickSlotKey.c_str(), BQuickSlotKeyLen);
+
+	// 스킬타입
+	*ResQuickSlotSwapMessage << (int16)SwapBQuickSlotInfo.QuickBarSkillInfo._SkillType;
+	// 스킬레벨
+	*ResQuickSlotSwapMessage << SwapBQuickSlotInfo.QuickBarSkillInfo._SkillLevel;
+
+	// 스킬이름
+	int8 BQuickSlotSkillNameLen = (int8)(SwapBQuickSlotInfo.QuickBarSkillInfo._SkillName.length() * 2);
+	*ResQuickSlotSwapMessage << BQuickSlotSkillNameLen;
+	ResQuickSlotSwapMessage->InsertData(SwapBQuickSlotInfo.QuickBarSkillInfo._SkillName.c_str(), BQuickSlotSkillNameLen);
+
+	// 스킬 쿨타임
+	*ResQuickSlotSwapMessage << SwapBQuickSlotInfo.QuickBarSkillInfo._SkillCoolTime;
+
+	int8 BQuickSlotSkillImagePathLen = (int8)(SwapBQuickSlotInfo.QuickBarSkillInfo._SkillImagePath.length() * 2);
+	*ResQuickSlotSwapMessage << BQuickSlotSkillImagePathLen;
+	ResQuickSlotSwapMessage->InsertData(SwapBQuickSlotInfo.QuickBarSkillInfo._SkillImagePath.c_str(), BQuickSlotSkillImagePathLen);
+
+	return ResQuickSlotSwapMessage;
+}
+
 CMessage* CGameServer::MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_SkillType SkillType, int32 Damage, bool IsCritical)
 {
 	CMessage* ResAttackMessage = CMessage::Alloc();

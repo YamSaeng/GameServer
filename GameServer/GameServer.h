@@ -24,10 +24,11 @@ private:
 	HANDLE _NetworkThread;
 	HANDLE _DataBaseThread;
 	HANDLE _TimerJobThread;
+	HANDLE _LogicThread;
 
 	HANDLE _AuthThreadWakeEvent;
 	HANDLE _NetworkThreadWakeEvent;	
-	HANDLE _TimerThreadWakeEvent;
+	HANDLE _TimerThreadWakeEvent;	
 
 	// AuthThread 종료용 변수
 	bool _AuthThreadEnd;
@@ -35,6 +36,8 @@ private:
 	bool _NetworkThreadEnd;
 	// DataBaseThread 종료용 변수
 	bool _DataBaseThreadEnd;
+	// LogicThread 종료용 변수
+	bool _LogicThreadEnd;
 	// TimerJobThread 종료용 변수
 	bool _TimerJobThreadEnd;
 
@@ -45,6 +48,7 @@ private:
 	static unsigned __stdcall NetworkThreadProc(void* Argument);
 	static unsigned __stdcall DataBaseThreadProc(void* Argument);
 	static unsigned __stdcall TimerJobThreadProc(void* Argument);
+	static unsigned __stdcall LogicThreadProc(void* Argument);
 	static unsigned __stdcall HeartBeatCheckThreadProc(void* Argument);
 
 	void CreateNewClient(int64 SessionId);
@@ -74,6 +78,7 @@ private:
 	void PacketProcReqItemToInventory(int64 SessionId, CMessage* Message);
 	void PacketProcReqItemSwap(int64 SessionId, CMessage* Message);
 	void PacketProcReqQuickSlotSave(int64 SessionId, CMessage* Message);
+	void PacketProcReqQuickSlotSwap(int64 SessionId, CMessage* Message);
 	void PacketProcReqSectorMove(int64 SessionID, CMessage* Message);
 	void PacketProcReqMessage(int64 SessionID, CMessage* Message);
 	void PacketProcReqHeartBeat(int64 SessionID, CMessage* Message);
@@ -96,10 +101,12 @@ private:
 	void PacketProcReqDBGoldSave(int64 SessionId, CMessage* Message);
 	void PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Message);
 	void PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CMessage* Message);
+	void PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Message);
 
 
 	void PacketProcTimerAttackEnd(int64 SessionId, CMessage* Message);
 	void PacketProcTimerSpellEnd(int64 SessionId, CMessage* Message);
+	void PacketProcTimerCoolTimeEnd(int64 SessionId, CMessage* Message);
 
 	//----------------------------------------------------------------
 	//패킷조합 함수
@@ -132,6 +139,9 @@ private:
 	CMessage* MakePacketResItemSwap(int64 AccountId, int64 ObjectId, st_ItemInfo SwapAItemInfo, st_ItemInfo SwapBItemInfo);
 	CMessage* MakePacketResQuickSlotBarSlotUpdate(st_QuickSlotBarSlotInfo QuickSlotBarSlotInfo);
 	CMessage* MakePacketQuickSlotCreate(int8 QuickSlotBarSize, int8 QuickSlotBarSlotSize, vector<st_QuickSlotBarSlotInfo> QuickslotBarSlotInfos);
+	CMessage* MakePacketError(int64 PlayerId, en_ErrorType ErrorType);
+	CMessage* MakePacketCoolTime(int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, float SkillCoolTime, float SkillCoolTimeSpeed);
+	CMessage* MakePacketResQuickSlotSwap(int64 AccountId, int64 PlayerId, st_QuickSlotBarSlotInfo SwapAQuickSlotInfo, st_QuickSlotBarSlotInfo SwapBQuickSlotInfo);
 public:
 	CMessage* MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_SkillType SkillType, int32 Damage, bool IsCritical);
 	CMessage* MakePacketResMagic(int64 ObjectId, bool SpellStart, en_SkillType SkillType = en_SkillType::SKILL_TYPE_NONE, float SpellTime = 0.0f);
