@@ -68,10 +68,11 @@ struct st_DropData
 
 struct st_MonsterData
 {	
-	int32 _MonsterDataId; // 몬스터 번호
-	string _MonsterName;  // 몬스터 이름
-	st_PlayerStatusData _MonsterStatInfo; // 몬스터 스탯 정보	
-	vector<st_DropData> _DropItems; // 몬스터가 드랍하는 아이템 정보
+	int32 MonsterDataId; // 몬스터 번호
+	string MonsterName;  // 몬스터 이름
+	st_PlayerStatusData MonsterStatInfo; // 몬스터 스탯 정보	
+	vector<st_DropData> DropItems; // 몬스터가 드랍하는 아이템 정보
+	int16 GetDPPoint;
 };
 
 struct st_SkillData

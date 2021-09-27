@@ -182,8 +182,8 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 		int MonsterDataId = Filed["MonsterDataId"].GetInt();
 		string Name = Filed["Name"].GetString();
 				
-		MonsterData->_MonsterDataId = MonsterDataId;
-		MonsterData->_MonsterName = Name;									
+		MonsterData->MonsterDataId = MonsterDataId;
+		MonsterData->MonsterName = Name;									
 
 		for (auto& MonsterStatInfoFiled : Filed["MonsterStatInfo"].GetArray())
 		{
@@ -196,17 +196,19 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			int SearchCellDistance = MonsterStatInfoFiled["SearchCellDistance"].GetInt();
 			int ChaseCellDistance = MonsterStatInfoFiled["ChaseCellDistance"].GetInt();
 			int AttackRange = MonsterStatInfoFiled["AttackRange"].GetInt();
+			int16 GetDPPoint = (int16)MonsterStatInfoFiled["GetDPPoint"].GetInt();
 			int TotalExp = MonsterStatInfoFiled["TotalExp"].GetInt();
 
-			MonsterData->_MonsterStatInfo.Level = Level;
-			MonsterData->_MonsterStatInfo.MaxHP = MaxHP;
-			MonsterData->_MonsterStatInfo.MinAttackDamage = MinAttackDamage;
-			MonsterData->_MonsterStatInfo.MaxAttackDamage = MaxAttackDamage;
-			MonsterData->_MonsterStatInfo.CriticalPoint = CriticalPoint;
-			MonsterData->_MonsterStatInfo.Speed = Speed;
-			MonsterData->_MonsterStatInfo.SearchCellDistance = SearchCellDistance;
-			MonsterData->_MonsterStatInfo.ChaseCellDistance = ChaseCellDistance;
-			MonsterData->_MonsterStatInfo.AttackRange = AttackRange;
+			MonsterData->MonsterStatInfo.Level = Level;
+			MonsterData->MonsterStatInfo.MaxHP = MaxHP;
+			MonsterData->MonsterStatInfo.MinAttackDamage = MinAttackDamage;
+			MonsterData->MonsterStatInfo.MaxAttackDamage = MaxAttackDamage;
+			MonsterData->MonsterStatInfo.CriticalPoint = CriticalPoint;
+			MonsterData->MonsterStatInfo.Speed = Speed;
+			MonsterData->MonsterStatInfo.SearchCellDistance = SearchCellDistance;
+			MonsterData->MonsterStatInfo.ChaseCellDistance = ChaseCellDistance;
+			MonsterData->MonsterStatInfo.AttackRange = AttackRange;
+			MonsterData->GetDPPoint = GetDPPoint;
 		}
 
 		for (auto& DropDataFiled : Filed["DropData"].GetArray())
@@ -222,10 +224,10 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			DropData.MinCount = MinCount;
 			DropData.MaxCount = MaxCount;
 
-			MonsterData->_DropItems.push_back(DropData);
+			MonsterData->DropItems.push_back(DropData);
 		}	
 
-		_Monsters.insert(pair<int32, st_MonsterData*>(MonsterData->_MonsterDataId,MonsterData));
+		_Monsters.insert(pair<int32, st_MonsterData*>(MonsterData->MonsterDataId,MonsterData));
 	}
 }
 

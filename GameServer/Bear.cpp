@@ -14,18 +14,20 @@ CBear::CBear()
 	st_MonsterData MonsterData = *(*FindMonsterStat).second;
 
 	// ½ºÅÈ ¼ÂÆÃ		
-	_GameObjectInfo.ObjectName = (LPWSTR)CA2W(MonsterData._MonsterName.c_str());
-	_GameObjectInfo.ObjectStatInfo.MinAttackDamage = MonsterData._MonsterStatInfo.MinAttackDamage;
-	_GameObjectInfo.ObjectStatInfo.MaxAttackDamage = MonsterData._MonsterStatInfo.MaxAttackDamage;
-	_GameObjectInfo.ObjectStatInfo.CriticalPoint = MonsterData._MonsterStatInfo.CriticalPoint;
-	_GameObjectInfo.ObjectStatInfo.MaxHP = MonsterData._MonsterStatInfo.MaxHP;
-	_GameObjectInfo.ObjectStatInfo.HP = MonsterData._MonsterStatInfo.MaxHP;
-	_GameObjectInfo.ObjectStatInfo.Level = MonsterData._MonsterStatInfo.Level;
-	_GameObjectInfo.ObjectStatInfo.Speed = MonsterData._MonsterStatInfo.Speed;	
+	_GameObjectInfo.ObjectName = (LPWSTR)CA2W(MonsterData.MonsterName.c_str());
+	_GameObjectInfo.ObjectStatInfo.MinAttackDamage = MonsterData.MonsterStatInfo.MinAttackDamage;
+	_GameObjectInfo.ObjectStatInfo.MaxAttackDamage = MonsterData.MonsterStatInfo.MaxAttackDamage;
+	_GameObjectInfo.ObjectStatInfo.CriticalPoint = MonsterData.MonsterStatInfo.CriticalPoint;
+	_GameObjectInfo.ObjectStatInfo.MaxHP = MonsterData.MonsterStatInfo.MaxHP;
+	_GameObjectInfo.ObjectStatInfo.HP = MonsterData.MonsterStatInfo.MaxHP;
+	_GameObjectInfo.ObjectStatInfo.Level = MonsterData.MonsterStatInfo.Level;
+	_GameObjectInfo.ObjectStatInfo.Speed = MonsterData.MonsterStatInfo.Speed;	
 
-	_SearchCellDistance = MonsterData._MonsterStatInfo.SearchCellDistance;
-	_ChaseCellDistance = MonsterData._MonsterStatInfo.ChaseCellDistance;
-	_AttackRange = MonsterData._MonsterStatInfo.AttackRange;
+	_SearchCellDistance = MonsterData.MonsterStatInfo.SearchCellDistance;
+	_ChaseCellDistance = MonsterData.MonsterStatInfo.ChaseCellDistance;
+	_AttackRange = MonsterData.MonsterStatInfo.AttackRange;
+
+	_GetDPPoint = MonsterData.GetDPPoint;
 }
 
 CBear::~CBear()
@@ -203,6 +205,9 @@ void CBear::OnDead(CGameObject* Killer)
 
 	G_ObjectManager->ItemSpawn(Killer->_GameObjectInfo.ObjectId, Killer->_GameObjectInfo.ObjectType, GetCellPosition(), en_MonsterDataType::BEAR_DATA);
 	
+	Killer->_GameObjectInfo.ObjectStatInfo.DP += _GetDPPoint;
+
+	BroadCastPacket(en_PACKET_S2C_CHANGE_OBJECT_STAT);
 	BroadCastPacket(en_PACKET_S2C_DIE);		
 
 	G_ObjectManager->Remove(this, 1);	

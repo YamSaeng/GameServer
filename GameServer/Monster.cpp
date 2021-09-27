@@ -51,7 +51,7 @@ void CMonster::OnDamaged(CGameObject* Attacker, int32 Damage)
 	CGameObject::OnDamaged(Attacker, Damage);
 	
 	_Target = (CPlayer*)Attacker;	
-
+	
 	if (_GameObjectInfo.ObjectStatInfo.HP == 0)
 	{
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;

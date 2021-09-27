@@ -14,6 +14,7 @@
           "SearchCellDistance": 10,
           "ChaseCellDistance": 10,
           "AttackRange": 1,
+          "GetDPPoint": 10,
           "TotalExp": 10
         }
       ],
@@ -46,6 +47,7 @@
           "SearchCellDistance": 15,
           "ChaseCellDistance": 28,
           "AttackRange": 1,
+          "GetDPPoint": 20,
           "TotalExp": 20
         }
       ],
