@@ -108,17 +108,21 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 		MaterialData->ItemName = ItemName;
 
 		ItemName.assign(MaterialData->ItemName.begin(), MaterialData->ItemName.end());
-		if (ItemName == "Leather")
+		if (ItemName == "°õ °¡Á×")
 		{
 			MaterialData->ItemType = en_ItemType::ITEM_TYPE_LEATHER;
 		}
-		else if (ItemName == "SlimeGel")
+		else if (ItemName == "½½¶óÀÓÁ©¸®")
 		{
 			MaterialData->ItemType = en_ItemType::ITEM_TYPE_SLIMEGEL;
 		}
-		else if (ItemName == "BronzeCoin")
+		else if (ItemName == "µ¿Àü")
 		{
 			MaterialData->ItemType = en_ItemType::ITEM_TYPE_BRONZE_COIN;
+		}
+		else if (ItemName == "Åë³ª¹«")
+		{
+			MaterialData->ItemType = en_ItemType::ITEM_TYPE_WOOD_LOG;
 		}
 
 		MaterialData->ItemConsumableType = en_ConsumableType::NONE;		
@@ -139,22 +143,28 @@ void CDataManager::LoadDataStatus(wstring LoadFileName)
 
 	for (auto& Filed : Document["Status"].GetArray())
 	{
+		int16 PlayerType = (int16)Filed["PlayerType"].GetInt();
 		int Level = Filed["Level"].GetInt();
 		int MaxHP = Filed["MaxHP"].GetInt();
+		int MaxMP = Filed["MaxMP"].GetInt();
+		int MaxDP = Filed["MaxDP"].GetInt();
 		int MinAttackDamage = Filed["MinAttackDamage"].GetInt();
 		int MaxAttackDamage = Filed["MaxAttackDamage"].GetInt();
 		int16 CriticalPoint = (int16)(Filed["CriticalPoint"].GetInt());
 		float Speed = Filed["Speed"].GetFloat();		
 
-		st_StatusData* StatusData = new st_StatusData();
+		st_PlayerStatusData* StatusData = new st_PlayerStatusData();
+		StatusData->PlayerType = PlayerType;
 		StatusData->Level = Level;
 		StatusData->MaxHP = MaxHP;
+		StatusData->MaxMP = MaxMP;
+		StatusData->MaxDP = MaxDP;
 		StatusData->MinAttackDamage = MinAttackDamage;
 		StatusData->MaxAttackDamage = MaxAttackDamage;
 		StatusData->CriticalPoint = CriticalPoint;
 		StatusData->Speed = Speed;
 
-		_Status.insert(pair<int32, st_StatusData*>(StatusData->Level, StatusData));		
+		_Status.insert(pair<int16, st_PlayerStatusData*>(StatusData->PlayerType, StatusData));
 	}
 }
 

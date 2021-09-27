@@ -817,8 +817,7 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 			{
 				break;
 			}			
-			
-			// 평타 스킬 예외처리 해야함
+						
 			// 요청한 스킬이 스킬창에 있는지 확인
 			st_SkillInfo* FindSkill = MyPlayer->_SkillBox.FindSkill((en_SkillType)ReqSkillType);
 			if (FindSkill->CanSkillUse == true)
@@ -2159,7 +2158,8 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 		{
 			// 요청한 ObjectType에 해당하는 캐릭터 정보 읽어옴
 			auto FindStatus = G_Datamanager->_Status.find(ReqGameObjectType);
-			st_StatusData NewCharacterStatus = *(*FindStatus).second;
+			st_PlayerStatusData NewCharacterStatus = *(*FindStatus).second;
+			int32 CurrentDP = 0;
 
 			// 앞서 읽어온 캐릭터 정보를 토대로 DB에 저장
 			// DBConnection Pool에서 DB연결을 위해서 하나를 꺼내온다.
@@ -2168,11 +2168,15 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			SP::CDBGameServerCreateCharacterPush NewCharacterPush(*NewCharacterPushDBConnection);
 			NewCharacterPush.InAccountID(Session->AccountId);
 			NewCharacterPush.InPlayerName(Session->CreateCharacterName);
-			NewCharacterPush.InPlayerType(ReqGameObjectType);
+			NewCharacterPush.InPlayerType(NewCharacterStatus.PlayerType);
 			NewCharacterPush.InPlayerIndex(ReqCharacterCreateSlotIndex);
 			NewCharacterPush.InLevel(NewCharacterStatus.Level);
 			NewCharacterPush.InCurrentHP(NewCharacterStatus.MaxHP);
 			NewCharacterPush.InMaxHP(NewCharacterStatus.MaxHP);
+			NewCharacterPush.InCurrentMP(NewCharacterStatus.MaxMP);
+			NewCharacterPush.InMaxMP(NewCharacterStatus.MaxMP);
+			NewCharacterPush.InCurrentDP(CurrentDP);
+			NewCharacterPush.InMaxDP(NewCharacterStatus.MaxDP);
 			NewCharacterPush.InMinAttack(NewCharacterStatus.MinAttackDamage);
 			NewCharacterPush.InMaxAttack(NewCharacterStatus.MaxAttackDamage);
 			NewCharacterPush.InCriticalPoint(NewCharacterStatus.CriticalPoint);

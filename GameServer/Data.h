@@ -39,11 +39,16 @@ struct st_MaterialData : public st_ItemData
 	int32 _MaxCount;
 };
 
-struct st_StatusData
+struct st_PlayerStatusData
 {
+	int16 PlayerType;
 	int32 Level;
 	int32 HP;
 	int32 MaxHP;
+	int32 MP;
+	int32 MaxMP;
+	int32 DP;
+	int32 MaxDP;
 	int32 MinAttackDamage;
 	int32 MaxAttackDamage;
 	int16 CriticalPoint;
@@ -65,7 +70,7 @@ struct st_MonsterData
 {	
 	int32 _MonsterDataId; // 몬스터 번호
 	string _MonsterName;  // 몬스터 이름
-	st_StatusData _MonsterStatInfo; // 몬스터 스탯 정보	
+	st_PlayerStatusData _MonsterStatInfo; // 몬스터 스탯 정보	
 	vector<st_DropData> _DropItems; // 몬스터가 드랍하는 아이템 정보
 };
 

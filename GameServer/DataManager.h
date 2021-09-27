@@ -9,7 +9,7 @@ class CDataManager
 {
 public:
 	map<int32, st_ItemData*> _Items;
-	map<int32, st_StatusData*> _Status;
+	map<int16, st_PlayerStatusData*> _Status;
 	map<int32, st_MonsterData*> _Monsters;
 	map<int32, st_SkillData*> _Skills;
 
