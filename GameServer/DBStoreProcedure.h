@@ -41,10 +41,10 @@ namespace SP
 	};
 
 	// DB에 새로운 캐릭 저장
-	class CDBGameServerCreateCharacterPush : public CDBBind<11, 0>
+	class CDBGameServerCreateCharacterPush : public CDBBind<15, 0>
 	{	
 	public:		
-		CDBGameServerCreateCharacterPush(CDBConnection& DBConnection) : CDBBind(DBConnection,L"{CALL dbo.spNewCharacterPush(?,?,?,?,?,?,?,?,?,?,?)}") {}
+		CDBGameServerCreateCharacterPush(CDBConnection& DBConnection) : CDBBind(DBConnection,L"{CALL dbo.spNewCharacterPush(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}") {}
 		void InAccountID(int64& AccountID) { BindParam(0, AccountID); }
 		void InPlayerName(wstring& PlayerName) { BindParam(1, PlayerName.c_str()); }
 		void InPlayerType(int16& PlayerType) { BindParam(2, PlayerType); }
@@ -52,10 +52,14 @@ namespace SP
 		void InLevel(int32& Level)  { BindParam(4, Level); }
 		void InCurrentHP(int32& CurrentHP) { BindParam(5, CurrentHP); }
 		void InMaxHP(int32& MaxHP) { BindParam(6, MaxHP); }
-		void InMinAttack(int32& MinAttack) { BindParam(7, MinAttack); }
-		void InMaxAttack(int32& MaxAttack) { BindParam(8, MaxAttack); }		
-		void InCriticalPoint(int16& CriticalPoint) { BindParam(9, CriticalPoint); }
-		void InSpeed(float Speed) { BindParam(10, Speed); }
+		void InCurrentMP(int32& CurrentMP) { BindParam(7, CurrentMP); }
+		void InMaxMP(int32& MaxMP) { BindParam(8, MaxMP); }
+		void InCurrentDP(int32& CurrentDP) { BindParam(9, CurrentDP); }
+		void InMaxDP(int32& MaxDP) { BindParam(10, MaxDP); }
+		void InMinAttack(int32& MinAttack) { BindParam(11, MinAttack); }
+		void InMaxAttack(int32& MaxAttack) { BindParam(12, MaxAttack); }		
+		void InCriticalPoint(int16& CriticalPoint) { BindParam(13, CriticalPoint); }
+		void InSpeed(float Speed) { BindParam(14, Speed); }
 	};
 
 	// 캐릭터 DBid 얻기

@@ -11,6 +11,10 @@
     <Column name="Level" type="int" notnull="true"/>
     <Column name="CurrentHP" type="int" notnull="true"/>
     <Column name="MaxHP" type="int" notnull="true"/>
+    <Column name="CurrentMP" type="int" notnull="true"/>
+    <Column name="MaxMP" type="int" notnull="true"/>
+    <Column name="CurrentDP" type="int" notnull="true"/>
+    <Column name="MaxDP" type="int" notnull="true"/>
     <Column name="MinAttack" type="int" notnull="true"/>
     <Column name="MaxAttack" type="int" notnull="true"/>
     <Column name="CriticalPoint" type="SmallInt" notnull="true"/>
@@ -122,13 +126,17 @@
     <Param name="@Level" type="int"/>
     <Param name="@CurrentHP" type="int"/>
     <Param name="@MaxHP" type="int"/>
+    <Param name="@CurrentMP" type="int"/>
+    <Param name="@MaxMP" type="int"/>
+    <Param name="@CurrentDP" type="int"/>
+    <Param name="@MaxDP" type="int"/>
     <Param name="@MinAttack" type="int"/>
     <Param name="@MaxAttack" type="int"/>
     <Param name="@CriticalPoint" type="SmallInt"/>
     <Param name="@Speed" type="float"/>
     <Body>
       <![CDATA[
-        INSERT INTO [dbo].[Player] VALUES ((@AccountId),(@PlayerName),(@PlayerType),(@PlayerIndex),(@Level),(@CurrentHP),(@MaxHP),(@MinAttack),(@MaxAttack),(@CriticalPoint),(@Speed))        
+        INSERT INTO [dbo].[Player] VALUES ((@AccountId),(@PlayerName),(@PlayerType),(@PlayerIndex),(@Level),(@CurrentHP),(@MaxHP),(@CurrentMP),(@MaxMP),(@CurrentDP),(@MaxDP),(@MinAttack),(@MaxAttack),(@CriticalPoint),(@Speed))        
       ]]>
     </Body>
   </Procedure>
