@@ -218,13 +218,12 @@ enum en_PACKET_TYPE
 	en_PACKET_S2C_DESPAWN,
 	
 	//------------------------------------------------------------
-	// 게임서버 HP 변경
+	// 게임서버 오브젝트 스탯 변경
 	// int64 AccountId
 	// int32 PlayerDBId
-	// int32 CurrentHP
-	// int32 MaxHP
+	// st_StatInfo ChangeStatInfo
 	//------------------------------------------------------------
-	en_PACKET_S2C_CHANGE_HP,
+	en_PACKET_S2C_CHANGE_OBJECT_STAT,
 	
 	//------------------------------------------------------------
 	// 게임서버 마우스 위치 캐릭터 정보 요청	
