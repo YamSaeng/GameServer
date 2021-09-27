@@ -207,6 +207,11 @@ void CBear::OnDead(CGameObject* Killer)
 	
 	Killer->_GameObjectInfo.ObjectStatInfo.DP += _GetDPPoint;
 
+	if (Killer->_GameObjectInfo.ObjectStatInfo.DP >= Killer->_GameObjectInfo.ObjectStatInfo.MaxDP)
+	{
+		Killer->_GameObjectInfo.ObjectStatInfo.DP = Killer->_GameObjectInfo.ObjectStatInfo.MaxDP;
+	}
+
 	BroadCastPacket(en_PACKET_S2C_CHANGE_OBJECT_STAT);
 	BroadCastPacket(en_PACKET_S2C_DIE);		
 
