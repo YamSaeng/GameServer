@@ -217,8 +217,8 @@ namespace SP
 		void InAccoountId(int64& AccountDBId) { BindParam(0, AccountDBId); }
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
 		void InGoldCoin(int64& GoldCoin) { BindParam(2, GoldCoin); }
-		void InSliverCoin(int8& SliverCoin) { BindParam(3, SliverCoin); }
-		void InBronzeCoin(int8& BronzeCoin) { BindParam(4, BronzeCoin); }
+		void InSliverCoin(int16& SliverCoin) { BindParam(3, SliverCoin); }
+		void InBronzeCoin(int16& BronzeCoin) { BindParam(4, BronzeCoin); }
 	};
 
 	// GoldTable¿¡ ÀÖ´Â Gold ±Ü¾î¿È
@@ -230,8 +230,8 @@ namespace SP
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
 
 		void OutGoldCoin(int64& GoldCoin) { BindCol(0, GoldCoin); }
-		void OutSliverCoin(int8& SliverCoin) { BindCol(1, SliverCoin); }
-		void OutBronzeCoin(int8& BronzeCoin) { BindCol(2, BronzeCoin); }
+		void OutSliverCoin(int16& SliverCoin) { BindCol(1, SliverCoin); }
+		void OutBronzeCoin(int16& BronzeCoin) { BindCol(2, BronzeCoin); }
 	};
 	
 	// ItemTable¿¡ ÀÖ´Â Item ¸ðµÎ ±Ü¾î¿È

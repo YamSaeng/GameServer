@@ -65,8 +65,8 @@
     <Column name="AccountDBId" type="BigInt" notnull="true"/>
     <Column name="PlayerDBId" type="BigInt" notnull="true"/>
     <Column name="GoldCoin" type="BigInt" notnull="true"/>
-    <Column name="SliverCoin" type="TinyInt" notnull="true"/>
-    <Column name="BronzeCoin" type="TinyInt" notnull="true"/>
+    <Column name="SliverCoin" type="SmallInt" notnull="true"/>
+    <Column name="BronzeCoin" type="SmallInt" notnull="true"/>
     <Index type="clustered">
       <PrimaryKey/>
       <Column name="PlayerDBId"/>
@@ -168,8 +168,8 @@
     <Param name="@AccountDBId" type="BigInt"/>
     <Param name="@PlayerDBId" type="BigInt"/>    
     <Param name="@GoldCount" type="BigInt"/>
-    <Param name="@SliverCount" type="TinyInt"/>
-    <Param name="@BronzeCount" type="TinyInt"/>
+    <Param name="@SliverCount" type="SmallInt"/>
+    <Param name="@BronzeCount" type="SmallInt"/>
     <Body>
       <![CDATA[
         UPDATE [dbo].[Gold] SET GoldCoin = (@GoldCount), SliverCoin = (@SliverCount), BronzeCoin = (@BronzeCount) WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
