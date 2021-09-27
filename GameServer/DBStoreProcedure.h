@@ -14,7 +14,7 @@ namespace SP
 	};
 
 	// AccountID를 기준으로 클라가 소유하고 있는 캐릭터를 찾는다.
-	class CDBGameServerPlayersGet : public CDBBind<1, 11>
+	class CDBGameServerPlayersGet : public CDBBind<1, 15>
 	{	
 	public:
 		CDBGameServerPlayersGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetPlayers(?)}") { }
@@ -25,11 +25,15 @@ namespace SP
 		void OutLevel(int32& Level) { BindCol(3, Level); }
 		void OutCurrentHP(int32& CurrentHP) { BindCol(4, CurrentHP); }
 		void OutMaxHP(int32& MaxHP) { BindCol(5, MaxHP); }
-		void OutMinAttack(int32& MinAttack) { BindCol(6, MinAttack); }
-		void OutMaxAttack(int32& MaxAttack) { BindCol(7, MaxAttack); }
-		void OutCriticalPoint(int16& CriticalPoint) { BindCol(8, CriticalPoint); }
-		void OutSpeed(float& Speed) { BindCol(9, Speed); }
-		void OutPlayerObjectType(int16& ObjectType) { BindCol(10, ObjectType); }
+		void OutCurrentMP(int32& CurrentMP) { BindCol(6, CurrentMP); }
+		void OutMaxMP(int32& MaxMP) { BindCol(7, MaxMP); }
+		void OutCurrentDP(int32& CurrentDP) { BindCol(8, CurrentDP); }
+		void OutMaxDP(int32& MaxDP) { BindCol(9, MaxDP); }
+		void OutMinAttack(int32& MinAttack) { BindCol(10, MinAttack); }
+		void OutMaxAttack(int32& MaxAttack) { BindCol(11, MaxAttack); }
+		void OutCriticalPoint(int16& CriticalPoint) { BindCol(12, CriticalPoint); }
+		void OutSpeed(float& Speed) { BindCol(13, Speed); }
+		void OutPlayerObjectType(int16& ObjectType) { BindCol(14, ObjectType); }
 	};
 
 	// DB에 입력한 해당 캐릭터가 있는지 확인
