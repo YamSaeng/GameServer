@@ -13,8 +13,8 @@ public:
 	//-------------------
 	// 보유하고 있는 동전
 	//-------------------
-	int8 _BronzeCoinCount;
-	int8 _SliverCoinCount;
+	int16 _BronzeCoinCount;
+	int16 _SliverCoinCount;
 	int64 _GoldCoinCount;
 
 	CInventory();

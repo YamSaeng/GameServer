@@ -967,7 +967,7 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 					int32 ChoiceDamage = DamageChoiceRandom(Gen);
 					int32 FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
 
-					Target->OnDamaged(MyPlayer, FinalDamage);
+					Target->OnDamaged(MyPlayer, FinalDamage);					
 
 					// 데미지 시스템 메세지 생성
 					switch ((en_SkillType)ReqSkillType)
@@ -1007,7 +1007,7 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 					G_ObjectManager->GameServer->SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMyAttackOtherPacket);
 					ResMyAttackOtherPacket->Free();
 										
-					// HP 변경 메세지 전송
+					// 스탯 변경 메세지 전송
 					CMessage* ResChangeObjectStat = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectStatInfo);
 					G_ObjectManager->GameServer->SendPacketAroundSector(Target->GetCellPosition(), ResChangeObjectStat);
 					ResChangeObjectStat->Free();
@@ -2378,7 +2378,7 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 	int32 Sum = 0;
 
 	st_ItemData DropItemData;
-	for (st_DropData DropItem : MonsterData._DropItems)
+	for (st_DropData DropItem : MonsterData.DropItems)
 	{
 		Sum += DropItem.Probability;
 
@@ -2791,10 +2791,10 @@ void CGameServer::PacketProcReqDBGoldSave(int64 SessionId, CMessage* Message)
 		int64 GoldCoinCount;
 		*Message >> GoldCoinCount;
 
-		int8 SliverCoinCount;
+		int16 SliverCoinCount;
 		*Message >> SliverCoinCount;
 
-		int8 BronzeCoinCount;
+		int16 BronzeCoinCount;
 		*Message >> BronzeCoinCount;
 
 		int16 ItemCount;
@@ -2855,40 +2855,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 	{
 		do
 		{
-			InterlockedDecrement64(&Session->IOBlock->IOCount);
-
-			int64 GoldCoin = 0;
-			int8 SliverCoin = 0;
-			int8 BronzeCoin = 0;
-
-#pragma region 골드 정보 읽어오기
-			// 캐릭터가 소유하고 있었던 골드 정보를 GoldTable에서 읽어온다.
-			CDBConnection* DBCharacterGoldGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-			SP::CDBGameServerGoldGet CharacterGoldGet(*DBCharacterGoldGetConnection);
-			CharacterGoldGet.InAccountDBId(Session->MyPlayer->_AccountId);
-			CharacterGoldGet.InPlayerDBId(Session->MyPlayer->_GameObjectInfo.ObjectId);
-
-			CharacterGoldGet.OutGoldCoin(GoldCoin);
-			CharacterGoldGet.OutSliverCoin(SliverCoin);
-			CharacterGoldGet.OutBronzeCoin(BronzeCoin);
-
-			if (CharacterGoldGet.Execute() && CharacterGoldGet.Fetch())
-			{
-				// DB에서 읽어온 Gold를 Inventory에 저장한다.
-				Session->MyPlayer->_Inventory._GoldCoinCount = GoldCoin;
-				Session->MyPlayer->_Inventory._SliverCoinCount = SliverCoin;
-				Session->MyPlayer->_Inventory._BronzeCoinCount = BronzeCoin;
-
-				// DBConnection 반납하고
-				G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterGoldGetConnection);
-
-				// 클라에게 골드 정보를 보내준다.
-				CMessage* ResGoldSaveMeesage = MakePacketGoldSave(Session->MyPlayer->_AccountId, Session->MyPlayer->_GameObjectInfo.ObjectId, GoldCoin, SliverCoin, BronzeCoin, 0, 0, false);
-				SendPacket(Session->SessionId, ResGoldSaveMeesage);
-				ResGoldSaveMeesage->Free();
-			}
-#pragma endregion			
-			
+			InterlockedDecrement64(&Session->IOBlock->IOCount);			
 #pragma region 퀵슬롯 정보 가져오기
 			// 퀵슬롯 정보 초기화
 			Session->MyPlayer->_QuickSlotManager.Init();
@@ -3021,7 +2988,40 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			}
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterInventoryItemGetConnection);
-#pragma endregion
+#pragma endregion			
+
+#pragma region 골드 정보 읽어오기
+			// 캐릭터가 소유하고 있었던 골드 정보를 GoldTable에서 읽어온다.
+			CDBConnection* DBCharacterGoldGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+			SP::CDBGameServerGoldGet CharacterGoldGet(*DBCharacterGoldGetConnection);
+			CharacterGoldGet.InAccountDBId(Session->MyPlayer->_AccountId);
+			CharacterGoldGet.InPlayerDBId(Session->MyPlayer->_GameObjectInfo.ObjectId);
+			
+			int64 GoldCoin = 0;
+			int16 SliverCoin = 0;
+			int16 BronzeCoin = 0;
+
+			CharacterGoldGet.OutGoldCoin(GoldCoin);
+			CharacterGoldGet.OutSliverCoin(SliverCoin);
+			CharacterGoldGet.OutBronzeCoin(BronzeCoin);
+
+			if (CharacterGoldGet.Execute() && CharacterGoldGet.Fetch())
+			{
+				// DB에서 읽어온 Gold를 Inventory에 저장한다.
+				Session->MyPlayer->_Inventory._GoldCoinCount = GoldCoin;
+				Session->MyPlayer->_Inventory._SliverCoinCount = SliverCoin;
+				Session->MyPlayer->_Inventory._BronzeCoinCount = BronzeCoin;
+
+				// DBConnection 반납하고
+				G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterGoldGetConnection);
+
+				// 클라에게 골드 정보를 보내준다.
+				CMessage* ResGoldSaveMeesage = MakePacketGoldSave(Session->MyPlayer->_AccountId, Session->MyPlayer->_GameObjectInfo.ObjectId, GoldCoin, SliverCoin, BronzeCoin, 0, 0, false);
+				SendPacket(Session->SessionId, ResGoldSaveMeesage);
+				ResGoldSaveMeesage->Free();
+			}
+#pragma endregion			
+
 #pragma region 스킬 정보 읽어오기
 			// 캐릭터가 소유하고 있는 스킬 정보를 DB로부터 읽어온다.
 			CDBConnection* DBCharacterSkillGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
@@ -3696,7 +3696,7 @@ CMessage* CGameServer::MakePacketResMousePositionObjectInfo(int64 AccountId, int
 	return ResMousePositionObjectInfoPacket;
 }
 
-CMessage* CGameServer::MakePacketGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int8 SliverCount, int8 BronzeCount, int16 ItemCount, int16 ItemType, bool ItemGainPrint)
+CMessage* CGameServer::MakePacketGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int16 SliverCount, int16 BronzeCount, int16 ItemCount, int16 ItemType, bool ItemGainPrint)
 {
 	CMessage* ResGoldSaveMessage = CMessage::Alloc();
 	if (ResGoldSaveMessage == nullptr)
