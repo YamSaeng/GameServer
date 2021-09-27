@@ -140,10 +140,9 @@ void CGameObject::BroadCastPacket(en_PACKET_TYPE PacketType)
 			_GameObjectInfo.ObjectType,
 			_GameObjectInfo.ObjectPositionInfo.State);
 		break;	
-	case en_PACKET_TYPE::en_PACKET_S2C_CHANGE_HP:
-		ResPacket = G_ObjectManager->GameServer->MakePacketResChangeHP(_Target->_GameObjectInfo.ObjectId,
-			_Target->_GameObjectInfo.ObjectStatInfo.HP,
-			_Target->_GameObjectInfo.ObjectStatInfo.MaxHP);
+	case en_PACKET_TYPE::en_PACKET_S2C_CHANGE_OBJECT_STAT:
+		ResPacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_Target->_GameObjectInfo.ObjectId,
+			_Target->_GameObjectInfo.ObjectStatInfo);
 		break;
 	case en_PACKET_TYPE::en_PACKET_S2C_DIE:
 		ResPacket = G_ObjectManager->GameServer->MakePacketResDie(this->_GameObjectInfo.ObjectId);

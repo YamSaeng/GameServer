@@ -167,7 +167,7 @@ void CSlime::UpdateAttack()
 		ResSlimeAttackPacket->Free();
 
 		// 주위 플레이어들에게 데미지 적용 결과 전송
-		BroadCastPacket(en_PACKET_S2C_CHANGE_HP);
+		BroadCastPacket(en_PACKET_S2C_CHANGE_OBJECT_STAT);
 
 		// 0.8초마다 공격
 		_AttackTick = GetTickCount64() + 800;
