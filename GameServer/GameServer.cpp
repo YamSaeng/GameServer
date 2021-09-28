@@ -820,7 +820,7 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 						
 			// 요청한 스킬이 스킬창에 있는지 확인
 			st_SkillInfo* FindSkill = MyPlayer->_SkillBox.FindSkill((en_SkillType)ReqSkillType);
-			if (FindSkill->CanSkillUse == true)
+			if (FindSkill != nullptr && FindSkill->CanSkillUse == true)
 			{
 				// 스킬 지정
 				MyPlayer->_SkillType = (en_SkillType)ReqSkillType;
@@ -836,8 +836,7 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 				{
 				case en_SkillType::SKILL_TYPE_NONE:
 					break;
-				case en_SkillType::SKILL_KNIGHT_NORMAL:
-				case en_SkillType::SKILL_SHAMAN_NORMAL:
+				case en_SkillType::SKILL_NORMAL:
 					FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
 					Target = MyPlayer->_Channel->_Map->Find(FrontCell);
 					if (Target != nullptr)
@@ -870,6 +869,32 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 								ResSyncPosition->Free();
 							}
 						}
+						else
+						{
+							wstring ErrorNonSelectObjectString;
+
+							WCHAR ErrorMessage[100] = { 0 };
+
+							wsprintf(ErrorMessage, L"[%s] 대상과의 거리가 너무 멉니다. [거리 : %d ]", FindSkill->_SkillName.c_str(), Distance);
+							ErrorNonSelectObjectString = ErrorMessage;
+
+							CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_DISTANCE, ErrorNonSelectObjectString);
+							SendPacket(MyPlayer->_SessionId, ResErrorPacket);
+							ResErrorPacket->Free();
+						}
+					}
+					else
+					{
+						wstring ErrorDistance;
+
+						WCHAR ErrorMessage[100] = { 0 };
+
+						wsprintf(ErrorMessage, L"[%s] 대상을 선택하고 사용해야 합니다.", FindSkill->_SkillName.c_str());
+						ErrorDistance = ErrorMessage;
+
+						CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorDistance);
+						SendPacket(MyPlayer->_SessionId, ResErrorPacket);
+						ResErrorPacket->Free();
 					}
 				}
 				break;
@@ -924,6 +949,32 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 								ResSyncPosition->Free();
 							}
 						}
+						else
+						{
+							wstring ErrorDistance;
+
+							WCHAR ErrorMessage[100] = { 0 };
+
+							wsprintf(ErrorMessage, L"[%s] 대상과의 거리가 너무 멉니다. [거리 : %d ]", FindSkill->_SkillName.c_str(), Distance);
+							ErrorDistance = ErrorMessage;
+
+							CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_DISTANCE, ErrorDistance);
+							SendPacket(MyPlayer->_SessionId, ResErrorPacket);
+							ResErrorPacket->Free();
+						}
+					}
+					else
+					{
+						wstring ErrorNonSelectObjectString;
+
+						WCHAR ErrorMessage[100] = { 0 };
+
+						wsprintf(ErrorMessage, L"[%s] 대상을 선택하고 사용해야 합니다.", FindSkill->_SkillName.c_str());
+						ErrorNonSelectObjectString = ErrorMessage;
+
+						CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorNonSelectObjectString);
+						SendPacket(MyPlayer->_SessionId, ResErrorPacket);
+						ResErrorPacket->Free();
 					}
 				}
 				break;
@@ -975,7 +1026,7 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 					case en_SkillType::SKILL_TYPE_NONE:
 						CRASH("SkillType None");
 						break;
-					case en_SkillType::SKILL_KNIGHT_NORMAL:
+					case en_SkillType::SKILL_NORMAL:
 						wsprintf(SkillTypeMessage, L"%s가 일반공격을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
 						break;
 					case en_SkillType::SKILL_KNIGHT_CHOHONE:
@@ -986,10 +1037,7 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 						break;
 					case en_SkillType::SKILL_KNIGHT_SMASH_WAVE:
 						wsprintf(SkillTypeMessage, L"%s가 분쇄파동을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
-						break;
-					case en_SkillType::SKILL_SHAMAN_NORMAL:
-						wsprintf(SkillTypeMessage, L"%s가 일반공격을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
-						break;
+						break;				
 					default:
 						break;
 					}
@@ -1060,7 +1108,14 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 			}
 			else
 			{
-				CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_SKILL_COOLTIME);
+				wstring ErrorSkillCoolTime;				
+
+				WCHAR ErrorMessage[100] = { 0 };
+								
+				wsprintf(ErrorMessage, L"[%s] 재사용 대기시간이 완료되지 않았습니다.", FindSkill->_SkillName.c_str());
+				ErrorSkillCoolTime = ErrorMessage;
+
+				CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_SKILL_COOLTIME, ErrorSkillCoolTime);
 				SendPacket(MyPlayer->_SessionId, ResErrorPacket);
 				ResErrorPacket->Free();
 				break;
@@ -1137,96 +1192,150 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 
 				CGameObject* FindGameObject = nullptr;				
 
-				float SpellTime = 0.0f;				
+				float SpellCastingTime = 0.0f;				
 
-				// 스킬 타입 확인
-				switch ((en_SkillType)ReqSkillType)
-				{
-					// 돌격 자세
-				case en_SkillType::SKILL_KNIGHT_CHARGE_POSE:
-					MyPlayer->_SpellTick = GetTickCount() + 100;
-					SpellTime = 100.0f / 1000.0f;
-
-					Targets.push_back(MyPlayer);
-					break;
-					// 불꽃 작살
-				case en_SkillType::SKILL_SHAMNA_FLAME_HARPOON:
-					MyPlayer->_SpellTick = GetTickCount64() + 500;
-					SpellTime = 500.0f / 1000.0f;
-
-					// 타겟이 ObjectManager에 존재하는지 확인
-					FindGameObject = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType);
-					if (FindGameObject != nullptr)
-					{
-						Targets.push_back(FindGameObject);
-					}
-					break;
-					// 치유의 빛
-				case en_SkillType::SKILL_SHAMAN_HEALING_LIGHT:
-					MyPlayer->_SpellTick = GetTickCount64() + 1000;
-					
-					SpellTime = 1000.0f / 1000.0f;
-
-					FindGameObject = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType);
-					if (FindGameObject != nullptr)
-					{
-						Targets.push_back(FindGameObject);
-					}
-					break;
-					// 치유의 바람
-				case en_SkillType::SKILL_SHAMAN_HEALING_WIND:
-					MyPlayer->_SpellTick = GetTickCount64() + 1500;
-
-					SpellTime = 1500.0f / 1000.0f;
-
-					FindGameObject = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType);
-					if (FindGameObject != nullptr)
-					{
-						Targets.push_back(FindGameObject);
-					}
-					break;
-				}
-				
-				// 스펠창 시작
-				CMessage* ResMagicPacket = G_ObjectManager->GameServer->MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId, true, (en_SkillType)ReqSkillType, SpellTime);
-				G_ObjectManager->GameServer->SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMagicPacket);
-				ResMagicPacket->Free();
-
-				MyPlayer->_SkillType = (en_SkillType)ReqSkillType;
-
-				if (Targets.size() >= 1)
+				// 요청한 스킬이 스킬창에 있는지 확인
+				st_SkillInfo* FindSkill = MyPlayer->_SkillBox.FindSkill((en_SkillType)ReqSkillType);
+				if (FindSkill != nullptr && FindSkill->CanSkillUse)
 				{					
-					MyPlayer->SetTarget(Targets[0]);
-					
-					MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPELL;
+					// 스킬 타입 확인
+					switch ((en_SkillType)ReqSkillType)
+					{
+						// 돌격 자세
+					case en_SkillType::SKILL_KNIGHT_CHARGE_POSE:
+						MyPlayer->_SpellTick = GetTickCount() + 100;
+						SpellCastingTime = 100.0f / 1000.0f;
 
-					// 마법 스킬 모션 출력
-					CMessage* ResObjectStateChangePacket = MakePacketResObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
-					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateChangePacket);
-					ResObjectStateChangePacket->Free();					
+						Targets.push_back(MyPlayer);
+						break;
+						// 불꽃 작살
+					case en_SkillType::SKILL_SHAMNA_FLAME_HARPOON:
+						MyPlayer->_SpellTick = GetTickCount64() + 1000;
+						SpellCastingTime = 1000.0f / 1000.0f;
 
-					// TimerJob 등록
-					st_TimerJob* TimerJob = _TimerJobMemoryPool->Alloc();
-					TimerJob->ExecTick = MyPlayer->_SpellTick;
-					TimerJob->SessionId = MyPlayer->_SessionId;
-					TimerJob->Type = en_TimerJobType::TIMER_SPELL_END;		
+						// 타겟이 ObjectManager에 존재하는지 확인
+						FindGameObject = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType);
+						if (FindGameObject != nullptr)
+						{
+							Targets.push_back(FindGameObject);
+						}
+						break;
+						// 치유의 빛
+					case en_SkillType::SKILL_SHAMAN_HEALING_LIGHT:
+						MyPlayer->_SpellTick = GetTickCount64() + 1000;
 
-					AcquireSRWLockExclusive(&_TimerJobLock);
-					_TimerHeapJob->InsertHeap(TimerJob->ExecTick, TimerJob);
-					ReleaseSRWLockExclusive(&_TimerJobLock);
+						SpellCastingTime = 1000.0f / 1000.0f;
 
-					SetEvent(_TimerThreadWakeEvent);
+						FindGameObject = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType);
+						if (FindGameObject != nullptr)
+						{
+							Targets.push_back(FindGameObject);
+						}
+						break;
+						// 치유의 바람
+					case en_SkillType::SKILL_SHAMAN_HEALING_WIND:
+						MyPlayer->_SpellTick = GetTickCount64() + 1500;
+
+						SpellCastingTime = 1500.0f / 1000.0f;
+
+						FindGameObject = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType);
+						if (FindGameObject != nullptr)
+						{
+							Targets.push_back(FindGameObject);
+						}
+						break;
+					}
+
+					// 스펠창 시작
+					CMessage* ResMagicPacket = G_ObjectManager->GameServer->MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId, true, (en_SkillType)ReqSkillType, SpellCastingTime);
+					G_ObjectManager->GameServer->SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMagicPacket);
+					ResMagicPacket->Free();
+
+					MyPlayer->_SkillType = (en_SkillType)ReqSkillType;
+
+					if (Targets.size() >= 1)
+					{
+						MyPlayer->SetTarget(Targets[0]);
+
+						MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPELL;
+
+						// 마법 스킬 모션 출력
+						CMessage* ResObjectStateChangePacket = MakePacketResObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
+						SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateChangePacket);
+						ResObjectStateChangePacket->Free();
+
+						// TimerJob 등록
+						st_TimerJob* TimerJob = _TimerJobMemoryPool->Alloc();
+						TimerJob->ExecTick = MyPlayer->_SpellTick;
+						TimerJob->SessionId = MyPlayer->_SessionId;
+						TimerJob->Type = en_TimerJobType::TIMER_SPELL_END;
+
+						AcquireSRWLockExclusive(&_TimerJobLock);
+						_TimerHeapJob->InsertHeap(TimerJob->ExecTick, TimerJob);
+						ReleaseSRWLockExclusive(&_TimerJobLock);
+
+						SetEvent(_TimerThreadWakeEvent);
+
+						float SkillCoolTimee = FindSkill->_SkillCoolTime / 1000.0f;
+						// 클라에게 쿨타임 표시
+						CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(MyPlayer->_GameObjectInfo.ObjectId, QuickSlotBarindex, QuickSlotBarSlotIndex, SkillCoolTimee, 1.0f);
+						SendPacket(MyPlayer->_SessionId, ResCoolTimeStartPacket);
+						ResCoolTimeStartPacket->Free();
+
+						// 쿨타임 시간 동안 스킬 사용 못하게 막음
+						FindSkill->CanSkillUse = false;
+
+						// 스킬 쿨타임 얻어옴
+						auto FindSkilliterator = G_Datamanager->_Skills.find(ReqSkillType);
+						st_SkillData* ReqSkillData = (*FindSkilliterator).second;
+
+						// 스킬 쿨타임 스킬쿨타임 잡 등록
+						st_TimerJob* SkillCoolTimeTimerJob = _TimerJobMemoryPool->Alloc();
+						SkillCoolTimeTimerJob->ExecTick = GetTickCount64() + ReqSkillData->SkillCoolTime;
+						SkillCoolTimeTimerJob->SessionId = MyPlayer->_SessionId;
+						SkillCoolTimeTimerJob->Type = en_TimerJobType::TIMER_SKILL_COOLTIME_END;
+
+						CMessage* ResCoolTimeEndMessage = CMessage::Alloc();
+						ResCoolTimeEndMessage->Clear();
+
+						*ResCoolTimeEndMessage << ReqSkillType;
+						SkillCoolTimeTimerJob->Message = ResCoolTimeEndMessage;
+
+						AcquireSRWLockExclusive(&_TimerJobLock);
+						_TimerHeapJob->InsertHeap(SkillCoolTimeTimerJob->ExecTick, SkillCoolTimeTimerJob);
+						ReleaseSRWLockExclusive(&_TimerJobLock);
+
+						SetEvent(_TimerThreadWakeEvent);
+					}
+					else
+					{						
+						wstring ErrorNonSelectObjectString;
+
+						WCHAR ErrorMessage[100] = { 0 };
+
+						wsprintf(ErrorMessage, L"[%s] 대상을 선택하고 사용해야 합니다.", FindSkill->_SkillName.c_str());
+						ErrorNonSelectObjectString = ErrorMessage;
+
+						CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorNonSelectObjectString);
+						SendPacket(MyPlayer->_SessionId, ResErrorPacket);
+						ResErrorPacket->Free();
+					}
 				}
 				else
 				{
-					// 선택한 대상이 없다고 클라에게 알려줘야함
+					wstring ErrorSkillCoolTime;
+	
+					WCHAR ErrorMessage[100] = { 0 };
+
+					wsprintf(ErrorMessage, L"[%s] 재사용 대기시간이 완료되지 않았습니다.", FindSkill->_SkillName.c_str());
+					ErrorSkillCoolTime = ErrorMessage;
+
+					CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_SKILL_COOLTIME, ErrorSkillCoolTime);
+					SendPacket(MyPlayer->_SessionId, ResErrorPacket);
+					ResErrorPacket->Free();
+					break;
 				}
-			}
-			else
-			{
-				CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId,en_ErrorType::ERROR_NON_SELECT_OBJECT);
-				ResErrorPacket->Free();
-			}
+			}			
 		} while (0);		
 	}
 
@@ -3438,7 +3547,7 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CMessage* Message)
 		ResAttackMagicSystemMessagePacket->Free();
 
 		// HP 변경 전송
-		CMessage* ResChangeObjectStat = MakePacketResChangeObjectStat(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectStatInfo);
+		CMessage* ResChangeObjectStat = MakePacketResChangeObjectStat(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, MyPlayer->GetTarget()->_GameObjectInfo.ObjectStatInfo);
 		SendPacketAroundSector(MyPlayer->GetTarget()->GetCellPosition(), ResChangeObjectStat);
 		ResChangeObjectStat->Free();
 
@@ -3891,7 +4000,7 @@ CMessage* CGameServer::MakePacketQuickSlotCreate(int8 QuickSlotBarSize, int8 Qui
 	return ResQuickSlotCreateMessage;
 }
 
-CMessage* CGameServer::MakePacketError(int64 PlayerId, en_ErrorType ErrorType)
+CMessage* CGameServer::MakePacketError(int64 PlayerId, en_ErrorType ErrorType, wstring ErrorMessage)
 {
 	CMessage* ResErrorMessage = CMessage::Alloc();
 	if (ResErrorMessage == nullptr)
@@ -3904,6 +4013,11 @@ CMessage* CGameServer::MakePacketError(int64 PlayerId, en_ErrorType ErrorType)
 	*ResErrorMessage << (int16)en_PACKET_S2C_ERROR;
 	*ResErrorMessage << PlayerId;
 	*ResErrorMessage << (int16)ErrorType;
+
+	// 에러 메세지
+	int8 ErrorMessageLen = (int8)(ErrorMessage.length() * 2);
+	*ResErrorMessage << ErrorMessageLen;
+	ResErrorMessage->InsertData(ErrorMessage.c_str(), ErrorMessageLen);
 
 	return ResErrorMessage;
 }
