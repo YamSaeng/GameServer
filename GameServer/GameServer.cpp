@@ -2394,6 +2394,8 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 				ItemToInventory.Execute();
 			}			
 
+			int8 DefaultKey = 1;
+
 			// DB¿¡ Äü½½·Ô¹Ù »ý¼º
 			for (int8 SlotIndex = 0; SlotIndex < (int8)en_QuickSlotBar::QUICK_SLOT_BAR_SIZE; ++SlotIndex)
 			{
@@ -2416,7 +2418,14 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 				{
 					QuickSlotBarSlotIndex = i;
 
-					wsprintf(QuickSlotBarKeyString, L"%d", i + 1);
+					wsprintf(QuickSlotBarKeyString, L"%d", DefaultKey);
+					DefaultKey++;
+
+					if (DefaultKey == 10)
+					{
+						DefaultKey = 0;
+					}
+
 					QuickSlotBarKey = QuickSlotBarKeyString;
 
 					QuickSlotBarSlotCreate.InAccountDBId(AccountDBId);
