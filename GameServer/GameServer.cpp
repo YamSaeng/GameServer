@@ -1018,7 +1018,7 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResEffectPacket);
 					ResEffectPacket->Free();
 				}
-				break;
+				break;				
 				default:
 					break;
 				}
@@ -1048,7 +1048,7 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 
 					en_EffectType HitEffectType;
 
-					// 데미지 시스템 메세지 생성
+					// 시스템 메세지 생성
 					switch ((en_SkillType)ReqSkillType)
 					{
 					case en_SkillType::SKILL_TYPE_NONE:
@@ -1209,48 +1209,54 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 			}
 						
 			CPlayer* MyPlayer = Session->MyPlayer;
-			if (MyPlayer->_SelectTarget != nullptr)
-			{
-				int8 QuickSlotBarindex;
-				*Message >> QuickSlotBarindex;
 
-				int8 QuickSlotBarSlotIndex;
-				*Message >> QuickSlotBarSlotIndex;
+			int8 QuickSlotBarindex;
+			*Message >> QuickSlotBarindex;
 
-				// 공격한 방향
-				int8 ReqMoveDir;
-				*Message >> ReqMoveDir;
+			int8 QuickSlotBarSlotIndex;
+			*Message >> QuickSlotBarSlotIndex;
 
-				// 스킬 종류
-				int16 ReqSkillType;
-				*Message >> ReqSkillType;
+			// 공격한 방향
+			int8 ReqMoveDir;
+			*Message >> ReqMoveDir;
 
-				vector<CGameObject*> Targets;
+			// 스킬 종류
+			int16 ReqSkillType;
+			*Message >> ReqSkillType;
 
-				CGameObject* FindGameObject = nullptr;				
+			vector<CGameObject*> Targets;
 
-				float SpellCastingTime = 0.0f;				
+			CGameObject* FindGameObject = nullptr;
 
-				// 요청한 스킬이 스킬창에 있는지 확인
-				st_SkillInfo* FindSkill = MyPlayer->_SkillBox.FindSkill((en_SkillType)ReqSkillType);
-				if (FindSkill != nullptr && FindSkill->CanSkillUse)
-				{					
-					en_EffectType CastingEffectType;
+			float SpellCastingTime = 0.0f;
 
-					// 스킬 타입 확인
-					switch ((en_SkillType)ReqSkillType)
+			// 요청한 스킬이 스킬창에 있는지 확인
+			st_SkillInfo* FindSkill = MyPlayer->_SkillBox.FindSkill((en_SkillType)ReqSkillType);
+			if (FindSkill != nullptr && FindSkill->CanSkillUse)
+			{				
+				CMessage* ResEffectPacket = nullptr;
+				CMessage* ResMagicPacket = nullptr;
+				CMessage* ResErrorPacket = nullptr;
+
+				// 스킬 타입 확인
+				switch ((en_SkillType)ReqSkillType)
+				{
+					// 돌격 자세
+				case en_SkillType::SKILL_KNIGHT_CHARGE_POSE:
+					MyPlayer->_SpellTick = GetTickCount() + 100;
+					SpellCastingTime = 100.0f / 1000.0f;
+
+					Targets.push_back(MyPlayer);
+
+					// 이펙트 출력
+					ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_CHARGE_POSE);
+					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResEffectPacket);
+					ResEffectPacket->Free();
+					break;
+					// 불꽃 작살
+				case en_SkillType::SKILL_SHAMNA_FLAME_HARPOON:
+					if (MyPlayer->_SelectTarget != nullptr)
 					{
-						// 돌격 자세
-					case en_SkillType::SKILL_KNIGHT_CHARGE_POSE:
-						MyPlayer->_SpellTick = GetTickCount() + 100;
-						SpellCastingTime = 100.0f / 1000.0f;
-
-						Targets.push_back(MyPlayer);
-
-						CastingEffectType = en_EffectType::EFFECT_CHARGE_POSE;
-						break;
-						// 불꽃 작살
-					case en_SkillType::SKILL_SHAMNA_FLAME_HARPOON:
 						MyPlayer->_SpellTick = GetTickCount64() + 1000;
 						SpellCastingTime = 1000.0f / 1000.0f;
 
@@ -1260,23 +1266,74 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 						{
 							Targets.push_back(FindGameObject);
 						}
-						CastingEffectType = en_EffectType::EFFECT_TYPE_NONE;
-						break;
-						// 치유의 빛
-					case en_SkillType::SKILL_SHAMAN_HEALING_LIGHT:
-						MyPlayer->_SpellTick = GetTickCount64() + 1000;
 
-						SpellCastingTime = 1000.0f / 1000.0f;
+						// 스펠창 시작
+						ResMagicPacket = MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId, true, (en_SkillType)ReqSkillType, SpellCastingTime);
+						SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMagicPacket);
+						ResMagicPacket->Free();
 
+						MyPlayer->_SkillType = (en_SkillType)ReqSkillType;
+					}
+					else
+					{
+						wstring ErrorNonSelectObjectString;
+
+						WCHAR ErrorMessage[100] = { 0 };
+
+						wsprintf(ErrorMessage, L"[%s] 대상을 선택해야합니다.", FindSkill->_SkillName.c_str());
+						ErrorNonSelectObjectString = ErrorMessage;
+
+						ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorNonSelectObjectString);
+						SendPacket(MyPlayer->_SessionId, ResErrorPacket);
+						ResErrorPacket->Free();
+					}
+					break;
+					// 치유의 빛
+				case en_SkillType::SKILL_SHAMAN_HEALING_LIGHT:
+					MyPlayer->_SpellTick = GetTickCount64() + 1000;
+
+					SpellCastingTime = 1000.0f / 1000.0f;
+
+					if (MyPlayer->_SelectTarget != nullptr)
+					{
 						FindGameObject = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType);
 						if (FindGameObject != nullptr)
 						{
 							Targets.push_back(FindGameObject);
 						}
-						CastingEffectType = en_EffectType::EFFECT_HELAING_MYSELF;
-						break;
-						// 치유의 바람
-					case en_SkillType::SKILL_SHAMAN_HEALING_WIND:
+					}
+					else
+					{
+						Targets.push_back(MyPlayer);
+
+						wstring ErrorNonSelectObjectString;
+
+						WCHAR ErrorMessage[100] = { 0 };
+
+						wsprintf(ErrorMessage, L"[%s] 대상을 선택하지 않아서 자신에게 사용합니다.", FindSkill->_SkillName.c_str());
+						ErrorNonSelectObjectString = ErrorMessage;
+
+						ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorNonSelectObjectString);
+						SendPacket(MyPlayer->_SessionId, ResErrorPacket);
+						ResErrorPacket->Free();
+					}
+
+					// 이펙트 출력
+					ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_HELAING_MYSELF);
+					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResEffectPacket);
+					ResEffectPacket->Free();
+
+					// 스펠창 시작
+					ResMagicPacket = MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId, true, (en_SkillType)ReqSkillType, SpellCastingTime);
+					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMagicPacket);
+					ResMagicPacket->Free();
+
+					MyPlayer->_SkillType = (en_SkillType)ReqSkillType;
+					break;
+					// 치유의 바람
+				case en_SkillType::SKILL_SHAMAN_HEALING_WIND:
+					if (MyPlayer->_SelectTarget != nullptr)
+					{
 						MyPlayer->_SpellTick = GetTickCount64() + 1500;
 
 						SpellCastingTime = 1500.0f / 1000.0f;
@@ -1285,106 +1342,96 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 						if (FindGameObject != nullptr)
 						{
 							Targets.push_back(FindGameObject);
-						}
-						CastingEffectType = en_EffectType::EFFECT_HELAING_MYSELF;
-						break;
-					}					
+						}						
 
-					// 이펙트 출력
-					CMessage* ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, CastingEffectType);
-					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResEffectPacket);
-					ResEffectPacket->Free();
+						// 이펙트 출력
+						ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_HELAING_MYSELF);
+						SendPacketAroundSector(MyPlayer->GetCellPosition(), ResEffectPacket);
+						ResEffectPacket->Free();
 
-					// 스펠창 시작
-					CMessage* ResMagicPacket = MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId, true, (en_SkillType)ReqSkillType, SpellCastingTime);
-					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMagicPacket);
-					ResMagicPacket->Free();
+						// 스펠창 시작
+						ResMagicPacket = MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId, true, (en_SkillType)ReqSkillType, SpellCastingTime);
+						SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMagicPacket);
+						ResMagicPacket->Free();
 
-					MyPlayer->_SkillType = (en_SkillType)ReqSkillType;
-
-					if (Targets.size() >= 1)
-					{
-						MyPlayer->SetTarget(Targets[0]);
-
-						MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPELL;
-
-						// 마법 스킬 모션 출력
-						CMessage* ResObjectStateChangePacket = MakePacketResObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
-						SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateChangePacket);
-						ResObjectStateChangePacket->Free();
-
-						// TimerJob 등록
-						st_TimerJob* TimerJob = _TimerJobMemoryPool->Alloc();
-						TimerJob->ExecTick = MyPlayer->_SpellTick;
-						TimerJob->SessionId = MyPlayer->_SessionId;
-						TimerJob->Type = en_TimerJobType::TIMER_SPELL_END;
-
-						AcquireSRWLockExclusive(&_TimerJobLock);
-						_TimerHeapJob->InsertHeap(TimerJob->ExecTick, TimerJob);
-						ReleaseSRWLockExclusive(&_TimerJobLock);
-
-						SetEvent(_TimerThreadWakeEvent);
-
-						float SkillCoolTimee = FindSkill->_SkillCoolTime / 1000.0f;
-						// 클라에게 쿨타임 표시
-						CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(MyPlayer->_GameObjectInfo.ObjectId, QuickSlotBarindex, QuickSlotBarSlotIndex, SkillCoolTimee, 1.0f);
-						SendPacket(MyPlayer->_SessionId, ResCoolTimeStartPacket);
-						ResCoolTimeStartPacket->Free();
-
-						// 쿨타임 시간 동안 스킬 사용 못하게 막음
-						FindSkill->CanSkillUse = false;
-
-						// 스킬 쿨타임 얻어옴
-						auto FindSkilliterator = G_Datamanager->_Skills.find(ReqSkillType);
-						st_SkillData* ReqSkillData = (*FindSkilliterator).second;
-
-						// 스킬 쿨타임 스킬쿨타임 잡 등록
-						st_TimerJob* SkillCoolTimeTimerJob = _TimerJobMemoryPool->Alloc();
-						SkillCoolTimeTimerJob->ExecTick = GetTickCount64() + ReqSkillData->SkillCoolTime;
-						SkillCoolTimeTimerJob->SessionId = MyPlayer->_SessionId;
-						SkillCoolTimeTimerJob->Type = en_TimerJobType::TIMER_SKILL_COOLTIME_END;
-
-						CMessage* ResCoolTimeEndMessage = CMessage::Alloc();
-						ResCoolTimeEndMessage->Clear();
-
-						*ResCoolTimeEndMessage << ReqSkillType;
-						SkillCoolTimeTimerJob->Message = ResCoolTimeEndMessage;
-
-						AcquireSRWLockExclusive(&_TimerJobLock);
-						_TimerHeapJob->InsertHeap(SkillCoolTimeTimerJob->ExecTick, SkillCoolTimeTimerJob);
-						ReleaseSRWLockExclusive(&_TimerJobLock);
-
-						SetEvent(_TimerThreadWakeEvent);
+						MyPlayer->_SkillType = (en_SkillType)ReqSkillType;
 					}
 					else
-					{						
-						wstring ErrorNonSelectObjectString;
+					{
 
-						WCHAR ErrorMessage[100] = { 0 };
-
-						wsprintf(ErrorMessage, L"[%s] 대상을 선택하고 사용해야 합니다.", FindSkill->_SkillName.c_str());
-						ErrorNonSelectObjectString = ErrorMessage;
-
-						CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorNonSelectObjectString);
-						SendPacket(MyPlayer->_SessionId, ResErrorPacket);
-						ResErrorPacket->Free();
 					}
-				}
-				else
-				{
-					wstring ErrorSkillCoolTime;
-	
-					WCHAR ErrorMessage[100] = { 0 };
-
-					wsprintf(ErrorMessage, L"[%s] 재사용 대기시간이 완료되지 않았습니다.", FindSkill->_SkillName.c_str());
-					ErrorSkillCoolTime = ErrorMessage;
-
-					CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_SKILL_COOLTIME, ErrorSkillCoolTime);
-					SendPacket(MyPlayer->_SessionId, ResErrorPacket);
-					ResErrorPacket->Free();
 					break;
+				}								
+
+				if (Targets.size() >= 1)
+				{
+					MyPlayer->SetTarget(Targets[0]);
+
+					MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPELL;
+
+					// 마법 스킬 모션 출력
+					CMessage* ResObjectStateChangePacket = MakePacketResObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
+					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateChangePacket);
+					ResObjectStateChangePacket->Free();
+
+					// TimerJob 등록
+					st_TimerJob* TimerJob = _TimerJobMemoryPool->Alloc();
+					TimerJob->ExecTick = MyPlayer->_SpellTick;
+					TimerJob->SessionId = MyPlayer->_SessionId;
+					TimerJob->Type = en_TimerJobType::TIMER_SPELL_END;
+
+					AcquireSRWLockExclusive(&_TimerJobLock);
+					_TimerHeapJob->InsertHeap(TimerJob->ExecTick, TimerJob);
+					ReleaseSRWLockExclusive(&_TimerJobLock);
+
+					SetEvent(_TimerThreadWakeEvent);
+
+					float SkillCoolTimee = FindSkill->_SkillCoolTime / 1000.0f;
+					// 클라에게 쿨타임 표시
+					CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(MyPlayer->_GameObjectInfo.ObjectId, QuickSlotBarindex, QuickSlotBarSlotIndex, SkillCoolTimee, 1.0f);
+					SendPacket(MyPlayer->_SessionId, ResCoolTimeStartPacket);
+					ResCoolTimeStartPacket->Free();
+
+					// 쿨타임 시간 동안 스킬 사용 못하게 막음
+					FindSkill->CanSkillUse = false;
+
+					// 스킬 쿨타임 얻어옴
+					auto FindSkilliterator = G_Datamanager->_Skills.find(ReqSkillType);
+					st_SkillData* ReqSkillData = (*FindSkilliterator).second;
+
+					// 스킬 쿨타임 스킬쿨타임 잡 등록
+					st_TimerJob* SkillCoolTimeTimerJob = _TimerJobMemoryPool->Alloc();
+					SkillCoolTimeTimerJob->ExecTick = GetTickCount64() + ReqSkillData->SkillCoolTime;
+					SkillCoolTimeTimerJob->SessionId = MyPlayer->_SessionId;
+					SkillCoolTimeTimerJob->Type = en_TimerJobType::TIMER_SKILL_COOLTIME_END;
+
+					CMessage* ResCoolTimeEndMessage = CMessage::Alloc();
+					ResCoolTimeEndMessage->Clear();
+
+					*ResCoolTimeEndMessage << ReqSkillType;
+					SkillCoolTimeTimerJob->Message = ResCoolTimeEndMessage;
+
+					AcquireSRWLockExclusive(&_TimerJobLock);
+					_TimerHeapJob->InsertHeap(SkillCoolTimeTimerJob->ExecTick, SkillCoolTimeTimerJob);
+					ReleaseSRWLockExclusive(&_TimerJobLock);
+
+					SetEvent(_TimerThreadWakeEvent);
 				}
-			}			
+			}
+			else
+			{
+				wstring ErrorSkillCoolTime;
+
+				WCHAR ErrorMessage[100] = { 0 };
+
+				wsprintf(ErrorMessage, L"[%s] 재사용 대기시간이 완료되지 않았습니다.", FindSkill->_SkillName.c_str());
+				ErrorSkillCoolTime = ErrorMessage;
+
+				CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_SKILL_COOLTIME, ErrorSkillCoolTime);
+				SendPacket(MyPlayer->_SessionId, ResErrorPacket);
+				ResErrorPacket->Free();
+				break;
+			}
 		} while (0);		
 	}
 
@@ -3501,7 +3548,7 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CMessage* Message)
 		ResMagicPacket->Free();
 
 		// 이펙트 출력
-		CMessage* ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, HitEffectType);
+		CMessage* ResEffectPacket = MakePacketEffect(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, HitEffectType);
 		SendPacketAroundSector(MyPlayer->GetCellPosition(), ResEffectPacket);
 		ResEffectPacket->Free();
 	}
