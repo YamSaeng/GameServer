@@ -20,7 +20,7 @@ CGameServer::CGameServer()
 	_TimerJobThread = nullptr;
 	_LogicThread = nullptr;
 
-	// Nonsignaled상태 자동리셋
+	// 논시그널 상태 자동리셋
 	_AuthThreadWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	_NetworkThreadWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	_DataBaseWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);	
@@ -32,18 +32,26 @@ CGameServer::CGameServer()
 	_LogicThreadEnd = false;
 	_TimerJobThreadEnd = false;
 
+	// 타이머 잡 전용 SWRLock 초기화
 	InitializeSRWLock(&_TimerJobLock);
 
+	// 잡 메모리풀 생성
 	_JobMemoryPool = new CMemoryPoolTLS<st_Job>();
+	// 타이머 잡 메모리풀 생성
 	_TimerJobMemoryPool = new CMemoryPoolTLS<st_TimerJob>();
 
-	_TimerHeapJob = new CHeap<int64, st_TimerJob*>(1000);
+	// 타이머 우선순위 큐 생성
+	_TimerHeapJob = new CHeap<int64, st_TimerJob*>(2000);
 
-	_AuthThreadTPS = 0;
 	_AuthThreadWakeCount = 0;
+	_AuthThreadTPS = 0;	
 
+	_NetworkThreadWakeCount = 0;
 	_NetworkThreadTPS = 0;
 	
+	
+	_TimerJobThreadWakeCount = 0;
+	_TimerJobThreadTPS = 0;	
 }
 
 CGameServer::~CGameServer()
@@ -52,7 +60,7 @@ CGameServer::~CGameServer()
 	//timeEndPeriod(1);
 }
 
-void CGameServer::Start(const WCHAR* OpenIP, int32 Port)
+void CGameServer::GameServerStart(const WCHAR* OpenIP, int32 Port)
 {
 	CNetworkLib::Start(OpenIP, Port);
 
@@ -61,16 +69,22 @@ void CGameServer::Start(const WCHAR* OpenIP, int32 Port)
 
 	G_ObjectManager->GameServer = this;
 
+	// 인증 쓰레드 시작
 	_AuthThread = (HANDLE)_beginthreadex(NULL, 0, AuthThreadProc, this, 0, NULL);
+	// 네트워크 쓰레드 시작
 	_NetworkThread = (HANDLE)_beginthreadex(NULL, 0, NetworkThreadProc, this, 0, NULL);
+	// 데이터베이스 쓰레드 시작
 	_DataBaseThread = (HANDLE)_beginthreadex(NULL, 0, DataBaseThreadProc, this, 0, NULL);
+	// 타이머 잡 쓰레드 시작
 	_TimerJobThread = (HANDLE)_beginthreadex(NULL, 0, TimerJobThreadProc, this, 0, NULL);
+	// 로직 쓰레드 시작
 	_LogicThread = (HANDLE)_beginthreadex(NULL, 0, LogicThreadProc, this, 0, NULL);
 
 	CloseHandle(_AuthThread);
 	CloseHandle(_NetworkThread);
 	CloseHandle(_DataBaseThread);
 	CloseHandle(_TimerJobThread);
+	CloseHandle(_LogicThread);
 }
 
 unsigned __stdcall CGameServer::AuthThreadProc(void* Argument)
@@ -94,9 +108,11 @@ unsigned __stdcall CGameServer::AuthThreadProc(void* Argument)
 
 			switch (Job->Type)
 			{
+			// 접속한 세션 대상으로 기본 정보 셋팅
 			case en_JobType::AUTH_NEW_CLIENT_JOIN:
 				Instance->CreateNewClient(Job->SessionId);
 				break;
+			// 접속 종료한 세션 대상으로 콘텐츠 정리
 			case en_JobType::AUTH_DISCONNECT_CLIENT:
 				Instance->DeleteClient(Job->Session);
 				break;
@@ -121,6 +137,8 @@ unsigned __stdcall CGameServer::NetworkThreadProc(void* Argument)
 	while (!Instance->_NetworkThreadEnd)
 	{
 		WaitForSingleObject(Instance->_NetworkThreadWakeEvent, INFINITE);
+
+		Instance->_NetworkThreadWakeCount++;
 
 		while (!Instance->_GameServerNetworkThreadMessageQue.IsEmpty())
 		{
@@ -196,6 +214,9 @@ unsigned __stdcall CGameServer::DataBaseThreadProc(void* Argument)
 			case en_JobType::DATA_BASE_QUICK_SWAP:
 				Instance->PacketProcReqDBQuickSlotSwap(Job->SessionId, Job->Message);
 				break;
+			default:
+				Instance->Disconnect(Job->SessionId);
+				break;
 			}
 
 			Instance->_DataBaseThreadTPS++;
@@ -213,6 +234,8 @@ unsigned __stdcall CGameServer::TimerJobThreadProc(void* Argument)
 	{			
 		WaitForSingleObject(Instance->_TimerThreadWakeEvent, INFINITE);
 				
+		Instance->_TimerJobThreadWakeCount++;
+
 		while (Instance->_TimerHeapJob->GetUseSize() != 0)
 		{						
 			// 맨 위 데이터의 시간을 확인한다.
@@ -243,8 +266,12 @@ unsigned __stdcall CGameServer::TimerJobThreadProc(void* Argument)
 					Instance->PacketProcTimerCoolTimeEnd(TimerJob->SessionId, TimerJob->Message);
 					break;
 				default:
+					Instance->Disconnect(TimerJob->SessionId);
 					break;
 				}
+
+				Instance->_TimerJobThreadTPS++;
+				Instance->_TimerJobMemoryPool->Free(TimerJob);
 			}					
 		}	
 		
@@ -312,7 +339,7 @@ void CGameServer::DeleteClient(st_Session* Session)
 
 		vector<int64> DeSpawnObjectIds;
 		DeSpawnObjectIds.push_back(Session->MyPlayer->_GameObjectInfo.ObjectId);
-		CMessage* ResLeaveGame = MakePacketResDeSpawn(1, DeSpawnObjectIds);
+		CMessage* ResLeaveGame = MakePacketResObjectDeSpawn(1, DeSpawnObjectIds);
 		SendPacketAroundSector(Session, ResLeaveGame);
 		ResLeaveGame->Free();
 
@@ -379,13 +406,7 @@ void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 		break;
 	case en_PACKET_TYPE::en_PACKET_C2S_QUICKSLOT_SWAP:
 		PacketProcReqQuickSlotSwap(SessionId, Message);
-		break;
-	case en_PACKET_TYPE::en_PACKET_CS_GAME_REQ_SECTOR_MOVE:
-		PacketProcReqSectorMove(SessionId, Message);
-		break;
-	case en_PACKET_TYPE::en_PACKET_CS_GAME_REQ_MESSAGE:
-		PacketProcReqMessage(SessionId, Message);
-		break;
+		break;	
 	case en_PACKET_TYPE::en_PACKET_CS_GAME_REQ_HEARTBEAT:
 		PacketProcReqHeartBeat(SessionId, Message);
 		break;
@@ -581,7 +602,7 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 			SpawnObjectInfo.push_back(Session->MyPlayer->_GameObjectInfo);
 
 			// 다른 플레이어들한테 나를 생성하라고 알려줌
-			CMessage* ResSpawnPacket = MakePacketResSpawn(1, SpawnObjectInfo);
+			CMessage* ResSpawnPacket = MakePacketResObjectSpawn(1, SpawnObjectInfo);
 			SendPacketAroundSector(Session, ResSpawnPacket);
 			ResSpawnPacket->Free();
 
@@ -601,7 +622,7 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 					SpawnObjectInfo.push_back(AroundObjects[i]->_GameObjectInfo);
 				}
 
-				CMessage* ResOtherObjectSpawnPacket = MakePacketResSpawn((int32)AroundObjects.size(), SpawnObjectInfo);
+				CMessage* ResOtherObjectSpawnPacket = MakePacketResObjectSpawn((int32)AroundObjects.size(), SpawnObjectInfo);
 				SendPacket(Session->SessionId, ResOtherObjectSpawnPacket);
 				ResOtherObjectSpawnPacket->Free();
 
@@ -1046,7 +1067,7 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 					SkillTypeString = IsCritical ? L"치명타! " + SkillTypeString : SkillTypeString;
 
 					// 데미지 시스템 메세지 전송
-					CMessage* ResSkillSystemMessagePacket = MakePacketResChattingMessage(MyPlayer->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, IsCritical ? st_Color::Red() : st_Color::White(), SkillTypeString);
+					CMessage* ResSkillSystemMessagePacket = MakePacketResChattingBoxMessage(MyPlayer->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, IsCritical ? st_Color::Red() : st_Color::White(), SkillTypeString);
 					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResSkillSystemMessagePacket);
 					ResSkillSystemMessagePacket->Free();
 
@@ -1056,7 +1077,7 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 					ResMyAttackOtherPacket->Free();
 										
 					// 스탯 변경 메세지 전송
-					CMessage* ResChangeObjectStat = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectStatInfo);
+					CMessage* ResChangeObjectStat = G_ObjectManager->GameServer->MakePacketChangeObjectStat(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectStatInfo);
 					G_ObjectManager->GameServer->SendPacketAroundSector(Target->GetCellPosition(), ResChangeObjectStat);
 					ResChangeObjectStat->Free();
 				}
@@ -1571,7 +1592,7 @@ void CGameServer::PacketProcReqChattingMessage(int64 SessionId, CMessage* Messag
 		// 주위 플레이어에게 채팅 메세지 전송
 		for (CPlayer* Player : Players)
 		{
-			CMessage* ResChattingMessage = MakePacketResChattingMessage(PlayerDBId, en_MessageType::CHATTING, st_Color::White(), ChattingMessage);
+			CMessage* ResChattingMessage = MakePacketResChattingBoxMessage(PlayerDBId, en_MessageType::CHATTING, st_Color::White(), ChattingMessage);
 			SendPacket(Player->_SessionId, ResChattingMessage);
 			ResChattingMessage->Free();
 		}
@@ -1965,128 +1986,6 @@ void CGameServer::PacketProcReqQuickSlotSwap(int64 SessionId, CMessage* Message)
 			SetEvent(_DataBaseWakeEvent);
 		} while (0);
 	}
-
-	ReturnSession(Session);
-}
-
-//---------------------------------------------------------------------------------
-//섹터 이동 요청
-//WORD Type
-//INT64 AccountNo
-//WORD SectorX
-//WORD SectorY
-//---------------------------------------------------------------------------------
-void CGameServer::PacketProcReqSectorMove(int64 SessionID, CMessage* Message)
-{
-	st_Session* Session = FindSession(SessionID);
-
-	int64 AccountNo;
-	WORD SectorX;
-	WORD SectorY;
-
-	if (Session)
-	{
-		//클라가 로그인 중인지 판단
-		if (!Session->IsLogin)
-		{
-			Disconnect(Session->SessionId);
-			return;
-		}
-
-		*Message >> AccountNo;
-
-		if (Session->AccountId != AccountNo)
-		{
-			Disconnect(Session->SessionId);
-			return;
-		}
-
-		*Message >> SectorX;
-		*Message >> SectorY;
-
-		//섹터 X Y 좌표 범위 검사
-		if (SectorX < 0 || SectorX >= SECTOR_X_MAX || SectorY < 0 || SectorY >= SECTOR_Y_MAX)
-		{
-			Disconnect(Session->SessionId);
-			return;
-		}
-
-		//기존 섹터에서 클라 제거
-		if (Session->SectorX != -1 && Session->SectorY != -1)
-		{
-			_SectorList[Session->SectorY][Session->SectorX].remove(Session->SessionId);
-		}
-
-		Session->SectorY = SectorY;
-		Session->SectorX = SectorX;
-
-		_SectorList[Session->SectorY][Session->SectorX].push_back(Session->SessionId);
-
-		/*CMessage* SectorMoveResMessage = MakePacketResSectorMove(Client->AccountId, Client->SectorX, Client->SectorY);
-		SendPacket(Client->SessionId, SectorMoveResMessage);
-		SectorMoveResMessage->Free();*/
-	}
-	else
-	{
-
-	}
-
-	ReturnSession(Session);
-}
-
-//---------------------------------------------------------------------------------
-//채팅 보내기 요청
-//WORD	Type
-//INT64 AccountNo
-//WORD MessageLen
-//WCHAR Message[MessageLen/2] // null 미포함
-//---------------------------------------------------------------------------------
-void CGameServer::PacketProcReqMessage(int64 SessionID, CMessage* Message)
-{
-	st_Session* Session = FindSession(SessionID);
-
-	int64 AccountNo;
-	int MessageLen = 0;
-	WORD CSMessageLen;
-	WCHAR CSMessage[1024];
-
-	memset(CSMessage, 0, sizeof(CSMessage));
-
-	if (!Session->IsLogin)
-	{
-		Disconnect(Session->SessionId);
-		return;
-	}
-
-	*Message >> AccountNo;
-	if (Session->AccountId != AccountNo)
-	{
-		Disconnect(Session->SessionId);
-		return;
-	}
-
-	*Message >> CSMessageLen;
-	MessageLen = Message->GetData(CSMessage, CSMessageLen);
-	if (MessageLen != CSMessageLen)
-	{
-		Disconnect(Session->SessionId);
-		return;
-	}
-
-	*Message >> CSMessageLen;
-	int MessageUseBufSize = Message->GetUseBufferSize();
-
-	if (MessageUseBufSize - sizeof(CMessage::st_ENCODE_HEADER) != CSMessageLen)
-	{
-		Disconnect(Session->SessionId);
-		return;
-	}
-
-	Message->GetData(CSMessage, CSMessageLen);
-
-	CMessage* ChattingResMessage = nullptr;
-	//ChattingResMessage = MakePacketResMessage(Client->AccountID, Client->ClientID, Client->NickName, CSMessageLen, CSMessage);
-	ChattingResMessage->Free();
 
 	ReturnSession(Session);
 }
@@ -2721,7 +2620,7 @@ void CGameServer::PacketProcReqDBItemToInventorySave(int64 SessionId, CMessage* 
 		DeSpawnItem.push_back(ItemDBId);
 
 		// 클라에게 해당 아이템 삭제하라고 알려줌
-		CMessage* ResItemDeSpawnPacket = MakePacketResDeSpawn(1, DeSpawnItem);
+		CMessage* ResItemDeSpawnPacket = MakePacketResObjectDeSpawn(1, DeSpawnItem);
 		SendPacketAroundSector(Session, ResItemDeSpawnPacket, true);
 		ResItemDeSpawnPacket->Free();
 
@@ -2937,7 +2836,7 @@ void CGameServer::PacketProcReqDBGoldSave(int64 SessionId, CMessage* Message)
 		G_DBConnectionPool->Push(en_DBConnect::GAME, GoldSaveDBConnection);
 
 		// 클라에게 돈 저장 결과 알려줌
-		CMessage* ResGoldSaveMeesage = MakePacketGoldSave(AccountId, TargetId, GoldCoinCount, SliverCoinCount, BronzeCoinCount, ItemCount, ItemType);
+		CMessage* ResGoldSaveMeesage = MakePacketResGoldSave(AccountId, TargetId, GoldCoinCount, SliverCoinCount, BronzeCoinCount, ItemCount, ItemType);
 		SendPacket(Session->SessionId, ResGoldSaveMeesage);
 		ResGoldSaveMeesage->Free();
 
@@ -2945,7 +2844,7 @@ void CGameServer::PacketProcReqDBGoldSave(int64 SessionId, CMessage* Message)
 		vector<int64> DeSpawnItem;
 		DeSpawnItem.push_back(ItemDBId);
 
-		CMessage* ResItemDeSpawnPacket = MakePacketResDeSpawn(1, DeSpawnItem);
+		CMessage* ResItemDeSpawnPacket = MakePacketResObjectDeSpawn(1, DeSpawnItem);
 		SendPacketAroundSector(Session, ResItemDeSpawnPacket, true);
 		ResItemDeSpawnPacket->Free();
 
@@ -3134,7 +3033,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterGoldGetConnection);
 
 				// 클라에게 골드 정보를 보내준다.
-				CMessage* ResGoldSaveMeesage = MakePacketGoldSave(Session->MyPlayer->_AccountId, Session->MyPlayer->_GameObjectInfo.ObjectId, GoldCoin, SliverCoin, BronzeCoin, 0, 0, false);
+				CMessage* ResGoldSaveMeesage = MakePacketResGoldSave(Session->MyPlayer->_AccountId, Session->MyPlayer->_GameObjectInfo.ObjectId, GoldCoin, SliverCoin, BronzeCoin, 0, 0, false);
 				SendPacket(Session->SessionId, ResGoldSaveMeesage);
 				ResGoldSaveMeesage->Free();
 			}
@@ -3278,7 +3177,7 @@ void CGameServer::PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CMessage*
 
 				G_DBConnectionPool->Push(en_DBConnect::GAME, DBQuickSlotUpdateConnection);		
 
-				CMessage* ResQuickSlotUpdateMessage = MakePacketResQuickSlotBarSlotUpdate(QuickSlotBarSlotInfo);
+				CMessage* ResQuickSlotUpdateMessage = MakePacketResQuickSlotBarSlotSave(QuickSlotBarSlotInfo);
 				SendPacket(Session->SessionId, ResQuickSlotUpdateMessage);
 				ResQuickSlotUpdateMessage->Free();
 			}
@@ -3551,12 +3450,12 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CMessage* Message)
 		ResObjectStateChangePacket->Free();
 
 		// 시스템 메세지 전송
-		CMessage* ResAttackMagicSystemMessagePacket = MakePacketResChattingMessage(MyPlayer->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, st_Color::White(), MagicSystemString);
+		CMessage* ResAttackMagicSystemMessagePacket = MakePacketResChattingBoxMessage(MyPlayer->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, st_Color::White(), MagicSystemString);
 		SendPacketAroundSector(MyPlayer->GetCellPosition(), ResAttackMagicSystemMessagePacket);
 		ResAttackMagicSystemMessagePacket->Free();
 
 		// HP 변경 전송
-		CMessage* ResChangeObjectStat = MakePacketResChangeObjectStat(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, MyPlayer->GetTarget()->_GameObjectInfo.ObjectStatInfo);
+		CMessage* ResChangeObjectStat = MakePacketChangeObjectStat(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, MyPlayer->GetTarget()->_GameObjectInfo.ObjectStatInfo);
 		SendPacketAroundSector(MyPlayer->GetTarget()->GetCellPosition(), ResChangeObjectStat);
 		ResChangeObjectStat->Free();
 
@@ -3814,7 +3713,7 @@ CMessage* CGameServer::MakePacketResMousePositionObjectInfo(int64 AccountId, int
 	return ResMousePositionObjectInfoPacket;
 }
 
-CMessage* CGameServer::MakePacketGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int16 SliverCount, int16 BronzeCount, int16 ItemCount, int16 ItemType, bool ItemGainPrint)
+CMessage* CGameServer::MakePacketResGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int16 SliverCount, int16 BronzeCount, int16 ItemCount, int16 ItemType, bool ItemGainPrint)
 {
 	CMessage* ResGoldSaveMessage = CMessage::Alloc();
 	if (ResGoldSaveMessage == nullptr)
@@ -3835,35 +3734,6 @@ CMessage* CGameServer::MakePacketGoldSave(int64 AccountId, int64 ObjectId, int64
 	*ResGoldSaveMessage << ItemGainPrint;
 
 	return ResGoldSaveMessage;
-}
-
-//-------------------------------------------------------
-//채팅 보내기 요청 응답 패킷 만들기 함수
-//WORD	Type
-//INT64	AccountNo
-//WCHAR	ID[20]	// null 포함
-//WCHAR	Nickname[20] // null 포함
-//WORD	MessageLen
-//WCHAR	Message[MessageLen / 2] // null 미포함
-//-------------------------------------------------------
-CMessage* CGameServer::MakePacketResMessage(int64 AccountNo, WCHAR* ID, WCHAR* NickName, WORD MessageLen, WCHAR* Message)
-{
-	CMessage* ChattingMessage = CMessage::Alloc();
-	if (ChattingMessage == nullptr)
-	{
-		return nullptr;
-	}
-
-	ChattingMessage->Clear();
-
-	*ChattingMessage << (WORD)en_PACKET_CS_GAME_RES_MESSAGE;
-	*ChattingMessage << AccountNo;
-	ChattingMessage->InsertData(ID, sizeof(WCHAR) * 20);
-	ChattingMessage->InsertData(NickName, sizeof(WCHAR) * 20);
-	*ChattingMessage << MessageLen;
-	ChattingMessage->InsertData(Message, sizeof(WCHAR) * (MessageLen / 2));
-
-	return ChattingMessage;
 }
 
 CMessage* CGameServer::MakePacketResItemSwap(int64 AccountId, int64 ObjectId, st_ItemInfo SwapAItemInfo, st_ItemInfo SwapBItemInfo)
@@ -3921,7 +3791,46 @@ CMessage* CGameServer::MakePacketResItemSwap(int64 AccountId, int64 ObjectId, st
 	return ResItemSwapMessage;
 }
 
-CMessage* CGameServer::MakePacketResQuickSlotBarSlotUpdate(st_QuickSlotBarSlotInfo QuickSlotBarSlotInfo)
+CMessage* CGameServer::MakePacketResItemToInventory(int64 TargetObjectId, st_ItemInfo ItemInfo, int16 ItemEach, bool ItemGainPrint)
+{
+	CMessage* ResItemToInventoryMessage = CMessage::Alloc();
+	if (ResItemToInventoryMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResItemToInventoryMessage->Clear();
+
+	*ResItemToInventoryMessage << (WORD)en_PACKET_S2C_ITEM_TO_INVENTORY;
+	*ResItemToInventoryMessage << TargetObjectId;
+	// ItemInfo
+	*ResItemToInventoryMessage << ItemInfo.ItemDBId;
+	*ResItemToInventoryMessage << ItemInfo.IsQuickSlotUse;
+	*ResItemToInventoryMessage << (int16)ItemInfo.ItemType;
+	*ResItemToInventoryMessage << (int16)ItemInfo.ItemConsumableType;
+	*ResItemToInventoryMessage << ItemInfo.ItemCount;
+	*ResItemToInventoryMessage << ItemInfo.SlotIndex;
+	*ResItemToInventoryMessage << ItemInfo.IsEquipped;
+
+	// Item 이름
+	int8 ItemNameLen = (int8)(ItemInfo.ItemName.length() * 2);
+	*ResItemToInventoryMessage << ItemNameLen;
+	ResItemToInventoryMessage->InsertData(ItemInfo.ItemName.c_str(), ItemNameLen);
+
+	// 썸네일 이미지 경로 
+	int8 ThumbnailImagePathLen = (int8)(ItemInfo.ThumbnailImagePath.length() * 2);
+	*ResItemToInventoryMessage << ThumbnailImagePathLen;
+	ResItemToInventoryMessage->InsertData(ItemInfo.ThumbnailImagePath.c_str(), ThumbnailImagePathLen);
+
+	// 아이템 낱개 개수
+	*ResItemToInventoryMessage << ItemEach;
+	// 아이템 얻는 UI 출력 할 것인지 말것인지
+	*ResItemToInventoryMessage << ItemGainPrint;
+
+	return ResItemToInventoryMessage;
+}
+
+CMessage* CGameServer::MakePacketResQuickSlotBarSlotSave(st_QuickSlotBarSlotInfo QuickSlotBarSlotInfo)
 {
 	CMessage* ResQuickSlotBarSlotMessage = CMessage::Alloc();
 	if (ResQuickSlotBarSlotMessage == nullptr)
@@ -4009,48 +3918,6 @@ CMessage* CGameServer::MakePacketQuickSlotCreate(int8 QuickSlotBarSize, int8 Qui
 	return ResQuickSlotCreateMessage;
 }
 
-CMessage* CGameServer::MakePacketError(int64 PlayerId, en_ErrorType ErrorType, wstring ErrorMessage)
-{
-	CMessage* ResErrorMessage = CMessage::Alloc();
-	if (ResErrorMessage == nullptr)
-	{
-		return nullptr;
-	}
-
-	ResErrorMessage->Clear();
-
-	*ResErrorMessage << (int16)en_PACKET_S2C_ERROR;
-	*ResErrorMessage << PlayerId;
-	*ResErrorMessage << (int16)ErrorType;
-
-	// 에러 메세지
-	int8 ErrorMessageLen = (int8)(ErrorMessage.length() * 2);
-	*ResErrorMessage << ErrorMessageLen;
-	ResErrorMessage->InsertData(ErrorMessage.c_str(), ErrorMessageLen);
-
-	return ResErrorMessage;
-}
-
-CMessage* CGameServer::MakePacketCoolTime(int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, float SkillCoolTime, float SkillCoolTimeSpeed)
-{
-	CMessage* ResCoolTimeMessage = CMessage::Alloc();
-	if (ResCoolTimeMessage == nullptr)
-	{
-		return nullptr;
-	}
-
-	ResCoolTimeMessage->Clear();
-
-	*ResCoolTimeMessage << (int16)en_PACKET_S2C_COOLTIME_START;
-	*ResCoolTimeMessage << PlayerId;
-	*ResCoolTimeMessage << QuickSlotBarIndex;
-	*ResCoolTimeMessage << QuickSlotBarSlotIndex;
-	*ResCoolTimeMessage << SkillCoolTime;
-	*ResCoolTimeMessage << SkillCoolTimeSpeed;
-
-	return ResCoolTimeMessage;
-}
-
 CMessage* CGameServer::MakePacketResQuickSlotSwap(int64 AccountId, int64 PlayerId, st_QuickSlotBarSlotInfo SwapAQuickSlotInfo, st_QuickSlotBarSlotInfo SwapBQuickSlotInfo)
 {
 	CMessage* ResQuickSlotSwapMessage = CMessage::Alloc();
@@ -4064,11 +3931,11 @@ CMessage* CGameServer::MakePacketResQuickSlotSwap(int64 AccountId, int64 PlayerI
 	*ResQuickSlotSwapMessage << (short)en_PACKET_S2C_QUICKSLOT_SWAP;
 	*ResQuickSlotSwapMessage << AccountId;
 	*ResQuickSlotSwapMessage << PlayerId;
-	
+
 	// AQuickSlotInfo
 	*ResQuickSlotSwapMessage << AccountId;
 	*ResQuickSlotSwapMessage << PlayerId;
-	
+
 	*ResQuickSlotSwapMessage << SwapAQuickSlotInfo.QuickSlotBarIndex;
 	*ResQuickSlotSwapMessage << SwapAQuickSlotInfo.QuickSlotBarSlotIndex;
 
@@ -4126,6 +3993,48 @@ CMessage* CGameServer::MakePacketResQuickSlotSwap(int64 AccountId, int64 PlayerI
 	return ResQuickSlotSwapMessage;
 }
 
+CMessage* CGameServer::MakePacketError(int64 PlayerId, en_ErrorType ErrorType, wstring ErrorMessage)
+{
+	CMessage* ResErrorMessage = CMessage::Alloc();
+	if (ResErrorMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResErrorMessage->Clear();
+
+	*ResErrorMessage << (int16)en_PACKET_S2C_ERROR;
+	*ResErrorMessage << PlayerId;
+	*ResErrorMessage << (int16)ErrorType;
+
+	// 에러 메세지
+	int8 ErrorMessageLen = (int8)(ErrorMessage.length() * 2);
+	*ResErrorMessage << ErrorMessageLen;
+	ResErrorMessage->InsertData(ErrorMessage.c_str(), ErrorMessageLen);
+
+	return ResErrorMessage;
+}
+
+CMessage* CGameServer::MakePacketCoolTime(int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, float SkillCoolTime, float SkillCoolTimeSpeed)
+{
+	CMessage* ResCoolTimeMessage = CMessage::Alloc();
+	if (ResCoolTimeMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResCoolTimeMessage->Clear();
+
+	*ResCoolTimeMessage << (int16)en_PACKET_S2C_COOLTIME_START;
+	*ResCoolTimeMessage << PlayerId;
+	*ResCoolTimeMessage << QuickSlotBarIndex;
+	*ResCoolTimeMessage << QuickSlotBarSlotIndex;
+	*ResCoolTimeMessage << SkillCoolTime;
+	*ResCoolTimeMessage << SkillCoolTimeSpeed;
+
+	return ResCoolTimeMessage;
+}
+
 CMessage* CGameServer::MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_SkillType SkillType, int32 Damage, bool IsCritical)
 {
 	CMessage* ResAttackMessage = CMessage::Alloc();
@@ -4168,7 +4077,7 @@ CMessage* CGameServer::MakePacketResMagic(int64 ObjectId, bool SpellStart, en_Sk
 // int64 AccountId
 // int32 PlayerDBId
 // int32 HP
-CMessage* CGameServer::MakePacketResChangeObjectStat(int64 ObjectId, st_StatInfo ChangeObjectStatInfo)
+CMessage* CGameServer::MakePacketChangeObjectStat(int64 ObjectId, st_StatInfo ChangeObjectStatInfo)
 {
 	CMessage* ResChangeObjectStatPacket = CMessage::Alloc();
 	if (ResChangeObjectStatPacket == nullptr)
@@ -4254,7 +4163,7 @@ CMessage* CGameServer::MakePacketResMove(int64 AccountId, int64 ObjectId, en_Gam
 // int64 AccountId
 // int32 PlayerDBId
 // st_GameObjectInfo GameObjectInfo
-CMessage* CGameServer::MakePacketResSpawn(int32 ObjectInfosCount, vector<st_GameObjectInfo> ObjectInfos)
+CMessage* CGameServer::MakePacketResObjectSpawn(int32 ObjectInfosCount, vector<st_GameObjectInfo> ObjectInfos)
 {
 	CMessage* ResSpawnPacket = CMessage::Alloc();
 	if (ResSpawnPacket == nullptr)
@@ -4310,7 +4219,7 @@ CMessage* CGameServer::MakePacketResSpawn(int32 ObjectInfosCount, vector<st_Game
 
 // int64 AccountId
 // int32 PlayerDBId
-CMessage* CGameServer::MakePacketResDeSpawn(int32 DeSpawnObjectCount, vector<int64> DeSpawnObjectIds)
+CMessage* CGameServer::MakePacketResObjectDeSpawn(int32 DeSpawnObjectCount, vector<int64> DeSpawnObjectIds)
 {
 	CMessage* ResDeSpawnPacket = CMessage::Alloc();
 	if (ResDeSpawnPacket == nullptr)
@@ -4331,7 +4240,7 @@ CMessage* CGameServer::MakePacketResDeSpawn(int32 DeSpawnObjectCount, vector<int
 	return ResDeSpawnPacket;
 }
 
-CMessage* CGameServer::MakePacketResDie(int64 DieObjectId)
+CMessage* CGameServer::MakePacketObjectDie(int64 DieObjectId)
 {
 	CMessage* ResDiePacket = CMessage::Alloc();
 	if (ResDiePacket == nullptr)
@@ -4349,7 +4258,7 @@ CMessage* CGameServer::MakePacketResDie(int64 DieObjectId)
 
 // int32 PlayerDBId
 // wstring ChattingMessage
-CMessage* CGameServer::MakePacketResChattingMessage(int64 PlayerDBId, en_MessageType MessageType, st_Color Color, wstring ChattingMessage)
+CMessage* CGameServer::MakePacketResChattingBoxMessage(int64 PlayerDBId, en_MessageType MessageType, st_Color Color, wstring ChattingMessage)
 {
 	CMessage* ResChattingMessage = CMessage::Alloc();
 	if (ResChattingMessage == nullptr)
@@ -4372,45 +4281,6 @@ CMessage* CGameServer::MakePacketResChattingMessage(int64 PlayerDBId, en_Message
 	ResChattingMessage->InsertData(ChattingMessage.c_str(), PlayerNameLen);
 
 	return ResChattingMessage;
-}
-
-CMessage* CGameServer::MakePacketResItemToInventory(int64 TargetObjectId, st_ItemInfo ItemInfo, int16 ItemEach, bool ItemGainPrint)
-{
-	CMessage* ResItemToInventoryMessage = CMessage::Alloc();
-	if (ResItemToInventoryMessage == nullptr)
-	{
-		return nullptr;
-	}
-
-	ResItemToInventoryMessage->Clear();
-
-	*ResItemToInventoryMessage << (WORD)en_PACKET_S2C_ITEM_TO_INVENTORY;
-	*ResItemToInventoryMessage << TargetObjectId;
-	// ItemInfo
-	*ResItemToInventoryMessage << ItemInfo.ItemDBId;
-	*ResItemToInventoryMessage << ItemInfo.IsQuickSlotUse;
-	*ResItemToInventoryMessage << (int16)ItemInfo.ItemType;
-	*ResItemToInventoryMessage << (int16)ItemInfo.ItemConsumableType;
-	*ResItemToInventoryMessage << ItemInfo.ItemCount;
-	*ResItemToInventoryMessage << ItemInfo.SlotIndex;
-	*ResItemToInventoryMessage << ItemInfo.IsEquipped;
-
-	// Item 이름
-	int8 ItemNameLen = (int8)(ItemInfo.ItemName.length() * 2);
-	*ResItemToInventoryMessage << ItemNameLen;
-	ResItemToInventoryMessage->InsertData(ItemInfo.ItemName.c_str(), ItemNameLen);
-
-	// 썸네일 이미지 경로 
-	int8 ThumbnailImagePathLen = (int8)(ItemInfo.ThumbnailImagePath.length() * 2);
-	*ResItemToInventoryMessage << ThumbnailImagePathLen;
-	ResItemToInventoryMessage->InsertData(ItemInfo.ThumbnailImagePath.c_str(), ThumbnailImagePathLen);
-
-	// 아이템 낱개 개수
-	*ResItemToInventoryMessage << ItemEach;
-	// 아이템 얻는 UI 출력 할 것인지 말것인지
-	*ResItemToInventoryMessage << ItemGainPrint;
-
-	return ResItemToInventoryMessage;
 }
 
 CMessage* CGameServer::MakePacketResSyncPosition(int64 TargetObjectId, st_PositionInfo SyncPosition)
@@ -4513,14 +4383,6 @@ void CGameServer::OnClientLeave(st_Session* LeaveSession)
 bool CGameServer::OnConnectionRequest(const wchar_t ClientIP, int32 Port)
 {
 	return false;
-}
-
-void CGameServer::SendPacketSector(CSector* Sector, CMessage* Message)
-{
-	for (CPlayer* Player : Sector->GetPlayers())
-	{
-		SendPacket(Player->_SessionId, Message);
-	}
 }
 
 void CGameServer::SendPacketAroundSector(st_Vector2Int CellPosition, CMessage* Message)
