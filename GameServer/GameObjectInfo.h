@@ -13,7 +13,9 @@ enum class en_GameObjectType : int16
 	BRONZE_COIN,
 	SLIVER_COIN,
 	GOLD_COIN,
-	SKILL_BOOK	
+	SKILL_BOOK,
+	STONE,
+	TREE
 };
 
 enum class en_MoveDir : int8
@@ -79,20 +81,21 @@ enum class en_ItemType : int16
 	ITEM_TYPE_SLIMEGEL = 2001,
 	ITEM_TYPE_BRONZE_COIN = 2002,
 	ITEM_TYPE_SLIVER_COIN = 2003,
-	ITEM_TYPE_GOLD_COIN = 2004
+	ITEM_TYPE_GOLD_COIN = 2004,
+	ITEM_TYPE_WOOD_STONE = 2005,
+	ITEM_TYPE_WOOD_LOG = 2006
 };
 
 enum class en_SkillType : int16
 {
 	SKILL_TYPE_NONE = 0,
-	SKILL_KNIGHT_NORMAL,
+	SKILL_NORMAL,
 	SKILL_KNIGHT_FIERCE_ATTACK,
 	SKILL_KNIGHT_CONVERSION_ATTACK,
 	SKILL_KNIGHT_CHARGE_POSE,
 	SKILL_KNIGHT_SHAEHONE,
 	SKILL_KNIGHT_CHOHONE,	
-	SKILL_KNIGHT_SMASH_WAVE,
-	SKILL_SHAMAN_NORMAL,
+	SKILL_KNIGHT_SMASH_WAVE,	
 	SKILL_SHAMNA_FLAME_HARPOON,
 	SKILL_SHAMAN_HEALING_LIGHT,
 	SKILL_SHAMAN_HEALING_WIND,	
@@ -100,10 +103,25 @@ enum class en_SkillType : int16
 	SKILL_BEAR_NORMAL
 };
 
+enum class en_EffectType : int16
+{
+	EFFECT_TYPE_NONE = 0,
+	EFFECT_NORMAL_ATTACK_TARGET_HIT,	
+	EFFECT_SMASH_WAVE,
+	EFFECT_CHOHONE_TARGET_HIT,
+	EFFECT_SHAHONE_TARGET_HIT,
+	EFFECT_CHARGE_POSE,
+	EFFECT_FLAME_HARPOON_TARGET,
+	EFFECT_HEALING_LIGHT_TARGET,
+	EFFECT_HEALING_WIND_TARGET,
+	EFFECT_HELAING_MYSELF	
+};
+
 enum class en_ErrorType : int16
 {
 	ERROR_SKILL_COOLTIME,
-	ERROR_NON_SELECT_OBJECT
+	ERROR_NON_SELECT_OBJECT,
+	ERROR_DISTANCE
 };
 
 enum class en_ConsumableType : int16
@@ -126,6 +144,10 @@ struct st_StatInfo
 	int32 Level;
 	int32 HP;
 	int32 MaxHP;
+	int32 MP;
+	int32 MaxMP;
+	int32 DP;
+	int32 MaxDP;
 	int32 MinAttackDamage;
 	int32 MaxAttackDamage;	
 	int16 CriticalPoint;
@@ -186,7 +208,7 @@ struct st_SkillInfo
 	wstring _SkillName;		 // 스킬 이름
 	int32 _SkillCoolTime = 0;	 // 스킬 쿨타임	
 	wstring _SkillImagePath; // 스킬 이미지 경로
-	bool CanSkillUse = true; // 스킬을 사용 할 수 있는지 여부
+	bool CanSkillUse = true; // 스킬을 사용 할 수 있는지 여부	
 };
 
 struct st_QuickSlotBarSlotInfo

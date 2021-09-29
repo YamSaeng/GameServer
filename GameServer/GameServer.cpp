@@ -1012,6 +1012,11 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 							Targets.push_back(Target);
 						}
 					}
+
+					// 이펙트 출력
+					CMessage* ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_SMASH_WAVE);
+					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResEffectPacket);
+					ResEffectPacket->Free();
 				}
 				break;
 				default:
@@ -1041,6 +1046,8 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 
 					Target->OnDamaged(MyPlayer, FinalDamage);					
 
+					en_EffectType HitEffectType;
+
 					// 데미지 시스템 메세지 생성
 					switch ((en_SkillType)ReqSkillType)
 					{
@@ -1049,15 +1056,19 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 						break;
 					case en_SkillType::SKILL_NORMAL:
 						wsprintf(SkillTypeMessage, L"%s가 일반공격을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+						HitEffectType = en_EffectType::EFFECT_NORMAL_ATTACK_TARGET_HIT;
 						break;
 					case en_SkillType::SKILL_KNIGHT_CHOHONE:
 						wsprintf(SkillTypeMessage, L"%s가 초혼비무를 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+						HitEffectType = en_EffectType::EFFECT_CHOHONE_TARGET_HIT;
 						break;
 					case en_SkillType::SKILL_KNIGHT_SHAEHONE:
 						wsprintf(SkillTypeMessage, L"%s가 쇄혼비무를 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+						HitEffectType = en_EffectType::EFFECT_SHAHONE_TARGET_HIT;
 						break;
 					case en_SkillType::SKILL_KNIGHT_SMASH_WAVE:
 						wsprintf(SkillTypeMessage, L"%s가 분쇄파동을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+						HitEffectType = en_EffectType::EFFECT_NORMAL_ATTACK_TARGET_HIT;
 						break;				
 					default:
 						break;
@@ -1073,12 +1084,17 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 
 					// 공격 응답 메세지 전송
 					CMessage* ResMyAttackOtherPacket = MakePacketResAttack(MyPlayer->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectId, (en_SkillType)ReqSkillType, FinalDamage, IsCritical);
-					G_ObjectManager->GameServer->SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMyAttackOtherPacket);
+					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMyAttackOtherPacket);
 					ResMyAttackOtherPacket->Free();
+
+					// 이펙트 출력
+					CMessage* ResEffectPacket = MakePacketEffect(Target->_GameObjectInfo.ObjectId, HitEffectType);
+					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResEffectPacket);
+					ResEffectPacket->Free();
 										
 					// 스탯 변경 메세지 전송
-					CMessage* ResChangeObjectStat = G_ObjectManager->GameServer->MakePacketChangeObjectStat(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectStatInfo);
-					G_ObjectManager->GameServer->SendPacketAroundSector(Target->GetCellPosition(), ResChangeObjectStat);
+					CMessage* ResChangeObjectStat = MakePacketChangeObjectStat(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectStatInfo);
+					SendPacketAroundSector(Target->GetCellPosition(), ResChangeObjectStat);
 					ResChangeObjectStat->Free();
 				}
 
@@ -1219,6 +1235,8 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 				st_SkillInfo* FindSkill = MyPlayer->_SkillBox.FindSkill((en_SkillType)ReqSkillType);
 				if (FindSkill != nullptr && FindSkill->CanSkillUse)
 				{					
+					en_EffectType CastingEffectType;
+
 					// 스킬 타입 확인
 					switch ((en_SkillType)ReqSkillType)
 					{
@@ -1228,6 +1246,8 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 						SpellCastingTime = 100.0f / 1000.0f;
 
 						Targets.push_back(MyPlayer);
+
+						CastingEffectType = en_EffectType::EFFECT_CHARGE_POSE;
 						break;
 						// 불꽃 작살
 					case en_SkillType::SKILL_SHAMNA_FLAME_HARPOON:
@@ -1240,6 +1260,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 						{
 							Targets.push_back(FindGameObject);
 						}
+						CastingEffectType = en_EffectType::EFFECT_TYPE_NONE;
 						break;
 						// 치유의 빛
 					case en_SkillType::SKILL_SHAMAN_HEALING_LIGHT:
@@ -1252,6 +1273,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 						{
 							Targets.push_back(FindGameObject);
 						}
+						CastingEffectType = en_EffectType::EFFECT_HELAING_MYSELF;
 						break;
 						// 치유의 바람
 					case en_SkillType::SKILL_SHAMAN_HEALING_WIND:
@@ -1264,12 +1286,18 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 						{
 							Targets.push_back(FindGameObject);
 						}
+						CastingEffectType = en_EffectType::EFFECT_HELAING_MYSELF;
 						break;
-					}
+					}					
+
+					// 이펙트 출력
+					CMessage* ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, CastingEffectType);
+					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResEffectPacket);
+					ResEffectPacket->Free();
 
 					// 스펠창 시작
-					CMessage* ResMagicPacket = G_ObjectManager->GameServer->MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId, true, (en_SkillType)ReqSkillType, SpellCastingTime);
-					G_ObjectManager->GameServer->SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMagicPacket);
+					CMessage* ResMagicPacket = MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId, true, (en_SkillType)ReqSkillType, SpellCastingTime);
+					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMagicPacket);
 					ResMagicPacket->Free();
 
 					MyPlayer->_SkillType = (en_SkillType)ReqSkillType;
@@ -3371,6 +3399,8 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CMessage* Message)
 
 	if (Session)
 	{
+		en_EffectType HitEffectType;
+
 		CPlayer* MyPlayer = Session->MyPlayer;
 				
 		wstring MagicSystemString;
@@ -3399,6 +3429,8 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CMessage* Message)
 		{
 		case en_SkillType::SKILL_SHAMNA_FLAME_HARPOON:
 		{
+			HitEffectType = en_EffectType::EFFECT_FLAME_HARPOON_TARGET;
+
 			uniform_int_distribution<int> DamageChoiceRandom(MyPlayer->_GameObjectInfo.ObjectStatInfo.MinAttackDamage, MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxAttackDamage);
 			int32 ChoiceDamage = DamageChoiceRandom(Gen);
 			FinalDamage = 40;// IsCritical ? ChoiceDamage * 2 : ChoiceDamage
@@ -3413,6 +3445,8 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CMessage* Message)
 		break;
 		case en_SkillType::SKILL_SHAMAN_HEALING_LIGHT:
 		{
+			HitEffectType = en_EffectType::EFFECT_HEALING_LIGHT_TARGET;
+
 			FinalDamage = 100;
 			MyPlayer->GetTarget()->OnHeal(MyPlayer, FinalDamage);
 
@@ -3422,6 +3456,8 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CMessage* Message)
 		break;
 		case en_SkillType::SKILL_SHAMAN_HEALING_WIND:
 		{
+			HitEffectType = en_EffectType::EFFECT_HEALING_WIND_TARGET;
+
 			FinalDamage = 200;
 			MyPlayer->GetTarget()->OnHeal(MyPlayer, FinalDamage);
 
@@ -3434,13 +3470,13 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CMessage* Message)
 		}
 
 		// 공격 응답
-		CMessage* ResAttackMagicPacket = G_ObjectManager->GameServer->MakePacketResAttack(
+		CMessage* ResAttackMagicPacket = MakePacketResAttack(
 			MyPlayer->_GameObjectInfo.ObjectId,
 			MyPlayer->GetTarget()->_GameObjectInfo.ObjectId,
 			MyPlayer->_SkillType,
 			FinalDamage,
 			false);
-		G_ObjectManager->GameServer->SendPacketAroundSector(MyPlayer->GetTarget()->GetCellPosition(), ResAttackMagicPacket);
+		SendPacketAroundSector(MyPlayer->GetTarget()->GetCellPosition(), ResAttackMagicPacket);
 		ResAttackMagicPacket->Free();
 
 		// Idle로 상태 변경 후 주위섹터에 전송
@@ -3463,6 +3499,11 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CMessage* Message)
 		CMessage* ResMagicPacket = MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId, false);
 		SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMagicPacket);
 		ResMagicPacket->Free();
+
+		// 이펙트 출력
+		CMessage* ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, HitEffectType);
+		SendPacketAroundSector(MyPlayer->GetCellPosition(), ResEffectPacket);
+		ResEffectPacket->Free();
 	}
 
 	ReturnSession(Session);
@@ -4341,6 +4382,23 @@ CMessage* CGameServer::MakePacketResSkillToSkillBox(int64 TargetObjectId, st_Ski
 	ResSkillToSkillBoxMessage->InsertData(SkillInfo._SkillImagePath.c_str(), SkillImagePathLen);
 
 	return ResSkillToSkillBoxMessage;
+}
+
+CMessage* CGameServer::MakePacketEffect(int64 TargetObjectId, en_EffectType EffectType)
+{
+	CMessage* ResEffectMessage = CMessage::Alloc();
+	if (ResEffectMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResEffectMessage->Clear();
+
+	*ResEffectMessage << (int16)en_PACKET_S2C_EFFECT;
+	*ResEffectMessage << TargetObjectId;
+	*ResEffectMessage << (int16)EffectType;
+
+	return ResEffectMessage;
 }
 
 void CGameServer::OnClientJoin(int64 SessionID)
