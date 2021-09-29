@@ -12,64 +12,6 @@ enum en_PACKET_TYPE
 	// Game Server
 	//------------------------------------------------------
 	en_PACKET_CS_GAME_SERVER = 0,
-	//------------------------------------------------------------
-	// 게임서버 섹터 이동 요청
-	//
-	//	{
-	//		WORD	Type
-	//
-	//		INT64	AccountNo
-	//		WORD	SectorX
-	//		WORD	SectorY
-	//	}
-	//
-	//------------------------------------------------------------
-	en_PACKET_CS_GAME_REQ_SECTOR_MOVE,
-
-	//------------------------------------------------------------
-	// 게임서버 섹터 이동 결과
-	//
-	//	{
-	//		WORD	Type
-	//
-	//		INT64	AccountNo
-	//		WORD	SectorX
-	//		WORD	SectorY
-	//	}
-	//
-	//------------------------------------------------------------
-	en_PACKET_CS_GAME_RES_SECTOR_MOVE,
-
-	//------------------------------------------------------------
-	// 게임서버 채팅보내기 요청
-	//
-	//	{
-	//		WORD	Type
-	//
-	//		INT64	AccountNo
-	//		WORD	MessageLen
-	//		WCHAR	Message[MessageLen / 2]		// null 미포함
-	//	}
-	//
-	//------------------------------------------------------------
-	en_PACKET_CS_GAME_REQ_MESSAGE,
-
-	//------------------------------------------------------------
-	// 게임서버 채팅보내기 응답  (다른 클라가 보낸 채팅도 이걸로 받음)
-	//
-	//	{
-	//		WORD	Type
-	//
-	//		INT64	AccountNo
-	//		WCHAR	ID[20]						// null 포함
-	//		WCHAR	Nickname[20]				// null 포함
-	//		
-	//		WORD	MessageLen
-	//		WCHAR	Message[MessageLen / 2]		// null 미포함
-	//	}
-	//
-	//------------------------------------------------------------
-	en_PACKET_CS_GAME_RES_MESSAGE,
 
 	//------------------------------------------------------------
 	// 하트비트
@@ -384,11 +326,19 @@ enum en_PACKET_TYPE
 	en_PACKET_C2S_QUICKSLOT_SWAP,
 
 	//------------------------------------------------------------
+	// 게임서버 아이템 스왑 요청 응답
 	// int64 ObjectId
 	// st_QuickSlotInfo SwapQuickSlotAItem
 	// st_QuickSlotInfo SwapQuickSlotBItem
 	//------------------------------------------------------------
 	en_PACKET_S2C_QUICKSLOT_SWAP,
+
+	//------------------------------------------------------------
+	// 게임서버 이펙트 출력 
+	// int64 ObjectId
+	// st_SkillInfo EffectSkillInfo
+	//------------------------------------------------------------
+	en_PACKET_S2C_EFFECT,
 
 	//-----------------------------------------------------------
 	// 게임서버 에러 전송	
