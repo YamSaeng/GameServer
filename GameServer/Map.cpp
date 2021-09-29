@@ -213,7 +213,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 			vector<int64> DeSpawnSectorObjectIds;
 			DeSpawnSectorObjectIds.push_back(MovePlayer->_GameObjectInfo.ObjectId);
 			// 나를 제외하라는 메시지를 생성 후 
-			CMessage* ResSectorDespawnPlayer = G_ObjectManager->GameServer->MakePacketResDeSpawn(1, DeSpawnSectorObjectIds);
+			CMessage* ResSectorDespawnPlayer = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(1, DeSpawnSectorObjectIds);
 			// 해당 섹터 플레이어들에게 전송한다.
 			for (int32 i = 0; i < DeSpawnSectors.size(); i++)
 			{
@@ -247,7 +247,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 			
 			if (DeSpawnSectorObjectIds.size() > 0)
 			{
-				CMessage* ResSectorDespawnOtherPlayer = G_ObjectManager->GameServer->MakePacketResDeSpawn((int32)DeSpawnSectorObjectIds.size(), DeSpawnSectorObjectIds);
+				CMessage* ResSectorDespawnOtherPlayer = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn((int32)DeSpawnSectorObjectIds.size(), DeSpawnSectorObjectIds);
 				G_ObjectManager->GameServer->SendPacket(MovePlayer->_SessionId, ResSectorDespawnOtherPlayer);
 				ResSectorDespawnOtherPlayer->Free();
 			}			
@@ -275,7 +275,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 			SpawnObjectInfos.push_back(MovePlayer->_GameObjectInfo);
 
 			// 나를 소환하라고 앞서 얻어준 섹터 플레이어들에게 패킷을 전송한다.
-			CMessage* ResSectorSpawnPlayer = G_ObjectManager->GameServer->MakePacketResSpawn(1, SpawnObjectInfos);
+			CMessage* ResSectorSpawnPlayer = G_ObjectManager->GameServer->MakePacketResObjectSpawn(1, SpawnObjectInfos);
 			for (int32 i = 0; i < SpawnSectors.size(); i++)
 			{
 				for (CPlayer* Player : SpawnSectors[i]->GetPlayers())
@@ -309,7 +309,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 			// 나에게 전송하여 스폰 섹터에 있는 오브젝트들을 스폰 시킨다.
 			if (SpawnObjectInfos.size() > 0)
 			{
-				CMessage* ResOtherObjectSpawnPacket = G_ObjectManager->GameServer->MakePacketResSpawn((int32)SpawnObjectInfos.size(), SpawnObjectInfos);
+				CMessage* ResOtherObjectSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectSpawn((int32)SpawnObjectInfos.size(), SpawnObjectInfos);
 				G_ObjectManager->GameServer->SendPacket(MovePlayer->_SessionId, ResOtherObjectSpawnPacket);
 				ResOtherObjectSpawnPacket->Free();
 			}			
@@ -350,7 +350,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 			vector<int64> DeSpawnSectorObjectIds;
 			DeSpawnSectorObjectIds.push_back(MoveMonster->_GameObjectInfo.ObjectId);
 			// 나를 제외하라는 메시지를 생성 후 
-			CMessage* ResSectorDespawnPlayer = G_ObjectManager->GameServer->MakePacketResDeSpawn(1, DeSpawnSectorObjectIds);
+			CMessage* ResSectorDespawnPlayer = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(1, DeSpawnSectorObjectIds);
 			// 해당 섹터 플레이어들에게 전송한다.
 			for (int32 i = 0; i < DeSpawnSectors.size(); i++)
 			{
@@ -385,7 +385,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 			SpawnObjectInfos.push_back(MoveMonster->_GameObjectInfo);
 
 			// 나를 소환하라고 앞서 얻어준 섹터 플레이어들에게 패킷을 전송한다.
-			CMessage* ResSectorSpawnPlayer = G_ObjectManager->GameServer->MakePacketResSpawn(1, SpawnObjectInfos);
+			CMessage* ResSectorSpawnPlayer = G_ObjectManager->GameServer->MakePacketResObjectSpawn(1, SpawnObjectInfos);
 			for (int32 i = 0; i < SpawnSectors.size(); i++)
 			{
 				for (CPlayer* Player : SpawnSectors[i]->GetPlayers())
@@ -434,7 +434,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 			vector<int64> DeSpawnSectorObjectIds;
 			DeSpawnSectorObjectIds.push_back(MoveItem->_GameObjectInfo.ObjectId);
 			// 나를 제외하라는 메시지를 생성 후 
-			CMessage* ResSectorDespawnPlayer = G_ObjectManager->GameServer->MakePacketResDeSpawn(1, DeSpawnSectorObjectIds);
+			CMessage* ResSectorDespawnPlayer = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(1, DeSpawnSectorObjectIds);
 			// 해당 섹터 플레이어들에게 전송한다.
 			for (int32 i = 0; i < DeSpawnSectors.size(); i++)
 			{
@@ -468,7 +468,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 			SpawnObjectInfos.push_back(MoveItem->_GameObjectInfo);
 
 			// 나를 소환하라고 앞서 얻어준 섹터 플레이어들에게 패킷을 전송한다.
-			CMessage* ResSectorSpawnPlayer = G_ObjectManager->GameServer->MakePacketResSpawn(1, SpawnObjectInfos);
+			CMessage* ResSectorSpawnPlayer = G_ObjectManager->GameServer->MakePacketResObjectSpawn(1, SpawnObjectInfos);
 			for (int32 i = 0; i < SpawnSectors.size(); i++)
 			{
 				for (CPlayer* Player : SpawnSectors[i]->GetPlayers())

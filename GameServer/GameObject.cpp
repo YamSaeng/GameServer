@@ -141,24 +141,24 @@ void CGameObject::BroadCastPacket(en_PACKET_TYPE PacketType)
 			_GameObjectInfo.ObjectPositionInfo.State);
 		break;	
 	case en_PACKET_TYPE::en_PACKET_S2C_CHANGE_OBJECT_STAT:
-		ResPacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_Target->_GameObjectInfo.ObjectId,
+		ResPacket = G_ObjectManager->GameServer->MakePacketChangeObjectStat(_Target->_GameObjectInfo.ObjectId,
 			_Target->_GameObjectInfo.ObjectStatInfo);
 		break;
 	case en_PACKET_TYPE::en_PACKET_S2C_DIE:
-		ResPacket = G_ObjectManager->GameServer->MakePacketResDie(this->_GameObjectInfo.ObjectId);
+		ResPacket = G_ObjectManager->GameServer->MakePacketObjectDie(this->_GameObjectInfo.ObjectId);
 		break;
 	case en_PACKET_TYPE::en_PACKET_S2C_SPAWN:
 	{
 		vector<st_GameObjectInfo> SpawnObjectIds;
 		SpawnObjectIds.push_back(_GameObjectInfo);
-		ResPacket = G_ObjectManager->GameServer->MakePacketResSpawn(1, SpawnObjectIds);
+		ResPacket = G_ObjectManager->GameServer->MakePacketResObjectSpawn(1, SpawnObjectIds);
 	}
 	break;
 	case en_PACKET_TYPE::en_PACKET_S2C_DESPAWN:
 	{
 		vector<int64> DeSpawnObjectIds;
 		DeSpawnObjectIds.push_back(_GameObjectInfo.ObjectId);
-		ResPacket = G_ObjectManager->GameServer->MakePacketResDeSpawn(1, DeSpawnObjectIds);
+		ResPacket = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(1, DeSpawnObjectIds);
 	}
 	break;	
 	default:
