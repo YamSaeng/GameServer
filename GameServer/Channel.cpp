@@ -260,7 +260,7 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	G_Logger->WriteStdOut(en_Color::RED, L"SpawnPosition Y : %d X : %d \n", SpawnPosition._Y, SpawnPosition._X);	
 
 	// 입장한 오브젝트의 타입에 따라
-	switch (EnterChannelGameObject->_GameObjectInfo.ObjectType)
+	switch ((en_GameObjectType)EnterChannelGameObject->_GameObjectInfo.ObjectType)
 	{
 	case en_GameObjectType::MELEE_PLAYER:
 	case en_GameObjectType::MAGIC_PLAYER:
@@ -334,7 +334,7 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 {	
 	// 채널 퇴장
-	switch (LeaveChannelGameObject->_GameObjectInfo.ObjectType)
+	switch ((en_GameObjectType)LeaveChannelGameObject->_GameObjectInfo.ObjectType)
 	{
 	case en_GameObjectType::MELEE_PLAYER:
 	case en_GameObjectType::MAGIC_PLAYER:

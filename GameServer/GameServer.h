@@ -6,6 +6,8 @@
 #include "MemoryPoolTLS.h"
 #include "Heap.h"
 
+class CGameServerMeesage;
+
 class CGameServer : public CNetworkLib
 {
 private:
@@ -160,7 +162,7 @@ private:
 	//--------------------------------------------------------------------------
 	// 퀵슬롯 테이블에 요청 스킬 저장
 	//--------------------------------------------------------------------------
-	void PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CMessage* Message);
+	void PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CGameServerMessage* Message);
 	//--------------------------------------------------------------------
 	// 퀵슬롯바에서 퀵슬롯 스왑
 	//--------------------------------------------------------------------
@@ -191,104 +193,104 @@ private:
 	//--------------------------------------
 	// 클라이언트 접속 응답 패킷 조합
 	//--------------------------------------
-	CMessage* MakePacketResClientConnected();
+	CGameServerMessage* MakePacketResClientConnected();
 	//---------------------------------------------------------------------------------------
 	// 로그인 요청 응답 패킷 조합
 	//---------------------------------------------------------------------------------------
-	CMessage* MakePacketResLogin(bool Status, int8 PlayerCount, CGameObject** MyPlayersInfo);
+	CGameServerMessage* MakePacketResLogin(bool Status, int8 PlayerCount, CGameObject** MyPlayersInfo);
 	//--------------------------------------------------------------------------------------------------
 	// 캐릭터 생성 요청 응답 패킷 조합
 	//--------------------------------------------------------------------------------------------------
-	CMessage* MakePacketResCreateCharacter(bool IsSuccess, st_GameObjectInfo CreateCharacterObjectInfo);
+	CGameServerMessage* MakePacketResCreateCharacter(bool IsSuccess, st_GameObjectInfo CreateCharacterObjectInfo);
 	//-------------------------------------------------------------
 	// 게임서버 입장 요청 응답 패킷 조합
 	//-------------------------------------------------------------
-	CMessage* MakePacketResEnterGame(st_GameObjectInfo ObjectInfo);
+	CGameServerMessage* MakePacketResEnterGame(st_GameObjectInfo ObjectInfo);
 	//-------------------------------------------------------------------------------------------------------------------------
 	// 게임서버 마우스 위치 오브젝트 정보 요청 응답 패킷 조합
 	//-------------------------------------------------------------------------------------------------------------------------
-	CMessage* MakePacketResMousePositionObjectInfo(int64 AccountId, int64 PreviousChoiceObjectId, st_GameObjectInfo ObjectInfo);
+	CGameServerMessage* MakePacketResMousePositionObjectInfo(int64 AccountId, int64 PreviousChoiceObjectId, st_GameObjectInfo ObjectInfo);
 	//-------------------------------------------------------------------------------------------------------------------------
 	// 게임서버 돈 저장 요청 응답 패킷 조합
 	//-------------------------------------------------------------------------------------------------------------------------
-	CMessage* MakePacketResGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int16 SliverCount, int16 BronzeCount, int16 ItemCount, int16 ItemType, bool ItemGainPrint = true);
+	CGameServerMessage* MakePacketResGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int16 SliverCount, int16 BronzeCount, int16 ItemCount, int16 ItemType, bool ItemGainPrint = true);
 	//-------------------------------------------------------------------------------------------------------------------------
 	// 게임서버 아이템 스왑 요청 응답 패킷 조합
 	//-------------------------------------------------------------------------------------------------------------------------
-	CMessage* MakePacketResItemSwap(int64 AccountId, int64 ObjectId, st_ItemInfo SwapAItemInfo, st_ItemInfo SwapBItemInfo);
+	CGameServerMessage* MakePacketResItemSwap(int64 AccountId, int64 ObjectId, st_ItemInfo SwapAItemInfo, st_ItemInfo SwapBItemInfo);
 	//-------------------------------------------------------------------------------------------------------------------------
 	// 게임서버 아이템 인벤토리 저장 요청 응답 패킷 조합
 	//-------------------------------------------------------------------------------------------------------------------------
-	CMessage* MakePacketResItemToInventory(int64 TargetObjectId, st_ItemInfo ItemInfo, int16 ItemEach, bool ItemGainPrint = true);
+	CGameServerMessage* MakePacketResItemToInventory(int64 TargetObjectId, st_ItemInfo ItemInfo, int16 ItemEach, bool ItemGainPrint = true);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 퀵슬롯 등록 요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CMessage* MakePacketResQuickSlotBarSlotSave(st_QuickSlotBarSlotInfo QuickSlotBarSlotInfo);
+	CGameServerMessage* MakePacketResQuickSlotBarSlotSave(st_QuickSlotBarSlotInfo QuickSlotBarSlotInfo);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 퀵슬롯 생성 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CMessage* MakePacketQuickSlotCreate(int8 QuickSlotBarSize, int8 QuickSlotBarSlotSize, vector<st_QuickSlotBarSlotInfo> QuickslotBarSlotInfos);
+	CGameServerMessage* MakePacketQuickSlotCreate(int8 QuickSlotBarSize, int8 QuickSlotBarSlotSize, vector<st_QuickSlotBarSlotInfo> QuickslotBarSlotInfos);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 퀵슬롯 스왑 요청 응답 패킷 조합 
 	//-----------------------------------------------------------------------------------------
-	CMessage* MakePacketResQuickSlotSwap(int64 AccountId, int64 PlayerId, st_QuickSlotBarSlotInfo SwapAQuickSlotInfo, st_QuickSlotBarSlotInfo SwapBQuickSlotInfo);
+	CGameServerMessage* MakePacketResQuickSlotSwap(int64 AccountId, int64 PlayerId, st_QuickSlotBarSlotInfo SwapAQuickSlotInfo, st_QuickSlotBarSlotInfo SwapBQuickSlotInfo);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 에러 메세지 생성 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CMessage* MakePacketError(int64 PlayerId, en_ErrorType ErrorType, wstring ErrorMessage);
+	CGameServerMessage* MakePacketError(int64 PlayerId, en_ErrorType ErrorType, wstring ErrorMessage);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 재사용대기시간 출력 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CMessage* MakePacketCoolTime(int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, float SkillCoolTime, float SkillCoolTimeSpeed);	
+	CGameServerMessage* MakePacketCoolTime(int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, float SkillCoolTime, float SkillCoolTimeSpeed);
 public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 공격요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CMessage* MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_SkillType SkillType, int32 Damage, bool IsCritical);
+	CGameServerMessage* MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_SkillType SkillType, int32 Damage, bool IsCritical);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 마법요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CMessage* MakePacketResMagic(int64 ObjectId, bool SpellStart, en_SkillType SkillType = en_SkillType::SKILL_TYPE_NONE, float SpellTime = 0.0f);
+	CGameServerMessage* MakePacketResMagic(int64 ObjectId, bool SpellStart, en_SkillType SkillType = en_SkillType::SKILL_TYPE_NONE, float SpellTime = 0.0f);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 오브젝트 스탯 변경 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CMessage* MakePacketChangeObjectStat(int64 ObjectId, st_StatInfo ChangeObjectStatInfo);
+	CGameServerMessage* MakePacketChangeObjectStat(int64 ObjectId, st_StatInfo ChangeObjectStatInfo);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 오브젝트 상태 변경 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CMessage* MakePacketResObjectState(int64 ObjectId, en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState);
+	CGameServerMessage* MakePacketResObjectState(int64 ObjectId, en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 이동 요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CMessage* MakePacketResMove(int64 AccountId, int64 ObjectId, en_GameObjectType ObjectType, st_PositionInfo PositionInfo);
+	CGameServerMessage* MakePacketResMove(int64 AccountId, int64 ObjectId, en_GameObjectType ObjectType, st_PositionInfo PositionInfo);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 오브젝트 스폰 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CMessage* MakePacketResObjectSpawn(int32 ObjectInfosCount, vector<st_GameObjectInfo> ObjectInfos);
+	CGameServerMessage* MakePacketResObjectSpawn(int32 ObjectInfosCount, vector<st_GameObjectInfo> ObjectInfos);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 오브젝트 디스폰 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CMessage* MakePacketResObjectDeSpawn(int32 DeSpawnObjectCount, vector<int64> DeSpawnObjectIds);
+	CGameServerMessage* MakePacketResObjectDeSpawn(int32 DeSpawnObjectCount, vector<int64> DeSpawnObjectIds);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 오브젝트 죽음 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CMessage* MakePacketObjectDie(int64 DieObjectId);
+	CGameServerMessage* MakePacketObjectDie(int64 DieObjectId);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 메세지 ( 채팅, 시스템 ) 요청 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CMessage* MakePacketResChattingBoxMessage(int64 PlayerDBId, en_MessageType MessageType, st_Color Color, wstring ChattingMessage);		
+	CGameServerMessage* MakePacketResChattingBoxMessage(int64 PlayerDBId, en_MessageType MessageType, st_Color Color, wstring ChattingMessage);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 오브젝트 위치 싱크 맞추기 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CMessage* MakePacketResSyncPosition(int64 TargetObjectId, st_PositionInfo SyncPosition);	
+	CGameServerMessage* MakePacketResSyncPosition(int64 TargetObjectId, st_PositionInfo SyncPosition);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 스킬 저장 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CMessage* MakePacketResSkillToSkillBox(int64 TargetObjectId, st_SkillInfo SkillInfo);	
+	CGameServerMessage* MakePacketResSkillToSkillBox(int64 TargetObjectId, st_SkillInfo SkillInfo);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 이펙트 출력 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CMessage* MakePacketEffect(int64 TargetObjectId, en_EffectType EffectType);
+	CGameServerMessage* MakePacketEffect(int64 TargetObjectId, en_EffectType EffectType);
 public:
 	//------------------------------------
 	// Job 메모리풀

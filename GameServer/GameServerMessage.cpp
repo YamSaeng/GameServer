@@ -1,0 +1,170 @@
+#include "pch.h"
+#include "GameServerMessage.h"
+
+CMemoryPoolTLS<CGameServerMessage> CGameServerMessage::_MessageObjectPool(0);
+
+CGameServerMessage::CGameServerMessage()
+{
+
+}
+
+CGameServerMessage::~CGameServerMessage()
+{
+
+}
+
+CGameServerMessage& CGameServerMessage::operator=(CGameServerMessage& GameServerMessage)
+{
+    memcpy(this, &GameServerMessage, sizeof(CGameServerMessage));
+    return *(this);
+}
+
+CGameServerMessage& CGameServerMessage::operator<<(st_GameObjectInfo& GameObjectInfo)
+{
+    *this << GameObjectInfo.ObjectId;
+
+    int8 GameObjectInfoNameLen = (int8)GameObjectInfo.ObjectName.length() * 2;
+    *this << GameObjectInfoNameLen;    
+    InsertData(GameObjectInfo.ObjectName.c_str(), GameObjectInfoNameLen);      
+
+    *this << GameObjectInfo.ObjectPositionInfo;
+    *this << GameObjectInfo.ObjectStatInfo;
+    *this << (int16)GameObjectInfo.ObjectType;
+    *this << GameObjectInfo.OwnerObjectId;
+    *this << (int16)GameObjectInfo.OwnerObjectType;
+    *this << GameObjectInfo.PlayerSlotIndex;
+
+    return *(this);
+}
+
+CGameServerMessage& CGameServerMessage::operator<<(st_PositionInfo& PositionInfo)
+{
+    memcpy(&_MessageBuf[_Rear], &PositionInfo, sizeof(st_PositionInfo));
+    _Rear += sizeof(st_PositionInfo);
+    _UseBufferSize += sizeof(st_PositionInfo);
+
+    return *(this);
+}
+
+CGameServerMessage& CGameServerMessage::operator<<(st_StatInfo& StatInfo)
+{
+    memcpy(&_MessageBuf[_Rear], &StatInfo, sizeof(st_StatInfo));
+    _Rear += sizeof(st_StatInfo);
+    _UseBufferSize += sizeof(st_StatInfo);
+
+    return *(this);
+}
+
+CGameServerMessage& CGameServerMessage::operator<<(st_SkillInfo& SkillInfo)
+{
+    *this << (int16)SkillInfo._SkillType;
+    *this << SkillInfo._SkillLevel;
+
+    int8 SkillNameLen = (int8)SkillInfo._SkillName.length() * 2;
+    *this << SkillNameLen;
+    InsertData(SkillInfo._SkillName.c_str(), SkillNameLen);
+
+    *this << SkillInfo._SkillCoolTime;
+
+    int8 SkillImagePathLen = (int8)SkillInfo._SkillImagePath.length() * 2;
+    *this << SkillImagePathLen;
+    InsertData(SkillInfo._SkillImagePath.c_str(), SkillImagePathLen);
+
+    return *(this);
+}
+
+CGameServerMessage& CGameServerMessage::operator<<(st_ItemInfo& ItemInfo)
+{
+    *this << ItemInfo.ItemDBId;
+    *this << ItemInfo.IsQuickSlotUse;
+    *this << (int16)ItemInfo.ItemType;
+    *this << (int16)ItemInfo.ItemConsumableType;    
+    *this << ItemInfo.ItemCount;
+    *this << ItemInfo.SlotIndex;
+    *this << ItemInfo.IsEquipped;
+
+    int8 ItemNameLen = (int8)ItemInfo.ItemName.length() * 2;
+    *this << ItemNameLen;
+    InsertData(ItemInfo.ItemName.c_str(), ItemNameLen);
+
+    int8 ItemImagePathLen = (int8)ItemInfo.ThumbnailImagePath.length() * 2;
+    *this << ItemImagePathLen;
+    InsertData(ItemInfo.ThumbnailImagePath.c_str(), ItemImagePathLen);
+
+    return *(this);
+}
+
+CGameServerMessage& CGameServerMessage::operator<<(st_QuickSlotBarSlotInfo& QuickSlotBarSlotInfo)
+{
+    *this << QuickSlotBarSlotInfo.AccountDBId;
+    *this << QuickSlotBarSlotInfo.PlayerDBId;
+    *this << QuickSlotBarSlotInfo.QuickSlotBarIndex;
+    *this << QuickSlotBarSlotInfo.QuickSlotBarSlotIndex;
+
+    int8 QuickSlotKeyLen = (int8)QuickSlotBarSlotInfo.QuickSlotKey.length() * 2;
+    *this << QuickSlotKeyLen;
+    InsertData(QuickSlotBarSlotInfo.QuickSlotKey.c_str(), QuickSlotKeyLen);
+
+    *this << QuickSlotBarSlotInfo.QuickBarSkillInfo;
+
+    return *(this);
+}
+
+CGameServerMessage& CGameServerMessage::operator<<(st_Color& Color)
+{
+    memcpy(&_MessageBuf[_Rear], &Color, sizeof(st_Color));
+    _Rear += sizeof(st_Color);
+    _UseBufferSize += sizeof(st_Color);
+
+    return *(this);
+}
+
+CGameServerMessage& CGameServerMessage::operator>>(st_SkillInfo& Value)
+{
+    int16 SkillType = 0;
+    *this >> SkillType;
+    Value._SkillType = (en_SkillType)SkillType;
+
+    *this >> Value._SkillLevel;
+
+    int8 SkillNameLen = 0;
+    *this >> SkillNameLen;
+    GetData(Value._SkillName, SkillNameLen);
+
+    *this >> Value._SkillCoolTime;
+
+    int8 SkillImagePath = 0;
+    *this >> SkillImagePath;
+    GetData(Value._SkillImagePath, SkillImagePath);
+
+    return *(this);
+}
+
+CGameServerMessage& CGameServerMessage::operator>>(st_QuickSlotBarSlotInfo& Value)
+{
+    *this >> Value.AccountDBId;
+    *this >> Value.PlayerDBId;
+    *this >> Value.QuickSlotBarIndex;
+    *this >> Value.QuickSlotBarSlotIndex;
+    int8 QuickSlotKeyLen = 0;
+    *this >> QuickSlotKeyLen;
+    GetData(Value.QuickSlotKey, QuickSlotKeyLen);
+    *this >> Value.QuickBarSkillInfo;
+
+    return *(this);
+}
+
+CGameServerMessage* CGameServerMessage::GameServerMessageAlloc()
+{
+    CGameServerMessage* AllocMessage = _MessageObjectPool.Alloc();
+    InterlockedIncrement(AllocMessage->_RetCount);
+    return AllocMessage;
+}
+
+void CGameServerMessage::Free()
+{
+    if (InterlockedDecrement(_RetCount) == 0)
+    {
+        _MessageObjectPool.Free(this);
+    }
+}

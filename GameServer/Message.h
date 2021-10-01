@@ -146,7 +146,7 @@ public:
 
 	//메모리풀로부터 메세지 하나 할당
 	static CMessage* Alloc();
-	void Free();
+	virtual void Free();
 	void AddRetCount();
 
 	//패킷 인코딩

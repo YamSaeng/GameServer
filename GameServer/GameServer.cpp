@@ -8,6 +8,7 @@
 #include "ChannelManager.h"
 #include "ObjectManager.h"
 #include "Inventory.h"
+#include "GameServerMessage.h"
 #include <process.h>
 #include <atlbase.h>
 
@@ -518,7 +519,7 @@ void CGameServer::PacketProcReqCreateCharacter(int64 SessionID, CMessage* Messag
 
 		InterlockedIncrement64(&Session->IOBlock->IOCount);
 
-		CMessage* DBReqChatacerCreateMessage = CMessage::Alloc();
+		CGameServerMessage* DBReqChatacerCreateMessage = CGameServerMessage::GameServerMessageAlloc();
 		DBReqChatacerCreateMessage->Clear();
 
 		*DBReqChatacerCreateMessage << ReqGameObjectType;
@@ -1131,7 +1132,7 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 				SkillCoolTimeTimerJob->SessionId = MyPlayer->_SessionId;
 				SkillCoolTimeTimerJob->Type = en_TimerJobType::TIMER_SKILL_COOLTIME_END;
 				
-				CMessage* ResCoolTimeEndMessage = CMessage::Alloc();
+				CGameServerMessage* ResCoolTimeEndMessage = CGameServerMessage::GameServerMessageAlloc();
 				ResCoolTimeEndMessage->Clear();
 
 				*ResCoolTimeEndMessage << ReqSkillType;
@@ -1405,7 +1406,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 					SkillCoolTimeTimerJob->SessionId = MyPlayer->_SessionId;
 					SkillCoolTimeTimerJob->Type = en_TimerJobType::TIMER_SKILL_COOLTIME_END;
 
-					CMessage* ResCoolTimeEndMessage = CMessage::Alloc();
+					CGameServerMessage* ResCoolTimeEndMessage = CGameServerMessage::GameServerMessageAlloc();
 					ResCoolTimeEndMessage->Clear();
 
 					*ResCoolTimeEndMessage << ReqSkillType;
@@ -1743,7 +1744,7 @@ void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Messag
 					DBGoldSaveJob->Type = en_JobType::DATA_BASE_GOLD_SAVE;
 					DBGoldSaveJob->SessionId = TargetPlayer->_SessionId;
 
-					CMessage* DBGoldSaveMessage = CMessage::Alloc();
+					CGameServerMessage* DBGoldSaveMessage = CGameServerMessage::GameServerMessageAlloc();
 					DBGoldSaveMessage->Clear();
 
 					*DBGoldSaveMessage << TargetPlayer->_AccountId;
@@ -1786,7 +1787,7 @@ void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Messag
 					DBInventorySaveJob->Type = en_JobType::DATA_BASE_ITEM_INVENTORY_SAVE;
 					DBInventorySaveJob->SessionId = Session->SessionId;
 
-					CMessage* DBSaveMessage = CMessage::Alloc();
+					CGameServerMessage* DBSaveMessage = CGameServerMessage::GameServerMessageAlloc();
 
 					DBSaveMessage->Clear();
 
@@ -1903,7 +1904,7 @@ void CGameServer::PacketProcReqItemSwap(int64 SessionId, CMessage* Message)
 			DBItemSwapJob->Type = en_JobType::DATA_BASE_ITEM_SWAP;
 			DBItemSwapJob->SessionId = Session->MyPlayer->_SessionId;
 
-			CMessage* DBItemSwapMessage = CMessage::Alloc();
+			CGameServerMessage* DBItemSwapMessage = CGameServerMessage::GameServerMessageAlloc();
 			DBItemSwapMessage->Clear();
 
 			*DBItemSwapMessage << AccountId;
@@ -1972,7 +1973,7 @@ void CGameServer::PacketProcReqQuickSlotSave(int64 SessionId, CMessage* Message)
 			DBQuickSlotSaveJob->Type = en_JobType::DATA_BASE_QUICK_SLOT_SAVE;
 			DBQuickSlotSaveJob->SessionId = Session->MyPlayer->_SessionId;
 
-			CMessage* DBQuickSlotSaveMessage = CMessage::Alloc();
+			CGameServerMessage* DBQuickSlotSaveMessage = CGameServerMessage::GameServerMessageAlloc();
 			DBQuickSlotSaveMessage->Clear();
 
 			*DBQuickSlotSaveMessage << AccountId;
@@ -2047,7 +2048,7 @@ void CGameServer::PacketProcReqQuickSlotSwap(int64 SessionId, CMessage* Message)
 			DBQuickSlotSwapJob->Type = en_JobType::DATA_BASE_QUICK_SWAP;
 			DBQuickSlotSwapJob->SessionId = Session->MyPlayer->_SessionId;
 
-			CMessage* DBQuickSlotSwapMessage = CMessage::Alloc();
+			CGameServerMessage* DBQuickSlotSwapMessage = CGameServerMessage::GameServerMessageAlloc();
 			DBQuickSlotSwapMessage->Clear();
 
 			*DBQuickSlotSwapMessage << AccountId;
@@ -3163,7 +3164,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 	ReturnSession(Session);
 }
 
-void CGameServer::PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CMessage* Message)
+void CGameServer::PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CGameServerMessage* Message)
 {
 	st_Session* Session = FindSession(SessionId);
 
@@ -3173,86 +3174,38 @@ void CGameServer::PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CMessage*
 		{
 			InterlockedDecrement64(&Session->IOBlock->IOCount);
 
-			int64 AccountId;
-			*Message >> AccountId;
-
-			int64 PlayerId;
-			*Message >> PlayerId;
-
-			int8 QuickSlotBarIndex;
-			*Message >> QuickSlotBarIndex;
-
-			int8 QuickSlotBarSlotIndex;
-			*Message >> QuickSlotBarSlotIndex;
-
-			int8 QuickSlotKeyLen;
-			*Message >> QuickSlotKeyLen;
-
-			wstring QuickSlotKey;
-			Message->GetData(QuickSlotKey, QuickSlotKeyLen);
-
-			int16 SkillType;
-			*Message >> SkillType;
-
-			int8 SkillLevel;
-			*Message >> SkillLevel;
-
-			int8 SkillNameLen;
-			*Message >> SkillNameLen;
-
-			wstring SkillName;
-			Message->GetData(SkillName, SkillNameLen);
-
-			int32 SkillCoolTime;
-			*Message >> SkillCoolTime;						
-
-			int8 SkillImagePathLen;
-			*Message >> SkillImagePathLen;
-
-			wstring SkillImagePath;
-			Message->GetData(SkillImagePath, SkillImagePathLen);
+			st_QuickSlotBarSlotInfo SaveQuickSlotInfo;
+			*Message >> SaveQuickSlotInfo;			
 
 			Message->Free();
 
-			st_SkillInfo* FindSkill = Session->MyPlayer->_SkillBox.FindSkill((en_SkillType)SkillType);
+			st_SkillInfo* FindSkill = Session->MyPlayer->_SkillBox.FindSkill(SaveQuickSlotInfo.QuickBarSkillInfo._SkillType);
 			// 캐릭터가 해당 스킬을 가지고 있는지 확인
 			if (FindSkill != nullptr)
 			{
-				FindSkill->_IsQuickSlotUse = true;
+				FindSkill->_IsQuickSlotUse = true;				
 
-				st_QuickSlotBarSlotInfo QuickSlotBarSlotInfo;
-				QuickSlotBarSlotInfo.AccountDBId = AccountId;
-				QuickSlotBarSlotInfo.PlayerDBId = PlayerId;
-				QuickSlotBarSlotInfo.QuickSlotBarIndex = QuickSlotBarIndex;
-				QuickSlotBarSlotInfo.QuickSlotBarSlotIndex = QuickSlotBarSlotIndex;
-				QuickSlotBarSlotInfo.QuickSlotKey = QuickSlotKey;
-				QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillType = (en_SkillType)SkillType;
-				QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillLevel = SkillLevel;
-				QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillName = SkillName;
-				QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillCoolTime = SkillCoolTime;
-				QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillImagePath = SkillImagePath;
-
-				Session->MyPlayer->_QuickSlotManager.UpdateQuickSlotBar(QuickSlotBarSlotInfo);
-
+				Session->MyPlayer->_QuickSlotManager.UpdateQuickSlotBar(SaveQuickSlotInfo);
+				int16 SkillType = (int16)SaveQuickSlotInfo.QuickBarSkillInfo._SkillType;
 				// DB에 퀵슬롯 정보 저장
 				CDBConnection* DBQuickSlotUpdateConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 				SP::CDBGameServerQuickSlotBarSlotUpdate QuickSlotUpdate(*DBQuickSlotUpdateConnection);
-				QuickSlotUpdate.InAccountDBId(AccountId);
-				QuickSlotUpdate.InPlayerDBId(PlayerId);
-				QuickSlotUpdate.InQuickSlotBarIndex(QuickSlotBarIndex);
-				QuickSlotUpdate.InQuickSlotBarSlotIndex(QuickSlotBarSlotIndex);
-				QuickSlotUpdate.InQuickSlotKey(QuickSlotKey);
+				QuickSlotUpdate.InAccountDBId(SaveQuickSlotInfo.AccountDBId);
+				QuickSlotUpdate.InPlayerDBId(SaveQuickSlotInfo.PlayerDBId);
+				QuickSlotUpdate.InQuickSlotBarIndex(SaveQuickSlotInfo.QuickSlotBarIndex);
+				QuickSlotUpdate.InQuickSlotBarSlotIndex(SaveQuickSlotInfo.QuickSlotBarSlotIndex);
+				QuickSlotUpdate.InQuickSlotKey(SaveQuickSlotInfo.QuickSlotKey);
 				QuickSlotUpdate.InSkillType(SkillType);
-				QuickSlotUpdate.InSkillLevel(SkillLevel);
-				QuickSlotUpdate.InSkillName(SkillName);
-				QuickSlotUpdate.InSkillCoolTime(SkillCoolTime);
-				QuickSlotUpdate.InSkillThumbnailImagePath(SkillImagePath);
+				QuickSlotUpdate.InSkillLevel(SaveQuickSlotInfo.QuickBarSkillInfo._SkillLevel);
+				QuickSlotUpdate.InSkillName(SaveQuickSlotInfo.QuickBarSkillInfo._SkillName);
+				QuickSlotUpdate.InSkillCoolTime(SaveQuickSlotInfo.QuickBarSkillInfo._SkillCoolTime);
+				QuickSlotUpdate.InSkillThumbnailImagePath(SaveQuickSlotInfo.QuickBarSkillInfo._SkillImagePath);
 
 				QuickSlotUpdate.Execute();
 
 				G_DBConnectionPool->Push(en_DBConnect::GAME, DBQuickSlotUpdateConnection);		
 
-				CMessage* ResQuickSlotUpdateMessage = MakePacketResQuickSlotBarSlotSave(QuickSlotBarSlotInfo);
+				CMessage* ResQuickSlotUpdateMessage = MakePacketResQuickSlotBarSlotSave(SaveQuickSlotInfo);
 				SendPacket(Session->SessionId, ResQuickSlotUpdateMessage);
 				ResQuickSlotUpdateMessage->Free();
 			}
@@ -3574,9 +3527,9 @@ void CGameServer::PacketProcTimerCoolTimeEnd(int64 SessionId, CMessage* Message)
 	ReturnSession(Session);
 }
 
-CMessage* CGameServer::MakePacketResClientConnected()
+CGameServerMessage* CGameServer::MakePacketResClientConnected()
 {
-	CMessage* ClientConnetedMessage = CMessage::Alloc();
+	CGameServerMessage* ClientConnetedMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ClientConnetedMessage == nullptr)
 	{
 		CRASH("ClientConnectdMessage가 nullptr");
@@ -3584,7 +3537,7 @@ CMessage* CGameServer::MakePacketResClientConnected()
 
 	ClientConnetedMessage->Clear();
 
-	*ClientConnetedMessage << (uint16)en_PACKET_S2C_GAME_CLIENT_CONNECTED;
+	*ClientConnetedMessage << (int16)en_PACKET_S2C_GAME_CLIENT_CONNECTED;
 
 	return ClientConnetedMessage;
 }
@@ -3595,9 +3548,9 @@ CMessage* CGameServer::MakePacketResClientConnected()
 //BYTE Status  //0 : 실패  1 : 성공
 //CPlayer Players
 //---------------------------------------------------------------
-CMessage* CGameServer::MakePacketResLogin(bool Status, int8 PlayerCount, CGameObject** MyPlayersInfo)
+CGameServerMessage* CGameServer::MakePacketResLogin(bool Status, int8 PlayerCount, CGameObject** MyPlayersInfo)
 {
-	CMessage* LoginMessage = CMessage::Alloc();
+	CGameServerMessage* LoginMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (LoginMessage == nullptr)
 	{
 		return nullptr;
@@ -3605,7 +3558,7 @@ CMessage* CGameServer::MakePacketResLogin(bool Status, int8 PlayerCount, CGameOb
 
 	LoginMessage->Clear();
 
-	*LoginMessage << (WORD)en_PACKET_S2C_GAME_RES_LOGIN;
+	*LoginMessage << (int16)en_PACKET_S2C_GAME_RES_LOGIN;
 	*LoginMessage << Status;
 	*LoginMessage << PlayerCount;
 
@@ -3613,32 +3566,7 @@ CMessage* CGameServer::MakePacketResLogin(bool Status, int8 PlayerCount, CGameOb
 	{
 		for (int32 i = 0; i < PlayerCount; i++)
 		{
-			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectId;
-
-			int8 ObjectNameLen = (int8)(MyPlayersInfo[i]->_GameObjectInfo.ObjectName.length() * 2);
-			*LoginMessage << ObjectNameLen;
-			LoginMessage->InsertData(MyPlayersInfo[i]->_GameObjectInfo.ObjectName.c_str(), ObjectNameLen);
-
-			*LoginMessage << (int8)(MyPlayersInfo[i]->_GameObjectInfo.ObjectPositionInfo.State);
-			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectPositionInfo.PositionX;
-			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectPositionInfo.PositionY;
-			*LoginMessage << (int8)(MyPlayersInfo[i]->_GameObjectInfo.ObjectPositionInfo.MoveDir);
-
-			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectStatInfo.Level;
-			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectStatInfo.HP;
-			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectStatInfo.MaxHP;
-			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectStatInfo.MP;
-			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectStatInfo.MaxMP;
-			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectStatInfo.DP;
-			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectStatInfo.MaxDP;
-			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectStatInfo.MinAttackDamage;
-			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectStatInfo.MaxAttackDamage;
-			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectStatInfo.CriticalPoint;
-			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.ObjectStatInfo.Speed;
-			*LoginMessage << (int16)(MyPlayersInfo[i]->_GameObjectInfo.ObjectType);
-			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo.OwnerObjectId;
-			*LoginMessage << (int16)MyPlayersInfo[i]->_GameObjectInfo.OwnerObjectType;
-			*LoginMessage << (int8)(MyPlayersInfo[i]->_GameObjectInfo.PlayerSlotIndex);
+			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo;
 		}
 	}
 
@@ -3648,9 +3576,9 @@ CMessage* CGameServer::MakePacketResLogin(bool Status, int8 PlayerCount, CGameOb
 // int32 PlayerDBId
 // bool IsSuccess
 // wstring PlayerName
-CMessage* CGameServer::MakePacketResCreateCharacter(bool IsSuccess, st_GameObjectInfo CreateCharacterObjectInfo)
+CGameServerMessage* CGameServer::MakePacketResCreateCharacter(bool IsSuccess, st_GameObjectInfo CreateCharacterObjectInfo)
 {
-	CMessage* ResCreateCharacter = CMessage::Alloc();
+	CGameServerMessage* ResCreateCharacter = CGameServerMessage::GameServerMessageAlloc();
 	if (ResCreateCharacter == nullptr)
 	{
 		return nullptr;
@@ -3658,45 +3586,17 @@ CMessage* CGameServer::MakePacketResCreateCharacter(bool IsSuccess, st_GameObjec
 
 	ResCreateCharacter->Clear();
 
-	*ResCreateCharacter << (WORD)en_PACKET_S2C_GAME_CREATE_CHARACTER;
+	*ResCreateCharacter << (int16)en_PACKET_S2C_GAME_CREATE_CHARACTER;
 	*ResCreateCharacter << IsSuccess;
 
-	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectId;
-
-	int8 CreateCharacterObjectNameLen = (int8)(CreateCharacterObjectInfo.ObjectName.length() * 2);
-	*ResCreateCharacter << CreateCharacterObjectNameLen;
-	ResCreateCharacter->InsertData(CreateCharacterObjectInfo.ObjectName.c_str(), CreateCharacterObjectNameLen);
-
-	// st_PositionInfo
-	*ResCreateCharacter << (int8)(CreateCharacterObjectInfo.ObjectPositionInfo.State);
-	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectPositionInfo.PositionX;
-	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectPositionInfo.PositionY;
-	*ResCreateCharacter << (int8)(CreateCharacterObjectInfo.ObjectPositionInfo.MoveDir);
-
-	// st_StatInfo
-	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectStatInfo.Level;
-	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectStatInfo.HP;
-	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectStatInfo.MaxHP;
-	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectStatInfo.MP;
-	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectStatInfo.MaxMP;
-	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectStatInfo.DP;
-	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectStatInfo.MaxDP;
-	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectStatInfo.MinAttackDamage;
-	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectStatInfo.MaxAttackDamage;
-	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectStatInfo.CriticalPoint;
-	*ResCreateCharacter << CreateCharacterObjectInfo.ObjectStatInfo.Speed;
-
-	*ResCreateCharacter << (int16)(CreateCharacterObjectInfo.ObjectType);
-	*ResCreateCharacter << CreateCharacterObjectInfo.OwnerObjectId;
-	*ResCreateCharacter << (int16)CreateCharacterObjectInfo.OwnerObjectType;
-	*ResCreateCharacter << (int8)(CreateCharacterObjectInfo.PlayerSlotIndex);
+	*ResCreateCharacter << CreateCharacterObjectInfo;
 
 	return ResCreateCharacter;
 }
 
-CMessage* CGameServer::MakePacketResEnterGame(st_GameObjectInfo ObjectInfo)
+CGameServerMessage* CGameServer::MakePacketResEnterGame(st_GameObjectInfo ObjectInfo)
 {
-	CMessage* ResEnterGamePacket = CMessage::Alloc();
+	CGameServerMessage* ResEnterGamePacket = CGameServerMessage::GameServerMessageAlloc();
 	if (ResEnterGamePacket == nullptr)
 	{
 		return nullptr;
@@ -3704,53 +3604,18 @@ CMessage* CGameServer::MakePacketResEnterGame(st_GameObjectInfo ObjectInfo)
 
 	ResEnterGamePacket->Clear();
 
-	*ResEnterGamePacket << (WORD)en_PACKET_S2C_GAME_ENTER;
-
-	// ObjectId
-	*ResEnterGamePacket << ObjectInfo.ObjectId;
-
-	// EnterPlayerName
-	int8 EnterPlayerNameLen = (int8)(ObjectInfo.ObjectName.length() * 2);
-	*ResEnterGamePacket << EnterPlayerNameLen;
-	ResEnterGamePacket->InsertData(ObjectInfo.ObjectName.c_str(), EnterPlayerNameLen);
-
-	// st_PositionInfo
-	*ResEnterGamePacket << (int8)ObjectInfo.ObjectPositionInfo.State;
-	*ResEnterGamePacket << ObjectInfo.ObjectPositionInfo.PositionX;
-	*ResEnterGamePacket << ObjectInfo.ObjectPositionInfo.PositionY;
-	*ResEnterGamePacket << (int8)ObjectInfo.ObjectPositionInfo.MoveDir;
-
-	// st_StatInfo
-	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.Level;
-	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.HP;
-	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.MaxHP;
-	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.MP;
-	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.MaxMP;
-	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.DP;
-	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.MaxDP;
-	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.MinAttackDamage;
-	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.MaxAttackDamage;
-	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.CriticalPoint;
-	*ResEnterGamePacket << ObjectInfo.ObjectStatInfo.Speed;
-
-	// ObjectType
-	*ResEnterGamePacket << (int16)ObjectInfo.ObjectType;
-
-	*ResEnterGamePacket << ObjectInfo.OwnerObjectId;
-
-	*ResEnterGamePacket << (int16)ObjectInfo.OwnerObjectType;
-
-	*ResEnterGamePacket << (int8)ObjectInfo.PlayerSlotIndex;
-
+	*ResEnterGamePacket << (int16)en_PACKET_S2C_GAME_ENTER;
+	*ResEnterGamePacket << ObjectInfo;	
+	
 	return ResEnterGamePacket;
 }
 
 // int64 AccountId
 // int32 PlayerDBId
 // st_GameObjectInfo ObjectInfo
-CMessage* CGameServer::MakePacketResMousePositionObjectInfo(int64 AccountId, int64 PreviousChoiceObjectId, st_GameObjectInfo FindObjectInfo)
+CGameServerMessage* CGameServer::MakePacketResMousePositionObjectInfo(int64 AccountId, int64 PreviousChoiceObjectId, st_GameObjectInfo FindObjectInfo)
 {
-	CMessage* ResMousePositionObjectInfoPacket = CMessage::Alloc();
+	CGameServerMessage* ResMousePositionObjectInfoPacket = CGameServerMessage::GameServerMessageAlloc();
 	if (ResMousePositionObjectInfoPacket == nullptr)
 	{
 		return nullptr;
@@ -3758,52 +3623,19 @@ CMessage* CGameServer::MakePacketResMousePositionObjectInfo(int64 AccountId, int
 
 	ResMousePositionObjectInfoPacket->Clear();
 
-	*ResMousePositionObjectInfoPacket << (WORD)en_PACKET_S2C_MOUSE_POSITION_OBJECT_INFO;
+	*ResMousePositionObjectInfoPacket << (int16)en_PACKET_S2C_MOUSE_POSITION_OBJECT_INFO;
 	*ResMousePositionObjectInfoPacket << AccountId;
 	*ResMousePositionObjectInfoPacket << PreviousChoiceObjectId;
 
 	// ObjectId
-	*ResMousePositionObjectInfoPacket << FindObjectInfo.ObjectId;
-
-	// EnterPlayerName
-	int8 ObjectNameLen = (int8)(FindObjectInfo.ObjectName.length() * 2);
-	*ResMousePositionObjectInfoPacket << ObjectNameLen;
-	ResMousePositionObjectInfoPacket->InsertData(FindObjectInfo.ObjectName.c_str(), ObjectNameLen);
-
-	// st_PositionInfo
-	*ResMousePositionObjectInfoPacket << (int8)FindObjectInfo.ObjectPositionInfo.State;
-	*ResMousePositionObjectInfoPacket << FindObjectInfo.ObjectPositionInfo.PositionX;
-	*ResMousePositionObjectInfoPacket << FindObjectInfo.ObjectPositionInfo.PositionY;
-	*ResMousePositionObjectInfoPacket << (int8)FindObjectInfo.ObjectPositionInfo.MoveDir;
-
-	// st_StatInfo
-	*ResMousePositionObjectInfoPacket << FindObjectInfo.ObjectStatInfo.Level;
-	*ResMousePositionObjectInfoPacket << FindObjectInfo.ObjectStatInfo.HP;
-	*ResMousePositionObjectInfoPacket << FindObjectInfo.ObjectStatInfo.MaxHP;
-	*ResMousePositionObjectInfoPacket << FindObjectInfo.ObjectStatInfo.MP;
-	*ResMousePositionObjectInfoPacket << FindObjectInfo.ObjectStatInfo.MaxMP;
-	*ResMousePositionObjectInfoPacket << FindObjectInfo.ObjectStatInfo.DP;
-	*ResMousePositionObjectInfoPacket << FindObjectInfo.ObjectStatInfo.MaxDP;
-	*ResMousePositionObjectInfoPacket << FindObjectInfo.ObjectStatInfo.MinAttackDamage;
-	*ResMousePositionObjectInfoPacket << FindObjectInfo.ObjectStatInfo.MaxAttackDamage;
-	*ResMousePositionObjectInfoPacket << FindObjectInfo.ObjectStatInfo.CriticalPoint;
-	*ResMousePositionObjectInfoPacket << FindObjectInfo.ObjectStatInfo.Speed;
-
-	// ObjectType
-	*ResMousePositionObjectInfoPacket << (int16)FindObjectInfo.ObjectType;
-
-	// OwnerObjectId, OwnerObjectType
-	*ResMousePositionObjectInfoPacket << FindObjectInfo.OwnerObjectId;
-	*ResMousePositionObjectInfoPacket << (int16)FindObjectInfo.OwnerObjectType;
-
-	*ResMousePositionObjectInfoPacket << (int8)FindObjectInfo.PlayerSlotIndex;
+	*ResMousePositionObjectInfoPacket << FindObjectInfo;
 
 	return ResMousePositionObjectInfoPacket;
 }
 
-CMessage* CGameServer::MakePacketResGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int16 SliverCount, int16 BronzeCount, int16 ItemCount, int16 ItemType, bool ItemGainPrint)
+CGameServerMessage* CGameServer::MakePacketResGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int16 SliverCount, int16 BronzeCount, int16 ItemCount, int16 ItemType, bool ItemGainPrint)
 {
-	CMessage* ResGoldSaveMessage = CMessage::Alloc();
+	CGameServerMessage* ResGoldSaveMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResGoldSaveMessage == nullptr)
 	{
 		return nullptr;
@@ -3811,7 +3643,7 @@ CMessage* CGameServer::MakePacketResGoldSave(int64 AccountId, int64 ObjectId, in
 
 	ResGoldSaveMessage->Clear();
 
-	*ResGoldSaveMessage << (WORD)en_PACKET_S2C_GOLD_SAVE;
+	*ResGoldSaveMessage << (int16)en_PACKET_S2C_GOLD_SAVE;
 	*ResGoldSaveMessage << AccountId;
 	*ResGoldSaveMessage << ObjectId;
 	*ResGoldSaveMessage << GoldCount;
@@ -3824,9 +3656,9 @@ CMessage* CGameServer::MakePacketResGoldSave(int64 AccountId, int64 ObjectId, in
 	return ResGoldSaveMessage;
 }
 
-CMessage* CGameServer::MakePacketResItemSwap(int64 AccountId, int64 ObjectId, st_ItemInfo SwapAItemInfo, st_ItemInfo SwapBItemInfo)
+CGameServerMessage* CGameServer::MakePacketResItemSwap(int64 AccountId, int64 ObjectId, st_ItemInfo SwapAItemInfo, st_ItemInfo SwapBItemInfo)
 {
-	CMessage* ResItemSwapMessage = CMessage::Alloc();
+	CGameServerMessage* ResItemSwapMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResItemSwapMessage == nullptr)
 	{
 		return nullptr;
@@ -3834,54 +3666,22 @@ CMessage* CGameServer::MakePacketResItemSwap(int64 AccountId, int64 ObjectId, st
 
 	ResItemSwapMessage->Clear();
 
-	*ResItemSwapMessage << (WORD)en_PACKET_S2C_ITEM_SWAP;
+	*ResItemSwapMessage << (int16)en_PACKET_S2C_ITEM_SWAP;
 	*ResItemSwapMessage << AccountId;
 	*ResItemSwapMessage << ObjectId;
 
 	// AItemInfo	
-	*ResItemSwapMessage << SwapAItemInfo.ItemDBId;
-	*ResItemSwapMessage << SwapAItemInfo.IsQuickSlotUse;
-	*ResItemSwapMessage << (int16)SwapAItemInfo.ItemType;
-	*ResItemSwapMessage << (int16)SwapAItemInfo.ItemConsumableType;
-	*ResItemSwapMessage << SwapAItemInfo.ItemCount;
-	*ResItemSwapMessage << SwapAItemInfo.SlotIndex;
-	*ResItemSwapMessage << SwapAItemInfo.IsEquipped;
-
-	// AItem 이름
-	int8 AItemNameLen = (int8)(SwapAItemInfo.ItemName.length() * 2);
-	*ResItemSwapMessage << AItemNameLen;
-	ResItemSwapMessage->InsertData(SwapAItemInfo.ItemName.c_str(), AItemNameLen);
-
-	// AItem 썸네일 이미지 경로 
-	int8 AItemThumbnailImagePathLen = (int8)(SwapAItemInfo.ThumbnailImagePath.length() * 2);
-	*ResItemSwapMessage << AItemThumbnailImagePathLen;
-	ResItemSwapMessage->InsertData(SwapAItemInfo.ThumbnailImagePath.c_str(), AItemThumbnailImagePathLen);
+	*ResItemSwapMessage << SwapAItemInfo;	
 
 	// BItemInfo		
-	*ResItemSwapMessage << SwapBItemInfo.ItemDBId;
-	*ResItemSwapMessage << SwapBItemInfo.IsQuickSlotUse;
-	*ResItemSwapMessage << (int16)SwapBItemInfo.ItemType;
-	*ResItemSwapMessage << (int16)SwapBItemInfo.ItemConsumableType;
-	*ResItemSwapMessage << SwapBItemInfo.ItemCount;
-	*ResItemSwapMessage << SwapBItemInfo.SlotIndex;
-	*ResItemSwapMessage << SwapBItemInfo.IsEquipped;
-
-	// BItem 이름
-	int8 BItemNameLen = (int8)(SwapBItemInfo.ItemName.length() * 2);
-	*ResItemSwapMessage << BItemNameLen;
-	ResItemSwapMessage->InsertData(SwapBItemInfo.ItemName.c_str(), BItemNameLen);
-
-	// AItem 썸네일 이미지 경로 
-	int8 BItemThumbnailImagePathLen = (int8)(SwapBItemInfo.ThumbnailImagePath.length() * 2);
-	*ResItemSwapMessage << BItemThumbnailImagePathLen;
-	ResItemSwapMessage->InsertData(SwapBItemInfo.ThumbnailImagePath.c_str(), BItemThumbnailImagePathLen);
+	*ResItemSwapMessage << SwapBItemInfo;
 
 	return ResItemSwapMessage;
 }
 
-CMessage* CGameServer::MakePacketResItemToInventory(int64 TargetObjectId, st_ItemInfo ItemInfo, int16 ItemEach, bool ItemGainPrint)
+CGameServerMessage* CGameServer::MakePacketResItemToInventory(int64 TargetObjectId, st_ItemInfo ItemInfo, int16 ItemEach, bool ItemGainPrint)
 {
-	CMessage* ResItemToInventoryMessage = CMessage::Alloc();
+	CGameServerMessage* ResItemToInventoryMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResItemToInventoryMessage == nullptr)
 	{
 		return nullptr;
@@ -3889,26 +3689,10 @@ CMessage* CGameServer::MakePacketResItemToInventory(int64 TargetObjectId, st_Ite
 
 	ResItemToInventoryMessage->Clear();
 
-	*ResItemToInventoryMessage << (WORD)en_PACKET_S2C_ITEM_TO_INVENTORY;
+	*ResItemToInventoryMessage << (int16)en_PACKET_S2C_ITEM_TO_INVENTORY;
 	*ResItemToInventoryMessage << TargetObjectId;
-	// ItemInfo
-	*ResItemToInventoryMessage << ItemInfo.ItemDBId;
-	*ResItemToInventoryMessage << ItemInfo.IsQuickSlotUse;
-	*ResItemToInventoryMessage << (int16)ItemInfo.ItemType;
-	*ResItemToInventoryMessage << (int16)ItemInfo.ItemConsumableType;
-	*ResItemToInventoryMessage << ItemInfo.ItemCount;
-	*ResItemToInventoryMessage << ItemInfo.SlotIndex;
-	*ResItemToInventoryMessage << ItemInfo.IsEquipped;
-
-	// Item 이름
-	int8 ItemNameLen = (int8)(ItemInfo.ItemName.length() * 2);
-	*ResItemToInventoryMessage << ItemNameLen;
-	ResItemToInventoryMessage->InsertData(ItemInfo.ItemName.c_str(), ItemNameLen);
-
-	// 썸네일 이미지 경로 
-	int8 ThumbnailImagePathLen = (int8)(ItemInfo.ThumbnailImagePath.length() * 2);
-	*ResItemToInventoryMessage << ThumbnailImagePathLen;
-	ResItemToInventoryMessage->InsertData(ItemInfo.ThumbnailImagePath.c_str(), ThumbnailImagePathLen);
+	
+	*ResItemToInventoryMessage << ItemInfo;	
 
 	// 아이템 낱개 개수
 	*ResItemToInventoryMessage << ItemEach;
@@ -3918,9 +3702,9 @@ CMessage* CGameServer::MakePacketResItemToInventory(int64 TargetObjectId, st_Ite
 	return ResItemToInventoryMessage;
 }
 
-CMessage* CGameServer::MakePacketResQuickSlotBarSlotSave(st_QuickSlotBarSlotInfo QuickSlotBarSlotInfo)
+CGameServerMessage* CGameServer::MakePacketResQuickSlotBarSlotSave(st_QuickSlotBarSlotInfo QuickSlotBarSlotInfo)
 {
-	CMessage* ResQuickSlotBarSlotMessage = CMessage::Alloc();
+	CGameServerMessage* ResQuickSlotBarSlotMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResQuickSlotBarSlotMessage == nullptr)
 	{
 		return nullptr;
@@ -3929,38 +3713,14 @@ CMessage* CGameServer::MakePacketResQuickSlotBarSlotSave(st_QuickSlotBarSlotInfo
 	ResQuickSlotBarSlotMessage->Clear();
 
 	*ResQuickSlotBarSlotMessage << (int16)en_PACKET_S2C_QUICKSLOT_SAVE;
-	*ResQuickSlotBarSlotMessage << QuickSlotBarSlotInfo.AccountDBId;
-	*ResQuickSlotBarSlotMessage << QuickSlotBarSlotInfo.PlayerDBId;
-	*ResQuickSlotBarSlotMessage << QuickSlotBarSlotInfo.QuickSlotBarIndex;
-	*ResQuickSlotBarSlotMessage << QuickSlotBarSlotInfo.QuickSlotBarSlotIndex;
-
-	int8 QuickSlotKeyLen = (int8)(QuickSlotBarSlotInfo.QuickSlotKey.length() * 2);
-	*ResQuickSlotBarSlotMessage << QuickSlotKeyLen;
-	ResQuickSlotBarSlotMessage->InsertData(QuickSlotBarSlotInfo.QuickSlotKey.c_str(), QuickSlotKeyLen);
-
-	// 스킬타입
-	*ResQuickSlotBarSlotMessage << (int16)QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillType;
-	// 스킬레벨
-	*ResQuickSlotBarSlotMessage << QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillLevel;
-
-	// 스킬이름
-	int8 SkillNameLen = (int8)(QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillName.length() * 2);
-	*ResQuickSlotBarSlotMessage << SkillNameLen;
-	ResQuickSlotBarSlotMessage->InsertData(QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillName.c_str(), SkillNameLen);
-
-	// 스킬 쿨타임
-	*ResQuickSlotBarSlotMessage << QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillCoolTime;
-
-	int8 SkillImagePathLen = (int8)(QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillImagePath.length() * 2);
-	*ResQuickSlotBarSlotMessage << SkillImagePathLen;
-	ResQuickSlotBarSlotMessage->InsertData(QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillImagePath.c_str(), SkillImagePathLen);
-
+	*ResQuickSlotBarSlotMessage << QuickSlotBarSlotInfo;
+	
 	return ResQuickSlotBarSlotMessage;
 }
 
-CMessage* CGameServer::MakePacketQuickSlotCreate(int8 QuickSlotBarSize, int8 QuickSlotBarSlotSize, vector<st_QuickSlotBarSlotInfo> QuickslotBarSlotInfos)
+CGameServerMessage* CGameServer::MakePacketQuickSlotCreate(int8 QuickSlotBarSize, int8 QuickSlotBarSlotSize, vector<st_QuickSlotBarSlotInfo> QuickslotBarSlotInfos)
 {
-	CMessage* ResQuickSlotCreateMessage = CMessage::Alloc();
+	CGameServerMessage* ResQuickSlotCreateMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResQuickSlotCreateMessage == nullptr)
 	{
 		return nullptr;
@@ -3968,47 +3728,23 @@ CMessage* CGameServer::MakePacketQuickSlotCreate(int8 QuickSlotBarSize, int8 Qui
 
 	ResQuickSlotCreateMessage->Clear();
 
-	*ResQuickSlotCreateMessage << (short)en_PACKET_S2C_QUICKSLOT_CREATE;
+	*ResQuickSlotCreateMessage << (int16)en_PACKET_S2C_QUICKSLOT_CREATE;
 	*ResQuickSlotCreateMessage << QuickSlotBarSize;
 	*ResQuickSlotCreateMessage << QuickSlotBarSlotSize;
 
-	*ResQuickSlotCreateMessage << (byte)QuickslotBarSlotInfos.size();
+	*ResQuickSlotCreateMessage << (int8)QuickslotBarSlotInfos.size();
 
 	for (st_QuickSlotBarSlotInfo QuickSlotBarSlotInfo : QuickslotBarSlotInfos)
 	{
-		*ResQuickSlotCreateMessage << QuickSlotBarSlotInfo.AccountDBId;
-		*ResQuickSlotCreateMessage << QuickSlotBarSlotInfo.PlayerDBId;
-		*ResQuickSlotCreateMessage << QuickSlotBarSlotInfo.QuickSlotBarIndex;
-		*ResQuickSlotCreateMessage << QuickSlotBarSlotInfo.QuickSlotBarSlotIndex;
-				
-		int8 QuickSlotKeyLen = (int8)(QuickSlotBarSlotInfo.QuickSlotKey.length() * 2);
-		*ResQuickSlotCreateMessage << QuickSlotKeyLen;
-		ResQuickSlotCreateMessage->InsertData(QuickSlotBarSlotInfo.QuickSlotKey.c_str(), QuickSlotKeyLen);
-		
-		// 스킬타입
-		*ResQuickSlotCreateMessage << (int16)QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillType;
-		// 스킬레벨
-		*ResQuickSlotCreateMessage << QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillLevel;
-
-		// 스킬이름
-		int8 SkillNameLen = (int8)(QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillName.length() * 2);
-		*ResQuickSlotCreateMessage << SkillNameLen;
-		ResQuickSlotCreateMessage->InsertData(QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillName.c_str(), SkillNameLen);
-
-		// 스킬 쿨타임
-		*ResQuickSlotCreateMessage << QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillCoolTime;
-
-		int8 SkillImagePathLen = (int8)(QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillImagePath.length() * 2);
-		*ResQuickSlotCreateMessage << SkillImagePathLen;
-		ResQuickSlotCreateMessage->InsertData(QuickSlotBarSlotInfo.QuickBarSkillInfo._SkillImagePath.c_str(), SkillImagePathLen);
+		*ResQuickSlotCreateMessage << QuickSlotBarSlotInfo;		
 	}
 
 	return ResQuickSlotCreateMessage;
 }
 
-CMessage* CGameServer::MakePacketResQuickSlotSwap(int64 AccountId, int64 PlayerId, st_QuickSlotBarSlotInfo SwapAQuickSlotInfo, st_QuickSlotBarSlotInfo SwapBQuickSlotInfo)
+CGameServerMessage* CGameServer::MakePacketResQuickSlotSwap(int64 AccountId, int64 PlayerId, st_QuickSlotBarSlotInfo SwapAQuickSlotInfo, st_QuickSlotBarSlotInfo SwapBQuickSlotInfo)
 {
-	CMessage* ResQuickSlotSwapMessage = CMessage::Alloc();
+	CGameServerMessage* ResQuickSlotSwapMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResQuickSlotSwapMessage == nullptr)
 	{
 		return nullptr;
@@ -4016,74 +3752,19 @@ CMessage* CGameServer::MakePacketResQuickSlotSwap(int64 AccountId, int64 PlayerI
 
 	ResQuickSlotSwapMessage->Clear();
 
-	*ResQuickSlotSwapMessage << (short)en_PACKET_S2C_QUICKSLOT_SWAP;
+	*ResQuickSlotSwapMessage << (int16)en_PACKET_S2C_QUICKSLOT_SWAP;
 	*ResQuickSlotSwapMessage << AccountId;
 	*ResQuickSlotSwapMessage << PlayerId;
 
-	// AQuickSlotInfo
-	*ResQuickSlotSwapMessage << AccountId;
-	*ResQuickSlotSwapMessage << PlayerId;
-
-	*ResQuickSlotSwapMessage << SwapAQuickSlotInfo.QuickSlotBarIndex;
-	*ResQuickSlotSwapMessage << SwapAQuickSlotInfo.QuickSlotBarSlotIndex;
-
-	// 퀵슬롯에 연동된 키
-	int8 AQuickSlotKeyLen = (int8)(SwapAQuickSlotInfo.QuickSlotKey.length() * 2);
-	*ResQuickSlotSwapMessage << AQuickSlotKeyLen;
-	ResQuickSlotSwapMessage->InsertData(SwapAQuickSlotInfo.QuickSlotKey.c_str(), AQuickSlotKeyLen);
-
-	// 스킬타입
-	*ResQuickSlotSwapMessage << (int16)SwapAQuickSlotInfo.QuickBarSkillInfo._SkillType;
-	// 스킬레벨
-	*ResQuickSlotSwapMessage << SwapAQuickSlotInfo.QuickBarSkillInfo._SkillLevel;
-
-	// 스킬이름
-	int8 AQuickSlotSkillNameLen = (int8)(SwapAQuickSlotInfo.QuickBarSkillInfo._SkillName.length() * 2);
-	*ResQuickSlotSwapMessage << AQuickSlotSkillNameLen;
-	ResQuickSlotSwapMessage->InsertData(SwapAQuickSlotInfo.QuickBarSkillInfo._SkillName.c_str(), AQuickSlotSkillNameLen);
-
-	// 스킬 쿨타임
-	*ResQuickSlotSwapMessage << SwapAQuickSlotInfo.QuickBarSkillInfo._SkillCoolTime;
-
-	int8 AQuickSlotSkillImagePathLen = (int8)(SwapAQuickSlotInfo.QuickBarSkillInfo._SkillImagePath.length() * 2);
-	*ResQuickSlotSwapMessage << AQuickSlotSkillImagePathLen;
-	ResQuickSlotSwapMessage->InsertData(SwapAQuickSlotInfo.QuickBarSkillInfo._SkillImagePath.c_str(), AQuickSlotSkillImagePathLen);
-
-	// BQuickSlotInfo
-	*ResQuickSlotSwapMessage << AccountId;
-	*ResQuickSlotSwapMessage << PlayerId;
-
-	*ResQuickSlotSwapMessage << SwapBQuickSlotInfo.QuickSlotBarIndex;
-	*ResQuickSlotSwapMessage << SwapBQuickSlotInfo.QuickSlotBarSlotIndex;
-
-	// 퀵슬롯에 연동된 키
-	int8 BQuickSlotKeyLen = (int8)(SwapBQuickSlotInfo.QuickSlotKey.length() * 2);
-	*ResQuickSlotSwapMessage << BQuickSlotKeyLen;
-	ResQuickSlotSwapMessage->InsertData(SwapBQuickSlotInfo.QuickSlotKey.c_str(), BQuickSlotKeyLen);
-
-	// 스킬타입
-	*ResQuickSlotSwapMessage << (int16)SwapBQuickSlotInfo.QuickBarSkillInfo._SkillType;
-	// 스킬레벨
-	*ResQuickSlotSwapMessage << SwapBQuickSlotInfo.QuickBarSkillInfo._SkillLevel;
-
-	// 스킬이름
-	int8 BQuickSlotSkillNameLen = (int8)(SwapBQuickSlotInfo.QuickBarSkillInfo._SkillName.length() * 2);
-	*ResQuickSlotSwapMessage << BQuickSlotSkillNameLen;
-	ResQuickSlotSwapMessage->InsertData(SwapBQuickSlotInfo.QuickBarSkillInfo._SkillName.c_str(), BQuickSlotSkillNameLen);
-
-	// 스킬 쿨타임
-	*ResQuickSlotSwapMessage << SwapBQuickSlotInfo.QuickBarSkillInfo._SkillCoolTime;
-
-	int8 BQuickSlotSkillImagePathLen = (int8)(SwapBQuickSlotInfo.QuickBarSkillInfo._SkillImagePath.length() * 2);
-	*ResQuickSlotSwapMessage << BQuickSlotSkillImagePathLen;
-	ResQuickSlotSwapMessage->InsertData(SwapBQuickSlotInfo.QuickBarSkillInfo._SkillImagePath.c_str(), BQuickSlotSkillImagePathLen);
+	*ResQuickSlotSwapMessage << SwapAQuickSlotInfo;
+	*ResQuickSlotSwapMessage << SwapBQuickSlotInfo;
 
 	return ResQuickSlotSwapMessage;
 }
 
-CMessage* CGameServer::MakePacketError(int64 PlayerId, en_ErrorType ErrorType, wstring ErrorMessage)
+CGameServerMessage* CGameServer::MakePacketError(int64 PlayerId, en_ErrorType ErrorType, wstring ErrorMessage)
 {
-	CMessage* ResErrorMessage = CMessage::Alloc();
+	CGameServerMessage* ResErrorMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResErrorMessage == nullptr)
 	{
 		return nullptr;
@@ -4103,9 +3784,9 @@ CMessage* CGameServer::MakePacketError(int64 PlayerId, en_ErrorType ErrorType, w
 	return ResErrorMessage;
 }
 
-CMessage* CGameServer::MakePacketCoolTime(int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, float SkillCoolTime, float SkillCoolTimeSpeed)
+CGameServerMessage* CGameServer::MakePacketCoolTime(int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, float SkillCoolTime, float SkillCoolTimeSpeed)
 {
-	CMessage* ResCoolTimeMessage = CMessage::Alloc();
+	CGameServerMessage* ResCoolTimeMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResCoolTimeMessage == nullptr)
 	{
 		return nullptr;
@@ -4123,9 +3804,9 @@ CMessage* CGameServer::MakePacketCoolTime(int64 PlayerId, int8 QuickSlotBarIndex
 	return ResCoolTimeMessage;
 }
 
-CMessage* CGameServer::MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_SkillType SkillType, int32 Damage, bool IsCritical)
+CGameServerMessage* CGameServer::MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_SkillType SkillType, int32 Damage, bool IsCritical)
 {
-	CMessage* ResAttackMessage = CMessage::Alloc();
+	CGameServerMessage* ResAttackMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResAttackMessage == nullptr)
 	{
 		return nullptr;
@@ -4133,7 +3814,7 @@ CMessage* CGameServer::MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_
 
 	ResAttackMessage->Clear();
 
-	*ResAttackMessage << (WORD)en_PACKET_S2C_ATTACK;
+	*ResAttackMessage << (int16)en_PACKET_S2C_ATTACK;
 	*ResAttackMessage << PlayerDBId;
 	*ResAttackMessage << TargetId;
 	*ResAttackMessage << (int16)SkillType;
@@ -4143,9 +3824,9 @@ CMessage* CGameServer::MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_
 	return ResAttackMessage;
 }
 
-CMessage* CGameServer::MakePacketResMagic(int64 ObjectId, bool SpellStart, en_SkillType SkillType, float SpellTime)
+CGameServerMessage* CGameServer::MakePacketResMagic(int64 ObjectId, bool SpellStart, en_SkillType SkillType, float SpellTime)
 {
-	CMessage* ResMagicMessage = CMessage::Alloc();
+	CGameServerMessage* ResMagicMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResMagicMessage == nullptr)
 	{
 		return nullptr;
@@ -4153,10 +3834,10 @@ CMessage* CGameServer::MakePacketResMagic(int64 ObjectId, bool SpellStart, en_Sk
 
 	ResMagicMessage->Clear();
 
-	*ResMagicMessage << (short)en_PACKET_S2C_MAGIC;
+	*ResMagicMessage << (int16)en_PACKET_S2C_MAGIC;
 	*ResMagicMessage << ObjectId;
 	*ResMagicMessage << SpellStart;
-	*ResMagicMessage << (short)SkillType;
+	*ResMagicMessage << (int16)SkillType;
 	*ResMagicMessage << SpellTime;
 
 	return ResMagicMessage;
@@ -4165,9 +3846,9 @@ CMessage* CGameServer::MakePacketResMagic(int64 ObjectId, bool SpellStart, en_Sk
 // int64 AccountId
 // int32 PlayerDBId
 // int32 HP
-CMessage* CGameServer::MakePacketChangeObjectStat(int64 ObjectId, st_StatInfo ChangeObjectStatInfo)
+CGameServerMessage* CGameServer::MakePacketChangeObjectStat(int64 ObjectId, st_StatInfo ChangeObjectStatInfo)
 {
-	CMessage* ResChangeObjectStatPacket = CMessage::Alloc();
+	CGameServerMessage* ResChangeObjectStatPacket = CGameServerMessage::GameServerMessageAlloc();
 	if (ResChangeObjectStatPacket == nullptr)
 	{
 		return nullptr;
@@ -4175,29 +3856,17 @@ CMessage* CGameServer::MakePacketChangeObjectStat(int64 ObjectId, st_StatInfo Ch
 
 	ResChangeObjectStatPacket->Clear();
 
-	*ResChangeObjectStatPacket << (WORD)en_PACKET_S2C_CHANGE_OBJECT_STAT;
+	*ResChangeObjectStatPacket << (int16)en_PACKET_S2C_CHANGE_OBJECT_STAT;
 	*ResChangeObjectStatPacket << ObjectId;
 
-	// st_StatInfo
-	*ResChangeObjectStatPacket << ChangeObjectStatInfo.Level;
-	*ResChangeObjectStatPacket << ChangeObjectStatInfo.HP;
-	*ResChangeObjectStatPacket << ChangeObjectStatInfo.MaxHP;
-	*ResChangeObjectStatPacket << ChangeObjectStatInfo.MP;
-	*ResChangeObjectStatPacket << ChangeObjectStatInfo.MaxMP;
-	*ResChangeObjectStatPacket << ChangeObjectStatInfo.DP;
-	*ResChangeObjectStatPacket << ChangeObjectStatInfo.MaxDP;
-	*ResChangeObjectStatPacket << ChangeObjectStatInfo.MinAttackDamage;
-	*ResChangeObjectStatPacket << ChangeObjectStatInfo.MaxAttackDamage;
-	*ResChangeObjectStatPacket << ChangeObjectStatInfo.CriticalPoint;
-	*ResChangeObjectStatPacket << ChangeObjectStatInfo.Speed;
-	
+	*ResChangeObjectStatPacket << ChangeObjectStatInfo;	
 
 	return ResChangeObjectStatPacket;
 }
 
-CMessage* CGameServer::MakePacketResObjectState(int64 ObjectId, en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState)
+CGameServerMessage* CGameServer::MakePacketResObjectState(int64 ObjectId, en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState)
 {
-	CMessage* ResObjectStatePacket = CMessage::Alloc();
+	CGameServerMessage* ResObjectStatePacket = CGameServerMessage::GameServerMessageAlloc();
 	if (ResObjectStatePacket == nullptr)
 	{
 		return nullptr;
@@ -4205,7 +3874,7 @@ CMessage* CGameServer::MakePacketResObjectState(int64 ObjectId, en_MoveDir Direc
 
 	ResObjectStatePacket->Clear();
 
-	*ResObjectStatePacket << (WORD)en_PACKET_S2C_OBJECT_STATE_CHANGE;
+	*ResObjectStatePacket << (int16)en_PACKET_S2C_OBJECT_STATE_CHANGE;
 	*ResObjectStatePacket << ObjectId;
 	*ResObjectStatePacket << (int8)Direction;
 	*ResObjectStatePacket << (int16)ObjectType;
@@ -4218,9 +3887,9 @@ CMessage* CGameServer::MakePacketResObjectState(int64 ObjectId, en_MoveDir Direc
 // int32 PlayerDBId
 // bool CanGo
 // st_PositionInfo PositionInfo
-CMessage* CGameServer::MakePacketResMove(int64 AccountId, int64 ObjectId, en_GameObjectType ObjectType, st_PositionInfo PositionInfo)
+CGameServerMessage* CGameServer::MakePacketResMove(int64 AccountId, int64 ObjectId, en_GameObjectType ObjectType, st_PositionInfo PositionInfo)
 {
-	CMessage* ResMoveMessage = CMessage::Alloc();
+	CGameServerMessage* ResMoveMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResMoveMessage == nullptr)
 	{
 		return nullptr;
@@ -4228,22 +3897,14 @@ CMessage* CGameServer::MakePacketResMove(int64 AccountId, int64 ObjectId, en_Gam
 
 	ResMoveMessage->Clear();
 
-	*ResMoveMessage << (WORD)en_PACKET_S2C_MOVE;
+	*ResMoveMessage << (int16)en_PACKET_S2C_MOVE;
 	*ResMoveMessage << AccountId;
 	*ResMoveMessage << ObjectId;
 
 	// ObjectType
 	*ResMoveMessage << (int16)ObjectType;
 
-	// State
-	*ResMoveMessage << (int8)PositionInfo.State;
-
-	// int32 PositionX, PositionY
-	*ResMoveMessage << PositionInfo.PositionX;
-	*ResMoveMessage << PositionInfo.PositionY;
-
-	// MoveDir
-	*ResMoveMessage << (int8)PositionInfo.MoveDir;
+	*ResMoveMessage << PositionInfo;	
 
 	return ResMoveMessage;
 }
@@ -4251,9 +3912,9 @@ CMessage* CGameServer::MakePacketResMove(int64 AccountId, int64 ObjectId, en_Gam
 // int64 AccountId
 // int32 PlayerDBId
 // st_GameObjectInfo GameObjectInfo
-CMessage* CGameServer::MakePacketResObjectSpawn(int32 ObjectInfosCount, vector<st_GameObjectInfo> ObjectInfos)
+CGameServerMessage* CGameServer::MakePacketResObjectSpawn(int32 ObjectInfosCount, vector<st_GameObjectInfo> ObjectInfos)
 {
-	CMessage* ResSpawnPacket = CMessage::Alloc();
+	CGameServerMessage* ResSpawnPacket = CGameServerMessage::GameServerMessageAlloc();
 	if (ResSpawnPacket == nullptr)
 	{
 		return nullptr;
@@ -4261,7 +3922,7 @@ CMessage* CGameServer::MakePacketResObjectSpawn(int32 ObjectInfosCount, vector<s
 
 	ResSpawnPacket->Clear();
 
-	*ResSpawnPacket << (WORD)en_PACKET_S2C_SPAWN;
+	*ResSpawnPacket << (int16)en_PACKET_S2C_SPAWN;
 
 	// Spawn 오브젝트 개수
 	*ResSpawnPacket << ObjectInfosCount;
@@ -4269,37 +3930,7 @@ CMessage* CGameServer::MakePacketResObjectSpawn(int32 ObjectInfosCount, vector<s
 	for (int i = 0; i < ObjectInfosCount; i++)
 	{
 		// SpawnObjectId
-		*ResSpawnPacket << ObjectInfos[i].ObjectId;
-
-		// SpawnObjectName
-		int8 SpawnObjectNameLen = (int8)(ObjectInfos[i].ObjectName.length() * 2);
-		*ResSpawnPacket << SpawnObjectNameLen;
-		ResSpawnPacket->InsertData(ObjectInfos[i].ObjectName.c_str(), SpawnObjectNameLen);
-
-		// st_PositionInfo
-		*ResSpawnPacket << (int8)ObjectInfos[i].ObjectPositionInfo.State;
-		*ResSpawnPacket << ObjectInfos[i].ObjectPositionInfo.PositionX;
-		*ResSpawnPacket << ObjectInfos[i].ObjectPositionInfo.PositionY;
-		*ResSpawnPacket << (int8)ObjectInfos[i].ObjectPositionInfo.MoveDir;
-
-		// st_StatInfo
-		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.Level;
-		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.HP;
-		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.MaxHP;
-		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.MP;
-		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.MaxMP;
-		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.DP;
-		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.MaxDP;
-		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.MinAttackDamage;
-		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.MaxAttackDamage;
-		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.CriticalPoint;
-		*ResSpawnPacket << ObjectInfos[i].ObjectStatInfo.Speed;
-
-		// ObjectType
-		*ResSpawnPacket << (int16)ObjectInfos[i].ObjectType;
-		*ResSpawnPacket << ObjectInfos[i].OwnerObjectId;
-		*ResSpawnPacket << (int16)ObjectInfos[i].OwnerObjectType;
-		*ResSpawnPacket << ObjectInfos[i].PlayerSlotIndex;
+		*ResSpawnPacket << ObjectInfos[i];		
 	}
 
 	return ResSpawnPacket;
@@ -4307,9 +3938,9 @@ CMessage* CGameServer::MakePacketResObjectSpawn(int32 ObjectInfosCount, vector<s
 
 // int64 AccountId
 // int32 PlayerDBId
-CMessage* CGameServer::MakePacketResObjectDeSpawn(int32 DeSpawnObjectCount, vector<int64> DeSpawnObjectIds)
+CGameServerMessage* CGameServer::MakePacketResObjectDeSpawn(int32 DeSpawnObjectCount, vector<int64> DeSpawnObjectIds)
 {
-	CMessage* ResDeSpawnPacket = CMessage::Alloc();
+	CGameServerMessage* ResDeSpawnPacket = CGameServerMessage::GameServerMessageAlloc();
 	if (ResDeSpawnPacket == nullptr)
 	{
 		return nullptr;
@@ -4317,7 +3948,7 @@ CMessage* CGameServer::MakePacketResObjectDeSpawn(int32 DeSpawnObjectCount, vect
 
 	ResDeSpawnPacket->Clear();
 
-	*ResDeSpawnPacket << (WORD)en_PACKET_S2C_DESPAWN;
+	*ResDeSpawnPacket << (int16)en_PACKET_S2C_DESPAWN;
 	*ResDeSpawnPacket << DeSpawnObjectCount;
 
 	for (int32 i = 0; i < DeSpawnObjectCount; i++)
@@ -4328,9 +3959,9 @@ CMessage* CGameServer::MakePacketResObjectDeSpawn(int32 DeSpawnObjectCount, vect
 	return ResDeSpawnPacket;
 }
 
-CMessage* CGameServer::MakePacketObjectDie(int64 DieObjectId)
+CGameServerMessage* CGameServer::MakePacketObjectDie(int64 DieObjectId)
 {
-	CMessage* ResDiePacket = CMessage::Alloc();
+	CGameServerMessage* ResDiePacket = CGameServerMessage::GameServerMessageAlloc();
 	if (ResDiePacket == nullptr)
 	{
 		return nullptr;
@@ -4338,7 +3969,7 @@ CMessage* CGameServer::MakePacketObjectDie(int64 DieObjectId)
 
 	ResDiePacket->Clear();
 
-	*ResDiePacket << (WORD)en_PACKET_S2C_DIE;
+	*ResDiePacket << (int16)en_PACKET_S2C_DIE;
 	*ResDiePacket << DieObjectId;
 
 	return ResDiePacket;
@@ -4346,9 +3977,9 @@ CMessage* CGameServer::MakePacketObjectDie(int64 DieObjectId)
 
 // int32 PlayerDBId
 // wstring ChattingMessage
-CMessage* CGameServer::MakePacketResChattingBoxMessage(int64 PlayerDBId, en_MessageType MessageType, st_Color Color, wstring ChattingMessage)
+CGameServerMessage* CGameServer::MakePacketResChattingBoxMessage(int64 PlayerDBId, en_MessageType MessageType, st_Color Color, wstring ChattingMessage)
 {
-	CMessage* ResChattingMessage = CMessage::Alloc();
+	CGameServerMessage* ResChattingMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResChattingMessage == nullptr)
 	{
 		return nullptr;
@@ -4360,9 +3991,7 @@ CMessage* CGameServer::MakePacketResChattingBoxMessage(int64 PlayerDBId, en_Mess
 	*ResChattingMessage << PlayerDBId;
 	*ResChattingMessage << (int8)MessageType;
 
-	*ResChattingMessage << Color._Red;
-	*ResChattingMessage << Color._Green;
-	*ResChattingMessage << Color._Blue;
+	*ResChattingMessage << Color;	
 
 	int8 PlayerNameLen = (int8)(ChattingMessage.length() * 2);
 	*ResChattingMessage << PlayerNameLen;
@@ -4371,9 +4000,9 @@ CMessage* CGameServer::MakePacketResChattingBoxMessage(int64 PlayerDBId, en_Mess
 	return ResChattingMessage;
 }
 
-CMessage* CGameServer::MakePacketResSyncPosition(int64 TargetObjectId, st_PositionInfo SyncPosition)
+CGameServerMessage* CGameServer::MakePacketResSyncPosition(int64 TargetObjectId, st_PositionInfo SyncPosition)
 {
-	CMessage* ResSyncPositionMessage = CMessage::Alloc();
+	CGameServerMessage* ResSyncPositionMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResSyncPositionMessage == nullptr)
 	{
 		return nullptr;
@@ -4384,23 +4013,14 @@ CMessage* CGameServer::MakePacketResSyncPosition(int64 TargetObjectId, st_Positi
 	*ResSyncPositionMessage << (short)en_PACKET_S2C_SYNC_OBJECT_POSITION;
 	*ResSyncPositionMessage << TargetObjectId;
 
-	// st_Position
-	// State
-	*ResSyncPositionMessage << (int8)SyncPosition.State;
-
-	// int32 PositionX, PositionY
-	*ResSyncPositionMessage << SyncPosition.PositionX;
-	*ResSyncPositionMessage << SyncPosition.PositionY;
-
-	// MoveDir
-	*ResSyncPositionMessage << (int8)SyncPosition.MoveDir;
+	*ResSyncPositionMessage << SyncPosition;
 
 	return ResSyncPositionMessage;
 }
 
-CMessage* CGameServer::MakePacketResSkillToSkillBox(int64 TargetObjectId, st_SkillInfo SkillInfo)
+CGameServerMessage* CGameServer::MakePacketResSkillToSkillBox(int64 TargetObjectId, st_SkillInfo SkillInfo)
 {
-	CMessage* ResSkillToSkillBoxMessage = CMessage::Alloc();
+	CGameServerMessage* ResSkillToSkillBoxMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResSkillToSkillBoxMessage == nullptr)
 	{
 		return nullptr;
@@ -4411,29 +4031,14 @@ CMessage* CGameServer::MakePacketResSkillToSkillBox(int64 TargetObjectId, st_Ski
 	*ResSkillToSkillBoxMessage << (int16)en_PACKET_S2C_SKILL_TO_SKILLBOX;
 	*ResSkillToSkillBoxMessage << TargetObjectId;
 
-	// 스킬타입
-	*ResSkillToSkillBoxMessage << (int16)SkillInfo._SkillType;
-	// 스킬레벨
-	*ResSkillToSkillBoxMessage << SkillInfo._SkillLevel;
-	
-	// 스킬이름
-	int8 SkillNameLen = (int8)(SkillInfo._SkillName.length() * 2);
-	*ResSkillToSkillBoxMessage << SkillNameLen;
-	ResSkillToSkillBoxMessage->InsertData(SkillInfo._SkillName.c_str(), SkillNameLen);
-
-	// 스킬 쿨타임
-	*ResSkillToSkillBoxMessage << SkillInfo._SkillCoolTime;	
-
-	int8 SkillImagePathLen = (int8)(SkillInfo._SkillImagePath.length() * 2);
-	*ResSkillToSkillBoxMessage << SkillImagePathLen;
-	ResSkillToSkillBoxMessage->InsertData(SkillInfo._SkillImagePath.c_str(), SkillImagePathLen);
+	*ResSkillToSkillBoxMessage << SkillInfo;	
 
 	return ResSkillToSkillBoxMessage;
 }
 
-CMessage* CGameServer::MakePacketEffect(int64 TargetObjectId, en_EffectType EffectType)
+CGameServerMessage* CGameServer::MakePacketEffect(int64 TargetObjectId, en_EffectType EffectType)
 {
-	CMessage* ResEffectMessage = CMessage::Alloc();
+	CGameServerMessage* ResEffectMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResEffectMessage == nullptr)
 	{
 		return nullptr;
@@ -4461,7 +4066,7 @@ void CGameServer::OnClientJoin(int64 SessionID)
 void CGameServer::OnRecv(int64 SessionID, CMessage* Packet)
 {
 	st_Job* NewMessageJob = _JobMemoryPool->Alloc();
-	CMessage* JobMessage = CMessage::Alloc();
+	CGameServerMessage* JobMessage = CGameServerMessage::GameServerMessageAlloc();
 	JobMessage->Clear();
 	JobMessage->SetHeader(Packet->GetBufferPtr(), sizeof(CMessage::st_ENCODE_HEADER));
 	JobMessage->InsertData(Packet->GetFrontBufferPtr(), Packet->GetUseBufferSize() - sizeof(CMessage::st_ENCODE_HEADER));

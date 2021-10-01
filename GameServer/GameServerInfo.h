@@ -1,8 +1,8 @@
 #pragma once
 #include <winnt.h>
 #include <minwindef.h>
-#include "Message.h"
 #include "Player.h"
+#include "GameServerMessage.h"
 
 #define SECTOR_X_MAX 50
 #define SECTOR_Y_MAX 50
@@ -33,7 +33,7 @@ struct st_Job
 {
 	en_JobType Type;
 	int64 SessionId;
-	CMessage* Message = nullptr;
+	CGameServerMessage* Message = nullptr;
 	st_Session* Session = nullptr;
 };
 
@@ -48,7 +48,7 @@ struct st_TimerJob
 {
 	en_TimerJobType Type;
 	int64 SessionId;
-	CMessage* Message = nullptr;
+	CGameServerMessage* Message = nullptr;
 	st_Session* Session = nullptr;
 	int64 ExecTick;
 };
