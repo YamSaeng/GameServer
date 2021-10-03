@@ -4,6 +4,7 @@
 #include "Message.h"
 #include "Monster.h"
 #include "Item.h"
+#include "Heap.h"
 
 CChannel::~CChannel()
 {
@@ -163,13 +164,21 @@ CPlayer* CChannel::FindNearPlayer(CGameObject* Object, int32 Range)
 {
 	// 주위 플레이어 정보 받아와서
 	vector<CPlayer*> Players = GetAroundPlayer(Object, Range);	
-
-	// 플레이어 목록 돌면서 길찾기로 찾아보고 갈 수 있으면 해당 플레이어반환
-	for (int32 i = 0; i < Players.size(); i++)
+	
+	// 받아온 플레이어 정보를 토대로 거리를 구해서 우선순위 큐에 담는다.
+	CHeap<int16, CPlayer*> Distances((int32)Players.size());		
+	for (CPlayer* Player : Players)
+	{		
+		Distances.InsertHeap(st_Vector2Int::Distance(Player->GetCellPosition(), Object->GetCellPosition()), Player);
+	}
+	
+	// 거리 가까운 애부터 접근해서 해당 플레이어로 갈 수 있는지 확인하고
+	// 갈 수 있는 대상이면 해당 플레리어를 반환해준다.
+	while (Distances.GetUseSize() != 0)
 	{
-		CPlayer* Player = Players[i];
-		vector<st_Vector2Int> Path = _Map->FindPath(Object->GetCellPosition(), Player->GetCellPosition());
-		if (Path.size() < 2)
+		CPlayer* Player = Distances.PopHeap();
+		vector<st_Vector2Int> Paths = _Map->FindPath(Object->GetCellPosition(), Player->GetCellPosition());
+		if (Paths.size() < 2)
 		{
 			continue;
 		}
@@ -177,7 +186,7 @@ CPlayer* CChannel::FindNearPlayer(CGameObject* Object, int32 Range)
 		return Player;
 	}
 
-	return nullptr;
+	return nullptr;	
 }
 
 void CChannel::Update()
