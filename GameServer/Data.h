@@ -70,7 +70,10 @@ struct st_MonsterData
 {	
 	int32 MonsterDataId; // 몬스터 번호
 	string MonsterName;  // 몬스터 이름
-	st_PlayerStatusData MonsterStatInfo; // 몬스터 스탯 정보	
+	st_PlayerStatusData MonsterStatInfo; // 몬스터 스탯 정보
+	int32 SearchTick; // 탐색 속도
+	int32 PatrolTick; // 정찰 속도
+	int32 AttackTick; // 공격 속도
 	vector<st_DropData> DropItems; // 몬스터가 드랍하는 아이템 정보
 	int16 GetDPPoint;
 };

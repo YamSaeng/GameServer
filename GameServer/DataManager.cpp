@@ -195,6 +195,9 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			float Speed = MonsterStatInfoFiled["Speed"].GetFloat();
 			int SearchCellDistance = MonsterStatInfoFiled["SearchCellDistance"].GetInt();
 			int ChaseCellDistance = MonsterStatInfoFiled["ChaseCellDistance"].GetInt();
+			int SearchTick = MonsterStatInfoFiled["SearchTick"].GetInt();
+			int PatrolTick = MonsterStatInfoFiled["PatrolTick"].GetInt();
+			int AttackTick = MonsterStatInfoFiled["AttackTick"].GetInt();
 			int AttackRange = MonsterStatInfoFiled["AttackRange"].GetInt();
 			int16 GetDPPoint = (int16)MonsterStatInfoFiled["GetDPPoint"].GetInt();
 			int TotalExp = MonsterStatInfoFiled["TotalExp"].GetInt();
@@ -207,6 +210,9 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			MonsterData->MonsterStatInfo.Speed = Speed;
 			MonsterData->MonsterStatInfo.SearchCellDistance = SearchCellDistance;
 			MonsterData->MonsterStatInfo.ChaseCellDistance = ChaseCellDistance;
+			MonsterData->SearchTick = SearchTick;
+			MonsterData->PatrolTick = PatrolTick;
+			MonsterData->AttackTick = AttackTick;
 			MonsterData->MonsterStatInfo.AttackRange = AttackRange;
 			MonsterData->GetDPPoint = GetDPPoint;
 		}
