@@ -53,9 +53,9 @@ struct st_Vector2Int
 	}
 	
 	// 거리 구하기
-	static int Distance(st_Vector2Int TargetCellPosition, st_Vector2Int MyCellPosition)
+	static int16 Distance(st_Vector2Int TargetCellPosition, st_Vector2Int MyCellPosition)
 	{
-		return (int)sqrt(pow(TargetCellPosition._X - MyCellPosition._X, 2) + pow(TargetCellPosition._Y - MyCellPosition._Y, 2));
+		return (int16)sqrt(pow(TargetCellPosition._X - MyCellPosition._X, 2) + pow(TargetCellPosition._Y - MyCellPosition._Y, 2));
 	}
 
 	//--------------------------------------------------------------

@@ -89,7 +89,7 @@ st_Vector2Int CGameObject::GetFrontCellPosition(en_MoveDir Dir, int8 Distance)
 	return FrontPosition;
 }
 
-vector<st_Vector2Int> CGameObject::GetAroundCellPosition(st_Vector2Int CellPosition, int8 Distance)
+vector<st_Vector2Int> CGameObject::GetAroundCellPositions(st_Vector2Int CellPosition, int8 Distance)
 {
 	vector<st_Vector2Int> AroundPosition;
 
@@ -133,6 +133,11 @@ void CGameObject::BroadCastPacket(en_PACKET_TYPE PacketType)
 	{
 	case en_PACKET_TYPE::en_PACKET_S2C_MOVE:
 		ResPacket = G_ObjectManager->GameServer->MakePacketResMove((int64)-1, _GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType, _GameObjectInfo.ObjectPositionInfo);
+		break;
+	case en_PACKET_TYPE::en_PACKET_S2C_PATROL:
+		ResPacket = G_ObjectManager->GameServer->MakePacketPatrol(_GameObjectInfo.ObjectId,
+			_GameObjectInfo.ObjectType,
+			_GameObjectInfo.ObjectPositionInfo);
 		break;
 	case en_PACKET_TYPE::en_PACKET_S2C_OBJECT_STATE_CHANGE:
 		ResPacket = G_ObjectManager->GameServer->MakePacketResObjectState(_GameObjectInfo.ObjectId,

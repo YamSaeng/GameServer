@@ -70,33 +70,18 @@ CSector* CChannel::GetSector(int32 IndexY, int32 IndexX)
 
 vector<CSector*> CChannel::GetAroundSectors(st_Vector2Int CellPosition, int32 Range)
 {
+	CSector* Sector = GetSector(CellPosition);
+
+	int MaxY = Sector->_SectorY + Range;
+	int MinY = Sector->_SectorY - Range;
+	int MaxX = Sector->_SectorX + Range;
+	int MinX = Sector->_SectorX - Range;
+	
 	vector<CSector*> Sectors;
 
-	int MaxY = CellPosition._Y + Range;
-	int MinY = CellPosition._Y - Range;
-	int MaxX = CellPosition._X + Range;
-	int MinX = CellPosition._X - Range;
-
-	// 좌측 상단 섹터 얻기
-	st_Vector2Int LeftTop;
-	LeftTop._X = MinX;
-	LeftTop._Y = MaxY;
-
-	int MinIndexY = (_Map->_Down - LeftTop._Y) / _SectorSize;
-	int MinIndexX = (LeftTop._X - _Map->_Left) / _SectorSize;
-
-	// 우측 하단 섹터 얻기
-	st_Vector2Int RightBottom;
-	RightBottom._X = MaxX;
-	RightBottom._Y = MinY;
-
-	int MaxIndexY = (_Map->_Down - RightBottom._Y) / _SectorSize;
-	int MaxIndexX = (RightBottom._X - _Map->_Left) / _SectorSize;
-
-	// 좌측 상단 섹터 부터 우측 하단 섹터 얻어서 저장후 반환
-	for (int X = MinIndexX; X <= MaxIndexX; X++)
+	for (int X = MinX; X <= MaxX; X++)
 	{
-		for (int Y = MinIndexY; Y <= MaxIndexY; Y++)
+		for (int Y = MinY; Y <= MaxY; Y++)
 		{
 			CSector* Sector = GetSector(Y, X);
 			if (Sector == nullptr)
@@ -106,8 +91,7 @@ vector<CSector*> CChannel::GetAroundSectors(st_Vector2Int CellPosition, int32 Ra
 
 			Sectors.push_back(Sector);
 		}
-	}	
-
+	}
 	return Sectors;
 }
 
@@ -185,7 +169,7 @@ CPlayer* CChannel::FindNearPlayer(CGameObject* Object, int32 Range)
 	{
 		CPlayer* Player = Players[i];
 		vector<st_Vector2Int> Path = _Map->FindPath(Object->GetCellPosition(), Player->GetCellPosition());
-		if (Path.size() < 2 || Path.size() > Range)
+		if (Path.size() < 2)
 		{
 			continue;
 		}
@@ -300,6 +284,7 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 
 			// 맵에 적용
 			_Map->ApplyMove(EnterChannelMonster, SpawnPosition);
+			EnterChannelMonster->Init(SpawnPosition);
 
 			// 섹터 얻어서 해당 섹터에도 저장
 			CSector* EnterSector = GetSector(SpawnPosition);

@@ -612,7 +612,7 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 			// 나한테 다른 오브젝트들을 생성하라고 알려줌						
 			st_GameObjectInfo* SpawnGameObjectInfos;
 
-			vector<CGameObject*> AroundObjects = G_ChannelManager->Find(1)->GetAroundObjects(Session->MyPlayer, 10);
+			vector<CGameObject*> AroundObjects = G_ChannelManager->Find(1)->GetAroundObjects(Session->MyPlayer, 1);
 
 			if (AroundObjects.size() > 0)
 			{
@@ -1004,7 +1004,7 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 				{
 					vector<st_Vector2Int> TargetPositions;
 
-					TargetPositions = MyPlayer->GetAroundCellPosition(MyPlayer->GetCellPosition(), 1);
+					TargetPositions = MyPlayer->GetAroundCellPositions(MyPlayer->GetCellPosition(), 1);
 					for (st_Vector2Int TargetPosition : TargetPositions)
 					{
 						CGameObject* Target = MyPlayer->_Channel->_Map->Find(TargetPosition);
@@ -1559,47 +1559,56 @@ void CGameServer::PacketProcReqObjectStateChange(int64 SessionId, CMessage* Mess
 				}
 			}
 
+			int16 ObjectType;
+			*Message >> ObjectType;
+
+			int64 ObjectId;
+			*Message >> ObjectId;
+
 			*Message >> StateChange;
 
-			CMessage* ResObjectStatePakcet = nullptr;
+			CMessage* ResObjectStatePakcet = nullptr;			
 
-			switch ((en_StateChange)StateChange)
+			CGameObject* FindGameObject = G_ObjectManager->Find(ObjectId, (en_GameObjectType)ObjectType);
+			if (FindGameObject != nullptr)
 			{
-			case en_StateChange::MOVE_TO_STOP:
-				if (Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::MOVING
-					|| Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::IDLE)
+				switch ((en_StateChange)StateChange)
 				{
-					Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+				case en_StateChange::MOVE_TO_STOP:
+					if (FindGameObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::MOVING						
+						|| FindGameObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::PATROL
+						|| FindGameObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::IDLE)
+					{
+						FindGameObject->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
-					ResObjectStatePakcet = MakePacketResObjectState(Session->MyPlayer->_GameObjectInfo.ObjectId, Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, Session->MyPlayer->_GameObjectInfo.ObjectType, Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
-					SendPacketAroundSector(Session, ResObjectStatePakcet, true);
-					ResObjectStatePakcet->Free();
-				}
-				else
-				{
-					Disconnect(Session->SessionId);
+						ResObjectStatePakcet = MakePacketResObjectState(FindGameObject->_GameObjectInfo.ObjectId, FindGameObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, FindGameObject->_GameObjectInfo.ObjectType, FindGameObject->_GameObjectInfo.ObjectPositionInfo.State);
+						SendPacketAroundSector(Session, ResObjectStatePakcet, true);
+						ResObjectStatePakcet->Free();
+					}
+					else
+					{
+						Disconnect(Session->SessionId);
+						break;
+					}
 					break;
-				}
-				break;
-			case en_StateChange::SPELL_TO_IDLE:
-				if (Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::ATTACK
-					|| Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::SPELL)
-				{
-					Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+				case en_StateChange::SPELL_TO_IDLE:
+					if (FindGameObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::ATTACK
+						|| FindGameObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::SPELL)
+					{
+						FindGameObject->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
-					ResObjectStatePakcet = MakePacketResObjectState(Session->MyPlayer->_GameObjectInfo.ObjectId, Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, Session->MyPlayer->_GameObjectInfo.ObjectType, Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
-					SendPacketAroundSector(Session, ResObjectStatePakcet, true);
-					ResObjectStatePakcet->Free();
+						ResObjectStatePakcet = MakePacketResObjectState(FindGameObject->_GameObjectInfo.ObjectId, FindGameObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, FindGameObject->_GameObjectInfo.ObjectType, FindGameObject->_GameObjectInfo.ObjectPositionInfo.State);
+						SendPacketAroundSector(Session, ResObjectStatePakcet, true);
+						ResObjectStatePakcet->Free();
+					}
+					else
+					{
+						Disconnect(Session->SessionId);
+						break;
+					}
+					break;				
 				}
-				else
-				{
-					Disconnect(Session->SessionId);
-					break;
-				}
-				break;
-			default:
-				break;
-			}
+			}			
 		} while (0);	
 	}
 
@@ -3909,6 +3918,24 @@ CGameServerMessage* CGameServer::MakePacketResMove(int64 AccountId, int64 Object
 	return ResMoveMessage;
 }
 
+CGameServerMessage* CGameServer::MakePacketPatrol(int64 ObjectId, en_GameObjectType ObjectType, st_PositionInfo PositionInfo)
+{
+	CGameServerMessage* ResPatrolPacket = CGameServerMessage::GameServerMessageAlloc();
+	if (ResPatrolPacket == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResPatrolPacket->Clear();
+
+	*ResPatrolPacket << (int16)en_PACKET_S2C_PATROL;
+	*ResPatrolPacket << ObjectId;
+	*ResPatrolPacket << (int16)ObjectType;
+	*ResPatrolPacket << PositionInfo;
+
+	return ResPatrolPacket;
+}
+
 // int64 AccountId
 // int32 PlayerDBId
 // st_GameObjectInfo GameObjectInfo
@@ -4098,7 +4125,7 @@ bool CGameServer::OnConnectionRequest(const wchar_t ClientIP, int32 Port)
 void CGameServer::SendPacketAroundSector(st_Vector2Int CellPosition, CMessage* Message)
 {
 	CChannel* Channel = G_ChannelManager->Find(1);
-	vector<CSector*> Sectors = Channel->GetAroundSectors(CellPosition, 10);
+	vector<CSector*> Sectors = Channel->GetAroundSectors(CellPosition, 1);
 
 	for (CSector* Sector : Sectors)
 	{
@@ -4112,7 +4139,7 @@ void CGameServer::SendPacketAroundSector(st_Vector2Int CellPosition, CMessage* M
 void CGameServer::SendPacketAroundSector(st_Session* Session, CMessage* Message, bool SendMe)
 {
 	CChannel* Channel = G_ChannelManager->Find(1);
-	vector<CSector*> Sectors = Channel->GetAroundSectors(Session->MyPlayer->GetCellPosition(), 10);
+	vector<CSector*> Sectors = Channel->GetAroundSectors(Session->MyPlayer->GetCellPosition(), 1);
 
 	for (CSector* Sector : Sectors)
 	{

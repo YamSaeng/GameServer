@@ -29,6 +29,7 @@ enum class en_MoveDir : int8
 enum class en_CreatureState : int8
 {
 	IDLE,
+	PATROL,
 	MOVING,
 	ATTACK,
 	SPELL,

@@ -6,7 +6,7 @@
 #include "MemoryPoolTLS.h"
 #include "Heap.h"
 
-class CGameServerMeesage;
+class CGameServerMessage;
 
 class CGameServer : public CNetworkLib
 {
@@ -263,6 +263,10 @@ public:
 	// 게임서버 이동 요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResMove(int64 AccountId, int64 ObjectId, en_GameObjectType ObjectType, st_PositionInfo PositionInfo);
+	//-----------------------------------------------------------------------------------------
+	// 게임서버 정찰 패킷 조합
+	//-----------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketPatrol(int64 ObjectId, en_GameObjectType ObjectType, st_PositionInfo PositionInfo);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 오브젝트 스폰 패킷 조합
 	//-----------------------------------------------------------------------------------------

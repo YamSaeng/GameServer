@@ -37,10 +37,11 @@ public:
 	st_Vector2Int GetFrontCellPosition(en_MoveDir Dir,int8 Distance);
 	
 	//------------------------------------------------------------------------------------
-	// 내 주위 Distance안에 있는 모든 오브젝트들의 위치를 반환한다.
+	// 내 주위 Distance안에 있는 위치들의 값을 반환한다.
 	//------------------------------------------------------------------------------------
-	vector<st_Vector2Int> GetAroundCellPosition(st_Vector2Int CellPosition, int8 Distance);
+	vector<st_Vector2Int> GetAroundCellPositions(st_Vector2Int CellPosition, int8 Distance);
 	
+
 	void SetTarget(CGameObject* Target);
 	CGameObject* GetTarget();
 protected:

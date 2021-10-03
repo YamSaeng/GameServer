@@ -192,8 +192,8 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 			// 현재 섹터에서 플레이어 제거
 			CurrentSector->Remove(MovePlayer);		
 
-			vector<CSector*> CurrentSectors =  GameObject->_Channel->GetAroundSectors(MovePlayer->GetCellPosition(), 10);
-			vector<CSector*> NextSectors =  GameObject->_Channel->GetAroundSectors(DestPosition, 10);			
+			vector<CSector*> CurrentSectors =  GameObject->_Channel->GetAroundSectors(MovePlayer->GetCellPosition(), 1);
+			vector<CSector*> NextSectors =  GameObject->_Channel->GetAroundSectors(DestPosition, 1);			
 
 			// 나를 제거할 섹터를 찾는 작업
 			// Current - Next;
@@ -329,8 +329,8 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 			// 현재 섹터에서 몬스터 제거
 			CurrentSector->Remove(MoveMonster);		
 
-			vector<CSector*> CurrentSectors = GameObject->_Channel->GetAroundSectors(MoveMonster->GetCellPosition(), 10);
-			vector<CSector*> NextSectors = GameObject->_Channel->GetAroundSectors(DestPosition, 10);
+			vector<CSector*> CurrentSectors = GameObject->_Channel->GetAroundSectors(MoveMonster->GetCellPosition(), 1);
+			vector<CSector*> NextSectors = GameObject->_Channel->GetAroundSectors(DestPosition, 1);
 
 			// 나를 제거할 섹터를 찾는 작업
 			// Current - Next;
@@ -412,9 +412,9 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 			CurrentSector->Remove(MoveItem);
 
 			// 아이템 섹터 옮기기 전 주변 섹터 
-			vector<CSector*> CurrentSectors = GameObject->_Channel->GetAroundSectors(MoveItem->GetCellPosition(), 10);
+			vector<CSector*> CurrentSectors = GameObject->_Channel->GetAroundSectors(MoveItem->GetCellPosition(), 1);
 			// 섹터 옮기고 난 후 주변 섹터
-			vector<CSector*> NextSectors = GameObject->_Channel->GetAroundSectors(DestPosition, 10);
+			vector<CSector*> NextSectors = GameObject->_Channel->GetAroundSectors(DestPosition, 1);
 
 			// 나를 제거할 섹터를 찾는 작업
 			// Current - Next;
