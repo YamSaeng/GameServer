@@ -27,6 +27,10 @@ CBear::CBear()
 	_ChaseCellDistance = MonsterData.MonsterStatInfo.ChaseCellDistance;
 	_AttackRange = MonsterData.MonsterStatInfo.AttackRange;
 
+	_SearchTickPoint = MonsterData.SearchTick;
+	_PatrolTickPoint = MonsterData.PatrolTick;
+	_AttackTickPoint = MonsterData.AttackTick;	
+
 	_GetDPPoint = MonsterData.GetDPPoint;
 }
 
@@ -35,41 +39,90 @@ CBear::~CBear()
 	
 }
 
-void CBear::Init(int32 DataSheetId)
+void CBear::Init(st_Vector2Int SpawnPosition)
 {
-	_DataSheetId = DataSheetId;
+	CMonster::Init(SpawnPosition);
+	_SearchTick = GetTickCount64() + _SearchTickPoint;
 }
 
 void CBear::UpdateIdle()
 {
-	if (_NextSearchTick > GetTickCount64())
+	if (_SearchTick > GetTickCount64())
 	{
 		return;
 	}
 
-	_NextSearchTick = GetTickCount64() + 1000;
-		
-	CPlayer* Target = _Channel->FindNearPlayer(this, _SearchCellDistance);
+	_SearchTick = GetTickCount64() + _SearchTickPoint;
+
+	CPlayer* Target = _Channel->FindNearPlayer(this, 1);
 	if (Target == nullptr)
 	{
+		_PatrolTick = GetTickCount64() + _PatrolTickPoint;
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::PATROL;
+	}
+	else
+	{
+		// 타겟 발견		
+		int16 Distance = st_Vector2Int::Distance(Target->GetCellPosition(), GetCellPosition());
+		// 타겟과의 거리가 추격거리 안에 있지 않으면 정찰 상태로 유지		
+		if (Distance > _ChaseCellDistance)
+		{
+			_PatrolTick = GetTickCount64() + _PatrolTickPoint;
+			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::PATROL;
+		}
+		else
+		{
+			// 타겟과의 거리가 추격거리 안에 있으면 추격
+			_Target = Target;
+			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
+		}
+	}
+}
+
+void CBear::UpdatePatrol()
+{
+	if (_PatrolTick > GetTickCount64())
+	{
 		return;
 	}
 
-	_Target = Target;
-	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
+	_PatrolTick = GetTickCount64() + _PatrolTickPoint;
+
+	random_device Seed;
+	mt19937 Gen(Seed());
+
+	// 몬스터를 생성할때 정해준 스폰 위치를 기준으로 저장해둔 정찰 위치 중에서
+	// 랜덤으로 정찰 위치를 얻는다.
+	int8 MaxPatrolIndex = (int8)_PatrolPositions.size();
+	uniform_int_distribution<int> RandomPatrolPoint(0, MaxPatrolIndex);
+	int8 RandomIndex = RandomPatrolPoint(Gen);
+
+	// 위에서 얻은 정찰위치까지의 길을 찾는다.
+	st_Vector2Int MonsterPosition = GetCellPosition();
+	vector<st_Vector2Int> Path = _Channel->_Map->FindPath(MonsterPosition, _PatrolPositions[RandomIndex]);
+	if (Path.size() < 2)
+	{
+		// 정찰 위치로 이동 할 수 없을 경우 Idle상태로 바꿔준다.
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+		BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
+		return;
+	}
+
+	_GameObjectInfo.ObjectPositionInfo.MoveDir = st_Vector2Int::GetDirectionFromVector(Path[1] - MonsterPosition);
+
+	_Channel->_Map->ApplyMove(this, Path[1]);
+	BroadCastPacket(en_PACKET_S2C_PATROL);
 }
 
 void CBear::UpdateMoving()
 {
-	if (_NextMoveTick > GetTickCount64())
+	if (_MoveTick > GetTickCount64())
 	{
 		return;
 	}
 
 	int MoveTick = (int)(1000 / _GameObjectInfo.ObjectStatInfo.Speed);
-	_NextMoveTick = GetTickCount64() + MoveTick;
-
-	//G_Logger->WriteStdOut(en_Color::RED, L"UpdateMoving Func CAll\n");
+	_MoveTick = GetTickCount64() + MoveTick;	
 
 	// 타겟이 없거나 나와 다른 채널에 있을 경우 Idle 상태로 전환한다.
 	if (_Target == nullptr || _Target->_Channel != _Channel)
@@ -98,7 +151,7 @@ void CBear::UpdateMoving()
 
 	vector<st_Vector2Int> Path = _Channel->_Map->FindPath(MonsterPosition, TargetPosition);
 	// 추격중에 플레이어한테 다가갈수 없거나 추격거리를 벗어나면 멈춘다.
-	if (Path.size() < 2 || Path.size() > _ChaseCellDistance)
+	if (Path.size() < 2 || Distance > _ChaseCellDistance)
 	{
 		_Target = nullptr;
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
@@ -109,7 +162,7 @@ void CBear::UpdateMoving()
 	// 대상과의 거리가 공격 범위안에 있고, 대각선에 있지 않을때 공격 상태로 바꾼다.
 	if (Distance <= _AttackRange && (Direction._X == 0 || Direction._Y == 0))
 	{
-		_AttackTick = GetTickCount64() + 1000;
+		_AttackTick = GetTickCount64() + _AttackTickPoint;
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;
 		_GameObjectInfo.ObjectPositionInfo.MoveDir = st_Vector2Int::GetDirectionFromVector(Direction);
 		BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
@@ -141,7 +194,9 @@ void CBear::UpdateAttack()
 
 		_GameObjectInfo.ObjectPositionInfo.MoveDir = st_Vector2Int::GetDirectionFromVector(Direction);
 
-		int32 Distance = Direction.CellDistanceFromZero();
+		BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
+
+		int32 Distance = st_Vector2Int::Distance(TargetCellPosition, MyCellPosition);
 		// 타겟과의 거리가 공격 범위 안에 속하고 X==0 || Y ==0 일때( 대각선은 제한) 공격
 		bool CanUseAttack = (Distance <= _AttackRange && (Direction._X == 0 || Direction._Y == 0));
 		if (CanUseAttack == false)
@@ -174,7 +229,7 @@ void CBear::UpdateAttack()
 		BroadCastPacket(en_PACKET_S2C_CHANGE_OBJECT_STAT);
 
 		// 1.2초마다 공격
-		_AttackTick = GetTickCount64() + 1200;
+		_AttackTick = GetTickCount64() + _AttackTickPoint;
 
 		wchar_t BearAttackMessage[64] = L"0";
 		wsprintf(BearAttackMessage, L"%s이 일반 공격을 사용해 %s에게 %d의 데미지를 줬습니다", _GameObjectInfo.ObjectName.c_str(), _Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);

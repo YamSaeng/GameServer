@@ -6,6 +6,20 @@ class CPlayer;
 
 class CMonster : public CGameObject
 {
+public:
+	// 몬스터 데이터 시트 Id
+	int32 _DataSheetId;
+
+	// 몬스터 죽이면 얻는 DPPoint
+	int16 _GetDPPoint;
+
+	CMonster();
+	virtual ~CMonster();	
+
+	virtual void Update() override;
+	virtual void OnDamaged(CGameObject* Attacker, int32 Damage) override;
+	// 몬스터 초기화
+	virtual void Init(st_Vector2Int SpawnPosition);
 protected:
 	//--------------------------
 	// Idle 상태에서 Search 거리
@@ -24,21 +38,51 @@ protected:
 	//------------------------------------
 	// Idle 상태에서 Search를 실행할 Tick
 	//------------------------------------
-	uint64 _NextSearchTick;
+	uint64 _SearchTick;
+	//------------------------------------
+	// 탐색 속도
+	//------------------------------------
+	uint64 _SearchTickPoint;
+	//------------------------------------
+	// Patrol 상태에서 Patrol를 실행할 Tick
+	//------------------------------------
+	uint64 _PatrolTick;
+	//------------------------------------
+	// 정찰 속도
+	//------------------------------------
+	uint64 _PatrolTickPoint;
 	//-------------------------------------
 	// Moving 상태에서 Chase를 실행할 Tick
 	//-------------------------------------
-	uint64 _NextMoveTick;
+	uint64 _MoveTick;
 
 	//--------------------------------------
 	// Attack 상태에서 Attack을 실행할 Tick
 	//--------------------------------------
 	uint64 _AttackTick;
+	//------------------------------------
+	// 공격 속도
+	//------------------------------------
+	uint64 _AttackTickPoint;
+
+	//---------------------------
+	// 몬스터가 스폰된 위치
+	//---------------------------
+	st_Vector2Int _SpawnPosition;
+
+	//-------------------------------------
+	// 몬스터가 정찰할 위치
+	//-------------------------------------
+	vector<st_Vector2Int> _PatrolPositions;	
 
 	//------------------------
 	// Idle 상태 Update
 	//------------------------
 	virtual void UpdateIdle() = 0;
+	//------------------------
+	// Patrol 상태 Update
+	//------------------------
+	virtual void UpdatePatrol() = 0;
 	//------------------------
 	// Moving 상태 Update
 	//------------------------
@@ -50,21 +94,6 @@ protected:
 	//------------------------
 	// Dead 상태 Update
 	//------------------------
-	virtual void UpdateDead() = 0;
-	
-public:
-	// 몬스터 데이터 시트 Id
-	int32 _DataSheetId;
-
-	// 몬스터 죽이면 얻는 DPPoint
-	int16 _GetDPPoint;
-
-	CMonster();
-	virtual ~CMonster();
-
-	void Init(int32 DataSheetId);
-
-	virtual void Update() override;
-	virtual void OnDamaged(CGameObject* Attacker, int32 Damage) override;
+	virtual void UpdateDead() = 0;	
 };
 

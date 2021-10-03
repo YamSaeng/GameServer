@@ -6,18 +6,14 @@
 
 CMonster::CMonster()
 {
-	_NextSearchTick = GetTickCount64();
-	_NextMoveTick = GetTickCount64();	
+	_SearchTick = GetTickCount64();
+	_MoveTick = GetTickCount64();	
+	_PatrolTick = GetTickCount64();
 }
 
 CMonster::~CMonster()
 {
 
-}
-
-void CMonster::Init(int32 DataSheetId)
-{
-	_DataSheetId = DataSheetId;
 }
 
 void CMonster::Update()
@@ -31,6 +27,9 @@ void CMonster::Update()
 	{
 	case en_CreatureState::IDLE:
 		UpdateIdle();
+		break;
+	case en_CreatureState::PATROL:
+		UpdatePatrol();
 		break;
 	case en_CreatureState::MOVING:
 		UpdateMoving();
@@ -63,4 +62,9 @@ void CMonster::OnDamaged(CGameObject* Attacker, int32 Damage)
 
 		OnDead(Attacker);
 	}
+}
+
+void CMonster::Init(st_Vector2Int SpawnPosition)
+{
+	_PatrolPositions = GetAroundCellPositions(GetCellPosition(), 2);
 }
