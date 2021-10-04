@@ -33,7 +33,7 @@ private:
 
 	bool _IsPlacementNew;
 public:
-	CObjectPoolFreeList(int BlockNum);
+	CObjectPoolFreeList();
 	virtual ~CObjectPoolFreeList();
 
 	DATA* Alloc(void);
@@ -45,7 +45,7 @@ public:
 };
 
 template<class DATA>
-CObjectPoolFreeList<DATA>::CObjectPoolFreeList(int BlockNum)
+CObjectPoolFreeList<DATA>::CObjectPoolFreeList()
 {
 	_TopNode = (st_CHECK_BLOCK_NODE*)_aligned_malloc(sizeof(st_CHECK_BLOCK_NODE), 16);
 	_TopNode->TopNode = nullptr;
@@ -58,45 +58,28 @@ CObjectPoolFreeList<DATA>::CObjectPoolFreeList(int BlockNum)
 template<class DATA>
 CObjectPoolFreeList<DATA>::~CObjectPoolFreeList()
 {
-	//bool IsDestructorCall;
-	//if (_UseCount > 0)
-	//{
-	//	CObjectPoolException ObjectPoolException;
-	//}
+	if (_TopNode != nullptr)
+	{
+		st_BLOCK_NODE* FreeNode = _TopNode->TopNode;
 
-	//if (_TopNode)
-	//{
-	//	for (int i = 0; i < _AllocCount; i++)
-	//	{
-	//		char *p = (char*)_TopNode;
-	//		char *q = p;
-	//		//p += sizeof(st_BLOCK_NODE);
-	//		p += (sizeof(st_BLOCK_NODE*) + sizeof(int) + sizeof(bool));
-	//		memcpy(&IsDestructorCall, p, sizeof(bool));
+		if (FreeNode != nullptr)
+		{
+			for (int i = 0; i < _AllocCount; i++)
+			{
+				char* p = (char*)FreeNode;
+				char* q = p;
 
-	//		/*
-	//			소멸자를 콜하라는 것이 false이면 여기서 일괄적으로 소멸자를 호출해준다.
-	//		*/
-	//		if (!IsDestructorCall)
-	//		{
-	//			p += sizeof(bool);
-	//			DATA* FreeData = (DATA*)p;
-	//			FreeData->~DATA();
-	//		}
+				DATA* FreeData = (DATA*)p;
+				FreeData->~DATA();
+				FreeNode = FreeNode->NextBlock;
 
-	//		_TopNode = _TopNodeNode.NextBlock;
+				free(q);
+			}
+		}
 
-	//		if (!_FreeNode)
-	//		{
-	//			free(q);
-	//		}
-	//	}
-
-	//	if (_FreeNode)
-	//	{
-	//		free(_FreeNode);
-	//	}
-	//}
+		_aligned_free(_TopNode);
+		_TopNode = nullptr;
+	}	
 }
 
 //----------------------------------------------------------

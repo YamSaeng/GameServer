@@ -52,7 +52,7 @@ public:
 
 		}
 
-		_ChunkObjectFreeList = new CObjectPoolFreeList<CChunk>(0);
+		_ChunkObjectFreeList = new CObjectPoolFreeList<CChunk>();
 
 		_AllocCount = 0;
 		_UseCount = 0;

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Item.h"
 #include "ObjectManager.h"
+#include "GameServerMessage.h"
 
 CItem::CItem()
 {
@@ -67,7 +68,7 @@ void CItem::UpdateIdle()
 		ReqItemToInventoryJob->Session = nullptr;
 
 		// Item 정보 담기
-		CMessage* ReqItemToInventoryMessage = CMessage::Alloc();
+		CGameServerMessage* ReqItemToInventoryMessage = CGameServerMessage::GameServerMessageAlloc();
 		ReqItemToInventoryMessage->Clear();
 
 		*ReqItemToInventoryMessage << (int16)(en_PACKET_TYPE::en_PACKET_C2S_ITEM_TO_INVENTORY);

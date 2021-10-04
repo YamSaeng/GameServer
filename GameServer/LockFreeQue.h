@@ -79,7 +79,7 @@ CLockFreeQue<DATA>::CLockFreeQue()
 	_Size = 0;
 	_LockCheckCount = 0;
 
-	_ObjectPoolFreeList = new CObjectPoolFreeList<st_Node>(0);
+	_ObjectPoolFreeList = new CObjectPoolFreeList<st_Node>();
 
 	_DummyNode = _ObjectPoolFreeList->Alloc();
 	_DummyNode->Next = nullptr;

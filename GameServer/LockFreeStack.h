@@ -37,7 +37,7 @@ public:
 template<class DATA>
 CLockFreeStack<DATA>::CLockFreeStack()
 {
-	_ObjectPoolFreeList = new CObjectPoolFreeList<st_Node>(0);
+	_ObjectPoolFreeList = new CObjectPoolFreeList<st_Node>();
 	_TopNode = (st_CheckNode*)_aligned_malloc(sizeof(st_CheckNode), 16);
 	_TopNode->TopNode = nullptr;
 	_TopNode->NodeCheckValue = 0;
