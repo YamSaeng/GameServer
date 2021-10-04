@@ -160,7 +160,7 @@ vector<CPlayer*> CChannel::GetAroundPlayer(CGameObject* Object, int32 Range, boo
 	return Players;
 }
 
-CPlayer* CChannel::FindNearPlayer(CGameObject* Object, int32 Range)
+CGameObject* CChannel::FindNearPlayer(CGameObject* Object, int32 Range, bool* Cango)
 {
 	// 주위 플레이어 정보 받아와서
 	vector<CPlayer*> Players = GetAroundPlayer(Object, Range);	
@@ -180,13 +180,20 @@ CPlayer* CChannel::FindNearPlayer(CGameObject* Object, int32 Range)
 		vector<st_Vector2Int> Paths = _Map->FindPath(Object->GetCellPosition(), Player->GetCellPosition());
 		if (Paths.size() < 2)
 		{
+			if (Player != nullptr)
+			{				
+				*Cango = false;
+				return Player;
+			}
 			continue;
 		}
-
+		
+		*Cango = true;
 		return Player;
 	}
-
-	return nullptr;	
+		
+	*Cango = false;
+	return nullptr;
 }
 
 void CChannel::Update()
@@ -195,7 +202,7 @@ void CChannel::Update()
 	for (auto MonsterIteraotr : _Monsters)
 	{
 		CMonster* Monster = MonsterIteraotr.second;
-
+		
 		Monster->Update();
 	}
 

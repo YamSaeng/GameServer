@@ -63,7 +63,7 @@ public:
 	//-------------------------------------------------------
 	// 내 근처 플레이어 반환
 	//-------------------------------------------------------
-	CPlayer* FindNearPlayer(CGameObject* Object, int32 Range);
+	CGameObject* FindNearPlayer(CGameObject* Object, int32 Range, bool* Cango);
 
 	//------------------------------
 	// 소유하고 있는 몬스터 업데이트

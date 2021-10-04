@@ -78,19 +78,19 @@ protected:
 	//------------------------
 	// Idle 상태 Update
 	//------------------------
-	virtual void UpdateIdle() = 0;
+	virtual void UpdateIdle();
 	//------------------------
 	// Patrol 상태 Update
 	//------------------------
-	virtual void UpdatePatrol() = 0;
+	virtual void UpdatePatrol();
 	//------------------------
 	// Moving 상태 Update
 	//------------------------
-	virtual void UpdateMoving() = 0;
+	virtual void UpdateMoving();
 	//------------------------
 	// Attack 상태 Update
 	//------------------------
-	virtual void UpdateAttack() = 0;
+	virtual void UpdateAttack();
 	//------------------------
 	// Dead 상태 Update
 	//------------------------
