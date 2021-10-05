@@ -341,6 +341,22 @@ enum en_PACKET_TYPE
 	en_PACKET_S2C_QUICKSLOT_SWAP,
 
 	//------------------------------------------------------------
+	// 게임서버 퀵슬롯 초기화 요청
+	// int64 ObjectId
+	// int8 QuickSlotBarIndexA
+	// int8 QuickSlotBarSlotIndexA	
+	//------------------------------------------------------------
+	en_PACKET_C2S_QUICKSLOT_EMPTY,
+	
+	//------------------------------------------------------------
+	// 게임서버 퀵슬롯 초기화 요청 응답
+	// int64 ObjectId
+	// int8 QuickSlotBarIndexA
+	// int8 QuickSlotBarSlotIndexA	
+	//------------------------------------------------------------
+	en_PACKET_S2C_QUICKSLOT_EMPTY,
+
+	//------------------------------------------------------------
 	// 게임서버 이펙트 출력 
 	// int64 ObjectId
 	// st_SkillInfo EffectSkillInfo
