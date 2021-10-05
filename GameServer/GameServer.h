@@ -123,6 +123,11 @@ private:
 	// 퀵슬롯 스왑 요청 처리
 	//------------------------------------------------------------------
 	void PacketProcReqQuickSlotSwap(int64 SessionId, CMessage* Message);
+	//------------------------------------------------------------------
+	// 퀵슬롯 초기화 요청 처리
+	//------------------------------------------------------------------
+	void PacketProcReqQuickSlotInit(int64 SessionId, CMessage* Message);
+
 	//-------------------------------------------------------------
 	//-------------------------------------------------------------
 	void PacketProcReqHeartBeat(int64 SessionID, CMessage* Message);
@@ -167,6 +172,10 @@ private:
 	// 퀵슬롯바에서 퀵슬롯 스왑
 	//--------------------------------------------------------------------
 	void PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Message);
+	//--------------------------------------------------------------------
+	// 퀵슬롯바 초기화
+	//--------------------------------------------------------------------
+	void PacketProcReqDBQuickSlotInit(int64 SessionId, CMessage* Message);
 
 
 	//------------------------------------------------------------------
@@ -234,6 +243,10 @@ private:
 	// 게임서버 퀵슬롯 스왑 요청 응답 패킷 조합 
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResQuickSlotSwap(int64 AccountId, int64 PlayerId, st_QuickSlotBarSlotInfo SwapAQuickSlotInfo, st_QuickSlotBarSlotInfo SwapBQuickSlotInfo);
+	//-----------------------------------------------------------------------------------------
+	// 게임서버 퀵슬롯 초기화 패킷 조합
+	//-----------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResQuickSlotInit(int64 AccountId, int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, wstring QuickSlotKey);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 에러 메세지 생성 패킷 조합
 	//-----------------------------------------------------------------------------------------

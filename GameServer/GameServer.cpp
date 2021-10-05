@@ -65,8 +65,8 @@ void CGameServer::GameServerStart(const WCHAR* OpenIP, int32 Port)
 {
 	CNetworkLib::Start(OpenIP, Port);
 
-	G_ObjectManager->MonsterSpawn(200, 1, en_GameObjectType::SLIME);
-	G_ObjectManager->MonsterSpawn(20, 1, en_GameObjectType::BEAR);
+	G_ObjectManager->MonsterSpawn(50, 1, en_GameObjectType::SLIME);
+	G_ObjectManager->MonsterSpawn(50, 1, en_GameObjectType::BEAR);
 
 	G_ObjectManager->GameServer = this;
 
@@ -214,6 +214,9 @@ unsigned __stdcall CGameServer::DataBaseThreadProc(void* Argument)
 				break;
 			case en_JobType::DATA_BASE_QUICK_SWAP:
 				Instance->PacketProcReqDBQuickSlotSwap(Job->SessionId, Job->Message);
+				break;
+			case en_JobType::DATA_BASE_QUICK_INIT:
+				Instance->PacketProcReqDBQuickSlotInit(Job->SessionId, Job->Message);
 				break;
 			default:
 				Instance->Disconnect(Job->SessionId);
@@ -408,6 +411,9 @@ void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 	case en_PACKET_TYPE::en_PACKET_C2S_QUICKSLOT_SWAP:
 		PacketProcReqQuickSlotSwap(SessionId, Message);
 		break;	
+	case en_PACKET_TYPE::en_PACKET_C2S_QUICKSLOT_EMPTY:
+		PacketProcReqQuickSlotInit(SessionId, Message);
+		break;
 	case en_PACKET_TYPE::en_PACKET_CS_GAME_REQ_HEARTBEAT:
 		PacketProcReqHeartBeat(SessionId, Message);
 		break;
@@ -2075,6 +2081,74 @@ void CGameServer::PacketProcReqQuickSlotSwap(int64 SessionId, CMessage* Message)
 	ReturnSession(Session);
 }
 
+void CGameServer::PacketProcReqQuickSlotInit(int64 SessionId, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionId);
+
+	if (Session)
+	{
+		InterlockedIncrement64(&Session->IOBlock->IOCount);
+
+		int64 AccountId;
+		int64 PlayerDBId;
+
+		do
+		{
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountId;
+
+			// AccountId가 맞는지 확인
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> PlayerDBId;
+
+			// 조종하고 있는 플레이어가 있는지 확인 
+			if (Session->MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
+				if (Session->MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			st_Job* DBQuickSlotInitJob = _JobMemoryPool->Alloc();
+			DBQuickSlotInitJob->Type = en_JobType::DATA_BASE_QUICK_INIT;
+			DBQuickSlotInitJob->SessionId = Session->MyPlayer->_SessionId;
+
+			CGameServerMessage* DBQuickSlotInitMessage = CGameServerMessage::GameServerMessageAlloc();
+			DBQuickSlotInitMessage->Clear();
+
+			*DBQuickSlotInitMessage << AccountId;
+			*DBQuickSlotInitMessage << PlayerDBId;
+			DBQuickSlotInitMessage->InsertData(Message->GetFrontBufferPtr(), Message->GetUseBufferSize());
+			Message->MoveReadPosition(Message->GetUseBufferSize());
+
+			DBQuickSlotInitJob->Message = DBQuickSlotInitMessage;
+
+			_GameServerDataBaseThreadMessageQue.Enqueue(DBQuickSlotInitJob);
+			SetEvent(_DataBaseWakeEvent);			
+		} while (0);
+	}
+
+	ReturnSession(Session);
+}
+
 //---------------------------------------------------------------------------------
 //하트 비트
 //WORD Type
@@ -3383,6 +3457,79 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 	ReturnSession(Session);
 }
 
+void CGameServer::PacketProcReqDBQuickSlotInit(int64 SessionId, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionId);
+
+	if (Session)
+	{
+		do
+		{
+			InterlockedDecrement64(&Session->IOBlock->IOCount);
+
+			int64 AccountId;
+			*Message >> AccountId;
+
+			int64 PlayerId;
+			*Message >> PlayerId;
+
+			int8 QuickSlotBarIndex;
+			*Message >> QuickSlotBarIndex;
+
+			int8 QuickSlotBarSlotIndex;
+			*Message >> QuickSlotBarSlotIndex;
+
+			Message->Free();
+
+			// 해당 퀵슬롯 위치에 정보가 있는지 DB에서 확인
+			CDBConnection* DBQuickSlotCheckConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+			SP::CDBGameServerQuickSlotCheck QuickSlotACheck(*DBQuickSlotCheckConnection);
+			QuickSlotACheck.InAccountDBId(AccountId);
+			QuickSlotACheck.InPlayerDBId(PlayerId);
+			QuickSlotACheck.InQuickSlotBarIndex(QuickSlotBarIndex);
+			QuickSlotACheck.InQuickSlotBarSlotIndex(QuickSlotBarSlotIndex);
+
+			WCHAR QuickSlotKey[20] = { 0 };
+			int16 QuickSlotSkillType;
+			int8 QuickSlotSkillLevel;
+			WCHAR QuickSlotSkillName[20] = { 0 };
+			int32 QuickSlotSkillCoolTime;
+			WCHAR QuickSlotSkillImagePath[100] = { 0 };
+
+			QuickSlotACheck.OutQuickSlotKey(QuickSlotKey);
+			QuickSlotACheck.OutQuickSlotSkillType(QuickSlotSkillType);
+			QuickSlotACheck.OutQuickSlotSkillLevel(QuickSlotSkillLevel);
+			QuickSlotACheck.OutQuickSlotSkillName(QuickSlotSkillName);
+			QuickSlotACheck.OutQuickSlotSkillCoolTime(QuickSlotSkillCoolTime);
+			QuickSlotACheck.OutQuickSlotSkillThumbnailImagePath(QuickSlotSkillImagePath);
+
+			QuickSlotACheck.Execute();
+
+			bool QuickSlotAFind = QuickSlotACheck.Fetch();
+
+			G_DBConnectionPool->Push(en_DBConnect::GAME, DBQuickSlotCheckConnection);
+
+			// 찾은 퀵슬롯 정보를 초기화
+			CDBConnection* DBQuickSlotInitConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+			SP::CDBGameServerQuickSlotInit QuickSlotInit(*DBQuickSlotInitConnection);
+			QuickSlotInit.InAccountDBId(AccountId);
+			QuickSlotInit.InPlayerDBId(PlayerId);
+			QuickSlotInit.InQuickSlotBarIndex(QuickSlotBarIndex);
+			QuickSlotInit.InQuickSlotBarSlotIndex(QuickSlotBarSlotIndex);
+
+			QuickSlotInit.Execute();
+
+			G_DBConnectionPool->Push(en_DBConnect::GAME, DBQuickSlotInitConnection);
+
+			CMessage* ResQuickSlotInitMessage = MakePacketResQuickSlotInit(Session->AccountId, Session->MyPlayer->_GameObjectInfo.ObjectId, QuickSlotBarIndex, QuickSlotBarSlotIndex, QuickSlotKey);
+			SendPacket(Session->SessionId, ResQuickSlotInitMessage);
+			ResQuickSlotInitMessage->Free();
+		} while (0);
+	}
+
+	ReturnSession(Session);
+}
+
 void CGameServer::PacketProcTimerAttackEnd(int64 SessionId, CMessage* Message)
 {
 	st_Session* Session = FindSession(SessionId);
@@ -3769,6 +3916,30 @@ CGameServerMessage* CGameServer::MakePacketResQuickSlotSwap(int64 AccountId, int
 	*ResQuickSlotSwapMessage << SwapBQuickSlotInfo;
 
 	return ResQuickSlotSwapMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketResQuickSlotInit(int64 AccountId, int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, wstring QuickSlotKey)
+{
+	CGameServerMessage* ResQuickSlotInitMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResQuickSlotInitMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResQuickSlotInitMessage->Clear();
+
+	*ResQuickSlotInitMessage << (int16)en_PACKET_S2C_QUICKSLOT_EMPTY;
+	*ResQuickSlotInitMessage << AccountId;
+	*ResQuickSlotInitMessage << PlayerId;
+	*ResQuickSlotInitMessage << QuickSlotBarIndex;
+	*ResQuickSlotInitMessage << QuickSlotBarSlotIndex;
+
+	// 퀵슬롯 키
+	int8 QuickSlotKeyLen = (int8)(QuickSlotKey.length() * 2);
+	*ResQuickSlotInitMessage << QuickSlotKeyLen;
+	ResQuickSlotInitMessage->InsertData(QuickSlotKey.c_str(), QuickSlotKeyLen);
+
+	return ResQuickSlotInitMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketError(int64 PlayerId, en_ErrorType ErrorType, wstring ErrorMessage)
