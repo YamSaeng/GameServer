@@ -4,22 +4,22 @@
 namespace SP
 {
 	class CDBAccountTokenGet : public CDBBind<1, 3>
-	{	
+	{
 	public:
 		CDBAccountTokenGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetAccountToken(?)}") { }
-		void InAccountID(int64& AccountID) { BindParam(0, AccountID); }		
-		void OutToken(int32& Token) { BindCol(0, Token); }		
+		void InAccountID(int64& AccountID) { BindParam(0, AccountID); }
+		void OutToken(int32& Token) { BindCol(0, Token); }
 		void OutLoginsuccessTime(TIMESTAMP_STRUCT& LoginSuccessTime) { BindCol(1, LoginSuccessTime); }
 		void OutTokenExpiredTime(TIMESTAMP_STRUCT& TokenExpiredTime) { BindCol(2, TokenExpiredTime); }
 	};
 
 	// AccountID를 기준으로 클라가 소유하고 있는 캐릭터를 찾는다.
 	class CDBGameServerPlayersGet : public CDBBind<1, 15>
-	{	
+	{
 	public:
 		CDBGameServerPlayersGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetPlayers(?)}") { }
 		void InAccountID(int64& AccountID) { BindParam(0, AccountID); }
-		void OutPlayerDBID(int64& PlayerDBID) { BindCol(0, PlayerDBID); }		
+		void OutPlayerDBID(int64& PlayerDBID) { BindCol(0, PlayerDBID); }
 		template<int32 N> void OutPlayerName(WCHAR(&PlayerName)[N]) { BindCol(1, PlayerName); }
 		void OutPlayerIndex(int8& PlayerIndex) { BindCol(2, PlayerIndex); }
 		void OutLevel(int32& Level) { BindCol(3, Level); }
@@ -46,14 +46,14 @@ namespace SP
 
 	// DB에 새로운 캐릭 저장
 	class CDBGameServerCreateCharacterPush : public CDBBind<15, 0>
-	{	
-	public:		
-		CDBGameServerCreateCharacterPush(CDBConnection& DBConnection) : CDBBind(DBConnection,L"{CALL dbo.spNewCharacterPush(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}") {}
+	{
+	public:
+		CDBGameServerCreateCharacterPush(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spNewCharacterPush(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}") {}
 		void InAccountID(int64& AccountID) { BindParam(0, AccountID); }
 		void InPlayerName(wstring& PlayerName) { BindParam(1, PlayerName.c_str()); }
 		void InPlayerType(int16& PlayerType) { BindParam(2, PlayerType); }
 		void InPlayerIndex(int8& PlayerIndex) { BindParam(3, PlayerIndex); }
-		void InLevel(int32& Level)  { BindParam(4, Level); }
+		void InLevel(int32& Level) { BindParam(4, Level); }
 		void InCurrentHP(int32& CurrentHP) { BindParam(5, CurrentHP); }
 		void InMaxHP(int32& MaxHP) { BindParam(6, MaxHP); }
 		void InCurrentMP(int32& CurrentMP) { BindParam(7, CurrentMP); }
@@ -61,7 +61,7 @@ namespace SP
 		void InCurrentDP(int32& CurrentDP) { BindParam(9, CurrentDP); }
 		void InMaxDP(int32& MaxDP) { BindParam(10, MaxDP); }
 		void InMinAttack(int32& MinAttack) { BindParam(11, MinAttack); }
-		void InMaxAttack(int32& MaxAttack) { BindParam(12, MaxAttack); }		
+		void InMaxAttack(int32& MaxAttack) { BindParam(12, MaxAttack); }
 		void InCriticalPoint(int16& CriticalPoint) { BindParam(13, CriticalPoint); }
 		void InSpeed(float Speed) { BindParam(14, Speed); }
 	};
@@ -70,7 +70,7 @@ namespace SP
 	class CDBGameServerPlayerDBIDGet : public CDBBind<2, 1>
 	{
 	public:
-		CDBGameServerPlayerDBIDGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spPlayerDBIdGet(?,?)}") {}	
+		CDBGameServerPlayerDBIDGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spPlayerDBIdGet(?,?)}") {}
 		void InAccountID(int64& AccountId) { BindParam(0, AccountId); }
 		void InPlayerSlotIndex(int8& PlayerSlotIndex) { BindParam(1, PlayerSlotIndex); }
 		void OutPlayerDBID(int64& PlayerDBId) { BindCol(0, PlayerDBId); }
@@ -120,17 +120,17 @@ namespace SP
 	class CDBGameServerItemToInventoryPush : public CDBBind<10, 0>
 	{
 	public:
-		CDBGameServerItemToInventoryPush(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spItemToInventorySave(?,?,?,?,?,?,?,?,?,?)}") {}				
+		CDBGameServerItemToInventoryPush(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spItemToInventorySave(?,?,?,?,?,?,?,?,?,?)}") {}
 		void InIsQuickSlotUse(bool& IsQuickSlotUse) { BindParam(0, IsQuickSlotUse); }
 		void InItemType(int16& ItemType) { BindParam(1, ItemType); }
 		void InItemConsumableType(int16& ItemConsumableType) { BindParam(2, ItemConsumableType); }
 		void InItemName(wstring& ItemName) { BindParam(3, ItemName.c_str()); }
 		void InItemCount(int16& ItemCount) { BindParam(4, ItemCount); }
 		void InSlotIndex(int8& SlotIndex) { BindParam(5, SlotIndex); }
-		void InIsEquipped(bool& IsEquipped) { BindParam(6, IsEquipped); }		
+		void InIsEquipped(bool& IsEquipped) { BindParam(6, IsEquipped); }
 		void InThumbnailImagePath(wstring& ThumbnailImagePath) { BindParam(7, ThumbnailImagePath.c_str()); }
 		void InOwnerAccountId(int64& OwnerAccountId) { BindParam(8, OwnerAccountId); }
-		void InOwnerPlayerId(int64& OwnerPlayerId) { BindParam(9, OwnerPlayerId); }		
+		void InOwnerPlayerId(int64& OwnerPlayerId) { BindParam(9, OwnerPlayerId); }
 	};
 
 	// ItemTable에 Item 개수 갱신
@@ -154,20 +154,20 @@ namespace SP
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
 		void InSlotIndex(int8& SlotIndex) { BindParam(2, SlotIndex); }
-		
+
 		void OutIsQuickSlotUse(bool& IsQuickSlotUse) { BindCol(0, IsQuickSlotUse); }
-		void OutItemType(int16& ItemType) { BindCol(1, ItemType); }		
+		void OutItemType(int16& ItemType) { BindCol(1, ItemType); }
 		void OutItemConsumableType(int16& ItemConsumableType) { BindCol(2, ItemConsumableType); }
 		template<int8 Length> void OutItemName(WCHAR(&ItemName)[Length]) { BindCol(3, ItemName); }
 		void OutItemCount(int16& ItemCount) { BindCol(4, ItemCount); }
 		void OutItemIsEquipped(bool& ItemIsEquipped) { BindCol(5, ItemIsEquipped); }
-		template<int16 Length> void OutItemThumbnailImagePath(WCHAR(&ItemThumbnailImagePath)[Length]) { BindCol(6, ItemThumbnailImagePath); }		
+		template<int16 Length> void OutItemThumbnailImagePath(WCHAR(&ItemThumbnailImagePath)[Length]) { BindCol(6, ItemThumbnailImagePath); }
 	};
 
 	// InventoryItemSwap Swap 
 	class CDBGameServerItemSwap : public CDBBind<18, 0>
 	{
-	public:		
+	public:
 		CDBGameServerItemSwap(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spInventoryItemSwap(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}") {}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
@@ -180,7 +180,7 @@ namespace SP
 		void InAItemIsEquipped(bool& AItemIsEquipped) { BindParam(7, AItemIsEquipped); }
 		void InAItemThumbnailImagePath(wstring& AItemThumbnailImagePath) { BindParam(8, AItemThumbnailImagePath.c_str()); }
 		void InAItemSlotIndex(int8& AItemSlotIndex) { BindParam(9, AItemSlotIndex); }
-		
+
 		void InBIsQuickSlotUse(bool& IsQuickSlotUse) { BindParam(10, IsQuickSlotUse); }
 		void InBItemType(int16& BItemType) { BindParam(11, BItemType); }
 		void InBItemConsumableType(int16& BItemConsumableType) { BindParam(12, BItemConsumableType); }
@@ -195,7 +195,7 @@ namespace SP
 	class CDBGameServerItemDelete : public CDBBind<2, 0>
 	{
 	public:
-		CDBGameServerItemDelete(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spItemDelete(?,?)}") {}	
+		CDBGameServerItemDelete(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spItemDelete(?,?)}") {}
 		void InItemDBId(int64& ItemDBId) { BindParam(0, ItemDBId); }
 		void InItemUse(bool& ItemUse) { BindParam(1, ItemUse); }
 	};
@@ -233,21 +233,21 @@ namespace SP
 		void OutSliverCoin(int16& SliverCoin) { BindCol(1, SliverCoin); }
 		void OutBronzeCoin(int16& BronzeCoin) { BindCol(2, BronzeCoin); }
 	};
-	
+
 	// ItemTable에 있는 Item 모두 긁어옴
 	class CDBGameServerInventoryItemGet : public CDBBind<2, 7>
 	{
 	public:
 		CDBGameServerInventoryItemGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetItemTableInfoToInventory(?,?)}") {}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
-		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }		
+		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
 
 		void OutItemType(int16& ItemType) { BindCol(0, ItemType); }
-		void OutItemConsumableType(int16 &ConsumableType) { BindCol(1, ConsumableType); }
+		void OutItemConsumableType(int16& ConsumableType) { BindCol(1, ConsumableType); }
 		template<int8 Length> void OutItemName(WCHAR(&ItemName)[Length]) { BindCol(2, ItemName); }
 		void OutItemCount(int16& itemCount) { BindCol(3, itemCount); }
-		void OutSlotIndex(int8& SlotIndex) { BindCol(4, SlotIndex); }		
-		void OutIsEquipped(bool& IsEquipped) { BindCol(5, IsEquipped); }				
+		void OutSlotIndex(int8& SlotIndex) { BindCol(4, SlotIndex); }
+		void OutIsEquipped(bool& IsEquipped) { BindCol(5, IsEquipped); }
 		template<int16 Length> void OutItemThumbnailImagePath(WCHAR(&ItemThumbnailImagePath)[Length]) { BindCol(6, ItemThumbnailImagePath); }
 	};
 
@@ -274,15 +274,15 @@ namespace SP
 		CDBGameServerQuickSlotBarSlotCreate(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spQuickSlotBarSlotCreate(?,?,?,?,?,?,?,?,?,?)}") {}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
-		
+
 		void InQuickSlotBarIndex(int8& QuickSlotBarIndex) { BindParam(2, QuickSlotBarIndex); }
 		void InQuickSlotBarSlotIndex(int8& QuickSlotBarSlotIndex) { BindParam(3, QuickSlotBarSlotIndex); }
 		void InQuickSlotKey(wstring& QuickSlotKey) { BindParam(4, QuickSlotKey.c_str()); }
 		void InSkillType(int16& SkillType) { BindParam(5, SkillType); }
 		void InSkillLevel(int8& SkillLevel) { BindParam(6, SkillLevel); }
-		void InSkillName(wstring& SkillName) { BindParam(7, SkillName.c_str()); }		
+		void InSkillName(wstring& SkillName) { BindParam(7, SkillName.c_str()); }
 		void InSkillCoolTime(int32& SkillCoolTime) { BindParam(8, SkillCoolTime); }
-		void InSkillThumbnailImagePath(wstring& SkillThumbnailImagePath) { BindParam(9, SkillThumbnailImagePath.c_str()); }		
+		void InSkillThumbnailImagePath(wstring& SkillThumbnailImagePath) { BindParam(9, SkillThumbnailImagePath.c_str()); }
 	};
 
 	// QuickSlotBarSlot정보 업데이트 프로시저
@@ -312,7 +312,7 @@ namespace SP
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
 
 		void OutQuickSlotBarIndex(int8& SlotBarIndex) { BindCol(0, SlotBarIndex); }
-		void OutQuickSlotBarItemIndex(int8& SlotBarItemIndex) { BindCol(1, SlotBarItemIndex); }	
+		void OutQuickSlotBarItemIndex(int8& SlotBarItemIndex) { BindCol(1, SlotBarItemIndex); }
 		template<int8 Length> void OutQuickSlotKey(WCHAR(&QuickSlotKey)[Length]) { BindCol(2, QuickSlotKey); }
 		void OutQuickSlotSkillType(int16& SkillType) { BindCol(3, SkillType); }
 		void OutQuickSlotSkillLevel(int8& SkillLevel) { BindCol(4, SkillLevel); }
@@ -330,7 +330,7 @@ namespace SP
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
 		void InQuickSlotBarIndex(int8& QuickSlotBarIndex) { BindParam(2, QuickSlotBarIndex); }
 		void InQuickSlotBarSlotIndex(int8& QuickSlotBarSlotIndex) { BindParam(3, QuickSlotBarSlotIndex); }
-		
+
 		template<int8 Length> void OutQuickSlotKey(WCHAR(&QuickSlotKey)[Length]) { BindCol(0, QuickSlotKey); }
 		void OutQuickSlotSkillType(int16& SkillType) { BindCol(1, SkillType); }
 		void OutQuickSlotSkillLevel(int8& SkillLevel) { BindCol(2, SkillLevel); }
@@ -362,5 +362,16 @@ namespace SP
 		void InBQuickSlotSKillName(wstring& QuickSlotSKillNam) { BindParam(13, QuickSlotSKillNam.c_str()); }
 		void InBQuickSlotSkillCoolTime(int32& QuickSlotSkillCoolTime) { BindParam(14, QuickSlotSkillCoolTime); }
 		void InBQuickSlotSKillImagePath(wstring& QuickSlotSKillImagePath) { BindParam(15, QuickSlotSKillImagePath.c_str()); }
+	};
+
+	// 퀵슬롯 정보 초기화
+	class CDBGameServerQuickSlotInit : public CDBBind<4, 0>
+	{
+	public:
+		CDBGameServerQuickSlotInit(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spQuickSlotInit(?,?,?,?)}") {}
+		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
+		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
+		void InQuickSlotBarIndex(int8& QuickSlotBarIndex) { BindParam(2, QuickSlotBarIndex); }
+		void InQuickSlotBarSlotIndex(int8& QuickSlotBarSlotIndex) { BindParam(3, QuickSlotBarSlotIndex); }
 	};
 }
