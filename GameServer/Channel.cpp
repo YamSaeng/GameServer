@@ -183,28 +183,45 @@ CGameObject* CChannel::FindNearPlayer(CGameObject* Object, int32 Range, bool* Ca
 		Distances.InsertHeap(st_Vector2Int::Distance(Player->GetCellPosition(), Object->GetCellPosition()), Player);
 	}
 	
+	CPlayer* Player = nullptr;
 	// 거리 가까운 애부터 접근해서 해당 플레이어로 갈 수 있는지 확인하고
-	// 갈 수 있는 대상이면 해당 플레리어를 반환해준다.
-	while (Distances.GetUseSize() != 0)
+	// 갈 수 있는 대상이면 해당 플레이어를 반환해준다.
+	if (Distances.GetUseSize() != 0)
 	{
-		CPlayer* Player = Distances.PopHeap();
-		vector<st_Vector2Int> Paths = _Map->FindPath(Object->GetCellPosition(), Player->GetCellPosition());
-		if (Paths.size() < 2)
+		Player = Distances.PopHeap();
+		vector<st_Vector2Int> FirstPaths = _Map->FindPath(Object->GetCellPosition(), Player->GetCellPosition());
+		if (FirstPaths.size() < 2)
 		{
+			// 타겟은 있지만 갈수는 없는 상태 ( 주위에 오브젝트들로 막혀서 )
 			if (Player != nullptr)
 			{				
+				// 주위 다른 대상중에서 갈 수 있는 대상이 있는지 추가로 판단
+				while (Distances.GetUseSize() != 0)
+				{
+					Player = Distances.PopHeap();
+					vector<st_Vector2Int> SecondPaths = _Map->FindPath(Object->GetCellPosition(), Player->GetCellPosition());
+					if (SecondPaths.size() < 2)
+					{
+						continue;
+					}
+
+					*Cango = true;
+					return Player;
+				}
+
 				*Cango = false;
 				return Player;
-			}
-			continue;
+			}			
 		}
 		
 		*Cango = true;
 		return Player;
 	}
-		
-	*Cango = false;
-	return nullptr;
+	else
+	{
+		*Cango = false;
+		return nullptr;
+	}
 }
 
 void CChannel::Update()
