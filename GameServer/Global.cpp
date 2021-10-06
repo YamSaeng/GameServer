@@ -29,11 +29,13 @@ public:
 		G_Datamanager->LoadDataStatus(L"StatusData.json");
 		G_Datamanager->LoadDataMonster(L"MonsterData.json");
 		G_Datamanager->LoadDataSkill(L"SkillData.json");
+		G_Datamanager->LoadDataEnvironment(L"EnvironmentData.json");
 		
 		G_ChannelManager = new CChannelManager();	
 		G_ChannelManager->Add(1);
 
-		G_ObjectManager = new CObjectManager();
+		G_ObjectManager = new CObjectManager();		
+		delete G_ObjectManager;
 	}
 
 	~CGlobal()
@@ -41,5 +43,7 @@ public:
 		delete G_DBConnectionPool;
 		delete G_Logger;
 		delete G_Datamanager;
+		delete G_ChannelManager;
+		delete G_ObjectManager;
 	}
 } G_Global;

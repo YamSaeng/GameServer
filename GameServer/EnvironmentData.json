@@ -1,0 +1,40 @@
+{
+  "Environments": [
+    {
+      "EnvironmentDataId": 1,
+      "Name": "µ¹",
+      "EnvironmentStatInfo": [
+        {
+          "Level": 1,
+          "MaxHP": 200
+        }
+      ],
+      "EnvironmentDropData": [
+        {
+          "Probability": 90,
+          "ItemDataSheetId": 2005,
+          "MinCount": 5,
+          "MaxCount": 15
+        }
+      ]
+    },
+    {
+      "EnvironmentDataId": 2,
+      "Name": "³ª¹«",
+      "EnvironmentStatInfo": [
+        {
+          "Level": 1,
+          "MaxHP": 200
+        }
+      ],
+      "EnvironmentDropData": [
+        {
+          "Probability": 90,
+          "ItemDataSheetId": 2006,
+          "MinCount": 5,
+          "MaxCount": 15
+        }
+      ]
+    }
+  ]
+}

@@ -120,6 +120,10 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 		{
 			MaterialData->ItemType = en_ItemType::ITEM_TYPE_BRONZE_COIN;
 		}
+		else if (ItemName == "암석")
+		{
+			MaterialData->ItemType = en_ItemType::ITEM_TYPE_STONE;
+		}
 		else if (ItemName == "통나무")
 		{
 			MaterialData->ItemType = en_ItemType::ITEM_TYPE_WOOD_LOG;
@@ -263,5 +267,51 @@ void CDataManager::LoadDataSkill(wstring LoadFileName)
 		SkillData->SkillThumbnailImagePath = SkillImagePath;
 
 		_Skills.insert(pair<int32, st_SkillData*>(SkillDataSheetId, SkillData));
+	}
+}
+
+void CDataManager::LoadDataEnvironment(wstring LoadFileName)
+{
+	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());
+
+	rapidjson::Document Document;
+	Document.Parse(FileStr);
+
+	for (auto& Filed : Document["Environments"].GetArray())
+	{
+		st_EnvironmentData* EnvironmentData = new st_EnvironmentData();
+
+		int EnvironmentDataId = Filed["EnvironmentDataId"].GetInt();
+		string Name = Filed["Name"].GetString();
+
+		EnvironmentData->EnvironmentDataId = EnvironmentDataId;
+		EnvironmentData->EnvironmentName = Name;
+
+		for (auto& EnvironmentStatInfoFiled : Filed["EnvironmentStatInfo"].GetArray())
+		{
+			int Level = EnvironmentStatInfoFiled["Level"].GetInt();
+			int MaxHP = EnvironmentStatInfoFiled["MaxHP"].GetInt();
+
+			EnvironmentData->Level = Level;
+			EnvironmentData->MaxHP = MaxHP;
+		}
+
+		for (auto& DropDataFiled : Filed["EnvironmentDropData"].GetArray())
+		{
+			int Probability = DropDataFiled["Probability"].GetInt();
+			int ItemDataSheetId = DropDataFiled["ItemDataSheetId"].GetInt();
+			int8 MinCount = (int8)(DropDataFiled["MinCount"].GetInt());
+			int16 MaxCount = (int16)(DropDataFiled["MaxCount"].GetInt());
+
+			st_DropData DropData;
+			DropData.Probability = Probability;
+			DropData.ItemDataSheetId = ItemDataSheetId;
+			DropData.MinCount = MinCount;
+			DropData.MaxCount = MaxCount;
+
+			EnvironmentData->DropItems.push_back(DropData);
+		}
+		
+		_Environments.insert(pair<int32, st_EnvironmentData*>(EnvironmentData->EnvironmentDataId, EnvironmentData));
 	}
 }

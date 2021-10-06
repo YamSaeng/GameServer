@@ -48,24 +48,52 @@
   "Material": [
     {
       "DataSheetId": 2000,
-      "Name": "Leather",
+      "Name": "곰 가죽",
       "MaxCount": 99,
       "IsEquipped": false,
       "ImageFilePath": "Textures/Material/Leather"
     },
     {
       "DataSheetId": 2001,
-      "Name": "SlimeGel",
+      "Name": "슬라임젤리",
       "MaxCount": 99,
       "IsEquipped": false,
       "ImageFilePath": "Textures/MonsterPart/SlimeGel"
     },
     {
       "DataSheetId": 2002,
-      "Name": "BronzeCoin",
+      "Name": "동전",
       "MaxCount": 99,
       "IsEquipped": false,
       "ImageFilePath": "Textures/Misc/CopperCoin"
+    },
+    {
+      "DataSheetId": 2003,
+      "Name": "은전",
+      "MaxCount": 99,
+      "IsEquipped": false,
+      "ImageFilePath": "Textures/Misc/SliverCoin"
+    },
+    {
+      "DataSheetId": 2004,
+      "Name": "금전",
+      "MaxCount": 99,
+      "IsEquipped": false,
+      "ImageFilePath": "Textures/Misc/GoldCoin"
+    },
+    {
+      "DataSheetId": 2005,
+      "Name": "암석",
+      "MaxCount": 99,
+      "IsEquipped": false,
+      "ImageFilePath": "Textures/Material/Stone"
+    },
+    {
+      "DataSheetId": 2006,
+      "Name": "통나무",
+      "MaxCount": 99,
+      "IsEquipped": false,
+      "ImageFilePath": "Textures/Material/Wood Log"
     }
   ]
 } 

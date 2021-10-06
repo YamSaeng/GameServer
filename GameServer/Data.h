@@ -1,10 +1,12 @@
 #pragma once
 #include "Item.h"
 
-enum en_MonsterDataType
+enum en_ObjectDataType
 {
 	SLIME_DATA = 1,
-	BEAR_DATA
+	BEAR_DATA,
+	STONE_DATA = 1,
+	TREE_DATA
 };
 
 struct st_ItemData
@@ -86,4 +88,13 @@ struct st_SkillData
 	float SkillCastingTime;
 	int SkillDistance;
 	string SkillThumbnailImagePath;
+};
+
+struct st_EnvironmentData
+{
+	int32 EnvironmentDataId;
+	string EnvironmentName;
+	int32 Level;
+	int32 MaxHP;
+	vector<st_DropData> DropItems;
 };
