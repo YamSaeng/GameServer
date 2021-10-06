@@ -4,6 +4,7 @@
 
 class CMonster;
 class CItem;
+class CEnvironment;
 
 class CChannel
 {
@@ -14,6 +15,7 @@ private:
 	map<int64, CPlayer*> _Players;
 	map<int64, CMonster*> _Monsters;
 	map<int64, CItem*> _Items;
+	map<int64, CEnvironment*> _Environments;
 
 	//-----------------
 	// 섹터 목록

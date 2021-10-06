@@ -5,6 +5,7 @@
 #include "Monster.h"
 #include "Item.h"
 #include "Heap.h"
+#include "Environment.h"
 
 CChannel::~CChannel()
 {
@@ -126,6 +127,16 @@ vector<CGameObject*> CChannel::GetAroundObjects(CGameObject* Object, int32 Range
 		{
 			GameObjects.push_back(Monster);
 		}
+
+		for (CEnvironment* Environment : Sector->GetEnvironment())
+		{
+			GameObjects.push_back(Environment);
+		}
+
+		for (CItem* Item : Sector->GetItems())
+		{
+			GameObjects.push_back(Item);
+		}
 	}	
 	
 	return GameObjects;
@@ -197,8 +208,7 @@ CGameObject* CChannel::FindNearPlayer(CGameObject* Object, int32 Range, bool* Ca
 }
 
 void CChannel::Update()
-{
-	// 소유하고 있는 몬스터 업데이트
+{	
 	for (auto MonsterIteraotr : _Monsters)
 	{
 		CMonster* Monster = MonsterIteraotr.second;
@@ -218,6 +228,13 @@ void CChannel::Update()
 		CItem* Item = ItemIterator.second;
 
 		Item->Update();
+	}
+
+	for (auto EnvironmentIterator : _Environments)
+	{
+		CEnvironment* Environment = EnvironmentIterator.second;
+
+		Environment->Update();
 	}
 }
 
@@ -262,8 +279,8 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	// 입장한 오브젝트의 타입에 따라
 	switch ((en_GameObjectType)EnterChannelGameObject->_GameObjectInfo.ObjectType)
 	{
-	case en_GameObjectType::MELEE_PLAYER:
-	case en_GameObjectType::MAGIC_PLAYER:
+	case en_GameObjectType::OBJECT_MELEE_PLAYER:
+	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 		{
 			// 플레이어로 형변환
 			CPlayer* EnterChannelPlayer = (CPlayer*)EnterChannelGameObject;
@@ -284,8 +301,8 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			EnterSector->Insert(EnterChannelPlayer);			
 		}
 		break;
-	case en_GameObjectType::SLIME:
-	case en_GameObjectType::BEAR:
+	case en_GameObjectType::OBJECT_SLIME:
+	case en_GameObjectType::OBJECT_BEAR:
 		{
 			// 몬스터로 형변환
 			CMonster* EnterChannelMonster = (CMonster*)EnterChannelGameObject;
@@ -307,10 +324,12 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			EnterSector->Insert(EnterChannelMonster);												
 		}
 		break;
-	case en_GameObjectType::SLIME_GEL:
-	case en_GameObjectType::BRONZE_COIN:
-	case en_GameObjectType::LEATHER:
-	case en_GameObjectType::SKILL_BOOK:
+	case en_GameObjectType::ITEM_SLIME_GEL:
+	case en_GameObjectType::ITEM_BRONZE_COIN:
+	case en_GameObjectType::ITEM_LEATHER:
+	case en_GameObjectType::ITEM_SKILL_BOOK:
+	case en_GameObjectType::ITEM_WOOD_LOG:
+	case en_GameObjectType::ITEM_STONE:
 		{
 			// 아이템으로 형변환
 			CItem* EnterChannelItem = (CItem*)EnterChannelGameObject;
@@ -329,32 +348,58 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			EnterSector->Insert(EnterChannelItem);
 		}
 		break;
+	case en_GameObjectType::OBJECT_STONE:
+	case en_GameObjectType::OBJECT_TREE:
+		{			
+			CEnvironment* EnterChannelEnvironment = (CEnvironment*)EnterChannelGameObject;
+			EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.PositionY = SpawnPosition._Y;
+			EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.PositionX = SpawnPosition._X;
+
+			_Environments.insert(pair<int64, CEnvironment*>(EnterChannelEnvironment->_GameObjectInfo.ObjectId, EnterChannelEnvironment));
+
+			EnterChannelEnvironment->_Channel = this;
+						
+			_Map->ApplyMove(EnterChannelEnvironment, SpawnPosition);
+
+			// 섹터 얻어서 해당 섹터에도 저장
+			CSector* EnterSector = GetSector(SpawnPosition);
+			EnterSector->Insert(EnterChannelEnvironment);
+		}
+		break;
 	}
 }
 
 void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 {	
 	// 채널 퇴장
+	// 컨테이너에서 제거한 후 맵에서도 제거
 	switch ((en_GameObjectType)LeaveChannelGameObject->_GameObjectInfo.ObjectType)
 	{
-	case en_GameObjectType::MELEE_PLAYER:
-	case en_GameObjectType::MAGIC_PLAYER:
-		// 컨테이너에서 제거
+	case en_GameObjectType::OBJECT_MELEE_PLAYER:
+	case en_GameObjectType::OBJECT_MAGIC_PLAYER:		
 		_Players.erase(LeaveChannelGameObject->_GameObjectInfo.ObjectId);
 		
 		_Map->ApplyLeave(LeaveChannelGameObject);		
 		break;
-	case en_GameObjectType::SLIME:
-	case en_GameObjectType::BEAR:
+	case en_GameObjectType::OBJECT_SLIME:
+	case en_GameObjectType::OBJECT_BEAR:
 		_Monsters.erase(LeaveChannelGameObject->_GameObjectInfo.ObjectId);
 
 		_Map->ApplyLeave(LeaveChannelGameObject);		
 		break;	
-	case en_GameObjectType::SLIME_GEL:
-	case en_GameObjectType::BRONZE_COIN:
-	case en_GameObjectType::LEATHER:
-	case en_GameObjectType::SKILL_BOOK:
+	case en_GameObjectType::ITEM_SLIME_GEL:
+	case en_GameObjectType::ITEM_BRONZE_COIN:
+	case en_GameObjectType::ITEM_LEATHER:
+	case en_GameObjectType::ITEM_SKILL_BOOK:
+	case en_GameObjectType::ITEM_WOOD_LOG:
+	case en_GameObjectType::ITEM_STONE:
 		_Items.erase(LeaveChannelGameObject->_GameObjectInfo.ObjectId);
+
+		_Map->ApplyLeave(LeaveChannelGameObject);
+		break;
+	case en_GameObjectType::OBJECT_STONE:
+	case en_GameObjectType::OBJECT_TREE:
+		_Environments.erase(LeaveChannelGameObject->_GameObjectInfo.ObjectId);
 
 		_Map->ApplyLeave(LeaveChannelGameObject);
 		break;

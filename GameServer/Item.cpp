@@ -53,8 +53,8 @@ void CItem::UpdateIdle()
 
 		switch (_Target->_GameObjectInfo.ObjectType)
 		{
-		case en_GameObjectType::MELEE_PLAYER:
-		case en_GameObjectType::MAGIC_PLAYER:
+		case en_GameObjectType::OBJECT_MELEE_PLAYER:
+		case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 			Player = (CPlayer*)_Target;
 			break;
 		default:

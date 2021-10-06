@@ -37,7 +37,7 @@ public:
 	//-------------------------------------
 	// 인벤토리에 이미 아이템이 있는지 확인
 	//-------------------------------------
-	bool IsExistItem(en_ItemType ItemType, int16* Count, int8* SlotIndex);
+	bool IsExistItem(en_ItemType ItemType, int16* ItemCount, int16& ItemEach,int8* SlotIndex);
 	//----------------------------------
 	// 비어 있는 슬롯 반환
 	//----------------------------------

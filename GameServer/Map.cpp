@@ -179,8 +179,8 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	// 섹터 작업
 	switch (GameObject->_GameObjectInfo.ObjectType)
 	{	
-	case en_GameObjectType::MELEE_PLAYER:		
-	case en_GameObjectType::MAGIC_PLAYER:
+	case en_GameObjectType::OBJECT_MELEE_PLAYER:		
+	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 	{
 		CPlayer* MovePlayer = (CPlayer*)GameObject;
 
@@ -188,7 +188,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 		CSector* NextSector = GameObject->_Channel->GetSector(DestPosition);		
 
 		if (CurrentSector != NextSector)
-		{
+		{			
 			// 현재 섹터에서 플레이어 제거
 			CurrentSector->Remove(MovePlayer);		
 
@@ -242,6 +242,11 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 				for (CItem* DeSpawnItem : Sector->GetItems())
 				{
 					DeSpawnSectorObjectIds.push_back(DeSpawnItem->_GameObjectInfo.ObjectId);
+				}
+
+				for (CEnvironment* DeSpawnEnvironment : Sector->GetEnvironment())
+				{
+					DeSpawnSectorObjectIds.push_back(DeSpawnEnvironment->_GameObjectInfo.ObjectId);
 				}
 			}	
 			
@@ -304,6 +309,11 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 				{
 					SpawnObjectInfos.push_back(ExistItem->_GameObjectInfo);
 				}
+
+				for (CEnvironment* ExistEnvironment : Sector->GetEnvironment())
+				{
+					SpawnObjectInfos.push_back(ExistEnvironment->_GameObjectInfo);
+				}
 			}			
 	
 			// 나에게 전송하여 스폰 섹터에 있는 오브젝트들을 스폰 시킨다.
@@ -316,8 +326,8 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 		}
 	}
 		break;
-	case en_GameObjectType::SLIME:
-	case en_GameObjectType::BEAR:
+	case en_GameObjectType::OBJECT_SLIME:
+	case en_GameObjectType::OBJECT_BEAR:
 	{
 		CMonster* MoveMonster = (CMonster*)GameObject;
 
@@ -397,10 +407,12 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 		}
 	}
 		break;
-	case en_GameObjectType::SLIME_GEL:
-	case en_GameObjectType::BRONZE_COIN:
-	case en_GameObjectType::LEATHER:
-	case en_GameObjectType::SKILL_BOOK:
+	case en_GameObjectType::ITEM_SLIME_GEL:
+	case en_GameObjectType::ITEM_BRONZE_COIN:
+	case en_GameObjectType::ITEM_LEATHER:
+	case en_GameObjectType::ITEM_SKILL_BOOK:
+	case en_GameObjectType::ITEM_WOOD_LOG:
+	case en_GameObjectType::ITEM_STONE:
 	{
 		CItem* MoveItem = (CItem*)GameObject;
 
@@ -480,6 +492,87 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 		}
 	}
 		break;
+	case en_GameObjectType::OBJECT_STONE:
+	case en_GameObjectType::OBJECT_TREE:
+	{
+		CEnvironment* MoveEnvironment = (CEnvironment*)GameObject;
+
+		CSector* CurrentSector = GameObject->_Channel->GetSector(MoveEnvironment->GetCellPosition());
+		CSector* NextSector = GameObject->_Channel->GetSector(DestPosition);
+
+		if (CurrentSector != NextSector)
+		{
+			CurrentSector->Remove(MoveEnvironment);
+
+			// 환경 섹터 옮기기 전 주변 섹터 
+			vector<CSector*> CurrentSectors = GameObject->_Channel->GetAroundSectors(MoveEnvironment->GetCellPosition(), 1);
+			// 섹터 옮기고 난 후 주변 섹터
+			vector<CSector*> NextSectors = GameObject->_Channel->GetAroundSectors(DestPosition, 1);
+
+			// 나를 제거할 섹터를 찾는 작업
+			// Current - Next;
+			// 현재 섹터들에서 내가 이동할 섹터를 제거한 차집합 섹터를 얻는다.
+			vector<CSector*> DeSpawnSectors = CurrentSectors;
+			for (int32 i = 0; i < DeSpawnSectors.size(); i++)
+			{
+				for (int32 j = 0; j < NextSectors.size(); j++)
+				{
+					if (DeSpawnSectors[i]->_SectorY == NextSectors[j]->_SectorY && DeSpawnSectors[i]->_SectorX == NextSectors[j]->_SectorX)
+					{
+						DeSpawnSectors.erase(DeSpawnSectors.begin() + i);
+					}
+				}
+			}
+
+			vector<int64> DeSpawnSectorObjectIds;
+			DeSpawnSectorObjectIds.push_back(MoveEnvironment->_GameObjectInfo.ObjectId);
+			// 나를 제외하라는 메시지를 생성 후 
+			CMessage* ResSectorDespawnPlayer = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(1, DeSpawnSectorObjectIds);
+			// 해당 섹터 플레이어들에게 전송한다.
+			for (int32 i = 0; i < DeSpawnSectors.size(); i++)
+			{
+				for (CPlayer* Player : DeSpawnSectors[i]->GetPlayers())
+				{
+					G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSectorDespawnPlayer);
+				}
+			}
+			ResSectorDespawnPlayer->Free();
+
+			NextSector->Insert(MoveEnvironment);
+
+			// 나를 스폰할 섹터를 찾는 작업
+			// Next - Current;
+			// 이동할 섹터에서 현재 섹터를 제거한 차집합 섹터를 찾는다.
+			vector<CSector*> SpawnSectors = NextSectors;
+			for (int32 i = 0; i < SpawnSectors.size(); i++)
+			{
+				for (int32 j = 0; j < CurrentSectors.size(); j++)
+				{
+					if (SpawnSectors[i]->_SectorY == CurrentSectors[j]->_SectorY && SpawnSectors[i]->_SectorX == CurrentSectors[j]->_SectorX)
+					{
+						SpawnSectors.erase(SpawnSectors.begin() + i);
+					}
+				}
+			}
+
+			// 스폰할 대상배열
+			vector<st_GameObjectInfo> SpawnObjectInfos;
+			// 나의 정보를 담고
+			SpawnObjectInfos.push_back(MoveEnvironment->_GameObjectInfo);
+
+			// 나를 소환하라고 앞서 얻어준 섹터 플레이어들에게 패킷을 전송한다.
+			CMessage* ResSectorSpawnPlayer = G_ObjectManager->GameServer->MakePacketResObjectSpawn(1, SpawnObjectInfos);
+			for (int32 i = 0; i < SpawnSectors.size(); i++)
+			{
+				for (CPlayer* Player : SpawnSectors[i]->GetPlayers())
+				{
+					G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSectorSpawnPlayer);
+				}
+			}
+			ResSectorSpawnPlayer->Free();
+		}
+	}
+		break;
 	default:
 		CRASH("ApplyMove GameObject Type 이상한 값")
 		break;
@@ -525,10 +618,12 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 	int X = PositionInfo.PositionX - _Left;
 	int Y = _Down - PositionInfo.PositionY;
 	
-	if (GameObject->_GameObjectInfo.ObjectType == en_GameObjectType::SLIME_GEL 
-		|| GameObject->_GameObjectInfo.ObjectType == en_GameObjectType::LEATHER
-		|| GameObject->_GameObjectInfo.ObjectType == en_GameObjectType::BRONZE_COIN
-		|| GameObject->_GameObjectInfo.ObjectType == en_GameObjectType::SKILL_BOOK)
+	if (GameObject->_GameObjectInfo.ObjectType == en_GameObjectType::ITEM_SLIME_GEL 
+		|| GameObject->_GameObjectInfo.ObjectType == en_GameObjectType::ITEM_LEATHER
+		|| GameObject->_GameObjectInfo.ObjectType == en_GameObjectType::ITEM_BRONZE_COIN
+		|| GameObject->_GameObjectInfo.ObjectType == en_GameObjectType::ITEM_SKILL_BOOK
+		|| GameObject->_GameObjectInfo.ObjectType == en_GameObjectType::ITEM_WOOD_LOG
+		|| GameObject->_GameObjectInfo.ObjectType == en_GameObjectType::ITEM_STONE)
 	{
 		return true;
 	}

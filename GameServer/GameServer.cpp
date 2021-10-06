@@ -65,8 +65,10 @@ void CGameServer::GameServerStart(const WCHAR* OpenIP, int32 Port)
 {
 	CNetworkLib::Start(OpenIP, Port);
 
-	G_ObjectManager->MonsterSpawn(50, 1, en_GameObjectType::SLIME);
-	G_ObjectManager->MonsterSpawn(50, 1, en_GameObjectType::BEAR);
+	G_ObjectManager->MonsterSpawn(50, 1, en_GameObjectType::OBJECT_SLIME);
+	G_ObjectManager->MonsterSpawn(50, 1, en_GameObjectType::OBJECT_BEAR);
+	G_ObjectManager->EnvironmentSpawn(100, 1, en_GameObjectType::OBJECT_TREE);
+	G_ObjectManager->EnvironmentSpawn(100, 1, en_GameObjectType::OBJECT_STONE);
 
 	G_ObjectManager->GameServer = this;
 
@@ -315,7 +317,7 @@ void CGameServer::CreateNewClient(int64 SessionId)
 
 		for (int i = 0; i < SESSION_CHARACTER_MAX; i++)
 		{
-			Session->MyPlayers[i] = (CPlayer*)G_ObjectManager->ObjectCreate(en_GameObjectType::MELEE_PLAYER);
+			Session->MyPlayers[i] = (CPlayer*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_MELEE_PLAYER);
 		}
 
 		Session->MyPlayer = nullptr;
@@ -756,7 +758,6 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 			CMessage* ResMyMoveOtherPacket = MakePacketResMove(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
 			SendPacketAroundSector(Session, ResMyMoveOtherPacket, true);
 			ResMyMoveOtherPacket->Free();
-
 		}
 		else
 		{
@@ -1727,7 +1728,7 @@ void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Messag
 
 			int8 ObjectType;
 
-			*Message >> ObjectType;
+			*Message >> ObjectType;			
 
 			// 아이템이 ObjectManager에 있는지 확인한다.
 			CItem* Item = (CItem*)(G_ObjectManager->Find(ItemId, (en_GameObjectType)ObjectType));
@@ -1778,13 +1779,16 @@ void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Messag
 				}
 				else
 				{
+					// 아이템 개수
+					int16 ItemEach = Item->_ItemInfo.ItemCount;
+
 					// 그 외 아이템이라면 
 					int8 SlotIndex = 0;
 					int16 ItemCount = 0;
 
 					// 아이템이 이미 존재 하는지 확인한다.
-					// 존재 하면 개수를 1 증가시킨다.
-					IsExistItem = TargetPlayer->_Inventory.IsExistItem(Item->_ItemInfo.ItemType, &ItemCount, &SlotIndex);
+					// 존재 하면 개수를 아이템 개수 만큼 증가한다.
+					IsExistItem = TargetPlayer->_Inventory.IsExistItem(Item->_ItemInfo.ItemType, &ItemCount, ItemEach, &SlotIndex);
 
 					// 존재 하지 않을 경우
 					if (IsExistItem == false)
@@ -1792,9 +1796,8 @@ void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Messag
 						if (TargetPlayer->_Inventory.GetEmptySlot(&SlotIndex))
 						{
 							Item->_ItemInfo.SlotIndex = SlotIndex;
-							TargetPlayer->_Inventory.AddItem(Item->_ItemInfo);
-
-							ItemCount = 1;
+							TargetPlayer->_Inventory.AddItem(Item->_ItemInfo);	
+							ItemCount = ItemEach;
 						}
 					}
 
@@ -1815,7 +1818,7 @@ void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Messag
 					// 아이템 개수
 					*DBSaveMessage << ItemCount;
 					// 아이템 추가한 개수
-					*DBSaveMessage << (int16)1;
+					*DBSaveMessage << ItemEach;
 					// 아이템 슬롯 번호
 					*DBSaveMessage << SlotIndex;
 					// 아이템 착용 여부
@@ -2529,22 +2532,23 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 
 	int16 KillerObjectType;
 	*Message >> KillerObjectType;
-
+		
 	int32 SpawnPositionX;
 	*Message >> SpawnPositionX;
 
 	int32 SpawnPositionY;
 	*Message >> SpawnPositionY;
 
-	int32 MonsterDataType;
-	*Message >> MonsterDataType;
+	int16 SpawnItemOwnerType;
+	*Message >> SpawnItemOwnerType;
+
+	int32 DropItemDataType;
+	*Message >> DropItemDataType;
 
 	Message->Free();
 
 	bool Find = false;
-
-	auto FindMonsterDropItem = G_Datamanager->_Monsters.find(MonsterDataType);
-	st_MonsterData MonsterData = *(*FindMonsterDropItem).second;
+	st_ItemData DropItemData;
 
 	random_device RD;
 	mt19937 Gen(RD());
@@ -2553,29 +2557,69 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 
 	int32 Sum = 0;
 
-	st_ItemData DropItemData;
-	for (st_DropData DropItem : MonsterData.DropItems)
+	switch ((en_GameObjectType)SpawnItemOwnerType)
 	{
-		Sum += DropItem.Probability;
-
-		if (Sum >= RandomPoint)
+	case en_GameObjectType::OBJECT_SLIME:
+	case en_GameObjectType::OBJECT_BEAR:
 		{
-			Find = true;
-			// 드랍 확정 되면 해당 아이템 읽어오기
-			auto FindDropItemInfo = G_Datamanager->_Items.find(DropItem.ItemDataSheetId);
-			if (FindDropItemInfo == G_Datamanager->_Items.end())
+			auto FindMonsterDropItem = G_Datamanager->_Monsters.find(DropItemDataType);
+			st_MonsterData MonsterData = *(*FindMonsterDropItem).second;						
+			
+			for (st_DropData DropItem : MonsterData.DropItems)
 			{
-				CRASH("DropItemInfo를 찾지 못함");
-			}
+				Sum += DropItem.Probability;
 
-			DropItemData = *(*FindDropItemInfo).second;
+				if (Sum >= RandomPoint)
+				{
+					Find = true;
+					// 드랍 확정 되면 해당 아이템 읽어오기
+					auto FindDropItemInfo = G_Datamanager->_Items.find(DropItem.ItemDataSheetId);
+					if (FindDropItemInfo == G_Datamanager->_Items.end())
+					{
+						CRASH("DropItemInfo를 찾지 못함");
+					}
 
-			uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
-			DropItemData.ItemCount = RandomDropItemCount(Gen);
-			DropItemData.DataSheetId = DropItem.ItemDataSheetId;
-			break;
+					DropItemData = *(*FindDropItemInfo).second;
+
+					uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
+					DropItemData.ItemCount = RandomDropItemCount(Gen);
+					DropItemData.DataSheetId = DropItem.ItemDataSheetId;
+					break;
+				}
+			}		
 		}
-	}
+		break;
+	case en_GameObjectType::OBJECT_STONE:
+	case en_GameObjectType::OBJECT_TREE:	
+		{
+			auto FindEnvironmentDropItem = G_Datamanager->_Environments.find(DropItemDataType);
+			st_EnvironmentData EnvironmentData = *(*FindEnvironmentDropItem).second;
+			
+			for (st_DropData DropItem : EnvironmentData.DropItems)
+			{
+				Sum += DropItem.Probability;
+
+				if (Sum >= RandomPoint)
+				{
+					Find = true;
+					// 드랍 확정 되면 해당 아이템 읽어오기
+					auto FindDropItemInfo = G_Datamanager->_Items.find(DropItem.ItemDataSheetId);
+					if (FindDropItemInfo == G_Datamanager->_Items.end())
+					{
+						CRASH("DropItemInfo를 찾지 못함");
+					}
+
+					DropItemData = *(*FindDropItemInfo).second;
+
+					uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
+					DropItemData.ItemCount = RandomDropItemCount(Gen);
+					DropItemData.DataSheetId = DropItem.ItemDataSheetId;
+					break;
+				}
+			}
+		}
+		break;
+	}	
 
 	if (Find == true)
 	{
@@ -2598,7 +2642,7 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 		int16 ItemType = (int16)NewItemInfo.ItemType;
 		int16 ItemConsumableeType = (int16)NewItemInfo.ItemConsumableType;
 
-		bool ItemUse = false;		
+		bool ItemUse = false;
 		CreateItem.InItemUse(ItemUse);
 		CreateItem.InIsQuickSlotUse(NewItemInfo.IsQuickSlotUse);
 		CreateItem.InItemType(ItemType);
@@ -2632,16 +2676,22 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 				switch (NewItemInfo.ItemType)
 				{
 				case en_ItemType::ITEM_TYPE_SLIMEGEL:
-					GameObjectType = en_GameObjectType::SLIME_GEL;
+					GameObjectType = en_GameObjectType::ITEM_SLIME_GEL;
 					break;
 				case en_ItemType::ITEM_TYPE_LEATHER:
-					GameObjectType = en_GameObjectType::LEATHER;
+					GameObjectType = en_GameObjectType::ITEM_LEATHER;
 					break;
 				case en_ItemType::ITEM_TYPE_BRONZE_COIN:
-					GameObjectType = en_GameObjectType::BRONZE_COIN;
+					GameObjectType = en_GameObjectType::ITEM_BRONZE_COIN;
 					break;
 				case en_ItemType::ITEM_TYPE_SKILL_BOOK:
-					GameObjectType = en_GameObjectType::SKILL_BOOK;
+					GameObjectType = en_GameObjectType::ITEM_SKILL_BOOK;
+					break;
+				case en_ItemType::ITEM_TYPE_STONE:
+					GameObjectType = en_GameObjectType::ITEM_STONE;
+					break;
+				case en_ItemType::ITEM_TYPE_WOOD_LOG:
+					GameObjectType = en_GameObjectType::ITEM_WOOD_LOG;
 					break;
 				default:
 					break;
@@ -2651,7 +2701,7 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 				st_Vector2Int SpawnPosition(SpawnPositionX, SpawnPositionY);
 
 				// 생성할 아이템 정보 셋팅
-				CItem* NewItem = (CItem*)G_ObjectManager->ObjectCreate(GameObjectType);				
+				CItem* NewItem = (CItem*)G_ObjectManager->ObjectCreate(GameObjectType);
 				NewItem->_ItemInfo = NewItemInfo;
 				NewItem->_GameObjectInfo.ObjectType = GameObjectType;
 				NewItem->_GameObjectInfo.ObjectId = NewItem->_ItemInfo.ItemDBId;
@@ -2930,7 +2980,7 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		bool SwapSuccess = ItemSwap.Execute();
 		if (SwapSuccess == true)
 		{
-			CPlayer* TargetPlayer = (CPlayer*)G_ObjectManager->Find(PlayerDBId, en_GameObjectType::MELEE_PLAYER);
+			CPlayer* TargetPlayer = (CPlayer*)G_ObjectManager->Find(PlayerDBId, en_GameObjectType::OBJECT_MELEE_PLAYER);
 
 			// Swap 요청한 플레이어의 인벤토리에서 아이템 Swap
 			TargetPlayer->_Inventory.SwapItem(SwapBItemInfo, SwapAItemInfo);
@@ -3136,13 +3186,19 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				case en_ItemType::ITEM_TYPE_NONE:
 					break;
 				case en_ItemType::ITEM_TYPE_SLIMEGEL:
-					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::SLIME_GEL));
+					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::ITEM_SLIME_GEL));
 					break;
 				case en_ItemType::ITEM_TYPE_LEATHER:
-					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::LEATHER));
+					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::ITEM_LEATHER));
 					break;
 				case en_ItemType::ITEM_TYPE_SKILL_BOOK:
-					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::SKILL_BOOK));
+					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::ITEM_SKILL_BOOK));
+					break;
+				case en_ItemType::ITEM_TYPE_WOOD_LOG:
+					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::ITEM_WOOD_LOG));
+					break;
+				case en_ItemType::ITEM_TYPE_STONE:
+					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::ITEM_STONE));
 					break;
 				default:
 					CRASH("의도치 않은 ItemType");

@@ -5,6 +5,7 @@
 #include "Slime.h"
 #include "Item.h"
 #include "GameServer.h"
+#include "Environment.h"
 
 class CObjectManager
 {
@@ -12,6 +13,7 @@ private:
 	map<int64, CItem*> _Items;
 	map<int64, CPlayer*> _Players;
 	map<int64, CMonster*> _Monsters;
+	map<int64, CEnvironment*> _Environments;
 		
 	CMemoryPoolTLS<CPlayer>* _PlayerMemoryPool;		
 	CMemoryPoolTLS<CSlime>* _SlimeMemoryPool;
@@ -19,12 +21,16 @@ private:
 	CMemoryPoolTLS<CWeapon>* _WeaponMemoryPool;
 	CMemoryPoolTLS<CMaterial>* _MaterialMemoryPool;
 	CMemoryPoolTLS<CConsumable>* _ConsumableMemoryPool;
+
+	CMemoryPoolTLS<CTree>* _TreeMemoryPool;
+	CMemoryPoolTLS<CStone>* _StoneMemoryPool;
 	
-	int64 _MonsterObjectId;	
+	int64 _GameServerObjectId;	
 public:
 	CGameServer* GameServer;
 	
 	CObjectManager();
+	~CObjectManager();
 	//-----------------------------------------------------------
 	// Object를 추가하면서 Object가 입장할 채널의 아이디를 받는다.
 	//-----------------------------------------------------------
@@ -48,13 +54,15 @@ public:
 	//---------------
 	void ObjectReturn(en_GameObjectType ObjectType, CGameObject* ReturnObject);
 
-	//-------------
+	//-----------------------------------------------------------------------------------
 	// 몬스터 스폰
-	//-------------
+	//-----------------------------------------------------------------------------------
 	void MonsterSpawn(int32 MonsterCount, int32 ChannelId, en_GameObjectType MonsterType);
-	//-------------
+	//------------------------------------------------------------------------------------------------
 	// 아이템 스폰
-	//-------------
-	void ItemSpawn(int64 KillerId, en_GameObjectType KillerObjectType, st_Vector2Int SpawnPosition, en_MonsterDataType MonsterDataType);	
+	//------------------------------------------------------------------------------------------------
+	void ItemSpawn(int64 KillerId, en_GameObjectType KillerObjectType, st_Vector2Int SpawnPosition, en_GameObjectType SpawnItemOwnerType, en_ObjectDataType MonsterDataType);		
+	
+	void EnvironmentSpawn(int32 EnvironmentCount, int32 ChannelId, en_GameObjectType EnvironmentType);
 };
 

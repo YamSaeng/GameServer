@@ -7,10 +7,10 @@
 
 CBear::CBear()
 {
-	_GameObjectInfo.ObjectType = en_GameObjectType::BEAR;
+	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_BEAR;
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
-	auto FindMonsterStat = G_Datamanager->_Monsters.find(2);
+	auto FindMonsterStat = G_Datamanager->_Monsters.find(en_ObjectDataType::BEAR_DATA);
 	st_MonsterData MonsterData = *(*FindMonsterStat).second;
 
 	// ½ºÅÈ ¼ÂÆÃ		
@@ -72,9 +72,7 @@ void CBear::UpdateDead()
 
 void CBear::OnDead(CGameObject* Killer)
 {
-	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
-
-	G_ObjectManager->ItemSpawn(Killer->_GameObjectInfo.ObjectId, Killer->_GameObjectInfo.ObjectType, GetCellPosition(), en_MonsterDataType::BEAR_DATA);
+	G_ObjectManager->ItemSpawn(Killer->_GameObjectInfo.ObjectId, Killer->_GameObjectInfo.ObjectType, GetCellPosition(), _GameObjectInfo.ObjectType, en_ObjectDataType::BEAR_DATA);
 	
 	Killer->_GameObjectInfo.ObjectStatInfo.DP += _GetDPPoint;
 

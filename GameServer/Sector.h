@@ -4,6 +4,7 @@ class CGameObject;
 class CPlayer;
 class CMonster;
 class CItem;
+class CEnvironment;
 
 class CSector
 {
@@ -12,6 +13,7 @@ private:
 	set<CPlayer*> _Players;
 	set<CMonster*> _Monsters;
 	set<CItem*> _Items;
+	set<CEnvironment*> _Environment;
 public:
 	// ¼½ÅÍ ÁÂÇ¥
 	int32 _SectorY;
@@ -28,5 +30,6 @@ public:
 	set<CPlayer*> GetPlayers();	
 	set<CMonster*> GetMonsters();
 	set<CItem*> GetItems();
+	set<CEnvironment*> GetEnvironment();
 };
 

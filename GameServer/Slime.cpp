@@ -7,10 +7,10 @@
 
 CSlime::CSlime()
 {	
-	_GameObjectInfo.ObjectType = en_GameObjectType::SLIME;
+	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_SLIME;
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
-	auto FindMonsterStat = G_Datamanager->_Monsters.find(1);
+	auto FindMonsterStat = G_Datamanager->_Monsters.find(en_ObjectDataType::SLIME_DATA);
 	st_MonsterData MonsterData = *(*FindMonsterStat).second;
 
 	// ½ºÅÈ ¼ÂÆÃ	
@@ -71,9 +71,7 @@ void CSlime::UpdateDead()
 
 void CSlime::OnDead(CGameObject* Killer)
 {
-	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
-
-	G_ObjectManager->ItemSpawn(Killer->_GameObjectInfo.ObjectId, Killer->_GameObjectInfo.ObjectType, GetCellPosition(), en_MonsterDataType::SLIME_DATA);
+	G_ObjectManager->ItemSpawn(Killer->_GameObjectInfo.ObjectId, Killer->_GameObjectInfo.ObjectType, GetCellPosition(), _GameObjectInfo.ObjectType, en_ObjectDataType::SLIME_DATA);
 	
 	Killer->_GameObjectInfo.ObjectStatInfo.DP += _GetDPPoint;
 
