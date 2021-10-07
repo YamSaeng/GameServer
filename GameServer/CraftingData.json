@@ -1,0 +1,59 @@
+{
+  "CraftingDatas": [
+    {
+      "CraftingDataId": 1,
+      "Name": "³ª¹« °Ë",
+      "CraftingCompleteItemDataId": 1,
+      "CraftingMaterial": [
+        {
+          "ItemDataId": 2007,
+          "Count": 20
+        }
+      ]
+    },
+    {
+      "CraftingDataId": 2,
+      "Name": "³ª¹« °©¿Ê",
+      "CraftingCompleteItemDataId": 100,
+      "CraftingMaterial": [
+        {
+          "ItemDataId": 2007,
+          "Count": 30
+        }
+      ]
+    },
+    {
+      "CraftingDataId": 3,
+      "Name": "°¡Á× ¸ðÀÚ",
+      "CraftingCompleteItemDataId": 101,
+      "CraftingMaterial": [
+        {
+          "ItemDataId": 2000,
+          "Count": 30
+        }
+      ]
+    },
+    {
+      "CraftingDataId": 4,
+      "Name": "°¡Á× ½Å¹ß",
+      "CraftingCompleteItemDataId": 102,
+      "CraftingMaterial": [
+        {
+          "ItemDataId": 2000,
+          "Count": 30
+        }
+      ]
+    },
+    {
+      "CraftingDataId": 5,
+      "Name": "³ª¹« ÆÇÀÚ",
+      "CraftingCompleteItemDataId": 2007,
+      "CraftingMaterial": [
+        {
+          "ItemDataId": 2006,
+          "Count": 10
+        }
+      ]
+    }
+  ]
+}

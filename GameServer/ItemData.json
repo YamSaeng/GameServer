@@ -2,37 +2,45 @@
   "Weapons": [
     {
       "DataSheetId": 1,
-      "Name": "°ß½À»ýÀÇ °Ë",
+      "Name": "³ª¹« °Ë",
       "WeaponType": "Sword",
       "Damage": 10,
-      "IsEquipped": true,
-      "ImageFilePath": "Textures/Weapon & Tool/Knife"
+      "IsEquipped": false,
+      "ImageFilePath": "Textures/Weapon & Tool/Wooden Sword"
     }
   ],
   "Armors": [
     {
       "DataSheetId": 100,
-      "Name": "»À °©¿Ê",
+      "Name": "³ª¹« °©¿Ê",
       "ArmorType": "Armor",
       "Defence": 15,
-      "IsEquipped": true,
-      "ImageFilePath": "Textures/Equipment/Leather Armor"
+      "IsEquipped": false,
+      "ImageFilePath": "Textures/Equipment/Wooden Armor"
     },
     {
       "DataSheetId": 101,
-      "Name": "»À Åõ±¸",
+      "Name": "°¡Á× ¸ðÀÚ",
       "ArmorType": "Helmet",
       "Defence": 5,
-      "IsEquipped": true,
+      "IsEquipped": false,
       "ImageFilePath": "Textures/Equipment/Leather Helmet"
+    },
+    {
+      "DataSheetId": 102,
+      "Name": "°¡Á× ½Å¹ß",
+      "ArmorType": "Shoes",
+      "Defence": 5,
+      "IsEquipped": false,
+      "ImageFilePath": "Textures/Equipment/Leather Boot"
     }
   ],
   "Consumables": [
     {
       "DataSheetId": 200,
-      "Name": "Potion",
+      "Name": "È¸º¹¹°¾à(¼Ò)",
       "ConsumableType": "Potion",
-      "MaxCount": 10,
+      "MaxCount": 99,
       "IsEquipped": false,
       "ImageFilePath": "Textures/Potion/Red Potion"
     },
@@ -94,6 +102,13 @@
       "MaxCount": 99,
       "IsEquipped": false,
       "ImageFilePath": "Textures/Material/Wood Log"
+    },
+    {
+      "DataSheetId": 2007,
+      "Name": "³ª¹«ÆÇÀÚ",
+      "MaxCount": 99,
+      "IsEquipped": false,
+      "ImageFilePath": "Textures/Material/Wooden Plank"
     }
   ]
 } 
