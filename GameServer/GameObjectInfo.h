@@ -89,6 +89,15 @@ enum class en_ItemType : int16
 	ITEM_TYPE_WOOD_LOG = 2006
 };
 
+enum class en_CraftingCategory : int8
+{
+	CRAFTING_TYPE_NONE = 0,
+	CRAFTING_TYPE_WEAPON,
+	CRAFTING_TYPE_ARMOR,
+	CRAFTING_TYPE_POTION,
+	CRAFTING_TYPE_MATERIAL	
+};
+
 enum class en_SkillType : int16
 {
 	SKILL_TYPE_NONE = 0,
@@ -134,7 +143,6 @@ enum class en_ConsumableType : int16
 	SKILL_BOOK
 };
 
-#pragma pack(push,1)
 struct st_PositionInfo
 {
 	en_CreatureState State;
@@ -142,9 +150,7 @@ struct st_PositionInfo
 	int32 PositionY;
 	en_MoveDir MoveDir;
 };
-#pragma pack(pop)
 
-#pragma pack(push,1)
 struct st_StatInfo
 {
 	int32 Level;
@@ -159,9 +165,7 @@ struct st_StatInfo
 	int16 CriticalPoint;
 	float Speed;
 };
-#pragma pack(pop)
 
-#pragma pack(push,1)
 struct st_GameObjectInfo
 {
 	int64 ObjectId;
@@ -173,7 +177,6 @@ struct st_GameObjectInfo
 	en_GameObjectType OwnerObjectType;
 	int8 PlayerSlotIndex;
 };
-#pragma pack(pop)
 
 struct st_Color
 {
@@ -196,11 +199,10 @@ struct st_Color
 	static st_Color White() { return st_Color(255, 255, 255); }
 };
 
-#pragma pack(push,1)
 struct st_ItemInfo
 {	
 	int64 ItemDBId;				// 아이템 DB에 저장되어 있는 ID		
-	bool IsQuickSlotUse;       // 퀵슬롯에 등록되어 있는지 여부 
+	bool IsQuickSlotUse;        // 퀵슬롯에 등록되어 있는지 여부 
 	en_ItemType ItemType;		// 아이템 타입
 	en_ConsumableType ItemConsumableType;	// 소비용 아이템인지
 	wstring ItemName;			// 아이템 이름
@@ -209,9 +211,7 @@ struct st_ItemInfo
 	bool IsEquipped;			// 아이템을 착용할 수 있는지	
 	int8 SlotIndex;				// 슬롯 번호
 };
-#pragma pack(pop)
 
-#pragma pack(push,1)
 struct st_SkillInfo
 {
 	bool _IsQuickSlotUse;    // 퀵슬롯에 등록되어 있는지 여부
@@ -222,9 +222,7 @@ struct st_SkillInfo
 	wstring _SkillImagePath; // 스킬 이미지 경로
 	bool CanSkillUse = true; // 스킬을 사용 할 수 있는지 여부	
 };
-#pragma pack(pop)
 
-#pragma pack(push,1)
 struct st_QuickSlotBarSlotInfo
 {
 	int64 AccountDBId; // 퀵슬롯 슬롯 소유한 Account
@@ -235,4 +233,26 @@ struct st_QuickSlotBarSlotInfo
 	st_SkillInfo QuickBarSkillInfo;	// 퀵슬롯에 등록할 스킬 정보
 	bool CanQuickSlotUse = true; // 퀵슬롯을 사용할 수 있는지 없는지
 };
-#pragma pack(pop)
+
+struct st_CraftingMaterialItemInfo
+{
+	int64 AccountDBId; // 재료템 가지고 있는 Account
+	int64 PlayerDBId; // 재료템 가지고 있는 Player
+	en_ItemType MaterialItemType; // 재료템 종류
+	wstring MaterialItemName; // 재료템 이름
+	int16 ItemCount; // 재료템 필요 개수
+};
+
+struct st_CraftingCompleteItem
+{
+	en_ItemType CompleteItemType; // 완성 제작템 종류
+	wstring CompleteItemName; // 완성 제작템 이름
+	vector<st_CraftingMaterialItemInfo> Materials; // 제작템 만들때 필요한 재료들
+};
+
+struct st_CraftingItemCategory
+{
+	en_CraftingCategory CategoryType; // 제작템 범주
+	wstring CategoryName; // 제작템 범주 이름
+	vector<st_CraftingCompleteItem> CompleteItems; // 범주에 속한 완성 제작템들
+};
