@@ -83,8 +83,8 @@ namespace SP
 		CDBGameServerCreateItem(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spItemCreate(?,?,?,?,?,?,?,?)}") {}
 		void InItemUse(bool& ItemUse) { BindParam(0, ItemUse); }
 		void InIsQuickSlotUse(bool& IsQuickSlotUse) { BindParam(1, IsQuickSlotUse); }
-		void InItemType(int16& ItemType) { BindParam(2, ItemType); }
-		void InItemConsumableType(int16& ItemConsumableType) { BindParam(3, ItemConsumableType); }
+		void InItemCategoryType(int8& ItemCategoryType) { BindParam(2, ItemCategoryType); }
+		void InItemType(int16& ItemType) { BindParam(3, ItemType); }
 		void InItemName(wstring& ItemName) { BindParam(4, ItemName.c_str()); }
 		void InItemCount(int16& ItemCount) { BindParam(5, ItemCount); }
 		void InIsEquipped(bool& IsEquipped) { BindParam(6, IsEquipped); }
@@ -105,8 +105,8 @@ namespace SP
 	public:
 		CDBGameServerItemCreateToInventory(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spItemToInventoryInit(?,?,?,?,?,?,?,?,?,?)}") {}
 		void InQuickSlotUse(bool& QuickSlotUse) { BindParam(0, QuickSlotUse); }
-		void InItemType(int16& ItemType) { BindParam(1, ItemType); }
-		void InItemConsumableType(int16& ItemConsumableType) { BindParam(2, ItemConsumableType); }
+		void InItemCategoryType(int8& ItemCategoryType) { BindParam(1, ItemCategoryType); }
+		void InItemType(int16& ItemType) { BindParam(2, ItemType); }
 		void InItemName(wstring& ItemName) { BindParam(3, ItemName.c_str()); }
 		void InItemCount(int16& ItemCount) { BindParam(4, ItemCount); }
 		void InSlotIndex(int8& SlotIndex) { BindParam(5, SlotIndex); }
@@ -122,8 +122,8 @@ namespace SP
 	public:
 		CDBGameServerItemToInventoryPush(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spItemToInventorySave(?,?,?,?,?,?,?,?,?,?)}") {}
 		void InIsQuickSlotUse(bool& IsQuickSlotUse) { BindParam(0, IsQuickSlotUse); }
-		void InItemType(int16& ItemType) { BindParam(1, ItemType); }
-		void InItemConsumableType(int16& ItemConsumableType) { BindParam(2, ItemConsumableType); }
+		void InItemCategoryType(int8& ItemCategoryType) { BindParam(1, ItemCategoryType); }
+		void InItemType(int16& ItemType) { BindParam(2, ItemType); }
 		void InItemName(wstring& ItemName) { BindParam(3, ItemName.c_str()); }
 		void InItemCount(int16& ItemCount) { BindParam(4, ItemCount); }
 		void InSlotIndex(int8& SlotIndex) { BindParam(5, SlotIndex); }
@@ -156,8 +156,8 @@ namespace SP
 		void InSlotIndex(int8& SlotIndex) { BindParam(2, SlotIndex); }
 
 		void OutIsQuickSlotUse(bool& IsQuickSlotUse) { BindCol(0, IsQuickSlotUse); }
-		void OutItemType(int16& ItemType) { BindCol(1, ItemType); }
-		void OutItemConsumableType(int16& ItemConsumableType) { BindCol(2, ItemConsumableType); }
+		void OutItemCategoryType(int8& ItemCategoryType) { BindCol(1, ItemCategoryType); }
+		void OutItemType(int16& ItemType) { BindCol(2, ItemType); }
 		template<int8 Length> void OutItemName(WCHAR(&ItemName)[Length]) { BindCol(3, ItemName); }
 		void OutItemCount(int16& ItemCount) { BindCol(4, ItemCount); }
 		void OutItemIsEquipped(bool& ItemIsEquipped) { BindCol(5, ItemIsEquipped); }
@@ -173,8 +173,8 @@ namespace SP
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
 
 		void InAIsQuickSlotUse(bool& IsQuickSlotUse) { BindParam(2, IsQuickSlotUse); }
-		void InAItemType(int16& AItemType) { BindParam(3, AItemType); }
-		void InAItemConsumableType(int16& AItemConsumableType) { BindParam(4, AItemConsumableType); }
+		void InAItemCategoryType(int8& AItemCategoryType) { BindParam(3, AItemCategoryType); }
+		void InAItemType(int16& AItemType) { BindParam(4, AItemType); }
 		void InAItemName(wstring& AItemName) { BindParam(5, AItemName.c_str()); }
 		void InAItemCount(int16& AItemCount) { BindParam(6, AItemCount); }
 		void InAItemIsEquipped(bool& AItemIsEquipped) { BindParam(7, AItemIsEquipped); }
@@ -182,8 +182,8 @@ namespace SP
 		void InAItemSlotIndex(int8& AItemSlotIndex) { BindParam(9, AItemSlotIndex); }
 
 		void InBIsQuickSlotUse(bool& IsQuickSlotUse) { BindParam(10, IsQuickSlotUse); }
-		void InBItemType(int16& BItemType) { BindParam(11, BItemType); }
-		void InBItemConsumableType(int16& BItemConsumableType) { BindParam(12, BItemConsumableType); }
+		void InBItemCategoryType(int8& BItemCategoryType) { BindParam(11, BItemCategoryType); }
+		void InBItemType(int16& BItemType) { BindParam(12, BItemType); }
 		void InBItemName(wstring& BItemName) { BindParam(13, BItemName.c_str()); }
 		void InBItemCount(int16& BItemCount) { BindParam(14, BItemCount); }
 		void InBItemIsEquipped(bool& BItemIsEquipped) { BindParam(15, BItemIsEquipped); }
@@ -242,8 +242,8 @@ namespace SP
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
 
-		void OutItemType(int16& ItemType) { BindCol(0, ItemType); }
-		void OutItemConsumableType(int16& ConsumableType) { BindCol(1, ConsumableType); }
+		void OutItemCategoryType(int8& ItemCategoryType) { BindCol(0, ItemCategoryType); }
+		void OutItemType(int16& ItemType) { BindCol(1, ItemType); }
 		template<int8 Length> void OutItemName(WCHAR(&ItemName)[Length]) { BindCol(2, ItemName); }
 		void OutItemCount(int16& itemCount) { BindCol(3, itemCount); }
 		void OutSlotIndex(int8& SlotIndex) { BindCol(4, SlotIndex); }
