@@ -39,18 +39,27 @@ CGameServerMessage& CGameServerMessage::operator<<(st_GameObjectInfo& GameObject
 
 CGameServerMessage& CGameServerMessage::operator<<(st_PositionInfo& PositionInfo)
 {
-    memcpy(&_MessageBuf[_Rear], &PositionInfo, sizeof(st_PositionInfo));
-    _Rear += sizeof(st_PositionInfo);
-    _UseBufferSize += sizeof(st_PositionInfo);
+    *this << (int8)PositionInfo.State;
+    *this << PositionInfo.PositionX;
+    *this << PositionInfo.PositionY;
+    *this << (int8)PositionInfo.MoveDir;    
 
     return *(this);
 }
 
 CGameServerMessage& CGameServerMessage::operator<<(st_StatInfo& StatInfo)
 {
-    memcpy(&_MessageBuf[_Rear], &StatInfo, sizeof(st_StatInfo));
-    _Rear += sizeof(st_StatInfo);
-    _UseBufferSize += sizeof(st_StatInfo);
+    *this << StatInfo.Level;
+    *this << StatInfo.HP;
+    *this << StatInfo.MaxHP;
+    *this << StatInfo.MP;
+    *this << StatInfo.MaxMP;
+    *this << StatInfo.DP;
+    *this << StatInfo.MaxDP;
+    *this << StatInfo.MinAttackDamage;
+    *this << StatInfo.MaxAttackDamage;
+    *this << StatInfo.CriticalPoint;
+    *this << StatInfo.Speed;    
 
     return *(this);
 }
@@ -77,19 +86,21 @@ CGameServerMessage& CGameServerMessage::operator<<(st_ItemInfo& ItemInfo)
 {
     *this << ItemInfo.ItemDBId;
     *this << ItemInfo.IsQuickSlotUse;
-    *this << (int16)ItemInfo.ItemType;
-    *this << (int16)ItemInfo.ItemConsumableType;    
-    *this << ItemInfo.ItemCount;
-    *this << ItemInfo.SlotIndex;
-    *this << ItemInfo.IsEquipped;
+    *this << (int8)ItemInfo.ItemCategory;
+    *this << (int16)ItemInfo.ItemType;    
 
     int8 ItemNameLen = (int8)ItemInfo.ItemName.length() * 2;
     *this << ItemNameLen;
     InsertData(ItemInfo.ItemName.c_str(), ItemNameLen);
 
+    *this << ItemInfo.ItemCount;
+
     int8 ItemImagePathLen = (int8)ItemInfo.ThumbnailImagePath.length() * 2;
     *this << ItemImagePathLen;
     InsertData(ItemInfo.ThumbnailImagePath.c_str(), ItemImagePathLen);
+
+    *this << ItemInfo.SlotIndex;
+    *this << ItemInfo.IsEquipped;        
 
     return *(this);
 }
@@ -112,9 +123,9 @@ CGameServerMessage& CGameServerMessage::operator<<(st_QuickSlotBarSlotInfo& Quic
 
 CGameServerMessage& CGameServerMessage::operator<<(st_Color& Color)
 {
-    memcpy(&_MessageBuf[_Rear], &Color, sizeof(st_Color));
-    _Rear += sizeof(st_Color);
-    _UseBufferSize += sizeof(st_Color);
+    *this << Color._Red;
+    *this << Color._Green;
+    *this << Color._Blue;   
 
     return *(this);
 }
@@ -146,9 +157,11 @@ CGameServerMessage& CGameServerMessage::operator>>(st_QuickSlotBarSlotInfo& Valu
     *this >> Value.PlayerDBId;
     *this >> Value.QuickSlotBarIndex;
     *this >> Value.QuickSlotBarSlotIndex;
+
     int8 QuickSlotKeyLen = 0;
     *this >> QuickSlotKeyLen;
     GetData(Value.QuickSlotKey, QuickSlotKeyLen);
+
     *this >> Value.QuickBarSkillInfo;
 
     return *(this);
