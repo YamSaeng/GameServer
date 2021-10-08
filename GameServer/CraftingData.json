@@ -2,6 +2,7 @@
   "CraftingDatas": [
     {
       "CraftingDataId": 1,
+      "CraftingType": "무기",
       "Name": "나무 검",
       "CraftingCompleteItemDataId": 1,
       "CraftingMaterial": [
@@ -13,6 +14,7 @@
     },
     {
       "CraftingDataId": 2,
+      "CraftingType": "방어구",
       "Name": "나무 갑옷",
       "CraftingCompleteItemDataId": 100,
       "CraftingMaterial": [
@@ -24,6 +26,7 @@
     },
     {
       "CraftingDataId": 3,
+      "CraftingType": "방어구",
       "Name": "가죽 모자",
       "CraftingCompleteItemDataId": 101,
       "CraftingMaterial": [
@@ -35,6 +38,7 @@
     },
     {
       "CraftingDataId": 4,
+      "CraftingType": "방어구",
       "Name": "가죽 신발",
       "CraftingCompleteItemDataId": 102,
       "CraftingMaterial": [
@@ -46,6 +50,7 @@
     },
     {
       "CraftingDataId": 5,
+      "CraftingType": "재료",
       "Name": "나무 판자",
       "CraftingCompleteItemDataId": 2007,
       "CraftingMaterial": [
