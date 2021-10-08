@@ -1823,10 +1823,10 @@ void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Messag
 					*DBSaveMessage << SlotIndex;
 					// 아이템 착용 여부
 					*DBSaveMessage << Item->_ItemInfo.IsEquipped;
+					// 아이템 범주
+					*DBSaveMessage << (int8)Item->_ItemInfo.ItemCategory;
 					// 아이템 타입
-					*DBSaveMessage << (int16)Item->_ItemInfo.ItemType;
-					// 아이템 소비 타입
-					*DBSaveMessage << (int16)Item->_ItemInfo.ItemConsumableType;
+					*DBSaveMessage << (int16)Item->_ItemInfo.ItemType;					
 					// AccoountId
 					*DBSaveMessage << TargetPlayer->_AccountId;
 
@@ -2430,20 +2430,20 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 
 				NewItem.ItemDBId = 0;
 				NewItem.IsQuickSlotUse = false;
-				NewItem.ItemType = en_ItemType::ITEM_TYPE_NONE;
-				NewItem.ItemConsumableType = en_ConsumableType::NONE;
+				NewItem.ItemCategory = en_ItemCategory::ITEM_CATEGORY_NONE;
+				NewItem.ItemType = en_ItemType::ITEM_TYPE_NONE;				
 				NewItem.ItemName = L"";
 				NewItem.ItemCount = 0;
 				NewItem.SlotIndex = SlotIndex;
 				NewItem.IsEquipped = false;
 				NewItem.ThumbnailImagePath = L"";
 
-				int16 ItemType = (int16)NewItem.ItemType;
-				int16 ItemConsumableType = (int16)NewItem.ItemConsumableType;
+				int8 ItemCategory = (int8)NewItem.ItemCategory;
+				int16 ItemType = (int16)NewItem.ItemType;				
 								
 				ItemToInventory.InQuickSlotUse(NewItem.IsQuickSlotUse);
-				ItemToInventory.InItemType(ItemType);
-				ItemToInventory.InItemConsumableType(ItemConsumableType);
+				ItemToInventory.InItemCategoryType(ItemCategory);
+				ItemToInventory.InItemType(ItemType);				
 				ItemToInventory.InItemName(NewItem.ItemName);
 				ItemToInventory.InItemCount(NewItem.ItemCount);
 				ItemToInventory.InSlotIndex(SlotIndex);
@@ -2626,8 +2626,8 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 		st_ItemInfo NewItemInfo;
 
 		NewItemInfo.IsQuickSlotUse = false;
+		NewItemInfo.ItemCategory = DropItemData.ItemCategory;
 		NewItemInfo.ItemType = DropItemData.ItemType;
-		NewItemInfo.ItemConsumableType = DropItemData.ItemConsumableType;
 		NewItemInfo.ItemName = (LPWSTR)CA2W(DropItemData.ItemName.c_str());
 		NewItemInfo.ItemCount = DropItemData.ItemCount;
 		NewItemInfo.IsEquipped = false;
@@ -2639,14 +2639,15 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 		CDBConnection* DBCreateItemConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 		SP::CDBGameServerCreateItem CreateItem(*DBCreateItemConnection);
 
-		int16 ItemType = (int16)NewItemInfo.ItemType;
-		int16 ItemConsumableeType = (int16)NewItemInfo.ItemConsumableType;
+		int8 ItemCategoryType = (int8)NewItemInfo.ItemCategory;
+		int16 ItemType = (int16)NewItemInfo.ItemType;		
 
 		bool ItemUse = false;
+
 		CreateItem.InItemUse(ItemUse);
 		CreateItem.InIsQuickSlotUse(NewItemInfo.IsQuickSlotUse);
-		CreateItem.InItemType(ItemType);
-		CreateItem.InItemConsumableType(ItemConsumableeType);
+		CreateItem.InItemCategoryType(ItemCategoryType);
+		CreateItem.InItemType(ItemType);		
 		CreateItem.InItemName(NewItemInfo.ItemName);
 		CreateItem.InItemCount(NewItemInfo.ItemCount);
 		CreateItem.InIsEquipped(NewItemInfo.IsEquipped);
@@ -2684,7 +2685,7 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 				case en_ItemType::ITEM_TYPE_BRONZE_COIN:
 					GameObjectType = en_GameObjectType::ITEM_BRONZE_COIN;
 					break;
-				case en_ItemType::ITEM_TYPE_SKILL_BOOK:
+				case en_ItemType::ITEM_TYPE_SKILL_BOOK_CHOHONE:
 					GameObjectType = en_GameObjectType::ITEM_SKILL_BOOK;
 					break;
 				case en_ItemType::ITEM_TYPE_STONE:
@@ -2754,19 +2755,19 @@ void CGameServer::PacketProcReqDBItemToInventorySave(int64 SessionId, CMessage* 
 		bool IsEquipped;
 		*Message >> IsEquipped;
 
-		int16 ItemType;
-		*Message >> ItemType;
+		int8 ItemCategory;
+		*Message >> ItemCategory;
 
-		int16 ItemConsumableType;
-		*Message >> ItemConsumableType;
+		int16 ItemType;
+		*Message >> ItemType;		
 
 		int64 OwnerAccountId;
 		*Message >> OwnerAccountId;
 
 		st_ItemInfo ItemInfo;
 		ItemInfo.IsQuickSlotUse = false;
-		ItemInfo.ItemType = (en_ItemType)(ItemType);
-		ItemInfo.ItemConsumableType = (en_ConsumableType)(ItemConsumableType);
+		ItemInfo.ItemCategory = (en_ItemCategory)ItemCategory;
+		ItemInfo.ItemType = (en_ItemType)(ItemType);		
 		ItemInfo.ItemCount = ItemCount;
 		ItemInfo.SlotIndex = SlotIndex;
 		ItemInfo.ItemDBId = ItemDBId;
@@ -2805,8 +2806,8 @@ void CGameServer::PacketProcReqDBItemToInventorySave(int64 SessionId, CMessage* 
 			// 새로운 아이템 생성 후 Inventory DB 넣기			
 			SP::CDBGameServerItemToInventoryPush ItemToInventoryPush(*ItemToInventorySaveDBConnection);
 			ItemToInventoryPush.InIsQuickSlotUse(ItemInfo.IsQuickSlotUse);
+			ItemToInventoryPush.InItemCategoryType(ItemCategory);
 			ItemToInventoryPush.InItemType(ItemType);
-			ItemToInventoryPush.InItemConsumableType(ItemConsumableType);
 			ItemToInventoryPush.InItemName(ItemName);
 			ItemToInventoryPush.InItemCount(ItemCount);
 			ItemToInventoryPush.InSlotIndex(SlotIndex);
@@ -2878,6 +2879,7 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		ADBItemCheck.InSlotIndex(SwapAIndex);
 
 		bool AIsQuickSlotUse = false;
+		int8 AItemCategory = 0;
 		int16 ADBItemType = -1;
 		int16 ADBItemConsumableType = -1;
 		WCHAR AItemName[20] = { 0 };
@@ -2885,8 +2887,8 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		bool AItemEquipped = false;
 		WCHAR AItemThumbnailImagePath[100] = { 0 };	
 		ADBItemCheck.OutIsQuickSlotUse(AIsQuickSlotUse);
-		ADBItemCheck.OutItemType(ADBItemType);
-		ADBItemCheck.OutItemConsumableType(ADBItemConsumableType);
+		ADBItemCheck.OutItemCategoryType(AItemCategory);
+		ADBItemCheck.OutItemType(ADBItemType);		
 		ADBItemCheck.OutItemName(AItemName);
 		ADBItemCheck.OutItemCount(AItemCount);
 		ADBItemCheck.OutItemIsEquipped(AItemEquipped);
@@ -2900,8 +2902,8 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		st_ItemInfo SwapAItemInfo;		
 		SwapAItemInfo.SlotIndex = SwapBIndex;
 		SwapAItemInfo.IsQuickSlotUse = AIsQuickSlotUse;
-		SwapAItemInfo.ItemType = (en_ItemType)ADBItemType;
-		SwapAItemInfo.ItemConsumableType = (en_ConsumableType)ADBItemConsumableType;
+		SwapAItemInfo.ItemCategory = (en_ItemCategory)AItemCategory;
+		SwapAItemInfo.ItemType = (en_ItemType)ADBItemType;		
 		SwapAItemInfo.ItemName = AItemName;
 		SwapAItemInfo.ItemCount = AItemCount;
 		SwapAItemInfo.IsEquipped = AItemEquipped;
@@ -2911,37 +2913,37 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 
 		// 스왑 요청한 B 아이템이 Inventory에 있는지 확인한다.
 		CDBConnection* BItemCheckDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-		SP::CDBGameServerItemCheck DBItemCheck(*BItemCheckDBConnection);
-		DBItemCheck.InAccountDBId(AccountId);
-		DBItemCheck.InPlayerDBId(PlayerDBId);
-		DBItemCheck.InSlotIndex(SwapBIndex);
+		SP::CDBGameServerItemCheck BDBItemCheck(*BItemCheckDBConnection);
+		BDBItemCheck.InAccountDBId(AccountId);
+		BDBItemCheck.InPlayerDBId(PlayerDBId);
+		BDBItemCheck.InSlotIndex(SwapBIndex);
 
 		bool BIsQuickSlotUse = false;
-		int16 BDBItemType = -1;
-		int16 BDBItemConsumableType = -1;
+		int8 BItemCategory = 0;
+		int16 BDBItemType = -1;		
 		WCHAR BItemName[20] = { 0 };
 		int16 BItemCount = -1;
 		bool BItemEquipped = false;
 		WCHAR BItemThumbnailImagePath[100] = { 0 };
 
-		DBItemCheck.OutIsQuickSlotUse(BIsQuickSlotUse);
-		DBItemCheck.OutItemType(BDBItemType);
-		DBItemCheck.OutItemConsumableType(BDBItemConsumableType);
-		DBItemCheck.OutItemName(BItemName);
-		DBItemCheck.OutItemCount(BItemCount);
-		DBItemCheck.OutItemIsEquipped(BItemEquipped);
-		DBItemCheck.OutItemThumbnailImagePath(BItemThumbnailImagePath);
+		BDBItemCheck.OutIsQuickSlotUse(BIsQuickSlotUse);
+		BDBItemCheck.OutItemCategoryType(BItemCategory);
+		BDBItemCheck.OutItemType(BDBItemType);
+		BDBItemCheck.OutItemName(BItemName);
+		BDBItemCheck.OutItemCount(BItemCount);
+		BDBItemCheck.OutItemIsEquipped(BItemEquipped);
+		BDBItemCheck.OutItemThumbnailImagePath(BItemThumbnailImagePath);
 
-		DBItemCheck.Execute();
+		BDBItemCheck.Execute();
 
-		DBItemCheck.Fetch();
+		BDBItemCheck.Fetch();
 
 		// 스왑 요청할 B 아이템 정보 셋팅
 		st_ItemInfo SwapBItemInfo;		
 		SwapBItemInfo.SlotIndex = SwapAIndex;
 		SwapBItemInfo.IsQuickSlotUse = BIsQuickSlotUse;
+		SwapBItemInfo.ItemCategory = (en_ItemCategory)BItemCategory;
 		SwapBItemInfo.ItemType = (en_ItemType)BDBItemType;
-		SwapBItemInfo.ItemConsumableType = (en_ConsumableType)BDBItemConsumableType;
 		SwapBItemInfo.ItemName = BItemName;
 		SwapBItemInfo.ItemCount = BItemCount;
 		SwapBItemInfo.IsEquipped = BItemEquipped;
@@ -2959,8 +2961,8 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		ItemSwap.InPlayerDBId(PlayerDBId);
 
 		ItemSwap.InAIsQuickSlotUse(SwapBItemInfo.IsQuickSlotUse);
-		ItemSwap.InAItemType(BItemType);
-		ItemSwap.InAItemConsumableType(BDBItemConsumableType);
+		ItemSwap.InAItemCategoryType(BItemCategory);
+		ItemSwap.InAItemType(BItemType);		
 		ItemSwap.InAItemName(SwapBItemInfo.ItemName);
 		ItemSwap.InAItemCount(SwapBItemInfo.ItemCount);
 		ItemSwap.InAItemIsEquipped(SwapBItemInfo.IsEquipped);
@@ -2968,8 +2970,8 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		ItemSwap.InAItemSlotIndex(SwapBItemInfo.SlotIndex);
 
 		ItemSwap.InBIsQuickSlotUse(SwapAItemInfo.IsQuickSlotUse);
+		ItemSwap.InBItemCategoryType(AItemCategory);
 		ItemSwap.InBItemType(AItemType);
-		ItemSwap.InBItemConsumableType(ADBItemConsumableType);
 		ItemSwap.InBItemName(SwapAItemInfo.ItemName);
 		ItemSwap.InBItemCount(SwapAItemInfo.ItemCount);
 		ItemSwap.InBItemIsEquipped(SwapAItemInfo.IsEquipped);
@@ -3148,6 +3150,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			CharacterInventoryItemGet.InAccountDBId(Session->MyPlayer->_AccountId);
 			CharacterInventoryItemGet.InPlayerDBId(Session->MyPlayer->_GameObjectInfo.ObjectId);
 
+			int8 ItemCategory;
 			int16 ItemType;
 			int16 ItemConsumableType;
 			WCHAR ItemName[20] = { 0 };
@@ -3157,7 +3160,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			WCHAR ItemThumbnailImagePath[100] = { 0 };
 
 			CharacterInventoryItemGet.OutItemType(ItemType);
-			CharacterInventoryItemGet.OutItemConsumableType(ItemConsumableType);
+			CharacterInventoryItemGet.OutItemCategoryType(ItemCategory);			
 			CharacterInventoryItemGet.OutItemName(ItemName);
 			CharacterInventoryItemGet.OutItemCount(ItemCount);
 			CharacterInventoryItemGet.OutSlotIndex(SlotIndex);
@@ -3171,8 +3174,8 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				// 읽어온 데이터를 이용해서 ItemInfo를 조립
 				st_ItemInfo ItemInfo;
 				ItemInfo.ItemDBId = 0;
-				ItemInfo.ItemType = (en_ItemType)ItemType;
-				ItemInfo.ItemConsumableType = (en_ConsumableType)ItemConsumableType;
+				ItemInfo.ItemCategory = (en_ItemCategory)ItemCategory;
+				ItemInfo.ItemType = (en_ItemType)ItemType;				
 				ItemInfo.ItemName = ItemName;
 				ItemInfo.ItemCount = ItemCount;
 				ItemInfo.SlotIndex = SlotIndex;
@@ -3191,7 +3194,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				case en_ItemType::ITEM_TYPE_LEATHER:
 					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::ITEM_LEATHER));
 					break;
-				case en_ItemType::ITEM_TYPE_SKILL_BOOK:
+				case en_ItemType::ITEM_TYPE_SKILL_BOOK_CHOHONE:
 					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::ITEM_SKILL_BOOK));
 					break;
 				case en_ItemType::ITEM_TYPE_WOOD_LOG:

@@ -224,6 +224,9 @@
       <Filter>ContentServer\Content\QuickSlotBar</Filter>
     </ClInclude>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="GameServerMessage.h">
+      <Filter>Message</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -318,6 +321,9 @@
     <ClCompile Include="QuickSlotBar.cpp">
       <Filter>ContentServer\Content\QuickSlotBar</Filter>
     </ClCompile>
+    <ClCompile Include="GameServerMessage.cpp">
+      <Filter>Message</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="DBConfig.xml">
@@ -344,6 +350,12 @@
       <Filter>Util\설정 파일\Data</Filter>
     </None>
     <None Include="SkillData.json">
+      <Filter>Util\설정 파일\Data</Filter>
+    </None>
+    <None Include="EnvironmentData.json">
+      <Filter>Util\설정 파일\Data</Filter>
+    </None>
+    <None Include="CraftingData.json">
       <Filter>Util\설정 파일\Data</Filter>
     </None>
   </ItemGroup>

@@ -171,6 +171,7 @@
     <ClInclude Include="GameObjectInfo.h" />
     <ClInclude Include="GameServer.h" />
     <ClInclude Include="GameServerInfo.h" />
+    <ClInclude Include="GameServerMessage.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="Heap.h" />
     <ClInclude Include="Inventory.h" />
@@ -262,6 +263,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="GameServerMessage.cpp" />
     <ClCompile Include="Global.cpp" />
     <ClCompile Include="Inventory.cpp" />
     <ClCompile Include="Item.cpp">
@@ -314,6 +316,8 @@
     <Xml Include="ServerConfig.xml" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="CraftingData.json" />
+    <None Include="EnvironmentData.json" />
     <None Include="ItemData.json" />
     <None Include="MonsterData.json" />
     <None Include="SkillData.json" />
