@@ -2,61 +2,69 @@
   "CraftingDatas": [
     {
       "CraftingDataId": 1,
-      "CraftingType": "무기",
-      "Name": "나무 검",
-      "CraftingCompleteItemDataId": 1,
-      "CraftingMaterial": [
+      "CraftingTypeName": "무기",
+      "CraftingCompleteItem": [
         {
-          "MaterialDataId": 2007,
-          "MaterialCount": 20
+          "CraftingCompleteItemDataId": 1,
+          "CraftingCompleteItemName": "나무 검",
+          "CraftingMaterial": [
+            {
+              "MaterialDataId": 2007,
+              "MaterialCount": 20
+            }
+          ]
         }
       ]
     },
     {
       "CraftingDataId": 2,
-      "CraftingType": "방어구",
-      "Name": "나무 갑옷",
-      "CraftingCompleteItemDataId": 100,
-      "CraftingMaterial": [
+      "CraftingTypeName": "방어구",
+      "CraftingCompleteItem": [
         {
-          "MaterialDataId": 2007,
-          "MaterialCount": 30
+          "CraftingCompleteItemDataId": 100,
+          "CraftingCompleteItemName": "나무 갑옷",
+          "CraftingMaterial": [
+            {
+              "MaterialDataId": 2007,
+              "MaterialCount": 30
+            }
+          ]
+        },
+        {
+          "CraftingCompleteItemDataId": 101,
+          "CraftingCompleteItemName": "가죽 모자",
+          "CraftingMaterial": [
+            {
+              "MaterialDataId": 2000,
+              "MaterialCount": 30
+            }
+          ]
+        },
+        {
+          "CraftingCompleteItemDataId": 102,
+          "CraftingCompleteItemName": "가죽 신발",
+          "CraftingMaterial": [
+            {
+              "MaterialDataId": 2000,
+              "MaterialCount": 30
+            }
+          ]
         }
       ]
     },
     {
       "CraftingDataId": 3,
-      "CraftingType": "방어구",
-      "Name": "가죽 모자",
-      "CraftingCompleteItemDataId": 101,
-      "CraftingMaterial": [
+      "CraftingTypeName": "재료",
+      "CraftingCompleteItem": [
         {
-          "MaterialDataId": 2000,
-          "MaterialCount": 30
-        }
-      ]
-    },
-    {
-      "CraftingDataId": 4,
-      "CraftingType": "방어구",
-      "Name": "가죽 신발",
-      "CraftingCompleteItemDataId": 102,
-      "CraftingMaterial": [
-        {
-          "MaterialDataId": 2000,
-          "MaterialCount": 30
-        }
-      ]
-    },
-    {
-      "CraftingDataId": 5,
-      "CraftingType": "재료",
-      "Name": "나무 판자",
-      "CraftingCompleteItemDataId": 2007,
-      "CraftingMaterial": [
-        {
-          "MaterialDataId": 2006,
-          "MaterialCount": 10
+          "CraftingCompleteItemDataId": 2007,
+          "CraftingCompleteItemName": "나무 판자",
+          "CraftingMaterial": [
+            {
+              "MaterialDataId": 2006,
+              "MaterialCount": 10
+            }
+          ]
         }
       ]
     }
