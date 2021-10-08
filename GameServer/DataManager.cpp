@@ -84,7 +84,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 		{
 			ConsumableData->ItemType = en_ItemType::ITEM_TYPE_SKILL_BOOK_CHOHONE;
 			ConsumableData->ItemCategory = en_ItemCategory::ITEM_CATEGORY_SKILLBOOK;
-		}		
+		}
 
 		ConsumableData->ThumbnailImagePath = ImageFilePath;
 		ConsumableData->_MaxCount = MaxCount;
@@ -322,52 +322,61 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 
 	for (auto& Filed : Document["CraftingDatas"].GetArray())
 	{
-		st_CraftingData* CraftingData = new st_CraftingData();		
+		st_CraftingItemCategoryData* CraftingData = new st_CraftingItemCategoryData();
 
 		int CraftingDataId = Filed["CraftingDataId"].GetInt();
-		string CraftingType = Filed["CraftingType"].GetString();
-		string Name = Filed["Name"].GetString();
-					
-		CraftingData->CraftingDataId = CraftingDataId;
-		CraftingData->CraftingName = Name;
+		string CraftingTypeName = Filed["CraftingTypeName"].GetString();
 
-		if (CraftingType == "무기")
+		CraftingData->CraftingDataId = CraftingDataId;
+		CraftingData->CraftingTypeName = CraftingTypeName;
+
+		if (CraftingTypeName == "무기")
 		{
 			CraftingData->CraftingType = en_ItemCategory::ITEM_CATEGORY_WEAPON;
 		}
-		else if (CraftingType == "방어구")
+		else if (CraftingTypeName == "방어구")
 		{
 			CraftingData->CraftingType = en_ItemCategory::ITEM_CATEGORY_ARMOR;
 		}
-		else if (CraftingType == "음식")
+		else if (CraftingTypeName == "음식")
 		{
 			CraftingData->CraftingType = en_ItemCategory::ITEM_CATEGORY_FOOD;
 		}
-		else if (CraftingType == "물약")
+		else if (CraftingTypeName == "물약")
 		{
 			CraftingData->CraftingType = en_ItemCategory::ITEM_CATEGORY_POTION;
 		}
-		else if (CraftingType == "재료")
+		else if (CraftingTypeName == "재료")
 		{
 			CraftingData->CraftingType = en_ItemCategory::ITEM_CATEGORY_MATERIAL;
-		}				
-
-		int16 CraftingCompleteItemDataId = (int16)Filed["CraftingDataId"].GetInt();
-		CraftingData->CraftingCompleteItemDataId = (en_ItemType)CraftingCompleteItemDataId;
-
-		for (auto& MaterialFiled : Filed["CraftingMaterial"].GetArray())
-		{
-			st_CraftingMaterialData CraftingMaterialData;
-
-			int16 MaterialDataId = (int16)MaterialFiled["MaterialDataId"].GetInt();
-			int16 MaterialCount = (int16)MaterialFiled["MaterialCount"].GetInt();
-			
-			CraftingMaterialData.MaterialDataId = (en_ItemType)MaterialDataId;
-			CraftingMaterialData.MaterialCount = MaterialCount;
-
-			CraftingData->CraftingMaterials.push_back(CraftingMaterialData);
 		}
 
-		_CraftingData.insert(pair<int32, st_CraftingData*>(CraftingData->CraftingDataId,CraftingData));
+		for (auto& CraftingCompleteFiled : Filed["CraftingCompleteItem"].GetArray())
+		{
+			st_CraftingCompleteItemData CraftingCompleteItemData;
+
+			int16 CraftingCompleteItemDataId = (int16)CraftingCompleteFiled["CraftingCompleteItemDataId"].GetInt();
+			string CraftingCompleteItemName = CraftingCompleteFiled["CraftingCompleteItemName"].GetString();
+
+			CraftingCompleteItemData.CraftingCompleteItemDataId = (en_ItemType)CraftingCompleteItemDataId;
+			CraftingCompleteItemData.CraftingName = CraftingCompleteItemName;
+
+			for (auto& CraftingMaterialFiled : CraftingCompleteFiled["CraftingMaterial"].GetArray())
+			{
+				st_CraftingMaterialItemData CraftingMaterialData;
+
+				int16 MaterialDataId = (int16)CraftingMaterialFiled["MaterialDataId"].GetInt();
+				int16 MaterialCount = (int16)CraftingMaterialFiled["MaterialCount"].GetInt();
+
+				CraftingMaterialData.MaterialDataId = (en_ItemType)(MaterialDataId);
+				CraftingMaterialData.MaterialCount = MaterialCount;
+
+				CraftingCompleteItemData.CraftingMaterials.push_back(CraftingMaterialData);
+			}
+
+			CraftingData->CraftingCompleteItems.push_back(CraftingCompleteItemData);
+		}
+
+		_CraftingData.insert(pair<int32, st_CraftingItemCategoryData*>(CraftingData->CraftingDataId, CraftingData));
 	}
 }

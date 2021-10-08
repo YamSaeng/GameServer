@@ -13,7 +13,7 @@ public:
 	map<int32, st_MonsterData*> _Monsters;
 	map<int32, st_SkillData*> _Skills;
 	map<int32, st_EnvironmentData*> _Environments;
-	map<int32, st_CraftingData*> _CraftingData;
+	map<int32, st_CraftingItemCategoryData*> _CraftingData;
 
 	CDataManager()
 	{

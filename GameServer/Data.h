@@ -99,17 +99,23 @@ struct st_EnvironmentData
 	vector<st_DropData> DropItems;
 };
 
-struct st_CraftingMaterialData
+struct st_CraftingMaterialItemData
 {
 	en_ItemType MaterialDataId;
 	int16 MaterialCount;
 };
 
-struct st_CraftingData
+struct st_CraftingCompleteItemData
 {
-	int32 CraftingDataId;
-	string CraftingName;
-	en_ItemCategory CraftingType;
-	en_ItemType CraftingCompleteItemDataId;
-	vector<st_CraftingMaterialData> CraftingMaterials;
+	en_ItemType CraftingCompleteItemDataId; // 완성템의 ItemDataId
+	string CraftingName; // 제작템 이름			
+	vector<st_CraftingMaterialItemData> CraftingMaterials; // 재료
+};
+
+struct st_CraftingItemCategoryData
+{
+	int32 CraftingDataId; // 제작템 DataId
+	en_ItemCategory CraftingType; // 제작템 범주
+	string CraftingTypeName; // 제작템 범주 이름	
+	vector<st_CraftingCompleteItemData> CraftingCompleteItems; // 제작템 범주에 속한 아이템 목록
 };
