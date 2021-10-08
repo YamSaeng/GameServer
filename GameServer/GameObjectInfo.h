@@ -72,13 +72,13 @@ enum class en_ItemType : int16
 {
 	ITEM_TYPE_NONE = 0,
 
-	ITEM_TYPE_WEAPON_SWORD = 1,
+	ITEM_TYPE_WEAPON_WOOD_SWORD = 1,
 
-	ITEM_TYPE_ARMOR_ARMOR = 100,
-	ITEM_TYPE_ARMOR_HELMET = 101,
+	ITEM_TYPE_ARMOR_WOOD_ARMOR = 100,
+	ITEM_TYPE_ARMOR_LETHER_HAT = 101,
 
-	ITEM_TYPE_CONSUMABLE_POTION = 200,
-	ITEM_TYPE_SKILL_BOOK = 300,
+	ITEM_TYPE_POTION_HEAL_SMALL = 200,
+	ITEM_TYPE_SKILL_BOOK_CHOHONE = 300,
 
 	ITEM_TYPE_LEATHER = 2000,
 	ITEM_TYPE_SLIMEGEL = 2001,
@@ -86,16 +86,19 @@ enum class en_ItemType : int16
 	ITEM_TYPE_SLIVER_COIN = 2003,
 	ITEM_TYPE_GOLD_COIN = 2004,
 	ITEM_TYPE_STONE = 2005,
-	ITEM_TYPE_WOOD_LOG = 2006
+	ITEM_TYPE_WOOD_LOG = 2006,
+	ITEM_TYPE_WOOD_FLANK = 2007
 };
 
-enum class en_CraftingCategory : int8
+enum class en_ItemCategory : int8
 {
-	CRAFTING_TYPE_NONE = 0,
-	CRAFTING_TYPE_WEAPON,
-	CRAFTING_TYPE_ARMOR,
-	CRAFTING_TYPE_POTION,
-	CRAFTING_TYPE_MATERIAL	
+	ITEM_CATEGORY_NONE = 0,
+	ITEM_CATEGORY_WEAPON,
+	ITEM_CATEGORY_ARMOR,
+	ITEM_CATEGORY_FOOD,
+	ITEM_CATEGORY_POTION,
+	ITEM_CATEGORY_SKILLBOOK,
+	ITEM_CATEGORY_MATERIAL	
 };
 
 enum class en_SkillType : int16
@@ -203,8 +206,8 @@ struct st_ItemInfo
 {	
 	int64 ItemDBId;				// 아이템 DB에 저장되어 있는 ID		
 	bool IsQuickSlotUse;        // 퀵슬롯에 등록되어 있는지 여부 
+	en_ItemCategory ItemCategory; // 아이템 범주
 	en_ItemType ItemType;		// 아이템 타입
-	en_ConsumableType ItemConsumableType;	// 소비용 아이템인지
 	wstring ItemName;			// 아이템 이름
 	int16 ItemCount;			// 개수
 	wstring ThumbnailImagePath; // 이미지 경로
@@ -252,7 +255,7 @@ struct st_CraftingCompleteItem
 
 struct st_CraftingItemCategory
 {
-	en_CraftingCategory CategoryType; // 제작템 범주
+	en_ItemCategory CategoryType; // 제작템 범주
 	wstring CategoryName; // 제작템 범주 이름
 	vector<st_CraftingCompleteItem> CompleteItems; // 범주에 속한 완성 제작템들
 };
