@@ -13,6 +13,7 @@ public:
 	map<int32, st_MonsterData*> _Monsters;
 	map<int32, st_SkillData*> _Skills;
 	map<int32, st_EnvironmentData*> _Environments;
+	map<int32, st_CraftingData*> _CraftingData;
 
 	CDataManager()
 	{
@@ -29,5 +30,6 @@ public:
 	void LoadDataMonster(wstring LoadFileName);
 	void LoadDataSkill(wstring LoadFileName);
 	void LoadDataEnvironment(wstring LoadFileName);
+	void LoadDataCrafting(wstring LoadFileName);
 };
 

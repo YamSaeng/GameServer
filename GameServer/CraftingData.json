@@ -7,8 +7,8 @@
       "CraftingCompleteItemDataId": 1,
       "CraftingMaterial": [
         {
-          "ItemDataId": 2007,
-          "Count": 20
+          "MaterialDataId": 2007,
+          "MaterialCount": 20
         }
       ]
     },
@@ -19,8 +19,8 @@
       "CraftingCompleteItemDataId": 100,
       "CraftingMaterial": [
         {
-          "ItemDataId": 2007,
-          "Count": 30
+          "MaterialDataId": 2007,
+          "MaterialCount": 30
         }
       ]
     },
@@ -31,8 +31,8 @@
       "CraftingCompleteItemDataId": 101,
       "CraftingMaterial": [
         {
-          "ItemDataId": 2000,
-          "Count": 30
+          "MaterialDataId": 2000,
+          "MaterialCount": 30
         }
       ]
     },
@@ -43,8 +43,8 @@
       "CraftingCompleteItemDataId": 102,
       "CraftingMaterial": [
         {
-          "ItemDataId": 2000,
-          "Count": 30
+          "MaterialDataId": 2000,
+          "MaterialCount": 30
         }
       ]
     },
@@ -55,8 +55,8 @@
       "CraftingCompleteItemDataId": 2007,
       "CraftingMaterial": [
         {
-          "ItemDataId": 2006,
-          "Count": 10
+          "MaterialDataId": 2006,
+          "MaterialCount": 10
         }
       ]
     }

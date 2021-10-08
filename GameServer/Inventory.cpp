@@ -24,8 +24,8 @@ void CInventory::Init()
 		// 后伯单扁 沥焊 积己
 		st_ItemInfo* InitItemInfo = new st_ItemInfo();
 		InitItemInfo->ItemDBId = 0;
-		InitItemInfo->ItemType = en_ItemType::ITEM_TYPE_NONE;
-		InitItemInfo->ItemConsumableType = en_ConsumableType::NONE;
+		InitItemInfo->ItemCategory = en_ItemCategory::ITEM_CATEGORY_NONE;
+		InitItemInfo->ItemType = en_ItemType::ITEM_TYPE_NONE;		
 		InitItemInfo->ItemName = L"";
 		InitItemInfo->ItemCount = 0;
 		InitItemInfo->ThumbnailImagePath = L"";

@@ -2,8 +2,7 @@
   "Weapons": [
     {
       "DataSheetId": 1,
-      "Name": "나무 검",
-      "WeaponType": "Sword",
+      "ItemName": "나무 검",      
       "Damage": 10,
       "IsEquipped": false,
       "ImageFilePath": "Textures/Weapon & Tool/Wooden Sword"
@@ -12,24 +11,21 @@
   "Armors": [
     {
       "DataSheetId": 100,
-      "Name": "나무 갑옷",
-      "ArmorType": "Armor",
+      "ItemName": "나무 갑옷",      
       "Defence": 15,
       "IsEquipped": false,
       "ImageFilePath": "Textures/Equipment/Wooden Armor"
     },
     {
       "DataSheetId": 101,
-      "Name": "가죽 모자",
-      "ArmorType": "Helmet",
+      "ItemName": "가죽 모자",      
       "Defence": 5,
       "IsEquipped": false,
       "ImageFilePath": "Textures/Equipment/Leather Helmet"
     },
     {
       "DataSheetId": 102,
-      "Name": "가죽 신발",
-      "ArmorType": "Shoes",
+      "ItemName": "가죽 신발",      
       "Defence": 5,
       "IsEquipped": false,
       "ImageFilePath": "Textures/Equipment/Leather Boot"
@@ -38,16 +34,14 @@
   "Consumables": [
     {
       "DataSheetId": 200,
-      "Name": "회복물약(소)",
-      "ConsumableType": "Potion",
+      "ItemName": "회복물약(소)",      
       "MaxCount": 99,
       "IsEquipped": false,
       "ImageFilePath": "Textures/Potion/Red Potion"
     },
     {
       "DataSheetId": 300,
-      "Name": "초혼비무 스킬책",
-      "ConsumableType": "SkillBook",
+      "ItemName": "초혼비무 스킬책",      
       "MaxCount": 1,
       "IsEquipped": false,
       "ImageFilePath": "Textures/SkillBook/ChoHoneSkillBook"
@@ -56,56 +50,56 @@
   "Material": [
     {
       "DataSheetId": 2000,
-      "Name": "곰 가죽",
+      "ItemName": "곰 가죽",      
       "MaxCount": 99,
       "IsEquipped": false,
       "ImageFilePath": "Textures/Material/Leather"
     },
     {
       "DataSheetId": 2001,
-      "Name": "슬라임젤리",
+      "ItemName": "슬라임젤리",      
       "MaxCount": 99,
       "IsEquipped": false,
       "ImageFilePath": "Textures/MonsterPart/SlimeGel"
     },
     {
       "DataSheetId": 2002,
-      "Name": "동전",
+      "ItemName": "동전",
       "MaxCount": 99,
       "IsEquipped": false,
       "ImageFilePath": "Textures/Misc/CopperCoin"
     },
     {
       "DataSheetId": 2003,
-      "Name": "은전",
+      "ItemName": "은전",
       "MaxCount": 99,
       "IsEquipped": false,
       "ImageFilePath": "Textures/Misc/SliverCoin"
     },
     {
       "DataSheetId": 2004,
-      "Name": "금전",
+      "ItemName": "금전",
       "MaxCount": 99,
       "IsEquipped": false,
       "ImageFilePath": "Textures/Misc/GoldCoin"
     },
     {
       "DataSheetId": 2005,
-      "Name": "암석",
+      "ItemName": "암석",
       "MaxCount": 99,
       "IsEquipped": false,
       "ImageFilePath": "Textures/Material/Stone"
     },
     {
       "DataSheetId": 2006,
-      "Name": "통나무",
+      "ItemName": "통나무",
       "MaxCount": 99,
       "IsEquipped": false,
       "ImageFilePath": "Textures/Material/Wood Log"
     },
     {
       "DataSheetId": 2007,
-      "Name": "나무판자",
+      "ItemName": "나무판자",
       "MaxCount": 99,
       "IsEquipped": false,
       "ImageFilePath": "Textures/Material/Wooden Plank"

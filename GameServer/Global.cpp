@@ -30,12 +30,12 @@ public:
 		G_Datamanager->LoadDataMonster(L"MonsterData.json");
 		G_Datamanager->LoadDataSkill(L"SkillData.json");
 		G_Datamanager->LoadDataEnvironment(L"EnvironmentData.json");
+		G_Datamanager->LoadDataCrafting(L"CraftingData.json");
 		
 		G_ChannelManager = new CChannelManager();	
 		G_ChannelManager->Add(1);
 
-		G_ObjectManager = new CObjectManager();		
-		delete G_ObjectManager;
+		G_ObjectManager = new CObjectManager();				
 	}
 
 	~CGlobal()

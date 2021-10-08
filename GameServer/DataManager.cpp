@@ -11,8 +11,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 	for (auto& Filed : Document["Weapons"].GetArray())
 	{
 		int DataSheetId = Filed["DataSheetId"].GetInt();
-		string ItemName = Filed["Name"].GetString();
-		string Type = Filed["WeaponType"].GetString();
+		string ItemName = Filed["ItemName"].GetString();
 		int Damage = Filed["Damage"].GetInt();
 		bool IsEquipped = Filed["IsEquipped"].GetBool();
 		string ImageFilePath = Filed["ImageFilePath"].GetString();
@@ -21,12 +20,12 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 		WeaponData->DataSheetId = DataSheetId;
 		WeaponData->ItemName = ItemName;
 
-		if (Type == "Sword")
+		if (ItemName == "나무 검")
 		{
-			WeaponData->ItemType = en_ItemType::ITEM_TYPE_WEAPON_SWORD;
-		}		
-		
-		WeaponData->ItemConsumableType = en_ConsumableType::NONE;
+			WeaponData->ItemType = en_ItemType::ITEM_TYPE_WEAPON_WOOD_SWORD;
+		}
+
+		WeaponData->ItemCategory = en_ItemCategory::ITEM_CATEGORY_WEAPON;
 
 		WeaponData->ThumbnailImagePath = ImageFilePath;
 		WeaponData->_Damage = Damage;
@@ -37,8 +36,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 	for (auto& Filed : Document["Armors"].GetArray())
 	{
 		int DataSheetId = Filed["DataSheetId"].GetInt();
-		string ItemName = Filed["Name"].GetString();
-		string Type = Filed["ArmorType"].GetString();
+		string ItemName = Filed["ItemName"].GetString();
 		int Defence = Filed["Defence"].GetInt();
 		bool IsEquipped = Filed["IsEquipped"].GetBool();
 		string ImageFilePath = Filed["ImageFilePath"].GetString();
@@ -47,16 +45,16 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 		ArmorData->DataSheetId = DataSheetId;
 		ArmorData->ItemName = ItemName;
 
-		if (Type == "Armor")
+		if (ItemName == "나무 갑옷")
 		{
-			ArmorData->ItemType = en_ItemType::ITEM_TYPE_ARMOR_ARMOR;
+			ArmorData->ItemType = en_ItemType::ITEM_TYPE_ARMOR_WOOD_ARMOR;
 		}
-		else if (Type == "Helmet")
+		else if (ItemName == "가죽 모자")
 		{
-			ArmorData->ItemType = en_ItemType::ITEM_TYPE_ARMOR_HELMET;
+			ArmorData->ItemType = en_ItemType::ITEM_TYPE_ARMOR_LETHER_HAT;
 		}
 
-		ArmorData->ItemConsumableType = en_ConsumableType::NONE;
+		ArmorData->ItemCategory = en_ItemCategory::ITEM_CATEGORY_ARMOR;
 
 		ArmorData->ThumbnailImagePath = ImageFilePath;
 		ArmorData->_Defence = Defence;
@@ -67,8 +65,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 	for (auto& Filed : Document["Consumables"].GetArray())
 	{
 		int DataSheetId = Filed["DataSheetId"].GetInt();
-		string ItemName = Filed["Name"].GetString();
-		string Type = Filed["ConsumableType"].GetString();
+		string ItemName = Filed["ItemName"].GetString();
 		int MaxCount = Filed["MaxCount"].GetInt();
 		bool IsEquipped = Filed["IsEquipped"].GetBool();
 		string ImageFilePath = Filed["ImageFilePath"].GetString();
@@ -78,16 +75,16 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 		ConsumableData->ItemName = ItemName;
 
 		ItemName.assign(ConsumableData->ItemName.begin(), ConsumableData->ItemName.end());
-		if (Type == "Potion")
+		if (ItemName == "회복물약(소)")
 		{
-			ConsumableData->ItemType = en_ItemType::ITEM_TYPE_CONSUMABLE_POTION;
-			ConsumableData->ItemConsumableType = en_ConsumableType::POTION;
+			ConsumableData->ItemType = en_ItemType::ITEM_TYPE_POTION_HEAL_SMALL;
+			ConsumableData->ItemCategory = en_ItemCategory::ITEM_CATEGORY_POTION;
 		}
-		else if (Type == "SkillBook")
+		else if (ItemName == "초혼비무 스킬책")
 		{
-			ConsumableData->ItemType = en_ItemType::ITEM_TYPE_SKILL_BOOK;
-			ConsumableData->ItemConsumableType = en_ConsumableType::SKILL_BOOK;
-		}
+			ConsumableData->ItemType = en_ItemType::ITEM_TYPE_SKILL_BOOK_CHOHONE;
+			ConsumableData->ItemCategory = en_ItemCategory::ITEM_CATEGORY_SKILLBOOK;
+		}		
 
 		ConsumableData->ThumbnailImagePath = ImageFilePath;
 		ConsumableData->_MaxCount = MaxCount;
@@ -98,7 +95,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 	for (auto& Filed : Document["Material"].GetArray())
 	{
 		int DataSheetId = Filed["DataSheetId"].GetInt();
-		string ItemName = Filed["Name"].GetString();		
+		string ItemName = Filed["ItemName"].GetString();
 		int MaxCount = Filed["MaxCount"].GetInt();
 		bool IsEquipped = Filed["IsEquipped"].GetBool();
 		string ImageFilePath = Filed["ImageFilePath"].GetString();
@@ -129,7 +126,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			MaterialData->ItemType = en_ItemType::ITEM_TYPE_WOOD_LOG;
 		}
 
-		MaterialData->ItemConsumableType = en_ConsumableType::NONE;		
+		MaterialData->ItemCategory = en_ItemCategory::ITEM_CATEGORY_MATERIAL;
 
 		MaterialData->ThumbnailImagePath = ImageFilePath;
 		MaterialData->_MaxCount = MaxCount;
@@ -155,7 +152,7 @@ void CDataManager::LoadDataStatus(wstring LoadFileName)
 		int MinAttackDamage = Filed["MinAttackDamage"].GetInt();
 		int MaxAttackDamage = Filed["MaxAttackDamage"].GetInt();
 		int16 CriticalPoint = (int16)(Filed["CriticalPoint"].GetInt());
-		float Speed = Filed["Speed"].GetFloat();		
+		float Speed = Filed["Speed"].GetFloat();
 
 		st_PlayerStatusData* StatusData = new st_PlayerStatusData();
 		StatusData->PlayerType = PlayerType;
@@ -180,14 +177,14 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 	Document.Parse(FileStr);
 
 	for (auto& Filed : Document["Monsters"].GetArray())
-	{		
+	{
 		st_MonsterData* MonsterData = new st_MonsterData();
-		
+
 		int MonsterDataId = Filed["MonsterDataId"].GetInt();
 		string Name = Filed["Name"].GetString();
-				
+
 		MonsterData->MonsterDataId = MonsterDataId;
-		MonsterData->MonsterName = Name;									
+		MonsterData->MonsterName = Name;
 
 		for (auto& MonsterStatInfoFiled : Filed["MonsterStatInfo"].GetArray())
 		{
@@ -227,7 +224,7 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			int ItemDataSheetId = DropDataFiled["ItemDataSheetId"].GetInt();
 			int8 MinCount = (int8)(DropDataFiled["MinCount"].GetInt());
 			int16 MaxCount = (int16)(DropDataFiled["MaxCount"].GetInt());
-						
+
 			st_DropData DropData;
 			DropData.Probability = Probability;
 			DropData.ItemDataSheetId = ItemDataSheetId;
@@ -235,9 +232,9 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			DropData.MaxCount = MaxCount;
 
 			MonsterData->DropItems.push_back(DropData);
-		}	
+		}
 
-		_Monsters.insert(pair<int32, st_MonsterData*>(MonsterData->MonsterDataId,MonsterData));
+		_Monsters.insert(pair<int32, st_MonsterData*>(MonsterData->MonsterDataId, MonsterData));
 	}
 }
 
@@ -311,7 +308,66 @@ void CDataManager::LoadDataEnvironment(wstring LoadFileName)
 
 			EnvironmentData->DropItems.push_back(DropData);
 		}
-		
+
 		_Environments.insert(pair<int32, st_EnvironmentData*>(EnvironmentData->EnvironmentDataId, EnvironmentData));
+	}
+}
+
+void CDataManager::LoadDataCrafting(wstring LoadFileName)
+{
+	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());
+
+	rapidjson::Document Document;
+	Document.Parse(FileStr);
+
+	for (auto& Filed : Document["CraftingDatas"].GetArray())
+	{
+		st_CraftingData* CraftingData = new st_CraftingData();		
+
+		int CraftingDataId = Filed["CraftingDataId"].GetInt();
+		string CraftingType = Filed["CraftingType"].GetString();
+		string Name = Filed["Name"].GetString();
+					
+		CraftingData->CraftingDataId = CraftingDataId;
+		CraftingData->CraftingName = Name;
+
+		if (CraftingType == "무기")
+		{
+			CraftingData->CraftingType = en_ItemCategory::ITEM_CATEGORY_WEAPON;
+		}
+		else if (CraftingType == "방어구")
+		{
+			CraftingData->CraftingType = en_ItemCategory::ITEM_CATEGORY_ARMOR;
+		}
+		else if (CraftingType == "음식")
+		{
+			CraftingData->CraftingType = en_ItemCategory::ITEM_CATEGORY_FOOD;
+		}
+		else if (CraftingType == "물약")
+		{
+			CraftingData->CraftingType = en_ItemCategory::ITEM_CATEGORY_POTION;
+		}
+		else if (CraftingType == "재료")
+		{
+			CraftingData->CraftingType = en_ItemCategory::ITEM_CATEGORY_MATERIAL;
+		}				
+
+		int16 CraftingCompleteItemDataId = (int16)Filed["CraftingDataId"].GetInt();
+		CraftingData->CraftingCompleteItemDataId = (en_ItemType)CraftingCompleteItemDataId;
+
+		for (auto& MaterialFiled : Filed["CraftingMaterial"].GetArray())
+		{
+			st_CraftingMaterialData CraftingMaterialData;
+
+			int16 MaterialDataId = (int16)MaterialFiled["MaterialDataId"].GetInt();
+			int16 MaterialCount = (int16)MaterialFiled["MaterialCount"].GetInt();
+			
+			CraftingMaterialData.MaterialDataId = (en_ItemType)MaterialDataId;
+			CraftingMaterialData.MaterialCount = MaterialCount;
+
+			CraftingData->CraftingMaterials.push_back(CraftingMaterialData);
+		}
+
+		_CraftingData.insert(pair<int32, st_CraftingData*>(CraftingData->CraftingDataId,CraftingData));
 	}
 }

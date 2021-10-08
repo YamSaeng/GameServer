@@ -13,8 +13,8 @@ struct st_ItemData
 {
 	int32 DataSheetId;
 	string ItemName;
+	en_ItemCategory ItemCategory;
 	en_ItemType ItemType; 
-	en_ConsumableType ItemConsumableType;
 	string ThumbnailImagePath;
 	bool IsEquipped;
 	int16 ItemCount;
@@ -97,4 +97,19 @@ struct st_EnvironmentData
 	int32 Level;
 	int32 MaxHP;
 	vector<st_DropData> DropItems;
+};
+
+struct st_CraftingMaterialData
+{
+	en_ItemType MaterialDataId;
+	int16 MaterialCount;
+};
+
+struct st_CraftingData
+{
+	int32 CraftingDataId;
+	string CraftingName;
+	en_ItemCategory CraftingType;
+	en_ItemType CraftingCompleteItemDataId;
+	vector<st_CraftingMaterialData> CraftingMaterials;
 };
