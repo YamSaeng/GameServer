@@ -217,12 +217,12 @@ struct st_ItemInfo
 
 struct st_SkillInfo
 {
-	bool _IsQuickSlotUse;    // 퀵슬롯에 등록되어 있는지 여부
-	en_SkillType _SkillType; // 스킬 종류
-	int8 _SkillLevel = 0;		 // 스킬 레벨
-	wstring _SkillName;		 // 스킬 이름
-	int32 _SkillCoolTime = 0;	 // 스킬 쿨타임	
-	wstring _SkillImagePath; // 스킬 이미지 경로
+	bool IsQuickSlotUse;    // 퀵슬롯에 등록되어 있는지 여부
+	en_SkillType SkillType; // 스킬 종류
+	int8 SkillLevel = 0;		 // 스킬 레벨
+	wstring SkillName;		 // 스킬 이름
+	int32 SkillCoolTime = 0;	 // 스킬 쿨타임	
+	wstring SkillImagePath; // 스킬 이미지 경로
 	bool CanSkillUse = true; // 스킬을 사용 할 수 있는지 여부	
 };
 
@@ -244,12 +244,14 @@ struct st_CraftingMaterialItemInfo
 	en_ItemType MaterialItemType; // 재료템 종류
 	wstring MaterialItemName; // 재료템 이름
 	int16 ItemCount; // 재료템 필요 개수
+	wstring MaterialItemImagePath; // 재료템 이미지 경로
 };
 
 struct st_CraftingCompleteItem
 {
 	en_ItemType CompleteItemType; // 완성 제작템 종류
 	wstring CompleteItemName; // 완성 제작템 이름
+	wstring CompleteItemImagePath; // 완성 제작템 이미지 경로
 	vector<st_CraftingMaterialItemInfo> Materials; // 제작템 만들때 필요한 재료들
 };
 

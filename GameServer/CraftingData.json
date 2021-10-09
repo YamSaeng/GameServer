@@ -7,10 +7,13 @@
         {
           "CraftingCompleteItemDataId": 1,
           "CraftingCompleteItemName": "나무 검",
+          "CraftingCompleteItemThumbnailImagePath": "Textures/Weapon & Tool/Wooden Sword",
           "CraftingMaterial": [
             {
               "MaterialDataId": 2007,
-              "MaterialCount": 20
+              "MaterialName": "나무 판자",
+              "MaterialCount": 20,
+              "MaterialThumbnailImagePath": "Textures/Material/Wooden Plank"
             }
           ]
         }
@@ -23,30 +26,39 @@
         {
           "CraftingCompleteItemDataId": 100,
           "CraftingCompleteItemName": "나무 갑옷",
+          "CraftingCompleteItemThumbnailImagePath": "Textures/Equipment/Wooden Armor",
           "CraftingMaterial": [
             {
               "MaterialDataId": 2007,
-              "MaterialCount": 30
+              "MaterialName": "나무 판자",
+              "MaterialCount": 30,
+              "MaterialThumbnailImagePath": "Textures/Material/Wooden Plank"
             }
           ]
         },
         {
           "CraftingCompleteItemDataId": 101,
           "CraftingCompleteItemName": "가죽 모자",
+          "CraftingCompleteItemThumbnailImagePath": "Textures/Equipment/Leather Helmet",
           "CraftingMaterial": [
             {
               "MaterialDataId": 2000,
-              "MaterialCount": 30
+              "MaterialName": "가죽",
+              "MaterialCount": 30,
+              "MaterialThumbnailImagePath": "Textures/Material/Leather"
             }
           ]
         },
         {
           "CraftingCompleteItemDataId": 102,
           "CraftingCompleteItemName": "가죽 신발",
+          "CraftingCompleteItemThumbnailImagePath": "Textures/Equipment/Leather Boot",
           "CraftingMaterial": [
             {
               "MaterialDataId": 2000,
-              "MaterialCount": 30
+              "MaterialName": "가죽",
+              "MaterialCount": 30,
+              "MaterialThumbnailImagePath": "Textures/Material/Leather"
             }
           ]
         }
@@ -59,10 +71,13 @@
         {
           "CraftingCompleteItemDataId": 2007,
           "CraftingCompleteItemName": "나무 판자",
+          "CraftingCompleteItemThumbnailImagePath": "Textures/Material/Wooden Plank",
           "CraftingMaterial": [
             {
               "MaterialDataId": 2006,
-              "MaterialCount": 10
+              "MaterialName": "통나무",
+              "MaterialCount": 10,
+              "MaterialThumbnailImagePath": "Textures/Material/Wood Log"
             }
           ]
         }

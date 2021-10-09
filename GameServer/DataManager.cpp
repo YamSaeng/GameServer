@@ -105,7 +105,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 		MaterialData->ItemName = ItemName;
 
 		ItemName.assign(MaterialData->ItemName.begin(), MaterialData->ItemName.end());
-		if (ItemName == "°õ °¡Á×")
+		if (ItemName == "°¡Á×")
 		{
 			MaterialData->ItemType = en_ItemType::ITEM_TYPE_LEATHER;
 		}
@@ -357,19 +357,25 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 
 			int16 CraftingCompleteItemDataId = (int16)CraftingCompleteFiled["CraftingCompleteItemDataId"].GetInt();
 			string CraftingCompleteItemName = CraftingCompleteFiled["CraftingCompleteItemName"].GetString();
+			string CraftingCompleteItemThumbnailImagePath = CraftingCompleteFiled["CraftingCompleteItemThumbnailImagePath"].GetString();
 
 			CraftingCompleteItemData.CraftingCompleteItemDataId = (en_ItemType)CraftingCompleteItemDataId;
-			CraftingCompleteItemData.CraftingName = CraftingCompleteItemName;
+			CraftingCompleteItemData.CraftingCompleteName = CraftingCompleteItemName;
+			CraftingCompleteItemData.CraftingCompleteThumbnailImagePath = CraftingCompleteItemThumbnailImagePath;
 
 			for (auto& CraftingMaterialFiled : CraftingCompleteFiled["CraftingMaterial"].GetArray())
 			{
 				st_CraftingMaterialItemData CraftingMaterialData;
 
 				int16 MaterialDataId = (int16)CraftingMaterialFiled["MaterialDataId"].GetInt();
+				string MaterialName = CraftingMaterialFiled["MaterialName"].GetString();
 				int16 MaterialCount = (int16)CraftingMaterialFiled["MaterialCount"].GetInt();
+				string MaterialThumbnailImagePath = CraftingMaterialFiled["MaterialThumbnailImagePath"].GetString();
 
 				CraftingMaterialData.MaterialDataId = (en_ItemType)(MaterialDataId);
+				CraftingMaterialData.MaterialName = MaterialName;
 				CraftingMaterialData.MaterialCount = MaterialCount;
+				CraftingMaterialData.MaterialThumbnailImagePath = MaterialThumbnailImagePath;
 
 				CraftingCompleteItemData.CraftingMaterials.push_back(CraftingMaterialData);
 			}

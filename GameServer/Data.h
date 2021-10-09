@@ -101,14 +101,17 @@ struct st_EnvironmentData
 
 struct st_CraftingMaterialItemData
 {
-	en_ItemType MaterialDataId;
-	int16 MaterialCount;
+	en_ItemType MaterialDataId; // 재료템 Id
+	string MaterialName; // 재료 템 이름
+	string MaterialThumbnailImagePath; // 재료 템 이미지 경로
+	int16 MaterialCount; // 재료 템 개수
 };
 
 struct st_CraftingCompleteItemData
 {
 	en_ItemType CraftingCompleteItemDataId; // 완성템의 ItemDataId
-	string CraftingName; // 제작템 이름			
+	string CraftingCompleteName; // 제작템 이름			
+	string CraftingCompleteThumbnailImagePath; // 제작템 이미지 경로
 	vector<st_CraftingMaterialItemData> CraftingMaterials; // 재료
 };
 
