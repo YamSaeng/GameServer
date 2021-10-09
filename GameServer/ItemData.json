@@ -50,7 +50,7 @@
   "Material": [
     {
       "DataSheetId": 2000,
-      "ItemName": "°õ °¡Á×",      
+      "ItemName": "°¡Á×",      
       "MaxCount": 99,
       "IsEquipped": false,
       "ImageFilePath": "Textures/Material/Leather"
