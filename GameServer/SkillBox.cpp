@@ -35,7 +35,7 @@ st_SkillInfo* CSkillBox::FindSkill(en_SkillType FindSkillType)
 {
 	for (int SlotIndex = 0; SlotIndex < _Skills.size(); SlotIndex++)
 	{
-		if (_Skills[SlotIndex]->_SkillType == FindSkillType)
+		if (_Skills[SlotIndex]->SkillType == FindSkillType)
 		{
 			return _Skills[SlotIndex];
 		}

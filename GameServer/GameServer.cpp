@@ -904,7 +904,7 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 
 							WCHAR ErrorMessage[100] = { 0 };
 
-							wsprintf(ErrorMessage, L"[%s] 대상과의 거리가 너무 멉니다. [거리 : %d ]", FindSkill->_SkillName.c_str(), Distance);
+							wsprintf(ErrorMessage, L"[%s] 대상과의 거리가 너무 멉니다. [거리 : %d ]", FindSkill->SkillName.c_str(), Distance);
 							ErrorNonSelectObjectString = ErrorMessage;
 
 							CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_DISTANCE, ErrorNonSelectObjectString);
@@ -918,7 +918,7 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 
 						WCHAR ErrorMessage[100] = { 0 };
 
-						wsprintf(ErrorMessage, L"[%s] 대상을 선택하고 사용해야 합니다.", FindSkill->_SkillName.c_str());
+						wsprintf(ErrorMessage, L"[%s] 대상을 선택하고 사용해야 합니다.", FindSkill->SkillName.c_str());
 						ErrorDistance = ErrorMessage;
 
 						CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorDistance);
@@ -984,7 +984,7 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 
 							WCHAR ErrorMessage[100] = { 0 };
 
-							wsprintf(ErrorMessage, L"[%s] 대상과의 거리가 너무 멉니다. [거리 : %d ]", FindSkill->_SkillName.c_str(), Distance);
+							wsprintf(ErrorMessage, L"[%s] 대상과의 거리가 너무 멉니다. [거리 : %d ]", FindSkill->SkillName.c_str(), Distance);
 							ErrorDistance = ErrorMessage;
 
 							CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_DISTANCE, ErrorDistance);
@@ -998,7 +998,7 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 
 						WCHAR ErrorMessage[100] = { 0 };
 
-						wsprintf(ErrorMessage, L"[%s] 대상을 선택하고 사용해야 합니다.", FindSkill->_SkillName.c_str());
+						wsprintf(ErrorMessage, L"[%s] 대상을 선택하고 사용해야 합니다.", FindSkill->SkillName.c_str());
 						ErrorNonSelectObjectString = ErrorMessage;
 
 						CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorNonSelectObjectString);
@@ -1119,7 +1119,7 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 
 				SetEvent(_TimerThreadWakeEvent);
 
-				float SkillCoolTimee = FindSkill->_SkillCoolTime / 1000.0f;
+				float SkillCoolTimee = FindSkill->SkillCoolTime / 1000.0f;
 
 				// 클라에게 쿨타임 표시
 				CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(MyPlayer->_GameObjectInfo.ObjectId, QuickSlotBarindex, QuickSlotBarSlotIndex, SkillCoolTimee, 1.0f);
@@ -1157,7 +1157,7 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 
 				WCHAR ErrorMessage[100] = { 0 };
 								
-				wsprintf(ErrorMessage, L"[%s] 재사용 대기시간이 완료되지 않았습니다.", FindSkill->_SkillName.c_str());
+				wsprintf(ErrorMessage, L"[%s] 재사용 대기시간이 완료되지 않았습니다.", FindSkill->SkillName.c_str());
 				ErrorSkillCoolTime = ErrorMessage;
 
 				CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_SKILL_COOLTIME, ErrorSkillCoolTime);
@@ -1288,7 +1288,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 
 						WCHAR ErrorMessage[100] = { 0 };
 
-						wsprintf(ErrorMessage, L"[%s] 대상을 선택해야합니다.", FindSkill->_SkillName.c_str());
+						wsprintf(ErrorMessage, L"[%s] 대상을 선택해야합니다.", FindSkill->SkillName.c_str());
 						ErrorNonSelectObjectString = ErrorMessage;
 
 						ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorNonSelectObjectString);
@@ -1318,7 +1318,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 
 						WCHAR ErrorMessage[100] = { 0 };
 
-						wsprintf(ErrorMessage, L"[%s] 대상을 선택하지 않아서 자신에게 사용합니다.", FindSkill->_SkillName.c_str());
+						wsprintf(ErrorMessage, L"[%s] 대상을 선택하지 않아서 자신에게 사용합니다.", FindSkill->SkillName.c_str());
 						ErrorNonSelectObjectString = ErrorMessage;
 
 						ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorNonSelectObjectString);
@@ -1394,7 +1394,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 
 					SetEvent(_TimerThreadWakeEvent);
 
-					float SkillCoolTimee = FindSkill->_SkillCoolTime / 1000.0f;
+					float SkillCoolTimee = FindSkill->SkillCoolTime / 1000.0f;
 					// 클라에게 쿨타임 표시
 					CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(MyPlayer->_GameObjectInfo.ObjectId, QuickSlotBarindex, QuickSlotBarSlotIndex, SkillCoolTimee, 1.0f);
 					SendPacket(MyPlayer->_SessionId, ResCoolTimeStartPacket);
@@ -1432,7 +1432,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 
 				WCHAR ErrorMessage[100] = { 0 };
 
-				wsprintf(ErrorMessage, L"[%s] 재사용 대기시간이 완료되지 않았습니다.", FindSkill->_SkillName.c_str());
+				wsprintf(ErrorMessage, L"[%s] 재사용 대기시간이 완료되지 않았습니다.", FindSkill->SkillName.c_str());
 				ErrorSkillCoolTime = ErrorMessage;
 
 				CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_SKILL_COOLTIME, ErrorSkillCoolTime);
@@ -3122,10 +3122,10 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				NewQuickSlotBarSlot.QuickSlotBarIndex = QuickSlotBarIndex;
 				NewQuickSlotBarSlot.QuickSlotBarSlotIndex = QuickSlotBarSlotIndex;
 				NewQuickSlotBarSlot.QuickSlotKey = QuickSlotKey;
-				NewQuickSlotBarSlot.QuickBarSkillInfo._SkillType = (en_SkillType)QuickSlotSkillType;
-				NewQuickSlotBarSlot.QuickBarSkillInfo._SkillLevel = QuickSlotSkillLevel;
-				NewQuickSlotBarSlot.QuickBarSkillInfo._SkillCoolTime = QuickSlotSkillCoolTime;
-				NewQuickSlotBarSlot.QuickBarSkillInfo._SkillImagePath = QuickSlotSkillThumbnailImagePath;
+				NewQuickSlotBarSlot.QuickBarSkillInfo.SkillType = (en_SkillType)QuickSlotSkillType;
+				NewQuickSlotBarSlot.QuickBarSkillInfo.SkillLevel = QuickSlotSkillLevel;
+				NewQuickSlotBarSlot.QuickBarSkillInfo.SkillCoolTime = QuickSlotSkillCoolTime;
+				NewQuickSlotBarSlot.QuickBarSkillInfo.SkillImagePath = QuickSlotSkillThumbnailImagePath;
 
 				// 퀵슬롯에 등록한다.
 				Session->MyPlayer->_QuickSlotManager.UpdateQuickSlotBar(NewQuickSlotBarSlot);	
@@ -3283,12 +3283,12 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			while (CharacterSkillGet.Fetch())
 			{
 				st_SkillInfo SkillInfo;
-				SkillInfo._IsQuickSlotUse = IsQuickSlotUse;
-				SkillInfo._SkillType = (en_SkillType)SkillType;
-				SkillInfo._SkillLevel = SkillLevel;
-				SkillInfo._SkillName = SkillName;
-				SkillInfo._SkillCoolTime = SkillCoolTime;
-				SkillInfo._SkillImagePath = SkillThumbnailImagePath;
+				SkillInfo.IsQuickSlotUse = IsQuickSlotUse;
+				SkillInfo.SkillType = (en_SkillType)SkillType;
+				SkillInfo.SkillLevel = SkillLevel;
+				SkillInfo.SkillName = SkillName;
+				SkillInfo.SkillCoolTime = SkillCoolTime;
+				SkillInfo.SkillImagePath = SkillThumbnailImagePath;
 
 				Session->MyPlayer->_SkillBox.AddSkill(SkillInfo);
 
@@ -3299,6 +3299,58 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			}
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterSkillGetConnection);
+#pragma endregion
+
+#pragma region 조합템 정보 보내기
+			/*auto FindSkilliterator = G_Datamanager->_Skills.find(ReqSkillType);
+			st_SkillData* ReqSkillData = (*FindSkilliterator).second;*/
+			vector<st_CraftingItemCategory> CraftingItemCategorys;			
+			
+			for (int8 Category = (int8)en_ItemCategory::ITEM_CATEGORY_WEAPON; Category <= (int8)en_ItemCategory::ITEM_CATEGORY_MATERIAL; ++Category)
+			{
+				auto FindCraftingIterator = G_Datamanager->_CraftingData.find(Category);
+				if (FindCraftingIterator == G_Datamanager->_CraftingData.end())
+				{
+					continue;
+				}
+
+				st_CraftingItemCategoryData* CraftingData = (*FindCraftingIterator).second;
+				
+				// 제작템 카테고리 추출
+				st_CraftingItemCategory CraftingItemCategory;
+				CraftingItemCategory.CategoryType = CraftingData->CraftingType;
+				CraftingItemCategory.CategoryName = (LPWSTR)CA2W(CraftingData->CraftingTypeName.c_str());
+
+				// 제작템 카테고리에 속한 제작템 가져오기
+				for (st_CraftingCompleteItemData CraftingCompleteItemData : CraftingData->CraftingCompleteItems)
+				{
+					st_CraftingCompleteItem CraftingCompleteItem;
+					CraftingCompleteItem.CompleteItemType = CraftingCompleteItemData.CraftingCompleteItemDataId;
+					CraftingCompleteItem.CompleteItemName = (LPWSTR)CA2W(CraftingCompleteItemData.CraftingCompleteName.c_str());					
+					CraftingCompleteItem.CompleteItemImagePath = (LPWSTR)CA2W(CraftingCompleteItemData.CraftingCompleteThumbnailImagePath.c_str());
+					
+					for (st_CraftingMaterialItemData CraftingMaterialItemData : CraftingCompleteItemData.CraftingMaterials)
+					{
+						st_CraftingMaterialItemInfo CraftingMaterialItem;
+						CraftingMaterialItem.AccountDBId = Session->AccountId;
+						CraftingMaterialItem.PlayerDBId = Session->MyPlayer->_GameObjectInfo.ObjectId;
+						CraftingMaterialItem.MaterialItemType = CraftingMaterialItemData.MaterialDataId;
+						CraftingMaterialItem.MaterialItemName = (LPWSTR)CA2W(CraftingMaterialItemData.MaterialName.c_str());
+						CraftingMaterialItem.ItemCount = CraftingMaterialItemData.MaterialCount;
+						CraftingMaterialItem.MaterialItemImagePath = (LPWSTR)CA2W(CraftingMaterialItemData.MaterialThumbnailImagePath.c_str());
+
+						CraftingCompleteItem.Materials.push_back(CraftingMaterialItem);
+					}
+
+					CraftingItemCategory.CompleteItems.push_back(CraftingCompleteItem);
+				}	
+
+				CraftingItemCategorys.push_back(CraftingItemCategory);
+			}	
+
+			CMessage* ResCraftingItemListMessage = MakePacketCraftingList(Session->AccountId, Session->MyPlayer->_GameObjectInfo.ObjectId, CraftingItemCategorys);
+			SendPacket(Session->SessionId, ResCraftingItemListMessage);
+			ResCraftingItemListMessage->Free();
 #pragma endregion
 		} while (0);		
 	}
@@ -3321,14 +3373,14 @@ void CGameServer::PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CGameServ
 
 			Message->Free();
 
-			st_SkillInfo* FindSkill = Session->MyPlayer->_SkillBox.FindSkill(SaveQuickSlotInfo.QuickBarSkillInfo._SkillType);
+			st_SkillInfo* FindSkill = Session->MyPlayer->_SkillBox.FindSkill(SaveQuickSlotInfo.QuickBarSkillInfo.SkillType);
 			// 캐릭터가 해당 스킬을 가지고 있는지 확인
 			if (FindSkill != nullptr)
 			{
-				FindSkill->_IsQuickSlotUse = true;				
+				FindSkill->IsQuickSlotUse = true;				
 
 				Session->MyPlayer->_QuickSlotManager.UpdateQuickSlotBar(SaveQuickSlotInfo);
-				int16 SkillType = (int16)SaveQuickSlotInfo.QuickBarSkillInfo._SkillType;
+				int16 SkillType = (int16)SaveQuickSlotInfo.QuickBarSkillInfo.SkillType;
 				// DB에 퀵슬롯 정보 저장
 				CDBConnection* DBQuickSlotUpdateConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 				SP::CDBGameServerQuickSlotBarSlotUpdate QuickSlotUpdate(*DBQuickSlotUpdateConnection);
@@ -3338,10 +3390,10 @@ void CGameServer::PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CGameServ
 				QuickSlotUpdate.InQuickSlotBarSlotIndex(SaveQuickSlotInfo.QuickSlotBarSlotIndex);
 				QuickSlotUpdate.InQuickSlotKey(SaveQuickSlotInfo.QuickSlotKey);
 				QuickSlotUpdate.InSkillType(SkillType);
-				QuickSlotUpdate.InSkillLevel(SaveQuickSlotInfo.QuickBarSkillInfo._SkillLevel);
-				QuickSlotUpdate.InSkillName(SaveQuickSlotInfo.QuickBarSkillInfo._SkillName);
-				QuickSlotUpdate.InSkillCoolTime(SaveQuickSlotInfo.QuickBarSkillInfo._SkillCoolTime);
-				QuickSlotUpdate.InSkillThumbnailImagePath(SaveQuickSlotInfo.QuickBarSkillInfo._SkillImagePath);
+				QuickSlotUpdate.InSkillLevel(SaveQuickSlotInfo.QuickBarSkillInfo.SkillLevel);
+				QuickSlotUpdate.InSkillName(SaveQuickSlotInfo.QuickBarSkillInfo.SkillName);
+				QuickSlotUpdate.InSkillCoolTime(SaveQuickSlotInfo.QuickBarSkillInfo.SkillCoolTime);
+				QuickSlotUpdate.InSkillThumbnailImagePath(SaveQuickSlotInfo.QuickBarSkillInfo.SkillImagePath);
 
 				QuickSlotUpdate.Execute();
 
@@ -3422,11 +3474,11 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 			SwapAQuickSlotBarInfo.PlayerDBId = PlayerId;
 			SwapAQuickSlotBarInfo.QuickSlotBarIndex = QuickSlotBarSwapIndexB;
 			SwapAQuickSlotBarInfo.QuickSlotBarSlotIndex = QuickSlotBarSlotSwapIndexB;			
-			SwapAQuickSlotBarInfo.QuickBarSkillInfo._SkillType = (en_SkillType)QuickSlotASkillType;
-			SwapAQuickSlotBarInfo.QuickBarSkillInfo._SkillLevel = QuickSlotASkillLevel;
-			SwapAQuickSlotBarInfo.QuickBarSkillInfo._SkillName = QuickSlotASkillName;
-			SwapAQuickSlotBarInfo.QuickBarSkillInfo._SkillCoolTime = QuickSlotASkillCoolTime;
-			SwapAQuickSlotBarInfo.QuickBarSkillInfo._SkillImagePath = QuickSlotASkillImagePath;
+			SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillType = (en_SkillType)QuickSlotASkillType;
+			SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillLevel = QuickSlotASkillLevel;
+			SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillName = QuickSlotASkillName;
+			SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillCoolTime = QuickSlotASkillCoolTime;
+			SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillImagePath = QuickSlotASkillImagePath;
 #pragma endregion
 #pragma region 퀵슬롯 B가 DB에 있는지 확인
 			// 해당 퀵슬롯 위치에 정보가 있는지 DB에서 확인
@@ -3463,19 +3515,19 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 			SwapBQuickSlotBarInfo.PlayerDBId = PlayerId;
 			SwapBQuickSlotBarInfo.QuickSlotBarIndex = QuickSlotBarSwapIndexA;
 			SwapBQuickSlotBarInfo.QuickSlotBarSlotIndex = QuickSlotBarSlotSwapIndexA;			
-			SwapBQuickSlotBarInfo.QuickBarSkillInfo._SkillType = (en_SkillType)QuickSlotBSkillType;
-			SwapBQuickSlotBarInfo.QuickBarSkillInfo._SkillLevel = QuickSlotBSkillLevel;
-			SwapBQuickSlotBarInfo.QuickBarSkillInfo._SkillName = QuickSlotBSkillName;
-			SwapBQuickSlotBarInfo.QuickBarSkillInfo._SkillCoolTime = QuickSlotBSkillCoolTime;
-			SwapBQuickSlotBarInfo.QuickBarSkillInfo._SkillImagePath = QuickSlotBSkillImagePath;
+			SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillType = (en_SkillType)QuickSlotBSkillType;
+			SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillLevel = QuickSlotBSkillLevel;
+			SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillName = QuickSlotBSkillName;
+			SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillCoolTime = QuickSlotBSkillCoolTime;
+			SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillImagePath = QuickSlotBSkillImagePath;
 
 			SwapAQuickSlotBarInfo.QuickSlotKey = QuickSlotBKey;
 			SwapBQuickSlotBarInfo.QuickSlotKey = QuickSlotAKey;
 #pragma endregion
 
 #pragma region DB에서 퀵슬롯 스왑
-			int16 ASkillType = (int16)SwapAQuickSlotBarInfo.QuickBarSkillInfo._SkillType;
-			int16 BSkillType = (int16)SwapBQuickSlotBarInfo.QuickBarSkillInfo._SkillType;
+			int16 ASkillType = (int16)SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillType;
+			int16 BSkillType = (int16)SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillType;
 
 			CDBConnection* DBQuickSlotSwapConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 			SP::CDBGameServerQuickSlotSwap QuickSlotSwap(*DBQuickSlotSwapConnection);
@@ -3485,18 +3537,18 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 			QuickSlotSwap.InAQuickSlotBarIndex(SwapBQuickSlotBarInfo.QuickSlotBarIndex);
 			QuickSlotSwap.InAQuickSlotBarSlotIndex(SwapBQuickSlotBarInfo.QuickSlotBarSlotIndex);
 			QuickSlotSwap.InAQuickSlotSkillType(BSkillType);
-			QuickSlotSwap.InAQuickSlotSkillLevel(SwapBQuickSlotBarInfo.QuickBarSkillInfo._SkillLevel);
-			QuickSlotSwap.InAQuickSlotSKillName(SwapBQuickSlotBarInfo.QuickBarSkillInfo._SkillName);
-			QuickSlotSwap.InAQuickSlotSkillCoolTime(SwapBQuickSlotBarInfo.QuickBarSkillInfo._SkillCoolTime);
-			QuickSlotSwap.InAQuickSlotSKillImagePath(SwapBQuickSlotBarInfo.QuickBarSkillInfo._SkillImagePath);
+			QuickSlotSwap.InAQuickSlotSkillLevel(SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillLevel);
+			QuickSlotSwap.InAQuickSlotSKillName(SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillName);
+			QuickSlotSwap.InAQuickSlotSkillCoolTime(SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillCoolTime);
+			QuickSlotSwap.InAQuickSlotSKillImagePath(SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillImagePath);
 
 			QuickSlotSwap.InBQuickSlotBarIndex(SwapAQuickSlotBarInfo.QuickSlotBarIndex);
 			QuickSlotSwap.InBQuickSlotBarSlotIndex(SwapAQuickSlotBarInfo.QuickSlotBarSlotIndex);
 			QuickSlotSwap.InBQuickSlotSkillType(ASkillType);
-			QuickSlotSwap.InBQuickSlotSkillLevel(SwapAQuickSlotBarInfo.QuickBarSkillInfo._SkillLevel);
-			QuickSlotSwap.InBQuickSlotSKillName(SwapAQuickSlotBarInfo.QuickBarSkillInfo._SkillName);
-			QuickSlotSwap.InBQuickSlotSkillCoolTime(SwapAQuickSlotBarInfo.QuickBarSkillInfo._SkillCoolTime);
-			QuickSlotSwap.InBQuickSlotSKillImagePath(SwapAQuickSlotBarInfo.QuickBarSkillInfo._SkillImagePath);
+			QuickSlotSwap.InBQuickSlotSkillLevel(SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillLevel);
+			QuickSlotSwap.InBQuickSlotSKillName(SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillName);
+			QuickSlotSwap.InBQuickSlotSkillCoolTime(SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillCoolTime);
+			QuickSlotSwap.InBQuickSlotSKillImagePath(SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillImagePath);
 
 			bool QuickSlotSwapSuccess = QuickSlotSwap.Execute();
 			if (QuickSlotSwapSuccess == true)
@@ -4041,6 +4093,70 @@ CGameServerMessage* CGameServer::MakePacketCoolTime(int64 PlayerId, int8 QuickSl
 	*ResCoolTimeMessage << SkillCoolTimeSpeed;
 
 	return ResCoolTimeMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketCraftingList(int64 AccountId, int64 PlayerId, vector<st_CraftingItemCategory> CraftingItemList)
+{
+	CGameServerMessage* ResCraftingListMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResCraftingListMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResCraftingListMessage->Clear();
+
+	*ResCraftingListMessage << (int16)en_PACKET_S2C_CRAFTING_LIST;
+	*ResCraftingListMessage << (int8)CraftingItemList.size();
+	
+	for (st_CraftingItemCategory CraftingItemCategory : CraftingItemList)
+	{
+		*ResCraftingListMessage << (int8)CraftingItemCategory.CategoryType;
+		
+		// 카테고리 이름 
+		int8 CraftingItemCategoryNameLen = (int8)(CraftingItemCategory.CategoryName.length() * 2);
+		*ResCraftingListMessage << CraftingItemCategoryNameLen;
+		ResCraftingListMessage->InsertData(CraftingItemCategory.CategoryName.c_str(), CraftingItemCategoryNameLen);
+
+		*ResCraftingListMessage << (int8)CraftingItemCategory.CompleteItems.size();
+
+		for (st_CraftingCompleteItem CraftingCompleteItem : CraftingItemCategory.CompleteItems)
+		{
+			*ResCraftingListMessage << (int16)CraftingCompleteItem.CompleteItemType;
+
+			// 제작 완성템 이름
+			int8 CraftingCompleteItemNameLen = (int8)(CraftingCompleteItem.CompleteItemName.length() * 2);
+			*ResCraftingListMessage << CraftingCompleteItemNameLen;
+			ResCraftingListMessage->InsertData(CraftingCompleteItem.CompleteItemName.c_str(), CraftingCompleteItemNameLen);
+			
+			// 제작 완성템 이미지 경로
+			int8 CraftingCompleteItemImagePathLen = (int8)(CraftingCompleteItem.CompleteItemImagePath.length() * 2);
+			*ResCraftingListMessage << CraftingCompleteItemImagePathLen;
+			ResCraftingListMessage->InsertData(CraftingCompleteItem.CompleteItemImagePath.c_str(), CraftingCompleteItemImagePathLen);
+
+			*ResCraftingListMessage << (int8)CraftingCompleteItem.Materials.size();
+
+			for (st_CraftingMaterialItemInfo CraftingMaterialItem : CraftingCompleteItem.Materials)
+			{
+				*ResCraftingListMessage << AccountId;
+				*ResCraftingListMessage << PlayerId;
+				*ResCraftingListMessage << (int16)CraftingMaterialItem.MaterialItemType;
+				
+				// 재료템 이름
+				int8 CraftingMaterialItemNameLen = (int8)(CraftingMaterialItem.MaterialItemName.length() * 2);
+				*ResCraftingListMessage << CraftingMaterialItemNameLen;
+				ResCraftingListMessage->InsertData(CraftingMaterialItem.MaterialItemName.c_str(), CraftingMaterialItemNameLen);
+
+				*ResCraftingListMessage << CraftingMaterialItem.ItemCount;
+
+				// 재료템 이미지 경로
+				int8 MaterialImagePathLen = (int8)(CraftingMaterialItem.MaterialItemImagePath.length() * 2);
+				*ResCraftingListMessage << MaterialImagePathLen;
+				ResCraftingListMessage->InsertData(CraftingMaterialItem.MaterialItemImagePath.c_str(), MaterialImagePathLen);
+			}
+		}
+	}
+
+	return ResCraftingListMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_SkillType SkillType, int32 Damage, bool IsCritical)

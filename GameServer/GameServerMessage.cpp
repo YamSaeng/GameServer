@@ -66,18 +66,18 @@ CGameServerMessage& CGameServerMessage::operator<<(st_StatInfo& StatInfo)
 
 CGameServerMessage& CGameServerMessage::operator<<(st_SkillInfo& SkillInfo)
 {
-    *this << (int16)SkillInfo._SkillType;
-    *this << SkillInfo._SkillLevel;
+    *this << (int16)SkillInfo.SkillType;
+    *this << SkillInfo.SkillLevel;
 
-    int8 SkillNameLen = (int8)SkillInfo._SkillName.length() * 2;
+    int8 SkillNameLen = (int8)SkillInfo.SkillName.length() * 2;
     *this << SkillNameLen;
-    InsertData(SkillInfo._SkillName.c_str(), SkillNameLen);
+    InsertData(SkillInfo.SkillName.c_str(), SkillNameLen);
 
-    *this << SkillInfo._SkillCoolTime;
+    *this << SkillInfo.SkillCoolTime;
 
-    int8 SkillImagePathLen = (int8)SkillInfo._SkillImagePath.length() * 2;
+    int8 SkillImagePathLen = (int8)SkillInfo.SkillImagePath.length() * 2;
     *this << SkillImagePathLen;
-    InsertData(SkillInfo._SkillImagePath.c_str(), SkillImagePathLen);
+    InsertData(SkillInfo.SkillImagePath.c_str(), SkillImagePathLen);
 
     return *(this);
 }
@@ -134,19 +134,19 @@ CGameServerMessage& CGameServerMessage::operator>>(st_SkillInfo& Value)
 {
     int16 SkillType = 0;
     *this >> SkillType;
-    Value._SkillType = (en_SkillType)SkillType;
+    Value.SkillType = (en_SkillType)SkillType;
 
-    *this >> Value._SkillLevel;
+    *this >> Value.SkillLevel;
 
     int8 SkillNameLen = 0;
     *this >> SkillNameLen;
-    GetData(Value._SkillName, SkillNameLen);
+    GetData(Value.SkillName, SkillNameLen);
 
-    *this >> Value._SkillCoolTime;
+    *this >> Value.SkillCoolTime;
 
     int8 SkillImagePath = 0;
     *this >> SkillImagePath;
-    GetData(Value._SkillImagePath, SkillImagePath);
+    GetData(Value.SkillImagePath, SkillImagePath);
 
     return *(this);
 }

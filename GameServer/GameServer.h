@@ -255,6 +255,10 @@ private:
 	// 게임서버 재사용대기시간 출력 패킷 조합
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketCoolTime(int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, float SkillCoolTime, float SkillCoolTimeSpeed);
+	//-----------------------------------------------------------------------------------------
+	// 게임서버 제작템 목록 패킷 조합
+	//-----------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketCraftingList(int64 AccountId, int64 PlayerId, vector<st_CraftingItemCategory> CraftingItemList);
 public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 공격요청 응답 패킷 조합
