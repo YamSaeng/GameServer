@@ -370,6 +370,24 @@ enum en_PACKET_TYPE
 	//------------------------------------------------------------	
 	en_PACKET_S2C_CRAFTING_LIST,
 
+	//------------------------------------------------------------
+	// 게임서버 제작 요청
+	// int64 AccountId
+	// int64 PlayerId
+	// en_ItemType CompleteItemType
+	// int8 MaterialCount
+	// st_ItemInfo[] Materials
+	//------------------------------------------------------------
+	en_PACKET_C2S_CRAFTING_CONFIRM,
+	
+	//------------------------------------------------------------
+	// 게임서버 제작 요청 응답
+	// int64 AccountId
+	// int64 PlayerId
+	// st_ItemInfo CompleteItem		
+	//------------------------------------------------------------
+	en_PACKET_S2C_CRAFTING_CONFIRM,
+
 	//-----------------------------------------------------------
 	// 게임서버 에러 전송	
 	// int64 PlayerId
