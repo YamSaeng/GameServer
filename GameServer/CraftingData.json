@@ -12,8 +12,14 @@
             {
               "MaterialDataId": 2007,
               "MaterialName": "나무 판자",
-              "MaterialCount": 20,
+              "MaterialCount": 40,
               "MaterialThumbnailImagePath": "Textures/Material/Wooden Plank"
+            },
+            {
+              "MaterialDataId": 2008,
+              "MaterialName": "실",
+              "MaterialCount": 15,
+              "MaterialThumbnailImagePath": "Textures/Material/Yarn"
             }
           ]
         }
@@ -31,8 +37,14 @@
             {
               "MaterialDataId": 2007,
               "MaterialName": "나무 판자",
-              "MaterialCount": 30,
+              "MaterialCount": 50,
               "MaterialThumbnailImagePath": "Textures/Material/Wooden Plank"
+            },
+            {
+              "MaterialDataId": 2008,
+              "MaterialName": "실",
+              "MaterialCount": 20,
+              "MaterialThumbnailImagePath": "Textures/Material/Yarn"
             }
           ]
         },
@@ -46,6 +58,12 @@
               "MaterialName": "가죽",
               "MaterialCount": 30,
               "MaterialThumbnailImagePath": "Textures/Material/Leather"
+            },
+            {
+              "MaterialDataId": 2008,
+              "MaterialName": "실",
+              "MaterialCount": 10,
+              "MaterialThumbnailImagePath": "Textures/Material/Yarn"
             }
           ]
         },
@@ -57,8 +75,14 @@
             {
               "MaterialDataId": 2000,
               "MaterialName": "가죽",
-              "MaterialCount": 20,
+              "MaterialCount": 15,
               "MaterialThumbnailImagePath": "Textures/Material/Leather"
+            },
+            {
+              "MaterialDataId": 2008,
+              "MaterialName": "실",
+              "MaterialCount": 5,
+              "MaterialThumbnailImagePath": "Textures/Material/Yarn"
             }
           ]
         }
@@ -77,6 +101,19 @@
               "MaterialDataId": 2006,
               "MaterialName": "통나무",
               "MaterialCount": 10,
+              "MaterialThumbnailImagePath": "Textures/Material/Wood Log"
+            }
+          ]
+        },
+        {
+          "CraftingCompleteItemDataId": 2008,
+          "CraftingCompleteItemName": "실",
+          "CraftingCompleteItemThumbnailImagePath": "Textures/Material/Yarn",
+          "CraftingMaterial": [
+            {
+              "MaterialDataId": 2006,
+              "MaterialName": "통나무",
+              "MaterialCount": 2,
               "MaterialThumbnailImagePath": "Textures/Material/Wood Log"
             }
           ]

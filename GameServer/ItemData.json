@@ -103,6 +103,13 @@
       "MaxCount": 99,
       "IsEquipped": false,
       "ImageFilePath": "Textures/Material/Wooden Plank"
+    },
+    {
+      "DataSheetId": 2008,
+      "ItemName": "½Ç",
+      "MaxCount": 99,
+      "IsEquipped": false,
+      "ImageFilePath": "Textures/Material/Yarn"
     }
   ]
 } 
