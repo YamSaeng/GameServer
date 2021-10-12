@@ -142,8 +142,9 @@ public:
 	int32 _SizeX;
 	int32 _SizeY;
 	
-	bool** _CollisionMapInfo;	
-	CGameObject*** _ObjectsInfo;	
+	bool** _CollisionMapInfos;	
+	CGameObject*** _ObjectsInfos;		
+	st_ItemInfo*** _ItemInfos;
 
 	CMap(int MapId);
 	
@@ -166,10 +167,14 @@ public:
 	//------------------------------------------------------------------------------------------------------------------------
 	bool ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool CheckObject = true, bool Applycollision = true);
 
+	bool ApplyPositionUpdateItem(CGameObject* GameObject, st_Vector2Int& NewPosition);
+
 	//---------------------------------------
 	// ∏ ø°º≠ ø¿∫Í¡ß∆Æ ≈¿Â
 	//---------------------------------------
 	bool ApplyLeave(CGameObject* GameObject);	
+
+	bool ApplyPositionLeaveItem(CGameObject* GameObject);
 	
 	st_Position CellToPosition(st_Vector2Int CellPosition);
 	st_Vector2Int PositionToCell(st_Position Position);

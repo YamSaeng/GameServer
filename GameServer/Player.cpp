@@ -4,7 +4,7 @@
 
 CPlayer::CPlayer()
 {
-	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_MELEE_PLAYER;	
+	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_PLAYER;	
 	_AttackTick = 0;
 	_SpellTick = 0;
 }
@@ -12,7 +12,7 @@ CPlayer::CPlayer()
 CPlayer::CPlayer(st_GameObjectInfo _PlayerInfo)
 {
 	_GameObjectInfo = _PlayerInfo;		
-	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_MELEE_PLAYER;		
+	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_PLAYER;
 }
 
 CPlayer::~CPlayer()

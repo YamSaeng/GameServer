@@ -50,21 +50,32 @@ CMap::CMap(int MapId)
 	int XCount = _Right - _Left + 1;
 	int YCount = _Down - _Up + 1;	
 
-	_CollisionMapInfo = new bool*[YCount];
+	_CollisionMapInfos = new bool*[YCount];
 
 	for (int i = 0; i < YCount; i++)
 	{
-		_CollisionMapInfo[i] = new bool[XCount];
+		_CollisionMapInfos[i] = new bool[XCount];
 	}
 
-	_ObjectsInfo = new CGameObject**[YCount];
+	_ObjectsInfos = new CGameObject**[YCount];
 
 	for (int i = 0; i < YCount; i++)
 	{
-		_ObjectsInfo[i] = new CGameObject*[XCount];	
+		_ObjectsInfos[i] = new CGameObject*[XCount];	
 		for (int j = 0; j < XCount; j++)
 		{
-			_ObjectsInfo[i][j] = nullptr;
+			_ObjectsInfos[i][j] = nullptr;
+		}
+	}
+
+	_ItemInfos = new st_ItemInfo * *[YCount];
+	
+	for (int i = 0; i < YCount; i++)
+	{
+		_ItemInfos[i] = new st_ItemInfo*[XCount];
+		for (int j = 0; j < XCount; j++)
+		{
+			_ItemInfos[i][j] = new st_ItemInfo[20];				
 		}
 	}
 
@@ -73,17 +84,16 @@ CMap::CMap(int MapId)
 		for (int X = 0; X < XCount; X++)
 		{		
 			if (*ConvertP == '\r')
-			{
-				
+			{				
 				break;
 			}		
 
-			_CollisionMapInfo[Y][X] = *ConvertP - 48;		
+			_CollisionMapInfos[Y][X] = *ConvertP - 48;		
 
 			ConvertP++;
 		}
 		ConvertP += 2;
-	}
+	}		
 
 	_SizeX = _Right - _Left + 1;
 	_SizeY = _Down - _Up + 1;
@@ -106,7 +116,7 @@ CGameObject* CMap::Find(st_Vector2Int& CellPosition)
 	int X = CellPosition._X - _Left;
 	int Y = _Down - CellPosition._Y;
 	
-	return _ObjectsInfo[Y][X];
+	return _ObjectsInfos[Y][X];
 }
 
 bool CMap::Cango(st_Vector2Int& CellPosition, bool CheckObjects)
@@ -128,7 +138,7 @@ bool CMap::Cango(st_Vector2Int& CellPosition, bool CheckObjects)
 	
 	//G_Logger->WriteStdOut(en_Color::RED, L"Y : %d X : %d\n", Y, X);
 
-	return !_CollisionMapInfo[Y][X] && (!CheckObjects || _ObjectsInfo[Y][X] == nullptr);
+	return !_CollisionMapInfos[Y][X] && (!CheckObjects || _ObjectsInfos[Y][X] == nullptr);
 }
 
 bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool CheckObject, bool Applycollision)
@@ -164,16 +174,16 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 		int Y = _Down - PositionInfo.PositionY;
 
 		// 기존위치 데이터는 날리고
-		if (_ObjectsInfo[Y][X] == GameObject)
+		if (_ObjectsInfos[Y][X] == GameObject)
 		{
-			_ObjectsInfo[Y][X] = nullptr;
+			_ObjectsInfos[Y][X] = nullptr;
 		}
 
 		// 목적지 위치 구해주고
 		X = DestPosition._X - _Left;
 		Y = _Down - DestPosition._Y;
 		// 목적지에 넣어준다.
-		_ObjectsInfo[Y][X] = GameObject;
+		_ObjectsInfos[Y][X] = GameObject;
 	}		
 
 	// 섹터 작업
@@ -406,92 +416,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 			ResSectorSpawnPlayer->Free();
 		}
 	}
-		break;
-	case en_GameObjectType::ITEM_SLIME_GEL:
-	case en_GameObjectType::ITEM_BRONZE_COIN:
-	case en_GameObjectType::ITEM_LEATHER:
-	case en_GameObjectType::ITEM_SKILL_BOOK:
-	case en_GameObjectType::ITEM_WOOD_LOG:
-	case en_GameObjectType::ITEM_STONE:
-	{
-		CItem* MoveItem = (CItem*)GameObject;
-
-		CSector* CurrentSector = GameObject->_Channel->GetSector(MoveItem->GetCellPosition());
-		CSector* NextSector = GameObject->_Channel->GetSector(DestPosition);
-
-		if (CurrentSector != NextSector)
-		{
-			CurrentSector->Remove(MoveItem);
-
-			// 아이템 섹터 옮기기 전 주변 섹터 
-			vector<CSector*> CurrentSectors = GameObject->_Channel->GetAroundSectors(MoveItem->GetCellPosition(), 1);
-			// 섹터 옮기고 난 후 주변 섹터
-			vector<CSector*> NextSectors = GameObject->_Channel->GetAroundSectors(DestPosition, 1);
-
-			// 나를 제거할 섹터를 찾는 작업
-			// Current - Next;
-			// 현재 섹터들에서 내가 이동할 섹터를 제거한 차집합 섹터를 얻는다.
-			vector<CSector*> DeSpawnSectors = CurrentSectors;
-			for (int32 i = 0; i < DeSpawnSectors.size(); i++)
-			{
-				for (int32 j = 0; j < NextSectors.size(); j++)
-				{
-					if (DeSpawnSectors[i]->_SectorY == NextSectors[j]->_SectorY && DeSpawnSectors[i]->_SectorX == NextSectors[j]->_SectorX)
-					{
-						DeSpawnSectors.erase(DeSpawnSectors.begin() + i);
-					}
-				}
-			}
-
-			vector<int64> DeSpawnSectorObjectIds;
-			DeSpawnSectorObjectIds.push_back(MoveItem->_GameObjectInfo.ObjectId);
-			// 나를 제외하라는 메시지를 생성 후 
-			CMessage* ResSectorDespawnPlayer = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(1, DeSpawnSectorObjectIds);
-			// 해당 섹터 플레이어들에게 전송한다.
-			for (int32 i = 0; i < DeSpawnSectors.size(); i++)
-			{
-				for (CPlayer* Player : DeSpawnSectors[i]->GetPlayers())
-				{
-					G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSectorDespawnPlayer);
-				}
-			}
-			ResSectorDespawnPlayer->Free();
-
-			NextSector->Insert(MoveItem);
-
-			// 나를 스폰할 섹터를 찾는 작업
-			// Next - Current;
-			// 이동할 섹터에서 현재 섹터를 제거한 차집합 섹터를 찾는다.
-			vector<CSector*> SpawnSectors = NextSectors;
-			for (int32 i = 0; i < SpawnSectors.size(); i++)
-			{
-				for (int32 j = 0; j < CurrentSectors.size(); j++)
-				{
-					if (SpawnSectors[i]->_SectorY == CurrentSectors[j]->_SectorY && SpawnSectors[i]->_SectorX == CurrentSectors[j]->_SectorX)
-					{
-						SpawnSectors.erase(SpawnSectors.begin() + i);
-					}
-				}
-			}
-
-			// 스폰할 대상배열
-			vector<st_GameObjectInfo> SpawnObjectInfos;
-			// 나의 정보를 담고
-			SpawnObjectInfos.push_back(MoveItem->_GameObjectInfo);
-
-			// 나를 소환하라고 앞서 얻어준 섹터 플레이어들에게 패킷을 전송한다.
-			CMessage* ResSectorSpawnPlayer = G_ObjectManager->GameServer->MakePacketResObjectSpawn(1, SpawnObjectInfos);
-			for (int32 i = 0; i < SpawnSectors.size(); i++)
-			{
-				for (CPlayer* Player : SpawnSectors[i]->GetPlayers())
-				{
-					G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSectorSpawnPlayer);
-				}
-			}
-			ResSectorSpawnPlayer->Free();
-		}
-	}
-		break;
+		break;	
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
 	{
@@ -584,6 +509,128 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	return true;
 }
 
+bool CMap::ApplyPositionUpdateItem(CGameObject* GameObject, st_Vector2Int& NewPosition)
+{
+	CItem* Item = (CItem*)GameObject;
+
+	int X = NewPosition._X - _Left;
+	int Y = _Down - NewPosition._Y;
+	
+	bool FindItemInfo = false;
+
+	for (int i = 0; i < 20; i++)
+	{
+		if (_ItemInfos[Y][X][i].ItemType == Item->_ItemInfo.ItemType)
+		{			
+			_ItemInfos[Y][X][i].ItemCount += Item->_ItemInfo.ItemCount;
+			
+			CItem* FindItem = (CItem*)(G_ObjectManager->Find(_ItemInfos[Y][X][i].ItemDBId, en_GameObjectType::OBJECT_ITEM));
+			if (FindItem != nullptr)
+			{
+				FindItem->_ItemInfo.ItemCount = _ItemInfos[Y][X][i].ItemCount;
+			}
+			
+			return false;
+		}
+	}
+
+	if (FindItemInfo == false)
+	{
+		int NewItemInfoIndex = -1;
+
+		for (int i = 0; i < 20; i++)
+		{
+			if (_ItemInfos[Y][X][i].ItemType == en_ItemType::ITEM_TYPE_NONE)
+			{
+				NewItemInfoIndex = i;
+				break;
+			}		
+		}
+
+		_ItemInfos[Y][X][NewItemInfoIndex] = Item->_ItemInfo;
+	}
+
+	CSector* CurrentSector = Item->_Channel->GetSector(Item->GetCellPosition());
+	CSector* NextSector = Item->_Channel->GetSector(NewPosition);
+	
+	if (CurrentSector != NextSector)
+	{
+		CurrentSector->Remove(Item);
+
+		// 아이템 섹터 옮기기 전 주변 섹터 
+		vector<CSector*> CurrentSectors = Item->_Channel->GetAroundSectors(Item->GetCellPosition(), 1);
+		// 섹터 옮기고 난 후 주변 섹터
+		vector<CSector*> NextSectors = Item->_Channel->GetAroundSectors(NewPosition, 1);
+
+		// 나를 제거할 섹터를 찾는 작업
+		// Current - Next;
+		// 현재 섹터들에서 내가 이동할 섹터를 제거한 차집합 섹터를 얻는다.
+		vector<CSector*> DeSpawnSectors = CurrentSectors;
+		for (int32 i = 0; i < DeSpawnSectors.size(); i++)
+		{
+			for (int32 j = 0; j < NextSectors.size(); j++)
+			{
+				if (DeSpawnSectors[i]->_SectorY == NextSectors[j]->_SectorY && DeSpawnSectors[i]->_SectorX == NextSectors[j]->_SectorX)
+				{
+					DeSpawnSectors.erase(DeSpawnSectors.begin() + i);
+				}
+			}
+		}
+
+		vector<int64> DeSpawnSectorObjectIds;
+		DeSpawnSectorObjectIds.push_back(Item->_GameObjectInfo.ObjectId);
+		// 나를 제외하라는 메시지를 생성 후 
+		CMessage* ResSectorDespawnPlayer = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(1, DeSpawnSectorObjectIds);
+		// 해당 섹터 플레이어들에게 전송한다.
+		for (int32 i = 0; i < DeSpawnSectors.size(); i++)
+		{
+			for (CPlayer* Player : DeSpawnSectors[i]->GetPlayers())
+			{
+				G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSectorDespawnPlayer);
+			}
+		}
+		ResSectorDespawnPlayer->Free();
+
+		NextSector->Insert(Item);
+
+		// 나를 스폰할 섹터를 찾는 작업
+		// Next - Current;
+		// 이동할 섹터에서 현재 섹터를 제거한 차집합 섹터를 찾는다.
+		vector<CSector*> SpawnSectors = NextSectors;
+		for (int32 i = 0; i < SpawnSectors.size(); i++)
+		{
+			for (int32 j = 0; j < CurrentSectors.size(); j++)
+			{
+				if (SpawnSectors[i]->_SectorY == CurrentSectors[j]->_SectorY && SpawnSectors[i]->_SectorX == CurrentSectors[j]->_SectorX)
+				{
+					SpawnSectors.erase(SpawnSectors.begin() + i);
+				}
+			}
+		}
+
+		// 스폰할 대상배열
+		vector<st_GameObjectInfo> SpawnObjectInfos;
+		// 나의 정보를 담고
+		SpawnObjectInfos.push_back(Item->_GameObjectInfo);
+
+		// 나를 소환하라고 앞서 얻어준 섹터 플레이어들에게 패킷을 전송한다.
+		CMessage* ResSectorSpawnPlayer = G_ObjectManager->GameServer->MakePacketResObjectSpawn(1, SpawnObjectInfos);
+		for (int32 i = 0; i < SpawnSectors.size(); i++)
+		{
+			for (CPlayer* Player : SpawnSectors[i]->GetPlayers())
+			{
+				G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSectorSpawnPlayer);
+			}
+		}
+		ResSectorSpawnPlayer->Free();
+	}
+
+	Item->_GameObjectInfo.ObjectPositionInfo.PositionX = NewPosition._X;
+	Item->_GameObjectInfo.ObjectPositionInfo.PositionY = NewPosition._Y;
+
+	return true;
+}
+
 bool CMap::ApplyLeave(CGameObject* GameObject)
 {
 	if (GameObject->_Channel == nullptr)
@@ -617,26 +664,72 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 
 	int X = PositionInfo.PositionX - _Left;
 	int Y = _Down - PositionInfo.PositionY;
-	
-	if (GameObject->_GameObjectInfo.ObjectType == en_GameObjectType::ITEM_SLIME_GEL 
-		|| GameObject->_GameObjectInfo.ObjectType == en_GameObjectType::ITEM_LEATHER
-		|| GameObject->_GameObjectInfo.ObjectType == en_GameObjectType::ITEM_BRONZE_COIN
-		|| GameObject->_GameObjectInfo.ObjectType == en_GameObjectType::ITEM_SKILL_BOOK
-		|| GameObject->_GameObjectInfo.ObjectType == en_GameObjectType::ITEM_WOOD_LOG
-		|| GameObject->_GameObjectInfo.ObjectType == en_GameObjectType::ITEM_STONE)
-	{
-		return true;
-	}
 
 	// 맵에서 제거
-	if (_ObjectsInfo[Y][X] == GameObject)
+	if (_ObjectsInfos[Y][X] == GameObject)
 	{		
-		_ObjectsInfo[Y][X] = nullptr;
+		_ObjectsInfos[Y][X] = nullptr;
 	}
 	else
 	{
 		CRASH("ApplyLeave 삭제하려는 오브젝트가 저장되어 있는 오브젝트와 다름");
 	}
+
+	return true;
+}
+
+bool CMap::ApplyPositionLeaveItem(CGameObject* GameObject)
+{
+	// 맵에서 정보 삭제
+	if (GameObject->_Channel == nullptr)
+	{
+		G_Logger->WriteStdOut(en_Color::RED, L"ApplyPositionLeaveItem Channel is nullptr");
+		return false;
+	}
+
+	if (GameObject->_Channel->_Map != this)
+	{
+		G_Logger->WriteStdOut(en_Color::RED, L"ApplyPositionLeaveItem Channel _Map Error");
+		return false;
+	}
+
+	st_PositionInfo PositionInfo = GameObject->GetPositionInfo();
+	// 좌우 좌표 검사
+	if (PositionInfo.PositionX < _Left || PositionInfo.PositionX > _Right)
+	{
+		return false;
+	}
+
+	// 상하 좌표 검사
+	if (PositionInfo.PositionY < _Up || PositionInfo.PositionY > _Down)
+	{
+		return false;
+	}
+
+	CSector* Sector = GameObject->_Channel->GetSector(GameObject->GetCellPosition());
+	Sector->Remove(GameObject);
+
+	int X = PositionInfo.PositionX - _Left;
+	int Y = _Down - PositionInfo.PositionY;
+
+	CItem* Item = (CItem*)GameObject;
+
+	for (int i = 0; i < 20; i++)
+	{
+		if (_ItemInfos[Y][X][i].ItemType == Item->_ItemInfo.ItemType)
+		{
+			_ItemInfos[Y][X][i].ItemDBId = 0;
+			_ItemInfos[Y][X][i].IsQuickSlotUse = false;
+			_ItemInfos[Y][X][i].ItemCategory = en_ItemCategory::ITEM_CATEGORY_NONE;
+			_ItemInfos[Y][X][i].ItemType = en_ItemType::ITEM_TYPE_NONE;
+			_ItemInfos[Y][X][i].ItemName = L"";
+			_ItemInfos[Y][X][i].ItemCount = 0;
+			_ItemInfos[Y][X][i].ThumbnailImagePath = L"";
+			_ItemInfos[Y][X][i].IsEquipped = false;
+			_ItemInfos[Y][X][i].SlotIndex = -1;
+			break;
+		}
+	}	
 
 	return true;
 }

@@ -255,13 +255,14 @@ void CChannel::Update()
 	}
 }
 
-void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* ObjectSpawnPosition)
+bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* ObjectSpawnPosition)
 {
+	bool IsEnterChannel = false;
 	// 채널 입장
 	if (EnterChannelGameObject == nullptr)
 	{
 		CRASH("GameObject가 nullptr");
-		return;
+		return false;
 	}	
 
 	random_device RD;
@@ -311,7 +312,7 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			EnterChannelPlayer->_Channel = this;		
 
 			// 맵에 적용
-			_Map->ApplyMove(EnterChannelPlayer, SpawnPosition);
+			IsEnterChannel = _Map->ApplyMove(EnterChannelPlayer, SpawnPosition);
 
 			// 섹터 얻어서 해당 섹터에도 저장
 			CSector* EnterSector = GetSector(SpawnPosition);			
@@ -333,7 +334,7 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			EnterChannelMonster->_Channel = this;		
 
 			// 맵에 적용
-			_Map->ApplyMove(EnterChannelMonster, SpawnPosition);
+			IsEnterChannel = _Map->ApplyMove(EnterChannelMonster, SpawnPosition);
 			EnterChannelMonster->Init(SpawnPosition);
 
 			// 섹터 얻어서 해당 섹터에도 저장
@@ -341,28 +342,32 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			EnterSector->Insert(EnterChannelMonster);												
 		}
 		break;
-	case en_GameObjectType::ITEM_SLIME_GEL:
-	case en_GameObjectType::ITEM_BRONZE_COIN:
-	case en_GameObjectType::ITEM_LEATHER:
-	case en_GameObjectType::ITEM_SKILL_BOOK:
-	case en_GameObjectType::ITEM_WOOD_LOG:
-	case en_GameObjectType::ITEM_STONE:
+	case en_GameObjectType::OBJECT_ITEM_SLIME_GEL:
+	case en_GameObjectType::OBJECT_ITEM_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_LEATHER:
+	case en_GameObjectType::OBJECT_ITEM_SKILL_BOOK:
+	case en_GameObjectType::OBJECT_ITEM_WOOD_LOG:
+	case en_GameObjectType::OBJECT_ITEM_STONE:
 		{
 			// 아이템으로 형변환
 			CItem* EnterChannelItem = (CItem*)EnterChannelGameObject;
 			EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.PositionY = SpawnPosition._Y;
 			EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.PositionX = SpawnPosition._X;
-
-			_Items.insert(pair<int64, CItem*>(EnterChannelItem->_GameObjectInfo.ObjectId,EnterChannelItem));
-
+			
 			EnterChannelItem->_Channel = this;			
 			
-			// 맵에 적용 아이템의 경우는 충돌체로 인식하지 않게 한다.
-			_Map->ApplyMove(EnterChannelItem, SpawnPosition, false, false);
-
-			// 섹터 얻어서 해당 섹터에도 저장
-			CSector* EnterSector = GetSector(SpawnPosition);
-			EnterSector->Insert(EnterChannelItem);
+			// 맵 정보에 보관			
+			IsEnterChannel = _Map->ApplyPositionUpdateItem(EnterChannelItem, SpawnPosition);
+			
+			// 중복되지 않는 아이템의 경우에만 채널에 해당 아이템을 채널과 섹터에 저장
+			if (IsEnterChannel == true)
+			{
+				_Items.insert(pair<int64, CItem*>(EnterChannelItem->_GameObjectInfo.ObjectId, EnterChannelItem));
+				
+				// 섹터 얻어서 해당 섹터에도 저장
+				CSector* EnterSector = GetSector(SpawnPosition);
+				EnterSector->Insert(EnterChannelItem);
+			}		
 		}
 		break;
 	case en_GameObjectType::OBJECT_STONE:
@@ -376,7 +381,7 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 
 			EnterChannelEnvironment->_Channel = this;
 						
-			_Map->ApplyMove(EnterChannelEnvironment, SpawnPosition);
+			IsEnterChannel = _Map->ApplyMove(EnterChannelEnvironment, SpawnPosition);
 
 			// 섹터 얻어서 해당 섹터에도 저장
 			CSector* EnterSector = GetSector(SpawnPosition);
@@ -384,6 +389,8 @@ void CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 		}
 		break;
 	}
+
+	return IsEnterChannel;
 }
 
 void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
@@ -404,15 +411,15 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 
 		_Map->ApplyLeave(LeaveChannelGameObject);		
 		break;	
-	case en_GameObjectType::ITEM_SLIME_GEL:
-	case en_GameObjectType::ITEM_BRONZE_COIN:
-	case en_GameObjectType::ITEM_LEATHER:
-	case en_GameObjectType::ITEM_SKILL_BOOK:
-	case en_GameObjectType::ITEM_WOOD_LOG:
-	case en_GameObjectType::ITEM_STONE:
+	case en_GameObjectType::OBJECT_ITEM_SLIME_GEL:
+	case en_GameObjectType::OBJECT_ITEM_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_LEATHER:
+	case en_GameObjectType::OBJECT_ITEM_SKILL_BOOK:
+	case en_GameObjectType::OBJECT_ITEM_WOOD_LOG:
+	case en_GameObjectType::OBJECT_ITEM_STONE:
 		_Items.erase(LeaveChannelGameObject->_GameObjectInfo.ObjectId);
 
-		_Map->ApplyLeave(LeaveChannelGameObject);
+		_Map->ApplyPositionLeaveItem(LeaveChannelGameObject);
 		break;
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:

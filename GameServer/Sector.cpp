@@ -22,12 +22,12 @@ void CSector::Insert(CGameObject* InsertGameObject)
 	case en_GameObjectType::OBJECT_BEAR:
 		_Monsters.insert((CMonster*)InsertGameObject);
 		break;
-	case en_GameObjectType::ITEM_SLIME_GEL:
-	case en_GameObjectType::ITEM_BRONZE_COIN:
-	case en_GameObjectType::ITEM_LEATHER:
-	case en_GameObjectType::ITEM_SKILL_BOOK:
-	case en_GameObjectType::ITEM_WOOD_LOG:
-	case en_GameObjectType::ITEM_STONE:
+	case en_GameObjectType::OBJECT_ITEM_SLIME_GEL:
+	case en_GameObjectType::OBJECT_ITEM_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_LEATHER:
+	case en_GameObjectType::OBJECT_ITEM_SKILL_BOOK:
+	case en_GameObjectType::OBJECT_ITEM_WOOD_LOG:
+	case en_GameObjectType::OBJECT_ITEM_STONE:
 		_Items.insert((CItem*)InsertGameObject);
 		break;
 	case en_GameObjectType::OBJECT_STONE:
@@ -51,12 +51,12 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 	case en_GameObjectType::OBJECT_BEAR:
 		_Monsters.erase((CMonster*)RemoveGameObject);
 		break;
-	case en_GameObjectType::ITEM_SLIME_GEL:
-	case en_GameObjectType::ITEM_BRONZE_COIN:
-	case en_GameObjectType::ITEM_LEATHER:
-	case en_GameObjectType::ITEM_SKILL_BOOK:
-	case en_GameObjectType::ITEM_WOOD_LOG:
-	case en_GameObjectType::ITEM_STONE:
+	case en_GameObjectType::OBJECT_ITEM_SLIME_GEL:
+	case en_GameObjectType::OBJECT_ITEM_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_LEATHER:
+	case en_GameObjectType::OBJECT_ITEM_SKILL_BOOK:
+	case en_GameObjectType::OBJECT_ITEM_WOOD_LOG:
+	case en_GameObjectType::OBJECT_ITEM_STONE:
 		_Items.erase((CItem*)RemoveGameObject);
 		break;
 	case en_GameObjectType::OBJECT_STONE:

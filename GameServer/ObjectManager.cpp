@@ -31,6 +31,8 @@ CObjectManager::~CObjectManager()
 
 void CObjectManager::Add(CGameObject* AddObject, int32 ChannelId)
 {
+	bool IsEnterChannel = true;
+
 	// 채널 찾는다.
 	CChannel* EnterChannel = G_ChannelManager->Find(ChannelId);
 	if (EnterChannel == nullptr)
@@ -67,28 +69,37 @@ void CObjectManager::Add(CGameObject* AddObject, int32 ChannelId)
 				ResSpawnPacket->Free();
 			} 
 			break;		
-		case en_GameObjectType::ITEM_SLIME_GEL:
-		case en_GameObjectType::ITEM_BRONZE_COIN:
-		case en_GameObjectType::ITEM_LEATHER:
-		case en_GameObjectType::ITEM_SKILL_BOOK:
-		case en_GameObjectType::ITEM_WOOD_LOG:
-		case en_GameObjectType::ITEM_STONE:
+		case en_GameObjectType::OBJECT_ITEM_SLIME_GEL:
+		case en_GameObjectType::OBJECT_ITEM_BRONZE_COIN:
+		case en_GameObjectType::OBJECT_ITEM_LEATHER:
+		case en_GameObjectType::OBJECT_ITEM_SKILL_BOOK:
+		case en_GameObjectType::OBJECT_ITEM_WOOD_LOG:
+		case en_GameObjectType::OBJECT_ITEM_STONE:
 			{
 				vector<st_GameObjectInfo> SpawnItem;
 				
-				CItem* Item = (CItem*)AddObject;								
-				EnterChannel->EnterChannel(AddObject, &Item->_SpawnPosition);
+				CItem* Item = (CItem*)AddObject;				
+												
+				IsEnterChannel = EnterChannel->EnterChannel(AddObject, &Item->_SpawnPosition);
+				if (IsEnterChannel == true)
+				{
+					// 중복되지 않은 아이템 스폰
+					_Items.insert(pair<int64, CItem*>(AddObject->_GameObjectInfo.ObjectId, Item));
 
-				_Items.insert(pair<int64, CItem*>(AddObject->_GameObjectInfo.ObjectId,Item));
+					SpawnItem.push_back(Item->_GameObjectInfo);
 
-				SpawnItem.push_back(Item->_GameObjectInfo);
+					Item->SetDestoryTime(1800);
+					Item->ItemSetTarget(Item->_GameObjectInfo.OwnerObjectType, Item->_GameObjectInfo.OwnerObjectId);
 
-				Item->SetDestoryTime(1800);
-				Item->ItemSetTarget(Item->_GameObjectInfo.OwnerObjectType, Item->_GameObjectInfo.OwnerObjectId);
-
-				CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(1, SpawnItem);
-				GameServer->SendPacketAroundSector(Item->GetCellPosition(), ResSpawnPacket);
-				ResSpawnPacket->Free();
+					CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(1, SpawnItem);
+					GameServer->SendPacketAroundSector(Item->GetCellPosition(), ResSpawnPacket);
+					ResSpawnPacket->Free();
+				}
+				else
+				{
+					// 중복된 아이템의 경우 메모리에 반납
+					ObjectReturn(Item->_GameObjectInfo.ObjectType, Item);
+				}				
 			}
 			break;
 		case en_GameObjectType::OBJECT_STONE:
@@ -128,13 +139,13 @@ bool CObjectManager::Remove(CGameObject* RemoveObject, int32 _ChannelId, bool Is
 
 		RemoveObject->_Channel->LeaveChannel(RemoveObject);
 		break;	
-	case en_GameObjectType::ITEM_WEAPON:
-	case en_GameObjectType::ITEM_SLIME_GEL:
-	case en_GameObjectType::ITEM_BRONZE_COIN:
-	case en_GameObjectType::ITEM_LEATHER:
-	case en_GameObjectType::ITEM_SKILL_BOOK:
-	case en_GameObjectType::ITEM_WOOD_LOG:
-	case en_GameObjectType::ITEM_STONE:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON:
+	case en_GameObjectType::OBJECT_ITEM_SLIME_GEL:
+	case en_GameObjectType::OBJECT_ITEM_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_LEATHER:
+	case en_GameObjectType::OBJECT_ITEM_SKILL_BOOK:
+	case en_GameObjectType::OBJECT_ITEM_WOOD_LOG:
+	case en_GameObjectType::OBJECT_ITEM_STONE:
 		_Items.erase(RemoveObject->_GameObjectInfo.ObjectId);
 
 		RemoveObject->_Channel->LeaveChannel(RemoveObject);
@@ -160,6 +171,7 @@ CGameObject* CObjectManager::Find(int64 ObjectId, en_GameObjectType GameObjectTy
 {	
 	switch (GameObjectType)
 	{
+	case en_GameObjectType::OBJECT_PLAYER:
 	case en_GameObjectType::OBJECT_MELEE_PLAYER:
 	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 	{
@@ -171,6 +183,7 @@ CGameObject* CObjectManager::Find(int64 ObjectId, en_GameObjectType GameObjectTy
 
 		return (*FindIterator).second;
 	}
+	case en_GameObjectType::OBJECT_MONSTER:	
 	case en_GameObjectType::OBJECT_SLIME:
 	case en_GameObjectType::OBJECT_BEAR:
 	{
@@ -182,13 +195,16 @@ CGameObject* CObjectManager::Find(int64 ObjectId, en_GameObjectType GameObjectTy
 
 		return (*FindIterator).second;
 	}
-	case en_GameObjectType::ITEM_WEAPON:
-	case en_GameObjectType::ITEM_SLIME_GEL:
-	case en_GameObjectType::ITEM_LEATHER:
-	case en_GameObjectType::ITEM_BRONZE_COIN:
-	case en_GameObjectType::ITEM_SKILL_BOOK:
-	case en_GameObjectType::ITEM_WOOD_LOG:
-	case en_GameObjectType::ITEM_STONE:
+	case en_GameObjectType::OBJECT_ITEM:	
+	case en_GameObjectType::OBJECT_ITEM_WEAPON:
+	case en_GameObjectType::OBJECT_ITEM_SLIME_GEL:
+	case en_GameObjectType::OBJECT_ITEM_LEATHER:
+	case en_GameObjectType::OBJECT_ITEM_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_SLIVER_COIN:
+	case en_GameObjectType::OBJECT_ITEM_GOLD_COIN:
+	case en_GameObjectType::OBJECT_ITEM_SKILL_BOOK:
+	case en_GameObjectType::OBJECT_ITEM_WOOD_LOG:
+	case en_GameObjectType::OBJECT_ITEM_STONE:
 	{
 		auto FindIterator = _Items.find(ObjectId);
 		if (FindIterator == _Items.end())
@@ -197,7 +213,8 @@ CGameObject* CObjectManager::Find(int64 ObjectId, en_GameObjectType GameObjectTy
 		}
 
 		return (*FindIterator).second;
-	}	
+	}		
+	case en_GameObjectType::OBJECT_ENVIRONMENT:	
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
 	{
@@ -221,8 +238,7 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 
 	switch (ObjectType)
 	{
-	case en_GameObjectType::OBJECT_MELEE_PLAYER:
-	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
+	case en_GameObjectType::OBJECT_PLAYER:	
 		NewObject = _PlayerMemoryPool->Alloc();
 		break;
 	case en_GameObjectType::OBJECT_SLIME:
@@ -231,17 +247,17 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 	case en_GameObjectType::OBJECT_BEAR:
 		NewObject = _BearMemoryPool->Alloc();
 		break;
-	case en_GameObjectType::ITEM_WEAPON:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON:
 		NewObject = _WeaponMemoryPool->Alloc();
 		break;
-	case en_GameObjectType::ITEM_SLIME_GEL:
-	case en_GameObjectType::ITEM_BRONZE_COIN:
-	case en_GameObjectType::ITEM_LEATHER:
-	case en_GameObjectType::ITEM_WOOD_LOG:
-	case en_GameObjectType::ITEM_STONE:
+	case en_GameObjectType::OBJECT_ITEM_SLIME_GEL:
+	case en_GameObjectType::OBJECT_ITEM_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_LEATHER:
+	case en_GameObjectType::OBJECT_ITEM_WOOD_LOG:
+	case en_GameObjectType::OBJECT_ITEM_STONE:
 		NewObject = _MaterialMemoryPool->Alloc();
 		break;
-	case en_GameObjectType::ITEM_SKILL_BOOK:
+	case en_GameObjectType::OBJECT_ITEM_SKILL_BOOK:
 		NewObject = _ConsumableMemoryPool->Alloc();
 		break;
 	case en_GameObjectType::OBJECT_STONE:
@@ -269,17 +285,17 @@ void CObjectManager::ObjectReturn(en_GameObjectType ObjectType, CGameObject* Ret
 	case en_GameObjectType::OBJECT_BEAR:
 		_BearMemoryPool->Free((CBear*)ReturnObject);
 		break;
-	case en_GameObjectType::ITEM_WEAPON:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON:
 		_WeaponMemoryPool->Free((CWeapon*)ReturnObject);
 		break;
-	case en_GameObjectType::ITEM_SLIME_GEL:
-	case en_GameObjectType::ITEM_BRONZE_COIN:
-	case en_GameObjectType::ITEM_LEATHER:
-	case en_GameObjectType::ITEM_WOOD_LOG:
-	case en_GameObjectType::ITEM_STONE:
+	case en_GameObjectType::OBJECT_ITEM_SLIME_GEL:
+	case en_GameObjectType::OBJECT_ITEM_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_LEATHER:
+	case en_GameObjectType::OBJECT_ITEM_WOOD_LOG:
+	case en_GameObjectType::OBJECT_ITEM_STONE:
 		_MaterialMemoryPool->Free((CMaterial*)ReturnObject);
 		break;
-	case en_GameObjectType::ITEM_SKILL_BOOK:
+	case en_GameObjectType::OBJECT_ITEM_SKILL_BOOK:
 		_ConsumableMemoryPool->Free((CConsumable*)ReturnObject);
 		break;
 	case en_GameObjectType::OBJECT_STONE:

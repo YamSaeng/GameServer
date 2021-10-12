@@ -73,10 +73,8 @@ void CItem::UpdateIdle()
 
 		*ReqItemToInventoryMessage << (int16)(en_PACKET_TYPE::en_PACKET_C2S_ITEM_TO_INVENTORY);
 		*ReqItemToInventoryMessage << Player->_AccountId;
-		*ReqItemToInventoryMessage << _GameObjectInfo.ObjectId;
-		*ReqItemToInventoryMessage << (int8)_GameObjectInfo.ObjectType;
-		*ReqItemToInventoryMessage << _Target->_GameObjectInfo.ObjectId;
-		*ReqItemToInventoryMessage << (int8)_Target->_GameObjectInfo.ObjectType;
+		*ReqItemToInventoryMessage << _GameObjectInfo.ObjectId;		
+		*ReqItemToInventoryMessage << _Target->_GameObjectInfo.ObjectId;		
 
 		ReqItemToInventoryJob->Message = ReqItemToInventoryMessage;
 

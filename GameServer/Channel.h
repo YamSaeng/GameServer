@@ -77,7 +77,7 @@ public:
 	// - Object를 채널에 입장시키면서 자료구조에 저장한 후
 	// - Map에도 해당 오브젝트의 위치를 기록한다.
 	//----------------------------------------------------
-	void EnterChannel(CGameObject* EnterChannelGameObject,st_Vector2Int* ObjectSpawnPosition = nullptr);
+	bool EnterChannel(CGameObject* EnterChannelGameObject,st_Vector2Int* ObjectSpawnPosition = nullptr);
 	//----------------------------------------------------
 	// 채널 나가기
 	// - Object를 채널에 퇴장시키면서 자료구조에 제거한 후
