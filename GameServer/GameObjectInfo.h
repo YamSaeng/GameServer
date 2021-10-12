@@ -3,21 +3,29 @@
 enum class en_GameObjectType : int16
 {
 	NORMAL,
+		
+	OBJECT_PLAYER,
 	OBJECT_MELEE_PLAYER,
 	OBJECT_MAGIC_PLAYER,
+	
+	OBJECT_MONSTER,
 	OBJECT_SLIME,
-	OBJECT_BEAR,	
-	ITEM_WEAPON,
-	ITEM_SLIME_GEL,
-	ITEM_LEATHER,
-	ITEM_BRONZE_COIN,
-	ITEM_SLIVER_COIN,
-	ITEM_GOLD_COIN,
-	ITEM_SKILL_BOOK,
+	OBJECT_BEAR,
+
+	OBJECT_ENVIRONMENT,
 	OBJECT_STONE,
 	OBJECT_TREE,
-	ITEM_WOOD_LOG,
-	ITEM_STONE,
+
+	OBJECT_ITEM,
+	OBJECT_ITEM_WEAPON,
+	OBJECT_ITEM_SLIME_GEL,
+	OBJECT_ITEM_LEATHER,
+	OBJECT_ITEM_BRONZE_COIN,
+	OBJECT_ITEM_SLIVER_COIN,
+	OBJECT_ITEM_GOLD_COIN,
+	OBJECT_ITEM_SKILL_BOOK,
+	OBJECT_ITEM_WOOD_LOG,
+	OBJECT_ITEM_STONE,	
 };
 
 enum class en_MoveDir : int8
@@ -213,6 +221,19 @@ struct st_ItemInfo
 	wstring ThumbnailImagePath; // 이미지 경로
 	bool IsEquipped;			// 아이템을 착용할 수 있는지	
 	int8 SlotIndex;				// 슬롯 번호
+
+	st_ItemInfo()
+	{
+		ItemDBId = 0;
+		IsQuickSlotUse = false;
+		ItemCategory = en_ItemCategory::ITEM_CATEGORY_NONE;
+		ItemType = en_ItemType::ITEM_TYPE_NONE;
+		ItemName = L"";
+		ItemCount = 0;
+		ThumbnailImagePath = L"";
+		IsEquipped = false;
+		SlotIndex  = -1;
+	}
 };
 
 struct st_SkillInfo
