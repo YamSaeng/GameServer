@@ -154,6 +154,14 @@ enum class en_ConsumableType : int16
 	SKILL_BOOK
 };
 
+enum class en_TileMapEnvironment : int8
+{
+	TILE_MAP_NONE = 0,
+	TILE_MAP_WALL,
+	TILE_MAP_TREE,
+	TILE_MAP_STONE
+};
+
 struct st_PositionInfo
 {
 	en_CreatureState State;
