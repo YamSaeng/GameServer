@@ -50,11 +50,11 @@ CMap::CMap(int MapId)
 	int XCount = _Right - _Left + 1;
 	int YCount = _Down - _Up + 1;	
 
-	_CollisionMapInfos = new bool*[YCount];
+	_CollisionMapInfos = new en_TileMapEnvironment*[YCount];
 
 	for (int i = 0; i < YCount; i++)
 	{
-		_CollisionMapInfos[i] = new bool[XCount];
+		_CollisionMapInfos[i] = new en_TileMapEnvironment[XCount];
 	}
 
 	_ObjectsInfos = new CGameObject**[YCount];
@@ -88,7 +88,7 @@ CMap::CMap(int MapId)
 				break;
 			}		
 
-			_CollisionMapInfos[Y][X] = *ConvertP - 48;		
+			_CollisionMapInfos[Y][X] = (en_TileMapEnvironment)(*ConvertP - 48);		
 
 			ConvertP++;
 		}
@@ -137,8 +137,20 @@ bool CMap::Cango(st_Vector2Int& CellPosition, bool CheckObjects)
 	int Y = _Down - CellPosition._Y;	
 	
 	//G_Logger->WriteStdOut(en_Color::RED, L"Y : %d X : %d\n", Y, X);
+	bool IsCollisionMapInfo = false;
+	switch (_CollisionMapInfos[Y][X])
+	{
+	case en_TileMapEnvironment::TILE_MAP_NONE:
+	case en_TileMapEnvironment::TILE_MAP_TREE:
+	case en_TileMapEnvironment::TILE_MAP_STONE:
+		IsCollisionMapInfo = true;
+		break;
+	case en_TileMapEnvironment::TILE_MAP_WALL:
+		IsCollisionMapInfo = false;
+		break;	
+	}
 
-	return !_CollisionMapInfos[Y][X] && (!CheckObjects || _ObjectsInfos[Y][X] == nullptr);
+	return IsCollisionMapInfo && (!CheckObjects || _ObjectsInfos[Y][X] == nullptr);
 }
 
 bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool CheckObject, bool Applycollision)

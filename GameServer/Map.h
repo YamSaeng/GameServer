@@ -142,7 +142,7 @@ public:
 	int32 _SizeX;
 	int32 _SizeY;
 	
-	bool** _CollisionMapInfos;	
+	en_TileMapEnvironment** _CollisionMapInfos;	
 	CGameObject*** _ObjectsInfos;		
 	st_ItemInfo*** _ItemInfos;
 

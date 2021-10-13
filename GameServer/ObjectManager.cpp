@@ -108,9 +108,9 @@ void CObjectManager::Add(CGameObject* AddObject, int32 ChannelId)
 				vector<st_GameObjectInfo> SpawnEnvironment;
 					
 				CEnvironment* Environment = (CEnvironment*)AddObject;
-				EnterChannel->EnterChannel(AddObject);
+				EnterChannel->EnterChannel(AddObject, &Environment->_SpawnPosition);
 
-				_Environments.insert(pair<int64, CEnvironment*>());
+				_Environments.insert(pair<int64, CEnvironment*>(Environment->_GameObjectInfo.ObjectId,Environment));
 
 				SpawnEnvironment.push_back(Environment->_GameObjectInfo);
 				CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(1, SpawnEnvironment);
@@ -351,22 +351,46 @@ void CObjectManager::ItemSpawn(int64 KillerId, en_GameObjectType KillerObjectTyp
 	SetEvent(GameServer->_DataBaseWakeEvent);	
 }
 
-void CObjectManager::EnvironmentSpawn(int32 EnvironmentCount, int32 ChannelId, en_GameObjectType EnvironmentType)
+void CObjectManager::EnvironmentSpawn(int32 ChannelId)
 {
-	for (int32 i = 0; i < EnvironmentCount; i++)
+	CChannel* Channel = G_ChannelManager->Find(ChannelId);
+	if (Channel == nullptr)
 	{
-		CEnvironment* NewEnvironment = nullptr;
-		switch (EnvironmentType)
-		{
-		case en_GameObjectType::OBJECT_STONE:
-			NewEnvironment = (CStone*)ObjectCreate(en_GameObjectType::OBJECT_STONE);
-			break;
-		case en_GameObjectType::OBJECT_TREE:
-			NewEnvironment = (CTree*)ObjectCreate(en_GameObjectType::OBJECT_TREE);
-			break;
-		}
-
-		NewEnvironment->_GameObjectInfo.ObjectId = _GameServerObjectId++;
-		Add(NewEnvironment, ChannelId);
+		return;
 	}
+
+	int32 SizeX = Channel->_Map->_SizeX;
+	int32 SizeY = Channel->_Map->_SizeY;
+
+	for (int Y = 0; Y < SizeY; Y++)
+	{
+		for (int X = 0; X < SizeX; X++)
+		{
+			CEnvironment* NewEnvironment = nullptr;
+
+			switch (Channel->_Map->_CollisionMapInfos[Y][X])
+			{
+			case en_TileMapEnvironment::TILE_MAP_TREE:
+				NewEnvironment = (CTree*)ObjectCreate(en_GameObjectType::OBJECT_TREE);
+				break;
+			case en_TileMapEnvironment::TILE_MAP_STONE:
+				NewEnvironment = (CTree*)ObjectCreate(en_GameObjectType::OBJECT_STONE);
+				break;			
+			}	
+
+			if (NewEnvironment != nullptr)
+			{
+				int SpawnPositionX = X + Channel->_Map->_Left;
+				int SpawnPositionY = Channel->_Map->_Down - Y;
+
+				st_Vector2Int NewPosition;				
+				NewPosition._Y = SpawnPositionY;
+				NewPosition._X = SpawnPositionX;
+
+				NewEnvironment->_GameObjectInfo.ObjectId = _GameServerObjectId++;
+				NewEnvironment->_SpawnPosition = NewPosition;
+				Add(NewEnvironment, ChannelId);
+			}
+		}
+	}	
 }

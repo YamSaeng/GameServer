@@ -63,6 +63,6 @@ public:
 	//------------------------------------------------------------------------------------------------
 	void ItemSpawn(int64 KillerId, en_GameObjectType KillerObjectType, st_Vector2Int SpawnPosition, en_GameObjectType SpawnItemOwnerType, en_ObjectDataType MonsterDataType);		
 	
-	void EnvironmentSpawn(int32 EnvironmentCount, int32 ChannelId, en_GameObjectType EnvironmentType);
+	void EnvironmentSpawn(int32 ChannelId);
 };
 
