@@ -250,7 +250,8 @@ struct st_SkillInfo
 	en_SkillType SkillType; // 스킬 종류
 	int8 SkillLevel = 0;		 // 스킬 레벨
 	wstring SkillName;		 // 스킬 이름
-	int32 SkillCoolTime = 0;	 // 스킬 쿨타임	
+	int32 SkillCoolTime = 0;	 // 스킬 쿨타임
+	int32 SkillCastingTime = 0;  // 스킬 캐스팅 타임
 	wstring SkillImagePath; // 스킬 이미지 경로
 	bool CanSkillUse = true; // 스킬을 사용 할 수 있는지 여부	
 };

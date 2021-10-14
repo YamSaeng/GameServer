@@ -74,6 +74,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_SkillInfo& SkillInfo)
     InsertData(SkillInfo.SkillName.c_str(), SkillNameLen);
 
     *this << SkillInfo.SkillCoolTime;
+    *this << SkillInfo.SkillCastingTime;
 
     int8 SkillImagePathLen = (int8)SkillInfo.SkillImagePath.length() * 2;
     *this << SkillImagePathLen;
@@ -143,6 +144,7 @@ CGameServerMessage& CGameServerMessage::operator>>(st_SkillInfo& Value)
     GetData(Value.SkillName, SkillNameLen);
 
     *this >> Value.SkillCoolTime;
+    *this >> Value.SkillCastingTime;
 
     int8 SkillImagePath = 0;
     *this >> SkillImagePath;

@@ -6,7 +6,7 @@
       "SkillCoolTime": 500,
       "SkillCastingTime": 0,
       "SkillDistance": 1,
-      "SkillThumbnailImagePath": ""
+      "SkillThumbnailImagePath": "Textures/Spell/Icon/일반공격"
     },
     {
       "SkillDataSheetId": 2,
@@ -51,7 +51,7 @@
     {
       "SkillDataSheetId": 7,
       "SkillName": "분쇄파동",
-      "SkillCoolTime": 2000,
+      "SkillCoolTime": 3000,
       "SkillCastingTime": 0,
       "SkillDistance": 1,
       "SkillThumbnailImagePath": "Textures/Spell/Icon/분쇄파동"
@@ -60,7 +60,7 @@
       "SkillDataSheetId": 8,
       "SkillName": "불꽃작살",
       "SkillCoolTime": 0,
-      "SkillCastingTime": 1.0,
+      "SkillCastingTime": 1000,
       "SkillDistance": 6,
       "SkillThumbnailImagePath": "Textures/Spell/Icon/불꽃작살"
     },
@@ -68,15 +68,15 @@
       "SkillDataSheetId": 9,
       "SkillName": "치유의빛",
       "SkillCoolTime": 0,
-      "SkillCastingTime": 2.0,
+      "SkillCastingTime": 1000,
       "SkillDistance": 6,
       "SkillThumbnailImagePath": "Textures/Spell/Icon/치유의빛"
     },
     {
       "SkillDataSheetId": 10,
       "SkillName": "치유의바람",
-      "SkillCoolTime": 0,
-      "SkillCastingTime": 3.0,
+      "SkillCoolTime": 4000,
+      "SkillCastingTime": 1500,
       "SkillDistance": 6,
       "SkillThumbnailImagePath": "Textures/Spell/Icon/치유의바람"
     },
