@@ -38,12 +38,13 @@ enum class en_MoveDir : int8
 
 enum class en_CreatureState : int8
 {
+	SPAWN_IDLE,
 	IDLE,
 	PATROL,
 	MOVING,
 	ATTACK,
 	SPELL,
-	DEAD,
+	DEAD,	
 };
 
 enum class en_MessageType : int8
