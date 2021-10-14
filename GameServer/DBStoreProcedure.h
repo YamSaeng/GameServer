@@ -269,10 +269,10 @@ namespace SP
 	};
 
 	// QuickSlotBarSlot정보 새로 생성
-	class CDBGameServerQuickSlotBarSlotCreate : public CDBBind<10, 0>
+	class CDBGameServerQuickSlotBarSlotCreate : public CDBBind<11, 0>
 	{
 	public:
-		CDBGameServerQuickSlotBarSlotCreate(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spQuickSlotBarSlotCreate(?,?,?,?,?,?,?,?,?,?)}") {}
+		CDBGameServerQuickSlotBarSlotCreate(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spQuickSlotBarSlotCreate(?,?,?,?,?,?,?,?,?,?,?)}") {}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
 
@@ -283,14 +283,15 @@ namespace SP
 		void InSkillLevel(int8& SkillLevel) { BindParam(6, SkillLevel); }
 		void InSkillName(wstring& SkillName) { BindParam(7, SkillName.c_str()); }
 		void InSkillCoolTime(int32& SkillCoolTime) { BindParam(8, SkillCoolTime); }
-		void InSkillThumbnailImagePath(wstring& SkillThumbnailImagePath) { BindParam(9, SkillThumbnailImagePath.c_str()); }
+		void InSkillCastingTime(int32& SkillCastingTime) { BindParam(9, SkillCastingTime); }
+		void InSkillThumbnailImagePath(wstring& SkillThumbnailImagePath) { BindParam(10, SkillThumbnailImagePath.c_str()); }
 	};
 
 	// QuickSlotBarSlot정보 업데이트 프로시저
 	class CDBGameServerQuickSlotBarSlotUpdate : public CDBBind<11, 0>
 	{
 	public:
-		CDBGameServerQuickSlotBarSlotUpdate(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spQuickSlotBarSlotUpdate(?,?,?,?,?,?,?,?,?,?)}") {}
+		CDBGameServerQuickSlotBarSlotUpdate(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spQuickSlotBarSlotUpdate(?,?,?,?,?,?,?,?,?,?,?)}") {}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
 
@@ -306,7 +307,7 @@ namespace SP
 	};
 
 	// QuickSlotBarTable에 있는 QuickSlotBar 정보 모두 긁어온다.
-	class CDBGameServerQuickSlotBarGet : public CDBBind<2, 7>
+	class CDBGameServerQuickSlotBarGet : public CDBBind<2, 8>
 	{
 	public:
 		CDBGameServerQuickSlotBarGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetQuickSlotBarSlot(?,?)}") {}
@@ -319,12 +320,13 @@ namespace SP
 		void OutQuickSlotSkillType(int16& SkillType) { BindCol(3, SkillType); }
 		void OutQuickSlotSkillLevel(int8& SkillLevel) { BindCol(4, SkillLevel); }
 		void OutQuickSlotSkillCoolTime(int32& SkillCoolTime) { BindCol(5, SkillCoolTime); }
-		template<int8 Length> void OutQuickSlotSkillThumbnailImagePath(WCHAR(&SkillThumbnailImagePath)[Length]) { BindCol(6, SkillThumbnailImagePath); }
+		void OutQuickSlotSkillCastingTime(int32& SkillCastingTime) { BindCol(6, SkillCastingTime); }
+		template<int8 Length> void OutQuickSlotSkillThumbnailImagePath(WCHAR(&SkillThumbnailImagePath)[Length]) { BindCol(7, SkillThumbnailImagePath); }
 	};
 
 	// Swap 요청한 아이템이 QuickSlot에 있는지 확인하고
 	// 요청한 퀵슬롯 정보 반환
-	class CDBGameServerQuickSlotCheck : public CDBBind<4, 6>
+	class CDBGameServerQuickSlotCheck : public CDBBind<4, 7>
 	{
 	public:
 		CDBGameServerQuickSlotCheck(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spQuickSlotCheck(?,?,?,?)}") {}
@@ -338,14 +340,15 @@ namespace SP
 		void OutQuickSlotSkillLevel(int8& SkillLevel) { BindCol(2, SkillLevel); }
 		template<int8 Length> void OutQuickSlotSkillName(WCHAR(&QuickSlotSkillName)[Length]) { BindCol(3, QuickSlotSkillName); }
 		void OutQuickSlotSkillCoolTime(int32& SkillCoolTime) { BindCol(4, SkillCoolTime); }
-		template<int8 Length> void OutQuickSlotSkillThumbnailImagePath(WCHAR(&SkillThumbnailImagePath)[Length]) { BindCol(5, SkillThumbnailImagePath); }
+		void OutQuickSlotSkillCastingTime(int32& SkillCastingTime) { BindCol(5, SkillCastingTime); }
+		template<int8 Length> void OutQuickSlotSkillThumbnailImagePath(WCHAR(&SkillThumbnailImagePath)[Length]) { BindCol(6, SkillThumbnailImagePath); }
 	};
 
 	// QuickSlot Swap
-	class CDBGameServerQuickSlotSwap : public CDBBind<16, 0>
+	class CDBGameServerQuickSlotSwap : public CDBBind<18, 0>
 	{
 	public:
-		CDBGameServerQuickSlotSwap(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spQuickSlotSwap(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}") {}
+		CDBGameServerQuickSlotSwap(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spQuickSlotSwap(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}") {}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
 
@@ -355,15 +358,17 @@ namespace SP
 		void InAQuickSlotSkillLevel(int8& QuickSkillLevel) { BindParam(5, QuickSkillLevel); }
 		void InAQuickSlotSKillName(wstring& QuickSlotSKillNam) { BindParam(6, QuickSlotSKillNam.c_str()); }
 		void InAQuickSlotSkillCoolTime(int32& QuickSlotSkillCoolTime) { BindParam(7, QuickSlotSkillCoolTime); }
-		void InAQuickSlotSKillImagePath(wstring& QuickSlotSKillImagePath) { BindParam(8, QuickSlotSKillImagePath.c_str()); }
+		void InAQuickSlotSkillCastingTime(int32& QuickSlotSkillCastingTime) { BindParam(8, QuickSlotSkillCastingTime); }
+		void InAQuickSlotSKillImagePath(wstring& QuickSlotSKillImagePath) { BindParam(9, QuickSlotSKillImagePath.c_str()); }
 
-		void InBQuickSlotBarIndex(int8& QuickSlotBarIndex) { BindParam(9, QuickSlotBarIndex); }
-		void InBQuickSlotBarSlotIndex(int8& QuickSlotBarSlotIndex) { BindParam(10, QuickSlotBarSlotIndex); }
-		void InBQuickSlotSkillType(int16& QuickSlotSkillType) { BindParam(11, QuickSlotSkillType); }
-		void InBQuickSlotSkillLevel(int8& QuickSkillLevel) { BindParam(12, QuickSkillLevel); }
-		void InBQuickSlotSKillName(wstring& QuickSlotSKillNam) { BindParam(13, QuickSlotSKillNam.c_str()); }
-		void InBQuickSlotSkillCoolTime(int32& QuickSlotSkillCoolTime) { BindParam(14, QuickSlotSkillCoolTime); }
-		void InBQuickSlotSKillImagePath(wstring& QuickSlotSKillImagePath) { BindParam(15, QuickSlotSKillImagePath.c_str()); }
+		void InBQuickSlotBarIndex(int8& QuickSlotBarIndex) { BindParam(10, QuickSlotBarIndex); }
+		void InBQuickSlotBarSlotIndex(int8& QuickSlotBarSlotIndex) { BindParam(11, QuickSlotBarSlotIndex); }
+		void InBQuickSlotSkillType(int16& QuickSlotSkillType) { BindParam(12, QuickSlotSkillType); }
+		void InBQuickSlotSkillLevel(int8& QuickSkillLevel) { BindParam(13, QuickSkillLevel); }
+		void InBQuickSlotSKillName(wstring& QuickSlotSKillNam) { BindParam(14, QuickSlotSKillNam.c_str()); }
+		void InBQuickSlotSkillCoolTime(int32& QuickSlotSkillCoolTime) { BindParam(15, QuickSlotSkillCoolTime); }
+		void InBQuickSlotSkillCastingTime(int32& QuickSlotSkillCastingTime) { BindParam(16, QuickSlotSkillCastingTime); }
+		void InBQuickSlotSKillImagePath(wstring& QuickSlotSKillImagePath) { BindParam(17, QuickSlotSKillImagePath.c_str()); }
 	};
 
 	// 퀵슬롯 정보 초기화

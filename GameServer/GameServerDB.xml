@@ -352,10 +352,11 @@
     <Param name="@SkillLevel" type="TinyInt"/>
     <Param name="@SkillName" type="nvarchar(20)"/>
     <Param name="@SkillCoolTime" type="int"/>
+    <Param name="@SkillCastingTime" type="int"/>
     <Param name="@SkillImagePath" type="nvarchar(100)"/>
     <Body>
       <![CDATA[        
-        INSERT INTO [dbo].[QuickSlotBar] VALUES ((@AccountDBId),(@PlayerDBId),(@QuickSlotBarIndex),(@QuickSlotBarSlotIndex),(@QuickSlotKey),(@SkillType),(@SkillLevel),(@SkillName),(@SkillCoolTime),(@SkillImagePath))
+        INSERT INTO [dbo].[QuickSlotBar] VALUES ((@AccountDBId),(@PlayerDBId),(@QuickSlotBarIndex),(@QuickSlotBarSlotIndex),(@QuickSlotKey),(@SkillType),(@SkillLevel),(@SkillName),(@SkillCoolTime),(@SkillCastingTime),(@SkillImagePath))
       ]]>
     </Body>   
   </Procedure>
@@ -387,7 +388,7 @@
     <Param name="@PlayerDBId" type="BigInt"/>    
     <Body>
       <![CDATA[
-        SELECT QuickSlotBarIndex, QuickSlotBarSlotIndex, QuickSlotKey, SkillType, SkillLevel, SkillCoolTime, SkillImagePath FROM [dbo].[QuickSlotBar] WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
+        SELECT QuickSlotBarIndex, QuickSlotBarSlotIndex, QuickSlotKey, SkillType, SkillLevel, SkillCoolTime, SkillCastingTime, SkillImagePath FROM [dbo].[QuickSlotBar] WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
     </Body>
   </Procedure>
@@ -400,7 +401,7 @@
     <Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
     <Body>
       <![CDATA[
-        SELECT QuickSlotKey, SkillType, SkillLevel, SkillName, SkillCoolTime, SkillImagePath FROM [dbo].[QuickSlotBar] WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId) AND QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex)
+        SELECT QuickSlotKey, SkillType, SkillLevel, SkillName, SkillCoolTime, SkillCastingTime, SkillImagePath FROM [dbo].[QuickSlotBar] WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId) AND QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex)
       ]]>
     </Body>
   </Procedure>
@@ -415,6 +416,7 @@
     <Param name="@AQuickSlotSkillLevel" type="TinyInt"/>
     <Param name="@AQuickSlotSkillName" type="nvarchar(20)"/>
     <Param name="@AQuickSlotSkillCoolTime" type="Int"/>
+    <Param name="@AQuickSlotSkillCastingTime" type="Int"/>
     <Param name="@AQuickSlotSkillImagePath" type="nvarchar(100)"/>
     <Param name="@BQuickSlotBarIndex" type="TinyInt"/>
     <Param name="@BQuickSlotBarSlotIndex" type="TinyInt"/>
@@ -422,11 +424,12 @@
     <Param name="@BQuickSlotSkillLevel" type="TinyInt"/>
     <Param name="@BQuickSlotSkillName" type="nvarchar(20)"/>
     <Param name="@BQuickSlotSkillCoolTime" type="Int"/>
+    <Param name="@BQuickSlotSkillCastingTime" type="Int"/>
     <Param name="@BQuickSlotSkillImagePath" type="nvarchar(100)"/>
     <Body>
       <![CDATA[
-        UPDATE [dbo].[QuickSlotBar] SET SkillType = (@AQuickSlotSkillType), SkillLevel = (@AQuickSlotSkillLevel), SkillName = (@AQuickSlotSkillName), SkillCoolTime = (@AQuickSlotSkillCoolTime), SkillImagePath = (@AQuickSlotSkillImagePath) WHERE QuickSlotBarIndex = (@AQuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@AQuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
-        UPDATE [dbo].[QuickSlotBar] SET SkillType = (@BQuickSlotSkillType), SkillLevel = (@BQuickSlotSkillLevel), SkillName = (@BQuickSlotSkillName), SkillCoolTime = (@BQuickSlotSkillCoolTime), SkillImagePath = (@BQuickSlotSkillImagePath) WHERE QuickSlotBarIndex = (@BQuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@BQuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
+        UPDATE [dbo].[QuickSlotBar] SET SkillType = (@AQuickSlotSkillType), SkillLevel = (@AQuickSlotSkillLevel), SkillName = (@AQuickSlotSkillName), SkillCoolTime = (@AQuickSlotSkillCoolTime), SkillCastingTime = (@AQuickSlotSkillCastingTime), SkillImagePath = (@AQuickSlotSkillImagePath) WHERE QuickSlotBarIndex = (@AQuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@AQuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
+        UPDATE [dbo].[QuickSlotBar] SET SkillType = (@BQuickSlotSkillType), SkillLevel = (@BQuickSlotSkillLevel), SkillName = (@BQuickSlotSkillName), SkillCoolTime = (@BQuickSlotSkillCoolTime), SkillCastingTime = (@BQuickSlotSkillCastingTime), SkillImagePath = (@BQuickSlotSkillImagePath) WHERE QuickSlotBarIndex = (@BQuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@BQuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
     </Body>
   </Procedure>
