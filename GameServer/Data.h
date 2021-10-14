@@ -85,7 +85,7 @@ struct st_SkillData
 	int32 SkillDataId;
 	string SkillName;
 	int32 SkillCoolTime;
-	float SkillCastingTime;
+	int32 SkillCastingTime;
 	int SkillDistance;
 	string SkillThumbnailImagePath;
 };
