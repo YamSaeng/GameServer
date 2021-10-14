@@ -35,6 +35,10 @@ protected:
 	//-----------------
 	int32 _AttackRange;
 
+	//--------------------------------------------
+	// SpawnIdle 상태에서 Idle 상태로 돌아갈 Tick
+	//--------------------------------------------
+	uint64 _SpawnIdleTick;
 	//------------------------------------
 	// Idle 상태에서 Search를 실행할 Tick
 	//------------------------------------
@@ -90,5 +94,9 @@ protected:
 	// Dead 상태 Update
 	//------------------------
 	virtual void UpdateDead() = 0;	
+	//------------------------
+	// Spawn Idle 상태 Update
+	//------------------------
+	virtual void UpdateSpawnIdle();
 };
 

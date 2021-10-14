@@ -5,7 +5,7 @@
 
 CItem::CItem()
 {
-	
+	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 }
 
 void CItem::Update()

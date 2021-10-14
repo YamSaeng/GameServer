@@ -4586,9 +4586,8 @@ void CGameServer::SpawnObjectTime(CGameObject* SpawnObject, int64 SpawnTime)
 	ResObjectSpawnMessage->Clear();
 
 	*ResObjectSpawnMessage << (int16)SpawnObject->_GameObjectInfo.ObjectType;
-	
-	st_Vector2Int SpawnCellPosition = SpawnObject->GetCellPosition();
-	*ResObjectSpawnMessage << SpawnCellPosition;
+		
+	*ResObjectSpawnMessage << SpawnObject->_SpawnPosition;
 
 	SpawnObjectTimerJob->Message = ResObjectSpawnMessage;
 

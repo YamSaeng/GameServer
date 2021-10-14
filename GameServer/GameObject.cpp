@@ -5,7 +5,7 @@
 CGameObject::CGameObject()
 {
 	_NetworkState = en_ObjectNetworkState::READY;
-	_GameObjectInfo.OwnerObjectId = 0;
+	_GameObjectInfo.OwnerObjectId = 0;	
 	_Channel = nullptr;
 	_Target = nullptr;
 	_SelectTarget = nullptr;

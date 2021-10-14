@@ -8,7 +8,7 @@
 CSlime::CSlime()
 {	
 	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_SLIME;
-	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_IDLE;
 
 	auto FindMonsterStat = G_Datamanager->_Monsters.find(en_ObjectDataType::SLIME_DATA);
 	st_MonsterData MonsterData = *(*FindMonsterStat).second;
@@ -32,6 +32,8 @@ CSlime::CSlime()
 	_AttackTickPoint = MonsterData.AttackTick;
 
 	_GetDPPoint = MonsterData.GetDPPoint;
+
+	_SpawnIdleTick = GetTickCount64() + 2000;	
 }
 
 CSlime::~CSlime()
@@ -41,7 +43,9 @@ CSlime::~CSlime()
 void CSlime::Init(st_Vector2Int SpawnPosition)
 {
 	CMonster::Init(SpawnPosition);
-	_SearchTick = GetTickCount64() + _SearchTickPoint;
+
+	_SpawnIdleTick = GetTickCount64() + 2000;
+	_SearchTick = GetTickCount64() + _SearchTickPoint;	
 }
 
 void CSlime::UpdateIdle()
@@ -69,6 +73,11 @@ void CSlime::UpdateDead()
 
 }
 
+void CSlime::UpdateSpawnIdle()
+{
+	CMonster::UpdateSpawnIdle();
+}
+
 void CSlime::OnDead(CGameObject* Killer)
 {
 	G_ObjectManager->ItemSpawn(Killer->_GameObjectInfo.ObjectId, Killer->_GameObjectInfo.ObjectType, GetCellPosition(), _GameObjectInfo.ObjectType, en_ObjectDataType::SLIME_DATA);
@@ -83,13 +92,8 @@ void CSlime::OnDead(CGameObject* Killer)
 	BroadCastPacket(en_PACKET_S2C_CHANGE_OBJECT_STAT);
 	BroadCastPacket(en_PACKET_S2C_DIE);		
 
-	G_ObjectManager->Remove(this, 1);	
+	G_ObjectManager->GameServer->SpawnObjectTime(this, 10000);
 
-	/*_GameObjectInfo.ObjectStatInfo.HP = _GameObjectInfo.ObjectStatInfo.MaxHP;
-	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-	_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;	
-
-	Channel->EnterChannel(this);
-	BroadCastPacket(en_PACKET_S2C_SPAWN);*/
+	G_ObjectManager->Remove(this, 1);		
 }
 

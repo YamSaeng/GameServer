@@ -143,6 +143,8 @@ bool CMap::Cango(st_Vector2Int& CellPosition, bool CheckObjects)
 	case en_TileMapEnvironment::TILE_MAP_NONE:
 	case en_TileMapEnvironment::TILE_MAP_TREE:
 	case en_TileMapEnvironment::TILE_MAP_STONE:
+	case en_TileMapEnvironment::TILE_MAP_SLIME:
+	case en_TileMapEnvironment::TILE_MAP_BEAR:
 		IsCollisionMapInfo = true;
 		break;
 	case en_TileMapEnvironment::TILE_MAP_WALL:

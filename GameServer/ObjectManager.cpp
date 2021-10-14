@@ -391,13 +391,13 @@ void CObjectManager::ObjectSpawn(en_GameObjectType ObjectType, st_Vector2Int Spa
 		SpawnGameObject = ObjectCreate(en_GameObjectType::OBJECT_SLIME);
 		break;
 	case en_GameObjectType::OBJECT_BEAR:
-		SpawnGameObject = (CBear*)ObjectCreate(en_GameObjectType::OBJECT_BEAR);
+		SpawnGameObject = ObjectCreate(en_GameObjectType::OBJECT_BEAR);
 		break;
 	case en_GameObjectType::OBJECT_STONE:
-		SpawnGameObject = (CStone*)ObjectCreate(en_GameObjectType::OBJECT_STONE);
+		SpawnGameObject = ObjectCreate(en_GameObjectType::OBJECT_STONE);
 		break;
 	case en_GameObjectType::OBJECT_TREE:
-		SpawnGameObject = (CTree*)ObjectCreate(en_GameObjectType::OBJECT_TREE);
+		SpawnGameObject = ObjectCreate(en_GameObjectType::OBJECT_TREE);
 		break;
 	default:
 		break;

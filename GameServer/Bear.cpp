@@ -8,7 +8,7 @@
 CBear::CBear()
 {
 	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_BEAR;
-	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_IDLE;
 
 	auto FindMonsterStat = G_Datamanager->_Monsters.find(en_ObjectDataType::BEAR_DATA);
 	st_MonsterData MonsterData = *(*FindMonsterStat).second;
@@ -32,6 +32,8 @@ CBear::CBear()
 	_AttackTickPoint = MonsterData.AttackTick;	
 
 	_GetDPPoint = MonsterData.GetDPPoint;
+
+	_SpawnIdleTick = GetTickCount64() + 2000;	
 }
 
 CBear::~CBear()
@@ -42,6 +44,8 @@ CBear::~CBear()
 void CBear::Init(st_Vector2Int SpawnPosition)
 {
 	CMonster::Init(SpawnPosition);
+
+	_SpawnIdleTick = GetTickCount64() + 2000;
 	_SearchTick = GetTickCount64() + _SearchTickPoint;
 }
 
@@ -70,6 +74,11 @@ void CBear::UpdateDead()
 
 }
 
+void CBear::UpdateSpawnIdle()
+{
+	CMonster::UpdateSpawnIdle();
+}
+
 void CBear::OnDead(CGameObject* Killer)
 {
 	G_ObjectManager->ItemSpawn(Killer->_GameObjectInfo.ObjectId, Killer->_GameObjectInfo.ObjectType, GetCellPosition(), _GameObjectInfo.ObjectType, en_ObjectDataType::BEAR_DATA);
@@ -84,12 +93,7 @@ void CBear::OnDead(CGameObject* Killer)
 	BroadCastPacket(en_PACKET_S2C_CHANGE_OBJECT_STAT);
 	BroadCastPacket(en_PACKET_S2C_DIE);		
 
-	G_ObjectManager->Remove(this, 1);	
+	G_ObjectManager->GameServer->SpawnObjectTime(this, 10000);
 
-	/*_GameObjectInfo.ObjectStatInfo.HP = _GameObjectInfo.ObjectStatInfo.MaxHP;
-	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-	_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
-
-	Channel->EnterChannel(this);
-	BroadCastPacket(en_PACKET_S2C_SPAWN);*/
+	G_ObjectManager->Remove(this, 1);		
 }

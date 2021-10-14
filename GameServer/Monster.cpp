@@ -25,6 +25,9 @@ void CMonster::Update()
 
 	switch (_GameObjectInfo.ObjectPositionInfo.State)
 	{
+	case en_CreatureState::SPAWN_IDLE:
+		UpdateSpawnIdle();
+		break;
 	case en_CreatureState::IDLE:
 		UpdateIdle();
 		break;
@@ -39,7 +42,7 @@ void CMonster::Update()
 		break;
 	case en_CreatureState::DEAD:
 		UpdateDead();
-		break;
+		break;	
 	default:
 		break;
 	}
@@ -116,7 +119,7 @@ void CMonster::UpdatePatrol()
 	if (_PatrolTick > GetTickCount64())
 	{
 		return;
-	}
+	}	
 
 	_PatrolTick = GetTickCount64() + _PatrolTickPoint;
 
@@ -279,4 +282,15 @@ void CMonster::UpdateAttack()
 	}
 
 	_AttackTick = 0;
+}
+
+void CMonster::UpdateSpawnIdle()
+{
+	G_Logger->WriteStdOut(en_Color::BLUE, L"SpawnIdle\n");
+	if (_SpawnIdleTick > GetTickCount64())
+	{
+		return;
+	}
+
+	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;	
 }
