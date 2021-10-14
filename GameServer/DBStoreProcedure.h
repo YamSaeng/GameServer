@@ -252,7 +252,7 @@ namespace SP
 	};
 
 	// SkillTable에 있는 Skill 모두 긁어옴
-	class CDBGameServerSkillGet : public CDBBind<2, 6>
+	class CDBGameServerSkillGet : public CDBBind<2, 7>
 	{
 	public:
 		CDBGameServerSkillGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetSkill(?,?)}") {}
@@ -264,7 +264,8 @@ namespace SP
 		void OutSkillLevel(int8& SkillLevel) { BindCol(2, SkillLevel); }
 		template<int8 Length> void OutSkillName(WCHAR(&SkillName)[Length]) { BindCol(3, SkillName); }
 		void OutSkillCoolTime(int32& SkillCoolTime) { BindCol(4, SkillCoolTime); }
-		template<int8 Length> void OutSkillThumbnailImagePath(WCHAR(&SkillThumbnailImagePath)[Length]) { BindCol(5, SkillThumbnailImagePath); }
+		void OutSkillCastingTime(int32& SkillCastingTime) { BindCol(5, SkillCastingTime); }
+		template<int8 Length> void OutSkillThumbnailImagePath(WCHAR(&SkillThumbnailImagePath)[Length]) { BindCol(6, SkillThumbnailImagePath); }
 	};
 
 	// QuickSlotBarSlot정보 새로 생성
@@ -286,7 +287,7 @@ namespace SP
 	};
 
 	// QuickSlotBarSlot정보 업데이트 프로시저
-	class CDBGameServerQuickSlotBarSlotUpdate : public CDBBind<10, 0>
+	class CDBGameServerQuickSlotBarSlotUpdate : public CDBBind<11, 0>
 	{
 	public:
 		CDBGameServerQuickSlotBarSlotUpdate(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spQuickSlotBarSlotUpdate(?,?,?,?,?,?,?,?,?,?)}") {}
@@ -300,7 +301,8 @@ namespace SP
 		void InSkillLevel(int8& SkillLevel) { BindParam(6, SkillLevel); }
 		void InSkillName(wstring& SkillName) { BindParam(7, SkillName.c_str()); }
 		void InSkillCoolTime(int32& SkillCoolTime) { BindParam(8, SkillCoolTime); }
-		void InSkillThumbnailImagePath(wstring& SkillThumbnailImagePath) { BindParam(9, SkillThumbnailImagePath.c_str()); }
+		void InSkillCastingTime(int32& SkillCastingTime) { BindParam(9, SkillCastingTime); }
+		void InSkillThumbnailImagePath(wstring& SkillThumbnailImagePath) { BindParam(10, SkillThumbnailImagePath.c_str()); }
 	};
 
 	// QuickSlotBarTable에 있는 QuickSlotBar 정보 모두 긁어온다.

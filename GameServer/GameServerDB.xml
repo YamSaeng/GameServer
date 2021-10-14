@@ -82,6 +82,7 @@
     <Column name="SkillLevel" type="TinyInt" notnull ="true"/>
     <Column name="SkillName" type="nvarchar(20)" notnull ="true"/>
     <Column name="SkillCoolTime" type="int" notnull ="true"/>
+    <Column name="SkillCastingTime" type="int" notnull ="true"/>
     <Column name="SkillImagePath" type="nvarchar(100)" notnull="true"/>    
   </Table>
   
@@ -96,6 +97,7 @@
     <Column name="SkillLevel" type="TinyInt"/>
     <Column name="SkillName" type="nvarchar(20)"/>
     <Column name="SkillCoolTime" type="int"/>    
+    <Column name="SkillCastingTime" type="int"/>    
     <Column name="SkillImagePath" type="nvarchar(100)"/>    
   </Table> 
   
@@ -334,7 +336,7 @@
     <Param name="@PlayerDBId" type="BigInt"/>
     <Body>
       <![CDATA[
-        SELECT IsQuickSlotUse, SkillType, SkillLevel, SkillName, SkillCoolTime, SkillImagePath FROM [dbo].[Skill] WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
+        SELECT IsQuickSlotUse, SkillType, SkillLevel, SkillName, SkillCoolTime, SkillCastingTime, SkillImagePath FROM [dbo].[Skill] WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
     </Body>
   </Procedure>  
@@ -369,10 +371,11 @@
     <Param name="@SkillLevel" type="TinyInt"/>
     <Param name="@SkillName" type="nvarchar(20)"/>
     <Param name="@SkillCoolTime" type="int"/>
+    <Param name="@SkillCastingTime" type="int"/>    
     <Param name="@SkillImagePath" type="nvarchar(100)"/>
     <Body>
       <![CDATA[
-        UPDATE [dbo].[QuickSlotBar] SET QuickSlotKey = (@QuickSlotKey), SkillType = (@SkillType), SkillLevel = (@SkillLevel), SkillName = (@SkillName), SkillCoolTime = (@SkillCoolTime), SkillImagePath = (@SkillImagePath) 
+        UPDATE [dbo].[QuickSlotBar] SET QuickSlotKey = (@QuickSlotKey), SkillType = (@SkillType), SkillLevel = (@SkillLevel), SkillName = (@SkillName), SkillCoolTime = (@SkillCoolTime), SkillCastingTime = (@SkillCastingTime), SkillImagePath = (@SkillImagePath) 
         WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)        
       ]]>
     </Body>
