@@ -42,7 +42,8 @@ enum class en_TimerJobType : int16
 {
 	TIMER_ATTACK_END,
 	TIMER_SPELL_END,
-	TIMER_SKILL_COOLTIME_END
+	TIMER_SKILL_COOLTIME_END,
+	TIMER_OBJECT_SPAWN
 };
 
 struct st_TimerJob

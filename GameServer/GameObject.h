@@ -15,6 +15,11 @@ public:
 	// 선택한 대상
 	CGameObject* _SelectTarget;
 
+	//---------------------------
+	// 오브젝트가 스폰될 위치
+	//---------------------------
+	st_Vector2Int _SpawnPosition;
+
 	CGameObject();
 	CGameObject(st_GameObjectInfo GameObjectInfo);
 	virtual ~CGameObject();

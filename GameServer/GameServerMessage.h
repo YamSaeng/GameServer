@@ -19,6 +19,7 @@ public:
 
 	CGameServerMessage& operator << (st_GameObjectInfo& GameObjectInfo);
 	CGameServerMessage& operator << (st_PositionInfo& PositionInfo);
+	CGameServerMessage& operator << (st_Vector2Int& CellPositionInfo);
 	CGameServerMessage& operator << (st_StatInfo& StatInfo);
 
 	CGameServerMessage& operator << (st_SkillInfo& SkillInfo);
@@ -32,6 +33,7 @@ public:
 #pragma endregion
 
 #pragma region µ¥ÀÌÅÍ »©±â
+	CGameServerMessage& operator >> (st_Vector2Int& CellPositionInfo);
 	CGameServerMessage& operator >> (st_SkillInfo& Value);
 	CGameServerMessage& operator >> (st_QuickSlotBarSlotInfo& Value);
 

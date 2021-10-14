@@ -47,6 +47,14 @@ CGameServerMessage& CGameServerMessage::operator<<(st_PositionInfo& PositionInfo
     return *(this);
 }
 
+CGameServerMessage& CGameServerMessage::operator<<(st_Vector2Int& CellPositionInfo)
+{
+    *this << CellPositionInfo._X;
+    *this << CellPositionInfo._Y;
+
+    return *(this);
+}
+
 CGameServerMessage& CGameServerMessage::operator<<(st_StatInfo& StatInfo)
 {
     *this << StatInfo.Level;
@@ -127,6 +135,14 @@ CGameServerMessage& CGameServerMessage::operator<<(st_Color& Color)
     *this << Color._Red;
     *this << Color._Green;
     *this << Color._Blue;   
+
+    return *(this);
+}
+
+CGameServerMessage& CGameServerMessage::operator>>(st_Vector2Int& CellPositionInfo)
+{
+    *this >> CellPositionInfo._X;
+    *this >> CellPositionInfo._Y;
 
     return *(this);
 }

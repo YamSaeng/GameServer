@@ -127,9 +127,11 @@ private:
 	// 퀵슬롯 초기화 요청 처리
 	//------------------------------------------------------------------
 	void PacketProcReqQuickSlotInit(int64 SessionId, CMessage* Message);
-
-	//-------------------------------------------------------------
-	//-------------------------------------------------------------
+	//------------------------------------------------------------------
+	// 제작템 제작 요청 처리
+	//------------------------------------------------------------------
+	void PacketProcReqCraftingConfirm(int64 SessionId, CMessage* Message);
+		
 	void PacketProcReqHeartBeat(int64 SessionID, CMessage* Message);
 
 	//-----------------------------------------------------------------------------------------------
@@ -194,6 +196,11 @@ private:
 	// 재사용대기 시간 끝 처리 함수
 	//----------------------------------------------------------------
 	void PacketProcTimerCoolTimeEnd(int64 SessionId, CMessage* Message);	
+	//----------------------------------------------------------------
+	// 오브젝트 스폰
+	//----------------------------------------------------------------
+	void PacketProcTimerObjectSpawn(CMessage* Message);
+
 
 	//--------------------------------------
 	// 패킷조합 함수		
@@ -386,4 +393,13 @@ public:
 	// Session을 기준으로 주위 섹터에 전송
 	//--------------------------------------------------------------
 	void SendPacketAroundSector(st_Session* Session, CMessage* Message, bool SendMe = false);
+
+	//--------------------------------------------------------------
+	// 스킬 쿨타임 타이머 잡 생성
+	//--------------------------------------------------------------
+	void CoolTimeSkillTimerJobCreate(CPlayer* Player, int64 CastingTime, st_SkillInfo* CoolTimeSkillInfo, en_TimerJobType TimerJobType, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex);
+	//--------------------------------------------------------------
+	// 오브젝트 스폰 타이머 잡 생성
+	//--------------------------------------------------------------
+	void SpawnObjectTime(CGameObject* SpawnObject, int64 SpawnTime);
 };

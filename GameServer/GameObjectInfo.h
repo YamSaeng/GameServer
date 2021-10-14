@@ -159,7 +159,9 @@ enum class en_TileMapEnvironment : int8
 	TILE_MAP_NONE = 0,
 	TILE_MAP_WALL,
 	TILE_MAP_TREE,
-	TILE_MAP_STONE
+	TILE_MAP_STONE,
+	TILE_MAP_SLIME,
+	TILE_MAP_BEAR
 };
 
 struct st_PositionInfo

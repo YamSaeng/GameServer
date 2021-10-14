@@ -54,15 +54,18 @@ public:
 	//---------------
 	void ObjectReturn(en_GameObjectType ObjectType, CGameObject* ReturnObject);
 
-	//-----------------------------------------------------------------------------------
-	// 몬스터 스폰
-	//-----------------------------------------------------------------------------------
-	void MonsterSpawn(int32 MonsterCount, int32 ChannelId, en_GameObjectType MonsterType);
+	//-----------------------------------
+	// 맵에 설정한 오브젝트 스폰
+	//-----------------------------------
+	void MapObjectSpawn(int32 ChannelId);
+
 	//------------------------------------------------------------------------------------------------
 	// 아이템 스폰
 	//------------------------------------------------------------------------------------------------
 	void ItemSpawn(int64 KillerId, en_GameObjectType KillerObjectType, st_Vector2Int SpawnPosition, en_GameObjectType SpawnItemOwnerType, en_ObjectDataType MonsterDataType);		
 	
-	void EnvironmentSpawn(int32 ChannelId);
+	//----------------------------------------------------------------------------
+	// 오브젝트 스폰
+	//----------------------------------------------------------------------------
+	void ObjectSpawn(en_GameObjectType ObjectType, st_Vector2Int SpawnPosition);
 };
-

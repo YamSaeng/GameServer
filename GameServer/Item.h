@@ -4,8 +4,7 @@
 class CItem : public CGameObject
 {
 public:	
-	st_ItemInfo _ItemInfo;	
-	st_Vector2Int _SpawnPosition;
+	st_ItemInfo _ItemInfo;		
 
 	int64 _OwnerObjectId;
 	en_GameObjectType _OwnerObjectType;

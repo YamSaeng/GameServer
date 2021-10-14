@@ -65,10 +65,8 @@ void CGameServer::GameServerStart(const WCHAR* OpenIP, int32 Port)
 {
 	CNetworkLib::Start(OpenIP, Port);
 
-	G_ObjectManager->MonsterSpawn(50, 1, en_GameObjectType::OBJECT_SLIME);
-	G_ObjectManager->MonsterSpawn(50, 1, en_GameObjectType::OBJECT_BEAR);
-	G_ObjectManager->EnvironmentSpawn(100, 1, en_GameObjectType::OBJECT_TREE);
-	G_ObjectManager->EnvironmentSpawn(100, 1, en_GameObjectType::OBJECT_STONE);
+	// 오브젝트 스폰
+	G_ObjectManager->MapObjectSpawn(1);	
 
 	G_ObjectManager->GameServer = this;
 
@@ -271,6 +269,9 @@ unsigned __stdcall CGameServer::TimerJobThreadProc(void* Argument)
 				case en_TimerJobType::TIMER_SKILL_COOLTIME_END:
 					Instance->PacketProcTimerCoolTimeEnd(TimerJob->SessionId, TimerJob->Message);
 					break;
+				case en_TimerJobType::TIMER_OBJECT_SPAWN:
+					Instance->PacketProcTimerObjectSpawn(TimerJob->Message);
+					break;
 				default:
 					Instance->Disconnect(TimerJob->SessionId);
 					break;
@@ -317,7 +318,7 @@ void CGameServer::CreateNewClient(int64 SessionId)
 
 		for (int i = 0; i < SESSION_CHARACTER_MAX; i++)
 		{
-			Session->MyPlayers[i] = (CPlayer*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_MELEE_PLAYER);
+			Session->MyPlayers[i] = (CPlayer*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_PLAYER);
 		}
 
 		Session->MyPlayer = nullptr;
@@ -415,6 +416,9 @@ void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 		break;	
 	case en_PACKET_TYPE::en_PACKET_C2S_QUICKSLOT_EMPTY:
 		PacketProcReqQuickSlotInit(SessionId, Message);
+		break;
+	case en_PACKET_TYPE::en_PACKET_C2S_CRAFTING_CONFIRM:
+		PacketProcReqCraftingConfirm(SessionId, Message);
 		break;
 	case en_PACKET_TYPE::en_PACKET_CS_GAME_REQ_HEARTBEAT:
 		PacketProcReqHeartBeat(SessionId, Message);
@@ -1106,50 +1110,7 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 					ResChangeObjectStat->Free();
 				}
 
-				// 스킬 모션 끝 판단
-				// 0.5초 후에 Idle상태로 바꾸기 위해 TimerJob 등록
-				st_TimerJob* TimerJob = _TimerJobMemoryPool->Alloc();
-				TimerJob->ExecTick = GetTickCount64() + 500;
-				TimerJob->SessionId = MyPlayer->_SessionId;
-				TimerJob->Type = en_TimerJobType::TIMER_ATTACK_END;
-								
-				AcquireSRWLockExclusive(&_TimerJobLock);
-				_TimerHeapJob->InsertHeap(TimerJob->ExecTick, TimerJob);				
-				ReleaseSRWLockExclusive(&_TimerJobLock);
-
-				SetEvent(_TimerThreadWakeEvent);
-
-				float SkillCoolTimee = FindSkill->SkillCoolTime / 1000.0f;
-
-				// 클라에게 쿨타임 표시
-				CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(MyPlayer->_GameObjectInfo.ObjectId, QuickSlotBarindex, QuickSlotBarSlotIndex, SkillCoolTimee, 1.0f);
-				SendPacket(MyPlayer->_SessionId, ResCoolTimeStartPacket);
-				ResCoolTimeStartPacket->Free();
-
-				// 쿨타임 시간 동안 스킬 사용 못하게 막음
-				FindSkill->CanSkillUse = false;
-
-				// 스킬 쿨타임 얻어옴
-				auto FindSkilliterator = G_Datamanager->_Skills.find(ReqSkillType);
-				st_SkillData* ReqSkillData = (*FindSkilliterator).second;
-
-				// 스킬 쿨타임 스킬쿨타임 잡 등록
-				st_TimerJob* SkillCoolTimeTimerJob = _TimerJobMemoryPool->Alloc();
-				SkillCoolTimeTimerJob->ExecTick = GetTickCount64() + ReqSkillData->SkillCoolTime;
-				SkillCoolTimeTimerJob->SessionId = MyPlayer->_SessionId;
-				SkillCoolTimeTimerJob->Type = en_TimerJobType::TIMER_SKILL_COOLTIME_END;
-				
-				CGameServerMessage* ResCoolTimeEndMessage = CGameServerMessage::GameServerMessageAlloc();
-				ResCoolTimeEndMessage->Clear();
-
-				*ResCoolTimeEndMessage << ReqSkillType;
-				SkillCoolTimeTimerJob->Message = ResCoolTimeEndMessage;
-
-				AcquireSRWLockExclusive(&_TimerJobLock);
-				_TimerHeapJob->InsertHeap(SkillCoolTimeTimerJob->ExecTick, SkillCoolTimeTimerJob);
-				ReleaseSRWLockExclusive(&_TimerJobLock);
-
-				SetEvent(_TimerThreadWakeEvent);				
+				CoolTimeSkillTimerJobCreate(MyPlayer, 500, FindSkill, en_TimerJobType::TIMER_ATTACK_END, QuickSlotBarindex, QuickSlotBarSlotIndex);
 			}
 			else
 			{
@@ -1238,9 +1199,11 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 
 			float SpellCastingTime = 0.0f;
 
+			int64 SpellEndTime = 0;
+
 			// 요청한 스킬이 스킬창에 있는지 확인
 			st_SkillInfo* FindSkill = MyPlayer->_SkillBox.FindSkill((en_SkillType)ReqSkillType);
-			if (FindSkill != nullptr && FindSkill->CanSkillUse)
+			if (FindSkill != nullptr && FindSkill->CanSkillUse == true)
 			{				
 				CMessage* ResEffectPacket = nullptr;
 				CMessage* ResMagicPacket = nullptr;
@@ -1250,9 +1213,9 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 				switch ((en_SkillType)ReqSkillType)
 				{
 					// 돌격 자세
-				case en_SkillType::SKILL_KNIGHT_CHARGE_POSE:
-					MyPlayer->_SpellTick = GetTickCount() + 100;
-					SpellCastingTime = 100.0f / 1000.0f;
+				case en_SkillType::SKILL_KNIGHT_CHARGE_POSE:					
+					MyPlayer->_SpellTick = GetTickCount64() + FindSkill->SkillCastingTime;
+					SpellCastingTime = FindSkill->SkillCastingTime / 1000.0f;
 
 					Targets.push_back(MyPlayer);
 
@@ -1264,9 +1227,9 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 					// 불꽃 작살
 				case en_SkillType::SKILL_SHAMNA_FLAME_HARPOON:
 					if (MyPlayer->_SelectTarget != nullptr)
-					{
-						MyPlayer->_SpellTick = GetTickCount64() + 1000;
-						SpellCastingTime = 1000.0f / 1000.0f;
+					{						
+						MyPlayer->_SpellTick = GetTickCount64() + FindSkill->SkillCastingTime;
+						SpellCastingTime = FindSkill->SkillCastingTime / 1000.0f;
 
 						// 타겟이 ObjectManager에 존재하는지 확인
 						FindGameObject = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType);
@@ -1297,10 +1260,10 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 					}
 					break;
 					// 치유의 빛
-				case en_SkillType::SKILL_SHAMAN_HEALING_LIGHT:
-					MyPlayer->_SpellTick = GetTickCount64() + 1000;
+				case en_SkillType::SKILL_SHAMAN_HEALING_LIGHT:					
+					MyPlayer->_SpellTick = GetTickCount64() + FindSkill->SkillCastingTime;
 
-					SpellCastingTime = 1000.0f / 1000.0f;
+					SpellCastingTime = FindSkill->SkillCastingTime / 1000.0f;
 
 					if (MyPlayer->_SelectTarget != nullptr)
 					{
@@ -1342,9 +1305,9 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 				case en_SkillType::SKILL_SHAMAN_HEALING_WIND:
 					if (MyPlayer->_SelectTarget != nullptr)
 					{
-						MyPlayer->_SpellTick = GetTickCount64() + 1500;
+						MyPlayer->_SpellTick = GetTickCount64() + FindSkill->SkillCastingTime;
 
-						SpellCastingTime = 1500.0f / 1000.0f;
+						SpellCastingTime = FindSkill->SkillCastingTime / 1000.0f;
 
 						FindGameObject = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType);
 						if (FindGameObject != nullptr)
@@ -1380,54 +1343,18 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 					// 마법 스킬 모션 출력
 					CMessage* ResObjectStateChangePacket = MakePacketResObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
 					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateChangePacket);
-					ResObjectStateChangePacket->Free();
+					ResObjectStateChangePacket->Free();					
 
-					// TimerJob 등록
-					st_TimerJob* TimerJob = _TimerJobMemoryPool->Alloc();
-					TimerJob->ExecTick = MyPlayer->_SpellTick;
-					TimerJob->SessionId = MyPlayer->_SessionId;
-					TimerJob->Type = en_TimerJobType::TIMER_SPELL_END;
-
-					AcquireSRWLockExclusive(&_TimerJobLock);
-					_TimerHeapJob->InsertHeap(TimerJob->ExecTick, TimerJob);
-					ReleaseSRWLockExclusive(&_TimerJobLock);
-
-					SetEvent(_TimerThreadWakeEvent);
-
-					float SkillCoolTimee = FindSkill->SkillCoolTime / 1000.0f;
-					// 클라에게 쿨타임 표시
-					CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(MyPlayer->_GameObjectInfo.ObjectId, QuickSlotBarindex, QuickSlotBarSlotIndex, SkillCoolTimee, 1.0f);
-					SendPacket(MyPlayer->_SessionId, ResCoolTimeStartPacket);
-					ResCoolTimeStartPacket->Free();
-
-					// 쿨타임 시간 동안 스킬 사용 못하게 막음
-					FindSkill->CanSkillUse = false;
-
-					// 스킬 쿨타임 얻어옴
-					auto FindSkilliterator = G_Datamanager->_Skills.find(ReqSkillType);
-					st_SkillData* ReqSkillData = (*FindSkilliterator).second;
-
-					// 스킬 쿨타임 스킬쿨타임 잡 등록
-					st_TimerJob* SkillCoolTimeTimerJob = _TimerJobMemoryPool->Alloc();
-					SkillCoolTimeTimerJob->ExecTick = GetTickCount64() + ReqSkillData->SkillCoolTime;
-					SkillCoolTimeTimerJob->SessionId = MyPlayer->_SessionId;
-					SkillCoolTimeTimerJob->Type = en_TimerJobType::TIMER_SKILL_COOLTIME_END;
-
-					CGameServerMessage* ResCoolTimeEndMessage = CGameServerMessage::GameServerMessageAlloc();
-					ResCoolTimeEndMessage->Clear();
-
-					*ResCoolTimeEndMessage << ReqSkillType;
-					SkillCoolTimeTimerJob->Message = ResCoolTimeEndMessage;
-
-					AcquireSRWLockExclusive(&_TimerJobLock);
-					_TimerHeapJob->InsertHeap(SkillCoolTimeTimerJob->ExecTick, SkillCoolTimeTimerJob);
-					ReleaseSRWLockExclusive(&_TimerJobLock);
-
-					SetEvent(_TimerThreadWakeEvent);
+					CoolTimeSkillTimerJobCreate(MyPlayer, FindSkill->SkillCastingTime, FindSkill, en_TimerJobType::TIMER_SPELL_END, QuickSlotBarindex, QuickSlotBarSlotIndex);
 				}
 			}
 			else
 			{
+				if (FindSkill == nullptr)
+				{
+					break;
+				}
+
 				wstring ErrorSkillCoolTime;
 
 				WCHAR ErrorMessage[100] = { 0 };
@@ -1492,7 +1419,7 @@ void CGameServer::PacketProcReqMousePositionObjectInfo(int64 SessionID, CMessage
 			}
 
 			int64 ObjectId;
-			*Message >> ObjectId;
+			*Message >> ObjectId;			
 
 			int16 ObjectType;
 			*Message >> ObjectType;
@@ -1564,7 +1491,7 @@ void CGameServer::PacketProcReqObjectStateChange(int64 SessionId, CMessage* Mess
 					Disconnect(Session->SessionId);
 					return;
 				}
-			}
+			}			
 
 			int16 ObjectType;
 			*Message >> ObjectType;
@@ -1724,23 +1651,16 @@ void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Messag
 			}
 
 			// ItemId와 ObjectType을 읽는다.
-			*Message >> ItemId;
-
-			int8 ObjectType;
-
-			*Message >> ObjectType;			
-
+			*Message >> ItemId;				
+						
 			// 아이템이 ObjectManager에 있는지 확인한다.
-			CItem* Item = (CItem*)(G_ObjectManager->Find(ItemId, (en_GameObjectType)ObjectType));
+			CItem* Item = (CItem*)(G_ObjectManager->Find(ItemId, en_GameObjectType::OBJECT_ITEM));
 			if (Item != nullptr)
 			{
 				int64 TargetObjectId;
-				*Message >> TargetObjectId;
+				*Message >> TargetObjectId;				
 
-				int8 TargetObjectType;
-				*Message >> TargetObjectType;
-
-				CPlayer* TargetPlayer = (CPlayer*)(G_ObjectManager->Find(TargetObjectId, (en_GameObjectType)TargetObjectType));
+				CPlayer* TargetPlayer = (CPlayer*)(G_ObjectManager->Find(TargetObjectId, en_GameObjectType::OBJECT_PLAYER));
 				if (TargetPlayer == nullptr)
 				{
 					break;
@@ -2152,6 +2072,64 @@ void CGameServer::PacketProcReqQuickSlotInit(int64 SessionId, CMessage* Message)
 	ReturnSession(Session);
 }
 
+void CGameServer::PacketProcReqCraftingConfirm(int64 SessionId, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionId);
+
+	if (Session)
+	{
+		do
+		{
+			int64 AccountId;
+			int64 PlayerDBId;
+
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountId;
+
+			// AccountId가 맞는지 확인
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> PlayerDBId;
+
+			// 조종하고 있는 플레이어가 있는지 확인 
+			if (Session->MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
+				if (Session->MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			int32 ReqCategoryType;
+			*Message >> ReqCategoryType;
+
+			int16 ReqCraftingItemType;
+			*Message >> ReqCraftingItemType;
+			
+			int8 MaterialCount;
+			*Message >> MaterialCount;
+		} while (0);
+	}
+
+	ReturnSession(Session);
+}
+
 //---------------------------------------------------------------------------------
 //하트 비트
 //WORD Type
@@ -2266,7 +2244,7 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectType = (en_GameObjectType)PlayerObjectType;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.OwnerObjectId = 0;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.OwnerObjectType = (en_GameObjectType)0;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.OwnerObjectType = (en_GameObjectType)PlayerObjectType;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.PlayerSlotIndex = PlayerIndex;
 				Session->MyPlayers[PlayerIndex]->_SessionId = Session->SessionId;
 				Session->MyPlayers[PlayerIndex]->_AccountId = Session->AccountId;
@@ -2472,6 +2450,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 				int8 SkillLevel = 0;
 				wstring SkillName;
 				int32 SkillCoolTime = 0;
+				int32 SkillCastingTime = 0;
 				wstring SkillThumbnailImagePath;
 				WCHAR QuickSlotBarKeyString[10] = { 0 };
 								
@@ -2498,6 +2477,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 					QuickSlotBarSlotCreate.InSkillLevel(SkillLevel);
 					QuickSlotBarSlotCreate.InSkillName(SkillName);
 					QuickSlotBarSlotCreate.InSkillCoolTime(SkillCoolTime);
+					QuickSlotBarSlotCreate.InSkillCastingTime(SkillCastingTime);
 					QuickSlotBarSlotCreate.InSkillThumbnailImagePath(SkillThumbnailImagePath);
 
 					QuickSlotBarSlotCreate.Execute();
@@ -2677,22 +2657,22 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 				switch (NewItemInfo.ItemType)
 				{
 				case en_ItemType::ITEM_TYPE_SLIMEGEL:
-					GameObjectType = en_GameObjectType::ITEM_SLIME_GEL;
+					GameObjectType = en_GameObjectType::OBJECT_ITEM_SLIME_GEL;
 					break;
 				case en_ItemType::ITEM_TYPE_LEATHER:
-					GameObjectType = en_GameObjectType::ITEM_LEATHER;
+					GameObjectType = en_GameObjectType::OBJECT_ITEM_LEATHER;
 					break;
 				case en_ItemType::ITEM_TYPE_BRONZE_COIN:
-					GameObjectType = en_GameObjectType::ITEM_BRONZE_COIN;
+					GameObjectType = en_GameObjectType::OBJECT_ITEM_BRONZE_COIN;
 					break;
 				case en_ItemType::ITEM_TYPE_SKILL_BOOK_CHOHONE:
-					GameObjectType = en_GameObjectType::ITEM_SKILL_BOOK;
+					GameObjectType = en_GameObjectType::OBJECT_ITEM_SKILL_BOOK;
 					break;
 				case en_ItemType::ITEM_TYPE_STONE:
-					GameObjectType = en_GameObjectType::ITEM_STONE;
+					GameObjectType = en_GameObjectType::OBJECT_ITEM_STONE;
 					break;
 				case en_ItemType::ITEM_TYPE_WOOD_LOG:
-					GameObjectType = en_GameObjectType::ITEM_WOOD_LOG;
+					GameObjectType = en_GameObjectType::OBJECT_ITEM_WOOD_LOG;
 					break;
 				default:
 					break;
@@ -2982,7 +2962,7 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 		bool SwapSuccess = ItemSwap.Execute();
 		if (SwapSuccess == true)
 		{
-			CPlayer* TargetPlayer = (CPlayer*)G_ObjectManager->Find(PlayerDBId, en_GameObjectType::OBJECT_MELEE_PLAYER);
+			CPlayer* TargetPlayer = (CPlayer*)G_ObjectManager->Find(PlayerDBId, en_GameObjectType::OBJECT_PLAYER);
 
 			// Swap 요청한 플레이어의 인벤토리에서 아이템 Swap
 			TargetPlayer->_Inventory.SwapItem(SwapBItemInfo, SwapAItemInfo);
@@ -3102,6 +3082,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			int16 QuickSlotSkillType;
 			int8 QuickSlotSkillLevel;
 			int32 QuickSlotSkillCoolTime;
+			int32 QuickSlotSkillCastingTime;
 			WCHAR QuickSlotSkillThumbnailImagePath[100] = { 0 };
 
 			QuickSlotBarGet.OutQuickSlotBarIndex(QuickSlotBarIndex);
@@ -3110,6 +3091,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			QuickSlotBarGet.OutQuickSlotSkillType(QuickSlotSkillType);
 			QuickSlotBarGet.OutQuickSlotSkillLevel(QuickSlotSkillLevel);
 			QuickSlotBarGet.OutQuickSlotSkillCoolTime(QuickSlotSkillCoolTime);
+			QuickSlotBarGet.OutQuickSlotSkillCastingTime(QuickSlotSkillCastingTime);
 			QuickSlotBarGet.OutQuickSlotSkillThumbnailImagePath(QuickSlotSkillThumbnailImagePath);
 
 			QuickSlotBarGet.Execute();
@@ -3125,6 +3107,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				NewQuickSlotBarSlot.QuickBarSkillInfo.SkillType = (en_SkillType)QuickSlotSkillType;
 				NewQuickSlotBarSlot.QuickBarSkillInfo.SkillLevel = QuickSlotSkillLevel;
 				NewQuickSlotBarSlot.QuickBarSkillInfo.SkillCoolTime = QuickSlotSkillCoolTime;
+				NewQuickSlotBarSlot.QuickBarSkillInfo.SkillCastingTime = QuickSlotSkillCastingTime;
 				NewQuickSlotBarSlot.QuickBarSkillInfo.SkillImagePath = QuickSlotSkillThumbnailImagePath;
 
 				// 퀵슬롯에 등록한다.
@@ -3189,19 +3172,19 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				case en_ItemType::ITEM_TYPE_NONE:
 					break;
 				case en_ItemType::ITEM_TYPE_SLIMEGEL:
-					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::ITEM_SLIME_GEL));
+					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_SLIME_GEL));
 					break;
 				case en_ItemType::ITEM_TYPE_LEATHER:
-					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::ITEM_LEATHER));
+					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_LEATHER));
 					break;
 				case en_ItemType::ITEM_TYPE_SKILL_BOOK_CHOHONE:
-					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::ITEM_SKILL_BOOK));
+					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_SKILL_BOOK));
 					break;
 				case en_ItemType::ITEM_TYPE_WOOD_LOG:
-					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::ITEM_WOOD_LOG));
+					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_WOOD_LOG));
 					break;
 				case en_ItemType::ITEM_TYPE_STONE:
-					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::ITEM_STONE));
+					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_STONE));
 					break;
 				default:
 					CRASH("의도치 않은 ItemType");
@@ -3269,6 +3252,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			int8 SkillLevel;
 			WCHAR SkillName[20] = { 0 };
 			int32 SkillCoolTime;
+			int32 SkillCastingTime;
 			WCHAR SkillThumbnailImagePath[100] = { 0 };
 
 			CharacterSkillGet.OutIsQuickSlotUse(IsQuickSlotUse);
@@ -3276,6 +3260,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			CharacterSkillGet.OutSkillLevel(SkillLevel);
 			CharacterSkillGet.OutSkillName(SkillName);
 			CharacterSkillGet.OutSkillCoolTime(SkillCoolTime);
+			CharacterSkillGet.OutSkillCastingTime(SkillCastingTime);
 			CharacterSkillGet.OutSkillThumbnailImagePath(SkillThumbnailImagePath);
 
 			CharacterSkillGet.Execute();
@@ -3288,6 +3273,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				SkillInfo.SkillLevel = SkillLevel;
 				SkillInfo.SkillName = SkillName;
 				SkillInfo.SkillCoolTime = SkillCoolTime;
+				SkillInfo.SkillCastingTime = SkillCastingTime;
 				SkillInfo.SkillImagePath = SkillThumbnailImagePath;
 
 				Session->MyPlayer->_SkillBox.AddSkill(SkillInfo);
@@ -3393,6 +3379,7 @@ void CGameServer::PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CGameServ
 				QuickSlotUpdate.InSkillLevel(SaveQuickSlotInfo.QuickBarSkillInfo.SkillLevel);
 				QuickSlotUpdate.InSkillName(SaveQuickSlotInfo.QuickBarSkillInfo.SkillName);
 				QuickSlotUpdate.InSkillCoolTime(SaveQuickSlotInfo.QuickBarSkillInfo.SkillCoolTime);
+				QuickSlotUpdate.InSkillCastingTime(SaveQuickSlotInfo.QuickBarSkillInfo.SkillCastingTime);
 				QuickSlotUpdate.InSkillThumbnailImagePath(SaveQuickSlotInfo.QuickBarSkillInfo.SkillImagePath);
 
 				QuickSlotUpdate.Execute();
@@ -3453,6 +3440,7 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 			int8 QuickSlotASkillLevel;			
 			WCHAR QuickSlotASkillName[20] = { 0 };
 			int32 QuickSlotASkillCoolTime;
+			int32 QuickSlotASkillCastingTime;
 			WCHAR QuickSlotASkillImagePath[100] = { 0 };
 			
 			QuickSlotACheck.OutQuickSlotKey(QuickSlotAKey);
@@ -3460,6 +3448,7 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 			QuickSlotACheck.OutQuickSlotSkillLevel(QuickSlotASkillLevel);
 			QuickSlotACheck.OutQuickSlotSkillName(QuickSlotASkillName);
 			QuickSlotACheck.OutQuickSlotSkillCoolTime(QuickSlotASkillCoolTime);
+			QuickSlotACheck.OutQuickSlotSkillCastingTime(QuickSlotASkillCastingTime);
 			QuickSlotACheck.OutQuickSlotSkillThumbnailImagePath(QuickSlotASkillImagePath);
 
 			QuickSlotACheck.Execute();
@@ -3478,6 +3467,7 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 			SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillLevel = QuickSlotASkillLevel;
 			SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillName = QuickSlotASkillName;
 			SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillCoolTime = QuickSlotASkillCoolTime;
+			SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillCastingTime = QuickSlotASkillCastingTime;
 			SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillImagePath = QuickSlotASkillImagePath;
 #pragma endregion
 #pragma region 퀵슬롯 B가 DB에 있는지 확인
@@ -3494,6 +3484,7 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 			int8 QuickSlotBSkillLevel;
 			WCHAR QuickSlotBSkillName[20] = { 0 };
 			int32 QuickSlotBSkillCoolTime;
+			int32 QuickSlotBSkillCastingTime;
 			WCHAR QuickSlotBSkillImagePath[100] = { 0 };
 
 			QuickSlotBCheck.OutQuickSlotKey(QuickSlotBKey);
@@ -3501,6 +3492,7 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 			QuickSlotBCheck.OutQuickSlotSkillLevel(QuickSlotBSkillLevel);
 			QuickSlotBCheck.OutQuickSlotSkillName(QuickSlotBSkillName);
 			QuickSlotBCheck.OutQuickSlotSkillCoolTime(QuickSlotBSkillCoolTime);
+			QuickSlotBCheck.OutQuickSlotSkillCastingTime(QuickSlotBSkillCastingTime);
 			QuickSlotBCheck.OutQuickSlotSkillThumbnailImagePath(QuickSlotBSkillImagePath);
 
 			QuickSlotBCheck.Execute();
@@ -3519,6 +3511,7 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 			SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillLevel = QuickSlotBSkillLevel;
 			SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillName = QuickSlotBSkillName;
 			SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillCoolTime = QuickSlotBSkillCoolTime;
+			SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillCastingTime = QuickSlotBSkillCastingTime;
 			SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillImagePath = QuickSlotBSkillImagePath;
 
 			SwapAQuickSlotBarInfo.QuickSlotKey = QuickSlotBKey;
@@ -3540,6 +3533,7 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 			QuickSlotSwap.InAQuickSlotSkillLevel(SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillLevel);
 			QuickSlotSwap.InAQuickSlotSKillName(SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillName);
 			QuickSlotSwap.InAQuickSlotSkillCoolTime(SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillCoolTime);
+			QuickSlotSwap.InAQuickSlotSkillCastingTime(SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillCastingTime);
 			QuickSlotSwap.InAQuickSlotSKillImagePath(SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillImagePath);
 
 			QuickSlotSwap.InBQuickSlotBarIndex(SwapAQuickSlotBarInfo.QuickSlotBarIndex);
@@ -3548,6 +3542,7 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 			QuickSlotSwap.InBQuickSlotSkillLevel(SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillLevel);
 			QuickSlotSwap.InBQuickSlotSKillName(SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillName);
 			QuickSlotSwap.InBQuickSlotSkillCoolTime(SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillCoolTime);
+			QuickSlotSwap.InBQuickSlotSkillCastingTime(SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillCastingTime);
 			QuickSlotSwap.InBQuickSlotSKillImagePath(SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillImagePath);
 
 			bool QuickSlotSwapSuccess = QuickSlotSwap.Execute();
@@ -3605,6 +3600,7 @@ void CGameServer::PacketProcReqDBQuickSlotInit(int64 SessionId, CMessage* Messag
 			int8 QuickSlotSkillLevel;
 			WCHAR QuickSlotSkillName[20] = { 0 };
 			int32 QuickSlotSkillCoolTime;
+			int32 QuickSlotSkillCastingTime;
 			WCHAR QuickSlotSkillImagePath[100] = { 0 };
 
 			QuickSlotACheck.OutQuickSlotKey(QuickSlotKey);
@@ -3612,6 +3608,7 @@ void CGameServer::PacketProcReqDBQuickSlotInit(int64 SessionId, CMessage* Messag
 			QuickSlotACheck.OutQuickSlotSkillLevel(QuickSlotSkillLevel);
 			QuickSlotACheck.OutQuickSlotSkillName(QuickSlotSkillName);
 			QuickSlotACheck.OutQuickSlotSkillCoolTime(QuickSlotSkillCoolTime);
+			QuickSlotACheck.OutQuickSlotSkillCastingTime(QuickSlotSkillCastingTime);
 			QuickSlotACheck.OutQuickSlotSkillThumbnailImagePath(QuickSlotSkillImagePath);
 
 			QuickSlotACheck.Execute();
@@ -3792,6 +3789,18 @@ void CGameServer::PacketProcTimerCoolTimeEnd(int64 SessionId, CMessage* Message)
 	}
 
 	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcTimerObjectSpawn(CMessage* Message)
+{
+	int16 SpawnObjectType;
+	*Message >> SpawnObjectType;
+		
+	st_Vector2Int SpawnPosition;
+	*Message >> SpawnPosition._X;
+	*Message >> SpawnPosition._Y;
+
+	G_ObjectManager->ObjectSpawn((en_GameObjectType)SpawnObjectType, SpawnPosition);
 }
 
 CGameServerMessage* CGameServer::MakePacketResClientConnected()
@@ -4504,4 +4513,88 @@ void CGameServer::SendPacketAroundSector(st_Session* Session, CMessage* Message,
 			}
 		}
 	}
+}
+
+void CGameServer::CoolTimeSkillTimerJobCreate(CPlayer* Player, int64 CastingTime, st_SkillInfo* CoolTimeSkillInfo, en_TimerJobType TimerJobType, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex)
+{
+	CoolTimeSkillInfo->CanSkillUse = false;
+
+	// 스킬 모션 끝 판단
+	// 0.5초 후에 Idle상태로 바꾸기 위해 TimerJob 등록
+	st_TimerJob* TimerJob = _TimerJobMemoryPool->Alloc();
+	TimerJob->ExecTick = GetTickCount64() + CastingTime;
+	TimerJob->SessionId = Player->_SessionId;
+	TimerJob->Type = TimerJobType;
+
+	AcquireSRWLockExclusive(&_TimerJobLock);
+	_TimerHeapJob->InsertHeap(TimerJob->ExecTick, TimerJob);
+	ReleaseSRWLockExclusive(&_TimerJobLock);
+
+	SetEvent(_TimerThreadWakeEvent);
+
+	float SkillCoolTime = CoolTimeSkillInfo->SkillCoolTime / 1000.0f;
+
+	// 클라에게 쿨타임 표시
+	CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(Player->_GameObjectInfo.ObjectId, QuickSlotBarIndex, QuickSlotBarSlotIndex, SkillCoolTime, 1.0f);
+	SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
+	ResCoolTimeStartPacket->Free();
+
+	// 쿨타임 시간 동안 스킬 사용 못하게 막음
+	CoolTimeSkillInfo->CanSkillUse = false;
+
+	// 스킬 쿨타임 얻어옴
+	auto FindSkilliterator = G_Datamanager->_Skills.find((int32)CoolTimeSkillInfo->SkillType);
+	st_SkillData* ReqSkillData = (*FindSkilliterator).second;
+
+	// 스킬 쿨타임 스킬쿨타임 잡 등록
+	st_TimerJob* SkillCoolTimeTimerJob = _TimerJobMemoryPool->Alloc();
+	SkillCoolTimeTimerJob->ExecTick = GetTickCount64() + ReqSkillData->SkillCoolTime;
+	SkillCoolTimeTimerJob->SessionId = Player->_SessionId;
+	SkillCoolTimeTimerJob->Type = en_TimerJobType::TIMER_SKILL_COOLTIME_END;
+
+	CGameServerMessage* ResCoolTimeEndMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResCoolTimeEndMessage == nullptr)
+	{
+		return;
+	}
+
+	ResCoolTimeEndMessage->Clear();
+
+	*ResCoolTimeEndMessage << (int16)CoolTimeSkillInfo->SkillType;
+	SkillCoolTimeTimerJob->Message = ResCoolTimeEndMessage;
+
+	AcquireSRWLockExclusive(&_TimerJobLock);
+	_TimerHeapJob->InsertHeap(SkillCoolTimeTimerJob->ExecTick, SkillCoolTimeTimerJob);
+	ReleaseSRWLockExclusive(&_TimerJobLock);
+
+	SetEvent(_TimerThreadWakeEvent);
+}
+
+void CGameServer::SpawnObjectTime(CGameObject* SpawnObject, int64 SpawnTime)
+{
+	st_TimerJob* SpawnObjectTimerJob = _TimerJobMemoryPool->Alloc();
+	SpawnObjectTimerJob->ExecTick = GetTickCount64() + SpawnTime;
+	SpawnObjectTimerJob->SessionId = 0;
+	SpawnObjectTimerJob->Type = en_TimerJobType::TIMER_OBJECT_SPAWN;
+
+	CGameServerMessage* ResObjectSpawnMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResObjectSpawnMessage == nullptr)
+	{
+		return;
+	}
+
+	ResObjectSpawnMessage->Clear();
+
+	*ResObjectSpawnMessage << (int16)SpawnObject->_GameObjectInfo.ObjectType;
+	
+	st_Vector2Int SpawnCellPosition = SpawnObject->GetCellPosition();
+	*ResObjectSpawnMessage << SpawnCellPosition;
+
+	SpawnObjectTimerJob->Message = ResObjectSpawnMessage;
+
+	AcquireSRWLockExclusive(&_TimerJobLock);
+	_TimerHeapJob->InsertHeap(SpawnObjectTimerJob->ExecTick, SpawnObjectTimerJob);
+	ReleaseSRWLockExclusive(&_TimerJobLock);
+
+	SetEvent(_TimerThreadWakeEvent);
 }

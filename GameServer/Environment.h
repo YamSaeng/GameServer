@@ -4,8 +4,6 @@
 class CEnvironment : public CGameObject
 {
 public:
-	st_Vector2Int _SpawnPosition;
-
 	CEnvironment();
 
 	virtual void Init(st_Vector2Int SpawnPosition);
