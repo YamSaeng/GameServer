@@ -225,6 +225,13 @@ enum en_PACKET_TYPE
 	// string Message
 	//------------------------------------------------------------
 	en_PACKET_S2C_MESSAGE,
+	
+	//------------------------------------------------------------
+	// 게임서버 인벤토리 생성 
+	// int8 InventorySize
+	// st_ItemInfo[] InventoryItemInfos
+	//------------------------------------------------------------
+	en_PACKET_S2C_INVENTORY_CREATE,
 
 	//------------------------------------------------------------
 	// 게임서버 아이템 인벤토리 저장 요청
@@ -292,6 +299,9 @@ enum en_PACKET_TYPE
 	
 	//------------------------------------------------------------
 	// 게임서버 퀵슬롯 생성 
+	// int8 QuickSlotBarSize
+	// int8 QuickSlotBarSlotSize
+	// st_QuickSlotBarSlotInfo[] QuickSlotBarSlotInfos
 	//------------------------------------------------------------
 	en_PACKET_S2C_QUICKSLOT_CREATE,
 
