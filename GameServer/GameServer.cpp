@@ -564,6 +564,9 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 	{
 		if (Session)
 		{
+			// DB 큐에 요청하기 전 IOCount를 증가시켜서 Session이 반납 안되도록 막음
+			InterlockedIncrement64(&Session->IOBlock->IOCount);
+
 			// 로그인 중이 아니면 나간다.
 			if (!Session->IsLogin)
 			{
@@ -643,10 +646,7 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 				ResOtherObjectSpawnPacket->Free();
 
 				delete[] SpawnGameObjectInfos;
-			}
-
-			// DB 큐에 요청하기 전 IOCount를 증가시켜서 Session이 반납 안되도록 막음
-			InterlockedIncrement64(&Session->IOBlock->IOCount);
+			}			
 
 			st_Job* DBCharacterInfoSendJob = _JobMemoryPool->Alloc();
 			DBCharacterInfoSendJob->Type = en_JobType::DATA_BASE_CHARACTER_INFO_SEND;
@@ -3407,6 +3407,8 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			// 인벤토리 초기화
 			Session->MyPlayer->_Inventory.Init();
 
+			vector<st_ItemInfo> InventoryItems;
+
 			// 캐릭터가 소유하고 있었던 Item 정보를 InventoryTable에서 읽어온다.
 			CDBConnection* DBCharacterInventoryItemGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 			SP::CDBGameServerInventoryItemGet CharacterInventoryItemGet(*DBCharacterInventoryItemGetConnection);
@@ -3443,53 +3445,21 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				ItemInfo.ItemCount = ItemCount;
 				ItemInfo.SlotIndex = SlotIndex;
 				ItemInfo.IsEquipped = IsEquipped;
-				ItemInfo.ThumbnailImagePath = ItemThumbnailImagePath;				
-
-				// ItemType에 따라 아이템을 생성하고
-				CItem* NewItem = nullptr;
-				switch (ItemInfo.ItemType)
-				{
-				case en_ItemType::ITEM_TYPE_NONE:
-					break;
-				case en_ItemType::ITEM_TYPE_SLIMEGEL:
-					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_SLIME_GEL));
-					break;
-				case en_ItemType::ITEM_TYPE_LEATHER:
-					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_LEATHER));
-					break;
-				case en_ItemType::ITEM_TYPE_SKILL_BOOK_CHOHONE:
-					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_SKILL_BOOK));
-					break;
-				case en_ItemType::ITEM_TYPE_WOOD_LOG:
-					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_WOOD_LOG));
-					break;
-				case en_ItemType::ITEM_TYPE_STONE:
-					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_STONE));
-					break;
-				case en_ItemType::ITEM_TYPE_WOOD_FLANK:
-					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_WOOD_FLANK));
-					break;
-				case en_ItemType::ITEM_TYPE_YARN:
-					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_YARN));
-					break;
-				default:
-					CRASH("의도치 않은 ItemType");
-					break;
-				}
+				ItemInfo.ThumbnailImagePath = ItemThumbnailImagePath;								
 
 				if (ItemInfo.ItemType != en_ItemType::ITEM_TYPE_NONE)
-				{
-					// 위에서 조립한 ItemInfo를 셋팅한다.
-					NewItem->_ItemInfo = ItemInfo;
+				{					
 					// 인벤토리에 아이템을 추가하고
 					Session->MyPlayer->_Inventory.AddItem(ItemInfo);
 
-					// 클라에게 아이템 정보를 보내준다.
-					CMessage* ResItemToInventoryPacket = MakePacketResItemToInventory(Session->MyPlayer->_GameObjectInfo.ObjectId, ItemInfo, ItemInfo.ItemCount, false);
-					SendPacket(Session->SessionId, ResItemToInventoryPacket);
-					ResItemToInventoryPacket->Free();
+					InventoryItems.push_back(ItemInfo);					
 				}
 			}
+
+			// 클라에게 아이템 정보를 보내준다.
+			CMessage* ResItemToInventoryPacket = MakePacketInventoryCreate((int8)en_Inventory::INVENTORY_SIZE, InventoryItems);
+			SendPacket(Session->SessionId, ResItemToInventoryPacket);
+			ResItemToInventoryPacket->Free();
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterInventoryItemGetConnection);
 #pragma endregion			
@@ -3524,6 +3494,8 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				SendPacket(Session->SessionId, ResGoldSaveMeesage);
 				ResGoldSaveMeesage->Free();
 			}
+
+			G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterGoldGetConnection);
 #pragma endregion			
 
 #pragma region 스킬 정보 읽어오기
@@ -3573,9 +3545,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterSkillGetConnection);
 #pragma endregion
 
-#pragma region 조합템 정보 보내기
-			/*auto FindSkilliterator = G_Datamanager->_Skills.find(ReqSkillType);
-			st_SkillData* ReqSkillData = (*FindSkilliterator).second;*/
+#pragma region 조합템 정보 보내기			
 			vector<st_CraftingItemCategory> CraftingItemCategorys;			
 			
 			for (int8 Category = (int8)en_ItemCategory::ITEM_CATEGORY_WEAPON; Category <= (int8)en_ItemCategory::ITEM_CATEGORY_MATERIAL; ++Category)
@@ -4219,6 +4189,22 @@ CGameServerMessage* CGameServer::MakePacketResGoldSave(int64 AccountId, int64 Ob
 	*ResGoldSaveMessage << ItemGainPrint;
 
 	return ResGoldSaveMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketInventoryCreate(int8 InventorySize, vector<st_ItemInfo> InventoryItems)
+{
+	CGameServerMessage* ResInventoryCreateMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResInventoryCreateMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResInventoryCreateMessage->Clear();
+
+	*ResInventoryCreateMessage << (int16)en_PACKET_S2C_INVENTORY_CREATE;
+	*ResInventoryCreateMessage << InventorySize;
+
+	return ResInventoryCreateMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketResItemSwap(int64 AccountId, int64 ObjectId, st_ItemInfo SwapAItemInfo, st_ItemInfo SwapBItemInfo)

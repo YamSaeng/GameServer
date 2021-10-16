@@ -22,14 +22,7 @@ void CInventory::Init()
 	for (int8 SlotIndex = 0; SlotIndex < (int8)en_Inventory::INVENTORY_SIZE; SlotIndex++)
 	{
 		// 后伯单扁 沥焊 积己
-		st_ItemInfo* InitItemInfo = new st_ItemInfo();
-		InitItemInfo->ItemDBId = 0;
-		InitItemInfo->ItemCategory = en_ItemCategory::ITEM_CATEGORY_NONE;
-		InitItemInfo->ItemType = en_ItemType::ITEM_TYPE_NONE;		
-		InitItemInfo->ItemName = L"";
-		InitItemInfo->ItemCount = 0;
-		InitItemInfo->ThumbnailImagePath = L"";
-		InitItemInfo->IsEquipped = false;
+		st_ItemInfo* InitItemInfo = new st_ItemInfo();		
 		InitItemInfo->SlotIndex = SlotIndex;
 
 		InitItemInfo->IsEquipped = false;

@@ -235,6 +235,10 @@ private:
 	//-------------------------------------------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int16 SliverCount, int16 BronzeCount, int16 ItemCount, int16 ItemType, bool ItemGainPrint = true);
 	//-------------------------------------------------------------------------------------------------------------------------
+	// 게임서버 인벤토리 생성 패킷 조합
+	//-------------------------------------------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketInventoryCreate(int8 InventorySize, vector<st_ItemInfo> InventoryItems);
+	//-------------------------------------------------------------------------------------------------------------------------
 	// 게임서버 아이템 스왑 요청 응답 패킷 조합
 	//-------------------------------------------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResItemSwap(int64 AccountId, int64 ObjectId, st_ItemInfo SwapAItemInfo, st_ItemInfo SwapBItemInfo);
