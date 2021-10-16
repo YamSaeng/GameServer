@@ -61,12 +61,17 @@ void CObjectManager::Add(CGameObject* AddObject, int32 ChannelId)
 
 				_Monsters.insert(pair<int64, CMonster*>(AddObject->_GameObjectInfo.ObjectId, Monster));
 
-				SpawnMonster.push_back(Monster->_GameObjectInfo);
+				SpawnMonster.push_back(Monster->_GameObjectInfo);				
 
 				// 몬스터 추가하면 몬스터 주위 플레이어들에게 몬스터를 소환하라고 알림
 				CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(1, SpawnMonster);
 				GameServer->SendPacketAroundSector(Monster->GetCellPosition(), ResSpawnPacket);
 				ResSpawnPacket->Free();
+
+				// 몬스터 소환할때 소환 이펙트 출력
+				CMessage* ResEffectPacket = GameServer->MakePacketEffect(Monster->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_OBJECT_SPAWN);
+				GameServer->SendPacketAroundSector(Monster->GetCellPosition(), ResEffectPacket);
+				ResEffectPacket->Free();
 			} 
 			break;		
 		case en_GameObjectType::OBJECT_ITEM_SLIME_GEL:
@@ -75,6 +80,8 @@ void CObjectManager::Add(CGameObject* AddObject, int32 ChannelId)
 		case en_GameObjectType::OBJECT_ITEM_SKILL_BOOK:
 		case en_GameObjectType::OBJECT_ITEM_WOOD_LOG:
 		case en_GameObjectType::OBJECT_ITEM_STONE:
+		case en_GameObjectType::OBJECT_ITEM_WOOD_FLANK:
+		case en_GameObjectType::OBJECT_ITEM_YARN:
 			{
 				vector<st_GameObjectInfo> SpawnItem;
 				
@@ -146,6 +153,8 @@ bool CObjectManager::Remove(CGameObject* RemoveObject, int32 _ChannelId, bool Is
 	case en_GameObjectType::OBJECT_ITEM_SKILL_BOOK:
 	case en_GameObjectType::OBJECT_ITEM_WOOD_LOG:
 	case en_GameObjectType::OBJECT_ITEM_STONE:
+	case en_GameObjectType::OBJECT_ITEM_WOOD_FLANK:
+	case en_GameObjectType::OBJECT_ITEM_YARN:
 		_Items.erase(RemoveObject->_GameObjectInfo.ObjectId);
 
 		RemoveObject->_Channel->LeaveChannel(RemoveObject);
@@ -205,6 +214,8 @@ CGameObject* CObjectManager::Find(int64 ObjectId, en_GameObjectType GameObjectTy
 	case en_GameObjectType::OBJECT_ITEM_SKILL_BOOK:
 	case en_GameObjectType::OBJECT_ITEM_WOOD_LOG:
 	case en_GameObjectType::OBJECT_ITEM_STONE:
+	case en_GameObjectType::OBJECT_ITEM_WOOD_FLANK:
+	case en_GameObjectType::OBJECT_ITEM_YARN:	
 	{
 		auto FindIterator = _Items.find(ObjectId);
 		if (FindIterator == _Items.end())
@@ -255,6 +266,8 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 	case en_GameObjectType::OBJECT_ITEM_LEATHER:
 	case en_GameObjectType::OBJECT_ITEM_WOOD_LOG:
 	case en_GameObjectType::OBJECT_ITEM_STONE:
+	case en_GameObjectType::OBJECT_ITEM_WOOD_FLANK:
+	case en_GameObjectType::OBJECT_ITEM_YARN:
 		NewObject = _MaterialMemoryPool->Alloc();
 		break;
 	case en_GameObjectType::OBJECT_ITEM_SKILL_BOOK:
@@ -293,6 +306,8 @@ void CObjectManager::ObjectReturn(en_GameObjectType ObjectType, CGameObject* Ret
 	case en_GameObjectType::OBJECT_ITEM_LEATHER:
 	case en_GameObjectType::OBJECT_ITEM_WOOD_LOG:
 	case en_GameObjectType::OBJECT_ITEM_STONE:
+	case en_GameObjectType::OBJECT_ITEM_WOOD_FLANK:
+	case en_GameObjectType::OBJECT_ITEM_YARN:
 		_MaterialMemoryPool->Free((CMaterial*)ReturnObject);
 		break;
 	case en_GameObjectType::OBJECT_ITEM_SKILL_BOOK:

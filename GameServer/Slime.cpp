@@ -42,7 +42,7 @@ CSlime::~CSlime()
 
 void CSlime::Init(st_Vector2Int SpawnPosition)
 {
-	CMonster::Init(SpawnPosition);
+	CMonster::Init(SpawnPosition);	
 
 	_SpawnIdleTick = GetTickCount64() + 2000;
 	_SearchTick = GetTickCount64() + _SearchTickPoint;	

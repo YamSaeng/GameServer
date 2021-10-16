@@ -65,7 +65,7 @@ void CGameServer::GameServerStart(const WCHAR* OpenIP, int32 Port)
 {
 	CNetworkLib::Start(OpenIP, Port);
 
-	// 오브젝트 스폰
+	// 맵 오브젝트 스폰
 	G_ObjectManager->MapObjectSpawn(1);	
 
 	G_ObjectManager->GameServer = this;
@@ -197,8 +197,11 @@ unsigned __stdcall CGameServer::DataBaseThreadProc(void* Argument)
 			case en_JobType::DATA_BASE_ITEM_CREATE:
 				Instance->PacketProcReqDBItemCreate(Job->Message);
 				break;
-			case en_JobType::DATA_BASE_ITEM_INVENTORY_SAVE:
-				Instance->PacketProcReqDBItemToInventorySave(Job->SessionId, Job->Message);
+			case en_JobType::DATA_BASE_LOOTING_ITEM_INVENTORY_SAVE:
+				Instance->PacketProcReqDBLootingItemToInventorySave(Job->SessionId, Job->Message);
+				break;
+			case en_JobType::DATA_BASE_CRAFTING_ITEM_INVENTORY_SAVE:
+				Instance->PacketProcReqDBCraftingItemToInventorySave(Job->SessionId, Job->Message);
 				break;
 			case en_JobType::DATA_BASE_ITEM_SWAP:
 				Instance->PacketProcReqDBItemSwap(Job->SessionId, Job->Message);
@@ -1699,11 +1702,12 @@ void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Messag
 				}
 				else
 				{
-					// 아이템 개수
+					// 인벤토리에 저장할 아이템 개수
 					int16 ItemEach = Item->_ItemInfo.ItemCount;
 
 					// 그 외 아이템이라면 
 					int8 SlotIndex = 0;
+					// 인벤토리에 저장된 아이템 개수
 					int16 ItemCount = 0;
 
 					// 아이템이 이미 존재 하는지 확인한다.
@@ -1713,16 +1717,19 @@ void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Messag
 					// 존재 하지 않을 경우
 					if (IsExistItem == false)
 					{
+						// 비어 있는 슬롯인덱스 가져와서
 						if (TargetPlayer->_Inventory.GetEmptySlot(&SlotIndex))
-						{
+						{							
+							// 인벤토리에 저장
 							Item->_ItemInfo.SlotIndex = SlotIndex;
 							TargetPlayer->_Inventory.AddItem(Item->_ItemInfo);	
 							ItemCount = ItemEach;
 						}
 					}
 
+					// DB 인벤토리에 저장하기 위해 Job 생성
 					st_Job* DBInventorySaveJob = _JobMemoryPool->Alloc();
-					DBInventorySaveJob->Type = en_JobType::DATA_BASE_ITEM_INVENTORY_SAVE;
+					DBInventorySaveJob->Type = en_JobType::DATA_BASE_LOOTING_ITEM_INVENTORY_SAVE;
 					DBInventorySaveJob->SessionId = Session->SessionId;
 
 					CGameServerMessage* DBSaveMessage = CGameServerMessage::GameServerMessageAlloc();
@@ -2080,6 +2087,8 @@ void CGameServer::PacketProcReqCraftingConfirm(int64 SessionId, CMessage* Messag
 	{
 		do
 		{
+			InterlockedIncrement64(&Session->IOBlock->IOCount);
+
 			int64 AccountId;
 			int64 PlayerDBId;
 
@@ -2116,14 +2125,181 @@ void CGameServer::PacketProcReqCraftingConfirm(int64 SessionId, CMessage* Messag
 				}
 			}
 
-			int32 ReqCategoryType;
+			int8 ReqCategoryType;
 			*Message >> ReqCategoryType;
 
 			int16 ReqCraftingItemType;
-			*Message >> ReqCraftingItemType;
+			*Message >> ReqCraftingItemType;			
+
+			int16 ReqCraftingItemCount;
+			*Message >> ReqCraftingItemCount;
+
+			int8 MaterialTotalCount;
+			*Message >> MaterialTotalCount;
+
+			// 클라가 제작 요청한 제작템의 재료템들
+			vector<st_CraftingMaterialItemInfo> ReqMaterials;
+			for (int i = 0; i < MaterialTotalCount; i++)
+			{
+				st_CraftingMaterialItemInfo CraftingMaterialItemInfo;				
+				
+				int16 MaterialType;
+				*Message >> MaterialType;
+				int16 MaterialItemCount;
+				*Message >> MaterialItemCount;
+
+				CraftingMaterialItemInfo.MaterialItemType = (en_ItemType)MaterialType;
+				CraftingMaterialItemInfo.ItemCount = MaterialItemCount;
+
+				ReqMaterials.push_back(CraftingMaterialItemInfo);
+			}			
+
+			st_CraftingItemCategoryData* FindCraftingCategoryData = nullptr;
+			// 제작법 카테고리 찾기
+			auto FindCategoryItem = G_Datamanager->_CraftingData.find(ReqCategoryType);
+			if (FindCategoryItem == G_Datamanager->_CraftingData.end())
+			{
+				// 카테고리를 찾지 못함
+				break;
+			}
+
+			FindCraftingCategoryData = (*FindCategoryItem).second;			
+
+			// 완성템 제작에 필요한 재료 목록 찾기
+			vector<st_CraftingMaterialItemData> RequireMaterialData;
+			for (st_CraftingCompleteItemData CraftingCompleteItemData : FindCraftingCategoryData->CraftingCompleteItems)
+			{
+				if (CraftingCompleteItemData.CraftingCompleteItemDataId == (en_ItemType)ReqCraftingItemType)
+				{
+					RequireMaterialData = CraftingCompleteItemData.CraftingMaterials;
+				}
+			}
+						
+			CPlayer* MyPlayer = Session->MyPlayer;
 			
-			int8 MaterialCount;
-			*Message >> MaterialCount;
+			bool InventoryCheck = true;
+			// 인벤토리에 재료템이 있는지 확인
+			for (st_CraftingMaterialItemInfo CraftingMaterialItemInfo : ReqMaterials)
+			{
+				// 인벤토리에 재료템 목록을 가지고 옴
+				vector<st_ItemInfo*> FindMaterials = MyPlayer->_Inventory.Find(CraftingMaterialItemInfo.MaterialItemType);
+				
+				if (FindMaterials.size() > 0)
+				{					
+					for (st_ItemInfo* InventoryItemInfo : FindMaterials)
+					{	
+						int16 InventoryMaterialItemCount = InventoryItemInfo->ItemCount;
+						int16 CraftingMaterialItemCount = CraftingMaterialItemInfo.ItemCount;
+
+						InventoryItemInfo->ItemCount -= CraftingMaterialItemInfo.ItemCount;
+						CraftingMaterialItemCount -= InventoryItemInfo->ItemCount;
+						if (InventoryItemInfo->ItemCount < 0)
+						{							
+							InventoryItemInfo->InventoryItemInit();							
+						}							
+
+						CraftingMaterialItemInfo.ItemCount -= CraftingMaterialItemCount;
+
+						CMessage* ReqInventoryItemUpdate = MakePacketInventoryItemUpdate(MyPlayer->_GameObjectInfo.ObjectId, *InventoryItemInfo);
+						SendPacket(SessionId, ReqInventoryItemUpdate);
+						ReqInventoryItemUpdate->Free();
+					}					
+				}	
+				else
+				{
+					InventoryCheck = false;
+					break;					
+				}
+			}
+
+			if (InventoryCheck == false)
+			{
+				break;
+			}
+
+			// 재료템 확인작업 완료
+			// 아이템 생성 후 인벤토리에 넣고 클라에게도 전송
+			auto ItemDataIterator = G_Datamanager->_Items.find((int32)ReqCraftingItemType);
+			if (ItemDataIterator == G_Datamanager->_Items.end())
+			{
+				break;
+			}
+
+			st_ItemData* FindReqCompleteItemData = (*ItemDataIterator).second;
+
+			st_ItemInfo CraftingItem;
+			CraftingItem.ItemDBId = 0;
+			CraftingItem.IsQuickSlotUse = FindReqCompleteItemData->IsEquipped;
+			CraftingItem.ItemCategory = FindReqCompleteItemData->ItemCategory;
+			CraftingItem.ItemType = FindReqCompleteItemData->ItemType;
+			CraftingItem.ItemName = (LPWSTR)CA2W(FindReqCompleteItemData->ItemName.c_str());
+			CraftingItem.ItemCount = ReqCraftingItemCount;
+			CraftingItem.ThumbnailImagePath = (LPWSTR)CA2W(FindReqCompleteItemData->ThumbnailImagePath.c_str());
+			CraftingItem.IsEquipped = FindReqCompleteItemData->IsEquipped;
+
+			bool IsExistItem = false;
+			int8 SlotIndex = 0;
+			int16 ItemCount = 0;
+
+			// 인벤토리에 제작템이 이미 있으면 개수만 늘려준다.
+			IsExistItem = MyPlayer->_Inventory.IsExistItem(CraftingItem.ItemType, &ItemCount, CraftingItem.ItemCount, &SlotIndex);
+			
+			// 인벤토리에 제작템이 없을 경우 인벤토리에 저장
+			if (IsExistItem == false)
+			{
+				if (MyPlayer->_Inventory.GetEmptySlot(&SlotIndex))
+				{
+					CraftingItem.SlotIndex = SlotIndex;
+					MyPlayer->_Inventory.AddItem(CraftingItem);
+					ItemCount = CraftingItem.ItemCount;
+				}
+			}
+
+			st_Job* DBInventorySaveJob = _JobMemoryPool->Alloc();
+			DBInventorySaveJob->Type = en_JobType::DATA_BASE_CRAFTING_ITEM_INVENTORY_SAVE;
+			DBInventorySaveJob->SessionId = Session->SessionId;
+
+			CGameServerMessage* DBSaveMessage = CGameServerMessage::GameServerMessageAlloc();
+
+			DBSaveMessage->Clear();
+
+			// 중복 여부
+			*DBSaveMessage << IsExistItem;
+			// 타겟 ObjectId
+			*DBSaveMessage << MyPlayer->_GameObjectInfo.ObjectId;
+			// 아이템 DBId
+			*DBSaveMessage << CraftingItem.ItemDBId;
+			// 아이템 개수
+			*DBSaveMessage << ItemCount;
+			// 아이템 추가한 개수
+			*DBSaveMessage << CraftingItem.ItemCount;
+			// 아이템 슬롯 번호
+			*DBSaveMessage << SlotIndex;
+			// 아이템 착용 여부
+			*DBSaveMessage << CraftingItem.IsEquipped;
+			// 아이템 범주
+			*DBSaveMessage << (int8)CraftingItem.ItemCategory;
+			// 아이템 타입
+			*DBSaveMessage << (int16)CraftingItem.ItemType;
+			// AccoountId
+			*DBSaveMessage << MyPlayer->_AccountId;
+
+			// 아이템 이름 길이
+			int8 ItemNameLen = (int8)(CraftingItem.ItemName.length() * 2);
+			*DBSaveMessage << ItemNameLen;
+			// 아이템 이름
+			DBSaveMessage->InsertData(CraftingItem.ItemName.c_str(), ItemNameLen);
+
+			// 아이템 썸네일 경로 길이
+			int8 ThumbnailImagePathLen = (int)(CraftingItem.ThumbnailImagePath.length() * 2);
+			*DBSaveMessage << ThumbnailImagePathLen;
+			// 아이템 썸네일 경로
+			DBSaveMessage->InsertData(CraftingItem.ThumbnailImagePath.c_str(), ThumbnailImagePathLen);
+
+			DBInventorySaveJob->Message = DBSaveMessage;
+
+			_GameServerDataBaseThreadMessageQue.Enqueue(DBInventorySaveJob);
+			SetEvent(_DataBaseWakeEvent);
 		} while (0);
 	}
 
@@ -2706,7 +2882,7 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 //int64 OwnerAccountId;
 //bool IsEquipped
 
-void CGameServer::PacketProcReqDBItemToInventorySave(int64 SessionId, CMessage* Message)
+void CGameServer::PacketProcReqDBLootingItemToInventorySave(int64 SessionId, CMessage* Message)
 {
 	st_Session* Session = FindSession(SessionId);
 
@@ -2824,6 +3000,110 @@ void CGameServer::PacketProcReqDBItemToInventorySave(int64 SessionId, CMessage* 
 		ItemDelete.Execute();
 
 		G_DBConnectionPool->Push(en_DBConnect::GAME, ItemDeleteDBConnection);
+	}
+
+	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcReqDBCraftingItemToInventorySave(int64 SessionId, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionId);
+
+	if (Session)
+	{
+		InterlockedDecrement64(&Session->IOBlock->IOCount);
+
+		bool IsExistItem;
+		*Message >> IsExistItem;
+
+		int64 TargetObjectId;
+		*Message >> TargetObjectId;
+
+		int64 ItemDBId;
+		*Message >> ItemDBId;
+
+		int16 ItemCount;
+		*Message >> ItemCount;
+
+		int16 ItemEach;
+		*Message >> ItemEach;
+
+		int8 SlotIndex;
+		*Message >> SlotIndex;
+
+		bool IsEquipped;
+		*Message >> IsEquipped;
+
+		int8 ItemCategory;
+		*Message >> ItemCategory;
+
+		int16 ItemType;
+		*Message >> ItemType;
+
+		int64 OwnerAccountId;
+		*Message >> OwnerAccountId;
+
+		st_ItemInfo ItemInfo;
+		ItemInfo.IsQuickSlotUse = false;
+		ItemInfo.ItemCategory = (en_ItemCategory)ItemCategory;
+		ItemInfo.ItemType = (en_ItemType)(ItemType);
+		ItemInfo.ItemCount = ItemCount;
+		ItemInfo.SlotIndex = SlotIndex;
+		ItemInfo.ItemDBId = ItemDBId;
+		ItemInfo.IsEquipped = IsEquipped;
+
+		int8 ItemNameLen;
+		*Message >> ItemNameLen;
+		wstring ItemName;
+		Message->GetData(ItemName, ItemNameLen);
+		ItemInfo.ItemName = ItemName;
+
+		int8 ThumbnailImagePathLen;
+		*Message >> ThumbnailImagePathLen;
+		wstring ThumbnailImagePath;
+		Message->GetData(ThumbnailImagePath, ThumbnailImagePathLen);
+		ItemInfo.ThumbnailImagePath = ThumbnailImagePath;
+
+		Message->Free();
+
+		CDBConnection* CraftingItemToInventorySaveDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+
+		// 아이템 Count 갱신
+		if (IsExistItem == true)
+		{
+			SP::CDBGameServerItemRefreshPush ItemRefreshPush(*CraftingItemToInventorySaveDBConnection);
+			ItemRefreshPush.InAccountDBId(OwnerAccountId);
+			ItemRefreshPush.InPlayerDBId(TargetObjectId);
+			ItemRefreshPush.InItemType(ItemType);
+			ItemRefreshPush.InCount(ItemCount);
+			ItemRefreshPush.InSlotIndex(SlotIndex);
+
+			ItemRefreshPush.Execute();
+		}
+		else
+		{
+			// 새로운 아이템 생성 후 Inventory DB 넣기			
+			SP::CDBGameServerItemToInventoryPush ItemToInventoryPush(*CraftingItemToInventorySaveDBConnection);
+			ItemToInventoryPush.InIsQuickSlotUse(ItemInfo.IsQuickSlotUse);
+			ItemToInventoryPush.InItemCategoryType(ItemCategory);
+			ItemToInventoryPush.InItemType(ItemType);
+			ItemToInventoryPush.InItemName(ItemName);
+			ItemToInventoryPush.InItemCount(ItemCount);
+			ItemToInventoryPush.InSlotIndex(SlotIndex);
+			ItemToInventoryPush.InIsEquipped(IsEquipped);
+			ItemToInventoryPush.InThumbnailImagePath(ThumbnailImagePath);
+			ItemToInventoryPush.InOwnerAccountId(OwnerAccountId);
+			ItemToInventoryPush.InOwnerPlayerId(TargetObjectId);
+
+			ItemToInventoryPush.Execute();
+		}
+
+		G_DBConnectionPool->Push(en_DBConnect::GAME, CraftingItemToInventorySaveDBConnection);
+
+		// 클라 인벤토리에서 해당 아이템을 저장
+		CMessage* ResItemToInventoryPacket = MakePacketResItemToInventory(TargetObjectId, ItemInfo, ItemEach);
+		SendPacket(Session->SessionId, ResItemToInventoryPacket);
+		ResItemToInventoryPacket->Free();		
 	}
 
 	ReturnSession(Session);
@@ -3185,6 +3465,12 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					break;
 				case en_ItemType::ITEM_TYPE_STONE:
 					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_STONE));
+					break;
+				case en_ItemType::ITEM_TYPE_WOOD_FLANK:
+					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_WOOD_FLANK));
+					break;
+				case en_ItemType::ITEM_TYPE_YARN:
+					NewItem = (CItem*)(G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_YARN));
 					break;
 				default:
 					CRASH("의도치 않은 ItemType");
@@ -3745,6 +4031,7 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CMessage* Message)
 
 		// Idle로 상태 변경 후 주위섹터에 전송
 		MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+
 		CMessage* ResObjectStateChangePacket = MakePacketResObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
 		SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateChangePacket);
 		ResObjectStateChangePacket->Free();
@@ -3799,6 +4086,8 @@ void CGameServer::PacketProcTimerObjectSpawn(CMessage* Message)
 	st_Vector2Int SpawnPosition;
 	*Message >> SpawnPosition._X;
 	*Message >> SpawnPosition._Y;
+
+	Message->Free();	
 
 	G_ObjectManager->ObjectSpawn((en_GameObjectType)SpawnObjectType, SpawnPosition);
 }
@@ -3976,6 +4265,23 @@ CGameServerMessage* CGameServer::MakePacketResItemToInventory(int64 TargetObject
 	*ResItemToInventoryMessage << ItemGainPrint;
 
 	return ResItemToInventoryMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketInventoryItemUpdate(int64 PlayerId, st_ItemInfo UpdateItemInfo)
+{
+	CGameServerMessage* ResInventoryItemUpdateMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResInventoryItemUpdateMessage == nullptr)
+	{
+		return nullptr;
+	}
+	
+	ResInventoryItemUpdateMessage->Clear();
+
+	*ResInventoryItemUpdateMessage << (int16)en_PACKET_S2C_INVENTORY_ITEM_UPDATE;
+	*ResInventoryItemUpdateMessage << PlayerId;
+	*ResInventoryItemUpdateMessage << UpdateItemInfo;
+
+	return ResInventoryItemUpdateMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketResQuickSlotBarSlotSave(st_QuickSlotBarSlotInfo QuickSlotBarSlotInfo)

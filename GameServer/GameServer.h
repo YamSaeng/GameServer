@@ -150,10 +150,14 @@ private:
 	// 아이템 생성 후 DB 저장
 	//-------------------------------------------------
 	void PacketProcReqDBItemCreate(CMessage* Message);
-	//-------------------------------------------------
-	// 인벤토리 테이블에 아이템 저장
-	//-------------------------------------------------------------------------
-	void PacketProcReqDBItemToInventorySave(int64 SessionId, CMessage* Message);
+	//------------------------------------------------------------------
+	// 인벤토리 테이블에 루팅한 아이템 저장
+	//------------------------------------------------------------------
+	void PacketProcReqDBLootingItemToInventorySave(int64 SessionId, CMessage* Message);
+	//------------------------------------------------------------------
+	// 인벤토리 테이블에 제작템 저장
+	//------------------------------------------------------------------
+	void PacketProcReqDBCraftingItemToInventorySave(int64 SessionId, CMessage* Message);
 	//---------------------------------------------------------------
 	// 인벤토리 테이블에 아이템 스왑
 	//---------------------------------------------------------------
@@ -239,6 +243,10 @@ private:
 	//-------------------------------------------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResItemToInventory(int64 TargetObjectId, st_ItemInfo ItemInfo, int16 ItemEach, bool ItemGainPrint = true);
 	//-----------------------------------------------------------------------------------------
+	// 게임서버 인벤토리 아이템 업데이트
+	//-----------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketInventoryItemUpdate(int64 PlayerId, st_ItemInfo UpdateItemInfo);
+	//-----------------------------------------------------------------------------------------
 	// 게임서버 퀵슬롯 등록 요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResQuickSlotBarSlotSave(st_QuickSlotBarSlotInfo QuickSlotBarSlotInfo);
@@ -265,7 +273,7 @@ private:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 제작템 목록 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketCraftingList(int64 AccountId, int64 PlayerId, vector<st_CraftingItemCategory> CraftingItemList);
+	CGameServerMessage* MakePacketCraftingList(int64 AccountId, int64 PlayerId, vector<st_CraftingItemCategory> CraftingItemList);	
 public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 공격요청 응답 패킷 조합

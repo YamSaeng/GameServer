@@ -19,7 +19,7 @@ public:
 	virtual void Update() override;
 	virtual void OnDamaged(CGameObject* Attacker, int32 Damage) override;
 	// 몬스터 초기화
-	virtual void Init(st_Vector2Int SpawnPosition);
+	virtual void Init(st_Vector2Int SpawnPosition);	
 protected:
 	//--------------------------
 	// Idle 상태에서 Search 거리

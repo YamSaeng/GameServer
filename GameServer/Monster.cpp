@@ -45,30 +45,35 @@ void CMonster::Update()
 		break;	
 	default:
 		break;
-	}
+	}	
 }
 
 void CMonster::OnDamaged(CGameObject* Attacker, int32 Damage)
 {
-	CGameObject::OnDamaged(Attacker, Damage);
-	
-	_Target = (CPlayer*)Attacker;	
-	
-	if (_GameObjectInfo.ObjectStatInfo.HP == 0)
+	if (_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE)
 	{
-		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
-		
-		if (Attacker->_SelectTarget == this)
-		{
-			Attacker->_SelectTarget = nullptr;
-		}
+		CGameObject::OnDamaged(Attacker, Damage);
 
-		OnDead(Attacker);
-	}
+		_Target = (CPlayer*)Attacker;
+
+		if (_GameObjectInfo.ObjectStatInfo.HP == 0)
+		{
+			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
+
+			if (Attacker->_SelectTarget == this)
+			{
+				Attacker->_SelectTarget = nullptr;
+			}
+
+			OnDead(Attacker);
+		}
+	}	
 }
 
 void CMonster::Init(st_Vector2Int SpawnPosition)
 {
+	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_IDLE;
+
 	_PatrolPositions = GetAroundCellPositions(GetCellPosition(), 2);
 }
 
@@ -286,7 +291,6 @@ void CMonster::UpdateAttack()
 
 void CMonster::UpdateSpawnIdle()
 {
-	G_Logger->WriteStdOut(en_Color::BLUE, L"SpawnIdle\n");
 	if (_SpawnIdleTick > GetTickCount64())
 	{
 		return;

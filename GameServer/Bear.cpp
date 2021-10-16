@@ -33,7 +33,7 @@ CBear::CBear()
 
 	_GetDPPoint = MonsterData.GetDPPoint;
 
-	_SpawnIdleTick = GetTickCount64() + 2000;	
+	_SpawnIdleTick = GetTickCount64() + 2000;
 }
 
 CBear::~CBear()
@@ -43,7 +43,7 @@ CBear::~CBear()
 
 void CBear::Init(st_Vector2Int SpawnPosition)
 {
-	CMonster::Init(SpawnPosition);
+	CMonster::Init(SpawnPosition);	
 
 	_SpawnIdleTick = GetTickCount64() + 2000;
 	_SearchTick = GetTickCount64() + _SearchTickPoint;

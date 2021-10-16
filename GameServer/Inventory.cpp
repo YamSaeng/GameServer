@@ -131,6 +131,23 @@ bool CInventory::IsExistItem(en_ItemType ItemType, int16* ItemCount, int16& Item
 	return false;
 }
 
+vector<st_ItemInfo*> CInventory::Find(en_ItemType ItemType)
+{
+	vector<st_ItemInfo*> FindItem;
+
+	for (auto ItemIterator : _Items)
+	{
+		st_ItemInfo* Item = ItemIterator.second;
+
+		if (Item->ItemType == ItemType)
+		{
+			FindItem.push_back(Item);
+		}
+	}
+
+	return FindItem;
+}
+
 bool CInventory::GetEmptySlot(int8* SlotIndex)
 {
 	for (auto ItemIteraotr : _Items)

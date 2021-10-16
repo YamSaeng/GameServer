@@ -26,6 +26,8 @@ enum class en_GameObjectType : int16
 	OBJECT_ITEM_SKILL_BOOK,
 	OBJECT_ITEM_WOOD_LOG,
 	OBJECT_ITEM_STONE,	
+	OBJECT_ITEM_WOOD_FLANK,
+	OBJECT_ITEM_YARN
 };
 
 enum class en_MoveDir : int8
@@ -96,7 +98,8 @@ enum class en_ItemType : int16
 	ITEM_TYPE_GOLD_COIN = 2004,
 	ITEM_TYPE_STONE = 2005,
 	ITEM_TYPE_WOOD_LOG = 2006,
-	ITEM_TYPE_WOOD_FLANK = 2007
+	ITEM_TYPE_WOOD_FLANK = 2007,
+	ITEM_TYPE_YARN = 2008
 };
 
 enum class en_ItemCategory : int8
@@ -138,7 +141,8 @@ enum class en_EffectType : int16
 	EFFECT_FLAME_HARPOON_TARGET,
 	EFFECT_HEALING_LIGHT_TARGET,
 	EFFECT_HEALING_WIND_TARGET,
-	EFFECT_HELAING_MYSELF	
+	EFFECT_HELAING_MYSELF,
+	EFFECT_OBJECT_SPAWN
 };
 
 enum class en_ErrorType : int16
@@ -244,6 +248,18 @@ struct st_ItemInfo
 		ThumbnailImagePath = L"";
 		IsEquipped = false;
 		SlotIndex  = -1;
+	}
+
+	void InventoryItemInit()
+	{
+		ItemDBId = 0;
+		IsQuickSlotUse = false;
+		ItemCategory = en_ItemCategory::ITEM_CATEGORY_NONE;
+		ItemType = en_ItemType::ITEM_TYPE_NONE;
+		ItemName = L"";
+		ItemCount = 0;
+		ThumbnailImagePath = L"";
+		IsEquipped = false;
 	}
 };
 

@@ -230,7 +230,7 @@ void CChannel::Update()
 	{
 		CMonster* Monster = MonsterIteraotr.second;
 		
-		Monster->Update();
+		Monster->Update();		
 	}
 
 	for (auto PlayerIterator : _Players)
@@ -327,6 +327,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.PositionY = SpawnPosition._Y;
 			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.PositionX = SpawnPosition._X;
 
+			EnterChannelMonster->Init(SpawnPosition);
+
 			// 몬스터 자료구조에 저장
 			_Monsters.insert(pair<int64,CMonster*>(EnterChannelMonster->_GameObjectInfo.ObjectId,EnterChannelMonster));
 
@@ -334,8 +336,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			EnterChannelMonster->_Channel = this;		
 
 			// 맵에 적용
-			IsEnterChannel = _Map->ApplyMove(EnterChannelMonster, SpawnPosition);
-			EnterChannelMonster->Init(SpawnPosition);
+			IsEnterChannel = _Map->ApplyMove(EnterChannelMonster, SpawnPosition);			
 
 			// 섹터 얻어서 해당 섹터에도 저장
 			CSector* EnterSector = GetSector(SpawnPosition);
