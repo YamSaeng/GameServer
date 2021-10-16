@@ -125,6 +125,14 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 		{
 			MaterialData->ItemType = en_ItemType::ITEM_TYPE_WOOD_LOG;
 		}
+		else if (ItemName == "나무판자")
+		{
+			MaterialData->ItemType = en_ItemType::ITEM_TYPE_WOOD_FLANK;
+		}
+		else if (ItemName == "실")
+		{
+			MaterialData->ItemType = en_ItemType::ITEM_TYPE_YARN;
+		}
 
 		MaterialData->ItemCategory = en_ItemCategory::ITEM_CATEGORY_MATERIAL;
 
