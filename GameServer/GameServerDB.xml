@@ -442,7 +442,7 @@
     <Param name="@QuickSlotBarSlotIndex" type="TinyInt"/> 
     <Body>
       <![CDATA[
-        UPDATE [dbo].[QuickSlotBar] SET SkillType = 0, SkillLevel = 0, SkillName = NULL, SkillCoolTime = 0, SkillImagePath = NULL WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
+        UPDATE [dbo].[QuickSlotBar] SET SkillType = 0, SkillLevel = 0, SkillName = NULL, SkillCoolTime = 0, SkillCastingTime = 0, SkillImagePath = NULL WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
     </Body>
   </Procedure>
