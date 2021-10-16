@@ -381,12 +381,12 @@ enum en_PACKET_TYPE
 	en_PACKET_C2S_CRAFTING_CONFIRM,
 	
 	//------------------------------------------------------------
-	// 게임서버 제작 요청 응답
+	// 게임서버 인벤토리 아이템 업데이트
 	// int64 AccountId
 	// int64 PlayerId
 	// st_ItemInfo CompleteItem		
 	//------------------------------------------------------------
-	en_PACKET_S2C_CRAFTING_CONFIRM,
+	en_PACKET_S2C_INVENTORY_ITEM_UPDATE,
 
 	//-----------------------------------------------------------
 	// 게임서버 에러 전송	
