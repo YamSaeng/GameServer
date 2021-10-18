@@ -74,14 +74,18 @@ void CObjectManager::Add(CGameObject* AddObject, int32 ChannelId)
 				ResEffectPacket->Free();
 			} 
 			break;		
-		case en_GameObjectType::OBJECT_ITEM_SLIME_GEL:
-		case en_GameObjectType::OBJECT_ITEM_BRONZE_COIN:
-		case en_GameObjectType::OBJECT_ITEM_LEATHER:
-		case en_GameObjectType::OBJECT_ITEM_SKILL_BOOK:
-		case en_GameObjectType::OBJECT_ITEM_WOOD_LOG:
-		case en_GameObjectType::OBJECT_ITEM_STONE:
-		case en_GameObjectType::OBJECT_ITEM_WOOD_FLANK:
-		case en_GameObjectType::OBJECT_ITEM_YARN:
+		case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
+		case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
+		case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
+		case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
+		case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK_CHOHONE:
+		case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
+		case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+		case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:		
+		case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
+		case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
+		case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
+		case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
 			{
 				vector<st_GameObjectInfo> SpawnItem;
 				
@@ -146,15 +150,18 @@ bool CObjectManager::Remove(CGameObject* RemoveObject, int32 _ChannelId, bool Is
 
 		RemoveObject->_Channel->LeaveChannel(RemoveObject);
 		break;	
-	case en_GameObjectType::OBJECT_ITEM_WEAPON:
-	case en_GameObjectType::OBJECT_ITEM_SLIME_GEL:
-	case en_GameObjectType::OBJECT_ITEM_BRONZE_COIN:
-	case en_GameObjectType::OBJECT_ITEM_LEATHER:
-	case en_GameObjectType::OBJECT_ITEM_SKILL_BOOK:
-	case en_GameObjectType::OBJECT_ITEM_WOOD_LOG:
-	case en_GameObjectType::OBJECT_ITEM_STONE:
-	case en_GameObjectType::OBJECT_ITEM_WOOD_FLANK:
-	case en_GameObjectType::OBJECT_ITEM_YARN:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK_CHOHONE:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:	
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
 		_Items.erase(RemoveObject->_GameObjectInfo.ObjectId);
 
 		RemoveObject->_Channel->LeaveChannel(RemoveObject);
@@ -204,18 +211,21 @@ CGameObject* CObjectManager::Find(int64 ObjectId, en_GameObjectType GameObjectTy
 
 		return (*FindIterator).second;
 	}
-	case en_GameObjectType::OBJECT_ITEM:	
-	case en_GameObjectType::OBJECT_ITEM_WEAPON:
-	case en_GameObjectType::OBJECT_ITEM_SLIME_GEL:
-	case en_GameObjectType::OBJECT_ITEM_LEATHER:
-	case en_GameObjectType::OBJECT_ITEM_BRONZE_COIN:
-	case en_GameObjectType::OBJECT_ITEM_SLIVER_COIN:
-	case en_GameObjectType::OBJECT_ITEM_GOLD_COIN:
-	case en_GameObjectType::OBJECT_ITEM_SKILL_BOOK:
-	case en_GameObjectType::OBJECT_ITEM_WOOD_LOG:
-	case en_GameObjectType::OBJECT_ITEM_STONE:
-	case en_GameObjectType::OBJECT_ITEM_WOOD_FLANK:
-	case en_GameObjectType::OBJECT_ITEM_YARN:	
+	case en_GameObjectType::OBJECT_ITEM:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK_CHOHONE:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIVER_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_GOLD_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:	
 	{
 		auto FindIterator = _Items.find(ObjectId);
 		if (FindIterator == _Items.end())
@@ -258,21 +268,21 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 	case en_GameObjectType::OBJECT_BEAR:
 		NewObject = _BearMemoryPool->Alloc();
 		break;
-	case en_GameObjectType::OBJECT_ITEM_WEAPON:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
 		NewObject = _WeaponMemoryPool->Alloc();
 		break;
-	case en_GameObjectType::OBJECT_ITEM_SLIME_GEL:
-	case en_GameObjectType::OBJECT_ITEM_BRONZE_COIN:
-	case en_GameObjectType::OBJECT_ITEM_LEATHER:
-	case en_GameObjectType::OBJECT_ITEM_WOOD_LOG:
-	case en_GameObjectType::OBJECT_ITEM_STONE:
-	case en_GameObjectType::OBJECT_ITEM_WOOD_FLANK:
-	case en_GameObjectType::OBJECT_ITEM_YARN:
-		NewObject = _MaterialMemoryPool->Alloc();
-		break;
-	case en_GameObjectType::OBJECT_ITEM_SKILL_BOOK:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK_CHOHONE:
 		NewObject = _ConsumableMemoryPool->Alloc();
 		break;
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
+		NewObject = _MaterialMemoryPool->Alloc();
+		break;	
 	case en_GameObjectType::OBJECT_STONE:
 		NewObject = _StoneMemoryPool->Alloc();
 		break;
@@ -298,21 +308,21 @@ void CObjectManager::ObjectReturn(en_GameObjectType ObjectType, CGameObject* Ret
 	case en_GameObjectType::OBJECT_BEAR:
 		_BearMemoryPool->Free((CBear*)ReturnObject);
 		break;
-	case en_GameObjectType::OBJECT_ITEM_WEAPON:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
 		_WeaponMemoryPool->Free((CWeapon*)ReturnObject);
 		break;
-	case en_GameObjectType::OBJECT_ITEM_SLIME_GEL:
-	case en_GameObjectType::OBJECT_ITEM_BRONZE_COIN:
-	case en_GameObjectType::OBJECT_ITEM_LEATHER:
-	case en_GameObjectType::OBJECT_ITEM_WOOD_LOG:
-	case en_GameObjectType::OBJECT_ITEM_STONE:
-	case en_GameObjectType::OBJECT_ITEM_WOOD_FLANK:
-	case en_GameObjectType::OBJECT_ITEM_YARN:
-		_MaterialMemoryPool->Free((CMaterial*)ReturnObject);
-		break;
-	case en_GameObjectType::OBJECT_ITEM_SKILL_BOOK:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK_CHOHONE:
 		_ConsumableMemoryPool->Free((CConsumable*)ReturnObject);
 		break;
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
+		_MaterialMemoryPool->Free((CMaterial*)ReturnObject);
+		break;	
 	case en_GameObjectType::OBJECT_STONE:
 		_StoneMemoryPool->Free((CStone*)ReturnObject);
 		break;

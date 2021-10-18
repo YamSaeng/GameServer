@@ -51,11 +51,11 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 		}
 		else if (ItemName == "가죽 모자")
 		{
-			ArmorData->ItemType = en_ItemType::ITEM_TYPE_ARMOR_LETHER_HAT;
+			ArmorData->ItemType = en_ItemType::ITEM_TYPE_ARMOR_LEATHER_HAT;
 		}
 		else if (ItemName == "가죽 신발")
 		{
-			ArmorData->ItemType = en_ItemType::ITEM_TYPE_ARMOR_LETHER_BOOT;
+			ArmorData->ItemType = en_ItemType::ITEM_TYPE_ARMOR_LEATHER_BOOT;
 		}
 
 		ArmorData->ItemCategory = en_ItemCategory::ITEM_CATEGORY_ARMOR;
@@ -81,12 +81,12 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 		ItemName.assign(ConsumableData->ItemName.begin(), ConsumableData->ItemName.end());
 		if (ItemName == "회복물약(소)")
 		{
-			ConsumableData->ItemType = en_ItemType::ITEM_TYPE_POTION_HEAL_SMALL;
+			ConsumableData->ItemType = en_ItemType::ITEM_TYPE_CONSUMABLE_HEAL_POTION_SMALL;
 			ConsumableData->ItemCategory = en_ItemCategory::ITEM_CATEGORY_POTION;
 		}
 		else if (ItemName == "초혼비무 스킬책")
 		{
-			ConsumableData->ItemType = en_ItemType::ITEM_TYPE_SKILL_BOOK_CHOHONE;
+			ConsumableData->ItemType = en_ItemType::ITEM_TYPE_CONSUMABLE_SKILL_BOOK_CHOHONE;
 			ConsumableData->ItemCategory = en_ItemCategory::ITEM_CATEGORY_SKILLBOOK;
 		}
 
@@ -111,31 +111,31 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 		ItemName.assign(MaterialData->ItemName.begin(), MaterialData->ItemName.end());
 		if (ItemName == "가죽")
 		{
-			MaterialData->ItemType = en_ItemType::ITEM_TYPE_LEATHER;
+			MaterialData->ItemType = en_ItemType::ITEM_TYPE_MATERIAL_LEATHER;
 		}
 		else if (ItemName == "슬라임젤리")
 		{
-			MaterialData->ItemType = en_ItemType::ITEM_TYPE_SLIMEGEL;
+			MaterialData->ItemType = en_ItemType::ITEM_TYPE_MATERIAL_SLIMEGEL;
 		}
 		else if (ItemName == "동전")
 		{
-			MaterialData->ItemType = en_ItemType::ITEM_TYPE_BRONZE_COIN;
+			MaterialData->ItemType = en_ItemType::ITEM_TYPE_MATERIAL_BRONZE_COIN;
 		}
 		else if (ItemName == "암석")
 		{
-			MaterialData->ItemType = en_ItemType::ITEM_TYPE_STONE;
+			MaterialData->ItemType = en_ItemType::ITEM_TYPE_MATERIAL_STONE;
 		}
 		else if (ItemName == "통나무")
 		{
-			MaterialData->ItemType = en_ItemType::ITEM_TYPE_WOOD_LOG;
+			MaterialData->ItemType = en_ItemType::ITEM_TYPE_MATERIAL_WOOD_LOG;
 		}
 		else if (ItemName == "나무판자")
 		{
-			MaterialData->ItemType = en_ItemType::ITEM_TYPE_WOOD_FLANK;
+			MaterialData->ItemType = en_ItemType::ITEM_TYPE_MATERIAL_WOOD_FLANK;
 		}
 		else if (ItemName == "실")
 		{
-			MaterialData->ItemType = en_ItemType::ITEM_TYPE_YARN;
+			MaterialData->ItemType = en_ItemType::ITEM_TYPE_MATERIAL_YARN;
 		}
 
 		MaterialData->ItemCategory = en_ItemCategory::ITEM_CATEGORY_MATERIAL;

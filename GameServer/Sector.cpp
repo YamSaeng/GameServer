@@ -22,12 +22,16 @@ void CSector::Insert(CGameObject* InsertGameObject)
 	case en_GameObjectType::OBJECT_BEAR:
 		_Monsters.insert((CMonster*)InsertGameObject);
 		break;
-	case en_GameObjectType::OBJECT_ITEM_SLIME_GEL:
-	case en_GameObjectType::OBJECT_ITEM_BRONZE_COIN:
-	case en_GameObjectType::OBJECT_ITEM_LEATHER:
-	case en_GameObjectType::OBJECT_ITEM_SKILL_BOOK:
-	case en_GameObjectType::OBJECT_ITEM_WOOD_LOG:
-	case en_GameObjectType::OBJECT_ITEM_STONE:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK_CHOHONE:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:	
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 		_Items.insert((CItem*)InsertGameObject);
 		break;
 	case en_GameObjectType::OBJECT_STONE:
@@ -51,12 +55,16 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 	case en_GameObjectType::OBJECT_BEAR:
 		_Monsters.erase((CMonster*)RemoveGameObject);
 		break;
-	case en_GameObjectType::OBJECT_ITEM_SLIME_GEL:
-	case en_GameObjectType::OBJECT_ITEM_BRONZE_COIN:
-	case en_GameObjectType::OBJECT_ITEM_LEATHER:
-	case en_GameObjectType::OBJECT_ITEM_SKILL_BOOK:
-	case en_GameObjectType::OBJECT_ITEM_WOOD_LOG:
-	case en_GameObjectType::OBJECT_ITEM_STONE:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK_CHOHONE:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:	
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 		_Items.erase((CItem*)RemoveGameObject);
 		break;
 	case en_GameObjectType::OBJECT_STONE:

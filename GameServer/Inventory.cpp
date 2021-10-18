@@ -59,7 +59,7 @@ void CInventory::AddCoin(CItem* Item)
 	int64 GoldCoinCount;
 	switch (Item->_ItemInfo.ItemType)
 	{
-	case en_ItemType::ITEM_TYPE_BRONZE_COIN:
+	case en_ItemType::ITEM_TYPE_MATERIAL_BRONZE_COIN:
 		_BronzeCoinCount += (byte)(Item->_ItemInfo.ItemCount);
 		SliverCoinCount = (byte)(_BronzeCoinCount / 100);
 
@@ -74,7 +74,7 @@ void CInventory::AddCoin(CItem* Item)
 
 		_SliverCoinCount += SliverCoinCount;
 		break;
-	case en_ItemType::ITEM_TYPE_SLIVER_COIN:
+	case en_ItemType::ITEM_TYPE_MATERIAL_SLIVER_COIN:
 		_SliverCoinCount += (byte)(Item->_ItemInfo.ItemCount);
 		GoldCoinCount = (byte)(_SliverCoinCount / 100);
 
@@ -89,7 +89,7 @@ void CInventory::AddCoin(CItem* Item)
 
 		_GoldCoinCount += GoldCoinCount;
 		break;
-	case en_ItemType::ITEM_TYPE_GOLD_COIN:
+	case en_ItemType::ITEM_TYPE_MATERIAL_GOLD_COIN:
 		_GoldCoinCount += Item->_ItemInfo.ItemCount;
 		break;
 	}
