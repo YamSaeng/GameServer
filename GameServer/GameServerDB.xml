@@ -289,7 +289,7 @@
     <Param name="@AItemType" type="SmallInt"/>    
     <Param name="@AItemName" type="nvarchar(20)"/>
     <Param name="@AItemCount" type="SmallInt"/>
-    <Param name="@AItemIsEquipped" type="bit"/>
+    <Param name="@AItemIsEquipped" type="bit"/>    
     <Param name="@AItemThumbnailImagePath" type="nvarchar(100)"/>
     <Param name="@AItemSlotIndex" type="TinyInt"/>
     <Param name="@BIsQuickSlotUse" type="bit"/>
@@ -443,6 +443,20 @@
     <Body>
       <![CDATA[
         UPDATE [dbo].[QuickSlotBar] SET SkillType = 0, SkillLevel = 0, SkillName = NULL, SkillCoolTime = 0, SkillCastingTime = 0, SkillImagePath = NULL WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
+      ]]>
+    </Body>
+  </Procedure>
+
+  <!--InventorySlotInit-->
+  <Procedure name="spInventorySlotInit">
+    <Param name="@AccountDBId" type="BigInt"/>
+    <Param name="@PlayerDBId" type="BigInt"/>
+    <Param name="@InitSlotIndex" type="TinyInt"/>
+    <Param name="@InitItemName" type="nvarchar(20)"/>
+    <Param name="@InitItemThumbnailImagePath" type="nvarchar(100)"/>
+    <Body>
+      <![CDATA[
+        UPDATE [dbo].[Inventory] SET ItemType = 0, ItemName = (@InitItemName), ItemCount = 0, IsEquipped = 0, ThumbnailImagePath = (@InitItemThumbnailImagePath) WHERE SlotIndex = (@InitSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
     </Body>
   </Procedure>
