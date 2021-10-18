@@ -449,14 +449,14 @@
 
   <!--InventorySlotInit-->
   <Procedure name="spInventorySlotInit">
-    <Param name="@AccountDBId" type="BigInt"/>
-    <Param name="@PlayerDBId" type="BigInt"/>
+    <Param name="@OwnerAccountDBId" type="BigInt"/>
+    <Param name="@OwnerPlayerDBId" type="BigInt"/>
     <Param name="@InitSlotIndex" type="TinyInt"/>
     <Param name="@InitItemName" type="nvarchar(20)"/>
     <Param name="@InitItemThumbnailImagePath" type="nvarchar(100)"/>
     <Body>
       <![CDATA[
-        UPDATE [dbo].[Inventory] SET ItemType = 0, ItemName = (@InitItemName), ItemCount = 0, IsEquipped = 0, ThumbnailImagePath = (@InitItemThumbnailImagePath) WHERE SlotIndex = (@InitSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
+        UPDATE [dbo].[Inventory] SET ItemType = 0, ItemName = (@InitItemName), ItemCount = 0, IsEquipped = 0, ThumbnailImagePath = (@InitItemThumbnailImagePath) WHERE SlotIndex = (@InitSlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
       ]]>
     </Body>
   </Procedure>

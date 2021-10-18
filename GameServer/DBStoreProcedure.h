@@ -200,13 +200,13 @@ namespace SP
 		void InItemUse(bool& ItemUse) { BindParam(1, ItemUse); }
 	};
 
-	// Inventory Item 
+	// Inventory Item √ ±‚»≠
 	class CDBGameServerInventorySlotInit : public CDBBind<5, 0>
 	{
 	public:
 		CDBGameServerInventorySlotInit(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spInventorySlotInit(?,?,?,?,?)}") {}
-		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
-		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }		
+		void InOwnerAccountId(int64& OwnerAccountId) { BindParam(0, OwnerAccountId); }
+		void InOwnerPlayerId(int64& OwnerPlayerId) { BindParam(1, OwnerPlayerId); }
 		void InSlotIndex(int8& SlotIndex) { BindParam(2, SlotIndex); }
 		void InItemName(wstring& ItemName) { BindParam(3, ItemName.c_str()); }
 		void InItemThumbnailImagePath(wstring& ItemThumbnailImagePath) { BindParam(4, ItemThumbnailImagePath.c_str()); }
