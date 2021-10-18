@@ -53,6 +53,10 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 		{
 			ArmorData->ItemType = en_ItemType::ITEM_TYPE_ARMOR_LETHER_HAT;
 		}
+		else if (ItemName == "°¡Á× ½Å¹ß")
+		{
+			ArmorData->ItemType = en_ItemType::ITEM_TYPE_ARMOR_LETHER_BOOT;
+		}
 
 		ArmorData->ItemCategory = en_ItemCategory::ITEM_CATEGORY_ARMOR;
 
