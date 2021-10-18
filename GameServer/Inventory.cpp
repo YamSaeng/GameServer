@@ -106,7 +106,7 @@ st_ItemInfo* CInventory::Get(int8 SlotIndex)
 	return (*FindItemIterator).second;
 }
 
-bool CInventory::IsExistItem(en_ItemType ItemType, int16* ItemCount, int16& ItemEach, int8* SlotIndex)
+bool CInventory::IsExistItem(en_ItemType ItemType, int16& ItemEach, int8* SlotIndex)
 {
 	for (auto ItemIteraotr : _Items)
 	{
@@ -115,7 +115,6 @@ bool CInventory::IsExistItem(en_ItemType ItemType, int16* ItemCount, int16& Item
 		if (Item != nullptr && Item->ItemType == ItemType)
 		{
 			Item->ItemCount += ItemEach;
-			*ItemCount = Item->ItemCount;
 			*SlotIndex = ItemIteraotr.first;
 			return true;
 		}

@@ -38,7 +38,7 @@ public:
 	//-----------------------------------------------------------------------
 	// 인벤토리에 이미 아이템이 있는지 확인 ( 아이템 인벤토리에 넣을때 확인 )
 	//-----------------------------------------------------------------------
-	bool IsExistItem(en_ItemType ItemType, int16* ItemCount, int16& ItemEach,int8* SlotIndex);
+	bool IsExistItem(en_ItemType ItemType, int16& ItemEach,int8* SlotIndex);
 
 	//--------------------------------------
 	// ItemType 받아서 아이템정보 반환
