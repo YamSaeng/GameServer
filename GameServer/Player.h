@@ -4,12 +4,15 @@
 #include "SkillBox.h"
 #include "QuickSlotManager.h"
 
+struct st_TimerJob;
+
 class CPlayer : public CGameObject
 {
 public:	
 	uint64 _AttackTick;
 	uint64 _SpellTick;
 	en_SkillType _SkillType;
+	st_TimerJob* _SkillJob;
 
 	int64 _SessionId;
 	int64 _AccountId;
@@ -18,8 +21,7 @@ public:
 	CSkillBox _SkillBox;
 	CQuickSlotManager _QuickSlotManager;
 
-	CPlayer();
-	CPlayer(st_GameObjectInfo _PlayerInfo);
+	CPlayer();	
 	~CPlayer();		
 
 	virtual void Update() override;

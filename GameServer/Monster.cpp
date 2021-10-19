@@ -165,10 +165,7 @@ void CMonster::UpdateMoving()
 	if (_MoveTick > GetTickCount64())
 	{
 		return;
-	}
-
-	st_Vector2Int TargetPosition = _Target->GetCellPosition();
-	st_Vector2Int MonsterPosition = GetCellPosition();		
+	}	
 
 	int MoveTick = (int)(1000 / _GameObjectInfo.ObjectStatInfo.Speed);
 	_MoveTick = GetTickCount64() + MoveTick;
@@ -181,6 +178,9 @@ void CMonster::UpdateMoving()
 		BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
 		return;
 	}	
+
+	st_Vector2Int TargetPosition = _Target->GetCellPosition();
+	st_Vector2Int MonsterPosition = GetCellPosition();
 
 	// 방향값 구한다.
 	st_Vector2Int Direction = TargetPosition - MonsterPosition;

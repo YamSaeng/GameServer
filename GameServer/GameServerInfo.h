@@ -49,9 +49,10 @@ enum class en_TimerJobType : int16
 
 struct st_TimerJob
 {
-	en_TimerJobType Type;
+	en_TimerJobType TimerJobType;
 	int64 SessionId;
-	CGameServerMessage* Message = nullptr;
+	CGameServerMessage* TimerJobMessage = nullptr;
 	st_Session* Session = nullptr;
-	int64 ExecTick;
+	int64 TimerJobExecTick;		 // 타이머 잡 실행 시간
+	bool TimerJobCancel = false; // 타이머 잡 취소 변수
 };

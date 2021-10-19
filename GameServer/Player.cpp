@@ -8,13 +8,7 @@ CPlayer::CPlayer()
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 	_AttackTick = 0;
 	_SpellTick = 0;
-}
-
-CPlayer::CPlayer(st_GameObjectInfo _PlayerInfo)
-{
-	_GameObjectInfo = _PlayerInfo;		
-	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_PLAYER;
-	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+	_SkillJob = nullptr;
 }
 
 CPlayer::~CPlayer()
@@ -49,8 +43,10 @@ void CPlayer::OnDead(CGameObject* Killer)
 
 void CPlayer::UpdateAttack()
 {
+
 }
 
 void CPlayer::UpdateSpell()
 {	
+
 }

@@ -253,32 +253,35 @@ unsigned __stdcall CGameServer::TimerJobThreadProc(void* Argument)
 
 			// TimerJob에 기록되어 있는 시간 보다 현재 시간이 클 경우
 			// 즉, 시간이 경과 되었으면
-			if (TimerJob->ExecTick <= NowTick)
+			if (TimerJob->TimerJobExecTick <= NowTick)
 			{
 				// TimerJob을 뽑고
 				AcquireSRWLockExclusive(&Instance->_TimerJobLock);
 				st_TimerJob* TimerJob = Instance->_TimerHeapJob->PopHeap();
 				ReleaseSRWLockExclusive(&Instance->_TimerJobLock);
 
-				// Type에 따라 실행한다.
-				switch (TimerJob->Type)
+				if (TimerJob->TimerJobCancel != true)
 				{
-				case en_TimerJobType::TIMER_ATTACK_END:
-					Instance->PacketProcTimerAttackEnd(TimerJob->SessionId, TimerJob->Message);
-					break;
-				case en_TimerJobType::TIMER_SPELL_END:
-					Instance->PacketProcTimerSpellEnd(TimerJob->SessionId, TimerJob->Message);
-					break;				
-				case en_TimerJobType::TIMER_SKILL_COOLTIME_END:
-					Instance->PacketProcTimerCoolTimeEnd(TimerJob->SessionId, TimerJob->Message);
-					break;
-				case en_TimerJobType::TIMER_OBJECT_SPAWN:
-					Instance->PacketProcTimerObjectSpawn(TimerJob->Message);
-					break;
-				default:
-					Instance->Disconnect(TimerJob->SessionId);
-					break;
-				}
+					// Type에 따라 실행한다.
+					switch (TimerJob->TimerJobType)
+					{
+					case en_TimerJobType::TIMER_ATTACK_END:
+						Instance->PacketProcTimerAttackEnd(TimerJob->SessionId, TimerJob->TimerJobMessage);
+						break;
+					case en_TimerJobType::TIMER_SPELL_END:
+						Instance->PacketProcTimerSpellEnd(TimerJob->SessionId, TimerJob->TimerJobMessage);
+						break;
+					case en_TimerJobType::TIMER_SKILL_COOLTIME_END:
+						Instance->PacketProcTimerCoolTimeEnd(TimerJob->SessionId, TimerJob->TimerJobMessage);
+						break;
+					case en_TimerJobType::TIMER_OBJECT_SPAWN:
+						Instance->PacketProcTimerObjectSpawn(TimerJob->TimerJobMessage);
+						break;
+					default:
+						Instance->Disconnect(TimerJob->SessionId);
+						break;
+					}
+				}				
 
 				Instance->_TimerJobThreadTPS++;
 				Instance->_TimerJobMemoryPool->Free(TimerJob);
@@ -395,6 +398,9 @@ void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 		break;
 	case en_PACKET_TYPE::en_PACKET_C2S_MAGIC:
 		PacketProcReqMagic(SessionId, Message);
+		break;
+	case en_PACKET_TYPE::en_PACKET_C2S_MAGIC_CANCEL:
+		PacketProcReqMagicCancel(SessionId, Message);
 		break;
 	case en_PACKET_TYPE::en_PACKET_C2S_MOUSE_POSITION_OBJECT_INFO:
 		PacketProcReqMousePositionObjectInfo(SessionId, Message);
@@ -1376,13 +1382,81 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 	ReturnSession(Session);
 }
 
-// int64 AccountId
-// int32 PlayerDBId
-// int32 X
-// int32 Y
-void CGameServer::PacketProcReqMousePositionObjectInfo(int64 SessionID, CMessage* Message)
+void CGameServer::PacketProcReqMagicCancel(int64 SessionId, CMessage* Message)
 {
-	st_Session* Session = FindSession(SessionID);
+	st_Session* Session = FindSession(SessionId);
+
+	do
+	{
+		if (Session)
+		{
+			int64 AccountId;
+			int64 PlayerId;
+
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountId;
+
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> PlayerId;
+
+			if (Session->MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				if (Session->MyPlayer->_GameObjectInfo.ObjectId != PlayerId)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			CPlayer* MagicCancelPlayer = (CPlayer*)G_ObjectManager->Find(PlayerId, en_GameObjectType::OBJECT_PLAYER);
+			if (MagicCancelPlayer->_SkillJob != nullptr)
+			{
+				MagicCancelPlayer->_SkillJob->TimerJobCancel = true;
+				MagicCancelPlayer->_SkillJob = nullptr;
+
+				// 스킬 취소 응답 처리 주위 섹터에 전송
+				CMessage* ResMagicCancelPacket = MakePacketMagicCancel(Session->MyPlayer->_AccountId,Session->MyPlayer->_GameObjectInfo.ObjectId);
+				SendPacketAroundSector(Session, ResMagicCancelPacket, true);
+				ResMagicCancelPacket->Free();
+			}
+			else
+			{
+				// 시전중인 스킬이 존재하지 않음
+				wstring ErrorCastingSkillNotExist;
+
+				WCHAR ErrorMessage[100] = { 0 };
+
+				wsprintf(ErrorMessage, L"스킬 시전 중이 아닙니다.");
+				ErrorCastingSkillNotExist = ErrorMessage;
+
+				CMessage* ResErrorPacket = MakePacketError(Session->MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_SKILL_COOLTIME, ErrorCastingSkillNotExist);
+				SendPacket(SessionId, ResErrorPacket);
+				ResErrorPacket->Free();
+			}
+		}
+	} while (0);
+
+	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcReqMousePositionObjectInfo(int64 SessionId, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionId);
 
 	do
 	{
@@ -4508,6 +4582,23 @@ CGameServerMessage* CGameServer::MakePacketCraftingList(int64 AccountId, int64 P
 	return ResCraftingListMessage;
 }
 
+CGameServerMessage* CGameServer::MakePacketMagicCancel(int64 AccountId, int64 PlayerId)
+{
+	CGameServerMessage* ResMagicCancelMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResMagicCancelMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResMagicCancelMessage->Clear();
+
+	*ResMagicCancelMessage << (int16)en_PACKET_S2C_MAGIC_CANCEL;
+	*ResMagicCancelMessage << AccountId;
+	*ResMagicCancelMessage << PlayerId;
+
+	return ResMagicCancelMessage;
+}
+
 CGameServerMessage* CGameServer::MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_SkillType SkillType, int32 Damage, bool IsCritical)
 {
 	CGameServerMessage* ResAttackMessage = CGameServerMessage::GameServerMessageAlloc();
@@ -4856,18 +4947,21 @@ void CGameServer::SendPacketAroundSector(st_Session* Session, CMessage* Message,
 }
 
 void CGameServer::CoolTimeSkillTimerJobCreate(CPlayer* Player, int64 CastingTime, st_SkillInfo* CoolTimeSkillInfo, en_TimerJobType TimerJobType, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex)
-{
+{	
 	CoolTimeSkillInfo->CanSkillUse = false;
 
 	// 스킬 모션 끝 판단
 	// 0.5초 후에 Idle상태로 바꾸기 위해 TimerJob 등록
 	st_TimerJob* TimerJob = _TimerJobMemoryPool->Alloc();
-	TimerJob->ExecTick = GetTickCount64() + CastingTime;
+	TimerJob->TimerJobExecTick = GetTickCount64() + CastingTime;
 	TimerJob->SessionId = Player->_SessionId;
-	TimerJob->Type = TimerJobType;
+	TimerJob->TimerJobType = TimerJobType;
+	TimerJob->TimerJobCancel = false;
+
+	Player->_SkillJob = TimerJob;
 
 	AcquireSRWLockExclusive(&_TimerJobLock);
-	_TimerHeapJob->InsertHeap(TimerJob->ExecTick, TimerJob);
+	_TimerHeapJob->InsertHeap(TimerJob->TimerJobExecTick, TimerJob);
 	ReleaseSRWLockExclusive(&_TimerJobLock);
 
 	SetEvent(_TimerThreadWakeEvent);
@@ -4888,9 +4982,9 @@ void CGameServer::CoolTimeSkillTimerJobCreate(CPlayer* Player, int64 CastingTime
 
 	// 스킬 쿨타임 스킬쿨타임 잡 등록
 	st_TimerJob* SkillCoolTimeTimerJob = _TimerJobMemoryPool->Alloc();
-	SkillCoolTimeTimerJob->ExecTick = GetTickCount64() + ReqSkillData->SkillCoolTime;
+	SkillCoolTimeTimerJob->TimerJobExecTick = GetTickCount64() + ReqSkillData->SkillCoolTime;
 	SkillCoolTimeTimerJob->SessionId = Player->_SessionId;
-	SkillCoolTimeTimerJob->Type = en_TimerJobType::TIMER_SKILL_COOLTIME_END;
+	SkillCoolTimeTimerJob->TimerJobType = en_TimerJobType::TIMER_SKILL_COOLTIME_END;
 
 	CGameServerMessage* ResCoolTimeEndMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResCoolTimeEndMessage == nullptr)
@@ -4901,10 +4995,10 @@ void CGameServer::CoolTimeSkillTimerJobCreate(CPlayer* Player, int64 CastingTime
 	ResCoolTimeEndMessage->Clear();
 
 	*ResCoolTimeEndMessage << (int16)CoolTimeSkillInfo->SkillType;
-	SkillCoolTimeTimerJob->Message = ResCoolTimeEndMessage;
+	SkillCoolTimeTimerJob->TimerJobMessage = ResCoolTimeEndMessage;
 
 	AcquireSRWLockExclusive(&_TimerJobLock);
-	_TimerHeapJob->InsertHeap(SkillCoolTimeTimerJob->ExecTick, SkillCoolTimeTimerJob);
+	_TimerHeapJob->InsertHeap(SkillCoolTimeTimerJob->TimerJobExecTick, SkillCoolTimeTimerJob);
 	ReleaseSRWLockExclusive(&_TimerJobLock);
 
 	SetEvent(_TimerThreadWakeEvent);
@@ -4913,9 +5007,9 @@ void CGameServer::CoolTimeSkillTimerJobCreate(CPlayer* Player, int64 CastingTime
 void CGameServer::SpawnObjectTime(CGameObject* SpawnObject, int64 SpawnTime)
 {
 	st_TimerJob* SpawnObjectTimerJob = _TimerJobMemoryPool->Alloc();
-	SpawnObjectTimerJob->ExecTick = GetTickCount64() + SpawnTime;
+	SpawnObjectTimerJob->TimerJobExecTick = GetTickCount64() + SpawnTime;
 	SpawnObjectTimerJob->SessionId = 0;
-	SpawnObjectTimerJob->Type = en_TimerJobType::TIMER_OBJECT_SPAWN;
+	SpawnObjectTimerJob->TimerJobType = en_TimerJobType::TIMER_OBJECT_SPAWN;
 
 	CGameServerMessage* ResObjectSpawnMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResObjectSpawnMessage == nullptr)
@@ -4929,10 +5023,10 @@ void CGameServer::SpawnObjectTime(CGameObject* SpawnObject, int64 SpawnTime)
 	
 	*ResObjectSpawnMessage << SpawnObject->_SpawnPosition;
 
-	SpawnObjectTimerJob->Message = ResObjectSpawnMessage;
+	SpawnObjectTimerJob->TimerJobMessage = ResObjectSpawnMessage;
 
 	AcquireSRWLockExclusive(&_TimerJobLock);
-	_TimerHeapJob->InsertHeap(SpawnObjectTimerJob->ExecTick, SpawnObjectTimerJob);
+	_TimerHeapJob->InsertHeap(SpawnObjectTimerJob->TimerJobExecTick, SpawnObjectTimerJob);
 	ReleaseSRWLockExclusive(&_TimerJobLock);
 
 	SetEvent(_TimerThreadWakeEvent);
