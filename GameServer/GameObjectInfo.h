@@ -52,6 +52,7 @@ enum class en_CreatureState : int8
 	IDLE,
 	PATROL,
 	MOVING,
+	RETURN_SPAWN_POSITION,
 	ATTACK,
 	SPELL,
 	DEAD,	

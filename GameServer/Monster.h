@@ -11,7 +11,7 @@ public:
 	int32 _DataSheetId;
 
 	// 몬스터 죽이면 얻는 DPPoint
-	int16 _GetDPPoint;
+	int16 _GetDPPoint;	
 
 	CMonster();
 	virtual ~CMonster();	
@@ -86,6 +86,10 @@ protected:
 	// Moving 상태 Update
 	//------------------------
 	virtual void UpdateMoving();
+	//--------------------------------------
+	// ReturnSpawnPosition 상태 Update
+	//--------------------------------------
+	virtual void UpdateReturnSpawnPosition();
 	//------------------------
 	// Attack 상태 Update
 	//------------------------
