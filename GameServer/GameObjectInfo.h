@@ -288,6 +288,32 @@ struct st_ItemInfo
 	}
 };
 
+struct st_WeaponItemInfo : public st_ItemInfo
+{
+	int32 MinDamage;
+	int32 MaxDamage;
+};
+
+struct st_ArmorItemInfo : public st_ItemInfo
+{
+	int32 Defence;
+};
+
+struct st_PotionItemInfo : public st_ItemInfo
+{
+	int32 MaxCount;
+};
+
+struct st_SkillBookIntemInfo : public st_ItemInfo
+{
+	
+};
+
+struct st_MaterialItemInfo : public st_ItemInfo
+{
+	int32 MaxCount;
+};
+
 struct st_SkillInfo
 {
 	bool IsQuickSlotUse;    // 퀵슬롯에 등록되어 있는지 여부
