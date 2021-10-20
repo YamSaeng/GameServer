@@ -71,7 +71,7 @@
           ]
         },
         {
-          "CraftingCompleteItemMediumCategory": "ITEM_LARGE_CATEGORY_ARMOR",
+          "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_BOOT",
           "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER",
           "CraftingCompleteItemName": "°¡Á× ½Å¹ß",
           "CraftingCompleteItemThumbnailImagePath": "Textures/Equipment/Leather Boot",

@@ -440,18 +440,16 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 		{
 			CraftingData->CraftingType = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
 		}		
-		else if (CraftingItemLargeCategory == "ITEM_LARGE_CATEGORY_WEAPON")
-		{
-			CraftingData->CraftingType = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
-		}
 		else if (CraftingItemLargeCategory == "ITEM_LARGE_CATEGORY_ARMOR")
 		{
-			CraftingData->CraftingType = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
+			CraftingData->CraftingType = en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARMOR;
 		}
 		else if (CraftingItemLargeCategory == "ITEM_LARGE_CATEGORY_MATERIAL")
 		{
-			CraftingData->CraftingType = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
+			CraftingData->CraftingType = en_LargeItemCategory::ITEM_LARGE_CATEGORY_MATERIAL;
 		}
+
+		CraftingData->CraftingTypeName = CraftingTypeName;
 
 		for (auto& CraftingCompleteItemFiled : Filed["CraftingCompleteItem"].GetArray())
 		{
