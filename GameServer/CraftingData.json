@@ -1,22 +1,23 @@
 {
   "CraftingDatas": [
     {
-      "CraftingDataId": 1,
+      "CraftingCompleteItemLargeCategory": "ITEM_LARGE_CATEGORY_WEAPON",
       "CraftingTypeName": "무기",
       "CraftingCompleteItem": [
         {
-          "CraftingCompleteItemDataId": 1,
+          "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_SWORD",
+          "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD",
           "CraftingCompleteItemName": "나무 검",
           "CraftingCompleteItemThumbnailImagePath": "Textures/Weapon & Tool/Wooden Sword",
           "CraftingMaterial": [
             {
-              "MaterialDataId": 2007,
+              "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK",
               "MaterialName": "나무 판자",
               "MaterialCount": 40,
               "MaterialThumbnailImagePath": "Textures/Material/Wooden Plank"
             },
             {
-              "MaterialDataId": 2008,
+              "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_YARN",
               "MaterialName": "실",
               "MaterialCount": 15,
               "MaterialThumbnailImagePath": "Textures/Material/Yarn"
@@ -26,22 +27,23 @@
       ]
     },
     {
-      "CraftingDataId": 2,
+      "CraftingCompleteItemLargeCategory": "ITEM_LARGE_CATEGORY_ARMOR",
       "CraftingTypeName": "방어구",
       "CraftingCompleteItem": [
         {
-          "CraftingCompleteItemDataId": 100,
+          "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_WEAR",
+          "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD",
           "CraftingCompleteItemName": "나무 갑옷",
           "CraftingCompleteItemThumbnailImagePath": "Textures/Equipment/Wooden Armor",
           "CraftingMaterial": [
             {
-              "MaterialDataId": 2007,
+              "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK",
               "MaterialName": "나무 판자",
               "MaterialCount": 50,
               "MaterialThumbnailImagePath": "Textures/Material/Wooden Plank"
             },
             {
-              "MaterialDataId": 2008,
+              "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_YARN",
               "MaterialName": "실",
               "MaterialCount": 20,
               "MaterialThumbnailImagePath": "Textures/Material/Yarn"
@@ -49,18 +51,19 @@
           ]
         },
         {
-          "CraftingCompleteItemDataId": 101,
+          "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_HAT",
+          "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER",
           "CraftingCompleteItemName": "가죽 모자",
           "CraftingCompleteItemThumbnailImagePath": "Textures/Equipment/Leather Helmet",
           "CraftingMaterial": [
             {
-              "MaterialDataId": 2000,
+              "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_LEATHER",
               "MaterialName": "가죽",
               "MaterialCount": 30,
               "MaterialThumbnailImagePath": "Textures/Material/Leather"
             },
             {
-              "MaterialDataId": 2008,
+              "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_YARN",
               "MaterialName": "실",
               "MaterialCount": 10,
               "MaterialThumbnailImagePath": "Textures/Material/Yarn"
@@ -68,18 +71,19 @@
           ]
         },
         {
-          "CraftingCompleteItemDataId": 102,
+          "CraftingCompleteItemMediumCategory": "ITEM_LARGE_CATEGORY_ARMOR",
+          "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER",
           "CraftingCompleteItemName": "가죽 신발",
           "CraftingCompleteItemThumbnailImagePath": "Textures/Equipment/Leather Boot",
           "CraftingMaterial": [
             {
-              "MaterialDataId": 2000,
+              "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_LEATHER",
               "MaterialName": "가죽",
               "MaterialCount": 15,
               "MaterialThumbnailImagePath": "Textures/Material/Leather"
             },
             {
-              "MaterialDataId": 2008,
+              "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_YARN",
               "MaterialName": "실",
               "MaterialCount": 5,
               "MaterialThumbnailImagePath": "Textures/Material/Yarn"
@@ -89,16 +93,17 @@
       ]
     },
     {
-      "CraftingDataId": 6,
+      "CraftingCompleteItemLargeCategory": "ITEM_LARGE_CATEGORY_MATERIAL",
       "CraftingTypeName": "재료",
       "CraftingCompleteItem": [
         {
-          "CraftingCompleteItemDataId": 2007,
+          "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK",
           "CraftingCompleteItemName": "나무 판자",
           "CraftingCompleteItemThumbnailImagePath": "Textures/Material/Wooden Plank",
           "CraftingMaterial": [
             {
-              "MaterialDataId": 2006,
+              "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG",
               "MaterialName": "통나무",
               "MaterialCount": 10,
               "MaterialThumbnailImagePath": "Textures/Material/Wood Log"
@@ -106,12 +111,13 @@
           ]
         },
         {
-          "CraftingCompleteItemDataId": 2008,
+          "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_YARN",
           "CraftingCompleteItemName": "실",
           "CraftingCompleteItemThumbnailImagePath": "Textures/Material/Yarn",
           "CraftingMaterial": [
             {
-              "MaterialDataId": 2006,
+              "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG",
               "MaterialName": "통나무",
               "MaterialCount": 2,
               "MaterialThumbnailImagePath": "Textures/Material/Wood Log"

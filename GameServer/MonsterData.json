@@ -21,16 +21,16 @@
           "TotalExp": 10
         }
       ],
-      "DropData": [
+      "MonsterDropData": [
         {
           "Probability": 10,
-          "ItemDataSheetId": 2001,
+          "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL",
           "MinCount": 1,
           "MaxCount": 3
         },
         {
           "Probability": 20,
-          "ItemDataSheetId": 2002,
+          "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN",
           "MinCount": 1,
           "MaxCount": 10
         }
@@ -57,24 +57,18 @@
           "TotalExp": 20
         }
       ],
-      "DropData": [
+      "MonsterDropData": [
         {
           "Probability": 10,
-          "ItemDataSheetId": 2000,
+          "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_LEATHER",
           "MinCount": 1,
           "MaxCount": 5
         },
         {
           "Probability": 20,
-          "ItemDataSheetId": 2002,
+          "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN",
           "MinCount": 5,
           "MaxCount": 20
-        },
-        {
-          "Probability": 1,
-          "ItemDataSheetId": 300,
-          "MinCount": 1,
-          "MaxCount": 1
         }
       ]
     }

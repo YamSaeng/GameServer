@@ -10,140 +10,215 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 
 	for (auto& Filed : Document["Weapons"].GetArray())
 	{
-		int DataSheetId = Filed["DataSheetId"].GetInt();
-		string ItemName = Filed["ItemName"].GetString();
-		int Damage = Filed["Damage"].GetInt();
-		bool IsEquipped = Filed["IsEquipped"].GetBool();
-		string ImageFilePath = Filed["ImageFilePath"].GetString();
+		string LargeCategory = Filed["ItemLargeCategory"].GetString();
 
-		st_WeaponData* WeaponData = new st_WeaponData();
-		WeaponData->DataSheetId = DataSheetId;
-		WeaponData->ItemName = ItemName;
-
-		if (ItemName == "나무 검")
+		for (auto& WeaponListFiled : Filed["List"].GetArray())
 		{
-			WeaponData->ItemType = en_ItemType::ITEM_TYPE_WEAPON_WOOD_SWORD;
-		}
+			string MediumCategory = WeaponListFiled["ItemMediumCategory"].GetString();
+			string SmallCategory = WeaponListFiled["ItemSmallCategory"].GetString();
+			string ItemName = WeaponListFiled["ItemName"].GetString();
+			int Damage = WeaponListFiled["Damage"].GetInt();
+			string ImageFilePath = WeaponListFiled["ImageFilePath"].GetString();
 
-		WeaponData->ItemCategory = en_ItemCategory::ITEM_CATEGORY_WEAPON;
+			st_WeaponData* WeaponData = new st_WeaponData();			
 
-		WeaponData->ThumbnailImagePath = ImageFilePath;
-		WeaponData->_Damage = Damage;
+			WeaponData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
 
-		_Items.insert(pair<int32, st_WeaponData*>(WeaponData->DataSheetId, WeaponData));
+			if (MediumCategory == "ITEM_MEDIUM_CATEGORY_SWORD")
+			{
+				WeaponData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_SWORD;
+			}
+
+			if (SmallCategory == "ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD")
+			{
+				WeaponData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD;
+			}
+
+			WeaponData->ItemName = ItemName;						
+			WeaponData->Damage = Damage;
+			WeaponData->ThumbnailImagePath = ImageFilePath;			
+
+			_Items.insert(pair<int16, st_WeaponData*>((int16)WeaponData->SmallItemCategory, WeaponData));
+		}		
 	}
 
 	for (auto& Filed : Document["Armors"].GetArray())
 	{
-		int DataSheetId = Filed["DataSheetId"].GetInt();
-		string ItemName = Filed["ItemName"].GetString();
-		int Defence = Filed["Defence"].GetInt();
-		bool IsEquipped = Filed["IsEquipped"].GetBool();
-		string ImageFilePath = Filed["ImageFilePath"].GetString();
+		string LargeCategory = Filed["ItemLargeCategory"].GetString();
 
-		st_ArmorData* ArmorData = new st_ArmorData();
-		ArmorData->DataSheetId = DataSheetId;
-		ArmorData->ItemName = ItemName;
-
-		if (ItemName == "나무 갑옷")
+		for (auto& ArmorListFiled : Filed["List"].GetArray())
 		{
-			ArmorData->ItemType = en_ItemType::ITEM_TYPE_ARMOR_WOOD_ARMOR;
-		}
-		else if (ItemName == "가죽 모자")
-		{
-			ArmorData->ItemType = en_ItemType::ITEM_TYPE_ARMOR_LEATHER_HAT;
-		}
-		else if (ItemName == "가죽 신발")
-		{
-			ArmorData->ItemType = en_ItemType::ITEM_TYPE_ARMOR_LEATHER_BOOT;
-		}
+			string MediumCategory = ArmorListFiled["ItemMediumCategory"].GetString();
+			string SmallCategory = ArmorListFiled["ItemSmallCategory"].GetString();
+			string ItemName = ArmorListFiled["ItemName"].GetString();
+			int Defence = ArmorListFiled["Damage"].GetInt();
+			string ImageFilePath = ArmorListFiled["ImageFilePath"].GetString();
 
-		ArmorData->ItemCategory = en_ItemCategory::ITEM_CATEGORY_ARMOR;
+			st_ArmorData* ArmorData = new st_ArmorData();
 
-		ArmorData->ThumbnailImagePath = ImageFilePath;
-		ArmorData->_Defence = Defence;
+			ArmorData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARMOR;
+			
+			if (MediumCategory == "ITEM_MEDIUM_CATEGORY_HAT")
+			{
+				ArmorData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_HAT;
+			}
+			else if (MediumCategory == "ITEM_MEDIUM_CATEGORY_WEAR")
+			{
+				ArmorData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_WEAR;
+			}
+			else if (MediumCategory == "ITEM_MEDIUM_CATEGORY_BOOT")
+			{
+				ArmorData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_BOOT;
+			}
 
-		_Items.insert(pair<int32, st_ArmorData*>(ArmorData->DataSheetId, ArmorData));
+			if (SmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER")
+			{
+				ArmorData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER;
+			}
+			else if (SmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD")
+			{
+				ArmorData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD;
+			}
+			else if (SmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER")
+			{
+				ArmorData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER;
+			}
+
+			ArmorData->ItemName = ItemName;			
+
+			ArmorData->Defence = Defence;
+			ArmorData->ThumbnailImagePath = ImageFilePath;			
+
+			_Items.insert(pair<int16, st_ArmorData*>((int16)ArmorData->SmallItemCategory, ArmorData));
+		}		
 	}
 
 	for (auto& Filed : Document["Consumables"].GetArray())
 	{
-		int DataSheetId = Filed["DataSheetId"].GetInt();
-		string ItemName = Filed["ItemName"].GetString();
-		int MaxCount = Filed["MaxCount"].GetInt();
-		bool IsEquipped = Filed["IsEquipped"].GetBool();
-		string ImageFilePath = Filed["ImageFilePath"].GetString();
-
-		st_ConsumableData* ConsumableData = new st_ConsumableData();
-		ConsumableData->DataSheetId = DataSheetId;
-		ConsumableData->ItemName = ItemName;
-
-		ItemName.assign(ConsumableData->ItemName.begin(), ConsumableData->ItemName.end());
-		if (ItemName == "회복물약(소)")
+		string PotionLargeCategory = Filed["ItemLargeCategory"].GetString();
+		for (auto& PotionDataListFiled : Filed["PotionList"].GetArray())
 		{
-			ConsumableData->ItemType = en_ItemType::ITEM_TYPE_CONSUMABLE_HEAL_POTION_SMALL;
-			ConsumableData->ItemCategory = en_ItemCategory::ITEM_CATEGORY_POTION;
+			string MediumCategory = PotionDataListFiled["ItemMediumCategory"].GetString();
+			string SmallCategory = PotionDataListFiled["ItemSmallCategory"].GetString();
+			string ItemName = PotionDataListFiled["ItemName"].GetString();
+			int MaxCount = PotionDataListFiled["MaxCount"].GetInt();
+			string ImageFilePath = PotionDataListFiled["ImageFilePath"].GetString();
+
+			st_ConsumableData* PotionData = new st_ConsumableData();
+			PotionData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_POTION;
+
+			if (MediumCategory == "ITEM_MEDIUM_CATEGORY_HEAL")
+			{
+				PotionData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_HEAL;
+			}
+
+			if (SmallCategory == "ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL")
+			{
+				PotionData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL;
+			}
+
+			PotionData->ItemName = ItemName;
+			PotionData->MaxCount = MaxCount;
+
+			PotionData->ThumbnailImagePath = ImageFilePath;
+
+			_Items.insert(pair<int16, st_ConsumableData*>((int16)PotionData->SmallItemCategory, PotionData));
 		}
-		else if (ItemName == "초혼비무 스킬책")
+
+		string SkillBookLargeCategory = Filed["ItemLargeCategory"].GetString();
+		for (auto& SkillBookDataListFiled : Filed["SkillBookList"].GetArray())
 		{
-			ConsumableData->ItemType = en_ItemType::ITEM_TYPE_CONSUMABLE_SKILL_BOOK_CHOHONE;
-			ConsumableData->ItemCategory = en_ItemCategory::ITEM_CATEGORY_SKILLBOOK;
+			string MediumCategory = SkillBookDataListFiled["ItemMediumCategory"].GetString();
+			string SmallCategory = SkillBookDataListFiled["ItemSmallCategory"].GetString();
+			string ItemName = SkillBookDataListFiled["ItemName"].GetString();
+			int MaxCount = SkillBookDataListFiled["MaxCount"].GetInt();
+			string ImageFilePath = SkillBookDataListFiled["ImageFilePath"].GetString();
+
+			st_ConsumableData* SkillBookData = new st_ConsumableData();
+			SkillBookData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_SKILLBOOK;
+
+			if (MediumCategory == "ITEM_MEDIUM_CATEGORY_NONE")
+			{
+				SkillBookData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
+			}
+
+			if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_CHOHONE")
+			{
+				SkillBookData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_CHOHONE;
+			}
+
+			SkillBookData->ItemName = ItemName;
+			SkillBookData->MaxCount = MaxCount;
+
+			SkillBookData->ThumbnailImagePath = ImageFilePath;
+
+			_Items.insert(pair<int16, st_ConsumableData*>((int16)SkillBookData->SmallItemCategory, SkillBookData));
 		}
-
-		ConsumableData->ThumbnailImagePath = ImageFilePath;
-		ConsumableData->_MaxCount = MaxCount;
-
-		_Items.insert(pair<int32, st_ConsumableData*>(ConsumableData->DataSheetId, ConsumableData));
 	}
 
 	for (auto& Filed : Document["Material"].GetArray())
 	{
-		int DataSheetId = Filed["DataSheetId"].GetInt();
-		string ItemName = Filed["ItemName"].GetString();
-		int MaxCount = Filed["MaxCount"].GetInt();
-		bool IsEquipped = Filed["IsEquipped"].GetBool();
-		string ImageFilePath = Filed["ImageFilePath"].GetString();
+		string MaterialLargeCategory = Filed["ItemLargeCategory"].GetString();
+		for (auto& MaterialDataListFiled : Filed["MaterialList"].GetArray())
+		{
+			string MediumCategory = MaterialDataListFiled["ItemMediumCategory"].GetString();
+			string SmallCategory = MaterialDataListFiled["ItemSmallCategory"].GetString();
+			string ItemName = MaterialDataListFiled["ItemName"].GetString();
+			int MaxCount = MaterialDataListFiled["MaxCount"].GetInt();
+			string ImageFilePath = MaterialDataListFiled["ImageFilePath"].GetString();
 
-		st_MaterialData* MaterialData = new st_MaterialData();
-		MaterialData->DataSheetId = DataSheetId;
-		MaterialData->ItemName = ItemName;
+			st_MaterialData* MaterialData = new st_MaterialData();
+			MaterialData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_MATERIAL;
 
-		ItemName.assign(MaterialData->ItemName.begin(), MaterialData->ItemName.end());
-		if (ItemName == "가죽")
-		{
-			MaterialData->ItemType = en_ItemType::ITEM_TYPE_MATERIAL_LEATHER;
-		}
-		else if (ItemName == "슬라임젤리")
-		{
-			MaterialData->ItemType = en_ItemType::ITEM_TYPE_MATERIAL_SLIMEGEL;
-		}
-		else if (ItemName == "동전")
-		{
-			MaterialData->ItemType = en_ItemType::ITEM_TYPE_MATERIAL_BRONZE_COIN;
-		}
-		else if (ItemName == "암석")
-		{
-			MaterialData->ItemType = en_ItemType::ITEM_TYPE_MATERIAL_STONE;
-		}
-		else if (ItemName == "통나무")
-		{
-			MaterialData->ItemType = en_ItemType::ITEM_TYPE_MATERIAL_WOOD_LOG;
-		}
-		else if (ItemName == "나무판자")
-		{
-			MaterialData->ItemType = en_ItemType::ITEM_TYPE_MATERIAL_WOOD_FLANK;
-		}
-		else if (ItemName == "실")
-		{
-			MaterialData->ItemType = en_ItemType::ITEM_TYPE_MATERIAL_YARN;
-		}
+			if (MediumCategory == "ITEM_MEDIUM_CATEGORY_NONE")
+			{
+				MaterialData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
+			}
 
-		MaterialData->ItemCategory = en_ItemCategory::ITEM_CATEGORY_MATERIAL;
+			if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_LEATHER")
+			{
+				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER;
+			}
+			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL")
+			{
+				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL;
+			}
+			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN")
+			{
+				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN;
+			}
+			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN")
+			{
+				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN;
+			}
+			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN")
+			{
+				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN;
+			}
+			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_STONE")
+			{
+				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE;
+			}
+			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG")
+			{
+				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG;
+			}
+			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK")
+			{
+				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK;
+			}
+			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_YARN")
+			{
+				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN;
+			}
 
-		MaterialData->ThumbnailImagePath = ImageFilePath;
-		MaterialData->_MaxCount = MaxCount;
+			MaterialData->ItemName = ItemName;
+			MaterialData->MaxCount = MaxCount;
 
-		_Items.insert(pair<int32, st_MaterialData*>(MaterialData->DataSheetId, MaterialData));
+			MaterialData->ThumbnailImagePath = ImageFilePath;
+
+			_Items.insert(pair<int16, st_MaterialData*>((int16)MaterialData->SmallItemCategory, MaterialData));
+		}	
 	}
 }
 
@@ -230,16 +305,29 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			MonsterData->GetDPPoint = GetDPPoint;
 		}
 
-		for (auto& DropDataFiled : Filed["DropData"].GetArray())
+		for (auto& DropDataFiled : Filed["MonsterDropData"].GetArray())
 		{
 			int Probability = DropDataFiled["Probability"].GetInt();
-			int ItemDataSheetId = DropDataFiled["ItemDataSheetId"].GetInt();
+			string DropItemSmallCategory = DropDataFiled["DropItemSmallCategory"].GetString();
 			int8 MinCount = (int8)(DropDataFiled["MinCount"].GetInt());
 			int16 MaxCount = (int16)(DropDataFiled["MaxCount"].GetInt());
 
 			st_DropData DropData;
+			
+			if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL")
+			{
+				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL;
+			}
+			else if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_LEATHER")
+			{
+				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER;
+			}
+			else if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN")
+			{
+				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN;
+			}			
+
 			DropData.Probability = Probability;
-			DropData.ItemDataSheetId = ItemDataSheetId;
 			DropData.MinCount = MinCount;
 			DropData.MaxCount = MaxCount;
 
@@ -308,13 +396,22 @@ void CDataManager::LoadDataEnvironment(wstring LoadFileName)
 		for (auto& DropDataFiled : Filed["EnvironmentDropData"].GetArray())
 		{
 			int Probability = DropDataFiled["Probability"].GetInt();
-			int ItemDataSheetId = DropDataFiled["ItemDataSheetId"].GetInt();
+			string DropItemSmallCategory = DropDataFiled["DropItemSmallCategory"].GetString();
 			int8 MinCount = (int8)(DropDataFiled["MinCount"].GetInt());
 			int16 MaxCount = (int16)(DropDataFiled["MaxCount"].GetInt());
 
 			st_DropData DropData;
-			DropData.Probability = Probability;
-			DropData.ItemDataSheetId = ItemDataSheetId;
+
+			if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_STONE")
+			{
+				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE;
+			}
+			else if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG")
+			{
+				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG;
+			}			
+
+			DropData.Probability = Probability;			
 			DropData.MinCount = MinCount;
 			DropData.MaxCount = MaxCount;
 
@@ -336,55 +433,90 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 	{
 		st_CraftingItemCategoryData* CraftingData = new st_CraftingItemCategoryData();
 
-		int CraftingDataId = Filed["CraftingDataId"].GetInt();
+		string CraftingItemLargeCategory = Filed["CraftingCompleteItemLargeCategory"].GetString();
 		string CraftingTypeName = Filed["CraftingTypeName"].GetString();
 
-		CraftingData->CraftingDataId = CraftingDataId;
-		CraftingData->CraftingTypeName = CraftingTypeName;
-
-		if (CraftingTypeName == "무기")
+		if (CraftingItemLargeCategory == "ITEM_LARGE_CATEGORY_WEAPON")
 		{
-			CraftingData->CraftingType = en_ItemCategory::ITEM_CATEGORY_WEAPON;
+			CraftingData->CraftingType = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
+		}		
+		else if (CraftingItemLargeCategory == "ITEM_LARGE_CATEGORY_WEAPON")
+		{
+			CraftingData->CraftingType = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
 		}
-		else if (CraftingTypeName == "방어구")
+		else if (CraftingItemLargeCategory == "ITEM_LARGE_CATEGORY_ARMOR")
 		{
-			CraftingData->CraftingType = en_ItemCategory::ITEM_CATEGORY_ARMOR;
+			CraftingData->CraftingType = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
 		}
-		else if (CraftingTypeName == "음식")
+		else if (CraftingItemLargeCategory == "ITEM_LARGE_CATEGORY_MATERIAL")
 		{
-			CraftingData->CraftingType = en_ItemCategory::ITEM_CATEGORY_FOOD;
-		}
-		else if (CraftingTypeName == "물약")
-		{
-			CraftingData->CraftingType = en_ItemCategory::ITEM_CATEGORY_POTION;
-		}
-		else if (CraftingTypeName == "재료")
-		{
-			CraftingData->CraftingType = en_ItemCategory::ITEM_CATEGORY_MATERIAL;
+			CraftingData->CraftingType = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
 		}
 
-		for (auto& CraftingCompleteFiled : Filed["CraftingCompleteItem"].GetArray())
+		for (auto& CraftingCompleteItemFiled : Filed["CraftingCompleteItem"].GetArray())
 		{
 			st_CraftingCompleteItemData CraftingCompleteItemData;
 
-			int16 CraftingCompleteItemDataId = (int16)CraftingCompleteFiled["CraftingCompleteItemDataId"].GetInt();
-			string CraftingCompleteItemName = CraftingCompleteFiled["CraftingCompleteItemName"].GetString();
-			string CraftingCompleteItemThumbnailImagePath = CraftingCompleteFiled["CraftingCompleteItemThumbnailImagePath"].GetString();
+			string CraftingCompleteItemMediumCategory = CraftingCompleteItemFiled["CraftingCompleteItemMediumCategory"].GetString();
+			string CraftingCompleteItemSmallCategory = CraftingCompleteItemFiled["CraftingCompleteItemSmallCategory"].GetString();
+					
+			string CraftingCompleteItemName = CraftingCompleteItemFiled["CraftingCompleteItemName"].GetString();
+			string CraftingCompleteItemThumbnailImagePath = CraftingCompleteItemFiled["CraftingCompleteItemThumbnailImagePath"].GetString();
 
-			CraftingCompleteItemData.CraftingCompleteItemDataId = (en_ItemType)CraftingCompleteItemDataId;
+			if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD")
+			{
+				CraftingCompleteItemData.CraftingCompleteItemDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD;
+			}
+			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD")
+			{
+				CraftingCompleteItemData.CraftingCompleteItemDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD;
+			}
+			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER")
+			{
+				CraftingCompleteItemData.CraftingCompleteItemDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER;
+			}
+			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER")
+			{
+				CraftingCompleteItemData.CraftingCompleteItemDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER;
+			}
+			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK")
+			{
+				CraftingCompleteItemData.CraftingCompleteItemDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK;
+			}
+			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_YARN")
+			{
+				CraftingCompleteItemData.CraftingCompleteItemDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN;
+			}
+			
 			CraftingCompleteItemData.CraftingCompleteName = CraftingCompleteItemName;
 			CraftingCompleteItemData.CraftingCompleteThumbnailImagePath = CraftingCompleteItemThumbnailImagePath;
 
-			for (auto& CraftingMaterialFiled : CraftingCompleteFiled["CraftingMaterial"].GetArray())
+			for (auto& CraftingMaterialFiled : CraftingCompleteItemFiled["CraftingMaterial"].GetArray())
 			{
 				st_CraftingMaterialItemData CraftingMaterialData;
 
-				int16 MaterialDataId = (int16)CraftingMaterialFiled["MaterialDataId"].GetInt();
+				string MaterialSmallCategory = CraftingMaterialFiled["MaterialSmallCategory"].GetString();
 				string MaterialName = CraftingMaterialFiled["MaterialName"].GetString();
 				int16 MaterialCount = (int16)CraftingMaterialFiled["MaterialCount"].GetInt();
 				string MaterialThumbnailImagePath = CraftingMaterialFiled["MaterialThumbnailImagePath"].GetString();
 
-				CraftingMaterialData.MaterialDataId = (en_ItemType)(MaterialDataId);
+				if (MaterialSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_LEATHER")
+				{
+					CraftingMaterialData.MaterialDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER;
+				}
+				else if (MaterialSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG")
+				{
+					CraftingMaterialData.MaterialDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG;
+				}
+				else if (MaterialSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK")
+				{
+					CraftingMaterialData.MaterialDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK;
+				}
+				else if (MaterialSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_YARN")
+				{
+					CraftingMaterialData.MaterialDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN;
+				}			
+				
 				CraftingMaterialData.MaterialName = MaterialName;
 				CraftingMaterialData.MaterialCount = MaterialCount;
 				CraftingMaterialData.MaterialThumbnailImagePath = MaterialThumbnailImagePath;
@@ -395,6 +527,6 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 			CraftingData->CraftingCompleteItems.push_back(CraftingCompleteItemData);
 		}
 
-		_CraftingData.insert(pair<int32, st_CraftingItemCategoryData*>(CraftingData->CraftingDataId, CraftingData));
+		_CraftingData.insert(pair<int8, st_CraftingItemCategoryData*>((int8)CraftingData->CraftingType, CraftingData));
 	}
 }

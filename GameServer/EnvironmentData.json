@@ -12,7 +12,7 @@
       "EnvironmentDropData": [
         {
           "Probability": 90,
-          "ItemDataSheetId": 2005,
+          "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_STONE",
           "MinCount": 5,
           "MaxCount": 15
         }
@@ -30,7 +30,7 @@
       "EnvironmentDropData": [
         {
           "Probability": 90,
-          "ItemDataSheetId": 2006,
+          "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG",
           "MinCount": 5,
           "MaxCount": 15
         }

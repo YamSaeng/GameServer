@@ -8,12 +8,12 @@
 class CDataManager
 {
 public:
-	map<int32, st_ItemData*> _Items;
+	map<int16, st_ItemData*> _Items;
 	map<int16, st_PlayerStatusData*> _Status;
 	map<int32, st_MonsterData*> _Monsters;
 	map<int32, st_SkillData*> _Skills;
 	map<int32, st_EnvironmentData*> _Environments;
-	map<int32, st_CraftingItemCategoryData*> _CraftingData;
+	map<int8, st_CraftingItemCategoryData*> _CraftingData;
 
 	CDataManager()
 	{

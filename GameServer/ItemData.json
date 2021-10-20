@@ -1,115 +1,140 @@
 {
   "Weapons": [
     {
-      "DataSheetId": 1,
-      "ItemName": "나무 검",      
-      "Damage": 10,
-      "IsEquipped": false,
-      "ImageFilePath": "Textures/Weapon & Tool/Wooden Sword"
+      "ItemLargeCategory": "ITEM_LARGE_CATEGORY_WEAPON",
+      "List": [
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_SWORD",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD",
+          "ItemName": "나무 검",
+          "Damage": 10,
+          "ImageFilePath": "Textures/Weapon & Tool/Wooden Sword"
+        }
+      ]      
     }
   ],
   "Armors": [
     {
-      "DataSheetId": 100,
-      "ItemName": "나무 갑옷",      
-      "Defence": 15,
-      "IsEquipped": false,
-      "ImageFilePath": "Textures/Equipment/Wooden Armor"
-    },
-    {
-      "DataSheetId": 101,
-      "ItemName": "가죽 모자",      
-      "Defence": 5,
-      "IsEquipped": false,
-      "ImageFilePath": "Textures/Equipment/Leather Helmet"
-    },
-    {
-      "DataSheetId": 102,
-      "ItemName": "가죽 신발",      
-      "Defence": 5,
-      "IsEquipped": false,
-      "ImageFilePath": "Textures/Equipment/Leather Boot"
-    }
+      "ItemLargeCategory": "ITEM_LARGE_CATEGORY_ARMOR",
+      "List": [
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_HAT",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER",
+          "ItemName": "가죽 모자",
+          "Defence": 5,
+          "ImageFilePath": "Textures/Equipment/Leather Helmet"
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_WEAR",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD",
+          "ItemName": "나무 갑옷",
+          "Defence": 15,
+          "ImageFilePath": "Textures/Equipment/Wooden Armor"
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_BOOT",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER",
+          "ItemName": "가죽 신발",
+          "Defence": 5,
+          "ImageFilePath": "Textures/Equipment/Leather Boot"
+        }
+      ]      
+    }   
   ],
   "Consumables": [
     {
-      "DataSheetId": 200,
-      "ItemName": "회복물약(소)",      
-      "MaxCount": 99,
-      "IsEquipped": false,
-      "ImageFilePath": "Textures/Potion/Red Potion"
-    },
+      "ItemLargeCategory": "ITEM_LARGE_CATEGORY_POTION",
+      "PotionList": [
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_HEAL",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL",
+          "ItemName": "회복물약(소)",
+          "MaxCount": 99,
+          "ImageFilePath": "Textures/Potion/Red Potion"
+        }
+      ]
+    },      
     {
-      "DataSheetId": 300,
-      "ItemName": "초혼비무 스킬책",      
-      "MaxCount": 1,
-      "IsEquipped": false,
-      "ImageFilePath": "Textures/SkillBook/ChoHoneSkillBook"
+      "ItemLargeCategory": "ITEM_LARGE_CATEGORY_SKILLBOOK",
+      "SkillBookList": [
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_SKILLBOOK_CHOHONE",
+          "ItemName": "초혼비무 스킬책",
+          "MaxCount": 1,
+          "ImageFilePath": "Textures/SkillBook/ChoHoneSkillBook"
+        }
+      ]      
     }
   ],
   "Material": [
     {
-      "DataSheetId": 2000,
-      "ItemName": "가죽",      
-      "MaxCount": 99,
-      "IsEquipped": false,
-      "ImageFilePath": "Textures/Material/Leather"
-    },
-    {
-      "DataSheetId": 2001,
-      "ItemName": "슬라임젤리",      
-      "MaxCount": 99,
-      "IsEquipped": false,
-      "ImageFilePath": "Textures/MonsterPart/SlimeGel"
-    },
-    {
-      "DataSheetId": 2002,
-      "ItemName": "동전",
-      "MaxCount": 99,
-      "IsEquipped": false,
-      "ImageFilePath": "Textures/Misc/CopperCoin"
-    },
-    {
-      "DataSheetId": 2003,
-      "ItemName": "은전",
-      "MaxCount": 99,
-      "IsEquipped": false,
-      "ImageFilePath": "Textures/Misc/SliverCoin"
-    },
-    {
-      "DataSheetId": 2004,
-      "ItemName": "금전",
-      "MaxCount": 99,
-      "IsEquipped": false,
-      "ImageFilePath": "Textures/Misc/GoldCoin"
-    },
-    {
-      "DataSheetId": 2005,
-      "ItemName": "암석",
-      "MaxCount": 99,
-      "IsEquipped": false,
-      "ImageFilePath": "Textures/Material/Stone"
-    },
-    {
-      "DataSheetId": 2006,
-      "ItemName": "통나무",
-      "MaxCount": 99,
-      "IsEquipped": false,
-      "ImageFilePath": "Textures/Material/Wood Log"
-    },
-    {
-      "DataSheetId": 2007,
-      "ItemName": "나무판자",
-      "MaxCount": 99,
-      "IsEquipped": false,
-      "ImageFilePath": "Textures/Material/Wooden Plank"
-    },
-    {
-      "DataSheetId": 2008,
-      "ItemName": "실",
-      "MaxCount": 99,
-      "IsEquipped": false,
-      "ImageFilePath": "Textures/Material/Yarn"
-    }
+      "ItemLargeCategory": "ITEM_LARGE_CATEGORY_MATERIAL",
+      "MaterialList": [
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_LEATHER",
+          "ItemName": "가죽",
+          "MaxCount": 99,
+          "ImageFilePath": "Textures/Material/Leather"
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL",
+          "ItemName": "슬라임젤리",
+          "MaxCount": 99,
+          "ImageFilePath": "Textures/MonsterPart/SlimeGel"
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN",
+          "ItemName": "동전",
+          "MaxCount": 99,
+          "ImageFilePath": "Textures/Misc/CopperCoin"
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN",
+          "ItemName": "은전",
+          "MaxCount": 99,
+          "ImageFilePath": "Textures/Misc/SliverCoin"
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN",
+          "ItemName": "금전",
+          "MaxCount": 99,
+          "ImageFilePath": "Textures/Misc/GoldCoin"
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_STONE",
+          "ItemName": "암석",
+          "MaxCount": 99,
+          "ImageFilePath": "Textures/Material/Stone"
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG",
+          "ItemName": "통나무",
+          "MaxCount": 99,
+          "ImageFilePath": "Textures/Material/Wood Log"
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK",
+          "ItemName": "나무판자",
+          "MaxCount": 99,
+          "ImageFilePath": "Textures/Material/Wooden Plank"
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_YARN",
+          "ItemName": "실",
+          "MaxCount": 99,
+          "ImageFilePath": "Textures/Material/Yarn"
+        }
+      ]
+    }    
   ]
 } 

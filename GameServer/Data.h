@@ -11,10 +11,10 @@ enum en_ObjectDataType
 
 struct st_ItemData
 {
-	int32 DataSheetId;
 	string ItemName;
-	en_ItemCategory ItemCategory;
-	en_ItemType ItemType; 
+	en_LargeItemCategory LargeItemCategory;
+	en_MediumItemCategory MediumItemCategory;
+	en_SmallItemCategory SmallItemCategory; 
 	string ThumbnailImagePath;
 	bool IsEquipped;
 	int16 ItemCount;
@@ -23,22 +23,22 @@ struct st_ItemData
 struct st_WeaponData : public st_ItemData
 {
 public:	
-	int32 _Damage;
+	int32 Damage;
 };
 
 struct st_ArmorData : public st_ItemData
 {
-	int32 _Defence;
+	int32 Defence;
 };
 
 struct st_ConsumableData : public st_ItemData
 {
-	int32 _MaxCount;
+	int32 MaxCount;
 };
 
 struct st_MaterialData : public st_ItemData
 {
-	int32 _MaxCount;
+	int32 MaxCount;
 };
 
 struct st_PlayerStatusData
@@ -63,7 +63,7 @@ struct st_PlayerStatusData
 struct st_DropData
 {
 	int32 Probability;
-	int32 ItemDataSheetId;
+	en_SmallItemCategory DropItemSmallCategory;
 	int8 MinCount;
 	int16 MaxCount;
 };
@@ -101,7 +101,7 @@ struct st_EnvironmentData
 
 struct st_CraftingMaterialItemData
 {
-	en_ItemType MaterialDataId; // 재료템 Id
+	en_SmallItemCategory MaterialDataId; // 재료템 Id
 	string MaterialName; // 재료 템 이름
 	string MaterialThumbnailImagePath; // 재료 템 이미지 경로
 	int16 MaterialCount; // 재료 템 개수
@@ -109,16 +109,15 @@ struct st_CraftingMaterialItemData
 
 struct st_CraftingCompleteItemData
 {
-	en_ItemType CraftingCompleteItemDataId; // 완성템의 ItemDataId
+	en_SmallItemCategory CraftingCompleteItemDataId; // 완성템의 ItemDataId
 	string CraftingCompleteName; // 제작템 이름			
 	string CraftingCompleteThumbnailImagePath; // 제작템 이미지 경로
 	vector<st_CraftingMaterialItemData> CraftingMaterials; // 재료
 };
 
 struct st_CraftingItemCategoryData
-{
-	int32 CraftingDataId; // 제작템 DataId
-	en_ItemCategory CraftingType; // 제작템 범주
+{	
+	en_LargeItemCategory CraftingType; // 제작템 범주
 	string CraftingTypeName; // 제작템 범주 이름	
 	vector<st_CraftingCompleteItemData> CraftingCompleteItems; // 제작템 범주에 속한 아이템 목록
 };
