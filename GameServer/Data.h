@@ -22,8 +22,8 @@ struct st_ItemData
 
 struct st_WeaponData : public st_ItemData
 {
-public:	
-	int32 Damage;
+	int32 MinDamage;
+	int32 MaxDamage;	
 };
 
 struct st_ArmorData : public st_ItemData

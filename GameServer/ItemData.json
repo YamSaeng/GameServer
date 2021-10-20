@@ -7,7 +7,8 @@
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_SWORD",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD",
           "ItemName": "³ª¹« °Ë",
-          "Damage": 10,
+          "MinDamage": 5,
+          "MaxDamage": 10,
           "ImageFilePath": "Textures/Weapon & Tool/Wooden Sword"
         }
       ]      

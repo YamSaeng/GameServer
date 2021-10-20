@@ -17,9 +17,10 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string MediumCategory = WeaponListFiled["ItemMediumCategory"].GetString();
 			string SmallCategory = WeaponListFiled["ItemSmallCategory"].GetString();
 			string ItemName = WeaponListFiled["ItemName"].GetString();
-			int Damage = WeaponListFiled["Damage"].GetInt();
+			int MinDamage = WeaponListFiled["MinDamage"].GetInt();
+			int MaxDamage = WeaponListFiled["MaxDamage"].GetInt();
 			string ImageFilePath = WeaponListFiled["ImageFilePath"].GetString();
-
+						
 			st_WeaponData* WeaponData = new st_WeaponData();			
 
 			WeaponData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
@@ -32,10 +33,11 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			if (SmallCategory == "ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD")
 			{
 				WeaponData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD;
-			}
+			}			
 
 			WeaponData->ItemName = ItemName;						
-			WeaponData->Damage = Damage;
+			WeaponData->MinDamage = MinDamage;
+			WeaponData->MaxDamage = MaxDamage;
 			WeaponData->ThumbnailImagePath = ImageFilePath;			
 
 			_Items.insert(pair<int16, st_WeaponData*>((int16)WeaponData->SmallItemCategory, WeaponData));
