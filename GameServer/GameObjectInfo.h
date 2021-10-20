@@ -88,39 +88,51 @@ enum class en_QuickSlotBar : int8
 	QUICK_SLOT_BAR_SLOT_SIZE = 5
 };
 
-enum class en_ItemType : int16
+enum class en_LargeItemCategory : int8
 {
-	ITEM_TYPE_NONE = 0,
-
-	ITEM_TYPE_WEAPON_WOOD_SWORD = 1,
-
-	ITEM_TYPE_ARMOR_WOOD_ARMOR = 100,
-	ITEM_TYPE_ARMOR_LEATHER_HAT = 101,
-	ITEM_TYPE_ARMOR_LEATHER_BOOT = 102,
-
-	ITEM_TYPE_CONSUMABLE_HEAL_POTION_SMALL = 200,
-	ITEM_TYPE_CONSUMABLE_SKILL_BOOK_CHOHONE = 300,
-
-	ITEM_TYPE_MATERIAL_LEATHER = 2000,
-	ITEM_TYPE_MATERIAL_SLIMEGEL = 2001,
-	ITEM_TYPE_MATERIAL_BRONZE_COIN = 2002,
-	ITEM_TYPE_MATERIAL_SLIVER_COIN = 2003,
-	ITEM_TYPE_MATERIAL_GOLD_COIN = 2004,
-	ITEM_TYPE_MATERIAL_STONE = 2005,
-	ITEM_TYPE_MATERIAL_WOOD_LOG = 2006,
-	ITEM_TYPE_MATERIAL_WOOD_FLANK = 2007,
-	ITEM_TYPE_MATERIAL_YARN = 2008
+	ITEM_LARGE_CATEGORY_NONE = 0,
+	ITEM_LARGE_CATEGORY_WEAPON,
+	ITEM_LARGE_CATEGORY_ARMOR,
+	ITEM_LARGE_CATEGORY_FOOD,
+	ITEM_LARGE_CATEGORY_POTION,
+	ITEM_LARGE_CATEGORY_SKILLBOOK,
+	ITEM_LARGE_CATEGORY_MATERIAL
 };
 
-enum class en_ItemCategory : int8
+enum class en_MediumItemCategory : int8
 {
-	ITEM_CATEGORY_NONE = 0,
-	ITEM_CATEGORY_WEAPON,
-	ITEM_CATEGORY_ARMOR,
-	ITEM_CATEGORY_FOOD,
-	ITEM_CATEGORY_POTION,
-	ITEM_CATEGORY_SKILLBOOK,
-	ITEM_CATEGORY_MATERIAL	
+	ITEM_MEDIUM_CATEGORY_NONE = 0,
+	ITEM_MEDIUM_CATEGORY_SWORD,
+	ITEM_MEDIUM_CATEGORY_HAT,
+	ITEM_MEDIUM_CATEGORY_WEAR,
+	ITEM_MEDIUM_CATEGORY_GLOVE,
+	ITEM_MEDIUM_CATEGORY_BOOT,
+	ITEM_MEDIUM_CATEGORY_HEAL,	
+	ITEM_MEDIUM_CATEGORY_MANA	
+};
+
+enum class en_SmallItemCategory : int16
+{
+	ITEM_SMALL_CATEGORY_NONE = 0,
+
+	ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD = 1,
+
+	ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD = 100,
+	ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER = 101,
+	ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER = 102,
+
+	ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL = 200,
+	ITEM_SMALL_CATEGORY_SKILLBOOK_CHOHONE = 300,
+
+	ITEM_SMALL_CATEGORY_MATERIAL_LEATHER = 2000,
+	ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL = 2001,
+	ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN = 2002,
+	ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN = 2003,
+	ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN = 2004,
+	ITEM_SMALL_CATEGORY_MATERIAL_STONE = 2005,
+	ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG = 2006,
+	ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK = 2007,
+	ITEM_SMALL_CATEGORY_MATERIAL_YARN = 2008
 };
 
 enum class en_SkillType : int16
@@ -239,8 +251,9 @@ struct st_ItemInfo
 {	
 	int64 ItemDBId;				// 아이템 DB에 저장되어 있는 ID		
 	bool IsQuickSlotUse;        // 퀵슬롯에 등록되어 있는지 여부 
-	en_ItemCategory ItemCategory; // 아이템 범주
-	en_ItemType ItemType;		// 아이템 타입
+	en_LargeItemCategory ItemLargeCategory; // 아이템 대분류
+	en_MediumItemCategory ItemMediumCategory; // 아이템 중분류
+	en_SmallItemCategory ItemSmallCategory;		// 아이템 소분류
 	wstring ItemName;			// 아이템 이름
 	int16 ItemCount;			// 개수
 	wstring ThumbnailImagePath; // 이미지 경로
@@ -251,8 +264,9 @@ struct st_ItemInfo
 	{
 		ItemDBId = 0;
 		IsQuickSlotUse = false;
-		ItemCategory = en_ItemCategory::ITEM_CATEGORY_NONE;
-		ItemType = en_ItemType::ITEM_TYPE_NONE;
+		ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_NONE;
+		ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
+		ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
 		ItemName = L"";
 		ItemCount = 0;
 		ThumbnailImagePath = L"";
@@ -264,8 +278,9 @@ struct st_ItemInfo
 	{
 		ItemDBId = 0;
 		IsQuickSlotUse = false;
-		ItemCategory = en_ItemCategory::ITEM_CATEGORY_NONE;
-		ItemType = en_ItemType::ITEM_TYPE_NONE;
+		ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_NONE;
+		ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
+		ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
 		ItemName = L"";
 		ItemCount = 0;
 		ThumbnailImagePath = L"";
@@ -300,7 +315,7 @@ struct st_CraftingMaterialItemInfo
 {
 	int64 AccountDBId; // 재료템 가지고 있는 Account
 	int64 PlayerDBId; // 재료템 가지고 있는 Player
-	en_ItemType MaterialItemType; // 재료템 종류
+	en_SmallItemCategory MaterialItemType; // 재료템 종류
 	wstring MaterialItemName; // 재료템 이름
 	int16 ItemCount; // 재료템 필요 개수
 	wstring MaterialItemImagePath; // 재료템 이미지 경로
@@ -308,7 +323,7 @@ struct st_CraftingMaterialItemInfo
 
 struct st_CraftingCompleteItem
 {
-	en_ItemType CompleteItemType; // 완성 제작템 종류
+	en_SmallItemCategory CompleteItemType; // 완성 제작템 종류
 	wstring CompleteItemName; // 완성 제작템 이름
 	wstring CompleteItemImagePath; // 완성 제작템 이미지 경로
 	vector<st_CraftingMaterialItemInfo> Materials; // 제작템 만들때 필요한 재료들
@@ -316,7 +331,7 @@ struct st_CraftingCompleteItem
 
 struct st_CraftingItemCategory
 {
-	en_ItemCategory CategoryType; // 제작템 범주
+	en_LargeItemCategory CategoryType; // 제작템 범주
 	wstring CategoryName; // 제작템 범주 이름
 	vector<st_CraftingCompleteItem> CompleteItems; // 범주에 속한 완성 제작템들
 };
