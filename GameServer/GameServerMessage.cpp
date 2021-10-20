@@ -95,8 +95,9 @@ CGameServerMessage& CGameServerMessage::operator<<(st_ItemInfo& ItemInfo)
 {
     *this << ItemInfo.ItemDBId;
     *this << ItemInfo.IsQuickSlotUse;
-    *this << (int8)ItemInfo.ItemCategory;
-    *this << (int16)ItemInfo.ItemType;    
+    *this << (int8)ItemInfo.ItemLargeCategory;
+    *this << (int8)ItemInfo.ItemMediumCategory;
+    *this << (int16)ItemInfo.ItemSmallCategory;    
 
     int8 ItemNameLen = (int8)ItemInfo.ItemName.length() * 2;
     *this << ItemNameLen;

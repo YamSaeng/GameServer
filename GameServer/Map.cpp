@@ -68,7 +68,7 @@ CMap::CMap(int MapId)
 		}
 	}
 
-	_ItemInfos = new st_ItemInfo * *[YCount];
+	_ItemInfos = new st_ItemInfo **[YCount];
 	
 	for (int i = 0; i < YCount; i++)
 	{
@@ -534,7 +534,7 @@ bool CMap::ApplyPositionUpdateItem(CGameObject* GameObject, st_Vector2Int& NewPo
 
 	for (int i = 0; i < 20; i++)
 	{
-		if (_ItemInfos[Y][X][i].ItemType == Item->_ItemInfo.ItemType)
+		if (_ItemInfos[Y][X][i].ItemSmallCategory == Item->_ItemInfo.ItemSmallCategory)
 		{			
 			_ItemInfos[Y][X][i].ItemCount += Item->_ItemInfo.ItemCount;
 			
@@ -554,7 +554,7 @@ bool CMap::ApplyPositionUpdateItem(CGameObject* GameObject, st_Vector2Int& NewPo
 
 		for (int i = 0; i < 20; i++)
 		{
-			if (_ItemInfos[Y][X][i].ItemType == en_ItemType::ITEM_TYPE_NONE)
+			if (_ItemInfos[Y][X][i].ItemSmallCategory == en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE)
 			{
 				NewItemInfoIndex = i;
 				break;
@@ -730,12 +730,13 @@ bool CMap::ApplyPositionLeaveItem(CGameObject* GameObject)
 
 	for (int i = 0; i < 20; i++)
 	{
-		if (_ItemInfos[Y][X][i].ItemType == Item->_ItemInfo.ItemType)
+		if (_ItemInfos[Y][X][i].ItemSmallCategory == Item->_ItemInfo.ItemSmallCategory)
 		{
 			_ItemInfos[Y][X][i].ItemDBId = 0;
 			_ItemInfos[Y][X][i].IsQuickSlotUse = false;
-			_ItemInfos[Y][X][i].ItemCategory = en_ItemCategory::ITEM_CATEGORY_NONE;
-			_ItemInfos[Y][X][i].ItemType = en_ItemType::ITEM_TYPE_NONE;
+			_ItemInfos[Y][X][i].ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_NONE;
+			_ItemInfos[Y][X][i].ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
+			_ItemInfos[Y][X][i].ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
 			_ItemInfos[Y][X][i].ItemName = L"";
 			_ItemInfos[Y][X][i].ItemCount = 0;
 			_ItemInfos[Y][X][i].ThumbnailImagePath = L"";

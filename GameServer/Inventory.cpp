@@ -36,7 +36,7 @@ void CInventory::Init()
 
 void CInventory::AddItem(st_ItemInfo& ItemInfo)
 {
-	if (ItemInfo.ItemType == en_ItemType::ITEM_TYPE_NONE)
+	if (ItemInfo.ItemSmallCategory == en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE)
 	{
 		CRASH("Inventory Item is null");
 		return;
@@ -57,9 +57,9 @@ void CInventory::AddCoin(CItem* Item)
 	// 다음 동전을 100개당 1개씩 비례하게 개수를 구하고 추가한다.
 	byte SliverCoinCount;
 	int64 GoldCoinCount;
-	switch (Item->_ItemInfo.ItemType)
+	switch (Item->_ItemInfo.ItemSmallCategory)
 	{
-	case en_ItemType::ITEM_TYPE_MATERIAL_BRONZE_COIN:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN:
 		_BronzeCoinCount += (byte)(Item->_ItemInfo.ItemCount);
 		SliverCoinCount = (byte)(_BronzeCoinCount / 100);
 
@@ -74,7 +74,7 @@ void CInventory::AddCoin(CItem* Item)
 
 		_SliverCoinCount += SliverCoinCount;
 		break;
-	case en_ItemType::ITEM_TYPE_MATERIAL_SLIVER_COIN:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN:
 		_SliverCoinCount += (byte)(Item->_ItemInfo.ItemCount);
 		GoldCoinCount = (byte)(_SliverCoinCount / 100);
 
@@ -89,7 +89,7 @@ void CInventory::AddCoin(CItem* Item)
 
 		_GoldCoinCount += GoldCoinCount;
 		break;
-	case en_ItemType::ITEM_TYPE_MATERIAL_GOLD_COIN:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN:
 		_GoldCoinCount += Item->_ItemInfo.ItemCount;
 		break;
 	}
@@ -106,13 +106,13 @@ st_ItemInfo* CInventory::Get(int8 SlotIndex)
 	return (*FindItemIterator).second;
 }
 
-bool CInventory::IsExistItem(en_ItemType ItemType, int16& ItemEach, int8* SlotIndex)
+bool CInventory::IsExistItem(en_SmallItemCategory ItemType, int16& ItemEach, int8* SlotIndex)
 {
 	for (auto ItemIteraotr : _Items)
 	{
 		st_ItemInfo* Item = ItemIteraotr.second;
 
-		if (Item != nullptr && Item->ItemType == ItemType)
+		if (Item != nullptr && Item->ItemSmallCategory == ItemType)
 		{
 			Item->ItemCount += ItemEach;
 			*SlotIndex = ItemIteraotr.first;
@@ -123,7 +123,7 @@ bool CInventory::IsExistItem(en_ItemType ItemType, int16& ItemEach, int8* SlotIn
 	return false;
 }
 
-vector<st_ItemInfo*> CInventory::Find(en_ItemType ItemType)
+vector<st_ItemInfo*> CInventory::Find(en_SmallItemCategory ItemType)
 {
 	vector<st_ItemInfo*> FindItem;
 
@@ -131,7 +131,7 @@ vector<st_ItemInfo*> CInventory::Find(en_ItemType ItemType)
 	{
 		st_ItemInfo* Item = ItemIterator.second;
 
-		if (Item->ItemType == ItemType)
+		if (Item->ItemSmallCategory == ItemType)
 		{
 			FindItem.push_back(Item);
 		}
@@ -146,7 +146,7 @@ bool CInventory::GetEmptySlot(int8* SlotIndex)
 	{
 		st_ItemInfo* Item = ItemIteraotr.second;
 
-		if (Item->ItemType == en_ItemType::ITEM_TYPE_NONE)
+		if (Item->ItemSmallCategory == en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE)
 		{
 			*SlotIndex = ItemIteraotr.first;
 			return true;
