@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "GameServerMessage.h"
+#include "Item.h"
 
 CMemoryPoolTLS<CGameServerMessage> CGameServerMessage::_MessageObjectPool(0);
 
@@ -136,6 +137,31 @@ CGameServerMessage& CGameServerMessage::operator<<(st_Color& Color)
     *this << Color._Red;
     *this << Color._Green;
     *this << Color._Blue;   
+
+    return *(this);
+}
+
+CGameServerMessage& CGameServerMessage::operator<<(CWeapon* Weapon)
+{
+    *this << Weapon->_ItemInfo;
+    *this << Weapon->_MinDamage;
+    *this << Weapon->_MaxDamage;
+
+    return *(this);
+}
+
+CGameServerMessage& CGameServerMessage::operator<<(CArmor* Armor)
+{
+    *this << Armor->_ItemInfo;
+    *this << Armor->_Defence;
+
+    return *(this);
+}
+
+CGameServerMessage& CGameServerMessage::operator<<(CMaterial* Material)
+{
+    *this << Material->_ItemInfo;
+    *this << Material->_MaxCount;
 
     return *(this);
 }

@@ -2,6 +2,10 @@
 
 #include "Message.h"
 
+class CWeapon;
+class CArmor;
+class CMaterial;
+
 class CGameServerMessage : public CMessage
 {
 public:
@@ -30,6 +34,9 @@ public:
 	
 	CGameServerMessage& operator << (st_Color& Color);
 
+	CGameServerMessage& operator << (CWeapon* Weapon);
+	CGameServerMessage& operator << (CArmor* Armor);
+	CGameServerMessage& operator << (CMaterial* Material);
 #pragma endregion
 
 #pragma region µ¥ÀÌÅÍ »©±â
