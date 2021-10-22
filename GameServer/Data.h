@@ -15,6 +15,7 @@ struct st_ItemData
 	en_LargeItemCategory LargeItemCategory;
 	en_MediumItemCategory MediumItemCategory;
 	en_SmallItemCategory SmallItemCategory; 
+	en_GameObjectType ItemObjectType;
 	string ThumbnailImagePath;
 	bool IsEquipped;
 	int16 ItemCount;

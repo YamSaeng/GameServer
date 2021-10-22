@@ -6,6 +6,7 @@
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_SWORD",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD",
+          "ItemObjectType": "OBJECT_ITEM_WEAPON_WOOD_SWORD",
           "ItemName": "나무 검",
           "MinDamage": 5,
           "MaxDamage": 10,
@@ -21,6 +22,7 @@
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_HAT",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER",
+          "ItemObjectType": "OBJECT_ITEM_ARMOR_LEATHER_HELMET",
           "ItemName": "가죽 모자",
           "Defence": 5,
           "ImageFilePath": "Textures/Equipment/Leather Helmet"
@@ -28,6 +30,7 @@
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_WEAR",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD",
+          "ItemObjectType": "OBJECT_ITEM_ARMOR_WOOD_ARMOR",
           "ItemName": "나무 갑옷",
           "Defence": 15,
           "ImageFilePath": "Textures/Equipment/Wooden Armor"
@@ -35,6 +38,7 @@
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_BOOT",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER",
+          "ItemObjectType": "OBJECT_ITEM_ARMOR_LEATHER_BOOT",
           "ItemName": "가죽 신발",
           "Defence": 5,
           "ImageFilePath": "Textures/Equipment/Leather Boot"
@@ -49,6 +53,7 @@
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_HEAL",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL",
+          "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL",
           "ItemName": "회복물약(소)",
           "MaxCount": 99,
           "ImageFilePath": "Textures/Potion/Red Potion"
@@ -61,6 +66,7 @@
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_SKILLBOOK_CHOHONE",
+          "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK_CHOHONE",
           "ItemName": "초혼비무 스킬책",
           "MaxCount": 1,
           "ImageFilePath": "Textures/SkillBook/ChoHoneSkillBook"
@@ -75,6 +81,7 @@
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_LEATHER",
+          "ItemObjectType": "OBJECT_ITEM_MATERIAL_LEATHER",
           "ItemName": "가죽",
           "MaxCount": 99,
           "ImageFilePath": "Textures/Material/Leather"
@@ -82,6 +89,7 @@
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL",
+          "ItemObjectType": "OBJECT_ITEM_MATERIAL_SLIME_GEL",
           "ItemName": "슬라임젤리",
           "MaxCount": 99,
           "ImageFilePath": "Textures/MonsterPart/SlimeGel"
@@ -89,6 +97,7 @@
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN",
+          "ItemObjectType": "OBJECT_ITEM_MATERIAL_BRONZE_COIN",
           "ItemName": "동전",
           "MaxCount": 99,
           "ImageFilePath": "Textures/Misc/CopperCoin"
@@ -96,6 +105,7 @@
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN",
+          "ItemObjectType": "OBJECT_ITEM_MATERIAL_SLIVER_COIN",
           "ItemName": "은전",
           "MaxCount": 99,
           "ImageFilePath": "Textures/Misc/SliverCoin"
@@ -103,6 +113,7 @@
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN",
+          "ItemObjectType": "OBJECT_ITEM_MATERIAL_GOLD_COIN",
           "ItemName": "금전",
           "MaxCount": 99,
           "ImageFilePath": "Textures/Misc/GoldCoin"
@@ -110,6 +121,7 @@
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_STONE",
+          "ItemObjectType": "OBJECT_ITEM_MATERIAL_STONE",
           "ItemName": "암석",
           "MaxCount": 99,
           "ImageFilePath": "Textures/Material/Stone"
@@ -117,6 +129,7 @@
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG",
+          "ItemObjectType": "OBJECT_ITEM_MATERIAL_WOOD_LOG",
           "ItemName": "통나무",
           "MaxCount": 99,
           "ImageFilePath": "Textures/Material/Wood Log"
@@ -124,6 +137,7 @@
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK",
+          "ItemObjectType": "OBJECT_ITEM_MATERIAL_WOOD_FLANK",
           "ItemName": "나무판자",
           "MaxCount": 99,
           "ImageFilePath": "Textures/Material/Wooden Plank"
@@ -131,6 +145,7 @@
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_YARN",
+          "ItemObjectType": "OBJECT_ITEM_MATERIAL_YARN",
           "ItemName": "실",
           "MaxCount": 99,
           "ImageFilePath": "Textures/Material/Yarn"

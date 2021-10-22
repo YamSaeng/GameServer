@@ -16,6 +16,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 		{
 			string MediumCategory = WeaponListFiled["ItemMediumCategory"].GetString();
 			string SmallCategory = WeaponListFiled["ItemSmallCategory"].GetString();
+			string ItemObjectType = WeaponListFiled["ItemObjectType"].GetString();
 			string ItemName = WeaponListFiled["ItemName"].GetString();
 			int MinDamage = WeaponListFiled["MinDamage"].GetInt();
 			int MaxDamage = WeaponListFiled["MaxDamage"].GetInt();
@@ -35,10 +36,15 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 				WeaponData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD;
 			}			
 
+			if (ItemObjectType == "OBJECT_ITEM_WEAPON_WOOD_SWORD")
+			{
+				WeaponData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD;
+			}
+
 			WeaponData->ItemName = ItemName;						
 			WeaponData->MinDamage = MinDamage;
 			WeaponData->MaxDamage = MaxDamage;
-			WeaponData->ThumbnailImagePath = ImageFilePath;			
+			WeaponData->ThumbnailImagePath = ImageFilePath;		
 
 			_Items.insert(pair<int16, st_WeaponData*>((int16)WeaponData->SmallItemCategory, WeaponData));
 		}		
@@ -52,6 +58,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 		{
 			string MediumCategory = ArmorListFiled["ItemMediumCategory"].GetString();
 			string SmallCategory = ArmorListFiled["ItemSmallCategory"].GetString();
+			string ItemObjectType = ArmorListFiled["ItemObjectType"].GetString();
 			string ItemName = ArmorListFiled["ItemName"].GetString();
 			int Defence = ArmorListFiled["Damage"].GetInt();
 			string ImageFilePath = ArmorListFiled["ImageFilePath"].GetString();
@@ -86,6 +93,19 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 				ArmorData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER;
 			}
 
+			if (ItemObjectType == "OBJECT_ITEM_ARMOR_LEATHER_HELMET")
+			{
+				ArmorData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET;
+			}
+			else if (ItemObjectType == "OBJECT_ITEM_ARMOR_WOOD_ARMOR")
+			{
+				ArmorData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR;
+			}
+			else if (ItemObjectType == "OBJECT_ITEM_ARMOR_LEATHER_BOOT")
+			{
+				ArmorData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT;
+			}
+
 			ArmorData->ItemName = ItemName;			
 
 			ArmorData->Defence = Defence;
@@ -102,6 +122,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 		{
 			string MediumCategory = PotionDataListFiled["ItemMediumCategory"].GetString();
 			string SmallCategory = PotionDataListFiled["ItemSmallCategory"].GetString();
+			string ItemObjectType = PotionDataListFiled["ItemObjectType"].GetString();
 			string ItemName = PotionDataListFiled["ItemName"].GetString();
 			int MaxCount = PotionDataListFiled["MaxCount"].GetInt();
 			string ImageFilePath = PotionDataListFiled["ImageFilePath"].GetString();
@@ -119,6 +140,11 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 				PotionData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL;
 			}
 
+			if (ItemObjectType == "OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL")
+			{
+				PotionData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL;
+			}			
+
 			PotionData->ItemName = ItemName;
 			PotionData->MaxCount = MaxCount;
 
@@ -132,6 +158,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 		{
 			string MediumCategory = SkillBookDataListFiled["ItemMediumCategory"].GetString();
 			string SmallCategory = SkillBookDataListFiled["ItemSmallCategory"].GetString();
+			string ItemObjectType = SkillBookDataListFiled["ItemObjectType"].GetString();
 			string ItemName = SkillBookDataListFiled["ItemName"].GetString();
 			int MaxCount = SkillBookDataListFiled["MaxCount"].GetInt();
 			string ImageFilePath = SkillBookDataListFiled["ImageFilePath"].GetString();
@@ -147,6 +174,11 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_CHOHONE")
 			{
 				SkillBookData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_CHOHONE;
+			}
+
+			if (ItemObjectType == "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK_CHOHONE")
+			{
+				SkillBookData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK_CHOHONE;
 			}
 
 			SkillBookData->ItemName = ItemName;
@@ -165,6 +197,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 		{
 			string MediumCategory = MaterialDataListFiled["ItemMediumCategory"].GetString();
 			string SmallCategory = MaterialDataListFiled["ItemSmallCategory"].GetString();
+			string ItemObjectType = MaterialDataListFiled["ItemObjectType"].GetString();
 			string ItemName = MaterialDataListFiled["ItemName"].GetString();
 			int MaxCount = MaterialDataListFiled["MaxCount"].GetInt();
 			string ImageFilePath = MaterialDataListFiled["ImageFilePath"].GetString();
@@ -212,6 +245,44 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_YARN")
 			{
 				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN;
+			}
+
+			// 재료 아이템의 스폰 오브젝트 타입
+			if (ItemObjectType == "OBJECT_ITEM_MATERIAL_LEATHER")
+			{
+				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER;
+			}
+			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_SLIME_GEL")
+			{
+				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL;
+			}
+			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_BRONZE_COIN")
+			{
+				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN;
+			}
+			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_SLIVER_COIN")
+			{
+				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIVER_COIN;
+			}
+			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_GOLD_COIN")
+			{
+				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_GOLD_COIN;
+			}
+			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_STONE")
+			{
+				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE;
+			}
+			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_WOOD_LOG")
+			{
+				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG;
+			}
+			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_WOOD_FLANK")
+			{
+				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK;
+			}
+			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_YARN")
+			{
+				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN;
 			}
 
 			MaterialData->ItemName = ItemName;
