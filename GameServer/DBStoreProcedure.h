@@ -262,8 +262,8 @@ namespace SP
 		void OutBronzeCoin(int16& BronzeCoin) { BindCol(2, BronzeCoin); }
 	};
 
-	// ItemTable¿¡ ÀÖ´Â Item ¸ðµÎ ±Ü¾î¿È
-	class CDBGameServerInventoryItemGet : public CDBBind<2, 8>
+	// InventoryTable¿¡ ÀÖ´Â Item ¸ðµÎ ±Ü¾î¿È
+	class CDBGameServerInventoryItemGet : public CDBBind<2, 12>
 	{
 	public:
 		CDBGameServerInventoryItemGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetItemTableInfoToInventory(?,?)}") {}
@@ -271,13 +271,17 @@ namespace SP
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
 
 		void OutItemLargeCategory(int8& ItemLargeCategory) { BindCol(0, ItemLargeCategory); }
-		void OutItemMediumCategory(int8& ItemMediumCategory) { BindCol(1, ItemMediumCategory); }
+		void OutItemMediumCategory(int8& ItemMediumCategory) { BindCol(1, ItemMediumCategory); }	
 		void OutItemSmallCategory(int16& ItemSmallCategory) { BindCol(2, ItemSmallCategory); }
 		template<int8 Length> void OutItemName(WCHAR(&ItemName)[Length]) { BindCol(3, ItemName); }
 		void OutItemCount(int16& itemCount) { BindCol(4, itemCount); }
 		void OutSlotIndex(int8& SlotIndex) { BindCol(5, SlotIndex); }
 		void OutIsEquipped(bool& IsEquipped) { BindCol(6, IsEquipped); }
-		template<int16 Length> void OutItemThumbnailImagePath(WCHAR(&ItemThumbnailImagePath)[Length]) { BindCol(7, ItemThumbnailImagePath); }
+		void OutMinDamage(int32& MinDamage) { BindCol(7, MinDamage); }
+		void OutMaxDamage(int32& MaxDamage) { BindCol(8, MaxDamage); }
+		void OutDefence(int32& Defence) { BindCol(9, Defence); }
+		void OutMaxCount(int32& MaxCount) { BindCol(10, MaxCount); }
+		template<int16 Length> void OutItemThumbnailImagePath(WCHAR(&ItemThumbnailImagePath)[Length]) { BindCol(11, ItemThumbnailImagePath); }
 	};
 
 	// SkillTable¿¡ ÀÖ´Â Skill ¸ðµÎ ±Ü¾î¿È
