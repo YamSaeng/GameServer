@@ -5,7 +5,13 @@
 
 CItem::CItem()
 {
+	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_ITEM;
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+}
+
+CItem::~CItem()
+{
+	
 }
 
 void CItem::Update()
@@ -45,7 +51,7 @@ void CItem::UpdateIdle()
 {
 	if (_Target && _Target->GetCellPosition() == GetCellPosition())
 	{
-		G_Logger->WriteStdOut(en_Color::GREEN, L"ÇÃ·¹ÀÌ¾î¿Í ºÎµúÈû");
+		G_Logger->WriteStdOut(en_Color::GREEN, L"ÇÃ·¹ÀÌ¾î¿Í ºÎµúÈû \n");
 
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;		
 				
@@ -73,8 +79,8 @@ void CItem::UpdateIdle()
 
 		*ReqItemToInventoryMessage << (int16)(en_PACKET_TYPE::en_PACKET_C2S_ITEM_TO_INVENTORY);
 		*ReqItemToInventoryMessage << Player->_AccountId;
-		*ReqItemToInventoryMessage << _GameObjectInfo.ObjectId;		
-		*ReqItemToInventoryMessage << _Target->_GameObjectInfo.ObjectId;		
+		*ReqItemToInventoryMessage << _GameObjectInfo.ObjectId;						
+		*ReqItemToInventoryMessage << _Target->_GameObjectInfo.ObjectId;				
 
 		ReqItemToInventoryJob->Message = ReqItemToInventoryMessage;
 
@@ -82,7 +88,44 @@ void CItem::UpdateIdle()
 	}
 }
 
+CWeapon::CWeapon()
+{
+	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_ITEM_WEAPON;
+}
+
+CWeapon::~CWeapon()
+{
+}
+
+void CWeapon::UpdateIdle()
+{
+	CItem::UpdateIdle();
+}
+
+CArmor::CArmor()
+{
+	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_ITEM_ARMOR;
+}
+
+CArmor::~CArmor()
+{
+}
+
+void CArmor::UpdateIdle()
+{
+	CItem::UpdateIdle();
+}
+
 CMaterial::CMaterial()
 {
+	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL;
+}
 
+CMaterial::~CMaterial()
+{
+}
+
+void CMaterial::UpdateIdle()
+{
+	CItem::UpdateIdle();	
 }
