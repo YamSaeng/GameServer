@@ -53,6 +53,6 @@ private:
 	// 인벤토리가 소유중인 아이템 ( 포인터로 관리 )
 	//   ( SlotIndex, 아이템정보 )
 	//---------------------------------------------
-	map<byte, CItem*> _Items;
+	map<int8, CItem*> _Items;
 };
 

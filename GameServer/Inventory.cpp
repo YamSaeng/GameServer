@@ -21,6 +21,14 @@ void CInventory::Init()
 	_BronzeCoinCount = 0;
 	_SliverCoinCount = 0;
 	_GoldCoinCount = 0;
+
+	for (int SlotIndex = 0; SlotIndex < (int8)en_Inventory::INVENTORY_SIZE; SlotIndex++)
+	{
+		CItem* Item = (CItem*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM);
+		Item->_ItemInfo.SlotIndex = SlotIndex;
+
+		_Items.insert(pair<int8, CItem*>(Item->_ItemInfo.SlotIndex,Item));
+	}
 }
 
 void CInventory::AddItem(CItem* Item)
@@ -51,6 +59,8 @@ void CInventory::AddItem(CItem* Item)
 				return;
 			}
 
+			G_ObjectManager->ObjectReturn((*FindSlotIterator).second->_GameObjectInfo.ObjectType, (*FindSlotIterator).second);
+			
 			(*FindSlotIterator).second = Item;
 		}
 		break;
