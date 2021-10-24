@@ -34,9 +34,8 @@ public:
 	
 	CGameServerMessage& operator << (st_Color& Color);
 
-	CGameServerMessage& operator << (CWeapon* Weapon);
-	CGameServerMessage& operator << (CArmor* Armor);
-	CGameServerMessage& operator << (CMaterial* Material);
+	CGameServerMessage& operator << (CItem** Item);
+	CGameServerMessage& operator << (CItem* Item);
 #pragma endregion
 
 #pragma region µ¥ÀÌÅÍ »©±â

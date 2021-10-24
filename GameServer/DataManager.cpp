@@ -62,7 +62,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string SmallCategory = ArmorListFiled["ItemSmallCategory"].GetString();
 			string ItemObjectType = ArmorListFiled["ItemObjectType"].GetString();
 			string ItemName = ArmorListFiled["ItemName"].GetString();
-			int Defence = ArmorListFiled["Damage"].GetInt();
+			int Defence = ArmorListFiled["Defence"].GetInt();
 			string ImageFilePath = ArmorListFiled["ImageFilePath"].GetString();
 
 			st_ItemData* ArmorItemData = new st_ItemData();

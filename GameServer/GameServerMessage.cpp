@@ -104,6 +104,11 @@ CGameServerMessage& CGameServerMessage::operator<<(st_ItemInfo& ItemInfo)
     *this << ItemNameLen;
     InsertData(ItemInfo.ItemName.c_str(), ItemNameLen);
 
+    *this << ItemInfo.MinDamage;
+    *this << ItemInfo.MaxDamage;
+    *this << ItemInfo.Defence;
+    *this << ItemInfo.MaxCount;
+
     *this << ItemInfo.ItemCount;
 
     int8 ItemImagePathLen = (int8)ItemInfo.ThumbnailImagePath.length() * 2;
@@ -141,27 +146,18 @@ CGameServerMessage& CGameServerMessage::operator<<(st_Color& Color)
     return *(this);
 }
 
-CGameServerMessage& CGameServerMessage::operator<<(CWeapon* Weapon)
+CGameServerMessage& CGameServerMessage::operator<<(CItem** Item)
 {
-    *this << Weapon->_ItemInfo;
-    *this << Weapon->_MinDamage;
-    *this << Weapon->_MaxDamage;
+    memcpy(&_MessageBuf[_Rear], Item, sizeof(CItem*));
+    _Rear += sizeof(CItem*);
+    _UseBufferSize += sizeof(CItem*);
 
     return *(this);
 }
 
-CGameServerMessage& CGameServerMessage::operator<<(CArmor* Armor)
+CGameServerMessage& CGameServerMessage::operator<<(CItem* Item)
 {
-    *this << Armor->_ItemInfo;
-    *this << Armor->_Defence;
-
-    return *(this);
-}
-
-CGameServerMessage& CGameServerMessage::operator<<(CMaterial* Material)
-{
-    *this << Material->_ItemInfo;
-    *this << Material->_MaxCount;
+    *this << Item->_ItemInfo;
 
     return *(this);
 }
