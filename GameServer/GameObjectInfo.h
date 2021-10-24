@@ -259,6 +259,10 @@ struct st_ItemInfo
 	en_MediumItemCategory ItemMediumCategory; // 아이템 중분류
 	en_SmallItemCategory ItemSmallCategory;		// 아이템 소분류
 	wstring ItemName;			// 아이템 이름
+	int32 MinDamage;			// 아이템 최소 공격력
+	int32 MaxDamage;			// 아이템 최대 공격력
+	int32 Defence;				// 아이템 방어력
+	int32 MaxCount;				// 아이템을 소유 할 수 있는 최대 개수
 	int16 ItemCount;			// 개수
 	wstring ThumbnailImagePath; // 이미지 경로
 	bool IsEquipped;			// 아이템을 착용할 수 있는지	
@@ -272,24 +276,30 @@ struct st_ItemInfo
 		ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
 		ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
 		ItemName = L"";
+		MinDamage = 0;
+		MaxDamage = 0;
+		Defence = 0;
+		MaxCount = 0;		
 		ItemCount = 0;
 		ThumbnailImagePath = L"";
 		IsEquipped = false;
 		SlotIndex  = -1;
-	}
+	}	
 
-	void InventoryItemInit()
+	bool operator == (st_ItemInfo OtherItemInfo)
 	{
-		ItemDBId = 0;
-		IsQuickSlotUse = false;
-		ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_NONE;
-		ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
-		ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
-		ItemName = L"";
-		ItemCount = 0;
-		ThumbnailImagePath = L"";
-		IsEquipped = false;
-	}
+		if (SlotIndex == OtherItemInfo.SlotIndex
+			&& ItemLargeCategory == OtherItemInfo.ItemLargeCategory
+			&& ItemMediumCategory == OtherItemInfo.ItemMediumCategory
+			&& ItemSmallCategory == OtherItemInfo.ItemSmallCategory
+			&& ItemName == OtherItemInfo.ItemName
+			&& ItemCount == OtherItemInfo.ItemCount)
+		{
+			return true;
+		}
+
+		return false;
+	}	
 };
 
 struct st_SkillInfo
