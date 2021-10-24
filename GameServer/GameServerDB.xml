@@ -208,17 +208,17 @@
     <Param name="@ItemMediumCategory" type="TinyInt" notnull="true"/>
     <Param name="@ItemSmallCategory" type="SmallInt"/>    
     <Param name="@ItemName" type="nvarchar(20)"/>
+    <Param name="@ItemMinDamage" type="int"/>
+    <Param name="@ItemMaxDamage" type="int"/>
+    <Param name="@ItemDefence" type="int"/>
+    <Param name="@ItemMaxCount" type="int"/>
     <Param name="@ItemCount" type="SmallInt"/>
-    <Param name="@IsEquipped" type="bit"/>
-    <Param name="@MinDamage" type="int"/>
-    <Param name="@MaxDamage" type="int"/>
-    <Param name="@Defence" type="int"/>
-    <Param name="@MaxCount" type="int"/>
+    <Param name="@IsEquipped" type="bit"/>    
     <Param name="@ThumbnailImagePath" type="nvarchar(100)"/>
     <Body>
       <![CDATA[
          INSERT INTO [dbo].[Item]
-         VALUES ((@ItemUse), (@IsQuickSlotUse), (@ItemLargeCategory), (@ItemMediumCategory), (@ItemSmallCategory), (@ItemName), (@ItemCount), (@IsEquipped), (@MinDamage), (@MaxDamage), (@Defence), (@MaxCount), (@ThumbnailImagePath))
+         VALUES ((@ItemUse), (@IsQuickSlotUse), (@ItemLargeCategory), (@ItemMediumCategory), (@ItemSmallCategory), (@ItemName), (@ItemMinDamage), (@ItemMaxDamage), (@ItemDefence), (@ItemMaxCount), (@ItemCount), (@IsEquipped), (@ThumbnailImagePath))
        ]]>
     </Body>    
   </Procedure>
@@ -253,13 +253,13 @@
     <Param name="@ItemMediumCategory" type="TinyInt" notnull="true"/>
     <Param name="@ItemSmallCategory" type="SmallInt"/>    
     <Param name="@ItemName" type="nvarchar(20)"/>
+    <Param name="@ItemMinDamage" type="int"/>
+    <Param name="@ItemMaxDamage" type="int"/>
+    <Param name="@ItemDefence" type="int"/>
+    <Param name="@ItemMaxCount" type="int"/>
     <Param name="@ItemCount" type="SmallInt"/>    
     <Param name="@SlotIndex" type="TinyInt"/>
-    <Param name="@IsEquipped" type="bit"/>
-    <Param name="@MinDamage" type="int"/>
-    <Param name="@MaxDamage" type="int"/>
-    <Param name="@Defence" type="int"/>
-    <Param name="@MaxCount" type="int"/>
+    <Param name="@IsEquipped" type="bit"/>    
     <Param name="@ThumbnailImagePath" type="nvarchar(100)"/>
     <Param name="@OwnerAccountDBId" type="BigInt"/>
     <Param name="@OwnerPlayerDBId" type="BigInt"/>    
@@ -269,8 +269,8 @@
         SET IsQuickSlotUse = (@IsQuickSlotUse), ItemLargeCategory = (@ItemLargeCategory),
         ItemMediumCategory = (@ItemMediumCategory), ItemSmallCategory = (@ItemSmallCategory),
         ItemName = (@ItemName), ItemCount = (@ItemCount), IsEquipped = (@IsEquipped), 
-        MinDamage = (@MinDamage), MaxDamage = (@MaxDamage),
-        Defence = (@Defence), MaxCount = (@MaxCount),
+        MinDamage = (@ItemMinDamage), MaxDamage = (@ItemMaxDamage),
+        Defence = (@ItemDefence), MaxCount = (@ItemMaxCount),
         ThumbnailImagePath = (@ThumbnailImagePath) 
         WHERE SlotIndex = (@SlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)        
       ]]>
@@ -298,7 +298,7 @@
     <Param name="@SlotIndex" type="TinyInt"/>
     <Body>      
       <![CDATA[
-        SELECT IsQuickSlotUse, ItemLargeCategory, ItemMediumCategory, ItemSmallCategory, ItemName, ItemCount, IsEquipped, MinDamage, MaxDamage, Defence, MaxCount, ThumbnailImagePath 
+        SELECT IsQuickSlotUse, ItemLargeCategory, ItemMediumCategory, ItemSmallCategory, ItemName, MinDamage, MaxDamage, Defence, MaxCount, ItemCount, IsEquipped, ThumbnailImagePath 
         FROM [dbo].[Inventory] 
         WHERE OwnerAccountDBId = (@AccountDBId) AND OwnerPlayerDBId = (@PlayerDBId) AND SlotIndex = (@SlotIndex)
       ]]>
@@ -314,12 +314,12 @@
     <Param name="@AItemMediumCategory" type="TinyInt" notnull="true"/>
     <Param name="@AItemSmallCategory" type="SmallInt"/>    
     <Param name="@AItemName" type="nvarchar(20)"/>
-    <Param name="@AItemCount" type="SmallInt"/>
-    <Param name="@AItemIsEquipped" type="bit"/>
     <Param name="@AMinDamage" type="int"/>
     <Param name="@AMaxDamage" type="int"/>
     <Param name="@ADefence" type="int"/>
     <Param name="@AMaxCount" type="int"/>
+    <Param name="@AItemCount" type="SmallInt"/>
+    <Param name="@AItemIsEquipped" type="bit"/>    
     <Param name="@AItemThumbnailImagePath" type="nvarchar(100)"/>
     <Param name="@AItemSlotIndex" type="TinyInt"/>
     <Param name="@BIsQuickSlotUse" type="bit"/>
@@ -327,18 +327,18 @@
     <Param name="@BItemMediumCategory" type="TinyInt" notnull="true"/>
     <Param name="@BItemSmallCategory" type="SmallInt"/>    
     <Param name="@BItemName" type="nvarchar(20)"/>
-    <Param name="@BItemCount" type="SmallInt"/>
-    <Param name="@BItemIsEquipped" type="bit"/>
     <Param name="@BMinDamage" type="int"/>
     <Param name="@BMaxDamage" type="int"/>
     <Param name="@BDefence" type="int"/>
     <Param name="@BMaxCount" type="int"/>
+    <Param name="@BItemCount" type="SmallInt"/>
+    <Param name="@BItemIsEquipped" type="bit"/>    
     <Param name="@BItemThumbnailImagePath" type="nvarchar(100)"/>
     <Param name="@BItemSlotIndex" type="TinyInt"/>
     <Body>
       <![CDATA[
-        UPDATE [dbo].[Inventory] SET IsQuickSlotUse = (@AIsQuickSlotUse), ItemLargeCategory = (@AItemLargeCategory), ItemMediumCategory = (@AItemMediumCategory), ItemSmallCategory = (@AItemSmallCategory), ItemName = (@AItemName), ItemCount = (@AItemCount), IsEquipped = (@AItemIsEquipped), MinDamage = (@AMinDamage), MaxDamage = (@AMaxDamage), Defence = (@ADefence), MaxCount = (@AMaxCount), ThumbnailImagePath = (@AItemThumbnailImagePath)  WHERE SlotIndex = (@AItemSlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
-        UPDATE [dbo].[Inventory] SET IsQuickSlotUse = (@BIsQuickSlotUse), ItemLargeCategory = (@BItemLargeCategory), ItemMediumCategory = (@BItemMediumCategory), ItemSmallCategory = (@BItemSmallCategory), ItemName = (@BItemName), ItemCount = (@BItemCount), IsEquipped = (@BItemIsEquipped), MinDamage = (@BMinDamage), MaxDamage = (@BMaxDamage), Defence = (@BDefence), MaxCount = (@BMaxCount), ThumbnailImagePath = (@BItemThumbnailImagePath)  WHERE SlotIndex = (@BItemSlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
+        UPDATE [dbo].[Inventory] SET IsQuickSlotUse = (@AIsQuickSlotUse), ItemLargeCategory = (@AItemLargeCategory), ItemMediumCategory = (@AItemMediumCategory), ItemSmallCategory = (@AItemSmallCategory), ItemName = (@AItemName), MinDamage = (@AMinDamage), MaxDamage = (@AMaxDamage), Defence = (@ADefence), MaxCount = (@AMaxCount), ItemCount = (@AItemCount), IsEquipped = (@AItemIsEquipped), ThumbnailImagePath = (@AItemThumbnailImagePath)  WHERE SlotIndex = (@AItemSlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
+        UPDATE [dbo].[Inventory] SET IsQuickSlotUse = (@BIsQuickSlotUse), ItemLargeCategory = (@BItemLargeCategory), ItemMediumCategory = (@BItemMediumCategory), ItemSmallCategory = (@BItemSmallCategory), ItemName = (@BItemName), MinDamage = (@BMinDamage), MaxDamage = (@BMaxDamage), Defence = (@BDefence), MaxCount = (@BMaxCount), ItemCount = (@BItemCount), IsEquipped = (@BItemIsEquipped), ThumbnailImagePath = (@BItemThumbnailImagePath)  WHERE SlotIndex = (@BItemSlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
       ]]>
     </Body>
   </Procedure>  
@@ -349,7 +349,7 @@
     <Param name="@PlayerDBId" type="BigInt"/>
     <Body>
       <![CDATA[
-        SELECT ItemLargeCategory, ItemMediumCategory, ItemSmallCategory, ItemName, ItemCount, SlotIndex, IsEquipped, MinDamage, MaxDamage, Defence, MaxCount, ThumbnailImagePath FROM [dbo].[Inventory] WHERE OwnerAccountDBId = (@AccountDBId) AND OwnerPlayerDBId = (@PlayerDBId)
+        SELECT ItemLargeCategory, ItemMediumCategory, ItemSmallCategory, ItemName, MinDamage, MaxDamage, Defence, MaxCount, ItemCount, SlotIndex, IsEquipped, ThumbnailImagePath FROM [dbo].[Inventory] WHERE OwnerAccountDBId = (@AccountDBId) AND OwnerPlayerDBId = (@PlayerDBId)
       ]]>
     </Body>
   </Procedure>

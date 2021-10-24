@@ -87,12 +87,12 @@ namespace SP
 		void InItemMediumCategory(int8& ItemMediumCategory) { BindParam(3, ItemMediumCategory); }
 		void InItemSmallCategory(int16& ItemSmallCategory) { BindParam(4, ItemSmallCategory); }
 		void InItemName(wstring& ItemName) { BindParam(5, ItemName.c_str()); }
-		void InItemCount(int16& ItemCount) { BindParam(6, ItemCount); }
-		void InIsEquipped(bool& IsEquipped) { BindParam(7, IsEquipped); }
-		void InItemMinDamage(int32& ItemMinDamage) { BindParam(8, ItemMinDamage); }
-		void InItemMaxDamage(int32& ItemMaxDamage) { BindParam(9, ItemMaxDamage); }
-		void InItemDefence(int32& ItemDefence) { BindParam(10, ItemDefence); }
-		void InItemMaxCount(int32& ItemMaxCount) { BindParam(11, ItemMaxCount); }
+		void InItemMinDamage(int32& ItemMinDamage) { BindParam(6, ItemMinDamage); }
+		void InItemMaxDamage(int32& ItemMaxDamage) { BindParam(7, ItemMaxDamage); }
+		void InItemDefence(int32& ItemDefence) { BindParam(8, ItemDefence); }
+		void InItemMaxCount(int32& ItemMaxCount) { BindParam(9, ItemMaxCount); }
+		void InItemCount(int16& ItemCount) { BindParam(10, ItemCount); }
+		void InIsEquipped(bool& IsEquipped) { BindParam(11, IsEquipped); }		
 		void InThumbnailImagePath(wstring& ThumbnailImagePath) { BindParam(12, ThumbnailImagePath.c_str()); }
 	};
 
@@ -126,13 +126,13 @@ namespace SP
 		void InItemMediumCategory(int8& ItemMediumCategory) { BindParam(2, ItemMediumCategory); }
 		void InItemSmallCategory(int16& ItemSmallCategory) { BindParam(3, ItemSmallCategory); }
 		void InItemName(wstring& ItemName) { BindParam(4, ItemName.c_str()); }
-		void InItemCount(int16& ItemCount) { BindParam(5, ItemCount); }
-		void InSlotIndex(int8& SlotIndex) { BindParam(6, SlotIndex); }
-		void InIsEquipped(bool& IsEquipped) { BindParam(7, IsEquipped); }
-		void InItemMinDamage(int32& ItemMinDamage) { BindParam(8, ItemMinDamage); }
-		void InItemMaxDamage(int32& ItemMaxDamage) { BindParam(9, ItemMaxDamage); }
-		void InItemDefence(int32& ItemDefence) { BindParam(10, ItemDefence); }
-		void InItemMaxCount(int32& ItemMaxCount) { BindParam(11, ItemMaxCount); }
+		void InItemMinDamage(int32& ItemMinDamage) { BindParam(5, ItemMinDamage); }
+		void InItemMaxDamage(int32& ItemMaxDamage) { BindParam(6, ItemMaxDamage); }
+		void InItemDefence(int32& ItemDefence) { BindParam(7, ItemDefence); }
+		void InItemMaxCount(int32& ItemMaxCount) { BindParam(8, ItemMaxCount); }
+		void InItemCount(int16& ItemCount) { BindParam(9, ItemCount); }
+		void InSlotIndex(int8& SlotIndex) { BindParam(10, SlotIndex); }
+		void InIsEquipped(bool& IsEquipped) { BindParam(11, IsEquipped); }		
 		void InThumbnailImagePath(wstring& ThumbnailImagePath) { BindParam(12, ThumbnailImagePath.c_str()); }
 		void InOwnerAccountId(int64& OwnerAccountId) { BindParam(13, OwnerAccountId); }
 		void InOwnerPlayerId(int64& OwnerPlayerId) { BindParam(14, OwnerPlayerId); }
@@ -152,7 +152,7 @@ namespace SP
 
 	// Swap 요청한 아이템이 Inventory에 있는지 확인하고
 	// 요청한 아이템의 정보를 반환
-	class CDBGameServerItemCheck : public CDBBind<3, 8>
+	class CDBGameServerItemCheck : public CDBBind<3, 12>
 	{
 	public:
 		CDBGameServerItemCheck(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spInventoryItemCheck(?,?,?)}") {}
@@ -165,9 +165,13 @@ namespace SP
 		void OutItemMediumCategory(int8& ItemMediumCategory) { BindCol(2, ItemMediumCategory); }
 		void OutItemSmallCategory(int16& ItemSmallCategory) { BindCol(3, ItemSmallCategory); }
 		template<int8 Length> void OutItemName(WCHAR(&ItemName)[Length]) { BindCol(4, ItemName); }
-		void OutItemCount(int16& ItemCount) { BindCol(5, ItemCount); }
-		void OutItemIsEquipped(bool& ItemIsEquipped) { BindCol(6, ItemIsEquipped); }
-		template<int16 Length> void OutItemThumbnailImagePath(WCHAR(&ItemThumbnailImagePath)[Length]) { BindCol(7, ItemThumbnailImagePath); }
+		void OutItemMinDamage(int32& ItemMinDamage) { BindCol(5, ItemMinDamage); }
+		void OutItemMaxDamage(int32& ItemMaxDamage) { BindCol(6, ItemMaxDamage); }
+		void OutItemDefence(int32& ItemDefence) { BindCol(7, ItemDefence); }
+		void OutItemMaxCount(int32& ItemMaxCount) { BindCol(8, ItemMaxCount); }
+		void OutItemCount(int16& ItemCount) { BindCol(9, ItemCount); }
+		void OutItemIsEquipped(bool& ItemIsEquipped) { BindCol(10, ItemIsEquipped); }	
+		template<int16 Length> void OutItemThumbnailImagePath(WCHAR(&ItemThumbnailImagePath)[Length]) { BindCol(11, ItemThumbnailImagePath); }
 	};
 
 	// InventoryItemSwap Swap 
@@ -183,12 +187,12 @@ namespace SP
 		void InAItemMediumCategory(int8& AItemMediumCategory) { BindParam(4, AItemMediumCategory); }
 		void InAItemSmallCategory(int16& AItemType) { BindParam(5, AItemType); }
 		void InAItemName(wstring& AItemName) { BindParam(6, AItemName.c_str()); }
-		void InAItemCount(int16& AItemCount) { BindParam(7, AItemCount); }
-		void InAItemIsEquipped(bool& AItemIsEquipped) { BindParam(8, AItemIsEquipped); }
-		void InAItemMinDamage(int32& AItemMinDamage) { BindParam(9, AItemMinDamage); }
-		void InAItemMaxDamage(int32& AItemMaxDamage) { BindParam(10, AItemMaxDamage); }
-		void InAItemDefence(int32& AItemDefence) { BindParam(11, AItemDefence); }
-		void InAItemMaxCount(int32& AItemMaxCount) { BindParam(12, AItemMaxCount); }
+		void InAItemMinDamage(int32& AItemMinDamage) { BindParam(7, AItemMinDamage); }
+		void InAItemMaxDamage(int32& AItemMaxDamage) { BindParam(8, AItemMaxDamage); }
+		void InAItemDefence(int32& AItemDefence) { BindParam(9, AItemDefence); }
+		void InAItemMaxCount(int32& AItemMaxCount) { BindParam(10, AItemMaxCount); }
+		void InAItemCount(int16& AItemCount) { BindParam(11, AItemCount); }
+		void InAItemIsEquipped(bool& AItemIsEquipped) { BindParam(12, AItemIsEquipped); }		
 		void InAItemThumbnailImagePath(wstring& AItemThumbnailImagePath) { BindParam(13, AItemThumbnailImagePath.c_str()); }
 		void InAItemSlotIndex(int8& AItemSlotIndex) { BindParam(14, AItemSlotIndex); }
 
@@ -197,12 +201,12 @@ namespace SP
 		void InBItemMediumCategory(int8& BItemMediumCategory) { BindParam(17, BItemMediumCategory); }
 		void InBItemSmallCategory(int16& BItemSmallCategory) { BindParam(18, BItemSmallCategory); }
 		void InBItemName(wstring& BItemName) { BindParam(19, BItemName.c_str()); }
-		void InBItemCount(int16& BItemCount) { BindParam(20, BItemCount); }
-		void InBItemIsEquipped(bool& BItemIsEquipped) { BindParam(21, BItemIsEquipped); }
-		void InBItemMinDamage(int32& AItemCount) { BindParam(22, AItemCount); }
-		void InBItemMaxDamage(int32& AItemCount) { BindParam(23, AItemCount); }
-		void InBItemDefence(int32& AItemCount) { BindParam(24, AItemCount); }
-		void InBItemMaxCount(int32& AItemCount) { BindParam(25, AItemCount); }
+		void InBItemMinDamage(int32& AItemCount) { BindParam(20, AItemCount); }
+		void InBItemMaxDamage(int32& AItemCount) { BindParam(21, AItemCount); }
+		void InBItemDefence(int32& AItemCount) { BindParam(22, AItemCount); }
+		void InBItemMaxCount(int32& AItemCount) { BindParam(23, AItemCount); }
+		void InBItemCount(int16& BItemCount) { BindParam(24, BItemCount); }
+		void InBItemIsEquipped(bool& BItemIsEquipped) { BindParam(25, BItemIsEquipped); }		
 		void InBItemThumbnailImagePath(wstring& BItemThumbnailImagePath) { BindParam(26, BItemThumbnailImagePath.c_str()); }
 		void InBItemSlotIndex(int8& BItemSlotIndex) { BindParam(27, BItemSlotIndex); }
 	};
@@ -274,13 +278,13 @@ namespace SP
 		void OutItemMediumCategory(int8& ItemMediumCategory) { BindCol(1, ItemMediumCategory); }	
 		void OutItemSmallCategory(int16& ItemSmallCategory) { BindCol(2, ItemSmallCategory); }
 		template<int8 Length> void OutItemName(WCHAR(&ItemName)[Length]) { BindCol(3, ItemName); }
-		void OutItemCount(int16& itemCount) { BindCol(4, itemCount); }
-		void OutSlotIndex(int8& SlotIndex) { BindCol(5, SlotIndex); }
-		void OutIsEquipped(bool& IsEquipped) { BindCol(6, IsEquipped); }
-		void OutMinDamage(int32& MinDamage) { BindCol(7, MinDamage); }
-		void OutMaxDamage(int32& MaxDamage) { BindCol(8, MaxDamage); }
-		void OutDefence(int32& Defence) { BindCol(9, Defence); }
-		void OutMaxCount(int32& MaxCount) { BindCol(10, MaxCount); }
+		void OutMinDamage(int32& MinDamage) { BindCol(4, MinDamage); }
+		void OutMaxDamage(int32& MaxDamage) { BindCol(5, MaxDamage); }
+		void OutDefence(int32& Defence) { BindCol(6, Defence); }
+		void OutMaxCount(int32& MaxCount) { BindCol(7, MaxCount); }
+		void OutItemCount(int16& itemCount) { BindCol(8, itemCount); }
+		void OutSlotIndex(int8& SlotIndex) { BindCol(9, SlotIndex); }
+		void OutIsEquipped(bool& IsEquipped) { BindCol(10, IsEquipped); }		
 		template<int16 Length> void OutItemThumbnailImagePath(WCHAR(&ItemThumbnailImagePath)[Length]) { BindCol(11, ItemThumbnailImagePath); }
 	};
 
