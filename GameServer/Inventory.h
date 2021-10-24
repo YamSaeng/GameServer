@@ -47,7 +47,7 @@ public:
 	//--------------------------------------
 	// 인벤토리 아이템 스왑
 	//--------------------------------------
-	void SwapItem(CItem* SwapAItem, CItem* SwapBItem);
+	void SwapItem(int8 SwapAIndex, int8 SwapBIndex);
 private:
 	//---------------------------------------------
 	// 인벤토리가 소유중인 아이템 ( 포인터로 관리 )

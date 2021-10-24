@@ -199,17 +199,20 @@ bool CInventory::GetEmptySlot(int8* SlotIndex)
 	return false;
 }
 
-void CInventory::SwapItem(CItem* SwapAItem, CItem* SwapBItem)
+void CInventory::SwapItem(int8 SwapAIndex, int8 SwapBIndex)
 {
-	auto FindSwapAItem = _Items.find(SwapAItem->_ItemInfo.SlotIndex);
+	CItem* AItem = Get(SwapAIndex);
+	CItem* BItem = Get(SwapBIndex);
+
+	auto FindSwapAItem = _Items.find(SwapAIndex);
 	if (FindSwapAItem != _Items.end())
 	{
-		(*FindSwapAItem).second = SwapAItem;
+		(*FindSwapAItem).second = BItem;
 	}
 
-	auto FindSwapBItem = _Items.find(SwapBItem->_ItemInfo.SlotIndex);
+	auto FindSwapBItem = _Items.find(SwapBIndex);
 	if (FindSwapBItem != _Items.end())
 	{
-		(*FindSwapBItem).second = SwapBItem;
+		(*FindSwapBItem).second = AItem;
 	}
 }
