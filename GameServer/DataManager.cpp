@@ -22,31 +22,33 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int MaxDamage = WeaponListFiled["MaxDamage"].GetInt();
 			string ImageFilePath = WeaponListFiled["ImageFilePath"].GetString();
 						
-			st_WeaponData* WeaponData = new st_WeaponData();			
+			st_ItemData* WeaponItemData = new st_ItemData();					
 
-			WeaponData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
+			WeaponItemData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
 
 			if (MediumCategory == "ITEM_MEDIUM_CATEGORY_SWORD")
 			{
-				WeaponData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_SWORD;
+				WeaponItemData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_SWORD;
 			}
 
 			if (SmallCategory == "ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD")
 			{
-				WeaponData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD;
+				WeaponItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD;
 			}			
 
 			if (ItemObjectType == "OBJECT_ITEM_WEAPON_WOOD_SWORD")
 			{
-				WeaponData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD;
+				WeaponItemData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD;
 			}
 
-			WeaponData->ItemName = ItemName;						
-			WeaponData->MinDamage = MinDamage;
-			WeaponData->MaxDamage = MaxDamage;
-			WeaponData->ThumbnailImagePath = ImageFilePath;		
+			WeaponItemData->ItemName = ItemName;						
+			WeaponItemData->MinDamage = MinDamage;
+			WeaponItemData->MaxDamage = MaxDamage;
+			WeaponItemData->Defence = 0;
+			WeaponItemData->MaxCount = 1;
+			WeaponItemData->ThumbnailImagePath = ImageFilePath;		
 
-			_Items.insert(pair<int16, st_WeaponData*>((int16)WeaponData->SmallItemCategory, WeaponData));
+			_Items.insert(pair<int16, st_ItemData*>((int16)WeaponItemData->SmallItemCategory, WeaponItemData));
 		}		
 	}
 
@@ -63,55 +65,57 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int Defence = ArmorListFiled["Damage"].GetInt();
 			string ImageFilePath = ArmorListFiled["ImageFilePath"].GetString();
 
-			st_ArmorData* ArmorData = new st_ArmorData();
+			st_ItemData* ArmorItemData = new st_ItemData();
 
-			ArmorData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARMOR;
+			ArmorItemData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARMOR;
 			
 			if (MediumCategory == "ITEM_MEDIUM_CATEGORY_HAT")
 			{
-				ArmorData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_HAT;
+				ArmorItemData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_HAT;
 			}
 			else if (MediumCategory == "ITEM_MEDIUM_CATEGORY_WEAR")
 			{
-				ArmorData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_WEAR;
+				ArmorItemData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_WEAR;
 			}
 			else if (MediumCategory == "ITEM_MEDIUM_CATEGORY_BOOT")
 			{
-				ArmorData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_BOOT;
+				ArmorItemData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_BOOT;
 			}
 
 			if (SmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER")
 			{
-				ArmorData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER;
+				ArmorItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD")
 			{
-				ArmorData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD;
+				ArmorItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER")
 			{
-				ArmorData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER;
+				ArmorItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER;
 			}
 
 			if (ItemObjectType == "OBJECT_ITEM_ARMOR_LEATHER_HELMET")
 			{
-				ArmorData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET;
+				ArmorItemData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET;
 			}
 			else if (ItemObjectType == "OBJECT_ITEM_ARMOR_WOOD_ARMOR")
 			{
-				ArmorData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR;
+				ArmorItemData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR;
 			}
 			else if (ItemObjectType == "OBJECT_ITEM_ARMOR_LEATHER_BOOT")
 			{
-				ArmorData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT;
-			}
+				ArmorItemData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT;
+			}	
 
-			ArmorData->ItemName = ItemName;			
+			ArmorItemData->ItemName = ItemName;	
+			ArmorItemData->MinDamage = 0;
+			ArmorItemData->MaxDamage = 0;
+			ArmorItemData->Defence = Defence;			
+			ArmorItemData->MaxCount = 1;
+			ArmorItemData->ThumbnailImagePath = ImageFilePath;	
 
-			ArmorData->Defence = Defence;
-			ArmorData->ThumbnailImagePath = ImageFilePath;			
-
-			_Items.insert(pair<int16, st_ArmorData*>((int16)ArmorData->SmallItemCategory, ArmorData));
+			_Items.insert(pair<int16, st_ItemData*>((int16)ArmorItemData->SmallItemCategory, ArmorItemData));
 		}		
 	}
 
@@ -127,30 +131,32 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int MaxCount = PotionDataListFiled["MaxCount"].GetInt();
 			string ImageFilePath = PotionDataListFiled["ImageFilePath"].GetString();
 
-			st_ConsumableData* PotionData = new st_ConsumableData();
-			PotionData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_POTION;
+			st_ItemData* PotionItemData = new st_ItemData();
+			PotionItemData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_POTION;
 
 			if (MediumCategory == "ITEM_MEDIUM_CATEGORY_HEAL")
 			{
-				PotionData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_HEAL;
+				PotionItemData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_HEAL;
 			}
 
 			if (SmallCategory == "ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL")
 			{
-				PotionData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL;
+				PotionItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL;
 			}
 
 			if (ItemObjectType == "OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL")
 			{
-				PotionData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL;
-			}			
+				PotionItemData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL;
+			}					
 
-			PotionData->ItemName = ItemName;
-			PotionData->MaxCount = MaxCount;
+			PotionItemData->ItemName = ItemName;
+			PotionItemData->MinDamage = 0;
+			PotionItemData->MaxDamage = 0;
+			PotionItemData->Defence = 0;
+			PotionItemData->MaxCount = MaxCount;
+			PotionItemData->ThumbnailImagePath = ImageFilePath;
 
-			PotionData->ThumbnailImagePath = ImageFilePath;
-
-			_Items.insert(pair<int16, st_ConsumableData*>((int16)PotionData->SmallItemCategory, PotionData));
+			_Items.insert(pair<int16, st_ItemData*>((int16)PotionItemData->SmallItemCategory, PotionItemData));
 		}
 
 		string SkillBookLargeCategory = Filed["ItemLargeCategory"].GetString();
@@ -163,30 +169,32 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int MaxCount = SkillBookDataListFiled["MaxCount"].GetInt();
 			string ImageFilePath = SkillBookDataListFiled["ImageFilePath"].GetString();
 
-			st_ConsumableData* SkillBookData = new st_ConsumableData();
-			SkillBookData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_SKILLBOOK;
+			st_ItemData* SkillBookItemData = new st_ItemData();
+			SkillBookItemData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_SKILLBOOK;
 
 			if (MediumCategory == "ITEM_MEDIUM_CATEGORY_NONE")
 			{
-				SkillBookData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
+				SkillBookItemData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
 			}
 
 			if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_CHOHONE")
 			{
-				SkillBookData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_CHOHONE;
+				SkillBookItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_CHOHONE;
 			}
 
 			if (ItemObjectType == "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK_CHOHONE")
 			{
-				SkillBookData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK_CHOHONE;
+				SkillBookItemData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK_CHOHONE;
 			}
 
-			SkillBookData->ItemName = ItemName;
-			SkillBookData->MaxCount = MaxCount;
+			SkillBookItemData->ItemName = ItemName;
+			SkillBookItemData->MinDamage = 0;
+			SkillBookItemData->MaxDamage = 0;
+			SkillBookItemData->Defence = 0;
+			SkillBookItemData->MaxCount = MaxCount;
+			SkillBookItemData->ThumbnailImagePath = ImageFilePath;						
 
-			SkillBookData->ThumbnailImagePath = ImageFilePath;
-
-			_Items.insert(pair<int16, st_ConsumableData*>((int16)SkillBookData->SmallItemCategory, SkillBookData));
+			_Items.insert(pair<int16, st_ItemData*>((int16)SkillBookItemData->SmallItemCategory, SkillBookItemData));
 		}
 	}
 
@@ -202,7 +210,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int MaxCount = MaterialDataListFiled["MaxCount"].GetInt();
 			string ImageFilePath = MaterialDataListFiled["ImageFilePath"].GetString();
 
-			st_MaterialData* MaterialData = new st_MaterialData();
+			st_ItemData* MaterialData = new st_ItemData();
 			MaterialData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_MATERIAL;
 
 			if (MediumCategory == "ITEM_MEDIUM_CATEGORY_NONE")
@@ -286,11 +294,13 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			}
 
 			MaterialData->ItemName = ItemName;
+			MaterialData->MinDamage = 0;
+			MaterialData->MaxDamage = 0;
+			MaterialData->Defence = 0;
 			MaterialData->MaxCount = MaxCount;
+			MaterialData->ThumbnailImagePath = ImageFilePath;			
 
-			MaterialData->ThumbnailImagePath = ImageFilePath;
-
-			_Items.insert(pair<int16, st_MaterialData*>((int16)MaterialData->SmallItemCategory, MaterialData));
+			_Items.insert(pair<int16, st_ItemData*>((int16)MaterialData->SmallItemCategory, MaterialData));
 		}	
 	}
 }

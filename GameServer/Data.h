@@ -16,30 +16,13 @@ struct st_ItemData
 	en_MediumItemCategory MediumItemCategory;
 	en_SmallItemCategory SmallItemCategory; 
 	en_GameObjectType ItemObjectType;
+	int32 MinDamage;
+	int32 MaxDamage;
+	int32 Defence;
+	int32 MaxCount;
 	string ThumbnailImagePath;
 	bool IsEquipped;
 	int16 ItemCount;
-};
-
-struct st_WeaponData : public st_ItemData
-{
-	int32 MinDamage;
-	int32 MaxDamage;	
-};
-
-struct st_ArmorData : public st_ItemData
-{
-	int32 Defence;
-};
-
-struct st_ConsumableData : public st_ItemData
-{
-	int32 MaxCount;
-};
-
-struct st_MaterialData : public st_ItemData
-{
-	int32 MaxCount;
 };
 
 struct st_PlayerStatusData
