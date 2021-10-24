@@ -3,9 +3,14 @@
 #include "Player.h"
 #include "Bear.h"
 #include "Slime.h"
-#include "Item.h"
 #include "GameServer.h"
 #include "Environment.h"
+
+class CItem;
+class CWeapon;
+class CArmor;
+class CConsumable;
+class CMaterial;
 
 class CObjectManager
 {
@@ -18,9 +23,12 @@ private:
 	CMemoryPoolTLS<CPlayer>* _PlayerMemoryPool;		
 	CMemoryPoolTLS<CSlime>* _SlimeMemoryPool;
 	CMemoryPoolTLS<CBear>* _BearMemoryPool;
+	
+	CMemoryPoolTLS<CItem>* _ItemMemoryPool;
 	CMemoryPoolTLS<CWeapon>* _WeaponMemoryPool;
-	CMemoryPoolTLS<CMaterial>* _MaterialMemoryPool;
+	CMemoryPoolTLS<CArmor>* _ArmorMemoryPool;
 	CMemoryPoolTLS<CConsumable>* _ConsumableMemoryPool;
+	CMemoryPoolTLS<CMaterial>* _MaterialMemoryPool;	
 
 	CMemoryPoolTLS<CTree>* _TreeMemoryPool;
 	CMemoryPoolTLS<CStone>* _StoneMemoryPool;

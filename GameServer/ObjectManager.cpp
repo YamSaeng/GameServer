@@ -2,15 +2,20 @@
 #include "ObjectManager.h"
 #include "Environment.h"
 #include "GameServerMessage.h"
+#include "Item.h"
 
 CObjectManager::CObjectManager()
 {
 	_PlayerMemoryPool = new CMemoryPoolTLS<CPlayer>();
 	_SlimeMemoryPool = new CMemoryPoolTLS<CSlime>();
 	_BearMemoryPool = new CMemoryPoolTLS<CBear>();
+
+	_ItemMemoryPool = new CMemoryPoolTLS<CItem>();
 	_WeaponMemoryPool = new CMemoryPoolTLS<CWeapon>();
+	_ArmorMemoryPool = new CMemoryPoolTLS<CArmor>();
 	_MaterialMemoryPool = new CMemoryPoolTLS<CMaterial>();
 	_ConsumableMemoryPool = new CMemoryPoolTLS<CConsumable>();
+	
 	_TreeMemoryPool = new CMemoryPoolTLS<CTree>();
 	_StoneMemoryPool = new CMemoryPoolTLS<CStone>();
 
@@ -268,12 +273,22 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 	case en_GameObjectType::OBJECT_BEAR:
 		NewObject = _BearMemoryPool->Alloc();
 		break;
+	case en_GameObjectType::OBJECT_ITEM:
+		NewObject = _ItemMemoryPool->Alloc();
+		break;
+	case en_GameObjectType::OBJECT_ITEM_WEAPON:
 	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
 		NewObject = _WeaponMemoryPool->Alloc();
 		break;
+	case en_GameObjectType::OBJECT_ITEM_ARMOR:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
+		NewObject = _ArmorMemoryPool->Alloc();
+		break;
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE:
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK_CHOHONE:
 		NewObject = _ConsumableMemoryPool->Alloc();
-		break;
+		break;		
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
@@ -307,6 +322,9 @@ void CObjectManager::ObjectReturn(en_GameObjectType ObjectType, CGameObject* Ret
 		break;
 	case en_GameObjectType::OBJECT_BEAR:
 		_BearMemoryPool->Free((CBear*)ReturnObject);
+		break;
+	case en_GameObjectType::OBJECT_ITEM:
+		_ItemMemoryPool->Free((CItem*)ReturnObject);
 		break;
 	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
 		_WeaponMemoryPool->Free((CWeapon*)ReturnObject);
