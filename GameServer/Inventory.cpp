@@ -25,9 +25,9 @@ void CInventory::Init()
 	for (int SlotIndex = 0; SlotIndex < (int8)en_Inventory::INVENTORY_SIZE; SlotIndex++)
 	{
 		CItem* Item = (CItem*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM);
-		Item->_ItemInfo.SlotIndex = SlotIndex;
+		Item->_ItemInfo.ItemSlotIndex = SlotIndex;
 
-		_Items.insert(pair<int8, CItem*>(Item->_ItemInfo.SlotIndex,Item));
+		_Items.insert(pair<int8, CItem*>(Item->_ItemInfo.ItemSlotIndex,Item));
 	}
 }
 
@@ -53,7 +53,7 @@ void CInventory::AddItem(CItem* Item)
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
 		{
-			auto FindSlotIterator = _Items.find(Item->_ItemInfo.SlotIndex);
+			auto FindSlotIterator = _Items.find(Item->_ItemInfo.ItemSlotIndex);
 			if (FindSlotIterator == _Items.end())
 			{
 				return;
@@ -214,5 +214,19 @@ void CInventory::SwapItem(int8 SwapAIndex, int8 SwapBIndex)
 	if (FindSwapBItem != _Items.end())
 	{
 		(*FindSwapBItem).second = AItem;
+	}
+}
+
+void CInventory::SlotInit(int8 InitSlotIndex)
+{
+	// 기존에 있던 아이템 반납 후
+	G_ObjectManager->ObjectReturn(Get(InitSlotIndex)->_GameObjectInfo.ObjectType, Get(InitSlotIndex));
+
+	// 해당 슬롯 초기화
+	auto FindInitSlot = _Items.find(InitSlotIndex);
+	if (FindInitSlot != _Items.end())
+	{
+		(*FindInitSlot).second = (CItem*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM);
+		(*FindInitSlot).second->_ItemInfo.ItemSlotIndex = InitSlotIndex;
 	}
 }
