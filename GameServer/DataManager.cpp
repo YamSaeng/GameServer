@@ -17,9 +17,10 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string MediumCategory = WeaponListFiled["ItemMediumCategory"].GetString();
 			string SmallCategory = WeaponListFiled["ItemSmallCategory"].GetString();
 			string ItemObjectType = WeaponListFiled["ItemObjectType"].GetString();
+			string ItemExplain = WeaponListFiled["ItemExplain"].GetString();
 			string ItemName = WeaponListFiled["ItemName"].GetString();
-			int MinDamage = WeaponListFiled["MinDamage"].GetInt();
-			int MaxDamage = WeaponListFiled["MaxDamage"].GetInt();
+			int ItemMinDamage = WeaponListFiled["ItemMinDamage"].GetInt();
+			int ItemMaxDamage = WeaponListFiled["ItemMaxDamage"].GetInt();
 			string ImageFilePath = WeaponListFiled["ImageFilePath"].GetString();
 						
 			st_ItemData* WeaponItemData = new st_ItemData();					
@@ -41,12 +42,13 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 				WeaponItemData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD;
 			}
 
+			WeaponItemData->ItemExplain = ItemExplain;
 			WeaponItemData->ItemName = ItemName;						
-			WeaponItemData->MinDamage = MinDamage;
-			WeaponItemData->MaxDamage = MaxDamage;
-			WeaponItemData->Defence = 0;
-			WeaponItemData->MaxCount = 1;
-			WeaponItemData->ThumbnailImagePath = ImageFilePath;		
+			WeaponItemData->ItemMinDamage = ItemMinDamage;
+			WeaponItemData->ItemMaxDamage = ItemMaxDamage;
+			WeaponItemData->ItemDefence = 0;
+			WeaponItemData->ItemMaxCount = 1;
+			WeaponItemData->ItemThumbnailImagePath = ImageFilePath;		
 
 			_Items.insert(pair<int16, st_ItemData*>((int16)WeaponItemData->SmallItemCategory, WeaponItemData));
 		}		
@@ -61,8 +63,9 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string MediumCategory = ArmorListFiled["ItemMediumCategory"].GetString();
 			string SmallCategory = ArmorListFiled["ItemSmallCategory"].GetString();
 			string ItemObjectType = ArmorListFiled["ItemObjectType"].GetString();
+			string ItemExplain = ArmorListFiled["ItemExplain"].GetString();
 			string ItemName = ArmorListFiled["ItemName"].GetString();
-			int Defence = ArmorListFiled["Defence"].GetInt();
+			int ItemDefence = ArmorListFiled["ItemDefence"].GetInt();
 			string ImageFilePath = ArmorListFiled["ImageFilePath"].GetString();
 
 			st_ItemData* ArmorItemData = new st_ItemData();
@@ -108,12 +111,13 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 				ArmorItemData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT;
 			}	
 
+			ArmorItemData->ItemExplain = ItemExplain;
 			ArmorItemData->ItemName = ItemName;	
-			ArmorItemData->MinDamage = 0;
-			ArmorItemData->MaxDamage = 0;
-			ArmorItemData->Defence = Defence;			
-			ArmorItemData->MaxCount = 1;
-			ArmorItemData->ThumbnailImagePath = ImageFilePath;	
+			ArmorItemData->ItemMinDamage = 0;
+			ArmorItemData->ItemMaxDamage = 0;
+			ArmorItemData->ItemDefence = ItemDefence;			
+			ArmorItemData->ItemMaxCount = 1;
+			ArmorItemData->ItemThumbnailImagePath = ImageFilePath;	
 
 			_Items.insert(pair<int16, st_ItemData*>((int16)ArmorItemData->SmallItemCategory, ArmorItemData));
 		}		
@@ -127,8 +131,9 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string MediumCategory = PotionDataListFiled["ItemMediumCategory"].GetString();
 			string SmallCategory = PotionDataListFiled["ItemSmallCategory"].GetString();
 			string ItemObjectType = PotionDataListFiled["ItemObjectType"].GetString();
+			string ItemExplain = PotionDataListFiled["ItemExplain"].GetString();
 			string ItemName = PotionDataListFiled["ItemName"].GetString();
-			int MaxCount = PotionDataListFiled["MaxCount"].GetInt();
+			int ItemMaxCount = PotionDataListFiled["ItemMaxCount"].GetInt();
 			string ImageFilePath = PotionDataListFiled["ImageFilePath"].GetString();
 
 			st_ItemData* PotionItemData = new st_ItemData();
@@ -149,12 +154,13 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 				PotionItemData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL;
 			}					
 
+			PotionItemData->ItemExplain = ItemExplain;
 			PotionItemData->ItemName = ItemName;
-			PotionItemData->MinDamage = 0;
-			PotionItemData->MaxDamage = 0;
-			PotionItemData->Defence = 0;
-			PotionItemData->MaxCount = MaxCount;
-			PotionItemData->ThumbnailImagePath = ImageFilePath;
+			PotionItemData->ItemMinDamage = 0;
+			PotionItemData->ItemMaxDamage = 0;
+			PotionItemData->ItemDefence = 0;
+			PotionItemData->ItemMaxCount = ItemMaxCount;
+			PotionItemData->ItemThumbnailImagePath = ImageFilePath;
 
 			_Items.insert(pair<int16, st_ItemData*>((int16)PotionItemData->SmallItemCategory, PotionItemData));
 		}
@@ -165,8 +171,9 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string MediumCategory = SkillBookDataListFiled["ItemMediumCategory"].GetString();
 			string SmallCategory = SkillBookDataListFiled["ItemSmallCategory"].GetString();
 			string ItemObjectType = SkillBookDataListFiled["ItemObjectType"].GetString();
+			string ItemExplain = SkillBookDataListFiled["ItemExplain"].GetString();
 			string ItemName = SkillBookDataListFiled["ItemName"].GetString();
-			int MaxCount = SkillBookDataListFiled["MaxCount"].GetInt();
+			int ItemMaxCount = SkillBookDataListFiled["ItemMaxCount"].GetInt();
 			string ImageFilePath = SkillBookDataListFiled["ImageFilePath"].GetString();
 
 			st_ItemData* SkillBookItemData = new st_ItemData();
@@ -187,12 +194,13 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 				SkillBookItemData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK_CHOHONE;
 			}
 
+			SkillBookItemData->ItemExplain = ItemExplain;
 			SkillBookItemData->ItemName = ItemName;
-			SkillBookItemData->MinDamage = 0;
-			SkillBookItemData->MaxDamage = 0;
-			SkillBookItemData->Defence = 0;
-			SkillBookItemData->MaxCount = MaxCount;
-			SkillBookItemData->ThumbnailImagePath = ImageFilePath;						
+			SkillBookItemData->ItemMinDamage = 0;
+			SkillBookItemData->ItemMaxDamage = 0;
+			SkillBookItemData->ItemDefence = 0;
+			SkillBookItemData->ItemMaxCount = ItemMaxCount;
+			SkillBookItemData->ItemThumbnailImagePath = ImageFilePath;						
 
 			_Items.insert(pair<int16, st_ItemData*>((int16)SkillBookItemData->SmallItemCategory, SkillBookItemData));
 		}
@@ -206,8 +214,9 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string MediumCategory = MaterialDataListFiled["ItemMediumCategory"].GetString();
 			string SmallCategory = MaterialDataListFiled["ItemSmallCategory"].GetString();
 			string ItemObjectType = MaterialDataListFiled["ItemObjectType"].GetString();
+			string ItemExplain = MaterialDataListFiled["ItemExplain"].GetString();
 			string ItemName = MaterialDataListFiled["ItemName"].GetString();
-			int MaxCount = MaterialDataListFiled["MaxCount"].GetInt();
+			int ItemMaxCount = MaterialDataListFiled["ItemMaxCount"].GetInt();
 			string ImageFilePath = MaterialDataListFiled["ImageFilePath"].GetString();
 
 			st_ItemData* MaterialData = new st_ItemData();
@@ -293,12 +302,13 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN;
 			}
 
+			MaterialData->ItemExplain = ItemExplain;
 			MaterialData->ItemName = ItemName;
-			MaterialData->MinDamage = 0;
-			MaterialData->MaxDamage = 0;
-			MaterialData->Defence = 0;
-			MaterialData->MaxCount = MaxCount;
-			MaterialData->ThumbnailImagePath = ImageFilePath;			
+			MaterialData->ItemMinDamage = 0;
+			MaterialData->ItemMaxDamage = 0;
+			MaterialData->ItemDefence = 0;
+			MaterialData->ItemMaxCount = ItemMaxCount;
+			MaterialData->ItemThumbnailImagePath = ImageFilePath;			
 
 			_Items.insert(pair<int16, st_ItemData*>((int16)MaterialData->SmallItemCategory, MaterialData));
 		}	

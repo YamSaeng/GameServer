@@ -16,12 +16,13 @@ struct st_ItemData
 	en_MediumItemCategory MediumItemCategory;
 	en_SmallItemCategory SmallItemCategory; 
 	en_GameObjectType ItemObjectType;
-	int32 MinDamage;
-	int32 MaxDamage;
-	int32 Defence;
-	int32 MaxCount;
-	string ThumbnailImagePath;
-	bool IsEquipped;
+	string ItemExplain;
+	int32 ItemMinDamage;
+	int32 ItemMaxDamage;
+	int32 ItemDefence;
+	int32 ItemMaxCount;
+	string ItemThumbnailImagePath;
+	bool ItemIsEquipped;
 	int16 ItemCount;
 };
 

@@ -7,9 +7,10 @@
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_SWORD",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD",
           "ItemObjectType": "OBJECT_ITEM_WEAPON_WOOD_SWORD",
+          "ItemExplain": "나무로 만든 검",
           "ItemName": "나무 검",
-          "MinDamage": 5,
-          "MaxDamage": 10,
+          "ItemMinDamage": 5,
+          "ItemMaxDamage": 10,
           "ImageFilePath": "Textures/Weapon & Tool/Wooden Sword"
         }
       ]      
@@ -23,24 +24,27 @@
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_HAT",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER",
           "ItemObjectType": "OBJECT_ITEM_ARMOR_LEATHER_HELMET",
+          "ItemExplain": "가죽으로 만든 모자",
           "ItemName": "가죽 모자",
-          "Defence": 5,
+          "ItemDefence": 5,
           "ImageFilePath": "Textures/Equipment/Leather Helmet"
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_WEAR",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD",
           "ItemObjectType": "OBJECT_ITEM_ARMOR_WOOD_ARMOR",
+          "ItemExplain": "나무로 만든 갑옷",
           "ItemName": "나무 갑옷",
-          "Defence": 15,
+          "ItemDefence": 15,
           "ImageFilePath": "Textures/Equipment/Wooden Armor"
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_BOOT",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER",
           "ItemObjectType": "OBJECT_ITEM_ARMOR_LEATHER_BOOT",
+          "ItemExplain": "가죽으로 만든 신발",
           "ItemName": "가죽 신발",
-          "Defence": 5,
+          "ItemDefence": 5,
           "ImageFilePath": "Textures/Equipment/Leather Boot"
         }
       ]      
@@ -54,8 +58,9 @@
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_HEAL",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL",
           "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL",
+          "ItemExplain": "슬라임 젤을 농축해서 만든 물약",
           "ItemName": "회복물약(소)",
-          "MaxCount": 99,
+          "ItemMaxCount": 99,
           "ImageFilePath": "Textures/Potion/Red Potion"
         }
       ]
@@ -67,8 +72,9 @@
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_SKILLBOOK_CHOHONE",
           "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK_CHOHONE",
+          "ItemExplain": "초혼비무를 배울 수 있다.",
           "ItemName": "초혼비무 스킬책",
-          "MaxCount": 1,
+          "ItemMaxCount": 1,
           "ImageFilePath": "Textures/SkillBook/ChoHoneSkillBook"
         }
       ]      
@@ -82,72 +88,81 @@
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_LEATHER",
           "ItemObjectType": "OBJECT_ITEM_MATERIAL_LEATHER",
+          "ItemExplain": "동물의 가죽",
           "ItemName": "가죽",
-          "MaxCount": 99,
+          "ItemMaxCount": 99,
           "ImageFilePath": "Textures/Material/Leather"
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL",
           "ItemObjectType": "OBJECT_ITEM_MATERIAL_SLIME_GEL",
+          "ItemExplain": "슬라임의 체액",
           "ItemName": "슬라임젤리",
-          "MaxCount": 99,
+          "ItemMaxCount": 99,
           "ImageFilePath": "Textures/MonsterPart/SlimeGel"
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN",
           "ItemObjectType": "OBJECT_ITEM_MATERIAL_BRONZE_COIN",
+          "ItemExplain": "",
           "ItemName": "동전",
-          "MaxCount": 99,
+          "ItemMaxCount": 99,
           "ImageFilePath": "Textures/Misc/CopperCoin"
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN",
           "ItemObjectType": "OBJECT_ITEM_MATERIAL_SLIVER_COIN",
+          "ItemExplain": "",
           "ItemName": "은전",
-          "MaxCount": 99,
+          "ItemMaxCount": 99,
           "ImageFilePath": "Textures/Misc/SliverCoin"
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN",
           "ItemObjectType": "OBJECT_ITEM_MATERIAL_GOLD_COIN",
+          "ItemExplain": "",
           "ItemName": "금전",
-          "MaxCount": 99,
+          "ItemMaxCount": 99,
           "ImageFilePath": "Textures/Misc/GoldCoin"
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_STONE",
           "ItemObjectType": "OBJECT_ITEM_MATERIAL_STONE",
+          "ItemExplain": "채광해서 얻은 암석",
           "ItemName": "암석",
-          "MaxCount": 99,
+          "ItemMaxCount": 99,
           "ImageFilePath": "Textures/Material/Stone"
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG",
           "ItemObjectType": "OBJECT_ITEM_MATERIAL_WOOD_LOG",
+          "ItemExplain": "벌목해서 얻은 통나무",
           "ItemName": "통나무",
-          "MaxCount": 99,
+          "ItemMaxCount": 99,
           "ImageFilePath": "Textures/Material/Wood Log"
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK",
           "ItemObjectType": "OBJECT_ITEM_MATERIAL_WOOD_FLANK",
+          "ItemExplain": "통나무로 만든 나무판자",
           "ItemName": "나무판자",
-          "MaxCount": 99,
+          "ItemMaxCount": 99,
           "ImageFilePath": "Textures/Material/Wooden Plank"
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_YARN",
           "ItemObjectType": "OBJECT_ITEM_MATERIAL_YARN",
+          "ItemExplain": "통나무를 가공해서 만든 실",
           "ItemName": "실",
-          "MaxCount": 99,
+          "ItemMaxCount": 99,
           "ImageFilePath": "Textures/Material/Yarn"
         }
       ]
