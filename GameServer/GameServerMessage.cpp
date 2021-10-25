@@ -95,7 +95,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_SkillInfo& SkillInfo)
 CGameServerMessage& CGameServerMessage::operator<<(st_ItemInfo& ItemInfo)
 {
     *this << ItemInfo.ItemDBId;
-    *this << ItemInfo.IsQuickSlotUse;
+    *this << ItemInfo.ItemIsQuickSlotUse;
     *this << (int8)ItemInfo.ItemLargeCategory;
     *this << (int8)ItemInfo.ItemMediumCategory;
     *this << (int16)ItemInfo.ItemSmallCategory;    
@@ -104,19 +104,19 @@ CGameServerMessage& CGameServerMessage::operator<<(st_ItemInfo& ItemInfo)
     *this << ItemNameLen;
     InsertData(ItemInfo.ItemName.c_str(), ItemNameLen);
 
-    *this << ItemInfo.MinDamage;
-    *this << ItemInfo.MaxDamage;
-    *this << ItemInfo.Defence;
-    *this << ItemInfo.MaxCount;
+    *this << ItemInfo.ItemMinDamage;
+    *this << ItemInfo.ItemMaxDamage;
+    *this << ItemInfo.ItemDefence;
+    *this << ItemInfo.ItemMaxCount;
 
     *this << ItemInfo.ItemCount;
 
-    int8 ItemImagePathLen = (int8)ItemInfo.ThumbnailImagePath.length() * 2;
+    int8 ItemImagePathLen = (int8)ItemInfo.ItemThumbnailImagePath.length() * 2;
     *this << ItemImagePathLen;
-    InsertData(ItemInfo.ThumbnailImagePath.c_str(), ItemImagePathLen);
+    InsertData(ItemInfo.ItemThumbnailImagePath.c_str(), ItemImagePathLen);
 
-    *this << ItemInfo.SlotIndex;
-    *this << ItemInfo.IsEquipped;        
+    *this << ItemInfo.ItemSlotIndex;
+    *this << ItemInfo.ItemIsEquipped;        
 
     return *(this);
 }

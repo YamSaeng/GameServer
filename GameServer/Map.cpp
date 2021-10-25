@@ -733,15 +733,19 @@ bool CMap::ApplyPositionLeaveItem(CGameObject* GameObject)
 		if (_ItemInfos[Y][X][i].ItemSmallCategory == Item->_ItemInfo.ItemSmallCategory)
 		{
 			_ItemInfos[Y][X][i].ItemDBId = 0;
-			_ItemInfos[Y][X][i].IsQuickSlotUse = false;
+			_ItemInfos[Y][X][i].ItemIsQuickSlotUse = false;
 			_ItemInfos[Y][X][i].ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_NONE;
 			_ItemInfos[Y][X][i].ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
 			_ItemInfos[Y][X][i].ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
 			_ItemInfos[Y][X][i].ItemName = L"";
+			_ItemInfos[Y][X][i].ItemMinDamage = 0;
+			_ItemInfos[Y][X][i].ItemMaxDamage = 0;
+			_ItemInfos[Y][X][i].ItemDefence = 0;
+			_ItemInfos[Y][X][i].ItemMaxCount = 0;
 			_ItemInfos[Y][X][i].ItemCount = 0;
-			_ItemInfos[Y][X][i].ThumbnailImagePath = L"";
-			_ItemInfos[Y][X][i].IsEquipped = false;
-			_ItemInfos[Y][X][i].SlotIndex = -1;
+			_ItemInfos[Y][X][i].ItemThumbnailImagePath = L"";
+			_ItemInfos[Y][X][i].ItemIsEquipped = false;
+			_ItemInfos[Y][X][i].ItemSlotIndex = -1;
 			break;
 		}
 	}	
