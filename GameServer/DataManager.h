@@ -11,7 +11,10 @@ public:
 	map<int16, st_ItemData*> _Items;
 	map<int16, st_PlayerStatusData*> _Status;
 	map<int32, st_MonsterData*> _Monsters;
-	map<int32, st_SkillData*> _Skills;
+	map<int16, st_SkillData*> _PlayerMeleeSkills;
+	map<int16, st_SkillData*> _PlayerMagicSkills;
+	map<int16, st_SkillData*> _MonsterMeleeSkills;
+	map<int16, st_SkillData*> _MonsterMagicSkills;
 	map<int32, st_EnvironmentData*> _Environments;
 	map<int8, st_CraftingItemCategoryData*> _CraftingData;
 

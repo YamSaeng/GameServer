@@ -67,7 +67,8 @@ struct st_MonsterData
 
 struct st_SkillData
 {
-	int32 SkillDataId;
+	en_SkillLargeCategory SkillLargeCategory;
+	en_SkillType SkillType;
 	string SkillName;
 	int32 SkillCoolTime;
 	int32 SkillCastingTime;

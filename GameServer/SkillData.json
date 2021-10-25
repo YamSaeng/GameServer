@@ -1,100 +1,144 @@
 {
-  "Skills": [
+  "PlayerMeleeSkills": [
     {
-      "SkillDataSheetId": 1,
-      "SkillName": "일반공격",
-      "SkillCoolTime": 500,
-      "SkillCastingTime": 0,
-      "SkillDistance": 1,
-      "SkillThumbnailImagePath": "Textures/Spell/Icon/일반공격"
-    },
+      "SKillLargeCategory": "SKILL_LARGE_CATEGORY_PLAYER_MELEE",
+      "PlayerMeleeSkillList": [
+        {
+          "SkillType": "SKILL_NORMAL",
+          "SkillName": "일반공격",
+          "SkillCoolTime": 500,
+          "SkillCastingTime": 0,
+          "SkillDistance": 1,
+          "SkillThumbnailImagePath": "Textures/Spell/Icon/일반공격"
+        },
+        {
+          "SkillType": "SKILL_KNIGHT_FIERCE_ATTACK",
+          "SkillName": "맹렬한일격",
+          "SkillCoolTime": 2000,
+          "SkillCastingTime": 0,
+          "SkillDistance": 1,
+          "SkillThumbnailImagePath": "Textures/SkillBook/맹렬한일격"
+        },
+        {
+          "SkillType": "SKILL_KNIGHT_CONVERSION_ATTACK",
+          "SkillName": "회심의일격",
+          "SkillCoolTime": 1000,
+          "SkillCastingTime": 0,
+          "SkillDistance": 1,
+          "SkillThumbnailImagePath": "Textures/SkillBook/회심의일격"
+        },
+        {
+          "SkillType": "SKILL_KNIGHT_SHAEHONE",
+          "SkillName": "쇄혼비무",
+          "SkillCoolTime": 5000,
+          "SkillCastingTime": 0,
+          "SkillDistance": 4,
+          "SkillThumbnailImagePath": "Textures/SkillBook/쇄혼비무"
+        },
+        {
+          "SkillType": "SKILL_KNIGHT_CHOHONE",
+          "SkillName": "초혼비무",
+          "SkillCoolTime": 5000,
+          "SkillCastingTime": 0,
+          "SkillDistance": 4,
+          "SkillThumbnailImagePath": "Textures/SkillBook/초혼비무"
+        },
+        {
+          "SkillType": "SKILL_KNIGHT_SMASH_WAVE",
+          "SkillName": "분쇄파동",
+          "SkillCoolTime": 3000,
+          "SkillCastingTime": 0,
+          "SkillDistance": 1,
+          "SkillThumbnailImagePath": "Textures/Spell/Icon/분쇄파동"
+        }
+      ]
+    }
+  ],
+  "PlayerMagicSkills": [
     {
-      "SkillDataSheetId": 2,
-      "SkillName": "맹렬한일격",
-      "SkillCoolTime": 2000,
-      "SkillCastingTime": 0,
-      "SkillDistance": 1,
-      "SkillThumbnailImagePath": "Textures/SkillBook/맹렬한일격"
-    },
+      "SKillLargeCategory": "SKILL_LARGE_CATEGORY_PLAYER_MAGIC",
+      "PlayerMagicSkillList": [
+        {
+          "SkillType": "SKILL_KNIGHT_CHARGE_POSE",
+          "SkillName": "돌격자세",
+          "SkillCoolTime": 10000,
+          "SkillCastingTime": 0,
+          "SkillDistance": 0,
+          "SkillThumbnailImagePath": "Textures/SkillBook/돌격자세"
+        },
+
+        {
+          "SkillType": "SKILL_SHAMNA_FLAME_HARPOON",
+          "SkillName": "불꽃작살",
+          "SkillCoolTime": 0,
+          "SkillCastingTime": 1000,
+          "SkillDistance": 6,
+          "SkillThumbnailImagePath": "Textures/Spell/Icon/불꽃작살"
+        },
+        {
+          "SkillType": "SKILL_SHAMAN_HELL_FIRE",
+          "SkillName": "지옥의화염",
+          "SkillCoolTime": 20000,
+          "SkillCastingTime": 3000,
+          "SkillDistance": 6,
+          "SkillThumbnailImagePath": "Textures/Spell/Icon/지옥의화염"
+        },
+        {
+          "SkillType": "SKILL_SHAMAN_HEALING_LIGHT",
+          "SkillName": "치유의빛",
+          "SkillCoolTime": 0,
+          "SkillCastingTime": 1000,
+          "SkillDistance": 6,
+          "SkillThumbnailImagePath": "Textures/Spell/Icon/치유의빛"
+        },
+        {
+          "SkillType": "SKILL_SHAMAN_HEALING_WIND",
+          "SkillName": "치유의바람",
+          "SkillCoolTime": 4000,
+          "SkillCastingTime": 2000,
+          "SkillDistance": 6,
+          "SkillThumbnailImagePath": "Textures/Spell/Icon/치유의바람"
+        },
+        {
+          "SkillType": "SKILL_SHOCK_RELEASE",
+          "SkillName": "충격해제",
+          "SkillCoolTime": 30000,
+          "SkillCastingTime": 0,
+          "SkillDistance": 0,
+          "SkillThumbnailImagePath": "Textures/Spell/Icon/충격해제"
+        }
+      ]
+    }
+  ],
+  "MonsterMeleeSkills": [
     {
-      "SkillDataSheetId": 3,
-      "SkillName": "회심의일격",
-      "SkillCoolTime": 1000,
-      "SkillCastingTime": 0,
-      "SkillDistance": 1,
-      "SkillThumbnailImagePath": "Textures/SkillBook/회심의일격"
-    },
+      "SKillLargeCategory": "SKILL_LARGE_CATEGORY_MONSTER_MELEE",
+      "MonsterMeleeSkillList": [
+        {
+          "SkillType": "SKILL_SLIME_NORMAL",
+          "SkillName": "슬라임일반공격",
+          "SkillCoolTime": 800,
+          "SkillCastingTime": 0,
+          "SkillDistance": 1,
+          "SkillThumbnailImagePath": ""
+        },
+        {
+          "SkillType": "SKILL_BEAR_NORMAL",
+          "SkillName": "곰일반공격",
+          "SkillCoolTime": 1200,
+          "SkillCastingTime": 0,
+          "SkillDistance": 1,
+          "SkillThumbnailImagePath": ""
+        }
+      ]
+    }    
+  ],
+  "MonsterMagicSkills": [
     {
-      "SkillDataSheetId": 4,
-      "SkillName": "돌격자세",
-      "SkillCoolTime": 10000,
-      "SkillCastingTime": 0,
-      "SkillDistance": 0,
-      "SkillThumbnailImagePath": "Textures/SkillBook/돌격자세"
-    },
-    {
-      "SkillDataSheetId": 5,
-      "SkillName": "쇄혼비무",
-      "SkillCoolTime": 5000,
-      "SkillCastingTime": 0,
-      "SkillDistance": 4,
-      "SkillThumbnailImagePath": "Textures/SkillBook/쇄혼비무"
-    },
-    {
-      "SkillDataSheetId": 6,
-      "SkillName": "초혼비무",
-      "SkillCoolTime": 5000,
-      "SkillCastingTime": 0,
-      "SkillDistance": 4,
-      "SkillThumbnailImagePath": "Textures/SkillBook/초혼비무"
-    },
-    {
-      "SkillDataSheetId": 7,
-      "SkillName": "분쇄파동",
-      "SkillCoolTime": 3000,
-      "SkillCastingTime": 0,
-      "SkillDistance": 1,
-      "SkillThumbnailImagePath": "Textures/Spell/Icon/분쇄파동"
-    },    
-    {
-      "SkillDataSheetId": 8,
-      "SkillName": "불꽃작살",
-      "SkillCoolTime": 0,
-      "SkillCastingTime": 1000,
-      "SkillDistance": 6,
-      "SkillThumbnailImagePath": "Textures/Spell/Icon/불꽃작살"
-    },
-    {
-      "SkillDataSheetId": 9,
-      "SkillName": "치유의빛",
-      "SkillCoolTime": 0,
-      "SkillCastingTime": 1000,
-      "SkillDistance": 6,
-      "SkillThumbnailImagePath": "Textures/Spell/Icon/치유의빛"
-    },
-    {
-      "SkillDataSheetId": 10,
-      "SkillName": "치유의바람",
-      "SkillCoolTime": 4000,
-      "SkillCastingTime": 2000,
-      "SkillDistance": 6,
-      "SkillThumbnailImagePath": "Textures/Spell/Icon/치유의바람"
-    },
-    {
-      "SkillDataSheetId": 11,
-      "SkillName": "슬라임일반공격",
-      "SkillCoolTime": 800,
-      "SkillCastingTime": 0,
-      "SkillDistance": 1,
-      "SkillThumbnailImagePath": ""
-    },
-    {
-      "SkillDataSheetId": 12,
-      "SkillName": "곰일반공격",
-      "SkillCoolTime": 1200,
-      "SkillCastingTime": 0,
-      "SkillDistance": 1,
-      "SkillThumbnailImagePath": ""
+      "SKillLargeCategory": "SKILL_LARGE_CATEGORY_MONSTER_MAGIC",
+      "MonsterMagicList": [
+
+      ]
     }
   ]
 }

@@ -438,26 +438,166 @@ void CDataManager::LoadDataSkill(wstring LoadFileName)
 	rapidjson::Document Document;
 	Document.Parse(FileStr);
 
-	for (auto& Filed : Document["Skills"].GetArray())
+	for (auto& Filed : Document["PlayerMeleeSkills"].GetArray())
 	{
-		st_SkillData* SkillData = new st_SkillData();
+		string MeleeSkillLargeCategory = Filed["SKillLargeCategory"].GetString();		
+		for (auto& PlayerMeleeSkillListFiled : Filed["PlayerMeleeSkillList"].GetArray())
+		{
+			st_SkillData* PlayerMeleeSkillData = new st_SkillData();
+			PlayerMeleeSkillData->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_PLAYER_MELEE;
 
-		int SkillDataSheetId = Filed["SkillDataSheetId"].GetInt();
-		string SkillName = Filed["SkillName"].GetString();
-		int SkillCoolTime = Filed["SkillCoolTime"].GetInt();
-		int SkillCastingTime = Filed["SkillCastingTime"].GetInt();
-		int SkillDistance = Filed["SkillDistance"].GetInt();
-		string SkillImagePath = Filed["SkillThumbnailImagePath"].GetString();
+			string SkillType = PlayerMeleeSkillListFiled["SkillType"].GetString();
+			string SkillName = PlayerMeleeSkillListFiled["SkillName"].GetString();
+			int SkillCoolTime = PlayerMeleeSkillListFiled["SkillCoolTime"].GetInt();
+			int SkillCastingTime = PlayerMeleeSkillListFiled["SkillCastingTime"].GetInt();
+			int SkillDistance = PlayerMeleeSkillListFiled["SkillDistance"].GetInt();
+			string SkillImagePath = PlayerMeleeSkillListFiled["SkillThumbnailImagePath"].GetString();
 
-		SkillData->SkillDataId = SkillDataSheetId;
-		SkillData->SkillName = SkillName;
-		SkillData->SkillCoolTime = SkillCoolTime;
-		SkillData->SkillCastingTime = SkillCastingTime;
-		SkillData->SkillDistance = SkillDistance;
-		SkillData->SkillThumbnailImagePath = SkillImagePath;
+			if (SkillType == "SKILL_NORMAL")
+			{
+				PlayerMeleeSkillData->SkillType = en_SkillType::SKILL_NORMAL;
+			}
+			else if (SkillType == "SKILL_KNIGHT_FIERCE_ATTACK")
+			{
+				PlayerMeleeSkillData->SkillType = en_SkillType::SKILL_KNIGHT_FIERCE_ATTACK;
+			}
+			else if (SkillType == "SKILL_KNIGHT_CONVERSION_ATTACK")
+			{
+				PlayerMeleeSkillData->SkillType = en_SkillType::SKILL_KNIGHT_CONVERSION_ATTACK;
+			}
+			else if (SkillType == "SKILL_KNIGHT_SHAEHONE")
+			{
+				PlayerMeleeSkillData->SkillType = en_SkillType::SKILL_KNIGHT_SHAEHONE;
+			}
+			else if (SkillType == "SKILL_KNIGHT_CHOHONE")
+			{
+				PlayerMeleeSkillData->SkillType = en_SkillType::SKILL_KNIGHT_CHOHONE;
+			}
+			else if (SkillType == "SKILL_KNIGHT_SMASH_WAVE")
+			{
+				PlayerMeleeSkillData->SkillType = en_SkillType::SKILL_KNIGHT_SMASH_WAVE;
+			}	
 
-		_Skills.insert(pair<int32, st_SkillData*>(SkillDataSheetId, SkillData));
+			PlayerMeleeSkillData->SkillName = SkillName;
+			PlayerMeleeSkillData->SkillCoolTime = SkillCoolTime;
+			PlayerMeleeSkillData->SkillCastingTime = SkillCastingTime;
+			PlayerMeleeSkillData->SkillDistance = SkillDistance;
+			PlayerMeleeSkillData->SkillThumbnailImagePath = SkillImagePath;
+
+			_PlayerMeleeSkills.insert(pair<int16, st_SkillData*>((int16)PlayerMeleeSkillData->SkillType, PlayerMeleeSkillData));
+		}		
 	}
+
+	for (auto& Filed : Document["PlayerMagicSkills"].GetArray())
+	{
+		string MagicSkillLargeCategory = Filed["SKillLargeCategory"].GetString();
+		for (auto& PlayerMagicSkillListFiled : Filed["PlayerMagicSkillList"].GetArray())
+		{
+			st_SkillData* PlayerMagicSkillData = new st_SkillData();
+			PlayerMagicSkillData->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_PLAYER_MAGIC;
+
+			string SkillType = PlayerMagicSkillListFiled["SkillType"].GetString();
+			string SkillName = PlayerMagicSkillListFiled["SkillName"].GetString();
+			int SkillCoolTime = PlayerMagicSkillListFiled["SkillCoolTime"].GetInt();
+			int SkillCastingTime = PlayerMagicSkillListFiled["SkillCastingTime"].GetInt();
+			int SkillDistance = PlayerMagicSkillListFiled["SkillDistance"].GetInt();
+			string SkillImagePath = PlayerMagicSkillListFiled["SkillThumbnailImagePath"].GetString();
+
+			if (SkillType == "SKILL_KNIGHT_CHARGE_POSE")
+			{
+				PlayerMagicSkillData->SkillType = en_SkillType::SKILL_KNIGHT_CHARGE_POSE;
+			}
+			else if (SkillType == "SKILL_SHAMNA_FLAME_HARPOON")
+			{
+				PlayerMagicSkillData->SkillType = en_SkillType::SKILL_SHAMAN_FLAME_HARPOON;
+			}
+			else if (SkillType == "SKILL_SHAMAN_HEALING_LIGHT")
+			{
+				PlayerMagicSkillData->SkillType = en_SkillType::SKILL_SHAMAN_HEALING_LIGHT;
+			}
+			else if (SkillType == "SKILL_SHAMAN_HEALING_WIND")
+			{
+				PlayerMagicSkillData->SkillType = en_SkillType::SKILL_SHAMAN_HEALING_WIND;
+			}
+			else if (SkillType == "SKILL_SHAMAN_HELL_FIRE")
+			{
+				PlayerMagicSkillData->SkillType = en_SkillType::SKILL_SHAMAN_HELL_FIRE;
+			}
+			else if (SkillType == "SKILL_SHOCK_RELEASE")
+			{
+				PlayerMagicSkillData->SkillType = en_SkillType::SKILL_SHOCK_RELEASE;
+			}
+
+			PlayerMagicSkillData->SkillName = SkillName;
+			PlayerMagicSkillData->SkillCoolTime = SkillCoolTime;
+			PlayerMagicSkillData->SkillCastingTime = SkillCastingTime;
+			PlayerMagicSkillData->SkillDistance = SkillDistance;
+			PlayerMagicSkillData->SkillThumbnailImagePath = SkillImagePath;
+
+			_PlayerMagicSkills.insert(pair<int16, st_SkillData*>((int16)PlayerMagicSkillData->SkillType, PlayerMagicSkillData));
+		}
+	}
+
+	for (auto& Filed : Document["MonsterMeleeSkills"].GetArray())
+	{
+		string MonsterMeleeSkillLargeCategory = Filed["SKillLargeCategory"].GetString();
+		for (auto& MonsterMeleeSkillListFiled : Filed["MonsterMeleeSkillList"].GetArray())
+		{
+			st_SkillData* MonsterMeleeSkillData = new st_SkillData();
+			MonsterMeleeSkillData->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_MONSTER_MELEE;
+
+			string SkillType = MonsterMeleeSkillListFiled["SkillType"].GetString();
+			string SkillName = MonsterMeleeSkillListFiled["SkillName"].GetString();
+			int SkillCoolTime = MonsterMeleeSkillListFiled["SkillCoolTime"].GetInt();
+			int SkillCastingTime = MonsterMeleeSkillListFiled["SkillCastingTime"].GetInt();
+			int SkillDistance = MonsterMeleeSkillListFiled["SkillDistance"].GetInt();
+			string SkillImagePath = MonsterMeleeSkillListFiled["SkillThumbnailImagePath"].GetString();
+
+			if (SkillType == "SKILL_SLIME_NORMAL")
+			{
+				MonsterMeleeSkillData->SkillType = en_SkillType::SKILL_KNIGHT_CHARGE_POSE;
+			}
+			else if (SkillType == "SKILL_BEAR_NORMAL")
+			{
+				MonsterMeleeSkillData->SkillType = en_SkillType::SKILL_SHAMAN_FLAME_HARPOON;
+			}
+
+			MonsterMeleeSkillData->SkillName = SkillName;
+			MonsterMeleeSkillData->SkillCoolTime = SkillCoolTime;
+			MonsterMeleeSkillData->SkillCastingTime = SkillCastingTime;
+			MonsterMeleeSkillData->SkillDistance = SkillDistance;
+			MonsterMeleeSkillData->SkillThumbnailImagePath = SkillImagePath;
+
+			_PlayerMagicSkills.insert(pair<int16, st_SkillData*>((int16)MonsterMeleeSkillData->SkillType, MonsterMeleeSkillData));
+		}
+	}
+
+	for (auto& Filed : Document["MonsterMagicSkills"].GetArray())
+	{
+		string MonsterMagicSkillLargeCategory = Filed["SKillLargeCategory"].GetString();
+		for (auto& MonsterMagicSkillListFiled : Filed["MonsterMeleeSkillList"].GetArray())
+		{
+			st_SkillData* MonsterMagicSkillData = new st_SkillData();
+			MonsterMagicSkillData->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_MONSTER_MAGIC;
+
+			string SkillType = MonsterMagicSkillListFiled["SkillType"].GetString();
+			string SkillName = MonsterMagicSkillListFiled["SkillName"].GetString();
+			int SkillCoolTime = MonsterMagicSkillListFiled["SkillCoolTime"].GetInt();
+			int SkillCastingTime = MonsterMagicSkillListFiled["SkillCastingTime"].GetInt();
+			int SkillDistance = MonsterMagicSkillListFiled["SkillDistance"].GetInt();
+			string SkillImagePath = MonsterMagicSkillListFiled["SkillThumbnailImagePath"].GetString();
+			
+			MonsterMagicSkillData->SkillName = SkillName;
+			MonsterMagicSkillData->SkillCoolTime = SkillCoolTime;
+			MonsterMagicSkillData->SkillCastingTime = SkillCastingTime;
+			MonsterMagicSkillData->SkillDistance = SkillDistance;
+			MonsterMagicSkillData->SkillThumbnailImagePath = SkillImagePath;
+
+			_PlayerMagicSkills.insert(pair<int16, st_SkillData*>((int16)MonsterMagicSkillData->SkillType, MonsterMagicSkillData));
+		}
+	}
+
+	st_SkillData* PlayerMagicSkillData = new st_SkillData();
 }
 
 void CDataManager::LoadDataEnvironment(wstring LoadFileName)
