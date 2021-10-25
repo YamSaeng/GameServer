@@ -13,7 +13,7 @@
             {
               "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK",
               "MaterialName": "나무 판자",
-              "MaterialCount": 40,
+              "MaterialCount": 30,
               "MaterialThumbnailImagePath": "Textures/Material/Wooden Plank"
             },
             {
@@ -39,7 +39,7 @@
             {
               "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK",
               "MaterialName": "나무 판자",
-              "MaterialCount": 50,
+              "MaterialCount": 40,
               "MaterialThumbnailImagePath": "Textures/Material/Wooden Plank"
             },
             {
@@ -59,7 +59,7 @@
             {
               "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_LEATHER",
               "MaterialName": "가죽",
-              "MaterialCount": 30,
+              "MaterialCount": 20,
               "MaterialThumbnailImagePath": "Textures/Material/Leather"
             },
             {
@@ -79,7 +79,7 @@
             {
               "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_LEATHER",
               "MaterialName": "가죽",
-              "MaterialCount": 15,
+              "MaterialCount": 10,
               "MaterialThumbnailImagePath": "Textures/Material/Leather"
             },
             {
@@ -105,7 +105,7 @@
             {
               "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG",
               "MaterialName": "통나무",
-              "MaterialCount": 10,
+              "MaterialCount": 5,
               "MaterialThumbnailImagePath": "Textures/Material/Wood Log"
             }
           ]
