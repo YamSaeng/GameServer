@@ -204,6 +204,9 @@ void CInventory::SwapItem(int8 SwapAIndex, int8 SwapBIndex)
 	CItem* AItem = Get(SwapAIndex);
 	CItem* BItem = Get(SwapBIndex);
 
+	AItem->_ItemInfo.ItemSlotIndex = SwapBIndex;
+	BItem->_ItemInfo.ItemSlotIndex = SwapAIndex;
+
 	auto FindSwapAItem = _Items.find(SwapAIndex);
 	if (FindSwapAItem != _Items.end())
 	{
