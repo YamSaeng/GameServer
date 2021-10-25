@@ -2306,21 +2306,20 @@ void CGameServer::PacketProcReqCraftingConfirm(int64 SessionId, CMessage* Messag
 
 			st_ItemData* FindReqCompleteItemData = (*ItemDataIterator).second;
 
-
 			st_ItemInfo CraftingItemInfo;
 			CraftingItemInfo.ItemDBId = 0;
-			CraftingItemInfo.ItemIsQuickSlotUse = FindReqCompleteItemData->IsEquipped;
+			CraftingItemInfo.ItemIsQuickSlotUse = FindReqCompleteItemData->ItemIsEquipped;
 			CraftingItemInfo.ItemLargeCategory = FindReqCompleteItemData->LargeItemCategory;
 			CraftingItemInfo.ItemMediumCategory = FindReqCompleteItemData->MediumItemCategory;
 			CraftingItemInfo.ItemSmallCategory = FindReqCompleteItemData->SmallItemCategory;
 			CraftingItemInfo.ItemName = (LPWSTR)CA2W(FindReqCompleteItemData->ItemName.c_str());
-			CraftingItemInfo.ItemMinDamage = FindReqCompleteItemData->MinDamage;
-			CraftingItemInfo.ItemMaxDamage = FindReqCompleteItemData->MaxDamage;
-			CraftingItemInfo.ItemDefence = FindReqCompleteItemData->Defence;
-			CraftingItemInfo.ItemMaxCount = FindReqCompleteItemData->MaxCount;
+			CraftingItemInfo.ItemMinDamage = FindReqCompleteItemData->ItemMinDamage;
+			CraftingItemInfo.ItemMaxDamage = FindReqCompleteItemData->ItemMaxDamage;
+			CraftingItemInfo.ItemDefence = FindReqCompleteItemData->ItemDefence;
+			CraftingItemInfo.ItemMaxCount = FindReqCompleteItemData->ItemMaxCount;
 			CraftingItemInfo.ItemCount = ReqCraftingItemCount;
-			CraftingItemInfo.ItemThumbnailImagePath = (LPWSTR)CA2W(FindReqCompleteItemData->ThumbnailImagePath.c_str());
-			CraftingItemInfo.ItemIsEquipped = FindReqCompleteItemData->IsEquipped;
+			CraftingItemInfo.ItemThumbnailImagePath = (LPWSTR)CA2W(FindReqCompleteItemData->ItemThumbnailImagePath.c_str());
+			CraftingItemInfo.ItemIsEquipped = FindReqCompleteItemData->ItemIsEquipped;
 
 			bool IsExistItem = false;
 			int8 SlotIndex = 0;
@@ -2890,11 +2889,11 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 			ItemName = (LPWSTR)CA2W(DropItemData.ItemName.c_str());
 			ItemCount = DropItemData.ItemCount;
 			ItemEquipped = false;
-			ItemThumbnailImagePath = (LPWSTR)CA2W(DropItemData.ThumbnailImagePath.c_str());
+			ItemThumbnailImagePath = (LPWSTR)CA2W(DropItemData.ItemThumbnailImagePath.c_str());
 
 			st_ItemData* WeaponItemData = (*G_Datamanager->_Items.find((int16)DropItemData.SmallItemCategory)).second;
-			ItemMinDamage = WeaponItemData->MinDamage;
-			ItemMaxDamage = WeaponItemData->MaxDamage;
+			ItemMinDamage = WeaponItemData->ItemMinDamage;
+			ItemMaxDamage = WeaponItemData->ItemMaxDamage;
 		}
 		break;
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
@@ -2908,10 +2907,10 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 			ItemName = (LPWSTR)CA2W(DropItemData.ItemName.c_str());
 			ItemCount = DropItemData.ItemCount;
 			ItemEquipped = false;
-			ItemThumbnailImagePath = (LPWSTR)CA2W(DropItemData.ThumbnailImagePath.c_str());
+			ItemThumbnailImagePath = (LPWSTR)CA2W(DropItemData.ItemThumbnailImagePath.c_str());
 
 			st_ItemData* ArmorItemData = (*G_Datamanager->_Items.find((int16)DropItemData.SmallItemCategory)).second;
-			ItemDefence = ArmorItemData->Defence;
+			ItemDefence = ArmorItemData->ItemDefence;
 		}
 		break;
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL:
@@ -2935,10 +2934,10 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 			ItemName = (LPWSTR)CA2W(DropItemData.ItemName.c_str());
 			ItemCount = DropItemData.ItemCount;
 			ItemEquipped = false;
-			ItemThumbnailImagePath = (LPWSTR)CA2W(DropItemData.ThumbnailImagePath.c_str());
+			ItemThumbnailImagePath = (LPWSTR)CA2W(DropItemData.ItemThumbnailImagePath.c_str());
 
 			st_ItemData* MaterialItemData = (*G_Datamanager->_Items.find((int16)DropItemData.SmallItemCategory)).second;
-			ItemMaxCount = MaterialItemData->MaxCount;
+			ItemMaxCount = MaterialItemData->ItemMaxCount;
 		}
 		break;
 		}
