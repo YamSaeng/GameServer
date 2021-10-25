@@ -254,41 +254,41 @@ struct st_Color
 struct st_ItemInfo
 {	
 	int64 ItemDBId;				// 아이템 DB에 저장되어 있는 ID		
-	bool IsQuickSlotUse;        // 퀵슬롯에 등록되어 있는지 여부 
+	bool ItemIsQuickSlotUse;        // 퀵슬롯에 등록되어 있는지 여부 
 	en_LargeItemCategory ItemLargeCategory; // 아이템 대분류
 	en_MediumItemCategory ItemMediumCategory; // 아이템 중분류
 	en_SmallItemCategory ItemSmallCategory;		// 아이템 소분류
 	wstring ItemName;			// 아이템 이름
-	int32 MinDamage;			// 아이템 최소 공격력
-	int32 MaxDamage;			// 아이템 최대 공격력
-	int32 Defence;				// 아이템 방어력
-	int32 MaxCount;				// 아이템을 소유 할 수 있는 최대 개수
+	int32 ItemMinDamage;			// 아이템 최소 공격력
+	int32 ItemMaxDamage;			// 아이템 최대 공격력
+	int32 ItemDefence;				// 아이템 방어력
+	int32 ItemMaxCount;				// 아이템을 소유 할 수 있는 최대 개수
 	int16 ItemCount;			// 개수
-	wstring ThumbnailImagePath; // 이미지 경로
-	bool IsEquipped;			// 아이템을 착용할 수 있는지	
-	int8 SlotIndex;				// 슬롯 번호
+	wstring ItemThumbnailImagePath; // 이미지 경로
+	bool ItemIsEquipped;			// 아이템을 착용할 수 있는지	
+	int8 ItemSlotIndex;				// 슬롯 번호
 
 	st_ItemInfo()
 	{
 		ItemDBId = 0;
-		IsQuickSlotUse = false;
+		ItemIsQuickSlotUse = false;
 		ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_NONE;
 		ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
 		ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
 		ItemName = L"";
-		MinDamage = 0;
-		MaxDamage = 0;
-		Defence = 0;
-		MaxCount = 0;		
+		ItemMinDamage = 0;
+		ItemMaxDamage = 0;
+		ItemDefence = 0;
+		ItemMaxCount = 0;		
 		ItemCount = 0;
-		ThumbnailImagePath = L"";
-		IsEquipped = false;
-		SlotIndex  = -1;
+		ItemThumbnailImagePath = L"";
+		ItemIsEquipped = false;
+		ItemSlotIndex  = -1;
 	}	
 
 	bool operator == (st_ItemInfo OtherItemInfo)
 	{
-		if (SlotIndex == OtherItemInfo.SlotIndex
+		if (ItemSlotIndex == OtherItemInfo.ItemSlotIndex
 			&& ItemLargeCategory == OtherItemInfo.ItemLargeCategory
 			&& ItemMediumCategory == OtherItemInfo.ItemMediumCategory
 			&& ItemSmallCategory == OtherItemInfo.ItemSmallCategory
