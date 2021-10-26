@@ -75,6 +75,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_StatInfo& StatInfo)
 
 CGameServerMessage& CGameServerMessage::operator<<(st_SkillInfo& SkillInfo)
 {
+    *this << (int8)SkillInfo.SkillLargeCategory;
     *this << (int16)SkillInfo.SkillType;
     *this << SkillInfo.SkillLevel;
 
@@ -172,6 +173,10 @@ CGameServerMessage& CGameServerMessage::operator>>(st_Vector2Int& CellPositionIn
 
 CGameServerMessage& CGameServerMessage::operator>>(st_SkillInfo& Value)
 {
+    int8 SkillLargeCategory = 0;
+    *this >> SkillLargeCategory;
+    Value.SkillLargeCategory = (en_SkillLargeCategory)SkillLargeCategory;
+
     int16 SkillType = 0;
     *this >> SkillType;
     Value.SkillType = (en_SkillType)SkillType;
