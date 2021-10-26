@@ -88,6 +88,7 @@
     <Column name="AccountDBId" type="BigInt" notnull ="true"/>
     <Column name="PlayerDBId" type="BigInt"  notnull ="true"/>
     <Column name="IsQuickSlotUse" type="bit" notnull ="true"/>
+    <Column name="SkillLargeCategory" type="TinyInt" notnull="true"/>
     <Column name="SkillType" type="SmallInt" notnull ="true"/>
     <Column name="SkillLevel" type="TinyInt" notnull ="true"/>
     <Column name="SkillName" type="nvarchar(20)" notnull ="true"/>
@@ -103,6 +104,7 @@
     <Column name="QuickSlotBarIndex" type="TinyInt" notnull ="true"/>
     <Column name="QuickSlotBarSlotIndex" type="TinyInt" notnull ="true"/>
     <Column name="QuickSlotKey" type="nvarchar(20)"/>
+    <Column name="SkillLargeCategory" type="TinyInt"/>
     <Column name="SkillType" type="SmallInt"/>
     <Column name="SkillLevel" type="TinyInt"/>
     <Column name="SkillName" type="nvarchar(20)"/>
@@ -364,123 +366,6 @@
       ]]>
     </Body>
   </Procedure>
-  
-  <!-- SkillTable에 있는 Skill 가지고 오기-->
-  <Procedure name="spGetSkill">
-    <Param name="@AccountDBId" type="BigInt"/>
-    <Param name="@PlayerDBId" type="BigInt"/>
-    <Body>
-      <![CDATA[
-        SELECT IsQuickSlotUse, SkillType, SkillLevel, SkillName, SkillCoolTime, SkillCastingTime, SkillImagePath FROM [dbo].[Skill] WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
-      ]]>
-    </Body>
-  </Procedure>  
-    
-  <!-- QuickSlotBarTable에 새로운 QuickSlotBarSlot 생성 -->
-  <Procedure name="spQuickSlotBarSlotCreate">
-    <Param name="@AccountDBId" type="BigInt"/>
-    <Param name="@PlayerDBId" type="BigInt"/>
-    <Param name="@QuickSlotBarIndex" type="TinyInt"/>
-    <Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
-    <Param name="@QuickSlotKey" type="nvarchar(20)"/>
-    <Param name="@SkillType" type="SmallInt"/>
-    <Param name="@SkillLevel" type="TinyInt"/>
-    <Param name="@SkillName" type="nvarchar(20)"/>
-    <Param name="@SkillCoolTime" type="int"/>
-    <Param name="@SkillCastingTime" type="int"/>
-    <Param name="@SkillImagePath" type="nvarchar(100)"/>
-    <Body>
-      <![CDATA[        
-        INSERT INTO [dbo].[QuickSlotBar] VALUES ((@AccountDBId),(@PlayerDBId),(@QuickSlotBarIndex),(@QuickSlotBarSlotIndex),(@QuickSlotKey),(@SkillType),(@SkillLevel),(@SkillName),(@SkillCoolTime),(@SkillCastingTime),(@SkillImagePath))
-      ]]>
-    </Body>   
-  </Procedure>
-
-  <!-- QuickSlotBarTable에 새로운 퀵슬롯바아이템 저장 -->
-  <Procedure name="spQuickSlotBarSlotUpdate">
-    <Param name="@AccountDBId" type="BigInt"/>
-    <Param name="@PlayerDBId" type="BigInt"/>
-    <Param name="@QuickSlotBarIndex" type="TinyInt"/>
-    <Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
-    <Param name="@QuickSlotKey" type="nvarchar(20)"/>
-    <Param name="@SkillType" type="SmallInt"/>
-    <Param name="@SkillLevel" type="TinyInt"/>
-    <Param name="@SkillName" type="nvarchar(20)"/>
-    <Param name="@SkillCoolTime" type="int"/>
-    <Param name="@SkillCastingTime" type="int"/>    
-    <Param name="@SkillImagePath" type="nvarchar(100)"/>
-    <Body>
-      <![CDATA[
-        UPDATE [dbo].[QuickSlotBar] SET QuickSlotKey = (@QuickSlotKey), SkillType = (@SkillType), SkillLevel = (@SkillLevel), SkillName = (@SkillName), SkillCoolTime = (@SkillCoolTime), SkillCastingTime = (@SkillCastingTime), SkillImagePath = (@SkillImagePath) 
-        WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)        
-      ]]>
-    </Body>
-  </Procedure>
-  
-  <!-- QuickSlotBarTable에 있는 퀵슬롯 정보 가져오기 -->
-  <Procedure name="spGetQuickSlotBarSlot">
-    <Param name="@AccountDBId" type="BigInt"/>
-    <Param name="@PlayerDBId" type="BigInt"/>    
-    <Body>
-      <![CDATA[
-        SELECT QuickSlotBarIndex, QuickSlotBarSlotIndex, QuickSlotKey, SkillType, SkillLevel, SkillCoolTime, SkillCastingTime, SkillImagePath FROM [dbo].[QuickSlotBar] WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
-      ]]>
-    </Body>
-  </Procedure>
-
-  <!-- QuickSlotBarTable에 있는 퀵슬롯 정보 가져오기 -->
-  <Procedure name="spQuickSlotCheck">
-    <Param name="@AccountDBId" type="BigInt"/>
-    <Param name="@PlayerDBId" type="BigInt"/>
-    <Param name="@QuickSlotBarIndex" type="TinyInt"/>
-    <Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
-    <Body>
-      <![CDATA[
-        SELECT QuickSlotKey, SkillType, SkillLevel, SkillName, SkillCoolTime, SkillCastingTime, SkillImagePath FROM [dbo].[QuickSlotBar] WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId) AND QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex)
-      ]]>
-    </Body>
-  </Procedure>
-  
-  <!--QuickSlotSwap -->
-  <Procedure name="spQuickSlotSwap">
-    <Param name="@AccountDBId" type="BigInt"/>
-    <Param name="@PlayerDBId" type="BigInt"/>
-    <Param name="@AQuickSlotBarIndex" type="TinyInt"/>
-    <Param name="@AQuickSlotBarSlotIndex" type="TinyInt"/>
-    <Param name="@AQuickSlotSkillType" type="SmallInt"/>
-    <Param name="@AQuickSlotSkillLevel" type="TinyInt"/>
-    <Param name="@AQuickSlotSkillName" type="nvarchar(20)"/>
-    <Param name="@AQuickSlotSkillCoolTime" type="Int"/>
-    <Param name="@AQuickSlotSkillCastingTime" type="Int"/>
-    <Param name="@AQuickSlotSkillImagePath" type="nvarchar(100)"/>
-    <Param name="@BQuickSlotBarIndex" type="TinyInt"/>
-    <Param name="@BQuickSlotBarSlotIndex" type="TinyInt"/>
-    <Param name="@BQuickSlotSkillType" type="SmallInt"/>
-    <Param name="@BQuickSlotSkillLevel" type="TinyInt"/>
-    <Param name="@BQuickSlotSkillName" type="nvarchar(20)"/>
-    <Param name="@BQuickSlotSkillCoolTime" type="Int"/>
-    <Param name="@BQuickSlotSkillCastingTime" type="Int"/>
-    <Param name="@BQuickSlotSkillImagePath" type="nvarchar(100)"/>
-    <Body>
-      <![CDATA[
-        UPDATE [dbo].[QuickSlotBar] SET SkillType = (@AQuickSlotSkillType), SkillLevel = (@AQuickSlotSkillLevel), SkillName = (@AQuickSlotSkillName), SkillCoolTime = (@AQuickSlotSkillCoolTime), SkillCastingTime = (@AQuickSlotSkillCastingTime), SkillImagePath = (@AQuickSlotSkillImagePath) WHERE QuickSlotBarIndex = (@AQuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@AQuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
-        UPDATE [dbo].[QuickSlotBar] SET SkillType = (@BQuickSlotSkillType), SkillLevel = (@BQuickSlotSkillLevel), SkillName = (@BQuickSlotSkillName), SkillCoolTime = (@BQuickSlotSkillCoolTime), SkillCastingTime = (@BQuickSlotSkillCastingTime), SkillImagePath = (@BQuickSlotSkillImagePath) WHERE QuickSlotBarIndex = (@BQuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@BQuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
-      ]]>
-    </Body>
-  </Procedure>
-
-  <!--QuickSlotInit-->
-  <Procedure name="spQuickSlotInit">
-    <Param name="@AccountDBId" type="BigInt"/>
-    <Param name="@PlayerDBId" type="BigInt"/>
-    <Param name="@QuickSlotBarIndex" type="TinyInt"/>
-    <Param name="@QuickSlotBarSlotIndex" type="TinyInt"/> 
-    <Body>
-      <![CDATA[
-        UPDATE [dbo].[QuickSlotBar] SET SkillType = 0, SkillLevel = 0, SkillName = NULL, SkillCoolTime = 0, SkillCastingTime = 0, SkillImagePath = NULL WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
-      ]]>
-    </Body>
-  </Procedure>
 
   <!--InventorySlotInit-->
   <Procedure name="spInventorySlotInit">
@@ -495,4 +380,125 @@
       ]]>
     </Body>
   </Procedure>
+  
+  <!-- SkillTable에 있는 Skill 가지고 오기-->
+  <Procedure name="spGetSkill">
+    <Param name="@AccountDBId" type="BigInt"/>
+    <Param name="@PlayerDBId" type="BigInt"/>
+    <Body>
+      <![CDATA[
+        SELECT IsQuickSlotUse, SkillLargeCategory, SkillType, SkillLevel, SkillName, SkillCoolTime, SkillCastingTime, SkillImagePath FROM [dbo].[Skill] WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
+      ]]>
+    </Body>
+  </Procedure>  
+    
+  <!-- QuickSlotBarTable에 새로운 QuickSlotBarSlot 생성 -->
+  <Procedure name="spQuickSlotBarSlotCreate">
+    <Param name="@AccountDBId" type="BigInt"/>
+    <Param name="@PlayerDBId" type="BigInt"/>
+    <Param name="@QuickSlotBarIndex" type="TinyInt"/>
+    <Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
+    <Param name="@QuickSlotKey" type="nvarchar(20)"/>
+    <Param name="@SkillLargeCategory" type="TinyInt"/>
+    <Param name="@SkillType" type="SmallInt"/>
+    <Param name="@SkillLevel" type="TinyInt"/>
+    <Param name="@SkillName" type="nvarchar(20)"/>
+    <Param name="@SkillCoolTime" type="int"/>
+    <Param name="@SkillCastingTime" type="int"/>
+    <Param name="@SkillImagePath" type="nvarchar(100)"/>
+    <Body>
+      <![CDATA[        
+        INSERT INTO [dbo].[QuickSlotBar] VALUES ((@AccountDBId), (@PlayerDBId), (@QuickSlotBarIndex), (@QuickSlotBarSlotIndex), (@QuickSlotKey), (@SkillLargeCategory), (@SkillType), (@SkillLevel), (@SkillName), (@SkillCoolTime), (@SkillCastingTime), (@SkillImagePath))
+      ]]>
+    </Body>   
+  </Procedure>
+
+  <!-- QuickSlotBarTable에 새로운 퀵슬롯바아이템 저장 -->
+  <Procedure name="spQuickSlotBarSlotUpdate">
+    <Param name="@AccountDBId" type="BigInt"/>
+    <Param name="@PlayerDBId" type="BigInt"/>
+    <Param name="@QuickSlotBarIndex" type="TinyInt"/>
+    <Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
+    <Param name="@QuickSlotKey" type="nvarchar(20)"/>
+    <Param name="@SkillLargeCategory" type="TinyInt"/>
+    <Param name="@SkillType" type="SmallInt"/>
+    <Param name="@SkillLevel" type="TinyInt"/>
+    <Param name="@SkillName" type="nvarchar(20)"/>
+    <Param name="@SkillCoolTime" type="int"/>
+    <Param name="@SkillCastingTime" type="int"/>    
+    <Param name="@SkillImagePath" type="nvarchar(100)"/>
+    <Body>
+      <![CDATA[
+        UPDATE [dbo].[QuickSlotBar] SET QuickSlotKey = (@QuickSlotKey), SkillLargeCategory = (@SkillLargeCategory), SkillType = (@SkillType), SkillLevel = (@SkillLevel), SkillName = (@SkillName), SkillCoolTime = (@SkillCoolTime), SkillCastingTime = (@SkillCastingTime), SkillImagePath = (@SkillImagePath) 
+        WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)        
+      ]]>
+    </Body>
+  </Procedure>
+  
+  <!-- QuickSlotBarTable에 있는 퀵슬롯 정보 가져오기 -->
+  <Procedure name="spGetQuickSlotBarSlot">
+    <Param name="@AccountDBId" type="BigInt"/>
+    <Param name="@PlayerDBId" type="BigInt"/>    
+    <Body>
+      <![CDATA[
+        SELECT QuickSlotBarIndex, QuickSlotBarSlotIndex, QuickSlotKey, SkillLargeCategory, SkillType, SkillLevel, SkillCoolTime, SkillCastingTime, SkillImagePath FROM [dbo].[QuickSlotBar] WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
+      ]]>
+    </Body>
+  </Procedure>
+
+  <!-- QuickSlotBarTable에 있는 퀵슬롯 정보 가져오기 -->
+  <Procedure name="spQuickSlotCheck">
+    <Param name="@AccountDBId" type="BigInt"/>
+    <Param name="@PlayerDBId" type="BigInt"/>
+    <Param name="@QuickSlotBarIndex" type="TinyInt"/>
+    <Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
+    <Body>
+      <![CDATA[
+        SELECT QuickSlotKey, SkillLargeCategory, SkillType, SkillLevel, SkillName, SkillCoolTime, SkillCastingTime, SkillImagePath FROM [dbo].[QuickSlotBar] WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId) AND QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex)
+      ]]>
+    </Body>
+  </Procedure>
+  
+  <!--QuickSlotSwap -->
+  <Procedure name="spQuickSlotSwap">
+    <Param name="@AccountDBId" type="BigInt"/>
+    <Param name="@PlayerDBId" type="BigInt"/>
+    <Param name="@AQuickSlotBarIndex" type="TinyInt"/>
+    <Param name="@AQuickSlotBarSlotIndex" type="TinyInt"/>
+    <Param name="@ASkillLargeCategory" type="TinyInt"/>
+    <Param name="@AQuickSlotSkillType" type="SmallInt"/>
+    <Param name="@AQuickSlotSkillLevel" type="TinyInt"/>
+    <Param name="@AQuickSlotSkillName" type="nvarchar(20)"/>
+    <Param name="@AQuickSlotSkillCoolTime" type="Int"/>
+    <Param name="@AQuickSlotSkillCastingTime" type="Int"/>
+    <Param name="@AQuickSlotSkillImagePath" type="nvarchar(100)"/>
+    <Param name="@BQuickSlotBarIndex" type="TinyInt"/>
+    <Param name="@BQuickSlotBarSlotIndex" type="TinyInt"/>
+    <Param name="@BSkillLargeCategory" type="TinyInt"/>
+    <Param name="@BQuickSlotSkillType" type="SmallInt"/>
+    <Param name="@BQuickSlotSkillLevel" type="TinyInt"/>
+    <Param name="@BQuickSlotSkillName" type="nvarchar(20)"/>
+    <Param name="@BQuickSlotSkillCoolTime" type="Int"/>
+    <Param name="@BQuickSlotSkillCastingTime" type="Int"/>
+    <Param name="@BQuickSlotSkillImagePath" type="nvarchar(100)"/>
+    <Body>
+      <![CDATA[
+        UPDATE [dbo].[QuickSlotBar] SET SkillLargeCategory = (@ASkillLargeCategory), SkillType = (@AQuickSlotSkillType), SkillLevel = (@AQuickSlotSkillLevel), SkillName = (@AQuickSlotSkillName), SkillCoolTime = (@AQuickSlotSkillCoolTime), SkillCastingTime = (@AQuickSlotSkillCastingTime), SkillImagePath = (@AQuickSlotSkillImagePath) WHERE QuickSlotBarIndex = (@AQuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@AQuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
+        UPDATE [dbo].[QuickSlotBar] SET SkillLargeCategory = (@BSkillLargeCategory), SkillType = (@BQuickSlotSkillType), SkillLevel = (@BQuickSlotSkillLevel), SkillName = (@BQuickSlotSkillName), SkillCoolTime = (@BQuickSlotSkillCoolTime), SkillCastingTime = (@BQuickSlotSkillCastingTime), SkillImagePath = (@BQuickSlotSkillImagePath) WHERE QuickSlotBarIndex = (@BQuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@BQuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
+      ]]>
+    </Body>
+  </Procedure>
+
+  <!--QuickSlotInit-->
+  <Procedure name="spQuickSlotInit">
+    <Param name="@AccountDBId" type="BigInt"/>
+    <Param name="@PlayerDBId" type="BigInt"/>
+    <Param name="@QuickSlotBarIndex" type="TinyInt"/>
+    <Param name="@QuickSlotBarSlotIndex" type="TinyInt"/> 
+    <Body>
+      <![CDATA[
+        UPDATE [dbo].[QuickSlotBar] SET SkillLargeCategory = 0, SkillType = 0, SkillLevel = 0, SkillName = NULL, SkillCoolTime = 0, SkillCastingTime = 0, SkillImagePath = NULL WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
+      ]]>
+    </Body>
+  </Procedure> 
 </GameServerDB>
