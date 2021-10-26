@@ -186,7 +186,7 @@ enum en_PACKET_TYPE
 	// int32 PlayerDBId
 	// st_StatInfo ChangeStatInfo
 	//------------------------------------------------------------
-	en_PACKET_S2C_CHANGE_OBJECT_STAT,
+	en_PACKET_S2C_OBJECT_STAT_CHANGE,
 	
 	//------------------------------------------------------------
 	// 게임서버 마우스 위치 캐릭터 정보 요청	
