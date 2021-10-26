@@ -494,10 +494,12 @@
     <Param name="@AccountDBId" type="BigInt"/>
     <Param name="@PlayerDBId" type="BigInt"/>
     <Param name="@QuickSlotBarIndex" type="TinyInt"/>
-    <Param name="@QuickSlotBarSlotIndex" type="TinyInt"/> 
+    <Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
+    <Param name="@QuickSlotSkillName" type="nvarchar(20)"/>
+    <Param name="@QuickSlotSkillImagePath" type="nvarchar(100)"/>
     <Body>
       <![CDATA[
-        UPDATE [dbo].[QuickSlotBar] SET SkillLargeCategory = 0, SkillType = 0, SkillLevel = 0, SkillName = NULL, SkillCoolTime = 0, SkillCastingTime = 0, SkillImagePath = NULL WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
+        UPDATE [dbo].[QuickSlotBar] SET SkillLargeCategory = 0, SkillType = 0, SkillLevel = 0, SkillName = NULL, SkillCoolTime = (@QuickSlotSkillName), SkillCastingTime = 0, SkillImagePath = (@QuickSlotSkillImagePath) WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
     </Body>
   </Procedure> 
