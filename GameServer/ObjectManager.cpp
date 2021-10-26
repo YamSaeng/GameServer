@@ -83,7 +83,7 @@ void CObjectManager::Add(CGameObject* AddObject, int32 ChannelId)
 		case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
 		case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
 		case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
-		case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK_CHOHONE:
+		case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:		
@@ -159,7 +159,7 @@ bool CObjectManager::Remove(CGameObject* RemoveObject, int32 _ChannelId, bool Is
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
-	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK_CHOHONE:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:	
@@ -221,7 +221,7 @@ CGameObject* CObjectManager::Find(int64 ObjectId, en_GameObjectType GameObjectTy
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
-	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK_CHOHONE:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
@@ -285,7 +285,7 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 		NewObject = _ArmorMemoryPool->Alloc();
 		break;
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE:
-	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK_CHOHONE:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
 		NewObject = _ConsumableMemoryPool->Alloc();
 		break;		
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL:
@@ -329,7 +329,7 @@ void CObjectManager::ObjectReturn(en_GameObjectType ObjectType, CGameObject* Ret
 	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
 		_WeaponMemoryPool->Free((CWeapon*)ReturnObject);
 		break;
-	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK_CHOHONE:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
 		_ConsumableMemoryPool->Free((CConsumable*)ReturnObject);
 		break;
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:

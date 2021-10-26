@@ -116,8 +116,8 @@ CGameServerMessage& CGameServerMessage::operator<<(st_ItemInfo& ItemInfo)
     *this << ItemImagePathLen;
     InsertData(ItemInfo.ItemThumbnailImagePath.c_str(), ItemImagePathLen);
 
-    *this << ItemInfo.ItemSlotIndex;
-    *this << ItemInfo.ItemIsEquipped;        
+    *this << ItemInfo.ItemIsEquipped;
+    *this << ItemInfo.ItemSlotIndex;         
 
     return *(this);
 }

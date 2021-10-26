@@ -70,12 +70,102 @@
       "SkillBookList": [
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_FIERCE_ATTACK",
+          "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK",
+          "ItemExplain": "맹렬한일격을 배울 수 있다.",
+          "ItemName": "맹렬한일격 스킬책",
+          "ItemMaxCount": 1,
+          "ImageFilePath": "Textures/SkillBook/SkillBook"
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CONVERSION_ATTACK",
+          "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK",
+          "ItemExplain": "회심의일격을 배울 수 있다.",
+          "ItemName": "회심의일격 스킬책",
+          "ItemMaxCount": 1,
+          "ImageFilePath": "Textures/SkillBook/SkillBook"
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_FIERCE_ATTACK",
+          "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK",
+          "ItemExplain": "쇄혼비무를 배울 수 있다.",
+          "ItemName": "쇄혼비무 스킬책",
+          "ItemMaxCount": 1,
+          "ImageFilePath": "Textures/SkillBook/SkillBook"
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_SKILLBOOK_CHOHONE",
-          "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK_CHOHONE",
+          "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK",
           "ItemExplain": "초혼비무를 배울 수 있다.",
           "ItemName": "초혼비무 스킬책",
           "ItemMaxCount": 1,
-          "ImageFilePath": "Textures/SkillBook/ChoHoneSkillBook"
+          "ImageFilePath": "Textures/SkillBook/SkillBook"
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SMASH_WAVE_ATTACK",
+          "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK",
+          "ItemExplain": "분쇄파동을 배울 수 있다.",
+          "ItemName": "분쇄파동 스킬책",
+          "ItemMaxCount": 1,
+          "ImageFilePath": "Textures/SkillBook/SkillBook"
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHARGE_POSE",
+          "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK",
+          "ItemExplain": "돌격자세를 배울 수 있다.",
+          "ItemName": "돌격자세 스킬책",
+          "ItemMaxCount": 1,
+          "ImageFilePath": "Textures/SkillBook/SkillBook"
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_FLAME_HARPOON",
+          "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK",
+          "ItemExplain": "불꽃작살을 배울 수 있다.",
+          "ItemName": "불꽃작살 스킬책",
+          "ItemMaxCount": 1,
+          "ImageFilePath": "Textures/SkillBook/SkillBook"
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HELL_FIRE",
+          "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK",
+          "ItemExplain": "지옥의화염을 배울 수 있다.",
+          "ItemName": "지옥의화염 스킬책",
+          "ItemMaxCount": 1,
+          "ImageFilePath": "Textures/SkillBook/SkillBook"
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEOGRY_SKILLBOOK_SHAMAN_HEALING_LIGHT",
+          "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK",
+          "ItemExplain": "치유의빛을 배울 수 있다.",
+          "ItemName": "치유의빛 스킬책",
+          "ItemMaxCount": 1,
+          "ImageFilePath": "Textures/SkillBook/SkillBook"
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_SKILLBOOK_CHOHONE",
+          "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK",
+          "ItemExplain": "치유의바람을 배울 수 있다.",
+          "ItemName": "치유의바람 스킬책",
+          "ItemMaxCount": 1,
+          "ImageFilePath": "Textures/SkillBook/SkillBook"
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_SKILLBOOK_SHOCK_RELEASE",
+          "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK",
+          "ItemExplain": "충격해제를 배울 수 있다.",
+          "ItemName": "충격해제 스킬책",
+          "ItemMaxCount": 1,
+          "ImageFilePath": "Textures/SkillBook/SkillBook"
         }
       ]      
     }

@@ -347,7 +347,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
-	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK_CHOHONE:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:	
@@ -420,7 +420,7 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
-	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK_CHOHONE:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:	

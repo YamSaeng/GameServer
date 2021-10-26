@@ -45,7 +45,7 @@ void CInventory::AddItem(CItem* Item)
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:		
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_CHOHONE:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE:
@@ -133,7 +133,7 @@ bool CInventory::IsExistItem(en_SmallItemCategory ItemType, int16& ItemEach, int
 		}	
 		break;
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL:		
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_CHOHONE:		
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:		
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL:			
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE:
