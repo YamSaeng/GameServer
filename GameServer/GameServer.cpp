@@ -1234,7 +1234,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 					ResEffectPacket->Free();
 					break;
 					// 불꽃 작살
-				case en_SkillType::SKILL_SHAMNA_FLAME_HARPOON:
+				case en_SkillType::SKILL_SHAMAN_FLAME_HARPOON:
 					if (MyPlayer->_SelectTarget != nullptr)
 					{
 						MyPlayer->_SpellTick = GetTickCount64() + FindSkill->SkillCastingTime;
@@ -2313,6 +2313,7 @@ void CGameServer::PacketProcReqCraftingConfirm(int64 SessionId, CMessage* Messag
 			CraftingItemInfo.ItemMediumCategory = FindReqCompleteItemData->MediumItemCategory;
 			CraftingItemInfo.ItemSmallCategory = FindReqCompleteItemData->SmallItemCategory;
 			CraftingItemInfo.ItemName = (LPWSTR)CA2W(FindReqCompleteItemData->ItemName.c_str());
+			CraftingItemInfo.ItemExplain = (LPWSTR)CA2W(FindReqCompleteItemData->ItemExplain.c_str());
 			CraftingItemInfo.ItemMinDamage = FindReqCompleteItemData->ItemMinDamage;
 			CraftingItemInfo.ItemMaxDamage = FindReqCompleteItemData->ItemMaxDamage;
 			CraftingItemInfo.ItemDefence = FindReqCompleteItemData->ItemDefence;
@@ -2706,10 +2707,11 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 				int64 PlayerDBId = Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectId;
 				int8 QuickSlotBarIndex = SlotIndex;
 				int8 QuickSlotBarSlotIndex;
-				wstring QuickSlotBarKey;
+				wstring QuickSlotBarKey = L"";
+				int8 SkillLargeCategory = (int8)(en_SkillLargeCategory::SKILL_LARGE_CATEGORY_NONE);
 				int16 SkillType = (int16)(en_SkillType::SKILL_TYPE_NONE);
 				int8 SkillLevel = 0;
-				wstring SkillName;
+				wstring SkillName = L"";
 				int32 SkillCoolTime = 0;
 				int32 SkillCastingTime = 0;
 				wstring SkillThumbnailImagePath;
@@ -2734,6 +2736,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 					QuickSlotBarSlotCreate.InQuickSlotBarIndex(SlotIndex);
 					QuickSlotBarSlotCreate.InQuickSlotBarSlotIndex(QuickSlotBarSlotIndex);
 					QuickSlotBarSlotCreate.InQuickSlotKey(QuickSlotBarKey);
+					QuickSlotBarSlotCreate.InSkillLargeCategory(SkillLargeCategory);
 					QuickSlotBarSlotCreate.InSkillType(SkillType);
 					QuickSlotBarSlotCreate.InSkillLevel(SkillLevel);
 					QuickSlotBarSlotCreate.InSkillName(SkillName);
@@ -2861,7 +2864,7 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 	}
 	break;
 	}
-
+	
 	if (Find == true)
 	{
 		bool ItemIsQuickSlotUse = false;
@@ -3223,8 +3226,7 @@ void CGameServer::PacketProcReqDBCraftingItemToInventorySave(int64 SessionId, CM
 			int16 MaterialItemSmallCategory = (int16)MaterialItem->_ItemInfo.ItemSmallCategory;
 			int16 MaterialItemCount = MaterialItem->_ItemInfo.ItemCount;
 			int8 MaterialItemSlotIndex = MaterialItem->_ItemInfo.ItemSlotIndex;
-
-			// 만약 개수가 0개라면 해당 인벤토리 슬롯을 초기화 시킨다.
+						
 			if (MaterialItemCount != 0)
 			{
 				// 재료템을 DB에서 개수 업데이트
@@ -3242,6 +3244,7 @@ void CGameServer::PacketProcReqDBCraftingItemToInventorySave(int64 SessionId, CM
 			}
 			else
 			{
+				// 만약 개수가 0개라면 해당 인벤토리 슬롯을 초기화 시킨다.
 				wstring InitString = L"";
 
 				CDBConnection* InventoryItemInitDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
@@ -3631,6 +3634,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			int8 QuickSlotBarIndex;
 			int8 QuickSlotBarSlotIndex;
 			WCHAR QuickSlotKey[20] = { 0 };
+			int8 QuickSlotSkillLargeCategory;
 			int16 QuickSlotSkillType;
 			int8 QuickSlotSkillLevel;
 			int32 QuickSlotSkillCoolTime;
@@ -3639,6 +3643,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 
 			QuickSlotBarGet.OutQuickSlotBarIndex(QuickSlotBarIndex);
 			QuickSlotBarGet.OutQuickSlotBarItemIndex(QuickSlotBarSlotIndex);
+			QuickSlotBarGet.OutQuickSlotSkillLargeCategory(QuickSlotSkillLargeCategory);
 			QuickSlotBarGet.OutQuickSlotKey(QuickSlotKey);
 			QuickSlotBarGet.OutQuickSlotSkillType(QuickSlotSkillType);
 			QuickSlotBarGet.OutQuickSlotSkillLevel(QuickSlotSkillLevel);
@@ -3656,6 +3661,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				NewQuickSlotBarSlot.QuickSlotBarIndex = QuickSlotBarIndex;
 				NewQuickSlotBarSlot.QuickSlotBarSlotIndex = QuickSlotBarSlotIndex;
 				NewQuickSlotBarSlot.QuickSlotKey = QuickSlotKey;
+				NewQuickSlotBarSlot.QuickBarSkillInfo.SkillLargeCategory = (en_SkillLargeCategory)QuickSlotSkillLargeCategory;
 				NewQuickSlotBarSlot.QuickBarSkillInfo.SkillType = (en_SkillType)QuickSlotSkillType;
 				NewQuickSlotBarSlot.QuickBarSkillInfo.SkillLevel = QuickSlotSkillLevel;
 				NewQuickSlotBarSlot.QuickBarSkillInfo.SkillCoolTime = QuickSlotSkillCoolTime;
@@ -3846,6 +3852,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			CharacterSkillGet.InPlayerDBId(Session->MyPlayer->_GameObjectInfo.ObjectId);
 
 			bool IsQuickSlotUse;
+			int8 SkillLargeCategory;
 			int16 SkillType;
 			int8 SkillLevel;
 			WCHAR SkillName[20] = { 0 };
@@ -3854,6 +3861,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			WCHAR SkillThumbnailImagePath[100] = { 0 };
 
 			CharacterSkillGet.OutIsQuickSlotUse(IsQuickSlotUse);
+			CharacterSkillGet.OutSkillLargeCategory(SkillLargeCategory);
 			CharacterSkillGet.OutSkillType(SkillType);
 			CharacterSkillGet.OutSkillLevel(SkillLevel);
 			CharacterSkillGet.OutSkillName(SkillName);
@@ -3867,6 +3875,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			{
 				st_SkillInfo SkillInfo;
 				SkillInfo.IsQuickSlotUse = IsQuickSlotUse;
+				SkillInfo.SkillLargeCategory = (en_SkillLargeCategory)SkillLargeCategory;
 				SkillInfo.SkillType = (en_SkillType)SkillType;
 				SkillInfo.SkillLevel = SkillLevel;
 				SkillInfo.SkillName = SkillName;
@@ -3962,7 +3971,10 @@ void CGameServer::PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CGameServ
 				FindSkill->IsQuickSlotUse = true;
 
 				Session->MyPlayer->_QuickSlotManager.UpdateQuickSlotBar(SaveQuickSlotInfo);
+				
+				int8 SkillLargeCategory = (int8)SaveQuickSlotInfo.QuickBarSkillInfo.SkillLargeCategory;
 				int16 SkillType = (int16)SaveQuickSlotInfo.QuickBarSkillInfo.SkillType;
+
 				// DB에 퀵슬롯 정보 저장
 				CDBConnection* DBQuickSlotUpdateConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 				SP::CDBGameServerQuickSlotBarSlotUpdate QuickSlotUpdate(*DBQuickSlotUpdateConnection);
@@ -3971,6 +3983,8 @@ void CGameServer::PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CGameServ
 				QuickSlotUpdate.InQuickSlotBarIndex(SaveQuickSlotInfo.QuickSlotBarIndex);
 				QuickSlotUpdate.InQuickSlotBarSlotIndex(SaveQuickSlotInfo.QuickSlotBarSlotIndex);
 				QuickSlotUpdate.InQuickSlotKey(SaveQuickSlotInfo.QuickSlotKey);
+
+				QuickSlotUpdate.InSkillLargeCategory(SkillLargeCategory);
 				QuickSlotUpdate.InSkillType(SkillType);
 				QuickSlotUpdate.InSkillLevel(SaveQuickSlotInfo.QuickBarSkillInfo.SkillLevel);
 				QuickSlotUpdate.InSkillName(SaveQuickSlotInfo.QuickBarSkillInfo.SkillName);
@@ -4032,6 +4046,7 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 			QuickSlotACheck.InQuickSlotBarSlotIndex(QuickSlotBarSlotSwapIndexA);
 
 			WCHAR QuickSlotAKey[20] = { 0 };
+			int8 QuickSlotASkillLargeCategory;
 			int16 QuickSlotASkillType;
 			int8 QuickSlotASkillLevel;
 			WCHAR QuickSlotASkillName[20] = { 0 };
@@ -4040,6 +4055,7 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 			WCHAR QuickSlotASkillImagePath[100] = { 0 };
 
 			QuickSlotACheck.OutQuickSlotKey(QuickSlotAKey);
+			QuickSlotACheck.OutQuickSlotSkillLargeCategory(QuickSlotASkillLargeCategory);
 			QuickSlotACheck.OutQuickSlotSkillType(QuickSlotASkillType);
 			QuickSlotACheck.OutQuickSlotSkillLevel(QuickSlotASkillLevel);
 			QuickSlotACheck.OutQuickSlotSkillName(QuickSlotASkillName);
@@ -4059,6 +4075,7 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 			SwapAQuickSlotBarInfo.PlayerDBId = PlayerId;
 			SwapAQuickSlotBarInfo.QuickSlotBarIndex = QuickSlotBarSwapIndexB;
 			SwapAQuickSlotBarInfo.QuickSlotBarSlotIndex = QuickSlotBarSlotSwapIndexB;
+			SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillLargeCategory = (en_SkillLargeCategory)QuickSlotASkillLargeCategory;
 			SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillType = (en_SkillType)QuickSlotASkillType;
 			SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillLevel = QuickSlotASkillLevel;
 			SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillName = QuickSlotASkillName;
@@ -4076,6 +4093,7 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 			QuickSlotBCheck.InQuickSlotBarSlotIndex(QuickSlotBarSlotSwapIndexB);
 
 			WCHAR QuickSlotBKey[20] = { 0 };
+			int8 QuickSlotBSkillLargeCategory;
 			int16 QuickSlotBSkillType;
 			int8 QuickSlotBSkillLevel;
 			WCHAR QuickSlotBSkillName[20] = { 0 };
@@ -4084,6 +4102,7 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 			WCHAR QuickSlotBSkillImagePath[100] = { 0 };
 
 			QuickSlotBCheck.OutQuickSlotKey(QuickSlotBKey);
+			QuickSlotBCheck.OutQuickSlotSkillLargeCategory(QuickSlotBSkillLargeCategory);
 			QuickSlotBCheck.OutQuickSlotSkillType(QuickSlotBSkillType);
 			QuickSlotBCheck.OutQuickSlotSkillLevel(QuickSlotBSkillLevel);
 			QuickSlotBCheck.OutQuickSlotSkillName(QuickSlotBSkillName);
@@ -4103,6 +4122,7 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 			SwapBQuickSlotBarInfo.PlayerDBId = PlayerId;
 			SwapBQuickSlotBarInfo.QuickSlotBarIndex = QuickSlotBarSwapIndexA;
 			SwapBQuickSlotBarInfo.QuickSlotBarSlotIndex = QuickSlotBarSlotSwapIndexA;
+			SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillLargeCategory = (en_SkillLargeCategory)QuickSlotBSkillLargeCategory;
 			SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillType = (en_SkillType)QuickSlotBSkillType;
 			SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillLevel = QuickSlotBSkillLevel;
 			SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillName = QuickSlotBSkillName;
@@ -4115,7 +4135,9 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 #pragma endregion
 
 #pragma region DB에서 퀵슬롯 스왑
+			int8 ASkillLargeCategory = (int8)SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillLargeCategory;
 			int16 ASkillType = (int16)SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillType;
+			int8 BSkillLargeCategory = (int8)SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillLargeCategory;
 			int16 BSkillType = (int16)SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillType;
 
 			CDBConnection* DBQuickSlotSwapConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
@@ -4125,6 +4147,7 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 
 			QuickSlotSwap.InAQuickSlotBarIndex(SwapBQuickSlotBarInfo.QuickSlotBarIndex);
 			QuickSlotSwap.InAQuickSlotBarSlotIndex(SwapBQuickSlotBarInfo.QuickSlotBarSlotIndex);
+			QuickSlotSwap.InASkillLargeCategory(BSkillLargeCategory);
 			QuickSlotSwap.InAQuickSlotSkillType(BSkillType);
 			QuickSlotSwap.InAQuickSlotSkillLevel(SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillLevel);
 			QuickSlotSwap.InAQuickSlotSKillName(SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillName);
@@ -4134,6 +4157,7 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 
 			QuickSlotSwap.InBQuickSlotBarIndex(SwapAQuickSlotBarInfo.QuickSlotBarIndex);
 			QuickSlotSwap.InBQuickSlotBarSlotIndex(SwapAQuickSlotBarInfo.QuickSlotBarSlotIndex);
+			QuickSlotSwap.InBSkillLargeCategory(ASkillLargeCategory);
 			QuickSlotSwap.InBQuickSlotSkillType(ASkillType);
 			QuickSlotSwap.InBQuickSlotSkillLevel(SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillLevel);
 			QuickSlotSwap.InBQuickSlotSKillName(SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillName);
@@ -4192,6 +4216,7 @@ void CGameServer::PacketProcReqDBQuickSlotInit(int64 SessionId, CMessage* Messag
 			QuickSlotACheck.InQuickSlotBarSlotIndex(QuickSlotBarSlotIndex);
 
 			WCHAR QuickSlotKey[20] = { 0 };
+			int8 QuickSlotSkillLargeCategory;
 			int16 QuickSlotSkillType;
 			int8 QuickSlotSkillLevel;
 			WCHAR QuickSlotSkillName[20] = { 0 };
@@ -4200,6 +4225,7 @@ void CGameServer::PacketProcReqDBQuickSlotInit(int64 SessionId, CMessage* Messag
 			WCHAR QuickSlotSkillImagePath[100] = { 0 };
 
 			QuickSlotACheck.OutQuickSlotKey(QuickSlotKey);
+			QuickSlotACheck.OutQuickSlotSkillLargeCategory(QuickSlotSkillLargeCategory);
 			QuickSlotACheck.OutQuickSlotSkillType(QuickSlotSkillType);
 			QuickSlotACheck.OutQuickSlotSkillLevel(QuickSlotSkillLevel);
 			QuickSlotACheck.OutQuickSlotSkillName(QuickSlotSkillName);
@@ -4216,10 +4242,15 @@ void CGameServer::PacketProcReqDBQuickSlotInit(int64 SessionId, CMessage* Messag
 			// 찾은 퀵슬롯 정보를 초기화
 			CDBConnection* DBQuickSlotInitConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 			SP::CDBGameServerQuickSlotInit QuickSlotInit(*DBQuickSlotInitConnection);
+
+			wstring InitString = L"";
+
 			QuickSlotInit.InAccountDBId(AccountId);
 			QuickSlotInit.InPlayerDBId(PlayerId);
 			QuickSlotInit.InQuickSlotBarIndex(QuickSlotBarIndex);
 			QuickSlotInit.InQuickSlotBarSlotIndex(QuickSlotBarSlotIndex);
+			QuickSlotInit.InQuickSlotBarSkillName(InitString);
+			QuickSlotInit.InQuickSlotBarSkillThumbnailImagePath(InitString);
 
 			QuickSlotInit.Execute();
 
@@ -4287,7 +4318,7 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CMessage* Message)
 
 		switch (MyPlayer->_SkillType)
 		{
-		case en_SkillType::SKILL_SHAMNA_FLAME_HARPOON:
+		case en_SkillType::SKILL_SHAMAN_FLAME_HARPOON:
 		{
 			HitEffectType = en_EffectType::EFFECT_FLAME_HARPOON_TARGET;
 
@@ -5203,8 +5234,28 @@ void CGameServer::CoolTimeSkillTimerJobCreate(CPlayer* Player, int64 CastingTime
 	CoolTimeSkillInfo->CanSkillUse = false;
 
 	// 스킬 쿨타임 얻어옴
-	auto FindSkilliterator = G_Datamanager->_Skills.find((int32)CoolTimeSkillInfo->SkillType);
-	st_SkillData* ReqSkillData = (*FindSkilliterator).second;
+	st_SkillData* ReqSkillData = nullptr;
+	switch (CoolTimeSkillInfo->SkillLargeCategory)
+	{
+	case en_SkillLargeCategory::SKILL_LARGE_CATEGORY_PLAYER_MELEE:
+		{	
+			auto FindSkilliterator = G_Datamanager->_PlayerMeleeSkills.find((int16)CoolTimeSkillInfo->SkillType);
+			if (FindSkilliterator != G_Datamanager->_PlayerMeleeSkills.end())
+			{
+				ReqSkillData = (*FindSkilliterator).second;
+			}
+		}
+		break;
+	case en_SkillLargeCategory::SKILL_LARGE_CATEGORY_PLAYER_MAGIC:
+		{
+			auto FindSkilliterator = G_Datamanager->_PlayerMagicSkills.find((int16)CoolTimeSkillInfo->SkillType);
+			if (FindSkilliterator != G_Datamanager->_PlayerMagicSkills.end())
+			{
+				ReqSkillData = (*FindSkilliterator).second;
+			}
+		}
+		break;	
+	}	
 
 	// 스킬 쿨타임 스킬쿨타임 잡 등록
 	st_TimerJob* SkillCoolTimeTimerJob = _TimerJobMemoryPool->Alloc();
