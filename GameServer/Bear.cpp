@@ -93,7 +93,7 @@ void CBear::OnDead(CGameObject* Killer)
 	BroadCastPacket(en_PACKET_S2C_CHANGE_OBJECT_STAT);
 	BroadCastPacket(en_PACKET_S2C_DIE);		
 
-	G_ObjectManager->GameServer->SpawnObjectTime(this, 10000);
+	G_ObjectManager->GameServer->SpawnObjectTime((int16)_GameObjectInfo.ObjectType, _SpawnPosition, 10000);
 
 	G_ObjectManager->Remove(this, 1);		
 }

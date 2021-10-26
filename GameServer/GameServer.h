@@ -90,7 +90,7 @@ private:
 	//---------------------------------------------------------------
 	// 공격 요청 처리
 	//---------------------------------------------------------------
-	void PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message);
+	void PacketProcReqMelee(int64 SessionID, CMessage* Message);
 	//---------------------------------------------------------
 	// 마법 요청 처리
 	//---------------------------------------------------------
@@ -421,5 +421,5 @@ public:
 	//--------------------------------------------------------------
 	// 오브젝트 스폰 타이머 잡 생성
 	//--------------------------------------------------------------
-	void SpawnObjectTime(CGameObject* SpawnObject, int64 SpawnTime);
+	void SpawnObjectTime(int16 SpawnObjectType, st_Vector2Int SpawnPosition, int64 SpawnTime);
 };

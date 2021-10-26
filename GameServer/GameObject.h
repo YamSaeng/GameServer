@@ -46,7 +46,6 @@ public:
 	//------------------------------------------------------------------------------------
 	vector<st_Vector2Int> GetAroundCellPositions(st_Vector2Int CellPosition, int8 Distance);
 	
-
 	void SetTarget(CGameObject* Target);
 	CGameObject* GetTarget();
 protected:

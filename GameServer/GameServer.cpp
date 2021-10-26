@@ -394,7 +394,7 @@ void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 		PacketProcReqMove(SessionId, Message);
 		break;
 	case en_PACKET_TYPE::en_PACKET_C2S_ATTACK:
-		PacketProcReqMeleeAttack(SessionId, Message);
+		PacketProcReqMelee(SessionId, Message);
 		break;
 	case en_PACKET_TYPE::en_PACKET_C2S_MAGIC:
 		PacketProcReqMagic(SessionId, Message);
@@ -784,7 +784,7 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 // int64 AccountId
 // int32 PlayerDBId
 // char Dir
-void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
+void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 {
 	st_Session* Session = FindSession(SessionID);
 
@@ -909,6 +909,11 @@ void CGameServer::PacketProcReqMeleeAttack(int64 SessionID, CMessage* Message)
 								ResSyncPosition = MakePacketResSyncPosition(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectPositionInfo);
 								SendPacketAroundSector(Target->GetCellPosition(), ResSyncPosition);
 								ResSyncPosition->Free();
+
+								Target->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::STUN;
+								CMessage* ResObjectStateChange = MakePacketResObjectState(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectPositionInfo.MoveDir, Target->_GameObjectInfo.ObjectType, Target->_GameObjectInfo.ObjectPositionInfo.State);
+								SendPacketAroundSector(Target->GetCellPosition(), ResObjectStateChange);
+								ResObjectStateChange->Free();
 							}
 						}
 						else
@@ -4430,7 +4435,20 @@ void CGameServer::PacketProcTimerObjectSpawn(CMessage* Message)
 
 	Message->Free();
 
-	G_ObjectManager->ObjectSpawn((en_GameObjectType)SpawnObjectType, SpawnPosition);
+	CChannel* Channel = G_ChannelManager->Find(1);
+	if (Channel != nullptr)
+	{
+		// 스폰할 위치에 이미 다른 오브젝트가 있을 경우 스폰 하지 않고 다시 예약한다. 		
+		CGameObject* FindGameObject = Channel->_Map->Find(SpawnPosition);
+		if (FindGameObject != nullptr)
+		{				
+			SpawnObjectTime(SpawnObjectType, SpawnPosition, 10000);
+		}
+		else
+		{
+			G_ObjectManager->ObjectSpawn((en_GameObjectType)SpawnObjectType, SpawnPosition);
+		}		
+	}	
 }
 
 CGameServerMessage* CGameServer::MakePacketResClientConnected()
@@ -5281,7 +5299,7 @@ void CGameServer::CoolTimeSkillTimerJobCreate(CPlayer* Player, int64 CastingTime
 	SetEvent(_TimerThreadWakeEvent);
 }
 
-void CGameServer::SpawnObjectTime(CGameObject* SpawnObject, int64 SpawnTime)
+void CGameServer::SpawnObjectTime(int16 SpawnObjectType, st_Vector2Int SpawnPosition, int64 SpawnTime)
 {
 	st_TimerJob* SpawnObjectTimerJob = _TimerJobMemoryPool->Alloc();
 	SpawnObjectTimerJob->TimerJobExecTick = GetTickCount64() + SpawnTime;
@@ -5296,9 +5314,9 @@ void CGameServer::SpawnObjectTime(CGameObject* SpawnObject, int64 SpawnTime)
 
 	ResObjectSpawnMessage->Clear();
 
-	*ResObjectSpawnMessage << (int16)SpawnObject->_GameObjectInfo.ObjectType;
+	*ResObjectSpawnMessage << SpawnObjectType;
 
-	*ResObjectSpawnMessage << SpawnObject->_SpawnPosition;
+	*ResObjectSpawnMessage << SpawnPosition;
 
 	SpawnObjectTimerJob->TimerJobMessage = ResObjectSpawnMessage;
 
