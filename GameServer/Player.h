@@ -1,5 +1,6 @@
 	#pragma once
 #include "GameObject.h"
+#include "Equipment.h"
 #include "Inventory.h"
 #include "SkillBox.h"
 #include "QuickSlotManager.h"
@@ -17,6 +18,7 @@ public:
 	int64 _SessionId;
 	int64 _AccountId;
 
+	CEquipment _Equipment;
 	CInventory _Inventory;
 	CSkillBox _SkillBox;
 	CQuickSlotManager _QuickSlotManager;
