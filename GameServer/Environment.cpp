@@ -70,7 +70,7 @@ void CStone::OnDead(CGameObject* Killer)
 
 	G_ObjectManager->ItemSpawn(Killer->_GameObjectInfo.ObjectId, Killer->_GameObjectInfo.ObjectType, GetCellPosition(), _GameObjectInfo.ObjectType, en_ObjectDataType::STONE_DATA);
 
-	BroadCastPacket(en_PACKET_S2C_CHANGE_OBJECT_STAT);
+	BroadCastPacket(en_PACKET_S2C_OBJECT_STAT_CHANGE);
 	BroadCastPacket(en_PACKET_S2C_DIE);
 
 	G_ObjectManager->GameServer->SpawnObjectTime((int16)_GameObjectInfo.ObjectType, GetCellPosition(), 10000);
@@ -107,7 +107,7 @@ void CTree::OnDead(CGameObject* Killer)
 
 	G_ObjectManager->ItemSpawn(Killer->_GameObjectInfo.ObjectId, Killer->_GameObjectInfo.ObjectType, GetCellPosition(), _GameObjectInfo.ObjectType, en_ObjectDataType::TREE_DATA);
 	
-	BroadCastPacket(en_PACKET_S2C_CHANGE_OBJECT_STAT);
+	BroadCastPacket(en_PACKET_S2C_OBJECT_STAT_CHANGE);
 	BroadCastPacket(en_PACKET_S2C_DIE);
 
 	G_ObjectManager->GameServer->SpawnObjectTime((int16)_GameObjectInfo.ObjectType, GetCellPosition(), 10000);

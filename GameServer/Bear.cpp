@@ -90,7 +90,7 @@ void CBear::OnDead(CGameObject* Killer)
 		Killer->_GameObjectInfo.ObjectStatInfo.DP = Killer->_GameObjectInfo.ObjectStatInfo.MaxDP;
 	}
 
-	BroadCastPacket(en_PACKET_S2C_CHANGE_OBJECT_STAT);
+	BroadCastPacket(en_PACKET_S2C_OBJECT_STAT_CHANGE);
 	BroadCastPacket(en_PACKET_S2C_DIE);		
 
 	G_ObjectManager->GameServer->SpawnObjectTime((int16)_GameObjectInfo.ObjectType, _SpawnPosition, 10000);

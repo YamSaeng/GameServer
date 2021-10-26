@@ -145,7 +145,7 @@ void CGameObject::BroadCastPacket(en_PACKET_TYPE PacketType)
 			_GameObjectInfo.ObjectType,
 			_GameObjectInfo.ObjectPositionInfo.State);
 		break;	
-	case en_PACKET_TYPE::en_PACKET_S2C_CHANGE_OBJECT_STAT:
+	case en_PACKET_TYPE::en_PACKET_S2C_OBJECT_STAT_CHANGE:
 		ResPacket = G_ObjectManager->GameServer->MakePacketChangeObjectStat(_Target->_GameObjectInfo.ObjectId,
 			_Target->_GameObjectInfo.ObjectStatInfo);
 		break;
