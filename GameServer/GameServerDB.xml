@@ -113,6 +113,7 @@
     <Column name="SkillImagePath" type="nvarchar(100)"/>    
   </Table> 
   
+  <!-- AccountID를 기준으로 클라가 소유하고 있는 캐릭터를 찾는다. -->
   <Procedure name="spGetPlayers">
     <Param name="@AccountId" type="BigInt"/>
     <Body>
@@ -122,6 +123,7 @@
     </Body>
   </Procedure>
 
+  <!-- 입력한 캐릭터의 이름이 DB에 있는지 확인한다. -->
   <Procedure name="spGetCharacterName">
     <Param name="@CharacterName" type="nvarchar(20)"/>
     <Body>
@@ -166,7 +168,7 @@
     </Body>
   </Procedure>
 
-  <!-- GoldTable 생성-->
+  <!-- 골드 테이블 생성-->
   <Procedure name="spGoldTableCreate">
     <Param name="@AccountDBId" type="BigInt"/>
     <Param name="@PlayerDBId" type="BigInt"/>    
@@ -177,7 +179,7 @@
     </Body>
   </Procedure>
   
-  <!-- GoldTable에 Gold 저장 -->
+  <!-- 골드 테이블에 골드 저장 -->
   <Procedure name="spGoldSave">
     <Param name="@AccountDBId" type="BigInt"/>
     <Param name="@PlayerDBId" type="BigInt"/>    
@@ -191,7 +193,7 @@
     </Body>    
   </Procedure>
 
-  <!-- GoldTable에 저장되어 있는 정보 긁어오기 -->
+  <!-- 골드 테이블에 저장되어 있는 정보 긁어오기 -->
   <Procedure name="spGetGoldTableInfoToInventory">
     <Param name="@AccountDBId" type="BigInt"/>
     <Param name="@PlayerDBId" type="BigInt"/>
@@ -202,7 +204,7 @@
     </Body>
   </Procedure>
   
-  <!-- ItemTable에 새로운 아이템 생성 -->
+  <!-- 아이템 테이블에 새로운 아이템 생성 -->
   <Procedure name="spItemCreate">
     <Param name="@ItemUse" type="bit"/>
     <Param name="@IsQuickSlotUse" type="bit"/>
@@ -234,7 +236,7 @@
     </Body>
   </Procedure>
   
-  <!-- InventoryTable 빈껍데기 아이템 정보 생성-->  
+  <!-- 인벤토리 테이블 빈껍데기 아이템 정보 생성-->  
   <Procedure name="spItemToInventoryInit">
     <Param name="@ItemName" type="nvarchar(20)"/>
     <Param name="@SlotIndex" type="TinyInt"/>
@@ -248,7 +250,7 @@
     </Body>
   </Procedure> 
   
-  <!-- InventoryTable에 새로운 아이템 저장 -->
+  <!-- 인벤토리 테이블에 새로운 아이템 저장 -->
   <Procedure name="spItemToInventorySave">
     <Param name="@IsQuickSlotUse" type="bit"/>
     <Param name="@ItemLargeCategory" type="TinyInt" notnull="true"/>
@@ -279,7 +281,7 @@
     </Body>
   </Procedure> 
   
-  <!-- ItemTable에 아이템 갱신 -->
+  <!-- 아이템 테이블에 아이템 갱신 -->
   <Procedure name="spItemRefreshCount">
     <Param name="@OwnerAccountDBId" type="BigInt"/>
     <Param name="@OwnerPlayerDBId" type="BigInt"/>
@@ -293,7 +295,7 @@
     </Body>
   </Procedure>  
   
-  <!-- Inventory에 아이템 있는지 확인 -->
+  <!-- 인벤토리 테이블에 아이템 있는지 확인 -->
   <Procedure name="spInventoryItemCheck">
     <Param name="@AccountDBId" type="BigInt"/>
     <Param name="@PlayerDbId" type="BigInt"/>
@@ -307,7 +309,7 @@
     </Body>    
   </Procedure>
   
-  <!-- InventoryItem Swap -->
+  <!-- 인벤토리 테이블에서 아이템 스왑 -->
   <Procedure name="spInventoryItemSwap">
     <Param name="@OwnerAccountDBId" type="BigInt"/>
     <Param name="@OwnerPlayerDBId" type="BigInt"/>
@@ -345,7 +347,7 @@
     </Body>
   </Procedure>  
   
-  <!-- InventoryTable에 있는 아이템 가지고 옴-->
+  <!-- 인벤토리 테이블에 있는 아이템 가지고 옴-->
   <Procedure name="spGetItemTableInfoToInventory">
     <Param name="@AccountDBId" type="BigInt"/>
     <Param name="@PlayerDBId" type="BigInt"/>
@@ -356,7 +358,7 @@
     </Body>
   </Procedure>
   
-  <!-- ItemTable에 있는 아이템 삭제 -->
+  <!-- 아이템 테이블에 있는 아이템 삭제 -->
   <Procedure name="spItemDelete">
     <Param name="@ItemDBId" type="BigInt"/>
     <Param name="@ItemUse" type="bit"/>
@@ -367,7 +369,7 @@
     </Body>
   </Procedure>
 
-  <!--InventorySlotInit-->
+  <!-- 인벤토리 아이템 초기화 -->
   <Procedure name="spInventorySlotInit">
     <Param name="@OwnerAccountDBId" type="BigInt"/>
     <Param name="@OwnerPlayerDBId" type="BigInt"/>
@@ -381,7 +383,20 @@
     </Body>
   </Procedure>
   
-  <!-- SkillTable에 있는 Skill 가지고 오기-->
+  <!-- 인벤토리 아이템 착용 / 착용해제 -->
+  <Procedure name="spInventoryItemEquip">
+    <Param name="@OwnerAccountDBId" type="BigInt"/>
+    <Param name="@OwnerPlayerDBId" type="BigInt"/>
+    <Param name="@SlotIndex" type="TinyInt"/>
+    <Param name="@IsEquipped" type="bit"/>
+    <Body>
+      <![CDATA[
+        UPDATE [dbo].[Inventory] SET IsEquipped = (@IsEquipped) WHERE OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId) And SlotIndex = (@SlotIndex)
+      ]]>
+    </Body>
+  </Procedure>
+  
+  <!-- 스킬 테이블에 있는 스킬 가지고 오기-->
   <Procedure name="spGetSkill">
     <Param name="@AccountDBId" type="BigInt"/>
     <Param name="@PlayerDBId" type="BigInt"/>
@@ -392,7 +407,7 @@
     </Body>
   </Procedure>  
     
-  <!-- QuickSlotBarTable에 새로운 QuickSlotBarSlot 생성 -->
+  <!-- 퀵슬롯바 테이블에 새로운 퀵슬롯바 슬롯 생성 -->
   <Procedure name="spQuickSlotBarSlotCreate">
     <Param name="@AccountDBId" type="BigInt"/>
     <Param name="@PlayerDBId" type="BigInt"/>
@@ -413,7 +428,7 @@
     </Body>   
   </Procedure>
 
-  <!-- QuickSlotBarTable에 새로운 퀵슬롯바아이템 저장 -->
+  <!-- 퀵슬롯바 테이블에 새로운 퀵슬롯바 슬롯 저장 -->
   <Procedure name="spQuickSlotBarSlotUpdate">
     <Param name="@AccountDBId" type="BigInt"/>
     <Param name="@PlayerDBId" type="BigInt"/>
@@ -435,7 +450,7 @@
     </Body>
   </Procedure>
   
-  <!-- QuickSlotBarTable에 있는 퀵슬롯 정보 가져오기 -->
+  <!-- 퀵슬롯바 테이블에 있는 퀵슬롯 정보 가져오기 -->
   <Procedure name="spGetQuickSlotBarSlot">
     <Param name="@AccountDBId" type="BigInt"/>
     <Param name="@PlayerDBId" type="BigInt"/>    
@@ -446,7 +461,7 @@
     </Body>
   </Procedure>
 
-  <!-- QuickSlotBarTable에 있는 퀵슬롯 정보 가져오기 -->
+  <!-- 퀵슬롯바 테이블에 있는 퀵슬롯 정보 가져오기 -->
   <Procedure name="spQuickSlotCheck">
     <Param name="@AccountDBId" type="BigInt"/>
     <Param name="@PlayerDBId" type="BigInt"/>
@@ -459,7 +474,7 @@
     </Body>
   </Procedure>
   
-  <!--QuickSlotSwap -->
+  <!-- 퀵슬롯바 테이블에서 퀵슬롯바 슬롯 스왑 -->
   <Procedure name="spQuickSlotSwap">
     <Param name="@AccountDBId" type="BigInt"/>
     <Param name="@PlayerDBId" type="BigInt"/>
@@ -489,7 +504,7 @@
     </Body>
   </Procedure>
 
-  <!--QuickSlotInit-->
+  <!-- 퀵슬롯바 테이블에서 퀵슬롯바 슬롯 초기화-->
   <Procedure name="spQuickSlotInit">
     <Param name="@AccountDBId" type="BigInt"/>
     <Param name="@PlayerDBId" type="BigInt"/>
@@ -499,7 +514,7 @@
     <Param name="@QuickSlotSkillImagePath" type="nvarchar(100)"/>
     <Body>
       <![CDATA[
-        UPDATE [dbo].[QuickSlotBar] SET SkillLargeCategory = 0, SkillType = 0, SkillLevel = 0, SkillName = NULL, SkillCoolTime = (@QuickSlotSkillName), SkillCastingTime = 0, SkillImagePath = (@QuickSlotSkillImagePath) WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
+        UPDATE [dbo].[QuickSlotBar] SET SkillLargeCategory = 0, SkillType = 0, SkillLevel = 0, SkillName = (@QuickSlotSkillName), SkillCoolTime = (@QuickSlotSkillName), SkillCastingTime = 0, SkillImagePath = (@QuickSlotSkillImagePath) WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
     </Body>
   </Procedure> 

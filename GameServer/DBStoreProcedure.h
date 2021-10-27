@@ -174,7 +174,7 @@ namespace SP
 		template<int16 Length> void OutItemThumbnailImagePath(WCHAR(&ItemThumbnailImagePath)[Length]) { BindCol(11, ItemThumbnailImagePath); }
 	};
 
-	// InventoryItemSwap Swap 
+	// 인벤토리 아이템 스왑
 	class CDBGameServerItemSwap : public CDBBind<28, 0>
 	{
 	public:
@@ -211,7 +211,7 @@ namespace SP
 		void InBItemSlotIndex(int8& BItemSlotIndex) { BindParam(27, BItemSlotIndex); }
 	};
 
-	// Item Delete
+	// 아이템 삭제
 	class CDBGameServerItemDelete : public CDBBind<2, 0>
 	{
 	public:
@@ -220,7 +220,7 @@ namespace SP
 		void InItemUse(bool& ItemUse) { BindParam(1, ItemUse); }
 	};
 
-	// Inventory Item 초기화
+	// 인벤토리 아이템 초기화
 	class CDBGameServerInventorySlotInit : public CDBBind<5, 0>
 	{
 	public:
@@ -230,6 +230,17 @@ namespace SP
 		void InSlotIndex(int8& SlotIndex) { BindParam(2, SlotIndex); }
 		void InItemName(wstring& ItemName) { BindParam(3, ItemName.c_str()); }
 		void InItemThumbnailImagePath(wstring& ItemThumbnailImagePath) { BindParam(4, ItemThumbnailImagePath.c_str()); }
+	};
+
+	// 인벤토리 아이템 착용 / 착용해제
+	class CDBGameServerInventoryItemEquip : public CDBBind<4, 0>
+	{
+	public:
+		CDBGameServerInventoryItemEquip(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spInventoryItemEquip(?,?,?,?)}") {}
+		void InOwnerAccountId(int64& OwnerAccountId) { BindParam(0, OwnerAccountId); }
+		void InOwnerPlayerId(int64& OwnerPlayerId) { BindParam(1, OwnerPlayerId); }
+		void InSlotIndex(int8& SlotIndex) { BindParam(2, SlotIndex); }
+		void InIsEquipped(bool& IsEquipped) { BindParam(3, IsEquipped); }
 	};
 
 	// GoldTable 생성
