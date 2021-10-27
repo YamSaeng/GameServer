@@ -397,7 +397,7 @@
     </Body>
   </Procedure>
   
-  <!-- 스킬 테이블에 있는 스킬 가지고 오기-->
+  <!-- 스킬 테이블에 있는 스킬 가지고 오기 -->
   <Procedure name="spGetSkill">
     <Param name="@AccountDBId" type="BigInt"/>
     <Param name="@PlayerDBId" type="BigInt"/>
@@ -408,6 +408,25 @@
     </Body>
   </Procedure>  
     
+  <!-- 스킬 테이블에 새로운 스킬 넣기 -->
+  <Procedure name="spSkillToSkillBox">
+    <Param name="@AccountDBId" type="BigInt"/>
+    <Param name="@PlayerDBId" type="BigInt"/>
+    <Param name="@IsQuickSlotUse" type="Bit"/>
+    <Param name="@SkillLargeCategory" type="TinyInt"/>
+    <Param name="@SkillType" type="SmallInt"/>
+    <Param name="@SkillLevel" type="TinyInt"/>
+    <Param name="@SkillName" type="nvarchar(20)"/>
+    <Param name="@SkillCoolTime" type="int"/>
+    <Param name="@SkillCastingTime" type="int"/>
+    <Param name="@SkillImagePath" type="nvarchar(100)"/>
+    <Body>
+      <![CDATA[
+        INSERT INTO [dbo].[Skill] VALUES ((@AccountDBId),(@PlayerDBId),(@IsQuickSlotUse),(@SkillLargeCategory),(@SkillType),(@SkillLevel),(@SkillName),(@SkillCoolTime),(@SkillCastingTime),(@SkillImagePath))
+      ]]>
+    </Body>
+  </Procedure>
+  
   <!-- 퀵슬롯바 테이블에 새로운 퀵슬롯바 슬롯 생성 -->
   <Procedure name="spQuickSlotBarSlotCreate">
     <Param name="@AccountDBId" type="BigInt"/>

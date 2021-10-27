@@ -318,6 +318,23 @@ namespace SP
 		template<int8 Length> void OutSkillThumbnailImagePath(WCHAR(&SkillThumbnailImagePath)[Length]) { BindCol(7, SkillThumbnailImagePath); }
 	};
 
+	// 스킬 테이블에 스킬 넣기
+	class CDBGameServerSkillToSkillBox : public CDBBind<10, 0>
+	{
+	public:
+		CDBGameServerSkillToSkillBox(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spSkillToSkillBox(?,?,?,?,?,?,?,?,?,?)}") {}
+		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
+		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
+		void InIsQuickSlotUse(bool& IsQuickSlotUse) { BindParam(2, IsQuickSlotUse); }
+		void InSkillLargeCategory(int8& SkillLargeCategory) { BindParam(3, SkillLargeCategory); };
+		void InSkillType(int16& SkillType) { BindParam(4, SkillType); }
+		void InSkillLevel(int8& SkillLevel) { BindParam(5, SkillLevel); }
+		void InSkillName(wstring& SkillName) { BindParam(6, SkillName.c_str()); }
+		void InSkillCoolTime(int32& SkillCoolTime) { BindParam(7, SkillCoolTime); }
+		void InSkillCastingTime(int32& SkillCastingTime) { BindParam(8, SkillCastingTime); }
+		void InSkillThumbnailImagePath(wstring& SkillThumbnailImagePath) { BindParam(9, SkillThumbnailImagePath.c_str()); }
+	};
+
 	// QuickSlotBarSlot정보 새로 생성
 	class CDBGameServerQuickSlotBarSlotCreate : public CDBBind<12, 0>
 	{
