@@ -26,6 +26,12 @@ struct st_ItemData
 	int16 ItemCount;
 };
 
+struct st_ConsumableData : public st_ItemData
+{
+	int16 HealPoint;
+	en_SkillType SkillType;
+};
+
 struct st_PlayerStatusData
 {
 	int16 PlayerType;
