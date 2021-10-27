@@ -37,7 +37,9 @@ public:
 	//--------------------------------------
 	// ItemType 받아서 아이템정보 반환
 	//--------------------------------------
-	vector<CItem*> Find(en_SmallItemCategory ItemType);
+	vector<CItem*> Find(en_LargeItemCategory ItemLargeType);
+	vector<CItem*> Find(en_MediumItemCategory ItemMediumType);
+	vector<CItem*> Find(en_SmallItemCategory ItemSmallType);	
 
 	//----------------------------------
 	// 비어 있는 슬롯 반환

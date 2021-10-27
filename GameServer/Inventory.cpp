@@ -164,7 +164,41 @@ bool CInventory::IsExistItem(en_SmallItemCategory ItemType, int16& ItemEach, int
 	return false;
 }
 
-vector<CItem*> CInventory::Find(en_SmallItemCategory ItemType)
+vector<CItem*> CInventory::Find(en_LargeItemCategory ItemLargeType)
+{
+	vector<CItem*> FindItem;
+
+	for (auto ItemIterator : _Items)
+	{
+		CItem* Item = (CItem*)ItemIterator.second;
+
+		if (Item != nullptr && Item->_ItemInfo.ItemLargeCategory == ItemLargeType)
+		{
+			FindItem.push_back(Item);
+		}
+	}
+
+	return FindItem;
+}
+
+vector<CItem*> CInventory::Find(en_MediumItemCategory ItemMediumType)
+{
+	vector<CItem*> FindItem;
+
+	for (auto ItemIterator : _Items)
+	{
+		CItem* Item = (CItem*)ItemIterator.second;
+
+		if (Item != nullptr && Item->_ItemInfo.ItemMediumCategory == ItemMediumType)
+		{
+			FindItem.push_back(Item);
+		}
+	}
+
+	return FindItem;
+}
+
+vector<CItem*> CInventory::Find(en_SmallItemCategory ItemSmallType)
 {
 	// 인벤토리에서 ItemType과 같은 모든 아이템을 찾아서 반환한다.
 	vector<CItem*> FindItem;
@@ -173,7 +207,7 @@ vector<CItem*> CInventory::Find(en_SmallItemCategory ItemType)
 	{
 		CItem* Item = (CItem*)ItemIterator.second;
 
-		if (Item != nullptr && Item->_ItemInfo.ItemSmallCategory == ItemType)
+		if (Item != nullptr && Item->_ItemInfo.ItemSmallCategory == ItemSmallType)
 		{
 			FindItem.push_back(Item);
 		}
