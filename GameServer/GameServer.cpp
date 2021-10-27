@@ -206,7 +206,7 @@ unsigned __stdcall CGameServer::DataBaseThreadProc(void* Argument)
 			case en_JobType::DATA_BASE_ITEM_SWAP:
 				Instance->PacketProcReqDBItemSwap(Job->SessionId, Job->Message);
 				break;
-			case en_JobType::DATA_BASE_ITEM_UPDATE:
+			case en_JobType::DATA_BASE_ITEM_USE:
 				Instance->PacketProcReqDBItemUpdate(Job->SessionId, Job->Message);
 				break;
 			case en_JobType::DATA_BASE_GOLD_SAVE:
@@ -2438,6 +2438,8 @@ void CGameServer::PacketProcReqItemUse(int64 SessionId, CMessage* Message)
 	{
 		do
 		{
+			InterlockedIncrement64(&Session->IOBlock->IOCount);
+
 			int64 AccountId;
 			int64 PlayerDBId;
 
@@ -2512,131 +2514,20 @@ void CGameServer::PacketProcReqItemUse(int64 SessionId, CMessage* Message)
 				CRASH("요청한 사용 아이템과 인벤토리에 보관중인 아이템이 다름");
 			}
 
-			switch (UseItem->_ItemInfo.ItemSmallCategory)
-			{
-			case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:
-			case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
-			case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD:
-			case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:			
-				{
-					Session->MyPlayer->_Equipment.ItemEquip(UseItem, Session->MyPlayer);
+			st_Job* DBItemEquipJob = _JobMemoryPool->Alloc();
+			DBItemEquipJob->Type = en_JobType::DATA_BASE_ITEM_USE;
+			DBItemEquipJob->SessionId = Session->MyPlayer->_SessionId;
 
-					st_Job* DBItemEquipJob = _JobMemoryPool->Alloc();
-					DBItemEquipJob->Type = en_JobType::DATA_BASE_ITEM_UPDATE;
-					DBItemEquipJob->SessionId = Session->MyPlayer->_SessionId;
+			CGameServerMessage* DBItemEquipMessage = CGameServerMessage::GameServerMessageAlloc();
+			DBItemEquipMessage->Clear();
 
-					CGameServerMessage* DBItemEquipMessage = CGameServerMessage::GameServerMessageAlloc();
-					DBItemEquipMessage->Clear();
+			// 착용할 아이템과 착용해제한 아이템의 정보를 담음
+			*DBItemEquipMessage << &UseItem;
 
-					// 착용할 아이템과 착용해제한 아이템의 정보를 담음
-					*DBItemEquipMessage << UseItem;
+			DBItemEquipJob->Message = DBItemEquipMessage;
 
-					DBItemEquipJob->Message = DBItemEquipMessage;
-
-					_GameServerDataBaseThreadMessageQue.Enqueue(DBItemEquipJob);
-					SetEvent(_DataBaseWakeEvent);
-				}				
-				break;
-			case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL:
-				Session->MyPlayer->_GameObjectInfo.ObjectStatInfo.HP += 50;
-				break;
-			case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_FIERCE_ATTACK:
-			case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CONVERSION_ATTACK:
-			case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SHAEHONE_ATTACK:
-			case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK:
-			case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SMASH_WAVE_ATTACK:
-			case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHARGE_POSE:
-				{
-					st_ConsumableData* ConsumableSkillItemData = (*G_Datamanager->_Consumables.find((int16)UseItem->_ItemInfo.ItemSmallCategory)).second;					
-					if (ConsumableSkillItemData == nullptr)
-					{
-						CRASH("스킬아이템 데이터를 찾을 수 없습니다.");
-					}
-
-					st_SkillData* SkillData = (*G_Datamanager->_PlayerMeleeSkills.find((int16)ConsumableSkillItemData->SkillType)).second;
-					if (SkillData == nullptr)
-					{
-						CRASH("스킬 데이터를 찾을 수 없습니다.");
-					}
-
-					st_SkillInfo NewSkillInfo;
-					NewSkillInfo.IsQuickSlotUse = false;
-					NewSkillInfo.SkillLargeCategory = SkillData->SkillLargeCategory;
-					NewSkillInfo.SkillType = SkillData->SkillType;
-					NewSkillInfo.SkillLevel = 1;
-					NewSkillInfo.SkillName = (LPWSTR)CA2W(SkillData->SkillName.c_str());
-					NewSkillInfo.SkillCoolTime = SkillData->SkillCoolTime;
-					NewSkillInfo.SkillCastingTime = SkillData->SkillCastingTime;
-					NewSkillInfo.SkillImagePath = (LPWSTR)CA2W(SkillData->SkillThumbnailImagePath.c_str());
-
-					Session->MyPlayer->_SkillBox.AddSkill(NewSkillInfo);
-
-					// 클라가 소유하고 있는 스킬 정보를 보내준다.
-					CMessage* ResSkillToSkillBoxPacket = MakePacketResSkillToSkillBox(Session->MyPlayer->_GameObjectInfo.ObjectId, NewSkillInfo);
-					SendPacket(Session->SessionId, ResSkillToSkillBoxPacket);
-					ResSkillToSkillBoxPacket->Free();
-				}
-				break;
-			case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_FLAME_HARPOON:
-			case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HELL_FIRE:
-			case en_SmallItemCategory::ITEM_SMALL_CATEOGRY_SKILLBOOK_SHAMAN_HEALING_LIGHT:
-			case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HEALING_WIND:
-			case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHOCK_RELEASE:	
-				{
-					st_ConsumableData* ConsumableSkillItemData = (*G_Datamanager->_Consumables.find((int16)UseItem->_ItemInfo.ItemSmallCategory)).second;
-					if (ConsumableSkillItemData == nullptr)
-					{
-						CRASH("스킬아이템 데이터를 찾을 수 없습니다.");
-					}
-
-					st_SkillData* SkillData = (*G_Datamanager->_PlayerMeleeSkills.find((int16)ConsumableSkillItemData->SkillType)).second;
-					if (SkillData == nullptr)
-					{
-						CRASH("스킬 데이터를 찾을 수 없습니다.");
-					}
-
-					st_SkillInfo NewSkillInfo;
-					NewSkillInfo.IsQuickSlotUse = false;
-					NewSkillInfo.SkillLargeCategory = (en_SkillLargeCategory)SkillData->SkillLargeCategory;
-					NewSkillInfo.SkillType = (en_SkillType)SkillData->SkillType;
-					NewSkillInfo.SkillLevel = 1;
-					NewSkillInfo.SkillName = (LPWSTR)CA2W(SkillData->SkillName.c_str());
-					NewSkillInfo.SkillCoolTime = SkillData->SkillCoolTime;
-					NewSkillInfo.SkillCastingTime = SkillData->SkillCastingTime;
-					NewSkillInfo.SkillImagePath = (LPWSTR)CA2W(SkillData->SkillThumbnailImagePath.c_str());
-
-					Session->MyPlayer->_SkillBox.AddSkill(NewSkillInfo);
-
-					// 클라가 소유하고 있는 스킬 정보를 보내준다.
-					CMessage* ResSkillToSkillBoxPacket = MakePacketResSkillToSkillBox(Session->MyPlayer->_GameObjectInfo.ObjectId, NewSkillInfo);
-					SendPacket(Session->SessionId, ResSkillToSkillBoxPacket);
-					ResSkillToSkillBoxPacket->Free();
-				}
-				break;
-			case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:
-			case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL:
-			case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE:
-			case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG:
-			case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
-			case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
-			{
-				wstring ErrorDistance;
-
-				WCHAR ErrorMessage[100] = { 0 };
-
-				wsprintf(ErrorMessage, L"[%s] 사용 할 수 없는 아이템 입니다.", UseItem->_ItemInfo.ItemName.c_str());
-				ErrorDistance = ErrorMessage;
-
-				CMessage* ResErrorPacket = MakePacketError(Session->MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorDistance);
-				SendPacket(Session->SessionId, ResErrorPacket);
-				ResErrorPacket->Free();
-			}
-			break;
-			default:
-				CRASH("요청한 사용 아이템 타입이 올바르지 않음");
-				break;
-			}
-
+			_GameServerDataBaseThreadMessageQue.Enqueue(DBItemEquipJob);
+			SetEvent(_DataBaseWakeEvent);
 		} while (0);
 	}
 
@@ -3494,6 +3385,8 @@ void CGameServer::PacketProcReqDBCraftingItemToInventorySave(int64 SessionId, CM
 				InventoryItemInit.Execute();
 
 				Session->MyPlayer->_Inventory.SlotInit(MaterialItem->_ItemInfo.ItemSlotIndex);
+
+				G_DBConnectionPool->Push(en_DBConnect::GAME, InventoryItemInitDBConnection);
 			}
 
 			// 클라에게 업데이트 결과 전송
@@ -3776,54 +3669,227 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CMessage* Message)
 
 	if (Session)
 	{
-		InterlockedDecrement64(&Session->IOBlock->IOCount);
+		InterlockedDecrement64(&Session->IOBlock->IOCount);		
 
-		int8 ItemLargeCategory;
-		int8 ItemMediumCategory;
-		int16 ItemSmallCategory;
+		CItem* UseItem = nullptr;
+		Message->GetData(&UseItem, sizeof(CItem*));
 
-		st_ItemInfo UpdateItemInfo;
-		*Message >> UpdateItemInfo.ItemDBId;
-		*Message >> UpdateItemInfo.ItemIsQuickSlotUse;
-		*Message >> ItemLargeCategory;
-		UpdateItemInfo.ItemLargeCategory = (en_LargeItemCategory)ItemLargeCategory;
-		*Message >> ItemMediumCategory;
-		UpdateItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemMediumCategory;
-		*Message >> ItemSmallCategory;
-		UpdateItemInfo.ItemSmallCategory = (en_SmallItemCategory)ItemSmallCategory;
+		Message->Free();
 
-		int8 ItemNameLen;
-		*Message >> ItemNameLen;
-		Message->GetData(UpdateItemInfo.ItemName, ItemNameLen);
+		switch (UseItem->_ItemInfo.ItemSmallCategory)
+		{
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:
+			{
+				Session->MyPlayer->_Equipment.ItemEquip(UseItem, Session->MyPlayer);		
 
-		*Message >> UpdateItemInfo.ItemMinDamage;
-		*Message >> UpdateItemInfo.ItemMaxDamage;
-		*Message >> UpdateItemInfo.ItemDefence;
-		*Message >> UpdateItemInfo.ItemMaxCount;
-		*Message >> UpdateItemInfo.ItemCount;
+				// DB 아이템 업데이트
+				CDBConnection* DBInventoryItemUpdateConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerInventoryItemUpdate ItemUpdate(*DBInventoryItemUpdateConnection);
+				ItemUpdate.InOwnerAccountId(Session->AccountId);
+				ItemUpdate.InOwnerPlayerId(Session->MyPlayer->_GameObjectInfo.ObjectId);
+				ItemUpdate.InSlotIndex(UseItem->_ItemInfo.ItemSlotIndex);
+				ItemUpdate.InItemCount(UseItem->_ItemInfo.ItemCount);
+				ItemUpdate.InIsEquipped(UseItem->_ItemInfo.ItemIsEquipped);
 
-		int8 ItemThumbnailImagePathLen;
-		*Message >> ItemThumbnailImagePathLen;
-		Message->GetData(UpdateItemInfo.ItemThumbnailImagePath, ItemThumbnailImagePathLen);
-		*Message >> UpdateItemInfo.ItemIsEquipped;
-		*Message >> UpdateItemInfo.ItemSlotIndex;
+				ItemUpdate.Execute();
 
-		// DB 아이템 업데이트
-		CDBConnection* InventoryItemUpdateConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-		SP::CDBGameServerInventoryItemUpdate ItemUpdate(*InventoryItemUpdateConnection);
-		ItemUpdate.InOwnerAccountId(Session->AccountId);
-		ItemUpdate.InOwnerPlayerId(Session->MyPlayer->_GameObjectInfo.ObjectId);
-		ItemUpdate.InSlotIndex(UpdateItemInfo.ItemSlotIndex);
-		ItemUpdate.InItemCount(UpdateItemInfo.ItemCount);
-		ItemUpdate.InIsEquipped(UpdateItemInfo.ItemIsEquipped);
+				G_DBConnectionPool->Push(en_DBConnect::GAME, DBInventoryItemUpdateConnection);
 
-		ItemUpdate.Execute();
+				CGameServerMessage* ResInventoryItemUsePacket = MakePacketInventoryItemUse(Session->MyPlayer->_GameObjectInfo.ObjectId, UseItem->_ItemInfo);
+				SendPacket(Session->SessionId, ResInventoryItemUsePacket);
+				ResInventoryItemUsePacket->Free();
+			}
+			break;
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL:
+			{
+				Session->MyPlayer->_GameObjectInfo.ObjectStatInfo.HP += 50;
 
-		G_DBConnectionPool->Push(en_DBConnect::GAME, InventoryItemUpdateConnection);
+				CGameServerMessage* ResChangeObjectStat = MakePacketChangeObjectStat(Session->MyPlayer->_GameObjectInfo.ObjectId, Session->MyPlayer->_GameObjectInfo.ObjectStatInfo);
+				SendPacketAroundSector(Session->MyPlayer->GetCellPosition(), ResChangeObjectStat);
+				ResChangeObjectStat->Free();
+			}			
+			break;
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_FIERCE_ATTACK:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CONVERSION_ATTACK:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SHAEHONE_ATTACK:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SMASH_WAVE_ATTACK:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHARGE_POSE:
+			{
+				st_ConsumableData* ConsumableSkillItemData = (*G_Datamanager->_Consumables.find((int16)UseItem->_ItemInfo.ItemSmallCategory)).second;
+				if (ConsumableSkillItemData == nullptr)
+				{
+					CRASH("스킬아이템 데이터를 찾을 수 없습니다.");
+				}
 
-		CGameServerMessage* ResInventoryItemUsePacket = MakePacketInventoryItemUse(Session->MyPlayer->_GameObjectInfo.ObjectId, UpdateItemInfo);
-		SendPacket(Session->SessionId, ResInventoryItemUsePacket);
-		ResInventoryItemUsePacket->Free();		
+				st_SkillData* SkillData = (*G_Datamanager->_PlayerMeleeSkills.find((int16)ConsumableSkillItemData->SkillType)).second;
+				if (SkillData == nullptr)
+				{
+					CRASH("스킬 데이터를 찾을 수 없습니다.");
+				}
+
+				st_SkillInfo NewSkillInfo;
+				NewSkillInfo.IsQuickSlotUse = false;
+				NewSkillInfo.SkillLargeCategory = SkillData->SkillLargeCategory;
+				NewSkillInfo.SkillType = SkillData->SkillType;
+				NewSkillInfo.SkillLevel = 1;
+				NewSkillInfo.SkillName = (LPWSTR)CA2W(SkillData->SkillName.c_str());
+				NewSkillInfo.SkillCoolTime = SkillData->SkillCoolTime;
+				NewSkillInfo.SkillCastingTime = SkillData->SkillCastingTime;
+				NewSkillInfo.SkillImagePath = (LPWSTR)CA2W(SkillData->SkillThumbnailImagePath.c_str());
+
+				int8 SkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
+				int16 SkillType = (int16)NewSkillInfo.SkillType;
+
+				CDBConnection* DBSkillToSkillBoxConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*DBSkillToSkillBoxConnection);
+				SkillToSkillBox.InAccountDBId(Session->AccountId);
+				SkillToSkillBox.InPlayerDBId(Session->MyPlayer->_GameObjectInfo.ObjectId);
+				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
+				SkillToSkillBox.InSkillLargeCategory(SkillLargeCategory);
+				SkillToSkillBox.InSkillType(SkillType);
+				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
+				SkillToSkillBox.InSkillName(NewSkillInfo.SkillName);
+				SkillToSkillBox.InSkillCoolTime(NewSkillInfo.SkillCoolTime);
+				SkillToSkillBox.InSkillCastingTime(NewSkillInfo.SkillCastingTime);
+				SkillToSkillBox.InSkillThumbnailImagePath(NewSkillInfo.SkillImagePath);
+
+				SkillToSkillBox.Execute();
+
+				G_DBConnectionPool->Push(en_DBConnect::GAME, DBSkillToSkillBoxConnection);
+
+				Session->MyPlayer->_SkillBox.AddSkill(NewSkillInfo);				
+
+				// 새로 배운 스킬을 클라에게 전송한다.
+				CMessage* ResSkillToSkillBoxPacket = MakePacketResSkillToSkillBox(Session->MyPlayer->_GameObjectInfo.ObjectId, NewSkillInfo);
+				SendPacket(Session->SessionId, ResSkillToSkillBoxPacket);
+				ResSkillToSkillBoxPacket->Free();
+
+				wstring InitString = L"";
+
+				CDBConnection* InventoryItemInitDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerInventorySlotInit InventoryItemInit(*InventoryItemInitDBConnection);
+				InventoryItemInit.InOwnerAccountId(Session->AccountId);
+				InventoryItemInit.InOwnerPlayerId(Session->MyPlayer->_GameObjectInfo.ObjectId);
+				InventoryItemInit.InSlotIndex(UseItem->_ItemInfo.ItemSlotIndex);
+				InventoryItemInit.InItemName(InitString);
+				InventoryItemInit.InItemThumbnailImagePath(InitString);
+
+				InventoryItemInit.Execute();				
+
+				G_DBConnectionPool->Push(en_DBConnect::GAME, InventoryItemInitDBConnection);			
+
+				Session->MyPlayer->_Inventory.SlotInit(UseItem->_ItemInfo.ItemSlotIndex);				
+
+				// 클라에게 업데이트 결과 전송
+				CMessage* ReqInventoryItemUpdate = MakePacketInventoryItemUpdate(Session->MyPlayer->_GameObjectInfo.ObjectId, UseItem->_ItemInfo);
+				SendPacket(SessionId, ReqInventoryItemUpdate);
+				ReqInventoryItemUpdate->Free();
+			}
+			break;
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_FLAME_HARPOON:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HELL_FIRE:
+		case en_SmallItemCategory::ITEM_SMALL_CATEOGRY_SKILLBOOK_SHAMAN_HEALING_LIGHT:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HEALING_WIND:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHOCK_RELEASE:
+			{
+				st_ConsumableData* ConsumableSkillItemData = (*G_Datamanager->_Consumables.find((int16)UseItem->_ItemInfo.ItemSmallCategory)).second;
+				if (ConsumableSkillItemData == nullptr)
+				{
+					CRASH("스킬아이템 데이터를 찾을 수 없습니다.");
+				}
+
+				st_SkillData* SkillData = (*G_Datamanager->_PlayerMagicSkills.find((int16)ConsumableSkillItemData->SkillType)).second;
+				if (SkillData == nullptr)
+				{
+					CRASH("스킬 데이터를 찾을 수 없습니다.");
+				}
+
+				st_SkillInfo NewSkillInfo;
+				NewSkillInfo.IsQuickSlotUse = false;
+				NewSkillInfo.SkillLargeCategory = (en_SkillLargeCategory)SkillData->SkillLargeCategory;
+				NewSkillInfo.SkillType = (en_SkillType)SkillData->SkillType;
+				NewSkillInfo.SkillLevel = 1;
+				NewSkillInfo.SkillName = (LPWSTR)CA2W(SkillData->SkillName.c_str());
+				NewSkillInfo.SkillCoolTime = SkillData->SkillCoolTime;
+				NewSkillInfo.SkillCastingTime = SkillData->SkillCastingTime;
+				NewSkillInfo.SkillImagePath = (LPWSTR)CA2W(SkillData->SkillThumbnailImagePath.c_str());
+
+				int8 SkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
+				int16 SkillType = (int16)NewSkillInfo.SkillType;
+
+				CDBConnection* DBSkillToSkillBoxConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*DBSkillToSkillBoxConnection);
+				SkillToSkillBox.InAccountDBId(Session->AccountId);
+				SkillToSkillBox.InPlayerDBId(Session->MyPlayer->_GameObjectInfo.ObjectId);
+				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
+				SkillToSkillBox.InSkillLargeCategory(SkillLargeCategory);
+				SkillToSkillBox.InSkillType(SkillType);
+				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
+				SkillToSkillBox.InSkillName(NewSkillInfo.SkillName);
+				SkillToSkillBox.InSkillCoolTime(NewSkillInfo.SkillCoolTime);
+				SkillToSkillBox.InSkillCastingTime(NewSkillInfo.SkillCastingTime);
+				SkillToSkillBox.InSkillThumbnailImagePath(NewSkillInfo.SkillImagePath);
+
+				SkillToSkillBox.Execute();
+
+				G_DBConnectionPool->Push(en_DBConnect::GAME, DBSkillToSkillBoxConnection);
+
+				Session->MyPlayer->_SkillBox.AddSkill(NewSkillInfo);
+
+				// 새로 배운 스킬을 클라에게 전송한다.
+				CMessage* ResSkillToSkillBoxPacket = MakePacketResSkillToSkillBox(Session->MyPlayer->_GameObjectInfo.ObjectId, NewSkillInfo);
+				SendPacket(Session->SessionId, ResSkillToSkillBoxPacket);
+				ResSkillToSkillBoxPacket->Free();
+
+				wstring InitString = L"";
+
+				CDBConnection* InventoryItemInitDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerInventorySlotInit InventoryItemInit(*InventoryItemInitDBConnection);
+				InventoryItemInit.InOwnerAccountId(Session->AccountId);
+				InventoryItemInit.InOwnerPlayerId(Session->MyPlayer->_GameObjectInfo.ObjectId);
+				InventoryItemInit.InSlotIndex(UseItem->_ItemInfo.ItemSlotIndex);
+				InventoryItemInit.InItemName(InitString);
+				InventoryItemInit.InItemThumbnailImagePath(InitString);
+
+				InventoryItemInit.Execute();
+
+				G_DBConnectionPool->Push(en_DBConnect::GAME, InventoryItemInitDBConnection);				
+
+				Session->MyPlayer->_Inventory.SlotInit(UseItem->_ItemInfo.ItemSlotIndex);
+
+				// 클라에게 업데이트 결과 전송
+				CMessage* ReqInventoryItemUpdate = MakePacketInventoryItemUpdate(Session->MyPlayer->_GameObjectInfo.ObjectId, UseItem->_ItemInfo);
+				SendPacket(SessionId, ReqInventoryItemUpdate);
+				ReqInventoryItemUpdate->Free();
+			}
+			break;
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
+			{
+				wstring ErrorDistance;
+
+				WCHAR ErrorMessage[100] = { 0 };
+
+				wsprintf(ErrorMessage, L"[%s] 사용 할 수 없는 아이템 입니다.", UseItem->_ItemInfo.ItemName.c_str());
+				ErrorDistance = ErrorMessage;
+
+				CMessage* ResErrorPacket = MakePacketError(Session->MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorDistance);
+				SendPacket(Session->SessionId, ResErrorPacket);
+				ResErrorPacket->Free();
+			}
+			break;
+		default:
+			CRASH("요청한 사용 아이템 타입이 올바르지 않음");
+			break;
+		}			
 	}
 
 	ReturnSession(Session);
