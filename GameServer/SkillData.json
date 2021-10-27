@@ -17,7 +17,7 @@
           "SkillCoolTime": 2000,
           "SkillCastingTime": 0,
           "SkillDistance": 1,
-          "SkillThumbnailImagePath": "Textures/SkillBook/맹렬한일격"
+          "SkillThumbnailImagePath": "Textures/Spell/Icon/맹렬한일격"
         },
         {
           "SkillType": "SKILL_KNIGHT_CONVERSION_ATTACK",
@@ -25,7 +25,7 @@
           "SkillCoolTime": 1000,
           "SkillCastingTime": 0,
           "SkillDistance": 1,
-          "SkillThumbnailImagePath": "Textures/SkillBook/회심의일격"
+          "SkillThumbnailImagePath": "Textures/Spell/Icon/회심의일격"
         },
         {
           "SkillType": "SKILL_KNIGHT_SHAEHONE",
@@ -33,7 +33,7 @@
           "SkillCoolTime": 5000,
           "SkillCastingTime": 0,
           "SkillDistance": 4,
-          "SkillThumbnailImagePath": "Textures/SkillBook/쇄혼비무"
+          "SkillThumbnailImagePath": "Textures/Spell/Icon/쇄혼비무"
         },
         {
           "SkillType": "SKILL_KNIGHT_CHOHONE",
@@ -41,7 +41,7 @@
           "SkillCoolTime": 5000,
           "SkillCastingTime": 0,
           "SkillDistance": 4,
-          "SkillThumbnailImagePath": "Textures/SkillBook/초혼비무"
+          "SkillThumbnailImagePath": "Textures/Spell/Icon/초혼비무"
         },
         {
           "SkillType": "SKILL_KNIGHT_SMASH_WAVE",
@@ -64,7 +64,7 @@
           "SkillCoolTime": 10000,
           "SkillCastingTime": 0,
           "SkillDistance": 0,
-          "SkillThumbnailImagePath": "Textures/SkillBook/돌격자세"
+          "SkillThumbnailImagePath": "Textures/Spell/Icon/돌격자세"
         },
         {
           "SkillType": "SKILL_SHAMNA_FLAME_HARPOON",
