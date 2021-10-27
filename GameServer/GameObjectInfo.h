@@ -324,6 +324,11 @@ struct st_ItemInfo
 
 		return false;
 	}
+
+	bool operator != (st_ItemInfo OtherItemInfo)
+	{
+		return !(*this == OtherItemInfo);
+	}
 };
 
 struct st_SkillInfo
