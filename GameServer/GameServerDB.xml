@@ -383,15 +383,16 @@
     </Body>
   </Procedure>
   
-  <!-- 인벤토리 아이템 착용 / 착용해제 -->
-  <Procedure name="spInventoryItemEquip">
+  <!-- 인벤토리 아이템 업데이트 -->
+ㅇ  <Procedure name="spInventoryItemUpdate">
     <Param name="@OwnerAccountDBId" type="BigInt"/>
     <Param name="@OwnerPlayerDBId" type="BigInt"/>
     <Param name="@SlotIndex" type="TinyInt"/>
+    <Param name="@ItemCount" type="SmallInt"/>
     <Param name="@IsEquipped" type="bit"/>
     <Body>
       <![CDATA[
-        UPDATE [dbo].[Inventory] SET IsEquipped = (@IsEquipped) WHERE OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId) And SlotIndex = (@SlotIndex)
+        UPDATE [dbo].[Inventory] SET ItemCount = (@ItemCount), IsEquipped = (@IsEquipped) WHERE OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId) And SlotIndex = (@SlotIndex)
       ]]>
     </Body>
   </Procedure>

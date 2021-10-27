@@ -232,15 +232,16 @@ namespace SP
 		void InItemThumbnailImagePath(wstring& ItemThumbnailImagePath) { BindParam(4, ItemThumbnailImagePath.c_str()); }
 	};
 
-	// 인벤토리 아이템 착용 / 착용해제
-	class CDBGameServerInventoryItemEquip : public CDBBind<4, 0>
+	// 인벤토리 아이템 업데이트
+	class CDBGameServerInventoryItemUpdate : public CDBBind<5, 0>
 	{
 	public:
-		CDBGameServerInventoryItemEquip(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spInventoryItemEquip(?,?,?,?)}") {}
+		CDBGameServerInventoryItemUpdate(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spInventoryItemUpdate(?,?,?,?,?)}") {}
 		void InOwnerAccountId(int64& OwnerAccountId) { BindParam(0, OwnerAccountId); }
 		void InOwnerPlayerId(int64& OwnerPlayerId) { BindParam(1, OwnerPlayerId); }
 		void InSlotIndex(int8& SlotIndex) { BindParam(2, SlotIndex); }
-		void InIsEquipped(bool& IsEquipped) { BindParam(3, IsEquipped); }
+		void InItemCount(int16& ItemCount) { BindParam(3, ItemCount); }
+		void InIsEquipped(bool& IsEquipped) { BindParam(4, IsEquipped); }
 	};
 
 	// GoldTable 생성
