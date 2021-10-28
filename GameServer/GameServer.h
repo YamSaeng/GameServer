@@ -267,6 +267,10 @@ private:
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketInventoryItemUse(int64 PlayerId, st_ItemInfo& UseItemInfo);
 	//-----------------------------------------------------------------------------------------
+	// 게임서버 장비 착용 응답 패킷 조합
+	//-----------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketEquipmentUpdate(int64 PlayerId, st_ItemInfo& EquipmentItemInfo);
+	//-----------------------------------------------------------------------------------------
 	// 게임서버 퀵슬롯 등록 요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResQuickSlotBarSlotSave(st_QuickSlotBarSlotInfo QuickSlotBarSlotInfo);

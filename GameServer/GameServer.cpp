@@ -3698,7 +3698,8 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CMessage* Message)
 
 				G_DBConnectionPool->Push(en_DBConnect::GAME, DBInventoryItemUpdateConnection);
 
-				CGameServerMessage* ResInventoryItemUsePacket = MakePacketInventoryItemUse(Session->MyPlayer->_GameObjectInfo.ObjectId, UseItem->_ItemInfo);
+				// 클라에게 장비 착용 결과 알려줌
+				CGameServerMessage* ResInventoryItemUsePacket = MakePacketEquipmentUpdate(Session->MyPlayer->_GameObjectInfo.ObjectId, UseItem->_ItemInfo);
 				SendPacket(Session->SessionId, ResInventoryItemUsePacket);
 				ResInventoryItemUsePacket->Free();
 			}
@@ -4087,6 +4088,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			Session->MyPlayer->_Inventory.Init();
 
 			vector<CItem*> InventoryItems;
+			vector<st_ItemInfo> Equipments;
 
 			// DB에 기록되어 있는 인벤토리 아이템들의 정보를 모두 긁어온다.
 			CDBConnection* DBInventoryItemInfoGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
@@ -4148,6 +4150,14 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 
 					Session->MyPlayer->_Inventory.AddItem(WeaponItem);
 
+					// 아이템 테이블에서 읽어들인 무기 아이템이 착용중일 경우
+					// 해당 무기를 착용하고 착용 아이템 정보에 담는다.
+					if (WeaponItem->_ItemInfo.ItemIsEquipped == true)
+					{
+						Session->MyPlayer->_Equipment.ItemEquip(WeaponItem, Session->MyPlayer);
+						Equipments.push_back(WeaponItem->_ItemInfo);					
+					}
+
 					InventoryItems.push_back(WeaponItem);
 					break;
 				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
@@ -4166,6 +4176,14 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					ArmorItem->_ItemInfo.ItemDefence = ItemDefence;
 
 					Session->MyPlayer->_Inventory.AddItem(ArmorItem);
+
+					// 아이템 테이블에서 읽어들인 방어구 아이템이 착용중일 경우
+					// 해당 방어구를 착용하고 착용 아이템 정보에 담는다.
+					if (ArmorItem->_ItemInfo.ItemIsEquipped == true)
+					{
+						Session->MyPlayer->_Equipment.ItemEquip(ArmorItem, Session->MyPlayer);						
+						Equipments.push_back(WeaponItem->_ItemInfo);
+					}
 
 					InventoryItems.push_back(ArmorItem);
 					break;
@@ -4234,8 +4252,18 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			CMessage* ResItemToInventoryPacket = MakePacketInventoryCreate((int8)en_Inventory::INVENTORY_SIZE, InventoryItems);
 			SendPacket(Session->SessionId, ResItemToInventoryPacket);
 			ResItemToInventoryPacket->Free();
-
+			
 #pragma endregion			
+
+#pragma region 장비 정보 보내주기
+			for(st_ItemInfo EquipmentItemInfo : Equipments)
+			{
+				CMessage* ResEquipmentItemInfoPacket = MakePacketEquipmentUpdate(Session->MyPlayer->_GameObjectInfo.ObjectId, EquipmentItemInfo);
+				SendPacket(Session->SessionId, ResEquipmentItemInfoPacket);
+				ResEquipmentItemInfoPacket->Free();
+			}			
+#pragma endregion
+
 
 #pragma region 골드 정보 읽어오기
 			// 캐릭터가 소유하고 있었던 골드 정보를 GoldTable에서 읽어온다.
@@ -5104,6 +5132,23 @@ CGameServerMessage* CGameServer::MakePacketInventoryItemUse(int64 PlayerId, st_I
 	*ResInventoryItemUseMessage << UseItemInfo;
 
 	return ResInventoryItemUseMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketEquipmentUpdate(int64 PlayerId, st_ItemInfo& EquipmentItemInfo)
+{
+	CGameServerMessage* ResEquipmentUpdateMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResEquipmentUpdateMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResEquipmentUpdateMessage->Clear();
+
+	*ResEquipmentUpdateMessage << (int16)en_PACKET_S2C_EQUIPMENT_UPDATE;
+	*ResEquipmentUpdateMessage << PlayerId;
+	*ResEquipmentUpdateMessage << EquipmentItemInfo;
+
+	return ResEquipmentUpdateMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketResQuickSlotBarSlotSave(st_QuickSlotBarSlotInfo QuickSlotBarSlotInfo)
