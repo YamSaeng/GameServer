@@ -3731,6 +3731,24 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CMessage* Message)
 					CRASH("스킬 데이터를 찾을 수 없습니다.");
 				}
 
+				// 스킬을 이미 습득했는지 확인
+				st_SkillInfo* FindSkill = Session->MyPlayer->_SkillBox.FindSkill(SkillData->SkillType);
+				if (FindSkill != nullptr)
+				{
+					wstring ErrorDistance;
+
+					WCHAR ErrorMessage[100] = { 0 };
+
+					wsprintf(ErrorMessage, L"[%s] 이미 습득한 스킬입니다.", FindSkill->SkillName.c_str());
+					ErrorDistance = ErrorMessage;
+
+					CMessage* ResErrorPacket = MakePacketError(Session->MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorDistance);
+					SendPacket(Session->SessionId, ResErrorPacket);
+					ResErrorPacket->Free();
+
+					break;
+				}
+
 				st_SkillInfo NewSkillInfo;
 				NewSkillInfo.IsQuickSlotUse = false;
 				NewSkillInfo.SkillLargeCategory = SkillData->SkillLargeCategory;
@@ -3744,6 +3762,7 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CMessage* Message)
 				int8 SkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
 				int16 SkillType = (int16)NewSkillInfo.SkillType;
 
+				// 스킬 테이블에 배운 스킬 넣기
 				CDBConnection* DBSkillToSkillBoxConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*DBSkillToSkillBoxConnection);
 				SkillToSkillBox.InAccountDBId(Session->AccountId);
@@ -3768,6 +3787,7 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CMessage* Message)
 				SendPacket(Session->SessionId, ResSkillToSkillBoxPacket);
 				ResSkillToSkillBoxPacket->Free();
 
+				// 사용을 다한 스킬북 인벤토리에서 제거하기	
 				wstring InitString = L"";
 
 				CDBConnection* InventoryItemInitDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
@@ -3808,6 +3828,24 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CMessage* Message)
 					CRASH("스킬 데이터를 찾을 수 없습니다.");
 				}
 
+				// 스킬을 이미 습득했는지 확인
+				st_SkillInfo* FindSkill = Session->MyPlayer->_SkillBox.FindSkill(SkillData->SkillType);
+				if (FindSkill != nullptr)
+				{
+					wstring ErrorDistance;
+
+					WCHAR ErrorMessage[100] = { 0 };
+
+					wsprintf(ErrorMessage, L"[%s] 이미 습득한 스킬입니다.", FindSkill->SkillName.c_str());
+					ErrorDistance = ErrorMessage;
+
+					CMessage* ResErrorPacket = MakePacketError(Session->MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorDistance);
+					SendPacket(Session->SessionId, ResErrorPacket);
+					ResErrorPacket->Free();
+
+					break;
+				}
+
 				st_SkillInfo NewSkillInfo;
 				NewSkillInfo.IsQuickSlotUse = false;
 				NewSkillInfo.SkillLargeCategory = (en_SkillLargeCategory)SkillData->SkillLargeCategory;
@@ -3821,6 +3859,7 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CMessage* Message)
 				int8 SkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
 				int16 SkillType = (int16)NewSkillInfo.SkillType;
 
+				// 새로운 스킬 스킬테이블에 등록하기
 				CDBConnection* DBSkillToSkillBoxConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*DBSkillToSkillBoxConnection);
 				SkillToSkillBox.InAccountDBId(Session->AccountId);
@@ -3845,6 +3884,7 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CMessage* Message)
 				SendPacket(Session->SessionId, ResSkillToSkillBoxPacket);
 				ResSkillToSkillBoxPacket->Free();
 
+				// 사용을 다한 스킬북 인벤토리에서 제거하기	
 				wstring InitString = L"";
 
 				CDBConnection* InventoryItemInitDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
