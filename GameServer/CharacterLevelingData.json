@@ -1,0 +1,29 @@
+{
+  "Leveling": [
+    {
+      "Level": 1,
+      "RequireExperience": 400,
+      "TotalExperience": 400
+    },
+    {
+      "Level": 2,
+      "RequireExperience": 700,
+      "TotalExperience": 1100
+    },
+    {
+      "Level": 3,
+      "RequireExperience": 1000,
+      "TotalExperience": 2100
+    },
+    {
+      "Level": 4,
+      "RequireExperience": 1300,
+      "TotalExperience": 3400
+    },
+    {
+      "Level": 5,
+      "RequireExperience": 1600,
+      "TotalExperience": 5000
+    }
+  ]
+}
