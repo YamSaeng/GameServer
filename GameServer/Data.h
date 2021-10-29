@@ -34,7 +34,7 @@ struct st_ConsumableData : public st_ItemData
 
 struct st_PlayerStatusData
 {
-	int16 PlayerType;
+	en_GameObjectType PlayerType;
 	int32 Level;
 	int32 HP;
 	int32 MaxHP;

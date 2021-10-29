@@ -30,7 +30,7 @@ public:
 	}
 
 	void LoadDataItem(wstring LoadFileName);
-	void LoadDataStatus(wstring LoadFileName);	
+	void LoadDataPlayerCharacterStatus(wstring LoadFileName);	
 	void LoadDataMonster(wstring LoadFileName);
 	void LoadDataSkill(wstring LoadFileName);
 	void LoadDataEnvironment(wstring LoadFileName);

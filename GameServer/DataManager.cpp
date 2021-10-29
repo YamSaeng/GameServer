@@ -367,16 +367,16 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 	}
 }
 
-void CDataManager::LoadDataStatus(wstring LoadFileName)
+void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 {
 	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());
 
 	rapidjson::Document Document;
 	Document.Parse(FileStr);
 
-	for (auto& Filed : Document["Status"].GetArray())
+	for (auto& Filed : Document["PlayerCharacterStatus"].GetArray())
 	{
-		int16 PlayerType = (int16)Filed["PlayerType"].GetInt();
+		string PlayerType = Filed["PlayerType"].GetString();
 		int Level = Filed["Level"].GetInt();
 		int MaxHP = Filed["MaxHP"].GetInt();
 		int MaxMP = Filed["MaxMP"].GetInt();
@@ -387,7 +387,16 @@ void CDataManager::LoadDataStatus(wstring LoadFileName)
 		float Speed = Filed["Speed"].GetFloat();
 
 		st_PlayerStatusData* StatusData = new st_PlayerStatusData();
-		StatusData->PlayerType = PlayerType;
+		
+		if (PlayerType == "OBJECT_MELEE_PLAYER")
+		{
+			StatusData->PlayerType = en_GameObjectType::OBJECT_MELEE_PLAYER;
+		}
+		else if (PlayerType == "OBJECT_MAGIC_PLAYER")
+		{
+			StatusData->PlayerType = en_GameObjectType::OBJECT_MAGIC_PLAYER;
+		}
+		
 		StatusData->Level = Level;
 		StatusData->MaxHP = MaxHP;
 		StatusData->MaxMP = MaxMP;
@@ -397,7 +406,7 @@ void CDataManager::LoadDataStatus(wstring LoadFileName)
 		StatusData->CriticalPoint = CriticalPoint;
 		StatusData->Speed = Speed;
 
-		_Status.insert(pair<int16, st_PlayerStatusData*>(StatusData->PlayerType, StatusData));
+		_Status.insert(pair<int16, st_PlayerStatusData*>((int16)StatusData->PlayerType, StatusData));
 	}
 }
 

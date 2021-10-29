@@ -1,7 +1,7 @@
 {
-  "Status": [
+  "PlayerCharacterStatus": [
     {
-      "PlayerType": 2,
+      "PlayerType": "OBJECT_MELEE_PLAYER",
       "Level": 1,
       "MaxHP": 300,
       "MaxMP": 200,
@@ -12,7 +12,7 @@
       "Speed": 5.0
     },
     {
-      "PlayerType": 3,
+      "PlayerType": "OBJECT_MAGIC_PLAYER",
       "Level": 1,
       "MaxHP": 200,
       "MaxMP": 400,
