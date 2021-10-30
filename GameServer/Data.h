@@ -46,9 +46,7 @@ struct st_PlayerStatusData
 	int32 MaxAttackDamage;
 	int32 Defence;
 	int16 CriticalPoint;
-	float Speed;
-	int64 RequireExperience;
-	int64 TotalExperience;
+	float Speed;	
 	int32 SearchCellDistance;
 	int32 ChaseCellDistance;
 	int32 AttackRange;
