@@ -14,26 +14,30 @@ namespace SP
 	};
 
 	// AccountID를 기준으로 클라가 소유하고 있는 캐릭터를 찾는다.
-	class CDBGameServerPlayersGet : public CDBBind<1, 15>
+	class CDBGameServerPlayersGet : public CDBBind<1, 18>
 	{
 	public:
 		CDBGameServerPlayersGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetPlayers(?)}") { }
 		void InAccountID(int64& AccountID) { BindParam(0, AccountID); }
 		void OutPlayerDBID(int64& PlayerDBID) { BindCol(0, PlayerDBID); }
 		template<int32 N> void OutPlayerName(WCHAR(&PlayerName)[N]) { BindCol(1, PlayerName); }
-		void OutPlayerIndex(int8& PlayerIndex) { BindCol(2, PlayerIndex); }
-		void OutLevel(int32& Level) { BindCol(3, Level); }
-		void OutCurrentHP(int32& CurrentHP) { BindCol(4, CurrentHP); }
-		void OutMaxHP(int32& MaxHP) { BindCol(5, MaxHP); }
-		void OutCurrentMP(int32& CurrentMP) { BindCol(6, CurrentMP); }
-		void OutMaxMP(int32& MaxMP) { BindCol(7, MaxMP); }
-		void OutCurrentDP(int32& CurrentDP) { BindCol(8, CurrentDP); }
-		void OutMaxDP(int32& MaxDP) { BindCol(9, MaxDP); }
-		void OutMinAttack(int32& MinAttack) { BindCol(10, MinAttack); }
-		void OutMaxAttack(int32& MaxAttack) { BindCol(11, MaxAttack); }
-		void OutCriticalPoint(int16& CriticalPoint) { BindCol(12, CriticalPoint); }
-		void OutSpeed(float& Speed) { BindCol(13, Speed); }
-		void OutPlayerObjectType(int16& ObjectType) { BindCol(14, ObjectType); }
+		void OutPlayerObjectType(int16& ObjectType) { BindCol(2, ObjectType); }
+		void OutPlayerIndex(int8& PlayerIndex) { BindCol(3, PlayerIndex); }
+		void OutLevel(int32& Level) { BindCol(4, Level); }
+		void OutCurrentHP(int32& CurrentHP) { BindCol(5, CurrentHP); }
+		void OutMaxHP(int32& MaxHP) { BindCol(6, MaxHP); }
+		void OutCurrentMP(int32& CurrentMP) { BindCol(7, CurrentMP); }
+		void OutMaxMP(int32& MaxMP) { BindCol(8, MaxMP); }
+		void OutCurrentDP(int32& CurrentDP) { BindCol(9, CurrentDP); }
+		void OutMaxDP(int32& MaxDP) { BindCol(10, MaxDP); }
+		void OutMinAttack(int32& MinAttack) { BindCol(11, MinAttack); }
+		void OutMaxAttack(int32& MaxAttack) { BindCol(12, MaxAttack); }
+		void OutDefence(int32& Defence) { BindCol(13, Defence); }
+		void OutCriticalPoint(int16& CriticalPoint) { BindCol(13, CriticalPoint); }
+		void OutSpeed(float& Speed) { BindCol(14, Speed); }		
+		void OutCurrentExperience(int64& CurrentExperience) { BindCol(15, CurrentExperience); }
+		void OutRequireExperience(int64& RequireExperience) { BindCol(16, RequireExperience); }
+		void OutTotalExperience(int64& TotalExperience) { BindCol(17, TotalExperience); }
 	};
 
 	// DB에 입력한 해당 캐릭터가 있는지 확인
@@ -45,10 +49,10 @@ namespace SP
 	};
 
 	// DB에 새로운 캐릭 저장
-	class CDBGameServerCreateCharacterPush : public CDBBind<15, 0>
+	class CDBGameServerCreateCharacterPush : public CDBBind<19, 0>
 	{
 	public:
-		CDBGameServerCreateCharacterPush(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spNewCharacterPush(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}") {}
+		CDBGameServerCreateCharacterPush(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spNewCharacterPush(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}") {}
 		void InAccountID(int64& AccountID) { BindParam(0, AccountID); }
 		void InPlayerName(wstring& PlayerName) { BindParam(1, PlayerName.c_str()); }
 		void InPlayerType(int16& PlayerType) { BindParam(2, PlayerType); }
@@ -62,8 +66,12 @@ namespace SP
 		void InMaxDP(int32& MaxDP) { BindParam(10, MaxDP); }
 		void InMinAttack(int32& MinAttack) { BindParam(11, MinAttack); }
 		void InMaxAttack(int32& MaxAttack) { BindParam(12, MaxAttack); }
-		void InCriticalPoint(int16& CriticalPoint) { BindParam(13, CriticalPoint); }
-		void InSpeed(float Speed) { BindParam(14, Speed); }
+		void InDefence(int32& Defence) { BindParam(13, Defence); }
+		void InCriticalPoint(int16& CriticalPoint) { BindParam(14, CriticalPoint); }
+		void InSpeed(float Speed) { BindParam(15, Speed); }
+		void InCurrentExperence(int64& CurrentExperence) { BindParam(16, CurrentExperence); }
+		void InRequireExperience(int64& RequireExperience) { BindParam(17, RequireExperience); }
+		void InTotalExperience(int64& CurrentExperence) { BindParam(18, CurrentExperence); }
 	};
 
 	// 캐릭터 DBid 얻기

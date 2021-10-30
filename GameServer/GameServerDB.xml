@@ -17,9 +17,13 @@
     <Column name="MaxDP" type="int" notnull="true"/>
     <Column name="MinAttack" type="int" notnull="true"/>
     <Column name="MaxAttack" type="int" notnull="true"/>
+    <Column name="Defence" type="int" notnull="true"/>
     <Column name="CriticalPoint" type="SmallInt" notnull="true"/>
     <Column name="Speed" type="float" notnull="true"/>
-    <Index type="clustered">
+    <Column name="CurrentExperence" type="BigInt" notnull="true"/>
+    <Column name="RequireExperience" type="BigInt" notnull="true"/>
+    <Column name="TotalExperience" type="BigInt" notnull="true"/>
+    <Index type="clustered"> 
       <PrimaryKey/>
       <Column name="PlayerDBId"/>
     </Index>    
@@ -148,8 +152,12 @@
     <Param name="@MaxDP" type="int"/>
     <Param name="@MinAttack" type="int"/>
     <Param name="@MaxAttack" type="int"/>
+    <Param name="@Defence" type="int"/>
     <Param name="@CriticalPoint" type="SmallInt"/>
     <Param name="@Speed" type="float"/>
+    <Param name="@CurrentExperience" type="BigInt"/>
+    <Param name="@RequireExperience" type="BigInt"/>
+    <Param name="@TotalExperience" type="BigInt"/>
     <Body>
       <![CDATA[
         INSERT INTO [dbo].[Player] VALUES ((@AccountId),(@PlayerName),(@PlayerType),(@PlayerIndex),(@Level),(@CurrentHP),(@MaxHP),(@CurrentMP),(@MaxMP),(@CurrentDP),(@MaxDP),(@MinAttack),(@MaxAttack),(@CriticalPoint),(@Speed))        
