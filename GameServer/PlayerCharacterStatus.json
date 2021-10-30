@@ -8,6 +8,7 @@
       "MaxDP": 4000,
       "MinAttackDamage": 5,
       "MaxAttackDamage": 20,
+      "Defence": 0,
       "CriticalPoint": 200,
       "Speed": 5.0
     },
@@ -19,6 +20,7 @@
       "MaxDP": 4000,
       "MinAttackDamage": 1,
       "MaxAttackDamage": 10,
+      "Defence": 0,
       "CriticalPoint": 300,
       "Speed": 5.0
     }   

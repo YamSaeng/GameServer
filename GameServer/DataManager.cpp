@@ -383,8 +383,9 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 		int MaxDP = Filed["MaxDP"].GetInt();
 		int MinAttackDamage = Filed["MinAttackDamage"].GetInt();
 		int MaxAttackDamage = Filed["MaxAttackDamage"].GetInt();
+		int Defence = Filed["Defence"].GetInt();
 		int16 CriticalPoint = (int16)(Filed["CriticalPoint"].GetInt());
-		float Speed = Filed["Speed"].GetFloat();
+		float Speed = Filed["Speed"].GetFloat();		
 
 		st_PlayerStatusData* StatusData = new st_PlayerStatusData();
 		
@@ -403,10 +404,34 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 		StatusData->MaxDP = MaxDP;
 		StatusData->MinAttackDamage = MinAttackDamage;
 		StatusData->MaxAttackDamage = MaxAttackDamage;
+		StatusData->Defence = Defence;
 		StatusData->CriticalPoint = CriticalPoint;
 		StatusData->Speed = Speed;
 
 		_Status.insert(pair<int16, st_PlayerStatusData*>((int16)StatusData->PlayerType, StatusData));
+	}
+}
+
+void CDataManager::LoadDataLevel(wstring LoadFileName)
+{
+	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());
+
+	rapidjson::Document Document;
+	Document.Parse(FileStr);
+
+	for (auto& Filed : Document["LevelingData"].GetArray())
+	{
+		st_LevelData* LevelData = new st_LevelData();
+
+		int Level = Filed["Level"].GetInt();
+		int64 RequireExperience = Filed["RequireExperience"].GetInt64();
+		int64 TotalExperience = Filed["TotalExperience"].GetInt64();
+
+		LevelData->Level = Level;
+		LevelData->RequireExperience = RequireExperience;
+		LevelData->TotalExperience = TotalExperience;
+
+		_LevelDatas.insert(pair<int32, st_LevelData*>(LevelData->Level, LevelData));
 	}
 }
 

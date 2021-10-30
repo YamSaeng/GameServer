@@ -18,6 +18,7 @@ public:
 	map<int16, st_SkillData*> _MonsterMagicSkills;
 	map<int32, st_EnvironmentData*> _Environments;
 	map<int8, st_CraftingItemCategoryData*> _CraftingData;
+	map<int32, st_LevelData*> _LevelDatas;
 
 	CDataManager()
 	{
@@ -31,6 +32,7 @@ public:
 
 	void LoadDataItem(wstring LoadFileName);
 	void LoadDataPlayerCharacterStatus(wstring LoadFileName);	
+	void LoadDataLevel(wstring LoadFileName);
 	void LoadDataMonster(wstring LoadFileName);
 	void LoadDataSkill(wstring LoadFileName);
 	void LoadDataEnvironment(wstring LoadFileName);
