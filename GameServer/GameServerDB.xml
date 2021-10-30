@@ -20,7 +20,7 @@
     <Column name="Defence" type="int" notnull="true"/>
     <Column name="CriticalPoint" type="SmallInt" notnull="true"/>
     <Column name="Speed" type="float" notnull="true"/>
-    <Column name="CurrentExperence" type="BigInt" notnull="true"/>
+    <Column name="CurrentExperience" type="BigInt" notnull="true"/>
     <Column name="RequireExperience" type="BigInt" notnull="true"/>
     <Column name="TotalExperience" type="BigInt" notnull="true"/>
     <Index type="clustered"> 
@@ -122,7 +122,7 @@
     <Param name="@AccountId" type="BigInt"/>
     <Body>
       <![CDATA[
-        SELECT PlayerDBId, PlayerName, PlayerIndex, Level, CurrentHP, MaxHP, CurrentMP, MaxMP, CurrentDP, MaxDP, MinAttack, MaxAttack, CriticalPoint, Speed, PlayerType FROM [dbo].[Player] WHERE AccountDBId = (@AccountId)
+        SELECT PlayerDBId, PlayerName, PlayerType, PlayerIndex, Level, CurrentHP, MaxHP, CurrentMP, MaxMP, CurrentDP, MaxDP, MinAttack, MaxAttack, Defence, CriticalPoint, Speed, CurrentExperience, RequireExperience, TotalExperience FROM [dbo].[Player] WHERE AccountDBId = (@AccountId)
       ]]>
     </Body>
   </Procedure>
@@ -160,7 +160,7 @@
     <Param name="@TotalExperience" type="BigInt"/>
     <Body>
       <![CDATA[
-        INSERT INTO [dbo].[Player] VALUES ((@AccountId),(@PlayerName),(@PlayerType),(@PlayerIndex),(@Level),(@CurrentHP),(@MaxHP),(@CurrentMP),(@MaxMP),(@CurrentDP),(@MaxDP),(@MinAttack),(@MaxAttack),(@CriticalPoint),(@Speed))        
+        INSERT INTO [dbo].[Player] VALUES ((@AccountId),(@PlayerName),(@PlayerType),(@PlayerIndex),(@Level),(@CurrentHP),(@MaxHP),(@CurrentMP),(@MaxMP),(@CurrentDP),(@MaxDP),(@MinAttack),(@MaxAttack),(@Defence),(@CriticalPoint),(@Speed),(@CurrentExperience),(@RequireExperience),(@TotalExperience))        
       ]]>
     </Body>
   </Procedure>
