@@ -2594,6 +2594,7 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 
 			int64 PlayerId;
 			WCHAR PlayerName[100];
+			int16 PlayerObjectType;
 			int8 PlayerIndex;
 			int32 PlayerLevel;
 			int32 PlayerCurrentHP;
@@ -2604,12 +2605,16 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 			int32 PlayerMaxDP;
 			int32 PlayerMinAttack;
 			int32 PlayerMaxAttack;
+			int32 PlayerDefence;
 			int16 PlayerCriticalPoint;
-			float PlayerSpeed;
-			int16 PlayerObjectType;
+			float PlayerSpeed;			
+			int64 PlayerCurrentExperience;
+			int64 PlayerRequireExperience;
+			int64 PlayerTotalExperience;
 
 			ClientPlayersGet.OutPlayerDBID(PlayerId);
 			ClientPlayersGet.OutPlayerName(PlayerName);
+			ClientPlayersGet.OutPlayerObjectType(PlayerObjectType);
 			ClientPlayersGet.OutPlayerIndex(PlayerIndex);
 			ClientPlayersGet.OutLevel(PlayerLevel);
 			ClientPlayersGet.OutCurrentHP(PlayerCurrentHP);
@@ -2620,9 +2625,12 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 			ClientPlayersGet.OutMaxDP(PlayerMaxDP);
 			ClientPlayersGet.OutMinAttack(PlayerMinAttack);
 			ClientPlayersGet.OutMaxAttack(PlayerMaxAttack);
+			ClientPlayersGet.OutDefence(PlayerDefence);
 			ClientPlayersGet.OutCriticalPoint(PlayerCriticalPoint);
-			ClientPlayersGet.OutSpeed(PlayerSpeed);
-			ClientPlayersGet.OutPlayerObjectType(PlayerObjectType);
+			ClientPlayersGet.OutSpeed(PlayerSpeed);			
+			ClientPlayersGet.OutCurrentExperience(PlayerCurrentExperience);
+			ClientPlayersGet.OutRequireExperience(PlayerRequireExperience);
+			ClientPlayersGet.OutTotalExperience(PlayerTotalExperience);
 
 			ClientPlayersGet.Execute();
 
@@ -2633,6 +2641,7 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 				// 플레이어 정보 셋팅
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectId = PlayerId;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectName = PlayerName;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.OwnerObjectType = (en_GameObjectType)PlayerObjectType;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.Level = PlayerLevel;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.HP = PlayerCurrentHP;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MaxHP = PlayerMaxHP;
@@ -2642,16 +2651,19 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MaxDP = PlayerMaxDP;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MinAttackDamage = PlayerMinAttack;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MaxAttackDamage = PlayerMaxAttack;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.Defence = PlayerDefence;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.CriticalPoint = PlayerCriticalPoint;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.Speed = PlayerSpeed;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectType = (en_GameObjectType)PlayerObjectType;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.OwnerObjectId = 0;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.OwnerObjectType = (en_GameObjectType)PlayerObjectType;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.OwnerObjectId = 0;				
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.PlayerSlotIndex = PlayerIndex;
 				Session->MyPlayers[PlayerIndex]->_SessionId = Session->SessionId;
 				Session->MyPlayers[PlayerIndex]->_AccountId = Session->AccountId;
+				Session->MyPlayers[PlayerIndex]->_Experience.CurrentExperience = PlayerCurrentExperience;
+				Session->MyPlayers[PlayerIndex]->_Experience.RequireExperience = PlayerRequireExperience;
+				Session->MyPlayers[PlayerIndex]->_Experience.TotalExperience = PlayerTotalExperience;
 
 				PlayerCount++;
 			}
@@ -2729,10 +2741,17 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			// DBConnection Pool에서 DB연결을 위해서 하나를 꺼내온다.
 			CDBConnection* NewCharacterPushDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 			// GameServerDB에 새로운 캐릭터 저장하는 프로시저 클래스
+
+			int16 PlayerType = (int16)NewCharacterStatus.PlayerType;
+			int64 CurrentExperience = 0;
+			
+			auto FindLevel = G_Datamanager->_LevelDatas.find(NewCharacterStatus.Level);
+			st_LevelData LevelData = *(*FindLevel).second;
+
 			SP::CDBGameServerCreateCharacterPush NewCharacterPush(*NewCharacterPushDBConnection);
 			NewCharacterPush.InAccountID(Session->AccountId);
 			NewCharacterPush.InPlayerName(Session->CreateCharacterName);
-			NewCharacterPush.InPlayerType(NewCharacterStatus.PlayerType);
+			NewCharacterPush.InPlayerType(PlayerType);
 			NewCharacterPush.InPlayerIndex(ReqCharacterCreateSlotIndex);
 			NewCharacterPush.InLevel(NewCharacterStatus.Level);
 			NewCharacterPush.InCurrentHP(NewCharacterStatus.MaxHP);
@@ -2743,8 +2762,12 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			NewCharacterPush.InMaxDP(NewCharacterStatus.MaxDP);
 			NewCharacterPush.InMinAttack(NewCharacterStatus.MinAttackDamage);
 			NewCharacterPush.InMaxAttack(NewCharacterStatus.MaxAttackDamage);
+			NewCharacterPush.InDefence(NewCharacterStatus.Defence);
 			NewCharacterPush.InCriticalPoint(NewCharacterStatus.CriticalPoint);
 			NewCharacterPush.InSpeed(NewCharacterStatus.Speed);
+			NewCharacterPush.InCurrentExperence(CurrentExperience);
+			NewCharacterPush.InRequireExperience(LevelData.RequireExperience);
+			NewCharacterPush.InTotalExperience(LevelData.TotalExperience);
 
 			// DB 요청 실행
 			NewCharacterPush.Execute();
@@ -2780,6 +2803,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MinAttackDamage = NewCharacterStatus.MinAttackDamage;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MaxAttackDamage = NewCharacterStatus.MaxAttackDamage;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.CriticalPoint = NewCharacterStatus.CriticalPoint;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
@@ -2788,6 +2812,9 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.OwnerObjectId = -1;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.OwnerObjectType = (en_GameObjectType)0;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.PlayerSlotIndex = ReqCharacterCreateSlotIndex; // 캐릭터가 속한 슬롯
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_Experience.CurrentExperience = 0;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_Experience.RequireExperience = LevelData.RequireExperience;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_Experience.TotalExperience = LevelData.TotalExperience;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_SessionId = Session->SessionId;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_AccountId = Session->AccountId;
 

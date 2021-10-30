@@ -321,9 +321,10 @@
     <None Include="CraftingData.json" />
     <None Include="EnvironmentData.json" />
     <None Include="ItemData.json" />
+    <None Include="CharacterLevelingData.json" />
     <None Include="MonsterData.json" />
     <None Include="SkillData.json" />
-    <None Include="StatusData.json" />
+    <None Include="PlayerCharacterStatus.json" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="MapData.txt" />
@@ -331,4 +332,9 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

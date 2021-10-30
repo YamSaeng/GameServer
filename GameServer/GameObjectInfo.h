@@ -236,8 +236,23 @@ struct st_StatInfo
 	int32 MaxDP;
 	int32 MinAttackDamage;
 	int32 MaxAttackDamage;
+	int32 Defence;
 	int16 CriticalPoint;
 	float Speed;
+};
+
+struct st_Experience
+{
+	int64 CurrentExperience;
+	int64 RequireExperience;
+	int64 TotalExperience;
+
+	st_Experience()
+	{
+		CurrentExperience = 0;
+		RequireExperience = 0;
+		TotalExperience = 0;
+	}
 };
 
 struct st_GameObjectInfo

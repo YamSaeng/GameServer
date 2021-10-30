@@ -352,7 +352,7 @@
     <None Include="ItemData.json">
       <Filter>Util\설정 파일\Data</Filter>
     </None>
-    <None Include="StatusData.json">
+    <None Include="PlayerCharacterStatus.json">
       <Filter>Util\설정 파일\Data</Filter>
     </None>
     <None Include="MonsterData.json">
@@ -365,6 +365,9 @@
       <Filter>Util\설정 파일\Data</Filter>
     </None>
     <None Include="CraftingData.json">
+      <Filter>Util\설정 파일\Data</Filter>
+    </None>
+    <None Include="CharacterLevelingData.json">
       <Filter>Util\설정 파일\Data</Filter>
     </None>
   </ItemGroup>
