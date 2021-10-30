@@ -26,11 +26,12 @@ public:
 		G_Logger = new CLog();
 		G_Datamanager = new CDataManager();
 		G_Datamanager->LoadDataItem(L"ItemData.json");
-		G_Datamanager->LoadDataStatus(L"StatusData.json");
+		G_Datamanager->LoadDataPlayerCharacterStatus(L"PlayerCharacterStatus.json");
 		G_Datamanager->LoadDataMonster(L"MonsterData.json");
 		G_Datamanager->LoadDataSkill(L"SkillData.json");
 		G_Datamanager->LoadDataEnvironment(L"EnvironmentData.json");
 		G_Datamanager->LoadDataCrafting(L"CraftingData.json");
+		G_Datamanager->LoadDataLevel(L"CharacterLevelingData.json");
 		
 		G_ChannelManager = new CChannelManager();	
 		G_ChannelManager->Add(1);
