@@ -2668,7 +2668,7 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 				PlayerCount++;
 			}
 
-			// 클라에게 로그인 응답 패킷 보냄
+			// 클라에게 로그인 응답 패킷을 보내면서 캐릭터의 정보를 함께 보낸다.
 			CMessage* ResLoginMessage = MakePacketResLogin(Status, PlayerCount, (CGameObject**)Session->MyPlayers);
 			SendPacket(Session->SessionId, ResLoginMessage);
 			ResLoginMessage->Free();
@@ -2900,7 +2900,42 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 
 					QuickSlotBarSlotCreate.Execute();
 				}
-			}
+			}			
+
+			// 기본 공격 스킬 생성
+			CDBConnection* DefaultAttackSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+			SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*DefaultAttackSkillCreateDBConnection);
+			
+			auto FindSkill = G_Datamanager->_PlayerMeleeSkills.find((int16)en_SkillType::SKILL_NORMAL);
+			st_SkillData* DefaultSkillData = (*FindSkill).second;
+
+			st_SkillInfo DefaultAttackSkillInfo;
+			DefaultAttackSkillInfo.IsQuickSlotUse = false;
+			DefaultAttackSkillInfo.SkillLargeCategory = DefaultSkillData->SkillLargeCategory;
+			DefaultAttackSkillInfo.SkillType = DefaultSkillData->SkillType;
+			DefaultAttackSkillInfo.SkillLevel = 1;
+			DefaultAttackSkillInfo.SkillName = (LPWSTR)CA2W(DefaultSkillData->SkillName.c_str());
+			DefaultAttackSkillInfo.SkillCoolTime = DefaultSkillData->SkillCoolTime;
+			DefaultAttackSkillInfo.SkillCastingTime = DefaultSkillData->SkillCastingTime;
+			DefaultAttackSkillInfo.SkillImagePath = (LPWSTR)CA2W(DefaultSkillData->SkillThumbnailImagePath.c_str());
+
+			int8 DefaultAttackSkillLargeCategory = (int8)DefaultAttackSkillInfo.SkillLargeCategory;
+			int16 DefaultAttackSkillType = (int16)DefaultAttackSkillInfo.SkillType;
+
+			SkillToSkillBox.InAccountDBId(Session->AccountId);
+			SkillToSkillBox.InPlayerDBId(Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectId);
+			SkillToSkillBox.InIsQuickSlotUse(DefaultAttackSkillInfo.IsQuickSlotUse);
+			SkillToSkillBox.InSkillLargeCategory(DefaultAttackSkillLargeCategory);
+			SkillToSkillBox.InSkillType(DefaultAttackSkillType);
+			SkillToSkillBox.InSkillLevel(DefaultAttackSkillInfo.SkillLevel);
+			SkillToSkillBox.InSkillName(DefaultAttackSkillInfo.SkillName);
+			SkillToSkillBox.InSkillCoolTime(DefaultAttackSkillInfo.SkillCoolTime);
+			SkillToSkillBox.InSkillCastingTime(DefaultAttackSkillInfo.SkillCastingTime);
+			SkillToSkillBox.InSkillThumbnailImagePath(DefaultAttackSkillInfo.SkillImagePath);
+
+			SkillToSkillBox.Execute();
+
+			G_DBConnectionPool->Push(en_DBConnect::GAME, DefaultAttackSkillCreateDBConnection);
 		}
 		else
 		{

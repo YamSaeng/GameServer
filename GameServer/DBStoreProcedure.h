@@ -68,7 +68,7 @@ namespace SP
 		void InMaxAttack(int32& MaxAttack) { BindParam(12, MaxAttack); }
 		void InDefence(int32& Defence) { BindParam(13, Defence); }
 		void InCriticalPoint(int16& CriticalPoint) { BindParam(14, CriticalPoint); }
-		void InSpeed(float Speed) { BindParam(15, Speed); }
+		void InSpeed(float& Speed) { BindParam(15, Speed); }
 		void InCurrentExperence(int64& CurrentExperence) { BindParam(16, CurrentExperence); }
 		void InRequireExperience(int64& RequireExperience) { BindParam(17, RequireExperience); }
 		void InTotalExperience(int64& CurrentExperence) { BindParam(18, CurrentExperence); }
