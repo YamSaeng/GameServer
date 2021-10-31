@@ -280,6 +280,9 @@ unsigned __stdcall CGameServer::TimerJobThreadProc(void* Argument)
 					case en_TimerJobType::TIMER_OBJECT_SPAWN:
 						Instance->PacketProcTimerObjectSpawn(TimerJob->TimerJobMessage);
 						break;
+					case en_TimerJobType::TIMER_OBJECT_STATE_CHANGE:
+						Instance->PacketProcTimerObjectStateChange(TimerJob->TimerJobMessage);
+						break;
 					default:
 						Instance->Disconnect(TimerJob->SessionId);
 						break;
@@ -355,6 +358,7 @@ void CGameServer::DeleteClient(st_Session* Session)
 
 		vector<int64> DeSpawnObjectIds;
 		DeSpawnObjectIds.push_back(Session->MyPlayer->_GameObjectInfo.ObjectId);
+
 		CMessage* ResLeaveGame = MakePacketResObjectDeSpawn(1, DeSpawnObjectIds);
 		SendPacketAroundSector(Session, ResLeaveGame);
 		ResLeaveGame->Free();
@@ -623,12 +627,15 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 
 			// ObjectManager에 플레이어 추가 및 패킷 전송
 			G_ObjectManager->Add(Session->MyPlayer, 1);
-
+						
 			// 나한테 나 생성하라고 알려줌
 			CMessage* ResEnterGamePacket = MakePacketResEnterGame(Session->MyPlayer->_GameObjectInfo);
 			SendPacket(Session->SessionId, ResEnterGamePacket);
 			ResEnterGamePacket->Free();
-
+			
+			// 캐릭터의 상태를 10초 후에 IDLE 상태로 전환
+			ObjectStateChangeTimerJobCreate(Session->MyPlayer, en_CreatureState::IDLE, 10000);
+			
 			vector<st_GameObjectInfo> SpawnObjectInfo;
 			SpawnObjectInfo.push_back(Session->MyPlayer->_GameObjectInfo);
 
@@ -1077,7 +1084,19 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 
 					int32 FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
 
-					Target->OnDamaged(MyPlayer, FinalDamage);
+					bool TargetIsDead = Target->OnDamaged(MyPlayer, FinalDamage);
+					if (TargetIsDead == true)
+					{						
+						CMonster* TargetMonster = (CMonster*)Target;
+						if (TargetMonster != nullptr)
+						{
+							MyPlayer->_Experience.CurrentExperience += TargetMonster->_GetExpPoint;							
+
+							CGameServerMessage* ResMonsterGetExpMessage = MakePacketExperience(MyPlayer->_AccountId, MyPlayer->_GameObjectInfo.ObjectId, TargetMonster->_GetExpPoint, MyPlayer->_Experience.CurrentExperience, MyPlayer->_Experience.RequireExperience, MyPlayer->_Experience.TotalExperience);
+							SendPacket(Session->SessionId, ResMonsterGetExpMessage);
+							ResMonsterGetExpMessage->Free();
+						}
+					}
 
 					en_EffectType HitEffectType;
 
@@ -1131,7 +1150,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 					ResChangeObjectStat->Free();
 				}
 
-				CoolTimeSkillTimerJobCreate(MyPlayer, 500, FindSkill, en_TimerJobType::TIMER_ATTACK_END, QuickSlotBarindex, QuickSlotBarSlotIndex);
+				SkillCoolTimeTimerJobCreate(MyPlayer, 500, FindSkill, en_TimerJobType::TIMER_ATTACK_END, QuickSlotBarindex, QuickSlotBarSlotIndex);
 			}
 			else
 			{
@@ -1366,7 +1385,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateChangePacket);
 					ResObjectStateChangePacket->Free();
 
-					CoolTimeSkillTimerJobCreate(MyPlayer, FindSkill->SkillCastingTime, FindSkill, en_TimerJobType::TIMER_SPELL_END, QuickSlotBarindex, QuickSlotBarSlotIndex);
+					SkillCoolTimeTimerJobCreate(MyPlayer, FindSkill->SkillCastingTime, FindSkill, en_TimerJobType::TIMER_SPELL_END, QuickSlotBarindex, QuickSlotBarSlotIndex);
 				}
 			}
 			else
@@ -2609,6 +2628,8 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 			int32 PlayerDefence;
 			int16 PlayerCriticalPoint;
 			float PlayerSpeed;			
+			int32 PlayerLastPositionY;
+			int32 PlayerLastPositionX;
 			int64 PlayerCurrentExperience;
 			int64 PlayerRequireExperience;
 			int64 PlayerTotalExperience;
@@ -2628,7 +2649,9 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 			ClientPlayersGet.OutMaxAttack(PlayerMaxAttack);
 			ClientPlayersGet.OutDefence(PlayerDefence);
 			ClientPlayersGet.OutCriticalPoint(PlayerCriticalPoint);
-			ClientPlayersGet.OutSpeed(PlayerSpeed);			
+			ClientPlayersGet.OutSpeed(PlayerSpeed);	
+			ClientPlayersGet.OutLastPositionY(PlayerLastPositionY);
+			ClientPlayersGet.OutLastPositionX(PlayerLastPositionX);
 			ClientPlayersGet.OutCurrentExperience(PlayerCurrentExperience);
 			ClientPlayersGet.OutRequireExperience(PlayerRequireExperience);
 			ClientPlayersGet.OutTotalExperience(PlayerTotalExperience);
@@ -2654,9 +2677,11 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MaxAttackDamage = PlayerMaxAttack;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.Defence = PlayerDefence;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.CriticalPoint = PlayerCriticalPoint;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.Speed = PlayerSpeed;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.Speed = PlayerSpeed;				
+				Session->MyPlayers[PlayerIndex]->_SpawnPosition._Y = PlayerLastPositionY;
+				Session->MyPlayers[PlayerIndex]->_SpawnPosition._X = PlayerLastPositionX;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;				
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectType = (en_GameObjectType)PlayerObjectType;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.OwnerObjectId = 0;				
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.PlayerSlotIndex = PlayerIndex;
@@ -2749,6 +2774,9 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			auto FindLevel = G_Datamanager->_LevelDatas.find(NewCharacterStatus.Level);
 			st_LevelData LevelData = *(*FindLevel).second;
 
+			int32 NewCharacterPositionY = 26;
+			int32 NewCharacterPositionX = 17;
+
 			SP::CDBGameServerCreateCharacterPush NewCharacterPush(*NewCharacterPushDBConnection);
 			NewCharacterPush.InAccountID(Session->AccountId);
 			NewCharacterPush.InPlayerName(Session->CreateCharacterName);
@@ -2766,6 +2794,8 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			NewCharacterPush.InDefence(NewCharacterStatus.Defence);
 			NewCharacterPush.InCriticalPoint(NewCharacterStatus.CriticalPoint);
 			NewCharacterPush.InSpeed(NewCharacterStatus.Speed);
+			NewCharacterPush.InLastPositionY(NewCharacterPositionY);
+			NewCharacterPush.InLastPositionX(NewCharacterPositionX);
 			NewCharacterPush.InCurrentExperence(CurrentExperience);
 			NewCharacterPush.InRequireExperience(LevelData.RequireExperience);
 			NewCharacterPush.InTotalExperience(LevelData.TotalExperience);
@@ -2807,6 +2837,8 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.CriticalPoint = NewCharacterStatus.CriticalPoint;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_SpawnPosition._Y = NewCharacterPositionY;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_SpawnPosition._X = NewCharacterPositionX;			
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectType = (en_GameObjectType)ReqGameObjectType;
@@ -4962,13 +4994,68 @@ void CGameServer::PacketProcTimerObjectSpawn(CMessage* Message)
 		CGameObject* FindGameObject = Channel->_Map->Find(SpawnPosition);
 		if (FindGameObject != nullptr)
 		{
-			SpawnObjectTime(SpawnObjectType, SpawnPosition, 10000);
+			SpawnObjectTimeTimerJobCreate(SpawnObjectType, SpawnPosition, 10000);
 		}
 		else
 		{
 			G_ObjectManager->ObjectSpawn((en_GameObjectType)SpawnObjectType, SpawnPosition);
 		}
 	}
+}
+
+void CGameServer::PacketProcTimerObjectStateChange(CMessage* Message)
+{
+	int64 TargetObjectId;
+	*Message >> TargetObjectId;
+	int16 TargetObjectType;
+	*Message >> TargetObjectType;
+	int16 ChangeState;
+	*Message >> ChangeState;
+
+	CGameObject* ChangeStateObject = G_ObjectManager->Find(TargetObjectId, (en_GameObjectType)TargetObjectType);
+
+	if (ChangeStateObject != nullptr)
+	{
+		switch ((en_GameObjectType)TargetObjectType)
+		{
+		case en_GameObjectType::OBJECT_BEAR:
+		case en_GameObjectType::OBJECT_SLIME:
+			{
+				CMonster* ChangeStateMonsterObject = (CMonster*)ChangeStateObject;
+				ChangeStateMonsterObject->_GameObjectInfo.ObjectPositionInfo.State = (en_CreatureState)ChangeState;
+
+				CGameServerMessage* ResObjectStateChangeMessage = MakePacketResObjectState(TargetObjectId, ChangeStateObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, ChangeStateObject->_GameObjectInfo.ObjectType, (en_CreatureState)ChangeState);
+				SendPacketAroundSector(ChangeStateObject->GetCellPosition(), ResObjectStateChangeMessage);
+				ResObjectStateChangeMessage->Free();
+			}
+			break;
+		case en_GameObjectType::OBJECT_MELEE_PLAYER:
+		case en_GameObjectType::OBJECT_MAGIC_PLAYER:
+		{
+			CPlayer* ChangeStatePlayerObject = (CPlayer*)ChangeStateObject;
+			switch (ChangeStatePlayerObject->_GameObjectInfo.ObjectPositionInfo.State)
+			{
+			case en_CreatureState::SPAWN_IDLE:
+				{
+					CChannel* Channel = G_ChannelManager->Find(1);
+					if (Channel != nullptr)
+					{
+						st_Vector2Int ChangeStateObjectPosition = ChangeStateObject->GetCellPosition();
+						Channel->_Map->ApplyMove(ChangeStateObject, ChangeStateObjectPosition);
+
+						ChangeStatePlayerObject->_GameObjectInfo.ObjectPositionInfo.State = (en_CreatureState)ChangeState;
+
+						CGameServerMessage* ResObjectStateChangeMessage = MakePacketResObjectState(TargetObjectId, ChangeStateObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, ChangeStateObject->_GameObjectInfo.ObjectType, (en_CreatureState)ChangeState);
+						SendPacketAroundSector(ChangeStateObject->GetCellPosition(), ResObjectStateChangeMessage);
+						ResObjectStateChangeMessage->Free();
+					}
+				}
+				break;
+			}
+		}
+		break;
+		}
+	}	
 }
 
 CGameServerMessage* CGameServer::MakePacketResClientConnected()
@@ -5796,7 +5883,7 @@ void CGameServer::SendPacketAroundSector(st_Session* Session, CMessage* Message,
 	}
 }
 
-void CGameServer::CoolTimeSkillTimerJobCreate(CPlayer* Player, int64 CastingTime, st_SkillInfo* CoolTimeSkillInfo, en_TimerJobType TimerJobType, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex)
+void CGameServer::SkillCoolTimeTimerJobCreate(CPlayer* Player, int64 CastingTime, st_SkillInfo* CoolTimeSkillInfo, en_TimerJobType TimerJobType, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex)
 {
 	CoolTimeSkillInfo->CanSkillUse = false;
 
@@ -5874,7 +5961,7 @@ void CGameServer::CoolTimeSkillTimerJobCreate(CPlayer* Player, int64 CastingTime
 	SetEvent(_TimerThreadWakeEvent);
 }
 
-void CGameServer::SpawnObjectTime(int16 SpawnObjectType, st_Vector2Int SpawnPosition, int64 SpawnTime)
+void CGameServer::SpawnObjectTimeTimerJobCreate(int16 SpawnObjectType, st_Vector2Int SpawnPosition, int64 SpawnTime)
 {
 	st_TimerJob* SpawnObjectTimerJob = _TimerJobMemoryPool->Alloc();
 	SpawnObjectTimerJob->TimerJobExecTick = GetTickCount64() + SpawnTime;
@@ -5897,6 +5984,33 @@ void CGameServer::SpawnObjectTime(int16 SpawnObjectType, st_Vector2Int SpawnPosi
 
 	AcquireSRWLockExclusive(&_TimerJobLock);
 	_TimerHeapJob->InsertHeap(SpawnObjectTimerJob->TimerJobExecTick, SpawnObjectTimerJob);
+	ReleaseSRWLockExclusive(&_TimerJobLock);
+
+	SetEvent(_TimerThreadWakeEvent);
+}
+
+void CGameServer::ObjectStateChangeTimerJobCreate(CGameObject* Target, en_CreatureState ChangeState, int64 ChangeTime)
+{
+	st_TimerJob* ObjectStateChangeTimerJob = _TimerJobMemoryPool->Alloc();
+	ObjectStateChangeTimerJob->TimerJobExecTick = GetTickCount64() + ChangeTime;
+	ObjectStateChangeTimerJob->SessionId = 0;
+	ObjectStateChangeTimerJob->TimerJobType = en_TimerJobType::TIMER_OBJECT_STATE_CHANGE;
+
+	CGameServerMessage* ResObjectStateChangeMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResObjectStateChangeMessage == nullptr)
+	{
+		return;
+	}
+
+	ResObjectStateChangeMessage->Clear();
+	*ResObjectStateChangeMessage << Target->_GameObjectInfo.ObjectId;
+	*ResObjectStateChangeMessage << (int16)Target->_GameObjectInfo.ObjectType;
+	*ResObjectStateChangeMessage << (int16)ChangeState;
+
+	ObjectStateChangeTimerJob->TimerJobMessage = ResObjectStateChangeMessage;
+
+	AcquireSRWLockExclusive(&_TimerJobLock);
+	_TimerHeapJob->InsertHeap(ObjectStateChangeTimerJob->TimerJobExecTick, ObjectStateChangeTimerJob);
 	ReleaseSRWLockExclusive(&_TimerJobLock);
 
 	SetEvent(_TimerThreadWakeEvent);

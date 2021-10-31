@@ -686,7 +686,10 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 	}
 	else
 	{
-		CRASH("ApplyLeave 삭제하려는 오브젝트가 저장되어 있는 오브젝트와 다름");
+		if (GameObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE)
+		{
+			CRASH("ApplyLeave 삭제하려는 오브젝트가 저장되어 있는 오브젝트와 다름");
+		}		
 	}
 
 	return true;

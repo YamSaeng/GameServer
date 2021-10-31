@@ -216,6 +216,10 @@ private:
 	// 오브젝트 스폰
 	//----------------------------------------------------------------
 	void PacketProcTimerObjectSpawn(CMessage* Message);
+	//----------------------------------------------------------------
+	// 오브젝트 상태 변경
+	//----------------------------------------------------------------
+	void PacketProcTimerObjectStateChange(CMessage* Message);
 
 
 	//--------------------------------------
@@ -433,13 +437,17 @@ public:
 	// Session을 기준으로 주위 섹터에 전송
 	//--------------------------------------------------------------
 	void SendPacketAroundSector(st_Session* Session, CMessage* Message, bool SendMe = false);
-
+	
 	//--------------------------------------------------------------
 	// 스킬 쿨타임 타이머 잡 생성
 	//--------------------------------------------------------------
-	void CoolTimeSkillTimerJobCreate(CPlayer* Player, int64 CastingTime, st_SkillInfo* CoolTimeSkillInfo, en_TimerJobType TimerJobType, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex);
+	void SkillCoolTimeTimerJobCreate(CPlayer* Player, int64 CastingTime, st_SkillInfo* CoolTimeSkillInfo, en_TimerJobType TimerJobType, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex);
 	//--------------------------------------------------------------
 	// 오브젝트 스폰 타이머 잡 생성
 	//--------------------------------------------------------------
-	void SpawnObjectTime(int16 SpawnObjectType, st_Vector2Int SpawnPosition, int64 SpawnTime);
+	void SpawnObjectTimeTimerJobCreate(int16 SpawnObjectType, st_Vector2Int SpawnPosition, int64 SpawnTime);
+	//--------------------------------------------------------------
+	// 오브젝트 상태 변경 타이머 잡 생성
+	//--------------------------------------------------------------
+	void ObjectStateChangeTimerJobCreate(CGameObject* Target, en_CreatureState ChangeState, int64 ChangeTime);
 };
