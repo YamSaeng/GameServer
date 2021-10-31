@@ -312,7 +312,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			EnterChannelPlayer->_Channel = this;		
 
 			// 맵에 적용
-			IsEnterChannel = _Map->ApplyMove(EnterChannelPlayer, SpawnPosition);
+			IsEnterChannel = _Map->ApplyMove(EnterChannelPlayer, SpawnPosition, true, false);
 
 			// 섹터 얻어서 해당 섹터에도 저장
 			CSector* EnterSector = GetSector(SpawnPosition);			

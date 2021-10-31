@@ -51,8 +51,11 @@ void CObjectManager::Add(CGameObject* AddObject, int32 ChannelId)
 		case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 			{
 				CPlayer* Player = (CPlayer*)AddObject;
+
+				Player->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_IDLE;
+				
 				// 채널 입장
-				EnterChannel->EnterChannel(AddObject);
+				EnterChannel->EnterChannel(AddObject, &Player->_SpawnPosition);
 				_Players.insert(pair<int64, CPlayer*>(AddObject->_GameObjectInfo.ObjectId, Player));
 			}
 			break;
