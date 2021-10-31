@@ -122,7 +122,26 @@
     <Param name="@AccountId" type="BigInt"/>
     <Body>
       <![CDATA[
-        SELECT PlayerDBId, PlayerName, PlayerType, PlayerIndex, Level, CurrentHP, MaxHP, CurrentMP, MaxMP, CurrentDP, MaxDP, MinAttack, MaxAttack, Defence, CriticalPoint, Speed, CurrentExperience, RequireExperience, TotalExperience FROM [dbo].[Player] WHERE AccountDBId = (@AccountId)
+        SELECT PlayerDBId,
+        PlayerName,
+        PlayerType,
+        PlayerIndex,
+        Level,
+        CurrentHP,
+        MaxHP,
+        CurrentMP, 
+        MaxMP,
+        CurrentDP,
+        MaxDP, 
+        MinAttack,
+        MaxAttack,
+        Defence,
+        CriticalPoint,
+        Speed, 
+        CurrentExperience,
+        RequireExperience, 
+        TotalExperience 
+        FROM [dbo].[Player] WHERE AccountDBId = (@AccountId)
       ]]>
     </Body>
   </Procedure>

@@ -14,11 +14,12 @@ namespace SP
 	};
 
 	// AccountID를 기준으로 클라가 소유하고 있는 캐릭터를 찾는다.
-	class CDBGameServerPlayersGet : public CDBBind<1, 18>
+	class CDBGameServerPlayersGet : public CDBBind<1, 19>
 	{
 	public:
 		CDBGameServerPlayersGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetPlayers(?)}") { }
 		void InAccountID(int64& AccountID) { BindParam(0, AccountID); }
+
 		void OutPlayerDBID(int64& PlayerDBID) { BindCol(0, PlayerDBID); }
 		template<int32 N> void OutPlayerName(WCHAR(&PlayerName)[N]) { BindCol(1, PlayerName); }
 		void OutPlayerObjectType(int16& ObjectType) { BindCol(2, ObjectType); }
@@ -33,11 +34,11 @@ namespace SP
 		void OutMinAttack(int32& MinAttack) { BindCol(11, MinAttack); }
 		void OutMaxAttack(int32& MaxAttack) { BindCol(12, MaxAttack); }
 		void OutDefence(int32& Defence) { BindCol(13, Defence); }
-		void OutCriticalPoint(int16& CriticalPoint) { BindCol(13, CriticalPoint); }
-		void OutSpeed(float& Speed) { BindCol(14, Speed); }		
-		void OutCurrentExperience(int64& CurrentExperience) { BindCol(15, CurrentExperience); }
-		void OutRequireExperience(int64& RequireExperience) { BindCol(16, RequireExperience); }
-		void OutTotalExperience(int64& TotalExperience) { BindCol(17, TotalExperience); }
+		void OutCriticalPoint(int16& CriticalPoint) { BindCol(14, CriticalPoint); }
+		void OutSpeed(float& Speed) { BindCol(15, Speed); }		
+		void OutCurrentExperience(int64& CurrentExperience) { BindCol(16, CurrentExperience); }
+		void OutRequireExperience(int64& RequireExperience) { BindCol(17, RequireExperience); }
+		void OutTotalExperience(int64& TotalExperience) { BindCol(18, TotalExperience); }
 	};
 
 	// DB에 입력한 해당 캐릭터가 있는지 확인
