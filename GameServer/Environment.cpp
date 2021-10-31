@@ -26,7 +26,7 @@ void CEnvironment::Update()
 
 }
 
-void CEnvironment::OnDamaged(CGameObject* Attacker, int32 Damage)
+bool CEnvironment::OnDamaged(CGameObject* Attacker, int32 Damage)
 {
 	CGameObject::OnDamaged(Attacker, Damage);
 
@@ -37,7 +37,11 @@ void CEnvironment::OnDamaged(CGameObject* Attacker, int32 Damage)
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
 
 		OnDead(Attacker);
+
+		return true;
 	}
+
+	return false;
 }
 
 void CEnvironment::UpdateIdle()
@@ -73,7 +77,7 @@ void CStone::OnDead(CGameObject* Killer)
 	BroadCastPacket(en_PACKET_S2C_OBJECT_STAT_CHANGE);
 	BroadCastPacket(en_PACKET_S2C_DIE);
 
-	G_ObjectManager->GameServer->SpawnObjectTime((int16)_GameObjectInfo.ObjectType, GetCellPosition(), 10000);
+	G_ObjectManager->GameServer->SpawnObjectTimeTimerJobCreate((int16)_GameObjectInfo.ObjectType, GetCellPosition(), 10000);
 
 	G_ObjectManager->Remove(this, 1);
 }
@@ -110,7 +114,7 @@ void CTree::OnDead(CGameObject* Killer)
 	BroadCastPacket(en_PACKET_S2C_OBJECT_STAT_CHANGE);
 	BroadCastPacket(en_PACKET_S2C_DIE);
 
-	G_ObjectManager->GameServer->SpawnObjectTime((int16)_GameObjectInfo.ObjectType, GetCellPosition(), 10000);
+	G_ObjectManager->GameServer->SpawnObjectTimeTimerJobCreate((int16)_GameObjectInfo.ObjectType, GetCellPosition(), 10000);
 
 	G_ObjectManager->Remove(this, 1);	
 }

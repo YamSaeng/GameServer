@@ -51,7 +51,7 @@ void CMonster::Update()
 	}	
 }
 
-void CMonster::OnDamaged(CGameObject* Attacker, int32 Damage)
+bool CMonster::OnDamaged(CGameObject* Attacker, int32 Damage)
 {
 	if (_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE
 		|| _GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::RETURN_SPAWN_POSITION)
@@ -70,8 +70,12 @@ void CMonster::OnDamaged(CGameObject* Attacker, int32 Damage)
 			}
 
 			OnDead(Attacker);
+
+			return true;
 		}
 	}	
+
+	return false;
 }
 
 void CMonster::Init(st_Vector2Int SpawnPosition)
@@ -101,6 +105,12 @@ void CMonster::UpdateIdle()
 	}
 	else
 	{
+		if (Target->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::SPAWN_IDLE)
+		{
+			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::PATROL;
+			return;
+		}
+
 		int16 Distance = st_Vector2Int::Distance(Target->GetCellPosition(), GetCellPosition());
 		// 타겟은 찾앗지만 추격할 수 있는 거리가 되지 않음
 		if (Distance > _ChaseCellDistance)

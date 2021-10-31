@@ -30,7 +30,7 @@ public:
 
 	virtual void Update() override;
 
-	virtual void OnDamaged(CGameObject* Attacker, int32 Damage) override;
+	virtual bool OnDamaged(CGameObject* Attacker, int32 Damage) override;
 	virtual void OnDead(CGameObject* Killer) override;	
 
 protected:

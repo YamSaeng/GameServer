@@ -9,7 +9,7 @@ public:
 	virtual void Init(st_Vector2Int SpawnPosition);
 
 	virtual void Update() override;
-	virtual void OnDamaged(CGameObject* Attacker, int32 Damage) override;
+	virtual bool OnDamaged(CGameObject* Attacker, int32 Damage) override;
 protected:
 	//------------------------
 	// Idle ป๓ลย Update

@@ -25,7 +25,7 @@ public:
 	virtual ~CGameObject();
 
 	virtual void Update();
-	virtual void OnDamaged(CGameObject* Attacker, int32 DamagePoint);
+	virtual bool OnDamaged(CGameObject* Attacker, int32 DamagePoint);
 	virtual void OnHeal(CGameObject* Healer, int32 HealPoint);
 	virtual void OnDead(CGameObject* Killer);
 

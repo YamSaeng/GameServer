@@ -19,7 +19,7 @@ public:
 	virtual ~CMonster();	
 
 	virtual void Update() override;
-	virtual void OnDamaged(CGameObject* Attacker, int32 Damage) override;
+	virtual bool OnDamaged(CGameObject* Attacker, int32 Damage) override;
 	// 몬스터 초기화
 	virtual void Init(st_Vector2Int SpawnPosition);	
 protected:

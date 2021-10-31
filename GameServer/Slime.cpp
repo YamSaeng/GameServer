@@ -93,7 +93,7 @@ void CSlime::OnDead(CGameObject* Killer)
 	BroadCastPacket(en_PACKET_S2C_OBJECT_STAT_CHANGE);
 	BroadCastPacket(en_PACKET_S2C_DIE);		
 
-	G_ObjectManager->GameServer->SpawnObjectTime((int16)_GameObjectInfo.ObjectType, _SpawnPosition , 10000);
+	G_ObjectManager->GameServer->SpawnObjectTimeTimerJobCreate((int16)_GameObjectInfo.ObjectType, _SpawnPosition , 10000);
 
 	G_ObjectManager->Remove(this, 1);		
 }

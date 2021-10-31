@@ -30,10 +30,9 @@ void CPlayer::Update()
 	}
 }
 
-void CPlayer::OnDamaged(CGameObject* Attacker, int32 Damage)
+bool CPlayer::OnDamaged(CGameObject* Attacker, int32 Damage)
 {
-	CGameObject::OnDamaged(Attacker, Damage);
-
+	return CGameObject::OnDamaged(Attacker, Damage);
 }
 
 void CPlayer::OnDead(CGameObject* Killer)

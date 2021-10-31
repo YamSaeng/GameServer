@@ -28,14 +28,18 @@ void CGameObject::Update()
 
 }
 
-void CGameObject::OnDamaged(CGameObject* Attacker, int32 DamagePoint)
+bool CGameObject::OnDamaged(CGameObject* Attacker, int32 DamagePoint)
 {
 	_GameObjectInfo.ObjectStatInfo.HP -= DamagePoint;
 
 	if (_GameObjectInfo.ObjectStatInfo.HP <= 0)
 	{
 		_GameObjectInfo.ObjectStatInfo.HP = 0;
+
+		return true;
 	}
+
+	return false;
 }
 
 void CGameObject::OnHeal(CGameObject* Healer, int32 HealPoint)
