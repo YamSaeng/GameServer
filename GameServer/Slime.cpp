@@ -32,6 +32,7 @@ CSlime::CSlime()
 	_AttackTickPoint = MonsterData.AttackTick;
 
 	_GetDPPoint = MonsterData.GetDPPoint;
+	_GetExpPoint = MonsterData.GetExpPoint;
 
 	_SpawnIdleTick = GetTickCount64() + 2000;	
 }

@@ -77,6 +77,7 @@ struct st_MonsterData
 	int32 AttackTick; // 공격 속도
 	vector<st_DropData> DropItems; // 몬스터가 드랍하는 아이템 정보
 	int16 GetDPPoint;
+	int32 GetExpPoint;
 };
 
 struct st_SkillData

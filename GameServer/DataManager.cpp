@@ -467,7 +467,7 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			int AttackTick = MonsterStatInfoFiled["AttackTick"].GetInt();
 			int AttackRange = MonsterStatInfoFiled["AttackRange"].GetInt();
 			int16 GetDPPoint = (int16)MonsterStatInfoFiled["GetDPPoint"].GetInt();
-			int TotalExp = MonsterStatInfoFiled["TotalExp"].GetInt();
+			int GetExpPoint = MonsterStatInfoFiled["GetExpPoint"].GetInt();
 
 			MonsterData->MonsterStatInfo.Level = Level;
 			MonsterData->MonsterStatInfo.MaxHP = MaxHP;
@@ -482,6 +482,7 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			MonsterData->AttackTick = AttackTick;
 			MonsterData->MonsterStatInfo.AttackRange = AttackRange;
 			MonsterData->GetDPPoint = GetDPPoint;
+			MonsterData->GetExpPoint = GetExpPoint;
 		}
 
 		for (auto& DropDataFiled : Filed["MonsterDropData"].GetArray())

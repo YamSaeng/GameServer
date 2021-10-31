@@ -31,7 +31,8 @@ CBear::CBear()
 	_PatrolTickPoint = MonsterData.PatrolTick;
 	_AttackTickPoint = MonsterData.AttackTick;	
 
-	_GetDPPoint = MonsterData.GetDPPoint;
+	_GetDPPoint = MonsterData.GetDPPoint;		
+	_GetExpPoint = MonsterData.GetExpPoint;
 
 	_SpawnIdleTick = GetTickCount64() + 2000;
 }

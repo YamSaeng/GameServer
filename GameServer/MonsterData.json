@@ -18,7 +18,7 @@
           "AttackTick": 500,
           "AttackRange": 1,
           "GetDPPoint": 10,
-          "TotalExp": 10
+          "GetExpPoint": 10
         }
       ],
       "MonsterDropData": [
@@ -54,7 +54,7 @@
           "AttackTick": 1100,
           "AttackRange": 1,
           "GetDPPoint": 20,
-          "TotalExp": 20
+          "GetExpPoint": 30
         }
       ],
       "MonsterDropData": [
