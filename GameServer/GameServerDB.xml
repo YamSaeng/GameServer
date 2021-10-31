@@ -20,6 +20,8 @@
     <Column name="Defence" type="int" notnull="true"/>
     <Column name="CriticalPoint" type="SmallInt" notnull="true"/>
     <Column name="Speed" type="float" notnull="true"/>
+    <Column name="LastPositionY" type="int" notnull="true"/>
+    <Column name="LastPositionX" type="int" notnull="true"/>
     <Column name="CurrentExperience" type="BigInt" notnull="true"/>
     <Column name="RequireExperience" type="BigInt" notnull="true"/>
     <Column name="TotalExperience" type="BigInt" notnull="true"/>
@@ -138,6 +140,8 @@
         Defence,
         CriticalPoint,
         Speed, 
+        LastPositionY,
+        LastPositionX,
         CurrentExperience,
         RequireExperience, 
         TotalExperience 
@@ -174,12 +178,36 @@
     <Param name="@Defence" type="int"/>
     <Param name="@CriticalPoint" type="SmallInt"/>
     <Param name="@Speed" type="float"/>
+    <Param name="@LastPositionY" type="int"/>
+    <Param name="@LastPositionX" type="int"/>
     <Param name="@CurrentExperience" type="BigInt"/>
     <Param name="@RequireExperience" type="BigInt"/>
     <Param name="@TotalExperience" type="BigInt"/>
     <Body>
       <![CDATA[
-        INSERT INTO [dbo].[Player] VALUES ((@AccountId),(@PlayerName),(@PlayerType),(@PlayerIndex),(@Level),(@CurrentHP),(@MaxHP),(@CurrentMP),(@MaxMP),(@CurrentDP),(@MaxDP),(@MinAttack),(@MaxAttack),(@Defence),(@CriticalPoint),(@Speed),(@CurrentExperience),(@RequireExperience),(@TotalExperience))        
+        INSERT INTO [dbo].[Player]
+        VALUES (
+        (@AccountId),
+        (@PlayerName),
+        (@PlayerType),
+        (@PlayerIndex),
+        (@Level),
+        (@CurrentHP),
+        (@MaxHP),
+        (@CurrentMP),
+        (@MaxMP),
+        (@CurrentDP),
+        (@MaxDP),
+        (@MinAttack),
+        (@MaxAttack),
+        (@Defence),
+        (@CriticalPoint),
+        (@Speed),
+        (@LastPositionY),
+        (@LastPositionX),
+        (@CurrentExperience),
+        (@RequireExperience),
+        (@TotalExperience))        
       ]]>
     </Body>
   </Procedure>
@@ -317,7 +345,9 @@
     <Param name="@SlotIndex" type="TinyInt"/>
     <Body>
       <![CDATA[
-        UPDATE [dbo].[Inventory] SET ItemCount = (@ItemCount) WHERE ItemSmallCategory = (@ItemSmallCategory) AND SlotIndex = (@SlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
+        UPDATE [dbo].[Inventory]
+        SET ItemCount = (@ItemCount)
+        WHERE ItemSmallCategory = (@ItemSmallCategory) AND SlotIndex = (@SlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
       ]]>
     </Body>
   </Procedure>  

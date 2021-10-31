@@ -14,7 +14,7 @@ namespace SP
 	};
 
 	// AccountID를 기준으로 클라가 소유하고 있는 캐릭터를 찾는다.
-	class CDBGameServerPlayersGet : public CDBBind<1, 19>
+	class CDBGameServerPlayersGet : public CDBBind<1, 21>
 	{
 	public:
 		CDBGameServerPlayersGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetPlayers(?)}") { }
@@ -36,9 +36,11 @@ namespace SP
 		void OutDefence(int32& Defence) { BindCol(13, Defence); }
 		void OutCriticalPoint(int16& CriticalPoint) { BindCol(14, CriticalPoint); }
 		void OutSpeed(float& Speed) { BindCol(15, Speed); }		
-		void OutCurrentExperience(int64& CurrentExperience) { BindCol(16, CurrentExperience); }
-		void OutRequireExperience(int64& RequireExperience) { BindCol(17, RequireExperience); }
-		void OutTotalExperience(int64& TotalExperience) { BindCol(18, TotalExperience); }
+		void OutLastPositionY(int32& LastPositionY) { BindCol(16, LastPositionY); }
+		void OutLastPositionX(int32& LastPositionX) { BindCol(17, LastPositionX); }
+		void OutCurrentExperience(int64& CurrentExperience) { BindCol(18, CurrentExperience); }
+		void OutRequireExperience(int64& RequireExperience) { BindCol(19, RequireExperience); }
+		void OutTotalExperience(int64& TotalExperience) { BindCol(20, TotalExperience); }
 	};
 
 	// DB에 입력한 해당 캐릭터가 있는지 확인
@@ -50,10 +52,10 @@ namespace SP
 	};
 
 	// DB에 새로운 캐릭 저장
-	class CDBGameServerCreateCharacterPush : public CDBBind<19, 0>
+	class CDBGameServerCreateCharacterPush : public CDBBind<21, 0>
 	{
 	public:
-		CDBGameServerCreateCharacterPush(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spNewCharacterPush(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}") {}
+		CDBGameServerCreateCharacterPush(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spNewCharacterPush(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}") {}
 		void InAccountID(int64& AccountID) { BindParam(0, AccountID); }
 		void InPlayerName(wstring& PlayerName) { BindParam(1, PlayerName.c_str()); }
 		void InPlayerType(int16& PlayerType) { BindParam(2, PlayerType); }
@@ -70,9 +72,11 @@ namespace SP
 		void InDefence(int32& Defence) { BindParam(13, Defence); }
 		void InCriticalPoint(int16& CriticalPoint) { BindParam(14, CriticalPoint); }
 		void InSpeed(float& Speed) { BindParam(15, Speed); }
-		void InCurrentExperence(int64& CurrentExperence) { BindParam(16, CurrentExperence); }
-		void InRequireExperience(int64& RequireExperience) { BindParam(17, RequireExperience); }
-		void InTotalExperience(int64& CurrentExperence) { BindParam(18, CurrentExperence); }
+		void InLastPositionY(int32& LastPositionY) { BindParam(16, LastPositionY); }
+		void InLastPositionX(int32& LastPositionX) { BindParam(17, LastPositionX); }
+		void InCurrentExperence(int64& CurrentExperence) { BindParam(18, CurrentExperence); }
+		void InRequireExperience(int64& RequireExperience) { BindParam(19, RequireExperience); }
+		void InTotalExperience(int64& CurrentExperence) { BindParam(20, CurrentExperence); }
 	};
 
 	// 캐릭터 DBid 얻기
