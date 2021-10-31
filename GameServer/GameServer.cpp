@@ -224,6 +224,9 @@ unsigned __stdcall CGameServer::DataBaseThreadProc(void* Argument)
 			case en_JobType::DATA_BASE_QUICK_INIT:
 				Instance->PacketProcReqDBQuickSlotInit(Job->SessionId, Job->Message);
 				break;
+			case en_JobType::DATA_BASE_LEAVE_PLAYER_INFO_SAVE:
+				Instance->PacketProcReqDBLeavePlayerInfoSave(Job->SessionId, Job->Message);
+				break;
 			default:
 				Instance->Disconnect(Job->SessionId);
 				break;
@@ -353,6 +356,28 @@ void CGameServer::DeleteClient(st_Session* Session)
 
 	if (Session->MyPlayer != nullptr)
 	{
+		// 마지막 위치 기록
+		st_Job* DBLeavePlayerInfoSaveJob = _JobMemoryPool->Alloc();
+		DBLeavePlayerInfoSaveJob->Type = en_JobType::DATA_BASE_LEAVE_PLAYER_INFO_SAVE;
+		DBLeavePlayerInfoSaveJob->SessionId = Session->SessionId;
+
+		CGameServerMessage* DBLeavePlayerInfoSaveMessage = CGameServerMessage::GameServerMessageAlloc();
+		if (DBLeavePlayerInfoSaveMessage == nullptr)
+		{
+			return;
+		}
+
+		DBLeavePlayerInfoSaveMessage->Clear();
+
+		*DBLeavePlayerInfoSaveMessage << Session->AccountId;
+		*DBLeavePlayerInfoSaveMessage << Session->MyPlayer->_GameObjectInfo.ObjectId;	
+		*DBLeavePlayerInfoSaveMessage << Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo;
+
+		DBLeavePlayerInfoSaveJob->Message = DBLeavePlayerInfoSaveMessage;
+
+		_GameServerDataBaseThreadMessageQue.Enqueue(DBLeavePlayerInfoSaveJob);
+		SetEvent(_DataBaseWakeEvent);
+
 		CChannel* Channel = G_ChannelManager->Find(1);
 		Channel->LeaveChannel(Session->MyPlayer);
 
@@ -4823,6 +4848,39 @@ void CGameServer::PacketProcReqDBQuickSlotInit(int64 SessionId, CMessage* Messag
 	}
 
 	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcReqDBLeavePlayerInfoSave(int64 SessionId, CMessage* Message)
+{
+	int64 AccountId;
+	*Message >> AccountId;
+	int64 PlayerId;
+	*Message >> PlayerId;
+	int8 State;
+	*Message >> State;
+	int32 LastPositionX;
+	*Message >> LastPositionX;
+	int32 LastPositionY;
+	*Message >> LastPositionY;
+	int8 Dir;
+	*Message >> Dir;
+
+	Message->Free();	
+
+	CDBConnection* PlayerInfoSaveDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+	SP::CDBGameServerPlayerLeaveInfoSave PlayerLeaveInfoSave(*PlayerInfoSaveDBConnection);
+	PlayerLeaveInfoSave.InAccountDBId(AccountId);
+	PlayerLeaveInfoSave.InPlayerDBId(PlayerId);
+	PlayerLeaveInfoSave.InLastPositionY(LastPositionY);
+	PlayerLeaveInfoSave.InLastPositionX(LastPositionX);
+
+	bool IsPlayerLeaveInfoSave = PlayerLeaveInfoSave.Execute();
+	if (IsPlayerLeaveInfoSave == false)
+	{
+		CRASH("PlayerInfoSave 실패");
+	}
+
+	G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerInfoSaveDBConnection);
 }
 
 void CGameServer::PacketProcTimerAttackEnd(int64 SessionId, CMessage* Message)
