@@ -1068,86 +1068,89 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 
 				// 타겟 데미지 적용
 				for (CGameObject* Target : Targets)
-				{
-					// 크리티컬 판단
-					random_device Seed;
-					default_random_engine Eng(Seed());
-
-					float CriticalPoint = MyPlayer->_GameObjectInfo.ObjectStatInfo.CriticalPoint / 1000.0f;
-					bernoulli_distribution CriticalCheck(CriticalPoint);
-					bool IsCritical = CriticalCheck(Eng);
-
-					// 데미지 판단
-					mt19937 Gen(Seed());
-					uniform_int_distribution<int> DamageChoiceRandom(MyPlayer->_GameObjectInfo.ObjectStatInfo.MinAttackDamage, MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxAttackDamage);
-					int32 ChoiceDamage = DamageChoiceRandom(Gen);
-
-					int32 FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
-
-					bool TargetIsDead = Target->OnDamaged(MyPlayer, FinalDamage);
-					if (TargetIsDead == true)
-					{						
-						CMonster* TargetMonster = (CMonster*)Target;
-						if (TargetMonster != nullptr)
-						{
-							MyPlayer->_Experience.CurrentExperience += TargetMonster->_GetExpPoint;							
-
-							CGameServerMessage* ResMonsterGetExpMessage = MakePacketExperience(MyPlayer->_AccountId, MyPlayer->_GameObjectInfo.ObjectId, TargetMonster->_GetExpPoint, MyPlayer->_Experience.CurrentExperience, MyPlayer->_Experience.RequireExperience, MyPlayer->_Experience.TotalExperience);
-							SendPacket(Session->SessionId, ResMonsterGetExpMessage);
-							ResMonsterGetExpMessage->Free();
-						}
-					}
-
-					en_EffectType HitEffectType;
-
-					// 시스템 메세지 생성
-					switch ((en_SkillType)ReqSkillType)
+				{					
+					if (Target->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE)
 					{
-					case en_SkillType::SKILL_TYPE_NONE:
-						CRASH("SkillType None");
-						break;
-					case en_SkillType::SKILL_NORMAL:
-						wsprintf(SkillTypeMessage, L"%s가 일반공격을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
-						HitEffectType = en_EffectType::EFFECT_NORMAL_ATTACK_TARGET_HIT;
-						break;
-					case en_SkillType::SKILL_KNIGHT_CHOHONE:
-						wsprintf(SkillTypeMessage, L"%s가 초혼비무를 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
-						HitEffectType = en_EffectType::EFFECT_CHOHONE_TARGET_HIT;
-						break;
-					case en_SkillType::SKILL_KNIGHT_SHAEHONE:
-						wsprintf(SkillTypeMessage, L"%s가 쇄혼비무를 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
-						HitEffectType = en_EffectType::EFFECT_SHAHONE_TARGET_HIT;
-						break;
-					case en_SkillType::SKILL_KNIGHT_SMASH_WAVE:
-						wsprintf(SkillTypeMessage, L"%s가 분쇄파동을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
-						HitEffectType = en_EffectType::EFFECT_NORMAL_ATTACK_TARGET_HIT;
-						break;
-					default:
-						break;
-					}
+						// 크리티컬 판단
+						random_device Seed;
+						default_random_engine Eng(Seed());
 
-					SkillTypeString = SkillTypeMessage;
-					SkillTypeString = IsCritical ? L"치명타! " + SkillTypeString : SkillTypeString;
+						float CriticalPoint = MyPlayer->_GameObjectInfo.ObjectStatInfo.CriticalPoint / 1000.0f;
+						bernoulli_distribution CriticalCheck(CriticalPoint);
+						bool IsCritical = CriticalCheck(Eng);
 
-					// 데미지 시스템 메세지 전송
-					CMessage* ResSkillSystemMessagePacket = MakePacketResChattingBoxMessage(MyPlayer->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, IsCritical ? st_Color::Red() : st_Color::White(), SkillTypeString);
-					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResSkillSystemMessagePacket);
-					ResSkillSystemMessagePacket->Free();
+						// 데미지 판단
+						mt19937 Gen(Seed());
+						uniform_int_distribution<int> DamageChoiceRandom(MyPlayer->_GameObjectInfo.ObjectStatInfo.MinAttackDamage, MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxAttackDamage);
+						int32 ChoiceDamage = DamageChoiceRandom(Gen);
 
-					// 공격 응답 메세지 전송
-					CMessage* ResMyAttackOtherPacket = MakePacketResAttack(MyPlayer->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectId, (en_SkillType)ReqSkillType, FinalDamage, IsCritical);
-					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMyAttackOtherPacket);
-					ResMyAttackOtherPacket->Free();
+						int32 FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
 
-					// 이펙트 출력
-					CMessage* ResEffectPacket = MakePacketEffect(Target->_GameObjectInfo.ObjectId, HitEffectType);
-					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResEffectPacket);
-					ResEffectPacket->Free();
+						bool TargetIsDead = Target->OnDamaged(MyPlayer, FinalDamage);
+						if (TargetIsDead == true)
+						{
+							CMonster* TargetMonster = (CMonster*)Target;
+							if (TargetMonster != nullptr)
+							{
+								MyPlayer->_Experience.CurrentExperience += TargetMonster->_GetExpPoint;
 
-					// 스탯 변경 메세지 전송
-					CMessage* ResChangeObjectStat = MakePacketChangeObjectStat(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectStatInfo);
-					SendPacketAroundSector(Target->GetCellPosition(), ResChangeObjectStat);
-					ResChangeObjectStat->Free();
+								CGameServerMessage* ResMonsterGetExpMessage = MakePacketExperience(MyPlayer->_AccountId, MyPlayer->_GameObjectInfo.ObjectId, TargetMonster->_GetExpPoint, MyPlayer->_Experience.CurrentExperience, MyPlayer->_Experience.RequireExperience, MyPlayer->_Experience.TotalExperience);
+								SendPacket(Session->SessionId, ResMonsterGetExpMessage);
+								ResMonsterGetExpMessage->Free();
+							}
+						}
+
+						en_EffectType HitEffectType;
+
+						// 시스템 메세지 생성
+						switch ((en_SkillType)ReqSkillType)
+						{
+						case en_SkillType::SKILL_TYPE_NONE:
+							CRASH("SkillType None");
+							break;
+						case en_SkillType::SKILL_NORMAL:
+							wsprintf(SkillTypeMessage, L"%s가 일반공격을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+							HitEffectType = en_EffectType::EFFECT_NORMAL_ATTACK_TARGET_HIT;
+							break;
+						case en_SkillType::SKILL_KNIGHT_CHOHONE:
+							wsprintf(SkillTypeMessage, L"%s가 초혼비무를 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+							HitEffectType = en_EffectType::EFFECT_CHOHONE_TARGET_HIT;
+							break;
+						case en_SkillType::SKILL_KNIGHT_SHAEHONE:
+							wsprintf(SkillTypeMessage, L"%s가 쇄혼비무를 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+							HitEffectType = en_EffectType::EFFECT_SHAHONE_TARGET_HIT;
+							break;
+						case en_SkillType::SKILL_KNIGHT_SMASH_WAVE:
+							wsprintf(SkillTypeMessage, L"%s가 분쇄파동을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+							HitEffectType = en_EffectType::EFFECT_NORMAL_ATTACK_TARGET_HIT;
+							break;
+						default:
+							break;
+						}
+
+						SkillTypeString = SkillTypeMessage;
+						SkillTypeString = IsCritical ? L"치명타! " + SkillTypeString : SkillTypeString;
+
+						// 데미지 시스템 메세지 전송
+						CMessage* ResSkillSystemMessagePacket = MakePacketResChattingBoxMessage(MyPlayer->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, IsCritical ? st_Color::Red() : st_Color::White(), SkillTypeString);
+						SendPacketAroundSector(MyPlayer->GetCellPosition(), ResSkillSystemMessagePacket);
+						ResSkillSystemMessagePacket->Free();
+
+						// 공격 응답 메세지 전송
+						CMessage* ResMyAttackOtherPacket = MakePacketResAttack(MyPlayer->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectId, (en_SkillType)ReqSkillType, FinalDamage, IsCritical);
+						SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMyAttackOtherPacket);
+						ResMyAttackOtherPacket->Free();
+
+						// 이펙트 출력
+						CMessage* ResEffectPacket = MakePacketEffect(Target->_GameObjectInfo.ObjectId, HitEffectType);
+						SendPacketAroundSector(MyPlayer->GetCellPosition(), ResEffectPacket);
+						ResEffectPacket->Free();
+
+						// 스탯 변경 메세지 전송
+						CMessage* ResChangeObjectStat = MakePacketChangeObjectStat(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectStatInfo);
+						SendPacketAroundSector(Target->GetCellPosition(), ResChangeObjectStat);
+						ResChangeObjectStat->Free();
+					}					
 				}
 
 				SkillCoolTimeTimerJobCreate(MyPlayer, 500, FindSkill, en_TimerJobType::TIMER_ATTACK_END, QuickSlotBarindex, QuickSlotBarSlotIndex);
