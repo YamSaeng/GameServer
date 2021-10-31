@@ -67,6 +67,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_StatInfo& StatInfo)
     *this << StatInfo.MaxDP;
     *this << StatInfo.MinAttackDamage;
     *this << StatInfo.MaxAttackDamage;
+    *this << StatInfo.Defence;
     *this << StatInfo.CriticalPoint;
     *this << StatInfo.Speed;    
 

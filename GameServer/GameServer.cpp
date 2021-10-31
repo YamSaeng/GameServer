@@ -1074,6 +1074,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 					mt19937 Gen(Seed());
 					uniform_int_distribution<int> DamageChoiceRandom(MyPlayer->_GameObjectInfo.ObjectStatInfo.MinAttackDamage, MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxAttackDamage);
 					int32 ChoiceDamage = DamageChoiceRandom(Gen);
+
 					int32 FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
 
 					Target->OnDamaged(MyPlayer, FinalDamage);
@@ -2669,7 +2670,7 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 			}
 
 			// 클라에게 로그인 응답 패킷을 보내면서 캐릭터의 정보를 함께 보낸다.
-			CMessage* ResLoginMessage = MakePacketResLogin(Status, PlayerCount, (CGameObject**)Session->MyPlayers);
+			CMessage* ResLoginMessage = MakePacketResLogin(Status, PlayerCount, Session->MyPlayers);
 			SendPacket(Session->SessionId, ResLoginMessage);
 			ResLoginMessage->Free();
 
@@ -4083,7 +4084,14 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 		do
 		{
 			InterlockedDecrement64(&Session->IOBlock->IOCount);
-#pragma region 퀵슬롯 정보 가져오기
+
+#pragma region 캐릭터 경험치 정보 보내기
+			CGameServerMessage* ResExperience = MakePacketExperience(Session->MyPlayer->_AccountId, Session->MyPlayer->_GameObjectInfo.ObjectId, 0, Session->MyPlayer->_Experience.CurrentExperience, Session->MyPlayer->_Experience.RequireExperience, Session->MyPlayer->_Experience.TotalExperience);
+			SendPacket(Session->SessionId, ResExperience);
+			ResExperience->Free();
+#pragma endregion
+
+#pragma region 퀵슬롯 정보 가져와서 클라에 보내기
 			// 퀵슬롯 정보 초기화
 			Session->MyPlayer->_QuickSlotManager.Init();
 
@@ -4984,7 +4992,7 @@ CGameServerMessage* CGameServer::MakePacketResClientConnected()
 //BYTE Status  //0 : 실패  1 : 성공
 //CPlayer Players
 //---------------------------------------------------------------
-CGameServerMessage* CGameServer::MakePacketResLogin(bool Status, int8 PlayerCount, CGameObject** MyPlayersInfo)
+CGameServerMessage* CGameServer::MakePacketResLogin(bool Status, int8 PlayerCount, CPlayer** MyPlayersInfo)
 {
 	CGameServerMessage* LoginMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (LoginMessage == nullptr)
@@ -5002,7 +5010,7 @@ CGameServerMessage* CGameServer::MakePacketResLogin(bool Status, int8 PlayerCoun
 	{
 		for (int32 i = 0; i < PlayerCount; i++)
 		{
-			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo;
+			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo;			
 		}
 	}
 
@@ -5418,6 +5426,27 @@ CGameServerMessage* CGameServer::MakePacketMagicCancel(int64 AccountId, int64 Pl
 	*ResMagicCancelMessage << PlayerId;
 
 	return ResMagicCancelMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketExperience(int64 AccountId, int64 PlayerId, int64 GainExp, int64 CurrentExp, int64 RequireExp, int64 TotalExp)
+{
+	CGameServerMessage* ResExperienceMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResExperienceMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResExperienceMessage->Clear();
+
+	*ResExperienceMessage << (int16)en_PACKET_S2C_EXPERIENCE;
+	*ResExperienceMessage << AccountId;
+	*ResExperienceMessage << PlayerId;
+	*ResExperienceMessage << GainExp;
+	*ResExperienceMessage << CurrentExp;
+	*ResExperienceMessage << RequireExp;
+	*ResExperienceMessage << TotalExp;
+
+	return ResExperienceMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_SkillType SkillType, int32 Damage, bool IsCritical)
