@@ -469,4 +469,15 @@ namespace SP
 		void InQuickSlotBarSkillName(wstring& QuickSlotBarSkillName) { BindParam(4, QuickSlotBarSkillName.c_str()); }
 		void InQuickSlotBarSkillThumbnailImagePath(wstring& QuickSlotBarSkillThumbnailImagePath) { BindParam(5, QuickSlotBarSkillThumbnailImagePath.c_str()); }
 	};
+
+	// 접속 종료시 플레이어 정보 DB에 기록
+	class CDBGameServerPlayerLeaveInfoSave : public CDBBind<4, 0>
+	{
+	public:
+		CDBGameServerPlayerLeaveInfoSave(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spPlayerLeaveInfoSave(?,?,?,?)}"){}
+		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
+		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
+		void InLastPositionY(int32& LastPositionY) { BindParam(2, LastPositionY); }
+		void InLastPositionX(int32& LastPositionX) { BindParam(3, LastPositionX); }
+	};
 }

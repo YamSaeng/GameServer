@@ -591,8 +591,25 @@
     <Param name="@QuickSlotSkillImagePath" type="nvarchar(100)"/>
     <Body>
       <![CDATA[
-        UPDATE [dbo].[QuickSlotBar] SET SkillLargeCategory = 0, SkillType = 0, SkillLevel = 0, SkillName = (@QuickSlotSkillName), SkillCoolTime = (@QuickSlotSkillName), SkillCastingTime = 0, SkillImagePath = (@QuickSlotSkillImagePath) WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
+        UPDATE [dbo].[QuickSlotBar]
+        SET SkillLargeCategory = 0, SkillType = 0, SkillLevel = 0, SkillName = (@QuickSlotSkillName), SkillCoolTime = (@QuickSlotSkillName), SkillCastingTime = 0, SkillImagePath = (@QuickSlotSkillImagePath)
+        WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
     </Body>
   </Procedure> 
+  
+  <!-- 접속 종료시 플레이어 정보 DB에 기록 -->
+  <Procedure name="spPlayerLeaveInfoSave">
+    <Param name="@AccountDBId" type="BigInt"/>
+    <Param name="@PlayerDBId" type="BigInt"/>
+    <Param name="@LastPositionY" type="int"/>
+    <Param name="@LastPositionX" type="int"/>
+    <Body>
+      <![CDATA[
+        UPDATE [dbo].[Player]
+        SET LastPositionY = (@LastPositionY), LastPositionX = (@LastPositionX)
+        WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
+      ]]>
+    </Body>
+  </Procedure>
 </GameServerDB>
