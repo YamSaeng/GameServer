@@ -284,7 +284,7 @@ unsigned __stdcall CGameServer::TimerJobThreadProc(void* Argument)
 						Instance->PacketProcTimerObjectSpawn(TimerJob->TimerJobMessage);
 						break;
 					case en_TimerJobType::TIMER_OBJECT_STATE_CHANGE:
-						Instance->PacketProcTimerObjectStateChange(TimerJob->TimerJobMessage);
+						Instance->PacketProcTimerObjectStateChange(TimerJob->SessionId, TimerJob->TimerJobMessage);
 						break;
 					default:
 						Instance->Disconnect(TimerJob->SessionId);
@@ -658,8 +658,10 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 			SendPacket(Session->SessionId, ResEnterGamePacket);
 			ResEnterGamePacket->Free();
 			
+			InterlockedIncrement64(&Session->IOBlock->IOCount);
+
 			// 캐릭터의 상태를 10초 후에 IDLE 상태로 전환
-			ObjectStateChangeTimerJobCreate(Session->MyPlayer, en_CreatureState::IDLE, 10000);
+			ObjectStateChangeTimerJobCreate(Session->MyPlayer, en_CreatureState::IDLE, 10000, Session->SessionId);
 			
 			vector<st_GameObjectInfo> SpawnObjectInfo;
 			SpawnObjectInfo.push_back(Session->MyPlayer->_GameObjectInfo);
@@ -1178,6 +1180,8 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 					}					
 				}
 
+				InterlockedIncrement64(&Session->IOBlock->IOCount);
+
 				SkillCoolTimeTimerJobCreate(MyPlayer, 500, FindSkill, en_TimerJobType::TIMER_ATTACK_END, QuickSlotBarindex, QuickSlotBarSlotIndex);
 			}
 			else
@@ -1412,6 +1416,8 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 					CMessage* ResObjectStateChangePacket = MakePacketResObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
 					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateChangePacket);
 					ResObjectStateChangePacket->Free();
+
+					InterlockedIncrement64(&Session->IOBlock->IOCount);
 
 					SkillCoolTimeTimerJobCreate(MyPlayer, FindSkill->SkillCastingTime, FindSkill, en_TimerJobType::TIMER_SPELL_END, QuickSlotBarindex, QuickSlotBarSlotIndex);
 				}
@@ -5024,7 +5030,9 @@ void CGameServer::PacketProcTimerCoolTimeEnd(int64 SessionId, CMessage* Message)
 	st_Session* Session = FindSession(SessionId);
 
 	if (Session)
-	{
+	{		
+		InterlockedDecrement64(&Session->IOBlock->IOCount);
+
 		int16 SkillType;
 		*Message >> SkillType;
 
@@ -5064,7 +5072,7 @@ void CGameServer::PacketProcTimerObjectSpawn(CMessage* Message)
 	}
 }
 
-void CGameServer::PacketProcTimerObjectStateChange(CMessage* Message)
+void CGameServer::PacketProcTimerObjectStateChange(int64 SessionId, CMessage* Message)
 {
 	int64 TargetObjectId;
 	*Message >> TargetObjectId;
@@ -5093,26 +5101,34 @@ void CGameServer::PacketProcTimerObjectStateChange(CMessage* Message)
 		case en_GameObjectType::OBJECT_MELEE_PLAYER:
 		case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 		{
-			CPlayer* ChangeStatePlayerObject = (CPlayer*)ChangeStateObject;
-			switch (ChangeStatePlayerObject->_GameObjectInfo.ObjectPositionInfo.State)
+			st_Session* Session = FindSession(SessionId);
+			if (Session != nullptr)
 			{
-			case en_CreatureState::SPAWN_IDLE:
+				InterlockedDecrement64(&Session->IOBlock->IOCount);
+
+				CPlayer* ChangeStatePlayerObject = (CPlayer*)ChangeStateObject;
+				switch (ChangeStatePlayerObject->_GameObjectInfo.ObjectPositionInfo.State)
 				{
-					CChannel* Channel = G_ChannelManager->Find(1);
-					if (Channel != nullptr)
+				case en_CreatureState::SPAWN_IDLE:
 					{
-						st_Vector2Int ChangeStateObjectPosition = ChangeStateObject->GetCellPosition();
-						Channel->_Map->ApplyMove(ChangeStateObject, ChangeStateObjectPosition);
+						CChannel* Channel = G_ChannelManager->Find(1);
+						if (Channel != nullptr)
+						{
+							st_Vector2Int ChangeStateObjectPosition = ChangeStateObject->GetCellPosition();
+							Channel->_Map->ApplyMove(ChangeStateObject, ChangeStateObjectPosition);
 
-						ChangeStatePlayerObject->_GameObjectInfo.ObjectPositionInfo.State = (en_CreatureState)ChangeState;
+							ChangeStatePlayerObject->_GameObjectInfo.ObjectPositionInfo.State = (en_CreatureState)ChangeState;
 
-						CGameServerMessage* ResObjectStateChangeMessage = MakePacketResObjectState(TargetObjectId, ChangeStateObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, ChangeStateObject->_GameObjectInfo.ObjectType, (en_CreatureState)ChangeState);
-						SendPacketAroundSector(ChangeStateObject->GetCellPosition(), ResObjectStateChangeMessage);
-						ResObjectStateChangeMessage->Free();
+							CGameServerMessage* ResObjectStateChangeMessage = MakePacketResObjectState(TargetObjectId, ChangeStateObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, ChangeStateObject->_GameObjectInfo.ObjectType, (en_CreatureState)ChangeState);
+							SendPacketAroundSector(ChangeStateObject->GetCellPosition(), ResObjectStateChangeMessage);
+							ResObjectStateChangeMessage->Free();
+						}
 					}
+					break;
 				}
-				break;
-			}
+			}		
+
+			ReturnSession(Session);
 		}
 		break;
 		}
@@ -6050,11 +6066,11 @@ void CGameServer::SpawnObjectTimeTimerJobCreate(int16 SpawnObjectType, st_Vector
 	SetEvent(_TimerThreadWakeEvent);
 }
 
-void CGameServer::ObjectStateChangeTimerJobCreate(CGameObject* Target, en_CreatureState ChangeState, int64 ChangeTime)
+void CGameServer::ObjectStateChangeTimerJobCreate(CGameObject* Target, en_CreatureState ChangeState, int64 ChangeTime, int64 SessionId)
 {
 	st_TimerJob* ObjectStateChangeTimerJob = _TimerJobMemoryPool->Alloc();
 	ObjectStateChangeTimerJob->TimerJobExecTick = GetTickCount64() + ChangeTime;
-	ObjectStateChangeTimerJob->SessionId = 0;
+	ObjectStateChangeTimerJob->SessionId = SessionId;
 	ObjectStateChangeTimerJob->TimerJobType = en_TimerJobType::TIMER_OBJECT_STATE_CHANGE;
 
 	CGameServerMessage* ResObjectStateChangeMessage = CGameServerMessage::GameServerMessageAlloc();

@@ -222,7 +222,7 @@ private:
 	//----------------------------------------------------------------
 	// 오브젝트 상태 변경
 	//----------------------------------------------------------------
-	void PacketProcTimerObjectStateChange(CMessage* Message);
+	void PacketProcTimerObjectStateChange(int64 SessionId, CMessage* Message);
 
 
 	//--------------------------------------
@@ -452,5 +452,5 @@ public:
 	//--------------------------------------------------------------
 	// 오브젝트 상태 변경 타이머 잡 생성
 	//--------------------------------------------------------------
-	void ObjectStateChangeTimerJobCreate(CGameObject* Target, en_CreatureState ChangeState, int64 ChangeTime);
+	void ObjectStateChangeTimerJobCreate(CGameObject* Target, en_CreatureState ChangeState, int64 ChangeTime, int64 SessionId = 0);
 };
