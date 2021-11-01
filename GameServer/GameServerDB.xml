@@ -601,13 +601,28 @@
   <!-- 접속 종료시 플레이어 정보 DB에 기록 -->
   <Procedure name="spPlayerLeaveInfoSave">
     <Param name="@AccountDBId" type="BigInt"/>
-    <Param name="@PlayerDBId" type="BigInt"/>
-    <Param name="@LastPositionY" type="int"/>
-    <Param name="@LastPositionX" type="int"/>
+    <Param name="@PlayerDBId" type="BigInt"/>    
+    <Param name="@Level" type="Int"/>
+    <Param name="@MaxHP" type="Int"/>
+    <Param name="@MaxMP" type="Int"/>
+    <Param name="@MaxDP" type="Int"/>
+    <Param name="@MinAttack" type="Int"/>
+    <Param name="@MaxAttack" type="Int"/>
+    <Param name="@Defence" type="Int"/>
+    <Param name="@CriticalPoint" type="SmallInt"/>
+    <Param name="@Speed" type="float"/>
+    <Param name="@LastPositionY" type="Int"/>
+    <Param name="@LastPositionX" type="Int"/>
+    <Param name="@CurrentExperience" type="BigInt"/>
+    <Param name="@RequireExperience" type="BigInt"/>
+    <Param name="@TotalExperience" type="BigInt"/>
     <Body>
       <![CDATA[
         UPDATE [dbo].[Player]
-        SET LastPositionY = (@LastPositionY), LastPositionX = (@LastPositionX)
+        SET Level = (@Level), MaxHP = (@MaxHP), MaxMP = (@MaxMP), MinAttack = (@MinAttack), MaxAttack = (@MaxAttack),
+        Defence = (@Defence), CriticalPoint = (@CriticalPoint),
+        Speed = (@Speed), LastPositionY = (@LastPositionY), LastPositionX = (@LastPositionX),
+        CurrentExperience = (@CurrentExperience), RequireExperience = (@RequireExperience), TotalExperience = (@TotalExperience)
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
     </Body>

@@ -471,13 +471,25 @@ namespace SP
 	};
 
 	// 접속 종료시 플레이어 정보 DB에 기록
-	class CDBGameServerPlayerLeaveInfoSave : public CDBBind<4, 0>
+	class CDBGameServerPlayerLeaveInfoSave : public CDBBind<16, 0>
 	{
 	public:
-		CDBGameServerPlayerLeaveInfoSave(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spPlayerLeaveInfoSave(?,?,?,?)}"){}
+		CDBGameServerPlayerLeaveInfoSave(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spPlayerLeaveInfoSave(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}"){}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
-		void InLastPositionY(int32& LastPositionY) { BindParam(2, LastPositionY); }
-		void InLastPositionX(int32& LastPositionX) { BindParam(3, LastPositionX); }
+		void InLevel(int32& Level) { BindParam(2, Level); }
+		void InMaxHP(int32& MaxHP) { BindParam(3, MaxHP); }
+		void InMaxMP(int32& MaxMP) { BindParam(4, MaxMP); }
+		void InMaxDP(int32& MaxDP) { BindParam(5, MaxDP); }
+		void InMinAttack(int32& MinAttack) { BindParam(6, MinAttack); }
+		void InMaxAttack(int32& MaxAttack) { BindParam(7, MaxAttack); }
+		void InDefence(int32& Defence) { BindParam(8, Defence); }
+		void InCriticalPoint(int16& CriticalPoint) { BindParam(9, CriticalPoint); }
+		void InSpeed(float& Speed) { BindParam(10, Speed); }
+		void InLastPositionY(int32& LastPositionY) { BindParam(11, LastPositionY); }
+		void InLastPositionX(int32& LastPositionX) { BindParam(12, LastPositionX); }
+		void InCurrentExperience(int64& CurrentExperience) { BindParam(13, CurrentExperience); }
+		void InRequireExperience(int64& RequireExperience) { BindParam(14, RequireExperience); }
+		void InTotalExperience(int64& TotalExperience) { BindParam(15, TotalExperience); }
 	};
 }
