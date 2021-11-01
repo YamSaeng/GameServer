@@ -234,10 +234,15 @@ struct st_StatInfo
 	int32 MaxMP;
 	int32 DP;
 	int32 MaxDP;
-	int32 MinAttackDamage;
-	int32 MaxAttackDamage;
-	int32 Defence;
-	int16 CriticalPoint;
+	int32 MinMeleeAttackDamage;
+	int32 MaxMeleeAttackDamage;
+	int16 MeleeAttackHitRate;
+	int16 MagicDamage;
+	int16 MagicHitRate;
+	int32 Defence;	
+	int16 EvasionRate;
+	int16 MeleeCriticalPoint;
+	int16 MagicCriticalPoint;
 	float Speed;
 };
 

@@ -15,12 +15,20 @@ CSlime::CSlime()
 
 	// ½ºÅÈ ¼ÂÆÃ	
 	_GameObjectInfo.ObjectName = (LPWSTR)CA2W(MonsterData.MonsterName.c_str());
-	_GameObjectInfo.ObjectStatInfo.MinAttackDamage = MonsterData.MonsterStatInfo.MinAttackDamage;
-	_GameObjectInfo.ObjectStatInfo.MaxAttackDamage = MonsterData.MonsterStatInfo.MaxAttackDamage;
-	_GameObjectInfo.ObjectStatInfo.CriticalPoint = MonsterData.MonsterStatInfo.CriticalPoint;
+	_GameObjectInfo.ObjectStatInfo.Level = MonsterData.MonsterStatInfo.Level;
 	_GameObjectInfo.ObjectStatInfo.MaxHP = MonsterData.MonsterStatInfo.MaxHP;
 	_GameObjectInfo.ObjectStatInfo.HP = MonsterData.MonsterStatInfo.MaxHP;
-	_GameObjectInfo.ObjectStatInfo.Level = MonsterData.MonsterStatInfo.Level;
+	_GameObjectInfo.ObjectStatInfo.MaxMP = MonsterData.MonsterStatInfo.MaxMP;
+	_GameObjectInfo.ObjectStatInfo.MP = MonsterData.MonsterStatInfo.MP;
+	_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = MonsterData.MonsterStatInfo.MinMeleeAttackDamage;
+	_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = MonsterData.MonsterStatInfo.MaxMeleeAttackDamage;
+	_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = MonsterData.MonsterStatInfo.MeleeAttackHitRate;
+	_GameObjectInfo.ObjectStatInfo.MagicDamage = MonsterData.MonsterStatInfo.MagicDamage;
+	_GameObjectInfo.ObjectStatInfo.MagicHitRate = MonsterData.MonsterStatInfo.MagicHitRate;
+	_GameObjectInfo.ObjectStatInfo.Defence = MonsterData.MonsterStatInfo.Defence;
+	_GameObjectInfo.ObjectStatInfo.EvasionRate = MonsterData.MonsterStatInfo.EvasionRate;
+	_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = MonsterData.MonsterStatInfo.MeleeCriticalPoint;
+	_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = MonsterData.MonsterStatInfo.MagicCriticalPoint;
 	_GameObjectInfo.ObjectStatInfo.Speed = MonsterData.MonsterStatInfo.Speed;
 
 	_SearchCellDistance = MonsterData.MonsterStatInfo.SearchCellDistance;
