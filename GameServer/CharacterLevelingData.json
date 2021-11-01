@@ -24,6 +24,31 @@
       "Level": 5,
       "RequireExperience": 1600,
       "TotalExperience": 5000
+    },
+    {
+      "Level": 6,
+      "RequireExperience": 1800,
+      "TotalExperience": 6800
+    },
+    {
+      "Level": 7,
+      "RequireExperience": 2000,
+      "TotalExperience": 8800
+    },
+    {
+      "Level": 8,
+      "RequireExperience": 2200,
+      "TotalExperience": 11000
+    },
+    {
+      "Level": 9,
+      "RequireExperience": 2400,
+      "TotalExperience": 13400
+    },
+    {
+      "Level": 10,
+      "RequireExperience": 2600,
+      "TotalExperience": 16000
     }
   ]
 }
