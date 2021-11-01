@@ -15,10 +15,15 @@
     <Column name="MaxMP" type="int" notnull="true"/>
     <Column name="CurrentDP" type="int" notnull="true"/>
     <Column name="MaxDP" type="int" notnull="true"/>
-    <Column name="MinAttack" type="int" notnull="true"/>
-    <Column name="MaxAttack" type="int" notnull="true"/>
+    <Column name="MinMeleeAttackDamage" type="int" notnull="true"/>
+    <Column name="MaxMeleeAttackDamage" type="int" notnull="true"/>
+    <Column name="MeleeAttackHitRate" type="SmallInt" notnull="true"/>
+    <Column name="MagicDamage" type="SmallInt" notnull="true"/>
+    <Column name="MagicHitRate" type="SmallInt" notnull="true"/>
     <Column name="Defence" type="int" notnull="true"/>
-    <Column name="CriticalPoint" type="SmallInt" notnull="true"/>
+    <Column name="EvasionRate" type="SmallInt" notnull="true"/>
+    <Column name="MeleeCriticalPoint" type="SmallInt" notnull="true"/>
+    <Column name="MagicCriticalPoint" type="SmallInt" notnull="true"/>
     <Column name="Speed" type="float" notnull="true"/>
     <Column name="LastPositionY" type="int" notnull="true"/>
     <Column name="LastPositionX" type="int" notnull="true"/>
@@ -135,10 +140,15 @@
         MaxMP,
         CurrentDP,
         MaxDP, 
-        MinAttack,
-        MaxAttack,
+        MinMeleeAttackDamage,
+        MaxMeleeAttackDamage,
+        MeleeAttackHitRate,
+        MagicDamage,
+        MagicHitRate,
         Defence,
-        CriticalPoint,
+        EvasionRate,
+        MeleeCriticalPoint,
+        MagicCriticalPoint,
         Speed, 
         LastPositionY,
         LastPositionX,
@@ -173,10 +183,15 @@
     <Param name="@MaxMP" type="int"/>
     <Param name="@CurrentDP" type="int"/>
     <Param name="@MaxDP" type="int"/>
-    <Param name="@MinAttack" type="int"/>
-    <Param name="@MaxAttack" type="int"/>
+    <Param name="@MinMeleeAttackDamage" type="int"/>
+    <Param name="@MaxMeleeAttackDamage" type="int"/>
+    <Param name="@MeleeAttackHitRate" type="SmallInt"/>
+    <Param name="@MagicDamage" type="SmallInt"/>
+    <Param name="@MagicHitRate" type="SmallInt"/>
     <Param name="@Defence" type="int"/>
-    <Param name="@CriticalPoint" type="SmallInt"/>
+    <Param name="@EvasionRate" type="SmallInt"/>
+    <Param name="@MeleeCriticalPoint" type="SmallInt"/>
+    <Param name="@MagicCriticalPoint" type="SmallInt"/>
     <Param name="@Speed" type="float"/>
     <Param name="@LastPositionY" type="int"/>
     <Param name="@LastPositionX" type="int"/>
@@ -198,10 +213,15 @@
         (@MaxMP),
         (@CurrentDP),
         (@MaxDP),
-        (@MinAttack),
-        (@MaxAttack),
+        (@MinMeleeAttackDamage),
+        (@MaxMeleeAttackDamage),
+        (@MeleeAttackHitRate),
+        (@MagicDamage),
+        (@MagicHitRate),
         (@Defence),
-        (@CriticalPoint),
+        (@EvasionRate),
+        (@MeleeCriticalPoint),
+        (@MagicCriticalPoint),
         (@Speed),
         (@LastPositionY),
         (@LastPositionX),
@@ -606,10 +626,15 @@
     <Param name="@MaxHP" type="Int"/>
     <Param name="@MaxMP" type="Int"/>
     <Param name="@MaxDP" type="Int"/>
-    <Param name="@MinAttack" type="Int"/>
-    <Param name="@MaxAttack" type="Int"/>
-    <Param name="@Defence" type="Int"/>
-    <Param name="@CriticalPoint" type="SmallInt"/>
+    <Param name="@MinMeleeAttackDamage" type="int"/>
+    <Param name="@MaxMeleeAttackDamage" type="int"/>
+    <Param name="@MeleeAttackHitRate" type="SmallInt"/>
+    <Param name="@MagicDamage" type="SmallInt"/>
+    <Param name="@MagicHitRate" type="SmallInt"/>
+    <Param name="@Defence" type="int"/>
+    <Param name="@EvasionRate" type="SmallInt"/>
+    <Param name="@MeleeCriticalPoint" type="SmallInt"/>
+    <Param name="@MagicCriticalPoint" type="SmallInt"/>    
     <Param name="@Speed" type="float"/>
     <Param name="@LastPositionY" type="Int"/>
     <Param name="@LastPositionX" type="Int"/>
@@ -619,10 +644,24 @@
     <Body>
       <![CDATA[
         UPDATE [dbo].[Player]
-        SET Level = (@Level), MaxHP = (@MaxHP), MaxMP = (@MaxMP), MinAttack = (@MinAttack), MaxAttack = (@MaxAttack),
-        Defence = (@Defence), CriticalPoint = (@CriticalPoint),
-        Speed = (@Speed), LastPositionY = (@LastPositionY), LastPositionX = (@LastPositionX),
-        CurrentExperience = (@CurrentExperience), RequireExperience = (@RequireExperience), TotalExperience = (@TotalExperience)
+        SET Level = (@Level),
+        MaxHP = (@MaxHP),
+        MaxMP = (@MaxMP),
+        MinMeleeAttackDamage = (@MinMeleeAttackDamage),
+        MaxMeleeAttackDamage = (@MaxMeleeAttackDamage),
+        MeleeAttackHitRate = (@MeleeAttackHitRate),
+        MagicDamage = (@MagicDamage),
+        MagicHitRate = (@MagicHitRate),
+        Defence = (@Defence),
+        EvasionRate = (@EvasionRate),
+        MeleeCriticalPoint = (@MeleeCriticalPoint),
+        MagicCriticalPoint = (@MagicCriticalPoint),
+        Speed = (@Speed),
+        LastPositionY = (@LastPositionY), 
+        LastPositionX = (@LastPositionX),
+        CurrentExperience = (@CurrentExperience),
+        RequireExperience = (@RequireExperience),
+        TotalExperience = (@TotalExperience)
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
     </Body>
