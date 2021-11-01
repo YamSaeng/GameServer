@@ -1,28 +1,126 @@
 {
-  "PlayerCharacterStatus": [
+  "PlayerWarriorCharacterStatus": [
     {
       "PlayerType": "OBJECT_MELEE_PLAYER",
-      "Level": 1,
-      "MaxHP": 300,
-      "MaxMP": 200,
-      "MaxDP": 4000,
-      "MinAttackDamage": 5,
-      "MaxAttackDamage": 20,
-      "Defence": 0,
-      "CriticalPoint": 200,
-      "Speed": 5.0
-    },
+      "PlayerWarriorCharacterLevelDataList": [
+        {
+          "Level": 1,
+          "MaxHP": 300,
+          "MaxMP": 200,
+          "MaxDP": 4000,
+          "MinAttackDamage": 5,
+          "MaxAttackDamage": 20,
+          "Defence": 0,
+          "CriticalPoint": 200,
+          "Speed": 5.0
+        },
+        {
+          "Level": 2,
+          "MaxHP": 350,
+          "MaxMP": 210,
+          "MaxDP": 4000,
+          "MinAttackDamage": 6,
+          "MaxAttackDamage": 20,
+          "Defence": 0,
+          "CriticalPoint": 210,
+          "Speed": 5.0
+        },
+        {
+          "Level": 3,
+          "MaxHP": 400,
+          "MaxMP": 220,
+          "MaxDP": 4000,
+          "MinAttackDamage": 7,
+          "MaxAttackDamage": 20,
+          "Defence": 0,
+          "CriticalPoint": 220,
+          "Speed": 5.0
+        },
+        {
+          "Level": 4,
+          "MaxHP": 450,
+          "MaxMP": 230,
+          "MaxDP": 4000,
+          "MinAttackDamage": 8,
+          "MaxAttackDamage": 20,
+          "Defence": 0,
+          "CriticalPoint": 220,
+          "Speed": 5.0
+        },
+        {
+          "Level": 5,
+          "MaxHP": 500,
+          "MaxMP": 240,
+          "MaxDP": 4000,
+          "MinAttackDamage": 10,
+          "MaxAttackDamage": 20,
+          "Defence": 0,
+          "CriticalPoint": 220,
+          "Speed": 5.0
+        }
+      ]      
+    }
+  ],
+  "PlayerMagicCharacterStatus": [
     {
       "PlayerType": "OBJECT_MAGIC_PLAYER",
-      "Level": 1,
-      "MaxHP": 200,
-      "MaxMP": 400,
-      "MaxDP": 4000,
-      "MinAttackDamage": 1,
-      "MaxAttackDamage": 10,
-      "Defence": 0,
-      "CriticalPoint": 300,
-      "Speed": 5.0
-    }   
+      "PlayerMagicCharacterLevelDataList": [
+        {
+          "Level": 1,
+          "MaxHP": 200,
+          "MaxMP": 400,
+          "MaxDP": 4000,
+          "MinAttackDamage": 1,
+          "MaxAttackDamage": 10,
+          "Defence": 0,
+          "CriticalPoint": 200,
+          "Speed": 5.0
+        },
+        {
+          "Level": 2,
+          "MaxHP": 220,
+          "MaxMP": 450,
+          "MaxDP": 4000,
+          "MinAttackDamage": 2,
+          "MaxAttackDamage": 10,
+          "Defence": 0,
+          "CriticalPoint": 200,
+          "Speed": 5.0
+        },
+        {
+          "Level": 3,
+          "MaxHP": 240,
+          "MaxMP": 500,
+          "MaxDP": 4000,
+          "MinAttackDamage": 3,
+          "MaxAttackDamage": 10,
+          "Defence": 0,
+          "CriticalPoint": 200,
+          "Speed": 5.0
+        },
+        {
+          "Level": 4,
+          "MaxHP": 260,
+          "MaxMP": 550,
+          "MaxDP": 4000,
+          "MinAttackDamage": 3,
+          "MaxAttackDamage": 10,
+          "Defence": 0,
+          "CriticalPoint": 200,
+          "Speed": 5.0
+        },
+        {
+          "Level": 5,
+          "MaxHP": 280,
+          "MaxMP": 600,
+          "MaxDP": 4000,
+          "MinAttackDamage": 4,
+          "MaxAttackDamage": 10,
+          "Defence": 0,
+          "CriticalPoint": 200,
+          "Speed": 5.0
+        }
+      ]      
+    }
   ]
 }

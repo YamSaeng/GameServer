@@ -374,41 +374,72 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 	rapidjson::Document Document;
 	Document.Parse(FileStr);
 
-	for (auto& Filed : Document["PlayerCharacterStatus"].GetArray())
+	for (auto& Filed : Document["PlayerWarriorCharacterStatus"].GetArray())
 	{
 		string PlayerType = Filed["PlayerType"].GetString();
-		int Level = Filed["Level"].GetInt();
-		int MaxHP = Filed["MaxHP"].GetInt();
-		int MaxMP = Filed["MaxMP"].GetInt();
-		int MaxDP = Filed["MaxDP"].GetInt();
-		int MinAttackDamage = Filed["MinAttackDamage"].GetInt();
-		int MaxAttackDamage = Filed["MaxAttackDamage"].GetInt();
-		int Defence = Filed["Defence"].GetInt();
-		int16 CriticalPoint = (int16)(Filed["CriticalPoint"].GetInt());
-		float Speed = Filed["Speed"].GetFloat();		
-
-		st_PlayerStatusData* StatusData = new st_PlayerStatusData();
 		
-		if (PlayerType == "OBJECT_MELEE_PLAYER")
+		for (auto& PlayerWarriorCharacterFiled : Filed["PlayerWarriorCharacterLevelDataList"].GetArray())
 		{
-			StatusData->PlayerType = en_GameObjectType::OBJECT_MELEE_PLAYER;
-		}
-		else if (PlayerType == "OBJECT_MAGIC_PLAYER")
-		{
-			StatusData->PlayerType = en_GameObjectType::OBJECT_MAGIC_PLAYER;
-		}
-		
-		StatusData->Level = Level;
-		StatusData->MaxHP = MaxHP;
-		StatusData->MaxMP = MaxMP;
-		StatusData->MaxDP = MaxDP;
-		StatusData->MinAttackDamage = MinAttackDamage;
-		StatusData->MaxAttackDamage = MaxAttackDamage;
-		StatusData->Defence = Defence;
-		StatusData->CriticalPoint = CriticalPoint;
-		StatusData->Speed = Speed;
+			int Level = PlayerWarriorCharacterFiled["Level"].GetInt();
+			int MaxHP = PlayerWarriorCharacterFiled["MaxHP"].GetInt();
+			int MaxMP = PlayerWarriorCharacterFiled["MaxMP"].GetInt();
+			int MaxDP = PlayerWarriorCharacterFiled["MaxDP"].GetInt();
+			int MinAttackDamage = PlayerWarriorCharacterFiled["MinAttackDamage"].GetInt();
+			int MaxAttackDamage = PlayerWarriorCharacterFiled["MaxAttackDamage"].GetInt();
+			int Defence = PlayerWarriorCharacterFiled["Defence"].GetInt();
+			int16 CriticalPoint = (int16)(PlayerWarriorCharacterFiled["CriticalPoint"].GetInt());
+			float Speed = PlayerWarriorCharacterFiled["Speed"].GetFloat();
 
-		_Status.insert(pair<int16, st_PlayerStatusData*>((int16)StatusData->PlayerType, StatusData));
+			st_PlayerStatusData* WarriorStatusData = new st_PlayerStatusData();
+			
+			WarriorStatusData->PlayerType = en_GameObjectType::OBJECT_MELEE_PLAYER;	
+
+			WarriorStatusData->Level = Level;
+			WarriorStatusData->MaxHP = MaxHP;
+			WarriorStatusData->MaxMP = MaxMP;
+			WarriorStatusData->MaxDP = MaxDP;
+			WarriorStatusData->MinAttackDamage = MinAttackDamage;
+			WarriorStatusData->MaxAttackDamage = MaxAttackDamage;
+			WarriorStatusData->Defence = Defence;
+			WarriorStatusData->CriticalPoint = CriticalPoint;
+			WarriorStatusData->Speed = Speed;
+
+			_WarriorStatus.insert(pair<int32, st_PlayerStatusData*>(WarriorStatusData->Level, WarriorStatusData));
+		}		
+	}
+
+	for (auto& Filed : Document["PlayerMagicCharacterStatus"].GetArray())
+	{
+		string PlayerType = Filed["PlayerType"].GetString();
+
+		for (auto& PlayerShamanCharacterFiled : Filed["PlayerMagicCharacterLevelDataList"].GetArray())
+		{
+			int Level = PlayerShamanCharacterFiled["Level"].GetInt();
+			int MaxHP = PlayerShamanCharacterFiled["MaxHP"].GetInt();
+			int MaxMP = PlayerShamanCharacterFiled["MaxMP"].GetInt();
+			int MaxDP = PlayerShamanCharacterFiled["MaxDP"].GetInt();
+			int MinAttackDamage = PlayerShamanCharacterFiled["MinAttackDamage"].GetInt();
+			int MaxAttackDamage = PlayerShamanCharacterFiled["MaxAttackDamage"].GetInt();
+			int Defence = PlayerShamanCharacterFiled["Defence"].GetInt();
+			int16 CriticalPoint = (int16)(PlayerShamanCharacterFiled["CriticalPoint"].GetInt());
+			float Speed = PlayerShamanCharacterFiled["Speed"].GetFloat();
+
+			st_PlayerStatusData* ShamanStatusData = new st_PlayerStatusData();
+
+			ShamanStatusData->PlayerType = en_GameObjectType::OBJECT_MAGIC_PLAYER;
+
+			ShamanStatusData->Level = Level;
+			ShamanStatusData->MaxHP = MaxHP;
+			ShamanStatusData->MaxMP = MaxMP;
+			ShamanStatusData->MaxDP = MaxDP;
+			ShamanStatusData->MinAttackDamage = MinAttackDamage;
+			ShamanStatusData->MaxAttackDamage = MaxAttackDamage;
+			ShamanStatusData->Defence = Defence;
+			ShamanStatusData->CriticalPoint = CriticalPoint;
+			ShamanStatusData->Speed = Speed;
+
+			_ShamanStatus.insert(pair<int32, st_PlayerStatusData*>(ShamanStatusData->Level, ShamanStatusData));
+		}
 	}
 }
 
