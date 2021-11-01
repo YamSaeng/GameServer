@@ -384,13 +384,18 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			int MaxHP = PlayerWarriorCharacterFiled["MaxHP"].GetInt();
 			int MaxMP = PlayerWarriorCharacterFiled["MaxMP"].GetInt();
 			int MaxDP = PlayerWarriorCharacterFiled["MaxDP"].GetInt();
-			int MinAttackDamage = PlayerWarriorCharacterFiled["MinAttackDamage"].GetInt();
-			int MaxAttackDamage = PlayerWarriorCharacterFiled["MaxAttackDamage"].GetInt();
+			int MinMeleeAttackDamage = PlayerWarriorCharacterFiled["MinMeleeAttackDamage"].GetInt();
+			int MaxMeleeAttackDamage = PlayerWarriorCharacterFiled["MaxMeleeAttackDamage"].GetInt();
+			int16 MeleeAttackHitRate = (int16)PlayerWarriorCharacterFiled["MeleeAttackHitRate"].GetInt();
+			int16 MagicDamage = (int16)PlayerWarriorCharacterFiled["MagicDamage"].GetInt();
+			int16 MagicHitRate = (int16)PlayerWarriorCharacterFiled["MagicHitRate"].GetInt();
 			int Defence = PlayerWarriorCharacterFiled["Defence"].GetInt();
-			int16 CriticalPoint = (int16)(PlayerWarriorCharacterFiled["CriticalPoint"].GetInt());
+			int16 EvasionRate = PlayerWarriorCharacterFiled["EvasionRate"].GetInt();
+			int16 MeleeCriticalPoint = (int16)(PlayerWarriorCharacterFiled["MeleeCriticalPoint"].GetInt());
+			int16 MagicCriticalPoint = (int16)(PlayerWarriorCharacterFiled["MagicCriticalPoint"].GetInt());
 			float Speed = PlayerWarriorCharacterFiled["Speed"].GetFloat();
 
-			st_PlayerStatusData* WarriorStatusData = new st_PlayerStatusData();
+			st_ObjectStatusData* WarriorStatusData = new st_ObjectStatusData();
 			
 			WarriorStatusData->PlayerType = en_GameObjectType::OBJECT_MELEE_PLAYER;	
 
@@ -398,13 +403,18 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			WarriorStatusData->MaxHP = MaxHP;
 			WarriorStatusData->MaxMP = MaxMP;
 			WarriorStatusData->MaxDP = MaxDP;
-			WarriorStatusData->MinAttackDamage = MinAttackDamage;
-			WarriorStatusData->MaxAttackDamage = MaxAttackDamage;
+			WarriorStatusData->MinMeleeAttackDamage = MinMeleeAttackDamage;
+			WarriorStatusData->MaxMeleeAttackDamage = MaxMeleeAttackDamage;
+			WarriorStatusData->MeleeAttackHitRate = MeleeAttackHitRate;
+			WarriorStatusData->MagicDamage = MagicDamage;
+			WarriorStatusData->MagicHitRate = MagicHitRate;
 			WarriorStatusData->Defence = Defence;
-			WarriorStatusData->CriticalPoint = CriticalPoint;
+			WarriorStatusData->EvasionRate = EvasionRate;
+			WarriorStatusData->MeleeCriticalPoint = MeleeCriticalPoint;
+			WarriorStatusData->MagicCriticalPoint = MagicCriticalPoint;
 			WarriorStatusData->Speed = Speed;
 
-			_WarriorStatus.insert(pair<int32, st_PlayerStatusData*>(WarriorStatusData->Level, WarriorStatusData));
+			_WarriorStatus.insert(pair<int32, st_ObjectStatusData*>(WarriorStatusData->Level, WarriorStatusData));
 		}		
 	}
 
@@ -418,13 +428,18 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			int MaxHP = PlayerShamanCharacterFiled["MaxHP"].GetInt();
 			int MaxMP = PlayerShamanCharacterFiled["MaxMP"].GetInt();
 			int MaxDP = PlayerShamanCharacterFiled["MaxDP"].GetInt();
-			int MinAttackDamage = PlayerShamanCharacterFiled["MinAttackDamage"].GetInt();
-			int MaxAttackDamage = PlayerShamanCharacterFiled["MaxAttackDamage"].GetInt();
+			int MinMeleeAttackDamage = PlayerShamanCharacterFiled["MinMeleeAttackDamage"].GetInt();
+			int MaxMeleeAttackDamage = PlayerShamanCharacterFiled["MaxMeleeAttackDamage"].GetInt();
+			int16 MeleeAttackHitRate = (int16)PlayerShamanCharacterFiled["MeleeAttackHitRate"].GetInt();
+			int16 MagicDamage = (int16)PlayerShamanCharacterFiled["MagicDamage"].GetInt();
+			int16 MagicHitRate = (int16)PlayerShamanCharacterFiled["MagicHitRate"].GetInt();
 			int Defence = PlayerShamanCharacterFiled["Defence"].GetInt();
-			int16 CriticalPoint = (int16)(PlayerShamanCharacterFiled["CriticalPoint"].GetInt());
+			int16 EvasionRate = PlayerShamanCharacterFiled["EvasionRate"].GetInt();
+			int16 MeleeCriticalPoint = (int16)(PlayerShamanCharacterFiled["MeleeCriticalPoint"].GetInt());
+			int16 MagicCriticalPoint = (int16)(PlayerShamanCharacterFiled["MagicCriticalPoint"].GetInt());
 			float Speed = PlayerShamanCharacterFiled["Speed"].GetFloat();
 
-			st_PlayerStatusData* ShamanStatusData = new st_PlayerStatusData();
+			st_ObjectStatusData* ShamanStatusData = new st_ObjectStatusData();
 
 			ShamanStatusData->PlayerType = en_GameObjectType::OBJECT_MAGIC_PLAYER;
 
@@ -432,13 +447,18 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			ShamanStatusData->MaxHP = MaxHP;
 			ShamanStatusData->MaxMP = MaxMP;
 			ShamanStatusData->MaxDP = MaxDP;
-			ShamanStatusData->MinAttackDamage = MinAttackDamage;
-			ShamanStatusData->MaxAttackDamage = MaxAttackDamage;
+			ShamanStatusData->MinMeleeAttackDamage = MinMeleeAttackDamage;
+			ShamanStatusData->MaxMeleeAttackDamage = MaxMeleeAttackDamage;
+			ShamanStatusData->MeleeAttackHitRate = MeleeAttackHitRate;
+			ShamanStatusData->MagicDamage = MagicDamage;
+			ShamanStatusData->MagicHitRate = MagicHitRate;
 			ShamanStatusData->Defence = Defence;
-			ShamanStatusData->CriticalPoint = CriticalPoint;
+			ShamanStatusData->EvasionRate = EvasionRate;
+			ShamanStatusData->MeleeCriticalPoint = MeleeCriticalPoint;
+			ShamanStatusData->MagicCriticalPoint = MagicCriticalPoint;
 			ShamanStatusData->Speed = Speed;
 
-			_ShamanStatus.insert(pair<int32, st_PlayerStatusData*>(ShamanStatusData->Level, ShamanStatusData));
+			_ShamanStatus.insert(pair<int32, st_ObjectStatusData*>(ShamanStatusData->Level, ShamanStatusData));
 		}
 	}
 }
@@ -487,9 +507,16 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 		{
 			int Level = MonsterStatInfoFiled["Level"].GetInt();
 			int MaxHP = MonsterStatInfoFiled["MaxHP"].GetInt();
-			int MinAttackDamage = MonsterStatInfoFiled["MinAttackDamage"].GetInt();
-			int MaxAttackDamage = MonsterStatInfoFiled["MaxAttackDamage"].GetInt();
-			int CriticalPoint = MonsterStatInfoFiled["CriticalPoint"].GetInt();
+			int MaxMP = MonsterStatInfoFiled["MaxMP"].GetInt();
+			int MinMeleeAttackDamage = MonsterStatInfoFiled["MinMeleeAttackDamage"].GetInt();
+			int MaxMeleeAttackDamage = MonsterStatInfoFiled["MaxMeleeAttackDamage"].GetInt();
+			int16 MeleeAttackHitRate = MonsterStatInfoFiled["MeleeAttackHitRate"].GetInt();
+			int16 MagicDamage = (int16)MonsterStatInfoFiled["MagicDamage"].GetInt();
+			int16 MagicHitRate = (int16)MonsterStatInfoFiled["MagicHitRate"].GetInt();
+			int Defence = MonsterStatInfoFiled["Defence"].GetInt();
+			int16 EvasionRate = (int16)MonsterStatInfoFiled["EvasionRate"].GetInt();
+			int16 MeleeCriticalPoint = (int16)MonsterStatInfoFiled["MeleeCriticalPoint"].GetInt();
+			int16 MagicCriticalPoint = (int16)MonsterStatInfoFiled["MagicCriticalPoint"].GetInt();
 			float Speed = MonsterStatInfoFiled["Speed"].GetFloat();
 			int SearchCellDistance = MonsterStatInfoFiled["SearchCellDistance"].GetInt();
 			int ChaseCellDistance = MonsterStatInfoFiled["ChaseCellDistance"].GetInt();
@@ -502,9 +529,15 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 
 			MonsterData->MonsterStatInfo.Level = Level;
 			MonsterData->MonsterStatInfo.MaxHP = MaxHP;
-			MonsterData->MonsterStatInfo.MinAttackDamage = MinAttackDamage;
-			MonsterData->MonsterStatInfo.MaxAttackDamage = MaxAttackDamage;
-			MonsterData->MonsterStatInfo.CriticalPoint = CriticalPoint;
+			MonsterData->MonsterStatInfo.MinMeleeAttackDamage = MinMeleeAttackDamage;
+			MonsterData->MonsterStatInfo.MaxMeleeAttackDamage = MaxMeleeAttackDamage;
+			MonsterData->MonsterStatInfo.MeleeAttackHitRate = MeleeAttackHitRate;
+			MonsterData->MonsterStatInfo.MagicDamage = MagicDamage;
+			MonsterData->MonsterStatInfo.MagicHitRate = MagicHitRate;
+			MonsterData->MonsterStatInfo.Defence = Defence;
+			MonsterData->MonsterStatInfo.EvasionRate = EvasionRate;
+			MonsterData->MonsterStatInfo.MeleeCriticalPoint = MeleeCriticalPoint;
+			MonsterData->MonsterStatInfo.MagicCriticalPoint = MagicCriticalPoint;
 			MonsterData->MonsterStatInfo.Speed = Speed;
 			MonsterData->MonsterStatInfo.SearchCellDistance = SearchCellDistance;
 			MonsterData->MonsterStatInfo.ChaseCellDistance = ChaseCellDistance;

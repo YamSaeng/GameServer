@@ -32,7 +32,7 @@ struct st_ConsumableData : public st_ItemData
 	en_SkillType SkillType;
 };
 
-struct st_PlayerStatusData
+struct st_ObjectStatusData
 {
 	en_GameObjectType PlayerType;
 	int32 Level;
@@ -42,10 +42,15 @@ struct st_PlayerStatusData
 	int32 MaxMP;
 	int32 DP;
 	int32 MaxDP;
-	int32 MinAttackDamage;
-	int32 MaxAttackDamage;
+	int32 MinMeleeAttackDamage;
+	int32 MaxMeleeAttackDamage;
+	int16 MeleeAttackHitRate;
+	int16 MagicDamage;
+	int16 MagicHitRate;
 	int32 Defence;
-	int16 CriticalPoint;
+	int16 EvasionRate;
+	int16 MeleeCriticalPoint;
+	int16 MagicCriticalPoint;
 	float Speed;	
 	int32 SearchCellDistance;
 	int32 ChaseCellDistance;
@@ -71,7 +76,7 @@ struct st_MonsterData
 {	
 	int32 MonsterDataId; // 몬스터 번호
 	string MonsterName;  // 몬스터 이름
-	st_PlayerStatusData MonsterStatInfo; // 몬스터 스탯 정보
+	st_ObjectStatusData MonsterStatInfo; // 몬스터 스탯 정보
 	int32 SearchTick; // 탐색 속도
 	int32 PatrolTick; // 정찰 속도
 	int32 AttackTick; // 공격 속도
