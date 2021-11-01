@@ -372,6 +372,10 @@ void CGameServer::DeleteClient(st_Session* Session)
 		*DBLeavePlayerInfoSaveMessage << Session->AccountId;
 		*DBLeavePlayerInfoSaveMessage << Session->MyPlayer->_GameObjectInfo.ObjectId;	
 		*DBLeavePlayerInfoSaveMessage << Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo;
+		*DBLeavePlayerInfoSaveMessage << Session->MyPlayer->_GameObjectInfo.ObjectStatInfo;
+		*DBLeavePlayerInfoSaveMessage << Session->MyPlayer->_Experience.CurrentExperience;
+		*DBLeavePlayerInfoSaveMessage << Session->MyPlayer->_Experience.RequireExperience;
+		*DBLeavePlayerInfoSaveMessage << Session->MyPlayer->_Experience.TotalExperience;
 
 		DBLeavePlayerInfoSaveJob->Message = DBLeavePlayerInfoSaveMessage;
 
@@ -909,7 +913,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 				// 공격 상태로 변경
 				MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;
 				// 클라에게 알려줘서 공격 애니메이션 출력
-				CMessage* ResObjectStateChangePacket = MakePacketResObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
+				CMessage* ResObjectStateChangePacket = MakePacketResChangeObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
 				SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateChangePacket);
 				ResObjectStateChangePacket->Free();
 
@@ -951,7 +955,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 								ResSyncPosition->Free();
 
 								//Target->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::STUN;
-								CMessage* ResObjectStateChange = MakePacketResObjectState(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectPositionInfo.MoveDir, Target->_GameObjectInfo.ObjectType, Target->_GameObjectInfo.ObjectPositionInfo.State);
+								CMessage* ResObjectStateChange = MakePacketResChangeObjectState(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectPositionInfo.MoveDir, Target->_GameObjectInfo.ObjectType, Target->_GameObjectInfo.ObjectPositionInfo.State);
 								SendPacketAroundSector(Target->GetCellPosition(), ResObjectStateChange);
 								ResObjectStateChange->Free();
 							}
@@ -1120,6 +1124,85 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 							if (TargetMonster != nullptr)
 							{
 								MyPlayer->_Experience.CurrentExperience += TargetMonster->_GetExpPoint;
+								MyPlayer->_Experience.CurrentExpRatio = ((float)MyPlayer->_Experience.CurrentExperience) / MyPlayer->_Experience.RequireExperience;
+
+								if (MyPlayer->_Experience.CurrentExpRatio >= 1.0f)
+								{
+									// 레벨 증가
+									MyPlayer->_GameObjectInfo.ObjectStatInfo.Level += 1;
+
+									// 해당 레벨에 
+									st_PlayerStatusData NewCharacterStatus;
+									st_LevelData LevelData;
+
+									switch (MyPlayer->_GameObjectInfo.ObjectType)
+									{
+									case en_GameObjectType::OBJECT_MELEE_PLAYER:
+									{
+										auto FindStatus = G_Datamanager->_WarriorStatus.find(MyPlayer->_GameObjectInfo.ObjectStatInfo.Level);
+										if (FindStatus == G_Datamanager->_WarriorStatus.end())
+										{
+											CRASH("레벨 스테이터스 찾지 못함");
+										}
+
+										NewCharacterStatus = *(*FindStatus).second;
+
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MinAttackDamage = NewCharacterStatus.MinAttackDamage;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxAttackDamage = NewCharacterStatus.MaxAttackDamage;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.CriticalPoint = NewCharacterStatus.CriticalPoint;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;																				
+									}
+									break;
+									case en_GameObjectType::OBJECT_MAGIC_PLAYER:
+									{
+										auto FindStatus = G_Datamanager->_ShamanStatus.find(MyPlayer->_GameObjectInfo.ObjectStatInfo.Level);
+										if (FindStatus == G_Datamanager->_WarriorStatus.end())
+										{
+											CRASH("레벨 데이터 찾지 못함");
+										}
+
+										NewCharacterStatus = *(*FindStatus).second;
+
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MinAttackDamage = NewCharacterStatus.MinAttackDamage;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxAttackDamage = NewCharacterStatus.MaxAttackDamage;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.CriticalPoint = NewCharacterStatus.CriticalPoint;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
+									}
+									break;
+									default:
+										break;
+									}
+
+									CGameServerMessage* ResObjectStatChangeMessage = MakePacketResChangeObjectStat(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectStatInfo);
+									SendPacket(Session->SessionId, ResObjectStatChangeMessage);
+									ResObjectStatChangeMessage->Free();
+
+									auto FindLevelData = G_Datamanager->_LevelDatas.find(MyPlayer->_GameObjectInfo.ObjectStatInfo.Level);
+									if (FindLevelData == G_Datamanager->_LevelDatas.end())
+									{
+										CRASH("레벨 데이터 찾지 못함");
+									}
+
+									LevelData = *(*FindLevelData).second;
+
+									MyPlayer->_Experience.CurrentExperience = 0;
+									MyPlayer->_Experience.RequireExperience = LevelData.RequireExperience;
+									MyPlayer->_Experience.TotalExperience = LevelData.TotalExperience;
+								}
 
 								CGameServerMessage* ResMonsterGetExpMessage = MakePacketExperience(MyPlayer->_AccountId, MyPlayer->_GameObjectInfo.ObjectId, TargetMonster->_GetExpPoint, MyPlayer->_Experience.CurrentExperience, MyPlayer->_Experience.RequireExperience, MyPlayer->_Experience.TotalExperience);
 								SendPacket(Session->SessionId, ResMonsterGetExpMessage);
@@ -1174,7 +1257,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 						ResEffectPacket->Free();
 
 						// 스탯 변경 메세지 전송
-						CMessage* ResChangeObjectStat = MakePacketChangeObjectStat(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectStatInfo);
+						CMessage* ResChangeObjectStat = MakePacketResChangeObjectStat(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectStatInfo);
 						SendPacketAroundSector(Target->GetCellPosition(), ResChangeObjectStat);
 						ResChangeObjectStat->Free();
 					}					
@@ -1413,7 +1496,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 					MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPELL;
 
 					// 마법 스킬 모션 출력
-					CMessage* ResObjectStateChangePacket = MakePacketResObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
+					CMessage* ResObjectStateChangePacket = MakePacketResChangeObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
 					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateChangePacket);
 					ResObjectStateChangePacket->Free();
 
@@ -1657,7 +1740,7 @@ void CGameServer::PacketProcReqObjectStateChange(int64 SessionId, CMessage* Mess
 					{
 						FindGameObject->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
-						ResObjectStatePakcet = MakePacketResObjectState(FindGameObject->_GameObjectInfo.ObjectId, FindGameObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, FindGameObject->_GameObjectInfo.ObjectType, FindGameObject->_GameObjectInfo.ObjectPositionInfo.State);
+						ResObjectStatePakcet = MakePacketResChangeObjectState(FindGameObject->_GameObjectInfo.ObjectId, FindGameObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, FindGameObject->_GameObjectInfo.ObjectType, FindGameObject->_GameObjectInfo.ObjectPositionInfo.State);
 						SendPacketAroundSector(Session, ResObjectStatePakcet, true);
 						ResObjectStatePakcet->Free();
 					}
@@ -1673,7 +1756,7 @@ void CGameServer::PacketProcReqObjectStateChange(int64 SessionId, CMessage* Mess
 					{
 						FindGameObject->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
-						ResObjectStatePakcet = MakePacketResObjectState(FindGameObject->_GameObjectInfo.ObjectId, FindGameObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, FindGameObject->_GameObjectInfo.ObjectType, FindGameObject->_GameObjectInfo.ObjectPositionInfo.State);
+						ResObjectStatePakcet = MakePacketResChangeObjectState(FindGameObject->_GameObjectInfo.ObjectId, FindGameObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, FindGameObject->_GameObjectInfo.ObjectType, FindGameObject->_GameObjectInfo.ObjectPositionInfo.State);
 						SendPacketAroundSector(Session, ResObjectStatePakcet, true);
 						ResObjectStatePakcet->Free();
 					}
@@ -2792,9 +2875,26 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 		// 캐릭터가 존재하지 않을 경우
 		if (!CharacterNameFind)
 		{
-			// 요청한 ObjectType에 해당하는 캐릭터 정보 읽어옴
-			auto FindStatus = G_Datamanager->_Status.find(ReqGameObjectType);
-			st_PlayerStatusData NewCharacterStatus = *(*FindStatus).second;
+			// 요청한 캐릭터의 1레벨에 해당하는 데이터를 읽어온다.
+			st_PlayerStatusData NewCharacterStatus;
+			switch ((en_GameObjectType)ReqGameObjectType)
+			{			
+			case en_GameObjectType::OBJECT_MELEE_PLAYER:
+				{
+					auto FindStatus = G_Datamanager->_WarriorStatus.find(1);
+					NewCharacterStatus = *(*FindStatus).second;
+				}
+				break;
+			case en_GameObjectType::OBJECT_MAGIC_PLAYER:
+				{
+					auto FindStatus = G_Datamanager->_ShamanStatus.find(1);
+					NewCharacterStatus = *(*FindStatus).second;
+				}
+				break;
+			default:
+				break;
+			}
+			
 			int32 CurrentDP = 0;
 
 			// 앞서 읽어온 캐릭터 정보를 토대로 DB에 저장
@@ -3837,7 +3937,7 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CMessage* Message)
 			{
 				Session->MyPlayer->_GameObjectInfo.ObjectStatInfo.HP += 50;
 
-				CGameServerMessage* ResChangeObjectStat = MakePacketChangeObjectStat(Session->MyPlayer->_GameObjectInfo.ObjectId, Session->MyPlayer->_GameObjectInfo.ObjectStatInfo);
+				CGameServerMessage* ResChangeObjectStat = MakePacketResChangeObjectStat(Session->MyPlayer->_GameObjectInfo.ObjectId, Session->MyPlayer->_GameObjectInfo.ObjectStatInfo);
 				SendPacketAroundSector(Session->MyPlayer->GetCellPosition(), ResChangeObjectStat);
 				ResChangeObjectStat->Free();
 			}			
@@ -4862,6 +4962,8 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(int64 SessionId, CMessage* 
 	*Message >> AccountId;
 	int64 PlayerId;
 	*Message >> PlayerId;
+
+	// 저장할 상태 위치 방향 정보
 	int8 State;
 	*Message >> State;
 	int32 LastPositionX;
@@ -4870,6 +4972,40 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(int64 SessionId, CMessage* 
 	*Message >> LastPositionY;
 	int8 Dir;
 	*Message >> Dir;
+	
+	// 저장할 스탯 정보
+	int32 Level;
+	*Message >> Level;
+	int32 CurrentHP;
+	*Message >> CurrentHP;
+	int32 MaxHP;
+	*Message >> MaxHP;
+	int32 CurrentMP;
+	*Message >> CurrentMP;
+	int32 MaxMP;
+	*Message >> MaxMP;
+	int32 CurrentDP;
+	*Message >> CurrentDP;
+	int32 MaxDP;
+	*Message >> MaxDP;
+	int32 MinAttackDamage;
+	*Message >> MinAttackDamage;
+	int32 MaxAttackDamage;
+	*Message >> MaxAttackDamage;
+	int32 Defence;
+	*Message >> Defence;
+	int16 CriticalPoint;
+	*Message >> CriticalPoint;
+	float Speed = 0;
+	*Message >> Speed;
+
+	// 경험치 정보
+	int64 CurrentExperience;
+	*Message >> CurrentExperience;
+	int64 RequireExperience;
+	*Message >> RequireExperience;
+	int64 TotalExperience;
+	*Message >> TotalExperience;
 
 	Message->Free();	
 
@@ -4877,8 +5013,20 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(int64 SessionId, CMessage* 
 	SP::CDBGameServerPlayerLeaveInfoSave PlayerLeaveInfoSave(*PlayerInfoSaveDBConnection);
 	PlayerLeaveInfoSave.InAccountDBId(AccountId);
 	PlayerLeaveInfoSave.InPlayerDBId(PlayerId);
+	PlayerLeaveInfoSave.InLevel(Level);
+	PlayerLeaveInfoSave.InMaxHP(MaxHP);
+	PlayerLeaveInfoSave.InMaxMP(MaxMP);
+	PlayerLeaveInfoSave.InMaxDP(MaxDP);
+	PlayerLeaveInfoSave.InMinAttack(MinAttackDamage);
+	PlayerLeaveInfoSave.InMaxAttack(MaxAttackDamage);
+	PlayerLeaveInfoSave.InDefence(Defence);
+	PlayerLeaveInfoSave.InCriticalPoint(CriticalPoint);
+	PlayerLeaveInfoSave.InSpeed(Speed);
 	PlayerLeaveInfoSave.InLastPositionY(LastPositionY);
 	PlayerLeaveInfoSave.InLastPositionX(LastPositionX);
+	PlayerLeaveInfoSave.InCurrentExperience(CurrentExperience);
+	PlayerLeaveInfoSave.InRequireExperience(RequireExperience);
+	PlayerLeaveInfoSave.InTotalExperience(TotalExperience);
 
 	bool IsPlayerLeaveInfoSave = PlayerLeaveInfoSave.Execute();
 	if (IsPlayerLeaveInfoSave == false)
@@ -4900,7 +5048,7 @@ void CGameServer::PacketProcTimerAttackEnd(int64 SessionId, CMessage* Message)
 		MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 		MyPlayer->_SkillType = en_SkillType::SKILL_TYPE_NONE;
 
-		CMessage* ResObjectStateMessage = MakePacketResObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
+		CMessage* ResObjectStateMessage = MakePacketResChangeObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
 		SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateMessage);
 		ResObjectStateMessage->Free();
 	}
@@ -4997,7 +5145,7 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CMessage* Message)
 		// Idle로 상태 변경 후 주위섹터에 전송
 		MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
-		CMessage* ResObjectStateChangePacket = MakePacketResObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
+		CMessage* ResObjectStateChangePacket = MakePacketResChangeObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
 		SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateChangePacket);
 		ResObjectStateChangePacket->Free();
 
@@ -5007,7 +5155,7 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CMessage* Message)
 		ResAttackMagicSystemMessagePacket->Free();
 
 		// HP 변경 전송
-		CMessage* ResChangeObjectStat = MakePacketChangeObjectStat(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, MyPlayer->GetTarget()->_GameObjectInfo.ObjectStatInfo);
+		CMessage* ResChangeObjectStat = MakePacketResChangeObjectStat(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, MyPlayer->GetTarget()->_GameObjectInfo.ObjectStatInfo);
 		SendPacketAroundSector(MyPlayer->GetTarget()->GetCellPosition(), ResChangeObjectStat);
 		ResChangeObjectStat->Free();
 
@@ -5093,7 +5241,7 @@ void CGameServer::PacketProcTimerObjectStateChange(int64 SessionId, CMessage* Me
 				CMonster* ChangeStateMonsterObject = (CMonster*)ChangeStateObject;
 				ChangeStateMonsterObject->_GameObjectInfo.ObjectPositionInfo.State = (en_CreatureState)ChangeState;
 
-				CGameServerMessage* ResObjectStateChangeMessage = MakePacketResObjectState(TargetObjectId, ChangeStateObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, ChangeStateObject->_GameObjectInfo.ObjectType, (en_CreatureState)ChangeState);
+				CGameServerMessage* ResObjectStateChangeMessage = MakePacketResChangeObjectState(TargetObjectId, ChangeStateObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, ChangeStateObject->_GameObjectInfo.ObjectType, (en_CreatureState)ChangeState);
 				SendPacketAroundSector(ChangeStateObject->GetCellPosition(), ResObjectStateChangeMessage);
 				ResObjectStateChangeMessage->Free();
 			}
@@ -5119,7 +5267,7 @@ void CGameServer::PacketProcTimerObjectStateChange(int64 SessionId, CMessage* Me
 
 							ChangeStatePlayerObject->_GameObjectInfo.ObjectPositionInfo.State = (en_CreatureState)ChangeState;
 
-							CGameServerMessage* ResObjectStateChangeMessage = MakePacketResObjectState(TargetObjectId, ChangeStateObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, ChangeStateObject->_GameObjectInfo.ObjectType, (en_CreatureState)ChangeState);
+							CGameServerMessage* ResObjectStateChangeMessage = MakePacketResChangeObjectState(TargetObjectId, ChangeStateObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, ChangeStateObject->_GameObjectInfo.ObjectType, (en_CreatureState)ChangeState);
 							SendPacketAroundSector(ChangeStateObject->GetCellPosition(), ResObjectStateChangeMessage);
 							ResObjectStateChangeMessage->Free();
 						}
@@ -5655,7 +5803,7 @@ CGameServerMessage* CGameServer::MakePacketResMagic(int64 ObjectId, bool SpellSt
 // int64 AccountId
 // int32 PlayerDBId
 // int32 HP
-CGameServerMessage* CGameServer::MakePacketChangeObjectStat(int64 ObjectId, st_StatInfo ChangeObjectStatInfo)
+CGameServerMessage* CGameServer::MakePacketResChangeObjectStat(int64 ObjectId, st_StatInfo ChangeObjectStatInfo)
 {
 	CGameServerMessage* ResChangeObjectStatPacket = CGameServerMessage::GameServerMessageAlloc();
 	if (ResChangeObjectStatPacket == nullptr)
@@ -5673,7 +5821,7 @@ CGameServerMessage* CGameServer::MakePacketChangeObjectStat(int64 ObjectId, st_S
 	return ResChangeObjectStatPacket;
 }
 
-CGameServerMessage* CGameServer::MakePacketResObjectState(int64 ObjectId, en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState)
+CGameServerMessage* CGameServer::MakePacketResChangeObjectState(int64 ObjectId, en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState)
 {
 	CGameServerMessage* ResObjectStatePacket = CGameServerMessage::GameServerMessageAlloc();
 	if (ResObjectStatePacket == nullptr)

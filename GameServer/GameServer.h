@@ -325,11 +325,11 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 오브젝트 스탯 변경 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketChangeObjectStat(int64 ObjectId, st_StatInfo ChangeObjectStatInfo);
+	CGameServerMessage* MakePacketResChangeObjectStat(int64 ObjectId, st_StatInfo ChangeObjectStatInfo);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 오브젝트 상태 변경 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResObjectState(int64 ObjectId, en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState);
+	CGameServerMessage* MakePacketResChangeObjectState(int64 ObjectId, en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 이동 요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------

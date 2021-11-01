@@ -246,12 +246,14 @@ struct st_Experience
 	int64 CurrentExperience;
 	int64 RequireExperience;
 	int64 TotalExperience;
+	float CurrentExpRatio;
 
 	st_Experience()
 	{
 		CurrentExperience = 0;
 		RequireExperience = 0;
 		TotalExperience = 0;
+		CurrentExpRatio = 0;
 	}
 };
 
