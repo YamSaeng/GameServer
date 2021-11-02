@@ -1,0 +1,46 @@
+{
+  "ShamanSkills": [
+    {
+      "SkillLargeCategory": "SKILL_LARGE_CATEGORY_SHMAN",
+      "ShamanSkillList": [
+        {
+          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK",
+          "ShamanAttackSkillList": [
+            {
+              "SkillType": "SKILL_SHAMNA_FLAME_HARPOON",
+              "SkillName": "∫“≤…¿€ªÏ",
+              "SkillLevel": 1,
+              "SkillMinDamage": 20,
+              "SkillMaxDamage": 30,
+              "SkillCoolTime": 0,
+              "SkillCastingTime": 1000,
+              "SkillDistance": 6,
+              "SkillThumbnailImagePath": "Textures/Spell/Icon/∫“≤…¿€ªÏ"
+            },
+            {
+              "SkillType": "SKILL_SHAMAN_HELL_FIRE",
+              "SkillName": "¡ˆø¡¿«»≠ø∞",
+              "SkillLevel": 1,
+              "SkillMinDamage": 100,
+              "SkillMaxDamage": 200,
+              "SkillCoolTime": 20000,
+              "SkillCastingTime": 3000,
+              "SkillDistance": 6,
+              "SkillThumbnailImagePath": "Textures/Spell/Icon/¡ˆø¡¿«»≠ø∞"
+            }
+          ]
+        },
+        {
+          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_SHMAN_HEAL",
+          "ShamanHealSkillList": [           
+          ]
+        },
+        {
+          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_SHMAN_BUF",
+          "ShamanBufSkillList": [           
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "WarriorSkills": [
+    {
+      "SkillLargeCategory": "SKILL_LARGE_CATEGORY_WARRIOR",
+      "WarriorSkillList": [
+        {
+          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK",
+          "WarriorAttackSkillList": [
+            {
+              "SkillType": "SKILL_KNIGHT_FIERCE_ATTACK",
+              "SkillName": "맹렬한일격",
+              "SkillLevel": 1,
+              "SkillMinDamage": 2,
+              "SkillMaxDamage": 5,
+              "SkillCoolTime": 2000,
+              "SkillCastingTime": 0,
+              "SkillDistance": 1,
+              "SkillThumbnailImagePath": "Textures/Spell/Icon/맹렬한일격"
+            },
+            {
+              "SkillType": "SKILL_KNIGHT_CONVERSION_ATTACK",
+              "SkillName": "회심의일격",
+              "SkillLevel": 1,
+              "SkillMinDamage": 2,
+              "SkillMaxDamage": 5,
+              "SkillCoolTime": 1000,
+              "SkillCastingTime": 0,
+              "SkillDistance": 1,
+              "SkillThumbnailImagePath": "Textures/Spell/Icon/회심의일격"
+            },
+            {
+              "SkillType": "SKILL_KNIGHT_SHAEHONE",
+              "SkillName": "쇄혼비무",
+              "SkillLevel": 1,
+              "SkillMinDamage": 10,
+              "SkillMaxDamage": 15,
+              "SkillCoolTime": 5000,
+              "SkillCastingTime": 0,
+              "SkillDistance": 4,
+              "SkillThumbnailImagePath": "Textures/Spell/Icon/쇄혼비무"
+            },
+            {
+              "SkillType": "SKILL_KNIGHT_CHOHONE",
+              "SkillName": "초혼비무",
+              "SkillLevel": 1,
+              "SkillMinDamage": 10,
+              "SkillMaxDamage": 15,
+              "SkillCoolTime": 5000,
+              "SkillCastingTime": 0,
+              "SkillDistance": 4,
+              "SkillThumbnailImagePath": "Textures/Spell/Icon/초혼비무"
+            },
+            {
+              "SkillType": "SKILL_KNIGHT_SMASH_WAVE",
+              "SkillName": "분쇄파동",
+              "SkillLevel": 1,
+              "SkillMinDamage": 5,
+              "SkillMaxDamage": 10,
+              "SkillCoolTime": 3000,
+              "SkillCastingTime": 0,
+              "SkillDistance": 1,
+              "SkillThumbnailImagePath": "Textures/Spell/Icon/분쇄파동"
+            }
+          ]
+        },
+        {
+          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_WARRIOR_HEAL",
+          "WarriorHealSkillList": [            
+          ]
+        },
+        {
+          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_WARRIOR_BUF",
+          "WarriorBufSkillList": [
+            {
+              "SkillType": "SKILL_KNIGHT_CHARGE_POSE",
+              "SkillName": "돌격자세",
+              "SkillLevel": 1,
+              "IncreaseMinAttackPoint": 50,
+              "IncreaseMaxAttackPoint": 100,
+              "IncreaseMeleeAttackSpeedPoint": 0,
+              "IncreaseMeleeAttackHitRate": 0,
+              "IncreaseMagicAttackPoint": 0,
+              "IncreaseMagicCastingPoint": 0,
+              "IncreaseMagicAttackHitRate": 0,
+              "IncreaseDefencePoint": 0,
+              "IncreaseEvasionRate": 0,
+              "IncreaseMeleeCriticalPoint": 0,
+              "IncreaseMagicCriticalPoint": 0,
+              "IncreaseSpeedPoint": 0,
+              "IncreaseStatusAbnormalityResistance": 0,
+              "SkillCoolTime": 10000,
+              "SkillCastingTime": 0,
+              "SkillDistance": 0,
+              "SkillThumbnailImagePath": "Textures/Spell/Icon/돌격자세"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

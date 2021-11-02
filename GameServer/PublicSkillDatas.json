@@ -1,0 +1,56 @@
+{
+  "PublicSkills": [
+    {
+      "SkillLargeCategory": "SKILL_LARGE_CATEOGRY_PUBLIC",
+      "PublicSkillList": [
+        {
+          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK",
+          "PublicAttackSkillList": [
+            {
+              "SkillType": "SKILL_NORMAL",
+              "SkillName": "일반공격",
+              "SkillLevel": 1,
+              "SkillMinDamage": 0,
+              "SkillMaxDamage": 0,
+              "SkillCoolTime": 500,
+              "SkillCastingTime": 0,
+              "SkillDistance": 1,
+              "SkillThumbnailImagePath": "Textures/Spell/Icon/일반공격"
+            }
+          ]
+        },
+        {
+          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL",
+          "PublicHealSkillList": [
+          ]
+        },
+        {
+          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_PUBLIC_BUF",
+          "PublicBufSkillList": [
+            {
+              "SkillType": "SKILL_SHOCK_RELEASE",
+              "SkillName": "충격해제",
+              "IncreaseMinAttackPoint": 0,
+              "IncreaseMaxAttackPoint": 0,
+              "IncreaseMeleeAttackSpeedPoint": 0,
+              "IncreaseMeleeAttackHitRate": 0,
+              "IncreaseMagicAttackPoint": 0,
+              "IncreaseMagicCastingPoint": 0,
+              "IncreaseMagicAttackHitRate": 0,
+              "IncreaseDefencePoint": 0,
+              "IncreaseEvasionRate": 0,
+              "IncreaseMeleeCriticalPoint": 0,
+              "IncreaseMagicCriticalPoint": 0,
+              "IncreaseSpeedPoint": 0,
+              "IncreaseStatusAbnormalityResistance": 1000,
+              "SkillCoolTime": 30000,
+              "SkillCastingTime": 0,
+              "SkillDistance": 0,
+              "SkillThumbnailImagePath": "Textures/Spell/Icon/충격해제"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

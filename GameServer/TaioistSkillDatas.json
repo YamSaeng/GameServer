@@ -1,0 +1,46 @@
+{
+  "TaioistSkills": [
+    {
+      "SkillLargeCategory": "SKILL_LARGE_CATEGORY_TAOIST",
+      "TaioistSkillList": [
+        {
+          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK",
+          "TaioistAttackSkillLit": [          
+          ]
+        },
+        {
+          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_TAOIST_HEAL",
+          "TaioistHealSkillList": [
+            {
+              "SkillType": "SKILL_SHAMAN_HEALING_LIGHT",
+              "SkillName": "치유의빛",
+              "SkillLevel": 1,
+              "SkillMinHeal": 30,
+              "SkillMaxHeal": 50,
+              "SkillCoolTime": 0,
+              "SkillCastingTime": 1000,
+              "SkillDistance": 6,
+              "SkillThumbnailImagePath": "Textures/Spell/Icon/치유의빛"
+            },
+            {
+              "SkillType": "SKILL_SHAMAN_HEALING_WIND",
+              "SkillName": "치유의바람",
+              "SkillLevel": 1,
+              "SkillMinHeal": 80,
+              "SkillMaxHeal": 120,
+              "SkillCoolTime": 4000,
+              "SkillCastingTime": 2000,
+              "SkillDistance": 6,
+              "SkillThumbnailImagePath": "Textures/Spell/Icon/치유의바람"
+            }
+          ]
+        },
+        {
+          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_TAOIST_BUF",
+          "TaioistBufSkillList": [           
+          ]
+        }
+      ]
+    }
+  ]
+}
