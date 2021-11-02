@@ -65,10 +65,15 @@ CGameServerMessage& CGameServerMessage::operator<<(st_StatInfo& StatInfo)
     *this << StatInfo.MaxMP;
     *this << StatInfo.DP;
     *this << StatInfo.MaxDP;
-    *this << StatInfo.MinAttackDamage;
-    *this << StatInfo.MaxAttackDamage;
+    *this << StatInfo.MinMeleeAttackDamage;
+    *this << StatInfo.MaxMeleeAttackDamage;
+    *this << StatInfo.MeleeAttackHitRate;
+    *this << StatInfo.MagicDamage;
+    *this << StatInfo.MagicHitRate;
     *this << StatInfo.Defence;
-    *this << StatInfo.CriticalPoint;
+    *this << StatInfo.EvasionRate;
+    *this << StatInfo.MeleeCriticalPoint;
+    *this << StatInfo.MagicCriticalPoint;
     *this << StatInfo.Speed;    
 
     return *(this);

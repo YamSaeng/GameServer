@@ -303,13 +303,13 @@ void CMonster::UpdateAttack()
 		random_device Seed;
 		default_random_engine Eng(Seed());
 
-		float CriticalPoint = _GameObjectInfo.ObjectStatInfo.CriticalPoint / 1000.0f;
+		float CriticalPoint = _GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint / 1000.0f;
 		bernoulli_distribution CriticalCheck(CriticalPoint);
 		bool IsCritical = CriticalCheck(Eng);
 
 		// 데미지 판단
 		mt19937 Gen(Seed());
-		uniform_int_distribution<int> DamageChoiceRandom(_GameObjectInfo.ObjectStatInfo.MinAttackDamage, _GameObjectInfo.ObjectStatInfo.MaxAttackDamage);
+		uniform_int_distribution<int> DamageChoiceRandom(_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage, _GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage);
 		int32 ChoiceDamage = DamageChoiceRandom(Gen);
 		int32 FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
 

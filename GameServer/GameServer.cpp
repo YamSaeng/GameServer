@@ -1106,13 +1106,13 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 						random_device Seed;
 						default_random_engine Eng(Seed());
 
-						float CriticalPoint = MyPlayer->_GameObjectInfo.ObjectStatInfo.CriticalPoint / 1000.0f;
+						float CriticalPoint = MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint / 1000.0f;
 						bernoulli_distribution CriticalCheck(CriticalPoint);
 						bool IsCritical = CriticalCheck(Eng);
 
 						// 데미지 판단
 						mt19937 Gen(Seed());
-						uniform_int_distribution<int> DamageChoiceRandom(MyPlayer->_GameObjectInfo.ObjectStatInfo.MinAttackDamage, MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxAttackDamage);
+						uniform_int_distribution<int> DamageChoiceRandom(MyPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage, MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage);
 						int32 ChoiceDamage = DamageChoiceRandom(Gen);
 
 						int32 FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
@@ -1132,7 +1132,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 									MyPlayer->_GameObjectInfo.ObjectStatInfo.Level += 1;
 
 									// 해당 레벨에 
-									st_PlayerStatusData NewCharacterStatus;
+									st_ObjectStatusData NewCharacterStatus;
 									st_LevelData LevelData;
 
 									switch (MyPlayer->_GameObjectInfo.ObjectType)
@@ -1153,10 +1153,15 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
 										MyPlayer->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
 										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MinAttackDamage = NewCharacterStatus.MinAttackDamage;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxAttackDamage = NewCharacterStatus.MaxAttackDamage;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
 										MyPlayer->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.CriticalPoint = NewCharacterStatus.CriticalPoint;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
 										MyPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;																				
 									}
 									break;
@@ -1176,10 +1181,15 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
 										MyPlayer->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
 										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MinAttackDamage = NewCharacterStatus.MinAttackDamage;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxAttackDamage = NewCharacterStatus.MaxAttackDamage;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
 										MyPlayer->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.CriticalPoint = NewCharacterStatus.CriticalPoint;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
 										MyPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
 									}
 									break;
@@ -2740,10 +2750,15 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 			int32 PlayerMaxMP;
 			int32 PlayerCurrentDP;
 			int32 PlayerMaxDP;
-			int32 PlayerMinAttack;
-			int32 PlayerMaxAttack;
+			int32 PlayerMinMeleeAttackDamage;
+			int32 PlayerMaxMeleeAttackDamage;
+			int16 PlayerMeleeAttackHitRate;
+			int16 PlayerMagicDamage;
+			int16 PlayerMagicHitRate;
 			int32 PlayerDefence;
-			int16 PlayerCriticalPoint;
+			int16 PlayerEvasionRate;
+			int16 PlayerMeleeCriticalPoint;
+			int16 PlayerMagicCriticalPoint;
 			float PlayerSpeed;			
 			int32 PlayerLastPositionY;
 			int32 PlayerLastPositionX;
@@ -2762,10 +2777,15 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 			ClientPlayersGet.OutMaxMP(PlayerMaxMP);
 			ClientPlayersGet.OutCurrentDP(PlayerCurrentDP);
 			ClientPlayersGet.OutMaxDP(PlayerMaxDP);
-			ClientPlayersGet.OutMinAttack(PlayerMinAttack);
-			ClientPlayersGet.OutMaxAttack(PlayerMaxAttack);
+			ClientPlayersGet.OutMinMeleeAttackDamage(PlayerMinMeleeAttackDamage);
+			ClientPlayersGet.OutMaxMeleeAttackDamage(PlayerMaxMeleeAttackDamage);
+			ClientPlayersGet.OutMeleeAttackHitRate(PlayerMeleeAttackHitRate);
+			ClientPlayersGet.OutMagicDamage(PlayerMagicDamage);
+			ClientPlayersGet.OutMagicHitRate(PlayerMagicHitRate);
 			ClientPlayersGet.OutDefence(PlayerDefence);
-			ClientPlayersGet.OutCriticalPoint(PlayerCriticalPoint);
+			ClientPlayersGet.OutEvasionRate(PlayerEvasionRate);
+			ClientPlayersGet.OutMeleeCriticalPoint(PlayerMeleeCriticalPoint);
+			ClientPlayersGet.OutMagicCriticalPointt(PlayerMagicCriticalPoint);
 			ClientPlayersGet.OutSpeed(PlayerSpeed);	
 			ClientPlayersGet.OutLastPositionY(PlayerLastPositionY);
 			ClientPlayersGet.OutLastPositionX(PlayerLastPositionX);
@@ -2790,10 +2810,15 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MaxMP = PlayerMaxMP;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.DP = PlayerCurrentDP;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MaxDP = PlayerMaxDP;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MinAttackDamage = PlayerMinAttack;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MaxAttackDamage = PlayerMaxAttack;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = PlayerMinMeleeAttackDamage;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = PlayerMaxMeleeAttackDamage;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = PlayerMeleeAttackHitRate;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MagicDamage = PlayerMagicDamage;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MagicHitRate = PlayerMagicHitRate;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.Defence = PlayerDefence;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.CriticalPoint = PlayerCriticalPoint;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.EvasionRate = PlayerEvasionRate;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = PlayerMeleeCriticalPoint;
+				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = PlayerMagicCriticalPoint;
 				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.Speed = PlayerSpeed;				
 				Session->MyPlayers[PlayerIndex]->_SpawnPosition._Y = PlayerLastPositionY;
 				Session->MyPlayers[PlayerIndex]->_SpawnPosition._X = PlayerLastPositionX;
@@ -2876,7 +2901,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 		if (!CharacterNameFind)
 		{
 			// 요청한 캐릭터의 1레벨에 해당하는 데이터를 읽어온다.
-			st_PlayerStatusData NewCharacterStatus;
+			st_ObjectStatusData NewCharacterStatus;
 			switch ((en_GameObjectType)ReqGameObjectType)
 			{			
 			case en_GameObjectType::OBJECT_MELEE_PLAYER:
@@ -2923,10 +2948,15 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			NewCharacterPush.InMaxMP(NewCharacterStatus.MaxMP);
 			NewCharacterPush.InCurrentDP(CurrentDP);
 			NewCharacterPush.InMaxDP(NewCharacterStatus.MaxDP);
-			NewCharacterPush.InMinAttack(NewCharacterStatus.MinAttackDamage);
-			NewCharacterPush.InMaxAttack(NewCharacterStatus.MaxAttackDamage);
+			NewCharacterPush.InMinMeleeAttackDamage(NewCharacterStatus.MinMeleeAttackDamage);
+			NewCharacterPush.InMaxMeleeAttackDamage(NewCharacterStatus.MaxMeleeAttackDamage);
+			NewCharacterPush.InMeleeAttackHitRate(NewCharacterStatus.MeleeAttackHitRate);
+			NewCharacterPush.InMagicDamage(NewCharacterStatus.MagicDamage);
+			NewCharacterPush.InMagicHitRate(NewCharacterStatus.MagicHitRate);
 			NewCharacterPush.InDefence(NewCharacterStatus.Defence);
-			NewCharacterPush.InCriticalPoint(NewCharacterStatus.CriticalPoint);
+			NewCharacterPush.InEvasionRate(NewCharacterStatus.EvasionRate);
+			NewCharacterPush.InMeleeCriticalPoint(NewCharacterStatus.MeleeCriticalPoint);
+			NewCharacterPush.InMagicCriticalPoint(NewCharacterStatus.MagicCriticalPoint);
 			NewCharacterPush.InSpeed(NewCharacterStatus.Speed);
 			NewCharacterPush.InLastPositionY(NewCharacterPositionY);
 			NewCharacterPush.InLastPositionX(NewCharacterPositionX);
@@ -2966,10 +2996,15 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.DP = 0;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MinAttackDamage = NewCharacterStatus.MinAttackDamage;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MaxAttackDamage = NewCharacterStatus.MaxAttackDamage;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.CriticalPoint = NewCharacterStatus.CriticalPoint;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
+			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_SpawnPosition._Y = NewCharacterPositionY;
 			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_SpawnPosition._X = NewCharacterPositionX;			
@@ -4988,14 +5023,24 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(int64 SessionId, CMessage* 
 	*Message >> CurrentDP;
 	int32 MaxDP;
 	*Message >> MaxDP;
-	int32 MinAttackDamage;
-	*Message >> MinAttackDamage;
-	int32 MaxAttackDamage;
-	*Message >> MaxAttackDamage;
+	int32 MinMeleeAttackDamage;
+	*Message >> MinMeleeAttackDamage;
+	int32 MaxMeleeAttackDamage;
+	*Message >> MaxMeleeAttackDamage;
+	int16 MeleeAttackHitRate;
+	*Message >> MeleeAttackHitRate;
+	int16 MagicDamage;
+	*Message >> MagicDamage;
+	int16 MagicHitRate;
+	*Message >> MagicHitRate;
 	int32 Defence;
 	*Message >> Defence;
-	int16 CriticalPoint;
-	*Message >> CriticalPoint;
+	int16 EvasionRate;
+	*Message >> EvasionRate;
+	int16 MeleeCriticalPoint;
+	*Message >> MeleeCriticalPoint;
+	int16 MagicCriticalPoint;
+	*Message >> MagicCriticalPoint;
 	float Speed = 0;
 	*Message >> Speed;
 
@@ -5017,10 +5062,15 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(int64 SessionId, CMessage* 
 	PlayerLeaveInfoSave.InMaxHP(MaxHP);
 	PlayerLeaveInfoSave.InMaxMP(MaxMP);
 	PlayerLeaveInfoSave.InMaxDP(MaxDP);
-	PlayerLeaveInfoSave.InMinAttack(MinAttackDamage);
-	PlayerLeaveInfoSave.InMaxAttack(MaxAttackDamage);
+	PlayerLeaveInfoSave.InMinMeleeAttackDamage(MinMeleeAttackDamage);
+	PlayerLeaveInfoSave.InMaxMeleeAttackDamage(MaxMeleeAttackDamage);
+	PlayerLeaveInfoSave.InMeleeAttackHitRate(MeleeAttackHitRate);
+	PlayerLeaveInfoSave.InMagicDamage(MagicDamage);
+	PlayerLeaveInfoSave.InMagicHitRate(MagicHitRate);
 	PlayerLeaveInfoSave.InDefence(Defence);
-	PlayerLeaveInfoSave.InCriticalPoint(CriticalPoint);
+	PlayerLeaveInfoSave.InEvasionRate(EvasionRate);
+	PlayerLeaveInfoSave.InMeleeCriticalPoint(MeleeCriticalPoint);
+	PlayerLeaveInfoSave.InMagicCriticalPoint(MagicCriticalPoint);
 	PlayerLeaveInfoSave.InSpeed(Speed);
 	PlayerLeaveInfoSave.InLastPositionY(LastPositionY);
 	PlayerLeaveInfoSave.InLastPositionX(LastPositionX);
@@ -5081,7 +5131,7 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CMessage* Message)
 		int16 CriticalPoint = CriticalPointCreate(Gen);
 		// 크리티컬 판정
 		// 내 캐릭터의 크리티컬 포인트보다 값이 작으면 크리티컬로 판단한다.				
-		if (CriticalPoint < MyPlayer->_GameObjectInfo.ObjectStatInfo.CriticalPoint)
+		if (CriticalPoint < MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint)
 		{
 			IsCritical = true;
 		}
@@ -5094,7 +5144,7 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CMessage* Message)
 		{
 			HitEffectType = en_EffectType::EFFECT_FLAME_HARPOON_TARGET;
 
-			uniform_int_distribution<int> DamageChoiceRandom(MyPlayer->_GameObjectInfo.ObjectStatInfo.MinAttackDamage, MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxAttackDamage);
+			uniform_int_distribution<int> DamageChoiceRandom(MyPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage, MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage);
 			int32 ChoiceDamage = DamageChoiceRandom(Gen);
 			FinalDamage = 40;// IsCritical ? ChoiceDamage * 2 : ChoiceDamage
 
