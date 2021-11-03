@@ -18,7 +18,7 @@ public:
 	void Init();
 	
 	// 스킬 추가
-	void AddSkill(st_SkillInfo& SkillInfo);
+	void AddSkill(st_SkillInfo* SkillInfo);
 	// 스킬 얻기
 	st_SkillInfo* Get(int8 SlotIndex);
 	// 스킬 찾기

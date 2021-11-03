@@ -323,8 +323,12 @@
     <None Include="ItemData.json" />
     <None Include="CharacterLevelingData.json" />
     <None Include="MonsterData.json" />
-    <None Include="SkillData.json" />
+    <None Include="MonsterSkillDatas.json" />
+    <None Include="PublicSkillDatas.json" />
+    <None Include="ShamanSkillDatas.json" />
     <None Include="PlayerCharacterStatus.json" />
+    <None Include="TaioistSkillDatas.json" />
+    <None Include="WarriorSkillDatas.json" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="MapData.txt" />

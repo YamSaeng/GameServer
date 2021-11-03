@@ -358,9 +358,6 @@
     <None Include="MonsterData.json">
       <Filter>Util\설정 파일\Data</Filter>
     </None>
-    <None Include="SkillData.json">
-      <Filter>Util\설정 파일\Data</Filter>
-    </None>
     <None Include="EnvironmentData.json">
       <Filter>Util\설정 파일\Data</Filter>
     </None>
@@ -368,6 +365,21 @@
       <Filter>Util\설정 파일\Data</Filter>
     </None>
     <None Include="CharacterLevelingData.json">
+      <Filter>Util\설정 파일\Data</Filter>
+    </None>
+    <None Include="PublicSkillDatas.json">
+      <Filter>Util\설정 파일\Data</Filter>
+    </None>
+    <None Include="WarriorSkillDatas.json">
+      <Filter>Util\설정 파일\Data</Filter>
+    </None>
+    <None Include="ShamanSkillDatas.json">
+      <Filter>Util\설정 파일\Data</Filter>
+    </None>
+    <None Include="TaioistSkillDatas.json">
+      <Filter>Util\설정 파일\Data</Filter>
+    </None>
+    <None Include="MonsterSkillDatas.json">
       <Filter>Util\설정 파일\Data</Filter>
     </None>
   </ItemGroup>

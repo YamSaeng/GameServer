@@ -18,12 +18,9 @@ void CSkillBox::Init()
 
 }
 
-void CSkillBox::AddSkill(st_SkillInfo& SkillInfo)
+void CSkillBox::AddSkill(st_SkillInfo* SkillInfo)
 {
-	st_SkillInfo* NewSkillInfo = new st_SkillInfo();
-	*NewSkillInfo = SkillInfo;
-
-	_Skills.push_back(NewSkillInfo);
+	_Skills.push_back(SkillInfo);
 }
 
 st_SkillInfo* CSkillBox::Get(int8 SlotIndex)

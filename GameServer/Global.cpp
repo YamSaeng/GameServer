@@ -25,11 +25,20 @@ public:
 		G_DBConnectionPool->Init(100);
 		G_Logger = new CLog();
 		G_Datamanager = new CDataManager();
+		// 아이템 데이터 파싱
 		G_Datamanager->LoadDataItem(L"ItemData.json");
+		// 플레이어 캐릭터 스테이터스 데이터 파싱
 		G_Datamanager->LoadDataPlayerCharacterStatus(L"PlayerCharacterStatus.json");
+		// 몬스터 데이터 파싱
 		G_Datamanager->LoadDataMonster(L"MonsterData.json");
-		G_Datamanager->LoadDataSkill(L"SkillData.json");
+		// 스킬 데이터 파싱
+		G_Datamanager->LoadDataPublicSkill(L"PublicSkillDatas.json");
+		G_Datamanager->LoadDataWarriorSkill(L"WarriorSkillDatas.json");
+		G_Datamanager->LoadDataShamanSkill(L"ShamanSkillDatas.json");
+		G_Datamanager->LoadDataTaioistSkill(L"TaioistSkillDatas.json");
+		// 환경 오브젝트 데이터 파싱
 		G_Datamanager->LoadDataEnvironment(L"EnvironmentData.json");
+		// 제작템 데이터 파싱
 		G_Datamanager->LoadDataCrafting(L"CraftingData.json");
 		G_Datamanager->LoadDataLevel(L"CharacterLevelingData.json");
 		

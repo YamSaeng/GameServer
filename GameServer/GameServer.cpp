@@ -1109,13 +1109,17 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 						float CriticalPoint = MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint / 1000.0f;
 						bernoulli_distribution CriticalCheck(CriticalPoint);
 						bool IsCritical = CriticalCheck(Eng);
-
+						
 						// 데미지 판단
 						mt19937 Gen(Seed());
-						uniform_int_distribution<int> DamageChoiceRandom(MyPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage, MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage);
+						uniform_int_distribution<int> DamageChoiceRandom(MyPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage + MyPlayer->_Equipment._WeaponMinDamage, MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage + MyPlayer->_Equipment._WeaponMaxDamage);
 						int32 ChoiceDamage = DamageChoiceRandom(Gen);
 
-						int32 FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
+						int32 CriticalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;						
+						
+						float DefenceRate = (float)pow(((float)(200 - Target->_GameObjectInfo.ObjectStatInfo.Defence)) / 20, 2) * 0.01f;
+
+						int32 FinalDamage = CriticalDamage * DefenceRate;
 
 						bool TargetIsDead = Target->OnDamaged(MyPlayer, FinalDamage);
 						if (TargetIsDead == true)
@@ -1425,7 +1429,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 					}
 					break;
 					// 치유의 빛
-				case en_SkillType::SKILL_SHAMAN_HEALING_LIGHT:
+				case en_SkillType::SKILL_TAIOIST_HEALING_LIGHT:
 					MyPlayer->_SpellTick = GetTickCount64() + FindSkill->SkillCastingTime;
 
 					SpellCastingTime = FindSkill->SkillCastingTime / 1000.0f;
@@ -1467,7 +1471,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 					MyPlayer->_SkillType = (en_SkillType)ReqSkillType;
 					break;
 					// 치유의 바람
-				case en_SkillType::SKILL_SHAMAN_HEALING_WIND:
+				case en_SkillType::SKILL_TAIOIST_HEALING_WIND:
 					if (MyPlayer->_SelectTarget != nullptr)
 					{
 						MyPlayer->_SpellTick = GetTickCount64() + FindSkill->SkillCastingTime;
@@ -3065,6 +3069,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 				int8 QuickSlotBarSlotIndex;
 				wstring QuickSlotBarKey = L"";
 				int8 SkillLargeCategory = (int8)(en_SkillLargeCategory::SKILL_LARGE_CATEGORY_NONE);
+				int8 SkillMediumCategory = (int8)(en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE);
 				int16 SkillType = (int16)(en_SkillType::SKILL_TYPE_NONE);
 				int8 SkillLevel = 0;
 				wstring SkillName = L"";
@@ -3093,12 +3098,9 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 					QuickSlotBarSlotCreate.InQuickSlotBarSlotIndex(QuickSlotBarSlotIndex);
 					QuickSlotBarSlotCreate.InQuickSlotKey(QuickSlotBarKey);
 					QuickSlotBarSlotCreate.InSkillLargeCategory(SkillLargeCategory);
+					QuickSlotBarSlotCreate.InSkillMediumCategory(SkillMediumCategory);
 					QuickSlotBarSlotCreate.InSkillType(SkillType);
-					QuickSlotBarSlotCreate.InSkillLevel(SkillLevel);
-					QuickSlotBarSlotCreate.InSkillName(SkillName);
-					QuickSlotBarSlotCreate.InSkillCoolTime(SkillCoolTime);
-					QuickSlotBarSlotCreate.InSkillCastingTime(SkillCastingTime);
-					QuickSlotBarSlotCreate.InSkillThumbnailImagePath(SkillThumbnailImagePath);
+					QuickSlotBarSlotCreate.InSkillLevel(SkillLevel);					
 
 					QuickSlotBarSlotCreate.Execute();
 				}
@@ -3108,32 +3110,27 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			CDBConnection* DefaultAttackSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 			SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*DefaultAttackSkillCreateDBConnection);
 			
-			auto FindSkill = G_Datamanager->_PlayerMeleeSkills.find((int16)en_SkillType::SKILL_NORMAL);
-			st_SkillData* DefaultSkillData = (*FindSkill).second;
+			auto FindSkill = G_Datamanager->_PublicAttackSkillDatas.find((int16)en_SkillType::SKILL_NORMAL);
+			st_AttackSkillData* DefaultSkillData = (*FindSkill).second;
 
 			st_SkillInfo DefaultAttackSkillInfo;
 			DefaultAttackSkillInfo.IsQuickSlotUse = false;
 			DefaultAttackSkillInfo.SkillLargeCategory = DefaultSkillData->SkillLargeCategory;
+			DefaultAttackSkillInfo.SkillMediumCategory = DefaultSkillData->SkillMediumCategory;
 			DefaultAttackSkillInfo.SkillType = DefaultSkillData->SkillType;
-			DefaultAttackSkillInfo.SkillLevel = 1;
-			DefaultAttackSkillInfo.SkillName = (LPWSTR)CA2W(DefaultSkillData->SkillName.c_str());
-			DefaultAttackSkillInfo.SkillCoolTime = DefaultSkillData->SkillCoolTime;
-			DefaultAttackSkillInfo.SkillCastingTime = DefaultSkillData->SkillCastingTime;
-			DefaultAttackSkillInfo.SkillImagePath = (LPWSTR)CA2W(DefaultSkillData->SkillThumbnailImagePath.c_str());
+			DefaultAttackSkillInfo.SkillLevel = 1;			
 
 			int8 DefaultAttackSkillLargeCategory = (int8)DefaultAttackSkillInfo.SkillLargeCategory;
+			int8 DefaultAttackSkillMediumCategory = (int8)DefaultAttackSkillInfo.SkillMediumCategory;
 			int16 DefaultAttackSkillType = (int16)DefaultAttackSkillInfo.SkillType;
 
 			SkillToSkillBox.InAccountDBId(Session->AccountId);
 			SkillToSkillBox.InPlayerDBId(Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectId);
 			SkillToSkillBox.InIsQuickSlotUse(DefaultAttackSkillInfo.IsQuickSlotUse);
-			SkillToSkillBox.InSkillLargeCategory(DefaultAttackSkillLargeCategory);
+			SkillToSkillBox.InSkillLargeCategory(DefaultAttackSkillLargeCategory);	
+			SkillToSkillBox.InSkillMediumCategory(DefaultAttackSkillMediumCategory);
 			SkillToSkillBox.InSkillType(DefaultAttackSkillType);
-			SkillToSkillBox.InSkillLevel(DefaultAttackSkillInfo.SkillLevel);
-			SkillToSkillBox.InSkillName(DefaultAttackSkillInfo.SkillName);
-			SkillToSkillBox.InSkillCoolTime(DefaultAttackSkillInfo.SkillCoolTime);
-			SkillToSkillBox.InSkillCastingTime(DefaultAttackSkillInfo.SkillCastingTime);
-			SkillToSkillBox.InSkillThumbnailImagePath(DefaultAttackSkillInfo.SkillImagePath);
+			SkillToSkillBox.InSkillLevel(DefaultAttackSkillInfo.SkillLevel);			
 
 			SkillToSkillBox.Execute();
 
@@ -3982,22 +3979,28 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CMessage* Message)
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SHAEHONE_ATTACK:
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK:
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SMASH_WAVE_ATTACK:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_FLAME_HARPOON:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HELL_FIRE:	
+		case en_SmallItemCategory::ITEM_SMALL_CATEOGRY_SKILLBOOK_SHAMAN_HEALING_LIGHT:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HEALING_WIND:
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHARGE_POSE:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHOCK_RELEASE:
 			{
 				st_ConsumableData* ConsumableSkillItemData = (*G_Datamanager->_Consumables.find((int16)UseItem->_ItemInfo.ItemSmallCategory)).second;
 				if (ConsumableSkillItemData == nullptr)
 				{
 					CRASH("스킬아이템 데이터를 찾을 수 없습니다.");
 				}
-
-				st_SkillData* SkillData = (*G_Datamanager->_PlayerMeleeSkills.find((int16)ConsumableSkillItemData->SkillType)).second;
-				if (SkillData == nullptr)
+				
+				// 스킬 데이터 찾기
+				st_AttackSkillData* FindAttackSkillData = (st_AttackSkillData*)G_Datamanager->FindSkillData(ConsumableSkillItemData->SkillMediumCategory, ConsumableSkillItemData->SkillType);
+				if (FindAttackSkillData == nullptr)
 				{
 					CRASH("스킬 데이터를 찾을 수 없습니다.");
 				}
 
 				// 스킬을 이미 습득했는지 확인
-				st_SkillInfo* FindSkill = Session->MyPlayer->_SkillBox.FindSkill(SkillData->SkillType);
+				st_SkillInfo* FindSkill = Session->MyPlayer->_SkillBox.FindSkill(FindAttackSkillData->SkillType);
 				if (FindSkill != nullptr)
 				{
 					wstring ErrorDistance;
@@ -4012,43 +4015,44 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CMessage* Message)
 					ResErrorPacket->Free();
 
 					break;
-				}
+				}				
 
-				st_SkillInfo NewSkillInfo;
-				NewSkillInfo.IsQuickSlotUse = false;
-				NewSkillInfo.SkillLargeCategory = SkillData->SkillLargeCategory;
-				NewSkillInfo.SkillType = SkillData->SkillType;
-				NewSkillInfo.SkillLevel = 1;
-				NewSkillInfo.SkillName = (LPWSTR)CA2W(SkillData->SkillName.c_str());
-				NewSkillInfo.SkillCoolTime = SkillData->SkillCoolTime;
-				NewSkillInfo.SkillCastingTime = SkillData->SkillCastingTime;
-				NewSkillInfo.SkillImagePath = (LPWSTR)CA2W(SkillData->SkillThumbnailImagePath.c_str());
+				st_AttackSkillInfo* NewAttackSkillInfo = new st_AttackSkillInfo();
+				NewAttackSkillInfo->IsQuickSlotUse = false;
+				NewAttackSkillInfo->SkillLargeCategory = FindAttackSkillData->SkillLargeCategory;
+				NewAttackSkillInfo->SkillMediumCategory = FindAttackSkillData->SkillMediumCategory;
+				NewAttackSkillInfo->SkillType = FindAttackSkillData->SkillType;
+				NewAttackSkillInfo->SkillLevel = 1;
+				NewAttackSkillInfo->SkillName = (LPWSTR)CA2W(FindAttackSkillData->SkillName.c_str());
+				NewAttackSkillInfo->SkillCoolTime = FindAttackSkillData->SkillCoolTime;
+				NewAttackSkillInfo->SkillCastingTime = FindAttackSkillData->SkillCastingTime;
+				NewAttackSkillInfo->SkillImagePath = (LPWSTR)CA2W(FindAttackSkillData->SkillThumbnailImagePath.c_str());
+				NewAttackSkillInfo->SkillMinDamage = FindAttackSkillData->SkillMinDamage;
+				NewAttackSkillInfo->SkillMaxDamage = FindAttackSkillData->SkillMaxDamage;
 
-				int8 SkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
-				int16 SkillType = (int16)NewSkillInfo.SkillType;
+				int8 SkillLargeCategory = (int8)NewAttackSkillInfo->SkillLargeCategory;
+				int8 SkillMediumCategory = (int8)NewAttackSkillInfo->SkillMediumCategory;
+				int16 SkillType = (int16)NewAttackSkillInfo->SkillType;
 
-				// 스킬 테이블에 배운 스킬 넣기
+				// 스킬 테이블에 배운 스킬 DB에 넣기
 				CDBConnection* DBSkillToSkillBoxConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*DBSkillToSkillBoxConnection);
 				SkillToSkillBox.InAccountDBId(Session->AccountId);
 				SkillToSkillBox.InPlayerDBId(Session->MyPlayer->_GameObjectInfo.ObjectId);
-				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
+				SkillToSkillBox.InIsQuickSlotUse(NewAttackSkillInfo->IsQuickSlotUse);
 				SkillToSkillBox.InSkillLargeCategory(SkillLargeCategory);
+				SkillToSkillBox.InSkillMediumCategory(SkillMediumCategory);
 				SkillToSkillBox.InSkillType(SkillType);
-				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
-				SkillToSkillBox.InSkillName(NewSkillInfo.SkillName);
-				SkillToSkillBox.InSkillCoolTime(NewSkillInfo.SkillCoolTime);
-				SkillToSkillBox.InSkillCastingTime(NewSkillInfo.SkillCastingTime);
-				SkillToSkillBox.InSkillThumbnailImagePath(NewSkillInfo.SkillImagePath);
+				SkillToSkillBox.InSkillLevel(NewAttackSkillInfo->SkillLevel);
 
 				SkillToSkillBox.Execute();
 
 				G_DBConnectionPool->Push(en_DBConnect::GAME, DBSkillToSkillBoxConnection);
 
-				Session->MyPlayer->_SkillBox.AddSkill(NewSkillInfo);				
+				Session->MyPlayer->_SkillBox.AddSkill(NewAttackSkillInfo);
 
 				// 새로 배운 스킬을 클라에게 전송한다.
-				CMessage* ResSkillToSkillBoxPacket = MakePacketResSkillToSkillBox(Session->MyPlayer->_GameObjectInfo.ObjectId, NewSkillInfo);
+				CMessage* ResSkillToSkillBoxPacket = MakePacketResSkillToSkillBox(Session->MyPlayer->_GameObjectInfo.ObjectId, NewAttackSkillInfo);
 				SendPacket(Session->SessionId, ResSkillToSkillBoxPacket);
 				ResSkillToSkillBoxPacket->Free();
 
@@ -4074,104 +4078,7 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CMessage* Message)
 				SendPacket(SessionId, ReqInventoryItemUpdate);
 				ReqInventoryItemUpdate->Free();
 			}
-			break;
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_FLAME_HARPOON:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HELL_FIRE:
-		case en_SmallItemCategory::ITEM_SMALL_CATEOGRY_SKILLBOOK_SHAMAN_HEALING_LIGHT:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HEALING_WIND:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHOCK_RELEASE:
-			{
-				st_ConsumableData* ConsumableSkillItemData = (*G_Datamanager->_Consumables.find((int16)UseItem->_ItemInfo.ItemSmallCategory)).second;
-				if (ConsumableSkillItemData == nullptr)
-				{
-					CRASH("스킬아이템 데이터를 찾을 수 없습니다.");
-				}
-
-				st_SkillData* SkillData = (*G_Datamanager->_PlayerMagicSkills.find((int16)ConsumableSkillItemData->SkillType)).second;
-				if (SkillData == nullptr)
-				{
-					CRASH("스킬 데이터를 찾을 수 없습니다.");
-				}
-
-				// 스킬을 이미 습득했는지 확인
-				st_SkillInfo* FindSkill = Session->MyPlayer->_SkillBox.FindSkill(SkillData->SkillType);
-				if (FindSkill != nullptr)
-				{
-					wstring ErrorDistance;
-
-					WCHAR ErrorMessage[100] = { 0 };
-
-					wsprintf(ErrorMessage, L"[%s] 이미 습득한 스킬입니다.", FindSkill->SkillName.c_str());
-					ErrorDistance = ErrorMessage;
-
-					CMessage* ResErrorPacket = MakePacketError(Session->MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorDistance);
-					SendPacket(Session->SessionId, ResErrorPacket);
-					ResErrorPacket->Free();
-
-					break;
-				}
-
-				st_SkillInfo NewSkillInfo;
-				NewSkillInfo.IsQuickSlotUse = false;
-				NewSkillInfo.SkillLargeCategory = (en_SkillLargeCategory)SkillData->SkillLargeCategory;
-				NewSkillInfo.SkillType = (en_SkillType)SkillData->SkillType;
-				NewSkillInfo.SkillLevel = 1;
-				NewSkillInfo.SkillName = (LPWSTR)CA2W(SkillData->SkillName.c_str());
-				NewSkillInfo.SkillCoolTime = SkillData->SkillCoolTime;
-				NewSkillInfo.SkillCastingTime = SkillData->SkillCastingTime;
-				NewSkillInfo.SkillImagePath = (LPWSTR)CA2W(SkillData->SkillThumbnailImagePath.c_str());
-
-				int8 SkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
-				int16 SkillType = (int16)NewSkillInfo.SkillType;
-
-				// 새로운 스킬 스킬테이블에 등록하기
-				CDBConnection* DBSkillToSkillBoxConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*DBSkillToSkillBoxConnection);
-				SkillToSkillBox.InAccountDBId(Session->AccountId);
-				SkillToSkillBox.InPlayerDBId(Session->MyPlayer->_GameObjectInfo.ObjectId);
-				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
-				SkillToSkillBox.InSkillLargeCategory(SkillLargeCategory);
-				SkillToSkillBox.InSkillType(SkillType);
-				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
-				SkillToSkillBox.InSkillName(NewSkillInfo.SkillName);
-				SkillToSkillBox.InSkillCoolTime(NewSkillInfo.SkillCoolTime);
-				SkillToSkillBox.InSkillCastingTime(NewSkillInfo.SkillCastingTime);
-				SkillToSkillBox.InSkillThumbnailImagePath(NewSkillInfo.SkillImagePath);
-
-				SkillToSkillBox.Execute();
-
-				G_DBConnectionPool->Push(en_DBConnect::GAME, DBSkillToSkillBoxConnection);
-
-				Session->MyPlayer->_SkillBox.AddSkill(NewSkillInfo);
-
-				// 새로 배운 스킬을 클라에게 전송한다.
-				CMessage* ResSkillToSkillBoxPacket = MakePacketResSkillToSkillBox(Session->MyPlayer->_GameObjectInfo.ObjectId, NewSkillInfo);
-				SendPacket(Session->SessionId, ResSkillToSkillBoxPacket);
-				ResSkillToSkillBoxPacket->Free();
-
-				// 사용을 다한 스킬북 인벤토리에서 제거하기	
-				wstring InitString = L"";
-
-				CDBConnection* InventoryItemInitDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-				SP::CDBGameServerInventorySlotInit InventoryItemInit(*InventoryItemInitDBConnection);
-				InventoryItemInit.InOwnerAccountId(Session->AccountId);
-				InventoryItemInit.InOwnerPlayerId(Session->MyPlayer->_GameObjectInfo.ObjectId);
-				InventoryItemInit.InSlotIndex(UseItem->_ItemInfo.ItemSlotIndex);
-				InventoryItemInit.InItemName(InitString);
-				InventoryItemInit.InItemThumbnailImagePath(InitString);
-
-				InventoryItemInit.Execute();
-
-				G_DBConnectionPool->Push(en_DBConnect::GAME, InventoryItemInitDBConnection);				
-
-				Session->MyPlayer->_Inventory.SlotInit(UseItem->_ItemInfo.ItemSlotIndex);
-
-				// 클라에게 업데이트 결과 전송
-				CMessage* ReqInventoryItemUpdate = MakePacketInventoryItemUpdate(Session->MyPlayer->_GameObjectInfo.ObjectId, UseItem->_ItemInfo);
-				SendPacket(SessionId, ReqInventoryItemUpdate);
-				ReqInventoryItemUpdate->Free();
-			}
-			break;
+			break;				
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL:
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE:
@@ -4308,21 +4215,17 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			int8 QuickSlotBarSlotIndex;
 			WCHAR QuickSlotKey[20] = { 0 };
 			int8 QuickSlotSkillLargeCategory;
+			int8 QuickSlotSkillMediumCategory;
 			int16 QuickSlotSkillType;
-			int8 QuickSlotSkillLevel;
-			int32 QuickSlotSkillCoolTime;
-			int32 QuickSlotSkillCastingTime;
-			WCHAR QuickSlotSkillThumbnailImagePath[100] = { 0 };
+			int8 QuickSlotSkillLevel;			
 
 			QuickSlotBarGet.OutQuickSlotBarIndex(QuickSlotBarIndex);
 			QuickSlotBarGet.OutQuickSlotBarItemIndex(QuickSlotBarSlotIndex);
-			QuickSlotBarGet.OutQuickSlotSkillLargeCategory(QuickSlotSkillLargeCategory);
 			QuickSlotBarGet.OutQuickSlotKey(QuickSlotKey);
+			QuickSlotBarGet.OutQuickSlotSkillLargeCategory(QuickSlotSkillLargeCategory);
+			QuickSlotBarGet.OutQuickSlotSkillMediumCategory(QuickSlotSkillMediumCategory);			
 			QuickSlotBarGet.OutQuickSlotSkillType(QuickSlotSkillType);
-			QuickSlotBarGet.OutQuickSlotSkillLevel(QuickSlotSkillLevel);
-			QuickSlotBarGet.OutQuickSlotSkillCoolTime(QuickSlotSkillCoolTime);
-			QuickSlotBarGet.OutQuickSlotSkillCastingTime(QuickSlotSkillCastingTime);
-			QuickSlotBarGet.OutQuickSlotSkillThumbnailImagePath(QuickSlotSkillThumbnailImagePath);
+			QuickSlotBarGet.OutQuickSlotSkillLevel(QuickSlotSkillLevel);			
 
 			QuickSlotBarGet.Execute();
 
@@ -4335,12 +4238,20 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				NewQuickSlotBarSlot.QuickSlotBarSlotIndex = QuickSlotBarSlotIndex;
 				NewQuickSlotBarSlot.QuickSlotKey = QuickSlotKey;
 				NewQuickSlotBarSlot.QuickBarSkillInfo.SkillLargeCategory = (en_SkillLargeCategory)QuickSlotSkillLargeCategory;
+				NewQuickSlotBarSlot.QuickBarSkillInfo.SkillMediumCategory = (en_SkillMediumCategory)QuickSlotSkillMediumCategory;
 				NewQuickSlotBarSlot.QuickBarSkillInfo.SkillType = (en_SkillType)QuickSlotSkillType;
 				NewQuickSlotBarSlot.QuickBarSkillInfo.SkillLevel = QuickSlotSkillLevel;
-				NewQuickSlotBarSlot.QuickBarSkillInfo.SkillCoolTime = QuickSlotSkillCoolTime;
-				NewQuickSlotBarSlot.QuickBarSkillInfo.SkillCastingTime = QuickSlotSkillCastingTime;
-				NewQuickSlotBarSlot.QuickBarSkillInfo.SkillImagePath = QuickSlotSkillThumbnailImagePath;
 
+				// 퀵슬롯에 등록된 스킬 정보 찾기
+				st_SkillData* FindSkillData = G_Datamanager->FindSkillData((en_SkillMediumCategory)QuickSlotSkillMediumCategory, (en_SkillType)QuickSlotSkillType);
+				if (FindSkillData != nullptr)
+				{
+					NewQuickSlotBarSlot.QuickBarSkillInfo.SkillName = (LPWSTR)CA2W(FindSkillData->SkillName.c_str());
+					NewQuickSlotBarSlot.QuickBarSkillInfo.SkillCoolTime = FindSkillData->SkillCoolTime;
+					NewQuickSlotBarSlot.QuickBarSkillInfo.SkillCastingTime = FindSkillData->SkillCastingTime;
+					NewQuickSlotBarSlot.QuickBarSkillInfo.SkillImagePath = (LPWSTR)CA2W(FindSkillData->SkillThumbnailImagePath.c_str());
+				}								
+				
 				// 퀵슬롯에 등록한다.
 				Session->MyPlayer->_QuickSlotManager.UpdateQuickSlotBar(NewQuickSlotBarSlot);
 				QuickSlotBarSlotInfos.push_back(NewQuickSlotBarSlot);
@@ -4579,35 +4490,38 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 
 			bool IsQuickSlotUse;
 			int8 SkillLargeCategory;
+			int8 SkillMediumCategory;
 			int16 SkillType;
-			int8 SkillLevel;
-			WCHAR SkillName[20] = { 0 };
-			int32 SkillCoolTime;
-			int32 SkillCastingTime;
-			WCHAR SkillThumbnailImagePath[100] = { 0 };
+			int8 SkillLevel;			
 
 			CharacterSkillGet.OutIsQuickSlotUse(IsQuickSlotUse);
 			CharacterSkillGet.OutSkillLargeCategory(SkillLargeCategory);
+			CharacterSkillGet.OutSkillMediumCategory(SkillMediumCategory);
 			CharacterSkillGet.OutSkillType(SkillType);
-			CharacterSkillGet.OutSkillLevel(SkillLevel);
-			CharacterSkillGet.OutSkillName(SkillName);
-			CharacterSkillGet.OutSkillCoolTime(SkillCoolTime);
-			CharacterSkillGet.OutSkillCastingTime(SkillCastingTime);
-			CharacterSkillGet.OutSkillThumbnailImagePath(SkillThumbnailImagePath);
+			CharacterSkillGet.OutSkillLevel(SkillLevel);			
 
 			CharacterSkillGet.Execute();
 
 			while (CharacterSkillGet.Fetch())
 			{
-				st_SkillInfo SkillInfo;
-				SkillInfo.IsQuickSlotUse = IsQuickSlotUse;
-				SkillInfo.SkillLargeCategory = (en_SkillLargeCategory)SkillLargeCategory;
-				SkillInfo.SkillType = (en_SkillType)SkillType;
-				SkillInfo.SkillLevel = SkillLevel;
-				SkillInfo.SkillName = SkillName;
-				SkillInfo.SkillCoolTime = SkillCoolTime;
-				SkillInfo.SkillCastingTime = SkillCastingTime;
-				SkillInfo.SkillImagePath = SkillThumbnailImagePath;
+				st_SkillInfo* SkillInfo = new st_SkillInfo();
+				SkillInfo->IsQuickSlotUse = IsQuickSlotUse;
+				SkillInfo->SkillLargeCategory = (en_SkillLargeCategory)SkillLargeCategory;
+				SkillInfo->SkillMediumCategory = (en_SkillMediumCategory)SkillMediumCategory;
+				SkillInfo->SkillType = (en_SkillType)SkillType;
+				SkillInfo->SkillLevel = SkillLevel;
+				
+				// 스킬 데이터 찾기
+				st_AttackSkillData* FindAttackSkillData = (st_AttackSkillData*)G_Datamanager->FindSkillData((en_SkillMediumCategory)SkillMediumCategory, (en_SkillType)SkillType);
+				if (FindAttackSkillData == nullptr)
+				{
+					CRASH("스킬 데이터를 찾을 수 없습니다.");
+				}
+
+				SkillInfo->SkillName = (LPWSTR)CA2W(FindAttackSkillData->SkillName.c_str());
+				SkillInfo->SkillCoolTime = FindAttackSkillData->SkillCoolTime;
+				SkillInfo->SkillCastingTime = FindAttackSkillData->SkillCastingTime;
+				SkillInfo->SkillImagePath = (LPWSTR)CA2W(FindAttackSkillData->SkillThumbnailImagePath.c_str());
 
 				Session->MyPlayer->_SkillBox.AddSkill(SkillInfo);
 
@@ -4699,6 +4613,7 @@ void CGameServer::PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CGameServ
 				Session->MyPlayer->_QuickSlotManager.UpdateQuickSlotBar(SaveQuickSlotInfo);
 
 				int8 SkillLargeCategory = (int8)SaveQuickSlotInfo.QuickBarSkillInfo.SkillLargeCategory;
+				int8 SkillMediumCategory = (int8)SaveQuickSlotInfo.QuickBarSkillInfo.SkillMediumCategory;
 				int16 SkillType = (int16)SaveQuickSlotInfo.QuickBarSkillInfo.SkillType;
 
 				// DB에 퀵슬롯 정보 저장
@@ -4709,16 +4624,24 @@ void CGameServer::PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CGameServ
 				QuickSlotUpdate.InQuickSlotBarIndex(SaveQuickSlotInfo.QuickSlotBarIndex);
 				QuickSlotUpdate.InQuickSlotBarSlotIndex(SaveQuickSlotInfo.QuickSlotBarSlotIndex);
 				QuickSlotUpdate.InQuickSlotKey(SaveQuickSlotInfo.QuickSlotKey);
-
 				QuickSlotUpdate.InSkillLargeCategory(SkillLargeCategory);
+				QuickSlotUpdate.InSkillMediumCategory(SkillMediumCategory);
 				QuickSlotUpdate.InSkillType(SkillType);
-				QuickSlotUpdate.InSkillLevel(SaveQuickSlotInfo.QuickBarSkillInfo.SkillLevel);
-				QuickSlotUpdate.InSkillName(SaveQuickSlotInfo.QuickBarSkillInfo.SkillName);
-				QuickSlotUpdate.InSkillCoolTime(SaveQuickSlotInfo.QuickBarSkillInfo.SkillCoolTime);
-				QuickSlotUpdate.InSkillCastingTime(SaveQuickSlotInfo.QuickBarSkillInfo.SkillCastingTime);
-				QuickSlotUpdate.InSkillThumbnailImagePath(SaveQuickSlotInfo.QuickBarSkillInfo.SkillImagePath);
+				QuickSlotUpdate.InSkillLevel(SaveQuickSlotInfo.QuickBarSkillInfo.SkillLevel);								
 
 				QuickSlotUpdate.Execute();
+
+				// 스킬 데이터 찾기
+				st_AttackSkillData* FindAttackSkillData = (st_AttackSkillData*)G_Datamanager->FindSkillData((en_SkillMediumCategory)SkillMediumCategory, (en_SkillType)SkillType);
+				if (FindAttackSkillData == nullptr)
+				{
+					CRASH("스킬 데이터를 찾을 수 없습니다.");
+				}
+
+				SaveQuickSlotInfo.QuickBarSkillInfo.SkillName = (LPWSTR)CA2W(FindAttackSkillData->SkillName.c_str());
+				SaveQuickSlotInfo.QuickBarSkillInfo.SkillCoolTime = FindAttackSkillData->SkillCoolTime;
+				SaveQuickSlotInfo.QuickBarSkillInfo.SkillCastingTime = FindAttackSkillData->SkillCastingTime;
+				SaveQuickSlotInfo.QuickBarSkillInfo.SkillImagePath = (LPWSTR)CA2W(FindAttackSkillData->SkillThumbnailImagePath.c_str());
 
 				G_DBConnectionPool->Push(en_DBConnect::GAME, DBQuickSlotUpdateConnection);
 
@@ -4773,21 +4696,15 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 
 			WCHAR QuickSlotAKey[20] = { 0 };
 			int8 QuickSlotASkillLargeCategory;
+			int8 QuickSlotASkillMediumCategory;
 			int16 QuickSlotASkillType;
-			int8 QuickSlotASkillLevel;
-			WCHAR QuickSlotASkillName[20] = { 0 };
-			int32 QuickSlotASkillCoolTime;
-			int32 QuickSlotASkillCastingTime;
-			WCHAR QuickSlotASkillImagePath[100] = { 0 };
+			int8 QuickSlotASkillLevel;			
 
 			QuickSlotACheck.OutQuickSlotKey(QuickSlotAKey);
 			QuickSlotACheck.OutQuickSlotSkillLargeCategory(QuickSlotASkillLargeCategory);
+			QuickSlotACheck.OutQuickSlotSkillMediumCategory(QuickSlotASkillMediumCategory);
 			QuickSlotACheck.OutQuickSlotSkillType(QuickSlotASkillType);
-			QuickSlotACheck.OutQuickSlotSkillLevel(QuickSlotASkillLevel);
-			QuickSlotACheck.OutQuickSlotSkillName(QuickSlotASkillName);
-			QuickSlotACheck.OutQuickSlotSkillCoolTime(QuickSlotASkillCoolTime);
-			QuickSlotACheck.OutQuickSlotSkillCastingTime(QuickSlotASkillCastingTime);
-			QuickSlotACheck.OutQuickSlotSkillThumbnailImagePath(QuickSlotASkillImagePath);
+			QuickSlotACheck.OutQuickSlotSkillLevel(QuickSlotASkillLevel);			
 
 			QuickSlotACheck.Execute();
 
@@ -4802,12 +4719,9 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 			SwapAQuickSlotBarInfo.QuickSlotBarIndex = QuickSlotBarSwapIndexB;
 			SwapAQuickSlotBarInfo.QuickSlotBarSlotIndex = QuickSlotBarSlotSwapIndexB;
 			SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillLargeCategory = (en_SkillLargeCategory)QuickSlotASkillLargeCategory;
+			SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillMediumCategory = (en_SkillMediumCategory)QuickSlotASkillMediumCategory;
 			SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillType = (en_SkillType)QuickSlotASkillType;
-			SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillLevel = QuickSlotASkillLevel;
-			SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillName = QuickSlotASkillName;
-			SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillCoolTime = QuickSlotASkillCoolTime;
-			SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillCastingTime = QuickSlotASkillCastingTime;
-			SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillImagePath = QuickSlotASkillImagePath;
+			SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillLevel = QuickSlotASkillLevel;			
 #pragma endregion
 #pragma region 퀵슬롯 B가 DB에 있는지 확인
 			// 해당 퀵슬롯 위치에 정보가 있는지 DB에서 확인
@@ -4820,21 +4734,15 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 
 			WCHAR QuickSlotBKey[20] = { 0 };
 			int8 QuickSlotBSkillLargeCategory;
+			int8 QuickSlotBSkillMediumCategory;
 			int16 QuickSlotBSkillType;
-			int8 QuickSlotBSkillLevel;
-			WCHAR QuickSlotBSkillName[20] = { 0 };
-			int32 QuickSlotBSkillCoolTime;
-			int32 QuickSlotBSkillCastingTime;
-			WCHAR QuickSlotBSkillImagePath[100] = { 0 };
+			int8 QuickSlotBSkillLevel;			
 
 			QuickSlotBCheck.OutQuickSlotKey(QuickSlotBKey);
 			QuickSlotBCheck.OutQuickSlotSkillLargeCategory(QuickSlotBSkillLargeCategory);
+			QuickSlotBCheck.OutQuickSlotSkillMediumCategory(QuickSlotBSkillMediumCategory);
 			QuickSlotBCheck.OutQuickSlotSkillType(QuickSlotBSkillType);
-			QuickSlotBCheck.OutQuickSlotSkillLevel(QuickSlotBSkillLevel);
-			QuickSlotBCheck.OutQuickSlotSkillName(QuickSlotBSkillName);
-			QuickSlotBCheck.OutQuickSlotSkillCoolTime(QuickSlotBSkillCoolTime);
-			QuickSlotBCheck.OutQuickSlotSkillCastingTime(QuickSlotBSkillCastingTime);
-			QuickSlotBCheck.OutQuickSlotSkillThumbnailImagePath(QuickSlotBSkillImagePath);
+			QuickSlotBCheck.OutQuickSlotSkillLevel(QuickSlotBSkillLevel);			
 
 			QuickSlotBCheck.Execute();
 
@@ -4849,12 +4757,9 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 			SwapBQuickSlotBarInfo.QuickSlotBarIndex = QuickSlotBarSwapIndexA;
 			SwapBQuickSlotBarInfo.QuickSlotBarSlotIndex = QuickSlotBarSlotSwapIndexA;
 			SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillLargeCategory = (en_SkillLargeCategory)QuickSlotBSkillLargeCategory;
+			SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillMediumCategory = (en_SkillMediumCategory)QuickSlotBSkillMediumCategory;
 			SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillType = (en_SkillType)QuickSlotBSkillType;
-			SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillLevel = QuickSlotBSkillLevel;
-			SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillName = QuickSlotBSkillName;
-			SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillCoolTime = QuickSlotBSkillCoolTime;
-			SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillCastingTime = QuickSlotBSkillCastingTime;
-			SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillImagePath = QuickSlotBSkillImagePath;
+			SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillLevel = QuickSlotBSkillLevel;			
 
 			SwapAQuickSlotBarInfo.QuickSlotKey = QuickSlotBKey;
 			SwapBQuickSlotBarInfo.QuickSlotKey = QuickSlotAKey;
@@ -4862,8 +4767,11 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 
 #pragma region DB에서 퀵슬롯 스왑
 			int8 ASkillLargeCategory = (int8)SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillLargeCategory;
+			int8 ASkillMediumCategory = (int8)SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillMediumCategory;
 			int16 ASkillType = (int16)SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillType;
+
 			int8 BSkillLargeCategory = (int8)SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillLargeCategory;
+			int8 BSkillMediumCategory = (int8)SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillMediumCategory;
 			int16 BSkillType = (int16)SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillType;
 
 			CDBConnection* DBQuickSlotSwapConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
@@ -4874,26 +4782,40 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 			QuickSlotSwap.InAQuickSlotBarIndex(SwapBQuickSlotBarInfo.QuickSlotBarIndex);
 			QuickSlotSwap.InAQuickSlotBarSlotIndex(SwapBQuickSlotBarInfo.QuickSlotBarSlotIndex);
 			QuickSlotSwap.InASkillLargeCategory(BSkillLargeCategory);
+			QuickSlotSwap.InASkillMediumCategory(BSkillMediumCategory);
 			QuickSlotSwap.InAQuickSlotSkillType(BSkillType);
-			QuickSlotSwap.InAQuickSlotSkillLevel(SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillLevel);
-			QuickSlotSwap.InAQuickSlotSKillName(SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillName);
-			QuickSlotSwap.InAQuickSlotSkillCoolTime(SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillCoolTime);
-			QuickSlotSwap.InAQuickSlotSkillCastingTime(SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillCastingTime);
-			QuickSlotSwap.InAQuickSlotSKillImagePath(SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillImagePath);
+			QuickSlotSwap.InAQuickSlotSkillLevel(SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillLevel);			
 
 			QuickSlotSwap.InBQuickSlotBarIndex(SwapAQuickSlotBarInfo.QuickSlotBarIndex);
 			QuickSlotSwap.InBQuickSlotBarSlotIndex(SwapAQuickSlotBarInfo.QuickSlotBarSlotIndex);
 			QuickSlotSwap.InBSkillLargeCategory(ASkillLargeCategory);
+			QuickSlotSwap.InBSkillMediumCategory(ASkillMediumCategory);
 			QuickSlotSwap.InBQuickSlotSkillType(ASkillType);
-			QuickSlotSwap.InBQuickSlotSkillLevel(SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillLevel);
-			QuickSlotSwap.InBQuickSlotSKillName(SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillName);
-			QuickSlotSwap.InBQuickSlotSkillCoolTime(SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillCoolTime);
-			QuickSlotSwap.InBQuickSlotSkillCastingTime(SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillCastingTime);
-			QuickSlotSwap.InBQuickSlotSKillImagePath(SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillImagePath);
+			QuickSlotSwap.InBQuickSlotSkillLevel(SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillLevel);			
 
 			bool QuickSlotSwapSuccess = QuickSlotSwap.Execute();
 			if (QuickSlotSwapSuccess == true)
 			{
+				// 스킬 데이터 찾기
+				st_SkillData* FindASkillData = G_Datamanager->FindSkillData(SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillMediumCategory, SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillType);
+				if (FindASkillData != nullptr)
+				{
+					SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillName = (LPWSTR)CA2W(FindASkillData->SkillName.c_str());
+					SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillCoolTime = FindASkillData->SkillCoolTime;
+					SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillCastingTime = FindASkillData->SkillCastingTime;
+					SwapAQuickSlotBarInfo.QuickBarSkillInfo.SkillImagePath = (LPWSTR)CA2W(FindASkillData->SkillThumbnailImagePath.c_str());
+				}				
+
+				// 스킬 데이터 찾기
+				st_SkillData* FindBSkillData = G_Datamanager->FindSkillData(SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillMediumCategory, SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillType);
+				if (FindBSkillData != nullptr)
+				{
+					SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillName = (LPWSTR)CA2W(FindBSkillData->SkillName.c_str());
+					SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillCoolTime = FindBSkillData->SkillCoolTime;
+					SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillCastingTime = FindBSkillData->SkillCastingTime;
+					SwapBQuickSlotBarInfo.QuickBarSkillInfo.SkillImagePath = (LPWSTR)CA2W(FindBSkillData->SkillThumbnailImagePath.c_str());
+				}				
+
 				// 캐릭터에서 퀵슬롯 스왑
 				MyPlayer->_QuickSlotManager.SwapQuickSlot(SwapBQuickSlotBarInfo, SwapAQuickSlotBarInfo);
 
@@ -4943,21 +4865,15 @@ void CGameServer::PacketProcReqDBQuickSlotInit(int64 SessionId, CMessage* Messag
 
 			WCHAR QuickSlotKey[20] = { 0 };
 			int8 QuickSlotSkillLargeCategory;
+			int8 QuickSlotSkillMediumCategory;
 			int16 QuickSlotSkillType;
-			int8 QuickSlotSkillLevel;
-			WCHAR QuickSlotSkillName[20] = { 0 };
-			int32 QuickSlotSkillCoolTime;
-			int32 QuickSlotSkillCastingTime;
-			WCHAR QuickSlotSkillImagePath[100] = { 0 };
+			int8 QuickSlotSkillLevel;			
 
 			QuickSlotACheck.OutQuickSlotKey(QuickSlotKey);
 			QuickSlotACheck.OutQuickSlotSkillLargeCategory(QuickSlotSkillLargeCategory);
+			QuickSlotACheck.OutQuickSlotSkillMediumCategory(QuickSlotSkillMediumCategory);
 			QuickSlotACheck.OutQuickSlotSkillType(QuickSlotSkillType);
-			QuickSlotACheck.OutQuickSlotSkillLevel(QuickSlotSkillLevel);
-			QuickSlotACheck.OutQuickSlotSkillName(QuickSlotSkillName);
-			QuickSlotACheck.OutQuickSlotSkillCoolTime(QuickSlotSkillCoolTime);
-			QuickSlotACheck.OutQuickSlotSkillCastingTime(QuickSlotSkillCastingTime);
-			QuickSlotACheck.OutQuickSlotSkillThumbnailImagePath(QuickSlotSkillImagePath);
+			QuickSlotACheck.OutQuickSlotSkillLevel(QuickSlotSkillLevel);			
 
 			QuickSlotACheck.Execute();
 
@@ -5156,7 +5072,7 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CMessage* Message)
 			MagicSystemString = SpellMessage;
 		}
 		break;
-		case en_SkillType::SKILL_SHAMAN_HEALING_LIGHT:
+		case en_SkillType::SKILL_TAIOIST_HEALING_LIGHT:
 		{
 			HitEffectType = en_EffectType::EFFECT_HEALING_LIGHT_TARGET;
 
@@ -5167,7 +5083,7 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CMessage* Message)
 			MagicSystemString = SpellMessage;
 		}
 		break;
-		case en_SkillType::SKILL_SHAMAN_HEALING_WIND:
+		case en_SkillType::SKILL_TAIOIST_HEALING_WIND:
 		{
 			HitEffectType = en_EffectType::EFFECT_HEALING_WIND_TARGET;
 
@@ -6043,7 +5959,7 @@ CGameServerMessage* CGameServer::MakePacketResSyncPosition(int64 TargetObjectId,
 	return ResSyncPositionMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResSkillToSkillBox(int64 TargetObjectId, st_SkillInfo SkillInfo)
+CGameServerMessage* CGameServer::MakePacketResSkillToSkillBox(int64 TargetObjectId, st_SkillInfo* SkillInfo)
 {
 	CGameServerMessage* ResSkillToSkillBoxMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResSkillToSkillBoxMessage == nullptr)
@@ -6056,7 +5972,7 @@ CGameServerMessage* CGameServer::MakePacketResSkillToSkillBox(int64 TargetObject
 	*ResSkillToSkillBoxMessage << (int16)en_PACKET_S2C_SKILL_TO_SKILLBOX;
 	*ResSkillToSkillBoxMessage << TargetObjectId;
 
-	*ResSkillToSkillBoxMessage << SkillInfo;
+	*ResSkillToSkillBoxMessage << *SkillInfo;
 
 	return ResSkillToSkillBoxMessage;
 }
@@ -6192,24 +6108,24 @@ void CGameServer::SkillCoolTimeTimerJobCreate(CPlayer* Player, int64 CastingTime
 	st_SkillData* ReqSkillData = nullptr;
 	switch (CoolTimeSkillInfo->SkillLargeCategory)
 	{
-	case en_SkillLargeCategory::SKILL_LARGE_CATEGORY_PLAYER_MELEE:
-	{
-		auto FindSkilliterator = G_Datamanager->_PlayerMeleeSkills.find((int16)CoolTimeSkillInfo->SkillType);
-		if (FindSkilliterator != G_Datamanager->_PlayerMeleeSkills.end())
+	case en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR:
 		{
-			ReqSkillData = (*FindSkilliterator).second;
+			auto FindSkilliterator = G_Datamanager->_WarriorAttackSkillDatas.find((int16)CoolTimeSkillInfo->SkillType);
+			if (FindSkilliterator != G_Datamanager->_WarriorAttackSkillDatas.end())
+			{
+				ReqSkillData = (*FindSkilliterator).second;
+			}
 		}
-	}
-	break;
-	case en_SkillLargeCategory::SKILL_LARGE_CATEGORY_PLAYER_MAGIC:
-	{
-		auto FindSkilliterator = G_Datamanager->_PlayerMagicSkills.find((int16)CoolTimeSkillInfo->SkillType);
-		if (FindSkilliterator != G_Datamanager->_PlayerMagicSkills.end())
+		break;
+	case en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN:
 		{
-			ReqSkillData = (*FindSkilliterator).second;
+			auto FindSkilliterator = G_Datamanager->_ShamanAttackSkillDatas.find((int16)CoolTimeSkillInfo->SkillType);
+			if (FindSkilliterator != G_Datamanager->_ShamanAttackSkillDatas.end())
+			{
+				ReqSkillData = (*FindSkilliterator).second;
+			}
 		}
-	}
-	break;
+		break;
 	}
 
 	// 스킬 쿨타임 스킬쿨타임 잡 등록
