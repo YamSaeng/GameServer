@@ -153,10 +153,36 @@ enum class en_SmallItemCategory : int16
 enum class en_SkillLargeCategory : int8
 {
 	SKILL_LARGE_CATEGORY_NONE = 0,
-	SKILL_LARGE_CATEGORY_PLAYER_MELEE,
-	SKILL_LARGE_CATEGORY_PLAYER_MAGIC,
+	SKILL_LARGE_CATEOGRY_PUBLIC,
+
+	SKILL_LARGE_CATEGORY_WARRIOR,
+
+	SKILL_LARGE_CATEGORY_SHMAN,
+
+	SKILL_LARGE_CATEGORY_TAOIST,
+
 	SKILL_LARGE_CATEGORY_MONSTER_MELEE,
 	SKILL_LARGE_CATEGORY_MONSTER_MAGIC
+};
+
+enum class en_SkillMediumCategory : int8
+{
+	SKILL_MEDIUM_CATEGORY_NONE = 0,
+	SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK,
+	SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL,
+	SKILL_MEDIUM_CATEGORY_PUBLIC_BUF,
+
+	SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK,
+	SKILL_MEDIUM_CATEGORY_WARRIOR_HEAL,
+	SKILL_MEDIUM_CATEGORY_WARRIOR_BUF,
+
+	SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK,
+	SKILL_MEDIUM_CATEGORY_SHMAN_HEAL,
+	SKILL_MEDIUM_CATEGORY_SHMAN_BUF,
+
+	SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK,
+	SKILL_MEDIUM_CATEGORY_TAOIST_HEAL,
+	SKILL_MEDIUM_CATEGORY_TAOIST_BUF
 };
 
 enum class en_SkillType : int16
@@ -171,8 +197,8 @@ enum class en_SkillType : int16
 	SKILL_KNIGHT_CHARGE_POSE = 1000,
 	SKILL_SHAMAN_FLAME_HARPOON,
 	SKILL_SHAMAN_HELL_FIRE,
-	SKILL_SHAMAN_HEALING_LIGHT,
-	SKILL_SHAMAN_HEALING_WIND,
+	SKILL_TAIOIST_HEALING_LIGHT,
+	SKILL_TAIOIST_HEALING_WIND,
 	SKILL_SHOCK_RELEASE,
 	SKILL_SLIME_NORMAL = 3000,
 	SKILL_BEAR_NORMAL
@@ -357,6 +383,7 @@ struct st_SkillInfo
 {
 	bool IsQuickSlotUse;	 // 퀵슬롯에 등록되어 있는지 여부
 	en_SkillLargeCategory SkillLargeCategory; // 스킬 대분류
+	en_SkillMediumCategory SkillMediumCategory; // 스킬 중분류
 	en_SkillType SkillType;	 // 스킬 종류
 	int8 SkillLevel;		 // 스킬 레벨
 	wstring SkillName;		 // 스킬 이름
@@ -369,6 +396,7 @@ struct st_SkillInfo
 	{
 		IsQuickSlotUse = false;
 		SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_NONE;
+		SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
 		SkillType = en_SkillType::SKILL_TYPE_NONE;
 		SkillLevel = 0;
 		SkillName = L"";
@@ -376,6 +404,64 @@ struct st_SkillInfo
 		SkillCastingTime = 0;
 		SkillImagePath = L"";
 		CanSkillUse = true;
+	}
+};
+
+struct st_AttackSkillInfo : public st_SkillInfo
+{
+	int32 SkillMinDamage; // 최소 공격력
+	int32 SkillMaxDamage; // 최대 공격력
+
+	st_AttackSkillInfo()
+	{
+		SkillMinDamage = 0;
+		SkillMaxDamage = 0;
+	}
+};
+
+struct st_HealSkillInfo : public st_SkillInfo
+{
+	int32 SkillMinHealPoint; // 최소 치유량
+	int32 SkillMaxHealPoint; // 최대 치유량
+
+	st_HealSkillInfo()
+	{
+		SkillMinHealPoint = 0;
+		SkillMaxHealPoint = 0;
+	}
+};
+
+struct st_BufSkillInfo : public st_SkillInfo
+{
+	int32 IncreaseMinAttackPoint; // 증가하는 최소 근접 공격력
+	int32 IncreaseMaxAttackPoint; // 증가하는 최대 근접 공격력
+	int32 IncreaseMeleeAttackSpeedPoint; // 증가하는 근접 공격 속도
+	int16 IncreaseMeleeAttackHitRate; // 증가하는 근접 명중률	
+	int16 IncreaseMagicAttackPoint; // 증가하는 마법 공격력
+	int16 IncreaseMagicCastingPoint; // 증가하는 마법 캐스팅 속도
+	int16 IncreaseMagicAttackHitRate; // 증가하는 마법 명중률		
+	int32 IncreaseDefencePoint; // 증가하는 방어력 
+	int16 IncreaseEvasionRate; // 증가하는 회피율
+	int16 IncreaseMeleeCriticalPoint; // 증가하는 근접 치명타율
+	int16 IncreaseMagicCriticalPoint; // 증가하는 마법 치명타율
+	float IncreaseSpeedPoint; // 증가하는 이동 속도	
+	int16 IncreaseStatusAbnormalityResistance; // 증가하는 상태이상저항값
+
+	st_BufSkillInfo()
+	{
+		IncreaseMinAttackPoint = 0;
+		IncreaseMaxAttackPoint = 0;
+		IncreaseMeleeAttackSpeedPoint = 0;
+		IncreaseMeleeAttackHitRate = 0;
+		IncreaseMagicAttackPoint = 0;
+		IncreaseMagicCastingPoint = 0;
+		IncreaseMagicAttackHitRate = 0;
+		IncreaseDefencePoint = 0;
+		IncreaseEvasionRate = 0;
+		IncreaseMeleeCriticalPoint = 0;
+		IncreaseMagicCriticalPoint = 0;
+		IncreaseSpeedPoint = 0;
+		IncreaseStatusAbnormalityResistance = 0;
 	}
 };
 
