@@ -29,6 +29,7 @@ struct st_ItemData
 struct st_ConsumableData : public st_ItemData
 {
 	int16 HealPoint;
+	en_SkillMediumCategory SkillMediumCategory;
 	en_SkillType SkillType;
 };
 
@@ -88,12 +89,43 @@ struct st_MonsterData
 struct st_SkillData
 {
 	en_SkillLargeCategory SkillLargeCategory;
+	en_SkillMediumCategory SkillMediumCategory;
 	en_SkillType SkillType;
 	string SkillName;
+	int8 SkillLevel;
 	int32 SkillCoolTime;
 	int32 SkillCastingTime;
 	int SkillDistance;
 	string SkillThumbnailImagePath;
+};
+
+struct st_AttackSkillData : public st_SkillData
+{
+	int32 SkillMinDamage; // 최소 공격력
+	int32 SkillMaxDamage; // 최대 공격력
+};
+
+struct st_HealSkillData : public st_SkillData
+{
+	int32 SkillMinHealPoint; // 최소 치유량
+	int32 SkillMaxHealPoint; // 최대 치유량
+};
+
+struct st_BufSkillData : public st_SkillData
+{
+	int32 IncreaseMinAttackPoint; // 증가하는 최소 근접 공격력
+	int32 IncreaseMaxAttackPoint; // 증가하는 최대 근접 공격력
+	int32 IncreaseMeleeAttackSpeedPoint; // 증가하는 근접 공격 속도
+	int16 IncreaseMeleeAttackHitRate; // 증가하는 근접 명중률	
+	int16 IncreaseMagicAttackPoint; // 증가하는 마법 공격력
+	int16 IncreaseMagicCastingPoint; // 증가하는 마법 캐스팅 속도
+	int16 IncreaseMagicAttackHitRate; // 증가하는 마법 명중률		
+	int32 IncreaseDefencePoint; // 증가하는 방어력 
+	int16 IncreaseEvasionRate; // 증가하는 회피율
+	int16 IncreaseMeleeCriticalPoint; // 증가하는 근접 치명타율
+	int16 IncreaseMagicCriticalPoint; // 증가하는 마법 치명타율
+	float IncreaseSpeedPoint; // 증가하는 이동 속도	
+	int16 IncreaseStatusAbnormalityResistance; // 증가하는 상태이상저항값
 };
 
 struct st_EnvironmentData
