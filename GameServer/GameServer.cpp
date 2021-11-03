@@ -1102,6 +1102,8 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 				{					
 					if (Target->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE)
 					{
+						st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)FindSkill;
+
 						// 크리티컬 판단
 						random_device Seed;
 						default_random_engine Eng(Seed());
@@ -1112,7 +1114,9 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 						
 						// 데미지 판단
 						mt19937 Gen(Seed());
-						uniform_int_distribution<int> DamageChoiceRandom(MyPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage + MyPlayer->_Equipment._WeaponMinDamage, MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage + MyPlayer->_Equipment._WeaponMaxDamage);
+						uniform_int_distribution<int> DamageChoiceRandom(
+							MyPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage + MyPlayer->_Equipment._WeaponMinDamage + AttackSkillInfo->SkillMinDamage,
+							MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage + MyPlayer->_Equipment._WeaponMaxDamage + AttackSkillInfo->SkillMaxDamage);
 						int32 ChoiceDamage = DamageChoiceRandom(Gen);
 
 						int32 CriticalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;						
@@ -4503,32 +4507,113 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			CharacterSkillGet.Execute();
 
 			while (CharacterSkillGet.Fetch())
-			{
-				st_SkillInfo* SkillInfo = new st_SkillInfo();
-				SkillInfo->IsQuickSlotUse = IsQuickSlotUse;
-				SkillInfo->SkillLargeCategory = (en_SkillLargeCategory)SkillLargeCategory;
-				SkillInfo->SkillMediumCategory = (en_SkillMediumCategory)SkillMediumCategory;
-				SkillInfo->SkillType = (en_SkillType)SkillType;
-				SkillInfo->SkillLevel = SkillLevel;
-				
+			{		
 				// 스킬 데이터 찾기
-				st_AttackSkillData* FindAttackSkillData = (st_AttackSkillData*)G_Datamanager->FindSkillData((en_SkillMediumCategory)SkillMediumCategory, (en_SkillType)SkillType);
-				if (FindAttackSkillData == nullptr)
+				st_SkillData* FindSkillData = G_Datamanager->FindSkillData((en_SkillMediumCategory)SkillMediumCategory, (en_SkillType)SkillType);
+				if (FindSkillData == nullptr)
 				{
 					CRASH("스킬 데이터를 찾을 수 없습니다.");
 				}
 
-				SkillInfo->SkillName = (LPWSTR)CA2W(FindAttackSkillData->SkillName.c_str());
-				SkillInfo->SkillCoolTime = FindAttackSkillData->SkillCoolTime;
-				SkillInfo->SkillCastingTime = FindAttackSkillData->SkillCastingTime;
-				SkillInfo->SkillImagePath = (LPWSTR)CA2W(FindAttackSkillData->SkillThumbnailImagePath.c_str());
+				switch ((en_SkillMediumCategory)SkillMediumCategory)
+				{
+				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK:
+				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK:
+				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK:
+				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK:
+					{
+						st_AttackSkillData* FindAttackSkillData = (st_AttackSkillData*)FindSkillData;
 
-				Session->MyPlayer->_SkillBox.AddSkill(SkillInfo);
+						st_AttackSkillInfo* AttackSkillInfo = new st_AttackSkillInfo();
+						AttackSkillInfo->IsQuickSlotUse = IsQuickSlotUse;
+						AttackSkillInfo->SkillLargeCategory = (en_SkillLargeCategory)SkillLargeCategory;
+						AttackSkillInfo->SkillMediumCategory = (en_SkillMediumCategory)SkillMediumCategory;
+						AttackSkillInfo->SkillType = (en_SkillType)SkillType;
+						AttackSkillInfo->SkillLevel = SkillLevel;
+						AttackSkillInfo->SkillName = (LPWSTR)CA2W(FindAttackSkillData->SkillName.c_str());
+						AttackSkillInfo->SkillCoolTime = FindAttackSkillData->SkillCoolTime;
+						AttackSkillInfo->SkillCastingTime = FindAttackSkillData->SkillCastingTime;
+						AttackSkillInfo->SkillImagePath = (LPWSTR)CA2W(FindAttackSkillData->SkillThumbnailImagePath.c_str());
+						AttackSkillInfo->SkillMinDamage = FindAttackSkillData->SkillMinDamage;
+						AttackSkillInfo->SkillMaxDamage = FindAttackSkillData->SkillMaxDamage;
 
-				// 클라가 소유하고 있는 스킬 정보를 보내준다.
-				CMessage* ResSkillToSkillBoxPacket = MakePacketResSkillToSkillBox(Session->MyPlayer->_GameObjectInfo.ObjectId, SkillInfo);
-				SendPacket(Session->SessionId, ResSkillToSkillBoxPacket);
-				ResSkillToSkillBoxPacket->Free();
+						Session->MyPlayer->_SkillBox.AddSkill(AttackSkillInfo);
+
+						// 클라가 소유하고 있는 스킬 정보를 보내준다.
+						CMessage* ResSkillToSkillBoxPacket = MakePacketResSkillToSkillBox(Session->MyPlayer->_GameObjectInfo.ObjectId, AttackSkillInfo);
+						SendPacket(Session->SessionId, ResSkillToSkillBoxPacket);
+						ResSkillToSkillBoxPacket->Free();
+					}
+					break;
+				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL:
+				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_HEAL:
+				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_HEAL:
+				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_HEAL:				
+					{
+						st_HealSkillData* FindHealSkillData = (st_HealSkillData*)FindSkillData;
+
+						st_HealSkillInfo* HealSkillInfo = new st_HealSkillInfo();
+						HealSkillInfo->IsQuickSlotUse = IsQuickSlotUse;
+						HealSkillInfo->SkillLargeCategory = (en_SkillLargeCategory)SkillLargeCategory;
+						HealSkillInfo->SkillMediumCategory = (en_SkillMediumCategory)SkillMediumCategory;
+						HealSkillInfo->SkillType = (en_SkillType)SkillType;
+						HealSkillInfo->SkillLevel = SkillLevel;
+						HealSkillInfo->SkillName = (LPWSTR)CA2W(FindHealSkillData->SkillName.c_str());
+						HealSkillInfo->SkillCoolTime = FindHealSkillData->SkillCoolTime;
+						HealSkillInfo->SkillCastingTime = FindHealSkillData->SkillCastingTime;
+						HealSkillInfo->SkillImagePath = (LPWSTR)CA2W(FindHealSkillData->SkillThumbnailImagePath.c_str());
+						HealSkillInfo->SkillMinHealPoint = FindHealSkillData->SkillMinHealPoint;
+						HealSkillInfo->SkillMaxHealPoint = FindHealSkillData->SkillMaxHealPoint;
+
+						Session->MyPlayer->_SkillBox.AddSkill(HealSkillInfo);
+
+						// 클라가 소유하고 있는 스킬 정보를 보내준다.
+						CMessage* ResSkillToSkillBoxPacket = MakePacketResSkillToSkillBox(Session->MyPlayer->_GameObjectInfo.ObjectId, HealSkillInfo);
+						SendPacket(Session->SessionId, ResSkillToSkillBoxPacket);
+						ResSkillToSkillBoxPacket->Free();
+					}
+					break;
+				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF:									
+				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_BUF:					
+				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_BUF:					
+				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_BUF:
+					{
+						st_BufSkillData* FindBufSkillData = (st_BufSkillData*)FindSkillData;
+
+						st_BufSkillInfo* BufSkillInfo = new st_BufSkillInfo();
+						BufSkillInfo->IsQuickSlotUse = IsQuickSlotUse;
+						BufSkillInfo->SkillLargeCategory = (en_SkillLargeCategory)SkillLargeCategory;
+						BufSkillInfo->SkillMediumCategory = (en_SkillMediumCategory)SkillMediumCategory;
+						BufSkillInfo->SkillType = (en_SkillType)SkillType;
+						BufSkillInfo->SkillLevel = SkillLevel;
+						BufSkillInfo->SkillName = (LPWSTR)CA2W(FindBufSkillData->SkillName.c_str());
+						BufSkillInfo->SkillCoolTime = FindBufSkillData->SkillCoolTime;
+						BufSkillInfo->SkillCastingTime = FindBufSkillData->SkillCastingTime;
+						BufSkillInfo->SkillImagePath = (LPWSTR)CA2W(FindBufSkillData->SkillThumbnailImagePath.c_str());
+						
+						BufSkillInfo->IncreaseMinAttackPoint = FindBufSkillData->IncreaseMinAttackPoint;
+						BufSkillInfo->IncreaseMaxAttackPoint = FindBufSkillData->IncreaseMaxAttackPoint;
+						BufSkillInfo->IncreaseMeleeAttackSpeedPoint = FindBufSkillData->IncreaseMeleeAttackSpeedPoint;
+						BufSkillInfo->IncreaseMeleeAttackHitRate = FindBufSkillData->IncreaseMeleeAttackHitRate;
+						BufSkillInfo->IncreaseMagicAttackPoint = FindBufSkillData->IncreaseMagicAttackPoint;
+						BufSkillInfo->IncreaseMagicCastingPoint = FindBufSkillData->IncreaseMagicCastingPoint;
+						BufSkillInfo->IncreaseMagicAttackHitRate = FindBufSkillData->IncreaseMagicAttackHitRate;
+						BufSkillInfo->IncreaseDefencePoint = FindBufSkillData->IncreaseDefencePoint;
+						BufSkillInfo->IncreaseEvasionRate = FindBufSkillData->IncreaseEvasionRate;
+						BufSkillInfo->IncreaseMeleeCriticalPoint = FindBufSkillData->IncreaseMeleeCriticalPoint;
+						BufSkillInfo->IncreaseMagicCriticalPoint = FindBufSkillData->IncreaseMagicCriticalPoint;
+						BufSkillInfo->IncreaseSpeedPoint = FindBufSkillData->IncreaseSpeedPoint;
+						BufSkillInfo->IncreaseStatusAbnormalityResistance = FindBufSkillData->IncreaseStatusAbnormalityResistance;
+
+						Session->MyPlayer->_SkillBox.AddSkill(BufSkillInfo);
+
+						// 클라가 소유하고 있는 스킬 정보를 보내준다.
+						CMessage* ResSkillToSkillBoxPacket = MakePacketResSkillToSkillBox(Session->MyPlayer->_GameObjectInfo.ObjectId, BufSkillInfo);
+						SendPacket(Session->SessionId, ResSkillToSkillBoxPacket);
+						ResSkillToSkillBoxPacket->Free();
+					}
+					break;
+				}						
 			}
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterSkillGetConnection);
@@ -6105,51 +6190,32 @@ void CGameServer::SkillCoolTimeTimerJobCreate(CPlayer* Player, int64 CastingTime
 	CoolTimeSkillInfo->CanSkillUse = false;
 
 	// 스킬 쿨타임 얻어옴
-	st_SkillData* ReqSkillData = nullptr;
-	switch (CoolTimeSkillInfo->SkillLargeCategory)
+	st_SkillData* ReqSkillData = G_Datamanager->FindSkillData(CoolTimeSkillInfo->SkillMediumCategory, CoolTimeSkillInfo->SkillType);
+	if (ReqSkillData != nullptr)
 	{
-	case en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR:
+		// 스킬 쿨타임 스킬쿨타임 잡 등록
+		st_TimerJob* SkillCoolTimeTimerJob = _TimerJobMemoryPool->Alloc();
+		SkillCoolTimeTimerJob->TimerJobExecTick = GetTickCount64() + ReqSkillData->SkillCoolTime;
+		SkillCoolTimeTimerJob->SessionId = Player->_SessionId;
+		SkillCoolTimeTimerJob->TimerJobType = en_TimerJobType::TIMER_SKILL_COOLTIME_END;
+
+		CGameServerMessage* ResCoolTimeEndMessage = CGameServerMessage::GameServerMessageAlloc();
+		if (ResCoolTimeEndMessage == nullptr)
 		{
-			auto FindSkilliterator = G_Datamanager->_WarriorAttackSkillDatas.find((int16)CoolTimeSkillInfo->SkillType);
-			if (FindSkilliterator != G_Datamanager->_WarriorAttackSkillDatas.end())
-			{
-				ReqSkillData = (*FindSkilliterator).second;
-			}
+			return;
 		}
-		break;
-	case en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN:
-		{
-			auto FindSkilliterator = G_Datamanager->_ShamanAttackSkillDatas.find((int16)CoolTimeSkillInfo->SkillType);
-			if (FindSkilliterator != G_Datamanager->_ShamanAttackSkillDatas.end())
-			{
-				ReqSkillData = (*FindSkilliterator).second;
-			}
-		}
-		break;
-	}
 
-	// 스킬 쿨타임 스킬쿨타임 잡 등록
-	st_TimerJob* SkillCoolTimeTimerJob = _TimerJobMemoryPool->Alloc();
-	SkillCoolTimeTimerJob->TimerJobExecTick = GetTickCount64() + ReqSkillData->SkillCoolTime;
-	SkillCoolTimeTimerJob->SessionId = Player->_SessionId;
-	SkillCoolTimeTimerJob->TimerJobType = en_TimerJobType::TIMER_SKILL_COOLTIME_END;
+		ResCoolTimeEndMessage->Clear();
 
-	CGameServerMessage* ResCoolTimeEndMessage = CGameServerMessage::GameServerMessageAlloc();
-	if (ResCoolTimeEndMessage == nullptr)
-	{
-		return;
-	}
+		*ResCoolTimeEndMessage << (int16)CoolTimeSkillInfo->SkillType;
+		SkillCoolTimeTimerJob->TimerJobMessage = ResCoolTimeEndMessage;
 
-	ResCoolTimeEndMessage->Clear();
+		AcquireSRWLockExclusive(&_TimerJobLock);
+		_TimerHeapJob->InsertHeap(SkillCoolTimeTimerJob->TimerJobExecTick, SkillCoolTimeTimerJob);
+		ReleaseSRWLockExclusive(&_TimerJobLock);
 
-	*ResCoolTimeEndMessage << (int16)CoolTimeSkillInfo->SkillType;
-	SkillCoolTimeTimerJob->TimerJobMessage = ResCoolTimeEndMessage;
-
-	AcquireSRWLockExclusive(&_TimerJobLock);
-	_TimerHeapJob->InsertHeap(SkillCoolTimeTimerJob->TimerJobExecTick, SkillCoolTimeTimerJob);
-	ReleaseSRWLockExclusive(&_TimerJobLock);
-
-	SetEvent(_TimerThreadWakeEvent);
+		SetEvent(_TimerThreadWakeEvent);
+	}	
 }
 
 void CGameServer::SpawnObjectTimeTimerJobCreate(int16 SpawnObjectType, st_Vector2Int SpawnPosition, int64 SpawnTime)
