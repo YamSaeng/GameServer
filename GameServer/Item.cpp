@@ -61,6 +61,7 @@ void CItem::UpdateIdle()
 		{
 		case en_GameObjectType::OBJECT_MELEE_PLAYER:
 		case en_GameObjectType::OBJECT_MAGIC_PLAYER:
+		case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 			Player = (CPlayer*)_Target;
 			break;
 		default:

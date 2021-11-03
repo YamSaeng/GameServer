@@ -472,6 +472,50 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			_ShamanStatus.insert(pair<int32, st_ObjectStatusData*>(ShamanStatusData->Level, ShamanStatusData));
 		}
 	}
+
+	for (auto& Filed : Document["PlayerTaioistCharacterStatus"].GetArray())
+	{
+		string PlayerType = Filed["PlayerType"].GetString();
+
+		for (auto& PlayerTaioistCharacterFiled : Filed["PlayerTaioistCharacterLevelDataList"].GetArray())
+		{
+			int Level = PlayerTaioistCharacterFiled["Level"].GetInt();
+			int MaxHP = PlayerTaioistCharacterFiled["MaxHP"].GetInt();
+			int MaxMP = PlayerTaioistCharacterFiled["MaxMP"].GetInt();
+			int MaxDP = PlayerTaioistCharacterFiled["MaxDP"].GetInt();
+			int MinMeleeAttackDamage = PlayerTaioistCharacterFiled["MinMeleeAttackDamage"].GetInt();
+			int MaxMeleeAttackDamage = PlayerTaioistCharacterFiled["MaxMeleeAttackDamage"].GetInt();
+			int16 MeleeAttackHitRate = (int16)PlayerTaioistCharacterFiled["MeleeAttackHitRate"].GetInt();
+			int16 MagicDamage = (int16)PlayerTaioistCharacterFiled["MagicDamage"].GetInt();
+			int16 MagicHitRate = (int16)PlayerTaioistCharacterFiled["MagicHitRate"].GetInt();
+			int Defence = PlayerTaioistCharacterFiled["Defence"].GetInt();
+			int16 EvasionRate = PlayerTaioistCharacterFiled["EvasionRate"].GetInt();
+			int16 MeleeCriticalPoint = (int16)(PlayerTaioistCharacterFiled["MeleeCriticalPoint"].GetInt());
+			int16 MagicCriticalPoint = (int16)(PlayerTaioistCharacterFiled["MagicCriticalPoint"].GetInt());
+			float Speed = PlayerTaioistCharacterFiled["Speed"].GetFloat();
+
+			st_ObjectStatusData* TaioistStatusData = new st_ObjectStatusData();
+
+			TaioistStatusData->PlayerType = en_GameObjectType::OBJECT_TAIOIST_PLAYER;
+
+			TaioistStatusData->Level = Level;
+			TaioistStatusData->MaxHP = MaxHP;
+			TaioistStatusData->MaxMP = MaxMP;
+			TaioistStatusData->MaxDP = MaxDP;
+			TaioistStatusData->MinMeleeAttackDamage = MinMeleeAttackDamage;
+			TaioistStatusData->MaxMeleeAttackDamage = MaxMeleeAttackDamage;
+			TaioistStatusData->MeleeAttackHitRate = MeleeAttackHitRate;
+			TaioistStatusData->MagicDamage = MagicDamage;
+			TaioistStatusData->MagicHitRate = MagicHitRate;
+			TaioistStatusData->Defence = Defence;
+			TaioistStatusData->EvasionRate = EvasionRate;
+			TaioistStatusData->MeleeCriticalPoint = MeleeCriticalPoint;
+			TaioistStatusData->MagicCriticalPoint = MagicCriticalPoint;
+			TaioistStatusData->Speed = Speed;
+
+			_TaioistStatus.insert(pair<int32, st_ObjectStatusData*>(TaioistStatusData->Level, TaioistStatusData));
+		}
+	}
 }
 
 void CDataManager::LoadDataLevel(wstring LoadFileName)

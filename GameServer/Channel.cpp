@@ -299,6 +299,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	{
 	case en_GameObjectType::OBJECT_MELEE_PLAYER:
 	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
+	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 		{
 			// 플레이어로 형변환
 			CPlayer* EnterChannelPlayer = (CPlayer*)EnterChannelGameObject;
@@ -405,7 +406,8 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 	switch ((en_GameObjectType)LeaveChannelGameObject->_GameObjectInfo.ObjectType)
 	{
 	case en_GameObjectType::OBJECT_MELEE_PLAYER:
-	case en_GameObjectType::OBJECT_MAGIC_PLAYER:		
+	case en_GameObjectType::OBJECT_MAGIC_PLAYER:	
+	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 		_Players.erase(LeaveChannelGameObject->_GameObjectInfo.ObjectId);
 		
 		_Map->ApplyLeave(LeaveChannelGameObject);		

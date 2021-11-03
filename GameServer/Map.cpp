@@ -205,6 +205,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	{	
 	case en_GameObjectType::OBJECT_MELEE_PLAYER:		
 	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
+	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 	{
 		CPlayer* MovePlayer = (CPlayer*)GameObject;
 

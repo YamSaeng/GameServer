@@ -179,7 +179,7 @@
           "MagicCriticalPoint": 0,
           "Speed": 5.0
         }
-      ]      
+      ]
     }
   ],
   "PlayerMagicCharacterStatus": [
@@ -346,7 +346,174 @@
           "MagicCriticalPoint": 320,
           "Speed": 5.0
         }
-      ]      
+      ]
+    }
+  ],
+  "PlayerTaioistCharacterStatus": [
+    {
+      "PlayerType": "OBJECT_TAIOIST_PLAYER",
+      "PlayerTaioistCharacterLevelDataList": [
+        {
+          "Level": 1,
+          "MaxHP": 200,
+          "MaxMP": 300,
+          "MaxDP": 4000,
+          "MinMeleeAttackDamage": 2,
+          "MaxMeleeAttackDamage": 12,
+          "MeleeAttackHitRate": 1000,
+          "MagicDamage": 100,
+          "MagicHitRate": 100,
+          "Defence": 0,
+          "EvasionRate": 100,
+          "MeleeCriticalPoint": 100,
+          "MagicCriticalPoint": 200,
+          "Speed": 5.0
+        },
+        {
+          "Level": 2,
+          "MaxHP": 220,
+          "MaxMP": 320,
+          "MaxDP": 4000,
+          "MinMeleeAttackDamage": 2,
+          "MaxMeleeAttackDamage": 12,
+          "MeleeAttackHitRate": 1000,
+          "MagicDamage": 120,
+          "MagicHitRate": 100,
+          "Defence": 0,
+          "EvasionRate": 100,
+          "MeleeCriticalPoint": 100,
+          "MagicCriticalPoint": 200,
+          "Speed": 5.0
+        },
+        {
+          "Level": 3,
+          "MaxHP": 240,
+          "MaxMP": 340,
+          "MaxDP": 4000,
+          "MinMeleeAttackDamage": 3,
+          "MaxMeleeAttackDamage": 12,
+          "MeleeAttackHitRate": 1000,
+          "MagicDamage": 140,
+          "MagicHitRate": 100,
+          "Defence": 0,
+          "EvasionRate": 100,
+          "MeleeCriticalPoint": 100,
+          "MagicCriticalPoint": 200,
+          "Speed": 5.0
+        },
+        {
+          "Level": 4,
+          "MaxHP": 260,
+          "MaxMP": 360,
+          "MaxDP": 4000,
+          "MinMeleeAttackDamage": 3,
+          "MaxMeleeAttackDamage": 12,
+          "MeleeAttackHitRate": 1000,
+          "MagicDamage": 160,
+          "MagicHitRate": 100,
+          "Defence": 0,
+          "EvasionRate": 100,
+          "MeleeCriticalPoint": 100,
+          "MagicCriticalPoint": 200,
+          "Speed": 5.0
+        },
+        {
+          "Level": 5,
+          "MaxHP": 280,
+          "MaxMP": 380,
+          "MaxDP": 4000,
+          "MinMeleeAttackDamage": 4,
+          "MaxMeleeAttackDamage": 13,
+          "MeleeAttackHitRate": 1000,
+          "MagicDamage": 180,
+          "MagicHitRate": 100,
+          "Defence": 0,
+          "EvasionRate": 100,
+          "MeleeCriticalPoint": 100,
+          "MagicCriticalPoint": 210,
+          "Speed": 5.0
+        },
+        {
+          "Level": 6,
+          "MaxHP": 300,
+          "MaxMP": 400,
+          "MaxDP": 4000,
+          "MinMeleeAttackDamage": 4,
+          "MaxMeleeAttackDamage": 13,
+          "MeleeAttackHitRate": 1000,
+          "MagicDamage": 200,
+          "MagicHitRate": 100,
+          "Defence": 0,
+          "EvasionRate": 100,
+          "MeleeCriticalPoint": 100,
+          "MagicCriticalPoint": 210,
+          "Speed": 5.0
+        },
+        {
+          "Level": 7,
+          "MaxHP": 320,
+          "MaxMP": 420,
+          "MaxDP": 4000,
+          "MinMeleeAttackDamage": 5,
+          "MaxMeleeAttackDamage": 13,
+          "MeleeAttackHitRate": 1000,
+          "MagicDamage": 220,
+          "MagicHitRate": 100,
+          "Defence": 0,
+          "EvasionRate": 100,
+          "MeleeCriticalPoint": 100,
+          "MagicCriticalPoint": 210,
+          "Speed": 5.0
+        },
+        {
+          "Level": 8,
+          "MaxHP": 340,
+          "MaxMP": 440,
+          "MaxDP": 4000,
+          "MinMeleeAttackDamage": 5,
+          "MaxMeleeAttackDamage": 13,
+          "MeleeAttackHitRate": 1000,
+          "MagicDamage": 240,
+          "MagicHitRate": 100,
+          "Defence": 0,
+          "EvasionRate": 100,
+          "MeleeCriticalPoint": 100,
+          "MagicCriticalPoint": 210,
+          "Speed": 5.0
+        },
+        {
+          "Level": 9,
+          "MaxHP": 360,
+          "MaxMP": 460,
+          "MaxDP": 4000,
+          "MinMeleeAttackDamage": 6,
+          "MaxMeleeAttackDamage": 13,
+          "MeleeAttackHitRate": 1000,
+          "MagicDamage": 260,
+          "MagicHitRate": 100,
+          "Defence": 0,
+          "EvasionRate": 100,
+          "MeleeCriticalPoint": 100,
+          "MagicCriticalPoint": 210,
+          "Speed": 5.0
+        },
+        {
+          "Level": 10,
+          "MaxHP": 380,
+          "MaxMP": 480,
+          "MaxDP": 4000,
+          "MinMeleeAttackDamage": 7,
+          "MaxMeleeAttackDamage": 14,
+          "MeleeAttackHitRate": 1000,
+          "MagicDamage": 280,
+          "MagicHitRate": 100,
+          "Defence": 0,
+          "EvasionRate": 100,
+          "MeleeCriticalPoint": 100,
+          "MagicCriticalPoint": 220,
+          "Speed": 5.0
+        }
+      ]
     }
   ]
 }

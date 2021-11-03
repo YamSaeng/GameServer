@@ -49,6 +49,7 @@ void CObjectManager::Add(CGameObject* AddObject, int32 ChannelId)
 	{
 		case en_GameObjectType::OBJECT_MELEE_PLAYER:
 		case en_GameObjectType::OBJECT_MAGIC_PLAYER:
+		case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 			{
 				CPlayer* Player = (CPlayer*)AddObject;
 
@@ -150,6 +151,7 @@ bool CObjectManager::Remove(CGameObject* RemoveObject, int32 _ChannelId, bool Is
 	{
 	case en_GameObjectType::OBJECT_MELEE_PLAYER:
 	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
+	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 		_Players.erase(RemoveObject->_GameObjectInfo.ObjectId);
 		break;;
 	case en_GameObjectType::OBJECT_SLIME:
@@ -198,6 +200,7 @@ CGameObject* CObjectManager::Find(int64 ObjectId, en_GameObjectType GameObjectTy
 	case en_GameObjectType::OBJECT_PLAYER:
 	case en_GameObjectType::OBJECT_MELEE_PLAYER:
 	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
+	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 	{
 		auto FindIterator = _Players.find(ObjectId);
 		if (FindIterator == _Players.end())
@@ -318,6 +321,7 @@ void CObjectManager::ObjectReturn(en_GameObjectType ObjectType, CGameObject* Ret
 	{
 	case en_GameObjectType::OBJECT_MELEE_PLAYER:
 	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
+	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 		_PlayerMemoryPool->Free((CPlayer*)ReturnObject);
 		break;
 	case en_GameObjectType::OBJECT_SLIME:
