@@ -110,11 +110,7 @@ private:
 	//--------------------------------------------------------------------
 	// 채팅 메세지 요청 처리
 	//--------------------------------------------------------------------
-	void PacketProcReqChattingMessage(int64 SessionId, CMessage* Message);
-	//--------------------------------------------------------------------
-	// 아이템 인벤토리 저장 요청 처리
-	//--------------------------------------------------------------------
-	void PacketProcReqItemToInventory(int64 SessionId, CMessage* Message);
+	void PacketProcReqChattingMessage(int64 SessionId, CMessage* Message);	
 	//------------------------------------------------------------
 	// 아이템 인벤토리 스왑 요청 처리
 	//------------------------------------------------------------
@@ -139,6 +135,10 @@ private:
 	// 아이템 사용 요청 처리
 	//------------------------------------------------------------------
 	void PacketProcReqItemUse(int64 SessionId, CMessage* Message);
+	//------------------------------------------------------------------
+	// 아이템 줍기 요청 처리
+	//------------------------------------------------------------------
+	void PacketProcReqItemLooting(int64 SessionId, CMessage* Message);
 		
 	void PacketProcReqHeartBeat(int64 SessionID, CMessage* Message);
 

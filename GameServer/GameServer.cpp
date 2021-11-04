@@ -447,8 +447,8 @@ void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 	case en_PACKET_TYPE::en_PACKET_C2S_MESSAGE:
 		PacketProcReqChattingMessage(SessionId, Message);
 		break;
-	case en_PACKET_TYPE::en_PACKET_C2S_ITEM_TO_INVENTORY:
-		PacketProcReqItemToInventory(SessionId, Message);
+	case en_PACKET_TYPE::en_PACKET_C2S_LOOTING:
+		PacketProcReqItemLooting(SessionId, Message);
 		break;
 	case en_PACKET_TYPE::en_PACKET_C2S_ITEM_SWAP:
 		PacketProcReqItemSwap(SessionId, Message);
@@ -1781,9 +1781,8 @@ void CGameServer::PacketProcReqObjectStateChange(int64 SessionId, CMessage* Mess
 				{
 				case en_StateChange::MOVE_TO_STOP:
 					if (FindGameObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::MOVING
-						|| FindGameObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::PATROL
-						|| FindGameObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::IDLE)
-					{
+						|| FindGameObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::PATROL)
+					{						
 						FindGameObject->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
 						ResObjectStatePakcet = MakePacketResChangeObjectState(FindGameObject->_GameObjectInfo.ObjectId, FindGameObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, FindGameObject->_GameObjectInfo.ObjectType, FindGameObject->_GameObjectInfo.ObjectPositionInfo.State);
@@ -1889,152 +1888,6 @@ void CGameServer::PacketProcReqChattingMessage(int64 SessionId, CMessage* Messag
 	}
 
 	// 세션 반납
-	ReturnSession(Session);
-}
-
-void CGameServer::PacketProcReqItemToInventory(int64 SessionId, CMessage* Message)
-{
-	st_Session* Session = FindSession(SessionId);
-
-	do
-	{
-		if (Session)
-		{
-			InterlockedIncrement64(&Session->IOBlock->IOCount);
-
-			int64 AccountId;
-			int64 ItemId;
-
-			// 로그인 중인지 확인
-			if (!Session->IsLogin)
-			{
-				Disconnect(Session->SessionId);
-				break;
-			}
-
-			*Message >> AccountId;
-
-			// AccountId 확인
-			if (Session->AccountId != AccountId)
-			{
-				Disconnect(Session->SessionId);
-				break;
-			}
-
-			// ItemId와 ObjectType을 읽는다.
-			*Message >> ItemId;
-
-			// 아이템이 ObjectManager에 있는지 확인한다.
-			CItem* Item = (CItem*)(G_ObjectManager->Find(ItemId, en_GameObjectType::OBJECT_ITEM));
-			if (Item != nullptr)
-			{
-				int64 TargetObjectId;
-				*Message >> TargetObjectId;
-
-				CPlayer* TargetPlayer = (CPlayer*)(G_ObjectManager->Find(TargetObjectId, en_GameObjectType::OBJECT_PLAYER));
-				if (TargetPlayer == nullptr)
-				{
-					break;
-				}
-
-				bool IsExistItem = false;
-
-				// 아이템 정보가 코인이라면
-				if (Item->_ItemInfo.ItemSmallCategory == en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN
-					|| Item->_ItemInfo.ItemSmallCategory == en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN
-					|| Item->_ItemInfo.ItemSmallCategory == en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN)
-				{
-					// 코인 저장
-					TargetPlayer->_Inventory.AddItem(Item);
-
-					st_Job* DBGoldSaveJob = _JobMemoryPool->Alloc();
-					DBGoldSaveJob->Type = en_JobType::DATA_BASE_GOLD_SAVE;
-					DBGoldSaveJob->SessionId = TargetPlayer->_SessionId;
-
-					CGameServerMessage* DBGoldSaveMessage = CGameServerMessage::GameServerMessageAlloc();
-					DBGoldSaveMessage->Clear();
-
-					*DBGoldSaveMessage << TargetPlayer->_AccountId;
-					*DBGoldSaveMessage << TargetPlayer->_GameObjectInfo.ObjectId;
-					*DBGoldSaveMessage << ItemId;
-					*DBGoldSaveMessage << TargetPlayer->_Inventory._GoldCoinCount;
-					*DBGoldSaveMessage << TargetPlayer->_Inventory._SliverCoinCount;
-					*DBGoldSaveMessage << TargetPlayer->_Inventory._BronzeCoinCount;
-					*DBGoldSaveMessage << Item->_ItemInfo.ItemCount;
-					*DBGoldSaveMessage << (int16)Item->_ItemInfo.ItemSmallCategory;
-
-					DBGoldSaveJob->Message = DBGoldSaveMessage;
-
-					_GameServerDataBaseThreadMessageQue.Enqueue(DBGoldSaveJob);
-					SetEvent(_DataBaseWakeEvent);
-				}
-				else
-				{
-					// 인벤토리에 저장할 아이템 개수 ( 맵에 스폰되어 있는 아이템의 개수 )
-					int16 ItemEach = Item->_ItemInfo.ItemCount;
-
-					// 그 외 아이템이라면 
-					int8 SlotIndex = 0;
-					// 인벤토리에 저장된 아이템 개수
-					int16 ItemCount = 0;
-
-					// 아이템이 이미 존재 하는지 확인한다.
-					// 존재 하면 개수를 아이템 개수 만큼 증가한다.
-					IsExistItem = TargetPlayer->_Inventory.IsExistItem(Item->_ItemInfo.ItemSmallCategory, ItemEach, &SlotIndex);
-
-					// 존재 하지 않을 경우
-					if (IsExistItem == false)
-					{
-						// 비어 있는 슬롯인덱스 가져와서
-						if (TargetPlayer->_Inventory.GetEmptySlot(&SlotIndex))
-						{
-							// 인벤토리에 저장
-							Item->_ItemInfo.ItemSlotIndex = SlotIndex;
-							TargetPlayer->_Inventory.AddItem(Item);
-							ItemCount = ItemEach;
-						}
-					}
-
-					// DB 인벤토리에 저장하기 위해 Job 생성
-					st_Job* DBInventorySaveJob = _JobMemoryPool->Alloc();
-					DBInventorySaveJob->Type = en_JobType::DATA_BASE_LOOTING_ITEM_INVENTORY_SAVE;
-					DBInventorySaveJob->SessionId = Session->SessionId;
-
-					CGameServerMessage* DBSaveMessage = CGameServerMessage::GameServerMessageAlloc();
-
-					DBSaveMessage->Clear();
-
-					CItem* CraftingItemCompleteItem = TargetPlayer->_Inventory.Get(SlotIndex);
-
-					// 타겟 ObjectId
-					*DBSaveMessage << TargetPlayer->_GameObjectInfo.ObjectId;
-					// 중복 여부
-					*DBSaveMessage << IsExistItem;
-					// 얻은 아이템 개수
-					*DBSaveMessage << ItemEach;
-					// 삭제해야할 아이템 ObjectId;
-					*DBSaveMessage << Item->_GameObjectInfo.ObjectId;
-					// 아이템 포인터 담기
-					*DBSaveMessage << &CraftingItemCompleteItem;
-					// 아이템 처리한 AccountId
-					*DBSaveMessage << AccountId;
-
-					DBInventorySaveJob->Message = DBSaveMessage;
-
-					_GameServerDataBaseThreadMessageQue.Enqueue(DBInventorySaveJob);
-					SetEvent(_DataBaseWakeEvent);
-				}
-
-				// 월드에 스폰되어 있었던 아이템을 반납한다.
-				G_ObjectManager->Remove(Item, 1, IsExistItem);
-			}
-			else
-			{
-
-			}
-		}
-	} while (0);
-
 	ReturnSession(Session);
 }
 
@@ -2711,6 +2564,164 @@ void CGameServer::PacketProcReqItemUse(int64 SessionId, CMessage* Message)
 
 			_GameServerDataBaseThreadMessageQue.Enqueue(DBItemEquipJob);
 			SetEvent(_DataBaseWakeEvent);
+		} while (0);
+	}
+
+	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcReqItemLooting(int64 SessionId, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionId);
+
+	if (Session)
+	{
+		do
+		{
+			InterlockedIncrement64(&Session->IOBlock->IOCount);
+
+			int64 AccountId;			
+
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountId;
+
+			// AccountId가 맞는지 확인
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}		
+
+			st_PositionInfo ItemPosition;
+			int8 ItemState;
+			int8 ItemMoveDir;
+
+			*Message >> ItemState;
+			*Message >> ItemPosition.PositionX;
+			*Message >> ItemPosition.PositionY;
+			*Message >> ItemMoveDir;
+
+			st_Vector2Int ItemCellPosition;
+			ItemCellPosition._X = ItemPosition.PositionX;
+			ItemCellPosition._Y = ItemPosition.PositionY;
+
+			// 루팅 위치에 아이템들을 가져온다.
+			CItem** Items = G_ChannelManager->Find(1)->_Map->FindItem(ItemCellPosition);
+			if (Items != nullptr)
+			{
+				for (int8 i = 0; i < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; i++)
+				{
+					if (Items[i] == nullptr)
+					{
+						continue;
+					}
+
+					int64 TargetObjectId = Session->MyPlayer->_GameObjectInfo.ObjectId;
+
+					CPlayer* TargetPlayer = (CPlayer*)(G_ObjectManager->Find(TargetObjectId, en_GameObjectType::OBJECT_PLAYER));
+					if (TargetPlayer == nullptr)
+					{
+						break;
+					}
+
+					bool IsExistItem = false;					
+					CItem* CraftingItemCompleteItem;
+					// 아이템 정보가 코인이라면
+					if (Items[i]->_ItemInfo.ItemSmallCategory == en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN
+						|| Items[i]->_ItemInfo.ItemSmallCategory == en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN
+						|| Items[i]->_ItemInfo.ItemSmallCategory == en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN)
+					{
+						// 코인 저장
+						TargetPlayer->_Inventory.AddItem(Items[i]);
+
+						st_Job* DBGoldSaveJob = _JobMemoryPool->Alloc();
+						DBGoldSaveJob->Type = en_JobType::DATA_BASE_GOLD_SAVE;
+						DBGoldSaveJob->SessionId = TargetPlayer->_SessionId;
+
+						CGameServerMessage* DBGoldSaveMessage = CGameServerMessage::GameServerMessageAlloc();
+						DBGoldSaveMessage->Clear();
+
+						*DBGoldSaveMessage << TargetPlayer->_AccountId;
+						*DBGoldSaveMessage << TargetPlayer->_GameObjectInfo.ObjectId;
+						*DBGoldSaveMessage << Items[i]->_ItemInfo.ItemDBId;
+						*DBGoldSaveMessage << TargetPlayer->_Inventory._GoldCoinCount;
+						*DBGoldSaveMessage << TargetPlayer->_Inventory._SliverCoinCount;
+						*DBGoldSaveMessage << TargetPlayer->_Inventory._BronzeCoinCount;
+						*DBGoldSaveMessage << Items[i]->_ItemInfo.ItemCount;
+						*DBGoldSaveMessage << (int16)Items[i]->_ItemInfo.ItemSmallCategory;
+
+						DBGoldSaveJob->Message = DBGoldSaveMessage;
+
+						_GameServerDataBaseThreadMessageQue.Enqueue(DBGoldSaveJob);
+						SetEvent(_DataBaseWakeEvent);
+					}
+					else
+					{
+						// 인벤토리에 저장할 아이템 개수 ( 맵에 스폰되어 있는 아이템의 개수 )
+						int16 ItemEach = Items[i]->_ItemInfo.ItemCount;
+
+						// 그 외 아이템이라면 
+						int8 SlotIndex = 0;
+						// 인벤토리에 저장된 아이템 개수
+						int16 ItemCount = 0;
+
+						// 아이템이 이미 존재 하는지 확인한다.
+						// 존재 하면 개수를 아이템 개수 만큼 증가한다.
+						IsExistItem = TargetPlayer->_Inventory.IsExistItem(Items[i]->_ItemInfo.ItemSmallCategory, ItemEach, &SlotIndex);
+
+						// 존재 하지 않을 경우
+						if (IsExistItem == false)
+						{
+							// 비어 있는 슬롯인덱스 가져와서
+							if (TargetPlayer->_Inventory.GetEmptySlot(&SlotIndex))
+							{
+								// 인벤토리에 저장
+								Items[i]->_ItemInfo.ItemSlotIndex = SlotIndex;
+								TargetPlayer->_Inventory.AddItem(Items[i]);
+								ItemCount = ItemEach;
+							}
+						}
+
+						// DB 인벤토리에 저장하기 위해 Job 생성
+						st_Job* DBInventorySaveJob = _JobMemoryPool->Alloc();
+						DBInventorySaveJob->Type = en_JobType::DATA_BASE_LOOTING_ITEM_INVENTORY_SAVE;
+						DBInventorySaveJob->SessionId = Session->SessionId;
+
+						CGameServerMessage* DBSaveMessage = CGameServerMessage::GameServerMessageAlloc();
+
+						DBSaveMessage->Clear();
+
+						CraftingItemCompleteItem = TargetPlayer->_Inventory.Get(SlotIndex);
+
+						// 타겟 ObjectId
+						*DBSaveMessage << TargetPlayer->_GameObjectInfo.ObjectId;
+						// 중복 여부
+						*DBSaveMessage << IsExistItem;
+						// 얻은 아이템 개수
+						*DBSaveMessage << ItemEach;
+						// 삭제해야할 아이템 ObjectId;
+						*DBSaveMessage << Items[i]->_GameObjectInfo.ObjectId;
+						// 아이템 포인터 담기
+						*DBSaveMessage << &CraftingItemCompleteItem;
+						// 아이템 처리한 AccountId
+						*DBSaveMessage << AccountId;
+
+						DBInventorySaveJob->Message = DBSaveMessage;
+
+						_GameServerDataBaseThreadMessageQue.Enqueue(DBInventorySaveJob);
+						SetEvent(_DataBaseWakeEvent);
+					}
+
+					// 월드에 스폰되어 있었던 아이템을 반납한다.
+					G_ObjectManager->Remove(Items[i], 1, IsExistItem);
+				}
+			}
+
 		} while (0);
 	}
 
@@ -5553,7 +5564,7 @@ CGameServerMessage* CGameServer::MakePacketResItemToInventory(int64 TargetObject
 
 	ResItemToInventoryMessage->Clear();
 
-	*ResItemToInventoryMessage << (int16)en_PACKET_S2C_ITEM_TO_INVENTORY;
+	*ResItemToInventoryMessage << (int16)en_PACKET_S2C_LOOTING;
 	// 타겟 아이디
 	*ResItemToInventoryMessage << TargetObjectId;
 	// 인벤토리 아이템의 소분류 값

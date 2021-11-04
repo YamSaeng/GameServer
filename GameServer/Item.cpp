@@ -50,42 +50,8 @@ void CItem::ItemSetTarget(en_GameObjectType TargetType, int64 TargetDBId)
 void CItem::UpdateIdle()
 {
 	if (_Target && _Target->GetCellPosition() == GetCellPosition())
-	{
-		G_Logger->WriteStdOut(en_Color::GREEN, L"플레이어와 부딪힘 \n");
-
+	{		
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;		
-				
-		CPlayer* Player = nullptr;
-
-		switch (_Target->_GameObjectInfo.ObjectType)
-		{
-		case en_GameObjectType::OBJECT_MELEE_PLAYER:
-		case en_GameObjectType::OBJECT_MAGIC_PLAYER:
-		case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
-			Player = (CPlayer*)_Target;
-			break;
-		default:
-			break;
-		}
-
-		// Item 인벤토리 저장 요청 Job 생성
-		st_Job* ReqItemToInventoryJob = G_ObjectManager->GameServer->_JobMemoryPool->Alloc();
-		ReqItemToInventoryJob->Type = en_JobType::NETWORK_MESSAGE;
-		ReqItemToInventoryJob->SessionId = Player->_SessionId;
-		ReqItemToInventoryJob->Session = nullptr;
-
-		// Item 정보 담기
-		CGameServerMessage* ReqItemToInventoryMessage = CGameServerMessage::GameServerMessageAlloc();
-		ReqItemToInventoryMessage->Clear();
-
-		*ReqItemToInventoryMessage << (int16)(en_PACKET_TYPE::en_PACKET_C2S_ITEM_TO_INVENTORY);
-		*ReqItemToInventoryMessage << Player->_AccountId;
-		*ReqItemToInventoryMessage << _GameObjectInfo.ObjectId;						
-		*ReqItemToInventoryMessage << _Target->_GameObjectInfo.ObjectId;				
-
-		ReqItemToInventoryJob->Message = ReqItemToInventoryMessage;
-
-		G_ObjectManager->GameServer->_GameServerNetworkThreadMessageQue.Enqueue(ReqItemToInventoryJob);
 	}
 }
 

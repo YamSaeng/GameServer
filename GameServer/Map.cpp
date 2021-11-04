@@ -552,26 +552,23 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 
 bool CMap::ApplyPositionUpdateItem(CItem* ItemObject, st_Vector2Int& NewPosition)
 {	
-	int X = NewPosition._X - _Left;
-	int Y = _Down - NewPosition._Y;	
-
 	// 우선 해당 위치에 아이템들과 새로 얻은 아이템의 종류를 비교한다.
 	// 새로 얻은 아이템의 종류가 이미 해당 위치에 있을 경우에
 	// 카운트를 증가시키고 새로 얻은 아이템은 맵에 스폰시키지 않는다.
 	for (int8 i = 0; i < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; i++)
 	{
-		if (_Items[Y][X][i]->_ItemInfo.ItemSmallCategory == ItemObject->_ItemInfo.ItemSmallCategory)
-		{			
-			_Items[Y][X][i]->_ItemInfo.ItemCount += ItemObject->_ItemInfo.ItemCount;
-			
-			CItem* FindItem = (CItem*)(G_ObjectManager->Find(_Items[Y][X][i]->_ItemInfo.ItemDBId, en_GameObjectType::OBJECT_ITEM));
+		if (_Items[NewPosition._Y][NewPosition._X][i] != nullptr && _Items[NewPosition._Y][NewPosition._X][i]->_ItemInfo.ItemSmallCategory == ItemObject->_ItemInfo.ItemSmallCategory)
+		{
+			_Items[NewPosition._Y][NewPosition._X][i]->_ItemInfo.ItemCount += ItemObject->_ItemInfo.ItemCount;
+
+			CItem* FindItem = (CItem*)(G_ObjectManager->Find(_Items[NewPosition._Y][NewPosition._X][i]->_ItemInfo.ItemDBId, en_GameObjectType::OBJECT_ITEM));
 			if (FindItem != nullptr)
 			{
-				FindItem->_ItemInfo.ItemCount = _Items[Y][X][i]->_ItemInfo.ItemCount;
+				FindItem->_ItemInfo.ItemCount = _Items[NewPosition._Y][NewPosition._X][i]->_ItemInfo.ItemCount;
 			}
-			
+
 			return false;
-		}
+		}		
 	}
 
 	// 새로 얻은 아이템의 종류가 해당 위치에 없다면
@@ -579,15 +576,15 @@ bool CMap::ApplyPositionUpdateItem(CItem* ItemObject, st_Vector2Int& NewPosition
 	int NewItemInfoIndex = -1;
 	for (int8 i = 0; i < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; i++)
 	{
-		if (_Items[Y][X][i]->_ItemInfo.ItemSmallCategory == en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE)
+		if (_Items[NewPosition._Y][NewPosition._X][i] == nullptr)
 		{
 			NewItemInfoIndex = i;
 			break;
-		}
+		}		
 	}
 
 	// 아이템을 저장한다.
-	_Items[Y][X][NewItemInfoIndex] = ItemObject;
+	_Items[NewPosition._Y][NewPosition._X][NewItemInfoIndex] = ItemObject;
 
 	// 아이템 섹터처리
 	CSector* CurrentSector = ItemObject->_Channel->GetSector(ItemObject->GetCellPosition());
@@ -750,31 +747,16 @@ bool CMap::ApplyPositionLeaveItem(CGameObject* GameObject)
 	}
 
 	CSector* Sector = GameObject->_Channel->GetSector(GameObject->GetCellPosition());
-	Sector->Remove(GameObject);
-
-	int X = PositionInfo.PositionX - _Left;
-	int Y = _Down - PositionInfo.PositionY;
+	Sector->Remove(GameObject);	
 
 	CItem* Item = (CItem*)GameObject;
 
 	for (int8 i = 0; i < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; i++)
 	{
-		if (_Items[Y][X][i]->_ItemInfo.ItemSmallCategory == Item->_ItemInfo.ItemSmallCategory)
+		if (_Items[PositionInfo.PositionY][PositionInfo.PositionX][i] != nullptr && 
+			_Items[PositionInfo.PositionY][PositionInfo.PositionX][i]->_ItemInfo.ItemSmallCategory == Item->_ItemInfo.ItemSmallCategory)
 		{
-			_Items[Y][X][i]->_ItemInfo.ItemDBId = 0;
-			_Items[Y][X][i]->_ItemInfo.ItemIsQuickSlotUse = false;
-			_Items[Y][X][i]->_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_NONE;
-			_Items[Y][X][i]->_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
-			_Items[Y][X][i]->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
-			_Items[Y][X][i]->_ItemInfo.ItemName = L"";
-			_Items[Y][X][i]->_ItemInfo.ItemMinDamage = 0;
-			_Items[Y][X][i]->_ItemInfo.ItemMaxDamage = 0;
-			_Items[Y][X][i]->_ItemInfo.ItemDefence = 0;
-			_Items[Y][X][i]->_ItemInfo.ItemMaxCount = 0;
-			_Items[Y][X][i]->_ItemInfo.ItemCount = 0;
-			_Items[Y][X][i]->_ItemInfo.ItemThumbnailImagePath = L"";
-			_Items[Y][X][i]->_ItemInfo.ItemIsEquipped = false;
-			_Items[Y][X][i]->_ItemInfo.ItemSlotIndex = -1;
+			_Items[PositionInfo.PositionY][PositionInfo.PositionX][i] = nullptr;
 			break;
 		}
 	}	
