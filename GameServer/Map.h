@@ -2,6 +2,7 @@
 #include "FileUtils.h"
 #include "GameObjectInfo.h"
 
+class CItem;
 class CGameObject;
 
 struct st_Vector2Int
@@ -142,9 +143,21 @@ public:
 	int32 _SizeX;
 	int32 _SizeY;
 	
+	//-----------------------------------------
+	// 맵 타일의 정보를 보관
+	//-----------------------------------------
 	en_TileMapEnvironment** _CollisionMapInfos;	
-	CGameObject*** _ObjectsInfos;		
-	st_ItemInfo*** _ItemInfos;
+	
+	//-------------------------------------
+	//맵 타일에 존재하는 게임 오브젝트 정보
+	//-------------------------------------
+	CGameObject*** _ObjectsInfos;
+
+	//-----------------------------------------------------------
+	// 맵 타일에 존재하는 아이템 정보
+	// 한 타일에 존재 할 수 있는 아이템의 종류는 20개로 제한한다.
+	//-----------------------------------------------------------
+	CItem**** _Items;
 
 	CMap(int MapId);
 	
@@ -152,6 +165,11 @@ public:
 	// 좌표 위치에 있는 오브젝트 반환
 	//-------------------------------------------
 	CGameObject* Find(st_Vector2Int& CellPosition);
+
+	//-------------------------------------------
+	// 좌표 위치에 있는 아이템들을 반환
+	//-------------------------------------------
+	CItem** FindItem(st_Vector2Int& ItemCellPosition);
 	
 	//----------------------------------------------------------------------------
 	// 위치로 갈 수 있는지 확인
@@ -167,7 +185,7 @@ public:
 	//------------------------------------------------------------------------------------------------------------------------
 	bool ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool CheckObject = true, bool Applycollision = true);
 
-	bool ApplyPositionUpdateItem(CGameObject* GameObject, st_Vector2Int& NewPosition);
+	bool ApplyPositionUpdateItem(CItem* ItemObject, st_Vector2Int& NewPosition);
 
 	//---------------------------------------
 	// 맵에서 오브젝트 퇴장
@@ -180,5 +198,5 @@ public:
 	st_Vector2Int PositionToCell(st_Position Position);
 		
 	vector<st_Vector2Int> FindPath(st_Vector2Int StartCellPosition, st_Vector2Int DestCellPostion, bool CheckObjects = true, int32 MaxDistance = 10);
-	vector<st_Vector2Int> CompletePath(map<st_Position,st_Position> Parents, st_Position DestPosition);
+	vector<st_Vector2Int> CompletePath(map<st_Position,st_Position> Parents, st_Position DestPosition);	
 ;};

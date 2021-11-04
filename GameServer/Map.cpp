@@ -5,6 +5,7 @@
 #include "Monster.h"
 #include "Heap.h"
 #include "ObjectManager.h"
+#include "Item.h"
 
 CMap::CMap(int MapId)
 {
@@ -68,14 +69,19 @@ CMap::CMap(int MapId)
 		}
 	}
 
-	_ItemInfos = new st_ItemInfo **[YCount];
+	_Items = new CItem***[YCount];
 	
 	for (int i = 0; i < YCount; i++)
 	{
-		_ItemInfos[i] = new st_ItemInfo*[XCount];
+		_Items[i] = new CItem**[XCount];
 		for (int j = 0; j < XCount; j++)
 		{
-			_ItemInfos[i][j] = new st_ItemInfo[20];				
+			_Items[i][j] = new CItem*[(int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX];
+
+			for (int8 k = 0; k < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; k++)
+			{
+				_Items[i][j][k] = nullptr;				
+			}
 		}
 	}
 
@@ -117,6 +123,26 @@ CGameObject* CMap::Find(st_Vector2Int& CellPosition)
 	int Y = _Down - CellPosition._Y;
 	
 	return _ObjectsInfos[Y][X];
+}
+
+CItem** CMap::FindItem(st_Vector2Int& ItemCellPosition)
+{
+	// 좌우 좌표 검사
+	if (ItemCellPosition._X < _Left || ItemCellPosition._X > _Right)
+	{
+		return nullptr;
+	}
+
+	// 상하 좌표 검사
+	if (ItemCellPosition._X < _Left || ItemCellPosition._X > _Right)
+	{
+		return nullptr;
+	}
+	
+	int XCount = _Right - _Left + 1;
+	int YCount = _Down - _Up + 1;
+
+	return _Items[ItemCellPosition._Y][ItemCellPosition._X];	
 }
 
 bool CMap::Cango(st_Vector2Int& CellPosition, bool CheckObjects)
@@ -524,58 +550,57 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	return true;
 }
 
-bool CMap::ApplyPositionUpdateItem(CGameObject* GameObject, st_Vector2Int& NewPosition)
-{
-	CItem* Item = (CItem*)GameObject;
-
+bool CMap::ApplyPositionUpdateItem(CItem* ItemObject, st_Vector2Int& NewPosition)
+{	
 	int X = NewPosition._X - _Left;
-	int Y = _Down - NewPosition._Y;
-	
-	bool FindItemInfo = false;
+	int Y = _Down - NewPosition._Y;	
 
-	for (int i = 0; i < 20; i++)
+	// 우선 해당 위치에 아이템들과 새로 얻은 아이템의 종류를 비교한다.
+	// 새로 얻은 아이템의 종류가 이미 해당 위치에 있을 경우에
+	// 카운트를 증가시키고 새로 얻은 아이템은 맵에 스폰시키지 않는다.
+	for (int8 i = 0; i < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; i++)
 	{
-		if (_ItemInfos[Y][X][i].ItemSmallCategory == Item->_ItemInfo.ItemSmallCategory)
+		if (_Items[Y][X][i]->_ItemInfo.ItemSmallCategory == ItemObject->_ItemInfo.ItemSmallCategory)
 		{			
-			_ItemInfos[Y][X][i].ItemCount += Item->_ItemInfo.ItemCount;
+			_Items[Y][X][i]->_ItemInfo.ItemCount += ItemObject->_ItemInfo.ItemCount;
 			
-			CItem* FindItem = (CItem*)(G_ObjectManager->Find(_ItemInfos[Y][X][i].ItemDBId, en_GameObjectType::OBJECT_ITEM));
+			CItem* FindItem = (CItem*)(G_ObjectManager->Find(_Items[Y][X][i]->_ItemInfo.ItemDBId, en_GameObjectType::OBJECT_ITEM));
 			if (FindItem != nullptr)
 			{
-				FindItem->_ItemInfo.ItemCount = _ItemInfos[Y][X][i].ItemCount;
+				FindItem->_ItemInfo.ItemCount = _Items[Y][X][i]->_ItemInfo.ItemCount;
 			}
 			
 			return false;
 		}
 	}
 
-	if (FindItemInfo == false)
+	// 새로 얻은 아이템의 종류가 해당 위치에 없다면
+	// 빈 자리(Index)를 찾는다.
+	int NewItemInfoIndex = -1;
+	for (int8 i = 0; i < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; i++)
 	{
-		int NewItemInfoIndex = -1;
-
-		for (int i = 0; i < 20; i++)
+		if (_Items[Y][X][i]->_ItemInfo.ItemSmallCategory == en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE)
 		{
-			if (_ItemInfos[Y][X][i].ItemSmallCategory == en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE)
-			{
-				NewItemInfoIndex = i;
-				break;
-			}		
+			NewItemInfoIndex = i;
+			break;
 		}
-
-		_ItemInfos[Y][X][NewItemInfoIndex] = Item->_ItemInfo;
 	}
 
-	CSector* CurrentSector = Item->_Channel->GetSector(Item->GetCellPosition());
-	CSector* NextSector = Item->_Channel->GetSector(NewPosition);
+	// 아이템을 저장한다.
+	_Items[Y][X][NewItemInfoIndex] = ItemObject;
+
+	// 아이템 섹터처리
+	CSector* CurrentSector = ItemObject->_Channel->GetSector(ItemObject->GetCellPosition());
+	CSector* NextSector = ItemObject->_Channel->GetSector(NewPosition);
 	
 	if (CurrentSector != NextSector)
 	{
-		CurrentSector->Remove(Item);
+		CurrentSector->Remove(ItemObject);
 
 		// 아이템 섹터 옮기기 전 주변 섹터 
-		vector<CSector*> CurrentSectors = Item->_Channel->GetAroundSectors(Item->GetCellPosition(), 1);
+		vector<CSector*> CurrentSectors = ItemObject->_Channel->GetAroundSectors(ItemObject->GetCellPosition(), 1);
 		// 섹터 옮기고 난 후 주변 섹터
-		vector<CSector*> NextSectors = Item->_Channel->GetAroundSectors(NewPosition, 1);
+		vector<CSector*> NextSectors = ItemObject->_Channel->GetAroundSectors(NewPosition, 1);
 
 		// 나를 제거할 섹터를 찾는 작업
 		// Current - Next;
@@ -593,7 +618,7 @@ bool CMap::ApplyPositionUpdateItem(CGameObject* GameObject, st_Vector2Int& NewPo
 		}
 
 		vector<int64> DeSpawnSectorObjectIds;
-		DeSpawnSectorObjectIds.push_back(Item->_GameObjectInfo.ObjectId);
+		DeSpawnSectorObjectIds.push_back(ItemObject->_GameObjectInfo.ObjectId);
 		// 나를 제외하라는 메시지를 생성 후 
 		CMessage* ResSectorDespawnPlayer = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(1, DeSpawnSectorObjectIds);
 		// 해당 섹터 플레이어들에게 전송한다.
@@ -606,7 +631,7 @@ bool CMap::ApplyPositionUpdateItem(CGameObject* GameObject, st_Vector2Int& NewPo
 		}
 		ResSectorDespawnPlayer->Free();
 
-		NextSector->Insert(Item);
+		NextSector->Insert(ItemObject);
 
 		// 나를 스폰할 섹터를 찾는 작업
 		// Next - Current;
@@ -626,7 +651,7 @@ bool CMap::ApplyPositionUpdateItem(CGameObject* GameObject, st_Vector2Int& NewPo
 		// 스폰할 대상배열
 		vector<st_GameObjectInfo> SpawnObjectInfos;
 		// 나의 정보를 담고
-		SpawnObjectInfos.push_back(Item->_GameObjectInfo);
+		SpawnObjectInfos.push_back(ItemObject->_GameObjectInfo);
 
 		// 나를 소환하라고 앞서 얻어준 섹터 플레이어들에게 패킷을 전송한다.
 		CMessage* ResSectorSpawnPlayer = G_ObjectManager->GameServer->MakePacketResObjectSpawn(1, SpawnObjectInfos);
@@ -640,8 +665,8 @@ bool CMap::ApplyPositionUpdateItem(CGameObject* GameObject, st_Vector2Int& NewPo
 		ResSectorSpawnPlayer->Free();
 	}
 
-	Item->_GameObjectInfo.ObjectPositionInfo.PositionX = NewPosition._X;
-	Item->_GameObjectInfo.ObjectPositionInfo.PositionY = NewPosition._Y;
+	ItemObject->_GameObjectInfo.ObjectPositionInfo.PositionX = NewPosition._X;
+	ItemObject->_GameObjectInfo.ObjectPositionInfo.PositionY = NewPosition._Y;
 
 	return true;
 }
@@ -732,24 +757,24 @@ bool CMap::ApplyPositionLeaveItem(CGameObject* GameObject)
 
 	CItem* Item = (CItem*)GameObject;
 
-	for (int i = 0; i < 20; i++)
+	for (int8 i = 0; i < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; i++)
 	{
-		if (_ItemInfos[Y][X][i].ItemSmallCategory == Item->_ItemInfo.ItemSmallCategory)
+		if (_Items[Y][X][i]->_ItemInfo.ItemSmallCategory == Item->_ItemInfo.ItemSmallCategory)
 		{
-			_ItemInfos[Y][X][i].ItemDBId = 0;
-			_ItemInfos[Y][X][i].ItemIsQuickSlotUse = false;
-			_ItemInfos[Y][X][i].ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_NONE;
-			_ItemInfos[Y][X][i].ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
-			_ItemInfos[Y][X][i].ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
-			_ItemInfos[Y][X][i].ItemName = L"";
-			_ItemInfos[Y][X][i].ItemMinDamage = 0;
-			_ItemInfos[Y][X][i].ItemMaxDamage = 0;
-			_ItemInfos[Y][X][i].ItemDefence = 0;
-			_ItemInfos[Y][X][i].ItemMaxCount = 0;
-			_ItemInfos[Y][X][i].ItemCount = 0;
-			_ItemInfos[Y][X][i].ItemThumbnailImagePath = L"";
-			_ItemInfos[Y][X][i].ItemIsEquipped = false;
-			_ItemInfos[Y][X][i].ItemSlotIndex = -1;
+			_Items[Y][X][i]->_ItemInfo.ItemDBId = 0;
+			_Items[Y][X][i]->_ItemInfo.ItemIsQuickSlotUse = false;
+			_Items[Y][X][i]->_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_NONE;
+			_Items[Y][X][i]->_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
+			_Items[Y][X][i]->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
+			_Items[Y][X][i]->_ItemInfo.ItemName = L"";
+			_Items[Y][X][i]->_ItemInfo.ItemMinDamage = 0;
+			_Items[Y][X][i]->_ItemInfo.ItemMaxDamage = 0;
+			_Items[Y][X][i]->_ItemInfo.ItemDefence = 0;
+			_Items[Y][X][i]->_ItemInfo.ItemMaxCount = 0;
+			_Items[Y][X][i]->_ItemInfo.ItemCount = 0;
+			_Items[Y][X][i]->_ItemInfo.ItemThumbnailImagePath = L"";
+			_Items[Y][X][i]->_ItemInfo.ItemIsEquipped = false;
+			_Items[Y][X][i]->_ItemInfo.ItemSlotIndex = -1;
 			break;
 		}
 	}	
