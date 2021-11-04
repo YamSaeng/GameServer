@@ -8,6 +8,7 @@ enum class en_GameObjectType : int16
 	OBJECT_MELEE_PLAYER,
 	OBJECT_MAGIC_PLAYER,
 	OBJECT_TAIOIST_PLAYER,
+	OBJECT_THIEF_PLAYER,
 
 	OBJECT_MONSTER,
 	OBJECT_SLIME,
@@ -242,6 +243,12 @@ enum class en_TileMapEnvironment : int8
 	TILE_MAP_STONE,
 	TILE_MAP_SLIME,
 	TILE_MAP_BEAR
+};
+
+// 한 타일에 존재 할 수 있는 아이템의 최대 종류 개수
+enum class en_MapItemInfo : int8
+{
+	MAP_ITEM_COUNT_MAX = 20
 };
 
 struct st_PositionInfo
