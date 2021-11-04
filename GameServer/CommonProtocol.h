@@ -246,23 +246,21 @@ enum en_PACKET_TYPE
 	// st_ItemInfo[] InventoryItemInfos
 	//------------------------------------------------------------
 	en_PACKET_S2C_INVENTORY_CREATE,
-
-	//------------------------------------------------------------
-	// 게임서버 아이템 인벤토리 저장 요청
-	// int64 AccountId
-	// int64 ObjectId
-	// int8 ObjectType	
-	// int64 TargetObjectId
-	// int8 TargetObjectType
-	//------------------------------------------------------------
-	en_PACKET_C2S_ITEM_TO_INVENTORY,
     
 	//------------------------------------------------------------
-	// 게임서버 아이템 인벤토리 저장 요청 응답
+	// 게임서버 줍기 요청
+	// int64 AccountId
+	// int64 PlayerId
+	// st_PositionInfo LootingPositionInfo	
+	//------------------------------------------------------------
+	en_PACKET_C2S_LOOTING,
+
+	//------------------------------------------------------------
+	// 게임서버 줍기 요청 응답
 	// int64 TargetObjectId
 	// st_ItemInfo ItemInfo
 	//------------------------------------------------------------
-	en_PACKET_S2C_ITEM_TO_INVENTORY,
+	en_PACKET_S2C_LOOTING,
 
 	//------------------------------------------------------------
 	// 게임서버 아이템 스왑 요청
@@ -443,15 +441,7 @@ enum en_PACKET_TYPE
 	// int64 RequireExp
 	// int64 TotalExp
 	//------------------------------------------------------------
-	en_PACKET_S2C_EXPERIENCE,
-
-	//------------------------------------------------------------
-	// 게임서버 줍기 요청
-	// int64 AccountId
-	// int64 PlayerId
-	// st_PositionInfo LootingPositionInfo	
-	//------------------------------------------------------------
-	en_PACKET_C2S_LOOTING,	
+	en_PACKET_S2C_EXPERIENCE,	
 
 	//-----------------------------------------------------------
 	// 게임서버 에러 전송	
