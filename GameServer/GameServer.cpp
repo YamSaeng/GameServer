@@ -1201,6 +1201,34 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 										MyPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
 									}
 									break;
+									case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
+									{
+										auto FindStatus = G_Datamanager->_TaioistStatus.find(MyPlayer->_GameObjectInfo.ObjectStatInfo.Level);
+										if (FindStatus == G_Datamanager->_TaioistStatus.end())
+										{
+											CRASH("레벨 데이터 찾지 못함");
+										}
+
+										NewCharacterStatus = *(*FindStatus).second;
+
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
+										MyPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
+									}
+									break;
 									default:
 										break;
 									}
@@ -2921,6 +2949,12 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 				{
 					auto FindStatus = G_Datamanager->_ShamanStatus.find(1);
+					NewCharacterStatus = *(*FindStatus).second;
+				}
+				break;
+			case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
+				{
+					auto FindStatus = G_Datamanager->_TaioistStatus.find(1);
 					NewCharacterStatus = *(*FindStatus).second;
 				}
 				break;
@@ -5299,6 +5333,7 @@ void CGameServer::PacketProcTimerObjectStateChange(int64 SessionId, CMessage* Me
 			break;
 		case en_GameObjectType::OBJECT_MELEE_PLAYER:
 		case en_GameObjectType::OBJECT_MAGIC_PLAYER:
+		case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 		{
 			st_Session* Session = FindSession(SessionId);
 			if (Session != nullptr)
