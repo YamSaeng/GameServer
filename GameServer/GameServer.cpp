@@ -277,8 +277,8 @@ unsigned __stdcall CGameServer::TimerJobThreadProc(void* Argument)
 					case en_TimerJobType::TIMER_SPELL_END:
 						Instance->PacketProcTimerSpellEnd(TimerJob->SessionId, TimerJob->TimerJobMessage);
 						break;
-					case en_TimerJobType::TIMER_SKILL_COOLTIME_END:
-						Instance->PacketProcTimerCoolTimeEnd(TimerJob->SessionId, TimerJob->TimerJobMessage);
+					case en_TimerJobType::TIMER_SKILL_CASTING_END:
+						Instance->PacketProcTimerCastingTimeEnd(TimerJob->SessionId, TimerJob->TimerJobMessage);
 						break;
 					case en_TimerJobType::TIMER_OBJECT_SPAWN:
 						Instance->PacketProcTimerObjectSpawn(TimerJob->TimerJobMessage);
@@ -1408,7 +1408,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 			{
 				CMessage* ResEffectPacket = nullptr;
 				CMessage* ResMagicPacket = nullptr;
-				CMessage* ResErrorPacket = nullptr;
+				CMessage* ResErrorPacket = nullptr;				
 
 				// 스킬 타입 확인
 				switch ((en_SkillType)ReqSkillType)
@@ -1460,6 +1460,20 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 						ResErrorPacket->Free();
 					}
 					break;
+				case en_SkillType::SKILL_SHAMAN_ROOT:
+					break;
+				case en_SkillType::SKILL_SHAMAN_ICE_CHAIN:
+					break;
+				case en_SkillType::SKILL_SHAMAN_ICE_WAVE:
+					break;
+				case en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE:
+					break;
+				case en_SkillType::SKILL_SHAMAN_HELL_FIRE:
+					break;
+				case en_SkillType::SKILL_TAIOIST_DIVINE_STRIKE:
+					break;
+				case en_SkillType::SKILL_TAIOIST_ROOT:
+					break;					
 					// 치유의 빛
 				case en_SkillType::SKILL_TAIOIST_HEALING_LIGHT:
 					MyPlayer->_SpellTick = GetTickCount64() + FindSkill->SkillCastingTime;
@@ -1532,6 +1546,8 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 					{
 
 					}
+					break;
+				case en_SkillType::SKILL_SHOCK_RELEASE:
 					break;
 				}
 
@@ -3530,7 +3546,7 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 //int64 OwnerAccountId;
 //bool IsEquipped
 
-void CGameServer::PacketProcReqDBLootingItemToInventorySave(int64 SessionId, CMessage* Message)
+void CGameServer::PacketProcReqDBLootingItemToInventorySave(int64 SessionId, CGameServerMessage* Message)
 {
 	st_Session* Session = FindSession(SessionId);
 
@@ -3548,10 +3564,10 @@ void CGameServer::PacketProcReqDBLootingItemToInventorySave(int64 SessionId, CMe
 		*Message >> ItemEach;
 
 		int64 MapDeleteItemObjectId;
-		*Message >> MapDeleteItemObjectId;
+		*Message >> MapDeleteItemObjectId;		
 
 		CItem* Item = nullptr;
-		Message->GetData(&Item, sizeof(CItem*));
+		*Message >> &Item;
 
 		int64 OwnerAccountId;
 		*Message >> OwnerAccountId;
@@ -5133,9 +5149,11 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(int64 SessionId, CMessage* 
 	G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerInfoSaveDBConnection);
 }
 
-void CGameServer::PacketProcTimerAttackEnd(int64 SessionId, CMessage* Message)
+void CGameServer::PacketProcTimerAttackEnd(int64 SessionId, CGameServerMessage* Message)
 {
 	st_Session* Session = FindSession(SessionId);
+
+	Message->Free();
 
 	if (Session)
 	{
@@ -5152,47 +5170,99 @@ void CGameServer::PacketProcTimerAttackEnd(int64 SessionId, CMessage* Message)
 	ReturnSession(Session);
 }
 
-void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CMessage* Message)
+void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* Message)
 {
 	st_Session* Session = FindSession(SessionId);
 
+	int8 QuickSlotBarIndex;
+	*Message >> QuickSlotBarIndex;
+
+	int8 QuickSlotBarSlotIndex;
+	*Message >> QuickSlotBarSlotIndex;
+
+	int8 SkillMediumCategory;
+	*Message >> SkillMediumCategory;	
+
+	st_SkillInfo* SpellEndSkillInfo = nullptr;
+	*Message >> &SpellEndSkillInfo;
+
+	Message->Free();
+
 	if (Session)
 	{
-		en_EffectType HitEffectType;
-
 		CPlayer* MyPlayer = Session->MyPlayer;
+
+		float SkillCoolTime = SpellEndSkillInfo->SkillCoolTime / 1000.0f;
+
+		// 클라에게 쿨타임 표시
+		CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(MyPlayer->_GameObjectInfo.ObjectId, QuickSlotBarIndex, QuickSlotBarSlotIndex, SkillCoolTime, 1.0f);
+		SendPacket(Session->SessionId, ResCoolTimeStartPacket);
+		ResCoolTimeStartPacket->Free();
+
+		// 쿨타임 시간 동안 스킬 사용 못하게 막음
+		SpellEndSkillInfo->CanSkillUse = false;
+
+		// 스킬 쿨타임 얻어옴
+		// 스킬 쿨타임 스킬쿨타임 잡 등록
+		st_TimerJob* SkillCoolTimeTimerJob = _TimerJobMemoryPool->Alloc();
+		SkillCoolTimeTimerJob->TimerJobExecTick = GetTickCount64() + SpellEndSkillInfo->SkillCoolTime;
+		SkillCoolTimeTimerJob->SessionId = Session->SessionId;
+		SkillCoolTimeTimerJob->TimerJobType = en_TimerJobType::TIMER_SKILL_CASTING_END;
+
+		CGameServerMessage* ResCoolTimeEndMessage = CGameServerMessage::GameServerMessageAlloc();
+		if (ResCoolTimeEndMessage == nullptr)
+		{
+			return;
+		}
+
+		ResCoolTimeEndMessage->Clear();
+
+		*ResCoolTimeEndMessage << (int16)SpellEndSkillInfo->SkillType;
+		SkillCoolTimeTimerJob->TimerJobMessage = ResCoolTimeEndMessage;
+
+		AcquireSRWLockExclusive(&_TimerJobLock);
+		_TimerHeapJob->InsertHeap(SkillCoolTimeTimerJob->TimerJobExecTick, SkillCoolTimeTimerJob);
+		ReleaseSRWLockExclusive(&_TimerJobLock);
+
+		SetEvent(_TimerThreadWakeEvent);
+
+		en_EffectType HitEffectType;		
 
 		wstring MagicSystemString;
 
 		wchar_t SpellMessage[64] = L"0";
 
-		// 크리티컬 판단 준비
-		random_device RD;
-		mt19937 Gen(RD());
+		// 크리티컬 판단
+		random_device Seed;
+		default_random_engine Eng(Seed());
 
-		uniform_int_distribution<int> CriticalPointCreate(0, 100);
-
-		bool IsCritical = false;
-
-		int16 CriticalPoint = CriticalPointCreate(Gen);
-		// 크리티컬 판정
-		// 내 캐릭터의 크리티컬 포인트보다 값이 작으면 크리티컬로 판단한다.				
-		if (CriticalPoint < MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint)
-		{
-			IsCritical = true;
-		}
+		float CriticalPoint = MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint / 1000.0f;
+		bernoulli_distribution CriticalCheck(CriticalPoint);
+		bool IsCritical = CriticalCheck(Eng);		
 
 		int32 FinalDamage = 0;
+		int32 FinalHeal = 0;
+		int32 HealPoint = 0;
+		int32 MinDamage = 0;
+		int32 MaxDamage = 0;
+		int32 MinHeal = 0;
+		int32 MaxHeal = 0;
+
+		mt19937 Gen(Seed());
 
 		switch (MyPlayer->_SkillType)
 		{
 		case en_SkillType::SKILL_SHAMAN_FLAME_HARPOON:
 		{
-			HitEffectType = en_EffectType::EFFECT_FLAME_HARPOON_TARGET;
+			HitEffectType = en_EffectType::EFFECT_FLAME_HARPOON_TARGET;			
 
-			uniform_int_distribution<int> DamageChoiceRandom(MyPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage, MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage);
+			int32 MagicDamage = MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage * 0.6;
+
+			st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)SpellEndSkillInfo;
+			
+			uniform_int_distribution<int> DamageChoiceRandom(AttackSkillInfo->SkillMinDamage + MagicDamage, AttackSkillInfo->SkillMaxDamage + MagicDamage);
 			int32 ChoiceDamage = DamageChoiceRandom(Gen);
-			FinalDamage = 40;// IsCritical ? ChoiceDamage * 2 : ChoiceDamage
+			FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
 
 			// 데미지 처리
 			MyPlayer->GetTarget()->OnDamaged(MyPlayer, FinalDamage);
@@ -5269,7 +5339,7 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CMessage* Message)
 	ReturnSession(Session);
 }
 
-void CGameServer::PacketProcTimerCoolTimeEnd(int64 SessionId, CMessage* Message)
+void CGameServer::PacketProcTimerCastingTimeEnd(int64 SessionId, CGameServerMessage* Message)
 {
 	st_Session* Session = FindSession(SessionId);
 
@@ -5289,7 +5359,7 @@ void CGameServer::PacketProcTimerCoolTimeEnd(int64 SessionId, CMessage* Message)
 	ReturnSession(Session);
 }
 
-void CGameServer::PacketProcTimerObjectSpawn(CMessage* Message)
+void CGameServer::PacketProcTimerObjectSpawn(CGameServerMessage* Message)
 {
 	int16 SpawnObjectType;
 	*Message >> SpawnObjectType;
@@ -5316,7 +5386,7 @@ void CGameServer::PacketProcTimerObjectSpawn(CMessage* Message)
 	}
 }
 
-void CGameServer::PacketProcTimerObjectStateChange(int64 SessionId, CMessage* Message)
+void CGameServer::PacketProcTimerObjectStateChange(int64 SessionId, CGameServerMessage* Message)
 {
 	int64 TargetObjectId;
 	*Message >> TargetObjectId;
@@ -6207,61 +6277,37 @@ void CGameServer::SendPacketAroundSector(st_Session* Session, CMessage* Message,
 
 void CGameServer::SkillCoolTimeTimerJobCreate(CPlayer* Player, int64 CastingTime, st_SkillInfo* CoolTimeSkillInfo, en_TimerJobType TimerJobType, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex)
 {
-	CoolTimeSkillInfo->CanSkillUse = false;
-
 	// 스킬 모션 끝 판단
 	// 0.5초 후에 Idle상태로 바꾸기 위해 TimerJob 등록
-	st_TimerJob* TimerJob = _TimerJobMemoryPool->Alloc();
-	TimerJob->TimerJobExecTick = GetTickCount64() + CastingTime;
-	TimerJob->SessionId = Player->_SessionId;
-	TimerJob->TimerJobType = TimerJobType;
-	TimerJob->TimerJobCancel = false;
+	st_TimerJob* SkillEndTimerJob = _TimerJobMemoryPool->Alloc();
+	SkillEndTimerJob->TimerJobExecTick = GetTickCount64() + CastingTime;
+	SkillEndTimerJob->SessionId = Player->_SessionId;
+	SkillEndTimerJob->TimerJobType = TimerJobType;
+	// 스펠 취소 여부 
+	SkillEndTimerJob->TimerJobCancel = false;
 
-	Player->_SkillJob = TimerJob;
+	Player->_SkillJob = SkillEndTimerJob;
+
+	CGameServerMessage* SkillEndMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (SkillEndMessage == nullptr)
+	{
+		return;
+	}
+
+	SkillEndMessage->Clear();
+
+	*SkillEndMessage << QuickSlotBarIndex;
+	*SkillEndMessage << QuickSlotBarSlotIndex;
+	*SkillEndMessage << (int8)CoolTimeSkillInfo->SkillMediumCategory;
+	*SkillEndMessage << &CoolTimeSkillInfo;
+
+	SkillEndTimerJob->TimerJobMessage = SkillEndMessage;
 
 	AcquireSRWLockExclusive(&_TimerJobLock);
-	_TimerHeapJob->InsertHeap(TimerJob->TimerJobExecTick, TimerJob);
+	_TimerHeapJob->InsertHeap(SkillEndTimerJob->TimerJobExecTick, SkillEndTimerJob);
 	ReleaseSRWLockExclusive(&_TimerJobLock);
 
-	SetEvent(_TimerThreadWakeEvent);
-
-	float SkillCoolTime = CoolTimeSkillInfo->SkillCoolTime / 1000.0f;
-
-	// 클라에게 쿨타임 표시
-	CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(Player->_GameObjectInfo.ObjectId, QuickSlotBarIndex, QuickSlotBarSlotIndex, SkillCoolTime, 1.0f);
-	SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
-	ResCoolTimeStartPacket->Free();
-
-	// 쿨타임 시간 동안 스킬 사용 못하게 막음
-	CoolTimeSkillInfo->CanSkillUse = false;
-
-	// 스킬 쿨타임 얻어옴
-	st_SkillData* ReqSkillData = G_Datamanager->FindSkillData(CoolTimeSkillInfo->SkillMediumCategory, CoolTimeSkillInfo->SkillType);
-	if (ReqSkillData != nullptr)
-	{
-		// 스킬 쿨타임 스킬쿨타임 잡 등록
-		st_TimerJob* SkillCoolTimeTimerJob = _TimerJobMemoryPool->Alloc();
-		SkillCoolTimeTimerJob->TimerJobExecTick = GetTickCount64() + ReqSkillData->SkillCoolTime;
-		SkillCoolTimeTimerJob->SessionId = Player->_SessionId;
-		SkillCoolTimeTimerJob->TimerJobType = en_TimerJobType::TIMER_SKILL_COOLTIME_END;
-
-		CGameServerMessage* ResCoolTimeEndMessage = CGameServerMessage::GameServerMessageAlloc();
-		if (ResCoolTimeEndMessage == nullptr)
-		{
-			return;
-		}
-
-		ResCoolTimeEndMessage->Clear();
-
-		*ResCoolTimeEndMessage << (int16)CoolTimeSkillInfo->SkillType;
-		SkillCoolTimeTimerJob->TimerJobMessage = ResCoolTimeEndMessage;
-
-		AcquireSRWLockExclusive(&_TimerJobLock);
-		_TimerHeapJob->InsertHeap(SkillCoolTimeTimerJob->TimerJobExecTick, SkillCoolTimeTimerJob);
-		ReleaseSRWLockExclusive(&_TimerJobLock);
-
-		SetEvent(_TimerThreadWakeEvent);
-	}	
+	SetEvent(_TimerThreadWakeEvent);		
 }
 
 void CGameServer::SpawnObjectTimeTimerJobCreate(int16 SpawnObjectType, st_Vector2Int SpawnPosition, int64 SpawnTime)

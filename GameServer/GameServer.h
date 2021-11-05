@@ -161,7 +161,7 @@ private:
 	//------------------------------------------------------------------
 	// 인벤토리 테이블에 루팅한 아이템 저장
 	//------------------------------------------------------------------
-	void PacketProcReqDBLootingItemToInventorySave(int64 SessionId, CMessage* Message);
+	void PacketProcReqDBLootingItemToInventorySave(int64 SessionId, CGameServerMessage* Message);
 	//------------------------------------------------------------------
 	// 인벤토리 테이블에 제작템 저장
 	//------------------------------------------------------------------
@@ -206,23 +206,23 @@ private:
 	//----------------------------------------------------------------
 	// 밀리공격 끝 처리 함수
 	//----------------------------------------------------------------
-	void PacketProcTimerAttackEnd(int64 SessionId, CMessage* Message);
+	void PacketProcTimerAttackEnd(int64 SessionId, CGameServerMessage* Message);
 	//----------------------------------------------------------------
 	// 마법공격 끝 처리 함수
 	//----------------------------------------------------------------
-	void PacketProcTimerSpellEnd(int64 SessionId, CMessage* Message);
+	void PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* Message);
 	//----------------------------------------------------------------
 	// 재사용대기 시간 끝 처리 함수
 	//----------------------------------------------------------------
-	void PacketProcTimerCoolTimeEnd(int64 SessionId, CMessage* Message);	
+	void PacketProcTimerCastingTimeEnd(int64 SessionId, CGameServerMessage* Message);
 	//----------------------------------------------------------------
 	// 오브젝트 스폰
 	//----------------------------------------------------------------
-	void PacketProcTimerObjectSpawn(CMessage* Message);
+	void PacketProcTimerObjectSpawn(CGameServerMessage* Message);
 	//----------------------------------------------------------------
 	// 오브젝트 상태 변경
 	//----------------------------------------------------------------
-	void PacketProcTimerObjectStateChange(int64 SessionId, CMessage* Message);
+	void PacketProcTimerObjectStateChange(int64 SessionId, CGameServerMessage* Message);
 
 
 	//--------------------------------------
