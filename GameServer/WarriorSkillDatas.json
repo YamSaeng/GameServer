@@ -14,7 +14,16 @@
               "SkillMaxDamage": 5,
               "SkillCoolTime": 2000,
               "SkillCastingTime": 0,
+              "SkillDebuf": false,
               "SkillDistance": 1,
+              "SkillDebufTime": 0,
+              "SkillDebufAttackSpeed": 0,
+              "SkillDebufMovingSpeed": 0,
+              "SkillDebufStun": false,
+              "SkillDebufPushAway": false,
+              "SkillDebufRoot": false,
+              "SkillDebufDamageOverTime": 0,
+              "StatusAbnormalityProbability": 0,
               "SkillThumbnailImagePath": "Textures/Spell/Icon/¸Í·ÄÇÑÀÏ°Ý"
             },
             {
@@ -26,6 +35,15 @@
               "SkillCoolTime": 1000,
               "SkillCastingTime": 0,
               "SkillDistance": 1,
+              "SkillDebuf": false,
+              "SkillDebufTime": 0,
+              "SkillDebufAttackSpeed": 0,
+              "SkillDebufMovingSpeed": 0,
+              "SkillDebufStun": false,
+              "SkillDebufPushAway": false,
+              "SkillDebufRoot": false,
+              "SkillDebufDamageOverTime": 0,
+              "StatusAbnormalityProbability": 0,
               "SkillThumbnailImagePath": "Textures/Spell/Icon/È¸½ÉÀÇÀÏ°Ý"
             },
             {
@@ -37,6 +55,15 @@
               "SkillCoolTime": 5000,
               "SkillCastingTime": 0,
               "SkillDistance": 4,
+              "SkillDebuf": true,
+              "SkillDebufTime": 1000,
+              "SkillDebufAttackSpeed": 0,
+              "SkillDebufMovingSpeed": 0,
+              "SkillDebufStun": false,
+              "SkillDebufPushAway": false,
+              "SkillDebufRoot": true,
+              "SkillDebufDamageOverTime": 0,
+              "StatusAbnormalityProbability": 0,
               "SkillThumbnailImagePath": "Textures/Spell/Icon/¼âÈ¥ºñ¹«"
             },
             {
@@ -48,6 +75,15 @@
               "SkillCoolTime": 5000,
               "SkillCastingTime": 0,
               "SkillDistance": 4,
+              "SkillDebuf": false,
+              "SkillDebufTime": 0,
+              "SkillDebufAttackSpeed": 0,
+              "SkillDebufMovingSpeed": 0,
+              "SkillDebufStun": false,
+              "SkillDebufPushAway": false,
+              "SkillDebufRoot": false,
+              "SkillDebufDamageOverTime": 0,
+              "StatusAbnormalityProbability": 0,
               "SkillThumbnailImagePath": "Textures/Spell/Icon/ÃÊÈ¥ºñ¹«"
             },
             {
@@ -59,6 +95,15 @@
               "SkillCoolTime": 3000,
               "SkillCastingTime": 0,
               "SkillDistance": 1,
+              "SkillDebuf": false,
+              "SkillDebufTime": 0,
+              "SkillDebufAttackSpeed": 0,
+              "SkillDebufMovingSpeed": 0,
+              "SkillDebufStun": false,
+              "SkillDebufPushAway": false,
+              "SkillDebufRoot": false,
+              "SkillDebufDamageOverTime": 0,
+              "StatusAbnormalityProbability": 0,
               "SkillThumbnailImagePath": "Textures/Spell/Icon/ºÐ¼âÆÄµ¿"
             }
           ]

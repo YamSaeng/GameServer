@@ -22,8 +22,8 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int ItemMinDamage = WeaponListFiled["ItemMinDamage"].GetInt();
 			int ItemMaxDamage = WeaponListFiled["ItemMaxDamage"].GetInt();
 			string ImageFilePath = WeaponListFiled["ImageFilePath"].GetString();
-						
-			st_ItemData* WeaponItemData = new st_ItemData();					
+
+			st_ItemData* WeaponItemData = new st_ItemData();
 
 			WeaponItemData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
 
@@ -35,7 +35,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			if (SmallCategory == "ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD")
 			{
 				WeaponItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD;
-			}			
+			}
 
 			if (ItemObjectType == "OBJECT_ITEM_WEAPON_WOOD_SWORD")
 			{
@@ -43,15 +43,15 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			}
 
 			WeaponItemData->ItemExplain = ItemExplain;
-			WeaponItemData->ItemName = ItemName;						
+			WeaponItemData->ItemName = ItemName;
 			WeaponItemData->ItemMinDamage = ItemMinDamage;
 			WeaponItemData->ItemMaxDamage = ItemMaxDamage;
 			WeaponItemData->ItemDefence = 0;
 			WeaponItemData->ItemMaxCount = 1;
-			WeaponItemData->ItemThumbnailImagePath = ImageFilePath;		
+			WeaponItemData->ItemThumbnailImagePath = ImageFilePath;
 
 			_Items.insert(pair<int16, st_ItemData*>((int16)WeaponItemData->SmallItemCategory, WeaponItemData));
-		}		
+		}
 	}
 
 	for (auto& Filed : Document["Armors"].GetArray())
@@ -71,7 +71,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			st_ItemData* ArmorItemData = new st_ItemData();
 
 			ArmorItemData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARMOR;
-			
+
 			if (MediumCategory == "ITEM_MEDIUM_CATEGORY_HAT")
 			{
 				ArmorItemData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_HAT;
@@ -109,18 +109,18 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			else if (ItemObjectType == "OBJECT_ITEM_ARMOR_LEATHER_BOOT")
 			{
 				ArmorItemData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT;
-			}	
+			}
 
 			ArmorItemData->ItemExplain = ItemExplain;
-			ArmorItemData->ItemName = ItemName;	
+			ArmorItemData->ItemName = ItemName;
 			ArmorItemData->ItemMinDamage = 0;
 			ArmorItemData->ItemMaxDamage = 0;
-			ArmorItemData->ItemDefence = ItemDefence;			
+			ArmorItemData->ItemDefence = ItemDefence;
 			ArmorItemData->ItemMaxCount = 1;
-			ArmorItemData->ItemThumbnailImagePath = ImageFilePath;	
+			ArmorItemData->ItemThumbnailImagePath = ImageFilePath;
 
 			_Items.insert(pair<int16, st_ItemData*>((int16)ArmorItemData->SmallItemCategory, ArmorItemData));
-		}		
+		}
 	}
 
 	for (auto& Filed : Document["Consumables"].GetArray())
@@ -153,7 +153,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			if (ItemObjectType == "OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL")
 			{
 				PotionItemData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL;
-			}					
+			}
 
 			PotionItemData->ItemExplain = ItemExplain;
 			PotionItemData->ItemName = ItemName;
@@ -161,7 +161,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			PotionItemData->ItemMaxDamage = 0;
 			PotionItemData->ItemDefence = 0;
 			PotionItemData->ItemMaxCount = ItemMaxCount;
-			PotionItemData->ItemThumbnailImagePath = ImageFilePath;			
+			PotionItemData->ItemThumbnailImagePath = ImageFilePath;
 
 			_Consumables.insert(pair<int16, st_ConsumableData*>((int16)PotionItemData->SmallItemCategory, PotionItemData));
 		}
@@ -176,7 +176,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string ItemName = SkillBookDataListFiled["ItemName"].GetString();
 			int ItemMaxCount = SkillBookDataListFiled["ItemMaxCount"].GetInt();
 			string ImageFilePath = SkillBookDataListFiled["ImageFilePath"].GetString();
-						
+
 			st_ConsumableData* SkillBookItemData = new st_ConsumableData();
 			SkillBookItemData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_SKILLBOOK;
 
@@ -263,7 +263,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			SkillBookItemData->ItemMaxDamage = 0;
 			SkillBookItemData->ItemDefence = 0;
 			SkillBookItemData->ItemMaxCount = ItemMaxCount;
-			SkillBookItemData->ItemThumbnailImagePath = ImageFilePath;						
+			SkillBookItemData->ItemThumbnailImagePath = ImageFilePath;
 
 			_Consumables.insert(pair<int16, st_ConsumableData*>((int16)SkillBookItemData->SmallItemCategory, SkillBookItemData));
 		}
@@ -371,10 +371,10 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			MaterialData->ItemMaxDamage = 0;
 			MaterialData->ItemDefence = 0;
 			MaterialData->ItemMaxCount = ItemMaxCount;
-			MaterialData->ItemThumbnailImagePath = ImageFilePath;			
+			MaterialData->ItemThumbnailImagePath = ImageFilePath;
 
 			_Items.insert(pair<int16, st_ItemData*>((int16)MaterialData->SmallItemCategory, MaterialData));
-		}	
+		}
 	}
 }
 
@@ -388,7 +388,7 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 	for (auto& Filed : Document["PlayerWarriorCharacterStatus"].GetArray())
 	{
 		string PlayerType = Filed["PlayerType"].GetString();
-		
+
 		for (auto& PlayerWarriorCharacterFiled : Filed["PlayerWarriorCharacterLevelDataList"].GetArray())
 		{
 			int Level = PlayerWarriorCharacterFiled["Level"].GetInt();
@@ -407,8 +407,8 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			float Speed = PlayerWarriorCharacterFiled["Speed"].GetFloat();
 
 			st_ObjectStatusData* WarriorStatusData = new st_ObjectStatusData();
-			
-			WarriorStatusData->PlayerType = en_GameObjectType::OBJECT_MELEE_PLAYER;	
+
+			WarriorStatusData->PlayerType = en_GameObjectType::OBJECT_MELEE_PLAYER;
 
 			WarriorStatusData->Level = Level;
 			WarriorStatusData->MaxHP = MaxHP;
@@ -426,7 +426,7 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			WarriorStatusData->Speed = Speed;
 
 			_WarriorStatus.insert(pair<int32, st_ObjectStatusData*>(WarriorStatusData->Level, WarriorStatusData));
-		}		
+		}
 	}
 
 	for (auto& Filed : Document["PlayerMagicCharacterStatus"].GetArray())
@@ -612,7 +612,7 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			int16 MaxCount = (int16)(DropDataFiled["MaxCount"].GetInt());
 
 			st_DropData DropData;
-			
+
 			if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL")
 			{
 				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL;
@@ -624,7 +624,7 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			else if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN")
 			{
 				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN;
-			}			
+			}
 
 			DropData.Probability = Probability;
 			DropData.MinCount = MinCount;
@@ -643,10 +643,10 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 
 	rapidjson::Document Document;
 	Document.Parse(FileStr);
-		
+
 	for (auto& Filed : Document["PublicSkills"].GetArray())
-	{	
-		string PublicSkillLargeCategory = Filed["SkillLargeCategory"].GetString();			
+	{
+		string PublicSkillLargeCategory = Filed["SkillLargeCategory"].GetString();
 
 		for (auto& PublicSkillListFiled : Filed["PublicSkillList"].GetArray())
 		{
@@ -671,7 +671,7 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 					PublicAttackSkill->SkillType = en_SkillType::SKILL_NORMAL;
 				}
 
-				PublicAttackSkill->SkillName = SkillName;	
+				PublicAttackSkill->SkillName = SkillName;
 				PublicAttackSkill->SkillLevel = SkillLevel;
 				PublicAttackSkill->SkillMinDamage = SkillMinDamage;
 				PublicAttackSkill->SkillMaxDamage = SkillMaxDamage;
@@ -702,14 +702,14 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				PublicHealSkill->SkillName = SkillName;
 				PublicHealSkill->SkillLevel = SkillLevel;
 				PublicHealSkill->SkillMinHealPoint = SkillMinHeal;
-				PublicHealSkill->SkillMaxHealPoint = SkillMaxHeal;				
+				PublicHealSkill->SkillMaxHealPoint = SkillMaxHeal;
 				PublicHealSkill->SkillCoolTime = SkillCoolTime;
 				PublicHealSkill->SkillCastingTime = SkillCastingTime;
 				PublicHealSkill->SkillDistance = SkillDistance;
 				PublicHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_PublicHealSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)PublicHealSkill->SkillType, PublicHealSkill));
-			}			
+			}
 
 			for (auto& PublicBufSkillListFiled : PublicSkillListFiled["PublicBufSkillList"].GetArray())
 			{
@@ -734,7 +734,7 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				int16 IncreaseMagicCriticalPoint = (int16)PublicBufSkillListFiled["IncreaseMagicCriticalPoint"].GetInt();
 				float IncreaseSpeedPoint = PublicBufSkillListFiled["IncreaseSpeedPoint"].GetFloat();
 				int16 IncreaseStatusAbnormalityResistance = (int16)PublicBufSkillListFiled["IncreaseStatusAbnormalityResistance"].GetInt();
-				
+
 				int SkillCoolTime = PublicBufSkillListFiled["SkillCoolTime"].GetInt();
 				int SkillCastingTime = PublicBufSkillListFiled["SkillCastingTime"].GetInt();
 				int SkillDistance = PublicBufSkillListFiled["SkillDistance"].GetInt();
@@ -767,8 +767,8 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 
 				_PublicBufSkillDatas.insert(pair<int16, st_BufSkillData*>((int16)PublicBufSkill->SkillType, PublicBufSkill));
 			}
-		}		
-	}	
+		}
+	}
 }
 
 void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
@@ -800,6 +800,15 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				int SkillCoolTime = WarriorAttackSkillListFiled["SkillCoolTime"].GetInt();
 				int SkillCastingTime = WarriorAttackSkillListFiled["SkillCastingTime"].GetInt();
 				int SkillDistance = WarriorAttackSkillListFiled["SkillDistance"].GetInt();
+				bool SkillDebuf = WarriorAttackSkillListFiled["SkillDebuf"].GetBool();
+				int64 SkillDebufTime = WarriorAttackSkillListFiled["SkillDebufTime"].GetInt64();
+				int8 SkillDebufAttackSpeed = (int8)WarriorAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
+				int8 SkillDebufMovingSpeed = (int8)WarriorAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
+				bool SkillDebufStun = WarriorAttackSkillListFiled["SkillDebufStun"].GetBool();
+				bool SkillDebufPushAway = WarriorAttackSkillListFiled["SkillDebufPushAway"].GetBool();
+				int64 SkillDamageOverTime = WarriorAttackSkillListFiled["SkillDamageOverTime"].GetInt64();
+				int8 StatusAbnormalityProbability = (int8)WarriorAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
+				int SkillDebufRoot = WarriorAttackSkillListFiled["SkillDebufRoot"].GetBool();
 				string SkillImagePath = WarriorAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
 
 				if (SkillType == "SKILL_KNIGHT_FIERCE_ATTACK")
@@ -830,6 +839,16 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				WarriorAttackSkill->SkillCoolTime = SkillCoolTime;
 				WarriorAttackSkill->SkillCastingTime = SkillCastingTime;
 				WarriorAttackSkill->SkillDistance = SkillDistance;
+
+				WarriorAttackSkill->SkillDebuf = SkillDebuf;
+				WarriorAttackSkill->SkillDebufTime = SkillDebufTime;
+				WarriorAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
+				WarriorAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
+				WarriorAttackSkill->SkillDebufStun = SkillDebufStun;
+				WarriorAttackSkill->SkillDebufPushAway = SkillDebufPushAway;
+				WarriorAttackSkill->SkillDebufRoot = SkillDebufRoot;
+				WarriorAttackSkill->SkillDamageOverTime = SkillDamageOverTime;
+				WarriorAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
 				WarriorAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_WarriorAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)WarriorAttackSkill->SkillType, WarriorAttackSkill));
@@ -942,7 +961,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 		{
 			string ShamanAttackSkillMediumCategory = ShamanSkillListFiled["SkillMediumCategory"].GetString();
 
-			for (auto& ShmanAttackSkillListFiled : ShamanSkillListFiled["ShamanAttackSkillLit"].GetArray())
+			for (auto& ShmanAttackSkillListFiled : ShamanSkillListFiled["ShamanAttackSkillList"].GetArray())
 			{
 				st_AttackSkillData* ShamanAttackSkill = new st_AttackSkillData();
 				ShamanAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
@@ -956,11 +975,36 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				int SkillCoolTime = ShmanAttackSkillListFiled["SkillCoolTime"].GetInt();
 				int SkillCastingTime = ShmanAttackSkillListFiled["SkillCastingTime"].GetInt();
 				int SkillDistance = ShmanAttackSkillListFiled["SkillDistance"].GetInt();
+				bool SkillDebuf = ShmanAttackSkillListFiled["SkillDebuf"].GetBool();
+				int64 SkillDebufTime = ShmanAttackSkillListFiled["SkillDebufTime"].GetInt64();
+				int8 SkillDebufAttackSpeed = (int8)ShmanAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
+				int8 SkillDebufMovingSpeed = (int8)ShmanAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
+				bool SkillDebufStun = ShmanAttackSkillListFiled["SkillDebufStun"].GetBool();
+				bool SkillDebufPushAway = ShmanAttackSkillListFiled["SkillDebufPushAway"].GetBool();
+				int64 SkillDamageOverTime = ShmanAttackSkillListFiled["SkillDamageOverTime"].GetInt64();
+				int8 StatusAbnormalityProbability = (int8)ShmanAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
+				int SkillDebufRoot = ShmanAttackSkillListFiled["SkillDebufRoot"].GetBool();
 				string SkillImagePath = ShmanAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
 
-				if (SkillType == "SKILL_SHAMNA_FLAME_HARPOON")
+				if (SkillType == "SKILL_SHAMAN_FLAME_HARPOON")
 				{
 					ShamanAttackSkill->SkillType = en_SkillType::SKILL_SHAMAN_FLAME_HARPOON;
+				}
+				else if (SkillType == "SKILL_SHAMAN_ROOT")
+				{
+					ShamanAttackSkill->SkillType = en_SkillType::SKILL_SHAMAN_ROOT;
+				}
+				else if (SkillType == "SKILL_SHAMAN_ICE_CHAIN")
+				{
+					ShamanAttackSkill->SkillType = en_SkillType::SKILL_SHAMAN_ICE_CHAIN;
+				}
+				else if (SkillType == "SKILL_SHAMAN_ICE_WAVE")
+				{
+					ShamanAttackSkill->SkillType = en_SkillType::SKILL_SHAMAN_ICE_WAVE;
+				}
+				else if (SkillType == "SKILL_SHAMAN_LIGHTNING_STRIKE")
+				{
+					ShamanAttackSkill->SkillType = en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE;
 				}
 				else if (SkillType == "SKILL_SHAMAN_HELL_FIRE")
 				{
@@ -974,6 +1018,16 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanAttackSkill->SkillCoolTime = SkillCoolTime;
 				ShamanAttackSkill->SkillCastingTime = SkillCastingTime;
 				ShamanAttackSkill->SkillDistance = SkillDistance;
+
+				ShamanAttackSkill->SkillDebuf = SkillDebuf;
+				ShamanAttackSkill->SkillDebufTime = SkillDebufTime;
+				ShamanAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
+				ShamanAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
+				ShamanAttackSkill->SkillDebufStun = SkillDebufStun;
+				ShamanAttackSkill->SkillDebufPushAway = SkillDebufPushAway;
+				ShamanAttackSkill->SkillDebufRoot = SkillDebufRoot;
+				ShamanAttackSkill->SkillDamageOverTime = SkillDamageOverTime;
+				ShamanAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
 				ShamanAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_ShamanAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)ShamanAttackSkill->SkillType, ShamanAttackSkill));
@@ -1105,12 +1159,25 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				int SkillCoolTime = TaioistAttackSkillListFiled["SkillCoolTime"].GetInt();
 				int SkillCastingTime = TaioistAttackSkillListFiled["SkillCastingTime"].GetInt();
 				int SkillDistance = TaioistAttackSkillListFiled["SkillDistance"].GetInt();
+				bool SkillDebuf = TaioistAttackSkillListFiled["SkillDebuf"].GetBool();
+				int64 SkillDebufTime = TaioistAttackSkillListFiled["SkillDebufTime"].GetInt64();
+				int8 SkillDebufAttackSpeed = (int8)TaioistAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
+				int8 SkillDebufMovingSpeed = (int8)TaioistAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
+				bool SkillDebufStun = TaioistAttackSkillListFiled["SkillDebufStun"].GetBool();
+				bool SkillDebufPushAway = TaioistAttackSkillListFiled["SkillDebufPushAway"].GetBool();
+				int64 SkillDamageOverTime = TaioistAttackSkillListFiled["SkillDamageOverTime"].GetInt64();
+				int8 StatusAbnormalityProbability = (int8)TaioistAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
+				int SkillDebufRoot = TaioistAttackSkillListFiled["SkillDebufRoot"].GetBool();
 				string SkillImagePath = TaioistAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
 
-				if (SkillType == "")
+				if (SkillType == "SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK")
 				{
-					
-				}				
+					TaioistAttackSkill->SkillType = en_SkillType::SKILL_TAIOIST_DIVINE_STRIKE;
+				}
+				else if (SkillType == "SKILL_TAIOIST_ROOT")
+				{
+					TaioistAttackSkill->SkillType = en_SkillType::SKILL_TAIOIST_ROOT;
+				}
 
 				TaioistAttackSkill->SkillName = SkillName;
 				TaioistAttackSkill->SkillLevel = SkillLevel;
@@ -1119,8 +1186,19 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				TaioistAttackSkill->SkillCoolTime = SkillCoolTime;
 				TaioistAttackSkill->SkillCastingTime = SkillCastingTime;
 				TaioistAttackSkill->SkillDistance = SkillDistance;
+
+				TaioistAttackSkill->SkillDebuf = SkillDebuf;
+				TaioistAttackSkill->SkillDebufTime = SkillDebufTime;
+				TaioistAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
+				TaioistAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
+				TaioistAttackSkill->SkillDebufStun = SkillDebufStun;
+				TaioistAttackSkill->SkillDebufPushAway = SkillDebufPushAway;
+				TaioistAttackSkill->SkillDebufRoot = SkillDebufRoot;
+				TaioistAttackSkill->SkillDamageOverTime = SkillDamageOverTime;
+				TaioistAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
 				TaioistAttackSkill->SkillThumbnailImagePath = SkillImagePath;
-								
+				TaioistAttackSkill->SkillThumbnailImagePath = SkillImagePath;
+
 				_TaioistAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)TaioistAttackSkill->SkillType, TaioistAttackSkill));
 			}
 
@@ -1159,7 +1237,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				TaioistHealSkill->SkillCastingTime = SkillCastingTime;
 				TaioistHealSkill->SkillDistance = SkillDistance;
 				TaioistHealSkill->SkillThumbnailImagePath = SkillImagePath;
-								
+
 				_TaioistHealSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)TaioistHealSkill->SkillType, TaioistHealSkill));
 			}
 
@@ -1267,9 +1345,9 @@ void CDataManager::LoadDataEnvironment(wstring LoadFileName)
 			else if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG")
 			{
 				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG;
-			}			
+			}
 
-			DropData.Probability = Probability;			
+			DropData.Probability = Probability;
 			DropData.MinCount = MinCount;
 			DropData.MaxCount = MaxCount;
 
@@ -1297,7 +1375,7 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 		if (CraftingItemLargeCategory == "ITEM_LARGE_CATEGORY_WEAPON")
 		{
 			CraftingData->CraftingType = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
-		}		
+		}
 		else if (CraftingItemLargeCategory == "ITEM_LARGE_CATEGORY_ARMOR")
 		{
 			CraftingData->CraftingType = en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARMOR;
@@ -1315,7 +1393,7 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 
 			string CraftingCompleteItemMediumCategory = CraftingCompleteItemFiled["CraftingCompleteItemMediumCategory"].GetString();
 			string CraftingCompleteItemSmallCategory = CraftingCompleteItemFiled["CraftingCompleteItemSmallCategory"].GetString();
-					
+
 			string CraftingCompleteItemName = CraftingCompleteItemFiled["CraftingCompleteItemName"].GetString();
 			string CraftingCompleteItemThumbnailImagePath = CraftingCompleteItemFiled["CraftingCompleteItemThumbnailImagePath"].GetString();
 
@@ -1343,7 +1421,7 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 			{
 				CraftingCompleteItemData.CraftingCompleteItemDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN;
 			}
-			
+
 			CraftingCompleteItemData.CraftingCompleteName = CraftingCompleteItemName;
 			CraftingCompleteItemData.CraftingCompleteThumbnailImagePath = CraftingCompleteItemThumbnailImagePath;
 
@@ -1371,8 +1449,8 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 				else if (MaterialSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_YARN")
 				{
 					CraftingMaterialData.MaterialDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN;
-				}			
-				
+				}
+
 				CraftingMaterialData.MaterialName = MaterialName;
 				CraftingMaterialData.MaterialCount = MaterialCount;
 				CraftingMaterialData.MaterialThumbnailImagePath = MaterialThumbnailImagePath;
@@ -1390,11 +1468,11 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 st_SkillData* CDataManager::FindSkillData(en_SkillMediumCategory FindAttackSkillMediumCategory, en_SkillType FindSkillType)
 {
 	switch (FindAttackSkillMediumCategory)
-	{	
+	{
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE:
 		return nullptr;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK:		
-		return (*_PublicAttackSkillDatas.find((int16)FindSkillType)).second;		
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK:
+		return (*_PublicAttackSkillDatas.find((int16)FindSkillType)).second;
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL:
 		return (*_PublicHealSkillDatas.find((int16)FindSkillType)).second;
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF:
@@ -1417,5 +1495,5 @@ st_SkillData* CDataManager::FindSkillData(en_SkillMediumCategory FindAttackSkill
 		return (*_TaioistHealSkillDatas.find((int16)FindSkillType)).second;
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_BUF:
 		return (*_TaioistBufSkillDatas.find((int16)FindSkillType)).second;
-	}	
+	}
 }

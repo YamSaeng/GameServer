@@ -191,17 +191,28 @@ enum class en_SkillType : int16
 {
 	SKILL_TYPE_NONE = 0,
 	SKILL_NORMAL = 1,
+	
 	SKILL_KNIGHT_FIERCE_ATTACK,
 	SKILL_KNIGHT_CONVERSION_ATTACK,
 	SKILL_KNIGHT_SHAEHONE,
 	SKILL_KNIGHT_CHOHONE,
 	SKILL_KNIGHT_SMASH_WAVE,
-	SKILL_KNIGHT_CHARGE_POSE = 1000,
+	SKILL_KNIGHT_CHARGE_POSE,
+	
 	SKILL_SHAMAN_FLAME_HARPOON,
+	SKILL_SHAMAN_ROOT,
+	SKILL_SHAMAN_ICE_CHAIN,
+	SKILL_SHAMAN_ICE_WAVE,
+	SKILL_SHAMAN_LIGHTNING_STRIKE,
 	SKILL_SHAMAN_HELL_FIRE,
+
+	SKILL_TAIOIST_DIVINE_STRIKE,
+	SKILL_TAIOIST_ROOT,
 	SKILL_TAIOIST_HEALING_LIGHT,
 	SKILL_TAIOIST_HEALING_WIND,
+	
 	SKILL_SHOCK_RELEASE,
+	
 	SKILL_SLIME_NORMAL = 3000,
 	SKILL_BEAR_NORMAL
 };
@@ -417,13 +428,31 @@ struct st_SkillInfo
 
 struct st_AttackSkillInfo : public st_SkillInfo
 {
-	int32 SkillMinDamage; // 최소 공격력
-	int32 SkillMaxDamage; // 최대 공격력
+	int32 SkillMinDamage;		// 최소 공격력
+	int32 SkillMaxDamage;		// 최대 공격력
+	bool SkillDebuf;			// 스킬 디버프 여부
+	int64 SkillDebufTime;		// 스킬 디버프 시간
+	int8 SkillDebufAttackSpeed; // 스킬 공격속도 감소 수치
+	int8 SkillDebufMovingSpeed; // 스킬 이동속도 감소 수치
+	bool SkillDebufStun;		// 스킬 스턴 여부
+	bool SkillDebufPushAway;	// 스킬 밀려남 여부
+	bool SkillDebufRoot;		// 스킬 이동불가 여부	
+	int64 SkillDamageOverTime;	// 스킬 도트 데미지 시간 간격
+	int8 StatusAbnormalityProbability; // 상태 이상 적용 확률
 
 	st_AttackSkillInfo()
 	{
 		SkillMinDamage = 0;
 		SkillMaxDamage = 0;
+		SkillDebuf = false;
+		SkillDebufTime = 0;
+		SkillDebufAttackSpeed = 0;
+		SkillDebufMovingSpeed = 0;		
+		SkillDebufStun = false;
+		SkillDebufPushAway = false;
+		SkillDebufRoot = false;		
+		SkillDamageOverTime = 0;
+		StatusAbnormalityProbability = 0;
 	}
 };
 
