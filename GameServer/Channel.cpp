@@ -268,29 +268,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	random_device RD;
 	mt19937 Gen(RD());
 		
-	st_Vector2Int SpawnPosition;
-
-	// 스폰 포지션을 따로 지정해 주지 않았으면 랜덤 스폰 좌표 얻음
-	if (ObjectSpawnPosition == nullptr)
-	{
-		while (true)
-		{
-			uniform_int_distribution<int> RandomXPosition(-10, 54);
-			uniform_int_distribution<int> RandomYPosition(-4, 40);
-
-			SpawnPosition._X = RandomXPosition(Gen);
-			SpawnPosition._Y = RandomYPosition(Gen);
-
-			if (_Map->Find(SpawnPosition) == nullptr)
-			{
-				break;
-			}
-		}
-	}
-	else
-	{
-		SpawnPosition = *ObjectSpawnPosition;
-	}
+	st_Vector2Int SpawnPosition = *ObjectSpawnPosition;	
 	
 	G_Logger->WriteStdOut(en_Color::RED, L"SpawnPosition Y : %d X : %d \n", SpawnPosition._Y, SpawnPosition._X);	
 
