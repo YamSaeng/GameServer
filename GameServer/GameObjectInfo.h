@@ -256,1313 +256,1316 @@ enum class en_TileMapEnvironment : int8
 	TILE_MAP_BEAR
 };
 
-enum en_UnityKeyCode
+namespace UnityEngine
 {
-    //
-    // 요약:
-    //     Not assigned (never returned as the result of a keystroke).
-    None = 0,
-    //
-    // 요약:
-    //     The backspace key.
-    Backspace = 8,
-    //
-    // 요약:
-    //     The tab key.
-    Tab = 9,
-    //
-    // 요약:
-    //     The Clear key.
-    Clear = 12,
-    //
-    // 요약:
-    //     Return key.
-    Return = 13,
-    //
-    // 요약:
-    //     Pause on PC machines.
-    Pause = 19,
-    //
-    // 요약:
-    //     Escape key.
-    Escape = 27,
-    //
-    // 요약:
-    //     Space key.
-    Space = 32,
-    //
-    // 요약:
-    //     Exclamation mark key '!'.
-    Exclaim = 33,
-    //
-    // 요약:
-    //     Double quote key '"'.
-    DoubleQuote = 34,
-    //
-    // 요약:
-    //     Hash key '#'.
-    Hash = 35,
-    //
-    // 요약:
-    //     Dollar sign key '$'.
-    Dollar = 36,
-    //
-    // 요약:
-    //     Percent '%' key.
-    Percent = 37,
-    //
-    // 요약:
-    //     Ampersand key '&'.
-    Ampersand = 38,
-    //
-    // 요약:
-    //     Quote key '.
-    Quote = 39,
-    //
-    // 요약:
-    //     Left Parenthesis key '('.
-    LeftParen = 40,
-    //
-    // 요약:
-    //     Right Parenthesis key ')'.
-    RightParen = 41,
-    //
-    // 요약:
-    //     Asterisk key '*'.
-    Asterisk = 42,
-    //
-    // 요약:
-    //     Plus key '+'.
-    Plus = 43,
-    //
-    // 요약:
-    //     Comma ',' key.
-    Comma = 44,
-    //
-    // 요약:
-    //     Minus '-' key.
-    Minus = 45,
-    //
-    // 요약:
-    //     Period '.' key.
-    Period = 46,
-    //
-    // 요약:
-    //     Slash '/' key.
-    Slash = 47,
-    //
-    // 요약:
-    //     The '0' key on the top of the alphanumeric keyboard.
-    Alpha0 = 48,
-    //
-    // 요약:
-    //     The '1' key on the top of the alphanumeric keyboard.
-    Alpha1 = 49,
-    //
-    // 요약:
-    //     The '2' key on the top of the alphanumeric keyboard.
-    Alpha2 = 50,
-    //
-    // 요약:
-    //     The '3' key on the top of the alphanumeric keyboard.
-    Alpha3 = 51,
-    //
-    // 요약:
-    //     The '4' key on the top of the alphanumeric keyboard.
-    Alpha4 = 52,
-    //
-    // 요약:
-    //     The '5' key on the top of the alphanumeric keyboard.
-    Alpha5 = 53,
-    //
-    // 요약:
-    //     The '6' key on the top of the alphanumeric keyboard.
-    Alpha6 = 54,
-    //
-    // 요약:
-    //     The '7' key on the top of the alphanumeric keyboard.
-    Alpha7 = 55,
-    //
-    // 요약:
-    //     The '8' key on the top of the alphanumeric keyboard.
-    Alpha8 = 56,
-    //
-    // 요약:
-    //     The '9' key on the top of the alphanumeric keyboard.
-    Alpha9 = 57,
-    //
-    // 요약:
-    //     Colon ':' key.
-    Colon = 58,
-    //
-    // 요약:
-    //     Semicolon ';' key.
-    Semicolon = 59,
-    //
-    // 요약:
-    //     Less than '<' key.
-    Less = 60,
-    //
-    // 요약:
-    //     Equals '=' key.
-    Equals = 61,
-    //
-    // 요약:
-    //     Greater than '>' key.
-    Greater = 62,
-    //
-    // 요약:
-    //     Question mark '?' key.
-    Question = 63,
-    //
-    // 요약:
-    //     At key '@'.
-    At = 64,
-    //
-    // 요약:
-    //     Left square bracket key '['.
-    LeftBracket = 91,
-    //
-    // 요약:
-    //     Backslash key '\'.
-    Backslash = 92,
-    //
-    // 요약:
-    //     Right square bracket key ']'.
-    RightBracket = 93,
-    //
-    // 요약:
-    //     Caret key '^'.
-    Caret = 94,
-    //
-    // 요약:
-    //     Underscore '_' key.
-    Underscore = 95,
-    //
-    // 요약:
-    //     Back quote key '`'.
-    BackQuote = 96,
-    //
-    // 요약:
-    //     'a' key.
-    A = 97,
-    //
-    // 요약:
-    //     'b' key.
-    B = 98,
-    //
-    // 요약:
-    //     'c' key.
-    C = 99,
-    //
-    // 요약:
-    //     'd' key.
-    D = 100,
-    //
-    // 요약:
-    //     'e' key.
-    E = 101,
-    //
-    // 요약:
-    //     'f' key.
-    F = 102,
-    //
-    // 요약:
-    //     'g' key.
-    G = 103,
-    //
-    // 요약:
-    //     'h' key.
-    H = 104,
-    //
-    // 요약:
-    //     'i' key.
-    I = 105,
-    //
-    // 요약:
-    //     'j' key.
-    J = 106,
-    //
-    // 요약:
-    //     'k' key.
-    K = 107,
-    //
-    // 요약:
-    //     'l' key.
-    L = 108,
-    //
-    // 요약:
-    //     'm' key.
-    M = 109,
-    //
-    // 요약:
-    //     'n' key.
-    N = 110,
-    //
-    // 요약:
-    //     'o' key.
-    O = 111,
-    //
-    // 요약:
-    //     'p' key.
-    P = 112,
-    //
-    // 요약:
-    //     'q' key.
-    Q = 113,
-    //
-    // 요약:
-    //     'r' key.
-    R = 114,
-    //
-    // 요약:
-    //     's' key.
-    S = 115,
-    //
-    // 요약:
-    //     't' key.
-    T = 116,
-    //
-    // 요약:
-    //     'u' key.
-    U = 117,
-    //
-    // 요약:
-    //     'v' key.
-    V = 118,
-    //
-    // 요약:
-    //     'w' key.
-    W = 119,
-    //
-    // 요약:
-    //     'x' key.
-    X = 120,
-    //
-    // 요약:
-    //     'y' key.
-    Y = 121,
-    //
-    // 요약:
-    //     'z' key.
-    Z = 122,
-    //
-    // 요약:
-    //     Left curly bracket key '{'.
-    LeftCurlyBracket = 123,
-    //
-    // 요약:
-    //     Pipe '|' key.
-    Pipe = 124,
-    //
-    // 요약:
-    //     Right curly bracket key '}'.
-    RightCurlyBracket = 125,
-    //
-    // 요약:
-    //     Tilde '~' key.
-    Tilde = 126,
-    //
-    // 요약:
-    //     The forward delete key.
-    Delete = 127,
-    //
-    // 요약:
-    //     Numeric keypad 0.
-    Keypad0 = 256,
-    //
-    // 요약:
-    //     Numeric keypad 1.
-    Keypad1 = 257,
-    //
-    // 요약:
-    //     Numeric keypad 2.
-    Keypad2 = 258,
-    //
-    // 요약:
-    //     Numeric keypad 3.
-    Keypad3 = 259,
-    //
-    // 요약:
-    //     Numeric keypad 4.
-    Keypad4 = 260,
-    //
-    // 요약:
-    //     Numeric keypad 5.
-    Keypad5 = 261,
-    //
-    // 요약:
-    //     Numeric keypad 6.
-    Keypad6 = 262,
-    //
-    // 요약:
-    //     Numeric keypad 7.
-    Keypad7 = 263,
-    //
-    // 요약:
-    //     Numeric keypad 8.
-    Keypad8 = 264,
-    //
-    // 요약:
-    //     Numeric keypad 9.
-    Keypad9 = 265,
-    //
-    // 요약:
-    //     Numeric keypad '.'.
-    KeypadPeriod = 266,
-    //
-    // 요약:
-    //     Numeric keypad '/'.
-    KeypadDivide = 267,
-    //
-    // 요약:
-    //     Numeric keypad '*'.
-    KeypadMultiply = 268,
-    //
-    // 요약:
-    //     Numeric keypad '-'.
-    KeypadMinus = 269,
-    //
-    // 요약:
-    //     Numeric keypad '+'.
-    KeypadPlus = 270,
-    //
-    // 요약:
-    //     Numeric keypad Enter.
-    KeypadEnter = 271,
-    //
-    // 요약:
-    //     Numeric keypad '='.
-    KeypadEquals = 272,
-    //
-    // 요약:
-    //     Up arrow key.
-    UpArrow = 273,
-    //
-    // 요약:
-    //     Down arrow key.
-    DownArrow = 274,
-    //
-    // 요약:
-    //     Right arrow key.
-    RightArrow = 275,
-    //
-    // 요약:
-    //     Left arrow key.
-    LeftArrow = 276,
-    //
-    // 요약:
-    //     Insert key key.
-    Insert = 277,
-    //
-    // 요약:
-    //     Home key.
-    Home = 278,
-    //
-    // 요약:
-    //     End key.
-    End = 279,
-    //
-    // 요약:
-    //     Page up.
-    PageUp = 280,
-    //
-    // 요약:
-    //     Page down.
-    PageDown = 281,
-    //
-    // 요약:
-    //     F1 function key.
-    F1 = 282,
-    //
-    // 요약:
-    //     F2 function key.
-    F2 = 283,
-    //
-    // 요약:
-    //     F3 function key.
-    F3 = 284,
-    //
-    // 요약:
-    //     F4 function key.
-    F4 = 285,
-    //
-    // 요약:
-    //     F5 function key.
-    F5 = 286,
-    //
-    // 요약:
-    //     F6 function key.
-    F6 = 287,
-    //
-    // 요약:
-    //     F7 function key.
-    F7 = 288,
-    //
-    // 요약:
-    //     F8 function key.
-    F8 = 289,
-    //
-    // 요약:
-    //     F9 function key.
-    F9 = 290,
-    //
-    // 요약:
-    //     F10 function key.
-    F10 = 291,
-    //
-    // 요약:
-    //     F11 function key.
-    F11 = 292,
-    //
-    // 요약:
-    //     F12 function key.
-    F12 = 293,
-    //
-    // 요약:
-    //     F13 function key.
-    F13 = 294,
-    //
-    // 요약:
-    //     F14 function key.
-    F14 = 295,
-    //
-    // 요약:
-    //     F15 function key.
-    F15 = 296,
-    //
-    // 요약:
-    //     Numlock key.
-    Numlock = 300,
-    //
-    // 요약:
-    //     Capslock key.
-    CapsLock = 301,
-    //
-    // 요약:
-    //     Scroll lock key.
-    ScrollLock = 302,
-    //
-    // 요약:
-    //     Right shift key.
-    RightShift = 303,
-    //
-    // 요약:
-    //     Left shift key.
-    LeftShift = 304,
-    //
-    // 요약:
-    //     Right Control key.
-    RightControl = 305,
-    //
-    // 요약:
-    //     Left Control key.
-    LeftControl = 306,
-    //
-    // 요약:
-    //     Right Alt key.
-    RightAlt = 307,
-    //
-    // 요약:
-    //     Left Alt key.
-    LeftAlt = 308,
-    //
-    // 요약:
-    //     Right Command key.
-    RightCommand = 309,
-    //
-    // 요약:
-    //     Right Command key.
-    RightApple = 309,
-    //
-    // 요약:
-    //     Left Command key.
-    LeftCommand = 310,
-    //
-    // 요약:
-    //     Left Command key.
-    LeftApple = 310,
-    //
-    // 요약:
-    //     Left Windows key.
-    LeftWindows = 311,
-    //
-    // 요약:
-    //     Right Windows key.
-    RightWindows = 312,
-    //
-    // 요약:
-    //     Alt Gr key.
-    AltGr = 313,
-    //
-    // 요약:
-    //     Help key.
-    Help = 315,
-    //
-    // 요약:
-    //     Print key.
-    Print = 316,
-    //
-    // 요약:
-    //     Sys Req key.
-    SysReq = 317,
-    //
-    // 요약:
-    //     Break key.
-    Break = 318,
-    //
-    // 요약:
-    //     Menu key.
-    Menu = 319,
-    //
-    // 요약:
-    //     The Left (or primary) mouse button.
-    Mouse0 = 323,
-    //
-    // 요약:
-    //     Right mouse button (or secondary mouse button).
-    Mouse1 = 324,
-    //
-    // 요약:
-    //     Middle mouse button (or third button).
-    Mouse2 = 325,
-    //
-    // 요약:
-    //     Additional (fourth) mouse button.
-    Mouse3 = 326,
-    //
-    // 요약:
-    //     Additional (fifth) mouse button.
-    Mouse4 = 327,
-    //
-    // 요약:
-    //     Additional (or sixth) mouse button.
-    Mouse5 = 328,
-    //
-    // 요약:
-    //     Additional (or seventh) mouse button.
-    Mouse6 = 329,
-    //
-    // 요약:
-    //     Button 0 on any joystick.
-    JoystickButton0 = 330,
-    //
-    // 요약:
-    //     Button 1 on any joystick.
-    JoystickButton1 = 331,
-    //
-    // 요약:
-    //     Button 2 on any joystick.
-    JoystickButton2 = 332,
-    //
-    // 요약:
-    //     Button 3 on any joystick.
-    JoystickButton3 = 333,
-    //
-    // 요약:
-    //     Button 4 on any joystick.
-    JoystickButton4 = 334,
-    //
-    // 요약:
-    //     Button 5 on any joystick.
-    JoystickButton5 = 335,
-    //
-    // 요약:
-    //     Button 6 on any joystick.
-    JoystickButton6 = 336,
-    //
-    // 요약:
-    //     Button 7 on any joystick.
-    JoystickButton7 = 337,
-    //
-    // 요약:
-    //     Button 8 on any joystick.
-    JoystickButton8 = 338,
-    //
-    // 요약:
-    //     Button 9 on any joystick.
-    JoystickButton9 = 339,
-    //
-    // 요약:
-    //     Button 10 on any joystick.
-    JoystickButton10 = 340,
-    //
-    // 요약:
-    //     Button 11 on any joystick.
-    JoystickButton11 = 341,
-    //
-    // 요약:
-    //     Button 12 on any joystick.
-    JoystickButton12 = 342,
-    //
-    // 요약:
-    //     Button 13 on any joystick.
-    JoystickButton13 = 343,
-    //
-    // 요약:
-    //     Button 14 on any joystick.
-    JoystickButton14 = 344,
-    //
-    // 요약:
-    //     Button 15 on any joystick.
-    JoystickButton15 = 345,
-    //
-    // 요약:
-    //     Button 16 on any joystick.
-    JoystickButton16 = 346,
-    //
-    // 요약:
-    //     Button 17 on any joystick.
-    JoystickButton17 = 347,
-    //
-    // 요약:
-    //     Button 18 on any joystick.
-    JoystickButton18 = 348,
-    //
-    // 요약:
-    //     Button 19 on any joystick.
-    JoystickButton19 = 349,
-    //
-    // 요약:
-    //     Button 0 on first joystick.
-    Joystick1Button0 = 350,
-    //
-    // 요약:
-    //     Button 1 on first joystick.
-    Joystick1Button1 = 351,
-    //
-    // 요약:
-    //     Button 2 on first joystick.
-    Joystick1Button2 = 352,
-    //
-    // 요약:
-    //     Button 3 on first joystick.
-    Joystick1Button3 = 353,
-    //
-    // 요약:
-    //     Button 4 on first joystick.
-    Joystick1Button4 = 354,
-    //
-    // 요약:
-    //     Button 5 on first joystick.
-    Joystick1Button5 = 355,
-    //
-    // 요약:
-    //     Button 6 on first joystick.
-    Joystick1Button6 = 356,
-    //
-    // 요약:
-    //     Button 7 on first joystick.
-    Joystick1Button7 = 357,
-    //
-    // 요약:
-    //     Button 8 on first joystick.
-    Joystick1Button8 = 358,
-    //
-    // 요약:
-    //     Button 9 on first joystick.
-    Joystick1Button9 = 359,
-    //
-    // 요약:
-    //     Button 10 on first joystick.
-    Joystick1Button10 = 360,
-    //
-    // 요약:
-    //     Button 11 on first joystick.
-    Joystick1Button11 = 361,
-    //
-    // 요약:
-    //     Button 12 on first joystick.
-    Joystick1Button12 = 362,
-    //
-    // 요약:
-    //     Button 13 on first joystick.
-    Joystick1Button13 = 363,
-    //
-    // 요약:
-    //     Button 14 on first joystick.
-    Joystick1Button14 = 364,
-    //
-    // 요약:
-    //     Button 15 on first joystick.
-    Joystick1Button15 = 365,
-    //
-    // 요약:
-    //     Button 16 on first joystick.
-    Joystick1Button16 = 366,
-    //
-    // 요약:
-    //     Button 17 on first joystick.
-    Joystick1Button17 = 367,
-    //
-    // 요약:
-    //     Button 18 on first joystick.
-    Joystick1Button18 = 368,
-    //
-    // 요약:
-    //     Button 19 on first joystick.
-    Joystick1Button19 = 369,
-    //
-    // 요약:
-    //     Button 0 on second joystick.
-    Joystick2Button0 = 370,
-    //
-    // 요약:
-    //     Button 1 on second joystick.
-    Joystick2Button1 = 371,
-    //
-    // 요약:
-    //     Button 2 on second joystick.
-    Joystick2Button2 = 372,
-    //
-    // 요약:
-    //     Button 3 on second joystick.
-    Joystick2Button3 = 373,
-    //
-    // 요약:
-    //     Button 4 on second joystick.
-    Joystick2Button4 = 374,
-    //
-    // 요약:
-    //     Button 5 on second joystick.
-    Joystick2Button5 = 375,
-    //
-    // 요약:
-    //     Button 6 on second joystick.
-    Joystick2Button6 = 376,
-    //
-    // 요약:
-    //     Button 7 on second joystick.
-    Joystick2Button7 = 377,
-    //
-    // 요약:
-    //     Button 8 on second joystick.
-    Joystick2Button8 = 378,
-    //
-    // 요약:
-    //     Button 9 on second joystick.
-    Joystick2Button9 = 379,
-    //
-    // 요약:
-    //     Button 10 on second joystick.
-    Joystick2Button10 = 380,
-    //
-    // 요약:
-    //     Button 11 on second joystick.
-    Joystick2Button11 = 381,
-    //
-    // 요약:
-    //     Button 12 on second joystick.
-    Joystick2Button12 = 382,
-    //
-    // 요약:
-    //     Button 13 on second joystick.
-    Joystick2Button13 = 383,
-    //
-    // 요약:
-    //     Button 14 on second joystick.
-    Joystick2Button14 = 384,
-    //
-    // 요약:
-    //     Button 15 on second joystick.
-    Joystick2Button15 = 385,
-    //
-    // 요약:
-    //     Button 16 on second joystick.
-    Joystick2Button16 = 386,
-    //
-    // 요약:
-    //     Button 17 on second joystick.
-    Joystick2Button17 = 387,
-    //
-    // 요약:
-    //     Button 18 on second joystick.
-    Joystick2Button18 = 388,
-    //
-    // 요약:
-    //     Button 19 on second joystick.
-    Joystick2Button19 = 389,
-    //
-    // 요약:
-    //     Button 0 on third joystick.
-    Joystick3Button0 = 390,
-    //
-    // 요약:
-    //     Button 1 on third joystick.
-    Joystick3Button1 = 391,
-    //
-    // 요약:
-    //     Button 2 on third joystick.
-    Joystick3Button2 = 392,
-    //
-    // 요약:
-    //     Button 3 on third joystick.
-    Joystick3Button3 = 393,
-    //
-    // 요약:
-    //     Button 4 on third joystick.
-    Joystick3Button4 = 394,
-    //
-    // 요약:
-    //     Button 5 on third joystick.
-    Joystick3Button5 = 395,
-    //
-    // 요약:
-    //     Button 6 on third joystick.
-    Joystick3Button6 = 396,
-    //
-    // 요약:
-    //     Button 7 on third joystick.
-    Joystick3Button7 = 397,
-    //
-    // 요약:
-    //     Button 8 on third joystick.
-    Joystick3Button8 = 398,
-    //
-    // 요약:
-    //     Button 9 on third joystick.
-    Joystick3Button9 = 399,
-    //
-    // 요약:
-    //     Button 10 on third joystick.
-    Joystick3Button10 = 400,
-    //
-    // 요약:
-    //     Button 11 on third joystick.
-    Joystick3Button11 = 401,
-    //
-    // 요약:
-    //     Button 12 on third joystick.
-    Joystick3Button12 = 402,
-    //
-    // 요약:
-    //     Button 13 on third joystick.
-    Joystick3Button13 = 403,
-    //
-    // 요약:
-    //     Button 14 on third joystick.
-    Joystick3Button14 = 404,
-    //
-    // 요약:
-    //     Button 15 on third joystick.
-    Joystick3Button15 = 405,
-    //
-    // 요약:
-    //     Button 16 on third joystick.
-    Joystick3Button16 = 406,
-    //
-    // 요약:
-    //     Button 17 on third joystick.
-    Joystick3Button17 = 407,
-    //
-    // 요약:
-    //     Button 18 on third joystick.
-    Joystick3Button18 = 408,
-    //
-    // 요약:
-    //     Button 19 on third joystick.
-    Joystick3Button19 = 409,
-    //
-    // 요약:
-    //     Button 0 on forth joystick.
-    Joystick4Button0 = 410,
-    //
-    // 요약:
-    //     Button 1 on forth joystick.
-    Joystick4Button1 = 411,
-    //
-    // 요약:
-    //     Button 2 on forth joystick.
-    Joystick4Button2 = 412,
-    //
-    // 요약:
-    //     Button 3 on forth joystick.
-    Joystick4Button3 = 413,
-    //
-    // 요약:
-    //     Button 4 on forth joystick.
-    Joystick4Button4 = 414,
-    //
-    // 요약:
-    //     Button 5 on forth joystick.
-    Joystick4Button5 = 415,
-    //
-    // 요약:
-    //     Button 6 on forth joystick.
-    Joystick4Button6 = 416,
-    //
-    // 요약:
-    //     Button 7 on forth joystick.
-    Joystick4Button7 = 417,
-    //
-    // 요약:
-    //     Button 8 on forth joystick.
-    Joystick4Button8 = 418,
-    //
-    // 요약:
-    //     Button 9 on forth joystick.
-    Joystick4Button9 = 419,
-    //
-    // 요약:
-    //     Button 10 on forth joystick.
-    Joystick4Button10 = 420,
-    //
-    // 요약:
-    //     Button 11 on forth joystick.
-    Joystick4Button11 = 421,
-    //
-    // 요약:
-    //     Button 12 on forth joystick.
-    Joystick4Button12 = 422,
-    //
-    // 요약:
-    //     Button 13 on forth joystick.
-    Joystick4Button13 = 423,
-    //
-    // 요약:
-    //     Button 14 on forth joystick.
-    Joystick4Button14 = 424,
-    //
-    // 요약:
-    //     Button 15 on forth joystick.
-    Joystick4Button15 = 425,
-    //
-    // 요약:
-    //     Button 16 on forth joystick.
-    Joystick4Button16 = 426,
-    //
-    // 요약:
-    //     Button 17 on forth joystick.
-    Joystick4Button17 = 427,
-    //
-    // 요약:
-    //     Button 18 on forth joystick.
-    Joystick4Button18 = 428,
-    //
-    // 요약:
-    //     Button 19 on forth joystick.
-    Joystick4Button19 = 429,
-    //
-    // 요약:
-    //     Button 0 on fifth joystick.
-    Joystick5Button0 = 430,
-    //
-    // 요약:
-    //     Button 1 on fifth joystick.
-    Joystick5Button1 = 431,
-    //
-    // 요약:
-    //     Button 2 on fifth joystick.
-    Joystick5Button2 = 432,
-    //
-    // 요약:
-    //     Button 3 on fifth joystick.
-    Joystick5Button3 = 433,
-    //
-    // 요약:
-    //     Button 4 on fifth joystick.
-    Joystick5Button4 = 434,
-    //
-    // 요약:
-    //     Button 5 on fifth joystick.
-    Joystick5Button5 = 435,
-    //
-    // 요약:
-    //     Button 6 on fifth joystick.
-    Joystick5Button6 = 436,
-    //
-    // 요약:
-    //     Button 7 on fifth joystick.
-    Joystick5Button7 = 437,
-    //
-    // 요약:
-    //     Button 8 on fifth joystick.
-    Joystick5Button8 = 438,
-    //
-    // 요약:
-    //     Button 9 on fifth joystick.
-    Joystick5Button9 = 439,
-    //
-    // 요약:
-    //     Button 10 on fifth joystick.
-    Joystick5Button10 = 440,
-    //
-    // 요약:
-    //     Button 11 on fifth joystick.
-    Joystick5Button11 = 441,
-    //
-    // 요약:
-    //     Button 12 on fifth joystick.
-    Joystick5Button12 = 442,
-    //
-    // 요약:
-    //     Button 13 on fifth joystick.
-    Joystick5Button13 = 443,
-    //
-    // 요약:
-    //     Button 14 on fifth joystick.
-    Joystick5Button14 = 444,
-    //
-    // 요약:
-    //     Button 15 on fifth joystick.
-    Joystick5Button15 = 445,
-    //
-    // 요약:
-    //     Button 16 on fifth joystick.
-    Joystick5Button16 = 446,
-    //
-    // 요약:
-    //     Button 17 on fifth joystick.
-    Joystick5Button17 = 447,
-    //
-    // 요약:
-    //     Button 18 on fifth joystick.
-    Joystick5Button18 = 448,
-    //
-    // 요약:
-    //     Button 19 on fifth joystick.
-    Joystick5Button19 = 449,
-    //
-    // 요약:
-    //     Button 0 on sixth joystick.
-    Joystick6Button0 = 450,
-    //
-    // 요약:
-    //     Button 1 on sixth joystick.
-    Joystick6Button1 = 451,
-    //
-    // 요약:
-    //     Button 2 on sixth joystick.
-    Joystick6Button2 = 452,
-    //
-    // 요약:
-    //     Button 3 on sixth joystick.
-    Joystick6Button3 = 453,
-    //
-    // 요약:
-    //     Button 4 on sixth joystick.
-    Joystick6Button4 = 454,
-    //
-    // 요약:
-    //     Button 5 on sixth joystick.
-    Joystick6Button5 = 455,
-    //
-    // 요약:
-    //     Button 6 on sixth joystick.
-    Joystick6Button6 = 456,
-    //
-    // 요약:
-    //     Button 7 on sixth joystick.
-    Joystick6Button7 = 457,
-    //
-    // 요약:
-    //     Button 8 on sixth joystick.
-    Joystick6Button8 = 458,
-    //
-    // 요약:
-    //     Button 9 on sixth joystick.
-    Joystick6Button9 = 459,
-    //
-    // 요약:
-    //     Button 10 on sixth joystick.
-    Joystick6Button10 = 460,
-    //
-    // 요약:
-    //     Button 11 on sixth joystick.
-    Joystick6Button11 = 461,
-    //
-    // 요약:
-    //     Button 12 on sixth joystick.
-    Joystick6Button12 = 462,
-    //
-    // 요약:
-    //     Button 13 on sixth joystick.
-    Joystick6Button13 = 463,
-    //
-    // 요약:
-    //     Button 14 on sixth joystick.
-    Joystick6Button14 = 464,
-    //
-    // 요약:
-    //     Button 15 on sixth joystick.
-    Joystick6Button15 = 465,
-    //
-    // 요약:
-    //     Button 16 on sixth joystick.
-    Joystick6Button16 = 466,
-    //
-    // 요약:
-    //     Button 17 on sixth joystick.
-    Joystick6Button17 = 467,
-    //
-    // 요약:
-    //     Button 18 on sixth joystick.
-    Joystick6Button18 = 468,
-    //
-    // 요약:
-    //     Button 19 on sixth joystick.
-    Joystick6Button19 = 469,
-    //
-    // 요약:
-    //     Button 0 on seventh joystick.
-    Joystick7Button0 = 470,
-    //
-    // 요약:
-    //     Button 1 on seventh joystick.
-    Joystick7Button1 = 471,
-    //
-    // 요약:
-    //     Button 2 on seventh joystick.
-    Joystick7Button2 = 472,
-    //
-    // 요약:
-    //     Button 3 on seventh joystick.
-    Joystick7Button3 = 473,
-    //
-    // 요약:
-    //     Button 4 on seventh joystick.
-    Joystick7Button4 = 474,
-    //
-    // 요약:
-    //     Button 5 on seventh joystick.
-    Joystick7Button5 = 475,
-    //
-    // 요약:
-    //     Button 6 on seventh joystick.
-    Joystick7Button6 = 476,
-    //
-    // 요약:
-    //     Button 7 on seventh joystick.
-    Joystick7Button7 = 477,
-    //
-    // 요약:
-    //     Button 8 on seventh joystick.
-    Joystick7Button8 = 478,
-    //
-    // 요약:
-    //     Button 9 on seventh joystick.
-    Joystick7Button9 = 479,
-    //
-    // 요약:
-    //     Button 10 on seventh joystick.
-    Joystick7Button10 = 480,
-    //
-    // 요약:
-    //     Button 11 on seventh joystick.
-    Joystick7Button11 = 481,
-    //
-    // 요약:
-    //     Button 12 on seventh joystick.
-    Joystick7Button12 = 482,
-    //
-    // 요약:
-    //     Button 13 on seventh joystick.
-    Joystick7Button13 = 483,
-    //
-    // 요약:
-    //     Button 14 on seventh joystick.
-    Joystick7Button14 = 484,
-    //
-    // 요약:
-    //     Button 15 on seventh joystick.
-    Joystick7Button15 = 485,
-    //
-    // 요약:
-    //     Button 16 on seventh joystick.
-    Joystick7Button16 = 486,
-    //
-    // 요약:
-    //     Button 17 on seventh joystick.
-    Joystick7Button17 = 487,
-    //
-    // 요약:
-    //     Button 18 on seventh joystick.
-    Joystick7Button18 = 488,
-    //
-    // 요약:
-    //     Button 19 on seventh joystick.
-    Joystick7Button19 = 489,
-    //
-    // 요약:
-    //     Button 0 on eighth joystick.
-    Joystick8Button0 = 490,
-    //
-    // 요약:
-    //     Button 1 on eighth joystick.
-    Joystick8Button1 = 491,
-    //
-    // 요약:
-    //     Button 2 on eighth joystick.
-    Joystick8Button2 = 492,
-    //
-    // 요약:
-    //     Button 3 on eighth joystick.
-    Joystick8Button3 = 493,
-    //
-    // 요약:
-    //     Button 4 on eighth joystick.
-    Joystick8Button4 = 494,
-    //
-    // 요약:
-    //     Button 5 on eighth joystick.
-    Joystick8Button5 = 495,
-    //
-    // 요약:
-    //     Button 6 on eighth joystick.
-    Joystick8Button6 = 496,
-    //
-    // 요약:
-    //     Button 7 on eighth joystick.
-    Joystick8Button7 = 497,
-    //
-    // 요약:
-    //     Button 8 on eighth joystick.
-    Joystick8Button8 = 498,
-    //
-    // 요약:
-    //     Button 9 on eighth joystick.
-    Joystick8Button9 = 499,
-    //
-    // 요약:
-    //     Button 10 on eighth joystick.
-    Joystick8Button10 = 500,
-    //
-    // 요약:
-    //     Button 11 on eighth joystick.
-    Joystick8Button11 = 501,
-    //
-    // 요약:
-    //     Button 12 on eighth joystick.
-    Joystick8Button12 = 502,
-    //
-    // 요약:
-    //     Button 13 on eighth joystick.
-    Joystick8Button13 = 503,
-    //
-    // 요약:
-    //     Button 14 on eighth joystick.
-    Joystick8Button14 = 504,
-    //
-    // 요약:
-    //     Button 15 on eighth joystick.
-    Joystick8Button15 = 505,
-    //
-    // 요약:
-    //     Button 16 on eighth joystick.
-    Joystick8Button16 = 506,
-    //
-    // 요약:
-    //     Button 17 on eighth joystick.
-    Joystick8Button17 = 507,
-    //
-    // 요약:
-    //     Button 18 on eighth joystick.
-    Joystick8Button18 = 508,
-    //
-    // 요약:
-    //     Button 19 on eighth joystick.
-    Joystick8Button19 = 509
-};
+	enum en_UnityKeyCode
+	{
+		//
+		// 요약:
+		//     Not assigned (never returned as the result of a keystroke).
+		None = 0,
+		//
+		// 요약:
+		//     The backspace key.
+		Backspace = 8,
+		//
+		// 요약:
+		//     The tab key.
+		Tab = 9,
+		//
+		// 요약:
+		//     The Clear key.
+		Clear = 12,
+		//
+		// 요약:
+		//     Return key.
+		Return = 13,
+		//
+		// 요약:
+		//     Pause on PC machines.
+		Pause = 19,
+		//
+		// 요약:
+		//     Escape key.
+		Escape = 27,
+		//
+		// 요약:
+		//     Space key.
+		Space = 32,
+		//
+		// 요약:
+		//     Exclamation mark key '!'.
+		Exclaim = 33,
+		//
+		// 요약:
+		//     Double quote key '"'.
+		DoubleQuote = 34,
+		//
+		// 요약:
+		//     Hash key '#'.
+		Hash = 35,
+		//
+		// 요약:
+		//     Dollar sign key '$'.
+		Dollar = 36,
+		//
+		// 요약:
+		//     Percent '%' key.
+		Percent = 37,
+		//
+		// 요약:
+		//     Ampersand key '&'.
+		Ampersand = 38,
+		//
+		// 요약:
+		//     Quote key '.
+		Quote = 39,
+		//
+		// 요약:
+		//     Left Parenthesis key '('.
+		LeftParen = 40,
+		//
+		// 요약:
+		//     Right Parenthesis key ')'.
+		RightParen = 41,
+		//
+		// 요약:
+		//     Asterisk key '*'.
+		Asterisk = 42,
+		//
+		// 요약:
+		//     Plus key '+'.
+		Plus = 43,
+		//
+		// 요약:
+		//     Comma ',' key.
+		Comma = 44,
+		//
+		// 요약:
+		//     Minus '-' key.
+		Minus = 45,
+		//
+		// 요약:
+		//     Period '.' key.
+		Period = 46,
+		//
+		// 요약:
+		//     Slash '/' key.
+		Slash = 47,
+		//
+		// 요약:
+		//     The '0' key on the top of the alphanumeric keyboard.
+		Alpha0 = 48,
+		//
+		// 요약:
+		//     The '1' key on the top of the alphanumeric keyboard.
+		Alpha1 = 49,
+		//
+		// 요약:
+		//     The '2' key on the top of the alphanumeric keyboard.
+		Alpha2 = 50,
+		//
+		// 요약:
+		//     The '3' key on the top of the alphanumeric keyboard.
+		Alpha3 = 51,
+		//
+		// 요약:
+		//     The '4' key on the top of the alphanumeric keyboard.
+		Alpha4 = 52,
+		//
+		// 요약:
+		//     The '5' key on the top of the alphanumeric keyboard.
+		Alpha5 = 53,
+		//
+		// 요약:
+		//     The '6' key on the top of the alphanumeric keyboard.
+		Alpha6 = 54,
+		//
+		// 요약:
+		//     The '7' key on the top of the alphanumeric keyboard.
+		Alpha7 = 55,
+		//
+		// 요약:
+		//     The '8' key on the top of the alphanumeric keyboard.
+		Alpha8 = 56,
+		//
+		// 요약:
+		//     The '9' key on the top of the alphanumeric keyboard.
+		Alpha9 = 57,
+		//
+		// 요약:
+		//     Colon ':' key.
+		Colon = 58,
+		//
+		// 요약:
+		//     Semicolon ';' key.
+		Semicolon = 59,
+		//
+		// 요약:
+		//     Less than '<' key.
+		Less = 60,
+		//
+		// 요약:
+		//     Equals '=' key.
+		Equals = 61,
+		//
+		// 요약:
+		//     Greater than '>' key.
+		Greater = 62,
+		//
+		// 요약:
+		//     Question mark '?' key.
+		Question = 63,
+		//
+		// 요약:
+		//     At key '@'.
+		At = 64,
+		//
+		// 요약:
+		//     Left square bracket key '['.
+		LeftBracket = 91,
+		//
+		// 요약:
+		//     Backslash key '\'.
+		Backslash = 92,
+		//
+		// 요약:
+		//     Right square bracket key ']'.
+		RightBracket = 93,
+		//
+		// 요약:
+		//     Caret key '^'.
+		Caret = 94,
+		//
+		// 요약:
+		//     Underscore '_' key.
+		Underscore = 95,
+		//
+		// 요약:
+		//     Back quote key '`'.
+		BackQuote = 96,
+		//
+		// 요약:
+		//     'a' key.
+		A = 97,
+		//
+		// 요약:
+		//     'b' key.
+		B = 98,
+		//
+		// 요약:
+		//     'c' key.
+		C = 99,
+		//
+		// 요약:
+		//     'd' key.
+		D = 100,
+		//
+		// 요약:
+		//     'e' key.
+		E = 101,
+		//
+		// 요약:
+		//     'f' key.
+		F = 102,
+		//
+		// 요약:
+		//     'g' key.
+		G = 103,
+		//
+		// 요약:
+		//     'h' key.
+		H = 104,
+		//
+		// 요약:
+		//     'i' key.
+		I = 105,
+		//
+		// 요약:
+		//     'j' key.
+		J = 106,
+		//
+		// 요약:
+		//     'k' key.
+		K = 107,
+		//
+		// 요약:
+		//     'l' key.
+		L = 108,
+		//
+		// 요약:
+		//     'm' key.
+		M = 109,
+		//
+		// 요약:
+		//     'n' key.
+		N = 110,
+		//
+		// 요약:
+		//     'o' key.
+		O = 111,
+		//
+		// 요약:
+		//     'p' key.
+		P = 112,
+		//
+		// 요약:
+		//     'q' key.
+		Q = 113,
+		//
+		// 요약:
+		//     'r' key.
+		R = 114,
+		//
+		// 요약:
+		//     's' key.
+		S = 115,
+		//
+		// 요약:
+		//     't' key.
+		T = 116,
+		//
+		// 요약:
+		//     'u' key.
+		U = 117,
+		//
+		// 요약:
+		//     'v' key.
+		V = 118,
+		//
+		// 요약:
+		//     'w' key.
+		W = 119,
+		//
+		// 요약:
+		//     'x' key.
+		X = 120,
+		//
+		// 요약:
+		//     'y' key.
+		Y = 121,
+		//
+		// 요약:
+		//     'z' key.
+		Z = 122,
+		//
+		// 요약:
+		//     Left curly bracket key '{'.
+		LeftCurlyBracket = 123,
+		//
+		// 요약:
+		//     Pipe '|' key.
+		Pipe = 124,
+		//
+		// 요약:
+		//     Right curly bracket key '}'.
+		RightCurlyBracket = 125,
+		//
+		// 요약:
+		//     Tilde '~' key.
+		Tilde = 126,
+		//
+		// 요약:
+		//     The forward delete key.
+		Delete = 127,
+		//
+		// 요약:
+		//     Numeric keypad 0.
+		Keypad0 = 256,
+		//
+		// 요약:
+		//     Numeric keypad 1.
+		Keypad1 = 257,
+		//
+		// 요약:
+		//     Numeric keypad 2.
+		Keypad2 = 258,
+		//
+		// 요약:
+		//     Numeric keypad 3.
+		Keypad3 = 259,
+		//
+		// 요약:
+		//     Numeric keypad 4.
+		Keypad4 = 260,
+		//
+		// 요약:
+		//     Numeric keypad 5.
+		Keypad5 = 261,
+		//
+		// 요약:
+		//     Numeric keypad 6.
+		Keypad6 = 262,
+		//
+		// 요약:
+		//     Numeric keypad 7.
+		Keypad7 = 263,
+		//
+		// 요약:
+		//     Numeric keypad 8.
+		Keypad8 = 264,
+		//
+		// 요약:
+		//     Numeric keypad 9.
+		Keypad9 = 265,
+		//
+		// 요약:
+		//     Numeric keypad '.'.
+		KeypadPeriod = 266,
+		//
+		// 요약:
+		//     Numeric keypad '/'.
+		KeypadDivide = 267,
+		//
+		// 요약:
+		//     Numeric keypad '*'.
+		KeypadMultiply = 268,
+		//
+		// 요약:
+		//     Numeric keypad '-'.
+		KeypadMinus = 269,
+		//
+		// 요약:
+		//     Numeric keypad '+'.
+		KeypadPlus = 270,
+		//
+		// 요약:
+		//     Numeric keypad Enter.
+		KeypadEnter = 271,
+		//
+		// 요약:
+		//     Numeric keypad '='.
+		KeypadEquals = 272,
+		//
+		// 요약:
+		//     Up arrow key.
+		UpArrow = 273,
+		//
+		// 요약:
+		//     Down arrow key.
+		DownArrow = 274,
+		//
+		// 요약:
+		//     Right arrow key.
+		RightArrow = 275,
+		//
+		// 요약:
+		//     Left arrow key.
+		LeftArrow = 276,
+		//
+		// 요약:
+		//     Insert key key.
+		Insert = 277,
+		//
+		// 요약:
+		//     Home key.
+		Home = 278,
+		//
+		// 요약:
+		//     End key.
+		End = 279,
+		//
+		// 요약:
+		//     Page up.
+		PageUp = 280,
+		//
+		// 요약:
+		//     Page down.
+		PageDown = 281,
+		//
+		// 요약:
+		//     F1 function key.
+		F1 = 282,
+		//
+		// 요약:
+		//     F2 function key.
+		F2 = 283,
+		//
+		// 요약:
+		//     F3 function key.
+		F3 = 284,
+		//
+		// 요약:
+		//     F4 function key.
+		F4 = 285,
+		//
+		// 요약:
+		//     F5 function key.
+		F5 = 286,
+		//
+		// 요약:
+		//     F6 function key.
+		F6 = 287,
+		//
+		// 요약:
+		//     F7 function key.
+		F7 = 288,
+		//
+		// 요약:
+		//     F8 function key.
+		F8 = 289,
+		//
+		// 요약:
+		//     F9 function key.
+		F9 = 290,
+		//
+		// 요약:
+		//     F10 function key.
+		F10 = 291,
+		//
+		// 요약:
+		//     F11 function key.
+		F11 = 292,
+		//
+		// 요약:
+		//     F12 function key.
+		F12 = 293,
+		//
+		// 요약:
+		//     F13 function key.
+		F13 = 294,
+		//
+		// 요약:
+		//     F14 function key.
+		F14 = 295,
+		//
+		// 요약:
+		//     F15 function key.
+		F15 = 296,
+		//
+		// 요약:
+		//     Numlock key.
+		Numlock = 300,
+		//
+		// 요약:
+		//     Capslock key.
+		CapsLock = 301,
+		//
+		// 요약:
+		//     Scroll lock key.
+		ScrollLock = 302,
+		//
+		// 요약:
+		//     Right shift key.
+		RightShift = 303,
+		//
+		// 요약:
+		//     Left shift key.
+		LeftShift = 304,
+		//
+		// 요약:
+		//     Right Control key.
+		RightControl = 305,
+		//
+		// 요약:
+		//     Left Control key.
+		LeftControl = 306,
+		//
+		// 요약:
+		//     Right Alt key.
+		RightAlt = 307,
+		//
+		// 요약:
+		//     Left Alt key.
+		LeftAlt = 308,
+		//
+		// 요약:
+		//     Right Command key.
+		RightCommand = 309,
+		//
+		// 요약:
+		//     Right Command key.
+		RightApple = 309,
+		//
+		// 요약:
+		//     Left Command key.
+		LeftCommand = 310,
+		//
+		// 요약:
+		//     Left Command key.
+		LeftApple = 310,
+		//
+		// 요약:
+		//     Left Windows key.
+		LeftWindows = 311,
+		//
+		// 요약:
+		//     Right Windows key.
+		RightWindows = 312,
+		//
+		// 요약:
+		//     Alt Gr key.
+		AltGr = 313,
+		//
+		// 요약:
+		//     Help key.
+		Help = 315,
+		//
+		// 요약:
+		//     Print key.
+		Print = 316,
+		//
+		// 요약:
+		//     Sys Req key.
+		SysReq = 317,
+		//
+		// 요약:
+		//     Break key.
+		Break = 318,
+		//
+		// 요약:
+		//     Menu key.
+		Menu = 319,
+		//
+		// 요약:
+		//     The Left (or primary) mouse button.
+		Mouse0 = 323,
+		//
+		// 요약:
+		//     Right mouse button (or secondary mouse button).
+		Mouse1 = 324,
+		//
+		// 요약:
+		//     Middle mouse button (or third button).
+		Mouse2 = 325,
+		//
+		// 요약:
+		//     Additional (fourth) mouse button.
+		Mouse3 = 326,
+		//
+		// 요약:
+		//     Additional (fifth) mouse button.
+		Mouse4 = 327,
+		//
+		// 요약:
+		//     Additional (or sixth) mouse button.
+		Mouse5 = 328,
+		//
+		// 요약:
+		//     Additional (or seventh) mouse button.
+		Mouse6 = 329,
+		//
+		// 요약:
+		//     Button 0 on any joystick.
+		JoystickButton0 = 330,
+		//
+		// 요약:
+		//     Button 1 on any joystick.
+		JoystickButton1 = 331,
+		//
+		// 요약:
+		//     Button 2 on any joystick.
+		JoystickButton2 = 332,
+		//
+		// 요약:
+		//     Button 3 on any joystick.
+		JoystickButton3 = 333,
+		//
+		// 요약:
+		//     Button 4 on any joystick.
+		JoystickButton4 = 334,
+		//
+		// 요약:
+		//     Button 5 on any joystick.
+		JoystickButton5 = 335,
+		//
+		// 요약:
+		//     Button 6 on any joystick.
+		JoystickButton6 = 336,
+		//
+		// 요약:
+		//     Button 7 on any joystick.
+		JoystickButton7 = 337,
+		//
+		// 요약:
+		//     Button 8 on any joystick.
+		JoystickButton8 = 338,
+		//
+		// 요약:
+		//     Button 9 on any joystick.
+		JoystickButton9 = 339,
+		//
+		// 요약:
+		//     Button 10 on any joystick.
+		JoystickButton10 = 340,
+		//
+		// 요약:
+		//     Button 11 on any joystick.
+		JoystickButton11 = 341,
+		//
+		// 요약:
+		//     Button 12 on any joystick.
+		JoystickButton12 = 342,
+		//
+		// 요약:
+		//     Button 13 on any joystick.
+		JoystickButton13 = 343,
+		//
+		// 요약:
+		//     Button 14 on any joystick.
+		JoystickButton14 = 344,
+		//
+		// 요약:
+		//     Button 15 on any joystick.
+		JoystickButton15 = 345,
+		//
+		// 요약:
+		//     Button 16 on any joystick.
+		JoystickButton16 = 346,
+		//
+		// 요약:
+		//     Button 17 on any joystick.
+		JoystickButton17 = 347,
+		//
+		// 요약:
+		//     Button 18 on any joystick.
+		JoystickButton18 = 348,
+		//
+		// 요약:
+		//     Button 19 on any joystick.
+		JoystickButton19 = 349,
+		//
+		// 요약:
+		//     Button 0 on first joystick.
+		Joystick1Button0 = 350,
+		//
+		// 요약:
+		//     Button 1 on first joystick.
+		Joystick1Button1 = 351,
+		//
+		// 요약:
+		//     Button 2 on first joystick.
+		Joystick1Button2 = 352,
+		//
+		// 요약:
+		//     Button 3 on first joystick.
+		Joystick1Button3 = 353,
+		//
+		// 요약:
+		//     Button 4 on first joystick.
+		Joystick1Button4 = 354,
+		//
+		// 요약:
+		//     Button 5 on first joystick.
+		Joystick1Button5 = 355,
+		//
+		// 요약:
+		//     Button 6 on first joystick.
+		Joystick1Button6 = 356,
+		//
+		// 요약:
+		//     Button 7 on first joystick.
+		Joystick1Button7 = 357,
+		//
+		// 요약:
+		//     Button 8 on first joystick.
+		Joystick1Button8 = 358,
+		//
+		// 요약:
+		//     Button 9 on first joystick.
+		Joystick1Button9 = 359,
+		//
+		// 요약:
+		//     Button 10 on first joystick.
+		Joystick1Button10 = 360,
+		//
+		// 요약:
+		//     Button 11 on first joystick.
+		Joystick1Button11 = 361,
+		//
+		// 요약:
+		//     Button 12 on first joystick.
+		Joystick1Button12 = 362,
+		//
+		// 요약:
+		//     Button 13 on first joystick.
+		Joystick1Button13 = 363,
+		//
+		// 요약:
+		//     Button 14 on first joystick.
+		Joystick1Button14 = 364,
+		//
+		// 요약:
+		//     Button 15 on first joystick.
+		Joystick1Button15 = 365,
+		//
+		// 요약:
+		//     Button 16 on first joystick.
+		Joystick1Button16 = 366,
+		//
+		// 요약:
+		//     Button 17 on first joystick.
+		Joystick1Button17 = 367,
+		//
+		// 요약:
+		//     Button 18 on first joystick.
+		Joystick1Button18 = 368,
+		//
+		// 요약:
+		//     Button 19 on first joystick.
+		Joystick1Button19 = 369,
+		//
+		// 요약:
+		//     Button 0 on second joystick.
+		Joystick2Button0 = 370,
+		//
+		// 요약:
+		//     Button 1 on second joystick.
+		Joystick2Button1 = 371,
+		//
+		// 요약:
+		//     Button 2 on second joystick.
+		Joystick2Button2 = 372,
+		//
+		// 요약:
+		//     Button 3 on second joystick.
+		Joystick2Button3 = 373,
+		//
+		// 요약:
+		//     Button 4 on second joystick.
+		Joystick2Button4 = 374,
+		//
+		// 요약:
+		//     Button 5 on second joystick.
+		Joystick2Button5 = 375,
+		//
+		// 요약:
+		//     Button 6 on second joystick.
+		Joystick2Button6 = 376,
+		//
+		// 요약:
+		//     Button 7 on second joystick.
+		Joystick2Button7 = 377,
+		//
+		// 요약:
+		//     Button 8 on second joystick.
+		Joystick2Button8 = 378,
+		//
+		// 요약:
+		//     Button 9 on second joystick.
+		Joystick2Button9 = 379,
+		//
+		// 요약:
+		//     Button 10 on second joystick.
+		Joystick2Button10 = 380,
+		//
+		// 요약:
+		//     Button 11 on second joystick.
+		Joystick2Button11 = 381,
+		//
+		// 요약:
+		//     Button 12 on second joystick.
+		Joystick2Button12 = 382,
+		//
+		// 요약:
+		//     Button 13 on second joystick.
+		Joystick2Button13 = 383,
+		//
+		// 요약:
+		//     Button 14 on second joystick.
+		Joystick2Button14 = 384,
+		//
+		// 요약:
+		//     Button 15 on second joystick.
+		Joystick2Button15 = 385,
+		//
+		// 요약:
+		//     Button 16 on second joystick.
+		Joystick2Button16 = 386,
+		//
+		// 요약:
+		//     Button 17 on second joystick.
+		Joystick2Button17 = 387,
+		//
+		// 요약:
+		//     Button 18 on second joystick.
+		Joystick2Button18 = 388,
+		//
+		// 요약:
+		//     Button 19 on second joystick.
+		Joystick2Button19 = 389,
+		//
+		// 요약:
+		//     Button 0 on third joystick.
+		Joystick3Button0 = 390,
+		//
+		// 요약:
+		//     Button 1 on third joystick.
+		Joystick3Button1 = 391,
+		//
+		// 요약:
+		//     Button 2 on third joystick.
+		Joystick3Button2 = 392,
+		//
+		// 요약:
+		//     Button 3 on third joystick.
+		Joystick3Button3 = 393,
+		//
+		// 요약:
+		//     Button 4 on third joystick.
+		Joystick3Button4 = 394,
+		//
+		// 요약:
+		//     Button 5 on third joystick.
+		Joystick3Button5 = 395,
+		//
+		// 요약:
+		//     Button 6 on third joystick.
+		Joystick3Button6 = 396,
+		//
+		// 요약:
+		//     Button 7 on third joystick.
+		Joystick3Button7 = 397,
+		//
+		// 요약:
+		//     Button 8 on third joystick.
+		Joystick3Button8 = 398,
+		//
+		// 요약:
+		//     Button 9 on third joystick.
+		Joystick3Button9 = 399,
+		//
+		// 요약:
+		//     Button 10 on third joystick.
+		Joystick3Button10 = 400,
+		//
+		// 요약:
+		//     Button 11 on third joystick.
+		Joystick3Button11 = 401,
+		//
+		// 요약:
+		//     Button 12 on third joystick.
+		Joystick3Button12 = 402,
+		//
+		// 요약:
+		//     Button 13 on third joystick.
+		Joystick3Button13 = 403,
+		//
+		// 요약:
+		//     Button 14 on third joystick.
+		Joystick3Button14 = 404,
+		//
+		// 요약:
+		//     Button 15 on third joystick.
+		Joystick3Button15 = 405,
+		//
+		// 요약:
+		//     Button 16 on third joystick.
+		Joystick3Button16 = 406,
+		//
+		// 요약:
+		//     Button 17 on third joystick.
+		Joystick3Button17 = 407,
+		//
+		// 요약:
+		//     Button 18 on third joystick.
+		Joystick3Button18 = 408,
+		//
+		// 요약:
+		//     Button 19 on third joystick.
+		Joystick3Button19 = 409,
+		//
+		// 요약:
+		//     Button 0 on forth joystick.
+		Joystick4Button0 = 410,
+		//
+		// 요약:
+		//     Button 1 on forth joystick.
+		Joystick4Button1 = 411,
+		//
+		// 요약:
+		//     Button 2 on forth joystick.
+		Joystick4Button2 = 412,
+		//
+		// 요약:
+		//     Button 3 on forth joystick.
+		Joystick4Button3 = 413,
+		//
+		// 요약:
+		//     Button 4 on forth joystick.
+		Joystick4Button4 = 414,
+		//
+		// 요약:
+		//     Button 5 on forth joystick.
+		Joystick4Button5 = 415,
+		//
+		// 요약:
+		//     Button 6 on forth joystick.
+		Joystick4Button6 = 416,
+		//
+		// 요약:
+		//     Button 7 on forth joystick.
+		Joystick4Button7 = 417,
+		//
+		// 요약:
+		//     Button 8 on forth joystick.
+		Joystick4Button8 = 418,
+		//
+		// 요약:
+		//     Button 9 on forth joystick.
+		Joystick4Button9 = 419,
+		//
+		// 요약:
+		//     Button 10 on forth joystick.
+		Joystick4Button10 = 420,
+		//
+		// 요약:
+		//     Button 11 on forth joystick.
+		Joystick4Button11 = 421,
+		//
+		// 요약:
+		//     Button 12 on forth joystick.
+		Joystick4Button12 = 422,
+		//
+		// 요약:
+		//     Button 13 on forth joystick.
+		Joystick4Button13 = 423,
+		//
+		// 요약:
+		//     Button 14 on forth joystick.
+		Joystick4Button14 = 424,
+		//
+		// 요약:
+		//     Button 15 on forth joystick.
+		Joystick4Button15 = 425,
+		//
+		// 요약:
+		//     Button 16 on forth joystick.
+		Joystick4Button16 = 426,
+		//
+		// 요약:
+		//     Button 17 on forth joystick.
+		Joystick4Button17 = 427,
+		//
+		// 요약:
+		//     Button 18 on forth joystick.
+		Joystick4Button18 = 428,
+		//
+		// 요약:
+		//     Button 19 on forth joystick.
+		Joystick4Button19 = 429,
+		//
+		// 요약:
+		//     Button 0 on fifth joystick.
+		Joystick5Button0 = 430,
+		//
+		// 요약:
+		//     Button 1 on fifth joystick.
+		Joystick5Button1 = 431,
+		//
+		// 요약:
+		//     Button 2 on fifth joystick.
+		Joystick5Button2 = 432,
+		//
+		// 요약:
+		//     Button 3 on fifth joystick.
+		Joystick5Button3 = 433,
+		//
+		// 요약:
+		//     Button 4 on fifth joystick.
+		Joystick5Button4 = 434,
+		//
+		// 요약:
+		//     Button 5 on fifth joystick.
+		Joystick5Button5 = 435,
+		//
+		// 요약:
+		//     Button 6 on fifth joystick.
+		Joystick5Button6 = 436,
+		//
+		// 요약:
+		//     Button 7 on fifth joystick.
+		Joystick5Button7 = 437,
+		//
+		// 요약:
+		//     Button 8 on fifth joystick.
+		Joystick5Button8 = 438,
+		//
+		// 요약:
+		//     Button 9 on fifth joystick.
+		Joystick5Button9 = 439,
+		//
+		// 요약:
+		//     Button 10 on fifth joystick.
+		Joystick5Button10 = 440,
+		//
+		// 요약:
+		//     Button 11 on fifth joystick.
+		Joystick5Button11 = 441,
+		//
+		// 요약:
+		//     Button 12 on fifth joystick.
+		Joystick5Button12 = 442,
+		//
+		// 요약:
+		//     Button 13 on fifth joystick.
+		Joystick5Button13 = 443,
+		//
+		// 요약:
+		//     Button 14 on fifth joystick.
+		Joystick5Button14 = 444,
+		//
+		// 요약:
+		//     Button 15 on fifth joystick.
+		Joystick5Button15 = 445,
+		//
+		// 요약:
+		//     Button 16 on fifth joystick.
+		Joystick5Button16 = 446,
+		//
+		// 요약:
+		//     Button 17 on fifth joystick.
+		Joystick5Button17 = 447,
+		//
+		// 요약:
+		//     Button 18 on fifth joystick.
+		Joystick5Button18 = 448,
+		//
+		// 요약:
+		//     Button 19 on fifth joystick.
+		Joystick5Button19 = 449,
+		//
+		// 요약:
+		//     Button 0 on sixth joystick.
+		Joystick6Button0 = 450,
+		//
+		// 요약:
+		//     Button 1 on sixth joystick.
+		Joystick6Button1 = 451,
+		//
+		// 요약:
+		//     Button 2 on sixth joystick.
+		Joystick6Button2 = 452,
+		//
+		// 요약:
+		//     Button 3 on sixth joystick.
+		Joystick6Button3 = 453,
+		//
+		// 요약:
+		//     Button 4 on sixth joystick.
+		Joystick6Button4 = 454,
+		//
+		// 요약:
+		//     Button 5 on sixth joystick.
+		Joystick6Button5 = 455,
+		//
+		// 요약:
+		//     Button 6 on sixth joystick.
+		Joystick6Button6 = 456,
+		//
+		// 요약:
+		//     Button 7 on sixth joystick.
+		Joystick6Button7 = 457,
+		//
+		// 요약:
+		//     Button 8 on sixth joystick.
+		Joystick6Button8 = 458,
+		//
+		// 요약:
+		//     Button 9 on sixth joystick.
+		Joystick6Button9 = 459,
+		//
+		// 요약:
+		//     Button 10 on sixth joystick.
+		Joystick6Button10 = 460,
+		//
+		// 요약:
+		//     Button 11 on sixth joystick.
+		Joystick6Button11 = 461,
+		//
+		// 요약:
+		//     Button 12 on sixth joystick.
+		Joystick6Button12 = 462,
+		//
+		// 요약:
+		//     Button 13 on sixth joystick.
+		Joystick6Button13 = 463,
+		//
+		// 요약:
+		//     Button 14 on sixth joystick.
+		Joystick6Button14 = 464,
+		//
+		// 요약:
+		//     Button 15 on sixth joystick.
+		Joystick6Button15 = 465,
+		//
+		// 요약:
+		//     Button 16 on sixth joystick.
+		Joystick6Button16 = 466,
+		//
+		// 요약:
+		//     Button 17 on sixth joystick.
+		Joystick6Button17 = 467,
+		//
+		// 요약:
+		//     Button 18 on sixth joystick.
+		Joystick6Button18 = 468,
+		//
+		// 요약:
+		//     Button 19 on sixth joystick.
+		Joystick6Button19 = 469,
+		//
+		// 요약:
+		//     Button 0 on seventh joystick.
+		Joystick7Button0 = 470,
+		//
+		// 요약:
+		//     Button 1 on seventh joystick.
+		Joystick7Button1 = 471,
+		//
+		// 요약:
+		//     Button 2 on seventh joystick.
+		Joystick7Button2 = 472,
+		//
+		// 요약:
+		//     Button 3 on seventh joystick.
+		Joystick7Button3 = 473,
+		//
+		// 요약:
+		//     Button 4 on seventh joystick.
+		Joystick7Button4 = 474,
+		//
+		// 요약:
+		//     Button 5 on seventh joystick.
+		Joystick7Button5 = 475,
+		//
+		// 요약:
+		//     Button 6 on seventh joystick.
+		Joystick7Button6 = 476,
+		//
+		// 요약:
+		//     Button 7 on seventh joystick.
+		Joystick7Button7 = 477,
+		//
+		// 요약:
+		//     Button 8 on seventh joystick.
+		Joystick7Button8 = 478,
+		//
+		// 요약:
+		//     Button 9 on seventh joystick.
+		Joystick7Button9 = 479,
+		//
+		// 요약:
+		//     Button 10 on seventh joystick.
+		Joystick7Button10 = 480,
+		//
+		// 요약:
+		//     Button 11 on seventh joystick.
+		Joystick7Button11 = 481,
+		//
+		// 요약:
+		//     Button 12 on seventh joystick.
+		Joystick7Button12 = 482,
+		//
+		// 요약:
+		//     Button 13 on seventh joystick.
+		Joystick7Button13 = 483,
+		//
+		// 요약:
+		//     Button 14 on seventh joystick.
+		Joystick7Button14 = 484,
+		//
+		// 요약:
+		//     Button 15 on seventh joystick.
+		Joystick7Button15 = 485,
+		//
+		// 요약:
+		//     Button 16 on seventh joystick.
+		Joystick7Button16 = 486,
+		//
+		// 요약:
+		//     Button 17 on seventh joystick.
+		Joystick7Button17 = 487,
+		//
+		// 요약:
+		//     Button 18 on seventh joystick.
+		Joystick7Button18 = 488,
+		//
+		// 요약:
+		//     Button 19 on seventh joystick.
+		Joystick7Button19 = 489,
+		//
+		// 요약:
+		//     Button 0 on eighth joystick.
+		Joystick8Button0 = 490,
+		//
+		// 요약:
+		//     Button 1 on eighth joystick.
+		Joystick8Button1 = 491,
+		//
+		// 요약:
+		//     Button 2 on eighth joystick.
+		Joystick8Button2 = 492,
+		//
+		// 요약:
+		//     Button 3 on eighth joystick.
+		Joystick8Button3 = 493,
+		//
+		// 요약:
+		//     Button 4 on eighth joystick.
+		Joystick8Button4 = 494,
+		//
+		// 요약:
+		//     Button 5 on eighth joystick.
+		Joystick8Button5 = 495,
+		//
+		// 요약:
+		//     Button 6 on eighth joystick.
+		Joystick8Button6 = 496,
+		//
+		// 요약:
+		//     Button 7 on eighth joystick.
+		Joystick8Button7 = 497,
+		//
+		// 요약:
+		//     Button 8 on eighth joystick.
+		Joystick8Button8 = 498,
+		//
+		// 요약:
+		//     Button 9 on eighth joystick.
+		Joystick8Button9 = 499,
+		//
+		// 요약:
+		//     Button 10 on eighth joystick.
+		Joystick8Button10 = 500,
+		//
+		// 요약:
+		//     Button 11 on eighth joystick.
+		Joystick8Button11 = 501,
+		//
+		// 요약:
+		//     Button 12 on eighth joystick.
+		Joystick8Button12 = 502,
+		//
+		// 요약:
+		//     Button 13 on eighth joystick.
+		Joystick8Button13 = 503,
+		//
+		// 요약:
+		//     Button 14 on eighth joystick.
+		Joystick8Button14 = 504,
+		//
+		// 요약:
+		//     Button 15 on eighth joystick.
+		Joystick8Button15 = 505,
+		//
+		// 요약:
+		//     Button 16 on eighth joystick.
+		Joystick8Button16 = 506,
+		//
+		// 요약:
+		//     Button 17 on eighth joystick.
+		Joystick8Button17 = 507,
+		//
+		// 요약:
+		//     Button 18 on eighth joystick.
+		Joystick8Button18 = 508,
+		//
+		// 요약:
+		//     Button 19 on eighth joystick.
+		Joystick8Button19 = 509
+	};
+}
 
 // 한 타일에 존재 할 수 있는 아이템의 최대 종류 개수
 enum class en_MapItemInfo : int8
@@ -1816,7 +1819,7 @@ struct st_QuickSlotBarSlotInfo
 	int64 PlayerDBId;  // 퀵슬롯 슬롯 소유한 Player	
 	int8 QuickSlotBarIndex; // 퀵슬롯 Index
 	int8 QuickSlotBarSlotIndex; // 퀵슬롯 슬롯 Index
-	wstring QuickSlotKey;   // 퀵슬롯에 연동된 키값
+	int16 QuickSlotKey;   // 퀵슬롯에 연동된 키값
 	st_SkillInfo QuickBarSkillInfo;	// 퀵슬롯에 등록할 스킬 정보
 	bool CanQuickSlotUse = true; // 퀵슬롯을 사용할 수 있는지 없는지
 };

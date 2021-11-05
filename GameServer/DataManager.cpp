@@ -1170,7 +1170,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				int SkillDebufRoot = TaioistAttackSkillListFiled["SkillDebufRoot"].GetBool();
 				string SkillImagePath = TaioistAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
 
-				if (SkillType == "SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK")
+				if (SkillType == "SKILL_TAIOIST_DIVINE_STRIKE")
 				{
 					TaioistAttackSkill->SkillType = en_SkillType::SKILL_TAIOIST_DIVINE_STRIKE;
 				}
