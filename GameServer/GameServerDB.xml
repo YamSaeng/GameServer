@@ -111,7 +111,7 @@
     <Column name="PlayerDBId" type="BigInt" notnull ="true"/>
     <Column name="QuickSlotBarIndex" type="TinyInt" notnull ="true"/>
     <Column name="QuickSlotBarSlotIndex" type="TinyInt" notnull ="true"/>
-    <Column name="QuickSlotKey" type="nvarchar(20)"/>
+    <Column name="QuickSlotKey" type="SmallInt"/>
     <Column name="SkillLargeCategory" type="TinyInt"/>
     <Column name="SkillMediumCategory" type="TinyInt"/>
     <Column name="SkillType" type="SmallInt"/>
@@ -515,7 +515,7 @@
     <Param name="@PlayerDBId" type="BigInt"/>
     <Param name="@QuickSlotBarIndex" type="TinyInt"/>
     <Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
-    <Param name="@QuickSlotKey" type="nvarchar(20)"/>
+    <Param name="@QuickSlotKey" type="SmallInt"/>
     <Param name="@SkillLargeCategory" type="TinyInt"/>
     <Param name="@SkillMediumCategory" type="TinyInt"/>
     <Param name="@SkillType" type="SmallInt"/>
@@ -533,7 +533,7 @@
     <Param name="@PlayerDBId" type="BigInt"/>
     <Param name="@QuickSlotBarIndex" type="TinyInt"/>
     <Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
-    <Param name="@QuickSlotKey" type="nvarchar(20)"/>
+    <Param name="@QuickSlotKey" type="SmalInt"/>
     <Param name="@SkillLargeCategory" type="TinyInt"/>
     <Param name="@SkillMediumCategory" type="TinyInt"/>
     <Param name="@SkillType" type="SmallInt"/>
