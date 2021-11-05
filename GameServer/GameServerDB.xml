@@ -533,7 +533,7 @@
     <Param name="@PlayerDBId" type="BigInt"/>
     <Param name="@QuickSlotBarIndex" type="TinyInt"/>
     <Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
-    <Param name="@QuickSlotKey" type="SmalInt"/>
+    <Param name="@QuickSlotKey" type="SmallInt"/>
     <Param name="@SkillLargeCategory" type="TinyInt"/>
     <Param name="@SkillMediumCategory" type="TinyInt"/>
     <Param name="@SkillType" type="SmallInt"/>
