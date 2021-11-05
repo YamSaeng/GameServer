@@ -135,10 +135,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_QuickSlotBarSlotInfo& Quic
     *this << QuickSlotBarSlotInfo.PlayerDBId;
     *this << QuickSlotBarSlotInfo.QuickSlotBarIndex;
     *this << QuickSlotBarSlotInfo.QuickSlotBarSlotIndex;
-
-    int8 QuickSlotKeyLen = (int8)QuickSlotBarSlotInfo.QuickSlotKey.length() * 2;
-    *this << QuickSlotKeyLen;
-    InsertData(QuickSlotBarSlotInfo.QuickSlotKey.c_str(), QuickSlotKeyLen);
+    *this << QuickSlotBarSlotInfo.QuickSlotKey;   
 
     *this << QuickSlotBarSlotInfo.QuickBarSkillInfo;
 
@@ -170,6 +167,15 @@ CGameServerMessage& CGameServerMessage::operator<<(CItem* Item)
     return *(this);
 }
 
+CGameServerMessage& CGameServerMessage::operator<<(st_SkillInfo** SkillInfo)
+{
+    memcpy(&_MessageBuf[_Rear], SkillInfo, sizeof(st_SkillInfo*));
+    _Rear += sizeof(st_SkillInfo*);
+    _UseBufferSize += sizeof(st_SkillInfo*);
+
+    return *(this);
+}
+
 CGameServerMessage& CGameServerMessage::operator>>(st_Vector2Int& CellPositionInfo)
 {
     *this >> CellPositionInfo._X;
@@ -178,32 +184,32 @@ CGameServerMessage& CGameServerMessage::operator>>(st_Vector2Int& CellPositionIn
     return *(this);
 }
 
-CGameServerMessage& CGameServerMessage::operator>>(st_SkillInfo& Value)
+CGameServerMessage& CGameServerMessage::operator>>(st_SkillInfo& SkillInfo)
 {
     int8 SkillLargeCategory = 0;
     *this >> SkillLargeCategory;
-    Value.SkillLargeCategory = (en_SkillLargeCategory)SkillLargeCategory;
+    SkillInfo.SkillLargeCategory = (en_SkillLargeCategory)SkillLargeCategory;
 
     int8 SkillMediumCategory = 0;
     *this >> SkillMediumCategory;
-    Value.SkillMediumCategory = (en_SkillMediumCategory)SkillMediumCategory;
+    SkillInfo.SkillMediumCategory = (en_SkillMediumCategory)SkillMediumCategory;
 
     int16 SkillType = 0;
     *this >> SkillType;
-    Value.SkillType = (en_SkillType)SkillType;
+    SkillInfo.SkillType = (en_SkillType)SkillType;
 
-    *this >> Value.SkillLevel;
+    *this >> SkillInfo.SkillLevel;
 
     int8 SkillNameLen = 0;
     *this >> SkillNameLen;
-    GetData(Value.SkillName, SkillNameLen);
+    GetData(SkillInfo.SkillName, SkillNameLen);
 
-    *this >> Value.SkillCoolTime;
-    *this >> Value.SkillCastingTime;
+    *this >> SkillInfo.SkillCoolTime;
+    *this >> SkillInfo.SkillCastingTime;
 
     int8 SkillImagePath = 0;
     *this >> SkillImagePath;
-    GetData(Value.SkillImagePath, SkillImagePath);
+    GetData(SkillInfo.SkillImagePath, SkillImagePath);
 
     return *(this);
 }
@@ -214,12 +220,27 @@ CGameServerMessage& CGameServerMessage::operator>>(st_QuickSlotBarSlotInfo& Valu
     *this >> Value.PlayerDBId;
     *this >> Value.QuickSlotBarIndex;
     *this >> Value.QuickSlotBarSlotIndex;
-
-    int8 QuickSlotKeyLen = 0;
-    *this >> QuickSlotKeyLen;
-    GetData(Value.QuickSlotKey, QuickSlotKeyLen);
+    *this >> Value.QuickSlotKey;    
 
     *this >> Value.QuickBarSkillInfo;
+
+    return *(this);
+}
+
+CGameServerMessage& CGameServerMessage::operator>>(CItem** Item)
+{
+    memcpy(Item, &_MessageBuf[_Front], sizeof(CItem*));
+    _Front += sizeof(CItem*);
+    _UseBufferSize -= sizeof(CItem*);
+
+    return *(this);
+}
+
+CGameServerMessage& CGameServerMessage::operator>>(st_SkillInfo** SkillInfo)
+{
+    memcpy(SkillInfo, &_MessageBuf[_Front], sizeof(st_SkillInfo*));
+    _Front += sizeof(st_SkillInfo*);
+    _UseBufferSize -= sizeof(st_SkillInfo*);
 
     return *(this);
 }
