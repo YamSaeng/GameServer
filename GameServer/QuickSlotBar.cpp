@@ -15,16 +15,12 @@ CQuickSlotBar::~CQuickSlotBar()
 
 void CQuickSlotBar::Init()
 {
-	WCHAR QuickSlotBarKeyString[10] = { 0 };
-
 	for (int8 SlotIndex = 0; SlotIndex < (int8)en_QuickSlotBar::QUICK_SLOT_BAR_SLOT_SIZE; ++SlotIndex)
 	{
 		st_QuickSlotBarSlotInfo* QuickSlotBarSlotInfo = new st_QuickSlotBarSlotInfo();
 		QuickSlotBarSlotInfo->QuickSlotBarIndex = _QuickSlotBarIndex;
 		QuickSlotBarSlotInfo->QuickSlotBarSlotIndex = SlotIndex;
-
-		wsprintf(QuickSlotBarKeyString, L"%d", SlotIndex + 1);
-		QuickSlotBarSlotInfo->QuickSlotKey = QuickSlotBarKeyString;
+		QuickSlotBarSlotInfo->QuickSlotKey = SlotIndex + 1;
 
 		_QuickSlotBarSlotInfos.insert(pair<int8, st_QuickSlotBarSlotInfo*>(SlotIndex, QuickSlotBarSlotInfo));
 	}
