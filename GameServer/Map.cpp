@@ -229,7 +229,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	// 섹터 작업
 	switch (GameObject->_GameObjectInfo.ObjectType)
 	{	
-	case en_GameObjectType::OBJECT_MELEE_PLAYER:		
+	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:		
 	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 	{

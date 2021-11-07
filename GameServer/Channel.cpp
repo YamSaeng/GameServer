@@ -275,7 +275,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	// 입장한 오브젝트의 타입에 따라
 	switch ((en_GameObjectType)EnterChannelGameObject->_GameObjectInfo.ObjectType)
 	{
-	case en_GameObjectType::OBJECT_MELEE_PLAYER:
+	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 		{
@@ -383,7 +383,7 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 	// 컨테이너에서 제거한 후 맵에서도 제거
 	switch ((en_GameObjectType)LeaveChannelGameObject->_GameObjectInfo.ObjectType)
 	{
-	case en_GameObjectType::OBJECT_MELEE_PLAYER:
+	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 	case en_GameObjectType::OBJECT_MAGIC_PLAYER:	
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 		_Players.erase(LeaveChannelGameObject->_GameObjectInfo.ObjectId);

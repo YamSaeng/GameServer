@@ -14,7 +14,7 @@ void CSector::Insert(CGameObject* InsertGameObject)
 {
 	switch (InsertGameObject->_GameObjectInfo.ObjectType)
 	{
-	case en_GameObjectType::OBJECT_MELEE_PLAYER:
+	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 		_Players.insert((CPlayer*)InsertGameObject);
@@ -48,7 +48,7 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 {
 	switch (RemoveGameObject->_GameObjectInfo.ObjectType)
 	{
-	case en_GameObjectType::OBJECT_MELEE_PLAYER:
+	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 		_Players.erase((CPlayer*)RemoveGameObject);

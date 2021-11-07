@@ -47,7 +47,7 @@ void CObjectManager::Add(CGameObject* AddObject, int32 ChannelId)
 	
 	switch (AddObject->_GameObjectInfo.ObjectType)
 	{
-		case en_GameObjectType::OBJECT_MELEE_PLAYER:
+		case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 		case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 		case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 			{
@@ -78,7 +78,7 @@ void CObjectManager::Add(CGameObject* AddObject, int32 ChannelId)
 				ResSpawnPacket->Free();
 
 				// 몬스터 소환할때 소환 이펙트 출력
-				CMessage* ResEffectPacket = GameServer->MakePacketEffect(Monster->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_OBJECT_SPAWN);
+				CMessage* ResEffectPacket = GameServer->MakePacketEffect(Monster->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_OBJECT_SPAWN, 0.5f);
 				GameServer->SendPacketAroundSector(Monster->GetCellPosition(), ResEffectPacket);
 				ResEffectPacket->Free();
 			} 
@@ -149,7 +149,7 @@ bool CObjectManager::Remove(CGameObject* RemoveObject, int32 _ChannelId, bool Is
 	// 채널에서 삭제
 	switch (RemoveObject->_GameObjectInfo.ObjectType)
 	{
-	case en_GameObjectType::OBJECT_MELEE_PLAYER:
+	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 		_Players.erase(RemoveObject->_GameObjectInfo.ObjectId);
@@ -198,7 +198,7 @@ CGameObject* CObjectManager::Find(int64 ObjectId, en_GameObjectType GameObjectTy
 	switch (GameObjectType)
 	{
 	case en_GameObjectType::OBJECT_PLAYER:
-	case en_GameObjectType::OBJECT_MELEE_PLAYER:
+	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 	{
@@ -319,7 +319,7 @@ void CObjectManager::ObjectReturn(en_GameObjectType ObjectType, CGameObject* Ret
 {
 	switch (ObjectType)
 	{
-	case en_GameObjectType::OBJECT_MELEE_PLAYER:
+	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 		_PlayerMemoryPool->Free((CPlayer*)ReturnObject);
