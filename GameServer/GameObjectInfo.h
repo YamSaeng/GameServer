@@ -5,7 +5,7 @@ enum class en_GameObjectType : int16
 	NORMAL,
 
 	OBJECT_PLAYER,
-	OBJECT_MELEE_PLAYER,
+	OBJECT_WARRIOR_PLAYER,
 	OBJECT_MAGIC_PLAYER,
 	OBJECT_TAIOIST_PLAYER,
 	OBJECT_THIEF_PLAYER,
@@ -62,7 +62,9 @@ enum class en_CreatureState : int8
 	ATTACK,
 	SPELL,
 	DEAD,
-	STUN
+	STUN,
+	PUSH_AWAY,
+	ROOT
 };
 
 enum class en_MessageType : int8
@@ -229,7 +231,8 @@ enum class en_EffectType : int16
 	EFFECT_HEALING_LIGHT_TARGET,
 	EFFECT_HEALING_WIND_TARGET,
 	EFFECT_HELAING_MYSELF,
-	EFFECT_OBJECT_SPAWN
+	EFFECT_OBJECT_SPAWN,
+	EFFECT_DEBUF_ROOT
 };
 
 enum class en_ErrorType : int16
@@ -1719,6 +1722,7 @@ struct st_SkillInfo
 	wstring SkillName;		 // 스킬 이름
 	int32 SkillCoolTime;	 // 스킬 쿨타임
 	int32 SkillCastingTime;  // 스킬 캐스팅 타임
+	float SkillTargetEffectTime;
 	wstring SkillImagePath;	 // 스킬 이미지 경로
 	bool CanSkillUse;		 // 스킬을 사용 할 수 있는지 여부	
 
@@ -1732,6 +1736,7 @@ struct st_SkillInfo
 		SkillName = L"";
 		SkillCoolTime = 0;
 		SkillCastingTime = 0;
+		SkillTargetEffectTime = 0;
 		SkillImagePath = L"";
 		CanSkillUse = true;
 	}
