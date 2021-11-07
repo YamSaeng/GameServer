@@ -77,6 +77,10 @@ protected:
 	vector<st_Vector2Int> _PatrolPositions;	
 
 	//------------------------
+	// Spawn Idle 상태 Update
+	//------------------------
+	virtual void UpdateSpawnIdle();
+	//------------------------
 	// Idle 상태 Update
 	//------------------------
 	virtual void UpdateIdle();
@@ -97,12 +101,24 @@ protected:
 	//------------------------
 	virtual void UpdateAttack();
 	//------------------------
+	// Spell 상태 Update
+	//------------------------
+	virtual void UpdateSpell();
+	//------------------------
 	// Dead 상태 Update
 	//------------------------
-	virtual void UpdateDead() = 0;	
+	virtual void UpdateDead() = 0;		
 	//------------------------
-	// Spawn Idle 상태 Update
+	// Stun 상태 Update
 	//------------------------
-	virtual void UpdateSpawnIdle();
+	virtual void UpdateStun();
+	//------------------------
+	// PushAway 상태 Update
+	//------------------------
+	virtual void UpdatePushAway();
+	//------------------------
+	// Root 상태 Update
+	//------------------------
+	virtual void UpdateRoot();
 };
 

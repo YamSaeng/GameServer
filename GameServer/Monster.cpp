@@ -43,9 +43,21 @@ void CMonster::Update()
 	case en_CreatureState::ATTACK:
 		UpdateAttack();
 		break;
+	case en_CreatureState::SPELL:
+		UpdateSpell();
+		break;
 	case en_CreatureState::DEAD:
 		UpdateDead();
-		break;	
+		break;
+	case en_CreatureState::STUN:
+		UpdateStun();
+		break;
+	case en_CreatureState::PUSH_AWAY:
+		UpdatePushAway();
+		break;
+	case en_CreatureState::ROOT:
+		UpdateRoot();
+		break;
 	default:
 		break;
 	}	
@@ -87,6 +99,16 @@ void CMonster::Init(st_Vector2Int SpawnPosition)
 	_PatrolPositions = GetAroundCellPositions(GetCellPosition(), 2);
 }
 
+void CMonster::UpdateSpawnIdle()
+{
+	if (_SpawnIdleTick > GetTickCount64())
+	{
+		return;
+	}
+
+	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+}
+
 void CMonster::UpdateIdle()
 {
 	if (_SearchTick > GetTickCount64())
@@ -102,12 +124,14 @@ void CMonster::UpdateIdle()
 	{
 		_PatrolTick = GetTickCount64() + _PatrolTickPoint;
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::PATROL;
+		BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
 	}
 	else
 	{
 		if (Target->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::SPAWN_IDLE)
 		{
 			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::PATROL;
+			BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
 			return;
 		}
 
@@ -119,6 +143,7 @@ void CMonster::UpdateIdle()
 			if (Cango == true)
 			{
 				_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::PATROL;
+				BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
 			}
 			// 대기 ( 타겟은 있지만 다른 오브젝트에 의해 갈 수 없어서 대기 상태로 변경 )
 			else
@@ -127,10 +152,14 @@ void CMonster::UpdateIdle()
 			}
 		}
 		else
-		{
+		{			
 			// 추격거리 도달 쫓음
 			_Target = Target;
-			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
+						
+			_MoveTick = GetTickCount64() + (int)(1000 / _GameObjectInfo.ObjectStatInfo.Speed);
+
+			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;				
+			BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
 		}
 	}
 }
@@ -157,9 +186,9 @@ void CMonster::UpdatePatrol()
 	st_Vector2Int MonsterPosition = GetCellPosition();
 	vector<st_Vector2Int> Path = _Channel->_Map->FindPath(MonsterPosition, _PatrolPositions[RandomIndex]);
 	if (Path.size() < 2)
-	{
+	{		
 		// 정찰 위치로 이동 할 수 없을 경우 Idle상태로 바꿔준다.
-		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;		
 		BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
 		return;
 	}
@@ -175,8 +204,8 @@ void CMonster::UpdateMoving()
 	if (_MoveTick > GetTickCount64())
 	{
 		return;
-	}	
-
+	}		
+	
 	int MoveTick = (int)(1000 / _GameObjectInfo.ObjectStatInfo.Speed);
 	_MoveTick = GetTickCount64() + MoveTick;
 
@@ -343,12 +372,18 @@ void CMonster::UpdateAttack()
 	_AttackTick = 0;
 }
 
-void CMonster::UpdateSpawnIdle()
+void CMonster::UpdateSpell()
 {
-	if (_SpawnIdleTick > GetTickCount64())
-	{
-		return;
-	}
+}
 
-	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;	
+void CMonster::UpdateStun()
+{
+}
+
+void CMonster::UpdatePushAway()
+{
+}
+
+void CMonster::UpdateRoot()
+{	
 }
