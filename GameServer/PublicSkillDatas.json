@@ -15,6 +15,7 @@
               "SkillCoolTime": 500,
               "SkillCastingTime": 0,
               "SkillDistance": 1,
+              "SkillTargetEffectTime": 2.0,
               "SkillThumbnailImagePath": "Textures/Spell/Icon/일반공격"
             }
           ]
@@ -46,6 +47,7 @@
               "SkillCoolTime": 30000,
               "SkillCastingTime": 0,
               "SkillDistance": 0,
+              "SkillTargetEffectTime": 0.5,
               "SkillThumbnailImagePath": "Textures/Spell/Icon/충격해제"
             }
           ]

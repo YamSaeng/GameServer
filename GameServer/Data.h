@@ -95,7 +95,8 @@ struct st_SkillData
 	int8 SkillLevel;
 	int32 SkillCoolTime;
 	int32 SkillCastingTime;
-	int SkillDistance;
+	int SkillDistance;	
+	float SkillTargetEffectTime;
 	string SkillThumbnailImagePath;
 };
 

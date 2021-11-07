@@ -16,6 +16,7 @@
               "SkillCastingTime": 0,
               "SkillDebuf": false,
               "SkillDistance": 1,
+              "SkillTargetEffectTime": 0.5,
               "SkillDebufTime": 0,
               "SkillDebufAttackSpeed": 0,
               "SkillDebufMovingSpeed": 0,
@@ -35,6 +36,7 @@
               "SkillCoolTime": 1000,
               "SkillCastingTime": 0,
               "SkillDistance": 1,
+              "SkillTargetEffectTime": 0.5,
               "SkillDebuf": false,
               "SkillDebufTime": 0,
               "SkillDebufAttackSpeed": 0,
@@ -55,6 +57,7 @@
               "SkillCoolTime": 5000,
               "SkillCastingTime": 0,
               "SkillDistance": 4,
+              "SkillTargetEffectTime": 1.1,
               "SkillDebuf": true,
               "SkillDebufTime": 1000,
               "SkillDebufAttackSpeed": 0,
@@ -75,6 +78,7 @@
               "SkillCoolTime": 5000,
               "SkillCastingTime": 0,
               "SkillDistance": 4,
+              "SkillTargetEffectTime": 1.1,
               "SkillDebuf": false,
               "SkillDebufTime": 0,
               "SkillDebufAttackSpeed": 0,
@@ -95,6 +99,7 @@
               "SkillCoolTime": 3000,
               "SkillCastingTime": 0,
               "SkillDistance": 1,
+              "SkillTargetEffectTime": 2.0,
               "SkillDebuf": false,
               "SkillDebufTime": 0,
               "SkillDebufAttackSpeed": 0,
@@ -136,6 +141,7 @@
               "SkillCoolTime": 10000,
               "SkillCastingTime": 0,
               "SkillDistance": 0,
+              "SkillTargetEffectTime": 2.7,
               "SkillThumbnailImagePath": "Textures/Spell/Icon/돌격자세"
             }
           ]
