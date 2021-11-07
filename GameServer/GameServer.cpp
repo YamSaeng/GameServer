@@ -1084,7 +1084,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 					}
 
 					// 이펙트 출력
-					CMessage* ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_SMASH_WAVE);
+					CMessage* ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_SMASH_WAVE, 2.0f);
 					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResEffectPacket);
 					ResEffectPacket->Free();
 				}
@@ -1110,7 +1110,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 
 						float CriticalPoint = MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint / 1000.0f;
 						bernoulli_distribution CriticalCheck(CriticalPoint);
-						bool IsCritical = CriticalCheck(Eng);
+						bool IsCritical = CriticalCheck(Eng);				
 						
 						// 데미지 판단
 						mt19937 Gen(Seed());
@@ -1145,7 +1145,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 
 									switch (MyPlayer->_GameObjectInfo.ObjectType)
 									{
-									case en_GameObjectType::OBJECT_MELEE_PLAYER:
+									case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 									{
 										auto FindStatus = G_Datamanager->_WarriorStatus.find(MyPlayer->_GameObjectInfo.ObjectStatInfo.Level);
 										if (FindStatus == G_Datamanager->_WarriorStatus.end())
@@ -1298,7 +1298,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 						ResMyAttackOtherPacket->Free();
 
 						// 이펙트 출력
-						CMessage* ResEffectPacket = MakePacketEffect(Target->_GameObjectInfo.ObjectId, HitEffectType);
+						CMessage* ResEffectPacket = MakePacketEffect(Target->_GameObjectInfo.ObjectId, HitEffectType, AttackSkillInfo->SkillTargetEffectTime);
 						SendPacketAroundSector(MyPlayer->GetCellPosition(), ResEffectPacket);
 						ResEffectPacket->Free();
 
@@ -1421,12 +1421,18 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 					Targets.push_back(MyPlayer);
 
 					// 이펙트 출력
-					ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_CHARGE_POSE);
+					ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_CHARGE_POSE, 2.8f);
 					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResEffectPacket);
 					ResEffectPacket->Free();
-					break;
-					// 불꽃 작살
-				case en_SkillType::SKILL_SHAMAN_FLAME_HARPOON:
+					break;					
+				case en_SkillType::SKILL_SHAMAN_FLAME_HARPOON:				
+				case en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE:
+				case en_SkillType::SKILL_SHAMAN_HELL_FIRE:
+				case en_SkillType::SKILL_SHAMAN_ROOT:			
+				case en_SkillType::SKILL_SHAMAN_ICE_CHAIN:
+				case en_SkillType::SKILL_SHAMAN_ICE_WAVE:
+				case en_SkillType::SKILL_TAIOIST_DIVINE_STRIKE:
+				case en_SkillType::SKILL_TAIOIST_ROOT:									
 					if (MyPlayer->_SelectTarget != nullptr)
 					{
 						MyPlayer->_SpellTick = GetTickCount64() + FindSkill->SkillCastingTime;
@@ -1459,23 +1465,8 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 						SendPacket(MyPlayer->_SessionId, ResErrorPacket);
 						ResErrorPacket->Free();
 					}
-					break;
-				case en_SkillType::SKILL_SHAMAN_ROOT:
-					break;
-				case en_SkillType::SKILL_SHAMAN_ICE_CHAIN:
-					break;
-				case en_SkillType::SKILL_SHAMAN_ICE_WAVE:
-					break;
-				case en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE:
-					break;
-				case en_SkillType::SKILL_SHAMAN_HELL_FIRE:
-					break;
-				case en_SkillType::SKILL_TAIOIST_DIVINE_STRIKE:
-					break;
-				case en_SkillType::SKILL_TAIOIST_ROOT:
-					break;					
-					// 치유의 빛
-				case en_SkillType::SKILL_TAIOIST_HEALING_LIGHT:
+					break;								
+				case en_SkillType::SKILL_TAIOIST_HEALING_LIGHT: // 치유의 빛
 					MyPlayer->_SpellTick = GetTickCount64() + FindSkill->SkillCastingTime;
 
 					SpellCastingTime = FindSkill->SkillCastingTime / 1000.0f;
@@ -1502,12 +1493,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 						ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorNonSelectObjectString);
 						SendPacket(MyPlayer->_SessionId, ResErrorPacket);
 						ResErrorPacket->Free();
-					}
-
-					// 이펙트 출력
-					ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_HELAING_MYSELF);
-					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResEffectPacket);
-					ResEffectPacket->Free();
+					}				
 
 					// 스펠창 시작
 					ResMagicPacket = MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId, true, (en_SkillType)ReqSkillType, SpellCastingTime);
@@ -1515,9 +1501,8 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 					ResMagicPacket->Free();
 
 					MyPlayer->_SkillType = (en_SkillType)ReqSkillType;
-					break;
-					// 치유의 바람
-				case en_SkillType::SKILL_TAIOIST_HEALING_WIND:
+					break;					
+				case en_SkillType::SKILL_TAIOIST_HEALING_WIND: // 치유의 바람
 					if (MyPlayer->_SelectTarget != nullptr)
 					{
 						MyPlayer->_SpellTick = GetTickCount64() + FindSkill->SkillCastingTime;
@@ -1529,11 +1514,6 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 						{
 							Targets.push_back(FindGameObject);
 						}
-
-						// 이펙트 출력
-						ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_HELAING_MYSELF);
-						SendPacketAroundSector(MyPlayer->GetCellPosition(), ResEffectPacket);
-						ResEffectPacket->Free();
 
 						// 스펠창 시작
 						ResMagicPacket = MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId, true, (en_SkillType)ReqSkillType, SpellCastingTime);
@@ -2967,7 +2947,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			st_ObjectStatusData NewCharacterStatus;
 			switch ((en_GameObjectType)ReqGameObjectType)
 			{			
-			case en_GameObjectType::OBJECT_MELEE_PLAYER:
+			case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 				{
 					auto FindStatus = G_Datamanager->_WarriorStatus.find(1);
 					NewCharacterStatus = *(*FindStatus).second;
@@ -3120,7 +3100,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 				ItemToInventory.Execute();
 			}
 
-			int8 DefaultKey = 1;
+			int16 DefaultKey = (int16)UnityEngine::Alpha1;
 
 			// DB에 퀵슬롯바 생성
 			for (int8 SlotIndex = 0; SlotIndex < (int8)en_QuickSlotBar::QUICK_SLOT_BAR_SIZE; ++SlotIndex)
@@ -3132,7 +3112,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 				int64 PlayerDBId = Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectId;
 				int8 QuickSlotBarIndex = SlotIndex;
 				int8 QuickSlotBarSlotIndex;
-				wstring QuickSlotBarKey = L"";
+				int16 QuickSlotBarKey = 0;
 				int8 SkillLargeCategory = (int8)(en_SkillLargeCategory::SKILL_LARGE_CATEGORY_NONE);
 				int8 SkillMediumCategory = (int8)(en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE);
 				int16 SkillType = (int16)(en_SkillType::SKILL_TYPE_NONE);
@@ -3140,22 +3120,18 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 				wstring SkillName = L"";
 				int32 SkillCoolTime = 0;
 				int32 SkillCastingTime = 0;
-				wstring SkillThumbnailImagePath;
-				WCHAR QuickSlotBarKeyString[10] = { 0 };
+				wstring SkillThumbnailImagePath;				
 
 				for (int8 i = 0; i < (int8)en_QuickSlotBar::QUICK_SLOT_BAR_SLOT_SIZE; ++i)
 				{
-					QuickSlotBarSlotIndex = i;
+					QuickSlotBarSlotIndex = i;										
 
-					wsprintf(QuickSlotBarKeyString, L"%d", DefaultKey);
-					DefaultKey++;
-
-					if (DefaultKey == 10)
+					if (DefaultKey == (int16)UnityEngine::Colon)
 					{
-						DefaultKey = 0;
+						DefaultKey = (int16)UnityEngine::Alpha0;
 					}
 
-					QuickSlotBarKey = QuickSlotBarKeyString;
+					QuickSlotBarKey = DefaultKey;
 
 					QuickSlotBarSlotCreate.InAccountDBId(AccountDBId);
 					QuickSlotBarSlotCreate.InPlayerDBId(PlayerDBId);
@@ -3168,6 +3144,8 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 					QuickSlotBarSlotCreate.InSkillLevel(SkillLevel);					
 
 					QuickSlotBarSlotCreate.Execute();
+
+					DefaultKey++;
 				}
 			}			
 
@@ -3656,7 +3634,7 @@ void CGameServer::PacketProcReqDBLootingItemToInventorySave(int64 SessionId, CGa
 	ReturnSession(Session);
 }
 
-void CGameServer::PacketProcReqDBCraftingItemToInventorySave(int64 SessionId, CMessage* Message)
+void CGameServer::PacketProcReqDBCraftingItemToInventorySave(int64 SessionId, CGameServerMessage* Message)
 {
 	st_Session* Session = FindSession(SessionId);
 
@@ -3674,7 +3652,7 @@ void CGameServer::PacketProcReqDBCraftingItemToInventorySave(int64 SessionId, CM
 		for (int i = 0; i < UpdateMaterialItemCount; i++)
 		{
 			CItem* MaterialItem = nullptr;
-			Message->GetData(&MaterialItem, sizeof(CItem*));
+			*Message >> &MaterialItem;			
 
 			int16 MaterialItemSmallCategory = (int16)MaterialItem->_ItemInfo.ItemSmallCategory;
 			int16 MaterialItemCount = MaterialItem->_ItemInfo.ItemCount;
@@ -3727,8 +3705,8 @@ void CGameServer::PacketProcReqDBCraftingItemToInventorySave(int64 SessionId, CM
 		int16 ItemEachCount;
 		*Message >> ItemEachCount;
 
-		CItem* CompleteItem;
-		Message->GetData(&CompleteItem, sizeof(CItem*));
+		CItem* CompleteItem = nullptr;
+		*Message >> &CompleteItem;		
 
 		int64 OwnerAccountId;
 		*Message >> OwnerAccountId;
@@ -3989,16 +3967,16 @@ void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
 	ReturnSession(Session);
 }
 
-void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CMessage* Message)
+void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CGameServerMessage* Message)
 {
 	st_Session* Session = FindSession(SessionId);
 
 	if (Session)
 	{
-		InterlockedDecrement64(&Session->IOBlock->IOCount);		
+		InterlockedDecrement64(&Session->IOBlock->IOCount);				
 
 		CItem* UseItem = nullptr;
-		Message->GetData(&UseItem, sizeof(CItem*));
+		*Message >> &UseItem;
 
 		Message->Free();
 
@@ -4278,7 +4256,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 
 			int8 QuickSlotBarIndex;
 			int8 QuickSlotBarSlotIndex;
-			WCHAR QuickSlotKey[20] = { 0 };
+			int16 QuickSlotKey;
 			int8 QuickSlotSkillLargeCategory;
 			int8 QuickSlotSkillMediumCategory;
 			int16 QuickSlotSkillType;
@@ -4597,7 +4575,18 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 						AttackSkillInfo->SkillImagePath = (LPWSTR)CA2W(FindAttackSkillData->SkillThumbnailImagePath.c_str());
 						AttackSkillInfo->SkillMinDamage = FindAttackSkillData->SkillMinDamage;
 						AttackSkillInfo->SkillMaxDamage = FindAttackSkillData->SkillMaxDamage;
+						AttackSkillInfo->SkillTargetEffectTime = FindAttackSkillData->SkillTargetEffectTime;
 
+						AttackSkillInfo->SkillDebuf = FindAttackSkillData->SkillDebuf;
+						AttackSkillInfo->SkillDebufTime = FindAttackSkillData->SkillDebufTime;
+						AttackSkillInfo->SkillDebufAttackSpeed = FindAttackSkillData->SkillDebufAttackSpeed;
+						AttackSkillInfo->SkillDebufMovingSpeed = FindAttackSkillData->SkillDebufMovingSpeed;
+						AttackSkillInfo->SkillDebufStun = FindAttackSkillData->SkillDebufStun;
+						AttackSkillInfo->SkillDebufPushAway = FindAttackSkillData->SkillDebufPushAway;
+						AttackSkillInfo->SkillDebufRoot = FindAttackSkillData->SkillDebufRoot;
+						AttackSkillInfo->SkillDamageOverTime = FindAttackSkillData->SkillDamageOverTime;
+						AttackSkillInfo->StatusAbnormalityProbability = FindAttackSkillData->StatusAbnormalityProbability;
+						
 						Session->MyPlayer->_SkillBox.AddSkill(AttackSkillInfo);
 
 						// 클라가 소유하고 있는 스킬 정보를 보내준다.
@@ -4625,6 +4614,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 						HealSkillInfo->SkillImagePath = (LPWSTR)CA2W(FindHealSkillData->SkillThumbnailImagePath.c_str());
 						HealSkillInfo->SkillMinHealPoint = FindHealSkillData->SkillMinHealPoint;
 						HealSkillInfo->SkillMaxHealPoint = FindHealSkillData->SkillMaxHealPoint;
+						HealSkillInfo->SkillTargetEffectTime = FindHealSkillData->SkillTargetEffectTime;
 
 						Session->MyPlayer->_SkillBox.AddSkill(HealSkillInfo);
 
@@ -4650,6 +4640,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 						BufSkillInfo->SkillName = (LPWSTR)CA2W(FindBufSkillData->SkillName.c_str());
 						BufSkillInfo->SkillCoolTime = FindBufSkillData->SkillCoolTime;
 						BufSkillInfo->SkillCastingTime = FindBufSkillData->SkillCastingTime;
+						BufSkillInfo->SkillTargetEffectTime = FindBufSkillData->SkillTargetEffectTime;
 						BufSkillInfo->SkillImagePath = (LPWSTR)CA2W(FindBufSkillData->SkillThumbnailImagePath.c_str());
 						
 						BufSkillInfo->IncreaseMinAttackPoint = FindBufSkillData->IncreaseMinAttackPoint;
@@ -4840,7 +4831,7 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 			QuickSlotACheck.InQuickSlotBarIndex(QuickSlotBarSwapIndexA);
 			QuickSlotACheck.InQuickSlotBarSlotIndex(QuickSlotBarSlotSwapIndexA);
 
-			WCHAR QuickSlotAKey[20] = { 0 };
+			int16 QuickSlotAKey;
 			int8 QuickSlotASkillLargeCategory;
 			int8 QuickSlotASkillMediumCategory;
 			int16 QuickSlotASkillType;
@@ -4878,7 +4869,7 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 			QuickSlotBCheck.InQuickSlotBarIndex(QuickSlotBarSwapIndexB);
 			QuickSlotBCheck.InQuickSlotBarSlotIndex(QuickSlotBarSlotSwapIndexB);
 
-			WCHAR QuickSlotBKey[20] = { 0 };
+			int16 QuickSlotBKey;
 			int8 QuickSlotBSkillLargeCategory;
 			int8 QuickSlotBSkillMediumCategory;
 			int16 QuickSlotBSkillType;
@@ -5009,7 +5000,7 @@ void CGameServer::PacketProcReqDBQuickSlotInit(int64 SessionId, CMessage* Messag
 			QuickSlotACheck.InQuickSlotBarIndex(QuickSlotBarIndex);
 			QuickSlotACheck.InQuickSlotBarSlotIndex(QuickSlotBarSlotIndex);
 
-			WCHAR QuickSlotKey[20] = { 0 };
+			int16 QuickSlotKey;
 			int8 QuickSlotSkillLargeCategory;
 			int8 QuickSlotSkillMediumCategory;
 			int16 QuickSlotSkillType;
@@ -5192,6 +5183,13 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 	{
 		CPlayer* MyPlayer = Session->MyPlayer;
 
+		// 마법 시전 완료 했으니 원래 상태로 돌려줌
+		MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+
+		CMessage* ResObjectStateChangePacket = MakePacketResChangeObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
+		SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateChangePacket);
+		ResObjectStateChangePacket->Free();
+
 		float SkillCoolTime = SpellEndSkillInfo->SkillCoolTime / 1000.0f;
 
 		// 클라에게 쿨타임 표시
@@ -5226,7 +5224,7 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 
 		SetEvent(_TimerThreadWakeEvent);
 
-		en_EffectType HitEffectType;		
+		en_EffectType HitEffectType = en_EffectType::EFFECT_TYPE_NONE;
 
 		wstring MagicSystemString;
 
@@ -5240,60 +5238,160 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 		bernoulli_distribution CriticalCheck(CriticalPoint);
 		bool IsCritical = CriticalCheck(Eng);		
 
-		int32 FinalDamage = 0;
-		int32 FinalHeal = 0;
-		int32 HealPoint = 0;
-		int32 MinDamage = 0;
-		int32 MaxDamage = 0;
-		int32 MinHeal = 0;
-		int32 MaxHeal = 0;
+		int32 FinalDamage = 0;				
 
 		mt19937 Gen(Seed());
 
 		switch (MyPlayer->_SkillType)
 		{
-		case en_SkillType::SKILL_SHAMAN_FLAME_HARPOON:
-		{
-			HitEffectType = en_EffectType::EFFECT_FLAME_HARPOON_TARGET;			
+		case en_SkillType::SKILL_SHAMAN_FLAME_HARPOON:		
+			{
+				HitEffectType = en_EffectType::EFFECT_FLAME_HARPOON_TARGET;			
 
-			int32 MagicDamage = MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage * 0.6;
+				int32 MagicDamage = MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage * 0.6;
 
-			st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)SpellEndSkillInfo;
-			
-			uniform_int_distribution<int> DamageChoiceRandom(AttackSkillInfo->SkillMinDamage + MagicDamage, AttackSkillInfo->SkillMaxDamage + MagicDamage);
-			int32 ChoiceDamage = DamageChoiceRandom(Gen);
-			FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
+				st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)SpellEndSkillInfo;
+				
+				uniform_int_distribution<int> DamageChoiceRandom(AttackSkillInfo->SkillMinDamage + MagicDamage, AttackSkillInfo->SkillMaxDamage + MagicDamage);
+				int32 ChoiceDamage = DamageChoiceRandom(Gen);
+				FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
 
-			// 데미지 처리
-			MyPlayer->GetTarget()->OnDamaged(MyPlayer, FinalDamage);
+				// 데미지 처리
+				MyPlayer->GetTarget()->OnDamaged(MyPlayer, FinalDamage);
 
-			wsprintf(SpellMessage, L"%s가 불꽃작살을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), MyPlayer->GetTarget()->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+				wsprintf(SpellMessage, L"%s가 %s을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), SpellEndSkillInfo->SkillName.c_str(), MyPlayer->GetTarget()->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
 
-			MagicSystemString = SpellMessage;
-		}
-		break;
+				MagicSystemString = SpellMessage;
+			}
+			break;	
+		case en_SkillType::SKILL_SHAMAN_ROOT:
+			{
+				MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ROOT;
+
+				st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)SpellEndSkillInfo;
+
+				InterlockedIncrement64(&Session->IOBlock->IOCount);
+
+				ObjectStateChangeTimerJobCreate(MyPlayer->GetTarget(), en_CreatureState::IDLE, AttackSkillInfo->SkillDebufTime, MyPlayer->_SessionId);
+			}
+			break;
+		case en_SkillType::SKILL_SHAMAN_ICE_CHAIN:
+			{
+				st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)SpellEndSkillInfo;
+
+				MyPlayer->GetTarget()->_GameObjectInfo.ObjectStatInfo.Speed -= AttackSkillInfo->SkillDebufMovingSpeed;
+			}
+			break;
+		case en_SkillType::SKILL_SHAMAN_ICE_WAVE:
+			break;
+		case en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE:
+			{
+				MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::STUN;
+				
+				int32 MagicDamage = MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage * 0.6;
+
+				st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)SpellEndSkillInfo;
+
+				uniform_int_distribution<int> DamageChoiceRandom(AttackSkillInfo->SkillMinDamage + MagicDamage, AttackSkillInfo->SkillMaxDamage + MagicDamage);
+				int32 ChoiceDamage = DamageChoiceRandom(Gen);
+				FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
+
+				// 데미지 처리
+				MyPlayer->GetTarget()->OnDamaged(MyPlayer, FinalDamage);
+
+				InterlockedIncrement64(&Session->IOBlock->IOCount);
+
+				ObjectStateChangeTimerJobCreate(MyPlayer->GetTarget(), en_CreatureState::IDLE, AttackSkillInfo->SkillDebufTime, MyPlayer->_SessionId);
+			}
+			break;
+		case en_SkillType::SKILL_SHAMAN_HELL_FIRE:
+			{
+				HitEffectType = en_EffectType::EFFECT_FLAME_HARPOON_TARGET;
+
+				int32 MagicDamage = MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage * 0.6;
+
+				st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)SpellEndSkillInfo;
+
+				uniform_int_distribution<int> DamageChoiceRandom(AttackSkillInfo->SkillMinDamage + MagicDamage, AttackSkillInfo->SkillMaxDamage + MagicDamage);
+				int32 ChoiceDamage = DamageChoiceRandom(Gen);
+				FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
+
+				// 데미지 처리
+				MyPlayer->GetTarget()->OnDamaged(MyPlayer, FinalDamage);
+
+				wsprintf(SpellMessage, L"%s가 %s을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), SpellEndSkillInfo->SkillName.c_str(), MyPlayer->GetTarget()->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+
+				MagicSystemString = SpellMessage;
+			}
+			break;
+		case en_SkillType::SKILL_TAIOIST_DIVINE_STRIKE:
+			{
+				HitEffectType = en_EffectType::EFFECT_FLAME_HARPOON_TARGET;
+
+				int32 MagicDamage = MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage * 0.6;
+
+				st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)SpellEndSkillInfo;
+
+				uniform_int_distribution<int> DamageChoiceRandom(AttackSkillInfo->SkillMinDamage + MagicDamage, AttackSkillInfo->SkillMaxDamage + MagicDamage);
+				int32 ChoiceDamage = DamageChoiceRandom(Gen);
+				FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
+
+				// 데미지 처리
+				MyPlayer->GetTarget()->OnDamaged(MyPlayer, FinalDamage);
+
+				wsprintf(SpellMessage, L"%s가 %s을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), SpellEndSkillInfo->SkillName.c_str(), MyPlayer->GetTarget()->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+
+				MagicSystemString = SpellMessage;
+			}
+			break;
+		case en_SkillType::SKILL_TAIOIST_ROOT:
+			{
+				HitEffectType = en_EffectType::EFFECT_DEBUF_ROOT;
+
+				MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ROOT;
+
+				// HP 변경 전송
+				CMessage* ResChangeObjectStat = MakePacketResChangeObjectState(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.MoveDir,MyPlayer->GetTarget()->_GameObjectInfo.ObjectType, MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.State);
+				SendPacketAroundSector(MyPlayer->GetTarget()->GetCellPosition(), ResChangeObjectStat);
+				ResChangeObjectStat->Free();
+
+				st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)SpellEndSkillInfo;
+
+				InterlockedIncrement64(&Session->IOBlock->IOCount);
+
+				ObjectStateChangeTimerJobCreate(MyPlayer->GetTarget(), en_CreatureState::IDLE, AttackSkillInfo->SkillDebufTime, MyPlayer->_SessionId);
+			}
+			break;
 		case en_SkillType::SKILL_TAIOIST_HEALING_LIGHT:
-		{
-			HitEffectType = en_EffectType::EFFECT_HEALING_LIGHT_TARGET;
+			{
+				HitEffectType = en_EffectType::EFFECT_HEALING_LIGHT_TARGET;
 
-			FinalDamage = 100;
-			MyPlayer->GetTarget()->OnHeal(MyPlayer, FinalDamage);
+				st_HealSkillInfo* HealSkillInfo = (st_HealSkillInfo*)SpellEndSkillInfo;
 
-			wsprintf(SpellMessage, L"%s가 치유의빛을 사용해 %s를 %d만큼 회복했습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), MyPlayer->GetTarget()->_GameObjectInfo.ObjectName.c_str(), 10);
-			MagicSystemString = SpellMessage;
-		}
-		break;
+				uniform_int_distribution<int> HealChoiceRandom(HealSkillInfo->SkillMinHealPoint, HealSkillInfo->SkillMaxHealPoint);
+				FinalDamage = HealChoiceRandom(Gen);
+				
+				MyPlayer->GetTarget()->OnHeal(MyPlayer, FinalDamage);
+
+				wsprintf(SpellMessage, L"%s가 치유의빛을 사용해 %s를 %d만큼 회복했습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), MyPlayer->GetTarget()->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+				MagicSystemString = SpellMessage;
+			}
+			break;
 		case en_SkillType::SKILL_TAIOIST_HEALING_WIND:
-		{
-			HitEffectType = en_EffectType::EFFECT_HEALING_WIND_TARGET;
+			{
+				HitEffectType = en_EffectType::EFFECT_HEALING_WIND_TARGET;
 
-			FinalDamage = 200;
-			MyPlayer->GetTarget()->OnHeal(MyPlayer, FinalDamage);
+				st_HealSkillInfo* HealSkillInfo = (st_HealSkillInfo*)SpellEndSkillInfo;
 
-			wsprintf(SpellMessage, L"%s가 치유의바람을 사용해 %s를 %d만큼 회복했습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), MyPlayer->GetTarget()->_GameObjectInfo.ObjectName.c_str(), 10);
-			MagicSystemString = SpellMessage;
-		}
-		break;
+				uniform_int_distribution<int> HealChoiceRandom(HealSkillInfo->SkillMinHealPoint, HealSkillInfo->SkillMaxHealPoint);
+				FinalDamage = HealChoiceRandom(Gen);
+
+				MyPlayer->GetTarget()->OnHeal(MyPlayer, FinalDamage);
+
+				wsprintf(SpellMessage, L"%s가 치유의바람을 사용해 %s를 %d만큼 회복했습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), MyPlayer->GetTarget()->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+				MagicSystemString = SpellMessage;
+			}
+			break;
 		default:
 			break;
 		}
@@ -5307,13 +5405,7 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 			false);
 		SendPacketAroundSector(MyPlayer->GetTarget()->GetCellPosition(), ResAttackMagicPacket);
 		ResAttackMagicPacket->Free();
-
-		// Idle로 상태 변경 후 주위섹터에 전송
-		MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-
-		CMessage* ResObjectStateChangePacket = MakePacketResChangeObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
-		SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateChangePacket);
-		ResObjectStateChangePacket->Free();
+		
 
 		// 시스템 메세지 전송
 		CMessage* ResAttackMagicSystemMessagePacket = MakePacketResChattingBoxMessage(MyPlayer->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, st_Color::White(), MagicSystemString);
@@ -5331,7 +5423,7 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 		ResMagicPacket->Free();
 
 		// 이펙트 출력
-		CMessage* ResEffectPacket = MakePacketEffect(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, HitEffectType);
+		CMessage* ResEffectPacket = MakePacketEffect(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, HitEffectType, SpellEndSkillInfo->SkillTargetEffectTime);
 		SendPacketAroundSector(MyPlayer->GetCellPosition(), ResEffectPacket);
 		ResEffectPacket->Free();
 	}
@@ -5412,7 +5504,7 @@ void CGameServer::PacketProcTimerObjectStateChange(int64 SessionId, CGameServerM
 				ResObjectStateChangeMessage->Free();
 			}
 			break;
-		case en_GameObjectType::OBJECT_MELEE_PLAYER:
+		case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 		case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 		case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 		{
@@ -5760,7 +5852,7 @@ CGameServerMessage* CGameServer::MakePacketResQuickSlotSwap(int64 AccountId, int
 	return ResQuickSlotSwapMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResQuickSlotInit(int64 AccountId, int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, wstring QuickSlotKey)
+CGameServerMessage* CGameServer::MakePacketResQuickSlotInit(int64 AccountId, int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, int16 QuickSlotKey)
 {
 	CGameServerMessage* ResQuickSlotInitMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResQuickSlotInitMessage == nullptr)
@@ -5775,11 +5867,7 @@ CGameServerMessage* CGameServer::MakePacketResQuickSlotInit(int64 AccountId, int
 	*ResQuickSlotInitMessage << PlayerId;
 	*ResQuickSlotInitMessage << QuickSlotBarIndex;
 	*ResQuickSlotInitMessage << QuickSlotBarSlotIndex;
-
-	// 퀵슬롯 키
-	int8 QuickSlotKeyLen = (int8)(QuickSlotKey.length() * 2);
-	*ResQuickSlotInitMessage << QuickSlotKeyLen;
-	ResQuickSlotInitMessage->InsertData(QuickSlotKey.c_str(), QuickSlotKeyLen);
+	*ResQuickSlotInitMessage << QuickSlotKey;	
 
 	return ResQuickSlotInitMessage;
 }
@@ -6178,7 +6266,7 @@ CGameServerMessage* CGameServer::MakePacketResSkillToSkillBox(int64 TargetObject
 	return ResSkillToSkillBoxMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketEffect(int64 TargetObjectId, en_EffectType EffectType)
+CGameServerMessage* CGameServer::MakePacketEffect(int64 TargetObjectId, en_EffectType EffectType, float PrintEffectTime)
 {
 	CGameServerMessage* ResEffectMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResEffectMessage == nullptr)
@@ -6191,6 +6279,7 @@ CGameServerMessage* CGameServer::MakePacketEffect(int64 TargetObjectId, en_Effec
 	*ResEffectMessage << (int16)en_PACKET_S2C_EFFECT;
 	*ResEffectMessage << TargetObjectId;
 	*ResEffectMessage << (int16)EffectType;
+	*ResEffectMessage << PrintEffectTime;
 
 	return ResEffectMessage;
 }

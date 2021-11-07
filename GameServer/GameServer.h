@@ -165,7 +165,7 @@ private:
 	//------------------------------------------------------------------
 	// 인벤토리 테이블에 제작템 저장
 	//------------------------------------------------------------------
-	void PacketProcReqDBCraftingItemToInventorySave(int64 SessionId, CMessage* Message);
+	void PacketProcReqDBCraftingItemToInventorySave(int64 SessionId, CGameServerMessage* Message);
 	//---------------------------------------------------------------
 	// 인벤토리 테이블에 아이템 스왑
 	//---------------------------------------------------------------
@@ -173,7 +173,7 @@ private:
 	//---------------------------------------------------------------
 	// 인벤토리 테이블에 아이템 업데이트
 	//---------------------------------------------------------------
-	void PacketProcReqDBItemUpdate(int64 SessionId, CMessage* Message);
+	void PacketProcReqDBItemUpdate(int64 SessionId, CGameServerMessage* Message);
 	//---------------------------------------------------------------
 	// 인벤토리에 돈 저장
 	//---------------------------------------------------------------
@@ -292,7 +292,7 @@ private:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 퀵슬롯 초기화 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResQuickSlotInit(int64 AccountId, int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, wstring QuickSlotKey);
+	CGameServerMessage* MakePacketResQuickSlotInit(int64 AccountId, int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, int16 QuickSlotKey);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 에러 메세지 생성 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -365,7 +365,7 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 이펙트 출력 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketEffect(int64 TargetObjectId, en_EffectType EffectType);
+	CGameServerMessage* MakePacketEffect(int64 TargetObjectId, en_EffectType EffectType, float PrintEffectTime);
 public:
 	//------------------------------------
 	// Job 메모리풀
