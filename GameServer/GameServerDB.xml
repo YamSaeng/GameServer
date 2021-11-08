@@ -15,6 +15,8 @@
     <Column name="MaxMP" type="int" notnull="true"/>
     <Column name="CurrentDP" type="int" notnull="true"/>
     <Column name="MaxDP" type="int" notnull="true"/>
+    <Column name="AutoRecoveyHPPercent" type="SmallInt" notnull="true"/>
+    <Column name="AutoRecoveyMPPercent" type="SmallInt" notnull="true"/>
     <Column name="MinMeleeAttackDamage" type="int" notnull="true"/>
     <Column name="MaxMeleeAttackDamage" type="int" notnull="true"/>
     <Column name="MeleeAttackHitRate" type="SmallInt" notnull="true"/>
@@ -133,7 +135,9 @@
         CurrentMP, 
         MaxMP,
         CurrentDP,
-        MaxDP, 
+        MaxDP,
+        AutoRecoveyHPPercent,
+        AutoRecoveyMPPercent,
         MinMeleeAttackDamage,
         MaxMeleeAttackDamage,
         MeleeAttackHitRate,
@@ -177,6 +181,8 @@
     <Param name="@MaxMP" type="int"/>
     <Param name="@CurrentDP" type="int"/>
     <Param name="@MaxDP" type="int"/>
+    <Param name="AutoRecoveyHPPercent" type="SmallInt"/>
+    <Param name="AutoRecoveyMPPercent" type="SmallInt"/>
     <Param name="@MinMeleeAttackDamage" type="int"/>
     <Param name="@MaxMeleeAttackDamage" type="int"/>
     <Param name="@MeleeAttackHitRate" type="SmallInt"/>
@@ -207,6 +213,8 @@
         (@MaxMP),
         (@CurrentDP),
         (@MaxDP),
+        (@AutoRecoveyHPPercent),
+        (@AutoRecoveyMPPercent),
         (@MinMeleeAttackDamage),
         (@MaxMeleeAttackDamage),
         (@MeleeAttackHitRate),
