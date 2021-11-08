@@ -395,6 +395,8 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			int MaxHP = PlayerWarriorCharacterFiled["MaxHP"].GetInt();
 			int MaxMP = PlayerWarriorCharacterFiled["MaxMP"].GetInt();
 			int MaxDP = PlayerWarriorCharacterFiled["MaxDP"].GetInt();
+			int AutoRecoveyHPPercent = PlayerWarriorCharacterFiled["AutoRecoveyHPPercent"].GetInt();
+			int AutoRecoveyMPPercent = PlayerWarriorCharacterFiled["AutoRecoveyMPPercent"].GetInt();
 			int MinMeleeAttackDamage = PlayerWarriorCharacterFiled["MinMeleeAttackDamage"].GetInt();
 			int MaxMeleeAttackDamage = PlayerWarriorCharacterFiled["MaxMeleeAttackDamage"].GetInt();
 			int16 MeleeAttackHitRate = (int16)PlayerWarriorCharacterFiled["MeleeAttackHitRate"].GetInt();
@@ -414,6 +416,8 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			WarriorStatusData->MaxHP = MaxHP;
 			WarriorStatusData->MaxMP = MaxMP;
 			WarriorStatusData->MaxDP = MaxDP;
+			WarriorStatusData->AutoRecoveyHPPercent = AutoRecoveyHPPercent;
+			WarriorStatusData->AutoRecoveyMPPercent = AutoRecoveyMPPercent;
 			WarriorStatusData->MinMeleeAttackDamage = MinMeleeAttackDamage;
 			WarriorStatusData->MaxMeleeAttackDamage = MaxMeleeAttackDamage;
 			WarriorStatusData->MeleeAttackHitRate = MeleeAttackHitRate;
@@ -439,6 +443,8 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			int MaxHP = PlayerShamanCharacterFiled["MaxHP"].GetInt();
 			int MaxMP = PlayerShamanCharacterFiled["MaxMP"].GetInt();
 			int MaxDP = PlayerShamanCharacterFiled["MaxDP"].GetInt();
+			int AutoRecoveyHPPercent = PlayerShamanCharacterFiled["AutoRecoveyHPPercent"].GetInt();
+			int AutoRecoveyMPPercent = PlayerShamanCharacterFiled["AutoRecoveyMPPercent"].GetInt();
 			int MinMeleeAttackDamage = PlayerShamanCharacterFiled["MinMeleeAttackDamage"].GetInt();
 			int MaxMeleeAttackDamage = PlayerShamanCharacterFiled["MaxMeleeAttackDamage"].GetInt();
 			int16 MeleeAttackHitRate = (int16)PlayerShamanCharacterFiled["MeleeAttackHitRate"].GetInt();
@@ -458,6 +464,8 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			ShamanStatusData->MaxHP = MaxHP;
 			ShamanStatusData->MaxMP = MaxMP;
 			ShamanStatusData->MaxDP = MaxDP;
+			ShamanStatusData->AutoRecoveyHPPercent = AutoRecoveyHPPercent;
+			ShamanStatusData->AutoRecoveyMPPercent = AutoRecoveyMPPercent;
 			ShamanStatusData->MinMeleeAttackDamage = MinMeleeAttackDamage;
 			ShamanStatusData->MaxMeleeAttackDamage = MaxMeleeAttackDamage;
 			ShamanStatusData->MeleeAttackHitRate = MeleeAttackHitRate;
@@ -483,6 +491,8 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			int MaxHP = PlayerTaioistCharacterFiled["MaxHP"].GetInt();
 			int MaxMP = PlayerTaioistCharacterFiled["MaxMP"].GetInt();
 			int MaxDP = PlayerTaioistCharacterFiled["MaxDP"].GetInt();
+			int AutoRecoveyHPPercent = PlayerTaioistCharacterFiled["AutoRecoveyHPPercent"].GetInt();
+			int AutoRecoveyMPPercent = PlayerTaioistCharacterFiled["AutoRecoveyMPPercent"].GetInt();
 			int MinMeleeAttackDamage = PlayerTaioistCharacterFiled["MinMeleeAttackDamage"].GetInt();
 			int MaxMeleeAttackDamage = PlayerTaioistCharacterFiled["MaxMeleeAttackDamage"].GetInt();
 			int16 MeleeAttackHitRate = (int16)PlayerTaioistCharacterFiled["MeleeAttackHitRate"].GetInt();
@@ -502,6 +512,8 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			TaioistStatusData->MaxHP = MaxHP;
 			TaioistStatusData->MaxMP = MaxMP;
 			TaioistStatusData->MaxDP = MaxDP;
+			TaioistStatusData->AutoRecoveyHPPercent = AutoRecoveyHPPercent;
+			TaioistStatusData->AutoRecoveyMPPercent = AutoRecoveyMPPercent;
 			TaioistStatusData->MinMeleeAttackDamage = MinMeleeAttackDamage;
 			TaioistStatusData->MaxMeleeAttackDamage = MaxMeleeAttackDamage;
 			TaioistStatusData->MeleeAttackHitRate = MeleeAttackHitRate;
