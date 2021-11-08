@@ -318,6 +318,155 @@ unsigned __stdcall CGameServer::HeartBeatCheckThreadProc(void* Argument)
 	return 0;
 }
 
+void CGameServer::NewPlayerDefaultSkillCreate(st_Session* Session, int8& CharacterCreateSlotIndex)
+{
+	// 일반 공격 스킬 생성
+	CDBConnection* DefaultAttackSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+	SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*DefaultAttackSkillCreateDBConnection);
+
+	auto FindDefaultAttackSkill = G_Datamanager->_PublicAttackSkillDatas.find((int16)en_SkillType::SKILL_NORMAL);
+	st_AttackSkillData* DefaultAttackSkillData = (*FindDefaultAttackSkill).second;
+
+	st_SkillInfo DefaultAttackSkillInfo;
+	DefaultAttackSkillInfo.IsQuickSlotUse = false;
+	DefaultAttackSkillInfo.SkillLargeCategory = DefaultAttackSkillData->SkillLargeCategory;
+	DefaultAttackSkillInfo.SkillMediumCategory = DefaultAttackSkillData->SkillMediumCategory;
+	DefaultAttackSkillInfo.SkillType = DefaultAttackSkillData->SkillType;
+	DefaultAttackSkillInfo.SkillLevel = 1;
+
+	int8 DefaultAttackSkillLargeCategory = (int8)DefaultAttackSkillInfo.SkillLargeCategory;
+	int8 DefaultAttackSkillMediumCategory = (int8)DefaultAttackSkillInfo.SkillMediumCategory;
+	int16 DefaultAttackSkillType = (int16)DefaultAttackSkillInfo.SkillType;
+
+	SkillToSkillBox.InAccountDBId(Session->AccountId);
+	SkillToSkillBox.InPlayerDBId(Session->MyPlayers[CharacterCreateSlotIndex]->_GameObjectInfo.ObjectId);
+	SkillToSkillBox.InIsQuickSlotUse(DefaultAttackSkillInfo.IsQuickSlotUse);
+	SkillToSkillBox.InSkillLargeCategory(DefaultAttackSkillLargeCategory);
+	SkillToSkillBox.InSkillMediumCategory(DefaultAttackSkillMediumCategory);
+	SkillToSkillBox.InSkillType(DefaultAttackSkillType);
+	SkillToSkillBox.InSkillLevel(DefaultAttackSkillInfo.SkillLevel);
+
+	SkillToSkillBox.Execute();
+
+	// 클래스 공격 스킬 생성
+	switch (Session->MyPlayers[CharacterCreateSlotIndex]->_GameObjectInfo.ObjectType)
+	{
+	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
+		{
+			// 분쇄파동 스킬 추가
+			auto FindWarriorAttackSkill = G_Datamanager->_WarriorAttackSkillDatas.find((int)en_SkillType::SKILL_KNIGHT_SMASH_WAVE);
+			st_AttackSkillData* WarriorAttackSkillData = (*FindWarriorAttackSkill).second;
+
+			st_SkillInfo WarriorDefaultAttackSkillInfo;
+			WarriorDefaultAttackSkillInfo.IsQuickSlotUse = false;
+			WarriorDefaultAttackSkillInfo.SkillLargeCategory = WarriorAttackSkillData->SkillLargeCategory;
+			WarriorDefaultAttackSkillInfo.SkillMediumCategory = WarriorAttackSkillData->SkillMediumCategory;
+			WarriorDefaultAttackSkillInfo.SkillType = WarriorAttackSkillData->SkillType;
+			WarriorDefaultAttackSkillInfo.SkillLevel = 1;
+
+			int8 DefaultWarriorAttackSkillLargeCategory = (int8)WarriorDefaultAttackSkillInfo.SkillLargeCategory;
+			int8 DefaultWarriorAttackSkillMediumCategory = (int8)WarriorDefaultAttackSkillInfo.SkillMediumCategory;
+			int16 DefaultWarriorAttackSkillType = (int16)WarriorDefaultAttackSkillInfo.SkillType;
+
+			SkillToSkillBox.InAccountDBId(Session->AccountId);
+			SkillToSkillBox.InPlayerDBId(Session->MyPlayers[CharacterCreateSlotIndex]->_GameObjectInfo.ObjectId);
+			SkillToSkillBox.InIsQuickSlotUse(WarriorDefaultAttackSkillInfo.IsQuickSlotUse);
+			SkillToSkillBox.InSkillLargeCategory(DefaultWarriorAttackSkillLargeCategory);
+			SkillToSkillBox.InSkillMediumCategory(DefaultWarriorAttackSkillMediumCategory);
+			SkillToSkillBox.InSkillType(DefaultWarriorAttackSkillType);
+			SkillToSkillBox.InSkillLevel(WarriorDefaultAttackSkillInfo.SkillLevel);
+
+			SkillToSkillBox.Execute();
+		}	
+		break;
+	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
+		{			
+			// 불꽃 작살 추가
+			auto FindShamanAttackSkill = G_Datamanager->_ShamanAttackSkillDatas.find((int)en_SkillType::SKILL_SHAMAN_FLAME_HARPOON);
+			st_AttackSkillData* ShamanAttackSkillData = (*FindShamanAttackSkill).second;
+
+			st_SkillInfo ShamanDefaultAttackSkillInfo;
+			ShamanDefaultAttackSkillInfo.IsQuickSlotUse = false;
+			ShamanDefaultAttackSkillInfo.SkillLargeCategory = ShamanAttackSkillData->SkillLargeCategory;
+			ShamanDefaultAttackSkillInfo.SkillMediumCategory = ShamanAttackSkillData->SkillMediumCategory;
+			ShamanDefaultAttackSkillInfo.SkillType = ShamanAttackSkillData->SkillType;
+			ShamanDefaultAttackSkillInfo.SkillLevel = 1;
+
+			int8 DefaultShamanAttackSkillLargeCategory = (int8)ShamanDefaultAttackSkillInfo.SkillLargeCategory;
+			int8 DefaultShamanAttackSkillMediumCategory = (int8)ShamanDefaultAttackSkillInfo.SkillMediumCategory;
+			int16 DefaultShamanAttackSkillType = (int16)ShamanDefaultAttackSkillInfo.SkillType;
+
+			SkillToSkillBox.InAccountDBId(Session->AccountId);
+			SkillToSkillBox.InPlayerDBId(Session->MyPlayers[CharacterCreateSlotIndex]->_GameObjectInfo.ObjectId);
+			SkillToSkillBox.InIsQuickSlotUse(ShamanDefaultAttackSkillInfo.IsQuickSlotUse);
+			SkillToSkillBox.InSkillLargeCategory(DefaultShamanAttackSkillLargeCategory);
+			SkillToSkillBox.InSkillMediumCategory(DefaultShamanAttackSkillMediumCategory);
+			SkillToSkillBox.InSkillType(DefaultShamanAttackSkillType);
+			SkillToSkillBox.InSkillLevel(ShamanDefaultAttackSkillInfo.SkillLevel);
+
+			SkillToSkillBox.Execute();
+		}
+		break;
+	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
+		{
+			// 신성한 일격 추가
+			auto FindTaioistAttackSkill = G_Datamanager->_TaioistAttackSkillDatas.find((int)en_SkillType::SKILL_TAIOIST_DIVINE_STRIKE);
+			st_AttackSkillData* TaioistAttackSkillData = (*FindTaioistAttackSkill).second;
+
+			st_SkillInfo TaioistDefaultAttackSkillInfo;
+			TaioistDefaultAttackSkillInfo.IsQuickSlotUse = false;
+			TaioistDefaultAttackSkillInfo.SkillLargeCategory = TaioistAttackSkillData->SkillLargeCategory;
+			TaioistDefaultAttackSkillInfo.SkillMediumCategory = TaioistAttackSkillData->SkillMediumCategory;
+			TaioistDefaultAttackSkillInfo.SkillType = TaioistAttackSkillData->SkillType;
+			TaioistDefaultAttackSkillInfo.SkillLevel = 1;
+
+			int8 DefaultTaioistAttackSkillLargeCategory = (int8)TaioistDefaultAttackSkillInfo.SkillLargeCategory;
+			int8 DefaultTaioistAttackSkillMediumCategory = (int8)TaioistDefaultAttackSkillInfo.SkillMediumCategory;
+			int16 DefaultTaioistAttackSkillType = (int16)TaioistDefaultAttackSkillInfo.SkillType;
+
+			SkillToSkillBox.InAccountDBId(Session->AccountId);
+			SkillToSkillBox.InPlayerDBId(Session->MyPlayers[CharacterCreateSlotIndex]->_GameObjectInfo.ObjectId);
+			SkillToSkillBox.InIsQuickSlotUse(TaioistDefaultAttackSkillInfo.IsQuickSlotUse);
+			SkillToSkillBox.InSkillLargeCategory(DefaultTaioistAttackSkillLargeCategory);
+			SkillToSkillBox.InSkillMediumCategory(DefaultTaioistAttackSkillMediumCategory);
+			SkillToSkillBox.InSkillType(DefaultTaioistAttackSkillType);
+			SkillToSkillBox.InSkillLevel(TaioistDefaultAttackSkillInfo.SkillLevel);
+
+			SkillToSkillBox.Execute();
+
+			// 치유의 빛 추가
+			auto FindTaioistHealSkill = G_Datamanager->_TaioistHealSkillDatas.find((int)en_SkillType::SKILL_TAIOIST_HEALING_LIGHT);
+			st_HealSkillData* TaioistHealSkillData = (*FindTaioistHealSkill).second;
+
+			st_SkillInfo TaioistDefaultHealSkillInfo;
+			TaioistDefaultHealSkillInfo.IsQuickSlotUse = false;
+			TaioistDefaultHealSkillInfo.SkillLargeCategory = TaioistHealSkillData->SkillLargeCategory;
+			TaioistDefaultHealSkillInfo.SkillMediumCategory = TaioistHealSkillData->SkillMediumCategory;
+			TaioistDefaultHealSkillInfo.SkillType = TaioistHealSkillData->SkillType;
+			TaioistDefaultHealSkillInfo.SkillLevel = 1;
+
+			int8 DefaultTaioistHealSkillLargeCategory = (int8)TaioistDefaultHealSkillInfo.SkillLargeCategory;
+			int8 DefaultTaioistHealSkillMediumCategory = (int8)TaioistDefaultHealSkillInfo.SkillMediumCategory;
+			int16 DefaultTaioistHealSkillType = (int16)TaioistDefaultHealSkillInfo.SkillType;
+
+			SkillToSkillBox.InAccountDBId(Session->AccountId);
+			SkillToSkillBox.InPlayerDBId(Session->MyPlayers[CharacterCreateSlotIndex]->_GameObjectInfo.ObjectId);
+			SkillToSkillBox.InIsQuickSlotUse(TaioistDefaultHealSkillInfo.IsQuickSlotUse);
+			SkillToSkillBox.InSkillLargeCategory(DefaultTaioistHealSkillLargeCategory);
+			SkillToSkillBox.InSkillMediumCategory(DefaultTaioistHealSkillMediumCategory);
+			SkillToSkillBox.InSkillType(DefaultTaioistHealSkillType);
+			SkillToSkillBox.InSkillLevel(TaioistDefaultHealSkillInfo.SkillLevel);
+
+			SkillToSkillBox.Execute();
+		}	
+		break;
+	default:
+		break;
+	}
+
+	G_DBConnectionPool->Push(en_DBConnect::GAME, DefaultAttackSkillCreateDBConnection);
+}
+
 void CGameServer::CreateNewClient(int64 SessionId)
 {
 	// 세션 찾기
@@ -1777,6 +1926,7 @@ void CGameServer::PacketProcReqObjectStateChange(int64 SessionId, CMessage* Mess
 				{
 				case en_StateChange::MOVE_TO_STOP:
 					if (FindGameObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::MOVING
+						|| FindGameObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::IDLE
 						|| FindGameObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::PATROL)
 					{						
 						FindGameObject->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
@@ -2793,6 +2943,8 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 			int32 PlayerMaxMP;
 			int32 PlayerCurrentDP;
 			int32 PlayerMaxDP;
+			int16 PlayerAutoRecoveyHPPercent;
+			int16 PlayerAutoRecoveyMPPercent;
 			int32 PlayerMinMeleeAttackDamage;
 			int32 PlayerMaxMeleeAttackDamage;
 			int16 PlayerMeleeAttackHitRate;
@@ -2820,6 +2972,8 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 			ClientPlayersGet.OutMaxMP(PlayerMaxMP);
 			ClientPlayersGet.OutCurrentDP(PlayerCurrentDP);
 			ClientPlayersGet.OutMaxDP(PlayerMaxDP);
+			ClientPlayersGet.OutAutoRecoveyHPPercent(PlayerAutoRecoveyHPPercent);
+			ClientPlayersGet.OutAutoRecoveyMPPercent(PlayerAutoRecoveyMPPercent);
 			ClientPlayersGet.OutMinMeleeAttackDamage(PlayerMinMeleeAttackDamage);
 			ClientPlayersGet.OutMaxMeleeAttackDamage(PlayerMaxMeleeAttackDamage);
 			ClientPlayersGet.OutMeleeAttackHitRate(PlayerMeleeAttackHitRate);
@@ -2997,6 +3151,8 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			NewCharacterPush.InMaxMP(NewCharacterStatus.MaxMP);
 			NewCharacterPush.InCurrentDP(CurrentDP);
 			NewCharacterPush.InMaxDP(NewCharacterStatus.MaxDP);
+			NewCharacterPush.InAutoRecoveyHPPercent(NewCharacterStatus.AutoRecoveyHPPercent);
+			NewCharacterPush.InAutoRecoveyMPPercent(NewCharacterStatus.AutoRecoveyMPPercent);
 			NewCharacterPush.InMinMeleeAttackDamage(NewCharacterStatus.MinMeleeAttackDamage);
 			NewCharacterPush.InMaxMeleeAttackDamage(NewCharacterStatus.MaxMeleeAttackDamage);
 			NewCharacterPush.InMeleeAttackHitRate(NewCharacterStatus.MeleeAttackHitRate);
@@ -3147,37 +3303,9 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 
 					DefaultKey++;
 				}
-			}			
-
-			// 기본 공격 스킬 생성
-			CDBConnection* DefaultAttackSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-			SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*DefaultAttackSkillCreateDBConnection);
+			}							
 			
-			auto FindSkill = G_Datamanager->_PublicAttackSkillDatas.find((int16)en_SkillType::SKILL_NORMAL);
-			st_AttackSkillData* DefaultSkillData = (*FindSkill).second;
-
-			st_SkillInfo DefaultAttackSkillInfo;
-			DefaultAttackSkillInfo.IsQuickSlotUse = false;
-			DefaultAttackSkillInfo.SkillLargeCategory = DefaultSkillData->SkillLargeCategory;
-			DefaultAttackSkillInfo.SkillMediumCategory = DefaultSkillData->SkillMediumCategory;
-			DefaultAttackSkillInfo.SkillType = DefaultSkillData->SkillType;
-			DefaultAttackSkillInfo.SkillLevel = 1;			
-
-			int8 DefaultAttackSkillLargeCategory = (int8)DefaultAttackSkillInfo.SkillLargeCategory;
-			int8 DefaultAttackSkillMediumCategory = (int8)DefaultAttackSkillInfo.SkillMediumCategory;
-			int16 DefaultAttackSkillType = (int16)DefaultAttackSkillInfo.SkillType;
-
-			SkillToSkillBox.InAccountDBId(Session->AccountId);
-			SkillToSkillBox.InPlayerDBId(Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectId);
-			SkillToSkillBox.InIsQuickSlotUse(DefaultAttackSkillInfo.IsQuickSlotUse);
-			SkillToSkillBox.InSkillLargeCategory(DefaultAttackSkillLargeCategory);	
-			SkillToSkillBox.InSkillMediumCategory(DefaultAttackSkillMediumCategory);
-			SkillToSkillBox.InSkillType(DefaultAttackSkillType);
-			SkillToSkillBox.InSkillLevel(DefaultAttackSkillInfo.SkillLevel);			
-
-			SkillToSkillBox.Execute();
-
-			G_DBConnectionPool->Push(en_DBConnect::GAME, DefaultAttackSkillCreateDBConnection);
+			NewPlayerDefaultSkillCreate(Session, ReqCharacterCreateSlotIndex);
 		}
 		else
 		{
@@ -5266,7 +5394,13 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 			break;	
 		case en_SkillType::SKILL_SHAMAN_ROOT:
 			{
+				HitEffectType = en_EffectType::EFFECT_DEBUF_ROOT;
+
 				MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ROOT;
+
+				CMessage* ResChangeObjectStat = MakePacketResChangeObjectState(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->GetTarget()->_GameObjectInfo.ObjectType, MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.State);
+				SendPacketAroundSector(MyPlayer->GetTarget()->GetCellPosition(), ResChangeObjectStat);
+				ResChangeObjectStat->Free();
 
 				st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)SpellEndSkillInfo;
 
@@ -5286,8 +5420,15 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 			break;
 		case en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE:
 			{
+				HitEffectType = en_EffectType::EFFECT_DEBUF_STUN;
+
 				MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::STUN;
 				
+				// 스턴 상태로 변경
+				CMessage* ResChangeObjectStat = MakePacketResChangeObjectState(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->GetTarget()->_GameObjectInfo.ObjectType, MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.State);
+				SendPacketAroundSector(MyPlayer->GetTarget()->GetCellPosition(), ResChangeObjectStat);
+				ResChangeObjectStat->Free();
+
 				int32 MagicDamage = MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage * 0.6;
 
 				st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)SpellEndSkillInfo;
@@ -5349,8 +5490,7 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 				HitEffectType = en_EffectType::EFFECT_DEBUF_ROOT;
 
 				MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ROOT;
-
-				// HP 변경 전송
+								
 				CMessage* ResChangeObjectStat = MakePacketResChangeObjectState(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.MoveDir,MyPlayer->GetTarget()->_GameObjectInfo.ObjectType, MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.State);
 				SendPacketAroundSector(MyPlayer->GetTarget()->GetCellPosition(), ResChangeObjectStat);
 				ResChangeObjectStat->Free();
@@ -5530,6 +5670,15 @@ void CGameServer::PacketProcTimerObjectStateChange(int64 SessionId, CGameServerM
 							SendPacketAroundSector(ChangeStateObject->GetCellPosition(), ResObjectStateChangeMessage);
 							ResObjectStateChangeMessage->Free();
 						}
+					}
+					break;
+				default:
+					{
+						ChangeStatePlayerObject->_GameObjectInfo.ObjectPositionInfo.State = (en_CreatureState)ChangeState;
+
+						CGameServerMessage* ResObjectStateChangeMessage = MakePacketResChangeObjectState(TargetObjectId, ChangeStateObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, ChangeStateObject->_GameObjectInfo.ObjectType, (en_CreatureState)ChangeState);
+						SendPacketAroundSector(ChangeStateObject->GetCellPosition(), ResObjectStateChangeMessage);
+						ResObjectStateChangeMessage->Free();
 					}
 					break;
 				}

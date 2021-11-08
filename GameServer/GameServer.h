@@ -53,6 +53,11 @@ private:
 	static unsigned __stdcall LogicThreadProc(void* Argument);
 	static unsigned __stdcall HeartBeatCheckThreadProc(void* Argument);
 
+	//---------------------------------
+	// 캐릭터 기본 스킬 생성
+	//---------------------------------
+	void NewPlayerDefaultSkillCreate(st_Session* Session,int8& CharacterCreateSlotIndex);
+
 	//------------------------------------
 	// 클라 접속 기본 정보 셋팅
 	//------------------------------------
