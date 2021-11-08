@@ -72,9 +72,9 @@
               "SkillMinHeal": 200,
               "SkillMaxHeal": 250,
               "SkillCoolTime": 4000,
-              "SkillTargetEffectTime": 0.6,
               "SkillCastingTime": 2000,
               "SkillDistance": 6,
+              "SkillTargetEffectTime": 0.6,
               "SkillThumbnailImagePath": "Textures/Spell/Icon/도사/치유의바람"
             }
           ]
