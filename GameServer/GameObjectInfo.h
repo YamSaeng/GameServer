@@ -232,7 +232,8 @@ enum class en_EffectType : int16
 	EFFECT_HEALING_WIND_TARGET,
 	EFFECT_HELAING_MYSELF,
 	EFFECT_OBJECT_SPAWN,
-	EFFECT_DEBUF_ROOT
+	EFFECT_DEBUF_ROOT,
+	EFFECT_DEBUF_STUN
 };
 
 enum class en_ErrorType : int16
@@ -1593,6 +1594,8 @@ struct st_StatInfo
 	int32 MaxMP;
 	int32 DP;
 	int32 MaxDP;
+	int16 AutoRecoveyHPPercent;
+	int16 AutoRecoveyMPPercent;
 	int32 MinMeleeAttackDamage;
 	int32 MaxMeleeAttackDamage;
 	int16 MeleeAttackHitRate;

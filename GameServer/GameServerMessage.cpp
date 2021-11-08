@@ -65,6 +65,8 @@ CGameServerMessage& CGameServerMessage::operator<<(st_StatInfo& StatInfo)
     *this << StatInfo.MaxMP;
     *this << StatInfo.DP;
     *this << StatInfo.MaxDP;
+    *this << StatInfo.AutoRecoveyHPPercent;
+    *this << StatInfo.AutoRecoveyMPPercent;
     *this << StatInfo.MinMeleeAttackDamage;
     *this << StatInfo.MaxMeleeAttackDamage;
     *this << StatInfo.MeleeAttackHitRate;
