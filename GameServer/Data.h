@@ -43,8 +43,8 @@ struct st_ObjectStatusData
 	int32 MaxMP;
 	int32 DP;
 	int32 MaxDP;
-	int16 AutoRecoveyHPPercent;
-	int16 AutoRecoveyMPPercent;
+	int16 AutoRecoveryHPPercent;
+	int16 AutoRecoveryMPPercent;
 	int32 MinMeleeAttackDamage;
 	int32 MaxMeleeAttackDamage;
 	int16 MeleeAttackHitRate;

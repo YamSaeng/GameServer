@@ -68,4 +68,5 @@ public:
 	void LoadDataCrafting(wstring LoadFileName);
 
 	st_SkillData* FindSkillData(en_SkillMediumCategory FindSkillMediumCategory, en_SkillType FindSkillType);	
+	st_ObjectStatusData* FindObjectStatusData(en_GameObjectType GameObjectType, int16 Level);
 };

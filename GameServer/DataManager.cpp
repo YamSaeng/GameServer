@@ -395,8 +395,8 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			int MaxHP = PlayerWarriorCharacterFiled["MaxHP"].GetInt();
 			int MaxMP = PlayerWarriorCharacterFiled["MaxMP"].GetInt();
 			int MaxDP = PlayerWarriorCharacterFiled["MaxDP"].GetInt();
-			int AutoRecoveyHPPercent = PlayerWarriorCharacterFiled["AutoRecoveyHPPercent"].GetInt();
-			int AutoRecoveyMPPercent = PlayerWarriorCharacterFiled["AutoRecoveyMPPercent"].GetInt();
+			int AutoRecoveryHPPercent = PlayerWarriorCharacterFiled["AutoRecoveryHPPercent"].GetInt();
+			int AutoRecoveryMPPercent = PlayerWarriorCharacterFiled["AutoRecoveryMPPercent"].GetInt();
 			int MinMeleeAttackDamage = PlayerWarriorCharacterFiled["MinMeleeAttackDamage"].GetInt();
 			int MaxMeleeAttackDamage = PlayerWarriorCharacterFiled["MaxMeleeAttackDamage"].GetInt();
 			int16 MeleeAttackHitRate = (int16)PlayerWarriorCharacterFiled["MeleeAttackHitRate"].GetInt();
@@ -416,8 +416,8 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			WarriorStatusData->MaxHP = MaxHP;
 			WarriorStatusData->MaxMP = MaxMP;
 			WarriorStatusData->MaxDP = MaxDP;
-			WarriorStatusData->AutoRecoveyHPPercent = AutoRecoveyHPPercent;
-			WarriorStatusData->AutoRecoveyMPPercent = AutoRecoveyMPPercent;
+			WarriorStatusData->AutoRecoveryHPPercent = AutoRecoveryHPPercent;
+			WarriorStatusData->AutoRecoveryMPPercent = AutoRecoveryMPPercent;
 			WarriorStatusData->MinMeleeAttackDamage = MinMeleeAttackDamage;
 			WarriorStatusData->MaxMeleeAttackDamage = MaxMeleeAttackDamage;
 			WarriorStatusData->MeleeAttackHitRate = MeleeAttackHitRate;
@@ -443,8 +443,8 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			int MaxHP = PlayerShamanCharacterFiled["MaxHP"].GetInt();
 			int MaxMP = PlayerShamanCharacterFiled["MaxMP"].GetInt();
 			int MaxDP = PlayerShamanCharacterFiled["MaxDP"].GetInt();
-			int AutoRecoveyHPPercent = PlayerShamanCharacterFiled["AutoRecoveyHPPercent"].GetInt();
-			int AutoRecoveyMPPercent = PlayerShamanCharacterFiled["AutoRecoveyMPPercent"].GetInt();
+			int AutoRecoveryHPPercent = PlayerShamanCharacterFiled["AutoRecoveryHPPercent"].GetInt();
+			int AutoRecoveryMPPercent = PlayerShamanCharacterFiled["AutoRecoveryMPPercent"].GetInt();
 			int MinMeleeAttackDamage = PlayerShamanCharacterFiled["MinMeleeAttackDamage"].GetInt();
 			int MaxMeleeAttackDamage = PlayerShamanCharacterFiled["MaxMeleeAttackDamage"].GetInt();
 			int16 MeleeAttackHitRate = (int16)PlayerShamanCharacterFiled["MeleeAttackHitRate"].GetInt();
@@ -464,8 +464,8 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			ShamanStatusData->MaxHP = MaxHP;
 			ShamanStatusData->MaxMP = MaxMP;
 			ShamanStatusData->MaxDP = MaxDP;
-			ShamanStatusData->AutoRecoveyHPPercent = AutoRecoveyHPPercent;
-			ShamanStatusData->AutoRecoveyMPPercent = AutoRecoveyMPPercent;
+			ShamanStatusData->AutoRecoveryHPPercent = AutoRecoveryHPPercent;
+			ShamanStatusData->AutoRecoveryMPPercent = AutoRecoveryMPPercent;
 			ShamanStatusData->MinMeleeAttackDamage = MinMeleeAttackDamage;
 			ShamanStatusData->MaxMeleeAttackDamage = MaxMeleeAttackDamage;
 			ShamanStatusData->MeleeAttackHitRate = MeleeAttackHitRate;
@@ -491,8 +491,8 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			int MaxHP = PlayerTaioistCharacterFiled["MaxHP"].GetInt();
 			int MaxMP = PlayerTaioistCharacterFiled["MaxMP"].GetInt();
 			int MaxDP = PlayerTaioistCharacterFiled["MaxDP"].GetInt();
-			int AutoRecoveyHPPercent = PlayerTaioistCharacterFiled["AutoRecoveyHPPercent"].GetInt();
-			int AutoRecoveyMPPercent = PlayerTaioistCharacterFiled["AutoRecoveyMPPercent"].GetInt();
+			int AutoRecoveryHPPercent = PlayerTaioistCharacterFiled["AutoRecoveryHPPercent"].GetInt();
+			int AutoRecoveryMPPercent = PlayerTaioistCharacterFiled["AutoRecoveryMPPercent"].GetInt();
 			int MinMeleeAttackDamage = PlayerTaioistCharacterFiled["MinMeleeAttackDamage"].GetInt();
 			int MaxMeleeAttackDamage = PlayerTaioistCharacterFiled["MaxMeleeAttackDamage"].GetInt();
 			int16 MeleeAttackHitRate = (int16)PlayerTaioistCharacterFiled["MeleeAttackHitRate"].GetInt();
@@ -512,8 +512,8 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			TaioistStatusData->MaxHP = MaxHP;
 			TaioistStatusData->MaxMP = MaxMP;
 			TaioistStatusData->MaxDP = MaxDP;
-			TaioistStatusData->AutoRecoveyHPPercent = AutoRecoveyHPPercent;
-			TaioistStatusData->AutoRecoveyMPPercent = AutoRecoveyMPPercent;
+			TaioistStatusData->AutoRecoveryHPPercent = AutoRecoveryHPPercent;
+			TaioistStatusData->AutoRecoveryMPPercent = AutoRecoveryMPPercent;
 			TaioistStatusData->MinMeleeAttackDamage = MinMeleeAttackDamage;
 			TaioistStatusData->MaxMeleeAttackDamage = MaxMeleeAttackDamage;
 			TaioistStatusData->MeleeAttackHitRate = MeleeAttackHitRate;
@@ -1532,4 +1532,29 @@ st_SkillData* CDataManager::FindSkillData(en_SkillMediumCategory FindAttackSkill
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_BUF:
 		return (*_TaioistBufSkillDatas.find((int16)FindSkillType)).second;
 	}
+}
+
+st_ObjectStatusData* CDataManager::FindObjectStatusData(en_GameObjectType GameObjectType, int16 Level)
+{
+	switch (GameObjectType)
+	{
+	case en_GameObjectType::NORMAL:
+		return nullptr;
+	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
+		return (*_WarriorStatus.find(Level)).second;		
+	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
+		return (*_ShamanStatus.find(Level)).second;		
+	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
+		return (*_TaioistStatus.find(Level)).second;		
+	case en_GameObjectType::OBJECT_THIEF_PLAYER:
+		break;
+	case en_GameObjectType::OBJECT_SLIME:
+		break;
+	case en_GameObjectType::OBJECT_BEAR:
+		break;
+	case en_GameObjectType::OBJECT_STONE:
+		break;
+	case en_GameObjectType::OBJECT_TREE:
+		break;
+	}	
 }
