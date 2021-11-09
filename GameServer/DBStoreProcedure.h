@@ -31,8 +31,8 @@ namespace SP
 		void OutMaxMP(int32& MaxMP) { BindCol(8, MaxMP); }
 		void OutCurrentDP(int32& CurrentDP) { BindCol(9, CurrentDP); }
 		void OutMaxDP(int32& MaxDP) { BindCol(10, MaxDP); }
-		void OutAutoRecoveyHPPercent(int16& AutoRecoveyHPPercent) { BindCol(11, AutoRecoveyHPPercent); }
-		void OutAutoRecoveyMPPercent(int16& AutoRecoveyMPPercent) { BindCol(12, AutoRecoveyMPPercent); }
+		void OutAutoRecoveryHPPercent(int16& AutoRecoveryHPPercent) { BindCol(11, AutoRecoveryHPPercent); }
+		void OutAutoRecoveryMPPercent(int16& AutoRecoveryMPPercent) { BindCol(12, AutoRecoveryMPPercent); }
 		void OutMinMeleeAttackDamage(int32& MinMeleeAttackDamage) { BindCol(13, MinMeleeAttackDamage); }
 		void OutMaxMeleeAttackDamage(int32& MaxMeleeAttackDamage) { BindCol(14, MaxMeleeAttackDamage); }
 		void OutMeleeAttackHitRate(int16& MeleeAttackHitRate) { BindCol(15, MeleeAttackHitRate); }
@@ -74,8 +74,8 @@ namespace SP
 		void InMaxMP(int32& MaxMP) { BindParam(8, MaxMP); }
 		void InCurrentDP(int32& CurrentDP) { BindParam(9, CurrentDP); }
 		void InMaxDP(int32& MaxDP) { BindParam(10, MaxDP); }
-		void InAutoRecoveyHPPercent(int16& AutoRecoveyHPPercent) { BindParam(11, AutoRecoveyHPPercent); }
-		void InAutoRecoveyMPPercent(int16& AutoRecoveyMPPercent) { BindParam(12, AutoRecoveyMPPercent); }
+		void InAutoRecoveryHPPercent(int16& AutoRecoveryHPPercent) { BindParam(11, AutoRecoveryHPPercent); }
+		void InAutoRecoveryMPPercent(int16& AutoRecoveryMPPercent) { BindParam(12, AutoRecoveryMPPercent); }
 		void InMinMeleeAttackDamage(int32& MinMeleeAttackDamage) { BindParam(13, MinMeleeAttackDamage); }
 		void InMaxMeleeAttackDamage(int32& MaxMeleeAttackDamage) { BindParam(14, MaxMeleeAttackDamage); }
 		void InMeleeAttackHitRate(int16& MeleeAttackHitRate) { BindParam(15, MeleeAttackHitRate); }
@@ -472,8 +472,8 @@ namespace SP
 		void InMaxHP(int32& MaxHP) { BindParam(3, MaxHP); }
 		void InMaxMP(int32& MaxMP) { BindParam(4, MaxMP); }
 		void InMaxDP(int32& MaxDP) { BindParam(5, MaxDP); }
-		void InAutoRecoveyHPPercent(int16& AutoRecoveyHPPercent) { BindParam(6, AutoRecoveyHPPercent); }
-		void InAutoRecoveyMPPercent(int16& AutoRecoveyMPPercent) { BindParam(7, AutoRecoveyMPPercent); }
+		void InAutoRecoveryHPPercent(int16& AutoRecoveryHPPercent) { BindParam(6, AutoRecoveryHPPercent); }
+		void InAutoRecoveryMPPercent(int16& AutoRecoveryMPPercent) { BindParam(7, AutoRecoveryMPPercent); }
 		void InMinMeleeAttackDamage(int32& MinMeleeAttackDamage) { BindParam(8, MinMeleeAttackDamage); }
 		void InMaxMeleeAttackDamage(int32& MaxMeleeAttackDamage) { BindParam(9, MaxMeleeAttackDamage); }
 		void InMeleeAttackHitRate(int16& MeleeAttackHitRate) { BindParam(10, MeleeAttackHitRate); }
