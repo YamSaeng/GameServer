@@ -57,6 +57,11 @@ private:
 	// 캐릭터 기본 스킬 생성
 	//---------------------------------
 	void NewPlayerDefaultSkillCreate(st_Session* Session,int8& CharacterCreateSlotIndex);
+	
+	//------------------------
+	// 오브젝트 자연 회복 추가
+	//------------------------
+	void ObjectAutoRecovery(int16 ObjectId, en_GameObjectType GameObjectType, int16 Level);
 
 	//------------------------------------
 	// 클라 접속 기본 정보 셋팅
@@ -228,7 +233,10 @@ private:
 	// 오브젝트 상태 변경
 	//----------------------------------------------------------------
 	void PacketProcTimerObjectStateChange(int64 SessionId, CGameServerMessage* Message);
-
+	//----------------------------------------------------------------
+	// 오브젝트 도트 처리
+	//----------------------------------------------------------------
+	void PacketProcTimerDot(int64 SessionId, CGameServerMessage* Message);
 
 	//--------------------------------------
 	// 패킷조합 함수		
@@ -458,4 +466,8 @@ public:
 	// 오브젝트 상태 변경 타이머 잡 생성
 	//--------------------------------------------------------------
 	void ObjectStateChangeTimerJobCreate(CGameObject* Target, en_CreatureState ChangeState, int64 ChangeTime, int64 SessionId = 0);
+	//--------------------------------------------------------------
+	// 오브젝트 도트 타이머 잡 생성
+	//--------------------------------------------------------------
+	void ObjectDotTimerCreate(CGameObject* Target, en_DotType DotType, int64 DotTime, int32 HPPoint, int32 MPPoint, int64 DotTotalTime = 0, int64 SessionId = 0);
 };
