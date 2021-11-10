@@ -79,13 +79,13 @@ void CGameServer::GameServerStart(const WCHAR* OpenIP, int32 Port)
 	// 타이머 잡 쓰레드 시작
 	_TimerJobThread = (HANDLE)_beginthreadex(NULL, 0, TimerJobThreadProc, this, 0, NULL);
 	// 로직 쓰레드 시작
-	_LogicThread = (HANDLE)_beginthreadex(NULL, 0, LogicThreadProc, this, 0, NULL);
+	_LogicThread = (HANDLE)_beginthreadex(NULL, 0, LogicThreadProc, this, 0, NULL);	
 
 	CloseHandle(_AuthThread);
 	CloseHandle(_NetworkThread);
 	CloseHandle(_DataBaseThread);
 	CloseHandle(_TimerJobThread);
-	CloseHandle(_LogicThread);
+	CloseHandle(_LogicThread);	
 }
 
 unsigned __stdcall CGameServer::AuthThreadProc(void* Argument)
@@ -277,7 +277,7 @@ unsigned __stdcall CGameServer::TimerJobThreadProc(void* Argument)
 					case en_TimerJobType::TIMER_SPELL_END:
 						Instance->PacketProcTimerSpellEnd(TimerJob->SessionId, TimerJob->TimerJobMessage);
 						break;
-					case en_TimerJobType::TIMER_SKILL_CASTING_END:
+					case en_TimerJobType::TIMER_SKILL_COOLTIME_END:
 						Instance->PacketProcTimerCastingTimeEnd(TimerJob->SessionId, TimerJob->TimerJobMessage);
 						break;
 					case en_TimerJobType::TIMER_OBJECT_SPAWN:
@@ -289,9 +289,23 @@ unsigned __stdcall CGameServer::TimerJobThreadProc(void* Argument)
 					case en_TimerJobType::TIMER_OBJECT_DOT:
 						Instance->PacketProcTimerDot(TimerJob->SessionId, TimerJob->TimerJobMessage);
 						break;
+					case en_TimerJobType::TIMER_PING:
+						Instance->PacketProcTimerPing(TimerJob->SessionId);
+						break;
 					default:
 						Instance->Disconnect(TimerJob->SessionId);
 						break;
+					}
+				}
+				else
+				{
+					st_Session* Session = Instance->FindSession(TimerJob->SessionId);
+
+					if (Session)
+					{
+						InterlockedDecrement64(&Session->IOBlock->IOCount);
+
+						Instance->ReturnSession(Session);
 					}
 				}
 
@@ -313,11 +327,6 @@ unsigned __stdcall CGameServer::LogicThreadProc(void* Argument)
 		G_ChannelManager->Update();
 	}
 
-	return 0;
-}
-
-unsigned __stdcall CGameServer::HeartBeatCheckThreadProc(void* Argument)
-{
 	return 0;
 }
 
@@ -496,7 +505,7 @@ void CGameServer::CreateNewClient(int64 SessionId)
 		Session->AccountId = 0;
 		Session->IsLogin = false;
 		Session->Token = 0;
-		Session->RecvPacketTime = timeGetTime();
+		Session->RecvPacketTime = GetTickCount64();
 
 		for (int i = 0; i < SESSION_CHARACTER_MAX; i++)
 		{
@@ -509,6 +518,9 @@ void CGameServer::CreateNewClient(int64 SessionId)
 		CMessage* ResClientConnectedMessage = MakePacketResClientConnected();
 		SendPacket(Session->SessionId, ResClientConnectedMessage);
 		ResClientConnectedMessage->Free();
+
+		// 핑 전송 시작
+		PingTimerCreate(Session);
 	}
 
 	ReturnSession(Session);
@@ -635,8 +647,10 @@ void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 	case en_PACKET_TYPE::en_PACKET_C2S_INVENTORY_ITEM_USE:
 		PacketProcReqItemUse(SessionId, Message);
 		break;
-	case en_PACKET_TYPE::en_PACKET_CS_GAME_REQ_HEARTBEAT:
-		PacketProcReqHeartBeat(SessionId, Message);
+	case en_PACKET_TYPE::en_PACKET_CS_GAME_REQ_HEARTBEAT:		
+		break;
+	case en_PACKET_TYPE::en_PACKET_C2S_PONG:
+		PacketProcReqPong(SessionId, Message);
 		break;
 	default:
 		Disconnect(SessionId);
@@ -2901,15 +2915,11 @@ void CGameServer::PacketProcReqItemLooting(int64 SessionId, CMessage* Message)
 	ReturnSession(Session);
 }
 
-//---------------------------------------------------------------------------------
-//하트 비트
-//WORD Type
-//---------------------------------------------------------------------------------
-void CGameServer::PacketProcReqHeartBeat(int64 SessionID, CMessage* Message)
+void CGameServer::PacketProcReqPong(int64 SessionID, CMessage* Message)
 {
 	st_Session* Session = FindSession(SessionID);
 
-	Session->RecvPacketTime = timeGetTime();
+	Session->RecvPacketTime = GetTickCount64();
 
 	ReturnSession(Session);
 }
@@ -5313,6 +5323,8 @@ void CGameServer::PacketProcTimerAttackEnd(int64 SessionId, CGameServerMessage* 
 
 	if (Session)
 	{
+		InterlockedDecrement64(&Session->IOBlock->IOCount);
+
 		CPlayer* MyPlayer = Session->MyPlayer;
 
 		MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
@@ -5346,6 +5358,8 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 
 	if (Session)
 	{
+		InterlockedDecrement64(&Session->IOBlock->IOCount);
+
 		CPlayer* MyPlayer = Session->MyPlayer;
 
 		// 마법 시전 완료 했으니 원래 상태로 돌려줌
@@ -5370,7 +5384,7 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 		st_TimerJob* SkillCoolTimeTimerJob = _TimerJobMemoryPool->Alloc();
 		SkillCoolTimeTimerJob->TimerJobExecTick = GetTickCount64() + SpellEndSkillInfo->SkillCoolTime;
 		SkillCoolTimeTimerJob->SessionId = Session->SessionId;
-		SkillCoolTimeTimerJob->TimerJobType = en_TimerJobType::TIMER_SKILL_CASTING_END;
+		SkillCoolTimeTimerJob->TimerJobType = en_TimerJobType::TIMER_SKILL_COOLTIME_END;
 
 		CGameServerMessage* ResCoolTimeEndMessage = CGameServerMessage::GameServerMessageAlloc();
 		if (ResCoolTimeEndMessage == nullptr)
@@ -5382,6 +5396,8 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 
 		*ResCoolTimeEndMessage << (int16)SpellEndSkillInfo->SkillType;
 		SkillCoolTimeTimerJob->TimerJobMessage = ResCoolTimeEndMessage;
+
+		InterlockedIncrement64(&Session->IOBlock->IOCount);
 
 		AcquireSRWLockExclusive(&_TimerJobLock);
 		_TimerHeapJob->InsertHeap(SkillCoolTimeTimerJob->TimerJobExecTick, SkillCoolTimeTimerJob);
@@ -5831,6 +5847,41 @@ void CGameServer::PacketProcTimerDot(int64 SessionId, CGameServerMessage* Messag
 	}
 
 	Message->Free();
+}
+
+void CGameServer::PacketProcTimerPing(int64 SessionId)
+{
+	st_Session* Session = FindSession(SessionId);
+
+	do
+	{
+		if (Session)
+		{
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			int64 DeltaTime = GetTickCount64() - Session->RecvPacketTime;
+
+			if (DeltaTime > 20 * 1000)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			// 핑 패킷 전송
+			CGameServerMessage* PingMessage = MakePacketPing();
+			SendPacket(Session->SessionId, PingMessage);
+			PingMessage->Free();
+
+			// 핑 패킷 예약
+			PingTimerCreate(Session);			
+
+			ReturnSession(Session);
+		}
+	} while (0);	
 }
 
 CGameServerMessage* CGameServer::MakePacketResClientConnected()
@@ -6307,6 +6358,21 @@ CGameServerMessage* CGameServer::MakePacketExperience(int64 AccountId, int64 Pla
 	return ResExperienceMessage;
 }
 
+CGameServerMessage* CGameServer::MakePacketPing()
+{
+	CGameServerMessage* PingMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (PingMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	PingMessage->Clear();
+
+	*PingMessage << (int16)en_PACKET_S2C_PING;
+
+	return PingMessage;
+}
+
 CGameServerMessage* CGameServer::MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_SkillType SkillType, int32 Damage, bool IsCritical)
 {
 	CGameServerMessage* ResAttackMessage = CGameServerMessage::GameServerMessageAlloc();
@@ -6582,7 +6648,7 @@ void CGameServer::OnClientJoin(int64 SessionID)
 	ClientJoinJob->SessionId = SessionID;
 	ClientJoinJob->Message = nullptr;
 	_GameServerAuthThreadMessageQue.Enqueue(ClientJoinJob);
-	SetEvent(_AuthThreadWakeEvent);
+	SetEvent(_AuthThreadWakeEvent);	
 }
 
 void CGameServer::OnRecv(int64 SessionID, CMessage* Packet)
@@ -6771,6 +6837,20 @@ void CGameServer::ObjectDotTimerCreate(CGameObject* Target, en_DotType DotType, 
 
 	AcquireSRWLockExclusive(&_TimerJobLock);
 	_TimerHeapJob->InsertHeap(ObjectDotTimerJob->TimerJobExecTick, ObjectDotTimerJob);
+	ReleaseSRWLockExclusive(&_TimerJobLock);
+
+	SetEvent(_TimerThreadWakeEvent);
+}
+
+void CGameServer::PingTimerCreate(st_Session* PingSession)
+{
+	st_TimerJob* PingTimerJob = _TimerJobMemoryPool->Alloc();
+	PingTimerJob->TimerJobExecTick = GetTickCount64() + 2000;
+	PingTimerJob->SessionId = PingSession->SessionId;
+	PingTimerJob->TimerJobType = en_TimerJobType::TIMER_PING;
+
+	AcquireSRWLockExclusive(&_TimerJobLock);
+	_TimerHeapJob->InsertHeap(PingTimerJob->TimerJobExecTick, PingTimerJob);
 	ReleaseSRWLockExclusive(&_TimerJobLock);
 
 	SetEvent(_TimerThreadWakeEvent);

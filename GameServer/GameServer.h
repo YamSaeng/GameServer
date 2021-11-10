@@ -20,7 +20,7 @@ private:
 	// 타이머잡 쓰레드
 	HANDLE _TimerJobThread;
 	// 로직 쓰레드
-	HANDLE _LogicThread;
+	HANDLE _LogicThread;	
 
 	// 인증 쓰레드 깨우기 이벤트
 	HANDLE _AuthThreadWakeEvent;
@@ -38,7 +38,7 @@ private:
 	// LogicThread 종료용 변수
 	bool _LogicThreadEnd;
 	// TimerJobThread 종료용 변수
-	bool _TimerJobThreadEnd;
+	bool _TimerJobThreadEnd;	
 
 	// TimerJobThread 전용 Lock
 	SRWLOCK _TimerJobLock;
@@ -47,11 +47,22 @@ private:
 	// 인증 쓰레드 ( 클라 접속, 클라 비접속 )
 	//-------------------------------------------------------
 	static unsigned __stdcall AuthThreadProc(void* Argument);
+	//----------------------------------------------------------
+	// 네트워크 쓰레드 ( 패킷 처리 )
+	//----------------------------------------------------------
 	static unsigned __stdcall NetworkThreadProc(void* Argument);
+	//----------------------------------------------------------
+	// 데이터베이스 쓰레드 ( 데이터 베이스 작업 처리 )
+	//----------------------------------------------------------
 	static unsigned __stdcall DataBaseThreadProc(void* Argument);
+	//----------------------------------------------------------
+	// 타이머 잡 쓰레드 ( 타이머 잡 처리 )
+	//----------------------------------------------------------
 	static unsigned __stdcall TimerJobThreadProc(void* Argument);
-	static unsigned __stdcall LogicThreadProc(void* Argument);
-	static unsigned __stdcall HeartBeatCheckThreadProc(void* Argument);
+	//--------------------------------------------------------
+	// 로직 쓰레드 
+	//--------------------------------------------------------
+	static unsigned __stdcall LogicThreadProc(void* Argument);	
 
 	//---------------------------------
 	// 캐릭터 기본 스킬 생성
@@ -149,8 +160,10 @@ private:
 	// 아이템 줍기 요청 처리
 	//------------------------------------------------------------------
 	void PacketProcReqItemLooting(int64 SessionId, CMessage* Message);
-		
-	void PacketProcReqHeartBeat(int64 SessionID, CMessage* Message);
+	//--------------------------------------------------------
+	// 퐁 패킷 처리
+	//--------------------------------------------------------
+	void PacketProcReqPong(int64 SessionID, CMessage* Message);
 
 	//-----------------------------------------------------------------------------------------------
 	// DB 요청 처리 함수
@@ -237,6 +250,10 @@ private:
 	// 오브젝트 도트 처리
 	//----------------------------------------------------------------
 	void PacketProcTimerDot(int64 SessionId, CGameServerMessage* Message);
+	//----------------------------------------------------------------
+	// 핑 처리
+	//----------------------------------------------------------------
+	void PacketProcTimerPing(int64 SessionId);
 
 	//--------------------------------------
 	// 패킷조합 함수		
@@ -326,6 +343,10 @@ private:
 	// 게임서버 경험치 패킷 조합
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketExperience(int64 AccountId, int64 PlayerId, int64 GainExp, int64 CurrentExp, int64 RequireExp, int64 TotalExp);
+	//-------------------------------------------------
+	// 게임서버 핑 패킷 조합
+	//-------------------------------------------------
+	CGameServerMessage* MakePacketPing();
 public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 공격요청 응답 패킷 조합
@@ -470,4 +491,9 @@ public:
 	// 오브젝트 도트 타이머 잡 생성
 	//--------------------------------------------------------------
 	void ObjectDotTimerCreate(CGameObject* Target, en_DotType DotType, int64 DotTime, int32 HPPoint, int32 MPPoint, int64 DotTotalTime = 0, int64 SessionId = 0);
+
+	//-------------------------------------------
+	// 핑 타이머 잡 생성
+	//-------------------------------------------
+	void PingTimerCreate(st_Session* PingSession);
 };

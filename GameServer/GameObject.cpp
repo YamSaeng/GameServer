@@ -31,7 +31,7 @@ void CGameObject::Update()
 bool CGameObject::OnDamaged(CGameObject* Attacker, int32 DamagePoint)
 {
 	_GameObjectInfo.ObjectStatInfo.HP -= DamagePoint;
-
+	
 	if (_GameObjectInfo.ObjectStatInfo.HP <= 0)
 	{
 		_GameObjectInfo.ObjectStatInfo.HP = 0;
