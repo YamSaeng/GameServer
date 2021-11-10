@@ -19,7 +19,32 @@ CObjectManager::CObjectManager()
 	_TreeMemoryPool = new CMemoryPoolTLS<CTree>();
 	_StoneMemoryPool = new CMemoryPoolTLS<CStone>();
 
-	_GameServerObjectId = 10000;	
+	_GameServerObjectId = 10000;
+
+	// 오브젝트 매니저가 소유중인 플레이어, 몬스터, 아이템 미리 할당해서 보관
+	for (int PlayerCount = PLAYER_MAX - 1; PlayerCount >= 0; --PlayerCount)
+	{
+		_PlayersArray[PlayerCount] = nullptr;
+		_PlayersArrayIndexs.Push(PlayerCount);
+	}
+
+	for (int MonsterCount = MONSTER_MAX - 1; MonsterCount >= 0; --MonsterCount)
+	{
+		_MonstersArray[MonsterCount] = nullptr;
+		_MonstersArrayIndexs.Push(MonsterCount);
+	}
+
+	for (int ItemCount = ITEM_MAX - 1; ItemCount >= 0; --ItemCount)
+	{
+		_ItemsArray[ItemCount] = nullptr;
+		_ItemsArrayIndexs.Push(ItemCount);
+	}
+	
+	for (int EnvironmentCount = ENVIRONMENT_MAX - 1; EnvironmentCount >= 0; --EnvironmentCount)
+	{
+		_EnvironmentsArray[EnvironmentCount] = nullptr;
+		_EnvironmentsArrayIndexs.Push(EnvironmentCount);
+	}
 }
 
 CObjectManager::~CObjectManager()

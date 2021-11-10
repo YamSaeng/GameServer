@@ -15,6 +15,14 @@ class CMaterial;
 class CObjectManager
 {
 private:
+	enum en_ObjectCount
+	{
+		PLAYER_MAX = 5000,
+		MONSTER_MAX = 5000,
+		ITEM_MAX = 5000,
+		ENVIRONMENT_MAX = 5000
+	};
+
 	map<int64, CItem*> _Items;
 	map<int64, CPlayer*> _Players;
 	map<int64, CMonster*> _Monsters;
@@ -34,6 +42,16 @@ private:
 	CMemoryPoolTLS<CStone>* _StoneMemoryPool;
 	
 	int64 _GameServerObjectId;	
+
+	CPlayer* _PlayersArray[PLAYER_MAX];
+	CMonster* _MonstersArray[MONSTER_MAX];
+	CItem* _ItemsArray[ITEM_MAX];
+	CEnvironment* _EnvironmentsArray[ENVIRONMENT_MAX];
+
+	CLockFreeStack<int32> _PlayersArrayIndexs;
+	CLockFreeStack<int32> _MonstersArrayIndexs;
+	CLockFreeStack<int32> _ItemsArrayIndexs;
+	CLockFreeStack<int32> _EnvironmentsArrayIndexs;
 public:
 	CGameServer* GameServer;
 	
