@@ -127,6 +127,9 @@ CGameObject* CMap::Find(st_Vector2Int& CellPosition)
 
 CItem** CMap::FindItem(st_Vector2Int& ItemCellPosition)
 {
+	int32 X = ItemCellPosition._X - _Left;
+	int32 Y = _Down - ItemCellPosition._Y;
+
 	// 좌우 좌표 검사
 	if (ItemCellPosition._X < _Left || ItemCellPosition._X > _Right)
 	{
@@ -142,7 +145,7 @@ CItem** CMap::FindItem(st_Vector2Int& ItemCellPosition)
 	int XCount = _Right - _Left + 1;
 	int YCount = _Down - _Up + 1;
 
-	return _Items[ItemCellPosition._Y][ItemCellPosition._X];	
+	return _Items[Y][X];
 }
 
 bool CMap::Cango(st_Vector2Int& CellPosition, bool CheckObjects)
@@ -552,19 +555,22 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 
 bool CMap::ApplyPositionUpdateItem(CItem* ItemObject, st_Vector2Int& NewPosition)
 {	
+	int32 X = NewPosition._X - _Left;
+	int32 Y = _Down - NewPosition._Y;
+
 	// 우선 해당 위치에 아이템들과 새로 얻은 아이템의 종류를 비교한다.
 	// 새로 얻은 아이템의 종류가 이미 해당 위치에 있을 경우에
 	// 카운트를 증가시키고 새로 얻은 아이템은 맵에 스폰시키지 않는다.
 	for (int8 i = 0; i < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; i++)
 	{
-		if (_Items[NewPosition._Y][NewPosition._X][i] != nullptr && _Items[NewPosition._Y][NewPosition._X][i]->_ItemInfo.ItemSmallCategory == ItemObject->_ItemInfo.ItemSmallCategory)
+		if (_Items[Y][X][i] != nullptr && _Items[Y][X][i]->_ItemInfo.ItemSmallCategory == ItemObject->_ItemInfo.ItemSmallCategory)
 		{
-			_Items[NewPosition._Y][NewPosition._X][i]->_ItemInfo.ItemCount += ItemObject->_ItemInfo.ItemCount;
+			_Items[Y][X][i]->_ItemInfo.ItemCount += ItemObject->_ItemInfo.ItemCount;
 
-			CItem* FindItem = (CItem*)(G_ObjectManager->Find(_Items[NewPosition._Y][NewPosition._X][i]->_ItemInfo.ItemDBId, en_GameObjectType::OBJECT_ITEM));
+			CItem* FindItem = (CItem*)(G_ObjectManager->Find(_Items[Y][X][i]->_ItemInfo.ItemDBId, en_GameObjectType::OBJECT_ITEM));
 			if (FindItem != nullptr)
 			{
-				FindItem->_ItemInfo.ItemCount = _Items[NewPosition._Y][NewPosition._X][i]->_ItemInfo.ItemCount;
+				FindItem->_ItemInfo.ItemCount = _Items[Y][X][i]->_ItemInfo.ItemCount;
 			}
 
 			return false;
@@ -576,7 +582,7 @@ bool CMap::ApplyPositionUpdateItem(CItem* ItemObject, st_Vector2Int& NewPosition
 	int NewItemInfoIndex = -1;
 	for (int8 i = 0; i < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; i++)
 	{
-		if (_Items[NewPosition._Y][NewPosition._X][i] == nullptr)
+		if (_Items[Y][X][i] == nullptr)
 		{
 			NewItemInfoIndex = i;
 			break;
@@ -584,7 +590,7 @@ bool CMap::ApplyPositionUpdateItem(CItem* ItemObject, st_Vector2Int& NewPosition
 	}
 
 	// 아이템을 저장한다.
-	_Items[NewPosition._Y][NewPosition._X][NewItemInfoIndex] = ItemObject;
+	_Items[Y][X][NewItemInfoIndex] = ItemObject;
 
 	// 아이템 섹터처리
 	CSector* CurrentSector = ItemObject->_Channel->GetSector(ItemObject->GetCellPosition());
@@ -720,6 +726,9 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 
 bool CMap::ApplyPositionLeaveItem(CGameObject* GameObject)
 {
+	int32 X = GameObject->_GameObjectInfo.ObjectPositionInfo.PositionX - _Left;
+	int32 Y = _Down - GameObject->_GameObjectInfo.ObjectPositionInfo.PositionY;
+
 	// 맵에서 정보 삭제
 	if (GameObject->_Channel == nullptr)
 	{
@@ -753,10 +762,10 @@ bool CMap::ApplyPositionLeaveItem(CGameObject* GameObject)
 
 	for (int8 i = 0; i < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; i++)
 	{
-		if (_Items[PositionInfo.PositionY][PositionInfo.PositionX][i] != nullptr && 
-			_Items[PositionInfo.PositionY][PositionInfo.PositionX][i]->_ItemInfo.ItemSmallCategory == Item->_ItemInfo.ItemSmallCategory)
+		if (_Items[Y][X][i] != nullptr &&
+			_Items[Y][X][i]->_ItemInfo.ItemSmallCategory == Item->_ItemInfo.ItemSmallCategory)
 		{
-			_Items[PositionInfo.PositionY][PositionInfo.PositionX][i] = nullptr;
+			_Items[Y][X][i] = nullptr;
 			break;
 		}
 	}	
