@@ -4,6 +4,7 @@
 
 CGameObject::CGameObject()
 {
+	_ObjectManagerIndex = -1;
 	_NetworkState = en_ObjectNetworkState::READY;
 	_GameObjectInfo.OwnerObjectId = 0;	
 	_Channel = nullptr;

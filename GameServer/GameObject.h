@@ -8,6 +8,7 @@ class CGameObject
 {
 private:
 public:
+	int32 _ObjectManagerIndex;
 	en_ObjectNetworkState _NetworkState;
 	st_GameObjectInfo _GameObjectInfo;
 	CChannel* _Channel;	
