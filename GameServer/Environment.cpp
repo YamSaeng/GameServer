@@ -79,7 +79,7 @@ void CStone::OnDead(CGameObject* Killer)
 
 	G_ObjectManager->GameServer->SpawnObjectTimeTimerJobCreate((int16)_GameObjectInfo.ObjectType, GetCellPosition(), 10000);
 
-	G_ObjectManager->Remove(this, 1);
+	G_ObjectManager->ObjectLeaveGame(this, _ObjectManagerIndex, 1);
 }
 
 void CStone::UpdateIdle()
@@ -116,7 +116,7 @@ void CTree::OnDead(CGameObject* Killer)
 
 	G_ObjectManager->GameServer->SpawnObjectTimeTimerJobCreate((int16)_GameObjectInfo.ObjectType, GetCellPosition(), 10000);
 
-	G_ObjectManager->Remove(this, 1);	
+	G_ObjectManager->ObjectLeaveGame(this, _ObjectManagerIndex, 1);
 }
 
 void CTree::UpdateIdle()
