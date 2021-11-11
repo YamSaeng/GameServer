@@ -330,7 +330,7 @@ unsigned __stdcall CGameServer::LogicThreadProc(void* Argument)
 	return 0;
 }
 
-void CGameServer::NewPlayerDefaultSkillCreate(st_Session* Session, int8& CharacterCreateSlotIndex)
+void CGameServer::NewPlayerDefaultSkillCreate(int64& AccountId, st_GameObjectInfo& NewCharacterInfo, int8& CharacterCreateSlotIndex)
 {
 	// 일반 공격 스킬 생성
 	CDBConnection* DefaultAttackSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
@@ -350,8 +350,8 @@ void CGameServer::NewPlayerDefaultSkillCreate(st_Session* Session, int8& Charact
 	int8 DefaultAttackSkillMediumCategory = (int8)DefaultAttackSkillInfo.SkillMediumCategory;
 	int16 DefaultAttackSkillType = (int16)DefaultAttackSkillInfo.SkillType;
 
-	SkillToSkillBox.InAccountDBId(Session->AccountId);
-	SkillToSkillBox.InPlayerDBId(Session->MyPlayers[CharacterCreateSlotIndex]->_GameObjectInfo.ObjectId);
+	SkillToSkillBox.InAccountDBId(AccountId);
+	SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
 	SkillToSkillBox.InIsQuickSlotUse(DefaultAttackSkillInfo.IsQuickSlotUse);
 	SkillToSkillBox.InSkillLargeCategory(DefaultAttackSkillLargeCategory);
 	SkillToSkillBox.InSkillMediumCategory(DefaultAttackSkillMediumCategory);
@@ -361,7 +361,7 @@ void CGameServer::NewPlayerDefaultSkillCreate(st_Session* Session, int8& Charact
 	SkillToSkillBox.Execute();
 
 	// 클래스 공격 스킬 생성
-	switch (Session->MyPlayers[CharacterCreateSlotIndex]->_GameObjectInfo.ObjectType)
+	switch (NewCharacterInfo.ObjectType)
 	{
 	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 	{
@@ -380,8 +380,8 @@ void CGameServer::NewPlayerDefaultSkillCreate(st_Session* Session, int8& Charact
 		int8 DefaultWarriorAttackSkillMediumCategory = (int8)WarriorDefaultAttackSkillInfo.SkillMediumCategory;
 		int16 DefaultWarriorAttackSkillType = (int16)WarriorDefaultAttackSkillInfo.SkillType;
 
-		SkillToSkillBox.InAccountDBId(Session->AccountId);
-		SkillToSkillBox.InPlayerDBId(Session->MyPlayers[CharacterCreateSlotIndex]->_GameObjectInfo.ObjectId);
+		SkillToSkillBox.InAccountDBId(AccountId);
+		SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
 		SkillToSkillBox.InIsQuickSlotUse(WarriorDefaultAttackSkillInfo.IsQuickSlotUse);
 		SkillToSkillBox.InSkillLargeCategory(DefaultWarriorAttackSkillLargeCategory);
 		SkillToSkillBox.InSkillMediumCategory(DefaultWarriorAttackSkillMediumCategory);
@@ -408,8 +408,8 @@ void CGameServer::NewPlayerDefaultSkillCreate(st_Session* Session, int8& Charact
 		int8 DefaultShamanAttackSkillMediumCategory = (int8)ShamanDefaultAttackSkillInfo.SkillMediumCategory;
 		int16 DefaultShamanAttackSkillType = (int16)ShamanDefaultAttackSkillInfo.SkillType;
 
-		SkillToSkillBox.InAccountDBId(Session->AccountId);
-		SkillToSkillBox.InPlayerDBId(Session->MyPlayers[CharacterCreateSlotIndex]->_GameObjectInfo.ObjectId);
+		SkillToSkillBox.InAccountDBId(AccountId);
+		SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
 		SkillToSkillBox.InIsQuickSlotUse(ShamanDefaultAttackSkillInfo.IsQuickSlotUse);
 		SkillToSkillBox.InSkillLargeCategory(DefaultShamanAttackSkillLargeCategory);
 		SkillToSkillBox.InSkillMediumCategory(DefaultShamanAttackSkillMediumCategory);
@@ -436,8 +436,8 @@ void CGameServer::NewPlayerDefaultSkillCreate(st_Session* Session, int8& Charact
 		int8 DefaultTaioistAttackSkillMediumCategory = (int8)TaioistDefaultAttackSkillInfo.SkillMediumCategory;
 		int16 DefaultTaioistAttackSkillType = (int16)TaioistDefaultAttackSkillInfo.SkillType;
 
-		SkillToSkillBox.InAccountDBId(Session->AccountId);
-		SkillToSkillBox.InPlayerDBId(Session->MyPlayers[CharacterCreateSlotIndex]->_GameObjectInfo.ObjectId);
+		SkillToSkillBox.InAccountDBId(AccountId);
+		SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
 		SkillToSkillBox.InIsQuickSlotUse(TaioistDefaultAttackSkillInfo.IsQuickSlotUse);
 		SkillToSkillBox.InSkillLargeCategory(DefaultTaioistAttackSkillLargeCategory);
 		SkillToSkillBox.InSkillMediumCategory(DefaultTaioistAttackSkillMediumCategory);
@@ -461,8 +461,8 @@ void CGameServer::NewPlayerDefaultSkillCreate(st_Session* Session, int8& Charact
 		int8 DefaultTaioistHealSkillMediumCategory = (int8)TaioistDefaultHealSkillInfo.SkillMediumCategory;
 		int16 DefaultTaioistHealSkillType = (int16)TaioistDefaultHealSkillInfo.SkillType;
 
-		SkillToSkillBox.InAccountDBId(Session->AccountId);
-		SkillToSkillBox.InPlayerDBId(Session->MyPlayers[CharacterCreateSlotIndex]->_GameObjectInfo.ObjectId);
+		SkillToSkillBox.InAccountDBId(AccountId);
+		SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
 		SkillToSkillBox.InIsQuickSlotUse(TaioistDefaultHealSkillInfo.IsQuickSlotUse);
 		SkillToSkillBox.InSkillLargeCategory(DefaultTaioistHealSkillLargeCategory);
 		SkillToSkillBox.InSkillMediumCategory(DefaultTaioistHealSkillMediumCategory);
@@ -505,14 +505,15 @@ void CGameServer::CreateNewClient(int64 SessionId)
 		Session->AccountId = 0;
 		Session->IsLogin = false;
 		Session->Token = 0;
-		Session->RecvPacketTime = GetTickCount64();
+		Session->PingPacketTime = GetTickCount64();
 
 		for (int i = 0; i < SESSION_CHARACTER_MAX; i++)
-		{
-			Session->MyPlayers[i] = (CPlayer*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_PLAYER);
+		{				
+			// 플레이어 인덱스 할당
+			G_ObjectManager->_PlayersArrayIndexs.Pop(&Session->MyPlayerIndexes[i]);			
 		}
 
-		Session->MyPlayer = nullptr;
+		Session->MyPlayerIndex = -1;
 
 		// 게임 서버 접속 성공을 클라에게 알려준다.
 		CMessage* ResClientConnectedMessage = MakePacketResClientConnected();
@@ -533,7 +534,9 @@ void CGameServer::DeleteClient(st_Session* Session)
 		return;
 	}
 
-	if (Session->MyPlayer != nullptr)
+	CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+	if (MyPlayer != nullptr)
 	{
 		// 마지막 위치 기록
 		st_Job* DBLeavePlayerInfoSaveJob = _JobMemoryPool->Alloc();
@@ -549,12 +552,12 @@ void CGameServer::DeleteClient(st_Session* Session)
 		DBLeavePlayerInfoSaveMessage->Clear();
 
 		*DBLeavePlayerInfoSaveMessage << Session->AccountId;
-		*DBLeavePlayerInfoSaveMessage << Session->MyPlayer->_GameObjectInfo.ObjectId;
-		*DBLeavePlayerInfoSaveMessage << Session->MyPlayer->_GameObjectInfo.ObjectPositionInfo;
-		*DBLeavePlayerInfoSaveMessage << Session->MyPlayer->_GameObjectInfo.ObjectStatInfo;
-		*DBLeavePlayerInfoSaveMessage << Session->MyPlayer->_Experience.CurrentExperience;
-		*DBLeavePlayerInfoSaveMessage << Session->MyPlayer->_Experience.RequireExperience;
-		*DBLeavePlayerInfoSaveMessage << Session->MyPlayer->_Experience.TotalExperience;
+		*DBLeavePlayerInfoSaveMessage << MyPlayer->_GameObjectInfo.ObjectId;
+		*DBLeavePlayerInfoSaveMessage << MyPlayer->_GameObjectInfo.ObjectPositionInfo;
+		*DBLeavePlayerInfoSaveMessage << MyPlayer->_GameObjectInfo.ObjectStatInfo;
+		*DBLeavePlayerInfoSaveMessage << MyPlayer->_Experience.CurrentExperience;
+		*DBLeavePlayerInfoSaveMessage << MyPlayer->_Experience.RequireExperience;
+		*DBLeavePlayerInfoSaveMessage << MyPlayer->_Experience.TotalExperience;
 
 		DBLeavePlayerInfoSaveJob->Message = DBLeavePlayerInfoSaveMessage;
 
@@ -562,10 +565,10 @@ void CGameServer::DeleteClient(st_Session* Session)
 		SetEvent(_DataBaseWakeEvent);
 
 		CChannel* Channel = G_ChannelManager->Find(1);
-		Channel->LeaveChannel(Session->MyPlayer);
+		Channel->LeaveChannel(MyPlayer);
 
 		vector<int64> DeSpawnObjectIds;
-		DeSpawnObjectIds.push_back(Session->MyPlayer->_GameObjectInfo.ObjectId);
+		DeSpawnObjectIds.push_back(MyPlayer->_GameObjectInfo.ObjectId);
 
 		CMessage* ResLeaveGame = MakePacketResObjectDeSpawn(1, DeSpawnObjectIds);
 		SendPacketAroundSector(Session, ResLeaveGame);
@@ -573,13 +576,16 @@ void CGameServer::DeleteClient(st_Session* Session)
 
 		for (int i = 0; i < SESSION_CHARACTER_MAX; i++)
 		{
-			Session->MyPlayers[i]->_NetworkState = en_ObjectNetworkState::LEAVE;
-			G_ObjectManager->Remove(Session->MyPlayers[i], 1);
-			Session->MyPlayers[i] = nullptr;
+			CPlayer* SessionPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndexes[i]];
+			if (SessionPlayer != nullptr)
+			{
+				SessionPlayer->_NetworkState = en_ObjectNetworkState::LEAVE;
+				G_ObjectManager->ObjectLeaveGame(SessionPlayer, Session->MyPlayerIndexes[i], 1);
+			}			
 		}
 	}
 
-	Session->MyPlayer = nullptr;
+	Session->MyPlayerIndex = -1;
 	Session->AccountId = 0;
 
 	Session->ClientSock = INVALID_SOCKET;
@@ -674,61 +680,62 @@ void CGameServer::PacketProcReqLogin(int64 SessionID, CMessage* Message)
 	int64 AccountId;
 	int32 Token;
 
-	if (Session != nullptr)
+	do
 	{
-		// AccountID 셋팅
-		*Message >> AccountId;
-
-		// 중복 로그인 확인
-		for (st_Session* FindSession : _SessionArray)
+		if (Session != nullptr)
 		{
-			if (FindSession->AccountId == AccountId)
+			// AccountID 셋팅
+			*Message >> AccountId;
+
+			// 중복 로그인 확인
+			for (st_Session* FindSession : _SessionArray)
 			{
-				// 새로 접속한 중복 되는 유저 연결 끊음
-				Disconnect(Session->SessionId);
-				ReturnSession(Session);
-				return;
+				if (FindSession->AccountId == AccountId)
+				{
+					// 새로 접속한 중복 되는 유저 연결 끊음
+					Disconnect(Session->SessionId);
+					break;
+				}
 			}
+
+			Session->AccountId = AccountId;
+
+			int8 IdLen;
+			*Message >> IdLen;
+
+			WCHAR ClientId[20];
+			memset(ClientId, 0, sizeof(WCHAR) * 20);
+			Message->GetData(ClientId, IdLen);
+
+			Session->LoginId = ClientId;
+
+			// 토큰 셋팅
+			*Message >> Token;
+			Session->Token = Token;
+
+			if (Session->AccountId != 0 && Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			// DB 큐에 요청하기 전 IOCount를 증가시켜서 Session이 반납 안되도록 막음
+			InterlockedIncrement64(&Session->IOBlock->IOCount);
+
+			st_Job* DBAccountCheckJob = _JobMemoryPool->Alloc();
+			DBAccountCheckJob->Type = en_JobType::DATA_BASE_ACCOUNT_CHECK;
+			DBAccountCheckJob->SessionId = Session->SessionId;
+			DBAccountCheckJob->Message = nullptr;
+
+			_GameServerDataBaseThreadMessageQue.Enqueue(DBAccountCheckJob);
+			SetEvent(_DataBaseWakeEvent);
 		}
-
-		Session->AccountId = AccountId;
-
-		int8 IdLen;
-		*Message >> IdLen;
-
-		WCHAR ClientId[20];
-		memset(ClientId, 0, sizeof(WCHAR) * 20);
-		Message->GetData(ClientId, IdLen);
-
-		Session->LoginId = ClientId;
-
-		// 토큰 셋팅
-		*Message >> Token;
-		Session->Token = Token;
-
-		if (Session->AccountId != 0 && Session->AccountId != AccountId)
+		else
 		{
-			Disconnect(Session->SessionId);
-			ReturnSession(Session);
-			return;
+			// 해당 클라가 없음
+			bool Status = LOGIN_FAIL;
 		}
-
-		// DB 큐에 요청하기 전 IOCount를 증가시켜서 Session이 반납 안되도록 막음
-		InterlockedIncrement64(&Session->IOBlock->IOCount);
-
-		st_Job* DBAccountCheckJob = _JobMemoryPool->Alloc();
-		DBAccountCheckJob->Type = en_JobType::DATA_BASE_ACCOUNT_CHECK;
-		DBAccountCheckJob->SessionId = Session->SessionId;
-		DBAccountCheckJob->Message = nullptr;
-
-		_GameServerDataBaseThreadMessageQue.Enqueue(DBAccountCheckJob);
-		SetEvent(_DataBaseWakeEvent);
-	}
-	else
-	{
-		// 해당 클라가 없음
-		bool Status = LOGIN_FAIL;
-	}
+	} while (0);	
 
 	ReturnSession(Session);
 }
@@ -756,15 +763,15 @@ void CGameServer::PacketProcReqCreateCharacter(int64 SessionID, CMessage* Messag
 
 		// 클라에서 선택한 플레이어 인덱스
 		byte CharacterCreateSlotIndex;
-		*Message >> CharacterCreateSlotIndex;
-
-		InterlockedIncrement64(&Session->IOBlock->IOCount);
+		*Message >> CharacterCreateSlotIndex;			
 
 		CGameServerMessage* DBReqChatacerCreateMessage = CGameServerMessage::GameServerMessageAlloc();
 		DBReqChatacerCreateMessage->Clear();
 
 		*DBReqChatacerCreateMessage << ReqGameObjectType;
 		*DBReqChatacerCreateMessage << CharacterCreateSlotIndex;
+
+		InterlockedIncrement64(&Session->IOBlock->IOCount);
 
 		st_Job* DBCharacterCheckJob = _JobMemoryPool->Alloc();
 		DBCharacterCheckJob->Type = en_JobType::DATA_BASE_CHARACTER_CHECK;
@@ -790,9 +797,6 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 	{
 		if (Session)
 		{
-			// DB 큐에 요청하기 전 IOCount를 증가시켜서 Session이 반납 안되도록 막음
-			InterlockedIncrement64(&Session->IOBlock->IOCount);
-
 			// 로그인 중이 아니면 나간다.
 			if (!Session->IsLogin)
 			{
@@ -819,12 +823,12 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 			bool FindName = false;
 			// 클라가 가지고 있는 캐릭 중에 패킷으로 받은 캐릭터가 있는지 확인한다.
 			for (int i = 0; i < SESSION_CHARACTER_MAX; i++)
-			{
-				if (Session->MyPlayers[i]->_GameObjectInfo.ObjectName == EnterGameCharacterName)
+			{					
+				if (G_ObjectManager->_PlayersArray[Session->MyPlayerIndexes[i]]->_GameObjectInfo.ObjectName == EnterGameCharacterName)
 				{
 					FindName = true;
-					Session->MyPlayer = Session->MyPlayers[i];
-					Session->MyPlayer->_NetworkState = en_ObjectNetworkState::LIVE;
+					Session->MyPlayerIndex = Session->MyPlayerIndexes[i];					
+					G_ObjectManager->_PlayersArray[Session->MyPlayerIndex]->_NetworkState = en_ObjectNetworkState::LIVE;					
 					break;
 				}
 			}
@@ -835,21 +839,21 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 				break;
 			}
 
-			// ObjectManager에 플레이어 추가 및 패킷 전송
-			G_ObjectManager->Add(Session->MyPlayer, 1);
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			// 클라가 선택한 오브젝트를 게임에 입장 시킨다.
+			G_ObjectManager->ObjectEnterGame(MyPlayer, 1);
 
 			// 나한테 나 생성하라고 알려줌
-			CMessage* ResEnterGamePacket = MakePacketResEnterGame(Session->MyPlayer->_GameObjectInfo);
+			CMessage* ResEnterGamePacket = MakePacketResEnterGame(MyPlayer->_GameObjectInfo);
 			SendPacket(Session->SessionId, ResEnterGamePacket);
-			ResEnterGamePacket->Free();
-
-			InterlockedIncrement64(&Session->IOBlock->IOCount);
+			ResEnterGamePacket->Free();			
 
 			// 캐릭터의 상태를 10초 후에 IDLE 상태로 전환
-			ObjectStateChangeTimerJobCreate(Session->MyPlayer, en_CreatureState::IDLE, 10000, Session->SessionId);
+			ObjectStateChangeTimerJobCreate(MyPlayer, en_CreatureState::IDLE, 10000);
 
 			vector<st_GameObjectInfo> SpawnObjectInfo;
-			SpawnObjectInfo.push_back(Session->MyPlayer->_GameObjectInfo);
+			SpawnObjectInfo.push_back(MyPlayer->_GameObjectInfo);
 
 			// 다른 플레이어들한테 나를 생성하라고 알려줌
 			CMessage* ResSpawnPacket = MakePacketResObjectSpawn(1, SpawnObjectInfo);
@@ -861,7 +865,7 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 			// 나한테 다른 오브젝트들을 생성하라고 알려줌						
 			st_GameObjectInfo* SpawnGameObjectInfos;
 
-			vector<CGameObject*> AroundObjects = G_ChannelManager->Find(1)->GetAroundObjects(Session->MyPlayer, 1);
+			vector<CGameObject*> AroundObjects = G_ChannelManager->Find(1)->GetAroundObjects(MyPlayer, 1);
 
 			if (AroundObjects.size() > 0)
 			{
@@ -879,6 +883,9 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 				delete[] SpawnGameObjectInfos;
 			}
 
+			// DB 큐에 요청하기 전 IOCount를 증가시켜서 Session이 반납 안되도록 막음
+			InterlockedIncrement64(&Session->IOBlock->IOCount);
+
 			st_Job* DBCharacterInfoSendJob = _JobMemoryPool->Alloc();
 			DBCharacterInfoSendJob->Type = en_JobType::DATA_BASE_CHARACTER_INFO_SEND;
 			DBCharacterInfoSendJob->SessionId = Session->SessionId;
@@ -888,7 +895,7 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 			SetEvent(_DataBaseWakeEvent);
 
 			// 접속한 캐릭터 대상으로 재생력 On
-			ObjectAutoRecovery(Session->MyPlayer->_GameObjectInfo.ObjectId, Session->MyPlayer->_GameObjectInfo.ObjectType, Session->MyPlayer->_GameObjectInfo.ObjectStatInfo.Level);
+			ObjectAutoRecovery(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectStatInfo.Level);
 		}
 		else
 		{
@@ -932,8 +939,11 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 			int64 PlayerDBId;
 			*Message >> PlayerDBId;
 
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
 			// 클라가 조종중인 캐릭터가 있는지 확인
-			if (Session->MyPlayer == nullptr)
+			if (MyPlayer == nullptr)
 			{
 				Disconnect(Session->SessionId);
 				break;
@@ -941,7 +951,7 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 			else
 			{
 				// 조종중인 캐릭터가 있으면 ObjectId가 다른지 확인
-				if (Session->MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
 				{
 					Disconnect(Session->SessionId);
 					break;
@@ -971,8 +981,7 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 				DirVector2Int = st_Vector2Int::Right();
 				break;
 			}
-
-			CPlayer* MyPlayer = Session->MyPlayer;
+						
 			MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = MoveDir;
 			MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
 
@@ -1041,8 +1050,11 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 
 			*Message >> ObjectId;
 
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
 			// 조종하고 있는 플레이어가 있는지 확인
-			if (Session->MyPlayer == nullptr)
+			if (MyPlayer == nullptr)
 			{
 				Disconnect(Session->SessionId);
 				break;
@@ -1050,14 +1062,12 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 			else
 			{
 				// 조종하고 있는 플레이어의 ObjectId와 클라가 보낸 ObjectId가 같은지 확인
-				if (Session->MyPlayer->_GameObjectInfo.ObjectId != ObjectId)
+				if (MyPlayer->_GameObjectInfo.ObjectId != ObjectId)
 				{
 					Disconnect(Session->SessionId);
 					break;
 				}
-			}
-
-			CPlayer* MyPlayer = Session->MyPlayer;
+			}			
 
 			int8 QuickSlotBarindex;
 			*Message >> QuickSlotBarindex;
@@ -1497,9 +1507,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 						SendPacketAroundSector(Target->GetCellPosition(), ResChangeObjectStat);
 						ResChangeObjectStat->Free();
 					}
-				}
-
-				InterlockedIncrement64(&Session->IOBlock->IOCount);
+				}				
 
 				SkillCoolTimeTimerJobCreate(MyPlayer, 500, FindSkill, en_TimerJobType::TIMER_ATTACK_END, QuickSlotBarindex, QuickSlotBarSlotIndex);
 			}
@@ -1551,9 +1559,11 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 			}
 
 			*Message >> ObjectId;
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
 
-			// 조종하고 잇는 캐릭이 있는지 확인
-			if (Session->MyPlayer == nullptr)
+			// 입장한 캐릭터가 있는지 확인
+			if (MyPlayer == nullptr)
 			{
 				Disconnect(Session->SessionId);
 				break;
@@ -1561,14 +1571,12 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 			else
 			{
 				// 조종하고 있는 캐릭의 ObjectId와 클라가 전송한 ObjectId가 같은지 확인
-				if (Session->MyPlayer->_GameObjectInfo.ObjectId != ObjectId)
+				if (MyPlayer->_GameObjectInfo.ObjectId != ObjectId)
 				{
 					Disconnect(Session->SessionId);
 					break;
 				}
-			}
-
-			CPlayer* MyPlayer = Session->MyPlayer;
+			}		
 
 			int8 QuickSlotBarindex;
 			*Message >> QuickSlotBarindex;
@@ -1730,9 +1738,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 					// 마법 스킬 모션 출력
 					CMessage* ResObjectStateChangePacket = MakePacketResChangeObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
 					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateChangePacket);
-					ResObjectStateChangePacket->Free();
-
-					InterlockedIncrement64(&Session->IOBlock->IOCount);
+					ResObjectStateChangePacket->Free();					
 
 					SkillCoolTimeTimerJobCreate(MyPlayer, FindSkill->SkillCastingTime, FindSkill, en_TimerJobType::TIMER_SPELL_END, QuickSlotBarindex, QuickSlotBarSlotIndex);
 				}
@@ -1789,14 +1795,17 @@ void CGameServer::PacketProcReqMagicCancel(int64 SessionId, CMessage* Message)
 
 			*Message >> PlayerId;
 
-			if (Session->MyPlayer == nullptr)
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			if (MyPlayer == nullptr)
 			{
 				Disconnect(Session->SessionId);
 				break;
 			}
 			else
 			{
-				if (Session->MyPlayer->_GameObjectInfo.ObjectId != PlayerId)
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerId)
 				{
 					Disconnect(Session->SessionId);
 					break;
@@ -1810,7 +1819,7 @@ void CGameServer::PacketProcReqMagicCancel(int64 SessionId, CMessage* Message)
 				MagicCancelPlayer->_SkillJob = nullptr;
 
 				// 스킬 취소 응답 처리 주위 섹터에 전송
-				CMessage* ResMagicCancelPacket = MakePacketMagicCancel(Session->MyPlayer->_AccountId, Session->MyPlayer->_GameObjectInfo.ObjectId);
+				CMessage* ResMagicCancelPacket = MakePacketMagicCancel(MyPlayer->_AccountId, MyPlayer->_GameObjectInfo.ObjectId);
 				SendPacketAroundSector(Session, ResMagicCancelPacket, true);
 				ResMagicCancelPacket->Free();
 			}
@@ -1824,7 +1833,7 @@ void CGameServer::PacketProcReqMagicCancel(int64 SessionId, CMessage* Message)
 				wsprintf(ErrorMessage, L"스킬 시전 중이 아닙니다.");
 				ErrorCastingSkillNotExist = ErrorMessage;
 
-				CMessage* ResErrorPacket = MakePacketError(Session->MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_SKILL_COOLTIME, ErrorCastingSkillNotExist);
+				CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_SKILL_COOLTIME, ErrorCastingSkillNotExist);
 				SendPacket(SessionId, ResErrorPacket);
 				ResErrorPacket->Free();
 			}
@@ -1861,14 +1870,17 @@ void CGameServer::PacketProcReqMousePositionObjectInfo(int64 SessionId, CMessage
 
 			*Message >> PlayerId;
 
-			if (Session->MyPlayer == nullptr)
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			if (MyPlayer == nullptr)
 			{
 				Disconnect(Session->SessionId);
 				break;
 			}
 			else
 			{
-				if (Session->MyPlayer->_GameObjectInfo.ObjectId != PlayerId)
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerId)
 				{
 					Disconnect(Session->SessionId);
 					break;
@@ -1886,12 +1898,12 @@ void CGameServer::PacketProcReqMousePositionObjectInfo(int64 SessionId, CMessage
 			{
 				int64 PreviousChoiceObject = 0;
 
-				if (Session->MyPlayer->_SelectTarget != nullptr)
+				if (MyPlayer->_SelectTarget != nullptr)
 				{
-					PreviousChoiceObject = Session->MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId;
+					PreviousChoiceObject = MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId;
 				}
 
-				Session->MyPlayer->_SelectTarget = FindObject;
+				MyPlayer->_SelectTarget = FindObject;
 
 				CMessage* ResMousePositionObjectInfo = MakePacketResMousePositionObjectInfo(Session->AccountId, PreviousChoiceObject, FindObject->_GameObjectInfo);
 				SendPacket(Session->SessionId, ResMousePositionObjectInfo);
@@ -1934,8 +1946,10 @@ void CGameServer::PacketProcReqObjectStateChange(int64 SessionId, CMessage* Mess
 
 			*Message >> PlayerDBId;
 
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
 			// 조종하고 있는 플레이어가 있는지 확인 
-			if (Session->MyPlayer == nullptr)
+			if (MyPlayer == nullptr)
 			{
 				Disconnect(Session->SessionId);
 				return;
@@ -1943,7 +1957,7 @@ void CGameServer::PacketProcReqObjectStateChange(int64 SessionId, CMessage* Mess
 			else
 			{
 				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
-				if (Session->MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
 				{
 					Disconnect(Session->SessionId);
 					return;
@@ -2036,8 +2050,11 @@ void CGameServer::PacketProcReqChattingMessage(int64 SessionId, CMessage* Messag
 
 		*Message >> PlayerDBId;
 
+		// 게임에 입장한 캐릭터를 가져온다.
+		CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
 		// 조종하고 있는 플레이어가 있는지 확인 
-		if (Session->MyPlayer == nullptr)
+		if (MyPlayer == nullptr)
 		{
 			Disconnect(Session->SessionId);
 			return;
@@ -2045,7 +2062,7 @@ void CGameServer::PacketProcReqChattingMessage(int64 SessionId, CMessage* Messag
 		else
 		{
 			// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
-			if (Session->MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+			if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
 			{
 				Disconnect(Session->SessionId);
 				return;
@@ -2063,7 +2080,7 @@ void CGameServer::PacketProcReqChattingMessage(int64 SessionId, CMessage* Messag
 		// 채널 찾고
 		CChannel* Channel = G_ChannelManager->Find(1);
 		// 주위 플레이어 반환
-		vector<CPlayer*> Players = Channel->GetAroundPlayer(Session->MyPlayer, 10, false);
+		vector<CPlayer*> Players = Channel->GetAroundPlayer(MyPlayer, 10, false);
 
 		// 주위 플레이어에게 채팅 메세지 전송
 		for (CPlayer* Player : Players)
@@ -2088,8 +2105,6 @@ void CGameServer::PacketProcReqItemSwap(int64 SessionId, CMessage* Message)
 
 	if (Session)
 	{
-		InterlockedIncrement64(&Session->IOBlock->IOCount);
-
 		int64 AccountId;
 		int64 PlayerDBId;
 
@@ -2112,8 +2127,11 @@ void CGameServer::PacketProcReqItemSwap(int64 SessionId, CMessage* Message)
 
 			*Message >> PlayerDBId;
 
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
 			// 조종하고 있는 플레이어가 있는지 확인 
-			if (Session->MyPlayer == nullptr)
+			if (MyPlayer == nullptr)
 			{
 				Disconnect(Session->SessionId);
 				break;
@@ -2121,7 +2139,7 @@ void CGameServer::PacketProcReqItemSwap(int64 SessionId, CMessage* Message)
 			else
 			{
 				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
-				if (Session->MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
 				{
 					Disconnect(Session->SessionId);
 					break;
@@ -2134,9 +2152,11 @@ void CGameServer::PacketProcReqItemSwap(int64 SessionId, CMessage* Message)
 			int8 SwapIndexB;
 			*Message >> SwapIndexB;
 
+			InterlockedIncrement64(&Session->IOBlock->IOCount);
+
 			st_Job* DBItemSwapJob = _JobMemoryPool->Alloc();
 			DBItemSwapJob->Type = en_JobType::DATA_BASE_ITEM_SWAP;
-			DBItemSwapJob->SessionId = Session->MyPlayer->_SessionId;
+			DBItemSwapJob->SessionId = MyPlayer->_SessionId;
 
 			CGameServerMessage* DBItemSwapMessage = CGameServerMessage::GameServerMessageAlloc();
 			DBItemSwapMessage->Clear();
@@ -2163,8 +2183,6 @@ void CGameServer::PacketProcReqQuickSlotSave(int64 SessionId, CMessage* Message)
 
 	if (Session)
 	{
-		InterlockedIncrement64(&Session->IOBlock->IOCount);
-
 		int64 AccountId;
 		int64 PlayerDBId;
 
@@ -2187,8 +2205,11 @@ void CGameServer::PacketProcReqQuickSlotSave(int64 SessionId, CMessage* Message)
 
 			*Message >> PlayerDBId;
 
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
 			// 조종하고 있는 플레이어가 있는지 확인 
-			if (Session->MyPlayer == nullptr)
+			if (MyPlayer == nullptr)
 			{
 				Disconnect(Session->SessionId);
 				break;
@@ -2196,16 +2217,18 @@ void CGameServer::PacketProcReqQuickSlotSave(int64 SessionId, CMessage* Message)
 			else
 			{
 				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
-				if (Session->MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
 				{
 					Disconnect(Session->SessionId);
 					break;
 				}
 			}
 
+			InterlockedIncrement64(&Session->IOBlock->IOCount);
+
 			st_Job* DBQuickSlotSaveJob = _JobMemoryPool->Alloc();
 			DBQuickSlotSaveJob->Type = en_JobType::DATA_BASE_QUICK_SLOT_SAVE;
-			DBQuickSlotSaveJob->SessionId = Session->MyPlayer->_SessionId;
+			DBQuickSlotSaveJob->SessionId = MyPlayer->_SessionId;
 
 			CGameServerMessage* DBQuickSlotSaveMessage = CGameServerMessage::GameServerMessageAlloc();
 			DBQuickSlotSaveMessage->Clear();
@@ -2238,8 +2261,6 @@ void CGameServer::PacketProcReqQuickSlotSwap(int64 SessionId, CMessage* Message)
 
 	if (Session)
 	{
-		InterlockedIncrement64(&Session->IOBlock->IOCount);
-
 		int64 AccountId;
 		int64 PlayerDBId;
 
@@ -2262,8 +2283,11 @@ void CGameServer::PacketProcReqQuickSlotSwap(int64 SessionId, CMessage* Message)
 
 			*Message >> PlayerDBId;
 
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
 			// 조종하고 있는 플레이어가 있는지 확인 
-			if (Session->MyPlayer == nullptr)
+			if (MyPlayer == nullptr)
 			{
 				Disconnect(Session->SessionId);
 				break;
@@ -2271,16 +2295,18 @@ void CGameServer::PacketProcReqQuickSlotSwap(int64 SessionId, CMessage* Message)
 			else
 			{
 				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
-				if (Session->MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
 				{
 					Disconnect(Session->SessionId);
 					break;
 				}
 			}
 
+			InterlockedIncrement64(&Session->IOBlock->IOCount);
+
 			st_Job* DBQuickSlotSwapJob = _JobMemoryPool->Alloc();
 			DBQuickSlotSwapJob->Type = en_JobType::DATA_BASE_QUICK_SWAP;
-			DBQuickSlotSwapJob->SessionId = Session->MyPlayer->_SessionId;
+			DBQuickSlotSwapJob->SessionId = MyPlayer->_SessionId;
 
 			CGameServerMessage* DBQuickSlotSwapMessage = CGameServerMessage::GameServerMessageAlloc();
 			DBQuickSlotSwapMessage->Clear();
@@ -2306,8 +2332,6 @@ void CGameServer::PacketProcReqQuickSlotInit(int64 SessionId, CMessage* Message)
 
 	if (Session)
 	{
-		InterlockedIncrement64(&Session->IOBlock->IOCount);
-
 		int64 AccountId;
 		int64 PlayerDBId;
 
@@ -2330,8 +2354,11 @@ void CGameServer::PacketProcReqQuickSlotInit(int64 SessionId, CMessage* Message)
 
 			*Message >> PlayerDBId;
 
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
 			// 조종하고 있는 플레이어가 있는지 확인 
-			if (Session->MyPlayer == nullptr)
+			if (MyPlayer == nullptr)
 			{
 				Disconnect(Session->SessionId);
 				break;
@@ -2339,16 +2366,18 @@ void CGameServer::PacketProcReqQuickSlotInit(int64 SessionId, CMessage* Message)
 			else
 			{
 				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
-				if (Session->MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
 				{
 					Disconnect(Session->SessionId);
 					break;
 				}
 			}
 
+			InterlockedIncrement64(&Session->IOBlock->IOCount);
+
 			st_Job* DBQuickSlotInitJob = _JobMemoryPool->Alloc();
 			DBQuickSlotInitJob->Type = en_JobType::DATA_BASE_QUICK_INIT;
-			DBQuickSlotInitJob->SessionId = Session->MyPlayer->_SessionId;
+			DBQuickSlotInitJob->SessionId = MyPlayer->_SessionId;
 
 			CGameServerMessage* DBQuickSlotInitMessage = CGameServerMessage::GameServerMessageAlloc();
 			DBQuickSlotInitMessage->Clear();
@@ -2376,8 +2405,6 @@ void CGameServer::PacketProcReqCraftingConfirm(int64 SessionId, CMessage* Messag
 	{
 		do
 		{
-			InterlockedIncrement64(&Session->IOBlock->IOCount);
-
 			int64 AccountId;
 			int64 PlayerDBId;
 
@@ -2398,8 +2425,11 @@ void CGameServer::PacketProcReqCraftingConfirm(int64 SessionId, CMessage* Messag
 
 			*Message >> PlayerDBId;
 
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
 			// 조종하고 있는 플레이어가 있는지 확인 
-			if (Session->MyPlayer == nullptr)
+			if (MyPlayer == nullptr)
 			{
 				Disconnect(Session->SessionId);
 				break;
@@ -2407,7 +2437,7 @@ void CGameServer::PacketProcReqCraftingConfirm(int64 SessionId, CMessage* Messag
 			else
 			{
 				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
-				if (Session->MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
 				{
 					Disconnect(Session->SessionId);
 					break;
@@ -2462,9 +2492,9 @@ void CGameServer::PacketProcReqCraftingConfirm(int64 SessionId, CMessage* Messag
 				{
 					RequireMaterialDatas = CraftingCompleteItemData.CraftingMaterials;
 				}
-			}
+			}			
 
-			CPlayer* MyPlayer = Session->MyPlayer;
+			InterlockedIncrement64(&Session->IOBlock->IOCount);
 
 			// 재료템 DB에 개수 업데이트와 제작한 아이템 저장하기 위한 Job
 			st_Job* DBInventorySaveJob = _JobMemoryPool->Alloc();
@@ -2661,8 +2691,6 @@ void CGameServer::PacketProcReqItemUse(int64 SessionId, CMessage* Message)
 	{
 		do
 		{
-			InterlockedIncrement64(&Session->IOBlock->IOCount);
-
 			int64 AccountId;
 			int64 PlayerDBId;
 
@@ -2683,8 +2711,11 @@ void CGameServer::PacketProcReqItemUse(int64 SessionId, CMessage* Message)
 
 			*Message >> PlayerDBId;
 
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
 			// 조종하고 있는 플레이어가 있는지 확인 
-			if (Session->MyPlayer == nullptr)
+			if (MyPlayer == nullptr)
 			{
 				Disconnect(Session->SessionId);
 				break;
@@ -2692,7 +2723,7 @@ void CGameServer::PacketProcReqItemUse(int64 SessionId, CMessage* Message)
 			else
 			{
 				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
-				if (Session->MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
 				{
 					Disconnect(Session->SessionId);
 					break;
@@ -2731,15 +2762,17 @@ void CGameServer::PacketProcReqItemUse(int64 SessionId, CMessage* Message)
 			*Message >> UseItemInfo.ItemSlotIndex;
 
 			// 인벤토리에 아이템이 있는지 확인
-			CItem* UseItem = Session->MyPlayer->_Inventory.Get(UseItemInfo.ItemSlotIndex);
+			CItem* UseItem = MyPlayer->_Inventory.Get(UseItemInfo.ItemSlotIndex);
 			if (UseItem->_ItemInfo != UseItemInfo)
 			{
 				CRASH("요청한 사용 아이템과 인벤토리에 보관중인 아이템이 다름");
 			}
 
+			InterlockedIncrement64(&Session->IOBlock->IOCount);
+
 			st_Job* DBItemEquipJob = _JobMemoryPool->Alloc();
 			DBItemEquipJob->Type = en_JobType::DATA_BASE_ITEM_USE;
-			DBItemEquipJob->SessionId = Session->MyPlayer->_SessionId;
+			DBItemEquipJob->SessionId = MyPlayer->_SessionId;
 
 			CGameServerMessage* DBItemEquipMessage = CGameServerMessage::GameServerMessageAlloc();
 			DBItemEquipMessage->Clear();
@@ -2765,8 +2798,6 @@ void CGameServer::PacketProcReqItemLooting(int64 SessionId, CMessage* Message)
 	{
 		do
 		{
-			InterlockedIncrement64(&Session->IOBlock->IOCount);
-
 			int64 AccountId;
 
 			if (!Session->IsLogin)
@@ -2808,7 +2839,10 @@ void CGameServer::PacketProcReqItemLooting(int64 SessionId, CMessage* Message)
 						continue;
 					}
 
-					int64 TargetObjectId = Session->MyPlayer->_GameObjectInfo.ObjectId;
+					// 게임에 입장한 캐릭터를 가져온다.
+					CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+					int64 TargetObjectId = MyPlayer->_GameObjectInfo.ObjectId;
 
 					CPlayer* TargetPlayer = (CPlayer*)(G_ObjectManager->Find(TargetObjectId, en_GameObjectType::OBJECT_PLAYER));
 					if (TargetPlayer == nullptr)
@@ -2825,6 +2859,8 @@ void CGameServer::PacketProcReqItemLooting(int64 SessionId, CMessage* Message)
 					{
 						// 코인 저장
 						TargetPlayer->_Inventory.AddItem(Items[i]);
+
+						InterlockedIncrement64(&Session->IOBlock->IOCount);
 
 						st_Job* DBGoldSaveJob = _JobMemoryPool->Alloc();
 						DBGoldSaveJob->Type = en_JobType::DATA_BASE_GOLD_SAVE;
@@ -2874,6 +2910,8 @@ void CGameServer::PacketProcReqItemLooting(int64 SessionId, CMessage* Message)
 							}
 						}
 
+						InterlockedIncrement64(&Session->IOBlock->IOCount);
+
 						// DB 인벤토리에 저장하기 위해 Job 생성
 						st_Job* DBInventorySaveJob = _JobMemoryPool->Alloc();
 						DBInventorySaveJob->Type = en_JobType::DATA_BASE_LOOTING_ITEM_INVENTORY_SAVE;
@@ -2905,7 +2943,7 @@ void CGameServer::PacketProcReqItemLooting(int64 SessionId, CMessage* Message)
 					}
 
 					// 월드에 스폰되어 있었던 아이템을 반납한다.
-					G_ObjectManager->Remove(Items[i], 1, IsExistItem);
+					G_ObjectManager->ObjectLeaveGame(Items[i], 1, IsExistItem);
 				}
 			}
 
@@ -2919,7 +2957,7 @@ void CGameServer::PacketProcReqPong(int64 SessionID, CMessage* Message)
 {
 	st_Session* Session = FindSession(SessionID);
 
-	Session->RecvPacketTime = GetTickCount64();
+	Session->PingPacketTime = GetTickCount64();
 
 	ReturnSession(Session);
 }
@@ -3034,46 +3072,50 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 			while (ClientPlayersGet.Fetch())
 			{
 				// 플레이어 정보 셋팅
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectId = PlayerId;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectName = PlayerName;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.OwnerObjectType = (en_GameObjectType)PlayerObjectType;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.Level = PlayerLevel;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.HP = PlayerCurrentHP;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MaxHP = PlayerMaxHP;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MP = PlayerCurrentMP;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MaxMP = PlayerMaxMP;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.DP = PlayerCurrentDP;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MaxDP = PlayerMaxDP;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = PlayerAutoRecoveyHPPercent;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = PlayerAutoRecoveyMPPercent;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = PlayerMinMeleeAttackDamage;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = PlayerMaxMeleeAttackDamage;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = PlayerMeleeAttackHitRate;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MagicDamage = PlayerMagicDamage;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MagicHitRate = PlayerMagicHitRate;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.Defence = PlayerDefence;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.EvasionRate = PlayerEvasionRate;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = PlayerMeleeCriticalPoint;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = PlayerMagicCriticalPoint;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectStatInfo.Speed = PlayerSpeed;
-				Session->MyPlayers[PlayerIndex]->_SpawnPosition._Y = PlayerLastPositionY;
-				Session->MyPlayers[PlayerIndex]->_SpawnPosition._X = PlayerLastPositionX;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.ObjectType = (en_GameObjectType)PlayerObjectType;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.OwnerObjectId = 0;
-				Session->MyPlayers[PlayerIndex]->_GameObjectInfo.PlayerSlotIndex = PlayerIndex;
-				Session->MyPlayers[PlayerIndex]->_SessionId = Session->SessionId;
-				Session->MyPlayers[PlayerIndex]->_AccountId = Session->AccountId;
-				Session->MyPlayers[PlayerIndex]->_Experience.CurrentExperience = PlayerCurrentExperience;
-				Session->MyPlayers[PlayerIndex]->_Experience.RequireExperience = PlayerRequireExperience;
-				Session->MyPlayers[PlayerIndex]->_Experience.TotalExperience = PlayerTotalExperience;
-
+				CPlayer* NewPlayerCharacter = (CPlayer*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_PLAYER);
+				NewPlayerCharacter->_GameObjectInfo.ObjectId = PlayerId;
+				NewPlayerCharacter->_GameObjectInfo.ObjectName = PlayerName;
+				NewPlayerCharacter->_GameObjectInfo.OwnerObjectType = (en_GameObjectType)PlayerObjectType;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.Level = PlayerLevel;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.HP = PlayerCurrentHP;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxHP = PlayerMaxHP;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MP = PlayerCurrentMP;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxMP = PlayerMaxMP;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.DP = PlayerCurrentDP;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxDP = PlayerMaxDP;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = PlayerAutoRecoveyHPPercent;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = PlayerAutoRecoveyMPPercent;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = PlayerMinMeleeAttackDamage;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = PlayerMaxMeleeAttackDamage;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = PlayerMeleeAttackHitRate;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MagicDamage = PlayerMagicDamage;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MagicHitRate = PlayerMagicHitRate;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.Defence = PlayerDefence;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.EvasionRate = PlayerEvasionRate;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = PlayerMeleeCriticalPoint;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = PlayerMagicCriticalPoint;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.Speed = PlayerSpeed;
+				NewPlayerCharacter->_SpawnPosition._Y = PlayerLastPositionY;
+				NewPlayerCharacter->_SpawnPosition._X = PlayerLastPositionX;
+				NewPlayerCharacter->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+				NewPlayerCharacter->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
+				NewPlayerCharacter->_GameObjectInfo.ObjectType = (en_GameObjectType)PlayerObjectType;
+				NewPlayerCharacter->_GameObjectInfo.OwnerObjectId = 0;
+				NewPlayerCharacter->_GameObjectInfo.PlayerSlotIndex = PlayerIndex;
+				NewPlayerCharacter->_SessionId = Session->SessionId;
+				NewPlayerCharacter->_AccountId = Session->AccountId;
+				NewPlayerCharacter->_Experience.CurrentExperience = PlayerCurrentExperience;
+				NewPlayerCharacter->_Experience.RequireExperience = PlayerRequireExperience;
+				NewPlayerCharacter->_Experience.TotalExperience = PlayerTotalExperience;
+				
+				// 플레이어 배열에 새로만들어준 캐릭터 할당
+				G_ObjectManager->_PlayersArray[Session->MyPlayerIndexes[PlayerCount]] = NewPlayerCharacter;
+				
 				PlayerCount++;
 			}
 
 			// 클라에게 로그인 응답 패킷을 보내면서 캐릭터의 정보를 함께 보낸다.
-			CMessage* ResLoginMessage = MakePacketResLogin(Status, PlayerCount, Session->MyPlayers);
+			CMessage* ResLoginMessage = MakePacketResLogin(Status, PlayerCount, Session->MyPlayerIndexes);
 			SendPacket(Session->SessionId, ResLoginMessage);
 			ResLoginMessage->Free();
 
@@ -3099,7 +3141,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 
 	int64 PlayerDBId = 0;
 
-	if (Session)
+	if (Session != nullptr)
 	{
 		InterlockedDecrement64(&Session->IOBlock->IOCount);
 
@@ -3209,162 +3251,169 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			NewCharacterPush.InTotalExperience(LevelData.TotalExperience);
 
 			// DB 요청 실행
-			NewCharacterPush.Execute();
+			bool SaveNewCharacterQuery = NewCharacterPush.Execute();
+			if (SaveNewCharacterQuery == true)
+			{				
+				// 앞서 저장한 캐릭터의 DBId를 AccountId를 이용해 얻어온다.
+				CDBConnection* PlayerDBIDGetDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				// GameServerDB에 생성한 캐릭터의 PlayerDBId를 읽어오는 프로시저 클래스
+				SP::CDBGameServerPlayerDBIDGet PlayerDBIDGet(*PlayerDBIDGetDBConnection);
+				PlayerDBIDGet.InAccountID(Session->AccountId);
+				PlayerDBIDGet.InPlayerSlotIndex(ReqCharacterCreateSlotIndex);
+
+				PlayerDBIDGet.OutPlayerDBID(PlayerDBId);
+
+				// DB 요청 실행
+				bool GetNewCharacterPlayerDBId = PlayerDBIDGet.Execute();
+
+				if (GetNewCharacterPlayerDBId == true)
+				{
+					PlayerDBIDGet.Fetch();					
+					
+					// DB에 등록한 새 캐릭터 정보
+					CPlayer* NewPlayerCharacter = (CPlayer*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_PLAYER);
+					NewPlayerCharacter->_GameObjectInfo.ObjectId = PlayerDBId;
+					NewPlayerCharacter->_GameObjectInfo.ObjectName = Session->CreateCharacterName;
+					NewPlayerCharacter->_GameObjectInfo.OwnerObjectType = en_GameObjectType::NORMAL;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.Level = NewCharacterStatus.Level;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.DP = CurrentDP;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
+					NewPlayerCharacter->_SpawnPosition._Y = NewCharacterPositionY;
+					NewPlayerCharacter->_SpawnPosition._X = NewCharacterPositionX;
+					NewPlayerCharacter->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+					NewPlayerCharacter->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
+					NewPlayerCharacter->_GameObjectInfo.ObjectType = (en_GameObjectType)PlayerType;
+					NewPlayerCharacter->_GameObjectInfo.OwnerObjectId = 0;
+					NewPlayerCharacter->_GameObjectInfo.PlayerSlotIndex = ReqCharacterCreateSlotIndex;
+					NewPlayerCharacter->_SessionId = Session->SessionId;
+					NewPlayerCharacter->_AccountId = Session->AccountId;
+					NewPlayerCharacter->_Experience.CurrentExperience = 0;
+					NewPlayerCharacter->_Experience.RequireExperience = LevelData.RequireExperience;
+					NewPlayerCharacter->_Experience.TotalExperience = LevelData.TotalExperience;					
+					
+					G_ObjectManager->_PlayersArray[Session->MyPlayerIndexes[ReqCharacterCreateSlotIndex]] = NewPlayerCharacter;
+
+					// Gold Table 생성
+					CDBConnection* DBGoldTableCreateConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+					SP::CDBGameServerGoldTableCreatePush GoldTableCreate(*DBGoldTableCreateConnection);
+					GoldTableCreate.InAccountDBId(Session->AccountId);
+					GoldTableCreate.InPlayerDBId(PlayerDBId);
+
+					GoldTableCreate.Execute();
+
+					G_DBConnectionPool->Push(en_DBConnect::GAME, DBGoldTableCreateConnection);
+
+					// DB에 인벤토리 생성
+					for (int8 SlotIndex = 0; SlotIndex < (int8)en_Inventory::INVENTORY_SIZE; SlotIndex++)
+					{
+						CDBConnection* DBItemToInventoryConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+						SP::CDBGameServerItemCreateToInventory ItemToInventory(*DBItemToInventoryConnection);
+						st_ItemInfo NewItem;
+
+						NewItem.ItemName = L"";
+						NewItem.ItemThumbnailImagePath = L"";
+
+						ItemToInventory.InItemName(NewItem.ItemName);
+						ItemToInventory.InSlotIndex(SlotIndex);
+						ItemToInventory.InThumbnailImagePath(NewItem.ItemThumbnailImagePath);
+						ItemToInventory.InOwnerAccountId(Session->AccountId);
+						ItemToInventory.InOwnerPlayerId(PlayerDBId);
+
+						ItemToInventory.Execute();
+
+						G_DBConnectionPool->Push(en_DBConnect::GAME, DBItemToInventoryConnection);
+					}
+
+					int16 DefaultKey = (int16)UnityEngine::Alpha1;
+
+					// DB에 퀵슬롯바 생성
+					for (int8 SlotIndex = 0; SlotIndex < (int8)en_QuickSlotBar::QUICK_SLOT_BAR_SIZE; ++SlotIndex)
+					{
+						CDBConnection* DBQuickSlotCreateConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+						SP::CDBGameServerQuickSlotBarSlotCreate QuickSlotBarSlotCreate(*DBQuickSlotCreateConnection);
+																
+						int8 QuickSlotBarIndex = SlotIndex;
+						int8 QuickSlotBarSlotIndex;
+						int16 QuickSlotBarKey = 0;
+						int8 SkillLargeCategory = (int8)(en_SkillLargeCategory::SKILL_LARGE_CATEGORY_NONE);
+						int8 SkillMediumCategory = (int8)(en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE);
+						int16 SkillType = (int16)(en_SkillType::SKILL_TYPE_NONE);
+						int8 SkillLevel = 0;
+						wstring SkillName = L"";
+						int32 SkillCoolTime = 0;
+						int32 SkillCastingTime = 0;
+						wstring SkillThumbnailImagePath;
+
+						for (int8 i = 0; i < (int8)en_QuickSlotBar::QUICK_SLOT_BAR_SLOT_SIZE; ++i)
+						{
+							QuickSlotBarSlotIndex = i;
+
+							if (DefaultKey == (int16)UnityEngine::Colon)
+							{
+								DefaultKey = (int16)UnityEngine::Alpha0;
+							}
+
+							QuickSlotBarKey = DefaultKey;
+
+							QuickSlotBarSlotCreate.InAccountDBId(Session->AccountId);
+							QuickSlotBarSlotCreate.InPlayerDBId(PlayerDBId);
+							QuickSlotBarSlotCreate.InQuickSlotBarIndex(SlotIndex);
+							QuickSlotBarSlotCreate.InQuickSlotBarSlotIndex(QuickSlotBarSlotIndex);
+							QuickSlotBarSlotCreate.InQuickSlotKey(QuickSlotBarKey);
+							QuickSlotBarSlotCreate.InSkillLargeCategory(SkillLargeCategory);
+							QuickSlotBarSlotCreate.InSkillMediumCategory(SkillMediumCategory);
+							QuickSlotBarSlotCreate.InSkillType(SkillType);
+							QuickSlotBarSlotCreate.InSkillLevel(SkillLevel);
+
+							QuickSlotBarSlotCreate.Execute();
+
+							DefaultKey++;
+						}
+
+						G_DBConnectionPool->Push(en_DBConnect::GAME, DBQuickSlotCreateConnection);
+					}
+
+					NewPlayerDefaultSkillCreate(Session->AccountId, NewPlayerCharacter->_GameObjectInfo, ReqCharacterCreateSlotIndex);
+
+					// 캐릭터 생성 응답 보냄
+					CMessage* ResCreateCharacterMessage = MakePacketResCreateCharacter(!CharacterNameFind, NewPlayerCharacter->_GameObjectInfo);
+					SendPacket(Session->SessionId, ResCreateCharacterMessage);
+					ResCreateCharacterMessage->Free();
+				}				
+
+				G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerDBIDGetDBConnection);
+			}
+			else
+			{
+
+			}
 
 			// DBConnection 반납
 			G_DBConnectionPool->Push(en_DBConnect::GAME, NewCharacterPushDBConnection);
-
-			// 앞서 저장한 캐릭터의 DBId를 AccountId를 이용해 얻어온다.
-			CDBConnection* PlayerDBIDGetDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-			// GameServerDB에 생성한 캐릭터의 PlayerDBId를 읽어오는 프로시저 클래스
-			SP::CDBGameServerPlayerDBIDGet PlayerDBIDGet(*PlayerDBIDGetDBConnection);
-			PlayerDBIDGet.InAccountID(Session->AccountId);
-			PlayerDBIDGet.InPlayerSlotIndex(ReqCharacterCreateSlotIndex);
-
-			PlayerDBIDGet.OutPlayerDBID(PlayerDBId);
-
-			// DB 요청 실행
-			PlayerDBIDGet.Execute();
-
-			PlayerDBIDGet.Fetch();
-
-			// DB에서 읽어온 DBId를 저장
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectId = PlayerDBId;
-			// 캐릭터의 이름도 저장
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectName = Session->CreateCharacterName;
-
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.Level = NewCharacterStatus.Level;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.DP = 0;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_SpawnPosition._Y = NewCharacterPositionY;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_SpawnPosition._X = NewCharacterPositionX;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectType = (en_GameObjectType)ReqGameObjectType;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.OwnerObjectId = -1;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.OwnerObjectType = (en_GameObjectType)0;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.PlayerSlotIndex = ReqCharacterCreateSlotIndex; // 캐릭터가 속한 슬롯
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_Experience.CurrentExperience = 0;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_Experience.RequireExperience = LevelData.RequireExperience;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_Experience.TotalExperience = LevelData.TotalExperience;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_SessionId = Session->SessionId;
-			Session->MyPlayers[ReqCharacterCreateSlotIndex]->_AccountId = Session->AccountId;
-
-			G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerDBIDGetDBConnection);
-
-			// Gold Table 생성
-			CDBConnection* DBGoldTableCreateConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-			SP::CDBGameServerGoldTableCreatePush GoldTableCreate(*DBGoldTableCreateConnection);
-			GoldTableCreate.InAccountDBId(Session->MyPlayers[ReqCharacterCreateSlotIndex]->_AccountId);
-			GoldTableCreate.InPlayerDBId(Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectId);
-
-			GoldTableCreate.Execute();
-
-			G_DBConnectionPool->Push(en_DBConnect::GAME, DBGoldTableCreateConnection);
-
-			// DB에 인벤토리 생성
-			for (int8 SlotIndex = 0; SlotIndex < (int8)en_Inventory::INVENTORY_SIZE; SlotIndex++)
-			{
-				CDBConnection* DBItemToInventoryConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-				SP::CDBGameServerItemCreateToInventory ItemToInventory(*DBItemToInventoryConnection);
-				st_ItemInfo NewItem;
-
-				NewItem.ItemName = L"";
-				NewItem.ItemThumbnailImagePath = L"";
-
-				ItemToInventory.InItemName(NewItem.ItemName);
-				ItemToInventory.InSlotIndex(SlotIndex);
-				ItemToInventory.InThumbnailImagePath(NewItem.ItemThumbnailImagePath);
-				ItemToInventory.InOwnerAccountId(Session->AccountId);
-				ItemToInventory.InOwnerPlayerId(PlayerDBId);
-
-				ItemToInventory.Execute();
-			}
-
-			int16 DefaultKey = (int16)UnityEngine::Alpha1;
-
-			// DB에 퀵슬롯바 생성
-			for (int8 SlotIndex = 0; SlotIndex < (int8)en_QuickSlotBar::QUICK_SLOT_BAR_SIZE; ++SlotIndex)
-			{
-				CDBConnection* DBQuickSlotCreateConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-				SP::CDBGameServerQuickSlotBarSlotCreate QuickSlotBarSlotCreate(*DBQuickSlotCreateConnection);
-
-				int64 AccountDBId = Session->AccountId;
-				int64 PlayerDBId = Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectId;
-				int8 QuickSlotBarIndex = SlotIndex;
-				int8 QuickSlotBarSlotIndex;
-				int16 QuickSlotBarKey = 0;
-				int8 SkillLargeCategory = (int8)(en_SkillLargeCategory::SKILL_LARGE_CATEGORY_NONE);
-				int8 SkillMediumCategory = (int8)(en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE);
-				int16 SkillType = (int16)(en_SkillType::SKILL_TYPE_NONE);
-				int8 SkillLevel = 0;
-				wstring SkillName = L"";
-				int32 SkillCoolTime = 0;
-				int32 SkillCastingTime = 0;
-				wstring SkillThumbnailImagePath;
-
-				for (int8 i = 0; i < (int8)en_QuickSlotBar::QUICK_SLOT_BAR_SLOT_SIZE; ++i)
-				{
-					QuickSlotBarSlotIndex = i;
-
-					if (DefaultKey == (int16)UnityEngine::Colon)
-					{
-						DefaultKey = (int16)UnityEngine::Alpha0;
-					}
-
-					QuickSlotBarKey = DefaultKey;
-
-					QuickSlotBarSlotCreate.InAccountDBId(AccountDBId);
-					QuickSlotBarSlotCreate.InPlayerDBId(PlayerDBId);
-					QuickSlotBarSlotCreate.InQuickSlotBarIndex(SlotIndex);
-					QuickSlotBarSlotCreate.InQuickSlotBarSlotIndex(QuickSlotBarSlotIndex);
-					QuickSlotBarSlotCreate.InQuickSlotKey(QuickSlotBarKey);
-					QuickSlotBarSlotCreate.InSkillLargeCategory(SkillLargeCategory);
-					QuickSlotBarSlotCreate.InSkillMediumCategory(SkillMediumCategory);
-					QuickSlotBarSlotCreate.InSkillType(SkillType);
-					QuickSlotBarSlotCreate.InSkillLevel(SkillLevel);
-
-					QuickSlotBarSlotCreate.Execute();
-
-					DefaultKey++;
 				}
-			}
-
-			NewPlayerDefaultSkillCreate(Session, ReqCharacterCreateSlotIndex);
-		}
 		else
 		{
-			// 캐릭터가 이미 DB에 있는 경우
-			PlayerDBId = Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo.ObjectId;
-		}
-
-		// 캐릭터 생성 응답 보냄
-		CMessage* ResCreateCharacterMessage = MakePacketResCreateCharacter(!CharacterNameFind, Session->MyPlayers[ReqCharacterCreateSlotIndex]->_GameObjectInfo);
-		SendPacket(Session->SessionId, ResCreateCharacterMessage);
-		ResCreateCharacterMessage->Free();
+			// 캐릭터가 이미 DB에 생성되어 있는 경우
+		}		
 #pragma endregion
 
-	}
-	else
-	{
-
-	}
+	}	
 
 	ReturnSession(Session);
 }
@@ -3616,7 +3665,7 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 					NewWeaponItem->_SpawnPosition = SpawnPosition;
 					NewWeaponItem->_SpawnPosition = SpawnPosition;
 
-					G_ObjectManager->Add(NewWeaponItem, 1);
+					G_ObjectManager->ObjectEnterGame(NewWeaponItem, 1);
 				}
 				break;
 				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
@@ -3642,7 +3691,7 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 					NewArmorItem->_GameObjectInfo.OwnerObjectType = (en_GameObjectType)KillerObjectType;
 					NewArmorItem->_SpawnPosition = SpawnPosition;
 
-					G_ObjectManager->Add(NewArmorItem, 1);
+					G_ObjectManager->ObjectEnterGame(NewArmorItem, 1);
 				}
 				break;
 				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL:
@@ -3678,7 +3727,7 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 					NewMaterialItem->_GameObjectInfo.OwnerObjectType = (en_GameObjectType)KillerObjectType;
 					NewMaterialItem->_SpawnPosition = SpawnPosition;
 
-					G_ObjectManager->Add(NewMaterialItem, 1);
+					G_ObjectManager->ObjectEnterGame(NewMaterialItem, 1);
 				}
 				break;
 				}
@@ -3857,7 +3906,10 @@ void CGameServer::PacketProcReqDBCraftingItemToInventorySave(int64 SessionId, CG
 
 				InventoryItemInit.Execute();
 
-				Session->MyPlayer->_Inventory.SlotInit(MaterialItem->_ItemInfo.ItemSlotIndex);
+				// 게임에 입장한 캐릭터를 가져온다.
+				CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+				MyPlayer->_Inventory.SlotInit(MaterialItem->_ItemInfo.ItemSlotIndex);
 
 				G_DBConnectionPool->Push(en_DBConnect::GAME, InventoryItemInitDBConnection);
 			}
@@ -4149,6 +4201,9 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CGameServerMessage*
 
 		Message->Free();
 
+		// 게임에 입장한 캐릭터를 가져온다.
+		CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
 		switch (UseItem->_ItemInfo.ItemSmallCategory)
 		{
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:
@@ -4156,13 +4211,13 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CGameServerMessage*
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD:
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:
 		{
-			Session->MyPlayer->_Equipment.ItemEquip(UseItem, Session->MyPlayer);
+			MyPlayer->_Equipment.ItemEquip(UseItem, MyPlayer);
 
 			// DB 아이템 업데이트
 			CDBConnection* DBInventoryItemUpdateConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 			SP::CDBGameServerInventoryItemUpdate ItemUpdate(*DBInventoryItemUpdateConnection);
 			ItemUpdate.InOwnerAccountId(Session->AccountId);
-			ItemUpdate.InOwnerPlayerId(Session->MyPlayer->_GameObjectInfo.ObjectId);
+			ItemUpdate.InOwnerPlayerId(MyPlayer->_GameObjectInfo.ObjectId);
 			ItemUpdate.InSlotIndex(UseItem->_ItemInfo.ItemSlotIndex);
 			ItemUpdate.InItemCount(UseItem->_ItemInfo.ItemCount);
 			ItemUpdate.InIsEquipped(UseItem->_ItemInfo.ItemIsEquipped);
@@ -4172,17 +4227,17 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CGameServerMessage*
 			G_DBConnectionPool->Push(en_DBConnect::GAME, DBInventoryItemUpdateConnection);
 
 			// 클라에게 장비 착용 결과 알려줌
-			CGameServerMessage* ResInventoryItemUsePacket = MakePacketEquipmentUpdate(Session->MyPlayer->_GameObjectInfo.ObjectId, UseItem->_ItemInfo);
+			CGameServerMessage* ResInventoryItemUsePacket = MakePacketEquipmentUpdate(MyPlayer->_GameObjectInfo.ObjectId, UseItem->_ItemInfo);
 			SendPacket(Session->SessionId, ResInventoryItemUsePacket);
 			ResInventoryItemUsePacket->Free();
 		}
 		break;
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL:
 		{
-			Session->MyPlayer->_GameObjectInfo.ObjectStatInfo.HP += 50;
+			MyPlayer->_GameObjectInfo.ObjectStatInfo.HP += 50;
 
-			CGameServerMessage* ResChangeObjectStat = MakePacketResChangeObjectStat(Session->MyPlayer->_GameObjectInfo.ObjectId, Session->MyPlayer->_GameObjectInfo.ObjectStatInfo);
-			SendPacketAroundSector(Session->MyPlayer->GetCellPosition(), ResChangeObjectStat);
+			CGameServerMessage* ResChangeObjectStat = MakePacketResChangeObjectStat(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectStatInfo);
+			SendPacketAroundSector(MyPlayer->GetCellPosition(), ResChangeObjectStat);
 			ResChangeObjectStat->Free();
 		}
 		break;
@@ -4212,7 +4267,7 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CGameServerMessage*
 			}
 
 			// 스킬을 이미 습득했는지 확인
-			st_SkillInfo* FindSkill = Session->MyPlayer->_SkillBox.FindSkill(FindAttackSkillData->SkillType);
+			st_SkillInfo* FindSkill = MyPlayer->_SkillBox.FindSkill(FindAttackSkillData->SkillType);
 			if (FindSkill != nullptr)
 			{
 				wstring ErrorDistance;
@@ -4222,7 +4277,7 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CGameServerMessage*
 				wsprintf(ErrorMessage, L"[%s] 이미 습득한 스킬입니다.", FindSkill->SkillName.c_str());
 				ErrorDistance = ErrorMessage;
 
-				CMessage* ResErrorPacket = MakePacketError(Session->MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorDistance);
+				CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorDistance);
 				SendPacket(Session->SessionId, ResErrorPacket);
 				ResErrorPacket->Free();
 
@@ -4250,7 +4305,7 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CGameServerMessage*
 			CDBConnection* DBSkillToSkillBoxConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 			SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*DBSkillToSkillBoxConnection);
 			SkillToSkillBox.InAccountDBId(Session->AccountId);
-			SkillToSkillBox.InPlayerDBId(Session->MyPlayer->_GameObjectInfo.ObjectId);
+			SkillToSkillBox.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
 			SkillToSkillBox.InIsQuickSlotUse(NewAttackSkillInfo->IsQuickSlotUse);
 			SkillToSkillBox.InSkillLargeCategory(SkillLargeCategory);
 			SkillToSkillBox.InSkillMediumCategory(SkillMediumCategory);
@@ -4261,10 +4316,10 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CGameServerMessage*
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, DBSkillToSkillBoxConnection);
 
-			Session->MyPlayer->_SkillBox.AddSkill(NewAttackSkillInfo);
+			MyPlayer->_SkillBox.AddSkill(NewAttackSkillInfo);
 
 			// 새로 배운 스킬을 클라에게 전송한다.
-			CMessage* ResSkillToSkillBoxPacket = MakePacketResSkillToSkillBox(Session->MyPlayer->_GameObjectInfo.ObjectId, NewAttackSkillInfo);
+			CMessage* ResSkillToSkillBoxPacket = MakePacketResSkillToSkillBox(MyPlayer->_GameObjectInfo.ObjectId, NewAttackSkillInfo);
 			SendPacket(Session->SessionId, ResSkillToSkillBoxPacket);
 			ResSkillToSkillBoxPacket->Free();
 
@@ -4274,7 +4329,7 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CGameServerMessage*
 			CDBConnection* InventoryItemInitDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 			SP::CDBGameServerInventorySlotInit InventoryItemInit(*InventoryItemInitDBConnection);
 			InventoryItemInit.InOwnerAccountId(Session->AccountId);
-			InventoryItemInit.InOwnerPlayerId(Session->MyPlayer->_GameObjectInfo.ObjectId);
+			InventoryItemInit.InOwnerPlayerId(MyPlayer->_GameObjectInfo.ObjectId);
 			InventoryItemInit.InSlotIndex(UseItem->_ItemInfo.ItemSlotIndex);
 			InventoryItemInit.InItemName(InitString);
 			InventoryItemInit.InItemThumbnailImagePath(InitString);
@@ -4283,10 +4338,10 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CGameServerMessage*
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, InventoryItemInitDBConnection);
 
-			Session->MyPlayer->_Inventory.SlotInit(UseItem->_ItemInfo.ItemSlotIndex);
+			MyPlayer->_Inventory.SlotInit(UseItem->_ItemInfo.ItemSlotIndex);
 
 			// 클라에게 업데이트 결과 전송
-			CMessage* ReqInventoryItemUpdate = MakePacketInventoryItemUpdate(Session->MyPlayer->_GameObjectInfo.ObjectId, UseItem->_ItemInfo);
+			CMessage* ReqInventoryItemUpdate = MakePacketInventoryItemUpdate(MyPlayer->_GameObjectInfo.ObjectId, UseItem->_ItemInfo);
 			SendPacket(SessionId, ReqInventoryItemUpdate);
 			ReqInventoryItemUpdate->Free();
 		}
@@ -4305,7 +4360,7 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CGameServerMessage*
 			wsprintf(ErrorMessage, L"[%s] 사용 할 수 없는 아이템 입니다.", UseItem->_ItemInfo.ItemName.c_str());
 			ErrorDistance = ErrorMessage;
 
-			CMessage* ResErrorPacket = MakePacketError(Session->MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorDistance);
+			CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorDistance);
 			SendPacket(Session->SessionId, ResErrorPacket);
 			ResErrorPacket->Free();
 		}
@@ -4405,23 +4460,25 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 		{
 			InterlockedDecrement64(&Session->IOBlock->IOCount);
 
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
 #pragma region 캐릭터 경험치 정보 보내기
-			CGameServerMessage* ResExperience = MakePacketExperience(Session->MyPlayer->_AccountId, Session->MyPlayer->_GameObjectInfo.ObjectId, 0, Session->MyPlayer->_Experience.CurrentExperience, Session->MyPlayer->_Experience.RequireExperience, Session->MyPlayer->_Experience.TotalExperience);
+			CGameServerMessage* ResExperience = MakePacketExperience(MyPlayer->_AccountId, MyPlayer->_GameObjectInfo.ObjectId, 0, MyPlayer->_Experience.CurrentExperience, MyPlayer->_Experience.RequireExperience, MyPlayer->_Experience.TotalExperience);
 			SendPacket(Session->SessionId, ResExperience);
 			ResExperience->Free();
 #pragma endregion
 
 #pragma region 퀵슬롯 정보 가져와서 클라에 보내기
 			// 퀵슬롯 정보 초기화
-			Session->MyPlayer->_QuickSlotManager.Init();
+			MyPlayer->_QuickSlotManager.Init();
 
 			vector<st_QuickSlotBarSlotInfo> QuickSlotBarSlotInfos;
 
 			// 퀵슬롯 테이블 접근해서 해당 스킬이 등록되어 있는 모든 퀵슬롯 번호 가지고옴
 			CDBConnection* DBQuickSlotBarGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 			SP::CDBGameServerQuickSlotBarGet QuickSlotBarGet(*DBQuickSlotBarGetConnection);
-			QuickSlotBarGet.InAccountDBId(Session->MyPlayer->_AccountId);
-			QuickSlotBarGet.InPlayerDBId(Session->MyPlayer->_GameObjectInfo.ObjectId);
+			QuickSlotBarGet.InAccountDBId(MyPlayer->_AccountId);
+			QuickSlotBarGet.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
 
 			int8 QuickSlotBarIndex;
 			int8 QuickSlotBarSlotIndex;
@@ -4444,8 +4501,8 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			while (QuickSlotBarGet.Fetch())
 			{
 				st_QuickSlotBarSlotInfo NewQuickSlotBarSlot;
-				NewQuickSlotBarSlot.AccountDBId = Session->MyPlayer->_AccountId;
-				NewQuickSlotBarSlot.PlayerDBId = Session->MyPlayer->_GameObjectInfo.ObjectId;
+				NewQuickSlotBarSlot.AccountDBId = MyPlayer->_AccountId;
+				NewQuickSlotBarSlot.PlayerDBId = MyPlayer->_GameObjectInfo.ObjectId;
 				NewQuickSlotBarSlot.QuickSlotBarIndex = QuickSlotBarIndex;
 				NewQuickSlotBarSlot.QuickSlotBarSlotIndex = QuickSlotBarSlotIndex;
 				NewQuickSlotBarSlot.QuickSlotKey = QuickSlotKey;
@@ -4465,7 +4522,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				}
 
 				// 퀵슬롯에 등록한다.
-				Session->MyPlayer->_QuickSlotManager.UpdateQuickSlotBar(NewQuickSlotBarSlot);
+				MyPlayer->_QuickSlotManager.UpdateQuickSlotBar(NewQuickSlotBarSlot);
 				QuickSlotBarSlotInfos.push_back(NewQuickSlotBarSlot);
 			}
 
@@ -4479,7 +4536,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 
 #pragma region 가방 아이템 정보 읽어오기
 			// 인벤토리 초기화
-			Session->MyPlayer->_Inventory.Init();
+			MyPlayer->_Inventory.Init();
 
 			vector<CItem*> InventoryItems;
 			vector<st_ItemInfo> Equipments;
@@ -4487,8 +4544,8 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			// DB에 기록되어 있는 인벤토리 아이템들의 정보를 모두 긁어온다.
 			CDBConnection* DBInventoryItemInfoGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 			SP::CDBGameServerInventoryItemGet CharacterInventoryItem(*DBInventoryItemInfoGetConnection);
-			CharacterInventoryItem.InAccountDBId(Session->MyPlayer->_AccountId);
-			CharacterInventoryItem.InPlayerDBId(Session->MyPlayer->_GameObjectInfo.ObjectId);
+			CharacterInventoryItem.InAccountDBId(MyPlayer->_AccountId);
+			CharacterInventoryItem.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
 
 			int8 ItemLargeCategory = 0;
 			int8 ItemMediumCategory = 0;
@@ -4542,13 +4599,13 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					WeaponItem->_ItemInfo.ItemMinDamage = ItemMinDamage;
 					WeaponItem->_ItemInfo.ItemMaxDamage = ItemMaxDamage;
 
-					Session->MyPlayer->_Inventory.AddItem(WeaponItem);
+					MyPlayer->_Inventory.AddItem(WeaponItem);
 
 					// 아이템 테이블에서 읽어들인 무기 아이템이 착용중일 경우
 					// 해당 무기를 착용하고 착용 아이템 정보에 담는다.
 					if (WeaponItem->_ItemInfo.ItemIsEquipped == true)
 					{
-						Session->MyPlayer->_Equipment.ItemEquip(WeaponItem, Session->MyPlayer);
+						MyPlayer->_Equipment.ItemEquip(WeaponItem, MyPlayer);
 						Equipments.push_back(WeaponItem->_ItemInfo);
 					}
 
@@ -4569,13 +4626,13 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					ArmorItem->_ItemInfo.ItemSlotIndex = SlotIndex;
 					ArmorItem->_ItemInfo.ItemDefence = ItemDefence;
 
-					Session->MyPlayer->_Inventory.AddItem(ArmorItem);
+					MyPlayer->_Inventory.AddItem(ArmorItem);
 
 					// 아이템 테이블에서 읽어들인 방어구 아이템이 착용중일 경우
 					// 해당 방어구를 착용하고 착용 아이템 정보에 담는다.
 					if (ArmorItem->_ItemInfo.ItemIsEquipped == true)
 					{
-						Session->MyPlayer->_Equipment.ItemEquip(ArmorItem, Session->MyPlayer);
+						MyPlayer->_Equipment.ItemEquip(ArmorItem, MyPlayer);
 						Equipments.push_back(WeaponItem->_ItemInfo);
 					}
 
@@ -4606,7 +4663,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					SkillBookItem->_ItemInfo.ItemSlotIndex = SlotIndex;
 					SkillBookItem->_ItemInfo.ItemMaxCount = ItemMaxCount;
 
-					Session->MyPlayer->_Inventory.AddItem(SkillBookItem);
+					MyPlayer->_Inventory.AddItem(SkillBookItem);
 
 					InventoryItems.push_back(SkillBookItem);
 					break;
@@ -4631,7 +4688,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					MaterialItem->_ItemInfo.ItemSlotIndex = SlotIndex;
 					MaterialItem->_ItemInfo.ItemMaxCount = ItemMaxCount;
 
-					Session->MyPlayer->_Inventory.AddItem(MaterialItem);
+					MyPlayer->_Inventory.AddItem(MaterialItem);
 
 					InventoryItems.push_back(MaterialItem);
 					break;
@@ -4652,7 +4709,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 #pragma region 장비 정보 보내주기
 			for (st_ItemInfo EquipmentItemInfo : Equipments)
 			{
-				CMessage* ResEquipmentItemInfoPacket = MakePacketEquipmentUpdate(Session->MyPlayer->_GameObjectInfo.ObjectId, EquipmentItemInfo);
+				CMessage* ResEquipmentItemInfoPacket = MakePacketEquipmentUpdate(MyPlayer->_GameObjectInfo.ObjectId, EquipmentItemInfo);
 				SendPacket(Session->SessionId, ResEquipmentItemInfoPacket);
 				ResEquipmentItemInfoPacket->Free();
 			}
@@ -4663,8 +4720,8 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			// 캐릭터가 소유하고 있었던 골드 정보를 GoldTable에서 읽어온다.
 			CDBConnection* DBCharacterGoldGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 			SP::CDBGameServerGoldGet CharacterGoldGet(*DBCharacterGoldGetConnection);
-			CharacterGoldGet.InAccountDBId(Session->MyPlayer->_AccountId);
-			CharacterGoldGet.InPlayerDBId(Session->MyPlayer->_GameObjectInfo.ObjectId);
+			CharacterGoldGet.InAccountDBId(MyPlayer->_AccountId);
+			CharacterGoldGet.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
 
 			int64 GoldCoin = 0;
 			int16 SliverCoin = 0;
@@ -4677,15 +4734,15 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			if (CharacterGoldGet.Execute() && CharacterGoldGet.Fetch())
 			{
 				// DB에서 읽어온 Gold를 Inventory에 저장한다.
-				Session->MyPlayer->_Inventory._GoldCoinCount = GoldCoin;
-				Session->MyPlayer->_Inventory._SliverCoinCount = SliverCoin;
-				Session->MyPlayer->_Inventory._BronzeCoinCount = BronzeCoin;
+				MyPlayer->_Inventory._GoldCoinCount = GoldCoin;
+				MyPlayer->_Inventory._SliverCoinCount = SliverCoin;
+				MyPlayer->_Inventory._BronzeCoinCount = BronzeCoin;
 
 				// DBConnection 반납하고
 				G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterGoldGetConnection);
 
 				// 클라에게 골드 정보를 보내준다.
-				CMessage* ResGoldSaveMeesage = MakePacketResGoldSave(Session->MyPlayer->_AccountId, Session->MyPlayer->_GameObjectInfo.ObjectId, GoldCoin, SliverCoin, BronzeCoin, 0, 0, false);
+				CMessage* ResGoldSaveMeesage = MakePacketResGoldSave(MyPlayer->_AccountId, MyPlayer->_GameObjectInfo.ObjectId, GoldCoin, SliverCoin, BronzeCoin, 0, 0, false);
 				SendPacket(Session->SessionId, ResGoldSaveMeesage);
 				ResGoldSaveMeesage->Free();
 			}
@@ -4697,8 +4754,8 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			// 캐릭터가 소유하고 있는 스킬 정보를 DB로부터 읽어온다.
 			CDBConnection* DBCharacterSkillGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 			SP::CDBGameServerSkillGet CharacterSkillGet(*DBCharacterSkillGetConnection);
-			CharacterSkillGet.InAccountDBId(Session->MyPlayer->_AccountId);
-			CharacterSkillGet.InPlayerDBId(Session->MyPlayer->_GameObjectInfo.ObjectId);
+			CharacterSkillGet.InAccountDBId(MyPlayer->_AccountId);
+			CharacterSkillGet.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
 
 			bool IsQuickSlotUse;
 			int8 SkillLargeCategory;
@@ -4756,10 +4813,10 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					AttackSkillInfo->SkillDamageOverTime = FindAttackSkillData->SkillDamageOverTime;
 					AttackSkillInfo->StatusAbnormalityProbability = FindAttackSkillData->StatusAbnormalityProbability;
 
-					Session->MyPlayer->_SkillBox.AddSkill(AttackSkillInfo);
+					MyPlayer->_SkillBox.AddSkill(AttackSkillInfo);
 
 					// 클라가 소유하고 있는 스킬 정보를 보내준다.
-					CMessage* ResSkillToSkillBoxPacket = MakePacketResSkillToSkillBox(Session->MyPlayer->_GameObjectInfo.ObjectId, AttackSkillInfo);
+					CMessage* ResSkillToSkillBoxPacket = MakePacketResSkillToSkillBox(MyPlayer->_GameObjectInfo.ObjectId, AttackSkillInfo);
 					SendPacket(Session->SessionId, ResSkillToSkillBoxPacket);
 					ResSkillToSkillBoxPacket->Free();
 				}
@@ -4785,10 +4842,10 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					HealSkillInfo->SkillMaxHealPoint = FindHealSkillData->SkillMaxHealPoint;
 					HealSkillInfo->SkillTargetEffectTime = FindHealSkillData->SkillTargetEffectTime;
 
-					Session->MyPlayer->_SkillBox.AddSkill(HealSkillInfo);
+					MyPlayer->_SkillBox.AddSkill(HealSkillInfo);
 
 					// 클라가 소유하고 있는 스킬 정보를 보내준다.
-					CMessage* ResSkillToSkillBoxPacket = MakePacketResSkillToSkillBox(Session->MyPlayer->_GameObjectInfo.ObjectId, HealSkillInfo);
+					CMessage* ResSkillToSkillBoxPacket = MakePacketResSkillToSkillBox(MyPlayer->_GameObjectInfo.ObjectId, HealSkillInfo);
 					SendPacket(Session->SessionId, ResSkillToSkillBoxPacket);
 					ResSkillToSkillBoxPacket->Free();
 				}
@@ -4826,10 +4883,10 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					BufSkillInfo->IncreaseSpeedPoint = FindBufSkillData->IncreaseSpeedPoint;
 					BufSkillInfo->IncreaseStatusAbnormalityResistance = FindBufSkillData->IncreaseStatusAbnormalityResistance;
 
-					Session->MyPlayer->_SkillBox.AddSkill(BufSkillInfo);
+					MyPlayer->_SkillBox.AddSkill(BufSkillInfo);
 
 					// 클라가 소유하고 있는 스킬 정보를 보내준다.
-					CMessage* ResSkillToSkillBoxPacket = MakePacketResSkillToSkillBox(Session->MyPlayer->_GameObjectInfo.ObjectId, BufSkillInfo);
+					CMessage* ResSkillToSkillBoxPacket = MakePacketResSkillToSkillBox(MyPlayer->_GameObjectInfo.ObjectId, BufSkillInfo);
 					SendPacket(Session->SessionId, ResSkillToSkillBoxPacket);
 					ResSkillToSkillBoxPacket->Free();
 				}
@@ -4870,7 +4927,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					{
 						st_CraftingMaterialItemInfo CraftingMaterialItem;
 						CraftingMaterialItem.AccountDBId = Session->AccountId;
-						CraftingMaterialItem.PlayerDBId = Session->MyPlayer->_GameObjectInfo.ObjectId;
+						CraftingMaterialItem.PlayerDBId = MyPlayer->_GameObjectInfo.ObjectId;
 						CraftingMaterialItem.MaterialItemType = CraftingMaterialItemData.MaterialDataId;
 						CraftingMaterialItem.MaterialItemName = (LPWSTR)CA2W(CraftingMaterialItemData.MaterialName.c_str());
 						CraftingMaterialItem.ItemCount = CraftingMaterialItemData.MaterialCount;
@@ -4885,7 +4942,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				CraftingItemCategorys.push_back(CraftingItemCategory);
 			}
 
-			CMessage* ResCraftingItemListMessage = MakePacketCraftingList(Session->AccountId, Session->MyPlayer->_GameObjectInfo.ObjectId, CraftingItemCategorys);
+			CMessage* ResCraftingItemListMessage = MakePacketCraftingList(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, CraftingItemCategorys);
 			SendPacket(Session->SessionId, ResCraftingItemListMessage);
 			ResCraftingItemListMessage->Free();
 #pragma endregion
@@ -4910,13 +4967,16 @@ void CGameServer::PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CGameServ
 
 			Message->Free();
 
-			st_SkillInfo* FindSkill = Session->MyPlayer->_SkillBox.FindSkill(SaveQuickSlotInfo.QuickBarSkillInfo.SkillType);
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			st_SkillInfo* FindSkill = MyPlayer->_SkillBox.FindSkill(SaveQuickSlotInfo.QuickBarSkillInfo.SkillType);
 			// 캐릭터가 해당 스킬을 가지고 있는지 확인
 			if (FindSkill != nullptr)
 			{
 				FindSkill->IsQuickSlotUse = true;
 
-				Session->MyPlayer->_QuickSlotManager.UpdateQuickSlotBar(SaveQuickSlotInfo);
+				MyPlayer->_QuickSlotManager.UpdateQuickSlotBar(SaveQuickSlotInfo);
 
 				int8 SkillLargeCategory = (int8)SaveQuickSlotInfo.QuickBarSkillInfo.SkillLargeCategory;
 				int8 SkillMediumCategory = (int8)SaveQuickSlotInfo.QuickBarSkillInfo.SkillMediumCategory;
@@ -4989,7 +5049,8 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 
 			Message->Free();
 
-			CPlayer* MyPlayer = Session->MyPlayer;
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];			
 
 #pragma region 퀵슬롯 A가 DB에 있는지 확인
 			// 해당 퀵슬롯 위치에 정보가 있는지 DB에서 확인
@@ -5204,7 +5265,10 @@ void CGameServer::PacketProcReqDBQuickSlotInit(int64 SessionId, CMessage* Messag
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, DBQuickSlotInitConnection);
 
-			CMessage* ResQuickSlotInitMessage = MakePacketResQuickSlotInit(Session->AccountId, Session->MyPlayer->_GameObjectInfo.ObjectId, QuickSlotBarIndex, QuickSlotBarSlotIndex, QuickSlotKey);
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			CMessage* ResQuickSlotInitMessage = MakePacketResQuickSlotInit(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, QuickSlotBarIndex, QuickSlotBarSlotIndex, QuickSlotKey);
 			SendPacket(Session->SessionId, ResQuickSlotInitMessage);
 			ResQuickSlotInitMessage->Free();
 		} while (0);
@@ -5319,28 +5383,11 @@ void CGameServer::PacketProcTimerAttackEnd(int64 SessionId, CGameServerMessage* 
 {
 	st_Session* Session = FindSession(SessionId);
 
-	Message->Free();
+	int64 TargetObjectId;
+	*Message >> TargetObjectId;
 
-	if (Session)
-	{
-		InterlockedDecrement64(&Session->IOBlock->IOCount);
-
-		CPlayer* MyPlayer = Session->MyPlayer;
-
-		MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-		MyPlayer->_SkillType = en_SkillType::SKILL_TYPE_NONE;
-
-		CMessage* ResObjectStateMessage = MakePacketResChangeObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
-		SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateMessage);
-		ResObjectStateMessage->Free();
-	}
-
-	ReturnSession(Session);
-}
-
-void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* Message)
-{
-	st_Session* Session = FindSession(SessionId);
+	int16 TargetObjectType;
+	*Message >> TargetObjectType;
 
 	int8 QuickSlotBarIndex;
 	*Message >> QuickSlotBarIndex;
@@ -5358,9 +5405,84 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 
 	if (Session)
 	{
-		InterlockedDecrement64(&Session->IOBlock->IOCount);
+		// 게임에 입장한 캐릭터를 가져온다.
+		CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];		
 
-		CPlayer* MyPlayer = Session->MyPlayer;
+		MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+		MyPlayer->_SkillType = en_SkillType::SKILL_TYPE_NONE;
+
+		CMessage* ResObjectStateMessage = MakePacketResChangeObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
+		SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateMessage);
+		ResObjectStateMessage->Free();
+
+		float SkillCoolTime = SpellEndSkillInfo->SkillCoolTime / 1000.0f;
+
+		// 클라에게 쿨타임 표시
+		CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(MyPlayer->_GameObjectInfo.ObjectId, QuickSlotBarIndex, QuickSlotBarSlotIndex, SkillCoolTime, 1.0f);
+		SendPacket(Session->SessionId, ResCoolTimeStartPacket);
+		ResCoolTimeStartPacket->Free();
+
+		// 쿨타임 시간 동안 스킬 사용 못하게 막음
+		SpellEndSkillInfo->CanSkillUse = false;
+
+		// 스킬 쿨타임 얻어옴
+		// 스킬 쿨타임 스킬쿨타임 잡 등록
+		st_TimerJob* SkillCoolTimeTimerJob = _TimerJobMemoryPool->Alloc();
+		SkillCoolTimeTimerJob->TimerJobExecTick = GetTickCount64() + SpellEndSkillInfo->SkillCoolTime;
+		SkillCoolTimeTimerJob->SessionId = Session->SessionId;
+		SkillCoolTimeTimerJob->TimerJobType = en_TimerJobType::TIMER_SKILL_COOLTIME_END;
+
+		CGameServerMessage* ResCoolTimeEndMessage = CGameServerMessage::GameServerMessageAlloc();
+		if (ResCoolTimeEndMessage == nullptr)
+		{
+			return;
+		}
+
+		ResCoolTimeEndMessage->Clear();
+
+		*ResCoolTimeEndMessage << (int16)SpellEndSkillInfo->SkillType;
+		SkillCoolTimeTimerJob->TimerJobMessage = ResCoolTimeEndMessage;
+
+		AcquireSRWLockExclusive(&_TimerJobLock);
+		_TimerHeapJob->InsertHeap(SkillCoolTimeTimerJob->TimerJobExecTick, SkillCoolTimeTimerJob);
+		ReleaseSRWLockExclusive(&_TimerJobLock);
+
+		SetEvent(_TimerThreadWakeEvent);
+	}
+
+	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* Message)
+{
+	st_Session* Session = FindSession(SessionId);
+
+	int64 TargetObjectId;
+	*Message >> TargetObjectId;
+
+	int16 TargetObjectType;
+	*Message >> TargetObjectType;
+
+	int8 QuickSlotBarIndex;
+	*Message >> QuickSlotBarIndex;
+
+	int8 QuickSlotBarSlotIndex;
+	*Message >> QuickSlotBarSlotIndex;
+
+	int8 SkillMediumCategory;
+	*Message >> SkillMediumCategory;
+
+	st_SkillInfo* SpellEndSkillInfo = nullptr;
+	*Message >> &SpellEndSkillInfo;
+
+	Message->Free();
+
+	CGameObject* FindObject = G_ObjectManager->Find(TargetObjectId,(en_GameObjectType)TargetObjectType);
+
+	if (Session)
+	{
+		// 게임에 입장한 캐릭터를 가져온다.
+		CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];		
 
 		// 마법 시전 완료 했으니 원래 상태로 돌려줌
 		MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
@@ -5395,9 +5517,7 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 		ResCoolTimeEndMessage->Clear();
 
 		*ResCoolTimeEndMessage << (int16)SpellEndSkillInfo->SkillType;
-		SkillCoolTimeTimerJob->TimerJobMessage = ResCoolTimeEndMessage;
-
-		InterlockedIncrement64(&Session->IOBlock->IOCount);
+		SkillCoolTimeTimerJob->TimerJobMessage = ResCoolTimeEndMessage;		
 
 		AcquireSRWLockExclusive(&_TimerJobLock);
 		_TimerHeapJob->InsertHeap(SkillCoolTimeTimerJob->TimerJobExecTick, SkillCoolTimeTimerJob);
@@ -5451,15 +5571,17 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 
 			MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ROOT;
 
-			CMessage* ResChangeObjectStat = MakePacketResChangeObjectState(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->GetTarget()->_GameObjectInfo.ObjectType, MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.State);
-			SendPacketAroundSector(MyPlayer->GetTarget()->GetCellPosition(), ResChangeObjectStat);
-			ResChangeObjectStat->Free();
+			CMessage* ResChangeObjectStatMessage = MakePacketResChangeObjectState(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->GetTarget()->_GameObjectInfo.ObjectType, MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.State);
+			SendPacketAroundSector(MyPlayer->GetTarget()->GetCellPosition(), ResChangeObjectStatMessage);
+			ResChangeObjectStatMessage->Free();
+
+			CMessage* ResBufMessage = MakePacketBuf(MyPlayer->_GameObjectInfo.ObjectId, SpellEndSkillInfo->SkillCoolTime, 1.0f, SpellEndSkillInfo);
+			SendPacketAroundSector(MyPlayer->GetTarget()->GetCellPosition(), ResBufMessage);
+			ResBufMessage->Free();
 
 			st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)SpellEndSkillInfo;
 
-			InterlockedIncrement64(&Session->IOBlock->IOCount);
-
-			ObjectStateChangeTimerJobCreate(MyPlayer->GetTarget(), en_CreatureState::IDLE, AttackSkillInfo->SkillDebufTime, MyPlayer->_SessionId);
+			ObjectStateChangeTimerJobCreate(MyPlayer->GetTarget(), en_CreatureState::IDLE, AttackSkillInfo->SkillDebufTime);
 		}
 		break;
 		case en_SkillType::SKILL_SHAMAN_ICE_CHAIN:
@@ -5493,9 +5615,7 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 			// 데미지 처리
 			MyPlayer->GetTarget()->OnDamaged(MyPlayer, FinalDamage);
 
-			InterlockedIncrement64(&Session->IOBlock->IOCount);
-
-			ObjectStateChangeTimerJobCreate(MyPlayer->GetTarget(), en_CreatureState::IDLE, AttackSkillInfo->SkillDebufTime, MyPlayer->_SessionId);
+			ObjectStateChangeTimerJobCreate(MyPlayer->GetTarget(), en_CreatureState::IDLE, AttackSkillInfo->SkillDebufTime);
 		}
 		break;
 		case en_SkillType::SKILL_SHAMAN_HELL_FIRE:
@@ -5550,9 +5670,7 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 
 			st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)SpellEndSkillInfo;
 
-			InterlockedIncrement64(&Session->IOBlock->IOCount);
-
-			ObjectStateChangeTimerJobCreate(MyPlayer->GetTarget(), en_CreatureState::IDLE, AttackSkillInfo->SkillDebufTime, MyPlayer->_SessionId);
+			ObjectStateChangeTimerJobCreate(MyPlayer->GetTarget(), en_CreatureState::IDLE, AttackSkillInfo->SkillDebufTime);
 		}
 		break;
 		case en_SkillType::SKILL_TAIOIST_HEALING_LIGHT:
@@ -5630,14 +5748,15 @@ void CGameServer::PacketProcTimerCastingTimeEnd(int64 SessionId, CGameServerMess
 
 	if (Session)
 	{
-		InterlockedDecrement64(&Session->IOBlock->IOCount);
-
 		int16 SkillType;
 		*Message >> SkillType;
 
 		Message->Free();
 
-		st_SkillInfo* SkillInfo = Session->MyPlayer->_SkillBox.FindSkill((en_SkillType)SkillType);
+		// 게임에 입장한 캐릭터를 가져온다.
+		CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+		st_SkillInfo* SkillInfo = MyPlayer->_SkillBox.FindSkill((en_SkillType)SkillType);
 		SkillInfo->CanSkillUse = true;
 	}
 
@@ -5678,68 +5797,61 @@ void CGameServer::PacketProcTimerObjectStateChange(int64 SessionId, CGameServerM
 	int16 TargetObjectType;
 	*Message >> TargetObjectType;
 	int16 ChangeState;
-	*Message >> ChangeState;
+	*Message >> ChangeState;	
 
 	CGameObject* ChangeStateObject = G_ObjectManager->Find(TargetObjectId, (en_GameObjectType)TargetObjectType);
-
 	if (ChangeStateObject != nullptr)
 	{
 		switch ((en_GameObjectType)TargetObjectType)
 		{
 		case en_GameObjectType::OBJECT_BEAR:
 		case en_GameObjectType::OBJECT_SLIME:
-		{
-			CMonster* ChangeStateMonsterObject = (CMonster*)ChangeStateObject;
-			ChangeStateMonsterObject->_GameObjectInfo.ObjectPositionInfo.State = (en_CreatureState)ChangeState;
+			{
+				CMonster* ChangeStateMonsterObject = (CMonster*)ChangeStateObject;
+				ChangeStateMonsterObject->_GameObjectInfo.ObjectPositionInfo.State = (en_CreatureState)ChangeState;
 
-			CGameServerMessage* ResObjectStateChangeMessage = MakePacketResChangeObjectState(TargetObjectId, ChangeStateObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, ChangeStateObject->_GameObjectInfo.ObjectType, (en_CreatureState)ChangeState);
-			SendPacketAroundSector(ChangeStateObject->GetCellPosition(), ResObjectStateChangeMessage);
-			ResObjectStateChangeMessage->Free();
-		}
-		break;
+				CGameServerMessage* ResObjectStateChangeMessage = MakePacketResChangeObjectState(TargetObjectId, ChangeStateObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, ChangeStateObject->_GameObjectInfo.ObjectType, (en_CreatureState)ChangeState);
+				SendPacketAroundSector(ChangeStateObject->GetCellPosition(), ResObjectStateChangeMessage);
+				ResObjectStateChangeMessage->Free();
+			}
+			break;
 		case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 		case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 		case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
-		{
-			st_Session* Session = FindSession(SessionId);
-			if (Session != nullptr)
 			{
-				InterlockedDecrement64(&Session->IOBlock->IOCount);
-
 				CPlayer* ChangeStatePlayerObject = (CPlayer*)ChangeStateObject;
 				switch (ChangeStatePlayerObject->_GameObjectInfo.ObjectPositionInfo.State)
 				{
 				case en_CreatureState::SPAWN_IDLE:
-				{
-					CChannel* Channel = G_ChannelManager->Find(1);
-					if (Channel != nullptr)
 					{
-						st_Vector2Int ChangeStateObjectPosition = ChangeStateObject->GetCellPosition();
-						Channel->_Map->ApplyMove(ChangeStateObject, ChangeStateObjectPosition);
+						CChannel* Channel = G_ChannelManager->Find(1);
+						if (Channel != nullptr)
+						{
+							st_Vector2Int ChangeStateObjectPosition = ChangeStateObject->GetCellPosition();
+							Channel->_Map->ApplyMove(ChangeStateObject, ChangeStateObjectPosition);
 
+							ChangeStatePlayerObject->_GameObjectInfo.ObjectPositionInfo.State = (en_CreatureState)ChangeState;
+
+							CGameServerMessage* ResObjectStateChangeMessage = MakePacketResChangeObjectState(TargetObjectId, ChangeStateObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, ChangeStateObject->_GameObjectInfo.ObjectType, (en_CreatureState)ChangeState);
+							SendPacketAroundSector(ChangeStateObject->GetCellPosition(), ResObjectStateChangeMessage);
+							ResObjectStateChangeMessage->Free();
+						}
+					}
+					break;				
+				default:
+					{
 						ChangeStatePlayerObject->_GameObjectInfo.ObjectPositionInfo.State = (en_CreatureState)ChangeState;
 
 						CGameServerMessage* ResObjectStateChangeMessage = MakePacketResChangeObjectState(TargetObjectId, ChangeStateObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, ChangeStateObject->_GameObjectInfo.ObjectType, (en_CreatureState)ChangeState);
 						SendPacketAroundSector(ChangeStateObject->GetCellPosition(), ResObjectStateChangeMessage);
 						ResObjectStateChangeMessage->Free();
 					}
-				}
-				break;
-				default:
-				{
-					ChangeStatePlayerObject->_GameObjectInfo.ObjectPositionInfo.State = (en_CreatureState)ChangeState;
-
-					CGameServerMessage* ResObjectStateChangeMessage = MakePacketResChangeObjectState(TargetObjectId, ChangeStateObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, ChangeStateObject->_GameObjectInfo.ObjectType, (en_CreatureState)ChangeState);
-					SendPacketAroundSector(ChangeStateObject->GetCellPosition(), ResObjectStateChangeMessage);
-					ResObjectStateChangeMessage->Free();
-				}
-				break;
+					break;
 				}
 			}
-
-			ReturnSession(Session);
-		}
-		break;
+			break;
+		default:
+			break;
 		}
 	}
 }
@@ -5771,8 +5883,6 @@ void CGameServer::PacketProcTimerDot(int64 SessionId, CGameServerMessage* Messag
 		switch ((en_DotType)DotType)
 		{
 		case en_DotType::DOT_TYPE_HEAL:
-			InterlockedDecrement64(&Session->IOBlock->IOCount);
-
 			FindObject->_GameObjectInfo.ObjectStatInfo.HP += HPPoint;
 
 			if (FindObject->_GameObjectInfo.ObjectStatInfo.HP >= FindObject->_GameObjectInfo.ObjectStatInfo.MaxHP)
@@ -5784,17 +5894,12 @@ void CGameServer::PacketProcTimerDot(int64 SessionId, CGameServerMessage* Messag
 
 			// 힐 도트 시간이 아직 남아 있을 경우 예약
 			if (DotTotalTime > 0)
-			{
-				InterlockedIncrement64(&Session->IOBlock->IOCount);
-
-				ObjectDotTimerCreate(FindObject, (en_DotType)DotType, DotTime, DotTotalTime, Session->SessionId);
+			{				ObjectDotTimerCreate(FindObject, (en_DotType)DotType, DotTime, DotTotalTime, Session->SessionId);
 			}
 			break;
 		case en_DotType::DOT_TYPE_POISON:
 		case en_DotType::DOT_TYPE_BLEEDING:
 		case en_DotType::DOT_TYPE_BURN:
-			InterlockedDecrement64(&Session->IOBlock->IOCount);
-
 			FindObject->_GameObjectInfo.ObjectStatInfo.HP -= HPPoint;
 
 			if (FindObject->_GameObjectInfo.ObjectStatInfo.HP <= 0)
@@ -5807,8 +5912,6 @@ void CGameServer::PacketProcTimerDot(int64 SessionId, CGameServerMessage* Messag
 			// 데미지 도트 시간이 아직 남아 있고 대상의 HP가 0 보다 클경우 도트 데미지 예약
 			if (DotTotalTime > 0 && FindObject->_GameObjectInfo.ObjectStatInfo.HP > 0)
 			{
-				InterlockedIncrement64(&Session->IOBlock->IOCount);
-
 				ObjectDotTimerCreate(FindObject, (en_DotType)DotType, DotTime, DotTotalTime, Session->SessionId);
 			}
 			break;
@@ -5859,25 +5962,25 @@ void CGameServer::PacketProcTimerPing(int64 SessionId)
 		{
 			if (!Session->IsLogin)
 			{
-				Disconnect(Session->SessionId);
-				break;
+				Disconnect(Session->SessionId);				
 			}
 
-			int64 DeltaTime = GetTickCount64() - Session->RecvPacketTime;
+			int64 DeltaTime = GetTickCount64() - Session->PingPacketTime;
 
 			if (DeltaTime > 20 * 1000)
 			{
-				Disconnect(Session->SessionId);
-				break;
+				//Disconnect(Session->SessionId);				
 			}
+			else
+			{
+				// 핑 패킷 전송
+				CGameServerMessage* PingMessage = MakePacketPing();
+				SendPacket(Session->SessionId, PingMessage);
+				PingMessage->Free();
 
-			// 핑 패킷 전송
-			CGameServerMessage* PingMessage = MakePacketPing();
-			SendPacket(Session->SessionId, PingMessage);
-			PingMessage->Free();
-
-			// 핑 패킷 예약
-			PingTimerCreate(Session);			
+				// 핑 패킷 예약
+				PingTimerCreate(Session);
+			}	
 
 			ReturnSession(Session);
 		}
@@ -5905,7 +6008,7 @@ CGameServerMessage* CGameServer::MakePacketResClientConnected()
 //BYTE Status  //0 : 실패  1 : 성공
 //CPlayer Players
 //---------------------------------------------------------------
-CGameServerMessage* CGameServer::MakePacketResLogin(bool Status, int8 PlayerCount, CPlayer** MyPlayersInfo)
+CGameServerMessage* CGameServer::MakePacketResLogin(bool& Status, int8& PlayerCount, int32* MyPlayerIndexes)
 {
 	CGameServerMessage* LoginMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (LoginMessage == nullptr)
@@ -5919,12 +6022,12 @@ CGameServerMessage* CGameServer::MakePacketResLogin(bool Status, int8 PlayerCoun
 	*LoginMessage << Status;
 	*LoginMessage << PlayerCount;
 
-	if (PlayerCount > 0)
+	for (int i = 0; i < SESSION_CHARACTER_MAX; i++)
 	{
-		for (int32 i = 0; i < PlayerCount; i++)
+		if (G_ObjectManager->_PlayersArray[MyPlayerIndexes[i]] != nullptr)
 		{
-			*LoginMessage << MyPlayersInfo[i]->_GameObjectInfo;
-		}
+			*LoginMessage << G_ObjectManager->_PlayersArray[MyPlayerIndexes[i]]->_GameObjectInfo;
+		}		
 	}
 
 	return LoginMessage;
@@ -5933,7 +6036,7 @@ CGameServerMessage* CGameServer::MakePacketResLogin(bool Status, int8 PlayerCoun
 // int32 PlayerDBId
 // bool IsSuccess
 // wstring PlayerName
-CGameServerMessage* CGameServer::MakePacketResCreateCharacter(bool IsSuccess, st_GameObjectInfo CreateCharacterObjectInfo)
+CGameServerMessage* CGameServer::MakePacketResCreateCharacter(bool IsSuccess, st_GameObjectInfo& CreateCharacterObjectInfo)
 {
 	CGameServerMessage* ResCreateCharacter = CGameServerMessage::GameServerMessageAlloc();
 	if (ResCreateCharacter == nullptr)
@@ -6641,6 +6744,25 @@ CGameServerMessage* CGameServer::MakePacketEffect(int64 TargetObjectId, en_Effec
 	return ResEffectMessage;
 }
 
+CGameServerMessage* CGameServer::MakePacketBuf(int64 TargetObjectId, float SkillCoolTime, float SkillCoolTimeSpeed, st_SkillInfo* SkillInfo)
+{
+	CGameServerMessage* ResBufMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResBufMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResBufMessage->Clear();
+
+	*ResBufMessage << (int16)en_PACKET_S2C_BUF;
+	*ResBufMessage << TargetObjectId;
+	*ResBufMessage << SkillCoolTime;
+	*ResBufMessage << SkillCoolTimeSpeed;
+	*ResBufMessage << *SkillInfo;
+
+	return ResBufMessage;
+}
+
 void CGameServer::OnClientJoin(int64 SessionID)
 {
 	st_Job* ClientJoinJob = _JobMemoryPool->Alloc();
@@ -6699,8 +6821,10 @@ void CGameServer::SendPacketAroundSector(st_Vector2Int CellPosition, CMessage* M
 
 void CGameServer::SendPacketAroundSector(st_Session* Session, CMessage* Message, bool SendMe)
 {
+	CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
 	CChannel* Channel = G_ChannelManager->Find(1);
-	vector<CSector*> Sectors = Channel->GetAroundSectors(Session->MyPlayer->GetCellPosition(), 1);
+	vector<CSector*> Sectors = Channel->GetAroundSectors(MyPlayer->GetCellPosition(), 1);
 
 	for (CSector* Sector : Sectors)
 	{
@@ -6742,6 +6866,8 @@ void CGameServer::SkillCoolTimeTimerJobCreate(CPlayer* Player, int64 CastingTime
 
 	SkillEndMessage->Clear();
 
+	*SkillEndMessage << Player->_GameObjectInfo.ObjectId;
+	*SkillEndMessage << (int16)Player->_GameObjectInfo.ObjectType;
 	*SkillEndMessage << QuickSlotBarIndex;
 	*SkillEndMessage << QuickSlotBarSlotIndex;
 	*SkillEndMessage << (int8)CoolTimeSkillInfo->SkillMediumCategory;
@@ -6784,11 +6910,11 @@ void CGameServer::SpawnObjectTimeTimerJobCreate(int16 SpawnObjectType, st_Vector
 	SetEvent(_TimerThreadWakeEvent);
 }
 
-void CGameServer::ObjectStateChangeTimerJobCreate(CGameObject* Target, en_CreatureState ChangeState, int64 ChangeTime, int64 SessionId)
+void CGameServer::ObjectStateChangeTimerJobCreate(CGameObject* Target, en_CreatureState ChangeState, int64 ChangeTime)
 {
 	st_TimerJob* ObjectStateChangeTimerJob = _TimerJobMemoryPool->Alloc();
 	ObjectStateChangeTimerJob->TimerJobExecTick = GetTickCount64() + ChangeTime;
-	ObjectStateChangeTimerJob->SessionId = SessionId;
+	ObjectStateChangeTimerJob->SessionId = 0;
 	ObjectStateChangeTimerJob->TimerJobType = en_TimerJobType::TIMER_OBJECT_STATE_CHANGE;
 
 	CGameServerMessage* ResObjectStateChangeMessage = CGameServerMessage::GameServerMessageAlloc();

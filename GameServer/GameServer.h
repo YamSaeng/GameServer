@@ -67,7 +67,7 @@ private:
 	//---------------------------------
 	// 캐릭터 기본 스킬 생성
 	//---------------------------------
-	void NewPlayerDefaultSkillCreate(st_Session* Session,int8& CharacterCreateSlotIndex);
+	void NewPlayerDefaultSkillCreate(int64& AccountId, st_GameObjectInfo& NewCharacterInfo, int8& CharacterCreateSlotIndex);
 	
 	//------------------------
 	// 오브젝트 자연 회복 추가
@@ -266,11 +266,11 @@ private:
 	//---------------------------------------------------------------------------------------
 	// 로그인 요청 응답 패킷 조합
 	//---------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResLogin(bool Status, int8 PlayerCount, CPlayer** MyPlayersInfo);
+	CGameServerMessage* MakePacketResLogin(bool& Status,int8& PlayerCount, int32* MyPlayerIndexes);
 	//--------------------------------------------------------------------------------------------------
 	// 캐릭터 생성 요청 응답 패킷 조합
 	//--------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResCreateCharacter(bool IsSuccess, st_GameObjectInfo CreateCharacterObjectInfo);
+	CGameServerMessage* MakePacketResCreateCharacter(bool IsSuccess, st_GameObjectInfo& CreateCharacterObjectInfo);
 	//-------------------------------------------------------------
 	// 게임서버 입장 요청 응답 패킷 조합
 	//-------------------------------------------------------------
@@ -400,6 +400,11 @@ public:
 	// 게임서버 이펙트 출력 패킷 조합
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketEffect(int64 TargetObjectId, en_EffectType EffectType, float PrintEffectTime);
+	//---------------------------------------------------------------------------------
+	// 게임서버 버프 패킷 조합
+	//---------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketBuf(int64 TargetObjectId, float SkillCoolTime, float SkillCoolTimeSpeed, st_SkillInfo* SkillInfo);
+
 public:
 	//------------------------------------
 	// Job 메모리풀
@@ -486,7 +491,7 @@ public:
 	//--------------------------------------------------------------
 	// 오브젝트 상태 변경 타이머 잡 생성
 	//--------------------------------------------------------------
-	void ObjectStateChangeTimerJobCreate(CGameObject* Target, en_CreatureState ChangeState, int64 ChangeTime, int64 SessionId = 0);
+	void ObjectStateChangeTimerJobCreate(CGameObject* Target, en_CreatureState ChangeState, int64 ChangeTime);
 	//--------------------------------------------------------------
 	// 오브젝트 도트 타이머 잡 생성
 	//--------------------------------------------------------------
