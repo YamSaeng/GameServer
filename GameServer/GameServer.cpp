@@ -271,7 +271,7 @@ unsigned __stdcall CGameServer::TimerJobThreadProc(void* Argument)
 					// Type에 따라 실행한다.
 					switch (TimerJob->TimerJobType)
 					{
-					case en_TimerJobType::TIMER_ATTACK_END:
+					case en_TimerJobType::TIMER_MELEE_ATTACK_END:
 						Instance->PacketProcTimerAttackEnd(TimerJob->SessionId, TimerJob->TimerJobMessage);
 						break;
 					case en_TimerJobType::TIMER_SPELL_END:
@@ -1069,8 +1069,8 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 				}
 			}			
 
-			int8 QuickSlotBarindex;
-			*Message >> QuickSlotBarindex;
+			int8 QuickSlotBarIndex;
+			*Message >> QuickSlotBarIndex;
 
 			int8 QuickSlotBarSlotIndex;
 			*Message >> QuickSlotBarSlotIndex;
@@ -1509,7 +1509,41 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 					}
 				}				
 
-				SkillCoolTimeTimerJobCreate(MyPlayer, 500, FindSkill, en_TimerJobType::TIMER_ATTACK_END, QuickSlotBarindex, QuickSlotBarSlotIndex);
+				SkillCoolTimeTimerJobCreate(MyPlayer, 500, FindSkill, en_TimerJobType::TIMER_MELEE_ATTACK_END, QuickSlotBarIndex, QuickSlotBarSlotIndex);
+
+				float SkillCoolTime = FindSkill->SkillCoolTime / 1000.0f;
+
+				// 클라에게 쿨타임 표시
+				CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(MyPlayer->_GameObjectInfo.ObjectId, QuickSlotBarIndex, QuickSlotBarSlotIndex, SkillCoolTime, 1.0f);
+				SendPacket(Session->SessionId, ResCoolTimeStartPacket);
+				ResCoolTimeStartPacket->Free();
+
+				// 쿨타임 시간 동안 스킬 사용 못하게 막음
+				FindSkill->CanSkillUse = false;
+
+				// 스킬 쿨타임 얻어옴
+				// 스킬 쿨타임 스킬쿨타임 잡 등록
+				st_TimerJob* SkillCoolTimeTimerJob = _TimerJobMemoryPool->Alloc();
+				SkillCoolTimeTimerJob->TimerJobExecTick = GetTickCount64() + FindSkill->SkillCoolTime;
+				SkillCoolTimeTimerJob->SessionId = Session->SessionId;
+				SkillCoolTimeTimerJob->TimerJobType = en_TimerJobType::TIMER_SKILL_COOLTIME_END;
+
+				CGameServerMessage* ResCoolTimeEndMessage = CGameServerMessage::GameServerMessageAlloc();
+				if (ResCoolTimeEndMessage == nullptr)
+				{
+					return;
+				}
+
+				ResCoolTimeEndMessage->Clear();
+
+				*ResCoolTimeEndMessage << (int16)FindSkill->SkillType;
+				SkillCoolTimeTimerJob->TimerJobMessage = ResCoolTimeEndMessage;
+
+				AcquireSRWLockExclusive(&_TimerJobLock);
+				_TimerHeapJob->InsertHeap(SkillCoolTimeTimerJob->TimerJobExecTick, SkillCoolTimeTimerJob);
+				ReleaseSRWLockExclusive(&_TimerJobLock);
+
+				SetEvent(_TimerThreadWakeEvent);
 			}
 			else
 			{
@@ -5414,40 +5448,6 @@ void CGameServer::PacketProcTimerAttackEnd(int64 SessionId, CGameServerMessage* 
 		CMessage* ResObjectStateMessage = MakePacketResChangeObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
 		SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateMessage);
 		ResObjectStateMessage->Free();
-
-		float SkillCoolTime = SpellEndSkillInfo->SkillCoolTime / 1000.0f;
-
-		// 클라에게 쿨타임 표시
-		CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(MyPlayer->_GameObjectInfo.ObjectId, QuickSlotBarIndex, QuickSlotBarSlotIndex, SkillCoolTime, 1.0f);
-		SendPacket(Session->SessionId, ResCoolTimeStartPacket);
-		ResCoolTimeStartPacket->Free();
-
-		// 쿨타임 시간 동안 스킬 사용 못하게 막음
-		SpellEndSkillInfo->CanSkillUse = false;
-
-		// 스킬 쿨타임 얻어옴
-		// 스킬 쿨타임 스킬쿨타임 잡 등록
-		st_TimerJob* SkillCoolTimeTimerJob = _TimerJobMemoryPool->Alloc();
-		SkillCoolTimeTimerJob->TimerJobExecTick = GetTickCount64() + SpellEndSkillInfo->SkillCoolTime;
-		SkillCoolTimeTimerJob->SessionId = Session->SessionId;
-		SkillCoolTimeTimerJob->TimerJobType = en_TimerJobType::TIMER_SKILL_COOLTIME_END;
-
-		CGameServerMessage* ResCoolTimeEndMessage = CGameServerMessage::GameServerMessageAlloc();
-		if (ResCoolTimeEndMessage == nullptr)
-		{
-			return;
-		}
-
-		ResCoolTimeEndMessage->Clear();
-
-		*ResCoolTimeEndMessage << (int16)SpellEndSkillInfo->SkillType;
-		SkillCoolTimeTimerJob->TimerJobMessage = ResCoolTimeEndMessage;
-
-		AcquireSRWLockExclusive(&_TimerJobLock);
-		_TimerHeapJob->InsertHeap(SkillCoolTimeTimerJob->TimerJobExecTick, SkillCoolTimeTimerJob);
-		ReleaseSRWLockExclusive(&_TimerJobLock);
-
-		SetEvent(_TimerThreadWakeEvent);
 	}
 
 	ReturnSession(Session);
