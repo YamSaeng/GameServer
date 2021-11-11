@@ -97,9 +97,7 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int32 Channel
 				_MonstersArray[EnterGameObject->_ObjectManagerIndex] = Monster;
 
 				// 채널 입장
-				EnterChannel->EnterChannel(EnterGameObject, &Monster->_SpawnPosition);
-
-				_Monsters.insert(pair<int64, CMonster*>(EnterGameObject->_GameObjectInfo.ObjectId, Monster));
+				EnterChannel->EnterChannel(EnterGameObject, &Monster->_SpawnPosition);			
 
 				SpawnMonster.push_back(Monster->_GameObjectInfo);				
 
@@ -129,18 +127,16 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int32 Channel
 			{
 				vector<st_GameObjectInfo> SpawnItem;
 				
-				CItem* Item = (CItem*)EnterGameObject;				
-
-				// 인덱스 가져오기		x	
-				_ItemsArrayIndexs.Pop(&EnterGameObject->_ObjectManagerIndex);
-				// 배열에 저장
-				_ItemsArray[EnterGameObject->_ObjectManagerIndex] = Item;
+				CItem* Item = (CItem*)EnterGameObject;								
 
 				IsEnterChannel = EnterChannel->EnterChannel(EnterGameObject, &Item->_SpawnPosition);
 				if (IsEnterChannel == true)
 				{
 					// 중복되지 않은 아이템 스폰
-					_Items.insert(pair<int64, CItem*>(EnterGameObject->_GameObjectInfo.ObjectId, Item));
+					// 인덱스 가져오기	
+					_ItemsArrayIndexs.Pop(&EnterGameObject->_ObjectManagerIndex);
+					// 배열에 저장
+					_ItemsArray[EnterGameObject->_ObjectManagerIndex] = Item;
 
 					SpawnItem.push_back(Item->_GameObjectInfo);
 
@@ -170,9 +166,7 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int32 Channel
 				// 배열에 저장
 				_EnvironmentsArray[EnterGameObject->_ObjectManagerIndex] = Environment;
 
-				EnterChannel->EnterChannel(EnterGameObject, &Environment->_SpawnPosition);
-
-				_Environments.insert(pair<int64, CEnvironment*>(Environment->_GameObjectInfo.ObjectId,Environment));
+				EnterChannel->EnterChannel(EnterGameObject, &Environment->_SpawnPosition);				
 
 				SpawnEnvironment.push_back(Environment->_GameObjectInfo);
 				CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(1, SpawnEnvironment);

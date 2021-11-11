@@ -21,12 +21,7 @@ private:
 		MONSTER_MAX = 5000,
 		ITEM_MAX = 5000,
 		ENVIRONMENT_MAX = 5000
-	};
-
-	map<int64, CItem*> _Items;
-	map<int64, CPlayer*> _Players;
-	map<int64, CMonster*> _Monsters;
-	map<int64, CEnvironment*> _Environments;
+	};	
 		
 	CMemoryPoolTLS<CPlayer>* _PlayerMemoryPool;		
 	CMemoryPoolTLS<CSlime>* _SlimeMemoryPool;
