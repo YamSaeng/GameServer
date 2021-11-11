@@ -104,5 +104,5 @@ void CBear::OnDead(CGameObject* Killer)
 
 	G_ObjectManager->GameServer->SpawnObjectTimeTimerJobCreate((int16)_GameObjectInfo.ObjectType, _SpawnPosition, 10000);
 
-	G_ObjectManager->Remove(this, 1);		
+	G_ObjectManager->ObjectLeaveGame(this, _ObjectManagerIndex, 1);
 }
