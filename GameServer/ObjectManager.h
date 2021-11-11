@@ -41,7 +41,9 @@ private:
 	CMemoryPoolTLS<CTree>* _TreeMemoryPool;
 	CMemoryPoolTLS<CStone>* _StoneMemoryPool;
 	
-	int64 _GameServerObjectId;	
+	int64 _GameServerObjectId;		
+public:
+	CGameServer* GameServer;
 
 	CPlayer* _PlayersArray[PLAYER_MAX];
 	CMonster* _MonstersArray[MONSTER_MAX];
@@ -52,19 +54,17 @@ private:
 	CLockFreeStack<int32> _MonstersArrayIndexs;
 	CLockFreeStack<int32> _ItemsArrayIndexs;
 	CLockFreeStack<int32> _EnvironmentsArrayIndexs;
-public:
-	CGameServer* GameServer;
-	
+
 	CObjectManager();
 	~CObjectManager();
 	//-----------------------------------------------------------
-	// Object를 추가하면서 Object가 입장할 채널의 아이디를 받는다.
+	// Object를 게임에 입장시켜준다. ( 입장할 채널의 아이디를 받는다 )
 	//-----------------------------------------------------------
-	void Add(CGameObject* AddObject, int32 ChannelId);
+	void ObjectEnterGame(CGameObject* EnterGameObject, int32 ChannelId);
 	//-----------------------------------------------------------
-	// Object를 삭제하면서 Object가 퇴장할 채널의 아이디를 받는다.
+	// Object를 게임에서 퇴장시켜준다. ( 퇴장할 채널의 아이디를 받는다 )
 	//-----------------------------------------------------------
-	bool Remove(CGameObject* RemoveObject, int32 _ChannelId, bool IsObjectReturn = true);
+	bool ObjectLeaveGame(CGameObject* LeaveGameObject, int32 ObjectIndex, int32 _ChannelId, bool IsObjectReturn = true);
 
 	//---------------
 	// 오브젝트 찾기
