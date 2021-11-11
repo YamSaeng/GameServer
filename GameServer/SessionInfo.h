@@ -43,10 +43,13 @@ struct st_Session
 	int32 Token;
 	bool IsLogin;
 
-	DWORD RecvPacketTime;
+	// 마지막으로 받은 핑 패킷 시간
+	int64 PingPacketTime;
 
-	CPlayer* MyPlayers[SESSION_CHARACTER_MAX];
-	CPlayer* MyPlayer;
+	// 플레이어 캐릭터가 할당된 인덱스를 저장
+	int32 MyPlayerIndexes[SESSION_CHARACTER_MAX];
+	// 현재 조종하고 있는 캐릭터의 인덱스를 저장
+	int32 MyPlayerIndex;	
 
 	//char DebugArray[100000];
 	//int DebugArrayCount;
