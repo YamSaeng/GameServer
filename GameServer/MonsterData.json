@@ -6,7 +6,7 @@
       "MonsterStatInfo": [
         {
           "Level": 1,
-          "MaxHP": 40,
+          "MaxHP": 200,
           "MaxMP": 10,
           "MinMeleeAttackDamage": 1,
           "MaxMeleeAttackDamage": 10,
@@ -49,7 +49,7 @@
       "MonsterStatInfo": [
         {
           "Level": 1,
-          "MaxHP": 80,
+          "MaxHP": 500,
           "MaxMP": 20,
           "MinMeleeAttackDamage": 5,
           "MaxMeleeAttackDamage": 25,

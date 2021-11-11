@@ -25,7 +25,7 @@
               "SkillDebufRoot": false,
               "SkillDebufDamageOverTime": 0,
               "StatusAbnormalityProbability": 0,
-              "SkillThumbnailImagePath": "Textures/Spell/Icon/맹렬한일격"
+              "SkillThumbnailImagePath": "Textures/Spell/Icon/전사/맹렬한일격"
             },
             {
               "SkillType": "SKILL_KNIGHT_CONVERSION_ATTACK",
@@ -46,7 +46,7 @@
               "SkillDebufRoot": false,
               "SkillDebufDamageOverTime": 0,
               "StatusAbnormalityProbability": 0,
-              "SkillThumbnailImagePath": "Textures/Spell/Icon/회심의일격"
+              "SkillThumbnailImagePath": "Textures/Spell/Icon/전사/회심의일격"
             },
             {
               "SkillType": "SKILL_KNIGHT_SHAEHONE",
@@ -67,7 +67,7 @@
               "SkillDebufRoot": true,
               "SkillDebufDamageOverTime": 0,
               "StatusAbnormalityProbability": 0,
-              "SkillThumbnailImagePath": "Textures/Spell/Icon/쇄혼비무"
+              "SkillThumbnailImagePath": "Textures/Spell/Icon/전사/쇄혼비무"
             },
             {
               "SkillType": "SKILL_KNIGHT_CHOHONE",
@@ -88,7 +88,7 @@
               "SkillDebufRoot": false,
               "SkillDebufDamageOverTime": 0,
               "StatusAbnormalityProbability": 0,
-              "SkillThumbnailImagePath": "Textures/Spell/Icon/초혼비무"
+              "SkillThumbnailImagePath": "Textures/Spell/Icon/전사/초혼비무"
             },
             {
               "SkillType": "SKILL_KNIGHT_SMASH_WAVE",
@@ -109,7 +109,7 @@
               "SkillDebufRoot": false,
               "SkillDebufDamageOverTime": 0,
               "StatusAbnormalityProbability": 0,
-              "SkillThumbnailImagePath": "Textures/Spell/Icon/분쇄파동"
+              "SkillThumbnailImagePath": "Textures/Spell/Icon/전사/분쇄파동"
             }
           ]
         },
@@ -142,7 +142,7 @@
               "SkillCastingTime": 0,
               "SkillDistance": 0,
               "SkillTargetEffectTime": 2.7,
-              "SkillThumbnailImagePath": "Textures/Spell/Icon/돌격자세"
+              "SkillThumbnailImagePath": "Textures/Spell/Icon/전사/돌격자세"
             }
           ]
         }
