@@ -107,7 +107,7 @@ protected:
 	//------------------------
 	// Dead 상태 Update
 	//------------------------
-	virtual void UpdateDead() = 0;		
+	virtual void UpdateDead();		
 	//------------------------
 	// Stun 상태 Update
 	//------------------------

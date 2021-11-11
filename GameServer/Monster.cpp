@@ -376,6 +376,11 @@ void CMonster::UpdateSpell()
 {
 }
 
+void CMonster::UpdateDead()
+{
+
+}
+
 void CMonster::UpdateStun()
 {
 }
