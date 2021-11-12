@@ -241,7 +241,7 @@ CGameObject* CObjectManager::Find(int64 ObjectId, en_GameObjectType GameObjectTy
 		{
 			for (int32 i = 0; i < PLAYER_MAX; i++)
 			{
-				if (_PlayersArray[i]->_GameObjectInfo.ObjectId == ObjectId)
+				if (_PlayersArray[i] != nullptr && _PlayersArray[i]->_GameObjectInfo.ObjectId == ObjectId)
 				{
 					return _PlayersArray[i];
 				}
@@ -254,7 +254,7 @@ CGameObject* CObjectManager::Find(int64 ObjectId, en_GameObjectType GameObjectTy
 		{
 			for (int32 i = 0; i < PLAYER_MAX; i++)
 			{
-				if (_MonstersArray[i]->_GameObjectInfo.ObjectId == ObjectId)
+				if (_MonstersArray[i] != nullptr && _MonstersArray[i]->_GameObjectInfo.ObjectId == ObjectId)
 				{
 					return _MonstersArray[i];
 				}
@@ -267,7 +267,7 @@ CGameObject* CObjectManager::Find(int64 ObjectId, en_GameObjectType GameObjectTy
 		{
 			for (int32 i = 0; i < PLAYER_MAX; i++)
 			{
-				if (_EnvironmentsArray[i]->_GameObjectInfo.ObjectId == ObjectId)
+				if (_EnvironmentsArray[i] != nullptr && _EnvironmentsArray[i]->_GameObjectInfo.ObjectId == ObjectId)
 				{
 					return _EnvironmentsArray[i];
 				}
@@ -294,7 +294,7 @@ CGameObject* CObjectManager::Find(int64 ObjectId, en_GameObjectType GameObjectTy
 		{
 			for (int32 i = 0; i < PLAYER_MAX; i++)
 			{
-				if (_MonstersArray[i]->_GameObjectInfo.ObjectId == ObjectId)
+				if (_MonstersArray[i] != nullptr && _MonstersArray[i]->_GameObjectInfo.ObjectId == ObjectId)
 				{
 					return _EnvironmentsArray[i];
 				}
