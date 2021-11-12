@@ -462,8 +462,58 @@ void CGameServer::NewPlayerDefaultSkillCreate(int64& AccountId, st_GameObjectInf
 	}	
 	break;
 	case en_GameObjectType::OBJECT_THIEF_PLAYER:
+		{
+			auto FindThiefAttackSkill = G_Datamanager->_ThiefAttackSkillDatas.find((int)en_SkillType::SKILL_THIEF_QUICK_CUT);
+			st_AttackSkillData* ThiefAttackSkillData = (*FindThiefAttackSkill).second;
+
+			st_SkillInfo ThiefDefaultAttackSkillInfo;
+			ThiefDefaultAttackSkillInfo.IsQuickSlotUse = false;
+			ThiefDefaultAttackSkillInfo.SkillLargeCategory = ThiefAttackSkillData->SkillLargeCategory;
+			ThiefDefaultAttackSkillInfo.SkillMediumCategory = ThiefAttackSkillData->SkillMediumCategory;
+			ThiefDefaultAttackSkillInfo.SkillType = ThiefAttackSkillData->SkillType;
+			ThiefDefaultAttackSkillInfo.SkillLevel = 1;
+
+			int8 DefaultThiefAttackSkillLargeCategory = (int8)ThiefDefaultAttackSkillInfo.SkillLargeCategory;
+			int8 DefaultThiefAttackSkillMediumCategory = (int8)ThiefDefaultAttackSkillInfo.SkillMediumCategory;
+			int16 DefaultThiefAttackSkillType = (int16)ThiefDefaultAttackSkillInfo.SkillType;
+
+			SkillToSkillBox.InAccountDBId(AccountId);
+			SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
+			SkillToSkillBox.InIsQuickSlotUse(ThiefDefaultAttackSkillInfo.IsQuickSlotUse);
+			SkillToSkillBox.InSkillLargeCategory(DefaultThiefAttackSkillLargeCategory);
+			SkillToSkillBox.InSkillMediumCategory(DefaultThiefAttackSkillMediumCategory);
+			SkillToSkillBox.InSkillType(DefaultThiefAttackSkillType);
+			SkillToSkillBox.InSkillLevel(ThiefDefaultAttackSkillInfo.SkillLevel);
+
+			SkillToSkillBox.Execute();			
+		}
 		break;
 	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
+		{
+			auto FindArcherAttackSkill = G_Datamanager->_ArcherAttackSkillDatas.find((int)en_SkillType::SKILL_ARCHER_SNIFING);
+			st_AttackSkillData* ArcherAttackSkillData = (*FindArcherAttackSkill).second;
+
+			st_SkillInfo ArcherDefaultAttackSkillInfo;
+			ArcherDefaultAttackSkillInfo.IsQuickSlotUse = false;
+			ArcherDefaultAttackSkillInfo.SkillLargeCategory = ArcherAttackSkillData->SkillLargeCategory;
+			ArcherDefaultAttackSkillInfo.SkillMediumCategory = ArcherAttackSkillData->SkillMediumCategory;
+			ArcherDefaultAttackSkillInfo.SkillType = ArcherAttackSkillData->SkillType;
+			ArcherDefaultAttackSkillInfo.SkillLevel = 1;
+
+			int8 DefaultArcherAttackSkillLargeCategory = (int8)ArcherDefaultAttackSkillInfo.SkillLargeCategory;
+			int8 DefaultArcherAttackSkillMediumCategory = (int8)ArcherDefaultAttackSkillInfo.SkillMediumCategory;
+			int16 DefaultArcherAttackSkillType = (int16)ArcherDefaultAttackSkillInfo.SkillType;
+
+			SkillToSkillBox.InAccountDBId(AccountId);
+			SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
+			SkillToSkillBox.InIsQuickSlotUse(ArcherDefaultAttackSkillInfo.IsQuickSlotUse);
+			SkillToSkillBox.InSkillLargeCategory(DefaultArcherAttackSkillLargeCategory);
+			SkillToSkillBox.InSkillMediumCategory(DefaultArcherAttackSkillMediumCategory);
+			SkillToSkillBox.InSkillType(DefaultArcherAttackSkillType);
+			SkillToSkillBox.InSkillLevel(ArcherDefaultAttackSkillInfo.SkillLevel);
+
+			SkillToSkillBox.Execute();
+		}
 		break;
 	default:
 		break;
@@ -1333,98 +1383,154 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 									switch (MyPlayer->_GameObjectInfo.ObjectType)
 									{
 									case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-									{
-										auto FindStatus = G_Datamanager->_WarriorStatus.find(MyPlayer->_GameObjectInfo.ObjectStatInfo.Level);
-										if (FindStatus == G_Datamanager->_WarriorStatus.end())
 										{
-											CRASH("레벨 스테이터스 찾지 못함");
+											auto FindStatus = G_Datamanager->_WarriorStatus.find(MyPlayer->_GameObjectInfo.ObjectStatInfo.Level);
+											if (FindStatus == G_Datamanager->_WarriorStatus.end())
+											{
+												CRASH("레벨 스테이터스 찾지 못함");
+											}
+
+											NewCharacterStatus = *(*FindStatus).second;
+
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
 										}
-
-										NewCharacterStatus = *(*FindStatus).second;
-
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
-									}
-									break;
+										break;
 									case en_GameObjectType::OBJECT_MAGIC_PLAYER:
-									{
-										auto FindStatus = G_Datamanager->_ShamanStatus.find(MyPlayer->_GameObjectInfo.ObjectStatInfo.Level);
-										if (FindStatus == G_Datamanager->_WarriorStatus.end())
 										{
-											CRASH("레벨 데이터 찾지 못함");
+											auto FindStatus = G_Datamanager->_ShamanStatus.find(MyPlayer->_GameObjectInfo.ObjectStatInfo.Level);
+											if (FindStatus == G_Datamanager->_WarriorStatus.end())
+											{
+												CRASH("레벨 데이터 찾지 못함");
+											}
+
+											NewCharacterStatus = *(*FindStatus).second;
+
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
 										}
-
-										NewCharacterStatus = *(*FindStatus).second;
-
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
-									}
-									break;
+										break;
 									case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
-									{
-										auto FindStatus = G_Datamanager->_TaioistStatus.find(MyPlayer->_GameObjectInfo.ObjectStatInfo.Level);
-										if (FindStatus == G_Datamanager->_TaioistStatus.end())
 										{
-											CRASH("레벨 데이터 찾지 못함");
+											auto FindStatus = G_Datamanager->_TaioistStatus.find(MyPlayer->_GameObjectInfo.ObjectStatInfo.Level);
+											if (FindStatus == G_Datamanager->_TaioistStatus.end())
+											{
+												CRASH("레벨 데이터 찾지 못함");
+											}
+
+											NewCharacterStatus = *(*FindStatus).second;
+
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
 										}
-
-										NewCharacterStatus = *(*FindStatus).second;
-
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
-										MyPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
-									}
-									break;
+										break;
 									case en_GameObjectType::OBJECT_THIEF_PLAYER:
+										{
+											auto FindStatus = G_Datamanager->_ThiefStatus.find(MyPlayer->_GameObjectInfo.ObjectStatInfo.Level);
+											if (FindStatus == G_Datamanager->_ThiefStatus.end())
+											{
+												CRASH("레벨 데이터 찾지 못함");
+											}
+
+											NewCharacterStatus = *(*FindStatus).second;
+
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
+										}
 										break;
 									case en_GameObjectType::OBJECT_ARCHER_PLAYER:
+										{
+											auto FindStatus = G_Datamanager->_ArcherStatus.find(MyPlayer->_GameObjectInfo.ObjectStatInfo.Level);
+											if (FindStatus == G_Datamanager->_ArcherStatus.end())
+											{
+												CRASH("레벨 데이터 찾지 못함");
+											}
+
+											NewCharacterStatus = *(*FindStatus).second;
+
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
+											MyPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
+										}
 										break;
 									default:
 										break;
@@ -3214,26 +3320,34 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			switch ((en_GameObjectType)ReqGameObjectType)
 			{
 			case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-			{
-				auto FindStatus = G_Datamanager->_WarriorStatus.find(1);
-				NewCharacterStatus = *(*FindStatus).second;
-			}
-			break;
+				{
+					auto FindStatus = G_Datamanager->_WarriorStatus.find(1);
+					NewCharacterStatus = *(*FindStatus).second;
+				}
+				break;
 			case en_GameObjectType::OBJECT_MAGIC_PLAYER:
-			{
-				auto FindStatus = G_Datamanager->_ShamanStatus.find(1);
-				NewCharacterStatus = *(*FindStatus).second;
-			}
-			break;
+				{
+					auto FindStatus = G_Datamanager->_ShamanStatus.find(1);
+					NewCharacterStatus = *(*FindStatus).second;
+				}
+				break;
 			case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
-			{
-				auto FindStatus = G_Datamanager->_TaioistStatus.find(1);
-				NewCharacterStatus = *(*FindStatus).second;
-			}
-			break;
+				{
+					auto FindStatus = G_Datamanager->_TaioistStatus.find(1);
+					NewCharacterStatus = *(*FindStatus).second;
+				}
+				break;
 			case en_GameObjectType::OBJECT_THIEF_PLAYER:
+				{
+					auto FindStatus = G_Datamanager->_ThiefStatus.find(1);
+					NewCharacterStatus = *(*FindStatus).second;
+				}
 				break;
 			case en_GameObjectType::OBJECT_ARCHER_PLAYER:
+				{
+					auto FindStatus = G_Datamanager->_ArcherStatus.find(1);
+					NewCharacterStatus = *(*FindStatus).second;
+				}
 				break;
 			default:
 				break;
