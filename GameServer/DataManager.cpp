@@ -528,6 +528,102 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			_TaioistStatus.insert(pair<int32, st_ObjectStatusData*>(TaioistStatusData->Level, TaioistStatusData));
 		}
 	}
+
+	for (auto& Filed : Document["PlayerThiefCharacterStatus"].GetArray())
+	{
+		string PlayerType = Filed["PlayerType"].GetString();
+
+		for (auto& PlayerThiefCharacterFiled : Filed["PlayerThiefCharacterLevelDataList"].GetArray())
+		{
+			int Level = PlayerThiefCharacterFiled["Level"].GetInt();
+			int MaxHP = PlayerThiefCharacterFiled["MaxHP"].GetInt();
+			int MaxMP = PlayerThiefCharacterFiled["MaxMP"].GetInt();
+			int MaxDP = PlayerThiefCharacterFiled["MaxDP"].GetInt();
+			int AutoRecoveryHPPercent = PlayerThiefCharacterFiled["AutoRecoveryHPPercent"].GetInt();
+			int AutoRecoveryMPPercent = PlayerThiefCharacterFiled["AutoRecoveryMPPercent"].GetInt();
+			int MinMeleeAttackDamage = PlayerThiefCharacterFiled["MinMeleeAttackDamage"].GetInt();
+			int MaxMeleeAttackDamage = PlayerThiefCharacterFiled["MaxMeleeAttackDamage"].GetInt();
+			int16 MeleeAttackHitRate = (int16)PlayerThiefCharacterFiled["MeleeAttackHitRate"].GetInt();
+			int16 MagicDamage = (int16)PlayerThiefCharacterFiled["MagicDamage"].GetInt();
+			int16 MagicHitRate = (int16)PlayerThiefCharacterFiled["MagicHitRate"].GetInt();
+			int Defence = PlayerThiefCharacterFiled["Defence"].GetInt();
+			int16 EvasionRate = PlayerThiefCharacterFiled["EvasionRate"].GetInt();
+			int16 MeleeCriticalPoint = (int16)(PlayerThiefCharacterFiled["MeleeCriticalPoint"].GetInt());
+			int16 MagicCriticalPoint = (int16)(PlayerThiefCharacterFiled["MagicCriticalPoint"].GetInt());
+			float Speed = PlayerThiefCharacterFiled["Speed"].GetFloat();
+
+			st_ObjectStatusData* ThiefStatusData = new st_ObjectStatusData();
+
+			ThiefStatusData->PlayerType = en_GameObjectType::OBJECT_TAIOIST_PLAYER;
+
+			ThiefStatusData->Level = Level;
+			ThiefStatusData->MaxHP = MaxHP;
+			ThiefStatusData->MaxMP = MaxMP;
+			ThiefStatusData->MaxDP = MaxDP;
+			ThiefStatusData->AutoRecoveryHPPercent = AutoRecoveryHPPercent;
+			ThiefStatusData->AutoRecoveryMPPercent = AutoRecoveryMPPercent;
+			ThiefStatusData->MinMeleeAttackDamage = MinMeleeAttackDamage;
+			ThiefStatusData->MaxMeleeAttackDamage = MaxMeleeAttackDamage;
+			ThiefStatusData->MeleeAttackHitRate = MeleeAttackHitRate;
+			ThiefStatusData->MagicDamage = MagicDamage;
+			ThiefStatusData->MagicHitRate = MagicHitRate;
+			ThiefStatusData->Defence = Defence;
+			ThiefStatusData->EvasionRate = EvasionRate;
+			ThiefStatusData->MeleeCriticalPoint = MeleeCriticalPoint;
+			ThiefStatusData->MagicCriticalPoint = MagicCriticalPoint;
+			ThiefStatusData->Speed = Speed;
+
+			_ThiefStatus.insert(pair<int32, st_ObjectStatusData*>(ThiefStatusData->Level, ThiefStatusData));
+		}
+	}
+
+	for (auto& Filed : Document["PlayerArcherCharacterStatus"].GetArray())
+	{
+		string PlayerType = Filed["PlayerType"].GetString();
+
+		for (auto& PlayerArcherCharacterFiled : Filed["PlayerArcherCharacterLevelDataList"].GetArray())
+		{
+			int Level = PlayerArcherCharacterFiled["Level"].GetInt();
+			int MaxHP = PlayerArcherCharacterFiled["MaxHP"].GetInt();
+			int MaxMP = PlayerArcherCharacterFiled["MaxMP"].GetInt();
+			int MaxDP = PlayerArcherCharacterFiled["MaxDP"].GetInt();
+			int AutoRecoveryHPPercent = PlayerArcherCharacterFiled["AutoRecoveryHPPercent"].GetInt();
+			int AutoRecoveryMPPercent = PlayerArcherCharacterFiled["AutoRecoveryMPPercent"].GetInt();
+			int MinMeleeAttackDamage = PlayerArcherCharacterFiled["MinMeleeAttackDamage"].GetInt();
+			int MaxMeleeAttackDamage = PlayerArcherCharacterFiled["MaxMeleeAttackDamage"].GetInt();
+			int16 MeleeAttackHitRate = (int16)PlayerArcherCharacterFiled["MeleeAttackHitRate"].GetInt();
+			int16 MagicDamage = (int16)PlayerArcherCharacterFiled["MagicDamage"].GetInt();
+			int16 MagicHitRate = (int16)PlayerArcherCharacterFiled["MagicHitRate"].GetInt();
+			int Defence = PlayerArcherCharacterFiled["Defence"].GetInt();
+			int16 EvasionRate = PlayerArcherCharacterFiled["EvasionRate"].GetInt();
+			int16 MeleeCriticalPoint = (int16)(PlayerArcherCharacterFiled["MeleeCriticalPoint"].GetInt());
+			int16 MagicCriticalPoint = (int16)(PlayerArcherCharacterFiled["MagicCriticalPoint"].GetInt());
+			float Speed = PlayerArcherCharacterFiled["Speed"].GetFloat();
+
+			st_ObjectStatusData* ArcherStatusData = new st_ObjectStatusData();
+
+			ArcherStatusData->PlayerType = en_GameObjectType::OBJECT_TAIOIST_PLAYER;
+
+			ArcherStatusData->Level = Level;
+			ArcherStatusData->MaxHP = MaxHP;
+			ArcherStatusData->MaxMP = MaxMP;
+			ArcherStatusData->MaxDP = MaxDP;
+			ArcherStatusData->AutoRecoveryHPPercent = AutoRecoveryHPPercent;
+			ArcherStatusData->AutoRecoveryMPPercent = AutoRecoveryMPPercent;
+			ArcherStatusData->MinMeleeAttackDamage = MinMeleeAttackDamage;
+			ArcherStatusData->MaxMeleeAttackDamage = MaxMeleeAttackDamage;
+			ArcherStatusData->MeleeAttackHitRate = MeleeAttackHitRate;
+			ArcherStatusData->MagicDamage = MagicDamage;
+			ArcherStatusData->MagicHitRate = MagicHitRate;
+			ArcherStatusData->Defence = Defence;
+			ArcherStatusData->EvasionRate = EvasionRate;
+			ArcherStatusData->MeleeCriticalPoint = MeleeCriticalPoint;
+			ArcherStatusData->MagicCriticalPoint = MagicCriticalPoint;
+			ArcherStatusData->Speed = Speed;
+
+			_ArcherStatus.insert(pair<int32, st_ObjectStatusData*>(ArcherStatusData->Level, ArcherStatusData));
+		}
+	}
 }
 
 void CDataManager::LoadDataLevel(wstring LoadFileName)
@@ -1339,6 +1435,348 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 	}
 }
 
+void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
+{
+	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());
+
+	rapidjson::Document Document;
+	Document.Parse(FileStr);
+
+	for (auto& Filed : Document["ThiefSkills"].GetArray())
+	{
+		string ThiefSkillLargeCategory = Filed["SkillLargeCategory"].GetString();
+
+		for (auto& ThiefSkillListFiled : Filed["ThiefSkillList"].GetArray())
+		{
+			string ThiefAttackSkillMediumCategory = ThiefSkillListFiled["SkillMediumCategory"].GetString();
+
+			for (auto& ThiefAttackSkillListFiled : ThiefSkillListFiled["ThiefAttackSkillLit"].GetArray())
+			{
+				st_AttackSkillData* ThiefAttackSkill = new st_AttackSkillData();
+				ThiefAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
+				ThiefAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK;
+
+				string SkillType = ThiefAttackSkillListFiled["SkillType"].GetString();
+				string SkillName = ThiefAttackSkillListFiled["SkillName"].GetString();
+				int SkillLevel = ThiefAttackSkillListFiled["SkillLevel"].GetInt();
+				int SkillMinDamage = ThiefAttackSkillListFiled["SkillMinDamage"].GetInt();
+				int SkillMaxDamage = ThiefAttackSkillListFiled["SkillMaxDamage"].GetInt();
+				int SkillCoolTime = ThiefAttackSkillListFiled["SkillCoolTime"].GetInt();
+				int SkillCastingTime = ThiefAttackSkillListFiled["SkillCastingTime"].GetInt();
+				int SkillDistance = ThiefAttackSkillListFiled["SkillDistance"].GetInt();
+				float SkillTargetEffectTime = ThiefAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
+				bool SkillDebuf = ThiefAttackSkillListFiled["SkillDebuf"].GetBool();
+				int64 SkillDebufTime = ThiefAttackSkillListFiled["SkillDebufTime"].GetInt64();
+				int8 SkillDebufAttackSpeed = (int8)ThiefAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
+				int8 SkillDebufMovingSpeed = (int8)ThiefAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
+				bool SkillDebufStun = ThiefAttackSkillListFiled["SkillDebufStun"].GetBool();
+				bool SkillDebufPushAway = ThiefAttackSkillListFiled["SkillDebufPushAway"].GetBool();
+				int64 SkillDamageOverTime = ThiefAttackSkillListFiled["SkillDamageOverTime"].GetInt64();
+				int8 StatusAbnormalityProbability = (int8)ThiefAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
+				int SkillDebufRoot = ThiefAttackSkillListFiled["SkillDebufRoot"].GetBool();
+				string SkillImagePath = ThiefAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
+
+				if (SkillType == "SKILL_THIEF_QUICK_CUT")
+				{
+					ThiefAttackSkill->SkillType = en_SkillType::SKILL_THIEF_QUICK_CUT;
+				}				
+
+				ThiefAttackSkill->SkillName = SkillName;
+				ThiefAttackSkill->SkillLevel = SkillLevel;
+				ThiefAttackSkill->SkillMinDamage = SkillMinDamage;
+				ThiefAttackSkill->SkillMaxDamage = SkillMaxDamage;
+				ThiefAttackSkill->SkillCoolTime = SkillCoolTime;
+				ThiefAttackSkill->SkillCastingTime = SkillCastingTime;
+				ThiefAttackSkill->SkillDistance = SkillDistance;
+				ThiefAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+
+				ThiefAttackSkill->SkillDebuf = SkillDebuf;
+				ThiefAttackSkill->SkillDebufTime = SkillDebufTime;
+				ThiefAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
+				ThiefAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
+				ThiefAttackSkill->SkillDebufStun = SkillDebufStun;
+				ThiefAttackSkill->SkillDebufPushAway = SkillDebufPushAway;
+				ThiefAttackSkill->SkillDebufRoot = SkillDebufRoot;
+				ThiefAttackSkill->SkillDamageOverTime = SkillDamageOverTime;
+				ThiefAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
+				ThiefAttackSkill->SkillThumbnailImagePath = SkillImagePath;
+				ThiefAttackSkill->SkillThumbnailImagePath = SkillImagePath;
+
+				_ThiefAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)ThiefAttackSkill->SkillType, ThiefAttackSkill));
+			}
+
+			string ThiefHealSkillMediumCategory = ThiefSkillListFiled["SkillMediumCategory"].GetString();
+
+			for (auto& ThiefHealSkillListFiled : ThiefSkillListFiled["ThiefHealSkillList"].GetArray())
+			{
+				st_HealSkillData* ThiefHealSkill = new st_HealSkillData();
+				ThiefHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEOGRY_PUBLIC;
+				ThiefHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL;
+
+				string SkillType = ThiefHealSkillListFiled["SkillType"].GetString();
+				string SkillName = ThiefHealSkillListFiled["SkillName"].GetString();
+				int SkillLevel = ThiefHealSkillListFiled["SkillLevel"].GetInt();
+				int SkillMinHeal = ThiefHealSkillListFiled["SkillMinHeal"].GetInt();
+				int SkillMaxHeal = ThiefHealSkillListFiled["SkillMaxHeal"].GetInt();
+				int SkillCoolTime = ThiefHealSkillListFiled["SkillCoolTime"].GetInt();
+				int SkillCastingTime = ThiefHealSkillListFiled["SkillCastingTime"].GetInt();
+				int SkillDistance = ThiefHealSkillListFiled["SkillDistance"].GetInt();
+				float SkillTargetEffectTime = ThiefHealSkillListFiled["SkillTargetEffectTime"].GetFloat();
+				string SkillImagePath = ThiefHealSkillListFiled["SkillThumbnailImagePath"].GetString();
+
+				if (SkillType == "")
+				{
+					
+				}				
+
+				ThiefHealSkill->SkillName = SkillName;
+				ThiefHealSkill->SkillLevel = SkillLevel;
+				ThiefHealSkill->SkillMinHealPoint = SkillMinHeal;
+				ThiefHealSkill->SkillMaxHealPoint = SkillMaxHeal;
+				ThiefHealSkill->SkillCoolTime = SkillCoolTime;
+				ThiefHealSkill->SkillCastingTime = SkillCastingTime;
+				ThiefHealSkill->SkillDistance = SkillDistance;
+				ThiefHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+				ThiefHealSkill->SkillThumbnailImagePath = SkillImagePath;
+
+				_ThiefHealSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)ThiefHealSkill->SkillType, ThiefHealSkill));
+			}
+
+			string ThiefBufSkillMediumCategory = ThiefSkillListFiled["SkillMediumCategory"].GetString();
+
+			for (auto& ThiefBufSkillListFiled : ThiefSkillListFiled["ThiefBufSkillList"].GetArray())
+			{
+				st_BufSkillData* ThiefBufSkill = new st_BufSkillData();
+				ThiefBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEOGRY_PUBLIC;
+				ThiefBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF;
+
+				string SkillType = ThiefBufSkillListFiled["SkillType"].GetString();
+				string SkillName = ThiefBufSkillListFiled["SkillName"].GetString();
+				int SkillLevel = ThiefBufSkillListFiled["SkillLevel"].GetInt();
+
+				int IncreaseMinAttackPoint = ThiefBufSkillListFiled["IncreaseMinAttackPoint"].GetInt();
+				int IncreaseMaxAttackPoint = ThiefBufSkillListFiled["IncreaseMaxAttackPoint"].GetInt();
+				int IncreaseMeleeAttackSpeedPoint = ThiefBufSkillListFiled["IncreaseMeleeAttackSpeedPoint"].GetInt();
+				int16 IncreaseMeleeAttackHitRate = (int16)ThiefBufSkillListFiled["IncreaseMeleeAttackHitRate"].GetInt();
+				int16 IncreaseMagicAttackPoint = (int16)ThiefBufSkillListFiled["IncreaseMagicAttackPoint"].GetInt();
+				int16 IncreaseMagicCastingPoint = (int16)ThiefBufSkillListFiled["IncreaseMagicCastingPoint"].GetInt();
+				int16 IncreaseMagicAttackHitRate = (int16)ThiefBufSkillListFiled["IncreaseMagicAttackHitRate"].GetInt();
+				int IncreaseDefencePoint = ThiefBufSkillListFiled["IncreaseDefencePoint"].GetInt();
+				int16 IncreaseEvasionRate = (int16)ThiefBufSkillListFiled["IncreaseEvasionRate"].GetInt();
+				int16 IncreaseMeleeCriticalPoint = (int16)ThiefBufSkillListFiled["IncreaseMeleeCriticalPoint"].GetInt();
+				int16 IncreaseMagicCriticalPoint = (int16)ThiefBufSkillListFiled["IncreaseMagicCriticalPoint"].GetInt();
+				float IncreaseSpeedPoint = ThiefBufSkillListFiled["IncreaseSpeedPoint"].GetFloat();
+				int16 IncreaseStatusAbnormalityResistance = (int16)ThiefBufSkillListFiled["IncreaseStatusAbnormalityResistance"].GetInt();
+
+				int SkillCoolTime = ThiefBufSkillListFiled["SkillCoolTime"].GetInt();
+				int SkillCastingTime = ThiefBufSkillListFiled["SkillCastingTime"].GetInt();
+				int SkillDistance = ThiefBufSkillListFiled["SkillDistance"].GetInt();
+				float SkillTargetEffectTime = ThiefBufSkillListFiled["SkillTargetEffectTime"].GetFloat();
+				string SkillImagePath = ThiefBufSkillListFiled["SkillThumbnailImagePath"].GetString();
+
+				if (SkillType == "")
+				{
+
+				}
+
+				ThiefBufSkill->SkillName = SkillName;
+				ThiefBufSkill->SkillLevel = SkillLevel;
+				ThiefBufSkill->IncreaseMinAttackPoint = IncreaseMinAttackPoint;
+				ThiefBufSkill->IncreaseMaxAttackPoint = IncreaseMaxAttackPoint;
+				ThiefBufSkill->IncreaseMeleeAttackSpeedPoint = IncreaseMeleeAttackSpeedPoint;
+				ThiefBufSkill->IncreaseMeleeAttackHitRate = IncreaseMeleeAttackHitRate;
+				ThiefBufSkill->IncreaseMagicAttackPoint = IncreaseMagicAttackPoint;
+				ThiefBufSkill->IncreaseMagicCastingPoint = IncreaseMagicCastingPoint;
+				ThiefBufSkill->IncreaseMagicAttackHitRate = IncreaseMagicAttackHitRate;
+				ThiefBufSkill->IncreaseDefencePoint = IncreaseDefencePoint;
+				ThiefBufSkill->IncreaseEvasionRate = IncreaseEvasionRate;
+				ThiefBufSkill->IncreaseMeleeCriticalPoint = IncreaseMeleeCriticalPoint;
+				ThiefBufSkill->IncreaseMagicCriticalPoint = IncreaseMagicCriticalPoint;
+				ThiefBufSkill->IncreaseSpeedPoint = IncreaseSpeedPoint;
+				ThiefBufSkill->IncreaseStatusAbnormalityResistance = IncreaseStatusAbnormalityResistance;
+				ThiefBufSkill->SkillCoolTime = SkillCoolTime;
+				ThiefBufSkill->SkillCastingTime = SkillCastingTime;
+				ThiefBufSkill->SkillDistance = SkillDistance;
+				ThiefBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+				ThiefBufSkill->SkillThumbnailImagePath = SkillImagePath;
+
+				_ThiefBufSkillDatas.insert(pair<int16, st_BufSkillData*>((int16)ThiefBufSkill->SkillType, ThiefBufSkill));
+			}
+		}
+	}
+}
+
+void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
+{
+	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());
+
+	rapidjson::Document Document;
+	Document.Parse(FileStr);
+
+	for (auto& Filed : Document["ArcherSkills"].GetArray())
+	{
+		string ArcherSkillLargeCategory = Filed["SkillLargeCategory"].GetString();
+
+		for (auto& ArcherSkillListFiled : Filed["ArcherSkillList"].GetArray())
+		{
+			string ArcherAttackSkillMediumCategory = ArcherSkillListFiled["SkillMediumCategory"].GetString();
+
+			for (auto& ArcherAttackSkillListFiled : ArcherSkillListFiled["ArcherAttackSkillList"].GetArray())
+			{
+				st_AttackSkillData* ArcherAttackSkill = new st_AttackSkillData();
+				ArcherAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
+				ArcherAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK;
+
+				string SkillType = ArcherAttackSkillListFiled["SkillType"].GetString();
+				string SkillName = ArcherAttackSkillListFiled["SkillName"].GetString();
+				int SkillLevel = ArcherAttackSkillListFiled["SkillLevel"].GetInt();
+				int SkillMinDamage = ArcherAttackSkillListFiled["SkillMinDamage"].GetInt();
+				int SkillMaxDamage = ArcherAttackSkillListFiled["SkillMaxDamage"].GetInt();
+				int SkillCoolTime = ArcherAttackSkillListFiled["SkillCoolTime"].GetInt();
+				int SkillCastingTime = ArcherAttackSkillListFiled["SkillCastingTime"].GetInt();
+				int SkillDistance = ArcherAttackSkillListFiled["SkillDistance"].GetInt();
+				float SkillTargetEffectTime = ArcherAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
+				bool SkillDebuf = ArcherAttackSkillListFiled["SkillDebuf"].GetBool();
+				int64 SkillDebufTime = ArcherAttackSkillListFiled["SkillDebufTime"].GetInt64();
+				int8 SkillDebufAttackSpeed = (int8)ArcherAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
+				int8 SkillDebufMovingSpeed = (int8)ArcherAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
+				bool SkillDebufStun = ArcherAttackSkillListFiled["SkillDebufStun"].GetBool();
+				bool SkillDebufPushAway = ArcherAttackSkillListFiled["SkillDebufPushAway"].GetBool();
+				int64 SkillDamageOverTime = ArcherAttackSkillListFiled["SkillDamageOverTime"].GetInt64();
+				int8 StatusAbnormalityProbability = (int8)ArcherAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
+				int SkillDebufRoot = ArcherAttackSkillListFiled["SkillDebufRoot"].GetBool();
+				string SkillImagePath = ArcherAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
+
+				if (SkillType == "SKILL_ARCHER_SNIFING")
+				{
+					ArcherAttackSkill->SkillType = en_SkillType::SKILL_ARCHER_SNIFING;
+				}			
+
+				ArcherAttackSkill->SkillName = SkillName;
+				ArcherAttackSkill->SkillLevel = SkillLevel;
+				ArcherAttackSkill->SkillMinDamage = SkillMinDamage;
+				ArcherAttackSkill->SkillMaxDamage = SkillMaxDamage;
+				ArcherAttackSkill->SkillCoolTime = SkillCoolTime;
+				ArcherAttackSkill->SkillCastingTime = SkillCastingTime;
+				ArcherAttackSkill->SkillDistance = SkillDistance;
+				ArcherAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+
+				ArcherAttackSkill->SkillDebuf = SkillDebuf;
+				ArcherAttackSkill->SkillDebufTime = SkillDebufTime;
+				ArcherAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
+				ArcherAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
+				ArcherAttackSkill->SkillDebufStun = SkillDebufStun;
+				ArcherAttackSkill->SkillDebufPushAway = SkillDebufPushAway;
+				ArcherAttackSkill->SkillDebufRoot = SkillDebufRoot;
+				ArcherAttackSkill->SkillDamageOverTime = SkillDamageOverTime;
+				ArcherAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
+				ArcherAttackSkill->SkillThumbnailImagePath = SkillImagePath;
+				ArcherAttackSkill->SkillThumbnailImagePath = SkillImagePath;
+
+				_ArcherAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)ArcherAttackSkill->SkillType, ArcherAttackSkill));
+			}
+
+			string ArcherHealSkillMediumCategory = ArcherSkillListFiled["SkillMediumCategory"].GetString();
+
+			for (auto& ArcherHealSkillListFiled : ArcherSkillListFiled["ArcherHealSkillList"].GetArray())
+			{
+				st_HealSkillData* ArcherHealSkill = new st_HealSkillData();
+				ArcherHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEOGRY_PUBLIC;
+				ArcherHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL;
+
+				string SkillType = ArcherHealSkillListFiled["SkillType"].GetString();
+				string SkillName = ArcherHealSkillListFiled["SkillName"].GetString();
+				int SkillLevel = ArcherHealSkillListFiled["SkillLevel"].GetInt();
+				int SkillMinHeal = ArcherHealSkillListFiled["SkillMinHeal"].GetInt();
+				int SkillMaxHeal = ArcherHealSkillListFiled["SkillMaxHeal"].GetInt();
+				int SkillCoolTime = ArcherHealSkillListFiled["SkillCoolTime"].GetInt();
+				int SkillCastingTime = ArcherHealSkillListFiled["SkillCastingTime"].GetInt();
+				int SkillDistance = ArcherHealSkillListFiled["SkillDistance"].GetInt();
+				float SkillTargetEffectTime = ArcherHealSkillListFiled["SkillTargetEffectTime"].GetFloat();
+				string SkillImagePath = ArcherHealSkillListFiled["SkillThumbnailImagePath"].GetString();
+
+				if (SkillType == "")
+				{
+					
+				}				
+
+				ArcherHealSkill->SkillName = SkillName;
+				ArcherHealSkill->SkillLevel = SkillLevel;
+				ArcherHealSkill->SkillMinHealPoint = SkillMinHeal;
+				ArcherHealSkill->SkillMaxHealPoint = SkillMaxHeal;
+				ArcherHealSkill->SkillCoolTime = SkillCoolTime;
+				ArcherHealSkill->SkillCastingTime = SkillCastingTime;
+				ArcherHealSkill->SkillDistance = SkillDistance;
+				ArcherHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+				ArcherHealSkill->SkillThumbnailImagePath = SkillImagePath;
+
+				_ArcherHealSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)ArcherHealSkill->SkillType, ArcherHealSkill));
+			}
+
+			string ArcherBufSkillMediumCategory = ArcherSkillListFiled["SkillMediumCategory"].GetString();
+
+			for (auto& ArcherBufSkillListFiled : ArcherSkillListFiled["ArcherBufSkillList"].GetArray())
+			{
+				st_BufSkillData* ArcherBufSkill = new st_BufSkillData();
+				ArcherBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEOGRY_PUBLIC;
+				ArcherBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF;
+
+				string SkillType = ArcherBufSkillListFiled["SkillType"].GetString();
+				string SkillName = ArcherBufSkillListFiled["SkillName"].GetString();
+				int SkillLevel = ArcherBufSkillListFiled["SkillLevel"].GetInt();
+
+				int IncreaseMinAttackPoint = ArcherBufSkillListFiled["IncreaseMinAttackPoint"].GetInt();
+				int IncreaseMaxAttackPoint = ArcherBufSkillListFiled["IncreaseMaxAttackPoint"].GetInt();
+				int IncreaseMeleeAttackSpeedPoint = ArcherBufSkillListFiled["IncreaseMeleeAttackSpeedPoint"].GetInt();
+				int16 IncreaseMeleeAttackHitRate = (int16)ArcherBufSkillListFiled["IncreaseMeleeAttackHitRate"].GetInt();
+				int16 IncreaseMagicAttackPoint = (int16)ArcherBufSkillListFiled["IncreaseMagicAttackPoint"].GetInt();
+				int16 IncreaseMagicCastingPoint = (int16)ArcherBufSkillListFiled["IncreaseMagicCastingPoint"].GetInt();
+				int16 IncreaseMagicAttackHitRate = (int16)ArcherBufSkillListFiled["IncreaseMagicAttackHitRate"].GetInt();
+				int IncreaseDefencePoint = ArcherBufSkillListFiled["IncreaseDefencePoint"].GetInt();
+				int16 IncreaseEvasionRate = (int16)ArcherBufSkillListFiled["IncreaseEvasionRate"].GetInt();
+				int16 IncreaseMeleeCriticalPoint = (int16)ArcherBufSkillListFiled["IncreaseMeleeCriticalPoint"].GetInt();
+				int16 IncreaseMagicCriticalPoint = (int16)ArcherBufSkillListFiled["IncreaseMagicCriticalPoint"].GetInt();
+				float IncreaseSpeedPoint = ArcherBufSkillListFiled["IncreaseSpeedPoint"].GetFloat();
+				int16 IncreaseStatusAbnormalityResistance = (int16)ArcherBufSkillListFiled["IncreaseStatusAbnormalityResistance"].GetInt();
+
+				int SkillCoolTime = ArcherBufSkillListFiled["SkillCoolTime"].GetInt();
+				int SkillCastingTime = ArcherBufSkillListFiled["SkillCastingTime"].GetInt();
+				int SkillDistance = ArcherBufSkillListFiled["SkillDistance"].GetInt();
+				float SkillTargetEffectTime = ArcherBufSkillListFiled["SkillTargetEffectTime"].GetFloat();
+				string SkillImagePath = ArcherBufSkillListFiled["SkillThumbnailImagePath"].GetString();
+
+				if (SkillType == "")
+				{
+
+				}
+
+				ArcherBufSkill->SkillName = SkillName;
+				ArcherBufSkill->SkillLevel = SkillLevel;
+				ArcherBufSkill->IncreaseMinAttackPoint = IncreaseMinAttackPoint;
+				ArcherBufSkill->IncreaseMaxAttackPoint = IncreaseMaxAttackPoint;
+				ArcherBufSkill->IncreaseMeleeAttackSpeedPoint = IncreaseMeleeAttackSpeedPoint;
+				ArcherBufSkill->IncreaseMeleeAttackHitRate = IncreaseMeleeAttackHitRate;
+				ArcherBufSkill->IncreaseMagicAttackPoint = IncreaseMagicAttackPoint;
+				ArcherBufSkill->IncreaseMagicCastingPoint = IncreaseMagicCastingPoint;
+				ArcherBufSkill->IncreaseMagicAttackHitRate = IncreaseMagicAttackHitRate;
+				ArcherBufSkill->IncreaseDefencePoint = IncreaseDefencePoint;
+				ArcherBufSkill->IncreaseEvasionRate = IncreaseEvasionRate;
+				ArcherBufSkill->IncreaseMeleeCriticalPoint = IncreaseMeleeCriticalPoint;
+				ArcherBufSkill->IncreaseMagicCriticalPoint = IncreaseMagicCriticalPoint;
+				ArcherBufSkill->IncreaseSpeedPoint = IncreaseSpeedPoint;
+				ArcherBufSkill->IncreaseStatusAbnormalityResistance = IncreaseStatusAbnormalityResistance;
+				ArcherBufSkill->SkillCoolTime = SkillCoolTime;
+				ArcherBufSkill->SkillCastingTime = SkillCastingTime;
+				ArcherBufSkill->SkillDistance = SkillDistance;
+				ArcherBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+				ArcherBufSkill->SkillThumbnailImagePath = SkillImagePath;
+
+				_ArcherBufSkillDatas.insert(pair<int16, st_BufSkillData*>((int16)ArcherBufSkill->SkillType, ArcherBufSkill));
+			}
+		}
+	}
+}
+
 void CDataManager::LoadDataEnvironment(wstring LoadFileName)
 {
 	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());
@@ -1531,6 +1969,18 @@ st_SkillData* CDataManager::FindSkillData(en_SkillMediumCategory FindAttackSkill
 		return (*_TaioistHealSkillDatas.find((int16)FindSkillType)).second;
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_BUF:
 		return (*_TaioistBufSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_ATTACK:
+		return (*_ThiefAttackSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_HEAL:
+		return (*_ThiefHealSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_BUF:
+		return (*_ThiefBufSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_ATTACK:
+		return (*_ArcherAttackSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_HEAL:
+		return (*_ArcherHealSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_BUF:
+		return (*_ArcherBufSkillDatas.find((int16)FindSkillType)).second;
 	}
 }
 
@@ -1547,7 +1997,9 @@ st_ObjectStatusData* CDataManager::FindObjectStatusData(en_GameObjectType GameOb
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 		return (*_TaioistStatus.find(Level)).second;		
 	case en_GameObjectType::OBJECT_THIEF_PLAYER:
-		break;
+		return (*_ThiefStatus.find(Level)).second;
+	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
+		return (*_ArcherStatus.find(Level)).second;
 	case en_GameObjectType::OBJECT_SLIME:
 		break;
 	case en_GameObjectType::OBJECT_BEAR:

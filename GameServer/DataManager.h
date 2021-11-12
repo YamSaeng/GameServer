@@ -13,6 +13,8 @@ public:
 	map<int32, st_ObjectStatusData*> _WarriorStatus;
 	map<int32, st_ObjectStatusData*> _ShamanStatus;
 	map<int32, st_ObjectStatusData*> _TaioistStatus;
+	map<int32, st_ObjectStatusData*> _ThiefStatus;
+	map<int32, st_ObjectStatusData*> _ArcherStatus;
 	map<int32, st_MonsterData*> _Monsters;
 
 	//------------------------------------------------------
@@ -41,6 +43,18 @@ public:
 	map<int16, st_AttackSkillData*> _TaioistAttackSkillDatas;
 	map<int16, st_HealSkillData*> _TaioistHealSkillDatas;
 	map<int16, st_BufSkillData*> _TaioistBufSkillDatas;
+	//------------------------------------------------------
+	// 도적 스킬 데이터
+	//------------------------------------------------------
+	map<int16, st_AttackSkillData*> _ThiefAttackSkillDatas;
+	map<int16, st_HealSkillData*> _ThiefHealSkillDatas;
+	map<int16, st_BufSkillData*> _ThiefBufSkillDatas;
+	//------------------------------------------------------
+	// 궁사 스킬 데이터
+	//------------------------------------------------------
+	map<int16, st_AttackSkillData*> _ArcherAttackSkillDatas;
+	map<int16, st_HealSkillData*> _ArcherHealSkillDatas;
+	map<int16, st_BufSkillData*> _ArcherBufSkillDatas;
 
 	map<int32, st_EnvironmentData*> _Environments;
 	map<int8, st_CraftingItemCategoryData*> _CraftingData;
@@ -64,6 +78,8 @@ public:
 	void LoadDataWarriorSkill(wstring LoadFileName);
 	void LoadDataShamanSkill(wstring LoadFileName);
 	void LoadDataTaioistSkill(wstring LoadFileName);
+	void LoadDataThiefSkill(wstring LoadFileName);
+	void LoadDataArcherSkill(wstring LoadFileName);
 	void LoadDataEnvironment(wstring LoadFileName);
 	void LoadDataCrafting(wstring LoadFileName);
 
