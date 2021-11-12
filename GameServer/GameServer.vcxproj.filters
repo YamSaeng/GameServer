@@ -82,6 +82,9 @@
     <Filter Include="ContentServer\Content\Equiment">
       <UniqueIdentifier>{ad620a1c-6f26-4d33-b623-da20f3ff6f50}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Util\설정 파일\Data\SkillData">
+      <UniqueIdentifier>{40192980-e430-431a-929f-2f8a9aafd339}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Type.h">
@@ -367,20 +370,26 @@
     <None Include="CharacterLevelingData.json">
       <Filter>Util\설정 파일\Data</Filter>
     </None>
-    <None Include="PublicSkillDatas.json">
-      <Filter>Util\설정 파일\Data</Filter>
+    <None Include="ArcherSkillDatas.json">
+      <Filter>Util\설정 파일\Data\SkillData</Filter>
     </None>
-    <None Include="WarriorSkillDatas.json">
-      <Filter>Util\설정 파일\Data</Filter>
+    <None Include="PublicSkillDatas.json">
+      <Filter>Util\설정 파일\Data\SkillData</Filter>
     </None>
     <None Include="ShamanSkillDatas.json">
-      <Filter>Util\설정 파일\Data</Filter>
+      <Filter>Util\설정 파일\Data\SkillData</Filter>
     </None>
     <None Include="TaioistSkillDatas.json">
-      <Filter>Util\설정 파일\Data</Filter>
+      <Filter>Util\설정 파일\Data\SkillData</Filter>
+    </None>
+    <None Include="WarriorSkillDatas.json">
+      <Filter>Util\설정 파일\Data\SkillData</Filter>
     </None>
     <None Include="MonsterSkillDatas.json">
-      <Filter>Util\설정 파일\Data</Filter>
+      <Filter>Util\설정 파일\Data\SkillData</Filter>
+    </None>
+    <None Include="ThiefSkillDatas.json">
+      <Filter>Util\설정 파일\Data\SkillData</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

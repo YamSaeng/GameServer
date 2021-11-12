@@ -318,6 +318,7 @@
     <Xml Include="ServerConfig.xml" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ArcherSkillDatas.json" />
     <None Include="CraftingData.json" />
     <None Include="EnvironmentData.json" />
     <None Include="ItemData.json" />
@@ -328,6 +329,7 @@
     <None Include="ShamanSkillDatas.json" />
     <None Include="PlayerCharacterStatus.json" />
     <None Include="TaioistSkillDatas.json" />
+    <None Include="ThiefSkillDatas.json" />
     <None Include="WarriorSkillDatas.json" />
   </ItemGroup>
   <ItemGroup>
