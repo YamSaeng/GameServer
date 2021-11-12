@@ -1,0 +1,45 @@
+{
+  "ArcherSkills": [
+    {
+      "SkillLargeCategory": "SKILL_LARGE_CATEGORY_ARCHER",
+      "ArcherSkillList": [
+        {
+          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_ARCHER_ATTACK",
+          "ArcherAttackSkillList": [
+            {
+              "SkillType": "SKILL_ARCHER_SNIFING",
+              "SkillName": "저격",
+              "SkillLevel": 1,
+              "SkillMinDamage": 25,
+              "SkillMaxDamage": 35,
+              "SkillCoolTime": 2000,
+              "SkillCastingTime": 0,
+              "SkillDistance": 6,
+              "SkillTargetEffectTime": 0,
+              "SkillDebuf": false,
+              "SkillDebufTime": 0,
+              "SkillDebufAttackSpeed": 0,
+              "SkillDebufMovingSpeed": 0,
+              "SkillDebufStun": false,
+              "SkillDebufPushAway": false,
+              "SkillDebufRoot": false,
+              "SkillDebufDamageOverTime": 0,
+              "StatusAbnormalityProbability": 0,
+              "SkillThumbnailImagePath": "Textures/Spell/Icon/궁사/저격"
+            }
+          ]
+        },
+        {
+          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_ARCHER_HEAL",
+          "ArcherHealSkillList": [
+          ]
+        },
+        {
+          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_ARCHER_BUF",
+          "ArcherBufSkillList": [
+          ]
+        }
+      ]
+    }
+  ]
+}

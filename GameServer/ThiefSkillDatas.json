@@ -1,0 +1,45 @@
+{
+  "ThiefSkills": [
+    {
+      "SkillLargeCategory": "SKILL_LARGE_CATEGORY_THIEF",
+      "ThiefSkillList": [
+        {
+          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_THIEF_ATTACK",
+          "ThiefAttackSkillList": [
+            {
+              "SkillType": "SKILL_THIEF_QUICK_CUT",
+              "SkillName": "빠른베기",
+              "SkillLevel": 1,
+              "SkillMinDamage": 20,
+              "SkillMaxDamage": 30,
+              "SkillCoolTime": 2000,
+              "SkillCastingTime": 0,
+              "SkillDistance": 1,
+              "SkillTargetEffectTime": 0,
+              "SkillDebuf": false,
+              "SkillDebufTime": 0,
+              "SkillDebufAttackSpeed": 0,
+              "SkillDebufMovingSpeed": 0,
+              "SkillDebufStun": false,
+              "SkillDebufPushAway": false,
+              "SkillDebufRoot": false,
+              "SkillDebufDamageOverTime": 0,
+              "StatusAbnormalityProbability": 0,
+              "SkillThumbnailImagePath": "Textures/Spell/Icon/도적/빠른베기"
+            }
+          ]
+        },
+        {
+          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_THIEF_HEAL",
+          "ThiefHealSkillList": [
+          ]
+        },
+        {
+          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_THIEF_BUF",
+          "ThiefBufSkillList": [
+          ]
+        }
+      ]
+    }
+  ]
+}
