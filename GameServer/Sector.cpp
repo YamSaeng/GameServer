@@ -17,6 +17,8 @@ void CSector::Insert(CGameObject* InsertGameObject)
 	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
+	case en_GameObjectType::OBJECT_THIEF_PLAYER:
+	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
 		_Players.insert((CPlayer*)InsertGameObject);
 		break;
 	case en_GameObjectType::OBJECT_SLIME:
@@ -51,6 +53,8 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
+	case en_GameObjectType::OBJECT_THIEF_PLAYER:
+	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
 		_Players.erase((CPlayer*)RemoveGameObject);
 		break;
 	case en_GameObjectType::OBJECT_SLIME:

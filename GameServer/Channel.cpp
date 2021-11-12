@@ -278,6 +278,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
+	case en_GameObjectType::OBJECT_THIEF_PLAYER:
+	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
 		{
 			// 플레이어로 형변환
 			CPlayer* EnterChannelPlayer = (CPlayer*)EnterChannelGameObject;
@@ -386,6 +388,8 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 	case en_GameObjectType::OBJECT_MAGIC_PLAYER:	
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
+	case en_GameObjectType::OBJECT_THIEF_PLAYER:
+	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
 		_Players.erase(LeaveChannelGameObject->_GameObjectInfo.ObjectId);
 		
 		_Map->ApplyLeave(LeaveChannelGameObject);		

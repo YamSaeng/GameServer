@@ -296,18 +296,7 @@ unsigned __stdcall CGameServer::TimerJobThreadProc(void* Argument)
 						Instance->Disconnect(TimerJob->SessionId);
 						break;
 					}
-				}
-				else
-				{
-					st_Session* Session = Instance->FindSession(TimerJob->SessionId);
-
-					if (Session)
-					{
-						InterlockedDecrement64(&Session->IOBlock->IOCount);
-
-						Instance->ReturnSession(Session);
-					}
-				}
+				}				
 
 				Instance->_TimerJobThreadTPS++;
 				Instance->_TimerJobMemoryPool->Free(TimerJob);
@@ -470,8 +459,12 @@ void CGameServer::NewPlayerDefaultSkillCreate(int64& AccountId, st_GameObjectInf
 		SkillToSkillBox.InSkillLevel(TaioistDefaultHealSkillInfo.SkillLevel);
 
 		SkillToSkillBox.Execute();
-	}
+	}	
 	break;
+	case en_GameObjectType::OBJECT_THIEF_PLAYER:
+		break;
+	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
+		break;
 	default:
 		break;
 	}
@@ -1429,6 +1422,10 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 										MyPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
 									}
 									break;
+									case en_GameObjectType::OBJECT_THIEF_PLAYER:
+										break;
+									case en_GameObjectType::OBJECT_ARCHER_PLAYER:
+										break;
 									default:
 										break;
 									}
@@ -3234,6 +3231,10 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 				NewCharacterStatus = *(*FindStatus).second;
 			}
 			break;
+			case en_GameObjectType::OBJECT_THIEF_PLAYER:
+				break;
+			case en_GameObjectType::OBJECT_ARCHER_PLAYER:
+				break;
 			default:
 				break;
 			}
@@ -5818,6 +5819,8 @@ void CGameServer::PacketProcTimerObjectStateChange(int64 SessionId, CGameServerM
 		case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 		case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 		case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
+		case en_GameObjectType::OBJECT_THIEF_PLAYER:
+		case en_GameObjectType::OBJECT_ARCHER_PLAYER:
 			{
 				CPlayer* ChangeStatePlayerObject = (CPlayer*)ChangeStateObject;
 				switch (ChangeStatePlayerObject->_GameObjectInfo.ObjectPositionInfo.State)
@@ -5969,7 +5972,7 @@ void CGameServer::PacketProcTimerPing(int64 SessionId)
 
 			if (DeltaTime > 20 * 1000)
 			{
-				//Disconnect(Session->SessionId);				
+				Disconnect(Session->SessionId);				
 			}
 			else
 			{

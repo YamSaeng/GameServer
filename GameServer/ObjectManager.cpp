@@ -75,6 +75,8 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int32 Channel
 		case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 		case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 		case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
+		case en_GameObjectType::OBJECT_THIEF_PLAYER:
+		case en_GameObjectType::OBJECT_ARCHER_PLAYER:
 			{
 				CPlayer* Player = (CPlayer*)EnterGameObject;
 
@@ -188,6 +190,8 @@ bool CObjectManager::ObjectLeaveGame(CGameObject* LeaveGameObject, int32 ObjectI
 	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
+	case en_GameObjectType::OBJECT_THIEF_PLAYER:
+	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
 		_PlayersArrayIndexs.Push(ObjectIndex);		
 		break;;
 	case en_GameObjectType::OBJECT_SLIME:
@@ -238,6 +242,7 @@ CGameObject* CObjectManager::Find(int64 ObjectId, en_GameObjectType GameObjectTy
 	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 	case en_GameObjectType::OBJECT_THIEF_PLAYER:
+	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
 		{
 			for (int32 i = 0; i < PLAYER_MAX; i++)
 			{
@@ -366,6 +371,8 @@ void CObjectManager::ObjectReturn(en_GameObjectType ObjectType, CGameObject* Ret
 	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
+	case en_GameObjectType::OBJECT_THIEF_PLAYER:
+	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
 		_PlayerMemoryPool->Free((CPlayer*)ReturnObject);
 		break;
 	case en_GameObjectType::OBJECT_SLIME:
