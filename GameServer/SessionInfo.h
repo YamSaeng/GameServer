@@ -41,6 +41,11 @@ struct st_Session
 	int16 SectorY;
 
 	int32 Token;
+
+	// 더미 여부
+	bool IsDummy;
+
+	// 로그인 여부
 	bool IsLogin;
 
 	// 마지막으로 받은 핑 패킷 시간
