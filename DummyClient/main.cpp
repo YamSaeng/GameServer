@@ -587,7 +587,8 @@ struct st_CraftingItemCategory
 enum en_ClientMessage
 {
 	CHAT_MSG,
-	MOVE
+	MOVE,
+	MELEE_ATTACK
 };
 
 int64 G_DummyClientAccountId = 1000000;
@@ -745,7 +746,7 @@ int main()
 							if (Header.PacketCode != 119)
 							{
 								break;
-							}							
+							}									
 						}				
 						else
 						{
@@ -840,13 +841,18 @@ int main()
 										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.MeleeCriticalPoint;
 										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.MagicCriticalPoint;
 										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.Speed;
+										
 
 										int16 CharacterObjectType;
 										*RecvPacket >> CharacterObjectType;
+										G_ClientArray[i].MyCharacterGameObjectInfo.ObjectType = (en_GameObjectType)CharacterObjectType;
+
 										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.OwnerObjectId;
 
 										int16 CharacterOwnerObjectType;
 										*RecvPacket >> CharacterOwnerObjectType;
+										G_ClientArray[i].MyCharacterGameObjectInfo.OwnerObjectType = (en_GameObjectType)CharacterOwnerObjectType;
+
 										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.PlayerSlotIndex;
 
 										CMessage* ReqEnterGamePacket = CMessage::Alloc();
@@ -962,6 +968,42 @@ int main()
 
 							}
 							break;
+						case en_PACKET_S2C_MOVE:
+							{
+								int64 AccountId;
+								int64 PlayerId;
+								int16 ObjectType;
+								int8 CreatureState;
+								int32 PositionX;
+								int32 PositionY;
+								int8 MoveDir;
+
+								*RecvPacket >> AccountId;
+								*RecvPacket >> PlayerId;
+								*RecvPacket >> ObjectType;
+								*RecvPacket >> CreatureState;
+								*RecvPacket >> PositionX;
+								*RecvPacket >> PositionY;
+								*RecvPacket >> MoveDir;
+
+								G_ClientArray[i].MyCharacterGameObjectInfo.ObjectPositionInfo.State = (en_CreatureState)CreatureState;
+								G_ClientArray[i].MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX = PositionX;
+								G_ClientArray[i].MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY = PositionY;
+								G_ClientArray[i].MyCharacterGameObjectInfo.ObjectPositionInfo.MoveDir = (en_MoveDir)MoveDir;	
+								
+								CMessage* ReqMoveStopPacket = CMessage::Alloc();
+
+								ReqMoveStopPacket->Clear();
+								*ReqMoveStopPacket << (int16)en_PACKET_C2S_OBJECT_STATE_CHANGE;
+								*ReqMoveStopPacket << G_ClientArray[i].AccountId;
+								*ReqMoveStopPacket << G_ClientArray[i].PlayerId;
+								*ReqMoveStopPacket << (int16)G_ClientArray[i].MyCharacterGameObjectInfo.ObjectType;
+								*ReqMoveStopPacket << G_ClientArray[i].MyCharacterGameObjectInfo.ObjectId;
+								*ReqMoveStopPacket << (int16)en_StateChange::MOVE_TO_STOP;
+
+								G_ClientArray[i].SendRingBuf.Enqueue(ReqMoveStopPacket);
+							}							
+							break;
 						default:
 							break;
 						}
@@ -1016,10 +1058,11 @@ unsigned __stdcall SendProc(void* Argument)
 	{
 		for (int32 i = 0; i < CLIENT_MAX; i++)
 		{
-			// 캐릭터 생성 완료 시 채팅 메세지 전송
+			// 로그인 및 게임에 입장하면 메세지 전송
 			if (G_ClientArray[i].IsLogin == true && G_ClientArray[i].IsEnterGame == true)
 			{
-				int RandMessageType = 0;//rand() % 2;
+				int RandMessageType = rand() % 3;
+				int RandDir;				
 				CMessage* RandPacket = nullptr;
 				wstring SendChatMsg;
 				int8 DummyChatLen;
@@ -1044,17 +1087,28 @@ unsigned __stdcall SendProc(void* Argument)
 					G_ClientArray[i].SendRingBuf.Enqueue(RandPacket);
 					break;
 				case en_ClientMessage::MOVE:
-					break;					
-				}
+					RandPacket = CMessage::Alloc();
 
-				//G_ClientArray[i].SendRingBuf.Enqueue(S);
+					RandPacket->Clear();
+					*RandPacket << (int16)en_PACKET_C2S_MOVE;					
+					*RandPacket << G_ClientArray[i].AccountId;
+					*RandPacket << G_ClientArray[i].PlayerId;
+
+					RandDir = rand() % 4;
+					*RandPacket << (int8)RandDir;
+
+					G_ClientArray[i].SendRingBuf.Enqueue(RandPacket);
+					break;	
+				case en_ClientMessage::MELEE_ATTACK:
+					break;
+				}
 			}
 			else
 			{
 				
 			}
 
-			Sleep(1);
+			Sleep(10);
 		}
 	}
 
