@@ -2008,5 +2008,7 @@ st_ObjectStatusData* CDataManager::FindObjectStatusData(en_GameObjectType GameOb
 		break;
 	case en_GameObjectType::OBJECT_TREE:
 		break;
+	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
+		return (*_WarriorStatus.find(Level)).second;
 	}	
 }
