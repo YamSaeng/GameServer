@@ -172,7 +172,7 @@
   <Procedure name="spNewCharacterPush">
     <Param name="@AccountId" type="BigInt"/>
     <Param name="@PlayerName" type="nvarchar(20)"/>
-    <Param name="@PlayerType" type="TinyInt"/>
+    <Param name="@PlayerType" type="SmallInt"/>
     <Param name="@PlayerIndex" type="TinyInt"/>
     <Param name="@Level" type="int"/>
     <Param name="@CurrentHP" type="int"/>
