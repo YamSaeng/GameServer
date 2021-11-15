@@ -72,6 +72,15 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int32 Channel
 	
 	switch (EnterGameObject->_GameObjectInfo.ObjectType)
 	{
+		case en_GameObjectType::OBJECT_PLAYER_DUMMY:
+			{
+				CPlayer* Player = (CPlayer*)EnterGameObject;
+				
+				Player->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_IDLE;
+
+				EnterChannel->EnterChannel(EnterGameObject);
+			}
+			break;
 		case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 		case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 		case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
@@ -192,6 +201,7 @@ bool CObjectManager::ObjectLeaveGame(CGameObject* LeaveGameObject, int32 ObjectI
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 	case en_GameObjectType::OBJECT_THIEF_PLAYER:
 	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
+	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 		_PlayersArrayIndexs.Push(ObjectIndex);		
 		break;;
 	case en_GameObjectType::OBJECT_SLIME:
@@ -374,6 +384,7 @@ void CObjectManager::ObjectReturn(en_GameObjectType ObjectType, CGameObject* Ret
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 	case en_GameObjectType::OBJECT_THIEF_PLAYER:
 	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
+	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 		_PlayerMemoryPool->Free((CPlayer*)ReturnObject);
 		break;
 	case en_GameObjectType::OBJECT_SLIME:

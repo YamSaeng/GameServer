@@ -22,7 +22,7 @@ struct st_Session
 	SOCKET CloseSock;		// Disconnect 호출시 종료 절차용 소켓
 	SOCKADDR_IN ClientAddr; // 접속한 클라 주소
 
-	RingBuffer RecvRingBuf;
+	CRingBuffer RecvRingBuf;
 	CLockFreeQue<CMessage*> SendRingBuf;
 
 	OVERLAPPED RecvOverlapped = {}; // WSARecv 통지용

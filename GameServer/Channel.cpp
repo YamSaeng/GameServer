@@ -266,9 +266,31 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	}	
 
 	random_device RD;
-	mt19937 Gen(RD());
-		
-	st_Vector2Int SpawnPosition = *ObjectSpawnPosition;	
+	mt19937 Gen(RD());	
+
+	st_Vector2Int SpawnPosition;	
+
+	if (ObjectSpawnPosition != nullptr)
+	{
+		SpawnPosition = *ObjectSpawnPosition;
+	}
+	else
+	{
+		// 더미를 대상으로 랜덤 좌표 받아서 채널에 입장
+		while (true)
+		{
+			uniform_int_distribution<int> RandomXPosition(-10, 54);
+			uniform_int_distribution<int> RandomYPosition(-4, 40);
+
+			SpawnPosition._X = RandomXPosition(Gen);
+			SpawnPosition._Y = RandomYPosition(Gen);
+						
+			if (_Map->Cango(SpawnPosition) == true)
+			{
+				break;
+			}
+		}
+	}
 	
 	G_Logger->WriteStdOut(en_Color::RED, L"SpawnPosition Y : %d X : %d \n", SpawnPosition._Y, SpawnPosition._X);	
 
@@ -280,9 +302,12 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 	case en_GameObjectType::OBJECT_THIEF_PLAYER:
 	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
+	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 		{
 			// 플레이어로 형변환
 			CPlayer* EnterChannelPlayer = (CPlayer*)EnterChannelGameObject;
+			EnterChannelPlayer->_SpawnPosition._Y = SpawnPosition._Y;
+			EnterChannelPlayer->_SpawnPosition._X = SpawnPosition._X;
 			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY = SpawnPosition._Y;
 			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX = SpawnPosition._X;
 
@@ -390,6 +415,7 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 	case en_GameObjectType::OBJECT_THIEF_PLAYER:
 	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
+	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 		_Players.erase(LeaveChannelGameObject->_GameObjectInfo.ObjectId);
 		
 		_Map->ApplyLeave(LeaveChannelGameObject);		

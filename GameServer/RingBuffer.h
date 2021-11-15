@@ -1,11 +1,11 @@
 #pragma once
 #include <string.h>
 
-#define BUFFER_DEFUALT_SIZE	(int)RingBuffer::eDefaultInfo::DefaultSize
-#define BLANK				(int)RingBuffer::eDefaultInfo::Blank
+#define BUFFER_DEFUALT_SIZE	(int)CRingBuffer::eDefaultInfo::DefaultSize
+#define BLANK				(int)CRingBuffer::eDefaultInfo::Blank
 
 //¿øÇü Å¥
-class RingBuffer
+class CRingBuffer
 {
 private:
 	char* _Buffer;
@@ -36,17 +36,17 @@ private:
 	}
 
 public:
-	RingBuffer(void)
+	CRingBuffer(void)
 	{
 		Init(BUFFER_DEFUALT_SIZE);
 	}
 
-	RingBuffer(int bufferSize)
+	CRingBuffer(int bufferSize)
 	{
 		Init(bufferSize);
 	}
 
-	~RingBuffer()
+	~CRingBuffer()
 	{
 		delete[] _Buffer;
 	}
