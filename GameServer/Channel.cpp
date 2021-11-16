@@ -279,8 +279,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 		// 더미를 대상으로 랜덤 좌표 받아서 채널에 입장
 		while (true)
 		{
-			uniform_int_distribution<int> RandomXPosition(-10, 54);
-			uniform_int_distribution<int> RandomYPosition(-4, 40);
+			uniform_int_distribution<int> RandomXPosition(-26, 63);
+			uniform_int_distribution<int> RandomYPosition(-13, 56);
 
 			SpawnPosition._X = RandomXPosition(Gen);
 			SpawnPosition._Y = RandomYPosition(Gen);
