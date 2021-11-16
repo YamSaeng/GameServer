@@ -371,7 +371,7 @@ void CMessage::SetHeader(char* Header, char Size)
 CMessage* CMessage::Alloc()
 {
 	CMessage* AllocMessage = _ObjectPoolFreeList.Alloc();
-	InterlockedIncrement(AllocMessage->_RetCount);
+	InterlockedIncrement(AllocMessage->_RetCount);	
 	return AllocMessage;
 }
 

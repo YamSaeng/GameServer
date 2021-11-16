@@ -18,7 +18,7 @@ private:
 public:
 	enum class eDefaultInfo
 	{
-		DefaultSize = 10001,
+		DefaultSize = 100001,
 		Blank = 1
 	};
 

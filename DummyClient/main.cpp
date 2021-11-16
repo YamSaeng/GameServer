@@ -603,8 +603,7 @@ struct st_Client
 	CRingBuffer RecvRingBuf;
 
 	int64 AccountId;
-	wstring LoginId;
-	int64 PlayerId;
+	wstring LoginId;	
 
 	int32 X;
 	int32 Y;
@@ -620,8 +619,7 @@ struct st_Client
 	{
 		ClientSocket = INVALID_SOCKET;
 
-		AccountId = 0;
-		PlayerId = 0;
+		AccountId = 0;		
 
 		X = 0;
 		Y = 0;
@@ -634,19 +632,16 @@ struct st_Client
 };
 
 static unsigned __stdcall SendProc(void* Argument);
+static unsigned __stdcall SelectProc(void* Argument);
 
 st_Client* G_ClientArray;
+st_Client** G_SelectCheckArray;
 
-#define CLIENT_MAX 64
+#define CLIENT_MAX 300
 
 int main()
 {
 	setlocale(LC_ALL, "Korean");
-
-	_beginthreadex(NULL, 0, SendProc, 0, 0, NULL);
-
-	int32 DummyId = 1;
-	Sleep(5000);
 
 	WSADATA wsa;
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
@@ -655,398 +650,12 @@ int main()
 		wprintf(L"WSAStartup Error %d\n", Error);
 	}
 
-	SOCKADDR_IN ServerAddr;
-	ZeroMemory(&ServerAddr, sizeof(ServerAddr));
-	ServerAddr.sin_family = AF_INET;
-	InetPtonW(AF_INET, L"127.0.0.1", &ServerAddr.sin_addr);
-	ServerAddr.sin_port = htons(7777);
-
-	FD_SET ReadSet;
-	FD_SET WriteSet;
-
-	st_Client Client;
-	G_ClientArray = new st_Client[64];	
-
-	for (int i = 0; i < CLIENT_MAX; i++)
-	{
-		G_ClientArray[i].ClientSocket = socket(AF_INET, SOCK_STREAM, 0);
-		G_ClientArray[i].AccountId = G_DummyClientAccountId + i;
-		int ret = connect(G_ClientArray[i].ClientSocket, (SOCKADDR*)&ServerAddr, sizeof(G_ClientArray[i].ClientAddr));
-		if (ret == SOCKET_ERROR)
-		{
-			DWORD Error = WSAGetLastError();
-			wprintf(L"connect Error %d", Error);
-		}
-	}
-
+	_beginthreadex(NULL, 0, SendProc, 0, 0, NULL);
+	_beginthreadex(NULL, 0, SelectProc, 0, 0, NULL);
+	
 	while (1)
 	{
-		FD_ZERO(&ReadSet);
-		FD_ZERO(&WriteSet);
-
-		for (int i = 0; i < CLIENT_MAX; i++)
-		{
-			FD_SET(G_ClientArray[i].ClientSocket, &ReadSet);
-
-			if (G_ClientArray[i].SendRingBuf.GetUseSize() > 0)
-			{
-				FD_SET(G_ClientArray[i].ClientSocket, &WriteSet);
-			}
-		}
-
-		timeval Time;
-		Time.tv_sec = 0;
-		Time.tv_usec = 0;
-
-		int SelectRetval = select(0, &ReadSet, &WriteSet, NULL, &Time);
-		if (SelectRetval == SOCKET_ERROR)
-		{
-			DWORD Error = WSAGetLastError();
-			wprintf(L"Select Error %d\n", Error);
-		}
-
-		if (SelectRetval > 0)
-		{
-			for (int i = 0; i < CLIENT_MAX; i++)
-			{
-				if (FD_ISSET(G_ClientArray[i].ClientSocket, &ReadSet))
-				{
-					int RecvDirectEnqueSize = G_ClientArray[i].RecvRingBuf.GetDirectEnqueueSize();
-					int RecvRet = recv(G_ClientArray[i].ClientSocket, G_ClientArray[i].RecvRingBuf.GetRearBufferPtr(), RecvDirectEnqueSize, 0);
-					if (RecvRet == SOCKET_ERROR)
-					{
-						DWORD Error = WSAGetLastError();
-						if (Error != WSAEWOULDBLOCK)
-						{
-							break;
-						}
-					}
-					else if (RecvRet == 0)
-					{
-						closesocket(G_ClientArray[i].ClientSocket);
-					}
-
-					G_ClientArray[i].RecvRingBuf.MoveRear(RecvRet);
-
-					CMessage::st_ENCODE_HEADER Header;
-					CMessage* RecvPacket = CMessage::Alloc();
-
-					while (1)
-					{
-						RecvPacket->Clear();
-
-						if (G_ClientArray[i].RecvRingBuf.GetUseSize() < sizeof(CMessage::st_ENCODE_HEADER))
-						{
-							break;
-						}
-
-						G_ClientArray[i].RecvRingBuf.Peek((char*)&Header, sizeof(CMessage::st_ENCODE_HEADER));
-						if (Header.PacketLen + sizeof(CMessage::st_ENCODE_HEADER) <= G_ClientArray[i].RecvRingBuf.GetUseSize())
-						{
-							if (Header.PacketCode != 119)
-							{
-								break;
-							}									
-						}				
-						else
-						{
-							break;
-						}
-
-						G_ClientArray[i].RecvRingBuf.MoveFront(sizeof(CMessage::st_ENCODE_HEADER));
-						G_ClientArray[i].RecvRingBuf.Dequeue(RecvPacket->GetRearBufferPtr(), Header.PacketLen);
-						RecvPacket->SetHeader((char*)&Header, sizeof(CMessage::st_ENCODE_HEADER));
-						RecvPacket->MoveWritePosition(Header.PacketLen);
-
-						if (!RecvPacket->Decode())
-						{
-							break;
-						}
-
-						WORD MessageType;
-						*RecvPacket >> MessageType;
-
-						switch (MessageType)
-						{
-						case en_PACKET_S2C_GAME_CLIENT_CONNECTED:
-							{
-								bool IsDummy = true;
-
-								CMessage* ReqGameServerLoginPacket = CMessage::Alloc();
-								
-								ReqGameServerLoginPacket->Clear();
-								WCHAR DummyCharacterName[256] = { 0 };
-								swprintf_s(DummyCharacterName, sizeof(DummyCharacterName), L"Dummy_Player %d", G_DummyClientLoginId++);						
-
-								G_ClientArray[i].LoginId = DummyCharacterName;
-								*ReqGameServerLoginPacket << (WORD)en_PACKET_C2S_GAME_REQ_LOGIN;
-								*ReqGameServerLoginPacket << G_ClientArray[i].AccountId;
-
-								int8 DummyClientNameLen = (int8)(G_ClientArray[i].LoginId.length() * 2);
-								*ReqGameServerLoginPacket << DummyClientNameLen;
-								ReqGameServerLoginPacket->InsertData(G_ClientArray[i].LoginId.c_str(),DummyClientNameLen);
-
-								*ReqGameServerLoginPacket << IsDummy;
-
-								G_ClientArray[i].SendRingBuf.Enqueue(ReqGameServerLoginPacket);
-							}
-							break;
-						case en_PACKET_S2C_GAME_RES_LOGIN:
-							{
-								bool LoginSucess = false;
-
-								*RecvPacket >> LoginSucess;
-
-								if (LoginSucess == true)
-								{	
-									int8 PlayerCount;
-									*RecvPacket >> PlayerCount;
-
-									if (PlayerCount > 0)
-									{
-										// 첫번째 캐릭으로 게임 접속 시도									
-										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectId;
-
-										G_ClientArray[i].PlayerId = G_ClientArray[i].MyCharacterGameObjectInfo.ObjectId;
-
-										int8 CharacterNameLen;
-										*RecvPacket >> CharacterNameLen;
-										RecvPacket->GetData(G_ClientArray[i].MyCharacterGameObjectInfo.ObjectName, CharacterNameLen);
-
-										int8 CharacterState;
-										*RecvPacket >> CharacterState;
-
-										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX;
-										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY;
-
-										int8 CharacterMoveDir;
-										*RecvPacket >> CharacterMoveDir;
-
-										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.Level;
-										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.HP;
-										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.MaxHP;
-										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.MP;
-										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.MaxMP;
-										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.DP;
-										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.MaxDP;
-										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent;
-										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent;
-										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage;
-										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage;
-										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.MeleeAttackHitRate;
-										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.MagicDamage;
-										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.MagicHitRate;
-										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.Defence;
-										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.EvasionRate;
-										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.MeleeCriticalPoint;
-										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.MagicCriticalPoint;
-										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.Speed;
-										
-
-										int16 CharacterObjectType;
-										*RecvPacket >> CharacterObjectType;
-										G_ClientArray[i].MyCharacterGameObjectInfo.ObjectType = (en_GameObjectType)CharacterObjectType;
-
-										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.OwnerObjectId;
-
-										int16 CharacterOwnerObjectType;
-										*RecvPacket >> CharacterOwnerObjectType;
-										G_ClientArray[i].MyCharacterGameObjectInfo.OwnerObjectType = (en_GameObjectType)CharacterOwnerObjectType;
-
-										*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.PlayerSlotIndex;
-
-										CMessage* ReqEnterGamePacket = CMessage::Alloc();
-										ReqEnterGamePacket->Clear();
-
-										*ReqEnterGamePacket << (int16)en_PACKET_C2S_GAME_ENTER;
-										*ReqEnterGamePacket << G_ClientArray[i].AccountId;
-
-										int8 DummyClientNameLen = (int8)(G_ClientArray[i].LoginId.length() * 2);
-										*ReqEnterGamePacket << DummyClientNameLen;
-										ReqEnterGamePacket->InsertData(G_ClientArray[i].LoginId.c_str(), DummyClientNameLen);
-
-										G_ClientArray[i].SendRingBuf.Enqueue(ReqEnterGamePacket);
-									}
-									else
-									{
-										// 캐릭터 없으면 게임 캐릭터 생성
-										CMessage* ReqCreateCharacterPacket = CMessage::Alloc();
-										ReqCreateCharacterPacket->Clear();
-
-										*ReqCreateCharacterPacket << (int16)en_PACKET_C2S_GAME_CREATE_CHARACTER;
-										*ReqCreateCharacterPacket << (int16)en_GameObjectType::OBJECT_PLAYER_DUMMY;
-
-										int8 DummyClientNameLen = (int8)(G_ClientArray[i].LoginId.length() * 2);
-										*ReqCreateCharacterPacket << DummyClientNameLen;
-										ReqCreateCharacterPacket->InsertData(G_ClientArray[i].LoginId.c_str(), DummyClientNameLen);
-										
-										*ReqCreateCharacterPacket << (int8)0;
-
-										G_ClientArray[i].SendRingBuf.Enqueue(ReqCreateCharacterPacket);
-									}
-
-									G_ClientArray[i].IsLogin = true;
-								}
-								else
-								{
-
-								}							
-							}
-							break;
-						case en_PACKET_S2C_GAME_CREATE_CHARACTER:
-							{
-								bool CharacterCreateSuccess = false;
-								
-								*RecvPacket >> CharacterCreateSuccess;
-
-								if (CharacterCreateSuccess == true)
-								{
-									*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectId;
-
-									int8 CharacterNameLen;
-									*RecvPacket >> CharacterNameLen;
-									RecvPacket->GetData(G_ClientArray[i].MyCharacterGameObjectInfo.ObjectName, CharacterNameLen);
-
-									int8 CharacterState;
-									*RecvPacket >> CharacterState;
-
-									*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX;
-									*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY;
-
-									int8 CharacterMoveDir;
-									*RecvPacket >> CharacterMoveDir;
-
-									*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.Level;
-									*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.HP;
-									*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.MaxHP;
-									*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.MP;
-									*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.MaxMP;
-									*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.DP;
-									*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.MaxDP;
-									*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent;
-									*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent;
-									*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage;
-									*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage;
-									*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.MeleeAttackHitRate;
-									*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.MagicDamage;
-									*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.MagicHitRate;
-									*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.Defence;
-									*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.EvasionRate;
-									*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.MeleeCriticalPoint;
-									*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.MagicCriticalPoint;
-									*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.ObjectStatInfo.Speed;
-
-									int16 CharacterObjectType;
-									*RecvPacket >> CharacterObjectType;
-									*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.OwnerObjectId;
-
-									int16 CharacterOwnerObjectType;
-									*RecvPacket >> CharacterOwnerObjectType;
-									*RecvPacket >> G_ClientArray[i].MyCharacterGameObjectInfo.PlayerSlotIndex;
-
-									CMessage* ReqEnterGamePacket = CMessage::Alloc();
-									ReqEnterGamePacket->Clear();
-
-									*ReqEnterGamePacket << (int16)en_PACKET_C2S_GAME_ENTER;
-									*ReqEnterGamePacket << G_ClientArray[i].AccountId;
-
-									int8 DummyClientNameLen = (int8)(G_ClientArray[i].LoginId.length() * 2);
-									*ReqEnterGamePacket << DummyClientNameLen;
-									ReqEnterGamePacket->InsertData(G_ClientArray[i].LoginId.c_str(), DummyClientNameLen);
-
-									G_ClientArray[i].SendRingBuf.Enqueue(ReqEnterGamePacket);
-								}								
-							}
-							break;
-						case en_PACKET_S2C_GAME_ENTER:
-							{
-								G_ClientArray[i].IsEnterGame = true;
-							}
-							break;
-						case en_PACKET_S2C_MESSAGE:
-							{
-
-							}
-							break;
-						case en_PACKET_S2C_MOVE:
-							{
-								int64 AccountId;
-								int64 PlayerId;
-								int16 ObjectType;
-								int8 CreatureState;
-								int32 PositionX;
-								int32 PositionY;
-								int8 MoveDir;
-
-								*RecvPacket >> AccountId;
-								*RecvPacket >> PlayerId;
-								*RecvPacket >> ObjectType;
-								*RecvPacket >> CreatureState;
-								*RecvPacket >> PositionX;
-								*RecvPacket >> PositionY;
-								*RecvPacket >> MoveDir;
-
-								G_ClientArray[i].MyCharacterGameObjectInfo.ObjectPositionInfo.State = (en_CreatureState)CreatureState;
-								G_ClientArray[i].MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX = PositionX;
-								G_ClientArray[i].MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY = PositionY;
-								G_ClientArray[i].MyCharacterGameObjectInfo.ObjectPositionInfo.MoveDir = (en_MoveDir)MoveDir;	
-								
-								CMessage* ReqMoveStopPacket = CMessage::Alloc();
-
-								ReqMoveStopPacket->Clear();
-								*ReqMoveStopPacket << (int16)en_PACKET_C2S_OBJECT_STATE_CHANGE;
-								*ReqMoveStopPacket << G_ClientArray[i].AccountId;
-								*ReqMoveStopPacket << G_ClientArray[i].PlayerId;
-								*ReqMoveStopPacket << (int16)G_ClientArray[i].MyCharacterGameObjectInfo.ObjectType;
-								*ReqMoveStopPacket << G_ClientArray[i].MyCharacterGameObjectInfo.ObjectId;
-								*ReqMoveStopPacket << (int16)en_StateChange::MOVE_TO_STOP;
-
-								G_ClientArray[i].SendRingBuf.Enqueue(ReqMoveStopPacket);
-							}							
-							break;
-						default:
-							break;
-						}
-					}
-
-					RecvPacket->Free();
-				}
-
-				if (FD_ISSET(G_ClientArray[i].ClientSocket, &WriteSet))
-				{
-					while (1)
-					{
-						CMessage* Packet = nullptr;
-
-						if (G_ClientArray[i].SendRingBuf.Dequeue(&Packet) == true)
-						{
-							Packet->Encode();
-							Packet->AddRetCount();
-
-							int SendRet = send(G_ClientArray[i].ClientSocket, Packet->GetBufferPtr(), Packet->GetUseBufferSize(), 0);
-							if (SendRet == SOCKET_ERROR)
-							{
-								DWORD Error = WSAGetLastError();
-								if (Error != WSAEWOULDBLOCK)
-								{
-									break;
-								}
-							}
-
-							Packet->Free();
-						}
-						else
-						{
-							break;
-						}
-					}					
-				}
-			}
-		}
-		else
-		{
-			
-		}
+		Sleep(10000);
 	}
 }
 
@@ -1075,9 +684,9 @@ unsigned __stdcall SendProc(void* Argument)
 					RandPacket->Clear();
 					*RandPacket << (short)en_PACKET_C2S_MESSAGE;
 					*RandPacket << G_ClientArray[i].AccountId;
-					*RandPacket << G_ClientArray[i].PlayerId;
+					*RandPacket << G_ClientArray[i].MyCharacterGameObjectInfo.ObjectId;
 
-					swprintf_s(G_ClientArray[i].ChatMsg, sizeof(G_ClientArray[i].ChatMsg), L"[%s]가 [%d]를 보냈습니다.", G_ClientArray[i].LoginId.c_str(), G_ClientArray[i].PlayerId, RandMessageType * i);
+					swprintf_s(G_ClientArray[i].ChatMsg, sizeof(G_ClientArray[i].ChatMsg), L"[%s]가 [%d]를 보냈습니다.", G_ClientArray[i].LoginId.c_str(), G_ClientArray[i].MyCharacterGameObjectInfo.ObjectId, RandMessageType * i);
 					SendChatMsg = G_ClientArray[i].ChatMsg;
 
 					DummyChatLen = (int8)(SendChatMsg.length() * 2);
@@ -1092,7 +701,7 @@ unsigned __stdcall SendProc(void* Argument)
 					RandPacket->Clear();
 					*RandPacket << (int16)en_PACKET_C2S_MOVE;					
 					*RandPacket << G_ClientArray[i].AccountId;
-					*RandPacket << G_ClientArray[i].PlayerId;
+					*RandPacket << G_ClientArray[i].MyCharacterGameObjectInfo.ObjectId;
 
 					RandDir = rand() % 4;
 					*RandPacket << (int8)RandDir;
@@ -1108,7 +717,419 @@ unsigned __stdcall SendProc(void* Argument)
 				
 			}
 
-			Sleep(10);
+			Sleep(100);
+		}
+	}
+
+	return 0;
+}
+
+unsigned __stdcall SelectProc(void* Argument)
+{
+	int32 DummyId = 1;	
+
+	SOCKADDR_IN ServerAddr;
+	ZeroMemory(&ServerAddr, sizeof(ServerAddr));
+	ServerAddr.sin_family = AF_INET;
+	InetPtonW(AF_INET, L"127.0.0.1", &ServerAddr.sin_addr);
+	ServerAddr.sin_port = htons(7777);
+
+	FD_SET ReadSet;
+	FD_SET WriteSet;
+
+	st_Client Client;
+	G_ClientArray = new st_Client[CLIENT_MAX];
+	G_SelectCheckArray = new st_Client * [FD_SETSIZE];
+	memset(G_SelectCheckArray, 0, sizeof(st_Client*) * FD_SETSIZE);
+
+	Sleep(2000);
+
+	for (int i = 0; i < CLIENT_MAX; i++)
+	{
+		G_ClientArray[i].ClientSocket = socket(AF_INET, SOCK_STREAM, 0);
+		G_ClientArray[i].AccountId = G_DummyClientAccountId + i;
+		int ret = connect(G_ClientArray[i].ClientSocket, (SOCKADDR*)&ServerAddr, sizeof(G_ClientArray[i].ClientAddr));
+		if (ret == SOCKET_ERROR)
+		{
+			DWORD Error = WSAGetLastError();
+			wprintf(L"connect Error %d", Error);
+		}
+	}	
+
+	while (1)
+	{
+		int SelectIndex = 0;
+
+		for (int i = 0; i < CLIENT_MAX / FD_SETSIZE; i++)
+		{
+			FD_ZERO(&ReadSet);
+			FD_ZERO(&WriteSet);
+
+			// 검사할 소켓 셋팅
+			for (int j = 0; j < FD_SETSIZE; j++)
+			{
+				FD_SET(G_ClientArray[SelectIndex].ClientSocket, &ReadSet);
+
+				if (G_ClientArray[SelectIndex].SendRingBuf.GetUseSize() > 0)
+				{
+					FD_SET(G_ClientArray[SelectIndex].ClientSocket, &WriteSet);
+				}
+
+				G_SelectCheckArray[j] = &G_ClientArray[SelectIndex];
+
+				SelectIndex++;
+			}
+
+			timeval Time;
+			Time.tv_sec = 0;
+			Time.tv_usec = 0;
+
+			int SelectRetval = select(0, &ReadSet, &WriteSet, NULL, &Time);
+			if (SelectRetval == SOCKET_ERROR)
+			{
+				DWORD Error = WSAGetLastError();
+				wprintf(L"Select Error %d\n", Error);
+			}
+
+			if (SelectRetval > 0)
+			{
+				for (int k = 0; k < FD_SETSIZE; k++)
+				{
+					if (FD_ISSET(G_SelectCheckArray[k]->ClientSocket, &ReadSet))
+					{
+						int RecvDirectEnqueSize = G_SelectCheckArray[k]->RecvRingBuf.GetDirectEnqueueSize();
+						int RecvRet = recv(G_SelectCheckArray[k]->ClientSocket, G_SelectCheckArray[k]->RecvRingBuf.GetRearBufferPtr(), RecvDirectEnqueSize, 0);
+						if (RecvRet == SOCKET_ERROR)
+						{
+							DWORD Error = WSAGetLastError();
+							if (Error != WSAEWOULDBLOCK)
+							{
+								break;
+							}
+						}
+						else if (RecvRet == 0)
+						{
+							closesocket(G_SelectCheckArray[k]->ClientSocket);
+						}
+
+						G_SelectCheckArray[k]->RecvRingBuf.MoveRear(RecvRet);
+
+						CMessage::st_ENCODE_HEADER Header;
+						CMessage* RecvPacket = CMessage::Alloc();
+
+						while (1)
+						{
+							RecvPacket->Clear();
+
+							if (G_SelectCheckArray[k]->RecvRingBuf.GetUseSize() < sizeof(CMessage::st_ENCODE_HEADER))
+							{
+								break;
+							}
+
+							G_SelectCheckArray[k]->RecvRingBuf.Peek((char*)&Header, sizeof(CMessage::st_ENCODE_HEADER));
+							if (Header.PacketLen + sizeof(CMessage::st_ENCODE_HEADER) <= G_SelectCheckArray[k]->RecvRingBuf.GetUseSize())
+							{
+								if (Header.PacketCode != 119)
+								{
+									break;
+								}
+							}
+							else
+							{
+								break;
+							}
+
+							G_SelectCheckArray[k]->RecvRingBuf.MoveFront(sizeof(CMessage::st_ENCODE_HEADER));
+							G_SelectCheckArray[k]->RecvRingBuf.Dequeue(RecvPacket->GetRearBufferPtr(), Header.PacketLen);
+							RecvPacket->SetHeader((char*)&Header, sizeof(CMessage::st_ENCODE_HEADER));
+							RecvPacket->MoveWritePosition(Header.PacketLen);
+
+							if (!RecvPacket->Decode())
+							{
+								break;
+							}
+
+							WORD MessageType;
+							*RecvPacket >> MessageType;
+
+							switch (MessageType)
+							{
+							case en_PACKET_S2C_GAME_CLIENT_CONNECTED:
+							{
+								bool IsDummy = true;
+
+								CMessage* ReqGameServerLoginPacket = CMessage::Alloc();
+
+								ReqGameServerLoginPacket->Clear();
+								WCHAR DummyCharacterName[256] = { 0 };
+								swprintf_s(DummyCharacterName, sizeof(DummyCharacterName), L"Dummy_Player %d", G_DummyClientLoginId++);
+
+								G_SelectCheckArray[k]->LoginId = DummyCharacterName;
+								*ReqGameServerLoginPacket << (WORD)en_PACKET_C2S_GAME_REQ_LOGIN;
+								*ReqGameServerLoginPacket << G_SelectCheckArray[k]->AccountId;
+
+								int8 DummyClientNameLen = (int8)(G_SelectCheckArray[k]->LoginId.length() * 2);
+								*ReqGameServerLoginPacket << DummyClientNameLen;
+								ReqGameServerLoginPacket->InsertData(G_SelectCheckArray[k]->LoginId.c_str(), DummyClientNameLen);
+
+								*ReqGameServerLoginPacket << IsDummy;
+
+								G_SelectCheckArray[k]->SendRingBuf.Enqueue(ReqGameServerLoginPacket);
+							}
+							break;
+							case en_PACKET_S2C_GAME_RES_LOGIN:
+							{
+								bool LoginSucess = false;
+
+								*RecvPacket >> LoginSucess;
+
+								if (LoginSucess == true)
+								{
+									int8 PlayerCount;
+									*RecvPacket >> PlayerCount;
+
+									if (PlayerCount > 0)
+									{
+										// 첫번째 캐릭으로 게임 접속 시도									
+										*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectId;
+
+										int8 CharacterNameLen;
+										*RecvPacket >> CharacterNameLen;
+										RecvPacket->GetData(G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectName, CharacterNameLen);
+
+										int8 CharacterState;
+										*RecvPacket >> CharacterState;
+
+										*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX;
+										*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY;
+
+										int8 CharacterMoveDir;
+										*RecvPacket >> CharacterMoveDir;
+
+										*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.Level;
+										*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.HP;
+										*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.MaxHP;
+										*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.MP;
+										*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.MaxMP;
+										*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.DP;
+										*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.MaxDP;
+										*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent;
+										*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent;
+										*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage;
+										*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage;
+										*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.MeleeAttackHitRate;
+										*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.MagicDamage;
+										*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.MagicHitRate;
+										*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.Defence;
+										*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.EvasionRate;
+										*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.MeleeCriticalPoint;
+										*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.MagicCriticalPoint;
+										*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.Speed;
+
+
+										int16 CharacterObjectType;
+										*RecvPacket >> CharacterObjectType;
+										G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectType = (en_GameObjectType)CharacterObjectType;
+
+										*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.OwnerObjectId;
+
+										int16 CharacterOwnerObjectType;
+										*RecvPacket >> CharacterOwnerObjectType;
+										G_SelectCheckArray[k]->MyCharacterGameObjectInfo.OwnerObjectType = (en_GameObjectType)CharacterOwnerObjectType;
+
+										*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.PlayerSlotIndex;
+
+										CMessage* ReqEnterGamePacket = CMessage::Alloc();
+										ReqEnterGamePacket->Clear();
+
+										*ReqEnterGamePacket << (int16)en_PACKET_C2S_GAME_ENTER;
+										*ReqEnterGamePacket << G_SelectCheckArray[k]->AccountId;
+
+										int8 DummyClientNameLen = (int8)(G_SelectCheckArray[k]->LoginId.length() * 2);
+										*ReqEnterGamePacket << DummyClientNameLen;
+										ReqEnterGamePacket->InsertData(G_SelectCheckArray[k]->LoginId.c_str(), DummyClientNameLen);
+
+										G_SelectCheckArray[k]->SendRingBuf.Enqueue(ReqEnterGamePacket);
+									}
+									else
+									{
+										// 캐릭터 없으면 게임 캐릭터 생성
+										CMessage* ReqCreateCharacterPacket = CMessage::Alloc();
+										ReqCreateCharacterPacket->Clear();
+
+										*ReqCreateCharacterPacket << (int16)en_PACKET_C2S_GAME_CREATE_CHARACTER;
+										*ReqCreateCharacterPacket << (int16)en_GameObjectType::OBJECT_PLAYER_DUMMY;
+
+										int8 DummyClientNameLen = (int8)(G_SelectCheckArray[k]->LoginId.length() * 2);
+										*ReqCreateCharacterPacket << DummyClientNameLen;
+										ReqCreateCharacterPacket->InsertData(G_SelectCheckArray[k]->LoginId.c_str(), DummyClientNameLen);
+
+										*ReqCreateCharacterPacket << (int8)0;
+
+										G_SelectCheckArray[k]->SendRingBuf.Enqueue(ReqCreateCharacterPacket);
+									}
+
+									G_SelectCheckArray[k]->IsLogin = true;
+								}
+								else
+								{
+
+								}
+							}
+							break;
+							case en_PACKET_S2C_GAME_CREATE_CHARACTER:
+							{
+								bool CharacterCreateSuccess = false;
+
+								*RecvPacket >> CharacterCreateSuccess;
+
+								if (CharacterCreateSuccess == true)
+								{
+									*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectId;
+
+									int8 CharacterNameLen;
+									*RecvPacket >> CharacterNameLen;
+									RecvPacket->GetData(G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectName, CharacterNameLen);
+
+									int8 CharacterState;
+									*RecvPacket >> CharacterState;
+
+									*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX;
+									*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY;
+
+									int8 CharacterMoveDir;
+									*RecvPacket >> CharacterMoveDir;
+
+									*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.Level;
+									*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.HP;
+									*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.MaxHP;
+									*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.MP;
+									*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.MaxMP;
+									*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.DP;
+									*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.MaxDP;
+									*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent;
+									*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent;
+									*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage;
+									*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage;
+									*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.MeleeAttackHitRate;
+									*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.MagicDamage;
+									*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.MagicHitRate;
+									*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.Defence;
+									*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.EvasionRate;
+									*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.MeleeCriticalPoint;
+									*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.MagicCriticalPoint;
+									*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectStatInfo.Speed;
+
+									int16 CharacterObjectType;
+									*RecvPacket >> CharacterObjectType;
+									*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.OwnerObjectId;
+
+									int16 CharacterOwnerObjectType;
+									*RecvPacket >> CharacterOwnerObjectType;
+									*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.PlayerSlotIndex;
+
+									CMessage* ReqEnterGamePacket = CMessage::Alloc();
+									ReqEnterGamePacket->Clear();
+
+									*ReqEnterGamePacket << (int16)en_PACKET_C2S_GAME_ENTER;
+									*ReqEnterGamePacket << G_SelectCheckArray[k]->AccountId;
+
+									int8 DummyClientNameLen = (int8)(G_SelectCheckArray[k]->LoginId.length() * 2);
+									*ReqEnterGamePacket << DummyClientNameLen;
+									ReqEnterGamePacket->InsertData(G_SelectCheckArray[k]->LoginId.c_str(), DummyClientNameLen);
+
+									G_SelectCheckArray[k]->SendRingBuf.Enqueue(ReqEnterGamePacket);
+								}
+							}
+							break;
+							case en_PACKET_S2C_GAME_ENTER:
+							{
+								G_SelectCheckArray[k]->IsEnterGame = true;
+							}
+							break;
+							case en_PACKET_S2C_MESSAGE:
+							{
+
+							}
+							break;
+							case en_PACKET_S2C_MOVE:
+							{
+								int64 AccountId;
+								int64 PlayerId;
+								int16 ObjectType;
+								int8 CreatureState;
+								int32 PositionX;
+								int32 PositionY;
+								int8 MoveDir;
+
+								*RecvPacket >> AccountId;
+								*RecvPacket >> PlayerId;
+								*RecvPacket >> ObjectType;
+								*RecvPacket >> CreatureState;
+								*RecvPacket >> PositionX;
+								*RecvPacket >> PositionY;
+								*RecvPacket >> MoveDir;
+
+								G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectPositionInfo.State = (en_CreatureState)CreatureState;
+								G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX = PositionX;
+								G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY = PositionY;
+								G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectPositionInfo.MoveDir = (en_MoveDir)MoveDir;
+
+								CMessage* ReqMoveStopPacket = CMessage::Alloc();
+
+								ReqMoveStopPacket->Clear();
+								*ReqMoveStopPacket << (int16)en_PACKET_C2S_OBJECT_STATE_CHANGE;
+								*ReqMoveStopPacket << G_SelectCheckArray[k]->AccountId;
+								*ReqMoveStopPacket << G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectId;
+								*ReqMoveStopPacket << (int16)G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectType;
+								*ReqMoveStopPacket << G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectId;
+								*ReqMoveStopPacket << (int16)en_StateChange::MOVE_TO_STOP;
+
+								G_SelectCheckArray[k]->SendRingBuf.Enqueue(ReqMoveStopPacket);
+							}
+							break;
+							default:
+								break;
+							}
+						}
+
+						RecvPacket->Free();
+					}
+
+					if (FD_ISSET(G_SelectCheckArray[k]->ClientSocket, &WriteSet))
+					{
+						while (1)
+						{
+							CMessage* Packet = nullptr;
+
+							if (G_SelectCheckArray[k]->SendRingBuf.Dequeue(&Packet) == true)
+							{
+								Packet->Encode();
+
+								int SendRet = send(G_SelectCheckArray[k]->ClientSocket, Packet->GetBufferPtr(), Packet->GetUseBufferSize(), 0);
+								if (SendRet == SOCKET_ERROR)
+								{
+									DWORD Error = WSAGetLastError();
+									if (Error != WSAEWOULDBLOCK)
+									{
+										break;
+									}
+								}
+
+								Packet->Free();
+							}
+							else
+							{
+								break;
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+
+			}
 		}
 	}
 
