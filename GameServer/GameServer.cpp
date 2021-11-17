@@ -563,8 +563,8 @@ void CGameServer::CreateNewClient(int64 SessionId)
 		SendPacket(Session->SessionId, ResClientConnectedMessage);
 		ResClientConnectedMessage->Free();
 
-		// 핑 전송 시작
-		PingTimerCreate(Session);
+		// 핑 전송 시작		
+		//PingTimerCreate(Session);
 	}
 
 	ReturnSession(Session);
@@ -752,9 +752,17 @@ void CGameServer::PacketProcReqLogin(int64 SessionID, CMessage* Message)
 
 			Session->LoginId = ClientId;
 
-			// 토큰 셋팅
-			*Message >> Token;
-			Session->Token = Token;
+			bool IsDummy;
+			*Message >> IsDummy;
+
+			if (IsDummy != true)
+			{
+				// 토큰 셋팅
+				*Message >> Token;
+				Session->Token = Token;
+			}			
+
+			Session->IsDummy = IsDummy;
 
 			if (Session->AccountId != 0 && Session->AccountId != AccountId)
 			{
@@ -867,7 +875,8 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 			// 클라가 가지고 있는 캐릭 중에 패킷으로 받은 캐릭터가 있는지 확인한다.
 			for (int i = 0; i < SESSION_CHARACTER_MAX; i++)
 			{					
-				if (G_ObjectManager->_PlayersArray[Session->MyPlayerIndexes[i]]->_GameObjectInfo.ObjectName == EnterGameCharacterName)
+				if (G_ObjectManager->_PlayersArray[Session->MyPlayerIndexes[i]] != nullptr && 
+					G_ObjectManager->_PlayersArray[Session->MyPlayerIndexes[i]]->_GameObjectInfo.ObjectName == EnterGameCharacterName)
 				{
 					FindName = true;
 					Session->MyPlayerIndex = Session->MyPlayerIndexes[i];					
@@ -903,28 +912,31 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 			SendPacketAroundSector(Session, ResSpawnPacket);
 			ResSpawnPacket->Free();
 
-			SpawnObjectInfo.clear();
+				SpawnObjectInfo.clear();
 
-			// 나한테 다른 오브젝트들을 생성하라고 알려줌						
-			st_GameObjectInfo* SpawnGameObjectInfos;
-
-			vector<CGameObject*> AroundObjects = G_ChannelManager->Find(1)->GetAroundObjects(MyPlayer, 1);
-
-			if (AroundObjects.size() > 0)
+			if (Session->IsDummy == false)
 			{
-				SpawnGameObjectInfos = new st_GameObjectInfo[AroundObjects.size()];
+				// 나한테 다른 오브젝트들을 생성하라고 알려줌						
+				st_GameObjectInfo* SpawnGameObjectInfos;
 
-				for (int32 i = 0; i < AroundObjects.size(); i++)
+				vector<CGameObject*> AroundObjects = G_ChannelManager->Find(1)->GetAroundObjects(MyPlayer, 1);
+
+				if (AroundObjects.size() > 0)
 				{
-					SpawnObjectInfo.push_back(AroundObjects[i]->_GameObjectInfo);
+					SpawnGameObjectInfos = new st_GameObjectInfo[AroundObjects.size()];
+
+					for (int32 i = 0; i < AroundObjects.size(); i++)
+					{
+						SpawnObjectInfo.push_back(AroundObjects[i]->_GameObjectInfo);
+					}
+
+					CMessage* ResOtherObjectSpawnPacket = MakePacketResObjectSpawn((int32)AroundObjects.size(), SpawnObjectInfo);
+					SendPacket(Session->SessionId, ResOtherObjectSpawnPacket);
+					ResOtherObjectSpawnPacket->Free();
+
+					delete[] SpawnGameObjectInfos;
 				}
-
-				CMessage* ResOtherObjectSpawnPacket = MakePacketResObjectSpawn((int32)AroundObjects.size(), SpawnObjectInfo);
-				SendPacket(Session->SessionId, ResOtherObjectSpawnPacket);
-				ResOtherObjectSpawnPacket->Free();
-
-				delete[] SpawnGameObjectInfos;
-			}
+			}			
 
 			// DB 큐에 요청하기 전 IOCount를 증가시켜서 Session이 반납 안되도록 막음
 			InterlockedIncrement64(&Session->IOBlock->IOCount);
@@ -2118,8 +2130,10 @@ void CGameServer::PacketProcReqObjectStateChange(int64 SessionId, CMessage* Mess
 				{
 				case en_StateChange::MOVE_TO_STOP:
 					if (FindGameObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::MOVING
+						|| FindGameObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::SPAWN_IDLE
 						|| FindGameObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::IDLE
-						|| FindGameObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::PATROL)
+						|| FindGameObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::PATROL
+						|| FindGameObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::ATTACK)
 					{
 						FindGameObject->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
@@ -2217,8 +2231,8 @@ void CGameServer::PacketProcReqChattingMessage(int64 SessionId, CMessage* Messag
 		// 채널 찾고
 		CChannel* Channel = G_ChannelManager->Find(1);
 		// 주위 플레이어 반환
-		vector<CPlayer*> Players = Channel->GetAroundPlayer(MyPlayer, 10, false);
-
+		vector<CPlayer*> Players = Channel->GetAroundPlayer(MyPlayer, 10, false);	
+		
 		// 주위 플레이어에게 채팅 메세지 전송
 		for (CPlayer* Player : Players)
 		{
@@ -3113,29 +3127,34 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 		int32 Token = Session->Token;
 
 		// AccountServer에 입력받은 AccountID가 있는지 확인한다.
-
-		// AccountNo와 Token으로 AccountServerDB 접근해서 데이터가 있는지 확인
-		CDBConnection* TokenDBConnection = G_DBConnectionPool->Pop(en_DBConnect::TOKEN);
-
-		SP::CDBAccountTokenGet AccountTokenGet(*TokenDBConnection);
-		AccountTokenGet.InAccountID(ClientAccountId); // AccountId 입력
+		// 더미일 경우에는 토큰은 확인하지 않는다.
 
 		int DBToken = 0;
-		TIMESTAMP_STRUCT LoginSuccessTime;
-		TIMESTAMP_STRUCT TokenExpiredTime;
 
-		AccountTokenGet.OutToken(DBToken); // 토큰 받아옴
-		AccountTokenGet.OutLoginsuccessTime(LoginSuccessTime);
-		AccountTokenGet.OutTokenExpiredTime(TokenExpiredTime);
+		if (Session->IsDummy == false)
+		{
+			// AccountNo와 Token으로 AccountServerDB 접근해서 데이터가 있는지 확인
+			CDBConnection* TokenDBConnection = G_DBConnectionPool->Pop(en_DBConnect::TOKEN);
 
-		AccountTokenGet.Execute();
+			SP::CDBAccountTokenGet AccountTokenGet(*TokenDBConnection);
+			AccountTokenGet.InAccountID(ClientAccountId); // AccountId 입력
+			
+			TIMESTAMP_STRUCT LoginSuccessTime;
+			TIMESTAMP_STRUCT TokenExpiredTime;
 
-		AccountTokenGet.Fetch();
+			AccountTokenGet.OutToken(DBToken); // 토큰 받아옴
+			AccountTokenGet.OutLoginsuccessTime(LoginSuccessTime);
+			AccountTokenGet.OutTokenExpiredTime(TokenExpiredTime);
 
-		G_DBConnectionPool->Push(en_DBConnect::TOKEN, TokenDBConnection); // 풀 반납
+			AccountTokenGet.Execute();
+
+			AccountTokenGet.Fetch();
+
+			G_DBConnectionPool->Push(en_DBConnect::TOKEN, TokenDBConnection); // 풀 반납
+		}	
 
 		// DB 토큰과 클라로부터 온 토큰이 같으면 로그인 최종성공
-		if (Token == DBToken)
+		if (Session->IsDummy == true || Token == DBToken)
 		{
 			Session->IsLogin = true;
 			// 클라가 소유하고 있는 플레이어들을 DB로부터 긁어온다.
@@ -3202,7 +3221,7 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 			ClientPlayersGet.OutRequireExperience(PlayerRequireExperience);
 			ClientPlayersGet.OutTotalExperience(PlayerTotalExperience);
 
-			ClientPlayersGet.Execute();
+			bool FindPlyaerCharacter = ClientPlayersGet.Execute();
 
 			int8 PlayerCount = 0;
 
@@ -3261,7 +3280,7 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 		else
 		{
 			Session->IsLogin = false;
-			Disconnect(SessionID);
+			//Disconnect(SessionID);
 		}
 	}
 	else
@@ -3349,6 +3368,12 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 					NewCharacterStatus = *(*FindStatus).second;
 				}
 				break;
+			case en_GameObjectType::OBJECT_PLAYER_DUMMY:
+				{
+					auto FindStatus = G_Datamanager->_WarriorStatus.find(1);
+					NewCharacterStatus = *(*FindStatus).second;
+				}
+				break;
 			default:
 				break;
 			}
@@ -3360,7 +3385,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			CDBConnection* NewCharacterPushDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 			// GameServerDB에 새로운 캐릭터 저장하는 프로시저 클래스
 
-			int16 PlayerType = (int16)NewCharacterStatus.PlayerType;
+			int16 PlayerType = ReqGameObjectType;
 			int64 CurrentExperience = 0;
 
 			auto FindLevel = G_Datamanager->_LevelDatas.find(NewCharacterStatus.Level);
@@ -3539,6 +3564,33 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 					}
 
 					NewPlayerDefaultSkillCreate(Session->AccountId, NewPlayerCharacter->_GameObjectInfo, ReqCharacterCreateSlotIndex);
+					
+					// 기본 공격 스킬 퀵슬롯 1번에 등록
+					st_QuickSlotBarSlotInfo DefaultAttackSkillQuickSlotInfo;
+					DefaultAttackSkillQuickSlotInfo.AccountDBId = Session->AccountId;
+					DefaultAttackSkillQuickSlotInfo.PlayerDBId = NewPlayerCharacter->_GameObjectInfo.ObjectId;
+					DefaultAttackSkillQuickSlotInfo.QuickSlotBarIndex = 0;
+					DefaultAttackSkillQuickSlotInfo.QuickSlotBarSlotIndex = 0;
+					DefaultAttackSkillQuickSlotInfo.QuickSlotKey = 49;
+
+					int8 DefaultSkillLargeCategory = (int8)en_SkillLargeCategory::SKILL_LARGE_CATEOGRY_PUBLIC;
+					int8 DefaultSkillMediumCategory = (int8)en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK;
+					int16 DefaultSkillType = (int16)en_SkillType::SKILL_NORMAL;
+					int8 DefaultAttackSkillLevel = 1;
+
+					CDBConnection* DBQuickSlotSaveConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+					SP::CDBGameServerQuickSlotBarSlotUpdate QuickSlotUpdate(*DBQuickSlotSaveConnection);
+					QuickSlotUpdate.InAccountDBId(DefaultAttackSkillQuickSlotInfo.AccountDBId);
+					QuickSlotUpdate.InPlayerDBId(DefaultAttackSkillQuickSlotInfo.PlayerDBId);
+					QuickSlotUpdate.InQuickSlotBarIndex(DefaultAttackSkillQuickSlotInfo.QuickSlotBarIndex);
+					QuickSlotUpdate.InQuickSlotBarSlotIndex(DefaultAttackSkillQuickSlotInfo.QuickSlotBarSlotIndex);
+					QuickSlotUpdate.InQuickSlotKey(DefaultAttackSkillQuickSlotInfo.QuickSlotKey);
+					QuickSlotUpdate.InSkillLargeCategory(DefaultSkillLargeCategory);
+					QuickSlotUpdate.InSkillMediumCategory(DefaultSkillMediumCategory);
+					QuickSlotUpdate.InSkillType(DefaultSkillType);
+					QuickSlotUpdate.InSkillLevel(DefaultAttackSkillLevel);
+
+					QuickSlotUpdate.Execute();
 
 					// 캐릭터 생성 응답 보냄
 					CMessage* ResCreateCharacterMessage = MakePacketResCreateCharacter(!CharacterNameFind, NewPlayerCharacter->_GameObjectInfo);
@@ -5935,6 +5987,7 @@ void CGameServer::PacketProcTimerObjectStateChange(int64 SessionId, CGameServerM
 		case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 		case en_GameObjectType::OBJECT_THIEF_PLAYER:
 		case en_GameObjectType::OBJECT_ARCHER_PLAYER:
+		case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 			{
 				CPlayer* ChangeStatePlayerObject = (CPlayer*)ChangeStateObject;
 				switch (ChangeStatePlayerObject->_GameObjectInfo.ObjectPositionInfo.State)
@@ -6084,7 +6137,7 @@ void CGameServer::PacketProcTimerPing(int64 SessionId)
 
 			int64 DeltaTime = GetTickCount64() - Session->PingPacketTime;
 
-			if (DeltaTime > 20 * 1000)
+			if (DeltaTime > 30 * 1000)
 			{
 				Disconnect(Session->SessionId);				
 			}
