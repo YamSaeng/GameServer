@@ -4,6 +4,10 @@
 
 using namespace DBModel;
 
+// PrimaryKey의 이름을 변경할때 문제가 있음
+// DB 업데이트 순서가 Dropindex -> AddColumn -> DropColumn 순으로 되있고
+// 아직 Primary Key가 날라가지 않은 상황에서 AddColumn으로 Primary Key 또 추가하려고 하니까 에러
+
 //-------------------------------------------------
 // DBSynchronizer
 //  xml로 기록중인 DB정보와

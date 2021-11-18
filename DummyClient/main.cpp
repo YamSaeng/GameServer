@@ -10,6 +10,7 @@
 #include "CommonProtocol.h"
 #include "LockFreeQue.h"
 #include <process.h>
+#include <conio.h>
 
 using namespace std;
 
@@ -636,8 +637,9 @@ static unsigned __stdcall SelectProc(void* Argument);
 
 st_Client* G_ClientArray;
 st_Client** G_SelectCheckArray;
+int32 G_SendProcRate = 2000;
 
-#define CLIENT_MAX 300
+#define CLIENT_MAX 500
 
 int main()
 {
@@ -655,7 +657,7 @@ int main()
 	
 	while (1)
 	{
-		Sleep(10000);
+		Sleep(1000);
 	}
 }
 
@@ -672,17 +674,16 @@ unsigned __stdcall SendProc(void* Argument)
 			{
 				int RandMessageType = rand() % 3;
 				int RandDir;				
-				CMessage* RandPacket = nullptr;
+				CMessage* RandPacket = CMessage::Alloc();
+				RandPacket->Clear();
+
 				wstring SendChatMsg;
 				int8 DummyChatLen;
 				
 				switch ((en_ClientMessage)RandMessageType)
 				{
-				case en_ClientMessage::CHAT_MSG:
-					RandPacket = CMessage::Alloc();
-
-					RandPacket->Clear();
-					*RandPacket << (short)en_PACKET_C2S_MESSAGE;
+				case en_ClientMessage::CHAT_MSG:					
+					*RandPacket << (int16)en_PACKET_C2S_MESSAGE;
 					*RandPacket << G_ClientArray[i].AccountId;
 					*RandPacket << G_ClientArray[i].MyCharacterGameObjectInfo.ObjectId;
 
@@ -695,10 +696,7 @@ unsigned __stdcall SendProc(void* Argument)
 
 					G_ClientArray[i].SendRingBuf.Enqueue(RandPacket);
 					break;
-				case en_ClientMessage::MOVE:
-					RandPacket = CMessage::Alloc();
-
-					RandPacket->Clear();
+				case en_ClientMessage::MOVE:					
 					*RandPacket << (int16)en_PACKET_C2S_MOVE;					
 					*RandPacket << G_ClientArray[i].AccountId;
 					*RandPacket << G_ClientArray[i].MyCharacterGameObjectInfo.ObjectId;
@@ -708,17 +706,26 @@ unsigned __stdcall SendProc(void* Argument)
 
 					G_ClientArray[i].SendRingBuf.Enqueue(RandPacket);
 					break;	
-				case en_ClientMessage::MELEE_ATTACK:
+				case en_ClientMessage::MELEE_ATTACK:	
+					/**RandPacket << (int16)en_PACKET_C2S_ATTACK;
+					*RandPacket << G_ClientArray[i].AccountId;
+					*RandPacket << G_ClientArray[i].MyCharacterGameObjectInfo.ObjectId;
+					*RandPacket << (int8)0;
+					*RandPacket << (int8)0;
+					*RandPacket << (int8)G_ClientArray[i].MyCharacterGameObjectInfo.ObjectPositionInfo.MoveDir;
+					*RandPacket << (int16)en_SkillType::SKILL_NORMAL;
+
+					G_ClientArray[i].SendRingBuf.Enqueue(RandPacket);*/
 					break;
 				}
 			}
 			else
 			{
-				
-			}
 
-			Sleep(100);
+			}			
 		}
+
+		Sleep(1000);
 	}
 
 	return 0;
@@ -742,7 +749,7 @@ unsigned __stdcall SelectProc(void* Argument)
 	G_SelectCheckArray = new st_Client * [FD_SETSIZE];
 	memset(G_SelectCheckArray, 0, sizeof(st_Client*) * FD_SETSIZE);
 
-	Sleep(2000);
+	Sleep(5000);
 
 	for (int i = 0; i < CLIENT_MAX; i++)
 	{
@@ -1073,21 +1080,19 @@ unsigned __stdcall SelectProc(void* Argument)
 								G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectPositionInfo.State = (en_CreatureState)CreatureState;
 								G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX = PositionX;
 								G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY = PositionY;
-								G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectPositionInfo.MoveDir = (en_MoveDir)MoveDir;
-
-								CMessage* ReqMoveStopPacket = CMessage::Alloc();
-
-								ReqMoveStopPacket->Clear();
-								*ReqMoveStopPacket << (int16)en_PACKET_C2S_OBJECT_STATE_CHANGE;
-								*ReqMoveStopPacket << G_SelectCheckArray[k]->AccountId;
-								*ReqMoveStopPacket << G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectId;
-								*ReqMoveStopPacket << (int16)G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectType;
-								*ReqMoveStopPacket << G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectId;
-								*ReqMoveStopPacket << (int16)en_StateChange::MOVE_TO_STOP;
-
-								G_SelectCheckArray[k]->SendRingBuf.Enqueue(ReqMoveStopPacket);
+								G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectPositionInfo.MoveDir = (en_MoveDir)MoveDir;								
 							}
 							break;
+							case en_PACKET_S2C_PING:
+							{
+								CMessage* ReqPongPacket = CMessage::Alloc();
+								ReqPongPacket->Clear();
+
+								*ReqPongPacket << (int16)en_PACKET_TYPE::en_PACKET_C2S_PONG;
+
+								G_SelectCheckArray[k]->SendRingBuf.Enqueue(ReqPongPacket);
+							}
+								break;
 							default:
 								break;
 							}
@@ -1096,7 +1101,7 @@ unsigned __stdcall SelectProc(void* Argument)
 						RecvPacket->Free();
 					}
 
-					if (FD_ISSET(G_SelectCheckArray[k]->ClientSocket, &WriteSet))
+					if (FD_ISSET(G_SelectCheckArray[k]->ClientSocket, &WriteSet) || G_SelectCheckArray[k]->SendRingBuf.GetUseSize() > 0)
 					{
 						while (1)
 						{
@@ -1123,7 +1128,7 @@ unsigned __stdcall SelectProc(void* Argument)
 								break;
 							}
 						}
-					}
+					}					
 				}
 			}
 			else

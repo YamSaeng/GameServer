@@ -71,7 +71,7 @@ void ServerInfoInit()
 }
 
 int main()
-{	
+{		
 	ServerInfoInit();		
 
 	SYSTEMTIME NowTime;

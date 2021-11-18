@@ -5,7 +5,7 @@ template <typename KEY, typename DATA>
 struct st_HEAP_NODE
 {
 	KEY Key;
-	DATA Data;
+	DATA Data;	
 };
 
 template<typename KEY, typename DATA>
@@ -15,7 +15,7 @@ private:
 	st_HEAP_NODE<KEY, DATA> *_HeapArray;
 	int _HeapSize;
 	int _UseSize;
-public:
+public:	
 	CHeap() {};
 	CHeap(int HeapSize);
 	~CHeap();
@@ -29,9 +29,12 @@ public:
 	void Clear();
 };
 
+//template<typename KEY, typename DATA>
+//CMemoryPoolTLS<st_HEAP_NODE<KEY,DATA>> CHeap<KEY, DATA>::_HeapMemoryPool(0);
+
 template<typename KEY, typename DATA>
 CHeap<KEY, DATA>::CHeap(int HeapSize)
-{
+{	
 	_HeapArray = (st_HEAP_NODE<KEY, DATA>*)malloc(sizeof(st_HEAP_NODE<KEY, DATA>)*HeapSize);
 	memset(_HeapArray, 0, sizeof(st_HEAP_NODE<KEY, DATA>)*HeapSize);
 	_HeapSize = HeapSize;
