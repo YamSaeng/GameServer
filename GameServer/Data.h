@@ -33,61 +33,6 @@ struct st_ConsumableData : public st_ItemData
 	en_SkillType SkillType;
 };
 
-struct st_ObjectStatusData
-{
-	en_GameObjectType PlayerType;
-	int32 Level;
-	int32 HP;
-	int32 MaxHP;
-	int32 MP;
-	int32 MaxMP;
-	int32 DP;
-	int32 MaxDP;
-	int16 AutoRecoveryHPPercent;
-	int16 AutoRecoveryMPPercent;
-	int32 MinMeleeAttackDamage;
-	int32 MaxMeleeAttackDamage;
-	int16 MeleeAttackHitRate;
-	int16 MagicDamage;
-	int16 MagicHitRate;
-	int32 Defence;
-	int16 EvasionRate;
-	int16 MeleeCriticalPoint;
-	int16 MagicCriticalPoint;
-	float Speed;	
-	int32 SearchCellDistance;
-	int32 ChaseCellDistance;
-	int32 AttackRange;
-};
-
-struct st_LevelData
-{
-	int32 Level;
-	int64 RequireExperience;
-	int64 TotalExperience;
-};
-
-struct st_DropData
-{
-	int32 Probability;
-	en_SmallItemCategory DropItemSmallCategory;
-	int8 MinCount;
-	int16 MaxCount;
-};
-
-struct st_MonsterData
-{	
-	int32 MonsterDataId; // 몬스터 번호
-	string MonsterName;  // 몬스터 이름
-	st_ObjectStatusData MonsterStatInfo; // 몬스터 스탯 정보
-	int32 SearchTick; // 탐색 속도
-	int32 PatrolTick; // 정찰 속도
-	int32 AttackTick; // 공격 속도
-	vector<st_DropData> DropItems; // 몬스터가 드랍하는 아이템 정보
-	int16 GetDPPoint;
-	int32 GetExpPoint;
-};
-
 struct st_SkillData
 {
 	en_SkillLargeCategory SkillLargeCategory;
@@ -97,7 +42,7 @@ struct st_SkillData
 	int8 SkillLevel;
 	int32 SkillCoolTime;
 	int32 SkillCastingTime;
-	int SkillDistance;	
+	int SkillDistance;
 	float SkillTargetEffectTime;
 	string SkillThumbnailImagePath;
 };
@@ -138,6 +83,64 @@ struct st_BufSkillData : public st_SkillData
 	int16 IncreaseMagicCriticalPoint; // 증가하는 마법 치명타율
 	float IncreaseSpeedPoint; // 증가하는 이동 속도	
 	int16 IncreaseStatusAbnormalityResistance; // 증가하는 상태이상저항값
+};
+
+struct st_ObjectStatusData
+{
+	en_GameObjectType PlayerType;
+	int32 Level;
+	int32 HP;
+	int32 MaxHP;
+	int32 MP;
+	int32 MaxMP;
+	int32 DP;
+	int32 MaxDP;
+	int16 AutoRecoveryHPPercent;
+	int16 AutoRecoveryMPPercent;
+	int32 MinMeleeAttackDamage;
+	int32 MaxMeleeAttackDamage;
+	int16 MeleeAttackHitRate;
+	int16 MagicDamage;
+	int16 MagicHitRate;
+	int32 Defence;
+	int16 EvasionRate;
+	int16 MeleeCriticalPoint;
+	int16 MagicCriticalPoint;
+	float Speed;	
+	int32 SearchCellDistance;
+	int32 ChaseCellDistance;
+	int32 AttackRange;
+	
+	// 각 레벨 마다 제공하는 스킬 데이터
+	vector<st_SkillData> LevelSkills;
+};
+
+struct st_LevelData
+{
+	int32 Level;
+	int64 RequireExperience;
+	int64 TotalExperience;
+};
+
+struct st_DropData
+{
+	int32 Probability;
+	en_SmallItemCategory DropItemSmallCategory;
+	int8 MinCount;
+	int16 MaxCount;
+};
+
+struct st_MonsterData
+{	
+	int32 MonsterDataId; // 몬스터 번호
+	string MonsterName;  // 몬스터 이름
+	st_ObjectStatusData MonsterStatInfo; // 몬스터 스탯 정보
+	int32 SearchTick; // 탐색 속도
+	int32 PatrolTick; // 정찰 속도
+	int32 AttackTick; // 공격 속도
+	vector<st_DropData> DropItems; // 몬스터가 드랍하는 아이템 정보
+	int16 GetDPPoint;
+	int32 GetExpPoint;
 };
 
 struct st_EnvironmentData

@@ -939,7 +939,7 @@
           "MagicCriticalPoint": 0,
           "Speed": 5.0,
           "LevelSkillDataList": [
-            {
+            { 
               "SkillLargeCategory": "SKILL_LARGE_CATEOGRY_PUBLIC",
               "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK",
               "SkillType": "SKILL_DEFAULT_ATTACK"
