@@ -19,7 +19,19 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+            {
+              "SkillLargeCategory": "SKILL_LARGE_CATEOGRY_PUBLIC",
+              "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK",
+              "SkillType": "SKILL_DEFAULT_ATTACK"
+            },
+            {
+              "SkillLargeCategory": "SKILL_LARGE_CATEGORY_WARRIOR",
+              "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK",
+              "SkillType": "SKILL_KNIGHT_SMASH_WAVE"
+            }
+          ]
         },
         {
           "Level": 2,
@@ -37,7 +49,14 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+            {
+              "SkillLargeCategory": "SKILL_LARGE_CATEGORY_WARRIOR",
+              "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK",
+              "SkillType": "SKILL_KNIGHT_SHAEHONE"
+            }
+          ]
         },
         {
           "Level": 3,
@@ -55,7 +74,14 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+            {
+              "SkillLargeCategory": "SKILL_LARGE_CATEGORY_WARRIOR",
+              "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK",
+              "SkillType": "SKILL_KNIGHT_CHOHONE"
+            }
+          ]
         },
         {
           "Level": 4,
@@ -73,7 +99,9 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 5,
@@ -91,7 +119,9 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 6,
@@ -109,7 +139,9 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 7,
@@ -127,7 +159,9 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 8,
@@ -145,7 +179,9 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 9,
@@ -163,7 +199,9 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 10,
@@ -181,7 +219,9 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 220,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         }
       ]
     }
@@ -206,7 +246,24 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 300,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+            {
+              "SkillLargeCategory": "SKILL_LARGE_CATEOGRY_PUBLIC",
+              "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK",
+              "SkillType": "SKILL_DEFAULT_ATTACK"
+            },
+            {
+              "SkillLargeCategory": "SKILL_LARGE_CATEGORY_SHMAN",
+              "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK",
+              "SkillType": "SKILL_SHAMAN_FLAME_HARPOON"
+            },
+            {
+              "SkillLargeCategory": "SKILL_LARGE_CATEGORY_SHMAN",
+              "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK",
+              "SkillType": "SKILL_SHAMAN_ROOT"
+            }
+          ]
         },
         {
           "Level": 2,
@@ -224,7 +281,14 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 300,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+            {
+              "SkillLargeCategory": "SKILL_LARGE_CATEGORY_SHMAN",
+              "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK",
+              "SkillType": "SKILL_SHAMAN_ICE_CHAIN"
+            }
+          ]
         },
         {
           "Level": 3,
@@ -242,7 +306,14 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 300,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+            {
+              "SkillLargeCategory": "SKILL_LARGE_CATEGORY_SHMAN",
+              "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK",
+              "SkillType": "SKILL_SHAMAN_ICE_WAVE"
+            }
+          ]
         },
         {
           "Level": 4,
@@ -260,7 +331,9 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 300,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 5,
@@ -278,7 +351,14 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 310,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+            {
+              "SkillLargeCategory": "SKILL_LARGE_CATEGORY_SHMAN",
+              "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK",
+              "SkillType": "SKILL_SHAMAN_LIGHTNING_STRIKE"
+            }
+          ]
         },
         {
           "Level": 6,
@@ -296,7 +376,9 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 310,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 7,
@@ -314,7 +396,9 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 310,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 8,
@@ -332,7 +416,9 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 310,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 9,
@@ -350,7 +436,9 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 310,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 10,
@@ -368,7 +456,14 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 320,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+            {
+              "SkillLargeCategory": "SKILL_LARGE_CATEGORY_SHMAN",
+              "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK",
+              "SkillType": "SKILL_SHAMAN_HELL_FIRE"
+            }
+          ]
         }
       ]
     }
@@ -393,7 +488,29 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 100,
           "MagicCriticalPoint": 200,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+            {
+              "SkillLargeCategory": "SKILL_LARGE_CATEOGRY_PUBLIC",
+              "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK",
+              "SkillType": "SKILL_DEFAULT_ATTACK"
+            },
+            {
+              "SkillLargeCategory": "SKILL_LARGE_CATEGORY_TAOIST",
+              "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK",
+              "SkillType": "SKILL_TAIOIST_DIVINE_STRIKE"
+            },
+            {
+              "SkillLargeCategory": "SKILL_LARGE_CATEGORY_TAOIST",
+              "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK",
+              "SkillType": "SKILL_TAIOIST_ROOT"
+            },
+            {
+              "SkillLargeCategory": "SKILL_LARGE_CATEGORY_TAOIST",
+              "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_TAOIST_HEAL",
+              "SkillType": "SKILL_TAIOIST_HEALING_LIGHT"
+            }
+          ]
         },
         {
           "Level": 2,
@@ -411,7 +528,9 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 100,
           "MagicCriticalPoint": 200,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 3,
@@ -429,7 +548,9 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 100,
           "MagicCriticalPoint": 200,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 4,
@@ -447,7 +568,9 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 100,
           "MagicCriticalPoint": 200,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 5,
@@ -465,7 +588,14 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 100,
           "MagicCriticalPoint": 210,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+            {
+              "SkillLargeCategory": "SKILL_LARGE_CATEGORY_TAOIST",
+              "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_TAOIST_HEAL",
+              "SkillType": "SKILL_TAIOIST_HEALING_WIND"
+            }
+          ]
         },
         {
           "Level": 6,
@@ -483,7 +613,9 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 100,
           "MagicCriticalPoint": 210,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 7,
@@ -501,7 +633,9 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 100,
           "MagicCriticalPoint": 210,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 8,
@@ -519,7 +653,9 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 100,
           "MagicCriticalPoint": 210,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 9,
@@ -537,7 +673,9 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 100,
           "MagicCriticalPoint": 210,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 10,
@@ -555,7 +693,9 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 100,
           "MagicCriticalPoint": 220,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         }
       ]
     }
@@ -580,7 +720,19 @@
           "EvasionRate": 200,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+            {
+              "SkillLargeCategory": "SKILL_LARGE_CATEOGRY_PUBLIC",
+              "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK",
+              "SkillType": "SKILL_DEFAULT_ATTACK"
+            },
+            {
+              "SkillLargeCategory": "SKILL_LARGE_CATEGORY_THIEF",
+              "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_THIEF_ATTACK",
+              "SkillType": "SKILL_THIEF_QUICK_CUT"
+            }
+          ]
         },
         {
           "Level": 2,
@@ -598,7 +750,9 @@
           "EvasionRate": 200,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 3,
@@ -616,7 +770,9 @@
           "EvasionRate": 200,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 4,
@@ -634,7 +790,9 @@
           "EvasionRate": 200,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 5,
@@ -652,7 +810,9 @@
           "EvasionRate": 300,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 6,
@@ -670,7 +830,9 @@
           "EvasionRate": 300,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 7,
@@ -688,7 +850,9 @@
           "EvasionRate": 300,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 8,
@@ -706,7 +870,9 @@
           "EvasionRate": 300,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 9,
@@ -724,7 +890,9 @@
           "EvasionRate": 300,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 10,
@@ -742,7 +910,9 @@
           "EvasionRate": 350,
           "MeleeCriticalPoint": 220,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         }
       ]
     }
@@ -767,7 +937,19 @@
           "EvasionRate": 200,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+            {
+              "SkillLargeCategory": "SKILL_LARGE_CATEOGRY_PUBLIC",
+              "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK",
+              "SkillType": "SKILL_DEFAULT_ATTACK"
+            },
+            {
+              "SkillLargeCategory": "SKILL_LARGE_CATEGORY_ARCHER",
+              "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_ARCHER_ATTACK",
+              "SkillType": "SKILL_ARCHER_SNIFING"
+            }
+          ]
         },
         {
           "Level": 2,
@@ -785,7 +967,9 @@
           "EvasionRate": 200,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 3,
@@ -803,7 +987,9 @@
           "EvasionRate": 200,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 4,
@@ -821,7 +1007,9 @@
           "EvasionRate": 200,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 5,
@@ -839,7 +1027,9 @@
           "EvasionRate": 300,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 6,
@@ -857,7 +1047,9 @@
           "EvasionRate": 300,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 7,
@@ -875,7 +1067,9 @@
           "EvasionRate": 300,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 8,
@@ -893,7 +1087,9 @@
           "EvasionRate": 300,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 9,
@@ -911,7 +1107,9 @@
           "EvasionRate": 300,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         },
         {
           "Level": 10,
@@ -929,7 +1127,9 @@
           "EvasionRate": 350,
           "MeleeCriticalPoint": 220,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 5.0,
+          "LevelSkillDataList": [
+          ]
         }
       ]
     }

@@ -221,7 +221,7 @@ enum class en_SkillMediumCategory : int8
 enum class en_SkillType : int16
 {
 	SKILL_TYPE_NONE = 0,
-	SKILL_NORMAL = 1,
+	SKILL_DEFAULT_ATTACK = 1,
 
 	SKILL_KNIGHT_FIERCE_ATTACK,
 	SKILL_KNIGHT_CONVERSION_ATTACK,

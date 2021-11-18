@@ -325,7 +325,7 @@ void CGameServer::NewPlayerDefaultSkillCreate(int64& AccountId, st_GameObjectInf
 	CDBConnection* DefaultAttackSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 	SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*DefaultAttackSkillCreateDBConnection);
 
-	auto FindDefaultAttackSkill = G_Datamanager->_PublicAttackSkillDatas.find((int16)en_SkillType::SKILL_NORMAL);
+	auto FindDefaultAttackSkill = G_Datamanager->_PublicAttackSkillDatas.find((int16)en_SkillType::SKILL_DEFAULT_ATTACK);
 	st_AttackSkillData* DefaultAttackSkillData = (*FindDefaultAttackSkill).second;
 
 	st_SkillInfo DefaultAttackSkillInfo;
@@ -1171,7 +1171,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 				{
 				case en_SkillType::SKILL_TYPE_NONE:
 					break;
-				case en_SkillType::SKILL_NORMAL:
+				case en_SkillType::SKILL_DEFAULT_ATTACK:
 					FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
 					Target = MyPlayer->_Channel->_Map->Find(FrontCell);
 					if (Target != nullptr)
@@ -1579,7 +1579,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 						case en_SkillType::SKILL_TYPE_NONE:
 							CRASH("SkillType None");
 							break;
-						case en_SkillType::SKILL_NORMAL:
+						case en_SkillType::SKILL_DEFAULT_ATTACK:
 							wsprintf(SkillTypeMessage, L"%s가 일반공격을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
 							HitEffectType = en_EffectType::EFFECT_NORMAL_ATTACK_TARGET_HIT;
 							break;
@@ -3575,7 +3575,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 
 					int8 DefaultSkillLargeCategory = (int8)en_SkillLargeCategory::SKILL_LARGE_CATEOGRY_PUBLIC;
 					int8 DefaultSkillMediumCategory = (int8)en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK;
-					int16 DefaultSkillType = (int16)en_SkillType::SKILL_NORMAL;
+					int16 DefaultSkillType = (int16)en_SkillType::SKILL_DEFAULT_ATTACK;
 					int8 DefaultAttackSkillLevel = 1;
 
 					CDBConnection* DBQuickSlotSaveConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);

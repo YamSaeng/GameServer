@@ -7,7 +7,7 @@
           "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK",
           "PublicAttackSkillList": [
             {
-              "SkillType": "SKILL_NORMAL",
+              "SkillType": "SKILL_DEFAULT_ATTACK",
               "SkillName": "일반공격",
               "SkillLevel": 1,
               "SkillMinDamage": 0,
