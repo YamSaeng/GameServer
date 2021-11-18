@@ -5,6 +5,12 @@
 
 CEquipment::CEquipment()
 {
+	_WeaponMinDamage = 0;
+	_WeaponMaxDamage = 0;
+	_HeadArmorDefence = 0;
+	_WearArmorDefence = 0;
+	_BootArmorDefence = 0;
+
 	_HeadArmorItem = nullptr;
 	_WearArmorItem = nullptr;
 	_GloveArmorItem = nullptr;
