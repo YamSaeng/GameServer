@@ -30,7 +30,6 @@ private:
 	CItem* _GloveArmorItem;
 	// 신발
 	CItem* _BootArmorItem;
-
 	// 무기
 	CItem* _WeaponItem;
 };
