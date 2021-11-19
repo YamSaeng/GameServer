@@ -65,9 +65,9 @@ private:
 	static unsigned __stdcall LogicThreadProc(void* Argument);	
 
 	//---------------------------------
-	// 캐릭터 기본 스킬 생성
+	// 캐릭터 스킬 생성
 	//---------------------------------
-	void NewPlayerDefaultSkillCreate(int64& AccountId, st_GameObjectInfo& NewCharacterInfo, int8& CharacterCreateSlotIndex);
+	void PlayerLevelUpSkillCreate(int64& AccountId, st_GameObjectInfo& NewCharacterInfo, int8& CharacterCreateSlotIndex);
 	
 	//------------------------
 	// 오브젝트 자연 회복 추가

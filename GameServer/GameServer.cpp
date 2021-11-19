@@ -319,207 +319,225 @@ unsigned __stdcall CGameServer::LogicThreadProc(void* Argument)
 	return 0;
 }
 
-void CGameServer::NewPlayerDefaultSkillCreate(int64& AccountId, st_GameObjectInfo& NewCharacterInfo, int8& CharacterCreateSlotIndex)
-{
-	// 일반 공격 스킬 생성
-	CDBConnection* DefaultAttackSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-	SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*DefaultAttackSkillCreateDBConnection);
-
-	auto FindDefaultAttackSkill = G_Datamanager->_PublicAttackSkillDatas.find((int16)en_SkillType::SKILL_DEFAULT_ATTACK);
-	st_AttackSkillData* DefaultAttackSkillData = (*FindDefaultAttackSkill).second;
-
-	st_SkillInfo DefaultAttackSkillInfo;
-	DefaultAttackSkillInfo.IsQuickSlotUse = false;
-	DefaultAttackSkillInfo.SkillLargeCategory = DefaultAttackSkillData->SkillLargeCategory;
-	DefaultAttackSkillInfo.SkillMediumCategory = DefaultAttackSkillData->SkillMediumCategory;
-	DefaultAttackSkillInfo.SkillType = DefaultAttackSkillData->SkillType;
-	DefaultAttackSkillInfo.SkillLevel = 1;
-
-	int8 DefaultAttackSkillLargeCategory = (int8)DefaultAttackSkillInfo.SkillLargeCategory;
-	int8 DefaultAttackSkillMediumCategory = (int8)DefaultAttackSkillInfo.SkillMediumCategory;
-	int16 DefaultAttackSkillType = (int16)DefaultAttackSkillInfo.SkillType;
-
-	SkillToSkillBox.InAccountDBId(AccountId);
-	SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
-	SkillToSkillBox.InIsQuickSlotUse(DefaultAttackSkillInfo.IsQuickSlotUse);
-	SkillToSkillBox.InSkillLargeCategory(DefaultAttackSkillLargeCategory);
-	SkillToSkillBox.InSkillMediumCategory(DefaultAttackSkillMediumCategory);
-	SkillToSkillBox.InSkillType(DefaultAttackSkillType);
-	SkillToSkillBox.InSkillLevel(DefaultAttackSkillInfo.SkillLevel);
-
-	SkillToSkillBox.Execute();
-
+void CGameServer::PlayerLevelUpSkillCreate(int64& AccountId, st_GameObjectInfo& NewCharacterInfo, int8& CharacterCreateSlotIndex)
+{	
 	// 클래스 공격 스킬 생성
 	switch (NewCharacterInfo.ObjectType)
 	{
 	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
+	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 	{
-		// 분쇄파동 스킬 추가
-		auto FindWarriorAttackSkill = G_Datamanager->_WarriorAttackSkillDatas.find((int)en_SkillType::SKILL_KNIGHT_SMASH_WAVE);
-		st_AttackSkillData* WarriorAttackSkillData = (*FindWarriorAttackSkill).second;
+		auto FindWarriorStatus = G_Datamanager->_WarriorStatus.find(NewCharacterInfo.ObjectStatInfo.Level);
+		st_ObjectStatusData* WarriorStatusData = (*FindWarriorStatus).second;
 
-		st_SkillInfo WarriorDefaultAttackSkillInfo;
-		WarriorDefaultAttackSkillInfo.IsQuickSlotUse = false;
-		WarriorDefaultAttackSkillInfo.SkillLargeCategory = WarriorAttackSkillData->SkillLargeCategory;
-		WarriorDefaultAttackSkillInfo.SkillMediumCategory = WarriorAttackSkillData->SkillMediumCategory;
-		WarriorDefaultAttackSkillInfo.SkillType = WarriorAttackSkillData->SkillType;
-		WarriorDefaultAttackSkillInfo.SkillLevel = 1;
+		if (WarriorStatusData != nullptr)
+		{
+			for (st_SkillData NewSkillData : WarriorStatusData->LevelSkills)
+			{
+				CDBConnection* NewSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*NewSkillCreateDBConnection);
+				
+				st_SkillInfo NewSkillInfo;
+				NewSkillInfo.IsQuickSlotUse = false;
+				NewSkillInfo.SkillLargeCategory = NewSkillData.SkillLargeCategory;
+				NewSkillInfo.SkillMediumCategory = NewSkillData.SkillMediumCategory;
+				NewSkillInfo.SkillType = NewSkillData.SkillType;
+				NewSkillInfo.SkillLevel = 1;
 
-		int8 DefaultWarriorAttackSkillLargeCategory = (int8)WarriorDefaultAttackSkillInfo.SkillLargeCategory;
-		int8 DefaultWarriorAttackSkillMediumCategory = (int8)WarriorDefaultAttackSkillInfo.SkillMediumCategory;
-		int16 DefaultWarriorAttackSkillType = (int16)WarriorDefaultAttackSkillInfo.SkillType;
+				int8 DefaultAttackSkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
+				int8 DefaultAttackSkillMediumCategory = (int8)NewSkillInfo.SkillMediumCategory;
+				int16 DefaultAttackSkillType = (int16)NewSkillInfo.SkillType;
 
-		SkillToSkillBox.InAccountDBId(AccountId);
-		SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
-		SkillToSkillBox.InIsQuickSlotUse(WarriorDefaultAttackSkillInfo.IsQuickSlotUse);
-		SkillToSkillBox.InSkillLargeCategory(DefaultWarriorAttackSkillLargeCategory);
-		SkillToSkillBox.InSkillMediumCategory(DefaultWarriorAttackSkillMediumCategory);
-		SkillToSkillBox.InSkillType(DefaultWarriorAttackSkillType);
-		SkillToSkillBox.InSkillLevel(WarriorDefaultAttackSkillInfo.SkillLevel);
+				SkillToSkillBox.InAccountDBId(AccountId);
+				SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
+				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
+				SkillToSkillBox.InSkillLargeCategory(DefaultAttackSkillLargeCategory);
+				SkillToSkillBox.InSkillMediumCategory(DefaultAttackSkillMediumCategory);
+				SkillToSkillBox.InSkillType(DefaultAttackSkillType);
+				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
 
-		SkillToSkillBox.Execute();
+				SkillToSkillBox.Execute();
+
+				G_DBConnectionPool->Push(en_DBConnect::GAME, NewSkillCreateDBConnection);
+			}
+		}
+		else
+		{
+			CRASH("전사 스킬 생성 데이터를 찾지 못함");
+		}		
 	}
 	break;
 	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 	{
-		// 불꽃 작살 추가
-		auto FindShamanAttackSkill = G_Datamanager->_ShamanAttackSkillDatas.find((int)en_SkillType::SKILL_SHAMAN_FLAME_HARPOON);
-		st_AttackSkillData* ShamanAttackSkillData = (*FindShamanAttackSkill).second;
+		auto FindShmanStatus = G_Datamanager->_ShamanStatus.find(NewCharacterInfo.ObjectStatInfo.Level);
+		st_ObjectStatusData* ShamanStatusData = (*FindShmanStatus).second;
 
-		st_SkillInfo ShamanDefaultAttackSkillInfo;
-		ShamanDefaultAttackSkillInfo.IsQuickSlotUse = false;
-		ShamanDefaultAttackSkillInfo.SkillLargeCategory = ShamanAttackSkillData->SkillLargeCategory;
-		ShamanDefaultAttackSkillInfo.SkillMediumCategory = ShamanAttackSkillData->SkillMediumCategory;
-		ShamanDefaultAttackSkillInfo.SkillType = ShamanAttackSkillData->SkillType;
-		ShamanDefaultAttackSkillInfo.SkillLevel = 1;
+		if (ShamanStatusData != nullptr)
+		{
+			for (st_SkillData NewSkillData : ShamanStatusData->LevelSkills)
+			{
+				CDBConnection* NewSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*NewSkillCreateDBConnection);
 
-		int8 DefaultShamanAttackSkillLargeCategory = (int8)ShamanDefaultAttackSkillInfo.SkillLargeCategory;
-		int8 DefaultShamanAttackSkillMediumCategory = (int8)ShamanDefaultAttackSkillInfo.SkillMediumCategory;
-		int16 DefaultShamanAttackSkillType = (int16)ShamanDefaultAttackSkillInfo.SkillType;
+				st_SkillInfo NewSkillInfo;
+				NewSkillInfo.IsQuickSlotUse = false;
+				NewSkillInfo.SkillLargeCategory = NewSkillData.SkillLargeCategory;
+				NewSkillInfo.SkillMediumCategory = NewSkillData.SkillMediumCategory;
+				NewSkillInfo.SkillType = NewSkillData.SkillType;
+				NewSkillInfo.SkillLevel = 1;
 
-		SkillToSkillBox.InAccountDBId(AccountId);
-		SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
-		SkillToSkillBox.InIsQuickSlotUse(ShamanDefaultAttackSkillInfo.IsQuickSlotUse);
-		SkillToSkillBox.InSkillLargeCategory(DefaultShamanAttackSkillLargeCategory);
-		SkillToSkillBox.InSkillMediumCategory(DefaultShamanAttackSkillMediumCategory);
-		SkillToSkillBox.InSkillType(DefaultShamanAttackSkillType);
-		SkillToSkillBox.InSkillLevel(ShamanDefaultAttackSkillInfo.SkillLevel);
+				int8 DefaultAttackSkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
+				int8 DefaultAttackSkillMediumCategory = (int8)NewSkillInfo.SkillMediumCategory;
+				int16 DefaultAttackSkillType = (int16)NewSkillInfo.SkillType;
 
-		SkillToSkillBox.Execute();
+				SkillToSkillBox.InAccountDBId(AccountId);
+				SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
+				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
+				SkillToSkillBox.InSkillLargeCategory(DefaultAttackSkillLargeCategory);
+				SkillToSkillBox.InSkillMediumCategory(DefaultAttackSkillMediumCategory);
+				SkillToSkillBox.InSkillType(DefaultAttackSkillType);
+				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
+
+				SkillToSkillBox.Execute();
+
+				G_DBConnectionPool->Push(en_DBConnect::GAME, NewSkillCreateDBConnection);
+			}
+		}
+		else
+		{
+			CRASH("주술사 스킬 생성 데이터를 찾지 못함");
+		}
 	}
 	break;
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 	{
-		// 신성한 일격 추가
-		auto FindTaioistAttackSkill = G_Datamanager->_TaioistAttackSkillDatas.find((int)en_SkillType::SKILL_TAIOIST_DIVINE_STRIKE);
-		st_AttackSkillData* TaioistAttackSkillData = (*FindTaioistAttackSkill).second;
+		auto FindTaioistStatus = G_Datamanager->_TaioistStatus.find(NewCharacterInfo.ObjectStatInfo.Level);
+		st_ObjectStatusData* TaioistStatusData = (*FindTaioistStatus).second;
 
-		st_SkillInfo TaioistDefaultAttackSkillInfo;
-		TaioistDefaultAttackSkillInfo.IsQuickSlotUse = false;
-		TaioistDefaultAttackSkillInfo.SkillLargeCategory = TaioistAttackSkillData->SkillLargeCategory;
-		TaioistDefaultAttackSkillInfo.SkillMediumCategory = TaioistAttackSkillData->SkillMediumCategory;
-		TaioistDefaultAttackSkillInfo.SkillType = TaioistAttackSkillData->SkillType;
-		TaioistDefaultAttackSkillInfo.SkillLevel = 1;
+		if (TaioistStatusData != nullptr)
+		{
+			for (st_SkillData NewSkillData : TaioistStatusData->LevelSkills)
+			{
+				CDBConnection* NewSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*NewSkillCreateDBConnection);
 
-		int8 DefaultTaioistAttackSkillLargeCategory = (int8)TaioistDefaultAttackSkillInfo.SkillLargeCategory;
-		int8 DefaultTaioistAttackSkillMediumCategory = (int8)TaioistDefaultAttackSkillInfo.SkillMediumCategory;
-		int16 DefaultTaioistAttackSkillType = (int16)TaioistDefaultAttackSkillInfo.SkillType;
+				st_SkillInfo NewSkillInfo;
+				NewSkillInfo.IsQuickSlotUse = false;
+				NewSkillInfo.SkillLargeCategory = NewSkillData.SkillLargeCategory;
+				NewSkillInfo.SkillMediumCategory = NewSkillData.SkillMediumCategory;
+				NewSkillInfo.SkillType = NewSkillData.SkillType;
+				NewSkillInfo.SkillLevel = 1;
 
-		SkillToSkillBox.InAccountDBId(AccountId);
-		SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
-		SkillToSkillBox.InIsQuickSlotUse(TaioistDefaultAttackSkillInfo.IsQuickSlotUse);
-		SkillToSkillBox.InSkillLargeCategory(DefaultTaioistAttackSkillLargeCategory);
-		SkillToSkillBox.InSkillMediumCategory(DefaultTaioistAttackSkillMediumCategory);
-		SkillToSkillBox.InSkillType(DefaultTaioistAttackSkillType);
-		SkillToSkillBox.InSkillLevel(TaioistDefaultAttackSkillInfo.SkillLevel);
+				int8 DefaultAttackSkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
+				int8 DefaultAttackSkillMediumCategory = (int8)NewSkillInfo.SkillMediumCategory;
+				int16 DefaultAttackSkillType = (int16)NewSkillInfo.SkillType;
 
-		SkillToSkillBox.Execute();
+				SkillToSkillBox.InAccountDBId(AccountId);
+				SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
+				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
+				SkillToSkillBox.InSkillLargeCategory(DefaultAttackSkillLargeCategory);
+				SkillToSkillBox.InSkillMediumCategory(DefaultAttackSkillMediumCategory);
+				SkillToSkillBox.InSkillType(DefaultAttackSkillType);
+				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
 
-		// 치유의 빛 추가
-		auto FindTaioistHealSkill = G_Datamanager->_TaioistHealSkillDatas.find((int)en_SkillType::SKILL_TAIOIST_HEALING_LIGHT);
-		st_HealSkillData* TaioistHealSkillData = (*FindTaioistHealSkill).second;
+				SkillToSkillBox.Execute();
 
-		st_SkillInfo TaioistDefaultHealSkillInfo;
-		TaioistDefaultHealSkillInfo.IsQuickSlotUse = false;
-		TaioistDefaultHealSkillInfo.SkillLargeCategory = TaioistHealSkillData->SkillLargeCategory;
-		TaioistDefaultHealSkillInfo.SkillMediumCategory = TaioistHealSkillData->SkillMediumCategory;
-		TaioistDefaultHealSkillInfo.SkillType = TaioistHealSkillData->SkillType;
-		TaioistDefaultHealSkillInfo.SkillLevel = 1;
-
-		int8 DefaultTaioistHealSkillLargeCategory = (int8)TaioistDefaultHealSkillInfo.SkillLargeCategory;
-		int8 DefaultTaioistHealSkillMediumCategory = (int8)TaioistDefaultHealSkillInfo.SkillMediumCategory;
-		int16 DefaultTaioistHealSkillType = (int16)TaioistDefaultHealSkillInfo.SkillType;
-
-		SkillToSkillBox.InAccountDBId(AccountId);
-		SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
-		SkillToSkillBox.InIsQuickSlotUse(TaioistDefaultHealSkillInfo.IsQuickSlotUse);
-		SkillToSkillBox.InSkillLargeCategory(DefaultTaioistHealSkillLargeCategory);
-		SkillToSkillBox.InSkillMediumCategory(DefaultTaioistHealSkillMediumCategory);
-		SkillToSkillBox.InSkillType(DefaultTaioistHealSkillType);
-		SkillToSkillBox.InSkillLevel(TaioistDefaultHealSkillInfo.SkillLevel);
-
-		SkillToSkillBox.Execute();
+				G_DBConnectionPool->Push(en_DBConnect::GAME, NewSkillCreateDBConnection);
+			}
+		}
+		else
+		{
+			CRASH("도사 스킬 생성 데이터를 찾지 못함");
+		}
 	}	
 	break;
 	case en_GameObjectType::OBJECT_THIEF_PLAYER:
+	{
+		auto FindThiefStatus = G_Datamanager->_ThiefStatus.find(NewCharacterInfo.ObjectStatInfo.Level);
+		st_ObjectStatusData* ThiefStatusData = (*FindThiefStatus).second;
+
+		if (ThiefStatusData != nullptr)
 		{
-			auto FindThiefAttackSkill = G_Datamanager->_ThiefAttackSkillDatas.find((int)en_SkillType::SKILL_THIEF_QUICK_CUT);
-			st_AttackSkillData* ThiefAttackSkillData = (*FindThiefAttackSkill).second;
+			for (st_SkillData NewSkillData : ThiefStatusData->LevelSkills)
+			{
+				CDBConnection* NewSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*NewSkillCreateDBConnection);
 
-			st_SkillInfo ThiefDefaultAttackSkillInfo;
-			ThiefDefaultAttackSkillInfo.IsQuickSlotUse = false;
-			ThiefDefaultAttackSkillInfo.SkillLargeCategory = ThiefAttackSkillData->SkillLargeCategory;
-			ThiefDefaultAttackSkillInfo.SkillMediumCategory = ThiefAttackSkillData->SkillMediumCategory;
-			ThiefDefaultAttackSkillInfo.SkillType = ThiefAttackSkillData->SkillType;
-			ThiefDefaultAttackSkillInfo.SkillLevel = 1;
+				st_SkillInfo NewSkillInfo;
+				NewSkillInfo.IsQuickSlotUse = false;
+				NewSkillInfo.SkillLargeCategory = NewSkillData.SkillLargeCategory;
+				NewSkillInfo.SkillMediumCategory = NewSkillData.SkillMediumCategory;
+				NewSkillInfo.SkillType = NewSkillData.SkillType;
+				NewSkillInfo.SkillLevel = 1;
 
-			int8 DefaultThiefAttackSkillLargeCategory = (int8)ThiefDefaultAttackSkillInfo.SkillLargeCategory;
-			int8 DefaultThiefAttackSkillMediumCategory = (int8)ThiefDefaultAttackSkillInfo.SkillMediumCategory;
-			int16 DefaultThiefAttackSkillType = (int16)ThiefDefaultAttackSkillInfo.SkillType;
+				int8 DefaultAttackSkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
+				int8 DefaultAttackSkillMediumCategory = (int8)NewSkillInfo.SkillMediumCategory;
+				int16 DefaultAttackSkillType = (int16)NewSkillInfo.SkillType;
 
-			SkillToSkillBox.InAccountDBId(AccountId);
-			SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
-			SkillToSkillBox.InIsQuickSlotUse(ThiefDefaultAttackSkillInfo.IsQuickSlotUse);
-			SkillToSkillBox.InSkillLargeCategory(DefaultThiefAttackSkillLargeCategory);
-			SkillToSkillBox.InSkillMediumCategory(DefaultThiefAttackSkillMediumCategory);
-			SkillToSkillBox.InSkillType(DefaultThiefAttackSkillType);
-			SkillToSkillBox.InSkillLevel(ThiefDefaultAttackSkillInfo.SkillLevel);
+				SkillToSkillBox.InAccountDBId(AccountId);
+				SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
+				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
+				SkillToSkillBox.InSkillLargeCategory(DefaultAttackSkillLargeCategory);
+				SkillToSkillBox.InSkillMediumCategory(DefaultAttackSkillMediumCategory);
+				SkillToSkillBox.InSkillType(DefaultAttackSkillType);
+				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
 
-			SkillToSkillBox.Execute();			
+				SkillToSkillBox.Execute();
+
+				G_DBConnectionPool->Push(en_DBConnect::GAME, NewSkillCreateDBConnection);
+			}
 		}
-		break;
+		else
+		{
+			CRASH("도적 스킬 생성 데이터를 찾지 못함");
+		}
+	}
+	break;
 	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
+	{
+		auto FindArcherStatus = G_Datamanager->_ArcherStatus.find(NewCharacterInfo.ObjectStatInfo.Level);
+		st_ObjectStatusData* ArcherStatusData = (*FindArcherStatus).second;
+
+		if (ArcherStatusData != nullptr)
 		{
-			auto FindArcherAttackSkill = G_Datamanager->_ArcherAttackSkillDatas.find((int)en_SkillType::SKILL_ARCHER_SNIFING);
-			st_AttackSkillData* ArcherAttackSkillData = (*FindArcherAttackSkill).second;
+			for (st_SkillData NewSkillData : ArcherStatusData->LevelSkills)
+			{
+				CDBConnection* NewSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*NewSkillCreateDBConnection);
 
-			st_SkillInfo ArcherDefaultAttackSkillInfo;
-			ArcherDefaultAttackSkillInfo.IsQuickSlotUse = false;
-			ArcherDefaultAttackSkillInfo.SkillLargeCategory = ArcherAttackSkillData->SkillLargeCategory;
-			ArcherDefaultAttackSkillInfo.SkillMediumCategory = ArcherAttackSkillData->SkillMediumCategory;
-			ArcherDefaultAttackSkillInfo.SkillType = ArcherAttackSkillData->SkillType;
-			ArcherDefaultAttackSkillInfo.SkillLevel = 1;
+				st_SkillInfo NewSkillInfo;
+				NewSkillInfo.IsQuickSlotUse = false;
+				NewSkillInfo.SkillLargeCategory = NewSkillData.SkillLargeCategory;
+				NewSkillInfo.SkillMediumCategory = NewSkillData.SkillMediumCategory;
+				NewSkillInfo.SkillType = NewSkillData.SkillType;
+				NewSkillInfo.SkillLevel = 1;
 
-			int8 DefaultArcherAttackSkillLargeCategory = (int8)ArcherDefaultAttackSkillInfo.SkillLargeCategory;
-			int8 DefaultArcherAttackSkillMediumCategory = (int8)ArcherDefaultAttackSkillInfo.SkillMediumCategory;
-			int16 DefaultArcherAttackSkillType = (int16)ArcherDefaultAttackSkillInfo.SkillType;
+				int8 DefaultAttackSkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
+				int8 DefaultAttackSkillMediumCategory = (int8)NewSkillInfo.SkillMediumCategory;
+				int16 DefaultAttackSkillType = (int16)NewSkillInfo.SkillType;
 
-			SkillToSkillBox.InAccountDBId(AccountId);
-			SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
-			SkillToSkillBox.InIsQuickSlotUse(ArcherDefaultAttackSkillInfo.IsQuickSlotUse);
-			SkillToSkillBox.InSkillLargeCategory(DefaultArcherAttackSkillLargeCategory);
-			SkillToSkillBox.InSkillMediumCategory(DefaultArcherAttackSkillMediumCategory);
-			SkillToSkillBox.InSkillType(DefaultArcherAttackSkillType);
-			SkillToSkillBox.InSkillLevel(ArcherDefaultAttackSkillInfo.SkillLevel);
+				SkillToSkillBox.InAccountDBId(AccountId);
+				SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
+				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
+				SkillToSkillBox.InSkillLargeCategory(DefaultAttackSkillLargeCategory);
+				SkillToSkillBox.InSkillMediumCategory(DefaultAttackSkillMediumCategory);
+				SkillToSkillBox.InSkillType(DefaultAttackSkillType);
+				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
 
-			SkillToSkillBox.Execute();
+				SkillToSkillBox.Execute();
+
+				G_DBConnectionPool->Push(en_DBConnect::GAME, NewSkillCreateDBConnection);
+			}
 		}
-		break;
+		else
+		{
+			CRASH("궁사 스킬 생성 데이터를 찾지 못함");
+		}
+	}
+	break;
 	default:
 		break;
-	}
-
-	G_DBConnectionPool->Push(en_DBConnect::GAME, DefaultAttackSkillCreateDBConnection);
+	}	
 }
 
 void CGameServer::ObjectAutoRecovery(int16 ObjectId, en_GameObjectType GameObjectType, int16 Level)
@@ -3535,7 +3553,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 						wstring SkillThumbnailImagePath;
 
 						for (int8 i = 0; i < (int8)en_QuickSlotBar::QUICK_SLOT_BAR_SLOT_SIZE; ++i)
-						{
+						{	
 							QuickSlotBarSlotIndex = i;
 
 							if (DefaultKey == (int16)UnityEngine::Colon)
@@ -3563,7 +3581,8 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 						G_DBConnectionPool->Push(en_DBConnect::GAME, DBQuickSlotCreateConnection);
 					}
 
-					NewPlayerDefaultSkillCreate(Session->AccountId, NewPlayerCharacter->_GameObjectInfo, ReqCharacterCreateSlotIndex);
+					// 기본 스킬 생성
+					PlayerLevelUpSkillCreate(Session->AccountId, NewPlayerCharacter->_GameObjectInfo, ReqCharacterCreateSlotIndex);
 					
 					// 기본 공격 스킬 퀵슬롯 1번에 등록
 					st_QuickSlotBarSlotInfo DefaultAttackSkillQuickSlotInfo;
