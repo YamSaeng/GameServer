@@ -82,7 +82,7 @@ public:
 			Chunk->_FreeCount = CHUNK_DATA_MAX;
 
 			InterlockedIncrement(&_AllocCount);
-			InterlockedAdd(&_UseCount, 100);
+			InterlockedAdd(&_UseCount, CHUNK_DATA_MAX);
 
 			TlsSetValue(_TlsIndex, Chunk);
 		}
@@ -106,7 +106,7 @@ public:
 			NewChunk->_FreeCount = CHUNK_DATA_MAX;
 
 			InterlockedIncrement(&_AllocCount);
-			InterlockedAdd(&_UseCount, 100);
+			InterlockedAdd(&_UseCount, CHUNK_DATA_MAX);
 
 			TlsSetValue(_TlsIndex, NewChunk); //쓰레드 지역저장소에 새로 받은 청크를 등록해둔다.`
 		}

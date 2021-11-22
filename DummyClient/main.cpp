@@ -588,7 +588,8 @@ enum en_ClientMessage
 {
 	CHAT_MSG,
 	MOVE,
-	MELEE_ATTACK
+	MELEE_ATTACK,
+	DISCONNECT
 };
 
 int64 G_DummyClientAccountId = 1000000;
@@ -637,7 +638,9 @@ static unsigned __stdcall SelectProc(void* Argument);
 st_Client* G_ClientArray;
 st_Client** G_SelectCheckArray;
 
-#define CLIENT_MAX 500
+CMemoryPoolTLS<CMessage> G_DummyClientMessage;
+
+#define CLIENT_MAX 1024
 
 int main()
 {
@@ -671,8 +674,9 @@ unsigned __stdcall SendProc(void* Argument)
 			if (G_ClientArray[i].IsLogin == true && G_ClientArray[i].IsEnterGame == true)
 			{
 				int RandMessageType = rand() % 3;
-				int RandDir;				
-				CMessage* RandPacket = RandPacket = CMessage::Alloc();
+				int RandDir;			
+
+				CMessage* RandPacket = CMessage::Alloc();
 				RandPacket->Clear();
 
 				wstring SendChatMsg;
@@ -702,9 +706,12 @@ unsigned __stdcall SendProc(void* Argument)
 					RandDir = rand() % 4;
 					*RandPacket << (int8)RandDir;
 
+					wprintf(L"[%s] Move Req Dir : [%d] Y : [%d] X : [%d]\n", G_ClientArray[i].LoginId.c_str(), RandDir,G_ClientArray[i].MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY,G_ClientArray[i].MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX);
+
 					G_ClientArray[i].SendRingBuf.Enqueue(RandPacket);
 					break;	
 				case en_ClientMessage::MELEE_ATTACK:
+					RandPacket->Free();
 					break;
 				}
 			}
@@ -714,7 +721,7 @@ unsigned __stdcall SendProc(void* Argument)
 			}			
 		}
 
-		Sleep(1000);
+		Sleep(100);		
 	}
 
 	return 0;
@@ -811,7 +818,7 @@ unsigned __stdcall SelectProc(void* Argument)
 						G_SelectCheckArray[k]->RecvRingBuf.MoveRear(RecvRet);
 
 						CMessage::st_ENCODE_HEADER Header;
-						CMessage* RecvPacket = CMessage::Alloc();
+						CMessage* RecvPacket = CMessage::Alloc();						
 
 						while (1)
 						{
@@ -855,8 +862,8 @@ unsigned __stdcall SelectProc(void* Argument)
 								bool IsDummy = true;
 
 								CMessage* ReqGameServerLoginPacket = CMessage::Alloc();
-
 								ReqGameServerLoginPacket->Clear();
+
 								WCHAR DummyCharacterName[256] = { 0 };
 								swprintf_s(DummyCharacterName, sizeof(DummyCharacterName), L"Dummy_Player %d", G_DummyClientLoginId++);
 
@@ -935,7 +942,8 @@ unsigned __stdcall SelectProc(void* Argument)
 
 										*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.PlayerSlotIndex;
 
-										CMessage* ReqEnterGamePacket = CMessage::Alloc();
+										CMessage* ReqEnterGamePacket = CMessage::Alloc();										
+
 										ReqEnterGamePacket->Clear();
 
 										*ReqEnterGamePacket << (int16)en_PACKET_C2S_GAME_ENTER;
@@ -1024,7 +1032,7 @@ unsigned __stdcall SelectProc(void* Argument)
 									*RecvPacket >> CharacterOwnerObjectType;
 									*RecvPacket >> G_SelectCheckArray[k]->MyCharacterGameObjectInfo.PlayerSlotIndex;
 
-									CMessage* ReqEnterGamePacket = CMessage::Alloc();
+									CMessage* ReqEnterGamePacket = CMessage::Alloc();									
 									ReqEnterGamePacket->Clear();
 
 									*ReqEnterGamePacket << (int16)en_PACKET_C2S_GAME_ENTER;
@@ -1069,19 +1077,8 @@ unsigned __stdcall SelectProc(void* Argument)
 								G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectPositionInfo.State = (en_CreatureState)CreatureState;
 								G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX = PositionX;
 								G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY = PositionY;
-								G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectPositionInfo.MoveDir = (en_MoveDir)MoveDir;
+								G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectPositionInfo.MoveDir = (en_MoveDir)MoveDir;							
 
-								CMessage* ReqMoveStopPacket = CMessage::Alloc();
-
-								ReqMoveStopPacket->Clear();
-								*ReqMoveStopPacket << (int16)en_PACKET_C2S_OBJECT_STATE_CHANGE;
-								*ReqMoveStopPacket << G_SelectCheckArray[k]->AccountId;
-								*ReqMoveStopPacket << G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectId;
-								*ReqMoveStopPacket << (int16)G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectType;
-								*ReqMoveStopPacket << G_SelectCheckArray[k]->MyCharacterGameObjectInfo.ObjectId;
-								*ReqMoveStopPacket << (int16)en_StateChange::MOVE_TO_STOP;
-
-								G_SelectCheckArray[k]->SendRingBuf.Enqueue(ReqMoveStopPacket);
 							}
 							break;
 							case en_PACKET_S2C_PING:
@@ -1095,8 +1092,8 @@ unsigned __stdcall SelectProc(void* Argument)
 								break;
 							default:
 								break;
-							}
-						}
+							}													
+						}		
 
 						RecvPacket->Free();
 					}
@@ -1109,7 +1106,7 @@ unsigned __stdcall SelectProc(void* Argument)
 
 							if (G_SelectCheckArray[k]->SendRingBuf.Dequeue(&Packet) == true)
 							{
-								Packet->Encode();
+								Packet->Encode();								
 
 								int SendRet = send(G_SelectCheckArray[k]->ClientSocket, Packet->GetBufferPtr(), Packet->GetUseBufferSize(), 0);
 								if (SendRet == SOCKET_ERROR)
@@ -1120,7 +1117,7 @@ unsigned __stdcall SelectProc(void* Argument)
 										break;
 									}
 								}
-
+								
 								Packet->Free();
 							}
 							else
