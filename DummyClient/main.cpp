@@ -640,7 +640,7 @@ st_Client** G_SelectCheckArray;
 
 CMemoryPoolTLS<CMessage> G_DummyClientMessage;
 
-#define CLIENT_MAX 1024
+#define CLIENT_MAX 960
 
 int main()
 {
@@ -706,13 +706,13 @@ unsigned __stdcall SendProc(void* Argument)
 					RandDir = rand() % 4;
 					*RandPacket << (int8)RandDir;
 
-					wprintf(L"[%s] Move Req Dir : [%d] Y : [%d] X : [%d]\n", G_ClientArray[i].LoginId.c_str(), RandDir,G_ClientArray[i].MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY,G_ClientArray[i].MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX);
+					wprintf(L"[%s] Move Req Dir : [%d] \n", G_ClientArray[i].LoginId.c_str(), RandDir);
 
 					G_ClientArray[i].SendRingBuf.Enqueue(RandPacket);
 					break;	
 				case en_ClientMessage::MELEE_ATTACK:
 					RandPacket->Free();
-					break;
+					break;				
 				}
 			}
 			else
