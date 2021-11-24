@@ -640,7 +640,7 @@ st_Client** G_SelectCheckArray;
 
 CMemoryPoolTLS<CMessage> G_DummyClientMessage;
 
-#define CLIENT_MAX 960
+#define CLIENT_MAX 1000
 
 int main()
 {
@@ -761,26 +761,33 @@ unsigned __stdcall SelectProc(void* Argument)
 
 	while (1)
 	{
-		int SelectIndex = 0;
-
-		for (int i = 0; i < CLIENT_MAX / FD_SETSIZE; i++)
+		int ClientArrayIndex = 0;		
+		
+		while(1)
 		{
 			FD_ZERO(&ReadSet);
 			FD_ZERO(&WriteSet);
 
-			// 검사할 소켓 셋팅
-			for (int j = 0; j < FD_SETSIZE; j++)
+			int SelectCheckArrayIndex = 0;
+			// 검사할 소켓을 담는다 최대 64개
+			for (int j = ClientArrayIndex; j < CLIENT_MAX && SelectCheckArrayIndex < FD_SETSIZE; j++)
 			{
-				FD_SET(G_ClientArray[SelectIndex].ClientSocket, &ReadSet);
-
-				if (G_ClientArray[SelectIndex].SendRingBuf.GetUseSize() > 0)
+				if (G_ClientArray[ClientArrayIndex].ClientSocket == INVALID_SOCKET)
 				{
-					FD_SET(G_ClientArray[SelectIndex].ClientSocket, &WriteSet);
+					continue;
 				}
 
-				G_SelectCheckArray[j] = &G_ClientArray[SelectIndex];
+				FD_SET(G_ClientArray[ClientArrayIndex].ClientSocket, &ReadSet);
 
-				SelectIndex++;
+				if (G_ClientArray[ClientArrayIndex].SendRingBuf.GetUseSize() > 0)
+				{
+					FD_SET(G_ClientArray[ClientArrayIndex].ClientSocket, &WriteSet);
+				}
+
+				G_SelectCheckArray[SelectCheckArrayIndex] = &G_ClientArray[ClientArrayIndex];
+
+				ClientArrayIndex++;
+				SelectCheckArrayIndex++;
 			}
 
 			timeval Time;
@@ -796,7 +803,7 @@ unsigned __stdcall SelectProc(void* Argument)
 
 			if (SelectRetval > 0)
 			{
-				for (int k = 0; k < FD_SETSIZE; k++)
+				for (int k = 0; k < CLIENT_MAX && k < FD_SETSIZE; k++)
 				{
 					if (FD_ISSET(G_SelectCheckArray[k]->ClientSocket, &ReadSet))
 					{
@@ -1131,6 +1138,11 @@ unsigned __stdcall SelectProc(void* Argument)
 			else
 			{
 
+			}
+
+			if (ClientArrayIndex == CLIENT_MAX)
+			{
+				break;
 			}
 		}
 	}
