@@ -10,6 +10,8 @@ CGameObject::CGameObject()
 	_Channel = nullptr;
 	_Target = nullptr;
 	_SelectTarget = nullptr;
+
+	_NatureRecoveryTick = 0;
 }
 
 CGameObject::CGameObject(st_GameObjectInfo GameObjectInfo)
@@ -26,7 +28,7 @@ CGameObject::~CGameObject()
 
 void CGameObject::Update()
 {
-
+	
 }
 
 bool CGameObject::OnDamaged(CGameObject* Attacker, int32 DamagePoint)

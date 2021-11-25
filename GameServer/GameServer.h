@@ -67,12 +67,7 @@ private:
 	//---------------------------------
 	// 캐릭터 스킬 생성
 	//---------------------------------
-	void PlayerLevelUpSkillCreate(int64& AccountId, st_GameObjectInfo& NewCharacterInfo, int8& CharacterCreateSlotIndex);
-	
-	//------------------------
-	// 오브젝트 자연 회복 추가
-	//------------------------
-	void ObjectAutoRecovery(int16 ObjectId, en_GameObjectType GameObjectType, int16 Level);
+	void PlayerLevelUpSkillCreate(int64& AccountId, st_GameObjectInfo& NewCharacterInfo, int8& CharacterCreateSlotIndex);	
 
 	//------------------------------------
 	// 클라 접속 기본 정보 셋팅

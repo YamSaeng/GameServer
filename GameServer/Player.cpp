@@ -17,6 +17,17 @@ CPlayer::~CPlayer()
 
 void CPlayer::Update()
 {	
+	if (_NatureRecoveryTick < GetTickCount64())
+	{
+		int32 AutoHPRecoveryPoint = 0;
+		int32 AutoMPRecoveryPoint = 0;	
+
+		AutoHPRecoveryPoint = (_GameObjectInfo.ObjectStatInfo.MaxHP / 100) * _GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent;
+		AutoMPRecoveryPoint = (_GameObjectInfo.ObjectStatInfo.MaxMP / 100) * _GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent;
+
+		_NatureRecoveryTick = GetTickCount64() + 5000;
+	}
+
 	switch (_GameObjectInfo.ObjectPositionInfo.State)
 	{
 	case en_CreatureState::ATTACK:		

@@ -541,24 +541,6 @@ void CGameServer::PlayerLevelUpSkillCreate(int64& AccountId, st_GameObjectInfo& 
 	}	
 }
 
-void CGameServer::ObjectAutoRecovery(int16 ObjectId, en_GameObjectType GameObjectType, int16 Level)
-{
-	int32 AutoHPRecoveryPoint = 0;
-	int32 AutoMPRecoveryPoint = 0;
-
-	st_ObjectStatusData* CharacterStatus = G_Datamanager->FindObjectStatusData(GameObjectType, Level);
-	CGameObject* FindObject = G_ObjectManager->Find(ObjectId, GameObjectType);
-
-	AutoHPRecoveryPoint = (FindObject->_GameObjectInfo.ObjectStatInfo.MaxHP / 100) * CharacterStatus->AutoRecoveryHPPercent;
-	AutoMPRecoveryPoint = (FindObject->_GameObjectInfo.ObjectStatInfo.MaxMP / 100) * CharacterStatus->AutoRecoveryMPPercent;
-
-	// 10초마다 한번씩 HP와 MP를 일정 비율 회복
-	st_TimerJob* AutoRecoveryJob = ObjectDotTimerCreate(FindObject, en_DotType::DOT_TYPE_AUTO_RECOVERY, 10000, AutoHPRecoveryPoint, AutoMPRecoveryPoint);
-	
-	CPlayer* IsPlayer = static_cast<CPlayer*>(FindObject);
-	IsPlayer->_NatureAutoRecoveryJob = AutoRecoveryJob;
-}
-
 void CGameServer::CreateNewClient(int64 SessionId)
 {
 	// 세션 찾기
@@ -644,9 +626,7 @@ void CGameServer::DeleteClient(st_Session* Session)
 			CPlayer* SessionPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndexes[i]];
 			if (SessionPlayer != nullptr)
 			{
-				SessionPlayer->_NetworkState = en_ObjectNetworkState::LEAVE;
-				SessionPlayer->_NatureAutoRecoveryJob->TimerJobCancel = true;	
-				SessionPlayer->_NatureAutoRecoveryJob = nullptr;
+				SessionPlayer->_NetworkState = en_ObjectNetworkState::LEAVE;				
 				// 오브젝트 반납 ( = 인덱스 반납 )
 				G_ObjectManager->ObjectLeaveGame(SessionPlayer, Session->MyPlayerIndexes[i], 1);
 			}			
@@ -972,10 +952,7 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 			DBCharacterInfoSendJob->Message = nullptr;
 
 			_GameServerDataBaseThreadMessageQue.Enqueue(DBCharacterInfoSendJob);
-			SetEvent(_DataBaseWakeEvent);
-
-			// 접속한 캐릭터 대상으로 재생력 활성화
-			ObjectAutoRecovery(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectStatInfo.Level);
+			SetEvent(_DataBaseWakeEvent);			
 		}
 		else
 		{

@@ -55,6 +55,11 @@ protected:
 	//---------------
 	CGameObject* _Target;	
 
+	//-------------------------
+	// Àç»ý·Â Tick
+	//-------------------------
+	uint64 _NatureRecoveryTick;
+
 	void BroadCastPacket(en_PACKET_TYPE PacketType);
 };
 

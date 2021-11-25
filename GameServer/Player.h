@@ -21,12 +21,7 @@ public:
 	//--------------------
 	// 시전 중인 스킬 Job
 	//--------------------
-	st_TimerJob* _SkillJob;
-
-	//---------------------------------
-	// 자연 회복 Job
-	//---------------------------------
-	st_TimerJob* _NatureAutoRecoveryJob;
+	st_TimerJob* _SkillJob;	
 
 	int64 _SessionId;
 	int64 _AccountId;
