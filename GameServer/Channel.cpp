@@ -144,9 +144,9 @@ vector<CGameObject*> CChannel::GetAroundObjects(CGameObject* Object, int32 Range
 
 vector<CPlayer*> CChannel::GetAroundPlayer(CGameObject* Object, int32 Range, bool ExceptMe)
 {
+	vector<CPlayer*> Players;	
 	// 주위 섹터 얻어오고
 	vector<CSector*> Sectors = GetAroundSectors(Object->GetCellPosition(), Range);
-	vector<CPlayer*> Players;
 
 	// 섹터에 있는 플레이어를 담아서 반환
 	// ExceptMe가 true면 제외 false면 포함

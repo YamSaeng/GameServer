@@ -12,8 +12,21 @@ class CPlayer : public CGameObject
 public:	
 	uint64 _AttackTick;
 	uint64 _SpellTick;
+
+	//---------------------
+	// 시전 한 스킬 종류
+	//---------------------
 	en_SkillType _SkillType;
+
+	//--------------------
+	// 시전 중인 스킬 Job
+	//--------------------
 	st_TimerJob* _SkillJob;
+
+	//---------------------------------
+	// 자연 회복 Job
+	//---------------------------------
+	st_TimerJob* _NatureAutoRecoveryJob;
 
 	int64 _SessionId;
 	int64 _AccountId;

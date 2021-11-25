@@ -59,5 +59,5 @@ struct st_TimerJob
 	CGameServerMessage* TimerJobMessage = nullptr;
 	st_Session* Session = nullptr;
 	int64 TimerJobExecTick;		 // 타이머 잡 실행 시간
-	bool TimerJobCancel = false; // 타이머 잡 취소 변수
+	bool TimerJobCancel = false; // 타이머 잡 취소 변수	
 };

@@ -120,7 +120,7 @@ void CNetworkLib::SendPost(st_Session* SendSession)
 	do
 	{
 		/*
-			IsSend를 1(true)로 바꾸면서 그전의 값이 0(false)인지 확인한다.
+			IsSend를 SENDING_DO(true)로 바꾸면서 그전의 값이 SENDING_DO_NOT(false)인지 확인한다.
 			그전의 값이 0(false)이라면 내가 바꾸면서 진입한것을 말하는데, 이것은 내가 직접 WSASend를 거는것을 의미하는것이고
 			다른 워커 쓰레드가 일어나서 이쪽으로 진입해도 IsSend가 0이 될때까지는 WSASend작업을 하지 않게 막아준다.
 		*/

@@ -495,7 +495,7 @@ public:
 	//--------------------------------------------------------------
 	// 오브젝트 도트 타이머 잡 생성
 	//--------------------------------------------------------------
-	void ObjectDotTimerCreate(CGameObject* Target, en_DotType DotType, int64 DotTime, int32 HPPoint, int32 MPPoint, int64 DotTotalTime = 0, int64 SessionId = 0);
+	st_TimerJob* ObjectDotTimerCreate(CGameObject* Target, en_DotType DotType, int64 DotTime, int32 HPPoint, int32 MPPoint, int64 DotTotalTime = 0, int64 SessionId = 0);
 
 	//-------------------------------------------
 	// 핑 타이머 잡 생성

@@ -266,6 +266,7 @@ unsigned __stdcall CGameServer::TimerJobThreadProc(void* Argument)
 				st_TimerJob* TimerJob = Instance->_TimerHeapJob->PopHeap();
 				ReleaseSRWLockExclusive(&Instance->_TimerJobLock);
 
+				// 취소가 되지 않은 TimerJob을 대상으로 처리
 				if (TimerJob->TimerJobCancel != true)
 				{
 					// Type에 따라 실행한다.
@@ -552,7 +553,10 @@ void CGameServer::ObjectAutoRecovery(int16 ObjectId, en_GameObjectType GameObjec
 	AutoMPRecoveryPoint = (FindObject->_GameObjectInfo.ObjectStatInfo.MaxMP / 100) * CharacterStatus->AutoRecoveryMPPercent;
 
 	// 10초마다 한번씩 HP와 MP를 일정 비율 회복
-	ObjectDotTimerCreate(FindObject, en_DotType::DOT_TYPE_AUTO_RECOVERY, 10000, AutoHPRecoveryPoint, AutoMPRecoveryPoint);
+	st_TimerJob* AutoRecoveryJob = ObjectDotTimerCreate(FindObject, en_DotType::DOT_TYPE_AUTO_RECOVERY, 10000, AutoHPRecoveryPoint, AutoMPRecoveryPoint);
+	
+	CPlayer* IsPlayer = static_cast<CPlayer*>(FindObject);
+	IsPlayer->_NatureAutoRecoveryJob = AutoRecoveryJob;
 }
 
 void CGameServer::CreateNewClient(int64 SessionId)
@@ -641,6 +645,9 @@ void CGameServer::DeleteClient(st_Session* Session)
 			if (SessionPlayer != nullptr)
 			{
 				SessionPlayer->_NetworkState = en_ObjectNetworkState::LEAVE;
+				SessionPlayer->_NatureAutoRecoveryJob->TimerJobCancel = true;	
+				SessionPlayer->_NatureAutoRecoveryJob = nullptr;
+				// 오브젝트 반납 ( = 인덱스 반납 )
 				G_ObjectManager->ObjectLeaveGame(SessionPlayer, Session->MyPlayerIndexes[i], 1);
 			}			
 		}
@@ -967,7 +974,7 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 			_GameServerDataBaseThreadMessageQue.Enqueue(DBCharacterInfoSendJob);
 			SetEvent(_DataBaseWakeEvent);
 
-			// 접속한 캐릭터 대상으로 재생력 On
+			// 접속한 캐릭터 대상으로 재생력 활성화
 			ObjectAutoRecovery(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectStatInfo.Level);
 		}
 		else
@@ -6083,7 +6090,8 @@ void CGameServer::PacketProcTimerDot(int64 SessionId, CGameServerMessage* Messag
 
 			// 힐 도트 시간이 아직 남아 있을 경우 예약
 			if (DotTotalTime > 0)
-			{				ObjectDotTimerCreate(FindObject, (en_DotType)DotType, DotTime, DotTotalTime, Session->SessionId);
+			{				
+				ObjectDotTimerCreate(FindObject, (en_DotType)DotType, DotTime, DotTotalTime, Session->SessionId);
 			}
 			break;
 		case en_DotType::DOT_TYPE_POISON:
@@ -6114,28 +6122,36 @@ void CGameServer::PacketProcTimerDot(int64 SessionId, CGameServerMessage* Messag
 		ResObjectStatChangePacket->Free();
 	}
 	// 세션이 없을 경우에는 자연 회복 도트를 의미
-	else if (Session == nullptr && FindObject != nullptr)
+	else if (Session == nullptr && FindObject != nullptr && FindObject->_NetworkState == en_ObjectNetworkState::LIVE)
 	{
-		// 자연 회복
-		FindObject->_GameObjectInfo.ObjectStatInfo.HP += HPPoint;
-		FindObject->_GameObjectInfo.ObjectStatInfo.MP += MPPoint;
-
-		if (FindObject->_GameObjectInfo.ObjectStatInfo.HP >= FindObject->_GameObjectInfo.ObjectStatInfo.MaxHP)
+		if (FindObject->_GameObjectInfo.ObjectStatInfo.HP != FindObject->_GameObjectInfo.ObjectStatInfo.MaxHP
+			|| FindObject->_GameObjectInfo.ObjectStatInfo.MP != FindObject->_GameObjectInfo.ObjectStatInfo.MaxMP)
 		{
-			FindObject->_GameObjectInfo.ObjectStatInfo.HP = FindObject->_GameObjectInfo.ObjectStatInfo.MaxHP;
-		}
+			// 자연 회복
+			FindObject->_GameObjectInfo.ObjectStatInfo.HP += HPPoint;
+			FindObject->_GameObjectInfo.ObjectStatInfo.MP += MPPoint;
 
-		if (FindObject->_GameObjectInfo.ObjectStatInfo.MP >= FindObject->_GameObjectInfo.ObjectStatInfo.MaxMP)
-		{
-			FindObject->_GameObjectInfo.ObjectStatInfo.MP = FindObject->_GameObjectInfo.ObjectStatInfo.MaxMP;
-		}
+			if (FindObject->_GameObjectInfo.ObjectStatInfo.HP >= FindObject->_GameObjectInfo.ObjectStatInfo.MaxHP)
+			{
+				FindObject->_GameObjectInfo.ObjectStatInfo.HP = FindObject->_GameObjectInfo.ObjectStatInfo.MaxHP;
+			}
 
-		ObjectDotTimerCreate(FindObject, (en_DotType)DotType, DotTime, HPPoint, MPPoint);
+			if (FindObject->_GameObjectInfo.ObjectStatInfo.MP >= FindObject->_GameObjectInfo.ObjectStatInfo.MaxMP)
+			{
+				FindObject->_GameObjectInfo.ObjectStatInfo.MP = FindObject->_GameObjectInfo.ObjectStatInfo.MaxMP;
+			}
 
-		// 변경된 HP 전송
-		CGameServerMessage* ResObjectStatChangePacket = MakePacketResChangeObjectStat(FindObject->_GameObjectInfo.ObjectId, FindObject->_GameObjectInfo.ObjectStatInfo);
-		SendPacketAroundSector(FindObject->GetCellPosition(), ResObjectStatChangePacket);
-		ResObjectStatChangePacket->Free();
+			ObjectDotTimerCreate(FindObject, (en_DotType)DotType, DotTime, HPPoint, MPPoint);
+
+			// 변경된 HP 전송
+			CGameServerMessage* ResObjectStatChangePacket = MakePacketResChangeObjectStat(FindObject->_GameObjectInfo.ObjectId, FindObject->_GameObjectInfo.ObjectStatInfo);
+			SendPacketAroundSector(FindObject->GetCellPosition(), ResObjectStatChangePacket);
+			ResObjectStatChangePacket->Free();
+		}		
+	}
+	else if (Session == nullptr && FindObject->_NetworkState == en_ObjectNetworkState::LIVE)
+	{
+		// 네트워크 연결 끊긴 대상
 	}
 
 	Message->Free();
@@ -7126,7 +7142,7 @@ void CGameServer::ObjectStateChangeTimerJobCreate(CGameObject* Target, en_Creatu
 	SetEvent(_TimerThreadWakeEvent);
 }
 
-void CGameServer::ObjectDotTimerCreate(CGameObject* Target, en_DotType DotType, int64 DotTime, int32 HPPoint, int32 MPPoint, int64 DotTotalTime, int64 SessionId)
+st_TimerJob* CGameServer::ObjectDotTimerCreate(CGameObject* Target, en_DotType DotType, int64 DotTime, int32 HPPoint, int32 MPPoint, int64 DotTotalTime, int64 SessionId)
 {
 	st_TimerJob* ObjectDotTimerJob = _TimerJobMemoryPool->Alloc();
 	ObjectDotTimerJob->TimerJobExecTick = GetTickCount64() + DotTime;
@@ -7136,7 +7152,7 @@ void CGameServer::ObjectDotTimerCreate(CGameObject* Target, en_DotType DotType, 
 	CGameServerMessage* ResObjectDotMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResObjectDotMessage == nullptr)
 	{
-		return;
+		return nullptr;
 	}
 
 	ResObjectDotMessage->Clear();
@@ -7155,6 +7171,8 @@ void CGameServer::ObjectDotTimerCreate(CGameObject* Target, en_DotType DotType, 
 	ReleaseSRWLockExclusive(&_TimerJobLock);
 
 	SetEvent(_TimerThreadWakeEvent);
+
+	return ObjectDotTimerJob;
 }
 
 void CGameServer::PingTimerCreate(st_Session* PingSession)
