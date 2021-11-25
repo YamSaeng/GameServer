@@ -17,10 +17,10 @@ class CObjectManager
 private:
 	enum en_ObjectCount
 	{
-		PLAYER_MAX = 5000,
-		MONSTER_MAX = 5000,
-		ITEM_MAX = 5000,
-		ENVIRONMENT_MAX = 5000
+		PLAYER_MAX = 15000,
+		MONSTER_MAX = 15000,
+		ITEM_MAX = 15000,
+		ENVIRONMENT_MAX = 15000
 	};	
 		
 	CMemoryPoolTLS<CPlayer>* _PlayerMemoryPool;		
