@@ -97,9 +97,9 @@ vector<CSector*> CChannel::GetAroundSectors(st_Vector2Int CellPosition, int32 Ra
 	return Sectors;
 }
 
-vector<CGameObject*> CChannel::GetAroundObjects(CGameObject* Object, int32 Range, bool ExceptMe)
+vector<CGameObject*> CChannel::GetAroundSectorObjects(CGameObject* Object, int32 Range, bool ExceptMe)
 {
-	vector<CGameObject*> GameObjects;
+	vector<CGameObject*> SectorGameObjects;
 
 	vector<CSector*> Sectors = GetAroundSectors(Object->GetCellPosition(), Range);
 		
@@ -107,39 +107,101 @@ vector<CGameObject*> CChannel::GetAroundObjects(CGameObject* Object, int32 Range
 	{
 		// 주변 섹터 플레이어 정보
 		for (CPlayer* Player : Sector->GetPlayers())
-		{
+		{			
 			// 함수 호출한 오브젝트를 포함할 것인지에 대한 여부 true면 제외 false면 포함
 			if (ExceptMe == true)
 			{
 				if (Object->_GameObjectInfo.ObjectId != Player->_GameObjectInfo.ObjectId)
 				{
-					GameObjects.push_back(Player);
+					SectorGameObjects.push_back(Player);
 				}
 			}
 			else
 			{
-				GameObjects.push_back(Player);
+				SectorGameObjects.push_back(Player);
 			}		
 		}
 
 		// 주변 섹터 몬스터 정보
 		for (CMonster* Monster : Sector->GetMonsters())
 		{
-			GameObjects.push_back(Monster);
+			SectorGameObjects.push_back(Monster);
 		}
 
 		for (CEnvironment* Environment : Sector->GetEnvironment())
 		{
-			GameObjects.push_back(Environment);
+			SectorGameObjects.push_back(Environment);
 		}
 
 		for (CItem* Item : Sector->GetItems())
 		{
-			GameObjects.push_back(Item);
+			SectorGameObjects.push_back(Item);
 		}
 	}	
 	
-	return GameObjects;
+	return SectorGameObjects;
+}
+
+vector<CGameObject*> CChannel::GetFieldOfViewObjects(CPlayer* MyPlayer, int16 Range, bool ExceptMe)
+{
+	vector<CGameObject*> FieldOfViewGameObjects;
+
+	vector<CSector*> Sectors = GetAroundSectors(MyPlayer->GetCellPosition(), Range);
+
+	for (CSector* Sector : Sectors)
+	{
+		// 주변 섹터 플레이어 정보
+		for (CPlayer* Player : Sector->GetPlayers())
+		{
+			int16 Distance = st_Vector2Int::Distance(MyPlayer->GetCellPosition(), Player->GetCellPosition());
+
+			// 함수 호출한 오브젝트를 포함할 것인지에 대한 여부 true면 제외 false면 포함
+			if (ExceptMe == true && Distance < MyPlayer->_FieldOfViewDistance)
+			{
+				if (MyPlayer->_GameObjectInfo.ObjectId != Player->_GameObjectInfo.ObjectId)
+				{
+					FieldOfViewGameObjects.push_back(Player);
+				}
+			}
+			else if(ExceptMe == false && Distance < MyPlayer->_FieldOfViewDistance)
+			{
+				FieldOfViewGameObjects.push_back(Player);
+			}
+		}
+
+		// 주변 섹터 몬스터 정보
+		for (CMonster* Monster : Sector->GetMonsters())
+		{
+			int16 Distance = st_Vector2Int::Distance(MyPlayer->GetCellPosition(), Monster->GetCellPosition());
+
+			if (Distance < MyPlayer->_FieldOfViewDistance)
+			{
+				FieldOfViewGameObjects.push_back(Monster);
+			}			
+		}
+
+		for (CEnvironment* Environment : Sector->GetEnvironment())
+		{
+			int16 Distance = st_Vector2Int::Distance(MyPlayer->GetCellPosition(), Environment->GetCellPosition());
+
+			if (Distance < MyPlayer->_FieldOfViewDistance)
+			{
+				FieldOfViewGameObjects.push_back(Environment);
+			}			
+		}
+
+		for (CItem* Item : Sector->GetItems())
+		{
+			int16 Distance = st_Vector2Int::Distance(MyPlayer->GetCellPosition(), Item->GetCellPosition());
+
+			if (Distance < MyPlayer->_FieldOfViewDistance)
+			{
+				FieldOfViewGameObjects.push_back(Item);
+			}			
+		}
+	}
+
+	return FieldOfViewGameObjects;
 }
 
 vector<CPlayer*> CChannel::GetAroundPlayer(CGameObject* Object, int32 Range, bool ExceptMe)

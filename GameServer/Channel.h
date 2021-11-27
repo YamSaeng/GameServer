@@ -55,7 +55,14 @@ public:
 	// 내 주위 섹터 반환
 	//-----------------------------------------------------------------
 	vector<CSector*> GetAroundSectors(st_Vector2Int CellPosition, int32 Range);
-	vector<CGameObject*> GetAroundObjects(CGameObject* Object, int32 Range, bool ExceptMe = true);
+	//-----------------------------------------------------------------
+	// 내 주위 섹터 안에 있는 오브젝트 반환
+	//-----------------------------------------------------------------
+	vector<CGameObject*> GetAroundSectorObjects(CGameObject* Object, int32 Range, bool ExceptMe = true);
+	//-----------------------------------------------------------------
+	// 내 시야 범위 안에 있는 오브젝트 반환
+	//-----------------------------------------------------------------
+	vector<CGameObject*> GetFieldOfViewObjects(CPlayer* MyPlayer, int16 Range, bool ExceptMe = true);
 	
 	//--------------------------------------------------------------------------------------
 	// 내 주위 플레이어 반환
