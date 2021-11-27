@@ -640,7 +640,7 @@ st_Client** G_SelectCheckArray;
 
 CMemoryPoolTLS<CMessage> G_DummyClientMessage;
 
-#define CLIENT_MAX 1000
+#define CLIENT_MAX 2048
 
 int main()
 {
@@ -664,7 +664,7 @@ int main()
 
 unsigned __stdcall SendProc(void* Argument)
 {
-	Sleep(10000);
+	Sleep(15000);
 
 	while (1)
 	{
@@ -718,10 +718,10 @@ unsigned __stdcall SendProc(void* Argument)
 			else
 			{
 				
-			}			
-		}
+			}		
 
-		Sleep(100);		
+			Sleep(1);
+		}			
 	}
 
 	return 0;
@@ -745,7 +745,7 @@ unsigned __stdcall SelectProc(void* Argument)
 	G_SelectCheckArray = new st_Client * [FD_SETSIZE];
 	memset(G_SelectCheckArray, 0, sizeof(st_Client*) * FD_SETSIZE);
 
-	Sleep(5000);
+	Sleep(6000);
 
 	for (int i = 0; i < CLIENT_MAX; i++)
 	{
