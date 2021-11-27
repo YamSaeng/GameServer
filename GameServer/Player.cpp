@@ -9,6 +9,8 @@ CPlayer::CPlayer()
 	_AttackTick = 0;
 	_SpellTick = 0;
 	_SkillJob = nullptr;
+
+	_FieldOfViewDistance = 6;
 }
 
 CPlayer::~CPlayer()

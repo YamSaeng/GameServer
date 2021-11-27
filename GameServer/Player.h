@@ -9,7 +9,8 @@ struct st_TimerJob;
 
 class CPlayer : public CGameObject
 {
-public:	
+public:
+
 	uint64 _AttackTick;
 	uint64 _SpellTick;
 
@@ -32,6 +33,8 @@ public:
 	CQuickSlotManager _QuickSlotManager;
 
 	st_Experience _Experience;
+
+	int8 _FieldOfViewDistance;
 
 	CPlayer();	
 	~CPlayer();		
