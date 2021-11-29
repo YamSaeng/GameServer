@@ -474,6 +474,10 @@ public:
 	// Session을 기준으로 주위 섹터에 전송
 	//--------------------------------------------------------------
 	void SendPacketAroundSector(st_Session* Session, CMessage* Message, bool SendMe = false);
+	//--------------------------------------------------------------
+	// Session 기준으로 시야뷰 안에 플레이어 대상으로 패킷 전송
+	//--------------------------------------------------------------
+	void SendPacketFieldOfView(st_Session* Session, CMessage* Message, bool SendMe = false);
 	
 	//--------------------------------------------------------------
 	// 스킬 쿨타임 타이머 잡 생성

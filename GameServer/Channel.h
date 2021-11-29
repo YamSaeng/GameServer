@@ -60,14 +60,18 @@ public:
 	//-----------------------------------------------------------------
 	vector<CGameObject*> GetAroundSectorObjects(CGameObject* Object, int32 Range, bool ExceptMe = true);
 	//-----------------------------------------------------------------
-	// 내 시야 범위 안에 있는 오브젝트 반환
+	// 오브젝트 시야 범위 안에 있는 오브젝트 반환
 	//-----------------------------------------------------------------
-	vector<CGameObject*> GetFieldOfViewObjects(CPlayer* MyPlayer, int16 Range, bool ExceptMe = true);
+	vector<CGameObject*> GetFieldOfViewObjects(CGameObject* Object, int16 Range, bool ExceptMe = true);
 	
 	//--------------------------------------------------------------------------------------
 	// 내 주위 플레이어 반환
 	//--------------------------------------------------------------------------------------
 	vector<CPlayer*> GetAroundPlayer(CGameObject* Object, int32 Range, bool ExceptMe = true);
+	//--------------------------------------------------------------------------------------
+	// 내 시야 범위 플레이어 반환
+	//--------------------------------------------------------------------------------------
+	vector<CPlayer*> GetFieldOfViewPlayer(CGameObject* Object, int16 Range, bool ExceptMe = true);
 
 	//-------------------------------------------------------
 	// 내 근처 플레이어 반환

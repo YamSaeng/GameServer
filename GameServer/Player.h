@@ -32,9 +32,7 @@ public:
 	CSkillBox _SkillBox;
 	CQuickSlotManager _QuickSlotManager;
 
-	st_Experience _Experience;
-
-	int8 _FieldOfViewDistance;
+	st_Experience _Experience;	
 
 	CPlayer();	
 	~CPlayer();		

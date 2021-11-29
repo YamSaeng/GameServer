@@ -618,7 +618,7 @@ void CGameServer::DeleteClient(st_Session* Session)
 		DeSpawnObjectIds.push_back(MyPlayer->_GameObjectInfo.ObjectId);
 
 		CMessage* ResLeaveGame = MakePacketResObjectDeSpawn(1, DeSpawnObjectIds);
-		SendPacketAroundSector(Session, ResLeaveGame);
+		SendPacketFieldOfView(Session, ResLeaveGame, true);		
 		ResLeaveGame->Free();
 
 		for (int i = 0; i < SESSION_CHARACTER_MAX; i++)
@@ -898,7 +898,7 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 
 			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
 
-			// 클라가 선택한 오브젝트를 게임에 입장 시킨다.
+			// 클라가 선택한 오브젝트를 게임에 입장 시킨다. ( 채널, 섹터 입장 )
 			G_ObjectManager->ObjectEnterGame(MyPlayer, 1);
 
 			// 나한테 나 생성하라고 알려줌
@@ -914,33 +914,34 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 
 			// 다른 플레이어들한테 나를 생성하라고 알려줌
 			CMessage* ResSpawnPacket = MakePacketResObjectSpawn(1, SpawnObjectInfo);
-			SendPacketAroundSector(Session, ResSpawnPacket);
+			SendPacketFieldOfView(Session, ResSpawnPacket);			
 			ResSpawnPacket->Free();
 
-				SpawnObjectInfo.clear();
+			SpawnObjectInfo.clear();
 
 			if (Session->IsDummy == false)
 			{
 				// 나한테 다른 오브젝트들을 생성하라고 알려줌						
 				st_GameObjectInfo* SpawnGameObjectInfos;
+				// 시야 범위 안에 있는 오브젝트 가져오기
+				vector<CGameObject*> FieldOfViewObjects = G_ChannelManager->Find(1)->GetFieldOfViewObjects(MyPlayer, MyPlayer->_FieldOfViewDistance);
+				MyPlayer->_FieldOfViewObjects = FieldOfViewObjects;				
 
-				vector<CGameObject*> AroundObjects = G_ChannelManager->Find(1)->GetAroundObjects(MyPlayer, 1);
-
-				if (AroundObjects.size() > 0)
+				if (FieldOfViewObjects.size() > 0)
 				{
-					SpawnGameObjectInfos = new st_GameObjectInfo[AroundObjects.size()];
+					SpawnGameObjectInfos = new st_GameObjectInfo[FieldOfViewObjects.size()];
 
-					for (int32 i = 0; i < AroundObjects.size(); i++)
+					for (int32 i = 0; i < FieldOfViewObjects.size(); i++)
 					{
-						SpawnObjectInfo.push_back(AroundObjects[i]->_GameObjectInfo);
+						SpawnObjectInfo.push_back(FieldOfViewObjects[i]->_GameObjectInfo);
 					}
 
-					CMessage* ResOtherObjectSpawnPacket = MakePacketResObjectSpawn((int32)AroundObjects.size(), SpawnObjectInfo);
+					CMessage* ResOtherObjectSpawnPacket = MakePacketResObjectSpawn((int32)FieldOfViewObjects.size(), SpawnObjectInfo);
 					SendPacket(Session->SessionId, ResOtherObjectSpawnPacket);
 					ResOtherObjectSpawnPacket->Free();
 
 					delete[] SpawnGameObjectInfos;
-				}
+				}				
 			}			
 
 			// DB 큐에 요청하기 전 IOCount를 증가시켜서 Session이 반납 안되도록 막음
@@ -1063,7 +1064,7 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 
 			// 내가 움직인 것을 내 주위 플레이어들에게 알려야함
 			CMessage* ResMyMoveOtherPacket = MakePacketResMove(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
-			SendPacketAroundSector(Session, ResMyMoveOtherPacket, true);
+			SendPacketFieldOfView(Session, ResMyMoveOtherPacket, true);			
 			ResMyMoveOtherPacket->Free();
 		}
 		else
@@ -1147,7 +1148,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 			st_Vector2Int FrontCell;
 			vector<CGameObject*> Targets;
 			CGameObject* Target = nullptr;
-			CMessage* ResSyncPosition = nullptr;
+			CMessage* ResSyncPositionPacket = nullptr;
 
 			// 퀵바에 등록되지 않은 스킬을 요청했을 경우
 			if ((en_SkillType)ReqSkillType == en_SkillType::SKILL_TYPE_NONE)
@@ -1165,7 +1166,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 				MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;
 				// 클라에게 알려줘서 공격 애니메이션 출력
 				CMessage* ResObjectStateChangePacket = MakePacketResChangeObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
-				SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateChangePacket);
+				SendPacketFieldOfView(Session, ResObjectStateChangePacket, true);				
 				ResObjectStateChangePacket->Free();
 
 				// 타겟 위치 확인
@@ -1201,14 +1202,14 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 								st_Vector2Int MyFrontCellPotision = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
 
 								MyPlayer->_Channel->_Map->ApplyMove(Target, MyFrontCellPotision);
-								ResSyncPosition = MakePacketResSyncPosition(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectPositionInfo);
-								SendPacketAroundSector(Target->GetCellPosition(), ResSyncPosition);
-								ResSyncPosition->Free();
+								ResSyncPositionPacket = MakePacketResSyncPosition(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectPositionInfo);
+								SendPacketFieldOfView(Session, ResSyncPositionPacket);								
+								ResSyncPositionPacket->Free();
 
 								//Target->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::STUN;
-								CMessage* ResObjectStateChange = MakePacketResChangeObjectState(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectPositionInfo.MoveDir, Target->_GameObjectInfo.ObjectType, Target->_GameObjectInfo.ObjectPositionInfo.State);
-								SendPacketAroundSector(Target->GetCellPosition(), ResObjectStateChange);
-								ResObjectStateChange->Free();
+								//CMessage* ResObjectStateChange = MakePacketResChangeObjectState(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectPositionInfo.MoveDir, Target->_GameObjectInfo.ObjectType, Target->_GameObjectInfo.ObjectPositionInfo.State);
+								//SendPacketFieldOfView(Session, ResObjectStateChange, true);
+								//ResObjectStateChange->Free();
 							}
 						}
 						else
@@ -1286,9 +1287,9 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 
 								MyPlayer->_Channel->_Map->ApplyMove(MyPlayer, MovePosition);
 
-								ResSyncPosition = MakePacketResSyncPosition(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
-								SendPacketAroundSector(MyPlayer->GetCellPosition(), ResSyncPosition);
-								ResSyncPosition->Free();
+								ResSyncPositionPacket = MakePacketResSyncPosition(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
+								SendPacketFieldOfView(Session, ResSyncPositionPacket, true);
+								ResSyncPositionPacket->Free();
 							}
 						}
 						else
@@ -1336,7 +1337,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 
 					// 이펙트 출력
 					CMessage* ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_SMASH_WAVE, 2.0f);
-					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResEffectPacket);
+					SendPacketFieldOfView(Session, ResEffectPacket, true);
 					ResEffectPacket->Free();
 				}
 				break;
@@ -1606,22 +1607,22 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 
 						// 데미지 시스템 메세지 전송
 						CMessage* ResSkillSystemMessagePacket = MakePacketResChattingBoxMessage(MyPlayer->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, IsCritical ? st_Color::Red() : st_Color::White(), SkillTypeString);
-						SendPacketAroundSector(MyPlayer->GetCellPosition(), ResSkillSystemMessagePacket);
+						SendPacketFieldOfView(Session, ResSkillSystemMessagePacket, true);
 						ResSkillSystemMessagePacket->Free();
 
 						// 공격 응답 메세지 전송
 						CMessage* ResMyAttackOtherPacket = MakePacketResAttack(MyPlayer->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectId, (en_SkillType)ReqSkillType, FinalDamage, IsCritical);
-						SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMyAttackOtherPacket);
+						SendPacketFieldOfView(Session, ResMyAttackOtherPacket, true);						
 						ResMyAttackOtherPacket->Free();
 
 						// 이펙트 출력
 						CMessage* ResEffectPacket = MakePacketEffect(Target->_GameObjectInfo.ObjectId, HitEffectType, AttackSkillInfo->SkillTargetEffectTime);
-						SendPacketAroundSector(MyPlayer->GetCellPosition(), ResEffectPacket);
+						SendPacketFieldOfView(Session, ResEffectPacket, true);
 						ResEffectPacket->Free();
 
 						// 스탯 변경 메세지 전송
 						CMessage* ResChangeObjectStat = MakePacketResChangeObjectStat(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectStatInfo);
-						SendPacketAroundSector(Target->GetCellPosition(), ResChangeObjectStat);
+						SendPacketFieldOfView(Session, ResChangeObjectStat, true);
 						ResChangeObjectStat->Free();
 					}
 				}				
@@ -1771,7 +1772,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 
 					// 이펙트 출력
 					ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_CHARGE_POSE, 2.8f);
-					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResEffectPacket);
+					SendPacketFieldOfView(Session, ResEffectPacket, true);					
 					ResEffectPacket->Free();
 					break;
 				case en_SkillType::SKILL_SHAMAN_FLAME_HARPOON:
@@ -1796,7 +1797,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 
 						// 스펠창 시작
 						ResMagicPacket = MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId, true, (en_SkillType)ReqSkillType, SpellCastingTime);
-						SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMagicPacket);
+						SendPacketFieldOfView(Session, ResMagicPacket, true);						
 						ResMagicPacket->Free();
 
 						MyPlayer->_SkillType = (en_SkillType)ReqSkillType;
@@ -1846,7 +1847,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 
 					// 스펠창 시작
 					ResMagicPacket = MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId, true, (en_SkillType)ReqSkillType, SpellCastingTime);
-					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMagicPacket);
+					SendPacketFieldOfView(Session, ResMagicPacket, true);					
 					ResMagicPacket->Free();
 
 					MyPlayer->_SkillType = (en_SkillType)ReqSkillType;
@@ -1866,7 +1867,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 
 						// 스펠창 시작
 						ResMagicPacket = MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId, true, (en_SkillType)ReqSkillType, SpellCastingTime);
-						SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMagicPacket);
+						SendPacketFieldOfView(Session, ResMagicPacket, true);						
 						ResMagicPacket->Free();
 
 						MyPlayer->_SkillType = (en_SkillType)ReqSkillType;
@@ -1888,7 +1889,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 
 					// 마법 스킬 모션 출력
 					CMessage* ResObjectStateChangePacket = MakePacketResChangeObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
-					SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateChangePacket);
+					SendPacketFieldOfView(Session, ResObjectStateChangePacket, true);					
 					ResObjectStateChangePacket->Free();					
 
 					SkillCoolTimeTimerJobCreate(MyPlayer, FindSkill->SkillCastingTime, FindSkill, en_TimerJobType::TIMER_SPELL_END, QuickSlotBarindex, QuickSlotBarSlotIndex);
@@ -1971,7 +1972,7 @@ void CGameServer::PacketProcReqMagicCancel(int64 SessionId, CMessage* Message)
 
 				// 스킬 취소 응답 처리 주위 섹터에 전송
 				CMessage* ResMagicCancelPacket = MakePacketMagicCancel(MyPlayer->_AccountId, MyPlayer->_GameObjectInfo.ObjectId);
-				SendPacketAroundSector(Session, ResMagicCancelPacket, true);
+				SendPacketFieldOfView(Session, ResMagicCancelPacket, true);				
 				ResMagicCancelPacket->Free();
 			}
 			else
@@ -2140,7 +2141,7 @@ void CGameServer::PacketProcReqObjectStateChange(int64 SessionId, CMessage* Mess
 						FindGameObject->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
 						ResObjectStatePakcet = MakePacketResChangeObjectState(FindGameObject->_GameObjectInfo.ObjectId, FindGameObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, FindGameObject->_GameObjectInfo.ObjectType, FindGameObject->_GameObjectInfo.ObjectPositionInfo.State);
-						SendPacketAroundSector(Session, ResObjectStatePakcet, true);
+						SendPacketFieldOfView(Session, ResObjectStatePakcet, true);
 						ResObjectStatePakcet->Free();
 					}
 					else
@@ -2156,7 +2157,7 @@ void CGameServer::PacketProcReqObjectStateChange(int64 SessionId, CMessage* Mess
 						FindGameObject->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
 						ResObjectStatePakcet = MakePacketResChangeObjectState(FindGameObject->_GameObjectInfo.ObjectId, FindGameObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, FindGameObject->_GameObjectInfo.ObjectType, FindGameObject->_GameObjectInfo.ObjectPositionInfo.State);
-						SendPacketAroundSector(Session, ResObjectStatePakcet, true);
+						SendPacketFieldOfView(Session, ResObjectStatePakcet, true);						
 						ResObjectStatePakcet->Free();
 					}
 					else
@@ -2230,18 +2231,9 @@ void CGameServer::PacketProcReqChattingMessage(int64 SessionId, CMessage* Messag
 		wstring ChattingMessage;
 		Message->GetData(ChattingMessage, ChattingMessageLen);
 
-		// 채널 찾고
-		CChannel* Channel = G_ChannelManager->Find(1);
-		// 주위 플레이어 반환
-		vector<CPlayer*> Players = Channel->GetAroundPlayer(MyPlayer, 10, false);	
-		
-		// 주위 플레이어에게 채팅 메세지 전송
-		for (CPlayer* Player : Players)
-		{
-			CMessage* ResChattingMessage = MakePacketResChattingBoxMessage(PlayerDBId, en_MessageType::CHATTING, st_Color::White(), ChattingMessage);
-			SendPacket(Player->_SessionId, ResChattingMessage);
-			ResChattingMessage->Free();
-		}
+		CMessage* ResChattingMessage = MakePacketResChattingBoxMessage(PlayerDBId, en_MessageType::CHATTING, st_Color::White(), ChattingMessage);
+		SendPacketFieldOfView(Session, ResChattingMessage, true);
+		ResChattingMessage->Free();		
 	}
 
 	// 세션 반납
@@ -4038,7 +4030,7 @@ void CGameServer::PacketProcReqDBLootingItemToInventorySave(int64 SessionId, CGa
 
 		// 클라에게 해당 아이템 삭제하라고 알려줌
 		CMessage* ResItemDeSpawnPacket = MakePacketResObjectDeSpawn(1, DeSpawnItem);
-		SendPacketAroundSector(Session, ResItemDeSpawnPacket, true);
+		SendPacketFieldOfView(Session, ResItemDeSpawnPacket, true);		
 		ResItemDeSpawnPacket->Free();
 
 		bool ItemUse = true;
@@ -4441,7 +4433,7 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CGameServerMessage*
 			MyPlayer->_GameObjectInfo.ObjectStatInfo.HP += 50;
 
 			CGameServerMessage* ResChangeObjectStat = MakePacketResChangeObjectStat(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectStatInfo);
-			SendPacketAroundSector(MyPlayer->GetCellPosition(), ResChangeObjectStat);
+			SendPacketFieldOfView(Session, ResChangeObjectStat, true);			
 			ResChangeObjectStat->Free();
 		}
 		break;
@@ -4635,7 +4627,7 @@ void CGameServer::PacketProcReqDBGoldSave(int64 SessionId, CMessage* Message)
 		DeSpawnItem.push_back(ItemDBId);
 
 		CMessage* ResItemDeSpawnPacket = MakePacketResObjectDeSpawn(1, DeSpawnItem);
-		SendPacketAroundSector(Session, ResItemDeSpawnPacket, true);
+		SendPacketFieldOfView(Session, ResItemDeSpawnPacket, true);		
 		ResItemDeSpawnPacket->Free();
 
 		bool ItemUse = true;
@@ -5616,7 +5608,7 @@ void CGameServer::PacketProcTimerAttackEnd(int64 SessionId, CGameServerMessage* 
 		MyPlayer->_SkillType = en_SkillType::SKILL_TYPE_NONE;
 
 		CMessage* ResObjectStateMessage = MakePacketResChangeObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
-		SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateMessage);
+		SendPacketFieldOfView(Session, ResObjectStateMessage, true);		
 		ResObjectStateMessage->Free();
 	}
 
@@ -5658,7 +5650,7 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 		MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
 		CMessage* ResObjectStateChangePacket = MakePacketResChangeObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
-		SendPacketAroundSector(MyPlayer->GetCellPosition(), ResObjectStateChangePacket);
+		SendPacketFieldOfView(Session, ResObjectStateChangePacket, true);		
 		ResObjectStateChangePacket->Free();
 
 		float SkillCoolTime = SpellEndSkillInfo->SkillCoolTime / 1000.0f;
@@ -5742,11 +5734,11 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 			MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ROOT;
 
 			CMessage* ResChangeObjectStatMessage = MakePacketResChangeObjectState(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->GetTarget()->_GameObjectInfo.ObjectType, MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.State);
-			SendPacketAroundSector(MyPlayer->GetTarget()->GetCellPosition(), ResChangeObjectStatMessage);
+			SendPacketFieldOfView(Session, ResChangeObjectStatMessage, true);			
 			ResChangeObjectStatMessage->Free();
 
 			CMessage* ResBufMessage = MakePacketBuf(MyPlayer->_GameObjectInfo.ObjectId, SpellEndSkillInfo->SkillCoolTime, 1.0f, SpellEndSkillInfo);
-			SendPacketAroundSector(MyPlayer->GetTarget()->GetCellPosition(), ResBufMessage);
+			SendPacketFieldOfView(Session, ResBufMessage, true);
 			ResBufMessage->Free();
 
 			st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)SpellEndSkillInfo;
@@ -5771,7 +5763,7 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 
 			// 스턴 상태로 변경
 			CMessage* ResChangeObjectStat = MakePacketResChangeObjectState(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->GetTarget()->_GameObjectInfo.ObjectType, MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.State);
-			SendPacketAroundSector(MyPlayer->GetTarget()->GetCellPosition(), ResChangeObjectStat);
+			SendPacketFieldOfView(Session, ResChangeObjectStat, true);			
 			ResChangeObjectStat->Free();
 
 			int32 MagicDamage = MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage * 0.6;
@@ -5835,7 +5827,7 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 			MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ROOT;
 
 			CMessage* ResChangeObjectStat = MakePacketResChangeObjectState(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->GetTarget()->_GameObjectInfo.ObjectType, MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.State);
-			SendPacketAroundSector(MyPlayer->GetTarget()->GetCellPosition(), ResChangeObjectStat);
+			SendPacketFieldOfView(Session, ResChangeObjectStat, true);
 			ResChangeObjectStat->Free();
 
 			st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)SpellEndSkillInfo;
@@ -5884,28 +5876,28 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 			MyPlayer->_SkillType,
 			FinalDamage,
 			false);
-		SendPacketAroundSector(MyPlayer->GetTarget()->GetCellPosition(), ResAttackMagicPacket);
+		SendPacketFieldOfView(Session, ResAttackMagicPacket, true);
 		ResAttackMagicPacket->Free();
 
 
 		// 시스템 메세지 전송
 		CMessage* ResAttackMagicSystemMessagePacket = MakePacketResChattingBoxMessage(MyPlayer->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, st_Color::White(), MagicSystemString);
-		SendPacketAroundSector(MyPlayer->GetCellPosition(), ResAttackMagicSystemMessagePacket);
+		SendPacketFieldOfView(Session, ResAttackMagicSystemMessagePacket, true);		
 		ResAttackMagicSystemMessagePacket->Free();
 
 		// HP 변경 전송
 		CMessage* ResChangeObjectStat = MakePacketResChangeObjectStat(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, MyPlayer->GetTarget()->_GameObjectInfo.ObjectStatInfo);
-		SendPacketAroundSector(MyPlayer->GetTarget()->GetCellPosition(), ResChangeObjectStat);
+		SendPacketFieldOfView(Session, ResChangeObjectStat, true);
 		ResChangeObjectStat->Free();
 
 		// 스펠창 끝
 		CMessage* ResMagicPacket = MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId, false);
-		SendPacketAroundSector(MyPlayer->GetCellPosition(), ResMagicPacket);
+		SendPacketFieldOfView(Session, ResMagicPacket, true);		
 		ResMagicPacket->Free();
 
 		// 이펙트 출력
 		CMessage* ResEffectPacket = MakePacketEffect(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, HitEffectType, SpellEndSkillInfo->SkillTargetEffectTime);
-		SendPacketAroundSector(MyPlayer->GetCellPosition(), ResEffectPacket);
+		SendPacketFieldOfView(Session, ResEffectPacket, true);		
 		ResEffectPacket->Free();
 	}
 
@@ -6095,7 +6087,7 @@ void CGameServer::PacketProcTimerDot(int64 SessionId, CGameServerMessage* Messag
 
 		// 변경된 HP 전송
 		CGameServerMessage* ResObjectStatChangePacket = MakePacketResChangeObjectStat(FindObject->_GameObjectInfo.ObjectId, FindObject->_GameObjectInfo.ObjectStatInfo);
-		SendPacketAroundSector(FindObject->GetCellPosition(), ResObjectStatChangePacket);
+		SendPacketFieldOfView(Session, ResObjectStatChangePacket, true);		
 		ResObjectStatChangePacket->Free();
 	}
 	// 세션이 없을 경우에는 자연 회복 도트를 의미
@@ -6122,7 +6114,7 @@ void CGameServer::PacketProcTimerDot(int64 SessionId, CGameServerMessage* Messag
 
 			// 변경된 HP 전송
 			CGameServerMessage* ResObjectStatChangePacket = MakePacketResChangeObjectStat(FindObject->_GameObjectInfo.ObjectId, FindObject->_GameObjectInfo.ObjectStatInfo);
-			SendPacketAroundSector(FindObject->GetCellPosition(), ResObjectStatChangePacket);
+			SendPacketFieldOfView(Session, ResObjectStatChangePacket, true);			
 			ResObjectStatChangePacket->Free();
 		}		
 	}
@@ -6996,6 +6988,11 @@ void CGameServer::SendPacketAroundSector(st_Vector2Int CellPosition, CMessage* M
 	{
 		for (CPlayer* Player : Sector->GetPlayers())
 		{
+			if (Player->_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_PLAYER_DUMMY)
+			{
+				continue;
+			}
+
 			SendPacket(Player->_SessionId, Message);
 		}
 	}
@@ -7012,11 +7009,52 @@ void CGameServer::SendPacketAroundSector(st_Session* Session, CMessage* Message,
 	{
 		for (CPlayer* Player : Sector->GetPlayers())
 		{
+			if (Player->_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_PLAYER_DUMMY)
+			{
+				continue;
+			}
+
 			if (SendMe == true)
 			{
 				SendPacket(Player->_SessionId, Message);
 			}
 			else
+			{
+				if (Session->SessionId != Player->_SessionId)
+				{
+					SendPacket(Player->_SessionId, Message);
+				}
+			}
+		}
+	}
+}
+
+void CGameServer::SendPacketFieldOfView(st_Session* Session, CMessage* Message, bool SendMe)
+{
+	CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+	CChannel* Channel = G_ChannelManager->Find(1);
+
+	// 주위 섹터들을 가져온다.
+	vector<CSector*> Sectors = Channel->GetAroundSectors(MyPlayer->GetCellPosition(), 1);
+
+	for (CSector* Sector : Sectors)
+	{
+		for (CPlayer* Player : Sector->GetPlayers())
+		{
+			/*if (Player->_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_PLAYER_DUMMY)
+			{
+				continue;
+			}*/
+
+			// 시야 범위 안에 있는 플레이어를 찾는다
+			int16 Distance = st_Vector2Int::Distance(MyPlayer->GetCellPosition(),Player->GetCellPosition());
+			
+			if (SendMe == true && Distance <= MyPlayer->_FieldOfViewDistance)
+			{
+				SendPacket(Player->_SessionId, Message);
+			}
+			else if(SendMe == false && Distance <= MyPlayer->_FieldOfViewDistance)
 			{
 				if (Session->SessionId != Player->_SessionId)
 				{

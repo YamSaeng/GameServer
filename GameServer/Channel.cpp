@@ -142,28 +142,28 @@ vector<CGameObject*> CChannel::GetAroundSectorObjects(CGameObject* Object, int32
 	return SectorGameObjects;
 }
 
-vector<CGameObject*> CChannel::GetFieldOfViewObjects(CPlayer* MyPlayer, int16 Range, bool ExceptMe)
+vector<CGameObject*> CChannel::GetFieldOfViewObjects(CGameObject* Object, int16 Range, bool ExceptMe)
 {
 	vector<CGameObject*> FieldOfViewGameObjects;
 
-	vector<CSector*> Sectors = GetAroundSectors(MyPlayer->GetCellPosition(), Range);
+	vector<CSector*> Sectors = GetAroundSectors(Object->GetCellPosition(), Range);
 
 	for (CSector* Sector : Sectors)
 	{
 		// 주변 섹터 플레이어 정보
 		for (CPlayer* Player : Sector->GetPlayers())
 		{
-			int16 Distance = st_Vector2Int::Distance(MyPlayer->GetCellPosition(), Player->GetCellPosition());
+			int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Player->GetCellPosition());
 
 			// 함수 호출한 오브젝트를 포함할 것인지에 대한 여부 true면 제외 false면 포함
-			if (ExceptMe == true && Distance < MyPlayer->_FieldOfViewDistance)
+			if (ExceptMe == true && Distance <= Object->_FieldOfViewDistance)
 			{
-				if (MyPlayer->_GameObjectInfo.ObjectId != Player->_GameObjectInfo.ObjectId)
+				if (Object->_GameObjectInfo.ObjectId != Player->_GameObjectInfo.ObjectId)
 				{
 					FieldOfViewGameObjects.push_back(Player);
 				}
 			}
-			else if(ExceptMe == false && Distance < MyPlayer->_FieldOfViewDistance)
+			else if(ExceptMe == false && Distance <= Object->_FieldOfViewDistance)
 			{
 				FieldOfViewGameObjects.push_back(Player);
 			}
@@ -172,9 +172,9 @@ vector<CGameObject*> CChannel::GetFieldOfViewObjects(CPlayer* MyPlayer, int16 Ra
 		// 주변 섹터 몬스터 정보
 		for (CMonster* Monster : Sector->GetMonsters())
 		{
-			int16 Distance = st_Vector2Int::Distance(MyPlayer->GetCellPosition(), Monster->GetCellPosition());
+			int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Monster->GetCellPosition());
 
-			if (Distance < MyPlayer->_FieldOfViewDistance)
+			if (Distance <= Object->_FieldOfViewDistance)
 			{
 				FieldOfViewGameObjects.push_back(Monster);
 			}			
@@ -182,9 +182,9 @@ vector<CGameObject*> CChannel::GetFieldOfViewObjects(CPlayer* MyPlayer, int16 Ra
 
 		for (CEnvironment* Environment : Sector->GetEnvironment())
 		{
-			int16 Distance = st_Vector2Int::Distance(MyPlayer->GetCellPosition(), Environment->GetCellPosition());
+			int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Environment->GetCellPosition());
 
-			if (Distance < MyPlayer->_FieldOfViewDistance)
+			if (Distance <= Object->_FieldOfViewDistance)
 			{
 				FieldOfViewGameObjects.push_back(Environment);
 			}			
@@ -192,9 +192,9 @@ vector<CGameObject*> CChannel::GetFieldOfViewObjects(CPlayer* MyPlayer, int16 Ra
 
 		for (CItem* Item : Sector->GetItems())
 		{
-			int16 Distance = st_Vector2Int::Distance(MyPlayer->GetCellPosition(), Item->GetCellPosition());
+			int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Item->GetCellPosition());
 
-			if (Distance < MyPlayer->_FieldOfViewDistance)
+			if (Distance <= Object->_FieldOfViewDistance)
 			{
 				FieldOfViewGameObjects.push_back(Item);
 			}			
@@ -231,6 +231,35 @@ vector<CPlayer*> CChannel::GetAroundPlayer(CGameObject* Object, int32 Range, boo
 	}
 
 	return Players;
+}
+
+vector<CPlayer*> CChannel::GetFieldOfViewPlayer(CGameObject* Object, int16 Range, bool ExceptMe)
+{
+	vector<CGameObject*> FieldOfViewPlayers;
+
+	vector<CSector*> Sectors = GetAroundSectors(Object->GetCellPosition(), Range);
+
+	for (CSector* Sector : Sectors)
+	{
+		// 주변 섹터 플레이어 정보
+		for (CPlayer* Player : Sector->GetPlayers())
+		{
+			int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Player->GetCellPosition());
+
+			// 함수 호출한 오브젝트를 포함할 것인지에 대한 여부 true면 제외 false면 포함
+			if (ExceptMe == true && Distance <= Object->_FieldOfViewDistance)
+			{
+				if (Object->_GameObjectInfo.ObjectId != Player->_GameObjectInfo.ObjectId)
+				{
+					FieldOfViewPlayers.push_back(Player);
+				}
+			}
+			else if (ExceptMe == false && Distance <= Object->_FieldOfViewDistance)
+			{
+				FieldOfViewPlayers.push_back(Player);
+			}
+		}
+	}
 }
 
 CGameObject* CChannel::FindNearPlayer(CGameObject* Object, int32 Range, bool* Cango)

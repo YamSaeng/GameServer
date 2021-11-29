@@ -12,6 +12,10 @@ CGameObject::CGameObject()
 	_SelectTarget = nullptr;
 
 	_NatureRecoveryTick = 0;
+
+	_FieldOfViewDistance = 10;
+
+	_IsSendPacketTarget = false;
 }
 
 CGameObject::CGameObject(st_GameObjectInfo GameObjectInfo)

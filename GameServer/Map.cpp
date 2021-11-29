@@ -247,140 +247,93 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 		if (CurrentSector != NextSector)
 		{			
 			// 현재 섹터에서 플레이어 제거
-			CurrentSector->Remove(MovePlayer);		
-
-			vector<CSector*> CurrentSectors =  GameObject->_Channel->GetAroundSectors(MovePlayer->GetCellPosition(), 1);
-			vector<CSector*> NextSectors =  GameObject->_Channel->GetAroundSectors(DestPosition, 1);			
-
-			// 나를 제거할 섹터를 찾는 작업
-			// Current - Next;
-			// 현재 섹터들에서 내가 이동할 섹터를 제거한 차집합 섹터를 얻는다.
-			vector<CSector*> DeSpawnSectors = CurrentSectors;
-			for (int32 i = 0; i < DeSpawnSectors.size(); i++)
-			{
-				for (int32 j = 0; j < NextSectors.size(); j++)
-				{
-					if (DeSpawnSectors[i]->_SectorY == NextSectors[j]->_SectorY && DeSpawnSectors[i]->_SectorX == NextSectors[j]->_SectorX)
-					{
-						DeSpawnSectors.erase(DeSpawnSectors.begin() + i);
-					}
-				}
-			}
-			
-			vector<int64> DeSpawnSectorObjectIds;
-			DeSpawnSectorObjectIds.push_back(MovePlayer->_GameObjectInfo.ObjectId);
-			// 나를 제외하라는 메시지를 생성 후 
-			CMessage* ResSectorDespawnPlayer = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(1, DeSpawnSectorObjectIds);
-			// 해당 섹터 플레이어들에게 전송한다.
-			for (int32 i = 0; i < DeSpawnSectors.size(); i++)
-			{
-				for (CPlayer* Player : DeSpawnSectors[i]->GetPlayers())
-				{
-					G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSectorDespawnPlayer);
-				}				
-			}
-			ResSectorDespawnPlayer->Free();			
-			
-			DeSpawnSectorObjectIds.clear();
-
-			// DeSpawnSector에 있는 오브젝트들을 담아서 나한테서 제거한다.
-			for (CSector* Sector : DeSpawnSectors)
-			{
-				for (CPlayer* DeSpawnPlayer : Sector->GetPlayers())
-				{
-					DeSpawnSectorObjectIds.push_back(DeSpawnPlayer->_GameObjectInfo.ObjectId);
-				}
-
-				for (CMonster* DeSpawnMonster : Sector->GetMonsters())
-				{
-					DeSpawnSectorObjectIds.push_back(DeSpawnMonster->_GameObjectInfo.ObjectId);
-				}
-
-				for (CItem* DeSpawnItem : Sector->GetItems())
-				{
-					DeSpawnSectorObjectIds.push_back(DeSpawnItem->_GameObjectInfo.ObjectId);
-				}
-
-				for (CEnvironment* DeSpawnEnvironment : Sector->GetEnvironment())
-				{
-					DeSpawnSectorObjectIds.push_back(DeSpawnEnvironment->_GameObjectInfo.ObjectId);
-				}
-			}	
-			
-			if (DeSpawnSectorObjectIds.size() > 0)
-			{
-				CMessage* ResSectorDespawnOtherPlayer = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn((int32)DeSpawnSectorObjectIds.size(), DeSpawnSectorObjectIds);
-				G_ObjectManager->GameServer->SendPacket(MovePlayer->_SessionId, ResSectorDespawnOtherPlayer);
-				ResSectorDespawnOtherPlayer->Free();
-			}			
-
+			CurrentSector->Remove(MovePlayer);	
 			// 이동한 섹터에 플레이어 추가
-			NextSector->Insert(MovePlayer);
-			// 나를 스폰할 섹터를 찾는 작업
-			// Next - Current;
-			// 이동할 섹터에서 현재 섹터를 제거한 차집합 섹터를 찾는다.
-			vector<CSector*> SpawnSectors = NextSectors;
-			for (int32 i = 0; i < SpawnSectors.size(); i++)
-			{
-				for (int32 j = 0; j < CurrentSectors.size(); j++)
-				{
-					if (SpawnSectors[i]->_SectorY == CurrentSectors[j]->_SectorY && SpawnSectors[i]->_SectorX == CurrentSectors[j]->_SectorX)
-					{
-						SpawnSectors.erase(SpawnSectors.begin() + i);
-					}
-				}
-			}					
+			NextSector->Insert(MovePlayer);			
+		}
+
+		vector<CGameObject*> CurrentFieldOfViewObjects = GameObject->_Channel->GetFieldOfViewObjects(MovePlayer,MovePlayer->_FieldOfViewDistance);
+		vector<CGameObject*> SpawnFieldOfViewObjects = CurrentFieldOfViewObjects;
+		vector<CGameObject*> PreviousFieldOfViewObjects = MovePlayer->_FieldOfViewObjects;
 		
-			// 스폰할 대상배열
-			vector<st_GameObjectInfo> SpawnObjectInfos;
-			// 나의 정보를 담고
-			SpawnObjectInfos.push_back(MovePlayer->_GameObjectInfo);
-
-			// 나를 소환하라고 앞서 얻어준 섹터 플레이어들에게 패킷을 전송한다.
-			CMessage* ResSectorSpawnPlayer = G_ObjectManager->GameServer->MakePacketResObjectSpawn(1, SpawnObjectInfos);
-			for (int32 i = 0; i < SpawnSectors.size(); i++)
+		// 현재 시야 오브젝트들과 이전 시야 오브젝트들을 비교한다.
+		// 현재 시야 오브젝트에서 이전 시야 오브젝트를 제거 하면 새로 스폰해야할 오브젝트라고 할 수 있다.
+		for (int16 i = 0; i < SpawnFieldOfViewObjects.size(); i++)
+		{
+			for (int16 j = 0; j < PreviousFieldOfViewObjects.size(); j++)
 			{
-				for (CPlayer* Player : SpawnSectors[i]->GetPlayers())
+				if (SpawnFieldOfViewObjects[i]->_GameObjectInfo.ObjectId == PreviousFieldOfViewObjects[j]->_GameObjectInfo.ObjectId)
 				{
-					G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSectorSpawnPlayer);					
+					SpawnFieldOfViewObjects.erase(SpawnFieldOfViewObjects.begin() + i);
 				}
-			}			
-			ResSectorSpawnPlayer->Free();			
+			}
+		}
+		
+		// 스폰 해야할 대상들을 스폰
+		vector<st_GameObjectInfo> OtherSpawnObjectInfos;
+		for (CGameObject* SpawnObject : SpawnFieldOfViewObjects)
+		{
+			OtherSpawnObjectInfos.push_back(SpawnObject->_GameObjectInfo);
+		}
 
-			SpawnObjectInfos.clear();
-						
-			// 반대로 스폰 섹터에 있는 오브젝트들을 담는다.
-			for (CSector* Sector : SpawnSectors)
+		CMessage* ResOtherObjectSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectSpawn((int32)SpawnFieldOfViewObjects.size(), OtherSpawnObjectInfos);
+		G_ObjectManager->GameServer->SendPacket(MovePlayer->_SessionId, ResOtherObjectSpawnPacket);
+		ResOtherObjectSpawnPacket->Free();
+
+		// 스폰 해야할 대상들에게 나를 스폰하라고 알림
+		vector<st_GameObjectInfo> MyCharacterSpawnObjectInfos;
+		MyCharacterSpawnObjectInfos.push_back(MovePlayer->_GameObjectInfo);
+				
+		CMessage* ResMyObjectSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectSpawn(1, MyCharacterSpawnObjectInfos);
+		for (CGameObject* SpawnObject : SpawnFieldOfViewObjects)
+		{	
+			if (SpawnObject->_IsSendPacketTarget == true)
 			{
-				for (CPlayer* ExistPlayer : Sector->GetPlayers())
-				{
-					SpawnObjectInfos.push_back(ExistPlayer->_GameObjectInfo);
-				}
-
-				for (CMonster* ExistMonster : Sector->GetMonsters())
-				{
-					SpawnObjectInfos.push_back(ExistMonster->_GameObjectInfo);
-				}
-
-				for (CItem* ExistItem : Sector->GetItems())
-				{
-					SpawnObjectInfos.push_back(ExistItem->_GameObjectInfo);
-				}
-
-				for (CEnvironment* ExistEnvironment : Sector->GetEnvironment())
-				{
-					SpawnObjectInfos.push_back(ExistEnvironment->_GameObjectInfo);
-				}
-			}			
-	
-			// 나에게 전송하여 스폰 섹터에 있는 오브젝트들을 스폰 시킨다.
-			if (SpawnObjectInfos.size() > 0)
-			{
-				CMessage* ResOtherObjectSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectSpawn((int32)SpawnObjectInfos.size(), SpawnObjectInfos);
-				G_ObjectManager->GameServer->SendPacket(MovePlayer->_SessionId, ResOtherObjectSpawnPacket);
-				ResOtherObjectSpawnPacket->Free();
+				G_ObjectManager->GameServer->SendPacket(((CPlayer*)SpawnObject)->_SessionId, ResMyObjectSpawnPacket);
 			}			
 		}
+		ResMyObjectSpawnPacket->Free();
+		
+
+		// 이전 시야 오브젝트들과 현재 시야 오브젝트들을 비교한다.
+		// 이전 시야 오브젝트들에서 현재 시야 오브젝트들을 제거하면 디스폰 해야할 오브젝트를 확인 할 수 있다.
+		for (int16 i = 0; i < PreviousFieldOfViewObjects.size(); i++)
+		{
+			for (int16 j = 0; j < CurrentFieldOfViewObjects.size(); j++)
+			{
+				if (PreviousFieldOfViewObjects[i]->_GameObjectInfo.ObjectId == CurrentFieldOfViewObjects[j]->_GameObjectInfo.ObjectId)
+				{
+					PreviousFieldOfViewObjects.erase(PreviousFieldOfViewObjects.begin() + i);
+				}
+			}
+		}
+
+		// 디스폰 해야할 대상들을 디스폰
+		vector<int64> DeSpawnObjectInfos;
+		for (CGameObject* DeSpawnObject : PreviousFieldOfViewObjects)
+		{
+			DeSpawnObjectInfos.push_back(DeSpawnObject->_GameObjectInfo.ObjectId);
+		}
+
+		CMessage* ResOtherCharacterDeSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn((int32)DeSpawnObjectInfos.size(), DeSpawnObjectInfos);
+		G_ObjectManager->GameServer->SendPacket(MovePlayer->_SessionId, ResOtherCharacterDeSpawnPacket);
+		ResOtherCharacterDeSpawnPacket->Free();
+
+		// 디스폰 해야할 대상들에게 나를 디스폰 하라고 알림
+		vector<int64> MyCharacterDeSpawnObjectInfos;
+		MyCharacterDeSpawnObjectInfos.push_back(MovePlayer->_GameObjectInfo.ObjectId);
+		
+		CMessage* ResMyObjectDeSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(1, MyCharacterDeSpawnObjectInfos);
+		for (CGameObject* DeSpawnObject : PreviousFieldOfViewObjects)
+		{
+			if (DeSpawnObject->_IsSendPacketTarget == true)
+			{
+				G_ObjectManager->GameServer->SendPacket(((CPlayer*)DeSpawnObject)->_SessionId, ResMyObjectDeSpawnPacket);
+			}			
+		}
+		ResMyObjectDeSpawnPacket->Free();
+
+		MovePlayer->_FieldOfViewObjects = CurrentFieldOfViewObjects;
 	}
 		break;
 	case en_GameObjectType::OBJECT_SLIME:
@@ -394,74 +347,70 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 		if (CurrentSector != NextSector)
 		{
 			// 현재 섹터에서 몬스터 제거
-			CurrentSector->Remove(MoveMonster);		
-
-			vector<CSector*> CurrentSectors = GameObject->_Channel->GetAroundSectors(MoveMonster->GetCellPosition(), 1);
-			vector<CSector*> NextSectors = GameObject->_Channel->GetAroundSectors(DestPosition, 1);
-
-			// 나를 제거할 섹터를 찾는 작업
-			// Current - Next;
-			// 현재 섹터들에서 내가 이동할 섹터를 제거한 차집합 섹터를 얻는다.
-			vector<CSector*> DeSpawnSectors = CurrentSectors;
-			for (int32 i = 0; i < DeSpawnSectors.size(); i++)
-			{
-				for (int32 j = 0; j < NextSectors.size(); j++)
-				{
-					if (DeSpawnSectors[i]->_SectorY == NextSectors[j]->_SectorY && DeSpawnSectors[i]->_SectorX == NextSectors[j]->_SectorX)
-					{
-						DeSpawnSectors.erase(DeSpawnSectors.begin() + i);
-					}
-				}
-			}
-
-			vector<int64> DeSpawnSectorObjectIds;
-			DeSpawnSectorObjectIds.push_back(MoveMonster->_GameObjectInfo.ObjectId);
-			// 나를 제외하라는 메시지를 생성 후 
-			CMessage* ResSectorDespawnPlayer = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(1, DeSpawnSectorObjectIds);
-			// 해당 섹터 플레이어들에게 전송한다.
-			for (int32 i = 0; i < DeSpawnSectors.size(); i++)
-			{
-				for (CPlayer* Player : DeSpawnSectors[i]->GetPlayers())
-				{
-					G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSectorDespawnPlayer);
-				}
-			}
-			ResSectorDespawnPlayer->Free();
-
-
+			CurrentSector->Remove(MoveMonster);	
 			// 이동한 섹터에 몬스터 추가
-			NextSector->Insert(MoveMonster);
-			// 나를 스폰할 섹터를 찾는 작업
-			// Next - Current;
-			// 이동할 섹터에서 현재 섹터를 제거한 차집합 섹터를 찾는다.
-			vector<CSector*> SpawnSectors = NextSectors;
-			for (int32 i = 0; i < SpawnSectors.size(); i++)
-			{
-				for (int32 j = 0; j < CurrentSectors.size(); j++)
-				{
-					if (SpawnSectors[i]->_SectorY == CurrentSectors[j]->_SectorY && SpawnSectors[i]->_SectorX == CurrentSectors[j]->_SectorX)
-					{
-						SpawnSectors.erase(SpawnSectors.begin() + i);
-					}
-				}
-			}
-
-			// 스폰할 대상배열
-			vector<st_GameObjectInfo> SpawnObjectInfos;
-			// 나의 정보를 담고
-			SpawnObjectInfos.push_back(MoveMonster->_GameObjectInfo);
-
-			// 나를 소환하라고 앞서 얻어준 섹터 플레이어들에게 패킷을 전송한다.
-			CMessage* ResSectorSpawnPlayer = G_ObjectManager->GameServer->MakePacketResObjectSpawn(1, SpawnObjectInfos);
-			for (int32 i = 0; i < SpawnSectors.size(); i++)
-			{
-				for (CPlayer* Player : SpawnSectors[i]->GetPlayers())
-				{
-					G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSectorSpawnPlayer);
-				}
-			}
-			ResSectorSpawnPlayer->Free();
+			NextSector->Insert(MoveMonster);			
 		}
+		
+		vector<CGameObject*> CurrentFieldOfViewObjects = GameObject->_Channel->GetFieldOfViewObjects(MoveMonster, MoveMonster->_FieldOfViewDistance);
+		vector<CGameObject*> SpawnFieldOfViewObjects = CurrentFieldOfViewObjects;
+		vector<CGameObject*> PreviousFieldOfViewObjects = MoveMonster->_FieldOfViewObjects;
+
+		// 현재 시야 오브젝트들과 이전 시야 오브젝트들을 비교한다.
+		// 현재 시야 오브젝트에서 이전 시야 오브젝트를 제거 하면 새로 스폰해야할 오브젝트라고 할 수 있다.
+		for (int16 i = 0; i < SpawnFieldOfViewObjects.size(); i++)
+		{
+			for (int16 j = 0; j < PreviousFieldOfViewObjects.size(); j++)
+			{
+				if (SpawnFieldOfViewObjects[i]->_GameObjectInfo.ObjectId == PreviousFieldOfViewObjects[j]->_GameObjectInfo.ObjectId)
+				{
+					SpawnFieldOfViewObjects.erase(SpawnFieldOfViewObjects.begin() + i);
+				}
+			}
+		}
+
+		// 스폰 해야할 대상들에게 나를 스폰하라고 알림
+		vector<st_GameObjectInfo> MyCharacterSpawnObjectInfos;
+		MyCharacterSpawnObjectInfos.push_back(MoveMonster->_GameObjectInfo);
+
+		CMessage* ResMyObjectSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectSpawn(1, MyCharacterSpawnObjectInfos);
+		for (CGameObject* SpawnObject : SpawnFieldOfViewObjects)
+		{			
+			if (SpawnObject->_IsSendPacketTarget == true)
+			{
+				G_ObjectManager->GameServer->SendPacket(((CPlayer*)SpawnObject)->_SessionId, ResMyObjectSpawnPacket);
+			}
+		}
+		ResMyObjectSpawnPacket->Free();
+		
+		// 이전 시야 오브젝트들과 현재 시야 오브젝트들을 비교한다.
+		// 이전 시야 오브젝트들에서 현재 시야 오브젝트들을 제거하면 디스폰 해야할 오브젝트를 확인 할 수 있다.
+		for (int16 i = 0; i < PreviousFieldOfViewObjects.size(); i++)
+		{
+			for (int16 j = 0; j < CurrentFieldOfViewObjects.size(); j++)
+			{
+				if (PreviousFieldOfViewObjects[i]->_GameObjectInfo.ObjectId == CurrentFieldOfViewObjects[j]->_GameObjectInfo.ObjectId)
+				{
+					PreviousFieldOfViewObjects.erase(PreviousFieldOfViewObjects.begin() + i);
+				}
+			}
+		}
+
+		// 디스폰 해야할 대상들에게 나를 디스폰 하라고 알림
+		vector<int64> MyCharacterDeSpawnObjectInfos;
+		MyCharacterDeSpawnObjectInfos.push_back(MoveMonster->_GameObjectInfo.ObjectId);
+
+		CMessage* ResMyObjectDeSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(1, MyCharacterDeSpawnObjectInfos);
+		for (CGameObject* DeSpawnObject : PreviousFieldOfViewObjects)
+		{
+			if (DeSpawnObject->_IsSendPacketTarget == true)
+			{
+				G_ObjectManager->GameServer->SendPacket(((CPlayer*)DeSpawnObject)->_SessionId, ResMyObjectDeSpawnPacket);
+			}
+		}
+		ResMyObjectDeSpawnPacket->Free();
+
+		MoveMonster->_FieldOfViewObjects = CurrentFieldOfViewObjects;
 	}
 		break;	
 	case en_GameObjectType::OBJECT_STONE:
@@ -475,73 +424,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 		if (CurrentSector != NextSector)
 		{
 			CurrentSector->Remove(MoveEnvironment);
-
-			// 환경 섹터 옮기기 전 주변 섹터 
-			vector<CSector*> CurrentSectors = GameObject->_Channel->GetAroundSectors(MoveEnvironment->GetCellPosition(), 1);
-			// 섹터 옮기고 난 후 주변 섹터
-			vector<CSector*> NextSectors = GameObject->_Channel->GetAroundSectors(DestPosition, 1);
-
-			// 나를 제거할 섹터를 찾는 작업
-			// Current - Next;
-			// 현재 섹터들에서 내가 이동할 섹터를 제거한 차집합 섹터를 얻는다.
-			vector<CSector*> DeSpawnSectors = CurrentSectors;
-			for (int32 i = 0; i < DeSpawnSectors.size(); i++)
-			{
-				for (int32 j = 0; j < NextSectors.size(); j++)
-				{
-					if (DeSpawnSectors[i]->_SectorY == NextSectors[j]->_SectorY && DeSpawnSectors[i]->_SectorX == NextSectors[j]->_SectorX)
-					{
-						DeSpawnSectors.erase(DeSpawnSectors.begin() + i);
-					}
-				}
-			}
-
-			vector<int64> DeSpawnSectorObjectIds;
-			DeSpawnSectorObjectIds.push_back(MoveEnvironment->_GameObjectInfo.ObjectId);
-			// 나를 제외하라는 메시지를 생성 후 
-			CMessage* ResSectorDespawnPlayer = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(1, DeSpawnSectorObjectIds);
-			// 해당 섹터 플레이어들에게 전송한다.
-			for (int32 i = 0; i < DeSpawnSectors.size(); i++)
-			{
-				for (CPlayer* Player : DeSpawnSectors[i]->GetPlayers())
-				{
-					G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSectorDespawnPlayer);
-				}
-			}
-			ResSectorDespawnPlayer->Free();
-
-			NextSector->Insert(MoveEnvironment);
-
-			// 나를 스폰할 섹터를 찾는 작업
-			// Next - Current;
-			// 이동할 섹터에서 현재 섹터를 제거한 차집합 섹터를 찾는다.
-			vector<CSector*> SpawnSectors = NextSectors;
-			for (int32 i = 0; i < SpawnSectors.size(); i++)
-			{
-				for (int32 j = 0; j < CurrentSectors.size(); j++)
-				{
-					if (SpawnSectors[i]->_SectorY == CurrentSectors[j]->_SectorY && SpawnSectors[i]->_SectorX == CurrentSectors[j]->_SectorX)
-					{
-						SpawnSectors.erase(SpawnSectors.begin() + i);
-					}
-				}
-			}
-
-			// 스폰할 대상배열
-			vector<st_GameObjectInfo> SpawnObjectInfos;
-			// 나의 정보를 담고
-			SpawnObjectInfos.push_back(MoveEnvironment->_GameObjectInfo);
-
-			// 나를 소환하라고 앞서 얻어준 섹터 플레이어들에게 패킷을 전송한다.
-			CMessage* ResSectorSpawnPlayer = G_ObjectManager->GameServer->MakePacketResObjectSpawn(1, SpawnObjectInfos);
-			for (int32 i = 0; i < SpawnSectors.size(); i++)
-			{
-				for (CPlayer* Player : SpawnSectors[i]->GetPlayers())
-				{
-					G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSectorSpawnPlayer);
-				}
-			}
-			ResSectorSpawnPlayer->Free();
+			NextSector->Insert(MoveEnvironment);			
 		}
 	}
 		break;
@@ -549,6 +432,9 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 		CRASH("ApplyMove GameObject Type 이상한 값")
 		break;
 	}
+
+	// 시야 작업 ( 시야 안에 들어오는 오브젝트와 시야 밖으로 벗어나는 오브젝트 작업 )
+
 
 	GameObject->_GameObjectInfo.ObjectPositionInfo.PositionX = DestPosition._X;
 	GameObject->_GameObjectInfo.ObjectPositionInfo.PositionY = DestPosition._Y;	
@@ -720,7 +606,7 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 	{
 		if (GameObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE)
 		{
-			CRASH("ApplyLeave 삭제하려는 오브젝트가 저장되어 있는 오브젝트와 다름");
+			//CRASH("ApplyLeave 삭제하려는 오브젝트가 저장되어 있는 오브젝트와 다름");
 		}		
 	}
 

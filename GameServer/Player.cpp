@@ -10,7 +10,7 @@ CPlayer::CPlayer()
 	_SpellTick = 0;
 	_SkillJob = nullptr;
 
-	_FieldOfViewDistance = 6;
+	_IsSendPacketTarget = true;
 }
 
 CPlayer::~CPlayer()

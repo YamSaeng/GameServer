@@ -8,7 +8,7 @@ CMonster::CMonster()
 {
 	_SearchTick = GetTickCount64();
 	_MoveTick = GetTickCount64();	
-	_PatrolTick = GetTickCount64();
+	_PatrolTick = GetTickCount64();		
 }
 
 CMonster::~CMonster()

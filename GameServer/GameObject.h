@@ -8,6 +8,8 @@ class CGameObject
 {
 private:
 public:
+	bool _IsSendPacketTarget;
+
 	int32 _ObjectManagerIndex;
 	en_ObjectNetworkState _NetworkState;
 	st_GameObjectInfo _GameObjectInfo;
@@ -20,6 +22,11 @@ public:
 	// 오브젝트가 스폰될 위치
 	//---------------------------
 	st_Vector2Int _SpawnPosition;
+
+	// 시야 범위
+	int8 _FieldOfViewDistance;
+	// 시야 범위 오브젝트
+	vector<CGameObject*> _FieldOfViewObjects;
 
 	CGameObject();
 	CGameObject(st_GameObjectInfo GameObjectInfo);
@@ -58,7 +65,7 @@ protected:
 	//-------------------------
 	// 재생력 Tick
 	//-------------------------
-	uint64 _NatureRecoveryTick;
+	uint64 _NatureRecoveryTick;	
 
 	void BroadCastPacket(en_PACKET_TYPE PacketType);
 };
