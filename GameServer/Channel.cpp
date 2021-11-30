@@ -235,7 +235,7 @@ vector<CPlayer*> CChannel::GetAroundPlayer(CGameObject* Object, int32 Range, boo
 
 vector<CPlayer*> CChannel::GetFieldOfViewPlayer(CGameObject* Object, int16 Range, bool ExceptMe)
 {
-	vector<CGameObject*> FieldOfViewPlayers;
+	vector<CPlayer*> FieldOfViewPlayers;
 
 	vector<CSector*> Sectors = GetAroundSectors(Object->GetCellPosition(), Range);
 
@@ -260,6 +260,8 @@ vector<CPlayer*> CChannel::GetFieldOfViewPlayer(CGameObject* Object, int16 Range
 			}
 		}
 	}
+
+	return FieldOfViewPlayers;
 }
 
 CGameObject* CChannel::FindNearPlayer(CGameObject* Object, int32 Range, bool* Cango)
