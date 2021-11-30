@@ -107,13 +107,16 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int32 Channel
 				// 배열에 저장
 				_MonstersArray[EnterGameObject->_ObjectManagerIndex] = Monster;
 
+				// 몬스터 주위 오브젝트 정보 저장
+				Monster->_FieldOfViewPlayers = EnterChannel->GetFieldOfViewPlayer(Monster, Monster->_FieldOfViewDistance);
+
 				// 채널 입장
 				EnterChannel->EnterChannel(EnterGameObject, &Monster->_SpawnPosition);			
 
-				SpawnMonster.push_back(Monster->_GameObjectInfo);				
+				SpawnMonster.push_back(Monster->_GameObjectInfo);								
 
 				// 몬스터 추가하면 몬스터 주위 플레이어들에게 몬스터를 소환하라고 알림
-				CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(1, SpawnMonster);
+				CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(1, SpawnMonster);				
 				GameServer->SendPacketAroundSector(Monster->GetCellPosition(), ResSpawnPacket);
 				ResSpawnPacket->Free();
 

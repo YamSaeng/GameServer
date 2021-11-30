@@ -15,6 +15,11 @@ public:
 	// 몬스터 죽이면 얻는 ExpPoint
 	int32 _GetExpPoint;
 
+	//-------------------------------------
+	// 몬스터 시야범위 플레이어 목록
+	//-------------------------------------
+	vector<CPlayer*> _FieldOfViewPlayers;
+
 	CMonster();
 	virtual ~CMonster();	
 
@@ -74,7 +79,7 @@ protected:
 	//-------------------------------------
 	// 몬스터가 정찰할 위치
 	//-------------------------------------
-	vector<st_Vector2Int> _PatrolPositions;	
+	vector<st_Vector2Int> _PatrolPositions;		
 
 	//------------------------
 	// Spawn Idle 상태 Update
