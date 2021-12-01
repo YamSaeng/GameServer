@@ -634,6 +634,7 @@ struct st_Client
 
 struct st_ClientThreadInfo
 {
+	int64 ClientSendMessageTime;
 	int16 ManageIndex;
 };
 
@@ -645,8 +646,8 @@ st_Client** G_SelectCheckArray;
 
 CMemoryPoolTLS<CMessage> G_DummyClientMessage;
 
-#define CLIENT_MAX 2050
-#define SEND_THREAD_MAX 10
+#define CLIENT_MAX 3000
+#define SEND_THREAD_MAX 50
 
 int main()
 {
@@ -659,7 +660,7 @@ int main()
 		wprintf(L"WSAStartup Error %d\n", Error);
 	}
 
-	Sleep(5000);
+	Sleep(20000);
 
 	SOCKADDR_IN ServerAddr;
 	ZeroMemory(&ServerAddr, sizeof(ServerAddr));
@@ -690,6 +691,7 @@ int main()
 	{
 		st_ClientThreadInfo* ClientThread = new st_ClientThreadInfo();
 		ClientThread->ManageIndex = ThreadManageSendIndex;
+		ClientThread->ClientSendMessageTime = 0;
 
 		_beginthreadex(NULL, 0, SendProc, ClientThread, 0, NULL);
 		ThreadManageSendIndex += ThreadManageSendCount;
@@ -707,64 +709,69 @@ unsigned __stdcall SendProc(void* Argument)
 {
 	st_ClientThreadInfo* ClientThreadInfo = (st_ClientThreadInfo*)Argument;
 
-	Sleep(15000);
+	Sleep(12000);
 
 	while (1)		
 	{
 		for (int32 i = ClientThreadInfo->ManageIndex; i < ClientThreadInfo->ManageIndex + (CLIENT_MAX / SEND_THREAD_MAX); i++)
 		{
-			// 로그인 및 게임에 입장하면 메세지 전송
-			if (G_ClientArray[i].IsLogin == true && G_ClientArray[i].IsEnterGame == true)
+			if (ClientThreadInfo->ClientSendMessageTime < GetTickCount64())
 			{
-				int RandMessageType = rand() % 3;
-				int RandDir;																																								
+				ClientThreadInfo->ClientSendMessageTime = GetTickCount64() + 50;
 
-				CMessage* RandPacket = CMessage::Alloc();
-				RandPacket->Clear();
-
-				wstring SendChatMsg;
-				int8 DummyChatLen;
-				
-				switch ((en_ClientMessage)RandMessageType)
+				// 로그인 및 게임에 입장하면 메세지 전송
+				if (G_ClientArray[i].IsLogin == true && G_ClientArray[i].IsEnterGame == true)
 				{
-				case en_ClientMessage::CHAT_MSG:					
-					*RandPacket << (int16)en_PACKET_C2S_MESSAGE;
-					*RandPacket << G_ClientArray[i].AccountId;
-					*RandPacket << G_ClientArray[i].MyCharacterGameObjectInfo.ObjectId;
+					int RandMessageType = rand() % 3;
+					int RandDir;
 
-					swprintf_s(G_ClientArray[i].ChatMsg, sizeof(G_ClientArray[i].ChatMsg), L"[%s]가 [%d]를 보냈습니다.", G_ClientArray[i].LoginId.c_str(), G_ClientArray[i].MyCharacterGameObjectInfo.ObjectId, RandMessageType * i);
-					SendChatMsg = G_ClientArray[i].ChatMsg;
+					CMessage* RandPacket = CMessage::Alloc();
+					RandPacket->Clear();
 
-					DummyChatLen = (int8)(SendChatMsg.length() * 2);
-					*RandPacket << DummyChatLen;
-					RandPacket->InsertData(SendChatMsg.c_str(), DummyChatLen);
+					wstring SendChatMsg;
+					int8 DummyChatLen;
 
-					G_ClientArray[i].SendRingBuf.Enqueue(RandPacket);
-					break;
-				case en_ClientMessage::MOVE:					
-					*RandPacket << (int16)en_PACKET_C2S_MOVE;					
-					*RandPacket << G_ClientArray[i].AccountId;
-					*RandPacket << G_ClientArray[i].MyCharacterGameObjectInfo.ObjectId;
+					switch ((en_ClientMessage)RandMessageType)
+					{
+					case en_ClientMessage::CHAT_MSG:
+						*RandPacket << (int16)en_PACKET_C2S_MESSAGE;
+						*RandPacket << G_ClientArray[i].AccountId;
+						*RandPacket << G_ClientArray[i].MyCharacterGameObjectInfo.ObjectId;
 
-					RandDir = rand() % 4;
-					*RandPacket << (int8)RandDir;
+						swprintf_s(G_ClientArray[i].ChatMsg, sizeof(G_ClientArray[i].ChatMsg), L"[%s]가 [%d]를 보냈습니다.", G_ClientArray[i].LoginId.c_str(), G_ClientArray[i].MyCharacterGameObjectInfo.ObjectId, RandMessageType * i);
+						SendChatMsg = G_ClientArray[i].ChatMsg;
 
-					wprintf(L"[%s] Move Req Dir : [%d] \n", G_ClientArray[i].LoginId.c_str(), RandDir);
+						DummyChatLen = (int8)(SendChatMsg.length() * 2);
+						*RandPacket << DummyChatLen;
+						RandPacket->InsertData(SendChatMsg.c_str(), DummyChatLen);
 
-					G_ClientArray[i].SendRingBuf.Enqueue(RandPacket);
-					break;	
-				case en_ClientMessage::MELEE_ATTACK:
-					RandPacket->Free();
-					break;				
+						G_ClientArray[i].SendRingBuf.Enqueue(RandPacket);
+						break;
+					case en_ClientMessage::MOVE:
+						*RandPacket << (int16)en_PACKET_C2S_MOVE;
+						*RandPacket << G_ClientArray[i].AccountId;
+						*RandPacket << G_ClientArray[i].MyCharacterGameObjectInfo.ObjectId;
+
+						RandDir = rand() % 4;
+						*RandPacket << (int8)RandDir;
+
+						wprintf(L"[%s] Move Req Dir : [%d] \n", G_ClientArray[i].LoginId.c_str(), RandDir);
+
+						G_ClientArray[i].SendRingBuf.Enqueue(RandPacket);
+						break;
+					case en_ClientMessage::MELEE_ATTACK:
+						RandPacket->Free();
+						break;
+					}
 				}
-			}
-			else
-			{
-				
-			}		
+				else
+				{
 
-			Sleep(1);
-		}			
+				}
+			}				
+		}
+
+		Sleep(100);
 	}
 
 	return 0;
@@ -774,7 +781,7 @@ unsigned __stdcall SelectProc(void* Argument)
 {
 	int32 DummyId = 1;	
 
-	Sleep(5000);	
+	Sleep(15000);	
 
 	FD_SET ReadSet;
 	FD_SET WriteSet;
