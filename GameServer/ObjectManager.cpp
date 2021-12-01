@@ -117,12 +117,12 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int32 Channel
 
 				// 몬스터 추가하면 몬스터 주위 플레이어들에게 몬스터를 소환하라고 알림
 				CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(1, SpawnMonster);				
-				GameServer->SendPacketAroundSector(Monster->GetCellPosition(), ResSpawnPacket);
+				GameServer->SendPacketFieldOfView(Monster, ResSpawnPacket);
 				ResSpawnPacket->Free();
 
 				// 몬스터 소환할때 소환 이펙트 출력
 				CMessage* ResEffectPacket = GameServer->MakePacketEffect(Monster->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_OBJECT_SPAWN, 0.5f);
-				GameServer->SendPacketAroundSector(Monster->GetCellPosition(), ResEffectPacket);
+				GameServer->SendPacketFieldOfView(Monster, ResEffectPacket);
 				ResEffectPacket->Free();
 			} 
 			break;		
@@ -158,7 +158,7 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int32 Channel
 					Item->ItemSetTarget(Item->_GameObjectInfo.OwnerObjectType, Item->_GameObjectInfo.OwnerObjectId);
 
 					CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(1, SpawnItem);
-					GameServer->SendPacketAroundSector(Item->GetCellPosition(), ResSpawnPacket);
+					GameServer->SendPacketFieldOfView(Item, ResSpawnPacket);
 					ResSpawnPacket->Free();
 				}
 				else
@@ -184,7 +184,7 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int32 Channel
 
 				SpawnEnvironment.push_back(Environment->_GameObjectInfo);
 				CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(1, SpawnEnvironment);
-				GameServer->SendPacketAroundSector(Environment->GetCellPosition(), ResSpawnPacket);
+				GameServer->SendPacketFieldOfView(Environment, ResSpawnPacket);
 				ResSpawnPacket->Free();
 			}
 			break;

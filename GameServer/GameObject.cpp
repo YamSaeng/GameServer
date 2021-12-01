@@ -182,6 +182,6 @@ void CGameObject::BroadCastPacket(en_PACKET_TYPE PacketType)
 		break;
 	}
 
-	G_ObjectManager->GameServer->SendPacketAroundSector(this->GetCellPosition(), ResPacket);
+	G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResPacket);
 	ResPacket->Free();
 }

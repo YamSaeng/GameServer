@@ -475,6 +475,10 @@ public:
 	//--------------------------------------------------------------
 	void SendPacketAroundSector(st_Session* Session, CMessage* Message, bool SendMe = false);
 	//--------------------------------------------------------------
+	// 오브젝트를 기준으로 시야뷰 안에 있는 플레이어 대상으로 패킷 전송
+	//--------------------------------------------------------------
+	void SendPacketFieldOfView(CGameObject* Object, CMessage* Message);
+	//--------------------------------------------------------------
 	// Session 기준으로 시야뷰 안에 플레이어 대상으로 패킷 전송
 	//--------------------------------------------------------------
 	void SendPacketFieldOfView(st_Session* Session, CMessage* Message, bool SendMe = false);

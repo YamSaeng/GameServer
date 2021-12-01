@@ -345,7 +345,7 @@ void CMonster::UpdateAttack()
 		_Target->OnDamaged(this, FinalDamage);
 
 		CMessage* ResBearAttackPacket = G_ObjectManager->GameServer->MakePacketResAttack(_GameObjectInfo.ObjectId, _Target->_GameObjectInfo.ObjectId, en_SkillType::SKILL_BEAR_NORMAL, FinalDamage, IsCritical);
-		G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResBearAttackPacket);
+		G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResBearAttackPacket);
 		ResBearAttackPacket->Free();
 
 		// 주위 플레이어들에게 데미지 적용 결과 전송
@@ -360,7 +360,7 @@ void CMonster::UpdateAttack()
 		wstring BearAttackString = BearAttackMessage;
 
 		CMessage* ResSlimeSystemMessage = G_ObjectManager->GameServer->MakePacketResChattingBoxMessage(_Target->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, IsCritical ? st_Color::Red() : st_Color::White(), IsCritical ? L"치명타! " + BearAttackString : BearAttackString);
-		G_ObjectManager->GameServer->SendPacketAroundSector(GetCellPosition(), ResSlimeSystemMessage);
+		G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResSlimeSystemMessage);
 		ResSlimeSystemMessage->Free();
 	}
 

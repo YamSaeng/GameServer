@@ -5973,7 +5973,7 @@ void CGameServer::PacketProcTimerObjectStateChange(int64 SessionId, CGameServerM
 				ChangeStateMonsterObject->_GameObjectInfo.ObjectPositionInfo.State = (en_CreatureState)ChangeState;
 
 				CGameServerMessage* ResObjectStateChangeMessage = MakePacketResChangeObjectState(TargetObjectId, ChangeStateObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, ChangeStateObject->_GameObjectInfo.ObjectType, (en_CreatureState)ChangeState);
-				SendPacketAroundSector(ChangeStateObject->GetCellPosition(), ResObjectStateChangeMessage);
+				SendPacketFieldOfView(ChangeStateMonsterObject, ResObjectStateChangeMessage);
 				ResObjectStateChangeMessage->Free();
 			}
 			break;
@@ -5998,7 +5998,7 @@ void CGameServer::PacketProcTimerObjectStateChange(int64 SessionId, CGameServerM
 							ChangeStatePlayerObject->_GameObjectInfo.ObjectPositionInfo.State = (en_CreatureState)ChangeState;
 
 							CGameServerMessage* ResObjectStateChangeMessage = MakePacketResChangeObjectState(TargetObjectId, ChangeStateObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, ChangeStateObject->_GameObjectInfo.ObjectType, (en_CreatureState)ChangeState);
-							SendPacketAroundSector(ChangeStateObject->GetCellPosition(), ResObjectStateChangeMessage);
+							SendPacketFieldOfView(ChangeStateObject, ResObjectStateChangeMessage);
 							ResObjectStateChangeMessage->Free();
 						}
 					}
@@ -6008,7 +6008,7 @@ void CGameServer::PacketProcTimerObjectStateChange(int64 SessionId, CGameServerM
 						ChangeStatePlayerObject->_GameObjectInfo.ObjectPositionInfo.State = (en_CreatureState)ChangeState;
 
 						CGameServerMessage* ResObjectStateChangeMessage = MakePacketResChangeObjectState(TargetObjectId, ChangeStateObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, ChangeStateObject->_GameObjectInfo.ObjectType, (en_CreatureState)ChangeState);
-						SendPacketAroundSector(ChangeStateObject->GetCellPosition(), ResObjectStateChangeMessage);
+						SendPacketFieldOfView(ChangeStateObject, ResObjectStateChangeMessage);
 						ResObjectStateChangeMessage->Free();
 					}
 					break;
@@ -7026,6 +7026,23 @@ void CGameServer::SendPacketAroundSector(st_Session* Session, CMessage* Message,
 				}
 			}
 		}
+	}
+}
+
+void CGameServer::SendPacketFieldOfView(CGameObject* Object, CMessage* Message)
+{
+	CChannel* Channel = G_ChannelManager->Find(1);
+
+	vector<CPlayer*> FieldOfViewPlayers = Channel->GetFieldOfViewPlayer(Object, Object->_FieldOfViewDistance);
+
+	for (CPlayer* FieldOfViewPlayer : FieldOfViewPlayers)
+	{
+		if (FieldOfViewPlayer->_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_PLAYER_DUMMY)
+		{
+			continue;
+		}
+
+		SendPacket(FieldOfViewPlayer->_SessionId, Message);
 	}
 }
 
