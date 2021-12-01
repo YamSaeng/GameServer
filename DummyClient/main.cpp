@@ -632,6 +632,11 @@ struct st_Client
 	}
 };
 
+struct st_ClientThreadInfo
+{
+	int16 ManageIndex;
+};
+
 static unsigned __stdcall SendProc(void* Argument);
 static unsigned __stdcall SelectProc(void* Argument);
 
@@ -640,7 +645,8 @@ st_Client** G_SelectCheckArray;
 
 CMemoryPoolTLS<CMessage> G_DummyClientMessage;
 
-#define CLIENT_MAX 2048
+#define CLIENT_MAX 2050
+#define SEND_THREAD_MAX 10
 
 int main()
 {
@@ -653,7 +659,42 @@ int main()
 		wprintf(L"WSAStartup Error %d\n", Error);
 	}
 
-	_beginthreadex(NULL, 0, SendProc, 0, 0, NULL);
+	Sleep(5000);
+
+	SOCKADDR_IN ServerAddr;
+	ZeroMemory(&ServerAddr, sizeof(ServerAddr));
+	ServerAddr.sin_family = AF_INET;
+	InetPtonW(AF_INET, L"127.0.0.1", &ServerAddr.sin_addr);
+	ServerAddr.sin_port = htons(7777);	
+
+	G_ClientArray = new st_Client[CLIENT_MAX];
+	G_SelectCheckArray = new st_Client * [FD_SETSIZE];
+	memset(G_SelectCheckArray, 0, sizeof(st_Client*) * FD_SETSIZE);
+
+	for (int i = 0; i < CLIENT_MAX; i++)
+	{
+		G_ClientArray[i].ClientSocket = socket(AF_INET, SOCK_STREAM, 0);
+		G_ClientArray[i].AccountId = G_DummyClientAccountId + i;
+		int ret = connect(G_ClientArray[i].ClientSocket, (SOCKADDR*)&ServerAddr, sizeof(G_ClientArray[i].ClientAddr));
+		if (ret == SOCKET_ERROR)
+		{
+			DWORD Error = WSAGetLastError();
+			wprintf(L"connect Error %d", Error);
+		}
+	}
+
+	int16 ThreadManageSendCount = CLIENT_MAX / SEND_THREAD_MAX;
+	int16 ThreadManageSendIndex = 0;
+
+	for (int16 i = 0; i < SEND_THREAD_MAX; i++)
+	{
+		st_ClientThreadInfo* ClientThread = new st_ClientThreadInfo();
+		ClientThread->ManageIndex = ThreadManageSendIndex;
+
+		_beginthreadex(NULL, 0, SendProc, ClientThread, 0, NULL);
+		ThreadManageSendIndex += ThreadManageSendCount;
+	}
+	
 	_beginthreadex(NULL, 0, SelectProc, 0, 0, NULL);
 	
 	while (1)
@@ -664,17 +705,19 @@ int main()
 
 unsigned __stdcall SendProc(void* Argument)
 {
+	st_ClientThreadInfo* ClientThreadInfo = (st_ClientThreadInfo*)Argument;
+
 	Sleep(15000);
 
-	while (1)
+	while (1)		
 	{
-		for (int32 i = 0; i < CLIENT_MAX; i++)
+		for (int32 i = ClientThreadInfo->ManageIndex; i < ClientThreadInfo->ManageIndex + (CLIENT_MAX / SEND_THREAD_MAX); i++)
 		{
 			// 로그인 및 게임에 입장하면 메세지 전송
 			if (G_ClientArray[i].IsLogin == true && G_ClientArray[i].IsEnterGame == true)
 			{
 				int RandMessageType = rand() % 3;
-				int RandDir;			
+				int RandDir;																																								
 
 				CMessage* RandPacket = CMessage::Alloc();
 				RandPacket->Clear();
@@ -731,33 +774,10 @@ unsigned __stdcall SelectProc(void* Argument)
 {
 	int32 DummyId = 1;	
 
-	SOCKADDR_IN ServerAddr;
-	ZeroMemory(&ServerAddr, sizeof(ServerAddr));
-	ServerAddr.sin_family = AF_INET;
-	InetPtonW(AF_INET, L"127.0.0.1", &ServerAddr.sin_addr);
-	ServerAddr.sin_port = htons(7777);
+	Sleep(5000);	
 
 	FD_SET ReadSet;
 	FD_SET WriteSet;
-
-	st_Client Client;
-	G_ClientArray = new st_Client[CLIENT_MAX];
-	G_SelectCheckArray = new st_Client * [FD_SETSIZE];
-	memset(G_SelectCheckArray, 0, sizeof(st_Client*) * FD_SETSIZE);
-
-	Sleep(6000);
-
-	for (int i = 0; i < CLIENT_MAX; i++)
-	{
-		G_ClientArray[i].ClientSocket = socket(AF_INET, SOCK_STREAM, 0);
-		G_ClientArray[i].AccountId = G_DummyClientAccountId + i;
-		int ret = connect(G_ClientArray[i].ClientSocket, (SOCKADDR*)&ServerAddr, sizeof(G_ClientArray[i].ClientAddr));
-		if (ret == SOCKET_ERROR)
-		{
-			DWORD Error = WSAGetLastError();
-			wprintf(L"connect Error %d", Error);
-		}
-	}	
 
 	while (1)
 	{
