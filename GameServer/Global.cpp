@@ -22,7 +22,7 @@ public:
 	{
 		setlocale(LC_ALL, "Korean");		
 		G_DBConnectionPool = new CDBConnectionPool();
-		G_DBConnectionPool->Init(500);
+		G_DBConnectionPool->Init(1000);
 		G_Logger = new CLog();
 		G_Datamanager = new CDataManager();
 		// 아이템 데이터 파싱
