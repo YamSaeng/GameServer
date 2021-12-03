@@ -13,7 +13,7 @@
 #define USING_DO_NOT 0 
 #define USING_DO 1
 
-#define SERVER_SESSION_MAX 15000
+#define SERVER_SESSION_MAX 5000
 
 // 세션 인덱스 넣기 16비트 왼쪽으로 밀고 INDEX 넣음
 #define ADD_SESSIONID_INDEX(SESSIONID,INDEX)	((SESSIONID << 0x10) | ((short)INDEX))
@@ -134,7 +134,13 @@ public:
 	//------------------------------------------------------------
 	virtual ~CNetworkLib();
 
+	//---------------------------------------------------
+	// 패킷 전송
+	//---------------------------------------------------
 	void SendPacket(__int64 SessionID, CMessage* Packet);
+	//--------------------------------
+	// 세션 끊기
+	//--------------------------------
 	void Disconnect(__int64 SessionID);
 
 	//---------------------------------------
