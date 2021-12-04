@@ -614,7 +614,13 @@ struct st_Client
 	bool IsLogin;
 	bool IsEnterGame;
 
+	int64 IsRelease;
+	LONG IsConnected;
+	LONG IsSend;
+
 	st_GameObjectInfo MyCharacterGameObjectInfo;
+
+	int64 ClientSendMessageTime;
 
 	st_Client()
 	{
@@ -629,25 +635,33 @@ struct st_Client
 
 		IsLogin = false;
 		IsEnterGame = false;
+
+		IsRelease = 0;
+		IsConnected = 0;
+		IsSend = 0;
+
+		ClientSendMessageTime = 0;
 	}
 };
 
 struct st_ClientThreadInfo
 {
-	int64 ClientSendMessageTime;
 	int16 ManageIndex;
 };
 
 static unsigned __stdcall SendProc(void* Argument);
 static unsigned __stdcall SelectProc(void* Argument);
+static unsigned __stdcall ConnectProc(void* Argument);
 
-st_Client* G_ClientArray;
+st_Client** G_ClientArray;
 st_Client** G_SelectCheckArray;
 
 CMemoryPoolTLS<CMessage> G_DummyClientMessage;
 
-#define CLIENT_MAX 3000
-#define SEND_THREAD_MAX 50
+#define CLIENT_MAX 960
+#define SEND_THREAD_MAX 2
+
+int64 G_SendPacketTPS = 0;
 
 int main()
 {
@@ -658,31 +672,9 @@ int main()
 	{
 		DWORD Error = WSAGetLastError();
 		wprintf(L"WSAStartup Error %d\n", Error);
-	}
+	}	
 
-	Sleep(20000);
-
-	SOCKADDR_IN ServerAddr;
-	ZeroMemory(&ServerAddr, sizeof(ServerAddr));
-	ServerAddr.sin_family = AF_INET;
-	InetPtonW(AF_INET, L"127.0.0.1", &ServerAddr.sin_addr);
-	ServerAddr.sin_port = htons(7777);	
-
-	G_ClientArray = new st_Client[CLIENT_MAX];
-	G_SelectCheckArray = new st_Client * [FD_SETSIZE];
-	memset(G_SelectCheckArray, 0, sizeof(st_Client*) * FD_SETSIZE);
-
-	for (int i = 0; i < CLIENT_MAX; i++)
-	{
-		G_ClientArray[i].ClientSocket = socket(AF_INET, SOCK_STREAM, 0);
-		G_ClientArray[i].AccountId = G_DummyClientAccountId + i;
-		int ret = connect(G_ClientArray[i].ClientSocket, (SOCKADDR*)&ServerAddr, sizeof(G_ClientArray[i].ClientAddr));
-		if (ret == SOCKET_ERROR)
-		{
-			DWORD Error = WSAGetLastError();
-			wprintf(L"connect Error %d", Error);
-		}
-	}
+	_beginthreadex(NULL, 0, ConnectProc, 0, 0, NULL);
 
 	int16 ThreadManageSendCount = CLIENT_MAX / SEND_THREAD_MAX;
 	int16 ThreadManageSendIndex = 0;
@@ -690,8 +682,7 @@ int main()
 	for (int16 i = 0; i < SEND_THREAD_MAX; i++)
 	{
 		st_ClientThreadInfo* ClientThread = new st_ClientThreadInfo();
-		ClientThread->ManageIndex = ThreadManageSendIndex;
-		ClientThread->ClientSendMessageTime = 0;
+		ClientThread->ManageIndex = ThreadManageSendIndex;		
 
 		_beginthreadex(NULL, 0, SendProc, ClientThread, 0, NULL);
 		ThreadManageSendIndex += ThreadManageSendCount;
@@ -701,77 +692,93 @@ int main()
 	
 	while (1)
 	{
-		Sleep(1000);
+		wprintf(L"SendPacketTPS : %d\n", G_SendPacketTPS);
+		
+		G_SendPacketTPS = 0;
+
+		Sleep(1000);		
 	}
+}
+
+void ReleaseClient(st_Client* Client)
+{
+	
 }
 
 unsigned __stdcall SendProc(void* Argument)
 {
 	st_ClientThreadInfo* ClientThreadInfo = (st_ClientThreadInfo*)Argument;
 
-	Sleep(12000);
+	Sleep(20000);
 
 	while (1)		
 	{
 		for (int32 i = ClientThreadInfo->ManageIndex; i < ClientThreadInfo->ManageIndex + (CLIENT_MAX / SEND_THREAD_MAX); i++)
 		{
-			if (ClientThreadInfo->ClientSendMessageTime < GetTickCount64())
+			// 로그인 및 게임에 입장했는지 확인
+			if (G_ClientArray[i]->IsLogin == true && G_ClientArray[i]->IsEnterGame == true)
 			{
-				ClientThreadInfo->ClientSendMessageTime = GetTickCount64() + 50;
-
-				// 로그인 및 게임에 입장하면 메세지 전송
-				if (G_ClientArray[i].IsLogin == true && G_ClientArray[i].IsEnterGame == true)
+				// 보낸 시간 경과 확인
+				if (G_ClientArray[i]->ClientSendMessageTime < GetTickCount64())
 				{
-					int RandMessageType = rand() % 3;
-					int RandDir;
+					G_ClientArray[i]->ClientSendMessageTime = GetTickCount64() + 20;
 
-					CMessage* RandPacket = CMessage::Alloc();
-					RandPacket->Clear();
-
-					wstring SendChatMsg;
-					int8 DummyChatLen;
-
-					switch ((en_ClientMessage)RandMessageType)
+					// IsSend를 1로 바꾸고 진입
+					if (InterlockedExchange(&G_ClientArray[i]->IsSend, 1) == 0)
 					{
-					case en_ClientMessage::CHAT_MSG:
-						*RandPacket << (int16)en_PACKET_C2S_MESSAGE;
-						*RandPacket << G_ClientArray[i].AccountId;
-						*RandPacket << G_ClientArray[i].MyCharacterGameObjectInfo.ObjectId;
+						InterlockedIncrement64(&G_SendPacketTPS);
 
-						swprintf_s(G_ClientArray[i].ChatMsg, sizeof(G_ClientArray[i].ChatMsg), L"[%s]가 [%d]를 보냈습니다.", G_ClientArray[i].LoginId.c_str(), G_ClientArray[i].MyCharacterGameObjectInfo.ObjectId, RandMessageType * i);
-						SendChatMsg = G_ClientArray[i].ChatMsg;
+						int RandMessageType = rand() % 2;
+						int RandDir;
 
-						DummyChatLen = (int8)(SendChatMsg.length() * 2);
-						*RandPacket << DummyChatLen;
-						RandPacket->InsertData(SendChatMsg.c_str(), DummyChatLen);
+						CMessage* RandPacket = CMessage::Alloc();
+						RandPacket->Clear();
 
-						G_ClientArray[i].SendRingBuf.Enqueue(RandPacket);
-						break;
-					case en_ClientMessage::MOVE:
-						*RandPacket << (int16)en_PACKET_C2S_MOVE;
-						*RandPacket << G_ClientArray[i].AccountId;
-						*RandPacket << G_ClientArray[i].MyCharacterGameObjectInfo.ObjectId;
+						wstring SendChatMsg;
+						int8 DummyChatLen;
 
-						RandDir = rand() % 4;
-						*RandPacket << (int8)RandDir;
+						switch ((en_ClientMessage)RandMessageType)
+						{
+						case en_ClientMessage::CHAT_MSG:
+							*RandPacket << (int16)en_PACKET_C2S_MESSAGE;
+							*RandPacket << G_ClientArray[i]->AccountId;
+							*RandPacket << G_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId;
 
-						wprintf(L"[%s] Move Req Dir : [%d] \n", G_ClientArray[i].LoginId.c_str(), RandDir);
+							swprintf_s(G_ClientArray[i]->ChatMsg, sizeof(G_ClientArray[i]->ChatMsg), L"[%s]가 [%d]를 보냈습니다.", G_ClientArray[i]->LoginId.c_str(), G_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId, RandMessageType * i);
+							SendChatMsg = G_ClientArray[i]->ChatMsg;
 
-						G_ClientArray[i].SendRingBuf.Enqueue(RandPacket);
-						break;
-					case en_ClientMessage::MELEE_ATTACK:
-						RandPacket->Free();
-						break;
+							//wprintf(L"[%s]가 [%d]를 보냈습니다.\n", G_ClientArray[i].ChatMsg);
+
+							DummyChatLen = (int8)(SendChatMsg.length() * 2);
+							*RandPacket << DummyChatLen;
+							RandPacket->InsertData(SendChatMsg.c_str(), DummyChatLen);
+
+							G_ClientArray[i]->SendRingBuf.Enqueue(RandPacket);
+							break;
+						case en_ClientMessage::MOVE:
+							*RandPacket << (int16)en_PACKET_C2S_MOVE;
+							*RandPacket << G_ClientArray[i]->AccountId;
+							*RandPacket << G_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId;
+
+							RandDir = rand() % 4;
+							*RandPacket << (int8)RandDir;
+
+							//wprintf(L"[%s] Move Req Dir : [%d] \n", G_ClientArray[i].LoginId.c_str(), RandDir);
+
+							G_ClientArray[i]->SendRingBuf.Enqueue(RandPacket);
+							break;
+						case en_ClientMessage::MELEE_ATTACK:
+							RandPacket->Free();
+							break;
+						}
+					}			
+					else
+					{
+
 					}
-				}
-				else
-				{
-
-				}
-			}				
-		}
-
-		Sleep(100);
+				}					
+			}								
+		}		
 	}
 
 	return 0;
@@ -799,19 +806,19 @@ unsigned __stdcall SelectProc(void* Argument)
 			// 검사할 소켓을 담는다 최대 64개
 			for (int j = ClientArrayIndex; j < CLIENT_MAX && SelectCheckArrayIndex < FD_SETSIZE; j++)
 			{
-				if (G_ClientArray[ClientArrayIndex].ClientSocket == INVALID_SOCKET)
+				if (G_ClientArray[ClientArrayIndex] == nullptr || G_ClientArray[ClientArrayIndex]->ClientSocket == INVALID_SOCKET)
 				{
 					continue;
 				}
 
-				FD_SET(G_ClientArray[ClientArrayIndex].ClientSocket, &ReadSet);
+				FD_SET(G_ClientArray[ClientArrayIndex]->ClientSocket, &ReadSet);
 
-				if (G_ClientArray[ClientArrayIndex].SendRingBuf.GetUseSize() > 0)
+				if (G_ClientArray[ClientArrayIndex]->SendRingBuf.GetUseSize() > 0)
 				{
-					FD_SET(G_ClientArray[ClientArrayIndex].ClientSocket, &WriteSet);
+					FD_SET(G_ClientArray[ClientArrayIndex]->ClientSocket, &WriteSet);
 				}
 
-				G_SelectCheckArray[SelectCheckArrayIndex] = &G_ClientArray[ClientArrayIndex];
+				G_SelectCheckArray[SelectCheckArrayIndex] = G_ClientArray[ClientArrayIndex];
 
 				ClientArrayIndex++;
 				SelectCheckArrayIndex++;
@@ -831,7 +838,7 @@ unsigned __stdcall SelectProc(void* Argument)
 			if (SelectRetval > 0)
 			{
 				for (int k = 0; k < CLIENT_MAX && k < FD_SETSIZE; k++)
-				{
+				{					
 					if (FD_ISSET(G_SelectCheckArray[k]->ClientSocket, &ReadSet))
 					{
 						int RecvDirectEnqueSize = G_SelectCheckArray[k]->RecvRingBuf.GetDirectEnqueueSize();
@@ -846,7 +853,7 @@ unsigned __stdcall SelectProc(void* Argument)
 						}
 						else if (RecvRet == 0)
 						{
-							closesocket(G_SelectCheckArray[k]->ClientSocket);
+							ReleaseClient(G_SelectCheckArray[k]);							
 						}
 
 						G_SelectCheckArray[k]->RecvRingBuf.MoveRear(RecvRet);
@@ -1159,6 +1166,8 @@ unsigned __stdcall SelectProc(void* Argument)
 								break;
 							}
 						}
+
+						InterlockedExchange(&G_SelectCheckArray[k]->IsSend, 0);						
 					}
 				}
 			}
@@ -1174,5 +1183,47 @@ unsigned __stdcall SelectProc(void* Argument)
 		}
 	}
 
+	return 0;
+}
+
+unsigned __stdcall ConnectProc(void* Argument)
+{
+	Sleep(10000);
+
+	SOCKADDR_IN ServerAddr;
+	ZeroMemory(&ServerAddr, sizeof(ServerAddr));
+	ServerAddr.sin_family = AF_INET;
+	InetPtonW(AF_INET, L"127.0.0.1", &ServerAddr.sin_addr);
+	ServerAddr.sin_port = htons(7777);
+
+	G_ClientArray = new st_Client*[CLIENT_MAX];
+	for (int i = 0; i < CLIENT_MAX; i++)
+	{
+		G_ClientArray[i] = new st_Client();
+	}
+
+	G_SelectCheckArray = new st_Client *[FD_SETSIZE];	
+	memset(G_SelectCheckArray, 0, sizeof(st_Client*) * FD_SETSIZE);
+
+	while (1)
+	{
+		for (int i = 0; i < CLIENT_MAX; i++)
+		{			
+			if (InterlockedExchange(&G_ClientArray[i]->IsConnected, 1) == 0)
+			{	
+				G_ClientArray[i]->ClientSocket = socket(AF_INET, SOCK_STREAM, 0);
+				G_ClientArray[i]->AccountId = G_DummyClientAccountId + i;
+				int ret = connect(G_ClientArray[i]->ClientSocket, (SOCKADDR*)&ServerAddr, sizeof(G_ClientArray[i]->ClientAddr));
+				if (ret == SOCKET_ERROR)
+				{
+					DWORD Error = WSAGetLastError();
+					wprintf(L"connect Error %d", Error);
+				}				
+			}			
+		}
+
+		Sleep(3000);
+	}
+	
 	return 0;
 }

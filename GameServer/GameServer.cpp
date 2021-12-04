@@ -16,14 +16,12 @@ CGameServer::CGameServer()
 {
 	//timeBeginPeriod(1);
 	_AuthThread = nullptr;
-	_NetworkThread = nullptr;
 	_DataBaseThread = nullptr;
 	_TimerJobThread = nullptr;
 	_LogicThread = nullptr;
 
 	// 논시그널 상태 자동리셋
 	_AuthThreadWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	_NetworkThreadWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	_DataBaseWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	_TimerThreadWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
@@ -57,7 +55,6 @@ CGameServer::CGameServer()
 
 CGameServer::~CGameServer()
 {
-	CloseHandle(_NetworkThreadWakeEvent);
 	//timeEndPeriod(1);
 }
 
@@ -70,15 +67,8 @@ void CGameServer::GameServerStart(const WCHAR* OpenIP, int32 Port)
 
 	G_ObjectManager->GameServer = this;
 
-	SYSTEM_INFO SI;
-	GetSystemInfo(&SI);
-
 	// 인증 쓰레드 시작
-	_AuthThread = (HANDLE)_beginthreadex(NULL, 0, AuthThreadProc, this, 0, NULL);
-	
-	int16 NetworkThreadManageCount = SERVER_SESSION_MAX / (int16)SI.dwNumberOfProcessors;
-	int16 NetworkThreadIndex = 0;	
-	
+	_AuthThread = (HANDLE)_beginthreadex(NULL, 0, AuthThreadProc, this, 0, NULL);	
 	// 데이터베이스 쓰레드 시작
 	_DataBaseThread = (HANDLE)_beginthreadex(NULL, 0, DataBaseThreadProc, this, 0, NULL);
 	// 타이머 잡 쓰레드 시작
@@ -87,7 +77,6 @@ void CGameServer::GameServerStart(const WCHAR* OpenIP, int32 Port)
 	_LogicThread = (HANDLE)_beginthreadex(NULL, 0, LogicThreadProc, this, 0, NULL);	
 
 	CloseHandle(_AuthThread);
-	CloseHandle(_NetworkThread);
 	CloseHandle(_DataBaseThread);
 	CloseHandle(_TimerJobThread);
 	CloseHandle(_LogicThread);	
@@ -6919,25 +6908,6 @@ void CGameServer::OnClientJoin(int64 SessionID)
 void CGameServer::OnRecv(int64 SessionID, CMessage* Packet)
 {
 	PacketProc(SessionID, Packet);
-
-	/*st_Session* Session = FindSession(SessionID);
-	
-	st_Job* NewMessageJob = _JobMemoryPool->Alloc();
-	CGameServerMessage* JobMessage = CGameServerMessage::GameServerMessageAlloc();
-	JobMessage->Clear();
-	JobMessage->SetHeader(Packet->GetBufferPtr(), sizeof(CMessage::st_ENCODE_HEADER));
-	JobMessage->InsertData(Packet->GetFrontBufferPtr(), Packet->GetUseBufferSize() - sizeof(CMessage::st_ENCODE_HEADER));
-
-	NewMessageJob->Type = en_JobType::NETWORK_MESSAGE;
-	NewMessageJob->SessionId = SessionID;
-	NewMessageJob->Message = JobMessage;	
-
-	Session->NetworkMessageQue.Enqueue(NewMessageJob);
-
-	_GameServerNetworkThreadMessageQue.Enqueue(NewMessageJob);
-	SetEvent(_NetworkThreadWakeEvent);	
-
-	ReturnSession(Session);*/
 }
 
 void CGameServer::OnClientLeave(st_Session* LeaveSession)
