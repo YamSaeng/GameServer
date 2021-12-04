@@ -70,10 +70,15 @@ void CGameServer::GameServerStart(const WCHAR* OpenIP, int32 Port)
 
 	G_ObjectManager->GameServer = this;
 
+	SYSTEM_INFO SI;
+	GetSystemInfo(&SI);
+
 	// 인증 쓰레드 시작
 	_AuthThread = (HANDLE)_beginthreadex(NULL, 0, AuthThreadProc, this, 0, NULL);
-	// 네트워크 쓰레드 시작
-	_NetworkThread = (HANDLE)_beginthreadex(NULL, 0, NetworkThreadProc, this, 0, NULL);
+	
+	int16 NetworkThreadManageCount = SERVER_SESSION_MAX / (int16)SI.dwNumberOfProcessors;
+	int16 NetworkThreadIndex = 0;	
+	
 	// 데이터베이스 쓰레드 시작
 	_DataBaseThread = (HANDLE)_beginthreadex(NULL, 0, DataBaseThreadProc, this, 0, NULL);
 	// 타이머 잡 쓰레드 시작
@@ -125,42 +130,6 @@ unsigned __stdcall CGameServer::AuthThreadProc(void* Argument)
 			}
 
 			Instance->_AuthThreadTPS++;
-			Instance->_JobMemoryPool->Free(Job);
-		}
-	}
-	return 0;
-}
-
-unsigned __stdcall CGameServer::NetworkThreadProc(void* Argument)
-{
-	CGameServer* Instance = (CGameServer*)Argument;
-
-	while (!Instance->_NetworkThreadEnd)
-	{
-		WaitForSingleObject(Instance->_NetworkThreadWakeEvent, INFINITE);
-
-		Instance->_NetworkThreadWakeCount++;
-
-		while (!Instance->_GameServerNetworkThreadMessageQue.IsEmpty())
-		{
-			st_Job* Job = nullptr;
-
-			if (!Instance->_GameServerNetworkThreadMessageQue.Dequeue(&Job))
-			{
-				break;
-			}
-
-			switch (Job->Type)
-			{
-			case en_JobType::NETWORK_MESSAGE:
-				Instance->PacketProc(Job->SessionId, Job->Message);
-				break;
-			default:
-				Instance->Disconnect(Job->SessionId);
-				break;
-			}
-
-			Instance->_NetworkThreadTPS++;
 			Instance->_JobMemoryPool->Free(Job);
 		}
 	}
@@ -711,7 +680,7 @@ void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 		break;
 	}
 
-	Message->Free();
+	//Message->Free();
 }
 
 //----------------------------------------------------------------------------
@@ -6949,6 +6918,10 @@ void CGameServer::OnClientJoin(int64 SessionID)
 
 void CGameServer::OnRecv(int64 SessionID, CMessage* Packet)
 {
+	PacketProc(SessionID, Packet);
+
+	/*st_Session* Session = FindSession(SessionID);
+	
 	st_Job* NewMessageJob = _JobMemoryPool->Alloc();
 	CGameServerMessage* JobMessage = CGameServerMessage::GameServerMessageAlloc();
 	JobMessage->Clear();
@@ -6957,9 +6930,14 @@ void CGameServer::OnRecv(int64 SessionID, CMessage* Packet)
 
 	NewMessageJob->Type = en_JobType::NETWORK_MESSAGE;
 	NewMessageJob->SessionId = SessionID;
-	NewMessageJob->Message = JobMessage;
+	NewMessageJob->Message = JobMessage;	
+
+	Session->NetworkMessageQue.Enqueue(NewMessageJob);
+
 	_GameServerNetworkThreadMessageQue.Enqueue(NewMessageJob);
-	SetEvent(_NetworkThreadWakeEvent);
+	SetEvent(_NetworkThreadWakeEvent);	
+
+	ReturnSession(Session);*/
 }
 
 void CGameServer::OnClientLeave(st_Session* LeaveSession)
@@ -7009,11 +6987,6 @@ void CGameServer::SendPacketAroundSector(st_Session* Session, CMessage* Message,
 	{
 		for (CPlayer* Player : Sector->GetPlayers())
 		{
-			if (Player->_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_PLAYER_DUMMY)
-			{
-				continue;
-			}
-
 			if (SendMe == true)
 			{
 				SendPacket(Player->_SessionId, Message);
@@ -7037,11 +7010,6 @@ void CGameServer::SendPacketFieldOfView(CGameObject* Object, CMessage* Message)
 
 	for (CPlayer* FieldOfViewPlayer : FieldOfViewPlayers)
 	{
-		if (FieldOfViewPlayer->_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_PLAYER_DUMMY)
-		{
-			continue;
-		}
-
 		SendPacket(FieldOfViewPlayer->_SessionId, Message);
 	}
 }
@@ -7059,11 +7027,6 @@ void CGameServer::SendPacketFieldOfView(st_Session* Session, CMessage* Message, 
 	{
 		for (CPlayer* Player : Sector->GetPlayers())
 		{
-			/*if (Player->_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_PLAYER_DUMMY)
-			{
-				continue;
-			}*/
-
 			// 시야 범위 안에 있는 플레이어를 찾는다
 			int16 Distance = st_Vector2Int::Distance(MyPlayer->GetCellPosition(),Player->GetCellPosition());
 			

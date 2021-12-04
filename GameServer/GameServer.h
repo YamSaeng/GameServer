@@ -12,9 +12,7 @@ class CGameServer : public CNetworkLib
 {
 private:
 	// 인증 쓰레드
-	HANDLE _AuthThread;
-	// 네트워크 쓰레드
-	HANDLE _NetworkThread;
+	HANDLE _AuthThread;	
 	// 데이터베이스 쓰레드
 	HANDLE _DataBaseThread;
 	// 타이머잡 쓰레드
@@ -23,9 +21,7 @@ private:
 	HANDLE _LogicThread;	
 
 	// 인증 쓰레드 깨우기 이벤트
-	HANDLE _AuthThreadWakeEvent;
-	// 네트워크 쓰레드 깨우기 이벤트
-	HANDLE _NetworkThreadWakeEvent;	
+	HANDLE _AuthThreadWakeEvent;	
 	// 타이머잡 쓰레드 깨우기 이벤트
 	HANDLE _TimerThreadWakeEvent;	
 
@@ -46,11 +42,7 @@ private:
 	//-------------------------------------------------------
 	// 인증 쓰레드 ( 클라 접속, 클라 비접속 )
 	//-------------------------------------------------------
-	static unsigned __stdcall AuthThreadProc(void* Argument);
-	//----------------------------------------------------------
-	// 네트워크 쓰레드 ( 패킷 처리 )
-	//----------------------------------------------------------
-	static unsigned __stdcall NetworkThreadProc(void* Argument);
+	static unsigned __stdcall AuthThreadProc(void* Argument);	
 	//----------------------------------------------------------
 	// 데이터베이스 쓰레드 ( 데이터 베이스 작업 처리 )
 	//----------------------------------------------------------
