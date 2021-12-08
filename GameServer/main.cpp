@@ -99,9 +99,6 @@ int main()
 		G_Logger->WriteStdOut(en_Color::WHITE, L"GameServerTimerJobPool Alloc : [%d]\n", G_GameServer._TimerJobMemoryPool->GetAllocCount()); // 게임서버 타이머 잡 메모리풀 Alloc
 		G_Logger->WriteStdOut(en_Color::WHITE, L"GameServerTimerJobPool Remain : [%d]\n", G_GameServer._TimerJobMemoryPool->GetUseCount()); // 게임서버 타이머 잡 메모리풀 남은 청크 파편 개수
 		G_Logger->WriteStdOut(en_Color::WHITE, L"GameServerTimerJobPool Return : [%d]\n", G_GameServer._TimerJobMemoryPool->ReturnCount()); // 게임서버 타이머 잡 메모리풀 반납되지 않은 청크 파편 개수
-		G_Logger->WriteStdOut(en_Color::WHITE, L"NetworkThread Que Size	:  [%d]\n", G_GameServer._GameServerNetworkThreadMessageQue.GetUseSize()); // 게임서버 네트워크 쓰레드 큐 사이즈
-		G_Logger->WriteStdOut(en_Color::WHITE, L"NetworkThread TPS	:  [%d]\n", G_GameServer._NetworkThreadTPS); // 게임서버 네트워크 쓰레드 TPS
-		G_Logger->WriteStdOut(en_Color::WHITE, L"NetworkThread WakeCount	:  [%d]\n", G_GameServer._NetworkThreadWakeCount); // 게임서버 네트워크 쓰레드 활성화 횟수
 		G_Logger->WriteStdOut(en_Color::WHITE, L"AuthThread Que Size :      [%d]\n", G_GameServer._GameServerAuthThreadMessageQue.GetUseSize()); //게임서버 인증 쓰레드 큐 사이즈
 		G_Logger->WriteStdOut(en_Color::WHITE, L"AuthThread TPS :	   [%d]\n", G_GameServer._AuthThreadTPS); // 게임서버 인증 쓰레드 TPS
 		G_Logger->WriteStdOut(en_Color::WHITE, L"AuthThread WakeCount :     [%d]\n", G_GameServer._AuthThreadWakeCount); // 게임서버 인증 쓰레드 활성화된 횟수
@@ -116,7 +113,6 @@ int main()
 		G_GameServer._AcceptTPS = 0;
 		G_GameServer._RecvPacketTPS = 0;
 		G_GameServer._SendPacketTPS = 0;
-		G_GameServer._NetworkThreadTPS = 0;
 		G_GameServer._AuthThreadTPS = 0;
 		G_GameServer._DataBaseThreadTPS = 0;
 		G_GameServer._TimerJobThreadTPS = 0;
