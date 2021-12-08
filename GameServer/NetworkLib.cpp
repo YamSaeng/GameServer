@@ -115,7 +115,7 @@ void CNetworkLib::SendPost(st_Session* SendSession)
 {
 	int SendRingBufUseSize;
 	int SendBufCount = 0;
-	WSABUF SendBuf[200];
+	WSABUF SendBuf[300];
 
 	do
 	{
@@ -162,7 +162,7 @@ void CNetworkLib::SendPost(st_Session* SendSession)
 
 	// 보내야할 패킷의 개수만큼 SendRingBuf에서 뽑아내서 WSABuf에 담는다.
 	for (int i = 0; i < SendBufCount; i++)
-	{
+	{		
 		CMessage* Packet = nullptr;
 		if (!SendSession->SendRingBuf.Dequeue(&Packet))
 		{
