@@ -13,7 +13,7 @@ CGameObject::CGameObject()
 
 	_NatureRecoveryTick = 0;
 
-	_FieldOfViewDistance = 8;
+	_FieldOfViewDistance = 6;
 
 	_IsSendPacketTarget = false;
 }
