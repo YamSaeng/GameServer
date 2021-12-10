@@ -115,7 +115,7 @@ void CNetworkLib::SendPost(st_Session* SendSession)
 {
 	int SendRingBufUseSize;
 	int SendBufCount = 0;
-	WSABUF SendBuf[300];
+	WSABUF SendBuf[400];
 
 	do
 	{
