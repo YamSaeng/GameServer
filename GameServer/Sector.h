@@ -14,6 +14,8 @@ private:
 	set<CMonster*> _Monsters;
 	set<CItem*> _Items;
 	set<CEnvironment*> _Environment;
+
+	SRWLOCK _SectorLock;
 public:
 	// ¼½ÅÍ ÁÂÇ¥
 	int32 _SectorY;
@@ -31,5 +33,8 @@ public:
 	set<CMonster*> GetMonsters();
 	set<CItem*> GetItems();
 	set<CEnvironment*> GetEnvironment();
+
+	void GetSectorLock();
+	void GetSectorUnLock();
 };
 

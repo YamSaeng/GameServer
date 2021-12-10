@@ -8,10 +8,14 @@ CSector::CSector(int32 SectorY, int32 SectorX)
 {
 	_SectorY = SectorY;
 	_SectorX = SectorX;
+	
+	InitializeSRWLock(&_SectorLock);
 }
 
 void CSector::Insert(CGameObject* InsertGameObject)
 {
+	AcquireSRWLockExclusive(&_SectorLock);
+
 	switch (InsertGameObject->_GameObjectInfo.ObjectType)
 	{
 	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
@@ -45,10 +49,14 @@ void CSector::Insert(CGameObject* InsertGameObject)
 	default:
 		break;
 	}
+
+	ReleaseSRWLockExclusive(&_SectorLock);
 }
 
 void CSector::Remove(CGameObject* RemoveGameObject)
 {
+	AcquireSRWLockExclusive(&_SectorLock);
+
 	switch (RemoveGameObject->_GameObjectInfo.ObjectType)
 	{
 	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
@@ -80,6 +88,8 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 		_Environment.erase((CEnvironment*)RemoveGameObject);
 		break;
 	}
+
+	ReleaseSRWLockExclusive(&_SectorLock);
 }
 
 set<CPlayer*> CSector::GetPlayers()
@@ -100,4 +110,14 @@ set<CItem*> CSector::GetItems()
 set<CEnvironment*> CSector::GetEnvironment()
 {
 	return _Environment;
+}
+
+void CSector::GetSectorLock()
+{
+	AcquireSRWLockExclusive(&_SectorLock);
+}
+
+void CSector::GetSectorUnLock()
+{
+	ReleaseSRWLockExclusive(&_SectorLock);
 }
