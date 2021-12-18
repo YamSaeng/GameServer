@@ -241,8 +241,8 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	{
 		CPlayer* MovePlayer = (CPlayer*)GameObject;
 
-		CSector* CurrentSector = GameObject->_Channel->GetSector(MovePlayer->GetCellPosition());
-		CSector* NextSector = GameObject->_Channel->GetSector(DestPosition);		
+		CSector* CurrentSector = GameObject->_Channel->GetSector(MovePlayer->GetCellPosition());		
+		CSector* NextSector = GameObject->_Channel->GetSector(DestPosition);				
 
 		if (CurrentSector != NextSector)
 		{			
@@ -251,8 +251,64 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 			// 이동한 섹터에 플레이어 추가
 			NextSector->Insert(MovePlayer);			
 		}
+		
+		// 섹터 얻어오기
+		vector<CSector*> AroundSectors = GameObject->_Channel->GetAroundSectors(MovePlayer->GetCellPosition(), 1);
+		
+		// 주위 섹터에서 내 시야 범위 안에 속하는 오브젝트 가져오기
+		vector<CGameObject*> CurrentFieldOfViewObjects;
 
-		vector<CGameObject*> CurrentFieldOfViewObjects = GameObject->_Channel->GetFieldOfViewObjects(MovePlayer,MovePlayer->_FieldOfViewDistance);
+		for (CSector* AroundSector : AroundSectors)
+		{
+			AroundSector->GetSectorLock();
+
+			// 플레이어 대상
+			for (CPlayer* Player : AroundSector->GetPlayers())
+			{
+				int16 Distance = st_Vector2Int::Distance(MovePlayer->GetCellPosition(), Player->GetCellPosition());
+
+				if (MovePlayer->_GameObjectInfo.ObjectId != Player->_GameObjectInfo.ObjectId 
+					&& Distance <= MovePlayer->_FieldOfViewDistance)
+				{
+					CurrentFieldOfViewObjects.push_back(Player);
+				}	
+			}
+
+			// 몬스터 대상
+			for (CMonster* Monster : AroundSector->GetMonsters())
+			{
+				int16 Distance = st_Vector2Int::Distance(MovePlayer->GetCellPosition(), Monster->GetCellPosition());
+
+				if (Distance <= MovePlayer->_FieldOfViewDistance)
+				{
+					CurrentFieldOfViewObjects.push_back(Monster);
+				}
+			}
+
+			// 환경 대상
+			for (CEnvironment* Environment : AroundSector->GetEnvironment())
+			{
+				int16 Distance = st_Vector2Int::Distance(MovePlayer->GetCellPosition(), Environment->GetCellPosition());
+
+				if (Distance <= MovePlayer->_FieldOfViewDistance)
+				{
+					CurrentFieldOfViewObjects.push_back(Environment);
+				}
+			}
+
+			// 아이템 대상
+			for (CItem* Item : AroundSector->GetItems())
+			{
+				int16 Distance = st_Vector2Int::Distance(MovePlayer->GetCellPosition(), Item->GetCellPosition());
+
+				if (Distance <= MovePlayer->_FieldOfViewDistance)
+				{
+					CurrentFieldOfViewObjects.push_back(Item);
+				}
+			}
+		}
+
+		// 플레이어가 움직이기전 주위 시야 범위 오브젝트들
 		vector<CGameObject*> PreviousFieldOfViewObjects = MovePlayer->_FieldOfViewObjects;	
 		
 		vector<CGameObject*> SpawnFieldOfViewObjects = CurrentFieldOfViewObjects;
@@ -358,6 +414,11 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 		}		
 
 		MovePlayer->_FieldOfViewObjects = CurrentFieldOfViewObjects;
+		
+		for (CSector* AroundSector : AroundSectors)
+		{
+			AroundSector->GetSectorUnLock();
+		}
 	}
 		break;
 	case en_GameObjectType::OBJECT_SLIME:
@@ -376,7 +437,28 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 			NextSector->Insert(MoveMonster);			
 		}
 		
-		vector<CPlayer*> CurrentFieldOfViewObjects = GameObject->_Channel->GetFieldOfViewPlayer(MoveMonster, MoveMonster->_FieldOfViewDistance);
+		// 섹터 얻어오기
+		vector<CSector*> AroundSectors = GameObject->_Channel->GetAroundSectors(MoveMonster->GetCellPosition(), 1);
+
+		// 몬스터 주위 시야 범위 오브젝트 가져오기
+		vector<CPlayer*> CurrentFieldOfViewObjects;
+
+		for (CSector* AroundSector : AroundSectors)
+		{
+			AroundSector->GetSectorLock();
+
+			// 플레이어 대상
+			for (CPlayer* Player : AroundSector->GetPlayers())
+			{
+				int16 Distance = st_Vector2Int::Distance(MoveMonster->GetCellPosition(), Player->GetCellPosition());
+
+				if (Distance <= MoveMonster->_FieldOfViewDistance)
+				{
+					CurrentFieldOfViewObjects.push_back(Player);
+				}
+			}			
+		}
+
 		vector<CPlayer*> PreviousFieldOfViewObjects = MoveMonster->_FieldOfViewPlayers;
 
 		vector<CPlayer*> SpawnFieldOfViewObjects = CurrentFieldOfViewObjects;		
@@ -394,7 +476,12 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 					{
 						if (CurrentFieldOfViewObjects[i]->_GameObjectInfo.ObjectId == SpawnFieldOfViewObjects[k]->_GameObjectInfo.ObjectId)
 						{
-							SpawnFieldOfViewObjects.erase(SpawnFieldOfViewObjects.begin() + k);
+							int16 Distance = st_Vector2Int::Distance(SpawnFieldOfViewObjects[k]->GetCellPosition(), MoveMonster->GetCellPosition());
+
+							if (Distance > SpawnFieldOfViewObjects[k]->_FieldOfViewDistance)
+							{
+								SpawnFieldOfViewObjects.erase(SpawnFieldOfViewObjects.begin() + k);
+							}							
 							break;
 						}
 					}
@@ -432,7 +519,12 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 					{
 						if (PreviousFieldOfViewObjects[i]->_GameObjectInfo.ObjectId == DeSpawnFieldOfViewObjects[k]->_GameObjectInfo.ObjectId)
 						{
-							DeSpawnFieldOfViewObjects.erase(DeSpawnFieldOfViewObjects.begin() + k);
+							int16 Distance = st_Vector2Int::Distance(DeSpawnFieldOfViewObjects[k]->GetCellPosition(), MoveMonster->GetCellPosition());
+							
+							if (Distance > DeSpawnFieldOfViewObjects[k]->_FieldOfViewDistance)
+							{
+								DeSpawnFieldOfViewObjects.erase(DeSpawnFieldOfViewObjects.begin() + k);
+							}							
 							break;
 						}
 					}
@@ -459,6 +551,11 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 		}		
 
 		MoveMonster->_FieldOfViewPlayers = CurrentFieldOfViewObjects;
+		
+		for (CSector* AroundSector : AroundSectors)
+		{
+			AroundSector->GetSectorUnLock();
+		}
 	}
 		break;	
 	case en_GameObjectType::OBJECT_STONE:
@@ -536,73 +633,7 @@ bool CMap::ApplyPositionUpdateItem(CItem* ItemObject, st_Vector2Int& NewPosition
 	if (CurrentSector != NextSector)
 	{
 		CurrentSector->Remove(ItemObject);
-
-		// 아이템 섹터 옮기기 전 주변 섹터 
-		vector<CSector*> CurrentSectors = ItemObject->_Channel->GetAroundSectors(ItemObject->GetCellPosition(), 1);
-		// 섹터 옮기고 난 후 주변 섹터
-		vector<CSector*> NextSectors = ItemObject->_Channel->GetAroundSectors(NewPosition, 1);
-
-		// 나를 제거할 섹터를 찾는 작업
-		// Current - Next;
-		// 현재 섹터들에서 내가 이동할 섹터를 제거한 차집합 섹터를 얻는다.
-		vector<CSector*> DeSpawnSectors = CurrentSectors;
-		for (int32 i = 0; i < DeSpawnSectors.size(); i++)
-		{
-			for (int32 j = 0; j < NextSectors.size(); j++)
-			{
-				if (DeSpawnSectors[i]->_SectorY == NextSectors[j]->_SectorY && DeSpawnSectors[i]->_SectorX == NextSectors[j]->_SectorX)
-				{
-					DeSpawnSectors.erase(DeSpawnSectors.begin() + i);
-				}
-			}
-		}
-
-		vector<int64> DeSpawnSectorObjectIds;
-		DeSpawnSectorObjectIds.push_back(ItemObject->_GameObjectInfo.ObjectId);
-		// 나를 제외하라는 메시지를 생성 후 
-		CMessage* ResSectorDespawnPlayer = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(1, DeSpawnSectorObjectIds);
-		// 해당 섹터 플레이어들에게 전송한다.
-		for (int32 i = 0; i < DeSpawnSectors.size(); i++)
-		{
-			for (CPlayer* Player : DeSpawnSectors[i]->GetPlayers())
-			{
-				G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSectorDespawnPlayer);
-			}
-		}
-		ResSectorDespawnPlayer->Free();
-
-		NextSector->Insert(ItemObject);
-
-		// 나를 스폰할 섹터를 찾는 작업
-		// Next - Current;
-		// 이동할 섹터에서 현재 섹터를 제거한 차집합 섹터를 찾는다.
-		vector<CSector*> SpawnSectors = NextSectors;
-		for (int32 i = 0; i < SpawnSectors.size(); i++)
-		{
-			for (int32 j = 0; j < CurrentSectors.size(); j++)
-			{
-				if (SpawnSectors[i]->_SectorY == CurrentSectors[j]->_SectorY && SpawnSectors[i]->_SectorX == CurrentSectors[j]->_SectorX)
-				{
-					SpawnSectors.erase(SpawnSectors.begin() + i);
-				}
-			}
-		}
-
-		// 스폰할 대상배열
-		vector<st_GameObjectInfo> SpawnObjectInfos;
-		// 나의 정보를 담고
-		SpawnObjectInfos.push_back(ItemObject->_GameObjectInfo);
-
-		// 나를 소환하라고 앞서 얻어준 섹터 플레이어들에게 패킷을 전송한다.
-		CMessage* ResSectorSpawnPlayer = G_ObjectManager->GameServer->MakePacketResObjectSpawn(1, SpawnObjectInfos);
-		for (int32 i = 0; i < SpawnSectors.size(); i++)
-		{
-			for (CPlayer* Player : SpawnSectors[i]->GetPlayers())
-			{
-				G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSectorSpawnPlayer);
-			}
-		}
-		ResSectorSpawnPlayer->Free();
+		NextSector->Insert(ItemObject);		
 	}
 
 	ItemObject->_GameObjectInfo.ObjectPositionInfo.PositionX = NewPosition._X;
