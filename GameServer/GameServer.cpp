@@ -597,6 +597,7 @@ void CGameServer::DeleteClient(st_Session* Session)
 	Session->ClientSock = INVALID_SOCKET;
 	closesocket(Session->CloseSock);
 
+	// 세션 인덱스 반납
 	int64 Index = GET_SESSIONINDEX(Session->SessionId);
 	_SessionArrayIndexs.Push(GET_SESSIONINDEX(Session->SessionId));
 }
@@ -663,7 +664,7 @@ void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 		break;
 	case en_PACKET_TYPE::en_PACKET_C2S_PONG:
 		PacketProcReqPong(SessionId, Message);
-		break;
+		break;	
 	default:
 		Disconnect(SessionId);
 		break;
@@ -767,13 +768,15 @@ void CGameServer::PacketProcReqCreateCharacter(int64 SessionID, CMessage* Messag
 		// 캐릭터 이름 길이
 		int8 CharacterNameLen;
 		*Message >> CharacterNameLen;
-
-		WCHAR CharacterName[20];
-		memset(CharacterName, 0, sizeof(WCHAR) * 20);
+				
+		WCHAR* CharacterName = (WCHAR*)malloc(sizeof(WCHAR) * CharacterNameLen);
+		memset(CharacterName, 0, sizeof(WCHAR) * CharacterNameLen);
 		Message->GetData(CharacterName, CharacterNameLen);
 
 		// 캐릭터 이름 셋팅
 		Session->CreateCharacterName = CharacterName;
+		free(CharacterName);
+		CharacterName = nullptr;
 
 		// 클라에서 선택한 플레이어 인덱스
 		byte CharacterCreateSlotIndex;
@@ -830,88 +833,91 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 			int8 EnterGameCharacterNameLen;
 			*Message >> EnterGameCharacterNameLen;
 
-			WCHAR EnterGameCharacterName[20];
-			memset(EnterGameCharacterName, 0, sizeof(WCHAR) * 20);
-			Message->GetData(EnterGameCharacterName, EnterGameCharacterNameLen);
+			wstring EnterGameCharacterName;			
+			Message->GetData(EnterGameCharacterName, EnterGameCharacterNameLen);			
 
 			bool FindName = false;
 			// 클라가 가지고 있는 캐릭 중에 패킷으로 받은 캐릭터가 있는지 확인한다.
 			for (int i = 0; i < SESSION_CHARACTER_MAX; i++)
-			{					
-				if (G_ObjectManager->_PlayersArray[Session->MyPlayerIndexes[i]] != nullptr && 
+			{
+				if (G_ObjectManager->_PlayersArray[Session->MyPlayerIndexes[i]] != nullptr &&
 					G_ObjectManager->_PlayersArray[Session->MyPlayerIndexes[i]]->_GameObjectInfo.ObjectName == EnterGameCharacterName)
 				{
 					FindName = true;
-					Session->MyPlayerIndex = Session->MyPlayerIndexes[i];					
-					G_ObjectManager->_PlayersArray[Session->MyPlayerIndex]->_NetworkState = en_ObjectNetworkState::LIVE;					
+					Session->MyPlayerIndex = Session->MyPlayerIndexes[i];
+					G_ObjectManager->_PlayersArray[Session->MyPlayerIndex]->_NetworkState = en_ObjectNetworkState::LIVE;
 					break;
 				}
 			}
 
 			if (FindName == false)
-			{
-				CRASH("클라가 가지고 있는 캐릭 중 패킷으로 받은 캐릭터가 없음");
+			{	
+				CMessage* ResEnterGamePacket = MakePacketResEnterGame(FindName, nullptr);
+				SendPacket(Session->SessionId, ResEnterGamePacket);
+				ResEnterGamePacket->Free();
 				break;
 			}
-
-			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
-
-			// 클라가 선택한 오브젝트를 게임에 입장 시킨다. ( 채널, 섹터 입장 )
-			G_ObjectManager->ObjectEnterGame(MyPlayer, 1);
-
-			// 나한테 나 생성하라고 알려줌
-			CMessage* ResEnterGamePacket = MakePacketResEnterGame(MyPlayer->_GameObjectInfo);
-			SendPacket(Session->SessionId, ResEnterGamePacket);
-			ResEnterGamePacket->Free();			
-
-			// 캐릭터의 상태를 10초 후에 IDLE 상태로 전환
-			ObjectStateChangeTimerJobCreate(MyPlayer, en_CreatureState::IDLE, 10000);
-
-			vector<st_GameObjectInfo> SpawnObjectInfo;
-			SpawnObjectInfo.push_back(MyPlayer->_GameObjectInfo);
-
-			// 다른 플레이어들한테 나를 생성하라고 알려줌
-			CMessage* ResSpawnPacket = MakePacketResObjectSpawn(1, SpawnObjectInfo);
-			SendPacketFieldOfView(Session, ResSpawnPacket);			
-			ResSpawnPacket->Free();
-
-			SpawnObjectInfo.clear();
-
-			if (Session->IsDummy == false)
+			else
 			{
-				// 나한테 다른 오브젝트들을 생성하라고 알려줌						
-				st_GameObjectInfo* SpawnGameObjectInfos;
-				// 시야 범위 안에 있는 오브젝트 가져오기
-				vector<CGameObject*> FieldOfViewObjects = G_ChannelManager->Find(1)->GetFieldOfViewObjects(MyPlayer, MyPlayer->_FieldOfViewDistance);
-				MyPlayer->_FieldOfViewObjects = FieldOfViewObjects;				
+				CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
 
-				if (FieldOfViewObjects.size() > 0)
+				// 클라가 선택한 오브젝트를 게임에 입장 시킨다. ( 채널, 섹터 입장 )
+				G_ObjectManager->ObjectEnterGame(MyPlayer, 1);
+
+				// 나한테 나 생성하라고 알려줌
+				CMessage* ResEnterGamePacket = MakePacketResEnterGame(FindName, &MyPlayer->_GameObjectInfo);
+				SendPacket(Session->SessionId, ResEnterGamePacket);
+				ResEnterGamePacket->Free();
+
+				// 캐릭터의 상태를 10초 후에 IDLE 상태로 전환
+				ObjectStateChangeTimerJobCreate(MyPlayer, en_CreatureState::IDLE, 10000);
+
+				vector<st_GameObjectInfo> SpawnObjectInfo;
+				SpawnObjectInfo.push_back(MyPlayer->_GameObjectInfo);
+
+				// 다른 플레이어들한테 나를 생성하라고 알려줌
+				CMessage* ResSpawnPacket = MakePacketResObjectSpawn(1, SpawnObjectInfo);
+				SendPacketFieldOfView(Session, ResSpawnPacket);
+				ResSpawnPacket->Free();
+
+				SpawnObjectInfo.clear();
+
+				if (Session->IsDummy == false)
 				{
-					SpawnGameObjectInfos = new st_GameObjectInfo[FieldOfViewObjects.size()];
+					// 나한테 다른 오브젝트들을 생성하라고 알려줌						
+					st_GameObjectInfo* SpawnGameObjectInfos;
+					// 시야 범위 안에 있는 오브젝트 가져오기
+					vector<CGameObject*> FieldOfViewObjects = G_ChannelManager->Find(1)->GetFieldOfViewObjects(MyPlayer, 1);
+					MyPlayer->_FieldOfViewObjects = FieldOfViewObjects;
 
-					for (int32 i = 0; i < FieldOfViewObjects.size(); i++)
+					if (FieldOfViewObjects.size() > 0)
 					{
-						SpawnObjectInfo.push_back(FieldOfViewObjects[i]->_GameObjectInfo);
+						SpawnGameObjectInfos = new st_GameObjectInfo[FieldOfViewObjects.size()];
+
+						for (int32 i = 0; i < FieldOfViewObjects.size(); i++)
+						{
+							SpawnObjectInfo.push_back(FieldOfViewObjects[i]->_GameObjectInfo);
+						}
+
+						CMessage* ResOtherObjectSpawnPacket = MakePacketResObjectSpawn((int32)FieldOfViewObjects.size(), SpawnObjectInfo);
+						SendPacket(Session->SessionId, ResOtherObjectSpawnPacket);
+						ResOtherObjectSpawnPacket->Free();
+
+						delete[] SpawnGameObjectInfos;
 					}
+				}
 
-					CMessage* ResOtherObjectSpawnPacket = MakePacketResObjectSpawn((int32)FieldOfViewObjects.size(), SpawnObjectInfo);
-					SendPacket(Session->SessionId, ResOtherObjectSpawnPacket);
-					ResOtherObjectSpawnPacket->Free();
+				// DB 큐에 요청하기 전 IOCount를 증가시켜서 Session이 반납 안되도록 막음
+				InterlockedIncrement64(&Session->IOBlock->IOCount);
 
-					delete[] SpawnGameObjectInfos;
-				}				
+				st_Job* DBCharacterInfoSendJob = _JobMemoryPool->Alloc();
+				DBCharacterInfoSendJob->Type = en_JobType::DATA_BASE_CHARACTER_INFO_SEND;
+				DBCharacterInfoSendJob->SessionId = Session->SessionId;
+				DBCharacterInfoSendJob->Message = nullptr;
+
+				_GameServerDataBaseThreadMessageQue.Enqueue(DBCharacterInfoSendJob);
+				SetEvent(_DataBaseWakeEvent);
 			}			
-
-			// DB 큐에 요청하기 전 IOCount를 증가시켜서 Session이 반납 안되도록 막음
-			InterlockedIncrement64(&Session->IOBlock->IOCount);
-
-			st_Job* DBCharacterInfoSendJob = _JobMemoryPool->Alloc();
-			DBCharacterInfoSendJob->Type = en_JobType::DATA_BASE_CHARACTER_INFO_SEND;
-			DBCharacterInfoSendJob->SessionId = Session->SessionId;
-			DBCharacterInfoSendJob->Message = nullptr;
-
-			_GameServerDataBaseThreadMessageQue.Enqueue(DBCharacterInfoSendJob);
-			SetEvent(_DataBaseWakeEvent);			
 		}
 		else
 		{
@@ -1147,7 +1153,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 						st_Vector2Int TargetPosition = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType)->GetCellPosition();
 						st_Vector2Int MyPosition = MyPlayer->GetCellPosition();
 						st_Vector2Int Direction = TargetPosition - MyPosition;
-
+										  
 						int32 Distance = st_Vector2Int::Distance(TargetPosition, MyPosition);
 
 						if (Distance <= 4)
@@ -1181,7 +1187,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 
 							CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_DISTANCE, ErrorNonSelectObjectString);
 							SendPacket(MyPlayer->_SessionId, ResErrorPacket);
-							ResErrorPacket->Free();
+							ResErrorPacket->Free(); 
 						}
 					}
 					else
@@ -5952,7 +5958,6 @@ void CGameServer::PacketProcTimerObjectStateChange(int64 SessionId, CGameServerM
 						{
 							st_Vector2Int ChangeStateObjectPosition = ChangeStateObject->GetCellPosition();
 							Channel->_Map->ApplyMove(ChangeStateObject, ChangeStateObjectPosition);
-
 							ChangeStatePlayerObject->_GameObjectInfo.ObjectPositionInfo.State = (en_CreatureState)ChangeState;
 
 							CGameServerMessage* ResObjectStateChangeMessage = MakePacketResChangeObjectState(TargetObjectId, ChangeStateObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, ChangeStateObject->_GameObjectInfo.ObjectType, (en_CreatureState)ChangeState);
@@ -6186,7 +6191,7 @@ CGameServerMessage* CGameServer::MakePacketResCreateCharacter(bool IsSuccess, st
 	return ResCreateCharacter;
 }
 
-CGameServerMessage* CGameServer::MakePacketResEnterGame(st_GameObjectInfo ObjectInfo)
+CGameServerMessage* CGameServer::MakePacketResEnterGame(bool EnterGameSuccess, st_GameObjectInfo* ObjectInfo)
 {
 	CGameServerMessage* ResEnterGamePacket = CGameServerMessage::GameServerMessageAlloc();
 	if (ResEnterGamePacket == nullptr)
@@ -6197,7 +6202,12 @@ CGameServerMessage* CGameServer::MakePacketResEnterGame(st_GameObjectInfo Object
 	ResEnterGamePacket->Clear();
 
 	*ResEnterGamePacket << (int16)en_PACKET_S2C_GAME_ENTER;
-	*ResEnterGamePacket << ObjectInfo;
+	*ResEnterGamePacket << EnterGameSuccess;
+	
+	if (ObjectInfo != nullptr)
+	{
+		*ResEnterGamePacket << *ObjectInfo;
+	}	
 
 	return ResEnterGamePacket;
 }
@@ -6976,12 +6986,27 @@ void CGameServer::SendPacketFieldOfView(CGameObject* Object, CMessage* Message)
 {
 	CChannel* Channel = G_ChannelManager->Find(1);
 
-	vector<CPlayer*> FieldOfViewPlayers = Channel->GetFieldOfViewPlayer(Object, Object->_FieldOfViewDistance);
+	// 섹터 얻어오기
+	vector<CSector*> AroundSectors = Object->_Channel->GetAroundSectors(Object->GetCellPosition(), 1);
 
-	for (CPlayer* FieldOfViewPlayer : FieldOfViewPlayers)
+	vector<CPlayer*> FieldOfViewPlayers;
+
+	for (CSector* AroundSector : AroundSectors)
 	{
-		SendPacket(FieldOfViewPlayer->_SessionId, Message);
-	}
+		AroundSector->GetSectorLock();
+
+		for (CPlayer* Player : AroundSector->GetPlayers())
+		{
+			int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Player->GetCellPosition());
+
+			if (Distance <= Object->_FieldOfViewDistance)
+			{
+				SendPacket(Player->_SessionId, Message);
+			}
+		}
+
+		AroundSector->GetSectorUnLock();
+	}	
 }
 
 void CGameServer::SendPacketFieldOfView(st_Session* Session, CMessage* Message, bool SendMe)
@@ -6995,16 +7020,18 @@ void CGameServer::SendPacketFieldOfView(st_Session* Session, CMessage* Message, 
 
 	for (CSector* Sector : Sectors)
 	{
+		Sector->GetSectorLock();
+
 		for (CPlayer* Player : Sector->GetPlayers())
 		{
 			// 시야 범위 안에 있는 플레이어를 찾는다
-			int16 Distance = st_Vector2Int::Distance(MyPlayer->GetCellPosition(),Player->GetCellPosition());
-			
+			int16 Distance = st_Vector2Int::Distance(MyPlayer->GetCellPosition(), Player->GetCellPosition());
+
 			if (SendMe == true && Distance <= MyPlayer->_FieldOfViewDistance)
 			{
 				SendPacket(Player->_SessionId, Message);
 			}
-			else if(SendMe == false && Distance <= MyPlayer->_FieldOfViewDistance)
+			else if (SendMe == false && Distance <= MyPlayer->_FieldOfViewDistance)
 			{
 				if (Session->SessionId != Player->_SessionId)
 				{
@@ -7012,6 +7039,8 @@ void CGameServer::SendPacketFieldOfView(st_Session* Session, CMessage* Message, 
 				}
 			}
 		}
+
+		Sector->GetSectorUnLock();
 	}
 }
 
