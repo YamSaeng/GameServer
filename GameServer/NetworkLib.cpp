@@ -77,7 +77,7 @@ st_Session* CNetworkLib::FindSession(__int64 SessionID)
 	}
 
 	return _SessionArray[SessionIndex];
-}
+}	
 
 void CNetworkLib::ReturnSession(st_Session* Session)
 {
@@ -113,9 +113,9 @@ void CNetworkLib::SendPacket(__int64 SessionID, CMessage* Packet)
 
 void CNetworkLib::SendPost(st_Session* SendSession)
 {
-	int SendRingBufUseSize;
-	int SendBufCount = 0;
-	WSABUF SendBuf[500];
+	int32 SendRingBufUseSize;
+	int32 SendBufCount = 0;
+	WSABUF SendBuf[SESSION_SEND_PACKET_MAX];
 
 	do
 	{
@@ -161,7 +161,7 @@ void CNetworkLib::SendPost(st_Session* SendSession)
 	SendSession->SendPacketCount = SendBufCount = SendRingBufUseSize;
 
 	// 보내야할 패킷의 개수만큼 SendRingBuf에서 뽑아내서 WSABuf에 담는다.
-	for (int i = 0; i < SendBufCount; i++)
+	for (int16 i = 0; i < SendBufCount; i++)
 	{		
 		CMessage* Packet = nullptr;
 		if (!SendSession->SendRingBuf.Dequeue(&Packet))
@@ -338,14 +338,18 @@ void CNetworkLib::RecvNotifyComplete(st_Session* RecvCompleteSession, const DWOR
 			break;
 		}
 
+		// 패킷 처리
 		OnRecv(RecvCompleteSession->SessionId, Packet);
 	}
 
 	// 패킷 반납
 	Packet->Free(); 
 
-	// WSARecv 걸기
-	RecvPost(RecvCompleteSession);
+	// CancelIO 호출하지 않은 대상 기준으로 WSARecv 걸기
+	if (!RecvCompleteSession->IsCancelIO)
+	{		
+		RecvPost(RecvCompleteSession);
+	}	
 }
 
 void CNetworkLib::SendNotifyComplete(st_Session* SendCompleteSession)
@@ -390,8 +394,9 @@ void CNetworkLib::Disconnect(__int64 SessionID)
 		ReleaseSession(DisconnectSession);
 	}
 	else
-	{
-		CancelIoEx((HANDLE)DisconnectSession->ClientSock, NULL);
+	{			
+		DisconnectSession->IsCancelIO = true;
+		CancelIoEx((HANDLE)DisconnectSession->ClientSock, NULL);		
 	}
 
 	ReturnSession(DisconnectSession);
@@ -478,7 +483,8 @@ unsigned __stdcall CNetworkLib::WorkerThreadProc(void* Argument)
 
 			do
 			{
-				CompleteRet = GetQueuedCompletionStatus(Instance->_HCP, &Transferred, (PULONG_PTR)&NotifyCompleteSession, (LPOVERLAPPED*)&MyOverlapped, INFINITE);
+				CompleteRet = GetQueuedCompletionStatus(Instance->_HCP, &Transferred,
+					(PULONG_PTR)&NotifyCompleteSession, (LPOVERLAPPED*)&MyOverlapped, INFINITE);
 							
 				// MyOverlapped가 nullptr일때는 내부적으로 IOCP의 에러가 난것으로
 				// Error값을 확인하고 워커 쓰레드를 종료해준다.
@@ -572,6 +578,7 @@ unsigned __stdcall CNetworkLib::AcceptThreadProc(void* Argument)
 			NewSession->ClientSock = ClientSock;
 			NewSession->CloseSock = ClientSock;
 			NewSession->IsSend = SENDING_DO_NOT;
+			NewSession->IsCancelIO = false;
 
 			//Instance->_SessionArray[NewSessionIndex]->SendPacketCount = 0;
 
@@ -622,11 +629,6 @@ unsigned __stdcall CNetworkLib::AcceptThreadProc(void* Argument)
 #pragma region 세션 할당 해제
 void CNetworkLib::ReleaseSession(st_Session* ReleaseSession)
 {
-	__int64 ReleaseSessionId = ReleaseSession->SessionId;
-	char* pRecvOverlapped = (char*)&ReleaseSession->RecvOverlapped;
-	char* pSendOverlapped = (char*)&ReleaseSession->SendOverlapped;
-	int ReleaseSessionIOcount = ReleaseSession->IOBlock->IOCount;
-
 	st_IOBlock CompareBlock;
 	CompareBlock.IOCount = 0;
 	CompareBlock.IsRelease = 0;
