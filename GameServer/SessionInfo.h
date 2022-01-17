@@ -5,6 +5,7 @@
 #include "pch.h"
 
 #define SESSION_CHARACTER_MAX 3
+#define SESSION_SEND_PACKET_MAX 500
 
 class CPlayer;
 
@@ -31,7 +32,7 @@ struct st_Session
 	st_IOBlock* IOBlock = nullptr;
 	LONG IsSend;		// 해당 세션에 대해 WSASend작업을 하고 있는지 안하고 있는지 판단해줄 변수 1 = WSASend 작업중 0 = WSASend 작업중 아님
 
-	CMessage* SendPacket[500]; //세션이 보내는 패킷을 담아둘 배열
+	CMessage* SendPacket[SESSION_SEND_PACKET_MAX]; //세션이 보내는 패킷을 담아둘 배열
 	LONG SendPacketCount; //해당 세션이 몇개의 패킷을 보내고 있는지 기록해주는 변수
 
 	wstring LoginId;
@@ -47,6 +48,9 @@ struct st_Session
 
 	// 로그인 여부
 	bool IsLogin;
+
+	// CancelIO 호출 여부
+	bool IsCancelIO;
 
 	// 마지막으로 받은 핑 패킷 시간
 	int64 PingPacketTime;
