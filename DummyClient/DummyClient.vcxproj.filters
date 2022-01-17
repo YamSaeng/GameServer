@@ -21,6 +21,9 @@
     <ClCompile Include="Message.cpp">
       <Filter>헤더 파일</Filter>
     </ClCompile>
+    <ClCompile Include="DummyClient.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Message.h">
@@ -45,6 +48,15 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="LockFreeQue.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="LockFreeStack.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ClientInfo.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObjectInfo.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
