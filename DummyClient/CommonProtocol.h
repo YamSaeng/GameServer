@@ -467,5 +467,7 @@ enum en_PACKET_TYPE
 	// int64 AccountId
 	// int64 PlayerId
 	//-----------------------------------------------------------
-	en_PACKET_S2C_PING
+	en_PACKET_S2C_PING,
+
+	en_PACKET_C2S_DISCONNECT = 10000	
 };
