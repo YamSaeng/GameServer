@@ -4,7 +4,7 @@
 #include "ClientInfo.h"
 #include "LockFreeStack.h"
 
-#define DUMMY_CLIENT_MAX 1000
+#define DUMMY_CLIENT_MAX 3000
 
 // 세션 인덱스 넣기 16비트 왼쪽으로 밀고 INDEX 넣음
 #define ADD_CLIENTID_INDEX(CLIENTID,INDEX)	((CLIENTID << 0x10) | ((short)INDEX))
@@ -19,8 +19,7 @@ private:
 	{
 		CHAT_MSG,
 		MOVE,
-		MELEE_ATTACK,
-		DISCONNECT
+		DISCONNECT		
 	};
 
 	HANDLE _DummyClientHCP;	

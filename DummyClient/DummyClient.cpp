@@ -124,36 +124,45 @@ unsigned __stdcall CDummyClient::ConnectThreadProc(void* Argument)
 			{
 				int32 NewClientIndex;
 				if (Instance->_ClientArrayIndexs.Pop(&NewClientIndex))
-				{
+				{				
 					st_Client* NewClient = Instance->_ClientArray[NewClientIndex];
-					NewClient->ServerSocket = socket(AF_INET, SOCK_STREAM, 0);
-
-					int ConnectRet = connect(NewClient->ServerSocket, (SOCKADDR*)&ServerAddr, sizeof(NewClient->ServerAddr));
-					if (ConnectRet == SOCKET_ERROR)
-					{
-						DWORD Error = WSAGetLastError();
-						wprintf(L"connect Error %d\n", Error);
-						break;
-					}
-
-					NewClient->ClientSendMessageTime = GetTickCount64() + 500;
-
-					memset(&NewClient->RecvOverlapped, 0, sizeof(OVERLAPPED));
-					memset(&NewClient->SendOverlapped, 0, sizeof(OVERLAPPED));
-
-					NewClient->ClientId = ADD_CLIENTID_INDEX(Instance->_DummyClientId, NewClientIndex);
-					NewClient->ServerAddr = ServerAddr;
-					NewClient->CloseSocket = NewClient->ServerSocket;
-					NewClient->IsSend = 0;
-
-					HANDLE SocketIORet = CreateIoCompletionPort((HANDLE)NewClient->ServerSocket, Instance->_DummyClientHCP, (ULONG_PTR)NewClient, 0);
 					
-					Instance->_ClientArray[NewClientIndex]->IOBlock->IOCount++;
-					Instance->_ClientArray[NewClientIndex]->IOBlock->IsRelease = 0;
+					if (NewClient->ClientReConnectTime < GetTickCount64())
+					{
+						NewClient->ServerSocket = socket(AF_INET, SOCK_STREAM, 0);
 
-					Instance->_DummyClientId++;
+						int ConnectRet = connect(NewClient->ServerSocket, (SOCKADDR*)&ServerAddr, sizeof(NewClient->ServerAddr));
+						if (ConnectRet == SOCKET_ERROR)
+						{
+							DWORD Error = WSAGetLastError();
+							wprintf(L"connect Error %d\n", Error);
+							break;
+						}
 
-					Instance->RecvPost(NewClient, true);
+						NewClient->ClientSendMessageTime = GetTickCount64() + 500;
+
+						memset(&NewClient->RecvOverlapped, 0, sizeof(OVERLAPPED));
+						memset(&NewClient->SendOverlapped, 0, sizeof(OVERLAPPED));
+
+						NewClient->ClientId = ADD_CLIENTID_INDEX(Instance->_DummyClientId, NewClientIndex);
+						NewClient->ServerAddr = ServerAddr;
+						NewClient->CloseSocket = NewClient->ServerSocket;
+						NewClient->IsSend = 0;
+
+						HANDLE SocketIORet = CreateIoCompletionPort((HANDLE)NewClient->ServerSocket, Instance->_DummyClientHCP, (ULONG_PTR)NewClient, 0);
+
+						Instance->_ClientArray[NewClientIndex]->IOBlock->IOCount++;
+						Instance->_ClientArray[NewClientIndex]->IOBlock->IsRelease = 0;
+						Instance->_ClientArray[NewClientIndex]->IsDisconnect = 0;
+
+						Instance->_DummyClientId++;
+
+						Instance->RecvPost(NewClient, true);
+					}
+					else
+					{
+						Instance->_ClientArrayIndexs.Push(NewClientIndex);
+					}					
 				}				
 			}
 		}			
@@ -174,9 +183,9 @@ unsigned __stdcall CDummyClient::SendProc(void* Argument)
 			{
 				if (Instance->_ClientArray[i]->IsLogin == true && Instance->_ClientArray[i]->IsEnterGame == true)
 				{				
-					if (Instance->_ClientArray[i]->ClientSendMessageTime < GetTickCount64())
+					if (Instance->_ClientArray[i]->IsDisconnect == 0 && Instance->_ClientArray[i]->ClientSendMessageTime < GetTickCount64())
 					{
-						Instance->_ClientArray[i]->ClientSendMessageTime = GetTickCount64() + 500;
+						Instance->_ClientArray[i]->ClientSendMessageTime = GetTickCount64() + DUMMY_CLIENT_SEND_TIME;
 
 						int32 RandMessageType = rand() % 2;
 						int8 RandDir;
@@ -212,6 +221,13 @@ unsigned __stdcall CDummyClient::SendProc(void* Argument)
 
 							RandDir = rand() % 4;
 							*RandPacket << (int8)RandDir;
+
+							Instance->SendPacket(Instance->_ClientArray[i]->ClientId, RandPacket);
+							break;
+						case en_DummyClientMessage::DISCONNECT:
+							Instance->_ClientArray[i]->IsDisconnect = true;
+
+							*RandPacket << (int16)en_PACKET_C2S_DISCONNECT;
 
 							Instance->SendPacket(Instance->_ClientArray[i]->ClientId, RandPacket);
 							break;
@@ -257,7 +273,23 @@ void CDummyClient::ReleaseClient(st_Client* ReleaseClient)
 
 	ReleaseClient->SendPacketCount = 0;
 
+	if (ReleaseClient->SendRingBuf.GetUseSize() > 0)
+	{
+		int SendPacketCompleteCount = ReleaseClient->SendRingBuf.GetUseSize();
+		for (int i = 0; i < SendPacketCompleteCount; i++)
+		{
+			CMessage* DeletePacket = nullptr;
+			ReleaseClient->SendRingBuf.Dequeue(&DeletePacket);
+			DeletePacket->Free();
+		}
+	}
+		
+	closesocket(ReleaseClient->CloseSocket);
+	ReleaseClient->CloseSocket = INVALID_SOCKET;
+	
+	ReleaseClient->ClientReConnectTime = GetTickCount64() + DUMMY_CLIENT_RE_CONNECT_TIME;
 
+	_ClientArrayIndexs.Push(GET_CLIENTINDEX(ReleaseClient->ClientId));
 }
 
 void CDummyClient::SendPost(st_Client* SendClient)

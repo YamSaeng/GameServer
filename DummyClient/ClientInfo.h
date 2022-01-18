@@ -5,6 +5,9 @@
 #include "Message.h"
 #include "CommonProtocol.h"
 
+#define DUMMY_CLIENT_RE_CONNECT_TIME 1000
+#define DUMMY_CLIENT_SEND_TIME 500
+
 struct st_IOBlock
 {
 	LONG64 IOCount;
@@ -40,10 +43,12 @@ struct st_Client
 
 	bool IsLogin;
 	bool IsEnterGame;
+	bool IsDisconnect;
 
 	LONG IsConnected;		
 
 	st_GameObjectInfo MyCharacterGameObjectInfo;
 
 	int64 ClientSendMessageTime;	
+	int64 ClientReConnectTime;
 };
