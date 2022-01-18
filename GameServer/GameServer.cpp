@@ -527,9 +527,9 @@ void CGameServer::CreateNewClient(int64 SessionId)
 
 		// ÇÎ Àü¼Û ½ÃÀÛ		
 		//PingTimerCreate(Session);
-	}
 
-	ReturnSession(Session);
+		ReturnSession(Session);
+	}	
 }
 
 void CGameServer::DeleteClient(st_Session* Session)
@@ -569,8 +569,8 @@ void CGameServer::DeleteClient(st_Session* Session)
 		_GameServerDataBaseThreadMessageQue.Enqueue(DBLeavePlayerInfoSaveJob);
 		SetEvent(_DataBaseWakeEvent);
 
-		CChannel* Channel = G_ChannelManager->Find(1);
-		Channel->LeaveChannel(MyPlayer);
+		CChannel* Channel = G_ChannelManager->Find(1);				
+		Channel->LeaveChannel(MyPlayer);		
 
 		vector<int64> DeSpawnObjectIds;
 		DeSpawnObjectIds.push_back(MyPlayer->_GameObjectInfo.ObjectId);
@@ -582,23 +582,25 @@ void CGameServer::DeleteClient(st_Session* Session)
 		for (int i = 0; i < SESSION_CHARACTER_MAX; i++)
 		{
 			CPlayer* SessionPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndexes[i]];
-			if (SessionPlayer != nullptr)
+			if (SessionPlayer != nullptr && Session->SessionId == SessionPlayer->_SessionId)
 			{
 				SessionPlayer->_NetworkState = en_ObjectNetworkState::LEAVE;				
-				// ¿ÀºêÁ§Æ® ¹Ý³³ ( = ÀÎµ¦½º ¹Ý³³ )
-				G_ObjectManager->ObjectLeaveGame(SessionPlayer, Session->MyPlayerIndexes[i], 1);
-			}			
+				// Player ¿ÀºêÁ§Æ® ¹Ý³³
+				G_ObjectManager->ObjectReturn(SessionPlayer->_GameObjectInfo.ObjectType, SessionPlayer);						
+			}	
+
+			// ÀÎµ¦½º ¹Ý³³
+			G_ObjectManager->PlayerIndexReturn(Session->MyPlayerIndexes[i]);
 		}
 	}
 
 	Session->MyPlayerIndex = -1;
 	Session->AccountId = 0;
-
-	Session->ClientSock = INVALID_SOCKET;
+		;
 	closesocket(Session->CloseSock);
+	Session->CloseSock = INVALID_SOCKET;
 
-	// ¼¼¼Ç ÀÎµ¦½º ¹Ý³³
-	int64 Index = GET_SESSIONINDEX(Session->SessionId);
+	// ¼¼¼Ç ÀÎµ¦½º ¹Ý³³	
 	_SessionArrayIndexs.Push(GET_SESSIONINDEX(Session->SessionId));
 }
 
@@ -665,6 +667,9 @@ void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 	case en_PACKET_TYPE::en_PACKET_C2S_PONG:
 		PacketProcReqPong(SessionId, Message);
 		break;	
+	case en_PACKET_TYPE::en_PACKET_C2S_DISCONNECT:
+		Disconnect(SessionId);
+		break;
 	default:
 		Disconnect(SessionId);
 		break;
@@ -709,12 +714,14 @@ void CGameServer::PacketProcReqLogin(int64 SessionID, CMessage* Message)
 
 			int8 IdLen;
 			*Message >> IdLen;
+			
+			WCHAR* ClientIdName = (WCHAR*)malloc(sizeof(WCHAR) * IdLen);
+			memset(ClientIdName, 0, sizeof(WCHAR) * IdLen);			
+			Message->GetData(ClientIdName, IdLen);
 
-			WCHAR ClientId[20];
-			memset(ClientId, 0, sizeof(WCHAR) * 20);
-			Message->GetData(ClientId, IdLen);
-
-			Session->LoginId = ClientId;
+			Session->LoginId = ClientIdName;
+			free(ClientIdName);
+			ClientIdName = nullptr;
 
 			bool IsDummy;
 			*Message >> IsDummy;
@@ -3122,7 +3129,7 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 			ClientPlayersGet.InAccountID(ClientAccountId);
 
 			int64 PlayerId;
-			WCHAR PlayerName[100];
+			WCHAR PlayerName[100] = { 0 };
 			int16 PlayerObjectType;
 			int8 PlayerIndex;
 			int32 PlayerLevel;
@@ -5948,34 +5955,44 @@ void CGameServer::PacketProcTimerObjectStateChange(int64 SessionId, CGameServerM
 		case en_GameObjectType::OBJECT_ARCHER_PLAYER:
 		case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 			{
-				CPlayer* ChangeStatePlayerObject = (CPlayer*)ChangeStateObject;
-				switch (ChangeStatePlayerObject->_GameObjectInfo.ObjectPositionInfo.State)
+				st_Session* Session = FindSession(SessionId);
+
+				if (Session != nullptr)
 				{
-				case en_CreatureState::SPAWN_IDLE:
+					CPlayer* ChangeStatePlayerObject = (CPlayer*)ChangeStateObject;
+					switch (ChangeStatePlayerObject->_GameObjectInfo.ObjectPositionInfo.State)
+					{
+					case en_CreatureState::SPAWN_IDLE:
 					{
 						CChannel* Channel = G_ChannelManager->Find(1);
 						if (Channel != nullptr)
 						{
 							st_Vector2Int ChangeStateObjectPosition = ChangeStateObject->GetCellPosition();
-							Channel->_Map->ApplyMove(ChangeStateObject, ChangeStateObjectPosition);
-							ChangeStatePlayerObject->_GameObjectInfo.ObjectPositionInfo.State = (en_CreatureState)ChangeState;
+							bool MapApplyMoveSuccess = Channel->_Map->ApplyMove(ChangeStateObject, ChangeStateObjectPosition);
+							if (MapApplyMoveSuccess == true)
+							{
+								ChangeStatePlayerObject->_GameObjectInfo.ObjectPositionInfo.State = (en_CreatureState)ChangeState;
 
-							CGameServerMessage* ResObjectStateChangeMessage = MakePacketResChangeObjectState(TargetObjectId, ChangeStateObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, ChangeStateObject->_GameObjectInfo.ObjectType, (en_CreatureState)ChangeState);
-							SendPacketFieldOfView(ChangeStateObject, ResObjectStateChangeMessage);
-							ResObjectStateChangeMessage->Free();
+								CGameServerMessage* ResObjectStateChangeMessage = MakePacketResChangeObjectState(TargetObjectId, ChangeStateObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, ChangeStateObject->_GameObjectInfo.ObjectType, (en_CreatureState)ChangeState);
+								SendPacketFieldOfView(Session, ResObjectStateChangeMessage);
+								ResObjectStateChangeMessage->Free();
+							}
 						}
 					}
-					break;				
-				default:
+					break;
+					default:
 					{
 						ChangeStatePlayerObject->_GameObjectInfo.ObjectPositionInfo.State = (en_CreatureState)ChangeState;
 
 						CGameServerMessage* ResObjectStateChangeMessage = MakePacketResChangeObjectState(TargetObjectId, ChangeStateObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, ChangeStateObject->_GameObjectInfo.ObjectType, (en_CreatureState)ChangeState);
-						SendPacketFieldOfView(ChangeStateObject, ResObjectStateChangeMessage);
+						SendPacketFieldOfView(Session, ResObjectStateChangeMessage);
 						ResObjectStateChangeMessage->Free();
 					}
 					break;
-				}
+					}
+				
+					ReturnSession(Session);
+				}								
 			}
 			break;
 		default:

@@ -68,8 +68,8 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int32 Channel
 	if (EnterChannel == nullptr)
 	{
 		CRASH("ObjectManager Add EnterChannel이 nullptr");
-	}
-	
+	}		
+
 	switch (EnterGameObject->_GameObjectInfo.ObjectType)
 	{
 		case en_GameObjectType::OBJECT_PLAYER_DUMMY:
@@ -188,7 +188,7 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int32 Channel
 				ResSpawnPacket->Free();
 			}
 			break;
-	}
+	}	
 }
 
 bool CObjectManager::ObjectLeaveGame(CGameObject* LeaveGameObject, int32 ObjectIndex, int32 _ChannelId, bool IsObjectReturn)
@@ -196,17 +196,9 @@ bool CObjectManager::ObjectLeaveGame(CGameObject* LeaveGameObject, int32 ObjectI
 	bool RemoveSuccess = false;
 	
 	// 타입에 따라 관리당하고 있는 자료구조에서 자신을 삭제
-	// 채널에서 삭제
+	// 채널에서 삭제	
 	switch (LeaveGameObject->_GameObjectInfo.ObjectType)
 	{
-	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
-	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
-	case en_GameObjectType::OBJECT_THIEF_PLAYER:
-	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
-	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
-		_PlayersArrayIndexs.Push(ObjectIndex);		
-		break;;
 	case en_GameObjectType::OBJECT_SLIME:
 	case en_GameObjectType::OBJECT_BEAR:
 		LeaveGameObject->_Channel->LeaveChannel(LeaveGameObject);
@@ -244,6 +236,11 @@ bool CObjectManager::ObjectLeaveGame(CGameObject* LeaveGameObject, int32 ObjectI
 	}
 
 	return RemoveSuccess;
+}
+
+void CObjectManager::PlayerIndexReturn(int32 PlayerIndex)
+{
+	_PlayersArrayIndexs.Push(PlayerIndex);
 }
 
 CGameObject* CObjectManager::Find(int64 ObjectId, en_GameObjectType GameObjectType)

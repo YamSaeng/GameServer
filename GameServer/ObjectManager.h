@@ -61,6 +61,11 @@ public:
 	//-----------------------------------------------------------
 	bool ObjectLeaveGame(CGameObject* LeaveGameObject, int32 ObjectIndex, int32 _ChannelId, bool IsObjectReturn = true);
 
+	//----------------------------------------
+	// 플레이어 배열 인덱스 반납
+	//----------------------------------------
+	void PlayerIndexReturn(int32 PlayerIndex);
+
 	//---------------
 	// 오브젝트 찾기
 	//---------------
