@@ -24,7 +24,7 @@ CObjectManager::CObjectManager()
 	// 오브젝트 매니저가 소유중인 플레이어, 몬스터, 아이템 미리 할당해서 보관
 	for (int PlayerCount = PLAYER_MAX - 1; PlayerCount >= 0; --PlayerCount)
 	{
-		_PlayersArray[PlayerCount] = nullptr;
+		_PlayersArray[PlayerCount] = (CPlayer*)ObjectCreate(en_GameObjectType::OBJECT_PLAYER);
 		_PlayersArrayIndexs.Push(PlayerCount);
 	}
 
