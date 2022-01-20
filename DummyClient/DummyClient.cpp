@@ -1,5 +1,6 @@
 #include "DummyClient.h"
 #include <process.h>
+#include <random>
 
 CDummyClient::CDummyClient()
 {
@@ -9,6 +10,8 @@ CDummyClient::CDummyClient()
 		DWORD Error = WSAGetLastError();
 		wprintf(L"WSAStartup Error %d\n", Error);
 	}
+
+	_ConnectThreadWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
 	int64 DummyClientAcountId = 1000000;
 
@@ -23,8 +26,12 @@ CDummyClient::CDummyClient()
 		_ClientArrayIndexs.Push(ClientCount);
 	}
 
+	_ConnectThreadProcEnd = false;
+
 	_DummyClientId = 1;
 	_SendPacketTPS = 0;
+	_RecvPacketTPS = 0;
+	_ClientCount = 0;
 
 	_DummyClientHCP = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
 	if (_DummyClientHCP == NULL)
@@ -43,7 +50,9 @@ CDummyClient::CDummyClient()
 		_beginthreadex(NULL, 0, WorkerThreadProc, this, 0, NULL);
 	}
 
-	_beginthreadex(NULL, 0, SendProc, this, 0, NULL);
+	_beginthreadex(NULL, 0, SendThreadProc, this, 0, NULL);
+
+	SetEvent(_ConnectThreadWakeEvent);
 }
 
 CDummyClient::~CDummyClient()
@@ -78,7 +87,7 @@ unsigned __stdcall CDummyClient::WorkerThreadProc(void* Argument)
 				}
 
 				if (Transferred == 0)
-				{
+				{				
 					NotifyCompleteClient->ServerSocket = INVALID_SOCKET;
 					CancelIoEx((HANDLE)NotifyCompleteClient->CloseSocket, NULL);
 					break;
@@ -112,67 +121,77 @@ unsigned __stdcall CDummyClient::ConnectThreadProc(void* Argument)
 
 	if (Instance)
 	{
+		int32 NewClientIndex;
+		
 		SOCKADDR_IN ServerAddr;
 		ZeroMemory(&ServerAddr, sizeof(ServerAddr));
 		ServerAddr.sin_family = AF_INET;
 		InetPtonW(AF_INET, L"127.0.0.1", &ServerAddr.sin_addr);
 		ServerAddr.sin_port = htons(7777);
 
-		while (1)
+		while(!Instance->_ConnectThreadProcEnd)
 		{
-			for (int i = 0; i < DUMMY_CLIENT_MAX; i++)
+			WaitForSingleObject(Instance->_ConnectThreadWakeEvent, INFINITE);
+
+			while (Instance->_ClientArrayIndexs.Pop(&NewClientIndex))
 			{
-				int32 NewClientIndex;
-				if (Instance->_ClientArrayIndexs.Pop(&NewClientIndex))
-				{				
-					st_Client* NewClient = Instance->_ClientArray[NewClientIndex];
-					
-					if (NewClient->ClientReConnectTime < GetTickCount64())
+				st_Client* NewClient = Instance->_ClientArray[NewClientIndex];
+
+				if (NewClient->ClientReConnectTime < GetTickCount64())
+				{
+					NewClient->ClientReConnectTime = GetTickCount64() + DUMMY_CLIENT_RE_CONNECT_TIME;					
+
+					NewClient->ServerSocket = socket(AF_INET, SOCK_STREAM, 0);
+
+					int ConnectRet = connect(NewClient->ServerSocket, (SOCKADDR*)&ServerAddr, sizeof(NewClient->ServerAddr));
+					if (ConnectRet == SOCKET_ERROR)
 					{
-						NewClient->ServerSocket = socket(AF_INET, SOCK_STREAM, 0);
-
-						int ConnectRet = connect(NewClient->ServerSocket, (SOCKADDR*)&ServerAddr, sizeof(NewClient->ServerAddr));
-						if (ConnectRet == SOCKET_ERROR)
-						{
-							DWORD Error = WSAGetLastError();
-							wprintf(L"connect Error %d\n", Error);
-							break;
-						}
-
-						NewClient->ClientSendMessageTime = GetTickCount64() + 500;
-
-						memset(&NewClient->RecvOverlapped, 0, sizeof(OVERLAPPED));
-						memset(&NewClient->SendOverlapped, 0, sizeof(OVERLAPPED));
-
-						NewClient->ClientId = ADD_CLIENTID_INDEX(Instance->_DummyClientId, NewClientIndex);
-						NewClient->ServerAddr = ServerAddr;
-						NewClient->CloseSocket = NewClient->ServerSocket;
-						NewClient->IsSend = 0;
-
-						HANDLE SocketIORet = CreateIoCompletionPort((HANDLE)NewClient->ServerSocket, Instance->_DummyClientHCP, (ULONG_PTR)NewClient, 0);
-
-						Instance->_ClientArray[NewClientIndex]->IOBlock->IOCount++;
-						Instance->_ClientArray[NewClientIndex]->IOBlock->IsRelease = 0;
-						Instance->_ClientArray[NewClientIndex]->IsDisconnect = 0;
-
-						Instance->_DummyClientId++;
-
-						Instance->RecvPost(NewClient, true);
+						DWORD Error = WSAGetLastError();
+						wprintf(L"connect Error %d\n", Error);
+						break;
 					}
-					else
-					{
-						Instance->_ClientArrayIndexs.Push(NewClientIndex);
-					}					
-				}				
+
+					Instance->_ConnectionTotal++;
+					Instance->_ConnectTPS++;
+
+					NewClient->ClientSendMessageTime = GetTickCount64() + DUMMY_CLIENT_SEND_TIME;
+
+					memset(&NewClient->RecvOverlapped, 0, sizeof(OVERLAPPED));
+					memset(&NewClient->SendOverlapped, 0, sizeof(OVERLAPPED));
+
+					NewClient->CloseSocket = NewClient->ServerSocket;
+					NewClient->ClientId = ADD_CLIENTID_INDEX(Instance->_DummyClientId, NewClientIndex);
+					NewClient->ServerAddr = ServerAddr;
+					NewClient->IsSend = 0;
+					NewClient->IsCancelIO = false;
+
+					HANDLE SocketIORet = CreateIoCompletionPort((HANDLE)NewClient->ServerSocket, Instance->_DummyClientHCP, (ULONG_PTR)NewClient, 0);
+
+					Instance->_ClientArray[NewClientIndex]->IOBlock->IOCount++;
+					Instance->_ClientArray[NewClientIndex]->IsDisconnect = false;
+					Instance->_ClientArray[NewClientIndex]->IOBlock->IsRelease = 0;
+
+					Instance->_DummyClientId++;
+
+					Instance->RecvPost(NewClient, true);					
+
+					InterlockedIncrement64(&Instance->_ClientCount);
+				}
+				else
+				{
+					Instance->_ClientArrayIndexs.Push(NewClientIndex);
+				}
 			}
-		}			
+		}		
 	}
 
 	return 0;
 }
 
-unsigned __stdcall CDummyClient::SendProc(void* Argument)
+unsigned __stdcall CDummyClient::SendThreadProc(void* Argument)
 {
+	Sleep(15000);
+
 	CDummyClient* Instance = (CDummyClient*)Argument;
 
 	if (Instance)
@@ -180,65 +199,100 @@ unsigned __stdcall CDummyClient::SendProc(void* Argument)
 		while (1)
 		{
 			for (int32 i = 0; i < DUMMY_CLIENT_MAX; i++)
-			{
-				if (Instance->_ClientArray[i]->IsLogin == true && Instance->_ClientArray[i]->IsEnterGame == true)
-				{				
-					if (Instance->_ClientArray[i]->IsDisconnect == 0 && Instance->_ClientArray[i]->ClientSendMessageTime < GetTickCount64())
+			{				
+				if (Instance->_ClientArray[i]->IsDisconnect == false)
+				{
+					if (Instance->_ClientArray[i]->IsLogin == true
+						&& Instance->_ClientArray[i]->IsEnterGame == true
+						&& Instance->_ClientArray[i]->ClientSendMessageTime < GetTickCount64())
 					{
 						Instance->_ClientArray[i]->ClientSendMessageTime = GetTickCount64() + DUMMY_CLIENT_SEND_TIME;
 
-						int32 RandMessageType = rand() % 2;
-						int8 RandDir;
+						random_device Seed;
+						default_random_engine Eng(Seed());
+
+						float DisconnectPoint = 50.0f / 1000.0f;
+						bernoulli_distribution DisconnectPointCheck(DisconnectPoint);
+						bool IsDisconnect = DisconnectPointCheck(Eng);
 
 						CMessage* RandPacket = CMessage::Alloc();
 						RandPacket->Clear();
 
-						wstring SendChatMsg;
-						int8 DummyChatLen;
-
-						switch ((en_DummyClientMessage)RandMessageType)
+						if (IsDisconnect)
 						{
-						case en_DummyClientMessage::CHAT_MSG:
-							*RandPacket << (int16)en_PACKET_C2S_MESSAGE;
-							*RandPacket << Instance->_ClientArray[i]->AccountId;
-							*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId;
-
-							swprintf_s(Instance->_ClientArray[i]->ChatMsg, sizeof(Instance->_ClientArray[i]->ChatMsg), L"[%s]가 [%d]를 보냈습니다.", Instance->_ClientArray[i]->LoginId.c_str(), Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId, RandMessageType * i);
-							SendChatMsg = Instance->_ClientArray[i]->ChatMsg;
-
-							//wprintf(L"[%s]가 [%d]를 보냈습니다.\n", G_ClientArray[i].ChatMsg);
-
-							DummyChatLen = (int8)(SendChatMsg.length() * 2);
-							*RandPacket << DummyChatLen;
-							RandPacket->InsertData(SendChatMsg.c_str(), DummyChatLen);
-
-							Instance->SendPacket(Instance->_ClientArray[i]->ClientId, RandPacket);
-							break;
-						case en_DummyClientMessage::MOVE:
-							*RandPacket << (int16)en_PACKET_C2S_MOVE;
-							*RandPacket << Instance->_ClientArray[i]->AccountId;
-							*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId;
-
-							RandDir = rand() % 4;
-							*RandPacket << (int8)RandDir;
-
-							Instance->SendPacket(Instance->_ClientArray[i]->ClientId, RandPacket);
-							break;
-						case en_DummyClientMessage::DISCONNECT:
 							Instance->_ClientArray[i]->IsDisconnect = true;
 
-							*RandPacket << (int16)en_PACKET_C2S_DISCONNECT;
+							Instance->Disconnect(Instance->_ClientArray[i]->ClientId);
 
-							Instance->SendPacket(Instance->_ClientArray[i]->ClientId, RandPacket);
-							break;
-						default:
-							break;
+							InterlockedIncrement64(&Instance->_DisconnectTPS);
+						}
+						else
+						{
+							int32 RandMessageType = rand() % 2;
+							int8 RandDir;
+
+							wstring SendChatMsg;
+							int8 DummyChatLen;
+
+							switch ((en_DummyClientMessage)RandMessageType)
+							{
+							case en_DummyClientMessage::CHAT_MSG:
+								*RandPacket << (int16)en_PACKET_C2S_MESSAGE;
+								*RandPacket << Instance->_ClientArray[i]->AccountId;
+								*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId;
+
+								swprintf_s(Instance->_ClientArray[i]->ChatMsg, sizeof(Instance->_ClientArray[i]->ChatMsg), L"[%s]가 [%d]를 보냈습니다.", Instance->_ClientArray[i]->LoginId.c_str(), Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId, RandMessageType * i);
+								SendChatMsg = Instance->_ClientArray[i]->ChatMsg;
+
+								//wprintf(L"[%s]가 [%d]를 보냈습니다.\n", G_ClientArray[i].ChatMsg);
+
+								DummyChatLen = (int8)(SendChatMsg.length() * 2);
+								*RandPacket << DummyChatLen;
+								RandPacket->InsertData(SendChatMsg.c_str(), DummyChatLen);
+
+								Instance->SendPacket(Instance->_ClientArray[i]->ClientId, RandPacket);
+								break;
+							case en_DummyClientMessage::MOVE:
+								*RandPacket << (int16)en_PACKET_C2S_MOVE;
+								*RandPacket << Instance->_ClientArray[i]->AccountId;
+								*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId;
+
+								RandDir = rand() % 4;
+								*RandPacket << (int8)RandDir;
+
+								Instance->SendPacket(Instance->_ClientArray[i]->ClientId, RandPacket);
+								break;
+							default:
+								break;
+							}
 						}
 
 						RandPacket->Free();
 					}
+					else
+					{
+						bool IsDummy = true;
+
+						// 로그인 패킷 전송
+						CMessage* ReqGameServerLoginPacket = CMessage::Alloc();
+						ReqGameServerLoginPacket->Clear();
+
+						*ReqGameServerLoginPacket << (WORD)en_PACKET_C2S_GAME_REQ_LOGIN;
+						*ReqGameServerLoginPacket << Instance->_ClientArray[i]->AccountId;
+
+						int8 DummyClientNameLen = (int8)(Instance->_ClientArray[i]->LoginId.length() * 2);
+						*ReqGameServerLoginPacket << DummyClientNameLen;
+						ReqGameServerLoginPacket->InsertData(Instance->_ClientArray[i]->LoginId.c_str(), DummyClientNameLen);
+
+						*ReqGameServerLoginPacket << IsDummy;
+
+						Instance->SendPacket(Instance->_ClientArray[i]->ClientId, ReqGameServerLoginPacket);
+						ReqGameServerLoginPacket->Free();
+					}
 				}
-			}			
+			}	
+
+			Sleep(200);
 		}		
 	}
 
@@ -284,12 +338,20 @@ void CDummyClient::ReleaseClient(st_Client* ReleaseClient)
 		}
 	}
 		
-	closesocket(ReleaseClient->CloseSocket);
-	ReleaseClient->CloseSocket = INVALID_SOCKET;
-	
+	InterlockedDecrement64(&_ClientCount);
+
+	ReleaseClient->IsLogin = false;
+	ReleaseClient->IsEnterGame = false;
+
+	ReleaseClient->ServerSocket = INVALID_SOCKET;
+	closesocket(ReleaseClient->CloseSocket);	
+
 	ReleaseClient->ClientReConnectTime = GetTickCount64() + DUMMY_CLIENT_RE_CONNECT_TIME;
+	ReleaseClient->ClientSendMessageTime = GetTickCount64() + 500;
 
 	_ClientArrayIndexs.Push(GET_CLIENTINDEX(ReleaseClient->ClientId));
+
+	SetEvent(_ConnectThreadWakeEvent);
 }
 
 void CDummyClient::SendPost(st_Client* SendClient)
@@ -339,7 +401,7 @@ void CDummyClient::SendPost(st_Client* SendClient)
 		SendBuf[i].len = Packet->GetUseBufferSize();
 
 		SendClient->SendPacket[i] = Packet;
-	}
+	}	
 
 	memset(&SendClient->SendOverlapped, 0, sizeof(OVERLAPPED));
 
@@ -383,9 +445,9 @@ void CDummyClient::RecvPost(st_Client* RecvClient, bool IsConnectRecvPost)
 		RecvBufCount = 1;
 		RecvBuf[0].buf = RecvClient->RecvRingBuf.GetRearBufferPtr();
 		RecvBuf[0].len = DirectEnqueSize;
-	}
+	}	
 
-	memset(&RecvClient->RecvOverlapped, 0, sizeof(OVERLAPPED));
+	memset(&RecvClient->RecvOverlapped, 0, sizeof(OVERLAPPED));	
 
 	if (IsConnectRecvPost == false)
 	{
@@ -440,6 +502,8 @@ void CDummyClient::RecvNotifyComplete(st_Client* RecvCompleteClient, const DWORD
 			}
 		}
 
+		InterlockedIncrement(&_RecvPacketTPS);
+
 		RecvCompleteClient->RecvRingBuf.MoveFront(sizeof(CMessage::st_ENCODE_HEADER));
 		RecvCompleteClient->RecvRingBuf.Dequeue(Packet->GetRearBufferPtr(), EncodeHeader.PacketLen);
 		Packet->SetHeader((char*)&EncodeHeader, sizeof(CMessage::st_ENCODE_HEADER));
@@ -456,7 +520,10 @@ void CDummyClient::RecvNotifyComplete(st_Client* RecvCompleteClient, const DWORD
 
 	Packet->Free();
 
-	RecvPost(RecvCompleteClient);
+	if (RecvCompleteClient->IsCancelIO == false)
+	{
+		RecvPost(RecvCompleteClient);
+	}	
 }
 
 void CDummyClient::SendNotifyComplete(st_Client* SendCompleteClient)
@@ -480,36 +547,23 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 {
 	st_Client* RecvClient = FindClient(ClientID);
 
-	WORD MessageType;
-	*Packet >> MessageType;
-
-	switch (MessageType)
+	if (RecvClient)
 	{
-	case en_PACKET_S2C_GAME_CLIENT_CONNECTED:
-		{
-			bool IsDummy = true;
-			
-			CMessage* ReqGameServerLoginPacket = CMessage::Alloc();
-			ReqGameServerLoginPacket->Clear();
+		WORD MessageType;
+		*Packet >> MessageType;
 
+		switch (MessageType)
+		{
+		case en_PACKET_S2C_GAME_CLIENT_CONNECTED:
+		{
 			WCHAR DummyCharacterName[256] = { 0 };
 			swprintf_s(DummyCharacterName, sizeof(DummyCharacterName), L"Dummy_Player %d", RecvClient->AccountId);
 
 			RecvClient->LoginId = DummyCharacterName;
-			*ReqGameServerLoginPacket << (WORD)en_PACKET_C2S_GAME_REQ_LOGIN;
-			*ReqGameServerLoginPacket << RecvClient->AccountId;
-
-			int8 DummyClientNameLen = (int8)(RecvClient->LoginId.length() * 2);
-			*ReqGameServerLoginPacket << DummyClientNameLen;
-			ReqGameServerLoginPacket->InsertData(RecvClient->LoginId.c_str(), DummyClientNameLen);
-
-			*ReqGameServerLoginPacket << IsDummy;
-
-			SendPacket(RecvClient->ClientId,ReqGameServerLoginPacket);
-			ReqGameServerLoginPacket->Free();
+			RecvClient->DummyClientLoginTime = GetTickCount64() + DUMMY_CLIENT_LOGIN_TIME;			
 		}
 		break;
-	case en_PACKET_S2C_GAME_RES_LOGIN:
+		case en_PACKET_S2C_GAME_RES_LOGIN:
 		{
 			bool LoginSuccess = false;
 			*Packet >> LoginSuccess;
@@ -603,10 +657,10 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 					SendPacket(ClientID, ReqCreateCharacterPacket);
 					ReqCreateCharacterPacket->Free();
 				}
-			}			
+			}
 		}
 		break;
-	case en_PACKET_S2C_GAME_CREATE_CHARACTER:
+		case en_PACKET_S2C_GAME_CREATE_CHARACTER:
 		{
 			bool CharacterCreateSuccess = false;
 
@@ -672,7 +726,7 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 			}
 		}
 		break;
-	case en_PACKET_S2C_GAME_ENTER:
+		case en_PACKET_S2C_GAME_ENTER:
 		{
 			bool GameEnterSuccess;
 			*Packet >> GameEnterSuccess;
@@ -696,9 +750,9 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 			}
 		}
 		break;
-	case en_PACKET_S2C_MESSAGE:
-		break;
-	case en_PACKET_S2C_MOVE:
+		case en_PACKET_S2C_MESSAGE:
+			break;
+		case en_PACKET_S2C_MOVE:
 		{
 			int64 AccountId;
 			int64 PlayerId;
@@ -722,22 +776,23 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 			RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.MoveDir = (en_MoveDir)MoveDir;
 		}
 		break;
-	case en_PACKET_S2C_PING:
+		case en_PACKET_S2C_PING:
 		{
 			CMessage* ReqPongPacket = CMessage::Alloc();
 			ReqPongPacket->Clear();
 
 			*ReqPongPacket << (int16)en_PACKET_TYPE::en_PACKET_C2S_PONG;
-			
+
 			SendPacket(ClientID, ReqPongPacket);
 			ReqPongPacket->Free();
-		}	
+		}
 		break;
-	default:
-		break;
-	}
+		default:
+			break;
+		}
 
-	ReturnClient(RecvClient);
+		ReturnClient(RecvClient);
+	}	
 }
 
 st_Client* CDummyClient::FindClient(int64 ClientID)
@@ -808,4 +863,20 @@ void CDummyClient::SendPacket(int64 ClientID, CMessage* Packet)
 
 void CDummyClient::Disconnect(int64 ClientID)
 {
+	st_Client* DisconnectClient = FindClient(ClientID);
+	if (DisconnectClient != nullptr)
+	{
+		if (DisconnectClient->IOBlock->IOCount == 0)
+		{
+			ReturnClient(DisconnectClient);
+		}
+		else
+		{		
+
+			DisconnectClient->IsCancelIO = true;
+			CancelIoEx((HANDLE)DisconnectClient->ServerSocket, NULL);
+		}
+
+		ReturnClient(DisconnectClient);
+	}	
 }

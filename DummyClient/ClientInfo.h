@@ -5,8 +5,9 @@
 #include "Message.h"
 #include "CommonProtocol.h"
 
-#define DUMMY_CLIENT_RE_CONNECT_TIME 1000
-#define DUMMY_CLIENT_SEND_TIME 500
+#define DUMMY_CLIENT_RE_CONNECT_TIME 200
+#define DUMMY_CLIENT_SEND_TIME 200
+#define DUMMY_CLIENT_LOGIN_TIME 500
 
 struct st_IOBlock
 {
@@ -17,7 +18,7 @@ struct st_IOBlock
 struct st_Client
 {
 	int64 ClientId;
-	SOCKET ServerSocket;
+	SOCKET ServerSocket;	
 	SOCKET CloseSocket;
 	SOCKADDR_IN ServerAddr;
 
@@ -44,11 +45,13 @@ struct st_Client
 	bool IsLogin;
 	bool IsEnterGame;
 	bool IsDisconnect;
+	bool IsCancelIO;
 
 	LONG IsConnected;		
 
 	st_GameObjectInfo MyCharacterGameObjectInfo;
 
-	int64 ClientSendMessageTime;	
+	int64 DummyClientLoginTime;
+	int64 ClientSendMessageTime;
 	int64 ClientReConnectTime;
 };

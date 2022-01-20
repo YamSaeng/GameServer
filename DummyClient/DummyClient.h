@@ -4,7 +4,7 @@
 #include "ClientInfo.h"
 #include "LockFreeStack.h"
 
-#define DUMMY_CLIENT_MAX 3000
+#define DUMMY_CLIENT_MAX 500
 
 // 세션 인덱스 넣기 16비트 왼쪽으로 밀고 INDEX 넣음
 #define ADD_CLIENTID_INDEX(CLIENTID,INDEX)	((CLIENTID << 0x10) | ((short)INDEX))
@@ -24,11 +24,13 @@ private:
 
 	HANDLE _DummyClientHCP;	
 
+	bool _ConnectThreadProcEnd;
+
 	static unsigned __stdcall WorkerThreadProc(void* Argument);
 		
 	static unsigned __stdcall ConnectThreadProc(void* Argument);
 
-	static unsigned __stdcall SendProc(void* Argument);
+	static unsigned __stdcall SendThreadProc(void* Argument);
 
 	void ReleaseClient(st_Client* ReleaseClient);
 
@@ -41,6 +43,8 @@ private:
 	void SendNotifyComplete(st_Client* SendCompleteClient);
 
 	void OnRecv(int64 ClientID, CMessage* Packet);
+
+	HANDLE _ConnectThreadWakeEvent;
 
 protected:
 	st_Client* _ClientArray[DUMMY_CLIENT_MAX];
@@ -55,6 +59,12 @@ public:
 	int64 _DummyClientId;	
 
 	LONG _SendPacketTPS;
+	LONG _RecvPacketTPS;	
+	int64 _ClientCount;
+
+	int64 _ConnectionTotal = 0;
+	int64 _ConnectTPS = 0;
+	int64 _DisconnectTPS = 0;	
 
 	CDummyClient();
 	~CDummyClient();
