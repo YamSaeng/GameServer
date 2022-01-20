@@ -591,17 +591,20 @@ void CGameServer::DeleteClient(st_Session* Session)
 
 			// 인덱스 반납
 			G_ObjectManager->PlayerIndexReturn(Session->MyPlayerIndexes[i]);
-		}
+		}				
 	}
+
+	Session->IsLogin = false;
+	Session->IsDummy = false;
 
 	Session->MyPlayerIndex = -1;
 	Session->AccountId = 0;
-		;
-	closesocket(Session->CloseSock);
-	Session->CloseSock = INVALID_SOCKET;
+		
+	closesocket(Session->ClientSock);
+	Session->ClientSock = INVALID_SOCKET;
 
 	// 세션 인덱스 반납	
-	_SessionArrayIndexs.Push(GET_SESSIONINDEX(Session->SessionId));
+	_SessionArrayIndexs.Push(GET_SESSIONINDEX(Session->SessionId));	
 }
 
 void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
@@ -666,10 +669,7 @@ void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 		break;
 	case en_PACKET_TYPE::en_PACKET_C2S_PONG:
 		PacketProcReqPong(SessionId, Message);
-		break;	
-	case en_PACKET_TYPE::en_PACKET_C2S_DISCONNECT:
-		Disconnect(SessionId);
-		break;
+		break;		
 	default:
 		Disconnect(SessionId);
 		break;
@@ -877,7 +877,7 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 				ResEnterGamePacket->Free();
 
 				// 캐릭터의 상태를 10초 후에 IDLE 상태로 전환
-				ObjectStateChangeTimerJobCreate(MyPlayer, en_CreatureState::IDLE, 10000);
+				//ObjectStateChangeTimerJobCreate(MyPlayer, en_CreatureState::IDLE, 10000);
 
 				vector<st_GameObjectInfo> SpawnObjectInfo;
 				SpawnObjectInfo.push_back(MyPlayer->_GameObjectInfo);
@@ -915,15 +915,18 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 				}
 
 				// DB 큐에 요청하기 전 IOCount를 증가시켜서 Session이 반납 안되도록 막음
-				InterlockedIncrement64(&Session->IOBlock->IOCount);
+				if (Session->IsDummy == false)
+				{
+					InterlockedIncrement64(&Session->IOBlock->IOCount);
 
-				st_Job* DBCharacterInfoSendJob = _JobMemoryPool->Alloc();
-				DBCharacterInfoSendJob->Type = en_JobType::DATA_BASE_CHARACTER_INFO_SEND;
-				DBCharacterInfoSendJob->SessionId = Session->SessionId;
-				DBCharacterInfoSendJob->Message = nullptr;
+					st_Job* DBCharacterInfoSendJob = _JobMemoryPool->Alloc();
+					DBCharacterInfoSendJob->Type = en_JobType::DATA_BASE_CHARACTER_INFO_SEND;
+					DBCharacterInfoSendJob->SessionId = Session->SessionId;
+					DBCharacterInfoSendJob->Message = nullptr;
 
-				_GameServerDataBaseThreadMessageQue.Enqueue(DBCharacterInfoSendJob);
-				SetEvent(_DataBaseWakeEvent);
+					_GameServerDataBaseThreadMessageQue.Enqueue(DBCharacterInfoSendJob);
+					SetEvent(_DataBaseWakeEvent);
+				}				
 			}			
 		}
 		else
@@ -3189,11 +3192,11 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 			bool FindPlyaerCharacter = ClientPlayersGet.Execute();
 
 			int8 PlayerCount = 0;
-
+			int8 i = 0;
 			while (ClientPlayersGet.Fetch())
-			{
-				// 플레이어 정보 셋팅
-				CPlayer* NewPlayerCharacter = (CPlayer*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_PLAYER);
+			{				
+				// 플레이어 정보 셋팅			
+				CPlayer* NewPlayerCharacter = G_ObjectManager->_PlayersArray[Session->MyPlayerIndexes[i]];				
 				NewPlayerCharacter->_GameObjectInfo.ObjectId = PlayerId;
 				NewPlayerCharacter->_GameObjectInfo.ObjectName = PlayerName;
 				NewPlayerCharacter->_GameObjectInfo.OwnerObjectType = (en_GameObjectType)PlayerObjectType;
@@ -3227,10 +3230,7 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 				NewPlayerCharacter->_AccountId = Session->AccountId;
 				NewPlayerCharacter->_Experience.CurrentExperience = PlayerCurrentExperience;
 				NewPlayerCharacter->_Experience.RequireExperience = PlayerRequireExperience;
-				NewPlayerCharacter->_Experience.TotalExperience = PlayerTotalExperience;
-				
-				// 플레이어 배열에 새로만들어준 캐릭터 할당
-				G_ObjectManager->_PlayersArray[Session->MyPlayerIndexes[PlayerCount]] = NewPlayerCharacter;
+				NewPlayerCharacter->_Experience.TotalExperience = PlayerTotalExperience;				
 				
 				PlayerCount++;
 			}
@@ -3246,12 +3246,8 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 		{
 			Session->IsLogin = false;
 			//Disconnect(SessionID);
-		}
-	}
-	else
-	{
-		// 클라 접속 끊겻을 경우
-	}
+		}		
+	}	
 
 	ReturnSession(Session);
 }
@@ -5114,9 +5110,9 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			ResCraftingItemListMessage->Free();
 #pragma endregion
 		} while (0);
-	}
 
-	ReturnSession(Session);
+		ReturnSession(Session);
+	}	
 }
 
 void CGameServer::PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CGameServerMessage* Message)
