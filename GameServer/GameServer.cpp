@@ -583,10 +583,8 @@ void CGameServer::DeleteClient(st_Session* Session)
 		{
 			CPlayer* SessionPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndexes[i]];
 			if (SessionPlayer != nullptr && Session->SessionId == SessionPlayer->_SessionId)
-			{
-				SessionPlayer->_NetworkState = en_ObjectNetworkState::LEAVE;				
-				// Player 오브젝트 반납
-				G_ObjectManager->ObjectReturn(SessionPlayer->_GameObjectInfo.ObjectType, SessionPlayer);						
+			{				
+				SessionPlayer->_NetworkState = en_ObjectNetworkState::LEAVE;								
 			}	
 
 			// 인덱스 반납
@@ -3196,7 +3194,7 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 			while (ClientPlayersGet.Fetch())
 			{				
 				// 플레이어 정보 셋팅			
-				CPlayer* NewPlayerCharacter = G_ObjectManager->_PlayersArray[Session->MyPlayerIndexes[i]];				
+				CPlayer* NewPlayerCharacter = G_ObjectManager->_PlayersArray[Session->MyPlayerIndexes[i]];
 				NewPlayerCharacter->_GameObjectInfo.ObjectId = PlayerId;
 				NewPlayerCharacter->_GameObjectInfo.ObjectName = PlayerName;
 				NewPlayerCharacter->_GameObjectInfo.OwnerObjectType = (en_GameObjectType)PlayerObjectType;
@@ -5536,7 +5534,7 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(int64 SessionId, CMessage* 
 	bool IsPlayerLeaveInfoSave = PlayerLeaveInfoSave.Execute();
 	if (IsPlayerLeaveInfoSave == false)
 	{
-		CRASH("PlayerInfoSave 실패");
+		//CRASH("PlayerInfoSave 실패");
 	}
 
 	G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerInfoSaveDBConnection);
