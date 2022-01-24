@@ -507,8 +507,7 @@ void CGameServer::CreateNewClient(int64 SessionId)
 	if (Session)
 	{
 		// 기본 정보 셋팅
-		Session->AccountId = 0;
-		Session->IsLogin = false;
+		Session->AccountId = 0;		
 		Session->Token = 0;
 		Session->PingPacketTime = GetTickCount64();
 
@@ -590,10 +589,10 @@ void CGameServer::DeleteClient(st_Session* Session)
 			// 인덱스 반납
 			G_ObjectManager->PlayerIndexReturn(Session->MyPlayerIndexes[i]);
 		}				
-	}
+	}	
 
 	Session->IsLogin = false;
-	Session->IsDummy = false;
+	Session->IsDummy = false;	
 
 	Session->MyPlayerIndex = -1;
 	Session->AccountId = 0;
@@ -3096,7 +3095,6 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 		// 더미일 경우에는 토큰은 확인하지 않는다.
 
 		int DBToken = 0;
-
 		if (Session->IsDummy == false)
 		{
 			// AccountNo와 Token으로 AccountServerDB 접근해서 데이터가 있는지 확인
