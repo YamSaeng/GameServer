@@ -265,13 +265,13 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 			// 플레이어 대상
 			for (CPlayer* Player : AroundSector->GetPlayers())
 			{
-				int16 Distance = st_Vector2Int::Distance(MovePlayer->GetCellPosition(), Player->GetCellPosition());
+				int16 Distance = st_Vector2Int::Distance(MovePlayer->GetCellPosition(), Player->GetCellPosition());				
 
 				if (MovePlayer->_GameObjectInfo.ObjectId != Player->_GameObjectInfo.ObjectId 
 					&& Distance <= MovePlayer->_FieldOfViewDistance)
 				{
 					CurrentFieldOfViewObjects.push_back(Player);
-				}	
+				}								
 			}
 
 			// 몬스터 대상
@@ -326,7 +326,13 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 					{
 						if (CurrentFieldOfViewObjects[i]->_GameObjectInfo.ObjectId == SpawnFieldOfViewObjects[k]->_GameObjectInfo.ObjectId)
 						{
-							SpawnFieldOfViewObjects.erase(SpawnFieldOfViewObjects.begin() + k);
+							int16 Distance = st_Vector2Int::Distance(MovePlayer->GetCellPosition(), SpawnFieldOfViewObjects[k]->GetCellPosition());
+
+							if (Distance > MovePlayer->_FieldOfViewDistance)
+							{
+								SpawnFieldOfViewObjects.erase(SpawnFieldOfViewObjects.begin() + k);
+							}
+
 							break;
 						}
 					}					
@@ -376,7 +382,13 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 					{
 						if (PreviousFieldOfViewObjects[i]->_GameObjectInfo.ObjectId == DeSpawnFieldOfViewObjects[k]->_GameObjectInfo.ObjectId)
 						{
-							DeSpawnFieldOfViewObjects.erase(DeSpawnFieldOfViewObjects.begin() + k);
+							int16 Distance = st_Vector2Int::Distance(MovePlayer->GetCellPosition(), DeSpawnFieldOfViewObjects[k]->GetCellPosition());
+
+							if (Distance < MovePlayer->_FieldOfViewDistance)
+							{
+								DeSpawnFieldOfViewObjects.erase(DeSpawnFieldOfViewObjects.begin() + k);
+							}						
+							
 							break;
 						}
 					}
@@ -521,7 +533,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 						{
 							int16 Distance = st_Vector2Int::Distance(DeSpawnFieldOfViewObjects[k]->GetCellPosition(), MoveMonster->GetCellPosition());
 							
-							if (Distance > DeSpawnFieldOfViewObjects[k]->_FieldOfViewDistance)
+							if (Distance < DeSpawnFieldOfViewObjects[k]->_FieldOfViewDistance)
 							{
 								DeSpawnFieldOfViewObjects.erase(DeSpawnFieldOfViewObjects.begin() + k);
 							}							
@@ -579,7 +591,6 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	}
 
 	// 시야 작업 ( 시야 안에 들어오는 오브젝트와 시야 밖으로 벗어나는 오브젝트 작업 )
-
 
 	GameObject->_GameObjectInfo.ObjectPositionInfo.PositionX = DestPosition._X;
 	GameObject->_GameObjectInfo.ObjectPositionInfo.PositionY = DestPosition._Y;	
