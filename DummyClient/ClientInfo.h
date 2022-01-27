@@ -46,6 +46,9 @@ struct st_Client
 	bool IsEnterGame;
 	bool IsDisconnect;
 	bool IsCancelIO;
+	
+	LONG IsReqMove;
+	bool IsReqLogin;
 
 	LONG IsConnected;		
 

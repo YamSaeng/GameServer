@@ -71,4 +71,6 @@ public:
 
 	void SendPacket(int64 ClientID, CMessage* Packet);
 	void Disconnect(int64 ClientID);
+
+	st_Client* FindById(int64& ObjectId);
 };
