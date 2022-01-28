@@ -94,6 +94,7 @@ enum en_PACKET_TYPE
 	// 게임서버 캐릭터 움직이기 요청
 	// int64 AccountId
 	// int32 PlayerDBId
+	// st_PositionInfo PositionInfo
 	// int8 Dir
 	//------------------------------------------------------------
 	en_PACKET_C2S_MOVE,
