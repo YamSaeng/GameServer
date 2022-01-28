@@ -566,29 +566,34 @@ void CGameServer::DeleteClient(st_Session* Session)
 		DBLeavePlayerInfoSaveJob->Message = DBLeavePlayerInfoSaveMessage;
 
 		_GameServerDataBaseThreadMessageQue.Enqueue(DBLeavePlayerInfoSaveJob);
-		SetEvent(_DataBaseWakeEvent);
+		SetEvent(_DataBaseWakeEvent);		
 
-		CChannel* Channel = G_ChannelManager->Find(1);				
-		Channel->LeaveChannel(MyPlayer);		
+		CChannel* Channel = G_ChannelManager->Find(1);
+		Channel->LeaveChannel(MyPlayer);
 
-		vector<int64> DeSpawnObjectIds;
-		DeSpawnObjectIds.push_back(MyPlayer->_GameObjectInfo.ObjectId);
-
-		CMessage* ResLeaveGame = MakePacketResObjectDeSpawn(1, DeSpawnObjectIds);
-		SendPacketFieldOfView(Session, ResLeaveGame, true);		
-		ResLeaveGame->Free();
+		vector<int64> DeSpawnObjectIds;			
 
 		for (int i = 0; i < SESSION_CHARACTER_MAX; i++)
 		{
 			CPlayer* SessionPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndexes[i]];
 			if (SessionPlayer != nullptr && Session->SessionId == SessionPlayer->_SessionId)
 			{				
-				SessionPlayer->_NetworkState = en_ObjectNetworkState::LEAVE;								
+				DeSpawnObjectIds.push_back(SessionPlayer->_GameObjectInfo.ObjectId);
+
+				SessionPlayer->_NetworkState = en_ObjectNetworkState::LEAVE;	
+				SessionPlayer->_FieldOfViewObjects.clear();
 			}	
 
 			// 인덱스 반납
 			G_ObjectManager->PlayerIndexReturn(Session->MyPlayerIndexes[i]);
-		}				
+		}	
+
+		if (DeSpawnObjectIds.size() > 0)
+		{
+			CMessage* ResLeaveGame = MakePacketResObjectDeSpawn(1, DeSpawnObjectIds);
+			SendPacketFieldOfView(Session, ResLeaveGame, true);
+			ResLeaveGame->Free();
+		}		
 	}	
 
 	Session->IsLogin = false;
@@ -596,10 +601,10 @@ void CGameServer::DeleteClient(st_Session* Session)
 
 	Session->MyPlayerIndex = -1;
 	Session->AccountId = 0;
-		
-	closesocket(Session->ClientSock);
-	Session->ClientSock = INVALID_SOCKET;
 
+	Session->ClientSock = INVALID_SOCKET;
+	closesocket(Session->CloseSock);
+	
 	// 세션 인덱스 반납	
 	_SessionArrayIndexs.Push(GET_SESSIONINDEX(Session->SessionId));	
 }
@@ -886,30 +891,27 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 
 				SpawnObjectInfo.clear();
 
-				if (Session->IsDummy == false)
+				// 나한테 다른 오브젝트들을 생성하라고 알려줌						
+				st_GameObjectInfo* SpawnGameObjectInfos;
+				// 시야 범위 안에 있는 오브젝트 가져오기
+				vector<CGameObject*> FieldOfViewObjects = G_ChannelManager->Find(1)->GetFieldOfViewObjects(MyPlayer, 1);
+				MyPlayer->_FieldOfViewObjects = FieldOfViewObjects;
+
+				if (FieldOfViewObjects.size() > 0)
 				{
-					// 나한테 다른 오브젝트들을 생성하라고 알려줌						
-					st_GameObjectInfo* SpawnGameObjectInfos;
-					// 시야 범위 안에 있는 오브젝트 가져오기
-					vector<CGameObject*> FieldOfViewObjects = G_ChannelManager->Find(1)->GetFieldOfViewObjects(MyPlayer, 1);
-					MyPlayer->_FieldOfViewObjects = FieldOfViewObjects;
+					SpawnGameObjectInfos = new st_GameObjectInfo[FieldOfViewObjects.size()];
 
-					if (FieldOfViewObjects.size() > 0)
+					for (int32 i = 0; i < FieldOfViewObjects.size(); i++)
 					{
-						SpawnGameObjectInfos = new st_GameObjectInfo[FieldOfViewObjects.size()];
-
-						for (int32 i = 0; i < FieldOfViewObjects.size(); i++)
-						{
-							SpawnObjectInfo.push_back(FieldOfViewObjects[i]->_GameObjectInfo);
-						}
-
-						CMessage* ResOtherObjectSpawnPacket = MakePacketResObjectSpawn((int32)FieldOfViewObjects.size(), SpawnObjectInfo);
-						SendPacket(Session->SessionId, ResOtherObjectSpawnPacket);
-						ResOtherObjectSpawnPacket->Free();
-
-						delete[] SpawnGameObjectInfos;
+						SpawnObjectInfo.push_back(FieldOfViewObjects[i]->_GameObjectInfo);
 					}
-				}
+
+					CMessage* ResOtherObjectSpawnPacket = MakePacketResObjectSpawn((int32)FieldOfViewObjects.size(), SpawnObjectInfo);
+					SendPacket(Session->SessionId, ResOtherObjectSpawnPacket);
+					ResOtherObjectSpawnPacket->Free();
+
+					delete[] SpawnGameObjectInfos;
+				}				
 
 				// DB 큐에 요청하기 전 IOCount를 증가시켜서 Session이 반납 안되도록 막음
 				if (Session->IsDummy == false)
@@ -987,9 +989,17 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 				}
 			}
 
-			// 클라가 전송해준 방향값을 뽑는다.
+			int8 MovePlayerCurrentState;
+			*Message >> MovePlayerCurrentState;
+			st_Vector2Int ClientPlayerPosition;
+			*Message >> ClientPlayerPosition._X;
+			*Message >> ClientPlayerPosition._Y;
+			int8 MovePlayerCurrentDir;
+			*Message >> MovePlayerCurrentDir;
+
+			// 클라가 움직일 방향값을 가져온다.
 			char ReqMoveDir;
-			*Message >> ReqMoveDir;
+			*Message >> ReqMoveDir;							
 
 			// 방향값에 따라 노말벡터 값을 뽑아온다.
 			en_MoveDir MoveDir = (en_MoveDir)ReqMoveDir;
@@ -1012,31 +1022,41 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 			}
 						
 			MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = MoveDir;
-			MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
+			MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;			
 
 			// 플레이어의 현재 위치를 읽어온다.
-			st_Vector2Int PlayerPosition;
-			PlayerPosition._X = MyPlayer->GetPositionInfo().PositionX;
-			PlayerPosition._Y = MyPlayer->GetPositionInfo().PositionY;
+			st_Vector2Int ServerPlayerPosition;
+			ServerPlayerPosition._X = MyPlayer->GetPositionInfo().PositionX;
+			ServerPlayerPosition._Y = MyPlayer->GetPositionInfo().PositionY;
 
 			CChannel* Channel = G_ChannelManager->Find(1);
 
-			// 움직일 위치를 얻는다.	
-			st_Vector2Int CheckPosition = PlayerPosition + DirVector2Int;
+			if (ServerPlayerPosition == ClientPlayerPosition)
+			{				
+				// 움직일 위치를 얻는다.	
+				st_Vector2Int CheckPosition = ServerPlayerPosition + DirVector2Int;
 
-			// 움직일 위치로 갈수 있는지 확인
-			bool IsCanGo = Channel->_Map->Cango(CheckPosition);
-			bool ApplyMoveExe;
-			if (IsCanGo == true)
-			{
-				// 갈 수 있으면 플레이어 위치 적용
-				ApplyMoveExe = Channel->_Map->ApplyMove(MyPlayer, CheckPosition);
+				// 움직일 위치로 갈수 있는지 확인
+				bool IsCanGo = Channel->_Map->Cango(CheckPosition);
+				bool ApplyMoveExe;
+				if (IsCanGo == true)
+				{
+					// 갈 수 있으면 플레이어 위치 적용
+					ApplyMoveExe = Channel->_Map->ApplyMove(MyPlayer, CheckPosition);
+				}
+
+				// 시야 범위 안에 있는 대상들에게 움직임 요청 응답 패킷 전송
+				CMessage* ResMyMoveOtherPacket = MakePacketResMove(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
+				SendPacketFieldOfView(Session, ResMyMoveOtherPacket, true);
+				ResMyMoveOtherPacket->Free();
 			}
-
-			// 내가 움직인 것을 내 주위 플레이어들에게 알려야함
-			CMessage* ResMyMoveOtherPacket = MakePacketResMove(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
-			SendPacketFieldOfView(Session, ResMyMoveOtherPacket, true);			
-			ResMyMoveOtherPacket->Free();
+			else
+			{				
+				// 서버와 클라 위치가 다를 경우 서버 기준으로 위치를 다시 잡는다.
+				CMessage* ResSyncPositionPacket = MakePacketResSyncPosition(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
+				SendPacketFieldOfView(Session, ResSyncPositionPacket);
+				ResSyncPositionPacket->Free();			
+			}									
 		}
 		else
 		{
@@ -3242,8 +3262,8 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 		{
 			Session->IsLogin = false;
 			//Disconnect(SessionID);
-		}		
-	}	
+		}				
+	}		
 
 	ReturnSession(Session);
 }
@@ -6721,7 +6741,7 @@ CGameServerMessage* CGameServer::MakePacketResMove(int64 AccountId, int64 Object
 	ResMoveMessage->Clear();
 
 	*ResMoveMessage << (int16)en_PACKET_S2C_MOVE;
-	*ResMoveMessage << AccountId;
+	*ResMoveMessage << AccountId;	
 	*ResMoveMessage << ObjectId;
 
 	// ObjectType
@@ -7002,8 +7022,6 @@ void CGameServer::SendPacketFieldOfView(CGameObject* Object, CMessage* Message)
 
 	for (CSector* AroundSector : AroundSectors)
 	{
-		AroundSector->GetSectorLock();
-
 		for (CPlayer* Player : AroundSector->GetPlayers())
 		{
 			int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Player->GetCellPosition());
@@ -7013,8 +7031,6 @@ void CGameServer::SendPacketFieldOfView(CGameObject* Object, CMessage* Message)
 				SendPacket(Player->_SessionId, Message);
 			}
 		}
-
-		AroundSector->GetSectorUnLock();
 	}	
 }
 
@@ -7023,13 +7039,12 @@ void CGameServer::SendPacketFieldOfView(st_Session* Session, CMessage* Message, 
 	CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
 
 	CChannel* Channel = G_ChannelManager->Find(1);
-
+	
 	// 주위 섹터들을 가져온다.
 	vector<CSector*> Sectors = Channel->GetAroundSectors(MyPlayer->GetCellPosition(), 1);
 
 	for (CSector* Sector : Sectors)
-	{
-		Sector->GetSectorLock();
+	{		
 
 		for (CPlayer* Player : Sector->GetPlayers())
 		{
@@ -7047,9 +7062,7 @@ void CGameServer::SendPacketFieldOfView(st_Session* Session, CMessage* Message, 
 					SendPacket(Player->_SessionId, Message);
 				}
 			}
-		}
-
-		Sector->GetSectorUnLock();
+		}		
 	}
 }
 
