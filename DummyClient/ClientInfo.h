@@ -5,7 +5,7 @@
 #include "Message.h"
 #include "CommonProtocol.h"
 
-#define DUMMY_CLIENT_MAX 1000
+#define DUMMY_CLIENT_MAX 2000
 
 #define DUMMY_CLIENT_RE_CONNECT_TIME 300
 #define DUMMY_CLIENT_SEND_TIME 200

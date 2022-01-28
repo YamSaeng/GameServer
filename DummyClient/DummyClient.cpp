@@ -150,11 +150,10 @@ unsigned __stdcall CDummyClient::ConnectThreadProc(void* Argument)
 					if (ConnectRet == SOCKET_ERROR)
 					{
 						DWORD Error = WSAGetLastError();
-						wprintf(L"connect Error %d\n", Error);
+						wprintf(L"connect Error %d \n", Error);												
 						break;
 					}					
 
-					NewClient->IsConnected = 1;
 					NewClient->IsReqLogin = 0;
 					NewClient->IsReqMove = 0;
 					NewClient->IsLogin = false;
@@ -184,7 +183,11 @@ unsigned __stdcall CDummyClient::ConnectThreadProc(void* Argument)
 
 					Instance->RecvPost(NewClient, true);					
 
-					InterlockedIncrement64(&Instance->_ClientCount);					
+					NewClient->IsConnected = 1;					
+
+					InterlockedIncrement64(&Instance->_ClientCount);	
+					
+					Sleep(0);
 				}
 				else
 				{
@@ -209,7 +212,7 @@ unsigned __stdcall CDummyClient::SendThreadProc(void* Argument)
 		{
 			for (int32 i = 0; i < DUMMY_CLIENT_MAX; i++)
 			{				
-				if (Instance->_ClientArray[i]->IsConnected == true && Instance->_ClientArray[i]->IsDisconnect == false)
+				if (Instance->_ClientArray[i]->IsConnected == 1 && Instance->_ClientArray[i]->IsDisconnect == false)
 				{
 					if (Instance->_ClientArray[i]->IsLogin == true
 						&& Instance->_ClientArray[i]->IsEnterGame == true
@@ -220,7 +223,7 @@ unsigned __stdcall CDummyClient::SendThreadProc(void* Argument)
 						random_device Seed;
 						default_random_engine Eng(Seed());
 
-						float DisconnectPoint = 50.0f / 1000.0f;
+						float DisconnectPoint = DUMMY_CLIENT_DISCONNECT / 1000.0f;
 						bernoulli_distribution DisconnectPointCheck(DisconnectPoint);
 						bool IsDisconnect = DisconnectPointCheck(Eng);
 
@@ -229,6 +232,7 @@ unsigned __stdcall CDummyClient::SendThreadProc(void* Argument)
 
 						if (IsDisconnect)
 						{
+							Instance->_ClientArray[i]->ServerSocket = INVALID_SOCKET;
 							Instance->_ClientArray[i]->IsDisconnect = true;
 
 							Instance->Disconnect(Instance->_ClientArray[i]->ClientId);
@@ -335,10 +339,12 @@ void CDummyClient::ReleaseClient(st_Client* ReleaseClient)
 	CompareBlock.IOCount = 0;
 	CompareBlock.IsRelease = 0;
 
-	if (!InterlockedCompareExchange128((LONG64*)ReleaseClient->IOBlock,(LONG64)true,(LONG64)0,(LONG64*)&CompareBlock))
+	if (!InterlockedCompareExchange128((LONG64*)ReleaseClient->IOBlock, (LONG64)true, (LONG64)0, (LONG64*)&CompareBlock))
 	{
 		return;
 	}
+
+	ReleaseClient->IsConnected = 0;
 
 	ReleaseClient->RecvRingBuf.ClearBuffer();
 
@@ -378,7 +384,7 @@ void CDummyClient::ReleaseClient(st_Client* ReleaseClient)
 
 	_ClientArrayIndexs.Push(GET_CLIENTINDEX(ReleaseClient->ClientId));
 
-	SetEvent(_ConnectThreadWakeEvent);
+	//SetEvent(_ConnectThreadWakeEvent);
 }
 
 void CDummyClient::SendPost(st_Client* SendClient)
@@ -483,10 +489,10 @@ void CDummyClient::RecvPost(st_Client* RecvClient, bool IsConnectRecvPost)
 
 	DWORD Flags = 0;
 
-	int WSARecvRetval = WSARecv(RecvClient->ServerSocket, RecvBuf, RecvBufCount, NULL, &Flags, (LPWSAOVERLAPPED)&RecvClient->RecvOverlapped, NULL);
+	int WSARecvRetval = WSARecv(RecvClient->ServerSocket, RecvBuf, RecvBufCount, NULL, &Flags, (LPWSAOVERLAPPED)&RecvClient->RecvOverlapped, NULL);	
 	if (WSARecvRetval == SOCKET_ERROR)
 	{
-		DWORD Error = WSAGetLastError();
+		DWORD Error = WSAGetLastError();		
 		if (Error != ERROR_IO_PENDING)
 		{
 			if (Error == WSAENOBUFS)
@@ -498,9 +504,8 @@ void CDummyClient::RecvPost(st_Client* RecvClient, bool IsConnectRecvPost)
 			{
 				ReleaseClient(RecvClient);
 			}
-		}
-	}
-
+		}		
+	}		
 }
 
 void CDummyClient::RecvNotifyComplete(st_Client* RecvCompleteClient, const DWORD& Transferred)
@@ -547,7 +552,7 @@ void CDummyClient::RecvNotifyComplete(st_Client* RecvCompleteClient, const DWORD
 
 	Packet->Free();
 
-	RecvPost(RecvCompleteClient);	
+	RecvPost(RecvCompleteClient);
 }
 
 void CDummyClient::SendNotifyComplete(st_Client* SendCompleteClient)
@@ -854,15 +859,7 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 				if (RecvClient->AccountId == Client->AccountId)
 				{
 					InterlockedExchange(&RecvClient->IsReqMove, 0);
-				}			
-
-				wprintf(L"%s S2C Move ServerPosition X : %d Y : %d ClientPosition X : %d Y : %d ReqDir : %d\n\n",
-					Client->MyCharacterGameObjectInfo.ObjectName.c_str(),
-					PositionX,
-					PositionY,
-					Client->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX,
-					Client->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY,
-					MoveDir);
+				}							
 			}							
 		}
 		break;
@@ -961,10 +958,9 @@ void CDummyClient::Disconnect(int64 ClientID)
 			ReturnClient(DisconnectClient);
 		}
 		else
-		{		
-
+		{	
 			DisconnectClient->IsCancelIO = true;
-			CancelIoEx((HANDLE)DisconnectClient->ServerSocket, NULL);
+			CancelIoEx((HANDLE)DisconnectClient->CloseSocket, NULL);						
 		}
 
 		ReturnClient(DisconnectClient);
