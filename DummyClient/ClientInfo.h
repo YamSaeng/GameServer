@@ -5,9 +5,13 @@
 #include "Message.h"
 #include "CommonProtocol.h"
 
-#define DUMMY_CLIENT_RE_CONNECT_TIME 200
+#define DUMMY_CLIENT_MAX 1000
+
+#define DUMMY_CLIENT_RE_CONNECT_TIME 300
 #define DUMMY_CLIENT_SEND_TIME 200
 #define DUMMY_CLIENT_LOGIN_TIME 500
+
+#define DUMMY_CLIENT_DISCONNECT 100
 
 struct st_IOBlock
 {
@@ -56,5 +60,5 @@ struct st_Client
 
 	int64 DummyClientLoginTime;
 	int64 ClientSendMessageTime;
-	int64 ClientReConnectTime;
+	int64 ClientReConnectTime;		
 };

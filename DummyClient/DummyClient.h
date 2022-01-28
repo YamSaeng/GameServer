@@ -4,8 +4,6 @@
 #include "ClientInfo.h"
 #include "LockFreeStack.h"
 
-#define DUMMY_CLIENT_MAX 500
-
 // 세션 인덱스 넣기 16비트 왼쪽으로 밀고 INDEX 넣음
 #define ADD_CLIENTID_INDEX(CLIENTID,INDEX)	((CLIENTID << 0x10) | ((short)INDEX))
 // 세션 아이디 얻기 
