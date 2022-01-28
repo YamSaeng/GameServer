@@ -406,8 +406,7 @@ public:
 	//------------------------------------
 	// Job ť
 	//------------------------------------
-	CLockFreeQue<st_Job*> _GameServerAuthThreadMessageQue;
-	CLockFreeQue<st_Job*> _GameServerNetworkThreadMessageQue;
+	CLockFreeQue<st_Job*> _GameServerAuthThreadMessageQue;	
 	CLockFreeQue<st_Job*> _GameServerDataBaseThreadMessageQue;
 
 	//--------------------------------------
