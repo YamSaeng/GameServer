@@ -17,6 +17,8 @@ private:
 	map<int64, CItem*> _Items;
 	map<int64, CEnvironment*> _Environments;
 
+	SRWLOCK _ChannelLock;
+
 	//-----------------
 	// 섹터 목록
 	//-----------------
@@ -37,7 +39,7 @@ public:
 	int32 _SectorCountX;
 	int32 _SectorCountY;
 
-	CChannel() {};
+	CChannel();
 	~CChannel();	
 
 	//---------------------------------------
@@ -94,6 +96,6 @@ public:
 	// - Object를 채널에 퇴장시키면서 자료구조에 제거한 후
 	// - Map에도 해당 오브젝트의 위치를 제거한다.
 	//----------------------------------------------------
-	void LeaveChannel(CGameObject* LeaveChannelGameObject);	
+	void LeaveChannel(CGameObject* LeaveChannelGameObject);			
 };
 

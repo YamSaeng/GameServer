@@ -7,6 +7,11 @@
 #include "Heap.h"
 #include "Environment.h"
 
+CChannel::CChannel()
+{
+	InitializeSRWLock(&_ChannelLock);
+}
+
 CChannel::~CChannel()
 {
 	for (int i = 0; i < _SectorCountY; i++)
@@ -74,27 +79,31 @@ vector<CSector*> CChannel::GetAroundSectors(st_Vector2Int CellPosition, int32 Ra
 {
 	CSector* Sector = GetSector(CellPosition);
 
-	int MaxY = Sector->_SectorY + Range;
-	int MinY = Sector->_SectorY - Range;
-	int MaxX = Sector->_SectorX + Range;
-	int MinX = Sector->_SectorX - Range;
-	
-	vector<CSector*> Sectors;
-
-	for (int X = MinX; X <= MaxX; X++)
+	if (Sector != nullptr)
 	{
-		for (int Y = MinY; Y <= MaxY; Y++)
-		{
-			CSector* Sector = GetSector(Y, X);
-			if (Sector == nullptr)
-			{
-				continue;
-			}
+		int MaxY = Sector->_SectorY + Range;
+		int MinY = Sector->_SectorY - Range;
+		int MaxX = Sector->_SectorX + Range;
+		int MinX = Sector->_SectorX - Range;
 
-			Sectors.push_back(Sector);
+		vector<CSector*> Sectors;
+
+		for (int X = MinX; X <= MaxX; X++)
+		{
+			for (int Y = MinY; Y <= MaxY; Y++)
+			{
+				CSector* Sector = GetSector(Y, X);		
+				if (Sector == nullptr)
+				{
+					continue;
+				}
+
+				Sectors.push_back(Sector);
+			}
 		}
-	}
-	return Sectors;
+
+		return Sectors;
+	}	
 }
 
 vector<CGameObject*> CChannel::GetAroundSectorObjects(CGameObject* Object, int32 Range, bool ExceptMe)
@@ -198,7 +207,7 @@ vector<CGameObject*> CChannel::GetFieldOfViewObjects(CGameObject* Object, int16 
 			{
 				FieldOfViewGameObjects.push_back(Item);
 			}			
-		}
+		}		
 	}
 
 	return FieldOfViewGameObjects;
@@ -325,13 +334,18 @@ void CChannel::Update()
 		
 		Monster->Update();		
 	}
-
+	
+	AcquireSRWLockExclusive(&_ChannelLock);
 	for (auto PlayerIterator : _Players)
 	{
 		CPlayer* Player = PlayerIterator.second;
 
-		Player->Update();
-	}
+		if (Player != nullptr)
+		{
+			Player->Update();
+		}			
+	}	
+	ReleaseSRWLockExclusive(&_ChannelLock);
 
 	for (auto ItemIterator : _Items)
 	{
@@ -345,11 +359,12 @@ void CChannel::Update()
 		CEnvironment* Environment = EnvironmentIterator.second;
 
 		Environment->Update();
-	}
+	}	
 }
 
 bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* ObjectSpawnPosition)
 {
+	AcquireSRWLockExclusive(&_ChannelLock);
 	bool IsEnterChannel = false;
 	// 채널 입장
 	if (EnterChannelGameObject == nullptr)
@@ -361,7 +376,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	random_device RD;
 	mt19937 Gen(RD());	
 
-	st_Vector2Int SpawnPosition;	
+	st_Vector2Int SpawnPosition;		
 
 	if (ObjectSpawnPosition != nullptr)
 	{
@@ -373,7 +388,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 		while (true)
 		{
 			uniform_int_distribution<int> RandomXPosition(-26, 63);
-			uniform_int_distribution<int> RandomYPosition(-13, 56);
+			uniform_int_distribution<int> RandomYPosition(-13, 56);		
 
 			SpawnPosition._X = RandomXPosition(Gen);
 			SpawnPosition._Y = RandomYPosition(Gen);
@@ -384,9 +399,6 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			}
 		}
 	}
-	
-	G_Logger->WriteStdOut(en_Color::RED, L"SpawnPosition Y : %d X : %d \n", SpawnPosition._Y, SpawnPosition._X);	
-
 	// 입장한 오브젝트의 타입에 따라
 	switch ((en_GameObjectType)EnterChannelGameObject->_GameObjectInfo.ObjectType)
 	{
@@ -404,14 +416,14 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY = SpawnPosition._Y;
 			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX = SpawnPosition._X;
 
-			// 플레이어 자료구조에 저장
-			_Players.insert(pair<int64, CPlayer*>(EnterChannelPlayer->_GameObjectInfo.ObjectId, EnterChannelPlayer));
+			// 플레이어 자료구조에 저장				
+			_Players.insert(pair<int64, CPlayer*>(EnterChannelPlayer->_GameObjectInfo.ObjectId, EnterChannelPlayer));			
 			
 			// 채널 저장
 			EnterChannelPlayer->_Channel = this;		
 
 			// 맵에 적용
-			IsEnterChannel = _Map->ApplyMove(EnterChannelPlayer, SpawnPosition, true, false);
+			IsEnterChannel = _Map->ApplyMove(EnterChannelPlayer, SpawnPosition);
 
 			// 섹터 얻어서 해당 섹터에도 저장
 			CSector* EnterSector = GetSector(SpawnPosition);			
@@ -493,32 +505,35 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 		}
 		break;
 	}
-
+	
+	ReleaseSRWLockExclusive(&_ChannelLock);
 	return IsEnterChannel;
 }
 
 void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 {	
+	AcquireSRWLockExclusive(&_ChannelLock);
+
 	// 채널 퇴장
 	// 컨테이너에서 제거한 후 맵에서도 제거
 	switch ((en_GameObjectType)LeaveChannelGameObject->_GameObjectInfo.ObjectType)
 	{
 	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-	case en_GameObjectType::OBJECT_MAGIC_PLAYER:	
+	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 	case en_GameObjectType::OBJECT_THIEF_PLAYER:
 	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
-	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
+	case en_GameObjectType::OBJECT_PLAYER_DUMMY:		
 		_Players.erase(LeaveChannelGameObject->_GameObjectInfo.ObjectId);
-		
+
 		_Map->ApplyLeave(LeaveChannelGameObject);		
 		break;
 	case en_GameObjectType::OBJECT_SLIME:
 	case en_GameObjectType::OBJECT_BEAR:
 		_Monsters.erase(LeaveChannelGameObject->_GameObjectInfo.ObjectId);
 
-		_Map->ApplyLeave(LeaveChannelGameObject);		
-		break;	
+		_Map->ApplyLeave(LeaveChannelGameObject);
+		break;
 	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
@@ -526,7 +541,7 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:	
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 		_Items.erase(LeaveChannelGameObject->_GameObjectInfo.ObjectId);
@@ -539,5 +554,7 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 
 		_Map->ApplyLeave(LeaveChannelGameObject);
 		break;
-	}	
+	}
+
+	ReleaseSRWLockExclusive(&_ChannelLock);
 }
