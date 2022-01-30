@@ -25,8 +25,9 @@ int main()
 	{
 		wprintf(L"DummyClientStart Time [%04d-%02d-%02d %02d:%02d:%02d] \n", NowTime.wYear, NowTime.wMonth, NowTime.wDay, NowTime.wHour, NowTime.wMinute, NowTime.wSecond);
 		wprintf(L"================================================\n");
-		wprintf(L"Connect Client : [%ld]\n", G_DummyClient._ClientCount);
 		wprintf(L"Connect Total  : [%ld]\n", G_DummyClient._ConnectionTotal);
+		wprintf(L"Connect Client : [%ld]\n", G_DummyClient._ClientCount);		
+		wprintf(L"Connect : [%ld] / Login : [%ld]\n", G_DummyClient._ConnectCount, G_DummyClient._LoginCount);
 		wprintf(L"ConnectTPS     : [%ld]\n", G_DummyClient._ConnectTPS);
 		wprintf(L"SendPacketTPS  : [%ld]\n", G_DummyClient._SendPacketTPS);
 		wprintf(L"RecvPacketTPS  : [%ld]\n", G_DummyClient._RecvPacketTPS);

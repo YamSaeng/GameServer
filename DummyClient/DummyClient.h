@@ -16,10 +16,9 @@ private:
 	enum en_DummyClientMessage
 	{
 		CHAT_MSG,
-		MOVE,
-		DISCONNECT		
+		MOVE		
 	};
-
+	
 	HANDLE _DummyClientHCP;	
 
 	bool _ConnectThreadProcEnd;
@@ -58,7 +57,9 @@ public:
 
 	LONG _SendPacketTPS;
 	LONG _RecvPacketTPS;	
-	int64 _ClientCount;
+	int64 _ClientCount = 0;
+	int64 _ConnectCount = 0;
+	int64 _LoginCount = 0;
 
 	int64 _ConnectionTotal = 0;
 	int64 _ConnectTPS = 0;
