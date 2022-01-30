@@ -9,9 +9,20 @@
 
 #define DUMMY_CLIENT_RE_CONNECT_TIME 300
 #define DUMMY_CLIENT_SEND_TIME 200
-#define DUMMY_CLIENT_LOGIN_TIME 500
+#define DUMMY_CLIENT_LOGIN_TIME 1000
 
-#define DUMMY_CLIENT_DISCONNECT 100
+#define DUMMY_CLIENT_DISCONNECT 50
+
+enum en_DummyClientNetworkState
+{
+	CONNECTED,
+	READY_LOGIN,
+	REQ_LOGIN,
+	IN_LOGIN,	
+	IN_ENTER_GAME,
+	REQ_RELEASE,
+	RELEASE
+};
 
 struct st_IOBlock
 {
@@ -24,6 +35,7 @@ struct st_Client
 	int64 ClientId;
 	SOCKET ServerSocket;	
 	SOCKET CloseSocket;
+	en_DummyClientNetworkState DummyClientState;
 	SOCKADDR_IN ServerAddr;
 
 	CRingBuffer RecvRingBuf;
@@ -45,16 +57,10 @@ struct st_Client
 	int32 Y;
 
 	WCHAR ChatMsg[256];
-
-	bool IsLogin;
-	bool IsEnterGame;
-	bool IsDisconnect;
+		
 	bool IsCancelIO;
 	
 	LONG IsReqMove;
-	bool IsReqLogin;
-
-	LONG IsConnected;		
 
 	st_GameObjectInfo MyCharacterGameObjectInfo;
 

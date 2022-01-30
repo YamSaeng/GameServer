@@ -23,9 +23,8 @@ CDummyClient::CDummyClient()
 		_ClientArray[ClientCount]->IOBlock->IOCount = 0;
 		_ClientArray[ClientCount]->AccountId = DummyClientAcountId++;
 		_ClientArray[ClientCount]->SendPacketCount = 0;
-		_ClientArray[ClientCount]->IsConnected = 0;
-		_ClientArray[ClientCount]->IsReqLogin = false;
 		_ClientArray[ClientCount]->IsReqMove = false;
+		_ClientArray[ClientCount]->DummyClientState = en_DummyClientNetworkState::RELEASE;
 		_ClientArrayIndexs.Push(ClientCount);
 	}
 
@@ -152,12 +151,9 @@ unsigned __stdcall CDummyClient::ConnectThreadProc(void* Argument)
 						DWORD Error = WSAGetLastError();
 						wprintf(L"connect Error %d \n", Error);												
 						break;
-					}					
+					}													
 
-					NewClient->IsReqLogin = 0;
 					NewClient->IsReqMove = 0;
-					NewClient->IsLogin = false;
-					NewClient->IsEnterGame = false;
 
 					Instance->_ConnectionTotal++;
 					Instance->_ConnectTPS++;
@@ -175,16 +171,16 @@ unsigned __stdcall CDummyClient::ConnectThreadProc(void* Argument)
 
 					HANDLE SocketIORet = CreateIoCompletionPort((HANDLE)NewClient->ServerSocket, Instance->_DummyClientHCP, (ULONG_PTR)NewClient, 0);
 
-					Instance->_ClientArray[NewClientIndex]->IOBlock->IOCount++;
-					Instance->_ClientArray[NewClientIndex]->IsDisconnect = false;
+					Instance->_ClientArray[NewClientIndex]->IOBlock->IOCount++;					
 					Instance->_ClientArray[NewClientIndex]->IOBlock->IsRelease = 0;
 
 					Instance->_DummyClientId++;
 
-					Instance->RecvPost(NewClient, true);					
+					Instance->RecvPost(NewClient, true);	
 
-					NewClient->IsConnected = 1;					
-
+					NewClient->DummyClientState = en_DummyClientNetworkState::CONNECTED;
+					
+					InterlockedIncrement64(&Instance->_ConnectCount);
 					InterlockedIncrement64(&Instance->_ClientCount);	
 					
 					Sleep(0);
@@ -212,98 +208,97 @@ unsigned __stdcall CDummyClient::SendThreadProc(void* Argument)
 		{
 			for (int32 i = 0; i < DUMMY_CLIENT_MAX; i++)
 			{				
-				if (Instance->_ClientArray[i]->IsConnected == 1 && Instance->_ClientArray[i]->IsDisconnect == false)
+				if (Instance->_ClientArray[i]->DummyClientState == en_DummyClientNetworkState::IN_ENTER_GAME 
+					&& Instance->_ClientArray[i]->ClientSendMessageTime < GetTickCount64())
 				{
-					if (Instance->_ClientArray[i]->IsLogin == true
-						&& Instance->_ClientArray[i]->IsEnterGame == true
-						&& Instance->_ClientArray[i]->ClientSendMessageTime < GetTickCount64())
+					Instance->_ClientArray[i]->ClientSendMessageTime = GetTickCount64() + DUMMY_CLIENT_SEND_TIME;
+
+					random_device Seed;
+					default_random_engine Eng(Seed());
+
+					float DisconnectPoint = DUMMY_CLIENT_DISCONNECT / 1000.0f;
+					bernoulli_distribution DisconnectPointCheck(DisconnectPoint);
+					bool IsDisconnect = DisconnectPointCheck(Eng);
+
+					CMessage* RandPacket = CMessage::Alloc();
+					RandPacket->Clear();
+
+					if (IsDisconnect)
 					{
-						Instance->_ClientArray[i]->ClientSendMessageTime = GetTickCount64() + DUMMY_CLIENT_SEND_TIME;
+						Instance->_ClientArray[i]->DummyClientState = en_DummyClientNetworkState::REQ_RELEASE;
 
-						random_device Seed;
-						default_random_engine Eng(Seed());
+						Instance->_ClientArray[i]->ServerSocket = INVALID_SOCKET;						
 
-						float DisconnectPoint = DUMMY_CLIENT_DISCONNECT / 1000.0f;
-						bernoulli_distribution DisconnectPointCheck(DisconnectPoint);
-						bool IsDisconnect = DisconnectPointCheck(Eng);
+						Instance->Disconnect(Instance->_ClientArray[i]->ClientId);
 
-						CMessage* RandPacket = CMessage::Alloc();
-						RandPacket->Clear();
-
-						if (IsDisconnect)
-						{
-							Instance->_ClientArray[i]->ServerSocket = INVALID_SOCKET;
-							Instance->_ClientArray[i]->IsDisconnect = true;
-
-							Instance->Disconnect(Instance->_ClientArray[i]->ClientId);
-
-							InterlockedIncrement64(&Instance->_DisconnectTPS);
-						}
-						else
-						{
-							random_device RandomSeed;
-							mt19937 Gen(RandomSeed());
-
-							uniform_int_distribution<int> RandomMessageTypeCreate(0, 1);
-							uniform_int_distribution<int> RandomDirCreate(0, 3);
-
-							int32 RandMessageType = RandomMessageTypeCreate(Gen);
-							int8 RandDir;
-
-							wstring SendChatMsg;
-							int8 DummyChatLen;
-
-							switch ((en_DummyClientMessage)RandMessageType)
-							{
-							case en_DummyClientMessage::CHAT_MSG:
-								*RandPacket << (int16)en_PACKET_C2S_MESSAGE;
-								*RandPacket << Instance->_ClientArray[i]->AccountId;
-								*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId;
-
-								swprintf_s(Instance->_ClientArray[i]->ChatMsg, sizeof(Instance->_ClientArray[i]->ChatMsg), L"[%s]가 [%d]를 보냈습니다.", Instance->_ClientArray[i]->LoginId.c_str(), Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId, RandMessageType * i);
-								SendChatMsg = Instance->_ClientArray[i]->ChatMsg;
-
-								//wprintf(L"[%s]가 [%d]를 보냈습니다.\n", G_ClientArray[i].ChatMsg);
-
-								DummyChatLen = (int8)(SendChatMsg.length() * 2);
-								*RandPacket << DummyChatLen;
-								RandPacket->InsertData(SendChatMsg.c_str(), DummyChatLen);
-
-								Instance->SendPacket(Instance->_ClientArray[i]->ClientId, RandPacket);
-								break;
-							case en_DummyClientMessage::MOVE:	
-								if (Instance->_ClientArray[i]->IsReqMove == 0)
-								{
-									InterlockedExchange(&Instance->_ClientArray[i]->IsReqMove, 1);									
-
-									*RandPacket << (int16)en_PACKET_C2S_MOVE;
-									*RandPacket << Instance->_ClientArray[i]->AccountId;
-									*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId;
-									*RandPacket << (int8)Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.State;
-									*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX;
-									*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY;
-									*RandPacket << (int8)Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.MoveDir;
-
-									RandDir = RandomDirCreate(Gen);
-
-									*RandPacket << (int8)RandDir;
-																		
-									Instance->SendPacket(Instance->_ClientArray[i]->ClientId, RandPacket);
-								}									
-								break;
-							default:
-								break;
-							}
-						}
-
-						RandPacket->Free();
+						InterlockedIncrement64(&Instance->_DisconnectTPS);
 					}
 					else
 					{
-						if (Instance->_ClientArray[i]->IsReqLogin == false)
-						{
-							Instance->_ClientArray[i]->IsReqLogin = true;
+						random_device RandomSeed;
+						mt19937 Gen(RandomSeed());
 
+						uniform_int_distribution<int> RandomMessageTypeCreate(0, 1);
+						uniform_int_distribution<int> RandomDirCreate(0, 2);
+
+						int32 RandMessageType = RandomMessageTypeCreate(Gen);
+						int8 RandDir;
+
+						wstring SendChatMsg;
+						int8 DummyChatLen;
+
+						switch ((en_DummyClientMessage)RandMessageType)
+						{
+						case en_DummyClientMessage::CHAT_MSG:
+							*RandPacket << (int16)en_PACKET_C2S_MESSAGE;
+							*RandPacket << Instance->_ClientArray[i]->AccountId;
+							*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId;
+
+							swprintf_s(Instance->_ClientArray[i]->ChatMsg, sizeof(Instance->_ClientArray[i]->ChatMsg), L"[%s]가 [%d]를 보냈습니다.", Instance->_ClientArray[i]->LoginId.c_str(), Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId, RandMessageType * i);
+							SendChatMsg = Instance->_ClientArray[i]->ChatMsg;
+
+							//wprintf(L"[%s]가 [%d]를 보냈습니다.\n", G_ClientArray[i].ChatMsg);
+
+							DummyChatLen = (int8)(SendChatMsg.length() * 2);
+							*RandPacket << DummyChatLen;
+							RandPacket->InsertData(SendChatMsg.c_str(), DummyChatLen);
+
+							Instance->SendPacket(Instance->_ClientArray[i]->ClientId, RandPacket);
+							break;
+						case en_DummyClientMessage::MOVE:
+							if (Instance->_ClientArray[i]->IsReqMove == 0)
+							{
+								InterlockedExchange(&Instance->_ClientArray[i]->IsReqMove, 1);
+
+								*RandPacket << (int16)en_PACKET_C2S_MOVE;
+								*RandPacket << Instance->_ClientArray[i]->AccountId;
+								*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId;
+								*RandPacket << (int8)Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.State;
+								*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX;
+								*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY;
+								*RandPacket << (int8)Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.MoveDir;
+
+								RandDir = RandomDirCreate(Gen);
+
+								*RandPacket << (int8)RandDir;
+
+								Instance->SendPacket(Instance->_ClientArray[i]->ClientId, RandPacket);
+							}
+							break;						
+						default:
+							break;
+						}
+					}
+
+					RandPacket->Free();
+				}
+				else
+				{
+					if (Instance->_ClientArray[i]->DummyClientState == en_DummyClientNetworkState::READY_LOGIN)
+					{
+						if (Instance->_ClientArray[i]->DummyClientLoginTime < GetTickCount64())
+						{
+							Instance->_ClientArray[i]->DummyClientState = en_DummyClientNetworkState::REQ_LOGIN;
 							bool IsDummy = true;
 
 							// 로그인 패킷 전송
@@ -321,7 +316,7 @@ unsigned __stdcall CDummyClient::SendThreadProc(void* Argument)
 
 							Instance->SendPacket(Instance->_ClientArray[i]->ClientId, ReqGameServerLoginPacket);
 							ReqGameServerLoginPacket->Free();
-						}						
+						}
 					}
 				}
 			}	
@@ -344,7 +339,21 @@ void CDummyClient::ReleaseClient(st_Client* ReleaseClient)
 		return;
 	}
 
-	ReleaseClient->IsConnected = 0;
+	if (ReleaseClient->DummyClientState == CONNECTED
+		|| ReleaseClient->DummyClientState == READY_LOGIN
+		|| ReleaseClient->DummyClientState == REQ_LOGIN)
+	{
+		InterlockedDecrement64(&_ConnectCount);
+	}
+	else if(ReleaseClient->DummyClientState == IN_LOGIN
+		|| ReleaseClient->DummyClientState == IN_ENTER_GAME
+		|| ReleaseClient->DummyClientState == REQ_RELEASE
+		|| ReleaseClient->DummyClientState == RELEASE)
+	{
+		InterlockedDecrement64(&_LoginCount);
+	}	
+
+	ReleaseClient->DummyClientState = en_DummyClientNetworkState::RELEASE;
 
 	ReleaseClient->RecvRingBuf.ClearBuffer();
 
@@ -384,7 +393,7 @@ void CDummyClient::ReleaseClient(st_Client* ReleaseClient)
 
 	_ClientArrayIndexs.Push(GET_CLIENTINDEX(ReleaseClient->ClientId));
 
-	//SetEvent(_ConnectThreadWakeEvent);
+	SetEvent(_ConnectThreadWakeEvent);
 }
 
 void CDummyClient::SendPost(st_Client* SendClient)
@@ -589,18 +598,22 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 			swprintf_s(DummyCharacterName, sizeof(DummyCharacterName), L"Dummy_Player %d", RecvClient->AccountId);
 
 			RecvClient->LoginId = DummyCharacterName;
-			RecvClient->DummyClientLoginTime = GetTickCount64() + DUMMY_CLIENT_LOGIN_TIME;			
+			RecvClient->DummyClientLoginTime = GetTickCount64() + DUMMY_CLIENT_LOGIN_TIME;	
+			RecvClient->DummyClientState = en_DummyClientNetworkState::READY_LOGIN;
 		}
 		break;
 		case en_PACKET_S2C_GAME_RES_LOGIN:
 		{
 			bool LoginSuccess = false;
-			*Packet >> LoginSuccess;
-
-			RecvClient->IsLogin = LoginSuccess;
+			*Packet >> LoginSuccess;			
 
 			if (LoginSuccess == true)
 			{
+				InterlockedDecrement64(&_ConnectCount);
+				InterlockedIncrement64(&_LoginCount);
+
+				RecvClient->DummyClientState = en_DummyClientNetworkState::IN_LOGIN;
+
 				int8 PlayerCount;
 				*Packet >> PlayerCount;
 
@@ -805,12 +818,10 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 				*Packet >> CharacterOwnerObjectType;
 				*Packet >> RecvClient->MyCharacterGameObjectInfo.PlayerSlotIndex;
 
-				RecvClient->IsEnterGame = true;
+				RecvClient->DummyClientState = en_DummyClientNetworkState::IN_ENTER_GAME;
 			}
 			else 
 			{
-				RecvClient->IsEnterGame = false;
-
 				CMessage* ReqEnterGamePacket = CMessage::Alloc();
 				ReqEnterGamePacket->Clear();
 
