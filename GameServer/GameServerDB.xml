@@ -125,6 +125,7 @@
     <Param name="@AccountId" type="BigInt"/>
     <Body>
       <![CDATA[
+	    SET NOCOUNT ON
         SELECT PlayerDBId,
         PlayerName,
         PlayerType,
@@ -163,6 +164,7 @@
     <Param name="@CharacterName" type="nvarchar(20)"/>
     <Body>
       <![CDATA[
+	    SET NOCOUNT ON
         SELECT * FROM [dbo].[Player] WHERE EXISTS (SELECT PlayerName FROM [dbo].[Player] WHERE PlayerName = (@CharacterName))
       ]]>
     </Body>
@@ -200,6 +202,7 @@
     <Param name="@TotalExperience" type="BigInt"/>
     <Body>
       <![CDATA[
+	    SET NOCOUNT ON
         INSERT INTO [dbo].[Player]
         VALUES (
         (@AccountId),
@@ -240,6 +243,7 @@
     <Param name="@PlayerIndex" type="TinyInt"/>
     <Body>
       <![CDATA[
+	    SET NOCOUNT ON
         SELECT PlayerDBId
         FROM [dbo].[Player]
         WHERE AccountDBId = (@AccountDBId) AND PlayerIndex = (@PlayerIndex)
@@ -253,6 +257,7 @@
     <Param name="@PlayerDBId" type="BigInt"/>    
     <Body>
       <![CDATA[
+	    SET NOCOUNT ON
         INSERT INTO [dbo].[Gold] VALUES ((@AccountDBId),(@PlayerDBId),(0),(0),(0))
       ]]>
     </Body>
@@ -267,6 +272,7 @@
     <Param name="@BronzeCount" type="SmallInt"/>
     <Body>
       <![CDATA[
+	    SET NOCOUNT ON
         UPDATE [dbo].[Gold]
         SET GoldCoin = (@GoldCount), SliverCoin = (@SliverCount), BronzeCoin = (@BronzeCount)
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
@@ -280,6 +286,7 @@
     <Param name="@PlayerDBId" type="BigInt"/>
     <Body>
       <![CDATA[
+	    SET NOCOUNT ON
         SELECT GoldCoin, SliverCoin, BronzeCoin
         FROM [dbo].[Gold]
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
@@ -304,6 +311,7 @@
     <Param name="@ThumbnailImagePath" type="nvarchar(100)"/>
     <Body>
       <![CDATA[
+	     SET NOCOUNT ON
          INSERT INTO [dbo].[Item]
          VALUES ((@ItemUse), (@IsQuickSlotUse), (@ItemLargeCategory), (@ItemMediumCategory), (@ItemSmallCategory), (@ItemName), (@ItemMinDamage), (@ItemMaxDamage), (@ItemDefence), (@ItemMaxCount), (@ItemCount), (@IsEquipped), (@ThumbnailImagePath))
        ]]>
@@ -314,6 +322,7 @@
   <Procedure name="spItemDBIdGet">
     <Body>
       <![CDATA[
+	    SET NOCOUNT ON
         SELECT IDENT_CURRENT('Item')
       ]]>
     </Body>
@@ -328,6 +337,7 @@
     <Param name="@OwnerPlayerDBId" type="BigInt"/>    
     <Body>
       <![CDATA[
+	    SET NOCOUNT ON
         INSERT INTO [dbo].[Inventory]
         VALUES (0, 0, 0, 0, (@ItemName), 0, (@SlotIndex), 0, 0, 0, 0, 0, (@ThumbnailImagePath), (@OwnerAccountDBId), (@OwnerPlayerDBId))
       ]]>
@@ -353,6 +363,7 @@
     <Param name="@OwnerPlayerDBId" type="BigInt"/>    
     <Body>
       <![CDATA[
+	    SET NOCOUNT ON
         UPDATE [dbo].[Inventory] 
         SET IsQuickSlotUse = (@IsQuickSlotUse), ItemLargeCategory = (@ItemLargeCategory),
         ItemMediumCategory = (@ItemMediumCategory), ItemSmallCategory = (@ItemSmallCategory),
@@ -374,6 +385,7 @@
     <Param name="@SlotIndex" type="TinyInt"/>
     <Body>
       <![CDATA[
+	    SET NOCOUNT ON
         UPDATE [dbo].[Inventory]
         SET ItemCount = (@ItemCount)
         WHERE ItemSmallCategory = (@ItemSmallCategory) AND SlotIndex = (@SlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
@@ -388,6 +400,7 @@
     <Param name="@SlotIndex" type="TinyInt"/>
     <Body>      
       <![CDATA[
+	    SET NOCOUNT ON
         SELECT IsQuickSlotUse, ItemLargeCategory, ItemMediumCategory, ItemSmallCategory, ItemName, MinDamage, MaxDamage, Defence, MaxCount, ItemCount, IsEquipped, ThumbnailImagePath 
         FROM [dbo].[Inventory] 
         WHERE OwnerAccountDBId = (@AccountDBId) AND OwnerPlayerDBId = (@PlayerDBId) AND SlotIndex = (@SlotIndex)
@@ -427,6 +440,7 @@
     <Param name="@BItemSlotIndex" type="TinyInt"/>
     <Body>
       <![CDATA[
+	    SET NOCOUNT ON
         UPDATE [dbo].[Inventory] SET IsQuickSlotUse = (@AIsQuickSlotUse), ItemLargeCategory = (@AItemLargeCategory), ItemMediumCategory = (@AItemMediumCategory), ItemSmallCategory = (@AItemSmallCategory), ItemName = (@AItemName), MinDamage = (@AMinDamage), MaxDamage = (@AMaxDamage), Defence = (@ADefence), MaxCount = (@AMaxCount), ItemCount = (@AItemCount), IsEquipped = (@AItemIsEquipped), ThumbnailImagePath = (@AItemThumbnailImagePath)  WHERE SlotIndex = (@AItemSlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
         UPDATE [dbo].[Inventory] SET IsQuickSlotUse = (@BIsQuickSlotUse), ItemLargeCategory = (@BItemLargeCategory), ItemMediumCategory = (@BItemMediumCategory), ItemSmallCategory = (@BItemSmallCategory), ItemName = (@BItemName), MinDamage = (@BMinDamage), MaxDamage = (@BMaxDamage), Defence = (@BDefence), MaxCount = (@BMaxCount), ItemCount = (@BItemCount), IsEquipped = (@BItemIsEquipped), ThumbnailImagePath = (@BItemThumbnailImagePath)  WHERE SlotIndex = (@BItemSlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
       ]]>
@@ -439,6 +453,7 @@
     <Param name="@PlayerDBId" type="BigInt"/>
     <Body>
       <![CDATA[
+	    SET NOCOUNT ON
         SELECT ItemLargeCategory, ItemMediumCategory, ItemSmallCategory, ItemName, MinDamage, MaxDamage, Defence, MaxCount, ItemCount, SlotIndex, IsEquipped, ThumbnailImagePath
         FROM [dbo].[Inventory]
         WHERE OwnerAccountDBId = (@AccountDBId) AND OwnerPlayerDBId = (@PlayerDBId)
@@ -452,6 +467,7 @@
     <Param name="@ItemUse" type="bit"/>
     <Body>
       <![CDATA[
+	    SET NOCOUNT ON
         UPDATE [dbo].[Item] SET ItemUse = (@ItemUse)
         WHERE ItemDBId = (@ItemDBId)
       ]]>
@@ -467,6 +483,7 @@
     <Param name="@InitItemThumbnailImagePath" type="nvarchar(100)"/>
     <Body>
       <![CDATA[
+	    SET NOCOUNT ON
         UPDATE [dbo].[Inventory]
         SET ItemLargeCategory = 0, ItemMediumCategory = 0, ItemSmallCategory = 0, ItemName = (@InitItemName), ItemCount = 0, IsEquipped = 0, MinDamage = 0, MaxDamage = 0, Defence = 0, MaxCount = 0, ThumbnailImagePath = (@InitItemThumbnailImagePath)
         WHERE SlotIndex = (@InitSlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
@@ -483,6 +500,7 @@
     <Param name="@IsEquipped" type="bit"/>
     <Body>
       <![CDATA[
+	    SET NOCOUNT ON
         UPDATE [dbo].[Inventory] SET ItemCount = (@ItemCount), IsEquipped = (@IsEquipped) WHERE OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId) And SlotIndex = (@SlotIndex)
       ]]>
     </Body>
@@ -494,6 +512,7 @@
     <Param name="@PlayerDBId" type="BigInt"/>
     <Body>
       <![CDATA[
+	    SET NOCOUNT ON
         SELECT IsQuickSlotUse, SkillLargeCategory, SkillMediumCategory, SkillType, SkillLevel
         FROM [dbo].[Skill]
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
@@ -512,6 +531,7 @@
     <Param name="@SkillLevel" type="TinyInt"/>        
     <Body>
       <![CDATA[
+	    SET NOCOUNT ON
         INSERT INTO [dbo].[Skill] VALUES ((@AccountDBId), (@PlayerDBId), (@IsQuickSlotUse), (@SkillLargeCategory), (@SkillMediumCategory), (@SkillType), (@SkillLevel))
       ]]>
     </Body>
@@ -529,7 +549,8 @@
     <Param name="@SkillType" type="SmallInt"/>
     <Param name="@SkillLevel" type="TinyInt"/>    
     <Body>
-      <![CDATA[        
+      <![CDATA[   
+	    SET NOCOUNT ON
         INSERT INTO [dbo].[QuickSlotBar] VALUES ((@AccountDBId), (@PlayerDBId), (@QuickSlotBarIndex), (@QuickSlotBarSlotIndex), (@QuickSlotKey), (@SkillLargeCategory), (@SkillMediumCategory), (@SkillType), (@SkillLevel))
       ]]>
     </Body>   
@@ -548,6 +569,7 @@
     <Param name="@SkillLevel" type="TinyInt"/>    
     <Body>
       <![CDATA[
+	    SET NOCOUNT ON
         UPDATE [dbo].[QuickSlotBar] SET QuickSlotKey = (@QuickSlotKey), SkillLargeCategory = (@SkillLargeCategory), SkillMediumCategory = (@SkillMediumCategory), SkillType = (@SkillType), SkillLevel = (@SkillLevel)
         WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
@@ -560,6 +582,7 @@
     <Param name="@PlayerDBId" type="BigInt"/>    
     <Body>
       <![CDATA[
+	    SET NOCOUNT ON
         SELECT QuickSlotBarIndex, QuickSlotBarSlotIndex, QuickSlotKey, SkillLargeCategory, SkillMediumCategory, SkillType, SkillLevel
         FROM [dbo].[QuickSlotBar]
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
@@ -575,6 +598,7 @@
     <Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
     <Body>
       <![CDATA[
+	    SET NOCOUNT ON
         SELECT QuickSlotKey, SkillLargeCategory, SkillMediumCategory, SkillType, SkillLevel
         FROM [dbo].[QuickSlotBar]
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId) AND QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex)
@@ -601,6 +625,7 @@
     <Param name="@BQuickSlotSkillLevel" type="TinyInt"/>    
     <Body>
       <![CDATA[
+	    SET NOCOUNT ON
         UPDATE [dbo].[QuickSlotBar] SET SkillLargeCategory = (@ASkillLargeCategory), SkillMediumCategory = (@ASkillMediumCategory), SkillType = (@AQuickSlotSkillType), SkillLevel = (@AQuickSlotSkillLevel) WHERE QuickSlotBarIndex = (@AQuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@AQuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
         UPDATE [dbo].[QuickSlotBar] SET SkillLargeCategory = (@BSkillLargeCategory), SkillMediumCategory = (@BSkillMediumCategory), SkillType = (@BQuickSlotSkillType), SkillLevel = (@BQuickSlotSkillLevel) WHERE QuickSlotBarIndex = (@BQuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@BQuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
@@ -617,6 +642,7 @@
     <Param name="@QuickSlotSkillImagePath" type="nvarchar(100)"/>
     <Body>
       <![CDATA[
+	    SET NOCOUNT ON
         UPDATE [dbo].[QuickSlotBar]
         SET SkillLargeCategory = 0, SkillMediumCategory = 0, SkillType = 0, SkillLevel = 0
         WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
@@ -651,6 +677,7 @@
     <Param name="@TotalExperience" type="BigInt"/>
     <Body>
       <![CDATA[
+	    SET NOCOUNT ON
         UPDATE [dbo].[Player]
         SET Level = (@Level),
         MaxHP = (@MaxHP),
