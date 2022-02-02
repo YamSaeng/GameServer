@@ -137,7 +137,7 @@ unsigned __stdcall CDummyClient::ConnectThreadProc(void* Argument)
 
 			while (Instance->_ClientArrayIndexs.Pop(&NewClientIndex))
 			{
-				st_Client* NewClient = Instance->_ClientArray[NewClientIndex];
+				st_Client* NewClient = Instance->_ClientArray[NewClientIndex];			
 
 				if (NewClient->ClientReConnectTime < GetTickCount64())
 				{
@@ -152,6 +152,8 @@ unsigned __stdcall CDummyClient::ConnectThreadProc(void* Argument)
 						wprintf(L"connect Error %d \n", Error);												
 						break;
 					}													
+
+					NewClient->DummyClientState = en_DummyClientNetworkState::CONNECTED;
 
 					NewClient->IsReqMove = 0;
 
@@ -176,9 +178,7 @@ unsigned __stdcall CDummyClient::ConnectThreadProc(void* Argument)
 
 					Instance->_DummyClientId++;
 
-					Instance->RecvPost(NewClient, true);	
-
-					NewClient->DummyClientState = en_DummyClientNetworkState::CONNECTED;
+					Instance->RecvPost(NewClient, true);						
 					
 					InterlockedIncrement64(&Instance->_ConnectCount);
 					InterlockedIncrement64(&Instance->_ClientCount);	
@@ -609,16 +609,16 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 
 			if (LoginSuccess == true)
 			{
-				InterlockedDecrement64(&_ConnectCount);
-				InterlockedIncrement64(&_LoginCount);
-
-				RecvClient->DummyClientState = en_DummyClientNetworkState::IN_LOGIN;
-
 				int8 PlayerCount;
 				*Packet >> PlayerCount;
 
 				if (PlayerCount > 0)
 				{
+					InterlockedDecrement64(&_ConnectCount);
+					InterlockedIncrement64(&_LoginCount);
+
+					RecvClient->DummyClientState = en_DummyClientNetworkState::IN_LOGIN;
+
 					*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectId;
 
 					int8 CharacterNameLen;
@@ -818,7 +818,7 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 				*Packet >> CharacterOwnerObjectType;
 				*Packet >> RecvClient->MyCharacterGameObjectInfo.PlayerSlotIndex;
 
-				RecvClient->DummyClientState = en_DummyClientNetworkState::IN_ENTER_GAME;
+				RecvClient->DummyClientState = en_DummyClientNetworkState::IN_ENTER_GAME;				
 			}
 			else 
 			{
@@ -837,6 +837,9 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 			}
 		}
 		break;
+		case en_PACKET_S2C_CHARACTER_INFO:
+			RecvClient->DummyClientState = en_DummyClientNetworkState::IN_ENTER_GAME;
+			break;
 		case en_PACKET_S2C_MESSAGE:
 			break;
 		case en_PACKET_S2C_MOVE:
