@@ -20,9 +20,9 @@ class CGlobal
 public:
 	CGlobal()
 	{
-		setlocale(LC_ALL, "Korean");		
+		setlocale(LC_ALL, "Korean");
 		G_DBConnectionPool = new CDBConnectionPool();
-		G_DBConnectionPool->Init(800);	
+		G_DBConnectionPool->Init(1000);
 		G_Logger = new CLog();
 		G_Datamanager = new CDataManager();
 		// 아이템 데이터 파싱
@@ -37,17 +37,17 @@ public:
 		// 플레이어 캐릭터 스테이터스 데이터 파싱
 		G_Datamanager->LoadDataPlayerCharacterStatus(L"PlayerCharacterStatus.json");
 		// 몬스터 데이터 파싱
-		G_Datamanager->LoadDataMonster(L"MonsterData.json");		
+		G_Datamanager->LoadDataMonster(L"MonsterData.json");
 		// 환경 오브젝트 데이터 파싱
 		G_Datamanager->LoadDataEnvironment(L"EnvironmentData.json");
 		// 제작템 데이터 파싱
 		G_Datamanager->LoadDataCrafting(L"CraftingData.json");
 		G_Datamanager->LoadDataLevel(L"CharacterLevelingData.json");
-		
-		G_ChannelManager = new CChannelManager();	
+
+		G_ChannelManager = new CChannelManager();
 		G_ChannelManager->Add(1);
 
-		G_ObjectManager = new CObjectManager();						
+		G_ObjectManager = new CObjectManager();
 	}
 
 	~CGlobal()

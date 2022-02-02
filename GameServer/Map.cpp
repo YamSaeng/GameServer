@@ -220,7 +220,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 		if (_ObjectsInfos[Y][X] == GameObject)
 		{
 			_ObjectsInfos[Y][X] = nullptr;
-		}
+		}	
 
 		// 목적지 위치 구해주고
 		X = DestPosition._X - _Left;
@@ -425,8 +425,8 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 			ResMyObjectDeSpawnPacket->Free();
 		}		
 
-		MovePlayer->_FieldOfViewObjects = CurrentFieldOfViewObjects;
-		
+		MovePlayer->_FieldOfViewObjects = CurrentFieldOfViewObjects;	
+
 		for (CSector* AroundSector : AroundSectors)
 		{
 			AroundSector->GetSectorUnLock();
@@ -562,8 +562,8 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 			ResMyObjectDeSpawnPacket->Free();
 		}		
 
-		MoveMonster->_FieldOfViewPlayers = CurrentFieldOfViewObjects;
-		
+		MoveMonster->_FieldOfViewPlayers = CurrentFieldOfViewObjects;		
+
 		for (CSector* AroundSector : AroundSectors)
 		{
 			AroundSector->GetSectorUnLock();
@@ -685,7 +685,7 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 	Sector->Remove(GameObject);
 
 	int X = PositionInfo.PositionX - _Left;
-	int Y = _Down - PositionInfo.PositionY;
+	int Y = _Down - PositionInfo.PositionY;	
 
 	// 맵에서 제거
 	if (_ObjectsInfos[Y][X] == GameObject)
@@ -693,7 +693,7 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 		_ObjectsInfos[Y][X] = nullptr;
 	}
 	else
-	{
+	{	
 		if (GameObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE)
 		{
 			//CRASH("ApplyLeave 삭제하려는 오브젝트가 저장되어 있는 오브젝트와 다름");

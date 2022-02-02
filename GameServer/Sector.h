@@ -15,7 +15,7 @@ private:
 	set<CItem*> _Items;
 	set<CEnvironment*> _Environment;
 
-	SRWLOCK _SectorLock;
+	SRWLOCK _SectorLock;	
 public:
 	// ¼½ÅÍ ÁÂÇ¥
 	int32 _SectorY;

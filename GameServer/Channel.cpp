@@ -339,11 +339,7 @@ void CChannel::Update()
 	for (auto PlayerIterator : _Players)
 	{
 		CPlayer* Player = PlayerIterator.second;
-
-		if (Player != nullptr)
-		{
-			Player->Update();
-		}			
+		Player->Update();					
 	}	
 	ReleaseSRWLockExclusive(&_ChannelLock);
 
@@ -390,8 +386,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			uniform_int_distribution<int> RandomXPosition(-26, 63);
 			uniform_int_distribution<int> RandomYPosition(-13, 56);		
 
-			SpawnPosition._X = RandomXPosition(Gen);
-			SpawnPosition._Y = RandomYPosition(Gen);
+			SpawnPosition._X =  RandomXPosition(Gen);
+			SpawnPosition._Y =  RandomYPosition(Gen);
 						
 			if (_Map->Cango(SpawnPosition) == true)
 			{
