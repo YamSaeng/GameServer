@@ -1,7 +1,7 @@
 #pragma once
 #include "RingBuffer.h"
 #include "LockFreeQue.h"
-#include "Message.h"
+#include "GameServerMessage.h"
 #include "pch.h"
 
 #define SESSION_CHARACTER_MAX 3
@@ -24,7 +24,8 @@ struct st_Session
 	SOCKADDR_IN ClientAddr; // 접속한 클라 주소
 
 	CRingBuffer RecvRingBuf;
-	CLockFreeQue<CMessage*> SendRingBuf;
+	CLockFreeQue<CMessage*> SendRingBuf;	
+	CLockFreeQue<CGameServerMessage*> DBQue;
 
 	OVERLAPPED RecvOverlapped = {}; // WSARecv 통지용
 	OVERLAPPED SendOverlapped = {}; // WSASend 통지용
@@ -34,6 +35,9 @@ struct st_Session
 
 	CMessage* SendPacket[SESSION_SEND_PACKET_MAX]; //세션이 보내는 패킷을 담아둘 배열
 	LONG SendPacketCount; //해당 세션이 몇개의 패킷을 보내고 있는지 기록해주는 변수
+		
+	int64 IsDBExecute;  // Session DB 큐 작업 중인지 아닌지 확인
+	int64 DBReserveCount; // Session 남은 DB 큐 작업
 
 	wstring LoginId;
 	wstring CreateCharacterName;
@@ -61,5 +65,5 @@ struct st_Session
 	int32 MyPlayerIndex;	
 
 	//char DebugArray[100000];
-	//int DebugArrayCount;
+	//int DebugArrayCount;	
 };
