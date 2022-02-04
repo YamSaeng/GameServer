@@ -1690,6 +1690,8 @@ struct st_ItemInfo
 {
 	int64 ItemDBId;				// 아이템 DB에 저장되어 있는 ID		
 	bool ItemIsQuickSlotUse;        // 퀵슬롯에 등록되어 있는지 여부 
+	int32 Width;			// 아이템 너비
+	int32 Height;			// 아이템 높이
 	en_LargeItemCategory ItemLargeCategory; // 아이템 대분류
 	en_MediumItemCategory ItemMediumCategory; // 아이템 중분류
 	en_SmallItemCategory ItemSmallCategory;		// 아이템 소분류
@@ -1708,6 +1710,8 @@ struct st_ItemInfo
 	{
 		ItemDBId = 0;
 		ItemIsQuickSlotUse = false;
+		Width = 0;
+		Height = 0;
 		ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_NONE;
 		ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
 		ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
