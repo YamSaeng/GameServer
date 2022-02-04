@@ -12,6 +12,8 @@ enum en_ObjectDataType
 struct st_ItemData
 {
 	string ItemName;
+	int32 ItemWidth;
+	int32 ItemHeight;
 	en_LargeItemCategory LargeItemCategory;
 	en_MediumItemCategory MediumItemCategory;
 	en_SmallItemCategory SmallItemCategory; 

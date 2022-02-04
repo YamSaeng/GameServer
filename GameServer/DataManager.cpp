@@ -19,6 +19,8 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string ItemObjectType = WeaponListFiled["ItemObjectType"].GetString();
 			string ItemExplain = WeaponListFiled["ItemExplain"].GetString();
 			string ItemName = WeaponListFiled["ItemName"].GetString();
+			int32 ItemWidth = WeaponListFiled["ItemWidth"].GetInt();
+			int32 ItemHeight = WeaponListFiled["ItemHeight"].GetInt();
 			int ItemMinDamage = WeaponListFiled["ItemMinDamage"].GetInt();
 			int ItemMaxDamage = WeaponListFiled["ItemMaxDamage"].GetInt();
 			string ImageFilePath = WeaponListFiled["ImageFilePath"].GetString();
@@ -44,6 +46,8 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 
 			WeaponItemData->ItemExplain = ItemExplain;
 			WeaponItemData->ItemName = ItemName;
+			WeaponItemData->ItemWidth = ItemWidth;
+			WeaponItemData->ItemHeight = ItemHeight;
 			WeaponItemData->ItemMinDamage = ItemMinDamage;
 			WeaponItemData->ItemMaxDamage = ItemMaxDamage;
 			WeaponItemData->ItemDefence = 0;
@@ -65,6 +69,8 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string ItemObjectType = ArmorListFiled["ItemObjectType"].GetString();
 			string ItemExplain = ArmorListFiled["ItemExplain"].GetString();
 			string ItemName = ArmorListFiled["ItemName"].GetString();
+			int32 ItemWidth = ArmorListFiled["ItemWidth"].GetInt();
+			int32 ItemHeight = ArmorListFiled["ItemHeight"].GetInt();
 			int ItemDefence = ArmorListFiled["ItemDefence"].GetInt();
 			string ImageFilePath = ArmorListFiled["ImageFilePath"].GetString();
 
@@ -113,6 +119,8 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 
 			ArmorItemData->ItemExplain = ItemExplain;
 			ArmorItemData->ItemName = ItemName;
+			ArmorItemData->ItemWidth = ItemWidth;
+			ArmorItemData->ItemHeight = ItemHeight;
 			ArmorItemData->ItemMinDamage = 0;
 			ArmorItemData->ItemMaxDamage = 0;
 			ArmorItemData->ItemDefence = ItemDefence;
@@ -133,6 +141,8 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string ItemObjectType = PotionDataListFiled["ItemObjectType"].GetString();
 			string ItemExplain = PotionDataListFiled["ItemExplain"].GetString();
 			string ItemName = PotionDataListFiled["ItemName"].GetString();
+			int32 ItemWidth = PotionDataListFiled["ItemWidth"].GetInt();
+			int32 ItemHeight = PotionDataListFiled["ItemHeight"].GetInt();
 			int ItemMaxCount = PotionDataListFiled["ItemMaxCount"].GetInt();
 			string ImageFilePath = PotionDataListFiled["ImageFilePath"].GetString();
 
@@ -157,6 +167,8 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 
 			PotionItemData->ItemExplain = ItemExplain;
 			PotionItemData->ItemName = ItemName;
+			PotionItemData->ItemWidth = ItemWidth;
+			PotionItemData->ItemHeight = ItemHeight;
 			PotionItemData->ItemMinDamage = 0;
 			PotionItemData->ItemMaxDamage = 0;
 			PotionItemData->ItemDefence = 0;
@@ -174,6 +186,8 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string ItemObjectType = SkillBookDataListFiled["ItemObjectType"].GetString();
 			string ItemExplain = SkillBookDataListFiled["ItemExplain"].GetString();
 			string ItemName = SkillBookDataListFiled["ItemName"].GetString();
+			int32 ItemWidth = SkillBookDataListFiled["ItemWidth"].GetInt();
+			int32 ItemHeight = SkillBookDataListFiled["ItemHeight"].GetInt();
 			int ItemMaxCount = SkillBookDataListFiled["ItemMaxCount"].GetInt();
 			string ImageFilePath = SkillBookDataListFiled["ImageFilePath"].GetString();
 
@@ -259,6 +273,8 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 
 			SkillBookItemData->ItemExplain = ItemExplain;
 			SkillBookItemData->ItemName = ItemName;
+			SkillBookItemData->ItemWidth = ItemWidth;
+			SkillBookItemData->ItemHeight = ItemHeight;
 			SkillBookItemData->ItemMinDamage = 0;
 			SkillBookItemData->ItemMaxDamage = 0;
 			SkillBookItemData->ItemDefence = 0;
@@ -279,6 +295,8 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string ItemObjectType = MaterialDataListFiled["ItemObjectType"].GetString();
 			string ItemExplain = MaterialDataListFiled["ItemExplain"].GetString();
 			string ItemName = MaterialDataListFiled["ItemName"].GetString();
+			int32 ItemWidth = MaterialDataListFiled["ItemWidth"].GetInt();
+			int32 ItemHeight = MaterialDataListFiled["ItemHeight"].GetInt();
 			int ItemMaxCount = MaterialDataListFiled["ItemMaxCount"].GetInt();
 			string ImageFilePath = MaterialDataListFiled["ImageFilePath"].GetString();
 
@@ -367,6 +385,8 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 
 			MaterialData->ItemExplain = ItemExplain;
 			MaterialData->ItemName = ItemName;
+			MaterialData->ItemWidth = ItemWidth;
+			MaterialData->ItemHeight = ItemHeight;
 			MaterialData->ItemMinDamage = 0;
 			MaterialData->ItemMaxDamage = 0;
 			MaterialData->ItemDefence = 0;
