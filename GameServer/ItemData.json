@@ -9,6 +9,8 @@
           "ItemObjectType": "OBJECT_ITEM_WEAPON_WOOD_SWORD",
           "ItemExplain": "나무로 만든 검",
           "ItemName": "나무 검",
+          "ItemWidth": 1,
+          "ItemHeight": 2,
           "ItemMinDamage": 5,
           "ItemMaxDamage": 10,
           "ImageFilePath": "Textures/Weapon & Tool/Wooden Sword"
@@ -26,6 +28,8 @@
           "ItemObjectType": "OBJECT_ITEM_ARMOR_LEATHER_HELMET",
           "ItemExplain": "가죽으로 만든 모자",
           "ItemName": "가죽 모자",
+          "ItemWidth": 2,
+          "ItemHeight": 1,
           "ItemDefence": 5,
           "ImageFilePath": "Textures/Equipment/Leather Helmet"
         },
@@ -35,6 +39,8 @@
           "ItemObjectType": "OBJECT_ITEM_ARMOR_WOOD_ARMOR",
           "ItemExplain": "나무로 만든 갑옷",
           "ItemName": "나무 갑옷",
+          "ItemWidth": 2,
+          "ItemHeight": 2,
           "ItemDefence": 15,
           "ImageFilePath": "Textures/Equipment/Wooden Armor"
         },
@@ -44,6 +50,8 @@
           "ItemObjectType": "OBJECT_ITEM_ARMOR_LEATHER_BOOT",
           "ItemExplain": "가죽으로 만든 신발",
           "ItemName": "가죽 신발",
+          "ItemWidth": 2,
+          "ItemHeight": 1,
           "ItemDefence": 5,
           "ImageFilePath": "Textures/Equipment/Leather Boot"
         }
@@ -60,6 +68,8 @@
           "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL",
           "ItemExplain": "슬라임 젤을 농축해서 만든 물약",
           "ItemName": "회복물약(소)",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
           "ItemMaxCount": 99,
           "ImageFilePath": "Textures/Potion/Red Potion"
         }
@@ -74,6 +84,8 @@
           "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK",
           "ItemExplain": "맹렬한일격을 배울 수 있다.",
           "ItemName": "맹렬한일격 스킬책",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
           "ItemMaxCount": 1,
           "ImageFilePath": "Textures/SkillBook/SkillBook"
         },
@@ -83,6 +95,8 @@
           "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK",
           "ItemExplain": "회심의일격을 배울 수 있다.",
           "ItemName": "회심의일격 스킬책",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
           "ItemMaxCount": 1,
           "ImageFilePath": "Textures/SkillBook/SkillBook"
         },
@@ -92,6 +106,8 @@
           "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK",
           "ItemExplain": "쇄혼비무를 배울 수 있다.",
           "ItemName": "쇄혼비무 스킬책",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
           "ItemMaxCount": 1,
           "ImageFilePath": "Textures/SkillBook/SkillBook"
         },
@@ -101,6 +117,8 @@
           "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK",
           "ItemExplain": "초혼비무를 배울 수 있다.",
           "ItemName": "초혼비무 스킬책",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
           "ItemMaxCount": 1,
           "ImageFilePath": "Textures/SkillBook/SkillBook"
         },
@@ -110,6 +128,8 @@
           "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK",
           "ItemExplain": "분쇄파동을 배울 수 있다.",
           "ItemName": "분쇄파동 스킬책",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
           "ItemMaxCount": 1,
           "ImageFilePath": "Textures/SkillBook/SkillBook"
         },
@@ -119,6 +139,8 @@
           "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK",
           "ItemExplain": "돌격자세를 배울 수 있다.",
           "ItemName": "돌격자세 스킬책",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
           "ItemMaxCount": 1,
           "ImageFilePath": "Textures/SkillBook/SkillBook"
         },
@@ -128,6 +150,8 @@
           "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK",
           "ItemExplain": "불꽃작살을 배울 수 있다.",
           "ItemName": "불꽃작살 스킬책",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
           "ItemMaxCount": 1,
           "ImageFilePath": "Textures/SkillBook/SkillBook"
         },
@@ -137,6 +161,8 @@
           "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK",
           "ItemExplain": "지옥의화염을 배울 수 있다.",
           "ItemName": "지옥의화염 스킬책",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
           "ItemMaxCount": 1,
           "ImageFilePath": "Textures/SkillBook/SkillBook"
         },
@@ -146,6 +172,8 @@
           "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK",
           "ItemExplain": "치유의빛을 배울 수 있다.",
           "ItemName": "치유의빛 스킬책",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
           "ItemMaxCount": 1,
           "ImageFilePath": "Textures/SkillBook/SkillBook"
         },
@@ -155,6 +183,8 @@
           "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK",
           "ItemExplain": "치유의바람을 배울 수 있다.",
           "ItemName": "치유의바람 스킬책",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
           "ItemMaxCount": 1,
           "ImageFilePath": "Textures/SkillBook/SkillBook"
         },
@@ -164,6 +194,8 @@
           "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK",
           "ItemExplain": "충격해제를 배울 수 있다.",
           "ItemName": "충격해제 스킬책",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
           "ItemMaxCount": 1,
           "ImageFilePath": "Textures/SkillBook/SkillBook"
         }
@@ -180,6 +212,8 @@
           "ItemObjectType": "OBJECT_ITEM_MATERIAL_LEATHER",
           "ItemExplain": "동물의 가죽",
           "ItemName": "가죽",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
           "ItemMaxCount": 99,
           "ImageFilePath": "Textures/Material/Leather"
         },
@@ -189,6 +223,8 @@
           "ItemObjectType": "OBJECT_ITEM_MATERIAL_SLIME_GEL",
           "ItemExplain": "슬라임의 체액",
           "ItemName": "슬라임젤리",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
           "ItemMaxCount": 99,
           "ImageFilePath": "Textures/MonsterPart/SlimeGel"
         },
@@ -198,6 +234,8 @@
           "ItemObjectType": "OBJECT_ITEM_MATERIAL_BRONZE_COIN",
           "ItemExplain": "",
           "ItemName": "동전",
+          "ItemWidth": 0,
+          "ItemHeight": 0,
           "ItemMaxCount": 99,
           "ImageFilePath": "Textures/Misc/CopperCoin"
         },
@@ -207,6 +245,8 @@
           "ItemObjectType": "OBJECT_ITEM_MATERIAL_SLIVER_COIN",
           "ItemExplain": "",
           "ItemName": "은전",
+          "ItemWidth": 0,
+          "ItemHeight": 0,
           "ItemMaxCount": 99,
           "ImageFilePath": "Textures/Misc/SliverCoin"
         },
@@ -216,6 +256,8 @@
           "ItemObjectType": "OBJECT_ITEM_MATERIAL_GOLD_COIN",
           "ItemExplain": "",
           "ItemName": "금전",
+          "ItemWidth": 0,
+          "ItemHeight": 0,
           "ItemMaxCount": 99,
           "ImageFilePath": "Textures/Misc/GoldCoin"
         },
@@ -225,6 +267,8 @@
           "ItemObjectType": "OBJECT_ITEM_MATERIAL_STONE",
           "ItemExplain": "채광해서 얻은 암석",
           "ItemName": "암석",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
           "ItemMaxCount": 99,
           "ImageFilePath": "Textures/Material/Stone"
         },
@@ -234,6 +278,8 @@
           "ItemObjectType": "OBJECT_ITEM_MATERIAL_WOOD_LOG",
           "ItemExplain": "벌목해서 얻은 통나무",
           "ItemName": "통나무",
+          "ItemWidth": 2,
+          "ItemHeight": 1,
           "ItemMaxCount": 99,
           "ImageFilePath": "Textures/Material/Wood Log"
         },
@@ -243,6 +289,8 @@
           "ItemObjectType": "OBJECT_ITEM_MATERIAL_WOOD_FLANK",
           "ItemExplain": "통나무로 만든 나무판자",
           "ItemName": "나무판자",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
           "ItemMaxCount": 99,
           "ImageFilePath": "Textures/Material/Wooden Plank"
         },
@@ -252,6 +300,8 @@
           "ItemObjectType": "OBJECT_ITEM_MATERIAL_YARN",
           "ItemExplain": "통나무를 가공해서 만든 실",
           "ItemName": "실",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
           "ItemMaxCount": 99,
           "ImageFilePath": "Textures/Material/Yarn"
         }
