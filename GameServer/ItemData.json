@@ -234,8 +234,8 @@
           "ItemObjectType": "OBJECT_ITEM_MATERIAL_BRONZE_COIN",
           "ItemExplain": "",
           "ItemName": "동전",
-          "ItemWidth": 0,
-          "ItemHeight": 0,
+          "ItemWidth": 1,
+          "ItemHeight": 1,
           "ItemMaxCount": 99,
           "ImageFilePath": "Textures/Misc/CopperCoin"
         },
@@ -245,8 +245,8 @@
           "ItemObjectType": "OBJECT_ITEM_MATERIAL_SLIVER_COIN",
           "ItemExplain": "",
           "ItemName": "은전",
-          "ItemWidth": 0,
-          "ItemHeight": 0,
+          "ItemWidth": 1,
+          "ItemHeight": 1,
           "ItemMaxCount": 99,
           "ImageFilePath": "Textures/Misc/SliverCoin"
         },
@@ -256,8 +256,8 @@
           "ItemObjectType": "OBJECT_ITEM_MATERIAL_GOLD_COIN",
           "ItemExplain": "",
           "ItemName": "금전",
-          "ItemWidth": 0,
-          "ItemHeight": 0,
+          "ItemWidth": 1,
+          "ItemHeight": 1,
           "ItemMaxCount": 99,
           "ImageFilePath": "Textures/Misc/GoldCoin"
         },
@@ -279,7 +279,7 @@
           "ItemExplain": "벌목해서 얻은 통나무",
           "ItemName": "통나무",
           "ItemWidth": 2,
-          "ItemHeight": 1,
+          "ItemHeight": 2,
           "ItemMaxCount": 99,
           "ImageFilePath": "Textures/Material/Wood Log"
         },
