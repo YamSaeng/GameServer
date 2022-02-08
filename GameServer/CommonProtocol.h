@@ -276,20 +276,21 @@ enum en_PACKET_TYPE
 	en_PACKET_S2C_LOOTING,
 
 	//------------------------------------------------------------
-	// 게임서버 아이템 스왑 요청
+	// 게임서버 아이템 선택 요청
 	// int64 AccountId
 	// int64 ObjectId
-	// int8 SwapIndexA
-	// int8 SwapIndexB
+	// int16 SelectItemTileGridPositionX
+	// int16 SelectItemTileGridPositionY
 	//------------------------------------------------------------
-	en_PACKET_C2S_ITEM_SWAP,
-	
+	en_PACKET_C2S_ITEM_SELECT,
+
 	//------------------------------------------------------------
+	// 게임서버 아이템 선택 요청 응답
+	// int64 AccountId
 	// int64 ObjectId
-	// st_ItemInfo SwapAItem
-	// st_ItemInfo SwapBItem
+	// CItem* SelectItem	
 	//------------------------------------------------------------
-	en_PACKET_S2C_ITEM_SWAP,
+	en_PACKET_S2C_ITEM_SELECT,	
 
 	//------------------------------------------------------------
 	// 게임서버 골드 인벤토리 저장 요청 응답
