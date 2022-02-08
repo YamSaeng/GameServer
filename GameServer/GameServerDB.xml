@@ -341,8 +341,8 @@
   <!-- 인벤토리 테이블 빈껍데기 아이템 정보 생성-->  
   <Procedure name="spItemToInventoryInit">
     <Param name="@ItemName" type="nvarchar(20)"/>    
-	<Param name="@ItemTileGridPositionX" type ="SmaillInt"/>
-	<Param name="@ItemTileGridPositionY" type ="SmaillInt"/>		  
+	<Param name="@ItemTileGridPositionX" type ="SmallInt"/>
+	<Param name="@ItemTileGridPositionY" type ="SmallInt"/>		  
     <Param name="@ThumbnailImagePath" type="nvarchar(100)"/>
     <Param name="@OwnerAccountDBId" type="BigInt"/>
     <Param name="@OwnerPlayerDBId" type="BigInt"/>    
@@ -424,7 +424,10 @@
     <Body>      
       <![CDATA[
 	    SET NOCOUNT ON
-        SELECT IsQuickSlotUse, ItemLargeCategory, ItemMediumCategory, ItemSmallCategory, ItemName, MinDamage, MaxDamage, Defence, MaxCount, ItemCount, IsEquipped, ThumbnailImagePath 
+        SELECT IsQuickSlotUse, ItemRotated, ItemWidth, ItemHeight, 
+		ItemLargeCategory, ItemMediumCategory, ItemSmallCategory,
+		ItemName,
+		MinDamage, MaxDamage, Defence, MaxCount, ItemCount, IsEquipped, ThumbnailImagePath 
         FROM [dbo].[Inventory] 
         WHERE OwnerAccountDBId = (@AccountDBId) AND OwnerPlayerDBId = (@PlayerDBId) AND ItemTileGridPositionX = (@ItemTileGridPositionX) AND ItemTileGridPositionY = (@ItemTileGridPositionY)
       ]]>
@@ -468,8 +471,8 @@
         UPDATE [dbo].[Inventory] SET IsQuickSlotUse = (@BIsQuickSlotUse), ItemLargeCategory = (@BItemLargeCategory), ItemMediumCategory = (@BItemMediumCategory), ItemSmallCategory = (@BItemSmallCategory), ItemName = (@BItemName), MinDamage = (@BMinDamage), MaxDamage = (@BMaxDamage), Defence = (@BDefence), MaxCount = (@BMaxCount), ItemCount = (@BItemCount), IsEquipped = (@BItemIsEquipped), ThumbnailImagePath = (@BItemThumbnailImagePath)  WHERE SlotIndex = (@BItemSlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
       ]]>
     </Body>
-  </Procedure>  
-  
+  </Procedure>
+	
   <!-- 인벤토리 테이블에 있는 아이템 가지고 옴-->
   <Procedure name="spGetItemTableInfoToInventory">
     <Param name="@AccountDBId" type="BigInt"/>
@@ -477,7 +480,8 @@
     <Body>
       <![CDATA[
 	    SET NOCOUNT ON
-        SELECT ItemLargeCategory, ItemMediumCategory, ItemSmallCategory, ItemName, MinDamage, MaxDamage, Defence, MaxCount, ItemCount, ItemTileGridPositionX, ItemTileGridPositionY, IsEquipped, ThumbnailImagePath
+        SELECT ItemRotated, ItemWidth, ItemHeight,
+		ItemLargeCategory, ItemMediumCategory, ItemSmallCategory, ItemName, MinDamage, MaxDamage, Defence, MaxCount, ItemCount, ItemTileGridPositionX, ItemTileGridPositionY, IsEquipped, ThumbnailImagePath
         FROM [dbo].[Inventory]
         WHERE OwnerAccountDBId = (@AccountDBId) AND OwnerPlayerDBId = (@PlayerDBId)
       ]]>
@@ -536,7 +540,7 @@
       <![CDATA[
 	    SET NOCOUNT ON
         UPDATE [dbo].[Inventory]
-		SET ItemRoated = (@ItemRotated),
+		SET ItemRotated = (@ItemRotated),
 		ItemTileGridPositionX = (@ItemTileGridPositionX),
 		ItemTileGridPositionY = (@ItemTileGridPositionY),
 		ItemCount = (@ItemCount),

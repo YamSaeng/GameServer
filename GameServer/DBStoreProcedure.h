@@ -135,17 +135,16 @@ namespace SP
 	};
 
 	// 인벤토리 초기화 할때 빈껍데기 생성해서 넣는 프로시저 클래스
-	class CDBGameServerItemCreateToInventory : public CDBBind<7, 0>
+	class CDBGameServerItemCreateToInventory : public CDBBind<6, 0>
 	{
 	public:
-		CDBGameServerItemCreateToInventory(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spItemToInventoryInit(?,?,?,?,?)}") {}
+		CDBGameServerItemCreateToInventory(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spItemToInventoryInit(?,?,?,?,?,?)}") {}
 		void InItemName(wstring& ItemName) { BindParam(0, ItemName.c_str()); }	
 		void InItemTileGridPositionX(int16& ItemTileGridPositionX) { BindParam(1, ItemTileGridPositionX); }
-		void InItemTileGridPositionY(int16& ItemTileGridPositionY) { BindParam(2, ItemTileGridPositionY); }
-		void InItemName(wstring& ItemName) { BindParam(3, ItemName.c_str()); }	
-		void InThumbnailImagePath(wstring& ThumbnailImagePath) { BindParam(4, ThumbnailImagePath.c_str()); }
-		void InOwnerAccountId(int64& OwnerAccountId) { BindParam(5, OwnerAccountId); }
-		void InOwnerPlayerId(int64& OwnerPlayerId) { BindParam(6, OwnerPlayerId); }
+		void InItemTileGridPositionY(int16& ItemTileGridPositionY) { BindParam(2, ItemTileGridPositionY); }			
+		void InThumbnailImagePath(wstring& ThumbnailImagePath) { BindParam(3, ThumbnailImagePath.c_str()); }
+		void InOwnerAccountId(int64& OwnerAccountId) { BindParam(4, OwnerAccountId); }
+		void InOwnerPlayerId(int64& OwnerPlayerId) { BindParam(5, OwnerPlayerId); }
 	};
 
 	// InventoryTable에 새로운 Item 저장
@@ -189,7 +188,7 @@ namespace SP
 
 	// Swap 요청한 아이템이 Inventory에 있는지 확인하고
 	// 요청한 아이템의 정보를 반환
-	class CDBGameServerItemCheck : public CDBBind<4, 12>
+	class CDBGameServerItemCheck : public CDBBind<4, 15>
 	{
 	public:
 		CDBGameServerItemCheck(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spInventoryItemCheck(?,?,?,?)}") {}
@@ -199,54 +198,65 @@ namespace SP
 		void InItemTileGridPositionY(int16& TileGridPositionY) { BindParam(3, TileGridPositionY); }
 
 		void OutIsQuickSlotUse(bool& IsQuickSlotUse) { BindCol(0, IsQuickSlotUse); }
-		void OutItemLargeCategory(int8& ItemLargeCategory) { BindCol(1, ItemLargeCategory); }
-		void OutItemMediumCategory(int8& ItemMediumCategory) { BindCol(2, ItemMediumCategory); }
-		void OutItemSmallCategory(int16& ItemSmallCategory) { BindCol(3, ItemSmallCategory); }
-		template<int8 Length> void OutItemName(WCHAR(&ItemName)[Length]) { BindCol(4, ItemName); }
-		void OutItemMinDamage(int32& ItemMinDamage) { BindCol(5, ItemMinDamage); }
-		void OutItemMaxDamage(int32& ItemMaxDamage) { BindCol(6, ItemMaxDamage); }
-		void OutItemDefence(int32& ItemDefence) { BindCol(7, ItemDefence); }
-		void OutItemMaxCount(int32& ItemMaxCount) { BindCol(8, ItemMaxCount); }
-		void OutItemCount(int16& ItemCount) { BindCol(9, ItemCount); }
-		void OutItemIsEquipped(bool& ItemIsEquipped) { BindCol(10, ItemIsEquipped); }	
-		template<int16 Length> void OutItemThumbnailImagePath(WCHAR(&ItemThumbnailImagePath)[Length]) { BindCol(11, ItemThumbnailImagePath); }
+		void OutIsRotated(bool& IsRotated) { BindCol(1, IsRotated); }
+		void OutItemWidth(int16& ItemWidth) { BindCol(2, ItemWidth); }
+		void OutItemHeight(int16& ItemHeight) { BindCol(3, ItemHeight); }		
+		void OutItemLargeCategory(int8& ItemLargeCategory) { BindCol(4, ItemLargeCategory); }
+		void OutItemMediumCategory(int8& ItemMediumCategory) { BindCol(5, ItemMediumCategory); }
+		void OutItemSmallCategory(int16& ItemSmallCategory) { BindCol(6, ItemSmallCategory); }
+		template<int8 Length> void OutItemName(WCHAR(&ItemName)[Length]) { BindCol(7, ItemName); }
+		void OutItemMinDamage(int32& ItemMinDamage) { BindCol(8, ItemMinDamage); }
+		void OutItemMaxDamage(int32& ItemMaxDamage) { BindCol(9, ItemMaxDamage); }
+		void OutItemDefence(int32& ItemDefence) { BindCol(10, ItemDefence); }
+		void OutItemMaxCount(int32& ItemMaxCount) { BindCol(11, ItemMaxCount); }
+		void OutItemCount(int16& ItemCount) { BindCol(12, ItemCount); }
+		void OutItemIsEquipped(bool& ItemIsEquipped) { BindCol(13, ItemIsEquipped); }	
+		template<int16 Length> void OutItemThumbnailImagePath(WCHAR(&ItemThumbnailImagePath)[Length]) { BindCol(14, ItemThumbnailImagePath); }
 	};
 
 	// 인벤토리 아이템 스왑
-	class CDBGameServerItemSwap : public CDBBind<28, 0>
+	class CDBGameServerItemSwap : public CDBBind<36, 0>
 	{
 	public:
-		CDBGameServerItemSwap(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spInventoryItemSwap(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}") {}
+		CDBGameServerItemSwap(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spInventoryItemSwap(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}") {}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
 
-		void InAIsQuickSlotUse(bool& IsQuickSlotUse) { BindParam(2, IsQuickSlotUse); }
-		void InAItemLargeCategory(int8& AItemCategoryType) { BindParam(3, AItemCategoryType); }
-		void InAItemMediumCategory(int8& AItemMediumCategory) { BindParam(4, AItemMediumCategory); }
-		void InAItemSmallCategory(int16& AItemType) { BindParam(5, AItemType); }
-		void InAItemName(wstring& AItemName) { BindParam(6, AItemName.c_str()); }
-		void InAItemMinDamage(int32& AItemMinDamage) { BindParam(7, AItemMinDamage); }
-		void InAItemMaxDamage(int32& AItemMaxDamage) { BindParam(8, AItemMaxDamage); }
-		void InAItemDefence(int32& AItemDefence) { BindParam(9, AItemDefence); }
-		void InAItemMaxCount(int32& AItemMaxCount) { BindParam(10, AItemMaxCount); }
-		void InAItemCount(int16& AItemCount) { BindParam(11, AItemCount); }
-		void InAItemIsEquipped(bool& AItemIsEquipped) { BindParam(12, AItemIsEquipped); }		
-		void InAItemThumbnailImagePath(wstring& AItemThumbnailImagePath) { BindParam(13, AItemThumbnailImagePath.c_str()); }
-		void InAItemSlotIndex(int8& AItemSlotIndex) { BindParam(14, AItemSlotIndex); }
+		void InAIsQuickSlotUse(bool& AIsQuickSlotUse) { BindParam(2, AIsQuickSlotUse); }
+		void InAIsRotated(bool& AIsRotated) { BindParam(3, AIsRotated); }
+		void InAItemWidth(int16& AItemWidth) { BindParam(4, AItemWidth); }
+		void InAItemHeight(int16& AItemHeight) { BindParam(5, AItemHeight); }
+		void InAItemLargeCategory(int8& AItemCategoryType) { BindParam(6, AItemCategoryType); }
+		void InAItemMediumCategory(int8& AItemMediumCategory) { BindParam(7, AItemMediumCategory); }
+		void InAItemSmallCategory(int16& AItemType) { BindParam(8, AItemType); }
+		void InAItemName(wstring& AItemName) { BindParam(9, AItemName.c_str()); }
+		void InAItemMinDamage(int32& AItemMinDamage) { BindParam(10, AItemMinDamage); }
+		void InAItemMaxDamage(int32& AItemMaxDamage) { BindParam(11, AItemMaxDamage); }
+		void InAItemDefence(int32& AItemDefence) { BindParam(12, AItemDefence); }
+		void InAItemMaxCount(int32& AItemMaxCount) { BindParam(13, AItemMaxCount); }
+		void InAItemCount(int16& AItemCount) { BindParam(14, AItemCount); }
+		void InAItemIsEquipped(bool& AItemIsEquipped) { BindParam(15, AItemIsEquipped); }		
+		void InAItemThumbnailImagePath(wstring& AItemThumbnailImagePath) { BindParam(16, AItemThumbnailImagePath.c_str()); }
+		void InAItemTilePositionX(int16& ATilePositionX) { BindParam(17, ATilePositionX); }
+		void InAItemTilePositionY(int16& ATilePositionY) { BindParam(18, ATilePositionY); }
 
-		void InBIsQuickSlotUse(bool& IsQuickSlotUse) { BindParam(15, IsQuickSlotUse); }
-		void InBItemLargeCategory(int8& BItemLargeCategory) { BindParam(16, BItemLargeCategory); }
-		void InBItemMediumCategory(int8& BItemMediumCategory) { BindParam(17, BItemMediumCategory); }
-		void InBItemSmallCategory(int16& BItemSmallCategory) { BindParam(18, BItemSmallCategory); }
-		void InBItemName(wstring& BItemName) { BindParam(19, BItemName.c_str()); }
-		void InBItemMinDamage(int32& AItemCount) { BindParam(20, AItemCount); }
-		void InBItemMaxDamage(int32& AItemCount) { BindParam(21, AItemCount); }
-		void InBItemDefence(int32& AItemCount) { BindParam(22, AItemCount); }
-		void InBItemMaxCount(int32& AItemCount) { BindParam(23, AItemCount); }
-		void InBItemCount(int16& BItemCount) { BindParam(24, BItemCount); }
-		void InBItemIsEquipped(bool& BItemIsEquipped) { BindParam(25, BItemIsEquipped); }		
-		void InBItemThumbnailImagePath(wstring& BItemThumbnailImagePath) { BindParam(26, BItemThumbnailImagePath.c_str()); }
-		void InBItemSlotIndex(int8& BItemSlotIndex) { BindParam(27, BItemSlotIndex); }
+		void InBIsQuickSlotUse(bool& BIsQuickSlotUse) { BindParam(19, BIsQuickSlotUse); }
+		void InBIsRotated(bool& BIsRotated) { BindParam(20, BIsRotated); }
+		void InBItemWidth(int16& BItemWidth) { BindParam(21, BItemWidth); }
+		void InBItemHeight(int16& BItemHeight) { BindParam(22, BItemHeight); }
+		void InBItemLargeCategory(int8& BItemLargeCategory) { BindParam(23, BItemLargeCategory); }
+		void InBItemMediumCategory(int8& BItemMediumCategory) { BindParam(24, BItemMediumCategory); }
+		void InBItemSmallCategory(int16& BItemSmallCategory) { BindParam(25, BItemSmallCategory); }
+		void InBItemName(wstring& BItemName) { BindParam(26, BItemName.c_str()); }
+		void InBItemMinDamage(int32& AItemCount) { BindParam(27, AItemCount); }
+		void InBItemMaxDamage(int32& AItemCount) { BindParam(28, AItemCount); }
+		void InBItemDefence(int32& AItemCount) { BindParam(29, AItemCount); }
+		void InBItemMaxCount(int32& AItemCount) { BindParam(30, AItemCount); }
+		void InBItemCount(int16& BItemCount) { BindParam(31, BItemCount); }
+		void InBItemIsEquipped(bool& BItemIsEquipped) { BindParam(32, BItemIsEquipped); }		
+		void InBItemThumbnailImagePath(wstring& BItemThumbnailImagePath) { BindParam(33, BItemThumbnailImagePath.c_str()); }
+		void InBItemTilePositionX(int16& BTilePositionX) { BindParam(34, BTilePositionX); }
+		void InBItemTilePositionY(int16& BTilePositionY) { BindParam(35, BTilePositionY); }
 	};
 
 	// 아이템 삭제
@@ -320,26 +330,29 @@ namespace SP
 	};
 
 	// InventoryTable에 있는 Item 모두 긁어옴
-	class CDBGameServerInventoryItemGet : public CDBBind<2, 13>
+	class CDBGameServerInventoryItemGet : public CDBBind<2, 16>
 	{
 	public:
 		CDBGameServerInventoryItemGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetItemTableInfoToInventory(?,?)}") {}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
 
-		void OutItemLargeCategory(int8& ItemLargeCategory) { BindCol(0, ItemLargeCategory); }
-		void OutItemMediumCategory(int8& ItemMediumCategory) { BindCol(1, ItemMediumCategory); }	
-		void OutItemSmallCategory(int16& ItemSmallCategory) { BindCol(2, ItemSmallCategory); }
-		template<int8 Length> void OutItemName(WCHAR(&ItemName)[Length]) { BindCol(3, ItemName); }
-		void OutMinDamage(int32& MinDamage) { BindCol(4, MinDamage); }
-		void OutMaxDamage(int32& MaxDamage) { BindCol(5, MaxDamage); }
-		void OutDefence(int32& Defence) { BindCol(6, Defence); }
-		void OutMaxCount(int32& MaxCount) { BindCol(7, MaxCount); }
-		void OutItemCount(int16& itemCount) { BindCol(8, itemCount); }
-		void OutItemTileGridPositionX(int16& TileGridPositionX) { BindCol(9, TileGridPositionX); }
-		void OutItemTileGridPositionX(int16& TileGridPositionX) { BindCol(10, TileGridPositionX); }		
-		void OutIsEquipped(bool& IsEquipped) { BindCol(11, IsEquipped); }		
-		template<int16 Length> void OutItemThumbnailImagePath(WCHAR(&ItemThumbnailImagePath)[Length]) { BindCol(12, ItemThumbnailImagePath); }
+		void OutIsRotated(bool& IsRotated) { BindCol(0, IsRotated); }
+		void OutItemWidth(int16& ItemWidth) { BindCol(1, ItemWidth); }
+		void OutItemHeight(int16& ItemHeight) { BindCol(2, ItemHeight); }
+		void OutItemLargeCategory(int8& ItemLargeCategory) { BindCol(3, ItemLargeCategory); }
+		void OutItemMediumCategory(int8& ItemMediumCategory) { BindCol(4, ItemMediumCategory); }	
+		void OutItemSmallCategory(int16& ItemSmallCategory) { BindCol(5, ItemSmallCategory); }
+		template<int8 Length> void OutItemName(WCHAR(&ItemName)[Length]) { BindCol(6, ItemName); }
+		void OutMinDamage(int32& MinDamage) { BindCol(7, MinDamage); }
+		void OutMaxDamage(int32& MaxDamage) { BindCol(8, MaxDamage); }
+		void OutDefence(int32& Defence) { BindCol(9, Defence); }
+		void OutMaxCount(int32& MaxCount) { BindCol(10, MaxCount); }
+		void OutItemCount(int16& itemCount) { BindCol(11, itemCount); }
+		void OutItemTileGridPositionX(int16& TileGridPositionX) { BindCol(12, TileGridPositionX); }
+		void OutItemTileGridPositionY(int16& TileGridPositionY) { BindCol(13, TileGridPositionY); }		
+		void OutIsEquipped(bool& IsEquipped) { BindCol(14, IsEquipped); }		
+		template<int16 Length> void OutItemThumbnailImagePath(WCHAR(&ItemThumbnailImagePath)[Length]) { BindCol(15, ItemThumbnailImagePath); }
 	};
 
 	// SkillTable에 있는 Skill 모두 긁어옴
