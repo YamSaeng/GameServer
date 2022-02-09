@@ -236,6 +236,9 @@
     <ClInclude Include="Equipment.h">
       <Filter>ContentServer\Content\Equiment</Filter>
     </ClInclude>
+    <ClInclude Include="InventoryManager.h">
+      <Filter>ContentServer\Content\Inventory</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -335,6 +338,9 @@
     </ClCompile>
     <ClCompile Include="Equipment.cpp">
       <Filter>ContentServer\Content\Equiment</Filter>
+    </ClCompile>
+    <ClCompile Include="InventoryManager.cpp">
+      <Filter>ContentServer\Content\Inventory</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

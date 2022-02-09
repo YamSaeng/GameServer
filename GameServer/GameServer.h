@@ -13,8 +13,10 @@ class CGameServer : public CNetworkLib
 private:
 	// 인증 쓰레드
 	HANDLE _AuthThread;	
-	// 데이터베이스 쓰레드
-	HANDLE _DataBaseThread;
+	// 유저 데이터베이스 쓰레드
+	HANDLE _UserDataBaseThread;
+	// 월드 데이터베이스 쓰레드
+	HANDLE _WorldDataBaseThread;
 	// 타이머잡 쓰레드
 	HANDLE _TimerJobThread;
 	// 로직 쓰레드
@@ -29,8 +31,11 @@ private:
 	bool _AuthThreadEnd;
 	// WorkerThread 종료용 변수
 	bool _NetworkThreadEnd;
-	// DataBaseThread 종료용 변수
-	bool _DataBaseThreadEnd;
+	// User DataBaseThread 종료용 변수
+	bool _UserDataBaseThreadEnd;
+	// World DataBaseThread 종료용 변수
+	bool _WorldDataBaseThreadEnd;
+
 	// LogicThread 종료용 변수
 	bool _LogicThreadEnd;
 	// TimerJobThread 종료용 변수
@@ -44,9 +49,14 @@ private:
 	//-------------------------------------------------------
 	static unsigned __stdcall AuthThreadProc(void* Argument);	
 	//----------------------------------------------------------
-	// 데이터베이스 쓰레드 ( 데이터 베이스 작업 처리 )
+	// 유저 데이터베이스 쓰레드 ( 유저 데이터 베이스 작업 처리 )
 	//----------------------------------------------------------
-	static unsigned __stdcall DataBaseThreadProc(void* Argument);
+	static unsigned __stdcall UserDataBaseThreadProc(void* Argument);
+	//----------------------------------------------------------
+	// 월드 데이터베이스 쓰레드 ( 월드 데이터 베이스 작업 처리 )
+	//----------------------------------------------------------
+	static unsigned __stdcall WorldDataBaseThreadProc(void* Argument);
+
 	//----------------------------------------------------------
 	// 타이머 잡 쓰레드 ( 타이머 잡 처리 )
 	//----------------------------------------------------------
@@ -125,9 +135,13 @@ private:
 	//--------------------------------------------------------------------
 	void PacketProcReqChattingMessage(int64 SessionId, CMessage* Message);	
 	//------------------------------------------------------------
-	// 아이템 인벤토리 스왑 요청 처리
+	// 아이템 인벤토리 선택 요청 처리
 	//------------------------------------------------------------
-	void PacketProcReqItemSwap(int64 SessionId, CMessage* Message);
+	void PacketProcReqItemSelect(int64 SessionId, CMessage* Message);
+	//------------------------------------------------------------
+	// 아이템 놓기 요청 처리
+	//------------------------------------------------------------
+	void PacketProcReqItemPlace(int64 SessionId, CMessage* Message);	
 	//------------------------------------------------------------------
 	// 퀵슬롯 저장 요청 처리
 	//------------------------------------------------------------------
@@ -181,10 +195,10 @@ private:
 	// 인벤토리 테이블에 제작템 저장
 	//------------------------------------------------------------------
 	void PacketProcReqDBCraftingItemToInventorySave(int64 SessionId, CGameServerMessage* Message);
-	//---------------------------------------------------------------
-	// 인벤토리 테이블에 아이템 스왑
-	//---------------------------------------------------------------
-	void PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message);
+	//-------------------------------------------------------------------------
+	// 인벤토리 테이블에 아이템 놓기
+	//-------------------------------------------------------------------------
+	void PacketProcReqDBItemPlace(int64 SessionId, CGameServerMessage* Message);	
 	//---------------------------------------------------------------
 	// 인벤토리 테이블에 아이템 업데이트
 	//---------------------------------------------------------------
@@ -279,14 +293,18 @@ private:
 	// 게임서버 인벤토리 생성 패킷 조합
 	//-------------------------------------------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketInventoryCreate(int8 InventorySize, vector<CItem*> InventoryItems);
-	//-------------------------------------------------------------------------------------------------------------------------
-	// 게임서버 아이템 스왑 요청 응답 패킷 조합
-	//-------------------------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResItemSwap(int64 AccountId, int64 ObjectId, st_ItemInfo SwapAItemInfo, st_ItemInfo SwapBItemInfo);
+	//---------------------------------------------------------------------------------------------
+	// 게임서버 인벤토리 아이템 선택 요청 응답 패킷 조합
+	//---------------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResSelectItem(int64 AccountId, int64 ObjectId, CItem* SelectItem);	
+	//---------------------------------------------------------------------------------------------
+	// 게임서버 인벤토리 아이템 놓기 요청 응답 패킷 조합
+	//---------------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResPlaceItem(int64 AccountId, int64 ObjectId, CItem* PlaceItem, CItem* OverlapItem);
 	//-------------------------------------------------------------------------------------------------------------------------
 	// 게임서버 아이템 인벤토리 저장 요청 응답 패킷 조합
 	//-------------------------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResItemToInventory(int64 TargetObjectId, CItem* InventoryItem, int16 ItemEach, bool ItemGainPrint = true);
+	CGameServerMessage* MakePacketResItemToInventory(int64 TargetObjectId, CItem* InventoryItem, int16 ItemEach, bool IsExist, bool ItemGainPrint = true);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 인벤토리 아이템 업데이트
 	//-----------------------------------------------------------------------------------------
@@ -412,7 +430,8 @@ public:
 	// Job 큐
 	//------------------------------------
 	CLockFreeQue<st_Job*> _GameServerAuthThreadMessageQue;	
-	CLockFreeQue<st_Job*> _GameServerDataBaseThreadMessageQue;
+	CLockFreeQue<st_Job*> _GameServerUserDataBaseThreadMessageQue;
+	CLockFreeQue<st_Job*> _GameServerWorldDataBaseThreadMessageQue;
 
 	//--------------------------------------
 	// TimerJob 우선순위 큐
@@ -428,8 +447,10 @@ public:
 	// 네트워크 쓰레드 TPS
 	int64 _NetworkThreadTPS; 
 
-	// DB 쓰레드 깨우기 이벤트
-	HANDLE _DataBaseWakeEvent;
+	// User DB 쓰레드 깨우기 이벤트
+	HANDLE _UserDataBaseWakeEvent;
+	// World DB 쓰레드 깨우기 이벤트
+	HANDLE _WorldDataBaseWakeEvent;
 	// DB 쓰레드 활성화된 횟수
 	int64 _DataBaseThreadWakeCount;
 	// DB 쓰레드 TPS

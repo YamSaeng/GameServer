@@ -16,18 +16,20 @@ CGameServer::CGameServer()
 {
 	//timeBeginPeriod(1);
 	_AuthThread = nullptr;
-	_DataBaseThread = nullptr;
+	_UserDataBaseThread = nullptr;
 	_TimerJobThread = nullptr;
 	_LogicThread = nullptr;
 
 	// 논시그널 상태 자동리셋
 	_AuthThreadWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	_DataBaseWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	_UserDataBaseWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	_WorldDataBaseWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	_TimerThreadWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
 	_AuthThreadEnd = false;
 	_NetworkThreadEnd = false;
-	_DataBaseThreadEnd = false;
+	_UserDataBaseThreadEnd = false;
+	_WorldDataBaseThreadEnd = false;
 	_LogicThreadEnd = false;
 	_TimerJobThreadEnd = false;
 
@@ -73,19 +75,23 @@ void CGameServer::GameServerStart(const WCHAR* OpenIP, int32 Port)
 	// 인증 쓰레드 시작
 	_AuthThread = (HANDLE)_beginthreadex(NULL, 0, AuthThreadProc, this, 0, NULL);	
 	
-	// 데이터 베이스 쓰레드 시작
+	// 유저 데이터 베이스 쓰레드 시작
 	for (int32 i = 0; i < (int32)SI.dwNumberOfProcessors; i++)
 	{
-		_DataBaseThread = (HANDLE)_beginthreadex(NULL, 0, DataBaseThreadProc, this, 0, NULL);		
+		_UserDataBaseThread = (HANDLE)_beginthreadex(NULL, 0, UserDataBaseThreadProc, this, 0, NULL);		
+		CloseHandle(_UserDataBaseThread);
 	}
 
+	// 월드 데이터 베이스 쓰레드 시작
+	_WorldDataBaseThread = (HANDLE)_beginthreadex(NULL, 0, WorldDataBaseThreadProc, this, 0, NULL);
+	
 	// 타이머 잡 쓰레드 시작
 	_TimerJobThread = (HANDLE)_beginthreadex(NULL, 0, TimerJobThreadProc, this, 0, NULL);
 	// 로직 쓰레드 시작
 	_LogicThread = (HANDLE)_beginthreadex(NULL, 0, LogicThreadProc, this, 0, NULL);	
 
 	CloseHandle(_AuthThread);
-	CloseHandle(_DataBaseThread);
+	CloseHandle(_WorldDataBaseThread);
 	CloseHandle(_TimerJobThread);
 	CloseHandle(_LogicThread);	
 }
@@ -133,19 +139,19 @@ unsigned __stdcall CGameServer::AuthThreadProc(void* Argument)
 	return 0;
 }
 
-unsigned __stdcall CGameServer::DataBaseThreadProc(void* Argument)
+unsigned __stdcall CGameServer::UserDataBaseThreadProc(void* Argument)
 {
 	CGameServer* Instance = (CGameServer*)Argument;
 
-	while (!Instance->_DataBaseThreadEnd)
+	while (!Instance->_UserDataBaseThreadEnd)
 	{
-		WaitForSingleObject(Instance->_DataBaseWakeEvent, INFINITE);
+		WaitForSingleObject(Instance->_UserDataBaseWakeEvent, INFINITE);
 
-		while (!Instance->_GameServerDataBaseThreadMessageQue.IsEmpty())
+		while (!Instance->_GameServerUserDataBaseThreadMessageQue.IsEmpty())
 		{
 			st_Job* Job = nullptr;
 
-			if (!Instance->_GameServerDataBaseThreadMessageQue.Dequeue(&Job))
+			if (!Instance->_GameServerUserDataBaseThreadMessageQue.Dequeue(&Job))
 			{
 				break;
 			}
@@ -177,19 +183,16 @@ unsigned __stdcall CGameServer::DataBaseThreadProc(void* Argument)
 								break;
 							case en_JobType::DATA_BASE_CHARACTER_CHECK:
 								Instance->PacketProcReqDBCreateCharacterNameCheck(Session->SessionId, DBMessage);
-								break;
-							case en_JobType::DATA_BASE_ITEM_CREATE:
-								Instance->PacketProcReqDBItemCreate(DBMessage);
-								break;
+								break;							
 							case en_JobType::DATA_BASE_LOOTING_ITEM_INVENTORY_SAVE:
 								Instance->PacketProcReqDBLootingItemToInventorySave(Session->SessionId, DBMessage);
 								break;
 							case en_JobType::DATA_BASE_CRAFTING_ITEM_INVENTORY_SAVE:
 								Instance->PacketProcReqDBCraftingItemToInventorySave(Session->SessionId, DBMessage);
 								break;
-							case en_JobType::DATA_BASE_ITEM_SWAP:
-								Instance->PacketProcReqDBItemSwap(Session->SessionId, DBMessage);
-								break;
+							case en_JobType::DATA_BASE_PLACE_ITEM:
+								Instance->PacketProcReqDBItemPlace(Session->SessionId, DBMessage);
+								break;						
 							case en_JobType::DATA_BASE_ITEM_USE:
 								Instance->PacketProcReqDBItemUpdate(Session->SessionId, DBMessage);
 								break;
@@ -229,6 +232,37 @@ unsigned __stdcall CGameServer::DataBaseThreadProc(void* Argument)
 			Instance->_JobMemoryPool->Free(Job);
 		}		
 	}
+	return 0;
+}
+
+unsigned __stdcall CGameServer::WorldDataBaseThreadProc(void* Argument)
+{
+	CGameServer* Instance = (CGameServer*)Argument;
+
+	while (!Instance->_WorldDataBaseThreadEnd)
+	{
+		WaitForSingleObject(Instance->_WorldDataBaseWakeEvent, INFINITE);
+
+		while (!Instance->_GameServerWorldDataBaseThreadMessageQue.IsEmpty())
+		{
+			st_Job* Job = nullptr;
+
+			if (!Instance->_GameServerWorldDataBaseThreadMessageQue.Dequeue(&Job))
+			{
+				break;
+			}
+
+			switch (Job->Type)
+			{
+			case en_JobType::DATA_BASE_ITEM_CREATE:
+				Instance->PacketProcReqDBItemCreate(Job->Message);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
 	return 0;
 }
 
@@ -702,8 +736,11 @@ void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 	case en_PACKET_TYPE::en_PACKET_C2S_LOOTING:
 		PacketProcReqItemLooting(SessionId, Message);
 		break;
-	case en_PACKET_TYPE::en_PACKET_C2S_ITEM_SWAP:
-		PacketProcReqItemSwap(SessionId, Message);
+	case en_PACKET_TYPE::en_PACKET_C2S_ITEM_SELECT:
+		PacketProcReqItemSelect(SessionId, Message);
+		break;	
+	case en_PACKET_TYPE::en_PACKET_C2S_ITEM_PLACE:
+		PacketProcReqItemPlace(SessionId, Message);
 		break;
 	case en_PACKET_TYPE::en_PACKET_C2S_QUICKSLOT_SAVE:
 		PacketProcReqQuickSlotSave(SessionId, Message);
@@ -753,7 +790,7 @@ void CGameServer::PacketProcReqLogin(int64 SessionID, CMessage* Message)
 		{
 			// AccountID 셋팅
 			*Message >> AccountId;
-				
+
 			// 중복 로그인 확인
 			for (st_Session* FindSession : _SessionArray)
 			{
@@ -805,10 +842,10 @@ void CGameServer::PacketProcReqLogin(int64 SessionID, CMessage* Message)
 			*DBAccountCheckMessage << (int16)en_JobType::DATA_BASE_ACCOUNT_CHECK;
 
 			InterlockedIncrement64(&Session->DBReserveCount);
-			Session->DBQue.Enqueue(DBAccountCheckMessage);			
+			Session->DBQue.Enqueue(DBAccountCheckMessage);
 
-			_GameServerDataBaseThreadMessageQue.Enqueue(DBAccountCheckJob);
-			SetEvent(_DataBaseWakeEvent);
+			_GameServerUserDataBaseThreadMessageQue.Enqueue(DBAccountCheckJob);
+			SetEvent(_UserDataBaseWakeEvent);
 		}
 		else
 		{
@@ -860,8 +897,8 @@ void CGameServer::PacketProcReqCreateCharacter(int64 SessionID, CMessage* Messag
 		InterlockedIncrement64(&Session->DBReserveCount);
 		Session->DBQue.Enqueue(DBReqChatacerCreateMessage);		
 
-		_GameServerDataBaseThreadMessageQue.Enqueue(DBCharacterCreateJob);
-		SetEvent(_DataBaseWakeEvent);
+		_GameServerUserDataBaseThreadMessageQue.Enqueue(DBCharacterCreateJob);
+		SetEvent(_UserDataBaseWakeEvent);
 	}
 	else
 	{
@@ -1032,8 +1069,8 @@ void CGameServer::PacketProcReqCharacterInfo(int64 SessionID, CMessage* Message)
 			InterlockedIncrement64(&Session->DBReserveCount);
 			Session->DBQue.Enqueue(DBCharacterInfoSendMessage);
 
-			_GameServerDataBaseThreadMessageQue.Enqueue(DBCharacterInfoSendJob);
-			SetEvent(_DataBaseWakeEvent);
+			_GameServerUserDataBaseThreadMessageQue.Enqueue(DBCharacterInfoSendJob);
+			SetEvent(_UserDataBaseWakeEvent);
 		}		
 
 		ReturnSession(Session);
@@ -2334,11 +2371,7 @@ void CGameServer::PacketProcReqChattingMessage(int64 SessionId, CMessage* Messag
 	ReturnSession(Session);
 }
 
-// int64 AccountId
-// int64 ObjectId
-// int8 SwapIndexA
-// int8 SwapIndexB
-void CGameServer::PacketProcReqItemSwap(int64 SessionId, CMessage* Message)
+void CGameServer::PacketProcReqItemSelect(int64 SessionId, CMessage* Message)
 {
 	st_Session* Session = FindSession(SessionId);
 
@@ -2385,35 +2418,91 @@ void CGameServer::PacketProcReqItemSwap(int64 SessionId, CMessage* Message)
 				}
 			}
 
-			int8 SwapIndexA;
-			*Message >> SwapIndexA;
+			int16 SelectItemTileGridPositionX;
+			int16 SelectItemTileGridPositionY;
+			*Message >> SelectItemTileGridPositionX;
+			*Message >> SelectItemTileGridPositionY;
 
-			int8 SwapIndexB;
-			*Message >> SwapIndexB;
+			CItem* SelectItem = MyPlayer->_InventoryManager.SelectItem(0, SelectItemTileGridPositionX, SelectItemTileGridPositionY);
 
-			InterlockedIncrement64(&Session->IOBlock->IOCount);
-
-			st_Job* DBItemSwapJob = _JobMemoryPool->Alloc();
-			DBItemSwapJob->Type = en_JobType::DATA_BASE_ITEM_SWAP;
-			DBItemSwapJob->SessionId = MyPlayer->_SessionId;
-
-			CGameServerMessage* DBItemSwapMessage = CGameServerMessage::GameServerMessageAlloc();
-			DBItemSwapMessage->Clear();
-
-			*DBItemSwapMessage << AccountId;
-			*DBItemSwapMessage << PlayerDBId;
-			*DBItemSwapMessage << SwapIndexA;
-			*DBItemSwapMessage << SwapIndexB;
-
-			DBItemSwapJob->Message = DBItemSwapMessage;
-
-			_GameServerDataBaseThreadMessageQue.Enqueue(DBItemSwapJob);
-			SetEvent(_DataBaseWakeEvent);
-
+			if (SelectItem != nullptr)
+			{
+				CMessage* ResItemSelectPacket = MakePacketResSelectItem(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, SelectItem);
+				SendPacket(Session->SessionId, ResItemSelectPacket);
+				ResItemSelectPacket->Free();
+			}			
 		} while (0);
-	}
 
-	ReturnSession(Session);
+		ReturnSession(Session);
+	}
+}
+
+void CGameServer::PacketProcReqItemPlace(int64 SessionId, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionId);
+
+	if (Session)
+	{
+		int64 AccountId;
+		int64 PlayerDBId;
+
+		do
+		{
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountId;
+
+			// AccountId가 맞는지 확인
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> PlayerDBId;
+
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			// 조종하고 있는 플레이어가 있는지 확인 
+			if (MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}				
+
+			st_Job* DBPlaceItemJob = _JobMemoryPool->Alloc();
+			DBPlaceItemJob->SessionId = Session->SessionId;
+
+			CGameServerMessage* DBPlaceItemMessage = CGameServerMessage::GameServerMessageAlloc();
+			DBPlaceItemMessage->Clear();
+
+			*DBPlaceItemMessage << (int16)en_JobType::DATA_BASE_PLACE_ITEM;
+			DBPlaceItemMessage->InsertData(Message->GetFrontBufferPtr(), Message->GetUseBufferSize());
+			Message->MoveReadPosition(Message->GetUseBufferSize());
+
+			InterlockedIncrement64(&Session->DBReserveCount);
+			Session->DBQue.Enqueue(DBPlaceItemMessage);
+
+			_GameServerUserDataBaseThreadMessageQue.Enqueue(DBPlaceItemJob);
+			SetEvent(_UserDataBaseWakeEvent);			
+		} while (0);
+
+		ReturnSession(Session);
+	}
 }
 
 void CGameServer::PacketProcReqQuickSlotSave(int64 SessionId, CMessage* Message)
@@ -2461,39 +2550,31 @@ void CGameServer::PacketProcReqQuickSlotSave(int64 SessionId, CMessage* Message)
 					Disconnect(Session->SessionId);
 					break;
 				}
-			}
-
-			InterlockedIncrement64(&Session->IOBlock->IOCount);
-
+			}			
+			
 			st_Job* DBQuickSlotSaveJob = _JobMemoryPool->Alloc();
-			DBQuickSlotSaveJob->Type = en_JobType::DATA_BASE_QUICK_SLOT_SAVE;
 			DBQuickSlotSaveJob->SessionId = MyPlayer->_SessionId;
 
 			CGameServerMessage* DBQuickSlotSaveMessage = CGameServerMessage::GameServerMessageAlloc();
 			DBQuickSlotSaveMessage->Clear();
 
+			*DBQuickSlotSaveMessage << (int16)en_JobType::DATA_BASE_QUICK_SLOT_SAVE;
 			*DBQuickSlotSaveMessage << AccountId;
 			*DBQuickSlotSaveMessage << PlayerDBId;
 			DBQuickSlotSaveMessage->InsertData(Message->GetFrontBufferPtr(), Message->GetUseBufferSize());
 			Message->MoveReadPosition(Message->GetUseBufferSize());
 
-			DBQuickSlotSaveJob->Message = DBQuickSlotSaveMessage;
+			InterlockedIncrement64(&Session->DBReserveCount);
+			Session->DBQue.Enqueue(DBQuickSlotSaveMessage);
 
-			_GameServerDataBaseThreadMessageQue.Enqueue(DBQuickSlotSaveJob);
-			SetEvent(_DataBaseWakeEvent);
-
+			_GameServerUserDataBaseThreadMessageQue.Enqueue(DBQuickSlotSaveJob);
+			SetEvent(_UserDataBaseWakeEvent);
 		} while (0);
 	}
 
 	ReturnSession(Session);
 }
 
-// int64 AccountId
-// int64 ObjectId
-// int8 SwapQuickSlotBarIndexA
-// int8 SwapQuickSlotBarSlotIndexA
-// int8 SwapQuickSlotBarIndexB
-// int8 SwapQuickSlotBarSlotIndexB
 void CGameServer::PacketProcReqQuickSlotSwap(int64 SessionId, CMessage* Message)
 {
 	st_Session* Session = FindSession(SessionId);
@@ -2539,26 +2620,25 @@ void CGameServer::PacketProcReqQuickSlotSwap(int64 SessionId, CMessage* Message)
 					Disconnect(Session->SessionId);
 					break;
 				}
-			}
-
-			InterlockedIncrement64(&Session->IOBlock->IOCount);
-
-			st_Job* DBQuickSlotSwapJob = _JobMemoryPool->Alloc();
-			DBQuickSlotSwapJob->Type = en_JobType::DATA_BASE_QUICK_SWAP;
+			}			
+			
+			st_Job* DBQuickSlotSwapJob = _JobMemoryPool->Alloc();			
 			DBQuickSlotSwapJob->SessionId = MyPlayer->_SessionId;
 
 			CGameServerMessage* DBQuickSlotSwapMessage = CGameServerMessage::GameServerMessageAlloc();
 			DBQuickSlotSwapMessage->Clear();
 
+			*DBQuickSlotSwapMessage << (int16)en_JobType::DATA_BASE_QUICK_SWAP;
 			*DBQuickSlotSwapMessage << AccountId;
 			*DBQuickSlotSwapMessage << PlayerDBId;
 			DBQuickSlotSwapMessage->InsertData(Message->GetFrontBufferPtr(), Message->GetUseBufferSize());
 			Message->MoveReadPosition(Message->GetUseBufferSize());
 
-			DBQuickSlotSwapJob->Message = DBQuickSlotSwapMessage;
+			InterlockedIncrement64(&Session->DBReserveCount);
+			Session->DBQue.Enqueue(DBQuickSlotSwapMessage);
 
-			_GameServerDataBaseThreadMessageQue.Enqueue(DBQuickSlotSwapJob);
-			SetEvent(_DataBaseWakeEvent);
+			_GameServerUserDataBaseThreadMessageQue.Enqueue(DBQuickSlotSwapJob);
+			SetEvent(_UserDataBaseWakeEvent);
 		} while (0);
 	}
 
@@ -2610,26 +2690,25 @@ void CGameServer::PacketProcReqQuickSlotInit(int64 SessionId, CMessage* Message)
 					Disconnect(Session->SessionId);
 					break;
 				}
-			}
+			}					
 
-			InterlockedIncrement64(&Session->IOBlock->IOCount);
-
-			st_Job* DBQuickSlotInitJob = _JobMemoryPool->Alloc();
-			DBQuickSlotInitJob->Type = en_JobType::DATA_BASE_QUICK_INIT;
+			st_Job* DBQuickSlotInitJob = _JobMemoryPool->Alloc();			
 			DBQuickSlotInitJob->SessionId = MyPlayer->_SessionId;
 
 			CGameServerMessage* DBQuickSlotInitMessage = CGameServerMessage::GameServerMessageAlloc();
 			DBQuickSlotInitMessage->Clear();
 
+			*DBQuickSlotInitMessage << (int16)en_JobType::DATA_BASE_QUICK_INIT;
 			*DBQuickSlotInitMessage << AccountId;
 			*DBQuickSlotInitMessage << PlayerDBId;
 			DBQuickSlotInitMessage->InsertData(Message->GetFrontBufferPtr(), Message->GetUseBufferSize());
 			Message->MoveReadPosition(Message->GetUseBufferSize());
 
-			DBQuickSlotInitJob->Message = DBQuickSlotInitMessage;
+			InterlockedIncrement64(&Session->DBReserveCount);
+			Session->DBQue.Enqueue(DBQuickSlotInitMessage);
 
-			_GameServerDataBaseThreadMessageQue.Enqueue(DBQuickSlotInitJob);
-			SetEvent(_DataBaseWakeEvent);
+			_GameServerUserDataBaseThreadMessageQue.Enqueue(DBQuickSlotInitJob);
+			SetEvent(_UserDataBaseWakeEvent);
 		} while (0);
 	}
 
@@ -2758,38 +2837,38 @@ void CGameServer::PacketProcReqCraftingConfirm(int64 SessionId, CMessage* Messag
 			// 인벤토리에 재료템이 있는지 확인
 			for (st_CraftingMaterialItemInfo CraftingMaterialItemInfo : ReqMaterials)
 			{
-				// 인벤토리에 재료템 목록을 가지고 옴
-				vector<CItem*> FindMaterialItem;
-				vector<CItem*> FindMaterials = MyPlayer->_Inventory.Find(CraftingMaterialItemInfo.MaterialItemType);
+				//// 인벤토리에 재료템 목록을 가지고 옴
+				//vector<CItem*> FindMaterialItem;
+				//vector<CItem*> FindMaterials = MyPlayer->_Inventory.Find(CraftingMaterialItemInfo.MaterialItemType);
 
-				if (FindMaterials.size() > 0)
-				{
-					for (CItem* FindMaterialItem : FindMaterials)
-					{
-						// 제작템을 한개 만들때 필요한 재료의 개수를 얻어옴
-						int16 OneReqMaterialCount = 0;
-						for (st_CraftingMaterialItemData ReqMaterialCountData : RequireMaterialDatas)
-						{
-							if (FindMaterialItem->_ItemInfo.ItemSmallCategory == ReqMaterialCountData.MaterialDataId)
-							{
-								OneReqMaterialCount = ReqMaterialCountData.MaterialCount;
-								break;
-							}
-						}
+				//if (FindMaterials.size() > 0)
+				//{
+				//	for (CItem* FindMaterialItem : FindMaterials)
+				//	{
+				//		// 제작템을 한개 만들때 필요한 재료의 개수를 얻어옴
+				//		int16 OneReqMaterialCount = 0;
+				//		for (st_CraftingMaterialItemData ReqMaterialCountData : RequireMaterialDatas)
+				//		{
+				//			if (FindMaterialItem->_ItemInfo.ItemSmallCategory == ReqMaterialCountData.MaterialDataId)
+				//			{
+				//				OneReqMaterialCount = ReqMaterialCountData.MaterialCount;
+				//				break;
+				//			}
+				//		}
 
-						// 클라가 요청한 개수 * 한개 만들떄 필요한 개수 만큼 인벤토리에서 차감한다.
-						int16 ReqCraftingItemTotalCount = ReqCraftingItemCount * OneReqMaterialCount;
-						FindMaterialItem->_ItemInfo.ItemCount -= ReqCraftingItemTotalCount;
+				//		// 클라가 요청한 개수 * 한개 만들떄 필요한 개수 만큼 인벤토리에서 차감한다.
+				//		int16 ReqCraftingItemTotalCount = ReqCraftingItemCount * OneReqMaterialCount;
+				//		FindMaterialItem->_ItemInfo.ItemCount -= ReqCraftingItemTotalCount;
 
-						// 앞서 업데이트한 아이템의 정보를 DB에 업데이트 하기 위해 담는다.
-						*DBCraftingItemSaveMessage << &FindMaterialItem;
-					}
-				}
-				else
-				{
-					InventoryCheck = false;
-					break;
-				}
+				//		// 앞서 업데이트한 아이템의 정보를 DB에 업데이트 하기 위해 담는다.
+				//		*DBCraftingItemSaveMessage << &FindMaterialItem;
+				//	}
+				//}
+				//else
+				//{
+				//	InventoryCheck = false;
+				//	break;
+				//}
 			}
 
 			if (InventoryCheck == false)
@@ -2828,94 +2907,94 @@ void CGameServer::PacketProcReqCraftingConfirm(int64 SessionId, CMessage* Messag
 			bool IsExistItem = false;
 			int8 SlotIndex = 0;
 
-			// 인벤토리에 제작템이 이미 있으면 개수만 늘려준다.
-			IsExistItem = MyPlayer->_Inventory.IsExistItem(CraftingItemInfo.ItemSmallCategory, ReqCraftingItemCount, &SlotIndex);
+			//// 인벤토리에 제작템이 이미 있으면 개수만 늘려준다.
+			//IsExistItem = MyPlayer->_Inventory.IsExistItem(CraftingItemInfo.ItemSmallCategory, ReqCraftingItemCount, &SlotIndex);
 
-			if (IsExistItem == false)
-			{
-				switch (FindReqCompleteItemData->SmallItemCategory)
-				{
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:
-				{
-					CWeapon* CraftingWeaponItem = (CWeapon*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_WEAPON);
-					CraftingWeaponItem->_ItemInfo = CraftingItemInfo;
+			//if (IsExistItem == false)
+			//{
+			//	switch (FindReqCompleteItemData->SmallItemCategory)
+			//	{
+			//	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:
+			//	{
+			//		CWeapon* CraftingWeaponItem = (CWeapon*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_WEAPON);
+			//		CraftingWeaponItem->_ItemInfo = CraftingItemInfo;
 
-					if (MyPlayer->_Inventory.GetEmptySlot(&SlotIndex))
-					{
-						CraftingWeaponItem->_ItemInfo.ItemSlotIndex = SlotIndex;
-						MyPlayer->_Inventory.AddItem(CraftingWeaponItem);
-					}
-				}
-				break;
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:
-				{
-					CArmor* CraftingArmorItem = (CArmor*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_ARMOR);
-					CraftingArmorItem->_ItemInfo = CraftingItemInfo;
+			//		if (MyPlayer->_Inventory.GetEmptySlot(&SlotIndex))
+			//		{
+			//			//CraftingWeaponItem->_ItemInfo.ItemSlotIndex = SlotIndex;
+			//			MyPlayer->_Inventory.AddItem(CraftingWeaponItem);
+			//		}
+			//	}
+			//	break;
+			//	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
+			//	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD:
+			//	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:
+			//	{
+			//		CArmor* CraftingArmorItem = (CArmor*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_ARMOR);
+			//		CraftingArmorItem->_ItemInfo = CraftingItemInfo;
 
-					if (MyPlayer->_Inventory.GetEmptySlot(&SlotIndex))
-					{
-						CraftingArmorItem->_ItemInfo.ItemSlotIndex = SlotIndex;
-						MyPlayer->_Inventory.AddItem(CraftingArmorItem);
-					}
-				}
-				break;
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL:
-					break;
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_FIERCE_ATTACK:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CONVERSION_ATTACK:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SHAEHONE_ATTACK:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SMASH_WAVE_ATTACK:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHARGE_POSE:
-					break;
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_FLAME_HARPOON:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HELL_FIRE:
-				case en_SmallItemCategory::ITEM_SMALL_CATEOGRY_SKILLBOOK_SHAMAN_HEALING_LIGHT:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HEALING_WIND:
-					break;
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHOCK_RELEASE:
-					break;
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
-				{
-					CMaterial* CraftingMaterialItem = (CMaterial*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_MATERIAL);
-					CraftingMaterialItem->_ItemInfo = CraftingItemInfo;
+			//		if (MyPlayer->_Inventory.GetEmptySlot(&SlotIndex))
+			//		{
+			//			//CraftingArmorItem->_ItemInfo.ItemSlotIndex = SlotIndex;
+			//			MyPlayer->_Inventory.AddItem(CraftingArmorItem);
+			//		}
+			//	}
+			//	break;
+			//	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL:
+			//		break;
+			//	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_FIERCE_ATTACK:
+			//	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CONVERSION_ATTACK:
+			//	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SHAEHONE_ATTACK:
+			//	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK:
+			//	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SMASH_WAVE_ATTACK:
+			//	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHARGE_POSE:
+			//		break;
+			//	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_FLAME_HARPOON:
+			//	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HELL_FIRE:
+			//	case en_SmallItemCategory::ITEM_SMALL_CATEOGRY_SKILLBOOK_SHAMAN_HEALING_LIGHT:
+			//	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HEALING_WIND:
+			//		break;
+			//	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHOCK_RELEASE:
+			//		break;
+			//	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:
+			//	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL:
+			//	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN:
+			//	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN:
+			//	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN:
+			//	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE:
+			//	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG:
+			//	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
+			//	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
+			//	{
+			//		CMaterial* CraftingMaterialItem = (CMaterial*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_MATERIAL);
+			//		CraftingMaterialItem->_ItemInfo = CraftingItemInfo;
 
-					if (MyPlayer->_Inventory.GetEmptySlot(&SlotIndex))
-					{
-						CraftingMaterialItem->_ItemInfo.ItemSlotIndex = SlotIndex;
-						MyPlayer->_Inventory.AddItem(CraftingMaterialItem);
-					}
-				}
-				break;
-				default:
-					break;
-				}
-			}
+			//		if (MyPlayer->_Inventory.GetEmptySlot(&SlotIndex))
+			//		{
+			//			//CraftingMaterialItem->_ItemInfo.ItemSlotIndex = SlotIndex;
+			//			MyPlayer->_Inventory.AddItem(CraftingMaterialItem);
+			//		}
+			//	}
+			//	break;
+			//	default:
+			//		break;
+			//	}
+			//}
 
-			CItem* CraftingItemCompleteItem = MyPlayer->_Inventory.Get(SlotIndex);
+			//CItem* CraftingItemCompleteItem = MyPlayer->_Inventory.Get(SlotIndex);
 
-			// 중복 여부
-			*DBCraftingItemSaveMessage << IsExistItem;
-			// 증가한 아이템 개수
-			*DBCraftingItemSaveMessage << ReqCraftingItemCount;
-			// 작업 완료된 아이템 정보
-			*DBCraftingItemSaveMessage << &CraftingItemCompleteItem;
-			*DBCraftingItemSaveMessage << AccountId;
+			//// 중복 여부
+			//*DBCraftingItemSaveMessage << IsExistItem;
+			//// 증가한 아이템 개수
+			//*DBCraftingItemSaveMessage << ReqCraftingItemCount;
+			//// 작업 완료된 아이템 정보
+			//*DBCraftingItemSaveMessage << &CraftingItemCompleteItem;
+			//*DBCraftingItemSaveMessage << AccountId;
 
-			DBInventorySaveJob->Message = DBCraftingItemSaveMessage;
+			//DBInventorySaveJob->Message = DBCraftingItemSaveMessage;
 
-			_GameServerDataBaseThreadMessageQue.Enqueue(DBInventorySaveJob);
-			SetEvent(_DataBaseWakeEvent);
+			//_GameServerDataBaseThreadMessageQue.Enqueue(DBInventorySaveJob);
+			//SetEvent(_DataBaseWakeEvent);
 		} while (0);
 	}
 
@@ -2998,14 +3077,13 @@ void CGameServer::PacketProcReqItemUse(int64 SessionId, CMessage* Message)
 			*Message >> ItemThumbnailImagePathLen;
 			Message->GetData(UseItemInfo.ItemThumbnailImagePath, ItemThumbnailImagePathLen);
 			*Message >> UseItemInfo.ItemIsEquipped;
-			*Message >> UseItemInfo.ItemSlotIndex;
 
 			// 인벤토리에 아이템이 있는지 확인
-			CItem* UseItem = MyPlayer->_Inventory.Get(UseItemInfo.ItemSlotIndex);
+			/*CItem* UseItem = MyPlayer->_Inventory.Get(UseItemInfo.ItemSlotIndex);
 			if (UseItem->_ItemInfo != UseItemInfo)
 			{
 				CRASH("요청한 사용 아이템과 인벤토리에 보관중인 아이템이 다름");
-			}
+			}*/
 
 			InterlockedIncrement64(&Session->IOBlock->IOCount);
 
@@ -3017,12 +3095,12 @@ void CGameServer::PacketProcReqItemUse(int64 SessionId, CMessage* Message)
 			DBItemEquipMessage->Clear();
 
 			// 착용할 아이템과 착용해제한 아이템의 정보를 담음
-			*DBItemEquipMessage << &UseItem;
+			//*DBItemEquipMessage << &UseItem;
 
 			DBItemEquipJob->Message = DBItemEquipMessage;
 
-			_GameServerDataBaseThreadMessageQue.Enqueue(DBItemEquipJob);
-			SetEvent(_DataBaseWakeEvent);
+			_GameServerUserDataBaseThreadMessageQue.Enqueue(DBItemEquipJob);
+			SetEvent(_UserDataBaseWakeEvent);
 		} while (0);
 	}
 
@@ -3031,6 +3109,7 @@ void CGameServer::PacketProcReqItemUse(int64 SessionId, CMessage* Message)
 
 void CGameServer::PacketProcReqItemLooting(int64 SessionId, CMessage* Message)
 {
+	// 아이템 줍기 처리
 	st_Session* Session = FindSession(SessionId);
 
 	if (Session)
@@ -3090,96 +3169,52 @@ void CGameServer::PacketProcReqItemLooting(int64 SessionId, CMessage* Message)
 					}
 
 					bool IsExistItem = false;
-					CItem* CraftingItemCompleteItem;
-					// 아이템 정보가 코인이라면
-					if (Items[i]->_ItemInfo.ItemSmallCategory == en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN
-						|| Items[i]->_ItemInfo.ItemSmallCategory == en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN
-						|| Items[i]->_ItemInfo.ItemSmallCategory == en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN)
+					// 인벤토리에 저장할 아이템 개수 ( 맵에 스폰되어 있는 아이템의 개수 )
+					int16 ItemEach = Items[i]->_ItemInfo.ItemCount;					
+
+					// 아이템이 인벤토리에 있는지 찾는다.						
+					CItem* FindItem = TargetPlayer->_InventoryManager.FindInventoryItem(0, Items[i]);
+					if (FindItem == nullptr)
 					{
-						// 코인 저장
-						TargetPlayer->_Inventory.AddItem(Items[i]);
-
-						InterlockedIncrement64(&Session->IOBlock->IOCount);
-
-						st_Job* DBGoldSaveJob = _JobMemoryPool->Alloc();
-						DBGoldSaveJob->Type = en_JobType::DATA_BASE_GOLD_SAVE;
-						DBGoldSaveJob->SessionId = TargetPlayer->_SessionId;
-
-						CGameServerMessage* DBGoldSaveMessage = CGameServerMessage::GameServerMessageAlloc();
-						DBGoldSaveMessage->Clear();
-
-						*DBGoldSaveMessage << TargetPlayer->_AccountId;
-						*DBGoldSaveMessage << TargetPlayer->_GameObjectInfo.ObjectId;
-						*DBGoldSaveMessage << Items[i]->_ItemInfo.ItemDBId;
-						*DBGoldSaveMessage << TargetPlayer->_Inventory._GoldCoinCount;
-						*DBGoldSaveMessage << TargetPlayer->_Inventory._SliverCoinCount;
-						*DBGoldSaveMessage << TargetPlayer->_Inventory._BronzeCoinCount;
-						*DBGoldSaveMessage << Items[i]->_ItemInfo.ItemCount;
-						*DBGoldSaveMessage << (int16)Items[i]->_ItemInfo.ItemSmallCategory;
-
-						DBGoldSaveJob->Message = DBGoldSaveMessage;
-
-						_GameServerDataBaseThreadMessageQue.Enqueue(DBGoldSaveJob);
-						SetEvent(_DataBaseWakeEvent);
+						// 찾지 못했을 경우
+						// 비어 있는 공간을 찾아서 해당 공간에 아이템을 넣는다.
+						TargetPlayer->_InventoryManager.InsertItem(0, Items[i]);
+						
+						FindItem = TargetPlayer->_InventoryManager.GetItem(0, Items[i]->_ItemInfo.TileGridPositionX, Items[i]->_ItemInfo.TileGridPositionY);
 					}
 					else
 					{
-						// 인벤토리에 저장할 아이템 개수 ( 맵에 스폰되어 있는 아이템의 개수 )
-						int16 ItemEach = Items[i]->_ItemInfo.ItemCount;
-
-						// 그 외 아이템이라면 
-						int8 SlotIndex = 0;
-						// 인벤토리에 저장된 아이템 개수
-						int16 ItemCount = 0;
-
-						// 아이템이 이미 존재 하는지 확인한다.
-						// 존재 하면 개수를 아이템 개수 만큼 증가한다.
-						IsExistItem = TargetPlayer->_Inventory.IsExistItem(Items[i]->_ItemInfo.ItemSmallCategory, ItemEach, &SlotIndex);
-
-						// 존재 하지 않을 경우
-						if (IsExistItem == false)
-						{
-							// 비어 있는 슬롯인덱스 가져와서
-							if (TargetPlayer->_Inventory.GetEmptySlot(&SlotIndex))
-							{
-								// 인벤토리에 저장
-								Items[i]->_ItemInfo.ItemSlotIndex = SlotIndex;
-								TargetPlayer->_Inventory.AddItem(Items[i]);
-								ItemCount = ItemEach;
-							}
-						}
-
-						InterlockedIncrement64(&Session->IOBlock->IOCount);
-
-						// DB 인벤토리에 저장하기 위해 Job 생성
-						st_Job* DBInventorySaveJob = _JobMemoryPool->Alloc();
-						DBInventorySaveJob->Type = en_JobType::DATA_BASE_LOOTING_ITEM_INVENTORY_SAVE;
-						DBInventorySaveJob->SessionId = Session->SessionId;
-
-						CGameServerMessage* DBSaveMessage = CGameServerMessage::GameServerMessageAlloc();
-
-						DBSaveMessage->Clear();
-
-						CraftingItemCompleteItem = TargetPlayer->_Inventory.Get(SlotIndex);
-
-						// 타겟 ObjectId
-						*DBSaveMessage << TargetPlayer->_GameObjectInfo.ObjectId;
-						// 중복 여부
-						*DBSaveMessage << IsExistItem;
-						// 얻은 아이템 개수
-						*DBSaveMessage << ItemEach;
-						// 삭제해야할 아이템 ObjectId;
-						*DBSaveMessage << Items[i]->_GameObjectInfo.ObjectId;
-						// 아이템 포인터 담기
-						*DBSaveMessage << &CraftingItemCompleteItem;
-						// 아이템 처리한 AccountId
-						*DBSaveMessage << AccountId;
-
-						DBInventorySaveJob->Message = DBSaveMessage;
-
-						_GameServerDataBaseThreadMessageQue.Enqueue(DBInventorySaveJob);
-						SetEvent(_DataBaseWakeEvent);
+						IsExistItem = true;
+						// 찾앗을 경우
+						FindItem->_ItemInfo.ItemCount += Items[i]->_ItemInfo.ItemCount;
 					}
+					
+					// DB 인벤토리에 저장하기 위해 Job 생성
+					st_Job* DBInventorySaveJob = _JobMemoryPool->Alloc();
+					DBInventorySaveJob->SessionId = Session->SessionId;
+
+					CGameServerMessage* DBInventoryItemSaveMessage = CGameServerMessage::GameServerMessageAlloc();
+					DBInventoryItemSaveMessage->Clear();
+
+					*DBInventoryItemSaveMessage << (int16)en_JobType::DATA_BASE_LOOTING_ITEM_INVENTORY_SAVE;
+					// 타겟 ObjectId
+					*DBInventoryItemSaveMessage << TargetPlayer->_GameObjectInfo.ObjectId;
+					// 중복 여부
+					*DBInventoryItemSaveMessage << IsExistItem;
+					// 얻은 아이템 개수
+					*DBInventoryItemSaveMessage << ItemEach;
+					// 삭제해야할 아이템 ObjectId;
+					*DBInventoryItemSaveMessage << Items[i]->_GameObjectInfo.ObjectId;
+					// 아이템 포인터 담기
+					*DBInventoryItemSaveMessage << &FindItem;
+					// 아이템 처리한 AccountId
+					*DBInventoryItemSaveMessage << AccountId;
+
+					InterlockedIncrement64(&Session->DBReserveCount);
+					Session->DBQue.Enqueue(DBInventoryItemSaveMessage);
+
+					_GameServerUserDataBaseThreadMessageQue.Enqueue(DBInventorySaveJob);
+					SetEvent(_UserDataBaseWakeEvent);
 
 					// 월드에 스폰되어 있었던 아이템을 반납한다.
 					G_ObjectManager->ObjectLeaveGame(Items[i], 1, IsExistItem);
@@ -3353,7 +3388,7 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 				PlayerCount++;
 			}
 
-			G_DBConnectionPool->Push(en_DBConnect::GAME, GameServerDBConnection);		
+			G_DBConnectionPool->Push(en_DBConnect::GAME, GameServerDBConnection);
 
 			// 클라에게 로그인 응답 패킷을 보내면서 캐릭터의 정보를 함께 보낸다.
 			CMessage* ResLoginMessage = MakePacketResLogin(Status, PlayerCount, Session->MyPlayerIndexes);
@@ -3413,41 +3448,41 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			switch ((en_GameObjectType)ReqGameObjectType)
 			{
 			case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-				{
-					auto FindStatus = G_Datamanager->_WarriorStatus.find(1);
-					NewCharacterStatus = *(*FindStatus).second;
-				}
-				break;
+			{
+				auto FindStatus = G_Datamanager->_WarriorStatus.find(1);
+				NewCharacterStatus = *(*FindStatus).second;
+			}
+			break;
 			case en_GameObjectType::OBJECT_MAGIC_PLAYER:
-				{
-					auto FindStatus = G_Datamanager->_ShamanStatus.find(1);
-					NewCharacterStatus = *(*FindStatus).second;
-				}
-				break;
+			{
+				auto FindStatus = G_Datamanager->_ShamanStatus.find(1);
+				NewCharacterStatus = *(*FindStatus).second;
+			}
+			break;
 			case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
-				{
-					auto FindStatus = G_Datamanager->_TaioistStatus.find(1);
-					NewCharacterStatus = *(*FindStatus).second;
-				}
-				break;
+			{
+				auto FindStatus = G_Datamanager->_TaioistStatus.find(1);
+				NewCharacterStatus = *(*FindStatus).second;
+			}
+			break;
 			case en_GameObjectType::OBJECT_THIEF_PLAYER:
-				{
-					auto FindStatus = G_Datamanager->_ThiefStatus.find(1);
-					NewCharacterStatus = *(*FindStatus).second;
-				}
-				break;
+			{
+				auto FindStatus = G_Datamanager->_ThiefStatus.find(1);
+				NewCharacterStatus = *(*FindStatus).second;
+			}
+			break;
 			case en_GameObjectType::OBJECT_ARCHER_PLAYER:
-				{
-					auto FindStatus = G_Datamanager->_ArcherStatus.find(1);
-					NewCharacterStatus = *(*FindStatus).second;
-				}
-				break;
+			{
+				auto FindStatus = G_Datamanager->_ArcherStatus.find(1);
+				NewCharacterStatus = *(*FindStatus).second;
+			}
+			break;
 			case en_GameObjectType::OBJECT_PLAYER_DUMMY:
-				{
-					auto FindStatus = G_Datamanager->_WarriorStatus.find(1);
-					NewCharacterStatus = *(*FindStatus).second;
-				}
-				break;
+			{
+				auto FindStatus = G_Datamanager->_WarriorStatus.find(1);
+				NewCharacterStatus = *(*FindStatus).second;
+			}
+			break;
 			default:
 				break;
 			}
@@ -3501,7 +3536,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 			// DB 요청 실행
 			bool SaveNewCharacterQuery = NewCharacterPush.Execute();
 			if (SaveNewCharacterQuery == true)
-			{				
+			{
 				// 앞서 저장한 캐릭터의 DBId를 AccountId를 이용해 얻어온다.
 				CDBConnection* PlayerDBIDGetDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 				// GameServerDB에 생성한 캐릭터의 PlayerDBId를 읽어오는 프로시저 클래스
@@ -3516,8 +3551,8 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 
 				if (GetNewCharacterPlayerDBId == true)
 				{
-					PlayerDBIDGet.Fetch();					
-					
+					PlayerDBIDGet.Fetch();
+
 					// DB에 등록한 새 캐릭터 정보
 					CPlayer* NewPlayerCharacter = (CPlayer*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_PLAYER);
 					NewPlayerCharacter->_GameObjectInfo.ObjectId = PlayerDBId;
@@ -3553,39 +3588,33 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 					NewPlayerCharacter->_AccountId = Session->AccountId;
 					NewPlayerCharacter->_Experience.CurrentExperience = 0;
 					NewPlayerCharacter->_Experience.RequireExperience = LevelData.RequireExperience;
-					NewPlayerCharacter->_Experience.TotalExperience = LevelData.TotalExperience;					
-					
-					G_ObjectManager->_PlayersArray[Session->MyPlayerIndexes[ReqCharacterCreateSlotIndex]] = NewPlayerCharacter;
+					NewPlayerCharacter->_Experience.TotalExperience = LevelData.TotalExperience;
 
-					// Gold Table 생성
-					CDBConnection* DBGoldTableCreateConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-					SP::CDBGameServerGoldTableCreatePush GoldTableCreate(*DBGoldTableCreateConnection);
-					GoldTableCreate.InAccountDBId(Session->AccountId);
-					GoldTableCreate.InPlayerDBId(PlayerDBId);
+					G_ObjectManager->_PlayersArray[Session->MyPlayerIndexes[ReqCharacterCreateSlotIndex]] = NewPlayerCharacter;					
 
-					GoldTableCreate.Execute();
-
-					G_DBConnectionPool->Push(en_DBConnect::GAME, DBGoldTableCreateConnection);
-
-					// DB에 인벤토리 생성
-					for (int8 SlotIndex = 0; SlotIndex < (int8)en_Inventory::INVENTORY_SIZE; SlotIndex++)
+					// DB에 새로운 인벤토리 생성
+					for (int16 Y = 0; Y < (int8)en_InventoryManager::INVENTORY_DEFAULT_HEIGHT_SIZE; Y++)
 					{
-						CDBConnection* DBItemToInventoryConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-						SP::CDBGameServerItemCreateToInventory ItemToInventory(*DBItemToInventoryConnection);
-						st_ItemInfo NewItem;
+						for (int16 X = 0; X < (int8)en_InventoryManager::INVENTORY_DEFAULT_WIDH_SIZE; X++)
+						{
+							CDBConnection* DBItemToInventoryConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+							SP::CDBGameServerItemCreateToInventory ItemToInventory(*DBItemToInventoryConnection);
+							st_ItemInfo NewItem;
 
-						NewItem.ItemName = L"";
-						NewItem.ItemThumbnailImagePath = L"";
+							NewItem.ItemName = L"";
+							NewItem.ItemThumbnailImagePath = L"";
 
-						ItemToInventory.InItemName(NewItem.ItemName);
-						ItemToInventory.InSlotIndex(SlotIndex);
-						ItemToInventory.InThumbnailImagePath(NewItem.ItemThumbnailImagePath);
-						ItemToInventory.InOwnerAccountId(Session->AccountId);
-						ItemToInventory.InOwnerPlayerId(PlayerDBId);
+							ItemToInventory.InItemName(NewItem.ItemName);
+							ItemToInventory.InItemTileGridPositionX(X);
+							ItemToInventory.InItemTileGridPositionY(Y);
+							ItemToInventory.InThumbnailImagePath(NewItem.ItemThumbnailImagePath);
+							ItemToInventory.InOwnerAccountId(Session->AccountId);
+							ItemToInventory.InOwnerPlayerId(PlayerDBId);
 
-						ItemToInventory.Execute();
+							ItemToInventory.Execute();
 
-						G_DBConnectionPool->Push(en_DBConnect::GAME, DBItemToInventoryConnection);
+							G_DBConnectionPool->Push(en_DBConnect::GAME, DBItemToInventoryConnection);
+						}
 					}
 
 					int16 DefaultKey = (int16)UnityEngine::Alpha1;
@@ -3595,7 +3624,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 					{
 						CDBConnection* DBQuickSlotCreateConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 						SP::CDBGameServerQuickSlotBarSlotCreate QuickSlotBarSlotCreate(*DBQuickSlotCreateConnection);
-																
+
 						int8 QuickSlotBarIndex = SlotIndex;
 						int8 QuickSlotBarSlotIndex;
 						int16 QuickSlotBarKey = 0;
@@ -3609,7 +3638,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 						wstring SkillThumbnailImagePath;
 
 						for (int8 i = 0; i < (int8)en_QuickSlotBar::QUICK_SLOT_BAR_SLOT_SIZE; ++i)
-						{	
+						{
 							QuickSlotBarSlotIndex = i;
 
 							if (DefaultKey == (int16)UnityEngine::Colon)
@@ -3639,7 +3668,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 
 					// 기본 스킬 생성
 					PlayerLevelUpSkillCreate(Session->AccountId, NewPlayerCharacter->_GameObjectInfo, ReqCharacterCreateSlotIndex);
-					
+
 					// 기본 공격 스킬 퀵슬롯 1번에 등록
 					st_QuickSlotBarSlotInfo DefaultAttackSkillQuickSlotInfo;
 					DefaultAttackSkillQuickSlotInfo.AccountDBId = Session->AccountId;
@@ -3671,7 +3700,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 					CMessage* ResCreateCharacterMessage = MakePacketResCreateCharacter(!CharacterNameFind, NewPlayerCharacter->_GameObjectInfo);
 					SendPacket(Session->SessionId, ResCreateCharacterMessage);
 					ResCreateCharacterMessage->Free();
-				}				
+				}
 
 				G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerDBIDGetDBConnection);
 			}
@@ -3682,7 +3711,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 
 			// DBConnection 반납
 			G_DBConnectionPool->Push(en_DBConnect::GAME, NewCharacterPushDBConnection);
-				}
+		}
 		else
 		{
 			// 캐릭터가 이미 DB에 생성되어 있는 경우
@@ -3791,6 +3820,9 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 	if (Find == true)
 	{
 		bool ItemIsQuickSlotUse = false;
+		bool ItemRotated = false;
+		int16 ItemWidth = 0;
+		int16 ItemHeight = 0;
 		int8 ItemLargeCategory = 0;
 		int8 ItemMediumCategory = 0;
 		int16 ItemSmallCategory = 0;
@@ -3798,7 +3830,8 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 		int16 ItemCount = 0;
 		wstring ItemThumbnailImagePath;
 		bool ItemEquipped = false;
-		int8 ItemSlotIndex = -1;
+		int16 ItemTilePositionX = 0;
+		int16 ItemTilePositionY = 0;		
 		int32 ItemMinDamage = 0;
 		int32 ItemMaxDamage = 0;
 		int32 ItemDefence = 0;
@@ -3808,7 +3841,7 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 		{
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:
 		{
-			ItemIsQuickSlotUse = false;
+			ItemIsQuickSlotUse = false;			
 			ItemLargeCategory = (int8)DropItemData.LargeItemCategory;
 			ItemMediumCategory = (int8)DropItemData.MediumItemCategory;
 			ItemSmallCategory = (int16)DropItemData.SmallItemCategory;
@@ -3818,6 +3851,8 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 			ItemThumbnailImagePath = (LPWSTR)CA2W(DropItemData.ItemThumbnailImagePath.c_str());
 
 			st_ItemData* WeaponItemData = (*G_Datamanager->_Items.find((int16)DropItemData.SmallItemCategory)).second;
+			ItemWidth = WeaponItemData->ItemWidth;
+			ItemHeight = WeaponItemData->ItemHeight;
 			ItemMinDamage = WeaponItemData->ItemMinDamage;
 			ItemMaxDamage = WeaponItemData->ItemMaxDamage;
 		}
@@ -3836,6 +3871,8 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 			ItemThumbnailImagePath = (LPWSTR)CA2W(DropItemData.ItemThumbnailImagePath.c_str());
 
 			st_ItemData* ArmorItemData = (*G_Datamanager->_Items.find((int16)DropItemData.SmallItemCategory)).second;
+			ItemWidth = ArmorItemData->ItemWidth;
+			ItemHeight = ArmorItemData->ItemHeight;
 			ItemDefence = ArmorItemData->ItemDefence;
 		}
 		break;
@@ -3863,6 +3900,8 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 			ItemThumbnailImagePath = (LPWSTR)CA2W(DropItemData.ItemThumbnailImagePath.c_str());
 
 			st_ItemData* MaterialItemData = (*G_Datamanager->_Items.find((int16)DropItemData.SmallItemCategory)).second;
+			ItemWidth = MaterialItemData->ItemWidth;
+			ItemHeight = MaterialItemData->ItemHeight;
 			ItemMaxCount = MaterialItemData->ItemMaxCount;
 		}
 		break;
@@ -3876,8 +3915,11 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 
 		bool ItemUse = false;
 
-		CreateItem.InItemUse(ItemUse);
+		CreateItem.InItemUse(ItemUse);		
 		CreateItem.InIsQuickSlotUse(ItemIsQuickSlotUse);
+		CreateItem.InItemRotated(ItemRotated);
+		CreateItem.InItemWidth(ItemWidth);
+		CreateItem.InItemHeight(ItemHeight);
 		CreateItem.InItemLargeCategory(ItemLargeCategory);
 		CreateItem.InItemMediumCategory(ItemMediumCategory);
 		CreateItem.InItemSmallCategory(ItemSmallCategory);
@@ -3930,7 +3972,8 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 					NewWeaponItem->_ItemInfo.ItemCount = ItemCount;
 					NewWeaponItem->_ItemInfo.ItemThumbnailImagePath = ItemThumbnailImagePath;
 					NewWeaponItem->_ItemInfo.ItemIsEquipped = ItemEquipped;
-					NewWeaponItem->_ItemInfo.ItemSlotIndex = ItemSlotIndex;
+					NewWeaponItem->_ItemInfo.TileGridPositionX = ItemTilePositionX;
+					NewWeaponItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;					
 
 					NewWeaponItem->_GameObjectInfo.ObjectType = DropItemData.ItemObjectType;
 					NewWeaponItem->_GameObjectInfo.ObjectId = ItemDBId;
@@ -3957,7 +4000,8 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 					NewArmorItem->_ItemInfo.ItemCount = ItemCount;
 					NewArmorItem->_ItemInfo.ItemThumbnailImagePath = ItemThumbnailImagePath;
 					NewArmorItem->_ItemInfo.ItemIsEquipped = ItemEquipped;
-					NewArmorItem->_ItemInfo.ItemSlotIndex = ItemSlotIndex;
+					NewArmorItem->_ItemInfo.TileGridPositionX = ItemTilePositionX;
+					NewArmorItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;
 
 					NewArmorItem->_GameObjectInfo.ObjectType = DropItemData.ItemObjectType;
 					NewArmorItem->_GameObjectInfo.ObjectId = ItemDBId;
@@ -3984,6 +4028,10 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 				{
 					CMaterial* NewMaterialItem = (CMaterial*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_MATERIAL);
 					NewMaterialItem->_ItemInfo.ItemDBId = ItemDBId;
+					NewMaterialItem->_ItemInfo.Width = ItemWidth;
+					NewMaterialItem->_ItemInfo.Height = ItemHeight;
+					NewMaterialItem->_ItemInfo.TileGridPositionX = ItemTilePositionX;
+					NewMaterialItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;
 					NewMaterialItem->_ItemInfo.ItemIsQuickSlotUse = ItemIsQuickSlotUse;
 					NewMaterialItem->_ItemInfo.ItemLargeCategory = (en_LargeItemCategory)ItemLargeCategory;
 					NewMaterialItem->_ItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemMediumCategory;
@@ -3992,8 +4040,7 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 					NewMaterialItem->_ItemInfo.ItemMaxCount = ItemMaxCount;
 					NewMaterialItem->_ItemInfo.ItemCount = ItemCount;
 					NewMaterialItem->_ItemInfo.ItemThumbnailImagePath = ItemThumbnailImagePath;
-					NewMaterialItem->_ItemInfo.ItemIsEquipped = ItemEquipped;
-					NewMaterialItem->_ItemInfo.ItemSlotIndex = ItemSlotIndex;
+					NewMaterialItem->_ItemInfo.ItemIsEquipped = ItemEquipped;					
 
 					NewMaterialItem->_GameObjectInfo.ObjectType = DropItemData.ItemObjectType;
 					NewMaterialItem->_GameObjectInfo.ObjectId = ItemDBId;
@@ -4009,12 +4056,6 @@ void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
 		}
 	}
 }
-
-//(WORD)ItemType
-//int32 Count
-//int32 SlotNumber;
-//int64 OwnerAccountId;
-//bool IsEquipped
 
 void CGameServer::PacketProcReqDBLootingItemToInventorySave(int64 SessionId, CGameServerMessage* Message)
 {
@@ -4042,18 +4083,22 @@ void CGameServer::PacketProcReqDBLootingItemToInventorySave(int64 SessionId, CGa
 
 		int64 ItemDBId = Item->_ItemInfo.ItemDBId;
 		bool ItemIsQuickSlotUse = Item->_ItemInfo.ItemIsQuickSlotUse;
+		bool ItemRotated = Item->_ItemInfo.Rotated;
+		int16 ItemWidth = Item->_ItemInfo.Width;
+		int16 ItemHeight = Item->_ItemInfo.Height;
+		int16 ItemTileGridPositionX = Item->_ItemInfo.TileGridPositionX;
+		int16 ItemTileGridPositionY = Item->_ItemInfo.TileGridPositionY;
 		int8 ItemLargeCategory = (int8)Item->_ItemInfo.ItemLargeCategory;
 		int8 ItemMediumCategory = (int8)Item->_ItemInfo.ItemMediumCategory;
 		int16 ItemSmallCategory = (int16)Item->_ItemInfo.ItemSmallCategory;
 		wstring ItemName = Item->_ItemInfo.ItemName;
 		int16 ItemCount = Item->_ItemInfo.ItemCount;
 		wstring ItemThumbnailImagePath = Item->_ItemInfo.ItemThumbnailImagePath;
-		bool ItemEquipped = Item->_ItemInfo.ItemIsEquipped;
-		int8 ItemSlotIndex = Item->_ItemInfo.ItemSlotIndex;
+		bool ItemEquipped = Item->_ItemInfo.ItemIsEquipped;					
 		int32 ItemMinDamage = Item->_ItemInfo.ItemMinDamage;
 		int32 ItemMaxDamage = Item->_ItemInfo.ItemMaxDamage;
 		int32 ItemDefence = Item->_ItemInfo.ItemDefence;
-		int32 ItemMaxCount = Item->_ItemInfo.ItemMaxCount;
+		int32 ItemMaxCount = Item->_ItemInfo.ItemMaxCount;		
 
 		CDBConnection* ItemToInventorySaveDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 
@@ -4065,7 +4110,8 @@ void CGameServer::PacketProcReqDBLootingItemToInventorySave(int64 SessionId, CGa
 			ItemRefreshPush.InPlayerDBId(TargetObjectId);
 			ItemRefreshPush.InItemType(ItemSmallCategory);
 			ItemRefreshPush.InCount(ItemCount);
-			ItemRefreshPush.InSlotIndex(ItemSlotIndex);
+			ItemRefreshPush.InItemTileGridPositionX(ItemTileGridPositionX);
+			ItemRefreshPush.InItemTileGridPositionY(ItemTileGridPositionY);
 
 			ItemRefreshPush.Execute();
 		}
@@ -4074,12 +4120,16 @@ void CGameServer::PacketProcReqDBLootingItemToInventorySave(int64 SessionId, CGa
 			// 새로운 아이템 생성 후 Inventory DB 넣기			
 			SP::CDBGameServerItemToInventoryPush ItemToInventoryPush(*ItemToInventorySaveDBConnection);
 			ItemToInventoryPush.InIsQuickSlotUse(ItemIsQuickSlotUse);
+			ItemToInventoryPush.InItemRotated(ItemRotated);
+			ItemToInventoryPush.InItemWidth(ItemWidth);
+			ItemToInventoryPush.InItemHeight(ItemHeight);
+			ItemToInventoryPush.InItemTileGridPositionX(ItemTileGridPositionX);
+			ItemToInventoryPush.InItemTileGridPositionY(ItemTileGridPositionY);
 			ItemToInventoryPush.InItemLargeCategory(ItemLargeCategory);
 			ItemToInventoryPush.InItemMediumCategory(ItemMediumCategory);
 			ItemToInventoryPush.InItemSmallCategory(ItemSmallCategory);
 			ItemToInventoryPush.InItemName(ItemName);
-			ItemToInventoryPush.InItemCount(ItemCount);
-			ItemToInventoryPush.InSlotIndex(ItemSlotIndex);
+			ItemToInventoryPush.InItemCount(ItemCount);			
 			ItemToInventoryPush.InIsEquipped(ItemEquipped);
 			ItemToInventoryPush.InItemMinDamage(ItemMinDamage);
 			ItemToInventoryPush.InItemMaxDamage(ItemMaxDamage);
@@ -4095,7 +4145,7 @@ void CGameServer::PacketProcReqDBLootingItemToInventorySave(int64 SessionId, CGa
 		G_DBConnectionPool->Push(en_DBConnect::GAME, ItemToInventorySaveDBConnection);
 
 		// 클라 인벤토리에서 해당 아이템을 저장
-		CMessage* ResItemToInventoryPacket = MakePacketResItemToInventory(TargetObjectId, Item, ItemEach);
+		CMessage* ResItemToInventoryPacket = MakePacketResItemToInventory(TargetObjectId, Item, ItemEach, IsExistItem);
 		SendPacket(Session->SessionId, ResItemToInventoryPacket);
 		ResItemToInventoryPacket->Free();
 
@@ -4141,8 +4191,9 @@ void CGameServer::PacketProcReqDBCraftingItemToInventorySave(int64 SessionId, CG
 			*Message >> &MaterialItem;
 
 			int16 MaterialItemSmallCategory = (int16)MaterialItem->_ItemInfo.ItemSmallCategory;
-			int16 MaterialItemCount = MaterialItem->_ItemInfo.ItemCount;
-			int8 MaterialItemSlotIndex = MaterialItem->_ItemInfo.ItemSlotIndex;
+			int16 MaterialItemTileGridPositonX = MaterialItem->_ItemInfo.TileGridPositionX;
+			int16 MaterialItemTileGridPositonY = MaterialItem->_ItemInfo.TileGridPositionY;
+			int16 MaterialItemCount = MaterialItem->_ItemInfo.ItemCount;			
 
 			if (MaterialItemCount != 0)
 			{
@@ -4153,7 +4204,8 @@ void CGameServer::PacketProcReqDBCraftingItemToInventorySave(int64 SessionId, CG
 				InventoryItemCountRefreshPush.InPlayerDBId(TargetObjectId);
 				InventoryItemCountRefreshPush.InItemType(MaterialItemSmallCategory);
 				InventoryItemCountRefreshPush.InCount(MaterialItemCount);
-				InventoryItemCountRefreshPush.InSlotIndex(MaterialItemSlotIndex);
+				InventoryItemCountRefreshPush.InItemTileGridPositionX(MaterialItemTileGridPositonX);
+				InventoryItemCountRefreshPush.InItemTileGridPositionY(MaterialItemTileGridPositonY);
 
 				InventoryItemCountRefreshPush.Execute();
 
@@ -4168,7 +4220,8 @@ void CGameServer::PacketProcReqDBCraftingItemToInventorySave(int64 SessionId, CG
 				SP::CDBGameServerInventorySlotInit InventoryItemInit(*InventoryItemInitDBConnection);
 				InventoryItemInit.InOwnerAccountId(Session->AccountId);
 				InventoryItemInit.InOwnerPlayerId(TargetObjectId);
-				InventoryItemInit.InSlotIndex(MaterialItem->_ItemInfo.ItemSlotIndex);
+				InventoryItemInit.InItemTileGridPositionX(MaterialItemTileGridPositonX);
+				InventoryItemInit.InItemTileGridPositionY(MaterialItemTileGridPositonY);
 				InventoryItemInit.InItemName(InitString);
 				InventoryItemInit.InItemThumbnailImagePath(InitString);
 
@@ -4177,7 +4230,8 @@ void CGameServer::PacketProcReqDBCraftingItemToInventorySave(int64 SessionId, CG
 				// 게임에 입장한 캐릭터를 가져온다.
 				CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
 
-				MyPlayer->_Inventory.SlotInit(MaterialItem->_ItemInfo.ItemSlotIndex);
+				// Grid 인벤토리 해당 공간에서 아이템의 넓이만큼 비워주는 작업 필요
+				//MyPlayer->_Inventory.SlotInit(MaterialItem->_ItemInfo.ItemSlotIndex);
 
 				G_DBConnectionPool->Push(en_DBConnect::GAME, InventoryItemInitDBConnection);
 			}
@@ -4206,21 +4260,28 @@ void CGameServer::PacketProcReqDBCraftingItemToInventorySave(int64 SessionId, CG
 		if (IsExistItem == true)
 		{
 			int16 CompleteItemSmallCategory = (int16)CompleteItem->_ItemInfo.ItemSmallCategory;
-			int16 CompleteItemCount = CompleteItem->_ItemInfo.ItemCount;
-			int8 CompleteItemSlotIndex = CompleteItem->_ItemInfo.ItemSlotIndex;
+			int16 CompleteItemTileGridPositionX = CompleteItem->_ItemInfo.TileGridPositionX;
+			int16 CompleteItemTileGridPositionY = CompleteItem->_ItemInfo.TileGridPositionY;
+			int16 CompleteItemCount = CompleteItem->_ItemInfo.ItemCount;			
 
 			SP::CDBGameServerItemRefreshPush ItemRefreshPush(*CraftingItemToInventorySaveDBConnection);
 			ItemRefreshPush.InAccountDBId(OwnerAccountId);
 			ItemRefreshPush.InPlayerDBId(TargetObjectId);
 			ItemRefreshPush.InItemType(CompleteItemSmallCategory);
 			ItemRefreshPush.InCount(CompleteItemCount);
-			ItemRefreshPush.InSlotIndex(CompleteItemSlotIndex);
+			ItemRefreshPush.InItemTileGridPositionX(CompleteItemTileGridPositionX);
+			ItemRefreshPush.InItemTileGridPositionY(CompleteItemTileGridPositionY);
 
 			ItemRefreshPush.Execute();
 		}
 		else
 		{
 			bool CompleteItemIsQuickSlotUse = CompleteItem->_ItemInfo.ItemIsQuickSlotUse;
+			bool CompleteItemRotated = CompleteItem->_ItemInfo.Rotated;
+			int16 CompleteItemWidth = CompleteItem->_ItemInfo.Width;
+			int16 CompleteItemHeight = CompleteItem->_ItemInfo.Height;
+			int16 CompleteItemTileGridPositionX = CompleteItem->_ItemInfo.TileGridPositionX;
+			int16 CompleteItemTileGridPositionY = CompleteItem->_ItemInfo.TileGridPositionY;
 			int8 CompleteItemLargeCategory = (int8)CompleteItem->_ItemInfo.ItemLargeCategory;
 			int8 CompleteItemMediumCategory = (int8)CompleteItem->_ItemInfo.ItemMediumCategory;
 			int16 CompleteItemSmallCategory = (int16)CompleteItem->_ItemInfo.ItemSmallCategory;
@@ -4231,12 +4292,16 @@ void CGameServer::PacketProcReqDBCraftingItemToInventorySave(int64 SessionId, CG
 			int32 CompleteItemMaxCount = CompleteItem->_ItemInfo.ItemMaxCount;
 			int16 CompleteItemCount = CompleteItem->_ItemInfo.ItemCount;
 			wstring CompleteItemThumbnailImagePath = CompleteItem->_ItemInfo.ItemThumbnailImagePath;
-			bool CompleteItemIsEquipped = CompleteItem->_ItemInfo.ItemIsEquipped;
-			int8 CompleteItemSlotIndex = CompleteItem->_ItemInfo.ItemSlotIndex;
+			bool CompleteItemIsEquipped = CompleteItem->_ItemInfo.ItemIsEquipped;			
 
 			// 새로운 아이템 생성 후 Inventory DB 넣기			
 			SP::CDBGameServerItemToInventoryPush ItemToInventoryPush(*CraftingItemToInventorySaveDBConnection);
 			ItemToInventoryPush.InIsQuickSlotUse(CompleteItemIsQuickSlotUse);
+			ItemToInventoryPush.InItemRotated(CompleteItemRotated);
+			ItemToInventoryPush.InItemWidth(CompleteItemWidth);
+			ItemToInventoryPush.InItemHeight(CompleteItemHeight);
+			ItemToInventoryPush.InItemTileGridPositionX(CompleteItemTileGridPositionX);
+			ItemToInventoryPush.InItemTileGridPositionY(CompleteItemTileGridPositionY);
 			ItemToInventoryPush.InItemLargeCategory(CompleteItemLargeCategory);
 			ItemToInventoryPush.InItemMediumCategory(CompleteItemMediumCategory);
 			ItemToInventoryPush.InItemSmallCategory(CompleteItemSmallCategory);
@@ -4245,8 +4310,7 @@ void CGameServer::PacketProcReqDBCraftingItemToInventorySave(int64 SessionId, CG
 			ItemToInventoryPush.InItemMaxDamage(CompleteItemMaxDamage);
 			ItemToInventoryPush.InItemDefence(CompleteItemDefence);
 			ItemToInventoryPush.InItemMaxCount(CompleteItemMaxCount);
-			ItemToInventoryPush.InItemCount(CompleteItemCount);
-			ItemToInventoryPush.InSlotIndex(CompleteItemSlotIndex);
+			ItemToInventoryPush.InItemCount(CompleteItemCount);			
 			ItemToInventoryPush.InIsEquipped(CompleteItemIsEquipped);
 			ItemToInventoryPush.InThumbnailImagePath(CompleteItemThumbnailImagePath);
 			ItemToInventoryPush.InOwnerAccountId(OwnerAccountId);
@@ -4258,7 +4322,7 @@ void CGameServer::PacketProcReqDBCraftingItemToInventorySave(int64 SessionId, CG
 		G_DBConnectionPool->Push(en_DBConnect::GAME, CraftingItemToInventorySaveDBConnection);
 
 		// 클라 인벤토리에서 해당 아이템을 저장
-		CMessage* ResItemToInventoryPacket = MakePacketResItemToInventory(TargetObjectId, CompleteItem, ItemEachCount);
+		CMessage* ResItemToInventoryPacket = MakePacketResItemToInventory(TargetObjectId, CompleteItem, ItemEachCount, IsExistItem);
 		SendPacket(Session->SessionId, ResItemToInventoryPacket);
 		ResItemToInventoryPacket->Free();
 	}
@@ -4266,188 +4330,74 @@ void CGameServer::PacketProcReqDBCraftingItemToInventorySave(int64 SessionId, CG
 	ReturnSession(Session);
 }
 
-void CGameServer::PacketProcReqDBItemSwap(int64 SessionId, CMessage* Message)
+void CGameServer::PacketProcReqDBItemPlace(int64 SessionId, CGameServerMessage* Message)
 {
 	st_Session* Session = FindSession(SessionId);
 
 	if (Session)
 	{
-		int64 AccountId;
-		*Message >> AccountId;
+		CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];	
 
-		int64 PlayerDBId;
-		*Message >> PlayerDBId;
+		int16 SelectItemTilePositionX = MyPlayer->_InventoryManager._SelectItem->_ItemInfo.TileGridPositionX;
+		int16 SelectItemTilePositionY = MyPlayer->_InventoryManager._SelectItem->_ItemInfo.TileGridPositionY;
 
-		int8 SwapAIndex;
-		*Message >> SwapAIndex;
+		int16 PlaceItemTilePositionX;
+		*Message >> PlaceItemTilePositionX;
+		int16 PlaceITemTilePositionY;
+		*Message >> PlaceITemTilePositionY;
 
-		int8 SwapBIndex;
-		*Message >> SwapBIndex;
+		CItem* PlaceItem = MyPlayer->_InventoryManager.SwapItem(0, PlaceItemTilePositionX, PlaceITemTilePositionY);
 
-		// 스왑 요청한 A 아이템이 Inventory에 있는지 확인한다.
-		CDBConnection* AItemCheckDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-		SP::CDBGameServerItemCheck ADBItemCheck(*AItemCheckDBConnection);
-		ADBItemCheck.InAccountDBId(AccountId);
-		ADBItemCheck.InPlayerDBId(PlayerDBId);
-		ADBItemCheck.InSlotIndex(SwapAIndex);
+		wstring InitString = L"";
 
-		bool AIsQuickSlotUse = false;
-		int8 ADBItemLargeCategory = 0;
-		int8 ADBItemMediumCategory = 0;
-		int16 ADBItemSmallCategory = -1;
-		WCHAR AItemName[20] = { 0 };
-		int16 AItemCount = -1;
-		bool AItemEquipped = false;
-		int32 AItemMinDamage = 0;
-		int32 AItemMaxDamage = 0;
-		int32 AItemDefence = 0;
-		int32 AItemMaxCount = 0;
-		WCHAR AItemThumbnailImagePath[100] = { 0 };
-		ADBItemCheck.OutIsQuickSlotUse(AIsQuickSlotUse);
-		ADBItemCheck.OutItemLargeCategory(ADBItemLargeCategory);
-		ADBItemCheck.OutItemMediumCategory(ADBItemMediumCategory);
-		ADBItemCheck.OutItemSmallCategory(ADBItemSmallCategory);
-		ADBItemCheck.OutItemName(AItemName);
-		ADBItemCheck.OutItemCount(AItemCount);
-		ADBItemCheck.OutItemIsEquipped(AItemEquipped);
-		ADBItemCheck.OutItemMinDamage(AItemMinDamage);
-		ADBItemCheck.OutItemMaxDamage(AItemMaxDamage);
-		ADBItemCheck.OutItemDefence(AItemDefence);
-		ADBItemCheck.OutItemMaxCount(AItemMaxCount);
-		ADBItemCheck.OutItemThumbnailImagePath(AItemThumbnailImagePath);
+		CDBConnection* InventoryItemInitConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+		SP::CDBGameServerInventorySlotInit InventoryItemInit(*InventoryItemInitConnection);
 
-		ADBItemCheck.Execute();
+		InventoryItemInit.InOwnerAccountId(Session->AccountId);
+		InventoryItemInit.InOwnerPlayerId(MyPlayer->_GameObjectInfo.ObjectId);
+		InventoryItemInit.InItemTileGridPositionX(SelectItemTilePositionX);
+		InventoryItemInit.InItemTileGridPositionY(SelectItemTilePositionY);
+		InventoryItemInit.InItemName(InitString);
+		InventoryItemInit.InItemThumbnailImagePath(InitString);
 
-		ADBItemCheck.Fetch();
+		InventoryItemInit.Execute();
 
-		// 스왑 요청할 A 아이템 정보 셋팅
-		st_ItemInfo SwapAItemInfo;
-		SwapAItemInfo.ItemSlotIndex = SwapBIndex;
-		SwapAItemInfo.ItemIsQuickSlotUse = AIsQuickSlotUse;
-		SwapAItemInfo.ItemLargeCategory = (en_LargeItemCategory)ADBItemLargeCategory;
-		SwapAItemInfo.ItemMediumCategory = (en_MediumItemCategory)ADBItemMediumCategory;
-		SwapAItemInfo.ItemSmallCategory = (en_SmallItemCategory)ADBItemSmallCategory;
-		SwapAItemInfo.ItemName = AItemName;
-		SwapAItemInfo.ItemMinDamage = AItemMinDamage;
-		SwapAItemInfo.ItemMaxDamage = AItemMaxDamage;
-		SwapAItemInfo.ItemDefence = AItemDefence;
-		SwapAItemInfo.ItemMaxCount = AItemMaxCount;
-		SwapAItemInfo.ItemCount = AItemCount;
-		SwapAItemInfo.ItemIsEquipped = AItemEquipped;
-		SwapAItemInfo.ItemThumbnailImagePath = AItemThumbnailImagePath;
+		SP::CDBGameServerInventoryPlace InventoryItemPlace(*InventoryItemInitConnection);
 
-		G_DBConnectionPool->Push(en_DBConnect::GAME, AItemCheckDBConnection);
+		int8 ItemLargeCategory = (int8)PlaceItem->_ItemInfo.ItemLargeCategory;
+		int8 ItemMediumCategory = (int8)PlaceItem->_ItemInfo.ItemMediumCategory;
+		int16 ItemSmallCateogry = (int16)PlaceItem->_ItemInfo.ItemSmallCategory;
 
-		// 스왑 요청한 B 아이템이 Inventory에 있는지 확인한다.
-		CDBConnection* BItemCheckDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-		SP::CDBGameServerItemCheck BDBItemCheck(*BItemCheckDBConnection);
-		BDBItemCheck.InAccountDBId(AccountId);
-		BDBItemCheck.InPlayerDBId(PlayerDBId);
-		BDBItemCheck.InSlotIndex(SwapBIndex);
+		InventoryItemPlace.InOwnerAccountId(Session->AccountId);
+		InventoryItemPlace.InOwnerPlayerId(MyPlayer->_GameObjectInfo.ObjectId);
+		InventoryItemPlace.InIsQuickSlotUse(PlaceItem->_ItemInfo.ItemIsQuickSlotUse);
+		InventoryItemPlace.InItemRotated(PlaceItem->_ItemInfo.Rotated);
+		InventoryItemPlace.InItemWidth(PlaceItem->_ItemInfo.Width);
+		InventoryItemPlace.InItemHeight(PlaceItem->_ItemInfo.Height);
+		InventoryItemPlace.InItemTileGridPositionX(PlaceItem->_ItemInfo.TileGridPositionX);
+		InventoryItemPlace.InItemTileGridPositionY(PlaceItem->_ItemInfo.TileGridPositionY);
+		InventoryItemPlace.InItemLargeCategory(ItemLargeCategory);
+		InventoryItemPlace.InItemMediumCategory(ItemMediumCategory);
+		InventoryItemPlace.InItemSmallCategory(ItemSmallCateogry);
+		InventoryItemPlace.InItemName(PlaceItem->_ItemInfo.ItemName);
+		InventoryItemPlace.InItemCount(PlaceItem->_ItemInfo.ItemCount);
+		InventoryItemPlace.InIsEquipped(PlaceItem->_ItemInfo.ItemIsEquipped);
+		InventoryItemPlace.InItemMinDamage(PlaceItem->_ItemInfo.ItemMinDamage);
+		InventoryItemPlace.InItemMaxDamage(PlaceItem->_ItemInfo.ItemMaxCount);
+		InventoryItemPlace.InItemDefence(PlaceItem->_ItemInfo.ItemDefence);
+		InventoryItemPlace.InItemMaxCount(PlaceItem->_ItemInfo.ItemMaxCount);
+		InventoryItemPlace.InItemThumbnailImagePath(PlaceItem->_ItemInfo.ItemThumbnailImagePath);
+		
+		InventoryItemPlace.Execute();
 
-		bool BIsQuickSlotUse = false;
-		int8 BDBItemLargeCategory = 0;
-		int8 BDBItemMediumCategory = 0;
-		int16 BDBItemSmallCategory = -1;
-		WCHAR BItemName[20] = { 0 };
-		int16 BItemCount = -1;
-		bool BItemEquipped = false;
-		int32 BItemMinDamage = 0;
-		int32 BItemMaxDamage = 0;
-		int32 BItemDefence = 0;
-		int32 BItemMaxCount = 0;
-		WCHAR BItemThumbnailImagePath[100] = { 0 };
+		G_DBConnectionPool->Push(en_DBConnect::GAME, InventoryItemInitConnection);
 
-		BDBItemCheck.OutIsQuickSlotUse(BIsQuickSlotUse);
-		BDBItemCheck.OutItemLargeCategory(BDBItemLargeCategory);
-		BDBItemCheck.OutItemMediumCategory(BDBItemMediumCategory);
-		BDBItemCheck.OutItemSmallCategory(BDBItemSmallCategory);
-		BDBItemCheck.OutItemName(BItemName);
-		BDBItemCheck.OutItemCount(BItemCount);
-		BDBItemCheck.OutItemIsEquipped(BItemEquipped);
-		BDBItemCheck.OutItemMinDamage(BItemMinDamage);
-		BDBItemCheck.OutItemMaxDamage(BItemMaxDamage);
-		BDBItemCheck.OutItemDefence(BItemDefence);
-		BDBItemCheck.OutItemMaxCount(BItemMaxCount);
-		BDBItemCheck.OutItemThumbnailImagePath(BItemThumbnailImagePath);
+		CMessage* ResPlaceItemPacket = MakePacketResPlaceItem(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, PlaceItem, MyPlayer->_InventoryManager._SelectItem);
+		SendPacket(Session->SessionId, ResPlaceItemPacket);
+		ResPlaceItemPacket->Free();			
 
-		BDBItemCheck.Execute();
-
-		BDBItemCheck.Fetch();
-
-		// 스왑 요청할 B 아이템 정보 셋팅
-		st_ItemInfo SwapBItemInfo;
-		SwapBItemInfo.ItemSlotIndex = SwapAIndex;
-		SwapBItemInfo.ItemIsQuickSlotUse = BIsQuickSlotUse;
-		SwapBItemInfo.ItemLargeCategory = (en_LargeItemCategory)BDBItemLargeCategory;
-		SwapBItemInfo.ItemMediumCategory = (en_MediumItemCategory)BDBItemMediumCategory;
-		SwapBItemInfo.ItemSmallCategory = (en_SmallItemCategory)BDBItemSmallCategory;
-		SwapBItemInfo.ItemName = BItemName;
-		SwapBItemInfo.ItemMinDamage = BItemMinDamage;
-		SwapBItemInfo.ItemMaxDamage = BItemMaxDamage;
-		SwapBItemInfo.ItemDefence = BItemDefence;
-		SwapBItemInfo.ItemMaxCount = BItemMaxCount;
-		SwapBItemInfo.ItemCount = BItemCount;
-		SwapBItemInfo.ItemIsEquipped = BItemEquipped;
-		SwapBItemInfo.ItemThumbnailImagePath = BItemThumbnailImagePath;
-
-		G_DBConnectionPool->Push(en_DBConnect::GAME, BItemCheckDBConnection);
-
-		int16 AItemSmallCategory = (int16)SwapAItemInfo.ItemSmallCategory;
-		int16 BItemSmallCategory = (int16)SwapBItemInfo.ItemSmallCategory;
-
-		// DB에서 아이템 스왑
-		CDBConnection* ItemSwapConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-		SP::CDBGameServerItemSwap ItemSwap(*ItemSwapConnection);
-		ItemSwap.InAccountDBId(AccountId);
-		ItemSwap.InPlayerDBId(PlayerDBId);
-
-		ItemSwap.InAIsQuickSlotUse(SwapBItemInfo.ItemIsQuickSlotUse);
-		ItemSwap.InAItemLargeCategory(BDBItemLargeCategory);
-		ItemSwap.InAItemMediumCategory(BDBItemMediumCategory);
-		ItemSwap.InAItemSmallCategory(BItemSmallCategory);
-		ItemSwap.InAItemName(SwapBItemInfo.ItemName);
-		ItemSwap.InAItemMinDamage(SwapBItemInfo.ItemMinDamage);
-		ItemSwap.InAItemMaxDamage(SwapBItemInfo.ItemMaxDamage);
-		ItemSwap.InAItemDefence(SwapBItemInfo.ItemDefence);
-		ItemSwap.InAItemMaxCount(SwapBItemInfo.ItemMaxCount);
-		ItemSwap.InAItemCount(SwapBItemInfo.ItemCount);
-		ItemSwap.InAItemIsEquipped(SwapBItemInfo.ItemIsEquipped);
-		ItemSwap.InAItemThumbnailImagePath(SwapBItemInfo.ItemThumbnailImagePath);
-		ItemSwap.InAItemSlotIndex(SwapBItemInfo.ItemSlotIndex);
-
-		ItemSwap.InBIsQuickSlotUse(SwapAItemInfo.ItemIsQuickSlotUse);
-		ItemSwap.InBItemLargeCategory(ADBItemLargeCategory);
-		ItemSwap.InBItemMediumCategory(ADBItemMediumCategory);
-		ItemSwap.InBItemSmallCategory(AItemSmallCategory);
-		ItemSwap.InBItemName(SwapAItemInfo.ItemName);
-		ItemSwap.InBItemMinDamage(SwapAItemInfo.ItemMinDamage);
-		ItemSwap.InBItemMaxDamage(SwapAItemInfo.ItemMaxDamage);
-		ItemSwap.InBItemDefence(SwapAItemInfo.ItemDefence);
-		ItemSwap.InBItemMaxCount(SwapAItemInfo.ItemMaxCount);
-		ItemSwap.InBItemCount(SwapAItemInfo.ItemCount);
-		ItemSwap.InBItemIsEquipped(SwapAItemInfo.ItemIsEquipped);
-		ItemSwap.InBItemThumbnailImagePath(SwapAItemInfo.ItemThumbnailImagePath);
-		ItemSwap.InBItemSlotIndex(SwapAItemInfo.ItemSlotIndex);
-
-		// Item Swap 성공
-		bool SwapSuccess = ItemSwap.Execute();
-		if (SwapSuccess == true)
-		{
-			CPlayer* TargetPlayer = (CPlayer*)G_ObjectManager->Find(PlayerDBId, en_GameObjectType::OBJECT_PLAYER);
-
-			TargetPlayer->_Inventory.SwapItem(SwapAIndex, SwapBIndex);
-
-			// Swap 요청 응답 보내기
-			CMessage* ResItemSwapPacket = MakePacketResItemSwap(AccountId, PlayerDBId, SwapBItemInfo, SwapAItemInfo);
-			SendPacket(Session->SessionId, ResItemSwapPacket);
-			ResItemSwapPacket->Free();
-		}
-
-		G_DBConnectionPool->Push(en_DBConnect::GAME, ItemSwapConnection);
+		ReturnSession(Session);
 	}
-
-	ReturnSession(Session);
 }
 
 void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CGameServerMessage* Message)
@@ -4476,7 +4426,9 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CGameServerMessage*
 			SP::CDBGameServerInventoryItemUpdate ItemUpdate(*DBInventoryItemUpdateConnection);
 			ItemUpdate.InOwnerAccountId(Session->AccountId);
 			ItemUpdate.InOwnerPlayerId(MyPlayer->_GameObjectInfo.ObjectId);
-			ItemUpdate.InSlotIndex(UseItem->_ItemInfo.ItemSlotIndex);
+			ItemUpdate.InItemRotated(UseItem->_ItemInfo.Rotated);
+			ItemUpdate.InItemTileGridPositionX(UseItem->_ItemInfo.TileGridPositionX);
+			ItemUpdate.InItemTileGridPositionY(UseItem->_ItemInfo.TileGridPositionY);			
 			ItemUpdate.InItemCount(UseItem->_ItemInfo.ItemCount);
 			ItemUpdate.InIsEquipped(UseItem->_ItemInfo.ItemIsEquipped);
 
@@ -4588,7 +4540,8 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CGameServerMessage*
 			SP::CDBGameServerInventorySlotInit InventoryItemInit(*InventoryItemInitDBConnection);
 			InventoryItemInit.InOwnerAccountId(Session->AccountId);
 			InventoryItemInit.InOwnerPlayerId(MyPlayer->_GameObjectInfo.ObjectId);
-			InventoryItemInit.InSlotIndex(UseItem->_ItemInfo.ItemSlotIndex);
+			InventoryItemInit.InItemTileGridPositionX(UseItem->_ItemInfo.TileGridPositionX);
+			InventoryItemInit.InItemTileGridPositionY(UseItem->_ItemInfo.TileGridPositionY);			
 			InventoryItemInit.InItemName(InitString);
 			InventoryItemInit.InItemThumbnailImagePath(InitString);
 
@@ -4596,7 +4549,7 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CGameServerMessage*
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, InventoryItemInitDBConnection);
 
-			MyPlayer->_Inventory.SlotInit(UseItem->_ItemInfo.ItemSlotIndex);
+			// MyPlayer->_Inventory.SlotInit(UseItem->_ItemInfo.ItemSlotIndex);
 
 			// 클라에게 업데이트 결과 전송
 			CMessage* ReqInventoryItemUpdate = MakePacketInventoryItemUpdate(MyPlayer->_GameObjectInfo.ObjectId, UseItem->_ItemInfo);
@@ -4800,11 +4753,14 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 
 
 #pragma region 가방 아이템 정보 읽어오기
-			// 인벤토리 초기화
-			MyPlayer->_Inventory.Init();
-
-			vector<CItem*> InventoryItems;
 			vector<st_ItemInfo> Equipments;
+			// 인벤토리 생성
+			MyPlayer->_InventoryManager.InventoryCreate(10, 10);			
+
+			*ResCharacterInfoMessage << 10;
+			*ResCharacterInfoMessage << 10;
+
+			vector<CItem*> InventoryItems;			
 
 			// DB에 기록되어 있는 인벤토리 아이템들의 정보를 모두 긁어온다.
 			CDBConnection* DBInventoryItemInfoGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
@@ -4812,6 +4768,9 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			CharacterInventoryItem.InAccountDBId(MyPlayer->_AccountId);
 			CharacterInventoryItem.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
 
+			bool ItemRotated;
+			int16 ItemWidth;
+			int16 ItemHeight;
 			int8 ItemLargeCategory = 0;
 			int8 ItemMediumCategory = 0;
 			int16 ItemSmallCategory = 0;
@@ -4823,8 +4782,13 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			int32 ItemMaxDamage = 0;
 			int32 ItemDefence = 0;
 			int32 ItemMaxCount = 0;
+			int16 ItemTilePositionX = 0;
+			int16 ItemTilePositionY = 0;
 			WCHAR ItemThumbnailImagePath[100] = { 0 };
 
+			CharacterInventoryItem.OutIsRotated(ItemRotated);
+			CharacterInventoryItem.OutItemWidth(ItemWidth);
+			CharacterInventoryItem.OutItemHeight(ItemHeight);
 			CharacterInventoryItem.OutItemLargeCategory(ItemLargeCategory);
 			CharacterInventoryItem.OutItemMediumCategory(ItemMediumCategory);
 			CharacterInventoryItem.OutItemSmallCategory(ItemSmallCategory);
@@ -4833,8 +4797,9 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			CharacterInventoryItem.OutMaxDamage(ItemMaxDamage);
 			CharacterInventoryItem.OutDefence(ItemDefence);
 			CharacterInventoryItem.OutMaxCount(ItemMaxCount);
-			CharacterInventoryItem.OutItemCount(ItemCount);
-			CharacterInventoryItem.OutSlotIndex(SlotIndex);
+			CharacterInventoryItem.OutItemCount(ItemCount);	
+			CharacterInventoryItem.OutItemTileGridPositionX(ItemTilePositionX);
+			CharacterInventoryItem.OutItemTileGridPositionY(ItemTilePositionY);
 			CharacterInventoryItem.OutIsEquipped(IsEquipped);
 			CharacterInventoryItem.OutItemThumbnailImagePath(ItemThumbnailImagePath);
 
@@ -4853,18 +4818,22 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:
 					WeaponItem = (CWeapon*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_WEAPON);
 					WeaponItem->_ItemInfo.ItemDBId = 0;
+					WeaponItem->_ItemInfo.Rotated = ItemRotated;
+					WeaponItem->_ItemInfo.Width = ItemWidth;
+					WeaponItem->_ItemInfo.Height = ItemHeight;
 					WeaponItem->_ItemInfo.ItemLargeCategory = (en_LargeItemCategory)ItemLargeCategory;
 					WeaponItem->_ItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemMediumCategory;
 					WeaponItem->_ItemInfo.ItemSmallCategory = (en_SmallItemCategory)ItemSmallCategory;
 					WeaponItem->_ItemInfo.ItemName = ItemName;
 					WeaponItem->_ItemInfo.ItemCount = ItemCount;
+					WeaponItem->_ItemInfo.TileGridPositionX = ItemTilePositionX;
+					WeaponItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;
 					WeaponItem->_ItemInfo.ItemThumbnailImagePath = ItemThumbnailImagePath;
-					WeaponItem->_ItemInfo.ItemIsEquipped = IsEquipped;
-					WeaponItem->_ItemInfo.ItemSlotIndex = SlotIndex;
+					WeaponItem->_ItemInfo.ItemIsEquipped = IsEquipped;					
 					WeaponItem->_ItemInfo.ItemMinDamage = ItemMinDamage;
 					WeaponItem->_ItemInfo.ItemMaxDamage = ItemMaxDamage;
 
-					MyPlayer->_Inventory.AddItem(WeaponItem);
+					MyPlayer->_InventoryManager.DBItemInsertItem(0, WeaponItem);
 
 					// 아이템 테이블에서 읽어들인 무기 아이템이 착용중일 경우
 					// 해당 무기를 착용하고 착용 아이템 정보에 담는다.
@@ -4881,17 +4850,21 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:
 					ArmorItem = (CArmor*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_ARMOR);
 					ArmorItem->_ItemInfo.ItemDBId = 0;
+					ArmorItem->_ItemInfo.Rotated = ItemRotated;
+					ArmorItem->_ItemInfo.Width = ItemWidth;
+					ArmorItem->_ItemInfo.Height = ItemHeight;
 					ArmorItem->_ItemInfo.ItemLargeCategory = (en_LargeItemCategory)ItemLargeCategory;
 					ArmorItem->_ItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemMediumCategory;
 					ArmorItem->_ItemInfo.ItemSmallCategory = (en_SmallItemCategory)ItemSmallCategory;
 					ArmorItem->_ItemInfo.ItemName = ItemName;
 					ArmorItem->_ItemInfo.ItemCount = ItemCount;
+					ArmorItem->_ItemInfo.TileGridPositionX = ItemTilePositionX;
+					ArmorItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;
 					ArmorItem->_ItemInfo.ItemThumbnailImagePath = ItemThumbnailImagePath;
-					ArmorItem->_ItemInfo.ItemIsEquipped = IsEquipped;
-					ArmorItem->_ItemInfo.ItemSlotIndex = SlotIndex;
+					ArmorItem->_ItemInfo.ItemIsEquipped = IsEquipped;					
 					ArmorItem->_ItemInfo.ItemDefence = ItemDefence;
 
-					MyPlayer->_Inventory.AddItem(ArmorItem);
+					MyPlayer->_InventoryManager.DBItemInsertItem(0, ArmorItem);
 
 					// 아이템 테이블에서 읽어들인 방어구 아이템이 착용중일 경우
 					// 해당 방어구를 착용하고 착용 아이템 정보에 담는다.
@@ -4918,17 +4891,21 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHOCK_RELEASE:
 					SkillBookItem = (CConsumable*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_CONSUMABLE);
 					SkillBookItem->_ItemInfo.ItemDBId = 0;
+					SkillBookItem->_ItemInfo.Rotated = ItemRotated;
+					SkillBookItem->_ItemInfo.Width = ItemWidth;
+					SkillBookItem->_ItemInfo.Height = ItemHeight;
 					SkillBookItem->_ItemInfo.ItemLargeCategory = (en_LargeItemCategory)ItemLargeCategory;
 					SkillBookItem->_ItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemMediumCategory;
 					SkillBookItem->_ItemInfo.ItemSmallCategory = (en_SmallItemCategory)ItemSmallCategory;
 					SkillBookItem->_ItemInfo.ItemName = ItemName;
 					SkillBookItem->_ItemInfo.ItemCount = ItemCount;
+					SkillBookItem->_ItemInfo.TileGridPositionX = ItemTilePositionX;
+					SkillBookItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;
 					SkillBookItem->_ItemInfo.ItemThumbnailImagePath = ItemThumbnailImagePath;
-					SkillBookItem->_ItemInfo.ItemIsEquipped = IsEquipped;
-					SkillBookItem->_ItemInfo.ItemSlotIndex = SlotIndex;
+					SkillBookItem->_ItemInfo.ItemIsEquipped = IsEquipped;					
 					SkillBookItem->_ItemInfo.ItemMaxCount = ItemMaxCount;
 
-					MyPlayer->_Inventory.AddItem(SkillBookItem);
+					MyPlayer->_InventoryManager.DBItemInsertItem(0, SkillBookItem);
 
 					InventoryItems.push_back(SkillBookItem);
 					break;
@@ -4943,17 +4920,21 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
 					MaterialItem = (CMaterial*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_MATERIAL);
 					MaterialItem->_ItemInfo.ItemDBId = 0;
+					MaterialItem->_ItemInfo.Rotated = ItemRotated;
+					MaterialItem->_ItemInfo.Width = ItemWidth;
+					MaterialItem->_ItemInfo.Height = ItemHeight;
 					MaterialItem->_ItemInfo.ItemLargeCategory = (en_LargeItemCategory)ItemLargeCategory;
 					MaterialItem->_ItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemMediumCategory;
 					MaterialItem->_ItemInfo.ItemSmallCategory = (en_SmallItemCategory)ItemSmallCategory;
 					MaterialItem->_ItemInfo.ItemName = ItemName;
 					MaterialItem->_ItemInfo.ItemCount = ItemCount;
+					MaterialItem->_ItemInfo.TileGridPositionX = ItemTilePositionX;
+					MaterialItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;
 					MaterialItem->_ItemInfo.ItemThumbnailImagePath = ItemThumbnailImagePath;
-					MaterialItem->_ItemInfo.ItemIsEquipped = IsEquipped;
-					MaterialItem->_ItemInfo.ItemSlotIndex = SlotIndex;
+					MaterialItem->_ItemInfo.ItemIsEquipped = IsEquipped;					
 					MaterialItem->_ItemInfo.ItemMaxCount = ItemMaxCount;
 
-					MyPlayer->_Inventory.AddItem(MaterialItem);
+					MyPlayer->_InventoryManager.DBItemInsertItem(0, MaterialItem);
 
 					InventoryItems.push_back(MaterialItem);
 					break;
@@ -4964,8 +4945,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, DBInventoryItemInfoGetConnection);
 
-			// 클라 인벤토리 정보 담기
-			*ResCharacterInfoMessage << (int8)en_Inventory::INVENTORY_SIZE;
+			// 클라 인벤토리 정보 담기			
 			*ResCharacterInfoMessage << (int8)InventoryItems.size();
 
 			for (CItem* Item : InventoryItems)
@@ -4986,35 +4966,35 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 
 
 #pragma region 골드 정보 읽어오기
-			// 캐릭터가 소유하고 있었던 골드 정보를 GoldTable에서 읽어온다.
-			CDBConnection* DBCharacterGoldGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-			SP::CDBGameServerGoldGet CharacterGoldGet(*DBCharacterGoldGetConnection);
-			CharacterGoldGet.InAccountDBId(MyPlayer->_AccountId);
-			CharacterGoldGet.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
+			//// 캐릭터가 소유하고 있었던 골드 정보를 GoldTable에서 읽어온다.
+			//CDBConnection* DBCharacterGoldGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+			//SP::CDBGameServerGoldGet CharacterGoldGet(*DBCharacterGoldGetConnection);
+			//CharacterGoldGet.InAccountDBId(MyPlayer->_AccountId);
+			//CharacterGoldGet.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
 
-			int64 GoldCoin = 0;
-			int16 SliverCoin = 0;
-			int16 BronzeCoin = 0;
+			//int64 GoldCoin = 0;
+			//int16 SliverCoin = 0;
+			//int16 BronzeCoin = 0;
 
-			CharacterGoldGet.OutGoldCoin(GoldCoin);
-			CharacterGoldGet.OutSliverCoin(SliverCoin);
-			CharacterGoldGet.OutBronzeCoin(BronzeCoin);
+			//CharacterGoldGet.OutGoldCoin(GoldCoin);
+			//CharacterGoldGet.OutSliverCoin(SliverCoin);
+			//CharacterGoldGet.OutBronzeCoin(BronzeCoin);
 
-			if (CharacterGoldGet.Execute() && CharacterGoldGet.Fetch())
-			{
-				// DB에서 읽어온 Gold를 Inventory에 저장한다.
-				MyPlayer->_Inventory._GoldCoinCount = GoldCoin;
-				MyPlayer->_Inventory._SliverCoinCount = SliverCoin;
-				MyPlayer->_Inventory._BronzeCoinCount = BronzeCoin;
+			//if (CharacterGoldGet.Execute() && CharacterGoldGet.Fetch())
+			//{
+			//	// DB에서 읽어온 Gold를 Inventory에 저장한다.
+			//	MyPlayer->_InventoryManager._GoldCoinCount = GoldCoin;
+			//	MyPlayer->_InventoryManager._SliverCoinCount = SliverCoin;
+			//	MyPlayer->_InventoryManager._BronzeCoinCount = BronzeCoin;
 
-				// DBConnection 반납하고
-				G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterGoldGetConnection);
+			//	// DBConnection 반납하고
+			//	G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterGoldGetConnection);
 
-				// 골드 정보 담기
-				*ResCharacterInfoMessage << GoldCoin;
-				*ResCharacterInfoMessage << SliverCoin;
-				*ResCharacterInfoMessage << BronzeCoin;				
-			}			
+			//	// 골드 정보 담기
+			//	*ResCharacterInfoMessage << GoldCoin;
+			//	*ResCharacterInfoMessage << SliverCoin;
+			//	*ResCharacterInfoMessage << BronzeCoin;				
+			//}			
 #pragma endregion			
 
 #pragma region 스킬 정보 읽어오기
@@ -6434,30 +6414,48 @@ CGameServerMessage* CGameServer::MakePacketInventoryCreate(int8 InventorySize, v
 	return ResInventoryCreateMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResItemSwap(int64 AccountId, int64 ObjectId, st_ItemInfo SwapAItemInfo, st_ItemInfo SwapBItemInfo)
+CGameServerMessage* CGameServer::MakePacketResSelectItem(int64 AccountId, int64 ObjectId, CItem* SelectItem)
 {
-	CGameServerMessage* ResItemSwapMessage = CGameServerMessage::GameServerMessageAlloc();
-	if (ResItemSwapMessage == nullptr)
+	CGameServerMessage* ResSelectItemMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResSelectItemMessage == nullptr)
 	{
 		return nullptr;
 	}
 
-	ResItemSwapMessage->Clear();
+	ResSelectItemMessage->Clear();
 
-	*ResItemSwapMessage << (int16)en_PACKET_S2C_ITEM_SWAP;
-	*ResItemSwapMessage << AccountId;
-	*ResItemSwapMessage << ObjectId;
+	*ResSelectItemMessage << (int16)en_PACKET_S2C_ITEM_SELECT;
+	*ResSelectItemMessage << AccountId;
+	*ResSelectItemMessage << ObjectId;
+	*ResSelectItemMessage << SelectItem;
 
-	// AItemInfo	
-	*ResItemSwapMessage << SwapAItemInfo;
-
-	// BItemInfo		
-	*ResItemSwapMessage << SwapBItemInfo;
-
-	return ResItemSwapMessage;
+	return ResSelectItemMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResItemToInventory(int64 TargetObjectId, CItem* InventoryItem, int16 ItemEach, bool ItemGainPrint)
+CGameServerMessage* CGameServer::MakePacketResPlaceItem(int64 AccountId, int64 ObjectId, CItem* PlaceItem, CItem* OverlapItem)
+{
+	CGameServerMessage* ResPlaceItemMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResPlaceItemMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResPlaceItemMessage->Clear();
+
+	*ResPlaceItemMessage << (int16)en_PACKET_S2C_ITEM_PLACE;
+	*ResPlaceItemMessage << AccountId;
+	*ResPlaceItemMessage << ObjectId;
+	*ResPlaceItemMessage << PlaceItem;
+
+	if (OverlapItem != nullptr)
+	{
+		*ResPlaceItemMessage << OverlapItem;
+	}	
+
+	return ResPlaceItemMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketResItemToInventory(int64 TargetObjectId, CItem* InventoryItem, int16 ItemEach, bool IsExist, bool ItemGainPrint)
 {
 	CGameServerMessage* ResItemToInventoryMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResItemToInventoryMessage == nullptr)
@@ -6469,13 +6467,13 @@ CGameServerMessage* CGameServer::MakePacketResItemToInventory(int64 TargetObject
 
 	*ResItemToInventoryMessage << (int16)en_PACKET_S2C_LOOTING;
 	// 타겟 아이디
-	*ResItemToInventoryMessage << TargetObjectId;
-	// 인벤토리 아이템의 소분류 값
-	*ResItemToInventoryMessage << (int16)InventoryItem->_ItemInfo.ItemSmallCategory;
+	*ResItemToInventoryMessage << TargetObjectId;	
 	// 인벤토리 아이템 정보 담기
 	*ResItemToInventoryMessage << InventoryItem;
 	// 아이템 낱개 개수
 	*ResItemToInventoryMessage << ItemEach;
+	// 아이템 중복 여부
+	*ResItemToInventoryMessage << IsExist;
 	// 아이템 얻는 UI 출력 할 것인지 말것인지
 	*ResItemToInventoryMessage << ItemGainPrint;
 
