@@ -293,6 +293,23 @@ enum en_PACKET_TYPE
 	en_PACKET_S2C_ITEM_SELECT,	
 
 	//------------------------------------------------------------
+	// 게임서버 아이템 놓기 요청
+	// int64 AccountId
+	// int64 ObjectId	
+	// int16 PlaceTileGridPositionX
+	// int16 PlaceTileGridPositionY
+	//------------------------------------------------------------
+	en_PACKET_C2S_ITEM_PLACE,
+
+	//------------------------------------------------------------
+	// 게임서버 아이템 놓기 요청 응답
+	// int64 AccountId
+	// int64 ObjectId
+	// st_ItemInfo OverlapItemInfo
+	//------------------------------------------------------------
+	en_PACKET_S2C_ITEM_PLACE,
+
+	//------------------------------------------------------------
 	// 게임서버 골드 인벤토리 저장 요청 응답
 	// int64 AccountId
 	// int64 ObjectId
