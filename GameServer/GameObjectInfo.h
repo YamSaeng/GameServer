@@ -89,9 +89,10 @@ enum class en_ObjectNetworkState : int8
 	LEAVE
 };
 
-enum class en_Inventory : int8
+enum class en_InventoryManager : int8
 {
-	INVENTORY_SIZE = 30
+	INVENTORY_DEFAULT_WIDH_SIZE = 10,
+	INVENTORY_DEFAULT_HEIGHT_SIZE = 10	
 };
 
 enum class en_QuickSlotBar : int8
@@ -1690,8 +1691,11 @@ struct st_ItemInfo
 {
 	int64 ItemDBId;				// 아이템 DB에 저장되어 있는 ID		
 	bool ItemIsQuickSlotUse;        // 퀵슬롯에 등록되어 있는지 여부 
-	int32 Width;			// 아이템 너비
-	int32 Height;			// 아이템 높이
+	bool Rotated;			// 아이템이 회전 되어 있는지 아닌지 여부
+	int16 Width;			// 아이템 너비
+	int16 Height;			// 아이템 높이	
+	int16 TileGridPositionX;	// 인벤토리 위치 X
+	int16 TileGridPositionY;   // 인벤토리 위치 Y
 	en_LargeItemCategory ItemLargeCategory; // 아이템 대분류
 	en_MediumItemCategory ItemMediumCategory; // 아이템 중분류
 	en_SmallItemCategory ItemSmallCategory;		// 아이템 소분류
@@ -1703,8 +1707,7 @@ struct st_ItemInfo
 	int32 ItemMaxCount;				// 아이템을 소유 할 수 있는 최대 개수
 	int16 ItemCount;			// 개수
 	wstring ItemThumbnailImagePath; // 이미지 경로
-	bool ItemIsEquipped;			// 아이템을 착용할 수 있는지	
-	int8 ItemSlotIndex;				// 슬롯 번호
+	bool ItemIsEquipped;			// 아이템을 착용할 수 있는지		
 
 	st_ItemInfo()
 	{
@@ -1712,6 +1715,9 @@ struct st_ItemInfo
 		ItemIsQuickSlotUse = false;
 		Width = 0;
 		Height = 0;
+		Rotated = false;
+		TileGridPositionX = 0;
+		TileGridPositionY = 0;
 		ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_NONE;
 		ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
 		ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
@@ -1723,13 +1729,13 @@ struct st_ItemInfo
 		ItemMaxCount = 0;
 		ItemCount = 0;
 		ItemThumbnailImagePath = L"";
-		ItemIsEquipped = false;
-		ItemSlotIndex = -1;
+		ItemIsEquipped = false;		
 	}
 
 	bool operator == (st_ItemInfo OtherItemInfo)
 	{
-		if (ItemSlotIndex == OtherItemInfo.ItemSlotIndex
+		if (TileGridPositionX == OtherItemInfo.TileGridPositionX
+			&& TileGridPositionY == OtherItemInfo.TileGridPositionY
 			&& ItemLargeCategory == OtherItemInfo.ItemLargeCategory
 			&& ItemMediumCategory == OtherItemInfo.ItemMediumCategory
 			&& ItemSmallCategory == OtherItemInfo.ItemSmallCategory
