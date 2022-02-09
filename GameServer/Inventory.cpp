@@ -9,261 +9,265 @@ CInventory::CInventory()
 
 CInventory::~CInventory()
 {
-	for (auto ItemIteraotr : _Items)
+	if (_Items != nullptr)
 	{
-		CItem* Item = ItemIteraotr.second;
-		delete Item;		
-	}
-}
-
-void CInventory::Init()
-{
-	_BronzeCoinCount = 0;
-	_SliverCoinCount = 0;
-	_GoldCoinCount = 0;
-
-	for (int SlotIndex = 0; SlotIndex < (int8)en_Inventory::INVENTORY_SIZE; SlotIndex++)
-	{
-		CItem* Item = (CItem*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM);
-		Item->_ItemInfo.ItemSlotIndex = SlotIndex;
-
-		_Items.insert(pair<int8, CItem*>(Item->_ItemInfo.ItemSlotIndex,Item));
-	}
-}
-
-void CInventory::AddItem(CItem* Item)
-{
-	// 동전과 은전 추가할 경우, 100개가 넘게 되면
-	// 다음 동전을 100개당 1개씩 비례하게 개수를 구하고 추가한다.
-	byte SliverCoinCount;
-	int64 GoldCoinCount;
-
-	switch (Item->_ItemInfo.ItemSmallCategory)
-	{
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:		
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:		
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
+		for (int Y = 0; Y < _InventoryHeight; Y++)
 		{
-			auto FindSlotIterator = _Items.find(Item->_ItemInfo.ItemSlotIndex);
-			if (FindSlotIterator == _Items.end())
+			for (int X = 0; X < _InventoryWidth; X++)
 			{
-				return;
+				G_ObjectManager->ObjectReturn(en_GameObjectType::OBJECT_ITEM, _Items[Y][X]->InventoryItem);				
+				delete _Items[Y][X];
 			}
 
-			G_ObjectManager->ObjectReturn((*FindSlotIterator).second->_GameObjectInfo.ObjectType, (*FindSlotIterator).second);
-			
-			(*FindSlotIterator).second = Item;
+			delete _Items[Y];
 		}
-		break;
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN:
-		{			
-			_BronzeCoinCount += (byte)(Item->_ItemInfo.ItemCount);
-			SliverCoinCount = (byte)(_BronzeCoinCount / 100);
 
-			if (SliverCoinCount > 0)
-			{
-				_BronzeCoinCount = (byte)(_BronzeCoinCount - (SliverCoinCount * 100));
-			}
-			else
-			{
-				_BronzeCoinCount += (byte)(SliverCoinCount * 100);
-			}
-
-			_SliverCoinCount += SliverCoinCount;	
-		}	
-		break;
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN:
-		{
-			_SliverCoinCount += (byte)(Item->_ItemInfo.ItemCount);
-			GoldCoinCount = (byte)(_SliverCoinCount / 100);
-
-			if (GoldCoinCount > 0)
-			{
-				_SliverCoinCount = (byte)(_SliverCoinCount - (GoldCoinCount * 100));
-			}
-			else
-			{
-				_SliverCoinCount += (byte)(GoldCoinCount * 100);
-			}
-
-			_GoldCoinCount += GoldCoinCount;
-		}			
-		break;
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN:
-		{
-			CMaterial* Coin = (CMaterial*)Item;
-
-			_GoldCoinCount += Item->_ItemInfo.ItemCount;
-		}		
-		break;							
-	}
+		delete _Items;
+	}	
 }
 
-CItem* CInventory::Get(int8 SlotIndex)
+void CInventory::Init(int8 InventoryWidth, int8 InventoryHeight)
 {
-	auto FindItemIterator = _Items.find(SlotIndex);
-	if (FindItemIterator == _Items.end())
+	_InventoryWidth = InventoryWidth;
+	_InventoryHeight = InventoryHeight;
+	
+	_Items = new st_InventoryItem **[_InventoryHeight];
+
+	for (int Y = 0; Y < _InventoryHeight; Y++)
+	{		
+		_Items[Y] = new st_InventoryItem *[_InventoryWidth];
+
+		for (int X = 0; X < _InventoryWidth; X++)
+		{			
+			_Items[Y][X] = new st_InventoryItem();
+			_Items[Y][X]->IsEmptySlot = true;
+			_Items[Y][X]->InventoryItem = (CItem*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM);
+			_Items[Y][X]->InventoryItem->_ItemInfo.TileGridPositionY = Y;
+			_Items[Y][X]->InventoryItem->_ItemInfo.TileGridPositionX = X;
+		}		
+	}			
+}
+
+CItem* CInventory::SelectItem(int8 TilePositionX, int8 TilePositionY)
+{
+	if (_Items[TilePositionX][TilePositionY]->IsEmptySlot == false)
+	{
+		CItem* ReturnItem = _Items[TilePositionX][TilePositionY]->InventoryItem;
+		if (ReturnItem == nullptr)
+		{
+			return nullptr;
+		}
+
+		CleanGridReference(ReturnItem);
+
+		return ReturnItem;
+	}
+	else
 	{
 		return nullptr;
 	}
-
-	return (*FindItemIterator).second;
 }
 
-bool CInventory::IsExistItem(en_SmallItemCategory ItemType, int16& ItemEach, int8* SlotIndex)
+void CInventory::CleanGridReference(CItem* CleanItem)
 {
-	switch (ItemType)
-	{	
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:
+	// 아이템의 넓이 만큼 인벤토리 위치 타일을 정리한다.
+	for (int X = 0; X < CleanItem->_ItemInfo.Width; X++)
+	{
+		for (int Y = 0; Y < CleanItem->_ItemInfo.Height; Y++)
 		{
-			// 무기와 방어구의 경우 중복이 안되므로 비어 있는 슬롯 인덱스를 반환한다.
-			GetEmptySlot(SlotIndex);
-		}	
-		break;
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL:		
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:		
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL:			
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
+			_Items[CleanItem->_ItemInfo.TileGridPositionX + X][CleanItem->_ItemInfo.TileGridPositionY + Y]->IsEmptySlot = true;
+		}
+	}
+}
+
+CItem* CInventory::GetItem(int8 X, int8 Y)
+{
+	return _Items[X][Y]->InventoryItem;
+}
+
+st_Vector2Int CInventory::FindEmptySpace(CItem* ItemInfo)
+{	
+	st_Vector2Int FindTilePosition;
+	FindTilePosition._X = -1;
+	FindTilePosition._Y = -1;
+
+	int SearchingHeight = _InventoryHeight - ItemInfo->_ItemInfo.Height + 1;
+	int SearchingWidth = _InventoryWidth - ItemInfo->_ItemInfo.Width + 1;
+
+	for (int Y = 0; Y < SearchingHeight; Y++)
+	{
+		for (int X = 0; X < SearchingWidth; X++)
 		{
-			// 재료의 경우 중복이 가능 하므로 
-			for (auto ItemIterator : _Items)
+			if (CheckEmptySpace(X, Y, ItemInfo->_ItemInfo.Width, ItemInfo->_ItemInfo.Height) == true)
 			{
-				CItem* Item = ItemIterator.second;				
+				FindTilePosition._X = X;
+				FindTilePosition._Y = Y;
+				
+				return FindTilePosition;
+			}
+		}
+	}
 
-				if (Item != nullptr && Item->_ItemInfo.ItemSmallCategory == ItemType)
+	return FindTilePosition;
+}
+
+bool CInventory::FindItemSpaceEmpty(CItem* Item)
+{
+	return CheckEmptySpace(Item->_ItemInfo.TileGridPositionX, Item->_ItemInfo.TileGridPositionY, Item->_ItemInfo.Width, Item->_ItemInfo.Height);
+}
+
+bool CInventory::CheckEmptySpace(int8 PositionX, int8 PositionY, int32 Width, int32 Height)
+{
+	// 매개변수로 받은 시작 위치부터 넓이만큼 인벤토리가 비어 있는지 확인한다.
+	for(int X = 0; X < Width; X++)
+	{
+		for (int Y = 0; Y < Height; Y++)
+		{
+			if (_Items[PositionX + X][PositionY + Y]->IsEmptySlot == false)
+			{
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+bool CInventory::PlaceItem(CItem* PlaceItemInfo, int16 PositionX, int16 PositionY, CItem** OverlapItem)
+{
+	// 아이템 범위 체크
+	if (BoundryCheck(PositionX, PositionY, PlaceItemInfo->_ItemInfo.Width, PlaceItemInfo->_ItemInfo.Height) == false)
+	{
+		return false;
+	}
+
+	// 아이템을 넣을 위치에 아이템이 이미 있는지 확인한다.
+	if (OverlapCheck(PositionX, PositionY, PlaceItemInfo->_ItemInfo.Width, PlaceItemInfo->_ItemInfo.Height, OverlapItem) == false)
+	{
+		OverlapItem = nullptr;
+		return false;
+	}
+
+	// 중복한 아이템을 찾앗을 경우 ( == 놓을 위치에 아이템이 하나만 있을 경우 )
+	if (*OverlapItem != nullptr)
+	{
+		// 중복 아이템의 공간을 비워준다.
+		CleanGridReference(*OverlapItem);
+	}
+
+	// 아이템을 넣는다.
+	PlaceItem(PlaceItemInfo, PositionX, PositionY);
+
+	return true;
+}
+
+void CInventory::PlaceItem(CItem* PlaceItemInfo, int16 PositionX, int16 PositionY)
+{
+	// 넣을 아이템의 위치를 설정한다.
+	PlaceItemInfo->_ItemInfo.TileGridPositionX = PositionX;
+	PlaceItemInfo->_ItemInfo.TileGridPositionY = PositionY;
+
+	// 아이템의 넓이만큼 시작 위치에서 슬롯에 채워넣는다.
+	for (int X = 0; X < PlaceItemInfo->_ItemInfo.Width; X++)
+	{
+		for (int Y = 0; Y < PlaceItemInfo->_ItemInfo.Height; Y++)
+		{			
+			_Items[PositionX + X][PositionY + Y]->IsEmptySlot = false;			
+			_Items[PositionX + X][PositionY + Y]->InventoryItem = PlaceItemInfo;			
+		}
+	}	
+}
+
+st_Vector2Int CInventory::CalculatePositionOnGrid(CItem* Item, int8 TilePositionX, int8 TilePositionY)
+{
+	st_Vector2Int TilePosition;
+	TilePosition._X = TilePositionX * en_Inventory::TILE_SIZE_WIDTH + en_Inventory::TILE_SIZE_WIDTH * Item->_ItemInfo.Width / 2;
+	TilePosition._Y = -(TilePositionY * en_Inventory::TILE_SIZE_HEIGHT + en_Inventory::TILE_SIZE_HEIGHT * Item->_ItemInfo.Height / 2);
+
+	return TilePosition;
+}
+
+bool CInventory::BoundryCheck(int16 PositionX, int16 PositionY, int32 Width, int32 Height)
+{
+	if (PositionCheck(PositionX, PositionY) == false)
+	{
+		return false;
+	}
+
+	PositionX += Width - 1;
+	PositionY += Height - 1;
+
+	if (PositionCheck(PositionX, PositionY) == false)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool CInventory::PositionCheck(int16 TilePositionX, int16 TilePositionY)
+{
+	// 위치 값이 음수일 경우 false
+	if (TilePositionX < 0 || TilePositionY < 0)
+	{
+		return false;
+	}
+
+	if (TilePositionX >= _InventoryWidth || TilePositionY >= _InventoryHeight)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool CInventory::OverlapCheck(int8 TilePositionX, int8 TilePositionY, int16 Width, int16 Height, CItem** OverlapItem)
+{
+	// 매개 변수로 받은 시작 위치로부터 넓이만큼 검사한다.
+	for (int X = 0; X < Width; X++)
+	{
+		for (int Y = 0; Y < Height; Y++)
+		{
+			// 만약 검사 위치에 아이템이 있을 경우
+			if (_Items[TilePositionX + X][TilePositionY + Y]->IsEmptySlot == false)
+			{
+				// OverlapItem이 null일 경우 즉, 첫번째로 중복된 아이템을 발견햇을 경우
+				if (*OverlapItem == nullptr)
 				{
-					CMaterial* Material = (CMaterial*)Item;
-
-					// 재료의 개수를 증가
-					Item->_ItemInfo.ItemCount += ItemEach;
-					// 작업한 슬롯의 인덱스를 반환
-					*SlotIndex = ItemIterator.first;
-					return true;
+					// OverlapItem에 검사 위치에서 발견한 아이템을 넣어준다.
+					*OverlapItem = _Items[TilePositionX + X][TilePositionY + Y]->InventoryItem;
+				}
+				else
+				{
+					// 중복 아이템을 발견했고
+					// 다른 위치를 검사하는데, 놓을 위치에 발견한 중복 아이템과 다른 아이템이 있을 경우
+					// 놓을 위치에 2개 이상의 아이템이 존재한다는 것을 의미하므로 false를 반환한다.
+					if (_Items[TilePositionX + X][TilePositionY + Y]->IsEmptySlot == false
+						&& *OverlapItem != _Items[TilePositionX + X][TilePositionY + Y]->InventoryItem)
+					{
+						return false;
+					}			
 				}
 			}
 		}
-		break;
 	}
 
-	return false;
+	return true;
 }
 
-vector<CItem*> CInventory::Find(en_LargeItemCategory ItemLargeType)
-{
-	vector<CItem*> FindItem;
-
-	for (auto ItemIterator : _Items)
-	{
-		CItem* Item = (CItem*)ItemIterator.second;
-
-		if (Item != nullptr && Item->_ItemInfo.ItemLargeCategory == ItemLargeType)
-		{
-			FindItem.push_back(Item);
-		}
-	}
-
-	return FindItem;
-}
-
-vector<CItem*> CInventory::Find(en_MediumItemCategory ItemMediumType)
-{
-	vector<CItem*> FindItem;
-
-	for (auto ItemIterator : _Items)
-	{
-		CItem* Item = (CItem*)ItemIterator.second;
-
-		if (Item != nullptr && Item->_ItemInfo.ItemMediumCategory == ItemMediumType)
-		{
-			FindItem.push_back(Item);
-		}
-	}
-
-	return FindItem;
-}
-
-vector<CItem*> CInventory::Find(en_SmallItemCategory ItemSmallType)
+CItem* CInventory::FindInventoryItem(CItem* FindItem)
 {
 	// 인벤토리에서 ItemType과 같은 모든 아이템을 찾아서 반환한다.
-	vector<CItem*> FindItem;
-
-	for (auto ItemIterator : _Items)
+	for (int Y = 0; Y < _InventoryHeight; Y++)
 	{
-		CItem* Item = (CItem*)ItemIterator.second;
-
-		if (Item != nullptr && Item->_ItemInfo.ItemSmallCategory == ItemSmallType)
+		for (int X = 0; X < _InventoryWidth; X++)
 		{
-			FindItem.push_back(Item);
+			if (_Items[Y][X]->InventoryItem->_ItemInfo.ItemSmallCategory == FindItem->_ItemInfo.ItemSmallCategory)
+			{
+				return _Items[Y][X]->InventoryItem;
+			}
 		}
-	}
-
-	return FindItem;
-}
-
-bool CInventory::GetEmptySlot(int8* SlotIndex)
-{
-	// 무기와 방어구의 경우 중복이 안되므로 비어 있는 슬롯 인덱스를 반환한다.
-	for (auto ItemIterator : _Items)
-	{
-		CItem* Item = ItemIterator.second;
-
-		if (Item->_ItemInfo.ItemSmallCategory == en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE)
-		{
-			*SlotIndex = ItemIterator.first;
-			return true;
-		}
-	}
-
-	return false;
-}
-
-void CInventory::SwapItem(int8 SwapAIndex, int8 SwapBIndex)
-{
-	CItem* AItem = Get(SwapAIndex);
-	CItem* BItem = Get(SwapBIndex);
-
-	AItem->_ItemInfo.ItemSlotIndex = SwapBIndex;
-	BItem->_ItemInfo.ItemSlotIndex = SwapAIndex;
-
-	auto FindSwapAItem = _Items.find(SwapAIndex);
-	if (FindSwapAItem != _Items.end())
-	{
-		(*FindSwapAItem).second = BItem;
-	}
-
-	auto FindSwapBItem = _Items.find(SwapBIndex);
-	if (FindSwapBItem != _Items.end())
-	{
-		(*FindSwapBItem).second = AItem;
-	}
-}
-
-void CInventory::SlotInit(int8 InitSlotIndex)
-{
-	// 기존에 있던 아이템 반납 후
-	G_ObjectManager->ObjectReturn(Get(InitSlotIndex)->_GameObjectInfo.ObjectType, Get(InitSlotIndex));
-
-	// 해당 슬롯 초기화
-	auto FindInitSlot = _Items.find(InitSlotIndex);
-	if (FindInitSlot != _Items.end())
-	{
-		(*FindInitSlot).second = (CItem*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM);
-		(*FindInitSlot).second->_ItemInfo.ItemSlotIndex = InitSlotIndex;
-	}
+	}	
+	 
+	return nullptr;
 }

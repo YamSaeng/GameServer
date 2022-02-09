@@ -4,13 +4,10 @@
 class CInventory
 {
 public:	
-
-	//---------------------
-	// 보유하고 있는 동전
-	//---------------------
-	int16 _BronzeCoinCount;
-	int16 _SliverCoinCount;
-	int64 _GoldCoinCount;
+	// 인벤토리 너비
+	int32 _InventoryWidth;
+	// 인벤토리 높이
+	int32 _InventoryHeight;		
 
 	CInventory();
 	~CInventory();
@@ -18,48 +15,83 @@ public:
 	//----------------------
 	// 인벤토리 초기화
 	//----------------------
-	void Init();
-		
-	//------------------------
-	// 인벤토리에 아이템 추가
-	//------------------------
-	void AddItem(CItem* Item);
-	//--------------------------
-	// 아이템 반환
-	//--------------------------
-	CItem* Get(int8 SlotIndex);
-	
-	//-----------------------------------------------------------------------
-	// 인벤토리에 이미 아이템이 있는지 확인 ( 아이템 인벤토리에 넣을때 확인 )
-	//-----------------------------------------------------------------------
-	bool IsExistItem(en_SmallItemCategory ItemType, int16& ItemEach,int8* SlotIndex);
+	void Init(int8 InventoryWidth, int8 InventoryHeight);			
 
+	//-----------------------------------------------------
+	// 아이템 선택
+	//-----------------------------------------------------
+	CItem* SelectItem(int8 TilePositionX, int8 TilePositionY);
+
+	//-------------------------------------------------
+	// 아이템이 위치한 인벤토리 정리
+	//-------------------------------------------------
+	void CleanGridReference(CItem* CleanItem);
+
+	//----------------------------------
+	// 아이템 반환
+	//----------------------------------
+	CItem* GetItem(int8 X, int8 Y);
+	
+	//--------------------------------------------------
+	// 인벤토리에서 비어 있는 공간을 찾아낸다.
+	//--------------------------------------------------
+	st_Vector2Int FindEmptySpace(CItem* ItemInfo);
+
+	//---------------------------------------------------
+	// 인벤토리에 아이템이 차지할 위치가 비어 있는지 확인
+	//---------------------------------------------------
+	bool FindItemSpaceEmpty(CItem* Item);
+
+	//-----------------------------------------------------------------------------
+	// 매개 변수로 받은 공간이 비어 있는지 확인한다.
+	//-----------------------------------------------------------------------------
+	bool CheckEmptySpace(int8 PositionX, int8 PositionY, int32 Width, int32 Height);
+
+	//------------------------------------------------------------------------------------------------
+	// 아이템을 인벤토리에 넣는다. ( 아이템 범위 체크, 중복 아이템 체크 )
+	//------------------------------------------------------------------------------------------------
+	bool PlaceItem(CItem* PlaceItemInfo, int16 PositionX, int16 PositionY, CItem** OverlapItem);
+	void PlaceItem(CItem* PlaceItemInfo, int16 PositionX, int16 PositionY);	
+
+	//----------------------------------------------------------------------------------------
+	// 아이템의 Grid 인벤토리 위치를 계산한다.
+	//----------------------------------------------------------------------------------------
+	st_Vector2Int CalculatePositionOnGrid(CItem* Item, int8 TilePositionX, int8 TilePositionY);
+
+	//---------------------------------------------------------------------------
+	// 범위 체크
+	//---------------------------------------------------------------------------
+	bool BoundryCheck(int16 PositionX, int16 PositionY, int32 Width, int32 Height);
+	
+	//------------------------------------------------
+	// 위치 검사
+	//------------------------------------------------
+	bool PositionCheck(int16 TilePositionX, int16 TilePositionY);
+
+	//------------------------------------------------------------------------------------------------------
+	// 아이템을 놓을 위치에 이미 아이템이 있는지 확인
+	//------------------------------------------------------------------------------------------------------
+	bool OverlapCheck(int8 TilePositionX, int8 TilePositionY, int16 Width, int16 Height, CItem** OverlapItem);		
+	
 	//--------------------------------------
 	// ItemType 받아서 아이템정보 반환
-	//--------------------------------------
-	vector<CItem*> Find(en_LargeItemCategory ItemLargeType);
-	vector<CItem*> Find(en_MediumItemCategory ItemMediumType);
-	vector<CItem*> Find(en_SmallItemCategory ItemSmallType);	
+	//--------------------------------------	
+	CItem* FindInventoryItem(CItem* FindItem);
 
-	//----------------------------------
-	// 비어 있는 슬롯 반환
-	//----------------------------------
-	bool GetEmptySlot(int8* SlotIndex);
-
-	//--------------------------------------
-	// 인벤토리 아이템 스왑
-	//--------------------------------------
-	void SwapItem(int8 SwapAIndex, int8 SwapBIndex);
-
-	//--------------------------------
-	// 인벤토리 슬롯 초기화
-	//--------------------------------
-	void SlotInit(int8 InitSlotIndex);
 private:
-	//---------------------------------------------
-	// 인벤토리가 소유중인 아이템 ( 포인터로 관리 )
-	//   ( SlotIndex, 아이템정보 )
-	//---------------------------------------------
-	map<int8, CItem*> _Items;
+	struct st_InventoryItem
+	{
+		bool IsEmptySlot;
+		CItem* InventoryItem;
+	};
+
+	enum en_Inventory
+	{
+		TILE_SIZE_WIDTH = 64,
+		TILE_SIZE_HEIGHT = 64
+	};
+
+	// 보유중인 아이템 목록
+	st_InventoryItem*** _Items;
 };
 
