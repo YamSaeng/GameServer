@@ -549,6 +549,41 @@
       ]]>
     </Body>
   </Procedure>
+	
+  <!-- 인벤토리 아이템 놓기 -->
+	<Procedure name="spInventoryItemPlace">
+	<Param name="@OwnerAccountDBId" type="BigInt"/>
+	<Param name="@OwnerPlayerDBId" type="BigInt"/>
+	<Param name="@IsQuickSlotUse" type="bit"/>
+	<Param name="@ItemRotated" type="bit"/>
+	<Param name="@ItemWidth" type="SmallInt"/>
+	<Param name="@ItemHeight" type="SmallInt"/>
+	<Param name="@ItemTileGridPositionX" type="SmallInt"/>
+	<Param name="@ItemTileGridPositionY" type="SmallInt"/>
+	<Param name="@ItemLargeCategory" type="TinyInt" notnull="true"/>
+	<Param name="@ItemMediumCategory" type="TinyInt" notnull="true"/>
+	<Param name="@ItemSmallCategory" type="SmallInt"/>
+	<Param name="@ItemName" type="nvarchar(20)"/>
+	<Param name="@ItemCount" type="SmallInt"/>
+	<Param name="@IsEquipped" type="bit"/>
+	<Param name="@MinDamage" type="int"/>
+	<Param name="@MaxDamage" type="int"/>
+	<Param name="@Defence" type="int"/>
+	<Param name="@MaxCount" type="int"/>		
+	<Param name="@ThumbnailImagePath" type="nvarchar(100)"/>
+	<Body>
+	  <![CDATA[
+		SET NOCOUNT ON
+		UPDATE [dbo].[Inventory]
+		SET IsQuickSlotUse = (@IsQuickSlotUse),
+		ItemRotated = (@ItemRotated),
+		ItemWidth = (@ItemWidth), ItemHeight = (@ItemHeight),
+		ItemLargeCategory = (@ItemLargeCategory), ItemMediumCategory = (@ItemMediumCategory), ItemSmallCategory = (@ItemSmallCategory),
+		ItemName = (@ItemName), ItemCount = (@ItemCount), IsEquipped = (@IsEquipped), MinDamage = (@MinDamage), MaxDamage = (@MaxDamage), Defence = (@Defence), MaxCount = (@MaxCount), ThumbnailImagePath = (@ThumbnailImagePath)
+		WHERE OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId) And ItemTileGridPositionX = (@ItemTileGridPositionX) AND ItemTileGridPositionY = (@ItemTileGridPositionY)
+		]]>
+	</Body>	
+ </Procedure>
   
   <!-- 스킬 테이블에 있는 스킬 가지고 오기 -->
   <Procedure name="spGetSkill">

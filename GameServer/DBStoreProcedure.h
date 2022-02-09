@@ -281,7 +281,7 @@ namespace SP
 		void InItemThumbnailImagePath(wstring& ItemThumbnailImagePath) { BindParam(5, ItemThumbnailImagePath.c_str()); }
 	};
 
-	// 인벤토리 아이템 업데이트
+	// 인벤토리 아이템 업데이트 프로시저
 	class CDBGameServerInventoryItemUpdate : public CDBBind<7, 0>
 	{
 	public:
@@ -293,6 +293,32 @@ namespace SP
 		void InItemTileGridPositionY(int16& TileGridPositionY) { BindParam(4, TileGridPositionY); }
 		void InItemCount(int16& ItemCount) { BindParam(5, ItemCount); }
 		void InIsEquipped(bool& IsEquipped) { BindParam(6, IsEquipped); }
+	};
+
+	// 인벤토리 아이템 넣기 프로시저
+	class CDBGameServerInventoryPlace : public CDBBind<19, 0>
+	{
+	public:
+		CDBGameServerInventoryPlace(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spInventoryItemPlace(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}") {}
+		void InOwnerAccountId(int64& OwnerAccountId) { BindParam(0, OwnerAccountId); }
+		void InOwnerPlayerId(int64& OwnerPlayerId) { BindParam(1, OwnerPlayerId); }
+		void InIsQuickSlotUse(bool& IsQuickSlotUse) { BindParam(2, IsQuickSlotUse); }
+		void InItemRotated(bool& ItemRotated) { BindParam(3, ItemRotated); }
+		void InItemWidth(int16& ItemWidth) { BindParam(4, ItemWidth); }
+		void InItemHeight(int16& ItemHeight) { BindParam(5, ItemHeight); }		
+		void InItemTileGridPositionX(int16& TileGridPositionX) { BindParam(6, TileGridPositionX); }
+		void InItemTileGridPositionY(int16& TileGridPositionY) { BindParam(7, TileGridPositionY); }
+		void InItemLargeCategory(int8& ItemCategoryType) { BindParam(8, ItemCategoryType); }
+		void InItemMediumCategory(int8& ItemMediumCategory) { BindParam(9, ItemMediumCategory); }
+		void InItemSmallCategory(int16& ItemType) { BindParam(10, ItemType); }
+		void InItemName(wstring& ItemName) { BindParam(11, ItemName.c_str()); }
+		void InItemCount(int16& ItemCount) { BindParam(12, ItemCount); }
+		void InIsEquipped(bool& IsEquipped) { BindParam(13, IsEquipped); }
+		void InItemMinDamage(int32& ItemMinDamage) { BindParam(14, ItemMinDamage); }
+		void InItemMaxDamage(int32& ItemMaxDamage) { BindParam(15, ItemMaxDamage); }
+		void InItemDefence(int32& ItemDefence) { BindParam(16, ItemDefence); }
+		void InItemMaxCount(int32& ItemMaxCount) { BindParam(17, ItemMaxCount); }		
+		void InItemThumbnailImagePath(wstring& ItemThumbnailImagePath) { BindParam(18, ItemThumbnailImagePath.c_str()); }
 	};
 
 	// GoldTable 생성
