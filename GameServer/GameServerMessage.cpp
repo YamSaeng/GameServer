@@ -106,6 +106,12 @@ CGameServerMessage& CGameServerMessage::operator<<(st_ItemInfo& ItemInfo)
 {
     *this << ItemInfo.ItemDBId;
     *this << ItemInfo.ItemIsQuickSlotUse;
+    *this << ItemInfo.Rotated;
+    *this << ItemInfo.Width;
+    *this << ItemInfo.Height;
+    *this << ItemInfo.TileGridPositionX;
+    *this << ItemInfo.TileGridPositionY;
+
     *this << (int8)ItemInfo.ItemLargeCategory;
     *this << (int8)ItemInfo.ItemMediumCategory;
     *this << (int16)ItemInfo.ItemSmallCategory;    
@@ -125,8 +131,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_ItemInfo& ItemInfo)
     *this << ItemImagePathLen;
     InsertData(ItemInfo.ItemThumbnailImagePath.c_str(), ItemImagePathLen);
 
-    *this << ItemInfo.ItemIsEquipped;
-    *this << ItemInfo.ItemSlotIndex;         
+    *this << ItemInfo.ItemIsEquipped;         
 
     return *(this);
 }

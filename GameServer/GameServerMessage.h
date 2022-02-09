@@ -43,7 +43,7 @@ public:
 #pragma region µ¥ÀÌÅÍ »©±â
 	CGameServerMessage& operator >> (st_Vector2Int& CellPositionInfo);
 	CGameServerMessage& operator >> (st_SkillInfo& SkillInfo);
-	CGameServerMessage& operator >> (st_QuickSlotBarSlotInfo& Value);
+	CGameServerMessage& operator >> (st_QuickSlotBarSlotInfo& Value);	
 	CGameServerMessage& operator >> (CItem** Item);
 	CGameServerMessage& operator >> (st_SkillInfo** SkillInfo);
 #pragma endregion
