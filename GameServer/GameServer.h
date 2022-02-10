@@ -226,7 +226,7 @@ private:
 	//--------------------------------------------------------------------
 	// 접속 종료시 플레이어 정보 DB에 기록
 	//--------------------------------------------------------------------
-	void PacketProcReqDBLeavePlayerInfoSave(CMessage* Message);
+	void PacketProcReqDBLeavePlayerInfoSave(CPlayer* MyPlayer);
 
 	//------------------------------------------------------------------
 	// 타이머 잡 요청 처리 함수
@@ -288,11 +288,7 @@ private:
 	//-------------------------------------------------------------------------------------------------------------------------
 	// 게임서버 돈 저장 요청 응답 패킷 조합
 	//-------------------------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int16 SliverCount, int16 BronzeCount, int16 ItemCount, int16 ItemType, bool ItemGainPrint = true);
-	//-------------------------------------------------------------------------------------------------------------------------
-	// 게임서버 인벤토리 생성 패킷 조합
-	//-------------------------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketInventoryCreate(int8 InventorySize, vector<CItem*> InventoryItems);
+	CGameServerMessage* MakePacketResGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int16 SliverCount, int16 BronzeCount, int16 ItemCount, int16 ItemType, bool ItemGainPrint = true);	
 	//---------------------------------------------------------------------------------------------
 	// 게임서버 인벤토리 아이템 선택 요청 응답 패킷 조합
 	//---------------------------------------------------------------------------------------------
