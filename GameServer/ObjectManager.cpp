@@ -490,8 +490,8 @@ void CObjectManager::ItemSpawn(int64 KillerId, en_GameObjectType KillerObjectTyp
 	ReqDBaseItemCreateJob->Session = nullptr;
 	ReqDBaseItemCreateJob->Message = ReqItemCreateMessage;
 
-	GameServer->_GameServerDataBaseThreadMessageQue.Enqueue(ReqDBaseItemCreateJob);
-	SetEvent(GameServer->_DataBaseWakeEvent);	
+	GameServer->_GameServerWorldDataBaseThreadMessageQue.Enqueue(ReqDBaseItemCreateJob);
+	SetEvent(GameServer->_WorldDataBaseWakeEvent);	
 }
 
 void CObjectManager::ObjectSpawn(en_GameObjectType ObjectType, st_Vector2Int SpawnPosition)
