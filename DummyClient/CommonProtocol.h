@@ -251,14 +251,7 @@ enum en_PACKET_TYPE
 	// int32 ObjectId
 	// string Message
 	//------------------------------------------------------------
-	en_PACKET_S2C_MESSAGE,
-
-	//------------------------------------------------------------
-	// 게임서버 인벤토리 생성 
-	// int8 InventorySize
-	// st_ItemInfo[] InventoryItemInfos
-	//------------------------------------------------------------
-	en_PACKET_S2C_INVENTORY_CREATE,
+	en_PACKET_S2C_MESSAGE,	
 
 	//------------------------------------------------------------
 	// 게임서버 줍기 요청
