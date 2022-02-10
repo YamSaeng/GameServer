@@ -1,9 +1,9 @@
 	#pragma once
 #include "GameObject.h"
 #include "Equipment.h"
-#include "Inventory.h"
 #include "SkillBox.h"
 #include "QuickSlotManager.h"
+#include "InventoryManager.h"
 
 struct st_TimerJob;
 
@@ -27,8 +27,9 @@ public:
 	int64 _SessionId;
 	int64 _AccountId;
 
-	CEquipment _Equipment;
-	CInventory _Inventory;
+	CEquipment _Equipment;	
+	CInventoryManager _InventoryManager;
+	
 	CSkillBox _SkillBox;
 	CQuickSlotManager _QuickSlotManager;
 
