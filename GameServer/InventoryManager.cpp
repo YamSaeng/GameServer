@@ -52,7 +52,7 @@ CItem* CInventoryManager::SelectItem(int8 SelectInventoryIndex, int8 TilePositio
 
 CItem* CInventoryManager::SwapItem(int8 SelectInventoryIndex, int16 PlaceItemTileGridPositionX, int16 PlaceItemTileGridPositionY)
 {
-	CItem* BItem = nullptr;
+	CItem* BItem = nullptr;	
 	CItem* PlaceItem = _SelectItem;	
 
 	if (_Inventorys[SelectInventoryIndex]->PlaceItem(_SelectItem, PlaceItemTileGridPositionX, PlaceItemTileGridPositionY, &BItem) == false)
@@ -75,8 +75,13 @@ st_Vector2Int CInventoryManager::FindEmptySpace(int8 SelectInventoryIndex, CItem
 	return _Inventorys[SelectInventoryIndex]->FindEmptySpace(ItemInfo);
 }
 
-CItem* CInventoryManager::FindInventoryItem(int8 SelectInventoryIndex, CItem* FindItem)
+CItem* CInventoryManager::FindInventoryItem(int8 SelectInventoryIndex, en_SmallItemCategory FindItemSmallItemCategory)
 {
-	return _Inventorys[SelectInventoryIndex]->FindInventoryItem(FindItem);
+	return _Inventorys[SelectInventoryIndex]->FindInventoryItem(FindItemSmallItemCategory);
+}
+
+vector<CItem*> CInventoryManager::FindAllInventoryItem(int8 SelectInventoryIndex, en_SmallItemCategory FindItemSmallItemCategory)
+{
+	return _Inventorys[SelectInventoryIndex]->FindAllInventoryItem(FindItemSmallItemCategory);
 }
 

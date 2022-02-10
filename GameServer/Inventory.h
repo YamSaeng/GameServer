@@ -73,11 +73,20 @@ public:
 	//------------------------------------------------------------------------------------------------------
 	bool OverlapCheck(int8 TilePositionX, int8 TilePositionY, int16 Width, int16 Height, CItem** OverlapItem);		
 	
-	//--------------------------------------
-	// ItemType 받아서 아이템정보 반환
-	//--------------------------------------	
-	CItem* FindInventoryItem(CItem* FindItem);
+	//----------------------------------------------------------------------
+	// ItemType 받아서 해당 타입과 맞는 첫번째로 발견한 아이템 정보 반환
+	//----------------------------------------------------------------------
+	CItem* FindInventoryItem(en_SmallItemCategory FindItemSmallItemCategory);
 
+	//---------------------------------------------------------------------------------
+	// ItemType 받아서 해당 타입과 맞는 모든 아이템 정보 반환
+	//---------------------------------------------------------------------------------
+	vector<CItem*> FindAllInventoryItem(en_SmallItemCategory FindItemSmallItemCategory);
+
+	//-----------------------------------------------------
+	// 서버에 저장하기 위해 소유중인 아이템 정보를 반환한다.
+	//-----------------------------------------------------
+	vector<st_ItemInfo> DBInventorySaveReturnItems();
 private:
 	struct st_InventoryItem
 	{

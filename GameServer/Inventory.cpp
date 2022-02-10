@@ -41,31 +41,36 @@ void CInventory::Init(int8 InventoryWidth, int8 InventoryHeight)
 		{			
 			_Items[Y][X] = new st_InventoryItem();
 			_Items[Y][X]->IsEmptySlot = true;
-			_Items[Y][X]->InventoryItem = (CItem*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM);
-			_Items[Y][X]->InventoryItem->_ItemInfo.TileGridPositionY = Y;
-			_Items[Y][X]->InventoryItem->_ItemInfo.TileGridPositionX = X;
+			_Items[Y][X]->InventoryItem = nullptr;
 		}		
 	}			
 }
 
 CItem* CInventory::SelectItem(int8 TilePositionX, int8 TilePositionY)
 {
-	if (_Items[TilePositionX][TilePositionY]->IsEmptySlot == false)
+	if (PositionCheck(TilePositionX, TilePositionY) == true)
 	{
-		CItem* ReturnItem = _Items[TilePositionX][TilePositionY]->InventoryItem;
-		if (ReturnItem == nullptr)
+		if (_Items[TilePositionX][TilePositionY]->IsEmptySlot == false)
+		{
+			CItem* ReturnItem = _Items[TilePositionX][TilePositionY]->InventoryItem;
+			if (ReturnItem == nullptr)
+			{
+				return nullptr;
+			}
+
+			CleanGridReference(ReturnItem);
+
+			return ReturnItem;
+		}
+		else
 		{
 			return nullptr;
 		}
-
-		CleanGridReference(ReturnItem);
-
-		return ReturnItem;
 	}
 	else
 	{
 		return nullptr;
-	}
+	}	
 }
 
 void CInventory::CleanGridReference(CItem* CleanItem)
@@ -122,7 +127,7 @@ bool CInventory::CheckEmptySpace(int8 PositionX, int8 PositionY, int32 Width, in
 	for(int X = 0; X < Width; X++)
 	{
 		for (int Y = 0; Y < Height; Y++)
-		{
+		{			
 			if (_Items[PositionX + X][PositionY + Y]->IsEmptySlot == false)
 			{
 				return false;
@@ -172,8 +177,8 @@ void CInventory::PlaceItem(CItem* PlaceItemInfo, int16 PositionX, int16 Position
 	{
 		for (int Y = 0; Y < PlaceItemInfo->_ItemInfo.Height; Y++)
 		{			
-			_Items[PositionX + X][PositionY + Y]->IsEmptySlot = false;			
-			_Items[PositionX + X][PositionY + Y]->InventoryItem = PlaceItemInfo;			
+			_Items[PositionX + X][PositionY + Y]->IsEmptySlot = false;							
+			_Items[PositionX + X][PositionY + Y]->InventoryItem = PlaceItemInfo;
 		}
 	}	
 }
@@ -255,19 +260,78 @@ bool CInventory::OverlapCheck(int8 TilePositionX, int8 TilePositionY, int16 Widt
 	return true;
 }
 
-CItem* CInventory::FindInventoryItem(CItem* FindItem)
+CItem* CInventory::FindInventoryItem(en_SmallItemCategory FindItemSmallItemCategory)
 {
-	// 인벤토리에서 ItemType과 같은 모든 아이템을 찾아서 반환한다.
 	for (int Y = 0; Y < _InventoryHeight; Y++)
 	{
 		for (int X = 0; X < _InventoryWidth; X++)
 		{
-			if (_Items[Y][X]->InventoryItem->_ItemInfo.ItemSmallCategory == FindItem->_ItemInfo.ItemSmallCategory)
+			if (_Items[Y][X]->IsEmptySlot == false && _Items[Y][X]->InventoryItem->_ItemInfo.ItemSmallCategory == FindItemSmallItemCategory)
 			{
 				return _Items[Y][X]->InventoryItem;
-			}
+			}			
 		}
 	}	
 	 
 	return nullptr;
+}
+
+vector<CItem*> CInventory::FindAllInventoryItem(en_SmallItemCategory FindItemSmallItemCategory)
+{
+	bool FindItemCheck = true;
+
+	vector<CItem*> FindItems;
+
+	for (int Y = 0; Y < _InventoryHeight; Y++)
+	{
+		for (int X = 0; X < _InventoryWidth; X++)
+		{
+			if (_Items[Y][X]->IsEmptySlot == false && _Items[Y][X]->InventoryItem->_ItemInfo.ItemSmallCategory == FindItemSmallItemCategory)
+			{
+				for (CItem* FindItem : FindItems)
+				{
+					if (FindItem->_ItemInfo.TileGridPositionX == _Items[Y][X]->InventoryItem->_ItemInfo.TileGridPositionX
+						&& FindItem->_ItemInfo.TileGridPositionY == _Items[Y][X]->InventoryItem->_ItemInfo.TileGridPositionY)
+					{
+						FindItemCheck = false;
+						break;
+					}
+				}
+
+				if (FindItemCheck == true)
+				{
+					FindItems.push_back(_Items[Y][X]->InventoryItem);
+				}				
+			}
+		}
+	}
+
+	return FindItems;
+}
+
+vector<st_ItemInfo> CInventory::DBInventorySaveReturnItems()
+{
+	st_ItemInfo InitItemInfo;
+
+	vector<st_ItemInfo> ReturnItem;
+	
+	for (int Y = 0; Y < _InventoryHeight; Y++)
+	{
+		for (int X = 0; X < _InventoryWidth; X++)
+		{
+			if (_Items[Y][X]->IsEmptySlot == false)
+			{
+				ReturnItem.push_back(_Items[Y][X]->InventoryItem->_ItemInfo);
+			}
+			else
+			{
+				InitItemInfo.TileGridPositionY = Y;
+				InitItemInfo.TileGridPositionX = X;				
+
+				ReturnItem.push_back(InitItemInfo);
+			}
+		}
+	}
+
+	return ReturnItem;
 }
