@@ -513,9 +513,7 @@
       <![CDATA[
 	    SET NOCOUNT ON
         UPDATE [dbo].[Inventory]
-        SET ItemRotated = 0, ItemWidth = 0, ItemHeight = 0,
-		ItemTileGridPositionX = 0,
-		ItemTileGridPositionY = 0,
+        SET ItemRotated = 0, ItemWidth = 0, ItemHeight = 0,		
 		ItemLargeCategory = 0, ItemMediumCategory = 0, ItemSmallCategory = 0,
 		ItemName = (@InitItemName),
 		ItemCount = 0,
