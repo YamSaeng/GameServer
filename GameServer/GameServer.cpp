@@ -220,7 +220,7 @@ unsigned __stdcall CGameServer::UserDataBaseThreadProc(void* Argument)
 
 							InterlockedDecrement64(&Session->DBReserveCount);
 							InterlockedIncrement64(&Instance->_DataBaseThreadTPS);
-						}
+						}					
 
 						InterlockedExchange64(&Session->IsDBExecute, 0);						
 					}
@@ -2421,7 +2421,7 @@ void CGameServer::PacketProcReqItemSelect(int64 SessionId, CMessage* Message)
 			int16 SelectItemTileGridPositionX;
 			int16 SelectItemTileGridPositionY;
 			*Message >> SelectItemTileGridPositionX;
-			*Message >> SelectItemTileGridPositionY;
+			*Message >> SelectItemTileGridPositionY;			
 
 			CItem* SelectItem = MyPlayer->_InventoryManager.SelectItem(0, SelectItemTileGridPositionX, SelectItemTileGridPositionY);
 
@@ -4348,19 +4348,25 @@ void CGameServer::PacketProcReqDBItemPlace(int64 SessionId, CGameServerMessage* 
 
 		CItem* PlaceItem = MyPlayer->_InventoryManager.SwapItem(0, PlaceItemTilePositionX, PlaceITemTilePositionY);
 
-		wstring InitString = L"";
-
 		CDBConnection* InventoryItemInitConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-		SP::CDBGameServerInventorySlotInit InventoryItemInit(*InventoryItemInitConnection);
+				
+		if (SelectItemTilePositionX != PlaceItemTilePositionX 
+			|| SelectItemTilePositionY != PlaceITemTilePositionY)
+		{
+			// 제자리에 놓지 않을 경우
+			// 선택한 아이템이 있던 공간을 초기화 한다.
+			SP::CDBGameServerInventorySlotInit InventoryItemInit(*InventoryItemInitConnection);
 
-		InventoryItemInit.InOwnerAccountId(Session->AccountId);
-		InventoryItemInit.InOwnerPlayerId(MyPlayer->_GameObjectInfo.ObjectId);
-		InventoryItemInit.InItemTileGridPositionX(SelectItemTilePositionX);
-		InventoryItemInit.InItemTileGridPositionY(SelectItemTilePositionY);
-		InventoryItemInit.InItemName(InitString);
-		InventoryItemInit.InItemThumbnailImagePath(InitString);
+			wstring InitString = L"";
+			InventoryItemInit.InOwnerAccountId(Session->AccountId);
+			InventoryItemInit.InOwnerPlayerId(MyPlayer->_GameObjectInfo.ObjectId);
+			InventoryItemInit.InItemTileGridPositionX(SelectItemTilePositionX);
+			InventoryItemInit.InItemTileGridPositionY(SelectItemTilePositionY);
+			InventoryItemInit.InItemName(InitString);
+			InventoryItemInit.InItemThumbnailImagePath(InitString);
 
-		InventoryItemInit.Execute();
+			InventoryItemInit.Execute();
+		}					
 
 		SP::CDBGameServerInventoryPlace InventoryItemPlace(*InventoryItemInitConnection);
 
@@ -4755,10 +4761,10 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 #pragma region 가방 아이템 정보 읽어오기
 			vector<st_ItemInfo> Equipments;
 			// 인벤토리 생성
-			MyPlayer->_InventoryManager.InventoryCreate(10, 10);			
+			MyPlayer->_InventoryManager.InventoryCreate((int8)en_InventoryManager::INVENTORY_DEFAULT_WIDH_SIZE, (int8)en_InventoryManager::INVENTORY_DEFAULT_HEIGHT_SIZE);
 
-			*ResCharacterInfoMessage << 10;
-			*ResCharacterInfoMessage << 10;
+			*ResCharacterInfoMessage << (int8)en_InventoryManager::INVENTORY_DEFAULT_WIDH_SIZE;
+			*ResCharacterInfoMessage << (int8)en_InventoryManager::INVENTORY_DEFAULT_HEIGHT_SIZE;
 
 			vector<CItem*> InventoryItems;			
 
