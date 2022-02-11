@@ -4,6 +4,9 @@
 class CInventory
 {
 public:	
+	// 인벤토리 번호
+	int8 _InventoryIndex;
+	int64 _InventoryItemNumber;
 	// 인벤토리 너비
 	int32 _InventoryWidth;
 	// 인벤토리 높이

@@ -1689,25 +1689,26 @@ struct st_Color
 
 struct st_ItemInfo
 {
-	int64 ItemDBId;				// 아이템 DB에 저장되어 있는 ID		
+	int64 ItemDBId;				    // 아이템 DB에 저장되어 있는 ID		
+	int64 InventoryItemNumber;		// 아이템이 인벤토리에 속할때 구분할 숫자
 	bool ItemIsQuickSlotUse;        // 퀵슬롯에 등록되어 있는지 여부 
-	bool Rotated;			// 아이템이 회전 되어 있는지 아닌지 여부
-	int16 Width;			// 아이템 너비
-	int16 Height;			// 아이템 높이	
-	int16 TileGridPositionX;	// 인벤토리 위치 X
-	int16 TileGridPositionY;   // 인벤토리 위치 Y
-	en_LargeItemCategory ItemLargeCategory; // 아이템 대분류
+	bool Rotated;				    // 아이템이 회전 되어 있는지 아닌지 여부
+	int16 Width;			     	// 아이템 너비
+	int16 Height;			        // 아이템 높이	
+	int16 TileGridPositionX;	    // 인벤토리 위치 X
+	int16 TileGridPositionY;        // 인벤토리 위치 Y
+	en_LargeItemCategory ItemLargeCategory;   // 아이템 대분류
 	en_MediumItemCategory ItemMediumCategory; // 아이템 중분류
-	en_SmallItemCategory ItemSmallCategory;		// 아이템 소분류
-	wstring ItemName;			// 아이템 이름
-	wstring ItemExplain;			// 아이템 설명문
-	int32 ItemMinDamage;			// 아이템 최소 공격력
-	int32 ItemMaxDamage;			// 아이템 최대 공격력
-	int32 ItemDefence;				// 아이템 방어력
-	int32 ItemMaxCount;				// 아이템을 소유 할 수 있는 최대 개수
-	int16 ItemCount;			// 개수
-	wstring ItemThumbnailImagePath; // 이미지 경로
-	bool ItemIsEquipped;			// 아이템을 착용할 수 있는지		
+	en_SmallItemCategory ItemSmallCategory;	  // 아이템 소분류
+	wstring ItemName;			              // 아이템 이름
+	wstring ItemExplain;		              // 아이템 설명문
+	int32 ItemMinDamage;			          // 아이템 최소 공격력
+	int32 ItemMaxDamage;			          // 아이템 최대 공격력
+	int32 ItemDefence;				          // 아이템 방어력
+	int32 ItemMaxCount;				          // 아이템을 소유 할 수 있는 최대 개수
+	int16 ItemCount;			              // 개수
+	wstring ItemThumbnailImagePath;           // 이미지 경로
+	bool ItemIsEquipped;			          // 아이템을 착용할 수 있는지		
 
 	st_ItemInfo()
 	{

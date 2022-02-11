@@ -43,7 +43,9 @@ void CInventory::Init(int8 InventoryWidth, int8 InventoryHeight)
 			_Items[Y][X]->IsEmptySlot = true;
 			_Items[Y][X]->InventoryItem = nullptr;
 		}		
-	}			
+	}		
+
+	_InventoryItemNumber = 0;
 }
 
 CItem* CInventory::SelectItem(int8 TilePositionX, int8 TilePositionY)
@@ -149,7 +151,8 @@ bool CInventory::PlaceItem(CItem* PlaceItemInfo, int16 PositionX, int16 Position
 	// 아이템을 넣을 위치에 아이템이 이미 있는지 확인한다.
 	if (OverlapCheck(PositionX, PositionY, PlaceItemInfo->_ItemInfo.Width, PlaceItemInfo->_ItemInfo.Height, OverlapItem) == false)
 	{
-		OverlapItem = nullptr;
+		// 넣을 위치에 2가지 이상 아이템이 존재할 경우 아이템을 넣을 수 없다고 판단한다.
+		*OverlapItem = nullptr;
 		return false;
 	}
 
@@ -178,9 +181,12 @@ void CInventory::PlaceItem(CItem* PlaceItemInfo, int16 PositionX, int16 Position
 		for (int Y = 0; Y < PlaceItemInfo->_ItemInfo.Height; Y++)
 		{			
 			_Items[PositionX + X][PositionY + Y]->IsEmptySlot = false;							
-			_Items[PositionX + X][PositionY + Y]->InventoryItem = PlaceItemInfo;
+			_Items[PositionX + X][PositionY + Y]->InventoryItem = PlaceItemInfo;			
+			_Items[PositionX + X][PositionY + Y]->InventoryItem->_ItemInfo.InventoryItemNumber = _InventoryItemNumber;
 		}
 	}	
+
+	_InventoryItemNumber++;
 }
 
 st_Vector2Int CInventory::CalculatePositionOnGrid(CItem* Item, int8 TilePositionX, int8 TilePositionY)
