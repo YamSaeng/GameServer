@@ -57,7 +57,7 @@ CItem* CInventoryManager::SwapItem(int8 SelectInventoryIndex, int16 PlaceItemTil
 
 	if (_Inventorys[SelectInventoryIndex]->PlaceItem(_SelectItem, PlaceItemTileGridPositionX, PlaceItemTileGridPositionY, &BItem) == false)
 	{
-		_Inventorys[SelectInventoryIndex]->PlaceItem(_SelectItem, _SelectItem->_ItemInfo.TileGridPositionX, _SelectItem->_ItemInfo.TileGridPositionY);
+		_Inventorys[SelectInventoryIndex]->PlaceItem(_SelectItem, _SelectItem->_ItemInfo.TileGridPositionX, _SelectItem->_ItemInfo.TileGridPositionY);		
 	}
 
 	_SelectItem = BItem;

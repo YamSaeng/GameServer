@@ -328,6 +328,8 @@ vector<st_ItemInfo> CInventory::DBInventorySaveReturnItems()
 			if (_Items[Y][X]->IsEmptySlot == false)
 			{
 				ReturnItem.push_back(_Items[Y][X]->InventoryItem->_ItemInfo);
+				// 사용 다한 아이템 메모리 반납
+				G_ObjectManager->ObjectReturn(_Items[Y][X]->InventoryItem->_GameObjectInfo.ObjectType, (CGameObject*)_Items[Y][X]);
 			}
 			else
 			{

@@ -352,7 +352,9 @@ private:
 	//-------------------------------------------------
 	// 게임서버 핑 패킷 조합
 	//-------------------------------------------------
-	CGameServerMessage* MakePacketPing();
+	CGameServerMessage* MakePacketPing();	
+	
+	CItem* NewItemCrate(st_ItemInfo& NewItemInfo);
 public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 공격요청 응답 패킷 조합
