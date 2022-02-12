@@ -10,7 +10,12 @@ struct st_Vector2Int
 	int32 _X;
 	int32 _Y;
 
-	st_Vector2Int() {};
+	st_Vector2Int()
+	{
+		_X = 0;
+		_Y = 0;
+	}
+
 	st_Vector2Int(int X, int Y)
 	{
 		_X = X;

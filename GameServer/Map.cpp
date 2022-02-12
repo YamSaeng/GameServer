@@ -403,7 +403,10 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 			vector<int64> DeSpawnObjectInfos;
 			for (CGameObject* DeSpawnObject : DeSpawnFieldOfViewObjects)
 			{
-				DeSpawnObjectInfos.push_back(DeSpawnObject->_GameObjectInfo.ObjectId);
+				if (DeSpawnObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
+				{
+					DeSpawnObjectInfos.push_back(DeSpawnObject->_GameObjectInfo.ObjectId);
+				}				
 			}
 
 			CMessage* ResOtherCharacterDeSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn((int32)DeSpawnObjectInfos.size(), DeSpawnObjectInfos);
