@@ -4,6 +4,8 @@
 #include "RingBuffer.h"
 #include "Message.h"
 #include "CommonProtocol.h"
+#include "QuickSlotManager.h"
+#include "SkillBox.h"
 
 #define DUMMY_CLIENT_MAX 2000
 
@@ -68,4 +70,7 @@ struct st_Client
 	int64 DummyClientLoginTime;
 	int64 ClientSendMessageTime;
 	int64 ClientReConnectTime;		
+
+	CSkillBox _SkillBox;
+	CQuickSlotManager _QuickSlotManager;
 };

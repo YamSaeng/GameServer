@@ -1,0 +1,22 @@
+#pragma once
+#include <map>
+#include "GameObjectInfo.h"
+
+class CQuickSlotBar
+{
+public:
+	// Äü½½·Ô ¹Ù ÀÎµ¦½º
+	int8 _QuickSlotBarIndex;
+
+	CQuickSlotBar();
+	~CQuickSlotBar();
+
+	void Init();
+
+	// QuickSlot¿¡ ½ºÅ³ ÀúÀå
+	void UpdateQuickSlotBarSlot(st_QuickSlotBarSlotInfo& QuickSlotBarSlotInfo);
+
+private:
+	map<int8, st_QuickSlotBarSlotInfo*> _QuickSlotBarSlotInfos;
+};
+
