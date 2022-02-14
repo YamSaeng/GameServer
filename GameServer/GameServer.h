@@ -108,8 +108,8 @@ private:
 
 	//---------------------------------------------------------
 	// 이동 요청 처리
-	//--------------------------------------------------------
-	void PacketProcReqMove(int64 SessionID, CMessage* Message);
+	//---------------------------------------------------------
+	void PacketProcReqMove(int64 SessionID, CMessage* Message);	
 	//---------------------------------------------------------------
 	// 공격 요청 처리
 	//---------------------------------------------------------------
@@ -411,8 +411,7 @@ public:
 	//---------------------------------------------------------------------------------
 	// 게임서버 버프 패킷 조합
 	//---------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketBuf(int64 TargetObjectId, float SkillCoolTime, float SkillCoolTimeSpeed, st_SkillInfo* SkillInfo);
-
+	CGameServerMessage* MakePacketBuf(int64 TargetObjectId, float SkillCoolTime, float SkillCoolTimeSpeed, st_SkillInfo* SkillInfo);	
 public:
 	//------------------------------------
 	// Job 메모리풀
@@ -436,6 +435,7 @@ public:
 	//--------------------------------------
 	CHeap<int64,st_TimerJob*>* _TimerHeapJob;
 
+	int64 _LogicThreadTPS;
 	// 인증 쓰레드 활성화된 횟수
 	int64 _AuthThreadWakeCount;
 	// 인증 쓰레드 TPS

@@ -44,6 +44,8 @@ CGameServer::CGameServer()
 	// 타이머 우선순위 큐 생성
 	_TimerHeapJob = new CHeap<int64, st_TimerJob*>(2000);
 
+	_LogicThreadTPS = 0;
+
 	_AuthThreadWakeCount = 0;
 	_AuthThreadTPS = 0;
 
@@ -222,7 +224,7 @@ unsigned __stdcall CGameServer::UserDataBaseThreadProc(void* Argument)
 							InterlockedIncrement64(&Instance->_DataBaseThreadTPS);
 						}					
 
-						InterlockedExchange64(&Session->IsDBExecute, 0);						
+						InterlockedExchange64(&Session->IsDBExecute, 0);
 					}
 				} while (0);
 
@@ -339,9 +341,26 @@ unsigned __stdcall CGameServer::LogicThreadProc(void* Argument)
 {
 	CGameServer* Instance = (CGameServer*)Argument;
 
+	int64 LogicUpdatePreviousTime = GetTickCount64();
+	int64 LogicUpdateCurrentTime = 0;
+	int64 DeltaTime = 0;	
+
 	while (!Instance->_LogicThreadEnd)
-	{
-		G_ChannelManager->Update();
+	{		
+		LogicUpdateCurrentTime = GetTickCount64();
+		DeltaTime = LogicUpdateCurrentTime - LogicUpdatePreviousTime;
+
+		if (DeltaTime >= 20)
+		{
+			LogicUpdatePreviousTime = LogicUpdateCurrentTime - (DeltaTime - 20);
+			G_ChannelManager->Update();
+
+			Instance->_LogicThreadTPS++;			
+		}	
+		else
+		{
+			Sleep(0);
+		}
 	}
 
 	return 0;
@@ -702,7 +721,7 @@ void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 		break;
 	case en_PACKET_TYPE::en_PACKET_C2S_MOVE:
 		PacketProcReqMove(SessionId, Message);
-		break;
+		break;	
 	case en_PACKET_TYPE::en_PACKET_C2S_ATTACK:
 		PacketProcReqMelee(SessionId, Message);
 		break;
@@ -1044,22 +1063,19 @@ void CGameServer::PacketProcReqCharacterInfo(int64 SessionID, CMessage* Message)
 			}
 		}
 
-		if (Session->IsDummy == false)
-		{
-			st_Job* DBCharacterInfoSendJob = _JobMemoryPool->Alloc();
-			DBCharacterInfoSendJob->SessionId = Session->SessionId;
+		st_Job* DBCharacterInfoSendJob = _JobMemoryPool->Alloc();
+		DBCharacterInfoSendJob->SessionId = Session->SessionId;
 
-			CGameServerMessage* DBCharacterInfoSendMessage = CGameServerMessage::GameServerMessageAlloc();
-			DBCharacterInfoSendMessage->Clear();
+		CGameServerMessage* DBCharacterInfoSendMessage = CGameServerMessage::GameServerMessageAlloc();
+		DBCharacterInfoSendMessage->Clear();
 
-			*DBCharacterInfoSendMessage << (int16)en_JobType::DATA_BASE_CHARACTER_INFO_SEND;
+		*DBCharacterInfoSendMessage << (int16)en_JobType::DATA_BASE_CHARACTER_INFO_SEND;
 
-			InterlockedIncrement64(&Session->DBReserveCount);
-			Session->DBQue.Enqueue(DBCharacterInfoSendMessage);
+		InterlockedIncrement64(&Session->DBReserveCount);
+		Session->DBQue.Enqueue(DBCharacterInfoSendMessage);
 
-			_GameServerUserDataBaseThreadMessageQue.Enqueue(DBCharacterInfoSendJob);
-			SetEvent(_UserDataBaseWakeEvent);
-		}		
+		_GameServerUserDataBaseThreadMessageQue.Enqueue(DBCharacterInfoSendJob);
+		SetEvent(_UserDataBaseWakeEvent);
 
 		ReturnSession(Session);
 	}
@@ -5470,40 +5486,44 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CPlayer* MyPlayer)
 	LeavePlayerStatInfoSave.InRequireExperience(MyPlayer->_Experience.RequireExperience);
 	LeavePlayerStatInfoSave.InTotalExperience(MyPlayer->_Experience.TotalExperience);
 
-	LeavePlayerStatInfoSave.Execute();
+	LeavePlayerStatInfoSave.Execute();		
 
-	SP::CDBGameServerInventoryPlace LeavePlayerInventoryItemSave(*PlayerInfoSaveDBConnection);
-	LeavePlayerInventoryItemSave.InOwnerAccountId(MyPlayer->_AccountId);
-	LeavePlayerInventoryItemSave.InOwnerPlayerId(MyPlayer->_GameObjectInfo.ObjectId);
-
-	vector<st_ItemInfo> PlayerInventoryItems = MyPlayer->_InventoryManager._Inventorys[0]->DBInventorySaveReturnItems();
-
-	for (st_ItemInfo InventoryItem : PlayerInventoryItems)
+	// 인벤토리가 존재할 때
+	if (MyPlayer->_InventoryManager._Inventorys[0] != nullptr)
 	{
-		int8 InventoryItemLargeCategory = (int8)InventoryItem.ItemLargeCategory;
-		int8 InventoryItemMediumCategory = (int8)InventoryItem.ItemMediumCategory;
-		int16 InventoryItemSmallCategory = (int16)InventoryItem.ItemSmallCategory;
+		SP::CDBGameServerInventoryPlace LeavePlayerInventoryItemSave(*PlayerInfoSaveDBConnection);
+		LeavePlayerInventoryItemSave.InOwnerAccountId(MyPlayer->_AccountId);
+		LeavePlayerInventoryItemSave.InOwnerPlayerId(MyPlayer->_GameObjectInfo.ObjectId);
 
-		LeavePlayerInventoryItemSave.InIsQuickSlotUse(InventoryItem.ItemIsQuickSlotUse);
-		LeavePlayerInventoryItemSave.InItemRotated(InventoryItem.ItemIsQuickSlotUse);
-		LeavePlayerInventoryItemSave.InItemWidth(InventoryItem.Width);
-		LeavePlayerInventoryItemSave.InItemHeight(InventoryItem.Height);
-		LeavePlayerInventoryItemSave.InItemTileGridPositionX(InventoryItem.TileGridPositionX);
-		LeavePlayerInventoryItemSave.InItemTileGridPositionY(InventoryItem.TileGridPositionY);
-		LeavePlayerInventoryItemSave.InItemLargeCategory(InventoryItemLargeCategory);
-		LeavePlayerInventoryItemSave.InItemMediumCategory(InventoryItemMediumCategory);
-		LeavePlayerInventoryItemSave.InItemSmallCategory(InventoryItemSmallCategory);
-		LeavePlayerInventoryItemSave.InItemName(InventoryItem.ItemName);
-		LeavePlayerInventoryItemSave.InItemCount(InventoryItem.ItemCount);
-		LeavePlayerInventoryItemSave.InIsEquipped(InventoryItem.ItemIsEquipped);
-		LeavePlayerInventoryItemSave.InItemMinDamage(InventoryItem.ItemMinDamage);
-		LeavePlayerInventoryItemSave.InItemMaxDamage(InventoryItem.ItemMaxDamage);
-		LeavePlayerInventoryItemSave.InItemDefence(InventoryItem.ItemDefence);
-		LeavePlayerInventoryItemSave.InItemMaxCount(InventoryItem.ItemMaxCount);
-		LeavePlayerInventoryItemSave.InItemThumbnailImagePath(InventoryItem.ItemThumbnailImagePath);
+		vector<st_ItemInfo> PlayerInventoryItems = MyPlayer->_InventoryManager._Inventorys[0]->DBInventorySaveReturnItems();
 
-		LeavePlayerInventoryItemSave.Execute();
-	}
+		for (st_ItemInfo InventoryItem : PlayerInventoryItems)
+		{
+			int8 InventoryItemLargeCategory = (int8)InventoryItem.ItemLargeCategory;
+			int8 InventoryItemMediumCategory = (int8)InventoryItem.ItemMediumCategory;
+			int16 InventoryItemSmallCategory = (int16)InventoryItem.ItemSmallCategory;
+
+			LeavePlayerInventoryItemSave.InIsQuickSlotUse(InventoryItem.ItemIsQuickSlotUse);
+			LeavePlayerInventoryItemSave.InItemRotated(InventoryItem.ItemIsQuickSlotUse);
+			LeavePlayerInventoryItemSave.InItemWidth(InventoryItem.Width);
+			LeavePlayerInventoryItemSave.InItemHeight(InventoryItem.Height);
+			LeavePlayerInventoryItemSave.InItemTileGridPositionX(InventoryItem.TileGridPositionX);
+			LeavePlayerInventoryItemSave.InItemTileGridPositionY(InventoryItem.TileGridPositionY);
+			LeavePlayerInventoryItemSave.InItemLargeCategory(InventoryItemLargeCategory);
+			LeavePlayerInventoryItemSave.InItemMediumCategory(InventoryItemMediumCategory);
+			LeavePlayerInventoryItemSave.InItemSmallCategory(InventoryItemSmallCategory);
+			LeavePlayerInventoryItemSave.InItemName(InventoryItem.ItemName);
+			LeavePlayerInventoryItemSave.InItemCount(InventoryItem.ItemCount);
+			LeavePlayerInventoryItemSave.InIsEquipped(InventoryItem.ItemIsEquipped);
+			LeavePlayerInventoryItemSave.InItemMinDamage(InventoryItem.ItemMinDamage);
+			LeavePlayerInventoryItemSave.InItemMaxDamage(InventoryItem.ItemMaxDamage);
+			LeavePlayerInventoryItemSave.InItemDefence(InventoryItem.ItemDefence);
+			LeavePlayerInventoryItemSave.InItemMaxCount(InventoryItem.ItemMaxCount);
+			LeavePlayerInventoryItemSave.InItemThumbnailImagePath(InventoryItem.ItemThumbnailImagePath);
+
+			LeavePlayerInventoryItemSave.Execute();
+		}
+	}	
 
 	G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerInfoSaveDBConnection);
 }
