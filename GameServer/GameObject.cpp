@@ -4,7 +4,8 @@
 
 CGameObject::CGameObject()
 {
-	_ObjectManagerIndex = -1;
+	_ObjectManagerArrayIndex = -1;
+	_ChannelArrayIndex = -1;
 	_NetworkState = en_ObjectNetworkState::READY;
 	_GameObjectInfo.OwnerObjectId = 0;	
 	_Channel = nullptr;
@@ -13,7 +14,7 @@ CGameObject::CGameObject()
 
 	_NatureRecoveryTick = 0;
 
-	_FieldOfViewDistance = 6;
+	_FieldOfViewDistance = 10;
 
 	_IsSendPacketTarget = false;
 }
@@ -71,7 +72,7 @@ st_PositionInfo CGameObject::GetPositionInfo()
 
 st_Vector2Int CGameObject::GetCellPosition()
 {
-	return st_Vector2Int(_GameObjectInfo.ObjectPositionInfo.PositionX, _GameObjectInfo.ObjectPositionInfo.PositionY);
+	return st_Vector2Int(_GameObjectInfo.ObjectPositionInfo.CollisionPositionX, _GameObjectInfo.ObjectPositionInfo.CollisionPositionY);
 }
 
 st_Vector2Int CGameObject::GetFrontCellPosition(en_MoveDir Dir, int8 Distance)
@@ -136,15 +137,15 @@ CGameObject* CGameObject::GetTarget()
 	return _Target;
 }
 
-void CGameObject::BroadCastPacket(en_PACKET_TYPE PacketType)
+void CGameObject::BroadCastPacket(en_PACKET_TYPE PacketType, bool CanMove)
 {
 	CMessage* ResPacket = nullptr;
 
 	switch (PacketType)
 	{
 	case en_PACKET_TYPE::en_PACKET_S2C_MOVE:
-		ResPacket = G_ObjectManager->GameServer->MakePacketResMove((int64)-1, _GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType, _GameObjectInfo.ObjectPositionInfo);
-		break;
+		ResPacket = G_ObjectManager->GameServer->MakePacketResMove((int64)-1, _GameObjectInfo.ObjectId, CanMove, _GameObjectInfo.ObjectPositionInfo);
+		break;	
 	case en_PACKET_TYPE::en_PACKET_S2C_PATROL:
 		ResPacket = G_ObjectManager->GameServer->MakePacketPatrol(_GameObjectInfo.ObjectId,
 			_GameObjectInfo.ObjectType,

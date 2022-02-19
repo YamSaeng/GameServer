@@ -1,63 +1,107 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="소스 파일">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    <Filter Include="Network">
+      <UniqueIdentifier>{bcf5c916-3e6f-4f9c-9f11-1180592085a5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="헤더 파일">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    <Filter Include="Network\DummyClientMessage">
+      <UniqueIdentifier>{30da3d58-de9d-4bbc-9734-b1cb2d49596e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="리소스 파일">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    <Filter Include="Client">
+      <UniqueIdentifier>{39718cf8-20d1-4730-8fe5-42bf5a6ea680}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\QuickSlotBar">
+      <UniqueIdentifier>{5506165e-a2ab-475f-b587-d6acb6c7a433}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\Memory">
+      <UniqueIdentifier>{be357f14-eef6-4312-94ee-88cf2f15c919}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\LockFree">
+      <UniqueIdentifier>{bed5d912-4fdd-4b70-b123-e70e9b9d6677}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\SKillBox">
+      <UniqueIdentifier>{7025cb2f-0cc2-491f-ae22-8f2b2e41d57e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\Map">
+      <UniqueIdentifier>{ae8b20d3-409e-49f5-8508-d72af728305f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\Util">
+      <UniqueIdentifier>{7666bb77-5b31-4ed9-bae8-12fc12c013b9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Message.cpp">
-      <Filter>헤더 파일</Filter>
+      <Filter>Network\DummyClientMessage</Filter>
     </ClCompile>
-    <ClCompile Include="DummyClient.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="QuickSlotBar.cpp">
+      <Filter>Client\QuickSlotBar</Filter>
+    </ClCompile>
+    <ClCompile Include="QuickSlotManager.cpp">
+      <Filter>Client\QuickSlotBar</Filter>
+    </ClCompile>
+    <ClCompile Include="DummyClient.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="SkillBox.cpp">
+      <Filter>Client\SKillBox</Filter>
+    </ClCompile>
+    <ClCompile Include="FileUtils.cpp">
+      <Filter>Client\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Map.cpp">
+      <Filter>Client\Map</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Message.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="DummyClient.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="MemoryPoolTLS.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ObjectPoolFreeList.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Type.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="RingBuffer.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="CommonProtocol.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="LockFreeQue.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="LockFreeStack.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Network\DummyClientMessage</Filter>
     </ClInclude>
     <ClInclude Include="ClientInfo.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Client</Filter>
     </ClInclude>
+    <ClInclude Include="QuickSlotBar.h">
+      <Filter>Client\QuickSlotBar</Filter>
+    </ClInclude>
+    <ClInclude Include="QuickSlotManager.h">
+      <Filter>Client\QuickSlotBar</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectPoolFreeList.h">
+      <Filter>Client\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryPoolTLS.h">
+      <Filter>Client\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="LockFreeQue.h">
+      <Filter>Client\LockFree</Filter>
+    </ClInclude>
+    <ClInclude Include="LockFreeStack.h">
+      <Filter>Client\LockFree</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonProtocol.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="DummyClient.h" />
     <ClInclude Include="GameObjectInfo.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Client</Filter>
     </ClInclude>
+    <ClInclude Include="RingBuffer.h">
+      <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="Type.h">
+      <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="SkillBox.h">
+      <Filter>Client\SKillBox</Filter>
+    </ClInclude>
+    <ClInclude Include="Map.h">
+      <Filter>Client\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="FileUtils.h">
+      <Filter>Client\Util</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="MapData.txt">
+      <Filter>Client</Filter>
+    </Text>
   </ItemGroup>
 </Project>

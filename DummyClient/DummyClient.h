@@ -3,6 +3,7 @@
 
 #include "ClientInfo.h"
 #include "LockFreeStack.h"
+#include "Map.h"
 
 // 세션 인덱스 넣기 16비트 왼쪽으로 밀고 INDEX 넣음
 #define ADD_CLIENTID_INDEX(CLIENTID,INDEX)	((CLIENTID << 0x10) | ((short)INDEX))
@@ -13,6 +14,8 @@
 class CDummyClient
 {
 private:
+	CMap* _Map;
+
 	enum en_DummyClientMessage
 	{
 		CHAT_MSG,
@@ -26,6 +29,8 @@ private:
 	static unsigned __stdcall WorkerThreadProc(void* Argument);
 		
 	static unsigned __stdcall ConnectThreadProc(void* Argument);
+
+	static unsigned __stdcall LogicThreadProc(void* Argument);
 
 	static unsigned __stdcall SendThreadProc(void* Argument);
 
@@ -42,7 +47,7 @@ private:
 	void OnRecv(int64 ClientID, CMessage* Packet);
 
 	HANDLE _ConnectThreadWakeEvent;
-
+		
 protected:
 	st_Client* _ClientArray[DUMMY_CLIENT_MAX];
 
@@ -57,6 +62,8 @@ public:
 
 	LONG _SendPacketTPS;
 	LONG _RecvPacketTPS;	
+	int64 _LogicThreadFPS;
+	int64 _SendThreadFPS;
 	int64 _ClientCount = 0;
 	int64 _ConnectCount = 0;
 	int64 _LoginCount = 0;

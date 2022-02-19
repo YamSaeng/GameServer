@@ -5,6 +5,44 @@
 class CItem;
 class CGameObject;
 
+struct st_Vector2
+{
+	float _X;
+	float _Y;
+
+	st_Vector2()
+	{
+		_X = 0;
+		_Y = 0;
+	}
+
+	st_Vector2(float X, float Y)
+	{
+		_X = X;
+		_Y = Y;
+	}
+
+	static st_Vector2 Up() { return st_Vector2(0, 1.0f); }
+	static st_Vector2 Down() { return st_Vector2(0, -1.0f); }
+	static st_Vector2 Left() { return st_Vector2(-1.0f, 0); }
+	static st_Vector2 Right() { return st_Vector2(1.0f, 0); }
+
+	st_Vector2 operator + (st_Vector2& Vector)
+	{
+		return st_Vector2(_X + Vector._X, _Y + Vector._Y);
+	}
+
+	st_Vector2 operator - (st_Vector2& Vector)
+	{
+		return st_Vector2(_X - Vector._X, _Y - Vector._Y);
+	}
+
+	st_Vector2 operator * (int8& Sclar)
+	{
+		return st_Vector2(_X * Sclar, _Y * Sclar);
+	}		
+};
+
 struct st_Vector2Int
 {
 	int32 _X;
@@ -16,7 +54,7 @@ struct st_Vector2Int
 		_Y = 0;
 	}
 
-	st_Vector2Int(int X, int Y)
+	st_Vector2Int(int32 X, int32 Y)
 	{
 		_X = X;
 		_Y = Y;
@@ -176,12 +214,13 @@ public:
 	//-------------------------------------------
 	CItem** FindItem(st_Vector2Int& ItemCellPosition);
 	
+	bool Cango(CGameObject* Object, float X, float Y);
 	//----------------------------------------------------------------------------
 	// 위치로 갈 수 있는지 확인
 	// CheckObjects = 벽을 제외한 오브젝트를 충돌 대상으로 여길 것인지에 대한 판단
 	// ( true : 해당위치에 오브젝트가 있는지 확인해서 있으면 충돌체로 판단한다. )
 	//----------------------------------------------------------------------------
-	bool Cango(st_Vector2Int& CellPosition, bool CheckObjects = true);
+	bool CollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool CheckObjects = true);
 
 	//------------------------------------------------------------------------------------------------------------------------
 	// 목적지 좌표값을 받아서 해당 좌표로 갈 수 있는지 없는지 판단
@@ -202,6 +241,6 @@ public:
 	st_Position CellToPosition(st_Vector2Int CellPosition);
 	st_Vector2Int PositionToCell(st_Position Position);
 		
-	vector<st_Vector2Int> FindPath(st_Vector2Int StartCellPosition, st_Vector2Int DestCellPostion, bool CheckObjects = true, int32 MaxDistance = 10);
+	vector<st_Vector2Int> FindPath(CGameObject* Object, st_Vector2Int StartCellPosition, st_Vector2Int DestCellPostion, bool CheckObjects = true, int32 MaxDistance = 10);
 	vector<st_Vector2Int> CompletePath(map<st_Position,st_Position> Parents, st_Position DestPosition);	
 ;};

@@ -142,21 +142,34 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DummyClient.cpp" />
+    <ClCompile Include="FileUtils.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Map.cpp" />
     <ClCompile Include="Message.cpp" />
+    <ClCompile Include="QuickSlotBar.cpp" />
+    <ClCompile Include="QuickSlotManager.cpp" />
+    <ClCompile Include="SkillBox.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommonProtocol.h" />
     <ClInclude Include="DummyClient.h" />
+    <ClInclude Include="FileUtils.h" />
     <ClInclude Include="GameObjectInfo.h" />
     <ClInclude Include="LockFreeQue.h" />
     <ClInclude Include="LockFreeStack.h" />
+    <ClInclude Include="Map.h" />
     <ClInclude Include="MemoryPoolTLS.h" />
     <ClInclude Include="Message.h" />
     <ClInclude Include="ObjectPoolFreeList.h" />
+    <ClInclude Include="QuickSlotBar.h" />
+    <ClInclude Include="QuickSlotManager.h" />
     <ClInclude Include="RingBuffer.h" />
+    <ClInclude Include="SkillBox.h" />
     <ClInclude Include="Type.h" />
     <ClInclude Include="ClientInfo.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="MapData.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

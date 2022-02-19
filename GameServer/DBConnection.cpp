@@ -96,7 +96,7 @@ int32 CDBConnection::GetRowCount()
 
 // 이전에 받앗던 DB 결과물을 제거
 void CDBConnection::UnBind()
-{
+{  
 	// Statement 정리
 	SQLFreeStmt(_Statement, SQL_UNBIND);
 	SQLFreeStmt(_Statement, SQL_RESET_PARAMS);

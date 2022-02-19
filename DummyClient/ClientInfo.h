@@ -7,13 +7,13 @@
 #include "QuickSlotManager.h"
 #include "SkillBox.h"
 
-#define DUMMY_CLIENT_MAX 2000
+#define DUMMY_CLIENT_MAX 500
 
 #define DUMMY_CLIENT_RE_CONNECT_TIME 200
 #define DUMMY_CLIENT_SEND_TIME 200
 #define DUMMY_CLIENT_LOGIN_TIME 500
 
-#define DUMMY_CLIENT_DISCONNECT 50
+#define DUMMY_CLIENT_DISCONNECT 0//50
 
 enum en_DummyClientNetworkState
 {
@@ -38,7 +38,7 @@ struct st_Client
 	int64 ClientId;
 	SOCKET ServerSocket;	
 	SOCKET CloseSocket;
-	en_DummyClientNetworkState DummyClientState;
+	en_DummyClientNetworkState DummyClientNetworkState;	
 	SOCKADDR_IN ServerAddr;
 
 	CRingBuffer RecvRingBuf;
@@ -61,15 +61,15 @@ struct st_Client
 
 	WCHAR ChatMsg[256];
 		
-	bool IsCancelIO;
-	
-	LONG IsReqMove;
+	bool IsCancelIO;		
 
 	st_GameObjectInfo MyCharacterGameObjectInfo;
 
 	int64 DummyClientLoginTime;
 	int64 ClientSendMessageTime;
 	int64 ClientReConnectTime;		
+	int64 ClientReMoveTime;	
+	int64 ClientChatTime;	
 
 	CSkillBox _SkillBox;
 	CQuickSlotManager _QuickSlotManager;

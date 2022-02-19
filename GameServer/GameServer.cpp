@@ -23,13 +23,13 @@ CGameServer::CGameServer()
 	// 논시그널 상태 자동리셋
 	_AuthThreadWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	_UserDataBaseWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	_WorldDataBaseWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	_WorldDataBaseWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);	
 	_TimerThreadWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
 	_AuthThreadEnd = false;
 	_NetworkThreadEnd = false;
 	_UserDataBaseThreadEnd = false;
-	_WorldDataBaseThreadEnd = false;
+	_WorldDataBaseThreadEnd = false;	
 	_LogicThreadEnd = false;
 	_TimerJobThreadEnd = false;
 
@@ -44,14 +44,13 @@ CGameServer::CGameServer()
 	// 타이머 우선순위 큐 생성
 	_TimerHeapJob = new CHeap<int64, st_TimerJob*>(2000);
 
-	_LogicThreadTPS = 0;
+	_LogicThreadFPS = 0;
 
 	_AuthThreadWakeCount = 0;
 	_AuthThreadTPS = 0;
 
 	_NetworkThreadWakeCount = 0;
-	_NetworkThreadTPS = 0;
-
+	_NetworkThreadTPS = 0;	
 
 	_TimerJobThreadWakeCount = 0;
 	_TimerJobThreadTPS = 0;
@@ -78,7 +77,7 @@ void CGameServer::GameServerStart(const WCHAR* OpenIP, int32 Port)
 	_AuthThread = (HANDLE)_beginthreadex(NULL, 0, AuthThreadProc, this, 0, NULL);	
 	
 	// 유저 데이터 베이스 쓰레드 시작
-	for (int32 i = 0; i < (int32)SI.dwNumberOfProcessors; i++)
+	for (int32 i = 0; i < 4; i++)
 	{
 		_UserDataBaseThread = (HANDLE)_beginthreadex(NULL, 0, UserDataBaseThreadProc, this, 0, NULL);		
 		CloseHandle(_UserDataBaseThread);
@@ -90,7 +89,7 @@ void CGameServer::GameServerStart(const WCHAR* OpenIP, int32 Port)
 	// 타이머 잡 쓰레드 시작
 	_TimerJobThread = (HANDLE)_beginthreadex(NULL, 0, TimerJobThreadProc, this, 0, NULL);
 	// 로직 쓰레드 시작
-	_LogicThread = (HANDLE)_beginthreadex(NULL, 0, LogicThreadProc, this, 0, NULL);	
+	_LogicThread = (HANDLE)_beginthreadex(NULL, 0, LogicThreadProc, this, 0, NULL);		
 
 	CloseHandle(_AuthThread);
 	CloseHandle(_WorldDataBaseThread);
@@ -346,21 +345,18 @@ unsigned __stdcall CGameServer::LogicThreadProc(void* Argument)
 	int64 DeltaTime = 0;	
 
 	while (!Instance->_LogicThreadEnd)
-	{		
+	{	
 		LogicUpdateCurrentTime = GetTickCount64();
 		DeltaTime = LogicUpdateCurrentTime - LogicUpdatePreviousTime;
 
 		if (DeltaTime >= 20)
 		{
 			LogicUpdatePreviousTime = LogicUpdateCurrentTime - (DeltaTime - 20);
+		
 			G_ChannelManager->Update();
 
-			Instance->_LogicThreadTPS++;			
-		}	
-		else
-		{
-			Sleep(0);
-		}
+			Instance->_LogicThreadFPS++;
+		}			
 	}
 
 	return 0;
@@ -650,7 +646,7 @@ void CGameServer::DeleteClient(st_Session* Session)
 
 				break;
 			}
-		}		
+		}			
 
 		//----------------------------------------------------------------------------------------
 		// 캐릭터 풀에 반납 및 인덱스 반납
@@ -722,6 +718,9 @@ void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 	case en_PACKET_TYPE::en_PACKET_C2S_MOVE:
 		PacketProcReqMove(SessionId, Message);
 		break;	
+	case en_PACKET_TYPE::en_PACKET_C2S_MOVE_STOP:
+		PacketProcReqMoveStop(SessionId, Message);
+		break;
 	case en_PACKET_TYPE::en_PACKET_C2S_ATTACK:
 		PacketProcReqMelee(SessionId, Message);
 		break;
@@ -777,13 +776,6 @@ void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 	//Message->Free();
 }
 
-//----------------------------------------------------------------------------
-// 로그인 요청
-// int AccountID
-// WCHAR ID[20]
-// WCHAR NickName[20]
-// int Token
-//----------------------------------------------------------------------------
 void CGameServer::PacketProcReqLogin(int64 SessionID, CMessage* Message)
 {
 	st_Session* Session = FindSession(SessionID);
@@ -1081,9 +1073,6 @@ void CGameServer::PacketProcReqCharacterInfo(int64 SessionID, CMessage* Message)
 	}
 }
 
-// int64 AccountId
-// int32 PlayerDBId
-// char Dir
 void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 {
 	st_Session* Session = FindSession(SessionID);
@@ -1139,11 +1128,15 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 			*Message >> ClientPlayerPosition._X;
 			*Message >> ClientPlayerPosition._Y;
 			int8 MovePlayerCurrentDir;
-			*Message >> MovePlayerCurrentDir;
+			*Message >> MovePlayerCurrentDir;	
+			float PositionX;
+			*Message >> PositionX;
+			float PositionY;
+			*Message >> PositionY;
 
 			// 클라가 움직일 방향값을 가져온다.
 			char ReqMoveDir;
-			*Message >> ReqMoveDir;							
+			*Message >> ReqMoveDir;									
 
 			// 방향값에 따라 노말벡터 값을 뽑아온다.
 			en_MoveDir MoveDir = (en_MoveDir)ReqMoveDir;
@@ -1166,41 +1159,19 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 			}
 						
 			MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = MoveDir;
-			MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;			
+			if (MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::IDLE
+				|| MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::SPAWN_IDLE)
+			{
+				MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
+				Session->ReqMoveTime = GetTickCount64();
+			}											
 
-			// 플레이어의 현재 위치를 읽어온다.
-			st_Vector2Int ServerPlayerPosition;
-			ServerPlayerPosition._X = MyPlayer->GetPositionInfo().PositionX;
-			ServerPlayerPosition._Y = MyPlayer->GetPositionInfo().PositionY;
-
-			CChannel* Channel = G_ChannelManager->Find(1);
-
-			if (ServerPlayerPosition == ClientPlayerPosition)
-			{				
-				// 움직일 위치를 얻는다.	
-				st_Vector2Int CheckPosition = ServerPlayerPosition + DirVector2Int;
-
-				// 움직일 위치로 갈수 있는지 확인
-				bool IsCanGo = Channel->_Map->Cango(CheckPosition);
-				bool ApplyMoveExe;
-				if (IsCanGo == true)
-				{
-					// 갈 수 있으면 플레이어 위치 적용
-					ApplyMoveExe = Channel->_Map->ApplyMove(MyPlayer, CheckPosition);
-				}
-
-				// 시야 범위 안에 있는 대상들에게 움직임 요청 응답 패킷 전송
-				CMessage* ResMyMoveOtherPacket = MakePacketResMove(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
-				SendPacketFieldOfView(Session, ResMyMoveOtherPacket, true);
-				ResMyMoveOtherPacket->Free();
-			}
-			else
-			{				
-				// 서버와 클라 위치가 다를 경우 서버 기준으로 위치를 다시 잡는다.
-				CMessage* ResSyncPositionPacket = MakePacketResSyncPosition(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
-				SendPacketFieldOfView(Session, ResSyncPositionPacket);
-				ResSyncPositionPacket->Free();			
-			}									
+			CMessage* ResMyMoveOtherPacket = MakePacketResMove(Session->AccountId,
+				MyPlayer->_GameObjectInfo.ObjectId,
+				true,
+				MyPlayer->_GameObjectInfo.ObjectPositionInfo);
+			SendPacketFieldOfView(Session, ResMyMoveOtherPacket, true);
+			ResMyMoveOtherPacket->Free();			
 		}
 		else
 		{
@@ -1211,9 +1182,82 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 	ReturnSession(Session);
 }
 
-// int64 AccountId
-// int32 PlayerDBId
-// char Dir
+void CGameServer::PacketProcReqMoveStop(int64 SessionID, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionID);
+
+	if (Session)
+	{
+		do
+		{
+			// 클라가 로그인중인지 확인
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			// AccountId를 뽑고
+			int64 AccountId;
+			*Message >> AccountId;
+
+			// 클라에 들어있는 AccountId와 뽑은 AccoountId가 다른지 확인
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			// PlayerDBId를 뽑는다.
+			int64 PlayerDBId;
+			*Message >> PlayerDBId;
+
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			// 클라가 조종중인 캐릭터가 있는지 확인
+			if (MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				// 조종중인 캐릭터가 있으면 ObjectId가 다른지 확인
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+			Session->ReqStopTime = GetTickCount64();			
+		
+			int8  StopPlayerCurrentState;
+			*Message >> StopPlayerCurrentState;
+			int32 ClientCollisionPositionX;
+			*Message >> ClientCollisionPositionX;
+			int32 ClientCollisionPositionY;
+			*Message >> ClientCollisionPositionY;
+			int8 StopDir;
+			*Message >> StopDir;
+			float PositionX;
+			*Message >> PositionX;
+			float PositionY;
+			*Message >> PositionY;								
+
+			CMessage* ResMoveStopPacket = MakePacketResMoveStop(Session->AccountId,
+				MyPlayer->_GameObjectInfo.ObjectId,
+				MyPlayer->_GameObjectInfo.ObjectPositionInfo);
+			SendPacketFieldOfView(Session, ResMoveStopPacket, true);
+			ResMoveStopPacket->Free();
+		} while (0);
+
+		ReturnSession(Session);
+	}	
+}
+
 void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 {
 	st_Session* Session = FindSession(SessionID);
@@ -2309,8 +2353,6 @@ void CGameServer::PacketProcReqObjectStateChange(int64 SessionId, CMessage* Mess
 	ReturnSession(Session);
 }
 
-// int32 ObjectId
-// string Message
 void CGameServer::PacketProcReqChattingMessage(int64 SessionId, CMessage* Message)
 {
 	// 세션 얻기
@@ -3147,13 +3189,13 @@ void CGameServer::PacketProcReqItemLooting(int64 SessionId, CMessage* Message)
 			int8 ItemMoveDir;
 
 			*Message >> ItemState;
-			*Message >> ItemPosition.PositionX;
-			*Message >> ItemPosition.PositionY;
+			*Message >> ItemPosition.CollisionPositionX;
+			*Message >> ItemPosition.CollisionPositionY;
 			*Message >> ItemMoveDir;
 
 			st_Vector2Int ItemCellPosition;
-			ItemCellPosition._X = ItemPosition.PositionX;
-			ItemCellPosition._Y = ItemPosition.PositionY;
+			ItemCellPosition._X = ItemPosition.CollisionPositionX;
+			ItemCellPosition._Y = ItemPosition.CollisionPositionY;
 
 			// 루팅 위치에 아이템들을 가져온다.
 			CItem** Items = G_ChannelManager->Find(1)->_Map->FindItem(ItemCellPosition);
@@ -5459,7 +5501,7 @@ void CGameServer::PacketProcReqDBQuickSlotInit(int64 SessionId, CMessage* Messag
 
 void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CPlayer* MyPlayer)
 {
-	CDBConnection* PlayerInfoSaveDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+	/*CDBConnection* PlayerInfoSaveDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 	SP::CDBGameServerLeavePlayerStatInfoSave LeavePlayerStatInfoSave(*PlayerInfoSaveDBConnection);
 
 	LeavePlayerStatInfoSave.InAccountDBId(MyPlayer->_AccountId);
@@ -5480,52 +5522,52 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CPlayer* MyPlayer)
 	LeavePlayerStatInfoSave.InMeleeCriticalPoint(MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint);
 	LeavePlayerStatInfoSave.InMagicCriticalPoint(MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint);
 	LeavePlayerStatInfoSave.InSpeed(MyPlayer->_GameObjectInfo.ObjectStatInfo.Speed);
-	LeavePlayerStatInfoSave.InLastPositionY(MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY);
-	LeavePlayerStatInfoSave.InLastPositionX(MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX);
+	LeavePlayerStatInfoSave.InLastPositionY(MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY);
+	LeavePlayerStatInfoSave.InLastPositionX(MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX);
 	LeavePlayerStatInfoSave.InCurrentExperience(MyPlayer->_Experience.CurrentExperience);
 	LeavePlayerStatInfoSave.InRequireExperience(MyPlayer->_Experience.RequireExperience);
 	LeavePlayerStatInfoSave.InTotalExperience(MyPlayer->_Experience.TotalExperience);
 
-	LeavePlayerStatInfoSave.Execute();		
+	LeavePlayerStatInfoSave.Execute();		*/
 
-	// 인벤토리가 존재할 때
-	if (MyPlayer->_InventoryManager._Inventorys[0] != nullptr)
-	{
-		SP::CDBGameServerInventoryPlace LeavePlayerInventoryItemSave(*PlayerInfoSaveDBConnection);
-		LeavePlayerInventoryItemSave.InOwnerAccountId(MyPlayer->_AccountId);
-		LeavePlayerInventoryItemSave.InOwnerPlayerId(MyPlayer->_GameObjectInfo.ObjectId);
+	//// 인벤토리가 존재할 때
+	//if (MyPlayer->_InventoryManager._Inventorys[0] != nullptr)
+	//{
+	//	SP::CDBGameServerInventoryPlace LeavePlayerInventoryItemSave(*PlayerInfoSaveDBConnection);
+	//	LeavePlayerInventoryItemSave.InOwnerAccountId(MyPlayer->_AccountId);
+	//	LeavePlayerInventoryItemSave.InOwnerPlayerId(MyPlayer->_GameObjectInfo.ObjectId);
 
-		vector<st_ItemInfo> PlayerInventoryItems = MyPlayer->_InventoryManager._Inventorys[0]->DBInventorySaveReturnItems();
+	//	vector<st_ItemInfo> PlayerInventoryItems = MyPlayer->_InventoryManager._Inventorys[0]->DBInventorySaveReturnItems();
 
-		for (st_ItemInfo InventoryItem : PlayerInventoryItems)
-		{
-			int8 InventoryItemLargeCategory = (int8)InventoryItem.ItemLargeCategory;
-			int8 InventoryItemMediumCategory = (int8)InventoryItem.ItemMediumCategory;
-			int16 InventoryItemSmallCategory = (int16)InventoryItem.ItemSmallCategory;
+	//	for (st_ItemInfo InventoryItem : PlayerInventoryItems)
+	//	{
+	//		int8 InventoryItemLargeCategory = (int8)InventoryItem.ItemLargeCategory;
+	//		int8 InventoryItemMediumCategory = (int8)InventoryItem.ItemMediumCategory;
+	//		int16 InventoryItemSmallCategory = (int16)InventoryItem.ItemSmallCategory;
 
-			LeavePlayerInventoryItemSave.InIsQuickSlotUse(InventoryItem.ItemIsQuickSlotUse);
-			LeavePlayerInventoryItemSave.InItemRotated(InventoryItem.ItemIsQuickSlotUse);
-			LeavePlayerInventoryItemSave.InItemWidth(InventoryItem.Width);
-			LeavePlayerInventoryItemSave.InItemHeight(InventoryItem.Height);
-			LeavePlayerInventoryItemSave.InItemTileGridPositionX(InventoryItem.TileGridPositionX);
-			LeavePlayerInventoryItemSave.InItemTileGridPositionY(InventoryItem.TileGridPositionY);
-			LeavePlayerInventoryItemSave.InItemLargeCategory(InventoryItemLargeCategory);
-			LeavePlayerInventoryItemSave.InItemMediumCategory(InventoryItemMediumCategory);
-			LeavePlayerInventoryItemSave.InItemSmallCategory(InventoryItemSmallCategory);
-			LeavePlayerInventoryItemSave.InItemName(InventoryItem.ItemName);
-			LeavePlayerInventoryItemSave.InItemCount(InventoryItem.ItemCount);
-			LeavePlayerInventoryItemSave.InIsEquipped(InventoryItem.ItemIsEquipped);
-			LeavePlayerInventoryItemSave.InItemMinDamage(InventoryItem.ItemMinDamage);
-			LeavePlayerInventoryItemSave.InItemMaxDamage(InventoryItem.ItemMaxDamage);
-			LeavePlayerInventoryItemSave.InItemDefence(InventoryItem.ItemDefence);
-			LeavePlayerInventoryItemSave.InItemMaxCount(InventoryItem.ItemMaxCount);
-			LeavePlayerInventoryItemSave.InItemThumbnailImagePath(InventoryItem.ItemThumbnailImagePath);
+	//		LeavePlayerInventoryItemSave.InIsQuickSlotUse(InventoryItem.ItemIsQuickSlotUse);
+	//		LeavePlayerInventoryItemSave.InItemRotated(InventoryItem.ItemIsQuickSlotUse);
+	//		LeavePlayerInventoryItemSave.InItemWidth(InventoryItem.Width);
+	//		LeavePlayerInventoryItemSave.InItemHeight(InventoryItem.Height);
+	//		LeavePlayerInventoryItemSave.InItemTileGridPositionX(InventoryItem.TileGridPositionX);
+	//		LeavePlayerInventoryItemSave.InItemTileGridPositionY(InventoryItem.TileGridPositionY);
+	//		LeavePlayerInventoryItemSave.InItemLargeCategory(InventoryItemLargeCategory);
+	//		LeavePlayerInventoryItemSave.InItemMediumCategory(InventoryItemMediumCategory);
+	//		LeavePlayerInventoryItemSave.InItemSmallCategory(InventoryItemSmallCategory);
+	//		LeavePlayerInventoryItemSave.InItemName(InventoryItem.ItemName);
+	//		LeavePlayerInventoryItemSave.InItemCount(InventoryItem.ItemCount);
+	//		LeavePlayerInventoryItemSave.InIsEquipped(InventoryItem.ItemIsEquipped);
+	//		LeavePlayerInventoryItemSave.InItemMinDamage(InventoryItem.ItemMinDamage);
+	//		LeavePlayerInventoryItemSave.InItemMaxDamage(InventoryItem.ItemMaxDamage);
+	//		LeavePlayerInventoryItemSave.InItemDefence(InventoryItem.ItemDefence);
+	//		LeavePlayerInventoryItemSave.InItemMaxCount(InventoryItem.ItemMaxCount);
+	//		LeavePlayerInventoryItemSave.InItemThumbnailImagePath(InventoryItem.ItemThumbnailImagePath);
 
-			LeavePlayerInventoryItemSave.Execute();
-		}
-	}	
+	//		LeavePlayerInventoryItemSave.Execute();
+	//	}
+	//}	
 
-	G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerInfoSaveDBConnection);
+	//G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerInfoSaveDBConnection);
 }
 
 void CGameServer::PacketProcTimerAttackEnd(int64 SessionId, CGameServerMessage* Message)
@@ -5873,9 +5915,9 @@ void CGameServer::PacketProcTimerCastingTimeEnd(int64 SessionId, CGameServerMess
 
 		st_SkillInfo* SkillInfo = MyPlayer->_SkillBox.FindSkill((en_SkillType)SkillType);
 		SkillInfo->CanSkillUse = true;
-	}
 
-	ReturnSession(Session);
+		ReturnSession(Session);
+	}	
 }
 
 void CGameServer::PacketProcTimerObjectSpawn(CGameServerMessage* Message)
@@ -6730,11 +6772,7 @@ CGameServerMessage* CGameServer::MakePacketResChangeObjectState(int64 ObjectId, 
 	return ResObjectStatePacket;
 }
 
-// int64 AccountId
-// int32 PlayerDBId
-// bool CanGo
-// st_PositionInfo PositionInfo
-CGameServerMessage* CGameServer::MakePacketResMove(int64 AccountId, int64 ObjectId, en_GameObjectType ObjectType, st_PositionInfo PositionInfo)
+CGameServerMessage* CGameServer::MakePacketResMove(int64 AccountId, int64 ObjectId, bool CanMove, st_PositionInfo PositionInfo)
 {
 	CGameServerMessage* ResMoveMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResMoveMessage == nullptr)
@@ -6747,13 +6785,29 @@ CGameServerMessage* CGameServer::MakePacketResMove(int64 AccountId, int64 Object
 	*ResMoveMessage << (int16)en_PACKET_S2C_MOVE;
 	*ResMoveMessage << AccountId;	
 	*ResMoveMessage << ObjectId;
-
-	// ObjectType
-	*ResMoveMessage << (int16)ObjectType;
+	*ResMoveMessage << CanMove;	
 
 	*ResMoveMessage << PositionInfo;
 
 	return ResMoveMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketResMoveStop(int64 AccountId, int64 ObjectId, st_PositionInfo PositionInto)
+{
+	CGameServerMessage* ResMoveStopPacket = CGameServerMessage::GameServerMessageAlloc();
+	if (ResMoveStopPacket == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResMoveStopPacket->Clear();
+
+	*ResMoveStopPacket << (int16)en_PACKET_S2C_MOVE_STOP;
+	*ResMoveStopPacket << AccountId;
+	*ResMoveStopPacket << ObjectId;
+	*ResMoveStopPacket << PositionInto;
+
+	return ResMoveStopPacket;
 }
 
 CGameServerMessage* CGameServer::MakePacketPatrol(int64 ObjectId, en_GameObjectType ObjectType, st_PositionInfo PositionInfo)
@@ -7024,9 +7078,7 @@ void CGameServer::SendPacketFieldOfView(CGameObject* Object, CMessage* Message)
 	CChannel* Channel = G_ChannelManager->Find(1);
 
 	// 섹터 얻어오기
-	vector<CSector*> AroundSectors = Object->_Channel->GetAroundSectors(Object->GetCellPosition(), 1);
-
-	vector<CPlayer*> FieldOfViewPlayers;
+	vector<CSector*> AroundSectors = Object->_Channel->GetAroundSectors(Object->GetCellPosition(), 1);	
 
 	for (CSector* AroundSector : AroundSectors)
 	{
@@ -7065,7 +7117,7 @@ void CGameServer::SendPacketFieldOfView(st_Session* Session, CMessage* Message, 
 			int16 Distance = st_Vector2Int::Distance(MyPlayer->GetCellPosition(), Player->GetCellPosition());
 
 			if (SendMe == true && Distance <= MyPlayer->_FieldOfViewDistance)
-			{
+			{				
 				SendPacket(Player->_SessionId, Message);
 			}
 			else if (SendMe == false && Distance <= MyPlayer->_FieldOfViewDistance)

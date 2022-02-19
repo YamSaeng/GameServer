@@ -4,6 +4,8 @@
 
 CDummyClient::CDummyClient()
 {
+	_Map = new CMap(0);
+
 	WSADATA WSA;
 	if (WSAStartup(MAKEWORD(2, 2), &WSA) != 0)
 	{
@@ -22,9 +24,10 @@ CDummyClient::CDummyClient()
 		memset(&_ClientArray[ClientCount]->SendPacket, 0, sizeof(CMessage*) * 500);
 		_ClientArray[ClientCount]->IOBlock->IOCount = 0;
 		_ClientArray[ClientCount]->AccountId = DummyClientAcountId++;
-		_ClientArray[ClientCount]->SendPacketCount = 0;
-		_ClientArray[ClientCount]->IsReqMove = false;
-		_ClientArray[ClientCount]->DummyClientState = en_DummyClientNetworkState::RELEASE;
+		_ClientArray[ClientCount]->SendPacketCount = 0;		
+		_ClientArray[ClientCount]->DummyClientNetworkState = en_DummyClientNetworkState::RELEASE;
+		_ClientArray[ClientCount]->ClientChatTime = 0;
+		_ClientArray[ClientCount]->ClientReConnectTime = 0;
 		_ClientArrayIndexs.Push(ClientCount);
 	}
 
@@ -53,6 +56,8 @@ CDummyClient::CDummyClient()
 	}
 
 	_beginthreadex(NULL, 0, SendThreadProc, this, 0, NULL);
+	
+	_beginthreadex(NULL, 0, LogicThreadProc, this, 0, NULL);
 
 	SetEvent(_ConnectThreadWakeEvent);
 }
@@ -152,11 +157,12 @@ unsigned __stdcall CDummyClient::ConnectThreadProc(void* Argument)
 						wprintf(L"connect Error %d \n", Error);												
 						break;
 					}													
+					
+					NewClient->ClientChatTime = 0;					
+					NewClient->ClientReMoveTime = 0;					
 
-					NewClient->DummyClientState = en_DummyClientNetworkState::CONNECTED;
-
-					NewClient->IsReqMove = 0;
-
+					NewClient->DummyClientNetworkState = en_DummyClientNetworkState::CONNECTED;					
+					
 					Instance->_ConnectionTotal++;
 					Instance->_ConnectTPS++;
 
@@ -169,7 +175,7 @@ unsigned __stdcall CDummyClient::ConnectThreadProc(void* Argument)
 					NewClient->ClientId = ADD_CLIENTID_INDEX(Instance->_DummyClientId, NewClientIndex);
 					NewClient->ServerAddr = ServerAddr;
 					NewClient->IsSend = 0;
-					NewClient->IsCancelIO = false;
+					NewClient->IsCancelIO = false;					
 
 					HANDLE SocketIORet = CreateIoCompletionPort((HANDLE)NewClient->ServerSocket, Instance->_DummyClientHCP, (ULONG_PTR)NewClient, 0);
 
@@ -196,132 +202,304 @@ unsigned __stdcall CDummyClient::ConnectThreadProc(void* Argument)
 	return 0;
 }
 
+unsigned __stdcall CDummyClient::LogicThreadProc(void* Argument)
+{
+	CDummyClient* Instance = (CDummyClient*)Argument;
+
+	int64 LogicUpdatePreviousTime = GetTickCount64();
+	int64 LogicUpdateCurrentTime = 0;
+	int64 DeltaTime = 0;
+
+	while (1)
+	{
+		LogicUpdateCurrentTime = GetTickCount64();
+		DeltaTime = LogicUpdateCurrentTime - LogicUpdatePreviousTime;
+
+		if (DeltaTime >= 20)
+		{
+			LogicUpdatePreviousTime = LogicUpdateCurrentTime - (DeltaTime - 20);
+			for (int32 i = 0; i < DUMMY_CLIENT_MAX; i++)
+			{
+				if (Instance->_ClientArray[i]->DummyClientNetworkState == en_DummyClientNetworkState::IN_ENTER_GAME)
+				{					
+					if (Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.State == en_CreatureState::MOVING)
+					{
+						switch (Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.MoveDir)
+						{
+						case en_MoveDir::UP:
+							Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY += (1.0f * 5.0f * 0.02f);
+							break;
+						case en_MoveDir::DOWN:
+							Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY += (-1.0f * 5.0f * 0.02f);
+							break;
+						case en_MoveDir::LEFT:
+							Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX += (-1.0f * 5.0f * 0.02f);
+							break;
+						case en_MoveDir::RIGHT:
+							Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX += (1.0f * 5.0f * 0.02f);
+							break;
+						}
+
+						/*wprintf(
+							L"%d [Dir : %d] [PX : %0.1f] [PY : %0.1f] [CX : %d] [CY : %d]\n",
+							Instance->_ClientArray[i]->AccountId,
+							Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.MoveDir,
+							Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX,
+							Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY,
+							Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionX,
+							Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionY
+						);*/
+
+						// 다음 좌표로 이동 할 수 있는지 판단
+						bool CanMove = Instance->_Map->Cango(Instance->_ClientArray[i],
+							Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX,
+							Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY);
+						if (CanMove == true)
+						{
+							// 이동 할 수 있으면 다음 이동 장소가 다음 칸인지 확인
+							st_Vector2Int CollisionPosition;
+							CollisionPosition._X = Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX;
+							CollisionPosition._Y = Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY;
+							
+							// 다음 칸이라면 새로운 타일에 더미 저장
+							if (CollisionPosition._X != Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionX
+								|| CollisionPosition._Y != Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionY)
+							{
+								Instance->_Map->ApplyMove(Instance->_ClientArray[i], CollisionPosition);
+							}
+						}
+						else
+						{
+							// 이동 할 수 없음
+							Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.State = en_CreatureState::STOP;							
+
+							// 이동 방향에 따라 좌표값 재 조정
+							switch (Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.MoveDir)
+							{
+							case en_MoveDir::UP:
+							case en_MoveDir::DOWN:
+								if (Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionY >= 0)
+								{
+									Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY =
+										Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionY + 0.5f;
+								}
+								else if (Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionY == 0)
+								{
+									Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY =
+										Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionY;
+								}
+								else if (Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionY < 0)
+								{
+									Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY =
+										Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionY - 0.5f;
+								}
+								break;
+							case en_MoveDir::LEFT:
+							case en_MoveDir::RIGHT:
+								if (Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionX >= 0)
+								{
+									Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX =
+										Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionX + 0.5f;
+								}
+								else if (Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionX == 0)
+								{
+									Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX =
+										Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionX;
+								}
+								else if (Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionX < 0)
+								{
+									Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX =
+										Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionX - 0.5f;
+								}
+								break;
+							}												
+							
+							CMessage* ReqMoveStopPacket = CMessage::Alloc();
+							ReqMoveStopPacket->Clear();
+							
+							*ReqMoveStopPacket << (int16)en_PACKET_C2S_MOVE_STOP;
+							*ReqMoveStopPacket << Instance->_ClientArray[i]->AccountId;
+							*ReqMoveStopPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId;
+							*ReqMoveStopPacket << (int8)Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.State;
+							*ReqMoveStopPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionX;
+							*ReqMoveStopPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionY;
+							*ReqMoveStopPacket << (int8)Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.MoveDir;
+							*ReqMoveStopPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX;
+							*ReqMoveStopPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY;
+							
+							Instance->SendPacket(Instance->_ClientArray[i]->ClientId, ReqMoveStopPacket);
+							ReqMoveStopPacket->Free();
+						}
+					}					
+				}
+			}
+
+			Instance->_LogicThreadFPS++;
+		}		
+	}
+
+	return 0;
+}
+
 unsigned __stdcall CDummyClient::SendThreadProc(void* Argument)
 {
-	Sleep(25000);
+	Sleep(10000);
 
 	CDummyClient* Instance = (CDummyClient*)Argument;
 
 	if (Instance)
 	{
+		int64 SendThreadPreviousTime = GetTickCount64();
+		int64 SendThreadCurrentTime = 0;
+		int64 DeltaTime = 0;
+
 		while (1)
-		{
-			for (int32 i = 0; i < DUMMY_CLIENT_MAX; i++)
-			{				
-				if (Instance->_ClientArray[i]->DummyClientState == en_DummyClientNetworkState::IN_ENTER_GAME 
-					&& Instance->_ClientArray[i]->ClientSendMessageTime < GetTickCount64())
+		{			
+			SendThreadCurrentTime = GetTickCount64();
+			DeltaTime = SendThreadCurrentTime - SendThreadPreviousTime;
+
+			if (DeltaTime >= 20)
+			{
+				SendThreadPreviousTime = SendThreadCurrentTime - (DeltaTime - 20);
+
+				Instance->_SendThreadFPS++;
+
+				for (int32 i = 0; i < DUMMY_CLIENT_MAX; i++)
 				{
-					Instance->_ClientArray[i]->ClientSendMessageTime = GetTickCount64() + DUMMY_CLIENT_SEND_TIME;
-
-					random_device Seed;
-					default_random_engine Eng(Seed());
-
-					float DisconnectPoint = DUMMY_CLIENT_DISCONNECT / 1000.0f;
-					bernoulli_distribution DisconnectPointCheck(DisconnectPoint);
-					bool IsDisconnect = DisconnectPointCheck(Eng);
-
-					CMessage* RandPacket = CMessage::Alloc();
-					RandPacket->Clear();
-
-					if (IsDisconnect)
+					if (Instance->_ClientArray[i]->DummyClientNetworkState == en_DummyClientNetworkState::IN_ENTER_GAME
+						&& Instance->_ClientArray[i]->ClientSendMessageTime < GetTickCount64())
 					{
-						Instance->_ClientArray[i]->DummyClientState = en_DummyClientNetworkState::REQ_RELEASE;
+						Instance->_ClientArray[i]->ClientSendMessageTime = GetTickCount64() + DUMMY_CLIENT_SEND_TIME;
 
-						Instance->_ClientArray[i]->ServerSocket = INVALID_SOCKET;						
+						random_device Seed;
+						default_random_engine Eng(Seed());
 
-						Instance->Disconnect(Instance->_ClientArray[i]->ClientId);
+						float DisconnectPoint = DUMMY_CLIENT_DISCONNECT / 1000.0f;
+						bernoulli_distribution DisconnectPointCheck(DisconnectPoint);
+						bool IsDisconnect = DisconnectPointCheck(Eng);
 
-						InterlockedIncrement64(&Instance->_DisconnectTPS);
+						CMessage* RandPacket = CMessage::Alloc();
+						RandPacket->Clear();
+
+						if (IsDisconnect)
+						{
+							Instance->_ClientArray[i]->DummyClientNetworkState = en_DummyClientNetworkState::REQ_RELEASE;
+
+							Instance->_ClientArray[i]->ServerSocket = INVALID_SOCKET;
+
+							Instance->Disconnect(Instance->_ClientArray[i]->ClientId);
+
+							InterlockedIncrement64(&Instance->_DisconnectTPS);
+						}
+						else
+						{
+							random_device RandomSeed;
+							mt19937 Gen(RandomSeed());
+
+							uniform_int_distribution<int> RandomMessageTypeCreate(0, 1);
+							uniform_int_distribution<int> RandomDirCreate(0, 3);
+							uniform_int_distribution<int> RandomNumber(0, 1000);
+
+							int32 RandMessageType = RandomMessageTypeCreate(Gen);
+							int8 RandDir;
+							int16 RandChat;
+
+							wstring SendChatMsg;
+							int8 DummyChatLen;
+
+							switch ((en_DummyClientMessage)RandMessageType)
+							{
+							case en_DummyClientMessage::CHAT_MSG:
+								if (Instance->_ClientArray[i]->ClientChatTime < GetTickCount64())
+								{
+									Instance->_ClientArray[i]->ClientChatTime = GetTickCount64() + 1000;
+									RandChat = RandomNumber(Gen);
+
+									*RandPacket << (int16)en_PACKET_C2S_MESSAGE;
+									*RandPacket << Instance->_ClientArray[i]->AccountId;
+									*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId;
+
+									swprintf_s(Instance->_ClientArray[i]->ChatMsg, sizeof(Instance->_ClientArray[i]->ChatMsg), L"[%s]가 [%d]를 보냈습니다.", Instance->_ClientArray[i]->LoginId.c_str(), Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId, RandMessageType * i * RandChat);
+									SendChatMsg = Instance->_ClientArray[i]->ChatMsg;
+
+									//wprintf(L"[%s]가 [%d]를 보냈습니다.\n", G_ClientArray[i].ChatMsg);
+
+									DummyChatLen = (int8)(SendChatMsg.length() * 2);
+									*RandPacket << DummyChatLen;
+									RandPacket->InsertData(SendChatMsg.c_str(), DummyChatLen);
+
+									Instance->SendPacket(Instance->_ClientArray[i]->ClientId, RandPacket);
+								}								
+								break;
+							case en_DummyClientMessage::MOVE:		
+								if (Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.State != en_CreatureState::STOP)
+								{
+									Instance->_ClientArray[i]->ClientReMoveTime = GetTickCount64() + 500;									
+
+									RandDir = RandomDirCreate(Gen);
+
+									/*do
+									{
+										RandDir = RandomDirCreate(Gen);
+									} while (RandDir == (int8)Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.MoveDir);*/
+
+									Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.MoveDir = (en_MoveDir)RandDir;
+									Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
+
+									*RandPacket << (int16)en_PACKET_C2S_MOVE;
+									*RandPacket << Instance->_ClientArray[i]->AccountId;
+									*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId;
+									*RandPacket << (int8)Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.State;
+									*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionX;
+									*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionY;
+									*RandPacket << (int8)Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.MoveDir;
+									*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX;
+									*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY;
+									*RandPacket << (int8)RandDir;
+
+									Instance->SendPacket(Instance->_ClientArray[i]->ClientId, RandPacket);
+								}																								
+								break;							
+							default:
+								break;
+							}
+						}
+
+						RandPacket->Free();
 					}
 					else
 					{
-						random_device RandomSeed;
-						mt19937 Gen(RandomSeed());
-
-						uniform_int_distribution<int> RandomMessageTypeCreate(0, 1);
-						uniform_int_distribution<int> RandomDirCreate(0, 2);
-
-						int32 RandMessageType = RandomMessageTypeCreate(Gen);
-						int8 RandDir;
-
-						wstring SendChatMsg;
-						int8 DummyChatLen;
-
-						switch ((en_DummyClientMessage)RandMessageType)
+						if (Instance->_ClientArray[i]->DummyClientNetworkState == en_DummyClientNetworkState::READY_LOGIN)
 						{
-						case en_DummyClientMessage::CHAT_MSG:
-							*RandPacket << (int16)en_PACKET_C2S_MESSAGE;
-							*RandPacket << Instance->_ClientArray[i]->AccountId;
-							*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId;
-
-							swprintf_s(Instance->_ClientArray[i]->ChatMsg, sizeof(Instance->_ClientArray[i]->ChatMsg), L"[%s]가 [%d]를 보냈습니다.", Instance->_ClientArray[i]->LoginId.c_str(), Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId, RandMessageType * i);
-							SendChatMsg = Instance->_ClientArray[i]->ChatMsg;
-
-							//wprintf(L"[%s]가 [%d]를 보냈습니다.\n", G_ClientArray[i].ChatMsg);
-
-							DummyChatLen = (int8)(SendChatMsg.length() * 2);
-							*RandPacket << DummyChatLen;
-							RandPacket->InsertData(SendChatMsg.c_str(), DummyChatLen);
-
-							Instance->SendPacket(Instance->_ClientArray[i]->ClientId, RandPacket);
-							break;
-						case en_DummyClientMessage::MOVE:
-							if (Instance->_ClientArray[i]->IsReqMove == 0)
+							if (Instance->_ClientArray[i]->DummyClientLoginTime < GetTickCount64())
 							{
-								InterlockedExchange(&Instance->_ClientArray[i]->IsReqMove, 1);
+								Instance->_ClientArray[i]->DummyClientNetworkState = en_DummyClientNetworkState::REQ_LOGIN;
+								bool IsDummy = true;
 
-								*RandPacket << (int16)en_PACKET_C2S_MOVE;
-								*RandPacket << Instance->_ClientArray[i]->AccountId;
-								*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId;
-								*RandPacket << (int8)Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.State;
-								*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX;
-								*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY;
-								*RandPacket << (int8)Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.MoveDir;
+								// 로그인 패킷 전송
+								CMessage* ReqGameServerLoginPacket = CMessage::Alloc();
+								ReqGameServerLoginPacket->Clear();
 
-								RandDir = RandomDirCreate(Gen);
+								*ReqGameServerLoginPacket << (WORD)en_PACKET_C2S_GAME_REQ_LOGIN;
+								*ReqGameServerLoginPacket << Instance->_ClientArray[i]->AccountId;
 
-								*RandPacket << (int8)RandDir;
+								int8 DummyClientNameLen = (int8)(Instance->_ClientArray[i]->LoginId.length() * 2);
+								*ReqGameServerLoginPacket << DummyClientNameLen;
+								ReqGameServerLoginPacket->InsertData(Instance->_ClientArray[i]->LoginId.c_str(), DummyClientNameLen);
 
-								Instance->SendPacket(Instance->_ClientArray[i]->ClientId, RandPacket);
+								*ReqGameServerLoginPacket << IsDummy;
+
+								Instance->SendPacket(Instance->_ClientArray[i]->ClientId, ReqGameServerLoginPacket);
+								ReqGameServerLoginPacket->Free();
 							}
-							break;						
-						default:
-							break;
-						}
-					}
-
-					RandPacket->Free();
-				}
-				else
-				{
-					if (Instance->_ClientArray[i]->DummyClientState == en_DummyClientNetworkState::READY_LOGIN)
-					{
-						if (Instance->_ClientArray[i]->DummyClientLoginTime < GetTickCount64())
-						{
-							Instance->_ClientArray[i]->DummyClientState = en_DummyClientNetworkState::REQ_LOGIN;
-							bool IsDummy = true;
-
-							// 로그인 패킷 전송
-							CMessage* ReqGameServerLoginPacket = CMessage::Alloc();
-							ReqGameServerLoginPacket->Clear();
-
-							*ReqGameServerLoginPacket << (WORD)en_PACKET_C2S_GAME_REQ_LOGIN;
-							*ReqGameServerLoginPacket << Instance->_ClientArray[i]->AccountId;
-
-							int8 DummyClientNameLen = (int8)(Instance->_ClientArray[i]->LoginId.length() * 2);
-							*ReqGameServerLoginPacket << DummyClientNameLen;
-							ReqGameServerLoginPacket->InsertData(Instance->_ClientArray[i]->LoginId.c_str(), DummyClientNameLen);
-
-							*ReqGameServerLoginPacket << IsDummy;
-
-							Instance->SendPacket(Instance->_ClientArray[i]->ClientId, ReqGameServerLoginPacket);
-							ReqGameServerLoginPacket->Free();
 						}
 					}
 				}
-			}	
+			}
+			else
+			{
 
-			Sleep(200);
+			}
 		}		
 	}
 
@@ -339,21 +517,22 @@ void CDummyClient::ReleaseClient(st_Client* ReleaseClient)
 		return;
 	}
 
-	if (ReleaseClient->DummyClientState == CONNECTED
-		|| ReleaseClient->DummyClientState == READY_LOGIN
-		|| ReleaseClient->DummyClientState == REQ_LOGIN)
+	if (ReleaseClient->DummyClientNetworkState == CONNECTED
+		|| ReleaseClient->DummyClientNetworkState == READY_LOGIN
+		|| ReleaseClient->DummyClientNetworkState == REQ_LOGIN)
 	{
 		InterlockedDecrement64(&_ConnectCount);
 	}
-	else if(ReleaseClient->DummyClientState == IN_LOGIN
-		|| ReleaseClient->DummyClientState == IN_ENTER_GAME
-		|| ReleaseClient->DummyClientState == REQ_RELEASE
-		|| ReleaseClient->DummyClientState == RELEASE)
+	else if(ReleaseClient->DummyClientNetworkState == IN_LOGIN
+		|| ReleaseClient->DummyClientNetworkState == WAIT_CHARACTER_INFOSEND
+		|| ReleaseClient->DummyClientNetworkState == IN_ENTER_GAME
+		|| ReleaseClient->DummyClientNetworkState == REQ_RELEASE
+		|| ReleaseClient->DummyClientNetworkState == RELEASE)
 	{
 		InterlockedDecrement64(&_LoginCount);
 	}	
 
-	ReleaseClient->DummyClientState = en_DummyClientNetworkState::RELEASE;
+	ReleaseClient->DummyClientNetworkState = en_DummyClientNetworkState::RELEASE;
 
 	ReleaseClient->RecvRingBuf.ClearBuffer();
 
@@ -599,7 +778,7 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 
 			RecvClient->LoginId = DummyCharacterName;
 			RecvClient->DummyClientLoginTime = GetTickCount64() + DUMMY_CLIENT_LOGIN_TIME;	
-			RecvClient->DummyClientState = en_DummyClientNetworkState::READY_LOGIN;
+			RecvClient->DummyClientNetworkState = en_DummyClientNetworkState::READY_LOGIN;
 		}
 		break;
 		case en_PACKET_S2C_GAME_RES_LOGIN:
@@ -611,13 +790,13 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 			{
 				int8 PlayerCount;
 				*Packet >> PlayerCount;
+								
+				InterlockedDecrement64(&_ConnectCount);
+				InterlockedIncrement64(&_LoginCount);
 
 				if (PlayerCount > 0)
 				{
-					InterlockedDecrement64(&_ConnectCount);
-					InterlockedIncrement64(&_LoginCount);
-
-					RecvClient->DummyClientState = en_DummyClientNetworkState::IN_LOGIN;
+					RecvClient->DummyClientNetworkState = en_DummyClientNetworkState::IN_LOGIN;
 
 					*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectId;
 
@@ -628,8 +807,8 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 					int8 CharacterState;
 					*Packet >> CharacterState;
 
-					*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX;
-					*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY;
+					*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionX;
+					*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionY;
 
 					int8 CharacterMoveDir;
 					*Packet >> CharacterMoveDir;
@@ -719,8 +898,8 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 				int8 CharacterState;
 				*Packet >> CharacterState;
 
-				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX;
-				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY;
+				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionX;
+				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionY;
 
 				int8 CharacterMoveDir;
 				*Packet >> CharacterMoveDir;
@@ -784,8 +963,11 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 				int8 CharacterState;
 				*Packet >> CharacterState;
 
-				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX;
-				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY;
+				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionX;
+				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionY;
+
+				RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY = RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionY + 0.5f;
+				RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX = RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionX + 0.5f;				
 
 				int8 CharacterMoveDir;
 				*Packet >> CharacterMoveDir;
@@ -816,9 +998,26 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 
 				int16 CharacterOwnerObjectType;
 				*Packet >> CharacterOwnerObjectType;
-				*Packet >> RecvClient->MyCharacterGameObjectInfo.PlayerSlotIndex;
+				*Packet >> RecvClient->MyCharacterGameObjectInfo.PlayerSlotIndex;				
 
-				RecvClient->DummyClientState = en_DummyClientNetworkState::IN_ENTER_GAME;				
+				st_Vector2Int ServerPlayerPosition;
+				ServerPlayerPosition._X = RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionX;
+				ServerPlayerPosition._Y = RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionY;
+
+				_Map->ApplyMove(RecvClient, ServerPlayerPosition);
+
+				RecvClient->DummyClientNetworkState = en_DummyClientNetworkState::IN_ENTER_GAME;
+				
+				/*RecvClient->DummyClientState = en_DummyClientNetworkState::WAIT_CHARACTER_INFOSEND;
+
+				CMessage* ReqCharacterInfo = CMessage::Alloc();
+				ReqCharacterInfo->Clear();
+
+				*ReqCharacterInfo << (int16)en_PACKET_C2S_CHARACTER_INFO;
+				*ReqCharacterInfo << RecvClient->AccountId;
+				*ReqCharacterInfo << RecvClient->MyCharacterGameObjectInfo.ObjectId;
+
+				SendPacket(ClientID, ReqCharacterInfo);*/
 			}
 			else 
 			{
@@ -838,7 +1037,21 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 		}
 		break;
 		case en_PACKET_S2C_CHARACTER_INFO:
-			RecvClient->DummyClientState = en_DummyClientNetworkState::IN_ENTER_GAME;
+			int64 AccountId;		
+			int64 PlayerId;
+
+			*Packet >> AccountId;
+			*Packet >> PlayerId;			
+
+			int64 CurrentExperience;
+			int64 RequireExperience;
+			int64 TotalExperience;
+
+			*Packet >> CurrentExperience;
+			*Packet >> RequireExperience;
+			*Packet >> TotalExperience;
+
+			RecvClient->DummyClientNetworkState = en_DummyClientNetworkState::IN_ENTER_GAME;
 			break;
 		case en_PACKET_S2C_MESSAGE:
 			break;
@@ -846,37 +1059,54 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 		{			
 			int64 AccountId;
 			int64 PlayerId;
-			int16 ObjectType;
+			bool CanMove;			
 			int8 CreatureState;
-			int32 PositionX;
-			int32 PositionY;
+			int32 CollisionPositionX;
+			int32 CollisionPositionY;
 			int8 MoveDir;
+			float PositionX;
+			float PositionY;
 
 			*Packet >> AccountId;
 			*Packet >> PlayerId;
-			*Packet >> ObjectType;
+			*Packet >> CanMove;			
 			*Packet >> CreatureState;
-			*Packet >> PositionX;
-			*Packet >> PositionY;
+			*Packet >> CollisionPositionX;
+			*Packet >> CollisionPositionY;
 			*Packet >> MoveDir;		
-
-			st_Client* Client = FindById(PlayerId);
-
-			if (Client)
-			{
-				Client->MyCharacterGameObjectInfo.ObjectPositionInfo.State = (en_CreatureState)CreatureState;
-				Client->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX = PositionX;
-				Client->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY = PositionY;
-				Client->MyCharacterGameObjectInfo.ObjectPositionInfo.MoveDir = (en_MoveDir)MoveDir;
-
-				// 내가 요청한 움직임
-				if (RecvClient->AccountId == Client->AccountId)
-				{
-					InterlockedExchange(&RecvClient->IsReqMove, 0);
-				}							
-			}							
+			*Packet >> PositionX;
+			*Packet >> PositionY;			
 		}
 		break;
+		case en_PACKET_S2C_MOVE_STOP:
+		{	
+			int64 AccountId;
+			int64 ObjectId;
+			int8 CreatureState;
+			int32 CollsitionPositionX;
+			int32 CollsitionPositionY;
+			int8 MoveDir;
+			float PositionX;
+			float PositionY;
+
+			*Packet >> AccountId;
+			*Packet >> ObjectId;
+			*Packet >> CreatureState;
+			*Packet >> CollsitionPositionX;
+			*Packet >> CollsitionPositionY;
+			*Packet >> MoveDir;
+			*Packet >> PositionX;
+			*Packet >> PositionY;						
+						
+			RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionX = CollsitionPositionX;
+			RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionY = CollsitionPositionY;
+			RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.MoveDir = (en_MoveDir)MoveDir;
+			RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX = PositionX;
+			RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY = PositionY;
+			
+			RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;						
+		}
+			break;
 		case en_PACKET_S2C_PING:
 		{
 			CMessage* ReqPongPacket = CMessage::Alloc();

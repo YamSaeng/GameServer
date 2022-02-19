@@ -58,9 +58,6 @@
     <Filter Include="ContentServer\Content\GameObject">
       <UniqueIdentifier>{821a2af2-60a7-4c19-8f19-590f7bfe1ef6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ContentServer\Content\GameObject\Player">
-      <UniqueIdentifier>{ae04998f-66c9-4da1-8bfd-9f8523536e46}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ContentServer\Content\GameObject\Monster">
       <UniqueIdentifier>{33925b0f-ac21-4ddd-875e-de847e8abf20}</UniqueIdentifier>
     </Filter>
@@ -84,6 +81,9 @@
     </Filter>
     <Filter Include="Util\설정 파일\Data\SkillData">
       <UniqueIdentifier>{40192980-e430-431a-929f-2f8a9aafd339}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ContentServer\Content\GameObject\Player">
+      <UniqueIdentifier>{ae04998f-66c9-4da1-8bfd-9f8523536e46}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -20,12 +20,12 @@ private:
 	// 타이머잡 쓰레드
 	HANDLE _TimerJobThread;
 	// 로직 쓰레드
-	HANDLE _LogicThread;	
+	HANDLE _LogicThread;		
 
 	// 인증 쓰레드 깨우기 이벤트
 	HANDLE _AuthThreadWakeEvent;	
 	// 타이머잡 쓰레드 깨우기 이벤트
-	HANDLE _TimerThreadWakeEvent;	
+	HANDLE _TimerThreadWakeEvent;		
 
 	// AuthThread 종료용 변수
 	bool _AuthThreadEnd;
@@ -34,7 +34,7 @@ private:
 	// User DataBaseThread 종료용 변수
 	bool _UserDataBaseThreadEnd;
 	// World DataBaseThread 종료용 변수
-	bool _WorldDataBaseThreadEnd;
+	bool _WorldDataBaseThreadEnd;	
 
 	// LogicThread 종료용 변수
 	bool _LogicThreadEnd;
@@ -62,7 +62,7 @@ private:
 	//----------------------------------------------------------
 	static unsigned __stdcall TimerJobThreadProc(void* Argument);
 	//--------------------------------------------------------
-	// 로직 쓰레드 
+	// 로직처리 쓰레드 
 	//--------------------------------------------------------
 	static unsigned __stdcall LogicThreadProc(void* Argument);	
 
@@ -110,6 +110,10 @@ private:
 	// 이동 요청 처리
 	//---------------------------------------------------------
 	void PacketProcReqMove(int64 SessionID, CMessage* Message);	
+	//------------------------------------------------------------
+	// 이동 멈춤 처리
+	//------------------------------------------------------------
+	void PacketProcReqMoveStop(int64 SessionID, CMessage* Message);
 	//---------------------------------------------------------------
 	// 공격 요청 처리
 	//---------------------------------------------------------------
@@ -375,7 +379,11 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 이동 요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResMove(int64 AccountId, int64 ObjectId, en_GameObjectType ObjectType, st_PositionInfo PositionInfo);
+	CGameServerMessage* MakePacketResMove(int64 AccountId, int64 ObjectId, bool CanMove, st_PositionInfo PositionInfo);
+	//------------------------------------------------------------------------------------------------------
+	// 게임서버 이동 멈춤 요청 응답 패킷 조합
+	//------------------------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResMoveStop(int64 AccountId, int64 ObjectId, st_PositionInfo PositionInto);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 정찰 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -428,14 +436,14 @@ public:
 	//------------------------------------
 	CLockFreeQue<st_Job*> _GameServerAuthThreadMessageQue;	
 	CLockFreeQue<st_Job*> _GameServerUserDataBaseThreadMessageQue;
-	CLockFreeQue<st_Job*> _GameServerWorldDataBaseThreadMessageQue;
+	CLockFreeQue<st_Job*> _GameServerWorldDataBaseThreadMessageQue;	
 
 	//--------------------------------------
 	// TimerJob 우선순위 큐
 	//--------------------------------------
 	CHeap<int64,st_TimerJob*>* _TimerHeapJob;
 
-	int64 _LogicThreadTPS;
+	int64 _LogicThreadFPS;
 	// 인증 쓰레드 활성화된 횟수
 	int64 _AuthThreadWakeCount;
 	// 인증 쓰레드 TPS
@@ -443,7 +451,7 @@ public:
 	// 네트워크 쓰레드 활성화된 횟수
 	int64 _NetworkThreadWakeCount;
 	// 네트워크 쓰레드 TPS
-	int64 _NetworkThreadTPS; 
+	int64 _NetworkThreadTPS;	
 
 	// User DB 쓰레드 깨우기 이벤트
 	HANDLE _UserDataBaseWakeEvent;

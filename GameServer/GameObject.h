@@ -10,9 +10,10 @@ private:
 public:
 	bool _IsSendPacketTarget;
 
-	int32 _ObjectManagerIndex;
+	int32 _ObjectManagerArrayIndex;
+	int32 _ChannelArrayIndex;
 	en_ObjectNetworkState _NetworkState;
-	st_GameObjectInfo _GameObjectInfo;
+	st_GameObjectInfo _GameObjectInfo;	
 	CChannel* _Channel;	
 
 	// 선택한 대상
@@ -67,6 +68,6 @@ protected:
 	//-------------------------
 	uint64 _NatureRecoveryTick;	
 
-	void BroadCastPacket(en_PACKET_TYPE PacketType);
+	void BroadCastPacket(en_PACKET_TYPE PacketType, bool CanMove = true);
 };
 

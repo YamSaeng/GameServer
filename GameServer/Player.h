@@ -9,8 +9,7 @@ struct st_TimerJob;
 
 class CPlayer : public CGameObject
 {
-public:
-
+public:	
 	uint64 _AttackTick;
 	uint64 _SpellTick;
 
@@ -43,8 +42,11 @@ public:
 	virtual bool OnDamaged(CGameObject* Attacker, int32 Damage) override;
 	virtual void OnDead(CGameObject* Killer) override;	
 
+	void Init();
+
+	void PositionReset();
 protected:
+	virtual void UpdateMove();
 	virtual void UpdateAttack();
 	virtual void UpdateSpell();
 };
-

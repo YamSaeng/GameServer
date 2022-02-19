@@ -1,6 +1,7 @@
 #pragma once
 #include "Sector.h"
 #include "Map.h"
+#include "LockFreeStack.h"
 
 class CMonster;
 class CItem;
@@ -9,13 +10,26 @@ class CEnvironment;
 class CChannel
 {
 private:
+	enum en_Channel
+	{
+		PLAYER_MAX = 800,
+		MONSTER_MAX = 100,
+		ITEM_MAX = 200,
+		ENVIRONMENT_MAX = 100
+	};
+
 	//-------------------------------------------
 	// 채널에서 관리중인 플레이어, 몬스터, 아이템
 	//-------------------------------------------
-	map<int64, CPlayer*> _Players;
-	map<int64, CMonster*> _Monsters;
-	map<int64, CItem*> _Items;
-	map<int64, CEnvironment*> _Environments;
+	CPlayer* _ChannelPlayerArray[PLAYER_MAX];
+	CMonster* _ChannelMonsterArray[MONSTER_MAX];
+	CItem* _ChannelItemArray[ITEM_MAX];
+	CEnvironment* _ChannelEnvironmentArray[ENVIRONMENT_MAX];
+
+	CLockFreeStack<int32> _ChannelPlayerArrayIndexs;
+	CLockFreeStack<int32> _ChannelMonsterArrayIndexs;
+	CLockFreeStack<int32> _ChannelItemArrayIndexs;
+	CLockFreeStack<int32> _ChannelEnvironmentArrayIndexs;
 
 	SRWLOCK _ChannelLock;
 
@@ -78,7 +92,7 @@ public:
 	//-------------------------------------------------------
 	// 내 근처 플레이어 반환
 	//-------------------------------------------------------
-	CGameObject* FindNearPlayer(CGameObject* Object, int32 Range, bool* Cango);
+	CGameObject* FindNearPlayer(CGameObject* Object, int32 Range, bool* CollisionCango);
 
 	//------------------------------
 	// 소유하고 있는 몬스터 업데이트

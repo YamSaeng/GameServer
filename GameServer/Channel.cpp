@@ -10,6 +10,30 @@
 CChannel::CChannel()
 {
 	InitializeSRWLock(&_ChannelLock);
+
+	for (int32 PlayerCount = PLAYER_MAX - 1; PlayerCount >= 0; --PlayerCount)
+	{
+		_ChannelPlayerArray[PlayerCount] = nullptr;
+		_ChannelPlayerArrayIndexs.Push(PlayerCount);
+	}
+
+	for (int32 MonsterCount = MONSTER_MAX - 1; MonsterCount >= 0; --MonsterCount)
+	{
+		_ChannelMonsterArray[MonsterCount] = nullptr;
+		_ChannelMonsterArrayIndexs.Push(MonsterCount);
+	}
+
+	for (int32 ItemCount = ITEM_MAX - 1; ItemCount >= 0; --ItemCount)
+	{
+		_ChannelItemArray[ItemCount] = nullptr;
+		_ChannelItemArrayIndexs.Push(ItemCount);
+	}
+
+	for (int32 Environment = ENVIRONMENT_MAX - 1; Environment >= 0; --Environment)
+	{
+		_ChannelEnvironmentArray[Environment] = nullptr;
+		_ChannelEnvironmentArrayIndexs.Push(Environment);
+	}
 }
 
 CChannel::~CChannel()
@@ -273,7 +297,7 @@ vector<CPlayer*> CChannel::GetFieldOfViewPlayer(CGameObject* Object, int16 Range
 	return FieldOfViewPlayers;
 }
 
-CGameObject* CChannel::FindNearPlayer(CGameObject* Object, int32 Range, bool* Cango)
+CGameObject* CChannel::FindNearPlayer(CGameObject* Object, int32 Range, bool* CollisionCango)
 {
 	// 주위 플레이어 정보 받아와서
 	vector<CPlayer*> Players = GetAroundPlayer(Object, Range);	
@@ -291,7 +315,7 @@ CGameObject* CChannel::FindNearPlayer(CGameObject* Object, int32 Range, bool* Ca
 	if (Distances.GetUseSize() != 0)
 	{
 		Player = Distances.PopHeap();
-		vector<st_Vector2Int> FirstPaths = _Map->FindPath(Object->GetCellPosition(), Player->GetCellPosition());
+		vector<st_Vector2Int> FirstPaths = _Map->FindPath(Object, Object->GetCellPosition(), Player->GetCellPosition());
 		if (FirstPaths.size() < 2)
 		{
 			// 타겟은 있지만 갈수는 없는 상태 ( 주위에 오브젝트들로 막혀서 )
@@ -301,66 +325,73 @@ CGameObject* CChannel::FindNearPlayer(CGameObject* Object, int32 Range, bool* Ca
 				while (Distances.GetUseSize() != 0)
 				{
 					Player = Distances.PopHeap();
-					vector<st_Vector2Int> SecondPaths = _Map->FindPath(Object->GetCellPosition(), Player->GetCellPosition());
+					vector<st_Vector2Int> SecondPaths = _Map->FindPath(Object, Object->GetCellPosition(), Player->GetCellPosition());
 					if (SecondPaths.size() < 2)
 					{
 						continue;
 					}
 
-					*Cango = true;
+					*CollisionCango = true;
 					return Player;
 				}
 
-				*Cango = false;
+				*CollisionCango = false;
 				return Player;
 			}			
 		}
 		
-		*Cango = true;
+		*CollisionCango = true;
 		return Player;
 	}
 	else
 	{
-		*Cango = false;
+		*CollisionCango = false;
 		return nullptr;
 	}
 }
 
 void CChannel::Update()
 {	
-	for (auto MonsterIteraotr : _Monsters)
+	for (int16 i = 0; i < PLAYER_MAX; i++)
 	{
-		CMonster* Monster = MonsterIteraotr.second;
-		
-		Monster->Update();		
-	}
-	
-	AcquireSRWLockExclusive(&_ChannelLock);
-	for (auto PlayerIterator : _Players)
-	{
-		CPlayer* Player = PlayerIterator.second;
-		Player->Update();					
-	}	
-	ReleaseSRWLockExclusive(&_ChannelLock);
-
-	for (auto ItemIterator : _Items)
-	{
-		CItem* Item = ItemIterator.second;
-
-		Item->Update();
+		if (_ChannelPlayerArray[i] 
+			&& _ChannelPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE
+			&& _ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
+		{
+			_ChannelPlayerArray[i]->Update();
+		}
 	}
 
-	for (auto EnvironmentIterator : _Environments)
+	for (int16 i = 0; i < MONSTER_MAX; i++)
 	{
-		CEnvironment* Environment = EnvironmentIterator.second;
+		if (_ChannelMonsterArray[i]
+			&& _ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
+		{
+			_ChannelMonsterArray[i]->Update();
+		}
+	}
 
-		Environment->Update();
+	for (int16 i = 0; i < ITEM_MAX; i++)
+	{
+		if (_ChannelItemArray[i]
+			&& _ChannelItemArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
+		{
+			_ChannelItemArray[i]->Update();
+		}
+	}
+
+	for (int16 i = 0; i < ENVIRONMENT_MAX; i++)
+	{
+		if (_ChannelEnvironmentArray[i]
+			&& _ChannelEnvironmentArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
+		{
+			_ChannelEnvironmentArray[i]->Update();
+		}
 	}	
 }
 
 bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* ObjectSpawnPosition)
-{
-	AcquireSRWLockExclusive(&_ChannelLock);
+{	
 	bool IsEnterChannel = false;
 	// 채널 입장
 	if (EnterChannelGameObject == nullptr)
@@ -389,7 +420,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			SpawnPosition._X =  RandomXPosition(Gen);
 			SpawnPosition._Y =  RandomYPosition(Gen);
 						
-			if (_Map->Cango(SpawnPosition) == true)
+			if (_Map->CollisionCango(EnterChannelGameObject, SpawnPosition) == true)
 			{
 				break;
 			}
@@ -409,11 +440,16 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			CPlayer* EnterChannelPlayer = (CPlayer*)EnterChannelGameObject;
 			EnterChannelPlayer->_SpawnPosition._Y = SpawnPosition._Y;
 			EnterChannelPlayer->_SpawnPosition._X = SpawnPosition._X;
-			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY = SpawnPosition._Y;
-			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX = SpawnPosition._X;
+			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY = SpawnPosition._Y;
+			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX = SpawnPosition._X;
+						
+			EnterChannelPlayer->PositionReset();			
+						
+			// 플레이어 저장
+			_ChannelPlayerArrayIndexs.Pop(&EnterChannelPlayer->_ChannelArrayIndex);
+			_ChannelPlayerArray[EnterChannelPlayer->_ChannelArrayIndex] = EnterChannelPlayer;
 
-			// 플레이어 자료구조에 저장				
-			_Players.insert(pair<int64, CPlayer*>(EnterChannelPlayer->_GameObjectInfo.ObjectId, EnterChannelPlayer));			
+			//_Players.insert(pair<int64, CPlayer*>(EnterChannelPlayer->_GameObjectInfo.ObjectId, EnterChannelPlayer));			
 			
 			// 채널 저장
 			EnterChannelPlayer->_Channel = this;		
@@ -431,14 +467,15 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 		{
 			// 몬스터로 형변환
 			CMonster* EnterChannelMonster = (CMonster*)EnterChannelGameObject;
-			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.PositionY = SpawnPosition._Y;
-			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.PositionX = SpawnPosition._X;
+			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY = SpawnPosition._Y;
+			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX = SpawnPosition._X;
 
 			EnterChannelMonster->Init(SpawnPosition);
-
-			// 몬스터 자료구조에 저장
-			_Monsters.insert(pair<int64,CMonster*>(EnterChannelMonster->_GameObjectInfo.ObjectId,EnterChannelMonster));
-
+						
+			// 몬스터 저장
+			_ChannelMonsterArrayIndexs.Pop(&EnterChannelMonster->_ChannelArrayIndex);
+			_ChannelMonsterArray[EnterChannelMonster->_ChannelArrayIndex] = EnterChannelMonster;
+			
 			// 채널 저장
 			EnterChannelMonster->_Channel = this;		
 
@@ -463,8 +500,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 		{
 			// 아이템으로 형변환
 			CItem* EnterChannelItem = (CItem*)EnterChannelGameObject;
-			EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.PositionY = SpawnPosition._Y;
-			EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.PositionX = SpawnPosition._X;
+			EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY = SpawnPosition._Y;
+			EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX = SpawnPosition._X;
 			
 			EnterChannelItem->_Channel = this;			
 			
@@ -474,7 +511,9 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			// 중복되지 않는 아이템의 경우에만 채널에 해당 아이템을 채널과 섹터에 저장
 			if (IsEnterChannel == true)
 			{
-				_Items.insert(pair<int64, CItem*>(EnterChannelItem->_GameObjectInfo.ObjectId, EnterChannelItem));
+				// 몬스터 저장
+				_ChannelItemArrayIndexs.Pop(&EnterChannelItem->_ChannelArrayIndex);
+				_ChannelItemArray[EnterChannelItem->_ChannelArrayIndex] = EnterChannelItem;				
 				
 				// 섹터 얻어서 해당 섹터에도 저장
 				CSector* EnterSector = GetSector(SpawnPosition);
@@ -486,12 +525,36 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	case en_GameObjectType::OBJECT_TREE:
 		{			
 			CEnvironment* EnterChannelEnvironment = (CEnvironment*)EnterChannelGameObject;
-			EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.PositionY = SpawnPosition._Y;
-			EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.PositionX = SpawnPosition._X;
+			EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY = SpawnPosition._Y;
+			EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX = SpawnPosition._X;
+			
+			if (EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY > 0)
+			{
+				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.PositionY = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY;
+			}
+			else if (EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY == 0)
+			{
+				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.PositionY = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY - 0.5f;
+			}
+			else
+			{
+				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.PositionY = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY - 1.0f;
+			}
+			
+			if (EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX > 0)
+			{
+				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.PositionX = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX + 0.5f;
+			}
+			else
+			{
+				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.PositionX = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX - 0.5f;
+			}		
 
-			_Environments.insert(pair<int64, CEnvironment*>(EnterChannelEnvironment->_GameObjectInfo.ObjectId, EnterChannelEnvironment));
+			// 환경 오브젝트 저장
+			_ChannelEnvironmentArrayIndexs.Pop(&EnterChannelEnvironment->_ChannelArrayIndex);
+			_ChannelEnvironmentArray[EnterChannelEnvironment->_ChannelArrayIndex] = EnterChannelEnvironment;
 
-			EnterChannelEnvironment->_Channel = this;
+			EnterChannelEnvironment->_Channel = this;		
 						
 			IsEnterChannel = _Map->ApplyMove(EnterChannelEnvironment, SpawnPosition);
 
@@ -500,16 +563,13 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			EnterSector->Insert(EnterChannelEnvironment);
 		}
 		break;
-	}
+	}	
 	
-	ReleaseSRWLockExclusive(&_ChannelLock);
 	return IsEnterChannel;
 }
 
 void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 {	
-	AcquireSRWLockExclusive(&_ChannelLock);
-
 	// 채널 퇴장
 	// 컨테이너에서 제거한 후 맵에서도 제거
 	switch ((en_GameObjectType)LeaveChannelGameObject->_GameObjectInfo.ObjectType)
@@ -520,13 +580,13 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 	case en_GameObjectType::OBJECT_THIEF_PLAYER:
 	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:		
-		_Players.erase(LeaveChannelGameObject->_GameObjectInfo.ObjectId);
+		_ChannelPlayerArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);		
 
 		_Map->ApplyLeave(LeaveChannelGameObject);		
 		break;
 	case en_GameObjectType::OBJECT_SLIME:
 	case en_GameObjectType::OBJECT_BEAR:
-		_Monsters.erase(LeaveChannelGameObject->_GameObjectInfo.ObjectId);
+		_ChannelMonsterArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);		
 
 		_Map->ApplyLeave(LeaveChannelGameObject);
 		break;
@@ -540,17 +600,15 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
-		_Items.erase(LeaveChannelGameObject->_GameObjectInfo.ObjectId);
+		_ChannelItemArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);		
 
 		_Map->ApplyPositionLeaveItem(LeaveChannelGameObject);
 		break;
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
-		_Environments.erase(LeaveChannelGameObject->_GameObjectInfo.ObjectId);
+		_ChannelEnvironmentArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);		
 
 		_Map->ApplyLeave(LeaveChannelGameObject);
 		break;
-	}
-
-	ReleaseSRWLockExclusive(&_ChannelLock);
+	}	
 }
