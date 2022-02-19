@@ -7,6 +7,7 @@ enum class en_CreatureState : int8
 	IDLE,
 	PATROL,
 	MOVING,
+	STOP,
 	RETURN_SPAWN_POSITION,
 	ATTACK,
 	SPELL,
@@ -158,12 +159,29 @@ enum class en_QuickSlotBar : int8
 	QUICK_SLOT_BAR_SLOT_SIZE = 5
 };
 
+enum class en_TileMapEnvironment : int8
+{
+	TILE_MAP_NONE = 0,
+	TILE_MAP_WALL,
+	TILE_MAP_TREE,
+	TILE_MAP_STONE,
+	TILE_MAP_SLIME,
+	TILE_MAP_BEAR
+};
+
+enum class en_MapItemInfo : int8
+{
+	MAP_ITEM_COUNT_MAX = 20
+};
+
 struct st_PositionInfo
 {
 	en_CreatureState State;
-	int32 PositionX;
-	int32 PositionY;
+	int32 CollisionPositionX;
+	int32 CollisionPositionY;
 	en_MoveDir MoveDir;
+	float PositionX;
+	float PositionY;
 };
 
 struct st_StatInfo

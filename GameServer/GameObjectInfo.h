@@ -61,6 +61,7 @@ enum class en_CreatureState : int8
 	IDLE,
 	PATROL,
 	MOVING,
+	STOP,
 	RETURN_SPAWN_POSITION,
 	ATTACK,
 	SPELL,
@@ -1610,9 +1611,11 @@ enum class en_MapItemInfo : int8
 struct st_PositionInfo
 {
 	en_CreatureState State;
-	int32 PositionX;
-	int32 PositionY;
+	int32 CollisionPositionX;
+	int32 CollisionPositionY;
 	en_MoveDir MoveDir;
+	float PositionX;
+	float PositionY;
 };
 
 struct st_StatInfo
