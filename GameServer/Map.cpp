@@ -781,12 +781,12 @@ bool CMap::ApplyPositionLeaveItem(CGameObject* GameObject)
 	return true;
 }
 
-st_Position CMap::CellToPosition(st_Vector2Int CellPosition)
+st_PositionInt CMap::CellToPositionInt(st_Vector2Int CellPosition)
 {
-	return st_Position(_Down - CellPosition._Y, CellPosition._X - _Left);
+	return st_PositionInt(_Down - CellPosition._Y, CellPosition._X - _Left);
 }
 
-st_Vector2Int CMap::PositionToCell(st_Position Position)
+st_Vector2Int CMap::PositionToCellInt(st_PositionInt Position)
 {
 	return st_Vector2Int(Position._X + _Left, _Down - Position._Y);
 }
@@ -798,8 +798,8 @@ vector<st_Vector2Int> CMap::FindPath(CGameObject* Object, st_Vector2Int StartCel
 	int32 Cost[4] = { 10,10,10,10 };
 	
 	// 시작점 도착점 좌표변환
-	st_Position StartPosition = CellToPosition(StartCellPosition);
-	st_Position DestPosition = CellToPosition(DestCellPostion);
+	st_PositionInt StartPosition = CellToPositionInt(StartCellPosition);
+	st_PositionInt DestPosition = CellToPositionInt(DestCellPostion);
 
 	// 닫힌노드 검사배열
 	bool** CloseList = (bool**)malloc(sizeof(bool) * _SizeY * _SizeX);
@@ -818,27 +818,27 @@ vector<st_Vector2Int> CMap::FindPath(CGameObject* Object, st_Vector2Int StartCel
 	}
 
 	// 자식, 부모 맵
-	map<st_Position, st_Position> Parents;	
+	map<st_PositionInt, st_PositionInt> Parents;	
 
 	// 우선순위 큐 생성
-	CHeap<int32, st_AStarNode> OpenListQue(_SizeY * _SizeX);
+	CHeap<int32, st_AStarNodeInt> OpenListQue(_SizeY * _SizeX);
 
 	// 열린노드에 처음 F 값 기록
 	OpenList[StartPosition._Y][StartPosition._X] = abs(DestPosition._Y - StartPosition._Y) + abs(DestPosition._X - StartPosition._X);
 
 	// AStar Node 생성
-	st_AStarNode StartNode(abs(DestPosition._Y - StartPosition._Y) + abs(DestPosition._X - StartPosition._X), 0, StartPosition._X, StartPosition._Y);
+	st_AStarNodeInt StartNode(abs(DestPosition._Y - StartPosition._Y) + abs(DestPosition._X - StartPosition._X), 0, StartPosition._X, StartPosition._Y);
 	// 큐에 삽입
 	OpenListQue.InsertHeap(StartNode._F, StartNode);
 	
 	// 처음 위치 첫 부모로 설정
-	Parents.insert(pair<st_Position, st_Position>(StartPosition, StartPosition));
+	Parents.insert(pair<st_PositionInt, st_PositionInt>(StartPosition, StartPosition));
 
 	// 오픈리스트 큐가 비워질때까지 반복
 	while (OpenListQue.GetUseSize() > 0)
 	{
 		// 오픈리스트 큐에서 노드 하나 뽑음
-		st_AStarNode AStarNode = OpenListQue.PopHeap();
+		st_AStarNodeInt AStarNode = OpenListQue.PopHeap();
 		// 해당 위치를 방문했엇는지 확인
 		if (CloseList[AStarNode._Position._Y][AStarNode._Position._X] == true)
 		{
@@ -858,7 +858,7 @@ vector<st_Vector2Int> CMap::FindPath(CGameObject* Object, st_Vector2Int StartCel
 		for (int32 i = 0; i < 4; i++)
 		{
 			// 다음 위치를 알아낸다.
-			st_Position NextPosition(AStarNode._Position._Y + DeltaY[i], AStarNode._Position._X + DeltaX[i]);			
+			st_PositionInt NextPosition(AStarNode._Position._Y + DeltaY[i], AStarNode._Position._X + DeltaX[i]);			
 			
 			// 다음으로 뽑아낸 위치가 시작점으로 지정해준 값보다 너무 멀다면 해당 좌표는 무시한다.
 			if (abs(StartPosition._Y - NextPosition._Y) + abs(StartPosition._X - NextPosition._X) > MaxDistance)
@@ -869,7 +869,7 @@ vector<st_Vector2Int> CMap::FindPath(CGameObject* Object, st_Vector2Int StartCel
 			// 다음 위치가 목적지 좌표가 아닐 경우, 해당 위치로 갈 수 있는지 검사한다.
 			if (NextPosition._Y != DestPosition._Y || NextPosition._X != DestPosition._X)
 			{
-				st_Vector2Int NextPositionVector = PositionToCell(NextPosition);
+				st_Vector2Int NextPositionVector = PositionToCellInt(NextPosition);
 
 				// 갈 수 없으면 다음 위치를 검사한다.
 				if (CollisionCango(Object, NextPositionVector, CheckObjects) == false)
@@ -896,7 +896,7 @@ vector<st_Vector2Int> CMap::FindPath(CGameObject* Object, st_Vector2Int StartCel
 			}
 
 			// 삽입할 노드를 준비하고
-			st_AStarNode InsertAStartNode;
+			st_AStarNodeInt InsertAStartNode;
 			// 앞서 구한 값들을 이용해 F값을 구한후 저장한다.
 			OpenList[NextPosition._Y][NextPosition._X] = G + H;
 
@@ -913,7 +913,7 @@ vector<st_Vector2Int> CMap::FindPath(CGameObject* Object, st_Vector2Int StartCel
 			if (ChildFind == Parents.end())
 			{
 				//찾지 못햇으면 넣어주고
-				Parents.insert(pair<st_Position, st_Position>(NextPosition, AStarNode._Position));
+				Parents.insert(pair<st_PositionInt, st_PositionInt>(NextPosition, AStarNode._Position));
 			}
 			else
 			{
@@ -936,7 +936,7 @@ vector<st_Vector2Int> CMap::FindPath(CGameObject* Object, st_Vector2Int StartCel
 	return CompletePath(Parents, DestPosition);
 }
 
-vector<st_Vector2Int> CMap::CompletePath(map<st_Position, st_Position> Parents, st_Position DestPosition)
+vector<st_Vector2Int> CMap::CompletePath(map<st_PositionInt, st_PositionInt> Parents, st_PositionInt DestPosition)
 {
 	// 반환해줄 배열
 	vector<st_Vector2Int> Cells;	
@@ -944,12 +944,12 @@ vector<st_Vector2Int> CMap::CompletePath(map<st_Position, st_Position> Parents, 
 	int32 X = DestPosition._X;
 	int32 Y = DestPosition._Y;
 
-	st_Position Point;			
+	st_PositionInt Point;			
 
 	// 부모 목록 중에서 목적지가 없으면
 	if (Parents.find(DestPosition) == Parents.end())
 	{			
-		st_Position BestPosition;
+		st_PositionInt BestPosition;
 		int32 BestDistance;
 		memset(&BestDistance, 1, sizeof(int32));
 
@@ -968,15 +968,15 @@ vector<st_Vector2Int> CMap::CompletePath(map<st_Position, st_Position> Parents, 
 		DestPosition = BestPosition;
 	}
 
-	st_Position Position = DestPosition;
+	st_PositionInt Position = DestPosition;
 	while ((*Parents.find(Position)).second != Position)
 	{
-		Cells.push_back(PositionToCell(Position));
+		Cells.push_back(PositionToCellInt(Position));
 		Position = (*Parents.find(Position)).second;
 	}
 
 	// 시작점 담기
-	Cells.push_back(PositionToCell(Position));
+	Cells.push_back(PositionToCellInt(Position));
 	// 부모 위치 담은 배열 거꾸로 뒤집어서 반환
 	reverse(Cells.begin(), Cells.end());	
 

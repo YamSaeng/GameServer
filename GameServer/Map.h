@@ -41,6 +41,55 @@ struct st_Vector2
 	{
 		return st_Vector2(_X * Sclar, _Y * Sclar);
 	}		
+
+	// 거리 구하기
+	static float Distance(st_Vector2 TargetCellPosition, st_Vector2 MyCellPosition)
+	{
+		float CalculateDistance = sqrt(pow(TargetCellPosition._X - MyCellPosition._X, 2) + pow(TargetCellPosition._Y - MyCellPosition._Y, 2));
+		return round((CalculateDistance * 100) / 100);
+	}
+
+	// 벡터 크기 구하기
+	static float Size(st_Vector2 Vector)
+	{
+		return (float)sqrt(pow(Vector._X, 2) + pow(Vector._Y, 2));
+	}
+
+	// 벡터 정규화
+	static st_Vector2 Normalize(st_Vector2 Vector)
+	{
+		float VectorSize = st_Vector2::Size(Vector);
+
+		// 둘째 자리에서 반올림
+		st_Vector2 NormalVector;
+		NormalVector._X = round(((Vector._X / VectorSize) * 100) / 100);
+		NormalVector._Y = round(((Vector._Y / VectorSize) * 100) / 100);
+
+		return NormalVector;
+	}
+
+	static en_MoveDir GetMoveDir(st_Vector2 NormalVector)
+	{
+		if (NormalVector._X > 0)
+		{
+			return en_MoveDir::RIGHT;
+		}
+
+		if (NormalVector._X < 0)
+		{
+			return en_MoveDir::LEFT;
+		}
+
+		if (NormalVector._Y > 0)
+		{
+			return en_MoveDir::UP;
+		}
+
+		if (NormalVector._Y < 0)
+		{
+			return en_MoveDir::DOWN;
+		}
+	}
 };
 
 struct st_Vector2Int
@@ -102,71 +151,71 @@ struct st_Vector2Int
 		return (int16)sqrt(pow(TargetCellPosition._X - MyCellPosition._X, 2) + pow(TargetCellPosition._Y - MyCellPosition._Y, 2));
 	}
 
-	//--------------------------------------------------------------
-	// 위치값 정보를 받아서 방향값을 반환한다.
-	//--------------------------------------------------------------
-	static en_MoveDir GetDirectionFromVector(st_Vector2Int DirectionVector)
+	static en_MoveDir GetMoveDir(st_Vector2Int NormalVector)
 	{
-		if (DirectionVector._X > 0)
+		if (NormalVector._X > 0)
 		{
 			return en_MoveDir::RIGHT;
 		}
-		else if (DirectionVector._X < 0)
+
+		if (NormalVector._X < 0)
 		{
 			return en_MoveDir::LEFT;
 		}
-		else if (DirectionVector._Y > 0)
+
+		if (NormalVector._Y > 0)
 		{
 			return en_MoveDir::UP;
 		}
-		else
+
+		if (NormalVector._Y < 0)
 		{
 			return en_MoveDir::DOWN;
 		}
-	}
+	}	
 };
 
-struct st_Position
+struct st_PositionInt
 {
 	int32 _Y;
 	int32 _X;
 
-	st_Position() {}
+	st_PositionInt() {}
 
-	st_Position(int Y, int X)
+	st_PositionInt(int Y, int X)
 	{
 		_Y = Y;
 		_X = X;
 	}	
 
-	bool operator ==(st_Position& Position)
+	bool operator ==(st_PositionInt& Position)
 	{
 		return (_Y == Position._Y) && (_X == Position._X);
 	}
 
-	bool operator !=(st_Position& Position)
+	bool operator !=(st_PositionInt& Position)
 	{
 		return !((*this) == Position);
 	}
 
-	bool operator <(const st_Position& Position) const
+	bool operator <(const st_PositionInt& Position) const
 	{
 		return _X < Position._X || (_X == Position._X && _Y < Position._Y);
 	}
 };
 
-struct st_AStarNode
+struct st_AStarNodeInt
 {
 	int32 _F;
 	int32 _G;
-	st_Position _Position;
+	st_PositionInt _Position;
 
 	int32 _X;
 	int32 _Y;
 	
-	st_AStarNode() {}
+	st_AStarNodeInt() {}
 
-	st_AStarNode(int32 F, int32 G, int32 X, int32 Y)
+	st_AStarNodeInt(int32 F, int32 G, int32 X, int32 Y)
 	{
 		_F = F;
 		_G = G;
@@ -185,12 +234,12 @@ public:
 
 	int32 _SizeX;
 	int32 _SizeY;
-	
+
 	//-----------------------------------------
 	// 맵 타일의 정보를 보관
 	//-----------------------------------------
-	en_TileMapEnvironment** _CollisionMapInfos;	
-	
+	en_TileMapEnvironment** _CollisionMapInfos;
+
 	//-------------------------------------
 	//맵 타일에 존재하는 게임 오브젝트 정보
 	//-------------------------------------
@@ -203,7 +252,7 @@ public:
 	CItem**** _Items;
 
 	CMap(int MapId);
-	
+
 	//-------------------------------------------
 	// 좌표 위치에 있는 오브젝트 반환
 	//-------------------------------------------
@@ -213,7 +262,7 @@ public:
 	// 좌표 위치에 있는 아이템들을 반환
 	//-------------------------------------------
 	CItem** FindItem(st_Vector2Int& ItemCellPosition);
-	
+
 	bool Cango(CGameObject* Object, float X, float Y);
 	//----------------------------------------------------------------------------
 	// 위치로 갈 수 있는지 확인
@@ -234,13 +283,13 @@ public:
 	//---------------------------------------
 	// 맵에서 오브젝트 퇴장
 	//---------------------------------------
-	bool ApplyLeave(CGameObject* GameObject);	
+	bool ApplyLeave(CGameObject* GameObject);
 
 	bool ApplyPositionLeaveItem(CGameObject* GameObject);
-	
-	st_Position CellToPosition(st_Vector2Int CellPosition);
-	st_Vector2Int PositionToCell(st_Position Position);
-		
+
+	st_PositionInt CellToPositionInt(st_Vector2Int CellPosition);
+	st_Vector2Int PositionToCellInt(st_PositionInt Position);
+
 	vector<st_Vector2Int> FindPath(CGameObject* Object, st_Vector2Int StartCellPosition, st_Vector2Int DestCellPostion, bool CheckObjects = true, int32 MaxDistance = 10);
-	vector<st_Vector2Int> CompletePath(map<st_Position,st_Position> Parents, st_Position DestPosition);	
-;};
+	vector<st_Vector2Int> CompletePath(map<st_PositionInt, st_PositionInt> Parents, st_PositionInt DestPosition);
+};
