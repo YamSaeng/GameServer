@@ -60,7 +60,7 @@ enum class en_CreatureState : int8
 	SPAWN_IDLE,
 	IDLE,
 	PATROL,
-	MOVING,
+	MOVING,		
 	STOP,
 	RETURN_SPAWN_POSITION,
 	ATTACK,
@@ -69,6 +69,15 @@ enum class en_CreatureState : int8
 	STUN,
 	PUSH_AWAY,
 	ROOT
+};
+
+enum class en_MonsterState : int8
+{
+	MONSTER_IDLE,
+	MONSTER_READY_PATROL,
+	MONSTER_PATROL,
+	MONSTER_READY_MOVE,
+	MONSTER_MOVE
 };
 
 enum class en_MessageType : int8
