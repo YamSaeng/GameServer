@@ -42,6 +42,8 @@ CBear::CBear()
 	_GetDPPoint = MonsterData.GetDPPoint;		
 	_GetExpPoint = MonsterData.GetExpPoint;
 
+	_FieldOfViewDistance = 8;
+
 	_SpawnIdleTick = GetTickCount64() + 2000;
 }
 
@@ -104,5 +106,28 @@ void CBear::OnDead(CGameObject* Killer)
 
 	G_ObjectManager->GameServer->SpawnObjectTimeTimerJobCreate((int16)_GameObjectInfo.ObjectType, _SpawnPosition, 10000);
 
-	G_ObjectManager->ObjectLeaveGame(this, _ObjectManagerIndex, 1);
+	G_ObjectManager->ObjectLeaveGame(this, _ObjectManagerArrayIndex, 1);
+}
+
+void CBear::PositionReset()
+{
+	switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
+	{
+	case en_MoveDir::LEFT:
+		_GameObjectInfo.ObjectPositionInfo.PositionX =
+			_GameObjectInfo.ObjectPositionInfo.CollisionPositionX + 0.3f;
+		break;
+	case en_MoveDir::RIGHT:
+		_GameObjectInfo.ObjectPositionInfo.PositionX =
+			_GameObjectInfo.ObjectPositionInfo.CollisionPositionX + 0.7f;
+		break;
+	case en_MoveDir::UP:
+		_GameObjectInfo.ObjectPositionInfo.PositionY =
+			_GameObjectInfo.ObjectPositionInfo.CollisionPositionY + 0.7f;
+		break;
+	case en_MoveDir::DOWN:
+		_GameObjectInfo.ObjectPositionInfo.PositionY =
+			_GameObjectInfo.ObjectPositionInfo.CollisionPositionY + 0.3f;
+		break;
+	}
 }

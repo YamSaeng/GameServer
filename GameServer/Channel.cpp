@@ -237,7 +237,7 @@ vector<CGameObject*> CChannel::GetFieldOfViewObjects(CGameObject* Object, int16 
 	return FieldOfViewGameObjects;
 }
 
-vector<CPlayer*> CChannel::GetAroundPlayer(CGameObject* Object, int32 Range, bool ExceptMe)
+vector<CPlayer*> CChannel::GetAroundPlayer(CGameObject* Object, int32 Range)
 {
 	vector<CPlayer*> Players;	
 	// 주위 섹터 얻어오고
@@ -248,17 +248,14 @@ vector<CPlayer*> CChannel::GetAroundPlayer(CGameObject* Object, int32 Range, boo
 	for (CSector* Sector : Sectors)
 	{
 		for (CPlayer* Player : Sector->GetPlayers())
-		{
-			if (ExceptMe == true)
+		{			
+			int16 Distance = st_Vector2Int::Distance(Player->GetCellPosition(), Object->GetCellPosition());
+			if (Distance <= Object->_FieldOfViewDistance)
 			{
 				if (Object->_GameObjectInfo.ObjectId != Player->_GameObjectInfo.ObjectId)
 				{
 					Players.push_back(Player);
 				}
-			}
-			else
-			{
-				Players.push_back(Player);
 			}			
 		}
 	}
@@ -299,11 +296,11 @@ vector<CPlayer*> CChannel::GetFieldOfViewPlayer(CGameObject* Object, int16 Range
 
 CGameObject* CChannel::FindNearPlayer(CGameObject* Object, int32 Range, bool* CollisionCango)
 {
-	// 주위 플레이어 정보 받아와서
+	// 주위 시야 범위 안에 있는 플레이어들을 받아온다.
 	vector<CPlayer*> Players = GetAroundPlayer(Object, Range);	
 	
 	// 받아온 플레이어 정보를 토대로 거리를 구해서 우선순위 큐에 담는다.
-	CHeap<int16, CPlayer*> Distances((int32)Players.size());		
+	CHeap<int16, CPlayer*> Distances((int32)Players.size()); // 가까운 순서대로 
 	for (CPlayer* Player : Players)
 	{		
 		Distances.InsertHeap(st_Vector2Int::Distance(Player->GetCellPosition(), Object->GetCellPosition()), Player);
@@ -313,8 +310,9 @@ CGameObject* CChannel::FindNearPlayer(CGameObject* Object, int32 Range, bool* Co
 	// 거리 가까운 애부터 접근해서 해당 플레이어로 갈 수 있는지 확인하고
 	// 갈 수 있는 대상이면 해당 플레이어를 반환해준다.
 	if (Distances.GetUseSize() != 0)
-	{
+	{		
 		Player = Distances.PopHeap();
+
 		vector<st_Vector2Int> FirstPaths = _Map->FindPath(Object, Object->GetCellPosition(), Player->GetCellPosition());
 		if (FirstPaths.size() < 2)
 		{
@@ -414,8 +412,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 		// 더미를 대상으로 랜덤 좌표 받아서 채널에 입장
 		while (true)
 		{
-			uniform_int_distribution<int> RandomXPosition(-26, 63);
-			uniform_int_distribution<int> RandomYPosition(-13, 56);		
+			uniform_int_distribution<int> RandomXPosition(0, 89);
+			uniform_int_distribution<int> RandomYPosition(0, 73);
 
 			SpawnPosition._X =  RandomXPosition(Gen);
 			SpawnPosition._Y =  RandomYPosition(Gen);
@@ -472,6 +470,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 
 			EnterChannelMonster->Init(SpawnPosition);
 						
+			EnterChannelMonster->PositionReset();
+
 			// 몬스터 저장
 			_ChannelMonsterArrayIndexs.Pop(&EnterChannelMonster->_ChannelArrayIndex);
 			_ChannelMonsterArray[EnterChannelMonster->_ChannelArrayIndex] = EnterChannelMonster;

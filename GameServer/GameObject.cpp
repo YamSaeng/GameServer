@@ -12,9 +12,7 @@ CGameObject::CGameObject()
 	_Target = nullptr;
 	_SelectTarget = nullptr;
 
-	_NatureRecoveryTick = 0;
-
-	_FieldOfViewDistance = 10;
+	_NatureRecoveryTick = 0;	
 
 	_IsSendPacketTarget = false;
 }
@@ -63,6 +61,49 @@ void CGameObject::OnHeal(CGameObject* Healer, int32 HealPoint)
 void CGameObject::OnDead(CGameObject* Killer)
 {
 	
+}
+
+st_Vector2 CGameObject::PositionCheck(st_Vector2Int& CheckPosition)
+{
+	st_Vector2 ResultPosition;
+
+	if (CheckPosition._Y > 0)
+	{
+		ResultPosition._Y = 
+			CheckPosition._Y + 0.5f;			
+	}
+	else if (CheckPosition._Y == 0)
+	{
+		ResultPosition._Y =
+			CheckPosition._Y;
+	}
+	else if (CheckPosition._Y < 0)
+	{
+		ResultPosition._Y =
+			CheckPosition._Y - 0.5f;		
+	}
+	
+	if (CheckPosition._X > 0)
+	{
+		ResultPosition._X =
+			CheckPosition._X + 0.5f;
+	}
+	else if (CheckPosition._X == 0)
+	{
+		ResultPosition._X =
+			CheckPosition._X;
+	}
+	else if (CheckPosition._X < 0)
+	{
+		ResultPosition._X =
+			CheckPosition._X - 0.5f;
+	}	
+
+	return ResultPosition;
+}
+
+void CGameObject::PositionReset()
+{
 }
 
 st_PositionInfo CGameObject::GetPositionInfo()
@@ -142,15 +183,7 @@ void CGameObject::BroadCastPacket(en_PACKET_TYPE PacketType, bool CanMove)
 	CMessage* ResPacket = nullptr;
 
 	switch (PacketType)
-	{
-	case en_PACKET_TYPE::en_PACKET_S2C_MOVE:
-		ResPacket = G_ObjectManager->GameServer->MakePacketResMove((int64)-1, _GameObjectInfo.ObjectId, CanMove, _GameObjectInfo.ObjectPositionInfo);
-		break;	
-	case en_PACKET_TYPE::en_PACKET_S2C_PATROL:
-		ResPacket = G_ObjectManager->GameServer->MakePacketPatrol(_GameObjectInfo.ObjectId,
-			_GameObjectInfo.ObjectType,
-			_GameObjectInfo.ObjectPositionInfo);
-		break;
+	{		
 	case en_PACKET_TYPE::en_PACKET_S2C_OBJECT_STATE_CHANGE:
 		ResPacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
 			_GameObjectInfo.ObjectPositionInfo.MoveDir,

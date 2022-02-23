@@ -26,6 +26,7 @@ struct st_Vector2
 	static st_Vector2 Down() { return st_Vector2(0, -1.0f); }
 	static st_Vector2 Left() { return st_Vector2(-1.0f, 0); }
 	static st_Vector2 Right() { return st_Vector2(1.0f, 0); }
+	static st_Vector2 Zero() { return st_Vector2(0, 0); }
 
 	st_Vector2 operator + (st_Vector2& Vector)
 	{
@@ -45,7 +46,7 @@ struct st_Vector2
 	// 거리 구하기
 	static float Distance(st_Vector2 TargetCellPosition, st_Vector2 MyCellPosition)
 	{
-		float CalculateDistance = sqrt(pow(TargetCellPosition._X - MyCellPosition._X, 2) + pow(TargetCellPosition._Y - MyCellPosition._Y, 2));
+		float CalculateDistance = (float)sqrt(pow(TargetCellPosition._X - MyCellPosition._X, 2) + pow(TargetCellPosition._Y - MyCellPosition._Y, 2));
 		return round((CalculateDistance * 100) / 100);
 	}
 
@@ -114,6 +115,7 @@ struct st_Vector2Int
 	static st_Vector2Int Down() { return st_Vector2Int(0, -1); }
 	static st_Vector2Int Left() { return st_Vector2Int(-1, 0); }
 	static st_Vector2Int Right() { return st_Vector2Int(1, 0); }
+	static st_Vector2Int Zero() { return st_Vector2Int(0, 0); }
 
 	st_Vector2Int operator +(st_Vector2Int& Vector)
 	{

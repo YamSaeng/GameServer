@@ -38,6 +38,9 @@ public:
 	virtual void OnHeal(CGameObject* Healer, int32 HealPoint);
 	virtual void OnDead(CGameObject* Killer);
 
+	st_Vector2 PositionCheck(st_Vector2Int& CheckPosition);
+	virtual void PositionReset();
+
 	st_PositionInfo GetPositionInfo();
 
 	//--------------------------------------------

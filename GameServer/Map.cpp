@@ -150,7 +150,7 @@ CItem** CMap::FindItem(st_Vector2Int& ItemCellPosition)
 
 bool CMap::Cango(CGameObject* Object, float X, float Y)
 {
-	st_Vector2Int CollisionPosition;
+	st_Vector2Int CollisionPosition;	
 	CollisionPosition._X = X;
 	CollisionPosition._Y = Y;
 	
@@ -174,7 +174,8 @@ bool CMap::CollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool
 	int X = CellPosition._X - _Left;
 	int Y = _Down - CellPosition._Y;	
 	
-	//G_Logger->WriteStdOut(en_Color::RED, L"Y : %d X : %d\n", Y, X);
+	//G_Logger->WriteStdOut(en_Color::RED, L"X : %d Y : %d \n", X, Y);
+
 	bool IsCollisionMapInfo = false;
 	switch (_CollisionMapInfos[Y][X])
 	{
