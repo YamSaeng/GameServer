@@ -15,19 +15,32 @@ public:
 	// 몬스터 죽이면 얻는 ExpPoint
 	int32 _GetExpPoint;
 
+	en_MonsterState _MonsterState;
+
 	//-------------------------------------
 	// 몬스터 시야범위 플레이어 목록
 	//-------------------------------------
 	vector<CPlayer*> _FieldOfViewPlayers;
-
+	
 	CMonster();
 	virtual ~CMonster();	
 
 	virtual void Update() override;
+
+	virtual void PositionReset() override;
 	virtual bool OnDamaged(CGameObject* Attacker, int32 Damage) override;
 	// 몬스터 초기화
 	virtual void Init(st_Vector2Int SpawnPosition);	
 protected:
+	//---------------------
+	// 정찰 위치
+	//---------------------
+	st_Vector2 _PatrolPoint;
+	//---------------------
+	// 이동 위치
+	//---------------------
+	st_Vector2 _MovePoint;
+
 	//--------------------------
 	// Idle 상태에서 Search 거리
 	//--------------------------	
@@ -79,8 +92,9 @@ protected:
 	//-------------------------------------
 	// 몬스터가 정찰할 위치
 	//-------------------------------------
-	vector<st_Vector2Int> _PatrolPositions;		
+	vector<st_Vector2Int> _PatrolPositions;			
 
+	CGameObject* FindTarget();
 	//------------------------
 	// Spawn Idle 상태 Update
 	//------------------------
@@ -92,11 +106,13 @@ protected:
 	//------------------------
 	// Patrol 상태 Update
 	//------------------------
+	void ReadyPatrol();
 	virtual void UpdatePatrol();
 	//------------------------
 	// Moving 상태 Update
 	//------------------------
-	virtual void UpdateMoving();
+	void ReadMoving();
+	virtual void UpdateMoving();		
 	//--------------------------------------
 	// ReturnSpawnPosition 상태 Update
 	//--------------------------------------

@@ -10,6 +10,8 @@ CPlayer::CPlayer()
 	_SpellTick = 0;
 	_SkillJob = nullptr;
 
+	_FieldOfViewDistance = 10;
+
 	_IsSendPacketTarget = true;
 }
 
@@ -70,71 +72,44 @@ void CPlayer::Init()
 
 void CPlayer::PositionReset()
 {
-	// 이동 방향에 따라 좌표값 재 조정
 	switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
 	{
-	case en_MoveDir::UP:
-	case en_MoveDir::DOWN:
-		if (_GameObjectInfo.ObjectPositionInfo.CollisionPositionY >= 0)
-		{
-			_GameObjectInfo.ObjectPositionInfo.PositionY =
-				_GameObjectInfo.ObjectPositionInfo.CollisionPositionY + 0.5f;
-		}
-		else if (_GameObjectInfo.ObjectPositionInfo.CollisionPositionY == 0)
-		{
-			_GameObjectInfo.ObjectPositionInfo.PositionY =
-				_GameObjectInfo.ObjectPositionInfo.CollisionPositionY;
-		}
-		else if (_GameObjectInfo.ObjectPositionInfo.CollisionPositionY < 0)
-		{
-			_GameObjectInfo.ObjectPositionInfo.PositionY =
-				_GameObjectInfo.ObjectPositionInfo.CollisionPositionY - 0.5f;
-		}
-		break;
 	case en_MoveDir::LEFT:
-	case en_MoveDir::RIGHT:
-		if (_GameObjectInfo.ObjectPositionInfo.CollisionPositionX >= 0)
-		{
-			_GameObjectInfo.ObjectPositionInfo.PositionX =
-				_GameObjectInfo.ObjectPositionInfo.CollisionPositionX + 0.5f;
-		}
-		else if (_GameObjectInfo.ObjectPositionInfo.CollisionPositionX == 0)
-		{
-			_GameObjectInfo.ObjectPositionInfo.PositionX =
-				_GameObjectInfo.ObjectPositionInfo.CollisionPositionX;
-		}
-		else if (_GameObjectInfo.ObjectPositionInfo.CollisionPositionX < 0)
-		{
-			_GameObjectInfo.ObjectPositionInfo.PositionX =
-				_GameObjectInfo.ObjectPositionInfo.CollisionPositionX - 0.5f;
-		}
+		_GameObjectInfo.ObjectPositionInfo.PositionX =
+			_GameObjectInfo.ObjectPositionInfo.CollisionPositionX + 0.3f;
 		break;
-	}
+	case en_MoveDir::RIGHT:
+		_GameObjectInfo.ObjectPositionInfo.PositionX =
+			_GameObjectInfo.ObjectPositionInfo.CollisionPositionX + 0.7f;
+		break;
+	case en_MoveDir::UP:
+		_GameObjectInfo.ObjectPositionInfo.PositionY =
+			_GameObjectInfo.ObjectPositionInfo.CollisionPositionY + 0.7f;
+		break;
+	case en_MoveDir::DOWN:
+		_GameObjectInfo.ObjectPositionInfo.PositionY =
+			_GameObjectInfo.ObjectPositionInfo.CollisionPositionY + 0.3f;
+		break;	
+	}	
 }
 
 void CPlayer::UpdateMove()
-{		
-	st_Vector2 DirVector;	
-
+{	
 	switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
 	{
-	case en_MoveDir::UP:
-		DirVector = st_Vector2::Up();
-		_GameObjectInfo.ObjectPositionInfo.PositionY += (DirVector._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+	case en_MoveDir::UP:		
+		_GameObjectInfo.ObjectPositionInfo.PositionY += (st_Vector2::Up()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 		break;
-	case en_MoveDir::DOWN:
-		DirVector = st_Vector2::Down();
-		_GameObjectInfo.ObjectPositionInfo.PositionY += (DirVector._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+	case en_MoveDir::DOWN:		
+		_GameObjectInfo.ObjectPositionInfo.PositionY += (st_Vector2::Down()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 		break;
-	case en_MoveDir::LEFT:
-		DirVector = st_Vector2::Left();
-		_GameObjectInfo.ObjectPositionInfo.PositionX += (DirVector._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+	case en_MoveDir::LEFT:		
+		_GameObjectInfo.ObjectPositionInfo.PositionX += (st_Vector2::Left()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 		break;
-	case en_MoveDir::RIGHT:
-		DirVector = st_Vector2::Right();
-		_GameObjectInfo.ObjectPositionInfo.PositionX += (DirVector._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+	case en_MoveDir::RIGHT:		
+		_GameObjectInfo.ObjectPositionInfo.PositionX += (st_Vector2::Right()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 		break;
-	}
+	}	
 
 	bool CanMove = _Channel->_Map->Cango(this, _GameObjectInfo.ObjectPositionInfo.PositionX, _GameObjectInfo.ObjectPositionInfo.PositionY);
 	if (CanMove == true)

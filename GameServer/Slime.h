@@ -10,6 +10,8 @@ public:
 	virtual void Init(st_Vector2Int SpawnPosition) override;	
 
 	virtual void OnDead(CGameObject* Killer) override;
+
+	virtual void PositionReset() override;
 protected:
 	virtual void UpdateIdle() override;
 	virtual void UpdatePatrol() override;
