@@ -49,7 +49,8 @@ void CMonster::Update()
 	case en_CreatureState::MOVING:
 		switch (_MonsterState)
 		{
-		case en_MonsterState::MONSTER_READY_MOVE:
+		case en_MonsterState::MONSTER_IDLE:
+		case en_MonsterState::MONSTER_READY_MOVE:		
 			ReadMoving();
 			break;
 		case en_MonsterState::MONSTER_MOVE:
@@ -62,6 +63,15 @@ void CMonster::Update()
 		break;
 	case en_CreatureState::ATTACK:
 		UpdateAttack();
+		switch (_MonsterState)
+		{
+		case en_MonsterState::MONSTER_IDLE:
+			break;
+		case en_MonsterState::MONSTER_READY_ATTACK:
+			break;
+		case en_MonsterState::MONSTER_ATTACK:			
+			break;
+		}		
 		break;
 	case en_CreatureState::SPELL:
 		UpdateSpell();
@@ -287,98 +297,35 @@ void CMonster::UpdatePatrol()
 	case en_MoveDir::RIGHT:
 		G_Logger->WriteStdOut(en_Color::GREEN, L"Dir : 오른쪽 ");
 		break;
-	}*/
+	}
 
-	/*G_Logger->WriteStdOut(en_Color::RED, L"PositionX [%0.1f] PositionY [%0.1f] GoalPositionX [%0.1f] GoalPosition [%0.1f]  \n",
+	G_Logger->WriteStdOut(en_Color::RED, L"PositionX [%0.1f] PositionY [%0.1f] GoalPositionX [%0.1f] GoalPosition [%0.1f]  \n",
 		_GameObjectInfo.ObjectPositionInfo.PositionX,
 		_GameObjectInfo.ObjectPositionInfo.PositionY,
 		_PatrolPoint._X,
 		_PatrolPoint._Y);*/
 
-	switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
-	{
-	case en_MoveDir::UP:
-		_GameObjectInfo.ObjectPositionInfo.PositionY += (st_Vector2::Up()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
-		break;
-	case en_MoveDir::DOWN:
-		_GameObjectInfo.ObjectPositionInfo.PositionY += (st_Vector2::Down()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
-		break;
-	case en_MoveDir::LEFT:
-		_GameObjectInfo.ObjectPositionInfo.PositionX += (st_Vector2::Left()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
-		break;
-	case en_MoveDir::RIGHT:
-		_GameObjectInfo.ObjectPositionInfo.PositionX += (st_Vector2::Right()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
-		break;
-	}
-
-	bool CanMove = _Channel->_Map->Cango(this, _GameObjectInfo.ObjectPositionInfo.PositionX, _GameObjectInfo.ObjectPositionInfo.PositionY);
-	if (CanMove == true)
-	{
-		st_Vector2Int CollisionPosition;
-		CollisionPosition._X = _GameObjectInfo.ObjectPositionInfo.PositionX;
-		CollisionPosition._Y = _GameObjectInfo.ObjectPositionInfo.PositionY;
-
-		if (CollisionPosition._X != _GameObjectInfo.ObjectPositionInfo.CollisionPositionX
-			|| CollisionPosition._Y != _GameObjectInfo.ObjectPositionInfo.CollisionPositionY)
-		{
-			_Channel->_Map->ApplyMove(this, CollisionPosition);
-		}
-
-		switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
-		{
-		case en_MoveDir::UP:	
-			if (_GameObjectInfo.ObjectPositionInfo.PositionY >= _PatrolPoint._Y)
-			{
-				_MonsterState = en_MonsterState::MONSTER_READY_PATROL;
-				_PatrolTick = GetTickCount64() + _PatrolTickPoint;
-				CanMove = false;				
-			}
-			break;
-		case en_MoveDir::DOWN:
-			if (_GameObjectInfo.ObjectPositionInfo.PositionY <= _PatrolPoint._Y)
-			{
-				_MonsterState = en_MonsterState::MONSTER_READY_PATROL;
-				_PatrolTick = GetTickCount64() + _PatrolTickPoint;
-				CanMove = false;				
-			}
-			break;
-		case en_MoveDir::LEFT:			
-			if (_GameObjectInfo.ObjectPositionInfo.PositionX <= _PatrolPoint._X)
-			{
-				_MonsterState = en_MonsterState::MONSTER_READY_PATROL;
-				_PatrolTick = GetTickCount64() + _PatrolTickPoint;
-				CanMove = false;				
-			}
-			break;
-		case en_MoveDir::RIGHT:
-			if (_GameObjectInfo.ObjectPositionInfo.PositionX >= _PatrolPoint._X)
-			{
-				_MonsterState = en_MonsterState::MONSTER_READY_PATROL;
-				_PatrolTick = GetTickCount64() + _PatrolTickPoint;
-				CanMove = false;				
-			}
-			break;		
-		}		
-	}
-	else
-	{
-		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-		_MonsterState = en_MonsterState::MONSTER_IDLE;
-
-		PositionReset();
-	}
-		
-	CMessage* MonsterPatrolPacket = G_ObjectManager->GameServer->MakePacketPatrol(_GameObjectInfo.ObjectId,
-		_GameObjectInfo.ObjectType,
-		CanMove,
-		_GameObjectInfo.ObjectPositionInfo,
-		_MonsterState);	
-	G_ObjectManager->GameServer->SendPacketFieldOfView(this, MonsterPatrolPacket);
-	MonsterPatrolPacket->Free();
+	Move();	
 }
 
 void CMonster::ReadMoving()
 {
+	do
+	{
+		if (_MonsterState == en_MonsterState::MONSTER_IDLE)
+		{
+			if (_MoveTick > GetTickCount64())
+			{
+				return;
+			}
+			else
+			{
+				break;
+			}
+		}
+
+	} while (0);		
+
 	if (_Target == nullptr)
 	{
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
@@ -409,13 +356,14 @@ void CMonster::ReadMoving()
 	if (Path[1] == TargetPosition)
 	{
 		// 공격 상태로 바꾼다.
-		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;			
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;
+		BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
 	}
 	else
 	{
 		_MonsterState = en_MonsterState::MONSTER_MOVE;
 		_MovePoint = PositionCheck(Path[1]);
-	}	
+	}
 }
 
 void CMonster::UpdateMoving()
@@ -426,6 +374,8 @@ void CMonster::UpdateMoving()
 
 	st_Vector2 DirectionVector = _MovePoint - MonsterPosition;
 	st_Vector2 NormalVector = st_Vector2::Normalize(DirectionVector);
+
+	//G_Logger->WriteStdOut(en_Color::RED, L"X : %0.1f Y : %0.1f\n", NormalVector._X, NormalVector._Y);
 
 	_GameObjectInfo.ObjectPositionInfo.MoveDir = st_Vector2::GetMoveDir(NormalVector);
 
@@ -450,84 +400,8 @@ void CMonster::UpdateMoving()
 		_GameObjectInfo.ObjectPositionInfo.PositionY,
 		_MovePoint._X,
 		_MovePoint._Y);*/
-
-	switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
-	{
-	case en_MoveDir::UP:
-		_GameObjectInfo.ObjectPositionInfo.PositionY += (st_Vector2::Up()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
-		break;
-	case en_MoveDir::DOWN:
-		_GameObjectInfo.ObjectPositionInfo.PositionY += (st_Vector2::Down()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
-		break;
-	case en_MoveDir::LEFT:
-		_GameObjectInfo.ObjectPositionInfo.PositionX += (st_Vector2::Left()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
-		break;
-	case en_MoveDir::RIGHT:
-		_GameObjectInfo.ObjectPositionInfo.PositionX += (st_Vector2::Right()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
-		break;
-	}
-
-	bool CanMove = _Channel->_Map->Cango(this, _GameObjectInfo.ObjectPositionInfo.PositionX, _GameObjectInfo.ObjectPositionInfo.PositionY);
-	if (CanMove == true)
-	{
-		st_Vector2Int CollisionPosition;
-		CollisionPosition._X = _GameObjectInfo.ObjectPositionInfo.PositionX;
-		CollisionPosition._Y = _GameObjectInfo.ObjectPositionInfo.PositionY;
-
-		if (CollisionPosition._X != _GameObjectInfo.ObjectPositionInfo.CollisionPositionX
-			|| CollisionPosition._Y != _GameObjectInfo.ObjectPositionInfo.CollisionPositionY)
-		{
-			_Channel->_Map->ApplyMove(this, CollisionPosition);
-		}
-
-		switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
-		{
-		case en_MoveDir::UP:
-			if (_GameObjectInfo.ObjectPositionInfo.PositionY >= _MovePoint._Y)
-			{
-				_MonsterState = en_MonsterState::MONSTER_READY_MOVE;
-				_PatrolTick = GetTickCount64() + _PatrolTickPoint;				
-			}
-			break;
-		case en_MoveDir::DOWN:
-			if (_GameObjectInfo.ObjectPositionInfo.PositionY <= _MovePoint._Y)
-			{
-				_MonsterState = en_MonsterState::MONSTER_READY_MOVE;
-				_PatrolTick = GetTickCount64() + _PatrolTickPoint;				
-			}
-			break;
-		case en_MoveDir::LEFT:
-			if (_GameObjectInfo.ObjectPositionInfo.PositionX <= _MovePoint._X)
-			{
-				_MonsterState = en_MonsterState::MONSTER_READY_MOVE;								
-			}
-			break;
-		case en_MoveDir::RIGHT:
-			if (_GameObjectInfo.ObjectPositionInfo.PositionX >= _MovePoint._X)
-			{
-				_MonsterState = en_MonsterState::MONSTER_READY_MOVE;			
-			}
-			break;
-		}
-	}
-	else
-	{
-		// 몬스터가 갈 위치에 다른 오브젝트가 있을 경우 새로운 길을 찾는다.
-		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
-		_MonsterState = en_MonsterState::MONSTER_READY_MOVE;
-		//_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-		//_MonsterState = en_MonsterState::MONSTER_IDLE;
-
-		PositionReset();
-	}
-
-	CMessage* MonsterMovePacket = G_ObjectManager->GameServer->MakePacketResMonsterMove(_GameObjectInfo.ObjectId,
-		_GameObjectInfo.ObjectType,
-		CanMove,
-		_GameObjectInfo.ObjectPositionInfo,
-		_MonsterState);
-	G_ObjectManager->GameServer->SendPacketFieldOfView(this, MonsterMovePacket);
-	MonsterMovePacket->Free();
+		
+	Move();	
 
 	//if (_MoveTick > GetTickCount64())
 	//{
@@ -631,6 +505,35 @@ void CMonster::UpdateReturnSpawnPosition()
 	BroadCastPacket(en_PACKET_S2C_MONSTER_MOVE);	
 }
 
+void CMonster::ReadAttack()
+{
+	st_Vector2 TargetPosition;
+	TargetPosition._X = _Target->_GameObjectInfo.ObjectPositionInfo.PositionX;
+	TargetPosition._Y = _Target->_GameObjectInfo.ObjectPositionInfo.PositionY;
+
+	st_Vector2 MonsterPosition;
+	MonsterPosition._X = _GameObjectInfo.ObjectPositionInfo.PositionX;
+	MonsterPosition._Y = _GameObjectInfo.ObjectPositionInfo.PositionY;
+
+	st_Vector2 DirectionVector = TargetPosition - MonsterPosition;
+	st_Vector2 NormalVector = st_Vector2::Normalize(DirectionVector);
+
+	en_MoveDir Dir = st_Vector2::GetMoveDir(NormalVector);
+
+	switch (Dir)
+	{
+	case en_MoveDir::UP:
+		break;
+	case en_MoveDir::DOWN:
+	
+		break;
+	case en_MoveDir::LEFT:
+		break;
+	case en_MoveDir::RIGHT:
+		break;	
+	}	
+}
+
 void CMonster::UpdateAttack()
 {
 	if (_AttackTick == 0)
@@ -724,4 +627,160 @@ void CMonster::UpdatePushAway()
 
 void CMonster::UpdateRoot()
 {	
+}
+
+void CMonster::Move()
+{
+	switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
+	{
+	case en_MoveDir::UP:
+		_GameObjectInfo.ObjectPositionInfo.PositionY += (st_Vector2::Up()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		break;
+	case en_MoveDir::DOWN:
+		_GameObjectInfo.ObjectPositionInfo.PositionY += (st_Vector2::Down()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		break;
+	case en_MoveDir::LEFT:
+		_GameObjectInfo.ObjectPositionInfo.PositionX += (st_Vector2::Left()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		break;
+	case en_MoveDir::RIGHT:
+		_GameObjectInfo.ObjectPositionInfo.PositionX += (st_Vector2::Right()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		break;
+	}
+
+	bool CanMove = _Channel->_Map->Cango(this, _GameObjectInfo.ObjectPositionInfo.PositionX, _GameObjectInfo.ObjectPositionInfo.PositionY);
+	if (CanMove == true)
+	{
+		st_Vector2Int CollisionPosition;
+		CollisionPosition._X = _GameObjectInfo.ObjectPositionInfo.PositionX;
+		CollisionPosition._Y = _GameObjectInfo.ObjectPositionInfo.PositionY;
+
+		if (CollisionPosition._X != _GameObjectInfo.ObjectPositionInfo.CollisionPositionX
+			|| CollisionPosition._Y != _GameObjectInfo.ObjectPositionInfo.CollisionPositionY)
+		{
+			_Channel->_Map->ApplyMove(this, CollisionPosition);
+		}
+
+		switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
+		{
+		case en_MoveDir::UP:
+			switch (_GameObjectInfo.ObjectPositionInfo.State)
+			{
+			case en_CreatureState::PATROL:
+				if (_GameObjectInfo.ObjectPositionInfo.PositionY >= _PatrolPoint._Y)
+				{
+					_MonsterState = en_MonsterState::MONSTER_READY_PATROL;
+					_PatrolTick = GetTickCount64() + _PatrolTickPoint;
+					CanMove = false;
+				}
+				break;
+			case en_CreatureState::MOVING:
+				if (_GameObjectInfo.ObjectPositionInfo.PositionY >= _MovePoint._Y)
+				{
+					_MonsterState = en_MonsterState::MONSTER_READY_MOVE;
+				}
+				break;
+			}			
+			break;
+		case en_MoveDir::DOWN:
+			switch (_GameObjectInfo.ObjectPositionInfo.State)
+			{
+			case en_CreatureState::PATROL:
+				if (_GameObjectInfo.ObjectPositionInfo.PositionY <= _PatrolPoint._Y)
+				{
+					_MonsterState = en_MonsterState::MONSTER_READY_PATROL;
+					_PatrolTick = GetTickCount64() + _PatrolTickPoint;
+					CanMove = false;
+				}
+				break;
+			case en_CreatureState::MOVING:
+				if (_GameObjectInfo.ObjectPositionInfo.PositionY <= _MovePoint._Y)
+				{
+					_MonsterState = en_MonsterState::MONSTER_READY_MOVE;
+				}
+				break;
+			}			
+			break;
+		case en_MoveDir::LEFT:
+			switch (_GameObjectInfo.ObjectPositionInfo.State)
+			{
+			case en_CreatureState::PATROL:
+				if (_GameObjectInfo.ObjectPositionInfo.PositionX <= _PatrolPoint._X)
+				{
+					_MonsterState = en_MonsterState::MONSTER_READY_PATROL;
+					_PatrolTick = GetTickCount64() + _PatrolTickPoint;
+					CanMove = false;
+				}
+				break;
+			case en_CreatureState::MOVING:
+				if (_GameObjectInfo.ObjectPositionInfo.PositionX <= _MovePoint._X)
+				{
+					_MonsterState = en_MonsterState::MONSTER_READY_MOVE;
+				}
+				break;			
+			}			
+			break;
+		case en_MoveDir::RIGHT:
+			switch (_GameObjectInfo.ObjectPositionInfo.State)
+			{
+			case en_CreatureState::PATROL:
+				if (_GameObjectInfo.ObjectPositionInfo.PositionX >= _PatrolPoint._X)
+				{
+					_MonsterState = en_MonsterState::MONSTER_READY_PATROL;
+					_PatrolTick = GetTickCount64() + _PatrolTickPoint;
+					CanMove = false;
+				}
+				break;
+			case en_CreatureState::MOVING:
+				if (_GameObjectInfo.ObjectPositionInfo.PositionX >= _MovePoint._X)
+				{
+					_MonsterState = en_MonsterState::MONSTER_READY_MOVE;
+				}
+				break;
+			}			
+			break;
+		}
+	}
+	else
+	{
+		switch (_GameObjectInfo.ObjectPositionInfo.State)
+		{
+		case en_CreatureState::PATROL:
+			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+			_MonsterState = en_MonsterState::MONSTER_IDLE;
+			break;
+		case en_CreatureState::MOVING:
+			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
+			_MonsterState = en_MonsterState::MONSTER_IDLE;
+			_MoveTick = GetTickCount64() + 300;
+			break;
+		}		
+
+		PositionReset();
+	}
+
+	switch (_GameObjectInfo.ObjectPositionInfo.State)
+	{
+	case en_CreatureState::PATROL:
+		{
+			CMessage* MonsterPatrolPacket = G_ObjectManager->GameServer->MakePacketPatrol(_GameObjectInfo.ObjectId,
+				_GameObjectInfo.ObjectType,
+				CanMove,
+				_GameObjectInfo.ObjectPositionInfo,
+				_MonsterState);
+			G_ObjectManager->GameServer->SendPacketFieldOfView(this, MonsterPatrolPacket);
+			MonsterPatrolPacket->Free();
+		}		
+		break;
+	case en_CreatureState::MOVING:
+		{
+			CMessage* MonsterMovePacket = G_ObjectManager->GameServer->MakePacketResMonsterMove(_GameObjectInfo.ObjectId,
+				_GameObjectInfo.ObjectType,
+				CanMove,
+				_GameObjectInfo.ObjectPositionInfo,
+				_MonsterState);
+			G_ObjectManager->GameServer->SendPacketFieldOfView(this, MonsterMovePacket);
+			MonsterMovePacket->Free();
+		}		
+		break;	
+	}	
 }

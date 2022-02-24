@@ -120,6 +120,7 @@ protected:
 	//------------------------
 	// Attack 상태 Update
 	//------------------------
+	void ReadAttack();
 	virtual void UpdateAttack();
 	//------------------------
 	// Spell 상태 Update
@@ -141,5 +142,7 @@ protected:
 	// Root 상태 Update
 	//------------------------
 	virtual void UpdateRoot();
+
+	void Move();
 };
 
