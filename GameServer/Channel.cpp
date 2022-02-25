@@ -441,7 +441,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY = SpawnPosition._Y;
 			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX = SpawnPosition._X;
 						
-			EnterChannelPlayer->PositionReset();			
+			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX + 0.5f;
+			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY + 0.5f;			
 						
 			// 플레이어 저장
 			_ChannelPlayerArrayIndexs.Pop(&EnterChannelPlayer->_ChannelArrayIndex);
@@ -470,7 +471,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 
 			EnterChannelMonster->Init(SpawnPosition);
 						
-			EnterChannelMonster->PositionReset();
+			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.PositionX = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX + 0.5f;
+			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.PositionY = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY + 0.5f;
 
 			// 몬스터 저장
 			_ChannelMonsterArrayIndexs.Pop(&EnterChannelMonster->_ChannelArrayIndex);
