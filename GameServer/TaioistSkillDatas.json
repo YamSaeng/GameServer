@@ -1,11 +1,9 @@
 {
   "TaioistSkills": [
     {
-      "SkillLargeCategory": "SKILL_LARGE_CATEGORY_TAOIST",
       "TaioistSkillList": [
         {
-          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK",
-          "TaioistAttackSkillLit": [
+          "TaioistAttackSkillList": [
             {
               "SkillType": "SKILL_TAIOIST_DIVINE_STRIKE",
               "SkillName": "신성한일격",
@@ -48,10 +46,7 @@
               "StatusAbnormalityProbability": 100,
               "SkillThumbnailImagePath": "Textures/Spell/Icon/도사/도사 속박"
             }
-          ]
-        },
-        {
-          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_TAOIST_HEAL",
+          ],
           "TaioistHealSkillList": [
             {
               "SkillType": "SKILL_TAIOIST_HEALING_LIGHT",
@@ -77,11 +72,9 @@
               "SkillTargetEffectTime": 0.6,
               "SkillThumbnailImagePath": "Textures/Spell/Icon/도사/치유의바람"
             }
-          ]
-        },
-        {
+          ],
           "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_TAOIST_BUF",
-          "TaioistBufSkillList": [           
+          "TaioistBufSkillList": [
           ]
         }
       ]

@@ -25,15 +25,15 @@
           "SkillDistance": 1,
           "SkillThumbnailImagePath": ""
         }
-      ]
-    }
-  ],
-  "MonsterMagicSkills": [
-    {
-      "SkillLargeCategory": "SKILL_LARGE_CATEGORY_MONSTER_MAGIC",
-      "MonsterMagicList": [
+      ],
+      "MonsterMagicSkills": [
+        {
+          "SkillLargeCategory": "SKILL_LARGE_CATEGORY_MONSTER_MAGIC",
+          "MonsterMagicList": [
 
+          ]
+        }
       ]
     }
-  ]
+  ] 
 }

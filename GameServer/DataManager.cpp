@@ -10,9 +10,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 
 	for (auto& Filed : Document["Weapons"].GetArray())
 	{
-		string LargeCategory = Filed["ItemLargeCategory"].GetString();
-
-		for (auto& WeaponListFiled : Filed["List"].GetArray())
+		for (auto& WeaponListFiled : Filed["WeaponList"].GetArray())
 		{
 			string MediumCategory = WeaponListFiled["ItemMediumCategory"].GetString();
 			string SmallCategory = WeaponListFiled["ItemSmallCategory"].GetString();
@@ -60,9 +58,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 
 	for (auto& Filed : Document["Armors"].GetArray())
 	{
-		string LargeCategory = Filed["ItemLargeCategory"].GetString();
-
-		for (auto& ArmorListFiled : Filed["List"].GetArray())
+		for (auto& ArmorListFiled : Filed["ArmorList"].GetArray())
 		{
 			string MediumCategory = ArmorListFiled["ItemMediumCategory"].GetString();
 			string SmallCategory = ArmorListFiled["ItemSmallCategory"].GetString();
@@ -132,8 +128,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 	}
 
 	for (auto& Filed : Document["Consumables"].GetArray())
-	{
-		string PotionLargeCategory = Filed["ItemLargeCategory"].GetString();
+	{		
 		for (auto& PotionDataListFiled : Filed["PotionList"].GetArray())
 		{
 			string MediumCategory = PotionDataListFiled["ItemMediumCategory"].GetString();
@@ -177,8 +172,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 
 			_Consumables.insert(pair<int16, st_ConsumableData*>((int16)PotionItemData->SmallItemCategory, PotionItemData));
 		}
-
-		string SkillBookLargeCategory = Filed["ItemLargeCategory"].GetString();
+				
 		for (auto& SkillBookDataListFiled : Filed["SkillBookList"].GetArray())
 		{
 			string MediumCategory = SkillBookDataListFiled["ItemMediumCategory"].GetString();
@@ -287,7 +281,6 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 
 	for (auto& Filed : Document["Material"].GetArray())
 	{
-		string MaterialLargeCategory = Filed["ItemLargeCategory"].GetString();
 		for (auto& MaterialDataListFiled : Filed["MaterialList"].GetArray())
 		{
 			string MediumCategory = MaterialDataListFiled["ItemMediumCategory"].GetString();
@@ -1077,14 +1070,12 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 
 	for (auto& Filed : Document["PublicSkills"].GetArray())
 	{
-		string PublicSkillLargeCategory = Filed["SkillLargeCategory"].GetString();
-
 		for (auto& PublicSkillListFiled : Filed["PublicSkillList"].GetArray())
 		{
 			for (auto& PublicAttackSkillListFiled : PublicSkillListFiled["PublicAttackSkillList"].GetArray())
 			{
 				st_AttackSkillData* PublicAttackSkill = new st_AttackSkillData();
-				PublicAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEOGRY_PUBLIC;
+				PublicAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_PUBLIC;
 				PublicAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK;
 
 				string SkillType = PublicAttackSkillListFiled["SkillType"].GetString();
@@ -1119,7 +1110,7 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 			for (auto& PublicHealSkillListFiled : PublicSkillListFiled["PublicHealSkillList"].GetArray())
 			{
 				st_HealSkillData* PublicHealSkill = new st_HealSkillData();
-				PublicHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEOGRY_PUBLIC;
+				PublicHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_PUBLIC;
 				PublicHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL;
 
 				string SkillType = PublicHealSkillListFiled["SkillType"].GetString();
@@ -1149,7 +1140,7 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 			for (auto& PublicBufSkillListFiled : PublicSkillListFiled["PublicBufSkillList"].GetArray())
 			{
 				st_BufSkillData* PublicBufSkill = new st_BufSkillData();
-				PublicBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEOGRY_PUBLIC;
+				PublicBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_PUBLIC;
 				PublicBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF;
 
 				string SkillType = PublicBufSkillListFiled["SkillType"].GetString();
@@ -1217,12 +1208,8 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 
 	for (auto& Filed : Document["WarriorSkills"].GetArray())
 	{
-		string WarriorSkillLargeCategory = Filed["SkillLargeCategory"].GetString();
-
 		for (auto& WarriorSkillListFiled : Filed["WarriorSkillList"].GetArray())
 		{
-			string WarriorAttackSkillMediumCategory = WarriorSkillListFiled["SkillMediumCategory"].GetString();
-
 			for (auto& WarriorAttackSkillListFiled : WarriorSkillListFiled["WarriorAttackSkillList"].GetArray())
 			{
 				st_AttackSkillData* WarriorAttackSkill = new st_AttackSkillData();
@@ -1244,9 +1231,9 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				int8 SkillDebufMovingSpeed = (int8)WarriorAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
 				bool SkillDebufStun = WarriorAttackSkillListFiled["SkillDebufStun"].GetBool();
 				bool SkillDebufPushAway = WarriorAttackSkillListFiled["SkillDebufPushAway"].GetBool();
-				int64 SkillDamageOverTime = WarriorAttackSkillListFiled["SkillDamageOverTime"].GetInt64();
+				bool SkillDebufRoot = WarriorAttackSkillListFiled["SkillDebufRoot"].GetBool();
+				int64 SkillDamageOverTime = WarriorAttackSkillListFiled["SkillDebufDamageOverTime"].GetInt64();
 				int8 StatusAbnormalityProbability = (int8)WarriorAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
-				int SkillDebufRoot = WarriorAttackSkillListFiled["SkillDebufRoot"].GetBool();
 				string SkillImagePath = WarriorAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
 
 				if (SkillType == "SKILL_KNIGHT_FIERCE_ATTACK")
@@ -1291,14 +1278,12 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				WarriorAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_WarriorAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)WarriorAttackSkill->SkillType, WarriorAttackSkill));
-			}
-
-			string WarriorHealSkillMediumCategory = WarriorSkillListFiled["SkillMediumCategory"].GetString();
+			}			
 
 			for (auto& WarriorHealSkillListFiled : WarriorSkillListFiled["WarriorHealSkillList"].GetArray())
 			{
 				st_HealSkillData* WarriorHealSkill = new st_HealSkillData();
-				WarriorHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEOGRY_PUBLIC;
+				WarriorHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
 				WarriorHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL;
 
 				string SkillType = WarriorHealSkillListFiled["SkillType"].GetString();
@@ -1325,12 +1310,10 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				_WarriorHealSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)WarriorHealSkill->SkillType, WarriorHealSkill));
 			}
 
-			string WarriorBufSkillMediumCategory = WarriorSkillListFiled["SkillMediumCategory"].GetString();
-
 			for (auto& WarriorBufSkillListFiled : WarriorSkillListFiled["WarriorBufSkillList"].GetArray())
 			{
 				st_BufSkillData* WarriorBufSkill = new st_BufSkillData();
-				WarriorBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEOGRY_PUBLIC;
+				WarriorBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
 				WarriorBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF;
 
 				string SkillType = WarriorBufSkillListFiled["SkillType"].GetString();
@@ -1398,12 +1381,8 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 
 	for (auto& Filed : Document["ShamanSkills"].GetArray())
 	{
-		string ShamanSkillLargeCategory = Filed["SkillLargeCategory"].GetString();
-
 		for (auto& ShamanSkillListFiled : Filed["ShamanSkillList"].GetArray())
 		{
-			string ShamanAttackSkillMediumCategory = ShamanSkillListFiled["SkillMediumCategory"].GetString();
-
 			for (auto& ShmanAttackSkillListFiled : ShamanSkillListFiled["ShamanAttackSkillList"].GetArray())
 			{
 				st_AttackSkillData* ShamanAttackSkill = new st_AttackSkillData();
@@ -1425,9 +1404,9 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				int8 SkillDebufMovingSpeed = (int8)ShmanAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
 				bool SkillDebufStun = ShmanAttackSkillListFiled["SkillDebufStun"].GetBool();
 				bool SkillDebufPushAway = ShmanAttackSkillListFiled["SkillDebufPushAway"].GetBool();
-				int64 SkillDamageOverTime = ShmanAttackSkillListFiled["SkillDamageOverTime"].GetInt64();
-				int8 StatusAbnormalityProbability = (int8)ShmanAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
-				int SkillDebufRoot = ShmanAttackSkillListFiled["SkillDebufRoot"].GetBool();
+				bool SkillDebufRoot = ShmanAttackSkillListFiled["SkillDebufRoot"].GetBool();
+				int64 SkillDamageOverTime = ShmanAttackSkillListFiled["SkillDebufDamageOverTime"].GetInt64();
+				int8 StatusAbnormalityProbability = (int8)ShmanAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();				
 				string SkillImagePath = ShmanAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
 
 				if (SkillType == "SKILL_SHAMAN_FLAME_HARPOON")
@@ -1476,15 +1455,13 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_ShamanAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)ShamanAttackSkill->SkillType, ShamanAttackSkill));
-			}
-
-			string ShamanHealSkillMediumCategory = ShamanSkillListFiled["SkillMediumCategory"].GetString();
+			}			
 
 			for (auto& ShamanHealSkillListFiled : ShamanSkillListFiled["ShamanHealSkillList"].GetArray())
 			{
 				st_HealSkillData* ShamanHealSkill = new st_HealSkillData();
-				ShamanHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEOGRY_PUBLIC;
-				ShamanHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL;
+				ShamanHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
+				ShamanHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_HEAL;
 
 				string SkillType = ShamanHealSkillListFiled["SkillType"].GetString();
 				string SkillName = ShamanHealSkillListFiled["SkillName"].GetString();
@@ -1513,15 +1490,13 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_ShamanHealSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)ShamanHealSkill->SkillType, ShamanHealSkill));
-			}
-
-			string ShmanBufSkillMediumCategory = ShamanSkillListFiled["SkillMediumCategory"].GetString();
+			}			
 
 			for (auto& ShmanBufSkillListFiled : ShamanSkillListFiled["ShamanBufSkillList"].GetArray())
 			{
 				st_BufSkillData* ShamanBufSkill = new st_BufSkillData();
-				ShamanBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEOGRY_PUBLIC;
-				ShamanBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF;
+				ShamanBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
+				ShamanBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_HEAL;
 
 				string SkillType = ShmanBufSkillListFiled["SkillType"].GetString();
 				string SkillName = ShmanBufSkillListFiled["SkillName"].GetString();
@@ -1588,17 +1563,13 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 
 	for (auto& Filed : Document["TaioistSkills"].GetArray())
 	{
-		string TaioistSkillLargeCategory = Filed["SkillLargeCategory"].GetString();
-
 		for (auto& TaioistSkillListFiled : Filed["TaioistSkillList"].GetArray())
 		{
-			string TaioistAttackSkillMediumCategory = TaioistSkillListFiled["SkillMediumCategory"].GetString();
-
-			for (auto& TaioistAttackSkillListFiled : TaioistSkillListFiled["TaioistAttackSkillLit"].GetArray())
+			for (auto& TaioistAttackSkillListFiled : TaioistSkillListFiled["TaioistAttackSkillList"].GetArray())
 			{
 				st_AttackSkillData* TaioistAttackSkill = new st_AttackSkillData();
-				TaioistAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
-				TaioistAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK;
+				TaioistAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_TAOIST;
+				TaioistAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK;
 
 				string SkillType = TaioistAttackSkillListFiled["SkillType"].GetString();
 				string SkillName = TaioistAttackSkillListFiled["SkillName"].GetString();
@@ -1615,9 +1586,9 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				int8 SkillDebufMovingSpeed = (int8)TaioistAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
 				bool SkillDebufStun = TaioistAttackSkillListFiled["SkillDebufStun"].GetBool();
 				bool SkillDebufPushAway = TaioistAttackSkillListFiled["SkillDebufPushAway"].GetBool();
-				int64 SkillDamageOverTime = TaioistAttackSkillListFiled["SkillDamageOverTime"].GetInt64();
-				int8 StatusAbnormalityProbability = (int8)TaioistAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
-				int SkillDebufRoot = TaioistAttackSkillListFiled["SkillDebufRoot"].GetBool();
+				bool SkillDebufRoot = TaioistAttackSkillListFiled["SkillDebufRoot"].GetBool();
+				int64 SkillDamageOverTime = TaioistAttackSkillListFiled["SkillDebufDamageOverTime"].GetInt64();
+				int8 StatusAbnormalityProbability = (int8)TaioistAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();				
 				string SkillImagePath = TaioistAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
 
 				if (SkillType == "SKILL_TAIOIST_DIVINE_STRIKE")
@@ -1653,13 +1624,11 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				_TaioistAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)TaioistAttackSkill->SkillType, TaioistAttackSkill));
 			}
 
-			string TaioistHealSkillMediumCategory = TaioistSkillListFiled["SkillMediumCategory"].GetString();
-
 			for (auto& TaioistHealSkillListFiled : TaioistSkillListFiled["TaioistHealSkillList"].GetArray())
 			{
 				st_HealSkillData* TaioistHealSkill = new st_HealSkillData();
-				TaioistHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEOGRY_PUBLIC;
-				TaioistHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL;
+				TaioistHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_TAOIST;
+				TaioistHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_HEAL;
 
 				string SkillType = TaioistHealSkillListFiled["SkillType"].GetString();
 				string SkillName = TaioistHealSkillListFiled["SkillName"].GetString();
@@ -1694,13 +1663,11 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				_TaioistHealSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)TaioistHealSkill->SkillType, TaioistHealSkill));
 			}
 
-			string TaioistBufSkillMediumCategory = TaioistSkillListFiled["SkillMediumCategory"].GetString();
-
 			for (auto& TaioistBufSkillListFiled : TaioistSkillListFiled["TaioistBufSkillList"].GetArray())
 			{
 				st_BufSkillData* TaioistBufSkill = new st_BufSkillData();
-				TaioistBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEOGRY_PUBLIC;
-				TaioistBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF;
+				TaioistBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_TAOIST;
+				TaioistBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_BUF;
 
 				string SkillType = TaioistBufSkillListFiled["SkillType"].GetString();
 				string SkillName = TaioistBufSkillListFiled["SkillName"].GetString();
@@ -1767,17 +1734,13 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 
 	for (auto& Filed : Document["ThiefSkills"].GetArray())
 	{
-		string ThiefSkillLargeCategory = Filed["SkillLargeCategory"].GetString();
-
 		for (auto& ThiefSkillListFiled : Filed["ThiefSkillList"].GetArray())
 		{
-			string ThiefAttackSkillMediumCategory = ThiefSkillListFiled["SkillMediumCategory"].GetString();
-
 			for (auto& ThiefAttackSkillListFiled : ThiefSkillListFiled["ThiefAttackSkillList"].GetArray())
 			{
 				st_AttackSkillData* ThiefAttackSkill = new st_AttackSkillData();
-				ThiefAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
-				ThiefAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK;
+				ThiefAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_THIEF;
+				ThiefAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_ATTACK;
 
 				string SkillType = ThiefAttackSkillListFiled["SkillType"].GetString();
 				string SkillName = ThiefAttackSkillListFiled["SkillName"].GetString();
@@ -1794,9 +1757,9 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				int8 SkillDebufMovingSpeed = (int8)ThiefAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
 				bool SkillDebufStun = ThiefAttackSkillListFiled["SkillDebufStun"].GetBool();
 				bool SkillDebufPushAway = ThiefAttackSkillListFiled["SkillDebufPushAway"].GetBool();
-				int64 SkillDamageOverTime = ThiefAttackSkillListFiled["SkillDamageOverTime"].GetInt64();
+				bool SkillDebufRoot = ThiefAttackSkillListFiled["SkillDebufRoot"].GetBool();
+				int64 SkillDamageOverTime = ThiefAttackSkillListFiled["SkillDebufDamageOverTime"].GetInt64();								
 				int8 StatusAbnormalityProbability = (int8)ThiefAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
-				int SkillDebufRoot = ThiefAttackSkillListFiled["SkillDebufRoot"].GetBool();
 				string SkillImagePath = ThiefAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
 
 				if (SkillType == "SKILL_THIEF_QUICK_CUT")
@@ -1826,15 +1789,13 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				ThiefAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_ThiefAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)ThiefAttackSkill->SkillType, ThiefAttackSkill));
-			}
-
-			string ThiefHealSkillMediumCategory = ThiefSkillListFiled["SkillMediumCategory"].GetString();
+			}			
 
 			for (auto& ThiefHealSkillListFiled : ThiefSkillListFiled["ThiefHealSkillList"].GetArray())
 			{
 				st_HealSkillData* ThiefHealSkill = new st_HealSkillData();
-				ThiefHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEOGRY_PUBLIC;
-				ThiefHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL;
+				ThiefHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_THIEF;
+				ThiefHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_HEAL;
 
 				string SkillType = ThiefHealSkillListFiled["SkillType"].GetString();
 				string SkillName = ThiefHealSkillListFiled["SkillName"].GetString();
@@ -1865,13 +1826,11 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				_ThiefHealSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)ThiefHealSkill->SkillType, ThiefHealSkill));
 			}
 
-			string ThiefBufSkillMediumCategory = ThiefSkillListFiled["SkillMediumCategory"].GetString();
-
 			for (auto& ThiefBufSkillListFiled : ThiefSkillListFiled["ThiefBufSkillList"].GetArray())
 			{
 				st_BufSkillData* ThiefBufSkill = new st_BufSkillData();
-				ThiefBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEOGRY_PUBLIC;
-				ThiefBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF;
+				ThiefBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_THIEF;
+				ThiefBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_BUF;
 
 				string SkillType = ThiefBufSkillListFiled["SkillType"].GetString();
 				string SkillName = ThiefBufSkillListFiled["SkillName"].GetString();
@@ -1938,17 +1897,13 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 
 	for (auto& Filed : Document["ArcherSkills"].GetArray())
 	{
-		string ArcherSkillLargeCategory = Filed["SkillLargeCategory"].GetString();
-
 		for (auto& ArcherSkillListFiled : Filed["ArcherSkillList"].GetArray())
 		{
-			string ArcherAttackSkillMediumCategory = ArcherSkillListFiled["SkillMediumCategory"].GetString();
-
 			for (auto& ArcherAttackSkillListFiled : ArcherSkillListFiled["ArcherAttackSkillList"].GetArray())
 			{
 				st_AttackSkillData* ArcherAttackSkill = new st_AttackSkillData();
-				ArcherAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
-				ArcherAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK;
+				ArcherAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_ARCHER;
+				ArcherAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_ATTACK;
 
 				string SkillType = ArcherAttackSkillListFiled["SkillType"].GetString();
 				string SkillName = ArcherAttackSkillListFiled["SkillName"].GetString();
@@ -1965,7 +1920,7 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				int8 SkillDebufMovingSpeed = (int8)ArcherAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
 				bool SkillDebufStun = ArcherAttackSkillListFiled["SkillDebufStun"].GetBool();
 				bool SkillDebufPushAway = ArcherAttackSkillListFiled["SkillDebufPushAway"].GetBool();
-				int64 SkillDamageOverTime = ArcherAttackSkillListFiled["SkillDamageOverTime"].GetInt64();
+				int64 SkillDamageOverTime = ArcherAttackSkillListFiled["SkillDebufDamageOverTime"].GetInt64();
 				int8 StatusAbnormalityProbability = (int8)ArcherAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
 				int SkillDebufRoot = ArcherAttackSkillListFiled["SkillDebufRoot"].GetBool();
 				string SkillImagePath = ArcherAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
@@ -1997,15 +1952,13 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				ArcherAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_ArcherAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)ArcherAttackSkill->SkillType, ArcherAttackSkill));
-			}
-
-			string ArcherHealSkillMediumCategory = ArcherSkillListFiled["SkillMediumCategory"].GetString();
+			}			
 
 			for (auto& ArcherHealSkillListFiled : ArcherSkillListFiled["ArcherHealSkillList"].GetArray())
 			{
 				st_HealSkillData* ArcherHealSkill = new st_HealSkillData();
-				ArcherHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEOGRY_PUBLIC;
-				ArcherHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL;
+				ArcherHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_ARCHER;
+				ArcherHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_HEAL;
 
 				string SkillType = ArcherHealSkillListFiled["SkillType"].GetString();
 				string SkillName = ArcherHealSkillListFiled["SkillName"].GetString();
@@ -2036,13 +1989,11 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				_ArcherHealSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)ArcherHealSkill->SkillType, ArcherHealSkill));
 			}
 
-			string ArcherBufSkillMediumCategory = ArcherSkillListFiled["SkillMediumCategory"].GetString();
-
 			for (auto& ArcherBufSkillListFiled : ArcherSkillListFiled["ArcherBufSkillList"].GetArray())
 			{
 				st_BufSkillData* ArcherBufSkill = new st_BufSkillData();
-				ArcherBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEOGRY_PUBLIC;
-				ArcherBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF;
+				ArcherBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_ARCHER;
+				ArcherBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_BUF;
 
 				string SkillType = ArcherBufSkillListFiled["SkillType"].GetString();
 				string SkillName = ArcherBufSkillListFiled["SkillName"].GetString();

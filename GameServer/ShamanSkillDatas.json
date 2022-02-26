@@ -1,10 +1,8 @@
 {
   "ShamanSkills": [
     {
-      "SkillLargeCategory": "SKILL_LARGE_CATEGORY_SHMAN",
       "ShamanSkillList": [
         {
-          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK",
           "ShamanAttackSkillList": [
             {
               "SkillType": "SKILL_SHAMAN_FLAME_HARPOON",
@@ -132,16 +130,10 @@
               "StatusAbnormalityProbability": 0,
               "SkillThumbnailImagePath": "Textures/Spell/Icon/ÁÖ¼ú»ç/Áö¿ÁÀÇÈ­¿°"
             }
-          ]
-        },
-        {
-          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_SHMAN_HEAL",
-          "ShamanHealSkillList": [           
-          ]
-        },
-        {
-          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_SHMAN_BUF",
-          "ShamanBufSkillList": [           
+          ],
+          "ShamanHealSkillList": [
+          ],
+          "ShamanBufSkillList": [
           ]
         }
       ]

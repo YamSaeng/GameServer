@@ -1,8 +1,7 @@
 {
   "Weapons": [
     {
-      "ItemLargeCategory": "ITEM_LARGE_CATEGORY_WEAPON",
-      "List": [
+      "WeaponList": [
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_SWORD",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD",
@@ -20,8 +19,7 @@
   ],
   "Armors": [
     {
-      "ItemLargeCategory": "ITEM_LARGE_CATEGORY_ARMOR",
-      "List": [
+      "ArmorList": [
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_HAT",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER",
@@ -59,8 +57,7 @@
     }   
   ],
   "Consumables": [
-    {
-      "ItemLargeCategory": "ITEM_LARGE_CATEGORY_POTION",
+    {      
       "PotionList": [
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_HEAL",
@@ -73,10 +70,7 @@
           "ItemMaxCount": 99,
           "ImageFilePath": "Textures/Potion/Red Potion"
         }
-      ]
-    },      
-    {
-      "ItemLargeCategory": "ITEM_LARGE_CATEGORY_SKILLBOOK",
+      ],      
       "SkillBookList": [
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -199,12 +193,11 @@
           "ItemMaxCount": 1,
           "ImageFilePath": "Textures/SkillBook/SkillBook"
         }
-      ]      
+      ]
     }
   ],
   "Material": [
     {
-      "ItemLargeCategory": "ITEM_LARGE_CATEGORY_MATERIAL",
       "MaterialList": [
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",

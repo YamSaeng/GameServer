@@ -1,10 +1,8 @@
 {
   "ThiefSkills": [
-    {
-      "SkillLargeCategory": "SKILL_LARGE_CATEGORY_THIEF",
+    {      
       "ThiefSkillList": [
         {
-          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_THIEF_ATTACK",
           "ThiefAttackSkillList": [
             {
               "SkillType": "SKILL_THIEF_QUICK_CUT",
@@ -27,15 +25,9 @@
               "StatusAbnormalityProbability": 0,
               "SkillThumbnailImagePath": "Textures/Spell/Icon/도적/빠른베기"
             }
-          ]
-        },
-        {
-          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_THIEF_HEAL",
+          ],
           "ThiefHealSkillList": [
-          ]
-        },
-        {
-          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_THIEF_BUF",
+          ],
           "ThiefBufSkillList": [
           ]
         }

@@ -1,10 +1,8 @@
 {
   "PublicSkills": [
     {
-      "SkillLargeCategory": "SKILL_LARGE_CATEOGRY_PUBLIC",
       "PublicSkillList": [
         {
-          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK",
           "PublicAttackSkillList": [
             {
               "SkillType": "SKILL_DEFAULT_ATTACK",
@@ -18,19 +16,14 @@
               "SkillTargetEffectTime": 2.0,
               "SkillThumbnailImagePath": "Textures/Spell/Icon/일반공격"
             }
-          ]
-        },
-        {
-          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL",
-          "PublicHealSkillList": [
-          ]
-        },
-        {
-          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_PUBLIC_BUF",
+          ],
+          "PublicHealSkillList": [           
+          ],
           "PublicBufSkillList": [
             {
               "SkillType": "SKILL_SHOCK_RELEASE",
               "SkillName": "충격해제",
+              "SkillLevel": 1,
               "IncreaseMinAttackPoint": 0,
               "IncreaseMaxAttackPoint": 0,
               "IncreaseMeleeAttackSpeedPoint": 0,

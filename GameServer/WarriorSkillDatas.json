@@ -1,10 +1,8 @@
 {
   "WarriorSkills": [
     {
-      "SkillLargeCategory": "SKILL_LARGE_CATEGORY_WARRIOR",
       "WarriorSkillList": [
         {
-          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK",
           "WarriorAttackSkillList": [
             {
               "SkillType": "SKILL_KNIGHT_FIERCE_ATTACK",
@@ -14,9 +12,9 @@
               "SkillMaxDamage": 5,
               "SkillCoolTime": 2000,
               "SkillCastingTime": 0,
-              "SkillDebuf": false,
               "SkillDistance": 1,
               "SkillTargetEffectTime": 0.5,
+              "SkillDebuf": false,
               "SkillDebufTime": 0,
               "SkillDebufAttackSpeed": 0,
               "SkillDebufMovingSpeed": 0,
@@ -111,15 +109,9 @@
               "StatusAbnormalityProbability": 0,
               "SkillThumbnailImagePath": "Textures/Spell/Icon/전사/분쇄파동"
             }
-          ]
-        },
-        {
-          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_WARRIOR_HEAL",
-          "WarriorHealSkillList": [            
-          ]
-        },
-        {
-          "SkillMediumCategory": "SKILL_MEDIUM_CATEGORY_WARRIOR_BUF",
+          ],
+          "WarriorHealSkillList": [
+          ],
           "WarriorBufSkillList": [
             {
               "SkillType": "SKILL_KNIGHT_CHARGE_POSE",
