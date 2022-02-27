@@ -111,10 +111,7 @@ struct st_ObjectStatusData
 	float Speed;	
 	int32 SearchCellDistance;
 	int32 ChaseCellDistance;
-	int32 AttackRange;
-	
-	// 각 레벨 마다 제공하는 스킬 데이터
-	vector<st_SkillData> LevelSkills;
+	int32 AttackRange;	
 };
 
 struct st_LevelData

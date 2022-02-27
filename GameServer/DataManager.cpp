@@ -419,72 +419,7 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			int16 EvasionRate = PlayerWarriorCharacterFiled["EvasionRate"].GetInt();
 			int16 MeleeCriticalPoint = (int16)(PlayerWarriorCharacterFiled["MeleeCriticalPoint"].GetInt());
 			int16 MagicCriticalPoint = (int16)(PlayerWarriorCharacterFiled["MagicCriticalPoint"].GetInt());
-			float Speed = PlayerWarriorCharacterFiled["Speed"].GetFloat();
-
-			vector<st_SkillData> LevelSkills;
-
-			for (auto& PlayerWarriorSkillFiled : PlayerWarriorCharacterFiled["LevelSkillDataList"].GetArray())
-			{
-				string SkillLargeCategoryString = PlayerWarriorSkillFiled["SkillLargeCategory"].GetString();
-				string SkillMediumCategoryString = PlayerWarriorSkillFiled["SkillMediumCategory"].GetString();
-				string SkillTypeString = PlayerWarriorSkillFiled["SkillType"].GetString();
-
-				en_SkillMediumCategory SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
-				en_SkillType SkillType = en_SkillType::SKILL_TYPE_NONE;
-
-				if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK;
-				}
-				else if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK;
-				}				
-				else if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL;
-				}
-				else if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_WARRIOR_HEAL")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_HEAL;
-				}				
-				else if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_PUBLIC_BUF")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF;
-				}
-				else if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_WARRIOR_BUF")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_BUF;
-				}				
-
-				if (SkillTypeString == "SKILL_DEFAULT_ATTACK")
-				{
-					SkillType = en_SkillType::SKILL_DEFAULT_ATTACK;
-				}
-				else if (SkillTypeString == "SKILL_KNIGHT_FIERCE_ATTACK")
-				{
-					SkillType = en_SkillType::SKILL_KNIGHT_FIERCE_ATTACK;
-				}
-				else if (SkillTypeString == "SKILL_KNIGHT_CONVERSION_ATTACK")
-				{
-					SkillType = en_SkillType::SKILL_KNIGHT_CONVERSION_ATTACK;
-				}
-				else if (SkillTypeString == "SKILL_KNIGHT_SHAEHONE")
-				{
-					SkillType = en_SkillType::SKILL_KNIGHT_SHAEHONE;
-				}
-				else if (SkillTypeString == "SKILL_KNIGHT_CHOHONE")
-				{
-					SkillType = en_SkillType::SKILL_KNIGHT_CHOHONE;
-				}
-				else if (SkillTypeString == "SKILL_KNIGHT_SMASH_WAVE")
-				{
-					SkillType = en_SkillType::SKILL_KNIGHT_SMASH_WAVE;
-				}			
-
-				st_SkillData* FindLevelSkilldata = FindSkillData(SkillMediumCategory, SkillType);
-				LevelSkills.push_back(*FindLevelSkilldata);
-			}
+			float Speed = PlayerWarriorCharacterFiled["Speed"].GetFloat();			
 
 			st_ObjectStatusData* WarriorStatusData = new st_ObjectStatusData();
 
@@ -505,9 +440,7 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			WarriorStatusData->EvasionRate = EvasionRate;
 			WarriorStatusData->MeleeCriticalPoint = MeleeCriticalPoint;
 			WarriorStatusData->MagicCriticalPoint = MagicCriticalPoint;
-			WarriorStatusData->Speed = Speed;
-
-			WarriorStatusData->LevelSkills = LevelSkills;
+			WarriorStatusData->Speed = Speed;			
 
 			_WarriorStatus.insert(pair<int32, st_ObjectStatusData*>(WarriorStatusData->Level, WarriorStatusData));
 		}
@@ -536,75 +469,6 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			int16 MagicCriticalPoint = (int16)(PlayerShamanCharacterFiled["MagicCriticalPoint"].GetInt());
 			float Speed = PlayerShamanCharacterFiled["Speed"].GetFloat();
 
-			vector<st_SkillData> LevelSkills;
-
-			for (auto& PlayerShamanSkillFiled : PlayerShamanCharacterFiled["LevelSkillDataList"].GetArray())
-			{
-				string SkillLargeCategoryString = PlayerShamanSkillFiled["SkillLargeCategory"].GetString();
-				string SkillMediumCategoryString = PlayerShamanSkillFiled["SkillMediumCategory"].GetString();
-				string SkillTypeString = PlayerShamanSkillFiled["SkillType"].GetString();
-
-				en_SkillMediumCategory SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
-				en_SkillType SkillType = en_SkillType::SKILL_TYPE_NONE;
-
-				if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK;
-				}
-				else if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK;
-				}
-				else if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL;
-				}
-				else if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_SHMAN_HEAL")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_HEAL;
-				}
-				else if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_PUBLIC_BUF")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF;
-				}
-				else if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_SHMAN_BUF")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_BUF;
-				}
-
-				if (SkillTypeString == "SKILL_DEFAULT_ATTACK")
-				{
-					SkillType = en_SkillType::SKILL_DEFAULT_ATTACK;
-				}
-				else if (SkillTypeString == "SKILL_SHAMAN_FLAME_HARPOON")
-				{
-					SkillType = en_SkillType::SKILL_SHAMAN_FLAME_HARPOON;
-				}
-				else if (SkillTypeString == "SKILL_SHAMAN_ROOT")
-				{
-					SkillType = en_SkillType::SKILL_SHAMAN_ROOT;
-				}
-				else if (SkillTypeString == "SKILL_SHAMAN_ICE_CHAIN")
-				{
-					SkillType = en_SkillType::SKILL_SHAMAN_ICE_CHAIN;
-				}
-				else if (SkillTypeString == "SKILL_SHAMAN_ICE_WAVE")
-				{
-					SkillType = en_SkillType::SKILL_SHAMAN_ICE_WAVE;
-				}
-				else if (SkillTypeString == "SKILL_SHAMAN_LIGHTNING_STRIKE")
-				{
-					SkillType = en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE;
-				}
-				else if (SkillTypeString == "SKILL_SHAMAN_HELL_FIRE")
-				{
-					SkillType = en_SkillType::SKILL_SHAMAN_HELL_FIRE;
-				}
-
-				st_SkillData* FindLevelSkilldata = FindSkillData(SkillMediumCategory, SkillType);
-				LevelSkills.push_back(*FindLevelSkilldata);
-			}
-
 			st_ObjectStatusData* ShamanStatusData = new st_ObjectStatusData();
 
 			ShamanStatusData->PlayerType = en_GameObjectType::OBJECT_MAGIC_PLAYER;
@@ -625,8 +489,6 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			ShamanStatusData->MeleeCriticalPoint = MeleeCriticalPoint;
 			ShamanStatusData->MagicCriticalPoint = MagicCriticalPoint;
 			ShamanStatusData->Speed = Speed;
-
-			ShamanStatusData->LevelSkills = LevelSkills;
 
 			_ShamanStatus.insert(pair<int32, st_ObjectStatusData*>(ShamanStatusData->Level, ShamanStatusData));
 		}
@@ -655,67 +517,6 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			int16 MagicCriticalPoint = (int16)(PlayerTaioistCharacterFiled["MagicCriticalPoint"].GetInt());
 			float Speed = PlayerTaioistCharacterFiled["Speed"].GetFloat();
 
-			vector<st_SkillData> LevelSkills;
-
-			for (auto& PlayerTaioistSkillFiled : PlayerTaioistCharacterFiled["LevelSkillDataList"].GetArray())
-			{
-				string SkillLargeCategoryString = PlayerTaioistSkillFiled["SkillLargeCategory"].GetString();
-				string SkillMediumCategoryString = PlayerTaioistSkillFiled["SkillMediumCategory"].GetString();
-				string SkillTypeString = PlayerTaioistSkillFiled["SkillType"].GetString();
-
-				en_SkillMediumCategory SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
-				en_SkillType SkillType = en_SkillType::SKILL_TYPE_NONE;
-
-				if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK;
-				}
-				else if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK;
-				}
-				else if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL;
-				}
-				else if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_TAOIST_HEAL")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_HEAL;
-				}
-				else if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_PUBLIC_BUF")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF;
-				}
-				else if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_TAOIST_BUF")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_BUF;
-				}
-
-				if (SkillTypeString == "SKILL_DEFAULT_ATTACK")
-				{
-					SkillType = en_SkillType::SKILL_DEFAULT_ATTACK;
-				}
-				else if (SkillTypeString == "SKILL_TAIOIST_DIVINE_STRIKE")
-				{
-					SkillType = en_SkillType::SKILL_TAIOIST_DIVINE_STRIKE;
-				}
-				else if (SkillTypeString == "SKILL_TAIOIST_ROOT")
-				{
-					SkillType = en_SkillType::SKILL_TAIOIST_ROOT;
-				}
-				else if (SkillTypeString == "SKILL_TAIOIST_HEALING_LIGHT")
-				{
-					SkillType = en_SkillType::SKILL_TAIOIST_HEALING_LIGHT;
-				}
-				else if (SkillTypeString == "SKILL_TAIOIST_HEALING_WIND")
-				{
-					SkillType = en_SkillType::SKILL_TAIOIST_HEALING_WIND;
-				}			
-
-				st_SkillData* FindLevelSkilldata = FindSkillData(SkillMediumCategory, SkillType);
-				LevelSkills.push_back(*FindLevelSkilldata);
-			}
-
 			st_ObjectStatusData* TaioistStatusData = new st_ObjectStatusData();
 
 			TaioistStatusData->PlayerType = en_GameObjectType::OBJECT_TAIOIST_PLAYER;
@@ -736,8 +537,6 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			TaioistStatusData->MeleeCriticalPoint = MeleeCriticalPoint;
 			TaioistStatusData->MagicCriticalPoint = MagicCriticalPoint;
 			TaioistStatusData->Speed = Speed;
-
-			TaioistStatusData->LevelSkills = LevelSkills;
 
 			_TaioistStatus.insert(pair<int32, st_ObjectStatusData*>(TaioistStatusData->Level, TaioistStatusData));
 		}
@@ -766,55 +565,6 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			int16 MagicCriticalPoint = (int16)(PlayerThiefCharacterFiled["MagicCriticalPoint"].GetInt());
 			float Speed = PlayerThiefCharacterFiled["Speed"].GetFloat();
 
-			vector<st_SkillData> LevelSkills;
-
-			for (auto& PlayerThiefSkillFiled : PlayerThiefCharacterFiled["LevelSkillDataList"].GetArray())
-			{
-				string SkillLargeCategoryString = PlayerThiefSkillFiled["SkillLargeCategory"].GetString();
-				string SkillMediumCategoryString = PlayerThiefSkillFiled["SkillMediumCategory"].GetString();
-				string SkillTypeString = PlayerThiefSkillFiled["SkillType"].GetString();
-
-				en_SkillMediumCategory SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
-				en_SkillType SkillType = en_SkillType::SKILL_TYPE_NONE;
-
-				if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK;
-				}
-				else if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_THIEF_ATTACK")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_ATTACK;
-				}
-				else if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL;
-				}
-				else if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_THIEF_HEAL")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_HEAL;
-				}
-				else if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_PUBLIC_BUF")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF;
-				}
-				else if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_THIEF_BUF")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_BUF;
-				}
-
-				if (SkillTypeString == "SKILL_DEFAULT_ATTACK")
-				{
-					SkillType = en_SkillType::SKILL_DEFAULT_ATTACK;
-				}
-				else if (SkillTypeString == "SKILL_THIEF_QUICK_CUT")
-				{
-					SkillType = en_SkillType::SKILL_THIEF_QUICK_CUT;
-				}
-				
-				st_SkillData* FindLevelSkilldata = FindSkillData(SkillMediumCategory, SkillType);
-				LevelSkills.push_back(*FindLevelSkilldata);
-			}
-
 			st_ObjectStatusData* ThiefStatusData = new st_ObjectStatusData();
 
 			ThiefStatusData->PlayerType = en_GameObjectType::OBJECT_TAIOIST_PLAYER;
@@ -835,8 +585,6 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			ThiefStatusData->MeleeCriticalPoint = MeleeCriticalPoint;
 			ThiefStatusData->MagicCriticalPoint = MagicCriticalPoint;
 			ThiefStatusData->Speed = Speed;
-
-			ThiefStatusData->LevelSkills = LevelSkills;
 
 			_ThiefStatus.insert(pair<int32, st_ObjectStatusData*>(ThiefStatusData->Level, ThiefStatusData));
 		}
@@ -865,55 +613,6 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			int16 MagicCriticalPoint = (int16)(PlayerArcherCharacterFiled["MagicCriticalPoint"].GetInt());
 			float Speed = PlayerArcherCharacterFiled["Speed"].GetFloat();
 
-			vector<st_SkillData> LevelSkills;
-
-			for (auto& PlayerArcherSkillFiled : PlayerArcherCharacterFiled["LevelSkillDataList"].GetArray())
-			{
-				string SkillLargeCategoryString = PlayerArcherSkillFiled["SkillLargeCategory"].GetString();
-				string SkillMediumCategoryString = PlayerArcherSkillFiled["SkillMediumCategory"].GetString();
-				string SkillTypeString = PlayerArcherSkillFiled["SkillType"].GetString();
-
-				en_SkillMediumCategory SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
-				en_SkillType SkillType = en_SkillType::SKILL_TYPE_NONE;
-
-				if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK;
-				}
-				else if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_ARCHER_ATTACK")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_ATTACK;
-				}
-				else if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL;
-				}
-				else if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_ARCHER_HEAL")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_HEAL;
-				}
-				else if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_PUBLIC_BUF")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF;
-				}
-				else if (SkillMediumCategoryString == "SKILL_MEDIUM_CATEGORY_ARCHER_BUF")
-				{
-					SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_BUF;
-				}
-
-				if (SkillTypeString == "SKILL_DEFAULT_ATTACK")
-				{
-					SkillType = en_SkillType::SKILL_DEFAULT_ATTACK;
-				}
-				else if (SkillTypeString == "SKILL_ARCHER_SNIFING")
-				{
-					SkillType = en_SkillType::SKILL_ARCHER_SNIFING;
-				}
-
-				st_SkillData* FindLevelSkilldata = FindSkillData(SkillMediumCategory, SkillType);
-				LevelSkills.push_back(*FindLevelSkilldata);
-			}
-
 			st_ObjectStatusData* ArcherStatusData = new st_ObjectStatusData();
 
 			ArcherStatusData->PlayerType = en_GameObjectType::OBJECT_TAIOIST_PLAYER;
@@ -933,9 +632,7 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			ArcherStatusData->EvasionRate = EvasionRate;
 			ArcherStatusData->MeleeCriticalPoint = MeleeCriticalPoint;
 			ArcherStatusData->MagicCriticalPoint = MagicCriticalPoint;
-			ArcherStatusData->Speed = Speed;
-
-			ArcherStatusData->LevelSkills = LevelSkills;
+			ArcherStatusData->Speed = Speed;			
 
 			_ArcherStatus.insert(pair<int32, st_ObjectStatusData*>(ArcherStatusData->Level, ArcherStatusData));
 		}
