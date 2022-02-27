@@ -397,17 +397,18 @@ namespace SP
 	};
 
 	// 스킬 테이블에 스킬 넣기
-	class CDBGameServerSkillToSkillBox : public CDBBind<7, 0>
+	class CDBGameServerSkillToSkillBox : public CDBBind<8, 0>
 	{
 	public:
-		CDBGameServerSkillToSkillBox(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spSkillToSkillBox(?,?,?,?,?,?,?)}") {}
+		CDBGameServerSkillToSkillBox(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spSkillToSkillBox(?,?,?,?,?,?,?,?)}") {}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
-		void InIsQuickSlotUse(bool& IsQuickSlotUse) { BindParam(2, IsQuickSlotUse); }
-		void InSkillLargeCategory(int8& SkillLargeCategory) { BindParam(3, SkillLargeCategory); };
-		void InSkillMediumCategory(int8& SkillMediumCategory) { BindParam(4, SkillMediumCategory); };
-		void InSkillType(int16& SkillType) { BindParam(5, SkillType); }
-		void InSkillLevel(int8& SkillLevel) { BindParam(6, SkillLevel); }		
+		void InIsSkillLearn(bool& IsSkillLearn) { BindParam(2, IsSkillLearn); }
+		void InIsQuickSlotUse(bool& IsQuickSlotUse) { BindParam(3, IsQuickSlotUse); }
+		void InSkillLargeCategory(int8& SkillLargeCategory) { BindParam(4, SkillLargeCategory); };
+		void InSkillMediumCategory(int8& SkillMediumCategory) { BindParam(5, SkillMediumCategory); };
+		void InSkillType(int16& SkillType) { BindParam(6, SkillType); }
+		void InSkillLevel(int8& SkillLevel) { BindParam(7, SkillLevel); }		
 	};
 
 	// QuickSlotBarSlot정보 새로 생성
@@ -516,10 +517,10 @@ namespace SP
 	};
 
 	// 접속 종료시 플레이어 정보 DB에 기록
-	class CDBGameServerPlayerLeaveInfoSave : public CDBBind<23, 0>
+	class CDBGameServerLeavePlayerStatInfoSave : public CDBBind<23, 0>
 	{
 	public:
-		CDBGameServerPlayerLeaveInfoSave(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spPlayerLeaveInfoSave(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}"){}
+		CDBGameServerLeavePlayerStatInfoSave(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spPlayerLeaveInfoSave(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}"){}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
 		void InLevel(int32& Level) { BindParam(2, Level); }

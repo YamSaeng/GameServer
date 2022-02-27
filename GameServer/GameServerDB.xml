@@ -107,6 +107,7 @@
   <Table name="Skill" desc="Skill Table">
     <Column name="AccountDBId" type="BigInt" notnull ="true"/>
     <Column name="PlayerDBId" type="BigInt"  notnull ="true"/>
+	<Column name="IsSkillLearn" type="bit" notnull="true"/>
     <Column name="IsQuickSlotUse" type="bit" notnull ="true"/>
     <Column name="SkillLargeCategory" type="TinyInt" notnull="true"/>
     <Column name="SkillMediumCategory" type="TinyInt" noutnull="true"/>
@@ -590,7 +591,7 @@
     <Body>
       <![CDATA[
 	    SET NOCOUNT ON
-        SELECT IsQuickSlotUse, SkillLargeCategory, SkillMediumCategory, SkillType, SkillLevel
+        SELECT IsSkillLearn ,IsQuickSlotUse, SkillLargeCategory, SkillMediumCategory, SkillType, SkillLevel
         FROM [dbo].[Skill]
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
@@ -601,6 +602,7 @@
   <Procedure name="spSkillToSkillBox">
     <Param name="@AccountDBId" type="BigInt"/>
     <Param name="@PlayerDBId" type="BigInt"/>
+	<Param name="@IsSkillLearn" type="Bit"/>
     <Param name="@IsQuickSlotUse" type="Bit"/>
     <Param name="@SkillLargeCategory" type="TinyInt"/>
     <Param name="@SkillMediumCategory" type="TinyInt"/>
@@ -609,11 +611,11 @@
     <Body>
       <![CDATA[
 	    SET NOCOUNT ON
-        INSERT INTO [dbo].[Skill] VALUES ((@AccountDBId), (@PlayerDBId), (@IsQuickSlotUse), (@SkillLargeCategory), (@SkillMediumCategory), (@SkillType), (@SkillLevel))
+        INSERT INTO [dbo].[Skill] VALUES ((@AccountDBId), (@PlayerDBId), (@IsSkillLearn), (@IsQuickSlotUse), (@SkillLargeCategory), (@SkillMediumCategory), (@SkillType), (@SkillLevel))
       ]]>
     </Body>
-  </Procedure>
-  
+  </Procedure> 
+	
   <!-- 퀵슬롯바 테이블에 새로운 퀵슬롯바 슬롯 생성 -->
   <Procedure name="spQuickSlotBarSlotCreate">
     <Param name="@AccountDBId" type="BigInt"/>
