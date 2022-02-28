@@ -77,7 +77,9 @@ enum class en_MonsterState : int8
 	MONSTER_READY_PATROL,
 	MONSTER_PATROL,
 	MONSTER_READY_MOVE,
-	MONSTER_MOVE
+	MONSTER_MOVE,
+	MONSTER_READY_ATTACK,
+	MONSTER_ATTACK
 };
 
 enum class en_MessageType : int8
@@ -171,7 +173,7 @@ enum class en_SmallItemCategory : int16
 enum class en_SkillLargeCategory : int8
 {
 	SKILL_LARGE_CATEGORY_NONE = 0,
-	SKILL_LARGE_CATEOGRY_PUBLIC,
+	SKILL_LARGE_CATEGORY_PUBLIC,
 
 	SKILL_LARGE_CATEGORY_WARRIOR,
 
@@ -1769,6 +1771,7 @@ struct st_ItemInfo
 
 struct st_SkillInfo
 {
+	bool IsSkillLearn;       // 스킬을 배웠는지에 대한 여부
 	bool IsQuickSlotUse;	 // 퀵슬롯에 등록되어 있는지 여부
 	en_SkillLargeCategory SkillLargeCategory; // 스킬 대분류
 	en_SkillMediumCategory SkillMediumCategory; // 스킬 중분류
@@ -1783,6 +1786,7 @@ struct st_SkillInfo
 
 	st_SkillInfo()
 	{
+		IsSkillLearn = false;
 		IsQuickSlotUse = false;
 		SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_NONE;
 		SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
