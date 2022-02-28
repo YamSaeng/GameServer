@@ -23,37 +23,37 @@ public:
 	// 공용 스킬 데이터
 	//------------------------------------------------------
 	map<int16, st_AttackSkillData*> _PublicAttackSkillDatas;
-	map<int16, st_HealSkillData*> _PublicHealSkillDatas;
+	map<int16, st_TacTicSkillData*> _PublicTacTicSkillDatas;
 	map<int16, st_BufSkillData*> _PublicBufSkillDatas;
 	//------------------------------------------------------
 	// 전사 스킬 데이터
 	//------------------------------------------------------
 	map<int16, st_AttackSkillData*> _WarriorAttackSkillDatas;
-	map<int16, st_HealSkillData*> _WarriorHealSkillDatas;
+	map<int16, st_TacTicSkillData*> _WarriorTacTicSkillDatas;
 	map<int16, st_BufSkillData*> _WarriorBufSkillDatas;
 	//------------------------------------------------------
 	// 주술사 스킬 데이터
 	//------------------------------------------------------
 	map<int16, st_AttackSkillData*> _ShamanAttackSkillDatas;
-	map<int16, st_HealSkillData*> _ShamanHealSkillDatas;
+	map<int16, st_TacTicSkillData*> _ShamanTacTicSkillDatas;
 	map<int16, st_BufSkillData*> _ShamanBufSkillDatas;
 	//------------------------------------------------------
 	// 도사 스킬 데이터
 	//------------------------------------------------------
 	map<int16, st_AttackSkillData*> _TaioistAttackSkillDatas;
-	map<int16, st_HealSkillData*> _TaioistHealSkillDatas;
+	map<int16, st_TacTicSkillData*> _TaioistTacTicSkillDatas;
 	map<int16, st_BufSkillData*> _TaioistBufSkillDatas;
 	//------------------------------------------------------
 	// 도적 스킬 데이터
 	//------------------------------------------------------
 	map<int16, st_AttackSkillData*> _ThiefAttackSkillDatas;
-	map<int16, st_HealSkillData*> _ThiefHealSkillDatas;
+	map<int16, st_TacTicSkillData*> _ThiefTacTicSkillDatas;
 	map<int16, st_BufSkillData*> _ThiefBufSkillDatas;
 	//------------------------------------------------------
 	// 궁사 스킬 데이터
 	//------------------------------------------------------
 	map<int16, st_AttackSkillData*> _ArcherAttackSkillDatas;
-	map<int16, st_HealSkillData*> _ArcherHealSkillDatas;
+	map<int16, st_TacTicSkillData*> _ArcherTacTicSkillDatas;
 	map<int16, st_BufSkillData*> _ArcherBufSkillDatas;
 
 	map<int32, st_EnvironmentData*> _Environments;

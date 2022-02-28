@@ -831,7 +831,7 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				PublicHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				PublicHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
-				_PublicHealSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)PublicHealSkill->SkillType, PublicHealSkill));
+				_PublicTacTicSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)PublicHealSkill->SkillType, PublicHealSkill));
 			}
 
 			for (auto& PublicBufSkillListFiled : PublicSkillListFiled["PublicBufSkillList"].GetArray())
@@ -981,7 +981,7 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 			{
 				st_HealSkillData* WarriorHealSkill = new st_HealSkillData();
 				WarriorHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
-				WarriorHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL;
+				WarriorHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_HEAL;
 
 				string SkillType = WarriorHealSkillListFiled["SkillType"].GetString();
 				string SkillName = WarriorHealSkillListFiled["SkillName"].GetString();
@@ -1004,14 +1004,14 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				WarriorHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				WarriorHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
-				_WarriorHealSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)WarriorHealSkill->SkillType, WarriorHealSkill));
+				_WarriorTacTicSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)WarriorHealSkill->SkillType, WarriorHealSkill));
 			}
 
 			for (auto& WarriorBufSkillListFiled : WarriorSkillListFiled["WarriorBufSkillList"].GetArray())
 			{
 				st_BufSkillData* WarriorBufSkill = new st_BufSkillData();
 				WarriorBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
-				WarriorBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF;
+				WarriorBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_BUF;
 
 				string SkillType = WarriorBufSkillListFiled["SkillType"].GetString();
 				string SkillName = WarriorBufSkillListFiled["SkillName"].GetString();
@@ -1186,14 +1186,14 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				ShamanHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
-				_ShamanHealSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)ShamanHealSkill->SkillType, ShamanHealSkill));
+				_ShamanTacTicSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)ShamanHealSkill->SkillType, ShamanHealSkill));
 			}			
 
 			for (auto& ShmanBufSkillListFiled : ShamanSkillListFiled["ShamanBufSkillList"].GetArray())
 			{
 				st_BufSkillData* ShamanBufSkill = new st_BufSkillData();
 				ShamanBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
-				ShamanBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_HEAL;
+				ShamanBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_BUF;
 
 				string SkillType = ShmanBufSkillListFiled["SkillType"].GetString();
 				string SkillName = ShmanBufSkillListFiled["SkillName"].GetString();
@@ -1357,7 +1357,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				TaioistHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				TaioistHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
-				_TaioistHealSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)TaioistHealSkill->SkillType, TaioistHealSkill));
+				_TaioistTacTicSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)TaioistHealSkill->SkillType, TaioistHealSkill));
 			}
 
 			for (auto& TaioistBufSkillListFiled : TaioistSkillListFiled["TaioistBufSkillList"].GetArray())
@@ -1520,7 +1520,7 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				ThiefHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				ThiefHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
-				_ThiefHealSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)ThiefHealSkill->SkillType, ThiefHealSkill));
+				_ThiefTacTicSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)ThiefHealSkill->SkillType, ThiefHealSkill));
 			}
 
 			for (auto& ThiefBufSkillListFiled : ThiefSkillListFiled["ThiefBufSkillList"].GetArray())
@@ -1683,7 +1683,7 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				ArcherHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				ArcherHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
-				_ArcherHealSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)ArcherHealSkill->SkillType, ArcherHealSkill));
+				_ArcherTacTicSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)ArcherHealSkill->SkillType, ArcherHealSkill));
 			}
 
 			for (auto& ArcherBufSkillListFiled : ArcherSkillListFiled["ArcherBufSkillList"].GetArray())
@@ -1918,38 +1918,44 @@ st_SkillData* CDataManager::FindSkillData(en_SkillMediumCategory FindAttackSkill
 		return nullptr;
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK:
 		return (*_PublicAttackSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_TACTIC:
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL:
-		return (*_PublicHealSkillDatas.find((int16)FindSkillType)).second;
+		return (*_PublicTacTicSkillDatas.find((int16)FindSkillType)).second;
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF:
 		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK:
 		return (*_WarriorAttackSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_TACTIC:
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_HEAL:
-		return (*_WarriorHealSkillDatas.find((int16)FindSkillType)).second;
+		return (*_WarriorTacTicSkillDatas.find((int16)FindSkillType)).second;
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_BUF:
 		return (*_WarriorBufSkillDatas.find((int16)FindSkillType)).second;
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK:
 		return (*_ShamanAttackSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_TACTIC:
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_HEAL:
-		return (*_ShamanHealSkillDatas.find((int16)FindSkillType)).second;
+		return (*_ShamanTacTicSkillDatas.find((int16)FindSkillType)).second;
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_BUF:
 		return (*_ShamanBufSkillDatas.find((int16)FindSkillType)).second;
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK:
 		return (*_TaioistAttackSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_TACTIC:
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_HEAL:
-		return (*_TaioistHealSkillDatas.find((int16)FindSkillType)).second;
+		return (*_TaioistTacTicSkillDatas.find((int16)FindSkillType)).second;
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_BUF:
 		return (*_TaioistBufSkillDatas.find((int16)FindSkillType)).second;
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_ATTACK:
 		return (*_ThiefAttackSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_TACTIC:
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_HEAL:
-		return (*_ThiefHealSkillDatas.find((int16)FindSkillType)).second;
+		return (*_ThiefTacTicSkillDatas.find((int16)FindSkillType)).second;
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_BUF:
 		return (*_ThiefBufSkillDatas.find((int16)FindSkillType)).second;
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_ATTACK:
 		return (*_ArcherAttackSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_TACTIC:
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_HEAL:
-		return (*_ArcherHealSkillDatas.find((int16)FindSkillType)).second;
+		return (*_ArcherTacTicSkillDatas.find((int16)FindSkillType)).second;
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_BUF:
 		return (*_ArcherBufSkillDatas.find((int16)FindSkillType)).second;
 	}

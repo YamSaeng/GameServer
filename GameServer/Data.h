@@ -64,7 +64,12 @@ struct st_AttackSkillData : public st_SkillData
 	int8 StatusAbnormalityProbability; // 상태 이상 적용 확률
 };
 
-struct st_HealSkillData : public st_SkillData
+struct st_TacTicSkillData : public st_SkillData
+{
+
+};
+
+struct st_HealSkillData : public st_TacTicSkillData
 {
 	int32 SkillMinHealPoint; // 최소 치유량
 	int32 SkillMaxHealPoint; // 최대 치유량
