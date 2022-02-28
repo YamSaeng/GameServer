@@ -26,6 +26,8 @@
               "SkillThumbnailImagePath": "Textures/Spell/Icon/도적/빠른베기"
             }
           ],
+          "ThiefTacTicSkillList": [
+          ],
           "ThiefHealSkillList": [
           ],
           "ThiefBufSkillList": [

@@ -17,6 +17,8 @@
               "SkillThumbnailImagePath": "Textures/Spell/Icon/일반공격"
             }
           ],
+          "PublicTacTicSkillList": [
+          ],
           "PublicHealSkillList": [           
           ],
           "PublicBufSkillList": [

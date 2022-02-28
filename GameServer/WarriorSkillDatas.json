@@ -110,6 +110,8 @@
               "SkillThumbnailImagePath": "Textures/Spell/Icon/전사/분쇄파동"
             }
           ],
+          "WarriorTacTicSkillList": [
+          ],
           "WarriorHealSkillList": [
           ],
           "WarriorBufSkillList": [
