@@ -10,7 +10,7 @@
 #define LOGIN_SUCCESS 1
 #define LOGIN_FAIL 0
 
-enum class en_JobType : int16
+enum class en_GameServerJobType : int16
 {
 	AUTH_NEW_CLIENT_JOIN = 0,
 	AUTH_DISCONNECT_CLIENT = 1,
@@ -35,9 +35,9 @@ enum class en_JobType : int16
 	OBJECT_DESAPWN
 };
 
-struct st_Job
+struct st_GameServerJob
 {
-	en_JobType Type;
+	en_GameServerJobType Type;
 	int64 SessionId;
 	CGameServerMessage* Message = nullptr;
 	st_Session* Session = nullptr;

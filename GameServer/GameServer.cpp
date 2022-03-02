@@ -13,7 +13,7 @@
 #include <atlbase.h>
 
 CGameServer::CGameServer()
-{
+{		
 	//timeBeginPeriod(1);
 	_AuthThread = nullptr;
 	_UserDataBaseThread = nullptr;
@@ -37,9 +37,11 @@ CGameServer::CGameServer()
 	InitializeSRWLock(&_TimerJobLock);
 
 	// 잡 메모리풀 생성
-	_JobMemoryPool = new CMemoryPoolTLS<st_Job>();
+	_GameServerJobMemoryPool = new CMemoryPoolTLS<st_GameServerJob>();
 	// 타이머 잡 메모리풀 생성
 	_TimerJobMemoryPool = new CMemoryPoolTLS<st_TimerJob>();
+
+	_PlayerJobMemoryPool = new CMemoryPoolTLS<CPlayer::st_PlayerJob>();
 
 	// 타이머 우선순위 큐 생성
 	_TimerHeapJob = new CHeap<int64, st_TimerJob*>(2000);
@@ -109,7 +111,7 @@ unsigned __stdcall CGameServer::AuthThreadProc(void* Argument)
 
 		while (!Instance->_GameServerAuthThreadMessageQue.IsEmpty())
 		{
-			st_Job* Job = nullptr;
+			st_GameServerJob* Job = nullptr;
 
 			if (!Instance->_GameServerAuthThreadMessageQue.Dequeue(&Job))
 			{
@@ -119,14 +121,14 @@ unsigned __stdcall CGameServer::AuthThreadProc(void* Argument)
 			switch (Job->Type)
 			{
 				// 접속한 세션 대상으로 기본 정보 셋팅
-			case en_JobType::AUTH_NEW_CLIENT_JOIN:
+			case en_GameServerJobType::AUTH_NEW_CLIENT_JOIN:
 				Instance->CreateNewClient(Job->SessionId);
 				break;
 				// 접속 종료한 세션 대상으로 콘텐츠 정리
-			case en_JobType::AUTH_DISCONNECT_CLIENT:
+			case en_GameServerJobType::AUTH_DISCONNECT_CLIENT:
 				Instance->DeleteClient(Job->Session);
 				break;
-			case en_JobType::AUTH_MESSAGE:
+			case en_GameServerJobType::AUTH_MESSAGE:
 				break;
 			default:
 				Instance->Disconnect(Job->SessionId);
@@ -134,7 +136,7 @@ unsigned __stdcall CGameServer::AuthThreadProc(void* Argument)
 			}
 
 			Instance->_AuthThreadTPS++;
-			Instance->_JobMemoryPool->Free(Job);
+			Instance->_GameServerJobMemoryPool->Free(Job);
 		}
 	}
 	return 0;
@@ -150,7 +152,7 @@ unsigned __stdcall CGameServer::UserDataBaseThreadProc(void* Argument)
 
 		while (!Instance->_GameServerUserDataBaseThreadMessageQue.IsEmpty())
 		{
-			st_Job* Job = nullptr;
+			st_GameServerJob* Job = nullptr;
 
 			if (!Instance->_GameServerUserDataBaseThreadMessageQue.Dequeue(&Job))
 			{
@@ -177,39 +179,39 @@ unsigned __stdcall CGameServer::UserDataBaseThreadProc(void* Argument)
 							int16 DBMessageType;
 							*DBMessage >> DBMessageType;
 
-							switch ((en_JobType)DBMessageType)
+							switch ((en_GameServerJobType)DBMessageType)
 							{
-							case en_JobType::DATA_BASE_ACCOUNT_CHECK:
+							case en_GameServerJobType::DATA_BASE_ACCOUNT_CHECK:
 								Instance->PacketProcReqDBAccountCheck(Session->SessionId, DBMessage);
 								break;
-							case en_JobType::DATA_BASE_CHARACTER_CHECK:
+							case en_GameServerJobType::DATA_BASE_CHARACTER_CHECK:
 								Instance->PacketProcReqDBCreateCharacterNameCheck(Session->SessionId, DBMessage);
 								break;							
-							case en_JobType::DATA_BASE_LOOTING_ITEM_INVENTORY_SAVE:
+							case en_GameServerJobType::DATA_BASE_LOOTING_ITEM_INVENTORY_SAVE:
 								Instance->PacketProcReqDBLootingItemToInventorySave(Session->SessionId, DBMessage);
 								break;
-							case en_JobType::DATA_BASE_CRAFTING_ITEM_INVENTORY_SAVE:
+							case en_GameServerJobType::DATA_BASE_CRAFTING_ITEM_INVENTORY_SAVE:
 								Instance->PacketProcReqDBCraftingItemToInventorySave(Session->SessionId, DBMessage);
 								break;
-							case en_JobType::DATA_BASE_PLACE_ITEM:
+							case en_GameServerJobType::DATA_BASE_PLACE_ITEM:
 								Instance->PacketProcReqDBItemPlace(Session->SessionId, DBMessage);
 								break;						
-							case en_JobType::DATA_BASE_ITEM_USE:
+							case en_GameServerJobType::DATA_BASE_ITEM_USE:
 								Instance->PacketProcReqDBItemUpdate(Session->SessionId, DBMessage);
 								break;
-							case en_JobType::DATA_BASE_GOLD_SAVE:
+							case en_GameServerJobType::DATA_BASE_GOLD_SAVE:
 								Instance->PacketProcReqDBGoldSave(Session->SessionId, DBMessage);
 								break;
-							case en_JobType::DATA_BASE_CHARACTER_INFO_SEND:
+							case en_GameServerJobType::DATA_BASE_CHARACTER_INFO_SEND:
 								Instance->PacketProcReqDBCharacterInfoSend(Session->SessionId, DBMessage);
 								break;
-							case en_JobType::DATA_BASE_QUICK_SLOT_SAVE:
+							case en_GameServerJobType::DATA_BASE_QUICK_SLOT_SAVE:
 								Instance->PacketProcReqDBQuickSlotBarSlotSave(Session->SessionId, DBMessage);
 								break;
-							case en_JobType::DATA_BASE_QUICK_SWAP:
+							case en_GameServerJobType::DATA_BASE_QUICK_SWAP:
 								Instance->PacketProcReqDBQuickSlotSwap(Session->SessionId, DBMessage);
 								break;
-							case en_JobType::DATA_BASE_QUICK_INIT:
+							case en_GameServerJobType::DATA_BASE_QUICK_INIT:
 								Instance->PacketProcReqDBQuickSlotInit(Session->SessionId, DBMessage);
 								break;							
 							default:
@@ -230,7 +232,7 @@ unsigned __stdcall CGameServer::UserDataBaseThreadProc(void* Argument)
 				Instance->ReturnSession(Session);
 			}	
 
-			Instance->_JobMemoryPool->Free(Job);
+			Instance->_GameServerJobMemoryPool->Free(Job);
 		}		
 	}
 	return 0;
@@ -246,7 +248,7 @@ unsigned __stdcall CGameServer::WorldDataBaseThreadProc(void* Argument)
 
 		while (!Instance->_GameServerWorldDataBaseThreadMessageQue.IsEmpty())
 		{
-			st_Job* Job = nullptr;
+			st_GameServerJob* Job = nullptr;
 
 			if (!Instance->_GameServerWorldDataBaseThreadMessageQue.Dequeue(&Job))
 			{
@@ -255,7 +257,7 @@ unsigned __stdcall CGameServer::WorldDataBaseThreadProc(void* Argument)
 
 			switch (Job->Type)
 			{
-			case en_JobType::DATA_BASE_ITEM_CREATE:
+			case en_GameServerJobType::DATA_BASE_ITEM_CREATE:
 				Instance->PacketProcReqDBItemCreate(Job->Message);
 				break;
 			default:
@@ -362,7 +364,7 @@ unsigned __stdcall CGameServer::LogicThreadProc(void* Argument)
 	return 0;
 }
 
-void CGameServer::PlayerLevelUpSkillCreate(int64& AccountId, st_GameObjectInfo& NewCharacterInfo, int8& CharacterCreateSlotIndex)
+void CGameServer::PlayerSkillCreate(int64& AccountId, st_GameObjectInfo& NewCharacterInfo, int8& CharacterCreateSlotIndex)
 {	
 	// 클래스 공격 스킬 생성
 	switch (NewCharacterInfo.ObjectType)
@@ -370,33 +372,35 @@ void CGameServer::PlayerLevelUpSkillCreate(int64& AccountId, st_GameObjectInfo& 
 	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 	{
-		auto FindWarriorStatus = G_Datamanager->_WarriorStatus.find(NewCharacterInfo.ObjectStatInfo.Level);
-		st_ObjectStatusData* WarriorStatusData = (*FindWarriorStatus).second;
-
-		if (WarriorStatusData != nullptr)
+		for (auto PublicAttackSkillDataIter : G_Datamanager->_PublicAttackSkillDatas)
 		{
-			for (st_SkillData NewSkillData : WarriorStatusData->LevelSkills)
+			st_AttackSkillData* PublicAttackSkillData = PublicAttackSkillDataIter.second;
+
+			if (PublicAttackSkillData != nullptr)
 			{
+				// 일반 공격 스킬 생성 후 DB 저장
 				CDBConnection* NewSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*NewSkillCreateDBConnection);
-				
+
 				st_SkillInfo NewSkillInfo;
+				NewSkillInfo.IsSkillLearn = false;
 				NewSkillInfo.IsQuickSlotUse = false;
-				NewSkillInfo.SkillLargeCategory = NewSkillData.SkillLargeCategory;
-				NewSkillInfo.SkillMediumCategory = NewSkillData.SkillMediumCategory;
-				NewSkillInfo.SkillType = NewSkillData.SkillType;
+				NewSkillInfo.SkillLargeCategory = PublicAttackSkillData->SkillLargeCategory;
+				NewSkillInfo.SkillMediumCategory = PublicAttackSkillData->SkillMediumCategory;
+				NewSkillInfo.SkillType = PublicAttackSkillData->SkillType;
 				NewSkillInfo.SkillLevel = 1;
 
-				int8 DefaultAttackSkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
-				int8 DefaultAttackSkillMediumCategory = (int8)NewSkillInfo.SkillMediumCategory;
-				int16 DefaultAttackSkillType = (int16)NewSkillInfo.SkillType;
+				int8 AttackSkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
+				int8 AttackSkillMediumCategory = (int8)NewSkillInfo.SkillMediumCategory;
+				int16 AttackSkillType = (int16)NewSkillInfo.SkillType;
 
 				SkillToSkillBox.InAccountDBId(AccountId);
 				SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
+				SkillToSkillBox.InIsSkillLearn(NewSkillInfo.IsSkillLearn);
 				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
-				SkillToSkillBox.InSkillLargeCategory(DefaultAttackSkillLargeCategory);
-				SkillToSkillBox.InSkillMediumCategory(DefaultAttackSkillMediumCategory);
-				SkillToSkillBox.InSkillType(DefaultAttackSkillType);
+				SkillToSkillBox.InSkillLargeCategory(AttackSkillLargeCategory);
+				SkillToSkillBox.InSkillMediumCategory(AttackSkillMediumCategory);
+				SkillToSkillBox.InSkillType(AttackSkillType);
 				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
 
 				SkillToSkillBox.Execute();
@@ -404,41 +408,187 @@ void CGameServer::PlayerLevelUpSkillCreate(int64& AccountId, st_GameObjectInfo& 
 				G_DBConnectionPool->Push(en_DBConnect::GAME, NewSkillCreateDBConnection);
 			}
 		}
-		else
+
+		for (auto PublicBufSkillDataIter : G_Datamanager->_PublicBufSkillDatas)
 		{
-			CRASH("전사 스킬 생성 데이터를 찾지 못함");
-		}		
+			st_BufSkillData* PublicBufSkillData = PublicBufSkillDataIter.second;
+
+			if (PublicBufSkillData != nullptr)
+			{
+				// 일반 공격 스킬 생성 후 DB 저장
+				CDBConnection* NewSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*NewSkillCreateDBConnection);
+
+				st_SkillInfo NewSkillInfo;
+				NewSkillInfo.IsSkillLearn = false;
+				NewSkillInfo.IsQuickSlotUse = false;
+				NewSkillInfo.SkillLargeCategory = PublicBufSkillData->SkillLargeCategory;
+				NewSkillInfo.SkillMediumCategory = PublicBufSkillData->SkillMediumCategory;
+				NewSkillInfo.SkillType = PublicBufSkillData->SkillType;
+				NewSkillInfo.SkillLevel = 1;
+
+				int8 BufSkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
+				int8 BufSkillMediumCategory = (int8)NewSkillInfo.SkillMediumCategory;
+				int16 BufSkillType = (int16)NewSkillInfo.SkillType;
+
+				SkillToSkillBox.InAccountDBId(AccountId);
+				SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
+				SkillToSkillBox.InIsSkillLearn(NewSkillInfo.IsSkillLearn);
+				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
+				SkillToSkillBox.InSkillLargeCategory(BufSkillLargeCategory);
+				SkillToSkillBox.InSkillMediumCategory(BufSkillMediumCategory);
+				SkillToSkillBox.InSkillType(BufSkillType);
+				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
+
+				SkillToSkillBox.Execute();
+
+				G_DBConnectionPool->Push(en_DBConnect::GAME, NewSkillCreateDBConnection);
+			}
+		}
+
+		for (auto WarriorAttackSkillDataIter : G_Datamanager->_WarriorAttackSkillDatas)
+		{
+			st_AttackSkillData* WarriorAttackSkillData = WarriorAttackSkillDataIter.second;
+
+			if (WarriorAttackSkillData != nullptr)
+			{
+				// 전사 공격 스킬 생성 후 DB 저장
+				CDBConnection* NewSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*NewSkillCreateDBConnection);
+
+				st_SkillInfo NewSkillInfo;
+				NewSkillInfo.IsSkillLearn = false;
+				NewSkillInfo.IsQuickSlotUse = false;
+				NewSkillInfo.SkillLargeCategory = WarriorAttackSkillData->SkillLargeCategory;
+				NewSkillInfo.SkillMediumCategory = WarriorAttackSkillData->SkillMediumCategory;
+				NewSkillInfo.SkillType = WarriorAttackSkillData->SkillType;
+				NewSkillInfo.SkillLevel = 1;
+				
+				int8 AttackSkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
+				int8 AttackSkillMediumCategory = (int8)NewSkillInfo.SkillMediumCategory;
+				int16 AttackSkillType = (int16)NewSkillInfo.SkillType;
+
+				SkillToSkillBox.InAccountDBId(AccountId);
+				SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
+				SkillToSkillBox.InIsSkillLearn(NewSkillInfo.IsSkillLearn);
+				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
+				SkillToSkillBox.InSkillLargeCategory(AttackSkillLargeCategory);
+				SkillToSkillBox.InSkillMediumCategory(AttackSkillMediumCategory);
+				SkillToSkillBox.InSkillType(AttackSkillType);
+				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
+
+				SkillToSkillBox.Execute();
+
+				G_DBConnectionPool->Push(en_DBConnect::GAME, NewSkillCreateDBConnection);
+			}
+		}
+
+		for (auto WarriorTacTicSkillDataIter : G_Datamanager->_WarriorTacTicSkillDatas)
+		{
+			st_TacTicSkillData* WarriorTacTicSkillData = WarriorTacTicSkillDataIter.second;
+
+			if (WarriorTacTicSkillData != nullptr)
+			{
+				// 전사 전술 스킬 생성 후 DB 저장
+				CDBConnection* NewSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*NewSkillCreateDBConnection);
+
+				st_SkillInfo NewSkillInfo;
+				NewSkillInfo.IsSkillLearn = false;
+				NewSkillInfo.IsQuickSlotUse = false;
+				NewSkillInfo.SkillLargeCategory = WarriorTacTicSkillData->SkillLargeCategory;
+				NewSkillInfo.SkillMediumCategory = WarriorTacTicSkillData->SkillMediumCategory;
+				NewSkillInfo.SkillType = WarriorTacTicSkillData->SkillType;
+				NewSkillInfo.SkillLevel = 1;
+
+				int8 TacTicSkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
+				int8 TacTicSkillMediumCategory = (int8)NewSkillInfo.SkillMediumCategory;
+				int16 TacTicSkillType = (int16)NewSkillInfo.SkillType;
+
+				SkillToSkillBox.InAccountDBId(AccountId);
+				SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
+				SkillToSkillBox.InIsSkillLearn(NewSkillInfo.IsSkillLearn);
+				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
+				SkillToSkillBox.InSkillLargeCategory(TacTicSkillLargeCategory);
+				SkillToSkillBox.InSkillMediumCategory(TacTicSkillMediumCategory);
+				SkillToSkillBox.InSkillType(TacTicSkillType);
+				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
+
+				SkillToSkillBox.Execute();
+
+				G_DBConnectionPool->Push(en_DBConnect::GAME, NewSkillCreateDBConnection);
+			}			
+		}
+
+		for (auto WarriorBufSkillDataIter : G_Datamanager->_WarriorBufSkillDatas)
+		{
+			st_BufSkillData* WarriorBufSkillData = WarriorBufSkillDataIter.second;
+
+			if (WarriorBufSkillData != nullptr)
+			{
+				// 전사 버프 스킬 생성 후 DB 저장
+				CDBConnection* NewSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*NewSkillCreateDBConnection);
+
+				st_SkillInfo NewSkillInfo;
+				NewSkillInfo.IsSkillLearn = false;
+				NewSkillInfo.IsQuickSlotUse = false;
+				NewSkillInfo.SkillLargeCategory = WarriorBufSkillData->SkillLargeCategory;
+				NewSkillInfo.SkillMediumCategory = WarriorBufSkillData->SkillMediumCategory;
+				NewSkillInfo.SkillType = WarriorBufSkillData->SkillType;
+				NewSkillInfo.SkillLevel = 1;
+
+				int8 BufSkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
+				int8 BufSkillMediumCategory = (int8)NewSkillInfo.SkillMediumCategory;
+				int16 BufSkillType = (int16)NewSkillInfo.SkillType;
+
+				SkillToSkillBox.InAccountDBId(AccountId);
+				SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
+				SkillToSkillBox.InIsSkillLearn(NewSkillInfo.IsSkillLearn);
+				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
+				SkillToSkillBox.InSkillLargeCategory(BufSkillLargeCategory);
+				SkillToSkillBox.InSkillMediumCategory(BufSkillMediumCategory);
+				SkillToSkillBox.InSkillType(BufSkillType);
+				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
+
+				SkillToSkillBox.Execute();
+
+				G_DBConnectionPool->Push(en_DBConnect::GAME, NewSkillCreateDBConnection);
+			}
+		}
 	}
 	break;
 	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
 	{
-		auto FindShmanStatus = G_Datamanager->_ShamanStatus.find(NewCharacterInfo.ObjectStatInfo.Level);
-		st_ObjectStatusData* ShamanStatusData = (*FindShmanStatus).second;
-
-		if (ShamanStatusData != nullptr)
+		for (auto PublicAttackSkillDataIter : G_Datamanager->_PublicAttackSkillDatas)
 		{
-			for (st_SkillData NewSkillData : ShamanStatusData->LevelSkills)
+			st_AttackSkillData* PublicAttackSkillData = PublicAttackSkillDataIter.second;
+
+			if (PublicAttackSkillData != nullptr)
 			{
+				// 일반 공격 스킬 생성 후 DB 저장
 				CDBConnection* NewSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*NewSkillCreateDBConnection);
 
 				st_SkillInfo NewSkillInfo;
+				NewSkillInfo.IsSkillLearn = false;
 				NewSkillInfo.IsQuickSlotUse = false;
-				NewSkillInfo.SkillLargeCategory = NewSkillData.SkillLargeCategory;
-				NewSkillInfo.SkillMediumCategory = NewSkillData.SkillMediumCategory;
-				NewSkillInfo.SkillType = NewSkillData.SkillType;
+				NewSkillInfo.SkillLargeCategory = PublicAttackSkillData->SkillLargeCategory;
+				NewSkillInfo.SkillMediumCategory = PublicAttackSkillData->SkillMediumCategory;
+				NewSkillInfo.SkillType = PublicAttackSkillData->SkillType;
 				NewSkillInfo.SkillLevel = 1;
 
-				int8 DefaultAttackSkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
-				int8 DefaultAttackSkillMediumCategory = (int8)NewSkillInfo.SkillMediumCategory;
-				int16 DefaultAttackSkillType = (int16)NewSkillInfo.SkillType;
+				int8 AttackSkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
+				int8 AttackSkillMediumCategory = (int8)NewSkillInfo.SkillMediumCategory;
+				int16 AttackSkillType = (int16)NewSkillInfo.SkillType;
 
 				SkillToSkillBox.InAccountDBId(AccountId);
 				SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
+				SkillToSkillBox.InIsSkillLearn(NewSkillInfo.IsSkillLearn);
 				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
-				SkillToSkillBox.InSkillLargeCategory(DefaultAttackSkillLargeCategory);
-				SkillToSkillBox.InSkillMediumCategory(DefaultAttackSkillMediumCategory);
-				SkillToSkillBox.InSkillType(DefaultAttackSkillType);
+				SkillToSkillBox.InSkillLargeCategory(AttackSkillLargeCategory);
+				SkillToSkillBox.InSkillMediumCategory(AttackSkillMediumCategory);
+				SkillToSkillBox.InSkillType(AttackSkillType);
 				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
 
 				SkillToSkillBox.Execute();
@@ -446,41 +596,187 @@ void CGameServer::PlayerLevelUpSkillCreate(int64& AccountId, st_GameObjectInfo& 
 				G_DBConnectionPool->Push(en_DBConnect::GAME, NewSkillCreateDBConnection);
 			}
 		}
-		else
+
+		for (auto PublicBufSkillDataIter : G_Datamanager->_PublicBufSkillDatas)
 		{
-			CRASH("주술사 스킬 생성 데이터를 찾지 못함");
+			st_BufSkillData* PublicBufSkillData = PublicBufSkillDataIter.second;
+
+			if (PublicBufSkillData != nullptr)
+			{
+				// 일반 공격 스킬 생성 후 DB 저장
+				CDBConnection* NewSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*NewSkillCreateDBConnection);
+
+				st_SkillInfo NewSkillInfo;
+				NewSkillInfo.IsSkillLearn = false;
+				NewSkillInfo.IsQuickSlotUse = false;
+				NewSkillInfo.SkillLargeCategory = PublicBufSkillData->SkillLargeCategory;
+				NewSkillInfo.SkillMediumCategory = PublicBufSkillData->SkillMediumCategory;
+				NewSkillInfo.SkillType = PublicBufSkillData->SkillType;
+				NewSkillInfo.SkillLevel = 1;
+
+				int8 BufSkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
+				int8 BufSkillMediumCategory = (int8)NewSkillInfo.SkillMediumCategory;
+				int16 BufSkillType = (int16)NewSkillInfo.SkillType;
+
+				SkillToSkillBox.InAccountDBId(AccountId);
+				SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
+				SkillToSkillBox.InIsSkillLearn(NewSkillInfo.IsSkillLearn);
+				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
+				SkillToSkillBox.InSkillLargeCategory(BufSkillLargeCategory);
+				SkillToSkillBox.InSkillMediumCategory(BufSkillMediumCategory);
+				SkillToSkillBox.InSkillType(BufSkillType);
+				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
+
+				SkillToSkillBox.Execute();
+
+				G_DBConnectionPool->Push(en_DBConnect::GAME, NewSkillCreateDBConnection);
+			}
+		}
+
+		for (auto ShamanAttackSkillDataIter : G_Datamanager->_ShamanAttackSkillDatas)
+		{
+			st_AttackSkillData* ShamanAttackSkillData = ShamanAttackSkillDataIter.second;
+
+			if (ShamanAttackSkillData != nullptr)
+			{
+				// 주술사 공격 스킬 생성 후 DB 저장
+				CDBConnection* NewSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*NewSkillCreateDBConnection);
+
+				st_SkillInfo NewSkillInfo;
+				NewSkillInfo.IsSkillLearn = false;
+				NewSkillInfo.IsQuickSlotUse = false;
+				NewSkillInfo.SkillLargeCategory = ShamanAttackSkillData->SkillLargeCategory;
+				NewSkillInfo.SkillMediumCategory = ShamanAttackSkillData->SkillMediumCategory;
+				NewSkillInfo.SkillType = ShamanAttackSkillData->SkillType;
+				NewSkillInfo.SkillLevel = 1;
+
+				int8 AttackSkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
+				int8 AttackSkillMediumCategory = (int8)NewSkillInfo.SkillMediumCategory;
+				int16 AttackSkillType = (int16)NewSkillInfo.SkillType;
+
+				SkillToSkillBox.InAccountDBId(AccountId);
+				SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
+				SkillToSkillBox.InIsSkillLearn(NewSkillInfo.IsSkillLearn);
+				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
+				SkillToSkillBox.InSkillLargeCategory(AttackSkillLargeCategory);
+				SkillToSkillBox.InSkillMediumCategory(AttackSkillMediumCategory);
+				SkillToSkillBox.InSkillType(AttackSkillType);
+				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
+
+				SkillToSkillBox.Execute();
+
+				G_DBConnectionPool->Push(en_DBConnect::GAME, NewSkillCreateDBConnection);
+			}
+		}
+
+		for (auto ShamanTacTicSkillDataIter : G_Datamanager->_ShamanTacTicSkillDatas)
+		{
+			st_TacTicSkillData* ShamanTacTicSkillData = ShamanTacTicSkillDataIter.second;
+
+			if (ShamanTacTicSkillData != nullptr)
+			{
+				// 주술사 전술 스킬 생성 후 DB 저장
+				CDBConnection* NewSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*NewSkillCreateDBConnection);
+
+				st_SkillInfo NewSkillInfo;
+				NewSkillInfo.IsSkillLearn = false;
+				NewSkillInfo.IsQuickSlotUse = false;
+				NewSkillInfo.SkillLargeCategory = ShamanTacTicSkillData->SkillLargeCategory;
+				NewSkillInfo.SkillMediumCategory = ShamanTacTicSkillData->SkillMediumCategory;
+				NewSkillInfo.SkillType = ShamanTacTicSkillData->SkillType;
+				NewSkillInfo.SkillLevel = 1;
+
+				int8 TacTicSkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
+				int8 TacTicSkillMediumCategory = (int8)NewSkillInfo.SkillMediumCategory;
+				int16 TacTicSkillType = (int16)NewSkillInfo.SkillType;
+
+				SkillToSkillBox.InAccountDBId(AccountId);
+				SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
+				SkillToSkillBox.InIsSkillLearn(NewSkillInfo.IsSkillLearn);
+				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
+				SkillToSkillBox.InSkillLargeCategory(TacTicSkillLargeCategory);
+				SkillToSkillBox.InSkillMediumCategory(TacTicSkillMediumCategory);
+				SkillToSkillBox.InSkillType(TacTicSkillType);
+				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
+
+				SkillToSkillBox.Execute();
+
+				G_DBConnectionPool->Push(en_DBConnect::GAME, NewSkillCreateDBConnection);
+			}
+		}
+
+		for (auto ShamanBufSkillDataIter : G_Datamanager->_ShamanBufSkillDatas)
+		{
+			st_BufSkillData* ShamanBufSkillData = ShamanBufSkillDataIter.second;
+
+			if (ShamanBufSkillData != nullptr)
+			{
+				// 주술사 버프 스킬 생성 후 DB 저장
+				CDBConnection* NewSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*NewSkillCreateDBConnection);
+
+				st_SkillInfo NewSkillInfo;
+				NewSkillInfo.IsSkillLearn = false;
+				NewSkillInfo.IsQuickSlotUse = false;
+				NewSkillInfo.SkillLargeCategory = ShamanBufSkillData->SkillLargeCategory;
+				NewSkillInfo.SkillMediumCategory = ShamanBufSkillData->SkillMediumCategory;
+				NewSkillInfo.SkillType = ShamanBufSkillData->SkillType;
+				NewSkillInfo.SkillLevel = 1;
+
+				int8 BufSkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
+				int8 BufSkillMediumCategory = (int8)NewSkillInfo.SkillMediumCategory;
+				int16 BufSkillType = (int16)NewSkillInfo.SkillType;
+
+				SkillToSkillBox.InAccountDBId(AccountId);
+				SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
+				SkillToSkillBox.InIsSkillLearn(NewSkillInfo.IsSkillLearn);
+				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
+				SkillToSkillBox.InSkillLargeCategory(BufSkillLargeCategory);
+				SkillToSkillBox.InSkillMediumCategory(BufSkillMediumCategory);
+				SkillToSkillBox.InSkillType(BufSkillType);
+				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
+
+				SkillToSkillBox.Execute();
+
+				G_DBConnectionPool->Push(en_DBConnect::GAME, NewSkillCreateDBConnection);
+			}
 		}
 	}
 	break;
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 	{
-		auto FindTaioistStatus = G_Datamanager->_TaioistStatus.find(NewCharacterInfo.ObjectStatInfo.Level);
-		st_ObjectStatusData* TaioistStatusData = (*FindTaioistStatus).second;
-
-		if (TaioistStatusData != nullptr)
+		for (auto PublicAttackSkillDataIter : G_Datamanager->_PublicAttackSkillDatas)
 		{
-			for (st_SkillData NewSkillData : TaioistStatusData->LevelSkills)
+			st_AttackSkillData* PublicAttackSkillData = PublicAttackSkillDataIter.second;
+
+			if (PublicAttackSkillData != nullptr)
 			{
+				// 일반 공격 스킬 생성 후 DB 저장
 				CDBConnection* NewSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*NewSkillCreateDBConnection);
 
 				st_SkillInfo NewSkillInfo;
+				NewSkillInfo.IsSkillLearn = false;
 				NewSkillInfo.IsQuickSlotUse = false;
-				NewSkillInfo.SkillLargeCategory = NewSkillData.SkillLargeCategory;
-				NewSkillInfo.SkillMediumCategory = NewSkillData.SkillMediumCategory;
-				NewSkillInfo.SkillType = NewSkillData.SkillType;
+				NewSkillInfo.SkillLargeCategory = PublicAttackSkillData->SkillLargeCategory;
+				NewSkillInfo.SkillMediumCategory = PublicAttackSkillData->SkillMediumCategory;
+				NewSkillInfo.SkillType = PublicAttackSkillData->SkillType;
 				NewSkillInfo.SkillLevel = 1;
 
-				int8 DefaultAttackSkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
-				int8 DefaultAttackSkillMediumCategory = (int8)NewSkillInfo.SkillMediumCategory;
-				int16 DefaultAttackSkillType = (int16)NewSkillInfo.SkillType;
+				int8 AttackSkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
+				int8 AttackSkillMediumCategory = (int8)NewSkillInfo.SkillMediumCategory;
+				int16 AttackSkillType = (int16)NewSkillInfo.SkillType;
 
 				SkillToSkillBox.InAccountDBId(AccountId);
 				SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
+				SkillToSkillBox.InIsSkillLearn(NewSkillInfo.IsSkillLearn);
 				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
-				SkillToSkillBox.InSkillLargeCategory(DefaultAttackSkillLargeCategory);
-				SkillToSkillBox.InSkillMediumCategory(DefaultAttackSkillMediumCategory);
-				SkillToSkillBox.InSkillType(DefaultAttackSkillType);
+				SkillToSkillBox.InSkillLargeCategory(AttackSkillLargeCategory);
+				SkillToSkillBox.InSkillMediumCategory(AttackSkillMediumCategory);
+				SkillToSkillBox.InSkillType(AttackSkillType);
 				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
 
 				SkillToSkillBox.Execute();
@@ -488,94 +784,164 @@ void CGameServer::PlayerLevelUpSkillCreate(int64& AccountId, st_GameObjectInfo& 
 				G_DBConnectionPool->Push(en_DBConnect::GAME, NewSkillCreateDBConnection);
 			}
 		}
-		else
+
+		for (auto PublicBufSkillDataIter : G_Datamanager->_PublicBufSkillDatas)
 		{
-			CRASH("도사 스킬 생성 데이터를 찾지 못함");
+			st_BufSkillData* PublicBufSkillData = PublicBufSkillDataIter.second;
+
+			if (PublicBufSkillData != nullptr)
+			{
+				// 일반 공격 스킬 생성 후 DB 저장
+				CDBConnection* NewSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*NewSkillCreateDBConnection);
+
+				st_SkillInfo NewSkillInfo;
+				NewSkillInfo.IsSkillLearn = false;
+				NewSkillInfo.IsQuickSlotUse = false;
+				NewSkillInfo.SkillLargeCategory = PublicBufSkillData->SkillLargeCategory;
+				NewSkillInfo.SkillMediumCategory = PublicBufSkillData->SkillMediumCategory;
+				NewSkillInfo.SkillType = PublicBufSkillData->SkillType;
+				NewSkillInfo.SkillLevel = 1;
+
+				int8 BufSkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
+				int8 BufSkillMediumCategory = (int8)NewSkillInfo.SkillMediumCategory;
+				int16 BufSkillType = (int16)NewSkillInfo.SkillType;
+
+				SkillToSkillBox.InAccountDBId(AccountId);
+				SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
+				SkillToSkillBox.InIsSkillLearn(NewSkillInfo.IsSkillLearn);
+				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
+				SkillToSkillBox.InSkillLargeCategory(BufSkillLargeCategory);
+				SkillToSkillBox.InSkillMediumCategory(BufSkillMediumCategory);
+				SkillToSkillBox.InSkillType(BufSkillType);
+				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
+
+				SkillToSkillBox.Execute();
+
+				G_DBConnectionPool->Push(en_DBConnect::GAME, NewSkillCreateDBConnection);
+			}
+		}
+
+		for (auto TaioistAttackSkillDataIter : G_Datamanager->_TaioistAttackSkillDatas)
+		{
+			st_AttackSkillData* TaioistAttackSkillData = TaioistAttackSkillDataIter.second;
+
+			if (TaioistAttackSkillData != nullptr)
+			{
+				// 도사 공격 스킬 생성 후 DB 저장
+				CDBConnection* NewSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*NewSkillCreateDBConnection);
+
+				st_SkillInfo NewSkillInfo;
+				NewSkillInfo.IsSkillLearn = false;
+				NewSkillInfo.IsQuickSlotUse = false;
+				NewSkillInfo.SkillLargeCategory = TaioistAttackSkillData->SkillLargeCategory;
+				NewSkillInfo.SkillMediumCategory = TaioistAttackSkillData->SkillMediumCategory;
+				NewSkillInfo.SkillType = TaioistAttackSkillData->SkillType;
+				NewSkillInfo.SkillLevel = 1;
+
+				int8 AttackSkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
+				int8 AttackSkillMediumCategory = (int8)NewSkillInfo.SkillMediumCategory;
+				int16 AttackSkillType = (int16)NewSkillInfo.SkillType;
+
+				SkillToSkillBox.InAccountDBId(AccountId);
+				SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
+				SkillToSkillBox.InIsSkillLearn(NewSkillInfo.IsSkillLearn);
+				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
+				SkillToSkillBox.InSkillLargeCategory(AttackSkillLargeCategory);
+				SkillToSkillBox.InSkillMediumCategory(AttackSkillMediumCategory);
+				SkillToSkillBox.InSkillType(AttackSkillType);
+				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
+
+				SkillToSkillBox.Execute();
+
+				G_DBConnectionPool->Push(en_DBConnect::GAME, NewSkillCreateDBConnection);
+			}
+		}
+
+		for (auto TaioistTacTicSkillDataIter : G_Datamanager->_TaioistTacTicSkillDatas)
+		{
+			st_TacTicSkillData* TaioistTacTicSkillData = TaioistTacTicSkillDataIter.second;
+
+			if (TaioistTacTicSkillData != nullptr)
+			{
+				// 도사 전술 스킬 생성 후 DB 저장
+				CDBConnection* NewSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*NewSkillCreateDBConnection);
+
+				st_SkillInfo NewSkillInfo;
+				NewSkillInfo.IsSkillLearn = false;
+				NewSkillInfo.IsQuickSlotUse = false;
+				NewSkillInfo.SkillLargeCategory = TaioistTacTicSkillData->SkillLargeCategory;
+				NewSkillInfo.SkillMediumCategory = TaioistTacTicSkillData->SkillMediumCategory;
+				NewSkillInfo.SkillType = TaioistTacTicSkillData->SkillType;
+				NewSkillInfo.SkillLevel = 1;
+
+				int8 TacTicSkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
+				int8 TacTicSkillMediumCategory = (int8)NewSkillInfo.SkillMediumCategory;
+				int16 TacTicSkillType = (int16)NewSkillInfo.SkillType;
+
+				SkillToSkillBox.InAccountDBId(AccountId);
+				SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
+				SkillToSkillBox.InIsSkillLearn(NewSkillInfo.IsSkillLearn);
+				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
+				SkillToSkillBox.InSkillLargeCategory(TacTicSkillLargeCategory);
+				SkillToSkillBox.InSkillMediumCategory(TacTicSkillMediumCategory);
+				SkillToSkillBox.InSkillType(TacTicSkillType);
+				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
+
+				SkillToSkillBox.Execute();
+
+				G_DBConnectionPool->Push(en_DBConnect::GAME, NewSkillCreateDBConnection);
+			}
+		}
+
+		for (auto TacTicBufSkillDataIter : G_Datamanager->_TaioistBufSkillDatas)
+		{
+			st_BufSkillData* TaioistBufSkillData = TacTicBufSkillDataIter.second;
+
+			if (TaioistBufSkillData != nullptr)
+			{
+				// 주술사 버프 스킬 생성 후 DB 저장
+				CDBConnection* NewSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*NewSkillCreateDBConnection);
+
+				st_SkillInfo NewSkillInfo;
+				NewSkillInfo.IsSkillLearn = false;
+				NewSkillInfo.IsQuickSlotUse = false;
+				NewSkillInfo.SkillLargeCategory = TaioistBufSkillData->SkillLargeCategory;
+				NewSkillInfo.SkillMediumCategory = TaioistBufSkillData->SkillMediumCategory;
+				NewSkillInfo.SkillType = TaioistBufSkillData->SkillType;
+				NewSkillInfo.SkillLevel = 1;
+
+				int8 BufSkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
+				int8 BufSkillMediumCategory = (int8)NewSkillInfo.SkillMediumCategory;
+				int16 BufSkillType = (int16)NewSkillInfo.SkillType;
+
+				SkillToSkillBox.InAccountDBId(AccountId);
+				SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
+				SkillToSkillBox.InIsSkillLearn(NewSkillInfo.IsSkillLearn);
+				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
+				SkillToSkillBox.InSkillLargeCategory(BufSkillLargeCategory);
+				SkillToSkillBox.InSkillMediumCategory(BufSkillMediumCategory);
+				SkillToSkillBox.InSkillType(BufSkillType);
+				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
+
+				SkillToSkillBox.Execute();
+
+				G_DBConnectionPool->Push(en_DBConnect::GAME, NewSkillCreateDBConnection);
+			}
 		}
 	}	
 	break;
 	case en_GameObjectType::OBJECT_THIEF_PLAYER:
 	{
-		auto FindThiefStatus = G_Datamanager->_ThiefStatus.find(NewCharacterInfo.ObjectStatInfo.Level);
-		st_ObjectStatusData* ThiefStatusData = (*FindThiefStatus).second;
-
-		if (ThiefStatusData != nullptr)
-		{
-			for (st_SkillData NewSkillData : ThiefStatusData->LevelSkills)
-			{
-				CDBConnection* NewSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*NewSkillCreateDBConnection);
-
-				st_SkillInfo NewSkillInfo;
-				NewSkillInfo.IsQuickSlotUse = false;
-				NewSkillInfo.SkillLargeCategory = NewSkillData.SkillLargeCategory;
-				NewSkillInfo.SkillMediumCategory = NewSkillData.SkillMediumCategory;
-				NewSkillInfo.SkillType = NewSkillData.SkillType;
-				NewSkillInfo.SkillLevel = 1;
-
-				int8 DefaultAttackSkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
-				int8 DefaultAttackSkillMediumCategory = (int8)NewSkillInfo.SkillMediumCategory;
-				int16 DefaultAttackSkillType = (int16)NewSkillInfo.SkillType;
-
-				SkillToSkillBox.InAccountDBId(AccountId);
-				SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
-				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
-				SkillToSkillBox.InSkillLargeCategory(DefaultAttackSkillLargeCategory);
-				SkillToSkillBox.InSkillMediumCategory(DefaultAttackSkillMediumCategory);
-				SkillToSkillBox.InSkillType(DefaultAttackSkillType);
-				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
-
-				SkillToSkillBox.Execute();
-
-				G_DBConnectionPool->Push(en_DBConnect::GAME, NewSkillCreateDBConnection);
-			}
-		}
-		else
-		{
-			CRASH("도적 스킬 생성 데이터를 찾지 못함");
-		}
+		
 	}
 	break;
 	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
 	{
-		auto FindArcherStatus = G_Datamanager->_ArcherStatus.find(NewCharacterInfo.ObjectStatInfo.Level);
-		st_ObjectStatusData* ArcherStatusData = (*FindArcherStatus).second;
 
-		if (ArcherStatusData != nullptr)
-		{
-			for (st_SkillData NewSkillData : ArcherStatusData->LevelSkills)
-			{
-				CDBConnection* NewSkillCreateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-				SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*NewSkillCreateDBConnection);
-
-				st_SkillInfo NewSkillInfo;
-				NewSkillInfo.IsQuickSlotUse = false;
-				NewSkillInfo.SkillLargeCategory = NewSkillData.SkillLargeCategory;
-				NewSkillInfo.SkillMediumCategory = NewSkillData.SkillMediumCategory;
-				NewSkillInfo.SkillType = NewSkillData.SkillType;
-				NewSkillInfo.SkillLevel = 1;
-
-				int8 DefaultAttackSkillLargeCategory = (int8)NewSkillInfo.SkillLargeCategory;
-				int8 DefaultAttackSkillMediumCategory = (int8)NewSkillInfo.SkillMediumCategory;
-				int16 DefaultAttackSkillType = (int16)NewSkillInfo.SkillType;
-
-				SkillToSkillBox.InAccountDBId(AccountId);
-				SkillToSkillBox.InPlayerDBId(NewCharacterInfo.ObjectId);
-				SkillToSkillBox.InIsQuickSlotUse(NewSkillInfo.IsQuickSlotUse);
-				SkillToSkillBox.InSkillLargeCategory(DefaultAttackSkillLargeCategory);
-				SkillToSkillBox.InSkillMediumCategory(DefaultAttackSkillMediumCategory);
-				SkillToSkillBox.InSkillType(DefaultAttackSkillType);
-				SkillToSkillBox.InSkillLevel(NewSkillInfo.SkillLevel);
-
-				SkillToSkillBox.Execute();
-
-				G_DBConnectionPool->Push(en_DBConnect::GAME, NewSkillCreateDBConnection);
-			}
-		}
-		else
-		{
-			CRASH("궁사 스킬 생성 데이터를 찾지 못함");
-		}
 	}
 	break;
 	default:
@@ -832,13 +1198,13 @@ void CGameServer::PacketProcReqLogin(int64 SessionID, CMessage* Message)
 				break;
 			}
 			
-			st_Job* DBAccountCheckJob = _JobMemoryPool->Alloc();
+			st_GameServerJob* DBAccountCheckJob = _GameServerJobMemoryPool->Alloc();
 			DBAccountCheckJob->SessionId = Session->SessionId;
 
 			CGameServerMessage* DBAccountCheckMessage = CGameServerMessage::GameServerMessageAlloc();
 			DBAccountCheckMessage->Clear();
 
-			*DBAccountCheckMessage << (int16)en_JobType::DATA_BASE_ACCOUNT_CHECK;
+			*DBAccountCheckMessage << (int16)en_GameServerJobType::DATA_BASE_ACCOUNT_CHECK;
 
 			InterlockedIncrement64(&Session->DBReserveCount);
 			Session->DBQue.Enqueue(DBAccountCheckMessage);
@@ -883,13 +1249,13 @@ void CGameServer::PacketProcReqCreateCharacter(int64 SessionID, CMessage* Messag
 		byte CharacterCreateSlotIndex;
 		*Message >> CharacterCreateSlotIndex;					
 
-		st_Job* DBCharacterCreateJob = _JobMemoryPool->Alloc();
+		st_GameServerJob* DBCharacterCreateJob = _GameServerJobMemoryPool->Alloc();
 		DBCharacterCreateJob->SessionId = Session->SessionId;
 
 		CGameServerMessage* DBReqChatacerCreateMessage = CGameServerMessage::GameServerMessageAlloc();
 		DBReqChatacerCreateMessage->Clear();
 
-		*DBReqChatacerCreateMessage << (int16)en_JobType::DATA_BASE_CHARACTER_CHECK;
+		*DBReqChatacerCreateMessage << (int16)en_GameServerJobType::DATA_BASE_CHARACTER_CHECK;
 		*DBReqChatacerCreateMessage << ReqGameObjectType;
 		*DBReqChatacerCreateMessage << CharacterCreateSlotIndex;
 
@@ -1055,13 +1421,13 @@ void CGameServer::PacketProcReqCharacterInfo(int64 SessionID, CMessage* Message)
 			}
 		}
 
-		st_Job* DBCharacterInfoSendJob = _JobMemoryPool->Alloc();
+		st_GameServerJob* DBCharacterInfoSendJob = _GameServerJobMemoryPool->Alloc();
 		DBCharacterInfoSendJob->SessionId = Session->SessionId;
 
 		CGameServerMessage* DBCharacterInfoSendMessage = CGameServerMessage::GameServerMessageAlloc();
 		DBCharacterInfoSendMessage->Clear();
 
-		*DBCharacterInfoSendMessage << (int16)en_JobType::DATA_BASE_CHARACTER_INFO_SEND;
+		*DBCharacterInfoSendMessage << (int16)en_GameServerJobType::DATA_BASE_CHARACTER_INFO_SEND;
 
 		InterlockedIncrement64(&Session->DBReserveCount);
 		Session->DBQue.Enqueue(DBCharacterInfoSendMessage);
@@ -1160,7 +1526,8 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 						
 			MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = MoveDir;
 			if (MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::IDLE
-				|| MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::SPAWN_IDLE)
+				|| MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::SPAWN_IDLE
+				|| MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::SPELL)
 			{
 				MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
 				Session->ReqMoveTime = GetTickCount64();
@@ -1245,8 +1612,8 @@ void CGameServer::PacketProcReqMoveStop(int64 SessionID, CMessage* Message)
 			float PositionX;
 			*Message >> PositionX;
 			float PositionY;
-			*Message >> PositionY;								
-
+			*Message >> PositionY;							
+						
 			CMessage* ResMoveStopPacket = MakePacketResMoveStop(Session->AccountId,
 				MyPlayer->_GameObjectInfo.ObjectId,
 				MyPlayer->_GameObjectInfo.ObjectPositionInfo);
@@ -1320,542 +1687,20 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 			int16 ReqSkillType;
 			*Message >> ReqSkillType;
 
-			// 공격 방향 캐스팅
-			en_MoveDir MoveDir = (en_MoveDir)ReqMoveDir;
-			MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = MoveDir;
-
-			st_Vector2Int FrontCell;
-			vector<CGameObject*> Targets;
-			CGameObject* Target = nullptr;
-			CMessage* ResSyncPositionPacket = nullptr;
-
-			// 퀵바에 등록되지 않은 스킬을 요청했을 경우
-			if ((en_SkillType)ReqSkillType == en_SkillType::SKILL_TYPE_NONE)
-			{
-				break;
-			}
-
-			// 요청한 스킬이 스킬창에 있는지 확인
-			st_SkillInfo* FindSkill = MyPlayer->_SkillBox.FindSkill((en_SkillType)ReqSkillType);
-			if (FindSkill != nullptr && FindSkill->CanSkillUse == true)
-			{
-				// 스킬 지정
-				MyPlayer->_SkillType = (en_SkillType)ReqSkillType;
-				// 공격 상태로 변경
-				MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;
-				// 클라에게 알려줘서 공격 애니메이션 출력
-				CMessage* ResObjectStateChangePacket = MakePacketResChangeObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
-				SendPacketFieldOfView(Session, ResObjectStateChangePacket, true);				
-				ResObjectStateChangePacket->Free();
-
-				// 타겟 위치 확인
-				switch ((en_SkillType)ReqSkillType)
-				{
-				case en_SkillType::SKILL_TYPE_NONE:
-					break;
-				case en_SkillType::SKILL_DEFAULT_ATTACK:
-					FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
-					Target = MyPlayer->_Channel->_Map->Find(FrontCell);
-					if (Target != nullptr)
-					{
-						Targets.push_back(Target);
-					}
-					break;
-				case en_SkillType::SKILL_KNIGHT_CHOHONE:
-				{
-					if (MyPlayer->_SelectTarget != nullptr)
-					{
-						st_Vector2Int TargetPosition = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType)->GetCellPosition();
-						st_Vector2Int MyPosition = MyPlayer->GetCellPosition();
-						st_Vector2Int Direction = TargetPosition - MyPosition;
-										  
-						int32 Distance = st_Vector2Int::Distance(TargetPosition, MyPosition);
-
-						if (Distance <= 4)
-						{
-							Target = MyPlayer->_Channel->_Map->Find(TargetPosition);
-							if (Target != nullptr)
-							{
-								Targets.push_back(Target);
-
-								st_Vector2Int MyFrontCellPotision = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
-
-								MyPlayer->_Channel->_Map->ApplyMove(Target, MyFrontCellPotision);
-								ResSyncPositionPacket = MakePacketResSyncPosition(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectPositionInfo);
-								SendPacketFieldOfView(Session, ResSyncPositionPacket);								
-								ResSyncPositionPacket->Free();
-
-								//Target->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::STUN;
-								//CMessage* ResObjectStateChange = MakePacketResChangeObjectState(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectPositionInfo.MoveDir, Target->_GameObjectInfo.ObjectType, Target->_GameObjectInfo.ObjectPositionInfo.State);
-								//SendPacketFieldOfView(Session, ResObjectStateChange, true);
-								//ResObjectStateChange->Free();
-							}
-						}
-						else
-						{
-							wstring ErrorNonSelectObjectString;
-
-							WCHAR ErrorMessage[100] = { 0 };
-
-							wsprintf(ErrorMessage, L"[%s] 대상과의 거리가 너무 멉니다. [거리 : %d ]", FindSkill->SkillName.c_str(), Distance);
-							ErrorNonSelectObjectString = ErrorMessage;
-
-							CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_DISTANCE, ErrorNonSelectObjectString);
-							SendPacket(MyPlayer->_SessionId, ResErrorPacket);
-							ResErrorPacket->Free(); 
-						}
-					}
-					else
-					{
-						wstring ErrorDistance;
-
-						WCHAR ErrorMessage[100] = { 0 };
-
-						wsprintf(ErrorMessage, L"[%s] 대상을 선택하고 사용해야 합니다.", FindSkill->SkillName.c_str());
-						ErrorDistance = ErrorMessage;
-
-						CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorDistance);
-						SendPacket(MyPlayer->_SessionId, ResErrorPacket);
-						ResErrorPacket->Free();
-					}
-				}
-				break;
-				case en_SkillType::SKILL_KNIGHT_SHAEHONE:
-				{
-					if (MyPlayer->_SelectTarget != nullptr)
-					{
-						st_Vector2Int TargetPosition = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType)->GetCellPosition();
-						st_Vector2Int MyPosition = MyPlayer->GetCellPosition();
-						st_Vector2Int Direction = TargetPosition - MyPosition;
-
-						// 타겟이 어느 방향에 있는지 확인한다.
-						en_MoveDir Dir = st_Vector2Int::GetDirectionFromVector(Direction);
-						// 타겟과의 거리를 구한다.
-						int32 Distance = st_Vector2Int::Distance(TargetPosition, MyPosition);
-
-						G_Logger->WriteStdOut(en_Color::YELLOW, L"Distance %d\n", Distance);
-						if (Distance <= 4)
-						{
-							Target = MyPlayer->_Channel->_Map->Find(TargetPosition);
-							st_Vector2Int MovePosition;
-							if (Target != nullptr)
-							{
-								Targets.push_back(Target);
-
-								switch (Dir)
-								{
-								case en_MoveDir::UP:
-									MovePosition = Target->GetFrontCellPosition(en_MoveDir::DOWN, 1);
-									MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::UP;
-									break;
-								case en_MoveDir::DOWN:
-									MovePosition = Target->GetFrontCellPosition(en_MoveDir::UP, 1);
-									MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
-									break;
-								case en_MoveDir::LEFT:
-									MovePosition = Target->GetFrontCellPosition(en_MoveDir::RIGHT, 1);
-									MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::LEFT;
-									break;
-								case en_MoveDir::RIGHT:
-									MovePosition = Target->GetFrontCellPosition(en_MoveDir::LEFT, 1);
-									MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::RIGHT;
-									break;
-								default:
-									break;
-								}
-
-								MyPlayer->_Channel->_Map->ApplyMove(MyPlayer, MovePosition);
-
-								ResSyncPositionPacket = MakePacketResSyncPosition(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
-								SendPacketFieldOfView(Session, ResSyncPositionPacket, true);
-								ResSyncPositionPacket->Free();
-							}
-						}
-						else
-						{
-							wstring ErrorDistance;
-
-							WCHAR ErrorMessage[100] = { 0 };
-
-							wsprintf(ErrorMessage, L"[%s] 대상과의 거리가 너무 멉니다. [거리 : %d ]", FindSkill->SkillName.c_str(), Distance);
-							ErrorDistance = ErrorMessage;
-
-							CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_DISTANCE, ErrorDistance);
-							SendPacket(MyPlayer->_SessionId, ResErrorPacket);
-							ResErrorPacket->Free();
-						}
-					}
-					else
-					{
-						wstring ErrorNonSelectObjectString;
-
-						WCHAR ErrorMessage[100] = { 0 };
-
-						wsprintf(ErrorMessage, L"[%s] 대상을 선택하고 사용해야 합니다.", FindSkill->SkillName.c_str());
-						ErrorNonSelectObjectString = ErrorMessage;
-
-						CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorNonSelectObjectString);
-						SendPacket(MyPlayer->_SessionId, ResErrorPacket);
-						ResErrorPacket->Free();
-					}
-				}
-				break;
-				case en_SkillType::SKILL_KNIGHT_SMASH_WAVE:
-				{
-					vector<st_Vector2Int> TargetPositions;
-
-					TargetPositions = MyPlayer->GetAroundCellPositions(MyPlayer->GetCellPosition(), 1);
-					for (st_Vector2Int TargetPosition : TargetPositions)
-					{
-						CGameObject* Target = MyPlayer->_Channel->_Map->Find(TargetPosition);
-						if (Target != nullptr)
-						{
-							Targets.push_back(Target);
-						}
-					}
-
-					// 이펙트 출력
-					CMessage* ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_SMASH_WAVE, 2.0f);
-					SendPacketFieldOfView(Session, ResEffectPacket, true);
-					ResEffectPacket->Free();
-				}
-				break;
-				default:
-					break;
-				}
-
-				wstring SkillTypeString;
-				wchar_t SkillTypeMessage[64] = L"0";
-				wchar_t SkillDamageMessage[64] = L"0";
-
-				// 타겟 데미지 적용
-				for (CGameObject* Target : Targets)
-				{
-					if (Target->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE)
-					{
-						st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)FindSkill;
-
-						// 크리티컬 판단
-						random_device Seed;
-						default_random_engine Eng(Seed());
-
-						float CriticalPoint = MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint / 1000.0f;
-						bernoulli_distribution CriticalCheck(CriticalPoint);
-						bool IsCritical = CriticalCheck(Eng);
-
-						// 데미지 판단
-						mt19937 Gen(Seed());
-						uniform_int_distribution<int> DamageChoiceRandom(
-							MyPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage + MyPlayer->_Equipment._WeaponMinDamage + AttackSkillInfo->SkillMinDamage,
-							MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage + MyPlayer->_Equipment._WeaponMaxDamage + AttackSkillInfo->SkillMaxDamage);
-						int32 ChoiceDamage = DamageChoiceRandom(Gen);
-
-						int32 CriticalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
-
-						float DefenceRate = (float)pow(((float)(200 - Target->_GameObjectInfo.ObjectStatInfo.Defence)) / 20, 2) * 0.01f;
-
-						int32 FinalDamage = CriticalDamage * DefenceRate;
-
-						bool TargetIsDead = Target->OnDamaged(MyPlayer, FinalDamage);
-						if (TargetIsDead == true)
-						{
-							CMonster* TargetMonster = (CMonster*)Target;
-							if (TargetMonster != nullptr)
-							{
-								MyPlayer->_Experience.CurrentExperience += TargetMonster->_GetExpPoint;
-								MyPlayer->_Experience.CurrentExpRatio = ((float)MyPlayer->_Experience.CurrentExperience) / MyPlayer->_Experience.RequireExperience;
-
-								if (MyPlayer->_Experience.CurrentExpRatio >= 1.0f)
-								{
-									// 레벨 증가
-									MyPlayer->_GameObjectInfo.ObjectStatInfo.Level += 1;
-
-									// 해당 레벨에 
-									st_ObjectStatusData NewCharacterStatus;
-									st_LevelData LevelData;
-
-									switch (MyPlayer->_GameObjectInfo.ObjectType)
-									{
-									case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-										{
-											auto FindStatus = G_Datamanager->_WarriorStatus.find(MyPlayer->_GameObjectInfo.ObjectStatInfo.Level);
-											if (FindStatus == G_Datamanager->_WarriorStatus.end())
-											{
-												CRASH("레벨 스테이터스 찾지 못함");
-											}
-
-											NewCharacterStatus = *(*FindStatus).second;
-
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
-										}
-										break;
-									case en_GameObjectType::OBJECT_MAGIC_PLAYER:
-										{
-											auto FindStatus = G_Datamanager->_ShamanStatus.find(MyPlayer->_GameObjectInfo.ObjectStatInfo.Level);
-											if (FindStatus == G_Datamanager->_WarriorStatus.end())
-											{
-												CRASH("레벨 데이터 찾지 못함");
-											}
-
-											NewCharacterStatus = *(*FindStatus).second;
-
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
-										}
-										break;
-									case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
-										{
-											auto FindStatus = G_Datamanager->_TaioistStatus.find(MyPlayer->_GameObjectInfo.ObjectStatInfo.Level);
-											if (FindStatus == G_Datamanager->_TaioistStatus.end())
-											{
-												CRASH("레벨 데이터 찾지 못함");
-											}
-
-											NewCharacterStatus = *(*FindStatus).second;
-
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
-										}
-										break;
-									case en_GameObjectType::OBJECT_THIEF_PLAYER:
-										{
-											auto FindStatus = G_Datamanager->_ThiefStatus.find(MyPlayer->_GameObjectInfo.ObjectStatInfo.Level);
-											if (FindStatus == G_Datamanager->_ThiefStatus.end())
-											{
-												CRASH("레벨 데이터 찾지 못함");
-											}
-
-											NewCharacterStatus = *(*FindStatus).second;
-
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
-										}
-										break;
-									case en_GameObjectType::OBJECT_ARCHER_PLAYER:
-										{
-											auto FindStatus = G_Datamanager->_ArcherStatus.find(MyPlayer->_GameObjectInfo.ObjectStatInfo.Level);
-											if (FindStatus == G_Datamanager->_ArcherStatus.end())
-											{
-												CRASH("레벨 데이터 찾지 못함");
-											}
-
-											NewCharacterStatus = *(*FindStatus).second;
-
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
-											MyPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
-										}
-										break;
-									default:
-										break;
-									}
-
-									CGameServerMessage* ResObjectStatChangeMessage = MakePacketResChangeObjectStat(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectStatInfo);
-									SendPacket(Session->SessionId, ResObjectStatChangeMessage);
-									ResObjectStatChangeMessage->Free();
-
-									auto FindLevelData = G_Datamanager->_LevelDatas.find(MyPlayer->_GameObjectInfo.ObjectStatInfo.Level);
-									if (FindLevelData == G_Datamanager->_LevelDatas.end())
-									{
-										CRASH("레벨 데이터 찾지 못함");
-									}
-
-									LevelData = *(*FindLevelData).second;
-
-									MyPlayer->_Experience.CurrentExperience = 0;
-									MyPlayer->_Experience.RequireExperience = LevelData.RequireExperience;
-									MyPlayer->_Experience.TotalExperience = LevelData.TotalExperience;
-								}
-
-								CGameServerMessage* ResMonsterGetExpMessage = MakePacketExperience(MyPlayer->_AccountId, MyPlayer->_GameObjectInfo.ObjectId, TargetMonster->_GetExpPoint, MyPlayer->_Experience.CurrentExperience, MyPlayer->_Experience.RequireExperience, MyPlayer->_Experience.TotalExperience);
-								SendPacket(Session->SessionId, ResMonsterGetExpMessage);
-								ResMonsterGetExpMessage->Free();
-							}
-						}
-
-						en_EffectType HitEffectType;
-
-						// 시스템 메세지 생성
-						switch ((en_SkillType)ReqSkillType)
-						{
-						case en_SkillType::SKILL_TYPE_NONE:
-							CRASH("SkillType None");
-							break;
-						case en_SkillType::SKILL_DEFAULT_ATTACK:
-							wsprintf(SkillTypeMessage, L"%s가 일반공격을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
-							HitEffectType = en_EffectType::EFFECT_NORMAL_ATTACK_TARGET_HIT;
-							break;
-						case en_SkillType::SKILL_KNIGHT_CHOHONE:
-							wsprintf(SkillTypeMessage, L"%s가 초혼비무를 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
-							HitEffectType = en_EffectType::EFFECT_CHOHONE_TARGET_HIT;
-							break;
-						case en_SkillType::SKILL_KNIGHT_SHAEHONE:
-							wsprintf(SkillTypeMessage, L"%s가 쇄혼비무를 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
-							HitEffectType = en_EffectType::EFFECT_SHAHONE_TARGET_HIT;
-							break;
-						case en_SkillType::SKILL_KNIGHT_SMASH_WAVE:
-							wsprintf(SkillTypeMessage, L"%s가 분쇄파동을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
-							HitEffectType = en_EffectType::EFFECT_NORMAL_ATTACK_TARGET_HIT;
-							break;
-						default:
-							break;
-						}
-
-						SkillTypeString = SkillTypeMessage;
-						SkillTypeString = IsCritical ? L"치명타! " + SkillTypeString : SkillTypeString;
-
-						// 데미지 시스템 메세지 전송
-						CMessage* ResSkillSystemMessagePacket = MakePacketResChattingBoxMessage(MyPlayer->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, IsCritical ? st_Color::Red() : st_Color::White(), SkillTypeString);
-						SendPacketFieldOfView(Session, ResSkillSystemMessagePacket, true);
-						ResSkillSystemMessagePacket->Free();
-
-						// 공격 응답 메세지 전송
-						CMessage* ResMyAttackOtherPacket = MakePacketResAttack(MyPlayer->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectId, (en_SkillType)ReqSkillType, FinalDamage, IsCritical);
-						SendPacketFieldOfView(Session, ResMyAttackOtherPacket, true);						
-						ResMyAttackOtherPacket->Free();
-
-						// 이펙트 출력
-						CMessage* ResEffectPacket = MakePacketEffect(Target->_GameObjectInfo.ObjectId, HitEffectType, AttackSkillInfo->SkillTargetEffectTime);
-						SendPacketFieldOfView(Session, ResEffectPacket, true);
-						ResEffectPacket->Free();
-
-						// 스탯 변경 메세지 전송
-						CMessage* ResChangeObjectStat = MakePacketResChangeObjectStat(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectStatInfo);
-						SendPacketFieldOfView(Session, ResChangeObjectStat, true);
-						ResChangeObjectStat->Free();
-					}
-				}				
-
-				SkillCoolTimeTimerJobCreate(MyPlayer, 500, FindSkill, en_TimerJobType::TIMER_MELEE_ATTACK_END, QuickSlotBarIndex, QuickSlotBarSlotIndex);
-
-				float SkillCoolTime = FindSkill->SkillCoolTime / 1000.0f;
-
-				// 클라에게 쿨타임 표시
-				CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(MyPlayer->_GameObjectInfo.ObjectId, QuickSlotBarIndex, QuickSlotBarSlotIndex, SkillCoolTime, 1.0f);
-				SendPacket(Session->SessionId, ResCoolTimeStartPacket);
-				ResCoolTimeStartPacket->Free();
-
-				// 쿨타임 시간 동안 스킬 사용 못하게 막음
-				FindSkill->CanSkillUse = false;
-
-				// 스킬 쿨타임 얻어옴
-				// 스킬 쿨타임 스킬쿨타임 잡 등록
-				st_TimerJob* SkillCoolTimeTimerJob = _TimerJobMemoryPool->Alloc();
-				SkillCoolTimeTimerJob->TimerJobExecTick = GetTickCount64() + FindSkill->SkillCoolTime;
-				SkillCoolTimeTimerJob->SessionId = Session->SessionId;
-				SkillCoolTimeTimerJob->TimerJobType = en_TimerJobType::TIMER_SKILL_COOLTIME_END;
-
-				CGameServerMessage* ResCoolTimeEndMessage = CGameServerMessage::GameServerMessageAlloc();
-				if (ResCoolTimeEndMessage == nullptr)
-				{
-					return;
-				}
-
-				ResCoolTimeEndMessage->Clear();
-
-				*ResCoolTimeEndMessage << (int16)FindSkill->SkillType;
-				SkillCoolTimeTimerJob->TimerJobMessage = ResCoolTimeEndMessage;
-
-				AcquireSRWLockExclusive(&_TimerJobLock);
-				_TimerHeapJob->InsertHeap(SkillCoolTimeTimerJob->TimerJobExecTick, SkillCoolTimeTimerJob);
-				ReleaseSRWLockExclusive(&_TimerJobLock);
-
-				SetEvent(_TimerThreadWakeEvent);
-			}
-			else
-			{
-				wstring ErrorSkillCoolTime;
-
-				WCHAR ErrorMessage[100] = { 0 };
-
-				wsprintf(ErrorMessage, L"[%s] 재사용 대기시간이 완료되지 않았습니다.", FindSkill->SkillName.c_str());
-				ErrorSkillCoolTime = ErrorMessage;
-
-				CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_SKILL_COOLTIME, ErrorSkillCoolTime);
-				SendPacket(MyPlayer->_SessionId, ResErrorPacket);
-				ResErrorPacket->Free();
-				break;
-			}
+			CPlayer::st_PlayerJob* PlayerMeleeAttackJob = _PlayerJobMemoryPool->Alloc();			
+			PlayerMeleeAttackJob->Type = CPlayer::en_PlayerJobType::PLAYER_MELEE_JOB;
+
+			CGameServerMessage* PlayerMeleeAttackMessage = CGameServerMessage::GameServerMessageAlloc();
+			PlayerMeleeAttackMessage->Clear();
+
+			*PlayerMeleeAttackMessage << QuickSlotBarIndex;
+			*PlayerMeleeAttackMessage << QuickSlotBarSlotIndex;
+			*PlayerMeleeAttackMessage << ReqMoveDir;
+			*PlayerMeleeAttackMessage << ReqSkillType;
+
+			PlayerMeleeAttackJob->Message = PlayerMeleeAttackMessage;
+			
+			MyPlayer->_PlayerJobQue.Enqueue(PlayerMeleeAttackJob);		
 		}
 	} while (0);
 
@@ -1909,8 +1754,8 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 				}
 			}		
 
-			int8 QuickSlotBarindex;
-			*Message >> QuickSlotBarindex;
+			int8 QuickSlotBarIndex;
+			*Message >> QuickSlotBarIndex;
 
 			int8 QuickSlotBarSlotIndex;
 			*Message >> QuickSlotBarSlotIndex;
@@ -1923,176 +1768,20 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 			int16 ReqSkillType;
 			*Message >> ReqSkillType;
 
-			vector<CGameObject*> Targets;
+			CPlayer::st_PlayerJob* PlayerMagicJob = _PlayerJobMemoryPool->Alloc();			
+			PlayerMagicJob->Type = CPlayer::en_PlayerJobType::PLAYER_MAGIC_JOB;
 
-			CGameObject* FindGameObject = nullptr;
+			CGameServerMessage* PlayerMagicMessage = CGameServerMessage::GameServerMessageAlloc();
+			PlayerMagicMessage->Clear();
 
-			float SpellCastingTime = 0.0f;
+			*PlayerMagicMessage << QuickSlotBarIndex;
+			*PlayerMagicMessage << QuickSlotBarSlotIndex;	
+			*PlayerMagicMessage << ReqMoveDir;
+			*PlayerMagicMessage << ReqSkillType;
 
-			int64 SpellEndTime = 0;
+			PlayerMagicJob->Message = PlayerMagicMessage;
 
-			// 요청한 스킬이 스킬창에 있는지 확인
-			st_SkillInfo* FindSkill = MyPlayer->_SkillBox.FindSkill((en_SkillType)ReqSkillType);
-			if (FindSkill != nullptr && FindSkill->CanSkillUse == true)
-			{
-				CMessage* ResEffectPacket = nullptr;
-				CMessage* ResMagicPacket = nullptr;
-				CMessage* ResErrorPacket = nullptr;
-
-				// 스킬 타입 확인
-				switch ((en_SkillType)ReqSkillType)
-				{
-					// 돌격 자세
-				case en_SkillType::SKILL_KNIGHT_CHARGE_POSE:
-					MyPlayer->_SpellTick = GetTickCount64() + FindSkill->SkillCastingTime;
-					SpellCastingTime = FindSkill->SkillCastingTime / 1000.0f;
-
-					Targets.push_back(MyPlayer);
-
-					// 이펙트 출력
-					ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_CHARGE_POSE, 2.8f);
-					SendPacketFieldOfView(Session, ResEffectPacket, true);					
-					ResEffectPacket->Free();
-					break;
-				case en_SkillType::SKILL_SHAMAN_FLAME_HARPOON:
-				case en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE:
-				case en_SkillType::SKILL_SHAMAN_HELL_FIRE:
-				case en_SkillType::SKILL_SHAMAN_ROOT:
-				case en_SkillType::SKILL_SHAMAN_ICE_CHAIN:
-				case en_SkillType::SKILL_SHAMAN_ICE_WAVE:
-				case en_SkillType::SKILL_TAIOIST_DIVINE_STRIKE:
-				case en_SkillType::SKILL_TAIOIST_ROOT:
-					if (MyPlayer->_SelectTarget != nullptr)
-					{
-						MyPlayer->_SpellTick = GetTickCount64() + FindSkill->SkillCastingTime;
-						SpellCastingTime = FindSkill->SkillCastingTime / 1000.0f;
-
-						// 타겟이 ObjectManager에 존재하는지 확인
-						FindGameObject = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType);
-						if (FindGameObject != nullptr)
-						{
-							Targets.push_back(FindGameObject);
-						}
-
-						// 스펠창 시작
-						ResMagicPacket = MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId, true, (en_SkillType)ReqSkillType, SpellCastingTime);
-						SendPacketFieldOfView(Session, ResMagicPacket, true);						
-						ResMagicPacket->Free();
-
-						MyPlayer->_SkillType = (en_SkillType)ReqSkillType;
-					}
-					else
-					{
-						wstring ErrorNonSelectObjectString;
-
-						WCHAR ErrorMessage[100] = { 0 };
-
-						wsprintf(ErrorMessage, L"[%s] 대상을 선택해야합니다.", FindSkill->SkillName.c_str());
-						ErrorNonSelectObjectString = ErrorMessage;
-
-						ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorNonSelectObjectString);
-						SendPacket(MyPlayer->_SessionId, ResErrorPacket);
-						ResErrorPacket->Free();
-					}
-					break;
-				case en_SkillType::SKILL_TAIOIST_HEALING_LIGHT: // 치유의 빛
-					MyPlayer->_SpellTick = GetTickCount64() + FindSkill->SkillCastingTime;
-
-					SpellCastingTime = FindSkill->SkillCastingTime / 1000.0f;
-
-					if (MyPlayer->_SelectTarget != nullptr)
-					{
-						FindGameObject = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType);
-						if (FindGameObject != nullptr)
-						{
-							Targets.push_back(FindGameObject);
-						}
-					}
-					else
-					{
-						Targets.push_back(MyPlayer);
-
-						wstring ErrorNonSelectObjectString;
-
-						WCHAR ErrorMessage[100] = { 0 };
-
-						wsprintf(ErrorMessage, L"[%s] 대상을 선택하지 않아서 자신에게 사용합니다.", FindSkill->SkillName.c_str());
-						ErrorNonSelectObjectString = ErrorMessage;
-
-						ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorNonSelectObjectString);
-						SendPacket(MyPlayer->_SessionId, ResErrorPacket);
-						ResErrorPacket->Free();
-					}
-
-					// 스펠창 시작
-					ResMagicPacket = MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId, true, (en_SkillType)ReqSkillType, SpellCastingTime);
-					SendPacketFieldOfView(Session, ResMagicPacket, true);					
-					ResMagicPacket->Free();
-
-					MyPlayer->_SkillType = (en_SkillType)ReqSkillType;
-					break;
-				case en_SkillType::SKILL_TAIOIST_HEALING_WIND: // 치유의 바람
-					if (MyPlayer->_SelectTarget != nullptr)
-					{
-						MyPlayer->_SpellTick = GetTickCount64() + FindSkill->SkillCastingTime;
-
-						SpellCastingTime = FindSkill->SkillCastingTime / 1000.0f;
-
-						FindGameObject = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType);
-						if (FindGameObject != nullptr)
-						{
-							Targets.push_back(FindGameObject);
-						}
-
-						// 스펠창 시작
-						ResMagicPacket = MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId, true, (en_SkillType)ReqSkillType, SpellCastingTime);
-						SendPacketFieldOfView(Session, ResMagicPacket, true);						
-						ResMagicPacket->Free();
-
-						MyPlayer->_SkillType = (en_SkillType)ReqSkillType;
-					}
-					else
-					{
-
-					}
-					break;
-				case en_SkillType::SKILL_SHOCK_RELEASE:
-					break;
-				}
-
-				if (Targets.size() >= 1)
-				{
-					MyPlayer->SetTarget(Targets[0]);
-
-					MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPELL;
-
-					// 마법 스킬 모션 출력
-					CMessage* ResObjectStateChangePacket = MakePacketResChangeObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
-					SendPacketFieldOfView(Session, ResObjectStateChangePacket, true);					
-					ResObjectStateChangePacket->Free();					
-
-					SkillCoolTimeTimerJobCreate(MyPlayer, FindSkill->SkillCastingTime, FindSkill, en_TimerJobType::TIMER_SPELL_END, QuickSlotBarindex, QuickSlotBarSlotIndex);
-				}
-			}
-			else
-			{
-				if (FindSkill == nullptr)
-				{
-					break;
-				}
-
-				wstring ErrorSkillCoolTime;
-
-				WCHAR ErrorMessage[100] = { 0 };
-
-				wsprintf(ErrorMessage, L"[%s] 재사용 대기시간이 완료되지 않았습니다.", FindSkill->SkillName.c_str());
-				ErrorSkillCoolTime = ErrorMessage;
-
-				CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_SKILL_COOLTIME, ErrorSkillCoolTime);
-				SendPacket(MyPlayer->_SessionId, ResErrorPacket);
-				ResErrorPacket->Free();
-				break;
-			}
+			MyPlayer->_PlayerJobQue.Enqueue(PlayerMagicJob);			
 		} while (0);
 	}
 
@@ -2153,21 +1842,7 @@ void CGameServer::PacketProcReqMagicCancel(int64 SessionId, CMessage* Message)
 				CMessage* ResMagicCancelPacket = MakePacketMagicCancel(MyPlayer->_AccountId, MyPlayer->_GameObjectInfo.ObjectId);
 				SendPacketFieldOfView(Session, ResMagicCancelPacket, true);				
 				ResMagicCancelPacket->Free();
-			}
-			else
-			{
-				// 시전중인 스킬이 존재하지 않음
-				wstring ErrorCastingSkillNotExist;
-
-				WCHAR ErrorMessage[100] = { 0 };
-
-				wsprintf(ErrorMessage, L"스킬 시전 중이 아닙니다.");
-				ErrorCastingSkillNotExist = ErrorMessage;
-
-				CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_SKILL_COOLTIME, ErrorCastingSkillNotExist);
-				SendPacket(SessionId, ResErrorPacket);
-				ResErrorPacket->Free();
-			}
+			}			
 		}
 	} while (0);
 
@@ -2530,13 +2205,13 @@ void CGameServer::PacketProcReqItemPlace(int64 SessionId, CMessage* Message)
 				}
 			}				
 
-			st_Job* DBPlaceItemJob = _JobMemoryPool->Alloc();
+			st_GameServerJob* DBPlaceItemJob = _GameServerJobMemoryPool->Alloc();
 			DBPlaceItemJob->SessionId = Session->SessionId;
 
 			CGameServerMessage* DBPlaceItemMessage = CGameServerMessage::GameServerMessageAlloc();
 			DBPlaceItemMessage->Clear();
 
-			*DBPlaceItemMessage << (int16)en_JobType::DATA_BASE_PLACE_ITEM;
+			*DBPlaceItemMessage << (int16)en_GameServerJobType::DATA_BASE_PLACE_ITEM;
 			DBPlaceItemMessage->InsertData(Message->GetFrontBufferPtr(), Message->GetUseBufferSize());
 			Message->MoveReadPosition(Message->GetUseBufferSize());
 
@@ -2598,13 +2273,13 @@ void CGameServer::PacketProcReqQuickSlotSave(int64 SessionId, CMessage* Message)
 				}
 			}			
 			
-			st_Job* DBQuickSlotSaveJob = _JobMemoryPool->Alloc();
+			st_GameServerJob* DBQuickSlotSaveJob = _GameServerJobMemoryPool->Alloc();
 			DBQuickSlotSaveJob->SessionId = MyPlayer->_SessionId;
 
 			CGameServerMessage* DBQuickSlotSaveMessage = CGameServerMessage::GameServerMessageAlloc();
 			DBQuickSlotSaveMessage->Clear();
 
-			*DBQuickSlotSaveMessage << (int16)en_JobType::DATA_BASE_QUICK_SLOT_SAVE;
+			*DBQuickSlotSaveMessage << (int16)en_GameServerJobType::DATA_BASE_QUICK_SLOT_SAVE;
 			*DBQuickSlotSaveMessage << AccountId;
 			*DBQuickSlotSaveMessage << PlayerDBId;
 			DBQuickSlotSaveMessage->InsertData(Message->GetFrontBufferPtr(), Message->GetUseBufferSize());
@@ -2668,13 +2343,13 @@ void CGameServer::PacketProcReqQuickSlotSwap(int64 SessionId, CMessage* Message)
 				}
 			}			
 			
-			st_Job* DBQuickSlotSwapJob = _JobMemoryPool->Alloc();			
+			st_GameServerJob* DBQuickSlotSwapJob = _GameServerJobMemoryPool->Alloc();			
 			DBQuickSlotSwapJob->SessionId = MyPlayer->_SessionId;
 
 			CGameServerMessage* DBQuickSlotSwapMessage = CGameServerMessage::GameServerMessageAlloc();
 			DBQuickSlotSwapMessage->Clear();
 
-			*DBQuickSlotSwapMessage << (int16)en_JobType::DATA_BASE_QUICK_SWAP;
+			*DBQuickSlotSwapMessage << (int16)en_GameServerJobType::DATA_BASE_QUICK_SWAP;
 			*DBQuickSlotSwapMessage << AccountId;
 			*DBQuickSlotSwapMessage << PlayerDBId;
 			DBQuickSlotSwapMessage->InsertData(Message->GetFrontBufferPtr(), Message->GetUseBufferSize());
@@ -2738,13 +2413,13 @@ void CGameServer::PacketProcReqQuickSlotInit(int64 SessionId, CMessage* Message)
 				}
 			}					
 
-			st_Job* DBQuickSlotInitJob = _JobMemoryPool->Alloc();			
+			st_GameServerJob* DBQuickSlotInitJob = _GameServerJobMemoryPool->Alloc();			
 			DBQuickSlotInitJob->SessionId = MyPlayer->_SessionId;
 
 			CGameServerMessage* DBQuickSlotInitMessage = CGameServerMessage::GameServerMessageAlloc();
 			DBQuickSlotInitMessage->Clear();
 
-			*DBQuickSlotInitMessage << (int16)en_JobType::DATA_BASE_QUICK_INIT;
+			*DBQuickSlotInitMessage << (int16)en_GameServerJobType::DATA_BASE_QUICK_INIT;
 			*DBQuickSlotInitMessage << AccountId;
 			*DBQuickSlotInitMessage << PlayerDBId;
 			DBQuickSlotInitMessage->InsertData(Message->GetFrontBufferPtr(), Message->GetUseBufferSize());
@@ -2859,7 +2534,7 @@ void CGameServer::PacketProcReqCraftingConfirm(int64 SessionId, CMessage* Messag
 			}						
 
 			// 재료템 DB에 개수 업데이트와 제작한 아이템 저장하기 위한 Job
-			st_Job* DBInventorySaveJob = _JobMemoryPool->Alloc();			
+			st_GameServerJob* DBInventorySaveJob = _GameServerJobMemoryPool->Alloc();			
 			DBInventorySaveJob->SessionId = Session->SessionId;
 
 			CGameServerMessage* DBCraftingItemSaveMessage = CGameServerMessage::GameServerMessageAlloc();
@@ -2870,7 +2545,7 @@ void CGameServer::PacketProcReqCraftingConfirm(int64 SessionId, CMessage* Messag
 
 			DBCraftingItemSaveMessage->Clear();
 
-			*DBCraftingItemSaveMessage << (int16)en_JobType::DATA_BASE_CRAFTING_ITEM_INVENTORY_SAVE;
+			*DBCraftingItemSaveMessage << (int16)en_GameServerJobType::DATA_BASE_CRAFTING_ITEM_INVENTORY_SAVE;
 			// 타겟 ObjectId
 			*DBCraftingItemSaveMessage << MyPlayer->_GameObjectInfo.ObjectId;
 
@@ -3138,8 +2813,8 @@ void CGameServer::PacketProcReqItemUse(int64 SessionId, CMessage* Message)
 
 			InterlockedIncrement64(&Session->IOBlock->IOCount);
 
-			st_Job* DBItemEquipJob = _JobMemoryPool->Alloc();
-			DBItemEquipJob->Type = en_JobType::DATA_BASE_ITEM_USE;
+			st_GameServerJob* DBItemEquipJob = _GameServerJobMemoryPool->Alloc();
+			DBItemEquipJob->Type = en_GameServerJobType::DATA_BASE_ITEM_USE;
 			DBItemEquipJob->SessionId = MyPlayer->_SessionId;
 
 			CGameServerMessage* DBItemEquipMessage = CGameServerMessage::GameServerMessageAlloc();
@@ -3243,13 +2918,13 @@ void CGameServer::PacketProcReqItemLooting(int64 SessionId, CMessage* Message)
 					}
 					
 					// DB 인벤토리에 저장하기 위해 Job 생성
-					st_Job* DBInventorySaveJob = _JobMemoryPool->Alloc();
+					st_GameServerJob* DBInventorySaveJob = _GameServerJobMemoryPool->Alloc();
 					DBInventorySaveJob->SessionId = Session->SessionId;
 
 					CGameServerMessage* DBInventoryItemSaveMessage = CGameServerMessage::GameServerMessageAlloc();
 					DBInventoryItemSaveMessage->Clear();
 
-					*DBInventoryItemSaveMessage << (int16)en_JobType::DATA_BASE_LOOTING_ITEM_INVENTORY_SAVE;
+					*DBInventoryItemSaveMessage << (int16)en_GameServerJobType::DATA_BASE_LOOTING_ITEM_INVENTORY_SAVE;
 					// 타겟 ObjectId
 					*DBInventoryItemSaveMessage << TargetPlayer->_GameObjectInfo.ObjectId;
 					// 중복 여부
@@ -3396,13 +3071,12 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 
 			bool FindPlyaerCharacter = ClientPlayersGet.Execute();
 
-			int8 PlayerCount = 0;
-			int8 i = 0;
+			int8 PlayerCount = 0;			
 
 			while (ClientPlayersGet.Fetch())
 			{				
 				// 플레이어 정보 셋팅			
-				CPlayer* NewPlayerCharacter = G_ObjectManager->_PlayersArray[Session->MyPlayerIndexes[i]];
+				CPlayer* NewPlayerCharacter = G_ObjectManager->_PlayersArray[Session->MyPlayerIndexes[PlayerCount]];
 				NewPlayerCharacter->_GameObjectInfo.ObjectId = PlayerId;
 				NewPlayerCharacter->_GameObjectInfo.ObjectName = PlayerName;
 				NewPlayerCharacter->_GameObjectInfo.OwnerObjectType = (en_GameObjectType)PlayerObjectType;
@@ -3720,7 +3394,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 					}
 
 					// 기본 스킬 생성
-					PlayerLevelUpSkillCreate(Session->AccountId, NewPlayerCharacter->_GameObjectInfo, ReqCharacterCreateSlotIndex);
+					PlayerSkillCreate(Session->AccountId, NewPlayerCharacter->_GameObjectInfo, ReqCharacterCreateSlotIndex);
 
 					// 기본 공격 스킬 퀵슬롯 1번에 등록
 					st_QuickSlotBarSlotInfo DefaultAttackSkillQuickSlotInfo;
@@ -3730,7 +3404,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMess
 					DefaultAttackSkillQuickSlotInfo.QuickSlotBarSlotIndex = 0;
 					DefaultAttackSkillQuickSlotInfo.QuickSlotKey = 49;
 
-					int8 DefaultSkillLargeCategory = (int8)en_SkillLargeCategory::SKILL_LARGE_CATEOGRY_PUBLIC;
+					int8 DefaultSkillLargeCategory = (int8)en_SkillLargeCategory::SKILL_LARGE_CATEGORY_PUBLIC;
 					int8 DefaultSkillMediumCategory = (int8)en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK;
 					int16 DefaultSkillType = (int16)en_SkillType::SKILL_DEFAULT_ATTACK;
 					int8 DefaultAttackSkillLevel = 1;
@@ -4354,164 +4028,58 @@ void CGameServer::PacketProcReqDBItemUpdate(int64 SessionId, CGameServerMessage*
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD:
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:
-		{
-			MyPlayer->_Equipment.ItemEquip(UseItem, MyPlayer);
+			{
+				MyPlayer->_Equipment.ItemEquip(UseItem, MyPlayer);
 
-			// DB 아이템 업데이트
-			CDBConnection* DBInventoryItemUpdateConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-			SP::CDBGameServerInventoryItemUpdate ItemUpdate(*DBInventoryItemUpdateConnection);
-			ItemUpdate.InOwnerAccountId(Session->AccountId);
-			ItemUpdate.InOwnerPlayerId(MyPlayer->_GameObjectInfo.ObjectId);
-			ItemUpdate.InItemRotated(UseItem->_ItemInfo.Rotated);
-			ItemUpdate.InItemTileGridPositionX(UseItem->_ItemInfo.TileGridPositionX);
-			ItemUpdate.InItemTileGridPositionY(UseItem->_ItemInfo.TileGridPositionY);			
-			ItemUpdate.InItemCount(UseItem->_ItemInfo.ItemCount);
-			ItemUpdate.InIsEquipped(UseItem->_ItemInfo.ItemIsEquipped);
+				// DB 아이템 업데이트
+				CDBConnection* DBInventoryItemUpdateConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+				SP::CDBGameServerInventoryItemUpdate ItemUpdate(*DBInventoryItemUpdateConnection);
+				ItemUpdate.InOwnerAccountId(Session->AccountId);
+				ItemUpdate.InOwnerPlayerId(MyPlayer->_GameObjectInfo.ObjectId);
+				ItemUpdate.InItemRotated(UseItem->_ItemInfo.Rotated);
+				ItemUpdate.InItemTileGridPositionX(UseItem->_ItemInfo.TileGridPositionX);
+				ItemUpdate.InItemTileGridPositionY(UseItem->_ItemInfo.TileGridPositionY);			
+				ItemUpdate.InItemCount(UseItem->_ItemInfo.ItemCount);
+				ItemUpdate.InIsEquipped(UseItem->_ItemInfo.ItemIsEquipped);
 
-			ItemUpdate.Execute();
+				ItemUpdate.Execute();
 
-			G_DBConnectionPool->Push(en_DBConnect::GAME, DBInventoryItemUpdateConnection);
+				G_DBConnectionPool->Push(en_DBConnect::GAME, DBInventoryItemUpdateConnection);
 
-			// 클라에게 장비 착용 결과 알려줌
-			CGameServerMessage* ResInventoryItemUsePacket = MakePacketEquipmentUpdate(MyPlayer->_GameObjectInfo.ObjectId, UseItem->_ItemInfo);
-			SendPacket(Session->SessionId, ResInventoryItemUsePacket);
-			ResInventoryItemUsePacket->Free();
-		}
+				// 클라에게 장비 착용 결과 알려줌
+				CGameServerMessage* ResInventoryItemUsePacket = MakePacketEquipmentUpdate(MyPlayer->_GameObjectInfo.ObjectId, UseItem->_ItemInfo);
+				SendPacket(Session->SessionId, ResInventoryItemUsePacket);
+				ResInventoryItemUsePacket->Free();
+			}
 		break;
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL:
-		{
-			MyPlayer->_GameObjectInfo.ObjectStatInfo.HP += 50;
-
-			CGameServerMessage* ResChangeObjectStat = MakePacketResChangeObjectStat(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectStatInfo);
-			SendPacketFieldOfView(Session, ResChangeObjectStat, true);			
-			ResChangeObjectStat->Free();
-		}
-		break;
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_FIERCE_ATTACK:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CONVERSION_ATTACK:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SHAEHONE_ATTACK:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SMASH_WAVE_ATTACK:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_FLAME_HARPOON:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HELL_FIRE:
-		case en_SmallItemCategory::ITEM_SMALL_CATEOGRY_SKILLBOOK_SHAMAN_HEALING_LIGHT:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HEALING_WIND:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHARGE_POSE:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHOCK_RELEASE:
-		{
-			st_ConsumableData* ConsumableSkillItemData = (*G_Datamanager->_Consumables.find((int16)UseItem->_ItemInfo.ItemSmallCategory)).second;
-			if (ConsumableSkillItemData == nullptr)
 			{
-				CRASH("스킬아이템 데이터를 찾을 수 없습니다.");
+				MyPlayer->_GameObjectInfo.ObjectStatInfo.HP += 50;
+
+				CGameServerMessage* ResChangeObjectStat = MakePacketResChangeObjectStat(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectStatInfo);
+				SendPacketFieldOfView(Session, ResChangeObjectStat, true);			
+				ResChangeObjectStat->Free();
 			}
-
-			// 스킬 데이터 찾기
-			st_AttackSkillData* FindAttackSkillData = (st_AttackSkillData*)G_Datamanager->FindSkillData(ConsumableSkillItemData->SkillMediumCategory, ConsumableSkillItemData->SkillType);
-			if (FindAttackSkillData == nullptr)
-			{
-				CRASH("스킬 데이터를 찾을 수 없습니다.");
-			}
-
-			// 스킬을 이미 습득했는지 확인
-			st_SkillInfo* FindSkill = MyPlayer->_SkillBox.FindSkill(FindAttackSkillData->SkillType);
-			if (FindSkill != nullptr)
-			{
-				wstring ErrorDistance;
-
-				WCHAR ErrorMessage[100] = { 0 };
-
-				wsprintf(ErrorMessage, L"[%s] 이미 습득한 스킬입니다.", FindSkill->SkillName.c_str());
-				ErrorDistance = ErrorMessage;
-
-				CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorDistance);
-				SendPacket(Session->SessionId, ResErrorPacket);
-				ResErrorPacket->Free();
-
-				break;
-			}
-
-			st_AttackSkillInfo* NewAttackSkillInfo = new st_AttackSkillInfo();
-			NewAttackSkillInfo->IsQuickSlotUse = false;
-			NewAttackSkillInfo->SkillLargeCategory = FindAttackSkillData->SkillLargeCategory;
-			NewAttackSkillInfo->SkillMediumCategory = FindAttackSkillData->SkillMediumCategory;
-			NewAttackSkillInfo->SkillType = FindAttackSkillData->SkillType;
-			NewAttackSkillInfo->SkillLevel = 1;
-			NewAttackSkillInfo->SkillName = (LPWSTR)CA2W(FindAttackSkillData->SkillName.c_str());
-			NewAttackSkillInfo->SkillCoolTime = FindAttackSkillData->SkillCoolTime;
-			NewAttackSkillInfo->SkillCastingTime = FindAttackSkillData->SkillCastingTime;
-			NewAttackSkillInfo->SkillImagePath = (LPWSTR)CA2W(FindAttackSkillData->SkillThumbnailImagePath.c_str());
-			NewAttackSkillInfo->SkillMinDamage = FindAttackSkillData->SkillMinDamage;
-			NewAttackSkillInfo->SkillMaxDamage = FindAttackSkillData->SkillMaxDamage;
-
-			int8 SkillLargeCategory = (int8)NewAttackSkillInfo->SkillLargeCategory;
-			int8 SkillMediumCategory = (int8)NewAttackSkillInfo->SkillMediumCategory;
-			int16 SkillType = (int16)NewAttackSkillInfo->SkillType;
-
-			// 스킬 테이블에 배운 스킬 DB에 넣기
-			CDBConnection* DBSkillToSkillBoxConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-			SP::CDBGameServerSkillToSkillBox SkillToSkillBox(*DBSkillToSkillBoxConnection);
-			SkillToSkillBox.InAccountDBId(Session->AccountId);
-			SkillToSkillBox.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
-			SkillToSkillBox.InIsQuickSlotUse(NewAttackSkillInfo->IsQuickSlotUse);
-			SkillToSkillBox.InSkillLargeCategory(SkillLargeCategory);
-			SkillToSkillBox.InSkillMediumCategory(SkillMediumCategory);
-			SkillToSkillBox.InSkillType(SkillType);
-			SkillToSkillBox.InSkillLevel(NewAttackSkillInfo->SkillLevel);
-
-			SkillToSkillBox.Execute();
-
-			G_DBConnectionPool->Push(en_DBConnect::GAME, DBSkillToSkillBoxConnection);
-
-			MyPlayer->_SkillBox.AddSkill(NewAttackSkillInfo);
-
-			// 새로 배운 스킬을 클라에게 전송한다.
-			CMessage* ResSkillToSkillBoxPacket = MakePacketResSkillToSkillBox(MyPlayer->_GameObjectInfo.ObjectId, NewAttackSkillInfo);
-			SendPacket(Session->SessionId, ResSkillToSkillBoxPacket);
-			ResSkillToSkillBoxPacket->Free();
-
-			// 사용을 다한 스킬북 인벤토리에서 제거하기	
-			wstring InitString = L"";
-
-			CDBConnection* InventoryItemInitDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-			SP::CDBGameServerInventorySlotInit InventoryItemInit(*InventoryItemInitDBConnection);
-			InventoryItemInit.InOwnerAccountId(Session->AccountId);
-			InventoryItemInit.InOwnerPlayerId(MyPlayer->_GameObjectInfo.ObjectId);
-			InventoryItemInit.InItemTileGridPositionX(UseItem->_ItemInfo.TileGridPositionX);
-			InventoryItemInit.InItemTileGridPositionY(UseItem->_ItemInfo.TileGridPositionY);			
-			InventoryItemInit.InItemName(InitString);
-			InventoryItemInit.InItemThumbnailImagePath(InitString);
-
-			InventoryItemInit.Execute();
-
-			G_DBConnectionPool->Push(en_DBConnect::GAME, InventoryItemInitDBConnection);
-
-			// MyPlayer->_Inventory.SlotInit(UseItem->_ItemInfo.ItemSlotIndex);
-
-			// 클라에게 업데이트 결과 전송
-			CMessage* ReqInventoryItemUpdate = MakePacketInventoryItemUpdate(MyPlayer->_GameObjectInfo.ObjectId, UseItem->_ItemInfo);
-			SendPacket(SessionId, ReqInventoryItemUpdate);
-			ReqInventoryItemUpdate->Free();
-		}
-		break;
+			break;		
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL:
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE:
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG:
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
-		{
-			wstring ErrorDistance;
+			{
+				/*wstring ErrorDistance;
 
-			WCHAR ErrorMessage[100] = { 0 };
+				WCHAR ErrorMessage[100] = { 0 };
 
-			wsprintf(ErrorMessage, L"[%s] 사용 할 수 없는 아이템 입니다.", UseItem->_ItemInfo.ItemName.c_str());
-			ErrorDistance = ErrorMessage;
+				wsprintf(ErrorMessage, L"[%s] 사용 할 수 없는 아이템 입니다.", UseItem->_ItemInfo.ItemName.c_str());
+				ErrorDistance = ErrorMessage;
 
-			CMessage* ResErrorPacket = MakePacketError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorDistance);
-			SendPacket(Session->SessionId, ResErrorPacket);
-			ResErrorPacket->Free();
-		}
-		break;
+				CMessage* ResErrorPacket = MakePacketSkillError(MyPlayer->_GameObjectInfo.ObjectId, en_ErrorType::ERROR_NON_SELECT_OBJECT, ErrorDistance);
+				SendPacket(Session->SessionId, ResErrorPacket);
+				ResErrorPacket->Free();*/
+			}
+			break;
 		default:
 			CRASH("요청한 사용 아이템 타입이 올바르지 않음");
 			break;
@@ -4933,19 +4501,21 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			//}			
 #pragma endregion			
 
-#pragma region 스킬 정보 읽어오기
+#pragma region 스킬 정보 읽어오기				
 			// 캐릭터가 소유하고 있는 스킬 정보를 DB로부터 읽어온다.
 			CDBConnection* DBCharacterSkillGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 			SP::CDBGameServerSkillGet CharacterSkillGet(*DBCharacterSkillGetConnection);
 			CharacterSkillGet.InAccountDBId(MyPlayer->_AccountId);
 			CharacterSkillGet.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
 
+			bool IsSkillLearn;
 			bool IsQuickSlotUse;
 			int8 SkillLargeCategory;
 			int8 SkillMediumCategory;
 			int16 SkillType;
 			int8 SkillLevel;
 
+			CharacterSkillGet.OutIsSkillLearn(IsSkillLearn);
 			CharacterSkillGet.OutIsQuickSlotUse(IsQuickSlotUse);
 			CharacterSkillGet.OutSkillLargeCategory(SkillLargeCategory);
 			CharacterSkillGet.OutSkillMediumCategory(SkillMediumCategory);
@@ -4954,7 +4524,9 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 
 			CharacterSkillGet.Execute();
 
-			vector<st_SkillInfo*> SkillInfos;
+			vector<st_SkillInfo*> SkillAttackInfos;
+			vector<st_SkillInfo*> SkillTacTicInfos;			
+			vector<st_SkillInfo*> SkillBufInfos;			
 
 			while (CharacterSkillGet.Fetch())
 			{
@@ -4975,6 +4547,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					st_AttackSkillData* FindAttackSkillData = (st_AttackSkillData*)FindSkillData;
 
 					st_AttackSkillInfo* AttackSkillInfo = new st_AttackSkillInfo();
+					AttackSkillInfo->IsSkillLearn = IsSkillLearn;
 					AttackSkillInfo->IsQuickSlotUse = IsQuickSlotUse;
 					AttackSkillInfo->SkillLargeCategory = (en_SkillLargeCategory)SkillLargeCategory;
 					AttackSkillInfo->SkillMediumCategory = (en_SkillMediumCategory)SkillMediumCategory;
@@ -4998,10 +4571,10 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					AttackSkillInfo->SkillDamageOverTime = FindAttackSkillData->SkillDamageOverTime;
 					AttackSkillInfo->StatusAbnormalityProbability = FindAttackSkillData->StatusAbnormalityProbability;
 
-					MyPlayer->_SkillBox.AddSkill(AttackSkillInfo);
+					MyPlayer->_SkillBox.AddAttackSkill(AttackSkillInfo);
 					
 					// 공격 스킬 담기
-					SkillInfos.push_back(AttackSkillInfo);				
+					SkillAttackInfos.push_back(AttackSkillInfo);
 				}
 				break;
 				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL:
@@ -5012,6 +4585,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					st_HealSkillData* FindHealSkillData = (st_HealSkillData*)FindSkillData;
 
 					st_HealSkillInfo* HealSkillInfo = new st_HealSkillInfo();
+					HealSkillInfo->IsSkillLearn = IsSkillLearn;
 					HealSkillInfo->IsQuickSlotUse = IsQuickSlotUse;
 					HealSkillInfo->SkillLargeCategory = (en_SkillLargeCategory)SkillLargeCategory;
 					HealSkillInfo->SkillMediumCategory = (en_SkillMediumCategory)SkillMediumCategory;
@@ -5025,10 +4599,10 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					HealSkillInfo->SkillMaxHealPoint = FindHealSkillData->SkillMaxHealPoint;
 					HealSkillInfo->SkillTargetEffectTime = FindHealSkillData->SkillTargetEffectTime;
 
-					MyPlayer->_SkillBox.AddSkill(HealSkillInfo);
+					MyPlayer->_SkillBox.AddTacTicSkill(HealSkillInfo);
 
-					// 힐 스킬 정보 담기
-					SkillInfos.push_back(HealSkillInfo);										
+					// 전술 스킬 정보 담기
+					SkillTacTicInfos.push_back(HealSkillInfo);
 				}
 				break;
 				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF:
@@ -5039,6 +4613,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					st_BufSkillData* FindBufSkillData = (st_BufSkillData*)FindSkillData;
 
 					st_BufSkillInfo* BufSkillInfo = new st_BufSkillInfo();
+					BufSkillInfo->IsSkillLearn = IsSkillLearn;
 					BufSkillInfo->IsQuickSlotUse = IsQuickSlotUse;
 					BufSkillInfo->SkillLargeCategory = (en_SkillLargeCategory)SkillLargeCategory;
 					BufSkillInfo->SkillMediumCategory = (en_SkillMediumCategory)SkillMediumCategory;
@@ -5064,20 +4639,37 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					BufSkillInfo->IncreaseSpeedPoint = FindBufSkillData->IncreaseSpeedPoint;
 					BufSkillInfo->IncreaseStatusAbnormalityResistance = FindBufSkillData->IncreaseStatusAbnormalityResistance;
 										
-					MyPlayer->_SkillBox.AddSkill(BufSkillInfo);
+					MyPlayer->_SkillBox.AddBufSkill(BufSkillInfo);
 					// 버프 스킬 담기					
-					SkillInfos.push_back(BufSkillInfo);					
+					SkillBufInfos.push_back(BufSkillInfo);
 				}
 				break;
 				}
 			}
 
-			// 스킬 개수
-			*ResCharacterInfoMessage << (int8)SkillInfos.size();
-			// 스킬 정보 담기
-			for (st_SkillInfo* SkillInfo : SkillInfos)
+			// 공격 스킬 개수
+			*ResCharacterInfoMessage << (int8)SkillAttackInfos.size();
+			// 전술 스킬 개수
+			*ResCharacterInfoMessage << (int8)SkillTacTicInfos.size();
+			// 버프 스킬 개수
+			*ResCharacterInfoMessage << (int8)SkillBufInfos.size();
+
+			// 공격 스킬 정보 담기
+			for (st_SkillInfo* AttackSkillInfo : SkillAttackInfos)
 			{
-				*ResCharacterInfoMessage << *SkillInfo;
+				*ResCharacterInfoMessage << *AttackSkillInfo;
+			}
+
+			// 전술 스킬 정보 담기
+			for (st_SkillInfo* TacTicSkillInfo : SkillTacTicInfos)
+			{
+				*ResCharacterInfoMessage << *TacTicSkillInfo;
+			}
+
+			// 버프 스킬 정보 담기
+			for (st_SkillInfo* BufSkillInfo : SkillBufInfos)
+			{
+				*ResCharacterInfoMessage << *BufSkillInfo;
 			}
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterSkillGetConnection);
@@ -5200,11 +4792,11 @@ void CGameServer::PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CGameServ
 			// 게임에 입장한 캐릭터를 가져온다.
 			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
 
-			st_SkillInfo* FindSkill = MyPlayer->_SkillBox.FindSkill(SaveQuickSlotInfo.QuickBarSkillInfo.SkillType);
+			st_SkillInfo* FindSkillInfo = MyPlayer->_SkillBox.FindSkill(SaveQuickSlotInfo.QuickBarSkillInfo.SkillType);
 			// 캐릭터가 해당 스킬을 가지고 있는지 확인
-			if (FindSkill != nullptr)
+			if (FindSkillInfo != nullptr)
 			{
-				FindSkill->IsQuickSlotUse = true;
+				FindSkillInfo->IsQuickSlotUse = true;
 
 				MyPlayer->_QuickSlotManager.UpdateQuickSlotBar(SaveQuickSlotInfo);
 
@@ -6496,48 +6088,6 @@ CGameServerMessage* CGameServer::MakePacketResQuickSlotInit(int64 AccountId, int
 	return ResQuickSlotInitMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketError(int64 PlayerId, en_ErrorType ErrorType, wstring ErrorMessage)
-{
-	CGameServerMessage* ResErrorMessage = CGameServerMessage::GameServerMessageAlloc();
-	if (ResErrorMessage == nullptr)
-	{
-		return nullptr;
-	}
-
-	ResErrorMessage->Clear();
-
-	*ResErrorMessage << (int16)en_PACKET_S2C_ERROR;
-	*ResErrorMessage << PlayerId;
-	*ResErrorMessage << (int16)ErrorType;
-
-	// 에러 메세지
-	int8 ErrorMessageLen = (int8)(ErrorMessage.length() * 2);
-	*ResErrorMessage << ErrorMessageLen;
-	ResErrorMessage->InsertData(ErrorMessage.c_str(), ErrorMessageLen);
-
-	return ResErrorMessage;
-}
-
-CGameServerMessage* CGameServer::MakePacketCoolTime(int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, float SkillCoolTime, float SkillCoolTimeSpeed)
-{
-	CGameServerMessage* ResCoolTimeMessage = CGameServerMessage::GameServerMessageAlloc();
-	if (ResCoolTimeMessage == nullptr)
-	{
-		return nullptr;
-	}
-
-	ResCoolTimeMessage->Clear();
-
-	*ResCoolTimeMessage << (int16)en_PACKET_S2C_COOLTIME_START;
-	*ResCoolTimeMessage << PlayerId;
-	*ResCoolTimeMessage << QuickSlotBarIndex;
-	*ResCoolTimeMessage << QuickSlotBarSlotIndex;
-	*ResCoolTimeMessage << SkillCoolTime;
-	*ResCoolTimeMessage << SkillCoolTimeSpeed;
-
-	return ResCoolTimeMessage;
-}
-
 CGameServerMessage* CGameServer::MakePacketCraftingList(int64 AccountId, int64 PlayerId, vector<st_CraftingItemCategory> CraftingItemList)
 {
 	CGameServerMessage* ResCraftingListMessage = CGameServerMessage::GameServerMessageAlloc();
@@ -6617,27 +6167,6 @@ CGameServerMessage* CGameServer::MakePacketMagicCancel(int64 AccountId, int64 Pl
 	*ResMagicCancelMessage << PlayerId;
 
 	return ResMagicCancelMessage;
-}
-
-CGameServerMessage* CGameServer::MakePacketExperience(int64 AccountId, int64 PlayerId, int64 GainExp, int64 CurrentExp, int64 RequireExp, int64 TotalExp)
-{
-	CGameServerMessage* ResExperienceMessage = CGameServerMessage::GameServerMessageAlloc();
-	if (ResExperienceMessage == nullptr)
-	{
-		return nullptr;
-	}
-
-	ResExperienceMessage->Clear();
-
-	*ResExperienceMessage << (int16)en_PACKET_S2C_EXPERIENCE;
-	*ResExperienceMessage << AccountId;
-	*ResExperienceMessage << PlayerId;
-	*ResExperienceMessage << GainExp;
-	*ResExperienceMessage << CurrentExp;
-	*ResExperienceMessage << RequireExp;
-	*ResExperienceMessage << TotalExp;
-
-	return ResExperienceMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketPing()
@@ -6767,7 +6296,27 @@ CGameServerMessage* CGameServer::MakePacketResChangeObjectState(int64 ObjectId, 
 	*ResObjectStatePacket << ObjectId;
 	*ResObjectStatePacket << (int8)Direction;
 	*ResObjectStatePacket << (int16)ObjectType;
-	*ResObjectStatePacket << (int16)ObjectState;
+	*ResObjectStatePacket << (int8)ObjectState;
+
+	return ResObjectStatePacket;
+}
+
+CGameServerMessage* CGameServer::MakePacketResChangeMonsterObjectState(int64 ObjectId, en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState, en_MonsterState MonsterState)
+{
+	CGameServerMessage* ResObjectStatePacket = CGameServerMessage::GameServerMessageAlloc();
+	if (ResObjectStatePacket == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResObjectStatePacket->Clear();
+
+	*ResObjectStatePacket << (int16)en_PACKET_S2C_MONSTER_OBJECT_STATE_CHANGE;
+	*ResObjectStatePacket << ObjectId;
+	*ResObjectStatePacket << (int8)Direction;
+	*ResObjectStatePacket << (int16)ObjectType;
+	*ResObjectStatePacket << (int8)ObjectState;
+	*ResObjectStatePacket << (int8)MonsterState;
 
 	return ResObjectStatePacket;
 }
@@ -6792,6 +6341,26 @@ CGameServerMessage* CGameServer::MakePacketResMove(int64 AccountId, int64 Object
 	return ResMoveMessage;
 }
 
+CGameServerMessage* CGameServer::MakePacketResMonsterMove(int64 ObjectId, en_GameObjectType ObjectType, bool CanMove, st_PositionInfo PositionInfo, en_MonsterState MonsterState)
+{
+	CGameServerMessage* ResMonsterMoveMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResMonsterMoveMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResMonsterMoveMessage->Clear();
+
+	*ResMonsterMoveMessage << (int16)en_PACKET_S2C_MONSTER_MOVE;
+	*ResMonsterMoveMessage << ObjectId;
+	*ResMonsterMoveMessage << (int16)ObjectType;
+	*ResMonsterMoveMessage << CanMove;
+	*ResMonsterMoveMessage << PositionInfo;
+	*ResMonsterMoveMessage << (int8)MonsterState;
+
+	return ResMonsterMoveMessage;
+}
+
 CGameServerMessage* CGameServer::MakePacketResMoveStop(int64 AccountId, int64 ObjectId, st_PositionInfo PositionInto)
 {
 	CGameServerMessage* ResMoveStopPacket = CGameServerMessage::GameServerMessageAlloc();
@@ -6810,7 +6379,7 @@ CGameServerMessage* CGameServer::MakePacketResMoveStop(int64 AccountId, int64 Ob
 	return ResMoveStopPacket;
 }
 
-CGameServerMessage* CGameServer::MakePacketPatrol(int64 ObjectId, en_GameObjectType ObjectType, st_PositionInfo PositionInfo)
+CGameServerMessage* CGameServer::MakePacketPatrol(int64 ObjectId, en_GameObjectType ObjectType, bool CanMove, st_PositionInfo PositionInfo, en_MonsterState MonsterState)
 {
 	CGameServerMessage* ResPatrolPacket = CGameServerMessage::GameServerMessageAlloc();
 	if (ResPatrolPacket == nullptr)
@@ -6820,10 +6389,12 @@ CGameServerMessage* CGameServer::MakePacketPatrol(int64 ObjectId, en_GameObjectT
 
 	ResPatrolPacket->Clear();
 
-	*ResPatrolPacket << (int16)en_PACKET_S2C_PATROL;
+	*ResPatrolPacket << (int16)en_PACKET_S2C_MONSTER_PATROL;
 	*ResPatrolPacket << ObjectId;
 	*ResPatrolPacket << (int16)ObjectType;
+	*ResPatrolPacket << CanMove;
 	*ResPatrolPacket << PositionInfo;
+	*ResPatrolPacket << (int8)MonsterState;
 
 	return ResPatrolPacket;
 }
@@ -6929,7 +6500,7 @@ CGameServerMessage* CGameServer::MakePacketResSyncPosition(int64 TargetObjectId,
 
 	ResSyncPositionMessage->Clear();
 
-	*ResSyncPositionMessage << (short)en_PACKET_S2C_SYNC_OBJECT_POSITION;
+	*ResSyncPositionMessage << (int16)en_PACKET_S2C_SYNC_OBJECT_POSITION;
 	*ResSyncPositionMessage << TargetObjectId;
 
 	*ResSyncPositionMessage << SyncPosition;
@@ -6992,10 +6563,95 @@ CGameServerMessage* CGameServer::MakePacketBuf(int64 TargetObjectId, float Skill
 	return ResBufMessage;
 }
 
+CGameServerMessage* CGameServer::MakePacketExperience(int64 AccountId, int64 PlayerId, int64 GainExp, int64 CurrentExp, int64 RequireExp, int64 TotalExp)
+{
+	CGameServerMessage* ResExperienceMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResExperienceMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResExperienceMessage->Clear();
+
+	*ResExperienceMessage << (int16)en_PACKET_S2C_EXPERIENCE;
+	*ResExperienceMessage << AccountId;
+	*ResExperienceMessage << PlayerId;
+	*ResExperienceMessage << GainExp;
+	*ResExperienceMessage << CurrentExp;
+	*ResExperienceMessage << RequireExp;
+	*ResExperienceMessage << TotalExp;
+
+	return ResExperienceMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketCoolTime(int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, float SkillCoolTime, float SkillCoolTimeSpeed)
+{
+	CGameServerMessage* ResCoolTimeMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResCoolTimeMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResCoolTimeMessage->Clear();
+
+	*ResCoolTimeMessage << (int16)en_PACKET_S2C_COOLTIME_START;
+	*ResCoolTimeMessage << PlayerId;
+	*ResCoolTimeMessage << QuickSlotBarIndex;
+	*ResCoolTimeMessage << QuickSlotBarSlotIndex;
+	*ResCoolTimeMessage << SkillCoolTime;
+	*ResCoolTimeMessage << SkillCoolTimeSpeed;
+
+	return ResCoolTimeMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketSkillError(int64 PlayerId, en_SkillErrorType ErrorType, const WCHAR* SkillName, int16 SkillDistance)
+{
+	CGameServerMessage* ResErrorMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResErrorMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResErrorMessage->Clear();
+
+	*ResErrorMessage << (int16)en_PACKET_S2C_ERROR;
+	*ResErrorMessage << PlayerId;
+	*ResErrorMessage << (int16)ErrorType;
+
+	WCHAR ErrorMessage[100] = { 0 };
+
+	switch (ErrorType)
+	{
+	case en_SkillErrorType::ERROR_SKILL_COOLTIME:
+		wsprintf(ErrorMessage, L"[%s]의 재사용 대기시간이 완료되지 않았습니다.", SkillName);
+		break;
+	case en_SkillErrorType::ERROR_NON_SELECT_OBJECT:
+		wsprintf(ErrorMessage, L"대상을 선택하고 [%s]을/를 사용해야 합니다.", SkillName);
+		break;
+	case en_SkillErrorType::ERROR_HEAL_NON_SELECT_OBJECT:
+		wsprintf(ErrorMessage, L"[%s] 대상을 선택하지 않아서 자신에게 사용합니다.", SkillName);
+		break;
+	case en_SkillErrorType::ERROR_PLACE_BLOCK:
+		wsprintf(ErrorMessage, L"이동할 위치가 막혀 있어서 [%s]을/를 사용할 수 없습니다.", SkillName);
+		break;
+	case en_SkillErrorType::ERROR_DISTANCE:
+		wsprintf(ErrorMessage, L"[%s] 대상과의 거리가 너무 멉니다. [거리 : %d ]", SkillName, SkillDistance);
+		break;	
+	}
+	wstring ErrorMessageString = ErrorMessage;
+
+	// 에러 메세지
+	int8 ErrorMessageLen = (int8)(ErrorMessageString.length() * 2);
+	*ResErrorMessage << ErrorMessageLen;
+	ResErrorMessage->InsertData(ErrorMessageString.c_str(), ErrorMessageLen);
+
+	return ResErrorMessage;
+}
+
 void CGameServer::OnClientJoin(int64 SessionID)
 {
-	st_Job* ClientJoinJob = _JobMemoryPool->Alloc();
-	ClientJoinJob->Type = en_JobType::AUTH_NEW_CLIENT_JOIN;
+	st_GameServerJob* ClientJoinJob = _GameServerJobMemoryPool->Alloc();
+	ClientJoinJob->Type = en_GameServerJobType::AUTH_NEW_CLIENT_JOIN;
 	ClientJoinJob->SessionId = SessionID;
 	ClientJoinJob->Message = nullptr;
 	_GameServerAuthThreadMessageQue.Enqueue(ClientJoinJob);
@@ -7009,8 +6665,8 @@ void CGameServer::OnRecv(int64 SessionID, CMessage* Packet)
 
 void CGameServer::OnClientLeave(st_Session* LeaveSession)
 {
-	st_Job* ClientLeaveJob = _JobMemoryPool->Alloc();
-	ClientLeaveJob->Type = en_JobType::AUTH_DISCONNECT_CLIENT;
+	st_GameServerJob* ClientLeaveJob = _GameServerJobMemoryPool->Alloc();
+	ClientLeaveJob->Type = en_GameServerJobType::AUTH_DISCONNECT_CLIENT;
 	ClientLeaveJob->SessionId = LeaveSession->SessionId;
 	ClientLeaveJob->Session = LeaveSession;
 	ClientLeaveJob->Message = nullptr;
@@ -7165,6 +6821,37 @@ void CGameServer::SkillCoolTimeTimerJobCreate(CPlayer* Player, int64 CastingTime
 
 	AcquireSRWLockExclusive(&_TimerJobLock);
 	_TimerHeapJob->InsertHeap(SkillEndTimerJob->TimerJobExecTick, SkillEndTimerJob);
+	ReleaseSRWLockExclusive(&_TimerJobLock);
+
+	SetEvent(_TimerThreadWakeEvent);
+
+	// 스킬 쿨타임 계산
+	float SkillCoolTime = CoolTimeSkillInfo->SkillCoolTime / 1000.0f;
+
+	// 클라에게 쿨타임 표시
+	CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(Player->_GameObjectInfo.ObjectId,
+		QuickSlotBarIndex,
+		QuickSlotBarSlotIndex,
+		SkillCoolTime, 1.0f);
+	SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
+	ResCoolTimeStartPacket->Free();
+
+	CoolTimeSkillInfo->CanSkillUse = false;
+
+	// 스킬 쿨타임 잡 등록
+	st_TimerJob* SkillCoolTimeTimerJob = _TimerJobMemoryPool->Alloc();
+	SkillCoolTimeTimerJob->TimerJobExecTick = GetTickCount64() + CoolTimeSkillInfo->SkillCoolTime;
+	SkillCoolTimeTimerJob->SessionId = Player->_SessionId;
+	SkillCoolTimeTimerJob->TimerJobType = en_TimerJobType::TIMER_SKILL_COOLTIME_END;
+
+	CGameServerMessage* ResCoolTimeEndMessage = CGameServerMessage::GameServerMessageAlloc();
+	ResCoolTimeEndMessage->Clear();
+
+	*ResCoolTimeEndMessage << (int16)CoolTimeSkillInfo->SkillType;
+	SkillCoolTimeTimerJob->TimerJobMessage = ResCoolTimeEndMessage;
+	
+	AcquireSRWLockExclusive(&_TimerJobLock);
+	_TimerHeapJob->InsertHeap(SkillCoolTimeTimerJob->TimerJobExecTick, SkillCoolTimeTimerJob);
 	ReleaseSRWLockExclusive(&_TimerJobLock);
 
 	SetEvent(_TimerThreadWakeEvent);

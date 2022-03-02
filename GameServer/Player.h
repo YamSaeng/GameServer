@@ -1,15 +1,29 @@
-	#pragma once
+#pragma once
 #include "GameObject.h"
 #include "Equipment.h"
 #include "SkillBox.h"
 #include "QuickSlotManager.h"
 #include "InventoryManager.h"
+#include "LockFreeQue.h"
+#include "GameServerMessage.h"
 
 struct st_TimerJob;
 
 class CPlayer : public CGameObject
 {
 public:	
+	enum class en_PlayerJobType : int16
+	{
+		PLAYER_MELEE_JOB,
+		PLAYER_MAGIC_JOB		
+	};
+
+	struct st_PlayerJob
+	{
+		en_PlayerJobType Type;		
+		CGameServerMessage* Message = nullptr;
+	};
+
 	uint64 _AttackTick;
 	uint64 _SpellTick;
 
@@ -34,6 +48,8 @@ public:
 
 	st_Experience _Experience;	
 
+	CLockFreeQue<st_PlayerJob*> _PlayerJobQue;
+
 	CPlayer();	
 	~CPlayer();		
 
@@ -45,6 +61,7 @@ public:
 	void Init();	
 
 	virtual void PositionReset() override;
+	void PlayerJobQueProc();
 protected:
 	virtual void UpdateMove();	
 	virtual void UpdateAttack();

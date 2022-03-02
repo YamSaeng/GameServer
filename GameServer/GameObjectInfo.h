@@ -274,11 +274,13 @@ enum class en_EffectType : int16
 	EFFECT_DEBUF_STUN
 };
 
-enum class en_ErrorType : int16
+enum class en_SkillErrorType : int16
 {
 	ERROR_SKILL_COOLTIME,
 	ERROR_NON_SELECT_OBJECT,
-	ERROR_DISTANCE
+	ERROR_HEAL_NON_SELECT_OBJECT,
+	ERROR_PLACE_BLOCK,
+	ERROR_DISTANCE,	
 };
 
 enum class en_ConsumableType : int16

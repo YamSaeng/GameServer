@@ -20,13 +20,13 @@ private:
 	// 타이머잡 쓰레드
 	HANDLE _TimerJobThread;
 	// 로직 쓰레드
-	HANDLE _LogicThread;		
+	HANDLE _LogicThread;	
 
 	// 인증 쓰레드 깨우기 이벤트
 	HANDLE _AuthThreadWakeEvent;	
 	// 타이머잡 쓰레드 깨우기 이벤트
-	HANDLE _TimerThreadWakeEvent;		
-
+	HANDLE _TimerThreadWakeEvent;
+	
 	// AuthThread 종료용 변수
 	bool _AuthThreadEnd;
 	// WorkerThread 종료용 변수
@@ -36,10 +36,11 @@ private:
 	// World DataBaseThread 종료용 변수
 	bool _WorldDataBaseThreadEnd;	
 
+	// TimerJobThread 종료용 변수
+	bool _TimerJobThreadEnd;
 	// LogicThread 종료용 변수
 	bool _LogicThreadEnd;
-	// TimerJobThread 종료용 변수
-	bool _TimerJobThreadEnd;	
+	
 
 	// TimerJobThread 전용 Lock
 	SRWLOCK _TimerJobLock;
@@ -64,12 +65,12 @@ private:
 	//--------------------------------------------------------
 	// 로직처리 쓰레드 
 	//--------------------------------------------------------
-	static unsigned __stdcall LogicThreadProc(void* Argument);	
+	static unsigned __stdcall LogicThreadProc(void* Argument);		
 
 	//---------------------------------
 	// 캐릭터 스킬 생성
 	//---------------------------------
-	void PlayerLevelUpSkillCreate(int64& AccountId, st_GameObjectInfo& NewCharacterInfo, int8& CharacterCreateSlotIndex);	
+	void PlayerSkillCreate(int64& AccountId, st_GameObjectInfo& NewCharacterInfo, int8& CharacterCreateSlotIndex);	
 
 	//------------------------------------
 	// 클라 접속 기본 정보 셋팅
@@ -332,15 +333,7 @@ private:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 퀵슬롯 초기화 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResQuickSlotInit(int64 AccountId, int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, int16 QuickSlotKey);
-	//-----------------------------------------------------------------------------------------
-	// 게임서버 에러 메세지 생성 패킷 조합
-	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketError(int64 PlayerId, en_ErrorType ErrorType, wstring ErrorMessage);
-	//-----------------------------------------------------------------------------------------
-	// 게임서버 재사용대기시간 출력 패킷 조합
-	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketCoolTime(int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, float SkillCoolTime, float SkillCoolTimeSpeed);
+	CGameServerMessage* MakePacketResQuickSlotInit(int64 AccountId, int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, int16 QuickSlotKey);		
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 제작템 목록 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -348,11 +341,7 @@ private:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 스킬 취소 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketMagicCancel(int64 AccountId, int64 PlayerId);
-	//-----------------------------------------------------------------------------------------
-	// 게임서버 경험치 패킷 조합
-	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketExperience(int64 AccountId, int64 PlayerId, int64 GainExp, int64 CurrentExp, int64 RequireExp, int64 TotalExp);
+	CGameServerMessage* MakePacketMagicCancel(int64 AccountId, int64 PlayerId);	
 	//-------------------------------------------------
 	// 게임서버 핑 패킷 조합
 	//-------------------------------------------------
@@ -377,9 +366,17 @@ public:
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResChangeObjectState(int64 ObjectId, en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState);
 	//-----------------------------------------------------------------------------------------
+	// 게임서버 몬스터 오브젝트 상태 변경 패킷 조합 
+	//-----------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResChangeMonsterObjectState(int64 ObjectId, en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState, en_MonsterState MonsterState);
+	//-----------------------------------------------------------------------------------------
 	// 게임서버 이동 요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResMove(int64 AccountId, int64 ObjectId, bool CanMove, st_PositionInfo PositionInfo);
+	//-----------------------------------------------------------------------------------------
+	// 게임서버 몬스터 이동 패킷 조합
+	//-----------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResMonsterMove(int64 ObjectId, en_GameObjectType ObjectType, bool CanMove, st_PositionInfo PositionInfo, en_MonsterState MonsterState);
 	//------------------------------------------------------------------------------------------------------
 	// 게임서버 이동 멈춤 요청 응답 패킷 조합
 	//------------------------------------------------------------------------------------------------------
@@ -387,7 +384,7 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 정찰 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketPatrol(int64 ObjectId, en_GameObjectType ObjectType, st_PositionInfo PositionInfo);
+	CGameServerMessage* MakePacketPatrol(int64 ObjectId, en_GameObjectType ObjectType, bool CanMove, st_PositionInfo PositionInfo, en_MonsterState MonsterState);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 오브젝트 스폰 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -420,11 +417,27 @@ public:
 	// 게임서버 버프 패킷 조합
 	//---------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketBuf(int64 TargetObjectId, float SkillCoolTime, float SkillCoolTimeSpeed, st_SkillInfo* SkillInfo);	
+	//-----------------------------------------------------------------------------------------
+	// 게임서버 경험치 패킷 조합
+	//-----------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketExperience(int64 AccountId, int64 PlayerId, int64 GainExp, int64 CurrentExp, int64 RequireExp, int64 TotalExp);
+	//-----------------------------------------------------------------------------------------
+	// 게임서버 재사용대기시간 출력 패킷 조합
+	//-----------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketCoolTime(int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, float SkillCoolTime, float SkillCoolTimeSpeed);
+	//-----------------------------------------------------------------------------------------
+	// 게임서버 스킬 에러 메세지 생성 패킷 조합
+	//-----------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketSkillError(int64 PlayerId, en_SkillErrorType ErrorType, const WCHAR* SkillName, int16 SkillDistance = 0);
 public:
-	//------------------------------------
+	//---------------------------------------------------------
+	// PlayerJob 메모리풀
+	//---------------------------------------------------------
+	CMemoryPoolTLS<CPlayer::st_PlayerJob>* _PlayerJobMemoryPool;
+	//-----------------------------------------------
 	// Job 메모리풀
-	//------------------------------------
-	CMemoryPoolTLS<st_Job>* _JobMemoryPool;
+	//-----------------------------------------------
+	CMemoryPoolTLS<st_GameServerJob>* _GameServerJobMemoryPool;
 
 	//------------------------------------
 	// TimerJob 메모리풀
@@ -434,9 +447,9 @@ public:
 	//------------------------------------
 	// Job 큐
 	//------------------------------------
-	CLockFreeQue<st_Job*> _GameServerAuthThreadMessageQue;	
-	CLockFreeQue<st_Job*> _GameServerUserDataBaseThreadMessageQue;
-	CLockFreeQue<st_Job*> _GameServerWorldDataBaseThreadMessageQue;	
+	CLockFreeQue<st_GameServerJob*> _GameServerAuthThreadMessageQue;	
+	CLockFreeQue<st_GameServerJob*> _GameServerUserDataBaseThreadMessageQue;
+	CLockFreeQue<st_GameServerJob*> _GameServerWorldDataBaseThreadMessageQue;	
 
 	//--------------------------------------
 	// TimerJob 우선순위 큐
