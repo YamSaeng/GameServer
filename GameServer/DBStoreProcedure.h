@@ -381,19 +381,20 @@ namespace SP
 		template<int16 Length> void OutItemThumbnailImagePath(WCHAR(&ItemThumbnailImagePath)[Length]) { BindCol(15, ItemThumbnailImagePath); }
 	};
 
-	// SkillTable에 있는 Skill 모두 긁어옴
-	class CDBGameServerSkillGet : public CDBBind<2, 5>
+	// 스킬 테이블에 있는 스킬 모두 긁어옴
+	class CDBGameServerSkillGet : public CDBBind<2, 6>
 	{
 	public:
 		CDBGameServerSkillGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetSkill(?,?)}") {}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
 
-		void OutIsQuickSlotUse(bool& OutIsQuickSlotUse) { BindCol(0, OutIsQuickSlotUse); }
-		void OutSkillLargeCategory(int8& SkillLargeCategory) { BindCol(1, SkillLargeCategory); }
-		void OutSkillMediumCategory(int8& SkillMediumCategory) { BindCol(2, SkillMediumCategory); }
-		void OutSkillType(int16& SkillType) { BindCol(3, SkillType); }
-		void OutSkillLevel(int8& SkillLevel) { BindCol(4, SkillLevel); }		
+		void OutIsSkillLearn(bool& OutIsSkillLearn) { BindCol(0, OutIsSkillLearn); }
+		void OutIsQuickSlotUse(bool& OutIsQuickSlotUse) { BindCol(1, OutIsQuickSlotUse); }
+		void OutSkillLargeCategory(int8& SkillLargeCategory) { BindCol(2, SkillLargeCategory); }
+		void OutSkillMediumCategory(int8& SkillMediumCategory) { BindCol(3, SkillMediumCategory); }
+		void OutSkillType(int16& SkillType) { BindCol(4, SkillType); }
+		void OutSkillLevel(int8& SkillLevel) { BindCol(5, SkillLevel); }		
 	};
 
 	// 스킬 테이블에 스킬 넣기
