@@ -85,6 +85,9 @@
     <Filter Include="ContentServer\Content\GameObject\Player">
       <UniqueIdentifier>{ae04998f-66c9-4da1-8bfd-9f8523536e46}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ContentServer\Content\Map">
+      <UniqueIdentifier>{c58762ae-f81f-4697-8cde-0d52a640418b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Type.h">
@@ -183,9 +186,6 @@
     <ClInclude Include="Sector.h">
       <Filter>ContentServer\Content\Channel</Filter>
     </ClInclude>
-    <ClInclude Include="Map.h">
-      <Filter>ContentServer\Content\Channel</Filter>
-    </ClInclude>
     <ClInclude Include="ChannelManager.h">
       <Filter>ContentServer\Content\Channel</Filter>
     </ClInclude>
@@ -239,6 +239,9 @@
     <ClInclude Include="InventoryManager.h">
       <Filter>ContentServer\Content\Inventory</Filter>
     </ClInclude>
+    <ClInclude Include="Map.h">
+      <Filter>ContentServer\Content\Map</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -291,9 +294,6 @@
     <ClCompile Include="Sector.cpp">
       <Filter>ContentServer\Content\Channel</Filter>
     </ClCompile>
-    <ClCompile Include="Map.cpp">
-      <Filter>ContentServer\Content\Channel</Filter>
-    </ClCompile>
     <ClCompile Include="ChannelManager.cpp">
       <Filter>ContentServer\Content\Channel</Filter>
     </ClCompile>
@@ -341,6 +341,9 @@
     </ClCompile>
     <ClCompile Include="InventoryManager.cpp">
       <Filter>ContentServer\Content\Inventory</Filter>
+    </ClCompile>
+    <ClCompile Include="Map.cpp">
+      <Filter>ContentServer\Content\Map</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

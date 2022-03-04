@@ -4,9 +4,6 @@
 #include "Player.h"
 #include "GameServerMessage.h"
 
-#define SECTOR_X_MAX 50
-#define SECTOR_Y_MAX 50
-
 #define LOGIN_SUCCESS 1
 #define LOGIN_FAIL 0
 

@@ -98,14 +98,14 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int32 Channel
 		case en_GameObjectType::OBJECT_SLIME:
 		case en_GameObjectType::OBJECT_BEAR:
 			{				
-				vector<st_GameObjectInfo> SpawnMonster;				
+				vector<CGameObject*> SpawnMonster;				
 
 				CMonster* Monster = (CMonster*)EnterGameObject;				
 
 				// 인덱스 가져오기
-				_MonstersArrayIndexs.Pop(&EnterGameObject->_ObjectManagerIndex);				
+				_MonstersArrayIndexs.Pop(&EnterGameObject->_ObjectManagerArrayIndex);				
 				// 배열에 저장
-				_MonstersArray[EnterGameObject->_ObjectManagerIndex] = Monster;
+				_MonstersArray[EnterGameObject->_ObjectManagerArrayIndex] = Monster;
 
 				// 몬스터 주위 오브젝트 정보 저장
 				Monster->_FieldOfViewPlayers = EnterChannel->GetFieldOfViewPlayer(Monster, Monster->_FieldOfViewDistance);
@@ -113,7 +113,7 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int32 Channel
 				// 채널 입장
 				EnterChannel->EnterChannel(EnterGameObject, &Monster->_SpawnPosition);			
 
-				SpawnMonster.push_back(Monster->_GameObjectInfo);								
+				SpawnMonster.push_back(Monster);								
 
 				// 몬스터 추가하면 몬스터 주위 플레이어들에게 몬스터를 소환하라고 알림
 				CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(1, SpawnMonster);				
@@ -139,7 +139,7 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int32 Channel
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
 			{
-				vector<st_GameObjectInfo> SpawnItem;
+				vector<CGameObject*> SpawnItem;
 				
 				CItem* Item = (CItem*)EnterGameObject;								
 
@@ -148,11 +148,11 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int32 Channel
 				{
 					// 중복되지 않은 아이템 스폰
 					// 인덱스 가져오기	
-					_ItemsArrayIndexs.Pop(&EnterGameObject->_ObjectManagerIndex);
+					_ItemsArrayIndexs.Pop(&EnterGameObject->_ObjectManagerArrayIndex);
 					// 배열에 저장
-					_ItemsArray[EnterGameObject->_ObjectManagerIndex] = Item;
+					_ItemsArray[EnterGameObject->_ObjectManagerArrayIndex] = Item;
 
-					SpawnItem.push_back(Item->_GameObjectInfo);
+					SpawnItem.push_back(Item);
 
 					Item->SetDestoryTime(1800);
 					Item->ItemSetTarget(Item->_GameObjectInfo.OwnerObjectType, Item->_GameObjectInfo.OwnerObjectId);
@@ -171,18 +171,19 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int32 Channel
 		case en_GameObjectType::OBJECT_STONE:
 		case en_GameObjectType::OBJECT_TREE:
 			{
-				vector<st_GameObjectInfo> SpawnEnvironment;
+				vector<CGameObject*> SpawnEnvironment;
 					
 				CEnvironment* Environment = (CEnvironment*)EnterGameObject;
 
 				// 인덱스 가져오기
-				_EnvironmentsArrayIndexs.Pop(&EnterGameObject->_ObjectManagerIndex);
+				_EnvironmentsArrayIndexs.Pop(&EnterGameObject->_ObjectManagerArrayIndex);
 				// 배열에 저장
-				_EnvironmentsArray[EnterGameObject->_ObjectManagerIndex] = Environment;
+				_EnvironmentsArray[EnterGameObject->_ObjectManagerArrayIndex] = Environment;
 
 				EnterChannel->EnterChannel(EnterGameObject, &Environment->_SpawnPosition);				
 
-				SpawnEnvironment.push_back(Environment->_GameObjectInfo);
+				SpawnEnvironment.push_back(Environment);
+
 				CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(1, SpawnEnvironment);
 				GameServer->SendPacketFieldOfView(Environment, ResSpawnPacket);
 				ResSpawnPacket->Free();
@@ -402,6 +403,7 @@ void CObjectManager::ObjectReturn(en_GameObjectType ObjectType, CGameObject* Ret
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
 		_ConsumableMemoryPool->Free((CConsumable*)ReturnObject);
 		break;
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
@@ -484,8 +486,8 @@ void CObjectManager::ItemSpawn(int64 KillerId, en_GameObjectType KillerObjectTyp
 	*ReqItemCreateMessage << (int16)SpawnItemOwnerType;
 	*ReqItemCreateMessage << (int32)MonsterDataType;
 
-	st_Job* ReqDBaseItemCreateJob = GameServer->_JobMemoryPool->Alloc();
-	ReqDBaseItemCreateJob->Type = en_JobType::DATA_BASE_ITEM_CREATE;
+	st_GameServerJob* ReqDBaseItemCreateJob = GameServer->_GameServerJobMemoryPool->Alloc();
+	ReqDBaseItemCreateJob->Type = en_GameServerJobType::DATA_BASE_ITEM_CREATE;
 	ReqDBaseItemCreateJob->SessionId = -1;
 	ReqDBaseItemCreateJob->Session = nullptr;
 	ReqDBaseItemCreateJob->Message = ReqItemCreateMessage;

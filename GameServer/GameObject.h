@@ -25,9 +25,7 @@ public:
 	st_Vector2Int _SpawnPosition;
 
 	// 시야 범위
-	int8 _FieldOfViewDistance;
-	// 시야 범위 오브젝트
-	vector<CGameObject*> _FieldOfViewObjects;
+	int8 _FieldOfViewDistance;	
 
 	CGameObject();
 	CGameObject(st_GameObjectInfo GameObjectInfo);
@@ -70,6 +68,11 @@ protected:
 	// 재생력 Tick
 	//-------------------------
 	uint64 _NatureRecoveryTick;	
+
+	//---------------------------
+	// 주위 시야 오브젝트 탐색 틱
+	//---------------------------
+	uint64 _FieldOfViewUpdateTick;
 
 	void BroadCastPacket(en_PACKET_TYPE PacketType, bool CanMove = true);
 };

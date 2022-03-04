@@ -79,7 +79,7 @@ void CGameServer::GameServerStart(const WCHAR* OpenIP, int32 Port)
 	_AuthThread = (HANDLE)_beginthreadex(NULL, 0, AuthThreadProc, this, 0, NULL);	
 	
 	// 유저 데이터 베이스 쓰레드 시작
-	for (int32 i = 0; i < 4; i++)
+	for (int32 i = 0; i < 3; i++)
 	{
 		_UserDataBaseThread = (HANDLE)_beginthreadex(NULL, 0, UserDataBaseThreadProc, this, 0, NULL);		
 		CloseHandle(_UserDataBaseThread);
@@ -1020,17 +1020,17 @@ void CGameServer::DeleteClient(st_Session* Session)
 		CChannel* Channel = G_ChannelManager->Find(1);
 		Channel->LeaveChannel(MyPlayer);
 
-		vector<int64> DeSpawnObjectIds;			
+		vector<CGameObject*> DeSpawnObjectIds;			
 
 		for (int i = 0; i < SESSION_CHARACTER_MAX; i++)
 		{
 			CPlayer* SessionPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndexes[i]];
 			if (SessionPlayer != nullptr && Session->SessionId == SessionPlayer->_SessionId)
 			{				
-				DeSpawnObjectIds.push_back(SessionPlayer->_GameObjectInfo.ObjectId);
+				DeSpawnObjectIds.push_back(SessionPlayer);
 
 				SessionPlayer->_NetworkState = en_ObjectNetworkState::LEAVE;	
-				SessionPlayer->_FieldOfViewObjects.clear();
+				SessionPlayer->_FieldOfViewInfos.clear();
 			}	
 
 			// 인덱스 반납
@@ -1338,38 +1338,6 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 
 				// 캐릭터의 상태를 10초 후에 IDLE 상태로 전환
 				//ObjectStateChangeTimerJobCreate(MyPlayer, en_CreatureState::IDLE, 10000);
-
-				vector<st_GameObjectInfo> SpawnObjectInfo;
-				SpawnObjectInfo.push_back(MyPlayer->_GameObjectInfo);
-
-				// 다른 플레이어들한테 나를 생성하라고 알려줌
-				CMessage* ResSpawnPacket = MakePacketResObjectSpawn(1, SpawnObjectInfo);
-				SendPacketFieldOfView(Session, ResSpawnPacket);
-				ResSpawnPacket->Free();
-
-				SpawnObjectInfo.clear();
-
-				// 나한테 다른 오브젝트들을 생성하라고 알려줌						
-				st_GameObjectInfo* SpawnGameObjectInfos;
-				// 시야 범위 안에 있는 오브젝트 가져오기
-				vector<CGameObject*> FieldOfViewObjects = G_ChannelManager->Find(1)->GetFieldOfViewObjects(MyPlayer, 1);
-				MyPlayer->_FieldOfViewObjects = FieldOfViewObjects;
-
-				if (FieldOfViewObjects.size() > 0)
-				{
-					SpawnGameObjectInfos = new st_GameObjectInfo[FieldOfViewObjects.size()];
-
-					for (int32 i = 0; i < FieldOfViewObjects.size(); i++)
-					{
-						SpawnObjectInfo.push_back(FieldOfViewObjects[i]->_GameObjectInfo);
-					}
-
-					CMessage* ResOtherObjectSpawnPacket = MakePacketResObjectSpawn((int32)FieldOfViewObjects.size(), SpawnObjectInfo);
-					SendPacket(Session->SessionId, ResOtherObjectSpawnPacket);
-					ResOtherObjectSpawnPacket->Free();
-
-					delete[] SpawnGameObjectInfos;
-				}									
 			}			
 		}
 		else
@@ -1501,30 +1469,11 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 			*Message >> PositionY;
 
 			// 클라가 움직일 방향값을 가져온다.
-			char ReqMoveDir;
-			*Message >> ReqMoveDir;									
-
-			// 방향값에 따라 노말벡터 값을 뽑아온다.
-			en_MoveDir MoveDir = (en_MoveDir)ReqMoveDir;
-			st_Vector2Int DirVector2Int;
-
-			switch (MoveDir)
-			{
-			case en_MoveDir::UP:
-				DirVector2Int = st_Vector2Int::Up();
-				break;
-			case en_MoveDir::DOWN:
-				DirVector2Int = st_Vector2Int::Down();
-				break;
-			case en_MoveDir::LEFT:
-				DirVector2Int = st_Vector2Int::Left();
-				break;
-			case en_MoveDir::RIGHT:
-				DirVector2Int = st_Vector2Int::Right();
-				break;
-			}
+			int8 ReqMoveDir;
+			*Message >> ReqMoveDir;				
 						
-			MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = MoveDir;
+			MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = (en_MoveDir)ReqMoveDir;
+
 			if (MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::IDLE
 				|| MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::SPAWN_IDLE
 				|| MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::SPELL)
@@ -1613,7 +1562,35 @@ void CGameServer::PacketProcReqMoveStop(int64 SessionID, CMessage* Message)
 			*Message >> PositionX;
 			float PositionY;
 			*Message >> PositionY;							
-						
+					
+			float CheckPositionX = abs(MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX - PositionX);
+			float CheckPositionY = abs(MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY - PositionY);
+
+			float DeltaTime = (Session->ReqStopTime - Session->ReqMoveTime) / 1000.0f;
+
+			//MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = (en_MoveDir)StopDir;
+			/*G_Logger->WriteStdOut(en_Color::RED, L"[%ld] DeltaTime [%0.1f] CheckPositionX : [%0.1f] CheckPositionY : [%0.1f] ServerPositionX : [%0.1f] ServerPositionY : [%0.1f] PositionX : [%0.1f] PositionY : [%0.1f] StopDir : [%d]\n",
+				AccountId,
+				(Session->ReqStopTime - Session->ReqMoveTime) / 1000.0f,
+				CheckPositionX,
+				CheckPositionY,
+				MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX,
+				MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY,
+				PositionX,
+				PositionY,
+				StopDir);	*/
+
+				// 서버 기준으로 좌표 설정
+				/*if (CheckPositionX >= 0.3f || CheckPositionY >= 0.3f)
+				{
+					MyPlayer->PositionReset();
+				}
+				else
+				{
+					MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX = PositionX;
+					MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY = PositionY;
+				}*/
+
 			CMessage* ResMoveStopPacket = MakePacketResMoveStop(Session->AccountId,
 				MyPlayer->_GameObjectInfo.ObjectId,
 				MyPlayer->_GameObjectInfo.ObjectPositionInfo);
@@ -1671,21 +1648,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 					Disconnect(Session->SessionId);
 					break;
 				}
-			}			
-
-			int8 QuickSlotBarIndex;
-			*Message >> QuickSlotBarIndex;
-
-			int8 QuickSlotBarSlotIndex;
-			*Message >> QuickSlotBarSlotIndex;
-
-			// 공격한 방향
-			int8 ReqMoveDir;
-			*Message >> ReqMoveDir;
-
-			// 스킬 종류
-			int16 ReqSkillType;
-			*Message >> ReqSkillType;
+			}						
 
 			CPlayer::st_PlayerJob* PlayerMeleeAttackJob = _PlayerJobMemoryPool->Alloc();			
 			PlayerMeleeAttackJob->Type = CPlayer::en_PlayerJobType::PLAYER_MELEE_JOB;
@@ -1693,10 +1656,8 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 			CGameServerMessage* PlayerMeleeAttackMessage = CGameServerMessage::GameServerMessageAlloc();
 			PlayerMeleeAttackMessage->Clear();
 
-			*PlayerMeleeAttackMessage << QuickSlotBarIndex;
-			*PlayerMeleeAttackMessage << QuickSlotBarSlotIndex;
-			*PlayerMeleeAttackMessage << ReqMoveDir;
-			*PlayerMeleeAttackMessage << ReqSkillType;
+			PlayerMeleeAttackMessage->InsertData(Message->GetFrontBufferPtr(), Message->GetUseBufferSize());
+			Message->MoveReadPosition(Message->GetUseBufferSize());			
 
 			PlayerMeleeAttackJob->Message = PlayerMeleeAttackMessage;
 			
@@ -1754,30 +1715,14 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 				}
 			}		
 
-			int8 QuickSlotBarIndex;
-			*Message >> QuickSlotBarIndex;
-
-			int8 QuickSlotBarSlotIndex;
-			*Message >> QuickSlotBarSlotIndex;
-
-			// 공격한 방향
-			int8 ReqMoveDir;
-			*Message >> ReqMoveDir;
-
-			// 스킬 종류
-			int16 ReqSkillType;
-			*Message >> ReqSkillType;
-
 			CPlayer::st_PlayerJob* PlayerMagicJob = _PlayerJobMemoryPool->Alloc();			
 			PlayerMagicJob->Type = CPlayer::en_PlayerJobType::PLAYER_MAGIC_JOB;
 
 			CGameServerMessage* PlayerMagicMessage = CGameServerMessage::GameServerMessageAlloc();
 			PlayerMagicMessage->Clear();
 
-			*PlayerMagicMessage << QuickSlotBarIndex;
-			*PlayerMagicMessage << QuickSlotBarSlotIndex;	
-			*PlayerMagicMessage << ReqMoveDir;
-			*PlayerMagicMessage << ReqSkillType;
+			PlayerMagicMessage->InsertData(Message->GetFrontBufferPtr(), Message->GetUseBufferSize());
+			Message->MoveReadPosition(Message->GetUseBufferSize());
 
 			PlayerMagicJob->Message = PlayerMagicMessage;
 
@@ -1832,17 +1777,11 @@ void CGameServer::PacketProcReqMagicCancel(int64 SessionId, CMessage* Message)
 				}
 			}
 
-			CPlayer* MagicCancelPlayer = (CPlayer*)G_ObjectManager->Find(PlayerId, en_GameObjectType::OBJECT_PLAYER);
-			if (MagicCancelPlayer->_SkillJob != nullptr)
-			{
-				MagicCancelPlayer->_SkillJob->TimerJobCancel = true;
-				MagicCancelPlayer->_SkillJob = nullptr;
+			CPlayer::st_PlayerJob* PlayerMagicCancelJob = _PlayerJobMemoryPool->Alloc();
+			PlayerMagicCancelJob->Type = CPlayer::en_PlayerJobType::PLAYER_MAGIC_CANCEL_JOB;
+			PlayerMagicCancelJob->Message = nullptr;
 
-				// 스킬 취소 응답 처리 주위 섹터에 전송
-				CMessage* ResMagicCancelPacket = MakePacketMagicCancel(MyPlayer->_AccountId, MyPlayer->_GameObjectInfo.ObjectId);
-				SendPacketFieldOfView(Session, ResMagicCancelPacket, true);				
-				ResMagicCancelPacket->Free();
-			}			
+			MyPlayer->_PlayerJobQue.Enqueue(PlayerMagicCancelJob);			
 		}
 	} while (0);
 
@@ -3806,8 +3745,8 @@ void CGameServer::PacketProcReqDBLootingItemToInventorySave(int64 SessionId, CGa
 		SendPacket(Session->SessionId, ResItemToInventoryPacket);
 		ResItemToInventoryPacket->Free();
 
-		vector<int64> DeSpawnItem;
-		DeSpawnItem.push_back(MapDeleteItemObjectId);
+		vector<CGameObject*> DeSpawnItem;
+		DeSpawnItem.push_back(Item);
 
 		// 클라에게 해당 아이템 삭제하라고 알려줌
 		CMessage* ResItemDeSpawnPacket = MakePacketResObjectDeSpawn(1, DeSpawnItem);
@@ -4137,13 +4076,13 @@ void CGameServer::PacketProcReqDBGoldSave(int64 SessionId, CMessage* Message)
 		SendPacket(Session->SessionId, ResGoldSaveMeesage);
 		ResGoldSaveMeesage->Free();
 
-		// 돈 오브젝트 디스폰
-		vector<int64> DeSpawnItem;
-		DeSpawnItem.push_back(ItemDBId);
+		//// 돈 오브젝트 디스폰
+		//vector<CGameObject*> DeSpawnItem;
+		//DeSpawnItem.push_back(ItemDBId);
 
-		CMessage* ResItemDeSpawnPacket = MakePacketResObjectDeSpawn(1, DeSpawnItem);
-		SendPacketFieldOfView(Session, ResItemDeSpawnPacket, true);		
-		ResItemDeSpawnPacket->Free();
+		//CMessage* ResItemDeSpawnPacket = MakePacketResObjectDeSpawn(1, DeSpawnItem);
+		//SendPacketFieldOfView(Session, ResItemDeSpawnPacket, true);		
+		//ResItemDeSpawnPacket->Free();
 
 		bool ItemUse = true;
 		// 아이템 DB에서 Inventory에 저장한 아이템 삭제 ( 아이템과 마찬가지로 ItemUse를 1로 바꾼다 )
@@ -6152,23 +6091,6 @@ CGameServerMessage* CGameServer::MakePacketCraftingList(int64 AccountId, int64 P
 	return ResCraftingListMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketMagicCancel(int64 AccountId, int64 PlayerId)
-{
-	CGameServerMessage* ResMagicCancelMessage = CGameServerMessage::GameServerMessageAlloc();
-	if (ResMagicCancelMessage == nullptr)
-	{
-		return nullptr;
-	}
-
-	ResMagicCancelMessage->Clear();
-
-	*ResMagicCancelMessage << (int16)en_PACKET_S2C_MAGIC_CANCEL;
-	*ResMagicCancelMessage << AccountId;
-	*ResMagicCancelMessage << PlayerId;
-
-	return ResMagicCancelMessage;
-}
-
 CGameServerMessage* CGameServer::MakePacketPing()
 {
 	CGameServerMessage* PingMessage = CGameServerMessage::GameServerMessageAlloc();
@@ -6402,7 +6324,7 @@ CGameServerMessage* CGameServer::MakePacketPatrol(int64 ObjectId, en_GameObjectT
 // int64 AccountId
 // int32 PlayerDBId
 // st_GameObjectInfo GameObjectInfo
-CGameServerMessage* CGameServer::MakePacketResObjectSpawn(int32 ObjectInfosCount, vector<st_GameObjectInfo> ObjectInfos)
+CGameServerMessage* CGameServer::MakePacketResObjectSpawn(int32 ObjectInfosCount, vector<CGameObject*> ObjectInfos)
 {
 	CGameServerMessage* ResSpawnPacket = CGameServerMessage::GameServerMessageAlloc();
 	if (ResSpawnPacket == nullptr)
@@ -6420,7 +6342,7 @@ CGameServerMessage* CGameServer::MakePacketResObjectSpawn(int32 ObjectInfosCount
 	for (int i = 0; i < ObjectInfosCount; i++)
 	{
 		// SpawnObjectId
-		*ResSpawnPacket << ObjectInfos[i];
+		*ResSpawnPacket << ObjectInfos[i]->_GameObjectInfo;
 	}
 
 	return ResSpawnPacket;
@@ -6428,7 +6350,7 @@ CGameServerMessage* CGameServer::MakePacketResObjectSpawn(int32 ObjectInfosCount
 
 // int64 AccountId
 // int32 PlayerDBId
-CGameServerMessage* CGameServer::MakePacketResObjectDeSpawn(int32 DeSpawnObjectCount, vector<int64> DeSpawnObjectIds)
+CGameServerMessage* CGameServer::MakePacketResObjectDeSpawn(int32 DeSpawnObjectCount, vector<CGameObject*> DeSpawnObjects)
 {
 	CGameServerMessage* ResDeSpawnPacket = CGameServerMessage::GameServerMessageAlloc();
 	if (ResDeSpawnPacket == nullptr)
@@ -6443,7 +6365,7 @@ CGameServerMessage* CGameServer::MakePacketResObjectDeSpawn(int32 DeSpawnObjectC
 
 	for (int32 i = 0; i < DeSpawnObjectCount; i++)
 	{
-		*ResDeSpawnPacket << DeSpawnObjectIds[i];
+		*ResDeSpawnPacket << DeSpawnObjects[i]->_GameObjectInfo.ObjectId;
 	}
 
 	return ResDeSpawnPacket;
@@ -6582,6 +6504,23 @@ CGameServerMessage* CGameServer::MakePacketExperience(int64 AccountId, int64 Pla
 	*ResExperienceMessage << TotalExp;
 
 	return ResExperienceMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketMagicCancel(int64 AccountId, int64 PlayerId)
+{
+	CGameServerMessage* ResMagicCancelMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResMagicCancelMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResMagicCancelMessage->Clear();
+
+	*ResMagicCancelMessage << (int16)en_PACKET_S2C_MAGIC_CANCEL;
+	*ResMagicCancelMessage << AccountId;
+	*ResMagicCancelMessage << PlayerId;
+
+	return ResMagicCancelMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketCoolTime(int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, float SkillCoolTime, float SkillCoolTimeSpeed)
@@ -6729,6 +6668,24 @@ void CGameServer::SendPacketAroundSector(st_Session* Session, CMessage* Message,
 	}
 }
 
+void CGameServer::SendPacketFieldOfView(vector<st_FieldOfViewInfo> FieldOfViewObject, CMessage* Message, CGameObject* Self)
+{
+	for (st_FieldOfViewInfo ObjectInfo : FieldOfViewObject)
+	{
+		CGameObject* FindObject = G_ObjectManager->Find(ObjectInfo.ObjectId, ObjectInfo.ObjectType);
+		
+		if (FindObject != nullptr && FindObject->_IsSendPacketTarget)
+		{
+			SendPacket(((CPlayer*)FindObject)->_SessionId, Message);
+		}		
+	}
+
+	if (Self != nullptr)
+	{
+		SendPacket(((CPlayer*)Self)->_SessionId, Message);
+	}
+}
+
 void CGameServer::SendPacketFieldOfView(CGameObject* Object, CMessage* Message)
 {
 	CChannel* Channel = G_ChannelManager->Find(1);
@@ -6738,14 +6695,14 @@ void CGameServer::SendPacketFieldOfView(CGameObject* Object, CMessage* Message)
 
 	for (CSector* AroundSector : AroundSectors)
 	{
-		AroundSector->GetSectorLock();
+		AroundSector->GetSectorLock();		
 
 		for (CPlayer* Player : AroundSector->GetPlayers())
 		{
 			int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Player->GetCellPosition());
 
 			if (Distance <= Object->_FieldOfViewDistance)
-			{
+			{				
 				SendPacket(Player->_SessionId, Message);
 			}
 		}

@@ -13,7 +13,7 @@ CGameObject::CGameObject()
 	_SelectTarget = nullptr;
 
 	_NatureRecoveryTick = 0;	
-
+	_FieldOfViewUpdateTick = 0;
 	_IsSendPacketTarget = false;
 }
 
@@ -190,21 +190,7 @@ void CGameObject::BroadCastPacket(en_PACKET_TYPE PacketType, bool CanMove)
 		break;
 	case en_PACKET_TYPE::en_PACKET_S2C_DIE:			
 		ResPacket = G_ObjectManager->GameServer->MakePacketObjectDie(this->_GameObjectInfo.ObjectId);
-		break;
-	case en_PACKET_TYPE::en_PACKET_S2C_SPAWN:
-	{
-		vector<st_GameObjectInfo> SpawnObjectIds;
-		SpawnObjectIds.push_back(_GameObjectInfo);
-		ResPacket = G_ObjectManager->GameServer->MakePacketResObjectSpawn(1, SpawnObjectIds);
-	}
-	break;
-	case en_PACKET_TYPE::en_PACKET_S2C_DESPAWN:
-	{
-		vector<int64> DeSpawnObjectIds;
-		DeSpawnObjectIds.push_back(_GameObjectInfo.ObjectId);
-		ResPacket = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(1, DeSpawnObjectIds);
-	}
-	break;	
+		break;		
 	default:
 		CRASH("Monster BroadCast PacketType Error");
 		break;

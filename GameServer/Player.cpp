@@ -16,6 +16,7 @@ CPlayer::CPlayer()
 	_IsSendPacketTarget = true;
 
 	_NatureRecoveryTick = GetTickCount64() + 5000;
+	_FieldOfViewUpdateTick = GetTickCount64() + 100;
 }
 
 CPlayer::~CPlayer()
@@ -23,7 +24,134 @@ CPlayer::~CPlayer()
 }
 
 void CPlayer::Update()
-{	
+{		
+	// 시야범위 객체 업데이트	
+	if (_FieldOfViewUpdateTick < GetTickCount64())
+	{	
+		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetFieldOfViewObjects(this, 1);
+		//vector<st_FieldOfViewInfo> PreviousFieldOfViewObjects = _FieldOfViewInfos;
+		vector<st_FieldOfViewInfo> SpawnObjectIds;
+		vector<st_FieldOfViewInfo> DeSpawnObjectIds;		
+
+		if (CurrentFieldOfViewObjectIds.size() > 1)
+		{
+			sort(CurrentFieldOfViewObjectIds.begin(), CurrentFieldOfViewObjectIds.end());
+		}
+
+		if (_FieldOfViewInfos.size() > 1)
+		{
+			sort(_FieldOfViewInfos.begin(), _FieldOfViewInfos.end());
+		}		
+
+		SpawnObjectIds.resize(CurrentFieldOfViewObjectIds.size());
+
+		set_difference(CurrentFieldOfViewObjectIds.begin(), CurrentFieldOfViewObjectIds.end(),
+			_FieldOfViewInfos.begin(), _FieldOfViewInfos.end(),
+			SpawnObjectIds.begin());
+		
+		DeSpawnObjectIds.resize(_FieldOfViewInfos.size());
+
+		set_difference(_FieldOfViewInfos.begin(), _FieldOfViewInfos.end(),
+			CurrentFieldOfViewObjectIds.begin(), CurrentFieldOfViewObjectIds.end(),
+			DeSpawnObjectIds.begin());
+		
+		// 한번 더 검사
+		if (SpawnObjectIds.size() > 0)
+		{
+			// 스폰 해야할 대상들을 스폰
+			vector<CGameObject*> SpawnObjectInfos;
+			for (st_FieldOfViewInfo SpawnObject : SpawnObjectIds)
+			{
+				if (SpawnObject.ObjectId != 0 && SpawnObject.ObjectType != en_GameObjectType::NORMAL)
+				{
+					CGameObject* FindObject = G_ObjectManager->Find(SpawnObject.ObjectId, SpawnObject.ObjectType);
+					if (FindObject != nullptr)
+					{
+						// 시야 범위 안에 존재할 경우 스폰정보 담음
+						int16 Distance = st_Vector2Int::Distance(FindObject->GetCellPosition(), GetCellPosition());
+						if (Distance <= _FieldOfViewDistance)
+						{
+							SpawnObjectInfos.push_back(FindObject);
+						}						
+					}
+				}								
+			}
+
+			// 스폰해야 할 대상을 나에게 스폰하라고 알림
+			if (SpawnObjectInfos.size() > 0)
+			{
+				CMessage* ResOtherObjectSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectSpawn((int32)SpawnObjectInfos.size(), SpawnObjectInfos);
+				G_ObjectManager->GameServer->SendPacket(_SessionId, ResOtherObjectSpawnPacket);
+				ResOtherObjectSpawnPacket->Free();
+
+				// 스폰 해야할 대상들 기준에서 나와의 거리가 스폰 해야할 대상들 시야범위안에 있을 경우 나를 스폰하라고 알려줌
+				SpawnObjectInfos.clear();
+				SpawnObjectInfos.push_back(this);
+
+				CMessage* ResMyObjectSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectSpawn(1, SpawnObjectInfos);
+				for (CGameObject* SpawnObject : SpawnObjectInfos)
+				{
+					if (SpawnObject->_IsSendPacketTarget == true)
+					{
+						int16 Distance = st_Vector2Int::Distance(GetCellPosition(), SpawnObject->GetCellPosition());
+
+						if (Distance <= SpawnObject->_FieldOfViewDistance)
+						{
+							G_ObjectManager->GameServer->SendPacket(((CPlayer*)SpawnObject)->_SessionId, ResMyObjectSpawnPacket);
+						}
+					}
+				}
+				ResMyObjectSpawnPacket->Free();
+			}						
+		}
+
+		// 한번 더 검사
+		if (DeSpawnObjectIds.size() > 0)
+		{
+			vector<CGameObject*> DeSpawnObjectInfos;
+			for (st_FieldOfViewInfo DeSpawnObject : DeSpawnObjectIds)
+			{
+				if (DeSpawnObject.ObjectId != 0 && DeSpawnObject.ObjectType != en_GameObjectType::NORMAL)
+				{
+					CGameObject* FindObject = G_ObjectManager->Find(DeSpawnObject.ObjectId, DeSpawnObject.ObjectType);
+
+					if (FindObject != nullptr && FindObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
+					{
+						DeSpawnObjectInfos.push_back(FindObject);
+					}
+				}				
+			}
+
+			// 디스폰해야 할 대상을 나에게 스폰하라고 알림
+			if (DeSpawnObjectInfos.size() > 0)
+			{
+				CMessage* ResOtherObjectDeSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn((int32)DeSpawnObjectInfos.size(), DeSpawnObjectInfos);
+				G_ObjectManager->GameServer->SendPacket(_SessionId, ResOtherObjectDeSpawnPacket);
+				ResOtherObjectDeSpawnPacket->Free();
+
+				// 하지만 나와 대상들의 거리가 대상들 시야범위 안에 속할 경우 나를 디스폰하지는 않는다.
+				DeSpawnObjectInfos.clear();
+				DeSpawnObjectInfos.push_back(this);
+
+				CMessage* ResMyObjectDeSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(1, DeSpawnObjectInfos);
+				for (CGameObject* DeSpawnObject : DeSpawnObjectInfos)
+				{
+					if (DeSpawnObject->_IsSendPacketTarget)
+					{
+						int16 Distance = st_Vector2Int::Distance(GetCellPosition(), DeSpawnObject->GetCellPosition());
+						if (Distance > DeSpawnObject->_FieldOfViewDistance)
+						{
+							G_ObjectManager->GameServer->SendPacket(((CPlayer*)DeSpawnObject)->_SessionId, ResMyObjectDeSpawnPacket);
+						}
+					}
+				}
+				ResMyObjectDeSpawnPacket->Free();
+			}			
+		}
+
+		_FieldOfViewInfos = CurrentFieldOfViewObjectIds;				
+	}	
+
 	PlayerJobQueProc();
 
 	if (_NatureRecoveryTick < GetTickCount64())
@@ -47,11 +175,11 @@ void CPlayer::Update()
 			_GameObjectInfo.ObjectStatInfo.HP = 0;
 		}
 
-		_NatureRecoveryTick = GetTickCount64() + 5000;
-
+		_NatureRecoveryTick = GetTickCount64() + 5000;		
+				
 		CMessage* ResObjectStatPacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId,
 			_GameObjectInfo.ObjectStatInfo);
-		G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResObjectStatPacket);
+		G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResObjectStatPacket, this);		
 		ResObjectStatPacket->Free();
 	}
 		
@@ -128,9 +256,10 @@ void CPlayer::PlayerJobQueProc()
 		vector<CGameObject*> Targets;
 		st_SkillInfo* FindSkillInfo = nullptr;
 		CMessage* ResErrorPacket = nullptr;		
+		CMessage* ResMagicCancelPacket = nullptr;
 
 		switch (PlayerJob->Type)
-		{
+		{	
 		case en_PlayerJobType::PLAYER_MELEE_JOB:
 			{
 				int8 QuickSlotBarIndex;
@@ -174,7 +303,7 @@ void CPlayer::PlayerJobQueProc()
 						_GameObjectInfo.ObjectPositionInfo.MoveDir, 
 						_GameObjectInfo.ObjectType,
 						_GameObjectInfo.ObjectPositionInfo.State);
-					G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResObjectStateChangePacket);
+					G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResObjectStateChangePacket, this);
 					ResObjectStateChangePacket->Free();
 
 					// 타겟 위치 확인
@@ -233,7 +362,7 @@ void CPlayer::PlayerJobQueProc()
 										}
 
 										ResSyncPositionPacket = G_ObjectManager->GameServer->MakePacketResSyncPosition(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectPositionInfo);
-										G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResSyncPositionPacket);
+										G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResSyncPositionPacket, this);
 										ResSyncPositionPacket->Free();
 									}
 									else
@@ -325,7 +454,7 @@ void CPlayer::PlayerJobQueProc()
 										}
 
 										ResSyncPositionPacket = G_ObjectManager->GameServer->MakePacketResSyncPosition(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo);
-										G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResSyncPositionPacket);
+										G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResSyncPositionPacket, this);
 										ResSyncPositionPacket->Free();
 									}
 									else
@@ -367,7 +496,7 @@ void CPlayer::PlayerJobQueProc()
 
 						// 이펙트 출력
 						CMessage* ResEffectPacket = G_ObjectManager->GameServer->MakePacketEffect(_GameObjectInfo.ObjectId, en_EffectType::EFFECT_SMASH_WAVE, 2.0f);
-						G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResEffectPacket);
+						G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResEffectPacket, this);
 						ResEffectPacket->Free();
 					}
 					break;
@@ -637,22 +766,22 @@ void CPlayer::PlayerJobQueProc()
 
 							// 데미지 시스템 메세지 전송
 							CMessage* ResSkillSystemMessagePacket = G_ObjectManager->GameServer->MakePacketResChattingBoxMessage(_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, IsCritical ? st_Color::Red() : st_Color::White(), SkillTypeString);
-							G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResSkillSystemMessagePacket);
+							G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResSkillSystemMessagePacket, this);
 							ResSkillSystemMessagePacket->Free();
 
 							// 공격 응답 메세지 전송
 							CMessage* ResMyAttackOtherPacket = G_ObjectManager->GameServer->MakePacketResAttack(_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectId, (en_SkillType)ReqSkillType, FinalDamage, IsCritical);
-							G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResMyAttackOtherPacket);
+							G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResMyAttackOtherPacket, this);
 							ResMyAttackOtherPacket->Free();
 
 							// 이펙트 출력
 							CMessage* ResEffectPacket = G_ObjectManager->GameServer->MakePacketEffect(Target->_GameObjectInfo.ObjectId, HitEffectType, AttackSkillInfo->SkillTargetEffectTime);
-							G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResEffectPacket);
+							G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResEffectPacket, this);
 							ResEffectPacket->Free();
 
 							// 스탯 변경 메세지 전송
 							CMessage* ResChangeObjectStat = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectStatInfo);
-							G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResChangeObjectStat);
+							G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResChangeObjectStat, this);
 							ResChangeObjectStat->Free();
 						}
 					}
@@ -699,7 +828,7 @@ void CPlayer::PlayerJobQueProc()
 						SpellCastingTime = FindSkillInfo->SkillCastingTime / 1000.0f;
 
 						ResEffectPacket = G_ObjectManager->GameServer->MakePacketEffect(_GameObjectInfo.ObjectId, en_EffectType::EFFECT_CHARGE_POSE, 2.8f);
-						G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResEffectPacket);
+						G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResEffectPacket, this);
 						ResEffectPacket->Free();
 						break;
 					case en_SkillType::SKILL_SHAMAN_FLAME_HARPOON:
@@ -727,7 +856,7 @@ void CPlayer::PlayerJobQueProc()
 
 								// 스펠창 시작
 								ResMagicPacket = G_ObjectManager->GameServer->MakePacketResMagic(_GameObjectInfo.ObjectId, true, FindSkillInfo->SkillType, SpellCastingTime);
-								G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResMagicPacket);
+								G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResMagicPacket, this);
 								ResMagicPacket->Free();
 
 								_SkillType = FindSkillInfo->SkillType;
@@ -761,7 +890,7 @@ void CPlayer::PlayerJobQueProc()
 
 							// 스펠창 시작
 							ResMagicPacket = G_ObjectManager->GameServer->MakePacketResMagic(_SelectTarget->_GameObjectInfo.ObjectId, true, FindSkillInfo->SkillType, SpellCastingTime);
-							G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResMagicPacket);
+							G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResMagicPacket, this);
 							ResMagicPacket->Free();
 
 							_SkillType = FindSkillInfo->SkillType;
@@ -792,7 +921,7 @@ void CPlayer::PlayerJobQueProc()
 						CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId, 
 							_GameObjectInfo.ObjectPositionInfo.MoveDir, _GameObjectInfo.ObjectType,
 							_GameObjectInfo.ObjectPositionInfo.State);
-						G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResObjectStateChangePacket);
+						G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResObjectStateChangePacket, this);
 						ResObjectStateChangePacket->Free();
 
 						G_ObjectManager->GameServer->SkillCoolTimeTimerJobCreate(this, FindSkillInfo->SkillCastingTime, FindSkillInfo, en_TimerJobType::TIMER_SPELL_END, QuickSlotBarIndex, QuickSlotBarSlotIndex);
@@ -810,10 +939,24 @@ void CPlayer::PlayerJobQueProc()
 					ResErrorPacket->Free();
 				}
 			}
-			break;	
+			break;
+		case en_PlayerJobType::PLAYER_MAGIC_CANCEL_JOB:
+			if (_SkillJob != nullptr)
+			{
+				_SkillJob->TimerJobCancel = true;
+				_SkillJob = nullptr;
+
+				ResMagicCancelPacket = G_ObjectManager->GameServer->MakePacketMagicCancel(_AccountId, _GameObjectInfo.ObjectId);
+				G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResMagicCancelPacket, this);
+				ResMagicCancelPacket->Free();
+			}
+			break;
 		}		
 
-		PlayerJob->Message->Free();
+		if (PlayerJob->Message != nullptr)
+		{
+			PlayerJob->Message->Free();
+		}		
 
 		G_ObjectManager->GameServer->_PlayerJobMemoryPool->Free(PlayerJob);
 	}
@@ -866,7 +1009,7 @@ void CPlayer::UpdateMove()
 			CanMove,
 			_GameObjectInfo.ObjectPositionInfo);
 
-		G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResMovePacket);
+		G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResMovePacket, this);
 		ResMovePacket->Free();
 	}		
 }

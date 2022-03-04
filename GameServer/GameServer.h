@@ -337,11 +337,7 @@ private:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 제작템 목록 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketCraftingList(int64 AccountId, int64 PlayerId, vector<st_CraftingItemCategory> CraftingItemList);	
-	//-----------------------------------------------------------------------------------------
-	// 게임서버 스킬 취소 패킷 조합
-	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketMagicCancel(int64 AccountId, int64 PlayerId);	
+	CGameServerMessage* MakePacketCraftingList(int64 AccountId, int64 PlayerId, vector<st_CraftingItemCategory> CraftingItemList);		
 	//-------------------------------------------------
 	// 게임서버 핑 패킷 조합
 	//-------------------------------------------------
@@ -388,11 +384,11 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 오브젝트 스폰 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResObjectSpawn(int32 ObjectInfosCount, vector<st_GameObjectInfo> ObjectInfos);
+	CGameServerMessage* MakePacketResObjectSpawn(int32 ObjectInfosCount, vector<CGameObject*> ObjectInfos);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 오브젝트 디스폰 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResObjectDeSpawn(int32 DeSpawnObjectCount, vector<int64> DeSpawnObjectIds);
+	CGameServerMessage* MakePacketResObjectDeSpawn(int32 DeSpawnObjectCount, vector<CGameObject*> DeSpawnObjects);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 오브젝트 죽음 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -421,6 +417,10 @@ public:
 	// 게임서버 경험치 패킷 조합
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketExperience(int64 AccountId, int64 PlayerId, int64 GainExp, int64 CurrentExp, int64 RequireExp, int64 TotalExp);
+	//-----------------------------------------------------------------------------------------
+	// 게임서버 스킬 취소 패킷 조합
+	//-----------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketMagicCancel(int64 AccountId, int64 PlayerId);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 재사용대기시간 출력 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -510,6 +510,10 @@ public:
 	// Session을 기준으로 주위 섹터에 전송
 	//--------------------------------------------------------------
 	void SendPacketAroundSector(st_Session* Session, CMessage* Message, bool SendMe = false);
+	//--------------------------------------------------------------
+	// 시야범위 기준으로 패킷 전송
+	//--------------------------------------------------------------
+	void SendPacketFieldOfView(vector<st_FieldOfViewInfo> FieldOfViewObject, CMessage* Message, CGameObject* Self = nullptr);
 	//--------------------------------------------------------------
 	// 오브젝트를 기준으로 시야뷰 안에 있는 플레이어 대상으로 패킷 전송
 	//--------------------------------------------------------------

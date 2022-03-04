@@ -46,8 +46,7 @@ struct st_Vector2
 	// 거리 구하기
 	static float Distance(st_Vector2 TargetCellPosition, st_Vector2 MyCellPosition)
 	{
-		float CalculateDistance = (float)sqrt(pow(TargetCellPosition._X - MyCellPosition._X, 2) + pow(TargetCellPosition._Y - MyCellPosition._Y, 2));
-		return round((CalculateDistance * 100) / 100);
+		return (float)sqrt(pow(TargetCellPosition._X - MyCellPosition._X, 2) + pow(TargetCellPosition._Y - MyCellPosition._Y, 2));		
 	}
 
 	// 벡터 크기 구하기
@@ -60,25 +59,27 @@ struct st_Vector2
 	static st_Vector2 Normalize(st_Vector2 Vector)
 	{
 		float VectorSize = st_Vector2::Size(Vector);
-
-		// 둘째 자리에서 반올림
+				
 		st_Vector2 NormalVector;
-		NormalVector._X = round(((Vector._X / VectorSize) * 100) / 100);
-		NormalVector._Y = round(((Vector._Y / VectorSize) * 100) / 100);
+		NormalVector._X = round(Vector._X / VectorSize);
+		NormalVector._Y = round(Vector._Y / VectorSize);	
 
 		return NormalVector;
 	}
 
 	static en_MoveDir GetMoveDir(st_Vector2 NormalVector)
 	{
-		if (NormalVector._X > 0)
-		{
-			return en_MoveDir::RIGHT;
-		}
+		NormalVector._X = round(NormalVector._X);
+		NormalVector._Y = round(NormalVector._Y);		
 
 		if (NormalVector._X < 0)
 		{
 			return en_MoveDir::LEFT;
+		}
+
+		if (NormalVector._X > 0)
+		{
+			return en_MoveDir::RIGHT;
 		}
 
 		if (NormalVector._Y > 0)
@@ -89,7 +90,7 @@ struct st_Vector2
 		if (NormalVector._Y < 0)
 		{
 			return en_MoveDir::DOWN;
-		}
+		}	
 	}
 };
 
@@ -151,7 +152,7 @@ struct st_Vector2Int
 	static int16 Distance(st_Vector2Int TargetCellPosition, st_Vector2Int MyCellPosition)
 	{
 		return (int16)sqrt(pow(TargetCellPosition._X - MyCellPosition._X, 2) + pow(TargetCellPosition._Y - MyCellPosition._Y, 2));
-	}
+	}	
 
 	static en_MoveDir GetMoveDir(st_Vector2Int NormalVector)
 	{

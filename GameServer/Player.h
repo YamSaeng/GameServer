@@ -13,16 +13,17 @@ class CPlayer : public CGameObject
 {
 public:	
 	enum class en_PlayerJobType : int16
-	{
+	{		
 		PLAYER_MELEE_JOB,
-		PLAYER_MAGIC_JOB		
+		PLAYER_MAGIC_JOB,
+		PLAYER_MAGIC_CANCEL_JOB
 	};
 
 	struct st_PlayerJob
 	{
 		en_PlayerJobType Type;		
 		CGameServerMessage* Message = nullptr;
-	};
+	};	
 
 	uint64 _AttackTick;
 	uint64 _SpellTick;
@@ -50,6 +51,9 @@ public:
 
 	CLockFreeQue<st_PlayerJob*> _PlayerJobQue;
 
+	// 시야 범위 오브젝트
+	vector<st_FieldOfViewInfo> _FieldOfViewInfos;	
+
 	CPlayer();	
 	~CPlayer();		
 
@@ -65,5 +69,5 @@ public:
 protected:
 	virtual void UpdateMove();	
 	virtual void UpdateAttack();
-	virtual void UpdateSpell();
+	virtual void UpdateSpell();	
 };

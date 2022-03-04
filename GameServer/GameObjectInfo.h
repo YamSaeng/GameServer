@@ -1920,3 +1920,14 @@ struct st_CraftingItemCategory
 	wstring CategoryName; // 제작템 범주 이름
 	vector<st_CraftingCompleteItem> CompleteItems; // 범주에 속한 완성 제작템들
 };
+
+struct st_FieldOfViewInfo
+{
+	int64 ObjectId;
+	en_GameObjectType ObjectType;
+
+	bool operator<(st_FieldOfViewInfo Right)
+	{
+		return this->ObjectId < Right.ObjectId;
+	}
+};

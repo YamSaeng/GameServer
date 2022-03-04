@@ -175,17 +175,21 @@ vector<CGameObject*> CChannel::GetAroundSectorObjects(CGameObject* Object, int32
 	return SectorGameObjects;
 }
 
-vector<CGameObject*> CChannel::GetFieldOfViewObjects(CGameObject* Object, int16 Range, bool ExceptMe)
+vector<st_FieldOfViewInfo> CChannel::GetFieldOfViewObjects(CGameObject* Object, int16 Range, bool ExceptMe)
 {
-	vector<CGameObject*> FieldOfViewGameObjects;
+	vector<st_FieldOfViewInfo> FieldOfViewGameObjects;
 
 	vector<CSector*> Sectors = GetAroundSectors(Object->GetCellPosition(), Range);
 
 	for (CSector* Sector : Sectors)
 	{
+		st_FieldOfViewInfo FieldOfViewInfo;
 		// 주변 섹터 플레이어 정보
 		for (CPlayer* Player : Sector->GetPlayers())
-		{
+		{			
+			FieldOfViewInfo.ObjectId = Player->_GameObjectInfo.ObjectId;
+			FieldOfViewInfo.ObjectType = Player->_GameObjectInfo.ObjectType;
+
 			int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Player->GetCellPosition());
 
 			// 함수 호출한 오브젝트를 포함할 것인지에 대한 여부 true면 제외 false면 포함
@@ -193,43 +197,52 @@ vector<CGameObject*> CChannel::GetFieldOfViewObjects(CGameObject* Object, int16 
 			{
 				if (Object->_GameObjectInfo.ObjectId != Player->_GameObjectInfo.ObjectId)
 				{
-					FieldOfViewGameObjects.push_back(Player);
+					FieldOfViewGameObjects.push_back(FieldOfViewInfo);
 				}
 			}
 			else if(ExceptMe == false && Distance <= Object->_FieldOfViewDistance)
 			{
-				FieldOfViewGameObjects.push_back(Player);
+				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
 			}
 		}
 
 		// 주변 섹터 몬스터 정보
 		for (CMonster* Monster : Sector->GetMonsters())
 		{
+			FieldOfViewInfo.ObjectId = Monster->_GameObjectInfo.ObjectId;
+			FieldOfViewInfo.ObjectType = Monster->_GameObjectInfo.ObjectType;
+
 			int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Monster->GetCellPosition());
 
 			if (Distance <= Object->_FieldOfViewDistance)
 			{
-				FieldOfViewGameObjects.push_back(Monster);
+				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
 			}			
 		}
 
 		for (CEnvironment* Environment : Sector->GetEnvironment())
 		{
+			FieldOfViewInfo.ObjectId = Environment->_GameObjectInfo.ObjectId;
+			FieldOfViewInfo.ObjectType = Environment->_GameObjectInfo.ObjectType;
+
 			int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Environment->GetCellPosition());
 
 			if (Distance <= Object->_FieldOfViewDistance)
 			{
-				FieldOfViewGameObjects.push_back(Environment);
+				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
 			}			
 		}
 
 		for (CItem* Item : Sector->GetItems())
 		{
+			FieldOfViewInfo.ObjectId = Item->_GameObjectInfo.ObjectId;
+			FieldOfViewInfo.ObjectType = Item->_GameObjectInfo.ObjectType;
+
 			int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Item->GetCellPosition());
 
 			if (Distance <= Object->_FieldOfViewDistance)
 			{
-				FieldOfViewGameObjects.push_back(Item);
+				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
 			}			
 		}		
 	}
@@ -452,13 +465,13 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			
 			// 채널 저장
 			EnterChannelPlayer->_Channel = this;		
-
+			
 			// 맵에 적용
-			IsEnterChannel = _Map->ApplyMove(EnterChannelPlayer, SpawnPosition);
+			IsEnterChannel = _Map->ApplyMove(EnterChannelPlayer, SpawnPosition);					
 
-			// 섹터 얻어서 해당 섹터에도 저장
-			CSector* EnterSector = GetSector(SpawnPosition);			
-			EnterSector->Insert(EnterChannelPlayer);			
+			// 섹터에 저장
+			CSector* EnterSector = GetSector(SpawnPosition);
+			EnterSector->Insert(EnterChannelPlayer);
 		}
 		break;
 	case en_GameObjectType::OBJECT_SLIME:

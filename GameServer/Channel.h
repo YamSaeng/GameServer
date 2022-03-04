@@ -6,6 +6,7 @@
 class CMonster;
 class CItem;
 class CEnvironment;
+class CPlayer;
 
 class CChannel
 {
@@ -76,9 +77,9 @@ public:
 	//-----------------------------------------------------------------
 	vector<CGameObject*> GetAroundSectorObjects(CGameObject* Object, int32 Range, bool ExceptMe = true);
 	//-----------------------------------------------------------------
-	// 오브젝트 시야 범위 안에 있는 오브젝트 반환
+	// 오브젝트 시야 범위 안에 있는 오브젝트 아이디 목록 반환
 	//-----------------------------------------------------------------
-	vector<CGameObject*> GetFieldOfViewObjects(CGameObject* Object, int16 Range, bool ExceptMe = true);
+	vector<st_FieldOfViewInfo> GetFieldOfViewObjects(CGameObject* Object, int16 Range, bool ExceptMe = true);
 	
 	//--------------------------------------------------------------------------------------
 	// 내 주위 플레이어 반환
