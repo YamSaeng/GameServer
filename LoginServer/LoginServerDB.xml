@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LoginServerDB>
+  <!-- 계정 테이블 -->
+	<Table name="Account" desc="Account Table">
+	  <Column name="AccountDBId" type="BigInt" notnull="true" identity="1,1"/>
+	  <Column name="AccountName" type="nvarchar(20)" notnull="true"/>
+	  <Column name="Password" type="nvarchar(20)" notnull="true"/>		
+	</Table>	
+	
+  <!-- 계정 넣기 -->
+  <Procedure name="">
+	  <Param name="@AccountName" type="nvarchar(20)"/>
+	  <Param name="@Password" type="nvarchar(20)"/>
+	  <Body>
+		<![CDATA[
+		  SET NOCOUNT ON
+		  INSERT INTO [dbo].[Account] VALUES ((@AccountName),(@Password))
+		]]>
+	  </Body>
+  </Procedure>
+
+  <!-- 계정이 이미 계정 테이블에 있는지 확인 -->
+	<Procedure name="">
+		<Param name="@AccountName" type="nvarchar(20)"/>
+		<Param name="@Password" type="nvarchar(20)"/>
+		<Body>
+		 <![CDATA[
+			SET NOCOUNT ON
+			SETLECT * 
+			FROM [dbo].[Account]
+			WHERE EXISTS (SELECT AccountName, Password FROM [dbo].[Account] WHERE AccountName = (@AccountName) AND Password = (@Password)
+		 ]]>
+		</Body>
+	</Procedure>
+</LoginServerDB>
