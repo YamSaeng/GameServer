@@ -1,36 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LoginServerDB>
-  <!-- 계정 테이블 -->
+	<!-- 계정 테이블 -->
 	<Table name="Account" desc="Account Table">
-	  <Column name="AccountDBId" type="BigInt" notnull="true" identity="1,1"/>
-	  <Column name="AccountName" type="nvarchar(20)" notnull="true"/>
-	  <Column name="Password" type="nvarchar(20)" notnull="true"/>		
-	</Table>	
-	
-  <!-- 계정 넣기 -->
-  <Procedure name="">
-	  <Param name="@AccountName" type="nvarchar(20)"/>
-	  <Param name="@Password" type="nvarchar(20)"/>
-	  <Body>
-		<![CDATA[
-		  SET NOCOUNT ON
-		  INSERT INTO [dbo].[Account] VALUES ((@AccountName),(@Password))
-		]]>
-	  </Body>
-  </Procedure>
+		<Column name="AccountDBId" type="BigInt" notnull="true" identity="1,1"/>
+		<Column name="AccountName" type="nvarchar(20)" notnull="true"/>
+		<Column name="Password" type="nvarchar(20)" notnull="true"/>
+		<Index type="clustered">
+			<PrimaryKey/>
+			<Column name="AccountName"/>
+		</Index>
+		<Index type="nonclustered">
+			<UniqueKey/>
+			<Column name="AccountDBId"/>
+		</Index>
+	</Table>
 
-  <!-- 계정이 이미 계정 테이블에 있는지 확인 -->
-	<Procedure name="">
+	<!-- 로그인 테이블 -->
+	<Table name="Login" desc="Login Table">
+		<Column name="AccountDBId" type="BigInt" notnull="true"/>
+		<Column name="AccountName" type="nvarchar(20)" notnull="true"/>
+		<Column name="Password" type="nvarchar(20)" notnull="true"/>
+		<Column name="LoginSuccessTime" type="DateTime" notnull="true"/>
+		<Index type="clustered">
+			<PrimaryKey/>
+			<Column name="AccountDBId"/>
+		</Index>
+		<Index type="nonclustered">
+			<UniqueKey/>
+			<Column name="AccountName"/>
+		</Index>
+	</Table>
+
+	<!-- 계정 넣기 -->
+	<Procedure name="spAccountNew">
 		<Param name="@AccountName" type="nvarchar(20)"/>
 		<Param name="@Password" type="nvarchar(20)"/>
 		<Body>
-		 <![CDATA[
+			<![CDATA[
+		  SET NOCOUNT ON
+		  INSERT INTO [dbo].[Account] VALUES ((@AccountName),(@Password))
+		]]>
+		</Body>
+	</Procedure>
+
+	<!-- 계정이 이미 계정 테이블에 있는지 확인 -->
+	<Procedure name="spGetAccount">
+		<Param name="@AccountName" type="nvarchar(20)"/>
+		<Param name="@Password" type="nvarchar(20)"/>
+		<Body>
+			<![CDATA[
 			SET NOCOUNT ON
-			SETLECT * 
+			SELECT * 
 			FROM [dbo].[Account]
-			WHERE EXISTS (SELECT AccountName, Password FROM [dbo].[Account] WHERE AccountName = (@AccountName) AND Password = (@Password)
+			WHERE EXISTS (SELECT AccountName, Password FROM [dbo].[Account] WHERE AccountName = (@AccountName) AND Password = (@Password))
 		 ]]>
 		</Body>
 	</Procedure>
+
+	<!-- 로그인 정보 넣기 -->
+	<Procedure name="spAccountLogin">
+		<Param name="@AccountDBId" type="BigInt"/>
+		<Param name="@AccountName" type="nvarchar(20)"/>
+		<Param name="@Password" type="nvarchar(20)"/>
+		<Param name="@LoginSuccessTime" type="DateTime"/>
+		<Body>
+			<![CDATA[
+		  SET NOCOUNT ON
+		  INSERT INTO [dbo].[Login] VALUES ((@AccountDBId),(@AccountName),(@Password),(@LoginSuccessTime))
+		]]>
+		</Body>
+	</Procedure>
+
+	<!-- 로그인 정보가 이미 있는지 확인 -->
+	<Procedure name="spGetLogin">
+		<Param name="@AccountDBId" type="BigInt"/>
+		<Param name="@AccountName" type="nvarchar(20)"/>		
+		<Body>
+			<![CDATA[
+			SET NOCOUNT ON
+			SELECT * 
+			FROM [dbo].[Login]
+			WHERE EXISTS (SELECT AccountDBId, AccountName FROM [dbo].[Login] WHERE AccountDBId = (@AccountDBId) AND AccountName = (@AccountName))
+		 ]]>
+		</Body>
+	</Procedure>	
 </LoginServerDB>
