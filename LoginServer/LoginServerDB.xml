@@ -5,7 +5,7 @@
 	<Table name="Account" desc="Account Table">
 		<Column name="AccountDBId" type="BigInt" notnull="true" identity="1,1"/>
 		<Column name="AccountName" type="nvarchar(20)" notnull="true"/>
-		<Column name="Password" type="nvarchar(20)" notnull="true"/>
+		<Column name="Password" type="VarBinary(50)" notnull="true"/>
 		<Index type="clustered">
 			<PrimaryKey/>
 			<Column name="AccountName"/>
@@ -18,9 +18,10 @@
 
 	<!-- 로그인 테이블 -->
 	<Table name="Login" desc="Login Table">
-		<Column name="AccountDBId" type="BigInt" notnull="true"/>
+		<Column name="LoginState" type="TinyInt" notnull="true"/>
+		<Column name="AccountDBId" type="BigInt" notnull="true"/>		
 		<Column name="AccountName" type="nvarchar(20)" notnull="true"/>
-		<Column name="Password" type="nvarchar(20)" notnull="true"/>
+		<Column name="Password" type="VarBinary(50)" notnull="true"/>		
 		<Column name="LoginSuccessTime" type="DateTime" notnull="true"/>
 		<Index type="clustered">
 			<PrimaryKey/>
@@ -31,11 +32,29 @@
 			<Column name="AccountName"/>
 		</Index>
 	</Table>
-
+	
+	<!-- 토큰 테이블 -->
+	<Table name="Token" desc="Token Table">
+		<Column name="TokenDBID" type="BigInt" notnull="true" identity="1,1"/>	
+		<Column name="AccountDBId" type="BigInt" notnull="true"/>
+		<Column name="Token" type="VarBinary(50)" notnull="true"/>
+		<Column name="LoginSuccessTime" type="DateTime" notnull="true"/>
+		<Column name="TokenExpiredTime" type="DateTime" notnull="true"/>		
+	</Table>
+	
+	<!-- 서버목록 테이블 -->
+	<Table name="ServerList" desc="ServerList Table">
+		<Column name="ServerDBId" type="BigInt" notnull="true" identity="1,1"/>
+		<Column name="ServerName" type="nvarchar(20)" notnull="true"/>
+		<Column name="ServerIP" type="nvarchar(20)" notnull="true"/>
+		<Column name="ServerPort" type="int" notnull="true"/>
+		<Column name="ServerBusy" type="float" notnull="true"/>
+	</Table>
+	
 	<!-- 계정 넣기 -->
 	<Procedure name="spAccountNew">
 		<Param name="@AccountName" type="nvarchar(20)"/>
-		<Param name="@Password" type="nvarchar(20)"/>
+		<Param name="@Password" type="VarBinary(50)"/>
 		<Body>
 			<![CDATA[
 		  SET NOCOUNT ON
@@ -46,28 +65,28 @@
 
 	<!-- 계정이 이미 계정 테이블에 있는지 확인 -->
 	<Procedure name="spGetAccount">
-		<Param name="@AccountName" type="nvarchar(20)"/>
-		<Param name="@Password" type="nvarchar(20)"/>
+		<Param name="@AccountName" type="nvarchar(20)"/>		
 		<Body>
 			<![CDATA[
 			SET NOCOUNT ON
-			SELECT * 
+			SELECT AccountDBId, Password 
 			FROM [dbo].[Account]
-			WHERE EXISTS (SELECT AccountName, Password FROM [dbo].[Account] WHERE AccountName = (@AccountName) AND Password = (@Password))
+			WHERE AccountName = (@AccountName)
 		 ]]>
 		</Body>
 	</Procedure>
 
 	<!-- 로그인 정보 넣기 -->
 	<Procedure name="spAccountLogin">
-		<Param name="@AccountDBId" type="BigInt"/>
+		<Param name="@LoginState" type="TinyInt"/>
+		<Param name="@AccountDBId" type="BigInt"/>		
 		<Param name="@AccountName" type="nvarchar(20)"/>
-		<Param name="@Password" type="nvarchar(20)"/>
+		<Param name="@Password" type="VarBinary(50)"/>	
 		<Param name="@LoginSuccessTime" type="DateTime"/>
 		<Body>
 			<![CDATA[
 		  SET NOCOUNT ON
-		  INSERT INTO [dbo].[Login] VALUES ((@AccountDBId),(@AccountName),(@Password),(@LoginSuccessTime))
+		  INSERT INTO [dbo].[Login] VALUES ((@LoginState),(@AccountDBId),(@AccountName),(@Password),(@LoginSuccessTime))
 		]]>
 		</Body>
 	</Procedure>
@@ -79,10 +98,67 @@
 		<Body>
 			<![CDATA[
 			SET NOCOUNT ON
-			SELECT * 
+			SELECT LoginState 
 			FROM [dbo].[Login]
-			WHERE EXISTS (SELECT AccountDBId, AccountName FROM [dbo].[Login] WHERE AccountDBId = (@AccountDBId) AND AccountName = (@AccountName))
+			WHERE AccountDBId = (@AccountDBId) AND AccountName = (@AccountName)
 		 ]]>
 		</Body>
 	</Procedure>	
+	
+	<!-- 로그인 상태 업데이트 -->
+	<Procedure name="spLoginStateUpdate">
+		<Param name="@LoginState" type="TinyInt"/>
+		<Param name="@AccountDBId" type="BigInt"/>
+		<Body>
+			<![CDATA[
+			SET NOCOUNT ON
+			UPDATE [dbo].[Login]
+			SET LoginState = (@LoginState)
+			WHERE AccountDBId = (@AccountDBId);
+			]]>
+		</Body>
+	</Procedure>
+
+	<!-- 토근 정보 넣기 -->
+	<Procedure name="spTokenInfoInput">
+		<Param name="@AccountDBId" type="BigInt"/>
+		<Param name="@Token" type="VarBinary(50)"/>
+		<Param name="@LoginSuccessTime" type="DateTime"/>
+		<Param name="@TokenExpiredTime" type="DateTime"/>
+		<Body>
+			<![CDATA[
+			SET NOCOUNT ON
+			INSERT INTO [dbo].[Token] VALUES ((@AccountDBId),(@Token),(@LoginSuccessTime),(@TokenExpiredTime))
+			]]>
+		</Body>
+	</Procedure>
+
+	<!--토큰 정보 있는지 확인 -->
+	<Procedure name="spIsToken">
+		<Param name="@AccountDBId" type="BigInt"/>
+		<Body>
+			<![CDATA[
+			SET NOCOUNT ON
+			SELECT TokenExpiredTime
+			FROM [dbo].[Token]
+			WHERE AccountDBId = (@AccountDBId)
+			]]>
+		</Body>
+	</Procedure>
+	
+	<!-- 토큰 업데이트 -->
+	<Procedure name="spTokenUpdate">
+		<Param name="@AccountDBId" type="BigInt"/>
+		<Param name="@Token" type="VarBinary(50)"/>
+		<Param name="@LoginSuccessTime" type="DateTime"/>
+		<Param name="@TokenExpiredTime" type="DateTime"/>
+		<Body>
+			<![CDATA[
+			SET NOCOUNT ON
+			UPDATE [dbo].[Token]
+			SET Token = (@Token), LoginSuccessTime = (@LoginSuccessTime), TokenExpiredTime = (@TokenExpiredTime)
+			WHERE AccountDBId = (@AccountDBId)
+			]]>
+		</Body>
+	</Procedure>
 </LoginServerDB>
