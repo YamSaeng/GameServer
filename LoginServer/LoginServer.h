@@ -69,6 +69,11 @@ private:
 	void AccountLogOut(int64 SessionID, CMessage* Packet);
 
 	void DeleteClient(int64 SessionID);
+
+	//-----------------------------------
+	// 서버 목록 가져오기
+	//-----------------------------------
+	vector<st_ServerInfo> GetServerList();
 	
 	//-------------------------------------------------------
 	// 새로운 계정 넣기 응답 패킷 조합
@@ -77,6 +82,6 @@ private:
 	//-----------------------------------------------------------------------------------------------------
 	// 로그인 응답 패킷 조합 
 	//-----------------------------------------------------------------------------------------------------
-	CMessage* MakePacketResAccountLogin(en_LoginInfo LoginInfo, int64 AccountID, BYTE* Token,int8 TokenLen);
+	CMessage* MakePacketResAccountLogin(en_LoginInfo LoginInfo, int64 AccountID, wstring AccountName, int8 TokenLen, BYTE* Token, vector<st_ServerInfo> ServerLists);
 };
 

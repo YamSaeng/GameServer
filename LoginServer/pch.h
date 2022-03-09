@@ -13,8 +13,8 @@
 #include <random>
 
 #include "Type.h"
-#include "Macro.h"
 #include "Global.h"
+#include "Macro.h"
 #include "Log.h"
 
 using namespace std;

@@ -42,3 +42,12 @@ struct st_LoginServerJob
 	int64 SessionID;	
 	CMessage* Message;
 };
+
+// 서버 정보
+struct st_ServerInfo
+{
+	wstring ServerName;
+	wstring ServerIP;
+	int32 ServerPort;
+	float ServerBusy;
+};

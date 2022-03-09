@@ -293,7 +293,7 @@ void CLoginServer::AccountLogIn(int64 SessionID, CMessage* Packet)
 		// Hash값 구하기
 		SHA256_Encrpyt((unsigned char*)Password, PasswordLen, (unsigned char*)PasswordHash);
 
-		int8 PasswordHashLen = strlen(PasswordHash);
+		int8 PasswordHashLen = (int8)strlen(PasswordHash);
 
 		// 계정 있는지 확인
 		CDBConnection* AccountCheckDBConnection = G_DBConnectionPool->Pop(en_DBConnect::ACCOUNT);
@@ -314,6 +314,8 @@ void CLoginServer::AccountLogIn(int64 SessionID, CMessage* Packet)
 
 		G_DBConnectionPool->Push(en_DBConnect::ACCOUNT, AccountCheckDBConnection);
 
+		// 서버 목록
+		vector<st_ServerInfo> ServerLists;
 		// 토큰 값
 		BYTE TokenHash[TOKEN_MAX_LENGTH] = { 0 };		
 
@@ -411,6 +413,8 @@ void CLoginServer::AccountLogIn(int64 SessionID, CMessage* Packet)
 
 					// 로그인 성공
 					LoginInfo = en_LoginInfo::LOGIN_ACCOUNT_LOGIN_SUCCESS;
+
+					ServerLists = GetServerList();
 				}
 				else
 				{
@@ -509,6 +513,8 @@ void CLoginServer::AccountLogIn(int64 SessionID, CMessage* Packet)
 							G_DBConnectionPool->Push(en_DBConnect::ACCOUNT, LoginStateUpdateDBConnection);
 
 							LoginInfo = en_LoginInfo::LOGIN_ACCOUNT_LOGIN_SUCCESS;
+
+							ServerLists = GetServerList();
 						}
 						break;
 					}					
@@ -525,8 +531,8 @@ void CLoginServer::AccountLogIn(int64 SessionID, CMessage* Packet)
 			// 계정이 없음
 			LoginInfo = en_LoginInfo::LOGIN_ACCOUNT_NOT_EXIST;
 		}
-				
-		CMessage* ResAccountLoginMessage = MakePacketResAccountLogin(LoginInfo, Session->AccountId, TokenHash, TOKEN_MAX_LENGTH);
+
+		CMessage* ResAccountLoginMessage = MakePacketResAccountLogin(LoginInfo, Session->AccountId, AccountLoginNameString, TOKEN_MAX_LENGTH, TokenHash, ServerLists);
 		SendPacket(Session->SessionId, ResAccountLoginMessage);
 		ResAccountLoginMessage->Free();		
 
@@ -559,6 +565,41 @@ void CLoginServer::DeleteClient(int64 SessionID)
 
 }
 
+vector<st_ServerInfo> CLoginServer::GetServerList()
+{
+	CDBConnection* GetServerListDBConnection = G_DBConnectionPool->Pop(en_DBConnect::ACCOUNT);
+	SP::CLoginServerDBGetServerList GetServerList(*GetServerListDBConnection);
+
+	WCHAR ServerName[20] = { 0 };
+	WCHAR ServerIP[40] = { 0 };
+	int32 ServerPort = 0;
+	float ServerBusy = 0;
+
+	GetServerList.OutServerName(ServerName);
+	GetServerList.OutServerIP(ServerIP);
+	GetServerList.OutServerPort(ServerPort);
+	GetServerList.OutServerBusy(ServerBusy);
+
+	GetServerList.Execute();
+
+	vector<st_ServerInfo> ServerLists;
+
+	while (GetServerList.Fetch())
+	{
+		st_ServerInfo ServerList;
+		ServerList.ServerName = ServerName;
+		ServerList.ServerIP = ServerIP;
+		ServerList.ServerPort = ServerPort;
+		ServerList.ServerBusy = ServerBusy;
+
+		ServerLists.push_back(ServerList);
+	}
+
+	G_DBConnectionPool->Push(en_DBConnect::ACCOUNT, GetServerListDBConnection);
+
+	return ServerLists;
+}
+
 CMessage* CLoginServer::MakePacketResAccountNew(bool AccountNewSuccess)
 {
 	CMessage* ResAccountNewPacket = CMessage::Alloc();
@@ -575,7 +616,7 @@ CMessage* CLoginServer::MakePacketResAccountNew(bool AccountNewSuccess)
 	return ResAccountNewPacket;
 }
 
-CMessage* CLoginServer::MakePacketResAccountLogin(en_LoginInfo LoginInfo, int64 AccountID, BYTE* Token, int8 TokenLen)
+CMessage* CLoginServer::MakePacketResAccountLogin(en_LoginInfo LoginInfo, int64 AccountID, wstring AccountName, int8 TokenLen, BYTE* Token, vector<st_ServerInfo> ServerLists)
 {
 	CMessage* ResAccountLoginPacket = CMessage::Alloc();
 	if (ResAccountLoginPacket == nullptr)
@@ -588,12 +629,35 @@ CMessage* CLoginServer::MakePacketResAccountLogin(en_LoginInfo LoginInfo, int64 
 	*ResAccountLoginPacket << (int16)en_LOGIN_SERVER_PACKET_TYPE::en_LOGIN_SERVER_S2C_ACCOUNT_LOGIN;
 	*ResAccountLoginPacket << (int8)LoginInfo;
 	*ResAccountLoginPacket << AccountID;
+	
+	int8 AccountNameLen = (int8)AccountName.length() * 2;
+	*ResAccountLoginPacket << AccountNameLen;
+	ResAccountLoginPacket->InsertData(AccountName.c_str(), AccountNameLen);
+
 	*ResAccountLoginPacket << TokenLen;
 
 	for (int8 i = 0; i < TokenLen; i++)
 	{
 		*ResAccountLoginPacket << Token[i];
 	}
+
+	int8 ServerListSize = (int8)ServerLists.size();
+
+	*ResAccountLoginPacket << ServerListSize;
+
+	for (int8 i = 0; i < ServerListSize; i++)
+	{
+		int8 ServerNameLen = (int8)ServerLists[i].ServerName.length() * 2;
+		*ResAccountLoginPacket << ServerNameLen;
+		ResAccountLoginPacket->InsertData(ServerLists[i].ServerName.c_str(), ServerNameLen);
+
+		int8 ServerIPLen = (int8)ServerLists[i].ServerIP.length() * 2;
+		*ResAccountLoginPacket << ServerIPLen;
+		ResAccountLoginPacket->InsertData(ServerLists[i].ServerIP.c_str(), ServerIPLen);
+
+		*ResAccountLoginPacket << ServerLists[i].ServerPort;
+		*ResAccountLoginPacket << ServerLists[i].ServerBusy;
+	}	
 
 	return ResAccountLoginPacket;
 }
