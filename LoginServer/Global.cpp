@@ -4,9 +4,6 @@
 
 CDBConnectionPool* G_DBConnectionPool = nullptr;
 CLog* G_Logger = nullptr;
-CDataManager* G_Datamanager = nullptr;
-CChannelManager* G_ChannelManager = nullptr;
-CObjectManager* G_ObjectManager = nullptr;
 
 //------------------------------------------------
 // 각종 전역 클래스 (Manager) 관리
@@ -20,15 +17,12 @@ public:
 		setlocale(LC_ALL, "Korean");
 		G_DBConnectionPool = new CDBConnectionPool();
 		G_DBConnectionPool->Init(1000);
-		G_Logger = new CLog();
+		G_Logger = new CLog();	
 	}
 
 	~CGlobal()
 	{
 		delete G_DBConnectionPool;
-		delete G_Logger;
-		delete G_Datamanager;
-		delete G_ChannelManager;
-		delete G_ObjectManager;
+		delete G_Logger;		
 	}
 } G_Global;
