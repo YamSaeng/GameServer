@@ -101,12 +101,19 @@ public:
 		_ParamFlag |= (1LL << Index);
 	}
 
-	// 문자열 넣기
+	// 유니코드 문자열 넣기
 	void BindParam(int32 Index, const WCHAR* Value)
 	{
 		_DBConnection.BindParam(Index + 1, Value, &_ParamIndex[Index]);
 		_ParamFlag |= (1LL << Index);
 	}
+	
+	// 문자열 넣기
+	void BindParam(int32 Index, const char* Value)
+	{
+		_DBConnection.BindParam(Index + 1, Value, &_ParamIndex[Index]);
+		_ParamFlag |= (1LL << Index);
+	}	
 
 	// 일반적인 배열 바인딩하기
 	template<typename T, int32 N>
@@ -144,12 +151,19 @@ public:
 		_ColumnFlag |= (1LL << Index);
 	}
 
-	// WCHAR 포인터와 길이 받음
+	// 유니코드 문자열 가져오기
 	void BindCol(int32 Index, WCHAR* Value, int32 Length)
 	{
 		_DBConnection.BindCol(Index + 1, Value, Length - 1, &_ColumnIndex[Index]);
 		_ColumnFlag |= (1LL << Index);
 	}	
+
+	// 문자열 가져오기
+	void BindCol(int32 Index, char* Value, int32 Length)
+	{
+		_DBConnection.BindCol(Index + 1, Value, Length - 1, &_ColumnIndex[Index]);
+		_ColumnFlag |= (1LL << Index);
+	}
 
 	// 일반적인 배열 
 	template<typename T, int32 N>

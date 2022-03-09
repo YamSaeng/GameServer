@@ -158,6 +158,21 @@ bool CDBConnection::BindParam(int32 ParamIndex, const WCHAR* Str, SQLLEN* Index)
 	}
 }
 
+bool CDBConnection::BindParam(int32 ParamIndex, const char* Str, SQLLEN* Index)
+{
+	SQLULEN Size = (SQLULEN)(strlen(Str + 1) * 2);
+	*Index = SQL_NTS;
+
+	if (Size > CHAR_MAX)
+	{
+		return BindParam(ParamIndex, SQL_C_CHAR, SQL_LONGVARCHAR, Size, (SQLPOINTER)Str, Index);
+	}
+	else
+	{
+		return BindParam(ParamIndex, SQL_C_CHAR, SQL_VARCHAR, Size, (SQLPOINTER)Str, Index);
+	}
+}
+
 bool CDBConnection::BindParam(int32 ParamIndex, const BYTE* Binary, int32 Size, SQLLEN* Index)
 {
 	if (Binary == nullptr)
@@ -223,6 +238,11 @@ bool CDBConnection::BindCol(int32 ColumnIndex, TIMESTAMP_STRUCT* Value, SQLLEN* 
 bool CDBConnection::BindCol(int32 ColumnIndex, WCHAR* Str, int32 Size, SQLLEN* Index)
 {
 	return BindCol(ColumnIndex, SQL_C_WCHAR, Size, Str, Index);
+}
+
+bool CDBConnection::BindCol(int32 ColumnIndex, char* Str, int32 Size, SQLLEN* Index)
+{
+	return BindCol(ColumnIndex, SQL_C_CHAR, Size, Str, Index);
 }
 
 bool CDBConnection::BindCol(int32 ColumnIndex, BYTE* Binary, int32 Size, SQLLEN* Index)
