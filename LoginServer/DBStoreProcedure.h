@@ -87,4 +87,15 @@ namespace SP
 		void InTokenCreateTime(TIMESTAMP_STRUCT& TokenCreateTime) { BindParam(2, TokenCreateTime); }
 		void InTokenExpiredTime(TIMESTAMP_STRUCT& TokenExpiredTime) { BindParam(3, TokenExpiredTime); }
 	};	
+
+	// 서버 목록 가져오기
+	class CLoginServerDBGetServerList : public CDBBind<0, 4>
+	{
+	public:
+		CLoginServerDBGetServerList(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetServerList()}") {}
+		template<int8 Length> void OutServerName(WCHAR(&ServerName)[Length]) { BindCol(0, ServerName); }
+		template<int8 Length> void OutServerIP(WCHAR(&ServerIP)[Length]) { BindCol(1, ServerIP); }
+		void OutServerPort(int32& ServerPort) { BindCol(2, ServerPort); }
+		void OutServerBusy(float& ServerBusy) { BindCol(3, ServerBusy); }
+	};
 }

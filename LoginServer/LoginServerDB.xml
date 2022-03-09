@@ -43,9 +43,9 @@
 	
 	<!-- 서버목록 테이블 -->
 	<Table name="ServerList" desc="ServerList Table">
-		<Column name="ServerDBId" type="BigInt" notnull="true" identity="1,1"/>
+		<Column name="ServerDBId" type="BigInt" notnull="true"/>
 		<Column name="ServerName" type="nvarchar(20)" notnull="true"/>
-		<Column name="ServerIP" type="nvarchar(20)" notnull="true"/>
+		<Column name="ServerIP" type="nvarchar(40)" notnull="true"/>
 		<Column name="ServerPort" type="int" notnull="true"/>
 		<Column name="ServerBusy" type="float" notnull="true"/>
 	</Table>
@@ -156,6 +156,17 @@
 			UPDATE [dbo].[Token]
 			SET Token = (@Token), TokenCreateTime = (@TokenCreateTime), TokenExpiredTime = (@TokenExpiredTime)
 			WHERE AccountDBId = (@AccountDBId)
+			]]>
+		</Body>
+	</Procedure>
+	
+	<!-- 서버 목록 가져오기 -->
+	<Procedure name="spGetServerList">
+		<Body>
+			<![CDATA[
+			SET NOCOUNT ON
+			SELECT ServerName, ServerIP, ServerPort, ServerBusy
+			FROM [dbo].[ServerList]
 			]]>
 		</Body>
 	</Procedure>
