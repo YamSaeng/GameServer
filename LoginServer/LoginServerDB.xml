@@ -21,8 +21,7 @@
 		<Column name="LoginState" type="TinyInt" notnull="true"/>
 		<Column name="AccountDBId" type="BigInt" notnull="true"/>		
 		<Column name="AccountName" type="nvarchar(20)" notnull="true"/>
-		<Column name="Password" type="VarBinary(50)" notnull="true"/>		
-		<Column name="LoginSuccessTime" type="DateTime" notnull="true"/>
+		<Column name="Password" type="VarBinary(50)" notnull="true"/>				
 		<Index type="clustered">
 			<PrimaryKey/>
 			<Column name="AccountDBId"/>
@@ -38,7 +37,7 @@
 		<Column name="TokenDBID" type="BigInt" notnull="true" identity="1,1"/>	
 		<Column name="AccountDBId" type="BigInt" notnull="true"/>
 		<Column name="Token" type="VarBinary(50)" notnull="true"/>
-		<Column name="LoginSuccessTime" type="DateTime" notnull="true"/>
+		<Column name="TokenCreateTime" type="DateTime" notnull="true"/>
 		<Column name="TokenExpiredTime" type="DateTime" notnull="true"/>		
 	</Table>
 	
@@ -81,12 +80,11 @@
 		<Param name="@LoginState" type="TinyInt"/>
 		<Param name="@AccountDBId" type="BigInt"/>		
 		<Param name="@AccountName" type="nvarchar(20)"/>
-		<Param name="@Password" type="VarBinary(50)"/>	
-		<Param name="@LoginSuccessTime" type="DateTime"/>
+		<Param name="@Password" type="VarBinary(50)"/>			
 		<Body>
 			<![CDATA[
 		  SET NOCOUNT ON
-		  INSERT INTO [dbo].[Login] VALUES ((@LoginState),(@AccountDBId),(@AccountName),(@Password),(@LoginSuccessTime))
+		  INSERT INTO [dbo].[Login] VALUES ((@LoginState),(@AccountDBId),(@AccountName),(@Password))
 		]]>
 		</Body>
 	</Procedure>
@@ -123,12 +121,12 @@
 	<Procedure name="spTokenInfoInput">
 		<Param name="@AccountDBId" type="BigInt"/>
 		<Param name="@Token" type="VarBinary(50)"/>
-		<Param name="@LoginSuccessTime" type="DateTime"/>
+		<Param name="@TokenCreateTime" type="DateTime"/>
 		<Param name="@TokenExpiredTime" type="DateTime"/>
 		<Body>
 			<![CDATA[
 			SET NOCOUNT ON
-			INSERT INTO [dbo].[Token] VALUES ((@AccountDBId),(@Token),(@LoginSuccessTime),(@TokenExpiredTime))
+			INSERT INTO [dbo].[Token] VALUES ((@AccountDBId),(@Token),(@TokenCreateTime),(@TokenExpiredTime))
 			]]>
 		</Body>
 	</Procedure>
@@ -139,7 +137,7 @@
 		<Body>
 			<![CDATA[
 			SET NOCOUNT ON
-			SELECT TokenExpiredTime
+			SELECT TokenCreateTime, Token
 			FROM [dbo].[Token]
 			WHERE AccountDBId = (@AccountDBId)
 			]]>
@@ -150,13 +148,13 @@
 	<Procedure name="spTokenUpdate">
 		<Param name="@AccountDBId" type="BigInt"/>
 		<Param name="@Token" type="VarBinary(50)"/>
-		<Param name="@LoginSuccessTime" type="DateTime"/>
+		<Param name="@TokenCreateTime" type="DateTime"/>
 		<Param name="@TokenExpiredTime" type="DateTime"/>
 		<Body>
 			<![CDATA[
 			SET NOCOUNT ON
 			UPDATE [dbo].[Token]
-			SET Token = (@Token), LoginSuccessTime = (@LoginSuccessTime), TokenExpiredTime = (@TokenExpiredTime)
+			SET Token = (@Token), TokenCreateTime = (@TokenCreateTime), TokenExpiredTime = (@TokenExpiredTime)
 			WHERE AccountDBId = (@AccountDBId)
 			]]>
 		</Body>

@@ -25,15 +25,14 @@ namespace SP
 	};	
 
 	// 계정 로그인
-	class CLoginServerDBAccountLogin : public CDBBind<5, 0>
+	class CLoginServerDBAccountLogin : public CDBBind<4, 0>
 	{
 	public:
-		CLoginServerDBAccountLogin(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spAccountLogin(?,?,?,?,?)}") {}
+		CLoginServerDBAccountLogin(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spAccountLogin(?,?,?,?)}") {}
 		void InLoginState(int8& LoginState) { BindParam(0, LoginState); }
 		void InAccountID(int64& AccountID) { BindParam(1, AccountID); }		
 		void InAccountName(wstring& AccountName) { BindParam(2, AccountName.c_str()); }
-		template<int8 Length> void InPassword(BYTE(&Password)[Length]) { BindParam(3, Password); }		
-		void InLoginsuccessTime(TIMESTAMP_STRUCT& LoginSuccessTime) { BindParam(4, LoginSuccessTime); }
+		template<int8 Length> void InPassword(BYTE(&Password)[Length]) { BindParam(3, Password); }				
 	};
 
 	// 로그인 테이블에 계정 있는지 확인
@@ -74,7 +73,7 @@ namespace SP
 		CLoginServerDBTokenNew(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spTokenInfoInput(?,?,?,?)}") {}
 		void InAccountID(int64& AccountID) { BindParam(0, AccountID); }
 		template<int8 Length> void InToken(BYTE(&Token)[Length]) { BindParam(1, Token); }
-		void InLoginsuccessTime(TIMESTAMP_STRUCT& LoginSuccessTime) { BindParam(2, LoginSuccessTime); }
+		void InTokenCreateTime(TIMESTAMP_STRUCT& LoginSuccessTime) { BindParam(2, LoginSuccessTime); }
 		void InTokenExpiredTime(TIMESTAMP_STRUCT& TokenExpiredTime) { BindParam(3, TokenExpiredTime); }
 	};
 
@@ -85,7 +84,7 @@ namespace SP
 		CLoginServerDBTokenUpdate(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spTokenUpdate(?,?,?,?)}") {}
 		void InAccountID(int64& AccountID) { BindParam(0, AccountID); }
 		template<int8 Length> void InToken(BYTE(&Token)[Length]) { BindParam(1, Token); }
-		void InLoginsuccessTime(TIMESTAMP_STRUCT& LoginSuccessTime) { BindParam(2, LoginSuccessTime); }
+		void InTokenCreateTime(TIMESTAMP_STRUCT& TokenCreateTime) { BindParam(2, TokenCreateTime); }
 		void InTokenExpiredTime(TIMESTAMP_STRUCT& TokenExpiredTime) { BindParam(3, TokenExpiredTime); }
 	};	
 }
