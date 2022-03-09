@@ -782,4 +782,17 @@
       ]]>
     </Body>
   </Procedure>
+
+  <!--토큰 정보 있는지 확인 -->
+  <Procedure name="spIsToken">
+	  <Param name="@AccountDBId" type="BigInt"/>
+	  <Body>
+		  <![CDATA[
+			SET NOCOUNT ON
+			SELECT TokenCreateTime, Token
+			FROM [dbo].[Token]
+			WHERE AccountDBId = (@AccountDBId)
+		  ]]>
+	  </Body>
+  </Procedure>
 </GameServerDB>

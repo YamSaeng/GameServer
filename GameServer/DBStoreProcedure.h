@@ -3,14 +3,14 @@
 
 namespace SP
 {
-	class CDBAccountTokenGet : public CDBBind<1, 3>
+	class CDBAccountTokenGet : public CDBBind<1, 2>
 	{
 	public:
-		CDBAccountTokenGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetAccountToken(?)}") { }
+		CDBAccountTokenGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spIsToken(?)}") { }
 		void InAccountID(int64& AccountID) { BindParam(0, AccountID); }
-		void OutToken(int32& Token) { BindCol(0, Token); }
-		void OutLoginsuccessTime(TIMESTAMP_STRUCT& LoginSuccessTime) { BindCol(1, LoginSuccessTime); }
-		void OutTokenExpiredTime(TIMESTAMP_STRUCT& TokenExpiredTime) { BindCol(2, TokenExpiredTime); }
+		
+		void OutTokenTime(TIMESTAMP_STRUCT& TokenTime) { BindCol(0, TokenTime); }
+		template<int8 Length> void OutToken(BYTE(&Token)[Length]) { BindCol(1, Token); }				
 	};
 
 	// AccountID를 기준으로 클라가 소유하고 있는 캐릭터를 찾는다.
