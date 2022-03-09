@@ -1,10 +1,10 @@
 #pragma once
 
-enum en_PACKET_TYPE
+enum en_GAME_SERVER_PACKET_TYPE
 {
 	////////////////////////////////////////////////////////
 	//
-	//	Client & Server Protocol
+	//	Client & GameServer Protocol
 	//
 	////////////////////////////////////////////////////////
 
@@ -528,4 +528,50 @@ enum en_PACKET_TYPE
 	// int64 PlayerId
 	//-----------------------------------------------------------
 	en_PACKET_S2C_PING
+};
+
+enum en_LOGIN_SERVER_PACKET_TYPE
+{
+	////////////////////////////////////////////////////////
+	//
+	//	Client & LoginServer Protocol
+	//
+	////////////////////////////////////////////////////////
+
+	//------------------------------------------------------
+	// Login Server
+	//------------------------------------------------------
+	en_PACKET_CS_LOGIN_SERVER = 1000,
+
+	//----------------------------------
+	// 로그인 서버 회원가입 요청
+	// wstring AccountName
+	// wstring Password
+	//----------------------------------
+	en_LOGIN_SERVER_C2S_ACCOUNT_NEW,
+
+	//----------------------------------
+	// 로그인 서버 회원가입 요청 응답
+	// bool AccountNewSuccess
+	//----------------------------------
+	en_LOGIN_SERVER_S2C_ACCOUNT_NEW,
+
+	//----------------------------------
+	// 로그인 서버 로그인 요청
+	// wstring AccountName
+	// wstring Password
+	//----------------------------------
+	en_LOGIN_SERVER_C2S_ACCOUNT_LOGIN,
+
+	//----------------------------------
+	// 로그인 서버 로그인 요청 응답
+	// en_LoginInfo LoginInfo
+	// int64 AccountID
+	// wstring AccountName
+	// int8 TokenLen
+	// byte Token[]
+	// int8 ServerListSize
+	// vector<st_ServerInfo> ServerLists
+	//----------------------------------
+	en_LOGIN_SERVER_S2C_ACCOUNT_LOGIN
 };
