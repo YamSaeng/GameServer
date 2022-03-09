@@ -29,6 +29,9 @@
     <Filter Include="File">
       <UniqueIdentifier>{0969c587-3ebd-4168-b30b-f159d461bc56}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SHA">
+      <UniqueIdentifier>{6a715667-1d48-4455-b9dd-0e39b32b84b5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -56,14 +59,17 @@
     <ClCompile Include="XmlParser.cpp">
       <Filter>Xml</Filter>
     </ClCompile>
-    <ClCompile Include="Global.cpp">
-      <Filter>ETC</Filter>
-    </ClCompile>
     <ClCompile Include="Log.cpp">
       <Filter>ETC</Filter>
     </ClCompile>
     <ClCompile Include="FileUtils.cpp">
       <Filter>File</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.cpp">
+      <Filter>ETC</Filter>
+    </ClCompile>
+    <ClCompile Include="KISA_SHA256.c">
+      <Filter>SHA</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -131,9 +137,6 @@
     <ClInclude Include="rapidxml.hpp">
       <Filter>Xml</Filter>
     </ClInclude>
-    <ClInclude Include="Global.h">
-      <Filter>ETC</Filter>
-    </ClInclude>
     <ClInclude Include="Log.h">
       <Filter>ETC</Filter>
     </ClInclude>
@@ -149,6 +152,12 @@
     <ClInclude Include="CommonProtocol.h">
       <Filter>Server</Filter>
     </ClInclude>
+    <ClInclude Include="Global.h">
+      <Filter>ETC</Filter>
+    </ClInclude>
+    <ClInclude Include="KISA_SHA256.h">
+      <Filter>SHA</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="DBConfig.xml">
@@ -156,6 +165,12 @@
     </Xml>
     <Xml Include="LoginServerDB.xml">
       <Filter>DB</Filter>
+    </Xml>
+    <Xml Include="LoginServerConfig.xml">
+      <Filter>Server</Filter>
+    </Xml>
+    <Xml Include="TokenDB.xml">
+      <Filter>Xml</Filter>
     </Xml>
   </ItemGroup>
 </Project>

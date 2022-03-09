@@ -5,10 +5,11 @@
 class CLoginServer : public CNetworkLib
 {
 public:
+	CLoginServer();
+	~CLoginServer();	
 	void LoginServerStart(const WCHAR* OpenIP, int32 Port);
 private:
-	HANDLE _AuthThread;
-	HANDLE _UserDataBaseThread; 
+	HANDLE _AuthThread;	
 
 	HANDLE _DataBaseThread;
 
@@ -18,24 +19,64 @@ private:
 	bool _AuthThreadEnd;
 	bool _DataBaseThreadEnd;
 
-	CLockFreeQue<st_LoginServerJob*> _AuthThreadMessageQue;	
-
+	CLockFreeQue<st_LoginServerJob*> _AuthThreadMessageQue;		
+	
+	//--------------------------------------------------------
+	// 데이터 베이스 큐
+	//--------------------------------------------------------
+	CLockFreeQue<st_LoginServerJob*> _DataBaseThreadMessageQue;
+	//--------------------------------------------------------
+	// 잡 메모리풀
+	//--------------------------------------------------------
 	CMemoryPoolTLS<st_LoginServerJob>* _LoginServerJobMemoryPool;
 
 	//-------------------------------------------------------
 	// 인증 쓰레드 ( 클라 접속, 클라 접속 종료 )
 	//-------------------------------------------------------
 	static unsigned __stdcall AuthThreadProc(void* Argument);	
+	static unsigned __stdcall DataBaseThreadProc(void* Argument);	
+
+	virtual void OnClientJoin(int64 SessionID) override;
+	virtual void OnClientLeave(st_LoginSession* LeaveSession) override;
+	virtual bool OnConnectionRequest(const wchar_t ClientIP, int32 Port) override;
 
 	virtual void OnRecv(int64 SessionID, CMessage* Packet) override;
 	
+	//------------------------------------------------
+	// 패킷 처리
+	//------------------------------------------------
 	void PacketProc(int64 SessionID, CMessage* Packet);
+	//-------------------------------------------------------------
+	// 회원가입 요청 처리
+	//-------------------------------------------------------------
 	void PacketProcReqAccountNew(int64 SessionID, CMessage* Packet);
+	//-------------------------------------------------------------
+	// 로그인 요청 처리
+	//-------------------------------------------------------------
+	void PacketProcReqAccountLogin(int64 SessionID, CMessage* Packet);
 
+	//------------------------------------------------
+	// 새로운 계정 넣기
+	//------------------------------------------------
 	void AccountNew(int64 SessionID, CMessage* Packet);
-	void AccountLogIn(int64 SessionID);
-	void AccountLogOut(int64 SessionID);
+	//------------------------------------------------
+	// 로그인 
+	//------------------------------------------------
+	void AccountLogIn(int64 SessionID, CMessage* Packet);
+	//------------------------------------------------
+	// 로그아웃
+	//------------------------------------------------
+	void AccountLogOut(int64 SessionID, CMessage* Packet);
 
 	void DeleteClient(int64 SessionID);
+	
+	//-------------------------------------------------------
+	// 새로운 계정 넣기 응답 패킷 조합
+	//-------------------------------------------------------
+	CMessage* MakePacketResAccountNew(bool AccountNewSuccess);
+	//-----------------------------------------------------------------------------------------------------
+	// 로그인 응답 패킷 조합 
+	//-----------------------------------------------------------------------------------------------------
+	CMessage* MakePacketResAccountLogin(en_LoginInfo LoginInfo, int64 AccountID, BYTE* Token,int8 TokenLen);
 };
 

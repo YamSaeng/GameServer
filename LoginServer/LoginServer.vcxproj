@@ -25,6 +25,7 @@
     <ClCompile Include="DBSynchronizer.cpp" />
     <ClCompile Include="FileUtils.cpp" />
     <ClCompile Include="Global.cpp" />
+    <ClCompile Include="KISA_SHA256.c" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="LoginServer.cpp" />
     <ClCompile Include="main.cpp" />
@@ -42,6 +43,7 @@
     <ClInclude Include="DBSynchronizer.h" />
     <ClInclude Include="FileUtils.h" />
     <ClInclude Include="Global.h" />
+    <ClInclude Include="KISA_SHA256.h" />
     <ClInclude Include="LockFreeQue.h" />
     <ClInclude Include="LockFreeStack.h" />
     <ClInclude Include="Log.h" />
@@ -64,7 +66,9 @@
   </ItemGroup>
   <ItemGroup>
     <Xml Include="DBConfig.xml" />
+    <Xml Include="LoginServerConfig.xml" />
     <Xml Include="LoginServerDB.xml" />
+    <Xml Include="TokenDB.xml" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -150,6 +154,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -178,6 +183,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
