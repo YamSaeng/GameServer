@@ -74,6 +74,6 @@ protected:
 	//---------------------------
 	uint64 _FieldOfViewUpdateTick;
 
-	void BroadCastPacket(en_PACKET_TYPE PacketType, bool CanMove = true);
+	void BroadCastPacket(en_GAME_SERVER_PACKET_TYPE PacketType, bool CanMove = true);
 };
 

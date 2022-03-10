@@ -158,6 +158,21 @@ bool CDBConnection::BindParam(int32 ParamIndex, const WCHAR* Str, SQLLEN* Index)
 	}
 }
 
+bool CDBConnection::BindParam(int32 ParamIndex, const char* Str, SQLLEN* Index)
+{
+	SQLULEN Size = (SQLULEN)(strlen(Str + 1));
+	*Index = SQL_NTSL;
+
+	if (Size > CHAR_MAX)
+	{
+		return BindParam(ParamIndex, SQL_C_CHAR, SQL_LONGVARCHAR, Size, (SQLPOINTER)Str, Index);
+	}
+	else
+	{
+		return BindParam(ParamIndex, SQL_C_CHAR, SQL_VARCHAR, Size, (SQLPOINTER)Str, Index);
+	}	
+}
+
 bool CDBConnection::BindParam(int32 ParamIndex, const BYTE* Binary, int32 Size, SQLLEN* Index)
 {
 	if (Binary == nullptr)

@@ -41,6 +41,7 @@ public:
 	bool BindParam(int32 ParamIndex, int64* Value, SQLLEN* Index);
 	bool BindParam(int32 ParamIndex, TIMESTAMP_STRUCT* TimeValue, SQLLEN* Index);
 	bool BindParam(int32 ParamIndex, const WCHAR* Str, SQLLEN* Index);
+	bool BindParam(int32 ParamIndex, const char* Str, SQLLEN* Index);
 	bool BindParam(int32 ParamIndex, const BYTE* Binary, int32 Size, SQLLEN* Index);
 
 	// 쿼리 실행후 관련된 데이터를 받아올때 사용할 함수

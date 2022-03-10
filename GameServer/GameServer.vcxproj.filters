@@ -350,10 +350,7 @@
     <Xml Include="DBConfig.xml">
       <Filter>Util\설정 파일\DB</Filter>
     </Xml>
-    <Xml Include="TokenDB.xml">
-      <Filter>Util\설정 파일\DB</Filter>
-    </Xml>
-    <Xml Include="ServerConfig.xml">
+    <Xml Include="GameServerConfig.xml">
       <Filter>Util\설정 파일\Server</Filter>
     </Xml>
     <Xml Include="GameServerDB.xml">

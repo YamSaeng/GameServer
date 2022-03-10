@@ -9,24 +9,22 @@
 #include "ObjectManager.h"
 #include "Inventory.h"
 #include "GameServerMessage.h"
+#include <WS2tcpip.h>
 #include <process.h>
 #include <atlbase.h>
 
 CGameServer::CGameServer()
 {		
 	//timeBeginPeriod(1);
-	_AuthThread = nullptr;
 	_UserDataBaseThread = nullptr;
 	_TimerJobThread = nullptr;
 	_LogicThread = nullptr;
 
 	// 논시그널 상태 자동리셋
-	_AuthThreadWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	_UserDataBaseWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	_WorldDataBaseWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);	
 	_TimerThreadWakeEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
-	_AuthThreadEnd = false;
 	_NetworkThreadEnd = false;
 	_UserDataBaseThreadEnd = false;
 	_WorldDataBaseThreadEnd = false;	
@@ -47,9 +45,6 @@ CGameServer::CGameServer()
 	_TimerHeapJob = new CHeap<int64, st_TimerJob*>(2000);
 
 	_LogicThreadFPS = 0;
-
-	_AuthThreadWakeCount = 0;
-	_AuthThreadTPS = 0;
 
 	_NetworkThreadWakeCount = 0;
 	_NetworkThreadTPS = 0;	
@@ -75,9 +70,6 @@ void CGameServer::GameServerStart(const WCHAR* OpenIP, int32 Port)
 
 	G_ObjectManager->GameServer = this;
 
-	// 인증 쓰레드 시작
-	_AuthThread = (HANDLE)_beginthreadex(NULL, 0, AuthThreadProc, this, 0, NULL);	
-	
 	// 유저 데이터 베이스 쓰레드 시작
 	for (int32 i = 0; i < 3; i++)
 	{
@@ -93,53 +85,34 @@ void CGameServer::GameServerStart(const WCHAR* OpenIP, int32 Port)
 	// 로직 쓰레드 시작
 	_LogicThread = (HANDLE)_beginthreadex(NULL, 0, LogicThreadProc, this, 0, NULL);		
 
-	CloseHandle(_AuthThread);
 	CloseHandle(_WorldDataBaseThread);
 	CloseHandle(_TimerJobThread);
-	CloseHandle(_LogicThread);	
+	CloseHandle(_LogicThread);		
 }
 
-unsigned __stdcall CGameServer::AuthThreadProc(void* Argument)
+void CGameServer::LoginServerConnect(const WCHAR* ConnectIP, int32 Port)
 {
-	CGameServer* Instance = (CGameServer*)Argument;
+	SOCKADDR_IN ServerAddr;
+	ZeroMemory(&ServerAddr, sizeof(ServerAddr));
+	ServerAddr.sin_family = AF_INET;
+	InetPtonW(AF_INET, ConnectIP, &ServerAddr.sin_addr);
+	ServerAddr.sin_port = htons(Port);
 
-	while (!Instance->_AuthThreadEnd)
+	_LoginServerSock = socket(AF_INET, SOCK_STREAM, 0);
+
+	while (1)
 	{
-		WaitForSingleObject(Instance->_AuthThreadWakeEvent, INFINITE);
-
-		Instance->_AuthThreadWakeCount++;
-
-		while (!Instance->_GameServerAuthThreadMessageQue.IsEmpty())
+		int32 LoginServerConnectRet = connect(_LoginServerSock, (SOCKADDR*)&ServerAddr, sizeof(ServerAddr));
+		if (LoginServerConnectRet == SOCKET_ERROR)
 		{
-			st_GameServerJob* Job = nullptr;
-
-			if (!Instance->_GameServerAuthThreadMessageQue.Dequeue(&Job))
-			{
-				break;
-			}
-
-			switch (Job->Type)
-			{
-				// 접속한 세션 대상으로 기본 정보 셋팅
-			case en_GameServerJobType::AUTH_NEW_CLIENT_JOIN:
-				Instance->CreateNewClient(Job->SessionId);
-				break;
-				// 접속 종료한 세션 대상으로 콘텐츠 정리
-			case en_GameServerJobType::AUTH_DISCONNECT_CLIENT:
-				Instance->DeleteClient(Job->Session);
-				break;
-			case en_GameServerJobType::AUTH_MESSAGE:
-				break;
-			default:
-				Instance->Disconnect(Job->SessionId);
-				break;
-			}
-
-			Instance->_AuthThreadTPS++;
-			Instance->_GameServerJobMemoryPool->Free(Job);
+			DWORD Error = WSAGetLastError();
+			G_Logger->WriteStdOut(en_Color::RED, L"LoginServerConnect Error %d\n", Error);			
+		}
+		else if (LoginServerConnectRet == 0)
+		{
+			break;
 		}
 	}
-	return 0;
 }
 
 unsigned __stdcall CGameServer::UserDataBaseThreadProc(void* Argument)
@@ -955,9 +928,7 @@ void CGameServer::CreateNewClient(int64 SessionId)
 	st_Session* Session = FindSession(SessionId);
 
 	if (Session)
-	{
-		// 기본 정보 셋팅
-		Session->Token = 0;
+	{		
 		Session->PingPacketTime = GetTickCount64();
 
 		for (int i = 0; i < SESSION_CHARACTER_MAX; i++)
@@ -971,8 +942,8 @@ void CGameServer::CreateNewClient(int64 SessionId)
 		// 게임 서버 접속 성공을 클라에게 알려준다.
 		CMessage* ResClientConnectedMessage = MakePacketResClientConnected();
 		SendPacket(Session->SessionId, ResClientConnectedMessage);
-		ResClientConnectedMessage->Free();
-
+		ResClientConnectedMessage->Free();	
+		
 		// 핑 전송 시작		
 		//PingTimerCreate(Session);
 
@@ -985,7 +956,12 @@ void CGameServer::DeleteClient(st_Session* Session)
 	if (Session == nullptr)
 	{
 		return;
-	}
+	}	
+		
+	// 로그인 서버에 로그아웃 요청
+	CGameServerMessage* LogOutPacket = MakePacketLogOut(Session->AccountId);
+	SendPacketToLoginServer(LogOutPacket);
+	LogOutPacket->Free();	
 
 	CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
 
@@ -1048,6 +1024,8 @@ void CGameServer::DeleteClient(st_Session* Session)
 		}		
 	}	
 
+	memset(Session->Token, 0, sizeof(Session->Token));
+
 	Session->IsLogin = false;
 	Session->IsDummy = false;	
 
@@ -1062,6 +1040,18 @@ void CGameServer::DeleteClient(st_Session* Session)
 	_SessionArrayIndexs.Push(GET_SESSIONINDEX(Session->SessionId));	
 }
 
+void CGameServer::SendPacketToLoginServer(CGameServerMessage* Message)
+{
+	Message->Encode();
+
+	int32 SendRet = send(_LoginServerSock, Message->GetBufferPtr(), Message->GetUseBufferSize(), 0);
+	if (SendRet == SOCKET_ERROR)
+	{
+		DWORD Error = WSAGetLastError();
+		G_Logger->WriteStdOut(en_Color::RED, L"Send LoginServer Error %d \n", Error);
+	}
+}
+
 void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 {
 	WORD MessageType;
@@ -1069,69 +1059,69 @@ void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 
 	switch (MessageType)
 	{
-	case en_PACKET_TYPE::en_PACKET_C2S_GAME_REQ_LOGIN:
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_GAME_REQ_LOGIN:
 		PacketProcReqLogin(SessionId, Message);
 		break;
-	case en_PACKET_TYPE::en_PACKET_C2S_GAME_CREATE_CHARACTER:
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_GAME_CREATE_CHARACTER:
 		PacketProcReqCreateCharacter(SessionId, Message);
 		break;
-	case en_PACKET_TYPE::en_PACKET_C2S_GAME_ENTER:
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_GAME_ENTER:
 		PacketProcReqEnterGame(SessionId, Message);
 		break;
-	case en_PACKET_TYPE::en_PACKET_C2S_CHARACTER_INFO:
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_CHARACTER_INFO:
 		PacketProcReqCharacterInfo(SessionId, Message);
 		break;
-	case en_PACKET_TYPE::en_PACKET_C2S_MOVE:
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_MOVE:
 		PacketProcReqMove(SessionId, Message);
 		break;	
-	case en_PACKET_TYPE::en_PACKET_C2S_MOVE_STOP:
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_MOVE_STOP:
 		PacketProcReqMoveStop(SessionId, Message);
 		break;
-	case en_PACKET_TYPE::en_PACKET_C2S_ATTACK:
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_ATTACK:
 		PacketProcReqMelee(SessionId, Message);
 		break;
-	case en_PACKET_TYPE::en_PACKET_C2S_MAGIC:
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_MAGIC:
 		PacketProcReqMagic(SessionId, Message);
 		break;
-	case en_PACKET_TYPE::en_PACKET_C2S_MAGIC_CANCEL:
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_MAGIC_CANCEL:
 		PacketProcReqMagicCancel(SessionId, Message);
 		break;
-	case en_PACKET_TYPE::en_PACKET_C2S_MOUSE_POSITION_OBJECT_INFO:
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_MOUSE_POSITION_OBJECT_INFO:
 		PacketProcReqMousePositionObjectInfo(SessionId, Message);
 		break;
-	case en_PACKET_TYPE::en_PACKET_C2S_OBJECT_STATE_CHANGE:
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_OBJECT_STATE_CHANGE:
 		PacketProcReqObjectStateChange(SessionId, Message);
 		break;
-	case en_PACKET_TYPE::en_PACKET_C2S_MESSAGE:
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_MESSAGE:
 		PacketProcReqChattingMessage(SessionId, Message);
 		break;
-	case en_PACKET_TYPE::en_PACKET_C2S_LOOTING:
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_LOOTING:
 		PacketProcReqItemLooting(SessionId, Message);
 		break;
-	case en_PACKET_TYPE::en_PACKET_C2S_ITEM_SELECT:
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_ITEM_SELECT:
 		PacketProcReqItemSelect(SessionId, Message);
 		break;	
-	case en_PACKET_TYPE::en_PACKET_C2S_ITEM_PLACE:
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_ITEM_PLACE:
 		PacketProcReqItemPlace(SessionId, Message);
 		break;
-	case en_PACKET_TYPE::en_PACKET_C2S_QUICKSLOT_SAVE:
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_QUICKSLOT_SAVE:
 		PacketProcReqQuickSlotSave(SessionId, Message);
 		break;
-	case en_PACKET_TYPE::en_PACKET_C2S_QUICKSLOT_SWAP:
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_QUICKSLOT_SWAP:
 		PacketProcReqQuickSlotSwap(SessionId, Message);
 		break;
-	case en_PACKET_TYPE::en_PACKET_C2S_QUICKSLOT_EMPTY:
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_QUICKSLOT_EMPTY:
 		PacketProcReqQuickSlotInit(SessionId, Message);
 		break;
-	case en_PACKET_TYPE::en_PACKET_C2S_CRAFTING_CONFIRM:
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_CRAFTING_CONFIRM:
 		PacketProcReqCraftingConfirm(SessionId, Message);
 		break;
-	case en_PACKET_TYPE::en_PACKET_C2S_INVENTORY_ITEM_USE:
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_INVENTORY_ITEM_USE:
 		PacketProcReqItemUse(SessionId, Message);
 		break;
-	case en_PACKET_TYPE::en_PACKET_CS_GAME_REQ_HEARTBEAT:		
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_CS_GAME_REQ_HEARTBEAT:		
 		break;
-	case en_PACKET_TYPE::en_PACKET_C2S_PONG:
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_PONG:
 		PacketProcReqPong(SessionId, Message);
 		break;		
 	default:
@@ -1154,41 +1144,30 @@ void CGameServer::PacketProcReqLogin(int64 SessionID, CMessage* Message)
 		if (Session != nullptr)
 		{
 			// AccountID 셋팅
-			*Message >> AccountId;
-
-			// 중복 로그인 확인
-			for (st_Session* FindSession : _SessionArray)
-			{
-				if (FindSession->AccountId == AccountId)
-				{
-					// 새로 접속한 중복 되는 유저 연결 끊음
-					Disconnect(Session->SessionId);
-					break;
-				}
-			}
+			*Message >> AccountId;			
 
 			Session->AccountId = AccountId;
 
 			int8 IdLen;
 			*Message >> IdLen;
 			
-			WCHAR* ClientIdName = (WCHAR*)malloc(sizeof(WCHAR) * IdLen);
-			memset(ClientIdName, 0, sizeof(WCHAR) * IdLen);			
-			Message->GetData(ClientIdName, IdLen);
+			WCHAR* AccountName = (WCHAR*)malloc(sizeof(WCHAR) * IdLen);
+			memset(AccountName, 0, sizeof(WCHAR) * IdLen);			
+			Message->GetData(AccountName, IdLen);
 
-			Session->LoginId = ClientIdName;
-			free(ClientIdName);
-			ClientIdName = nullptr;
+			Session->LoginId = AccountName;			
 
+			int8 TokenLen;
+			*Message >> TokenLen;
+
+			byte Token[ACCOUNT_TOKEN_LEN];
+			Message->GetData((char*)Token, TokenLen);
+			
 			bool IsDummy;
 			*Message >> IsDummy;
 
-			if (IsDummy != true)
-			{
-				// 토큰 셋팅
-				*Message >> Token;
-				Session->Token = Token;
-			}			
+			// 토큰 저장
+			memcpy(Session->Token, Token, TokenLen);
 
 			Session->IsDummy = IsDummy;
 
@@ -1211,6 +1190,9 @@ void CGameServer::PacketProcReqLogin(int64 SessionID, CMessage* Message)
 
 			_GameServerUserDataBaseThreadMessageQue.Enqueue(DBAccountCheckJob);
 			SetEvent(_UserDataBaseWakeEvent);
+
+			free(AccountName);
+			AccountName = nullptr;
 		}
 		else
 		{
@@ -2911,37 +2893,36 @@ void CGameServer::PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message
 
 	if (Session)
 	{
-		int64 ClientAccountId = Session->AccountId;
-		int32 Token = Session->Token;
+		int64 ClientAccountId = Session->AccountId;		
 
 		// AccountServer에 입력받은 AccountID가 있는지 확인한다.
 		// 더미일 경우에는 토큰은 확인하지 않는다.
 
 		int DBToken = 0;
+		BYTE OutToken[ACCOUNT_TOKEN_LEN] = { 0 };
+
 		if (Session->IsDummy == false)
 		{
 			// AccountNo와 Token으로 AccountServerDB 접근해서 데이터가 있는지 확인
-			CDBConnection* TokenDBConnection = G_DBConnectionPool->Pop(en_DBConnect::TOKEN);
+			CDBConnection* AccountDBConnection = G_DBConnectionPool->Pop(en_DBConnect::ACCOUNT);
 
-			SP::CDBAccountTokenGet AccountTokenGet(*TokenDBConnection);
+			SP::CDBAccountTokenGet AccountTokenGet(*AccountDBConnection);
 			AccountTokenGet.InAccountID(ClientAccountId); // AccountId 입력
 			
-			TIMESTAMP_STRUCT LoginSuccessTime;
-			TIMESTAMP_STRUCT TokenExpiredTime;
-
-			AccountTokenGet.OutToken(DBToken); // 토큰 받아옴
-			AccountTokenGet.OutLoginsuccessTime(LoginSuccessTime);
-			AccountTokenGet.OutTokenExpiredTime(TokenExpiredTime);
+			TIMESTAMP_STRUCT TokenCreateTime;			
+						
+			AccountTokenGet.OutTokenTime(TokenCreateTime);
+			AccountTokenGet.OutToken(OutToken);
 
 			AccountTokenGet.Execute();
 
 			AccountTokenGet.Fetch();
 
-			G_DBConnectionPool->Push(en_DBConnect::TOKEN, TokenDBConnection); // 풀 반납
+			G_DBConnectionPool->Push(en_DBConnect::ACCOUNT, AccountDBConnection); // 풀 반납
 		}	
 
 		// DB 토큰과 클라로부터 온 토큰이 같으면 로그인 최종성공
-		if (Session->IsDummy == true || Token == DBToken)
+		if (Session->IsDummy == true || memcmp(Session->Token,OutToken,ACCOUNT_TOKEN_LEN) == 0)
 		{
 			Session->IsLogin = true;
 			// 클라가 소유하고 있는 플레이어들을 DB로부터 긁어온다.
@@ -6587,14 +6568,25 @@ CGameServerMessage* CGameServer::MakePacketSkillError(int64 PlayerId, en_SkillEr
 	return ResErrorMessage;
 }
 
+CGameServerMessage* CGameServer::MakePacketLogOut(int64 AccountID)
+{
+	CGameServerMessage* ResLogOutMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResLogOutMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResLogOutMessage->Clear();
+
+	*ResLogOutMessage << (int16)en_LOGIN_SERVER_PACKET_TYPE::en_LOGIN_SERVER_C2S_ACCOUNT_LOGOUT;
+	*ResLogOutMessage << AccountID;
+
+	return ResLogOutMessage;
+}
+
 void CGameServer::OnClientJoin(int64 SessionID)
 {
-	st_GameServerJob* ClientJoinJob = _GameServerJobMemoryPool->Alloc();
-	ClientJoinJob->Type = en_GameServerJobType::AUTH_NEW_CLIENT_JOIN;
-	ClientJoinJob->SessionId = SessionID;
-	ClientJoinJob->Message = nullptr;
-	_GameServerAuthThreadMessageQue.Enqueue(ClientJoinJob);
-	SetEvent(_AuthThreadWakeEvent);	
+	CreateNewClient(SessionID);		
 }
 
 void CGameServer::OnRecv(int64 SessionID, CMessage* Packet)
@@ -6604,14 +6596,7 @@ void CGameServer::OnRecv(int64 SessionID, CMessage* Packet)
 
 void CGameServer::OnClientLeave(st_Session* LeaveSession)
 {
-	st_GameServerJob* ClientLeaveJob = _GameServerJobMemoryPool->Alloc();
-	ClientLeaveJob->Type = en_GameServerJobType::AUTH_DISCONNECT_CLIENT;
-	ClientLeaveJob->SessionId = LeaveSession->SessionId;
-	ClientLeaveJob->Session = LeaveSession;
-	ClientLeaveJob->Message = nullptr;
-
-	_GameServerAuthThreadMessageQue.Enqueue(ClientLeaveJob);
-	SetEvent(_AuthThreadWakeEvent);
+	DeleteClient(LeaveSession);	
 }
 
 bool CGameServer::OnConnectionRequest(const wchar_t ClientIP, int32 Port)

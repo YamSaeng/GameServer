@@ -316,8 +316,7 @@
   <ItemGroup>
     <Xml Include="DBConfig.xml" />
     <Xml Include="GameServerDB.xml" />
-    <Xml Include="TokenDB.xml" />
-    <Xml Include="ServerConfig.xml" />
+    <Xml Include="GameServerConfig.xml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ArcherSkillDatas.json" />

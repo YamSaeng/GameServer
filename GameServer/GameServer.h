@@ -10,9 +10,9 @@ class CGameServerMessage;
 
 class CGameServer : public CNetworkLib
 {
-private:
-	// 인증 쓰레드
-	HANDLE _AuthThread;	
+private:	
+	// 로그인 서버와 통신할 소켓
+	SOCKET _LoginServerSock;
 	// 유저 데이터베이스 쓰레드
 	HANDLE _UserDataBaseThread;
 	// 월드 데이터베이스 쓰레드
@@ -22,13 +22,9 @@ private:
 	// 로직 쓰레드
 	HANDLE _LogicThread;	
 
-	// 인증 쓰레드 깨우기 이벤트
-	HANDLE _AuthThreadWakeEvent;	
 	// 타이머잡 쓰레드 깨우기 이벤트
 	HANDLE _TimerThreadWakeEvent;
 	
-	// AuthThread 종료용 변수
-	bool _AuthThreadEnd;
 	// WorkerThread 종료용 변수
 	bool _NetworkThreadEnd;
 	// User DataBaseThread 종료용 변수
@@ -41,14 +37,9 @@ private:
 	// LogicThread 종료용 변수
 	bool _LogicThreadEnd;
 	
-
 	// TimerJobThread 전용 Lock
-	SRWLOCK _TimerJobLock;
-
-	//-------------------------------------------------------
-	// 인증 쓰레드 ( 클라 접속, 클라 비접속 )
-	//-------------------------------------------------------
-	static unsigned __stdcall AuthThreadProc(void* Argument);	
+	SRWLOCK _TimerJobLock;	
+			
 	//----------------------------------------------------------
 	// 유저 데이터베이스 쓰레드 ( 유저 데이터 베이스 작업 처리 )
 	//----------------------------------------------------------
@@ -81,6 +72,10 @@ private:
 	//------------------------------------
 	void DeleteClient(st_Session* Session);
 
+	//-------------------------------------------------------
+	// 로그인 서버에 패킷 전송
+	//-------------------------------------------------------
+	void SendPacketToLoginServer(CGameServerMessage* Message);
 	//--------------------------------------------------
 	// 네트워크 패킷 처리
 	//--------------------------------------------------
@@ -429,6 +424,10 @@ public:
 	// 게임서버 스킬 에러 메세지 생성 패킷 조합
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketSkillError(int64 PlayerId, en_SkillErrorType ErrorType, const WCHAR* SkillName, int16 SkillDistance = 0);
+	//---------------------------------------------------
+	// 로그인 서버 로그아웃 요청 패킷 조합
+	//---------------------------------------------------
+	CGameServerMessage* MakePacketLogOut(int64 AccountID);
 public:
 	//---------------------------------------------------------
 	// PlayerJob 메모리풀
@@ -447,7 +446,6 @@ public:
 	//------------------------------------
 	// Job 큐
 	//------------------------------------
-	CLockFreeQue<st_GameServerJob*> _GameServerAuthThreadMessageQue;	
 	CLockFreeQue<st_GameServerJob*> _GameServerUserDataBaseThreadMessageQue;
 	CLockFreeQue<st_GameServerJob*> _GameServerWorldDataBaseThreadMessageQue;	
 
@@ -457,10 +455,6 @@ public:
 	CHeap<int64,st_TimerJob*>* _TimerHeapJob;
 
 	int64 _LogicThreadFPS;
-	// 인증 쓰레드 활성화된 횟수
-	int64 _AuthThreadWakeCount;
-	// 인증 쓰레드 TPS
-	int64 _AuthThreadTPS;
 	// 네트워크 쓰레드 활성화된 횟수
 	int64 _NetworkThreadWakeCount;
 	// 네트워크 쓰레드 TPS
@@ -488,6 +482,11 @@ public:
 	//------------------------------------------
 	void GameServerStart(const WCHAR* OpenIP, int32 Port);
 
+	//------------------------------------------------------
+	// 로그인 서버와 연결
+	//------------------------------------------------------
+	void LoginServerConnect(const WCHAR* ConnectIP, int32 Port);
+
 	//--------------------------------------------------
 	// 새로운 클라이언트 접속 
 	//--------------------------------------------------
@@ -500,8 +499,8 @@ public:
 	// 클라이언트 떠남
 	//--------------------------------------------------------------
 	virtual void OnClientLeave(st_Session* LeaveSession) override;
-	virtual bool OnConnectionRequest(const wchar_t ClientIP, int32 Port) override;
-		
+	virtual bool OnConnectionRequest(const wchar_t ClientIP, int32 Port) override;	
+	
 	//--------------------------------------------------------------
 	// 위치값을 기준으로 메세지 주위 섹터에 전송
 	//--------------------------------------------------------------
