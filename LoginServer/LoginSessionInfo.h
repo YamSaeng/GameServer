@@ -30,15 +30,7 @@ struct st_LoginSession
 	LONG IsSend;
 
 	CMessage* SendPacket[SESSION_SEND_PACKET_MAX];
-	LONG SendPacketCount;
-
-	wstring LoginId;
-
-	int32 Token;
-
-	bool IsDummy;
-
-	bool IsLogin;
+	LONG SendPacketCount;	
 
 	bool IsCancelIO;
 };

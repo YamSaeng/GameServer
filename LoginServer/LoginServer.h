@@ -54,6 +54,10 @@ private:
 	// 로그인 요청 처리
 	//-------------------------------------------------------------
 	void PacketProcReqAccountLogin(int64 SessionID, CMessage* Packet);
+	//-------------------------------------------------------------
+	// 로그아웃 요청 처리
+	//-------------------------------------------------------------
+	void PacketProcReqAccountLogOut(int64 SessionID, CMessage* Packet);
 
 	//------------------------------------------------
 	// 새로운 계정 넣기
@@ -67,8 +71,8 @@ private:
 	// 로그아웃
 	//------------------------------------------------
 	void AccountLogOut(int64 SessionID, CMessage* Packet);
-
-	void DeleteClient(int64 SessionID);
+	
+	void DeleteClient(st_LoginSession* Session);
 
 	//-----------------------------------
 	// 서버 목록 가져오기

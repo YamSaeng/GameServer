@@ -107,19 +107,7 @@ void CLoginServer::OnClientJoin(int64 SessionID)
 
 void CLoginServer::OnClientLeave(st_LoginSession* LeaveSession)
 {
-	st_LoginServerJob* LogOutServerJob = _LoginServerJobMemoryPool->Alloc();
-	LogOutServerJob->Type = en_LoginServerJobType::DATA_BASE_ACCOUNT_LOGOUT;
-	LogOutServerJob->SessionID = LeaveSession->SessionId;	
-
-	CMessage* JobMessage = CMessage::Alloc();
-	JobMessage->Clear();
-
-	*JobMessage << LeaveSession->AccountId;
-
-	LogOutServerJob->Message = JobMessage;
-
-	_DataBaseThreadMessageQue.Enqueue(LogOutServerJob);
-	SetEvent(_DataBaseThreadWakeEvent);
+	DeleteClient(LeaveSession);	
 }
 
 bool CLoginServer::OnConnectionRequest(const wchar_t ClientIP, int32 Port)
@@ -157,6 +145,9 @@ void CLoginServer::PacketProc(int64 SessionID, CMessage* Packet)
 		break;
 	case en_LOGIN_SERVER_PACKET_TYPE::en_LOGIN_SERVER_C2S_ACCOUNT_LOGIN:
 		PacketProcReqAccountLogin(SessionID, Packet);
+		break;
+	case en_LOGIN_SERVER_PACKET_TYPE::en_LOGIN_SERVER_C2S_ACCOUNT_LOGOUT:
+		PacketProcReqAccountLogOut(SessionID, Packet);
 		break;
 	}
 
@@ -208,6 +199,31 @@ void CLoginServer::PacketProcReqAccountLogin(int64 SessionID, CMessage* Packet)
 
 		_DataBaseThreadMessageQue.Enqueue(DBAccountLoginJob);
 		SetEvent(_DataBaseThreadWakeEvent);		
+
+		ReturnSession(Session);
+	}
+}
+
+void CLoginServer::PacketProcReqAccountLogOut(int64 SessionID, CMessage* Packet)
+{
+	st_LoginSession* Session = FindSession(SessionID);
+
+	if (Session)
+	{
+		st_LoginServerJob* DBAccountLogOutJob = _LoginServerJobMemoryPool->Alloc();
+		DBAccountLogOutJob->SessionID = Session->SessionId;
+		DBAccountLogOutJob->Type = en_LoginServerJobType::DATA_BASE_ACCOUNT_LOGOUT;
+
+		CMessage* DBAccountLogOutMessage = CMessage::Alloc();
+		DBAccountLogOutMessage->Clear();
+
+		DBAccountLogOutMessage->InsertData(Packet->GetFrontBufferPtr(), Packet->GetUseBufferSize());
+		Packet->MoveReadPosition(Packet->GetUseBufferSize());
+
+		DBAccountLogOutJob->Message = DBAccountLogOutMessage;
+
+		_DataBaseThreadMessageQue.Enqueue(DBAccountLogOutJob);
+		SetEvent(_DataBaseThreadWakeEvent);
 
 		ReturnSession(Session);
 	}
@@ -428,8 +444,9 @@ void CLoginServer::AccountLogIn(int64 SessionID, CMessage* Packet)
 						// 중복 로그인
 						LoginInfo = en_LoginInfo::LOGIN_ACCOUNT_OVERLAP;
 						break;
-					// 로그아웃 중
+					// 로그아웃 또는 접속 종료라면	
 					case en_LoginState::LOGIN_OUT:
+					case en_LoginState::LOGIN_DISCONNECT:
 						{
 							// 토큰이 있는지 확인
 							CDBConnection* TokenDBConnection = G_DBConnectionPool->Pop(en_DBConnect::ACCOUNT);
@@ -560,9 +577,15 @@ void CLoginServer::AccountLogOut(int64 SessionID, CMessage* Packet)
 	G_DBConnectionPool->Push(en_DBConnect::ACCOUNT, LoginStateUpdateDBConnection);
 }
 
-void CLoginServer::DeleteClient(int64 SessionID)
+void CLoginServer::DeleteClient(st_LoginSession* Session)
 {
+	Session->AccountId = 0;
 
+	Session->ClientSock = INVALID_SOCKET;
+	closesocket(Session->CloseSock);
+	
+	InterlockedDecrement64(&_SessionCount);
+	_SessionArrayIndexs.Push(GET_SESSIONINDEX(Session->SessionId));
 }
 
 vector<st_ServerInfo> CLoginServer::GetServerList()
