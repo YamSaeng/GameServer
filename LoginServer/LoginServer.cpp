@@ -287,7 +287,7 @@ void CLoginServer::AccountLogIn(int64 SessionID, CMessage* Packet)
 		en_LoginInfo LoginInfo;
 
 		// 클라가 보낸 아이디 가져오기
-		int8 AccountLoginNameLen;
+		int16 AccountLoginNameLen;
 		*Packet >> AccountLoginNameLen;
 
 		WCHAR* AccountLoginName = (WCHAR*)malloc(sizeof(WCHAR) * AccountLoginNameLen);
@@ -297,7 +297,7 @@ void CLoginServer::AccountLogIn(int64 SessionID, CMessage* Packet)
 		wstring AccountLoginNameString = AccountLoginName;
 
 		// 클라가 보낸 비밀번호 가져오기
-		int8 PasswordLen;
+		int16 PasswordLen;
 		*Packet >> PasswordLen;
 
 		WCHAR* Password = (WCHAR*)malloc(sizeof(WCHAR) * PasswordLen);
@@ -653,7 +653,7 @@ CMessage* CLoginServer::MakePacketResAccountLogin(en_LoginInfo LoginInfo, int64 
 	*ResAccountLoginPacket << (int8)LoginInfo;
 	*ResAccountLoginPacket << AccountID;
 	
-	int8 AccountNameLen = (int8)AccountName.length() * 2;
+	int16 AccountNameLen = (int16)AccountName.length() * 2;
 	*ResAccountLoginPacket << AccountNameLen;
 	ResAccountLoginPacket->InsertData(AccountName.c_str(), AccountNameLen);
 
@@ -670,11 +670,11 @@ CMessage* CLoginServer::MakePacketResAccountLogin(en_LoginInfo LoginInfo, int64 
 
 	for (int8 i = 0; i < ServerListSize; i++)
 	{
-		int8 ServerNameLen = (int8)ServerLists[i].ServerName.length() * 2;
+		int16 ServerNameLen = (int16)ServerLists[i].ServerName.length() * 2;
 		*ResAccountLoginPacket << ServerNameLen;
 		ResAccountLoginPacket->InsertData(ServerLists[i].ServerName.c_str(), ServerNameLen);
 
-		int8 ServerIPLen = (int8)ServerLists[i].ServerIP.length() * 2;
+		int16 ServerIPLen = (int16)ServerLists[i].ServerIP.length() * 2;
 		*ResAccountLoginPacket << ServerIPLen;
 		ResAccountLoginPacket->InsertData(ServerLists[i].ServerIP.c_str(), ServerIPLen);
 
