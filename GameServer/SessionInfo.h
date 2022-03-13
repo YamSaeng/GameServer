@@ -7,6 +7,8 @@
 #define SESSION_CHARACTER_MAX 3
 #define SESSION_SEND_PACKET_MAX 500
 
+#define ACCOUNT_TOKEN_LEN 50
+
 class CPlayer;
 
 struct st_IOBlock
@@ -19,13 +21,13 @@ struct st_Session
 {
 	int64 SessionId;		// 게임서버에서 발급한 SessionId
 	int64 AccountId;		// Account서버에서 발급한 AccointId
-	SOCKET ClientSock;		// 데이터 송수신 소켓
-	SOCKET CloseSock;		// Disconnect 호출시 종료 절차용 소켓
+	SOCKET ClientSock;		// 클라 데이터 송수신 소켓
+	SOCKET CloseSock;		// Disconnect 호출시 종료 절차용 소켓	
 	SOCKADDR_IN ClientAddr; // 접속한 클라 주소
 
 	CRingBuffer RecvRingBuf;
 	CLockFreeQue<CMessage*> SendRingBuf;	
-	CLockFreeQue<CGameServerMessage*> DBQue;
+	CLockFreeQue<CGameServerMessage*> DBQue;	
 
 	OVERLAPPED RecvOverlapped = {}; // WSARecv 통지용
 	OVERLAPPED SendOverlapped = {}; // WSASend 통지용
@@ -45,7 +47,7 @@ struct st_Session
 	int16 SectorX;
 	int16 SectorY;
 
-	int32 Token;
+	BYTE Token[ACCOUNT_TOKEN_LEN];
 
 	// 더미 여부
 	bool IsDummy;

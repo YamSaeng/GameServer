@@ -111,13 +111,3 @@ set<CEnvironment*> CSector::GetEnvironment()
 {
 	return _Environment;
 }
-
-void CSector::GetSectorLock()
-{
-	AcquireSRWLockExclusive(&_SectorLock);
-}
-
-void CSector::GetSectorUnLock()
-{
-	ReleaseSRWLockExclusive(&_SectorLock);
-}

@@ -304,9 +304,8 @@ int32 CMessage::GetData(wstring& Dest, int32 Size)
 	WCHAR StringToWCHAR[256];
 	memset(StringToWCHAR, 0, sizeof(StringToWCHAR));
 
-	memcpy(StringToWCHAR, &_MessageBuf[_Front], Size);
-	wstring RetWString = StringToWCHAR;
-	Dest = RetWString;
+	memcpy(StringToWCHAR, &_MessageBuf[_Front], Size);	
+	Dest = StringToWCHAR;
 	_Front += Size;
 	_UseBufferSize -= Size;
 	return Size;	

@@ -32,9 +32,6 @@ public:
 	set<CPlayer*> GetPlayers();	
 	set<CMonster*> GetMonsters();
 	set<CItem*> GetItems();
-	set<CEnvironment*> GetEnvironment();
-
-	void GetSectorLock();
-	void GetSectorUnLock();
+	set<CEnvironment*> GetEnvironment();	
 };
 

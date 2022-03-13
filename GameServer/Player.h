@@ -11,20 +11,7 @@ struct st_TimerJob;
 
 class CPlayer : public CGameObject
 {
-public:	
-	enum class en_PlayerJobType : int16
-	{		
-		PLAYER_MELEE_JOB,
-		PLAYER_MAGIC_JOB,
-		PLAYER_MAGIC_CANCEL_JOB
-	};
-
-	struct st_PlayerJob
-	{
-		en_PlayerJobType Type;		
-		CGameServerMessage* Message = nullptr;
-	};	
-
+public:		
 	uint64 _AttackTick;
 	uint64 _SpellTick;
 
@@ -47,9 +34,7 @@ public:
 	CSkillBox _SkillBox;
 	CQuickSlotManager _QuickSlotManager;
 
-	st_Experience _Experience;	
-
-	CLockFreeQue<st_PlayerJob*> _PlayerJobQue;
+	st_Experience _Experience;			
 
 	// 시야 범위 오브젝트
 	vector<st_FieldOfViewInfo> _FieldOfViewInfos;	
@@ -64,8 +49,7 @@ public:
 
 	void Init();	
 
-	virtual void PositionReset() override;
-	void PlayerJobQueProc();
+	virtual void PositionReset() override;	
 protected:
 	virtual void UpdateMove();	
 	virtual void UpdateAttack();
