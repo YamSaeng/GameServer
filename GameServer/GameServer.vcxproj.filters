@@ -214,9 +214,6 @@
     <ClInclude Include="GameObjectInfo.h">
       <Filter>ContentServer\Content\GameObject</Filter>
     </ClInclude>
-    <ClInclude Include="SkillBox.h">
-      <Filter>ContentServer\Content\SkillBox</Filter>
-    </ClInclude>
     <ClInclude Include="Skill.h">
       <Filter>ContentServer\Content\SkillBox\Skill</Filter>
     </ClInclude>
@@ -240,6 +237,12 @@
       <Filter>ContentServer\Content\Inventory</Filter>
     </ClInclude>
     <ClInclude Include="Map.h">
+      <Filter>ContentServer\Content\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="SkillBox.h">
+      <Filter>DB</Filter>
+    </ClInclude>
+    <ClInclude Include="MapManager.h">
       <Filter>ContentServer\Content\Map</Filter>
     </ClInclude>
   </ItemGroup>
@@ -343,6 +346,9 @@
       <Filter>ContentServer\Content\Inventory</Filter>
     </ClCompile>
     <ClCompile Include="Map.cpp">
+      <Filter>ContentServer\Content\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="MapManager.cpp">
       <Filter>ContentServer\Content\Map</Filter>
     </ClCompile>
   </ItemGroup>

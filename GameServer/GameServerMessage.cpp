@@ -24,7 +24,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_GameObjectInfo& GameObject
 {
     *this << GameObjectInfo.ObjectId;
 
-    int8 GameObjectInfoNameLen = (int8)GameObjectInfo.ObjectName.length() * 2;
+    int16 GameObjectInfoNameLen = (int16)GameObjectInfo.ObjectName.length() * 2;
     *this << GameObjectInfoNameLen;    
     InsertData(GameObjectInfo.ObjectName.c_str(), GameObjectInfoNameLen);      
 
@@ -91,14 +91,14 @@ CGameServerMessage& CGameServerMessage::operator<<(st_SkillInfo& SkillInfo)
     *this << (int16)SkillInfo.SkillType;
     *this << SkillInfo.SkillLevel;
 
-    int8 SkillNameLen = (int8)SkillInfo.SkillName.length() * 2;
+    int16 SkillNameLen = (int16)SkillInfo.SkillName.length() * 2;
     *this << SkillNameLen;
     InsertData(SkillInfo.SkillName.c_str(), SkillNameLen);
 
     *this << SkillInfo.SkillCoolTime;
     *this << SkillInfo.SkillCastingTime;
 
-    int8 SkillImagePathLen = (int8)SkillInfo.SkillImagePath.length() * 2;
+    int16 SkillImagePathLen = (int16)SkillInfo.SkillImagePath.length() * 2;
     *this << SkillImagePathLen;
     InsertData(SkillInfo.SkillImagePath.c_str(), SkillImagePathLen);
 
@@ -119,7 +119,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_ItemInfo& ItemInfo)
     *this << (int8)ItemInfo.ItemMediumCategory;
     *this << (int16)ItemInfo.ItemSmallCategory;    
 
-    int8 ItemNameLen = (int8)ItemInfo.ItemName.length() * 2;
+    int16 ItemNameLen = (int16)ItemInfo.ItemName.length() * 2;
     *this << ItemNameLen;
     InsertData(ItemInfo.ItemName.c_str(), ItemNameLen);
 
@@ -130,7 +130,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_ItemInfo& ItemInfo)
 
     *this << ItemInfo.ItemCount;
 
-    int8 ItemImagePathLen = (int8)ItemInfo.ItemThumbnailImagePath.length() * 2;
+    int16 ItemImagePathLen = (int16)ItemInfo.ItemThumbnailImagePath.length() * 2;
     *this << ItemImagePathLen;
     InsertData(ItemInfo.ItemThumbnailImagePath.c_str(), ItemImagePathLen);
 
@@ -210,14 +210,14 @@ CGameServerMessage& CGameServerMessage::operator>>(st_SkillInfo& SkillInfo)
 
     *this >> SkillInfo.SkillLevel;
 
-    int8 SkillNameLen = 0;
+    int16 SkillNameLen = 0;
     *this >> SkillNameLen;
     GetData(SkillInfo.SkillName, SkillNameLen);
 
     *this >> SkillInfo.SkillCoolTime;
     *this >> SkillInfo.SkillCastingTime;
 
-    int8 SkillImagePath = 0;
+    int16 SkillImagePath = 0;
     *this >> SkillImagePath;
     GetData(SkillInfo.SkillImagePath, SkillImagePath);
 

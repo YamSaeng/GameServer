@@ -56,7 +56,7 @@ private:
 	//--------------------------------------------------------
 	// 로직처리 쓰레드 
 	//--------------------------------------------------------
-	static unsigned __stdcall LogicThreadProc(void* Argument);		
+	static unsigned __stdcall LogicThreadProc(void* Argument);
 
 	//---------------------------------
 	// 캐릭터 스킬 생성
@@ -226,7 +226,7 @@ private:
 	//--------------------------------------------------------------------
 	// 접속 종료시 플레이어 정보 DB에 기록
 	//--------------------------------------------------------------------
-	void PacketProcReqDBLeavePlayerInfoSave(CPlayer* MyPlayer);
+	void PacketProcReqDBLeavePlayerInfoSave(CMessage* Message);
 
 	//------------------------------------------------------------------
 	// 타이머 잡 요청 처리 함수
@@ -339,6 +339,7 @@ private:
 	CGameServerMessage* MakePacketPing();	
 	
 	CItem* NewItemCrate(st_ItemInfo& NewItemInfo);
+
 public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 공격요청 응답 패킷 조합
@@ -428,11 +429,7 @@ public:
 	// 로그인 서버 로그아웃 요청 패킷 조합
 	//---------------------------------------------------
 	CGameServerMessage* MakePacketLogOut(int64 AccountID);
-public:
-	//---------------------------------------------------------
-	// PlayerJob 메모리풀
-	//---------------------------------------------------------
-	CMemoryPoolTLS<CPlayer::st_PlayerJob>* _PlayerJobMemoryPool;
+public:	
 	//-----------------------------------------------
 	// Job 메모리풀
 	//-----------------------------------------------
