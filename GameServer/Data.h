@@ -44,6 +44,7 @@ struct st_SkillData
 	int8 SkillLevel;
 	int32 SkillCoolTime;
 	int32 SkillCastingTime;
+	int64 SkillDurationTime;
 	int SkillDistance;
 	float SkillTargetEffectTime;
 	string SkillThumbnailImagePath;
@@ -54,7 +55,6 @@ struct st_AttackSkillData : public st_SkillData
 	int32 SkillMinDamage;		// 최소 공격력
 	int32 SkillMaxDamage;		// 최대 공격력
 	bool SkillDebuf;			// 스킬 디버프 여부
-	int64 SkillDebufTime;	    // 스킬 디버프 시간
 	int8 SkillDebufAttackSpeed; // 스킬 공격속도 감소 수치
 	int8 SkillDebufMovingSpeed; // 스킬 이동속도 감소 수치
 	bool SkillDebufStun;		// 스킬 스턴 여부

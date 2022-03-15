@@ -11,6 +11,7 @@
           "SkillMaxDamage": 0,
           "SkillCoolTime": 800,
           "SkillCastingTime": 0,
+          "SkillDurationTime": 0,
           "SkillDistance": 1,
           "SkillThumbnailImagePath": ""
         },
@@ -22,6 +23,7 @@
           "SkillMaxDamage": 0,
           "SkillCoolTime": 1200,
           "SkillCastingTime": 0,
+          "SkillDurationTime": 0,
           "SkillDistance": 1,
           "SkillThumbnailImagePath": ""
         }
