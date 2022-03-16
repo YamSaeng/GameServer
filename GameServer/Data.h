@@ -45,6 +45,7 @@ struct st_SkillData
 	int32 SkillCoolTime;
 	int32 SkillCastingTime;
 	int64 SkillDurationTime;
+	int64 SkillDotTime;
 	int SkillDistance;
 	float SkillTargetEffectTime;
 	string SkillThumbnailImagePath;

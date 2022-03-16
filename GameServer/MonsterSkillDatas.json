@@ -12,6 +12,7 @@
           "SkillCoolTime": 800,
           "SkillCastingTime": 0,
           "SkillDurationTime": 0,
+          "SkillDotTime": 0,
           "SkillDistance": 1,
           "SkillThumbnailImagePath": ""
         },
@@ -24,6 +25,7 @@
           "SkillCoolTime": 1200,
           "SkillCastingTime": 0,
           "SkillDurationTime": 0,
+          "SkillDotTime": 0,
           "SkillDistance": 1,
           "SkillThumbnailImagePath": ""
         }

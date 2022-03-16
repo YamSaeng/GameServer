@@ -782,6 +782,8 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				int SkillMaxDamage = PublicAttackSkillListFiled["SkillMaxDamage"].GetInt();
 				int SkillCoolTime = PublicAttackSkillListFiled["SkillCoolTime"].GetInt();
 				int SkillCastingTime = PublicAttackSkillListFiled["SkillCastingTime"].GetInt();
+				int64 SkillDurationTime = PublicAttackSkillListFiled["SkillDurationTime"].GetInt64();
+				int64 SkillDotTime = PublicAttackSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = PublicAttackSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = PublicAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				string SkillImagePath = PublicAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
@@ -797,6 +799,8 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				PublicAttackSkill->SkillMaxDamage = SkillMaxDamage;
 				PublicAttackSkill->SkillCoolTime = SkillCoolTime;
 				PublicAttackSkill->SkillCastingTime = SkillCastingTime;
+				PublicAttackSkill->SkillDurationTime = SkillDurationTime;
+				PublicAttackSkill->SkillDotTime = SkillDotTime;
 				PublicAttackSkill->SkillDistance = SkillDistance;
 				PublicAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				PublicAttackSkill->SkillThumbnailImagePath = SkillImagePath;
@@ -817,6 +821,8 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				int SkillMaxHeal = PublicHealSkillListFiled["SkillMaxHeal"].GetInt();
 				int SkillCoolTime = PublicHealSkillListFiled["SkillCoolTime"].GetInt();
 				int SkillCastingTime = PublicHealSkillListFiled["SkillCastingTime"].GetInt();
+				int64 SkillDurationTime = PublicHealSkillListFiled["SkillDurationTime"].GetInt64();
+				int64 SkillDotTime = PublicHealSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = PublicHealSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = PublicHealSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				string SkillImagePath = PublicHealSkillListFiled["SkillThumbnailImagePath"].GetString();
@@ -827,6 +833,8 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				PublicHealSkill->SkillMaxHealPoint = SkillMaxHeal;
 				PublicHealSkill->SkillCoolTime = SkillCoolTime;
 				PublicHealSkill->SkillCastingTime = SkillCastingTime;
+				PublicHealSkill->SkillDurationTime = SkillDurationTime;
+				PublicHealSkill->SkillDotTime = SkillDotTime;
 				PublicHealSkill->SkillDistance = SkillDistance;
 				PublicHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				PublicHealSkill->SkillThumbnailImagePath = SkillImagePath;
@@ -860,6 +868,8 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 
 				int SkillCoolTime = PublicBufSkillListFiled["SkillCoolTime"].GetInt();
 				int SkillCastingTime = PublicBufSkillListFiled["SkillCastingTime"].GetInt();
+				int64 SkillDurationTime = PublicBufSkillListFiled["SkillDurationTime"].GetInt64();
+				int64 SkillDotTime = PublicBufSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = PublicBufSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = PublicBufSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				string SkillImagePath = PublicBufSkillListFiled["SkillThumbnailImagePath"].GetString();
@@ -886,6 +896,8 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				PublicBufSkill->IncreaseStatusAbnormalityResistance = IncreaseStatusAbnormalityResistance;
 				PublicBufSkill->SkillCoolTime = SkillCoolTime;
 				PublicBufSkill->SkillCastingTime = SkillCastingTime;
+				PublicBufSkill->SkillDurationTime = SkillDurationTime;
+				PublicBufSkill->SkillDotTime = SkillDotTime;
 				PublicBufSkill->SkillDistance = SkillDistance;
 				PublicBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				PublicBufSkill->SkillThumbnailImagePath = SkillImagePath;
@@ -912,7 +924,7 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				st_AttackSkillData* WarriorAttackSkill = new st_AttackSkillData();
 				WarriorAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
 				WarriorAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK;
-
+						
 				string SkillType = WarriorAttackSkillListFiled["SkillType"].GetString();
 				string SkillName = WarriorAttackSkillListFiled["SkillName"].GetString();
 				int SkillLevel = WarriorAttackSkillListFiled["SkillLevel"].GetInt();
@@ -921,6 +933,7 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				int SkillCoolTime = WarriorAttackSkillListFiled["SkillCoolTime"].GetInt();
 				int SkillCastingTime = WarriorAttackSkillListFiled["SkillCastingTime"].GetInt();
 				int64 SkillDurationTime = WarriorAttackSkillListFiled["SkillDurationTime"].GetInt64();
+				int64 SkillDotTime = WarriorAttackSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = WarriorAttackSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = WarriorAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				bool SkillDebuf = WarriorAttackSkillListFiled["SkillDebuf"].GetBool();				
@@ -961,6 +974,7 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				WarriorAttackSkill->SkillCoolTime = SkillCoolTime;
 				WarriorAttackSkill->SkillCastingTime = SkillCastingTime;
 				WarriorAttackSkill->SkillDurationTime = SkillDurationTime;
+				WarriorAttackSkill->SkillDotTime = SkillDotTime;
 				WarriorAttackSkill->SkillDistance = SkillDistance;
 				WarriorAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 
@@ -991,6 +1005,7 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				int SkillCoolTime = WarriorHealSkillListFiled["SkillCoolTime"].GetInt();
 				int SkillCastingTime = WarriorHealSkillListFiled["SkillCastingTime"].GetInt();
 				int64 SkillDurationTime = WarriorHealSkillListFiled["SkillDurationTime"].GetInt64();
+				int64 SkillDotTime = WarriorHealSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = WarriorHealSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = WarriorHealSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				string SkillImagePath = WarriorHealSkillListFiled["SkillThumbnailImagePath"].GetString();
@@ -1002,6 +1017,7 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				WarriorHealSkill->SkillCoolTime = SkillCoolTime;
 				WarriorHealSkill->SkillCastingTime = SkillCastingTime;
 				WarriorHealSkill->SkillDurationTime = SkillDurationTime;
+				WarriorHealSkill->SkillDotTime = SkillDotTime;
 				WarriorHealSkill->SkillDistance = SkillDistance;
 				WarriorHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				WarriorHealSkill->SkillThumbnailImagePath = SkillImagePath;
@@ -1036,6 +1052,7 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				int SkillCoolTime = WarriorBufSkillListFiled["SkillCoolTime"].GetInt();
 				int SkillCastingTime = WarriorBufSkillListFiled["SkillCastingTime"].GetInt();
 				int64 SkillDurationTime = WarriorBufSkillListFiled["SkillDurationTime"].GetInt64();
+				int64 SkillDotTime = WarriorBufSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = WarriorBufSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = WarriorBufSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				string SkillImagePath = WarriorBufSkillListFiled["SkillThumbnailImagePath"].GetString();
@@ -1063,6 +1080,7 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				WarriorBufSkill->SkillCoolTime = SkillCoolTime;
 				WarriorBufSkill->SkillCastingTime = SkillCastingTime;
 				WarriorBufSkill->SkillDurationTime = SkillDurationTime;	
+				WarriorBufSkill->SkillDotTime = SkillDotTime;
 				WarriorBufSkill->SkillDistance = SkillDistance;
 				WarriorBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				WarriorBufSkill->SkillThumbnailImagePath = SkillImagePath;
@@ -1098,6 +1116,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				int SkillCoolTime = ShmanAttackSkillListFiled["SkillCoolTime"].GetInt();
 				int SkillCastingTime = ShmanAttackSkillListFiled["SkillCastingTime"].GetInt();
 				int64 SkillDurationTime = ShmanAttackSkillListFiled["SkillDurationTime"].GetInt64();
+				int64 SkillDotTime = ShmanAttackSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ShmanAttackSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = ShmanAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				bool SkillDebuf = ShmanAttackSkillListFiled["SkillDebuf"].GetBool();				
@@ -1142,6 +1161,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanAttackSkill->SkillCoolTime = SkillCoolTime;
 				ShamanAttackSkill->SkillCastingTime = SkillCastingTime;
 				ShamanAttackSkill->SkillDurationTime = SkillDurationTime;
+				ShamanAttackSkill->SkillDotTime = SkillDotTime;
 				ShamanAttackSkill->SkillDistance = SkillDistance;
 				ShamanAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 
@@ -1172,6 +1192,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				int SkillCoolTime = ShamanHealSkillListFiled["SkillCoolTime"].GetInt();
 				int SkillCastingTime = ShamanHealSkillListFiled["SkillCastingTime"].GetInt();
 				int64 SkillDurationTime = ShamanHealSkillListFiled["SkillDurationTime"].GetInt64();
+				int64 SkillDotTime = ShamanHealSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ShamanHealSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = ShamanHealSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				string SkillImagePath = ShamanHealSkillListFiled["SkillThumbnailImagePath"].GetString();
@@ -1188,6 +1209,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanHealSkill->SkillCoolTime = SkillCoolTime;
 				ShamanHealSkill->SkillCastingTime = SkillCastingTime;
 				ShamanHealSkill->SkillDurationTime = SkillDurationTime;
+				ShamanHealSkill->SkillDotTime = SkillDotTime;
 				ShamanHealSkill->SkillDistance = SkillDistance;
 				ShamanHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				ShamanHealSkill->SkillThumbnailImagePath = SkillImagePath;
@@ -1222,6 +1244,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				int SkillCoolTime = ShmanBufSkillListFiled["SkillCoolTime"].GetInt();
 				int SkillCastingTime = ShmanBufSkillListFiled["SkillCastingTime"].GetInt();
 				int64 SkillDurationTime = ShmanBufSkillListFiled["SkillDurationTime"].GetInt64();
+				int64 SkillDotTime = ShmanBufSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ShmanBufSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = ShmanBufSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				string SkillImagePath = ShmanBufSkillListFiled["SkillThumbnailImagePath"].GetString();
@@ -1249,6 +1272,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanBufSkill->SkillCoolTime = SkillCoolTime;
 				ShamanBufSkill->SkillCastingTime = SkillCastingTime;
 				ShamanBufSkill->SkillDurationTime = SkillDurationTime;
+				ShamanBufSkill->SkillDotTime = SkillDotTime;
 				ShamanBufSkill->SkillDistance = SkillDistance;
 				ShamanBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				ShamanBufSkill->SkillThumbnailImagePath = SkillImagePath;
@@ -1284,6 +1308,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				int SkillCoolTime = TaioistAttackSkillListFiled["SkillCoolTime"].GetInt();
 				int SkillCastingTime = TaioistAttackSkillListFiled["SkillCastingTime"].GetInt();
 				int64 SkillDurationTime = TaioistAttackSkillListFiled["SkillDurationTime"].GetInt64();
+				int64 SkillDotTime = TaioistAttackSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = TaioistAttackSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = TaioistAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				bool SkillDebuf = TaioistAttackSkillListFiled["SkillDebuf"].GetBool();
@@ -1313,6 +1338,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				TaioistAttackSkill->SkillCoolTime = SkillCoolTime;
 				TaioistAttackSkill->SkillCastingTime = SkillCastingTime;
 				TaioistAttackSkill->SkillDurationTime = SkillDurationTime;
+				TaioistAttackSkill->SkillDotTime = SkillDotTime;
 				TaioistAttackSkill->SkillDistance = SkillDistance;
 				TaioistAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 
@@ -1344,6 +1370,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				int SkillCoolTime = TaioistHealSkillListFiled["SkillCoolTime"].GetInt();
 				int SkillCastingTime = TaioistHealSkillListFiled["SkillCastingTime"].GetInt();
 				int64 SkillDurationTime = TaioistHealSkillListFiled["SkillDurationTime"].GetInt64();
+				int64 SkillDotTime = TaioistHealSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = TaioistHealSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = TaioistHealSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				string SkillImagePath = TaioistHealSkillListFiled["SkillThumbnailImagePath"].GetString();
@@ -1364,6 +1391,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				TaioistHealSkill->SkillCoolTime = SkillCoolTime;
 				TaioistHealSkill->SkillCastingTime = SkillCastingTime;
 				TaioistHealSkill->SkillDurationTime = SkillDurationTime;
+				TaioistHealSkill->SkillDotTime = SkillDotTime;
 				TaioistHealSkill->SkillDistance = SkillDistance;
 				TaioistHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				TaioistHealSkill->SkillThumbnailImagePath = SkillImagePath;
@@ -1398,6 +1426,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				int SkillCoolTime = TaioistBufSkillListFiled["SkillCoolTime"].GetInt();
 				int SkillCastingTime = TaioistBufSkillListFiled["SkillCastingTime"].GetInt();
 				int64 SkillDurationTime = TaioistBufSkillListFiled["SkillDurationTime"].GetInt64();
+				int64 SkillDotTime = TaioistBufSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = TaioistBufSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = TaioistBufSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				string SkillImagePath = TaioistBufSkillListFiled["SkillThumbnailImagePath"].GetString();
@@ -1425,6 +1454,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				TaioistBufSkill->SkillCoolTime = SkillCoolTime;
 				TaioistBufSkill->SkillCastingTime = SkillCastingTime;
 				TaioistBufSkill->SkillDurationTime = SkillDurationTime;
+				TaioistBufSkill->SkillDotTime = SkillDotTime;
 				TaioistBufSkill->SkillDistance = SkillDistance;
 				TaioistBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				TaioistBufSkill->SkillThumbnailImagePath = SkillImagePath;
@@ -1460,6 +1490,7 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				int SkillCoolTime = ThiefAttackSkillListFiled["SkillCoolTime"].GetInt();
 				int SkillCastingTime = ThiefAttackSkillListFiled["SkillCastingTime"].GetInt();
 				int64 SkillDurationTime = ThiefAttackSkillListFiled["SkillDurationTime"].GetInt64();
+				int64 SkillDotTime = ThiefAttackSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ThiefAttackSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = ThiefAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				bool SkillDebuf = ThiefAttackSkillListFiled["SkillDebuf"].GetBool();				
@@ -1484,6 +1515,7 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				ThiefAttackSkill->SkillCoolTime = SkillCoolTime;
 				ThiefAttackSkill->SkillCastingTime = SkillCastingTime;
 				ThiefAttackSkill->SkillDurationTime = SkillDurationTime;
+				ThiefAttackSkill->SkillDotTime = SkillDotTime;
 				ThiefAttackSkill->SkillDistance = SkillDistance;
 				ThiefAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 
@@ -1515,6 +1547,7 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				int SkillCoolTime = ThiefHealSkillListFiled["SkillCoolTime"].GetInt();
 				int SkillCastingTime = ThiefHealSkillListFiled["SkillCastingTime"].GetInt();
 				int64 SkillDurationTime = ThiefHealSkillListFiled["SkillDurationTime"].GetInt64();
+				int64 SkillDotTime = ThiefHealSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ThiefHealSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = ThiefHealSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				string SkillImagePath = ThiefHealSkillListFiled["SkillThumbnailImagePath"].GetString();
@@ -1531,6 +1564,7 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				ThiefHealSkill->SkillCoolTime = SkillCoolTime;
 				ThiefHealSkill->SkillCastingTime = SkillCastingTime;
 				ThiefHealSkill->SkillDurationTime = SkillDurationTime;
+				ThiefHealSkill->SkillDotTime = SkillDotTime;
 				ThiefHealSkill->SkillDistance = SkillDistance;
 				ThiefHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				ThiefHealSkill->SkillThumbnailImagePath = SkillImagePath;
@@ -1565,6 +1599,7 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				int SkillCoolTime = ThiefBufSkillListFiled["SkillCoolTime"].GetInt();
 				int SkillCastingTime = ThiefBufSkillListFiled["SkillCastingTime"].GetInt();
 				int64 SkillDurationTime = ThiefBufSkillListFiled["SkillDurationTime"].GetInt64();
+				int64 SkillDotTime = ThiefBufSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ThiefBufSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = ThiefBufSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				string SkillImagePath = ThiefBufSkillListFiled["SkillThumbnailImagePath"].GetString();
@@ -1592,6 +1627,7 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				ThiefBufSkill->SkillCoolTime = SkillCoolTime;
 				ThiefBufSkill->SkillCastingTime = SkillCastingTime;
 				ThiefBufSkill->SkillDurationTime = SkillDurationTime;
+				ThiefBufSkill->SkillDotTime = SkillDotTime;
 				ThiefBufSkill->SkillDistance = SkillDistance;
 				ThiefBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				ThiefBufSkill->SkillThumbnailImagePath = SkillImagePath;
@@ -1627,6 +1663,7 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				int SkillCoolTime = ArcherAttackSkillListFiled["SkillCoolTime"].GetInt();
 				int SkillCastingTime = ArcherAttackSkillListFiled["SkillCastingTime"].GetInt();
 				int64 SkillDurationTime = ArcherAttackSkillListFiled["SkillDurationTime"].GetInt64();
+				int64 SkillDotTime = ArcherAttackSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ArcherAttackSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = ArcherAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				bool SkillDebuf = ArcherAttackSkillListFiled["SkillDebuf"].GetBool();
@@ -1652,6 +1689,7 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				ArcherAttackSkill->SkillCoolTime = SkillCoolTime;
 				ArcherAttackSkill->SkillCastingTime = SkillCastingTime;
 				ArcherAttackSkill->SkillDurationTime = SkillDurationTime;
+				ArcherAttackSkill->SkillDotTime = SkillDotTime;
 				ArcherAttackSkill->SkillDistance = SkillDistance;
 				ArcherAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 
@@ -1683,6 +1721,7 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				int SkillCoolTime = ArcherHealSkillListFiled["SkillCoolTime"].GetInt();
 				int SkillCastingTime = ArcherHealSkillListFiled["SkillCastingTime"].GetInt();
 				int64 SkillDurationTime = ArcherHealSkillListFiled["SkillDurationTime"].GetInt64();
+				int64 SkillDotTime = ArcherHealSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ArcherHealSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = ArcherHealSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				string SkillImagePath = ArcherHealSkillListFiled["SkillThumbnailImagePath"].GetString();
@@ -1699,6 +1738,7 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				ArcherHealSkill->SkillCoolTime = SkillCoolTime;
 				ArcherHealSkill->SkillCastingTime = SkillCastingTime;
 				ArcherHealSkill->SkillDurationTime = SkillDurationTime;
+				ArcherHealSkill->SkillDotTime = SkillDotTime;
 				ArcherHealSkill->SkillDistance = SkillDistance;
 				ArcherHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				ArcherHealSkill->SkillThumbnailImagePath = SkillImagePath;
@@ -1733,6 +1773,7 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				int SkillCoolTime = ArcherBufSkillListFiled["SkillCoolTime"].GetInt();
 				int SkillCastingTime = ArcherBufSkillListFiled["SkillCastingTime"].GetInt();
 				int64 SkillDurationTime = ArcherBufSkillListFiled["SkillDurationTime"].GetInt64();
+				int64 SkillDotTime = ArcherBufSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ArcherBufSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = ArcherBufSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				string SkillImagePath = ArcherBufSkillListFiled["SkillThumbnailImagePath"].GetString();
@@ -1760,6 +1801,7 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				ArcherBufSkill->SkillCoolTime = SkillCoolTime;
 				ArcherBufSkill->SkillCastingTime = SkillCastingTime;
 				ArcherBufSkill->SkillDurationTime = SkillDurationTime;
+				ArcherBufSkill->SkillDotTime = SkillDotTime;
 				ArcherBufSkill->SkillDistance = SkillDistance;
 				ArcherBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				ArcherBufSkill->SkillThumbnailImagePath = SkillImagePath;

@@ -13,6 +13,7 @@
               "SkillCoolTime": 2000,
               "SkillCastingTime": 0,
               "SkillDurationTime": 0,
+              "SkillDotTime": 0,
               "SkillDistance": 6,
               "SkillTargetEffectTime": 0,
               "SkillDebuf": false,              
