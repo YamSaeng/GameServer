@@ -11,6 +11,7 @@ class CWeapon;
 class CArmor;
 class CConsumable;
 class CMaterial;
+class CSkill;
 
 class CObjectManager
 {
@@ -37,6 +38,11 @@ private:
 	CMemoryPoolTLS<CStone>* _StoneMemoryPool;
 	
 	int64 _GameServerObjectId;		
+
+	CMemoryPoolTLS<CSkill>* _SkillMemoryPool;
+	CMemoryPoolTLS<st_AttackSkillInfo>* _AttackSkillInfoMemoryPool;	
+	CMemoryPoolTLS<st_HealSkillInfo>* _HealSkillInfoMemoryPool;
+	CMemoryPoolTLS<st_BufSkillInfo>* _BufSkillInfoMemoryPool;
 public:
 	CGameServer* GameServer;
 
@@ -79,6 +85,24 @@ public:
 	// 오브젝트 반납
 	//---------------
 	void ObjectReturn(en_GameObjectType ObjectType, CGameObject* ReturnObject);
+
+	//--------------------
+	// 스킬 생성
+	//--------------------
+	CSkill* SkillCreate();
+	//------------------------------------
+	// 스킬 반납
+	//------------------------------------
+	void SkillReturn(CSkill* ReturnSkill);
+
+	//-----------------------------------------------
+	// 스킬 정보 생성
+	//-----------------------------------------------
+	st_SkillInfo* SkillInfoCreate(en_SkillMediumCategory SkillMediumCategory);
+	//-----------------------------------------------
+	// 스킬 정보 반납
+	//-----------------------------------------------
+	void SkillInfoReturn(en_SkillMediumCategory SkillMediumCategory, st_SkillInfo* ReturnSkillInfo);
 
 	//-----------------------------------
 	// 맵에 설정한 오브젝트 스폰

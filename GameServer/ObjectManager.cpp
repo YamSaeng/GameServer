@@ -3,6 +3,7 @@
 #include "Environment.h"
 #include "GameServerMessage.h"
 #include "Item.h"
+#include "Skill.h"
 
 CObjectManager::CObjectManager()
 {
@@ -18,6 +19,12 @@ CObjectManager::CObjectManager()
 	
 	_TreeMemoryPool = new CMemoryPoolTLS<CTree>();
 	_StoneMemoryPool = new CMemoryPoolTLS<CStone>();
+
+	_SkillMemoryPool = new CMemoryPoolTLS<CSkill>();
+
+	_AttackSkillInfoMemoryPool = new CMemoryPoolTLS<st_AttackSkillInfo>();
+	_HealSkillInfoMemoryPool = new CMemoryPoolTLS<st_HealSkillInfo>();
+	_BufSkillInfoMemoryPool = new CMemoryPoolTLS<st_BufSkillInfo>();
 
 	_GameServerObjectId = 10000;
 
@@ -420,6 +427,89 @@ void CObjectManager::ObjectReturn(en_GameObjectType ObjectType, CGameObject* Ret
 		_TreeMemoryPool->Free((CTree*)ReturnObject);
 		break;
 	}		
+}
+
+CSkill* CObjectManager::SkillCreate()
+{
+	return _SkillMemoryPool->Alloc();
+}
+
+void CObjectManager::SkillReturn(CSkill* ReturnSkill)
+{
+	_SkillMemoryPool->Free(ReturnSkill);
+}
+
+st_SkillInfo* CObjectManager::SkillInfoCreate(en_SkillMediumCategory SkillMediumCategory)
+{
+	switch (SkillMediumCategory)
+	{	
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_ATTACK:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_ATTACK:
+		return _AttackSkillInfoMemoryPool->Alloc();		
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_TACTIC:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_TACTIC:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_TACTIC:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_TACTIC:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_TACTIC:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_TACTIC:		
+		return nullptr;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_HEAL:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_HEAL:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_HEAL:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_HEAL:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_HEAL:
+		return _HealSkillInfoMemoryPool->Alloc();
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_BUF:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_BUF:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_BUF:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_BUF:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_BUF:
+		return _BufSkillInfoMemoryPool->Alloc();		
+	}	
+}
+
+void CObjectManager::SkillInfoReturn(en_SkillMediumCategory SkillMediumCategory, st_SkillInfo* ReturnSkillInfo)
+{
+	switch (SkillMediumCategory)
+	{
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_ATTACK:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_ATTACK:
+		_AttackSkillInfoMemoryPool->Free((st_AttackSkillInfo*)ReturnSkillInfo);
+		break;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_TACTIC:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_TACTIC:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_TACTIC:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_TACTIC:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_TACTIC:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_TACTIC:
+		return;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_HEAL:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_HEAL:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_HEAL:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_HEAL:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_HEAL:
+		_HealSkillInfoMemoryPool->Free((st_HealSkillInfo*)ReturnSkillInfo);
+		break;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_BUF:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_BUF:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_BUF:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_BUF:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_BUF:
+		_BufSkillInfoMemoryPool->Free((st_BufSkillInfo*)ReturnSkillInfo);
+		break;
+	}
 }
 
 void CObjectManager::MapObjectSpawn(int32 ChannelId)
