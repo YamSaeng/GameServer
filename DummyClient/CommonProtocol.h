@@ -268,6 +268,14 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// en_MonsterState MonsterState
 	//------------------------------------------------------------
 	en_PACKET_S2C_MONSTER_OBJECT_STATE_CHANGE,
+	
+	//------------------------------------------------------------
+	// 게임서버 상태이상 적용 
+	// int64 ObjectId
+	// bool SetStatusAbnormal
+	// int8 StatusAbnormal
+	//------------------------------------------------------------
+	en_PACKET_S2C_STATUS_ABNORMAL,
 
 	//------------------------------------------------------------
 	// 게임서버 오브젝트 죽음 응답
@@ -508,7 +516,14 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int64 PlayerId
 	// st_SkillInfo SkillInfo
 	//------------------------------------------------------------
-	en_PACKET_S2C_BUF,
+	en_PACKET_S2C_BUF_DEBUF,
+
+	//------------------------------------------------------------
+	// 게임서버 강화효과 약화효과 끄기 패킷
+	// int64 TargetObjectId
+	// en_SkillType OffSkillType
+	//------------------------------------------------------------
+	en_PACKET_S2C_BUF_DEBUF_OFF,
 
 	//-----------------------------------------------------------
 	// 게임서버 에러 전송	
