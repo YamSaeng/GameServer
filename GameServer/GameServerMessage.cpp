@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "GameServerMessage.h"
 #include "Item.h"
+#include "Skill.h"
 
 CMemoryPoolTLS<CGameServerMessage> CGameServerMessage::_MessageObjectPool(0);
 
@@ -97,6 +98,9 @@ CGameServerMessage& CGameServerMessage::operator<<(st_SkillInfo& SkillInfo)
 
     *this << SkillInfo.SkillCoolTime;
     *this << SkillInfo.SkillCastingTime;
+    *this << SkillInfo.SkillDurationTime;
+    *this << SkillInfo.SkillDotTime;
+    *this << SkillInfo.SkillRemainTime;
 
     int16 SkillImagePathLen = (int16)SkillInfo.SkillImagePath.length() * 2;
     *this << SkillImagePathLen;
@@ -146,8 +150,20 @@ CGameServerMessage& CGameServerMessage::operator<<(st_QuickSlotBarSlotInfo& Quic
     *this << QuickSlotBarSlotInfo.QuickSlotBarIndex;
     *this << QuickSlotBarSlotInfo.QuickSlotBarSlotIndex;
     *this << QuickSlotBarSlotInfo.QuickSlotKey;   
+    
+    bool EmptyQuickSlotSkillInfo;
 
-    *this << QuickSlotBarSlotInfo.QuickBarSkillInfo;
+    if (QuickSlotBarSlotInfo.QuickBarSkill == nullptr)
+    {
+        EmptyQuickSlotSkillInfo = true;
+        *this << EmptyQuickSlotSkillInfo;
+    }
+    else
+    {
+        EmptyQuickSlotSkillInfo = false;
+        *this << EmptyQuickSlotSkillInfo;
+        *this << *(QuickSlotBarSlotInfo.QuickBarSkill->GetSkillInfo());
+    }   
 
     return *(this);
 }
@@ -186,6 +202,15 @@ CGameServerMessage& CGameServerMessage::operator<<(st_SkillInfo** SkillInfo)
     return *(this);
 }
 
+CGameServerMessage& CGameServerMessage::operator<<(CSkill** Skill)
+{
+    memcpy(&_MessageBuf[_Rear], Skill, sizeof(CSkill*));
+    _Rear += sizeof(CSkill*);
+    _UseBufferSize += sizeof(CSkill*);
+
+    return *(this);
+}
+
 CGameServerMessage& CGameServerMessage::operator>>(st_Vector2Int& CellPositionInfo)
 {
     *this >> CellPositionInfo._X;
@@ -216,6 +241,9 @@ CGameServerMessage& CGameServerMessage::operator>>(st_SkillInfo& SkillInfo)
 
     *this >> SkillInfo.SkillCoolTime;
     *this >> SkillInfo.SkillCastingTime;
+    *this >> SkillInfo.SkillDurationTime;
+    *this >> SkillInfo.SkillDotTime;
+    *this >> SkillInfo.SkillRemainTime;
 
     int16 SkillImagePath = 0;
     *this >> SkillImagePath;
@@ -232,7 +260,8 @@ CGameServerMessage& CGameServerMessage::operator>>(st_QuickSlotBarSlotInfo& Valu
     *this >> Value.QuickSlotBarSlotIndex;
     *this >> Value.QuickSlotKey;    
 
-    *this >> Value.QuickBarSkillInfo;
+    st_SkillInfo* SkillInfo = Value.QuickBarSkill->GetSkillInfo();
+    *this >> *SkillInfo;
 
     return *(this);
 }
@@ -251,6 +280,15 @@ CGameServerMessage& CGameServerMessage::operator>>(st_SkillInfo** SkillInfo)
     memcpy(SkillInfo, &_MessageBuf[_Front], sizeof(st_SkillInfo*));
     _Front += sizeof(st_SkillInfo*);
     _UseBufferSize -= sizeof(st_SkillInfo*);
+
+    return *(this);
+}
+
+CGameServerMessage& CGameServerMessage::operator>>(CSkill** Skill)
+{
+    memcpy(Skill, &_MessageBuf[_Front], sizeof(CSkill*));
+    _Front += sizeof(CSkill*);
+    _UseBufferSize -= sizeof(CSkill*);
 
     return *(this);
 }

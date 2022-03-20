@@ -38,6 +38,7 @@ public:
 	CGameServerMessage& operator << (CItem* Item);
 
 	CGameServerMessage& operator << (st_SkillInfo** SkillInfo);
+	CGameServerMessage& operator << (CSkill** Skill);
 #pragma endregion
 
 #pragma region µ¥ÀÌÅÍ »©±â
@@ -46,6 +47,7 @@ public:
 	CGameServerMessage& operator >> (st_QuickSlotBarSlotInfo& Value);	
 	CGameServerMessage& operator >> (CItem** Item);
 	CGameServerMessage& operator >> (st_SkillInfo** SkillInfo);
+	CGameServerMessage& operator >> (CSkill** Skill);
 #pragma endregion
 
 	static CGameServerMessage* GameServerMessageAlloc();
