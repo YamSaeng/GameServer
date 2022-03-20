@@ -12,25 +12,33 @@ public:
 	void Init();
 
 	// 공격 스킬 추가
-	void AddAttackSkill(st_SkillInfo* AttackSkillInfo);	
+	void AddAttackSkill(CSkill* AttackSkillInfo);
 	// 전술 스킬 추가
-	void AddTacTicSkill(st_SkillInfo* TacTicSkillInfo);
+	void AddTacTicSkill(CSkill* TacTicSkillInfo);
 	// 강화 효과 스킬 추가
-	void AddBufSkill(st_SkillInfo* BufSkillInfo);
+	void AddBufSkill(CSkill* BufSkillInfo);
 
-	st_SkillInfo* FindSkill(en_SkillType SkillType);
+	CSkill* FindSkill(en_SkillType SkillType);
+
+	void Update();
+
+	void Empty();
+
+	vector<CSkill*> GetAttackSkill();
+	vector<CSkill*> GetTacTicSkill();
+	vector<CSkill*> GetBufSkill();
 private:
 	//------------------------------
 	// 스킬박스가 소유중인 스킬 목록
 	//------------------------------
-	vector<st_SkillInfo*> _AttackSkills;
-	vector<st_SkillInfo*> _TacTicSkills;
-	vector<st_SkillInfo*> _BufSkills;
+	vector<CSkill*> _AttackSkills;
+	vector<CSkill*> _TacTicSkills;
+	vector<CSkill*> _BufSkills;
 
 	// 공격 스킬 찾기
-	st_SkillInfo* FindAttackSkill(en_SkillType FindAttackSkillType);
+	CSkill* FindAttackSkill(en_SkillType FindAttackSkillType);
 	// 전술 스킬 찾기
-	st_SkillInfo* FindTacTicSkill(en_SkillType FindTacTicSkillType);
+	CSkill* FindTacTicSkill(en_SkillType FindTacTicSkillType);
 	// 강화 효과 스킬 찾기
-	st_SkillInfo* FindBufSkill(en_SkillType FindBufSkillType);
+	CSkill* FindBufSkill(en_SkillType FindBufSkillType);
 };

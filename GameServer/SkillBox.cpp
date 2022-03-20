@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "SkillBox.h"
+#include "Skill.h"
+#include "ObjectManager.h"
 
 CSkillBox::CSkillBox()
 {
@@ -28,24 +30,24 @@ void CSkillBox::Init()
 
 }
 
-void CSkillBox::AddAttackSkill(st_SkillInfo* AttackSkillInfo)
+void CSkillBox::AddAttackSkill(CSkill* AttackSkillInfo)
 {
 	_AttackSkills.push_back(AttackSkillInfo);
 }
 
-void CSkillBox::AddTacTicSkill(st_SkillInfo* TacTicSkillInfo)
+void CSkillBox::AddTacTicSkill(CSkill* TacTicSkillInfo)
 {
 	_TacTicSkills.push_back(TacTicSkillInfo);
 }
 
-void CSkillBox::AddBufSkill(st_SkillInfo* BufSkillInfo)
+void CSkillBox::AddBufSkill(CSkill* BufSkillInfo)
 {
 	_BufSkills.push_back(BufSkillInfo);
 }
 
-st_SkillInfo* CSkillBox::FindSkill(en_SkillType SkillType)
+CSkill* CSkillBox::FindSkill(en_SkillType SkillType)
 {
-	st_SkillInfo* FindSkillInfo = nullptr;
+	CSkill* FindSkill = nullptr;
 
 	// 스킬 찾기
 	switch ((en_SkillType)SkillType)
@@ -68,27 +70,86 @@ st_SkillInfo* CSkillBox::FindSkill(en_SkillType SkillType)
 		// 도사 공격
 	case en_SkillType::SKILL_TAIOIST_DIVINE_STRIKE:
 	case en_SkillType::SKILL_TAIOIST_ROOT:
-		FindSkillInfo = FindAttackSkill((en_SkillType)SkillType);
+		FindSkill = FindAttackSkill((en_SkillType)SkillType);
 		break;
 		// 도사 전술
 	case en_SkillType::SKILL_TAIOIST_HEALING_LIGHT:
 	case en_SkillType::SKILL_TAIOIST_HEALING_WIND:
-		FindSkillInfo = FindTacTicSkill((en_SkillType)SkillType);
+		FindSkill = FindTacTicSkill((en_SkillType)SkillType);
 		break;
 		// 전사 버프
 	case en_SkillType::SKILL_KNIGHT_CHARGE_POSE:
-		FindSkillInfo = FindBufSkill((en_SkillType)SkillType);
+	case en_SkillType::SKILL_SHOCK_RELEASE:
+		FindSkill = FindBufSkill((en_SkillType)SkillType);
 		break;
 	}
 
-	return FindSkillInfo;
+	return FindSkill;
 }
 
-st_SkillInfo* CSkillBox::FindAttackSkill(en_SkillType FindAttackSkillType)
+void CSkillBox::Update()
+{
+	for (CSkill* AttackSkill : _AttackSkills)
+	{
+		AttackSkill->Update();
+	}
+
+	for (CSkill* TacTicSkill : _TacTicSkills)
+	{
+		TacTicSkill->Update();
+	}
+
+	for (CSkill* BufSkill : _BufSkills)
+	{
+		BufSkill->Update();
+	}
+}
+
+void CSkillBox::Empty()
+{
+	for (CSkill* AttackSkill : _AttackSkills)
+	{
+		G_ObjectManager->SkillInfoReturn(AttackSkill->GetSkillInfo()->SkillMediumCategory, AttackSkill->GetSkillInfo());
+		G_ObjectManager->SkillReturn(AttackSkill);
+	}
+
+	for (CSkill* TacTicSkill : _TacTicSkills)
+	{
+		G_ObjectManager->SkillInfoReturn(TacTicSkill->GetSkillInfo()->SkillMediumCategory, TacTicSkill->GetSkillInfo());
+		G_ObjectManager->SkillReturn(TacTicSkill);
+	}
+
+	for (CSkill* BufSkill : _BufSkills)
+	{
+		G_ObjectManager->SkillInfoReturn(BufSkill->GetSkillInfo()->SkillMediumCategory, BufSkill->GetSkillInfo());
+		G_ObjectManager->SkillReturn(BufSkill);
+	}
+
+	_AttackSkills.clear();
+	_TacTicSkills.clear();
+	_BufSkills.clear();
+}
+
+vector<CSkill*> CSkillBox::GetAttackSkill()
+{
+	return _AttackSkills;
+}
+
+vector<CSkill*> CSkillBox::GetTacTicSkill()
+{
+	return _TacTicSkills;
+}
+
+vector<CSkill*> CSkillBox::GetBufSkill()
+{
+	return _BufSkills;
+}
+
+CSkill* CSkillBox::FindAttackSkill(en_SkillType FindAttackSkillType)
 {
 	for (int SlotIndex = 0; SlotIndex < _AttackSkills.size(); SlotIndex++)
 	{
-		if (_AttackSkills[SlotIndex]->SkillType == FindAttackSkillType)
+		if (_AttackSkills[SlotIndex]->GetSkillInfo()->SkillType == FindAttackSkillType)
 		{
 			return _AttackSkills[SlotIndex];
 		}
@@ -97,11 +158,11 @@ st_SkillInfo* CSkillBox::FindAttackSkill(en_SkillType FindAttackSkillType)
 	return nullptr;
 }
 
-st_SkillInfo* CSkillBox::FindTacTicSkill(en_SkillType FindTacTicSkillType)
+CSkill* CSkillBox::FindTacTicSkill(en_SkillType FindTacTicSkillType)
 {
 	for (int SlotIndex = 0; SlotIndex < _TacTicSkills.size(); SlotIndex++)
 	{
-		if (_TacTicSkills[SlotIndex]->SkillType == FindTacTicSkillType)
+		if (_TacTicSkills[SlotIndex]->GetSkillInfo()->SkillType == FindTacTicSkillType)
 		{
 			return _TacTicSkills[SlotIndex];
 		}
@@ -110,11 +171,11 @@ st_SkillInfo* CSkillBox::FindTacTicSkill(en_SkillType FindTacTicSkillType)
 	return nullptr;
 }
 
-st_SkillInfo* CSkillBox::FindBufSkill(en_SkillType FindBufSkillType)
+CSkill* CSkillBox::FindBufSkill(en_SkillType FindBufSkillType)
 {
 	for (int SlotIndex = 0; SlotIndex < _BufSkills.size(); SlotIndex++)
 	{
-		if (_BufSkills[SlotIndex]->SkillType == FindBufSkillType)
+		if (_BufSkills[SlotIndex]->GetSkillInfo()->SkillType == FindBufSkillType)
 		{
 			return _BufSkills[SlotIndex];
 		}
