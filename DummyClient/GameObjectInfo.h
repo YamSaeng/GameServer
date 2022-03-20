@@ -6,15 +6,12 @@ enum class en_CreatureState : int8
 	SPAWN_IDLE,
 	IDLE,
 	PATROL,
-	MOVING,
+	MOVING,	
 	STOP,
 	RETURN_SPAWN_POSITION,
 	ATTACK,
 	SPELL,
-	DEAD,
-	STUN,
-	PUSH_AWAY,
-	ROOT
+	DEAD
 };
 
 enum class en_MoveDir : int8
@@ -95,26 +92,32 @@ enum class en_SkillMediumCategory : int8
 {
 	SKILL_MEDIUM_CATEGORY_NONE = 0,
 	SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK,
+	SKILL_MEDIUM_CATEGORY_PUBLIC_TACTIC,
 	SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL,
 	SKILL_MEDIUM_CATEGORY_PUBLIC_BUF,
 
 	SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK,
+	SKILL_MEDIUM_CATEGORY_WARRIOR_TACTIC,
 	SKILL_MEDIUM_CATEGORY_WARRIOR_HEAL,
 	SKILL_MEDIUM_CATEGORY_WARRIOR_BUF,
 
 	SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK,
+	SKILL_MEDIUM_CATEGORY_SHMAN_TACTIC,
 	SKILL_MEDIUM_CATEGORY_SHMAN_HEAL,
 	SKILL_MEDIUM_CATEGORY_SHMAN_BUF,
 
 	SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK,
+	SKILL_MEDIUM_CATEGORY_TAOIST_TACTIC,
 	SKILL_MEDIUM_CATEGORY_TAOIST_HEAL,
 	SKILL_MEDIUM_CATEGORY_TAOIST_BUF,
 
 	SKILL_MEDIUM_CATEGORY_THIEF_ATTACK,
+	SKILL_MEDIUM_CATEGORY_THIEF_TACTIC,
 	SKILL_MEDIUM_CATEGORY_THIEF_HEAL,
 	SKILL_MEDIUM_CATEGORY_THIEF_BUF,
 
 	SKILL_MEDIUM_CATEGORY_ARCHER_ATTACK,
+	SKILL_MEDIUM_CATEGORY_ARCHER_TACTIC,
 	SKILL_MEDIUM_CATEGORY_ARCHER_HEAL,
 	SKILL_MEDIUM_CATEGORY_ARCHER_BUF
 };
@@ -229,6 +232,9 @@ struct st_SkillInfo
 	wstring SkillName;		 // 스킬 이름
 	int32 SkillCoolTime;	 // 스킬 쿨타임
 	int32 SkillCastingTime;  // 스킬 캐스팅 타임
+	int64 SkillDurationTime; // 스킬 지속 시간
+	int64 SkillDotTime;      // 스킬 도트 시간 
+	int64 SkillRemainTime;   // 스킬 남은 시간
 	float SkillTargetEffectTime;
 	wstring SkillImagePath;	 // 스킬 이미지 경로
 	bool CanSkillUse;		 // 스킬을 사용 할 수 있는지 여부	
@@ -243,6 +249,9 @@ struct st_SkillInfo
 		SkillName = L"";
 		SkillCoolTime = 0;
 		SkillCastingTime = 0;
+		SkillDurationTime = 0;
+		SkillDotTime = 0;
+		SkillRemainTime = 0;
 		SkillTargetEffectTime = 0;
 		SkillImagePath = L"";
 		CanSkillUse = true;

@@ -1,5 +1,7 @@
 #pragma once
 
+class CSkill;
+
 enum class en_GameObjectType : int16
 {
 	NORMAL,
@@ -65,10 +67,7 @@ enum class en_CreatureState : int8
 	RETURN_SPAWN_POSITION,
 	ATTACK,
 	SPELL,
-	DEAD,
-	STUN,
-	PUSH_AWAY,
-	ROOT
+	DEAD
 };
 
 enum class en_MonsterState : int8
@@ -232,7 +231,7 @@ enum class en_SkillType : int16
 	SKILL_KNIGHT_CONVERSION_ATTACK,
 	SKILL_KNIGHT_SMASH_WAVE,
 	SKILL_KNIGHT_SHAEHONE,
-	SKILL_KNIGHT_CHOHONE,	
+	SKILL_KNIGHT_CHOHONE,
 	SKILL_KNIGHT_CHARGE_POSE,
 	
 	SKILL_SHAMAN_FLAME_HARPOON,
@@ -255,6 +254,12 @@ enum class en_SkillType : int16
 	
 	SKILL_SLIME_NORMAL = 3000,
 	SKILL_BEAR_NORMAL
+};
+
+enum class en_SkillCategory : int8
+{
+	QUICK_SLOT_SKILL,
+	STATUS_ABNORMAL_SKILL
 };
 
 enum class en_EffectType : int16
@@ -281,6 +286,13 @@ enum class en_SkillErrorType : int16
 	ERROR_HEAL_NON_SELECT_OBJECT,
 	ERROR_PLACE_BLOCK,
 	ERROR_DISTANCE,	
+};
+
+enum class en_CommonErrorType : int16
+{
+	ERROR_STATUS_ABNORMAL_MOVE,
+	ERROR_STATUS_ABNORMAL_MELEE,
+	ERROR_STATUS_ABNORMAL_MAGIC
 };
 
 enum class en_ConsumableType : int16
@@ -1786,8 +1798,11 @@ struct st_SkillInfo
 	en_SkillType SkillType;	 // 스킬 종류
 	int8 SkillLevel;		 // 스킬 레벨
 	wstring SkillName;		 // 스킬 이름
-	int32 SkillCoolTime;	 // 스킬 쿨타임
+	int32 SkillCoolTime;	 // 스킬 쿨타임	
 	int32 SkillCastingTime;  // 스킬 캐스팅 타임
+	int64 SkillDurationTime; // 스킬 지속 시간
+	int64 SkillDotTime;      // 스킬 도트 시간 
+	int64 SkillRemainTime;   // 스킬 남은 시간
 	float SkillTargetEffectTime;
 	wstring SkillImagePath;	 // 스킬 이미지 경로
 	bool CanSkillUse;		 // 스킬을 사용 할 수 있는지 여부	
@@ -1801,8 +1816,11 @@ struct st_SkillInfo
 		SkillType = en_SkillType::SKILL_TYPE_NONE;
 		SkillLevel = 0;
 		SkillName = L"";
-		SkillCoolTime = 0;
+		SkillCoolTime = 0;		
 		SkillCastingTime = 0;
+		SkillDurationTime = 0;
+		SkillDotTime = 0;
+		SkillRemainTime = 0;
 		SkillTargetEffectTime = 0;
 		SkillImagePath = L"";
 		CanSkillUse = true;
@@ -1813,8 +1831,7 @@ struct st_AttackSkillInfo : public st_SkillInfo
 {
 	int32 SkillMinDamage;		// 최소 공격력
 	int32 SkillMaxDamage;		// 최대 공격력
-	bool SkillDebuf;			// 스킬 디버프 여부
-	int64 SkillDebufTime;		// 스킬 디버프 시간
+	bool SkillDebuf;			// 스킬 디버프 여부	
 	int8 SkillDebufAttackSpeed; // 스킬 공격속도 감소 수치
 	int8 SkillDebufMovingSpeed; // 스킬 이동속도 감소 수치
 	bool SkillDebufStun;		// 스킬 스턴 여부
@@ -1827,8 +1844,7 @@ struct st_AttackSkillInfo : public st_SkillInfo
 	{
 		SkillMinDamage = 0;
 		SkillMaxDamage = 0;
-		SkillDebuf = false;
-		SkillDebufTime = 0;
+		SkillDebuf = false;		
 		SkillDebufAttackSpeed = 0;
 		SkillDebufMovingSpeed = 0;		
 		SkillDebufStun = false;
@@ -1887,13 +1903,13 @@ struct st_BufSkillInfo : public st_SkillInfo
 
 struct st_QuickSlotBarSlotInfo
 {
-	int64 AccountDBId; // 퀵슬롯 슬롯 소유한 Account
-	int64 PlayerDBId;  // 퀵슬롯 슬롯 소유한 Player	
-	int8 QuickSlotBarIndex; // 퀵슬롯 Index
-	int8 QuickSlotBarSlotIndex; // 퀵슬롯 슬롯 Index
-	int16 QuickSlotKey;   // 퀵슬롯에 연동된 키값
-	st_SkillInfo QuickBarSkillInfo;	// 퀵슬롯에 등록할 스킬 정보
-	bool CanQuickSlotUse = true; // 퀵슬롯을 사용할 수 있는지 없는지
+	int64 AccountDBId;               // 퀵슬롯 슬롯 소유한 Account
+	int64 PlayerDBId;                // 퀵슬롯 슬롯 소유한 Player	
+	int8 QuickSlotBarIndex;          // 퀵슬롯 Index
+	int8 QuickSlotBarSlotIndex;      // 퀵슬롯 슬롯 Index
+	int16 QuickSlotKey;              // 퀵슬롯에 연동된 키값
+	CSkill* QuickBarSkill = nullptr; // 퀵슬롯에 등록할 스킬 정보
+	bool CanQuickSlotUse = true;     // 퀵슬롯을 사용할 수 있는지 없는지
 };
 
 struct st_CraftingMaterialItemInfo
