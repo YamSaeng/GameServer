@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "QuickSlotBar.h"
+#include "ObjectManager.h"
 
 CQuickSlotBar::CQuickSlotBar()
 {
@@ -20,7 +21,8 @@ void CQuickSlotBar::Init()
 		st_QuickSlotBarSlotInfo* QuickSlotBarSlotInfo = new st_QuickSlotBarSlotInfo();
 		QuickSlotBarSlotInfo->QuickSlotBarIndex = _QuickSlotBarIndex;
 		QuickSlotBarSlotInfo->QuickSlotBarSlotIndex = SlotIndex;
-		QuickSlotBarSlotInfo->QuickSlotKey = SlotIndex + 1;
+		QuickSlotBarSlotInfo->QuickSlotKey = SlotIndex + 1;		
+		QuickSlotBarSlotInfo->QuickBarSkill = nullptr;
 
 		_QuickSlotBarSlotInfos.insert(pair<int8, st_QuickSlotBarSlotInfo*>(SlotIndex, QuickSlotBarSlotInfo));
 	}
@@ -36,4 +38,26 @@ void CQuickSlotBar::UpdateQuickSlotBarSlot(st_QuickSlotBarSlotInfo& QuickSlotBar
 	}
 
 	*(*FindQuickSlotBarSlotIterator).second = QuickSlotBarSlotInfo;
+}
+
+CSkill* CQuickSlotBar::FindQuickSlot(int8 QuickSlotbarSlotIndex)
+{
+	auto FindQuickSlotIterator = _QuickSlotBarSlotInfos.find(QuickSlotbarSlotIndex);
+	if (FindQuickSlotIterator == _QuickSlotBarSlotInfos.end())
+	{
+		return nullptr;
+	}
+
+	return (*FindQuickSlotIterator).second->QuickBarSkill;
+}
+
+void CQuickSlotBar::QuickSlotBarEmpty()
+{
+	for (auto QuickSlotBarSlot : _QuickSlotBarSlotInfos)
+	{	
+		delete QuickSlotBarSlot.second;
+		QuickSlotBarSlot.second = nullptr;
+	}
+
+	_QuickSlotBarSlotInfos.clear();
 }

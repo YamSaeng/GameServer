@@ -13,8 +13,11 @@ public:
 	void Init();
 
 	// QuickSlot에 스킬 저장
-	void UpdateQuickSlotBarSlot(st_QuickSlotBarSlotInfo& QuickSlotBarSlotInfo);
+	void UpdateQuickSlotBarSlot(st_QuickSlotBarSlotInfo& QuickSlotBarSlotInfo);	
+	
+	CSkill* FindQuickSlot(int8 QuickSlotbarSlotIndex);
 
+	void QuickSlotBarEmpty();
 private:
 	map<int8, st_QuickSlotBarSlotInfo*> _QuickSlotBarSlotInfos;
 };
