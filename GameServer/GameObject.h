@@ -4,14 +4,34 @@
 #include "CommonProtocol.h"
 #include "GameObjectInfo.h"
 
+class CSkill;
+
+#define STATUS_ABNORMAL_WARRIOR_CHOHONE         0b00000001
+#define STATUS_ABNORMAL_WARRIOR_SHAEHONE        0b00000010
+#define STATUS_ABNORMAL_SHAMAN_ROOT             0b00000100
+#define STATUS_ABNORMAL_SHAMAN_ICE_CHAIN        0b00001000
+#define STATUS_ABNORMAL_SHAMAN_ICE_WAVE         0b00010000
+#define STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE 0b00100000
+#define STATUS_ABNORMAL_TAIOIST_ROOT			0b01000000
+
+#define STATUS_ABNORMAL_WARRIOR_CHOHONE_MASK         0b11111110
+#define STATUS_ABNORMAL_WARRIOR_SHAEHONE_MASK        0b11111101
+#define STATUS_ABNORMAL_SHAMAN_ROOT_MASK             0b11111011
+#define STATUS_ABNORMAL_SHAMAN_ICE_CHAIN_MASK        0b11110111
+#define STATUS_ABNORMAL_SHAMAN_ICE_WAVE_MASK         0b11101111
+#define STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE_MASK 0b11011111
+#define STATUS_ABNORMAL_TAIOIST_ROOT_MASK            0b10111111
+
 class CGameObject
 {
 private:
 public:
+	int8 _StatusAbnormal;
 	bool _IsSendPacketTarget;
 
 	int32 _ObjectManagerArrayIndex;
 	int32 _ChannelArrayIndex;
+
 	en_ObjectNetworkState _NetworkState;
 	st_GameObjectInfo _GameObjectInfo;	
 	CChannel* _Channel;	
@@ -25,8 +45,16 @@ public:
 	st_Vector2Int _SpawnPosition;
 
 	// 시야 범위
-	int8 _FieldOfViewDistance;	
+	int8 _FieldOfViewDistance;		
+	
+	// 타겟
+	CGameObject* _Owner;	
 
+	// 강화효과
+	map<en_SkillType, CSkill*> _Bufs;
+	// 약화효과
+	map<en_SkillType, CSkill*> _DeBufs;
+	 
 	CGameObject();
 	CGameObject(st_GameObjectInfo GameObjectInfo);
 	virtual ~CGameObject();
@@ -56,14 +84,27 @@ public:
 	//------------------------------------------------------------------------------------
 	vector<st_Vector2Int> GetAroundCellPositions(st_Vector2Int CellPosition, int8 Distance);
 	
-	void SetTarget(CGameObject* Target);
+	void SetOwner(CGameObject* Target);
 	CGameObject* GetTarget();
-protected:
-	//---------------
-	// 타겟
-	//---------------
-	CGameObject* _Target;	
 
+	//---------------------------------------------
+	// 강화효과 스킬 추가 및 삭제
+	//---------------------------------------------
+	void AddBuf(CSkill* Buf);
+	void DeleteBuf(en_SkillType DeleteBufSkillType);
+
+	//-------------------------------------------------
+	// 약화효과 스킬 추가 및 삭제
+	//-------------------------------------------------
+	void AddDebuf(CSkill* DeBuf);	
+	void DeleteDebuf(en_SkillType DeleteDebufSkillType);
+
+	//--------------------------------------------------
+	// 상태이상 값 설정 및 해제
+	//--------------------------------------------------
+	void SetStatusAbnormal(int8 StatusAbnormalValue);
+	void ReleaseStatusAbnormal(int8 StatusAbnormalValue);
+protected:
 	//-------------------------
 	// 재생력 Tick
 	//-------------------------

@@ -1,15 +1,18 @@
 #include "pch.h"
 #include "GameObject.h"
 #include "ObjectManager.h"
+#include "Skill.h"
 
 CGameObject::CGameObject()
 {
+	_StatusAbnormal = 0;
+
 	_ObjectManagerArrayIndex = -1;
 	_ChannelArrayIndex = -1;
 	_NetworkState = en_ObjectNetworkState::READY;
 	_GameObjectInfo.OwnerObjectId = 0;	
 	_Channel = nullptr;
-	_Target = nullptr;
+	_Owner = nullptr;
 	_SelectTarget = nullptr;
 
 	_NatureRecoveryTick = 0;	
@@ -168,14 +171,48 @@ vector<st_Vector2Int> CGameObject::GetAroundCellPositions(st_Vector2Int CellPosi
 	return AroundPosition;
 }
 
-void CGameObject::SetTarget(CGameObject* Target)
+void CGameObject::SetOwner(CGameObject* Target)
 {
-	_Target = Target;
+	_Owner = Target;
 }
 
 CGameObject* CGameObject::GetTarget()
 {
-	return _Target;
+	return _Owner;
+}
+
+void CGameObject::AddBuf(CSkill* Buf)
+{	
+	Buf->SetOwner(this);		
+
+	_Bufs.insert(pair<en_SkillType, CSkill*>(Buf->GetSkillInfo()->SkillType, Buf));
+}
+
+void CGameObject::DeleteBuf(en_SkillType DeleteBufSkillType)
+{
+	_Bufs.erase(DeleteBufSkillType);	
+}
+
+void CGameObject::AddDebuf(CSkill* DeBuf)
+{
+	DeBuf->SetOwner(this);		
+
+	_DeBufs.insert(pair<en_SkillType, CSkill*>(DeBuf->GetSkillInfo()->SkillType, DeBuf));
+}
+
+void CGameObject::DeleteDebuf(en_SkillType DeleteDebufSkillType)
+{
+	_DeBufs.erase(DeleteDebufSkillType);	
+}
+
+void CGameObject::SetStatusAbnormal(int8 StatusAbnormalValue)
+{
+	_StatusAbnormal |= StatusAbnormalValue;
+}
+
+void CGameObject::ReleaseStatusAbnormal(int8 StatusAbnormalValue)
+{
+	_StatusAbnormal &= StatusAbnormalValue;
 }
 
 void CGameObject::BroadCastPacket(en_GAME_SERVER_PACKET_TYPE PacketType, bool CanMove)
@@ -185,8 +222,8 @@ void CGameObject::BroadCastPacket(en_GAME_SERVER_PACKET_TYPE PacketType, bool Ca
 	switch (PacketType)
 	{							
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_OBJECT_STAT_CHANGE:
-		ResPacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_Target->_GameObjectInfo.ObjectId,
-			_Target->_GameObjectInfo.ObjectStatInfo);
+		ResPacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_Owner->_GameObjectInfo.ObjectId,
+			_Owner->_GameObjectInfo.ObjectStatInfo);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_DIE:			
 		ResPacket = G_ObjectManager->GameServer->MakePacketObjectDie(this->_GameObjectInfo.ObjectId);
