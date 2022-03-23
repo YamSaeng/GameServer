@@ -6,16 +6,6 @@ class CGameObject;
 class CSkill
 {
 public:	
-	// 스킬 쿨타임 틱
-	int64 _SkillCootimeTick;
-	// 스킬 상태이상 적용 틱
-	int64 _SkillDurationTick;	
-	// 스킬 도트 틱
-	int64 _SkillDotTick;	
-
-	// 스킬이 도트인지 여부
-	bool _IsDot;
-
 	CSkill();	
 	~CSkill();
 
@@ -29,11 +19,21 @@ public:
 
 	// 쿨타임 시작
 	void CoolTimeStart();
+	// 상태이상 지속 시간 시작
+	void StatusAbnormalDurationTimeStart();
 
 	bool Update();
-private:
-	wstring _SkillName;
-	
+private:		
+	// 스킬 쿨타임 틱
+	int64 _SkillCootimeTick;
+	// 스킬 상태이상 적용 틱
+	int64 _SkillDurationTick;
+	// 스킬 도트 틱
+	int64 _SkillDotTick;
+
+	// 스킬이 도트인지 여부
+	bool _IsDot;	
+
 	// 스킬 가지고 있는 대상
 	CGameObject* _Owner;	
 
