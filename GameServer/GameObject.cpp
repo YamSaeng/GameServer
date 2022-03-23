@@ -119,6 +119,11 @@ st_Vector2Int CGameObject::GetCellPosition()
 	return st_Vector2Int(_GameObjectInfo.ObjectPositionInfo.CollisionPositionX, _GameObjectInfo.ObjectPositionInfo.CollisionPositionY);
 }
 
+st_Vector2 CGameObject::GetPosition()
+{
+	return st_Vector2(_GameObjectInfo.ObjectPositionInfo.PositionX, _GameObjectInfo.ObjectPositionInfo.PositionY);
+}
+
 st_Vector2Int CGameObject::GetFrontCellPosition(en_MoveDir Dir, int8 Distance)
 {
 	st_Vector2Int FrontPosition = GetCellPosition();
@@ -223,6 +228,7 @@ void CGameObject::BroadCastPacket(en_GAME_SERVER_PACKET_TYPE PacketType, bool Ca
 	{							
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_OBJECT_STAT_CHANGE:
 		ResPacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_Owner->_GameObjectInfo.ObjectId,
+			
 			_Owner->_GameObjectInfo.ObjectStatInfo);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_DIE:			
