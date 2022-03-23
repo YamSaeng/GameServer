@@ -16,13 +16,8 @@
               "SkillDotTime": 0,
               "SkillDistance": 6,
               "SkillTargetEffectTime": 0,
-              "SkillDebuf": false,              
               "SkillDebufAttackSpeed": 0,
-              "SkillDebufMovingSpeed": 0,
-              "SkillDebufStun": false,
-              "SkillDebufPushAway": false,
-              "SkillDebufRoot": false,
-              "SkillDebufDamageOverTime": 0,
+              "SkillDebufMovingSpeed": 0,              
               "StatusAbnormalityProbability": 0,
               "SkillThumbnailImagePath": "Textures/Spell/Icon/±Ã»ç/Àú°Ý"
             }

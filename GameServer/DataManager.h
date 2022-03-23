@@ -10,11 +10,13 @@ class CDataManager
 public:
 	map<int16, st_ItemData*> _Items;
 	map<int16, st_ConsumableData*> _Consumables;
+		
 	map<int32, st_ObjectStatusData*> _WarriorStatus;
 	map<int32, st_ObjectStatusData*> _ShamanStatus;
 	map<int32, st_ObjectStatusData*> _TaioistStatus;
 	map<int32, st_ObjectStatusData*> _ThiefStatus;
 	map<int32, st_ObjectStatusData*> _ArcherStatus;
+	
 	map<int32, st_MonsterData*> _Monsters;
 
 	//------------------------------------------------------

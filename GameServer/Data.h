@@ -55,13 +55,8 @@ struct st_AttackSkillData : public st_SkillData
 {
 	int32 SkillMinDamage;		// 최소 공격력
 	int32 SkillMaxDamage;		// 최대 공격력
-	bool SkillDebuf;			// 스킬 디버프 여부
 	int8 SkillDebufAttackSpeed; // 스킬 공격속도 감소 수치
 	int8 SkillDebufMovingSpeed; // 스킬 이동속도 감소 수치
-	bool SkillDebufStun;		// 스킬 스턴 여부
-	bool SkillDebufPushAway;	// 스킬 밀려남 여부
-	bool SkillDebufRoot;	    // 스킬 이동불가 여부	
-	int64 SkillDamageOverTime;  // 스킬 도트 데미지 시간 간격	
 	int8 StatusAbnormalityProbability; // 상태 이상 적용 확률
 };
 
@@ -91,6 +86,16 @@ struct st_BufSkillData : public st_SkillData
 	int16 IncreaseMagicCriticalPoint; // 증가하는 마법 치명타율
 	float IncreaseSpeedPoint; // 증가하는 이동 속도	
 	int16 IncreaseStatusAbnormalityResistance; // 증가하는 상태이상저항값
+};
+
+struct st_GameObjectUIPositionData
+{
+	float NameBarPositionX;
+	float NameBarPositionY;
+	float HPBarPositionX;
+	float HPBarPositionY;
+	float SpellBarPositionX;
+	float SpellBarPositionY;
 };
 
 struct st_ObjectStatusData

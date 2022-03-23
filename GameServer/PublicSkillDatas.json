@@ -16,6 +16,9 @@
               "SkillDotTime": 0,
               "SkillDistance": 1,
               "SkillTargetEffectTime": 2.0,
+              "SkillDebufAttackSpeed": 0,
+              "SkillDebufMovingSpeed": 0,
+              "StatusAbnormalityProbability": 0,
               "SkillThumbnailImagePath": "Textures/Spell/Icon/일반공격"
             }
           ],

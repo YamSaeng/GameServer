@@ -15,14 +15,9 @@
               "SkillDurationTime": 0,
               "SkillDotTime": 0,
               "SkillDistance": 1,
-              "SkillTargetEffectTime": 0,
-              "SkillDebuf": false,
+              "SkillTargetEffectTime": 0,              
               "SkillDebufAttackSpeed": 0,
-              "SkillDebufMovingSpeed": 0,
-              "SkillDebufStun": false,
-              "SkillDebufPushAway": false,
-              "SkillDebufRoot": false,
-              "SkillDebufDamageOverTime": 0,
+              "SkillDebufMovingSpeed": 0,              
               "StatusAbnormalityProbability": 0,
               "SkillThumbnailImagePath": "Textures/Spell/Icon/도적/빠른베기"
             }

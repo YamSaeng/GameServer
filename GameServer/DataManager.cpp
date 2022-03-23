@@ -400,7 +400,7 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 
 	for (auto& Filed : Document["PlayerWarriorCharacterStatus"].GetArray())
 	{
-		string PlayerType = Filed["PlayerType"].GetString();
+		string PlayerType = Filed["PlayerType"].GetString();		
 
 		for (auto& PlayerWarriorCharacterFiled : Filed["PlayerWarriorCharacterLevelDataList"].GetArray())
 		{
@@ -446,11 +446,11 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 		}
 	}
 
-	for (auto& Filed : Document["PlayerMagicCharacterStatus"].GetArray())
+	for (auto& Filed : Document["PlayerShamanCharacterStatus"].GetArray())
 	{
 		string PlayerType = Filed["PlayerType"].GetString();
 
-		for (auto& PlayerShamanCharacterFiled : Filed["PlayerMagicCharacterLevelDataList"].GetArray())
+		for (auto& PlayerShamanCharacterFiled : Filed["PlayerShamanCharacterLevelDataList"].GetArray())
 		{
 			int Level = PlayerShamanCharacterFiled["Level"].GetInt();
 			int MaxHP = PlayerShamanCharacterFiled["MaxHP"].GetInt();
@@ -471,7 +471,7 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 
 			st_ObjectStatusData* ShamanStatusData = new st_ObjectStatusData();
 
-			ShamanStatusData->PlayerType = en_GameObjectType::OBJECT_MAGIC_PLAYER;
+			ShamanStatusData->PlayerType = en_GameObjectType::OBJECT_SHAMAN_PLAYER;
 
 			ShamanStatusData->Level = Level;
 			ShamanStatusData->MaxHP = MaxHP;
@@ -786,7 +786,10 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				int64 SkillDotTime = PublicAttackSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = PublicAttackSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = PublicAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
-				string SkillImagePath = PublicAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
+				int8 SkillDebufAttackSpeed = (int8)PublicAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
+				int8 SkillDebufMovingSpeed = (int8)PublicAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
+				int8 StatusAbnormalityProbability = (int8)PublicAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
+				string SkillImagePath = PublicAttackSkillListFiled["SkillThumbnailImagePath"].GetString();				
 
 				if (SkillType == "SKILL_DEFAULT_ATTACK")
 				{
@@ -803,6 +806,9 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				PublicAttackSkill->SkillDotTime = SkillDotTime;
 				PublicAttackSkill->SkillDistance = SkillDistance;
 				PublicAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+				PublicAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
+				PublicAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
+				PublicAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
 				PublicAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_PublicAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)PublicAttackSkill->SkillType, PublicAttackSkill));
@@ -935,14 +941,9 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				int64 SkillDurationTime = WarriorAttackSkillListFiled["SkillDurationTime"].GetInt64();
 				int64 SkillDotTime = WarriorAttackSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = WarriorAttackSkillListFiled["SkillDistance"].GetInt();
-				float SkillTargetEffectTime = WarriorAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
-				bool SkillDebuf = WarriorAttackSkillListFiled["SkillDebuf"].GetBool();				
+				float SkillTargetEffectTime = WarriorAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();				
 				int8 SkillDebufAttackSpeed = (int8)WarriorAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
-				int8 SkillDebufMovingSpeed = (int8)WarriorAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
-				bool SkillDebufStun = WarriorAttackSkillListFiled["SkillDebufStun"].GetBool();
-				bool SkillDebufPushAway = WarriorAttackSkillListFiled["SkillDebufPushAway"].GetBool();
-				bool SkillDebufRoot = WarriorAttackSkillListFiled["SkillDebufRoot"].GetBool();
-				int64 SkillDamageOverTime = WarriorAttackSkillListFiled["SkillDebufDamageOverTime"].GetInt64();
+				int8 SkillDebufMovingSpeed = (int8)WarriorAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();				
 				int8 StatusAbnormalityProbability = (int8)WarriorAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
 				string SkillImagePath = WarriorAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -976,15 +977,9 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				WarriorAttackSkill->SkillDurationTime = SkillDurationTime;
 				WarriorAttackSkill->SkillDotTime = SkillDotTime;
 				WarriorAttackSkill->SkillDistance = SkillDistance;
-				WarriorAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-
-				WarriorAttackSkill->SkillDebuf = SkillDebuf;				
+				WarriorAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;										
 				WarriorAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
-				WarriorAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
-				WarriorAttackSkill->SkillDebufStun = SkillDebufStun;
-				WarriorAttackSkill->SkillDebufPushAway = SkillDebufPushAway;
-				WarriorAttackSkill->SkillDebufRoot = SkillDebufRoot;
-				WarriorAttackSkill->SkillDamageOverTime = SkillDamageOverTime;
+				WarriorAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;				
 				WarriorAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
 				WarriorAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -1119,13 +1114,8 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				int64 SkillDotTime = ShmanAttackSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ShmanAttackSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = ShmanAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
-				bool SkillDebuf = ShmanAttackSkillListFiled["SkillDebuf"].GetBool();				
 				int8 SkillDebufAttackSpeed = (int8)ShmanAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
 				int8 SkillDebufMovingSpeed = (int8)ShmanAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
-				bool SkillDebufStun = ShmanAttackSkillListFiled["SkillDebufStun"].GetBool();
-				bool SkillDebufPushAway = ShmanAttackSkillListFiled["SkillDebufPushAway"].GetBool();
-				bool SkillDebufRoot = ShmanAttackSkillListFiled["SkillDebufRoot"].GetBool();
-				int64 SkillDamageOverTime = ShmanAttackSkillListFiled["SkillDebufDamageOverTime"].GetInt64();
 				int8 StatusAbnormalityProbability = (int8)ShmanAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();				
 				string SkillImagePath = ShmanAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1163,15 +1153,9 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanAttackSkill->SkillDurationTime = SkillDurationTime;
 				ShamanAttackSkill->SkillDotTime = SkillDotTime;
 				ShamanAttackSkill->SkillDistance = SkillDistance;
-				ShamanAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-
-				ShamanAttackSkill->SkillDebuf = SkillDebuf;				
+				ShamanAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;									
 				ShamanAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
-				ShamanAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
-				ShamanAttackSkill->SkillDebufStun = SkillDebufStun;
-				ShamanAttackSkill->SkillDebufPushAway = SkillDebufPushAway;
-				ShamanAttackSkill->SkillDebufRoot = SkillDebufRoot;
-				ShamanAttackSkill->SkillDamageOverTime = SkillDamageOverTime;
+				ShamanAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;				
 				ShamanAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
 				ShamanAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -1311,14 +1295,9 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				int64 SkillDotTime = TaioistAttackSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = TaioistAttackSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = TaioistAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
-				bool SkillDebuf = TaioistAttackSkillListFiled["SkillDebuf"].GetBool();
 				int64 SkillDebufTime = TaioistAttackSkillListFiled["SkillDebufTime"].GetInt64();
 				int8 SkillDebufAttackSpeed = (int8)TaioistAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
 				int8 SkillDebufMovingSpeed = (int8)TaioistAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
-				bool SkillDebufStun = TaioistAttackSkillListFiled["SkillDebufStun"].GetBool();
-				bool SkillDebufPushAway = TaioistAttackSkillListFiled["SkillDebufPushAway"].GetBool();
-				bool SkillDebufRoot = TaioistAttackSkillListFiled["SkillDebufRoot"].GetBool();
-				int64 SkillDamageOverTime = TaioistAttackSkillListFiled["SkillDebufDamageOverTime"].GetInt64();
 				int8 StatusAbnormalityProbability = (int8)TaioistAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();				
 				string SkillImagePath = TaioistAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1340,15 +1319,9 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				TaioistAttackSkill->SkillDurationTime = SkillDurationTime;
 				TaioistAttackSkill->SkillDotTime = SkillDotTime;
 				TaioistAttackSkill->SkillDistance = SkillDistance;
-				TaioistAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-
-				TaioistAttackSkill->SkillDebuf = SkillDebuf;				
+				TaioistAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;								
 				TaioistAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
-				TaioistAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
-				TaioistAttackSkill->SkillDebufStun = SkillDebufStun;
-				TaioistAttackSkill->SkillDebufPushAway = SkillDebufPushAway;
-				TaioistAttackSkill->SkillDebufRoot = SkillDebufRoot;
-				TaioistAttackSkill->SkillDamageOverTime = SkillDamageOverTime;
+				TaioistAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;				
 				TaioistAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
 				TaioistAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 				TaioistAttackSkill->SkillThumbnailImagePath = SkillImagePath;
@@ -1493,12 +1466,8 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				int64 SkillDotTime = ThiefAttackSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ThiefAttackSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = ThiefAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
-				bool SkillDebuf = ThiefAttackSkillListFiled["SkillDebuf"].GetBool();				
 				int8 SkillDebufAttackSpeed = (int8)ThiefAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
 				int8 SkillDebufMovingSpeed = (int8)ThiefAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
-				bool SkillDebufStun = ThiefAttackSkillListFiled["SkillDebufStun"].GetBool();
-				bool SkillDebufPushAway = ThiefAttackSkillListFiled["SkillDebufPushAway"].GetBool();
-				bool SkillDebufRoot = ThiefAttackSkillListFiled["SkillDebufRoot"].GetBool();
 				int64 SkillDamageOverTime = ThiefAttackSkillListFiled["SkillDebufDamageOverTime"].GetInt64();								
 				int8 StatusAbnormalityProbability = (int8)ThiefAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
 				string SkillImagePath = ThiefAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
@@ -1517,17 +1486,10 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				ThiefAttackSkill->SkillDurationTime = SkillDurationTime;
 				ThiefAttackSkill->SkillDotTime = SkillDotTime;
 				ThiefAttackSkill->SkillDistance = SkillDistance;
-				ThiefAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-
-				ThiefAttackSkill->SkillDebuf = SkillDebuf;				
+				ThiefAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;											
 				ThiefAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
-				ThiefAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
-				ThiefAttackSkill->SkillDebufStun = SkillDebufStun;
-				ThiefAttackSkill->SkillDebufPushAway = SkillDebufPushAway;
-				ThiefAttackSkill->SkillDebufRoot = SkillDebufRoot;
-				ThiefAttackSkill->SkillDamageOverTime = SkillDamageOverTime;
+				ThiefAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;				
 				ThiefAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
-				ThiefAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 				ThiefAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_ThiefAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)ThiefAttackSkill->SkillType, ThiefAttackSkill));
@@ -1666,13 +1628,9 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				int64 SkillDotTime = ArcherAttackSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ArcherAttackSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = ArcherAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
-				bool SkillDebuf = ArcherAttackSkillListFiled["SkillDebuf"].GetBool();
 				int64 SkillDebufTime = ArcherAttackSkillListFiled["SkillDebufTime"].GetInt64();
 				int8 SkillDebufAttackSpeed = (int8)ArcherAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
 				int8 SkillDebufMovingSpeed = (int8)ArcherAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
-				bool SkillDebufStun = ArcherAttackSkillListFiled["SkillDebufStun"].GetBool();
-				bool SkillDebufPushAway = ArcherAttackSkillListFiled["SkillDebufPushAway"].GetBool();
-				int64 SkillDamageOverTime = ArcherAttackSkillListFiled["SkillDebufDamageOverTime"].GetInt64();
 				int8 StatusAbnormalityProbability = (int8)ArcherAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
 				int SkillDebufRoot = ArcherAttackSkillListFiled["SkillDebufRoot"].GetBool();
 				string SkillImagePath = ArcherAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
@@ -1691,15 +1649,9 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				ArcherAttackSkill->SkillDurationTime = SkillDurationTime;
 				ArcherAttackSkill->SkillDotTime = SkillDotTime;
 				ArcherAttackSkill->SkillDistance = SkillDistance;
-				ArcherAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-
-				ArcherAttackSkill->SkillDebuf = SkillDebuf;				
+				ArcherAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;									
 				ArcherAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
-				ArcherAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
-				ArcherAttackSkill->SkillDebufStun = SkillDebufStun;
-				ArcherAttackSkill->SkillDebufPushAway = SkillDebufPushAway;
-				ArcherAttackSkill->SkillDebufRoot = SkillDebufRoot;
-				ArcherAttackSkill->SkillDamageOverTime = SkillDamageOverTime;
+				ArcherAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;				
 				ArcherAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
 				ArcherAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 				ArcherAttackSkill->SkillThumbnailImagePath = SkillImagePath;
@@ -2033,7 +1985,7 @@ st_ObjectStatusData* CDataManager::FindObjectStatusData(en_GameObjectType GameOb
 		return nullptr;
 	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 		return (*_WarriorStatus.find(Level)).second;		
-	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
+	case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
 		return (*_ShamanStatus.find(Level)).second;		
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 		return (*_TaioistStatus.find(Level)).second;		
