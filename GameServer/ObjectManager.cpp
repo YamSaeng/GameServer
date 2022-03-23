@@ -89,7 +89,7 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int32 Channel
 			}
 			break;
 		case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-		case en_GameObjectType::OBJECT_MAGIC_PLAYER:
+		case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
 		case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 		case en_GameObjectType::OBJECT_THIEF_PLAYER:
 		case en_GameObjectType::OBJECT_ARCHER_PLAYER:
@@ -257,7 +257,7 @@ CGameObject* CObjectManager::Find(int64 ObjectId, en_GameObjectType GameObjectTy
 	{
 	case en_GameObjectType::OBJECT_PLAYER:
 	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
+	case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 	case en_GameObjectType::OBJECT_THIEF_PLAYER:
 	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
@@ -388,7 +388,7 @@ void CObjectManager::ObjectReturn(en_GameObjectType ObjectType, CGameObject* Ret
 	switch (ObjectType)
 	{
 	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
+	case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 	case en_GameObjectType::OBJECT_THIEF_PLAYER:
 	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
@@ -556,6 +556,7 @@ void CObjectManager::MapObjectSpawn(int32 ChannelId)
 
 				NewObject->_GameObjectInfo.ObjectId = _GameServerObjectId++;
 				NewObject->_SpawnPosition = NewPosition;
+				NewObject->_NetworkState = en_ObjectNetworkState::LIVE;
 				ObjectEnterGame(NewObject, ChannelId);
 			}
 		}

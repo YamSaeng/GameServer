@@ -258,7 +258,7 @@ CGameServerMessage& CGameServerMessage::operator>>(st_QuickSlotBarSlotInfo& Valu
     *this >> Value.PlayerDBId;
     *this >> Value.QuickSlotBarIndex;
     *this >> Value.QuickSlotBarSlotIndex;
-    *this >> Value.QuickSlotKey;    
+    *this >> Value.QuickSlotKey;        
 
     st_SkillInfo* SkillInfo = Value.QuickBarSkill->GetSkillInfo();
     *this >> *SkillInfo;
