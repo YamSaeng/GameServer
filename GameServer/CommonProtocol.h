@@ -526,11 +526,11 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_BUF_DEBUF_OFF,
 
 	//-----------------------------------------------------------
-	// 게임서버 에러 전송	
-	// int64 PlayerId
-	// en_ErrorType ErrorType
+	// 게임서버 개인 메세지 전송
+	// int8 MessageCount
+	// wstring Messages	
 	//-----------------------------------------------------------
-	en_PACKET_S2C_ERROR,
+	en_PACKET_PERSONAL_MESSAGE,
 			
 	//-----------------------------------------------------------
 	// 게임서버 클라 퐁 전송	
