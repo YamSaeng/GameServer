@@ -109,6 +109,8 @@ public:
 	//--------------------------------------------------
 	void SetStatusAbnormal(int8 StatusAbnormalValue);
 	void ReleaseStatusAbnormal(int8 StatusAbnormalValue);
+
+	int8 CheckStatusAbnormal();
 protected:
 	//-------------------------
 	// Àç»ý·Â Tick

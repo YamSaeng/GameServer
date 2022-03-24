@@ -2,6 +2,8 @@
 #include "Player.h"
 #include "ObjectManager.h"
 #include "DataManager.h"
+#include "Skill.h"
+#include "SkillBox.h"
 
 CPlayer::CPlayer()
 {
@@ -64,7 +66,7 @@ void CPlayer::Update()
 				if (SpawnObject.ObjectId != 0 && SpawnObject.ObjectType != en_GameObjectType::NORMAL)
 				{
 					CGameObject* FindObject = G_ObjectManager->Find(SpawnObject.ObjectId, SpawnObject.ObjectType);
-					if (FindObject != nullptr)
+					if (FindObject != nullptr) 
 					{
 						// 시야 범위 안에 존재할 경우 스폰정보 담음
 						int16 Distance = st_Vector2Int::Distance(FindObject->GetCellPosition(), GetCellPosition());
@@ -72,7 +74,7 @@ void CPlayer::Update()
 						{
 							SpawnObjectInfos.push_back(FindObject);
 						}						
-					}
+					}					
 				}								
 			}
 
@@ -121,7 +123,7 @@ void CPlayer::Update()
 				}				
 			}
 
-			// 디스폰해야 할 대상을 나에게 스폰하라고 알림
+			// 디스폰해야 할 대상을 나에게 스폰 해제하라고 알림
 			if (DeSpawnObjectInfos.size() > 0)
 			{
 				CMessage* ResOtherObjectDeSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn((int32)DeSpawnObjectInfos.size(), DeSpawnObjectInfos);
@@ -149,7 +151,40 @@ void CPlayer::Update()
 		}
 
 		_FieldOfViewInfos = CurrentFieldOfViewObjectIds;				
-	}		
+	}			
+
+	// 스킬목록 업데이트
+	_SkillBox.Update();
+
+	// 강화효과 스킬 리스트 순회
+	for (auto BufSkillIterator : _Bufs)
+	{
+		// 지속시간 끝난 강화효과 삭제
+		bool DeleteBufSkill = BufSkillIterator.second->Update();
+		if (DeleteBufSkill)
+		{
+			DeleteBuf(BufSkillIterator.first);
+			// 강화효과 스킬 정보 메모리 반납
+			G_ObjectManager->SkillInfoReturn(BufSkillIterator.second->GetSkillInfo()->SkillMediumCategory, BufSkillIterator.second->GetSkillInfo());
+			// 강화효과 스킬 메모리 반납
+			G_ObjectManager->SkillReturn(BufSkillIterator.second);
+		}
+	}
+
+	// 약화효과 스킬 리스트 순회
+	for (auto DebufSkillIterator : _DeBufs)
+	{
+		// 지속시간 끝난 약화효과 삭제
+		bool DeleteDebufSkill = DebufSkillIterator.second->Update();
+		if (DeleteDebufSkill)
+		{
+			DeleteDebuf(DebufSkillIterator.first);
+			// 약화효과 스킬 정보 메모리 반납
+			G_ObjectManager->SkillInfoReturn(DebufSkillIterator.second->GetSkillInfo()->SkillMediumCategory, DebufSkillIterator.second->GetSkillInfo());
+			// 약화효과 스킬 메모리 반납
+			G_ObjectManager->SkillReturn(DebufSkillIterator.second);
+		}		
+	}
 
 	if (_NatureRecoveryTick < GetTickCount64())
 	{
@@ -174,23 +209,23 @@ void CPlayer::Update()
 
 		_NatureRecoveryTick = GetTickCount64() + 5000;		
 				
-		CMessage* ResObjectStatPacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId,
+		CMessage* ResObjectStatPacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId,			
 			_GameObjectInfo.ObjectStatInfo);
 		G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResObjectStatPacket, this);		
 		ResObjectStatPacket->Free();
 	}
-		
+	
 	switch (_GameObjectInfo.ObjectPositionInfo.State)
-	{	
-	case en_CreatureState::MOVING:		
+	{
+	case en_CreatureState::MOVING:
 		UpdateMove();
 		break;
-	case en_CreatureState::ATTACK:		
+	case en_CreatureState::ATTACK:
 		UpdateAttack();
 		break;
-	case en_CreatureState::SPELL:		
+	case en_CreatureState::SPELL:
 		UpdateSpell();
-		break;	
+		break;
 	}
 }
 
@@ -206,14 +241,12 @@ void CPlayer::OnDead(CGameObject* Killer)
 
 void CPlayer::Init()
 {
-	wstring InitString = L"";
-
-	_GameObjectInfo.ObjectId = 0;
-	_GameObjectInfo.ObjectName = InitString;
-	_GameObjectInfo.OwnerObjectType = en_GameObjectType::NORMAL;
-	memset(&_GameObjectInfo.ObjectStatInfo, 0, sizeof(st_StatInfo));
-	_SpawnPosition._X = 0;
-	_SpawnPosition._Y = 0;	
+	// 스킬 목록 정리
+	_SkillBox.Empty();
+	// 퀵슬롯 정리
+	_QuickSlotManager.Empty();
+	
+	
 }
 
 void CPlayer::PositionReset()
@@ -260,7 +293,7 @@ void CPlayer::UpdateMove()
 			(st_Vector2::Right()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 		break;
 	}	
-
+		
 	bool CanMove = _Channel->_Map->Cango(this, _GameObjectInfo.ObjectPositionInfo.PositionX, _GameObjectInfo.ObjectPositionInfo.PositionY);
 	if (CanMove == true)
 	{

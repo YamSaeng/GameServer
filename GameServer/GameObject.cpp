@@ -220,6 +220,39 @@ void CGameObject::ReleaseStatusAbnormal(int8 StatusAbnormalValue)
 	_StatusAbnormal &= StatusAbnormalValue;
 }
 
+int8 CGameObject::CheckStatusAbnormal()
+{
+	int8 StatusAbnormalCount = 0;
+
+	if (_StatusAbnormal & STATUS_ABNORMAL_WARRIOR_CHOHONE)
+	{		
+		StatusAbnormalCount++;		
+	}
+
+	if(_StatusAbnormal & STATUS_ABNORMAL_WARRIOR_SHAEHONE)
+	{
+		StatusAbnormalCount++;		
+	}
+	
+	if ((_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ROOT)
+		|| (_StatusAbnormal & STATUS_ABNORMAL_TAIOIST_ROOT))
+	{
+		StatusAbnormalCount++;
+	}
+
+	if (_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ICE_WAVE)
+	{
+		StatusAbnormalCount++;
+	}
+
+	if (_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE)
+	{
+		StatusAbnormalCount++;		
+	}		
+
+	return StatusAbnormalCount;
+}
+
 void CGameObject::BroadCastPacket(en_GAME_SERVER_PACKET_TYPE PacketType, bool CanMove)
 {
 	CMessage* ResPacket = nullptr;

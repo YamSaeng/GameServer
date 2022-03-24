@@ -251,11 +251,7 @@ private:
 	//----------------------------------------------------------------
 	// 오브젝트 상태 변경
 	//----------------------------------------------------------------
-	void PacketProcTimerObjectStateChange(int64 SessionId, CGameServerMessage* Message);
-	//----------------------------------------------------------------
-	// 오브젝트 도트 처리
-	//----------------------------------------------------------------
-	void PacketProcTimerDot(int64 SessionId, CGameServerMessage* Message);
+	void PacketProcTimerObjectStateChange(int64 SessionId, CGameServerMessage* Message);	
 	//----------------------------------------------------------------
 	// 핑 처리
 	//----------------------------------------------------------------
@@ -284,7 +280,7 @@ private:
 	//-------------------------------------------------------------------------------------------------------------------------
 	// 게임서버 마우스 위치 오브젝트 정보 요청 응답 패킷 조합
 	//-------------------------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResMousePositionObjectInfo(int64 AccountId, int64 PreviousChoiceObjectId, st_GameObjectInfo ObjectInfo);
+	CGameServerMessage* MakePacketResMousePositionObjectInfo(int64 AccountId, int64 PreviousChoiceObjectId, int64 FindObjectId, map<en_SkillType, CSkill*> BufSkillInfo, map<en_SkillType, CSkill*> DeBufSkillInfo);
 	//-------------------------------------------------------------------------------------------------------------------------
 	// 게임서버 돈 저장 요청 응답 패킷 조합
 	//-------------------------------------------------------------------------------------------------------------------------
@@ -339,6 +335,8 @@ private:
 	CGameServerMessage* MakePacketPing();	
 	
 	CItem* NewItemCrate(st_ItemInfo& NewItemInfo);
+
+	void ExperienceCalculate(CPlayer* Player, CGameObject* Target);
 
 public:
 	//-----------------------------------------------------------------------------------------
@@ -406,9 +404,13 @@ public:
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketEffect(int64 TargetObjectId, en_EffectType EffectType, float PrintEffectTime);
 	//---------------------------------------------------------------------------------
-	// 게임서버 버프 패킷 조합
+	// 게임서버 강화효과, 약화효과 패킷 조합
 	//---------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketBuf(int64 TargetObjectId, float SkillCoolTime, float SkillCoolTimeSpeed, st_SkillInfo* SkillInfo);	
+	CGameServerMessage* MakePacketBufDeBuf(int64 TargetObjectId, bool BufDeBuf, st_SkillInfo* SkillInfo);
+	//---------------------------------------------------------------------------------
+	// 게임서버 강화효과, 약화효과 끄기 패킷 조합
+	//---------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketBufDeBufOff(int64 TargetObjectId, bool BufDeBuf, en_SkillType OffSkillType);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 경험치 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -420,11 +422,19 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 재사용대기시간 출력 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketCoolTime(int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, float SkillCoolTime, float SkillCoolTimeSpeed);
+	CGameServerMessage* MakePacketCoolTime(int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, float RemainTime, float CoolTime, float SkillCoolTimeSpeed);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 스킬 에러 메세지 생성 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketSkillError(int64 PlayerId, en_SkillErrorType ErrorType, const WCHAR* SkillName, int16 SkillDistance = 0);
+	CGameServerMessage* MakePacketSkillError(en_PersonalMessageType ErrorType, const WCHAR* SkillName, int16 SkillDistance = 0);
+	//-----------------------------------------------------------------------------------------
+	// 게임서버 일반 에러 메세지 생성 패킷 조합 
+	//-----------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketStatusAbnormalMessage(en_CommonErrorType ErrorType, int8 StatusAbnormalCount, int8 StatusAbnormal);
+	//------------------------------------------------------------
+	// 게임 서버 상태이상 적용 패킷 조합
+	//------------------------------------------------------------
+	CGameServerMessage* MakePacketStatusAbnormal(int64 PlayerId, en_GameObjectType ObjectType, en_MoveDir Dir, en_SkillType SkillType,  bool SetStatusAbnormal, int8 StatusAbnormal);
 	//---------------------------------------------------
 	// 로그인 서버 로그아웃 요청 패킷 조합
 	//---------------------------------------------------
@@ -520,9 +530,13 @@ public:
 	void SendPacketFieldOfView(st_Session* Session, CMessage* Message, bool SendMe = false);
 	
 	//--------------------------------------------------------------
-	// 스킬 쿨타임 타이머 잡 생성
+	// 스킬 모션 끝 타이머 잡 생성
 	//--------------------------------------------------------------
-	void SkillCoolTimeTimerJobCreate(CPlayer* Player, int64 CastingTime, st_SkillInfo* CoolTimeSkillInfo, en_TimerJobType TimerJobType, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex);
+	void SkillMotionEndTimerJobCreate(CPlayer* Player, int64 SkillMotionEndTime, en_TimerJobType TimerJobType);	
+	//--------------------------------------------------------------
+	// 스킬 모션 끝 타이머, 스킬 쿨타임 타이머 잡 생성
+	//--------------------------------------------------------------
+	void SkillCoolTimeTimerJobCreate(CPlayer* Player, int64 CastingTime, CSkill* CoolTimeSkill, en_TimerJobType TimerJobType, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex);
 	//--------------------------------------------------------------
 	// 오브젝트 스폰 타이머 잡 생성
 	//--------------------------------------------------------------
@@ -530,11 +544,7 @@ public:
 	//--------------------------------------------------------------
 	// 오브젝트 상태 변경 타이머 잡 생성
 	//--------------------------------------------------------------
-	void ObjectStateChangeTimerJobCreate(CGameObject* Target, en_CreatureState ChangeState, int64 ChangeTime);
-	//--------------------------------------------------------------
-	// 오브젝트 도트 타이머 잡 생성
-	//--------------------------------------------------------------
-	st_TimerJob* ObjectDotTimerCreate(CGameObject* Target, en_DotType DotType, int64 DotTime, int32 HPPoint, int32 MPPoint, int64 DotTotalTime = 0, int64 SessionId = 0);
+	void ObjectStateChangeTimerJobCreate(CGameObject* Target, en_CreatureState ChangeState, int64 ChangeTime);	
 
 	//-------------------------------------------
 	// 핑 타이머 잡 생성

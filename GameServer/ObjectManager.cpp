@@ -265,7 +265,9 @@ CGameObject* CObjectManager::Find(int64 ObjectId, en_GameObjectType GameObjectTy
 		{
 			for (int32 i = 0; i < PLAYER_MAX; i++)
 			{
-				if (_PlayersArray[i] != nullptr && _PlayersArray[i]->_GameObjectInfo.ObjectId == ObjectId)
+				if (_PlayersArray[i] != nullptr 
+					&& _PlayersArray[i]->_GameObjectInfo.ObjectId == ObjectId
+					&& _PlayersArray[i]->_NetworkState == en_ObjectNetworkState::LIVE)
 				{
 					return _PlayersArray[i];
 				}
