@@ -78,7 +78,7 @@
               "SkillLevel": 1,
               "SkillMinDamage": 50,
               "SkillMaxDamage": 100,
-              "SkillCoolTime": 5000,
+              "SkillCoolTime": 10000,
               "SkillCastingTime": 500,
               "SkillDurationTime": 2000,
               "SkillDotTime": 0,
@@ -108,10 +108,35 @@
             }
           ],
           "ShamanTacTicSkillList": [
+            {
+              "SkillType": "SKILL_SHAMAN_BACK_TELEPORT",
+              "SkillName": "시공의뒤틀림",
+              "SkillLevel": 1,
+              "IncreaseMinAttackPoint": 0,
+              "IncreaseMaxAttackPoint": 0,
+              "IncreaseMeleeAttackSpeedPoint": 0,
+              "IncreaseMeleeAttackHitRate": 0,
+              "IncreaseMagicAttackPoint": 0,
+              "IncreaseMagicCastingPoint": 0,
+              "IncreaseMagicAttackHitRate": 0,
+              "IncreaseDefencePoint": 0,
+              "IncreaseEvasionRate": 0,
+              "IncreaseMeleeCriticalPoint": 0,
+              "IncreaseMagicCriticalPoint": 0,
+              "IncreaseSpeedPoint": 0,
+              "IncreaseStatusAbnormalityResistance": 0,
+              "SkillCoolTime": 30000,
+              "SkillCastingTime": 0,
+              "SkillDurationTime": 0,
+              "SkillDotTime": 0,
+              "SkillDistance": 0,
+              "SkillTargetEffectTime": 0,
+              "SkillThumbnailImagePath": "Textures/Spell/Icon/주술사/시공의뒤틀림"
+            }
           ],
           "ShamanHealSkillList": [
           ],
-          "ShamanBufSkillList": [
+          "ShamanBufSkillList": [            
           ]
         }
       ]
