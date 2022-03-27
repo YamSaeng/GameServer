@@ -79,6 +79,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_StatInfo& StatInfo)
     *this << StatInfo.EvasionRate;
     *this << StatInfo.MeleeCriticalPoint;
     *this << StatInfo.MagicCriticalPoint;
+    *this << StatInfo.StatusAbnormalResistance;
     *this << StatInfo.Speed;    
 
     return *(this);

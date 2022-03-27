@@ -15,7 +15,7 @@ public:
 	// QuickSlot에 스킬 저장
 	void UpdateQuickSlotBarSlot(st_QuickSlotBarSlotInfo& QuickSlotBarSlotInfo);	
 	
-	CSkill* FindQuickSlot(int8 QuickSlotbarSlotIndex);
+	st_QuickSlotBarSlotInfo* FindQuickSlot(int8 QuickSlotbarSlotIndex);
 
 	void QuickSlotBarEmpty();
 private:

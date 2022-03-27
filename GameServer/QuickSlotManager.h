@@ -17,7 +17,7 @@ public:
 
 	void SwapQuickSlot(st_QuickSlotBarSlotInfo& SwapAQuickSlotInfo, st_QuickSlotBarSlotInfo& SwapBQuickSlotInfo);
 	
-	CSkill* FindQuickSlotBar(int8 QuickSlotBarIndex,int8 QuickSlotbarSlotIndex);
+	st_QuickSlotBarSlotInfo* FindQuickSlotBar(int8 QuickSlotBarIndex,int8 QuickSlotbarSlotIndex);
 	
 	void Empty();
 private:

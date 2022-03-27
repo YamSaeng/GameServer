@@ -186,10 +186,10 @@
       ]
     }
   ],
-  "PlayerMagicCharacterStatus": [
+  "PlayerShamanCharacterStatus": [
     {
-      "PlayerType": "OBJECT_MAGIC_PLAYER",
-      "PlayerMagicCharacterLevelDataList": [
+      "PlayerType": "OBJECT_SHAMAN_PLAYER",
+      "PlayerShamanCharacterLevelDataList": [
         {
           "Level": 1,
           "MaxHP": 200,

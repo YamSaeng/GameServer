@@ -40,7 +40,7 @@ void CQuickSlotBar::UpdateQuickSlotBarSlot(st_QuickSlotBarSlotInfo& QuickSlotBar
 	*(*FindQuickSlotBarSlotIterator).second = QuickSlotBarSlotInfo;
 }
 
-CSkill* CQuickSlotBar::FindQuickSlot(int8 QuickSlotbarSlotIndex)
+st_QuickSlotBarSlotInfo* CQuickSlotBar::FindQuickSlot(int8 QuickSlotbarSlotIndex)
 {
 	auto FindQuickSlotIterator = _QuickSlotBarSlotInfos.find(QuickSlotbarSlotIndex);
 	if (FindQuickSlotIterator == _QuickSlotBarSlotInfos.end())
@@ -48,7 +48,7 @@ CSkill* CQuickSlotBar::FindQuickSlot(int8 QuickSlotbarSlotIndex)
 		return nullptr;
 	}
 
-	return (*FindQuickSlotIterator).second->QuickBarSkill;
+	return (*FindQuickSlotIterator).second;
 }
 
 void CQuickSlotBar::QuickSlotBarEmpty()

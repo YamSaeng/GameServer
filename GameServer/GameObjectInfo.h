@@ -240,6 +240,7 @@ enum class en_SkillType : int16
 	SKILL_SHAMAN_ICE_WAVE,
 	SKILL_SHAMAN_LIGHTNING_STRIKE,
 	SKILL_SHAMAN_HELL_FIRE,
+	SKILL_SHAMAN_BACK_TELEPORT,
 
 	SKILL_TAIOIST_DIVINE_STRIKE,	
 	SKILL_TAIOIST_HEALING_LIGHT,	
@@ -272,6 +273,7 @@ enum class en_EffectType : int16
 	EFFECT_CHARGE_POSE,
 	EFFECT_FLAME_HARPOON_TARGET,
 	EFFECT_LIGHTNING,
+	EFFECT_BACK_TELEPORT,
 	EFFECT_HEALING_LIGHT_TARGET,
 	EFFECT_HEALING_WIND_TARGET,
 	EFFECT_HELAING_MYSELF,
@@ -1670,6 +1672,7 @@ struct st_StatInfo
 	int16 EvasionRate;
 	int16 MeleeCriticalPoint;
 	int16 MagicCriticalPoint;
+	int16 StatusAbnormalResistance;
 	float Speed;
 };
 
@@ -1856,7 +1859,12 @@ struct st_AttackSkillInfo : public st_SkillInfo
 	}
 };
 
-struct st_HealSkillInfo : public st_SkillInfo
+struct st_TacTicSkillInfo : public st_SkillInfo
+{
+
+};
+
+struct st_HealSkillInfo : public st_TacTicSkillInfo
 {
 	int32 SkillMinHealPoint; // 최소 치유량
 	int32 SkillMaxHealPoint; // 최대 치유량

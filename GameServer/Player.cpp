@@ -9,8 +9,7 @@ CPlayer::CPlayer()
 {
 	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_PLAYER;	
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-	_AttackTick = 0;
-	_SpellTick = 0;
+	_AttackTick = 0;	
 	_SkillJob = nullptr;
 
 	_FieldOfViewDistance = 10;

@@ -60,9 +60,9 @@ bool CSkill::Update()
 	{
 		// 스킬을 사용햇으면
 		if (_SkillInfo->CanSkillUse == false)
-		{
+		{			
 			// 스킬 쿨타임 재기
-			_SkillInfo->SkillRemainTime = _SkillCootimeTick - GetTickCount64();
+			_SkillInfo->SkillRemainTime = _SkillCootimeTick - GetTickCount64();		
 
 			// 0 보다 작아질 경우 쿨타임 완료 
 			if (_SkillInfo->SkillRemainTime < 0)
@@ -98,6 +98,22 @@ bool CSkill::Update()
 
 			switch (_SkillInfo->SkillType)
 			{
+			case en_SkillType::SKILL_SHOCK_RELEASE:
+				{
+					// 충격해제 버프 삭제
+					CMessage* ResBufDeBufOffPacket = G_ObjectManager->GameServer->MakePacketBufDeBufOff(_Owner->_GameObjectInfo.ObjectId, true, _SkillInfo->SkillType);
+					G_ObjectManager->GameServer->SendPacketFieldOfView(_Owner, ResBufDeBufOffPacket);
+					ResBufDeBufOffPacket->Free();
+				}
+				break;
+			case en_SkillType::SKILL_KNIGHT_CHARGE_POSE:
+				{					
+					// 돌격자세 버프 삭제
+					CMessage* ResBufDeBufOffPacket = G_ObjectManager->GameServer->MakePacketBufDeBufOff(_Owner->_GameObjectInfo.ObjectId, true, _SkillInfo->SkillType);
+					G_ObjectManager->GameServer->SendPacketFieldOfView(_Owner, ResBufDeBufOffPacket);
+					ResBufDeBufOffPacket->Free();
+				}
+				break;			
 			case en_SkillType::SKILL_KNIGHT_SHAEHONE:
 				{
 					// 전사 쇄혼비무 상태이상 해제

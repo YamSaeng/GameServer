@@ -46,7 +46,7 @@
               "IncreaseStatusAbnormalityResistance": 1000,
               "SkillCoolTime": 30000,
               "SkillCastingTime": 0,
-              "SkillDurationTime": 5000,
+              "SkillDurationTime": 8000,
               "SkillDotTime": 0,
               "SkillDistance": 0,
               "SkillTargetEffectTime": 0.5,

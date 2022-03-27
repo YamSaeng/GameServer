@@ -239,11 +239,7 @@ private:
 	//----------------------------------------------------------------
 	// 마법공격 끝 처리 함수
 	//----------------------------------------------------------------
-	void PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* Message);
-	//----------------------------------------------------------------
-	// 재사용대기 시간 끝 처리 함수
-	//----------------------------------------------------------------
-	void PacketProcTimerCastingTimeEnd(int64 SessionId, CGameServerMessage* Message);
+	void PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* Message);	
 	//----------------------------------------------------------------
 	// 오브젝트 스폰
 	//----------------------------------------------------------------
@@ -422,7 +418,7 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 재사용대기시간 출력 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketCoolTime(int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, float RemainTime, float CoolTime, float SkillCoolTimeSpeed);
+	CGameServerMessage* MakePacketCoolTime(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, float SkillCoolTimeSpeed, CSkill* QuickSlotSkill);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 스킬 에러 메세지 생성 패킷 조합
 	//-----------------------------------------------------------------------------------------

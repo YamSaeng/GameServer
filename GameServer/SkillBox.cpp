@@ -72,6 +72,8 @@ CSkill* CSkillBox::FindSkill(en_SkillType SkillType)
 	case en_SkillType::SKILL_TAIOIST_ROOT:
 		FindSkill = FindAttackSkill((en_SkillType)SkillType);
 		break;
+		// 주술사 전술
+	case en_SkillType::SKILL_SHAMAN_BACK_TELEPORT:
 		// 도사 전술
 	case en_SkillType::SKILL_TAIOIST_HEALING_LIGHT:
 	case en_SkillType::SKILL_TAIOIST_HEALING_WIND:

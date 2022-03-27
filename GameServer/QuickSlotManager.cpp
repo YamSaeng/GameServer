@@ -54,7 +54,7 @@ void CQuickSlotManager::SwapQuickSlot(st_QuickSlotBarSlotInfo& SwapAQuickSlotInf
 	}
 }
 
-CSkill* CQuickSlotManager::FindQuickSlotBar(int8 QuickSlotBarIndex, int8 QuickSlotbarSlotIndex)
+st_QuickSlotBarSlotInfo* CQuickSlotManager::FindQuickSlotBar(int8 QuickSlotBarIndex, int8 QuickSlotbarSlotIndex)
 {
 	auto FindQuickSlotIterator = _QuickSlotBars.find(QuickSlotBarIndex);
 	if (FindQuickSlotIterator != _QuickSlotBars.end())

@@ -200,7 +200,7 @@ vector<st_FieldOfViewInfo> CChannel::GetFieldOfViewObjects(CGameObject* Object, 
 					FieldOfViewGameObjects.push_back(FieldOfViewInfo);
 				}
 			}
-			else if(ExceptMe == false && Distance <= Object->_FieldOfViewDistance)
+			else if (ExceptMe == false && Distance <= Object->_FieldOfViewDistance)
 			{
 				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
 			}
@@ -441,7 +441,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	switch ((en_GameObjectType)EnterChannelGameObject->_GameObjectInfo.ObjectType)
 	{
 	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
+	case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 	case en_GameObjectType::OBJECT_THIEF_PLAYER:
 	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
@@ -590,7 +590,7 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 	switch ((en_GameObjectType)LeaveChannelGameObject->_GameObjectInfo.ObjectType)
 	{
 	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
+	case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 	case en_GameObjectType::OBJECT_THIEF_PLAYER:
 	case en_GameObjectType::OBJECT_ARCHER_PLAYER:

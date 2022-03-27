@@ -1162,6 +1162,41 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				_ShamanAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)ShamanAttackSkill->SkillType, ShamanAttackSkill));
 			}			
 
+			for (auto& ShamanTacTicSkillListFiled : ShamanSkillListFiled["ShamanTacTicSkillList"].GetArray())
+			{
+				st_TacTicSkillData* ShamanTacTicSkill = new st_TacTicSkillData();
+				ShamanTacTicSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
+				ShamanTacTicSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_TACTIC;
+
+				string SkillType = ShamanTacTicSkillListFiled["SkillType"].GetString();
+				string SkillName = ShamanTacTicSkillListFiled["SkillName"].GetString();
+				int SkillLevel = ShamanTacTicSkillListFiled["SkillLevel"].GetInt();
+				int SkillCoolTime = ShamanTacTicSkillListFiled["SkillCoolTime"].GetInt();
+				int SkillCastingTime = ShamanTacTicSkillListFiled["SkillCastingTime"].GetInt();
+				int64 SkillDurationTime = ShamanTacTicSkillListFiled["SkillDurationTime"].GetInt64();
+				int64 SkillDotTime = ShamanTacTicSkillListFiled["SkillDotTime"].GetInt64();
+				int SkillDistance = ShamanTacTicSkillListFiled["SkillDistance"].GetInt();
+				float SkillTargetEffectTime = ShamanTacTicSkillListFiled["SkillTargetEffectTime"].GetFloat();
+				string SkillImagePath = ShamanTacTicSkillListFiled["SkillThumbnailImagePath"].GetString();
+
+				if (SkillType == "SKILL_SHAMAN_BACK_TELEPORT")
+				{
+					ShamanTacTicSkill->SkillType = en_SkillType::SKILL_SHAMAN_BACK_TELEPORT;
+				}
+
+				ShamanTacTicSkill->SkillName = SkillName;
+				ShamanTacTicSkill->SkillLevel = SkillLevel;
+				ShamanTacTicSkill->SkillCoolTime = SkillCoolTime;
+				ShamanTacTicSkill->SkillCastingTime = SkillCastingTime;
+				ShamanTacTicSkill->SkillDurationTime = SkillDurationTime;
+				ShamanTacTicSkill->SkillDotTime = SkillDotTime;
+				ShamanTacTicSkill->SkillDistance = SkillDistance;
+				ShamanTacTicSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+				ShamanTacTicSkill->SkillThumbnailImagePath = SkillImagePath;
+								
+				_ShamanTacTicSkillDatas.insert(pair<int16, st_TacTicSkillData*>((int16)ShamanTacTicSkill->SkillType, ShamanTacTicSkill));
+			}
+
 			for (auto& ShamanHealSkillListFiled : ShamanSkillListFiled["ShamanHealSkillList"].GetArray())
 			{
 				st_HealSkillData* ShamanHealSkill = new st_HealSkillData();

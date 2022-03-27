@@ -23,6 +23,7 @@ CObjectManager::CObjectManager()
 	_SkillMemoryPool = new CMemoryPoolTLS<CSkill>();
 
 	_AttackSkillInfoMemoryPool = new CMemoryPoolTLS<st_AttackSkillInfo>();
+	_TacTicSkillInfoMemoryPool = new CMemoryPoolTLS<st_TacTicSkillInfo>();
 	_HealSkillInfoMemoryPool = new CMemoryPoolTLS<st_HealSkillInfo>();
 	_BufSkillInfoMemoryPool = new CMemoryPoolTLS<st_BufSkillInfo>();
 
@@ -458,7 +459,7 @@ st_SkillInfo* CObjectManager::SkillInfoCreate(en_SkillMediumCategory SkillMedium
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_TACTIC:
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_TACTIC:
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_TACTIC:		
-		return nullptr;
+		return _TacTicSkillInfoMemoryPool->Alloc();
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL:
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_HEAL:
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_HEAL:
@@ -494,6 +495,7 @@ void CObjectManager::SkillInfoReturn(en_SkillMediumCategory SkillMediumCategory,
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_TACTIC:
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_TACTIC:
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_TACTIC:
+		_TacTicSkillInfoMemoryPool->Free((st_TacTicSkillInfo*)ReturnSkillInfo);
 		return;
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL:
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_HEAL:

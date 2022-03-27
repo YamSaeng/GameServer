@@ -12,8 +12,7 @@ struct st_TimerJob;
 class CPlayer : public CGameObject
 {
 public:		
-	uint64 _AttackTick;
-	uint64 _SpellTick;
+	uint64 _AttackTick;	
 
 	//---------------------
 	// 시전 한 스킬 종류

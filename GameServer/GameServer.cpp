@@ -279,10 +279,7 @@ unsigned __stdcall CGameServer::TimerJobThreadProc(void* Argument)
 						break;
 					case en_TimerJobType::TIMER_SPELL_END:
 						Instance->PacketProcTimerSpellEnd(TimerJob->SessionId, TimerJob->TimerJobMessage);
-						break;
-					case en_TimerJobType::TIMER_SKILL_COOLTIME_END:
-						Instance->PacketProcTimerCastingTimeEnd(TimerJob->SessionId, TimerJob->TimerJobMessage);
-						break;
+						break;					
 					case en_TimerJobType::TIMER_OBJECT_SPAWN:
 						Instance->PacketProcTimerObjectSpawn(TimerJob->TimerJobMessage);
 						break;
@@ -1544,8 +1541,7 @@ void CGameServer::PacketProcReqMoveStop(int64 SessionID, CMessage* Message)
 				}
 			}
 
-			MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-			//Session->ReqStopTime = GetTickCount64();			
+			MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;				
 		
 			int8  StopPlayerCurrentState;
 			*Message >> StopPlayerCurrentState;
@@ -1562,31 +1558,6 @@ void CGameServer::PacketProcReqMoveStop(int64 SessionID, CMessage* Message)
 					
 			float CheckPositionX = abs(MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX - PositionX);
 			float CheckPositionY = abs(MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY - PositionY);
-
-			//float DeltaTime = (Session->ReqStopTime - Session->ReqMoveTime) / 1000.0f;
-
-			//MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = (en_MoveDir)StopDir;
-			/*G_Logger->WriteStdOut(en_Color::RED, L"[%ld] DeltaTime [%0.1f] CheckPositionX : [%0.1f] CheckPositionY : [%0.1f] ServerPositionX : [%0.1f] ServerPositionY : [%0.1f] PositionX : [%0.1f] PositionY : [%0.1f] StopDir : [%d]\n",
-				AccountId,
-				(Session->ReqStopTime - Session->ReqMoveTime) / 1000.0f,
-				CheckPositionX,
-				CheckPositionY,
-				MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX,
-				MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY,
-				PositionX,
-				PositionY,
-				StopDir);	*/
-
-				// 서버 기준으로 좌표 설정
-				/*if (CheckPositionX >= 0.3f || CheckPositionY >= 0.3f)
-				{
-					MyPlayer->PositionReset();
-				}
-				else
-				{
-					MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX = PositionX;
-					MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY = PositionY;
-				}*/
 
 			CMessage* ResMoveStopPacket = MakePacketResMoveStop(Session->AccountId,
 				MyPlayer->_GameObjectInfo.ObjectId,
@@ -1722,7 +1693,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 									st_Vector2Int MyFrontCellPotision = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
 
 									if (MyPlayer->_Channel->_Map->ApplyMove(Target, MyFrontCellPotision))
-									{
+									{										
 										CSkill* NewSkill = G_ObjectManager->SkillCreate();
 
 										st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(ReqMeleeSkill->GetSkillInfo()->SkillMediumCategory);
@@ -2049,11 +2020,9 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 				ReqMeleeSkill->CoolTimeStart();				
 
 				// 클라에게 쿨타임 표시
-				CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(MyPlayer->_GameObjectInfo.ObjectId,
-					QuickSlotBarIndex,
+				CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarIndex,
 					QuickSlotBarSlotIndex,
-					ReqMeleeSkill->GetSkillInfo()->SkillRemainTime / 1000.0f,
-					ReqMeleeSkill->GetSkillInfo()->SkillCoolTime, 1.0f);
+					1.0f, ReqMeleeSkill);					
 				SendPacket(Session->SessionId, ResCoolTimeStartPacket);
 				ResCoolTimeStartPacket->Free();
 
@@ -2145,13 +2114,84 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 			{
 				switch (ReqMagicSkill->GetSkillInfo()->SkillType)
 				{
-				case en_SkillType::SKILL_KNIGHT_CHARGE_POSE:
-					MyPlayer->_SpellTick = GetTickCount64() + ReqMagicSkill->GetSkillInfo()->SkillCastingTime;
-					SpellCastingTime = ReqMagicSkill->GetSkillInfo()->SkillCastingTime / 1000.0f;
+				case en_SkillType::SKILL_KNIGHT_CHARGE_POSE:					
+					{
+						st_BufSkillInfo* ChargePoseSkillInfo = (st_BufSkillInfo*)ReqMagicSkill->GetSkillInfo();
 
-					ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_CHARGE_POSE, 2.8f);
-					SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResEffectPacket, MyPlayer);
-					ResEffectPacket->Free();
+						CSkill* ChargePoseSkill = G_ObjectManager->SkillCreate();
+
+						st_BufSkillInfo* NewChargePoseSkillInfo = (st_BufSkillInfo*)G_ObjectManager->SkillInfoCreate(ReqMagicSkill->GetSkillInfo()->SkillMediumCategory);
+						*NewChargePoseSkillInfo = *((st_BufSkillInfo*)ReqMagicSkill->GetSkillInfo());
+						ChargePoseSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewChargePoseSkillInfo);
+						ChargePoseSkill->StatusAbnormalDurationTimeStart();
+
+						MyPlayer->AddBuf(ChargePoseSkill);
+
+						CMessage* ResBufDeBufSkillPacket = MakePacketBufDeBuf(MyPlayer->_GameObjectInfo.ObjectId, true, ChargePoseSkill->GetSkillInfo());
+						SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResBufDeBufSkillPacket, MyPlayer);
+						ResBufDeBufSkillPacket->Free();						
+
+						ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_CHARGE_POSE, 2.8f);
+						SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResEffectPacket, MyPlayer);
+						ResEffectPacket->Free();
+
+						ReqMagicSkill->CoolTimeStart();
+
+						// 클라에게 쿨타임 표시
+						CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarIndex,
+							QuickSlotBarSlotIndex,
+							1.0f, ReqMagicSkill);
+						SendPacket(Session->SessionId, ResCoolTimeStartPacket);
+						ResCoolTimeStartPacket->Free();
+					}				
+					break;
+				case en_SkillType::SKILL_SHAMAN_BACK_TELEPORT:
+					{
+						st_Vector2 MyPosition = MyPlayer->GetPosition();
+						
+						en_MoveDir TelePortDir;
+
+						switch (MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir)
+						{
+						case en_MoveDir::UP:
+							TelePortDir = en_MoveDir::DOWN;
+							break;
+						case en_MoveDir::DOWN:
+							TelePortDir = en_MoveDir::UP;
+							break;
+						case en_MoveDir::LEFT:
+							TelePortDir = en_MoveDir::RIGHT;
+							break;
+						case en_MoveDir::RIGHT:
+							TelePortDir = en_MoveDir::LEFT;
+							break;						
+						}
+
+						st_Vector2Int MovePosition;
+						MovePosition = MyPlayer->GetFrontCellPosition(TelePortDir, 5);
+
+						MyPlayer->_Channel->_Map->ApplyMove(MyPlayer, MovePosition);
+
+						MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX = MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX + 0.5f;
+						MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY = MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY + 0.5f;
+
+						CMessage* ResSyncPositionPacket = MakePacketResSyncPosition(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
+						SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResSyncPositionPacket, MyPlayer);
+						ResSyncPositionPacket->Free();						
+
+						ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_BACK_TELEPORT, 0.5f);
+						SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResEffectPacket, MyPlayer);
+						ResEffectPacket->Free();						
+
+						ReqMagicSkill->CoolTimeStart();
+
+						// 클라에게 쿨타임 표시
+						CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarIndex,
+							QuickSlotBarSlotIndex,
+							1.0f, ReqMagicSkill);
+						SendPacket(Session->SessionId, ResCoolTimeStartPacket);
+						ResCoolTimeStartPacket->Free();
+					}	
 					break;
 				case en_SkillType::SKILL_SHAMAN_FLAME_HARPOON:
 				case en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE:
@@ -2161,8 +2201,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 				case en_SkillType::SKILL_TAIOIST_DIVINE_STRIKE:
 				case en_SkillType::SKILL_TAIOIST_ROOT:
 					if (MyPlayer->_SelectTarget != nullptr)
-					{
-						MyPlayer->_SpellTick = GetTickCount64() + ReqMagicSkill->GetSkillInfo()->SkillCastingTime;
+					{						
 						SpellCastingTime = ReqMagicSkill->GetSkillInfo()->SkillCastingTime / 1000.0f;
 
 						int16 Distance = st_Vector2Int::Distance(MyPlayer->_SelectTarget->GetCellPosition(), MyPlayer->GetCellPosition());
@@ -2216,8 +2255,6 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 					}
 					break;
 				case en_SkillType::SKILL_TAIOIST_HEALING_LIGHT:
-					MyPlayer->_SpellTick = GetTickCount64() + ReqMagicSkill->GetSkillInfo()->SkillCastingTime;
-
 					SpellCastingTime = ReqMagicSkill->GetSkillInfo()->SkillCastingTime / 1000.0f;
 
 					if (MyPlayer->_SelectTarget != nullptr)
@@ -2256,17 +2293,27 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 				case en_SkillType::SKILL_TAIOIST_HEALING_WIND:
 					break;
 				case en_SkillType::SKILL_SHOCK_RELEASE:
-					MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+					{					
+						CSkill* NewBufSkill = G_ObjectManager->SkillCreate();
 
-					{
+						st_BufSkillInfo* NewShockReleaseSkillInfo = (st_BufSkillInfo*)G_ObjectManager->SkillInfoCreate(ReqMagicSkill->GetSkillInfo()->SkillMediumCategory);
+						
+						*NewShockReleaseSkillInfo = *((st_BufSkillInfo*)ReqMagicSkill->GetSkillInfo());
+						NewBufSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewShockReleaseSkillInfo);
+						NewBufSkill->StatusAbnormalDurationTimeStart();
+
+						MyPlayer->AddBuf(NewBufSkill);
+
+						CMessage* ResBufDebufSkillPacket = MakePacketBufDeBuf(MyPlayer->_GameObjectInfo.ObjectId, true, NewBufSkill->GetSkillInfo());
+						SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResBufDebufSkillPacket, MyPlayer);
+						ResBufDebufSkillPacket->Free();
+
 						ReqMagicSkill->CoolTimeStart();						
 
 						// 클라에게 쿨타임 표시
-						CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(MyPlayer->_GameObjectInfo.ObjectId,
-							QuickSlotBarIndex,
+						CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarIndex,
 							QuickSlotBarSlotIndex,
-							ReqMagicSkill->GetSkillInfo()->SkillRemainTime / 1000.0f,
-							ReqMagicSkill->GetSkillInfo()->SkillCoolTime, 1.0f);
+							1.0f, ReqMagicSkill);
 						SendPacket(Session->SessionId, ResCoolTimeStartPacket);
 						ResCoolTimeStartPacket->Free();
 
@@ -4779,6 +4826,37 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					MyPlayer->_SkillBox.AddAttackSkill(AttackSkill);
 				}
 				break;
+				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_TACTIC:
+				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_TACTIC:
+				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_TACTIC:
+				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_TACTIC:
+				{
+					CSkill* TacTicSkill = G_ObjectManager->SkillCreate();
+
+					st_TacTicSkillData* FindTacTicSkillData = (st_TacTicSkillData*)FindSkillData;
+
+					st_TacTicSkillInfo* TacTicSkillInfo = (st_TacTicSkillInfo*)G_ObjectManager->SkillInfoCreate(FindTacTicSkillData->SkillMediumCategory);
+					TacTicSkillInfo->CanSkillUse = true;
+					TacTicSkillInfo->IsSkillLearn = IsSkillLearn;
+					TacTicSkillInfo->IsQuickSlotUse = IsQuickSlotUse;
+					TacTicSkillInfo->SkillLargeCategory = (en_SkillLargeCategory)SkillLargeCategory;
+					TacTicSkillInfo->SkillMediumCategory = (en_SkillMediumCategory)SkillMediumCategory;
+					TacTicSkillInfo->SkillType = (en_SkillType)SkillType;
+					TacTicSkillInfo->SkillLevel = SkillLevel;
+					TacTicSkillInfo->SkillName = (LPWSTR)CA2W(FindTacTicSkillData->SkillName.c_str());
+					TacTicSkillInfo->SkillCoolTime = FindTacTicSkillData->SkillCoolTime;
+					TacTicSkillInfo->SkillCastingTime = FindTacTicSkillData->SkillCastingTime;
+					TacTicSkillInfo->SkillDurationTime = FindTacTicSkillData->SkillDurationTime;
+					TacTicSkillInfo->SkillDotTime = FindTacTicSkillData->SkillDotTime;
+					TacTicSkillInfo->SkillRemainTime = 0;
+					TacTicSkillInfo->SkillImagePath = (LPWSTR)CA2W(FindTacTicSkillData->SkillThumbnailImagePath.c_str());					
+					TacTicSkillInfo->SkillTargetEffectTime = FindTacTicSkillData->SkillTargetEffectTime;
+
+					TacTicSkill->SetSkillInfo(en_SkillCategory::QUICK_SLOT_SKILL, TacTicSkillInfo);
+
+					MyPlayer->_SkillBox.AddTacTicSkill(TacTicSkill);
+				}
+					break;
 				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL:
 				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_HEAL:
 				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_HEAL:
@@ -4931,7 +5009,11 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 				if (FindSkill != nullptr)
 				{
 					NewQuickSlotBarSlot.QuickBarSkill = FindSkill;					
-				}				
+				}		
+				else
+				{
+					NewQuickSlotBarSlot.QuickBarSkill = nullptr;
+				}
 
 				// 퀵슬롯에 등록한다.
 				MyPlayer->_QuickSlotManager.UpdateQuickSlotBar(NewQuickSlotBarSlot);
@@ -5437,15 +5519,22 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 			SwapAQuickSlotBarInfo.QuickSlotBarIndex = QuickSlotBarSwapIndexB;
 			SwapAQuickSlotBarInfo.QuickSlotBarSlotIndex = QuickSlotBarSlotSwapIndexB;			
 			
-			CSkill* ASkill = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarSwapIndexA, QuickSlotBarSlotSwapIndexA);
-			if (ASkill != nullptr)
+			st_QuickSlotBarSlotInfo* FindAQuickslotInfo = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarSwapIndexA, QuickSlotBarSlotSwapIndexA);
+			if (FindAQuickslotInfo != nullptr)
 			{
-				SwapAQuickSlotBarInfo.QuickBarSkill = ASkill;
+				if (FindAQuickslotInfo->QuickBarSkill != nullptr)
+				{
+					SwapAQuickSlotBarInfo.QuickBarSkill = FindAQuickslotInfo->QuickBarSkill;
+				}
+				else
+				{
+					SwapAQuickSlotBarInfo.QuickBarSkill = nullptr;
+				}
 			}
 			else
 			{
-				SwapAQuickSlotBarInfo.QuickBarSkill = nullptr;
-			}
+				CRASH("퀵슬롯 정보를 찾을 수 없음");
+			}		
 			
 #pragma endregion
 #pragma region 퀵슬롯 B가 DB에 있는지 확인
@@ -5482,15 +5571,22 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 			SwapBQuickSlotBarInfo.QuickSlotBarIndex = QuickSlotBarSwapIndexA;
 			SwapBQuickSlotBarInfo.QuickSlotBarSlotIndex = QuickSlotBarSlotSwapIndexA;
 
-			CSkill* BSkill = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarSwapIndexB, QuickSlotBarSlotSwapIndexB);
-			if (BSkill != nullptr)
+			st_QuickSlotBarSlotInfo* FindBQuickslotInfo = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarSwapIndexB, QuickSlotBarSlotSwapIndexB);
+			if (FindBQuickslotInfo != nullptr)
 			{
-				SwapBQuickSlotBarInfo.QuickBarSkill = BSkill;
+				if (FindBQuickslotInfo->QuickBarSkill != nullptr)
+				{
+					SwapBQuickSlotBarInfo.QuickBarSkill = FindBQuickslotInfo->QuickBarSkill;
+				}
+				else
+				{
+					SwapBQuickSlotBarInfo.QuickBarSkill = nullptr;
+				}
 			}
 			else
 			{
-				SwapBQuickSlotBarInfo.QuickBarSkill = nullptr;
-			}			
+				CRASH("퀵슬롯 정보를 찾을 수 없음");
+			}		
 
 			SwapAQuickSlotBarInfo.QuickSlotKey = QuickSlotBKey;
 			SwapBQuickSlotBarInfo.QuickSlotKey = QuickSlotAKey;
@@ -5522,7 +5618,9 @@ void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Messag
 				MyPlayer->_QuickSlotManager.SwapQuickSlot(SwapBQuickSlotBarInfo, SwapAQuickSlotBarInfo);
 
 				// 클라에게 결과 전송
-				CMessage* ResQuickSlotSwapPacket = MakePacketResQuickSlotSwap(AccountId, PlayerId, SwapBQuickSlotBarInfo, SwapAQuickSlotBarInfo);
+				CMessage* ResQuickSlotSwapPacket = MakePacketResQuickSlotSwap(AccountId, PlayerId,
+					SwapBQuickSlotBarInfo,
+					SwapAQuickSlotBarInfo);
 				SendPacket(MyPlayer->_SessionId, ResQuickSlotSwapPacket);
 				ResQuickSlotSwapPacket->Free();
 			}
@@ -5553,6 +5651,21 @@ void CGameServer::PacketProcReqDBQuickSlotInit(int64 SessionId, CMessage* Messag
 			int8 QuickSlotBarSlotIndex;
 			*Message >> QuickSlotBarSlotIndex;
 
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			// 퀵슬롯에서 정보 찾기
+			st_QuickSlotBarSlotInfo* InitQuickSlotBarSlot = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarIndex, QuickSlotBarSlotIndex);
+			if (InitQuickSlotBarSlot != nullptr)
+			{
+				// 퀵슬롯에서 스킬 연결 해제
+				InitQuickSlotBarSlot->QuickBarSkill = nullptr;
+			}
+			else
+			{
+				CRASH("퀵슬롯정보를 찾지 못함");
+			}
+			
 			// 해당 퀵슬롯 위치에 정보가 있는지 DB에서 확인
 			CDBConnection* DBQuickSlotCheckConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 			SP::CDBGameServerQuickSlotCheck QuickSlotACheck(*DBQuickSlotCheckConnection);
@@ -5595,9 +5708,6 @@ void CGameServer::PacketProcReqDBQuickSlotInit(int64 SessionId, CMessage* Messag
 			QuickSlotInit.Execute();
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, DBQuickSlotInitConnection);
-
-			// 게임에 입장한 캐릭터를 가져온다.
-			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
 
 			CMessage* ResQuickSlotInitMessage = MakePacketResQuickSlotInit(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, QuickSlotBarIndex, QuickSlotBarSlotIndex, QuickSlotKey);
 			SendPacket(Session->SessionId, ResQuickSlotInitMessage);
@@ -5779,36 +5889,11 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 		SpellEndSkill->CoolTimeStart();
 
 		// 클라에게 쿨타임 표시
-		CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(MyPlayer->_GameObjectInfo.ObjectId, 
-			QuickSlotBarIndex, QuickSlotBarSlotIndex,
-			SpellEndSkill->GetSkillInfo()->SkillRemainTime / 1000.0f,
-			SpellEndSkill->GetSkillInfo()->SkillCoolTime, 1.0f);
+		CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarIndex,
+			QuickSlotBarSlotIndex,
+			1.0f, SpellEndSkill);
 		SendPacket(Session->SessionId, ResCoolTimeStartPacket);
-		ResCoolTimeStartPacket->Free();		
-
-		// 스킬 쿨타임 얻어옴
-		// 스킬 쿨타임 스킬쿨타임 잡 등록
-		st_TimerJob* SkillCoolTimeTimerJob = _TimerJobMemoryPool->Alloc();
-		SkillCoolTimeTimerJob->TimerJobExecTick = GetTickCount64() + SpellEndSkill->GetSkillInfo()->SkillCoolTime;
-		SkillCoolTimeTimerJob->SessionId = Session->SessionId;
-		SkillCoolTimeTimerJob->TimerJobType = en_TimerJobType::TIMER_SKILL_COOLTIME_END;
-
-		CGameServerMessage* ResCoolTimeEndMessage = CGameServerMessage::GameServerMessageAlloc();
-		if (ResCoolTimeEndMessage == nullptr)
-		{
-			return;
-		}
-
-		ResCoolTimeEndMessage->Clear();
-
-		*ResCoolTimeEndMessage << (int16)SpellEndSkill->GetSkillInfo()->SkillType;
-		SkillCoolTimeTimerJob->TimerJobMessage = ResCoolTimeEndMessage;		
-
-		AcquireSRWLockExclusive(&_TimerJobLock);
-		_TimerHeapJob->InsertHeap(SkillCoolTimeTimerJob->TimerJobExecTick, SkillCoolTimeTimerJob);
-		ReleaseSRWLockExclusive(&_TimerJobLock);
-
-		SetEvent(_TimerThreadWakeEvent);
+		ResCoolTimeStartPacket->Free();
 
 		en_EffectType HitEffectType = en_EffectType::EFFECT_TYPE_NONE;
 
@@ -5854,17 +5939,29 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 			{
 				HitEffectType = en_EffectType::EFFECT_DEBUF_ROOT;			
 
-				CMessage* ResChangeObjectStatMessage = MakePacketResChangeObjectState(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->GetTarget()->_GameObjectInfo.ObjectType, MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.State);
-				SendPacketFieldOfView(Session, ResChangeObjectStatMessage, true);			
-				ResChangeObjectStatMessage->Free();
-
-				CMessage* ResBufMessage = MakePacketBufDeBuf(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, 0, SpellEndSkill->GetSkillInfo());
-				SendPacketFieldOfView(Session, ResBufMessage, true);
-				ResBufMessage->Free();
-
 				st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)SpellEndSkill->GetSkillInfo();
 
-				ObjectStateChangeTimerJobCreate(MyPlayer->GetTarget(), en_CreatureState::IDLE, AttackSkillInfo->SkillDurationTime);
+				CSkill* NewSkill = G_ObjectManager->SkillCreate();
+				
+				st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(SpellEndSkill->GetSkillInfo()->SkillMediumCategory);
+				*NewAttackSkillInfo = *((st_AttackSkillInfo*)SpellEndSkill->GetSkillInfo());
+				NewSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
+				NewSkill->StatusAbnormalDurationTimeStart();
+
+				MyPlayer->GetTarget()->AddDebuf(NewSkill);
+				MyPlayer->GetTarget()->SetStatusAbnormal(STATUS_ABNORMAL_SHAMAN_ROOT);
+
+				CMessage* ResStatusAbnormalPacket = MakePacketStatusAbnormal(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId,
+					MyPlayer->GetTarget()->_GameObjectInfo.ObjectType,
+					MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.MoveDir,
+					SpellEndSkill->GetSkillInfo()->SkillType,
+					true, STATUS_ABNORMAL_SHAMAN_ROOT);
+				SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResStatusAbnormalPacket, MyPlayer);
+				ResStatusAbnormalPacket->Free();
+
+				CMessage* ResBufDeBufSkillPacket = MakePacketBufDeBuf(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, false, NewSkill->GetSkillInfo());
+				SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResBufDeBufSkillPacket, MyPlayer);
+				ResBufDeBufSkillPacket->Free();												
 			}
 			break;
 		case en_SkillType::SKILL_SHAMAN_ICE_CHAIN:
@@ -5987,15 +6084,31 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 		break;
 		case en_SkillType::SKILL_TAIOIST_ROOT:
 		{
-			HitEffectType = en_EffectType::EFFECT_DEBUF_ROOT;			
-
-			CMessage* ResChangeObjectStat = MakePacketResChangeObjectState(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->GetTarget()->_GameObjectInfo.ObjectType, MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.State);
-			SendPacketFieldOfView(Session, ResChangeObjectStat, true);
-			ResChangeObjectStat->Free();
+			HitEffectType = en_EffectType::EFFECT_DEBUF_ROOT;
 
 			st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)SpellEndSkill->GetSkillInfo();
 
-			ObjectStateChangeTimerJobCreate(MyPlayer->GetTarget(), en_CreatureState::IDLE, AttackSkillInfo->SkillDurationTime);
+			CSkill* NewSkill = G_ObjectManager->SkillCreate();
+
+			st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(SpellEndSkill->GetSkillInfo()->SkillMediumCategory);
+			*NewAttackSkillInfo = *((st_AttackSkillInfo*)SpellEndSkill->GetSkillInfo());
+			NewSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
+			NewSkill->StatusAbnormalDurationTimeStart();
+
+			MyPlayer->GetTarget()->AddDebuf(NewSkill);
+			MyPlayer->GetTarget()->SetStatusAbnormal(STATUS_ABNORMAL_TAIOIST_ROOT);
+
+			CMessage* ResStatusAbnormalPacket = MakePacketStatusAbnormal(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId,
+				MyPlayer->GetTarget()->_GameObjectInfo.ObjectType,
+				MyPlayer->GetTarget()->_GameObjectInfo.ObjectPositionInfo.MoveDir,
+				SpellEndSkill->GetSkillInfo()->SkillType,
+				true, STATUS_ABNORMAL_TAIOIST_ROOT);
+			SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResStatusAbnormalPacket, MyPlayer);
+			ResStatusAbnormalPacket->Free();
+
+			CMessage* ResBufDeBufSkillPacket = MakePacketBufDeBuf(MyPlayer->GetTarget()->_GameObjectInfo.ObjectId, false, NewSkill->GetSkillInfo());
+			SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResBufDeBufSkillPacket, MyPlayer);
+			ResBufDeBufSkillPacket->Free();			
 		}
 		break;
 		case en_SkillType::SKILL_TAIOIST_HEALING_LIGHT:
@@ -6066,27 +6179,6 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 	}
 
 	ReturnSession(Session);
-}
-
-void CGameServer::PacketProcTimerCastingTimeEnd(int64 SessionId, CGameServerMessage* Message)
-{
-	st_Session* Session = FindSession(SessionId);
-
-	if (Session)
-	{
-		int16 SkillType;
-		*Message >> SkillType;
-
-		Message->Free();
-
-		// 게임에 입장한 캐릭터를 가져온다.
-		CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
-
-		CSkill* CastingTimeEndSkill = MyPlayer->_SkillBox.FindSkill((en_SkillType)SkillType);
-		CastingTimeEndSkill->GetSkillInfo()->CanSkillUse = true;
-
-		ReturnSession(Session);
-	}	
 }
 
 void CGameServer::PacketProcTimerObjectSpawn(CGameServerMessage* Message)
@@ -7295,8 +7387,7 @@ CGameServerMessage* CGameServer::MakePacketMagicCancel(int64 AccountId, int64 Pl
 	return ResMagicCancelMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketCoolTime(int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex,
-	float RemainTime, float CoolTime, float SkillCoolTimeSpeed)
+CGameServerMessage* CGameServer::MakePacketCoolTime(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, float SkillCoolTimeSpeed, CSkill* QuickSlotSkill)
 {
 	CGameServerMessage* ResCoolTimeMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResCoolTimeMessage == nullptr)
@@ -7305,14 +7396,16 @@ CGameServerMessage* CGameServer::MakePacketCoolTime(int64 PlayerId, int8 QuickSl
 	}
 
 	ResCoolTimeMessage->Clear();
-
+			
 	*ResCoolTimeMessage << (int16)en_PACKET_S2C_COOLTIME_START;
-	*ResCoolTimeMessage << PlayerId;
 	*ResCoolTimeMessage << QuickSlotBarIndex;
 	*ResCoolTimeMessage << QuickSlotBarSlotIndex;
-	*ResCoolTimeMessage << RemainTime;
-	*ResCoolTimeMessage << CoolTime;
 	*ResCoolTimeMessage << SkillCoolTimeSpeed;
+
+	if (QuickSlotSkill->GetSkillInfo())
+	{
+		*ResCoolTimeMessage << *QuickSlotSkill->GetSkillInfo();
+	}	
 
 	return ResCoolTimeMessage;
 }
