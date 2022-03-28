@@ -15,10 +15,11 @@
               "SkillDurationTime": 0,
               "SkillDotTime": 0,
               "SkillDistance": 1,
-              "SkillTargetEffectTime": 0.5,              
+              "SkillTargetEffectTime": 0.5,
               "SkillDebufAttackSpeed": 0,
-              "SkillDebufMovingSpeed": 0,              
+              "SkillDebufMovingSpeed": 0,
               "StatusAbnormalityProbability": 0,
+              "SkillExplanation": "전방 1칸 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입힌다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/전사/맹렬한일격"
             },
             {
@@ -32,10 +33,11 @@
               "SkillDurationTime": 0,
               "SkillDotTime": 0,
               "SkillDistance": 1,
-              "SkillTargetEffectTime": 0.5,              
+              "SkillTargetEffectTime": 0.5,
               "SkillDebufAttackSpeed": 0,
-              "SkillDebufMovingSpeed": 0,              
+              "SkillDebufMovingSpeed": 0,
               "StatusAbnormalityProbability": 0,
+              "SkillExplanation": "전방 1칸 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입힌다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/전사/회심의일격"
             },
             {
@@ -49,10 +51,11 @@
               "SkillDurationTime": 1000,
               "SkillDotTime": 0,
               "SkillDistance": 4,
-              "SkillTargetEffectTime": 1.1,              
+              "SkillTargetEffectTime": 1.1,
               "SkillDebufAttackSpeed": 0,
-              "SkillDebufMovingSpeed": 0,              
+              "SkillDebufMovingSpeed": 0,
               "StatusAbnormalityProbability": 0,
+              "SkillExplanation": "전방 4칸 안에 있는 대상에게 이동하면서 1초만큼 이동불가 상태로 만들고 %d ~ %d 만큼의 피해를 입힌다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/전사/쇄혼비무"
             },
             {
@@ -66,10 +69,11 @@
               "SkillDurationTime": 2000,
               "SkillDotTime": 0,
               "SkillDistance": 4,
-              "SkillTargetEffectTime": 1.1,              
+              "SkillTargetEffectTime": 1.1,
               "SkillDebufAttackSpeed": 0,
-              "SkillDebufMovingSpeed": 0,              
+              "SkillDebufMovingSpeed": 0,
               "StatusAbnormalityProbability": 0,
+              "SkillExplanation": "전방 4칸 안에 있는 대상을 자신 앞으로 끌어 당기면서 2초간 기절 상태로 만들고 %d ~ %d 만큼의 피해를 입힌다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/전사/초혼비무"
             },
             {
@@ -83,10 +87,11 @@
               "SkillDurationTime": 0,
               "SkillDotTime": 0,
               "SkillDistance": 1,
-              "SkillTargetEffectTime": 2.0,              
+              "SkillTargetEffectTime": 2.0,
               "SkillDebufAttackSpeed": 0,
-              "SkillDebufMovingSpeed": 0,              
+              "SkillDebufMovingSpeed": 0,
               "StatusAbnormalityProbability": 0,
+              "SkillExplanation": "주위 1칸 안에 있는 대상들에게 %d ~ %d 만큼의 피해를 입힌다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/전사/분쇄파동"
             }
           ],
@@ -118,6 +123,7 @@
               "SkillDotTime": 0,
               "SkillDistance": 0,
               "SkillTargetEffectTime": 2.7,
+              "SkillExplanation": "공격력을 %d 만큼 %f 초 동안 증가시킨다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/전사/돌격자세"
             }
           ]

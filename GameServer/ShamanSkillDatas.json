@@ -15,11 +15,12 @@
               "SkillDurationTime": 0,
               "SkillDotTime": 0,
               "SkillDistance": 6,
-              "SkillTargetEffectTime": 0.4,              
+              "SkillTargetEffectTime": 0.4,
               "SkillDebufAttackSpeed": 0,
-              "SkillDebufMovingSpeed": 0,              
+              "SkillDebufMovingSpeed": 0,
               "StatusAbnormalityProbability": 0,
-              "SkillThumbnailImagePath": "Textures/Spell/Icon/주술사/불꽃작살"              
+              "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입힌다.",
+              "SkillThumbnailImagePath": "Textures/Spell/Icon/주술사/불꽃작살"
             },
             {
               "SkillType": "SKILL_SHAMAN_ROOT",
@@ -32,10 +33,11 @@
               "SkillDurationTime": 10000,
               "SkillDotTime": 0,
               "SkillDistance": 6,
-              "SkillTargetEffectTime": 10.0,              
+              "SkillTargetEffectTime": 10.0,
               "SkillDebufAttackSpeed": 0,
-              "SkillDebufMovingSpeed": 0,              
+              "SkillDebufMovingSpeed": 0,
               "StatusAbnormalityProbability": 100,
+              "SkillExplanation": "%d 거리 안에 있는 대상을 %f초 동안 속박 시킨다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/주술사/주술사 속박"
             },
             {
@@ -49,10 +51,11 @@
               "SkillDurationTime": 4000,
               "SkillDotTime": 0,
               "SkillDistance": 6,
-              "SkillTargetEffectTime": 4,              
+              "SkillTargetEffectTime": 4,
               "SkillDebufAttackSpeed": 0,
-              "SkillDebufMovingSpeed": 3,              
+              "SkillDebufMovingSpeed": 3,
               "StatusAbnormalityProbability": 100,
+              "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입히고 %f 만큼 상대방의 속도를 %f초동안 줄인다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/주술사/얼음사슬"
             },
             {
@@ -66,10 +69,11 @@
               "SkillDurationTime": 0,
               "SkillDotTime": 0,
               "SkillDistance": 6,
-              "SkillTargetEffectTime": 1,              
+              "SkillTargetEffectTime": 1,
               "SkillDebufAttackSpeed": 0,
-              "SkillDebufMovingSpeed": 0,              
+              "SkillDebufMovingSpeed": 0,
               "StatusAbnormalityProbability": 100,
+              "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입히고 밀어낸다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/주술사/냉기파동"
             },
             {
@@ -83,10 +87,11 @@
               "SkillDurationTime": 2000,
               "SkillDotTime": 0,
               "SkillDistance": 6,
-              "SkillTargetEffectTime": 0.5,              
+              "SkillTargetEffectTime": 0.5,
               "SkillDebufAttackSpeed": 0,
-              "SkillDebufMovingSpeed": 0,              
+              "SkillDebufMovingSpeed": 0,
               "StatusAbnormalityProbability": 100,
+              "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입히고 %f초 동안 기절 시킨다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/주술사/낙뢰"
             },
             {
@@ -100,10 +105,11 @@
               "SkillDurationTime": 0,
               "SkillDotTime": 0,
               "SkillDistance": 6,
-              "SkillTargetEffectTime": 0.5,              
+              "SkillTargetEffectTime": 0.5,
               "SkillDebufAttackSpeed": 0,
-              "SkillDebufMovingSpeed": 0,              
+              "SkillDebufMovingSpeed": 0,
               "StatusAbnormalityProbability": 0,
+              "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입힌다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/주술사/지옥의화염"
             }
           ],
@@ -111,13 +117,14 @@
             {
               "SkillType": "SKILL_SHAMAN_BACK_TELEPORT",
               "SkillName": "시공의뒤틀림",
-              "SkillLevel": 1,              
+              "SkillLevel": 1,
               "SkillCoolTime": 10000,
               "SkillCastingTime": 0,
               "SkillDurationTime": 0,
               "SkillDotTime": 0,
               "SkillDistance": 0,
               "SkillTargetEffectTime": 0,
+              "SkillExplanation": "이동 삭제와 이동 속도 감소를 삭제하고 뒤로 캐릭터를 이동시킨다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/주술사/시공의뒤틀림"
             }
           ],

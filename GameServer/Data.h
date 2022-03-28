@@ -48,6 +48,7 @@ struct st_SkillData
 	int64 SkillDotTime;
 	int SkillDistance;
 	float SkillTargetEffectTime;
+	string SkillExplanation;
 	string SkillThumbnailImagePath;
 };
 

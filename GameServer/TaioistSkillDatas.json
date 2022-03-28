@@ -15,10 +15,11 @@
               "SkillDurationTime": 0,
               "SkillDotTime": 0,
               "SkillDistance": 6,
-              "SkillTargetEffectTime": 0.5,              
+              "SkillTargetEffectTime": 0.5,
               "SkillDebufAttackSpeed": 0,
-              "SkillDebufMovingSpeed": 0,              
+              "SkillDebufMovingSpeed": 0,
               "StatusAbnormalityProbability": 0,
+              "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입힌다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/도사/신성한일격"
             },
             {
@@ -32,10 +33,11 @@
               "SkillDurationTime": 2000,
               "SkillDotTime": 0,
               "SkillDistance": 6,
-              "SkillTargetEffectTime": 2.0,              
+              "SkillTargetEffectTime": 2.0,
               "SkillDebufAttackSpeed": 0,
-              "SkillDebufMovingSpeed": 0,              
+              "SkillDebufMovingSpeed": 0,
               "StatusAbnormalityProbability": 100,
+              "SkillExplanation": "%d 거리 안에 있는 대상을 %f초 동안 속박 시킨다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/도사/도사 속박"
             }
           ],
@@ -54,6 +56,7 @@
               "SkillDotTime": 0,
               "SkillDistance": 6,
               "SkillTargetEffectTime": 0.5,
+              "SkillExplanation": "%d 거리 안에 있는 대상 %d ~ %d 만큼 회복시킨다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/도사/치유의빛"
             },
             {
@@ -68,6 +71,7 @@
               "SkillDotTime": 0,
               "SkillDistance": 6,
               "SkillTargetEffectTime": 0.6,
+              "SkillExplanation": "%d 거리 안에 있는 대상 %d ~ %d 만큼 회복시킨다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/도사/치유의바람"
             }
           ],          
