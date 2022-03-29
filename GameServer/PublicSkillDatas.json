@@ -19,6 +19,7 @@
               "SkillDebufAttackSpeed": 0,
               "SkillDebufMovingSpeed": 0,
               "StatusAbnormalityProbability": 0,
+              "SkillExplanation": "전방 대상에게 피해를 입힌다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/일반공격"
             }
           ],

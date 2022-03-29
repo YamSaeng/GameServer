@@ -44,6 +44,8 @@ private:
 	CMemoryPoolTLS<st_TacTicSkillInfo>* _TacTicSkillInfoMemoryPool;
 	CMemoryPoolTLS<st_HealSkillInfo>* _HealSkillInfoMemoryPool;
 	CMemoryPoolTLS<st_BufSkillInfo>* _BufSkillInfoMemoryPool;
+
+	CMemoryPoolTLS<st_GameObjectJob>* _GameObjectJobMemoryPool;
 public:
 	CGameServer* GameServer;
 
@@ -119,4 +121,13 @@ public:
 	// 오브젝트 스폰
 	//----------------------------------------------------------------------------
 	void ObjectSpawn(en_GameObjectType ObjectType, st_Vector2Int SpawnPosition);
+
+	//-------------------------------------
+	// 게임 오브젝트 Job 생성
+	//-------------------------------------
+	st_GameObjectJob* GameObjectJobCreate();
+	//-------------------------------------------------------
+	// 게임 오브젝트 Job 반환
+	//-------------------------------------------------------
+	void GameObjectJobReturn(st_GameObjectJob* GameObjectJob);
 };

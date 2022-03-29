@@ -103,6 +103,10 @@ CGameServerMessage& CGameServerMessage::operator<<(st_SkillInfo& SkillInfo)
     *this << SkillInfo.SkillDotTime;
     *this << SkillInfo.SkillRemainTime;
 
+    int16 SkillExplanationLen = (int16)SkillInfo.SkillExplanation.length() * 2;
+    *this << SkillExplanationLen;
+    InsertData(SkillInfo.SkillExplanation.c_str(), SkillExplanationLen);
+
     int16 SkillImagePathLen = (int16)SkillInfo.SkillImagePath.length() * 2;
     *this << SkillImagePathLen;
     InsertData(SkillInfo.SkillImagePath.c_str(), SkillImagePathLen);

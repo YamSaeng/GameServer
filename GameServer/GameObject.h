@@ -3,6 +3,7 @@
 #include "Channel.h"
 #include "CommonProtocol.h"
 #include "GameObjectInfo.h"
+#include "LockFreeQue.h"
 
 class CSkill;
 
@@ -54,6 +55,9 @@ public:
 	map<en_SkillType, CSkill*> _Bufs;
 	// 약화효과
 	map<en_SkillType, CSkill*> _DeBufs;
+
+	// 게임오브젝트가 처리해야할 Job 구조체
+	CLockFreeQue<st_GameObjectJob*> _GameObjectJobQue;
 	 
 	CGameObject();
 	CGameObject(st_GameObjectInfo GameObjectInfo);

@@ -87,12 +87,9 @@ bool CSkill::Update()
 				}
 			}
 		}
-
-		// 상태이상 적용 스킬 지속시간 재기
-		_SkillInfo->SkillRemainTime = _SkillDurationTick - GetTickCount64();
-
+		
 		// 0 보다 작아질 경우 상태이상 해제
-		if (_SkillInfo->SkillRemainTime < 0)
+		if (_SkillInfo->SkillRemainTime <= 0)
 		{
 			_SkillInfo->SkillRemainTime = 0;
 
@@ -242,6 +239,9 @@ bool CSkill::Update()
 
 			return true;
 		}
+
+		// 상태이상 적용 스킬 지속시간 재기
+		_SkillInfo->SkillRemainTime = _SkillDurationTick - GetTickCount64();
 	}
 	break;
 	}

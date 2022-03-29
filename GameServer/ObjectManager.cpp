@@ -27,6 +27,8 @@ CObjectManager::CObjectManager()
 	_HealSkillInfoMemoryPool = new CMemoryPoolTLS<st_HealSkillInfo>();
 	_BufSkillInfoMemoryPool = new CMemoryPoolTLS<st_BufSkillInfo>();
 
+	_GameObjectJobMemoryPool = new CMemoryPoolTLS<st_GameObjectJob>();
+
 	_GameServerObjectId = 10000;
 
 	// 오브젝트 매니저가 소유중인 플레이어, 몬스터, 아이템 미리 할당해서 보관
@@ -619,4 +621,14 @@ void CObjectManager::ObjectSpawn(en_GameObjectType ObjectType, st_Vector2Int Spa
 		SpawnGameObject->_SpawnPosition = SpawnPosition;		
 		ObjectEnterGame(SpawnGameObject, 1);
 	}
+}
+
+st_GameObjectJob* CObjectManager::GameObjectJobCreate()
+{
+	return _GameObjectJobMemoryPool->Alloc();
+}
+
+void CObjectManager::GameObjectJobReturn(st_GameObjectJob* GameObjectJob)
+{
+	_GameObjectJobMemoryPool->Free(GameObjectJob);
 }

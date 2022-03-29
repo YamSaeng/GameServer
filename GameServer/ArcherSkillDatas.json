@@ -17,8 +17,9 @@
               "SkillDistance": 6,
               "SkillTargetEffectTime": 0,
               "SkillDebufAttackSpeed": 0,
-              "SkillDebufMovingSpeed": 0,              
+              "SkillDebufMovingSpeed": 0,
               "StatusAbnormalityProbability": 0,
+              "SkillExplanation": "%d 거리 안의 대상에게 %d ~ %d 만큼의 피해를 입힌다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/궁사/저격"
             }
           ],

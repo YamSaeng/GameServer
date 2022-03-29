@@ -34,7 +34,50 @@ CGameObject::~CGameObject()
 
 void CGameObject::Update()
 {
-	
+	while (!_GameObjectJobQue.IsEmpty())
+	{
+		st_GameObjectJob* GameObjectJob = nullptr;
+
+		if (!_GameObjectJobQue.Dequeue(&GameObjectJob))
+		{
+			break;
+		}
+		
+		switch ((en_GameObjectJobType)GameObjectJob->GameObjectJobType)
+		{
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SHOCK_RELEASE:
+			{			
+				for (auto DebufSkillIter : _DeBufs)
+				{
+					if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_KNIGHT_CHOHONE
+						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE)
+					{
+						DebufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
+					}
+				}				
+			}			
+			break;
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_BACK_TELEPORT:
+			{
+				for (auto DebufSkillIter : _DeBufs)
+				{
+					if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_ROOT
+						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_TAIOIST_ROOT)
+					{
+						DebufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
+					}
+				}
+			}
+			break;
+		}
+
+		if (GameObjectJob->GameObjectJobMessage != nullptr)
+		{
+			GameObjectJob->GameObjectJobMessage->Free();
+		}
+		
+		G_ObjectManager->GameObjectJobReturn(GameObjectJob);
+	}
 }
 
 bool CGameObject::OnDamaged(CGameObject* Attacker, int32 DamagePoint)
@@ -207,12 +250,12 @@ void CGameObject::AddDebuf(CSkill* DeBuf)
 
 void CGameObject::DeleteDebuf(en_SkillType DeleteDebufSkillType)
 {
-	_DeBufs.erase(DeleteDebufSkillType);	
+	_DeBufs.erase(DeleteDebufSkillType);		
 }
 
 void CGameObject::SetStatusAbnormal(int8 StatusAbnormalValue)
 {
-	_StatusAbnormal |= StatusAbnormalValue;
+	_StatusAbnormal |= StatusAbnormalValue;	
 }
 
 void CGameObject::ReleaseStatusAbnormal(int8 StatusAbnormalValue)

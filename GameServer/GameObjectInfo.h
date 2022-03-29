@@ -1,5 +1,6 @@
 #pragma once
 
+class CGameServerMessage;
 class CSkill;
 
 enum class en_GameObjectType : int16
@@ -62,12 +63,12 @@ enum class en_CreatureState : int8
 	SPAWN_IDLE,
 	IDLE,
 	PATROL,
-	MOVING,		
+	MOVING,
 	STOP,
 	RETURN_SPAWN_POSITION,
 	ATTACK,
-	SPELL,
-	DEAD	
+	SPELL,	
+	DEAD
 };
 
 enum class en_MonsterState : int8
@@ -323,6 +324,12 @@ enum class en_TileMapEnvironment : int8
 	TILE_MAP_STONE,
 	TILE_MAP_SLIME,
 	TILE_MAP_BEAR
+};
+
+enum class en_GameObjectJobType : int16
+{
+	GAMEOBJECT_JOB_TYPE_SHOCK_RELEASE,
+	GAMEOBJECT_JOB_TYPE_BACK_TELEPORT
 };
 
 namespace UnityEngine
@@ -1808,6 +1815,7 @@ struct st_SkillInfo
 	int64 SkillDotTime;      // 스킬 도트 시간 
 	int64 SkillRemainTime;   // 스킬 남은 시간
 	float SkillTargetEffectTime;
+	wstring SkillExplanation; // 스킬 설명 
 	wstring SkillImagePath;	 // 스킬 이미지 경로
 	bool CanSkillUse;		 // 스킬을 사용 할 수 있는지 여부	
 
@@ -1826,6 +1834,7 @@ struct st_SkillInfo
 		SkillDotTime = 0;
 		SkillRemainTime = 0;
 		SkillTargetEffectTime = 0;
+		SkillExplanation = L"";
 		SkillImagePath = L"";
 		CanSkillUse = true;
 	}
@@ -1955,4 +1964,10 @@ struct st_FieldOfViewInfo
 	{
 		return this->ObjectId < Right.ObjectId;
 	}
+};
+
+struct st_GameObjectJob
+{
+	en_GameObjectJobType GameObjectJobType;
+	CGameServerMessage* GameObjectJobMessage;
 };
