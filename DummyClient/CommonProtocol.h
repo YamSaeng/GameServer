@@ -530,7 +530,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int8 MessageCount
 	// wstring Messages	
 	//-----------------------------------------------------------
-	en_PACKET_PERSONAL_MESSAGE,
+	en_PACKET_S2C_PERSONAL_MESSAGE,
 
 	//-----------------------------------------------------------
 	// 게임서버 클라 퐁 전송	
