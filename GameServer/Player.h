@@ -13,6 +13,7 @@ class CPlayer : public CGameObject
 {
 public:		
 	uint64 _DefaultAttackTick;	
+	uint64 _SpellTick;
 
 	//---------------------
 	// 시전 한 스킬 종류

@@ -366,7 +366,7 @@ void CPlayer::UpdateAttack()
 			bool TargetIsDead = Target->OnDamaged(this, FinalDamage);
 			if (TargetIsDead == true)
 			{
-				//ExperienceCalculate(MyPlayer, Target);
+				G_ObjectManager->GameServer->ExperienceCalculate(this, Target);
 			}
 
 			en_EffectType HitEffectType;
@@ -392,13 +392,18 @@ void CPlayer::UpdateAttack()
 
 			// 공격 응답 메세지 전송
 			CMessage* ResMyAttackOtherPacket = G_ObjectManager->GameServer->MakePacketResAttack(_GameObjectInfo.ObjectId,
-				Target->_GameObjectInfo.ObjectId,				
-				_GameObjectInfo.ObjectPositionInfo.MoveDir,
+				Target->_GameObjectInfo.ObjectId,								
 				en_SkillType::SKILL_DEFAULT_ATTACK,
 				FinalDamage,
 				IsCritical);
 			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResMyAttackOtherPacket, this);
 			ResMyAttackOtherPacket->Free();
+
+			// 공격 애니메이션 출력
+			CMessage* AnimationPlayPacket = G_ObjectManager->GameServer->MakePacketResAnimationPlay(_GameObjectInfo.ObjectId,
+				_GameObjectInfo.ObjectPositionInfo.MoveDir, (*AttackSkillInfo->SkillAnimations.find(_GameObjectInfo.ObjectPositionInfo.MoveDir)).second);
+			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, AnimationPlayPacket, this);
+			AnimationPlayPacket->Free();
 			
 			// 스탯 변경 메세지 전송
 			CMessage* ResChangeObjectStat = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(Target->_GameObjectInfo.ObjectId,
@@ -431,5 +436,5 @@ void CPlayer::UpdateAttack()
 
 void CPlayer::UpdateSpell()
 {	
-
+	
 }
