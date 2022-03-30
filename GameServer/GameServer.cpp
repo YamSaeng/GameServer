@@ -95,7 +95,7 @@ void CGameServer::LoginServerConnect(const WCHAR* ConnectIP, int32 Port)
 	ZeroMemory(&ServerAddr, sizeof(ServerAddr));
 	ServerAddr.sin_family = AF_INET;
 	InetPtonW(AF_INET, ConnectIP, &ServerAddr.sin_addr);
-	ServerAddr.sin_port = htons(Port);
+	ServerAddr.sin_port = htons(Port);	
 
 	_LoginServerSock = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -998,9 +998,7 @@ void CGameServer::DeleteClient(st_Session* Session)
 				DeSpawnObject.push_back(SessionPlayer);
 
 				SessionPlayer->_NetworkState = en_ObjectNetworkState::LEAVE;
-				SessionPlayer->_FieldOfViewInfos.clear();
-				// 뒷정리
-				SessionPlayer->Init();
+				SessionPlayer->_FieldOfViewInfos.clear();				
 
 				// 주위 시야 범위 클라들에게 소환해제 패킷 날림
 				CMessage* ResDeSpawnObject = MakePacketResObjectDeSpawn(1, DeSpawnObject);
@@ -1010,6 +1008,9 @@ void CGameServer::DeleteClient(st_Session* Session)
 				// 채널 퇴장 
 				CChannel* Channel = G_ChannelManager->Find(1);
 				Channel->LeaveChannel(MyPlayer);
+
+				// 뒷정리
+				SessionPlayer->Init();
 
 				DeSpawnObject.clear();
 			}
@@ -1653,27 +1654,12 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 				MyPlayer->_SkillType = (en_SkillType)ReqSkillType;
 
 				MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;
-
-				CMessage* ResObjectStateChangePacket = MakePacketResChangeObjectState(MyPlayer->_GameObjectInfo.ObjectId,
-					MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir,
-					MyPlayer->_GameObjectInfo.ObjectType,
-					MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
-				SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResObjectStateChangePacket, MyPlayer);
-				ResObjectStateChangePacket->Free();
+				MyPlayer->_DefaultAttackTick = 0;
+			
 				
 				// 타겟 위치 확인
 				switch (ReqMeleeSkill->GetSkillInfo()->SkillType)
-				{
-				case en_SkillType::SKILL_DEFAULT_ATTACK:
-					{
-						st_Vector2Int FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
-						CGameObject* Target = MyPlayer->_Channel->_Map->Find(FrontCell);
-						if (Target != nullptr)
-						{
-							Targets.push_back(Target);
-						}
-					}					
-					break;			
+				{				
 				case en_SkillType::SKILL_KNIGHT_CHOHONE:
 					{
 						if (MyPlayer->_SelectTarget != nullptr)
@@ -1693,7 +1679,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 									st_Vector2Int MyFrontCellPotision = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
 
 									if (MyPlayer->_Channel->_Map->ApplyMove(Target, MyFrontCellPotision))
-									{										
+									{			
 										CSkill* NewSkill = G_ObjectManager->SkillCreate();
 
 										st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(ReqMeleeSkill->GetSkillInfo()->SkillMediumCategory);
@@ -1709,14 +1695,14 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 										CMessage* ResStatusAbnormalPacket = MakePacketStatusAbnormal(Target->_GameObjectInfo.ObjectId,
 											Target->_GameObjectInfo.ObjectType,
 											Target->_GameObjectInfo.ObjectPositionInfo.MoveDir,
-											ReqMeleeSkill->GetSkillInfo()->SkillType,											
+											ReqMeleeSkill->GetSkillInfo()->SkillType,
 											true, STATUS_ABNORMAL_WARRIOR_CHOHONE);
 										SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResStatusAbnormalPacket, MyPlayer);
 										ResStatusAbnormalPacket->Free();
 
 										CMessage* ResBufDeBufSkillPacket = MakePacketBufDeBuf(Target->_GameObjectInfo.ObjectId, false, NewSkill->GetSkillInfo());
 										SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResBufDeBufSkillPacket, MyPlayer);
-										ResBufDeBufSkillPacket->Free();	
+										ResBufDeBufSkillPacket->Free();
 									
 										float EffectPrintTime = ReqMeleeSkill->GetSkillInfo()->SkillDurationTime / 1000.0f;
 										
@@ -1792,7 +1778,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 								if (Target != nullptr)
 								{
 									switch (Dir)
-									{
+									{	
 									case en_MoveDir::UP:
 										MovePosition = Target->GetFrontCellPosition(en_MoveDir::DOWN, 1);
 										break;
@@ -1961,11 +1947,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 						{
 						case en_SkillType::SKILL_TYPE_NONE:
 							CRASH("SkillType None");
-							break;
-						case en_SkillType::SKILL_DEFAULT_ATTACK:
-							wsprintf(SkillTypeMessage, L"%s가 일반공격을 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
-							HitEffectType = en_EffectType::EFFECT_NORMAL_ATTACK_TARGET_HIT;
-							break;
+							break;						
 						case en_SkillType::SKILL_KNIGHT_CHOHONE:
 							wsprintf(SkillTypeMessage, L"%s가 초혼비무를 사용해 %s에게 %d의 데미지를 줬습니다.", MyPlayer->_GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
 							HitEffectType = en_EffectType::EFFECT_CHOHONE_TARGET_HIT;
@@ -1995,7 +1977,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 
 						// 공격 응답 메세지 전송
 						CMessage* ResMyAttackOtherPacket = MakePacketResAttack(MyPlayer->_GameObjectInfo.ObjectId, 
-							Target->_GameObjectInfo.ObjectId, 
+							Target->_GameObjectInfo.ObjectId,														
 							(en_SkillType)ReqSkillType,
 							FinalDamage, 
 							IsCritical);
@@ -2017,16 +1999,14 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 					}
 				}
 				
-				ReqMeleeSkill->CoolTimeStart();				
+				ReqMeleeSkill->CoolTimeStart();
 
 				// 클라에게 쿨타임 표시
 				CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarIndex,
 					QuickSlotBarSlotIndex,
-					1.0f, ReqMeleeSkill);					
+					1.0f, ReqMeleeSkill);
 				SendPacket(Session->SessionId, ResCoolTimeStartPacket);
-				ResCoolTimeStartPacket->Free();
-
-				SkillMotionEndTimerJobCreate(MyPlayer, 500, en_TimerJobType::TIMER_MELEE_ATTACK_END);				
+				ResCoolTimeStartPacket->Free();						
 			}
 			else
 			{
@@ -2294,6 +2274,11 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 					break;
 				case en_SkillType::SKILL_SHOCK_RELEASE:
 					{					
+						st_GameObjectJob* GameObjectJob = G_ObjectManager->GameObjectJobCreate();
+						GameObjectJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SHOCK_RELEASE;				
+						
+						MyPlayer->_GameObjectJobQue.Enqueue(GameObjectJob);
+
 						CSkill* NewBufSkill = G_ObjectManager->SkillCreate();
 
 						st_BufSkillInfo* NewShockReleaseSkillInfo = (st_BufSkillInfo*)G_ObjectManager->SkillInfoCreate(ReqMagicSkill->GetSkillInfo()->SkillMediumCategory);
@@ -4816,7 +4801,21 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					AttackSkillInfo->SkillMinDamage = FindAttackSkillData->SkillMinDamage;
 					AttackSkillInfo->SkillMaxDamage = FindAttackSkillData->SkillMaxDamage;
 					AttackSkillInfo->SkillTargetEffectTime = FindAttackSkillData->SkillTargetEffectTime;
+					AttackSkillInfo->SkillAnimations.insert(pair<en_MoveDir, wstring>(
+						en_MoveDir::UP, (LPWSTR)CA2W((*FindAttackSkillData->SkillAnimations.find(en_MoveDir::UP)).second.c_str())));
+					AttackSkillInfo->SkillAnimations.insert(pair<en_MoveDir, wstring>(
+						en_MoveDir::DOWN, (LPWSTR)CA2W((*FindAttackSkillData->SkillAnimations.find(en_MoveDir::DOWN)).second.c_str())));
+					AttackSkillInfo->SkillAnimations.insert(pair<en_MoveDir, wstring>(
+						en_MoveDir::LEFT, (LPWSTR)CA2W((*FindAttackSkillData->SkillAnimations.find(en_MoveDir::LEFT)).second.c_str())));
+					AttackSkillInfo->SkillAnimations.insert(pair<en_MoveDir, wstring>(
+						en_MoveDir::RIGHT, (LPWSTR)CA2W((*FindAttackSkillData->SkillAnimations.find(en_MoveDir::RIGHT)).second.c_str())));
+					AttackSkillInfo->SkillExplanation = (LPWSTR)CA2W(FindAttackSkillData->SkillExplanation.c_str());
+					
+					wchar_t SkillExplanationMessage[256] = L"0";
 
+					wsprintf(SkillExplanationMessage, AttackSkillInfo->SkillExplanation.c_str(), AttackSkillInfo->SkillMinDamage);
+
+					AttackSkillInfo->SkillExplanation = SkillExplanationMessage;
 					AttackSkillInfo->SkillDebufAttackSpeed = FindAttackSkillData->SkillDebufAttackSpeed;
 					AttackSkillInfo->SkillDebufMovingSpeed = FindAttackSkillData->SkillDebufMovingSpeed;
 					AttackSkillInfo->StatusAbnormalityProbability = FindAttackSkillData->StatusAbnormalityProbability;
@@ -4850,7 +4849,15 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					TacTicSkillInfo->SkillDotTime = FindTacTicSkillData->SkillDotTime;
 					TacTicSkillInfo->SkillRemainTime = 0;
 					TacTicSkillInfo->SkillImagePath = (LPWSTR)CA2W(FindTacTicSkillData->SkillThumbnailImagePath.c_str());					
-					TacTicSkillInfo->SkillTargetEffectTime = FindTacTicSkillData->SkillTargetEffectTime;
+					TacTicSkillInfo->SkillTargetEffectTime = FindTacTicSkillData->SkillTargetEffectTime;					
+					TacTicSkillInfo->SkillAnimations.insert(pair<en_MoveDir, wstring>(
+						en_MoveDir::UP, (LPWSTR)CA2W((*FindTacTicSkillData->SkillAnimations.find(en_MoveDir::UP)).second.c_str())));
+					TacTicSkillInfo->SkillAnimations.insert(pair<en_MoveDir, wstring>(
+						en_MoveDir::DOWN, (LPWSTR)CA2W((*FindTacTicSkillData->SkillAnimations.find(en_MoveDir::DOWN)).second.c_str())));
+					TacTicSkillInfo->SkillAnimations.insert(pair<en_MoveDir, wstring>(
+						en_MoveDir::LEFT, (LPWSTR)CA2W((*FindTacTicSkillData->SkillAnimations.find(en_MoveDir::LEFT)).second.c_str())));
+					TacTicSkillInfo->SkillAnimations.insert(pair<en_MoveDir, wstring>(
+						en_MoveDir::RIGHT, (LPWSTR)CA2W((*FindTacTicSkillData->SkillAnimations.find(en_MoveDir::RIGHT)).second.c_str())));
 
 					TacTicSkill->SetSkillInfo(en_SkillCategory::QUICK_SLOT_SKILL, TacTicSkillInfo);
 
@@ -4884,7 +4891,15 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					HealSkillInfo->SkillMinHealPoint = FindHealSkillData->SkillMinHealPoint;
 					HealSkillInfo->SkillMaxHealPoint = FindHealSkillData->SkillMaxHealPoint;
 					HealSkillInfo->SkillTargetEffectTime = FindHealSkillData->SkillTargetEffectTime;
-
+					HealSkillInfo->SkillAnimations.insert(pair<en_MoveDir, wstring>(
+						en_MoveDir::UP, (LPWSTR)CA2W((*FindHealSkillData->SkillAnimations.find(en_MoveDir::UP)).second.c_str())));
+					HealSkillInfo->SkillAnimations.insert(pair<en_MoveDir, wstring>(
+						en_MoveDir::DOWN, (LPWSTR)CA2W((*FindHealSkillData->SkillAnimations.find(en_MoveDir::DOWN)).second.c_str())));
+					HealSkillInfo->SkillAnimations.insert(pair<en_MoveDir, wstring>(
+						en_MoveDir::LEFT, (LPWSTR)CA2W((*FindHealSkillData->SkillAnimations.find(en_MoveDir::LEFT)).second.c_str())));
+					HealSkillInfo->SkillAnimations.insert(pair<en_MoveDir, wstring>(
+						en_MoveDir::RIGHT, (LPWSTR)CA2W((*FindHealSkillData->SkillAnimations.find(en_MoveDir::RIGHT)).second.c_str())));
+					
 					HealSkill->SetSkillInfo(en_SkillCategory::QUICK_SLOT_SKILL, HealSkillInfo);
 
 					MyPlayer->_SkillBox.AddTacTicSkill(HealSkill);
@@ -4913,8 +4928,16 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					BufSkillInfo->SkillDurationTime = FindBufSkillData->SkillDurationTime;
 					BufSkillInfo->SkillDotTime = FindBufSkillData->SkillDotTime;
 					BufSkillInfo->SkillRemainTime = 0;
-					BufSkillInfo->SkillTargetEffectTime = FindBufSkillData->SkillTargetEffectTime;
+					BufSkillInfo->SkillTargetEffectTime = FindBufSkillData->SkillTargetEffectTime;					
 					BufSkillInfo->SkillImagePath = (LPWSTR)CA2W(FindBufSkillData->SkillThumbnailImagePath.c_str());
+					BufSkillInfo->SkillAnimations.insert(pair<en_MoveDir, wstring>(
+						en_MoveDir::UP, (LPWSTR)CA2W((*FindBufSkillData->SkillAnimations.find(en_MoveDir::UP)).second.c_str())));
+					BufSkillInfo->SkillAnimations.insert(pair<en_MoveDir, wstring>(
+						en_MoveDir::DOWN, (LPWSTR)CA2W((*FindBufSkillData->SkillAnimations.find(en_MoveDir::DOWN)).second.c_str())));
+					BufSkillInfo->SkillAnimations.insert(pair<en_MoveDir, wstring>(
+						en_MoveDir::LEFT, (LPWSTR)CA2W((*FindBufSkillData->SkillAnimations.find(en_MoveDir::LEFT)).second.c_str())));
+					BufSkillInfo->SkillAnimations.insert(pair<en_MoveDir, wstring>(
+						en_MoveDir::RIGHT, (LPWSTR)CA2W((*FindBufSkillData->SkillAnimations.find(en_MoveDir::RIGHT)).second.c_str())));
 
 					BufSkillInfo->IncreaseMinAttackPoint = FindBufSkillData->IncreaseMinAttackPoint;
 					BufSkillInfo->IncreaseMaxAttackPoint = FindBufSkillData->IncreaseMaxAttackPoint;
@@ -5709,7 +5732,7 @@ void CGameServer::PacketProcReqDBQuickSlotInit(int64 SessionId, CMessage* Messag
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, DBQuickSlotInitConnection);
 
-			CMessage* ResQuickSlotInitMessage = MakePacketResQuickSlotInit(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, QuickSlotBarIndex, QuickSlotBarSlotIndex, QuickSlotKey);
+			CMessage* ResQuickSlotInitMessage = MakePacketResQuickSlotInit(QuickSlotBarIndex, QuickSlotBarSlotIndex);
 			SendPacket(Session->SessionId, ResQuickSlotInitMessage);
 			ResQuickSlotInitMessage->Free();
 		} while (0);
@@ -6148,7 +6171,7 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 		// 공격 응답
 		CMessage* ResAttackMagicPacket = MakePacketResAttack(
 			MyPlayer->_GameObjectInfo.ObjectId,
-			MyPlayer->GetTarget()->_GameObjectInfo.ObjectId,
+			MyPlayer->GetTarget()->_GameObjectInfo.ObjectId,						
 			MyPlayer->_SkillType,
 			FinalDamage,
 			false);
@@ -6647,7 +6670,7 @@ CGameServerMessage* CGameServer::MakePacketResQuickSlotSwap(int64 AccountId, int
 	return ResQuickSlotSwapMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResQuickSlotInit(int64 AccountId, int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, int16 QuickSlotKey)
+CGameServerMessage* CGameServer::MakePacketResQuickSlotInit(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex)
 {
 	CGameServerMessage* ResQuickSlotInitMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResQuickSlotInitMessage == nullptr)
@@ -6657,12 +6680,9 @@ CGameServerMessage* CGameServer::MakePacketResQuickSlotInit(int64 AccountId, int
 
 	ResQuickSlotInitMessage->Clear();
 
-	*ResQuickSlotInitMessage << (int16)en_PACKET_S2C_QUICKSLOT_EMPTY;
-	*ResQuickSlotInitMessage << AccountId;
-	*ResQuickSlotInitMessage << PlayerId;
+	*ResQuickSlotInitMessage << (int16)en_PACKET_S2C_QUICKSLOT_EMPTY;	
 	*ResQuickSlotInitMessage << QuickSlotBarIndex;
-	*ResQuickSlotInitMessage << QuickSlotBarSlotIndex;
-	*ResQuickSlotInitMessage << QuickSlotKey;
+	*ResQuickSlotInitMessage << QuickSlotBarSlotIndex;	
 
 	return ResQuickSlotInitMessage;
 }
@@ -6992,7 +7012,7 @@ Player->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
 	}	
 }
 
-CGameServerMessage* CGameServer::MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_SkillType SkillType, int32 Damage, bool IsCritical)
+CGameServerMessage* CGameServer::MakePacketResAttack(int64 ObjectId, int64 TargetId, en_SkillType SkillType, int32 Damage, bool IsCritical)
 {
 	CGameServerMessage* ResAttackMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResAttackMessage == nullptr)
@@ -7003,8 +7023,8 @@ CGameServerMessage* CGameServer::MakePacketResAttack(int64 PlayerDBId, int64 Tar
 	ResAttackMessage->Clear();
 
 	*ResAttackMessage << (int16)en_PACKET_S2C_ATTACK;
-	*ResAttackMessage << PlayerDBId;
-	*ResAttackMessage << TargetId;
+	*ResAttackMessage << ObjectId;
+	*ResAttackMessage << TargetId;		
 	*ResAttackMessage << (int16)SkillType;
 	*ResAttackMessage << Damage;
 	*ResAttackMessage << IsCritical;
@@ -7031,9 +7051,27 @@ CGameServerMessage* CGameServer::MakePacketResMagic(int64 ObjectId, bool SpellSt
 	return ResMagicMessage;
 }
 
-// int64 AccountId
-// int32 PlayerDBId
-// int32 HP
+CGameServerMessage* CGameServer::MakePacketResAnimationPlay(int64 ObjectId, en_MoveDir Dir, wstring AnimationName)
+{
+	CGameServerMessage* ResAnimationPlayMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResAnimationPlayMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResAnimationPlayMessage->Clear();
+
+	*ResAnimationPlayMessage << (int16)en_PACKET_S2C_ANIMATION_PLAY;
+	*ResAnimationPlayMessage << ObjectId;
+	*ResAnimationPlayMessage << (int8)Dir;
+
+	int16 AnimationNameLen = (int16)(AnimationName.length() * 2);
+	*ResAnimationPlayMessage << AnimationNameLen;
+	ResAnimationPlayMessage->InsertData(AnimationName.c_str(), AnimationNameLen);
+
+	return ResAnimationPlayMessage;
+}
+
 CGameServerMessage* CGameServer::MakePacketResChangeObjectStat(int64 ObjectId, st_StatInfo ChangeObjectStatInfo)
 {
 	CGameServerMessage* ResChangeObjectStatPacket = CGameServerMessage::GameServerMessageAlloc();
@@ -7168,9 +7206,6 @@ CGameServerMessage* CGameServer::MakePacketPatrol(int64 ObjectId, en_GameObjectT
 	return ResPatrolPacket;
 }
 
-// int64 AccountId
-// int32 PlayerDBId
-// st_GameObjectInfo GameObjectInfo
 CGameServerMessage* CGameServer::MakePacketResObjectSpawn(int32 ObjectInfosCount, vector<CGameObject*> ObjectInfos)
 {
 	CGameServerMessage* ResSpawnPacket = CGameServerMessage::GameServerMessageAlloc();
@@ -7195,8 +7230,6 @@ CGameServerMessage* CGameServer::MakePacketResObjectSpawn(int32 ObjectInfosCount
 	return ResSpawnPacket;
 }
 
-// int64 AccountId
-// int32 PlayerDBId
 CGameServerMessage* CGameServer::MakePacketResObjectDeSpawn(int32 DeSpawnObjectCount, vector<CGameObject*> DeSpawnObjects)
 {
 	CGameServerMessage* ResDeSpawnPacket = CGameServerMessage::GameServerMessageAlloc();
@@ -7234,8 +7267,6 @@ CGameServerMessage* CGameServer::MakePacketObjectDie(int64 DieObjectId)
 	return ResDiePacket;
 }
 
-// int32 PlayerDBId
-// wstring ChattingMessage
 CGameServerMessage* CGameServer::MakePacketResChattingBoxMessage(int64 PlayerDBId, en_MessageType MessageType, st_Color Color, wstring ChattingMessage)
 {
 	CGameServerMessage* ResChattingMessage = CGameServerMessage::GameServerMessageAlloc();
@@ -7420,7 +7451,7 @@ CGameServerMessage* CGameServer::MakePacketSkillError(en_PersonalMessageType Per
 
 	ResErrorMessage->Clear();
 
-	*ResErrorMessage << (int16)en_PACKET_PERSONAL_MESSAGE;
+	*ResErrorMessage << (int16)en_PACKET_S2C_PERSONAL_MESSAGE;
 	*ResErrorMessage << (int8)1;
 
 	WCHAR ErrorMessage[100] = { 0 };
@@ -7466,7 +7497,7 @@ CGameServerMessage* CGameServer::MakePacketStatusAbnormalMessage(en_CommonErrorT
 
 	ResErrorMessage->Clear();	
 
-	*ResErrorMessage << (int16)en_PACKET_PERSONAL_MESSAGE;
+	*ResErrorMessage << (int16)en_PACKET_S2C_PERSONAL_MESSAGE;
 	*ResErrorMessage << StatusAbnormalCount;
 
 	WCHAR ErrorMessage[100] = { 0 };

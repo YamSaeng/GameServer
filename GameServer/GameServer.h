@@ -320,7 +320,7 @@ private:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 퀵슬롯 초기화 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResQuickSlotInit(int64 AccountId, int64 PlayerId, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, int16 QuickSlotKey);		
+	CGameServerMessage* MakePacketResQuickSlotInit(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex);		
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 제작템 목록 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -331,18 +331,23 @@ private:
 	CGameServerMessage* MakePacketPing();	
 	
 	CItem* NewItemCrate(st_ItemInfo& NewItemInfo);
-
-	void ExperienceCalculate(CPlayer* Player, CGameObject* Target);
-
 public:
+	//-----------------------------------------------------------
+	// 경험치 계산
+	//-----------------------------------------------------------
+	void ExperienceCalculate(CPlayer* Player, CGameObject* Target);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 공격요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_SkillType SkillType, int32 Damage, bool IsCritical);
+	CGameServerMessage* MakePacketResAttack(int64 ObjectId, int64 TargetId, en_SkillType SkillType, int32 Damage, bool IsCritical);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 마법요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResMagic(int64 ObjectId, bool SpellStart, en_SkillType SkillType = en_SkillType::SKILL_TYPE_NONE, float SpellTime = 0.0f);
+	//-----------------------------------------------------------------------------------------
+	// 게임서버 애니메이션 출력 패킷 조합
+	//-----------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResAnimationPlay(int64 ObjectId, en_MoveDir Dir, wstring AnimationName);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 오브젝트 스탯 변경 패킷 조합
 	//-----------------------------------------------------------------------------------------
