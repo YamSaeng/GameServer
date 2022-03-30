@@ -48,6 +48,7 @@ struct st_SkillData
 	int64 SkillDotTime;
 	int SkillDistance;
 	float SkillTargetEffectTime;
+	map<en_MoveDir, string> SkillAnimations; // 스킬 애니메이션
 	string SkillExplanation;
 	string SkillThumbnailImagePath;
 };

@@ -1815,8 +1815,9 @@ struct st_SkillInfo
 	int64 SkillDotTime;      // 스킬 도트 시간 
 	int64 SkillRemainTime;   // 스킬 남은 시간
 	float SkillTargetEffectTime;
+	map<en_MoveDir, wstring> SkillAnimations; // 스킬 애니메이션
 	wstring SkillExplanation; // 스킬 설명 
-	wstring SkillImagePath;	 // 스킬 이미지 경로
+	wstring SkillImagePath;	 // 스킬 이미지 경로	
 	bool CanSkillUse;		 // 스킬을 사용 할 수 있는지 여부	
 
 	st_SkillInfo()

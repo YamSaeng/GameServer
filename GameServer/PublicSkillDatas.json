@@ -19,6 +19,10 @@
               "SkillDebufAttackSpeed": 0,
               "SkillDebufMovingSpeed": 0,
               "StatusAbnormalityProbability": 0,
+              "SkillUpAnimation": "ATTACK_WEAPON_BACK",
+              "SkillDownAnimation": "ATTACK_WEAPON_FRONT",
+              "SkillLeftAnimation": "ATTACK_WEAPON_LEFT",
+              "SkillRightAnimation": "ATTACK_WEAPON_LEFT",
               "SkillExplanation": "전방 대상에게 피해를 입힌다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/일반공격"
             }
@@ -51,6 +55,10 @@
               "SkillDotTime": 0,
               "SkillDistance": 0,
               "SkillTargetEffectTime": 0.5,
+              "SkillUpAnimation": "IDLE_BACK",
+              "SkillDownAnimation": "IDLE_FRONT",
+              "SkillLeftAnimation": "IDLE_LEFT",
+              "SkillRightAnimation": "IDLE_LEFT",
               "SkillExplanation": "기절, 밀려남 상태에서 풀려나고 %f초 동안 상태이상 저항값을 1000만큼 증가시킨다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/충격해제"
             }

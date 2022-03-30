@@ -789,6 +789,10 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				int8 SkillDebufAttackSpeed = (int8)PublicAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
 				int8 SkillDebufMovingSpeed = (int8)PublicAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
 				int8 StatusAbnormalityProbability = (int8)PublicAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
+				string SkillUpAnimation = PublicAttackSkillListFiled["SkillUpAnimation"].GetString();
+				string SkillDownAnimation = PublicAttackSkillListFiled["SkillDownAnimation"].GetString();
+				string SkillLeftAnimation = PublicAttackSkillListFiled["SkillLeftAnimation"].GetString();
+				string SkillRightAnimation = PublicAttackSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = PublicAttackSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = PublicAttackSkillListFiled["SkillThumbnailImagePath"].GetString();				
 
@@ -810,7 +814,11 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				PublicAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 				PublicAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
 				PublicAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
-				PublicAttackSkill->SkillExplanation = SkillExplation;
+				PublicAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
+				PublicAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
+				PublicAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
+				PublicAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				PublicAttackSkill->SkillExplanation = SkillExplation;				
 				PublicAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_PublicAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)PublicAttackSkill->SkillType, PublicAttackSkill));
@@ -833,6 +841,10 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				int64 SkillDotTime = PublicHealSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = PublicHealSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = PublicHealSkillListFiled["SkillTargetEffectTime"].GetFloat();
+				string SkillUpAnimation = PublicHealSkillListFiled["SkillUpAnimation"].GetString();
+				string SkillDownAnimation = PublicHealSkillListFiled["SkillDownAnimation"].GetString();
+				string SkillLeftAnimation = PublicHealSkillListFiled["SkillLeftAnimation"].GetString();
+				string SkillRightAnimation = PublicHealSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = PublicHealSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = PublicHealSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -846,6 +858,10 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				PublicHealSkill->SkillDotTime = SkillDotTime;
 				PublicHealSkill->SkillDistance = SkillDistance;
 				PublicHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+				PublicHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
+				PublicHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
+				PublicHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
+				PublicHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
 				PublicHealSkill->SkillExplanation = SkillExplation;
 				PublicHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -882,6 +898,10 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				int64 SkillDotTime = PublicBufSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = PublicBufSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = PublicBufSkillListFiled["SkillTargetEffectTime"].GetFloat();
+				string SkillUpAnimation = PublicBufSkillListFiled["SkillUpAnimation"].GetString();
+				string SkillDownAnimation = PublicBufSkillListFiled["SkillDownAnimation"].GetString();
+				string SkillLeftAnimation = PublicBufSkillListFiled["SkillLeftAnimation"].GetString();
+				string SkillRightAnimation = PublicBufSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = PublicBufSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = PublicBufSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -911,6 +931,10 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				PublicBufSkill->SkillDotTime = SkillDotTime;
 				PublicBufSkill->SkillDistance = SkillDistance;
 				PublicBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+				PublicBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
+				PublicBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
+				PublicBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
+				PublicBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
 				PublicBufSkill->SkillExplanation = SkillExplation;
 				PublicBufSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -951,6 +975,10 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				int8 SkillDebufAttackSpeed = (int8)WarriorAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
 				int8 SkillDebufMovingSpeed = (int8)WarriorAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();				
 				int8 StatusAbnormalityProbability = (int8)WarriorAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
+				string SkillUpAnimation = WarriorAttackSkillListFiled["SkillUpAnimation"].GetString();
+				string SkillDownAnimation = WarriorAttackSkillListFiled["SkillDownAnimation"].GetString();
+				string SkillLeftAnimation = WarriorAttackSkillListFiled["SkillLeftAnimation"].GetString();
+				string SkillRightAnimation = WarriorAttackSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = WarriorAttackSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = WarriorAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -988,6 +1016,10 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				WarriorAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 				WarriorAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;	
 				WarriorAttackSkill->SkillExplanation = SkillExplation;
+				WarriorAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
+				WarriorAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
+				WarriorAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
+				WarriorAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
 				WarriorAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
 				WarriorAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -1011,6 +1043,10 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				int64 SkillDotTime = WarriorHealSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = WarriorHealSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = WarriorHealSkillListFiled["SkillTargetEffectTime"].GetFloat();
+				string SkillUpAnimation = WarriorHealSkillListFiled["SkillUpAnimation"].GetString();
+				string SkillDownAnimation = WarriorHealSkillListFiled["SkillDownAnimation"].GetString();
+				string SkillLeftAnimation = WarriorHealSkillListFiled["SkillLeftAnimation"].GetString();
+				string SkillRightAnimation = WarriorHealSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = WarriorHealSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = WarriorHealSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1025,6 +1061,10 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				WarriorHealSkill->SkillDistance = SkillDistance;
 				WarriorHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				WarriorHealSkill->SkillExplanation = SkillExplation;
+				WarriorHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
+				WarriorHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
+				WarriorHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
+				WarriorHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
 				WarriorHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_WarriorTacTicSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)WarriorHealSkill->SkillType, WarriorHealSkill));
@@ -1060,6 +1100,10 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				int64 SkillDotTime = WarriorBufSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = WarriorBufSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = WarriorBufSkillListFiled["SkillTargetEffectTime"].GetFloat();
+				string SkillUpAnimation = WarriorBufSkillListFiled["SkillUpAnimation"].GetString();
+				string SkillDownAnimation = WarriorBufSkillListFiled["SkillDownAnimation"].GetString();
+				string SkillLeftAnimation = WarriorBufSkillListFiled["SkillLeftAnimation"].GetString();
+				string SkillRightAnimation = WarriorBufSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = WarriorBufSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = WarriorBufSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1089,6 +1133,10 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				WarriorBufSkill->SkillDotTime = SkillDotTime;
 				WarriorBufSkill->SkillDistance = SkillDistance;
 				WarriorBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+				WarriorBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
+				WarriorBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
+				WarriorBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
+				WarriorBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
 				WarriorBufSkill->SkillExplanation = SkillExplation;
 				WarriorBufSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -1129,6 +1177,10 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				int8 SkillDebufAttackSpeed = (int8)ShmanAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
 				int8 SkillDebufMovingSpeed = (int8)ShmanAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
 				int8 StatusAbnormalityProbability = (int8)ShmanAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();				
+				string SkillUpAnimation = ShmanAttackSkillListFiled["SkillUpAnimation"].GetString();
+				string SkillDownAnimation = ShmanAttackSkillListFiled["SkillDownAnimation"].GetString();
+				string SkillLeftAnimation = ShmanAttackSkillListFiled["SkillLeftAnimation"].GetString();
+				string SkillRightAnimation = ShmanAttackSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = ShmanAttackSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = ShmanAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1170,6 +1222,10 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 				ShamanAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;				
 				ShamanAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
+				ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
+				ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
+				ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
+				ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
 				ShamanAttackSkill->SkillExplanation = SkillExplation;
 				ShamanAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -1191,6 +1247,10 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				int64 SkillDotTime = ShamanTacTicSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ShamanTacTicSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = ShamanTacTicSkillListFiled["SkillTargetEffectTime"].GetFloat();
+				string SkillUpAnimation = ShamanTacTicSkillListFiled["SkillUpAnimation"].GetString();
+				string SkillDownAnimation = ShamanTacTicSkillListFiled["SkillDownAnimation"].GetString();
+				string SkillLeftAnimation = ShamanTacTicSkillListFiled["SkillLeftAnimation"].GetString();
+				string SkillRightAnimation = ShamanTacTicSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = ShamanTacTicSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = ShamanTacTicSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1207,6 +1267,10 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanTacTicSkill->SkillDotTime = SkillDotTime;
 				ShamanTacTicSkill->SkillDistance = SkillDistance;
 				ShamanTacTicSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+				ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
+				ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
+				ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
+				ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
 				ShamanTacTicSkill->SkillExplanation = SkillExplation;
 				ShamanTacTicSkill->SkillThumbnailImagePath = SkillImagePath;
 								
@@ -1230,6 +1294,10 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				int64 SkillDotTime = ShamanHealSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ShamanHealSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = ShamanHealSkillListFiled["SkillTargetEffectTime"].GetFloat();
+				string SkillUpAnimation = ShamanHealSkillListFiled["SkillUpAnimation"].GetString();
+				string SkillDownAnimation = ShamanHealSkillListFiled["SkillDownAnimation"].GetString();
+				string SkillLeftAnimation = ShamanHealSkillListFiled["SkillLeftAnimation"].GetString();
+				string SkillRightAnimation = ShamanHealSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = ShamanHealSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = ShamanHealSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1248,6 +1316,10 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanHealSkill->SkillDotTime = SkillDotTime;
 				ShamanHealSkill->SkillDistance = SkillDistance;
 				ShamanHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+				ShamanHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
+				ShamanHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
+				ShamanHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
+				ShamanHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
 				ShamanHealSkill->SkillExplanation = SkillExplation;
 				ShamanHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -1284,6 +1356,10 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				int64 SkillDotTime = ShmanBufSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ShmanBufSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = ShmanBufSkillListFiled["SkillTargetEffectTime"].GetFloat();
+				string SkillUpAnimation = ShmanBufSkillListFiled["SkillUpAnimation"].GetString();
+				string SkillDownAnimation = ShmanBufSkillListFiled["SkillDownAnimation"].GetString();
+				string SkillLeftAnimation = ShmanBufSkillListFiled["SkillLeftAnimation"].GetString();
+				string SkillRightAnimation = ShmanBufSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = ShmanBufSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = ShmanBufSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1313,6 +1389,10 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanBufSkill->SkillDotTime = SkillDotTime;
 				ShamanBufSkill->SkillDistance = SkillDistance;
 				ShamanBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+				ShamanBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
+				ShamanBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
+				ShamanBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
+				ShamanBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
 				ShamanBufSkill->SkillExplanation = SkillExplation;
 				ShamanBufSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -1354,6 +1434,10 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				int8 SkillDebufAttackSpeed = (int8)TaioistAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
 				int8 SkillDebufMovingSpeed = (int8)TaioistAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
 				int8 StatusAbnormalityProbability = (int8)TaioistAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();		
+				string SkillUpAnimation = TaioistAttackSkillListFiled["SkillUpAnimation"].GetString();
+				string SkillDownAnimation = TaioistAttackSkillListFiled["SkillDownAnimation"].GetString();
+				string SkillLeftAnimation = TaioistAttackSkillListFiled["SkillLeftAnimation"].GetString();
+				string SkillRightAnimation = TaioistAttackSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = TaioistAttackSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = TaioistAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1379,6 +1463,10 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				TaioistAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 				TaioistAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;				
 				TaioistAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
+				TaioistAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
+				TaioistAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
+				TaioistAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
+				TaioistAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
 				TaioistAttackSkill->SkillExplanation = SkillExplation;
 				TaioistAttackSkill->SkillThumbnailImagePath = SkillImagePath;				
 
@@ -1402,6 +1490,10 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				int64 SkillDotTime = TaioistHealSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = TaioistHealSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = TaioistHealSkillListFiled["SkillTargetEffectTime"].GetFloat();
+				string SkillUpAnimation = TaioistHealSkillListFiled["SkillUpAnimation"].GetString();
+				string SkillDownAnimation = TaioistHealSkillListFiled["SkillDownAnimation"].GetString();
+				string SkillLeftAnimation = TaioistHealSkillListFiled["SkillLeftAnimation"].GetString();
+				string SkillRightAnimation = TaioistHealSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = TaioistHealSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = TaioistHealSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1424,6 +1516,10 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				TaioistHealSkill->SkillDotTime = SkillDotTime;
 				TaioistHealSkill->SkillDistance = SkillDistance;
 				TaioistHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+				TaioistHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
+				TaioistHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
+				TaioistHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
+				TaioistHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
 				TaioistHealSkill->SkillExplanation = SkillExplation;
 				TaioistHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -1460,6 +1556,10 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				int64 SkillDotTime = TaioistBufSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = TaioistBufSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = TaioistBufSkillListFiled["SkillTargetEffectTime"].GetFloat();
+				string SkillUpAnimation = TaioistBufSkillListFiled["SkillUpAnimation"].GetString();
+				string SkillDownAnimation = TaioistBufSkillListFiled["SkillDownAnimation"].GetString();
+				string SkillLeftAnimation = TaioistBufSkillListFiled["SkillLeftAnimation"].GetString();
+				string SkillRightAnimation = TaioistBufSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = TaioistBufSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = TaioistBufSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1489,6 +1589,10 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				TaioistBufSkill->SkillDotTime = SkillDotTime;
 				TaioistBufSkill->SkillDistance = SkillDistance;
 				TaioistBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+				TaioistBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
+				TaioistBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
+				TaioistBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
+				TaioistBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
 				TaioistBufSkill->SkillExplanation = SkillExplation;
 				TaioistBufSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -1530,6 +1634,10 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				int8 SkillDebufMovingSpeed = (int8)ThiefAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
 				int64 SkillDamageOverTime = ThiefAttackSkillListFiled["SkillDebufDamageOverTime"].GetInt64();								
 				int8 StatusAbnormalityProbability = (int8)ThiefAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
+				string SkillUpAnimation = ThiefAttackSkillListFiled["SkillUpAnimation"].GetString();
+				string SkillDownAnimation = ThiefAttackSkillListFiled["SkillDownAnimation"].GetString();
+				string SkillLeftAnimation = ThiefAttackSkillListFiled["SkillLeftAnimation"].GetString();
+				string SkillRightAnimation = ThiefAttackSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = ThiefAttackSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = ThiefAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1551,6 +1659,10 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				ThiefAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 				ThiefAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;				
 				ThiefAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
+				ThiefAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
+				ThiefAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
+				ThiefAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
+				ThiefAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
 				ThiefAttackSkill->SkillExplanation = SkillExplation;
 				ThiefAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -1574,6 +1686,10 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				int64 SkillDotTime = ThiefHealSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ThiefHealSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = ThiefHealSkillListFiled["SkillTargetEffectTime"].GetFloat();
+				string SkillUpAnimation = ThiefHealSkillListFiled["SkillUpAnimation"].GetString();
+				string SkillDownAnimation = ThiefHealSkillListFiled["SkillDownAnimation"].GetString();
+				string SkillLeftAnimation = ThiefHealSkillListFiled["SkillLeftAnimation"].GetString();
+				string SkillRightAnimation = ThiefHealSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = ThiefHealSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = ThiefHealSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1592,6 +1708,10 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				ThiefHealSkill->SkillDotTime = SkillDotTime;
 				ThiefHealSkill->SkillDistance = SkillDistance;
 				ThiefHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+				ThiefHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
+				ThiefHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
+				ThiefHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
+				ThiefHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
 				ThiefHealSkill->SkillExplanation = SkillExplation;
 				ThiefHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -1628,6 +1748,10 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				int64 SkillDotTime = ThiefBufSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ThiefBufSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = ThiefBufSkillListFiled["SkillTargetEffectTime"].GetFloat();
+				string SkillUpAnimation = ThiefBufSkillListFiled["SkillUpAnimation"].GetString();
+				string SkillDownAnimation = ThiefBufSkillListFiled["SkillDownAnimation"].GetString();
+				string SkillLeftAnimation = ThiefBufSkillListFiled["SkillLeftAnimation"].GetString();
+				string SkillRightAnimation = ThiefBufSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = ThiefBufSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = ThiefBufSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1657,6 +1781,10 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				ThiefBufSkill->SkillDotTime = SkillDotTime;
 				ThiefBufSkill->SkillDistance = SkillDistance;
 				ThiefBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+				ThiefBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
+				ThiefBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
+				ThiefBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
+				ThiefBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
 				ThiefBufSkill->SkillExplanation = SkillExplation;
 				ThiefBufSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -1697,8 +1825,11 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				int64 SkillDebufTime = ArcherAttackSkillListFiled["SkillDebufTime"].GetInt64();
 				int8 SkillDebufAttackSpeed = (int8)ArcherAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
 				int8 SkillDebufMovingSpeed = (int8)ArcherAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
-				int8 StatusAbnormalityProbability = (int8)ArcherAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
-				int SkillDebufRoot = ArcherAttackSkillListFiled["SkillDebufRoot"].GetBool();
+				int8 StatusAbnormalityProbability = (int8)ArcherAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();				
+				string SkillUpAnimation = ArcherAttackSkillListFiled["SkillUpAnimation"].GetString();
+				string SkillDownAnimation = ArcherAttackSkillListFiled["SkillDownAnimation"].GetString();
+				string SkillLeftAnimation = ArcherAttackSkillListFiled["SkillLeftAnimation"].GetString();
+				string SkillRightAnimation = ArcherAttackSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = ArcherAttackSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = ArcherAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1720,6 +1851,10 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				ArcherAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 				ArcherAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;				
 				ArcherAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
+				ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
+				ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
+				ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
+				ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
 				ArcherAttackSkill->SkillExplanation = SkillExplation;
 				ArcherAttackSkill->SkillThumbnailImagePath = SkillImagePath;				
 
@@ -1743,6 +1878,10 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				int64 SkillDotTime = ArcherHealSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ArcherHealSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = ArcherHealSkillListFiled["SkillTargetEffectTime"].GetFloat();
+				string SkillUpAnimation = ArcherHealSkillListFiled["SkillUpAnimation"].GetString();
+				string SkillDownAnimation = ArcherHealSkillListFiled["SkillDownAnimation"].GetString();
+				string SkillLeftAnimation = ArcherHealSkillListFiled["SkillLeftAnimation"].GetString();
+				string SkillRightAnimation = ArcherHealSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = ArcherHealSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = ArcherHealSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1761,6 +1900,10 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				ArcherHealSkill->SkillDotTime = SkillDotTime;
 				ArcherHealSkill->SkillDistance = SkillDistance;
 				ArcherHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+				ArcherHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
+				ArcherHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
+				ArcherHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
+				ArcherHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
 				ArcherHealSkill->SkillExplanation = SkillExplation;
 				ArcherHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -1797,6 +1940,10 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				int64 SkillDotTime = ArcherBufSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ArcherBufSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = ArcherBufSkillListFiled["SkillTargetEffectTime"].GetFloat();
+				string SkillUpAnimation = ArcherBufSkillListFiled["SkillUpAnimation"].GetString();
+				string SkillDownAnimation = ArcherBufSkillListFiled["SkillDownAnimation"].GetString();
+				string SkillLeftAnimation = ArcherBufSkillListFiled["SkillLeftAnimation"].GetString();
+				string SkillRightAnimation = ArcherBufSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = ArcherBufSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = ArcherBufSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1826,6 +1973,10 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				ArcherBufSkill->SkillDotTime = SkillDotTime;
 				ArcherBufSkill->SkillDistance = SkillDistance;
 				ArcherBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+				ArcherBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
+				ArcherBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
+				ArcherBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
+				ArcherBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
 				ArcherBufSkill->SkillExplanation = SkillExplation;
 				ArcherBufSkill->SkillThumbnailImagePath = SkillImagePath;
 
