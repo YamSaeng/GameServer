@@ -202,6 +202,14 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_MAGIC_CANCEL,
 
 	//------------------------------------------------------------
+	// 게임서버 캐릭터 애니메이션 출력
+	// int64 PlayerID
+	// en_MoveDir Dir
+	// string AnimationName
+	//------------------------------------------------------------
+	en_PACKET_S2C_ANIMATION_PLAY,
+
+	//------------------------------------------------------------
 	// 게임서버 캐릭터 스폰
 	// int64 AccountId
 	// int32 PlayerDBId
