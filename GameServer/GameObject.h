@@ -34,7 +34,7 @@ public:
 	int32 _ChannelArrayIndex;
 
 	en_ObjectNetworkState _NetworkState;
-	st_GameObjectInfo _GameObjectInfo;	
+	st_GameObjectInfo _GameObjectInfo;		
 	CChannel* _Channel;	
 
 	// 선택한 대상

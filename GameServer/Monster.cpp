@@ -3,6 +3,7 @@
 #include "Player.h"
 #include "DataManager.h"
 #include "ObjectManager.h"
+#include "Skill.h"
 
 CMonster::CMonster()
 {
@@ -13,6 +14,8 @@ CMonster::CMonster()
 	_MonsterState = en_MonsterState::MONSTER_IDLE;
 	_MovePoint = st_Vector2::Zero();
 	_PatrolPoint = st_Vector2::Zero();
+
+	_Target = nullptr;
 }
 
 CMonster::~CMonster()
@@ -22,9 +25,35 @@ CMonster::~CMonster()
 
 void CMonster::Update()
 {
+	CGameObject::Update();
+
 	if (_Target && _Target->_NetworkState == en_ObjectNetworkState::LEAVE)
 	{
 		_Target = nullptr;		
+	}
+
+	for (auto BufSkillIterator : _Bufs)
+	{
+		bool DeleteBufSkill = BufSkillIterator.second->Update();
+		if (DeleteBufSkill)
+		{
+			DeleteBuf(BufSkillIterator.first);
+			G_ObjectManager->SkillInfoReturn(BufSkillIterator.second->GetSkillInfo()->SkillMediumCategory,
+				BufSkillIterator.second->GetSkillInfo());
+			G_ObjectManager->SkillReturn(BufSkillIterator.second);
+		}
+	}
+
+	for (auto DebufSkillIterator : _DeBufs)
+	{
+		bool DeleteDebufSkill = DebufSkillIterator.second->Update();
+		if (DeleteDebufSkill)
+		{
+			DeleteDebuf(DebufSkillIterator.first);
+			G_ObjectManager->SkillInfoReturn(DebufSkillIterator.second->GetSkillInfo()->SkillMediumCategory,
+				DebufSkillIterator.second->GetSkillInfo());
+			G_ObjectManager->SkillReturn(DebufSkillIterator.second);
+		}
 	}
 
 	switch (_GameObjectInfo.ObjectPositionInfo.State)
@@ -35,7 +64,7 @@ void CMonster::Update()
 	case en_CreatureState::IDLE:
 		UpdateIdle();
 		break;
-	case en_CreatureState::PATROL:		
+	case en_CreatureState::PATROL:
 		switch (_MonsterState)
 		{
 		case en_MonsterState::MONSTER_READY_PATROL:
@@ -44,34 +73,25 @@ void CMonster::Update()
 		case en_MonsterState::MONSTER_PATROL:
 			UpdatePatrol();
 			break;
-		}		
+		}
 		break;
 	case en_CreatureState::MOVING:
 		switch (_MonsterState)
 		{
 		case en_MonsterState::MONSTER_IDLE:
-		case en_MonsterState::MONSTER_READY_MOVE:		
+		case en_MonsterState::MONSTER_READY_MOVE:
 			ReadMoving();
 			break;
 		case en_MonsterState::MONSTER_MOVE:
 			UpdateMoving();
 			break;
-		}		
+		}
 		break;
 	case en_CreatureState::RETURN_SPAWN_POSITION:
 		UpdateReturnSpawnPosition();
 		break;
 	case en_CreatureState::ATTACK:
 		UpdateAttack();
-		switch (_MonsterState)
-		{
-		case en_MonsterState::MONSTER_IDLE:
-			break;
-		case en_MonsterState::MONSTER_READY_ATTACK:
-			break;
-		case en_MonsterState::MONSTER_ATTACK:			
-			break;
-		}		
 		break;
 	case en_CreatureState::SPELL:
 		UpdateSpell();
@@ -79,18 +99,7 @@ void CMonster::Update()
 	case en_CreatureState::DEAD:
 		UpdateDead();
 		break;
-	case en_CreatureState::STUN:
-		UpdateStun();
-		break;
-	case en_CreatureState::PUSH_AWAY:
-		UpdatePushAway();
-		break;
-	case en_CreatureState::ROOT:
-		UpdateRoot();
-		break;
-	default:
-		break;
-	}	
+	}
 }
 
 void CMonster::PositionReset()
@@ -143,7 +152,7 @@ CGameObject* CMonster::FindTarget()
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::PATROL;
 		_MonsterState = en_MonsterState::MONSTER_READY_PATROL;
 
-		BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
+		SendMonsterChangeObjectState();		
 	}
 	else
 	{
@@ -151,8 +160,8 @@ CGameObject* CMonster::FindTarget()
 		if (Target->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::SPAWN_IDLE)
 		{
 			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::PATROL;
-			_MonsterState = en_MonsterState::MONSTER_READY_PATROL;
-			BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
+			_MonsterState = en_MonsterState::MONSTER_READY_PATROL;			
+			SendMonsterChangeObjectState();
 			return nullptr;
 		}
 
@@ -165,7 +174,7 @@ CGameObject* CMonster::FindTarget()
 			{
 				_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::PATROL;
 				_MonsterState = en_MonsterState::MONSTER_READY_PATROL;
-				BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
+				SendMonsterChangeObjectState();
 			}
 			// 대기 ( 타겟은 있지만 다른 오브젝트에 의해 갈 수 없어서 대기 상태로 변경 )
 			else
@@ -181,7 +190,7 @@ CGameObject* CMonster::FindTarget()
 
 			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
 			_MonsterState = en_MonsterState::MONSTER_READY_MOVE;
-			BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
+			SendMonsterChangeObjectState();
 		}
 	}
 
@@ -200,6 +209,22 @@ void CMonster::UpdateSpawnIdle()
 
 void CMonster::UpdateIdle()
 {
+	bool IsChohoneStun = _StatusAbnormal & STATUS_ABNORMAL_WARRIOR_CHOHONE;
+	bool IsLightNingStun = _StatusAbnormal & STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE;
+	bool IsShaeHoneRoot = _StatusAbnormal & STATUS_ABNORMAL_WARRIOR_SHAEHONE;
+	bool IsShmanRoot = _StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ROOT;
+	bool IsTaioistRoot = _StatusAbnormal & STATUS_ABNORMAL_TAIOIST_ROOT;
+
+	if (IsChohoneStun == true
+		|| IsLightNingStun == true
+		|| IsShaeHoneRoot == true
+		|| IsShmanRoot == true
+		|| IsTaioistRoot == true)
+	{
+		return;
+	}
+
+
 	if (_SearchTick > GetTickCount64())
 	{
 		return;
@@ -211,7 +236,7 @@ void CMonster::UpdateIdle()
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::PATROL;
 	_MonsterState = en_MonsterState::MONSTER_READY_PATROL;
 	
-	BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
+	SendMonsterChangeObjectState();
 }
 
 void CMonster::ReadyPatrol()
@@ -262,7 +287,7 @@ void CMonster::ReadyPatrol()
 			// 정찰 위치로 이동 할 수 없을 경우 상태값을 IDLE로 초기화한다.
 			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 			_MonsterState = en_MonsterState::MONSTER_IDLE;
-			BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
+			SendMonsterChangeObjectState();
 			return;
 		}		
 			
@@ -348,16 +373,34 @@ void CMonster::ReadMoving()
 		// 타겟 위치로 이동 할 수 없을 경우 상태값을 IDLE로 초기화한다.
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 		_MonsterState = en_MonsterState::MONSTER_IDLE;
-		BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
+		SendMonsterChangeObjectState();
 		return;
 	}
 
 	// 다음 칸 위치가 타겟이라면
 	if (Path[1] == TargetPosition)
 	{
+		st_Vector2 TargetPosition;
+		TargetPosition._X = _Target->_GameObjectInfo.ObjectPositionInfo.PositionX;
+		TargetPosition._Y = _Target->_GameObjectInfo.ObjectPositionInfo.PositionY;
+
+		st_Vector2 MonsterPosition;
+		MonsterPosition._X = _GameObjectInfo.ObjectPositionInfo.PositionX;
+		MonsterPosition._Y = _GameObjectInfo.ObjectPositionInfo.PositionY;
+
+		st_Vector2 DirectionVector = TargetPosition - MonsterPosition;
+		st_Vector2 NormalVector = st_Vector2::Normalize(DirectionVector);
+
+		en_MoveDir Dir = st_Vector2::GetMoveDir(NormalVector);
+		_GameObjectInfo.ObjectPositionInfo.MoveDir = Dir;
+
 		// 공격 상태로 바꾼다.
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;
-		BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
+		_MonsterState = en_MonsterState::MONSTER_ATTACK;
+
+		_DefaultAttackTick = GetTickCount64() + _AttackTickPoint;
+
+		SendMonsterChangeObjectState();
 	}
 	else
 	{
@@ -368,33 +411,44 @@ void CMonster::ReadMoving()
 
 void CMonster::UpdateMoving()
 {
-	st_Vector2 MonsterPosition;
-	MonsterPosition._X = _GameObjectInfo.ObjectPositionInfo.PositionX;
-	MonsterPosition._Y = _GameObjectInfo.ObjectPositionInfo.PositionY;
+	bool IsChohoneStun = _StatusAbnormal & STATUS_ABNORMAL_WARRIOR_CHOHONE;	
+	bool IsLightNingStun = _StatusAbnormal & STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE;
+	bool IsShaeHoneRoot = _StatusAbnormal & STATUS_ABNORMAL_WARRIOR_SHAEHONE;
+	bool IsShmanRoot = _StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ROOT;
+	bool IsTaioistRoot = _StatusAbnormal & STATUS_ABNORMAL_TAIOIST_ROOT;
+
+	// 기절 상태일 경우 
+	if (IsChohoneStun || IsLightNingStun)
+	{
+		return;
+	}
+
+	// 발묶임 상태일 경우
+	if (IsShaeHoneRoot || IsShmanRoot || IsTaioistRoot)
+	{
+		if (_Target != nullptr)
+		{
+			TargetAttackCheck();
+		}
+		else
+		{
+			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+			_MonsterState = en_MonsterState::MONSTER_IDLE;			
+		}
+			
+		return;
+	}	
+
+	st_Vector2 MonsterPosition = GetPosition();	
 
 	st_Vector2 DirectionVector = _MovePoint - MonsterPosition;
 	st_Vector2 NormalVector = st_Vector2::Normalize(DirectionVector);
 
 	//G_Logger->WriteStdOut(en_Color::RED, L"X : %0.1f Y : %0.1f\n", NormalVector._X, NormalVector._Y);
 
-	_GameObjectInfo.ObjectPositionInfo.MoveDir = st_Vector2::GetMoveDir(NormalVector);
+	_GameObjectInfo.ObjectPositionInfo.MoveDir = st_Vector2::GetMoveDir(NormalVector);	
 
-	/*switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
-	{
-	case en_MoveDir::UP:
-		G_Logger->WriteStdOut(en_Color::GREEN, L"Dir : 위 ");
-		break;
-	case en_MoveDir::DOWN:
-		G_Logger->WriteStdOut(en_Color::GREEN, L"Dir : 아래 ");
-		break;
-	case en_MoveDir::LEFT:
-		G_Logger->WriteStdOut(en_Color::GREEN, L"Dir : 왼쪽 ");
-		break;
-	case en_MoveDir::RIGHT:
-		G_Logger->WriteStdOut(en_Color::GREEN, L"Dir : 오른쪽 ");
-		break;
-	}
-
+	/*
 	G_Logger->WriteStdOut(en_Color::RED, L"PositionX [%0.1f] PositionY [%0.1f] GoalPositionX [%0.1f] GoalPosition [%0.1f]  \n",
 		_GameObjectInfo.ObjectPositionInfo.PositionX,
 		_GameObjectInfo.ObjectPositionInfo.PositionY,
@@ -402,6 +456,16 @@ void CMonster::UpdateMoving()
 		_MovePoint._Y);*/
 		
 	Move();	
+
+	if (_Target != nullptr)
+	{
+		TargetAttackCheck();
+	}
+	else
+	{
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+		_MonsterState = en_MonsterState::MONSTER_IDLE;
+	}
 
 	//if (_MoveTick > GetTickCount64())
 	//{
@@ -480,7 +544,7 @@ void CMonster::UpdateReturnSpawnPosition()
 	if (st_Vector2Int::Distance(_SpawnPosition, MonsterPosition) <= 2)
 	{
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-		BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
+		SendMonsterChangeObjectState();
 		return;
 	}
 
@@ -505,47 +569,27 @@ void CMonster::UpdateReturnSpawnPosition()
 	BroadCastPacket(en_PACKET_S2C_MONSTER_MOVE);	
 }
 
-void CMonster::ReadAttack()
-{
-	st_Vector2 TargetPosition;
-	TargetPosition._X = _Target->_GameObjectInfo.ObjectPositionInfo.PositionX;
-	TargetPosition._Y = _Target->_GameObjectInfo.ObjectPositionInfo.PositionY;
-
-	st_Vector2 MonsterPosition;
-	MonsterPosition._X = _GameObjectInfo.ObjectPositionInfo.PositionX;
-	MonsterPosition._Y = _GameObjectInfo.ObjectPositionInfo.PositionY;
-
-	st_Vector2 DirectionVector = TargetPosition - MonsterPosition;
-	st_Vector2 NormalVector = st_Vector2::Normalize(DirectionVector);
-
-	en_MoveDir Dir = st_Vector2::GetMoveDir(NormalVector);
-
-	switch (Dir)
-	{
-	case en_MoveDir::UP:
-		break;
-	case en_MoveDir::DOWN:
-	
-		break;
-	case en_MoveDir::LEFT:
-		break;
-	case en_MoveDir::RIGHT:
-		break;	
-	}	
-}
-
 void CMonster::UpdateAttack()
 {
-	if (_AttackTick == 0)
+	bool IsChohoneStun = _StatusAbnormal & STATUS_ABNORMAL_WARRIOR_CHOHONE;
+	bool IsLightNingStun = _StatusAbnormal & STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE;	
+
+	if (IsChohoneStun == true || IsLightNingStun == true)
+	{
+		return;
+	}
+
+	if (_DefaultAttackTick == 0)
 	{
 		// 타겟이 사라지거나 채널이 달라질 경우 타겟을 해제
-		if (_Target == nullptr || _Target->_Channel != _Channel)
+		if (_Target == nullptr || _Target->_NetworkState == en_ObjectNetworkState::LEAVE || _Target->_Channel != _Channel)
 		{
-			_Target = nullptr;
-			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
+			_Target = nullptr;			
+			_MonsterState = en_MonsterState::MONSTER_IDLE;
+			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;			
 			return;
-		}
-
+		}			
+		
 		// 공격이 가능한지 확인
 		st_Vector2Int TargetCellPosition = _Target->GetCellPosition();
 		st_Vector2Int MyCellPosition = GetCellPosition();
@@ -553,7 +597,7 @@ void CMonster::UpdateAttack()
 
 		_GameObjectInfo.ObjectPositionInfo.MoveDir = st_Vector2Int::GetMoveDir(Direction);
 
-		BroadCastPacket(en_PACKET_S2C_OBJECT_STATE_CHANGE);
+		SendMonsterChangeObjectState();
 
 		int32 Distance = st_Vector2Int::Distance(TargetCellPosition, MyCellPosition);
 		// 타겟과의 거리가 공격 범위 안에 속하고 X==0 || Y ==0 일때( 대각선은 제한) 공격
@@ -561,6 +605,7 @@ void CMonster::UpdateAttack()
 		if (CanUseAttack == false)
 		{
 			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
+			_MonsterState = en_MonsterState::MONSTER_READY_MOVE;
 			return;
 		}
 
@@ -580,15 +625,28 @@ void CMonster::UpdateAttack()
 
 		_Target->OnDamaged(this, FinalDamage);
 
-		CMessage* ResBearAttackPacket = G_ObjectManager->GameServer->MakePacketResAttack(_GameObjectInfo.ObjectId, _Target->_GameObjectInfo.ObjectId, en_SkillType::SKILL_BEAR_NORMAL, FinalDamage, IsCritical);
+		CMessage* ResBearAttackPacket = G_ObjectManager->GameServer->MakePacketResAttack(_GameObjectInfo.ObjectId,
+			_Target->_GameObjectInfo.ObjectId,
+			en_SkillType::SKILL_SLIME_NORMAL,
+			FinalDamage, IsCritical);
 		G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResBearAttackPacket);
 		ResBearAttackPacket->Free();
 
+		wstring SlimeAttackAnimation = L"SLIME_ATTACK";
+
+		// 공격 애니메이션 출력
+		CMessage* AnimationPlayPacket = G_ObjectManager->GameServer->MakePacketResAnimationPlay(_GameObjectInfo.ObjectId,
+			_GameObjectInfo.ObjectPositionInfo.MoveDir, SlimeAttackAnimation);
+		G_ObjectManager->GameServer->SendPacketFieldOfView(this, AnimationPlayPacket);
+		AnimationPlayPacket->Free();
+
 		// 주위 플레이어들에게 데미지 적용 결과 전송
-		BroadCastPacket(en_PACKET_S2C_OBJECT_STAT_CHANGE);
+		CMessage* ResChangeObjectStatPacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_Target->_GameObjectInfo.ObjectId, _Target->_GameObjectInfo.ObjectStatInfo);
+		G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResChangeObjectStatPacket);
+		ResChangeObjectStatPacket->Free();		
 
 		// 1.2초마다 공격
-		_AttackTick = GetTickCount64() + _AttackTickPoint;
+		_DefaultAttackTick = GetTickCount64() + _AttackTickPoint;
 
 		wchar_t BearAttackMessage[64] = L"0";
 		wsprintf(BearAttackMessage, L"%s이 일반 공격을 사용해 %s에게 %d의 데미지를 줬습니다", _GameObjectInfo.ObjectName.c_str(), _Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
@@ -600,12 +658,12 @@ void CMonster::UpdateAttack()
 		ResSlimeSystemMessage->Free();
 	}
 
-	if (_AttackTick > GetTickCount64())
+	if (_DefaultAttackTick > GetTickCount64())
 	{
 		return;
 	}
 
-	_AttackTick = 0;
+	_DefaultAttackTick = 0;
 }
 
 void CMonster::UpdateSpell()
@@ -615,18 +673,6 @@ void CMonster::UpdateSpell()
 void CMonster::UpdateDead()
 {
 
-}
-
-void CMonster::UpdateStun()
-{
-}
-
-void CMonster::UpdatePushAway()
-{
-}
-
-void CMonster::UpdateRoot()
-{	
 }
 
 void CMonster::Move()
@@ -679,6 +725,12 @@ void CMonster::Move()
 					_MonsterState = en_MonsterState::MONSTER_READY_MOVE;
 				}
 				break;
+			case en_CreatureState::ATTACK:				
+				if (abs(_Target->_GameObjectInfo.ObjectPositionInfo.PositionY - _GameObjectInfo.ObjectPositionInfo.PositionY) <= 0.5f)
+				{
+					_MonsterState = en_MonsterState::MONSTER_ATTACK;
+				}
+				break;
 			}			
 			break;
 		case en_MoveDir::DOWN:
@@ -696,6 +748,12 @@ void CMonster::Move()
 				if (_GameObjectInfo.ObjectPositionInfo.PositionY <= _MovePoint._Y)
 				{
 					_MonsterState = en_MonsterState::MONSTER_READY_MOVE;
+				}
+				break;
+			case en_CreatureState::ATTACK:
+				if (abs(_Target->_GameObjectInfo.ObjectPositionInfo.PositionY - _GameObjectInfo.ObjectPositionInfo.PositionY) <= 0.5f)
+				{
+					_MonsterState = en_MonsterState::MONSTER_ATTACK;
 				}
 				break;
 			}			
@@ -717,6 +775,12 @@ void CMonster::Move()
 					_MonsterState = en_MonsterState::MONSTER_READY_MOVE;
 				}
 				break;			
+			case en_CreatureState::ATTACK:
+				if (abs(_Target->_GameObjectInfo.ObjectPositionInfo.PositionX - _GameObjectInfo.ObjectPositionInfo.PositionX) <= 0.5f)
+				{
+					_MonsterState = en_MonsterState::MONSTER_ATTACK;
+				}
+				break;
 			}			
 			break;
 		case en_MoveDir::RIGHT:
@@ -736,6 +800,12 @@ void CMonster::Move()
 					_MonsterState = en_MonsterState::MONSTER_READY_MOVE;
 				}
 				break;
+			case en_CreatureState::ATTACK:
+				if (abs(_Target->_GameObjectInfo.ObjectPositionInfo.PositionX - _GameObjectInfo.ObjectPositionInfo.PositionX) <= 0.5f)
+				{
+					_MonsterState = en_MonsterState::MONSTER_ATTACK;
+				}
+				break;
 			}			
 			break;
 		}
@@ -752,6 +822,9 @@ void CMonster::Move()
 			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
 			_MonsterState = en_MonsterState::MONSTER_IDLE;
 			_MoveTick = GetTickCount64() + 300;
+			break;		
+		case en_CreatureState::ATTACK:
+			_MonsterState = en_MonsterState::MONSTER_ATTACK;
 			break;
 		}		
 
@@ -782,5 +855,71 @@ void CMonster::Move()
 			MonsterMovePacket->Free();
 		}		
 		break;	
+	case en_CreatureState::ATTACK:
+		{
+			CMessage* MonsterMovePacket = G_ObjectManager->GameServer->MakePacketResMonsterMove(_GameObjectInfo.ObjectId,
+				_GameObjectInfo.ObjectType,
+				CanMove,
+				_GameObjectInfo.ObjectPositionInfo,
+				_MonsterState);
+			G_ObjectManager->GameServer->SendPacketFieldOfView(this, MonsterMovePacket);
+			MonsterMovePacket->Free();
+		}
+		break;
 	}	
+}
+
+void CMonster::SendMonsterChangeObjectState()
+{
+	CMessage* MonsterObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeMonsterObjectState(_GameObjectInfo.ObjectId,
+		_GameObjectInfo.ObjectPositionInfo.MoveDir,
+		_GameObjectInfo.ObjectType,
+		_GameObjectInfo.ObjectPositionInfo.State,
+		_MonsterState);
+	G_ObjectManager->GameServer->SendPacketFieldOfView(this, MonsterObjectStateChangePacket);
+	MonsterObjectStateChangePacket->Free();
+}
+
+void CMonster::TargetAttackCheck()
+{
+	st_Vector2Int MonsterCellPosition;
+	MonsterCellPosition._X = _GameObjectInfo.ObjectPositionInfo.CollisionPositionX;
+	MonsterCellPosition._Y = _GameObjectInfo.ObjectPositionInfo.CollisionPositionY;
+
+	st_Vector2Int TargetPosition;
+	TargetPosition._X = _Target->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX;
+	TargetPosition._Y = _Target->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY;
+
+	// 타겟 위치까지 길을 찾는다.
+	vector<st_Vector2Int> Path = _Channel->_Map->FindPath(this, MonsterCellPosition, TargetPosition);
+	if (Path[1] == TargetPosition)
+	{
+		st_Vector2 TargetPosition;
+		TargetPosition._X = _Target->_GameObjectInfo.ObjectPositionInfo.PositionX;
+		TargetPosition._Y = _Target->_GameObjectInfo.ObjectPositionInfo.PositionY;
+
+		st_Vector2 MonsterPosition;
+		MonsterPosition._X = _GameObjectInfo.ObjectPositionInfo.PositionX;
+		MonsterPosition._Y = _GameObjectInfo.ObjectPositionInfo.PositionY;
+
+		st_Vector2 DirectionVector = TargetPosition - MonsterPosition;
+		st_Vector2 NormalVector = st_Vector2::Normalize(DirectionVector);
+
+		en_MoveDir Dir = st_Vector2::GetMoveDir(NormalVector);
+		_GameObjectInfo.ObjectPositionInfo.MoveDir = Dir;
+
+		// 공격 상태로 바꾼다.
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;
+		_MonsterState = en_MonsterState::MONSTER_ATTACK;
+
+		_DefaultAttackTick = GetTickCount64() + _AttackTickPoint;
+
+		CMessage* MonsterObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeMonsterObjectState(_GameObjectInfo.ObjectId,
+			_GameObjectInfo.ObjectPositionInfo.MoveDir,
+			_GameObjectInfo.ObjectType,
+			_GameObjectInfo.ObjectPositionInfo.State,
+			_MonsterState);
+		G_ObjectManager->GameServer->SendPacketFieldOfView(this, MonsterObjectStateChangePacket);
+		MonsterObjectStateChangePacket->Free();		
+	}
 }

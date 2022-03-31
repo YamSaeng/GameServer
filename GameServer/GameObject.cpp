@@ -46,29 +46,29 @@ void CGameObject::Update()
 		switch ((en_GameObjectJobType)GameObjectJob->GameObjectJobType)
 		{
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SHOCK_RELEASE:
-			{			
-				for (auto DebufSkillIter : _DeBufs)
-				{
-					if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_KNIGHT_CHOHONE
-						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE)
-					{
-						DebufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
-					}
-				}				
-			}			
-			break;
-		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_BACK_TELEPORT:
+		{
+			for (auto DebufSkillIter : _DeBufs)
 			{
-				for (auto DebufSkillIter : _DeBufs)
+				if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_KNIGHT_CHOHONE
+					|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE)
 				{
-					if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_ROOT
-						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_TAIOIST_ROOT)
-					{
-						DebufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
-					}
+					DebufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
 				}
 			}
-			break;
+		}
+		break;
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_BACK_TELEPORT:
+		{
+			for (auto DebufSkillIter : _DeBufs)
+			{
+				if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_ROOT
+					|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_TAIOIST_ROOT)
+				{
+					DebufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
+				}
+			}
+		}
+		break;
 		}
 
 		if (GameObjectJob->GameObjectJobMessage != nullptr)
@@ -301,12 +301,7 @@ void CGameObject::BroadCastPacket(en_GAME_SERVER_PACKET_TYPE PacketType, bool Ca
 	CMessage* ResPacket = nullptr;
 
 	switch (PacketType)
-	{							
-	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_OBJECT_STAT_CHANGE:
-		ResPacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_Owner->_GameObjectInfo.ObjectId,
-			
-			_Owner->_GameObjectInfo.ObjectStatInfo);
-		break;
+	{								
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_DIE:			
 		ResPacket = G_ObjectManager->GameServer->MakePacketObjectDie(this->_GameObjectInfo.ObjectId);
 		break;		

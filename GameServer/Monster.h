@@ -13,7 +13,7 @@ public:
 	// 몬스터 죽이면 얻는 DPPoint
 	int16 _GetDPPoint;	
 	// 몬스터 죽이면 얻는 ExpPoint
-	int32 _GetExpPoint;
+	int32 _GetExpPoint;	
 
 	en_MonsterState _MonsterState;
 
@@ -32,6 +32,7 @@ public:
 	// 몬스터 초기화
 	virtual void Init(st_Vector2Int SpawnPosition);	
 protected:
+	CGameObject* _Target;
 	//---------------------
 	// 정찰 위치
 	//---------------------
@@ -83,7 +84,7 @@ protected:
 	//--------------------------------------
 	// Attack 상태에서 Attack을 실행할 Tick
 	//--------------------------------------
-	uint64 _AttackTick;
+	uint64 _DefaultAttackTick;
 	//------------------------------------
 	// 공격 속도
 	//------------------------------------
@@ -120,7 +121,6 @@ protected:
 	//------------------------
 	// Attack 상태 Update
 	//------------------------
-	void ReadAttack();
 	virtual void UpdateAttack();
 	//------------------------
 	// Spell 상태 Update
@@ -129,20 +129,12 @@ protected:
 	//------------------------
 	// Dead 상태 Update
 	//------------------------
-	virtual void UpdateDead();		
-	//------------------------
-	// Stun 상태 Update
-	//------------------------
-	virtual void UpdateStun();
-	//------------------------
-	// PushAway 상태 Update
-	//------------------------
-	virtual void UpdatePushAway();
-	//------------------------
-	// Root 상태 Update
-	//------------------------
-	virtual void UpdateRoot();
+	virtual void UpdateDead();			
 
 	void Move();
+
+	void SendMonsterChangeObjectState();		
+
+	void TargetAttackCheck();
 };
 
