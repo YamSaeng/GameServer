@@ -979,6 +979,7 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				string SkillDownAnimation = WarriorAttackSkillListFiled["SkillDownAnimation"].GetString();
 				string SkillLeftAnimation = WarriorAttackSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = WarriorAttackSkillListFiled["SkillRightAnimation"].GetString();
+				string NextComboSkill = WarriorAttackSkillListFiled["NextComboSkill"].GetString();
 				string SkillExplation = WarriorAttackSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = WarriorAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1014,7 +1015,17 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				WarriorAttackSkill->SkillDistance = SkillDistance;
 				WarriorAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;										
 				WarriorAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
-				WarriorAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;	
+				WarriorAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
+
+				if (NextComboSkill == "SKILL_KNIGHT_CONVERSION_ATTACK")
+				{
+					WarriorAttackSkill->NextComboSkill = en_SkillType::SKILL_KNIGHT_CONVERSION_ATTACK;
+				}
+				else if (NextComboSkill == "SKILL_TYPE_NONE")
+				{
+					WarriorAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+				}
+				
 				WarriorAttackSkill->SkillExplanation = SkillExplation;
 				WarriorAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
 				WarriorAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
@@ -1047,6 +1058,7 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				string SkillDownAnimation = WarriorHealSkillListFiled["SkillDownAnimation"].GetString();
 				string SkillLeftAnimation = WarriorHealSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = WarriorHealSkillListFiled["SkillRightAnimation"].GetString();
+				string NextComboSkill = WarriorHealSkillListFiled["NextComboSkill"].GetString();
 				string SkillExplation = WarriorHealSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = WarriorHealSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1060,6 +1072,12 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				WarriorHealSkill->SkillDotTime = SkillDotTime;
 				WarriorHealSkill->SkillDistance = SkillDistance;
 				WarriorHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+
+				if (NextComboSkill == "SKILL_TYPE_NONE")
+				{
+					WarriorHealSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+				}
+
 				WarriorHealSkill->SkillExplanation = SkillExplation;
 				WarriorHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
 				WarriorHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
@@ -1104,6 +1122,7 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				string SkillDownAnimation = WarriorBufSkillListFiled["SkillDownAnimation"].GetString();
 				string SkillLeftAnimation = WarriorBufSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = WarriorBufSkillListFiled["SkillRightAnimation"].GetString();
+				string NextComboSkill = WarriorBufSkillListFiled["NextComboSkill"].GetString();
 				string SkillExplation = WarriorBufSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = WarriorBufSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1137,6 +1156,12 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				WarriorBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				WarriorBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				WarriorBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+
+				if (NextComboSkill == "SKILL_TYPE_NONE")
+				{
+					WarriorBufSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+				}
+
 				WarriorBufSkill->SkillExplanation = SkillExplation;
 				WarriorBufSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -1181,6 +1206,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				string SkillDownAnimation = ShmanAttackSkillListFiled["SkillDownAnimation"].GetString();
 				string SkillLeftAnimation = ShmanAttackSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = ShmanAttackSkillListFiled["SkillRightAnimation"].GetString();
+				string NextComboSkill = ShmanAttackSkillListFiled["NextComboSkill"].GetString();
 				string SkillExplation = ShmanAttackSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = ShmanAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1226,6 +1252,16 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+
+				if (NextComboSkill == "SKILL_TYPE_NONE")
+				{
+					ShamanAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+				}
+				else if (NextComboSkill == "SKILL_SHAMAN_ICE_WAVE")
+				{
+					ShamanAttackSkill->NextComboSkill = en_SkillType::SKILL_SHAMAN_ICE_WAVE;
+				}
+
 				ShamanAttackSkill->SkillExplanation = SkillExplation;
 				ShamanAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -1251,6 +1287,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				string SkillDownAnimation = ShamanTacTicSkillListFiled["SkillDownAnimation"].GetString();
 				string SkillLeftAnimation = ShamanTacTicSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = ShamanTacTicSkillListFiled["SkillRightAnimation"].GetString();
+				string NextComboSkill = ShamanTacTicSkillListFiled["NextComboSkill"].GetString();
 				string SkillExplation = ShamanTacTicSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = ShamanTacTicSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1271,6 +1308,12 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+
+				if (NextComboSkill == "SKILL_TYPE_NONE")
+				{
+					ShamanTacTicSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+				}
+
 				ShamanTacTicSkill->SkillExplanation = SkillExplation;
 				ShamanTacTicSkill->SkillThumbnailImagePath = SkillImagePath;
 								
@@ -1298,6 +1341,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				string SkillDownAnimation = ShamanHealSkillListFiled["SkillDownAnimation"].GetString();
 				string SkillLeftAnimation = ShamanHealSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = ShamanHealSkillListFiled["SkillRightAnimation"].GetString();
+				string NextComboSkill = ShamanHealSkillListFiled["NextComboSkill"].GetString();
 				string SkillExplation = ShamanHealSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = ShamanHealSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1320,6 +1364,13 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				ShamanHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				ShamanHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				
+
+				if (NextComboSkill == "SKILL_TYPE_NONE")
+				{
+					ShamanHealSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+				}
+
 				ShamanHealSkill->SkillExplanation = SkillExplation;
 				ShamanHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -1360,6 +1411,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				string SkillDownAnimation = ShmanBufSkillListFiled["SkillDownAnimation"].GetString();
 				string SkillLeftAnimation = ShmanBufSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = ShmanBufSkillListFiled["SkillRightAnimation"].GetString();
+				string NextComboSkill = ShmanBufSkillListFiled["NextComboSkill"].GetString();
 				string SkillExplation = ShmanBufSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = ShmanBufSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1393,6 +1445,12 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				ShamanBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				ShamanBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				
+				if (NextComboSkill == "SKILL_TYPE_NONE")
+				{
+					ShamanBufSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+				}
+
 				ShamanBufSkill->SkillExplanation = SkillExplation;
 				ShamanBufSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -1438,6 +1496,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				string SkillDownAnimation = TaioistAttackSkillListFiled["SkillDownAnimation"].GetString();
 				string SkillLeftAnimation = TaioistAttackSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = TaioistAttackSkillListFiled["SkillRightAnimation"].GetString();
+				string NextComboSkill = TaioistAttackSkillListFiled["NextComboSkill"].GetString();
 				string SkillExplation = TaioistAttackSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = TaioistAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1467,6 +1526,12 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				TaioistAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				TaioistAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				TaioistAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				
+				if (NextComboSkill == "SKILL_TYPE_NONE")
+				{
+					TaioistAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+				}
+				
 				TaioistAttackSkill->SkillExplanation = SkillExplation;
 				TaioistAttackSkill->SkillThumbnailImagePath = SkillImagePath;				
 
@@ -1494,6 +1559,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				string SkillDownAnimation = TaioistHealSkillListFiled["SkillDownAnimation"].GetString();
 				string SkillLeftAnimation = TaioistHealSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = TaioistHealSkillListFiled["SkillRightAnimation"].GetString();
+				string NextComboSkill = TaioistHealSkillListFiled["NextComboSkill"].GetString();
 				string SkillExplation = TaioistHealSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = TaioistHealSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1520,6 +1586,12 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				TaioistHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				TaioistHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				TaioistHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				
+				if (NextComboSkill == "SKILL_TYPE_NONE")
+				{
+					TaioistHealSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+				}
+
 				TaioistHealSkill->SkillExplanation = SkillExplation;
 				TaioistHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -1560,6 +1632,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				string SkillDownAnimation = TaioistBufSkillListFiled["SkillDownAnimation"].GetString();
 				string SkillLeftAnimation = TaioistBufSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = TaioistBufSkillListFiled["SkillRightAnimation"].GetString();
+				string NextComboSkill = TaioistBufSkillListFiled["NextComboSkill"].GetString();
 				string SkillExplation = TaioistBufSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = TaioistBufSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1593,6 +1666,12 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				TaioistBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				TaioistBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				TaioistBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				
+				if (NextComboSkill == "SKILL_TYPE_NONE")
+				{
+					TaioistBufSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+				}
+
 				TaioistBufSkill->SkillExplanation = SkillExplation;
 				TaioistBufSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -1638,6 +1717,7 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				string SkillDownAnimation = ThiefAttackSkillListFiled["SkillDownAnimation"].GetString();
 				string SkillLeftAnimation = ThiefAttackSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = ThiefAttackSkillListFiled["SkillRightAnimation"].GetString();
+				string NextComboSkill = ThiefAttackSkillListFiled["NextComboSkill"].GetString();
 				string SkillExplation = ThiefAttackSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = ThiefAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1663,6 +1743,12 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				ThiefAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				ThiefAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				ThiefAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				
+				if (NextComboSkill == "SKILL_TYPE_NONE")
+				{
+					ThiefAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+				}
+
 				ThiefAttackSkill->SkillExplanation = SkillExplation;
 				ThiefAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -1690,6 +1776,7 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				string SkillDownAnimation = ThiefHealSkillListFiled["SkillDownAnimation"].GetString();
 				string SkillLeftAnimation = ThiefHealSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = ThiefHealSkillListFiled["SkillRightAnimation"].GetString();
+				string NextComboSkill = ThiefHealSkillListFiled["NextComboSkill"].GetString();
 				string SkillExplation = ThiefHealSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = ThiefHealSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1712,6 +1799,12 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				ThiefHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				ThiefHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				ThiefHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				
+				if (NextComboSkill == "SKILL_TYPE_NONE")
+				{
+					ThiefHealSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+				}
+
 				ThiefHealSkill->SkillExplanation = SkillExplation;
 				ThiefHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -1752,6 +1845,7 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				string SkillDownAnimation = ThiefBufSkillListFiled["SkillDownAnimation"].GetString();
 				string SkillLeftAnimation = ThiefBufSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = ThiefBufSkillListFiled["SkillRightAnimation"].GetString();
+				string NextComboSkill = ThiefBufSkillListFiled["NextComboSkill"].GetString();
 				string SkillExplation = ThiefBufSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = ThiefBufSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1785,6 +1879,12 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				ThiefBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				ThiefBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				ThiefBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				
+				if (NextComboSkill == "SKILL_TYPE_NONE")
+				{
+					ThiefBufSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+				}
+				
 				ThiefBufSkill->SkillExplanation = SkillExplation;
 				ThiefBufSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -1830,6 +1930,7 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				string SkillDownAnimation = ArcherAttackSkillListFiled["SkillDownAnimation"].GetString();
 				string SkillLeftAnimation = ArcherAttackSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = ArcherAttackSkillListFiled["SkillRightAnimation"].GetString();
+				string NextComboSkill = ArcherAttackSkillListFiled["NextComboSkill"].GetString();
 				string SkillExplation = ArcherAttackSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = ArcherAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1855,6 +1956,12 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				
+				if (NextComboSkill == "SKILL_TYPE_NONE")
+				{
+					ArcherAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+				}
+				
 				ArcherAttackSkill->SkillExplanation = SkillExplation;
 				ArcherAttackSkill->SkillThumbnailImagePath = SkillImagePath;				
 
@@ -1882,6 +1989,7 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				string SkillDownAnimation = ArcherHealSkillListFiled["SkillDownAnimation"].GetString();
 				string SkillLeftAnimation = ArcherHealSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = ArcherHealSkillListFiled["SkillRightAnimation"].GetString();
+				string NextComboSkill = ArcherHealSkillListFiled["NextComboSkill"].GetString();
 				string SkillExplation = ArcherHealSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = ArcherHealSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1904,6 +2012,12 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				ArcherHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				ArcherHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				ArcherHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				
+				if (NextComboSkill == "SKILL_TYPE_NONE")
+				{
+					ArcherHealSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+				}
+				
 				ArcherHealSkill->SkillExplanation = SkillExplation;
 				ArcherHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -1944,6 +2058,7 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				string SkillDownAnimation = ArcherBufSkillListFiled["SkillDownAnimation"].GetString();
 				string SkillLeftAnimation = ArcherBufSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = ArcherBufSkillListFiled["SkillRightAnimation"].GetString();
+				string NextComboSkill = ArcherBufSkillListFiled["NextComboSkill"].GetString();
 				string SkillExplation = ArcherBufSkillListFiled["SkillExplanation"].GetString();
 				string SkillImagePath = ArcherBufSkillListFiled["SkillThumbnailImagePath"].GetString();
 
@@ -1977,6 +2092,12 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				ArcherBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				ArcherBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				ArcherBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+								
+				if (NextComboSkill == "SKILL_TYPE_NONE")
+				{
+					ArcherBufSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+				}
+
 				ArcherBufSkill->SkillExplanation = SkillExplation;
 				ArcherBufSkill->SkillThumbnailImagePath = SkillImagePath;
 

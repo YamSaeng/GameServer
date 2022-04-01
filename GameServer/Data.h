@@ -49,6 +49,7 @@ struct st_SkillData
 	int SkillDistance;
 	float SkillTargetEffectTime;
 	map<en_MoveDir, string> SkillAnimations; // 스킬 애니메이션
+	en_SkillType NextComboSkill;
 	string SkillExplanation;
 	string SkillThumbnailImagePath;
 };

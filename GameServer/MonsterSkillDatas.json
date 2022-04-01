@@ -14,6 +14,15 @@
           "SkillDurationTime": 0,
           "SkillDotTime": 0,
           "SkillDistance": 1,
+          "SkillTargetEffectTime": 0,
+          "SkillDebufAttackSpeed": 0,
+          "SkillDebufMovingSpeed": 0,
+          "StatusAbnormalityProbability": 0,
+          "SkillUpAnimation": "SLIME_ATTACK",
+          "SkillDownAnimation": "SLIME_ATTACK",
+          "SkillLeftAnimation": "SLIME_ATTACK",
+          "SkillRightAnimation": "SLIME_ATTACK",
+          "NextComboSkill": "SKILL_TYPE_NONE",
           "SkillThumbnailImagePath": ""
         },
         {
@@ -27,6 +36,15 @@
           "SkillDurationTime": 0,
           "SkillDotTime": 0,
           "SkillDistance": 1,
+          "SkillTargetEffectTime": 0,
+          "SkillDebufAttackSpeed": 0,
+          "SkillDebufMovingSpeed": 0,
+          "StatusAbnormalityProbability": 0,
+          "SkillUpAnimation": "BEAR_ATTACK",
+          "SkillDownAnimation": "BEAR_ATTACK",
+          "SkillLeftAnimation": "BEAR_ATTACK",
+          "SkillRightAnimation": "BEAR_ATTACK",
+          "NextComboSkill": "SKILL_TYPE_NONE",
           "SkillThumbnailImagePath": ""
         }
       ],
