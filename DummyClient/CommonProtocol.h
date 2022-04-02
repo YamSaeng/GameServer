@@ -533,6 +533,22 @@ enum en_GAME_SERVER_PACKET_TYPE
 	//------------------------------------------------------------
 	en_PACKET_S2C_BUF_DEBUF_OFF,
 
+	//------------------------------------------------------------
+	// 게임서버 연속기 스킬 켜기 패킷
+	// int8 QuickSlotBarIndex
+	// int8 QuickSlotBarSlotIndex
+	// st_SkillInfo ComboSkillInfo
+	//------------------------------------------------------------
+	en_PACKET_S2C_COMBO_SKILL_ON,
+
+	//------------------------------------------------------------
+	// 게임서버 연속기 스킬 끄기 패킷
+	// int8 QuickSlotBarIndex
+	// int8 QuickSlotBarSlotIndex
+	// en_SkillType ComboSkilltype
+	//------------------------------------------------------------
+	en_PACKET_S2C_COMBO_SKILL_OFF,
+
 	//-----------------------------------------------------------
 	// 게임서버 개인 메세지 전송
 	// int8 MessageCount
