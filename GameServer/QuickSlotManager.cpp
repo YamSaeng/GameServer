@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "QuickSlotManager.h"
+#include "Skill.h"
 #include "QuickSlotBar.h"
 
 CQuickSlotManager::CQuickSlotManager()
@@ -61,6 +62,29 @@ st_QuickSlotBarSlotInfo* CQuickSlotManager::FindQuickSlotBar(int8 QuickSlotBarIn
 	{
 		return (*FindQuickSlotIterator).second->FindQuickSlot(QuickSlotbarSlotIndex);
 	}
+}
+
+vector<st_QuickSlotBarPosition> CQuickSlotManager::FindQuickSlotBar(en_SkillType FindSkillType)
+{
+	vector<st_QuickSlotBarPosition> QuickSlotSkillPositions;
+
+	for (auto QuickSlotBarIterator : _QuickSlotBars)
+	{
+		for (auto QuickSlotBarSlotIterator : QuickSlotBarIterator.second->_QuickSlotBarSlotInfos)
+		{
+			st_QuickSlotBarSlotInfo* SearchingQuickSlotBarSlot = QuickSlotBarSlotIterator.second;
+			if (SearchingQuickSlotBarSlot->QuickBarSkill != nullptr && SearchingQuickSlotBarSlot->QuickBarSkill->GetSkillInfo()->SkillType == FindSkillType)
+			{
+				st_QuickSlotBarPosition SearchingCompleteQuickSlotPosition;
+				SearchingCompleteQuickSlotPosition.QuickSlotBarIndex = SearchingQuickSlotBarSlot->QuickSlotBarIndex;
+				SearchingCompleteQuickSlotPosition.QuickSlotBarSlotIndex = SearchingQuickSlotBarSlot->QuickSlotBarSlotIndex;
+
+				QuickSlotSkillPositions.push_back(SearchingCompleteQuickSlotPosition);
+			}
+		}
+	}
+
+	return QuickSlotSkillPositions;
 }
 
 void CQuickSlotManager::Empty()

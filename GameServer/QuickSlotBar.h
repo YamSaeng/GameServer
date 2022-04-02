@@ -4,6 +4,7 @@
 class CQuickSlotBar
 {
 public:
+	map<int8, st_QuickSlotBarSlotInfo*> _QuickSlotBarSlotInfos;
 	// Äü½½·Ô ¹Ù ÀÎµ¦½º
 	int8 _QuickSlotBarIndex;
 
@@ -18,7 +19,5 @@ public:
 	st_QuickSlotBarSlotInfo* FindQuickSlot(int8 QuickSlotbarSlotIndex);
 
 	void QuickSlotBarEmpty();
-private:
-	map<int8, st_QuickSlotBarSlotInfo*> _QuickSlotBarSlotInfos;
 };
 

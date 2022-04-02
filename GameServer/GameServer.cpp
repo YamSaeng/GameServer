@@ -1679,7 +1679,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 									st_Vector2Int MyFrontCellPotision = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
 
 									if (MyPlayer->_Channel->_Map->ApplyMove(Target, MyFrontCellPotision))
-									{			
+									{	
 										CSkill* NewSkill = G_ObjectManager->SkillCreate();
 
 										st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(ReqMeleeSkill->GetSkillInfo()->SkillMediumCategory);
@@ -2001,12 +2001,15 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 				
 				ReqMeleeSkill->CoolTimeStart();
 
-				// 클라에게 쿨타임 표시
-				CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarIndex,
-					QuickSlotBarSlotIndex,
-					1.0f, ReqMeleeSkill);
-				SendPacket(Session->SessionId, ResCoolTimeStartPacket);
-				ResCoolTimeStartPacket->Free();						
+				for (auto QuickSlotBarPosition : MyPlayer->_QuickSlotManager.FindQuickSlotBar(ReqMeleeSkill->GetSkillInfo()->SkillType))
+				{
+					// 클라에게 쿨타임 표시
+					CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
+						QuickSlotBarPosition.QuickSlotBarSlotIndex,
+						1.0f, ReqMeleeSkill);
+					SendPacket(Session->SessionId, ResCoolTimeStartPacket);
+					ResCoolTimeStartPacket->Free();
+				}
 			}
 			else
 			{
@@ -2089,257 +2092,281 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 
 			vector<CGameObject*> Targets;
 
-			CSkill* ReqMagicSkill = MyPlayer->_SkillBox.FindSkill((en_SkillType)ReqSkillType);
-			if (ReqMagicSkill != nullptr && ReqMagicSkill->GetSkillInfo()->CanSkillUse)
+			st_QuickSlotBarSlotInfo* QuickSlotInfo = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarIndex, QuickSlotBarSlotIndex);
+			if (QuickSlotInfo->QuickBarSkill != nullptr)
 			{
-				switch (ReqMagicSkill->GetSkillInfo()->SkillType)
-				{
-				case en_SkillType::SKILL_KNIGHT_CHARGE_POSE:					
+				CSkill* ReqMagicSkill = MyPlayer->_SkillBox.FindSkill((en_SkillType)ReqSkillType);
+
+				if (QuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillType == (en_SkillType)ReqSkillType)
+				{					
+					if (ReqMagicSkill != nullptr && ReqMagicSkill->GetSkillInfo()->CanSkillUse)
 					{
-						st_BufSkillInfo* ChargePoseSkillInfo = (st_BufSkillInfo*)ReqMagicSkill->GetSkillInfo();
-
-						CSkill* ChargePoseSkill = G_ObjectManager->SkillCreate();
-
-						st_BufSkillInfo* NewChargePoseSkillInfo = (st_BufSkillInfo*)G_ObjectManager->SkillInfoCreate(ReqMagicSkill->GetSkillInfo()->SkillMediumCategory);
-						*NewChargePoseSkillInfo = *((st_BufSkillInfo*)ReqMagicSkill->GetSkillInfo());
-						ChargePoseSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewChargePoseSkillInfo);
-						ChargePoseSkill->StatusAbnormalDurationTimeStart();
-
-						MyPlayer->AddBuf(ChargePoseSkill);
-
-						CMessage* ResBufDeBufSkillPacket = MakePacketBufDeBuf(MyPlayer->_GameObjectInfo.ObjectId, true, ChargePoseSkill->GetSkillInfo());
-						SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResBufDeBufSkillPacket, MyPlayer);
-						ResBufDeBufSkillPacket->Free();						
-
-						ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_CHARGE_POSE, 2.8f);
-						SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResEffectPacket, MyPlayer);
-						ResEffectPacket->Free();
-
-						ReqMagicSkill->CoolTimeStart();
-
-						// 클라에게 쿨타임 표시
-						CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarIndex,
-							QuickSlotBarSlotIndex,
-							1.0f, ReqMagicSkill);
-						SendPacket(Session->SessionId, ResCoolTimeStartPacket);
-						ResCoolTimeStartPacket->Free();
-					}				
-					break;
-				case en_SkillType::SKILL_SHAMAN_BACK_TELEPORT:
-					{
-						st_Vector2 MyPosition = MyPlayer->GetPosition();
-						
-						en_MoveDir TelePortDir;
-
-						switch (MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir)
+						switch (ReqMagicSkill->GetSkillInfo()->SkillType)
 						{
-						case en_MoveDir::UP:
-							TelePortDir = en_MoveDir::DOWN;
-							break;
-						case en_MoveDir::DOWN:
-							TelePortDir = en_MoveDir::UP;
-							break;
-						case en_MoveDir::LEFT:
-							TelePortDir = en_MoveDir::RIGHT;
-							break;
-						case en_MoveDir::RIGHT:
-							TelePortDir = en_MoveDir::LEFT;
-							break;						
-						}
-
-						st_Vector2Int MovePosition;
-						MovePosition = MyPlayer->GetFrontCellPosition(TelePortDir, 5);
-
-						MyPlayer->_Channel->_Map->ApplyMove(MyPlayer, MovePosition);
-
-						MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX = MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX + 0.5f;
-						MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY = MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY + 0.5f;
-
-						CMessage* ResSyncPositionPacket = MakePacketResSyncPosition(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
-						SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResSyncPositionPacket, MyPlayer);
-						ResSyncPositionPacket->Free();						
-
-						ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_BACK_TELEPORT, 0.5f);
-						SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResEffectPacket, MyPlayer);
-						ResEffectPacket->Free();						
-
-						ReqMagicSkill->CoolTimeStart();
-
-						// 클라에게 쿨타임 표시
-						CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarIndex,
-							QuickSlotBarSlotIndex,
-							1.0f, ReqMagicSkill);
-						SendPacket(Session->SessionId, ResCoolTimeStartPacket);
-						ResCoolTimeStartPacket->Free();
-					}	
-					break;
-				case en_SkillType::SKILL_SHAMAN_FLAME_HARPOON:
-				case en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE:
-				case en_SkillType::SKILL_SHAMAN_HELL_FIRE:
-				case en_SkillType::SKILL_SHAMAN_ROOT:
-				case en_SkillType::SKILL_SHAMAN_ICE_CHAIN:				
-				case en_SkillType::SKILL_TAIOIST_DIVINE_STRIKE:
-				case en_SkillType::SKILL_TAIOIST_ROOT:
-					if (MyPlayer->_SelectTarget != nullptr)
-					{						
-						SpellCastingTime = ReqMagicSkill->GetSkillInfo()->SkillCastingTime / 1000.0f;
-
-						int16 Distance = st_Vector2Int::Distance(MyPlayer->_SelectTarget->GetCellPosition(), MyPlayer->GetCellPosition());
-
-						if (Distance <= 6)
-						{
-							FindGameObject = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId,
-								MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType);
-							if (FindGameObject != nullptr)
+							case en_SkillType::SKILL_KNIGHT_CHARGE_POSE:
 							{
-								Targets.push_back(FindGameObject);
+								st_BufSkillInfo* ChargePoseSkillInfo = (st_BufSkillInfo*)ReqMagicSkill->GetSkillInfo();
+
+								CSkill* ChargePoseSkill = G_ObjectManager->SkillCreate();
+
+								st_BufSkillInfo* NewChargePoseSkillInfo = (st_BufSkillInfo*)G_ObjectManager->SkillInfoCreate(ReqMagicSkill->GetSkillInfo()->SkillMediumCategory);
+								*NewChargePoseSkillInfo = *((st_BufSkillInfo*)ReqMagicSkill->GetSkillInfo());
+								ChargePoseSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewChargePoseSkillInfo);
+								ChargePoseSkill->StatusAbnormalDurationTimeStart();
+
+								MyPlayer->AddBuf(ChargePoseSkill);
+
+								CMessage* ResBufDeBufSkillPacket = MakePacketBufDeBuf(MyPlayer->_GameObjectInfo.ObjectId, true, ChargePoseSkill->GetSkillInfo());
+								SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResBufDeBufSkillPacket, MyPlayer);
+								ResBufDeBufSkillPacket->Free();
+
+								ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_CHARGE_POSE, 2.8f);
+								SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResEffectPacket, MyPlayer);
+								ResEffectPacket->Free();
+
+								ReqMagicSkill->CoolTimeStart();
+
+								// 클라에게 쿨타임 표시
+								CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarIndex,
+									QuickSlotBarSlotIndex,
+									1.0f, ReqMagicSkill);
+								SendPacket(Session->SessionId, ResCoolTimeStartPacket);
+								ResCoolTimeStartPacket->Free();
 							}
+							break;
+							case en_SkillType::SKILL_SHAMAN_BACK_TELEPORT:
+							{
+								st_Vector2 MyPosition = MyPlayer->GetPosition();
 
-							// 스펠창 시작
-							ResMagicPacket = MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId, true, ReqMagicSkill->GetSkillInfo()->SkillType, SpellCastingTime);
-							SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResMagicPacket, MyPlayer);
-							ResMagicPacket->Free();
+								en_MoveDir TelePortDir;
 
-							MyPlayer->_SkillType = ReqMagicSkill->GetSkillInfo()->SkillType;
+								switch (MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir)
+								{
+								case en_MoveDir::UP:
+									TelePortDir = en_MoveDir::DOWN;
+									break;
+								case en_MoveDir::DOWN:
+									TelePortDir = en_MoveDir::UP;
+									break;
+								case en_MoveDir::LEFT:
+									TelePortDir = en_MoveDir::RIGHT;
+									break;
+								case en_MoveDir::RIGHT:
+									TelePortDir = en_MoveDir::LEFT;
+									break;
+								}
+
+								st_Vector2Int MovePosition;
+								MovePosition = MyPlayer->GetFrontCellPosition(TelePortDir, 5);
+
+								MyPlayer->_Channel->_Map->ApplyMove(MyPlayer, MovePosition);
+
+								MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX = MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX + 0.5f;
+								MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY = MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY + 0.5f;
+
+								CMessage* ResSyncPositionPacket = MakePacketResSyncPosition(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
+								SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResSyncPositionPacket, MyPlayer);
+								ResSyncPositionPacket->Free();
+
+								ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_BACK_TELEPORT, 0.5f);
+								SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResEffectPacket, MyPlayer);
+								ResEffectPacket->Free();
+
+								ReqMagicSkill->CoolTimeStart();
+
+								// 클라에게 쿨타임 표시
+								CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarIndex,
+									QuickSlotBarSlotIndex,
+									1.0f, ReqMagicSkill);
+								SendPacket(Session->SessionId, ResCoolTimeStartPacket);
+								ResCoolTimeStartPacket->Free();
+							}
+							break;
+							case en_SkillType::SKILL_SHAMAN_FLAME_HARPOON:
+							case en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE:
+							case en_SkillType::SKILL_SHAMAN_HELL_FIRE:
+							case en_SkillType::SKILL_SHAMAN_ROOT:
+							case en_SkillType::SKILL_SHAMAN_ICE_CHAIN:
+							case en_SkillType::SKILL_TAIOIST_DIVINE_STRIKE:
+							case en_SkillType::SKILL_TAIOIST_ROOT:
+								if (MyPlayer->_SelectTarget != nullptr)
+								{
+									SpellCastingTime = ReqMagicSkill->GetSkillInfo()->SkillCastingTime / 1000.0f;
+
+									int16 Distance = st_Vector2Int::Distance(MyPlayer->_SelectTarget->GetCellPosition(), MyPlayer->GetCellPosition());
+
+									if (Distance <= 6)
+									{
+										FindGameObject = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId,
+											MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType);
+										if (FindGameObject != nullptr)
+										{
+											Targets.push_back(FindGameObject);
+										}
+
+										// 스펠창 시작
+										ResMagicPacket = MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId, true, ReqMagicSkill->GetSkillInfo()->SkillType, SpellCastingTime);
+										SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResMagicPacket, MyPlayer);
+										ResMagicPacket->Free();
+
+										MyPlayer->_SkillType = ReqMagicSkill->GetSkillInfo()->SkillType;
+									}
+									else
+									{
+										CMessage* ResErrorPacket = MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_PLACE_DISTANCE, ReqMagicSkill->GetSkillInfo()->SkillName.c_str(), Distance);
+										SendPacket(MyPlayer->_SessionId, ResErrorPacket);
+										ResErrorPacket->Free();
+									}
+								}
+								else
+								{
+									CMessage* ResErrorPacket = MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT, ReqMagicSkill->GetSkillInfo()->SkillName.c_str());
+									SendPacket(MyPlayer->_SessionId, ResErrorPacket);
+									ResErrorPacket->Free();
+								}
+								break;							
+							case en_SkillType::SKILL_TAIOIST_HEALING_LIGHT:
+								SpellCastingTime = ReqMagicSkill->GetSkillInfo()->SkillCastingTime / 1000.0f;
+
+								if (MyPlayer->_SelectTarget != nullptr)
+								{
+									FindGameObject = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType);
+									if (FindGameObject != nullptr)
+									{
+										Targets.push_back(FindGameObject);
+									}
+
+									// 스펠창 시작
+									ResMagicPacket = MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId,
+										true, ReqMagicSkill->GetSkillInfo()->SkillType, SpellCastingTime);
+									SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResMagicPacket, MyPlayer);
+									ResMagicPacket->Free();
+
+									MyPlayer->_SkillType = ReqMagicSkill->GetSkillInfo()->SkillType;
+								}
+								else
+								{
+									Targets.push_back(MyPlayer);
+
+									CMessage* ResErrorPacket = MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_HEAL_NON_SELECT_OBJECT, ReqMagicSkill->GetSkillInfo()->SkillName.c_str());
+									SendPacket(MyPlayer->_SessionId, ResErrorPacket);
+									ResErrorPacket->Free();
+
+									// 스펠창 시작
+									ResMagicPacket = MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId,
+										true, ReqMagicSkill->GetSkillInfo()->SkillType, SpellCastingTime);
+									SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResMagicPacket, MyPlayer);
+									ResMagicPacket->Free();
+
+									MyPlayer->_SkillType = ReqMagicSkill->GetSkillInfo()->SkillType;
+								}
+								break;
+							case en_SkillType::SKILL_TAIOIST_HEALING_WIND:
+								break;
+							case en_SkillType::SKILL_SHOCK_RELEASE:
+								{
+									st_GameObjectJob* GameObjectJob = G_ObjectManager->GameObjectJobCreate();
+									GameObjectJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SHOCK_RELEASE;
+
+									MyPlayer->_GameObjectJobQue.Enqueue(GameObjectJob);
+
+									CSkill* NewBufSkill = G_ObjectManager->SkillCreate();
+
+									st_BufSkillInfo* NewShockReleaseSkillInfo = (st_BufSkillInfo*)G_ObjectManager->SkillInfoCreate(ReqMagicSkill->GetSkillInfo()->SkillMediumCategory);
+
+									*NewShockReleaseSkillInfo = *((st_BufSkillInfo*)ReqMagicSkill->GetSkillInfo());
+									NewBufSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewShockReleaseSkillInfo);
+									NewBufSkill->StatusAbnormalDurationTimeStart();
+
+									MyPlayer->AddBuf(NewBufSkill);
+
+									CMessage* ResBufDebufSkillPacket = MakePacketBufDeBuf(MyPlayer->_GameObjectInfo.ObjectId, true, NewBufSkill->GetSkillInfo());
+									SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResBufDebufSkillPacket, MyPlayer);
+									ResBufDebufSkillPacket->Free();
+
+									ReqMagicSkill->CoolTimeStart();
+
+									// 클라에게 쿨타임 표시
+									CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarIndex,
+										QuickSlotBarSlotIndex,
+										1.0f, ReqMagicSkill);
+									SendPacket(Session->SessionId, ResCoolTimeStartPacket);
+									ResCoolTimeStartPacket->Free();
+
+									CMessage* ResObjectStateChangePacket = MakePacketResChangeObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
+									SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResObjectStateChangePacket, MyPlayer);
+									ResObjectStateChangePacket->Free();
+								}
+							break;
 						}
-						else
+
+						if (Targets.size() >= 1)
 						{
-							CMessage* ResErrorPacket = MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_PLACE_DISTANCE, ReqMagicSkill->GetSkillInfo()->SkillName.c_str(), Distance);
-							SendPacket(MyPlayer->_SessionId, ResErrorPacket);
-							ResErrorPacket->Free();
+							MyPlayer->_Owner = Targets[0];
+
+							MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPELL;
+
+							// 마법 스킬 모션 출력
+							CMessage* ResObjectStateChangePacket = MakePacketResChangeObjectState(MyPlayer->_GameObjectInfo.ObjectId,
+								MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType,
+								MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
+							SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResObjectStateChangePacket, MyPlayer);
+							ResObjectStateChangePacket->Free();
+
+							SkillCoolTimeTimerJobCreate(MyPlayer, ReqMagicSkill->GetSkillInfo()->SkillCastingTime,
+								ReqMagicSkill, en_TimerJobType::TIMER_SPELL_END,
+								QuickSlotBarIndex, QuickSlotBarSlotIndex);
 						}
 					}
 					else
 					{
-						CMessage* ResErrorPacket = MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT, ReqMagicSkill->GetSkillInfo()->SkillName.c_str());
-						SendPacket(MyPlayer->_SessionId, ResErrorPacket);
-						ResErrorPacket->Free();
-					}
-					break;
-				case en_SkillType::SKILL_SHAMAN_ICE_WAVE:
-					if (MyPlayer->_SelectTarget != nullptr)
-					{
-						st_Vector2 MyPosition = MyPlayer->GetPosition();
-						st_Vector2 SelectTargetPosition = MyPlayer->_SelectTarget->GetPosition();
-						st_Vector2 DirVector = SelectTargetPosition - MyPosition;
-						st_Vector2 NormalVector = DirVector.Normalize(DirVector);
-						
-						st_Vector2Int IceWavePosition = MyPlayer->_SelectTarget->GetFrontCellPosition(st_Vector2::GetMoveDir(NormalVector), 2);
-
-					}
-					else
-					{
-						CMessage* ResErrorPacket = MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT, ReqMagicSkill->GetSkillInfo()->SkillName.c_str());
-						SendPacket(MyPlayer->_SessionId, ResErrorPacket);
-						ResErrorPacket->Free();
-					}
-					break;
-				case en_SkillType::SKILL_TAIOIST_HEALING_LIGHT:
-					SpellCastingTime = ReqMagicSkill->GetSkillInfo()->SkillCastingTime / 1000.0f;
-
-					if (MyPlayer->_SelectTarget != nullptr)
-					{
-						FindGameObject = G_ObjectManager->Find(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType);
-						if (FindGameObject != nullptr)
+						if (ReqMagicSkill == nullptr)
 						{
-							Targets.push_back(FindGameObject);
+							break;
 						}
 
-						// 스펠창 시작
-						ResMagicPacket = MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId,
-							true, ReqMagicSkill->GetSkillInfo()->SkillType, SpellCastingTime);
-						SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResMagicPacket, MyPlayer);
-						ResMagicPacket->Free();
-
-						MyPlayer->_SkillType = ReqMagicSkill->GetSkillInfo()->SkillType;
-					}
-					else
-					{
-						Targets.push_back(MyPlayer);
-
-						CMessage* ResErrorPacket = MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_HEAL_NON_SELECT_OBJECT, ReqMagicSkill->GetSkillInfo()->SkillName.c_str());
+						CMessage* ResErrorPacket = MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_SKILL_COOLTIME,
+							ReqMagicSkill->GetSkillInfo()->SkillName.c_str());
 						SendPacket(MyPlayer->_SessionId, ResErrorPacket);
 						ResErrorPacket->Free();
-
-						// 스펠창 시작
-						ResMagicPacket = MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId,
-							true, ReqMagicSkill->GetSkillInfo()->SkillType, SpellCastingTime);
-						SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResMagicPacket, MyPlayer);
-						ResMagicPacket->Free();
-
-						MyPlayer->_SkillType = ReqMagicSkill->GetSkillInfo()->SkillType;
 					}
-					break;
-				case en_SkillType::SKILL_TAIOIST_HEALING_WIND:
-					break;
-				case en_SkillType::SKILL_SHOCK_RELEASE:
-					{					
-						st_GameObjectJob* GameObjectJob = G_ObjectManager->GameObjectJobCreate();
-						GameObjectJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SHOCK_RELEASE;				
-						
-						MyPlayer->_GameObjectJobQue.Enqueue(GameObjectJob);
-
-						CSkill* NewBufSkill = G_ObjectManager->SkillCreate();
-
-						st_BufSkillInfo* NewShockReleaseSkillInfo = (st_BufSkillInfo*)G_ObjectManager->SkillInfoCreate(ReqMagicSkill->GetSkillInfo()->SkillMediumCategory);
-						
-						*NewShockReleaseSkillInfo = *((st_BufSkillInfo*)ReqMagicSkill->GetSkillInfo());
-						NewBufSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewShockReleaseSkillInfo);
-						NewBufSkill->StatusAbnormalDurationTimeStart();
-
-						MyPlayer->AddBuf(NewBufSkill);
-
-						CMessage* ResBufDebufSkillPacket = MakePacketBufDeBuf(MyPlayer->_GameObjectInfo.ObjectId, true, NewBufSkill->GetSkillInfo());
-						SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResBufDebufSkillPacket, MyPlayer);
-						ResBufDebufSkillPacket->Free();
-
-						ReqMagicSkill->CoolTimeStart();						
-
-						// 클라에게 쿨타임 표시
-						CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarIndex,
-							QuickSlotBarSlotIndex,
-							1.0f, ReqMagicSkill);
-						SendPacket(Session->SessionId, ResCoolTimeStartPacket);
-						ResCoolTimeStartPacket->Free();
-
-						CMessage* ResObjectStateChangePacket = MakePacketResChangeObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
-						SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResObjectStateChangePacket, MyPlayer);
-						ResObjectStateChangePacket->Free();						
-					}
-					
-					break;
 				}
-
-				if (Targets.size() >= 1)
+				else
 				{
-					MyPlayer->_Owner = Targets[0];
-
-					MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPELL;
-
-					// 마법 스킬 모션 출력
-					CMessage* ResObjectStateChangePacket = MakePacketResChangeObjectState(MyPlayer->_GameObjectInfo.ObjectId,
-						MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType,
-						MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
-					SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResObjectStateChangePacket, MyPlayer);
-					ResObjectStateChangePacket->Free();
-
-					SkillCoolTimeTimerJobCreate(MyPlayer, ReqMagicSkill->GetSkillInfo()->SkillCastingTime,
-						ReqMagicSkill, en_TimerJobType::TIMER_SPELL_END,
-						QuickSlotBarIndex, QuickSlotBarSlotIndex);
+					// 연속기 공격인지 추가적으로 판단	
+					if (QuickSlotInfo->QuickBarSkill->GetSkillInfo()->NextComboSkill == (en_SkillType)ReqSkillType)
+					{
+						if (ReqMagicSkill != nullptr && ReqMagicSkill->GetSkillInfo()->CanSkillUse)
+						{
+							switch (ReqMagicSkill->GetSkillInfo()->SkillType)
+							{
+							case en_SkillType::SKILL_SHAMAN_ICE_WAVE:
+								if (MyPlayer->_SelectTarget != nullptr)
+								{
+									CMessage* ResNextComboSkillOff = MakePacketComboSkillOff(QuickSlotBarIndex,
+										QuickSlotBarSlotIndex,
+										*QuickSlotInfo->QuickBarSkill->GetSkillInfo(),
+										ReqMagicSkill->GetSkillInfo()->SkillType);
+									
+									SendPacket(Session->SessionId, ResNextComboSkillOff);									
+									ResNextComboSkillOff->Free();
+								}
+								else
+								{
+									CMessage* ResErrorPacket = MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT, ReqMagicSkill->GetSkillInfo()->SkillName.c_str());
+									SendPacket(MyPlayer->_SessionId, ResErrorPacket);
+									ResErrorPacket->Free();
+								}
+								break;
+							}
+						}
+					}					
 				}
 			}
 			else
 			{
-				if (ReqMagicSkill == nullptr)
-				{
-					break;
-				}
 
-			    CMessage* ResErrorPacket = MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_SKILL_COOLTIME,
-					ReqMagicSkill->GetSkillInfo()->SkillName.c_str());
-				SendPacket(MyPlayer->_SessionId, ResErrorPacket);
-				ResErrorPacket->Free();
-			}
+			}			
 		} while (0);
 	}
 
@@ -4809,6 +4836,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 						en_MoveDir::LEFT, (LPWSTR)CA2W((*FindAttackSkillData->SkillAnimations.find(en_MoveDir::LEFT)).second.c_str())));
 					AttackSkillInfo->SkillAnimations.insert(pair<en_MoveDir, wstring>(
 						en_MoveDir::RIGHT, (LPWSTR)CA2W((*FindAttackSkillData->SkillAnimations.find(en_MoveDir::RIGHT)).second.c_str())));
+					AttackSkillInfo->NextComboSkill = FindAttackSkillData->NextComboSkill;
 					AttackSkillInfo->SkillExplanation = (LPWSTR)CA2W(FindAttackSkillData->SkillExplanation.c_str());
 					
 					wchar_t SkillExplanationMessage[256] = L"0";
@@ -5910,13 +5938,16 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 		ResObjectStateChangePacket->Free();				
 
 		SpellEndSkill->CoolTimeStart();
-
-		// 클라에게 쿨타임 표시
-		CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarIndex,
-			QuickSlotBarSlotIndex,
-			1.0f, SpellEndSkill);
-		SendPacket(Session->SessionId, ResCoolTimeStartPacket);
-		ResCoolTimeStartPacket->Free();
+				
+		for (auto QuickSlotBarPosition : MyPlayer->_QuickSlotManager.FindQuickSlotBar(SpellEndSkill->GetSkillInfo()->SkillType))
+		{
+			// 클라에게 쿨타임 표시
+			CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
+				QuickSlotBarPosition.QuickSlotBarSlotIndex,
+				1.0f, SpellEndSkill);
+			SendPacket(Session->SessionId, ResCoolTimeStartPacket);
+			ResCoolTimeStartPacket->Free();
+		}		
 
 		en_EffectType HitEffectType = en_EffectType::EFFECT_TYPE_NONE;
 
@@ -5990,6 +6021,17 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 		case en_SkillType::SKILL_SHAMAN_ICE_CHAIN:
 			{
 				st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)SpellEndSkill->GetSkillInfo();
+
+				if (AttackSkillInfo->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
+				{
+					CSkill* NextComboSkill = MyPlayer->_SkillBox.FindSkill(AttackSkillInfo->NextComboSkill);
+					
+					CMessage* ResNextComboSkill = MakePacketComboSkillOn(QuickSlotBarIndex,
+						QuickSlotBarSlotIndex,
+						*NextComboSkill->GetSkillInfo());
+					SendPacket(Session->SessionId, ResNextComboSkill);
+					ResNextComboSkill->Free();
+				}
 
 				MyPlayer->GetTarget()->_GameObjectInfo.ObjectStatInfo.Speed -= AttackSkillInfo->SkillDebufMovingSpeed;
 
@@ -7378,6 +7420,43 @@ CGameServerMessage* CGameServer::MakePacketBufDeBufOff(int64 TargetObjectId, boo
 	*ResBufDeBufOffMessage << (int16)OffSkillType;
 
 	return ResBufDeBufOffMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketComboSkillOn(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, st_SkillInfo ComboSkillInfo)
+{
+	CGameServerMessage* ResComboSkillMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResComboSkillMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResComboSkillMessage->Clear();
+
+	*ResComboSkillMessage << (int16)en_PACKET_S2C_COMBO_SKILL_ON;	
+	*ResComboSkillMessage << QuickSlotBarIndex;
+	*ResComboSkillMessage << QuickSlotBarSlotIndex;
+	*ResComboSkillMessage << ComboSkillInfo;
+
+	return ResComboSkillMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketComboSkillOff(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, st_SkillInfo ComboSkillInfo, en_SkillType OffComboSkillType)
+{
+	CGameServerMessage* ResComboSkillMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResComboSkillMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResComboSkillMessage->Clear();
+
+	*ResComboSkillMessage << (int16)en_PACKET_S2C_COMBO_SKILL_OFF;
+	*ResComboSkillMessage << QuickSlotBarIndex;
+	*ResComboSkillMessage << QuickSlotBarSlotIndex;
+	*ResComboSkillMessage << ComboSkillInfo;
+	*ResComboSkillMessage << (int16)OffComboSkillType;
+
+	return ResComboSkillMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketExperience(int64 AccountId, int64 PlayerId, int64 GainExp, int64 CurrentExp, int64 RequireExp, int64 TotalExp)
