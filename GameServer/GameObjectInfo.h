@@ -67,7 +67,7 @@ enum class en_CreatureState : int8
 	STOP,
 	RETURN_SPAWN_POSITION,
 	ATTACK,
-	SPELL,	
+	SPELL,		
 	DEAD
 };
 
@@ -261,7 +261,8 @@ enum class en_SkillType : int16
 enum class en_SkillCategory : int8
 {
 	QUICK_SLOT_SKILL,
-	STATUS_ABNORMAL_SKILL
+	STATUS_ABNORMAL_SKILL,
+	COMBO_SKILL,
 };
 
 enum class en_EffectType : int16
@@ -1803,6 +1804,7 @@ struct st_ItemInfo
 struct st_SkillInfo
 {
 	bool IsSkillLearn;       // 스킬을 배웠는지에 대한 여부
+	bool CanSkillUse;		 // 스킬을 사용 할 수 있는지 여부	
 	bool IsQuickSlotUse;	 // 퀵슬롯에 등록되어 있는지 여부	
 	en_SkillLargeCategory SkillLargeCategory; // 스킬 대분류
 	en_SkillMediumCategory SkillMediumCategory; // 스킬 중분류
@@ -1818,12 +1820,12 @@ struct st_SkillInfo
 	en_SkillType NextComboSkill;
 	map<en_MoveDir, wstring> SkillAnimations; // 스킬 애니메이션	
 	wstring SkillExplanation; // 스킬 설명 
-	wstring SkillImagePath;	 // 스킬 이미지 경로		
-	bool CanSkillUse;		 // 스킬을 사용 할 수 있는지 여부	
+	wstring SkillImagePath;	 // 스킬 이미지 경로			
 
 	st_SkillInfo()
 	{
 		IsSkillLearn = false;
+		CanSkillUse = false;
 		IsQuickSlotUse = false;		
 		SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_NONE;
 		SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
@@ -1838,8 +1840,7 @@ struct st_SkillInfo
 		NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
 		SkillTargetEffectTime = 0;
 		SkillExplanation = L"";
-		SkillImagePath = L"";
-		CanSkillUse = true;
+		SkillImagePath = L"";		
 	}
 };
 
