@@ -87,6 +87,31 @@ vector<st_QuickSlotBarPosition> CQuickSlotManager::FindQuickSlotBar(en_SkillType
 	return QuickSlotSkillPositions;
 }
 
+vector<st_QuickSlotBarPosition> CQuickSlotManager::ExceptionFindQuickSlotBar(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex)
+{
+	vector<st_QuickSlotBarPosition> QuickSlotSkillPositions;
+
+	for (auto QuickSlotBarIterator : _QuickSlotBars)
+	{
+		for (auto QuickSlotBarSlotIterator : QuickSlotBarIterator.second->_QuickSlotBarSlotInfos)
+		{
+			st_QuickSlotBarSlotInfo* SearchingQuickSlotBarSlot = QuickSlotBarSlotIterator.second;
+			if (SearchingQuickSlotBarSlot->QuickBarSkill != nullptr && SearchingQuickSlotBarSlot->QuickBarSkill->GetSkillInfo()->CanSkillUse == true
+				&& ((SearchingQuickSlotBarSlot->QuickSlotBarIndex == QuickSlotBarIndex
+					&& SearchingQuickSlotBarSlot->QuickSlotBarSlotIndex == QuickSlotBarSlotIndex) == false))
+			{
+				st_QuickSlotBarPosition SearchingCompleteQuickSlotPosition;
+				SearchingCompleteQuickSlotPosition.QuickSlotBarIndex = SearchingQuickSlotBarSlot->QuickSlotBarIndex;
+				SearchingCompleteQuickSlotPosition.QuickSlotBarSlotIndex = SearchingQuickSlotBarSlot->QuickSlotBarSlotIndex;
+
+				QuickSlotSkillPositions.push_back(SearchingCompleteQuickSlotPosition);
+			}
+		}
+	}
+
+	return QuickSlotSkillPositions;
+}
+
 void CQuickSlotManager::Empty()
 {
 	for (auto QuickSlotBarIterator : _QuickSlotBars)

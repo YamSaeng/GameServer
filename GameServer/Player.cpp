@@ -1,4 +1,4 @@
-#include "pch.h"
+	#include "pch.h"
 #include "Player.h"
 #include "ObjectManager.h"
 #include "DataManager.h"
@@ -18,6 +18,9 @@ CPlayer::CPlayer()
 
 	_NatureRecoveryTick = GetTickCount64() + 5000;
 	_FieldOfViewUpdateTick = GetTickCount64() + 50;
+
+	_ComboSkill = nullptr;
+	_CurrentMeleeAttack = nullptr;
 }
 
 CPlayer::~CPlayer()
@@ -31,7 +34,7 @@ void CPlayer::Update()
 	// 시야범위 객체 조사
 	if (_FieldOfViewUpdateTick < GetTickCount64())
 	{	
-		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetFieldOfViewObjects(this, 1);		
+		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetFieldOfViewObjects(this, 1);
 		vector<st_FieldOfViewInfo> SpawnObjectIds;
 		vector<st_FieldOfViewInfo> DeSpawnObjectIds;		
 
@@ -157,6 +160,28 @@ void CPlayer::Update()
 	// 스킬목록 업데이트
 	_SkillBox.Update();
 
+	if (_ComboSkill != nullptr)
+	{
+		bool ReturnComboSkill = _ComboSkill->Update();
+		if (ReturnComboSkill)
+		{
+			G_ObjectManager->SkillInfoReturn(_ComboSkill->GetSkillInfo()->SkillMediumCategory, _ComboSkill->GetSkillInfo());
+			G_ObjectManager->SkillReturn(_ComboSkill);
+			_ComboSkill = nullptr;
+		}
+	}
+
+	if (_CurrentMeleeAttack != nullptr)
+	{
+		bool ReturnComboSkill = _CurrentMeleeAttack->Update();
+		if (ReturnComboSkill)
+		{
+			G_ObjectManager->SkillInfoReturn(_CurrentMeleeAttack->GetSkillInfo()->SkillMediumCategory, _CurrentMeleeAttack->GetSkillInfo());
+			G_ObjectManager->SkillReturn(_CurrentMeleeAttack);
+			_CurrentMeleeAttack = nullptr;
+		}
+	}
+
 	// 강화효과 스킬 리스트 순회
 	for (auto BufSkillIterator : _Bufs)
 	{
@@ -214,8 +239,65 @@ void CPlayer::Update()
 			_GameObjectInfo.ObjectStatInfo);
 		G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResObjectStatPacket, this);		
 		ResObjectStatPacket->Free();
-	}
+	}	
+
+	// 냉기파동 상태이상 검사
+	bool IsShmanIceWave = _StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ICE_WAVE;
 	
+	// 냉기파동 상태이상일 경우
+	// 대상이 바라보고 있는 반대방향으로 캐릭터를 밀어버림
+	if (IsShmanIceWave == true)
+	{
+		switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
+		{
+		case en_MoveDir::UP:
+			_GameObjectInfo.ObjectPositionInfo.PositionY +=
+				(st_Vector2::Down()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 2.0f * 0.02f);
+			break;
+		case en_MoveDir::DOWN:
+			_GameObjectInfo.ObjectPositionInfo.PositionY +=
+				(st_Vector2::Up()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 2.0f * 0.02f);
+			break;
+		case en_MoveDir::LEFT:
+			_GameObjectInfo.ObjectPositionInfo.PositionX +=
+				(st_Vector2::Right()._X * _GameObjectInfo.ObjectStatInfo.Speed * 2.0f * 0.02f);
+			break;
+		case en_MoveDir::RIGHT:
+			_GameObjectInfo.ObjectPositionInfo.PositionX +=
+				(st_Vector2::Left()._X * _GameObjectInfo.ObjectStatInfo.Speed * 2.0f * 0.02f);
+			break;
+		}
+
+		bool CanMove = _Channel->_Map->Cango(this, _GameObjectInfo.ObjectPositionInfo.PositionX, _GameObjectInfo.ObjectPositionInfo.PositionY);
+		if (CanMove == true)
+		{
+			st_Vector2Int CollisionPosition;
+			CollisionPosition._X = _GameObjectInfo.ObjectPositionInfo.PositionX;
+			CollisionPosition._Y = _GameObjectInfo.ObjectPositionInfo.PositionY;
+
+			if (CollisionPosition._X != _GameObjectInfo.ObjectPositionInfo.CollisionPositionX
+				|| CollisionPosition._Y != _GameObjectInfo.ObjectPositionInfo.CollisionPositionY)
+			{
+				_Channel->_Map->ApplyMove(this, CollisionPosition);
+			}
+		}
+		else
+		{
+			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+
+			PositionReset();
+
+			// 바뀐 좌표 값 시야범위 오브젝트들에게 전송
+			CMessage* ResMovePacket = G_ObjectManager->GameServer->MakePacketResMove(_AccountId,
+				_GameObjectInfo.ObjectId,
+				CanMove,
+				_GameObjectInfo.ObjectPositionInfo);
+
+			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResMovePacket, this);
+			ResMovePacket->Free();
+		}
+	}	
+
 	switch (_GameObjectInfo.ObjectPositionInfo.State)
 	{
 	case en_CreatureState::MOVING:
@@ -226,7 +308,7 @@ void CPlayer::Update()
 		break;
 	case en_CreatureState::SPELL:
 		UpdateSpell();
-		break;
+		break;	
 	}
 }
 
@@ -331,107 +413,7 @@ void CPlayer::UpdateMove()
 
 void CPlayer::UpdateAttack()
 {
-	if (_DefaultAttackTick < GetTickCount64())
-	{
-		_DefaultAttackTick = GetTickCount64() + 800;		
-
-		st_Vector2Int FrontCell = GetFrontCellPosition(_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
-		CGameObject* Target = _Channel->_Map->Find(FrontCell);
-
-		if (Target != nullptr && Target->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE)
-		{
-			st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)_SkillBox.FindSkill(en_SkillType::SKILL_DEFAULT_ATTACK)->GetSkillInfo();
-
-			random_device Seed;
-			default_random_engine Eng(Seed());
-
-			// 크리티컬 판단
-			float CriticalPoint = _GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint / 1000.0f;
-			bernoulli_distribution CriticalCheck(CriticalPoint);
-			bool IsCritical = CriticalCheck(Eng);
-
-			// 데미지 판단
-			mt19937 Gen(Seed());
-			uniform_int_distribution<int> DamageChoiceRandom(
-				_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage + _Equipment._WeaponMinDamage + AttackSkillInfo->SkillMinDamage,
-				_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage + _Equipment._WeaponMaxDamage + AttackSkillInfo->SkillMaxDamage);
-			int32 ChoiceDamage = DamageChoiceRandom(Gen);
-
-			int32 CriticalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
-
-			float DefenceRate = (float)pow(((float)(200 - Target->_GameObjectInfo.ObjectStatInfo.Defence)) / 20, 2) * 0.01f;
-
-			int32 FinalDamage = CriticalDamage * DefenceRate;
-
-			bool TargetIsDead = Target->OnDamaged(this, FinalDamage);
-			if (TargetIsDead == true)
-			{
-				G_ObjectManager->GameServer->ExperienceCalculate(this, Target);
-			}
-
-			en_EffectType HitEffectType;
-
-			wstring SkillTypeString;
-			wchar_t SkillTypeMessage[64] = L"0";
-			wchar_t SkillDamageMessage[64] = L"0";
-
-			// 시스템 메세지 생성
-			wsprintf(SkillTypeMessage, L"%s가 일반공격을 사용해 %s에게 %d의 데미지를 줬습니다.", _GameObjectInfo.ObjectName.c_str(), Target->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
-			HitEffectType = en_EffectType::EFFECT_NORMAL_ATTACK_TARGET_HIT;
-
-			SkillTypeString = SkillTypeMessage;
-			SkillTypeString = IsCritical ? L"치명타! " + SkillTypeString : SkillTypeString;
-
-			// 데미지 시스템 메세지 전송
-			CMessage* ResSkillSystemMessagePacket = G_ObjectManager->GameServer->MakePacketResChattingBoxMessage(_GameObjectInfo.ObjectId,
-				en_MessageType::SYSTEM,
-				IsCritical ? st_Color::Red() : st_Color::White(),
-				SkillTypeString);
-			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResSkillSystemMessagePacket, this);
-			ResSkillSystemMessagePacket->Free();
-
-			// 공격 응답 메세지 전송
-			CMessage* ResMyAttackOtherPacket = G_ObjectManager->GameServer->MakePacketResAttack(_GameObjectInfo.ObjectId,
-				Target->_GameObjectInfo.ObjectId,								
-				en_SkillType::SKILL_DEFAULT_ATTACK,
-				FinalDamage,
-				IsCritical);
-			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResMyAttackOtherPacket, this);
-			ResMyAttackOtherPacket->Free();
-
-			// 공격 애니메이션 출력
-			CMessage* AnimationPlayPacket = G_ObjectManager->GameServer->MakePacketResAnimationPlay(_GameObjectInfo.ObjectId,
-				_GameObjectInfo.ObjectPositionInfo.MoveDir, (*AttackSkillInfo->SkillAnimations.find(_GameObjectInfo.ObjectPositionInfo.MoveDir)).second);
-			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, AnimationPlayPacket, this);
-			AnimationPlayPacket->Free();
-			
-			// 스탯 변경 메세지 전송
-			CMessage* ResChangeObjectStat = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(Target->_GameObjectInfo.ObjectId,
-				Target->_GameObjectInfo.ObjectStatInfo);
-			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResChangeObjectStat, this);
-			ResChangeObjectStat->Free();
-
-			CSkill* DefaultAttackSkill = _SkillBox.FindSkill(en_SkillType::SKILL_DEFAULT_ATTACK);
-			DefaultAttackSkill->CoolTimeStart();
-						
-			CMessage* ResCoolTimeStartPacket = G_ObjectManager->GameServer->MakePacketCoolTime(0,
-				0,
-				1.0f, DefaultAttackSkill);
-			G_ObjectManager->GameServer->SendPacket(this->_SessionId, ResCoolTimeStartPacket);
-			ResCoolTimeStartPacket->Free();
-		}
-		else
-		{
-			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-
-			CMessage* ResChageObjectStatePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
-				_GameObjectInfo.ObjectPositionInfo.MoveDir,
-				_GameObjectInfo.ObjectType,
-				_GameObjectInfo.ObjectPositionInfo.State);
-			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResChageObjectStatePacket, this);
-			ResChageObjectStatePacket->Free();
-		}
-	}	
+	
 }
 
 void CPlayer::UpdateSpell()

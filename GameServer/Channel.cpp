@@ -464,7 +464,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			//_Players.insert(pair<int64, CPlayer*>(EnterChannelPlayer->_GameObjectInfo.ObjectId, EnterChannelPlayer));			
 			
 			// 채널 저장
-			EnterChannelPlayer->_Channel = this;		
+			EnterChannelPlayer->SetChannel(this);
 			
 			// 맵에 적용
 			IsEnterChannel = _Map->ApplyMove(EnterChannelPlayer, SpawnPosition);					
@@ -492,7 +492,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			_ChannelMonsterArray[EnterChannelMonster->_ChannelArrayIndex] = EnterChannelMonster;
 			
 			// 채널 저장
-			EnterChannelMonster->_Channel = this;		
+			EnterChannelMonster->SetChannel(this);
 
 			// 맵에 적용
 			IsEnterChannel = _Map->ApplyMove(EnterChannelMonster, SpawnPosition);			
@@ -518,7 +518,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY = SpawnPosition._Y;
 			EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX = SpawnPosition._X;
 			
-			EnterChannelItem->_Channel = this;			
+			EnterChannelItem->SetChannel(this);
 			
 			// 맵 정보에 보관			
 			IsEnterChannel = _Map->ApplyPositionUpdateItem(EnterChannelItem, SpawnPosition);
@@ -569,7 +569,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			_ChannelEnvironmentArrayIndexs.Pop(&EnterChannelEnvironment->_ChannelArrayIndex);
 			_ChannelEnvironmentArray[EnterChannelEnvironment->_ChannelArrayIndex] = EnterChannelEnvironment;
 
-			EnterChannelEnvironment->_Channel = this;		
+			EnterChannelEnvironment->SetChannel(this);
 						
 			IsEnterChannel = _Map->ApplyMove(EnterChannelEnvironment, SpawnPosition);
 

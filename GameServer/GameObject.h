@@ -34,8 +34,7 @@ public:
 	int32 _ChannelArrayIndex;
 
 	en_ObjectNetworkState _NetworkState;
-	st_GameObjectInfo _GameObjectInfo;		
-	CChannel* _Channel;	
+	st_GameObjectInfo _GameObjectInfo;			
 
 	// 선택한 대상
 	CGameObject* _SelectTarget;
@@ -115,7 +114,12 @@ public:
 	void ReleaseStatusAbnormal(int8 StatusAbnormalValue);
 
 	int8 CheckStatusAbnormal();
+
+	CChannel* GetChannel();
+	void SetChannel(CChannel* Channel);
 protected:
+	// 게임오브젝트가 속한 채널
+	CChannel* _Channel;
 	//-------------------------
 	// 재생력 Tick
 	//-------------------------

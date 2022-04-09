@@ -69,11 +69,16 @@ void CSkill::ComboSkillStart(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex,
 	_ComboSkillType = ComboSkilltype;
 }
 
+void CSkill::MeleeAttackSkillStart(int64 AttackEndTick)
+{
+	_MeleeAttackTick = GetTickCount64() + AttackEndTick;
+}
+
 bool CSkill::Update()
 {
 	switch (_SkillCategory)
 	{
-	case en_SkillCategory::QUICK_SLOT_SKILL:
+	case en_SkillCategory::QUICK_SLOT_SKILL_COOLTIME:
 		{
 			// 스킬을 사용햇으면
 			if (_SkillInfo->CanSkillUse == false)
@@ -278,6 +283,13 @@ bool CSkill::Update()
 			ResNextComboSkillOff->Free();			
 			return true;
 		}
+		break;
+	case en_SkillCategory::MELEE_SKILL:
+		if (_MeleeAttackTick < GetTickCount64())
+		{
+			((CPlayer*)_Owner)->_IsReqAttack = false;			
+			return true;
+		}		
 		break;
 	}	
 	

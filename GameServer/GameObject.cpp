@@ -46,29 +46,52 @@ void CGameObject::Update()
 		switch ((en_GameObjectJobType)GameObjectJob->GameObjectJobType)
 		{
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SHOCK_RELEASE:
-		{
-			for (auto DebufSkillIter : _DeBufs)
 			{
-				if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_KNIGHT_CHOHONE
-					|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE)
+				for (auto DebufSkillIter : _DeBufs)
 				{
-					DebufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
+					if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_KNIGHT_CHOHONE
+						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE)
+					{
+						DebufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
+					}
 				}
 			}
-		}
-		break;
+			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_BACK_TELEPORT:
-		{
-			for (auto DebufSkillIter : _DeBufs)
 			{
-				if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_ROOT
-					|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_TAIOIST_ROOT)
+				for (auto DebufSkillIter : _DeBufs)
 				{
-					DebufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
+					if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_ROOT
+						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_TAIOIST_ROOT)
+					{
+						DebufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
+					}
 				}
 			}
-		}
-		break;
+			break;
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_MELEE_ATTACK:
+			{				
+				CPlayer* MyPlayer = ((CPlayer*)this);
+
+				MyPlayer->_IsReqAttack = true;				
+
+				CSkill* MeleeSkill;
+				*GameObjectJob->GameObjectJobMessage >> &MeleeSkill;
+
+				int16 ReqSkillType;
+				*GameObjectJob->GameObjectJobMessage >> ReqSkillType;					
+			
+				CSkill* MeleeAttackSkill = G_ObjectManager->SkillCreate();
+				st_AttackSkillInfo* MeleeAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(MeleeSkill->GetSkillInfo()->SkillMediumCategory);
+				*MeleeAttackSkillInfo = *((st_AttackSkillInfo*)MeleeSkill->GetSkillInfo());
+
+				MeleeAttackSkill->SetSkillInfo(en_SkillCategory::MELEE_SKILL, MeleeAttackSkillInfo);
+				MeleeAttackSkill->SetOwner(this);
+				MeleeAttackSkill->MeleeAttackSkillStart(MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate);
+
+				MyPlayer->_CurrentMeleeAttack = MeleeAttackSkill;
+			}
+			break;
 		}
 
 		if (GameObjectJob->GameObjectJobMessage != nullptr)
@@ -294,6 +317,16 @@ int8 CGameObject::CheckStatusAbnormal()
 	}		
 
 	return StatusAbnormalCount;
+}
+
+CChannel* CGameObject::GetChannel()
+{
+	return _Channel;
+}
+
+void CGameObject::SetChannel(CChannel* Channel)
+{
+	_Channel = Channel;
 }
 
 void CGameObject::BroadCastPacket(en_GAME_SERVER_PACKET_TYPE PacketType, bool CanMove)

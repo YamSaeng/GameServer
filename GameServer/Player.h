@@ -12,6 +12,8 @@ struct st_TimerJob;
 class CPlayer : public CGameObject
 {
 public:		
+	bool _IsReqAttack;
+
 	uint64 _DefaultAttackTick;	
 	uint64 _SpellTick;
 
@@ -38,6 +40,11 @@ public:
 
 	// 시야 범위 오브젝트
 	vector<st_FieldOfViewInfo> _FieldOfViewInfos;	
+
+	// 현재 시전중인 물리 근접 스킬
+	CSkill* _CurrentMeleeAttack;
+	// 연속기 스킬
+	CSkill* _ComboSkill;
 
 	CPlayer();	
 	~CPlayer();		

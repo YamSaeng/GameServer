@@ -431,7 +431,7 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 재사용대기시간 출력 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketCoolTime(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, float SkillCoolTimeSpeed, CSkill* QuickSlotSkill);
+	CGameServerMessage* MakePacketCoolTime(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, float SkillCoolTimeSpeed, CSkill* QuickSlotSkill = nullptr, int32 CoolTime = 0);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 스킬 에러 메세지 생성 패킷 조합
 	//-----------------------------------------------------------------------------------------

@@ -212,7 +212,7 @@ bool CObjectManager::ObjectLeaveGame(CGameObject* LeaveGameObject, int32 ObjectI
 	{
 	case en_GameObjectType::OBJECT_SLIME:
 	case en_GameObjectType::OBJECT_BEAR:
-		LeaveGameObject->_Channel->LeaveChannel(LeaveGameObject);
+		LeaveGameObject->GetChannel()->LeaveChannel(LeaveGameObject);
 
 		_MonstersArrayIndexs.Push(ObjectIndex);	
 		break;	
@@ -228,13 +228,13 @@ bool CObjectManager::ObjectLeaveGame(CGameObject* LeaveGameObject, int32 ObjectI
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
-		LeaveGameObject->_Channel->LeaveChannel(LeaveGameObject);
+		LeaveGameObject->GetChannel()->LeaveChannel(LeaveGameObject);
 
 		_ItemsArrayIndexs.Push(ObjectIndex);		
 		break;
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
-		LeaveGameObject->_Channel->LeaveChannel(LeaveGameObject);
+		LeaveGameObject->GetChannel()->LeaveChannel(LeaveGameObject);
 
 		_EnvironmentsArrayIndexs.Push(ObjectIndex);		
 		break;

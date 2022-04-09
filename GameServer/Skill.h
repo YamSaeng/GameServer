@@ -6,6 +6,15 @@ class CGameObject;
 class CSkill
 {
 public:	
+	// 연속기 스킬 활성 시간 틱
+	int64 _ComboSkillTick;
+
+	// 근접 공격 시간 틱
+	int64 _MeleeAttackTick;
+
+	int8 _QuickSlotBarIndex;
+	int8 _QuickSlotBarSlotIndex;
+
 	CSkill();	
 	~CSkill();
 
@@ -23,15 +32,11 @@ public:
 	void StatusAbnormalDurationTimeStart();
 	// 연속기 스킬 시작
 	void ComboSkillStart(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, en_SkillType ComboSkilltype);
+	// 근접 공격 스킬 시작
+	void MeleeAttackSkillStart(int64 AttackEndTick);
 
-	bool Update();
-
-	// 연속기 스킬 활성 시간 틱
-	int64 _ComboSkillTick;
-private:		
-	int8 _QuickSlotBarIndex;
-	int8 _QuickSlotBarSlotIndex;	
-
+	bool Update();	
+private:				
 	// 스킬 쿨타임 틱
 	int64 _SkillCootimeTick;
 	// 스킬 상태이상 적용 틱

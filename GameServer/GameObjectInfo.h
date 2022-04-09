@@ -260,9 +260,10 @@ enum class en_SkillType : int16
 
 enum class en_SkillCategory : int8
 {
-	QUICK_SLOT_SKILL,
+	QUICK_SLOT_SKILL_COOLTIME,
 	STATUS_ABNORMAL_SKILL,
 	COMBO_SKILL,
+	MELEE_SKILL
 };
 
 enum class en_EffectType : int16
@@ -330,7 +331,8 @@ enum class en_TileMapEnvironment : int8
 enum class en_GameObjectJobType : int16
 {
 	GAMEOBJECT_JOB_TYPE_SHOCK_RELEASE,
-	GAMEOBJECT_JOB_TYPE_BACK_TELEPORT
+	GAMEOBJECT_JOB_TYPE_BACK_TELEPORT,
+	GAMEOBJECT_JOB_TYPE_MELEE_ATTACK
 };
 
 namespace UnityEngine
