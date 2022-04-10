@@ -1651,6 +1651,34 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 			CSkill* ReqMeleeSkill = MyPlayer->_SkillBox.FindSkill((en_SkillType)ReqSkillType);
 			if (ReqMeleeSkill != nullptr && ReqMeleeSkill->GetSkillInfo()->CanSkillUse == true)
 			{
+				CMessage* AnimationPlayPacket = MakePacketResAnimationPlay(MyPlayer->_GameObjectInfo.ObjectId,
+					MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir,
+					(*ReqMeleeSkill->GetSkillInfo()->SkillAnimations.find(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir)).second);
+				SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, AnimationPlayPacket, MyPlayer);
+				AnimationPlayPacket->Free();
+
+				ReqMeleeSkill->CoolTimeStart();
+
+				for (auto QuickSlotBarPosition : MyPlayer->_QuickSlotManager.FindQuickSlotBar(ReqMeleeSkill->GetSkillInfo()->SkillType))
+				{
+					// 클라에게 쿨타임 표시
+					CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
+						QuickSlotBarPosition.QuickSlotBarSlotIndex,
+						1.0f, ReqMeleeSkill);
+					SendPacket(Session->SessionId, ResCoolTimeStartPacket);
+					ResCoolTimeStartPacket->Free();
+				}
+
+				// 전역 쿨타임 시간 표시
+				for (auto QuickSlotBarPosition : MyPlayer->_QuickSlotManager.ExceptionFindQuickSlotBar(QuickSlotBarIndex, QuickSlotBarSlotIndex))
+				{
+					CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
+						QuickSlotBarPosition.QuickSlotBarSlotIndex,
+						1.0f, nullptr, MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate);
+					SendPacket(Session->SessionId, ResCoolTimeStartPacket);
+					ResCoolTimeStartPacket->Free();
+				}
+
 				st_GameObjectJob* GameObjectJob = G_ObjectManager->GameObjectJobCreate();
 				GameObjectJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_MELEE_ATTACK;
 
@@ -1669,32 +1697,67 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 				// 연속기 스킬이 활성화 되어 있는지 확인
 				if (MyPlayer->_ComboSkill != nullptr)
 				{
+					st_GameObjectJob* ComboAttackOffJob = G_ObjectManager->GameObjectJobCreate();
+					ComboAttackOffJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_OFF;
+					
+					ComboAttackOffJob->GameObjectJobMessage = nullptr;
+
+					MyPlayer->_GameObjectJobQue.Enqueue(ComboAttackOffJob);
+
 					// 요청한 연속기 근접 스킬 확인
-					en_SkillType ComboSkillType = MyPlayer->_ComboSkill->GetSkillInfo()->SkillType;
+					CSkill* FindComboSkill = MyPlayer->_SkillBox.FindSkill(ReqMeleeSkill->GetSkillInfo()->SkillType);					
 
-					switch (ComboSkillType)
-					{
-					case en_SkillType::SKILL_KNIGHT_FIERCE_ATTACK:
-					{
-						st_Vector2Int FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
-						CGameObject* Target = MyPlayer->GetChannel()->_Map->Find(FrontCell);
-
-						if (Target != nullptr && Target->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE)
-						{
-
-						}
-					}
-					break;
+					switch (FindComboSkill->GetSkillInfo()->SkillType)
+					{					
 					case en_SkillType::SKILL_KNIGHT_CONVERSION_ATTACK:
-						break;
+						{
+							st_Vector2Int FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
+							CGameObject* Target = MyPlayer->GetChannel()->_Map->Find(FrontCell);
+
+							if (Target != nullptr && Target->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE)
+							{
+								Targets.push_back(Target);
+							}
+						}
+						break;					
 					}
-				}
+				}				
 
 				MyPlayer->_SkillType = (en_SkillType)ReqSkillType;				
 
 				// 타겟 위치 확인
 				switch (ReqMeleeSkill->GetSkillInfo()->SkillType)
 				{
+				case en_SkillType::SKILL_KNIGHT_FIERCE_ATTACK:
+					{						
+						st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)ReqMeleeSkill->GetSkillInfo();
+
+						if (AttackSkillInfo->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
+						{
+							st_GameObjectJob* ComboAttackCreateJob = G_ObjectManager->GameObjectJobCreate();
+							ComboAttackCreateJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_CREATE;
+
+							CGameServerMessage* ComboAttackCreateMessage = CGameServerMessage::GameServerMessageAlloc();
+							ComboAttackCreateMessage->Clear();
+
+							*ComboAttackCreateMessage << QuickSlotBarIndex;
+							*ComboAttackCreateMessage << QuickSlotBarSlotIndex;
+							*ComboAttackCreateMessage << &ReqMeleeSkill;							
+
+							ComboAttackCreateJob->GameObjectJobMessage = ComboAttackCreateMessage;
+
+							MyPlayer->_GameObjectJobQue.Enqueue(ComboAttackCreateJob);
+						}
+
+						st_Vector2Int FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
+						CGameObject* Target = MyPlayer->GetChannel()->_Map->Find(FrontCell);
+
+						if (Target != nullptr && Target->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE)
+						{
+							Targets.push_back(Target);
+						}
+					}	
+					break;					
 				case en_SkillType::SKILL_KNIGHT_CHOHONE:
 				{
 					if (MyPlayer->_SelectTarget != nullptr)
@@ -2031,29 +2094,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 						SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, ResChangeObjectStat, MyPlayer);
 						ResChangeObjectStat->Free();
 					}
-				}
-
-				ReqMeleeSkill->CoolTimeStart();
-
-				for (auto QuickSlotBarPosition : MyPlayer->_QuickSlotManager.FindQuickSlotBar(ReqMeleeSkill->GetSkillInfo()->SkillType))
-				{
-					// 클라에게 쿨타임 표시
-					CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
-						QuickSlotBarPosition.QuickSlotBarSlotIndex,
-						1.0f, ReqMeleeSkill);
-					SendPacket(Session->SessionId, ResCoolTimeStartPacket);
-					ResCoolTimeStartPacket->Free();
-				}
-
-				// 전역 쿨타임 시간 표시
-				for (auto QuickSlotBarPosition : MyPlayer->_QuickSlotManager.ExceptionFindQuickSlotBar(QuickSlotBarIndex, QuickSlotBarSlotIndex))
-				{					
-					CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
-						QuickSlotBarPosition.QuickSlotBarSlotIndex,
-						1.0f, nullptr, MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate);
-					SendPacket(Session->SessionId, ResCoolTimeStartPacket);
-					ResCoolTimeStartPacket->Free();
-				}
+				}				
 			}
 			else
 			{
@@ -2162,7 +2203,12 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 						{
 							if (MyPlayer->_ComboSkill != nullptr)
 							{
-								MyPlayer->_ComboSkill->_ComboSkillTick = 0;
+								st_GameObjectJob* ComboAttackOffJob = G_ObjectManager->GameObjectJobCreate();
+								ComboAttackOffJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_OFF;
+
+								ComboAttackOffJob->GameObjectJobMessage = nullptr;
+
+								MyPlayer->_GameObjectJobQue.Enqueue(ComboAttackOffJob);
 
 								CSkill* FindComboSkill = MyPlayer->_SkillBox.FindSkill(ReqMagicSkill->GetSkillInfo()->NextComboSkill);
 
@@ -4898,7 +4944,16 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					AttackSkillInfo->SkillType = (en_SkillType)SkillType;
 					AttackSkillInfo->SkillLevel = SkillLevel;
 					AttackSkillInfo->SkillName = (LPWSTR)CA2W(FindAttackSkillData->SkillName.c_str());
-					AttackSkillInfo->SkillCoolTime = FindAttackSkillData->SkillCoolTime;
+					
+					if (AttackSkillInfo->SkillType != en_SkillType::SKILL_DEFAULT_ATTACK)
+					{
+						AttackSkillInfo->SkillCoolTime = FindAttackSkillData->SkillCoolTime;
+					}
+					else
+					{
+						AttackSkillInfo->SkillCoolTime = MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate;
+					}
+					
 					AttackSkillInfo->SkillCastingTime = FindAttackSkillData->SkillCastingTime;
 					AttackSkillInfo->SkillDurationTime = FindAttackSkillData->SkillDurationTime;
 					AttackSkillInfo->SkillDotTime = FindAttackSkillData->SkillDotTime;
@@ -6103,28 +6158,19 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 
 			if (AttackSkillInfo->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
 			{
-				// 스킬 창에 다음 연속기 스킬이 있는지 확인한다.
-				CSkill* FindComboSkill = MyPlayer->_SkillBox.FindSkill(AttackSkillInfo->NextComboSkill);
-				if (FindComboSkill != nullptr)
-				{
-					CSkill* NewComboSkill = G_ObjectManager->SkillCreate();
+				st_GameObjectJob* ComboAttackCreateJob = G_ObjectManager->GameObjectJobCreate();
+				ComboAttackCreateJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_CREATE;
 
-					st_AttackSkillInfo* NewPreviousSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(AttackSkillInfo->SkillMediumCategory);
+				CGameServerMessage* ComboAttackCreateMessage = CGameServerMessage::GameServerMessageAlloc();
+				ComboAttackCreateMessage->Clear();
 
-					*NewPreviousSkillInfo = *AttackSkillInfo;
-					NewComboSkill->SetSkillInfo(en_SkillCategory::COMBO_SKILL, nullptr, NewPreviousSkillInfo);
-					NewComboSkill->SetOwner(MyPlayer);
+				*ComboAttackCreateMessage << QuickSlotBarIndex;
+				*ComboAttackCreateMessage << QuickSlotBarSlotIndex;
+				*ComboAttackCreateMessage << &SpellEndSkill;
 
-					MyPlayer->_ComboSkill = NewComboSkill;
+				ComboAttackCreateJob->GameObjectJobMessage = ComboAttackCreateMessage;
 
-					NewComboSkill->ComboSkillStart(QuickSlotBarIndex, QuickSlotBarSlotIndex, FindComboSkill->GetSkillInfo()->SkillType);
-
-					CMessage* ResNextComboSkill = MakePacketComboSkillOn(QuickSlotBarIndex,
-						QuickSlotBarSlotIndex,
-						*FindComboSkill->GetSkillInfo());
-					SendPacket(Session->SessionId, ResNextComboSkill);
-					ResNextComboSkill->Free();
-				}
+				MyPlayer->_GameObjectJobQue.Enqueue(ComboAttackCreateJob);
 			}
 
 			MyPlayer->GetTarget()->_GameObjectInfo.ObjectStatInfo.Speed -= AttackSkillInfo->SkillDebufMovingSpeed;
