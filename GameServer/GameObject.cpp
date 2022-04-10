@@ -92,6 +92,54 @@ void CGameObject::Update()
 				MyPlayer->_CurrentMeleeAttack = MeleeAttackSkill;
 			}
 			break;
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_CREATE:
+			{
+				int8 QuickSlotBarIndex;
+				*GameObjectJob->GameObjectJobMessage >> QuickSlotBarIndex;
+				int8 QuickSlotBarSlotIndex;
+				*GameObjectJob->GameObjectJobMessage >> QuickSlotBarSlotIndex;
+				CSkill* ReqMeleeSkill;
+				*GameObjectJob->GameObjectJobMessage >> &ReqMeleeSkill;
+								
+				CPlayer* MyPlayer = ((CPlayer*)this);
+
+				// 연속기 스킬이 스킬창에서 찾는다.
+				CSkill* FindComboSkill = MyPlayer->_SkillBox.FindSkill(ReqMeleeSkill->GetSkillInfo()->NextComboSkill);
+				if (FindComboSkill != nullptr)					
+				{
+					// 연속기 스킬 생성
+					CSkill* NewComboSkill = G_ObjectManager->SkillCreate();
+
+					// 퀵슬롯바 복구를 위해 연속기 이전 스킬의 정보를 생성
+					st_AttackSkillInfo* NewPreviousSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(ReqMeleeSkill->GetSkillInfo()->SkillMediumCategory);					
+					*NewPreviousSkillInfo = *((st_AttackSkillInfo*)ReqMeleeSkill->GetSkillInfo());
+					// 정보를 저장
+					NewComboSkill->SetSkillInfo(en_SkillCategory::COMBO_SKILL, nullptr, NewPreviousSkillInfo);					
+					NewComboSkill->SetOwner(MyPlayer);
+					
+					// 연속기 스킬 정보 입력
+					MyPlayer->_ComboSkill = NewComboSkill;
+					
+					NewComboSkill->ComboSkillStart(QuickSlotBarIndex, QuickSlotBarSlotIndex, FindComboSkill->GetSkillInfo()->SkillType);
+
+					CMessage* ResNextComboSkill = G_ObjectManager->GameServer->MakePacketComboSkillOn(QuickSlotBarIndex,
+						QuickSlotBarSlotIndex,
+						*FindComboSkill->GetSkillInfo());
+					G_ObjectManager->GameServer->SendPacket(MyPlayer->_SessionId, ResNextComboSkill);
+					ResNextComboSkill->Free();
+				}
+			}
+			break;
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_OFF:
+			{
+				CPlayer* MyPlayer = ((CPlayer*)this);
+
+				if (MyPlayer->_ComboSkill != nullptr)
+				{
+					MyPlayer->_ComboSkill->_ComboSkillTick = 0;
+				}				
+			}
+			break;
 		}
 
 		if (GameObjectJob->GameObjectJobMessage != nullptr)
