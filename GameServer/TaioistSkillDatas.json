@@ -47,7 +47,7 @@
               "SkillLeftAnimation": "SPELL_LEFT",
               "SkillRightAnimation": "SPELL_LEFT",
               "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "%d 거리 안에 있는 대상을 %f초 동안 속박 시킨다.",
+              "SkillExplanation": "%d 거리 안에 있는 대상을 %.1f초 동안 속박 시킨다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/도사/도사 속박"
             }
           ],

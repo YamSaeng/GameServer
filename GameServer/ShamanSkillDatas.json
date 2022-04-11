@@ -47,7 +47,7 @@
               "SkillLeftAnimation": "SPELL_LEFT",
               "SkillRightAnimation": "SPELL_LEFT",
               "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "%d 거리 안에 있는 대상을 %f초 동안 속박 시킨다.",
+              "SkillExplanation": "%d 거리 안에 있는 대상을 %.1f초 동안 속박 시킨다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/주술사/주술사 속박"
             },
             {
@@ -70,7 +70,7 @@
               "SkillLeftAnimation": "SPELL_LEFT",
               "SkillRightAnimation": "SPELL_LEFT",
               "NextComboSkill": "SKILL_SHAMAN_ICE_WAVE",
-              "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입히고 %f 만큼 상대방의 속도를 %f초동안 줄인다.",
+              "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입히고 %d%% 만큼 상대방의 속도를 %.1f초동안 줄인다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/주술사/얼음사슬"
             },
             {
@@ -116,7 +116,7 @@
               "SkillLeftAnimation": "SPELL_LEFT",
               "SkillRightAnimation": "SPELL_LEFT",
               "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입히고 %f초 동안 기절 시킨다.",
+              "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입히고 %.1f초 동안 기절 시킨다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/주술사/낙뢰"
             },
             {
@@ -152,14 +152,14 @@
               "SkillCastingTime": 0,
               "SkillDurationTime": 0,
               "SkillDotTime": 0,
-              "SkillDistance": 0,
+              "SkillDistance": 4,
               "SkillTargetEffectTime": 0,
               "SkillUpAnimation": "SPELL_BACK",
               "SkillDownAnimation": "SPELL_FRONT",
               "SkillLeftAnimation": "SPELL_LEFT",
               "SkillRightAnimation": "SPELL_LEFT",
               "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "이동 삭제와 이동 속도 감소를 삭제하고 뒤로 캐릭터를 이동시킨다.",
+              "SkillExplanation": "이동 불가와 이동 속도 감소를 삭제하고 %d칸 뒤로 캐릭터를 이동시킨다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/주술사/시공의뒤틀림"
             }
           ],

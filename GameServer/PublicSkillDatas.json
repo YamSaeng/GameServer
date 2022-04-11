@@ -61,7 +61,7 @@
               "SkillLeftAnimation": "IDLE_LEFT",
               "SkillRightAnimation": "IDLE_LEFT",
               "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "기절, 밀려남 상태에서 풀려나고 %f초 동안 상태이상 저항값을 1000만큼 증가시킨다.",
+              "SkillExplanation": "기절, 밀려남 상태이상을 해제하고 %.1f초 동안 상태이상 저항값을 1000만큼 증가시킨다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/충격해제"
             }
           ]
