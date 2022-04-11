@@ -4973,9 +4973,40 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					AttackSkillInfo->NextComboSkill = FindAttackSkillData->NextComboSkill;
 					AttackSkillInfo->SkillExplanation = (LPWSTR)CA2W(FindAttackSkillData->SkillExplanation.c_str());
 
-					wchar_t SkillExplanationMessage[256] = L"0";
+					TCHAR SkillExplanationMessage[256] = L"0";					
 
-					wsprintf(SkillExplanationMessage, AttackSkillInfo->SkillExplanation.c_str(), AttackSkillInfo->SkillMinDamage);
+					switch (AttackSkillInfo->SkillType)
+					{				
+					case en_SkillType::SKILL_DEFAULT_ATTACK:
+						wsprintf(SkillExplanationMessage, AttackSkillInfo->SkillExplanation.c_str());
+						break;
+					case en_SkillType::SKILL_KNIGHT_FIERCE_ATTACK:
+					case en_SkillType::SKILL_KNIGHT_CONVERSION_ATTACK:
+					case en_SkillType::SKILL_KNIGHT_SMASH_WAVE:
+					case en_SkillType::SKILL_KNIGHT_SHAEHONE:
+					case en_SkillType::SKILL_KNIGHT_CHOHONE:
+						// 스킬 최소, 최대 데미지를 기록
+						_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, AttackSkillInfo->SkillExplanation.c_str(), FindAttackSkillData->SkillDistance, AttackSkillInfo->SkillMinDamage, AttackSkillInfo->SkillMaxDamage);
+						break;					
+					case en_SkillType::SKILL_SHAMAN_FLAME_HARPOON:
+						_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, AttackSkillInfo->SkillExplanation.c_str(), FindAttackSkillData->SkillDistance, AttackSkillInfo->SkillMinDamage, AttackSkillInfo->SkillMaxDamage);
+						break;					
+					case en_SkillType::SKILL_SHAMAN_ROOT:
+						_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, AttackSkillInfo->SkillExplanation.c_str(), FindAttackSkillData->SkillDistance, AttackSkillInfo->SkillDurationTime / 1000.0f);
+						break;
+					case en_SkillType::SKILL_SHAMAN_ICE_CHAIN:
+						_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, AttackSkillInfo->SkillExplanation.c_str(), FindAttackSkillData->SkillDistance, AttackSkillInfo->SkillMinDamage, AttackSkillInfo->SkillMaxDamage, FindAttackSkillData->SkillDebufMovingSpeed, AttackSkillInfo->SkillDurationTime / 1000.0f);
+						break;
+					case en_SkillType::SKILL_SHAMAN_ICE_WAVE:
+						_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, AttackSkillInfo->SkillExplanation.c_str(), FindAttackSkillData->SkillDistance, AttackSkillInfo->SkillMinDamage, AttackSkillInfo->SkillMaxDamage);
+						break;
+					case en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE:
+						_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, AttackSkillInfo->SkillExplanation.c_str(), FindAttackSkillData->SkillDistance, AttackSkillInfo->SkillMinDamage, AttackSkillInfo->SkillMaxDamage, AttackSkillInfo->SkillDurationTime / 1000.0f);						
+						break;
+					case en_SkillType::SKILL_SHAMAN_HELL_FIRE:
+						_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, AttackSkillInfo->SkillExplanation.c_str(), FindAttackSkillData->SkillDistance, AttackSkillInfo->SkillMinDamage, AttackSkillInfo->SkillMaxDamage);
+						break;					
+					}					
 
 					AttackSkillInfo->SkillExplanation = SkillExplanationMessage;
 					AttackSkillInfo->SkillDebufAttackSpeed = FindAttackSkillData->SkillDebufAttackSpeed;
@@ -5021,6 +5052,19 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					TacTicSkillInfo->SkillAnimations.insert(pair<en_MoveDir, wstring>(
 						en_MoveDir::RIGHT, (LPWSTR)CA2W((*FindTacTicSkillData->SkillAnimations.find(en_MoveDir::RIGHT)).second.c_str())));
 
+					TacTicSkillInfo->SkillExplanation = (LPWSTR)CA2W(FindTacTicSkillData->SkillExplanation.c_str());
+
+					TCHAR SkillExplanationMessage[256] = L"0";
+
+					switch (TacTicSkillInfo->SkillType)
+					{
+					case en_SkillType::SKILL_SHAMAN_BACK_TELEPORT:						
+						_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, TacTicSkillInfo->SkillExplanation.c_str(), FindTacTicSkillData->SkillDistance);
+						break;
+					}
+
+					TacTicSkillInfo->SkillExplanation = SkillExplanationMessage;
+
 					TacTicSkill->SetSkillInfo(en_SkillCategory::QUICK_SLOT_SKILL_COOLTIME, TacTicSkillInfo);
 
 					MyPlayer->_SkillBox.AddTacTicSkill(TacTicSkill);
@@ -5062,6 +5106,22 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 					HealSkillInfo->SkillAnimations.insert(pair<en_MoveDir, wstring>(
 						en_MoveDir::RIGHT, (LPWSTR)CA2W((*FindHealSkillData->SkillAnimations.find(en_MoveDir::RIGHT)).second.c_str())));
 
+					HealSkillInfo->SkillExplanation = (LPWSTR)CA2W(FindHealSkillData->SkillExplanation.c_str());
+
+					TCHAR SkillExplanationMessage[256] = L"0";
+
+					switch (HealSkillInfo->SkillType)
+					{
+					case en_SkillType::SKILL_TAIOIST_HEALING_LIGHT:
+						_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, HealSkillInfo->SkillExplanation.c_str(), FindHealSkillData->SkillDistance, HealSkillInfo->SkillMinHealPoint, HealSkillInfo->SkillMaxHealPoint);
+						break;
+					case en_SkillType::SKILL_TAIOIST_HEALING_WIND:
+						_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, HealSkillInfo->SkillExplanation.c_str(), FindHealSkillData->SkillDistance, HealSkillInfo->SkillMinHealPoint, HealSkillInfo->SkillMaxHealPoint);
+						break;
+					}
+
+					HealSkillInfo->SkillExplanation = SkillExplanationMessage;
+
 					HealSkill->SetSkillInfo(en_SkillCategory::QUICK_SLOT_SKILL_COOLTIME, HealSkillInfo);
 
 					MyPlayer->_SkillBox.AddTacTicSkill(HealSkill);
@@ -5100,6 +5160,21 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 						en_MoveDir::LEFT, (LPWSTR)CA2W((*FindBufSkillData->SkillAnimations.find(en_MoveDir::LEFT)).second.c_str())));
 					BufSkillInfo->SkillAnimations.insert(pair<en_MoveDir, wstring>(
 						en_MoveDir::RIGHT, (LPWSTR)CA2W((*FindBufSkillData->SkillAnimations.find(en_MoveDir::RIGHT)).second.c_str())));
+					
+					BufSkillInfo->SkillExplanation = (LPWSTR)CA2W(FindBufSkillData->SkillExplanation.c_str());
+					TCHAR SkillExplanationMessage[256] = L"0";
+
+					switch (BufSkillInfo->SkillType)
+					{
+					case en_SkillType::SKILL_SHOCK_RELEASE:
+						_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, BufSkillInfo->SkillExplanation.c_str(), FindBufSkillData->SkillDurationTime / 1000.0f);
+						break;
+					case en_SkillType::SKILL_KNIGHT_CHARGE_POSE:
+						_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, BufSkillInfo->SkillExplanation.c_str(), FindBufSkillData->IncreaseMaxAttackPoint, FindBufSkillData->SkillDurationTime / 1000.0f);
+						break;					
+					}					
+
+					BufSkillInfo->SkillExplanation = SkillExplanationMessage;
 
 					BufSkillInfo->IncreaseMinAttackPoint = FindBufSkillData->IncreaseMinAttackPoint;
 					BufSkillInfo->IncreaseMaxAttackPoint = FindBufSkillData->IncreaseMaxAttackPoint;
@@ -6079,6 +6154,16 @@ void CGameServer::PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* M
 			CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
 				QuickSlotBarPosition.QuickSlotBarSlotIndex,
 				1.0f, SpellEndSkill);
+			SendPacket(Session->SessionId, ResCoolTimeStartPacket);
+			ResCoolTimeStartPacket->Free();
+		}
+
+		// 전역 쿨타임 시간 표시
+		for (auto QuickSlotBarPosition : MyPlayer->_QuickSlotManager.ExceptionFindQuickSlotBar(QuickSlotBarIndex, QuickSlotBarSlotIndex))
+		{
+			CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
+				QuickSlotBarPosition.QuickSlotBarSlotIndex,
+				1.0f, nullptr, MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate);
 			SendPacket(Session->SessionId, ResCoolTimeStartPacket);
 			ResCoolTimeStartPacket->Free();
 		}
