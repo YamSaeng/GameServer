@@ -176,13 +176,7 @@ unsigned __stdcall CGameServer::UserDataBaseThreadProc(void* Argument)
 								break;
 							case en_GameServerJobType::DATA_BASE_CHARACTER_INFO_SEND:
 								Instance->PacketProcReqDBCharacterInfoSend(Session->SessionId, DBMessage);
-								break;
-							case en_GameServerJobType::DATA_BASE_QUICK_SLOT_SAVE:
-								Instance->PacketProcReqDBQuickSlotBarSlotSave(Session->SessionId, DBMessage);
-								break;							
-							case en_GameServerJobType::DATA_BASE_QUICK_INIT:
-								Instance->PacketProcReqDBQuickSlotInit(Session->SessionId, DBMessage);
-								break;
+								break;										
 							default:
 								Instance->Disconnect(Session->SessionId);
 								break;
@@ -2980,21 +2974,36 @@ void CGameServer::PacketProcReqQuickSlotSave(int64 SessionId, CMessage* Message)
 				}
 			}
 
-			st_GameServerJob* DBQuickSlotSaveJob = _GameServerJobMemoryPool->Alloc();
-			DBQuickSlotSaveJob->SessionId = MyPlayer->_SessionId;
+			int8 QuickSlotBarIndex;
+			*Message >> QuickSlotBarIndex;
+			int8 QuickSlotBarSlotIndex;
+			*Message >> QuickSlotBarSlotIndex;
+			int16 QuickSlotKey;
+			*Message >> QuickSlotKey;
+			int8 QuickSlotSkillLargetCategory;
+			*Message >> QuickSlotSkillLargetCategory;
+			int8 QuickSlotSkillMediumCategory;
+			*Message >> QuickSlotSkillMediumCategory;
+			int16 QuickSlotSkillType;
+			*Message >> QuickSlotSkillType;
 
-			CGameServerMessage* DBQuickSlotSaveMessage = CGameServerMessage::GameServerMessageAlloc();
-			DBQuickSlotSaveMessage->Clear();
+			st_QuickSlotBarSlotInfo* FindQuickSlotInfo = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarIndex, QuickSlotBarSlotIndex);
+			if (FindQuickSlotInfo != nullptr)
+			{
+				CSkill* FindSkill = MyPlayer->_SkillBox.FindSkill((en_SkillType)QuickSlotSkillType);
+				if (FindSkill != nullptr)
+				{
+					FindQuickSlotInfo->QuickBarSkill = FindSkill;
+				}
+				else
+				{
+					CRASH(L"스킬 박스에 없는 스킬을 퀵슬롯에 등록하려고 시도");
+				}
+			}			
 
-			*DBQuickSlotSaveMessage << (int16)en_GameServerJobType::DATA_BASE_QUICK_SLOT_SAVE;
-			DBQuickSlotSaveMessage->InsertData(Message->GetFrontBufferPtr(), Message->GetUseBufferSize());
-			Message->MoveReadPosition(Message->GetUseBufferSize());
-
-			InterlockedIncrement64(&Session->DBReserveCount);
-			Session->DBQue.Enqueue(DBQuickSlotSaveMessage);
-
-			_GameServerUserDataBaseThreadMessageQue.Enqueue(DBQuickSlotSaveJob);
-			SetEvent(_UserDataBaseWakeEvent);
+			CMessage* ResQuickSlotUpdateMessage = MakePacketResQuickSlotBarSlotSave(*FindQuickSlotInfo);
+			SendPacket(Session->SessionId, ResQuickSlotUpdateMessage);
+			ResQuickSlotUpdateMessage->Free();
 		} while (0);
 	}
 
@@ -3175,23 +3184,28 @@ void CGameServer::PacketProcReqQuickSlotInit(int64 SessionId, CMessage* Message)
 				}
 			}
 
-			st_GameServerJob* DBQuickSlotInitJob = _GameServerJobMemoryPool->Alloc();
-			DBQuickSlotInitJob->SessionId = MyPlayer->_SessionId;
+			int8 QuickSlotBarIndex;
+			*Message >> QuickSlotBarIndex;
 
-			CGameServerMessage* DBQuickSlotInitMessage = CGameServerMessage::GameServerMessageAlloc();
-			DBQuickSlotInitMessage->Clear();
+			int8 QuickSlotBarSlotIndex;
+			*Message >> QuickSlotBarSlotIndex;
 
-			*DBQuickSlotInitMessage << (int16)en_GameServerJobType::DATA_BASE_QUICK_INIT;
-			*DBQuickSlotInitMessage << AccountId;
-			*DBQuickSlotInitMessage << PlayerDBId;
-			DBQuickSlotInitMessage->InsertData(Message->GetFrontBufferPtr(), Message->GetUseBufferSize());
-			Message->MoveReadPosition(Message->GetUseBufferSize());
+			// 퀵슬롯에서 정보 찾기
+			st_QuickSlotBarSlotInfo* InitQuickSlotBarSlot = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarIndex, QuickSlotBarSlotIndex);
+			if (InitQuickSlotBarSlot != nullptr)
+			{
+				// 퀵슬롯에서 스킬 연결 해제
+				InitQuickSlotBarSlot->QuickBarSkill = nullptr;
+			}
+			else
+			{
+				CRASH("퀵슬롯정보를 찾지 못함");
+			}
+			
+			CMessage* ResQuickSlotInitMessage = MakePacketResQuickSlotInit(QuickSlotBarIndex, QuickSlotBarSlotIndex);
+			SendPacket(Session->SessionId, ResQuickSlotInitMessage);
+			ResQuickSlotInitMessage->Free();
 
-			InterlockedIncrement64(&Session->DBReserveCount);
-			Session->DBQue.Enqueue(DBQuickSlotInitMessage);
-
-			_GameServerUserDataBaseThreadMessageQue.Enqueue(DBQuickSlotInitJob);
-			SetEvent(_UserDataBaseWakeEvent);
 		} while (0);
 	}
 
@@ -5691,168 +5705,6 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Me
 			SendPacket(Session->SessionId, ResCharacterInfoMessage);
 			ResCharacterInfoMessage->Free();
 #pragma endregion
-		} while (0);
-	}
-
-	ReturnSession(Session);
-}
-
-void CGameServer::PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CGameServerMessage* Message)
-{
-	st_Session* Session = FindSession(SessionId);
-
-	if (Session)
-	{
-		do
-		{
-			int8 QuickSlotBarIndex;
-			*Message >> QuickSlotBarIndex;
-			int8 QuickSlotBarSlotIndex;
-			*Message >> QuickSlotBarSlotIndex;
-			int16 QuickSlotKey;
-			*Message >> QuickSlotKey;
-			int8 QuickSlotSkillLargetCategory;
-			*Message >> QuickSlotSkillLargetCategory;
-			int8 QuickSlotSkillMediumCategory;
-			*Message >> QuickSlotSkillMediumCategory;
-			int16 QuickSlotSkillType;
-			*Message >> QuickSlotSkillType;
-
-			// 게임에 입장한 캐릭터를 가져온다.
-			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
-
-			st_QuickSlotBarSlotInfo SaveQuickSlotBarSlot;
-			SaveQuickSlotBarSlot.AccountDBId = MyPlayer->_AccountId;
-			SaveQuickSlotBarSlot.PlayerDBId = MyPlayer->_GameObjectInfo.ObjectId;
-			SaveQuickSlotBarSlot.QuickSlotBarIndex = QuickSlotBarIndex;
-			SaveQuickSlotBarSlot.QuickSlotBarSlotIndex = QuickSlotBarSlotIndex;
-			SaveQuickSlotBarSlot.QuickSlotKey = QuickSlotKey;
-
-			CSkill* FindSkill = MyPlayer->_SkillBox.FindSkill((en_SkillType)QuickSlotSkillType);
-			if (FindSkill != nullptr)
-			{
-				SaveQuickSlotBarSlot.QuickBarSkill = FindSkill;
-			}
-			else
-			{
-				CRASH(L"스킬 박스에 없는 스킬을 퀵슬롯에 등록하려고 시도");
-			}
-
-			FindSkill->GetSkillInfo()->IsQuickSlotUse = true;
-
-			MyPlayer->_QuickSlotManager.UpdateQuickSlotBar(SaveQuickSlotBarSlot);
-
-			int8 SkillLargeCategory = (int8)SaveQuickSlotBarSlot.QuickBarSkill->GetSkillInfo()->SkillLargeCategory;
-			int8 SkillMediumCategory = (int8)SaveQuickSlotBarSlot.QuickBarSkill->GetSkillInfo()->SkillMediumCategory;
-			int16 SkillType = (int16)SaveQuickSlotBarSlot.QuickBarSkill->GetSkillInfo()->SkillType;
-
-			// DB에 퀵슬롯 정보 저장
-			CDBConnection* DBQuickSlotUpdateConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-			SP::CDBGameServerQuickSlotBarSlotUpdate QuickSlotUpdate(*DBQuickSlotUpdateConnection);
-			QuickSlotUpdate.InAccountDBId(SaveQuickSlotBarSlot.AccountDBId);
-			QuickSlotUpdate.InPlayerDBId(SaveQuickSlotBarSlot.PlayerDBId);
-			QuickSlotUpdate.InQuickSlotBarIndex(SaveQuickSlotBarSlot.QuickSlotBarIndex);
-			QuickSlotUpdate.InQuickSlotBarSlotIndex(SaveQuickSlotBarSlot.QuickSlotBarSlotIndex);
-			QuickSlotUpdate.InQuickSlotKey(SaveQuickSlotBarSlot.QuickSlotKey);
-			QuickSlotUpdate.InSkillLargeCategory(SkillLargeCategory);
-			QuickSlotUpdate.InSkillMediumCategory(SkillMediumCategory);
-			QuickSlotUpdate.InSkillType(SkillType);
-			QuickSlotUpdate.InSkillLevel(SaveQuickSlotBarSlot.QuickBarSkill->GetSkillInfo()->SkillLevel);
-
-			QuickSlotUpdate.Execute();
-
-			G_DBConnectionPool->Push(en_DBConnect::GAME, DBQuickSlotUpdateConnection);
-
-			CMessage* ResQuickSlotUpdateMessage = MakePacketResQuickSlotBarSlotSave(SaveQuickSlotBarSlot);
-			SendPacket(Session->SessionId, ResQuickSlotUpdateMessage);
-			ResQuickSlotUpdateMessage->Free();
-		} while (0);
-	}
-
-	ReturnSession(Session);
-}
-
-void CGameServer::PacketProcReqDBQuickSlotInit(int64 SessionId, CMessage* Message)
-{
-	st_Session* Session = FindSession(SessionId);
-
-	if (Session)
-	{
-		do
-		{
-			int64 AccountId;
-			*Message >> AccountId;
-
-			int64 PlayerId;
-			*Message >> PlayerId;
-
-			int8 QuickSlotBarIndex;
-			*Message >> QuickSlotBarIndex;
-
-			int8 QuickSlotBarSlotIndex;
-			*Message >> QuickSlotBarSlotIndex;
-
-			// 게임에 입장한 캐릭터를 가져온다.
-			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
-
-			// 퀵슬롯에서 정보 찾기
-			st_QuickSlotBarSlotInfo* InitQuickSlotBarSlot = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarIndex, QuickSlotBarSlotIndex);
-			if (InitQuickSlotBarSlot != nullptr)
-			{
-				// 퀵슬롯에서 스킬 연결 해제
-				InitQuickSlotBarSlot->QuickBarSkill = nullptr;
-			}
-			else
-			{
-				CRASH("퀵슬롯정보를 찾지 못함");
-			}
-
-			// 해당 퀵슬롯 위치에 정보가 있는지 DB에서 확인
-			CDBConnection* DBQuickSlotCheckConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-			SP::CDBGameServerQuickSlotCheck QuickSlotACheck(*DBQuickSlotCheckConnection);
-			QuickSlotACheck.InAccountDBId(AccountId);
-			QuickSlotACheck.InPlayerDBId(PlayerId);
-			QuickSlotACheck.InQuickSlotBarIndex(QuickSlotBarIndex);
-			QuickSlotACheck.InQuickSlotBarSlotIndex(QuickSlotBarSlotIndex);
-
-			int16 QuickSlotKey;
-			int8 QuickSlotSkillLargeCategory;
-			int8 QuickSlotSkillMediumCategory;
-			int16 QuickSlotSkillType;
-			int8 QuickSlotSkillLevel;
-
-			QuickSlotACheck.OutQuickSlotKey(QuickSlotKey);
-			QuickSlotACheck.OutQuickSlotSkillLargeCategory(QuickSlotSkillLargeCategory);
-			QuickSlotACheck.OutQuickSlotSkillMediumCategory(QuickSlotSkillMediumCategory);
-			QuickSlotACheck.OutQuickSlotSkillType(QuickSlotSkillType);
-			QuickSlotACheck.OutQuickSlotSkillLevel(QuickSlotSkillLevel);
-
-			QuickSlotACheck.Execute();
-
-			bool QuickSlotAFind = QuickSlotACheck.Fetch();
-
-			G_DBConnectionPool->Push(en_DBConnect::GAME, DBQuickSlotCheckConnection);
-
-			// 찾은 퀵슬롯 정보를 초기화
-			CDBConnection* DBQuickSlotInitConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-			SP::CDBGameServerQuickSlotInit QuickSlotInit(*DBQuickSlotInitConnection);
-
-			wstring InitString = L"";
-
-			QuickSlotInit.InAccountDBId(AccountId);
-			QuickSlotInit.InPlayerDBId(PlayerId);
-			QuickSlotInit.InQuickSlotBarIndex(QuickSlotBarIndex);
-			QuickSlotInit.InQuickSlotBarSlotIndex(QuickSlotBarSlotIndex);
-			QuickSlotInit.InQuickSlotBarSkillName(InitString);
-			QuickSlotInit.InQuickSlotBarSkillThumbnailImagePath(InitString);
-
-			QuickSlotInit.Execute();
-
-			G_DBConnectionPool->Push(en_DBConnect::GAME, DBQuickSlotInitConnection);
-
-			CMessage* ResQuickSlotInitMessage = MakePacketResQuickSlotInit(QuickSlotBarIndex, QuickSlotBarSlotIndex);
-			SendPacket(Session->SessionId, ResQuickSlotInitMessage);
-			ResQuickSlotInitMessage->Free();
 		} while (0);
 	}
 

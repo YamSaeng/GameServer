@@ -164,8 +164,7 @@ void CPlayer::Update()
 	{
 		bool ReturnComboSkill = _ComboSkill->Update();
 		if (ReturnComboSkill)
-		{
-			G_ObjectManager->SkillInfoReturn(_ComboSkill->GetSkillInfo()->SkillMediumCategory, _ComboSkill->GetSkillInfo());
+		{			
 			G_ObjectManager->SkillReturn(_ComboSkill);
 			_ComboSkill = nullptr;
 		}

@@ -210,16 +210,7 @@ private:
 	//-----------------------------------------------------------------------
 	// 게임 서버 접속시 캐릭터 정보를 DB에서 가져와서 클라에 전송
 	//-----------------------------------------------------------------------
-	void PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Message);
-	//--------------------------------------------------------------------------
-	// 퀵슬롯 테이블에 요청 스킬 저장
-	//--------------------------------------------------------------------------
-	void PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CGameServerMessage* Message);	
-	//--------------------------------------------------------------------
-	// 퀵슬롯바 초기화
-	//--------------------------------------------------------------------
-	void PacketProcReqDBQuickSlotInit(int64 SessionId, CMessage* Message);
-	//--------------------------------------------------------------------
+	void PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Message);	
 	// 접속 종료시 플레이어 정보 DB에 기록
 	//--------------------------------------------------------------------
 	void PacketProcReqDBLeavePlayerInfoSave(CMessage* Message);
