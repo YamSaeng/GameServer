@@ -105,7 +105,7 @@ vector<st_QuickSlotBarPosition> CQuickSlotManager::ExceptionFindQuickSlotBar(int
 				SearchingCompleteQuickSlotPosition.QuickSlotBarSlotIndex = SearchingQuickSlotBarSlot->QuickSlotBarSlotIndex;
 
 				QuickSlotSkillPositions.push_back(SearchingCompleteQuickSlotPosition);
-			}
+			}			
 		}
 	}
 

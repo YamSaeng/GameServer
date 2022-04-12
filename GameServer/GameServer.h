@@ -214,11 +214,7 @@ private:
 	//--------------------------------------------------------------------------
 	// 퀵슬롯 테이블에 요청 스킬 저장
 	//--------------------------------------------------------------------------
-	void PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CGameServerMessage* Message);
-	//--------------------------------------------------------------------
-	// 퀵슬롯바에서 퀵슬롯 스왑
-	//--------------------------------------------------------------------
-	void PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Message);
+	void PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CGameServerMessage* Message);	
 	//--------------------------------------------------------------------
 	// 퀵슬롯바 초기화
 	//--------------------------------------------------------------------
@@ -316,7 +312,7 @@ private:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 퀵슬롯 스왑 요청 응답 패킷 조합 
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResQuickSlotSwap(int64 AccountId, int64 PlayerId, st_QuickSlotBarSlotInfo SwapAQuickSlotInfo, st_QuickSlotBarSlotInfo SwapBQuickSlotInfo);
+	CGameServerMessage* MakePacketResQuickSlotSwap(st_QuickSlotBarSlotInfo SwapAQuickSlotInfo, st_QuickSlotBarSlotInfo SwapBQuickSlotInfo);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 퀵슬롯 초기화 패킷 조합
 	//-----------------------------------------------------------------------------------------

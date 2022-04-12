@@ -179,10 +179,7 @@ unsigned __stdcall CGameServer::UserDataBaseThreadProc(void* Argument)
 								break;
 							case en_GameServerJobType::DATA_BASE_QUICK_SLOT_SAVE:
 								Instance->PacketProcReqDBQuickSlotBarSlotSave(Session->SessionId, DBMessage);
-								break;
-							case en_GameServerJobType::DATA_BASE_QUICK_SWAP:
-								Instance->PacketProcReqDBQuickSlotSwap(Session->SessionId, DBMessage);
-								break;
+								break;							
 							case en_GameServerJobType::DATA_BASE_QUICK_INIT:
 								Instance->PacketProcReqDBQuickSlotInit(Session->SessionId, DBMessage);
 								break;
@@ -3049,25 +3046,82 @@ void CGameServer::PacketProcReqQuickSlotSwap(int64 SessionId, CMessage* Message)
 					Disconnect(Session->SessionId);
 					break;
 				}
+			}			
+
+			int8 QuickSlotBarSwapIndexA;
+			*Message >> QuickSlotBarSwapIndexA;
+			int8 QuickSlotBarSlotSwapIndexA;
+			*Message >> QuickSlotBarSlotSwapIndexA;
+
+			int8 QuickSlotBarSwapIndexB;
+			*Message >> QuickSlotBarSwapIndexB;
+			int8 QuickSlotBarSlotSwapIndexB;
+			*Message >> QuickSlotBarSlotSwapIndexB;
+
+			// 스왑 요청 A 정보 셋팅
+			st_QuickSlotBarSlotInfo SwapAQuickSlotBarInfo;
+			SwapAQuickSlotBarInfo.AccountDBId = AccountId;
+			SwapAQuickSlotBarInfo.PlayerDBId = PlayerDBId;
+
+			// 스왑 하기 위해서 B 퀵슬롯 위치 정보를 넣는다.
+			SwapAQuickSlotBarInfo.QuickSlotBarIndex = QuickSlotBarSwapIndexA;
+			SwapAQuickSlotBarInfo.QuickSlotBarSlotIndex = QuickSlotBarSlotSwapIndexA;
+
+			// B 퀵슬롯 정보를 가져온다.
+			st_QuickSlotBarSlotInfo* FindBQuickslotInfo = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarSwapIndexB, QuickSlotBarSlotSwapIndexB);
+			if (FindBQuickslotInfo != nullptr)
+			{
+				// 비어 있지 않다면 스킬 정보를 바꾼다.
+				if (FindBQuickslotInfo->QuickBarSkill != nullptr)
+				{
+					SwapAQuickSlotBarInfo.QuickBarSkill = FindBQuickslotInfo->QuickBarSkill;
+					SwapAQuickSlotBarInfo.QuickSlotKey = FindBQuickslotInfo->QuickSlotKey;
+				}
+				else // 비어 있을 경우엔 스킬 정보를 초기화한다.
+				{
+					SwapAQuickSlotBarInfo.QuickBarSkill = nullptr;
+				}
+			}
+			else
+			{
+				CRASH("퀵슬롯 정보를 찾을 수 없음");
 			}
 
-			st_GameServerJob* DBQuickSlotSwapJob = _GameServerJobMemoryPool->Alloc();
-			DBQuickSlotSwapJob->SessionId = MyPlayer->_SessionId;
+			// 스왑 요청 B 정보 셋팅
+			st_QuickSlotBarSlotInfo SwapBQuickSlotBarInfo;
+			SwapBQuickSlotBarInfo.AccountDBId = AccountId;
+			SwapBQuickSlotBarInfo.PlayerDBId = PlayerDBId;
+			SwapBQuickSlotBarInfo.QuickSlotBarIndex = QuickSlotBarSwapIndexB;
+			SwapBQuickSlotBarInfo.QuickSlotBarSlotIndex = QuickSlotBarSlotSwapIndexB;
 
-			CGameServerMessage* DBQuickSlotSwapMessage = CGameServerMessage::GameServerMessageAlloc();
-			DBQuickSlotSwapMessage->Clear();
+			st_QuickSlotBarSlotInfo* FindAQuickslotInfo = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarSwapIndexA, QuickSlotBarSlotSwapIndexA);
+			if (FindAQuickslotInfo != nullptr)
+			{
+				if (FindAQuickslotInfo->QuickBarSkill != nullptr)
+				{
+					SwapBQuickSlotBarInfo.QuickBarSkill = FindAQuickslotInfo->QuickBarSkill;					
+				}
+				else
+				{
+					SwapBQuickSlotBarInfo.QuickBarSkill = nullptr;
+				}
+			}
+			else
+			{
+				CRASH("퀵슬롯 정보를 찾을 수 없음");
+			}
+			
+			SwapAQuickSlotBarInfo.QuickSlotKey = FindAQuickslotInfo->QuickSlotKey;
+			SwapBQuickSlotBarInfo.QuickSlotKey = FindBQuickslotInfo->QuickSlotKey;
 
-			*DBQuickSlotSwapMessage << (int16)en_GameServerJobType::DATA_BASE_QUICK_SWAP;
-			*DBQuickSlotSwapMessage << AccountId;
-			*DBQuickSlotSwapMessage << PlayerDBId;
-			DBQuickSlotSwapMessage->InsertData(Message->GetFrontBufferPtr(), Message->GetUseBufferSize());
-			Message->MoveReadPosition(Message->GetUseBufferSize());
+			MyPlayer->_QuickSlotManager.SwapQuickSlot(SwapBQuickSlotBarInfo, SwapAQuickSlotBarInfo);
 
-			InterlockedIncrement64(&Session->DBReserveCount);
-			Session->DBQue.Enqueue(DBQuickSlotSwapMessage);
-
-			_GameServerUserDataBaseThreadMessageQue.Enqueue(DBQuickSlotSwapJob);
-			SetEvent(_UserDataBaseWakeEvent);
+			// 클라에게 결과 전송
+			CMessage* ResQuickSlotSwapPacket = MakePacketResQuickSlotSwap(
+				SwapBQuickSlotBarInfo,		
+				SwapAQuickSlotBarInfo);
+			SendPacket(MyPlayer->_SessionId, ResQuickSlotSwapPacket);
+			ResQuickSlotSwapPacket->Free();			
 		} while (0);
 	}
 
@@ -5718,179 +5772,6 @@ void CGameServer::PacketProcReqDBQuickSlotBarSlotSave(int64 SessionId, CGameServ
 	ReturnSession(Session);
 }
 
-void CGameServer::PacketProcReqDBQuickSlotSwap(int64 SessionId, CMessage* Message)
-{
-	st_Session* Session = FindSession(SessionId);
-
-	if (Session)
-	{
-		do
-		{
-			int64 AccountId;
-			*Message >> AccountId;
-
-			int64 PlayerId;
-			*Message >> PlayerId;
-
-			int8 QuickSlotBarSwapIndexA;
-			*Message >> QuickSlotBarSwapIndexA;
-			int8 QuickSlotBarSlotSwapIndexA;
-			*Message >> QuickSlotBarSlotSwapIndexA;
-
-			int8 QuickSlotBarSwapIndexB;
-			*Message >> QuickSlotBarSwapIndexB;
-			int8 QuickSlotBarSlotSwapIndexB;
-			*Message >> QuickSlotBarSlotSwapIndexB;
-
-			// 게임에 입장한 캐릭터를 가져온다.
-			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
-
-#pragma region 퀵슬롯 A가 DB에 있는지 확인
-			// 해당 퀵슬롯 위치에 정보가 있는지 DB에서 확인
-			CDBConnection* DBQuickSlotACheckConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-			SP::CDBGameServerQuickSlotCheck QuickSlotACheck(*DBQuickSlotACheckConnection);
-			QuickSlotACheck.InAccountDBId(AccountId);
-			QuickSlotACheck.InPlayerDBId(PlayerId);
-			QuickSlotACheck.InQuickSlotBarIndex(QuickSlotBarSwapIndexA);
-			QuickSlotACheck.InQuickSlotBarSlotIndex(QuickSlotBarSlotSwapIndexA);
-
-			int16 QuickSlotAKey;
-			int8 QuickSlotASkillLargeCategory;
-			int8 QuickSlotASkillMediumCategory;
-			int16 QuickSlotASkillType;
-			int8 QuickSlotASkillLevel;
-
-			QuickSlotACheck.OutQuickSlotKey(QuickSlotAKey);
-			QuickSlotACheck.OutQuickSlotSkillLargeCategory(QuickSlotASkillLargeCategory);
-			QuickSlotACheck.OutQuickSlotSkillMediumCategory(QuickSlotASkillMediumCategory);
-			QuickSlotACheck.OutQuickSlotSkillType(QuickSlotASkillType);
-			QuickSlotACheck.OutQuickSlotSkillLevel(QuickSlotASkillLevel);
-
-			QuickSlotACheck.Execute();
-
-			bool QuickSlotAFind = QuickSlotACheck.Fetch();
-
-			G_DBConnectionPool->Push(en_DBConnect::GAME, DBQuickSlotACheckConnection);
-
-			// 스왑 요청 A 정보 셋팅
-			st_QuickSlotBarSlotInfo SwapAQuickSlotBarInfo;
-			SwapAQuickSlotBarInfo.AccountDBId = AccountId;
-			SwapAQuickSlotBarInfo.PlayerDBId = PlayerId;
-			SwapAQuickSlotBarInfo.QuickSlotBarIndex = QuickSlotBarSwapIndexB;
-			SwapAQuickSlotBarInfo.QuickSlotBarSlotIndex = QuickSlotBarSlotSwapIndexB;
-
-			st_QuickSlotBarSlotInfo* FindAQuickslotInfo = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarSwapIndexA, QuickSlotBarSlotSwapIndexA);
-			if (FindAQuickslotInfo != nullptr)
-			{
-				if (FindAQuickslotInfo->QuickBarSkill != nullptr)
-				{
-					SwapAQuickSlotBarInfo.QuickBarSkill = FindAQuickslotInfo->QuickBarSkill;
-				}
-				else
-				{
-					SwapAQuickSlotBarInfo.QuickBarSkill = nullptr;
-				}
-			}
-			else
-			{
-				CRASH("퀵슬롯 정보를 찾을 수 없음");
-			}
-
-#pragma endregion
-#pragma region 퀵슬롯 B가 DB에 있는지 확인
-			// 해당 퀵슬롯 위치에 정보가 있는지 DB에서 확인
-			CDBConnection* DBQuickSlotBCheckConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-			SP::CDBGameServerQuickSlotCheck QuickSlotBCheck(*DBQuickSlotBCheckConnection);
-			QuickSlotBCheck.InAccountDBId(AccountId);
-			QuickSlotBCheck.InPlayerDBId(PlayerId);
-			QuickSlotBCheck.InQuickSlotBarIndex(QuickSlotBarSwapIndexB);
-			QuickSlotBCheck.InQuickSlotBarSlotIndex(QuickSlotBarSlotSwapIndexB);
-
-			int16 QuickSlotBKey;
-			int8 QuickSlotBSkillLargeCategory;
-			int8 QuickSlotBSkillMediumCategory;
-			int16 QuickSlotBSkillType;
-			int8 QuickSlotBSkillLevel;
-
-			QuickSlotBCheck.OutQuickSlotKey(QuickSlotBKey);
-			QuickSlotBCheck.OutQuickSlotSkillLargeCategory(QuickSlotBSkillLargeCategory);
-			QuickSlotBCheck.OutQuickSlotSkillMediumCategory(QuickSlotBSkillMediumCategory);
-			QuickSlotBCheck.OutQuickSlotSkillType(QuickSlotBSkillType);
-			QuickSlotBCheck.OutQuickSlotSkillLevel(QuickSlotBSkillLevel);
-
-			QuickSlotBCheck.Execute();
-
-			bool QuickSlotBFind = QuickSlotBCheck.Fetch();
-
-			G_DBConnectionPool->Push(en_DBConnect::GAME, DBQuickSlotBCheckConnection);
-
-			// 스왑 요청 B 정보 셋팅
-			st_QuickSlotBarSlotInfo SwapBQuickSlotBarInfo;
-			SwapBQuickSlotBarInfo.AccountDBId = AccountId;
-			SwapBQuickSlotBarInfo.PlayerDBId = PlayerId;
-			SwapBQuickSlotBarInfo.QuickSlotBarIndex = QuickSlotBarSwapIndexA;
-			SwapBQuickSlotBarInfo.QuickSlotBarSlotIndex = QuickSlotBarSlotSwapIndexA;
-
-			st_QuickSlotBarSlotInfo* FindBQuickslotInfo = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarSwapIndexB, QuickSlotBarSlotSwapIndexB);
-			if (FindBQuickslotInfo != nullptr)
-			{
-				if (FindBQuickslotInfo->QuickBarSkill != nullptr)
-				{
-					SwapBQuickSlotBarInfo.QuickBarSkill = FindBQuickslotInfo->QuickBarSkill;
-				}
-				else
-				{
-					SwapBQuickSlotBarInfo.QuickBarSkill = nullptr;
-				}
-			}
-			else
-			{
-				CRASH("퀵슬롯 정보를 찾을 수 없음");
-			}
-
-			SwapAQuickSlotBarInfo.QuickSlotKey = QuickSlotBKey;
-			SwapBQuickSlotBarInfo.QuickSlotKey = QuickSlotAKey;
-#pragma endregion
-
-#pragma region DB에서 퀵슬롯 스왑
-			CDBConnection* DBQuickSlotSwapConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-			SP::CDBGameServerQuickSlotSwap QuickSlotSwap(*DBQuickSlotSwapConnection);
-			QuickSlotSwap.InAccountDBId(AccountId);
-			QuickSlotSwap.InPlayerDBId(PlayerId);
-
-			QuickSlotSwap.InAQuickSlotBarIndex(SwapBQuickSlotBarInfo.QuickSlotBarIndex);
-			QuickSlotSwap.InAQuickSlotBarSlotIndex(SwapBQuickSlotBarInfo.QuickSlotBarSlotIndex);
-			QuickSlotSwap.InASkillLargeCategory(QuickSlotBSkillLargeCategory);
-			QuickSlotSwap.InASkillMediumCategory(QuickSlotBSkillMediumCategory);
-			QuickSlotSwap.InAQuickSlotSkillType(QuickSlotBSkillType);
-			QuickSlotSwap.InAQuickSlotSkillLevel(QuickSlotBSkillLevel);
-
-			QuickSlotSwap.InBQuickSlotBarIndex(SwapAQuickSlotBarInfo.QuickSlotBarIndex);
-			QuickSlotSwap.InBQuickSlotBarSlotIndex(SwapAQuickSlotBarInfo.QuickSlotBarSlotIndex);
-			QuickSlotSwap.InBSkillLargeCategory(QuickSlotASkillLargeCategory);
-			QuickSlotSwap.InBSkillMediumCategory(QuickSlotASkillMediumCategory);
-			QuickSlotSwap.InBQuickSlotSkillType(QuickSlotASkillType);
-			QuickSlotSwap.InBQuickSlotSkillLevel(QuickSlotASkillLevel);
-
-			bool QuickSlotSwapSuccess = QuickSlotSwap.Execute();
-			if (QuickSlotSwapSuccess == true)
-			{
-				MyPlayer->_QuickSlotManager.SwapQuickSlot(SwapBQuickSlotBarInfo, SwapAQuickSlotBarInfo);
-
-				// 클라에게 결과 전송
-				CMessage* ResQuickSlotSwapPacket = MakePacketResQuickSlotSwap(AccountId, PlayerId,
-					SwapBQuickSlotBarInfo,
-					SwapAQuickSlotBarInfo);
-				SendPacket(MyPlayer->_SessionId, ResQuickSlotSwapPacket);
-				ResQuickSlotSwapPacket->Free();
-			}
-#pragma endregion			
-		} while (0);
-	}
-
-	ReturnSession(Session);
-}
-
 void CGameServer::PacketProcReqDBQuickSlotInit(int64 SessionId, CMessage* Message)
 {
 	st_Session* Session = FindSession(SessionId);
@@ -6917,7 +6798,7 @@ CGameServerMessage* CGameServer::MakePacketQuickSlotCreate(int8 QuickSlotBarSize
 	return ResQuickSlotCreateMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResQuickSlotSwap(int64 AccountId, int64 PlayerId, st_QuickSlotBarSlotInfo SwapAQuickSlotInfo, st_QuickSlotBarSlotInfo SwapBQuickSlotInfo)
+CGameServerMessage* CGameServer::MakePacketResQuickSlotSwap(st_QuickSlotBarSlotInfo SwapAQuickSlotInfo, st_QuickSlotBarSlotInfo SwapBQuickSlotInfo)
 {
 	CGameServerMessage* ResQuickSlotSwapMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResQuickSlotSwapMessage == nullptr)
@@ -6927,9 +6808,7 @@ CGameServerMessage* CGameServer::MakePacketResQuickSlotSwap(int64 AccountId, int
 
 	ResQuickSlotSwapMessage->Clear();
 
-	*ResQuickSlotSwapMessage << (int16)en_PACKET_S2C_QUICKSLOT_SWAP;
-	*ResQuickSlotSwapMessage << AccountId;
-	*ResQuickSlotSwapMessage << PlayerId;
+	*ResQuickSlotSwapMessage << (int16)en_PACKET_S2C_QUICKSLOT_SWAP;	
 
 	*ResQuickSlotSwapMessage << SwapAQuickSlotInfo;
 	*ResQuickSlotSwapMessage << SwapBQuickSlotInfo;
