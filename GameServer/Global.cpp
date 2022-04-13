@@ -38,6 +38,8 @@ public:
 		G_Datamanager->LoadDataPlayerCharacterStatus(L"PlayerCharacterStatus.json");
 		// 몬스터 데이터 파싱
 		G_Datamanager->LoadDataMonster(L"MonsterData.json");
+		// 몬스터 어그로 데이터 파싱
+		G_Datamanager->LoadDataMonsterAggro(L"MonsterAggroData.json");
 		// 환경 오브젝트 데이터 파싱
 		G_Datamanager->LoadDataEnvironment(L"EnvironmentData.json");
 		// 제작템 데이터 파싱

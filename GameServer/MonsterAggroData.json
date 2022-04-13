@@ -1,0 +1,13 @@
+{
+  "MonsterAggro": [
+    {
+      "MonsterAggroFirstTarget": 0.01,
+      "MonsterAggroFirstAttacker": 0.05,
+      "MonsterAggroAttacker": 0.2,      
+      "MonsterAggroHeal": 1.0,
+      "MonsterAggroGroupHeal": 2.0,
+      "MonsterAggroBuf": 0.03,
+      "MonsterAggroDebuf": 0.1      
+    }
+  ]
+}

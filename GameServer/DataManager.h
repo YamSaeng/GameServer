@@ -19,6 +19,8 @@ public:
 	
 	map<int32, st_MonsterData*> _Monsters;
 
+	st_MonsterAggroData _MonsterAggroData;
+
 	//------------------------------------------------------
 	// 스킬 데이터		
 	//------------------------------------------------------
@@ -76,6 +78,7 @@ public:
 	void LoadDataPlayerCharacterStatus(wstring LoadFileName);	
 	void LoadDataLevel(wstring LoadFileName);
 	void LoadDataMonster(wstring LoadFileName);
+	void LoadDataMonsterAggro(wstring LoadFileName);
 	void LoadDataPublicSkill(wstring LoadFileName);
 	void LoadDataWarriorSkill(wstring LoadFileName);
 	void LoadDataShamanSkill(wstring LoadFileName);
@@ -86,5 +89,5 @@ public:
 	void LoadDataCrafting(wstring LoadFileName);
 
 	st_SkillData* FindSkillData(en_SkillMediumCategory FindSkillMediumCategory, en_SkillType FindSkillType);	
-	st_ObjectStatusData* FindObjectStatusData(en_GameObjectType GameObjectType, int16 Level);
+	st_ObjectStatusData* FindObjectStatusData(en_GameObjectType GameObjectType, int16 Level);	
 };

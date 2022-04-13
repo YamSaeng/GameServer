@@ -156,6 +156,17 @@ struct st_MonsterData
 	int32 GetExpPoint;
 };
 
+struct st_MonsterAggroData
+{
+	float MonsterAggroFirstTarget; // 최초 공격 목표 어그로 값
+	float MonsterAggroFirstAttacker; // 최초 공격자 어그로 값
+	float MonsterAggroAttacker; // 공격자 어그로 값
+	float MonsterAggroHeal; // 힐 어그로 값
+	float MonsterAggroGroupHeal; // 그룹 힐 어그로 값
+	float MonsterAggroBuf; // 강화효과 어그로 값
+	float MonsterAggroDebuf; //	약화효과 어그로 값	
+};
+
 struct st_EnvironmentData
 {
 	int32 EnvironmentDataId;

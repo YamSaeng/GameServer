@@ -758,6 +758,33 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 	}
 }
 
+void CDataManager::LoadDataMonsterAggro(wstring LoadFileName)
+{
+	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());
+
+	rapidjson::Document Document;
+	Document.Parse(FileStr);
+
+	for (auto& Filed : Document["MonsterAggro"].GetArray())
+	{
+		float MonsterAggroFirstTarget = Filed["MonsterAggroFirstTarget"].GetFloat();
+		float MonsterAggroFirstAttacker = Filed["MonsterAggroFirstAttacker"].GetFloat();
+		float MonsterAggroAttacker = Filed["MonsterAggroAttacker"].GetFloat();
+		float MonsterAggroHeal = Filed["MonsterAggroHeal"].GetFloat();
+		float MonsterAggroGroupHeal = Filed["MonsterAggroGroupHeal"].GetFloat();
+		float MonsterAggroBuf = Filed["MonsterAggroBuf"].GetFloat();
+		float MonsterAggroDebuf = Filed["MonsterAggroDebuf"].GetFloat();
+
+		_MonsterAggroData.MonsterAggroFirstTarget = MonsterAggroFirstTarget;
+		_MonsterAggroData.MonsterAggroFirstAttacker = MonsterAggroFirstAttacker;
+		_MonsterAggroData.MonsterAggroAttacker = MonsterAggroAttacker;
+		_MonsterAggroData.MonsterAggroHeal = MonsterAggroHeal;
+		_MonsterAggroData.MonsterAggroGroupHeal = MonsterAggroGroupHeal;
+		_MonsterAggroData.MonsterAggroBuf = MonsterAggroBuf;
+		_MonsterAggroData.MonsterAggroDebuf = MonsterAggroFirstTarget;
+	}
+}
+
 void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 {
 	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());
