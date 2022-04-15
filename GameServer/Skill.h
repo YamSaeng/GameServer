@@ -11,10 +11,12 @@ public:
 
 	// 근접 공격 시간 틱
 	int64 _MeleeAttackTick;
+	// 마법 요청 시간 틱
+	int64 _MagicTick;
 
 	int8 _QuickSlotBarIndex;
 	int8 _QuickSlotBarSlotIndex;
-
+	
 	CSkill();	
 	~CSkill();
 
@@ -32,8 +34,10 @@ public:
 	void StatusAbnormalDurationTimeStart();
 	// 연속기 스킬 시작
 	void ComboSkillStart(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, en_SkillType ComboSkilltype);
-	// 근접 공격 스킬 시작
-	void MeleeAttackSkillStart(int64 AttackEndTick);
+	// 스킬 시작
+	void CurrentSkillStart(int64 AttackEndTick);
+
+	en_SkillKinds GetSkillKind();
 
 	bool Update();	
 private:				
@@ -51,6 +55,7 @@ private:
 	CGameObject* _Owner;	
 
 	en_SkillCategory _SkillCategory;
+	en_SkillKinds _SkillKind;
 	st_SkillInfo* _SkillInfo;
 	
 	// 연속기 스킬에 사용하는 스킬 정보로

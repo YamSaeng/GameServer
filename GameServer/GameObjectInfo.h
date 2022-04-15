@@ -1,5 +1,6 @@
 #pragma once
 
+class CGameObject;
 class CGameServerMessage;
 class CSkill;
 
@@ -263,7 +264,15 @@ enum class en_SkillCategory : int8
 	QUICK_SLOT_SKILL_COOLTIME,
 	STATUS_ABNORMAL_SKILL,
 	COMBO_SKILL,
-	MELEE_SKILL
+	REQ_MELEE_SKILL_INIT,
+	REQ_MAGIC_SKILL_INIT
+};
+
+enum class en_SkillKinds : int8
+{
+	SKILL_KIND_NONE,
+	MELEE_SKILL,
+	MAGIC_SKILL
 };
 
 enum class en_EffectType : int16
@@ -308,7 +317,8 @@ enum class en_PersonalMessageType : int8
 	PERSONAL_MESSAGE_NON_SELECT_OBJECT,
 	PERSONAL_MESSAGE_HEAL_NON_SELECT_OBJECT,
 	PERSONAL_MESSAGE_PLACE_BLOCK,
-	PERSONAL_MESSAGE_PLACE_DISTANCE	
+	PERSONAL_MESSAGE_PLACE_DISTANCE,
+	PERSONAL_MESSAGE_MYSELF_TARGET
 };
 
 enum class en_ConsumableType : int16
@@ -333,8 +343,20 @@ enum class en_GameObjectJobType : int16
 	GAMEOBJECT_JOB_TYPE_SHOCK_RELEASE,
 	GAMEOBJECT_JOB_TYPE_BACK_TELEPORT,
 	GAMEOBJECT_JOB_TYPE_MELEE_ATTACK,
+	GAMEOBJECT_JOB_TYPE_REQ_MAGIC,	
 	GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_CREATE,
 	GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_OFF
+};
+
+enum class en_MonsterAggroType : int8
+{
+	MONSTER_AGGRO_FIRST_TARGET,
+	MONSTER_AGGRO_FIRST_ATTACKER,
+	MONSTER_AGGRO_DAMAGE,
+	MONSTER_AGGRO_HEAL,
+	MONSTER_AGGRO_BUF,
+	MONSTER_AGGRO_DEBUF,	
+	MONSTER_AGGRO_TAUNT
 };
 
 namespace UnityEngine
@@ -1984,4 +2006,10 @@ struct st_GameObjectJob
 {
 	en_GameObjectJobType GameObjectJobType;
 	CGameServerMessage* GameObjectJobMessage;
+};
+
+struct st_Aggro
+{
+	CGameObject* AggroTarget;
+	float AggroPoint;	
 };

@@ -18,6 +18,11 @@ CSkill::CSkill()
 	_SkillDurationTick = 0;	
 	_ComboSkillTick = 0;
 
+	_MeleeAttackTick = 0;
+	_MagicTick = 0;
+
+	_SkillKind = en_SkillKinds::SKILL_KIND_NONE;
+
 	_IsDot = false;
 }
 
@@ -41,6 +46,36 @@ void CSkill::SetSkillInfo(en_SkillCategory SkillCategory, st_SkillInfo* SkillInf
 	_SkillCategory = SkillCategory;
 	_SkillInfo = SkillInfo;
 	_PreviousSkillInfo = PreviousSkillInfo;
+
+	if (_SkillInfo != nullptr)
+	{
+		switch (_SkillInfo->SkillType)
+		{
+		case en_SkillType::SKILL_DEFAULT_ATTACK:			
+		case en_SkillType::SKILL_KNIGHT_FIERCE_ATTACK:
+		case en_SkillType::SKILL_KNIGHT_CONVERSION_ATTACK:
+		case en_SkillType::SKILL_KNIGHT_SMASH_WAVE:
+		case en_SkillType::SKILL_KNIGHT_SHAEHONE:
+		case en_SkillType::SKILL_KNIGHT_CHOHONE:
+			_SkillKind = en_SkillKinds::MELEE_SKILL;
+			break;
+		case en_SkillType::SKILL_KNIGHT_CHARGE_POSE:
+		case en_SkillType::SKILL_SHAMAN_FLAME_HARPOON:
+		case en_SkillType::SKILL_SHAMAN_ROOT:
+		case en_SkillType::SKILL_SHAMAN_ICE_CHAIN:
+		case en_SkillType::SKILL_SHAMAN_ICE_WAVE:
+		case en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE:
+		case en_SkillType::SKILL_SHAMAN_HELL_FIRE:
+		case en_SkillType::SKILL_TAIOIST_DIVINE_STRIKE:
+		case en_SkillType::SKILL_TAIOIST_ROOT:
+		case en_SkillType::SKILL_SHAMAN_BACK_TELEPORT:
+		case en_SkillType::SKILL_TAIOIST_HEALING_LIGHT:
+		case en_SkillType::SKILL_TAIOIST_HEALING_WIND:
+		case en_SkillType::SKILL_SHOCK_RELEASE:
+			_SkillKind = en_SkillKinds::MAGIC_SKILL;
+			break;
+		}
+	}
 }
 
 void CSkill::CoolTimeStart()
@@ -64,14 +99,19 @@ void CSkill::ComboSkillStart(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex,
 	_QuickSlotBarIndex = QuickSlotBarIndex;
 	_QuickSlotBarSlotIndex = QuickSlotBarSlotIndex;
 
-	_ComboSkillTick = GetTickCount64() + 2000;
+	_ComboSkillTick = GetTickCount64() + 3000;
 
 	_ComboSkillType = ComboSkilltype;
 }
 
-void CSkill::MeleeAttackSkillStart(int64 AttackEndTick)
+void CSkill::CurrentSkillStart(int64 AttackEndTick)
 {
 	_MeleeAttackTick = GetTickCount64() + AttackEndTick;
+}
+
+en_SkillKinds CSkill::GetSkillKind()
+{
+	return _SkillKind;
 }
 
 bool CSkill::Update()
@@ -284,12 +324,19 @@ bool CSkill::Update()
 			return true;
 		}
 		break;
-	case en_SkillCategory::MELEE_SKILL:
+	case en_SkillCategory::REQ_MELEE_SKILL_INIT:
 		if (_MeleeAttackTick < GetTickCount64())
-		{
+		{			
 			((CPlayer*)_Owner)->_IsReqAttack = false;			
 			return true;
 		}		
+		break;
+	case en_SkillCategory::REQ_MAGIC_SKILL_INIT:
+		if (_MagicTick < GetTickCount64())
+		{
+			((CPlayer*)_Owner)->_IsReqMagic = false;
+			return true;
+		}
 		break;
 	}	
 	
