@@ -9,8 +9,7 @@ CPlayer::CPlayer()
 {
 	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_PLAYER;	
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-	_DefaultAttackTick = 0;	
-	_SkillJob = nullptr;
+	_DefaultAttackTick = 0;		
 
 	_FieldOfViewDistance = 10;
 
@@ -755,7 +754,7 @@ void CPlayer::UpdateSpell()
 			CMessage* ResAttackMagicPacket = G_ObjectManager->GameServer->MakePacketResAttack(
 				_GameObjectInfo.ObjectId,
 				_SelectTarget->_GameObjectInfo.ObjectId,
-				_SkillType,
+				_CurrentSkill->GetSkillInfo()->SkillType,
 				FinalDamage,
 				false);
 			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResAttackMagicPacket, this);

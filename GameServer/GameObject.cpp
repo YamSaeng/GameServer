@@ -81,17 +81,65 @@ void CGameObject::Update()
 				int16 ReqSkillType;
 				*GameObjectJob->GameObjectJobMessage >> ReqSkillType;					
 			
-				CSkill* MeleeAttackSkill = G_ObjectManager->SkillCreate();
+				CSkill* ReqMeleeSkillInit = G_ObjectManager->SkillCreate();
 				st_AttackSkillInfo* MeleeAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(MeleeSkill->GetSkillInfo()->SkillMediumCategory);
 				*MeleeAttackSkillInfo = *((st_AttackSkillInfo*)MeleeSkill->GetSkillInfo());
 
-				MeleeAttackSkill->SetSkillInfo(en_SkillCategory::MELEE_SKILL, MeleeAttackSkillInfo);
-				MeleeAttackSkill->SetOwner(this);
-				MeleeAttackSkill->MeleeAttackSkillStart(MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate);
+				ReqMeleeSkillInit->SetSkillInfo(en_SkillCategory::REQ_MELEE_SKILL_INIT, MeleeAttackSkillInfo);
+				ReqMeleeSkillInit->SetOwner(this);
+				ReqMeleeSkillInit->ReqMeleeSkillInit(MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate);
 
-				MyPlayer->_CurrentMeleeAttack = MeleeAttackSkill;
+				MyPlayer->_ReqMeleeSkillInit = ReqMeleeSkillInit;				
 			}
 			break;
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_REQ_MAGIC:
+			{
+				CPlayer* MyPlayer = ((CPlayer*)this);
+
+				MyPlayer->_IsReqMagic = true;				
+
+				CSkill* MagicSkill;
+				*GameObjectJob->GameObjectJobMessage >> &MagicSkill;				
+
+				CSkill* ReqMagicSkillInit = G_ObjectManager->SkillCreate();
+
+				switch (MagicSkill->GetSkillInfo()->SkillMediumCategory)
+				{
+				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF:
+					{
+						st_BufSkillInfo* TacticSkillInfo = (st_BufSkillInfo*)G_ObjectManager->SkillInfoCreate(MagicSkill->GetSkillInfo()->SkillMediumCategory);
+						*TacticSkillInfo = *((st_BufSkillInfo*)MagicSkill->GetSkillInfo());
+
+						ReqMagicSkillInit->SetSkillInfo(en_SkillCategory::REQ_MAGIC_SKILL_INIT, TacticSkillInfo);
+						ReqMagicSkillInit->SetOwner(this);
+						ReqMagicSkillInit->ReqMagicSkillInit(MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate);						
+					}
+					break;
+				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_TACTIC:
+					{
+						st_TacTicSkillInfo* TacticSkillInfo = (st_TacTicSkillInfo*)G_ObjectManager->SkillInfoCreate(MagicSkill->GetSkillInfo()->SkillMediumCategory);
+						*TacticSkillInfo = *((st_TacTicSkillInfo*)MagicSkill->GetSkillInfo());
+
+						ReqMagicSkillInit->SetSkillInfo(en_SkillCategory::REQ_MAGIC_SKILL_INIT, TacticSkillInfo);
+						ReqMagicSkillInit->SetOwner(this);
+						ReqMagicSkillInit->ReqMagicSkillInit(MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate);
+					}
+					break;
+				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK:
+					{
+						st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(MagicSkill->GetSkillInfo()->SkillMediumCategory);
+						*AttackSkillInfo = *((st_AttackSkillInfo*)MagicSkill->GetSkillInfo());
+
+						ReqMagicSkillInit->SetSkillInfo(en_SkillCategory::REQ_MAGIC_SKILL_INIT, AttackSkillInfo);
+						ReqMagicSkillInit->SetOwner(this);
+						ReqMagicSkillInit->ReqMagicSkillInit(MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate);
+					}
+					break;				
+				}
+
+				MyPlayer->_ReqMagicSkillInit = ReqMagicSkillInit;
+			}
+			break;		
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_CREATE:
 			{
 				int8 QuickSlotBarIndex;

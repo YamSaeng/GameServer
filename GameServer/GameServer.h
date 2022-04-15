@@ -10,7 +10,7 @@ class CGameServerMessage;
 
 class CGameServer : public CNetworkLib
 {
-private:	
+private:
 	// 로그인 서버와 통신할 소켓
 	SOCKET _LoginServerSock;
 	// 유저 데이터베이스 쓰레드
@@ -20,26 +20,26 @@ private:
 	// 타이머잡 쓰레드
 	HANDLE _TimerJobThread;
 	// 로직 쓰레드
-	HANDLE _LogicThread;	
+	HANDLE _LogicThread;
 
 	// 타이머잡 쓰레드 깨우기 이벤트
 	HANDLE _TimerThreadWakeEvent;
-	
+
 	// WorkerThread 종료용 변수
 	bool _NetworkThreadEnd;
 	// User DataBaseThread 종료용 변수
 	bool _UserDataBaseThreadEnd;
 	// World DataBaseThread 종료용 변수
-	bool _WorldDataBaseThreadEnd;	
+	bool _WorldDataBaseThreadEnd;
 
 	// TimerJobThread 종료용 변수
 	bool _TimerJobThreadEnd;
 	// LogicThread 종료용 변수
 	bool _LogicThreadEnd;
-	
+
 	// TimerJobThread 전용 Lock
-	SRWLOCK _TimerJobLock;	
-			
+	SRWLOCK _TimerJobLock;
+
 	//----------------------------------------------------------
 	// 유저 데이터베이스 쓰레드 ( 유저 데이터 베이스 작업 처리 )
 	//----------------------------------------------------------
@@ -61,7 +61,7 @@ private:
 	//---------------------------------
 	// 캐릭터 스킬 생성
 	//---------------------------------
-	void PlayerSkillCreate(int64& AccountId, st_GameObjectInfo& NewCharacterInfo, int8& CharacterCreateSlotIndex);	
+	void PlayerSkillCreate(int64& AccountId, st_GameObjectInfo& NewCharacterInfo, int8& CharacterCreateSlotIndex);
 
 	//------------------------------------
 	// 클라 접속 기본 정보 셋팅
@@ -84,7 +84,7 @@ private:
 	//----------------------------------------------------------------
 	// 네트워크 패킷처리 함수
 	//----------------------------------------------------------------
-		
+
 	//----------------------------------------------------------
 	// 로그인 요청 처리
 	//----------------------------------------------------------
@@ -105,7 +105,7 @@ private:
 	//---------------------------------------------------------
 	// 이동 요청 처리
 	//---------------------------------------------------------
-	void PacketProcReqMove(int64 SessionID, CMessage* Message);	
+	void PacketProcReqMove(int64 SessionID, CMessage* Message);
 	//------------------------------------------------------------
 	// 이동 멈춤 처리
 	//------------------------------------------------------------
@@ -133,7 +133,7 @@ private:
 	//--------------------------------------------------------------------
 	// 채팅 메세지 요청 처리
 	//--------------------------------------------------------------------
-	void PacketProcReqChattingMessage(int64 SessionId, CMessage* Message);	
+	void PacketProcReqChattingMessage(int64 SessionId, CMessage* Message);
 	//------------------------------------------------------------
 	// 아이템 인벤토리 선택 요청 처리
 	//------------------------------------------------------------
@@ -141,7 +141,7 @@ private:
 	//------------------------------------------------------------
 	// 아이템 놓기 요청 처리
 	//------------------------------------------------------------
-	void PacketProcReqItemPlace(int64 SessionId, CMessage* Message);	
+	void PacketProcReqItemPlace(int64 SessionId, CMessage* Message);
 	//------------------------------------------------------------------
 	// 퀵슬롯 저장 요청 처리
 	//------------------------------------------------------------------
@@ -174,7 +174,7 @@ private:
 	//-----------------------------------------------------------------------------------------------
 	// DB 요청 처리 함수
 	//-----------------------------------------------------------------------------------------------
-	
+
 	//-------------------------------------------------------------------
 	// AccountID가 AccountDB에 있는지 체크
 	//-------------------------------------------------------------------
@@ -198,7 +198,7 @@ private:
 	//-------------------------------------------------------------------------
 	// 인벤토리 테이블에 아이템 놓기
 	//-------------------------------------------------------------------------
-	void PacketProcReqDBItemPlace(int64 SessionId, CGameServerMessage* Message);	
+	void PacketProcReqDBItemPlace(int64 SessionId, CGameServerMessage* Message);
 	//---------------------------------------------------------------
 	// 인벤토리 테이블에 아이템 업데이트
 	//---------------------------------------------------------------
@@ -210,7 +210,7 @@ private:
 	//-----------------------------------------------------------------------
 	// 게임 서버 접속시 캐릭터 정보를 DB에서 가져와서 클라에 전송
 	//-----------------------------------------------------------------------
-	void PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Message);	
+	void PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Message);
 	// 접속 종료시 플레이어 정보 DB에 기록
 	//--------------------------------------------------------------------
 	void PacketProcReqDBLeavePlayerInfoSave(CMessage* Message);
@@ -220,21 +220,9 @@ private:
 	//------------------------------------------------------------------
 
 	//----------------------------------------------------------------
-	// 밀리공격 끝 처리 함수
-	//----------------------------------------------------------------
-	void PacketProcTimerAttackEnd(int64 SessionId, CGameServerMessage* Message);
-	//----------------------------------------------------------------
-	// 마법공격 끝 처리 함수
-	//----------------------------------------------------------------
-	void PacketProcTimerSpellEnd(int64 SessionId, CGameServerMessage* Message);	
-	//----------------------------------------------------------------
 	// 오브젝트 스폰
 	//----------------------------------------------------------------
-	void PacketProcTimerObjectSpawn(CGameServerMessage* Message);
-	//----------------------------------------------------------------
-	// 오브젝트 상태 변경
-	//----------------------------------------------------------------
-	void PacketProcTimerObjectStateChange(int64 SessionId, CGameServerMessage* Message);	
+	void PacketProcTimerObjectSpawn(CGameServerMessage* Message);	
 	//----------------------------------------------------------------
 	// 핑 처리
 	//----------------------------------------------------------------
@@ -243,7 +231,7 @@ private:
 	//--------------------------------------
 	// 패킷조합 함수		
 	//--------------------------------------
-	
+
 	//--------------------------------------
 	// 클라이언트 접속 응답 패킷 조합
 	//--------------------------------------
@@ -251,7 +239,7 @@ private:
 	//---------------------------------------------------------------------------------------
 	// 로그인 요청 응답 패킷 조합
 	//---------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResLogin(bool& Status,int8& PlayerCount, int32* MyPlayerIndexes);
+	CGameServerMessage* MakePacketResLogin(bool& Status, int8& PlayerCount, int32* MyPlayerIndexes);
 	//--------------------------------------------------------------------------------------------------
 	// 캐릭터 생성 요청 응답 패킷 조합
 	//--------------------------------------------------------------------------------------------------
@@ -267,11 +255,11 @@ private:
 	//-------------------------------------------------------------------------------------------------------------------------
 	// 게임서버 돈 저장 요청 응답 패킷 조합
 	//-------------------------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int16 SliverCount, int16 BronzeCount, int16 ItemCount, int16 ItemType, bool ItemGainPrint = true);	
+	CGameServerMessage* MakePacketResGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int16 SliverCount, int16 BronzeCount, int16 ItemCount, int16 ItemType, bool ItemGainPrint = true);
 	//---------------------------------------------------------------------------------------------
 	// 게임서버 인벤토리 아이템 선택 요청 응답 패킷 조합
 	//---------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResSelectItem(int64 AccountId, int64 ObjectId, CItem* SelectItem);	
+	CGameServerMessage* MakePacketResSelectItem(int64 AccountId, int64 ObjectId, CItem* SelectItem);
 	//---------------------------------------------------------------------------------------------
 	// 게임서버 인벤토리 아이템 놓기 요청 응답 패킷 조합
 	//---------------------------------------------------------------------------------------------
@@ -307,16 +295,16 @@ private:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 퀵슬롯 초기화 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResQuickSlotInit(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex);		
+	CGameServerMessage* MakePacketResQuickSlotInit(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 제작템 목록 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketCraftingList(int64 AccountId, int64 PlayerId, vector<st_CraftingItemCategory> CraftingItemList);		
+	CGameServerMessage* MakePacketCraftingList(int64 AccountId, int64 PlayerId, vector<st_CraftingItemCategory> CraftingItemList);
 	//-------------------------------------------------
 	// 게임서버 핑 패킷 조합
 	//-------------------------------------------------
-	CGameServerMessage* MakePacketPing();	
-	
+	CGameServerMessage* MakePacketPing();
+
 	CItem* NewItemCrate(st_ItemInfo& NewItemInfo);
 public:
 	//-----------------------------------------------------------
@@ -382,7 +370,7 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 오브젝트 위치 싱크 맞추기 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResSyncPosition(int64 TargetObjectId, st_PositionInfo SyncPosition);	
+	CGameServerMessage* MakePacketResSyncPosition(int64 TargetObjectId, st_PositionInfo SyncPosition);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 스킬 저장 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -430,12 +418,12 @@ public:
 	//------------------------------------------------------------
 	// 게임 서버 상태이상 적용 패킷 조합
 	//------------------------------------------------------------
-	CGameServerMessage* MakePacketStatusAbnormal(int64 PlayerId, en_GameObjectType ObjectType, en_MoveDir Dir, en_SkillType SkillType,  bool SetStatusAbnormal, int8 StatusAbnormal);
+	CGameServerMessage* MakePacketStatusAbnormal(int64 PlayerId, en_GameObjectType ObjectType, en_MoveDir Dir, en_SkillType SkillType, bool SetStatusAbnormal, int8 StatusAbnormal);
 	//---------------------------------------------------
 	// 로그인 서버 로그아웃 요청 패킷 조합
 	//---------------------------------------------------
 	CGameServerMessage* MakePacketLogOut(int64 AccountID);
-public:	
+public:
 	//-----------------------------------------------
 	// Job 메모리풀
 	//-----------------------------------------------
@@ -450,18 +438,18 @@ public:
 	// Job 큐
 	//------------------------------------
 	CLockFreeQue<st_GameServerJob*> _GameServerUserDataBaseThreadMessageQue;
-	CLockFreeQue<st_GameServerJob*> _GameServerWorldDataBaseThreadMessageQue;	
+	CLockFreeQue<st_GameServerJob*> _GameServerWorldDataBaseThreadMessageQue;
 
 	//--------------------------------------
 	// TimerJob 우선순위 큐
 	//--------------------------------------
-	CHeap<int64,st_TimerJob*>* _TimerHeapJob;
+	CHeap<int64, st_TimerJob*>* _TimerHeapJob;
 
 	int64 _LogicThreadFPS;
 	// 네트워크 쓰레드 활성화된 횟수
 	int64 _NetworkThreadWakeCount;
 	// 네트워크 쓰레드 TPS
-	int64 _NetworkThreadTPS;	
+	int64 _NetworkThreadTPS;
 
 	// User DB 쓰레드 깨우기 이벤트
 	HANDLE _UserDataBaseWakeEvent;
@@ -470,8 +458,8 @@ public:
 	// DB 쓰레드 활성화된 횟수
 	int64 _DataBaseThreadWakeCount;
 	// DB 쓰레드 TPS
-	int64 _DataBaseThreadTPS;	
-	
+	int64 _DataBaseThreadTPS;
+
 	// 타이머 잡 쓰레드 활성화된 횟수
 	int64 _TimerJobThreadWakeCount;
 	// 타이머 잡 쓰레드 TPS
@@ -479,7 +467,7 @@ public:
 
 	CGameServer();
 	~CGameServer();
-	
+
 	//------------------------------------------
 	// 게임 서버 시작
 	//------------------------------------------
@@ -502,8 +490,8 @@ public:
 	// 클라이언트 떠남
 	//--------------------------------------------------------------
 	virtual void OnClientLeave(st_Session* LeaveSession) override;
-	virtual bool OnConnectionRequest(const wchar_t ClientIP, int32 Port) override;	
-	
+	virtual bool OnConnectionRequest(const wchar_t ClientIP, int32 Port) override;
+
 	//--------------------------------------------------------------
 	// 위치값을 기준으로 메세지 주위 섹터에 전송
 	//--------------------------------------------------------------
@@ -526,21 +514,9 @@ public:
 	void SendPacketFieldOfView(st_Session* Session, CMessage* Message, bool SendMe = false);
 	
 	//--------------------------------------------------------------
-	// 스킬 모션 끝 타이머 잡 생성
-	//--------------------------------------------------------------
-	void SkillMotionEndTimerJobCreate(CPlayer* Player, int64 SkillMotionEndTime, en_TimerJobType TimerJobType);	
-	//--------------------------------------------------------------
-	// 스킬 모션 끝 타이머, 스킬 쿨타임 타이머 잡 생성
-	//--------------------------------------------------------------
-	void SkillCoolTimeTimerJobCreate(CPlayer* Player, int64 CastingTime, CSkill* CoolTimeSkill, en_TimerJobType TimerJobType, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex);
-	//--------------------------------------------------------------
 	// 오브젝트 스폰 타이머 잡 생성
 	//--------------------------------------------------------------
-	void SpawnObjectTimeTimerJobCreate(int16 SpawnObjectType, st_Vector2Int SpawnPosition, int64 SpawnTime);
-	//--------------------------------------------------------------
-	// 오브젝트 상태 변경 타이머 잡 생성
-	//--------------------------------------------------------------
-	void ObjectStateChangeTimerJobCreate(CGameObject* Target, en_CreatureState ChangeState, int64 ChangeTime);	
+	void SpawnObjectTimeTimerJobCreate(int16 SpawnObjectType, st_Vector2Int SpawnPosition, int64 SpawnTime);	
 
 	//-------------------------------------------
 	// 핑 타이머 잡 생성

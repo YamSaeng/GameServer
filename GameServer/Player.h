@@ -16,17 +16,7 @@ public:
 	bool _IsReqMagic;
 
 	uint64 _DefaultAttackTick;	
-	uint64 _SpellTick;
-
-	//---------------------
-	// 시전 한 스킬 종류
-	//---------------------
-	en_SkillType _SkillType;
-
-	//--------------------
-	// 시전 중인 스킬 Job
-	//--------------------
-	st_TimerJob* _SkillJob;	
+	uint64 _SpellTick;		
 
 	int64 _SessionId;
 	int64 _AccountId;
