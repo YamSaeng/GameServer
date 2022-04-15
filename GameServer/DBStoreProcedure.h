@@ -37,7 +37,7 @@ namespace SP
 		void OutMaxMeleeAttackDamage(int32& MaxMeleeAttackDamage) { BindCol(14, MaxMeleeAttackDamage); }
 		void OutMeleeAttackHitRate(int16& MeleeAttackHitRate) { BindCol(15, MeleeAttackHitRate); }
 		void OutMagicDamage(int16& MagicDamage) { BindCol(16, MagicDamage); }
-		void OutMagicHitRate(int16& MagicHitRate) { BindCol(17, MagicHitRate); }
+		void OutMagicHitRate(float& MagicHitRate) { BindCol(17, MagicHitRate); }
 		void OutDefence(int32& Defence) { BindCol(18, Defence); }
 		void OutEvasionRate(int16& EvasionRate) { BindCol(19, EvasionRate); }
 		void OutMeleeCriticalPoint(int16& MeleeCriticalPoint) { BindCol(20, MeleeCriticalPoint); }
@@ -80,7 +80,7 @@ namespace SP
 		void InMaxMeleeAttackDamage(int32& MaxMeleeAttackDamage) { BindParam(14, MaxMeleeAttackDamage); }
 		void InMeleeAttackHitRate(int16& MeleeAttackHitRate) { BindParam(15, MeleeAttackHitRate); }
 		void InMagicDamage(int16& MagicDamage) { BindParam(16, MagicDamage); }
-		void InMagicHitRate(int16& MagicHitRate) { BindParam(17, MagicHitRate); }
+		void InMagicHitRate(float& MagicHitRate) { BindParam(17, MagicHitRate); }
 		void InDefence(int32& Defence) { BindParam(18, Defence); }
 		void InEvasionRate(int16& EvasionRate) { BindParam(19, EvasionRate); }
 		void InMeleeCriticalPoint(int16& MeleeCriticalPoint) { BindParam(20, MeleeCriticalPoint); }
@@ -534,7 +534,7 @@ namespace SP
 		void InMaxMeleeAttackDamage(int32& MaxMeleeAttackDamage) { BindParam(9, MaxMeleeAttackDamage); }
 		void InMeleeAttackHitRate(int16& MeleeAttackHitRate) { BindParam(10, MeleeAttackHitRate); }
 		void InMagicDamage(int16& MagicDamage) { BindParam(11, MagicDamage); }
-		void InMagicHitRate(int16& MagicHitRate) { BindParam(12, MagicHitRate); }
+		void InMagicHitRate(float& MagicHitRate) { BindParam(12, MagicHitRate); }
 		void InDefence(int32& Defence) { BindParam(13, Defence); }
 		void InEvasionRate(int16& EvasionRate) { BindParam(14, EvasionRate); }
 		void InMeleeCriticalPoint(int16& MeleeCriticalPoint) { BindParam(15, MeleeCriticalPoint); }

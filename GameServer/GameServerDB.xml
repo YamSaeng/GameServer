@@ -21,7 +21,7 @@
     <Column name="MaxMeleeAttackDamage" type="int" notnull="true"/>
     <Column name="MeleeAttackHitRate" type="SmallInt" notnull="true"/>
     <Column name="MagicDamage" type="SmallInt" notnull="true"/>
-    <Column name="MagicHitRate" type="SmallInt" notnull="true"/>
+    <Column name="MagicHitRate" type="float" notnull="true"/>
     <Column name="Defence" type="int" notnull="true"/>
     <Column name="EvasionRate" type="SmallInt" notnull="true"/>
     <Column name="MeleeCriticalPoint" type="SmallInt" notnull="true"/>
@@ -197,7 +197,7 @@
     <Param name="@MaxMeleeAttackDamage" type="int"/>
     <Param name="@MeleeAttackHitRate" type="SmallInt"/>
     <Param name="@MagicDamage" type="SmallInt"/>
-    <Param name="@MagicHitRate" type="SmallInt"/>
+    <Param name="@MagicHitRate" type="float"/>
     <Param name="@Defence" type="int"/>
     <Param name="@EvasionRate" type="SmallInt"/>
     <Param name="@MeleeCriticalPoint" type="SmallInt"/>
@@ -743,7 +743,7 @@
     <Param name="@MaxMeleeAttackDamage" type="int"/>
     <Param name="@MeleeAttackHitRate" type="SmallInt"/>
     <Param name="@MagicDamage" type="SmallInt"/>
-    <Param name="@MagicHitRate" type="SmallInt"/>
+    <Param name="@MagicHitRate" type="float"/>
     <Param name="@Defence" type="int"/>
     <Param name="@EvasionRate" type="SmallInt"/>
     <Param name="@MeleeCriticalPoint" type="SmallInt"/>
