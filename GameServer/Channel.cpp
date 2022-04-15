@@ -326,9 +326,9 @@ CGameObject* CChannel::FindNearPlayer(CGameObject* Object, int32 Range, bool* Co
 	{		
 		Player = Distances.PopHeap();
 
-		vector<st_Vector2Int> FirstPaths = _Map->FindPath(Object, Object->GetCellPosition(), Player->GetCellPosition());
-		if (FirstPaths.size() < 2)
-		{
+		vector<st_Vector2Int> FirstPaths = _Map->FindPath(Object, Object->GetCellPosition(), Player->GetCellPosition());		
+		if (FirstPaths.size() < 2) 
+		{			
 			// 타겟은 있지만 갈수는 없는 상태 ( 주위에 오브젝트들로 막혀서 )
 			if (Player != nullptr)
 			{				
@@ -343,22 +343,26 @@ CGameObject* CChannel::FindNearPlayer(CGameObject* Object, int32 Range, bool* Co
 					}
 
 					*CollisionCango = true;
-					return Player;
 				}
 
 				*CollisionCango = false;
-				return Player;
 			}			
 		}
 		
 		*CollisionCango = true;
-		return Player;
 	}
 	else
 	{
 		*CollisionCango = false;
-		return nullptr;
 	}
+
+	// 플레이어를 찾앗으나 상태값이 SPAWN_IDLE일 경우에는 무시한다.
+	if(Player != nullptr && Player->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::SPAWN_IDLE)	
+	{
+		Player = nullptr;
+	}
+
+	return Player;
 }
 
 void CChannel::Update()
