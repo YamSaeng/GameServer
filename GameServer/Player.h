@@ -13,6 +13,7 @@ class CPlayer : public CGameObject
 {
 public:		
 	bool _IsReqAttack;
+	bool _IsReqMagic;
 
 	uint64 _DefaultAttackTick;	
 	uint64 _SpellTick;
@@ -41,10 +42,13 @@ public:
 	// 시야 범위 오브젝트
 	vector<st_FieldOfViewInfo> _FieldOfViewInfos;	
 
-	// 현재 시전중인 물리 근접 스킬
-	CSkill* _CurrentMeleeAttack;
+	// 현재 사용 중인 스킬
+	CSkill* _CurrentSkill;
 	// 연속기 스킬
 	CSkill* _ComboSkill;
+	
+	CSkill* _ReqMeleeSkillInit;
+	CSkill* _ReqMagicSkillInit;		
 
 	CPlayer();	
 	~CPlayer();		
