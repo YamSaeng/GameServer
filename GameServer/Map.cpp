@@ -214,14 +214,14 @@ bool CMap::CollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool
 bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool CheckObject, bool Applycollision)
 {
 	// 채널이 할당되어 있는지 확인
-	if (GameObject->_Channel == nullptr)
+	if (GameObject->GetChannel() == nullptr)
 	{
 		CRASH("ApplyMove GameObject Channel nullptr")
 		return false;
 	}
 
 	// 게임오브젝트가 속한 채널이 들고 있는 맵과 현재 맵이 같은지 확인
-	if (GameObject->_Channel->_Map != this)
+	if (GameObject->GetChannel()->_Map != this)
 	{
 		CRASH("ApplyMove GameObject의 채널이 가지고 있는 맵과 지금 맵이 다름")
 		return false;
@@ -260,7 +260,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	switch (GameObject->_GameObjectInfo.ObjectType)
 	{	
 	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:		
-	case en_GameObjectType::OBJECT_MAGIC_PLAYER:
+	case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 	case en_GameObjectType::OBJECT_THIEF_PLAYER:
 	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
@@ -268,8 +268,8 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	{
 		CPlayer* MovePlayer = (CPlayer*)GameObject;
 
-		CSector* CurrentSector = GameObject->_Channel->GetSector(MovePlayer->GetCellPosition());		
-		CSector* NextSector = GameObject->_Channel->GetSector(DestPosition);				
+		CSector* CurrentSector = GameObject->GetChannel()->GetSector(MovePlayer->GetCellPosition());
+		CSector* NextSector = GameObject->GetChannel()->GetSector(DestPosition);
 				
 		if (CurrentSector != NextSector)
 		{			
@@ -285,8 +285,8 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	{
 		CMonster* MoveMonster = (CMonster*)GameObject;
 
-		CSector* CurrentSector = GameObject->_Channel->GetSector(MoveMonster->GetCellPosition());
-		CSector* NextSector = GameObject->_Channel->GetSector(DestPosition);
+		CSector* CurrentSector = GameObject->GetChannel()->GetSector(MoveMonster->GetCellPosition());
+		CSector* NextSector = GameObject->GetChannel()->GetSector(DestPosition);
 
 		if (CurrentSector != NextSector)
 		{
@@ -302,8 +302,8 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	{
 		CEnvironment* MoveEnvironment = (CEnvironment*)GameObject;
 
-		CSector* CurrentSector = GameObject->_Channel->GetSector(MoveEnvironment->GetCellPosition());
-		CSector* NextSector = GameObject->_Channel->GetSector(DestPosition);
+		CSector* CurrentSector = GameObject->GetChannel()->GetSector(MoveEnvironment->GetCellPosition());
+		CSector* NextSector = GameObject->GetChannel()->GetSector(DestPosition);
 
 		if (CurrentSector != NextSector)
 		{
@@ -365,8 +365,8 @@ bool CMap::ApplyPositionUpdateItem(CItem* ItemObject, st_Vector2Int& NewPosition
 	_Items[Y][X][NewItemInfoIndex] = ItemObject;
 
 	// 아이템 섹터처리
-	CSector* CurrentSector = ItemObject->_Channel->GetSector(ItemObject->GetCellPosition());
-	CSector* NextSector = ItemObject->_Channel->GetSector(NewPosition);
+	CSector* CurrentSector = ItemObject->GetChannel()->GetSector(ItemObject->GetCellPosition());
+	CSector* NextSector = ItemObject->GetChannel()->GetSector(NewPosition);
 	
 	if (CurrentSector != NextSector)
 	{
@@ -382,13 +382,13 @@ bool CMap::ApplyPositionUpdateItem(CItem* ItemObject, st_Vector2Int& NewPosition
 
 bool CMap::ApplyLeave(CGameObject* GameObject)
 {
-	if (GameObject->_Channel == nullptr)
+	if (GameObject->GetChannel() == nullptr)
 	{
 		G_Logger->WriteStdOut(en_Color::RED, L"ApplyLeave Channel is nullptr");
 		return false;
 	}
 
-	if (GameObject->_Channel->_Map != this)
+	if (GameObject->GetChannel()->_Map != this)
 	{
 		G_Logger->WriteStdOut(en_Color::RED, L"ApplyLeave Channel _Map Error");
 		return false;
@@ -408,7 +408,7 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 	}	
 
 	// 섹터에서 오브젝트 제거
-	CSector* Sector = GameObject->_Channel->GetSector(GameObject->GetCellPosition());	
+	CSector* Sector = GameObject->GetChannel()->GetSector(GameObject->GetCellPosition());
 	Sector->Remove(GameObject);
 
 	int X = PositionInfo.CollisionPositionX - _Left;
@@ -436,13 +436,13 @@ bool CMap::ApplyPositionLeaveItem(CGameObject* GameObject)
 	int32 Y = _Down - GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY;
 
 	// 맵에서 정보 삭제
-	if (GameObject->_Channel == nullptr)
+	if (GameObject->GetChannel() == nullptr)
 	{
 		G_Logger->WriteStdOut(en_Color::RED, L"ApplyPositionLeaveItem Channel is nullptr");
 		return false;
 	}
 
-	if (GameObject->_Channel->_Map != this)
+	if (GameObject->GetChannel()->_Map != this)
 	{
 		G_Logger->WriteStdOut(en_Color::RED, L"ApplyPositionLeaveItem Channel _Map Error");
 		return false;
@@ -461,7 +461,7 @@ bool CMap::ApplyPositionLeaveItem(CGameObject* GameObject)
 		return false;
 	}
 
-	CSector* Sector = GameObject->_Channel->GetSector(GameObject->GetCellPosition());
+	CSector* Sector = GameObject->GetChannel()->GetSector(GameObject->GetCellPosition());
 	Sector->Remove(GameObject);	
 
 	CItem* Item = (CItem*)GameObject;

@@ -230,6 +230,8 @@ struct st_AStarNodeInt
 class CMap
 {
 public:
+	wstring _MapName;
+
 	int32 _Left;
 	int32 _Right;
 	int32 _Up;
