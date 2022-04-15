@@ -159,7 +159,7 @@
               "SkillLeftAnimation": "SPELL_LEFT",
               "SkillRightAnimation": "SPELL_LEFT",
               "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "이동 불가와 이동 속도 감소를 삭제하고 %d칸 뒤로 캐릭터를 이동시킨다.",
+              "SkillExplanation": "이동 불가와 이동 속도 감소를 삭제하고 %d칸 뒤로 이동한다.",
               "SkillThumbnailImagePath": "Textures/Spell/Icon/주술사/시공의뒤틀림"
             }
           ],
