@@ -117,7 +117,7 @@ struct st_ObjectStatusData
 	int32 MaxMeleeAttackDamage;
 	int16 MeleeAttackHitRate;
 	int16 MagicDamage;
-	int16 MagicHitRate;
+	float MagicHitRate;
 	int32 Defence;
 	int16 EvasionRate;
 	int16 MeleeCriticalPoint;

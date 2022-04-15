@@ -414,7 +414,7 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			int MaxMeleeAttackDamage = PlayerWarriorCharacterFiled["MaxMeleeAttackDamage"].GetInt();
 			int16 MeleeAttackHitRate = (int16)PlayerWarriorCharacterFiled["MeleeAttackHitRate"].GetInt();
 			int16 MagicDamage = (int16)PlayerWarriorCharacterFiled["MagicDamage"].GetInt();
-			int16 MagicHitRate = (int16)PlayerWarriorCharacterFiled["MagicHitRate"].GetInt();
+			float MagicHitRate = (int16)PlayerWarriorCharacterFiled["MagicHitRate"].GetFloat();
 			int Defence = PlayerWarriorCharacterFiled["Defence"].GetInt();
 			int16 EvasionRate = PlayerWarriorCharacterFiled["EvasionRate"].GetInt();
 			int16 MeleeCriticalPoint = (int16)(PlayerWarriorCharacterFiled["MeleeCriticalPoint"].GetInt());
@@ -462,7 +462,7 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			int MaxMeleeAttackDamage = PlayerShamanCharacterFiled["MaxMeleeAttackDamage"].GetInt();
 			int16 MeleeAttackHitRate = (int16)PlayerShamanCharacterFiled["MeleeAttackHitRate"].GetInt();
 			int16 MagicDamage = (int16)PlayerShamanCharacterFiled["MagicDamage"].GetInt();
-			int16 MagicHitRate = (int16)PlayerShamanCharacterFiled["MagicHitRate"].GetInt();
+			float MagicHitRate = (int16)PlayerShamanCharacterFiled["MagicHitRate"].GetFloat();
 			int Defence = PlayerShamanCharacterFiled["Defence"].GetInt();
 			int16 EvasionRate = PlayerShamanCharacterFiled["EvasionRate"].GetInt();
 			int16 MeleeCriticalPoint = (int16)(PlayerShamanCharacterFiled["MeleeCriticalPoint"].GetInt());
@@ -510,7 +510,7 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			int MaxMeleeAttackDamage = PlayerTaioistCharacterFiled["MaxMeleeAttackDamage"].GetInt();
 			int16 MeleeAttackHitRate = (int16)PlayerTaioistCharacterFiled["MeleeAttackHitRate"].GetInt();
 			int16 MagicDamage = (int16)PlayerTaioistCharacterFiled["MagicDamage"].GetInt();
-			int16 MagicHitRate = (int16)PlayerTaioistCharacterFiled["MagicHitRate"].GetInt();
+			float MagicHitRate = (int16)PlayerTaioistCharacterFiled["MagicHitRate"].GetFloat();
 			int Defence = PlayerTaioistCharacterFiled["Defence"].GetInt();
 			int16 EvasionRate = PlayerTaioistCharacterFiled["EvasionRate"].GetInt();
 			int16 MeleeCriticalPoint = (int16)(PlayerTaioistCharacterFiled["MeleeCriticalPoint"].GetInt());
@@ -558,7 +558,7 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			int MaxMeleeAttackDamage = PlayerThiefCharacterFiled["MaxMeleeAttackDamage"].GetInt();
 			int16 MeleeAttackHitRate = (int16)PlayerThiefCharacterFiled["MeleeAttackHitRate"].GetInt();
 			int16 MagicDamage = (int16)PlayerThiefCharacterFiled["MagicDamage"].GetInt();
-			int16 MagicHitRate = (int16)PlayerThiefCharacterFiled["MagicHitRate"].GetInt();
+			float MagicHitRate = (int16)PlayerThiefCharacterFiled["MagicHitRate"].GetFloat();
 			int Defence = PlayerThiefCharacterFiled["Defence"].GetInt();
 			int16 EvasionRate = PlayerThiefCharacterFiled["EvasionRate"].GetInt();
 			int16 MeleeCriticalPoint = (int16)(PlayerThiefCharacterFiled["MeleeCriticalPoint"].GetInt());
@@ -606,7 +606,7 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			int MaxMeleeAttackDamage = PlayerArcherCharacterFiled["MaxMeleeAttackDamage"].GetInt();
 			int16 MeleeAttackHitRate = (int16)PlayerArcherCharacterFiled["MeleeAttackHitRate"].GetInt();
 			int16 MagicDamage = (int16)PlayerArcherCharacterFiled["MagicDamage"].GetInt();
-			int16 MagicHitRate = (int16)PlayerArcherCharacterFiled["MagicHitRate"].GetInt();
+			float MagicHitRate = (int16)PlayerArcherCharacterFiled["MagicHitRate"].GetFloat();
 			int Defence = PlayerArcherCharacterFiled["Defence"].GetInt();
 			int16 EvasionRate = PlayerArcherCharacterFiled["EvasionRate"].GetInt();
 			int16 MeleeCriticalPoint = (int16)(PlayerArcherCharacterFiled["MeleeCriticalPoint"].GetInt());
@@ -688,7 +688,7 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			int MaxMeleeAttackDamage = MonsterStatInfoFiled["MaxMeleeAttackDamage"].GetInt();
 			int16 MeleeAttackHitRate = MonsterStatInfoFiled["MeleeAttackHitRate"].GetInt();
 			int16 MagicDamage = (int16)MonsterStatInfoFiled["MagicDamage"].GetInt();
-			int16 MagicHitRate = (int16)MonsterStatInfoFiled["MagicHitRate"].GetInt();
+			float MagicHitRate = (int16)MonsterStatInfoFiled["MagicHitRate"].GetFloat();
 			int Defence = MonsterStatInfoFiled["Defence"].GetInt();
 			int16 EvasionRate = (int16)MonsterStatInfoFiled["EvasionRate"].GetInt();
 			int16 MeleeCriticalPoint = (int16)MonsterStatInfoFiled["MeleeCriticalPoint"].GetInt();
@@ -849,6 +849,58 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				PublicAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_PublicAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)PublicAttackSkill->SkillType, PublicAttackSkill));
+			}
+
+			for (auto& PublicTacTicSkillListFiled : PublicSkillListFiled["PublicTacTicSkillList"].GetArray())
+			{
+				st_TacTicSkillData* PublicTacTicSkill = new st_TacTicSkillData();
+				PublicTacTicSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_PUBLIC;
+				PublicTacTicSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_TACTIC;
+
+				string SkillType = PublicTacTicSkillListFiled["SkillType"].GetString();
+				string SkillName = PublicTacTicSkillListFiled["SkillName"].GetString();
+				int SkillLevel = PublicTacTicSkillListFiled["SkillLevel"].GetInt();
+				int SkillCoolTime = PublicTacTicSkillListFiled["SkillCoolTime"].GetInt();
+				int SkillCastingTime = PublicTacTicSkillListFiled["SkillCastingTime"].GetInt();
+				int64 SkillDurationTime = PublicTacTicSkillListFiled["SkillDurationTime"].GetInt64();
+				int64 SkillDotTime = PublicTacTicSkillListFiled["SkillDotTime"].GetInt64();
+				int SkillDistance = PublicTacTicSkillListFiled["SkillDistance"].GetInt();
+				float SkillTargetEffectTime = PublicTacTicSkillListFiled["SkillTargetEffectTime"].GetFloat();
+				string SkillUpAnimation = PublicTacTicSkillListFiled["SkillUpAnimation"].GetString();
+				string SkillDownAnimation = PublicTacTicSkillListFiled["SkillDownAnimation"].GetString();
+				string SkillLeftAnimation = PublicTacTicSkillListFiled["SkillLeftAnimation"].GetString();
+				string SkillRightAnimation = PublicTacTicSkillListFiled["SkillRightAnimation"].GetString();
+				string NextComboSkill = PublicTacTicSkillListFiled["NextComboSkill"].GetString();
+				string SkillExplation = PublicTacTicSkillListFiled["SkillExplanation"].GetString();
+				string SkillImagePath = PublicTacTicSkillListFiled["SkillThumbnailImagePath"].GetString();
+
+				if (SkillType == "")
+				{
+					
+				}
+
+				PublicTacTicSkill->SkillName = SkillName;
+				PublicTacTicSkill->SkillLevel = SkillLevel;
+				PublicTacTicSkill->SkillCoolTime = SkillCoolTime;
+				PublicTacTicSkill->SkillCastingTime = SkillCastingTime;
+				PublicTacTicSkill->SkillDurationTime = SkillDurationTime;
+				PublicTacTicSkill->SkillDotTime = SkillDotTime;
+				PublicTacTicSkill->SkillDistance = SkillDistance;
+				PublicTacTicSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+				PublicTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
+				PublicTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
+				PublicTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
+				PublicTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+
+				if (NextComboSkill == "SKILL_TYPE_NONE")
+				{
+					PublicTacTicSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+				}
+
+				PublicTacTicSkill->SkillExplanation = SkillExplation;
+				PublicTacTicSkill->SkillThumbnailImagePath = SkillImagePath;
+
+				_PublicTacTicSkillDatas.insert(pair<int16, st_TacTicSkillData*>((int16)PublicTacTicSkill->SkillType, PublicTacTicSkill));
 			}
 
 			for (auto& PublicHealSkillListFiled : PublicSkillListFiled["PublicHealSkillList"].GetArray())
