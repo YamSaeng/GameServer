@@ -87,7 +87,7 @@ vector<st_QuickSlotBarPosition> CQuickSlotManager::FindQuickSlotBar(en_SkillType
 	return QuickSlotSkillPositions;
 }
 
-vector<st_QuickSlotBarPosition> CQuickSlotManager::ExceptionFindQuickSlotBar(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex)
+vector<st_QuickSlotBarPosition> CQuickSlotManager::ExceptionFindQuickSlotBar(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, en_SkillKinds SkillKind)
 {
 	vector<st_QuickSlotBarPosition> QuickSlotSkillPositions;
 
@@ -95,10 +95,13 @@ vector<st_QuickSlotBarPosition> CQuickSlotManager::ExceptionFindQuickSlotBar(int
 	{
 		for (auto QuickSlotBarSlotIterator : QuickSlotBarIterator.second->_QuickSlotBarSlotInfos)
 		{
+			// 퀵슬롯 바에서  조사한다.
+			// 등록되어 있는 퀵슬롯바 중 사용 할 수 있고 (= 재사용 대기시간이 없는 ), SkillKind가 같으며, 매개변수로 받은 위치 값을 제외한 퀵슬롯을 찾는다.
 			st_QuickSlotBarSlotInfo* SearchingQuickSlotBarSlot = QuickSlotBarSlotIterator.second;
 			if (SearchingQuickSlotBarSlot->QuickBarSkill != nullptr && SearchingQuickSlotBarSlot->QuickBarSkill->GetSkillInfo()->CanSkillUse == true
 				&& ((SearchingQuickSlotBarSlot->QuickSlotBarIndex == QuickSlotBarIndex
-					&& SearchingQuickSlotBarSlot->QuickSlotBarSlotIndex == QuickSlotBarSlotIndex) == false))
+					&& SearchingQuickSlotBarSlot->QuickSlotBarSlotIndex == QuickSlotBarSlotIndex) == false)
+				&& SearchingQuickSlotBarSlot->QuickBarSkill->GetSkillKind() == SkillKind)
 			{
 				st_QuickSlotBarPosition SearchingCompleteQuickSlotPosition;
 				SearchingCompleteQuickSlotPosition.QuickSlotBarIndex = SearchingQuickSlotBarSlot->QuickSlotBarIndex;

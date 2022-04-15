@@ -24,7 +24,7 @@ public:
 	// 퀵슬롯바에서 퀵슬롯 위치 스킬 정보로 찾아서 반환
 	vector<st_QuickSlotBarPosition> FindQuickSlotBar(en_SkillType FindSkillType);
 	// 퀵슬롯바에서 매개 변수로 받은 위치를 제외한 위치의 퀵슬롯바를 반환
-	vector<st_QuickSlotBarPosition> ExceptionFindQuickSlotBar(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex);
+	vector<st_QuickSlotBarPosition> ExceptionFindQuickSlotBar(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, en_SkillKinds SkillKind);
 	
 	// 내용 비우기
 	void Empty();	
