@@ -104,9 +104,14 @@ void CSkill::ComboSkillStart(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex,
 	_ComboSkillType = ComboSkilltype;
 }
 
-void CSkill::CurrentSkillStart(int64 AttackEndTick)
+void CSkill::ReqMeleeSkillInit(int64 AttackEndTick)
 {
 	_MeleeAttackTick = GetTickCount64() + AttackEndTick;
+}
+
+void CSkill::ReqMagicSkillInit(float MagicHitRate)
+{
+	_MagicTick = GetTickCount64() + (int64)(500 * MagicHitRate);
 }
 
 en_SkillKinds CSkill::GetSkillKind()
@@ -334,7 +339,7 @@ bool CSkill::Update()
 	case en_SkillCategory::REQ_MAGIC_SKILL_INIT:
 		if (_MagicTick < GetTickCount64())
 		{
-			((CPlayer*)_Owner)->_IsReqMagic = false;
+			((CPlayer*)_Owner)->_IsReqMagic = false;			
 			return true;
 		}
 		break;

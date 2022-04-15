@@ -34,8 +34,11 @@ public:
 	void StatusAbnormalDurationTimeStart();
 	// 연속기 스킬 시작
 	void ComboSkillStart(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, en_SkillType ComboSkilltype);
-	// 스킬 시작
-	void CurrentSkillStart(int64 AttackEndTick);
+	// 물리 스킬 시작
+	void ReqMeleeSkillInit(int64 AttackEndTick);
+	// 마법 스킬 시작
+	void ReqMagicSkillInit(float MagicHitRate);
+
 
 	en_SkillKinds GetSkillKind();
 
