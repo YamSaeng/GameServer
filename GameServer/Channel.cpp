@@ -250,10 +250,27 @@ vector<st_FieldOfViewInfo> CChannel::GetFieldOfViewObjects(CGameObject* Object, 
 	return FieldOfViewGameObjects;
 }
 
+vector<CMonster*> CChannel::GetAroundMonster(CGameObject* Object, int16 Range, bool ExceptMe)
+{
+	vector<CMonster*> Monsters;
+
+	vector<CSector*> Sectors = GetAroundSectors(Object->GetCellPosition(), Range);
+
+	for (CSector* Sector : Sectors)
+	{
+		for (CMonster* Monster : Sector->GetMonsters())
+		{
+			Monsters.push_back(Monster);
+		}
+	}
+
+	return Monsters;
+}
+
 vector<CPlayer*> CChannel::GetAroundPlayer(CGameObject* Object, int32 Range)
 {
 	vector<CPlayer*> Players;	
-	// 주위 섹터 얻어오고
+	
 	vector<CSector*> Sectors = GetAroundSectors(Object->GetCellPosition(), Range);
 
 	// 섹터에 있는 플레이어를 담아서 반환
