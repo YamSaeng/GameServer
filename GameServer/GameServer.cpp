@@ -979,8 +979,24 @@ void CGameServer::DeleteClient(st_Session* Session)
 			{
 				DeSpawnObject.push_back(SessionPlayer);
 
+				// 주위 시야 범위 몬스터에게 자신을 어그로 목록에서 빼기
+				vector<CMonster*> AroundMonsters = SessionPlayer->GetChannel()->GetAroundMonster(SessionPlayer, 1);
+				for (CMonster* AroundMonster : AroundMonsters)
+				{
+					st_GameObjectJob* AggroRemoveJob = G_ObjectManager->GameObjectJobCreate();
+					AggroRemoveJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_AGGRO_LIST_REMOVE;
+
+					CGameServerMessage* AggroRemoveJobMessage = CGameServerMessage::GameServerMessageAlloc();
+					AggroRemoveJobMessage->Clear();
+
+					*AggroRemoveJobMessage << SessionPlayer->_GameObjectInfo.ObjectId;
+					AggroRemoveJob->GameObjectJobMessage = AggroRemoveJobMessage;
+
+					AroundMonster->_GameObjectJobQue.Enqueue(AggroRemoveJob);
+				}
+
 				SessionPlayer->_NetworkState = en_ObjectNetworkState::LEAVE;
-				SessionPlayer->_FieldOfViewInfos.clear();
+				SessionPlayer->_FieldOfViewInfos.clear();				
 
 				// 주위 시야 범위 클라들에게 소환해제 패킷 날림
 				CMessage* ResDeSpawnObject = MakePacketResObjectDeSpawn(1, DeSpawnObject);
@@ -1769,6 +1785,10 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 									Target->AddDebuf(NewSkill);
 									Target->SetStatusAbnormal(STATUS_ABNORMAL_WARRIOR_CHOHONE);
 
+									CMessage* SelectTargetMoveStopMessage = MakePacketResMoveStop(MyPlayer->_AccountId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectPositionInfo);
+									SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, SelectTargetMoveStopMessage, MyPlayer);
+									SelectTargetMoveStopMessage->Free();
+
 									CMessage* ResStatusAbnormalPacket = MakePacketStatusAbnormal(Target->_GameObjectInfo.ObjectId,
 										Target->_GameObjectInfo.ObjectType,
 										Target->_GameObjectInfo.ObjectPositionInfo.MoveDir,
@@ -1885,6 +1905,10 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 
 									Target->AddDebuf(NewSkill);
 									Target->SetStatusAbnormal(STATUS_ABNORMAL_WARRIOR_SHAEHONE);
+
+									CMessage* SelectTargetMoveStopMessage = MakePacketResMoveStop(MyPlayer->_AccountId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectPositionInfo);
+									SendPacketFieldOfView(MyPlayer->_FieldOfViewInfos, SelectTargetMoveStopMessage, MyPlayer);
+									SelectTargetMoveStopMessage->Free();
 
 									CMessage* ResStatusAbnormalPacket = MakePacketStatusAbnormal(Target->_GameObjectInfo.ObjectId,
 										Target->_GameObjectInfo.ObjectType,

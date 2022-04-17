@@ -537,6 +537,10 @@ void CPlayer::UpdateSpell()
 					_SelectTarget->AddDebuf(NewSkill);
 					_SelectTarget->SetStatusAbnormal(STATUS_ABNORMAL_SHAMAN_ROOT);
 
+					CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_AccountId, _SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
+					G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, SelectTargetMoveStopMessage, this);
+					SelectTargetMoveStopMessage->Free();
+
 					CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
 						_SelectTarget->_GameObjectInfo.ObjectType,
 						_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
@@ -627,7 +631,7 @@ void CPlayer::UpdateSpell()
 
 					CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_AccountId, _SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
 					G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, SelectTargetMoveStopMessage, this);
-					SelectTargetMoveStopMessage->Free();
+					SelectTargetMoveStopMessage->Free();					
 
 					CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
 						_SelectTarget->_GameObjectInfo.ObjectType,
@@ -701,6 +705,10 @@ void CPlayer::UpdateSpell()
 					*NewAttackSkillInfo = *((st_AttackSkillInfo*)_CurrentSkill->GetSkillInfo());
 					NewSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
 					NewSkill->StatusAbnormalDurationTimeStart();
+
+					CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_AccountId, _SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
+					G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, SelectTargetMoveStopMessage, this);
+					SelectTargetMoveStopMessage->Free();
 
 					_SelectTarget->AddDebuf(NewSkill);
 					_SelectTarget->SetStatusAbnormal(STATUS_ABNORMAL_TAIOIST_ROOT);
