@@ -122,6 +122,8 @@ bool CMonster::OnDamaged(CGameObject* Attacker, int32 Damage)
 		AggroJobMessage->Clear();	
 
 		*AggroJobMessage << &Attacker;
+		*AggroJobMessage << Damage;
+
 		AggroJob->GameObjectJobMessage = AggroJobMessage;
 
 		_GameObjectJobQue.Enqueue(AggroJob);	
@@ -270,7 +272,7 @@ void CMonster::ReadyPatrol()
 	{
 		int16 Distance = st_Vector2Int::Distance(Target->GetCellPosition(), GetCellPosition());
 		if (Distance <= _ChaseCellDistance) // 대상이 추적 거리 안에 있는지 확인한다.
-		{
+		{			
 			st_Aggro Aggro;
 			Aggro.AggroTarget = Target;
 			Aggro.AggroPoint = _GameObjectInfo.ObjectStatInfo.MaxHP * G_Datamanager->_MonsterAggroData.MonsterAggroFirstTarget;

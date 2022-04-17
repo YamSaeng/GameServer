@@ -193,17 +193,19 @@ void CGameObject::Update()
 			{
 				CGameObject* Attacker;
 				*GameObjectJob->GameObjectJobMessage >> &Attacker;
+				int32 Damage;
+				*GameObjectJob->GameObjectJobMessage >> Damage;
 
 				auto FindAggroTargetIterator = _AggroTargetList.find(Attacker->_GameObjectInfo.ObjectId);
 				if (FindAggroTargetIterator != _AggroTargetList.end())
 				{
-					FindAggroTargetIterator->second.AggroPoint += _GameObjectInfo.ObjectStatInfo.MaxHP * G_Datamanager->_MonsterAggroData.MonsterAggroFirstTarget;
+					FindAggroTargetIterator->second.AggroPoint += (Damage * (0.8 + G_Datamanager->_MonsterAggroData.MonsterAggroAttacker));
 				}
 				else
 				{
 					st_Aggro NewAggroTarget;
 					NewAggroTarget.AggroTarget = Attacker;
-					NewAggroTarget.AggroPoint = _GameObjectInfo.ObjectStatInfo.MaxHP * G_Datamanager->_MonsterAggroData.MonsterAggroFirstTarget;
+					NewAggroTarget.AggroPoint = _GameObjectInfo.ObjectStatInfo.MaxHP * G_Datamanager->_MonsterAggroData.MonsterAggroFirstAttacker;
 
 					_AggroTargetList.insert(pair<int64, st_Aggro>(Attacker->_GameObjectInfo.ObjectId, NewAggroTarget));
 				}			
