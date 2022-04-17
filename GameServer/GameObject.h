@@ -118,6 +118,8 @@ public:
 	CChannel* GetChannel();
 	void SetChannel(CChannel* Channel);
 protected:
+	map<int64, st_Aggro> _AggroTargetList;
+
 	// 게임오브젝트가 속한 채널
 	CChannel* _Channel;
 	//-------------------------

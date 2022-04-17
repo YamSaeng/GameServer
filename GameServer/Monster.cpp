@@ -27,7 +27,7 @@ void CMonster::Update()
 {
 	CGameObject::Update();
 
-	if (_Target && _Target->_NetworkState == en_ObjectNetworkState::LEAVE)
+	if (_Target != nullptr && _Target->_NetworkState == en_ObjectNetworkState::LEAVE)
 	{
 		_Target = nullptr;		
 	}
@@ -100,6 +100,8 @@ void CMonster::Update()
 		UpdateDead();
 		break;
 	}
+
+	SelectTarget();
 }
 
 void CMonster::PositionReset()
@@ -111,9 +113,18 @@ bool CMonster::OnDamaged(CGameObject* Attacker, int32 Damage)
 	if (_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE
 		|| _GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::RETURN_SPAWN_POSITION)
 	{
-		CGameObject::OnDamaged(Attacker, Damage);
+		CGameObject::OnDamaged(Attacker, Damage);		
 
-		_Target = (CPlayer*)Attacker;
+		st_GameObjectJob* AggroJob = G_ObjectManager->GameObjectJobCreate();
+		AggroJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_AGGRO_LIST_INSERT_OR_UPDATE;
+		
+		CGameServerMessage* AggroJobMessage = CGameServerMessage::GameServerMessageAlloc();
+		AggroJobMessage->Clear();	
+
+		*AggroJobMessage << &Attacker;
+		AggroJob->GameObjectJobMessage = AggroJobMessage;
+
+		_GameObjectJobQue.Enqueue(AggroJob);	
 
 		if (_GameObjectInfo.ObjectStatInfo.HP == 0)
 		{
@@ -142,12 +153,29 @@ void CMonster::Init(st_Vector2Int SpawnPosition)
 	_PatrolPositions = GetAroundCellPositions(GetCellPosition(), 1);
 }
 
+void CMonster::SelectTarget()
+{
+	float AggroPoint = 0.0f;
+	CGameObject* Target = nullptr;
+
+	for (auto AggroTargetIterator : _AggroTargetList)
+	{		
+		if (AggroTargetIterator.second.AggroPoint > AggroPoint)
+		{
+			AggroPoint = AggroTargetIterator.second.AggroPoint;
+			Target = AggroTargetIterator.second.AggroTarget;
+		}
+	}
+
+	_Target = Target;
+}
+
 CGameObject* CMonster::FindTarget()
 {
 	bool Cango = false;
 	CGameObject* Target = _Channel->FindNearPlayer(this, 1, &Cango);
 	if (Target == nullptr)
-	{
+	{	
 		_PatrolTick = GetTickCount64() + _PatrolTickPoint;
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::PATROL;
 		_MonsterState = en_MonsterState::MONSTER_READY_PATROL;
@@ -155,16 +183,7 @@ CGameObject* CMonster::FindTarget()
 		SendMonsterChangeObjectState();		
 	}
 	else
-	{
-		// 타겟의 상태가 SPAWN_IDLE일 경우 정찰 상태로
-		if (Target->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::SPAWN_IDLE)
-		{
-			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::PATROL;
-			_MonsterState = en_MonsterState::MONSTER_READY_PATROL;			
-			SendMonsterChangeObjectState();
-			return nullptr;
-		}
-
+	{				
 		int16 Distance = st_Vector2Int::Distance(Target->GetCellPosition(), GetCellPosition());
 		// 타겟은 찾앗지만 추격할 수 있는 거리가 되지 않음
 		if (Distance > _ChaseCellDistance)
@@ -250,10 +269,14 @@ void CMonster::ReadyPatrol()
 	if (Target != nullptr)
 	{
 		int16 Distance = st_Vector2Int::Distance(Target->GetCellPosition(), GetCellPosition());
-		if (Distance <= _ChaseCellDistance)
+		if (Distance <= _ChaseCellDistance) // 대상이 추적 거리 안에 있는지 확인한다.
 		{
-			// 대상 과의 거리를 잰다. 
-			_Target = Target;			
+			st_Aggro Aggro;
+			Aggro.AggroTarget = Target;
+			Aggro.AggroPoint = _GameObjectInfo.ObjectStatInfo.MaxHP * G_Datamanager->_MonsterAggroData.MonsterAggroFirstTarget;
+
+			_AggroTargetList.insert(pair<int64, st_Aggro>(Target->_GameObjectInfo.ObjectId, Aggro));
+			
 			return;
 		}	
 
@@ -582,9 +605,9 @@ void CMonster::UpdateAttack()
 	if (_DefaultAttackTick == 0)
 	{
 		// 타겟이 사라지거나 채널이 달라질 경우 타겟을 해제
-		if (_Target == nullptr || _Target->_NetworkState == en_ObjectNetworkState::LEAVE || _Target->_Channel != _Channel)
+		if (_Target == nullptr || _Target->_NetworkState == en_ObjectNetworkState::LEAVE || _Target->GetChannel() != _Channel)
 		{
-			_Target = nullptr;			
+			_Target = nullptr;
 			_MonsterState = en_MonsterState::MONSTER_IDLE;
 			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;			
 			return;

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "GameObject.h"
 #include "ObjectManager.h"
+#include "DataManager.h"
 #include "Skill.h"
 
 CGameObject::CGameObject()
@@ -185,6 +186,38 @@ void CGameObject::Update()
 				if (MyPlayer->_ComboSkill != nullptr)
 				{
 					MyPlayer->_ComboSkill->_ComboSkillTick = 0;
+				}				
+			}
+			break;	
+		case en_GameObjectJobType::GAMEOBJECT_JOB_AGGRO_LIST_INSERT_OR_UPDATE:
+			{
+				CGameObject* Attacker;
+				*GameObjectJob->GameObjectJobMessage >> &Attacker;
+
+				auto FindAggroTargetIterator = _AggroTargetList.find(Attacker->_GameObjectInfo.ObjectId);
+				if (FindAggroTargetIterator != _AggroTargetList.end())
+				{
+					FindAggroTargetIterator->second.AggroPoint += _GameObjectInfo.ObjectStatInfo.MaxHP * G_Datamanager->_MonsterAggroData.MonsterAggroFirstTarget;
+				}
+				else
+				{
+					st_Aggro NewAggroTarget;
+					NewAggroTarget.AggroTarget = Attacker;
+					NewAggroTarget.AggroPoint = _GameObjectInfo.ObjectStatInfo.MaxHP * G_Datamanager->_MonsterAggroData.MonsterAggroFirstTarget;
+
+					_AggroTargetList.insert(pair<int64, st_Aggro>(Attacker->_GameObjectInfo.ObjectId, NewAggroTarget));
+				}			
+			}
+			break;		
+		case en_GameObjectJobType::GAMEOBJECT_JOB_AGGRO_LIST_REMOVE:
+			{
+				int64 RemoveAggroListGameObjectId;
+				*GameObjectJob->GameObjectJobMessage >> RemoveAggroListGameObjectId;
+
+				auto FindAggroTargetIterator = _AggroTargetList.find(RemoveAggroListGameObjectId);
+				if (FindAggroTargetIterator != _AggroTargetList.end())
+				{
+					_AggroTargetList.erase(RemoveAggroListGameObjectId);
 				}				
 			}
 			break;

@@ -30,7 +30,7 @@ public:
 	virtual void PositionReset() override;
 	virtual bool OnDamaged(CGameObject* Attacker, int32 Damage) override;
 	// 몬스터 초기화
-	virtual void Init(st_Vector2Int SpawnPosition);	
+	virtual void Init(st_Vector2Int SpawnPosition);
 protected:
 	CGameObject* _Target;
 	//---------------------
@@ -94,6 +94,8 @@ protected:
 	// 몬스터가 정찰할 위치
 	//-------------------------------------
 	vector<st_Vector2Int> _PatrolPositions;			
+		
+	void SelectTarget();
 
 	CGameObject* FindTarget();
 	//------------------------
