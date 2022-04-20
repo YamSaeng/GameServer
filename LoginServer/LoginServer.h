@@ -58,6 +58,10 @@ private:
 	// 로그아웃 요청 처리
 	//-------------------------------------------------------------
 	void PacketProcReqAccountLogOut(int64 SessionID, CMessage* Packet);
+	//-------------------------------------------------------------
+	// 로그인 상태 변경 처리
+	//-------------------------------------------------------------
+	void PacketProcReqLoginStateChange(int64 SessionID, CMessage* Packet);
 
 	//------------------------------------------------
 	// 새로운 계정 넣기
@@ -66,11 +70,11 @@ private:
 	//------------------------------------------------
 	// 로그인 
 	//------------------------------------------------
-	void AccountLogIn(int64 SessionID, CMessage* Packet);
-	//------------------------------------------------
-	// 로그아웃
-	//------------------------------------------------
-	void AccountLogOut(int64 SessionID, CMessage* Packet);
+	void AccountLogIn(int64 SessionID, CMessage* Packet);	
+	//-------------------------------------------------------------
+	// 로그인 상태 변경
+	//-------------------------------------------------------------
+	void AccountLogInStateChange(int64 SessionID, CMessage* Packet);
 	
 	void DeleteClient(st_LoginSession* Session);
 

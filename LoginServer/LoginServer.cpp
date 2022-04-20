@@ -89,8 +89,9 @@ unsigned __stdcall CLoginServer::DataBaseThreadProc(void* Argument)
 				Instance->AccountLogIn(Job->SessionID, Job->Message);
 				break;
 			case en_LoginServerJobType::DATA_BASE_ACCOUNT_LOGOUT:
-				Instance->AccountLogOut(Job->SessionID, Job->Message);
-				break;
+			case en_LoginServerJobType::DATA_BASE_ACCOUNT_CHANGE_LOGIN_STATE:
+				Instance->AccountLogInStateChange(Job->SessionID, Job->Message);
+				break;			
 			}
 
 			Job->Message->Free();
@@ -149,6 +150,9 @@ void CLoginServer::PacketProc(int64 SessionID, CMessage* Packet)
 	case en_LOGIN_SERVER_PACKET_TYPE::en_LOGIN_SERVER_C2S_ACCOUNT_LOGOUT:
 		PacketProcReqAccountLogOut(SessionID, Packet);
 		break;
+	case en_LOGIN_SERVER_PACKET_TYPE::en_LOGIN_SERVER_C2S_LOGIN_STATE_CHANGE:
+		PacketProcReqLoginStateChange(SessionID, Packet);
+		break;	
 	}
 
 	Packet->Free();
@@ -229,13 +233,38 @@ void CLoginServer::PacketProcReqAccountLogOut(int64 SessionID, CMessage* Packet)
 	}
 }
 
+void CLoginServer::PacketProcReqLoginStateChange(int64 SessionID, CMessage* Packet)
+{
+	st_LoginSession* Session = FindSession(SessionID);
+
+	if (Session)
+	{
+		st_LoginServerJob* DBAccountLogOutJob = _LoginServerJobMemoryPool->Alloc();
+		DBAccountLogOutJob->SessionID = Session->SessionId;
+		DBAccountLogOutJob->Type = en_LoginServerJobType::DATA_BASE_ACCOUNT_CHANGE_LOGIN_STATE;
+
+		CMessage* DBAccountLogOutMessage = CMessage::Alloc();
+		DBAccountLogOutMessage->Clear();
+
+		DBAccountLogOutMessage->InsertData(Packet->GetFrontBufferPtr(), Packet->GetUseBufferSize());
+		Packet->MoveReadPosition(Packet->GetUseBufferSize());
+
+		DBAccountLogOutJob->Message = DBAccountLogOutMessage;
+
+		_DataBaseThreadMessageQue.Enqueue(DBAccountLogOutJob);
+		SetEvent(_DataBaseThreadWakeEvent);
+
+		ReturnSession(Session);
+	}
+}
+
 void CLoginServer::AccountNew(int64 SessionID, CMessage* Packet)
 {
 	st_LoginSession* Session = FindSession(SessionID);
 
 	if (Session)
 	{
-		int8 AccountNewNameLen;
+		int16 AccountNewNameLen;
 		*Packet >> AccountNewNameLen;
 
 		WCHAR* AccountNewName = (WCHAR*)malloc(sizeof(WCHAR) * AccountNewNameLen);
@@ -244,7 +273,7 @@ void CLoginServer::AccountNew(int64 SessionID, CMessage* Packet)
 
 		wstring AccountNewNameString = AccountNewName;
 
-		int8 PasswordLen;
+		int16 PasswordLen;
 		*Packet >> PasswordLen;
 
 		WCHAR* Password = (WCHAR*)malloc(sizeof(WCHAR) * PasswordLen);
@@ -358,8 +387,8 @@ void CLoginServer::AccountLogIn(int64 SessionID, CMessage* Packet)
 
 				bool LoginCheckSuccess = LoginCheck.Fetch();
 
-				G_DBConnectionPool->Push(en_DBConnect::ACCOUNT, LoginCheckDBConnection);
-				
+				G_DBConnectionPool->Push(en_DBConnect::ACCOUNT, LoginCheckDBConnection);				
+
 				TIMESTAMP_STRUCT LoginSuccessTime;
 				memset(&LoginSuccessTime, 0, sizeof(TIMESTAMP_STRUCT));
 				
@@ -444,9 +473,11 @@ void CLoginServer::AccountLogIn(int64 SessionID, CMessage* Packet)
 						// 중복 로그인
 						LoginInfo = en_LoginInfo::LOGIN_ACCOUNT_OVERLAP;
 						break;
-					// 로그아웃 또는 접속 종료라면	
-					case en_LoginState::LOGIN_OUT:
-					case en_LoginState::LOGIN_DISCONNECT:
+					case en_LoginState::LOGIN_DB_WORKING:
+						// DB 작업중
+						LoginInfo = en_LoginInfo::LOGIN_ACCOUNT_DB_WORKING;
+						break;					
+					case en_LoginState::LOGIN_OUT:					
 						{
 							// 토큰이 있는지 확인
 							CDBConnection* TokenDBConnection = G_DBConnectionPool->Pop(en_DBConnect::ACCOUNT);
@@ -560,12 +591,13 @@ void CLoginServer::AccountLogIn(int64 SessionID, CMessage* Packet)
 	}
 }
 
-void CLoginServer::AccountLogOut(int64 SessionID, CMessage* Packet)
+void CLoginServer::AccountLogInStateChange(int64 SessionID, CMessage* Packet)
 {
 	int64 AccountID;
 	*Packet >> AccountID;
 
-	int8 LoginState = 0;
+	int8 LoginState;
+	*Packet >> LoginState;
 
 	CDBConnection* LoginStateUpdateDBConnection = G_DBConnectionPool->Pop(en_DBConnect::ACCOUNT);
 	SP::CLoginServerLoginDBLoginStateUpdate LoginStateUpdate(*LoginStateUpdateDBConnection);

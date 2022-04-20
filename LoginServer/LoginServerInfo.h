@@ -8,11 +8,12 @@
 #define UTC_MONTH 1
 #define TOKEN_MAX_LENGTH 50
 
-// 로그인 정보
+// 로그인 응답 정보
 enum class en_LoginInfo : int8
 {
 	LOGIN_ACCOUNT_NOT_EXIST,
 	LOGIN_ACCOUNT_OVERLAP,
+	LOGIN_ACCOUNT_DB_WORKING,
 	LOGIN_ACCOUNT_DIFFERENT_PASSWORD,
 	LOGIN_ACCOUNT_LOGIN_SUCCESS
 };
@@ -21,7 +22,8 @@ enum class en_LoginInfo : int8
 enum class en_LoginState : int8
 {
 	LOGIN_OUT,
-	LOGIN_IN
+	LOGIN_IN,
+	LOGIN_DB_WORKING		
 };
 
 // 로그인 서버 잡 타입
@@ -32,6 +34,7 @@ enum class en_LoginServerJobType : int16
 	DATA_BASE_ACCOUNT_NEW,
 	DATA_BASE_ACCOUNT_LOGIN,
 	DATA_BASE_ACCOUNT_LOGOUT,
+	DATA_BASE_ACCOUNT_CHANGE_LOGIN_STATE,
 	DATA_BASE_ACCOUNT_DISCONNECT
 };
 

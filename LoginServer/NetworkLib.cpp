@@ -541,7 +541,7 @@ unsigned __stdcall CNetworkLib::AcceptThreadProc(void* Argument)
 	if (Instance)
 	{
 		for (;;)
-		{
+		{			
 			SOCKADDR_IN ClientAddr;
 			int AddrLen = sizeof(ClientAddr);
 			SOCKET ClientSock = accept(Instance->_ListenSock, (SOCKADDR*)&ClientAddr, &AddrLen);
