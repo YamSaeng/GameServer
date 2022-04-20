@@ -5,6 +5,7 @@
 class CWeapon;
 class CArmor;
 class CMaterial;
+struct st_Session;
 
 class CGameServerMessage : public CMessage
 {
@@ -39,7 +40,9 @@ public:
 
 	CGameServerMessage& operator << (st_SkillInfo** SkillInfo);
 	CGameServerMessage& operator << (CSkill** Skill);
-	CGameServerMessage& operator << (CGameObject** Skill);
+	CGameServerMessage& operator << (CGameObject** GameObject);
+	CGameServerMessage& operator << (CPlayer** Player);	
+	CGameServerMessage& operator << (st_Session** Session);
 #pragma endregion
 
 #pragma region µ¥ÀÌÅÍ »©±â
@@ -50,6 +53,8 @@ public:
 	CGameServerMessage& operator >> (st_SkillInfo** SkillInfo);
 	CGameServerMessage& operator >> (CSkill** Skill);
 	CGameServerMessage& operator >> (CGameObject** GameObject);
+	CGameServerMessage& operator >> (CPlayer** Player);
+	CGameServerMessage& operator >> (st_Session** Session);
 #pragma endregion
 
 	static CGameServerMessage* GameServerMessageAlloc();

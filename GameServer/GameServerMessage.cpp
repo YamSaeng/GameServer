@@ -87,7 +87,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_StatInfo& StatInfo)
 
 CGameServerMessage& CGameServerMessage::operator<<(st_SkillInfo& SkillInfo)
 {
-    *this << SkillInfo.IsSkillLearn;
+    *this << SkillInfo.IsSkillLearn;    
     *this << (int8)SkillInfo.SkillLargeCategory;
     *this << (int8)SkillInfo.SkillMediumCategory;
     *this << (int16)SkillInfo.SkillType;
@@ -216,6 +216,33 @@ CGameServerMessage& CGameServerMessage::operator<<(CSkill** Skill)
     return *(this);
 }
 
+CGameServerMessage& CGameServerMessage::operator<<(CGameObject** GameObject)
+{
+    memcpy(&_MessageBuf[_Rear], GameObject, sizeof(CGameObject*));
+    _Rear += sizeof(CGameObject*);
+    _UseBufferSize += sizeof(CGameObject*);
+
+    return *(this);
+}
+
+CGameServerMessage& CGameServerMessage::operator<<(CPlayer** Player)
+{
+    memcpy(&_MessageBuf[_Rear], Player, sizeof(CPlayer*));
+    _Rear += sizeof(CPlayer*);
+    _UseBufferSize += sizeof(CPlayer*);
+
+    return *(this);
+}
+
+CGameServerMessage& CGameServerMessage::operator<<(st_Session** Session)
+{
+    memcpy(&_MessageBuf[_Rear], Session, sizeof(st_Session*));
+    _Rear += sizeof(st_Session*);
+    _UseBufferSize += sizeof(st_Session*);
+
+    return *(this);
+}
+
 CGameServerMessage& CGameServerMessage::operator>>(st_Vector2Int& CellPositionInfo)
 {
     *this >> CellPositionInfo._X;
@@ -294,6 +321,33 @@ CGameServerMessage& CGameServerMessage::operator>>(CSkill** Skill)
     memcpy(Skill, &_MessageBuf[_Front], sizeof(CSkill*));
     _Front += sizeof(CSkill*);
     _UseBufferSize -= sizeof(CSkill*);
+
+    return *(this);
+}
+
+CGameServerMessage& CGameServerMessage::operator>>(CGameObject** GameObject)
+{
+    memcpy(GameObject, &_MessageBuf[_Front], sizeof(CGameObject*));
+    _Front += sizeof(CGameObject*);
+    _UseBufferSize -= sizeof(CGameObject*);
+
+    return *(this);
+}
+
+CGameServerMessage& CGameServerMessage::operator>>(CPlayer** Player)
+{
+    memcpy(Player, &_MessageBuf[_Front], sizeof(CPlayer*));
+    _Front += sizeof(CPlayer*);
+    _UseBufferSize -= sizeof(CPlayer*);
+
+    return *(this);
+}
+
+CGameServerMessage& CGameServerMessage::operator>>(st_Session** Session)
+{
+    memcpy(Session, &_MessageBuf[_Front], sizeof(st_Session*));
+    _Front += sizeof(st_Session*);
+    _UseBufferSize -= sizeof(st_Session*);
 
     return *(this);
 }
