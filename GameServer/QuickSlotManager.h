@@ -28,6 +28,8 @@ public:
 	
 	// ³»¿ë ºñ¿ì±â
 	void Empty();	
+
+	map<int8, CQuickSlotBar*> GetQuickSlotBar();
 private:
 	// Äü½½·Ô¹Ù 
 	map<int8, CQuickSlotBar*> _QuickSlotBars;

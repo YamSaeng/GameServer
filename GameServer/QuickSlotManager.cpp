@@ -126,3 +126,8 @@ void CQuickSlotManager::Empty()
 
 	_QuickSlotBars.clear();
 }
+
+map<int8, CQuickSlotBar*> CQuickSlotManager::GetQuickSlotBar()
+{
+	return _QuickSlotBars;
+}
