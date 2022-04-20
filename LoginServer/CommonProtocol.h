@@ -587,14 +587,9 @@ enum en_LOGIN_SERVER_PACKET_TYPE
 	en_LOGIN_SERVER_S2C_ACCOUNT_LOGOUT,
 
 	//--------------------------------
-	// 로그인 서버 DB 작업 중 요청 
+	// 로그인 서버 로그인 상태 바꾸기 요청
 	// int64 AccountID
+	// en_LoginState LoginState
 	//--------------------------------
-	en_LOGIN_SERVER_C2S_DBPROC_WORKING,
-
-	//--------------------------------
-	// 로그인 서버 DB 작업 완료 요청 
-	// int64 AccountID 	   
-	//--------------------------------
-	en_LOGIN_SERVER_C2S_DBPROC_COMPLETE
+	en_LOGIN_SERVER_C2S_LOGIN_STATE_CHANGE
 };
