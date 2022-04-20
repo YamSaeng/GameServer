@@ -28,7 +28,7 @@ void CMonster::Update()
 	CGameObject::Update();
 
 	if (_Target != nullptr && _Target->_NetworkState == en_ObjectNetworkState::LEAVE)
-	{
+	{	
 		_Target = nullptr;		
 	}
 
@@ -121,6 +121,7 @@ bool CMonster::OnDamaged(CGameObject* Attacker, int32 Damage)
 		CGameServerMessage* AggroJobMessage = CGameServerMessage::GameServerMessageAlloc();
 		AggroJobMessage->Clear();	
 
+		*AggroJobMessage << (int8)en_AggroCategory::AGGRO_CATEGORY_DAMAGE;
 		*AggroJobMessage << &Attacker;
 		*AggroJobMessage << Damage;
 
@@ -161,7 +162,7 @@ void CMonster::SelectTarget()
 	CGameObject* Target = nullptr;
 
 	for (auto AggroTargetIterator : _AggroTargetList)
-	{		
+	{			
 		if (AggroTargetIterator.second.AggroPoint > AggroPoint)
 		{
 			AggroPoint = AggroTargetIterator.second.AggroPoint;

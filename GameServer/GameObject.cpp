@@ -105,8 +105,10 @@ void CGameObject::Update()
 				CSkill* ReqMagicSkillInit = G_ObjectManager->SkillCreate();
 
 				switch (MagicSkill->GetSkillInfo()->SkillMediumCategory)
-				{
+				{					
 				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF:
+				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_BUF:
+				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_BUF:
 					{
 						st_BufSkillInfo* TacticSkillInfo = (st_BufSkillInfo*)G_ObjectManager->SkillInfoCreate(MagicSkill->GetSkillInfo()->SkillMediumCategory);
 						*TacticSkillInfo = *((st_BufSkillInfo*)MagicSkill->GetSkillInfo());
@@ -117,6 +119,7 @@ void CGameObject::Update()
 					}
 					break;
 				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_TACTIC:
+				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_TACTIC:
 					{
 						st_TacTicSkillInfo* TacticSkillInfo = (st_TacTicSkillInfo*)G_ObjectManager->SkillInfoCreate(MagicSkill->GetSkillInfo()->SkillMediumCategory);
 						*TacticSkillInfo = *((st_TacTicSkillInfo*)MagicSkill->GetSkillInfo());
@@ -127,6 +130,7 @@ void CGameObject::Update()
 					}
 					break;
 				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK:
+				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK:
 					{
 						st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(MagicSkill->GetSkillInfo()->SkillMediumCategory);
 						*AttackSkillInfo = *((st_AttackSkillInfo*)MagicSkill->GetSkillInfo());
@@ -135,7 +139,18 @@ void CGameObject::Update()
 						ReqMagicSkillInit->SetOwner(this);
 						ReqMagicSkillInit->ReqMagicSkillInit(MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate);
 					}
-					break;				
+					break;					
+				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_HEAL:
+				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_HEAL:
+					{
+						st_HealSkillInfo* HealSkillInfo = (st_HealSkillInfo*)G_ObjectManager->SkillInfoCreate(MagicSkill->GetSkillInfo()->SkillMediumCategory);
+						*HealSkillInfo = *((st_HealSkillInfo*)MagicSkill->GetSkillInfo());
+
+						ReqMagicSkillInit->SetSkillInfo(en_SkillCategory::REQ_MAGIC_SKILL_INIT, HealSkillInfo);
+						ReqMagicSkillInit->SetOwner(this);
+						ReqMagicSkillInit->ReqMagicSkillInit(MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate);
+					}
+					break;
 				}
 
 				MyPlayer->_ReqMagicSkillInit = ReqMagicSkillInit;
@@ -190,24 +205,44 @@ void CGameObject::Update()
 			}
 			break;	
 		case en_GameObjectJobType::GAMEOBJECT_JOB_AGGRO_LIST_INSERT_OR_UPDATE:
-			{
-				CGameObject* Attacker;
-				*GameObjectJob->GameObjectJobMessage >> &Attacker;
-				int32 Damage;
-				*GameObjectJob->GameObjectJobMessage >> Damage;
+			{				
+				int8 AggroCategory;
+				*GameObjectJob->GameObjectJobMessage >> AggroCategory;
+				CGameObject* Target;
+				*GameObjectJob->GameObjectJobMessage >> &Target;				
 
-				auto FindAggroTargetIterator = _AggroTargetList.find(Attacker->_GameObjectInfo.ObjectId);
+				auto FindAggroTargetIterator = _AggroTargetList.find(Target->_GameObjectInfo.ObjectId);
 				if (FindAggroTargetIterator != _AggroTargetList.end())
 				{
-					FindAggroTargetIterator->second.AggroPoint += (Damage * (0.8 + G_Datamanager->_MonsterAggroData.MonsterAggroAttacker));
+					switch ((en_AggroCategory)AggroCategory)
+					{
+					case en_AggroCategory::AGGRO_CATEGORY_DAMAGE:
+						{
+							int32 Damage;
+							*GameObjectJob->GameObjectJobMessage >> Damage;
+
+							FindAggroTargetIterator->second.AggroPoint += (Damage * (0.8 + G_Datamanager->_MonsterAggroData.MonsterAggroAttacker));
+						}												
+						break;
+					case en_AggroCategory::AGGRO_CATEGORY_HEAL:
+						{
+							int32 HealPoint;
+							*GameObjectJob->GameObjectJobMessage >> HealPoint;
+
+							FindAggroTargetIterator->second.AggroPoint += (HealPoint * G_Datamanager->_MonsterAggroData.MonsterAggroHeal);
+						}
+						break;
+					default:
+						break;
+					}					
 				}
 				else
 				{
 					st_Aggro NewAggroTarget;
-					NewAggroTarget.AggroTarget = Attacker;
+					NewAggroTarget.AggroTarget = Target;
 					NewAggroTarget.AggroPoint = _GameObjectInfo.ObjectStatInfo.MaxHP * G_Datamanager->_MonsterAggroData.MonsterAggroFirstAttacker;
 
-					_AggroTargetList.insert(pair<int64, st_Aggro>(Attacker->_GameObjectInfo.ObjectId, NewAggroTarget));
+					_AggroTargetList.insert(pair<int64, st_Aggro>(Target->_GameObjectInfo.ObjectId, NewAggroTarget));
 				}			
 			}
 			break;		
@@ -255,6 +290,25 @@ void CGameObject::OnHeal(CGameObject* Healer, int32 HealPoint)
 	if (_GameObjectInfo.ObjectStatInfo.HP >= _GameObjectInfo.ObjectStatInfo.MaxHP)
 	{
 		_GameObjectInfo.ObjectStatInfo.HP = _GameObjectInfo.ObjectStatInfo.MaxHP;
+	}
+
+	// 힐을 대상에게 시전시 주위 몬스터들에게 힐 어그로를 계산하기 위해 알려준다.
+	vector<CMonster*> AroundMonsters = _Channel->GetAroundMonster(Healer,1);
+	for (CMonster* AroundMonster : AroundMonsters)
+	{
+		st_GameObjectJob* AggroUpdateJob = G_ObjectManager->GameObjectJobCreate();
+		AggroUpdateJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_AGGRO_LIST_INSERT_OR_UPDATE;
+
+		CGameServerMessage* AggroUpdateJobMessage = CGameServerMessage::GameServerMessageAlloc();
+		AggroUpdateJobMessage->Clear();
+
+		*AggroUpdateJobMessage << (int8)en_AggroCategory::AGGRO_CATEGORY_HEAL;
+		*AggroUpdateJobMessage << &Healer;
+		*AggroUpdateJobMessage << HealPoint;
+
+		AggroUpdateJob->GameObjectJobMessage = AggroUpdateJobMessage;
+
+		AroundMonster->_GameObjectJobQue.Enqueue(AggroUpdateJob);
 	}
 }
 

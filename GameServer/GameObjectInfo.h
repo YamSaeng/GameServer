@@ -361,6 +361,12 @@ enum class en_MonsterAggroType : int8
 	MONSTER_AGGRO_TAUNT
 };
 
+enum class en_AggroCategory : int8
+{
+	AGGRO_CATEGORY_DAMAGE,
+	AGGRO_CATEGORY_HEAL
+};
+
 namespace UnityEngine
 {
 	enum en_UnityKeyCode
@@ -372,7 +378,7 @@ namespace UnityEngine
 		//
 		// 요약:
 		//     The backspace key.
-		Backspace = 8,
+		Backspace = 8,	
 		//
 		// 요약:
 		//     The tab key.
@@ -1853,7 +1859,7 @@ struct st_SkillInfo
 	st_SkillInfo()
 	{
 		IsSkillLearn = false;
-		CanSkillUse = false;
+		CanSkillUse = true;
 		IsQuickSlotUse = false;		
 		SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_NONE;
 		SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
