@@ -93,26 +93,7 @@ void CPlayer::Update()
 			{
 				CMessage* ResOtherObjectSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectSpawn((int32)SpawnObjectInfos.size(), SpawnObjectInfos);
 				G_ObjectManager->GameServer->SendPacket(_SessionId, ResOtherObjectSpawnPacket);
-				ResOtherObjectSpawnPacket->Free();
-
-				// 스폰 해야할 대상들 기준에서 나와의 거리가 스폰 해야할 대상들 시야범위안에 있을 경우 나를 스폰하라고 알려줌
-				SpawnObjectInfos.clear();
-				SpawnObjectInfos.push_back(this);
-
-				CMessage* ResMyObjectSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectSpawn(1, SpawnObjectInfos);
-				for (CGameObject* SpawnObject : SpawnObjectInfos)
-				{
-					if (SpawnObject->_IsSendPacketTarget == true)
-					{
-						int16 Distance = st_Vector2Int::Distance(GetCellPosition(), SpawnObject->GetCellPosition());
-
-						if (Distance <= SpawnObject->_FieldOfViewDistance)
-						{
-							G_ObjectManager->GameServer->SendPacket(((CPlayer*)SpawnObject)->_SessionId, ResMyObjectSpawnPacket);
-						}
-					}
-				}
-				ResMyObjectSpawnPacket->Free();
+				ResOtherObjectSpawnPacket->Free();				
 			}						
 		}
 
@@ -138,25 +119,7 @@ void CPlayer::Update()
 			{
 				CMessage* ResOtherObjectDeSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn((int32)DeSpawnObjectInfos.size(), DeSpawnObjectInfos);
 				G_ObjectManager->GameServer->SendPacket(_SessionId, ResOtherObjectDeSpawnPacket);
-				ResOtherObjectDeSpawnPacket->Free();
-
-				// 하지만 나와 대상들의 거리가 대상들 시야범위 안에 속할 경우 나를 디스폰하지는 않는다.
-				DeSpawnObjectInfos.clear();
-				DeSpawnObjectInfos.push_back(this);
-
-				CMessage* ResMyObjectDeSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(1, DeSpawnObjectInfos);
-				for (CGameObject* DeSpawnObject : DeSpawnObjectInfos)
-				{
-					if (DeSpawnObject->_IsSendPacketTarget)
-					{
-						int16 Distance = st_Vector2Int::Distance(GetCellPosition(), DeSpawnObject->GetCellPosition());
-						if (Distance > DeSpawnObject->_FieldOfViewDistance)
-						{							
-							G_ObjectManager->GameServer->SendPacket(((CPlayer*)DeSpawnObject)->_SessionId, ResMyObjectDeSpawnPacket);
-						}
-					}
-				}
-				ResMyObjectDeSpawnPacket->Free();
+				ResOtherObjectDeSpawnPacket->Free();				
 			}			
 		}
 
@@ -242,12 +205,12 @@ void CPlayer::Update()
 		if (_GameObjectInfo.ObjectStatInfo.HP > _GameObjectInfo.ObjectStatInfo.MaxHP)
 		{
 			_GameObjectInfo.ObjectStatInfo.HP = _GameObjectInfo.ObjectStatInfo.MaxHP;
-		}
+		}		
 
-		if (_GameObjectInfo.ObjectStatInfo.HP < 0)
+		if (_GameObjectInfo.ObjectStatInfo.MP > _GameObjectInfo.ObjectStatInfo.MaxMP)
 		{
-			_GameObjectInfo.ObjectStatInfo.HP = 0;
-		}
+			_GameObjectInfo.ObjectStatInfo.MP = _GameObjectInfo.ObjectStatInfo.MaxMP;
+		}		
 
 		_NatureRecoveryTick = GetTickCount64() + 5000;		
 				
@@ -349,7 +312,9 @@ void CPlayer::Init()
 	CGameObject::Update();
 
 	_GameObjectInfo.ObjectId = 0;
-	_GameObjectInfo.ObjectName = L"";	
+	_GameObjectInfo.ObjectName = L"";
+
+	_NetworkState = en_ObjectNetworkState::READY;
 }
 
 void CPlayer::PositionReset()
@@ -739,6 +704,7 @@ void CPlayer::UpdateSpell()
 
 					wsprintf(SpellMessage, L"%s가 치유의빛을 사용해 %s를 %d만큼 회복했습니다.", _GameObjectInfo.ObjectName.c_str(), _SelectTarget->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
 					MagicSystemString = SpellMessage;
+					
 				}
 				break;
 			case en_SkillType::SKILL_TAIOIST_HEALING_WIND:
