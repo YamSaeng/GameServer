@@ -140,6 +140,7 @@ enum class en_SkillType : int16
 	SKILL_SHAMAN_ICE_WAVE,
 	SKILL_SHAMAN_LIGHTNING_STRIKE,
 	SKILL_SHAMAN_HELL_FIRE,
+	SKILL_SHAMAN_BACK_TELEPORT,
 
 	SKILL_TAIOIST_DIVINE_STRIKE,
 	SKILL_TAIOIST_HEALING_LIGHT,
@@ -202,11 +203,12 @@ struct st_StatInfo
 	int32 MaxMeleeAttackDamage;
 	int16 MeleeAttackHitRate;
 	int16 MagicDamage;
-	int16 MagicHitRate;
+	float MagicHitRate;
 	int32 Defence;
 	int16 EvasionRate;
 	int16 MeleeCriticalPoint;
 	int16 MagicCriticalPoint;
+	int16 StatusAbnormalResistance;
 	float Speed;
 };
 

@@ -301,9 +301,8 @@ int32 CMessage::GetData(wstring& Dest, int32 Size)
 {
 	// 유니코드 문자열 생성후 wstring에 넣어서 반환
 	WCHAR StringToWCHAR[256] = { 0 };
-	memcpy(StringToWCHAR, &_MessageBuf[_Front], Size);
-	wstring RetWString = StringToWCHAR;
-	Dest = RetWString;
+	memcpy(StringToWCHAR, &_MessageBuf[_Front], Size);	
+	Dest = StringToWCHAR;
 	_Front += Size;
 	_UseBufferSize -= Size;
 	return Size;	
@@ -343,10 +342,10 @@ int CMessage::InsertData(wchar_t* Src, int32 Size)
 
 void CMessage::InsertData(wstring Data)
 {
-	int8 Len = Data.length();
-	memcpy(&_MessageBuf[_Rear], &Len, sizeof(int8));
-	_Rear += sizeof(int8);
-	_UseBufferSize += sizeof(int8);
+	int16 Len = Data.length();
+	memcpy(&_MessageBuf[_Rear], &Len, sizeof(int16));
+	_Rear += sizeof(int16);
+	_UseBufferSize += sizeof(int16);
 	memcpy(&_MessageBuf[_Rear], Data.c_str(), Len);
 	_Rear += Len;
 	_UseBufferSize += Len;

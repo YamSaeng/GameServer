@@ -96,7 +96,7 @@ CLockFreeQue<DATA>::CLockFreeQue()
 template<class DATA>
 CLockFreeQue<DATA>::~CLockFreeQue()
 {
-
+	
 }
 
 template<class DATA>

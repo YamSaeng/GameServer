@@ -19,7 +19,8 @@ private:
 	enum en_DummyClientMessage
 	{
 		CHAT_MSG,
-		MOVE		
+		MOVE,
+		DEFAULT_ATTACK
 	};
 	
 	HANDLE _DummyClientHCP;	
