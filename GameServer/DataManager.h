@@ -10,13 +10,13 @@ class CDataManager
 public:
 	map<int16, st_ItemData*> _Items;
 	map<int16, st_ConsumableData*> _Consumables;
-		
+
 	map<int32, st_ObjectStatusData*> _WarriorStatus;
 	map<int32, st_ObjectStatusData*> _ShamanStatus;
 	map<int32, st_ObjectStatusData*> _TaioistStatus;
 	map<int32, st_ObjectStatusData*> _ThiefStatus;
 	map<int32, st_ObjectStatusData*> _ArcherStatus;
-	
+
 	map<int32, st_MonsterData*> _Monsters;
 
 	st_MonsterAggroData _MonsterAggroData;
@@ -64,6 +64,8 @@ public:
 	map<int8, st_CraftingItemCategoryData*> _CraftingData;
 	map<int32, st_LevelData*> _LevelDatas;
 
+	map<int64, st_MapInfoData*> _MapInfoDatas;
+
 	CDataManager()
 	{
 
@@ -71,11 +73,11 @@ public:
 
 	~CDataManager()
 	{
-		
+
 	}
 
 	void LoadDataItem(wstring LoadFileName);
-	void LoadDataPlayerCharacterStatus(wstring LoadFileName);	
+	void LoadDataPlayerCharacterStatus(wstring LoadFileName);
 	void LoadDataLevel(wstring LoadFileName);
 	void LoadDataMonster(wstring LoadFileName);
 	void LoadDataMonsterAggro(wstring LoadFileName);
@@ -87,7 +89,8 @@ public:
 	void LoadDataArcherSkill(wstring LoadFileName);
 	void LoadDataEnvironment(wstring LoadFileName);
 	void LoadDataCrafting(wstring LoadFileName);
+	void LoadDataMapInfo(wstring LoadFileName);
 
-	st_SkillData* FindSkillData(en_SkillMediumCategory FindSkillMediumCategory, en_SkillType FindSkillType);	
-	st_ObjectStatusData* FindObjectStatusData(en_GameObjectType GameObjectType, int16 Level);	
+	st_SkillData* FindSkillData(en_SkillMediumCategory FindSkillMediumCategory, en_SkillType FindSkillType);
+	st_ObjectStatusData* FindObjectStatusData(en_GameObjectType GameObjectType, int16 Level);
 };

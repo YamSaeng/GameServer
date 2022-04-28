@@ -16,7 +16,7 @@ struct st_ItemData
 	int32 ItemHeight;
 	en_LargeItemCategory LargeItemCategory;
 	en_MediumItemCategory MediumItemCategory;
-	en_SmallItemCategory SmallItemCategory; 
+	en_SmallItemCategory SmallItemCategory;
 	en_GameObjectType ItemObjectType;
 	string ItemExplain;
 	int32 ItemMinDamage;
@@ -122,10 +122,10 @@ struct st_ObjectStatusData
 	int16 EvasionRate;
 	int16 MeleeCriticalPoint;
 	int16 MagicCriticalPoint;
-	float Speed;	
+	float Speed;
 	int32 SearchCellDistance;
 	int32 ChaseCellDistance;
-	int32 AttackRange;	
+	int32 AttackRange;
 };
 
 struct st_LevelData
@@ -144,7 +144,7 @@ struct st_DropData
 };
 
 struct st_MonsterData
-{	
+{
 	int32 MonsterDataId; // 몬스터 번호
 	string MonsterName;  // 몬스터 이름
 	st_ObjectStatusData MonsterStatInfo; // 몬스터 스탯 정보
@@ -193,8 +193,16 @@ struct st_CraftingCompleteItemData
 };
 
 struct st_CraftingItemCategoryData
-{	
+{
 	en_LargeItemCategory CraftingType; // 제작템 범주
 	string CraftingTypeName; // 제작템 범주 이름	
 	vector<st_CraftingCompleteItemData> CraftingCompleteItems; // 제작템 범주에 속한 아이템 목록
+};
+
+struct st_MapInfoData
+{
+	int64 MapID;			// 맵 고유 ID
+	string MapName;			// 맵 이름
+	int32 MapSectorSize;	// 맵 SectorSize
+	int8 ChannelCount;		// 채널 개수
 };

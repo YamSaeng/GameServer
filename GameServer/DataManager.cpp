@@ -128,7 +128,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 	}
 
 	for (auto& Filed : Document["Consumables"].GetArray())
-	{		
+	{
 		for (auto& PotionDataListFiled : Filed["PotionList"].GetArray())
 		{
 			string MediumCategory = PotionDataListFiled["ItemMediumCategory"].GetString();
@@ -172,7 +172,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 
 			_Consumables.insert(pair<int16, st_ConsumableData*>((int16)PotionItemData->SmallItemCategory, PotionItemData));
 		}
-				
+
 		for (auto& SkillBookDataListFiled : Filed["SkillBookList"].GetArray())
 		{
 			string MediumCategory = SkillBookDataListFiled["ItemMediumCategory"].GetString();
@@ -400,7 +400,7 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 
 	for (auto& Filed : Document["PlayerWarriorCharacterStatus"].GetArray())
 	{
-		string PlayerType = Filed["PlayerType"].GetString();		
+		string PlayerType = Filed["PlayerType"].GetString();
 
 		for (auto& PlayerWarriorCharacterFiled : Filed["PlayerWarriorCharacterLevelDataList"].GetArray())
 		{
@@ -419,7 +419,7 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			int16 EvasionRate = PlayerWarriorCharacterFiled["EvasionRate"].GetInt();
 			int16 MeleeCriticalPoint = (int16)(PlayerWarriorCharacterFiled["MeleeCriticalPoint"].GetInt());
 			int16 MagicCriticalPoint = (int16)(PlayerWarriorCharacterFiled["MagicCriticalPoint"].GetInt());
-			float Speed = PlayerWarriorCharacterFiled["Speed"].GetFloat();			
+			float Speed = PlayerWarriorCharacterFiled["Speed"].GetFloat();
 
 			st_ObjectStatusData* WarriorStatusData = new st_ObjectStatusData();
 
@@ -440,7 +440,7 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			WarriorStatusData->EvasionRate = EvasionRate;
 			WarriorStatusData->MeleeCriticalPoint = MeleeCriticalPoint;
 			WarriorStatusData->MagicCriticalPoint = MagicCriticalPoint;
-			WarriorStatusData->Speed = Speed;			
+			WarriorStatusData->Speed = Speed;
 
 			_WarriorStatus.insert(pair<int32, st_ObjectStatusData*>(WarriorStatusData->Level, WarriorStatusData));
 		}
@@ -632,7 +632,7 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			ArcherStatusData->EvasionRate = EvasionRate;
 			ArcherStatusData->MeleeCriticalPoint = MeleeCriticalPoint;
 			ArcherStatusData->MagicCriticalPoint = MagicCriticalPoint;
-			ArcherStatusData->Speed = Speed;			
+			ArcherStatusData->Speed = Speed;
 
 			_ArcherStatus.insert(pair<int32, st_ObjectStatusData*>(ArcherStatusData->Level, ArcherStatusData));
 		}
@@ -821,7 +821,7 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				string SkillLeftAnimation = PublicAttackSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = PublicAttackSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = PublicAttackSkillListFiled["SkillExplanation"].GetString();
-				string SkillImagePath = PublicAttackSkillListFiled["SkillThumbnailImagePath"].GetString();				
+				string SkillImagePath = PublicAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
 
 				if (SkillType == "SKILL_DEFAULT_ATTACK")
 				{
@@ -845,7 +845,7 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				PublicAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				PublicAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				PublicAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
-				PublicAttackSkill->SkillExplanation = SkillExplation;				
+				PublicAttackSkill->SkillExplanation = SkillExplation;
 				PublicAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_PublicAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)PublicAttackSkill->SkillType, PublicAttackSkill));
@@ -876,7 +876,7 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 
 				if (SkillType == "")
 				{
-					
+
 				}
 
 				PublicTacTicSkill->SkillName = SkillName;
@@ -1039,7 +1039,7 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				st_AttackSkillData* WarriorAttackSkill = new st_AttackSkillData();
 				WarriorAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
 				WarriorAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK;
-						
+
 				string SkillType = WarriorAttackSkillListFiled["SkillType"].GetString();
 				string SkillName = WarriorAttackSkillListFiled["SkillName"].GetString();
 				int SkillLevel = WarriorAttackSkillListFiled["SkillLevel"].GetInt();
@@ -1050,9 +1050,9 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				int64 SkillDurationTime = WarriorAttackSkillListFiled["SkillDurationTime"].GetInt64();
 				int64 SkillDotTime = WarriorAttackSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = WarriorAttackSkillListFiled["SkillDistance"].GetInt();
-				float SkillTargetEffectTime = WarriorAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();				
+				float SkillTargetEffectTime = WarriorAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				int8 SkillDebufAttackSpeed = (int8)WarriorAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
-				int8 SkillDebufMovingSpeed = (int8)WarriorAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();				
+				int8 SkillDebufMovingSpeed = (int8)WarriorAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
 				int8 StatusAbnormalityProbability = (int8)WarriorAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
 				string SkillUpAnimation = WarriorAttackSkillListFiled["SkillUpAnimation"].GetString();
 				string SkillDownAnimation = WarriorAttackSkillListFiled["SkillDownAnimation"].GetString();
@@ -1092,7 +1092,7 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				WarriorAttackSkill->SkillDurationTime = SkillDurationTime;
 				WarriorAttackSkill->SkillDotTime = SkillDotTime;
 				WarriorAttackSkill->SkillDistance = SkillDistance;
-				WarriorAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;										
+				WarriorAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				WarriorAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 				WarriorAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
 
@@ -1104,7 +1104,7 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				{
 					WarriorAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
 				}
-				
+
 				WarriorAttackSkill->SkillExplanation = SkillExplation;
 				WarriorAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
 				WarriorAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
@@ -1114,7 +1114,7 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				WarriorAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_WarriorAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)WarriorAttackSkill->SkillType, WarriorAttackSkill));
-			}			
+			}
 
 			for (auto& WarriorHealSkillListFiled : WarriorSkillListFiled["WarriorHealSkillList"].GetArray())
 			{
@@ -1227,7 +1227,7 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				WarriorBufSkill->IncreaseStatusAbnormalityResistance = IncreaseStatusAbnormalityResistance;
 				WarriorBufSkill->SkillCoolTime = SkillCoolTime;
 				WarriorBufSkill->SkillCastingTime = SkillCastingTime;
-				WarriorBufSkill->SkillDurationTime = SkillDurationTime;	
+				WarriorBufSkill->SkillDurationTime = SkillDurationTime;
 				WarriorBufSkill->SkillDotTime = SkillDotTime;
 				WarriorBufSkill->SkillDistance = SkillDistance;
 				WarriorBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
@@ -1280,7 +1280,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				float SkillTargetEffectTime = ShmanAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				int8 SkillDebufAttackSpeed = (int8)ShmanAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
 				int8 SkillDebufMovingSpeed = (int8)ShmanAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
-				int8 StatusAbnormalityProbability = (int8)ShmanAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();				
+				int8 StatusAbnormalityProbability = (int8)ShmanAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
 				string SkillUpAnimation = ShmanAttackSkillListFiled["SkillUpAnimation"].GetString();
 				string SkillDownAnimation = ShmanAttackSkillListFiled["SkillDownAnimation"].GetString();
 				string SkillLeftAnimation = ShmanAttackSkillListFiled["SkillLeftAnimation"].GetString();
@@ -1323,9 +1323,9 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanAttackSkill->SkillDurationTime = SkillDurationTime;
 				ShamanAttackSkill->SkillDotTime = SkillDotTime;
 				ShamanAttackSkill->SkillDistance = SkillDistance;
-				ShamanAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;									
+				ShamanAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				ShamanAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
-				ShamanAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;				
+				ShamanAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
 				ShamanAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
 				ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
 				ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
@@ -1345,7 +1345,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_ShamanAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)ShamanAttackSkill->SkillType, ShamanAttackSkill));
-			}			
+			}
 
 			for (auto& ShamanTacTicSkillListFiled : ShamanSkillListFiled["ShamanTacTicSkillList"].GetArray())
 			{
@@ -1395,7 +1395,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 
 				ShamanTacTicSkill->SkillExplanation = SkillExplation;
 				ShamanTacTicSkill->SkillThumbnailImagePath = SkillImagePath;
-								
+
 				_ShamanTacTicSkillDatas.insert(pair<int16, st_TacTicSkillData*>((int16)ShamanTacTicSkill->SkillType, ShamanTacTicSkill));
 			}
 
@@ -1443,7 +1443,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				ShamanHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				ShamanHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
-				
+
 
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
@@ -1454,7 +1454,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_ShamanTacTicSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)ShamanHealSkill->SkillType, ShamanHealSkill));
-			}			
+			}
 
 			for (auto& ShmanBufSkillListFiled : ShamanSkillListFiled["ShamanBufSkillList"].GetArray())
 			{
@@ -1524,7 +1524,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				ShamanBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				ShamanBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
-				
+
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
 					ShamanBufSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
@@ -1570,7 +1570,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				int64 SkillDebufTime = TaioistAttackSkillListFiled["SkillDebufTime"].GetInt64();
 				int8 SkillDebufAttackSpeed = (int8)TaioistAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
 				int8 SkillDebufMovingSpeed = (int8)TaioistAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
-				int8 StatusAbnormalityProbability = (int8)TaioistAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();		
+				int8 StatusAbnormalityProbability = (int8)TaioistAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
 				string SkillUpAnimation = TaioistAttackSkillListFiled["SkillUpAnimation"].GetString();
 				string SkillDownAnimation = TaioistAttackSkillListFiled["SkillDownAnimation"].GetString();
 				string SkillLeftAnimation = TaioistAttackSkillListFiled["SkillLeftAnimation"].GetString();
@@ -1597,22 +1597,22 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				TaioistAttackSkill->SkillDurationTime = SkillDurationTime;
 				TaioistAttackSkill->SkillDotTime = SkillDotTime;
 				TaioistAttackSkill->SkillDistance = SkillDistance;
-				TaioistAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;								
+				TaioistAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				TaioistAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
-				TaioistAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;				
+				TaioistAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
 				TaioistAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
 				TaioistAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
 				TaioistAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				TaioistAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				TaioistAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
-				
+
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
 					TaioistAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
 				}
-				
+
 				TaioistAttackSkill->SkillExplanation = SkillExplation;
-				TaioistAttackSkill->SkillThumbnailImagePath = SkillImagePath;				
+				TaioistAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_TaioistAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)TaioistAttackSkill->SkillType, TaioistAttackSkill));
 			}
@@ -1665,7 +1665,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				TaioistHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				TaioistHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				TaioistHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
-				
+
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
 					TaioistHealSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
@@ -1745,7 +1745,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				TaioistBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				TaioistBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				TaioistBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
-				
+
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
 					TaioistBufSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
@@ -1790,7 +1790,7 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				float SkillTargetEffectTime = ThiefAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				int8 SkillDebufAttackSpeed = (int8)ThiefAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
 				int8 SkillDebufMovingSpeed = (int8)ThiefAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
-				int64 SkillDamageOverTime = ThiefAttackSkillListFiled["SkillDebufDamageOverTime"].GetInt64();								
+				int64 SkillDamageOverTime = ThiefAttackSkillListFiled["SkillDebufDamageOverTime"].GetInt64();
 				int8 StatusAbnormalityProbability = (int8)ThiefAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
 				string SkillUpAnimation = ThiefAttackSkillListFiled["SkillUpAnimation"].GetString();
 				string SkillDownAnimation = ThiefAttackSkillListFiled["SkillDownAnimation"].GetString();
@@ -1803,7 +1803,7 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				if (SkillType == "SKILL_THIEF_QUICK_CUT")
 				{
 					ThiefAttackSkill->SkillType = en_SkillType::SKILL_THIEF_QUICK_CUT;
-				}				
+				}
 
 				ThiefAttackSkill->SkillName = SkillName;
 				ThiefAttackSkill->SkillLevel = SkillLevel;
@@ -1814,15 +1814,15 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				ThiefAttackSkill->SkillDurationTime = SkillDurationTime;
 				ThiefAttackSkill->SkillDotTime = SkillDotTime;
 				ThiefAttackSkill->SkillDistance = SkillDistance;
-				ThiefAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;											
+				ThiefAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				ThiefAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
-				ThiefAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;				
+				ThiefAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
 				ThiefAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
 				ThiefAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
 				ThiefAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				ThiefAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				ThiefAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
-				
+
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
 					ThiefAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
@@ -1832,7 +1832,7 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				ThiefAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_ThiefAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)ThiefAttackSkill->SkillType, ThiefAttackSkill));
-			}			
+			}
 
 			for (auto& ThiefHealSkillListFiled : ThiefSkillListFiled["ThiefHealSkillList"].GetArray())
 			{
@@ -1861,8 +1861,8 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 
 				if (SkillType == "")
 				{
-					
-				}				
+
+				}
 
 				ThiefHealSkill->SkillName = SkillName;
 				ThiefHealSkill->SkillLevel = SkillLevel;
@@ -1878,7 +1878,7 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				ThiefHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				ThiefHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				ThiefHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
-				
+
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
 					ThiefHealSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
@@ -1958,12 +1958,12 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				ThiefBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				ThiefBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				ThiefBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
-				
+
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
 					ThiefBufSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
 				}
-				
+
 				ThiefBufSkill->SkillExplanation = SkillExplation;
 				ThiefBufSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -2004,7 +2004,7 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				int64 SkillDebufTime = ArcherAttackSkillListFiled["SkillDebufTime"].GetInt64();
 				int8 SkillDebufAttackSpeed = (int8)ArcherAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
 				int8 SkillDebufMovingSpeed = (int8)ArcherAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
-				int8 StatusAbnormalityProbability = (int8)ArcherAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();				
+				int8 StatusAbnormalityProbability = (int8)ArcherAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
 				string SkillUpAnimation = ArcherAttackSkillListFiled["SkillUpAnimation"].GetString();
 				string SkillDownAnimation = ArcherAttackSkillListFiled["SkillDownAnimation"].GetString();
 				string SkillLeftAnimation = ArcherAttackSkillListFiled["SkillLeftAnimation"].GetString();
@@ -2016,7 +2016,7 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				if (SkillType == "SKILL_ARCHER_SNIFING")
 				{
 					ArcherAttackSkill->SkillType = en_SkillType::SKILL_ARCHER_SNIFING;
-				}			
+				}
 
 				ArcherAttackSkill->SkillName = SkillName;
 				ArcherAttackSkill->SkillLevel = SkillLevel;
@@ -2027,25 +2027,25 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				ArcherAttackSkill->SkillDurationTime = SkillDurationTime;
 				ArcherAttackSkill->SkillDotTime = SkillDotTime;
 				ArcherAttackSkill->SkillDistance = SkillDistance;
-				ArcherAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;									
+				ArcherAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				ArcherAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
-				ArcherAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;				
+				ArcherAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
 				ArcherAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
 				ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
 				ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
-				
+
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
 					ArcherAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
 				}
-				
+
 				ArcherAttackSkill->SkillExplanation = SkillExplation;
-				ArcherAttackSkill->SkillThumbnailImagePath = SkillImagePath;				
+				ArcherAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_ArcherAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)ArcherAttackSkill->SkillType, ArcherAttackSkill));
-			}			
+			}
 
 			for (auto& ArcherHealSkillListFiled : ArcherSkillListFiled["ArcherHealSkillList"].GetArray())
 			{
@@ -2074,8 +2074,8 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 
 				if (SkillType == "")
 				{
-					
-				}				
+
+				}
 
 				ArcherHealSkill->SkillName = SkillName;
 				ArcherHealSkill->SkillLevel = SkillLevel;
@@ -2091,12 +2091,12 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				ArcherHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				ArcherHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				ArcherHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
-				
+
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
 					ArcherHealSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
 				}
-				
+
 				ArcherHealSkill->SkillExplanation = SkillExplation;
 				ArcherHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
@@ -2171,7 +2171,7 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				ArcherBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				ArcherBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				ArcherBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
-								
+
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
 					ArcherBufSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
@@ -2348,6 +2348,31 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 	}
 }
 
+void CDataManager::LoadDataMapInfo(wstring LoadFileName)
+{
+	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());
+
+	rapidjson::Document Document;
+	Document.Parse(FileStr);
+
+	for (auto& Filed : Document["MapInfo"].GetArray())
+	{
+		st_MapInfoData* MapInfoData = new st_MapInfoData();
+
+		int64 MapID = Filed["MapID"].GetInt64();
+		string MapName = Filed["MapName"].GetString();
+		int32 MapSectorSize = Filed["MapSectorSize"].GetInt();
+		int8 ChannelCount = (int8)Filed["ChannelCount"].GetInt();
+
+		MapInfoData->MapID = MapID;
+		MapInfoData->MapName = MapName;
+		MapInfoData->MapSectorSize = MapSectorSize;
+		MapInfoData->ChannelCount = ChannelCount;
+
+		_MapInfoDatas.insert(pair<int64, st_MapInfoData*>(MapInfoData->MapID, MapInfoData));
+	}
+}
+
 st_SkillData* CDataManager::FindSkillData(en_SkillMediumCategory FindAttackSkillMediumCategory, en_SkillType FindSkillType)
 {
 	switch (FindAttackSkillMediumCategory)
@@ -2406,11 +2431,11 @@ st_ObjectStatusData* CDataManager::FindObjectStatusData(en_GameObjectType GameOb
 	case en_GameObjectType::NORMAL:
 		return nullptr;
 	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-		return (*_WarriorStatus.find(Level)).second;		
+		return (*_WarriorStatus.find(Level)).second;
 	case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
-		return (*_ShamanStatus.find(Level)).second;		
+		return (*_ShamanStatus.find(Level)).second;
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
-		return (*_TaioistStatus.find(Level)).second;		
+		return (*_TaioistStatus.find(Level)).second;
 	case en_GameObjectType::OBJECT_THIEF_PLAYER:
 		return (*_ThiefStatus.find(Level)).second;
 	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
@@ -2425,5 +2450,5 @@ st_ObjectStatusData* CDataManager::FindObjectStatusData(en_GameObjectType GameOb
 		break;
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 		return (*_WarriorStatus.find(Level)).second;
-	}	
+	}
 }

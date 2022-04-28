@@ -12,7 +12,7 @@ enum class en_GameObjectType : int16
 	OBJECT_WARRIOR_PLAYER,
 	OBJECT_SHAMAN_PLAYER,
 	OBJECT_TAIOIST_PLAYER,
-	OBJECT_THIEF_PLAYER,	
+	OBJECT_THIEF_PLAYER,
 	OBJECT_ARCHER_PLAYER,
 
 	OBJECT_MONSTER,
@@ -68,7 +68,7 @@ enum class en_CreatureState : int8
 	STOP,
 	RETURN_SPAWN_POSITION,
 	ATTACK,
-	SPELL,		
+	SPELL,
 	DEAD
 };
 
@@ -97,7 +97,7 @@ enum class en_StateChange : int16
 
 enum class en_ObjectNetworkState : int8
 {
-	READY,
+	READY,	
 	LIVE,
 	LEAVE
 };
@@ -105,7 +105,7 @@ enum class en_ObjectNetworkState : int8
 enum class en_InventoryManager : int8
 {
 	INVENTORY_DEFAULT_WIDH_SIZE = 10,
-	INVENTORY_DEFAULT_HEIGHT_SIZE = 10	
+	INVENTORY_DEFAULT_HEIGHT_SIZE = 10
 };
 
 enum class en_QuickSlotBar : int8
@@ -152,7 +152,7 @@ enum class en_SmallItemCategory : int16
 	ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CONVERSION_ATTACK = 301,
 	ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SHAEHONE_ATTACK = 302,
 	ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK = 303,
-	ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SMASH_WAVE_ATTACK = 304,	
+	ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SMASH_WAVE_ATTACK = 304,
 	ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHARGE_POSE = 305,
 	ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_FLAME_HARPOON = 306,
 	ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HELL_FIRE = 307,
@@ -228,14 +228,14 @@ enum class en_SkillType : int16
 {
 	SKILL_TYPE_NONE = 0,
 	SKILL_DEFAULT_ATTACK = 1,
-	
+
 	SKILL_KNIGHT_FIERCE_ATTACK,
 	SKILL_KNIGHT_CONVERSION_ATTACK,
 	SKILL_KNIGHT_SMASH_WAVE,
 	SKILL_KNIGHT_SHAEHONE,
 	SKILL_KNIGHT_CHOHONE,
 	SKILL_KNIGHT_CHARGE_POSE,
-	
+
 	SKILL_SHAMAN_FLAME_HARPOON,
 	SKILL_SHAMAN_ROOT,
 	SKILL_SHAMAN_ICE_CHAIN,
@@ -244,17 +244,17 @@ enum class en_SkillType : int16
 	SKILL_SHAMAN_HELL_FIRE,
 	SKILL_SHAMAN_BACK_TELEPORT,
 
-	SKILL_TAIOIST_DIVINE_STRIKE,	
-	SKILL_TAIOIST_HEALING_LIGHT,	
+	SKILL_TAIOIST_DIVINE_STRIKE,
+	SKILL_TAIOIST_HEALING_LIGHT,
 	SKILL_TAIOIST_HEALING_WIND,
 	SKILL_TAIOIST_ROOT,
-	
+
 	SKILL_THIEF_QUICK_CUT,
 
 	SKILL_ARCHER_SNIFING,
 
 	SKILL_SHOCK_RELEASE,
-	
+
 	SKILL_SLIME_NORMAL = 3000,
 	SKILL_BEAR_NORMAL
 };
@@ -343,11 +343,11 @@ enum class en_GameObjectJobType : int16
 	GAMEOBJECT_JOB_TYPE_SHOCK_RELEASE,
 	GAMEOBJECT_JOB_TYPE_BACK_TELEPORT,
 	GAMEOBJECT_JOB_TYPE_MELEE_ATTACK,
-	GAMEOBJECT_JOB_TYPE_REQ_MAGIC,	
+	GAMEOBJECT_JOB_TYPE_REQ_MAGIC,
 	GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_CREATE,
-	GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_OFF,	
-	GAMEOBJECT_JOB_AGGRO_LIST_INSERT_OR_UPDATE,	
-	GAMEOBJECT_JOB_AGGRO_LIST_REMOVE
+	GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_OFF,
+	GAMEOBJECT_JOB_AGGRO_LIST_INSERT_OR_UPDATE,
+	GAMEOBJECT_JOB_AGGRO_LIST_REMOVE	
 };
 
 enum class en_MonsterAggroType : int8
@@ -357,7 +357,7 @@ enum class en_MonsterAggroType : int8
 	MONSTER_AGGRO_DAMAGE,
 	MONSTER_AGGRO_HEAL,
 	MONSTER_AGGRO_BUF,
-	MONSTER_AGGRO_DEBUF,	
+	MONSTER_AGGRO_DEBUF,
 	MONSTER_AGGRO_TAUNT
 };
 
@@ -378,7 +378,7 @@ namespace UnityEngine
 		//
 		// ¿ä¾à:
 		//     The backspace key.
-		Backspace = 8,	
+		Backspace = 8,
 		//
 		// ¿ä¾à:
 		//     The tab key.
@@ -1710,7 +1710,7 @@ struct st_StatInfo
 	int16 MeleeAttackHitRate;
 	int16 MagicDamage;
 	float MagicHitRate;
-	int32 Defence;	
+	int32 Defence;
 	int16 EvasionRate;
 	int16 MeleeCriticalPoint;
 	int16 MagicCriticalPoint;
@@ -1810,7 +1810,7 @@ struct st_ItemInfo
 		ItemMaxCount = 0;
 		ItemCount = 0;
 		ItemThumbnailImagePath = L"";
-		ItemIsEquipped = false;		
+		ItemIsEquipped = false;
 	}
 
 	bool operator == (st_ItemInfo OtherItemInfo)
@@ -1860,13 +1860,13 @@ struct st_SkillInfo
 	{
 		IsSkillLearn = false;
 		CanSkillUse = true;
-		IsQuickSlotUse = false;		
+		IsQuickSlotUse = false;
 		SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_NONE;
 		SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
 		SkillType = en_SkillType::SKILL_TYPE_NONE;
 		SkillLevel = 0;
 		SkillName = L"";
-		SkillCoolTime = 0;		
+		SkillCoolTime = 0;
 		SkillCastingTime = 0;
 		SkillDurationTime = 0;
 		SkillDotTime = 0;
@@ -1874,7 +1874,7 @@ struct st_SkillInfo
 		NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
 		SkillTargetEffectTime = 0;
 		SkillExplanation = L"";
-		SkillImagePath = L"";		
+		SkillImagePath = L"";
 	}
 };
 
@@ -1895,12 +1895,12 @@ struct st_AttackSkillInfo : public st_SkillInfo
 	{
 		SkillMinDamage = 0;
 		SkillMaxDamage = 0;
-		SkillDebuf = false;		
+		SkillDebuf = false;
 		SkillDebufAttackSpeed = 0;
-		SkillDebufMovingSpeed = 0;		
+		SkillDebufMovingSpeed = 0;
 		SkillDebufStun = false;
 		SkillDebufPushAway = false;
-		SkillDebufRoot = false;		
+		SkillDebufRoot = false;
 		SkillDamageOverTime = 0;
 		StatusAbnormalityProbability = 0;
 	}
@@ -1964,7 +1964,7 @@ struct st_QuickSlotBarSlotInfo
 	int8 QuickSlotBarIndex;          // Äü½½·Ô Index
 	int8 QuickSlotBarSlotIndex;      // Äü½½·Ô ½½·Ô Index
 	int16 QuickSlotKey;              // Äü½½·Ô¿¡ ¿¬µ¿µÈ Å°°ª
-	CSkill* QuickBarSkill = nullptr; // Äü½½·Ô¿¡ µî·ÏÇÒ ½ºÅ³ Á¤º¸
+	CSkill* QuickBarSkill = nullptr; // Äü½½·Ô¿¡ µî·ÏÇÒ ½ºÅ³ Á¤º¸	
 	bool CanQuickSlotUse = true;     // Äü½½·ÔÀ» »ç¿ëÇÒ ¼ö ÀÖ´ÂÁö ¾ø´ÂÁö
 };
 
@@ -2019,5 +2019,13 @@ struct st_GameObjectJob
 struct st_Aggro
 {
 	CGameObject* AggroTarget;
-	float AggroPoint;	
+	float AggroPoint;
+};
+
+struct st_MapInfo
+{
+	int64 MapID;
+	wstring MapName;
+	int32 MapSectorSize;
+	int8 ChannelCount;
 };
