@@ -7,9 +7,9 @@
 #include "ObjectManager.h"
 #include "Item.h"
 
-CMap::CMap(int MapId)
+CMap::CMap()
 {
-	char* FileStr = FileUtils::LoadFile(L"MapData.txt");	
+	char* FileStr = FileUtils::LoadFile(L"MapData.txt");
 	char* MovingFileP = FileStr;
 	char* ConvertP = FileStr;
 
@@ -42,14 +42,14 @@ CMap::CMap(int MapId)
 				ConvertP = MovingFileP + 1;
 				i++;
 				break;
-			}		
+			}
 		}
 
 		MovingFileP++;
 	}
 
 	int XCount = _Right - _Left + 1;
-	int YCount = _Down - _Up + 1;	
+	int YCount = _Down - _Up + 1;
 
 	_CollisionMapInfos = new en_TileMapEnvironment*[YCount];
 
@@ -62,7 +62,7 @@ CMap::CMap(int MapId)
 
 	for (int i = 0; i < YCount; i++)
 	{
-		_ObjectsInfos[i] = new CGameObject*[XCount];	
+		_ObjectsInfos[i] = new CGameObject*[XCount];
 		for (int j = 0; j < XCount; j++)
 		{
 			_ObjectsInfos[i][j] = nullptr;
@@ -70,7 +70,7 @@ CMap::CMap(int MapId)
 	}
 
 	_Items = new CItem***[YCount];
-	
+
 	for (int i = 0; i < YCount; i++)
 	{
 		_Items[i] = new CItem**[XCount];
@@ -80,7 +80,7 @@ CMap::CMap(int MapId)
 
 			for (int8 k = 0; k < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; k++)
 			{
-				_Items[i][j][k] = nullptr;				
+				_Items[i][j][k] = nullptr;
 			}
 		}
 	}
@@ -88,21 +88,387 @@ CMap::CMap(int MapId)
 	for (int Y = 0; Y < YCount; Y++)
 	{
 		for (int X = 0; X < XCount; X++)
-		{		
+		{
 			if (*ConvertP == '\r')
-			{				
+			{
 				break;
-			}		
+			}
 
-			_CollisionMapInfos[Y][X] = (en_TileMapEnvironment)(*ConvertP - 48);		
+			_CollisionMapInfos[Y][X] = (en_TileMapEnvironment)(*ConvertP - 48);
 
 			ConvertP++;
 		}
 		ConvertP += 2;
-	}		
+	}
 
 	_SizeX = _Right - _Left + 1;
 	_SizeY = _Down - _Up + 1;
+}
+
+CMap::~CMap()
+{
+	if (_ChannelManager != nullptr)
+	{
+		delete _ChannelManager;
+		_ChannelManager = nullptr;
+	}
+
+	if (_Sectors != nullptr)
+	{
+		for (int8 i = 0; i < _SectorCountY; i++)
+		{
+			delete _Sectors[i];
+		}
+
+		delete _Sectors;
+		_Sectors = nullptr;
+	}
+}
+
+void CMap::MapInit(int64 MapID, wstring MapName, int32 SectorSize, int8 ChannelCount)
+{
+	_MapID = MapID;
+	_MapName = MapName;
+
+	_ChannelManager = new CChannelManager();
+	_ChannelManager->Init(this, ChannelCount);
+
+	_SectorSize = SectorSize;
+
+	// 맵 크기를 토대로 섹터가 가로 세로 몇개씩 있는지 확인
+	_SectorCountY = (_SizeY + _SectorSize - 1) / _SectorSize;
+	_SectorCountX = (_SizeX + _SectorSize - 1) / _SectorSize;
+
+	// 앞서 구한 가로 세로 개수를 토대로 동적할당 
+	_Sectors = new CSector * [_SectorCountY];
+
+	for (int32 i = 0; i < _SectorCountY; i++)
+	{
+		_Sectors[i] = new CSector[_SectorCountX];
+	}
+
+	for (int32 Y = 0; Y < _SectorCountY; Y++)
+	{
+		for (int32 X = 0; X < _SectorCountX; X++)
+		{
+			// 섹터 저장
+			_Sectors[Y][X] = CSector(Y, X);
+		}
+	}
+}
+
+CSector* CMap::GetSector(st_Vector2Int CellPosition)
+{
+	int X = (CellPosition._X - _Left) / _SectorSize;
+	int Y = (_Down - CellPosition._Y) / _SectorSize;
+
+	return GetSector(Y, X);
+}
+
+CSector* CMap::GetSector(int32 IndexY, int32 IndexX)
+{
+	if (IndexX < 0 || IndexX >= _SectorCountX)
+	{
+		return nullptr;
+	}
+
+	if (IndexY < 0 || IndexY >= _SectorCountY)
+	{
+		return nullptr;
+	}
+
+	return &_Sectors[IndexY][IndexX];
+}
+
+vector<CSector*> CMap::GetAroundSectors(st_Vector2Int CellPosition, int32 Range)
+{
+	CSector* Sector = GetSector(CellPosition);
+
+	if (Sector != nullptr)
+	{
+		int MaxY = Sector->_SectorY + Range;
+		int MinY = Sector->_SectorY - Range;
+		int MaxX = Sector->_SectorX + Range;
+		int MinX = Sector->_SectorX - Range;
+
+		vector<CSector*> Sectors;
+
+		for (int X = MinX; X <= MaxX; X++)
+		{
+			for (int Y = MinY; Y <= MaxY; Y++)
+			{
+				CSector* Sector = GetSector(Y, X);
+				if (Sector == nullptr)
+				{
+					continue;
+				}
+
+				Sectors.push_back(Sector);
+			}
+		}
+
+		return Sectors;
+	}
+}
+
+vector<CGameObject*> CMap::GetAroundSectorObjects(CGameObject* Object, int32 Range, bool ExceptMe)
+{
+	vector<CGameObject*> SectorGameObjects;
+
+	vector<CSector*> Sectors = GetAroundSectors(Object->GetCellPosition(), Range);
+
+	for (CSector* Sector : Sectors)
+	{
+		// 주변 섹터 플레이어 정보
+		for (CPlayer* Player : Sector->GetPlayers())
+		{
+			// 함수 호출한 오브젝트를 포함할 것인지에 대한 여부 true면 제외 false면 포함
+			if (ExceptMe == true)
+			{
+				if (Object->_GameObjectInfo.ObjectId != Player->_GameObjectInfo.ObjectId)
+				{
+					SectorGameObjects.push_back(Player);
+				}
+			}
+			else
+			{
+				SectorGameObjects.push_back(Player);
+			}
+		}
+
+		// 주변 섹터 몬스터 정보
+		for (CMonster* Monster : Sector->GetMonsters())
+		{
+			SectorGameObjects.push_back(Monster);
+		}
+
+		for (CEnvironment* Environment : Sector->GetEnvironment())
+		{
+			SectorGameObjects.push_back(Environment);
+		}
+
+		for (CItem* Item : Sector->GetItems())
+		{
+			SectorGameObjects.push_back(Item);
+		}
+	}
+
+	return SectorGameObjects;
+}
+
+vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object, int16 Range, bool ExceptMe)
+{
+	vector<st_FieldOfViewInfo> FieldOfViewGameObjects;
+
+	vector<CSector*> Sectors = GetAroundSectors(Object->GetCellPosition(), Range);
+
+	for (CSector* Sector : Sectors)
+	{
+		Sector->AcquireSectorLock();
+
+		st_FieldOfViewInfo FieldOfViewInfo;
+		// 주변 섹터 플레이어 정보
+		for (CPlayer* Player : Sector->GetPlayers())
+		{
+			FieldOfViewInfo.ObjectId = Player->_GameObjectInfo.ObjectId;
+			FieldOfViewInfo.ObjectType = Player->_GameObjectInfo.ObjectType;
+
+			int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Player->GetCellPosition());
+
+			// 함수 호출한 오브젝트를 포함할 것인지에 대한 여부 true면 제외 false면 포함
+			if (ExceptMe == true && Distance <= Object->_FieldOfViewDistance)
+			{
+				if (Object->_GameObjectInfo.ObjectId != Player->_GameObjectInfo.ObjectId)
+				{
+					FieldOfViewGameObjects.push_back(FieldOfViewInfo);
+				}
+			}
+			else if (ExceptMe == false && Distance <= Object->_FieldOfViewDistance)
+			{
+				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
+			}
+		}
+
+		// 주변 섹터 몬스터 정보
+		for (CMonster* Monster : Sector->GetMonsters())
+		{
+			FieldOfViewInfo.ObjectId = Monster->_GameObjectInfo.ObjectId;
+			FieldOfViewInfo.ObjectType = Monster->_GameObjectInfo.ObjectType;
+
+			int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Monster->GetCellPosition());
+
+			if (Distance <= Object->_FieldOfViewDistance)
+			{
+				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
+			}
+		}
+
+		for (CEnvironment* Environment : Sector->GetEnvironment())
+		{
+			FieldOfViewInfo.ObjectId = Environment->_GameObjectInfo.ObjectId;
+			FieldOfViewInfo.ObjectType = Environment->_GameObjectInfo.ObjectType;
+
+			int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Environment->GetCellPosition());
+
+			if (Distance <= Object->_FieldOfViewDistance)
+			{
+				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
+			}
+		}
+
+		for (CItem* Item : Sector->GetItems())
+		{
+			FieldOfViewInfo.ObjectId = Item->_GameObjectInfo.ObjectId;
+			FieldOfViewInfo.ObjectType = Item->_GameObjectInfo.ObjectType;
+
+			int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Item->GetCellPosition());
+
+			if (Distance <= Object->_FieldOfViewDistance)
+			{
+				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
+			}
+		}
+
+		Sector->ReleaseSectorLock();
+	}
+
+	return FieldOfViewGameObjects;
+}
+
+vector<CMonster*> CMap::GetAroundMonster(CGameObject* Object, int16 Range, bool ExceptMe)
+{
+	vector<CMonster*> Monsters;
+
+	vector<CSector*> Sectors = GetAroundSectors(Object->GetCellPosition(), Range);
+
+	for (CSector* Sector : Sectors)
+	{
+		Sector->AcquireSectorLock();
+
+		for (CMonster* Monster : Sector->GetMonsters())
+		{
+			Monsters.push_back(Monster);
+		}
+
+		Sector->ReleaseSectorLock();
+	}
+
+	return Monsters;
+}
+
+vector<CPlayer*> CMap::GetAroundPlayer(CGameObject* Object, int32 Range)
+{
+	vector<CPlayer*> Players;
+
+	vector<CSector*> Sectors = GetAroundSectors(Object->GetCellPosition(), Range);
+
+	// 섹터에 있는 플레이어를 담아서 반환
+	// ExceptMe가 true면 제외 false면 포함
+	for (CSector* Sector : Sectors)
+	{
+		for (CPlayer* Player : Sector->GetPlayers())
+		{
+			int16 Distance = st_Vector2Int::Distance(Player->GetCellPosition(), Object->GetCellPosition());
+			if (Distance <= Object->_FieldOfViewDistance)
+			{
+				if (Object->_GameObjectInfo.ObjectId != Player->_GameObjectInfo.ObjectId)
+				{
+					Players.push_back(Player);
+				}
+			}
+		}
+	}
+
+	return Players;
+}
+
+vector<CPlayer*> CMap::GetFieldOfViewPlayer(CGameObject* Object, int16 Range, bool ExceptMe)
+{
+	vector<CPlayer*> FieldOfViewPlayers;
+
+	vector<CSector*> Sectors = GetAroundSectors(Object->GetCellPosition(), Range);
+
+	for (CSector* Sector : Sectors)
+	{
+		// 주변 섹터 플레이어 정보
+		for (CPlayer* Player : Sector->GetPlayers())
+		{
+			int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Player->GetCellPosition());
+
+			// 함수 호출한 오브젝트를 포함할 것인지에 대한 여부 true면 제외 false면 포함
+			if (ExceptMe == true && Distance <= Object->_FieldOfViewDistance)
+			{
+				if (Object->_GameObjectInfo.ObjectId != Player->_GameObjectInfo.ObjectId)
+				{
+					FieldOfViewPlayers.push_back(Player);
+				}
+			}
+			else if (ExceptMe == false && Distance <= Object->_FieldOfViewDistance)
+			{
+				FieldOfViewPlayers.push_back(Player);
+			}
+		}
+	}
+
+	return FieldOfViewPlayers;
+}
+
+CGameObject* CMap::FindNearPlayer(CGameObject* Object, int32 Range, bool* CollisionCango)
+{
+	// 주위 시야 범위 안에 있는 플레이어들을 받아온다.
+	vector<CPlayer*> Players = GetAroundPlayer(Object, Range);
+
+	// 받아온 플레이어 정보를 토대로 거리를 구해서 우선순위 큐에 담는다.
+	CHeap<int16, CPlayer*> Distances((int32)Players.size()); // 가까운 순서대로 
+	for (CPlayer* Player : Players)
+	{
+		Distances.InsertHeap(st_Vector2Int::Distance(Player->GetCellPosition(), Object->GetCellPosition()), Player);
+	}
+
+	CPlayer* Player = nullptr;
+	// 거리 가까운 애부터 접근해서 해당 플레이어로 갈 수 있는지 확인하고
+	// 갈 수 있는 대상이면 해당 플레이어를 반환해준다.
+	if (Distances.GetUseSize() != 0)
+	{
+		Player = Distances.PopHeap();
+
+		vector<st_Vector2Int> FirstPaths = FindPath(Object, Object->GetCellPosition(), Player->GetCellPosition());
+		if (FirstPaths.size() < 2)
+		{
+			// 타겟은 있지만 갈수는 없는 상태 ( 주위에 오브젝트들로 막혀서 )
+			if (Player != nullptr)
+			{
+				// 주위 다른 대상중에서 갈 수 있는 대상이 있는지 추가로 판단
+				while (Distances.GetUseSize() != 0)
+				{
+					Player = Distances.PopHeap();
+					vector<st_Vector2Int> SecondPaths = FindPath(Object, Object->GetCellPosition(), Player->GetCellPosition());
+					if (SecondPaths.size() < 2)
+					{
+						continue;
+					}
+
+					*CollisionCango = true;
+				}
+
+				*CollisionCango = false;
+			}
+		}
+
+		*CollisionCango = true;
+	}
+	else
+	{
+		*CollisionCango = false;
+	}
+
+	// 플레이어를 찾앗으나 상태값이 SPAWN_IDLE일 경우에는 무시한다.
+	if (Player != nullptr && Player->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::SPAWN_IDLE)
+	{
+		Player = nullptr;
+	}
+
+	return Player;
 }
 
 CGameObject* CMap::Find(st_Vector2Int& CellPosition)
@@ -121,7 +487,7 @@ CGameObject* CMap::Find(st_Vector2Int& CellPosition)
 
 	int X = CellPosition._X - _Left;
 	int Y = _Down - CellPosition._Y;
-	
+
 	return _ObjectsInfos[Y][X];
 }
 
@@ -141,7 +507,7 @@ CItem** CMap::FindItem(st_Vector2Int& ItemCellPosition)
 	{
 		return nullptr;
 	}
-	
+
 	int XCount = _Right - _Left + 1;
 	int YCount = _Down - _Up + 1;
 
@@ -150,10 +516,10 @@ CItem** CMap::FindItem(st_Vector2Int& ItemCellPosition)
 
 bool CMap::Cango(CGameObject* Object, float X, float Y)
 {
-	st_Vector2Int CollisionPosition;	
+	st_Vector2Int CollisionPosition;
 	CollisionPosition._X = X;
 	CollisionPosition._Y = Y;
-	
+
 	return CollisionCango(Object, CollisionPosition);
 }
 
@@ -172,8 +538,8 @@ bool CMap::CollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool
 	}
 
 	int X = CellPosition._X - _Left;
-	int Y = _Down - CellPosition._Y;	
-	
+	int Y = _Down - CellPosition._Y;
+
 	//G_Logger->WriteStdOut(en_Color::RED, L"X : %d Y : %d \n", X, Y);
 
 	bool IsCollisionMapInfo = false;
@@ -187,7 +553,7 @@ bool CMap::CollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool
 		IsCollisionMapInfo = true;
 		break;
 	case en_TileMapEnvironment::TILE_MAP_WALL:
-		IsCollisionMapInfo = false;		
+		IsCollisionMapInfo = false;
 	}
 
 	bool ObjectCheck = false;
@@ -201,12 +567,12 @@ bool CMap::CollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool
 		if (_ObjectsInfos[Y][X]->_GameObjectInfo.ObjectId == Object->_GameObjectInfo.ObjectId)
 		{
 			ObjectCheck = true;
-		}		
+		}
 		else
-		{				
+		{
 			ObjectCheck = false;
 		}
-	}	
+	}
 
 	return IsCollisionMapInfo && (!CheckObjects || ObjectCheck);
 }
@@ -217,14 +583,14 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	if (GameObject->GetChannel() == nullptr)
 	{
 		CRASH("ApplyMove GameObject Channel nullptr")
-		return false;
+			return false;
 	}
 
 	// 게임오브젝트가 속한 채널이 들고 있는 맵과 현재 맵이 같은지 확인
 	if (GameObject->GetChannel()->_Map != this)
 	{
 		CRASH("ApplyMove GameObject의 채널이 가지고 있는 맵과 지금 맵이 다름")
-		return false;
+			return false;
 	}
 
 	// 위치 정보 가지고 온다.
@@ -247,19 +613,19 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 		if (_ObjectsInfos[Y][X] == GameObject)
 		{
 			_ObjectsInfos[Y][X] = nullptr;
-		}	
+		}
 
 		// 목적지 위치 구해주고
 		X = DestPosition._X - _Left;
 		Y = _Down - DestPosition._Y;
 		// 목적지에 넣어준다.
 		_ObjectsInfos[Y][X] = GameObject;
-	}		
+	}
 
 	// 섹터 작업
 	switch (GameObject->_GameObjectInfo.ObjectType)
-	{	
-	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:		
+	{
+	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 	case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 	case en_GameObjectType::OBJECT_THIEF_PLAYER:
@@ -268,65 +634,65 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	{
 		CPlayer* MovePlayer = (CPlayer*)GameObject;
 
-		CSector* CurrentSector = GameObject->GetChannel()->GetSector(MovePlayer->GetCellPosition());
-		CSector* NextSector = GameObject->GetChannel()->GetSector(DestPosition);
-				
+		CSector* CurrentSector = GetSector(MovePlayer->GetCellPosition());
+		CSector* NextSector = GetSector(DestPosition);
+
 		if (CurrentSector != NextSector)
-		{			
+		{
 			// 현재 섹터에서 플레이어 제거
-			CurrentSector->Remove(MovePlayer);	
+			CurrentSector->Remove(MovePlayer);
 			// 이동한 섹터에 플레이어 추가
-			NextSector->Insert(MovePlayer);			
-		}				
+			NextSector->Insert(MovePlayer);
+		}
 	}
-		break;
+	break;
 	case en_GameObjectType::OBJECT_SLIME:
 	case en_GameObjectType::OBJECT_BEAR:
 	{
 		CMonster* MoveMonster = (CMonster*)GameObject;
 
-		CSector* CurrentSector = GameObject->GetChannel()->GetSector(MoveMonster->GetCellPosition());
-		CSector* NextSector = GameObject->GetChannel()->GetSector(DestPosition);
+		CSector* CurrentSector = GetSector(MoveMonster->GetCellPosition());
+		CSector* NextSector = GetSector(DestPosition);
 
 		if (CurrentSector != NextSector)
 		{
 			// 현재 섹터에서 몬스터 제거
-			CurrentSector->Remove(MoveMonster);	
+			CurrentSector->Remove(MoveMonster);
 			// 이동한 섹터에 몬스터 추가
-			NextSector->Insert(MoveMonster);			
-		}		
+			NextSector->Insert(MoveMonster);
+		}
 	}
-		break;	
+	break;
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
 	{
 		CEnvironment* MoveEnvironment = (CEnvironment*)GameObject;
 
-		CSector* CurrentSector = GameObject->GetChannel()->GetSector(MoveEnvironment->GetCellPosition());
-		CSector* NextSector = GameObject->GetChannel()->GetSector(DestPosition);
+		CSector* CurrentSector = GetSector(MoveEnvironment->GetCellPosition());
+		CSector* NextSector = GetSector(DestPosition);
 
 		if (CurrentSector != NextSector)
 		{
 			CurrentSector->Remove(MoveEnvironment);
-			NextSector->Insert(MoveEnvironment);			
+			NextSector->Insert(MoveEnvironment);
 		}
 	}
-		break;
+	break;
 	default:
 		CRASH("ApplyMove GameObject Type 이상한 값")
-		break;
+			break;
 	}
 
 	// 시야 작업 ( 시야 안에 들어오는 오브젝트와 시야 밖으로 벗어나는 오브젝트 작업 )
 
 	GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX = DestPosition._X;
-	GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY = DestPosition._Y;	
+	GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY = DestPosition._Y;
 
 	return true;
 }
 
 bool CMap::ApplyPositionUpdateItem(CItem* ItemObject, st_Vector2Int& NewPosition)
-{	
+{
 	int32 X = NewPosition._X - _Left;
 	int32 Y = _Down - NewPosition._Y;
 
@@ -346,7 +712,7 @@ bool CMap::ApplyPositionUpdateItem(CItem* ItemObject, st_Vector2Int& NewPosition
 			}
 
 			return false;
-		}		
+		}
 	}
 
 	// 새로 얻은 아이템의 종류가 해당 위치에 없다면
@@ -358,20 +724,20 @@ bool CMap::ApplyPositionUpdateItem(CItem* ItemObject, st_Vector2Int& NewPosition
 		{
 			NewItemInfoIndex = i;
 			break;
-		}		
+		}
 	}
 
 	// 아이템을 저장한다.
 	_Items[Y][X][NewItemInfoIndex] = ItemObject;
 
 	// 아이템 섹터처리
-	CSector* CurrentSector = ItemObject->GetChannel()->GetSector(ItemObject->GetCellPosition());
-	CSector* NextSector = ItemObject->GetChannel()->GetSector(NewPosition);
-	
+	CSector* CurrentSector = GetSector(ItemObject->GetCellPosition());
+	CSector* NextSector = GetSector(NewPosition);
+
 	if (CurrentSector != NextSector)
 	{
 		CurrentSector->Remove(ItemObject);
-		NextSector->Insert(ItemObject);		
+		NextSector->Insert(ItemObject);
 	}
 
 	ItemObject->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX = NewPosition._X;
@@ -393,7 +759,7 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 		G_Logger->WriteStdOut(en_Color::RED, L"ApplyLeave Channel _Map Error");
 		return false;
 	}
-		
+
 	st_PositionInfo PositionInfo = GameObject->GetPositionInfo();
 	// 좌우 좌표 검사
 	if (PositionInfo.CollisionPositionX < _Left || PositionInfo.CollisionPositionX > _Right)
@@ -405,26 +771,26 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 	if (PositionInfo.CollisionPositionY < _Up || PositionInfo.CollisionPositionY > _Down)
 	{
 		return false;
-	}	
+	}
 
 	// 섹터에서 오브젝트 제거
-	CSector* Sector = GameObject->GetChannel()->GetSector(GameObject->GetCellPosition());
+	CSector* Sector = GetSector(GameObject->GetCellPosition());
 	Sector->Remove(GameObject);
 
 	int X = PositionInfo.CollisionPositionX - _Left;
-	int Y = _Down - PositionInfo.CollisionPositionY;	
+	int Y = _Down - PositionInfo.CollisionPositionY;
 
 	// 맵에서 제거
 	if (_ObjectsInfos[Y][X] == GameObject)
-	{		
+	{
 		_ObjectsInfos[Y][X] = nullptr;
 	}
 	else
-	{	
+	{
 		if (GameObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE)
 		{
 			//CRASH("ApplyLeave 삭제하려는 오브젝트가 저장되어 있는 오브젝트와 다름");
-		}		
+		}
 	}
 
 	return true;
@@ -461,8 +827,8 @@ bool CMap::ApplyPositionLeaveItem(CGameObject* GameObject)
 		return false;
 	}
 
-	CSector* Sector = GameObject->GetChannel()->GetSector(GameObject->GetCellPosition());
-	Sector->Remove(GameObject);	
+	CSector* Sector = GetSector(GameObject->GetCellPosition());
+	Sector->Remove(GameObject);
 
 	CItem* Item = (CItem*)GameObject;
 
@@ -474,7 +840,7 @@ bool CMap::ApplyPositionLeaveItem(CGameObject* GameObject)
 			_Items[Y][X][i] = nullptr;
 			break;
 		}
-	}	
+	}
 
 	return true;
 }
@@ -489,12 +855,12 @@ st_Vector2Int CMap::PositionToCellInt(st_PositionInt Position)
 	return st_Vector2Int(Position._X + _Left, _Down - Position._Y);
 }
 
-vector<st_Vector2Int> CMap::FindPath(CGameObject* Object, st_Vector2Int StartCellPosition, st_Vector2Int DestCellPostion, bool CheckObjects , int32 MaxDistance)
+vector<st_Vector2Int> CMap::FindPath(CGameObject* Object, st_Vector2Int StartCellPosition, st_Vector2Int DestCellPostion, bool CheckObjects, int32 MaxDistance)
 {
 	int32 DeltaY[4] = { 1, -1, 0, 0 };
 	int32 DeltaX[4] = { 0, 0, -1, 1 };
 	int32 Cost[4] = { 10,10,10,10 };
-	
+
 	// 시작점 도착점 좌표변환
 	st_PositionInt StartPosition = CellToPositionInt(StartCellPosition);
 	st_PositionInt DestPosition = CellToPositionInt(DestCellPostion);
@@ -516,7 +882,7 @@ vector<st_Vector2Int> CMap::FindPath(CGameObject* Object, st_Vector2Int StartCel
 	}
 
 	// 자식, 부모 맵
-	map<st_PositionInt, st_PositionInt> Parents;	
+	map<st_PositionInt, st_PositionInt> Parents;
 
 	// 우선순위 큐 생성
 	CHeap<int32, st_AStarNodeInt> OpenListQue(_SizeY * _SizeX);
@@ -528,7 +894,7 @@ vector<st_Vector2Int> CMap::FindPath(CGameObject* Object, st_Vector2Int StartCel
 	st_AStarNodeInt StartNode(abs(DestPosition._Y - StartPosition._Y) + abs(DestPosition._X - StartPosition._X), 0, StartPosition._X, StartPosition._Y);
 	// 큐에 삽입
 	OpenListQue.InsertHeap(StartNode._F, StartNode);
-	
+
 	// 처음 위치 첫 부모로 설정
 	Parents.insert(pair<st_PositionInt, st_PositionInt>(StartPosition, StartPosition));
 
@@ -556,8 +922,8 @@ vector<st_Vector2Int> CMap::FindPath(CGameObject* Object, st_Vector2Int StartCel
 		for (int32 i = 0; i < 4; i++)
 		{
 			// 다음 위치를 알아낸다.
-			st_PositionInt NextPosition(AStarNode._Position._Y + DeltaY[i], AStarNode._Position._X + DeltaX[i]);			
-			
+			st_PositionInt NextPosition(AStarNode._Position._Y + DeltaY[i], AStarNode._Position._X + DeltaX[i]);
+
 			// 다음으로 뽑아낸 위치가 시작점으로 지정해준 값보다 너무 멀다면 해당 좌표는 무시한다.
 			if (abs(StartPosition._Y - NextPosition._Y) + abs(StartPosition._X - NextPosition._X) > MaxDistance)
 			{
@@ -619,34 +985,34 @@ vector<st_Vector2Int> CMap::FindPath(CGameObject* Object, st_Vector2Int StartCel
 				(*ChildFind).second = AStarNode._Position;
 			}
 		}
-	}	
+	}
 
 	// 위에서 할당한 메모리를 삭제한다.
 	for (int32 i = 0; i < _SizeY; i++)
 	{
 		free(CloseList[i]);
-		free(OpenList[i]);		
+		free(OpenList[i]);
 	}
 
 	free(CloseList);
-	free(OpenList);	
-		
+	free(OpenList);
+
 	return CompletePath(Parents, DestPosition);
 }
 
 vector<st_Vector2Int> CMap::CompletePath(map<st_PositionInt, st_PositionInt> Parents, st_PositionInt DestPosition)
 {
 	// 반환해줄 배열
-	vector<st_Vector2Int> Cells;	
+	vector<st_Vector2Int> Cells;
 
 	int32 X = DestPosition._X;
 	int32 Y = DestPosition._Y;
 
-	st_PositionInt Point;			
+	st_PositionInt Point;
 
 	// 부모 목록 중에서 목적지가 없으면
 	if (Parents.find(DestPosition) == Parents.end())
-	{			
+	{
 		st_PositionInt BestPosition;
 		int32 BestDistance;
 		memset(&BestDistance, 1, sizeof(int32));
@@ -676,7 +1042,12 @@ vector<st_Vector2Int> CMap::CompletePath(map<st_PositionInt, st_PositionInt> Par
 	// 시작점 담기
 	Cells.push_back(PositionToCellInt(Position));
 	// 부모 위치 담은 배열 거꾸로 뒤집어서 반환
-	reverse(Cells.begin(), Cells.end());	
+	reverse(Cells.begin(), Cells.end());
 
 	return Cells;
+}
+
+CChannelManager* CMap::GetChannelManager()
+{
+	return _ChannelManager;
 }

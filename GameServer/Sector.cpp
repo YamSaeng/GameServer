@@ -8,7 +8,7 @@ CSector::CSector(int32 SectorY, int32 SectorX)
 {
 	_SectorY = SectorY;
 	_SectorX = SectorX;
-	
+
 	InitializeSRWLock(&_SectorLock);
 }
 
@@ -37,7 +37,7 @@ void CSector::Insert(CGameObject* InsertGameObject)
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:	
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 		_Items.insert((CItem*)InsertGameObject);
@@ -78,7 +78,7 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:	
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 		_Items.erase((CItem*)RemoveGameObject);
@@ -110,4 +110,14 @@ set<CItem*> CSector::GetItems()
 set<CEnvironment*> CSector::GetEnvironment()
 {
 	return _Environment;
+}
+
+void CSector::AcquireSectorLock()
+{
+	AcquireSRWLockExclusive(&_SectorLock);
+}
+
+void CSector::ReleaseSectorLock()
+{
+	ReleaseSRWLockExclusive(&_SectorLock);
 }

@@ -4,6 +4,10 @@
 
 class CItem;
 class CGameObject;
+class CSector;
+class CPlayer;
+class CMonster;
+class CChannelManager;
 
 struct st_Vector2
 {
@@ -41,12 +45,12 @@ struct st_Vector2
 	st_Vector2 operator * (int8& Sclar)
 	{
 		return st_Vector2(_X * Sclar, _Y * Sclar);
-	}		
+	}
 
 	// 거리 구하기
 	static float Distance(st_Vector2 TargetCellPosition, st_Vector2 MyCellPosition)
 	{
-		return (float)sqrt(pow(TargetCellPosition._X - MyCellPosition._X, 2) + pow(TargetCellPosition._Y - MyCellPosition._Y, 2));		
+		return (float)sqrt(pow(TargetCellPosition._X - MyCellPosition._X, 2) + pow(TargetCellPosition._Y - MyCellPosition._Y, 2));
 	}
 
 	// 벡터 크기 구하기
@@ -59,10 +63,10 @@ struct st_Vector2
 	static st_Vector2 Normalize(st_Vector2 Vector)
 	{
 		float VectorSize = st_Vector2::Size(Vector);
-				
+
 		st_Vector2 NormalVector;
 		NormalVector._X = round(Vector._X / VectorSize);
-		NormalVector._Y = round(Vector._Y / VectorSize);	
+		NormalVector._Y = round(Vector._Y / VectorSize);
 
 		return NormalVector;
 	}
@@ -70,7 +74,7 @@ struct st_Vector2
 	static en_MoveDir GetMoveDir(st_Vector2 NormalVector)
 	{
 		NormalVector._X = round(NormalVector._X);
-		NormalVector._Y = round(NormalVector._Y);		
+		NormalVector._Y = round(NormalVector._Y);
 
 		if (NormalVector._X < 0)
 		{
@@ -90,7 +94,7 @@ struct st_Vector2
 		if (NormalVector._Y < 0)
 		{
 			return en_MoveDir::DOWN;
-		}	
+		}
 	}
 };
 
@@ -126,7 +130,7 @@ struct st_Vector2Int
 	st_Vector2Int operator -(st_Vector2Int& Vector)
 	{
 		return st_Vector2Int(_X - Vector._X, _Y - Vector._Y);
-	}	
+	}
 
 	st_Vector2Int operator *(int8 Value)
 	{
@@ -141,18 +145,18 @@ struct st_Vector2Int
 		}
 
 		return false;
-	}	
+	}
 
 	int CellDistanceFromZero()
 	{
 		return abs(_X) + abs(_Y);
 	}
-	
+
 	// 거리 구하기
 	static int16 Distance(st_Vector2Int TargetCellPosition, st_Vector2Int MyCellPosition)
 	{
 		return (int16)sqrt(pow(TargetCellPosition._X - MyCellPosition._X, 2) + pow(TargetCellPosition._Y - MyCellPosition._Y, 2));
-	}	
+	}
 
 	static en_MoveDir GetMoveDir(st_Vector2Int NormalVector)
 	{
@@ -175,7 +179,7 @@ struct st_Vector2Int
 		{
 			return en_MoveDir::DOWN;
 		}
-	}	
+	}
 };
 
 struct st_PositionInt
@@ -189,7 +193,7 @@ struct st_PositionInt
 	{
 		_Y = Y;
 		_X = X;
-	}	
+	}
 
 	bool operator ==(st_PositionInt& Position)
 	{
@@ -215,7 +219,7 @@ struct st_AStarNodeInt
 
 	int32 _X;
 	int32 _Y;
-	
+
 	st_AStarNodeInt() {}
 
 	st_AStarNodeInt(int32 F, int32 G, int32 X, int32 Y)
@@ -223,13 +227,15 @@ struct st_AStarNodeInt
 		_F = F;
 		_G = G;
 		_Position._X = X;
-		_Position._Y = Y;		
-	}	
+		_Position._Y = Y;
+	}
 };
 
 class CMap
 {
 public:
+	int64 _MapID;
+
 	wstring _MapName;
 
 	int32 _Left;
@@ -256,7 +262,43 @@ public:
 	//-----------------------------------------------------------
 	CItem**** _Items;
 
-	CMap(int MapId);
+	CMap();
+	~CMap();
+
+	void MapInit(int64 MapID, wstring MapName, int32 SectorSize, int8 ChannelCount);
+
+	CSector* GetSector(st_Vector2Int CellPosition);
+	CSector* GetSector(int32 IndexY, int32 IndexX);
+
+	//-----------------------------------------------------------------
+	// 내 주위 섹터 반환
+	//-----------------------------------------------------------------
+	vector<CSector*> GetAroundSectors(st_Vector2Int CellPosition, int32 Range);
+	//-----------------------------------------------------------------
+	// 내 주위 섹터 안에 있는 오브젝트 반환
+	//-----------------------------------------------------------------
+	vector<CGameObject*> GetAroundSectorObjects(CGameObject* Object, int32 Range, bool ExceptMe = true);
+	//-----------------------------------------------------------------
+	// 오브젝트 시야 범위 안에 있는 오브젝트 아이디 목록 반환
+	//-----------------------------------------------------------------
+	vector<st_FieldOfViewInfo> GetFieldOfViewObjects(CGameObject* Object, int16 Range, bool ExceptMe = true);
+	//----------------------------------------------------------------------------------------
+	// 오브젝트 주위 몬스터 목록 반환
+	//----------------------------------------------------------------------------------------
+	vector<CMonster*> GetAroundMonster(CGameObject* Object, int16 Range, bool ExceptMe = true);
+	//--------------------------------------------------------------------------------------
+	// 내 주위 플레이어 반환
+	//--------------------------------------------------------------------------------------
+	vector<CPlayer*> GetAroundPlayer(CGameObject* Object, int32 Range);
+	//--------------------------------------------------------------------------------------
+	// 내 시야 범위 플레이어 반환
+	//--------------------------------------------------------------------------------------
+	vector<CPlayer*> GetFieldOfViewPlayer(CGameObject* Object, int16 Range, bool ExceptMe = true);
+
+	//-------------------------------------------------------
+	// 내 근처 플레이어 반환
+	//-------------------------------------------------------
+	CGameObject* FindNearPlayer(CGameObject* Object, int32 Range, bool* CollisionCango);
 
 	//-------------------------------------------
 	// 좌표 위치에 있는 오브젝트 반환
@@ -297,4 +339,13 @@ public:
 
 	vector<st_Vector2Int> FindPath(CGameObject* Object, st_Vector2Int StartCellPosition, st_Vector2Int DestCellPostion, bool CheckObjects = true, int32 MaxDistance = 10);
 	vector<st_Vector2Int> CompletePath(map<st_PositionInt, st_PositionInt> Parents, st_PositionInt DestPosition);
+
+	CChannelManager* GetChannelManager();
+private:
+	CChannelManager* _ChannelManager;
+	CSector** _Sectors;
+	int32 _SectorSize;
+
+	int32 _SectorCountX;
+	int32 _SectorCountY;
 };

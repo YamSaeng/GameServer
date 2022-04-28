@@ -2,8 +2,8 @@
 #include "ChannelManager.h"
 
 CChannelManager::CChannelManager()
-{	
-	_ChannelId = 1;
+{
+
 }
 
 CChannelManager::~CChannelManager()
@@ -14,16 +14,17 @@ CChannelManager::~CChannelManager()
 	}
 }
 
-CChannel* CChannelManager::Add(int32 MapId)
+void CChannelManager::Init(CMap* OwnerMap, int8 ChannelCount)
 {
-	CChannel* Channel = new CChannel();
-	Channel->Init(MapId, 10);
+	_OwnerMap = OwnerMap;
 
-	Channel->_ChannelId = _ChannelId;
-	_Channels.insert(pair<int32,CChannel*>(Channel->_ChannelId,Channel));
-	_ChannelId++;
+	for (int8 i = 0; i < ChannelCount; i++)
+	{
+		CChannel* NewChannel = new CChannel();
+		NewChannel->Init(_OwnerMap);
 
-	return Channel;
+		_Channels.insert(pair<int32, CChannel*>(i + 1, NewChannel));
+	}
 }
 
 bool CChannelManager::Remove(int32 ChannelId)
@@ -38,11 +39,11 @@ CChannel* CChannelManager::Find(int32 ChannelId)
 	auto ChannelFindIterator = _Channels.find(ChannelId);
 	if (ChannelFindIterator != _Channels.end())
 	{
-		Channel = (*ChannelFindIterator).second;	
+		Channel = (*ChannelFindIterator).second;
 	}
 	else
 	{
-		CRASH("ChannelManager Find 채널을 찾지 못함");		
+		CRASH("ChannelManager Find 채널을 찾지 못함");
 	}
 
 	return Channel;

@@ -1,19 +1,18 @@
 #pragma once
 #include "Channel.h"
 
+class CMap;
+
 class CChannelManager
 {
 private:
-	map<int32, CChannel*> _Channels;
-	int32 _ChannelId;
+	map<int8, CChannel*> _Channels;
+	CMap* _OwnerMap;
 public:
 	CChannelManager();
 	~CChannelManager();
 
-	//-------------------------
-	// 채널에 맵 할당
-	//-------------------------
-	CChannel* Add(int32 MapId);
+	void Init(CMap* OwnerMap, int8 ChannelCount);
 
 	//-------------------------
 	// 채널 삭제
