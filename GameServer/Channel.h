@@ -1,5 +1,6 @@
 #pragma once
 #include "Sector.h"
+#include "LockFreeQue.h"
 #include "LockFreeStack.h"
 
 class CMonster;
@@ -8,6 +9,7 @@ class CEnvironment;
 class CPlayer;
 class CMap;
 struct st_Vector2Int;
+struct st_GameObjectJob;
 
 class CChannel
 {
@@ -39,10 +41,10 @@ private:
 	// 섹터 목록
 	//-----------------
 	CSector** _Sectors;
-public:
-	int32 _ChannelId;
 
 	CMap* _Map;
+public:
+	int32 _ChannelId;	
 
 	//----------------
 	// 섹터 크기
@@ -55,18 +57,24 @@ public:
 	int32 _SectorCountX;
 	int32 _SectorCountY;
 
+	// 채널이 처리해야할 Job 구조체
+	CLockFreeQue<st_GameObjectJob*> _ChannelJobQue;
+
 	CChannel();
 	~CChannel();
 
 	//---------------------------------------
 	// 채널 초기화
 	//---------------------------------------
-	void Init(CMap* Map);
+	void Init();
 
 	//------------------------------
 	// 소유하고 있는 몬스터 업데이트
 	//------------------------------
 	void Update();
+
+	CMap* GetMap();
+	void SetMap(CMap* Map);
 
 	//----------------------------------------------------
 	// 채널 입장

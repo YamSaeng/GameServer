@@ -11,12 +11,12 @@ CGameObject::CGameObject()
 	_ObjectManagerArrayIndex = -1;
 	_ChannelArrayIndex = -1;
 	_NetworkState = en_ObjectNetworkState::READY;
-	_GameObjectInfo.OwnerObjectId = 0;	
+	_GameObjectInfo.OwnerObjectId = 0;
 	_Channel = nullptr;
 	_Owner = nullptr;
 	_SelectTarget = nullptr;
 
-	_NatureRecoveryTick = 0;	
+	_NatureRecoveryTick = 0;
 	_FieldOfViewUpdateTick = 0;
 	_IsSendPacketTarget = false;
 }
@@ -43,236 +43,236 @@ void CGameObject::Update()
 		{
 			break;
 		}
-		
+
 		switch ((en_GameObjectJobType)GameObjectJob->GameObjectJobType)
 		{
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SHOCK_RELEASE:
+		{
+			for (auto DebufSkillIter : _DeBufs)
 			{
-				for (auto DebufSkillIter : _DeBufs)
+				if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_KNIGHT_CHOHONE
+					|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE)
 				{
-					if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_KNIGHT_CHOHONE
-						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE)
-					{
-						DebufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
-					}
+					DebufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
 				}
 			}
-			break;
+		}
+		break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_BACK_TELEPORT:
+		{
+			for (auto DebufSkillIter : _DeBufs)
 			{
-				for (auto DebufSkillIter : _DeBufs)
+				if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_ROOT
+					|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_TAIOIST_ROOT)
 				{
-					if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_ROOT
-						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_TAIOIST_ROOT)
-					{
-						DebufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
-					}
+					DebufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
 				}
 			}
-			break;
+		}
+		break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_MELEE_ATTACK:
-			{				
-				CPlayer* MyPlayer = ((CPlayer*)this);
+		{
+			CPlayer* MyPlayer = ((CPlayer*)this);
 
-				MyPlayer->_IsReqAttack = true;				
+			MyPlayer->_IsReqAttack = true;
 
-				CSkill* MeleeSkill;
-				*GameObjectJob->GameObjectJobMessage >> &MeleeSkill;
+			CSkill* MeleeSkill;
+			*GameObjectJob->GameObjectJobMessage >> &MeleeSkill;
 
-				int16 ReqSkillType;
-				*GameObjectJob->GameObjectJobMessage >> ReqSkillType;					
-			
-				CSkill* ReqMeleeSkillInit = G_ObjectManager->SkillCreate();
-				st_AttackSkillInfo* MeleeAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(MeleeSkill->GetSkillInfo()->SkillMediumCategory);
-				*MeleeAttackSkillInfo = *((st_AttackSkillInfo*)MeleeSkill->GetSkillInfo());
+			int16 ReqSkillType;
+			*GameObjectJob->GameObjectJobMessage >> ReqSkillType;
 
-				ReqMeleeSkillInit->SetSkillInfo(en_SkillCategory::REQ_MELEE_SKILL_INIT, MeleeAttackSkillInfo);
-				ReqMeleeSkillInit->SetOwner(this);
-				ReqMeleeSkillInit->ReqMeleeSkillInit(MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate);
+			CSkill* ReqMeleeSkillInit = G_ObjectManager->SkillCreate();
+			st_AttackSkillInfo* MeleeAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(MeleeSkill->GetSkillInfo()->SkillMediumCategory);
+			*MeleeAttackSkillInfo = *((st_AttackSkillInfo*)MeleeSkill->GetSkillInfo());
 
-				MyPlayer->_ReqMeleeSkillInit = ReqMeleeSkillInit;				
-			}
-			break;
+			ReqMeleeSkillInit->SetSkillInfo(en_SkillCategory::REQ_MELEE_SKILL_INIT, MeleeAttackSkillInfo);
+			ReqMeleeSkillInit->SetOwner(this);
+			ReqMeleeSkillInit->ReqMeleeSkillInit(MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate);
+
+			MyPlayer->_ReqMeleeSkillInit = ReqMeleeSkillInit;
+		}
+		break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_REQ_MAGIC:
+		{
+			CPlayer* MyPlayer = ((CPlayer*)this);
+
+			MyPlayer->_IsReqMagic = true;
+
+			CSkill* MagicSkill;
+			*GameObjectJob->GameObjectJobMessage >> &MagicSkill;
+
+			CSkill* ReqMagicSkillInit = G_ObjectManager->SkillCreate();
+
+			switch (MagicSkill->GetSkillInfo()->SkillMediumCategory)
 			{
-				CPlayer* MyPlayer = ((CPlayer*)this);
+			case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF:
+			case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_BUF:
+			case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_BUF:
+			{
+				st_BufSkillInfo* TacticSkillInfo = (st_BufSkillInfo*)G_ObjectManager->SkillInfoCreate(MagicSkill->GetSkillInfo()->SkillMediumCategory);
+				*TacticSkillInfo = *((st_BufSkillInfo*)MagicSkill->GetSkillInfo());
 
-				MyPlayer->_IsReqMagic = true;				
-
-				CSkill* MagicSkill;
-				*GameObjectJob->GameObjectJobMessage >> &MagicSkill;				
-
-				CSkill* ReqMagicSkillInit = G_ObjectManager->SkillCreate();
-
-				switch (MagicSkill->GetSkillInfo()->SkillMediumCategory)
-				{					
-				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF:
-				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_BUF:
-				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_BUF:
-					{
-						st_BufSkillInfo* TacticSkillInfo = (st_BufSkillInfo*)G_ObjectManager->SkillInfoCreate(MagicSkill->GetSkillInfo()->SkillMediumCategory);
-						*TacticSkillInfo = *((st_BufSkillInfo*)MagicSkill->GetSkillInfo());
-
-						ReqMagicSkillInit->SetSkillInfo(en_SkillCategory::REQ_MAGIC_SKILL_INIT, TacticSkillInfo);
-						ReqMagicSkillInit->SetOwner(this);
-						ReqMagicSkillInit->ReqMagicSkillInit(MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate);						
-					}
-					break;
-				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_TACTIC:
-				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_TACTIC:
-					{
-						st_TacTicSkillInfo* TacticSkillInfo = (st_TacTicSkillInfo*)G_ObjectManager->SkillInfoCreate(MagicSkill->GetSkillInfo()->SkillMediumCategory);
-						*TacticSkillInfo = *((st_TacTicSkillInfo*)MagicSkill->GetSkillInfo());
-
-						ReqMagicSkillInit->SetSkillInfo(en_SkillCategory::REQ_MAGIC_SKILL_INIT, TacticSkillInfo);
-						ReqMagicSkillInit->SetOwner(this);
-						ReqMagicSkillInit->ReqMagicSkillInit(MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate);
-					}
-					break;
-				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK:
-				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK:
-					{
-						st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(MagicSkill->GetSkillInfo()->SkillMediumCategory);
-						*AttackSkillInfo = *((st_AttackSkillInfo*)MagicSkill->GetSkillInfo());
-
-						ReqMagicSkillInit->SetSkillInfo(en_SkillCategory::REQ_MAGIC_SKILL_INIT, AttackSkillInfo);
-						ReqMagicSkillInit->SetOwner(this);
-						ReqMagicSkillInit->ReqMagicSkillInit(MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate);
-					}
-					break;					
-				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_HEAL:
-				case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_HEAL:
-					{
-						st_HealSkillInfo* HealSkillInfo = (st_HealSkillInfo*)G_ObjectManager->SkillInfoCreate(MagicSkill->GetSkillInfo()->SkillMediumCategory);
-						*HealSkillInfo = *((st_HealSkillInfo*)MagicSkill->GetSkillInfo());
-
-						ReqMagicSkillInit->SetSkillInfo(en_SkillCategory::REQ_MAGIC_SKILL_INIT, HealSkillInfo);
-						ReqMagicSkillInit->SetOwner(this);
-						ReqMagicSkillInit->ReqMagicSkillInit(MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate);
-					}
-					break;
-				}
-
-				MyPlayer->_ReqMagicSkillInit = ReqMagicSkillInit;
+				ReqMagicSkillInit->SetSkillInfo(en_SkillCategory::REQ_MAGIC_SKILL_INIT, TacticSkillInfo);
+				ReqMagicSkillInit->SetOwner(this);
+				ReqMagicSkillInit->ReqMagicSkillInit(MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate);
 			}
-			break;		
+			break;
+			case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_TACTIC:
+			case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_TACTIC:
+			{
+				st_TacTicSkillInfo* TacticSkillInfo = (st_TacTicSkillInfo*)G_ObjectManager->SkillInfoCreate(MagicSkill->GetSkillInfo()->SkillMediumCategory);
+				*TacticSkillInfo = *((st_TacTicSkillInfo*)MagicSkill->GetSkillInfo());
+
+				ReqMagicSkillInit->SetSkillInfo(en_SkillCategory::REQ_MAGIC_SKILL_INIT, TacticSkillInfo);
+				ReqMagicSkillInit->SetOwner(this);
+				ReqMagicSkillInit->ReqMagicSkillInit(MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate);
+			}
+			break;
+			case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK:
+			case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK:
+			{
+				st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(MagicSkill->GetSkillInfo()->SkillMediumCategory);
+				*AttackSkillInfo = *((st_AttackSkillInfo*)MagicSkill->GetSkillInfo());
+
+				ReqMagicSkillInit->SetSkillInfo(en_SkillCategory::REQ_MAGIC_SKILL_INIT, AttackSkillInfo);
+				ReqMagicSkillInit->SetOwner(this);
+				ReqMagicSkillInit->ReqMagicSkillInit(MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate);
+			}
+			break;
+			case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_HEAL:
+			case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_HEAL:
+			{
+				st_HealSkillInfo* HealSkillInfo = (st_HealSkillInfo*)G_ObjectManager->SkillInfoCreate(MagicSkill->GetSkillInfo()->SkillMediumCategory);
+				*HealSkillInfo = *((st_HealSkillInfo*)MagicSkill->GetSkillInfo());
+
+				ReqMagicSkillInit->SetSkillInfo(en_SkillCategory::REQ_MAGIC_SKILL_INIT, HealSkillInfo);
+				ReqMagicSkillInit->SetOwner(this);
+				ReqMagicSkillInit->ReqMagicSkillInit(MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate);
+			}
+			break;
+			}
+
+			MyPlayer->_ReqMagicSkillInit = ReqMagicSkillInit;
+		}
+		break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_CREATE:
+		{
+			int8 QuickSlotBarIndex;
+			*GameObjectJob->GameObjectJobMessage >> QuickSlotBarIndex;
+			int8 QuickSlotBarSlotIndex;
+			*GameObjectJob->GameObjectJobMessage >> QuickSlotBarSlotIndex;
+			CSkill* ReqMeleeSkill;
+			*GameObjectJob->GameObjectJobMessage >> &ReqMeleeSkill;
+
+			CPlayer* MyPlayer = ((CPlayer*)this);
+
+			// 연속기 스킬이 스킬창에서 찾는다.
+			CSkill* FindComboSkill = MyPlayer->_SkillBox.FindSkill(ReqMeleeSkill->GetSkillInfo()->NextComboSkill);
+			if (FindComboSkill != nullptr)
 			{
-				int8 QuickSlotBarIndex;
-				*GameObjectJob->GameObjectJobMessage >> QuickSlotBarIndex;
-				int8 QuickSlotBarSlotIndex;
-				*GameObjectJob->GameObjectJobMessage >> QuickSlotBarSlotIndex;
-				CSkill* ReqMeleeSkill;
-				*GameObjectJob->GameObjectJobMessage >> &ReqMeleeSkill;
-								
-				CPlayer* MyPlayer = ((CPlayer*)this);
+				// 연속기 스킬 생성
+				CSkill* NewComboSkill = G_ObjectManager->SkillCreate();
 
-				// 연속기 스킬이 스킬창에서 찾는다.
-				CSkill* FindComboSkill = MyPlayer->_SkillBox.FindSkill(ReqMeleeSkill->GetSkillInfo()->NextComboSkill);
-				if (FindComboSkill != nullptr)					
-				{
-					// 연속기 스킬 생성
-					CSkill* NewComboSkill = G_ObjectManager->SkillCreate();
+				// 퀵슬롯바 복구를 위해 연속기 이전 스킬의 정보를 생성
+				st_AttackSkillInfo* NewPreviousSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(ReqMeleeSkill->GetSkillInfo()->SkillMediumCategory);
+				*NewPreviousSkillInfo = *((st_AttackSkillInfo*)ReqMeleeSkill->GetSkillInfo());
+				// 정보를 저장
+				NewComboSkill->SetSkillInfo(en_SkillCategory::COMBO_SKILL, nullptr, NewPreviousSkillInfo);
+				NewComboSkill->SetOwner(MyPlayer);
 
-					// 퀵슬롯바 복구를 위해 연속기 이전 스킬의 정보를 생성
-					st_AttackSkillInfo* NewPreviousSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(ReqMeleeSkill->GetSkillInfo()->SkillMediumCategory);					
-					*NewPreviousSkillInfo = *((st_AttackSkillInfo*)ReqMeleeSkill->GetSkillInfo());
-					// 정보를 저장
-					NewComboSkill->SetSkillInfo(en_SkillCategory::COMBO_SKILL, nullptr, NewPreviousSkillInfo);					
-					NewComboSkill->SetOwner(MyPlayer);
-					
-					// 연속기 스킬 정보 입력
-					MyPlayer->_ComboSkill = NewComboSkill;
-					
-					NewComboSkill->ComboSkillStart(QuickSlotBarIndex, QuickSlotBarSlotIndex, FindComboSkill->GetSkillInfo()->SkillType);
+				// 연속기 스킬 정보 입력
+				MyPlayer->_ComboSkill = NewComboSkill;
 
-					CMessage* ResNextComboSkill = G_ObjectManager->GameServer->MakePacketComboSkillOn(QuickSlotBarIndex,
-						QuickSlotBarSlotIndex,
-						*FindComboSkill->GetSkillInfo());
-					G_ObjectManager->GameServer->SendPacket(MyPlayer->_SessionId, ResNextComboSkill);
-					ResNextComboSkill->Free();
-				}
+				NewComboSkill->ComboSkillStart(QuickSlotBarIndex, QuickSlotBarSlotIndex, FindComboSkill->GetSkillInfo()->SkillType);
+
+				CMessage* ResNextComboSkill = G_ObjectManager->GameServer->MakePacketComboSkillOn(QuickSlotBarIndex,
+					QuickSlotBarSlotIndex,
+					*FindComboSkill->GetSkillInfo());
+				G_ObjectManager->GameServer->SendPacket(MyPlayer->_SessionId, ResNextComboSkill);
+				ResNextComboSkill->Free();
 			}
-			break;
+		}
+		break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_OFF:
-			{
-				CPlayer* MyPlayer = ((CPlayer*)this);
+		{
+			CPlayer* MyPlayer = ((CPlayer*)this);
 
-				if (MyPlayer->_ComboSkill != nullptr)
-				{
-					MyPlayer->_ComboSkill->_ComboSkillTick = 0;
-				}				
+			if (MyPlayer->_ComboSkill != nullptr)
+			{
+				MyPlayer->_ComboSkill->_ComboSkillTick = 0;
 			}
-			break;	
+		}
+		break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_AGGRO_LIST_INSERT_OR_UPDATE:
-			{				
-				int8 AggroCategory;
-				*GameObjectJob->GameObjectJobMessage >> AggroCategory;
-				CGameObject* Target;
-				*GameObjectJob->GameObjectJobMessage >> &Target;				
+		{
+			int8 AggroCategory;
+			*GameObjectJob->GameObjectJobMessage >> AggroCategory;
+			CGameObject* Target;
+			*GameObjectJob->GameObjectJobMessage >> &Target;
 
-				auto FindAggroTargetIterator = _AggroTargetList.find(Target->_GameObjectInfo.ObjectId);
-				if (FindAggroTargetIterator != _AggroTargetList.end())
-				{
-					switch ((en_AggroCategory)AggroCategory)
-					{
-					case en_AggroCategory::AGGRO_CATEGORY_DAMAGE:
-						{
-							int32 Damage;
-							*GameObjectJob->GameObjectJobMessage >> Damage;
-
-							FindAggroTargetIterator->second.AggroPoint += (Damage * (0.8 + G_Datamanager->_MonsterAggroData.MonsterAggroAttacker));
-						}												
-						break;
-					case en_AggroCategory::AGGRO_CATEGORY_HEAL:
-						{
-							int32 HealPoint;
-							*GameObjectJob->GameObjectJobMessage >> HealPoint;
-
-							FindAggroTargetIterator->second.AggroPoint += (HealPoint * G_Datamanager->_MonsterAggroData.MonsterAggroHeal);
-						}
-						break;
-					default:
-						break;
-					}					
-				}
-				else
-				{
-					st_Aggro NewAggroTarget;
-					NewAggroTarget.AggroTarget = Target;
-					NewAggroTarget.AggroPoint = _GameObjectInfo.ObjectStatInfo.MaxHP * G_Datamanager->_MonsterAggroData.MonsterAggroFirstAttacker;
-
-					_AggroTargetList.insert(pair<int64, st_Aggro>(Target->_GameObjectInfo.ObjectId, NewAggroTarget));
-				}			
-			}
-			break;		
-		case en_GameObjectJobType::GAMEOBJECT_JOB_AGGRO_LIST_REMOVE:
+			auto FindAggroTargetIterator = _AggroTargetList.find(Target->_GameObjectInfo.ObjectId);
+			if (FindAggroTargetIterator != _AggroTargetList.end())
 			{
-				int64 RemoveAggroListGameObjectId;
-				*GameObjectJob->GameObjectJobMessage >> RemoveAggroListGameObjectId;
-
-				auto FindAggroTargetIterator = _AggroTargetList.find(RemoveAggroListGameObjectId);
-				if (FindAggroTargetIterator != _AggroTargetList.end())
+				switch ((en_AggroCategory)AggroCategory)
 				{
-					_AggroTargetList.erase(RemoveAggroListGameObjectId);
-				}				
+				case en_AggroCategory::AGGRO_CATEGORY_DAMAGE:
+				{
+					int32 Damage;
+					*GameObjectJob->GameObjectJobMessage >> Damage;
+
+					FindAggroTargetIterator->second.AggroPoint += (Damage * (0.8 + G_Datamanager->_MonsterAggroData.MonsterAggroAttacker));
+				}
+				break;
+				case en_AggroCategory::AGGRO_CATEGORY_HEAL:
+				{
+					int32 HealPoint;
+					*GameObjectJob->GameObjectJobMessage >> HealPoint;
+
+					FindAggroTargetIterator->second.AggroPoint += (HealPoint * G_Datamanager->_MonsterAggroData.MonsterAggroHeal);
+				}
+				break;
+				default:
+					break;
+				}
 			}
-			break;
+			else
+			{
+				st_Aggro NewAggroTarget;
+				NewAggroTarget.AggroTarget = Target;
+				NewAggroTarget.AggroPoint = _GameObjectInfo.ObjectStatInfo.MaxHP * G_Datamanager->_MonsterAggroData.MonsterAggroFirstAttacker;
+
+				_AggroTargetList.insert(pair<int64, st_Aggro>(Target->_GameObjectInfo.ObjectId, NewAggroTarget));
+			}
+		}
+		break;
+		case en_GameObjectJobType::GAMEOBJECT_JOB_AGGRO_LIST_REMOVE:
+		{
+			int64 RemoveAggroListGameObjectId;
+			*GameObjectJob->GameObjectJobMessage >> RemoveAggroListGameObjectId;
+
+			auto FindAggroTargetIterator = _AggroTargetList.find(RemoveAggroListGameObjectId);
+			if (FindAggroTargetIterator != _AggroTargetList.end())
+			{
+				_AggroTargetList.erase(RemoveAggroListGameObjectId);
+			}
+		}
+		break;		
 		}
 
 		if (GameObjectJob->GameObjectJobMessage != nullptr)
 		{
 			GameObjectJob->GameObjectJobMessage->Free();
 		}
-		
+
 		G_ObjectManager->GameObjectJobReturn(GameObjectJob);
 	}
 }
 
 bool CGameObject::OnDamaged(CGameObject* Attacker, int32 DamagePoint)
-{	
+{
 	_GameObjectInfo.ObjectStatInfo.HP -= DamagePoint;
-	
+
 	if (_GameObjectInfo.ObjectStatInfo.HP <= 0)
 	{
 		_GameObjectInfo.ObjectStatInfo.HP = 0;
@@ -293,7 +293,7 @@ void CGameObject::OnHeal(CGameObject* Healer, int32 HealPoint)
 	}
 
 	// 힐을 대상에게 시전시 주위 몬스터들에게 힐 어그로를 계산하기 위해 알려준다.
-	vector<CMonster*> AroundMonsters = _Channel->GetAroundMonster(Healer,1);
+	vector<CMonster*> AroundMonsters = _Channel->GetMap()->GetAroundMonster(Healer, 1);
 	for (CMonster* AroundMonster : AroundMonsters)
 	{
 		st_GameObjectJob* AggroUpdateJob = G_ObjectManager->GameObjectJobCreate();
@@ -314,7 +314,7 @@ void CGameObject::OnHeal(CGameObject* Healer, int32 HealPoint)
 
 void CGameObject::OnDead(CGameObject* Killer)
 {
-	
+
 }
 
 st_Vector2 CGameObject::PositionCheck(st_Vector2Int& CheckPosition)
@@ -323,8 +323,8 @@ st_Vector2 CGameObject::PositionCheck(st_Vector2Int& CheckPosition)
 
 	if (CheckPosition._Y > 0)
 	{
-		ResultPosition._Y = 
-			CheckPosition._Y + 0.5f;			
+		ResultPosition._Y =
+			CheckPosition._Y + 0.5f;
 	}
 	else if (CheckPosition._Y == 0)
 	{
@@ -334,9 +334,9 @@ st_Vector2 CGameObject::PositionCheck(st_Vector2Int& CheckPosition)
 	else if (CheckPosition._Y < 0)
 	{
 		ResultPosition._Y =
-			CheckPosition._Y - 0.5f;		
+			CheckPosition._Y - 0.5f;
 	}
-	
+
 	if (CheckPosition._X > 0)
 	{
 		ResultPosition._X =
@@ -351,7 +351,7 @@ st_Vector2 CGameObject::PositionCheck(st_Vector2Int& CheckPosition)
 	{
 		ResultPosition._X =
 			CheckPosition._X - 0.5f;
-	}	
+	}
 
 	return ResultPosition;
 }
@@ -438,32 +438,32 @@ CGameObject* CGameObject::GetTarget()
 }
 
 void CGameObject::AddBuf(CSkill* Buf)
-{	
-	Buf->SetOwner(this);		
+{
+	Buf->SetOwner(this);
 
 	_Bufs.insert(pair<en_SkillType, CSkill*>(Buf->GetSkillInfo()->SkillType, Buf));
 }
 
 void CGameObject::DeleteBuf(en_SkillType DeleteBufSkillType)
 {
-	_Bufs.erase(DeleteBufSkillType);	
+	_Bufs.erase(DeleteBufSkillType);
 }
 
 void CGameObject::AddDebuf(CSkill* DeBuf)
 {
-	DeBuf->SetOwner(this);		
+	DeBuf->SetOwner(this);
 
 	_DeBufs.insert(pair<en_SkillType, CSkill*>(DeBuf->GetSkillInfo()->SkillType, DeBuf));
 }
 
 void CGameObject::DeleteDebuf(en_SkillType DeleteDebufSkillType)
 {
-	_DeBufs.erase(DeleteDebufSkillType);		
+	_DeBufs.erase(DeleteDebufSkillType);
 }
 
 void CGameObject::SetStatusAbnormal(int8 StatusAbnormalValue)
 {
-	_StatusAbnormal |= StatusAbnormalValue;	
+	_StatusAbnormal |= StatusAbnormalValue;
 }
 
 void CGameObject::ReleaseStatusAbnormal(int8 StatusAbnormalValue)
@@ -476,15 +476,15 @@ int8 CGameObject::CheckStatusAbnormal()
 	int8 StatusAbnormalCount = 0;
 
 	if (_StatusAbnormal & STATUS_ABNORMAL_WARRIOR_CHOHONE)
-	{		
-		StatusAbnormalCount++;		
+	{
+		StatusAbnormalCount++;
 	}
 
-	if(_StatusAbnormal & STATUS_ABNORMAL_WARRIOR_SHAEHONE)
+	if (_StatusAbnormal & STATUS_ABNORMAL_WARRIOR_SHAEHONE)
 	{
-		StatusAbnormalCount++;		
+		StatusAbnormalCount++;
 	}
-	
+
 	if ((_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ROOT)
 		|| (_StatusAbnormal & STATUS_ABNORMAL_TAIOIST_ROOT))
 	{
@@ -498,8 +498,8 @@ int8 CGameObject::CheckStatusAbnormal()
 
 	if (_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE)
 	{
-		StatusAbnormalCount++;		
-	}		
+		StatusAbnormalCount++;
+	}
 
 	return StatusAbnormalCount;
 }
@@ -519,10 +519,10 @@ void CGameObject::BroadCastPacket(en_GAME_SERVER_PACKET_TYPE PacketType, bool Ca
 	CMessage* ResPacket = nullptr;
 
 	switch (PacketType)
-	{								
-	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_DIE:			
+	{
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_DIE:
 		ResPacket = G_ObjectManager->GameServer->MakePacketObjectDie(this->_GameObjectInfo.ObjectId);
-		break;		
+		break;
 	default:
 		CRASH("Monster BroadCast PacketType Error");
 		break;

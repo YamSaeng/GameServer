@@ -7,6 +7,7 @@
 #include "Heap.h"
 #include "Environment.h"
 #include "Map.h"
+#include "ObjectManager.h"
 
 CChannel::CChannel()
 {
@@ -49,13 +50,67 @@ CChannel::~CChannel()
 	delete _Sectors;
 }
 
-void CChannel::Init(CMap* Map)
+void CChannel::Init()
 {
-	_Map = Map;
+	
 }
 
 void CChannel::Update()
 {
+	while (!_ChannelJobQue.IsEmpty())
+	{
+		st_GameObjectJob* GameObjectJob = nullptr;
+
+		if (!_ChannelJobQue.Dequeue(&GameObjectJob))
+		{
+			break;
+		}
+
+		switch ((en_GameObjectJobType)GameObjectJob->GameObjectJobType)
+		{
+		case en_GameObjectJobType::GAMEOBJECT_JOB_ENTER_CHANNEL:
+			{
+				CPlayer* EnterPlayer;
+				*GameObjectJob->GameObjectJobMessage >> &EnterPlayer;
+
+				G_ObjectManager->ObjectEnterGame(EnterPlayer, 1);
+
+				// 입장한 플레이어에게 전달 응답
+				CMessage* ResEnterGamePacket = G_ObjectManager->GameServer->MakePacketResEnterGame(true, &EnterPlayer->_GameObjectInfo);
+				G_ObjectManager->GameServer->SendPacket(EnterPlayer->_SessionId, ResEnterGamePacket);
+				ResEnterGamePacket->Free();
+			}
+			break;
+		case en_GameObjectJobType::GAMEOBJECT_JOB_LEAVE_CHANNEL:
+			{	
+				CPlayer* LeavePlayer;
+				*GameObjectJob->GameObjectJobMessage >> &LeavePlayer;
+				
+				LeaveChannel(LeavePlayer);
+
+				vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Map->GetFieldOfViewPlayers(LeavePlayer, 1);
+				
+				CMessage* ResObjectDeSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(LeavePlayer->_GameObjectInfo.ObjectId);
+				G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResObjectDeSpawnPacket);
+				ResObjectDeSpawnPacket->Free();
+
+				LeavePlayer->_NetworkState = en_ObjectNetworkState::LEAVE;
+
+				LeavePlayer->Init();
+
+				G_ObjectManager->PlayerIndexReturn(LeavePlayer->_ObjectManagerArrayIndex);
+			}
+			break;		
+		}
+
+		if (GameObjectJob->GameObjectJobMessage != nullptr)
+		{
+			GameObjectJob->GameObjectJobMessage->Free();
+		}
+
+		G_ObjectManager->GameObjectJobReturn(GameObjectJob);
+	}
+
 	for (int16 i = 0; i < PLAYER_MAX; i++)
 	{
 		if (_ChannelPlayerArray[i]
@@ -92,6 +147,16 @@ void CChannel::Update()
 			_ChannelEnvironmentArray[i]->Update();
 		}
 	}
+}
+
+CMap* CChannel::GetMap()
+{
+	return _Map;
+}
+
+void CChannel::SetMap(CMap* Map)
+{
+	_Map = Map;
 }
 
 bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* ObjectSpawnPosition)

@@ -21,7 +21,7 @@ void CChannelManager::Init(CMap* OwnerMap, int8 ChannelCount)
 	for (int8 i = 0; i < ChannelCount; i++)
 	{
 		CChannel* NewChannel = new CChannel();
-		NewChannel->Init(_OwnerMap);
+		NewChannel->SetMap(_OwnerMap);
 
 		_Channels.insert(pair<int32, CChannel*>(i + 1, NewChannel));
 	}
