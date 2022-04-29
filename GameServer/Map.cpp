@@ -335,6 +335,42 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object, int1
 	return FieldOfViewGameObjects;
 }
 
+vector<st_FieldOfViewInfo> CMap::GetFieldOfViewPlayers(CGameObject* Object, int16 Range)
+{
+	vector<st_FieldOfViewInfo> FieldOfViewGamePlayers;
+
+	vector<CSector*> Sectors = GetAroundSectors(Object->GetCellPosition(), Range);
+
+	st_FieldOfViewInfo FieldOfViewInfo;
+
+	for (CSector* Sector : Sectors)
+	{
+		Sector->AcquireSectorLock();
+		
+		// 주변 섹터 플레이어 정보
+		for (CPlayer* Player : Sector->GetPlayers())
+		{
+			FieldOfViewInfo.ObjectId = Player->_GameObjectInfo.ObjectId;
+			FieldOfViewInfo.ObjectType = Player->_GameObjectInfo.ObjectType;
+
+			int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Player->GetCellPosition());
+
+			// 자기 자신을 제외하고 담음
+			if (Distance <= Object->_FieldOfViewDistance)
+			{
+				if (Object->_GameObjectInfo.ObjectId != Player->_GameObjectInfo.ObjectId)
+				{
+					FieldOfViewGamePlayers.push_back(FieldOfViewInfo);
+				}
+			}			
+		}
+
+		Sector->ReleaseSectorLock();
+	}
+
+	return FieldOfViewGamePlayers;
+}
+
 vector<CMonster*> CMap::GetAroundMonster(CGameObject* Object, int16 Range, bool ExceptMe)
 {
 	vector<CMonster*> Monsters;
@@ -354,32 +390,6 @@ vector<CMonster*> CMap::GetAroundMonster(CGameObject* Object, int16 Range, bool 
 	}
 
 	return Monsters;
-}
-
-vector<CPlayer*> CMap::GetAroundPlayer(CGameObject* Object, int32 Range)
-{
-	vector<CPlayer*> Players;
-
-	vector<CSector*> Sectors = GetAroundSectors(Object->GetCellPosition(), Range);
-
-	// 섹터에 있는 플레이어를 담아서 반환
-	// ExceptMe가 true면 제외 false면 포함
-	for (CSector* Sector : Sectors)
-	{
-		for (CPlayer* Player : Sector->GetPlayers())
-		{
-			int16 Distance = st_Vector2Int::Distance(Player->GetCellPosition(), Object->GetCellPosition());
-			if (Distance <= Object->_FieldOfViewDistance)
-			{
-				if (Object->_GameObjectInfo.ObjectId != Player->_GameObjectInfo.ObjectId)
-				{
-					Players.push_back(Player);
-				}
-			}
-		}
-	}
-
-	return Players;
 }
 
 vector<CPlayer*> CMap::GetFieldOfViewPlayer(CGameObject* Object, int16 Range, bool ExceptMe)
@@ -416,7 +426,7 @@ vector<CPlayer*> CMap::GetFieldOfViewPlayer(CGameObject* Object, int16 Range, bo
 CGameObject* CMap::FindNearPlayer(CGameObject* Object, int32 Range, bool* CollisionCango)
 {
 	// 주위 시야 범위 안에 있는 플레이어들을 받아온다.
-	vector<CPlayer*> Players = GetAroundPlayer(Object, Range);
+	vector<CPlayer*> Players = GetFieldOfViewPlayer(Object, Range);
 
 	// 받아온 플레이어 정보를 토대로 거리를 구해서 우선순위 큐에 담는다.
 	CHeap<int16, CPlayer*> Distances((int32)Players.size()); // 가까운 순서대로 
@@ -587,7 +597,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	}
 
 	// 게임오브젝트가 속한 채널이 들고 있는 맵과 현재 맵이 같은지 확인
-	if (GameObject->GetChannel()->_Map != this)
+	if (GameObject->GetChannel()->GetMap() != this)
 	{
 		CRASH("ApplyMove GameObject의 채널이 가지고 있는 맵과 지금 맵이 다름")
 			return false;
@@ -754,7 +764,7 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 		return false;
 	}
 
-	if (GameObject->GetChannel()->_Map != this)
+	if (GameObject->GetChannel()->GetMap() != this)
 	{
 		G_Logger->WriteStdOut(en_Color::RED, L"ApplyLeave Channel _Map Error");
 		return false;
@@ -808,7 +818,7 @@ bool CMap::ApplyPositionLeaveItem(CGameObject* GameObject)
 		return false;
 	}
 
-	if (GameObject->GetChannel()->_Map != this)
+	if (GameObject->GetChannel()->GetMap() != this)
 	{
 		G_Logger->WriteStdOut(en_Color::RED, L"ApplyPositionLeaveItem Channel _Map Error");
 		return false;
