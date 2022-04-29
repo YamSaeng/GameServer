@@ -4,6 +4,7 @@
 #include "GameServerMessage.h"
 #include "Item.h"
 #include "Skill.h"
+#include "MapManager.h"
 
 CObjectManager::CObjectManager()
 {
@@ -16,7 +17,7 @@ CObjectManager::CObjectManager()
 	_ArmorMemoryPool = new CMemoryPoolTLS<CArmor>();
 	_MaterialMemoryPool = new CMemoryPoolTLS<CMaterial>();
 	_ConsumableMemoryPool = new CMemoryPoolTLS<CConsumable>();
-	
+
 	_TreeMemoryPool = new CMemoryPoolTLS<CTree>();
 	_StoneMemoryPool = new CMemoryPoolTLS<CStone>();
 
@@ -49,7 +50,7 @@ CObjectManager::CObjectManager()
 		_ItemsArray[ItemCount] = nullptr;
 		_ItemsArrayIndexs.Push(ItemCount);
 	}
-	
+
 	for (int EnvironmentCount = ENVIRONMENT_MAX - 1; EnvironmentCount >= 0; --EnvironmentCount)
 	{
 		_EnvironmentsArray[EnvironmentCount] = nullptr;
@@ -69,153 +70,73 @@ CObjectManager::~CObjectManager()
 	delete _StoneMemoryPool;
 }
 
-void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int32 ChannelId)
+void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int64 MapID)
 {
 	bool IsEnterChannel = true;
 
 	// 채널 찾는다.
-	CChannel* EnterChannel = G_ChannelManager->Find(ChannelId);
-	if (EnterChannel == nullptr)
+	CMap* Map = G_MapManager->GetMap(MapID);
+	if (Map == nullptr)
 	{
 		CRASH("ObjectManager Add EnterChannel이 nullptr");
-	}		
+	}
 
 	switch (EnterGameObject->_GameObjectInfo.ObjectType)
 	{
-		case en_GameObjectType::OBJECT_PLAYER_DUMMY:
-			{
-				CPlayer* Player = (CPlayer*)EnterGameObject;
-				
-				Player->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_IDLE;
-
-				EnterChannel->EnterChannel(EnterGameObject);
-			}
-			break;
-		case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-		case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
-		case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
-		case en_GameObjectType::OBJECT_THIEF_PLAYER:
-		case en_GameObjectType::OBJECT_ARCHER_PLAYER:
-			{
-				CPlayer* Player = (CPlayer*)EnterGameObject;
-
-				Player->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_IDLE;
-				
-				// 채널 입장
-				EnterChannel->EnterChannel(EnterGameObject, &Player->_SpawnPosition);				
-			}
-			break;
-		case en_GameObjectType::OBJECT_SLIME:
-		case en_GameObjectType::OBJECT_BEAR:
-			{				
-				vector<CGameObject*> SpawnMonster;				
-
-				CMonster* Monster = (CMonster*)EnterGameObject;				
-
-				// 인덱스 가져오기
-				_MonstersArrayIndexs.Pop(&EnterGameObject->_ObjectManagerArrayIndex);				
-				// 배열에 저장
-				_MonstersArray[EnterGameObject->_ObjectManagerArrayIndex] = Monster;
-
-				// 몬스터 주위 오브젝트 정보 저장
-				Monster->_FieldOfViewPlayers = EnterChannel->GetFieldOfViewPlayer(Monster, Monster->_FieldOfViewDistance);
-
-				// 채널 입장
-				EnterChannel->EnterChannel(EnterGameObject, &Monster->_SpawnPosition);			
-
-				SpawnMonster.push_back(Monster);								
-
-				// 몬스터 추가하면 몬스터 주위 플레이어들에게 몬스터를 소환하라고 알림
-				CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(1, SpawnMonster);				
-				GameServer->SendPacketFieldOfView(Monster, ResSpawnPacket);
-				ResSpawnPacket->Free();
-
-				// 몬스터 소환할때 소환 이펙트 출력
-				CMessage* ResEffectPacket = GameServer->MakePacketEffect(Monster->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_OBJECT_SPAWN, 0.5f);
-				GameServer->SendPacketFieldOfView(Monster, ResEffectPacket);
-				ResEffectPacket->Free();
-			} 
-			break;		
-		case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
-		case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
-		case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
-		case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
-		case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
-		case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
-		case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
-		case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:		
-		case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
-		case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
-		case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
-		case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
-			{
-				vector<CGameObject*> SpawnItem;
-				
-				CItem* Item = (CItem*)EnterGameObject;								
-
-				IsEnterChannel = EnterChannel->EnterChannel(EnterGameObject, &Item->_SpawnPosition);
-				if (IsEnterChannel == true)
-				{
-					// 중복되지 않은 아이템 스폰
-					// 인덱스 가져오기	
-					_ItemsArrayIndexs.Pop(&EnterGameObject->_ObjectManagerArrayIndex);
-					// 배열에 저장
-					_ItemsArray[EnterGameObject->_ObjectManagerArrayIndex] = Item;
-
-					SpawnItem.push_back(Item);
-
-					Item->SetDestoryTime(1800);
-					Item->ItemSetTarget(Item->_GameObjectInfo.OwnerObjectType, Item->_GameObjectInfo.OwnerObjectId);
-
-					CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(1, SpawnItem);
-					GameServer->SendPacketFieldOfView(Item, ResSpawnPacket);
-					ResSpawnPacket->Free();
-				}
-				else
-				{
-					// 중복된 아이템의 경우 메모리에 반납
-					ObjectReturn(Item->_GameObjectInfo.ObjectType, Item);
-				}				
-			}
-			break;
-		case en_GameObjectType::OBJECT_STONE:
-		case en_GameObjectType::OBJECT_TREE:
-			{
-				vector<CGameObject*> SpawnEnvironment;
-					
-				CEnvironment* Environment = (CEnvironment*)EnterGameObject;
-
-				// 인덱스 가져오기
-				_EnvironmentsArrayIndexs.Pop(&EnterGameObject->_ObjectManagerArrayIndex);
-				// 배열에 저장
-				_EnvironmentsArray[EnterGameObject->_ObjectManagerArrayIndex] = Environment;
-
-				EnterChannel->EnterChannel(EnterGameObject, &Environment->_SpawnPosition);				
-
-				SpawnEnvironment.push_back(Environment);
-
-				CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(1, SpawnEnvironment);
-				GameServer->SendPacketFieldOfView(Environment, ResSpawnPacket);
-				ResSpawnPacket->Free();
-			}
-			break;
-	}	
-}
-
-bool CObjectManager::ObjectLeaveGame(CGameObject* LeaveGameObject, int32 ObjectIndex, int32 _ChannelId, bool IsObjectReturn)
-{
-	bool RemoveSuccess = false;
-	
-	// 타입에 따라 관리당하고 있는 자료구조에서 자신을 삭제
-	// 채널에서 삭제	
-	switch (LeaveGameObject->_GameObjectInfo.ObjectType)
+	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 	{
+		CPlayer* Player = (CPlayer*)EnterGameObject;
+
+		Player->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_IDLE;
+
+		Map->GetChannelManager()->Find(1)->EnterChannel(EnterGameObject);
+	}
+	break;
+	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
+	case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
+	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
+	case en_GameObjectType::OBJECT_THIEF_PLAYER:
+	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
+	{
+		CPlayer* Player = (CPlayer*)EnterGameObject;
+
+		Player->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_IDLE;
+
+		// 채널 입장
+		Map->GetChannelManager()->Find(1)->EnterChannel(EnterGameObject, &Player->_SpawnPosition);
+	}
+	break;
 	case en_GameObjectType::OBJECT_SLIME:
 	case en_GameObjectType::OBJECT_BEAR:
-		LeaveGameObject->GetChannel()->LeaveChannel(LeaveGameObject);
+	{
+		vector<CGameObject*> SpawnMonster;
 
-		_MonstersArrayIndexs.Push(ObjectIndex);	
-		break;	
+		CMonster* Monster = (CMonster*)EnterGameObject;
+
+		// 인덱스 가져오기
+		_MonstersArrayIndexs.Pop(&EnterGameObject->_ObjectManagerArrayIndex);
+		// 배열에 저장
+		_MonstersArray[EnterGameObject->_ObjectManagerArrayIndex] = Monster;
+
+		// 몬스터 주위 오브젝트 정보 저장
+		Monster->_FieldOfViewPlayers = Map->GetFieldOfViewPlayer(Monster, Monster->_FieldOfViewDistance);
+
+		// 채널 입장
+		Map->GetChannelManager()->Find(1)->EnterChannel(EnterGameObject, &Monster->_SpawnPosition);
+
+		SpawnMonster.push_back(Monster);
+
+		// 몬스터 추가하면 몬스터 주위 플레이어들에게 몬스터를 소환하라고 알림
+		CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(1, SpawnMonster);
+		GameServer->SendPacketFieldOfView(Monster, ResSpawnPacket);
+		ResSpawnPacket->Free();
+
+		// 몬스터 소환할때 소환 이펙트 출력
+		CMessage* ResEffectPacket = GameServer->MakePacketEffect(Monster->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_OBJECT_SPAWN, 0.5f);
+		GameServer->SendPacketFieldOfView(Monster, ResEffectPacket);
+		ResEffectPacket->Free();
+	}
+	break;
 	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
@@ -223,20 +144,100 @@ bool CObjectManager::ObjectLeaveGame(CGameObject* LeaveGameObject, int32 ObjectI
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:	
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
+	{
+		vector<CGameObject*> SpawnItem;
+
+		CItem* Item = (CItem*)EnterGameObject;
+
+		IsEnterChannel = Map->GetChannelManager()->Find(1)->EnterChannel(EnterGameObject, &Item->_SpawnPosition);
+		if (IsEnterChannel == true)
+		{
+			// 중복되지 않은 아이템 스폰
+			// 인덱스 가져오기	
+			_ItemsArrayIndexs.Pop(&EnterGameObject->_ObjectManagerArrayIndex);
+			// 배열에 저장
+			_ItemsArray[EnterGameObject->_ObjectManagerArrayIndex] = Item;
+
+			SpawnItem.push_back(Item);
+
+			Item->SetDestoryTime(1800);
+			Item->ItemSetTarget(Item->_GameObjectInfo.OwnerObjectType, Item->_GameObjectInfo.OwnerObjectId);
+
+			CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(1, SpawnItem);
+			GameServer->SendPacketFieldOfView(Item, ResSpawnPacket);
+			ResSpawnPacket->Free();
+		}
+		else
+		{
+			// 중복된 아이템의 경우 메모리에 반납
+			ObjectReturn(Item->_GameObjectInfo.ObjectType, Item);
+		}
+	}
+	break;
+	case en_GameObjectType::OBJECT_STONE:
+	case en_GameObjectType::OBJECT_TREE:
+	{
+		vector<CGameObject*> SpawnEnvironment;
+
+		CEnvironment* Environment = (CEnvironment*)EnterGameObject;
+
+		// 인덱스 가져오기
+		_EnvironmentsArrayIndexs.Pop(&EnterGameObject->_ObjectManagerArrayIndex);
+		// 배열에 저장
+		_EnvironmentsArray[EnterGameObject->_ObjectManagerArrayIndex] = Environment;
+
+		Map->GetChannelManager()->Find(1)->EnterChannel(EnterGameObject, &Environment->_SpawnPosition);
+
+		SpawnEnvironment.push_back(Environment);
+
+		CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(1, SpawnEnvironment);
+		GameServer->SendPacketFieldOfView(Environment, ResSpawnPacket);
+		ResSpawnPacket->Free();
+	}
+	break;
+	}
+}
+
+bool CObjectManager::ObjectLeaveGame(CGameObject* LeaveGameObject, int32 ObjectIndex, int32 _ChannelId, bool IsObjectReturn)
+{
+	bool RemoveSuccess = false;
+
+	// 타입에 따라 관리당하고 있는 자료구조에서 자신을 삭제
+	// 채널에서 삭제	
+	switch (LeaveGameObject->_GameObjectInfo.ObjectType)
+	{	
+	case en_GameObjectType::OBJECT_SLIME:
+	case en_GameObjectType::OBJECT_BEAR:
+		LeaveGameObject->GetChannel()->LeaveChannel(LeaveGameObject);
+
+		_MonstersArrayIndexs.Push(ObjectIndex);
+		break;
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
 		LeaveGameObject->GetChannel()->LeaveChannel(LeaveGameObject);
 
-		_ItemsArrayIndexs.Push(ObjectIndex);		
+		_ItemsArrayIndexs.Push(ObjectIndex);
 		break;
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
 		LeaveGameObject->GetChannel()->LeaveChannel(LeaveGameObject);
 
-		_EnvironmentsArrayIndexs.Push(ObjectIndex);		
+		_EnvironmentsArrayIndexs.Push(ObjectIndex);
 		break;
 	}
 
@@ -255,7 +256,7 @@ void CObjectManager::PlayerIndexReturn(int32 PlayerIndex)
 }
 
 CGameObject* CObjectManager::Find(int64 ObjectId, en_GameObjectType GameObjectType)
-{	
+{
 	switch (GameObjectType)
 	{
 	case en_GameObjectType::OBJECT_PLAYER:
@@ -265,52 +266,52 @@ CGameObject* CObjectManager::Find(int64 ObjectId, en_GameObjectType GameObjectTy
 	case en_GameObjectType::OBJECT_THIEF_PLAYER:
 	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
+	{
+		for (int32 i = 0; i < PLAYER_MAX; i++)
 		{
-			for (int32 i = 0; i < PLAYER_MAX; i++)
+			if (_PlayersArray[i] != nullptr
+				&& _PlayersArray[i]->_GameObjectInfo.ObjectId == ObjectId
+				&& _PlayersArray[i]->_NetworkState == en_ObjectNetworkState::LIVE)
 			{
-				if (_PlayersArray[i] != nullptr 
-					&& _PlayersArray[i]->_GameObjectInfo.ObjectId == ObjectId
-					&& _PlayersArray[i]->_NetworkState == en_ObjectNetworkState::LIVE)
-				{
-					return _PlayersArray[i];
-				}
+				return _PlayersArray[i];
 			}
 		}
-		break;
+	}
+	break;
 	case en_GameObjectType::OBJECT_MONSTER:
 	case en_GameObjectType::OBJECT_SLIME:
 	case en_GameObjectType::OBJECT_BEAR:
+	{
+		for (int32 i = 0; i < PLAYER_MAX; i++)
 		{
-			for (int32 i = 0; i < PLAYER_MAX; i++)
+			if (_MonstersArray[i] != nullptr && _MonstersArray[i]->_GameObjectInfo.ObjectId == ObjectId)
 			{
-				if (_MonstersArray[i] != nullptr && _MonstersArray[i]->_GameObjectInfo.ObjectId == ObjectId)
-				{
-					return _MonstersArray[i];
-				}
-			}		
+				return _MonstersArray[i];
+			}
 		}
-		break;
+	}
+	break;
 	case en_GameObjectType::OBJECT_ENVIRONMENT:
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
+	{
+		for (int32 i = 0; i < PLAYER_MAX; i++)
 		{
-			for (int32 i = 0; i < PLAYER_MAX; i++)
+			if (_EnvironmentsArray[i] != nullptr && _EnvironmentsArray[i]->_GameObjectInfo.ObjectId == ObjectId)
 			{
-				if (_EnvironmentsArray[i] != nullptr && _EnvironmentsArray[i]->_GameObjectInfo.ObjectId == ObjectId)
-				{
-					return _EnvironmentsArray[i];
-				}
-			}		
+				return _EnvironmentsArray[i];
+			}
 		}
-		break;
-	case en_GameObjectType::OBJECT_ITEM:	
-	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:	
+	}
+	break;
+	case en_GameObjectType::OBJECT_ITEM:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE:
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
-	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL:	
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
@@ -320,18 +321,18 @@ CGameObject* CObjectManager::Find(int64 ObjectId, en_GameObjectType GameObjectTy
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
+	{
+		for (int32 i = 0; i < PLAYER_MAX; i++)
 		{
-			for (int32 i = 0; i < PLAYER_MAX; i++)
+			if (_MonstersArray[i] != nullptr && _MonstersArray[i]->_GameObjectInfo.ObjectId == ObjectId)
 			{
-				if (_MonstersArray[i] != nullptr && _MonstersArray[i]->_GameObjectInfo.ObjectId == ObjectId)
-				{
-					return _EnvironmentsArray[i];
-				}
-			}		
+				return _EnvironmentsArray[i];
+			}
 		}
-		break;
+	}
+	break;
 	default:
-		return nullptr;		
+		return nullptr;
 	}
 
 	return nullptr;
@@ -343,7 +344,7 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 
 	switch (ObjectType)
 	{
-	case en_GameObjectType::OBJECT_PLAYER:	
+	case en_GameObjectType::OBJECT_PLAYER:
 		NewObject = _PlayerMemoryPool->Alloc();
 		break;
 	case en_GameObjectType::OBJECT_SLIME:
@@ -366,7 +367,7 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE:
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
 		NewObject = _ConsumableMemoryPool->Alloc();
-		break;		
+		break;
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
@@ -376,7 +377,7 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
 		NewObject = _MaterialMemoryPool->Alloc();
-		break;	
+		break;
 	case en_GameObjectType::OBJECT_STONE:
 		NewObject = _StoneMemoryPool->Alloc();
 		break;
@@ -424,14 +425,14 @@ void CObjectManager::ObjectReturn(en_GameObjectType ObjectType, CGameObject* Ret
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
 		_MaterialMemoryPool->Free((CMaterial*)ReturnObject);
-		break;	
+		break;
 	case en_GameObjectType::OBJECT_STONE:
 		_StoneMemoryPool->Free((CStone*)ReturnObject);
 		break;
 	case en_GameObjectType::OBJECT_TREE:
 		_TreeMemoryPool->Free((CTree*)ReturnObject);
 		break;
-	}		
+	}
 }
 
 CSkill* CObjectManager::SkillCreate()
@@ -447,20 +448,20 @@ void CObjectManager::SkillReturn(CSkill* ReturnSkill)
 st_SkillInfo* CObjectManager::SkillInfoCreate(en_SkillMediumCategory SkillMediumCategory)
 {
 	switch (SkillMediumCategory)
-	{	
+	{
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK:
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK:
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK:
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK:
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_ATTACK:
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_ATTACK:
-		return _AttackSkillInfoMemoryPool->Alloc();		
+		return _AttackSkillInfoMemoryPool->Alloc();
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_TACTIC:
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_TACTIC:
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_TACTIC:
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_TACTIC:
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_TACTIC:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_TACTIC:		
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_TACTIC:
 		return _TacTicSkillInfoMemoryPool->Alloc();
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL:
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_HEAL:
@@ -475,8 +476,8 @@ st_SkillInfo* CObjectManager::SkillInfoCreate(en_SkillMediumCategory SkillMedium
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_BUF:
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_BUF:
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_BUF:
-		return _BufSkillInfoMemoryPool->Alloc();		
-	}	
+		return _BufSkillInfoMemoryPool->Alloc();
+	}
 }
 
 void CObjectManager::SkillInfoReturn(en_SkillMediumCategory SkillMediumCategory, st_SkillInfo* ReturnSkillInfo)
@@ -518,16 +519,12 @@ void CObjectManager::SkillInfoReturn(en_SkillMediumCategory SkillMediumCategory,
 	}
 }
 
-void CObjectManager::MapObjectSpawn(int32 ChannelId)
+void CObjectManager::MapObjectSpawn(int64& MapID)
 {
-	CChannel* Channel = G_ChannelManager->Find(ChannelId);
-	if (Channel == nullptr)
-	{
-		return;
-	}
+	CMap* Map = G_MapManager->GetMap(MapID);
 
-	int32 SizeX = Channel->_Map->_SizeX;
-	int32 SizeY = Channel->_Map->_SizeY;
+	int32 SizeX = Map->_SizeX;
+	int32 SizeY = Map->_SizeY;
 
 	for (int Y = 0; Y < SizeY; Y++)
 	{
@@ -535,7 +532,7 @@ void CObjectManager::MapObjectSpawn(int32 ChannelId)
 		{
 			CGameObject* NewObject = nullptr;
 
-			switch (Channel->_Map->_CollisionMapInfos[Y][X])
+			switch (Map->_CollisionMapInfos[Y][X])
 			{
 			case en_TileMapEnvironment::TILE_MAP_TREE:
 				NewObject = (CTree*)ObjectCreate(en_GameObjectType::OBJECT_TREE);
@@ -553,8 +550,8 @@ void CObjectManager::MapObjectSpawn(int32 ChannelId)
 
 			if (NewObject != nullptr)
 			{
-				int SpawnPositionX = X + Channel->_Map->_Left;
-				int SpawnPositionY = Channel->_Map->_Down - Y;
+				int SpawnPositionX = X + Map->_Left;
+				int SpawnPositionY = Map->_Down - Y;
 
 				st_Vector2Int NewPosition;
 				NewPosition._Y = SpawnPositionY;
@@ -563,7 +560,8 @@ void CObjectManager::MapObjectSpawn(int32 ChannelId)
 				NewObject->_GameObjectInfo.ObjectId = _GameServerObjectId++;
 				NewObject->_SpawnPosition = NewPosition;
 				NewObject->_NetworkState = en_ObjectNetworkState::LIVE;
-				ObjectEnterGame(NewObject, ChannelId);
+
+				ObjectEnterGame(NewObject, Map->_MapID);
 			}
 		}
 	}
@@ -589,8 +587,8 @@ void CObjectManager::ItemSpawn(int64 KillerId, en_GameObjectType KillerObjectTyp
 	ReqDBaseItemCreateJob->Session = nullptr;
 	ReqDBaseItemCreateJob->Message = ReqItemCreateMessage;
 
-	GameServer->_GameServerWorldDataBaseThreadMessageQue.Enqueue(ReqDBaseItemCreateJob);
-	SetEvent(GameServer->_WorldDataBaseWakeEvent);	
+	GameServer->_GameServerWorldDBThreadMessageQue.Enqueue(ReqDBaseItemCreateJob);
+	SetEvent(GameServer->_WorldDataBaseWakeEvent);
 }
 
 void CObjectManager::ObjectSpawn(en_GameObjectType ObjectType, st_Vector2Int SpawnPosition)
@@ -616,9 +614,9 @@ void CObjectManager::ObjectSpawn(en_GameObjectType ObjectType, st_Vector2Int Spa
 	}
 
 	if (SpawnGameObject != nullptr)
-	{	
+	{
 		SpawnGameObject->_GameObjectInfo.ObjectId = _GameServerObjectId++;
-		SpawnGameObject->_SpawnPosition = SpawnPosition;		
+		SpawnGameObject->_SpawnPosition = SpawnPosition;
 		ObjectEnterGame(SpawnGameObject, 1);
 	}
 }

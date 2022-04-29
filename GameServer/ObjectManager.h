@@ -22,22 +22,22 @@ private:
 		MONSTER_MAX = 15000,
 		ITEM_MAX = 15000,
 		ENVIRONMENT_MAX = 15000
-	};	
-		
-	CMemoryPoolTLS<CPlayer>* _PlayerMemoryPool;		
+	};
+
+	CMemoryPoolTLS<CPlayer>* _PlayerMemoryPool;
 	CMemoryPoolTLS<CSlime>* _SlimeMemoryPool;
 	CMemoryPoolTLS<CBear>* _BearMemoryPool;
-	
+
 	CMemoryPoolTLS<CItem>* _ItemMemoryPool;
 	CMemoryPoolTLS<CWeapon>* _WeaponMemoryPool;
 	CMemoryPoolTLS<CArmor>* _ArmorMemoryPool;
 	CMemoryPoolTLS<CConsumable>* _ConsumableMemoryPool;
-	CMemoryPoolTLS<CMaterial>* _MaterialMemoryPool;	
+	CMemoryPoolTLS<CMaterial>* _MaterialMemoryPool;
 
 	CMemoryPoolTLS<CTree>* _TreeMemoryPool;
 	CMemoryPoolTLS<CStone>* _StoneMemoryPool;
-	
-	int64 _GameServerObjectId;		
+
+	int64 _GameServerObjectId;
 
 	CMemoryPoolTLS<CSkill>* _SkillMemoryPool;
 	CMemoryPoolTLS<st_AttackSkillInfo>* _AttackSkillInfoMemoryPool;
@@ -62,11 +62,11 @@ public:
 	CObjectManager();
 	~CObjectManager();
 	//-----------------------------------------------------------
-	// Object를 게임에 입장시켜준다. ( 입장할 채널의 아이디를 받는다 )
+	// Object를 게임에 입장시켜준다. ( 입장할 맵의 아이디를 받는다 )
 	//-----------------------------------------------------------
-	void ObjectEnterGame(CGameObject* EnterGameObject, int32 ChannelId);
+	void ObjectEnterGame(CGameObject* EnterGameObject, int64 MapID);
 	//-----------------------------------------------------------
-	// Object를 게임에서 퇴장시켜준다. ( 퇴장할 채널의 아이디를 받는다 )
+	// Object를 게임에서 퇴장시켜준다. ( 퇴장할 맵의 아이디를 받는다 )
 	//-----------------------------------------------------------
 	bool ObjectLeaveGame(CGameObject* LeaveGameObject, int32 ObjectIndex, int32 _ChannelId, bool IsObjectReturn = true);
 
@@ -110,13 +110,13 @@ public:
 	//-----------------------------------
 	// 맵에 설정한 오브젝트 스폰
 	//-----------------------------------
-	void MapObjectSpawn(int32 ChannelId);
+	void MapObjectSpawn(int64& MapID);
 
 	//------------------------------------------------------------------------------------------------
 	// 아이템 스폰
 	//------------------------------------------------------------------------------------------------
-	void ItemSpawn(int64 KillerId, en_GameObjectType KillerObjectType, st_Vector2Int SpawnPosition, en_GameObjectType SpawnItemOwnerType, en_ObjectDataType MonsterDataType);		
-	
+	void ItemSpawn(int64 KillerId, en_GameObjectType KillerObjectType, st_Vector2Int SpawnPosition, en_GameObjectType SpawnItemOwnerType, en_ObjectDataType MonsterDataType);
+
 	//----------------------------------------------------------------------------
 	// 오브젝트 스폰
 	//----------------------------------------------------------------------------
