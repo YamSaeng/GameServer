@@ -2,13 +2,13 @@
 #include "Global.h"
 #include "DBConnectionPool.h"
 #include "DataManager.h"
-#include "ChannelManager.h"
+#include "MapManager.h"
 #include "ObjectManager.h"
 
 CDBConnectionPool* G_DBConnectionPool = nullptr;
 CLog* G_Logger = nullptr;
 CDataManager* G_Datamanager = nullptr;
-CChannelManager* G_ChannelManager = nullptr;
+CMapManager* G_MapManager = nullptr;
 CObjectManager* G_ObjectManager = nullptr;
 
 //------------------------------------------------
@@ -45,9 +45,10 @@ public:
 		// 제작템 데이터 파싱
 		G_Datamanager->LoadDataCrafting(L"CraftingData.json");
 		G_Datamanager->LoadDataLevel(L"CharacterLevelingData.json");
+		G_Datamanager->LoadDataMapInfo(L"MapInfoData.json");
 
-		G_ChannelManager = new CChannelManager();
-		G_ChannelManager->Add(1);
+		G_MapManager = new CMapManager();
+		G_MapManager->MapSave();
 
 		G_ObjectManager = new CObjectManager();
 	}
@@ -57,7 +58,7 @@ public:
 		delete G_DBConnectionPool;
 		delete G_Logger;
 		delete G_Datamanager;
-		delete G_ChannelManager;
+		delete G_MapManager;
 		delete G_ObjectManager;
 	}
 } G_Global;
