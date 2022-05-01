@@ -211,51 +211,6 @@ vector<CSector*> CMap::GetAroundSectors(st_Vector2Int CellPosition, int32 Range)
 	}
 }
 
-vector<CGameObject*> CMap::GetAroundSectorObjects(CGameObject* Object, int32 Range, bool ExceptMe)
-{
-	vector<CGameObject*> SectorGameObjects;
-
-	vector<CSector*> Sectors = GetAroundSectors(Object->GetCellPosition(), Range);
-
-	for (CSector* Sector : Sectors)
-	{
-		// 주변 섹터 플레이어 정보
-		for (CPlayer* Player : Sector->GetPlayers())
-		{
-			// 함수 호출한 오브젝트를 포함할 것인지에 대한 여부 true면 제외 false면 포함
-			if (ExceptMe == true)
-			{
-				if (Object->_GameObjectInfo.ObjectId != Player->_GameObjectInfo.ObjectId)
-				{
-					SectorGameObjects.push_back(Player);
-				}
-			}
-			else
-			{
-				SectorGameObjects.push_back(Player);
-			}
-		}
-
-		// 주변 섹터 몬스터 정보
-		for (CMonster* Monster : Sector->GetMonsters())
-		{
-			SectorGameObjects.push_back(Monster);
-		}
-
-		for (CEnvironment* Environment : Sector->GetEnvironment())
-		{
-			SectorGameObjects.push_back(Environment);
-		}
-
-		for (CItem* Item : Sector->GetItems())
-		{
-			SectorGameObjects.push_back(Item);
-		}
-	}
-
-	return SectorGameObjects;
-}
-
 vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object, int16 Range, bool ExceptMe)
 {
 	vector<st_FieldOfViewInfo> FieldOfViewGameObjects;
