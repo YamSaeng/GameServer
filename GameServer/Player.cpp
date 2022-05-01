@@ -45,7 +45,7 @@ void CPlayer::Update()
 	// 시야범위 객체 조사
 	if (_FieldOfViewUpdateTick < GetTickCount64())
 	{
-		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->_Map->GetFieldOfViewObjects(this, 1);
+		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldOfViewObjects(this, 1);
 		vector<st_FieldOfViewInfo> SpawnObjectIds;
 		vector<st_FieldOfViewInfo> DeSpawnObjectIds;
 
@@ -114,6 +114,11 @@ void CPlayer::Update()
 
 					if (FindObject != nullptr && FindObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 					{
+						if (_SelectTarget != nullptr && FindObject->_GameObjectInfo.ObjectId == _SelectTarget->_GameObjectInfo.ObjectId)
+						{
+							_SelectTarget = nullptr;
+						}
+
 						DeSpawnObjectInfos.push_back(FindObject);
 					}
 				}
@@ -252,7 +257,7 @@ void CPlayer::Update()
 			break;
 		}
 
-		bool CanMove = _Channel->_Map->Cango(this, _GameObjectInfo.ObjectPositionInfo.PositionX, _GameObjectInfo.ObjectPositionInfo.PositionY);
+		bool CanMove = _Channel->GetMap()->Cango(this, _GameObjectInfo.ObjectPositionInfo.PositionX, _GameObjectInfo.ObjectPositionInfo.PositionY);
 		if (CanMove == true)
 		{
 			st_Vector2Int CollisionPosition;
@@ -262,7 +267,7 @@ void CPlayer::Update()
 			if (CollisionPosition._X != _GameObjectInfo.ObjectPositionInfo.CollisionPositionX
 				|| CollisionPosition._Y != _GameObjectInfo.ObjectPositionInfo.CollisionPositionY)
 			{
-				_Channel->_Map->ApplyMove(this, CollisionPosition);
+				_Channel->GetMap()->ApplyMove(this, CollisionPosition);
 			}
 		}
 		else
@@ -367,7 +372,7 @@ void CPlayer::UpdateMove()
 		break;
 	}
 
-	bool CanMove = _Channel->_Map->Cango(this, _GameObjectInfo.ObjectPositionInfo.PositionX, _GameObjectInfo.ObjectPositionInfo.PositionY);
+	bool CanMove = _Channel->GetMap()->Cango(this, _GameObjectInfo.ObjectPositionInfo.PositionX, _GameObjectInfo.ObjectPositionInfo.PositionY);
 	if (CanMove == true)
 	{
 		st_Vector2Int CollisionPosition;
@@ -377,7 +382,7 @@ void CPlayer::UpdateMove()
 		if (CollisionPosition._X != _GameObjectInfo.ObjectPositionInfo.CollisionPositionX
 			|| CollisionPosition._Y != _GameObjectInfo.ObjectPositionInfo.CollisionPositionY)
 		{
-			_Channel->_Map->ApplyMove(this, CollisionPosition);
+			_Channel->GetMap()->ApplyMove(this, CollisionPosition);
 		}
 	}
 	else
@@ -467,7 +472,9 @@ void CPlayer::UpdateSpell()
 
 			int32 FinalDamage = 0;
 
-			mt19937 Gen(Seed());
+			mt19937 Gen(Seed());	
+
+			bool TargetIsDead = false;
 
 			switch (_CurrentSkill->GetSkillInfo()->SkillType)
 			{
@@ -483,10 +490,10 @@ void CPlayer::UpdateSpell()
 				int32 ChoiceDamage = DamageChoiceRandom(Gen);
 				FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
 
-				// 데미지 처리
-				_SelectTarget->OnDamaged(this, FinalDamage);
-
 				wsprintf(SpellMessage, L"%s가 %s을 사용해 %s에게 %d의 데미지를 줬습니다.", this->_GameObjectInfo.ObjectName.c_str(), _CurrentSkill->GetSkillInfo()->SkillName.c_str(), _SelectTarget->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+
+				// 데미지 처리
+				TargetIsDead = _SelectTarget->OnDamaged(this, FinalDamage);
 
 				MagicSystemString = SpellMessage;
 			}
@@ -526,7 +533,18 @@ void CPlayer::UpdateSpell()
 			break;
 			case en_SkillType::SKILL_SHAMAN_ICE_CHAIN:
 			{
+				HitEffectType = en_EffectType::EFFECT_NORMAL_ATTACK_TARGET_HIT;
+
+				int32 MagicDamage = _GameObjectInfo.ObjectStatInfo.MagicDamage * 0.6;
+
 				st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)_CurrentSkill->GetSkillInfo();
+
+				uniform_int_distribution<int> DamageChoiceRandom(AttackSkillInfo->SkillMinDamage + MagicDamage, AttackSkillInfo->SkillMaxDamage + MagicDamage);
+				int32 ChoiceDamage = DamageChoiceRandom(Gen);
+				FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
+
+				// 데미지 처리
+				TargetIsDead = _SelectTarget->OnDamaged(this, FinalDamage);				
 
 				if (AttackSkillInfo->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
 				{
@@ -587,7 +605,7 @@ void CPlayer::UpdateSpell()
 				FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
 
 				// 데미지 처리
-				_SelectTarget->OnDamaged(this, FinalDamage);
+				TargetIsDead = _SelectTarget->OnDamaged(this, FinalDamage);
 
 				CSkill* NewSkill = G_ObjectManager->SkillCreate();
 
@@ -635,10 +653,10 @@ void CPlayer::UpdateSpell()
 				int32 ChoiceDamage = DamageChoiceRandom(Gen);
 				FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
 
-				// 데미지 처리
-				_SelectTarget->OnDamaged(this, FinalDamage);
-
 				wsprintf(SpellMessage, L"%s가 %s을 사용해 %s에게 %d의 데미지를 줬습니다.", _GameObjectInfo.ObjectName.c_str(), _CurrentSkill->GetSkillInfo()->SkillName.c_str(), _SelectTarget->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+
+				// 데미지 처리
+				TargetIsDead = _SelectTarget->OnDamaged(this, FinalDamage);
 
 				MagicSystemString = SpellMessage;
 			}
@@ -655,10 +673,10 @@ void CPlayer::UpdateSpell()
 				int32 ChoiceDamage = DamageChoiceRandom(Gen);
 				FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
 
-				// 데미지 처리
-				_SelectTarget->OnDamaged(this, FinalDamage);
-
 				wsprintf(SpellMessage, L"%s가 %s을 사용해 %s에게 %d의 데미지를 줬습니다.", _GameObjectInfo.ObjectName.c_str(), _CurrentSkill->GetSkillInfo()->SkillName.c_str(), _SelectTarget->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+
+				// 데미지 처리
+				TargetIsDead = _SelectTarget->OnDamaged(this, FinalDamage);
 
 				MagicSystemString = SpellMessage;
 			}
@@ -705,9 +723,10 @@ void CPlayer::UpdateSpell()
 				uniform_int_distribution<int> HealChoiceRandom(HealSkillInfo->SkillMinHealPoint, HealSkillInfo->SkillMaxHealPoint);
 				FinalDamage = HealChoiceRandom(Gen);
 
-				_SelectTarget->OnHeal(this, FinalDamage);
-
 				wsprintf(SpellMessage, L"%s가 치유의빛을 사용해 %s를 %d만큼 회복했습니다.", _GameObjectInfo.ObjectName.c_str(), _SelectTarget->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+
+				_SelectTarget->OnHeal(this, FinalDamage);
+				
 				MagicSystemString = SpellMessage;
 
 			}
@@ -721,13 +740,14 @@ void CPlayer::UpdateSpell()
 				uniform_int_distribution<int> HealChoiceRandom(HealSkillInfo->SkillMinHealPoint, HealSkillInfo->SkillMaxHealPoint);
 				FinalDamage = HealChoiceRandom(Gen);
 
-				_SelectTarget->OnHeal(this, FinalDamage);
-
 				wsprintf(SpellMessage, L"%s가 치유의바람을 사용해 %s를 %d만큼 회복했습니다.", _GameObjectInfo.ObjectName.c_str(), _SelectTarget->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
+
+				_SelectTarget->OnHeal(this, FinalDamage);				
+
 				MagicSystemString = SpellMessage;
 			}
 			break;
-			}
+			}					
 
 			// 공격 응답
 			CMessage* ResAttackMagicPacket = G_ObjectManager->GameServer->MakePacketResAttack(
@@ -739,10 +759,10 @@ void CPlayer::UpdateSpell()
 			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResAttackMagicPacket, this);
 			ResAttackMagicPacket->Free();
 
-			// 시스템 메세지 전송
-			CMessage* ResAttackMagicSystemMessagePacket = G_ObjectManager->GameServer->MakePacketResChattingBoxMessage(_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, st_Color::White(), MagicSystemString);
-			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResAttackMagicSystemMessagePacket, this);
-			ResAttackMagicSystemMessagePacket->Free();
+			// 이펙트 출력
+			CMessage* ResEffectPacket = G_ObjectManager->GameServer->MakePacketEffect(_SelectTarget->_GameObjectInfo.ObjectId, HitEffectType, _CurrentSkill->GetSkillInfo()->SkillTargetEffectTime);
+			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResEffectPacket, this);
+			ResEffectPacket->Free();
 
 			// HP 변경 전송
 			CMessage* ResChangeObjectStat = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_SelectTarget->_GameObjectInfo.ObjectId,
@@ -750,15 +770,24 @@ void CPlayer::UpdateSpell()
 			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResChangeObjectStat, this);
 			ResChangeObjectStat->Free();
 
+			if (TargetIsDead == true)
+			{
+				CMessage* SelectTargetDeadPacket = G_ObjectManager->GameServer->MakePacketObjectDie(_SelectTarget->_GameObjectInfo.ObjectId);
+				G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, SelectTargetDeadPacket, this);
+				SelectTargetDeadPacket->Free();
+
+				_SelectTarget = nullptr;
+			}
+
+			// 시스템 메세지 전송
+			CMessage* ResAttackMagicSystemMessagePacket = G_ObjectManager->GameServer->MakePacketResChattingBoxMessage(_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, st_Color::White(), MagicSystemString);
+			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResAttackMagicSystemMessagePacket, this);
+			ResAttackMagicSystemMessagePacket->Free();			
+
 			// 스펠창 끝
 			CMessage* ResMagicPacket = G_ObjectManager->GameServer->MakePacketResMagic(_GameObjectInfo.ObjectId, false);
 			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResMagicPacket, this);
-			ResMagicPacket->Free();
-
-			// 이펙트 출력
-			CMessage* ResEffectPacket = G_ObjectManager->GameServer->MakePacketEffect(_SelectTarget->_GameObjectInfo.ObjectId, HitEffectType, _CurrentSkill->GetSkillInfo()->SkillTargetEffectTime);
-			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResEffectPacket, this);
-			ResEffectPacket->Free();
+			ResMagicPacket->Free();			
 		}
 	}
 }
