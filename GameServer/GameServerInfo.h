@@ -7,6 +7,13 @@
 #define LOGIN_SUCCESS 1
 #define LOGIN_FAIL 0
 
+enum class en_LoginState : int8
+{
+	LOGIN_OUT,
+	LOGIN_IN,
+	LOGIN_DB_WORKING
+};
+
 enum class en_GameServerJobType : int16
 {
 	AUTH_NEW_CLIENT_JOIN = 0,
@@ -23,7 +30,8 @@ enum class en_GameServerJobType : int16
 	DATA_BASE_PLACE_ITEM,
 	DATA_BASE_ITEM_USE,
 	DATA_BASE_GOLD_SAVE,
-	DATA_BASE_CHARACTER_INFO_SEND,		
+	DATA_BASE_CHARACTER_INFO_SEND,	
+	DATA_BASE_CHATACTER_INFO_SAVE,
 
 	OBJECT_SPAWN,
 	OBJECT_DESAPWN
