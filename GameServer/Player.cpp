@@ -43,7 +43,7 @@ void CPlayer::Update()
 	}
 
 	// 시야범위 객체 조사
-	if (_FieldOfViewUpdateTick < GetTickCount64())
+	if (_FieldOfViewUpdateTick < GetTickCount64() && _Channel != nullptr)
 	{
 		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldOfViewObjects(this, 1);
 		vector<st_FieldOfViewInfo> SpawnObjectIds;
@@ -313,6 +313,8 @@ void CPlayer::OnDead(CGameObject* Killer)
 
 void CPlayer::Init()
 {
+	_FieldOfViewInfos.clear();
+
 	// 스킬 목록 정리
 	_SkillBox.Empty();
 	// 퀵슬롯 정리
