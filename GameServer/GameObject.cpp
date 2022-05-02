@@ -257,7 +257,12 @@ void CGameObject::Update()
 				_AggroTargetList.erase(RemoveAggroListGameObjectId);
 			}
 		}
-		break;		
+		case en_GameObjectJobType::GAMEOBJECT_JOB_REQ_CHARACTER_INFO:
+			{
+				G_ObjectManager->GameServer->SendPacket(((CPlayer*)this)->_SessionId, GameObjectJob->GameObjectJobMessage);
+			}
+			break;
+		break;			
 		}
 
 		if (GameObjectJob->GameObjectJobMessage != nullptr)
@@ -271,12 +276,12 @@ void CGameObject::Update()
 
 bool CGameObject::OnDamaged(CGameObject* Attacker, int32 DamagePoint)
 {
-	_GameObjectInfo.ObjectStatInfo.HP -= DamagePoint;
+	_GameObjectInfo.ObjectStatInfo.HP -= DamagePoint;	
 
 	if (_GameObjectInfo.ObjectStatInfo.HP <= 0)
 	{
 		_GameObjectInfo.ObjectStatInfo.HP = 0;
-
+		
 		return true;
 	}
 
