@@ -88,7 +88,7 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int64 MapID)
 		CPlayer* Player = (CPlayer*)EnterGameObject;
 
 		Player->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_IDLE;
-
+	
 		Map->GetChannelManager()->Find(1)->EnterChannel(EnterGameObject);
 	}
 	break;
@@ -253,89 +253,6 @@ bool CObjectManager::ObjectLeaveGame(CGameObject* LeaveGameObject, int32 ObjectI
 void CObjectManager::PlayerIndexReturn(int32 PlayerIndex)
 {
 	_PlayersArrayIndexs.Push(PlayerIndex);
-}
-
-CGameObject* CObjectManager::Find(int64 ObjectId, en_GameObjectType GameObjectType)
-{
-	switch (GameObjectType)
-	{
-	case en_GameObjectType::OBJECT_PLAYER:
-	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-	case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
-	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
-	case en_GameObjectType::OBJECT_THIEF_PLAYER:
-	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
-	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
-	{
-		for (int32 i = 0; i < PLAYER_MAX; i++)
-		{
-			if (_PlayersArray[i] != nullptr
-				&& _PlayersArray[i]->_GameObjectInfo.ObjectId == ObjectId
-				&& _PlayersArray[i]->_NetworkState == en_ObjectNetworkState::LIVE)
-			{
-				return _PlayersArray[i];
-			}
-		}
-	}
-	break;
-	case en_GameObjectType::OBJECT_MONSTER:
-	case en_GameObjectType::OBJECT_SLIME:
-	case en_GameObjectType::OBJECT_BEAR:
-	{
-		for (int32 i = 0; i < PLAYER_MAX; i++)
-		{
-			if (_MonstersArray[i] != nullptr && _MonstersArray[i]->_GameObjectInfo.ObjectId == ObjectId)
-			{
-				return _MonstersArray[i];
-			}
-		}
-	}
-	break;
-	case en_GameObjectType::OBJECT_ENVIRONMENT:
-	case en_GameObjectType::OBJECT_STONE:
-	case en_GameObjectType::OBJECT_TREE:
-	{
-		for (int32 i = 0; i < PLAYER_MAX; i++)
-		{
-			if (_EnvironmentsArray[i] != nullptr && _EnvironmentsArray[i]->_GameObjectInfo.ObjectId == ObjectId)
-			{
-				return _EnvironmentsArray[i];
-			}
-		}
-	}
-	break;
-	case en_GameObjectType::OBJECT_ITEM:
-	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
-	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE:
-	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
-	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIVER_COIN:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_GOLD_COIN:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
-	{
-		for (int32 i = 0; i < PLAYER_MAX; i++)
-		{
-			if (_MonstersArray[i] != nullptr && _MonstersArray[i]->_GameObjectInfo.ObjectId == ObjectId)
-			{
-				return _EnvironmentsArray[i];
-			}
-		}
-	}
-	break;
-	default:
-		return nullptr;
-	}
-
-	return nullptr;
 }
 
 CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
@@ -582,8 +499,7 @@ void CObjectManager::ItemSpawn(int64 KillerId, en_GameObjectType KillerObjectTyp
 	*ReqItemCreateMessage << (int32)MonsterDataType;
 
 	st_GameServerJob* ReqDBaseItemCreateJob = GameServer->_GameServerJobMemoryPool->Alloc();
-	ReqDBaseItemCreateJob->Type = en_GameServerJobType::DATA_BASE_ITEM_CREATE;
-	ReqDBaseItemCreateJob->SessionId = -1;
+	ReqDBaseItemCreateJob->Type = en_GameServerJobType::DATA_BASE_ITEM_CREATE;	
 	ReqDBaseItemCreateJob->Session = nullptr;
 	ReqDBaseItemCreateJob->Message = ReqItemCreateMessage;
 
