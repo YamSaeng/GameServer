@@ -2,6 +2,7 @@
 #include "Sector.h"
 #include "LockFreeQue.h"
 #include "LockFreeStack.h"
+#include "GameObjectInfo.h"
 
 class CMonster;
 class CItem;
@@ -16,24 +17,28 @@ class CChannel
 private:
 	enum en_Channel
 	{
-		PLAYER_MAX = 800,
+		PLAYER_MAX = 100,
+		DUMMY_PLAYER_MAX = 500,
 		MONSTER_MAX = 100,
-		ITEM_MAX = 200,
-		ENVIRONMENT_MAX = 100
+		ENVIRONMENT_MAX = 100,
+		ITEM_MAX = 200		
 	};
 
 	//-------------------------------------------
 	// 채널에서 관리중인 플레이어, 몬스터, 아이템
 	//-------------------------------------------
 	CPlayer* _ChannelPlayerArray[PLAYER_MAX];
+	CPlayer* _ChannelDummyPlayerArray[DUMMY_PLAYER_MAX];
 	CMonster* _ChannelMonsterArray[MONSTER_MAX];
-	CItem* _ChannelItemArray[ITEM_MAX];
 	CEnvironment* _ChannelEnvironmentArray[ENVIRONMENT_MAX];
+	CItem* _ChannelItemArray[ITEM_MAX];
+	
 
 	CLockFreeStack<int32> _ChannelPlayerArrayIndexs;
+	CLockFreeStack<int32> _ChannelDummyPlayerArrayIndexs;
 	CLockFreeStack<int32> _ChannelMonsterArrayIndexs;
-	CLockFreeStack<int32> _ChannelItemArrayIndexs;
 	CLockFreeStack<int32> _ChannelEnvironmentArrayIndexs;
+	CLockFreeStack<int32> _ChannelItemArrayIndexs;	
 
 	SRWLOCK _ChannelLock;
 
@@ -75,6 +80,15 @@ public:
 
 	CMap* GetMap();
 	void SetMap(CMap* Map);
+
+	//------------------------------------------------------------------------------
+	// 채널에 있는 오브젝트 찾기
+	//------------------------------------------------------------------------------
+	CGameObject* FindChannelObject(int64 ObjectID, en_GameObjectType GameObjectType);
+	//------------------------------------------------------------------------------
+	// 채널에 있는 오브젝트들 찾기
+	//------------------------------------------------------------------------------
+	vector<CGameObject*> FindChannelObjects(vector<st_FieldOfViewInfo>& FindObjectIDs);
 
 	//----------------------------------------------------
 	// 채널 입장
