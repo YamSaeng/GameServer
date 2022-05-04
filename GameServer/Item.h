@@ -23,6 +23,8 @@ public:
 	// 아이템을 루팅 할 수 있는 대상을 지정한다.
 	//-----------------------------------------------------------------
 	void ItemSetTarget(en_GameObjectType TargetType, int64 TargetDBId);
+
+	void Init();
 protected:
 
 	//------------------

@@ -48,7 +48,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -326,6 +326,8 @@
     <None Include="EnvironmentData.json" />
     <None Include="ItemData.json" />
     <None Include="CharacterLevelingData.json" />
+    <None Include="MapInfoData.json" />
+    <None Include="MonsterAggroData.json" />
     <None Include="MonsterData.json" />
     <None Include="MonsterSkillDatas.json" />
     <None Include="PublicSkillDatas.json" />

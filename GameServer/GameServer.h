@@ -7,6 +7,7 @@
 #include "Heap.h"
 
 class CGameServerMessage;
+class CMap;
 
 class CGameServer : public CNetworkLib
 {
@@ -17,6 +18,8 @@ private:
 	HANDLE _UserDataBaseThread;
 	// 월드 데이터베이스 쓰레드
 	HANDLE _WorldDataBaseThread;
+	// 클라이언트 종료시 정보저장 쓰레드
+	HANDLE _ClientLeaveSaveThread;
 	// 타이머잡 쓰레드
 	HANDLE _TimerJobThread;
 	// 로직 쓰레드
@@ -31,6 +34,8 @@ private:
 	bool _UserDataBaseThreadEnd;
 	// World DataBaseThread 종료용 변수
 	bool _WorldDataBaseThreadEnd;
+	// ClientLeaveSaveThread 종료용 변수
+	bool _ClientLeaveSaveDBThreadEnd;
 
 	// TimerJobThread 종료용 변수
 	bool _TimerJobThreadEnd;
@@ -48,6 +53,10 @@ private:
 	// 월드 데이터베이스 쓰레드 ( 월드 데이터 베이스 작업 처리 )
 	//----------------------------------------------------------
 	static unsigned __stdcall WorldDataBaseThreadProc(void* Argument);
+	//-------------------------------------------------------------
+	// 클라이언트 접속 종료시 Player의 정보를 DB에 저장할 쓰레드
+	//-------------------------------------------------------------
+	static unsigned __stdcall ClientLeaveThreadProc(void* Argument);
 
 	//----------------------------------------------------------
 	// 타이머 잡 쓰레드 ( 타이머 잡 처리 )
@@ -178,11 +187,11 @@ private:
 	//-------------------------------------------------------------------
 	// AccountID가 AccountDB에 있는지 체크
 	//-------------------------------------------------------------------
-	void PacketProcReqDBAccountCheck(int64 SessionID, CMessage* Message);
+	void PacketProcReqDBAccountCheck(CMessage* Message);
 	//-------------------------------------------------------------------------------
 	// 생성요청한 캐릭터가 DB에 있는지 확인 후 캐릭터 생성
 	//-------------------------------------------------------------------------------
-	void PacketProcReqDBCreateCharacterNameCheck(int64 SessionID, CMessage* Message);
+	void PacketProcReqDBCreateCharacterNameCheck(CMessage* Message);
 	//-------------------------------------------------
 	// 아이템 생성 후 DB 저장
 	//-------------------------------------------------
@@ -190,39 +199,40 @@ private:
 	//------------------------------------------------------------------
 	// 인벤토리 테이블에 루팅한 아이템 저장
 	//------------------------------------------------------------------
-	void PacketProcReqDBLootingItemToInventorySave(int64 SessionId, CGameServerMessage* Message);
+	void PacketProcReqDBLootingItemToInventorySave(CGameServerMessage* Message);
 	//------------------------------------------------------------------
 	// 인벤토리 테이블에 제작템 저장
 	//------------------------------------------------------------------
-	void PacketProcReqDBCraftingItemToInventorySave(int64 SessionId, CGameServerMessage* Message);
+	void PacketProcReqDBCraftingItemToInventorySave(CGameServerMessage* Message);
 	//-------------------------------------------------------------------------
 	// 인벤토리 테이블에 아이템 놓기
 	//-------------------------------------------------------------------------
-	void PacketProcReqDBItemPlace(int64 SessionId, CGameServerMessage* Message);
+	void PacketProcReqDBItemPlace(CGameServerMessage* Message);
 	//---------------------------------------------------------------
 	// 인벤토리 테이블에 아이템 업데이트
 	//---------------------------------------------------------------
-	void PacketProcReqDBItemUpdate(int64 SessionId, CGameServerMessage* Message);
+	void PacketProcReqDBItemUpdate(CGameServerMessage* Message);
 	//---------------------------------------------------------------
 	// 인벤토리에 돈 저장
 	//---------------------------------------------------------------
-	void PacketProcReqDBGoldSave(int64 SessionId, CMessage* Message);
+	void PacketProcReqDBGoldSave(CMessage* Message);
 	//-----------------------------------------------------------------------
 	// 게임 서버 접속시 캐릭터 정보를 DB에서 가져와서 클라에 전송
 	//-----------------------------------------------------------------------
-	void PacketProcReqDBCharacterInfoSend(int64 SessionId, CMessage* Message);
+	void PacketProcReqDBCharacterInfoSend(CMessage* Message);
+	//--------------------------------------------------------------------
 	// 접속 종료시 플레이어 정보 DB에 기록
 	//--------------------------------------------------------------------
-	void PacketProcReqDBLeavePlayerInfoSave(CMessage* Message);
+	void PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message);
 
 	//------------------------------------------------------------------
 	// 타이머 잡 요청 처리 함수
 	//------------------------------------------------------------------
-
+	
 	//----------------------------------------------------------------
 	// 오브젝트 스폰
 	//----------------------------------------------------------------
-	void PacketProcTimerObjectSpawn(CGameServerMessage* Message);	
+	void PacketProcTimerObjectSpawn(CGameServerMessage* Message);
 	//----------------------------------------------------------------
 	// 핑 처리
 	//----------------------------------------------------------------
@@ -243,15 +253,12 @@ private:
 	//--------------------------------------------------------------------------------------------------
 	// 캐릭터 생성 요청 응답 패킷 조합
 	//--------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResCreateCharacter(bool IsSuccess, st_GameObjectInfo& CreateCharacterObjectInfo);
-	//-------------------------------------------------------------
-	// 게임서버 입장 요청 응답 패킷 조합
-	//-------------------------------------------------------------
-	CGameServerMessage* MakePacketResEnterGame(bool EnterGameSuccess, st_GameObjectInfo* ObjectInfo);
+	CGameServerMessage* MakePacketResCreateCharacter(bool IsSuccess, st_GameObjectInfo& CreateCharacterObjectInfo);	
 	//-------------------------------------------------------------------------------------------------------------------------
 	// 게임서버 마우스 위치 오브젝트 정보 요청 응답 패킷 조합
 	//-------------------------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResMousePositionObjectInfo(int64 AccountId, int64 PreviousChoiceObjectId, int64 FindObjectId, map<en_SkillType, CSkill*> BufSkillInfo, map<en_SkillType, CSkill*> DeBufSkillInfo);
+	CGameServerMessage* MakePacketResMousePositionObjectInfo(int64 AccountId, int64 PreviousChoiceObjectId, int64 FindObjectId,
+		map<en_SkillType, CSkill*> BufSkillInfo, map<en_SkillType, CSkill*> DeBufSkillInfo);
 	//-------------------------------------------------------------------------------------------------------------------------
 	// 게임서버 돈 저장 요청 응답 패킷 조합
 	//-------------------------------------------------------------------------------------------------------------------------
@@ -311,10 +318,14 @@ public:
 	// 경험치 계산
 	//-----------------------------------------------------------
 	void ExperienceCalculate(CPlayer* Player, CGameObject* Target);
+	//-------------------------------------------------------------
+	// 게임서버 입장 요청 응답 패킷 조합
+	//-------------------------------------------------------------
+	CGameServerMessage* MakePacketResEnterGame(bool EnterGameSuccess, st_GameObjectInfo* ObjectInfo, st_Vector2Int* SpawnPosition);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 공격요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResAttack(int64 ObjectId, int64 TargetId, en_SkillType SkillType, int32 Damage, bool IsCritical);
+	CGameServerMessage* MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_SkillType SkillType, int32 Damage, bool IsCritical);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 마법요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -355,8 +366,12 @@ public:
 	// 게임서버 오브젝트 스폰 패킷 조합
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResObjectSpawn(int32 ObjectInfosCount, vector<CGameObject*> ObjectInfos);
+	//-------------------------------------------------------------------
+	// 게임서버 오브젝트 디스폰 패킷 조합 ( 단일 대상 )
+	//-------------------------------------------------------------------
+	CGameServerMessage* MakePacketResObjectDeSpawn(int64 DeSpawnObjectID);
 	//-----------------------------------------------------------------------------------------
-	// 게임서버 오브젝트 디스폰 패킷 조합
+	// 게임서버 오브젝트 디스폰 패킷 조합 ( 복수 대상 )
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResObjectDeSpawn(int32 DeSpawnObjectCount, vector<CGameObject*> DeSpawnObjects);
 	//-----------------------------------------------------------------------------------------
@@ -410,11 +425,7 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 스킬 에러 메세지 생성 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketSkillError(en_PersonalMessageType ErrorType, const WCHAR* SkillName, int16 SkillDistance = 0);
-	//-----------------------------------------------------------------------------------------
-	// 게임서버 일반 에러 메세지 생성 패킷 조합 
-	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketStatusAbnormalMessage(en_CommonErrorType ErrorType, int8 StatusAbnormalCount, int8 StatusAbnormal);
+	CGameServerMessage* MakePacketSkillError(en_PersonalMessageType PersonalMessageType, const WCHAR* SkillName, int16 SkillDistance = 0);
 	//------------------------------------------------------------
 	// 게임 서버 상태이상 적용 패킷 조합
 	//------------------------------------------------------------
@@ -422,7 +433,11 @@ public:
 	//---------------------------------------------------
 	// 로그인 서버 로그아웃 요청 패킷 조합
 	//---------------------------------------------------
-	CGameServerMessage* MakePacketLogOut(int64 AccountID);
+	CGameServerMessage* MakePacketLoginServerLogOut(int64 AccountID);
+	//---------------------------------------------------
+	// 로그인 서버 로그인 상태 변경 패킷 조합
+	//---------------------------------------------------
+	CGameServerMessage* MakePacketLoginServerLoginStateChange(int64 AccountID, en_LoginState ChangeLoginState);
 public:
 	//-----------------------------------------------
 	// Job 메모리풀
@@ -437,8 +452,10 @@ public:
 	//------------------------------------
 	// Job 큐
 	//------------------------------------
-	CLockFreeQue<st_GameServerJob*> _GameServerUserDataBaseThreadMessageQue;
-	CLockFreeQue<st_GameServerJob*> _GameServerWorldDataBaseThreadMessageQue;
+	CLockFreeQue<st_GameServerJob*> _GameServerUserDBThreadMessageQue;
+	CLockFreeQue<st_GameServerJob*> _GameServerWorldDBThreadMessageQue;
+
+	CLockFreeQue<st_GameServerJob*> _GameServerClientLeaveDBThreadMessageQue;
 
 	//--------------------------------------
 	// TimerJob 우선순위 큐
@@ -450,15 +467,18 @@ public:
 	int64 _NetworkThreadWakeCount;
 	// 네트워크 쓰레드 TPS
 	int64 _NetworkThreadTPS;
-
+	
 	// User DB 쓰레드 깨우기 이벤트
 	HANDLE _UserDataBaseWakeEvent;
 	// World DB 쓰레드 깨우기 이벤트
 	HANDLE _WorldDataBaseWakeEvent;
+	HANDLE _ClientLeaveDBThreadWakeEvent;
 	// DB 쓰레드 활성화된 횟수
-	int64 _DataBaseThreadWakeCount;
+	int64 _UserDBThreadWakeCount;
 	// DB 쓰레드 TPS
-	int64 _DataBaseThreadTPS;
+	int64 _UserDBThreadTPS;
+	// 클라 정보 저장 쓰레드 TPS
+	int64 _LeaveDBThreadTPS;
 
 	// 타이머 잡 쓰레드 활성화된 횟수
 	int64 _TimerJobThreadWakeCount;
@@ -493,30 +513,17 @@ public:
 	virtual bool OnConnectionRequest(const wchar_t ClientIP, int32 Port) override;
 
 	//--------------------------------------------------------------
-	// 위치값을 기준으로 메세지 주위 섹터에 전송
-	//--------------------------------------------------------------
-	void SendPacketAroundSector(st_Vector2Int CellPosition, CMessage* Message);
-	//--------------------------------------------------------------
-	// Session을 기준으로 주위 섹터에 전송
-	//--------------------------------------------------------------
-	void SendPacketAroundSector(st_Session* Session, CMessage* Message, bool SendMe = false);
-	//--------------------------------------------------------------
 	// 시야범위 기준으로 패킷 전송
 	//--------------------------------------------------------------
-	void SendPacketFieldOfView(vector<st_FieldOfViewInfo> FieldOfViewObject, CMessage* Message, CGameObject* Self = nullptr);
+	void SendPacketFieldOfView(vector<st_FieldOfViewInfo> FieldOfViewObject, CMessage* Message);
 	//--------------------------------------------------------------
 	// 오브젝트를 기준으로 시야뷰 안에 있는 플레이어 대상으로 패킷 전송
 	//--------------------------------------------------------------
 	void SendPacketFieldOfView(CGameObject* Object, CMessage* Message);
 	//--------------------------------------------------------------
-	// Session 기준으로 시야뷰 안에 플레이어 대상으로 패킷 전송
-	//--------------------------------------------------------------
-	void SendPacketFieldOfView(st_Session* Session, CMessage* Message, bool SendMe = false);
-	
-	//--------------------------------------------------------------
 	// 오브젝트 스폰 타이머 잡 생성
 	//--------------------------------------------------------------
-	void SpawnObjectTimeTimerJobCreate(int16 SpawnObjectType, st_Vector2Int SpawnPosition, int64 SpawnTime);	
+	void SpawnObjectTimeTimerJobCreate(int16 SpawnObjectType, st_Vector2Int SpawnPosition, int64 SpawnTime);
 
 	//-------------------------------------------
 	// 핑 타이머 잡 생성

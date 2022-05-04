@@ -7,6 +7,8 @@ CItem::CItem()
 {
 	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_ITEM;
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+
+	_FieldOfViewDistance = 10;
 }
 
 CItem::~CItem()
@@ -21,9 +23,9 @@ void CItem::Update()
 	}
 
 	// 타겟의 상태가 LEAVE면 타겟을 없애준다.
-	if (_Target && _Target->_NetworkState == en_ObjectNetworkState::LEAVE)
+	if (_Owner && _Owner->_NetworkState == en_ObjectNetworkState::LEAVE)
 	{
-		_Target = nullptr;
+		_Owner = nullptr;
 	}
 
 	// 상태에 따라 Update문 따로 호출
@@ -44,12 +46,38 @@ void CItem::SetDestoryTime(int32 DestoryTime)
 
 void CItem::ItemSetTarget(en_GameObjectType TargetType, int64 TargetDBId)
 {
-	_Target = G_ObjectManager->Find(TargetDBId, TargetType);
+	if (_Channel != nullptr)
+	{
+		_Owner = _Channel->FindChannelObject(TargetDBId, TargetType);
+	}	
+}
+
+void CItem::Init()
+{
+	_ItemInfo.ItemDBId = 0;
+	_ItemInfo.ItemIsQuickSlotUse = false;
+	_ItemInfo.Width = 0;
+	_ItemInfo.Height = 0;
+	_ItemInfo.Rotated = false;
+	_ItemInfo.TileGridPositionX = 0;
+	_ItemInfo.TileGridPositionY = 0;
+	_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_NONE;
+	_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
+	_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
+	_ItemInfo.ItemName = L"";
+	_ItemInfo.ItemExplain = L"";
+	_ItemInfo.ItemMinDamage = 0;
+	_ItemInfo.ItemMaxDamage = 0;
+	_ItemInfo.ItemDefence = 0;
+	_ItemInfo.ItemMaxCount = 0;
+	_ItemInfo.ItemCount = 0;
+	_ItemInfo.ItemThumbnailImagePath = L"";
+	_ItemInfo.ItemIsEquipped = false;
 }
 
 void CItem::UpdateIdle()
 {
-	if (_Target && _Target->GetCellPosition() == GetCellPosition())
+	if (_Owner && _Owner->GetCellPosition() == GetCellPosition())
 	{		
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;		
 	}

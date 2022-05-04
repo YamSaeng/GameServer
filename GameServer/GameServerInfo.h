@@ -39,8 +39,7 @@ enum class en_GameServerJobType : int16
 
 struct st_GameServerJob
 {
-	en_GameServerJobType Type;
-	int64 SessionId;
+	en_GameServerJobType Type;	
 	CGameServerMessage* Message = nullptr;
 	st_Session* Session = nullptr;
 };

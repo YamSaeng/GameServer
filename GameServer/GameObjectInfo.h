@@ -2004,12 +2004,13 @@ struct st_CraftingItemCategory
 
 struct st_FieldOfViewInfo
 {
-	int64 ObjectId;
+	int64 ObjectID;
+	int64 SessionID = 0;
 	en_GameObjectType ObjectType;
 
 	bool operator<(st_FieldOfViewInfo Right)
 	{
-		return this->ObjectId < Right.ObjectId;
+		return this->ObjectID < Right.ObjectID;
 	}
 };
 

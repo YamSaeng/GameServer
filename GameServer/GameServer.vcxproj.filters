@@ -31,9 +31,6 @@
     <Filter Include="Util\File">
       <UniqueIdentifier>{b9b07ab4-ce0c-4b0a-9c37-bcda4302be5f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Util\설정 파일">
-      <UniqueIdentifier>{b3023991-54a2-4ae7-9aa4-811f2eb02c1c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ContentServer\Content">
       <UniqueIdentifier>{4cae6cf0-7bb7-4aa8-8506-398ba31b83af}</UniqueIdentifier>
     </Filter>
@@ -45,15 +42,6 @@
     </Filter>
     <Filter Include="ContentServer\Content\Data">
       <UniqueIdentifier>{12807dfe-17f2-4046-865b-c8efb38536d7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Util\설정 파일\DB">
-      <UniqueIdentifier>{78adbdab-1584-4001-a3cc-f094d3e8fdcd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Util\설정 파일\Server">
-      <UniqueIdentifier>{333fc71e-1d3d-4fb3-b966-5cc1ddef8388}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Util\설정 파일\Data">
-      <UniqueIdentifier>{39bd25db-55f2-4eb9-af34-6bad1c71c5bf}</UniqueIdentifier>
     </Filter>
     <Filter Include="ContentServer\Content\GameObject">
       <UniqueIdentifier>{821a2af2-60a7-4c19-8f19-590f7bfe1ef6}</UniqueIdentifier>
@@ -79,14 +67,26 @@
     <Filter Include="ContentServer\Content\Equiment">
       <UniqueIdentifier>{ad620a1c-6f26-4d33-b623-da20f3ff6f50}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Util\설정 파일\Data\SkillData">
-      <UniqueIdentifier>{40192980-e430-431a-929f-2f8a9aafd339}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ContentServer\Content\GameObject\Player">
       <UniqueIdentifier>{ae04998f-66c9-4da1-8bfd-9f8523536e46}</UniqueIdentifier>
     </Filter>
     <Filter Include="ContentServer\Content\Map">
       <UniqueIdentifier>{c58762ae-f81f-4697-8cde-0d52a640418b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util\Json,Xml">
+      <UniqueIdentifier>{b3023991-54a2-4ae7-9aa4-811f2eb02c1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util\Json,Xml\DB">
+      <UniqueIdentifier>{78adbdab-1584-4001-a3cc-f094d3e8fdcd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util\Json,Xml\Server">
+      <UniqueIdentifier>{333fc71e-1d3d-4fb3-b966-5cc1ddef8388}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util\Json,Xml\Data">
+      <UniqueIdentifier>{39bd25db-55f2-4eb9-af34-6bad1c71c5bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util\Json,Xml\Data\SkillData">
+      <UniqueIdentifier>{40192980-e430-431a-929f-2f8a9aafd339}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -183,9 +183,6 @@
     <ClInclude Include="Player.h">
       <Filter>ContentServer\Content\GameObject\Player</Filter>
     </ClInclude>
-    <ClInclude Include="Sector.h">
-      <Filter>ContentServer\Content\Channel</Filter>
-    </ClInclude>
     <ClInclude Include="ChannelManager.h">
       <Filter>ContentServer\Content\Channel</Filter>
     </ClInclude>
@@ -239,10 +236,13 @@
     <ClInclude Include="Map.h">
       <Filter>ContentServer\Content\Map</Filter>
     </ClInclude>
-    <ClInclude Include="SkillBox.h">
-      <Filter>DB</Filter>
-    </ClInclude>
     <ClInclude Include="MapManager.h">
+      <Filter>ContentServer\Content\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="SkillBox.h">
+      <Filter>ContentServer\Content\SkillBox</Filter>
+    </ClInclude>
+    <ClInclude Include="Sector.h">
       <Filter>ContentServer\Content\Map</Filter>
     </ClInclude>
   </ItemGroup>
@@ -293,9 +293,6 @@
     </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>ContentServer\Content\GameObject\Player</Filter>
-    </ClCompile>
-    <ClCompile Include="Sector.cpp">
-      <Filter>ContentServer\Content\Channel</Filter>
     </ClCompile>
     <ClCompile Include="ChannelManager.cpp">
       <Filter>ContentServer\Content\Channel</Filter>
@@ -351,62 +348,71 @@
     <ClCompile Include="MapManager.cpp">
       <Filter>ContentServer\Content\Map</Filter>
     </ClCompile>
+    <ClCompile Include="Sector.cpp">
+      <Filter>ContentServer\Content\Map</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="DBConfig.xml">
-      <Filter>Util\설정 파일\DB</Filter>
+      <Filter>Util\Json,Xml\DB</Filter>
     </Xml>
     <Xml Include="GameServerConfig.xml">
-      <Filter>Util\설정 파일\Server</Filter>
+      <Filter>Util\Json,Xml\Server</Filter>
     </Xml>
     <Xml Include="GameServerDB.xml">
-      <Filter>Util\설정 파일\Server</Filter>
+      <Filter>Util\Json,Xml\Server</Filter>
     </Xml>
   </ItemGroup>
   <ItemGroup>
     <None Include="ItemData.json">
-      <Filter>Util\설정 파일\Data</Filter>
+      <Filter>Util\Json,Xml\Data</Filter>
     </None>
     <None Include="PlayerCharacterStatus.json">
-      <Filter>Util\설정 파일\Data</Filter>
+      <Filter>Util\Json,Xml\Data</Filter>
     </None>
     <None Include="MonsterData.json">
-      <Filter>Util\설정 파일\Data</Filter>
+      <Filter>Util\Json,Xml\Data</Filter>
     </None>
     <None Include="EnvironmentData.json">
-      <Filter>Util\설정 파일\Data</Filter>
+      <Filter>Util\Json,Xml\Data</Filter>
     </None>
     <None Include="CraftingData.json">
-      <Filter>Util\설정 파일\Data</Filter>
+      <Filter>Util\Json,Xml\Data</Filter>
     </None>
     <None Include="CharacterLevelingData.json">
-      <Filter>Util\설정 파일\Data</Filter>
+      <Filter>Util\Json,Xml\Data</Filter>
     </None>
     <None Include="ArcherSkillDatas.json">
-      <Filter>Util\설정 파일\Data\SkillData</Filter>
+      <Filter>Util\Json,Xml\Data\SkillData</Filter>
     </None>
     <None Include="PublicSkillDatas.json">
-      <Filter>Util\설정 파일\Data\SkillData</Filter>
+      <Filter>Util\Json,Xml\Data\SkillData</Filter>
     </None>
     <None Include="ShamanSkillDatas.json">
-      <Filter>Util\설정 파일\Data\SkillData</Filter>
+      <Filter>Util\Json,Xml\Data\SkillData</Filter>
     </None>
     <None Include="TaioistSkillDatas.json">
-      <Filter>Util\설정 파일\Data\SkillData</Filter>
+      <Filter>Util\Json,Xml\Data\SkillData</Filter>
     </None>
     <None Include="WarriorSkillDatas.json">
-      <Filter>Util\설정 파일\Data\SkillData</Filter>
+      <Filter>Util\Json,Xml\Data\SkillData</Filter>
     </None>
     <None Include="MonsterSkillDatas.json">
-      <Filter>Util\설정 파일\Data\SkillData</Filter>
+      <Filter>Util\Json,Xml\Data\SkillData</Filter>
     </None>
     <None Include="ThiefSkillDatas.json">
-      <Filter>Util\설정 파일\Data\SkillData</Filter>
+      <Filter>Util\Json,Xml\Data\SkillData</Filter>
+    </None>
+    <None Include="MonsterAggroData.json">
+      <Filter>Util\Json,Xml\Data</Filter>
+    </None>
+    <None Include="MapInfoData.json">
+      <Filter>Util\Json,Xml\Data</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="MapData.txt">
-      <Filter>Util\설정 파일\Data</Filter>
+      <Filter>Util\Json,Xml\Data</Filter>
     </Text>
   </ItemGroup>
 </Project>

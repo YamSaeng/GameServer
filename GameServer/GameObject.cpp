@@ -248,21 +248,21 @@ void CGameObject::Update()
 		break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_AGGRO_LIST_REMOVE:
 		{
-			int64 RemoveAggroListGameObjectId;
-			*GameObjectJob->GameObjectJobMessage >> RemoveAggroListGameObjectId;
+				int64 RemoveAggroListGameObjectId;
+				*GameObjectJob->GameObjectJobMessage >> RemoveAggroListGameObjectId;
 
-			auto FindAggroTargetIterator = _AggroTargetList.find(RemoveAggroListGameObjectId);
-			if (FindAggroTargetIterator != _AggroTargetList.end())
-			{
-				_AggroTargetList.erase(RemoveAggroListGameObjectId);
+				auto FindAggroTargetIterator = _AggroTargetList.find(RemoveAggroListGameObjectId);
+				if (FindAggroTargetIterator != _AggroTargetList.end())
+				{
+					_AggroTargetList.erase(RemoveAggroListGameObjectId);
+				}
 			}
-		}
+		break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_REQ_CHARACTER_INFO:
 			{
-				G_ObjectManager->GameServer->SendPacket(((CPlayer*)this)->_SessionId, GameObjectJob->GameObjectJobMessage);
+				G_ObjectManager->GameServer->SendPacket(((CPlayer*)this)->_SessionId, GameObjectJob->GameObjectJobMessage);				
 			}
-			break;
-		break;			
+		break;				
 		}
 
 		if (GameObjectJob->GameObjectJobMessage != nullptr)
