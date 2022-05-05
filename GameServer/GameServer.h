@@ -363,7 +363,11 @@ public:
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketPatrol(int64 ObjectId, en_GameObjectType ObjectType, bool CanMove, st_PositionInfo PositionInfo, en_MonsterState MonsterState);
 	//-----------------------------------------------------------------------------------------
-	// 게임서버 오브젝트 스폰 패킷 조합
+	// 게임서버 오브젝트 스폰 패킷 조합 ( 단일 대상 )
+	//-----------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResObjectSpawn(CGameObject* SpawnObject);
+	//-----------------------------------------------------------------------------------------
+	// 게임서버 오브젝트 스폰 패킷 조합 ( 복수 대상 )
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResObjectSpawn(int32 ObjectInfosCount, vector<CGameObject*> ObjectInfos);
 	//-------------------------------------------------------------------

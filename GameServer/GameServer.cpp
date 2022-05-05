@@ -2179,69 +2179,59 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 
 				vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetFieldOfViewPlayers(MyPlayer, 1, false);
 
-				// 연속기 스킬 처리
+				// 연속기 스킬이 활성화 되어 있는ㄴ지 확인
 				if (MyPlayer->_ComboSkill != nullptr)
 				{
-					en_SkillType NextComboSkill = ReqMagicSkill->GetSkillInfo()->NextComboSkill;
+					st_GameObjectJob* ComboAttackOffJob = G_ObjectManager->GameObjectJobCreate();
+					ComboAttackOffJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_OFF;
 
-					// 연속기 공격인지 추가적으로 판단	
-					if (NextComboSkill == (en_SkillType)ReqSkillType)
+					ComboAttackOffJob->GameObjectJobMessage = nullptr;
+
+					MyPlayer->_GameObjectJobQue.Enqueue(ComboAttackOffJob);
+
+					CSkill* FindComboSkill = MyPlayer->_SkillBox.FindSkill(ReqMagicSkill->GetSkillInfo()->SkillType);
+
+					switch (FindComboSkill->GetSkillInfo()->SkillType)
 					{
-						if (ReqMagicSkill != nullptr && ReqMagicSkill->GetSkillInfo()->CanSkillUse)
-						{
-							if (MyPlayer->_ComboSkill != nullptr)
-							{
-								st_GameObjectJob* ComboAttackOffJob = G_ObjectManager->GameObjectJobCreate();
-								ComboAttackOffJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_OFF;
+					case en_SkillType::SKILL_SHAMAN_ICE_WAVE:
+					{
+						CSkill* NewDebufSkill = G_ObjectManager->SkillCreate();
 
-								ComboAttackOffJob->GameObjectJobMessage = nullptr;
+						st_AttackSkillInfo* NewDebufSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(FindComboSkill->GetSkillInfo()->SkillMediumCategory);
+						*NewDebufSkillInfo = *((st_AttackSkillInfo*)FindComboSkill->GetSkillInfo());
 
-								MyPlayer->_GameObjectJobQue.Enqueue(ComboAttackOffJob);
+						NewDebufSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewDebufSkillInfo);
+						NewDebufSkill->StatusAbnormalDurationTimeStart();
 
-								CSkill* FindComboSkill = MyPlayer->_SkillBox.FindSkill(ReqMagicSkill->GetSkillInfo()->NextComboSkill);
+						MyPlayer->_SelectTarget->AddDebuf(NewDebufSkill);
+						MyPlayer->_SelectTarget->SetStatusAbnormal(STATUS_ABNORMAL_SHAMAN_ICE_WAVE);
 
-								switch (NextComboSkill)
-								{
-								case en_SkillType::SKILL_SHAMAN_ICE_WAVE:
-								{
-									CSkill* NewDebufSkill = G_ObjectManager->SkillCreate();
+						CMessage* ResStatusAbnormalPacket = MakePacketStatusAbnormal(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId,
+							MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType,
+							MyPlayer->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
+							NewDebufSkill->GetSkillInfo()->SkillType,
+							true, STATUS_ABNORMAL_SHAMAN_ICE_WAVE);
+						SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
+						ResStatusAbnormalPacket->Free();
 
-									st_AttackSkillInfo* NewDebufSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(FindComboSkill->GetSkillInfo()->SkillMediumCategory);
-									*NewDebufSkillInfo = *((st_AttackSkillInfo*)FindComboSkill->GetSkillInfo());
-
-									NewDebufSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewDebufSkillInfo);
-									NewDebufSkill->StatusAbnormalDurationTimeStart();
-
-									MyPlayer->_SelectTarget->AddDebuf(NewDebufSkill);
-									MyPlayer->_SelectTarget->SetStatusAbnormal(STATUS_ABNORMAL_SHAMAN_ICE_WAVE);
-
-									CMessage* ResStatusAbnormalPacket = MakePacketStatusAbnormal(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId,
-										MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType,
-										MyPlayer->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
-										NewDebufSkill->GetSkillInfo()->SkillType,
-										true, STATUS_ABNORMAL_SHAMAN_ICE_WAVE);
-									SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
-									ResStatusAbnormalPacket->Free();
-
-									CMessage* ResBufDeBufSkillPacket = MakePacketBufDeBuf(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, false, NewDebufSkill->GetSkillInfo());
-									SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
-									ResBufDeBufSkillPacket->Free();
-								}
-								break;
-								}
-
-								for (auto QuickSlotBarPosition : MyPlayer->_QuickSlotManager.FindQuickSlotBar(ReqMagicSkill->GetSkillInfo()->NextComboSkill))
-								{
-									// 클라에게 쿨타임 표시
-									CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
-										QuickSlotBarPosition.QuickSlotBarSlotIndex,
-										1.0f, FindComboSkill);
-									SendPacket(Session->SessionId, ResCoolTimeStartPacket);
-									ResCoolTimeStartPacket->Free();
-								}
-							}
-						}
+						CMessage* ResBufDeBufSkillPacket = MakePacketBufDeBuf(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, false, NewDebufSkill->GetSkillInfo());
+						SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
+						ResBufDeBufSkillPacket->Free();
 					}
+					break;
+					}
+
+					FindComboSkill->CoolTimeStart();
+
+					for (auto QuickSlotBarPosition : MyPlayer->_QuickSlotManager.FindQuickSlotBar(FindComboSkill->GetSkillInfo()->SkillType))
+					{
+						// 클라에게 쿨타임 표시
+						CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
+							QuickSlotBarPosition.QuickSlotBarSlotIndex,
+							1.0f, FindComboSkill);
+						SendPacket(Session->SessionId, ResCoolTimeStartPacket);
+						ResCoolTimeStartPacket->Free();
+					}					
 				}
 
 				// 요청한 스킬이 퀵슬롯에 등록이 되어 있는지 확인
@@ -2367,12 +2357,12 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 							SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResObjectStateChangePacket);
 							ResObjectStateChangePacket->Free();
 						}
-						break;
+						break;							
 						case en_SkillType::SKILL_SHAMAN_FLAME_HARPOON:
 						case en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE:
 						case en_SkillType::SKILL_SHAMAN_HELL_FIRE:
 						case en_SkillType::SKILL_SHAMAN_ROOT:
-						case en_SkillType::SKILL_SHAMAN_ICE_CHAIN:
+						case en_SkillType::SKILL_SHAMAN_ICE_CHAIN:						
 						case en_SkillType::SKILL_TAIOIST_DIVINE_STRIKE:
 						case en_SkillType::SKILL_TAIOIST_ROOT:
 							if (MyPlayer->_SelectTarget != nullptr)
@@ -4992,7 +4982,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 			*ResCharacterInfoMessage << MyPlayer->_AccountId;
 			*ResCharacterInfoMessage << MyPlayer->_GameObjectInfo.ObjectId;
 #pragma region 캐릭터 경험치 정보 담기
-			* ResCharacterInfoMessage << MyPlayer->_Experience.CurrentExperience;
+			*ResCharacterInfoMessage << MyPlayer->_Experience.CurrentExperience;
 			*ResCharacterInfoMessage << MyPlayer->_Experience.RequireExperience;
 			*ResCharacterInfoMessage << MyPlayer->_Experience.TotalExperience;
 #pragma endregion
@@ -5739,14 +5729,8 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterInfoGetConnection);
 
-			// 캐릭터 정보를 전달
-			st_GameObjectJob* ResCharacterInfoJob = G_ObjectManager->GameObjectJobCreate();
-			ResCharacterInfoJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_REQ_CHARACTER_INFO;
-
-			ResCharacterInfoJob->GameObjectJobMessage = ResCharacterInfoMessage;
-
-			MyPlayer->_GameObjectJobQue.Enqueue(ResCharacterInfoJob);	
-
+			SendPacket(MyPlayer->_SessionId, ResCharacterInfoMessage);
+			
 			MyPlayer->_NetworkState = en_ObjectNetworkState::LIVE;			
 #pragma endregion
 		} while (0);
@@ -5911,21 +5895,19 @@ void CGameServer::PacketProcTimerObjectSpawn(CGameServerMessage* Message)
 
 	Message->Free();
 
-	//CMap* ObjectEnterMap = G_MapManager->GetMap(1);	
-
-	//if (ObjectEnterMap != nullptr)
-	//{
-	//	// 스폰할 위치에 이미 다른 오브젝트가 있을 경우 스폰 하지 않고 다시 예약한다. 		
-	//	CGameObject* FindGameObject = ObjectEnterMap->Find(SpawnPosition);
-	//	if (FindGameObject != nullptr)
-	//	{
-	//		SpawnObjectTimeTimerJobCreate(SpawnObjectType, SpawnPosition, 10000);
-	//	}
-	//	else
-	//	{
-	//		G_ObjectManager->ObjectSpawn((en_GameObjectType)SpawnObjectType, SpawnPosition);
-	//	}
-	//}
+	CMap* ObjectEnterMap = G_MapManager->GetMap(1);
+	if (ObjectEnterMap != nullptr)
+	{
+		CGameObject* FindObject = ObjectEnterMap->Find(SpawnPosition);
+		if (FindObject != nullptr)
+		{
+			SpawnObjectTimeTimerJobCreate(SpawnObjectType, SpawnPosition, 10000);
+		}
+		else
+		{
+			G_ObjectManager->ObjectSpawn((en_GameObjectType)SpawnObjectType, SpawnPosition);
+		}
+	}	
 }
 
 void CGameServer::PacketProcTimerPing(int64 SessionId)
@@ -6814,6 +6796,24 @@ CGameServerMessage* CGameServer::MakePacketPatrol(int64 ObjectId, en_GameObjectT
 	*ResPatrolPacket << (int8)MonsterState;
 
 	return ResPatrolPacket;
+}
+
+CGameServerMessage* CGameServer::MakePacketResObjectSpawn(CGameObject* SpawnObject)
+{
+	CGameServerMessage* ResSpawnPacket = CGameServerMessage::GameServerMessageAlloc();
+	if (ResSpawnPacket == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResSpawnPacket->Clear();
+
+	*ResSpawnPacket << (int16)en_PACKET_S2C_SPAWN;
+
+	*ResSpawnPacket << 1;
+	*ResSpawnPacket << SpawnObject->_GameObjectInfo;
+
+	return ResSpawnPacket;
 }
 
 CGameServerMessage* CGameServer::MakePacketResObjectSpawn(int32 ObjectInfosCount, vector<CGameObject*> ObjectInfos)
