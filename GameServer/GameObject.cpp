@@ -257,12 +257,7 @@ void CGameObject::Update()
 					_AggroTargetList.erase(RemoveAggroListGameObjectId);
 				}
 			}
-		break;
-		case en_GameObjectJobType::GAMEOBJECT_JOB_REQ_CHARACTER_INFO:
-			{
-				G_ObjectManager->GameServer->SendPacket(((CPlayer*)this)->_SessionId, GameObjectJob->GameObjectJobMessage);				
-			}
-		break;				
+		break;		
 		}
 
 		if (GameObjectJob->GameObjectJobMessage != nullptr)

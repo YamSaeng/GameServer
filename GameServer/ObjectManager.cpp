@@ -109,8 +109,6 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int64 MapID)
 	case en_GameObjectType::OBJECT_SLIME:
 	case en_GameObjectType::OBJECT_BEAR:
 	{
-		vector<CGameObject*> SpawnMonster;
-
 		CMonster* Monster = (CMonster*)EnterGameObject;
 
 		// 인덱스 가져오기
@@ -120,14 +118,12 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int64 MapID)
 
 		// 몬스터 주위 오브젝트 정보 저장
 		Monster->_FieldOfViewPlayers = Map->GetFieldOfViewPlayer(Monster, Monster->_FieldOfViewDistance);
-
+		
 		// 채널 입장
-		Map->GetChannelManager()->Find(1)->EnterChannel(EnterGameObject, &Monster->_SpawnPosition);
-
-		SpawnMonster.push_back(Monster);
+		Map->GetChannelManager()->Find(1)->EnterChannel(EnterGameObject, &Monster->_SpawnPosition);		
 
 		// 몬스터 추가하면 몬스터 주위 플레이어들에게 몬스터를 소환하라고 알림
-		CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(1, SpawnMonster);
+		CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(Monster);
 		GameServer->SendPacketFieldOfView(Monster, ResSpawnPacket);
 		ResSpawnPacket->Free();
 
