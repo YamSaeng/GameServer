@@ -239,6 +239,31 @@ private:
 	void PacketProcTimerPing(int64 SessionId);
 
 	//--------------------------------------
+	// 게임오브젝트 잡 생성 함수
+	//--------------------------------------
+		
+	//-------------------------------------------------------------------------------
+	// 채널 입장 잡 생성 함수
+	//-------------------------------------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobEnterChannel(CGameObject* EnterChannelObject);
+	//------------------------------------------------------------------------------
+	// 채널 퇴장 잡 생성 함수
+	//------------------------------------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobLeaveChannel(CGameObject* LeaveChannelObject);
+	//----------------------------------------------------------------------
+	// 근접 공격 잡 생성 함수
+	//----------------------------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobMeleeAttack(CSkill* MeleeAttackSkill);
+	//--------------------------------------------------------------------------------------------------------------------------
+	// 연속기 공격 생성 함수
+	//--------------------------------------------------------------------------------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobComboSkillCreate(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex,  CSkill* ComboSkill);
+	//------------------------------------------------
+	// 연속기 공격 끄기 함수
+	//------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobComboSkillOff();
+
+	//--------------------------------------
 	// 패킷조합 함수		
 	//--------------------------------------
 
@@ -357,7 +382,7 @@ public:
 	//------------------------------------------------------------------------------------------------------
 	// 게임서버 이동 멈춤 요청 응답 패킷 조합
 	//------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResMoveStop(int64 AccountId, int64 ObjectId, st_PositionInfo PositionInto);
+	CGameServerMessage* MakePacketResMoveStop(int64 ObjectId, st_PositionInfo PositionInto);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 정찰 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -433,7 +458,7 @@ public:
 	//------------------------------------------------------------
 	// 게임 서버 상태이상 적용 패킷 조합
 	//------------------------------------------------------------
-	CGameServerMessage* MakePacketStatusAbnormal(int64 PlayerId, en_GameObjectType ObjectType, en_MoveDir Dir, en_SkillType SkillType, bool SetStatusAbnormal, int8 StatusAbnormal);
+	CGameServerMessage* MakePacketStatusAbnormal(int64 TargetId, en_GameObjectType ObjectType, en_MoveDir Dir, en_SkillType SkillType, bool SetStatusAbnormal, int8 StatusAbnormal);
 	//---------------------------------------------------
 	// 로그인 서버 로그아웃 요청 패킷 조합
 	//---------------------------------------------------

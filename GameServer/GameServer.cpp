@@ -1271,18 +1271,9 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 				break;
 			}
 			else
-			{				
-				st_GameObjectJob* EnterGameJob = G_ObjectManager->GameObjectJobCreate();
-				EnterGameJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_ENTER_CHANNEL;
-
+			{	
 				CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
-
-				CGameServerMessage* EnterGameMessage = CGameServerMessage::GameServerMessageAlloc();
-				EnterGameMessage->Clear();
-
-				*EnterGameMessage << &MyPlayer;
-
-				EnterGameJob->GameObjectJobMessage = EnterGameMessage;
+				st_GameObjectJob* EnterGameJob = MakeGameObjectJobEnterChannel(MyPlayer);
 
 				CMap* EnterMap = G_MapManager->GetMap(1);
 				CChannel* EnterChannel = EnterMap->GetChannelManager()->Find(1);
@@ -1402,7 +1393,22 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 					Disconnect(Session->SessionId);
 					break;
 				}
-			}
+			}			
+
+			bool StatusAbnormalChohoneStunCheck = MyPlayer->_StatusAbnormal & STATUS_ABNORMAL_WARRIOR_CHOHONE;
+			bool StatusAbnormalLightningStunCheck = MyPlayer->_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE;
+			bool StatusAbnormalShamanRoot = MyPlayer->_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ROOT;
+			bool StatusAbnormalShamanIceWave = MyPlayer->_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ICE_WAVE;
+			bool StatusAbnormalTaioistRoot = MyPlayer->_StatusAbnormal & STATUS_ABNORMAL_TAIOIST_ROOT;
+
+			if (StatusAbnormalChohoneStunCheck
+				|| StatusAbnormalLightningStunCheck
+				|| StatusAbnormalShamanRoot
+				|| StatusAbnormalShamanIceWave
+				|| StatusAbnormalTaioistRoot)
+			{
+				break;
+			}			
 
 			int8 MovePlayerCurrentState;
 			*Message >> MovePlayerCurrentState;
@@ -1422,7 +1428,13 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 
 			MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = (en_MoveDir)ReqMoveDir;
 
-			MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
+			if (MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::IDLE
+				|| MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::SPAWN_IDLE
+				|| MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::SPELL
+				|| MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::ATTACK)
+			{
+				MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
+			}			
 
 			CMap* Map = G_MapManager->GetMap(1);
 
@@ -1515,7 +1527,7 @@ void CGameServer::PacketProcReqMoveStop(int64 SessionID, CMessage* Message)
 
 			vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetFieldOfViewPlayers(MyPlayer, 1, false);
 
-			CMessage* ResMoveStopPacket = MakePacketResMoveStop(Session->AccountId,
+			CMessage* ResMoveStopPacket = MakePacketResMoveStop(
 				MyPlayer->_GameObjectInfo.ObjectId,
 				MyPlayer->_GameObjectInfo.ObjectPositionInfo);
 			SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResMoveStopPacket);
@@ -1638,29 +1650,15 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 					ResCoolTimeStartPacket->Free();
 				}
 
-				st_GameObjectJob* GameObjectJob = G_ObjectManager->GameObjectJobCreate();
-				GameObjectJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_MELEE_ATTACK;
-
-				CGameServerMessage* ReqMeleeSkillMessage = CGameServerMessage::GameServerMessageAlloc();
-				ReqMeleeSkillMessage->Clear();
-
-				*ReqMeleeSkillMessage << &ReqMeleeSkill;
-				*ReqMeleeSkillMessage << ReqSkillType;
-
-				GameObjectJob->GameObjectJobMessage = ReqMeleeSkillMessage;
-
-				MyPlayer->_GameObjectJobQue.Enqueue(GameObjectJob);
+				st_GameObjectJob* MeleeAttackJob = MakeGameObjectJobMeleeAttack(ReqMeleeSkill);
+				MyPlayer->_GameObjectJobQue.Enqueue(MeleeAttackJob);
 
 				MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = (en_MoveDir)ReqMoveDir;
 
 				// 연속기 스킬이 활성화 되어 있는지 확인
 				if (MyPlayer->_ComboSkill != nullptr)
 				{
-					st_GameObjectJob* ComboAttackOffJob = G_ObjectManager->GameObjectJobCreate();
-					ComboAttackOffJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_OFF;
-
-					ComboAttackOffJob->GameObjectJobMessage = nullptr;
-
+					st_GameObjectJob* ComboAttackOffJob = MakeGameObjectJobComboSkillOff();
 					MyPlayer->_GameObjectJobQue.Enqueue(ComboAttackOffJob);
 
 					// 요청한 연속기 근접 스킬 확인
@@ -1704,18 +1702,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 
 					if (AttackSkillInfo->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
 					{
-						st_GameObjectJob* ComboAttackCreateJob = G_ObjectManager->GameObjectJobCreate();
-						ComboAttackCreateJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_CREATE;
-
-						CGameServerMessage* ComboAttackCreateMessage = CGameServerMessage::GameServerMessageAlloc();
-						ComboAttackCreateMessage->Clear();
-
-						*ComboAttackCreateMessage << QuickSlotBarIndex;
-						*ComboAttackCreateMessage << QuickSlotBarSlotIndex;
-						*ComboAttackCreateMessage << &ReqMeleeSkill;
-
-						ComboAttackCreateJob->GameObjectJobMessage = ComboAttackCreateMessage;
-
+						st_GameObjectJob* ComboAttackCreateJob = MakeGameObjectJobComboSkillCreate(QuickSlotBarIndex,QuickSlotBarSlotIndex,ReqMeleeSkill);
 						MyPlayer->_GameObjectJobQue.Enqueue(ComboAttackCreateJob);
 					}
 
@@ -1748,18 +1735,18 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 
 								if (MyPlayer->GetChannel()->GetMap()->ApplyMove(Target, MyFrontCellPotision))
 								{
-									CSkill* NewSkill = G_ObjectManager->SkillCreate();
+									CSkill* NewDeBufSkill = G_ObjectManager->SkillCreate();
 
 									st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(ReqMeleeSkill->GetSkillInfo()->SkillMediumCategory);
 									*NewAttackSkillInfo = *((st_AttackSkillInfo*)ReqMeleeSkill->GetSkillInfo());
 
-									NewSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
-									NewSkill->StatusAbnormalDurationTimeStart();
+									NewDeBufSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
+									NewDeBufSkill->StatusAbnormalDurationTimeStart();
+												
+									Target->AddDebuf(NewDeBufSkill);
+									Target->SetStatusAbnormal(STATUS_ABNORMAL_WARRIOR_CHOHONE);											
 
-									Target->AddDebuf(NewSkill);
-									Target->SetStatusAbnormal(STATUS_ABNORMAL_WARRIOR_CHOHONE);									
-
-									CMessage* SelectTargetMoveStopMessage = MakePacketResMoveStop(MyPlayer->_AccountId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectPositionInfo);
+									CMessage* SelectTargetMoveStopMessage = MakePacketResMoveStop(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectPositionInfo);
 									SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, SelectTargetMoveStopMessage);
 									SelectTargetMoveStopMessage->Free();
 
@@ -1771,14 +1758,11 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 									SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
 									ResStatusAbnormalPacket->Free();
 
-									CMessage* ResBufDeBufSkillPacket = MakePacketBufDeBuf(Target->_GameObjectInfo.ObjectId, false, NewSkill->GetSkillInfo());
+									CMessage* ResBufDeBufSkillPacket = MakePacketBufDeBuf(Target->_GameObjectInfo.ObjectId, false, NewDeBufSkill->GetSkillInfo());
 									SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
 									ResBufDeBufSkillPacket->Free();
 
-									float EffectPrintTime = ReqMeleeSkill->GetSkillInfo()->SkillDurationTime / 1000.0f;
-
-									// 이펙트 출력
-									CMessage* ResEffectPacket = MakePacketEffect(Target->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_DEBUF_STUN, EffectPrintTime);
+									CMessage* ResEffectPacket = G_ObjectManager->GameServer->MakePacketEffect(Target->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_DEBUF_STUN, NewDeBufSkill->GetSkillInfo()->SkillDurationTime / 1000.0f);
 									SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResEffectPacket);
 									ResEffectPacket->Free();
 
@@ -1868,19 +1852,19 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 
 								if (MyPlayer->GetChannel()->GetMap()->ApplyMove(MyPlayer, MovePosition))
 								{
-									CSkill* NewSkill = G_ObjectManager->SkillCreate();
+									CSkill* NewDeBufSkill = G_ObjectManager->SkillCreate();
 
 									st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(ReqMeleeSkill->GetSkillInfo()->SkillMediumCategory);
 
 									*AttackSkillInfo = *((st_AttackSkillInfo*)ReqMeleeSkill->GetSkillInfo());
 
-									NewSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, AttackSkillInfo);
-									NewSkill->StatusAbnormalDurationTimeStart();
+									NewDeBufSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, AttackSkillInfo);
+									NewDeBufSkill->StatusAbnormalDurationTimeStart();
+									
+									Target->AddDebuf(NewDeBufSkill);
+									Target->SetStatusAbnormal(STATUS_ABNORMAL_WARRIOR_SHAEHONE);																			
 
-									Target->AddDebuf(NewSkill);
-									Target->SetStatusAbnormal(STATUS_ABNORMAL_WARRIOR_SHAEHONE);
-
-									CMessage* SelectTargetMoveStopMessage = MakePacketResMoveStop(MyPlayer->_AccountId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectPositionInfo);
+									CMessage* SelectTargetMoveStopMessage = MakePacketResMoveStop(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectPositionInfo);
 									SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, SelectTargetMoveStopMessage);
 									SelectTargetMoveStopMessage->Free();
 
@@ -1892,7 +1876,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 									SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
 									ResStatusAbnormalPacket->Free();
 
-									CMessage* ResBufDeBufSkillPacket = MakePacketBufDeBuf(Target->_GameObjectInfo.ObjectId, false, NewSkill->GetSkillInfo());
+									CMessage* ResBufDeBufSkillPacket = MakePacketBufDeBuf(Target->_GameObjectInfo.ObjectId, false, NewDeBufSkill->GetSkillInfo());
 									SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
 									ResBufDeBufSkillPacket->Free();
 
@@ -2016,7 +2000,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 						wstring SkillTypeString;
 						wchar_t SkillTypeMessage[64] = L"0";
 						wchar_t SkillDamageMessage[64] = L"0";
-
+							
 						// 시스템 메세지 생성
 						switch ((en_SkillType)ReqSkillType)
 						{
@@ -5805,10 +5789,44 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 		}
 	}
 
-	G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerInfoSaveDBConnection);	
+	// 가방 정보 DB에 저장
+	if (MyPlayer->_InventoryManager._Inventorys[0] != nullptr)
+	{
+		SP::CDBGameServerInventoryPlace LeavePlayerInventoryItemSave(*PlayerInfoSaveDBConnection);
+		LeavePlayerInventoryItemSave.InOwnerAccountId(MyPlayer->_AccountId);
+		LeavePlayerInventoryItemSave.InOwnerPlayerId(MyPlayer->_GameObjectInfo.ObjectId);
 
-	st_GameObjectJob* LeaveGameJob = G_ObjectManager->GameObjectJobCreate();
-	LeaveGameJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_LEAVE_CHANNEL;
+		vector<st_ItemInfo> PlayerInventoryItems = MyPlayer->_InventoryManager._Inventorys[0]->DBInventorySaveReturnItems();
+
+		for (st_ItemInfo InventoryItem : PlayerInventoryItems)
+		{
+			int8 InventoryItemLargeCategory = (int8)InventoryItem.ItemLargeCategory;
+			int8 InventoryItemMediumCategory = (int8)InventoryItem.ItemMediumCategory;
+			int16 InventoryItemSmallCategory = (int16)InventoryItem.ItemSmallCategory;
+
+			LeavePlayerInventoryItemSave.InIsQuickSlotUse(InventoryItem.ItemIsQuickSlotUse);
+			LeavePlayerInventoryItemSave.InItemRotated(InventoryItem.ItemIsQuickSlotUse);
+			LeavePlayerInventoryItemSave.InItemWidth(InventoryItem.Width);
+			LeavePlayerInventoryItemSave.InItemHeight(InventoryItem.Height);
+			LeavePlayerInventoryItemSave.InItemTileGridPositionX(InventoryItem.TileGridPositionX);
+			LeavePlayerInventoryItemSave.InItemTileGridPositionY(InventoryItem.TileGridPositionY);
+			LeavePlayerInventoryItemSave.InItemLargeCategory(InventoryItemLargeCategory);
+			LeavePlayerInventoryItemSave.InItemMediumCategory(InventoryItemMediumCategory);
+			LeavePlayerInventoryItemSave.InItemSmallCategory(InventoryItemSmallCategory);
+			LeavePlayerInventoryItemSave.InItemName(InventoryItem.ItemName);
+			LeavePlayerInventoryItemSave.InItemCount(InventoryItem.ItemCount);
+			LeavePlayerInventoryItemSave.InIsEquipped(InventoryItem.ItemIsEquipped);
+			LeavePlayerInventoryItemSave.InItemMinDamage(InventoryItem.ItemMinDamage);
+			LeavePlayerInventoryItemSave.InItemMaxDamage(InventoryItem.ItemMaxDamage);
+			LeavePlayerInventoryItemSave.InItemDefence(InventoryItem.ItemDefence);
+			LeavePlayerInventoryItemSave.InItemMaxCount(InventoryItem.ItemMaxCount);
+			LeavePlayerInventoryItemSave.InItemThumbnailImagePath(InventoryItem.ItemThumbnailImagePath);
+
+			LeavePlayerInventoryItemSave.Execute();
+		}
+	}
+
+	G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerInfoSaveDBConnection);		
 	
 	for (int8 i = 0; i < SESSION_CHARACTER_MAX; i++)
 	{
@@ -5818,11 +5836,7 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 		}
 	}
 
-	CGameServerMessage* LeaveGameMessage = CGameServerMessage::GameServerMessageAlloc();
-	
-	*LeaveGameMessage << &MyPlayer;
-
-	LeaveGameJob->GameObjectJobMessage = LeaveGameMessage;
+	st_GameObjectJob* LeaveGameJob = MakeGameObjectJobLeaveChannel(MyPlayer);
 
 	CMap* LeaveMap = G_MapManager->GetMap(1);
 	CChannel* LeaveChannel = LeaveMap->GetChannelManager()->Find(1);
@@ -5844,42 +5858,7 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 	// 세션 인덱스 반납	
 	_SessionArrayIndexs.Push(GET_SESSIONINDEX(LeaveSession->SessionId));
 
-	//// 인벤토리가 존재할 때
-	//if (MyPlayer->_InventoryManager._Inventorys[0] != nullptr)
-	//{
-	//	SP::CDBGameServerInventoryPlace LeavePlayerInventoryItemSave(*PlayerInfoSaveDBConnection);
-	//	LeavePlayerInventoryItemSave.InOwnerAccountId(MyPlayer->_AccountId);
-	//	LeavePlayerInventoryItemSave.InOwnerPlayerId(MyPlayer->_GameObjectInfo.ObjectId);
-
-	//	vector<st_ItemInfo> PlayerInventoryItems = MyPlayer->_InventoryManager._Inventorys[0]->DBInventorySaveReturnItems();
-
-	//	for (st_ItemInfo InventoryItem : PlayerInventoryItems)
-	//	{
-	//		int8 InventoryItemLargeCategory = (int8)InventoryItem.ItemLargeCategory;
-	//		int8 InventoryItemMediumCategory = (int8)InventoryItem.ItemMediumCategory;
-	//		int16 InventoryItemSmallCategory = (int16)InventoryItem.ItemSmallCategory;
-
-	//		LeavePlayerInventoryItemSave.InIsQuickSlotUse(InventoryItem.ItemIsQuickSlotUse);
-	//		LeavePlayerInventoryItemSave.InItemRotated(InventoryItem.ItemIsQuickSlotUse);
-	//		LeavePlayerInventoryItemSave.InItemWidth(InventoryItem.Width);
-	//		LeavePlayerInventoryItemSave.InItemHeight(InventoryItem.Height);
-	//		LeavePlayerInventoryItemSave.InItemTileGridPositionX(InventoryItem.TileGridPositionX);
-	//		LeavePlayerInventoryItemSave.InItemTileGridPositionY(InventoryItem.TileGridPositionY);
-	//		LeavePlayerInventoryItemSave.InItemLargeCategory(InventoryItemLargeCategory);
-	//		LeavePlayerInventoryItemSave.InItemMediumCategory(InventoryItemMediumCategory);
-	//		LeavePlayerInventoryItemSave.InItemSmallCategory(InventoryItemSmallCategory);
-	//		LeavePlayerInventoryItemSave.InItemName(InventoryItem.ItemName);
-	//		LeavePlayerInventoryItemSave.InItemCount(InventoryItem.ItemCount);
-	//		LeavePlayerInventoryItemSave.InIsEquipped(InventoryItem.ItemIsEquipped);
-	//		LeavePlayerInventoryItemSave.InItemMinDamage(InventoryItem.ItemMinDamage);
-	//		LeavePlayerInventoryItemSave.InItemMaxDamage(InventoryItem.ItemMaxDamage);
-	//		LeavePlayerInventoryItemSave.InItemDefence(InventoryItem.ItemDefence);
-	//		LeavePlayerInventoryItemSave.InItemMaxCount(InventoryItem.ItemMaxCount);
-	//		LeavePlayerInventoryItemSave.InItemThumbnailImagePath(InventoryItem.ItemThumbnailImagePath);
-
-	//		LeavePlayerInventoryItemSave.Execute();
-	//	}
-	//}	
+	
 
 	//G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerInfoSaveDBConnection);
 }
@@ -5943,6 +5922,75 @@ void CGameServer::PacketProcTimerPing(int64 SessionId)
 			ReturnSession(Session);
 		}
 	} while (0);
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobEnterChannel(CGameObject* EnterChannelObject)
+{
+	st_GameObjectJob* EnterChannelJob = G_ObjectManager->GameObjectJobCreate();
+	EnterChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_ENTER_CHANNEL;
+
+	CGameServerMessage* EnterChannelGameMessage = CGameServerMessage::GameServerMessageAlloc();
+	EnterChannelGameMessage->Clear();
+
+	*EnterChannelGameMessage << &EnterChannelObject;
+	EnterChannelJob->GameObjectJobMessage = EnterChannelGameMessage;
+
+	return EnterChannelJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobLeaveChannel(CGameObject* LeaveChannelObject)
+{
+	st_GameObjectJob* LeaveChannelJob = G_ObjectManager->GameObjectJobCreate();
+	LeaveChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_LEAVE_CHANNEL;
+
+	CGameServerMessage* LeaveChannelMessage = CGameServerMessage::GameServerMessageAlloc();
+	*LeaveChannelMessage << &LeaveChannelObject;
+
+	LeaveChannelJob->GameObjectJobMessage = LeaveChannelMessage;
+
+	return LeaveChannelJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobMeleeAttack(CSkill* MeleeAttackSkill)
+{
+	st_GameObjectJob* MeleeAttackJob = G_ObjectManager->GameObjectJobCreate();
+	MeleeAttackJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_MELEE_ATTACK;
+
+	CGameServerMessage* ReqMeleeSkillMessage = CGameServerMessage::GameServerMessageAlloc();
+	ReqMeleeSkillMessage->Clear();
+
+	*ReqMeleeSkillMessage << &MeleeAttackSkill;	
+
+	MeleeAttackJob->GameObjectJobMessage = ReqMeleeSkillMessage;
+
+	return MeleeAttackJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobComboSkillCreate(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, CSkill* ComboSkill)
+{
+	st_GameObjectJob* ComboAttackCreateJob = G_ObjectManager->GameObjectJobCreate();
+	ComboAttackCreateJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_CREATE;
+
+	CGameServerMessage* ComboAttackCreateMessage = CGameServerMessage::GameServerMessageAlloc();
+	ComboAttackCreateMessage->Clear();
+
+	*ComboAttackCreateMessage << QuickSlotBarIndex;
+	*ComboAttackCreateMessage << QuickSlotBarSlotIndex;
+	*ComboAttackCreateMessage << &ComboSkill;
+
+	ComboAttackCreateJob->GameObjectJobMessage = ComboAttackCreateMessage;
+
+	return ComboAttackCreateJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobComboSkillOff()
+{
+	st_GameObjectJob* ComboAttackOffJob = G_ObjectManager->GameObjectJobCreate();
+	ComboAttackOffJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_OFF;
+
+	ComboAttackOffJob->GameObjectJobMessage = nullptr;
+
+	return ComboAttackOffJob;
 }
 
 CGameServerMessage* CGameServer::MakePacketResClientConnected()
@@ -6760,7 +6808,7 @@ CGameServerMessage* CGameServer::MakePacketResMonsterMove(int64 ObjectId, en_Gam
 	return ResMonsterMoveMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResMoveStop(int64 AccountId, int64 ObjectId, st_PositionInfo PositionInto)
+CGameServerMessage* CGameServer::MakePacketResMoveStop(int64 ObjectId, st_PositionInfo PositionInto)
 {
 	CGameServerMessage* ResMoveStopPacket = CGameServerMessage::GameServerMessageAlloc();
 	if (ResMoveStopPacket == nullptr)
@@ -6770,8 +6818,7 @@ CGameServerMessage* CGameServer::MakePacketResMoveStop(int64 AccountId, int64 Ob
 
 	ResMoveStopPacket->Clear();
 
-	*ResMoveStopPacket << (int16)en_PACKET_S2C_MOVE_STOP;
-	*ResMoveStopPacket << AccountId;
+	*ResMoveStopPacket << (int16)en_PACKET_S2C_MOVE_STOP;	
 	*ResMoveStopPacket << ObjectId;
 	*ResMoveStopPacket << PositionInto;
 
@@ -7175,7 +7222,7 @@ CGameServerMessage* CGameServer::MakePacketSkillError(en_PersonalMessageType Per
 	return ResErrorMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketStatusAbnormal(int64 PlayerId, en_GameObjectType ObjectType, en_MoveDir Dir, en_SkillType SkillType, bool SetStatusAbnormal, int8 StatusAbnormal)
+CGameServerMessage* CGameServer::MakePacketStatusAbnormal(int64 TargetId, en_GameObjectType ObjectType, en_MoveDir Dir, en_SkillType SkillType, bool SetStatusAbnormal, int8 StatusAbnormal)
 {
 	CGameServerMessage* ResStatusAbnormal = CGameServerMessage::GameServerMessageAlloc();
 	if (ResStatusAbnormal == nullptr)
@@ -7186,7 +7233,7 @@ CGameServerMessage* CGameServer::MakePacketStatusAbnormal(int64 PlayerId, en_Gam
 	ResStatusAbnormal->Clear();
 
 	*ResStatusAbnormal << (int16)en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_STATUS_ABNORMAL;
-	*ResStatusAbnormal << PlayerId;
+	*ResStatusAbnormal << TargetId;
 	*ResStatusAbnormal << (int16)ObjectType;
 	*ResStatusAbnormal << (int8)Dir;
 	*ResStatusAbnormal << (int16)SkillType;
