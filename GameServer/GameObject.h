@@ -38,7 +38,7 @@ public:
 	st_GameObjectInfo _GameObjectInfo;
 
 	// 선택한 대상
-	CGameObject* _SelectTarget;
+	CGameObject* _SelectTarget;	
 
 	//---------------------------
 	// 오브젝트가 스폰될 위치
@@ -135,6 +135,4 @@ protected:
 	// 주위 시야 오브젝트 탐색 틱
 	//---------------------------
 	uint64 _FieldOfViewUpdateTick;
-
-	void BroadCastPacket(en_GAME_SERVER_PACKET_TYPE PacketType, bool CanMove = true);
 };

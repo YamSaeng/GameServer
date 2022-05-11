@@ -14,7 +14,7 @@ CGameObject::CGameObject()
 	_GameObjectInfo.OwnerObjectId = 0;
 	_Channel = nullptr;
 	_Owner = nullptr;
-	_SelectTarget = nullptr;
+	_SelectTarget = nullptr;	
 
 	_NatureRecoveryTick = 0;
 	_FieldOfViewUpdateTick = 0;
@@ -35,6 +35,11 @@ CGameObject::~CGameObject()
 
 void CGameObject::Update()
 {
+	if (_NetworkState == en_ObjectNetworkState::LEAVE)
+	{
+		return;
+	}
+
 	while (!_GameObjectJobQue.IsEmpty())
 	{
 		st_GameObjectJob* GameObjectJob = nullptr;
@@ -51,7 +56,8 @@ void CGameObject::Update()
 			for (auto DebufSkillIter : _DeBufs)
 			{
 				if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_KNIGHT_CHOHONE
-					|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE)
+					|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE
+					|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_ICE_WAVE)
 				{
 					DebufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
 				}
@@ -62,7 +68,8 @@ void CGameObject::Update()
 		{
 			for (auto DebufSkillIter : _DeBufs)
 			{
-				if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_ROOT
+				if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_ICE_CHAIN
+					|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_ROOT
 					|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_TAIOIST_ROOT)
 				{
 					DebufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
@@ -78,9 +85,6 @@ void CGameObject::Update()
 
 			CSkill* MeleeSkill;
 			*GameObjectJob->GameObjectJobMessage >> &MeleeSkill;
-
-			int16 ReqSkillType;
-			*GameObjectJob->GameObjectJobMessage >> ReqSkillType;
 
 			CSkill* ReqMeleeSkillInit = G_ObjectManager->SkillCreate();
 			st_AttackSkillInfo* MeleeAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(MeleeSkill->GetSkillInfo()->SkillMediumCategory);
@@ -172,13 +176,9 @@ void CGameObject::Update()
 			if (FindComboSkill != nullptr)
 			{
 				// 연속기 스킬 생성
-				CSkill* NewComboSkill = G_ObjectManager->SkillCreate();
-
-				// 퀵슬롯바 복구를 위해 연속기 이전 스킬의 정보를 생성
-				st_AttackSkillInfo* NewPreviousSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(ReqMeleeSkill->GetSkillInfo()->SkillMediumCategory);
-				*NewPreviousSkillInfo = *((st_AttackSkillInfo*)ReqMeleeSkill->GetSkillInfo());
+				CSkill* NewComboSkill = G_ObjectManager->SkillCreate();				
 				// 정보를 저장
-				NewComboSkill->SetSkillInfo(en_SkillCategory::COMBO_SKILL, nullptr, NewPreviousSkillInfo);
+				NewComboSkill->SetSkillInfo(en_SkillCategory::COMBO_SKILL, FindComboSkill->GetSkillInfo(), ReqMeleeSkill->GetSkillInfo());
 				NewComboSkill->SetOwner(MyPlayer);
 
 				// 연속기 스킬 정보 입력
@@ -248,16 +248,16 @@ void CGameObject::Update()
 		break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_AGGRO_LIST_REMOVE:
 		{
-				int64 RemoveAggroListGameObjectId;
-				*GameObjectJob->GameObjectJobMessage >> RemoveAggroListGameObjectId;
+			int64 RemoveAggroListGameObjectId;
+			*GameObjectJob->GameObjectJobMessage >> RemoveAggroListGameObjectId;
 
-				auto FindAggroTargetIterator = _AggroTargetList.find(RemoveAggroListGameObjectId);
-				if (FindAggroTargetIterator != _AggroTargetList.end())
-				{
-					_AggroTargetList.erase(RemoveAggroListGameObjectId);
-				}
+			auto FindAggroTargetIterator = _AggroTargetList.find(RemoveAggroListGameObjectId);
+			if (FindAggroTargetIterator != _AggroTargetList.end())
+			{
+				_AggroTargetList.erase(RemoveAggroListGameObjectId);
 			}
-		break;		
+		}
+		break;
 		}
 
 		if (GameObjectJob->GameObjectJobMessage != nullptr)
@@ -512,22 +512,4 @@ CChannel* CGameObject::GetChannel()
 void CGameObject::SetChannel(CChannel* Channel)
 {
 	_Channel = Channel;
-}
-
-void CGameObject::BroadCastPacket(en_GAME_SERVER_PACKET_TYPE PacketType, bool CanMove)
-{
-	CMessage* ResPacket = nullptr;
-
-	switch (PacketType)
-	{
-	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_DIE:
-		ResPacket = G_ObjectManager->GameServer->MakePacketObjectDie(this->_GameObjectInfo.ObjectId);
-		break;
-	default:
-		CRASH("Monster BroadCast PacketType Error");
-		break;
-	}
-
-	G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResPacket);
-	ResPacket->Free();
 }
