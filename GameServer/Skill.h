@@ -30,6 +30,9 @@ public:
 
 	// 쿨타임 시작
 	void CoolTimeStart();
+	// 전역 쿨타임 시작
+	void GlobalCoolTimeStart(int32 GlobalCoolTime);
+
 	// 상태이상 지속 시간 시작
 	void StatusAbnormalDurationTimeStart();
 	// 연속기 스킬 시작

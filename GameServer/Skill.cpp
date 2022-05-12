@@ -85,6 +85,13 @@ void CSkill::CoolTimeStart()
 	_SkillInfo->SkillRemainTime = _SkillCootimeTick - GetTickCount64();
 }
 
+void CSkill::GlobalCoolTimeStart(int32 GlobalCoolTime)
+{
+	_SkillInfo->CanSkillUse = false;
+	_SkillCootimeTick = GlobalCoolTime + GetTickCount64();
+	_SkillInfo->SkillRemainTime = _SkillCootimeTick - GetTickCount64();
+}
+
 void CSkill::StatusAbnormalDurationTimeStart()
 {
 	_SkillDurationTick = _SkillInfo->SkillDurationTime + GetTickCount64();
@@ -328,21 +335,7 @@ bool CSkill::Update()
 			ResNextComboSkillOff->Free();			
 			return true;
 		}
-		break;
-	case en_SkillCategory::REQ_MELEE_SKILL_INIT:
-		if (_MeleeAttackTick < GetTickCount64())
-		{			
-			((CPlayer*)_Owner)->_IsReqAttack = false;			
-			return true;
-		}		
-		break;
-	case en_SkillCategory::REQ_MAGIC_SKILL_INIT:
-		if (_MagicTick < GetTickCount64())
-		{
-			((CPlayer*)_Owner)->_IsReqMagic = false;			
-			return true;
-		}
-		break;
+		break;		
 	}	
 	
 	return false;
