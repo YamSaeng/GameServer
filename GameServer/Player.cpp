@@ -723,7 +723,7 @@ void CPlayer::UpdateSpell()
 			}
 
 			// 전역 쿨타임 시간 표시
-			for (auto QuickSlotBarPosition : _QuickSlotManager.ExceptionFindQuickSlotBar(_CurrentSkill->_QuickSlotBarIndex, _CurrentSkill->_QuickSlotBarSlotIndex, _CurrentSkill->GetSkillKind()))
+			for (auto QuickSlotBarPosition : _QuickSlotManager.GlobalCoolTimeFindQuickSlotBar(_CurrentSkill->_QuickSlotBarIndex, _CurrentSkill->_QuickSlotBarSlotIndex, _CurrentSkill->GetSkillKind()))
 			{
 				st_QuickSlotBarSlotInfo* QuickSlotInfo = _QuickSlotManager.FindQuickSlotBar(QuickSlotBarPosition.QuickSlotBarIndex, QuickSlotBarPosition.QuickSlotBarSlotIndex);
 				if (QuickSlotInfo->QuickBarSkill != nullptr)

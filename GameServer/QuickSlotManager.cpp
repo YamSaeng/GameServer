@@ -87,7 +87,7 @@ vector<st_QuickSlotBarPosition> CQuickSlotManager::FindQuickSlotBar(en_SkillType
 	return QuickSlotSkillPositions;
 }
 
-vector<st_QuickSlotBarPosition> CQuickSlotManager::ExceptionFindQuickSlotBar(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, en_SkillKinds SkillKind)
+vector<st_QuickSlotBarPosition> CQuickSlotManager::GlobalCoolTimeFindQuickSlotBar(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, en_SkillKinds SkillKind)
 {
 	vector<st_QuickSlotBarPosition> QuickSlotSkillPositions;
 
@@ -101,7 +101,8 @@ vector<st_QuickSlotBarPosition> CQuickSlotManager::ExceptionFindQuickSlotBar(int
 			if (SearchingQuickSlotBarSlot->QuickBarSkill != nullptr && SearchingQuickSlotBarSlot->QuickBarSkill->GetSkillInfo()->CanSkillUse == true
 				&& ((SearchingQuickSlotBarSlot->QuickSlotBarIndex == QuickSlotBarIndex
 					&& SearchingQuickSlotBarSlot->QuickSlotBarSlotIndex == QuickSlotBarSlotIndex) == false)
-				&& SearchingQuickSlotBarSlot->QuickBarSkill->GetSkillKind() == SkillKind)
+				&& SearchingQuickSlotBarSlot->QuickBarSkill->GetSkillKind() == SkillKind
+				&& SearchingQuickSlotBarSlot->QuickBarSkill->GetSkillInfo()->SkillType != en_SkillType::SKILL_SHOCK_RELEASE)
 			{
 				st_QuickSlotBarPosition SearchingCompleteQuickSlotPosition;
 				SearchingCompleteQuickSlotPosition.QuickSlotBarIndex = SearchingQuickSlotBarSlot->QuickSlotBarIndex;
