@@ -4,6 +4,7 @@
 #include "DataManager.h"
 #include "Skill.h"
 #include "SkillBox.h"
+#include "MapManager.h"
 
 CPlayer::CPlayer()
 {
@@ -19,13 +20,7 @@ CPlayer::CPlayer()
 	_FieldOfViewUpdateTick = GetTickCount64() + 50;
 
 	_ComboSkill = nullptr;
-	_CurrentSkill = nullptr;
-
-	_IsReqAttack = false;
-	_IsReqMagic = false;
-
-	_ReqMeleeSkillInit = nullptr;
-	_ReqMagicSkillInit = nullptr;
+	_CurrentSkill = nullptr;		
 }
 
 CPlayer::~CPlayer()
@@ -40,17 +35,18 @@ void CPlayer::Update()
 	if (_NetworkState == en_ObjectNetworkState::LEAVE)
 	{
 		return;
-	}
+	}	
 
 	// 시야범위 객체 조사
 	if (_FieldOfViewUpdateTick < GetTickCount64() && _Channel != nullptr)
 	{
+		// 시야범위 오브젝트를 조사해서 저장
 		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldOfViewObjects(this, 1, false);
 		vector<st_FieldOfViewInfo> SpawnObjectIds;
 		vector<st_FieldOfViewInfo> DeSpawnObjectIds;
 
 		if (CurrentFieldOfViewObjectIds.size() > 1)
-		{
+		{ 
 			sort(CurrentFieldOfViewObjectIds.begin(), CurrentFieldOfViewObjectIds.end());
 		}
 
@@ -83,22 +79,17 @@ void CPlayer::Update()
 					CGameObject* FindObject = _Channel->FindChannelObject(SpawnObject.ObjectID, SpawnObject.ObjectType);
 					if (FindObject != nullptr)
 					{
-						// 시야 범위 안에 존재할 경우 스폰정보 담음
-						int16 Distance = st_Vector2Int::Distance(FindObject->GetCellPosition(), GetCellPosition());
-						if (Distance <= _FieldOfViewDistance)
-						{
-							SpawnObjectInfos.push_back(FindObject);
-						}
+						SpawnObjectInfos.push_back(FindObject);
 					}
 				}
 			}
-
-			// 스폰해야 할 대상을 나에게 스폰하라고 알림
+						
 			if (SpawnObjectInfos.size() > 0)
-			{
+			{				
+				// 스폰해야 할 대상들을 나에게 스폰하라고 알림
 				CMessage* ResOtherObjectSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectSpawn((int32)SpawnObjectInfos.size(), SpawnObjectInfos);
 				G_ObjectManager->GameServer->SendPacket(_SessionId, ResOtherObjectSpawnPacket);
-				ResOtherObjectSpawnPacket->Free();
+				ResOtherObjectSpawnPacket->Free();				
 			}
 		}
 
@@ -144,32 +135,10 @@ void CPlayer::Update()
 		bool ReturnComboSkill = _ComboSkill->Update();
 		if (ReturnComboSkill)
 		{
-			G_ObjectManager->SkillReturn(_ComboSkill);
+			G_ObjectManager->SkillReturn(_ComboSkill);			
 			_ComboSkill = nullptr;
 		}
-	}
-
-	if (_ReqMeleeSkillInit != nullptr)
-	{
-		bool ReturnReqMeleeSkillInit = _ReqMeleeSkillInit->Update();
-		if (ReturnReqMeleeSkillInit)
-		{
-			G_ObjectManager->SkillInfoReturn(_ReqMeleeSkillInit->GetSkillInfo()->SkillMediumCategory, _ReqMeleeSkillInit->GetSkillInfo());
-			G_ObjectManager->SkillReturn(_ReqMeleeSkillInit);
-			_ReqMeleeSkillInit = nullptr;
-		}
-	}
-
-	if (_ReqMagicSkillInit != nullptr)
-	{
-		bool ReturnReqMagicSkillInit = _ReqMagicSkillInit->Update();
-		if (ReturnReqMagicSkillInit)
-		{
-			G_ObjectManager->SkillInfoReturn(_ReqMagicSkillInit->GetSkillInfo()->SkillMediumCategory, _ReqMagicSkillInit->GetSkillInfo());
-			G_ObjectManager->SkillReturn(_ReqMagicSkillInit);
-			_ReqMagicSkillInit = nullptr;
-		}
-	}
+	}		
 
 	// 강화효과 스킬 리스트 순회
 	for (auto BufSkillIterator : _Bufs)
@@ -236,24 +205,24 @@ void CPlayer::Update()
 	// 냉기파동 상태이상일 경우
 	// 대상이 바라보고 있는 반대방향으로 캐릭터를 밀어버림
 	if (IsShmanIceWave == true)
-	{
+	{		
 		switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
 		{
 		case en_MoveDir::UP:
 			_GameObjectInfo.ObjectPositionInfo.PositionY +=
-				(st_Vector2::Down()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 2.0f * 0.02f);
+				(st_Vector2::Down()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 1.5f * 0.02f);
 			break;
 		case en_MoveDir::DOWN:
 			_GameObjectInfo.ObjectPositionInfo.PositionY +=
-				(st_Vector2::Up()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 2.0f * 0.02f);
+				(st_Vector2::Up()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 1.5f * 0.02f);
 			break;
 		case en_MoveDir::LEFT:
 			_GameObjectInfo.ObjectPositionInfo.PositionX +=
-				(st_Vector2::Right()._X * _GameObjectInfo.ObjectStatInfo.Speed * 2.0f * 0.02f);
+				(st_Vector2::Right()._X * _GameObjectInfo.ObjectStatInfo.Speed * 1.5f * 0.02f);
 			break;
 		case en_MoveDir::RIGHT:
 			_GameObjectInfo.ObjectPositionInfo.PositionX +=
-				(st_Vector2::Left()._X * _GameObjectInfo.ObjectStatInfo.Speed * 2.0f * 0.02f);
+				(st_Vector2::Left()._X * _GameObjectInfo.ObjectStatInfo.Speed * 1.5f * 0.02f);
 			break;
 		}
 
@@ -290,7 +259,7 @@ void CPlayer::Update()
 	switch (_GameObjectInfo.ObjectPositionInfo.State)
 	{
 	case en_CreatureState::MOVING:
-		UpdateMove();
+		UpdateMove();		
 		break;
 	case en_CreatureState::ATTACK:
 		UpdateAttack();
@@ -303,12 +272,33 @@ void CPlayer::Update()
 
 bool CPlayer::OnDamaged(CGameObject* Attacker, int32 Damage)
 {
-	return CGameObject::OnDamaged(Attacker, Damage);
+	if (_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE
+		|| _GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::RETURN_SPAWN_POSITION)
+	{
+		CGameObject::OnDamaged(Attacker, Damage);
+
+		if (_GameObjectInfo.ObjectStatInfo.HP == 0)
+		{
+			OnDead(Attacker);
+
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void CPlayer::OnDead(CGameObject* Killer)
 {
+	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
 
+	CMap* Map = G_MapManager->GetMap(1);
+
+	vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetFieldOfViewPlayers(this, 1, false);
+
+	CGameServerMessage* ResDeadStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo.MoveDir, _GameObjectInfo.ObjectType, _GameObjectInfo.ObjectPositionInfo.State);
+	G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResDeadStateChangePacket);
+	ResDeadStateChangePacket->Free();
 }
 
 void CPlayer::Init()
@@ -372,7 +362,7 @@ void CPlayer::UpdateMove()
 		_GameObjectInfo.ObjectPositionInfo.PositionX +=
 			(st_Vector2::Right()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 		break;
-	}
+	}	
 
 	bool CanMove = _Channel->GetMap()->Cango(this, _GameObjectInfo.ObjectPositionInfo.PositionX, _GameObjectInfo.ObjectPositionInfo.PositionY);
 	if (CanMove == true)
@@ -413,19 +403,6 @@ void CPlayer::UpdateSpell()
 {
 	if (_SpellTick < GetTickCount64())
 	{
-		// 마법 스킬을 사용한 캐릭터의 시전 속도에 비례해 다음 마법 스킬을 사용 할 수 있도록 한다.
-		st_GameObjectJob* GameObjectJob = G_ObjectManager->GameObjectJobCreate();
-		GameObjectJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_REQ_MAGIC;
-
-		CGameServerMessage* ReqMeleeSkillMessage = CGameServerMessage::GameServerMessageAlloc();
-		ReqMeleeSkillMessage->Clear();
-
-		*ReqMeleeSkillMessage << &_CurrentSkill;
-
-		GameObjectJob->GameObjectJobMessage = ReqMeleeSkillMessage;
-
-		_GameObjectJobQue.Enqueue(GameObjectJob);
-
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
 		CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo.MoveDir,
@@ -434,30 +411,8 @@ void CPlayer::UpdateSpell()
 		G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResObjectStateChangePacket);
 		ResObjectStateChangePacket->Free();
 
-		if (_CurrentSkill != nullptr)
-		{
-			_CurrentSkill->CoolTimeStart();
-
-			for (auto QuickSlotBarPosition : _QuickSlotManager.FindQuickSlotBar(_CurrentSkill->GetSkillInfo()->SkillType))
-			{
-				// 클라에게 쿨타임 표시
-				CMessage* ResCoolTimeStartPacket = G_ObjectManager->GameServer->MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
-					QuickSlotBarPosition.QuickSlotBarSlotIndex,
-					1.0f, _CurrentSkill);
-				G_ObjectManager->GameServer->SendPacket(_SessionId, ResCoolTimeStartPacket);
-				ResCoolTimeStartPacket->Free();
-			}
-
-			// 전역 쿨타임 시간 표시
-			for (auto QuickSlotBarPosition : _QuickSlotManager.ExceptionFindQuickSlotBar(_CurrentSkill->_QuickSlotBarIndex, _CurrentSkill->_QuickSlotBarSlotIndex, _CurrentSkill->GetSkillKind()))
-			{
-				CMessage* ResCoolTimeStartPacket = G_ObjectManager->GameServer->MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
-					QuickSlotBarPosition.QuickSlotBarSlotIndex,
-					1.0f, nullptr, (int32)(500 * _GameObjectInfo.ObjectStatInfo.MagicHitRate));
-				G_ObjectManager->GameServer->SendPacket(_SessionId, ResCoolTimeStartPacket);
-				ResCoolTimeStartPacket->Free();
-			}
-
+		if (_CurrentSkill != nullptr && _SelectTarget != nullptr)
+		{			
 			en_EffectType HitEffectType = en_EffectType::EFFECT_TYPE_NONE;
 
 			wstring MagicSystemString;
@@ -516,7 +471,7 @@ void CPlayer::UpdateSpell()
 				_SelectTarget->AddDebuf(NewSkill);
 				_SelectTarget->SetStatusAbnormal(STATUS_ABNORMAL_SHAMAN_ROOT);
 
-				CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_AccountId, _SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
+				CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
 				G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, SelectTargetMoveStopMessage);
 				SelectTargetMoveStopMessage->Free();
 
@@ -623,7 +578,7 @@ void CPlayer::UpdateSpell()
 				_SelectTarget->AddDebuf(NewSkill);
 				_SelectTarget->SetStatusAbnormal(STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE);
 
-				CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_AccountId, _SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
+				CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
 				G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, SelectTargetMoveStopMessage);
 				SelectTargetMoveStopMessage->Free();
 
@@ -700,7 +655,7 @@ void CPlayer::UpdateSpell()
 				NewSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
 				NewSkill->StatusAbnormalDurationTimeStart();
 
-				CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_AccountId, _SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
+				CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
 				G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, SelectTargetMoveStopMessage);
 				SelectTargetMoveStopMessage->Free();
 
@@ -755,6 +710,34 @@ void CPlayer::UpdateSpell()
 			break;
 			}					
 
+			_CurrentSkill->CoolTimeStart();
+
+			for (auto QuickSlotBarPosition : _QuickSlotManager.FindQuickSlotBar(_CurrentSkill->GetSkillInfo()->SkillType))
+			{
+				// 클라에게 쿨타임 표시
+				CMessage* ResCoolTimeStartPacket = G_ObjectManager->GameServer->MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
+					QuickSlotBarPosition.QuickSlotBarSlotIndex,
+					1.0f, _CurrentSkill);
+				G_ObjectManager->GameServer->SendPacket(_SessionId, ResCoolTimeStartPacket);
+				ResCoolTimeStartPacket->Free();
+			}
+
+			// 전역 쿨타임 시간 표시
+			for (auto QuickSlotBarPosition : _QuickSlotManager.ExceptionFindQuickSlotBar(_CurrentSkill->_QuickSlotBarIndex, _CurrentSkill->_QuickSlotBarSlotIndex, _CurrentSkill->GetSkillKind()))
+			{
+				st_QuickSlotBarSlotInfo* QuickSlotInfo = _QuickSlotManager.FindQuickSlotBar(QuickSlotBarPosition.QuickSlotBarIndex, QuickSlotBarPosition.QuickSlotBarSlotIndex);
+				if (QuickSlotInfo->QuickBarSkill != nullptr)
+				{
+					QuickSlotInfo->QuickBarSkill->GlobalCoolTimeStart((int32)(500 * _GameObjectInfo.ObjectStatInfo.MagicHitRate));
+
+					CMessage* ResCoolTimeStartPacket = G_ObjectManager->GameServer->MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
+						QuickSlotBarPosition.QuickSlotBarSlotIndex,
+						1.0f, nullptr, (int32)(500 * _GameObjectInfo.ObjectStatInfo.MagicHitRate));
+					G_ObjectManager->GameServer->SendPacket(_SessionId, ResCoolTimeStartPacket);
+					ResCoolTimeStartPacket->Free();
+				}
+			}
+
 			// 공격 응답
 			CMessage* ResAttackMagicPacket = G_ObjectManager->GameServer->MakePacketResAttack(
 				_GameObjectInfo.ObjectId,
@@ -774,14 +757,10 @@ void CPlayer::UpdateSpell()
 			CMessage* ResChangeObjectStat = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_SelectTarget->_GameObjectInfo.ObjectId,
 				_SelectTarget->_GameObjectInfo.ObjectStatInfo);
 			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResChangeObjectStat);
-			ResChangeObjectStat->Free();
+			ResChangeObjectStat->Free();			
 
 			if (TargetIsDead == true)
 			{
-				CMessage* SelectTargetDeadPacket = G_ObjectManager->GameServer->MakePacketObjectDie(_SelectTarget->_GameObjectInfo.ObjectId);
-				G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, SelectTargetDeadPacket);
-				SelectTargetDeadPacket->Free();
-
 				_SelectTarget = nullptr;
 			}
 

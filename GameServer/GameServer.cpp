@@ -1585,13 +1585,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 				|| MyPlayer->_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ICE_WAVE)
 			{
 				break;
-			}
-
-			// 이전 공격 요청이 아직 끝나지 않음
-			if (MyPlayer->_IsReqAttack == true)
-			{
-				break;
-			}
+			}			
 
 			int8 QuickSlotBarIndex;
 			*Message >> QuickSlotBarIndex;
@@ -1955,15 +1949,18 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 					// 전역 쿨타임 시간 표시
 					for (auto QuickSlotBarPosition : MyPlayer->_QuickSlotManager.ExceptionFindQuickSlotBar(QuickSlotBarIndex, QuickSlotBarSlotIndex, ReqMeleeSkill->GetSkillKind()))
 					{
-						CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
-							QuickSlotBarPosition.QuickSlotBarSlotIndex,
-							1.0f, nullptr, MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate);
-						SendPacket(Session->SessionId, ResCoolTimeStartPacket);
-						ResCoolTimeStartPacket->Free();
-					}
+						st_QuickSlotBarSlotInfo* QuickSlotInfo = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarPosition.QuickSlotBarIndex, QuickSlotBarPosition.QuickSlotBarSlotIndex);
+						if (QuickSlotInfo->QuickBarSkill != nullptr)
+						{
+							QuickSlotInfo->QuickBarSkill->GlobalCoolTimeStart(MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate);
 
-					st_GameObjectJob* MeleeAttackJob = MakeGameObjectJobMeleeAttack(ReqMeleeSkill);
-					MyPlayer->_GameObjectJobQue.Enqueue(MeleeAttackJob);
+							CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
+								QuickSlotBarPosition.QuickSlotBarSlotIndex,
+								1.0f, nullptr, MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate);
+							SendPacket(Session->SessionId, ResCoolTimeStartPacket);
+							ResCoolTimeStartPacket->Free();
+						}						
+					}					
 
 					MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = (en_MoveDir)ReqMoveDir;
 
@@ -2191,7 +2188,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 			}
 			else
 			{
-				// 마법 공격 요청일 경우 기절 상태와 밀려남 상태를 확인한다.
+				// 충격 해제 마법을 제외하고 상태이상값을 판단
 				bool IsWarriorChohone = MyPlayer->_StatusAbnormal & STATUS_ABNORMAL_WARRIOR_CHOHONE;
 				bool IsShamanLightningStrike = MyPlayer->_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE;
 				bool IsShamanIceWave = MyPlayer->_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ICE_WAVE;
@@ -2199,13 +2196,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 				if (IsWarriorChohone || IsShamanLightningStrike || IsShamanIceWave)
 				{
 					break;
-				}
-
-				// 이전 마법 요청이 아직 끝나지 않음
-				if (MyPlayer->_IsReqMagic == true)
-				{
-					break;
-				}
+				}				
 
 				CGameObject* FindGameObject = nullptr;
 				float SpellCastingTime = 0.0f;
@@ -5081,7 +5072,9 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 						break;
 					case en_SkillType::SKILL_KNIGHT_FIERCE_ATTACK:
 					case en_SkillType::SKILL_KNIGHT_CONVERSION_ATTACK:
-					case en_SkillType::SKILL_KNIGHT_SMASH_WAVE:
+					case en_SkillType::SKILL_KNIGHT_SMASH_WAVE:					
+						_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, AttackSkillInfo->SkillExplanation.c_str(), FindAttackSkillData->SkillDistance, AttackSkillInfo->SkillDurationTime / 1000.0f, AttackSkillInfo->SkillMinDamage, AttackSkillInfo->SkillMaxDamage);
+						break;
 					case en_SkillType::SKILL_KNIGHT_SHAEHONE:
 					case en_SkillType::SKILL_KNIGHT_CHOHONE:
 						_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, AttackSkillInfo->SkillExplanation.c_str(), FindAttackSkillData->SkillDistance, AttackSkillInfo->SkillMinDamage, AttackSkillInfo->SkillMaxDamage);
@@ -5967,21 +5960,6 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobLeaveChannel(CGameObject* LeaveC
 	LeaveChannelJob->GameObjectJobMessage = LeaveChannelMessage;
 
 	return LeaveChannelJob;
-}
-
-st_GameObjectJob* CGameServer::MakeGameObjectJobMeleeAttack(CSkill* MeleeAttackSkill)
-{
-	st_GameObjectJob* MeleeAttackJob = G_ObjectManager->GameObjectJobCreate();
-	MeleeAttackJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_MELEE_ATTACK;
-
-	CGameServerMessage* ReqMeleeSkillMessage = CGameServerMessage::GameServerMessageAlloc();
-	ReqMeleeSkillMessage->Clear();
-
-	*ReqMeleeSkillMessage << &MeleeAttackSkill;	
-
-	MeleeAttackJob->GameObjectJobMessage = ReqMeleeSkillMessage;
-
-	return MeleeAttackJob;
 }
 
 st_GameObjectJob* CGameServer::MakeGameObjectJobComboSkillCreate(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, CSkill* ComboSkill)

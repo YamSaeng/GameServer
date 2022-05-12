@@ -263,9 +263,7 @@ enum class en_SkillCategory : int8
 {
 	QUICK_SLOT_SKILL_COOLTIME,
 	STATUS_ABNORMAL_SKILL,
-	COMBO_SKILL,
-	REQ_MELEE_SKILL_INIT,
-	REQ_MAGIC_SKILL_INIT
+	COMBO_SKILL
 };
 
 enum class en_SkillKinds : int8
@@ -347,9 +345,7 @@ enum class en_TileMapEnvironment : int8
 enum class en_GameObjectJobType : int16
 {
 	GAMEOBJECT_JOB_TYPE_SHOCK_RELEASE,
-	GAMEOBJECT_JOB_TYPE_BACK_TELEPORT,
-	GAMEOBJECT_JOB_TYPE_MELEE_ATTACK,
-	GAMEOBJECT_JOB_TYPE_REQ_MAGIC,
+	GAMEOBJECT_JOB_TYPE_BACK_TELEPORT,		
 	GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_CREATE,
 	GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_OFF,
 	GAMEOBJECT_JOB_AGGRO_LIST_INSERT_OR_UPDATE,
@@ -1853,7 +1849,7 @@ struct st_SkillInfo
 	en_SkillType SkillType;	 // 스킬 종류
 	int8 SkillLevel;		 // 스킬 레벨
 	wstring SkillName;		 // 스킬 이름
-	int32 SkillCoolTime;	 // 스킬 쿨타임	
+	int32 SkillCoolTime;	 // 스킬 쿨타임		
 	int32 SkillCastingTime;  // 스킬 캐스팅 타임
 	int64 SkillDurationTime; // 스킬 지속 시간
 	int64 SkillDotTime;      // 스킬 도트 시간 
@@ -1874,7 +1870,7 @@ struct st_SkillInfo
 		SkillType = en_SkillType::SKILL_TYPE_NONE;
 		SkillLevel = 0;
 		SkillName = L"";
-		SkillCoolTime = 0;
+		SkillCoolTime = 0;		
 		SkillCastingTime = 0;
 		SkillDurationTime = 0;
 		SkillDotTime = 0;

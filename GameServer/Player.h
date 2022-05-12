@@ -11,10 +11,7 @@ struct st_TimerJob;
 
 class CPlayer : public CGameObject
 {
-public:		
-	bool _IsReqAttack;
-	bool _IsReqMagic;
-
+public:			
 	uint64 _DefaultAttackTick;	
 	uint64 _SpellTick;		
 
@@ -35,10 +32,7 @@ public:
 	// 현재 사용 중인 스킬
 	CSkill* _CurrentSkill;
 	// 연속기 스킬
-	CSkill* _ComboSkill;
-	
-	CSkill* _ReqMeleeSkillInit;
-	CSkill* _ReqMagicSkillInit;		
+	CSkill* _ComboSkill;		
 
 	CPlayer();	
 	~CPlayer();		
