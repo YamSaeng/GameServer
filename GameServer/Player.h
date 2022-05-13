@@ -40,9 +40,8 @@ public:
 	virtual void Update() override;
 
 	virtual bool OnDamaged(CGameObject* Attacker, int32 Damage) override;
-	virtual void OnDead(CGameObject* Killer) override;	
 
-	void Init();	
+	virtual void Init() override;	
 
 	virtual void PositionReset() override;	
 protected:

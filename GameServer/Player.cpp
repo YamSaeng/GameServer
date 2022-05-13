@@ -102,8 +102,13 @@ void CPlayer::Update()
 				if (DeSpawnObject.ObjectID != 0 && DeSpawnObject.ObjectType != en_GameObjectType::NORMAL)
 				{
 					CGameObject* FindObject = _Channel->FindChannelObject(DeSpawnObject.ObjectID, DeSpawnObject.ObjectType);
-
-					if (FindObject != nullptr && FindObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
+										
+					// 추가적으로 검사
+					// 소환해제 해야할 대상이 죽음 준비 상태 또는 죽음 상태일 경우에는 알아서 소환해제 되기 때문에
+					// 죽음 준비 상태 그리고 죽음 상태가 아닐 경우에만 소환해제 하도록 설정					
+					if (FindObject != nullptr 
+						&& FindObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::READY_DEAD 
+						&& FindObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 					{
 						if (_SelectTarget != nullptr && FindObject->_GameObjectInfo.ObjectId == _SelectTarget->_GameObjectInfo.ObjectId)
 						{
@@ -115,7 +120,7 @@ void CPlayer::Update()
 				}
 			}
 
-			// 디스폰해야 할 대상을 나에게 스폰 해제하라고 알림
+			// 소환해제해야 할 대상을 나에게 스폰 해제하라고 알림
 			if (DeSpawnObjectInfos.size() > 0)
 			{
 				CMessage* ResOtherObjectDeSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn((int32)DeSpawnObjectInfos.size(), DeSpawnObjectInfos);
@@ -279,26 +284,23 @@ bool CPlayer::OnDamaged(CGameObject* Attacker, int32 Damage)
 
 		if (_GameObjectInfo.ObjectStatInfo.HP == 0)
 		{
-			OnDead(Attacker);
+			_DeadTick = GetTickCount64() + 1000;
+
+			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::READY_DEAD;
+
+			CMap* Map = G_MapManager->GetMap(1);
+
+			vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetFieldOfViewPlayers(this, 1, false);
+
+			CGameServerMessage* ResDeadStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo.MoveDir, _GameObjectInfo.ObjectType, _GameObjectInfo.ObjectPositionInfo.State);
+			G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResDeadStateChangePacket);
+			ResDeadStateChangePacket->Free();
 
 			return true;
 		}
 	}
 
 	return false;
-}
-
-void CPlayer::OnDead(CGameObject* Killer)
-{
-	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
-
-	CMap* Map = G_MapManager->GetMap(1);
-
-	vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetFieldOfViewPlayers(this, 1, false);
-
-	CGameServerMessage* ResDeadStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo.MoveDir, _GameObjectInfo.ObjectType, _GameObjectInfo.ObjectPositionInfo.State);
-	G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResDeadStateChangePacket);
-	ResDeadStateChangePacket->Free();
 }
 
 void CPlayer::Init()
