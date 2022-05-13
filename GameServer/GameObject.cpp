@@ -175,6 +175,29 @@ void CGameObject::Update()
 				}
 			}
 			break;
+		case en_GameObjectJobType::GAMEOBJECT_JOB_FULL_RECOVERY:
+			{
+				for (auto DebufSkillIter : _DeBufs)
+				{
+					if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_KNIGHT_CHOHONE
+						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE
+						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_ICE_WAVE
+						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_ICE_CHAIN
+						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_ROOT
+						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_TAIOIST_ROOT)
+					{
+						DebufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
+					}
+				}
+
+				_GameObjectInfo.ObjectStatInfo.HP = _GameObjectInfo.ObjectStatInfo.MaxHP;
+				_GameObjectInfo.ObjectStatInfo.MP = _GameObjectInfo.ObjectStatInfo.MaxMP;
+
+				CMessage* StatChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectStatInfo);
+				G_ObjectManager->GameServer->SendPacketFieldOfView(this, StatChangePacket);
+				StatChangePacket->Free();
+			}
+			break;
 		}
 
 		if (GameObjectJob->GameObjectJobMessage != nullptr)
@@ -188,12 +211,12 @@ void CGameObject::Update()
 
 bool CGameObject::OnDamaged(CGameObject* Attacker, int32 DamagePoint)
 {
-	_GameObjectInfo.ObjectStatInfo.HP -= DamagePoint;	
+	_GameObjectInfo.ObjectStatInfo.HP -= DamagePoint;
 
 	if (_GameObjectInfo.ObjectStatInfo.HP <= 0)
 	{
 		_GameObjectInfo.ObjectStatInfo.HP = 0;
-		
+
 		return true;
 	}
 
@@ -227,11 +250,6 @@ void CGameObject::OnHeal(CGameObject* Healer, int32 HealPoint)
 
 		AroundMonster->_GameObjectJobQue.Enqueue(AggroUpdateJob);
 	}
-}
-
-void CGameObject::OnDead(CGameObject* Killer)
-{
-
 }
 
 st_Vector2 CGameObject::PositionCheck(st_Vector2Int& CheckPosition)
@@ -429,4 +447,8 @@ CChannel* CGameObject::GetChannel()
 void CGameObject::SetChannel(CChannel* Channel)
 {
 	_Channel = Channel;
+}
+
+void CGameObject::Init()
+{
 }

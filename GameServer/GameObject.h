@@ -68,8 +68,7 @@ public:
 
 	virtual void Update();
 	virtual bool OnDamaged(CGameObject* Attacker, int32 DamagePoint);
-	virtual void OnHeal(CGameObject* Healer, int32 HealPoint);
-	virtual void OnDead(CGameObject* Killer);
+	virtual void OnHeal(CGameObject* Healer, int32 HealPoint);	
 
 	st_Vector2 PositionCheck(st_Vector2Int& CheckPosition);
 	virtual void PositionReset();
@@ -121,6 +120,8 @@ public:
 
 	CChannel* GetChannel();
 	void SetChannel(CChannel* Channel);
+
+	virtual void Init();
 protected:
 	map<int64, st_Aggro> _AggroTargetList;
 
@@ -135,4 +136,9 @@ protected:
 	// ÁÖÀ§ ½Ã¾ß ¿ÀºêÁ§Æ® Å½»ö Æ½
 	//---------------------------
 	uint64 _FieldOfViewUpdateTick;
+
+	//------------------------------------
+	// Á×À½ ¾Ö´Ï¸ÞÀÌ¼Ç Æ½
+	//------------------------------------
+	uint64 _DeadTick;
 };
