@@ -206,7 +206,7 @@ vector<CSector*> CMap::GetAroundSectors(st_Vector2Int CellPosition, int32 Range)
 				Sectors.push_back(Sector);
 			}
 		}
-
+		
 		return Sectors;
 	}
 }
@@ -224,7 +224,7 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object, int1
 		st_FieldOfViewInfo FieldOfViewInfo;
 		// 주변 섹터 플레이어 정보
 		for (CPlayer* Player : Sector->GetPlayers())
-		{
+		{			
 			if (Player->_NetworkState == en_ObjectNetworkState::LIVE)
 			{
 				FieldOfViewInfo.ObjectID = Player->_GameObjectInfo.ObjectId;
@@ -402,7 +402,10 @@ CGameObject* CMap::FindNearPlayer(CGameObject* Object, int32 Range, bool* Collis
 	CHeap<int16, CPlayer*> Distances((int32)Players.size()); // 가까운 순서대로 
 	for (CPlayer* Player : Players)
 	{
-		Distances.InsertHeap(st_Vector2Int::Distance(Player->GetCellPosition(), Object->GetCellPosition()), Player);
+		if (Player->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::READY_DEAD && Player->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
+		{
+			Distances.InsertHeap(st_Vector2Int::Distance(Player->GetCellPosition(), Object->GetCellPosition()), Player);
+		}		
 	}
 
 	CPlayer* Player = nullptr;
