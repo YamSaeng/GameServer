@@ -26,10 +26,14 @@ public:
 
 	void InventoryCreate(int8 Width, int8 Height);		
 
+	//-----------------------------------------------------------------
+	// 주운 돈 아이템 인벤토리에 넣기
+	//-----------------------------------------------------------------
+	void InsertMoney(int8 SelectInventoryIndex, CItem* InsertMoneyItem);
 	//--------------------------------------------------------------
 	// 루팅한 아이템 인벤토리에 순서대로 넣기
 	//--------------------------------------------------------------
-	void InsertItem(int8 SelectInventoryIndex, CItem* NewItem);
+	void InsertItem(int8 SelectInventoryIndex, CItem* InsertNewItem);
 	
 	//--------------------------------------------------------------
 	// DB에 기록된 아이템 인벤토리에 넣기
@@ -64,5 +68,5 @@ public:
 	//------------------------------------------------------------------------------------------------------------
 	// 인벤토리에 조건에 맞는 아이템을 모두 찾는다.
 	//------------------------------------------------------------------------------------------------------------
-	vector<CItem*> FindAllInventoryItem(int8 SelectInventoryIndex, en_SmallItemCategory FindItemSmallItemCategory);
+	vector<CItem*> FindAllInventoryItem(int8 SelectInventoryIndex, en_SmallItemCategory FindItemSmallItemCategory);	
 };
