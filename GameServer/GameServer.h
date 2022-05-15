@@ -144,7 +144,7 @@ private:
 	//--------------------------------------------------------------------
 	void PacketProcReqChattingMessage(int64 SessionId, CMessage* Message);
 	//------------------------------------------------------------
-	// 아이템 인벤토리 선택 요청 처리
+	// 아이템 가방 선택 요청 처리
 	//------------------------------------------------------------
 	void PacketProcReqItemSelect(int64 SessionId, CMessage* Message);
 	//------------------------------------------------------------
@@ -195,25 +195,17 @@ private:
 	//-------------------------------------------------
 	// 아이템 생성 후 DB 저장
 	//-------------------------------------------------
-	void PacketProcReqDBItemCreate(CMessage* Message);
+	void PacketProcReqDBItemCreate(CMessage* Message);	
 	//------------------------------------------------------------------
-	// 인벤토리 테이블에 루팅한 아이템 저장
+	// 가방 테이블에 제작템 저장
 	//------------------------------------------------------------------
-	void PacketProcReqDBLootingItemToInventorySave(CGameServerMessage* Message);
-	//------------------------------------------------------------------
-	// 인벤토리 테이블에 제작템 저장
-	//------------------------------------------------------------------
-	void PacketProcReqDBCraftingItemToInventorySave(CGameServerMessage* Message);
-	//-------------------------------------------------------------------------
-	// 인벤토리 테이블에 아이템 놓기
-	//-------------------------------------------------------------------------
-	void PacketProcReqDBItemPlace(CGameServerMessage* Message);
+	void PacketProcReqDBCraftingItemToInventorySave(CGameServerMessage* Message);	
 	//---------------------------------------------------------------
-	// 인벤토리 테이블에 아이템 업데이트
+	// 가방 테이블에 아이템 업데이트
 	//---------------------------------------------------------------
 	void PacketProcReqDBItemUpdate(CGameServerMessage* Message);
 	//---------------------------------------------------------------
-	// 인벤토리에 돈 저장
+	// 가방에 돈 저장
 	//---------------------------------------------------------------
 	void PacketProcReqDBGoldSave(CMessage* Message);
 	//-----------------------------------------------------------------------
@@ -293,23 +285,27 @@ private:
 	//-------------------------------------------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int16 SliverCount, int16 BronzeCount, int16 ItemCount, int16 ItemType, bool ItemGainPrint = true);
 	//---------------------------------------------------------------------------------------------
-	// 게임서버 인벤토리 아이템 선택 요청 응답 패킷 조합
+	// 게임서버 가방 아이템 선택 요청 응답 패킷 조합
 	//---------------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResSelectItem(int64 AccountId, int64 ObjectId, CItem* SelectItem);
 	//---------------------------------------------------------------------------------------------
-	// 게임서버 인벤토리 아이템 놓기 요청 응답 패킷 조합
+	// 게임서버 가방 아이템 놓기 요청 응답 패킷 조합
 	//---------------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResPlaceItem(int64 AccountId, int64 ObjectId, CItem* PlaceItem, CItem* OverlapItem);
+	//------------------------------------------------------------------------------------------------------------------------------------------------------
+	// 게임서버 가방 돈 저장 요청 응답 패킷 조합
+	//------------------------------------------------------------------------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResMoneyToInventory(int64 TargetObjectID, bool IsMoney, int64 GoldCoinCount, int16 SliverCoinCount, int16 BronzeCoinCount, en_SmallItemCategory ItemCategory, int16 ItemEach);
 	//-------------------------------------------------------------------------------------------------------------------------
-	// 게임서버 아이템 인벤토리 저장 요청 응답 패킷 조합
+	// 게임서버 아이템 가방 저장 요청 응답 패킷 조합
 	//-------------------------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResItemToInventory(int64 TargetObjectId, CItem* InventoryItem, int16 ItemEach, bool IsExist, bool ItemGainPrint = true);
+	CGameServerMessage* MakePacketResItemToInventory(int64 TargetObjectId, CItem* InventoryItem, bool IsExist, int16 ItemEach, bool ItemGainPrint = true);
 	//-----------------------------------------------------------------------------------------
-	// 게임서버 인벤토리 아이템 업데이트
+	// 게임서버 가방 아이템 업데이트
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketInventoryItemUpdate(int64 PlayerId, st_ItemInfo UpdateItemInfo);
 	//-----------------------------------------------------------------------------------------
-	// 게임서버 인벤토리 아이템 사용 요청 응답 패킷 조합
+	// 게임서버 가방 아이템 사용 요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketInventoryItemUse(int64 PlayerId, st_ItemInfo& UseItemInfo);
 	//-----------------------------------------------------------------------------------------
@@ -339,10 +335,10 @@ private:
 	//-------------------------------------------------
 	// 게임서버 핑 패킷 조합
 	//-------------------------------------------------
-	CGameServerMessage* MakePacketPing();
-
-	CItem* NewItemCrate(st_ItemInfo& NewItemInfo);
+	CGameServerMessage* MakePacketPing();		
 public:
+	CItem* NewItemCrate(st_ItemInfo& NewItemInfo);
+
 	//-----------------------------------------------------------
 	// 경험치 계산
 	//-----------------------------------------------------------
