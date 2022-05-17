@@ -88,7 +88,7 @@ protected:
 	//------------------------------------
 	// 공격 속도
 	//------------------------------------
-	uint64 _AttackTickPoint;	
+	uint64 _AttackTickPoint;		
 
 	//-------------------------------------
 	// 몬스터가 정찰할 위치
@@ -128,10 +128,14 @@ protected:
 	// Spell 상태 Update
 	//------------------------
 	virtual void UpdateSpell();
+	//----------------------------
+	// Ready Dead 상태 Update
+	//----------------------------
+	virtual void UpdateReadyDead();
 	//------------------------
 	// Dead 상태 Update
 	//------------------------
-	virtual void UpdateDead();			
+	virtual void UpdateDead();				
 
 	void Move();
 
