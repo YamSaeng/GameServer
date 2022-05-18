@@ -2452,3 +2452,8 @@ st_ObjectStatusData* CDataManager::FindObjectStatusData(en_GameObjectType GameOb
 		return (*_WarriorStatus.find(Level)).second;
 	}
 }
+
+st_ItemData* CDataManager::FindItemData(en_SmallItemCategory FindItemCategory)
+{
+	return (*_Items.find((int16)FindItemCategory)).second;
+}
