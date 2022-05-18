@@ -55,11 +55,7 @@ protected:
 	// 공격 거리
 	//-----------------
 	int32 _AttackRange;
-
-	//--------------------------------------------
-	// SpawnIdle 상태에서 Idle 상태로 돌아갈 Tick
-	//--------------------------------------------
-	uint64 _SpawnIdleTick;
+	
 	//------------------------------------
 	// Idle 상태에서 Search를 실행할 Tick
 	//------------------------------------
@@ -81,10 +77,6 @@ protected:
 	//-------------------------------------
 	uint64 _MoveTick;
 
-	//--------------------------------------
-	// Attack 상태에서 Attack을 실행할 Tick
-	//--------------------------------------
-	uint64 _DefaultAttackTick;
 	//------------------------------------
 	// 공격 속도
 	//------------------------------------
@@ -101,41 +93,41 @@ protected:
 	//------------------------
 	// Spawn Idle 상태 Update
 	//------------------------
-	virtual void UpdateSpawnIdle();
+	virtual bool UpdateSpawnIdle() override;
 	//------------------------
 	// Idle 상태 Update
 	//------------------------
-	virtual void UpdateIdle();
+	virtual void UpdateIdle() override;
 	//------------------------
 	// Patrol 상태 Update
 	//------------------------
 	void ReadyPatrol();
-	virtual void UpdatePatrol();
+	virtual void UpdatePatrol() override;
 	//------------------------
 	// Moving 상태 Update
 	//------------------------
 	void ReadMoving();
-	virtual void UpdateMoving();		
+	virtual void UpdateMoving() override;		
 	//--------------------------------------
 	// ReturnSpawnPosition 상태 Update
 	//--------------------------------------
-	virtual void UpdateReturnSpawnPosition();
+	virtual void UpdateReturnSpawnPosition() override;
 	//------------------------
 	// Attack 상태 Update
 	//------------------------
-	virtual void UpdateAttack();
+	virtual void UpdateAttack() override;
 	//------------------------
 	// Spell 상태 Update
 	//------------------------
-	virtual void UpdateSpell();
+	virtual void UpdateSpell() override;
 	//----------------------------
 	// Ready Dead 상태 Update
 	//----------------------------
-	virtual void UpdateReadyDead();
+	virtual void UpdateReadyDead() override;
 	//------------------------
 	// Dead 상태 Update
 	//------------------------
-	virtual void UpdateDead();				
+	virtual void UpdateDead() override;
 
 	void Move();
 

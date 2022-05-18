@@ -225,14 +225,16 @@ CGameObject* CMonster::FindTarget()
 	return Target;
 }
 
-void CMonster::UpdateSpawnIdle()
+bool CMonster::UpdateSpawnIdle()
 {
-	if (_SpawnIdleTick > GetTickCount64())
-	{
-		return;
-	}
+	bool ChangeToIdle = CGameObject::UpdateSpawnIdle();
 
-	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+	if (ChangeToIdle)
+	{
+		SendMonsterChangeObjectState();
+	}	
+
+	return ChangeToIdle;
 }
 
 void CMonster::UpdateIdle()
@@ -285,6 +287,9 @@ void CMonster::ReadyPatrol()
 			Aggro.AggroPoint = _GameObjectInfo.ObjectStatInfo.MaxHP * G_Datamanager->_MonsterAggroData.MonsterAggroFirstTarget;
 
 			_AggroTargetList.insert(pair<int64, st_Aggro>(Target->_GameObjectInfo.ObjectId, Aggro));
+
+			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
+			_MonsterState = en_MonsterState::MONSTER_READY_MOVE;
 
 			return;
 		}
@@ -573,6 +578,7 @@ void CMonster::UpdateAttack()
 		// 목표물이 사라지거나 죽음 준비 또는 죽음 상태일 경우 목표물 해제하고 제자리로 돌아감
 		if (_Target == nullptr 
 			|| _Target->_NetworkState == en_ObjectNetworkState::LEAVE
+			|| _Target->_NetworkState == en_ObjectNetworkState::READY
 			|| _Target->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::READY_DEAD
 			|| _Target->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::DEAD)
 		{

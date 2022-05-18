@@ -12,9 +12,6 @@ struct st_TimerJob;
 class CPlayer : public CGameObject
 {
 public:			
-	uint64 _DefaultAttackTick;	
-	uint64 _SpellTick;		
-
 	int64 _SessionId;
 	int64 _AccountId;
 
@@ -28,9 +25,7 @@ public:
 
 	// 시야 범위 오브젝트
 	vector<st_FieldOfViewInfo> _FieldOfViewInfos;	
-
-	// 현재 사용 중인 스킬
-	CSkill* _CurrentSkill;
+	
 	// 연속기 스킬
 	CSkill* _ComboSkill;		
 
@@ -45,7 +40,9 @@ public:
 
 	virtual void PositionReset() override;	
 protected:
-	virtual void UpdateMove();	
-	virtual void UpdateAttack();
-	virtual void UpdateSpell();	
+	virtual bool UpdateSpawnIdle() override;
+	virtual void UpdateIdle() override;
+	virtual void UpdateMoving() override;	
+	virtual void UpdateAttack() override;
+	virtual void UpdateSpell() override;	
 };

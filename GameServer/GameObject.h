@@ -51,6 +51,11 @@ public:
 	// 시야 범위 오브젝트
 	vector<st_FieldOfViewInfo> _FieldOfViewInfos;
 
+	//--------------------------------------------
+	// SpawnIdle 상태에서 Idle 상태로 돌아갈 Tick
+	//--------------------------------------------
+	uint64 _SpawnIdleTick;	
+
 	// 타겟
 	CGameObject* _Owner;
 
@@ -127,10 +132,25 @@ protected:
 
 	// 게임오브젝트가 속한 채널
 	CChannel* _Channel;
+
+	//--------------------
+	// 현재 시전중인 마법스킬
+	//--------------------
+	CSkill* _CurrentSpellSkill;
+
 	//-------------------------
 	// 재생력 Tick
 	//-------------------------
 	uint64 _NatureRecoveryTick;
+
+	//--------------------------------------
+	// 공격 상태에서 기본공격을 실행할 Tick
+	//--------------------------------------
+	uint64 _DefaultAttackTick;
+	//--------------------------------------
+	// 마법 시전 상태에서 마법 시전 완료 Tick
+	//--------------------------------------
+	uint64 _SpellTick;
 
 	//---------------------------
 	// 주위 시야 오브젝트 탐색 틱
@@ -140,5 +160,15 @@ protected:
 	//------------------------------------
 	// 죽음 애니메이션 틱
 	//------------------------------------
-	uint64 _DeadTick;
+	uint64 _DeadTick;	
+
+	virtual bool UpdateSpawnIdle();
+	virtual void UpdateIdle();
+	virtual void UpdatePatrol();
+	virtual void UpdateMoving();
+	virtual void UpdateReturnSpawnPosition();
+	virtual void UpdateAttack();
+	virtual void UpdateSpell();
+	virtual void UpdateReadyDead();
+	virtual void UpdateDead();
 };

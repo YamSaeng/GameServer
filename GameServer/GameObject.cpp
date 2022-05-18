@@ -121,6 +121,32 @@ void CGameObject::Update()
 				}
 			}
 			break;
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SPELL_START:
+			{
+				CSkill* ReqSpellSkill;
+				*GameObjectJob->GameObjectJobMessage >> &ReqSpellSkill;
+						
+				_CurrentSpellSkill = ReqSpellSkill;
+
+				_SpellTick = GetTickCount64() + ReqSpellSkill->GetSkillInfo()->SkillCastingTime;
+
+				_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPELL;
+
+				CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
+					_GameObjectInfo.ObjectPositionInfo.MoveDir,
+					_GameObjectInfo.ObjectType,
+					_GameObjectInfo.ObjectPositionInfo.State);
+				G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResObjectStateChangePacket);
+				ResObjectStateChangePacket->Free();
+			}
+			break;
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SPELL_CANCEL:
+			{
+				CMessage* ResMagicCancelPacket = G_ObjectManager->GameServer->MakePacketMagicCancel(_GameObjectInfo.ObjectId);
+				G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResMagicCancelPacket);
+				ResMagicCancelPacket->Free();
+			}
+			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_AGGRO_LIST_INSERT_OR_UPDATE:
 			{
 				int8 AggroCategory;
@@ -450,5 +476,49 @@ void CGameObject::SetChannel(CChannel* Channel)
 }
 
 void CGameObject::Init()
+{
+}
+
+bool CGameObject::UpdateSpawnIdle()
+{
+	if (_SpawnIdleTick > GetTickCount64())
+	{
+		return false;
+	}
+
+	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+
+	return true;
+}
+
+void CGameObject::UpdateIdle()
+{
+}
+
+void CGameObject::UpdatePatrol()
+{
+}
+
+void CGameObject::UpdateMoving()
+{
+}
+
+void CGameObject::UpdateReturnSpawnPosition()
+{
+}
+
+void CGameObject::UpdateAttack()
+{
+}
+
+void CGameObject::UpdateSpell()
+{
+}
+
+void CGameObject::UpdateReadyDead()
+{
+}
+
+void CGameObject::UpdateDead()
 {
 }
