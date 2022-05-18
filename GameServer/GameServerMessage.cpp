@@ -133,6 +133,10 @@ CGameServerMessage& CGameServerMessage::operator<<(st_ItemInfo& ItemInfo)
     *this << ItemNameLen;
     InsertData(ItemInfo.ItemName.c_str(), ItemNameLen);
 
+    int16 ItemExplainLen = (int16)ItemInfo.ItemExplain.length() * 2;
+    *this << ItemExplainLen;
+	InsertData(ItemInfo.ItemExplain.c_str(), ItemExplainLen);
+
     *this << ItemInfo.ItemMinDamage;
     *this << ItemInfo.ItemMaxDamage;
     *this << ItemInfo.ItemDefence;

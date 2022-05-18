@@ -1597,6 +1597,12 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 
 			vector<CGameObject*> Targets;
 
+			if (MyPlayer->_ComboSkill != nullptr)
+			{
+				st_GameObjectJob* ComboAttackOffJob = MakeGameObjectJobComboSkillOff();
+				MyPlayer->_GameObjectJobQue.Enqueue(ComboAttackOffJob);
+			}
+
 			CSkill* ReqMeleeSkill = MyPlayer->_SkillBox.FindSkill((en_SkillType)ReqSkillType);
 			if (ReqMeleeSkill != nullptr && ReqMeleeSkill->GetSkillInfo()->CanSkillUse == true)
 			{
@@ -1652,10 +1658,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 						if (MyPlayer->_ComboSkill != nullptr && MyPlayer->_ComboSkill->GetSkillInfo()->SkillType == en_SkillType::SKILL_KNIGHT_CONVERSION_ATTACK)
 						{
 							SkillUseSuccess = true;
-							GlobalSkillCooltime = false;
-
-							st_GameObjectJob* ComboAttackOffJob = MakeGameObjectJobComboSkillOff();
-							MyPlayer->_GameObjectJobQue.Enqueue(ComboAttackOffJob);
+							GlobalSkillCooltime = false;							
 
 							st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)ReqMeleeSkill->GetSkillInfo();
 
@@ -2205,6 +2208,12 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 
 				vector<CGameObject*> Targets;
 
+				if (MyPlayer->_ComboSkill != nullptr)
+				{
+					st_GameObjectJob* ComboAttackOffJob = MakeGameObjectJobComboSkillOff();
+					MyPlayer->_GameObjectJobQue.Enqueue(ComboAttackOffJob);
+				}
+
 				// 요청 스킬을 스킬창에서 찾음
 				CSkill* ReqMagicSkill = MyPlayer->_SkillBox.FindSkill((en_SkillType)ReqSkillType);
 				if (ReqMagicSkill != nullptr && ReqMagicSkill->GetSkillInfo()->CanSkillUse == true)
@@ -2358,10 +2367,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 							case en_SkillType::SKILL_SHAMAN_ICE_WAVE:
 								{
 									if (MyPlayer->_ComboSkill != nullptr && MyPlayer->_ComboSkill->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_ICE_WAVE)
-									{										
-										st_GameObjectJob* ComboAttackOffJob = MakeGameObjectJobComboSkillOff();
-										MyPlayer->_GameObjectJobQue.Enqueue(ComboAttackOffJob);
-
+									{	
 										CSkill* NewDebufSkill = G_ObjectManager->SkillCreate();
 
 										st_AttackSkillInfo* NewDebufSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(ReqMagicSkill->GetSkillInfo()->SkillMediumCategory);
@@ -2443,18 +2449,8 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 								ReqMagicSkill->_QuickSlotBarIndex = QuickSlotBarIndex;
 								ReqMagicSkill->_QuickSlotBarSlotIndex = QuickSlotBarSlotIndex;
 
-								MyPlayer->_CurrentSkill = ReqMagicSkill;
-
-								MyPlayer->_SpellTick = GetTickCount64() + ReqMagicSkill->GetSkillInfo()->SkillCastingTime;
-
-								MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPELL;
-
-								// 마법 스킬 모션 출력
-								CMessage* ResObjectStateChangePacket = MakePacketResChangeObjectState(MyPlayer->_GameObjectInfo.ObjectId,
-									MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType,
-									MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
-								SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResObjectStateChangePacket);
-								ResObjectStateChangePacket->Free();
+								st_GameObjectJob* SpellStartJob = MakeGameObjectJobSpellStart(ReqMagicSkill);
+								MyPlayer->_GameObjectJobQue.Enqueue(SpellStartJob);								
 							}
 						}
 						else
@@ -2517,15 +2513,8 @@ void CGameServer::PacketProcReqMagicCancel(int64 SessionId, CMessage* Message)
 				}
 			}
 
-			if (MyPlayer->_CurrentSkill != nullptr)
-			{
-				CMap* Map = G_MapManager->GetMap(1);
-				vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetFieldOfViewPlayers(MyPlayer, 1, false);
-
-				CMessage* ResMagicCancelPacket = MakePacketMagicCancel(MyPlayer->_AccountId, MyPlayer->_GameObjectInfo.ObjectId);
-				SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResMagicCancelPacket);
-				ResMagicCancelPacket->Free();
-			}			
+			st_GameObjectJob* SpellCancelJob = MakeGameObjectJobSpellCancel();
+			MyPlayer->_GameObjectJobQue.Enqueue(SpellCancelJob);
 		}
 	} while (0);
 
@@ -3671,8 +3660,7 @@ void CGameServer::PacketProcReqItemLooting(int64 SessionId, CMessage* Message)
 						TargetPlayer->_InventoryManager.InsertMoney(0, Items[i]);
 
 						{
-							CMessage* ResMoneyToInventoryPacket = MakePacketResMoneyToInventory(TargetObjectId,
-								true, 
+							CMessage* ResMoneyToInventoryPacket = MakePacketResMoneyToInventory(TargetObjectId,								
 								TargetPlayer->_InventoryManager._GoldCoinCount,
 								TargetPlayer->_InventoryManager._SliverCoinCount,
 								TargetPlayer->_InventoryManager._BronzeCoinCount,
@@ -3702,7 +3690,7 @@ void CGameServer::PacketProcReqItemLooting(int64 SessionId, CMessage* Message)
 								FindItem->_ItemInfo.ItemCount += Items[i]->_ItemInfo.ItemCount;
 							}
 
-							CMessage* ResItemToInventoryPacket = MakePacketResItemToInventory(TargetObjectId, FindItem, ItemEach, IsExistItem);
+							CMessage* ResItemToInventoryPacket = MakePacketResItemToInventory(TargetObjectId, FindItem, IsExistItem, ItemEach);
 							SendPacket(Session->SessionId, ResItemToInventoryPacket);
 							ResItemToInventoryPacket->Free();
 						}
@@ -5313,6 +5301,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 				CArmor* ArmorItem = nullptr;
 				CItem* InventoryItem = nullptr;
 				CMaterial* MaterialItem = nullptr;
+				st_ItemData* ItemData = nullptr;
 				CConsumable* SkillBookItem = nullptr;
 
 				switch ((en_SmallItemCategory)ItemSmallCategory)
@@ -5420,6 +5409,8 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG:
 				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
 				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
+					ItemData = G_Datamanager->FindItemData((en_SmallItemCategory)ItemSmallCategory);
+
 					MaterialItem = (CMaterial*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_MATERIAL);
 					MaterialItem->_ItemInfo.ItemDBId = 0;
 					MaterialItem->_ItemInfo.Rotated = ItemRotated;
@@ -5429,6 +5420,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 					MaterialItem->_ItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemMediumCategory;
 					MaterialItem->_ItemInfo.ItemSmallCategory = (en_SmallItemCategory)ItemSmallCategory;
 					MaterialItem->_ItemInfo.ItemName = ItemName;
+					MaterialItem->_ItemInfo.ItemExplain = (LPWSTR)CA2W(ItemData->ItemExplain.c_str());
 					MaterialItem->_ItemInfo.ItemCount = ItemCount;
 					MaterialItem->_ItemInfo.TileGridPositionX = ItemTilePositionX;
 					MaterialItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;
@@ -5853,6 +5845,31 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobComboSkillOff()
 	return ComboAttackOffJob;
 }
 
+st_GameObjectJob* CGameServer::MakeGameObjectJobSpellStart(CSkill* StartSpellSkill)
+{
+	st_GameObjectJob* SpellStartJob = G_ObjectManager->GameObjectJobCreate();
+	SpellStartJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SPELL_START;
+
+	CGameServerMessage* SpellStartMessage = CGameServerMessage::GameServerMessageAlloc();
+	SpellStartMessage->Clear();
+
+	*SpellStartMessage << &StartSpellSkill;
+
+	SpellStartJob->GameObjectJobMessage = SpellStartMessage;
+
+	return SpellStartJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobSpellCancel()
+{
+	st_GameObjectJob* SpellCancelJob = G_ObjectManager->GameObjectJobCreate();
+	SpellCancelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SPELL_CANCEL;
+
+	SpellCancelJob->GameObjectJobMessage = nullptr;
+
+	return SpellCancelJob;
+}
+
 st_GameObjectJob* CGameServer::MakeGameObjectJobShockRelease()
 {
 	st_GameObjectJob* ShockReleaseJob = G_ObjectManager->GameObjectJobCreate();
@@ -6030,7 +6047,7 @@ CGameServerMessage* CGameServer::MakePacketResPlaceItem(int64 AccountId, int64 O
 	return ResPlaceItemMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResMoneyToInventory(int64 TargetObjectID, bool IsMoney, int64 GoldCoinCount, int16 SliverCoinCount, int16 BronzeCoinCount, en_SmallItemCategory ItemCategory, int16 ItemEach)
+CGameServerMessage* CGameServer::MakePacketResMoneyToInventory(int64 TargetObjectID, int64 GoldCoinCount, int16 SliverCoinCount, int16 BronzeCoinCount, en_SmallItemCategory ItemCategory, int16 ItemEach)
 {
 	CGameServerMessage* ResMoneyToInventoryMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResMoneyToInventoryMessage == nullptr)
@@ -6042,7 +6059,8 @@ CGameServerMessage* CGameServer::MakePacketResMoneyToInventory(int64 TargetObjec
 
 	*ResMoneyToInventoryMessage << (int16)en_PACKET_S2C_LOOTING;
 
-	*ResMoneyToInventoryMessage << IsMoney;
+	*ResMoneyToInventoryMessage << TargetObjectID;
+	*ResMoneyToInventoryMessage << true;
 	*ResMoneyToInventoryMessage << GoldCoinCount;
 	*ResMoneyToInventoryMessage << SliverCoinCount;
 	*ResMoneyToInventoryMessage << BronzeCoinCount;
@@ -6066,6 +6084,8 @@ CGameServerMessage* CGameServer::MakePacketResItemToInventory(int64 TargetObject
 	*ResItemToInventoryMessage << (int16)en_PACKET_S2C_LOOTING;
 	// 타겟 아이디
 	*ResItemToInventoryMessage << TargetObjectId;
+	
+	*ResItemToInventoryMessage << false;
 	// 인벤토리 아이템 정보 담기
 	*ResItemToInventoryMessage << InventoryItem;
 	// 아이템 중복 여부
@@ -7021,7 +7041,7 @@ CGameServerMessage* CGameServer::MakePacketExperience(int64 AccountId, int64 Pla
 	return ResExperienceMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketMagicCancel(int64 AccountId, int64 PlayerId)
+CGameServerMessage* CGameServer::MakePacketMagicCancel(int64 PlayerId)
 {
 	CGameServerMessage* ResMagicCancelMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResMagicCancelMessage == nullptr)
@@ -7031,8 +7051,7 @@ CGameServerMessage* CGameServer::MakePacketMagicCancel(int64 AccountId, int64 Pl
 
 	ResMagicCancelMessage->Clear();
 
-	*ResMagicCancelMessage << (int16)en_PACKET_S2C_MAGIC_CANCEL;
-	*ResMagicCancelMessage << AccountId;
+	*ResMagicCancelMessage << (int16)en_PACKET_S2C_MAGIC_CANCEL;	
 	*ResMagicCancelMessage << PlayerId;
 
 	return ResMagicCancelMessage;

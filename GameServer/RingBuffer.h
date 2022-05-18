@@ -245,11 +245,7 @@ public:
 			memcpy_s(Dest, directDeqSize, &_Buffer[_Front], directDeqSize);
 			memcpy_s(Dest + directDeqSize, Size - directDeqSize, &_Buffer[0], Size - directDeqSize);
 		}
-
-		if (*Dest == 0)
-		{
-			int a = 0;
-		}
+		
 		return Size;
 	}
 
