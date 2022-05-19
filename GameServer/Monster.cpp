@@ -105,6 +105,7 @@ void CMonster::Update()
 		break;
 	}
 
+	AggroTargetListCheck();
 	SelectTarget();
 }
 
@@ -165,13 +166,40 @@ void CMonster::Init(st_Vector2Int SpawnPosition)
 	_PatrolPositions = GetAroundCellPositions(GetCellPosition(), 1);
 }
 
+void CMonster::AggroTargetListCheck()
+{
+	for (auto AggroTargetIterator : _AggroTargetList)
+	{
+		CGameObject* AggroTarget = AggroTargetIterator.second.AggroTarget;
+
+		if (AggroTarget != nullptr)
+		{
+			// 어그로 목록에서 삭제할 조건 
+			if (AggroTarget->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::READY_DEAD
+				|| AggroTarget->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::DEAD
+				|| AggroTarget->_NetworkState == en_ObjectNetworkState::LEAVE
+				|| AggroTarget->_NetworkState == en_ObjectNetworkState::READY)
+			{
+				_AggroTargetList.erase(AggroTargetIterator.first);
+			}
+
+			int16 Distance = st_Vector2Int::Distance(AggroTarget->GetCellPosition(), GetCellPosition());
+
+			if (Distance >= _FieldOfViewDistance)
+			{
+				_AggroTargetList.erase(AggroTargetIterator.first);
+			}
+		}	
+	}
+}
+
 void CMonster::SelectTarget()
 {
 	float AggroPoint = 0.0f;
 	CGameObject* Target = nullptr;
 
 	for (auto AggroTargetIterator : _AggroTargetList)
-	{
+	{		
 		if (AggroTargetIterator.second.AggroPoint > AggroPoint)
 		{
 			AggroPoint = AggroTargetIterator.second.AggroPoint;
