@@ -1704,6 +1704,8 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 												
 									Target->AddDebuf(NewDeBufSkill);
 									Target->SetStatusAbnormal(STATUS_ABNORMAL_WARRIOR_CHOHONE);											
+									
+									Target->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
 									CMessage* SelectTargetMoveStopMessage = MakePacketResMoveStop(Target->_GameObjectInfo.ObjectId, Target->_GameObjectInfo.ObjectPositionInfo);
 									SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, SelectTargetMoveStopMessage);
@@ -1824,6 +1826,8 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 									
 									Target->AddDebuf(NewDeBufSkill);
 									Target->SetStatusAbnormal(STATUS_ABNORMAL_WARRIOR_SHAEHONE);																			
+
+									Target->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
 									CMessage* SelectTargetMoveStopMessage = MakePacketResMoveStop(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectPositionInfo);
 									SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, SelectTargetMoveStopMessage);
@@ -5694,19 +5698,11 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 		}
 	}
 
-	G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerInfoSaveDBConnection);		
-	
-	for (int8 i = 0; i < SESSION_CHARACTER_MAX; i++)
-	{
-		if (LeaveSession->MyPlayerIndex != LeaveSession->MyPlayerIndexes[i])
-		{
-			G_ObjectManager->PlayerIndexReturn(LeaveSession->MyPlayerIndexes[i]);			
-		}
-	}
+	G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerInfoSaveDBConnection);			
 
 	if (MyPlayer->GetChannel() != nullptr)
 	{
-		st_GameObjectJob* LeaveGameJob = MakeGameObjectJobLeaveChannel(MyPlayer);
+		st_GameObjectJob* LeaveGameJob = MakeGameObjectJobLeaveChannelPlayer(MyPlayer, LeaveSession->MyPlayerIndexes);
 
 		CMap* LeaveMap = G_MapManager->GetMap(1);
 		CChannel* LeaveChannel = LeaveMap->GetChannelManager()->Find(1);
@@ -5811,7 +5807,28 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobLeaveChannel(CGameObject* LeaveC
 	LeaveChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_LEAVE_CHANNEL;
 
 	CGameServerMessage* LeaveChannelMessage = CGameServerMessage::GameServerMessageAlloc();
-	*LeaveChannelMessage << &LeaveChannelObject;
+	*LeaveChannelMessage << &LeaveChannelObject;	
+
+	LeaveChannelJob->GameObjectJobMessage = LeaveChannelMessage;
+
+	return LeaveChannelJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobLeaveChannelPlayer(CGameObject* LeavePlayerObject, int32* PlayerIndexes)
+{
+	st_GameObjectJob* LeaveChannelJob = G_ObjectManager->GameObjectJobCreate();
+	LeaveChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_PLAYER_LEAVE_CHANNEL;
+
+	CGameServerMessage* LeaveChannelMessage = CGameServerMessage::GameServerMessageAlloc();
+	*LeaveChannelMessage << &LeavePlayerObject;
+
+	if (PlayerIndexes != nullptr)
+	{
+		for (int i = 0; i < SESSION_CHARACTER_MAX; i++)
+		{
+			*LeaveChannelMessage << PlayerIndexes[i];
+		}
+	}
 
 	LeaveChannelJob->GameObjectJobMessage = LeaveChannelMessage;
 

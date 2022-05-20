@@ -45,4 +45,6 @@ protected:
 	virtual void UpdateMoving() override;	
 	virtual void UpdateAttack() override;
 	virtual void UpdateSpell() override;	
+	virtual void UpdateReadyDead() override;
+	virtual void UpdateDead() override;
 };

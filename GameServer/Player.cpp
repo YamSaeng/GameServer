@@ -281,6 +281,10 @@ void CPlayer::Update()
 	case en_CreatureState::SPELL:
 		UpdateSpell();
 		break;
+	case en_CreatureState::READY_DEAD:
+		break;
+	case en_CreatureState::DEAD:
+		break;
 	}
 }
 
@@ -808,4 +812,14 @@ void CPlayer::UpdateSpell()
 			ResMagicPacket->Free();			
 		}
 	}
+}
+
+void CPlayer::UpdateReadyDead()
+{
+
+}
+
+void CPlayer::UpdateDead()
+{
+
 }

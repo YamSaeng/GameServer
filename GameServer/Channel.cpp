@@ -80,7 +80,8 @@ void CChannel::Update()
 			{				
 				CPlayer* EnterPlayer;
 				*GameObjectJob->GameObjectJobMessage >> &EnterPlayer;
-
+				
+				EnterPlayer->_SpawnIdleTick = GetTickCount64() + 5000;
 				EnterPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_IDLE;				
 
 				EnterChannel(EnterPlayer, &EnterPlayer->_SpawnPosition);
@@ -90,41 +91,69 @@ void CChannel::Update()
 				G_ObjectManager->GameServer->SendPacket(EnterPlayer->_SessionId, ResEnterGamePacket);
 				ResEnterGamePacket->Free();
 
-				st_GameServerJob* DBCharacterInfoSendJob = G_ObjectManager->GameServer->_GameServerJobMemoryPool->Alloc();
-				DBCharacterInfoSendJob->Type = en_GameServerJobType::DATA_BASE_CHARACTER_INFO_SEND;
+				if (EnterPlayer->_GameObjectInfo.ObjectType != en_GameObjectType::OBJECT_PLAYER_DUMMY)
+				{
+					st_GameServerJob* DBCharacterInfoSendJob = G_ObjectManager->GameServer->_GameServerJobMemoryPool->Alloc();
+					DBCharacterInfoSendJob->Type = en_GameServerJobType::DATA_BASE_CHARACTER_INFO_SEND;
 
-				CGameServerMessage* ReqDBCharacterInfoMessage = CGameServerMessage::GameServerMessageAlloc();
-				ReqDBCharacterInfoMessage->Clear();
+					CGameServerMessage* ReqDBCharacterInfoMessage = CGameServerMessage::GameServerMessageAlloc();
+					ReqDBCharacterInfoMessage->Clear();
 
-				*ReqDBCharacterInfoMessage << EnterPlayer->_SessionId;
+					*ReqDBCharacterInfoMessage << EnterPlayer->_SessionId;
 
-				DBCharacterInfoSendJob->Message = ReqDBCharacterInfoMessage;
+					DBCharacterInfoSendJob->Message = ReqDBCharacterInfoMessage;
 
-				G_ObjectManager->GameServer->_GameServerUserDBThreadMessageQue.Enqueue(DBCharacterInfoSendJob);
-				SetEvent(G_ObjectManager->GameServer->_UserDataBaseWakeEvent);
+					G_ObjectManager->GameServer->_GameServerUserDBThreadMessageQue.Enqueue(DBCharacterInfoSendJob);
+					SetEvent(G_ObjectManager->GameServer->_UserDataBaseWakeEvent);
+				}	
+				else
+				{
+					EnterPlayer->_NetworkState = en_ObjectNetworkState::LIVE;
+				}
 			}
 			break;
 			case en_GameObjectJobType::GAMEOBJECT_JOB_LEAVE_CHANNEL:
-			{
-				CPlayer* LeavePlayer;
-				*GameObjectJob->GameObjectJobMessage >> &LeavePlayer;
+				{
+					CGameObject* LeaveGameObject;
+					*GameObjectJob->GameObjectJobMessage >> &LeaveGameObject;
 
-				LeaveChannel(LeavePlayer);
+					LeaveChannel(LeaveGameObject);
 
-				// 나 포함해서 주위 시야범위 플레이어 조사
-				vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Map->GetFieldOfViewPlayers(LeavePlayer, 1, false);
+					// 나 포함해서 주위 시야범위 플레이어 조사
+					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Map->GetFieldOfViewPlayers(LeaveGameObject, 1, false);
 
-				CMessage* ResObjectDeSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(LeavePlayer->_GameObjectInfo.ObjectId);
-				G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResObjectDeSpawnPacket);
-				ResObjectDeSpawnPacket->Free();
+					CMessage* ResObjectDeSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(LeaveGameObject->_GameObjectInfo.ObjectId);
+					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResObjectDeSpawnPacket);
+					ResObjectDeSpawnPacket->Free();
+				}
+				break;
+			case en_GameObjectJobType::GAMEOBJECT_JOB_PLAYER_LEAVE_CHANNEL:
+				{
+					CGameObject* LeaveGameObject;
+					*GameObjectJob->GameObjectJobMessage >> &LeaveGameObject;
 
-				LeavePlayer->_NetworkState = en_ObjectNetworkState::LEAVE;
+					LeaveChannel(LeaveGameObject);
 
-				LeavePlayer->Init();
+					// 나 포함해서 주위 시야범위 플레이어 조사
+					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Map->GetFieldOfViewPlayers(LeaveGameObject, 1, false);
 
-				G_ObjectManager->PlayerIndexReturn(LeavePlayer->_ObjectManagerArrayIndex);				
-			}
-			break;
+					CMessage* ResObjectDeSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(LeaveGameObject->_GameObjectInfo.ObjectId);
+					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResObjectDeSpawnPacket);
+					ResObjectDeSpawnPacket->Free();
+
+					LeaveGameObject->_NetworkState = en_ObjectNetworkState::LEAVE;
+
+					LeaveGameObject->Init();
+
+					for (int8 i = 0; i < SESSION_CHARACTER_MAX; i++)
+					{
+						int32 PlayerIndex;
+						*GameObjectJob->GameObjectJobMessage >> PlayerIndex;
+
+						G_ObjectManager->PlayerIndexReturn(PlayerIndex);
+					}					
+				}
+				break;
 			}
 
 			if (GameObjectJob->GameObjectJobMessage != nullptr)
@@ -403,12 +432,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	mt19937 Gen(RD());
 
 	st_Vector2Int SpawnPosition;
-
-	if (ObjectSpawnPosition != nullptr)
-	{
-		SpawnPosition = *ObjectSpawnPosition;
-	}
-	else
+		
+	if (EnterChannelGameObject->_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_PLAYER_DUMMY)
 	{
 		// 더미를 대상으로 랜덤 좌표 받아서 채널에 입장
 		while (true)
@@ -425,6 +450,11 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			}
 		}
 	}
+	else
+	{
+		SpawnPosition = *ObjectSpawnPosition;
+	}
+	
 	// 입장한 오브젝트의 타입에 따라
 	switch ((en_GameObjectType)EnterChannelGameObject->_GameObjectInfo.ObjectType)
 	{
@@ -643,5 +673,5 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 
 		_Map->ApplyLeave(LeaveChannelGameObject);
 		break;
-	}
+	}	
 }
