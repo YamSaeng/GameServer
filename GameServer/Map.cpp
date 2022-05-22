@@ -229,7 +229,7 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object, int1
 			{
 				FieldOfViewInfo.ObjectID = Player->_GameObjectInfo.ObjectId;
 				FieldOfViewInfo.SessionID = Player->_SessionId;
-				FieldOfViewInfo.ObjectType = Player->_GameObjectInfo.ObjectType;
+				FieldOfViewInfo.ObjectType = Player->_GameObjectInfo.ObjectType;				
 
 				int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Player->GetCellPosition());
 
