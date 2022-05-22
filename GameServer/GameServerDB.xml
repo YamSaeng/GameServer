@@ -716,9 +716,7 @@
     <Param name="@AccountDBId" type="BigInt"/>
     <Param name="@PlayerDBId" type="BigInt"/>
     <Param name="@QuickSlotBarIndex" type="TinyInt"/>
-    <Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
-    <Param name="@QuickSlotSkillName" type="nvarchar(20)"/>
-    <Param name="@QuickSlotSkillImagePath" type="nvarchar(100)"/>
+    <Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>    
     <Body>
       <![CDATA[
 	    SET NOCOUNT ON

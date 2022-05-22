@@ -505,16 +505,14 @@ namespace SP
 	};
 
 	// 퀵슬롯 정보 초기화
-	class CDBGameServerQuickSlotInit : public CDBBind<6, 0>
+	class CDBGameServerQuickSlotInit : public CDBBind<4, 0>
 	{
 	public:
-		CDBGameServerQuickSlotInit(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spQuickSlotInit(?,?,?,?,?,?)}") {}
+		CDBGameServerQuickSlotInit(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spQuickSlotInit(?,?,?,?)}") {}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
 		void InQuickSlotBarIndex(int8& QuickSlotBarIndex) { BindParam(2, QuickSlotBarIndex); }
-		void InQuickSlotBarSlotIndex(int8& QuickSlotBarSlotIndex) { BindParam(3, QuickSlotBarSlotIndex); }
-		void InQuickSlotBarSkillName(wstring& QuickSlotBarSkillName) { BindParam(4, QuickSlotBarSkillName.c_str()); }
-		void InQuickSlotBarSkillThumbnailImagePath(wstring& QuickSlotBarSkillThumbnailImagePath) { BindParam(5, QuickSlotBarSkillThumbnailImagePath.c_str()); }
+		void InQuickSlotBarSlotIndex(int8& QuickSlotBarSlotIndex) { BindParam(3, QuickSlotBarSlotIndex); }		
 	};
 
 	// 접속 종료시 플레이어 정보 DB에 기록
