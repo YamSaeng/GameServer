@@ -1094,7 +1094,6 @@ void CGameServer::PacketProcReqLogin(int64 SessionID, CMessage* Message)
 	st_Session* Session = FindSession(SessionID);
 
 	int64 AccountId;
-	int32 Token;
 
 	do
 	{
@@ -1618,13 +1617,12 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 						SkillUseSuccess = true;
 
 						st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)ReqMeleeSkill->GetSkillInfo();
-
-						st_Vector2Int FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
-						CGameObject* Target = MyPlayer->GetChannel()->GetMap()->Find(FrontCell);
-
-						if (Target != nullptr && Target->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE)
+						
+						vector<CGameObject*> FindObjects = Map->GetChannelManager()->Find(1)->FindChannelObjects(CurrentFieldOfViewObjectIDs, MyPlayer, 2);
+						
+						for (CGameObject* FindOBJ : FindObjects)
 						{
-							Targets.push_back(Target);
+							Targets.push_back(FindOBJ);
 						}
 					}
 					break;
@@ -1633,8 +1631,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 						SkillUseSuccess = true;
 
 						st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)ReqMeleeSkill->GetSkillInfo();
-
-						if (AttackSkillInfo->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
+												if (AttackSkillInfo->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
 						{
 							CSkill* FindNextComboSkill = MyPlayer->_SkillBox.FindSkill(AttackSkillInfo->NextComboSkill);
 							if (FindNextComboSkill->GetSkillInfo()->CanSkillUse == true)
@@ -1995,7 +1992,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 
 							float DefenceRate = (float)pow(((float)(200 - Target->_GameObjectInfo.ObjectStatInfo.Defence)) / 20, 2) * 0.01f;
 
-							int32 FinalDamage = CriticalDamage * DefenceRate;
+							int32 FinalDamage = (int32)(CriticalDamage * DefenceRate);
 
 							bool TargetIsDead = Target->OnDamaged(MyPlayer, FinalDamage);
 							if (TargetIsDead == true)
@@ -5629,9 +5626,7 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 	LeavePlayerStatInfoSave.InRequireExperience(MyPlayer->_Experience.RequireExperience);
 	LeavePlayerStatInfoSave.InTotalExperience(MyPlayer->_Experience.TotalExperience);
 
-	LeavePlayerStatInfoSave.Execute();	
-
-	SP::CDBGameServerQuickSlotBarSlotUpdate QuickSlotDBupdate(*PlayerInfoSaveDBConnection);
+	LeavePlayerStatInfoSave.Execute();		
 
 	for (auto QuickSlotIterator : MyPlayer->_QuickSlotManager.GetQuickSlotBar())
 	{
@@ -5641,10 +5636,11 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 
 			if (SaveQuickSlotInfo->QuickBarSkill != nullptr)
 			{
+				SP::CDBGameServerQuickSlotBarSlotUpdate QuickSlotDBupdate(*PlayerInfoSaveDBConnection);
+
 				int8 SaveQuickSlotInfoSkillLargeCategory = (int8)SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillLargeCategory;
 				int8 SaveQuickSlotInfoSkillMediumCategory = (int8)SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillMediumCategory;
 				int16 SaveQuickSlotInfoSkillSkillType = (int8)SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillType;
-
 
 ;				QuickSlotDBupdate.InAccountDBId(MyPlayer->_AccountId);
 				QuickSlotDBupdate.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
@@ -5657,6 +5653,17 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 				QuickSlotDBupdate.InSkillLevel(SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillLevel);
 
 				QuickSlotDBupdate.Execute();
+			}
+			else
+			{
+				SP::CDBGameServerQuickSlotInit QuickSlotInit(*PlayerInfoSaveDBConnection);				
+
+				QuickSlotInit.InAccountDBId(MyPlayer->_AccountId);
+				QuickSlotInit.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
+				QuickSlotInit.InQuickSlotBarIndex(SaveQuickSlotInfo->QuickSlotBarIndex);
+				QuickSlotInit.InQuickSlotBarSlotIndex(SaveQuickSlotInfo->QuickSlotBarSlotIndex);
+
+				QuickSlotInit.Execute();
 			}
 		}
 	}
