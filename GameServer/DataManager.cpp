@@ -705,6 +705,7 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 
 			MonsterData->MonsterStatInfo.Level = Level;
 			MonsterData->MonsterStatInfo.MaxHP = MaxHP;
+			MonsterData->MonsterStatInfo.MaxMP = MaxMP;
 			MonsterData->MonsterStatInfo.MinMeleeAttackDamage = MinMeleeAttackDamage;
 			MonsterData->MonsterStatInfo.MaxMeleeAttackDamage = MaxMeleeAttackDamage;
 			MonsterData->MonsterStatInfo.MeleeAttackHitRate = MeleeAttackHitRate;
