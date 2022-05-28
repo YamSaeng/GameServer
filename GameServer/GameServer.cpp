@@ -2207,18 +2207,18 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 				CMessage* ResEffectPacket = nullptr;
 				CMessage* ResMagicPacket = nullptr;
 
-				vector<CGameObject*> Targets;
-
-				if (MyPlayer->_ComboSkill != nullptr)
-				{
-					st_GameObjectJob* ComboAttackOffJob = MakeGameObjectJobComboSkillOff();
-					MyPlayer->_GameObjectJobQue.Enqueue(ComboAttackOffJob);
-				}
-
+				vector<CGameObject*> Targets;				
+								
 				// 요청 스킬을 스킬창에서 찾음
 				CSkill* ReqMagicSkill = MyPlayer->_SkillBox.FindSkill((en_SkillType)ReqSkillType);
 				if (ReqMagicSkill != nullptr && ReqMagicSkill->GetSkillInfo()->CanSkillUse == true)
 				{
+					if (MyPlayer->_ComboSkill != nullptr)
+					{
+						st_GameObjectJob* ComboAttackOffJob = MakeGameObjectJobComboSkillOff();
+						MyPlayer->_GameObjectJobQue.Enqueue(ComboAttackOffJob);
+					}
+
 					CMap* Map = G_MapManager->GetMap(1);
 
 					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetFieldOfViewPlayers(MyPlayer, 1, false);
@@ -2367,43 +2367,52 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 								break;
 							case en_SkillType::SKILL_SHAMAN_ICE_WAVE:
 								{
-									if (MyPlayer->_ComboSkill != nullptr && MyPlayer->_ComboSkill->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_ICE_WAVE)
-									{	
-										CSkill* NewDebufSkill = G_ObjectManager->SkillCreate();
-
-										st_AttackSkillInfo* NewDebufSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(ReqMagicSkill->GetSkillInfo()->SkillMediumCategory);
-										*NewDebufSkillInfo = *((st_AttackSkillInfo*)ReqMagicSkill->GetSkillInfo());
-
-										NewDebufSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewDebufSkillInfo);
-										NewDebufSkill->StatusAbnormalDurationTimeStart();
-
-										MyPlayer->_SelectTarget->AddDebuf(NewDebufSkill);
-										MyPlayer->_SelectTarget->SetStatusAbnormal(STATUS_ABNORMAL_SHAMAN_ICE_WAVE);
-
-										CMessage* ResStatusAbnormalPacket = MakePacketStatusAbnormal(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId,
-											MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType,
-											MyPlayer->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
-											NewDebufSkill->GetSkillInfo()->SkillType,
-											true, STATUS_ABNORMAL_SHAMAN_ICE_WAVE);
-										SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
-										ResStatusAbnormalPacket->Free();
-
-										CMessage* ResBufDeBufSkillPacket = MakePacketBufDeBuf(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, false, NewDebufSkill->GetSkillInfo());
-										SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
-										ResBufDeBufSkillPacket->Free();
-
-										ReqMagicSkill->CoolTimeStart();
-
-										for (auto QuickSlotBarPosition : MyPlayer->_QuickSlotManager.FindQuickSlotBar(ReqMagicSkill->GetSkillInfo()->SkillType))
+									if (MyPlayer->_SelectTarget != nullptr)
+									{
+										if (MyPlayer->_ComboSkill != nullptr && MyPlayer->_ComboSkill->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_ICE_WAVE)
 										{
-											// 클라에게 쿨타임 표시
-											CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
-												QuickSlotBarPosition.QuickSlotBarSlotIndex,
-												1.0f, ReqMagicSkill);
-											SendPacket(Session->SessionId, ResCoolTimeStartPacket);
-											ResCoolTimeStartPacket->Free();
+											CSkill* NewDebufSkill = G_ObjectManager->SkillCreate();
+
+											st_AttackSkillInfo* NewDebufSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(ReqMagicSkill->GetSkillInfo()->SkillMediumCategory);
+											*NewDebufSkillInfo = *((st_AttackSkillInfo*)ReqMagicSkill->GetSkillInfo());
+
+											NewDebufSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewDebufSkillInfo);
+											NewDebufSkill->StatusAbnormalDurationTimeStart();
+
+											MyPlayer->_SelectTarget->AddDebuf(NewDebufSkill);
+											MyPlayer->_SelectTarget->SetStatusAbnormal(STATUS_ABNORMAL_SHAMAN_ICE_WAVE);
+
+											CMessage* ResStatusAbnormalPacket = MakePacketStatusAbnormal(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId,
+												MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType,
+												MyPlayer->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
+												NewDebufSkill->GetSkillInfo()->SkillType,
+												true, STATUS_ABNORMAL_SHAMAN_ICE_WAVE);
+											SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
+											ResStatusAbnormalPacket->Free();
+
+											CMessage* ResBufDeBufSkillPacket = MakePacketBufDeBuf(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, false, NewDebufSkill->GetSkillInfo());
+											SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
+											ResBufDeBufSkillPacket->Free();
+
+											ReqMagicSkill->CoolTimeStart();
+
+											for (auto QuickSlotBarPosition : MyPlayer->_QuickSlotManager.FindQuickSlotBar(ReqMagicSkill->GetSkillInfo()->SkillType))
+											{
+												// 클라에게 쿨타임 표시
+												CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
+													QuickSlotBarPosition.QuickSlotBarSlotIndex,
+													1.0f, ReqMagicSkill);
+												SendPacket(Session->SessionId, ResCoolTimeStartPacket);
+												ResCoolTimeStartPacket->Free();
+											}
 										}
-									}									
+									}
+									else
+									{
+										CMessage* ResErrorPacket = MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT, ReqMagicSkill->GetSkillInfo()->SkillName.c_str());
+										SendPacket(MyPlayer->_SessionId, ResErrorPacket);
+										ResErrorPacket->Free();
+									}																		
 								}
 								break;
 							case en_SkillType::SKILL_TAIOIST_HEALING_LIGHT:
@@ -2462,7 +2471,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 							ResErrorPacket->Free();
 						}
 					}
-				}
+				}				
 			}			
 		} while (0);
 	}
