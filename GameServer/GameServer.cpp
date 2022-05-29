@@ -3871,6 +3871,7 @@ void CGameServer::PacketProcReqDBAccountCheck(CMessage* Message)
 				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = PlayerMeleeCriticalPoint;
 				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = PlayerMagicCriticalPoint;
 				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.Speed = PlayerSpeed;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxSpeed = PlayerSpeed;
 				NewPlayerCharacter->_SpawnPosition._Y = PlayerLastPositionY;
 				NewPlayerCharacter->_SpawnPosition._X = PlayerLastPositionX;
 				NewPlayerCharacter->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
@@ -4079,6 +4080,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
 					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
 					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxSpeed = NewCharacterStatus.Speed;
 					NewPlayerCharacter->_SpawnPosition._Y = NewCharacterPositionY;
 					NewPlayerCharacter->_SpawnPosition._X = NewCharacterPositionX;
 					NewPlayerCharacter->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
@@ -6425,6 +6427,7 @@ void CGameServer::ExperienceCalculate(CPlayer* Player, CGameObject* Target)
 				Player->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
 				Player->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
 				Player->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
+				Player->_GameObjectInfo.ObjectStatInfo.MaxSpeed = NewCharacterStatus.Speed;
 			}
 			break;
 			case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
@@ -6455,6 +6458,7 @@ void CGameServer::ExperienceCalculate(CPlayer* Player, CGameObject* Target)
 				Player->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
 				Player->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
 				Player->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
+				Player->_GameObjectInfo.ObjectStatInfo.MaxSpeed = NewCharacterStatus.Speed;
 			}
 			break;
 			case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
@@ -6485,6 +6489,7 @@ void CGameServer::ExperienceCalculate(CPlayer* Player, CGameObject* Target)
 				Player->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
 				Player->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
 				Player->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
+				Player->_GameObjectInfo.ObjectStatInfo.MaxSpeed = NewCharacterStatus.Speed;
 			}
 			break;
 			case en_GameObjectType::OBJECT_THIEF_PLAYER:
@@ -6515,6 +6520,7 @@ void CGameServer::ExperienceCalculate(CPlayer* Player, CGameObject* Target)
 				Player->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
 				Player->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
 				Player->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
+				Player->_GameObjectInfo.ObjectStatInfo.MaxSpeed = NewCharacterStatus.Speed;
 			}
 			break;
 			case en_GameObjectType::OBJECT_ARCHER_PLAYER:
@@ -6545,6 +6551,7 @@ void CGameServer::ExperienceCalculate(CPlayer* Player, CGameObject* Target)
 				Player->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
 				Player->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
 				Player->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
+				Player->_GameObjectInfo.ObjectStatInfo.MaxSpeed = NewCharacterStatus.Speed;
 			}
 			break;
 			}

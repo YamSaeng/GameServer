@@ -80,7 +80,8 @@ CGameServerMessage& CGameServerMessage::operator<<(st_StatInfo& StatInfo)
     *this << StatInfo.MeleeCriticalPoint;
     *this << StatInfo.MagicCriticalPoint;
     *this << StatInfo.StatusAbnormalResistance;
-    *this << StatInfo.Speed;    
+    *this << StatInfo.Speed;  
+    *this << StatInfo.MaxSpeed;
 
     return *(this);
 }

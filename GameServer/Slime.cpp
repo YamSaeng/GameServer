@@ -19,7 +19,7 @@ CSlime::CSlime()
 	_GameObjectInfo.ObjectStatInfo.MaxHP = MonsterData.MonsterStatInfo.MaxHP;
 	_GameObjectInfo.ObjectStatInfo.HP = MonsterData.MonsterStatInfo.MaxHP;
 	_GameObjectInfo.ObjectStatInfo.MaxMP = MonsterData.MonsterStatInfo.MaxMP;
-	_GameObjectInfo.ObjectStatInfo.MP = MonsterData.MonsterStatInfo.MP;
+	_GameObjectInfo.ObjectStatInfo.MP = MonsterData.MonsterStatInfo.MaxMP;
 	_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = MonsterData.MonsterStatInfo.MinMeleeAttackDamage;
 	_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = MonsterData.MonsterStatInfo.MaxMeleeAttackDamage;
 	_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = MonsterData.MonsterStatInfo.MeleeAttackHitRate;
@@ -30,6 +30,7 @@ CSlime::CSlime()
 	_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = MonsterData.MonsterStatInfo.MeleeCriticalPoint;
 	_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = MonsterData.MonsterStatInfo.MagicCriticalPoint;
 	_GameObjectInfo.ObjectStatInfo.Speed = MonsterData.MonsterStatInfo.Speed;
+	_GameObjectInfo.ObjectStatInfo.MaxSpeed = MonsterData.MonsterStatInfo.Speed;
 
 	_SearchCellDistance = MonsterData.MonsterStatInfo.SearchCellDistance;
 	_ChaseCellDistance = MonsterData.MonsterStatInfo.ChaseCellDistance;
@@ -44,7 +45,7 @@ CSlime::CSlime()
 
 	_SpawnIdleTick = GetTickCount64() + 2000;	
 
-	_FieldOfViewDistance = 8;
+	_FieldOfViewDistance = 10;
 }
 
 CSlime::~CSlime()
@@ -57,6 +58,11 @@ void CSlime::Init(st_Vector2Int SpawnPosition)
 
 	_SpawnIdleTick = GetTickCount64() + 2000;
 	_SearchTick = GetTickCount64() + _SearchTickPoint;	
+}
+
+bool CSlime::UpdateSpawnIdle()
+{
+	return CMonster::UpdateSpawnIdle();
 }
 
 void CSlime::UpdateIdle()
@@ -79,33 +85,14 @@ void CSlime::UpdateAttack()
 	CMonster::UpdateAttack();
 }
 
+void CSlime::UpdateReadyDead()
+{
+	CMonster::UpdateReadyDead();
+}
+
 void CSlime::UpdateDead()
 {
-
-}
-
-void CSlime::UpdateSpawnIdle()
-{
-	CMonster::UpdateSpawnIdle();
-}
-
-void CSlime::OnDead(CGameObject* Killer)
-{
-	G_ObjectManager->ItemSpawn(Killer->_GameObjectInfo.ObjectId, Killer->_GameObjectInfo.ObjectType, GetCellPosition(), _GameObjectInfo.ObjectType, en_ObjectDataType::SLIME_DATA);
 	
-	Killer->_GameObjectInfo.ObjectStatInfo.DP += _GetDPPoint;
-
-	if (Killer->_GameObjectInfo.ObjectStatInfo.DP >= Killer->_GameObjectInfo.ObjectStatInfo.MaxDP)
-	{
-		Killer->_GameObjectInfo.ObjectStatInfo.DP = Killer->_GameObjectInfo.ObjectStatInfo.MaxDP;
-	}
-
-	BroadCastPacket(en_PACKET_S2C_OBJECT_STAT_CHANGE);
-	BroadCastPacket(en_PACKET_S2C_DIE);		
-
-	G_ObjectManager->GameServer->SpawnObjectTimeTimerJobCreate((int16)_GameObjectInfo.ObjectType, _SpawnPosition , 10000);
-
-	G_ObjectManager->ObjectLeaveGame(this, _ObjectManagerArrayIndex, 1);
 }
 
 void CSlime::PositionReset()

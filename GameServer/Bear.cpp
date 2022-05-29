@@ -30,6 +30,7 @@ CBear::CBear()
 	_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = MonsterData.MonsterStatInfo.MeleeCriticalPoint;	
 	_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = MonsterData.MonsterStatInfo.MagicCriticalPoint;	
 	_GameObjectInfo.ObjectStatInfo.Speed = MonsterData.MonsterStatInfo.Speed;	
+	_GameObjectInfo.ObjectStatInfo.MaxSpeed = MonsterData.MonsterStatInfo.Speed;
 
 	_SearchCellDistance = MonsterData.MonsterStatInfo.SearchCellDistance;
 	_ChaseCellDistance = MonsterData.MonsterStatInfo.ChaseCellDistance;
@@ -42,7 +43,7 @@ CBear::CBear()
 	_GetDPPoint = MonsterData.GetDPPoint;		
 	_GetExpPoint = MonsterData.GetExpPoint;
 
-	_FieldOfViewDistance = 8;
+	_FieldOfViewDistance = 10;
 
 	_SpawnIdleTick = GetTickCount64() + 2000;
 }
@@ -58,6 +59,11 @@ void CBear::Init(st_Vector2Int SpawnPosition)
 
 	_SpawnIdleTick = GetTickCount64() + 2000;
 	_SearchTick = GetTickCount64() + _SearchTickPoint;
+}
+
+bool CBear::UpdateSpawnIdle()
+{
+	return CMonster::UpdateSpawnIdle();
 }
 
 void CBear::UpdateIdle()
@@ -83,30 +89,6 @@ void CBear::UpdateAttack()
 void CBear::UpdateDead()
 {
 
-}
-
-void CBear::UpdateSpawnIdle()
-{
-	CMonster::UpdateSpawnIdle();
-}
-
-void CBear::OnDead(CGameObject* Killer)
-{
-	G_ObjectManager->ItemSpawn(Killer->_GameObjectInfo.ObjectId, Killer->_GameObjectInfo.ObjectType, GetCellPosition(), _GameObjectInfo.ObjectType, en_ObjectDataType::BEAR_DATA);
-	
-	Killer->_GameObjectInfo.ObjectStatInfo.DP += _GetDPPoint;
-
-	if (Killer->_GameObjectInfo.ObjectStatInfo.DP >= Killer->_GameObjectInfo.ObjectStatInfo.MaxDP)
-	{
-		Killer->_GameObjectInfo.ObjectStatInfo.DP = Killer->_GameObjectInfo.ObjectStatInfo.MaxDP;
-	}
-
-	BroadCastPacket(en_PACKET_S2C_OBJECT_STAT_CHANGE);
-	BroadCastPacket(en_PACKET_S2C_DIE);		
-
-	G_ObjectManager->GameServer->SpawnObjectTimeTimerJobCreate((int16)_GameObjectInfo.ObjectType, _SpawnPosition, 10000);
-
-	G_ObjectManager->ObjectLeaveGame(this, _ObjectManagerArrayIndex, 1);
 }
 
 void CBear::PositionReset()

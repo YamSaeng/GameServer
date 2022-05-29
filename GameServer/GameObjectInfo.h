@@ -1718,13 +1718,14 @@ struct st_StatInfo
 	int32 MaxMeleeAttackDamage;
 	int16 MeleeAttackHitRate;
 	int16 MagicDamage;
-	float MagicHitRate;
+	float MagicHitRate;	
 	int32 Defence;
 	int16 EvasionRate;
 	int16 MeleeCriticalPoint;
 	int16 MagicCriticalPoint;
 	int16 StatusAbnormalResistance;
 	float Speed;
+	float MaxSpeed;
 };
 
 struct st_Experience
