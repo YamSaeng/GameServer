@@ -130,7 +130,7 @@ void CPlayer::Update()
 		}
 
 		_FieldOfViewInfos = CurrentFieldOfViewObjectIds;
-	}
+	}		
 
 	// 스킬목록 업데이트
 	_SkillBox.Update();
@@ -205,64 +205,7 @@ void CPlayer::Update()
 			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResObjectStatPacket);
 			ResObjectStatPacket->Free();
 		}
-	}	
-
-	// 냉기파동 상태이상 검사
-	bool IsShmanIceWave = _StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ICE_WAVE;
-
-	// 냉기파동 상태이상일 경우
-	// 대상이 바라보고 있는 반대방향으로 캐릭터를 밀어버림
-	if (IsShmanIceWave == true)
-	{		
-		switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
-		{
-		case en_MoveDir::UP:
-			_GameObjectInfo.ObjectPositionInfo.PositionY +=
-				(st_Vector2::Down()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 1.5f * 0.02f);
-			break;
-		case en_MoveDir::DOWN:
-			_GameObjectInfo.ObjectPositionInfo.PositionY +=
-				(st_Vector2::Up()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 1.5f * 0.02f);
-			break;
-		case en_MoveDir::LEFT:
-			_GameObjectInfo.ObjectPositionInfo.PositionX +=
-				(st_Vector2::Right()._X * _GameObjectInfo.ObjectStatInfo.Speed * 1.5f * 0.02f);
-			break;
-		case en_MoveDir::RIGHT:
-			_GameObjectInfo.ObjectPositionInfo.PositionX +=
-				(st_Vector2::Left()._X * _GameObjectInfo.ObjectStatInfo.Speed * 1.5f * 0.02f);
-			break;
-		}
-
-		bool CanMove = _Channel->GetMap()->Cango(this, _GameObjectInfo.ObjectPositionInfo.PositionX, _GameObjectInfo.ObjectPositionInfo.PositionY);
-		if (CanMove == true)
-		{
-			st_Vector2Int CollisionPosition;
-			CollisionPosition._X = _GameObjectInfo.ObjectPositionInfo.PositionX;
-			CollisionPosition._Y = _GameObjectInfo.ObjectPositionInfo.PositionY;
-
-			if (CollisionPosition._X != _GameObjectInfo.ObjectPositionInfo.CollisionPositionX
-				|| CollisionPosition._Y != _GameObjectInfo.ObjectPositionInfo.CollisionPositionY)
-			{
-				_Channel->GetMap()->ApplyMove(this, CollisionPosition);
-			}
-		}
-		else
-		{
-			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-
-			PositionReset();
-
-			// 바뀐 좌표 값 시야범위 오브젝트들에게 전송
-			CMessage* ResMovePacket = G_ObjectManager->GameServer->MakePacketResMove(_AccountId,
-				_GameObjectInfo.ObjectId,
-				CanMove,
-				_GameObjectInfo.ObjectPositionInfo);
-
-			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResMovePacket);
-			ResMovePacket->Free();
-		}
-	}
+	}		
 
 	switch (_GameObjectInfo.ObjectPositionInfo.State)
 	{
@@ -421,11 +364,10 @@ void CPlayer::UpdateMoving()
 		PositionReset();
 
 		// 바뀐 좌표 값 시야범위 오브젝트들에게 전송
-		CMessage* ResMovePacket = G_ObjectManager->GameServer->MakePacketResMove(_AccountId,
+		CMessage* ResMovePacket = G_ObjectManager->GameServer->MakePacketResMove(
 			_GameObjectInfo.ObjectId,
 			CanMove,
-			_GameObjectInfo.ObjectPositionInfo);
-
+			_GameObjectInfo.ObjectPositionInfo);		
 		G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResMovePacket);
 		ResMovePacket->Free();
 	}
@@ -498,35 +440,39 @@ void CPlayer::UpdateSpell()
 
 				st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)_CurrentSpellSkill->GetSkillInfo();
 
-				CSkill* NewSkill = G_ObjectManager->SkillCreate();
+				bool IsShmanRoot = _StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ROOT;
+				if (IsShmanRoot == false)
+				{
+					CSkill* NewSkill = G_ObjectManager->SkillCreate();
 
-				st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(_CurrentSpellSkill->GetSkillInfo()->SkillMediumCategory);
-				*NewAttackSkillInfo = *((st_AttackSkillInfo*)_CurrentSpellSkill->GetSkillInfo());
-				NewSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
-				NewSkill->StatusAbnormalDurationTimeStart();
+					st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(_CurrentSpellSkill->GetSkillInfo()->SkillMediumCategory);
+					*NewAttackSkillInfo = *((st_AttackSkillInfo*)_CurrentSpellSkill->GetSkillInfo());
+					NewSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
+					NewSkill->StatusAbnormalDurationTimeStart();
 
-				_SelectTarget->AddDebuf(NewSkill);
-				_SelectTarget->SetStatusAbnormal(STATUS_ABNORMAL_SHAMAN_ROOT);
+					_SelectTarget->AddDebuf(NewSkill);
+					_SelectTarget->SetStatusAbnormal(STATUS_ABNORMAL_SHAMAN_ROOT);
 
-				CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
-				G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, SelectTargetMoveStopMessage);
-				SelectTargetMoveStopMessage->Free();
+					CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
+					G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, SelectTargetMoveStopMessage);
+					SelectTargetMoveStopMessage->Free();
 
-				CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
-					_SelectTarget->_GameObjectInfo.ObjectType,
-					_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
-					_CurrentSpellSkill->GetSkillInfo()->SkillType,
-					true, STATUS_ABNORMAL_SHAMAN_ROOT);
-				G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResStatusAbnormalPacket);
-				ResStatusAbnormalPacket->Free();
+					CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
+						_SelectTarget->_GameObjectInfo.ObjectType,
+						_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
+						_CurrentSpellSkill->GetSkillInfo()->SkillType,
+						true, STATUS_ABNORMAL_SHAMAN_ROOT);
+					G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResStatusAbnormalPacket);
+					ResStatusAbnormalPacket->Free();
 
-				CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewSkill->GetSkillInfo());
-				G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResBufDeBufSkillPacket);
-				ResBufDeBufSkillPacket->Free();
+					CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewSkill->GetSkillInfo());
+					G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResBufDeBufSkillPacket);
+					ResBufDeBufSkillPacket->Free();
+				}				
 			}
 			break;
 			case en_SkillType::SKILL_SHAMAN_ICE_CHAIN:
-			{
+			{				
 				HitEffectType = en_EffectType::EFFECT_NORMAL_ATTACK_TARGET_HIT;
 
 				int32 MagicDamage = _GameObjectInfo.ObjectStatInfo.MagicDamage * 0.6;
@@ -559,35 +505,41 @@ void CPlayer::UpdateSpell()
 
 						_GameObjectJobQue.Enqueue(ComboAttackCreateJob);
 					}					
-				}
+				}									
+				
+				float DebufMovingSpeed = _GameObjectInfo.ObjectStatInfo.MaxSpeed * AttackSkillInfo->SkillDebufMovingSpeed * 0.01;
 
-				_SelectTarget->_GameObjectInfo.ObjectStatInfo.Speed -= AttackSkillInfo->SkillDebufMovingSpeed;
+				_SelectTarget->_GameObjectInfo.ObjectStatInfo.Speed -= DebufMovingSpeed;
 
 				CMessage* ResObjectStatChange = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId,
 					_GameObjectInfo.ObjectStatInfo);
 				G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResObjectStatChange);
 				ResObjectStatChange->Free();
 
-				CSkill* NewSkill = G_ObjectManager->SkillCreate();
+				bool IsShamanIceChain = _StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ICE_CHAIN;
+				if (IsShamanIceChain == false)
+				{
+					CSkill* NewSkill = G_ObjectManager->SkillCreate();
 
-				st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(_CurrentSpellSkill->GetSkillInfo()->SkillMediumCategory);
-				*NewAttackSkillInfo = *((st_AttackSkillInfo*)_CurrentSpellSkill->GetSkillInfo());
-				NewSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
-				NewSkill->StatusAbnormalDurationTimeStart();
+					st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(_CurrentSpellSkill->GetSkillInfo()->SkillMediumCategory);
+					*NewAttackSkillInfo = *((st_AttackSkillInfo*)_CurrentSpellSkill->GetSkillInfo());
+					NewSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
+					NewSkill->StatusAbnormalDurationTimeStart();
 
-				_SelectTarget->AddDebuf(NewSkill);
-				_SelectTarget->SetStatusAbnormal(STATUS_ABNORMAL_SHAMAN_ICE_CHAIN);
+					_SelectTarget->AddDebuf(NewSkill);
+					_SelectTarget->SetStatusAbnormal(STATUS_ABNORMAL_SHAMAN_ICE_CHAIN);
 
-				CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
-					_SelectTarget->_GameObjectInfo.ObjectType,
-					_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
-					_CurrentSpellSkill->GetSkillInfo()->SkillType, true, STATUS_ABNORMAL_SHAMAN_ICE_CHAIN);
-				G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResStatusAbnormalPacket);
-				ResStatusAbnormalPacket->Free();
+					CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
+						_SelectTarget->_GameObjectInfo.ObjectType,
+						_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
+						_CurrentSpellSkill->GetSkillInfo()->SkillType, true, STATUS_ABNORMAL_SHAMAN_ICE_CHAIN);
+					G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResStatusAbnormalPacket);
+					ResStatusAbnormalPacket->Free();
 
-				CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewSkill->GetSkillInfo());
-				G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResBufDeBufSkillPacket);
-				ResBufDeBufSkillPacket->Free();
+					CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewSkill->GetSkillInfo());
+					G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResBufDeBufSkillPacket);
+					ResBufDeBufSkillPacket->Free();
+				}				
 			}
 			break;
 			case en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE:
@@ -605,31 +557,35 @@ void CPlayer::UpdateSpell()
 				// 데미지 처리
 				TargetIsDead = _SelectTarget->OnDamaged(this, FinalDamage);
 
-				CSkill* NewSkill = G_ObjectManager->SkillCreate();
+				bool IsLightningStrike = _StatusAbnormal & STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE;
+				if (IsLightningStrike == false)
+				{
+					CSkill* NewSkill = G_ObjectManager->SkillCreate();
 
-				st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(_CurrentSpellSkill->GetSkillInfo()->SkillMediumCategory);
-				*NewAttackSkillInfo = *((st_AttackSkillInfo*)_CurrentSpellSkill->GetSkillInfo());
-				NewSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
-				NewSkill->StatusAbnormalDurationTimeStart();
+					st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(_CurrentSpellSkill->GetSkillInfo()->SkillMediumCategory);
+					*NewAttackSkillInfo = *((st_AttackSkillInfo*)_CurrentSpellSkill->GetSkillInfo());
+					NewSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
+					NewSkill->StatusAbnormalDurationTimeStart();
 
-				_SelectTarget->AddDebuf(NewSkill);
-				_SelectTarget->SetStatusAbnormal(STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE);
+					_SelectTarget->AddDebuf(NewSkill);
+					_SelectTarget->SetStatusAbnormal(STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE);
 
-				CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
-				G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, SelectTargetMoveStopMessage);
-				SelectTargetMoveStopMessage->Free();
+					CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
+					G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, SelectTargetMoveStopMessage);
+					SelectTargetMoveStopMessage->Free();
 
-				CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
-					_SelectTarget->_GameObjectInfo.ObjectType,
-					_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
-					_CurrentSpellSkill->GetSkillInfo()->SkillType,
-					true, STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE);
-				G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResStatusAbnormalPacket);
-				ResStatusAbnormalPacket->Free();
+					CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
+						_SelectTarget->_GameObjectInfo.ObjectType,
+						_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
+						_CurrentSpellSkill->GetSkillInfo()->SkillType,
+						true, STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE);
+					G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResStatusAbnormalPacket);
+					ResStatusAbnormalPacket->Free();
 
-				CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewSkill->GetSkillInfo());
-				G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResBufDeBufSkillPacket);
-				ResBufDeBufSkillPacket->Free();
+					CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewSkill->GetSkillInfo());
+					G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResBufDeBufSkillPacket);
+					ResBufDeBufSkillPacket->Free();
+				}			
 
 				float EffectPrintTime = _CurrentSpellSkill->GetSkillInfo()->SkillDurationTime / 1000.0f;
 
@@ -685,31 +641,35 @@ void CPlayer::UpdateSpell()
 
 				st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)_CurrentSpellSkill->GetSkillInfo();
 
-				CSkill* NewSkill = G_ObjectManager->SkillCreate();
+				bool IsTaioistRoot = _StatusAbnormal & STATUS_ABNORMAL_TAIOIST_ROOT;
+				if (IsTaioistRoot == false)
+				{
+					CSkill* NewSkill = G_ObjectManager->SkillCreate();
 
-				st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(_CurrentSpellSkill->GetSkillInfo()->SkillMediumCategory);
-				*NewAttackSkillInfo = *((st_AttackSkillInfo*)_CurrentSpellSkill->GetSkillInfo());
-				NewSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
-				NewSkill->StatusAbnormalDurationTimeStart();
+					st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(_CurrentSpellSkill->GetSkillInfo()->SkillMediumCategory);
+					*NewAttackSkillInfo = *((st_AttackSkillInfo*)_CurrentSpellSkill->GetSkillInfo());
+					NewSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
+					NewSkill->StatusAbnormalDurationTimeStart();
 
-				CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
-				G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, SelectTargetMoveStopMessage);
-				SelectTargetMoveStopMessage->Free();
+					CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
+					G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, SelectTargetMoveStopMessage);
+					SelectTargetMoveStopMessage->Free();
 
-				_SelectTarget->AddDebuf(NewSkill);
-				_SelectTarget->SetStatusAbnormal(STATUS_ABNORMAL_TAIOIST_ROOT);
+					_SelectTarget->AddDebuf(NewSkill);
+					_SelectTarget->SetStatusAbnormal(STATUS_ABNORMAL_TAIOIST_ROOT);
 
-				CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
-					_SelectTarget->_GameObjectInfo.ObjectType,
-					_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
-					_CurrentSpellSkill->GetSkillInfo()->SkillType,
-					true, STATUS_ABNORMAL_TAIOIST_ROOT);
-				G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResStatusAbnormalPacket);
-				ResStatusAbnormalPacket->Free();
+					CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
+						_SelectTarget->_GameObjectInfo.ObjectType,
+						_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
+						_CurrentSpellSkill->GetSkillInfo()->SkillType,
+						true, STATUS_ABNORMAL_TAIOIST_ROOT);
+					G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResStatusAbnormalPacket);
+					ResStatusAbnormalPacket->Free();
 
-				CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewSkill->GetSkillInfo());
-				G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResBufDeBufSkillPacket);
-				ResBufDeBufSkillPacket->Free();
+					CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewSkill->GetSkillInfo());
+					G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResBufDeBufSkillPacket);
+					ResBufDeBufSkillPacket->Free();
+				}				
 			}
 			break;
 			case en_SkillType::SKILL_TAIOIST_HEALING_LIGHT:
@@ -758,8 +718,8 @@ void CPlayer::UpdateSpell()
 				G_ObjectManager->GameServer->SendPacket(_SessionId, ResCoolTimeStartPacket);
 				ResCoolTimeStartPacket->Free();
 			}
-
-			// 전역 쿨타임 시간 표시
+			
+			// 전역 쿨타임 시간 표시 및 적용
 			for (auto QuickSlotBarPosition : _QuickSlotManager.GlobalCoolTimeFindQuickSlotBar(_CurrentSpellSkill->_QuickSlotBarIndex, _CurrentSpellSkill->_QuickSlotBarSlotIndex, _CurrentSpellSkill->GetSkillKind()))
 			{
 				st_QuickSlotBarSlotInfo* QuickSlotInfo = _QuickSlotManager.FindQuickSlotBar(QuickSlotBarPosition.QuickSlotBarIndex, QuickSlotBarPosition.QuickSlotBarSlotIndex);
