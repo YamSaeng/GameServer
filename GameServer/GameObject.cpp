@@ -33,6 +33,62 @@ CGameObject::~CGameObject()
 
 }
 
+void CGameObject::StatusAbnormalCheck()
+{
+	bool IsShamanIceWave = _StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ICE_WAVE;
+	if (IsShamanIceWave == true)
+	{
+		switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
+		{
+		case en_MoveDir::UP:
+			_GameObjectInfo.ObjectPositionInfo.PositionY +=
+				(st_Vector2::Down()._Y * 4.0f * 0.02f);
+			break;
+		case en_MoveDir::DOWN:
+			_GameObjectInfo.ObjectPositionInfo.PositionY +=
+				(st_Vector2::Up()._Y * 4.0f * 0.02f);
+			break;
+		case en_MoveDir::LEFT:
+			_GameObjectInfo.ObjectPositionInfo.PositionX +=
+				(st_Vector2::Right()._X * 4.0f * 0.02f);
+			break;
+		case en_MoveDir::RIGHT:
+			_GameObjectInfo.ObjectPositionInfo.PositionX +=
+				(st_Vector2::Left()._X * 4.0f * 0.02f);
+			break;
+		}
+
+		bool CanMove = _Channel->GetMap()->Cango(this, _GameObjectInfo.ObjectPositionInfo.PositionX, _GameObjectInfo.ObjectPositionInfo.PositionY);
+		if (CanMove == true)
+		{
+			st_Vector2Int CollisionPosition;
+			CollisionPosition._X = _GameObjectInfo.ObjectPositionInfo.PositionX;
+			CollisionPosition._Y = _GameObjectInfo.ObjectPositionInfo.PositionY;
+
+			if (CollisionPosition._X != _GameObjectInfo.ObjectPositionInfo.CollisionPositionX
+				|| CollisionPosition._Y != _GameObjectInfo.ObjectPositionInfo.CollisionPositionY)
+			{
+				_Channel->GetMap()->ApplyMove(this, CollisionPosition);
+			}
+		}
+		else
+		{
+			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+
+			PositionReset();
+
+			// 바뀐 좌표 값 시야범위 오브젝트들에게 전송
+			CMessage* ResMovePacket = G_ObjectManager->GameServer->MakePacketResMove(
+				_GameObjectInfo.ObjectId,
+				CanMove,
+				_GameObjectInfo.ObjectPositionInfo);
+
+			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResMovePacket);
+			ResMovePacket->Free();
+		}
+	}
+}
+
 void CGameObject::Update()
 {
 	if (_NetworkState == en_ObjectNetworkState::LEAVE)
@@ -233,6 +289,8 @@ void CGameObject::Update()
 
 		G_ObjectManager->GameObjectJobReturn(GameObjectJob);
 	}
+
+	StatusAbnormalCheck();
 }
 
 bool CGameObject::OnDamaged(CGameObject* Attacker, int32 DamagePoint)

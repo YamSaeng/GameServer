@@ -71,6 +71,7 @@ public:
 	CGameObject(st_GameObjectInfo GameObjectInfo);
 	virtual ~CGameObject();
 
+	void StatusAbnormalCheck();
 	virtual void Update();
 	virtual bool OnDamaged(CGameObject* Attacker, int32 DamagePoint);
 	virtual void OnHeal(CGameObject* Healer, int32 HealPoint);	
