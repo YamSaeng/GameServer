@@ -100,20 +100,20 @@ void CSlime::PositionReset()
 	switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
 	{
 	case en_MoveDir::LEFT:
-		_GameObjectInfo.ObjectPositionInfo.PositionX =
-			_GameObjectInfo.ObjectPositionInfo.CollisionPositionX + 0.3f;
+		_GameObjectInfo.ObjectPositionInfo.Position._X =
+			_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.3f;
 		break;
 	case en_MoveDir::RIGHT:
-		_GameObjectInfo.ObjectPositionInfo.PositionX =
-			_GameObjectInfo.ObjectPositionInfo.CollisionPositionX + 0.7f;
+		_GameObjectInfo.ObjectPositionInfo.Position._X =
+			_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.7f;
 		break;
 	case en_MoveDir::UP:
-		_GameObjectInfo.ObjectPositionInfo.PositionY =
-			_GameObjectInfo.ObjectPositionInfo.CollisionPositionY + 0.7f;
+		_GameObjectInfo.ObjectPositionInfo.Position._Y =
+			_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.7f;
 		break;
 	case en_MoveDir::DOWN:
-		_GameObjectInfo.ObjectPositionInfo.PositionY =
-			_GameObjectInfo.ObjectPositionInfo.CollisionPositionY + 0.3f;
+		_GameObjectInfo.ObjectPositionInfo.Position._Y =
+			_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.3f;
 		break;
 	}	
 }

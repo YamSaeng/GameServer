@@ -282,20 +282,20 @@ void CPlayer::PositionReset()
 	switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
 	{
 	case en_MoveDir::LEFT:
-		_GameObjectInfo.ObjectPositionInfo.PositionX =
-			_GameObjectInfo.ObjectPositionInfo.CollisionPositionX + 0.3f;
+		_GameObjectInfo.ObjectPositionInfo.Position._X =
+			_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.3f;
 		break;
 	case en_MoveDir::RIGHT:
-		_GameObjectInfo.ObjectPositionInfo.PositionX =
-			_GameObjectInfo.ObjectPositionInfo.CollisionPositionX + 0.7f;
+		_GameObjectInfo.ObjectPositionInfo.Position._X =
+			_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.7f;
 		break;
 	case en_MoveDir::UP:
-		_GameObjectInfo.ObjectPositionInfo.PositionY =
-			_GameObjectInfo.ObjectPositionInfo.CollisionPositionY + 0.7f;
+		_GameObjectInfo.ObjectPositionInfo.Position._Y =
+			_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.7f;
 		break;
 	case en_MoveDir::DOWN:
-		_GameObjectInfo.ObjectPositionInfo.PositionY =
-			_GameObjectInfo.ObjectPositionInfo.CollisionPositionY + 0.3f;
+		_GameObjectInfo.ObjectPositionInfo.Position._Y =
+			_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.3f;
 		break;
 	}
 }
@@ -327,32 +327,32 @@ void CPlayer::UpdateMoving()
 	switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
 	{
 	case en_MoveDir::UP:
-		_GameObjectInfo.ObjectPositionInfo.PositionY +=
+		_GameObjectInfo.ObjectPositionInfo.Position._Y +=
 			(st_Vector2::Up()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 		break;
 	case en_MoveDir::DOWN:
-		_GameObjectInfo.ObjectPositionInfo.PositionY +=
+		_GameObjectInfo.ObjectPositionInfo.Position._Y +=
 			(st_Vector2::Down()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 		break;
 	case en_MoveDir::LEFT:
-		_GameObjectInfo.ObjectPositionInfo.PositionX +=
+		_GameObjectInfo.ObjectPositionInfo.Position._X +=
 			(st_Vector2::Left()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 		break;
 	case en_MoveDir::RIGHT:
-		_GameObjectInfo.ObjectPositionInfo.PositionX +=
+		_GameObjectInfo.ObjectPositionInfo.Position._X +=
 			(st_Vector2::Right()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 		break;
 	}	
 
-	bool CanMove = _Channel->GetMap()->Cango(this, _GameObjectInfo.ObjectPositionInfo.PositionX, _GameObjectInfo.ObjectPositionInfo.PositionY);
+	bool CanMove = _Channel->GetMap()->Cango(this, _GameObjectInfo.ObjectPositionInfo.Position._X, _GameObjectInfo.ObjectPositionInfo.Position._Y);
 	if (CanMove == true)
 	{
 		st_Vector2Int CollisionPosition;
-		CollisionPosition._X = _GameObjectInfo.ObjectPositionInfo.PositionX;
-		CollisionPosition._Y = _GameObjectInfo.ObjectPositionInfo.PositionY;
+		CollisionPosition._X = _GameObjectInfo.ObjectPositionInfo.Position._X;
+		CollisionPosition._Y = _GameObjectInfo.ObjectPositionInfo.Position._Y;
 
-		if (CollisionPosition._X != _GameObjectInfo.ObjectPositionInfo.CollisionPositionX
-			|| CollisionPosition._Y != _GameObjectInfo.ObjectPositionInfo.CollisionPositionY)
+		if (CollisionPosition._X != _GameObjectInfo.ObjectPositionInfo.CollisionPosition._X
+			|| CollisionPosition._Y != _GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y)
 		{
 			_Channel->GetMap()->ApplyMove(this, CollisionPosition);
 		}

@@ -42,11 +42,11 @@ CGameServerMessage& CGameServerMessage::operator<<(st_GameObjectInfo& GameObject
 CGameServerMessage& CGameServerMessage::operator<<(st_PositionInfo& PositionInfo)
 {
     *this << (int8)PositionInfo.State;
-    *this << PositionInfo.CollisionPositionX;
-    *this << PositionInfo.CollisionPositionY;
+    *this << PositionInfo.CollisionPosition._X;
+    *this << PositionInfo.CollisionPosition._Y;
     *this << (int8)PositionInfo.MoveDir;    
-    *this << PositionInfo.PositionX;
-    *this << PositionInfo.PositionY;
+    *this << PositionInfo.Position._X;
+    *this << PositionInfo.Position._Y;
 
     return *(this);
 }

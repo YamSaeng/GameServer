@@ -1,4 +1,5 @@
 #pragma once
+#include <xmmintrin.h>
 
 class CGameObject;
 class CGameServerMessage;
@@ -1693,14 +1694,318 @@ enum class en_MapItemInfo : int8
 	MAP_ITEM_COUNT_MAX = 20
 };
 
+struct st_Vector2
+{
+	static constexpr float PI = { 3.14159265358979323846f };
+
+	float _X;
+	float _Y;
+
+	st_Vector2()
+	{
+		_X = 0;
+		_Y = 0;
+	}
+
+	st_Vector2(float X, float Y)
+	{
+		_X = X;
+		_Y = Y;
+	}
+
+	static st_Vector2 Up() { return st_Vector2(0, 1.0f); }
+	static st_Vector2 Down() { return st_Vector2(0, -1.0f); }
+	static st_Vector2 Left() { return st_Vector2(-1.0f, 0); }
+	static st_Vector2 Right() { return st_Vector2(1.0f, 0); }
+	static st_Vector2 Zero() { return st_Vector2(0, 0); }
+
+	st_Vector2 operator + (st_Vector2& Vector)
+	{
+		return st_Vector2(_X + Vector._X, _Y + Vector._Y);
+	}
+
+	st_Vector2 operator - (st_Vector2& Vector)
+	{
+		return st_Vector2(_X - Vector._X, _Y - Vector._Y);
+	}
+
+	st_Vector2 operator - (st_Vector2&& Vector)
+	{
+		return st_Vector2(_X - Vector._X, _Y - Vector._Y);
+	}
+
+	st_Vector2 operator * (int8& Sclar)
+	{
+		return st_Vector2(_X * Sclar, _Y * Sclar);
+	}
+
+	st_Vector2 operator * (float& Sclar)
+	{
+		return st_Vector2(_X * Sclar, _Y * Sclar);
+	}
+
+	// 거리 구하기
+	static float Distance(st_Vector2 TargetCellPosition, st_Vector2 MyCellPosition)
+	{
+		return sqrt(((TargetCellPosition._X - MyCellPosition._X) * (TargetCellPosition._X - MyCellPosition._X))
+			+ ((TargetCellPosition._Y - MyCellPosition._Y) * (TargetCellPosition._Y - MyCellPosition._Y)));
+	}
+
+	// 벡터 크기 구하기
+	float Size(st_Vector2 Vector)
+	{
+		return sqrt(SizeSquared());
+	}
+
+	float SizeSquared()
+	{
+		return _X * _X + _Y * _Y;
+	}
+
+	// 벡터 정규화
+	st_Vector2 Normalize()
+	{
+		/*float VectorSize = Size(*this);
+
+		return st_Vector2(_X / VectorSize, _Y / VectorSize);*/
+		float SquaredSum = SizeSquared();
+
+		if (SquaredSum != 0)
+		{
+			const __m128 fOneHalf = _mm_set_ss(0.5f);
+			__m128 Y0, X0, X1, X2, FOver2;
+			float temp;
+
+			Y0 = _mm_set_ss(SquaredSum);
+			X0 = _mm_rsqrt_ss(Y0);	// 1/sqrt estimate (12 bits)
+			FOver2 = _mm_mul_ss(Y0, fOneHalf);
+
+			// 1st Newton-Raphson iteration
+			X1 = _mm_mul_ss(X0, X0);
+			X1 = _mm_sub_ss(fOneHalf, _mm_mul_ss(FOver2, X1));
+			X1 = _mm_add_ss(X0, _mm_mul_ss(X0, X1));
+
+			// 2nd Newton-Raphson iteration
+			X2 = _mm_mul_ss(X1, X1);
+			X2 = _mm_sub_ss(fOneHalf, _mm_mul_ss(FOver2, X2));
+			X2 = _mm_add_ss(X1, _mm_mul_ss(X1, X2));
+
+			_mm_store_ss(&temp, X2);
+
+			return st_Vector2(_X, _Y) * temp;
+		}
+		else
+		{
+			return st_Vector2::Zero();
+		}
+	}
+
+	static en_MoveDir GetMoveDir(st_Vector2 NormalVector)
+	{
+		NormalVector._X = round(NormalVector._X);
+		NormalVector._Y = round(NormalVector._Y);
+
+		if (NormalVector._X < 0)
+		{
+			return en_MoveDir::LEFT;
+		}
+
+		if (NormalVector._X > 0)
+		{
+			return en_MoveDir::RIGHT;
+		}
+
+		if (NormalVector._Y > 0)
+		{
+			return en_MoveDir::UP;
+		}
+
+		if (NormalVector._Y < 0)
+		{
+			return en_MoveDir::DOWN;
+		}
+	}
+
+	float Dot(st_Vector2 InVector)
+	{		
+		return _X * InVector._X + _Y * InVector._Y;
+	}
+
+	static st_Vector2 GetForwardVector(en_MoveDir MoveDir)
+	{
+		switch (MoveDir)
+		{
+		case en_MoveDir::UP:
+			return st_Vector2(0, 1.0f);
+		case en_MoveDir::DOWN:
+			return st_Vector2(0, -1.0f);
+		case en_MoveDir::LEFT:
+			return st_Vector2(-1.0f, 0);
+		case en_MoveDir::RIGHT:
+			return st_Vector2(1.0f, 0);
+		}
+	}
+
+	static float GetAngle(st_Vector2 TargetVector, st_Vector2 MyVector)
+	{
+		st_Vector2 TargetVectorNormal = TargetVector.Normalize();
+		st_Vector2 MyVectorNormal = MyVector.Normalize();
+
+		float Dot = TargetVectorNormal.Dot(MyVectorNormal);
+		float ACosf = acosf(Dot);
+		float Angle = ACosf * 180.0f / st_Vector2::PI;
+
+		return Angle;
+	}
+
+	static bool AngleCheck(st_Vector2 CheckPosition, st_Vector2 APosition, st_Vector2 BPosition, float Angle)
+	{
+		st_Vector2 APositionNormal = (APosition - CheckPosition).Normalize();
+		st_Vector2 BPositionNormal = (BPosition - CheckPosition).Normalize();
+
+		float APositionBPositionDot = APositionNormal.Dot(BPositionNormal);
+		float APositionBPositionACosf = acosf(APositionBPositionDot);
+		float APositionBPositionAngle = APositionBPositionACosf * 180.0f / st_Vector2::PI;
+
+		if (APositionBPositionAngle >= 0 && APositionBPositionAngle <= Angle)
+		{
+			return true;
+		}
+	}
+
+	static bool CheckFieldOfView(st_Vector2 TargetPosition, st_Vector2 CheckPosition, en_MoveDir Dir, int16 Angle)
+	{
+		// 대상 방향 벡터 구하기
+		st_Vector2 TargetDirVector = TargetPosition - CheckPosition;
+		// 방향 벡터 정규화
+		st_Vector2 NormalizeDirVector = TargetDirVector.Normalize();
+				
+		float FovCos = cosf((Angle * 0.5f) * PI / 180.0f);
+
+		st_Vector2 ForwardVector;
+
+		switch (Dir)
+		{
+		case en_MoveDir::UP:
+			ForwardVector._X = 0;
+			ForwardVector._Y = 1.0f;
+			break;
+		case en_MoveDir::DOWN:
+			ForwardVector._X = 0;
+			ForwardVector._Y = -1.0f;
+			break;
+		case en_MoveDir::LEFT:
+			ForwardVector._X = -1.0f;
+			ForwardVector._Y = 0;
+			break;
+		case en_MoveDir::RIGHT:
+			ForwardVector._X = 1.0f;
+			ForwardVector._Y = 0;
+			break;
+		}
+
+		if (NormalizeDirVector.Dot(ForwardVector) >= FovCos)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+};
+
+struct st_Vector2Int
+{
+	int32 _X;
+	int32 _Y;
+
+	st_Vector2Int()
+	{
+		_X = 0;
+		_Y = 0;
+	}
+
+	st_Vector2Int(int32 X, int32 Y)
+	{
+		_X = X;
+		_Y = Y;
+	}
+
+	// 방향 벡터
+	static st_Vector2Int Up() { return st_Vector2Int(0, 1); }
+	static st_Vector2Int Down() { return st_Vector2Int(0, -1); }
+	static st_Vector2Int Left() { return st_Vector2Int(-1, 0); }
+	static st_Vector2Int Right() { return st_Vector2Int(1, 0); }
+	static st_Vector2Int Zero() { return st_Vector2Int(0, 0); }
+
+	st_Vector2Int operator +(st_Vector2Int& Vector)
+	{
+		return st_Vector2Int(_X + Vector._X, _Y + Vector._Y);
+	}
+
+	st_Vector2Int operator -(st_Vector2Int& Vector)
+	{
+		return st_Vector2Int(_X - Vector._X, _Y - Vector._Y);
+	}
+
+	st_Vector2Int operator *(int8 Value)
+	{
+		return st_Vector2Int(_X * Value, _Y * Value);
+	}
+
+	bool operator == (st_Vector2Int CellPosition)
+	{
+		if (_X == CellPosition._X && _Y == CellPosition._Y)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	int CellDistanceFromZero()
+	{
+		return abs(_X) + abs(_Y);
+	}
+
+	// 거리 구하기
+	static int16 Distance(st_Vector2Int TargetCellPosition, st_Vector2Int MyCellPosition)
+	{
+		return (int16)sqrt(pow(TargetCellPosition._X - MyCellPosition._X, 2) + pow(TargetCellPosition._Y - MyCellPosition._Y, 2));
+	}
+
+	static en_MoveDir GetMoveDir(st_Vector2Int NormalVector)
+	{
+		if (NormalVector._X > 0)
+		{
+			return en_MoveDir::RIGHT;
+		}
+
+		if (NormalVector._X < 0)
+		{
+			return en_MoveDir::LEFT;
+		}
+
+		if (NormalVector._Y > 0)
+		{
+			return en_MoveDir::UP;
+		}
+
+		if (NormalVector._Y < 0)
+		{
+			return en_MoveDir::DOWN;
+		}
+	}
+};
+
+
 struct st_PositionInfo
 {
 	en_CreatureState State;
-	int32 CollisionPositionX;
-	int32 CollisionPositionY;
-	en_MoveDir MoveDir;
-	float PositionX;
-	float PositionY;
+	st_Vector2Int CollisionPosition;
+	st_Vector2 Position;
+	en_MoveDir MoveDir;	
 };
 
 struct st_StatInfo

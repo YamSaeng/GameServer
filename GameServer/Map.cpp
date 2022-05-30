@@ -215,7 +215,7 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object, int1
 {
 	vector<st_FieldOfViewInfo> FieldOfViewGameObjects;
 
-	vector<CSector*> Sectors = GetAroundSectors(Object->GetCellPosition(), Range);
+	vector<CSector*> Sectors = GetAroundSectors(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Range);
 
 	for (CSector* Sector : Sectors)
 	{
@@ -231,7 +231,7 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object, int1
 				FieldOfViewInfo.SessionID = Player->_SessionId;
 				FieldOfViewInfo.ObjectType = Player->_GameObjectInfo.ObjectType;				
 
-				int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Player->GetCellPosition());
+				float Distance = st_Vector2::Distance(Object->_GameObjectInfo.ObjectPositionInfo.Position, Player->_GameObjectInfo.ObjectPositionInfo.Position);
 
 				// 함수 호출한 오브젝트를 포함할 것인지에 대한 여부 true면 제외 false면 포함
 				if (ExceptMe == true && Distance <= Object->_FieldOfViewDistance)
@@ -255,7 +255,7 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object, int1
 			FieldOfViewInfo.SessionID = 0;
 			FieldOfViewInfo.ObjectType = Monster->_GameObjectInfo.ObjectType;
 
-			int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Monster->GetCellPosition());
+			int16 Distance = st_Vector2Int::Distance(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Monster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
 
 			if (Distance <= Object->_FieldOfViewDistance)
 			{
@@ -269,7 +269,7 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object, int1
 			FieldOfViewInfo.SessionID = 0;
 			FieldOfViewInfo.ObjectType = Environment->_GameObjectInfo.ObjectType;
 
-			int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Environment->GetCellPosition());
+			int16 Distance = st_Vector2Int::Distance(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Environment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
 
 			if (Distance <= Object->_FieldOfViewDistance)
 			{
@@ -283,7 +283,7 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object, int1
 			FieldOfViewInfo.SessionID = 0;
 			FieldOfViewInfo.ObjectType = Item->_GameObjectInfo.ObjectType;
 
-			int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Item->GetCellPosition());
+			int16 Distance = st_Vector2Int::Distance(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Item->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
 
 			if (Distance <= Object->_FieldOfViewDistance)
 			{
@@ -301,7 +301,7 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewPlayers(CGameObject* Object, int1
 {
 	vector<st_FieldOfViewInfo> FieldOfViewGamePlayers;
 
-	vector<CSector*> Sectors = GetAroundSectors(Object->GetCellPosition(), Range);
+	vector<CSector*> Sectors = GetAroundSectors(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Range);
 
 	st_FieldOfViewInfo FieldOfViewInfo;
 
@@ -318,7 +318,7 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewPlayers(CGameObject* Object, int1
 				FieldOfViewInfo.SessionID = Player->_SessionId;
 				FieldOfViewInfo.ObjectType = Player->_GameObjectInfo.ObjectType;
 
-				int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Player->GetCellPosition());
+				int16 Distance = st_Vector2Int::Distance(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
 
 				// 함수 호출한 오브젝트를 포함할 것인지에 대한 여부 true면 제외 false면 포함
 				if (ExceptMe == true && Distance <= Object->_FieldOfViewDistance)
@@ -345,7 +345,7 @@ vector<CMonster*> CMap::GetAroundMonster(CGameObject* Object, int16 Range, bool 
 {
 	vector<CMonster*> Monsters;
 
-	vector<CSector*> Sectors = GetAroundSectors(Object->GetCellPosition(), Range);
+	vector<CSector*> Sectors = GetAroundSectors(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Range);
 
 	for (CSector* Sector : Sectors)
 	{
@@ -366,14 +366,14 @@ vector<CPlayer*> CMap::GetFieldOfViewPlayer(CGameObject* Object, int16 Range, bo
 {
 	vector<CPlayer*> FieldOfViewPlayers;
 
-	vector<CSector*> Sectors = GetAroundSectors(Object->GetCellPosition(), Range);
+	vector<CSector*> Sectors = GetAroundSectors(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Range);
 
 	for (CSector* Sector : Sectors)
 	{
 		// 주변 섹터 플레이어 정보
 		for (CPlayer* Player : Sector->GetPlayers())
 		{
-			int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Player->GetCellPosition());
+			int16 Distance = st_Vector2Int::Distance(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
 
 			// 함수 호출한 오브젝트를 포함할 것인지에 대한 여부 true면 제외 false면 포함
 			if (ExceptMe == true && Distance <= Object->_FieldOfViewDistance)
@@ -404,7 +404,7 @@ CGameObject* CMap::FindNearPlayer(CGameObject* Object, int32 Range, bool* Collis
 	{
 		if (Player->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::READY_DEAD && Player->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 		{
-			Distances.InsertHeap(st_Vector2Int::Distance(Player->GetCellPosition(), Object->GetCellPosition()), Player);
+			Distances.InsertHeap(st_Vector2Int::Distance(Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition), Player);
 		}		
 	}
 
@@ -415,7 +415,7 @@ CGameObject* CMap::FindNearPlayer(CGameObject* Object, int32 Range, bool* Collis
 	{
 		Player = Distances.PopHeap();
 
-		vector<st_Vector2Int> FirstPaths = FindPath(Object, Object->GetCellPosition(), Player->GetCellPosition());
+		vector<st_Vector2Int> FirstPaths = FindPath(Object, Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
 		if (FirstPaths.size() < 2)
 		{
 			// 타겟은 있지만 갈수는 없는 상태 ( 주위에 오브젝트들로 막혀서 )
@@ -425,7 +425,7 @@ CGameObject* CMap::FindNearPlayer(CGameObject* Object, int32 Range, bool* Collis
 				while (Distances.GetUseSize() != 0)
 				{
 					Player = Distances.PopHeap();
-					vector<st_Vector2Int> SecondPaths = FindPath(Object, Object->GetCellPosition(), Player->GetCellPosition());
+					vector<st_Vector2Int> SecondPaths = FindPath(Object, Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
 					if (SecondPaths.size() < 2)
 					{
 						continue;
@@ -589,8 +589,8 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	// 호출해준 대상을 충돌체로 여긴다면
 	if (Applycollision == true)
 	{
-		int X = PositionInfo.CollisionPositionX - _Left;
-		int Y = _Down - PositionInfo.CollisionPositionY;
+		int X = PositionInfo.CollisionPosition._X - _Left;
+		int Y = _Down - PositionInfo.CollisionPosition._Y;
 
 		// 기존위치 데이터는 날리고
 		if (_ObjectsInfos[Y][X] == GameObject)
@@ -617,7 +617,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	{
 		CPlayer* MovePlayer = (CPlayer*)GameObject;
 
-		CSector* CurrentSector = GetSector(MovePlayer->GetCellPosition());
+		CSector* CurrentSector = GetSector(MovePlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
 		CSector* NextSector = GetSector(DestPosition);
 
 		if (CurrentSector != NextSector)
@@ -634,7 +634,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	{
 		CMonster* MoveMonster = (CMonster*)GameObject;
 
-		CSector* CurrentSector = GetSector(MoveMonster->GetCellPosition());
+		CSector* CurrentSector = GetSector(MoveMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
 		CSector* NextSector = GetSector(DestPosition);
 
 		if (CurrentSector != NextSector)
@@ -651,7 +651,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	{
 		CEnvironment* MoveEnvironment = (CEnvironment*)GameObject;
 
-		CSector* CurrentSector = GetSector(MoveEnvironment->GetCellPosition());
+		CSector* CurrentSector = GetSector(MoveEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
 		CSector* NextSector = GetSector(DestPosition);
 
 		if (CurrentSector != NextSector)
@@ -668,8 +668,8 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 
 	// 시야 작업 ( 시야 안에 들어오는 오브젝트와 시야 밖으로 벗어나는 오브젝트 작업 )
 
-	GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX = DestPosition._X;
-	GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY = DestPosition._Y;
+	GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X = DestPosition._X;
+	GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y = DestPosition._Y;
 
 	return true;
 }
@@ -714,7 +714,7 @@ bool CMap::ApplyPositionUpdateItem(CItem* ItemObject, st_Vector2Int& NewPosition
 	_Items[Y][X][NewItemInfoIndex] = ItemObject;
 
 	// 아이템 섹터처리
-	CSector* CurrentSector = GetSector(ItemObject->GetCellPosition());
+	CSector* CurrentSector = GetSector(ItemObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
 	CSector* NextSector = GetSector(NewPosition);
 
 	if (CurrentSector != NextSector)
@@ -723,8 +723,8 @@ bool CMap::ApplyPositionUpdateItem(CItem* ItemObject, st_Vector2Int& NewPosition
 		NextSector->Insert(ItemObject);
 	}
 
-	ItemObject->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX = NewPosition._X;
-	ItemObject->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY = NewPosition._Y;
+	ItemObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X = NewPosition._X;
+	ItemObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y = NewPosition._Y;
 
 	return true;
 }
@@ -745,23 +745,23 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 
 	st_PositionInfo PositionInfo = GameObject->GetPositionInfo();
 	// 좌우 좌표 검사
-	if (PositionInfo.CollisionPositionX < _Left || PositionInfo.CollisionPositionX > _Right)
+	if (PositionInfo.CollisionPosition._X < _Left || PositionInfo.CollisionPosition._X > _Right)
 	{
 		return false;
 	}
 
 	// 상하 좌표 검사
-	if (PositionInfo.CollisionPositionY < _Up || PositionInfo.CollisionPositionY > _Down)
+	if (PositionInfo.CollisionPosition._Y < _Up || PositionInfo.CollisionPosition._Y > _Down)
 	{
 		return false;
 	}
 
 	// 섹터에서 오브젝트 제거
-	CSector* Sector = GetSector(GameObject->GetCellPosition());
+	CSector* Sector = GetSector(GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
 	Sector->Remove(GameObject);
 
-	int X = PositionInfo.CollisionPositionX - _Left;
-	int Y = _Down - PositionInfo.CollisionPositionY;
+	int X = PositionInfo.CollisionPosition._X - _Left;
+	int Y = _Down - PositionInfo.CollisionPosition._Y;
 
 	// 맵에서 제거
 	if (_ObjectsInfos[Y][X] == GameObject)
@@ -781,8 +781,8 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 
 bool CMap::ApplyPositionLeaveItem(CGameObject* GameObject)
 {
-	int32 X = GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX - _Left;
-	int32 Y = _Down - GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY;
+	int32 X = GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X - _Left;
+	int32 Y = _Down - GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y;
 
 	// 맵에서 정보 삭제
 	if (GameObject->GetChannel() == nullptr)
@@ -799,18 +799,18 @@ bool CMap::ApplyPositionLeaveItem(CGameObject* GameObject)
 
 	st_PositionInfo PositionInfo = GameObject->GetPositionInfo();
 	// 좌우 좌표 검사
-	if (PositionInfo.CollisionPositionX < _Left || PositionInfo.CollisionPositionX > _Right)
+	if (PositionInfo.CollisionPosition._X < _Left || PositionInfo.CollisionPosition._X > _Right)
 	{
 		return false;
 	}
 
 	// 상하 좌표 검사
-	if (PositionInfo.CollisionPositionY < _Up || PositionInfo.CollisionPositionY > _Down)
+	if (PositionInfo.CollisionPosition._Y < _Up || PositionInfo.CollisionPosition._Y > _Down)
 	{
 		return false;
 	}
 
-	CSector* Sector = GetSector(GameObject->GetCellPosition());
+	CSector* Sector = GetSector(GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
 	Sector->Remove(GameObject);
 
 	CItem* Item = (CItem*)GameObject;

@@ -400,7 +400,7 @@ bool CMessage::Encode()
 	st_ENCODE_HEADER EncodeHeader;
 	EncodeHeader.PacketCode = 119;
 	EncodeHeader.PacketLen = _UseBufferSize;
-	EncodeHeader.RandXORCode = rand() % 256;
+	EncodeHeader.RandXORCode = rand() % 256;	
 
 	//----------------------------------------------------------------------
 	//Ã¼Å©¼¶ °è»ê
@@ -408,7 +408,7 @@ bool CMessage::Encode()
 	//----------------------------------------------------------------------
 	char* PayLoad = &_MessageBuf[_Front];
 	for (int32 i = 0; i < _UseBufferSize; i++)
-	{
+	{		
 		Sum += *PayLoad;
 		PayLoad++;
 	}

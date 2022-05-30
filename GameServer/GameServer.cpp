@@ -1427,7 +1427,7 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 
 			vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetFieldOfViewPlayers(MyPlayer, 1, false);
 
-			CMessage* ResMyMoveOtherPacket = MakePacketResMove(Session->AccountId,
+			CMessage* ResMyMoveOtherPacket = MakePacketResMove(
 				MyPlayer->_GameObjectInfo.ObjectId,
 				true,
 				MyPlayer->_GameObjectInfo.ObjectPositionInfo);
@@ -1507,8 +1507,8 @@ void CGameServer::PacketProcReqMoveStop(int64 SessionID, CMessage* Message)
 			float PositionY;
 			*Message >> PositionY;
 
-			float CheckPositionX = abs(MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX - PositionX);
-			float CheckPositionY = abs(MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY - PositionY);
+			float CheckPositionX = abs(MyPlayer->_GameObjectInfo.ObjectPositionInfo.Position._X - PositionX);
+			float CheckPositionY = abs(MyPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y - PositionY);
 
 			CMap* Map = G_MapManager->GetMap(1);
 
@@ -1674,8 +1674,8 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 					if (MyPlayer->_SelectTarget != nullptr)
 					{
 						st_Vector2Int TargetPosition = MyPlayer->GetChannel()->FindChannelObject(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId,
-							MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType)->GetCellPosition();
-						st_Vector2Int MyPosition = MyPlayer->GetCellPosition();
+							MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType)->_GameObjectInfo.ObjectPositionInfo.CollisionPosition;
+						st_Vector2Int MyPosition = MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition;
 						st_Vector2Int Direction = TargetPosition - MyPosition;
 
 						int32 Distance = st_Vector2Int::Distance(TargetPosition, MyPosition);
@@ -1729,20 +1729,20 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 									switch (MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir)
 									{
 									case en_MoveDir::UP:
-										Target->_GameObjectInfo.ObjectPositionInfo.PositionX = MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX;
-										Target->_GameObjectInfo.ObjectPositionInfo.PositionY = MyFrontCellPotision._Y + 0.5f;
+										Target->_GameObjectInfo.ObjectPositionInfo.Position._X = MyPlayer->_GameObjectInfo.ObjectPositionInfo.Position._X;
+										Target->_GameObjectInfo.ObjectPositionInfo.Position._Y = MyFrontCellPotision._Y + 0.5f;
 										break;
 									case en_MoveDir::DOWN:
-										Target->_GameObjectInfo.ObjectPositionInfo.PositionX = MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX;
-										Target->_GameObjectInfo.ObjectPositionInfo.PositionY = MyFrontCellPotision._Y + 0.5f;
+										Target->_GameObjectInfo.ObjectPositionInfo.Position._X = MyPlayer->_GameObjectInfo.ObjectPositionInfo.Position._X;
+										Target->_GameObjectInfo.ObjectPositionInfo.Position._Y = MyFrontCellPotision._Y + 0.5f;
 										break;
 									case en_MoveDir::LEFT:
-										Target->_GameObjectInfo.ObjectPositionInfo.PositionX = MyFrontCellPotision._X + 0.5f;
-										Target->_GameObjectInfo.ObjectPositionInfo.PositionY = MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY;
+										Target->_GameObjectInfo.ObjectPositionInfo.Position._X = MyFrontCellPotision._X + 0.5f;
+										Target->_GameObjectInfo.ObjectPositionInfo.Position._Y = MyPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y;
 										break;
 									case en_MoveDir::RIGHT:
-										Target->_GameObjectInfo.ObjectPositionInfo.PositionX = MyFrontCellPotision._X + 0.5f;
-										Target->_GameObjectInfo.ObjectPositionInfo.PositionY = MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY;
+										Target->_GameObjectInfo.ObjectPositionInfo.Position._X = MyFrontCellPotision._X + 0.5f;
+										Target->_GameObjectInfo.ObjectPositionInfo.Position._Y = MyPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y;
 										break;
 									}
 
@@ -1777,8 +1777,8 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 				{
 					if (MyPlayer->_SelectTarget != nullptr)
 					{
-						st_Vector2Int TargetPosition = MyPlayer->GetChannel()->FindChannelObject(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType)->GetCellPosition();
-						st_Vector2Int MyPosition = MyPlayer->GetCellPosition();
+						st_Vector2Int TargetPosition = MyPlayer->GetChannel()->FindChannelObject(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType)->_GameObjectInfo.ObjectPositionInfo.CollisionPosition;
+						st_Vector2Int MyPosition = MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition;
 						st_Vector2Int Direction = TargetPosition - MyPosition;
 
 						en_MoveDir Dir = st_Vector2Int::GetMoveDir(Direction);
@@ -1854,24 +1854,24 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 									switch (Dir)
 									{
 									case en_MoveDir::UP:
-										MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX = Target->_GameObjectInfo.ObjectPositionInfo.PositionX;
-										MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY = MovePosition._Y + 0.5f;
 										MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::UP;
+										MyPlayer->_GameObjectInfo.ObjectPositionInfo.Position._X = Target->_GameObjectInfo.ObjectPositionInfo.Position._X;
+										MyPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y = MovePosition._Y + 0.5f;										
 										break;
 									case en_MoveDir::DOWN:
 										MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
-										MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX = Target->_GameObjectInfo.ObjectPositionInfo.PositionX;
-										MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY = MovePosition._Y + 0.5f;
+										MyPlayer->_GameObjectInfo.ObjectPositionInfo.Position._X = Target->_GameObjectInfo.ObjectPositionInfo.Position._X;
+										MyPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y = MovePosition._Y + 0.5f;
 										break;
 									case en_MoveDir::LEFT:
 										MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::LEFT;
-										MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX = MovePosition._X + 0.5f;
-										MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY = Target->_GameObjectInfo.ObjectPositionInfo.PositionY;
+										MyPlayer->_GameObjectInfo.ObjectPositionInfo.Position._X = MovePosition._X + 0.5f;
+										MyPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y = Target->_GameObjectInfo.ObjectPositionInfo.Position._Y;
 										break;
 									case en_MoveDir::RIGHT:
 										MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::RIGHT;
-										MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX = MovePosition._X + 0.5f;
-										MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY = Target->_GameObjectInfo.ObjectPositionInfo.PositionY;
+										MyPlayer->_GameObjectInfo.ObjectPositionInfo.Position._X = MovePosition._X + 0.5f;
+										MyPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y = Target->_GameObjectInfo.ObjectPositionInfo.Position._Y;
 										break;
 									}
 
@@ -1908,7 +1908,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 
 					vector<st_Vector2Int> TargetPositions;
 
-					TargetPositions = MyPlayer->GetAroundCellPositions(MyPlayer->GetCellPosition(), 1);
+					TargetPositions = MyPlayer->GetAroundCellPositions(MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, 1);
 					for (st_Vector2Int TargetPosition : TargetPositions)
 					{
 						CGameObject* Target = MyPlayer->GetChannel()->GetMap()->Find(TargetPosition);
@@ -2267,9 +2267,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 							case en_SkillType::SKILL_SHAMAN_BACK_TELEPORT:
 							{								
 								st_GameObjectJob* BackTelePortJob = MakeGameObjectJobBackTeleport();
-								MyPlayer->_GameObjectJobQue.Enqueue(BackTelePortJob);
-
-								st_Vector2 MyPosition = MyPlayer->GetPosition();
+								MyPlayer->_GameObjectJobQue.Enqueue(BackTelePortJob);								
 
 								en_MoveDir TelePortDir;
 
@@ -2294,8 +2292,8 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 
 								MyPlayer->GetChannel()->GetMap()->ApplyMove(MyPlayer, MovePosition);
 
-								MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX = MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX + 0.5f;
-								MyPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY = MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY + 0.5f;
+								MyPlayer->_GameObjectInfo.ObjectPositionInfo.Position._X = MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
+								MyPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y = MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
 
 								CMessage* ResSyncPositionPacket = MakePacketResSyncPosition(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
 								SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResSyncPositionPacket);
@@ -2328,7 +2326,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 									{
 										SpellCastingTime = ReqMagicSkill->GetSkillInfo()->SkillCastingTime / 1000.0f;
 
-										int16 Distance = st_Vector2Int::Distance(MyPlayer->_SelectTarget->GetCellPosition(), MyPlayer->GetCellPosition());
+										int16 Distance = st_Vector2Int::Distance(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
 
 										if (Distance <= 6)
 										{
@@ -3625,13 +3623,13 @@ void CGameServer::PacketProcReqItemLooting(int64 SessionId, CMessage* Message)
 			int8 ItemMoveDir;
 
 			*Message >> ItemState;
-			*Message >> ItemPosition.CollisionPositionX;
-			*Message >> ItemPosition.CollisionPositionY;
+			*Message >> ItemPosition.CollisionPosition._X;
+			*Message >> ItemPosition.CollisionPosition._Y;
 			*Message >> ItemMoveDir;
 
 			st_Vector2Int ItemCellPosition;
-			ItemCellPosition._X = ItemPosition.CollisionPositionX;
-			ItemCellPosition._Y = ItemPosition.CollisionPositionY;
+			ItemCellPosition._X = ItemPosition.CollisionPosition._X;
+			ItemCellPosition._Y = ItemPosition.CollisionPosition._Y;
 
 			int64 MapID = 1;
 			// 루팅 위치에 아이템들을 가져온다.
@@ -5631,8 +5629,8 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 	LeavePlayerStatInfoSave.InMeleeCriticalPoint(MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint);
 	LeavePlayerStatInfoSave.InMagicCriticalPoint(MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint);
 	LeavePlayerStatInfoSave.InSpeed(MyPlayer->_GameObjectInfo.ObjectStatInfo.Speed);
-	LeavePlayerStatInfoSave.InLastPositionY(MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY);
-	LeavePlayerStatInfoSave.InLastPositionX(MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX);
+	LeavePlayerStatInfoSave.InLastPositionY(MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y);
+	LeavePlayerStatInfoSave.InLastPositionX(MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X);
 	LeavePlayerStatInfoSave.InCurrentExperience(MyPlayer->_Experience.CurrentExperience);
 	LeavePlayerStatInfoSave.InRequireExperience(MyPlayer->_Experience.RequireExperience);
 	LeavePlayerStatInfoSave.InTotalExperience(MyPlayer->_Experience.TotalExperience);
@@ -6731,7 +6729,7 @@ CGameServerMessage* CGameServer::MakePacketResChangeMonsterObjectState(int64 Obj
 	return ResObjectStatePacket;
 }
 
-CGameServerMessage* CGameServer::MakePacketResMove(int64 AccountId, int64 ObjectId, bool CanMove, st_PositionInfo PositionInfo)
+CGameServerMessage* CGameServer::MakePacketResMove(int64 ObjectId, bool CanMove, st_PositionInfo PositionInfo)
 {
 	CGameServerMessage* ResMoveMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResMoveMessage == nullptr)
@@ -6741,8 +6739,7 @@ CGameServerMessage* CGameServer::MakePacketResMove(int64 AccountId, int64 Object
 
 	ResMoveMessage->Clear();
 
-	*ResMoveMessage << (int16)en_PACKET_S2C_MOVE;
-	*ResMoveMessage << AccountId;
+	*ResMoveMessage << (int16)en_PACKET_S2C_MOVE;	
 	*ResMoveMessage << ObjectId;
 	*ResMoveMessage << CanMove;
 
@@ -7269,13 +7266,13 @@ void CGameServer::SendPacketFieldOfView(vector<st_FieldOfViewInfo> FieldOfViewOb
 void CGameServer::SendPacketFieldOfView(CGameObject* Object, CMessage* Message)
 {
 	// 섹터 얻어오기
-	vector<CSector*> AroundSectors = Object->GetChannel()->GetMap()->GetAroundSectors(Object->GetCellPosition(), 1);
+	vector<CSector*> AroundSectors = Object->GetChannel()->GetMap()->GetAroundSectors(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, 1);
 
 	for (CSector* AroundSector : AroundSectors)
 	{
 		for (CPlayer* Player : AroundSector->GetPlayers())
 		{
-			int16 Distance = st_Vector2Int::Distance(Object->GetCellPosition(), Player->GetCellPosition());
+			int16 Distance = st_Vector2Int::Distance(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
 
 			if (Distance <= Object->_FieldOfViewDistance)
 			{

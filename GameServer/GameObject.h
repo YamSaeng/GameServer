@@ -79,17 +79,7 @@ public:
 	st_Vector2 PositionCheck(st_Vector2Int& CheckPosition);
 	virtual void PositionReset();
 
-	st_PositionInfo GetPositionInfo();
-
-	//--------------------------------------------
-	// 현재 좌표 기준으로 st_Vector2Int를 반환한다.
-	//--------------------------------------------
-	st_Vector2Int GetCellPosition();
-
-	//-----------------------
-	// float 좌표 반환
-	//-----------------------
-	st_Vector2 GetPosition();
+	st_PositionInfo GetPositionInfo();		
 
 	//------------------------------------------------
 	// 방향값을 받아서 앞쪽에 있는 위치를 반환한다.

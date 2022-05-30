@@ -41,32 +41,32 @@ void CGameObject::StatusAbnormalCheck()
 		switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
 		{
 		case en_MoveDir::UP:
-			_GameObjectInfo.ObjectPositionInfo.PositionY +=
+			_GameObjectInfo.ObjectPositionInfo.Position._Y +=
 				(st_Vector2::Down()._Y * 4.0f * 0.02f);
 			break;
 		case en_MoveDir::DOWN:
-			_GameObjectInfo.ObjectPositionInfo.PositionY +=
+			_GameObjectInfo.ObjectPositionInfo.Position._Y +=
 				(st_Vector2::Up()._Y * 4.0f * 0.02f);
 			break;
 		case en_MoveDir::LEFT:
-			_GameObjectInfo.ObjectPositionInfo.PositionX +=
+			_GameObjectInfo.ObjectPositionInfo.Position._X +=
 				(st_Vector2::Right()._X * 4.0f * 0.02f);
 			break;
 		case en_MoveDir::RIGHT:
-			_GameObjectInfo.ObjectPositionInfo.PositionX +=
+			_GameObjectInfo.ObjectPositionInfo.Position._X +=
 				(st_Vector2::Left()._X * 4.0f * 0.02f);
 			break;
 		}
 
-		bool CanMove = _Channel->GetMap()->Cango(this, _GameObjectInfo.ObjectPositionInfo.PositionX, _GameObjectInfo.ObjectPositionInfo.PositionY);
+		bool CanMove = _Channel->GetMap()->Cango(this, _GameObjectInfo.ObjectPositionInfo.Position._X, _GameObjectInfo.ObjectPositionInfo.Position._Y);
 		if (CanMove == true)
 		{
 			st_Vector2Int CollisionPosition;
-			CollisionPosition._X = _GameObjectInfo.ObjectPositionInfo.PositionX;
-			CollisionPosition._Y = _GameObjectInfo.ObjectPositionInfo.PositionY;
+			CollisionPosition._X = _GameObjectInfo.ObjectPositionInfo.Position._X;
+			CollisionPosition._Y = _GameObjectInfo.ObjectPositionInfo.Position._Y;
 
-			if (CollisionPosition._X != _GameObjectInfo.ObjectPositionInfo.CollisionPositionX
-				|| CollisionPosition._Y != _GameObjectInfo.ObjectPositionInfo.CollisionPositionY)
+			if (CollisionPosition._X != _GameObjectInfo.ObjectPositionInfo.CollisionPosition._X
+				|| CollisionPosition._Y != _GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y)
 			{
 				_Channel->GetMap()->ApplyMove(this, CollisionPosition);
 			}
@@ -384,19 +384,9 @@ st_PositionInfo CGameObject::GetPositionInfo()
 	return _GameObjectInfo.ObjectPositionInfo;
 }
 
-st_Vector2Int CGameObject::GetCellPosition()
-{
-	return st_Vector2Int(_GameObjectInfo.ObjectPositionInfo.CollisionPositionX, _GameObjectInfo.ObjectPositionInfo.CollisionPositionY);
-}
-
-st_Vector2 CGameObject::GetPosition()
-{
-	return st_Vector2(_GameObjectInfo.ObjectPositionInfo.PositionX, _GameObjectInfo.ObjectPositionInfo.PositionY);
-}
-
 st_Vector2Int CGameObject::GetFrontCellPosition(en_MoveDir Dir, int8 Distance)
 {
-	st_Vector2Int FrontPosition = GetCellPosition();
+	st_Vector2Int FrontPosition = _GameObjectInfo.ObjectPositionInfo.CollisionPosition;
 
 	st_Vector2Int DirVector;
 	switch (Dir)
