@@ -112,8 +112,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_C2S_MOVE,
 	
 	//------------------------------------------------------------
-	// 게임서버 캐릭터 움직이기 요청 응답
-	// int64 AccountId
+	// 게임서버 캐릭터 움직이기 요청 응답	
 	// int32 PlayerDBId
 	// bool CanGo
 	// st_PositionInfo PositionInfo
@@ -202,6 +201,35 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_MAGIC_CANCEL,
 
 	//------------------------------------------------------------
+	// 게임서버 채집 요청
+	// int64 AccountId
+	// int64 PlayerID
+	// int64 ObjectID
+	// st_GameObjectType ObjectType
+	//------------------------------------------------------------
+	en_PACKET_C2S_GATHERING,
+
+	//------------------------------------------------------------
+	// 게임서버 채집 요청 응답
+	// int64 ObjectID
+	//------------------------------------------------------------
+	en_PACKET_S2C_GATHERING,
+
+	//------------------------------------------------------------
+	// 게임서버 채집 취소 요청
+	// int64 AccountID
+	// int64 ObjectID
+	//------------------------------------------------------------
+	en_PACKET_C2S_GATHERING_CANCEL,
+	
+	//------------------------------------------------------------
+	// 게임서버 채집 취소 요청 응답
+	// int64 AccountID
+	// int64 ObjectID
+	//------------------------------------------------------------
+	en_PACKET_S2C_GATHERING_CANCEL,
+
+	//------------------------------------------------------------
 	// 게임서버 캐릭터 애니메이션 출력
 	// int64 PlayerID
 	// en_MoveDir Dir
@@ -240,7 +268,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int32 X
 	// int32 Y
 	//------------------------------------------------------------
-	en_PACKET_C2S_MOUSE_POSITION_OBJECT_INFO,
+	en_PACKET_C2S_LEFT_MOUSE_POSITION_OBJECT_INFO,
 	
 	//------------------------------------------------------------
 	// 게임서버 마우스 위치 캐릭터 정보 요청 응답
@@ -248,8 +276,8 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int32 PlayerDBId
 	// st_GameObjectInfo ObjectInfo
 	//------------------------------------------------------------
-	en_PACKET_S2C_MOUSE_POSITION_OBJECT_INFO,
-	
+	en_PACKET_S2C_LEFT_MOUSE_POSITION_OBJECT_INFO,		
+
 	//------------------------------------------------------------
 	// 게임서버 오브젝트 상태 변경 요청
 	// int64 AccountId
