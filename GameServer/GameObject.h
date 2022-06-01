@@ -40,6 +40,11 @@ public:
 	// 선택한 대상
 	CGameObject* _SelectTarget;	
 
+	//----------------------------
+	// 채집하고 있는 대상
+	//----------------------------
+	CGameObject* _GatheringTarget;
+
 	//---------------------------
 	// 오브젝트가 스폰될 위치
 	//---------------------------
@@ -117,11 +122,16 @@ public:
 	CChannel* GetChannel();
 	void SetChannel(CChannel* Channel);
 
-	virtual void Init();
+	virtual void Start();
+	virtual void End();
 protected:
 	map<int64, st_Aggro> _AggroTargetList;
 
+	int64 _ReSpawnTime;
+
+	//-------------------------
 	// 게임오브젝트가 속한 채널
+	//-------------------------
 	CChannel* _Channel;
 
 	//--------------------
@@ -142,6 +152,10 @@ protected:
 	// 마법 시전 상태에서 마법 시전 완료 Tick
 	//--------------------------------------
 	uint64 _SpellTick;
+	//--------------------------------------
+	// 채집 완료 Tick
+	//--------------------------------------
+	uint64 _GatheringTick;
 
 	//---------------------------
 	// 주위 시야 오브젝트 탐색 틱
@@ -149,9 +163,19 @@ protected:
 	uint64 _FieldOfViewUpdateTick;
 
 	//------------------------------------
-	// 죽음 애니메이션 틱
+	// 죽음 준비 틱
 	//------------------------------------
-	uint64 _DeadTick;	
+	uint64 _DeadReadyTick;	
+
+	//------------------------------------
+	// 죽음 틱
+	//------------------------------------
+	uint64 _DeadTick;
+
+	//-------------------------------------------------------------------------
+	// 경험치 계산
+	//-------------------------------------------------------------------------
+	void ExperienceCalculate(CPlayer* TargetPlayer, CGameObject* TargetObject);
 
 	virtual bool UpdateSpawnIdle();
 	virtual void UpdateIdle();
@@ -160,6 +184,7 @@ protected:
 	virtual void UpdateReturnSpawnPosition();
 	virtual void UpdateAttack();
 	virtual void UpdateSpell();
+	virtual void UpdateGathering();
 	virtual void UpdateReadyDead();
 	virtual void UpdateDead();
 };

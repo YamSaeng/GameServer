@@ -203,6 +203,53 @@ void CGameObject::Update()
 				ResMagicCancelPacket->Free();
 			}
 			break;
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_GATHERING_START:
+			{
+				if (_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::GATHERING)
+				{
+					CGameObject* GatheringTarget;
+					*GameObjectJob->GameObjectJobMessage >> &GatheringTarget;
+
+					_GatheringTarget = GatheringTarget;
+
+					_GatheringTick = GetTickCount64() + 1000;
+
+					_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::GATHERING;
+
+					CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
+						_GameObjectInfo.ObjectPositionInfo.MoveDir,
+						_GameObjectInfo.ObjectType,
+						_GameObjectInfo.ObjectPositionInfo.State);
+					G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResObjectStateChangePacket);
+					ResObjectStateChangePacket->Free();
+
+					CMessage* ResGatheringPacket = nullptr;
+
+					switch (GatheringTarget->_GameObjectInfo.ObjectType)
+					{
+					case en_GameObjectType::OBJECT_STONE:
+						ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"돌 채집");
+						break;
+					case en_GameObjectType::OBJECT_TREE:
+						ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"나무 벌목");
+						break;
+					default:
+						CRASH("채집할 수 없는 채집물 채집 요청");
+						break;
+					}
+
+					G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResGatheringPacket);
+					ResGatheringPacket->Free();
+				}				
+			}
+			break;
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_GATHERING_CANCEL:
+			{
+				CMessage* ResGatheringCancelPacket = G_ObjectManager->GameServer->MakePacketGatheringCancel(_GameObjectInfo.ObjectId);
+				G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResGatheringCancelPacket);
+				ResGatheringCancelPacket->Free();
+			}
+			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_AGGRO_LIST_INSERT_OR_UPDATE:
 			{
 				int8 AggroCategory;
@@ -255,6 +302,43 @@ void CGameObject::Update()
 				{
 					_AggroTargetList.erase(RemoveAggroListGameObjectId);
 				}
+			}
+			break;
+		case en_GameObjectJobType::GAMEOBJECT_JOB_DAMAGE:
+			{
+				CGameObject* Attacker;
+				*GameObjectJob->GameObjectJobMessage >> &Attacker;
+
+				int32 Damage;
+				*GameObjectJob->GameObjectJobMessage >> Damage;
+
+				if (OnDamaged(Attacker, Damage))
+				{
+					End();
+					
+					ExperienceCalculate((CPlayer*)Attacker, this);
+					// 캐릭터 죽으면 버프 디버프 창 관리해야함
+					Attacker->_SelectTarget = nullptr;
+				}
+
+				CMessage* StatChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectStatInfo);
+				G_ObjectManager->GameServer->SendPacketFieldOfView(this, StatChangePacket);
+				StatChangePacket->Free();
+			}
+			break;
+		case en_GameObjectJobType::GAMEOJBECT_JOB_HEAL:
+			{
+				CGameObject* Healer;
+				*GameObjectJob->GameObjectJobMessage >> &Healer;
+				
+				int32 HealPoint;
+				*GameObjectJob->GameObjectJobMessage >> HealPoint;
+
+				OnHeal(Healer, HealPoint);
+
+				CMessage* StatChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectStatInfo);
+				G_ObjectManager->GameServer->SendPacketFieldOfView(this, StatChangePacket);
+				StatChangePacket->Free();
 			}
 			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_FULL_RECOVERY:
@@ -523,8 +607,234 @@ void CGameObject::SetChannel(CChannel* Channel)
 	_Channel = Channel;
 }
 
-void CGameObject::Init()
+void CGameObject::Start()
 {
+}
+
+void CGameObject::End()
+{
+	for (auto BufSkillIter : _Bufs)
+	{
+		BufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
+	}
+
+	for (auto DebufSkillIter : _DeBufs)
+	{
+		DebufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
+	}
+}
+
+void CGameObject::ExperienceCalculate(CPlayer* TargetPlayer, CGameObject* TargetObject)
+{
+	CMonster* TargetMonster = nullptr;	
+
+	switch (TargetObject->_GameObjectInfo.ObjectType)
+	{
+	case en_GameObjectType::OBJECT_SLIME:
+		TargetMonster = (CMonster*)TargetObject;
+
+		TargetPlayer->_Experience.CurrentExperience += TargetMonster->_GetExpPoint;
+		TargetPlayer->_Experience.CurrentExpRatio = ((float)TargetPlayer->_Experience.CurrentExperience) / TargetPlayer->_Experience.RequireExperience;
+
+		if (TargetPlayer->_Experience.CurrentExpRatio >= 1.0f)
+		{
+			// 레벨 증가
+			TargetPlayer->_GameObjectInfo.ObjectStatInfo.Level += 1;
+
+			// 증가한 레벨에 해당하는 능력치 정보를 읽어온 후 적용한다.
+			st_ObjectStatusData NewCharacterStatus;
+			st_LevelData LevelData;
+
+			switch (TargetPlayer->_GameObjectInfo.ObjectType)
+			{
+			case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
+			{
+				auto FindStatus = G_Datamanager->_WarriorStatus.find(TargetPlayer->_GameObjectInfo.ObjectStatInfo.Level);
+				if (FindStatus == G_Datamanager->_WarriorStatus.end())
+				{
+					CRASH("레벨 스테이터스 찾지 못함");
+				}
+
+				NewCharacterStatus = *(*FindStatus).second;
+
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxSpeed = NewCharacterStatus.Speed;
+			}
+			break;
+			case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
+			{
+				auto FindStatus = G_Datamanager->_ShamanStatus.find(TargetPlayer->_GameObjectInfo.ObjectStatInfo.Level);
+				if (FindStatus == G_Datamanager->_WarriorStatus.end())
+				{
+					CRASH("레벨 데이터 찾지 못함");
+				}
+
+				NewCharacterStatus = *(*FindStatus).second;
+
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxSpeed = NewCharacterStatus.Speed;
+			}
+			break;
+			case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
+			{
+				auto FindStatus = G_Datamanager->_TaioistStatus.find(TargetPlayer->_GameObjectInfo.ObjectStatInfo.Level);
+				if (FindStatus == G_Datamanager->_TaioistStatus.end())
+				{
+					CRASH("레벨 데이터 찾지 못함");
+				}
+
+				NewCharacterStatus = *(*FindStatus).second;
+
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxSpeed = NewCharacterStatus.Speed;
+			}
+			break;
+			case en_GameObjectType::OBJECT_THIEF_PLAYER:
+			{
+				auto FindStatus = G_Datamanager->_ThiefStatus.find(TargetPlayer->_GameObjectInfo.ObjectStatInfo.Level);
+				if (FindStatus == G_Datamanager->_ThiefStatus.end())
+				{
+					CRASH("레벨 데이터 찾지 못함");
+				}
+
+				NewCharacterStatus = *(*FindStatus).second;
+
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxSpeed = NewCharacterStatus.Speed;
+			}
+			break;
+			case en_GameObjectType::OBJECT_ARCHER_PLAYER:
+			{
+				auto FindStatus = G_Datamanager->_ArcherStatus.find(TargetPlayer->_GameObjectInfo.ObjectStatInfo.Level);
+				if (FindStatus == G_Datamanager->_ArcherStatus.end())
+				{
+					CRASH("레벨 데이터 찾지 못함");
+				}
+
+				NewCharacterStatus = *(*FindStatus).second;
+
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
+				TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxSpeed = NewCharacterStatus.Speed;
+			}
+			break;
+			}
+
+			CGameServerMessage* ResObjectStatChangeMessage = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(TargetPlayer->_GameObjectInfo.ObjectId, TargetPlayer->_GameObjectInfo.ObjectStatInfo);
+			G_ObjectManager->GameServer->SendPacket(TargetPlayer->_SessionId, ResObjectStatChangeMessage);
+			ResObjectStatChangeMessage->Free();
+
+			auto FindLevelData = G_Datamanager->_LevelDatas.find(TargetPlayer->_GameObjectInfo.ObjectStatInfo.Level);
+			if (FindLevelData == G_Datamanager->_LevelDatas.end())
+			{
+				CRASH("레벨 데이터 찾지 못함");
+			}
+
+			LevelData = *(*FindLevelData).second;
+
+			TargetPlayer->_Experience.CurrentExperience = 0;
+			TargetPlayer->_Experience.RequireExperience = LevelData.RequireExperience;
+			TargetPlayer->_Experience.TotalExperience = LevelData.TotalExperience;
+		}
+
+		{
+			CGameServerMessage* ResMonsterGetExpMessage = G_ObjectManager->GameServer->MakePacketExperience(TargetPlayer->_AccountId, TargetPlayer->_GameObjectInfo.ObjectId, TargetMonster->_GetExpPoint,
+				TargetPlayer->_Experience.CurrentExperience,
+				TargetPlayer->_Experience.RequireExperience,
+				TargetPlayer->_Experience.TotalExperience);
+			G_ObjectManager->GameServer->SendPacket(TargetPlayer->_SessionId, ResMonsterGetExpMessage);
+			ResMonsterGetExpMessage->Free();
+		}
+		break;
+	case en_GameObjectType::OBJECT_TREE:
+		break;
+	case en_GameObjectType::OBJECT_STONE:
+		break;
+	}
 }
 
 bool CGameObject::UpdateSpawnIdle()
@@ -560,6 +870,10 @@ void CGameObject::UpdateAttack()
 }
 
 void CGameObject::UpdateSpell()
+{
+}
+
+void CGameObject::UpdateGathering()
 {
 }
 
