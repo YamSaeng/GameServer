@@ -10,22 +10,23 @@
           "MaxMP": 10,
           "MinMeleeAttackDamage": 1,
           "MaxMeleeAttackDamage": 10,
-          "MeleeAttackHitRate": 1000,
+          "MeleeAttackHitRate": 1500,
           "MagicDamage": 0,
           "MagicHitRate": 0,
           "Defence": 0,
           "EvasionRate": 0,
           "MeleeCriticalPoint": 50,
           "MagicCriticalPoint": 0,
-          "Speed": 4.0,
+          "Speed": 3.0,
           "SearchCellDistance": 10,
-          "ChaseCellDistance": 6,
+          "ChaseCellDistance": 8,
           "SearchTick": 500,
-          "PatrolTick": 1500,
-          "AttackTick": 500,
+          "PatrolTick": 2000,
+          "AttackTick": 800,
           "AttackRange": 1,
           "GetDPPoint": 10,
-          "GetExpPoint": 12
+          "GetExpPoint": 12,
+          "ReSpawnTime": 5000
         }
       ],
       "MonsterDropData": [
@@ -60,15 +61,16 @@
           "EvasionRate": 0,
           "MeleeCriticalPoint": 100,
           "MagicCriticalPoint": 0,
-          "Speed": 2.0,
+          "Speed": 2.5,
           "SearchCellDistance": 10,
-          "ChaseCellDistance": 6,
+          "ChaseCellDistance": 8,
           "SearchTick": 500,
           "PatrolTick": 1500,
           "AttackTick": 1100,
           "AttackRange": 1,
           "GetDPPoint": 20,
-          "GetExpPoint": 33
+          "GetExpPoint": 33,
+          "ReSpawnTime": 5000
         }
       ],
       "MonsterDropData": [

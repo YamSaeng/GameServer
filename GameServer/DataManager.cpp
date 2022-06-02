@@ -702,6 +702,7 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			int AttackRange = MonsterStatInfoFiled["AttackRange"].GetInt();
 			int16 GetDPPoint = (int16)MonsterStatInfoFiled["GetDPPoint"].GetInt();
 			int GetExpPoint = MonsterStatInfoFiled["GetExpPoint"].GetInt();
+			int64 ReSpawnTime = MonsterStatInfoFiled["ReSpawnTime"].GetInt64();
 
 			MonsterData->MonsterStatInfo.Level = Level;
 			MonsterData->MonsterStatInfo.MaxHP = MaxHP;
@@ -724,6 +725,7 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			MonsterData->MonsterStatInfo.AttackRange = AttackRange;
 			MonsterData->GetDPPoint = GetDPPoint;
 			MonsterData->GetExpPoint = GetExpPoint;
+			MonsterData->ReSpawnTime = ReSpawnTime;
 		}
 
 		for (auto& DropDataFiled : Filed["MonsterDropData"].GetArray())
@@ -2208,9 +2210,11 @@ void CDataManager::LoadDataEnvironment(wstring LoadFileName)
 		{
 			int Level = EnvironmentStatInfoFiled["Level"].GetInt();
 			int MaxHP = EnvironmentStatInfoFiled["MaxHP"].GetInt();
+			long RecoveryTime = EnvironmentStatInfoFiled["RecoveryTime"].GetInt64();
 
 			EnvironmentData->Level = Level;
 			EnvironmentData->MaxHP = MaxHP;
+			EnvironmentData->RecoveryTime = RecoveryTime;
 		}
 
 		for (auto& DropDataFiled : Filed["EnvironmentDropData"].GetArray())
