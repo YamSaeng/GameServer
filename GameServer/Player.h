@@ -36,7 +36,8 @@ public:
 
 	virtual bool OnDamaged(CGameObject* Attacker, int32 Damage) override;
 
-	virtual void Init() override;	
+	virtual void Start() override;
+	virtual void End() override;
 
 	virtual void PositionReset() override;	
 protected:
@@ -45,6 +46,7 @@ protected:
 	virtual void UpdateMoving() override;	
 	virtual void UpdateAttack() override;
 	virtual void UpdateSpell() override;	
+	virtual void UpdateGathering() override;
 	virtual void UpdateReadyDead() override;
 	virtual void UpdateDead() override;
 };

@@ -179,31 +179,35 @@ void CPlayer::Update()
 	{
 		if (_NatureRecoveryTick < GetTickCount64())
 		{
-			int32 AutoHPRecoveryPoint = 0;
-			int32 AutoMPRecoveryPoint = 0;
-
-			AutoHPRecoveryPoint = (_GameObjectInfo.ObjectStatInfo.MaxHP / 100) * _GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent;
-			AutoMPRecoveryPoint = (_GameObjectInfo.ObjectStatInfo.MaxMP / 100) * _GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent;
-
-			_GameObjectInfo.ObjectStatInfo.HP += AutoHPRecoveryPoint;
-			_GameObjectInfo.ObjectStatInfo.MP += AutoMPRecoveryPoint;
-
-			if (_GameObjectInfo.ObjectStatInfo.HP > _GameObjectInfo.ObjectStatInfo.MaxHP)
+			if (_GameObjectInfo.ObjectStatInfo.HP != _GameObjectInfo.ObjectStatInfo.MaxHP
+				|| _GameObjectInfo.ObjectStatInfo.MP != _GameObjectInfo.ObjectStatInfo.MaxMP)
 			{
-				_GameObjectInfo.ObjectStatInfo.HP = _GameObjectInfo.ObjectStatInfo.MaxHP;
-			}
+				int32 AutoHPRecoveryPoint = 0;
+				int32 AutoMPRecoveryPoint = 0;
 
-			if (_GameObjectInfo.ObjectStatInfo.MP > _GameObjectInfo.ObjectStatInfo.MaxMP)
-			{
-				_GameObjectInfo.ObjectStatInfo.MP = _GameObjectInfo.ObjectStatInfo.MaxMP;
-			}
+				AutoHPRecoveryPoint = (_GameObjectInfo.ObjectStatInfo.MaxHP / 100) * _GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent;
+				AutoMPRecoveryPoint = (_GameObjectInfo.ObjectStatInfo.MaxMP / 100) * _GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent;
 
-			_NatureRecoveryTick = GetTickCount64() + 5000;
+				_GameObjectInfo.ObjectStatInfo.HP += AutoHPRecoveryPoint;
+				_GameObjectInfo.ObjectStatInfo.MP += AutoMPRecoveryPoint;
 
-			CMessage* ResObjectStatPacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId,
-				_GameObjectInfo.ObjectStatInfo);
-			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResObjectStatPacket);
-			ResObjectStatPacket->Free();
+				if (_GameObjectInfo.ObjectStatInfo.HP > _GameObjectInfo.ObjectStatInfo.MaxHP)
+				{
+					_GameObjectInfo.ObjectStatInfo.HP = _GameObjectInfo.ObjectStatInfo.MaxHP;
+				}
+
+				if (_GameObjectInfo.ObjectStatInfo.MP > _GameObjectInfo.ObjectStatInfo.MaxMP)
+				{
+					_GameObjectInfo.ObjectStatInfo.MP = _GameObjectInfo.ObjectStatInfo.MaxMP;
+				}
+
+				_NatureRecoveryTick = GetTickCount64() + 5000;
+
+				CMessage* ResObjectStatPacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId,
+					_GameObjectInfo.ObjectStatInfo);
+				G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResObjectStatPacket);
+				ResObjectStatPacket->Free();
+			}						
 		}
 	}		
 
@@ -224,6 +228,9 @@ void CPlayer::Update()
 	case en_CreatureState::SPELL:
 		UpdateSpell();
 		break;
+	case en_CreatureState::GATHERING:
+		UpdateGathering();
+		break;
 	case en_CreatureState::READY_DEAD:
 		break;
 	case en_CreatureState::DEAD:
@@ -240,7 +247,7 @@ bool CPlayer::OnDamaged(CGameObject* Attacker, int32 Damage)
 
 		if (_GameObjectInfo.ObjectStatInfo.HP == 0)
 		{
-			_DeadTick = GetTickCount64() + 1000;
+			_DeadReadyTick = GetTickCount64() + 1000;
 
 			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::READY_DEAD;
 
@@ -259,7 +266,12 @@ bool CPlayer::OnDamaged(CGameObject* Attacker, int32 Damage)
 	return false;
 }
 
-void CPlayer::Init()
+void CPlayer::Start()
+{
+	
+}
+
+void CPlayer::End()
 {
 	_FieldOfViewInfos.clear();
 
@@ -428,8 +440,8 @@ void CPlayer::UpdateSpell()
 
 				wsprintf(SpellMessage, L"%s가 %s을 사용해 %s에게 %d의 데미지를 줬습니다.", this->_GameObjectInfo.ObjectName.c_str(), _CurrentSpellSkill->GetSkillInfo()->SkillName.c_str(), _SelectTarget->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
 
-				// 데미지 처리
-				TargetIsDead = _SelectTarget->OnDamaged(this, FinalDamage);
+				st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, FinalDamage);
+				_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
 
 				MagicSystemString = SpellMessage;
 			}
@@ -483,8 +495,8 @@ void CPlayer::UpdateSpell()
 				int32 ChoiceDamage = DamageChoiceRandom(Gen);
 				FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
 
-				// 데미지 처리
-				TargetIsDead = _SelectTarget->OnDamaged(this, FinalDamage);				
+				st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, FinalDamage);
+				_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
 
 				if (AttackSkillInfo->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
 				{
@@ -507,8 +519,7 @@ void CPlayer::UpdateSpell()
 					}					
 				}									
 				
-				float DebufMovingSpeed = _GameObjectInfo.ObjectStatInfo.MaxSpeed * AttackSkillInfo->SkillDebufMovingSpeed * 0.01;
-
+				float DebufMovingSpeed = _SelectTarget->_GameObjectInfo.ObjectStatInfo.MaxSpeed * AttackSkillInfo->SkillDebufMovingSpeed * 0.01;
 				_SelectTarget->_GameObjectInfo.ObjectStatInfo.Speed -= DebufMovingSpeed;
 
 				CMessage* ResObjectStatChange = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId,
@@ -554,8 +565,8 @@ void CPlayer::UpdateSpell()
 				int32 ChoiceDamage = DamageChoiceRandom(Gen);
 				FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
 
-				// 데미지 처리
-				TargetIsDead = _SelectTarget->OnDamaged(this, FinalDamage);
+				st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, FinalDamage);
+				_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);				
 
 				bool IsLightningStrike = _StatusAbnormal & STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE;
 				if (IsLightningStrike == false)
@@ -609,8 +620,8 @@ void CPlayer::UpdateSpell()
 
 				wsprintf(SpellMessage, L"%s가 %s을 사용해 %s에게 %d의 데미지를 줬습니다.", _GameObjectInfo.ObjectName.c_str(), _CurrentSpellSkill->GetSkillInfo()->SkillName.c_str(), _SelectTarget->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
 
-				// 데미지 처리
-				TargetIsDead = _SelectTarget->OnDamaged(this, FinalDamage);
+				st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, FinalDamage);
+				_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
 
 				MagicSystemString = SpellMessage;
 			}
@@ -629,8 +640,8 @@ void CPlayer::UpdateSpell()
 
 				wsprintf(SpellMessage, L"%s가 %s을 사용해 %s에게 %d의 데미지를 줬습니다.", _GameObjectInfo.ObjectName.c_str(), _CurrentSpellSkill->GetSkillInfo()->SkillName.c_str(), _SelectTarget->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
 
-				// 데미지 처리
-				TargetIsDead = _SelectTarget->OnDamaged(this, FinalDamage);
+				st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, FinalDamage);
+				_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
 
 				MagicSystemString = SpellMessage;
 			}
@@ -754,12 +765,7 @@ void CPlayer::UpdateSpell()
 			CMessage* ResChangeObjectStat = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_SelectTarget->_GameObjectInfo.ObjectId,
 				_SelectTarget->_GameObjectInfo.ObjectStatInfo);
 			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResChangeObjectStat);
-			ResChangeObjectStat->Free();			
-
-			if (TargetIsDead == true)
-			{
-				_SelectTarget = nullptr;
-			}
+			ResChangeObjectStat->Free();						
 
 			// 시스템 메세지 전송
 			CMessage* ResAttackMagicSystemMessagePacket = G_ObjectManager->GameServer->MakePacketResChattingBoxMessage(_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, st_Color::White(), MagicSystemString);
@@ -771,6 +777,31 @@ void CPlayer::UpdateSpell()
 			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResMagicPacket);
 			ResMagicPacket->Free();			
 		}
+	}
+}
+
+void CPlayer::UpdateGathering()
+{
+	if (_GatheringTick < GetTickCount64())
+	{
+		if (_GatheringTarget == nullptr)
+		{
+			CRASH("채집할 대상이 없는데 채집 요청함");
+			return;
+		}		
+
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+
+		_GatheringTarget->OnDamaged(this, 1);
+
+		CMessage* ResObjectStatChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_GatheringTarget->_GameObjectInfo.ObjectId, _GatheringTarget->_GameObjectInfo.ObjectStatInfo);
+		G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResObjectStatChangePacket);
+		ResObjectStatChangePacket->Free();
+
+		// 채집창 끝
+		CMessage* ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, false, L"");
+		G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResGatheringPacket);
+		ResGatheringPacket->Free();		
 	}
 }
 
