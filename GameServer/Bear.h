@@ -7,7 +7,7 @@ public:
 	CBear();
 	~CBear();
 
-	virtual void Init(st_Vector2Int SpawnPosition) override;
+	virtual void Start() override;
 
 	virtual void PositionReset() override;
 protected:

@@ -43,21 +43,55 @@ CSlime::CSlime()
 	_GetDPPoint = MonsterData.GetDPPoint;
 	_GetExpPoint = MonsterData.GetExpPoint;
 
-	_SpawnIdleTick = GetTickCount64() + 2000;	
+	_ReSpawnTime = MonsterData.ReSpawnTime;
 
 	_FieldOfViewDistance = 10;
+
+	_SpawnIdleTick = GetTickCount64() + 2000;		
 }
 
 CSlime::~CSlime()
 {
 }
 
-void CSlime::Init(st_Vector2Int SpawnPosition)
+void CSlime::Start()
 {
-	CMonster::Init(SpawnPosition);	
+	CMonster::Start();	
 
 	_SpawnIdleTick = GetTickCount64() + 2000;
 	_SearchTick = GetTickCount64() + _SearchTickPoint;	
+}
+
+bool CSlime::OnDamaged(CGameObject* Attacker, int32 Damage)
+{
+	bool IsDead = CMonster::OnDamaged(Attacker, Damage);
+	if (IsDead == true)
+	{
+		_DeadReadyTick = GetTickCount64() + 1500;
+
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::READY_DEAD;
+
+		CMessage* ResChangeStatePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
+			_GameObjectInfo.ObjectPositionInfo.MoveDir,
+			_GameObjectInfo.ObjectType,
+			_GameObjectInfo.ObjectPositionInfo.State);
+		G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResChangeStatePacket);
+		ResChangeStatePacket->Free();
+
+		G_ObjectManager->ItemSpawn(Attacker->_GameObjectInfo.ObjectId,
+			Attacker->_GameObjectInfo.ObjectType,
+			_GameObjectInfo.ObjectPositionInfo.CollisionPosition,
+			_GameObjectInfo.ObjectType, en_ObjectDataType::SLIME_DATA);
+
+		Attacker->_GameObjectInfo.ObjectStatInfo.DP += _GetDPPoint;
+
+		if (Attacker->_GameObjectInfo.ObjectStatInfo.DP >= Attacker->_GameObjectInfo.ObjectStatInfo.MaxDP)
+		{
+			Attacker->_GameObjectInfo.ObjectStatInfo.DP = Attacker->_GameObjectInfo.ObjectStatInfo.MaxDP;
+		}
+	}
+
+	return IsDead;
 }
 
 bool CSlime::UpdateSpawnIdle()
@@ -92,7 +126,7 @@ void CSlime::UpdateReadyDead()
 
 void CSlime::UpdateDead()
 {
-	
+	CMonster::UpdateDead();
 }
 
 void CSlime::PositionReset()

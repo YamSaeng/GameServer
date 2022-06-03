@@ -7,7 +7,8 @@ public:
 	CSlime();
 	~CSlime();
 
-	virtual void Init(st_Vector2Int SpawnPosition) override;		
+	virtual void Start() override;
+	virtual bool OnDamaged(CGameObject* Attacker, int32 Damage) override;
 
 	virtual void PositionReset() override;
 protected:	

@@ -29,8 +29,9 @@ public:
 
 	virtual void PositionReset() override;
 	virtual bool OnDamaged(CGameObject* Attacker, int32 Damage) override;
-	// 몬스터 초기화
-	virtual void Init(st_Vector2Int SpawnPosition);
+	
+	virtual void Start() override;
+	virtual void End() override;
 protected:
 	CGameObject* _Target;
 	//---------------------
@@ -54,7 +55,7 @@ protected:
 	//-----------------
 	// 공격 거리
 	//-----------------
-	int32 _AttackRange;
+	float _AttackRange;
 	
 	//------------------------------------
 	// Idle 상태에서 Search를 실행할 Tick
@@ -140,6 +141,6 @@ protected:
 
 	void SendMonsterChangeObjectState();		
 
-	void TargetAttackCheck();
+	bool TargetAttackCheck();
 };
 
