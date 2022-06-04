@@ -285,10 +285,7 @@ unsigned __stdcall CGameServer::TimerJobThreadProc(void* Argument)
 				{
 					// Type에 따라 실행한다.
 					switch (TimerJob->TimerJobType)
-					{
-					case en_TimerJobType::TIMER_OBJECT_SPAWN:
-						Instance->PacketProcTimerObjectSpawn(TimerJob->TimerJobMessage);
-						break;
+					{					
 					case en_TimerJobType::TIMER_PING:
 						Instance->PacketProcTimerPing(TimerJob->SessionId);
 						break;
@@ -1043,8 +1040,14 @@ void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_MAGIC_CANCEL:
 		PacketProcReqMagicCancel(SessionId, Message);
 		break;
-	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_MOUSE_POSITION_OBJECT_INFO:
-		PacketProcReqMousePositionObjectInfo(SessionId, Message);
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_GATHERING_CANCEL:
+		PacketProcReqGatheringCancel(SessionId, Message);
+		break;
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_LEFT_MOUSE_POSITION_OBJECT_INFO:
+		PacketProcReqLeftMousePositionObjectInfo(SessionId, Message);
+		break;
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_GATHERING:
+		PacketProcReqGathering(SessionId, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_OBJECT_STATE_CHANGE:
 		PacketProcReqObjectStateChange(SessionId, Message);
@@ -1266,7 +1269,7 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 			else
 			{	
 				CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
-				st_GameObjectJob* EnterGameJob = MakeGameObjectJobEnterChannel(MyPlayer);
+				st_GameObjectJob* EnterGameJob = MakeGameObjectJobPlayerEnterChannel(MyPlayer);
 
 				CMap* EnterMap = G_MapManager->GetMap(1);
 				CChannel* EnterChannel = EnterMap->GetChannelManager()->Find(1);
@@ -1418,6 +1421,7 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 			if (MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::IDLE
 				|| MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::SPAWN_IDLE
 				|| MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::SPELL
+				|| MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::GATHERING
 				|| MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::ATTACK)
 			{
 				MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
@@ -1994,11 +1998,8 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 
 							int32 FinalDamage = (int32)(CriticalDamage * DefenceRate);
 
-							bool TargetIsDead = Target->OnDamaged(MyPlayer, FinalDamage);
-							if (TargetIsDead == true)
-							{
-								ExperienceCalculate(MyPlayer, Target);
-							}
+							st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(MyPlayer, FinalDamage);
+							Target->_GameObjectJobQue.Enqueue(DamageJob);							
 
 							en_EffectType HitEffectType = en_EffectType::EFFECT_TYPE_NONE;
 
@@ -2529,7 +2530,137 @@ void CGameServer::PacketProcReqMagicCancel(int64 SessionId, CMessage* Message)
 	ReturnSession(Session);
 }
 
-void CGameServer::PacketProcReqMousePositionObjectInfo(int64 SessionId, CMessage* Message)
+void CGameServer::PacketProcReqGathering(int64 SessionID, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionID);
+
+	do
+	{
+		if (Session)
+		{
+			int64 AccountId;
+			int64 PlayerId;
+
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountId;
+
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> PlayerId;
+
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			if (MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerId)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			int64 ObjectId;
+			*Message >> ObjectId;
+
+			int16 ObjectType;
+			*Message >> ObjectType;
+
+			CGameObject* FindObject = MyPlayer->GetChannel()->FindChannelObject(ObjectId, (en_GameObjectType)ObjectType);
+			if (FindObject != nullptr && FindObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::GATHERING)
+			{
+				st_Vector2 DirNormalVector = (FindObject->_GameObjectInfo.ObjectPositionInfo.Position - MyPlayer->_GameObjectInfo.ObjectPositionInfo.Position).Normalize();
+
+				en_MoveDir Dir = st_Vector2::GetMoveDir(DirNormalVector);
+
+				if (MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir != Dir)
+				{
+					CMessage* DirErrorPacket = MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_DIR_DIFFERENT, FindObject->_GameObjectInfo.ObjectName.c_str());
+					SendPacket(Session->SessionId, DirErrorPacket);
+					DirErrorPacket->Clear();
+					break;
+				}
+
+				CMap* Map = G_MapManager->GetMap(1);
+
+				vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetFieldOfViewPlayers(MyPlayer, 1, false);
+
+				st_GameObjectJob* GatheringStartJob = MakeGameObjectJobGatheringStart(FindObject);
+				MyPlayer->_GameObjectJobQue.Enqueue(GatheringStartJob);
+			}
+		}
+	} while (0);
+
+	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcReqGatheringCancel(int64 SessionID, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionID);
+
+	do
+	{
+		if (Session)
+		{
+			int64 AccountId;
+			int64 PlayerId;
+
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountId;
+
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> PlayerId;
+
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			if (MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerId)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			st_GameObjectJob* GatheringCancelJob = MakeGameObjectJobGatheringCancel();
+			MyPlayer->_GameObjectJobQue.Enqueue(GatheringCancelJob);
+		}
+	} while (0);
+
+	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcReqLeftMousePositionObjectInfo(int64 SessionId, CMessage* Message)
 {
 	st_Session* Session = FindSession(SessionId);
 
@@ -5742,32 +5873,6 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 	_SessionArrayIndexs.Push(GET_SESSIONINDEX(LeaveSession->SessionId));	
 }
 
-void CGameServer::PacketProcTimerObjectSpawn(CGameServerMessage* Message)
-{
-	int16 SpawnObjectType;
-	*Message >> SpawnObjectType;
-
-	st_Vector2Int SpawnPosition;
-	*Message >> SpawnPosition._X;
-	*Message >> SpawnPosition._Y;
-
-	Message->Free();
-
-	CMap* ObjectEnterMap = G_MapManager->GetMap(1);
-	if (ObjectEnterMap != nullptr)
-	{
-		CGameObject* FindObject = ObjectEnterMap->Find(SpawnPosition);
-		if (FindObject != nullptr)
-		{
-			SpawnObjectTimeTimerJobCreate(SpawnObjectType, SpawnPosition, 10000);
-		}
-		else
-		{
-			G_ObjectManager->ObjectSpawn((en_GameObjectType)SpawnObjectType, SpawnPosition);
-		}
-	}	
-}
-
 void CGameServer::PacketProcTimerPing(int64 SessionId)
 {
 	st_Session* Session = FindSession(SessionId);
@@ -5801,33 +5906,6 @@ void CGameServer::PacketProcTimerPing(int64 SessionId)
 			ReturnSession(Session);
 		}
 	} while (0);
-}
-
-st_GameObjectJob* CGameServer::MakeGameObjectJobEnterChannel(CGameObject* EnterChannelObject)
-{
-	st_GameObjectJob* EnterChannelJob = G_ObjectManager->GameObjectJobCreate();
-	EnterChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_ENTER_CHANNEL;
-
-	CGameServerMessage* EnterChannelGameMessage = CGameServerMessage::GameServerMessageAlloc();
-	EnterChannelGameMessage->Clear();
-
-	*EnterChannelGameMessage << &EnterChannelObject;
-	EnterChannelJob->GameObjectJobMessage = EnterChannelGameMessage;
-
-	return EnterChannelJob;
-}
-
-st_GameObjectJob* CGameServer::MakeGameObjectJobLeaveChannel(CGameObject* LeaveChannelObject)
-{
-	st_GameObjectJob* LeaveChannelJob = G_ObjectManager->GameObjectJobCreate();
-	LeaveChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_LEAVE_CHANNEL;
-
-	CGameServerMessage* LeaveChannelMessage = CGameServerMessage::GameServerMessageAlloc();
-	*LeaveChannelMessage << &LeaveChannelObject;	
-
-	LeaveChannelJob->GameObjectJobMessage = LeaveChannelMessage;
-
-	return LeaveChannelJob;
 }
 
 st_GameObjectJob* CGameServer::MakeGameObjectJobLeaveChannelPlayer(CGameObject* LeavePlayerObject, int32* PlayerIndexes)
@@ -5897,6 +5975,31 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobSpellCancel()
 {
 	st_GameObjectJob* SpellCancelJob = G_ObjectManager->GameObjectJobCreate();
 	SpellCancelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SPELL_CANCEL;
+
+	SpellCancelJob->GameObjectJobMessage = nullptr;
+
+	return SpellCancelJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobGatheringStart(CGameObject* GatheringObject)
+{
+	st_GameObjectJob* GatheringStartJob = G_ObjectManager->GameObjectJobCreate();
+	GatheringStartJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_GATHERING_START;
+
+	CGameServerMessage* GatheringMessage = CGameServerMessage::GameServerMessageAlloc();
+	GatheringMessage->Clear();
+
+	*GatheringMessage << &GatheringObject;
+
+	GatheringStartJob->GameObjectJobMessage = GatheringMessage;
+
+	return GatheringStartJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobGatheringCancel()
+{
+	st_GameObjectJob* SpellCancelJob = G_ObjectManager->GameObjectJobCreate();
+	SpellCancelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_GATHERING_CANCEL;
 
 	SpellCancelJob->GameObjectJobMessage = nullptr;
 
@@ -5992,7 +6095,7 @@ CGameServerMessage* CGameServer::MakePacketResMousePositionObjectInfo(int64 Acco
 
 	ResMousePositionObjectInfoPacket->Clear();
 
-	*ResMousePositionObjectInfoPacket << (int16)en_PACKET_S2C_MOUSE_POSITION_OBJECT_INFO;
+	*ResMousePositionObjectInfoPacket << (int16)en_PACKET_S2C_LEFT_MOUSE_POSITION_OBJECT_INFO;
 	*ResMousePositionObjectInfoPacket << AccountId;
 	*ResMousePositionObjectInfoPacket << PreviousChoiceObjectId;
 	*ResMousePositionObjectInfoPacket << FindObjectId;
@@ -6374,217 +6477,62 @@ CItem* CGameServer::NewItemCrate(st_ItemInfo& NewItemInfo)
 	}
 }
 
-void CGameServer::ExperienceCalculate(CPlayer* Player, CGameObject* Target)
+st_GameObjectJob* CGameServer::MakeGameObjectJobPlayerEnterChannel(CGameObject* EnterChannelObject)
 {
-	CMonster* TargetMonster = nullptr;
+	st_GameObjectJob* EnterChannelJob = G_ObjectManager->GameObjectJobCreate();
+	EnterChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_PLAYER_ENTER_CHANNEL;
 
-	switch (Target->_GameObjectInfo.ObjectType)
-	{
-	case en_GameObjectType::OBJECT_SLIME:
-		TargetMonster = (CMonster*)Target;
+	CGameServerMessage* EnterChannelGameMessage = CGameServerMessage::GameServerMessageAlloc();
+	EnterChannelGameMessage->Clear();
 
-		Player->_Experience.CurrentExperience += TargetMonster->_GetExpPoint;
-		Player->_Experience.CurrentExpRatio = ((float)Player->_Experience.CurrentExperience) / Player->_Experience.RequireExperience;
+	*EnterChannelGameMessage << &EnterChannelObject;
+	EnterChannelJob->GameObjectJobMessage = EnterChannelGameMessage;
 
-		if (Player->_Experience.CurrentExpRatio >= 1.0f)
-		{
-			// 레벨 증가
-			Player->_GameObjectInfo.ObjectStatInfo.Level += 1;
+	return EnterChannelJob;
+}
 
-			// 증가한 레벨에 해당하는 능력치 정보를 읽어온 후 적용한다.
-			st_ObjectStatusData NewCharacterStatus;
-			st_LevelData LevelData;
+st_GameObjectJob* CGameServer::MakeGameObjectJobObjectEnterChannel(CGameObject* EnterChannelObject)
+{
+	st_GameObjectJob* EnterChannelJob = G_ObjectManager->GameObjectJobCreate();
+	EnterChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_OBJECT_ENTER_CHANNEL;
 
-			switch (Player->_GameObjectInfo.ObjectType)
-			{
-			case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-			{
-				auto FindStatus = G_Datamanager->_WarriorStatus.find(Player->_GameObjectInfo.ObjectStatInfo.Level);
-				if (FindStatus == G_Datamanager->_WarriorStatus.end())
-				{
-					CRASH("레벨 스테이터스 찾지 못함");
-				}
+	CGameServerMessage* EnterChannelGameMessage = CGameServerMessage::GameServerMessageAlloc();
+	EnterChannelGameMessage->Clear();
 
-				NewCharacterStatus = *(*FindStatus).second;
+	*EnterChannelGameMessage << &EnterChannelObject;
+	EnterChannelJob->GameObjectJobMessage = EnterChannelGameMessage;
 
-				Player->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
-				Player->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
-				Player->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
-				Player->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
-				Player->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
-				Player->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
-				Player->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
-				Player->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
-				Player->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
-				Player->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
-				Player->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
-				Player->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
-				Player->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
-				Player->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
-				Player->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
-				Player->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
-				Player->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
-				Player->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
-				Player->_GameObjectInfo.ObjectStatInfo.MaxSpeed = NewCharacterStatus.Speed;
-			}
-			break;
-			case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
-			{
-				auto FindStatus = G_Datamanager->_ShamanStatus.find(Player->_GameObjectInfo.ObjectStatInfo.Level);
-				if (FindStatus == G_Datamanager->_WarriorStatus.end())
-				{
-					CRASH("레벨 데이터 찾지 못함");
-				}
+	return EnterChannelJob;
+}
 
-				NewCharacterStatus = *(*FindStatus).second;
+st_GameObjectJob* CGameServer::MakeGameObjectJobLeaveChannel(CGameObject* LeaveChannelObject)
+{
+	st_GameObjectJob* LeaveChannelJob = G_ObjectManager->GameObjectJobCreate();
+	LeaveChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_LEAVE_CHANNEL;
 
-				Player->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
-				Player->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
-				Player->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
-				Player->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
-				Player->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
-				Player->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
-				Player->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
-				Player->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
-				Player->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
-				Player->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
-				Player->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
-				Player->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
-				Player->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
-				Player->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
-				Player->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
-				Player->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
-				Player->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
-				Player->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
-				Player->_GameObjectInfo.ObjectStatInfo.MaxSpeed = NewCharacterStatus.Speed;
-			}
-			break;
-			case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
-			{
-				auto FindStatus = G_Datamanager->_TaioistStatus.find(Player->_GameObjectInfo.ObjectStatInfo.Level);
-				if (FindStatus == G_Datamanager->_TaioistStatus.end())
-				{
-					CRASH("레벨 데이터 찾지 못함");
-				}
+	CGameServerMessage* LeaveChannelMessage = CGameServerMessage::GameServerMessageAlloc();
+	LeaveChannelMessage->Clear();
+	*LeaveChannelMessage << &LeaveChannelObject;
 
-				NewCharacterStatus = *(*FindStatus).second;
+	LeaveChannelJob->GameObjectJobMessage = LeaveChannelMessage;
 
-				Player->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
-				Player->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
-				Player->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
-				Player->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
-				Player->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
-				Player->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
-				Player->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
-				Player->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
-				Player->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
-				Player->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
-				Player->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
-				Player->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
-				Player->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
-				Player->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
-				Player->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
-				Player->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
-				Player->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
-				Player->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
-				Player->_GameObjectInfo.ObjectStatInfo.MaxSpeed = NewCharacterStatus.Speed;
-			}
-			break;
-			case en_GameObjectType::OBJECT_THIEF_PLAYER:
-			{
-				auto FindStatus = G_Datamanager->_ThiefStatus.find(Player->_GameObjectInfo.ObjectStatInfo.Level);
-				if (FindStatus == G_Datamanager->_ThiefStatus.end())
-				{
-					CRASH("레벨 데이터 찾지 못함");
-				}
+	return LeaveChannelJob;
+}
 
-				NewCharacterStatus = *(*FindStatus).second;
+st_GameObjectJob* CGameServer::MakeGameObjectDamage(CGameObject* Attacker, int32 Damage)
+{
+	st_GameObjectJob* DamageJob = G_ObjectManager->GameObjectJobCreate();
+	DamageJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_DAMAGE;
 
-				Player->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
-				Player->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
-				Player->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
-				Player->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
-				Player->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
-				Player->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
-				Player->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
-				Player->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
-				Player->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
-				Player->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
-				Player->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
-				Player->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
-				Player->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
-				Player->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
-				Player->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
-				Player->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
-				Player->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
-				Player->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
-				Player->_GameObjectInfo.ObjectStatInfo.MaxSpeed = NewCharacterStatus.Speed;
-			}
-			break;
-			case en_GameObjectType::OBJECT_ARCHER_PLAYER:
-			{
-				auto FindStatus = G_Datamanager->_ArcherStatus.find(Player->_GameObjectInfo.ObjectStatInfo.Level);
-				if (FindStatus == G_Datamanager->_ArcherStatus.end())
-				{
-					CRASH("레벨 데이터 찾지 못함");
-				}
+	CGameServerMessage* DamageMessage = CGameServerMessage::GameServerMessageAlloc();
+	DamageMessage->Clear();
+	
+	*DamageMessage << &Attacker;
+	*DamageMessage << Damage;
 
-				NewCharacterStatus = *(*FindStatus).second;
+	DamageJob->GameObjectJobMessage = DamageMessage;
 
-				Player->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
-				Player->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
-				Player->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
-				Player->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
-				Player->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
-				Player->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
-				Player->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
-				Player->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
-				Player->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
-				Player->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
-				Player->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
-				Player->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
-				Player->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
-				Player->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
-				Player->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
-				Player->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
-				Player->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
-				Player->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
-				Player->_GameObjectInfo.ObjectStatInfo.MaxSpeed = NewCharacterStatus.Speed;
-			}
-			break;
-			}
-
-			CGameServerMessage* ResObjectStatChangeMessage = MakePacketResChangeObjectStat(Player->_GameObjectInfo.ObjectId, Player->_GameObjectInfo.ObjectStatInfo);
-			SendPacket(Player->_SessionId, ResObjectStatChangeMessage);
-			ResObjectStatChangeMessage->Free();
-
-			auto FindLevelData = G_Datamanager->_LevelDatas.find(Player->_GameObjectInfo.ObjectStatInfo.Level);
-			if (FindLevelData == G_Datamanager->_LevelDatas.end())
-			{
-				CRASH("레벨 데이터 찾지 못함");
-			}
-
-			LevelData = *(*FindLevelData).second;
-
-			Player->_Experience.CurrentExperience = 0;
-			Player->_Experience.RequireExperience = LevelData.RequireExperience;
-			Player->_Experience.TotalExperience = LevelData.TotalExperience;
-		}
-
-		{
-			CGameServerMessage* ResMonsterGetExpMessage = MakePacketExperience(Player->_AccountId, Player->_GameObjectInfo.ObjectId, TargetMonster->_GetExpPoint,
-				Player->_Experience.CurrentExperience,
-				Player->_Experience.RequireExperience,
-				Player->_Experience.TotalExperience);
-			SendPacket(Player->_SessionId, ResMonsterGetExpMessage);
-			ResMonsterGetExpMessage->Free();
-		}
-		break;
-	case en_GameObjectType::OBJECT_TREE:
-		break;
-	case en_GameObjectType::OBJECT_STONE:
-		break;
-	}
+	return DamageJob;
 }
 
 CGameServerMessage* CGameServer::MakePacketResEnterGame(bool EnterGameSuccess, st_GameObjectInfo* ObjectInfo, st_Vector2Int* SpawnPosition)
@@ -6650,6 +6598,30 @@ CGameServerMessage* CGameServer::MakePacketResMagic(int64 ObjectId, bool SpellSt
 	*ResMagicMessage << SpellTime;
 
 	return ResMagicMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketResGathering(int64 ObjectID, bool GatheringStart, wstring GatheringName)
+{
+	CGameServerMessage* ResGatheringMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResGatheringMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResGatheringMessage->Clear();
+
+	*ResGatheringMessage << (int16)en_PACKET_S2C_GATHERING;
+	*ResGatheringMessage << ObjectID;
+	*ResGatheringMessage << GatheringStart;
+
+	if (GatheringStart == true)
+	{
+		int16 GatheringNameLen = (int16)(GatheringName.length() * 2);
+		*ResGatheringMessage << GatheringNameLen;
+		ResGatheringMessage->InsertData(GatheringName.c_str(), GatheringNameLen);
+	}
+
+	return ResGatheringMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketResAnimationPlay(int64 ObjectId, en_MoveDir Dir, wstring AnimationName)
@@ -7094,6 +7066,22 @@ CGameServerMessage* CGameServer::MakePacketMagicCancel(int64 PlayerId)
 	return ResMagicCancelMessage;
 }
 
+CGameServerMessage* CGameServer::MakePacketGatheringCancel(int64 ObjectID)
+{
+	CGameServerMessage* ResMagicCancelMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResMagicCancelMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResMagicCancelMessage->Clear();
+
+	*ResMagicCancelMessage << (int16)en_PACKET_S2C_GATHERING_CANCEL;
+	*ResMagicCancelMessage << ObjectID;
+
+	return ResMagicCancelMessage;
+}
+
 CGameServerMessage* CGameServer::MakePacketCoolTime(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, float SkillCoolTimeSpeed, CSkill* QuickSlotSkill, int32 CoolTime)
 {
 	CGameServerMessage* ResCoolTimeMessage = CGameServerMessage::GameServerMessageAlloc();
@@ -7169,6 +7157,9 @@ CGameServerMessage* CGameServer::MakePacketSkillError(en_PersonalMessageType Per
 	case en_PersonalMessageType::PERSONAL_MESSAGE_MYSELF_TARGET:
 		wsprintf(ErrorMessage, L"[%s]을/를 자신에게 사용 할 수 없습니다.", SkillName, SkillDistance);
 		break;
+	case en_PersonalMessageType::PERSONAL_MESSAGE_DIR_DIFFERENT:
+		wsprintf(ErrorMessage, L"대상을 바라보아야 합니다.");
+		break;
 	}
 
 	wstring ErrorMessageString = ErrorMessage;
@@ -7179,6 +7170,40 @@ CGameServerMessage* CGameServer::MakePacketSkillError(en_PersonalMessageType Per
 	ResErrorMessage->InsertData(ErrorMessageString.c_str(), ErrorMessageLen);
 
 	return ResErrorMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketCommonError(en_PersonalMessageType PersonalMessageType, const WCHAR* Name)
+{
+	CGameServerMessage* ResCommonErrorMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResCommonErrorMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResCommonErrorMessage->Clear();
+
+	*ResCommonErrorMessage << (int16)en_PACKET_S2C_PERSONAL_MESSAGE;
+	*ResCommonErrorMessage << (int8)1;
+
+	WCHAR ErrorMessage[100] = { 0 };
+
+	*ResCommonErrorMessage << (int8)PersonalMessageType;
+
+	switch (PersonalMessageType)
+	{	
+	case en_PersonalMessageType::PERSONAL_MESSAGE_DIR_DIFFERENT:
+		wsprintf(ErrorMessage, L"[%s]을 바라보아야 합니다.", Name);
+		break;
+	}
+
+	wstring ErrorMessageString = ErrorMessage;
+
+	// 에러 메세지
+	int16 ErrorMessageLen = (int16)(ErrorMessageString.length() * 2);
+	*ResCommonErrorMessage << ErrorMessageLen;
+	ResCommonErrorMessage->InsertData(ErrorMessageString.c_str(), ErrorMessageLen);
+
+	return ResCommonErrorMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketStatusAbnormal(int64 TargetId, en_GameObjectType ObjectType, en_MoveDir Dir, en_SkillType SkillType, bool SetStatusAbnormal, int8 StatusAbnormal)
@@ -7280,34 +7305,6 @@ void CGameServer::SendPacketFieldOfView(CGameObject* Object, CMessage* Message)
 			}
 		}
 	}
-}
-
-void CGameServer::SpawnObjectTimeTimerJobCreate(int16 SpawnObjectType, st_Vector2Int SpawnPosition, int64 SpawnTime)
-{
-	st_TimerJob* SpawnObjectTimerJob = _TimerJobMemoryPool->Alloc();
-	SpawnObjectTimerJob->TimerJobExecTick = GetTickCount64() + SpawnTime;
-	SpawnObjectTimerJob->SessionId = 0;
-	SpawnObjectTimerJob->TimerJobType = en_TimerJobType::TIMER_OBJECT_SPAWN;
-
-	CGameServerMessage* ResObjectSpawnMessage = CGameServerMessage::GameServerMessageAlloc();
-	if (ResObjectSpawnMessage == nullptr)
-	{
-		return;
-	}
-
-	ResObjectSpawnMessage->Clear();
-	
-	*ResObjectSpawnMessage << SpawnObjectType;
-
-	*ResObjectSpawnMessage << SpawnPosition;
-
-	SpawnObjectTimerJob->TimerJobMessage = ResObjectSpawnMessage;
-
-	AcquireSRWLockExclusive(&_TimerJobLock);
-	_TimerHeapJob->InsertHeap(SpawnObjectTimerJob->TimerJobExecTick, SpawnObjectTimerJob);
-	ReleaseSRWLockExclusive(&_TimerJobLock);
-
-	SetEvent(_TimerThreadWakeEvent);
 }
 
 void CGameServer::PingTimerCreate(st_Session* PingSession)

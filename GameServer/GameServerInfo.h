@@ -44,8 +44,7 @@ struct st_GameServerJob
 
 enum class en_TimerJobType : int16
 {
-	TIMER_JOB_TYPE_NONE,	
-	TIMER_OBJECT_SPAWN,	
+	TIMER_JOB_TYPE_NONE,		
 	TIMER_PING
 };
 

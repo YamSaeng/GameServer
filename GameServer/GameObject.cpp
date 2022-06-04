@@ -83,7 +83,7 @@ void CGameObject::StatusAbnormalCheck()
 				CanMove,
 				_GameObjectInfo.ObjectPositionInfo);
 
-			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResMovePacket);
+			G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResMovePacket);
 			ResMovePacket->Free();
 		}
 	}
