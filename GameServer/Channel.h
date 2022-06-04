@@ -31,7 +31,7 @@ private:
 	CPlayer* _ChannelDummyPlayerArray[DUMMY_PLAYER_MAX];
 	CMonster* _ChannelMonsterArray[MONSTER_MAX];
 	CEnvironment* _ChannelEnvironmentArray[ENVIRONMENT_MAX];
-	CItem* _ChannelItemArray[ITEM_MAX];
+	CItem* _ChannelItemArray[ITEM_MAX];	
 	
 
 	CLockFreeStack<int32> _ChannelPlayerArrayIndexs;
@@ -89,6 +89,10 @@ public:
 	// 채널에 있는 오브젝트들 찾기
 	//------------------------------------------------------------------------------
 	vector<CGameObject*> FindChannelObjects(vector<st_FieldOfViewInfo>& FindObjectIDs);
+	//-----------------------------------------------------
+	// 채널에 있는 오브젝트들 찾기 ( 거리 기준 )
+	//-----------------------------------------------------
+	vector<CGameObject*> FindChannelObjects(vector<st_FieldOfViewInfo>& FindObjectIDs, CGameObject* Object, int16 Distance);
 
 	//----------------------------------------------------
 	// 채널 입장

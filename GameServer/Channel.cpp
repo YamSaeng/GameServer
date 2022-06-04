@@ -76,42 +76,57 @@ void CChannel::Update()
 		{
 			switch ((en_GameObjectJobType)GameObjectJob->GameObjectJobType)
 			{
-			case en_GameObjectJobType::GAMEOBJECT_JOB_ENTER_CHANNEL:
-			{				
-				CPlayer* EnterPlayer;
-				*GameObjectJob->GameObjectJobMessage >> &EnterPlayer;
-				
-				EnterPlayer->_SpawnIdleTick = GetTickCount64() + 5000;
-				EnterPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_IDLE;				
+			case en_GameObjectJobType::GAMEOBJECT_JOB_PLAYER_ENTER_CHANNEL:
+				{				
+					CPlayer* EnterPlayer;
+					*GameObjectJob->GameObjectJobMessage >> &EnterPlayer;
+					
+					EnterPlayer->_SpawnIdleTick = GetTickCount64() + 5000;
+					EnterPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_IDLE;				
 
-				EnterChannel(EnterPlayer, &EnterPlayer->_SpawnPosition);
+					EnterChannel(EnterPlayer, &EnterPlayer->_SpawnPosition);
 
-				// 나한테 나 생성하라고 알려줌
-				CMessage* ResEnterGamePacket = G_ObjectManager->GameServer->MakePacketResEnterGame(true, &EnterPlayer->_GameObjectInfo, &EnterPlayer->_SpawnPosition);
-				G_ObjectManager->GameServer->SendPacket(EnterPlayer->_SessionId, ResEnterGamePacket);
-				ResEnterGamePacket->Free();
+					// 나한테 나 생성하라고 알려줌
+					CMessage* ResEnterGamePacket = G_ObjectManager->GameServer->MakePacketResEnterGame(true, &EnterPlayer->_GameObjectInfo, &EnterPlayer->_SpawnPosition);
+					G_ObjectManager->GameServer->SendPacket(EnterPlayer->_SessionId, ResEnterGamePacket);
+					ResEnterGamePacket->Free();
 
-				if (EnterPlayer->_GameObjectInfo.ObjectType != en_GameObjectType::OBJECT_PLAYER_DUMMY)
-				{
-					st_GameServerJob* DBCharacterInfoSendJob = G_ObjectManager->GameServer->_GameServerJobMemoryPool->Alloc();
-					DBCharacterInfoSendJob->Type = en_GameServerJobType::DATA_BASE_CHARACTER_INFO_SEND;
+					if (EnterPlayer->_GameObjectInfo.ObjectType != en_GameObjectType::OBJECT_PLAYER_DUMMY)
+					{
+						st_GameServerJob* DBCharacterInfoSendJob = G_ObjectManager->GameServer->_GameServerJobMemoryPool->Alloc();
+						DBCharacterInfoSendJob->Type = en_GameServerJobType::DATA_BASE_CHARACTER_INFO_SEND;
 
-					CGameServerMessage* ReqDBCharacterInfoMessage = CGameServerMessage::GameServerMessageAlloc();
-					ReqDBCharacterInfoMessage->Clear();
+						CGameServerMessage* ReqDBCharacterInfoMessage = CGameServerMessage::GameServerMessageAlloc();
+						ReqDBCharacterInfoMessage->Clear();
 
-					*ReqDBCharacterInfoMessage << EnterPlayer->_SessionId;
+						*ReqDBCharacterInfoMessage << EnterPlayer->_SessionId;
 
-					DBCharacterInfoSendJob->Message = ReqDBCharacterInfoMessage;
+						DBCharacterInfoSendJob->Message = ReqDBCharacterInfoMessage;
 
-					G_ObjectManager->GameServer->_GameServerUserDBThreadMessageQue.Enqueue(DBCharacterInfoSendJob);
-					SetEvent(G_ObjectManager->GameServer->_UserDataBaseWakeEvent);
-				}	
-				else
-				{
-					EnterPlayer->_NetworkState = en_ObjectNetworkState::LIVE;
+						G_ObjectManager->GameServer->_GameServerUserDBThreadMessageQue.Enqueue(DBCharacterInfoSendJob);
+						SetEvent(G_ObjectManager->GameServer->_UserDataBaseWakeEvent);
+					}	
+					else
+					{
+						EnterPlayer->_NetworkState = en_ObjectNetworkState::LIVE;
+					}
 				}
-			}
-			break;
+				break;
+			case en_GameObjectJobType::GAMEOBJECT_JOB_OBJECT_ENTER_CHANNEL:
+				{
+					CGameObject* EnterObject;
+					*GameObjectJob->GameObjectJobMessage >> &EnterObject;
+
+					EnterObject->_SpawnIdleTick = GetTickCount64() + 5000;
+					EnterObject->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_IDLE;
+
+					EnterChannel(EnterObject, &EnterObject->_SpawnPosition);
+
+					CMessage* SpawnObjectPacket = G_ObjectManager->GameServer->MakePacketResObjectSpawn(EnterObject);
+					G_ObjectManager->GameServer->SendPacketFieldOfView(EnterObject, SpawnObjectPacket);
+					SpawnObjectPacket->Free();
+				}
+				break;
 			case en_GameObjectJobType::GAMEOBJECT_JOB_LEAVE_CHANNEL:
 				{
 					CGameObject* LeaveGameObject;
@@ -143,7 +158,7 @@ void CChannel::Update()
 
 					LeaveGameObject->_NetworkState = en_ObjectNetworkState::LEAVE;
 
-					LeaveGameObject->Init();
+					LeaveGameObject->End();
 
 					for (int8 i = 0; i < SESSION_CHARACTER_MAX; i++)
 					{
@@ -187,8 +202,7 @@ void CChannel::Update()
 
 	for (int16 i = 0; i < MONSTER_MAX; i++)
 	{
-		if (_ChannelMonsterArray[i]
-			&& _ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
+		if (_ChannelMonsterArray[i] != nullptr)
 		{
 			_ChannelMonsterArray[i]->Update();
 		}
@@ -196,8 +210,7 @@ void CChannel::Update()
 
 	for (int16 i = 0; i < ITEM_MAX; i++)
 	{
-		if (_ChannelItemArray[i]
-			&& _ChannelItemArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
+		if (_ChannelItemArray[i] != nullptr)
 		{
 			_ChannelItemArray[i]->Update();
 		}
@@ -205,8 +218,7 @@ void CChannel::Update()
 
 	for (int16 i = 0; i < ENVIRONMENT_MAX; i++)
 	{
-		if (_ChannelEnvironmentArray[i]
-			&& _ChannelEnvironmentArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
+		if (_ChannelEnvironmentArray[i] != nullptr)
 		{
 			_ChannelEnvironmentArray[i]->Update();
 		}
@@ -351,7 +363,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 			{
 				if (_ChannelDummyPlayerArray[i] != nullptr && _ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
 				{
-					FindObjects.push_back(_ChannelPlayerArray[i]);
+					FindObjects.push_back(_ChannelDummyPlayerArray[i]);
 				}
 			}
 		}
@@ -418,6 +430,107 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 	return FindObjects;
 }
 
+vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& FindObjectIDs, CGameObject* Object, int16 Distance)
+{
+	vector<CGameObject*> FindObjects;
+
+	for (st_FieldOfViewInfo FieldOfViewInfo : FindObjectIDs)
+	{
+		switch (FieldOfViewInfo.ObjectType)
+		{
+		case en_GameObjectType::OBJECT_PLAYER:
+		case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
+		case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
+		case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
+		case en_GameObjectType::OBJECT_THIEF_PLAYER:
+		case en_GameObjectType::OBJECT_ARCHER_PLAYER:
+		{
+			for (int32 i = 0; i < en_Channel::PLAYER_MAX; i++)
+			{
+				if (_ChannelPlayerArray[i] != nullptr
+					&& _ChannelPlayerArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID
+					&& _ChannelPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE)
+				{	
+					if (st_Vector2::CheckFieldOfView(_ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->GetPositionInfo().MoveDir, 80))
+					{
+						// 시야각 안에 오브젝트가 존재
+						float TargetDistance = st_Vector2::Distance(_ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
+						if (TargetDistance <= Distance)
+						{
+							FindObjects.push_back(_ChannelPlayerArray[i]);
+						}
+					}				
+				}
+			}
+		}
+		break;
+		case en_GameObjectType::OBJECT_PLAYER_DUMMY:
+		{
+			for (int32 i = 0; i < en_Channel::DUMMY_PLAYER_MAX; i++)
+			{
+				if (_ChannelDummyPlayerArray[i] != nullptr && _ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
+				{
+					if (st_Vector2::CheckFieldOfView(_ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->GetPositionInfo().MoveDir, 80))
+					{
+						// 시야각 안에 오브젝트가 존재
+						float TargetDistance = st_Vector2::Distance(_ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
+						if (TargetDistance <= Distance)
+						{
+							FindObjects.push_back(_ChannelDummyPlayerArray[i]);
+						}
+					}					
+				}
+			}
+		}
+		break;
+		case en_GameObjectType::OBJECT_MONSTER:
+		case en_GameObjectType::OBJECT_SLIME:
+		case en_GameObjectType::OBJECT_BEAR:
+		{
+			for (int32 i = 0; i < en_Channel::MONSTER_MAX; i++)
+			{
+				if (_ChannelMonsterArray[i] != nullptr && _ChannelMonsterArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
+				{
+					if (st_Vector2::CheckFieldOfView(_ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->GetPositionInfo().MoveDir, 80))
+					{
+						// 시야각 안에 오브젝트가 존재
+						float TargetDistance = st_Vector2::Distance(_ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
+						if (TargetDistance <= Distance)
+						{
+							FindObjects.push_back(_ChannelMonsterArray[i]);
+						}
+					}
+				}
+			}
+		}
+		break;
+		case en_GameObjectType::OBJECT_ENVIRONMENT:
+		case en_GameObjectType::OBJECT_STONE:
+		case en_GameObjectType::OBJECT_TREE:
+		{
+			for (int32 i = 0; i < en_Channel::ENVIRONMENT_MAX; i++)
+			{
+				if (_ChannelEnvironmentArray[i] != nullptr && _ChannelEnvironmentArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
+				{
+					if (st_Vector2::CheckFieldOfView(_ChannelEnvironmentArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->GetPositionInfo().MoveDir, 80))
+					{
+						// 시야각 안에 오브젝트가 존재
+						float TargetDistance = st_Vector2::Distance(_ChannelEnvironmentArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
+						if (TargetDistance <= Distance)
+						{
+							FindObjects.push_back(_ChannelEnvironmentArray[i]);
+						}
+					}
+				}
+			}
+		}
+		break;		
+		}
+	}
+
+	return FindObjects;
+}
+
 bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* ObjectSpawnPosition)
 {
 	bool IsEnterChannel = false;
@@ -466,18 +579,16 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 		{
 			// 플레이어로 형변환
 			CPlayer* EnterChannelPlayer = (CPlayer*)EnterChannelGameObject;
-			EnterChannelPlayer->_SpawnPosition._Y = SpawnPosition._Y;
-			EnterChannelPlayer->_SpawnPosition._X = SpawnPosition._X;
-			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY = SpawnPosition._Y;
-			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX = SpawnPosition._X;
+			EnterChannelPlayer->_SpawnPosition = SpawnPosition;
+			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 
-			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX + 0.5f;
-			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY + 0.5f;
+			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
+			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
 
 			// 플레이어 저장
 			_ChannelPlayerArrayIndexs.Pop(&EnterChannelPlayer->_ChannelArrayIndex);
 			_ChannelPlayerArray[EnterChannelPlayer->_ChannelArrayIndex] = EnterChannelPlayer;		
-
+											
 			//_Players.insert(pair<int64, CPlayer*>(EnterChannelPlayer->_GameObjectInfo.ObjectId, EnterChannelPlayer));			
 
 			// 채널 저장
@@ -495,13 +606,11 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 		{
 			// 플레이어로 형변환
 			CPlayer* EnterChannelPlayer = (CPlayer*)EnterChannelGameObject;
-			EnterChannelPlayer->_SpawnPosition._Y = SpawnPosition._Y;
-			EnterChannelPlayer->_SpawnPosition._X = SpawnPosition._X;
-			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY = SpawnPosition._Y;
-			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX = SpawnPosition._X;
+			EnterChannelPlayer->_SpawnPosition = SpawnPosition;
+			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 
-			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.PositionX = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX + 0.5f;
-			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.PositionY = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY + 0.5f;
+			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
+			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
 
 			// 플레이어 저장
 			_ChannelDummyPlayerArrayIndexs.Pop(&EnterChannelPlayer->_ChannelArrayIndex);
@@ -523,13 +632,12 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	{
 		// 몬스터로 형변환
 		CMonster* EnterChannelMonster = (CMonster*)EnterChannelGameObject;
-		EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY = SpawnPosition._Y;
-		EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX = SpawnPosition._X;
+		EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 
-		EnterChannelMonster->Init(SpawnPosition);
+		EnterChannelMonster->Start();
 
-		EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.PositionX = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX + 0.5f;
-		EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.PositionY = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY + 0.5f;
+		EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
+		EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
 
 		// 몬스터 저장
 		_ChannelMonsterArrayIndexs.Pop(&EnterChannelMonster->_ChannelArrayIndex);
@@ -559,8 +667,10 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	{
 		// 아이템으로 형변환
 		CItem* EnterChannelItem = (CItem*)EnterChannelGameObject;
-		EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY = SpawnPosition._Y;
-		EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX = SpawnPosition._X;
+		EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
+
+		EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
+		EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
 
 		EnterChannelItem->SetChannel(this);
 
@@ -584,30 +694,12 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	case en_GameObjectType::OBJECT_TREE:
 	{
 		CEnvironment* EnterChannelEnvironment = (CEnvironment*)EnterChannelGameObject;
-		EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY = SpawnPosition._Y;
-		EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX = SpawnPosition._X;
+		EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 
-		if (EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY > 0)
-		{
-			EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.PositionY = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY;
-		}
-		else if (EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY == 0)
-		{
-			EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.PositionY = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY - 0.5f;
-		}
-		else
-		{
-			EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.PositionY = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPositionY - 1.0f;
-		}
+		EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
+		EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;		
 
-		if (EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX > 0)
-		{
-			EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.PositionX = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX + 0.5f;
-		}
-		else
-		{
-			EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.PositionX = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPositionX - 0.5f;
-		}
+		EnterChannelEnvironment->Init(EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
 
 		// 환경 오브젝트 저장
 		_ChannelEnvironmentArrayIndexs.Pop(&EnterChannelEnvironment->_ChannelArrayIndex);
