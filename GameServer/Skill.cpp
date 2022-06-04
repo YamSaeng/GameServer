@@ -243,7 +243,9 @@ bool CSkill::Update()
 						// 주술사 얼음사슬 상태이상 해제
 						_Owner->ReleaseStatusAbnormal(STATUS_ABNORMAL_SHAMAN_ICE_CHAIN_MASK);
 
-						_Owner->_GameObjectInfo.ObjectStatInfo.Speed += ((st_AttackSkillInfo*)_SkillInfo)->SkillDebufMovingSpeed;
+						float DebufMovingSpeed = _Owner->_GameObjectInfo.ObjectStatInfo.MaxSpeed * ((st_AttackSkillInfo*)_SkillInfo)->SkillDebufMovingSpeed * 0.01;
+
+						_Owner->_GameObjectInfo.ObjectStatInfo.Speed += DebufMovingSpeed;						
 
 						CMessage* ResChangeObjectStatPacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_Owner->_GameObjectInfo.ObjectId,
 							_Owner->_GameObjectInfo.ObjectStatInfo);
