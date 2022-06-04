@@ -6,11 +6,13 @@ enum class en_CreatureState : int8
 	SPAWN_IDLE,
 	IDLE,
 	PATROL,
-	MOVING,	
+	MOVING,
 	STOP,
 	RETURN_SPAWN_POSITION,
 	ATTACK,
 	SPELL,
+	GATHERING,
+	READY_DEAD,
 	DEAD
 };
 
@@ -40,6 +42,9 @@ enum class en_GameObjectType : int16
 	OBJECT_ENVIRONMENT,
 	OBJECT_STONE,
 	OBJECT_TREE,
+
+	OBJECT_CRAFTING_TABLE,
+	OBJECT_FURNACE,
 
 	OBJECT_ITEM,
 	OBJECT_ITEM_WEAPON,
@@ -180,10 +185,10 @@ enum class en_MapItemInfo : int8
 
 struct st_PositionInfo
 {
-	en_CreatureState State;
-	int32 CollisionPositionX;
-	int32 CollisionPositionY;
+	en_CreatureState State;	
 	en_MoveDir MoveDir;
+	int32 CollisionPositionX;
+	int32 CollisionPositionY;	
 	float PositionX;
 	float PositionY;
 };
@@ -210,6 +215,7 @@ struct st_StatInfo
 	int16 MagicCriticalPoint;
 	int16 StatusAbnormalResistance;
 	float Speed;
+	float MaxSpeed;
 };
 
 struct st_GameObjectInfo
