@@ -6,6 +6,7 @@
 #include "Item.h"
 #include "Heap.h"
 #include "Environment.h"
+#include "CraftingTable.h"
 #include "Map.h"
 #include "ObjectManager.h"
 
@@ -35,6 +36,12 @@ CChannel::CChannel()
 	{
 		_ChannelEnvironmentArray[Environment] = nullptr;
 		_ChannelEnvironmentArrayIndexs.Push(Environment);
+	}
+
+	for (int32 Crafting = ENVIRONMENT_MAX - 1; Crafting >= 0; --Crafting)
+	{
+		_ChannelCraftingTableArray[Crafting] = nullptr;
+		_ChannelCraftingTableArrayIndexs.Push(Crafting);
 	}
 
 	for (int32 ItemCount = ITEM_MAX - 1; ItemCount >= 0; --ItemCount)
@@ -208,6 +215,14 @@ void CChannel::Update()
 		}
 	}
 
+	for (int16 i = 0; i < CRAFTING_TABLE_MAX; i++)
+	{
+		if (_ChannelCraftingTableArray[i] != nullptr)
+		{
+			_ChannelCraftingTableArray[i]->Update();
+		}
+	}
+
 	for (int16 i = 0; i < ITEM_MAX; i++)
 	{
 		if (_ChannelItemArray[i] != nullptr)
@@ -325,7 +340,18 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 				}
 			}
 		}
-		break;		
+		break;
+	case en_GameObjectType::OBJECT_FURNACE:
+		{
+			for (int32 i = 0; i < en_Channel::CRAFTING_TABLE_MAX; i++)
+			{
+				if (_ChannelCraftingTableArray[i] != nullptr && _ChannelCraftingTableArray[i]->_GameObjectInfo.ObjectId == ObjectID)
+				{	
+					FindObject = _ChannelCraftingTableArray[i];
+				}
+			}
+		}
+		break;
 	}
 
 	return FindObject;
@@ -345,55 +371,55 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 		case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 		case en_GameObjectType::OBJECT_THIEF_PLAYER:
 		case en_GameObjectType::OBJECT_ARCHER_PLAYER:
-		{
-			for (int32 i = 0; i < en_Channel::PLAYER_MAX; i++)
 			{
-				if (_ChannelPlayerArray[i] != nullptr
-					&& _ChannelPlayerArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID
-					&& _ChannelPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE)
+				for (int32 i = 0; i < en_Channel::PLAYER_MAX; i++)
 				{
-					FindObjects.push_back(_ChannelPlayerArray[i]);
+					if (_ChannelPlayerArray[i] != nullptr
+						&& _ChannelPlayerArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID
+						&& _ChannelPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE)
+					{
+						FindObjects.push_back(_ChannelPlayerArray[i]);
+					}
 				}
 			}
-		}
-		break;
+			break;
 		case en_GameObjectType::OBJECT_PLAYER_DUMMY:
-		{
-			for (int32 i = 0; i < en_Channel::DUMMY_PLAYER_MAX; i++)
 			{
-				if (_ChannelDummyPlayerArray[i] != nullptr && _ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
+				for (int32 i = 0; i < en_Channel::DUMMY_PLAYER_MAX; i++)
 				{
-					FindObjects.push_back(_ChannelDummyPlayerArray[i]);
+					if (_ChannelDummyPlayerArray[i] != nullptr && _ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
+					{
+						FindObjects.push_back(_ChannelDummyPlayerArray[i]);
+					}
 				}
 			}
-		}
-		break;
+			break;
 		case en_GameObjectType::OBJECT_MONSTER:
 		case en_GameObjectType::OBJECT_SLIME:
 		case en_GameObjectType::OBJECT_BEAR:
-		{
-			for (int32 i = 0; i < en_Channel::MONSTER_MAX; i++)
 			{
-				if (_ChannelMonsterArray[i] != nullptr && _ChannelMonsterArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
+				for (int32 i = 0; i < en_Channel::MONSTER_MAX; i++)
 				{
-					FindObjects.push_back(_ChannelMonsterArray[i]);
+					if (_ChannelMonsterArray[i] != nullptr && _ChannelMonsterArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
+					{
+						FindObjects.push_back(_ChannelMonsterArray[i]);
+					}
 				}
 			}
-		}
-		break;
+			break;
 		case en_GameObjectType::OBJECT_ENVIRONMENT:
 		case en_GameObjectType::OBJECT_STONE:
 		case en_GameObjectType::OBJECT_TREE:
-		{
-			for (int32 i = 0; i < en_Channel::ENVIRONMENT_MAX; i++)
 			{
-				if (_ChannelEnvironmentArray[i] != nullptr && _ChannelEnvironmentArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
+				for (int32 i = 0; i < en_Channel::ENVIRONMENT_MAX; i++)
 				{
-					FindObjects.push_back(_ChannelEnvironmentArray[i]);
+					if (_ChannelEnvironmentArray[i] != nullptr && _ChannelEnvironmentArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
+					{
+						FindObjects.push_back(_ChannelEnvironmentArray[i]);
+					}
 				}
 			}
-		}
-		break;
+			break;
 		case en_GameObjectType::OBJECT_ITEM:
 		case en_GameObjectType::OBJECT_ITEM_WEAPON:
 		case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
@@ -414,16 +440,27 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
-		{
-			for (int32 i = 0; i < en_Channel::ENVIRONMENT_MAX; i++)
 			{
-				if (_ChannelItemArray[i] != nullptr && _ChannelItemArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
+				for (int32 i = 0; i < en_Channel::ENVIRONMENT_MAX; i++)
 				{
-					FindObjects.push_back(_ChannelItemArray[i]);
+					if (_ChannelItemArray[i] != nullptr && _ChannelItemArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
+					{
+						FindObjects.push_back(_ChannelItemArray[i]);
+					}
 				}
 			}
-		}
-		break;
+			break;
+		case en_GameObjectType::OBJECT_FURNACE:
+			{
+				for (int32 i = 0; i < en_Channel::CRAFTING_TABLE_MAX; i++)
+				{
+					if (_ChannelCraftingTableArray[i] != nullptr && _ChannelCraftingTableArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
+					{
+						FindObjects.push_back(_ChannelCraftingTableArray[i]);
+					}
+				}
+			}
+			break;
 		}
 	}	
 
@@ -525,6 +562,17 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 			}
 		}
 		break;		
+		case en_GameObjectType::OBJECT_FURNACE:
+			{
+				for (int32 i = 0; i < en_Channel::CRAFTING_TABLE_MAX; i++)
+				{
+					if (_ChannelCraftingTableArray[i] != nullptr && _ChannelCraftingTableArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
+					{
+						FindObjects.push_back(_ChannelCraftingTableArray[i]);
+					}
+				}
+			}
+			break;
 		}
 	}
 
@@ -633,11 +681,10 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 		// 몬스터로 형변환
 		CMonster* EnterChannelMonster = (CMonster*)EnterChannelGameObject;
 		EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-
-		EnterChannelMonster->Start();
-
 		EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
 		EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
+
+		EnterChannelMonster->Start();		
 
 		// 몬스터 저장
 		_ChannelMonsterArrayIndexs.Pop(&EnterChannelMonster->_ChannelArrayIndex);
@@ -692,28 +739,47 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	break;
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
-	{
-		CEnvironment* EnterChannelEnvironment = (CEnvironment*)EnterChannelGameObject;
-		EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
+		{
+			CEnvironment* EnterChannelEnvironment = (CEnvironment*)EnterChannelGameObject;
+			EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
+			EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
+			EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;		
 
-		EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-		EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;		
+			EnterChannelEnvironment->Start();
 
-		EnterChannelEnvironment->Init(EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
+			// 환경 오브젝트 저장
+			_ChannelEnvironmentArrayIndexs.Pop(&EnterChannelEnvironment->_ChannelArrayIndex);
+			_ChannelEnvironmentArray[EnterChannelEnvironment->_ChannelArrayIndex] = EnterChannelEnvironment;
 
-		// 환경 오브젝트 저장
-		_ChannelEnvironmentArrayIndexs.Pop(&EnterChannelEnvironment->_ChannelArrayIndex);
-		_ChannelEnvironmentArray[EnterChannelEnvironment->_ChannelArrayIndex] = EnterChannelEnvironment;
+			EnterChannelEnvironment->SetChannel(this);
 
-		EnterChannelEnvironment->SetChannel(this);
+			IsEnterChannel = _Map->ApplyMove(EnterChannelEnvironment, SpawnPosition);
 
-		IsEnterChannel = _Map->ApplyMove(EnterChannelEnvironment, SpawnPosition);
+			// 섹터 얻어서 해당 섹터에도 저장
+			CSector* EnterSector = _Map->GetSector(SpawnPosition);
+			EnterSector->Insert(EnterChannelEnvironment);
+		}
+		break;
+	case en_GameObjectType::OBJECT_FURNACE:
+		{
+			CCraftingTable* EnterChannelCraftingTable = (CCraftingTable*)EnterChannelGameObject;
+			EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
+			EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
+			EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
 
-		// 섹터 얻어서 해당 섹터에도 저장
-		CSector* EnterSector = _Map->GetSector(SpawnPosition);
-		EnterSector->Insert(EnterChannelEnvironment);
-	}
-	break;
+			EnterChannelCraftingTable->Start();
+
+			_ChannelCraftingTableArrayIndexs.Pop(&EnterChannelCraftingTable->_ChannelArrayIndex);
+			_ChannelCraftingTableArray[EnterChannelCraftingTable->_ChannelArrayIndex] = EnterChannelCraftingTable;
+
+			EnterChannelCraftingTable->SetChannel(this);
+
+			IsEnterChannel = _Map->ApplyMove(EnterChannelCraftingTable, SpawnPosition);
+			
+			CSector* Entersector = _Map->GetSector(SpawnPosition);
+			Entersector->Insert(EnterChannelCraftingTable);
+		}
+		break;
 	}
 
 	return IsEnterChannel;
@@ -762,6 +828,11 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
 		_ChannelEnvironmentArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
+
+		_Map->ApplyLeave(LeaveChannelGameObject);
+		break;
+	case en_GameObjectType::OBJECT_FURNACE:
+		_ChannelCraftingTableArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
 
 		_Map->ApplyLeave(LeaveChannelGameObject);
 		break;
