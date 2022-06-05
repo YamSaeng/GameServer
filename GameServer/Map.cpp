@@ -6,6 +6,7 @@
 #include "Heap.h"
 #include "ObjectManager.h"
 #include "Item.h"
+#include "CraftingTable.h"
 
 CMap::CMap()
 {
@@ -277,6 +278,20 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object, int1
 			}
 		}
 
+		for (CCraftingTable* CraftingTable : Sector->GetCraftingTable())
+		{
+			FieldOfViewInfo.ObjectID = CraftingTable->_GameObjectInfo.ObjectId;
+			FieldOfViewInfo.SessionID = 0;
+			FieldOfViewInfo.ObjectType = CraftingTable->_GameObjectInfo.ObjectType;
+
+			int16 Distance = st_Vector2Int::Distance(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, CraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
+
+			if (Distance <= Object->_FieldOfViewDistance)
+			{
+				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
+			}
+		}
+
 		for (CItem* Item : Sector->GetItems())
 		{
 			FieldOfViewInfo.ObjectID = Item->_GameObjectInfo.ObjectId;
@@ -532,7 +547,7 @@ bool CMap::CollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool
 	case en_TileMapEnvironment::TILE_MAP_TREE:
 	case en_TileMapEnvironment::TILE_MAP_STONE:
 	case en_TileMapEnvironment::TILE_MAP_SLIME:
-	case en_TileMapEnvironment::TILE_MAP_BEAR:
+	case en_TileMapEnvironment::TILE_MAP_BEAR:	
 		IsCollisionMapInfo = true;
 		break;
 	case en_TileMapEnvironment::TILE_MAP_WALL:
@@ -648,19 +663,33 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	break;
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
-	{
-		CEnvironment* MoveEnvironment = (CEnvironment*)GameObject;
-
-		CSector* CurrentSector = GetSector(MoveEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
-		CSector* NextSector = GetSector(DestPosition);
-
-		if (CurrentSector != NextSector)
 		{
-			CurrentSector->Remove(MoveEnvironment);
-			NextSector->Insert(MoveEnvironment);
+			CEnvironment* MoveEnvironment = (CEnvironment*)GameObject;
+
+			CSector* CurrentSector = GetSector(MoveEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
+			CSector* NextSector = GetSector(DestPosition);
+
+			if (CurrentSector != NextSector)
+			{
+				CurrentSector->Remove(MoveEnvironment);
+				NextSector->Insert(MoveEnvironment);
+			}
 		}
-	}
-	break;
+		break;
+	case en_GameObjectType::OBJECT_FURNACE:
+		{
+			CCraftingTable* MoveCraftingTable = (CCraftingTable*)GameObject;
+
+			CSector* CurrentSector = GetSector(MoveCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
+			CSector* NextSector = GetSector(DestPosition);
+
+			if (CurrentSector != NextSector)
+			{
+				CurrentSector->Remove(MoveCraftingTable);
+				NextSector->Insert(MoveCraftingTable);
+			}
+		}
+		break;
 	default:
 		CRASH("ApplyMove GameObject Type 이상한 값")
 			break;
