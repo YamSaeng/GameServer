@@ -5,6 +5,7 @@ class CPlayer;
 class CMonster;
 class CItem;
 class CEnvironment;
+class CCraftingTable;
 
 class CSector
 {
@@ -13,7 +14,8 @@ private:
 	set<CPlayer*> _Players;
 	set<CMonster*> _Monsters;
 	set<CItem*> _Items;
-	set<CEnvironment*> _Environment;
+	set<CEnvironment*> _Environment;	
+	set<CCraftingTable*> _CraftingTable;
 
 	SRWLOCK _SectorLock;
 public:
@@ -33,6 +35,7 @@ public:
 	set<CMonster*> GetMonsters();
 	set<CItem*> GetItems();
 	set<CEnvironment*> GetEnvironment();
+	set<CCraftingTable*> GetCraftingTable();
 
 	void AcquireSectorLock();
 	void ReleaseSectorLock();

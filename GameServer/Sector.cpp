@@ -3,6 +3,7 @@
 #include "Player.h"
 #include "Monster.h"
 #include "Item.h"
+#include "CraftingTable.h"
 
 CSector::CSector(int32 SectorY, int32 SectorX)
 {
@@ -46,6 +47,9 @@ void CSector::Insert(CGameObject* InsertGameObject)
 	case en_GameObjectType::OBJECT_TREE:
 		_Environment.insert((CEnvironment*)InsertGameObject);
 		break;
+	case en_GameObjectType::OBJECT_FURNACE:
+		_CraftingTable.insert((CCraftingTable*)InsertGameObject);
+		break;
 	default:
 		break;
 	}
@@ -87,6 +91,9 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 	case en_GameObjectType::OBJECT_TREE:
 		_Environment.erase((CEnvironment*)RemoveGameObject);
 		break;
+	case en_GameObjectType::OBJECT_CRAFTING_TABLE:
+		_CraftingTable.erase((CCraftingTable*)RemoveGameObject);
+		break;
 	}
 
 	ReleaseSRWLockExclusive(&_SectorLock);
@@ -110,6 +117,11 @@ set<CItem*> CSector::GetItems()
 set<CEnvironment*> CSector::GetEnvironment()
 {
 	return _Environment;
+}
+
+set<CCraftingTable*> CSector::GetCraftingTable()
+{
+	return _CraftingTable;
 }
 
 void CSector::AcquireSectorLock()
