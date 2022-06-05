@@ -61,6 +61,7 @@ public:
 	map<int16, st_BufSkillData*> _ArcherBufSkillDatas;
 
 	map<int32, st_EnvironmentData*> _Environments;
+	map<int16, st_CraftingTableData*> _CraftingTableData;
 	map<int8, st_CraftingItemCategoryData*> _CraftingData;
 	map<int32, st_LevelData*> _LevelDatas;
 
@@ -89,6 +90,7 @@ public:
 	void LoadDataArcherSkill(wstring LoadFileName);
 	void LoadDataEnvironment(wstring LoadFileName);
 	void LoadDataCrafting(wstring LoadFileName);
+	void LoadDataCraftingTable(wstring LoadFileName);
 	void LoadDataMapInfo(wstring LoadFileName);
 
 	st_SkillData* FindSkillData(en_SkillMediumCategory FindSkillMediumCategory, en_SkillType FindSkillType);

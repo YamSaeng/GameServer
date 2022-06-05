@@ -1,0 +1,24 @@
+{
+  "CraftingTable": [
+    {
+      "CraftingTableName": "¿ë±¤·Î",
+      "CraftingTableCompleteItem": [
+        {
+          "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL",
+          "CraftingCompleteItemName": "½¡",
+          "CraftingCompleteItemThumbnailImagePath": "Textures/Ore & Gem/CharCoal",
+          "CraftingMaterial": [
+            {
+              "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG",
+              "MaterialName": "Åë³ª¹«",
+              "MaterialCount": 2,
+              "MaterialThumbnailImagePath": "Textures/Material/Wood Log"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+

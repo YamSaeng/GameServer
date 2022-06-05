@@ -699,7 +699,7 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			int SearchTick = MonsterStatInfoFiled["SearchTick"].GetInt();
 			int PatrolTick = MonsterStatInfoFiled["PatrolTick"].GetInt();
 			int AttackTick = MonsterStatInfoFiled["AttackTick"].GetInt();
-			int AttackRange = MonsterStatInfoFiled["AttackRange"].GetInt();
+			float AttackRange = MonsterStatInfoFiled["AttackRange"].GetFloat();
 			int16 GetDPPoint = (int16)MonsterStatInfoFiled["GetDPPoint"].GetInt();
 			int GetExpPoint = MonsterStatInfoFiled["GetExpPoint"].GetInt();
 			int64 ReSpawnTime = MonsterStatInfoFiled["ReSpawnTime"].GetInt64();
@@ -2350,6 +2350,72 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 		}
 
 		_CraftingData.insert(pair<int8, st_CraftingItemCategoryData*>((int8)CraftingData->CraftingType, CraftingData));
+	}
+}
+
+void CDataManager::LoadDataCraftingTable(wstring LoadFileName)
+{
+	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());
+
+	rapidjson::Document Document;
+	Document.Parse(FileStr);
+
+	for (auto& Filed : Document["CraftingTable"].GetArray())
+	{
+		st_CraftingTableData* CraftingTableData = new st_CraftingTableData();
+
+		string CraftingTableName = Filed["CraftingTableName"].GetString();
+
+		CraftingTableData->CraftingTableName = CraftingTableName;
+
+		if (CraftingTableName == "¿ë±¤·Î")
+		{
+			CraftingTableData->CraftingTableType = en_CraftingTable::CRAFTING_TABLE_FURNACE;
+		}
+
+		for (auto& CraftingTableCompleteItemFiled : Filed["CraftingTableCompleteItem"].GetArray())
+		{
+			st_CraftingCompleteItemData CraftingCompleteItemData;
+
+			string CraftingCompleteItemMediumCategory = CraftingTableCompleteItemFiled["CraftingCompleteItemMediumCategory"].GetString();
+			string CraftingCompleteItemSmallCategory = CraftingTableCompleteItemFiled["CraftingCompleteItemSmallCategory"].GetString();
+
+			string CraftingCompleteItemName = CraftingTableCompleteItemFiled["CraftingCompleteItemName"].GetString();
+			string CraftingCompleteItemThumbnailImagePath = CraftingTableCompleteItemFiled["CraftingCompleteItemThumbnailImagePath"].GetString();
+
+			if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL")
+			{
+				CraftingCompleteItemData.CraftingCompleteItemDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL;
+			}
+
+			CraftingCompleteItemData.CraftingCompleteName = CraftingCompleteItemName;
+			CraftingCompleteItemData.CraftingCompleteThumbnailImagePath = CraftingCompleteItemThumbnailImagePath;
+
+			for (auto& CraftingMaterialFiled : CraftingTableCompleteItemFiled["CraftingMaterial"].GetArray())
+			{
+				st_CraftingMaterialItemData CraftingMaterialData;
+
+				string MaterialSmallCategory = CraftingMaterialFiled["MaterialSmallCategory"].GetString();
+				string MaterialName = CraftingMaterialFiled["MaterialName"].GetString();
+				int16 MaterialCount = (int16)CraftingMaterialFiled["MaterialCount"].GetInt();
+				string MaterialThumbnailImagePath = CraftingMaterialFiled["MaterialThumbnailImagePath"].GetString();
+
+				if (MaterialSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG")
+				{
+					CraftingMaterialData.MaterialDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG;
+				}
+
+				CraftingMaterialData.MaterialName = MaterialName;
+				CraftingMaterialData.MaterialCount = MaterialCount;
+				CraftingMaterialData.MaterialThumbnailImagePath = MaterialThumbnailImagePath;
+
+				CraftingCompleteItemData.CraftingMaterials.push_back(CraftingMaterialData);
+			}			
+
+			CraftingTableData->CraftingCompleteItems.push_back(CraftingCompleteItemData);
+		}		
+		
+		_CraftingTableData.insert(pair<int16, st_CraftingTableData*>((int16)CraftingTableData->CraftingTableType, CraftingTableData));
 	}
 }
 

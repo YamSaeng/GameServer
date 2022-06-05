@@ -44,6 +44,7 @@ public:
 		G_Datamanager->LoadDataEnvironment(L"EnvironmentData.json");
 		// 제작템 데이터 파싱
 		G_Datamanager->LoadDataCrafting(L"CraftingData.json");
+		G_Datamanager->LoadDataCraftingTable(L"CraftingTableData.json");
 		G_Datamanager->LoadDataLevel(L"CharacterLevelingData.json");
 		G_Datamanager->LoadDataMapInfo(L"MapInfoData.json");
 

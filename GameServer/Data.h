@@ -125,7 +125,7 @@ struct st_ObjectStatusData
 	float Speed;
 	int32 SearchCellDistance;
 	int32 ChaseCellDistance;
-	int32 AttackRange;
+	float AttackRange;
 };
 
 struct st_LevelData
@@ -152,6 +152,7 @@ struct st_MonsterData
 	int32 PatrolTick; // 정찰 속도
 	int32 AttackTick; // 공격 속도
 	vector<st_DropData> DropItems; // 몬스터가 드랍하는 아이템 정보
+	int64 ReSpawnTime;
 	int16 GetDPPoint;
 	int32 GetExpPoint;
 };
@@ -173,6 +174,7 @@ struct st_EnvironmentData
 	string EnvironmentName;
 	int32 Level;
 	int32 MaxHP;
+	int64 RecoveryTime;
 	vector<st_DropData> DropItems;
 };
 
@@ -197,6 +199,13 @@ struct st_CraftingItemCategoryData
 	en_LargeItemCategory CraftingType; // 제작템 범주
 	string CraftingTypeName; // 제작템 범주 이름	
 	vector<st_CraftingCompleteItemData> CraftingCompleteItems; // 제작템 범주에 속한 아이템 목록
+};
+
+struct st_CraftingTableData
+{
+	en_GameObjectType CraftingTableType;
+	string CraftingTableName;
+	vector<st_CraftingCompleteItemData> CraftingCompleteItems;
 };
 
 struct st_MapInfoData
