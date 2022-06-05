@@ -12,6 +12,7 @@ class CArmor;
 class CConsumable;
 class CMaterial;
 class CSkill;
+class CFurnace;
 
 class CObjectManager
 {
@@ -21,7 +22,8 @@ private:
 		PLAYER_MAX = 15000,
 		MONSTER_MAX = 15000,
 		ITEM_MAX = 15000,
-		ENVIRONMENT_MAX = 15000
+		ENVIRONMENT_MAX = 15000,
+		CRAFTINGTABLE_MAX = 15000
 	};
 
 	CMemoryPoolTLS<CPlayer>* _PlayerMemoryPool;
@@ -35,7 +37,8 @@ private:
 	CMemoryPoolTLS<CMaterial>* _MaterialMemoryPool;
 
 	CMemoryPoolTLS<CTree>* _TreeMemoryPool;
-	CMemoryPoolTLS<CStone>* _StoneMemoryPool;
+	CMemoryPoolTLS<CStone>* _StoneMemoryPool;	
+	CMemoryPoolTLS<CFurnace>* _FurnaceMemoryPool;
 
 	int64 _GameServerObjectId;
 
@@ -53,11 +56,13 @@ public:
 	CMonster* _MonstersArray[MONSTER_MAX];
 	CItem* _ItemsArray[ITEM_MAX];
 	CEnvironment* _EnvironmentsArray[ENVIRONMENT_MAX];
+	CCraftingTable* _CraftingTablesArray[CRAFTINGTABLE_MAX];
 
 	CLockFreeStack<int32> _PlayersArrayIndexs;
 	CLockFreeStack<int32> _MonstersArrayIndexs;
 	CLockFreeStack<int32> _ItemsArrayIndexs;
 	CLockFreeStack<int32> _EnvironmentsArrayIndexs;
+	CLockFreeStack<int32> _CraftingTableArrayIndexs;
 
 	CObjectManager();
 	~CObjectManager();
@@ -92,6 +97,15 @@ public:
 	// 스킬 반납
 	//------------------------------------
 	void SkillReturn(CSkill* ReturnSkill);
+
+	//----------------------------------------------------------
+	// 아이템 생성
+	//----------------------------------------------------------
+	CItem* ItemCreate(en_SmallItemCategory NewItemSmallCategory);
+	//---------------------------------
+	// 아이템 반납
+	//---------------------------------
+	void ItemReturn(CItem* ReturnItem);
 
 	//-----------------------------------------------
 	// 스킬 정보 생성
