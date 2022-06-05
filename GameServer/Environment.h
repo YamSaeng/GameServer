@@ -6,7 +6,7 @@ class CEnvironment : public CGameObject
 public:
 	CEnvironment();
 
-	virtual void Init(st_Vector2Int SpawnPosition);
+	virtual void Start() override;
 
 	virtual void Update() override;
 	virtual bool OnDamaged(CGameObject* Attacker, int32 Damage) override;
@@ -14,7 +14,15 @@ protected:
 	//------------------------
 	// Idle 상태 Update
 	//------------------------
-	virtual void UpdateIdle();
+	virtual void UpdateIdle() override;
+	//---------------------------
+	// Ready Dead 상태 Update
+	//---------------------------
+	virtual void UpdateReadyDead() override;
+	//------------------------
+	// Dead 상태 Update
+	//------------------------
+	virtual void UpdateDead() override;
 };
 
 class CStone : public CEnvironment
@@ -22,8 +30,8 @@ class CStone : public CEnvironment
 public:
 	CStone();
 	
-	virtual void Init(st_Vector2Int SpawnPosition) override;
-	virtual void OnDead(CGameObject* Killer) override;
+	virtual void Start() override;
+	virtual bool OnDamaged(CGameObject* Attacker, int32 Damage) override;
 private:
 	virtual void UpdateIdle() override;
 };
@@ -33,8 +41,8 @@ class CTree : public CEnvironment
 public:
 	CTree();
 	
-	virtual void Init(st_Vector2Int SpawnPosition) override;
-	virtual void OnDead(CGameObject* Killer) override;
+	virtual void Start() override;
+	virtual bool OnDamaged(CGameObject* Attacker, int32 Damage) override;
 private:
 	virtual void UpdateIdle() override;
 };

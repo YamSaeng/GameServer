@@ -2,15 +2,19 @@
 #include "Environment.h"
 #include "DataManager.h"
 #include "ObjectManager.h"
+#include "MapManager.h"
 #include <atlbase.h>
 
 CEnvironment::CEnvironment()
 {
+	_FieldOfViewDistance = 10;
 }
 
-void CEnvironment::Init(st_Vector2Int SpawnPosition)
+void CEnvironment::Start()
 {
-	_SpawnPosition = SpawnPosition;
+	_SpawnPosition = _GameObjectInfo.ObjectPositionInfo.CollisionPosition;
+
+	_GameObjectInfo.ObjectStatInfo.HP = _GameObjectInfo.ObjectStatInfo.MaxHP;
 }
 
 void CEnvironment::Update()
@@ -20,6 +24,12 @@ void CEnvironment::Update()
 	case en_CreatureState::IDLE:
 		UpdateIdle();
 		break;
+	case en_CreatureState::READY_DEAD:
+		UpdateReadyDead();
+		break;
+	case en_CreatureState::DEAD:
+		UpdateDead();
+		break;
 	default:
 		break;
 	}
@@ -28,25 +38,53 @@ void CEnvironment::Update()
 
 bool CEnvironment::OnDamaged(CGameObject* Attacker, int32 Damage)
 {
-	CGameObject::OnDamaged(Attacker, Damage);
+	_Owner = (CPlayer*)Attacker;
 
-	_Target = (CPlayer*)Attacker;
-
-	if (_GameObjectInfo.ObjectStatInfo.HP == 0)
-	{
-		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
-
-		OnDead(Attacker);
-
-		return true;
-	}
-
-	return false;
+	return CGameObject::OnDamaged(Attacker, Damage);	
 }
 
 void CEnvironment::UpdateIdle()
 {
 
+}
+
+void CEnvironment::UpdateReadyDead()
+{
+	if (_DeadReadyTick < GetTickCount64())
+	{
+		_DeadTick = GetTickCount64() + 5000;
+
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
+
+		if (_Channel == nullptr)
+		{
+			CRASH("퇴장하려는 채널이 존재하지 않음");
+		}
+
+		st_GameObjectJob* LeaveChannelEnvironmentJob = G_ObjectManager->GameServer->MakeGameObjectJobLeaveChannel(this);
+		_Channel->_ChannelJobQue.Enqueue(LeaveChannelEnvironmentJob);
+	}	
+}
+
+void CEnvironment::UpdateDead()
+{
+	if (_DeadTick < GetTickCount64())
+	{
+		CMap* Map = G_MapManager->GetMap(1);
+		if (Map != nullptr)
+		{
+			CGameObject* FindObject = Map->Find(_SpawnPosition);
+			if (FindObject == nullptr)
+			{
+				st_GameObjectJob* ObjectEnterChannelJob = G_ObjectManager->GameServer->MakeGameObjectJobObjectEnterChannel(this);
+				Map->GetChannelManager()->Find(1)->_ChannelJobQue.Enqueue(ObjectEnterChannelJob);
+			}
+			else
+			{
+				_DeadTick = GetTickCount64() + 5000;
+			}
+		}
+	}	
 }
 
 CStone::CStone()
@@ -63,23 +101,29 @@ CStone::CStone()
 	_GameObjectInfo.ObjectStatInfo.Level = EnvironmentData.Level;
 }
 
-void CStone::Init(st_Vector2Int SpawnPosition)
+void CStone::Start()
 {
-	CEnvironment::Init(SpawnPosition);
+	CEnvironment::Start();
 }
 
-void CStone::OnDead(CGameObject* Killer)
+bool CStone::OnDamaged(CGameObject* Attacker, int32 Damage)
 {
-	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
+	bool IsDead = CEnvironment::OnDamaged(Attacker, Damage);
 
-	G_ObjectManager->ItemSpawn(Killer->_GameObjectInfo.ObjectId, Killer->_GameObjectInfo.ObjectType, GetCellPosition(), _GameObjectInfo.ObjectType, en_ObjectDataType::STONE_DATA);
+	if (IsDead == true)
+	{
+		_DeadReadyTick = 0;
 
-	BroadCastPacket(en_PACKET_S2C_OBJECT_STAT_CHANGE);
-	BroadCastPacket(en_PACKET_S2C_DIE);
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::READY_DEAD;
 
-	G_ObjectManager->GameServer->SpawnObjectTimeTimerJobCreate((int16)_GameObjectInfo.ObjectType, GetCellPosition(), 10000);
+		G_ObjectManager->ItemSpawn(Attacker->_GameObjectInfo.ObjectId,
+			Attacker->_GameObjectInfo.ObjectType,
+			_GameObjectInfo.ObjectPositionInfo.CollisionPosition,
+			_GameObjectInfo.ObjectType,
+			en_ObjectDataType::STONE_DATA);
+	}
 
-	G_ObjectManager->ObjectLeaveGame(this, _ObjectManagerArrayIndex, 1);
+	return IsDead;
 }
 
 void CStone::UpdateIdle()
@@ -100,23 +144,36 @@ CTree::CTree()
 	_GameObjectInfo.ObjectStatInfo.Level = EnvironmentData.Level;
 }
 
-void CTree::Init(st_Vector2Int SpawnPosition)
+void CTree::Start()
 {
-	CEnvironment::Init(SpawnPosition);
+	CEnvironment::Start();
 }
 
-void CTree::OnDead(CGameObject* Killer)
+bool CTree::OnDamaged(CGameObject* Attacker, int32 Damage)
 {
-	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
+	bool IsDead = CEnvironment::OnDamaged(Attacker, Damage);
 
-	G_ObjectManager->ItemSpawn(Killer->_GameObjectInfo.ObjectId, Killer->_GameObjectInfo.ObjectType, GetCellPosition(), _GameObjectInfo.ObjectType, en_ObjectDataType::TREE_DATA);
-	
-	BroadCastPacket(en_PACKET_S2C_OBJECT_STAT_CHANGE);
-	BroadCastPacket(en_PACKET_S2C_DIE);
+	if (IsDead == true)
+	{
+		_DeadReadyTick = GetTickCount64() + 1500;
 
-	G_ObjectManager->GameServer->SpawnObjectTimeTimerJobCreate((int16)_GameObjectInfo.ObjectType, GetCellPosition(), 10000);
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::READY_DEAD;
 
-	G_ObjectManager->ObjectLeaveGame(this, _ObjectManagerArrayIndex, 1);
+		CMessage* ResChangeStatePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
+			_GameObjectInfo.ObjectPositionInfo.MoveDir,
+			_GameObjectInfo.ObjectType,
+			_GameObjectInfo.ObjectPositionInfo.State);
+		G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResChangeStatePacket);
+		ResChangeStatePacket->Free();
+		
+		G_ObjectManager->ItemSpawn(Attacker->_GameObjectInfo.ObjectId,
+			Attacker->_GameObjectInfo.ObjectType,
+			_GameObjectInfo.ObjectPositionInfo.CollisionPosition,
+			_GameObjectInfo.ObjectType,
+			en_ObjectDataType::TREE_DATA);
+	}
+
+	return IsDead;
 }
 
 void CTree::UpdateIdle()
