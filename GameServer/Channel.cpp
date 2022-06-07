@@ -357,6 +357,102 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 	return FindObject;
 }
 
+vector<CGameObject*> CChannel::FindChannelObjects(en_GameObjectType GameObjectType)
+{
+	vector<CGameObject*> FindObjects;
+
+	switch (GameObjectType)
+	{
+	case en_GameObjectType::OBJECT_PLAYER:
+	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
+	case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
+	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
+	case en_GameObjectType::OBJECT_THIEF_PLAYER:
+	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
+		for (int32 i = 0; i < en_Channel::PLAYER_MAX; i++)
+		{
+			if (_ChannelPlayerArray[i] != nullptr
+				&& _ChannelPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE)
+			{
+				FindObjects.push_back(_ChannelPlayerArray[i]);
+			}
+		}
+		break;
+	case en_GameObjectType::OBJECT_MONSTER:
+	case en_GameObjectType::OBJECT_SLIME:
+	case en_GameObjectType::OBJECT_BEAR:
+		for (int32 i = 0; i < en_Channel::MONSTER_MAX; i++)
+		{
+			if (_ChannelMonsterArray[i] != nullptr)
+			{
+				FindObjects.push_back(_ChannelMonsterArray[i]);
+			}
+		}
+		break;
+	case en_GameObjectType::OBJECT_ENVIRONMENT:
+	case en_GameObjectType::OBJECT_STONE:
+	case en_GameObjectType::OBJECT_TREE:
+		for (int32 i = 0; i < en_Channel::ENVIRONMENT_MAX; i++)
+		{
+			if (_ChannelEnvironmentArray[i] != nullptr)
+			{
+				FindObjects.push_back(_ChannelEnvironmentArray[i]);
+			}
+		}
+		break;
+	case en_GameObjectType::OBJECT_CRAFTING_TABLE:
+	case en_GameObjectType::OBJECT_FURNACE:
+		for (int32 i = 0; i < en_Channel::CRAFTING_TABLE_MAX; i++)
+		{
+			if (_ChannelCraftingTableArray[i] != nullptr)
+			{
+				FindObjects.push_back(_ChannelCraftingTableArray[i]);
+			}
+		}
+		break;
+	case en_GameObjectType::OBJECT_ITEM:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIVER_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_GOLD_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL:
+		for (int32 i = 0; i < en_Channel::ENVIRONMENT_MAX; i++)
+		{
+			if (_ChannelItemArray[i] != nullptr)
+			{
+				FindObjects.push_back(_ChannelItemArray[i]);
+			}
+		}
+		break;
+	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
+		for (int32 i = 0; i < en_Channel::DUMMY_PLAYER_MAX; i++)
+		{
+			if (_ChannelDummyPlayerArray[i] != nullptr)
+			{
+				FindObjects.push_back(_ChannelDummyPlayerArray[i]);				
+			}
+		}
+		break;	
+	}
+
+	return FindObjects;
+}
+
 vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& FindObjectIDs)
 {
 	vector<CGameObject*> FindObjects;
