@@ -2,6 +2,7 @@
 #include "GameServerMessage.h"
 #include "Item.h"
 #include "Skill.h"
+#include "Data.h"
 
 CMemoryPoolTLS<CGameServerMessage> CGameServerMessage::_MessageObjectPool(0);
 
@@ -184,6 +185,84 @@ CGameServerMessage& CGameServerMessage::operator<<(st_Color& Color)
     *this << Color._Red;
     *this << Color._Green;
     *this << Color._Blue;   
+
+    return *(this);
+}
+
+CGameServerMessage& CGameServerMessage::operator<<(st_CraftingItemCategory& CraftingItemCategory)
+{
+    *this << (int8)CraftingItemCategory.CategoryType;
+    
+    int16 CraftingItemCategoryNameLen = (int16)(CraftingItemCategory.CategoryName.length() * 2);
+    *this << CraftingItemCategoryNameLen;
+    InsertData(CraftingItemCategory.CategoryName.c_str(), CraftingItemCategoryNameLen);
+
+    int8 CraftingItemCategoryCompleteItemCount = (int8)CraftingItemCategory.CompleteItems.size();
+    *this << CraftingItemCategoryCompleteItemCount;
+
+    for (st_CraftingCompleteItem CraftingCompleteItem : CraftingItemCategory.CompleteItems)
+    {
+        *this << CraftingCompleteItem;
+    }
+
+    return *(this);
+}
+
+CGameServerMessage& CGameServerMessage::operator<<(st_CraftingCompleteItem& CraftingCompleteItem)
+{
+    *this << (int16)CraftingCompleteItem.CompleteItemType;
+
+    int16 CraftingCompleteItemNameLen = (int16)(CraftingCompleteItem.CompleteItemName.length() * 2);
+    *this << CraftingCompleteItemNameLen;
+    InsertData(CraftingCompleteItem.CompleteItemName.c_str(), CraftingCompleteItemNameLen);
+
+    int16 CraftingCompleteItemImagePathLen = (int16)(CraftingCompleteItem.CompleteItemImagePath.length() * 2);
+    *this << CraftingCompleteItemImagePathLen;
+    InsertData(CraftingCompleteItem.CompleteItemImagePath.c_str(), CraftingCompleteItemImagePathLen);
+
+    int8 CraftingCompleteItemCount = (int8)CraftingCompleteItem.Materials.size();
+    *this << CraftingCompleteItemCount;
+
+    for (st_CraftingMaterialItemInfo MaterialItemInfo : CraftingCompleteItem.Materials)
+    {
+        *this << MaterialItemInfo;
+    }
+
+    return *(this);
+}
+
+CGameServerMessage& CGameServerMessage::operator<<(st_CraftingMaterialItemInfo& CraftingMaterialItemInfo)
+{    
+    *this << (int16)CraftingMaterialItemInfo.MaterialItemType;
+        
+    int16 MaterialItemNameLen = CraftingMaterialItemInfo.MaterialItemName.length() * 2;
+	*this << MaterialItemNameLen;
+    InsertData(CraftingMaterialItemInfo.MaterialItemName.c_str(), MaterialItemNameLen);
+
+    *this << CraftingMaterialItemInfo.ItemCount;
+
+    int16 MaterialImagePathLen = CraftingMaterialItemInfo.MaterialItemImagePath.length() * 2;
+    *this << MaterialImagePathLen;
+    InsertData(CraftingMaterialItemInfo.MaterialItemImagePath.c_str(), MaterialImagePathLen);
+
+    return *(this);
+}
+
+CGameServerMessage& CGameServerMessage::operator<<(st_CraftingTable& CraftingTable)
+{
+    *this << (int16)CraftingTable.CraftingTableType;
+
+    int16 CraftingTableNameLen = CraftingTable.CraftingTableName.length() * 2;
+    *this << CraftingTableNameLen;
+    InsertData(CraftingTable.CraftingTableName.c_str(), CraftingTableNameLen);
+
+    int8 CraftingCompleteItemCount = (int8)CraftingTable.CraftingTableCompleteItems.size();
+    *this << CraftingCompleteItemCount;
+
+    for (st_CraftingCompleteItem CraftingCompleteItem : CraftingTable.CraftingTableCompleteItems)
+    {
+        *this << CraftingCompleteItem;
+    }
 
     return *(this);
 }
