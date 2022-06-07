@@ -3,6 +3,7 @@
 
 CCraftingTable::CCraftingTable()
 {
+	_SelectedCraftingTable = false;
 }
 
 void CCraftingTable::Start()
