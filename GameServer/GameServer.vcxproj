@@ -157,6 +157,7 @@
     <ClInclude Include="Channel.h" />
     <ClInclude Include="ChannelManager.h" />
     <ClInclude Include="CommonProtocol.h" />
+    <ClInclude Include="CraftingTable.h" />
     <ClInclude Include="Data.h" />
     <ClInclude Include="DataManager.h" />
     <ClInclude Include="DBBind.h" />
@@ -168,6 +169,7 @@
     <ClInclude Include="Environment.h" />
     <ClInclude Include="Equipment.h" />
     <ClInclude Include="FileUtils.h" />
+    <ClInclude Include="Furnace.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameObjectInfo.h" />
     <ClInclude Include="GameServer.h" />
@@ -216,6 +218,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="ChannelManager.cpp" />
+    <ClCompile Include="CraftingTable.cpp" />
     <ClCompile Include="Data.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -260,6 +263,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Furnace.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameServer.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -323,6 +327,7 @@
   <ItemGroup>
     <None Include="ArcherSkillDatas.json" />
     <None Include="CraftingData.json" />
+    <None Include="CraftingTableData.json" />
     <None Include="EnvironmentData.json" />
     <None Include="ItemData.json" />
     <None Include="CharacterLevelingData.json" />

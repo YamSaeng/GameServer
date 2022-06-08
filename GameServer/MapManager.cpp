@@ -33,7 +33,7 @@ void CMapManager::MapSave()
 	}
 }
 
-CMap* CMapManager::GetMap(int64& MapID)
+CMap* CMapManager::GetMap(int64 MapID)
 {
 	CMap* Map = nullptr;
 

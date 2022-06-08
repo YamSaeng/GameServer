@@ -88,7 +88,7 @@ private:
 	//--------------------------------------------------
 	// 네트워크 패킷 처리
 	//--------------------------------------------------
-	void PacketProc(int64 SessionId, CMessage* Message);
+	void PacketProc(int64 SessionID, CMessage* Message);
 
 	//----------------------------------------------------------------
 	// 네트워크 패킷처리 함수
@@ -142,7 +142,19 @@ private:
 	//----------------------------------------------------------------------------
 	// 왼쪽 마우스 클릭 위치 오브젝트 정보 요청 처리
 	//----------------------------------------------------------------------------
-	void PacketProcReqLeftMousePositionObjectInfo(int64 SessionId, CMessage* Message);	
+	void PacketProcReqLeftMouseObjectInfo(int64 SessionId, CMessage* Message);	
+	//----------------------------------------------------------------------------
+	// 왼쪽 마우스 클릭 UI 오브젝트 정보 요청 처리
+	//----------------------------------------------------------------------------
+	void PacketProcReqLeftMouseUIObjectInfo(int64 SessionID, CMessage* Message);
+	//----------------------------------------------------------------------------
+	// 오른쪽 마우스 클릭 위치 오브젝트 정보 요청 처리
+	//----------------------------------------------------------------------------
+	void PacketProcReqRightMousePositionObjectInfo(int64 SessionId, CMessage* Message);
+	//--------------------------------------------------------------------------
+	// 제작대 선택 풀림 요청 처리
+	//--------------------------------------------------------------------------
+	void PacketProcReqCraftingTableNonSelect(int64 SessionID, CMessage* Message);
 	//----------------------------------------------------------------------
 	// 오브젝트 상태 변경 요청 처리
 	//----------------------------------------------------------------------
@@ -183,6 +195,10 @@ private:
 	// 아이템 줍기 요청 처리
 	//------------------------------------------------------------------
 	void PacketProcReqItemLooting(int64 SessionId, CMessage* Message);
+	//--------------------------------------------------------------------------
+	// 제작대 아이템 넣기 요청 처리
+	//---------------------------------------------------------------------------
+	void PacketProcReqCraftingTableInputItem(int64 SessionID, CMessage* Message);
 	//--------------------------------------------------------
 	// 퐁 패킷 처리
 	//--------------------------------------------------------
@@ -275,6 +291,14 @@ private:
 	// 시공의 뒤틀림 잡 생성 함수
 	//------------------------------------------------
 	st_GameObjectJob* MakeGameObjectJobBackTeleport();
+	//------------------------------------------------------
+	// 제작대 선택 잡 생성 함수
+	//------------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobCraftingTableSelect(CGameObject* CraftingTableObject, int64 OwnerObjectID);
+	//---------------------------------------------------------
+	// 제작대 선택 풀림 잡 생성 함수
+	//---------------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobCraftingTableNonSelect(CGameObject* CraftingTableObject);
 
 	//--------------------------------------
 	// 패킷조합 함수		
@@ -293,10 +317,18 @@ private:
 	//--------------------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResCreateCharacter(bool IsSuccess, st_GameObjectInfo& CreateCharacterObjectInfo);	
 	//-------------------------------------------------------------------------------------------------------------------------
-	// 게임서버 마우스 위치 오브젝트 정보 요청 응답 패킷 조합
+	// 게임서버 왼쪽 마우스 오브젝트 정보 요청 응답 패킷 조합
 	//-------------------------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResMousePositionObjectInfo(int64 AccountId, int64 PreviousChoiceObjectId, int64 FindObjectId,
+	CGameServerMessage* MakePacketResLeftMousePositionObjectInfo(int64 AccountId, int64 PreviousChoiceObjectId, int64 FindObjectId,
 		map<en_SkillType, CSkill*> BufSkillInfo, map<en_SkillType, CSkill*> DeBufSkillInfo);
+	//-------------------------------------------------------------------------------------------------------------------------
+	// 게임서버 오른쪽 마우스 오브젝트 정보 요청 응답 패킷 조합
+	//-------------------------------------------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResRightMousePositionObjectInfo(int64 ReqPlayerID, int64 FindObjectID, en_GameObjectType FindObjectType);
+	//-----------------------------------------------------------------------------------------------------------------------------
+	// 게임서버 제작대 선택풀림 요청 응답 패킷 조합
+	//-----------------------------------------------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResCraftingTableNonSelect(int64 CraftingTableObjectID, en_GameObjectType CraftingTableObjectType);
 	//-------------------------------------------------------------------------------------------------------------------------
 	// 게임서버 돈 저장 요청 응답 패킷 조합
 	//-------------------------------------------------------------------------------------------------------------------------
@@ -349,6 +381,10 @@ private:
 	// 게임서버 제작템 목록 패킷 조합
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketCraftingList(int64 AccountId, int64 PlayerId, vector<st_CraftingItemCategory> CraftingItemList);
+	//---------------------------------------------------------------------
+	// 게임서버 제작대 아이템 넣기 응답 패킷 조합
+	//---------------------------------------------------------------------
+	CGameServerMessage* MakePacketResCraftingTableInput(int64 CraftingTableObjectID, map<en_SmallItemCategory, CItem*> MaterialItems);
 	//-------------------------------------------------
 	// 게임서버 핑 패킷 조합
 	//-------------------------------------------------
@@ -495,7 +531,7 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 일반 에러 메세지 생성 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketCommonError(en_PersonalMessageType PersonalMessageType, const WCHAR* Name);
+	CGameServerMessage* MakePacketCommonError(en_PersonalMessageType PersonalMessageType, const WCHAR* Name = nullptr);
 	//------------------------------------------------------------
 	// 게임 서버 상태이상 적용 패킷 조합
 	//------------------------------------------------------------

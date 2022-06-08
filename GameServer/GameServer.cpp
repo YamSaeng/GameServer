@@ -12,6 +12,7 @@
 #include "Skill.h"
 #include "MapManager.h"
 #include "QuickSlotBar.h"
+#include "Furnace.h"
 #include <WS2tcpip.h>
 #include <process.h>
 #include <atlbase.h>
@@ -1006,7 +1007,7 @@ void CGameServer::SendPacketToLoginServer(CGameServerMessage* Message)
 	}
 }
 
-void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
+void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 {
 	WORD MessageType;
 	*Message >> MessageType;
@@ -1014,78 +1015,90 @@ void CGameServer::PacketProc(int64 SessionId, CMessage* Message)
 	switch (MessageType)
 	{
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_GAME_REQ_LOGIN:
-		PacketProcReqLogin(SessionId, Message);
+		PacketProcReqLogin(SessionID, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_GAME_CREATE_CHARACTER:
-		PacketProcReqCreateCharacter(SessionId, Message);
+		PacketProcReqCreateCharacter(SessionID, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_GAME_ENTER:
-		PacketProcReqEnterGame(SessionId, Message);
+		PacketProcReqEnterGame(SessionID, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_CHARACTER_INFO:
-		PacketProcReqCharacterInfo(SessionId, Message);
+		PacketProcReqCharacterInfo(SessionID, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_MOVE:
-		PacketProcReqMove(SessionId, Message);
+		PacketProcReqMove(SessionID, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_MOVE_STOP:
-		PacketProcReqMoveStop(SessionId, Message);
+		PacketProcReqMoveStop(SessionID, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_ATTACK:
-		PacketProcReqMelee(SessionId, Message);
+		PacketProcReqMelee(SessionID, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_MAGIC:
-		PacketProcReqMagic(SessionId, Message);
+		PacketProcReqMagic(SessionID, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_MAGIC_CANCEL:
-		PacketProcReqMagicCancel(SessionId, Message);
+		PacketProcReqMagicCancel(SessionID, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_GATHERING_CANCEL:
-		PacketProcReqGatheringCancel(SessionId, Message);
+		PacketProcReqGatheringCancel(SessionID, Message);
 		break;
-	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_LEFT_MOUSE_POSITION_OBJECT_INFO:
-		PacketProcReqLeftMousePositionObjectInfo(SessionId, Message);
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_LEFT_MOUSE_OBJECT_INFO:
+		PacketProcReqLeftMouseObjectInfo(SessionID, Message);
+		break;
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_LEFT_MOUSE_UI_OBJECT_INFO:
+		PacketProcReqLeftMouseUIObjectInfo(SessionID, Message);
+		break;
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_RIGHT_MOUSE_OBJECT_INFO:
+		PacketProcReqRightMousePositionObjectInfo(SessionID, Message);
+		break;
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_CRAFTING_TABLE_NON_SELECT:
+		PacketProcReqCraftingTableNonSelect(SessionID, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_GATHERING:
-		PacketProcReqGathering(SessionId, Message);
+		PacketProcReqGathering(SessionID, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_OBJECT_STATE_CHANGE:
-		PacketProcReqObjectStateChange(SessionId, Message);
+		PacketProcReqObjectStateChange(SessionID, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_MESSAGE:
-		PacketProcReqChattingMessage(SessionId, Message);
+		PacketProcReqChattingMessage(SessionID, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_LOOTING:
-		PacketProcReqItemLooting(SessionId, Message);
+		PacketProcReqItemLooting(SessionID, Message);
+		break;
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_CRAFTING_TABLE_INPUT_ITEM:
+		PacketProcReqCraftingTableInputItem(SessionID, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_ITEM_SELECT:
-		PacketProcReqItemSelect(SessionId, Message);
+		PacketProcReqItemSelect(SessionID, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_ITEM_PLACE:
-		PacketProcReqItemPlace(SessionId, Message);
+		PacketProcReqItemPlace(SessionID, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_QUICKSLOT_SAVE:
-		PacketProcReqQuickSlotSave(SessionId, Message);
+		PacketProcReqQuickSlotSave(SessionID, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_QUICKSLOT_SWAP:
-		PacketProcReqQuickSlotSwap(SessionId, Message);
+		PacketProcReqQuickSlotSwap(SessionID, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_QUICKSLOT_EMPTY:
-		PacketProcReqQuickSlotInit(SessionId, Message);
+		PacketProcReqQuickSlotInit(SessionID, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_CRAFTING_CONFIRM:
-		PacketProcReqCraftingConfirm(SessionId, Message);
+		PacketProcReqCraftingConfirm(SessionID, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_INVENTORY_ITEM_USE:
-		PacketProcReqItemUse(SessionId, Message);
+		PacketProcReqItemUse(SessionID, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_CS_GAME_REQ_HEARTBEAT:
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_PONG:
-		PacketProcReqPong(SessionId, Message);
+		PacketProcReqPong(SessionID, Message);
 		break;
 	default:
-		Disconnect(SessionId);
+		Disconnect(SessionID);
 		break;
 	}
 
@@ -2660,7 +2673,159 @@ void CGameServer::PacketProcReqGatheringCancel(int64 SessionID, CMessage* Messag
 	ReturnSession(Session);
 }
 
-void CGameServer::PacketProcReqLeftMousePositionObjectInfo(int64 SessionId, CMessage* Message)
+void CGameServer::PacketProcReqLeftMouseObjectInfo(int64 SessionId, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionId);
+
+	do
+	{
+		if (Session)
+		{
+			int64 AccountId;
+			int64 PlayerId;
+
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountId;
+
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> PlayerId;
+
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			if (MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerId)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			int64 ObjectId;
+			*Message >> ObjectId;
+
+			int16 ObjectType;
+			*Message >> ObjectType;			
+
+			CGameObject* FindObject = MyPlayer->GetChannel()->FindChannelObject(ObjectId, (en_GameObjectType)ObjectType);
+			if (FindObject != nullptr)
+			{
+				int64 PreviousChoiceObject = 0;
+
+				if (MyPlayer->_SelectTarget != nullptr)
+				{
+					PreviousChoiceObject = MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId;
+				}
+
+				MyPlayer->_SelectTarget = FindObject;
+
+				CMessage* ResMousePositionObjectInfo = MakePacketResLeftMousePositionObjectInfo(Session->AccountId,
+					PreviousChoiceObject, FindObject->_GameObjectInfo.ObjectId,
+					FindObject->_Bufs, FindObject->_DeBufs);
+				SendPacket(Session->SessionId, ResMousePositionObjectInfo);
+				ResMousePositionObjectInfo->Free();
+			}
+		}
+	} while (0);
+
+	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcReqLeftMouseUIObjectInfo(int64 SessionID, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionID);
+
+	do
+	{
+		if (Session)
+		{
+			int64 AccountId;
+			int64 PlayerId;
+
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountId;
+
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> PlayerId;
+
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			if (MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerId)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			int64 OwnerObjectID;
+			*Message >> OwnerObjectID;
+
+			int16 OwnerObjectType;
+			*Message >> OwnerObjectType;
+
+			int16 UIObjectInfo;
+			*Message >> UIObjectInfo;
+
+			switch ((en_UIObjectInfo)UIObjectInfo)
+			{
+			case en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_FURNACE:
+				{
+					CMap* Map = G_MapManager->GetMap(1);
+					CChannel* Channel = Map->GetChannelManager()->Find(1);
+
+					CGameObject* CraftingTable = Channel->FindChannelObject(OwnerObjectID, (en_GameObjectType)OwnerObjectType);
+					if (CraftingTable != nullptr)
+					{
+						CFurnace* Furnace = (CFurnace*)CraftingTable;
+
+						CMessage* ResCraftingTableInputPacket = MakePacketResCraftingTableInput(CraftingTable->_GameObjectInfo.ObjectId, Furnace->GetMaterialItems());
+						SendPacket(Session->SessionId, ResCraftingTableInputPacket);
+						ResCraftingTableInputPacket->Free();						
+					}					
+				}				
+				break;			
+			}
+		}
+	} while (0);
+
+	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcReqRightMousePositionObjectInfo(int64 SessionId, CMessage* Message)
 {
 	st_Session* Session = FindSession(SessionId);
 
@@ -2713,20 +2878,129 @@ void CGameServer::PacketProcReqLeftMousePositionObjectInfo(int64 SessionId, CMes
 			CGameObject* FindObject = MyPlayer->GetChannel()->FindChannelObject(ObjectId, (en_GameObjectType)ObjectType);
 			if (FindObject != nullptr)
 			{
-				int64 PreviousChoiceObject = 0;
-
-				if (MyPlayer->_SelectTarget != nullptr)
+				switch (FindObject->_GameObjectInfo.ObjectType)
 				{
-					PreviousChoiceObject = MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId;
+				case en_GameObjectType::OBJECT_FURNACE:
+					CFurnace* Furnace = (CFurnace*)FindObject;
+
+					// 사용중이 아님
+					if (Furnace->_SelectedCraftingTable == false)
+					{
+						// 요청한 플레이어가 전에 선택중이었던 용광로가 잇는지 확인
+						CMap* Map = G_MapManager->GetMap(1);
+						CChannel* Channel = Map->GetChannelManager()->Find(1);	
+
+						vector<CGameObject*> FindObjects = Channel->FindChannelObjects(FindObject->_GameObjectInfo.ObjectType);
+						for (CGameObject* FindObject : FindObjects)
+						{
+							CFurnace* FindFurnace = (CFurnace*)FindObject;
+
+							// 선택중이었던 용광로가 있으면
+							if (FindFurnace->_SelectedObjectID == MyPlayer->_GameObjectInfo.ObjectId)
+							{
+								// 선택중인 용광로 선택해제
+								st_GameObjectJob* CraftingTableNonSelectJob = MakeGameObjectJobCraftingTableNonSelect(FindObject);
+								FindObject->_GameObjectJobQue.Enqueue(CraftingTableNonSelectJob);
+							}
+						}
+
+						st_GameObjectJob* CraftingTableSelectJob = MakeGameObjectJobCraftingTableSelect(FindObject, MyPlayer->_GameObjectInfo.ObjectId);
+						FindObject->_GameObjectJobQue.Enqueue(CraftingTableSelectJob);						
+						
+						CMessage* ResRightMousePositionObjectInfoPacket = MakePacketResRightMousePositionObjectInfo(MyPlayer->_GameObjectInfo.ObjectId, FindObject->_GameObjectInfo.ObjectId, FindObject->_GameObjectInfo.ObjectType);
+						SendPacket(Session->SessionId, ResRightMousePositionObjectInfoPacket);
+						ResRightMousePositionObjectInfoPacket->Free();
+					}
+					else
+					{
+						// 사용중임
+						CMessage* CommonErrorPacket = MakePacketCommonError(en_PersonalMessageType::PERSONAL_MEESAGE_CRAFTING_TABLE_OVERLAP_SELECT, FindObject->_GameObjectInfo.ObjectName.c_str());
+						SendPacket(Session->SessionId, CommonErrorPacket);
+						CommonErrorPacket->Free();
+					}											
+					break;
 				}
+			}
+		}
+	} while (0);
 
-				MyPlayer->_SelectTarget = FindObject;
+	ReturnSession(Session);
+}
 
-				CMessage* ResMousePositionObjectInfo = MakePacketResMousePositionObjectInfo(Session->AccountId,
-					PreviousChoiceObject, FindObject->_GameObjectInfo.ObjectId,
-					FindObject->_Bufs, FindObject->_DeBufs);
-				SendPacket(Session->SessionId, ResMousePositionObjectInfo);
-				ResMousePositionObjectInfo->Free();
+void CGameServer::PacketProcReqCraftingTableNonSelect(int64 SessionID, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionID);
+
+	do
+	{
+		if (Session)
+		{
+			int64 AccountId;
+			int64 PlayerId;
+
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountId;
+
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> PlayerId;
+
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			if (MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerId)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			int64 CraftingTableObjectID;
+			*Message >> CraftingTableObjectID;
+
+			int16 CraftingTableObjectType;
+			*Message >> CraftingTableObjectType;
+
+			CGameObject* FindObject = MyPlayer->GetChannel()->FindChannelObject(CraftingTableObjectID, (en_GameObjectType)CraftingTableObjectType);
+			if (FindObject != nullptr)
+			{
+				switch (FindObject->_GameObjectInfo.ObjectType)
+				{
+				case en_GameObjectType::OBJECT_FURNACE:
+					CFurnace* Furnace = (CFurnace*)FindObject;
+
+					if (Furnace->_SelectedCraftingTable == true)
+					{
+						st_GameObjectJob* CraftingTableSelectJob = MakeGameObjectJobCraftingTableNonSelect(FindObject);
+						FindObject->_GameObjectJobQue.Enqueue(CraftingTableSelectJob);						
+
+						CMessage* ResCraftingTableNonSelectMessage = MakePacketResCraftingTableNonSelect(Furnace->_GameObjectInfo.ObjectId, Furnace->_GameObjectInfo.ObjectType);
+						SendPacket(Session->SessionId, ResCraftingTableNonSelectMessage);
+						ResCraftingTableNonSelectMessage->Free();
+					}
+					else
+					{
+						// 선택한 용광로 UI에서 다른 용광로 UI를 켤 경우 이전 용광로 UI는 닫는 작업이 필요함
+						CRASH("선택되어 있지 않은 대상을 선택 풀려고 함");
+					}
+					break;
+				}
 			}
 		}
 	} while (0);
@@ -3524,68 +3798,12 @@ void CGameServer::PacketProcReqCraftingConfirm(int64 SessionId, CMessage* Messag
 			CItem* FindItem = MyPlayer->_InventoryManager.FindInventoryItem(0, CraftingItemInfo.ItemSmallCategory);
 			if (FindItem == nullptr)
 			{
-				CWeapon* CraftingWeaponItem = nullptr;
-				CArmor* CraftingArmorItem = nullptr;
-				CMaterial* CraftingMaterialItem = nullptr;
+				CItem* CraftingItem = G_ObjectManager->ItemCreate(FindReqCompleteItemData->SmallItemCategory);
+				CraftingItem->_ItemInfo = CraftingItemInfo;
 
-				switch (FindReqCompleteItemData->SmallItemCategory)
-				{
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:
-					CraftingWeaponItem = (CWeapon*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_WEAPON);
-					CraftingWeaponItem->_ItemInfo = CraftingItemInfo;
-
-					MyPlayer->_InventoryManager.InsertItem(0, CraftingWeaponItem);
-
-					FindItemGridPositionX = CraftingWeaponItem->_ItemInfo.TileGridPositionX;
-					FindItemGridPositionY = CraftingWeaponItem->_ItemInfo.TileGridPositionY;
-					break;
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:
-					CraftingArmorItem = (CArmor*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_ARMOR);
-					CraftingArmorItem->_ItemInfo = CraftingItemInfo;
-
-					MyPlayer->_InventoryManager.InsertItem(0, CraftingArmorItem);
-
-					FindItemGridPositionX = CraftingArmorItem->_ItemInfo.TileGridPositionX;
-					FindItemGridPositionY = CraftingArmorItem->_ItemInfo.TileGridPositionY;
-					break;
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL:
-					break;
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_FIERCE_ATTACK:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CONVERSION_ATTACK:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SHAEHONE_ATTACK:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SMASH_WAVE_ATTACK:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHARGE_POSE:
-					break;
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_FLAME_HARPOON:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HELL_FIRE:
-				case en_SmallItemCategory::ITEM_SMALL_CATEOGRY_SKILLBOOK_SHAMAN_HEALING_LIGHT:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HEALING_WIND:
-					break;
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHOCK_RELEASE:
-					break;
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
-					CraftingMaterialItem = (CMaterial*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_MATERIAL);
-					CraftingMaterialItem->_ItemInfo = CraftingItemInfo;
-
-					MyPlayer->_InventoryManager.InsertItem(0, CraftingMaterialItem);
-
-					FindItemGridPositionX = CraftingMaterialItem->_ItemInfo.TileGridPositionX;
-					FindItemGridPositionY = CraftingMaterialItem->_ItemInfo.TileGridPositionY;
-					break;
-				default:
-					break;
-				}
+				MyPlayer->_InventoryManager.InsertItem(0, CraftingItem);
+				FindItemGridPositionX = CraftingItem->_ItemInfo.TileGridPositionX;
+				FindItemGridPositionY = CraftingItem->_ItemInfo.TileGridPositionY;				
 			}
 			else
 			{
@@ -3845,6 +4063,101 @@ void CGameServer::PacketProcReqItemLooting(int64 SessionId, CMessage* Message)
 				}
 			}
 
+		} while (0);
+	}
+
+	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcReqCraftingTableInputItem(int64 SessionID, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionID);
+
+	if (Session)
+	{
+		do
+		{
+			int64 AccountId;
+			int64 PlayerDBId;
+
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountId;
+
+			// AccountId가 맞는지 확인
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> PlayerDBId;
+
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			// 조종하고 있는 플레이어가 있는지 확인 
+			if (MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			int64 CraftingTableObjectID;
+			*Message >> CraftingTableObjectID;
+
+			int16 CraftingTableGameObjectType;
+			*Message >> CraftingTableGameObjectType;
+
+			int16 InputItemSmallCategory;
+			*Message >> InputItemSmallCategory;
+
+			int16 InputItemCount;
+			*Message >> InputItemCount;
+
+			CMap* Map = G_MapManager->GetMap(1);
+			CChannel* Channel = Map->GetChannelManager()->Find(1);
+
+			CGameObject* CraftingTable = Channel->FindChannelObject(CraftingTableObjectID, (en_GameObjectType)CraftingTableGameObjectType);
+			if (CraftingTable != nullptr)
+			{
+				CItem* FindInputItem = MyPlayer->_InventoryManager.FindInventoryItem(0, (en_SmallItemCategory)InputItemSmallCategory);
+				if (FindInputItem != nullptr && FindInputItem->_ItemInfo.ItemCount > 0)
+				{
+					switch (CraftingTable->_GameObjectInfo.ObjectType)
+					{
+					case en_GameObjectType::OBJECT_FURNACE:
+						{
+							CFurnace* Furnace = (CFurnace*)CraftingTable;
+							Furnace->InputMaterialItem(FindInputItem, InputItemCount);		
+
+							FindInputItem->_ItemInfo.ItemCount -= InputItemCount;
+
+							CMessage* ResInventoryItemUpdatePacket = MakePacketInventoryItemUpdate(MyPlayer->_GameObjectInfo.ObjectId, FindInputItem->_ItemInfo);
+							SendPacket(Session->SessionId, ResInventoryItemUpdatePacket);
+							ResInventoryItemUpdatePacket->Free();
+
+							CMessage* ResCraftingTableInputPacket = MakePacketResCraftingTableInput(CraftingTable->_GameObjectInfo.ObjectId, Furnace->GetMaterialItems());
+							SendPacket(Session->SessionId, ResCraftingTableInputPacket);
+							ResCraftingTableInputPacket->Free();
+						}
+						break;
+					}
+				}
+			}
 		} while (0);
 	}
 
@@ -5438,144 +5751,99 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 
 			while (CharacterInventoryItem.Fetch())
 			{
-				CWeapon* WeaponItem = nullptr;
-				CArmor* ArmorItem = nullptr;
-				CItem* InventoryItem = nullptr;
-				CMaterial* MaterialItem = nullptr;
-				st_ItemData* ItemData = nullptr;
-				CConsumable* SkillBookItem = nullptr;
+				CItem* NewItem = G_ObjectManager->ItemCreate((en_SmallItemCategory)ItemSmallCategory);
 
-				switch ((en_SmallItemCategory)ItemSmallCategory)
+				if (NewItem != nullptr)
 				{
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:
-					WeaponItem = (CWeapon*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_WEAPON);
-					WeaponItem->_ItemInfo.ItemDBId = 0;
-					WeaponItem->_ItemInfo.Rotated = ItemRotated;
-					WeaponItem->_ItemInfo.Width = ItemWidth;
-					WeaponItem->_ItemInfo.Height = ItemHeight;
-					WeaponItem->_ItemInfo.ItemLargeCategory = (en_LargeItemCategory)ItemLargeCategory;
-					WeaponItem->_ItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemMediumCategory;
-					WeaponItem->_ItemInfo.ItemSmallCategory = (en_SmallItemCategory)ItemSmallCategory;
-					WeaponItem->_ItemInfo.ItemName = ItemName;
-					WeaponItem->_ItemInfo.ItemCount = ItemCount;
-					WeaponItem->_ItemInfo.TileGridPositionX = ItemTilePositionX;
-					WeaponItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;
-					WeaponItem->_ItemInfo.ItemThumbnailImagePath = ItemThumbnailImagePath;
-					WeaponItem->_ItemInfo.ItemIsEquipped = IsEquipped;
-					WeaponItem->_ItemInfo.ItemMinDamage = ItemMinDamage;
-					WeaponItem->_ItemInfo.ItemMaxDamage = ItemMaxDamage;
-
-					MyPlayer->_InventoryManager.DBItemInsertItem(0, WeaponItem);
-
-					// 아이템 테이블에서 읽어들인 무기 아이템이 착용중일 경우
-					// 해당 무기를 착용하고 착용 아이템 정보에 담는다.
-					if (WeaponItem->_ItemInfo.ItemIsEquipped == true)
+					switch ((en_SmallItemCategory)ItemSmallCategory)
 					{
-						MyPlayer->_Equipment.ItemEquip(WeaponItem, MyPlayer);
-						Equipments.push_back(WeaponItem->_ItemInfo);
+					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:
+					{
+						CWeapon* NewWeaponItem = (CWeapon*)NewItem;
+
+						NewWeaponItem->_ItemInfo.ItemDBId = 0;
+						NewWeaponItem->_ItemInfo.Rotated = ItemRotated;
+						NewWeaponItem->_ItemInfo.Width = ItemWidth;
+						NewWeaponItem->_ItemInfo.Height = ItemHeight;
+						NewWeaponItem->_ItemInfo.ItemLargeCategory = (en_LargeItemCategory)ItemLargeCategory;
+						NewWeaponItem->_ItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemMediumCategory;
+						NewWeaponItem->_ItemInfo.ItemSmallCategory = (en_SmallItemCategory)ItemSmallCategory;
+						NewWeaponItem->_ItemInfo.ItemName = ItemName;
+						NewWeaponItem->_ItemInfo.ItemCount = ItemCount;
+						NewWeaponItem->_ItemInfo.TileGridPositionX = ItemTilePositionX;
+						NewWeaponItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;
+						NewWeaponItem->_ItemInfo.ItemThumbnailImagePath = ItemThumbnailImagePath;
+						NewWeaponItem->_ItemInfo.ItemIsEquipped = IsEquipped;
+						NewWeaponItem->_ItemInfo.ItemMinDamage = ItemMinDamage;
+						NewWeaponItem->_ItemInfo.ItemMaxDamage = ItemMaxDamage;
+
+						/*if (NewWeaponItem->_ItemInfo.ItemIsEquipped == true)
+						{
+							MyPlayer->_Equipment.ItemEquip(NewWeaponItem, MyPlayer);
+							Equipments.push_back(NewWeaponItem->_ItemInfo);
+						}*/
+					}
+					break;
+					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
+					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD:
+					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:
+					{
+						CArmor* NewArmorItem = (CArmor*)NewItem;
+
+						NewArmorItem->_ItemInfo.ItemDBId = 0;
+						NewArmorItem->_ItemInfo.Rotated = ItemRotated;
+						NewArmorItem->_ItemInfo.Width = ItemWidth;
+						NewArmorItem->_ItemInfo.Height = ItemHeight;
+						NewArmorItem->_ItemInfo.ItemLargeCategory = (en_LargeItemCategory)ItemLargeCategory;
+						NewArmorItem->_ItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemMediumCategory;
+						NewArmorItem->_ItemInfo.ItemSmallCategory = (en_SmallItemCategory)ItemSmallCategory;
+						NewArmorItem->_ItemInfo.ItemName = ItemName;
+						NewArmorItem->_ItemInfo.ItemCount = ItemCount;
+						NewArmorItem->_ItemInfo.TileGridPositionX = ItemTilePositionX;
+						NewArmorItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;
+						NewArmorItem->_ItemInfo.ItemThumbnailImagePath = ItemThumbnailImagePath;
+						NewArmorItem->_ItemInfo.ItemIsEquipped = IsEquipped;
+						NewArmorItem->_ItemInfo.ItemDefence = ItemDefence;
+					}
+					break;
+					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL:
+						break;
+					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:
+					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL:
+					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN:
+					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN:
+					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN:
+					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE:
+					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG:
+					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
+					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
+					{
+						CMaterial* NewMaterialItem = (CMaterial*)NewItem;
+
+						st_ItemData* ItemData = G_Datamanager->FindItemData((en_SmallItemCategory)ItemSmallCategory);
+
+						NewMaterialItem->_ItemInfo.ItemDBId = 0;
+						NewMaterialItem->_ItemInfo.Rotated = ItemRotated;
+						NewMaterialItem->_ItemInfo.Width = ItemWidth;
+						NewMaterialItem->_ItemInfo.Height = ItemHeight;
+						NewMaterialItem->_ItemInfo.ItemLargeCategory = (en_LargeItemCategory)ItemLargeCategory;
+						NewMaterialItem->_ItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemMediumCategory;
+						NewMaterialItem->_ItemInfo.ItemSmallCategory = (en_SmallItemCategory)ItemSmallCategory;
+						NewMaterialItem->_ItemInfo.ItemName = ItemName;
+						NewMaterialItem->_ItemInfo.ItemExplain = (LPWSTR)CA2W(ItemData->ItemExplain.c_str());
+						NewMaterialItem->_ItemInfo.ItemCount = ItemCount;
+						NewMaterialItem->_ItemInfo.TileGridPositionX = ItemTilePositionX;
+						NewMaterialItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;
+						NewMaterialItem->_ItemInfo.ItemThumbnailImagePath = ItemThumbnailImagePath;
+						NewMaterialItem->_ItemInfo.ItemIsEquipped = IsEquipped;
+						NewMaterialItem->_ItemInfo.ItemMaxCount = ItemMaxCount;
+					}
+					break;
 					}
 
-					InventoryItems.push_back(WeaponItem);
-					break;
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:
-					ArmorItem = (CArmor*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_ARMOR);
-					ArmorItem->_ItemInfo.ItemDBId = 0;
-					ArmorItem->_ItemInfo.Rotated = ItemRotated;
-					ArmorItem->_ItemInfo.Width = ItemWidth;
-					ArmorItem->_ItemInfo.Height = ItemHeight;
-					ArmorItem->_ItemInfo.ItemLargeCategory = (en_LargeItemCategory)ItemLargeCategory;
-					ArmorItem->_ItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemMediumCategory;
-					ArmorItem->_ItemInfo.ItemSmallCategory = (en_SmallItemCategory)ItemSmallCategory;
-					ArmorItem->_ItemInfo.ItemName = ItemName;
-					ArmorItem->_ItemInfo.ItemCount = ItemCount;
-					ArmorItem->_ItemInfo.TileGridPositionX = ItemTilePositionX;
-					ArmorItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;
-					ArmorItem->_ItemInfo.ItemThumbnailImagePath = ItemThumbnailImagePath;
-					ArmorItem->_ItemInfo.ItemIsEquipped = IsEquipped;
-					ArmorItem->_ItemInfo.ItemDefence = ItemDefence;
-
-					MyPlayer->_InventoryManager.DBItemInsertItem(0, ArmorItem);
-
-					// 아이템 테이블에서 읽어들인 방어구 아이템이 착용중일 경우
-					// 해당 방어구를 착용하고 착용 아이템 정보에 담는다.
-					if (ArmorItem->_ItemInfo.ItemIsEquipped == true)
-					{
-						MyPlayer->_Equipment.ItemEquip(ArmorItem, MyPlayer);
-						Equipments.push_back(WeaponItem->_ItemInfo);
-					}
-
-					InventoryItems.push_back(ArmorItem);
-					break;
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL:
-					break;
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_FIERCE_ATTACK:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CONVERSION_ATTACK:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SHAEHONE_ATTACK:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SMASH_WAVE_ATTACK:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHARGE_POSE:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_FLAME_HARPOON:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HELL_FIRE:
-				case en_SmallItemCategory::ITEM_SMALL_CATEOGRY_SKILLBOOK_SHAMAN_HEALING_LIGHT:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HEALING_WIND:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHOCK_RELEASE:
-					SkillBookItem = (CConsumable*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_CONSUMABLE);
-					SkillBookItem->_ItemInfo.ItemDBId = 0;
-					SkillBookItem->_ItemInfo.Rotated = ItemRotated;
-					SkillBookItem->_ItemInfo.Width = ItemWidth;
-					SkillBookItem->_ItemInfo.Height = ItemHeight;
-					SkillBookItem->_ItemInfo.ItemLargeCategory = (en_LargeItemCategory)ItemLargeCategory;
-					SkillBookItem->_ItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemMediumCategory;
-					SkillBookItem->_ItemInfo.ItemSmallCategory = (en_SmallItemCategory)ItemSmallCategory;
-					SkillBookItem->_ItemInfo.ItemName = ItemName;
-					SkillBookItem->_ItemInfo.ItemCount = ItemCount;
-					SkillBookItem->_ItemInfo.TileGridPositionX = ItemTilePositionX;
-					SkillBookItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;
-					SkillBookItem->_ItemInfo.ItemThumbnailImagePath = ItemThumbnailImagePath;
-					SkillBookItem->_ItemInfo.ItemIsEquipped = IsEquipped;
-					SkillBookItem->_ItemInfo.ItemMaxCount = ItemMaxCount;
-
-					MyPlayer->_InventoryManager.DBItemInsertItem(0, SkillBookItem);
-
-					InventoryItems.push_back(SkillBookItem);
-					break;
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
-					ItemData = G_Datamanager->FindItemData((en_SmallItemCategory)ItemSmallCategory);
-
-					MaterialItem = (CMaterial*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_MATERIAL);
-					MaterialItem->_ItemInfo.ItemDBId = 0;
-					MaterialItem->_ItemInfo.Rotated = ItemRotated;
-					MaterialItem->_ItemInfo.Width = ItemWidth;
-					MaterialItem->_ItemInfo.Height = ItemHeight;
-					MaterialItem->_ItemInfo.ItemLargeCategory = (en_LargeItemCategory)ItemLargeCategory;
-					MaterialItem->_ItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemMediumCategory;
-					MaterialItem->_ItemInfo.ItemSmallCategory = (en_SmallItemCategory)ItemSmallCategory;
-					MaterialItem->_ItemInfo.ItemName = ItemName;
-					MaterialItem->_ItemInfo.ItemExplain = (LPWSTR)CA2W(ItemData->ItemExplain.c_str());
-					MaterialItem->_ItemInfo.ItemCount = ItemCount;
-					MaterialItem->_ItemInfo.TileGridPositionX = ItemTilePositionX;
-					MaterialItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;
-					MaterialItem->_ItemInfo.ItemThumbnailImagePath = ItemThumbnailImagePath;
-					MaterialItem->_ItemInfo.ItemIsEquipped = IsEquipped;
-					MaterialItem->_ItemInfo.ItemMaxCount = ItemMaxCount;
-
-					MyPlayer->_InventoryManager.DBItemInsertItem(0, MaterialItem);
-
-					InventoryItems.push_back(MaterialItem);
-					break;
-				default:
-					break;
-				}
+					MyPlayer->_InventoryManager.DBItemInsertItem(0, NewItem);
+					InventoryItems.push_back(NewItem);
+				}							
 			}			
 
 			// 클라 인벤토리 정보 담기			
@@ -5648,15 +5916,14 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 				for (st_CraftingCompleteItemData CraftingCompleteItemData : CraftingData->CraftingCompleteItems)
 				{
 					st_CraftingCompleteItem CraftingCompleteItem;
+					CraftingCompleteItem.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_COMMON;
 					CraftingCompleteItem.CompleteItemType = CraftingCompleteItemData.CraftingCompleteItemDataId;
 					CraftingCompleteItem.CompleteItemName = (LPWSTR)CA2W(CraftingCompleteItemData.CraftingCompleteName.c_str());
 					CraftingCompleteItem.CompleteItemImagePath = (LPWSTR)CA2W(CraftingCompleteItemData.CraftingCompleteThumbnailImagePath.c_str());
 
 					for (st_CraftingMaterialItemData CraftingMaterialItemData : CraftingCompleteItemData.CraftingMaterials)
 					{
-						st_CraftingMaterialItemInfo CraftingMaterialItem;
-						CraftingMaterialItem.AccountDBId = Session->AccountId;
-						CraftingMaterialItem.PlayerDBId = MyPlayer->_GameObjectInfo.ObjectId;
+						st_CraftingMaterialItemInfo CraftingMaterialItem;						
 						CraftingMaterialItem.MaterialItemType = CraftingMaterialItemData.MaterialDataId;
 						CraftingMaterialItem.MaterialItemName = (LPWSTR)CA2W(CraftingMaterialItemData.MaterialName.c_str());
 						CraftingMaterialItem.ItemCount = CraftingMaterialItemData.MaterialCount;
@@ -5675,55 +5942,26 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 
 			for (st_CraftingItemCategory CraftingItemCategory : CraftingItemCategorys)
 			{
-				*ResCharacterInfoMessage << (int8)CraftingItemCategory.CategoryType;
-
-				int16 CraftingItemCategoryNameLen = (int16)(CraftingItemCategory.CategoryName.length() * 2);
-				*ResCharacterInfoMessage << CraftingItemCategoryNameLen;
-				ResCharacterInfoMessage->InsertData(CraftingItemCategory.CategoryName.c_str(), CraftingItemCategoryNameLen);
-
-				*ResCharacterInfoMessage << (int8)CraftingItemCategory.CompleteItems.size();
-
-				for (st_CraftingCompleteItem CraftingCompleteItem : CraftingItemCategory.CompleteItems)
-				{
-					*ResCharacterInfoMessage << (int16)CraftingCompleteItem.CompleteItemType;
-
-					// 제작 완성템 이름
-					int16 CraftingCompleteItemNameLen = (int16)(CraftingCompleteItem.CompleteItemName.length() * 2);
-					*ResCharacterInfoMessage << CraftingCompleteItemNameLen;
-					ResCharacterInfoMessage->InsertData(CraftingCompleteItem.CompleteItemName.c_str(), CraftingCompleteItemNameLen);
-
-					// 제작 완성템 이미지 경로
-					int16 CraftingCompleteItemImagePathLen = (int16)(CraftingCompleteItem.CompleteItemImagePath.length() * 2);
-					*ResCharacterInfoMessage << CraftingCompleteItemImagePathLen;
-					ResCharacterInfoMessage->InsertData(CraftingCompleteItem.CompleteItemImagePath.c_str(), CraftingCompleteItemImagePathLen);
-
-					*ResCharacterInfoMessage << (int8)CraftingCompleteItem.Materials.size();
-
-					for (st_CraftingMaterialItemInfo CraftingMaterialItem : CraftingCompleteItem.Materials)
-					{
-						*ResCharacterInfoMessage << MyPlayer->_AccountId;
-						*ResCharacterInfoMessage << MyPlayer->_GameObjectInfo.ObjectId;
-						*ResCharacterInfoMessage << (int16)CraftingMaterialItem.MaterialItemType;
-
-						// 재료템 이름
-						int16 CraftingMaterialItemNameLen = (int16)(CraftingMaterialItem.MaterialItemName.length() * 2);
-						*ResCharacterInfoMessage << CraftingMaterialItemNameLen;
-						ResCharacterInfoMessage->InsertData(CraftingMaterialItem.MaterialItemName.c_str(), CraftingMaterialItemNameLen);
-
-						*ResCharacterInfoMessage << CraftingMaterialItem.ItemCount;
-
-						// 재료템 이미지 경로
-						int16 MaterialImagePathLen = (int16)(CraftingMaterialItem.MaterialItemImagePath.length() * 2);
-						*ResCharacterInfoMessage << MaterialImagePathLen;
-						ResCharacterInfoMessage->InsertData(CraftingMaterialItem.MaterialItemImagePath.c_str(), MaterialImagePathLen);
-					}
-				}
+				*ResCharacterInfoMessage << CraftingItemCategory;				
 			}						
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterInfoGetConnection);
 
+			vector<st_CraftingTable*> CraftingTables;
+			auto FindFurnaceCraftingTable = G_Datamanager->_CraftingTableData.find((int16)en_GameObjectType::OBJECT_FURNACE);	
+			st_CraftingTable* FurnaceCraftingTable = (*FindFurnaceCraftingTable).second;
+
+			CraftingTables.push_back(FurnaceCraftingTable);			
+
+			*ResCharacterInfoMessage << (int8)CraftingTables.size();
+
+			for (st_CraftingTable* CraftingTable : CraftingTables)
+			{
+				*ResCharacterInfoMessage << *CraftingTable;
+			}
+
 			SendPacket(MyPlayer->_SessionId, ResCharacterInfoMessage);
-			
+
 			MyPlayer->_NetworkState = en_ObjectNetworkState::LIVE;			
 #pragma endregion
 		} while (0);
@@ -6026,6 +6264,37 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobBackTeleport()
 	return BackTeleportJob;
 }
 
+st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableSelect(CGameObject* CraftingTableObject, int64 OwnerObjectID)
+{
+	st_GameObjectJob* CraftingTableSelectJob = G_ObjectManager->GameObjectJobCreate();
+	CraftingTableSelectJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_SELECT;
+
+	CGameServerMessage* CraftingTableSelectJobMessage = CGameServerMessage::GameServerMessageAlloc();
+	CraftingTableSelectJobMessage->Clear();
+
+	*CraftingTableSelectJobMessage << &CraftingTableObject;
+	*CraftingTableSelectJobMessage << OwnerObjectID;
+
+	CraftingTableSelectJob->GameObjectJobMessage = CraftingTableSelectJobMessage;
+
+	return CraftingTableSelectJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableNonSelect(CGameObject* CraftingTableObject)
+{
+	st_GameObjectJob* CraftingTableSelectJob = G_ObjectManager->GameObjectJobCreate();
+	CraftingTableSelectJob->GameObjectJobType = en_GameObjectJobType::GAMEOJBECT_JOB_CRAFTING_TABLE_NON_SELECT;
+
+	CGameServerMessage* CraftingTableSelectJobMessage = CGameServerMessage::GameServerMessageAlloc();
+	CraftingTableSelectJobMessage->Clear();
+
+	*CraftingTableSelectJobMessage << &CraftingTableObject;
+
+	CraftingTableSelectJob->GameObjectJobMessage = CraftingTableSelectJobMessage;
+
+	return CraftingTableSelectJob;
+}
+
 CGameServerMessage* CGameServer::MakePacketResClientConnected()
 {
 	CGameServerMessage* ClientConnetedMessage = CGameServerMessage::GameServerMessageAlloc();
@@ -6084,7 +6353,7 @@ CGameServerMessage* CGameServer::MakePacketResCreateCharacter(bool IsSuccess, st
 	return ResCreateCharacter;
 }
 
-CGameServerMessage* CGameServer::MakePacketResMousePositionObjectInfo(int64 AccountId, int64 PreviousChoiceObjectId, int64 FindObjectId,
+CGameServerMessage* CGameServer::MakePacketResLeftMousePositionObjectInfo(int64 AccountId, int64 PreviousChoiceObjectId, int64 FindObjectId,
 	map<en_SkillType, CSkill*> BufSkillInfo, map<en_SkillType, CSkill*> DeBufSkillInfo)
 {
 	CGameServerMessage* ResMousePositionObjectInfoPacket = CGameServerMessage::GameServerMessageAlloc();
@@ -6095,7 +6364,7 @@ CGameServerMessage* CGameServer::MakePacketResMousePositionObjectInfo(int64 Acco
 
 	ResMousePositionObjectInfoPacket->Clear();
 
-	*ResMousePositionObjectInfoPacket << (int16)en_PACKET_S2C_LEFT_MOUSE_POSITION_OBJECT_INFO;
+	*ResMousePositionObjectInfoPacket << (int16)en_PACKET_S2C_LEFT_MOUSE_OBJECT_INFO;
 	*ResMousePositionObjectInfoPacket << AccountId;
 	*ResMousePositionObjectInfoPacket << PreviousChoiceObjectId;
 	*ResMousePositionObjectInfoPacket << FindObjectId;
@@ -6117,6 +6386,41 @@ CGameServerMessage* CGameServer::MakePacketResMousePositionObjectInfo(int64 Acco
 	}
 
 	return ResMousePositionObjectInfoPacket;
+}
+
+CGameServerMessage* CGameServer::MakePacketResRightMousePositionObjectInfo(int64 ReqPlayerID, int64 FindObjectID, en_GameObjectType FindObjectType)
+{
+	CGameServerMessage* ResRightMousePositionObjectInfoMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResRightMousePositionObjectInfoMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResRightMousePositionObjectInfoMessage->Clear();
+
+	*ResRightMousePositionObjectInfoMessage << (int16)en_PACKET_S2C_RIGHT_MOUSE_OBJECT_INFO;
+	*ResRightMousePositionObjectInfoMessage << ReqPlayerID;
+	*ResRightMousePositionObjectInfoMessage << FindObjectID;
+	*ResRightMousePositionObjectInfoMessage << (int16)FindObjectType;
+
+	return ResRightMousePositionObjectInfoMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketResCraftingTableNonSelect(int64 CraftingTableObjectID, en_GameObjectType CraftingTableObjectType)
+{
+	CGameServerMessage* ResCraftingTableNonSelectMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResCraftingTableNonSelectMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResCraftingTableNonSelectMessage->Clear();
+
+	*ResCraftingTableNonSelectMessage << (int16)en_PACKET_S2C_CRAFTING_TABLE_NON_SELECT;
+	*ResCraftingTableNonSelectMessage << CraftingTableObjectID;
+	*ResCraftingTableNonSelectMessage << (int16)CraftingTableObjectType;
+
+	return ResCraftingTableNonSelectMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketResGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int16 SliverCount, int16 BronzeCount, int16 ItemCount, int16 ItemType, bool ItemGainPrint)
@@ -6424,6 +6728,31 @@ CGameServerMessage* CGameServer::MakePacketCraftingList(int64 AccountId, int64 P
 	return ResCraftingListMessage;
 }
 
+CGameServerMessage* CGameServer::MakePacketResCraftingTableInput(int64 CraftingTableObjectID, map<en_SmallItemCategory, CItem*> MaterialItems)
+{
+	CGameServerMessage* ResCraftingTableMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResCraftingTableMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResCraftingTableMessage->Clear();
+
+	*ResCraftingTableMessage << (int16)en_PACKET_S2C_CRAFTING_TABLE_INPUT_ITEM;
+
+	*ResCraftingTableMessage << CraftingTableObjectID;
+
+	int16 MaterialItemCount = MaterialItems.size();
+	*ResCraftingTableMessage << MaterialItemCount;
+
+	for (auto MaterialItemIter : MaterialItems)
+	{
+		*ResCraftingTableMessage << MaterialItemIter.second->_ItemInfo;
+	}
+
+	return ResCraftingTableMessage;
+}
+
 CGameServerMessage* CGameServer::MakePacketPing()
 {
 	CGameServerMessage* PingMessage = CGameServerMessage::GameServerMessageAlloc();
@@ -6441,40 +6770,13 @@ CGameServerMessage* CGameServer::MakePacketPing()
 
 CItem* CGameServer::NewItemCrate(st_ItemInfo& NewItemInfo)
 {
-	CWeapon* NewWeaponItem = nullptr;
-	CArmor* NewArmorItem = nullptr;
-	CMaterial* NewMaterialItem = nullptr;
-
-	switch (NewItemInfo.ItemSmallCategory)
+	CItem* NewItem = G_ObjectManager->ItemCreate(NewItemInfo.ItemSmallCategory);
+	if (NewItem != nullptr)
 	{
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:
-		NewWeaponItem = (CWeapon*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_WEAPON);
-		NewWeaponItem->_ItemInfo = NewItemInfo;
-
-		return NewWeaponItem;
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:
-		NewArmorItem = (CArmor*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_ARMOR);
-		NewArmorItem->_ItemInfo = NewItemInfo;
-
-		return NewArmorItem;
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL:
-		break;
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
-		NewMaterialItem = (CMaterial*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_ITEM_MATERIAL);
-		NewMaterialItem->_ItemInfo = NewItemInfo;
-
-		return NewMaterialItem;
+		NewItem->_ItemInfo = NewItemInfo;		
 	}
+	
+	return NewItem;
 }
 
 st_GameObjectJob* CGameServer::MakeGameObjectJobPlayerEnterChannel(CGameObject* EnterChannelObject)
@@ -7193,6 +7495,9 @@ CGameServerMessage* CGameServer::MakePacketCommonError(en_PersonalMessageType Pe
 	{	
 	case en_PersonalMessageType::PERSONAL_MESSAGE_DIR_DIFFERENT:
 		wsprintf(ErrorMessage, L"[%s]을 바라보아야 합니다.", Name);
+		break;
+	case en_PersonalMessageType::PERSONAL_MEESAGE_CRAFTING_TABLE_OVERLAP_SELECT:
+		wsprintf(ErrorMessage, L"[%s]를 사용중입니다.", Name);
 		break;
 	}
 

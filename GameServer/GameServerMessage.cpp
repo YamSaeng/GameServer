@@ -210,6 +210,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_CraftingItemCategory& Craf
 
 CGameServerMessage& CGameServerMessage::operator<<(st_CraftingCompleteItem& CraftingCompleteItem)
 {
+    *this << (int16)CraftingCompleteItem.OwnerCraftingTable;
     *this << (int16)CraftingCompleteItem.CompleteItemType;
 
     int16 CraftingCompleteItemNameLen = (int16)(CraftingCompleteItem.CompleteItemName.length() * 2);

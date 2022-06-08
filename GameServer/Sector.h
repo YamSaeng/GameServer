@@ -15,7 +15,7 @@ private:
 	set<CMonster*> _Monsters;
 	set<CItem*> _Items;
 	set<CEnvironment*> _Environment;	
-	set<CCraftingTable*> _CraftingTable;
+	set<CCraftingTable*> _CraftingTables;
 
 	SRWLOCK _SectorLock;
 public:

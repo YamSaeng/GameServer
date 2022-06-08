@@ -19,7 +19,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0          
+          "Speed": 3.0          
         },
         {
           "Level": 2,
@@ -37,7 +37,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 3,
@@ -55,7 +55,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 4,
@@ -73,7 +73,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 5,
@@ -91,7 +91,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 6,
@@ -109,7 +109,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 7,
@@ -127,7 +127,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 8,
@@ -145,7 +145,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 9,
@@ -163,7 +163,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 10,
@@ -181,7 +181,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 220,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         }
       ]
     }
@@ -206,7 +206,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 300,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 2,
@@ -224,7 +224,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 300,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 3,
@@ -242,7 +242,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 300,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 4,
@@ -260,7 +260,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 300,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 5,
@@ -278,7 +278,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 310,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 6,
@@ -296,7 +296,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 310,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 7,
@@ -314,7 +314,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 310,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 8,
@@ -332,7 +332,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 310,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 9,
@@ -350,7 +350,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 310,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 10,
@@ -368,7 +368,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 320,
-          "Speed": 5.0
+          "Speed": 3.0
         }
       ]
     }
@@ -393,7 +393,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 100,
           "MagicCriticalPoint": 200,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 2,
@@ -411,7 +411,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 100,
           "MagicCriticalPoint": 200,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 3,
@@ -429,7 +429,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 100,
           "MagicCriticalPoint": 200,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 4,
@@ -447,7 +447,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 100,
           "MagicCriticalPoint": 200,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 5,
@@ -465,7 +465,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 100,
           "MagicCriticalPoint": 210,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 6,
@@ -483,7 +483,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 100,
           "MagicCriticalPoint": 210,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 7,
@@ -501,7 +501,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 100,
           "MagicCriticalPoint": 210,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 8,
@@ -519,7 +519,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 100,
           "MagicCriticalPoint": 210,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 9,
@@ -537,7 +537,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 100,
           "MagicCriticalPoint": 210,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 10,
@@ -555,7 +555,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 100,
           "MagicCriticalPoint": 220,
-          "Speed": 5.0
+          "Speed": 3.0
         }
       ]
     }
@@ -580,7 +580,7 @@
           "EvasionRate": 200,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 2,
@@ -598,7 +598,7 @@
           "EvasionRate": 200,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 3,
@@ -616,7 +616,7 @@
           "EvasionRate": 200,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 4,
@@ -634,7 +634,7 @@
           "EvasionRate": 200,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 5,
@@ -652,7 +652,7 @@
           "EvasionRate": 300,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 6,
@@ -670,7 +670,7 @@
           "EvasionRate": 300,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 7,
@@ -688,7 +688,7 @@
           "EvasionRate": 300,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 8,
@@ -706,7 +706,7 @@
           "EvasionRate": 300,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 9,
@@ -724,7 +724,7 @@
           "EvasionRate": 300,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 10,
@@ -742,7 +742,7 @@
           "EvasionRate": 350,
           "MeleeCriticalPoint": 220,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         }
       ]
     }
@@ -767,7 +767,7 @@
           "EvasionRate": 200,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 2,
@@ -785,7 +785,7 @@
           "EvasionRate": 200,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 3,
@@ -803,7 +803,7 @@
           "EvasionRate": 200,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 4,
@@ -821,7 +821,7 @@
           "EvasionRate": 200,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 5,
@@ -839,7 +839,7 @@
           "EvasionRate": 300,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 6,
@@ -857,7 +857,7 @@
           "EvasionRate": 300,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 7,
@@ -875,7 +875,7 @@
           "EvasionRate": 300,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 8,
@@ -893,7 +893,7 @@
           "EvasionRate": 300,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 9,
@@ -911,7 +911,7 @@
           "EvasionRate": 300,
           "MeleeCriticalPoint": 210,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         },
         {
           "Level": 10,
@@ -929,7 +929,7 @@
           "EvasionRate": 350,
           "MeleeCriticalPoint": 220,
           "MagicCriticalPoint": 0,
-          "Speed": 5.0
+          "Speed": 3.0
         }
       ]
     }

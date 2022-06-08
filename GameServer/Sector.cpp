@@ -48,7 +48,7 @@ void CSector::Insert(CGameObject* InsertGameObject)
 		_Environment.insert((CEnvironment*)InsertGameObject);
 		break;
 	case en_GameObjectType::OBJECT_FURNACE:
-		_CraftingTable.insert((CCraftingTable*)InsertGameObject);
+		_CraftingTables.insert((CCraftingTable*)InsertGameObject);
 		break;
 	default:
 		break;
@@ -92,7 +92,7 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 		_Environment.erase((CEnvironment*)RemoveGameObject);
 		break;
 	case en_GameObjectType::OBJECT_CRAFTING_TABLE:
-		_CraftingTable.erase((CCraftingTable*)RemoveGameObject);
+		_CraftingTables.erase((CCraftingTable*)RemoveGameObject);
 		break;
 	}
 
@@ -121,7 +121,7 @@ set<CEnvironment*> CSector::GetEnvironment()
 
 set<CCraftingTable*> CSector::GetCraftingTable()
 {
-	return _CraftingTable;
+	return _CraftingTables;
 }
 
 void CSector::AcquireSectorLock()

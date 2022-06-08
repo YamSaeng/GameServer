@@ -10,7 +10,7 @@ public:
 
 	void MapSave();
 
-	CMap* GetMap(int64& MapID);
+	CMap* GetMap(int64 MapID);
 
 	void Update();
 private:
