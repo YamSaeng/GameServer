@@ -51,6 +51,7 @@ enum class en_GameObjectType : int16
 	OBJECT_ITEM_MATERIAL_STONE,
 	OBJECT_ITEM_MATERIAL_WOOD_FLANK,
 	OBJECT_ITEM_MATERIAL_YARN,
+	OBJECT_ITEM_MATERIAL_CHAR_COAL,
 
 	OBJECT_PLAYER_DUMMY = 32000
 };
@@ -120,6 +121,14 @@ enum class en_QuickSlotBar : int8
 	QUICK_SLOT_BAR_SLOT_SIZE = 5
 };
 
+enum class en_UIObjectInfo : int16
+{
+	UI_OBJECT_INFO_NONE = 0,
+
+	UI_OBJECT_INFO_CRAFTING_TABLE_COMMON,
+	UI_OBJECT_INFO_CRAFTING_TABLE_FURNACE	
+};
+
 enum class en_LargeItemCategory : int8
 {
 	ITEM_LARGE_CATEGORY_NONE = 0,
@@ -174,7 +183,8 @@ enum class en_SmallItemCategory : int16
 	ITEM_SMALL_CATEGORY_MATERIAL_STONE = 2005,
 	ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG = 2006,
 	ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK = 2007,
-	ITEM_SMALL_CATEGORY_MATERIAL_YARN = 2008
+	ITEM_SMALL_CATEGORY_MATERIAL_YARN = 2008,
+	ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL = 2009
 };
 
 enum class en_SkillLargeCategory : int8
@@ -327,6 +337,8 @@ enum class en_PersonalMessageType : int8
 		
 	PERSONAL_MESSAGE_DIR_DIFFERENT,
 
+	PERSONAL_MEESAGE_CRAFTING_TABLE_OVERLAP_SELECT,
+
 	PERSONAL_MESSAGE_LOGIN_ACCOUNT_NOT_EXIST,
 	PERSONAL_MESSAGE_LOGIN_ACCOUNT_OVERLAP,
 	PERSONAL_MESSAGE_LOGIN_ACCOUNT_DB_WORKING,
@@ -347,7 +359,8 @@ enum class en_TileMapEnvironment : int8
 	TILE_MAP_TREE,
 	TILE_MAP_STONE,
 	TILE_MAP_SLIME,
-	TILE_MAP_BEAR
+	TILE_MAP_BEAR,
+	TILE_MAP_FURNACE
 };
 
 enum class en_GameObjectJobType : int16
@@ -368,7 +381,9 @@ enum class en_GameObjectJobType : int16
 	GAMEOBJECT_JOB_OBJECT_ENTER_CHANNEL,
 	GAMEOBJECT_JOB_LEAVE_CHANNEL,
 	GAMEOBJECT_JOB_PLAYER_LEAVE_CHANNEL,
-	GAMEOBJECT_JOB_FULL_RECOVERY
+	GAMEOBJECT_JOB_FULL_RECOVERY,
+	GAMEOBJECT_JOB_CRAFTING_TABLE_SELECT,
+	GAMEOJBECT_JOB_CRAFTING_TABLE_NON_SELECT
 };
 
 enum class en_MonsterAggroType : int8
@@ -2302,8 +2317,6 @@ struct st_QuickSlotBarPosition
 
 struct st_CraftingMaterialItemInfo
 {
-	int64 AccountDBId; // 재료템 가지고 있는 Account
-	int64 PlayerDBId; // 재료템 가지고 있는 Player
 	en_SmallItemCategory MaterialItemType; // 재료템 종류
 	wstring MaterialItemName; // 재료템 이름
 	int16 ItemCount; // 재료템 필요 개수
@@ -2312,6 +2325,7 @@ struct st_CraftingMaterialItemInfo
 
 struct st_CraftingCompleteItem
 {
+	en_UIObjectInfo OwnerCraftingTable;  // 완성 제작템을 소유한 제작대
 	en_SmallItemCategory CompleteItemType; // 완성 제작템 종류
 	wstring CompleteItemName; // 완성 제작템 이름
 	wstring CompleteItemImagePath; // 완성 제작템 이미지 경로
@@ -2323,6 +2337,14 @@ struct st_CraftingItemCategory
 	en_LargeItemCategory CategoryType; // 제작템 범주
 	wstring CategoryName; // 제작템 범주 이름
 	vector<st_CraftingCompleteItem> CompleteItems; // 범주에 속한 완성 제작템들
+};
+
+// 제작대 제작품 정보
+struct st_CraftingTable
+{
+	en_GameObjectType CraftingTableType; // 제작대 종류
+	wstring CraftingTableName;			 // 제작대 이름
+	vector<st_CraftingCompleteItem> CraftingTableCompleteItems; // 제작대 제작품 목록
 };
 
 struct st_FieldOfViewInfo
