@@ -8,8 +8,8 @@ public:
 	// 제작대 선택 여부
 	bool _SelectedCraftingTable;
 
-	// 제작대를 조종중인 ObjectID
-	int64 _OwnerObjectID;
+	// 제작대를 선택중인 ObjectID
+	int64 _SelectedObjectID;
 
 	CCraftingTable();
 

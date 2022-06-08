@@ -3,6 +3,7 @@
 #include "ObjectManager.h"
 #include "DataManager.h"
 #include "Skill.h"
+#include "CraftingTable.h"
 
 CGameObject::CGameObject()
 {
@@ -362,6 +363,32 @@ void CGameObject::Update()
 				CMessage* StatChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectStatInfo);
 				G_ObjectManager->GameServer->SendPacketFieldOfView(this, StatChangePacket);
 				StatChangePacket->Free();
+			}
+			break;
+		case en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_SELECT:
+			{
+				CGameObject* SelectCraftingTableObject;
+				*GameObjectJob->GameObjectJobMessage >> &SelectCraftingTableObject;
+				int64 OwnerID;
+				*GameObjectJob->GameObjectJobMessage >> OwnerID;
+
+				CCraftingTable* CraftingTableObject = (CCraftingTable*)SelectCraftingTableObject;
+				
+				CraftingTableObject->_SelectedCraftingTable = true;		
+
+				CraftingTableObject->_SelectedObjectID = OwnerID;
+			}
+			break;
+		case en_GameObjectJobType::GAMEOJBECT_JOB_CRAFTING_TABLE_NON_SELECT:
+			{
+				CGameObject* SelectCraftingTableObject;
+				*GameObjectJob->GameObjectJobMessage >> &SelectCraftingTableObject;
+
+				CCraftingTable* CraftingTableObject = (CCraftingTable*)SelectCraftingTableObject;
+
+				CraftingTableObject->_SelectedCraftingTable = false;
+
+				CraftingTableObject->_SelectedObjectID = -1;
 			}
 			break;
 		}
