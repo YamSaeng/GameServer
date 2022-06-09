@@ -389,6 +389,8 @@ void CGameObject::Update()
 				CraftingTableObject->_SelectedCraftingTable = false;
 
 				CraftingTableObject->_SelectedObjectID = -1;
+
+				CraftingTableObject->_SelectCraftingTableCompleteItem = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
 			}
 			break;
 		}
@@ -901,6 +903,10 @@ void CGameObject::UpdateSpell()
 }
 
 void CGameObject::UpdateGathering()
+{
+}
+
+void CGameObject::UpdateCrafting()
 {
 }
 

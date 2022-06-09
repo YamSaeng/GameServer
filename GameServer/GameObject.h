@@ -156,6 +156,10 @@ protected:
 	// 채집 완료 Tick
 	//--------------------------------------
 	uint64 _GatheringTick;
+	//--------------------------------------
+	// 제작 Tick
+	//--------------------------------------
+	uint64 _CraftingTick;
 
 	//---------------------------
 	// 주위 시야 오브젝트 탐색 틱
@@ -185,6 +189,7 @@ protected:
 	virtual void UpdateAttack();
 	virtual void UpdateSpell();
 	virtual void UpdateGathering();
+	virtual void UpdateCrafting();
 	virtual void UpdateReadyDead();
 	virtual void UpdateDead();
 };
