@@ -75,6 +75,7 @@ enum class en_CreatureState : int8
 	ATTACK,
 	SPELL,
 	GATHERING,
+	CRAFTING,
 	READY_DEAD,
 	DEAD
 };
