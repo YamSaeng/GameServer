@@ -189,6 +189,29 @@ void CInventory::PlaceItem(CItem* PlaceItemInfo, int16 PositionX, int16 Position
 	_InventoryItemNumber++;
 }
 
+void CInventory::InitItem(int8 TilePositionX, int8 TilePositionY)
+{
+	if (_Items[TilePositionX][TilePositionY] != nullptr)
+	{
+		st_InventoryItem* InitInventoryItem = _Items[TilePositionX][TilePositionY];
+		
+		int16 InitTileWidth = InitInventoryItem->InventoryItem->_ItemInfo.Width;
+		int16 InitTileHeight = InitInventoryItem->InventoryItem->_ItemInfo.Height;
+
+		CItem* Item = InitInventoryItem->InventoryItem;
+		G_ObjectManager->ItemReturn(Item);
+
+		for (int16 X = 0; X < InitTileWidth; X++)
+		{
+			for (int16 Y = 0; Y < InitTileHeight; Y++)
+			{
+				_Items[TilePositionX + X][TilePositionY + Y]->IsEmptySlot = true;	
+				_Items[TilePositionX + X][TilePositionY + Y]->InventoryItem = nullptr;
+			}
+		}		
+	}	
+}
+
 st_Vector2Int CInventory::CalculatePositionOnGrid(CItem* Item, int8 TilePositionX, int8 TilePositionY)
 {
 	st_Vector2Int TilePosition;

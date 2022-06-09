@@ -141,6 +141,11 @@ CItem* CInventoryManager::FindInventoryItem(int8 SelectInventoryIndex, en_SmallI
 	return _Inventorys[SelectInventoryIndex]->FindInventoryItem(FindItemSmallItemCategory);
 }
 
+void CInventoryManager::InitItem(int8 SelectInventoryIndex, int8 TilePositionX, int8 TilePositionY)
+{
+	_Inventorys[SelectInventoryIndex]->InitItem(TilePositionX, TilePositionY);
+}
+
 vector<CItem*> CInventoryManager::FindAllInventoryItem(int8 SelectInventoryIndex, en_SmallItemCategory FindItemSmallItemCategory)
 {
 	return _Inventorys[SelectInventoryIndex]->FindAllInventoryItem(FindItemSmallItemCategory);

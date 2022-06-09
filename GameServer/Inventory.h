@@ -56,6 +56,11 @@ public:
 	bool PlaceItem(CItem* PlaceItemInfo, int16 PositionX, int16 PositionY, CItem** OverlapItem);
 	void PlaceItem(CItem* PlaceItemInfo, int16 PositionX, int16 PositionY);	
 
+	//----------------------------------------------------
+	// 매개변수로 받은 위치 아이템 초기화
+	//----------------------------------------------------
+	void InitItem(int8 TilePositionX, int8 TilePositionY);
+
 	//----------------------------------------------------------------------------------------
 	// 아이템의 Grid 인벤토리 위치를 계산한다.
 	//----------------------------------------------------------------------------------------
