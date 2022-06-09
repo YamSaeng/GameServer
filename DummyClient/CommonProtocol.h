@@ -413,6 +413,30 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_CRAFTING_TABLE_INPUT_ITEM,
 
 	//------------------------------------------------------------
+	// 게임서버 제작대 제작 아이템 선택 응답
+	// int64 CraftingTableObjectID
+	// en_SmallItemCategory SelectCompleteItemType
+	// map MaterialItems
+	//------------------------------------------------------------
+	en_PACKET_S2C_CRAFTING_TABLE_COMPLETE_ITEM_SELECT,
+
+	//------------------------------------------------------------
+	// 게임서버 제작대 제작 시작
+	// int64 AccountID
+	// int64 PlayerID
+	// int64 CraftingTableObjectID
+	// en_GameObject CraftingTableObjectType
+	// en_SmallItemCateogry CraftingCompleteItem
+	// int16 CraftingCount
+	//------------------------------------------------------------
+	en_PACKET_C2S_CRAFTING_TABLE_CRAFTING_START,
+		
+	//------------------------------------------------------------
+	// 게임서버 제작대 제작 시작 응답
+	//------------------------------------------------------------
+	en_PACKET_S2C_CRAFTING_TABLE_CRAFTING_START,
+
+	//------------------------------------------------------------
 	// 게임서버 아이템 선택 요청
 	// int64 AccountId
 	// int64 ObjectId

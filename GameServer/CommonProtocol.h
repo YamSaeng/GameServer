@@ -282,7 +282,8 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// 게임서버 왼쪽 UI 마우스 정보 요청 
 	// int64 AccountID
 	// int64 PlayerID
-	// en_GameObjectType ObjectType
+	// int64 OwnerID  ( UI를 표시하는 게임 오브젝트 ID )
+	// en_UIObjectInfo UIObjectInfo ( UI가 속한 UIObjectInfo )
 	//------------------------------------------------------------
 	en_PACKET_C2S_LEFT_MOUSE_UI_OBJECT_INFO,
 	
@@ -411,6 +412,30 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// map MaterialItems
 	//------------------------------------------------------------
 	en_PACKET_S2C_CRAFTING_TABLE_INPUT_ITEM,
+
+	//------------------------------------------------------------
+	// 게임서버 제작대 제작 아이템 선택 응답
+	// int64 CraftingTableObjectID
+	// en_SmallItemCategory SelectCompleteItemType
+	// map MaterialItems
+	//------------------------------------------------------------
+	en_PACKET_S2C_CRAFTING_TABLE_COMPLETE_ITEM_SELECT,
+
+	//------------------------------------------------------------
+	// 게임서버 제작대 제작 시작
+	// int64 AccountID
+	// int64 PlayerID
+	// int64 CraftingTableObjectID
+	// en_GameObject CraftingTableObjectType
+	// en_SmallItemCateogry CraftingCompleteItem
+	// int16 CraftingCount
+	//------------------------------------------------------------
+	en_PACKET_C2S_CRAFTING_TABLE_CRAFTING_START,
+
+	//------------------------------------------------------------
+	// 게임서버 제작대 제작 시작 응답
+	//------------------------------------------------------------
+	en_PACKET_S2C_CRAFTING_TABLE_CRAFTING_START,
 
 	//------------------------------------------------------------
 	// 게임서버 아이템 선택 요청
