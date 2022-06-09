@@ -59,7 +59,53 @@ void CFurnace::InputMaterialItem(CItem* MaterialItem, int16 MaterialItemCount)
 	}
 }
 
+bool CFurnace::FindMaterialItem(en_SmallItemCategory FindSmallItemCategory, int16 ItemCount)
+{
+	auto FindMaterialIter = _MaterialItems.find(FindSmallItemCategory);
+	if (FindMaterialIter == _MaterialItems.end())
+	{
+		return false;
+	}
+	
+	if ((*FindMaterialIter).second->_ItemInfo.ItemCount == ItemCount)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+void CFurnace::Update()
+{
+	CGameObject::Update();
+
+	switch (_GameObjectInfo.ObjectPositionInfo.State)
+	{
+	case en_CreatureState::CRAFTING:
+		UpdateCrafting();
+		break;	
+	}
+}
+
 void CFurnace::CraftingStart()
 {
+	_CraftingTick = GetTickCount64() + 5000;
 
+	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::CRAFTING;
+}
+
+st_CraftingTable CFurnace::GetFurnaceCraftingTable()
+{
+	return _FurnaceCraftingTable;
+}
+
+void CFurnace::UpdateCrafting()
+{
+	if (_CraftingTick < GetTickCount64())
+	{
+		_CraftingTick = GetTickCount64() + 5000;
+		G_Logger->WriteStdOut(en_Color::GREEN, L"제작 완료\n");
+	}
 }
