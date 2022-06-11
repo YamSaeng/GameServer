@@ -17,8 +17,6 @@ public:
 
 	virtual void Update() override;
 
-	void CraftingStart();
-
 	st_CraftingTable GetFurnaceCraftingTable();
 protected:
 	virtual void UpdateCrafting() override;

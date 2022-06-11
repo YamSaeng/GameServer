@@ -14,7 +14,9 @@ public:
 	CCraftingTable();
 
 	virtual void Start();
-protected:
+
+	void CraftingStart();	
+
 	// 선택된 제작 완성 아이템
-	en_SmallItemCategory _SelectCraftingTableCompleteItem;
+	en_SmallItemCategory _SelectCraftingTableCompleteItem;	
 };
