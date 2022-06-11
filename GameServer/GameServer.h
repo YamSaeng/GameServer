@@ -199,6 +199,10 @@ private:
 	// 제작대 아이템 넣기 요청 처리
 	//---------------------------------------------------------------------------
 	void PacketProcReqCraftingTableInputItem(int64 SessionID, CMessage* Message);
+	//--------------------------------------------------------------------------
+	// 제작대 제작 요청 처리
+	//--------------------------------------------------------------------------
+	void PacketProcReqCraftingTableCraftingStart(int64 SessionID, CMessage* Message);
 	//--------------------------------------------------------
 	// 퐁 패킷 처리
 	//--------------------------------------------------------
@@ -381,10 +385,15 @@ private:
 	// 게임서버 제작템 목록 패킷 조합
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketCraftingList(int64 AccountId, int64 PlayerId, vector<st_CraftingItemCategory> CraftingItemList);
-	//---------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------------------
 	// 게임서버 제작대 아이템 넣기 응답 패킷 조합
-	//---------------------------------------------------------------------
+	//-----------------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResCraftingTableInput(int64 CraftingTableObjectID, map<en_SmallItemCategory, CItem*> MaterialItems);
+	//-----------------------------------------------------------------------------------------------
+	// 게임서버 제작대 제작 아이템 선택 응답 패킷 조합
+	//-----------------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResCraftingTableCompleteItemSelect(int64 CraftingTableObjectID, en_SmallItemCategory SelectCompleteType, map<en_SmallItemCategory, CItem*> MaterialItems);	
+	
 	//-------------------------------------------------
 	// 게임서버 핑 패킷 조합
 	//-------------------------------------------------
@@ -536,6 +545,14 @@ public:
 	// 게임 서버 상태이상 적용 패킷 조합
 	//------------------------------------------------------------
 	CGameServerMessage* MakePacketStatusAbnormal(int64 TargetId, en_GameObjectType ObjectType, en_MoveDir Dir, en_SkillType SkillType, bool SetStatusAbnormal, int8 StatusAbnormal);
+	//-----------------------------------------------------------------------------------------------
+	// 게임서버 제작대 재료 아이템 목록 패킷 조합
+	//-----------------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResCraftingTableMaterialItemList(int64 CraftingTableObjectID, en_GameObjectType CraftingTableObjectType, en_SmallItemCategory SelectCompleteItemType, map<en_SmallItemCategory, CItem*> MaterialItems);
+	//-----------------------------------------------------------------------------------------------
+	// 게임서버 제작대 제작 완료 아이템 목록 패킷 조합
+	//-----------------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResCraftingTableCompleteItemList(int64 CraftingTableObjectID, en_GameObjectType CraftingTableObjectType, map<en_SmallItemCategory, CItem*> CompleteItems);
 	//---------------------------------------------------
 	// 로그인 서버 로그아웃 요청 패킷 조합
 	//---------------------------------------------------
