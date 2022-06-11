@@ -437,6 +437,20 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_CRAFTING_TABLE_CRAFTING_START,
 
 	//------------------------------------------------------------
+	// 게임서버 제작대 재료 목록 보내기
+	// int64 CraftingTableObjectID
+	// map MaterialItems
+	//------------------------------------------------------------
+	en_PACKET_S2C_CRAFTING_TABLE_MATERIAL_ITEM_LIST,
+
+	//------------------------------------------------------------
+	// 게임서버 제작대 제작완료템 목록 보내기
+	// int64 CraftingtableObjectID
+	// map CompleteItems
+	//------------------------------------------------------------
+	en_PACKET_S2C_CRAFTING_TABLE_COMPLETE_ITEM_LIST,
+
+	//------------------------------------------------------------
 	// 게임서버 아이템 선택 요청
 	// int64 AccountId
 	// int64 ObjectId
