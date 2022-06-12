@@ -26,6 +26,9 @@ public:
 	// 제작대가 소유중인 완성 제작품 목록 반환
 	map<en_SmallItemCategory, CItem*> GetCompleteItems();
 protected:
+	// 제작 남은 시간
+	int64 _CraftingRemainTime;
+
 	// 제작대가 소유중인 재료 아이템 목록
 	map<en_SmallItemCategory, CItem*> _MaterialItems;
 	// 제작대가 소유중인 완성 제작품 아이템 목록

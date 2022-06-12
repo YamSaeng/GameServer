@@ -92,9 +92,11 @@ st_CraftingTable CFurnace::GetFurnaceCraftingTable()
 
 void CFurnace::UpdateCrafting()
 {
-	if (_CraftingTick < GetTickCount64())
+	_CraftingRemainTime = _CraftingTick - GetTickCount64();
+
+	if (_CraftingRemainTime < 0)
 	{
-		st_ItemData* ItemData = G_Datamanager->FindItemData(_SelectCraftingTableCompleteItem);		
+		st_ItemData* ItemData = G_Datamanager->FindItemData(_SelectCraftingTableCompleteItem);
 
 		for (st_CraftingCompleteItem CraftingCompleteItem : _FurnaceCraftingTable.CraftingTableCompleteItems)
 		{
@@ -103,107 +105,109 @@ void CFurnace::UpdateCrafting()
 				switch (_SelectCraftingTableCompleteItem)
 				{
 				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL:
+				{
+					// 숯 조합 재료에 해당하는 아이템들을 용광로 재료에서 없애줘야함
+					int16 OneReqMaterialCount = 0;
+
+					// 재료가 용광로에 있는지 우선 확인
+					bool IsCraftingSuccess = true;
+					for (st_CraftingMaterialItemInfo MaterialItem : CraftingCompleteItem.Materials)
 					{
-						// 숯 조합 재료에 해당하는 아이템들을 용광로 재료에서 없애줘야함
-						int16 OneReqMaterialCount = 0;
-						
-						// 재료가 용광로에 있는지 우선 확인
-						bool IsCraftingSuccess = true;
+						if (!FindMaterialItem(MaterialItem.MaterialItemType, MaterialItem.ItemCount))
+						{
+							IsCraftingSuccess = false;
+						}
+					}
+
+					if (IsCraftingSuccess == true)
+					{
+						CPlayer* Player = (CPlayer*)_SelectedObject;
+
+						// 재료 갯수 차감
+						for (st_CraftingMaterialItemInfo MaterialItem : CraftingCompleteItem.Materials)
+						{
+							auto FindMaterialIter = _MaterialItems.find(MaterialItem.MaterialItemType);
+							if (FindMaterialIter != _MaterialItems.end())
+							{
+								(*FindMaterialIter).second->_ItemInfo.ItemCount -= MaterialItem.ItemCount;
+							}
+						}
+
+						// 다음 번 재료 조합템이 용광로에 있는지 확인
+						bool IsNextCraftingSuccess = true;
 						for (st_CraftingMaterialItemInfo MaterialItem : CraftingCompleteItem.Materials)
 						{
 							if (!FindMaterialItem(MaterialItem.MaterialItemType, MaterialItem.ItemCount))
 							{
-								IsCraftingSuccess = false;
-							}							
+								IsNextCraftingSuccess = false;
+							}
 						}
 
-						if (IsCraftingSuccess == true)
+						if (IsNextCraftingSuccess == true)
 						{
-							CPlayer* Player = (CPlayer*)_SelectedObject;						
-
-							// 재료 갯수 차감
-							for (st_CraftingMaterialItemInfo MaterialItem : CraftingCompleteItem.Materials)
-							{
-								auto FindMaterialIter = _MaterialItems.find(MaterialItem.MaterialItemType);
-								if (FindMaterialIter != _MaterialItems.end())
-								{
-									(*FindMaterialIter).second->_ItemInfo.ItemCount -= MaterialItem.ItemCount;
-								}																
-							}
-
-							// 다음 번 재료 조합템이 용광로에 있는지 확인
-							bool IsNextCraftingSuccess = true;
-							for (st_CraftingMaterialItemInfo MaterialItem : CraftingCompleteItem.Materials)
-							{
-								if (!FindMaterialItem(MaterialItem.MaterialItemType, MaterialItem.ItemCount))
-								{
-									IsNextCraftingSuccess = false;
-								}
-							}
-							
-							if (IsNextCraftingSuccess == true)
-							{
-								CMessage* ResCraftingstartPacket = G_ObjectManager->GameServer->MakePacketResCraftingStart(
-									_GameObjectInfo.ObjectId,
-									_SelectCraftingTableCompleteItem,
-									ItemData->ItemCraftingTime);
-
-								G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCraftingstartPacket);
-							}
-
-							CMessage* ResCraftingTableMaterialItemListPacket = G_ObjectManager->GameServer->MakePacketResCraftingTableMaterialItemList(
+							CMessage* ResCraftingstartPacket = G_ObjectManager->GameServer->MakePacketResCraftingStart(
 								_GameObjectInfo.ObjectId,
-								_GameObjectInfo.ObjectType,
 								_SelectCraftingTableCompleteItem,
-								_MaterialItems);										
-							G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCraftingTableMaterialItemListPacket);
-							ResCraftingTableMaterialItemListPacket->Free();
+								ItemData->ItemCraftingTime);
 
-							st_ItemData* ItemData = G_Datamanager->FindItemData(_SelectCraftingTableCompleteItem);
+							G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCraftingstartPacket);
+						}
 
-							auto CompleteItemIter = _CompleteItems.find(_SelectCraftingTableCompleteItem);
-							if (CompleteItemIter == _CompleteItems.end())
-							{
-								CItem* CompleteItemCharCoal = G_ObjectManager->ItemCreate(_SelectCraftingTableCompleteItem);
-								CompleteItemCharCoal->_ItemInfo.ItemDBId = 0;
-								CompleteItemCharCoal->_ItemInfo.Rotated = 0;
-								CompleteItemCharCoal->_ItemInfo.Width = ItemData->ItemWidth;
-								CompleteItemCharCoal->_ItemInfo.Height = ItemData->ItemHeight;
-								CompleteItemCharCoal->_ItemInfo.ItemLargeCategory = (en_LargeItemCategory)ItemData->LargeItemCategory;
-								CompleteItemCharCoal->_ItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemData->MediumItemCategory;
-								CompleteItemCharCoal->_ItemInfo.ItemSmallCategory = (en_SmallItemCategory)ItemData->SmallItemCategory;
-								CompleteItemCharCoal->_ItemInfo.ItemName = (LPWSTR)CA2W(ItemData->ItemName.c_str());
-								CompleteItemCharCoal->_ItemInfo.ItemExplain = (LPWSTR)CA2W(ItemData->ItemExplain.c_str());
-								CompleteItemCharCoal->_ItemInfo.ItemCount = 1;
-								CompleteItemCharCoal->_ItemInfo.ItemThumbnailImagePath = (LPWSTR)CA2W(ItemData->ItemThumbnailImagePath.c_str());
-								CompleteItemCharCoal->_ItemInfo.ItemIsEquipped = false;
-								CompleteItemCharCoal->_ItemInfo.ItemMaxCount = ItemData->ItemMaxCount;									
-								CompleteItemCharCoal->_ItemInfo.ItemCraftingTime = ItemData->ItemCraftingTime;
+						CMessage* ResCraftingTableMaterialItemListPacket = G_ObjectManager->GameServer->MakePacketResCraftingTableMaterialItemList(
+							_GameObjectInfo.ObjectId,
+							_GameObjectInfo.ObjectType,
+							_SelectCraftingTableCompleteItem,
+							_MaterialItems);
+						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCraftingTableMaterialItemListPacket);
+						ResCraftingTableMaterialItemListPacket->Free();
 
-								_CompleteItems.insert(pair<en_SmallItemCategory, CItem*>(CompleteItemCharCoal->_ItemInfo.ItemSmallCategory, CompleteItemCharCoal));
-							}
-							else
-							{
-								(*CompleteItemIter).second->_ItemInfo.ItemCount += 1;
-							}							
+						st_ItemData* ItemData = G_Datamanager->FindItemData(_SelectCraftingTableCompleteItem);
 
-							CMessage* ResCrafintgTableCompleteItemListPacket = G_ObjectManager->GameServer->MakePacketResCraftingTableCompleteItemList(
-								_GameObjectInfo.ObjectId,
-								_GameObjectInfo.ObjectType,								
-								_CompleteItems);
-							G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCrafintgTableCompleteItemListPacket);
-							ResCrafintgTableCompleteItemListPacket->Free();
-						}	
+						auto CompleteItemIter = _CompleteItems.find(_SelectCraftingTableCompleteItem);
+						if (CompleteItemIter == _CompleteItems.end())
+						{
+							CItem* CompleteItemCharCoal = G_ObjectManager->ItemCreate(_SelectCraftingTableCompleteItem);
+							CompleteItemCharCoal->_ItemInfo.ItemDBId = 0;
+							CompleteItemCharCoal->_ItemInfo.Rotated = 0;
+							CompleteItemCharCoal->_ItemInfo.Width = ItemData->ItemWidth;
+							CompleteItemCharCoal->_ItemInfo.Height = ItemData->ItemHeight;
+							CompleteItemCharCoal->_ItemInfo.ItemLargeCategory = (en_LargeItemCategory)ItemData->LargeItemCategory;
+							CompleteItemCharCoal->_ItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemData->MediumItemCategory;
+							CompleteItemCharCoal->_ItemInfo.ItemSmallCategory = (en_SmallItemCategory)ItemData->SmallItemCategory;
+							CompleteItemCharCoal->_ItemInfo.ItemName = (LPWSTR)CA2W(ItemData->ItemName.c_str());
+							CompleteItemCharCoal->_ItemInfo.ItemExplain = (LPWSTR)CA2W(ItemData->ItemExplain.c_str());
+							CompleteItemCharCoal->_ItemInfo.ItemCount = 1;
+							CompleteItemCharCoal->_ItemInfo.ItemThumbnailImagePath = (LPWSTR)CA2W(ItemData->ItemThumbnailImagePath.c_str());
+							CompleteItemCharCoal->_ItemInfo.ItemIsEquipped = false;
+							CompleteItemCharCoal->_ItemInfo.ItemMaxCount = ItemData->ItemMaxCount;
+							CompleteItemCharCoal->_ItemInfo.ItemCraftingTime = ItemData->ItemCraftingTime;
+
+							_CompleteItems.insert(pair<en_SmallItemCategory, CItem*>(CompleteItemCharCoal->_ItemInfo.ItemSmallCategory, CompleteItemCharCoal));
+						}
 						else
 						{
-							_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+							(*CompleteItemIter).second->_ItemInfo.ItemCount += 1;
 						}
+
+						CMessage* ResCrafintgTableCompleteItemListPacket = G_ObjectManager->GameServer->MakePacketResCraftingTableCompleteItemList(
+							_GameObjectInfo.ObjectId,
+							_GameObjectInfo.ObjectType,
+							_CompleteItems);
+						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCrafintgTableCompleteItemListPacket);
+						ResCrafintgTableCompleteItemListPacket->Free();
 					}
+					else
+					{
+						_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+					}
+				}
 				break;
 				}
-			}			
+			}
 		}
-		
-		_CraftingTick = GetTickCount64() + ItemData->ItemCraftingTime;
-	}
+
+		_CraftingTick = ItemData->ItemCraftingTime + GetTickCount64();
+
+		_CraftingRemainTime = _CraftingTick - GetTickCount64();		
+	}	
 }

@@ -13,9 +13,11 @@ void CCraftingTable::Start()
 
 void CCraftingTable::CraftingStart(int64 CraftingTime)
 {
-	_CraftingTick = GetTickCount64() + CraftingTime;
+	_CraftingTick = CraftingTime + GetTickCount64();
 
-	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::CRAFTING;
+	_CraftingRemainTime = _CraftingTick - GetTickCount64();
+
+	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::CRAFTING;	
 }
 
 void CCraftingTable::CraftingStop()
