@@ -16,11 +16,6 @@ CFurnace::CFurnace()
 	_FurnaceCraftingTable = *(*FindFurnaceData).second;	
 }
 
-map<en_SmallItemCategory, CItem*> CFurnace::GetMaterialItems()
-{
-	return _MaterialItems;
-}
-
 void CFurnace::InputMaterialItem(CItem* MaterialItem, int16 MaterialItemCount)
 {
 	// 우선 용광로 재료 템들 중에 넣을 아이템이 존재하는지 확인
@@ -99,6 +94,8 @@ void CFurnace::UpdateCrafting()
 {
 	if (_CraftingTick < GetTickCount64())
 	{
+		st_ItemData* ItemData = G_Datamanager->FindItemData(_SelectCraftingTableCompleteItem);		
+
 		for (st_CraftingCompleteItem CraftingCompleteItem : _FurnaceCraftingTable.CraftingTableCompleteItems)
 		{
 			if (CraftingCompleteItem.CompleteItemType == _SelectCraftingTableCompleteItem)
@@ -122,6 +119,8 @@ void CFurnace::UpdateCrafting()
 
 						if (IsCraftingSuccess == true)
 						{
+							CPlayer* Player = (CPlayer*)_SelectedObject;						
+
 							// 재료 갯수 차감
 							for (st_CraftingMaterialItemInfo MaterialItem : CraftingCompleteItem.Materials)
 							{
@@ -129,15 +128,34 @@ void CFurnace::UpdateCrafting()
 								if (FindMaterialIter != _MaterialItems.end())
 								{
 									(*FindMaterialIter).second->_ItemInfo.ItemCount -= MaterialItem.ItemCount;
-								}								
+								}																
+							}
+
+							// 다음 번 재료 조합템이 용광로에 있는지 확인
+							bool IsNextCraftingSuccess = true;
+							for (st_CraftingMaterialItemInfo MaterialItem : CraftingCompleteItem.Materials)
+							{
+								if (!FindMaterialItem(MaterialItem.MaterialItemType, MaterialItem.ItemCount))
+								{
+									IsNextCraftingSuccess = false;
+								}
+							}
+							
+							if (IsNextCraftingSuccess == true)
+							{
+								CMessage* ResCraftingstartPacket = G_ObjectManager->GameServer->MakePacketResCraftingStart(
+									_GameObjectInfo.ObjectId,
+									_SelectCraftingTableCompleteItem,
+									ItemData->ItemCraftingTime);
+
+								G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCraftingstartPacket);
 							}
 
 							CMessage* ResCraftingTableMaterialItemListPacket = G_ObjectManager->GameServer->MakePacketResCraftingTableMaterialItemList(
 								_GameObjectInfo.ObjectId,
 								_GameObjectInfo.ObjectType,
 								_SelectCraftingTableCompleteItem,
-								_MaterialItems);							
-							CPlayer* Player = (CPlayer*)_Channel->FindChannelObject(_SelectedObjectID, en_GameObjectType::OBJECT_PLAYER);
+								_MaterialItems);										
 							G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCraftingTableMaterialItemListPacket);
 							ResCraftingTableMaterialItemListPacket->Free();
 
@@ -159,7 +177,8 @@ void CFurnace::UpdateCrafting()
 								CompleteItemCharCoal->_ItemInfo.ItemCount = 1;
 								CompleteItemCharCoal->_ItemInfo.ItemThumbnailImagePath = (LPWSTR)CA2W(ItemData->ItemThumbnailImagePath.c_str());
 								CompleteItemCharCoal->_ItemInfo.ItemIsEquipped = false;
-								CompleteItemCharCoal->_ItemInfo.ItemMaxCount = ItemData->ItemMaxCount;
+								CompleteItemCharCoal->_ItemInfo.ItemMaxCount = ItemData->ItemMaxCount;									
+								CompleteItemCharCoal->_ItemInfo.ItemCraftingTime = ItemData->ItemCraftingTime;
 
 								_CompleteItems.insert(pair<en_SmallItemCategory, CItem*>(CompleteItemCharCoal->_ItemInfo.ItemSmallCategory, CompleteItemCharCoal));
 							}
@@ -185,6 +204,6 @@ void CFurnace::UpdateCrafting()
 			}			
 		}
 		
-		_CraftingTick = GetTickCount64() + 5000;		
+		_CraftingTick = GetTickCount64() + ItemData->ItemCraftingTime;
 	}
 }

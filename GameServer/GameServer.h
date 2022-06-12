@@ -203,6 +203,10 @@ private:
 	// 제작대 제작 요청 처리
 	//--------------------------------------------------------------------------
 	void PacketProcReqCraftingTableCraftingStart(int64 SessionID, CMessage* Message);
+	//--------------------------------------------------------------------------
+	// 제작대 제작 멈춤 처리
+	//--------------------------------------------------------------------------
+	void PacketProcReqCraftingTableCraftingStop(int64 SessionID, CMessage* Message);
 	//--------------------------------------------------------
 	// 퐁 패킷 처리
 	//--------------------------------------------------------
@@ -298,11 +302,19 @@ private:
 	//------------------------------------------------------
 	// 제작대 선택 잡 생성 함수
 	//------------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobCraftingTableSelect(CGameObject* CraftingTableObject, int64 OwnerObjectID);
+	st_GameObjectJob* MakeGameObjectJobCraftingTableSelect(CGameObject* CraftingTableObject, CGameObject* OwnerObject);
 	//---------------------------------------------------------
 	// 제작대 선택 풀림 잡 생성 함수
 	//---------------------------------------------------------
 	st_GameObjectJob* MakeGameObjectJobCraftingTableNonSelect(CGameObject* CraftingTableObject);
+	//---------------------------------------------------------
+	// 제작대 제작 시작 잡 생성 함수
+	//---------------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobCraftingTableStart(CGameObject* CraftingStartObject, en_SmallItemCategory CraftingCompleteItemType, int16 CraftingCount);
+	//---------------------------------------------------------
+	// 제작대 제작 멈춤 잡 생성 함수
+	//---------------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobCraftingTableCancel();
 
 	//--------------------------------------
 	// 패킷조합 함수		
@@ -549,6 +561,10 @@ public:
 	// 게임서버 제작대 재료 아이템 목록 패킷 조합
 	//-----------------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResCraftingTableMaterialItemList(int64 CraftingTableObjectID, en_GameObjectType CraftingTableObjectType, en_SmallItemCategory SelectCompleteItemType, map<en_SmallItemCategory, CItem*> MaterialItems);
+	//-----------------------------------------------------------------------------------------------
+	// 게임서버 제작대 제작 시작 응답 패킷 조합
+	//-----------------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResCraftingStart(int64 TargetObjectID, en_SmallItemCategory CraftingStartItemType, int64 CraftingTime);
 	//-----------------------------------------------------------------------------------------------
 	// 게임서버 제작대 제작 완료 아이템 목록 패킷 조합
 	//-----------------------------------------------------------------------------------------------

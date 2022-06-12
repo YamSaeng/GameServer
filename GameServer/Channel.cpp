@@ -341,6 +341,7 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 			}
 		}
 		break;
+	case en_GameObjectType::OBJECT_CRAFTING_TABLE:
 	case en_GameObjectType::OBJECT_FURNACE:
 		{
 			for (int32 i = 0; i < en_Channel::CRAFTING_TABLE_MAX; i++)

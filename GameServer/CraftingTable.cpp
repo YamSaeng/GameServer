@@ -11,9 +11,24 @@ void CCraftingTable::Start()
 	_SpawnPosition = _GameObjectInfo.ObjectPositionInfo.CollisionPosition;
 }
 
-void CCraftingTable::CraftingStart()
+void CCraftingTable::CraftingStart(int64 CraftingTime)
 {
-	_CraftingTick = GetTickCount64() + 5000;
+	_CraftingTick = GetTickCount64() + CraftingTime;
 
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::CRAFTING;
+}
+
+void CCraftingTable::CraftingStop()
+{
+	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+}
+
+map<en_SmallItemCategory, CItem*> CCraftingTable::GetMaterialItems()
+{
+	return _MaterialItems;
+}
+
+map<en_SmallItemCategory, CItem*> CCraftingTable::GetCompleteItems()
+{
+	return _CompleteItems;
 }

@@ -339,6 +339,8 @@ enum class en_PersonalMessageType : int8
 	PERSONAL_MESSAGE_DIR_DIFFERENT,
 
 	PERSONAL_MEESAGE_CRAFTING_TABLE_OVERLAP_SELECT,
+	PERSONAL_MESSAGE_CRAFTING_TABLE_OVERLAP_CRAFTING_START,
+	PERSONAL_MESSAGE_CRAFTING_TABLE_MATERIAL_COUNT_NOT_ENOUGH,
 
 	PERSONAL_MESSAGE_LOGIN_ACCOUNT_NOT_EXIST,
 	PERSONAL_MESSAGE_LOGIN_ACCOUNT_OVERLAP,
@@ -384,7 +386,9 @@ enum class en_GameObjectJobType : int16
 	GAMEOBJECT_JOB_PLAYER_LEAVE_CHANNEL,
 	GAMEOBJECT_JOB_FULL_RECOVERY,
 	GAMEOBJECT_JOB_CRAFTING_TABLE_SELECT,
-	GAMEOJBECT_JOB_CRAFTING_TABLE_NON_SELECT
+	GAMEOJBECT_JOB_CRAFTING_TABLE_NON_SELECT,
+	GAMEOBJECT_JOB_CRAFTING_TABLE_CRAFTING_START,
+	GAMEOBJECT_JOB_CRAFTING_TABLE_CRAFTING_STOP
 };
 
 enum class en_MonsterAggroType : int8
@@ -2129,6 +2133,7 @@ struct st_ItemInfo
 	int32 ItemDefence;				          // 아이템 방어력
 	int32 ItemMaxCount;				          // 아이템을 소유 할 수 있는 최대 개수
 	int16 ItemCount;			              // 개수
+	float ItemCraftingTime;					  // 아이템 조합 시간
 	wstring ItemThumbnailImagePath;           // 이미지 경로
 	bool ItemIsEquipped;			          // 아이템을 착용할 수 있는지		
 
@@ -2151,6 +2156,7 @@ struct st_ItemInfo
 		ItemDefence = 0;
 		ItemMaxCount = 0;
 		ItemCount = 0;
+		ItemCraftingTime = 0;
 		ItemThumbnailImagePath = L"";
 		ItemIsEquipped = false;
 	}

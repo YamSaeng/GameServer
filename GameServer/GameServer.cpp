@@ -2907,7 +2907,7 @@ void CGameServer::PacketProcReqRightMousePositionObjectInfo(int64 SessionId, CMe
 							CFurnace* FindFurnace = (CFurnace*)FindObject;
 
 							// 선택중이었던 용광로가 있으면
-							if (FindFurnace->_SelectedObjectID == MyPlayer->_GameObjectInfo.ObjectId)
+							if (FindFurnace->_SelectedObject != nullptr)
 							{
 								// 선택중인 용광로 선택해제
 								st_GameObjectJob* CraftingTableNonSelectJob = MakeGameObjectJobCraftingTableNonSelect(FindObject);
@@ -2915,7 +2915,7 @@ void CGameServer::PacketProcReqRightMousePositionObjectInfo(int64 SessionId, CMe
 							}
 						}
 
-						st_GameObjectJob* CraftingTableSelectJob = MakeGameObjectJobCraftingTableSelect(FindObject, MyPlayer->_GameObjectInfo.ObjectId);
+						st_GameObjectJob* CraftingTableSelectJob = MakeGameObjectJobCraftingTableSelect(FindObject, MyPlayer);
 						FindObject->_GameObjectJobQue.Enqueue(CraftingTableSelectJob);						
 						
 						CMessage* ResRightMousePositionObjectInfoPacket = MakePacketResRightMousePositionObjectInfo(MyPlayer->_GameObjectInfo.ObjectId, FindObject->_GameObjectInfo.ObjectId, FindObject->_GameObjectInfo.ObjectType);
@@ -4128,10 +4128,7 @@ void CGameServer::PacketProcReqCraftingTableInputItem(int64 SessionID, CMessage*
 			}
 
 			int64 CraftingTableObjectID;
-			*Message >> CraftingTableObjectID;
-
-			int16 CraftingTableGameObjectType;
-			*Message >> CraftingTableGameObjectType;
+			*Message >> CraftingTableObjectID;			
 
 			int16 InputItemSmallCategory;
 			*Message >> InputItemSmallCategory;
@@ -4142,7 +4139,7 @@ void CGameServer::PacketProcReqCraftingTableInputItem(int64 SessionID, CMessage*
 			CMap* Map = G_MapManager->GetMap(1);
 			CChannel* Channel = Map->GetChannelManager()->Find(1);
 
-			CGameObject* CraftingTable = Channel->FindChannelObject(CraftingTableObjectID, (en_GameObjectType)CraftingTableGameObjectType);
+			CGameObject* CraftingTable = Channel->FindChannelObject(CraftingTableObjectID, en_GameObjectType::OBJECT_CRAFTING_TABLE);
 			if (CraftingTable != nullptr)
 			{
 				CItem* FindInputItem = MyPlayer->_InventoryManager.FindInventoryItem(0, (en_SmallItemCategory)InputItemSmallCategory);
@@ -4233,10 +4230,7 @@ void CGameServer::PacketProcReqCraftingTableCraftingStart(int64 SessionID, CMess
 			}
 
 			int64 CraftingTableObjectID;
-			*Message >> CraftingTableObjectID;
-
-			int16 CraftingTableObjectType;
-			*Message >> CraftingTableObjectType;
+			*Message >> CraftingTableObjectID;			
 
 			int16 CraftingCompleteItemType;
 			*Message >> CraftingCompleteItemType;
@@ -4247,51 +4241,87 @@ void CGameServer::PacketProcReqCraftingTableCraftingStart(int64 SessionID, CMess
 			CMap* Map = G_MapManager->GetMap(1);
 			CChannel* Channel = Map->GetChannelManager()->Find(1);
 
-			CGameObject* CraftingTable = Channel->FindChannelObject(CraftingTableObjectID, (en_GameObjectType)CraftingTableObjectType);
+			CGameObject* CraftingTable = Channel->FindChannelObject(CraftingTableObjectID, en_GameObjectType::OBJECT_CRAFTING_TABLE);
 			if (CraftingTable != nullptr)
 			{
 				switch (CraftingTable->_GameObjectInfo.ObjectType)
 				{
 				case en_GameObjectType::OBJECT_FURNACE:
 					{
-						CFurnace* Furnace = (CFurnace*)CraftingTable;
+						st_GameObjectJob* CraftingTableCraftStratJob = MakeGameObjectJobCraftingTableStart(MyPlayer, (en_SmallItemCategory)CraftingCompleteItemType, CraftingCount);
+						CraftingTable->_GameObjectJobQue.Enqueue(CraftingTableCraftStratJob);
+					}
+					break;
+				}
+			}
+		} while (0);
+	}
 
-						// 용광로에서 선택된 제작템과 요청한 제작템이 일치하는지 확인
-						if (Furnace->_SelectCraftingTableCompleteItem 
-							== (en_SmallItemCategory)CraftingCompleteItemType)
-						{
-							// 용광로에서 요청한 제작템의 조합법을 찾음
-							st_CraftingTable FurnaceCraftingTable = Furnace->GetFurnaceCraftingTable();
-							for (st_CraftingCompleteItem FurnaceCompleteItem : FurnaceCraftingTable.CraftingTableCompleteItems)
-							{								
-								if (FurnaceCompleteItem.CompleteItemType == (en_SmallItemCategory)CraftingCompleteItemType)
-								{
-									bool IsCrafting = true;
+	ReturnSession(Session);
+}
 
-									// 조합법을 찾으면 가방에 조합법 재료가 있는지 확인									
-									for (st_CraftingMaterialItemInfo FurnaceMateriatlItemInfo : FurnaceCompleteItem.Materials)
-									{
-										// 제작템을 한개 만들떄 필요한 재료의 개수를 얻는다.
-										int16 OneReqMaterialcount = FurnaceMateriatlItemInfo.ItemCount;
-										// 클라가 요청한 제작템 제작갯수와 위에서 구한 개수를 곱해서 총 필요개수를 구한다.
-										int16 ReqCraftingItemTotalCount = CraftingCount * OneReqMaterialcount;
-										
-										// 인벤토리에 제작템의 최소 재료 필요 개수만큼 용광로 재료템에 있는지 확인한다.
-										if (!Furnace->FindMaterialItem(FurnaceMateriatlItemInfo.MaterialItemType, OneReqMaterialcount))
-										{
-											IsCrafting = false;
-										}
-									}
+void CGameServer::PacketProcReqCraftingTableCraftingStop(int64 SessionID, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionID);
 
-									if (IsCrafting == true)
-									{
-										Furnace->CraftingStart();
-									}
+	if (Session)
+	{
+		do
+		{
+			int64 AccountId;
+			int64 PlayerDBId;
 
-									break;
-								}
-							}
-						}
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountId;
+
+			// AccountId가 맞는지 확인
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> PlayerDBId;
+
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			// 조종하고 있는 플레이어가 있는지 확인 
+			if (MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			int64 CraftingTableObjectID;
+			*Message >> CraftingTableObjectID;		
+
+			CMap* Map = G_MapManager->GetMap(1);
+			CChannel* Channel = Map->GetChannelManager()->Find(1);
+
+			CGameObject* CraftingTable = Channel->FindChannelObject(CraftingTableObjectID, en_GameObjectType::OBJECT_CRAFTING_TABLE);
+			if (CraftingTable != nullptr)
+			{
+				switch (CraftingTable->_GameObjectInfo.ObjectType)
+				{
+				case en_GameObjectType::OBJECT_FURNACE:
+					{
+						st_GameObjectJob* CraftingTableCraftStratJob = MakeGameObjectJobCraftingTableCancel();
+						CraftingTable->_GameObjectJobQue.Enqueue(CraftingTableCraftStratJob);					
 					}
 					break;
 				}
@@ -6402,7 +6432,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobBackTeleport()
 	return BackTeleportJob;
 }
 
-st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableSelect(CGameObject* CraftingTableObject, int64 OwnerObjectID)
+st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableSelect(CGameObject* CraftingTableObject, CGameObject* OwnerObject)
 {
 	st_GameObjectJob* CraftingTableSelectJob = G_ObjectManager->GameObjectJobCreate();
 	CraftingTableSelectJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_SELECT;
@@ -6411,7 +6441,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableSelect(CGameObject*
 	CraftingTableSelectJobMessage->Clear();
 
 	*CraftingTableSelectJobMessage << &CraftingTableObject;
-	*CraftingTableSelectJobMessage << OwnerObjectID;
+	*CraftingTableSelectJobMessage << &OwnerObject;
 
 	CraftingTableSelectJob->GameObjectJobMessage = CraftingTableSelectJobMessage;
 
@@ -6431,6 +6461,33 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableNonSelect(CGameObje
 	CraftingTableSelectJob->GameObjectJobMessage = CraftingTableSelectJobMessage;
 
 	return CraftingTableSelectJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableStart(CGameObject* CraftingStartObject, en_SmallItemCategory CraftingCompleteItemType, int16 CraftingCount)
+{
+	st_GameObjectJob* CraftingTableStartJob = G_ObjectManager->GameObjectJobCreate();
+	CraftingTableStartJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_CRAFTING_START;
+
+	CGameServerMessage* CraftingTableStartJobMessage = CGameServerMessage::GameServerMessageAlloc();
+	CraftingTableStartJobMessage->Clear();
+
+	*CraftingTableStartJobMessage << &CraftingStartObject;
+	*CraftingTableStartJobMessage << (int16)CraftingCompleteItemType;
+	*CraftingTableStartJobMessage << CraftingCount;
+
+	CraftingTableStartJob->GameObjectJobMessage = CraftingTableStartJobMessage;
+
+	return CraftingTableStartJob;	
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableCancel()
+{
+	st_GameObjectJob* CraftingTableStartJob = G_ObjectManager->GameObjectJobCreate();
+	CraftingTableStartJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_CRAFTING_STOP;
+
+	CraftingTableStartJob->GameObjectJobMessage = nullptr;
+
+	return CraftingTableStartJob;
 }
 
 CGameServerMessage* CGameServer::MakePacketResClientConnected()
@@ -7662,6 +7719,12 @@ CGameServerMessage* CGameServer::MakePacketCommonError(en_PersonalMessageType Pe
 	case en_PersonalMessageType::PERSONAL_MEESAGE_CRAFTING_TABLE_OVERLAP_SELECT:
 		wsprintf(ErrorMessage, L"[%s]를 사용중입니다.", Name);
 		break;
+	case en_PersonalMessageType::PERSONAL_MESSAGE_CRAFTING_TABLE_OVERLAP_CRAFTING_START:
+		wsprintf(ErrorMessage, L"제작 중인 아이템을 모두 제작하거나, 제작 멈춤을 누르고 제작을 다시 시작해야 합니다.");
+		break;
+	case en_PersonalMessageType::PERSONAL_MESSAGE_CRAFTING_TABLE_MATERIAL_COUNT_NOT_ENOUGH:
+		wsprintf(ErrorMessage, L"재료가 부족합니다.");
+		break;
 	}
 
 	wstring ErrorMessageString = ErrorMessage;
@@ -7719,6 +7782,24 @@ CGameServerMessage* CGameServer::MakePacketResCraftingTableMaterialItemList(int6
 	}
 
 	return ResCraftingTableMaterialItemListMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketResCraftingStart(int64 TargetObjectID, en_SmallItemCategory CraftingStartItemType, int64 CraftingTime)
+{
+	CGameServerMessage* ResCraftingStartMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResCraftingStartMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResCraftingStartMessage->Clear();
+
+	*ResCraftingStartMessage << (int16)en_PACKET_S2C_CRAFTING_TABLE_CRAFTING_START;
+	*ResCraftingStartMessage << TargetObjectID;
+	*ResCraftingStartMessage << (int16)CraftingStartItemType;
+	*ResCraftingStartMessage << CraftingTime;
+
+	return ResCraftingStartMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketResCraftingTableCompleteItemList(int64 CraftingTableObjectID, en_GameObjectType CraftingTableObjectType, map<en_SmallItemCategory, CItem*> CompleteItems)
