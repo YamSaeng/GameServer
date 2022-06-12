@@ -364,6 +364,7 @@ CItem* CObjectManager::ItemCreate(en_SmallItemCategory NewItemSmallCategory)
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL:
 		NewItem = _MaterialMemoryPool->Alloc();
 		break;
 	}
@@ -394,6 +395,7 @@ void CObjectManager::ItemReturn(CItem* ReturnItem)
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL:
 		_MaterialMemoryPool->Free((CMaterial*)ReturnItem);
 		break;
 	}
@@ -500,6 +502,9 @@ void CObjectManager::MapObjectSpawn(int64& MapID)
 			case en_TileMapEnvironment::TILE_MAP_BEAR:
 				NewObject = (CBear*)ObjectCreate(en_GameObjectType::OBJECT_BEAR);
 				break;			
+			case en_TileMapEnvironment::TILE_MAP_FURNACE:
+				NewObject = (CFurnace*)ObjectCreate(en_GameObjectType::OBJECT_FURNACE);
+				break;
 			}
 
 			if (NewObject != nullptr)
