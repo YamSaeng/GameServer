@@ -13,7 +13,7 @@
 #define DUMMY_CLIENT_SEND_TIME 200
 #define DUMMY_CLIENT_LOGIN_TIME 500
 
-#define DUMMY_CLIENT_DISCONNECT 0//50
+#define DUMMY_CLIENT_DISCONNECT 10//50
 
 enum en_DummyClientNetworkState
 {

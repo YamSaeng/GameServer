@@ -1104,8 +1104,7 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 		}
 		break;
 		case en_PACKET_S2C_MOVE_STOP:
-		{
-			int64 AccountId;
+		{			
 			int64 ObjectId;
 			int8 CreatureState;
 			int32 CollsitionPositionX;
@@ -1113,8 +1112,7 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 			int8 MoveDir;
 			float PositionX;
 			float PositionY;
-
-			*Packet >> AccountId;
+			
 			*Packet >> ObjectId;
 			*Packet >> CreatureState;
 			*Packet >> CollsitionPositionX;
