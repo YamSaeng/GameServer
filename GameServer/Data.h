@@ -26,6 +26,7 @@ struct st_ItemData
 	string ItemThumbnailImagePath;
 	bool ItemIsEquipped;
 	int16 ItemCount;
+	int64 ItemCraftingTime;
 };
 
 struct st_ConsumableData : public st_ItemData

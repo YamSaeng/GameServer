@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "DataManager.h"
+#include <atlbase.h>
 
 void CDataManager::LoadDataItem(wstring LoadFileName)
 {
@@ -21,6 +22,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int32 ItemHeight = WeaponListFiled["ItemHeight"].GetInt();
 			int ItemMinDamage = WeaponListFiled["ItemMinDamage"].GetInt();
 			int ItemMaxDamage = WeaponListFiled["ItemMaxDamage"].GetInt();
+			int64 ItemCraftingTime = WeaponListFiled["ItemCraftingTime"].GetInt64();
 			string ImageFilePath = WeaponListFiled["ImageFilePath"].GetString();
 
 			st_ItemData* WeaponItemData = new st_ItemData();
@@ -50,6 +52,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			WeaponItemData->ItemMaxDamage = ItemMaxDamage;
 			WeaponItemData->ItemDefence = 0;
 			WeaponItemData->ItemMaxCount = 1;
+			WeaponItemData->ItemCraftingTime = ItemCraftingTime;
 			WeaponItemData->ItemThumbnailImagePath = ImageFilePath;
 
 			_Items.insert(pair<int16, st_ItemData*>((int16)WeaponItemData->SmallItemCategory, WeaponItemData));
@@ -68,6 +71,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int32 ItemWidth = ArmorListFiled["ItemWidth"].GetInt();
 			int32 ItemHeight = ArmorListFiled["ItemHeight"].GetInt();
 			int ItemDefence = ArmorListFiled["ItemDefence"].GetInt();
+			int64 ItemCraftingTime = ArmorListFiled["ItemCraftingTime"].GetInt64();
 			string ImageFilePath = ArmorListFiled["ImageFilePath"].GetString();
 
 			st_ItemData* ArmorItemData = new st_ItemData();
@@ -121,6 +125,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			ArmorItemData->ItemMaxDamage = 0;
 			ArmorItemData->ItemDefence = ItemDefence;
 			ArmorItemData->ItemMaxCount = 1;
+			ArmorItemData->ItemCraftingTime = ItemCraftingTime;
 			ArmorItemData->ItemThumbnailImagePath = ImageFilePath;
 
 			_Items.insert(pair<int16, st_ItemData*>((int16)ArmorItemData->SmallItemCategory, ArmorItemData));
@@ -139,6 +144,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int32 ItemWidth = PotionDataListFiled["ItemWidth"].GetInt();
 			int32 ItemHeight = PotionDataListFiled["ItemHeight"].GetInt();
 			int ItemMaxCount = PotionDataListFiled["ItemMaxCount"].GetInt();
+			int64 ItemCraftingTime = PotionDataListFiled["ItemCraftingTime"].GetInt64();
 			string ImageFilePath = PotionDataListFiled["ImageFilePath"].GetString();
 
 			st_ConsumableData* PotionItemData = new st_ConsumableData();
@@ -168,6 +174,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			PotionItemData->ItemMaxDamage = 0;
 			PotionItemData->ItemDefence = 0;
 			PotionItemData->ItemMaxCount = ItemMaxCount;
+			PotionItemData->ItemCraftingTime = ItemCraftingTime;
 			PotionItemData->ItemThumbnailImagePath = ImageFilePath;
 
 			_Consumables.insert(pair<int16, st_ConsumableData*>((int16)PotionItemData->SmallItemCategory, PotionItemData));
@@ -183,6 +190,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int32 ItemWidth = SkillBookDataListFiled["ItemWidth"].GetInt();
 			int32 ItemHeight = SkillBookDataListFiled["ItemHeight"].GetInt();
 			int ItemMaxCount = SkillBookDataListFiled["ItemMaxCount"].GetInt();
+			int64 ItemCraftingTime = SkillBookDataListFiled["ItemCraftingTime"].GetInt64();
 			string ImageFilePath = SkillBookDataListFiled["ImageFilePath"].GetString();
 
 			st_ConsumableData* SkillBookItemData = new st_ConsumableData();
@@ -273,6 +281,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			SkillBookItemData->ItemMaxDamage = 0;
 			SkillBookItemData->ItemDefence = 0;
 			SkillBookItemData->ItemMaxCount = ItemMaxCount;
+			SkillBookItemData->ItemCraftingTime = ItemCraftingTime;
 			SkillBookItemData->ItemThumbnailImagePath = ImageFilePath;
 
 			_Consumables.insert(pair<int16, st_ConsumableData*>((int16)SkillBookItemData->SmallItemCategory, SkillBookItemData));
@@ -291,6 +300,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int32 ItemWidth = MaterialDataListFiled["ItemWidth"].GetInt();
 			int32 ItemHeight = MaterialDataListFiled["ItemHeight"].GetInt();
 			int ItemMaxCount = MaterialDataListFiled["ItemMaxCount"].GetInt();
+			int64 ItemCraftingTime = MaterialDataListFiled["ItemCraftingTime"].GetInt64();
 			string ImageFilePath = MaterialDataListFiled["ImageFilePath"].GetString();
 
 			st_ItemData* MaterialData = new st_ItemData();
@@ -337,6 +347,10 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			{
 				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN;
 			}
+			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL")
+			{
+				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL;
+			}
 
 			// 재료 아이템의 스폰 오브젝트 타입
 			if (ItemObjectType == "OBJECT_ITEM_MATERIAL_LEATHER")
@@ -375,6 +389,10 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			{
 				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN;
 			}
+			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_CHAR_COAL")
+			{
+				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL;
+			}
 
 			MaterialData->ItemExplain = ItemExplain;
 			MaterialData->ItemName = ItemName;
@@ -384,6 +402,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			MaterialData->ItemMaxDamage = 0;
 			MaterialData->ItemDefence = 0;
 			MaterialData->ItemMaxCount = ItemMaxCount;
+			MaterialData->ItemCraftingTime = ItemCraftingTime;
 			MaterialData->ItemThumbnailImagePath = ImageFilePath;
 
 			_Items.insert(pair<int16, st_ItemData*>((int16)MaterialData->SmallItemCategory, MaterialData));
@@ -2362,20 +2381,20 @@ void CDataManager::LoadDataCraftingTable(wstring LoadFileName)
 
 	for (auto& Filed : Document["CraftingTable"].GetArray())
 	{
-		st_CraftingTableData* CraftingTableData = new st_CraftingTableData();
+		st_CraftingTable* CraftingTableData = new st_CraftingTable();
 
 		string CraftingTableName = Filed["CraftingTableName"].GetString();
 
-		CraftingTableData->CraftingTableName = CraftingTableName;
+		CraftingTableData->CraftingTableName = (LPWSTR)CA2W(CraftingTableName.c_str());
 
 		if (CraftingTableName == "용광로")
 		{
-			CraftingTableData->CraftingTableType = en_CraftingTable::CRAFTING_TABLE_FURNACE;
+			CraftingTableData->CraftingTableType = en_GameObjectType::OBJECT_FURNACE;
 		}
 
 		for (auto& CraftingTableCompleteItemFiled : Filed["CraftingTableCompleteItem"].GetArray())
 		{
-			st_CraftingCompleteItemData CraftingCompleteItemData;
+			st_CraftingCompleteItem CraftingCompleteItemData;
 
 			string CraftingCompleteItemMediumCategory = CraftingTableCompleteItemFiled["CraftingCompleteItemMediumCategory"].GetString();
 			string CraftingCompleteItemSmallCategory = CraftingTableCompleteItemFiled["CraftingCompleteItemSmallCategory"].GetString();
@@ -2384,16 +2403,17 @@ void CDataManager::LoadDataCraftingTable(wstring LoadFileName)
 			string CraftingCompleteItemThumbnailImagePath = CraftingTableCompleteItemFiled["CraftingCompleteItemThumbnailImagePath"].GetString();
 
 			if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL")
-			{
-				CraftingCompleteItemData.CraftingCompleteItemDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL;
+			{				
+				CraftingCompleteItemData.CompleteItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL;
+				CraftingCompleteItemData.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_FURNACE;
 			}
 
-			CraftingCompleteItemData.CraftingCompleteName = CraftingCompleteItemName;
-			CraftingCompleteItemData.CraftingCompleteThumbnailImagePath = CraftingCompleteItemThumbnailImagePath;
+			CraftingCompleteItemData.CompleteItemName = (LPWSTR)CA2W(CraftingCompleteItemName.c_str());
+			CraftingCompleteItemData.CompleteItemImagePath = (LPWSTR)CA2W(CraftingCompleteItemThumbnailImagePath.c_str());
 
 			for (auto& CraftingMaterialFiled : CraftingTableCompleteItemFiled["CraftingMaterial"].GetArray())
 			{
-				st_CraftingMaterialItemData CraftingMaterialData;
+				st_CraftingMaterialItemInfo CraftingMaterialData;
 
 				string MaterialSmallCategory = CraftingMaterialFiled["MaterialSmallCategory"].GetString();
 				string MaterialName = CraftingMaterialFiled["MaterialName"].GetString();
@@ -2402,20 +2422,20 @@ void CDataManager::LoadDataCraftingTable(wstring LoadFileName)
 
 				if (MaterialSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG")
 				{
-					CraftingMaterialData.MaterialDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG;
+					CraftingMaterialData.MaterialItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG;
 				}
 
-				CraftingMaterialData.MaterialName = MaterialName;
-				CraftingMaterialData.MaterialCount = MaterialCount;
-				CraftingMaterialData.MaterialThumbnailImagePath = MaterialThumbnailImagePath;
+				CraftingMaterialData.MaterialItemName = (LPWSTR)CA2W(MaterialName.c_str());
+				CraftingMaterialData.ItemCount = MaterialCount;
+				CraftingMaterialData.MaterialItemImagePath = (LPWSTR)CA2W(MaterialThumbnailImagePath.c_str());
 
-				CraftingCompleteItemData.CraftingMaterials.push_back(CraftingMaterialData);
+				CraftingCompleteItemData.Materials.push_back(CraftingMaterialData);
 			}			
 
-			CraftingTableData->CraftingCompleteItems.push_back(CraftingCompleteItemData);
+			CraftingTableData->CraftingTableCompleteItems.push_back(CraftingCompleteItemData);
 		}		
 		
-		_CraftingTableData.insert(pair<int16, st_CraftingTableData*>((int16)CraftingTableData->CraftingTableType, CraftingTableData));
+		_CraftingTableData.insert(pair<int16, st_CraftingTable*>((int16)CraftingTableData->CraftingTableType, CraftingTableData));
 	}
 }
 
