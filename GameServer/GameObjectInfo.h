@@ -4,6 +4,7 @@
 class CGameObject;
 class CGameServerMessage;
 class CSkill;
+class CItem;
 
 enum class en_GameObjectType : int16
 {
@@ -2113,29 +2114,56 @@ struct st_Color
 	static st_Color White() { return st_Color(255, 255, 255); }
 };
 
+struct st_CraftingMaterialItemInfo
+{
+	en_SmallItemCategory MaterialItemType; // 재료템 종류
+	wstring MaterialItemName; // 재료템 이름
+	int16 ItemCount; // 재료템 필요 개수
+	wstring MaterialItemImagePath; // 재료템 이미지 경로
+};
+
+struct st_CraftingCompleteItem
+{
+	en_UIObjectInfo OwnerCraftingTable;  // 완성 제작템을 소유한 제작대
+	en_SmallItemCategory CompleteItemType; // 완성 제작템 종류
+	wstring CompleteItemName; // 완성 제작템 이름
+	wstring CompleteItemImagePath; // 완성 제작템 이미지 경로
+	vector<st_CraftingMaterialItemInfo> Materials; // 제작템 만들때 필요한 재료들
+};
+
+struct st_CraftingItemCategory
+{
+	en_LargeItemCategory CategoryType; // 제작템 범주
+	wstring CategoryName; // 제작템 범주 이름
+	vector<st_CraftingCompleteItem> CompleteItems; // 범주에 속한 완성 제작템들
+};
+
 struct st_ItemInfo
 {
-	int64 ItemDBId;				    // 아이템 DB에 저장되어 있는 ID		
-	int64 InventoryItemNumber;		// 아이템이 인벤토리에 속할때 구분할 숫자
-	bool ItemIsQuickSlotUse;        // 퀵슬롯에 등록되어 있는지 여부 
-	bool Rotated;				    // 아이템이 회전 되어 있는지 아닌지 여부
-	int16 Width;			     	// 아이템 너비
-	int16 Height;			        // 아이템 높이	
-	int16 TileGridPositionX;	    // 인벤토리 위치 X
-	int16 TileGridPositionY;        // 인벤토리 위치 Y
+	int64 ItemDBId;							  // 아이템 DB에 저장되어 있는 ID		
+	int64 InventoryItemNumber;				  // 아이템이 인벤토리에 속할때 구분할 숫자
+	bool ItemIsQuickSlotUse;				  // 퀵슬롯에 등록되어 있는지 여부 
+	bool Rotated;							  // 아이템이 회전 되어 있는지 아닌지 여부
+	int16 Width;			     			  // 아이템 너비
+	int16 Height;							  // 아이템 높이	
+	int16 TileGridPositionX;				  // 인벤토리 위치 X
+	int16 TileGridPositionY;				  // 인벤토리 위치 Y
+	en_UIObjectInfo OwnerCraftingTable;		  // 아이템이 제작 가능한 아이템이라면 아이템이 속한 제작대
 	en_LargeItemCategory ItemLargeCategory;   // 아이템 대분류
 	en_MediumItemCategory ItemMediumCategory; // 아이템 중분류
 	en_SmallItemCategory ItemSmallCategory;	  // 아이템 소분류
 	wstring ItemName;			              // 아이템 이름
 	wstring ItemExplain;		              // 아이템 설명문
+	int64 ItemCraftingTime;					  // 아이템 제작 시간
+	int64 ItemCraftingRemainTime;			  // 아이템 제작 남은 시간
 	int32 ItemMinDamage;			          // 아이템 최소 공격력
 	int32 ItemMaxDamage;			          // 아이템 최대 공격력
 	int32 ItemDefence;				          // 아이템 방어력
 	int32 ItemMaxCount;				          // 아이템을 소유 할 수 있는 최대 개수
-	int16 ItemCount;			              // 개수
-	float ItemCraftingTime;					  // 아이템 조합 시간
+	int16 ItemCount;			              // 개수	
 	wstring ItemThumbnailImagePath;           // 이미지 경로
 	bool ItemIsEquipped;			          // 아이템을 착용할 수 있는지		
+	vector<st_CraftingMaterialItemInfo> Materials; // 제작 아이템일 경우 조합에 필요한 재료 아이템 목록
 
 	st_ItemInfo()
 	{
@@ -2146,17 +2174,19 @@ struct st_ItemInfo
 		Rotated = false;
 		TileGridPositionX = 0;
 		TileGridPositionY = 0;
+		OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_NONE;
 		ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_NONE;
 		ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
 		ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
 		ItemName = L"";
 		ItemExplain = L"";
+		ItemCraftingTime = 0;
+		ItemCraftingRemainTime = 0;
 		ItemMinDamage = 0;
 		ItemMaxDamage = 0;
 		ItemDefence = 0;
 		ItemMaxCount = 0;
-		ItemCount = 0;
-		ItemCraftingTime = 0;
+		ItemCount = 0;		
 		ItemThumbnailImagePath = L"";
 		ItemIsEquipped = false;
 	}
@@ -2322,36 +2352,13 @@ struct st_QuickSlotBarPosition
 	int8 QuickSlotBarSlotIndex;
 };
 
-struct st_CraftingMaterialItemInfo
-{
-	en_SmallItemCategory MaterialItemType; // 재료템 종류
-	wstring MaterialItemName; // 재료템 이름
-	int16 ItemCount; // 재료템 필요 개수
-	wstring MaterialItemImagePath; // 재료템 이미지 경로
-};
-
-struct st_CraftingCompleteItem
-{
-	en_UIObjectInfo OwnerCraftingTable;  // 완성 제작템을 소유한 제작대
-	en_SmallItemCategory CompleteItemType; // 완성 제작템 종류
-	wstring CompleteItemName; // 완성 제작템 이름
-	wstring CompleteItemImagePath; // 완성 제작템 이미지 경로
-	vector<st_CraftingMaterialItemInfo> Materials; // 제작템 만들때 필요한 재료들
-};
-
-struct st_CraftingItemCategory
-{
-	en_LargeItemCategory CategoryType; // 제작템 범주
-	wstring CategoryName; // 제작템 범주 이름
-	vector<st_CraftingCompleteItem> CompleteItems; // 범주에 속한 완성 제작템들
-};
 
 // 제작대 제작품 정보
-struct st_CraftingTable
+struct st_CraftingTableRecipe
 {
 	en_GameObjectType CraftingTableType; // 제작대 종류
-	wstring CraftingTableName;			 // 제작대 이름
-	vector<st_CraftingCompleteItem> CraftingTableCompleteItems; // 제작대 제작품 목록
+	wstring CraftingTableName;			 // 제작대 이름	
+	vector<CItem*> CraftingTableCompleteItems;	// 제작대 제작품 목록
 };
 
 struct st_FieldOfViewInfo
