@@ -1074,6 +1074,9 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_CRAFTING_TABLE_CRAFTING_START:
 		PacketProcReqCraftingTableCraftingStart(SessionID, Message);
 		break;
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_CRAFTING_TABLE_CRAFTING_STOP:
+		PacketProcReqCraftingTableCraftingStop(SessionID, Message);
+		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_ITEM_SELECT:
 		PacketProcReqItemSelect(SessionID, Message);
 		break;
@@ -2918,7 +2921,8 @@ void CGameServer::PacketProcReqRightMousePositionObjectInfo(int64 SessionId, CMe
 						st_GameObjectJob* CraftingTableSelectJob = MakeGameObjectJobCraftingTableSelect(FindObject, MyPlayer);
 						FindObject->_GameObjectJobQue.Enqueue(CraftingTableSelectJob);						
 						
-						CMessage* ResRightMousePositionObjectInfoPacket = MakePacketResRightMousePositionObjectInfo(MyPlayer->_GameObjectInfo.ObjectId, FindObject->_GameObjectInfo.ObjectId, FindObject->_GameObjectInfo.ObjectType);
+						CMessage* ResRightMousePositionObjectInfoPacket = MakePacketResRightMousePositionObjectInfo(MyPlayer->_GameObjectInfo.ObjectId,
+							FindObject->_GameObjectInfo.ObjectId, FindObject->_GameObjectInfo.ObjectType);
 						SendPacket(Session->SessionId, ResRightMousePositionObjectInfoPacket);
 						ResRightMousePositionObjectInfoPacket->Free();
 					}
@@ -3689,7 +3693,7 @@ void CGameServer::PacketProcReqCraftingConfirm(int64 SessionId, CMessage* Messag
 				ReqMaterials.push_back(CraftingMaterialItemInfo);
 			}
 
-			st_CraftingItemCategoryData* FindCraftingCategoryData = nullptr;
+			st_CraftingItemCategory* FindCraftingCategoryData = nullptr;
 			// 제작법 카테고리 찾기
 			auto FindCategoryItem = G_Datamanager->_CraftingData.find(ReqCategoryType);
 			if (FindCategoryItem == G_Datamanager->_CraftingData.end())
@@ -3701,12 +3705,12 @@ void CGameServer::PacketProcReqCraftingConfirm(int64 SessionId, CMessage* Messag
 			FindCraftingCategoryData = (*FindCategoryItem).second;
 
 			// 완성템 제작에 필요한 재료 목록 찾기
-			vector<st_CraftingMaterialItemData> RequireMaterialDatas;
-			for (st_CraftingCompleteItemData CraftingCompleteItemData : FindCraftingCategoryData->CraftingCompleteItems)
+			vector<st_CraftingMaterialItemInfo> RequireMaterialDatas;
+			for (st_CraftingCompleteItem CraftingCompleteItemData : FindCraftingCategoryData->CompleteItems)
 			{
-				if (CraftingCompleteItemData.CraftingCompleteItemDataId == (en_SmallItemCategory)ReqCraftingItemType)
+				if (CraftingCompleteItemData.CompleteItemType == (en_SmallItemCategory)ReqCraftingItemType)
 				{
-					RequireMaterialDatas = CraftingCompleteItemData.CraftingMaterials;
+					RequireMaterialDatas = CraftingCompleteItemData.Materials;
 				}
 			}
 
@@ -3743,11 +3747,11 @@ void CGameServer::PacketProcReqCraftingConfirm(int64 SessionId, CMessage* Messag
 					{
 						// 제작템을 한개 만들때 필요한 재료의 개수를 얻어온다.
 						int16 OneReqMaterialCount = 0;
-						for (st_CraftingMaterialItemData ReqMaterialCountData : RequireMaterialDatas)
+						for (st_CraftingMaterialItemInfo ReqMaterialCountData : RequireMaterialDatas)
 						{
-							if (FindMaterialItem->_ItemInfo.ItemSmallCategory == ReqMaterialCountData.MaterialDataId)
+							if (FindMaterialItem->_ItemInfo.ItemSmallCategory == ReqMaterialCountData.MaterialItemType)
 							{
-								OneReqMaterialCount = ReqMaterialCountData.MaterialCount;
+								OneReqMaterialCount = ReqMaterialCountData.ItemCount;
 								break;
 							}
 						}
@@ -4320,7 +4324,7 @@ void CGameServer::PacketProcReqCraftingTableCraftingStop(int64 SessionID, CMessa
 				{
 				case en_GameObjectType::OBJECT_FURNACE:
 					{
-						st_GameObjectJob* CraftingTableCraftStratJob = MakeGameObjectJobCraftingTableCancel();
+						st_GameObjectJob* CraftingTableCraftStratJob = MakeGameObjectJobCraftingTableCancel(MyPlayer);
 						CraftingTable->_GameObjectJobQue.Enqueue(CraftingTableCraftStratJob);					
 					}
 					break;
@@ -6063,75 +6067,78 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 #pragma endregion	
 
 #pragma region 조합템 정보 보내기			
-			vector<st_CraftingItemCategory> CraftingItemCategorys;
+			//vector<st_CraftingItemCategory> CraftingItemCategorys;
 
-			for (int8 Category = (int8)en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON; Category <= (int8)en_LargeItemCategory::ITEM_LARGE_CATEGORY_MATERIAL; ++Category)
-			{
-				auto FindCraftingIterator = G_Datamanager->_CraftingData.find(Category);
-				if (FindCraftingIterator == G_Datamanager->_CraftingData.end())
-				{
-					continue;
-				}
+			//for (int8 Category = (int8)en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON; Category <= (int8)en_LargeItemCategory::ITEM_LARGE_CATEGORY_MATERIAL; ++Category)
+			//{
+			//	auto FindCraftingIterator = G_Datamanager->_CraftingData.find(Category);
+			//	if (FindCraftingIterator == G_Datamanager->_CraftingData.end())
+			//	{
+			//		continue;
+			//	}
 
-				st_CraftingItemCategoryData* CraftingData = (*FindCraftingIterator).second;
+			//	st_CraftingItemCategoryData* CraftingData = (*FindCraftingIterator).second;
 
-				// 제작템 카테고리 추출
-				st_CraftingItemCategory CraftingItemCategory;
-				CraftingItemCategory.CategoryType = CraftingData->CraftingType;
-				CraftingItemCategory.CategoryName = (LPWSTR)CA2W(CraftingData->CraftingTypeName.c_str());
+			//	// 제작템 카테고리 추출
+			//	st_CraftingItemCategory CraftingItemCategory;
+			//	CraftingItemCategory.CategoryType = CraftingData->CraftingType;
+			//	CraftingItemCategory.CategoryName = (LPWSTR)CA2W(CraftingData->CraftingTypeName.c_str());
 
-				// 제작템 카테고리에 속한 제작템 가져오기
-				for (st_CraftingCompleteItemData CraftingCompleteItemData : CraftingData->CraftingCompleteItems)
-				{
-					st_CraftingCompleteItem CraftingCompleteItem;
-					CraftingCompleteItem.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_COMMON;
-					CraftingCompleteItem.CompleteItemType = CraftingCompleteItemData.CraftingCompleteItemDataId;
-					CraftingCompleteItem.CompleteItemName = (LPWSTR)CA2W(CraftingCompleteItemData.CraftingCompleteName.c_str());
-					CraftingCompleteItem.CompleteItemImagePath = (LPWSTR)CA2W(CraftingCompleteItemData.CraftingCompleteThumbnailImagePath.c_str());
+			//	// 제작템 카테고리에 속한 제작템 가져오기
+			//	for (st_CraftingCompleteItemData CraftingCompleteItemData : CraftingData->CraftingCompleteItems)
+			//	{
+			//		st_CraftingCompleteItem CraftingCompleteItem;
+			//		CraftingCompleteItem.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_COMMON;
+			//		CraftingCompleteItem.CompleteItemType = CraftingCompleteItemData.CraftingCompleteItemDataId;
+			//		CraftingCompleteItem.CompleteItemName = (LPWSTR)CA2W(CraftingCompleteItemData.CraftingCompleteName.c_str());
+			//		CraftingCompleteItem.CompleteItemImagePath = (LPWSTR)CA2W(CraftingCompleteItemData.CraftingCompleteThumbnailImagePath.c_str());
 
-					for (st_CraftingMaterialItemData CraftingMaterialItemData : CraftingCompleteItemData.CraftingMaterials)
-					{
-						st_CraftingMaterialItemInfo CraftingMaterialItem;						
-						CraftingMaterialItem.MaterialItemType = CraftingMaterialItemData.MaterialDataId;
-						CraftingMaterialItem.MaterialItemName = (LPWSTR)CA2W(CraftingMaterialItemData.MaterialName.c_str());
-						CraftingMaterialItem.ItemCount = CraftingMaterialItemData.MaterialCount;
-						CraftingMaterialItem.MaterialItemImagePath = (LPWSTR)CA2W(CraftingMaterialItemData.MaterialThumbnailImagePath.c_str());
+			//		for (st_CraftingMaterialItemData CraftingMaterialItemData : CraftingCompleteItemData.CraftingMaterials)
+			//		{
+			//			st_CraftingMaterialItemInfo CraftingMaterialItem;						
+			//			CraftingMaterialItem.MaterialItemType = CraftingMaterialItemData.MaterialDataId;
+			//			CraftingMaterialItem.MaterialItemName = (LPWSTR)CA2W(CraftingMaterialItemData.MaterialName.c_str());
+			//			CraftingMaterialItem.ItemCount = CraftingMaterialItemData.MaterialCount;
+			//			CraftingMaterialItem.MaterialItemImagePath = (LPWSTR)CA2W(CraftingMaterialItemData.MaterialThumbnailImagePath.c_str());
 
-						CraftingCompleteItem.Materials.push_back(CraftingMaterialItem);
-					}
+			//			CraftingCompleteItem.Materials.push_back(CraftingMaterialItem);
+			//		}
 
-					CraftingItemCategory.CompleteItems.push_back(CraftingCompleteItem);
-				}
+			//		CraftingItemCategory.CompleteItems.push_back(CraftingCompleteItem);
+			//	}
 
-				CraftingItemCategorys.push_back(CraftingItemCategory);
-			}
+			//	CraftingItemCategorys.push_back(CraftingItemCategory);
+			//}
 
-			*ResCharacterInfoMessage << (int8)CraftingItemCategorys.size();
+			//*ResCharacterInfoMessage << (int8)CraftingItemCategorys.size();
 
-			for (st_CraftingItemCategory CraftingItemCategory : CraftingItemCategorys)
-			{
-				*ResCharacterInfoMessage << CraftingItemCategory;				
-			}						
+			//for (st_CraftingItemCategory CraftingItemCategory : CraftingItemCategorys)
+			//{
+			//	*ResCharacterInfoMessage << CraftingItemCategory;				
+			//}						
+#pragma endregion
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterInfoGetConnection);
 
-			vector<st_CraftingTable*> CraftingTables;
+#pragma region 제작대 조합템 정보 보내기
+			vector<st_CraftingTableRecipe*> CraftingTables;
 			auto FindFurnaceCraftingTable = G_Datamanager->_CraftingTableData.find((int16)en_GameObjectType::OBJECT_FURNACE);	
-			st_CraftingTable* FurnaceCraftingTable = (*FindFurnaceCraftingTable).second;
+			st_CraftingTableRecipe* FurnaceCraftingTable = (*FindFurnaceCraftingTable).second;
 
 			CraftingTables.push_back(FurnaceCraftingTable);			
 
 			*ResCharacterInfoMessage << (int8)CraftingTables.size();
 
-			for (st_CraftingTable* CraftingTable : CraftingTables)
+			for (st_CraftingTableRecipe* CraftingTable : CraftingTables)
 			{
 				*ResCharacterInfoMessage << *CraftingTable;
 			}
+#pragma endregion
 
 			SendPacket(MyPlayer->_SessionId, ResCharacterInfoMessage);
 
 			MyPlayer->_NetworkState = en_ObjectNetworkState::LIVE;			
-#pragma endregion
+
 		} while (0);
 	}
 
@@ -6480,14 +6487,19 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableStart(CGameObject* 
 	return CraftingTableStartJob;	
 }
 
-st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableCancel()
+st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableCancel(CGameObject* CraftingStopObject)
 {
-	st_GameObjectJob* CraftingTableStartJob = G_ObjectManager->GameObjectJobCreate();
-	CraftingTableStartJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_CRAFTING_STOP;
+	st_GameObjectJob* CraftingTableStopJob = G_ObjectManager->GameObjectJobCreate();
+	CraftingTableStopJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_CRAFTING_STOP;
 
-	CraftingTableStartJob->GameObjectJobMessage = nullptr;
+	CGameServerMessage* CraftingTableStopJobMessage = CGameServerMessage::GameServerMessageAlloc();
+	CraftingTableStopJobMessage->Clear();
 
-	return CraftingTableStartJob;
+	*CraftingTableStopJobMessage << &CraftingStopObject;
+
+	CraftingTableStopJob->GameObjectJobMessage = CraftingTableStopJobMessage;
+
+	return CraftingTableStopJob;
 }
 
 CGameServerMessage* CGameServer::MakePacketResClientConnected()
@@ -7784,7 +7796,7 @@ CGameServerMessage* CGameServer::MakePacketResCraftingTableMaterialItemList(int6
 	return ResCraftingTableMaterialItemListMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResCraftingStart(int64 TargetObjectID, en_SmallItemCategory CraftingStartItemType, int64 CraftingTime)
+CGameServerMessage* CGameServer::MakePacketResCraftingStart(int64 CraftingTableObjectID, st_ItemInfo CraftingItemInfo)
 {
 	CGameServerMessage* ResCraftingStartMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResCraftingStartMessage == nullptr)
@@ -7795,11 +7807,44 @@ CGameServerMessage* CGameServer::MakePacketResCraftingStart(int64 TargetObjectID
 	ResCraftingStartMessage->Clear();
 
 	*ResCraftingStartMessage << (int16)en_PACKET_S2C_CRAFTING_TABLE_CRAFTING_START;
-	*ResCraftingStartMessage << TargetObjectID;
-	*ResCraftingStartMessage << (int16)CraftingStartItemType;
-	*ResCraftingStartMessage << CraftingTime;
+	*ResCraftingStartMessage << CraftingTableObjectID;
+	*ResCraftingStartMessage << CraftingItemInfo;
 
 	return ResCraftingStartMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketResCraftingStop(int64 CraftingTableObjectID, st_ItemInfo CraftingStopItemInfo)
+{
+	CGameServerMessage* ResCraftingStartMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResCraftingStartMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResCraftingStartMessage->Clear();
+
+	*ResCraftingStartMessage << (int16)en_PACKET_S2C_CRAFTING_TABLE_CRAFTING_STOP;
+	*ResCraftingStartMessage << CraftingTableObjectID;
+	*ResCraftingStartMessage << CraftingStopItemInfo;
+
+	return ResCraftingStartMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketResCraftingTableCraftRemainTime(int64 CraftingTableObjectID, st_ItemInfo CraftingItemInfo)
+{
+	CGameServerMessage* ResCraftingTableSelectMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResCraftingTableSelectMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResCraftingTableSelectMessage->Clear();
+
+	*ResCraftingTableSelectMessage << (int16)en_PACKET_S2C_CRAFTING_TABLE_CRAFT_REMAIN_TIME;
+	*ResCraftingTableSelectMessage << CraftingTableObjectID;
+	*ResCraftingTableSelectMessage << CraftingItemInfo;
+
+	return ResCraftingTableSelectMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketResCraftingTableCompleteItemList(int64 CraftingTableObjectID, en_GameObjectType CraftingTableObjectType, map<en_SmallItemCategory, CItem*> CompleteItems)

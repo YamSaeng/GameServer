@@ -314,7 +314,7 @@ private:
 	//---------------------------------------------------------
 	// 제작대 제작 멈춤 잡 생성 함수
 	//---------------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobCraftingTableCancel();
+	st_GameObjectJob* MakeGameObjectJobCraftingTableCancel(CGameObject* CraftingStopObject);
 
 	//--------------------------------------
 	// 패킷조합 함수		
@@ -564,7 +564,15 @@ public:
 	//-----------------------------------------------------------------------------------------------
 	// 게임서버 제작대 제작 시작 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResCraftingStart(int64 TargetObjectID, en_SmallItemCategory CraftingStartItemType, int64 CraftingTime);
+	CGameServerMessage* MakePacketResCraftingStart(int64 CraftingTableObjectID, st_ItemInfo CraftingItemInfo);
+	//-----------------------------------------------------------------------------------------------
+	// 게임서버 제작대 제작 멈춤 응답 패킷 조합
+	//-----------------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResCraftingStop(int64 CraftingTableObjectID, st_ItemInfo CraftingStopItemInfo);
+	//-----------------------------------------------------------------------------------------------
+	// 게임서버 제작대 제작 남은 시간 패킷 조합
+	//-----------------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResCraftingTableCraftRemainTime(int64 CraftingTableObjectID, st_ItemInfo CraftingItemInfo);
 	//-----------------------------------------------------------------------------------------------
 	// 게임서버 제작대 제작 완료 아이템 목록 패킷 조합
 	//-----------------------------------------------------------------------------------------------
