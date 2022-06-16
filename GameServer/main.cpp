@@ -45,28 +45,25 @@ vector<st_ServerInfo> ServerConfigParser(const wchar_t* FileName)
 void ServerInfoInit()
 {
 	// 서버 초기화
-	vector<st_ServerInfo> ServerInfos = ServerConfigParser(L"ServerConfig.xml");
+	vector<st_ServerInfo> ServerInfos = ServerConfigParser(L"GameServerConfig.xml");
 
 	for (int32 i = 0; i < ServerInfos.size(); i++)
 	{
-		if (ServerInfos[i].ServerName == L"NetworkLib")
+		if (ServerInfos[i].ServerName == L"GameServer")
 		{
 			G_GameServer.GameServerStart(ServerInfos[i].IP.c_str(), ServerInfos[i].Port);
 		}
-	}
 
-	// DB 초기화
-	// xml에 기록되어 있는 것을 기준으로 DB를 업데이트 시켜준다.
-	// 현재 토큰을 관리하는 서버는 c#에서 모델링을 하고 있어서 해당 서버의 저장 프로시저만 이곳에서 우선 관리한다.
-	CDBConnection* TokenDBConnection = G_DBConnectionPool->Pop(en_DBConnect::TOKEN);
-	DBSynchronizer TokenDBSync(*TokenDBConnection);	
-	TokenDBSync.Synchronize(L"TokenDB.xml");
+		if (ServerInfos[i].ServerName == L"LoginServer")
+		{
+			G_GameServer.LoginServerConnect(ServerInfos[i].IP.c_str(), ServerInfos[i].Port);
+		}
+	}	
 
 	CDBConnection* GameServerDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 	DBSynchronizer GameServerDBSync(*GameServerDBConnection);
 	GameServerDBSync.Synchronize(L"GameServerDB.xml");
 
-	G_DBConnectionPool->Push(en_DBConnect::TOKEN, TokenDBConnection);
 	G_DBConnectionPool->Push(en_DBConnect::GAME, GameServerDBConnection);
 }
 
@@ -93,18 +90,15 @@ int main()
 		G_Logger->WriteStdOut(en_Color::WHITE, L"PacketPool Return : [%d]\n", CMessage::_ObjectPoolFreeList.ReturnCount());   // 반납되지 않은 메세지 개수
 		G_Logger->WriteStdOut(en_Color::WHITE, L"================================================\n\n");
 		G_Logger->WriteStdOut(en_Color::YELLOW, L"GameServer\n");
-		G_Logger->WriteStdOut(en_Color::WHITE, L"GameServerJobPool Alloc  : [%d]\n", G_GameServer._JobMemoryPool->GetAllocCount()); // 게임서버 잡 메모리풀 Alloc
-		G_Logger->WriteStdOut(en_Color::WHITE, L"GameServerJobPool Remain : [%d]\n", G_GameServer._JobMemoryPool->GetUseCount()); // 게임서버 잡 메모리풀 남아 있는 청크 파편 개수
-		G_Logger->WriteStdOut(en_Color::WHITE, L"GameServerJobPool Return : [%d]\n", G_GameServer._JobMemoryPool->ReturnCount()); // 게임서버 잡 메모리풀 반납되지 않은 청크 파편 개수
+		G_Logger->WriteStdOut(en_Color::WHITE, L"GameServerJobPool Alloc  : [%d]\n", G_GameServer._GameServerJobMemoryPool->GetAllocCount()); // 게임서버 잡 메모리풀 Alloc
+		G_Logger->WriteStdOut(en_Color::WHITE, L"GameServerJobPool Remain : [%d]\n", G_GameServer._GameServerJobMemoryPool->GetUseCount()); // 게임서버 잡 메모리풀 남아 있는 청크 파편 개수
+		G_Logger->WriteStdOut(en_Color::WHITE, L"GameServerJobPool Return : [%d]\n", G_GameServer._GameServerJobMemoryPool->ReturnCount()); // 게임서버 잡 메모리풀 반납되지 않은 청크 파편 개수
 		G_Logger->WriteStdOut(en_Color::WHITE, L"GameServerTimerJobPool Alloc : [%d]\n", G_GameServer._TimerJobMemoryPool->GetAllocCount()); // 게임서버 타이머 잡 메모리풀 Alloc
 		G_Logger->WriteStdOut(en_Color::WHITE, L"GameServerTimerJobPool Remain : [%d]\n", G_GameServer._TimerJobMemoryPool->GetUseCount()); // 게임서버 타이머 잡 메모리풀 남은 청크 파편 개수
-		G_Logger->WriteStdOut(en_Color::WHITE, L"GameServerTimerJobPool Return : [%d]\n", G_GameServer._TimerJobMemoryPool->ReturnCount()); // 게임서버 타이머 잡 메모리풀 반납되지 않은 청크 파편 개수
-		G_Logger->WriteStdOut(en_Color::WHITE, L"AuthThread Que Size :      [%d]\n", G_GameServer._GameServerAuthThreadMessageQue.GetUseSize()); //게임서버 인증 쓰레드 큐 사이즈
-		G_Logger->WriteStdOut(en_Color::WHITE, L"AuthThread TPS :	   [%d]\n", G_GameServer._AuthThreadTPS); // 게임서버 인증 쓰레드 TPS
-		G_Logger->WriteStdOut(en_Color::WHITE, L"AuthThread WakeCount :     [%d]\n", G_GameServer._AuthThreadWakeCount); // 게임서버 인증 쓰레드 활성화된 횟수
-		G_Logger->WriteStdOut(en_Color::WHITE, L"DataBaseThread Que Size :  [%d]\n", G_GameServer._GameServerDataBaseThreadMessageQue.GetUseSize()); // 게임서버 데이터베이스 쓰레드 큐 사이즈
-		G_Logger->WriteStdOut(en_Color::WHITE, L"DataBaseThread TPS :       [%d]\n", G_GameServer._DataBaseThreadTPS); // 게임서버 데이터베이스 쓰레드 TPS
-		G_Logger->WriteStdOut(en_Color::WHITE, L"DataBaseThread WakeCount : [%d]\n", G_GameServer._DataBaseThreadWakeCount); // 게임서버 데이터베이스 활성화된 횟수		
+		G_Logger->WriteStdOut(en_Color::WHITE, L"GameServerTimerJobPool Return : [%d]\n", G_GameServer._TimerJobMemoryPool->ReturnCount()); // 게임서버 타이머 잡 메모리풀 반납되지 않은 청크 파편 개수		
+		G_Logger->WriteStdOut(en_Color::WHITE, L"DataBaseThread Que Size :  [%d]\n", G_GameServer._GameServerUserDBThreadMessageQue.GetUseSize()); // 게임서버 데이터베이스 쓰레드 큐 사이즈
+		G_Logger->WriteStdOut(en_Color::WHITE, L"DataBaseThread TPS :       [%d]\n", G_GameServer._UserDBThreadTPS); // 게임서버 데이터베이스 쓰레드 TPS		
+		G_Logger->WriteStdOut(en_Color::WHITE, L"LogicThread TPS :       [%d]\n", G_GameServer._LogicThreadFPS); // 게임서버 로직 쓰레드 FPS		
 		G_Logger->WriteStdOut(en_Color::WHITE, L"TimerJobThread Que Size :  [%d]\n", G_GameServer._TimerHeapJob->GetUseSize()); // 게임서버 데이터베이스 쓰레드 큐 사이즈
 		G_Logger->WriteStdOut(en_Color::WHITE, L"TimerJobThread TPS :       [%d]\n", G_GameServer._TimerJobThreadTPS); // 게임서버 데이터베이스 활성화된 횟수
 		G_Logger->WriteStdOut(en_Color::WHITE, L"TimerJobThread WakeCount : [%d]\n", G_GameServer._TimerJobThreadWakeCount); // 게임서버 데이터베이스 활성화된 횟수
@@ -113,8 +107,6 @@ int main()
 		G_GameServer._AcceptTPS = 0;
 		G_GameServer._RecvPacketTPS = 0;
 		G_GameServer._SendPacketTPS = 0;
-		G_GameServer._AuthThreadTPS = 0;
-		G_GameServer._DataBaseThreadTPS = 0;
 		G_GameServer._TimerJobThreadTPS = 0;
 
 		Sleep(1000);
