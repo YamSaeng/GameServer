@@ -153,6 +153,11 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int64 MapID)
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
 		{
 			CItem* Item = (CItem*)EnterGameObject;
 
@@ -239,6 +244,11 @@ bool CObjectManager::ObjectLeaveGame(CGameObject* LeaveGameObject, int32 ObjectI
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
 		LeaveGameObject->GetChannel()->LeaveChannel(LeaveGameObject);
 
 		_ItemsArrayIndexs.Push(ObjectIndex);
@@ -365,6 +375,10 @@ CItem* CObjectManager::ItemCreate(en_SmallItemCategory NewItemSmallCategory)
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT:
 		NewItem = _MaterialMemoryPool->Alloc();
 		break;
 	}
@@ -396,6 +410,10 @@ void CObjectManager::ItemReturn(CItem* ReturnItem)
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT:
 		_MaterialMemoryPool->Free((CMaterial*)ReturnItem);
 		break;
 	}
