@@ -376,7 +376,20 @@ void CGameObject::Update()
 				
 				CraftingTableObject->_SelectedCraftingTable = true;		
 
-				CraftingTableObject->_SelectedObject = OwnerObject;
+				CraftingTableObject->_SelectedObject = OwnerObject;				
+								
+				// 제작대가 제작중이라면 제작중인 아이템의 정보를 클라에게 보냄
+				if (CraftingTableObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::CRAFTING)
+				{
+					for (CItem* CraftingTableItem : CraftingTableObject->GetCraftingTableRecipe().CraftingTableCompleteItems)
+					{
+						CMessage* ResCraftingTableSelectPacket = G_ObjectManager->GameServer->MakePacketResCraftingTableCraftRemainTime(
+							CraftingTableObject->_GameObjectInfo.ObjectId,
+							CraftingTableItem->_ItemInfo);
+						G_ObjectManager->GameServer->SendPacket(((CPlayer*)CraftingTableObject->_SelectedObject)->_SessionId, ResCraftingTableSelectPacket);
+						ResCraftingTableSelectPacket->Free();
+					}			
+				}
 
 				// 완성된 제작품이 있을 경우 목록을 보내준다.
 				if (CraftingTableObject->GetCompleteItems().size() > 0)
@@ -409,7 +422,7 @@ void CGameObject::Update()
 				CGameObject* CraftingStartObject;
 				*GameObjectJob->GameObjectJobMessage >> &CraftingStartObject;
 
-				if (CraftingStartObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::CRAFTING)
+				if (_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::CRAFTING)
 				{
 					int16 CraftingCompleteItemType;
 					*GameObjectJob->GameObjectJobMessage >> CraftingCompleteItemType;
@@ -423,58 +436,59 @@ void CGameObject::Update()
 						{
 							CFurnace* Furnace = (CFurnace*)this;
 
-							// 용광로에서 선택된 제작템과 요청한 제작템이 일치하는지 확인
-							if (Furnace->_SelectCraftingTableCompleteItem
-								== (en_SmallItemCategory)CraftingCompleteItemType)
+							// 용광로가 가지고 있는 제작법을 가지고옴
+							st_CraftingTableRecipe FurnaceCraftingTableRecipe = Furnace->GetCraftingTableRecipe();
+
+							// 제작법 중에서 요청한 아이템 타입의 제작법이 있는지 찾음
+							for (CItem* CraftingCompleteItem : FurnaceCraftingTableRecipe.CraftingTableCompleteItems)
 							{
-								// 용광로에서 요청한 제작템의 조합법을 찾음
-								st_CraftingTable FurnaceCraftingTable = Furnace->GetFurnaceCraftingTable();
-								for (st_CraftingCompleteItem FurnaceCompleteItem : FurnaceCraftingTable.CraftingTableCompleteItems)
+								if (CraftingCompleteItem->_ItemInfo.ItemSmallCategory == (en_SmallItemCategory)CraftingCompleteItemType)
 								{
-									if (FurnaceCompleteItem.CompleteItemType == (en_SmallItemCategory)CraftingCompleteItemType)
+									bool IsCrafting = true;
+
+									// 찾으면 가방에 제작법 재료가 있는지 확인함
+									for (st_CraftingMaterialItemInfo FurnaceMaterialItemInfo : CraftingCompleteItem->_ItemInfo.Materials)
 									{
-										bool IsCrafting = true;
+										// 제작템을 한개 만들떄 필요한 재료의 개수를 얻는다.
+										int16 OneReqMaterialcount = FurnaceMaterialItemInfo.ItemCount;
+										// 클라가 요청한 제작템 제작갯수와 위에서 구한 개수를 곱해서 총 필요개수를 구한다.
+										int16 ReqCraftingItemTotalCount = CraftingCount * OneReqMaterialcount;
 
-										// 조합법을 찾으면 가방에 조합법 재료가 있는지 확인									
-										for (st_CraftingMaterialItemInfo FurnaceMateriatlItemInfo : FurnaceCompleteItem.Materials)
+										// 인벤토리에 제작템의 최소 재료 필요 개수만큼 용광로 재료템에 있는지 확인한다.
+										if (!Furnace->FindMaterialItem(FurnaceMaterialItemInfo.MaterialItemType, OneReqMaterialcount))
 										{
-											// 제작템을 한개 만들떄 필요한 재료의 개수를 얻는다.
-											int16 OneReqMaterialcount = FurnaceMateriatlItemInfo.ItemCount;
-											// 클라가 요청한 제작템 제작갯수와 위에서 구한 개수를 곱해서 총 필요개수를 구한다.
-											int16 ReqCraftingItemTotalCount = CraftingCount * OneReqMaterialcount;
-
-											// 인벤토리에 제작템의 최소 재료 필요 개수만큼 용광로 재료템에 있는지 확인한다.
-											if (!Furnace->FindMaterialItem(FurnaceMateriatlItemInfo.MaterialItemType, OneReqMaterialcount))
-											{
-												IsCrafting = false;
-											}
+											IsCrafting = false;
 										}
-
-										if (IsCrafting == true)
-										{
-											st_ItemData* ItemData = G_Datamanager->FindItemData(FurnaceCompleteItem.CompleteItemType);
-
-											CPlayer* Player = (CPlayer*)Furnace->_SelectedObject;
-											CMessage* ResCraftingstartPacket = G_ObjectManager->GameServer->MakePacketResCraftingStart(
-												_GameObjectInfo.ObjectId,
-												FurnaceCompleteItem.CompleteItemType,
-												ItemData->ItemCraftingTime);
-											G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCraftingstartPacket);
-
-											// 클라에게 제작템 제작 시작할때 제작시간 알려줘야함
-											Furnace->CraftingStart(ItemData->ItemCraftingTime);
-										}
-										else
-										{
-											CMessage* CraftingStartErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_CRAFTING_TABLE_MATERIAL_COUNT_NOT_ENOUGH);
-											G_ObjectManager->GameServer->SendPacket(((CPlayer*)CraftingStartObject)->_SessionId, CraftingStartErrorPacket);
-											CraftingStartErrorPacket->Free();
-										}
-
-										break;
 									}
+
+									// 재료가 모두 있을 경우
+									if (IsCrafting == true)
+									{
+										Furnace->_CraftingStartCompleteItem = CraftingCompleteItem->_ItemInfo.ItemSmallCategory;										
+
+										// 아이템 제작 시작
+										CraftingCompleteItem->CraftingStart();
+
+										CPlayer* Player = (CPlayer*)Furnace->_SelectedObject;
+										CMessage* ResCraftingstartPacket = G_ObjectManager->GameServer->MakePacketResCraftingStart(
+											_GameObjectInfo.ObjectId,
+											CraftingCompleteItem->_ItemInfo);
+										G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCraftingstartPacket);
+										
+										// 용광로 제작 상태 진입
+										Furnace->CraftingStart();
+									}
+									else
+									{
+										// 재료 부족 에러 메세지 띄우기
+										CMessage* CraftingStartErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_CRAFTING_TABLE_MATERIAL_COUNT_NOT_ENOUGH);
+										G_ObjectManager->GameServer->SendPacket(((CPlayer*)CraftingStartObject)->_SessionId, CraftingStartErrorPacket);
+										CraftingStartErrorPacket->Free();
+									}
+
+									break;
 								}
-							}
+							}							
 						}
 						break;
 					}
@@ -489,8 +503,22 @@ void CGameObject::Update()
 			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_CRAFTING_STOP:
 			{
+				CGameObject* CraftingStoptObject;
+				*GameObjectJob->GameObjectJobMessage >> &CraftingStoptObject;
+
 				CCraftingTable* CraftingTable = (CCraftingTable*)this;
 				CraftingTable->CraftingStop();
+				
+				for (CItem* CraftingStopItem : CraftingTable->GetCraftingTableRecipe().CraftingTableCompleteItems)
+				{
+					CraftingStopItem->CraftingStop();
+
+					CMessage* CraftingTableCraftingStopPacket = G_ObjectManager->GameServer->MakePacketResCraftingStop(
+						_GameObjectInfo.ObjectId,
+						CraftingStopItem->_ItemInfo);
+					G_ObjectManager->GameServer->SendPacket(((CPlayer*)CraftingStoptObject)->_SessionId, CraftingTableCraftingStopPacket);
+					CraftingTableCraftingStopPacket->Free();
+				}
 			}
 			break;
 		}
