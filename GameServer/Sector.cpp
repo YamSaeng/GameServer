@@ -41,6 +41,13 @@ void CSector::Insert(CGameObject* InsertGameObject)
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
 		_Items.insert((CItem*)InsertGameObject);
 		break;
 	case en_GameObjectType::OBJECT_STONE:
@@ -85,6 +92,13 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
 		_Items.erase((CItem*)RemoveGameObject);
 		break;
 	case en_GameObjectType::OBJECT_STONE:
