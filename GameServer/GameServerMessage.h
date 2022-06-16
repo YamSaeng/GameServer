@@ -40,7 +40,7 @@ public:
 	CGameServerMessage& operator << (st_CraftingCompleteItem& CraftingCompleteItem);
 	CGameServerMessage& operator << (st_CraftingMaterialItemInfo& CraftingMaterialItemInfo);
 
-	CGameServerMessage& operator << (st_CraftingTable& CraftingTable);
+	CGameServerMessage& operator << (st_CraftingTableRecipe& CraftingTable);
 
 	CGameServerMessage& operator << (CItem** Item);
 	CGameServerMessage& operator << (CItem* Item);

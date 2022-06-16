@@ -127,6 +127,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_ItemInfo& ItemInfo)
     *this << ItemInfo.TileGridPositionX;
     *this << ItemInfo.TileGridPositionY;
 
+    *this << (int16)ItemInfo.OwnerCraftingTable;
     *this << (int8)ItemInfo.ItemLargeCategory;
     *this << (int8)ItemInfo.ItemMediumCategory;
     *this << (int16)ItemInfo.ItemSmallCategory;    
@@ -139,6 +140,8 @@ CGameServerMessage& CGameServerMessage::operator<<(st_ItemInfo& ItemInfo)
     *this << ItemExplainLen;
 	InsertData(ItemInfo.ItemExplain.c_str(), ItemExplainLen);
 
+    *this << ItemInfo.ItemCraftingTime;
+    *this << ItemInfo.ItemCraftingRemainTime;
     *this << ItemInfo.ItemMinDamage;
     *this << ItemInfo.ItemMaxDamage;
     *this << ItemInfo.ItemDefence;
@@ -150,7 +153,18 @@ CGameServerMessage& CGameServerMessage::operator<<(st_ItemInfo& ItemInfo)
     *this << ItemImagePathLen;
     InsertData(ItemInfo.ItemThumbnailImagePath.c_str(), ItemImagePathLen);
 
-    *this << ItemInfo.ItemIsEquipped;         
+    *this << ItemInfo.ItemIsEquipped;
+
+    int16 ItemCraftingMaterialCount = ItemInfo.Materials.size();
+    *this << ItemCraftingMaterialCount;
+
+    if (ItemCraftingMaterialCount > 0)
+    {
+        for (st_CraftingMaterialItemInfo MaterialItemInfo : ItemInfo.Materials)
+        {
+            *this << MaterialItemInfo;
+        }
+    }
 
     return *(this);
 }
@@ -249,7 +263,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_CraftingMaterialItemInfo& 
     return *(this);
 }
 
-CGameServerMessage& CGameServerMessage::operator<<(st_CraftingTable& CraftingTable)
+CGameServerMessage& CGameServerMessage::operator<<(st_CraftingTableRecipe& CraftingTable)
 {
     *this << (int16)CraftingTable.CraftingTableType;
 
@@ -260,9 +274,9 @@ CGameServerMessage& CGameServerMessage::operator<<(st_CraftingTable& CraftingTab
     int8 CraftingCompleteItemCount = (int8)CraftingTable.CraftingTableCompleteItems.size();
     *this << CraftingCompleteItemCount;
 
-    for (st_CraftingCompleteItem CraftingCompleteItem : CraftingTable.CraftingTableCompleteItems)
+    for (CItem* CraftingComplteItem : CraftingTable.CraftingTableCompleteItems)
     {
-        *this << CraftingCompleteItem;
+        *this << CraftingComplteItem->_ItemInfo;
     }
 
     return *(this);
