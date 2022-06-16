@@ -352,6 +352,23 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			{
 				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL;
 			}
+			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET")
+			{
+				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET;
+			}
+			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT")
+			{
+				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT;
+			}
+			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET")
+			{
+				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET;
+			}
+			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT")
+			{
+				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT;
+			}
+
 
 			// 재료 아이템의 스폰 오브젝트 타입
 			if (ItemObjectType == "OBJECT_ITEM_MATERIAL_LEATHER")
@@ -393,6 +410,22 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_CHAR_COAL")
 			{
 				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL;
+			}
+			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_COPPER_NUGGET")
+			{
+				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET;
+			}
+			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_COPPER_INGOT")
+			{
+				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT;
+			}
+			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_IRON_NUGGET")
+			{
+				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET;
+			}
+			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_IRON_INGOT")
+			{
+				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT;
 			}
 
 			MaterialData->ItemExplain = ItemExplain;
@@ -2328,7 +2361,7 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_YARN")
 			{
 				CraftingCompleteItem.CompleteItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN;
-			}
+			}			
 
 			CraftingCompleteItem.CompleteItemName = (LPWSTR)CA2W(CraftingCompleteItemName.c_str());
 			CraftingCompleteItem.CompleteItemImagePath = (LPWSTR)CA2W(CraftingCompleteItemThumbnailImagePath.c_str());
@@ -2357,7 +2390,7 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 				else if (MaterialSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_YARN")
 				{
 					CraftingMaterialItemInfo.MaterialItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN;
-				}
+				}				
 
 				CraftingMaterialItemInfo.MaterialItemName = (LPWSTR)CA2W(MaterialName.c_str());
 				CraftingMaterialItemInfo.ItemCount = MaterialCount;
@@ -2406,8 +2439,22 @@ void CDataManager::LoadDataCraftingTable(wstring LoadFileName)
 			{				
 				CraftingCompleteItem = G_ObjectManager->ItemCreate(en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL);
 				CraftingCompleteItem->_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_MATERIAL;
-				CraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL;												
-				CraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_FURNACE;									
+				CraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL;
+				CraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_FURNACE;
+			}
+			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT")
+			{
+				CraftingCompleteItem = G_ObjectManager->ItemCreate(en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT);
+				CraftingCompleteItem->_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_MATERIAL;
+				CraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT;
+				CraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_FURNACE;
+			}
+			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT")
+			{
+				CraftingCompleteItem = G_ObjectManager->ItemCreate(en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT);
+				CraftingCompleteItem->_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_MATERIAL;
+				CraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT;
+				CraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_FURNACE;
 			}
 
 			st_ItemData* CraftingCompleteItemData = FindItemData(CraftingCompleteItem->_ItemInfo.ItemSmallCategory);
@@ -2432,6 +2479,18 @@ void CDataManager::LoadDataCraftingTable(wstring LoadFileName)
 				if (MaterialSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG")
 				{
 					CraftingMaterialItemInfo.MaterialItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG;
+				}
+				else if (MaterialSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET")
+				{
+					CraftingMaterialItemInfo.MaterialItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET;
+				}
+				else if (MaterialSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET")
+				{
+					CraftingMaterialItemInfo.MaterialItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET;
+				}
+				else if (MaterialSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL")
+				{
+					CraftingMaterialItemInfo.MaterialItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL;
 				}
 
 				CraftingMaterialItemInfo.MaterialItemName = (LPWSTR)CA2W(MaterialName.c_str());
