@@ -331,6 +331,11 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
 		{
 			for (int32 i = 0; i < en_Channel::ENVIRONMENT_MAX; i++)
 			{
@@ -432,6 +437,10 @@ vector<CGameObject*> CChannel::FindChannelObjects(en_GameObjectType GameObjectTy
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
 		for (int32 i = 0; i < en_Channel::ENVIRONMENT_MAX; i++)
 		{
 			if (_ChannelItemArray[i] != nullptr)
@@ -537,6 +546,11 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
+		case en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL:
+		case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET:
+		case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
+		case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
+		case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
 			{
 				for (int32 i = 0; i < en_Channel::ENVIRONMENT_MAX; i++)
 				{
@@ -808,6 +822,13 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
 	{
 		// 아이템으로 형변환
 		CItem* EnterChannelItem = (CItem*)EnterChannelGameObject;
@@ -918,6 +939,13 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
 		_ChannelItemArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
 
 		_Map->ApplyPositionLeaveItem(LeaveChannelGameObject);
