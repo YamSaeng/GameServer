@@ -179,36 +179,6 @@ struct st_EnvironmentData
 	vector<st_DropData> DropItems;
 };
 
-struct st_CraftingMaterialItemData
-{
-	en_SmallItemCategory MaterialDataId; // 재료템 Id
-	string MaterialName; // 재료 템 이름
-	string MaterialThumbnailImagePath; // 재료 템 이미지 경로
-	int16 MaterialCount; // 재료 템 개수
-};
-
-struct st_CraftingCompleteItemData
-{
-	en_SmallItemCategory CraftingCompleteItemDataId; // 완성템의 ItemDataId
-	string CraftingCompleteName; // 제작템 이름			
-	string CraftingCompleteThumbnailImagePath; // 제작템 이미지 경로
-	vector<st_CraftingMaterialItemData> CraftingMaterials; // 재료
-};
-
-struct st_CraftingItemCategoryData
-{
-	en_LargeItemCategory CraftingType; // 제작템 범주
-	string CraftingTypeName; // 제작템 범주 이름	
-	vector<st_CraftingCompleteItemData> CraftingCompleteItems; // 제작템 범주에 속한 아이템 목록
-};
-
-struct st_CraftingTableData
-{
-	en_GameObjectType CraftingTableType;
-	string CraftingTableName;
-	vector<st_CraftingCompleteItemData> CraftingCompleteItems;
-};
-
 struct st_MapInfoData
 {
 	int64 MapID;			// 맵 고유 ID

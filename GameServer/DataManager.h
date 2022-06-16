@@ -61,8 +61,8 @@ public:
 	map<int16, st_BufSkillData*> _ArcherBufSkillDatas;
 
 	map<int32, st_EnvironmentData*> _Environments;
-	map<int16, st_CraftingTable*> _CraftingTableData;
-	map<int8, st_CraftingItemCategoryData*> _CraftingData;
+	map<int16, st_CraftingTableRecipe*> _CraftingTableData;
+	map<int8,  st_CraftingItemCategory*> _CraftingData;
 	map<int32, st_LevelData*> _LevelDatas;
 
 	map<int64, st_MapInfoData*> _MapInfoDatas;

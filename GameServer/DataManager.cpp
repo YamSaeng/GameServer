@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "DataManager.h"
+#include "ObjectManager.h"
 #include <atlbase.h>
 
 void CDataManager::LoadDataItem(wstring LoadFileName)
@@ -2274,29 +2275,29 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 
 	for (auto& Filed : Document["CraftingDatas"].GetArray())
 	{
-		st_CraftingItemCategoryData* CraftingData = new st_CraftingItemCategoryData();
+		st_CraftingItemCategory* CraftingItemCategory = new st_CraftingItemCategory();
 
 		string CraftingItemLargeCategory = Filed["CraftingCompleteItemLargeCategory"].GetString();
 		string CraftingTypeName = Filed["CraftingTypeName"].GetString();
 
 		if (CraftingItemLargeCategory == "ITEM_LARGE_CATEGORY_WEAPON")
 		{
-			CraftingData->CraftingType = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
+			CraftingItemCategory->CategoryType = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
 		}
 		else if (CraftingItemLargeCategory == "ITEM_LARGE_CATEGORY_ARMOR")
 		{
-			CraftingData->CraftingType = en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARMOR;
+			CraftingItemCategory->CategoryType = en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARMOR;
 		}
 		else if (CraftingItemLargeCategory == "ITEM_LARGE_CATEGORY_MATERIAL")
 		{
-			CraftingData->CraftingType = en_LargeItemCategory::ITEM_LARGE_CATEGORY_MATERIAL;
+			CraftingItemCategory->CategoryType = en_LargeItemCategory::ITEM_LARGE_CATEGORY_MATERIAL;
 		}
 
-		CraftingData->CraftingTypeName = CraftingTypeName;
+		CraftingItemCategory->CategoryName = (LPWSTR)CA2W(CraftingTypeName.c_str());
 
 		for (auto& CraftingCompleteItemFiled : Filed["CraftingCompleteItem"].GetArray())
 		{
-			st_CraftingCompleteItemData CraftingCompleteItemData;
+			st_CraftingCompleteItem CraftingCompleteItem;
 
 			string CraftingCompleteItemMediumCategory = CraftingCompleteItemFiled["CraftingCompleteItemMediumCategory"].GetString();
 			string CraftingCompleteItemSmallCategory = CraftingCompleteItemFiled["CraftingCompleteItemSmallCategory"].GetString();
@@ -2306,35 +2307,35 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 
 			if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD")
 			{
-				CraftingCompleteItemData.CraftingCompleteItemDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD;
+				CraftingCompleteItem.CompleteItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD;
 			}
 			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD")
 			{
-				CraftingCompleteItemData.CraftingCompleteItemDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD;
+				CraftingCompleteItem.CompleteItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD;
 			}
 			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER")
 			{
-				CraftingCompleteItemData.CraftingCompleteItemDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER;
+				CraftingCompleteItem.CompleteItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER;
 			}
 			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER")
 			{
-				CraftingCompleteItemData.CraftingCompleteItemDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER;
+				CraftingCompleteItem.CompleteItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER;
 			}
 			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK")
 			{
-				CraftingCompleteItemData.CraftingCompleteItemDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK;
+				CraftingCompleteItem.CompleteItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK;
 			}
 			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_YARN")
 			{
-				CraftingCompleteItemData.CraftingCompleteItemDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN;
+				CraftingCompleteItem.CompleteItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN;
 			}
 
-			CraftingCompleteItemData.CraftingCompleteName = CraftingCompleteItemName;
-			CraftingCompleteItemData.CraftingCompleteThumbnailImagePath = CraftingCompleteItemThumbnailImagePath;
+			CraftingCompleteItem.CompleteItemName = (LPWSTR)CA2W(CraftingCompleteItemName.c_str());
+			CraftingCompleteItem.CompleteItemImagePath = (LPWSTR)CA2W(CraftingCompleteItemThumbnailImagePath.c_str());
 
 			for (auto& CraftingMaterialFiled : CraftingCompleteItemFiled["CraftingMaterial"].GetArray())
 			{
-				st_CraftingMaterialItemData CraftingMaterialData;
+				st_CraftingMaterialItemInfo CraftingMaterialItemInfo;
 
 				string MaterialSmallCategory = CraftingMaterialFiled["MaterialSmallCategory"].GetString();
 				string MaterialName = CraftingMaterialFiled["MaterialName"].GetString();
@@ -2343,32 +2344,32 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 
 				if (MaterialSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_LEATHER")
 				{
-					CraftingMaterialData.MaterialDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER;
+					CraftingMaterialItemInfo.MaterialItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER;
 				}
 				else if (MaterialSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG")
 				{
-					CraftingMaterialData.MaterialDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG;
+					CraftingMaterialItemInfo.MaterialItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG;
 				}
 				else if (MaterialSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK")
 				{
-					CraftingMaterialData.MaterialDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK;
+					CraftingMaterialItemInfo.MaterialItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK;
 				}
 				else if (MaterialSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_YARN")
 				{
-					CraftingMaterialData.MaterialDataId = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN;
+					CraftingMaterialItemInfo.MaterialItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN;
 				}
 
-				CraftingMaterialData.MaterialName = MaterialName;
-				CraftingMaterialData.MaterialCount = MaterialCount;
-				CraftingMaterialData.MaterialThumbnailImagePath = MaterialThumbnailImagePath;
+				CraftingMaterialItemInfo.MaterialItemName = (LPWSTR)CA2W(MaterialName.c_str());
+				CraftingMaterialItemInfo.ItemCount = MaterialCount;
+				CraftingMaterialItemInfo.MaterialItemImagePath = (LPWSTR)CA2W(MaterialThumbnailImagePath.c_str());
 
-				CraftingCompleteItemData.CraftingMaterials.push_back(CraftingMaterialData);
+				CraftingCompleteItem.Materials.push_back(CraftingMaterialItemInfo);
 			}
 
-			CraftingData->CraftingCompleteItems.push_back(CraftingCompleteItemData);
+			CraftingItemCategory->CompleteItems.push_back(CraftingCompleteItem);
 		}
 
-		_CraftingData.insert(pair<int8, st_CraftingItemCategoryData*>((int8)CraftingData->CraftingType, CraftingData));
+		_CraftingData.insert(pair<int8, st_CraftingItemCategory*>((int8)CraftingItemCategory->CategoryType, CraftingItemCategory));
 	}
 }
 
@@ -2381,39 +2382,47 @@ void CDataManager::LoadDataCraftingTable(wstring LoadFileName)
 
 	for (auto& Filed : Document["CraftingTable"].GetArray())
 	{
-		st_CraftingTable* CraftingTableData = new st_CraftingTable();
+		st_CraftingTableRecipe* CraftingTableRecipe = new st_CraftingTableRecipe();
 
 		string CraftingTableName = Filed["CraftingTableName"].GetString();
 
-		CraftingTableData->CraftingTableName = (LPWSTR)CA2W(CraftingTableName.c_str());
+		CraftingTableRecipe->CraftingTableName = (LPWSTR)CA2W(CraftingTableName.c_str());
 
 		if (CraftingTableName == "¿ë±¤·Î")
 		{
-			CraftingTableData->CraftingTableType = en_GameObjectType::OBJECT_FURNACE;
+			CraftingTableRecipe->CraftingTableType = en_GameObjectType::OBJECT_FURNACE;
 		}
 
 		for (auto& CraftingTableCompleteItemFiled : Filed["CraftingTableCompleteItem"].GetArray())
 		{
-			st_CraftingCompleteItem CraftingCompleteItemData;
-
+			CItem* CraftingCompleteItem = nullptr;			
+			
 			string CraftingCompleteItemMediumCategory = CraftingTableCompleteItemFiled["CraftingCompleteItemMediumCategory"].GetString();
 			string CraftingCompleteItemSmallCategory = CraftingTableCompleteItemFiled["CraftingCompleteItemSmallCategory"].GetString();
 
-			string CraftingCompleteItemName = CraftingTableCompleteItemFiled["CraftingCompleteItemName"].GetString();
-			string CraftingCompleteItemThumbnailImagePath = CraftingTableCompleteItemFiled["CraftingCompleteItemThumbnailImagePath"].GetString();
+			string CraftingCompleteItemName = CraftingTableCompleteItemFiled["CraftingCompleteItemName"].GetString();			
 
 			if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL")
 			{				
-				CraftingCompleteItemData.CompleteItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL;
-				CraftingCompleteItemData.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_FURNACE;
+				CraftingCompleteItem = G_ObjectManager->ItemCreate(en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL);
+				CraftingCompleteItem->_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_MATERIAL;
+				CraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL;												
+				CraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_FURNACE;									
 			}
 
-			CraftingCompleteItemData.CompleteItemName = (LPWSTR)CA2W(CraftingCompleteItemName.c_str());
-			CraftingCompleteItemData.CompleteItemImagePath = (LPWSTR)CA2W(CraftingCompleteItemThumbnailImagePath.c_str());
+			st_ItemData* CraftingCompleteItemData = FindItemData(CraftingCompleteItem->_ItemInfo.ItemSmallCategory);
+						
+			CraftingCompleteItem->_ItemInfo.ItemExplain = (LPWSTR)CA2W(CraftingCompleteItemData->ItemExplain.c_str());
+			CraftingCompleteItem->_ItemInfo.ItemName = (LPWSTR)CA2W(CraftingCompleteItemData->ItemName.c_str());			
+			CraftingCompleteItem->_ItemInfo.Width = CraftingCompleteItemData->ItemWidth;
+			CraftingCompleteItem->_ItemInfo.Height = CraftingCompleteItemData->ItemHeight;
+			CraftingCompleteItem->_ItemInfo.ItemCraftingTime = CraftingCompleteItemData->ItemCraftingTime;
+			CraftingCompleteItem->_ItemInfo.ItemThumbnailImagePath = (LPWSTR)CA2W(CraftingCompleteItemData->ItemThumbnailImagePath.c_str());
+			CraftingCompleteItem->_ItemInfo.ItemMaxCount = CraftingCompleteItemData->ItemMaxCount;			
 
 			for (auto& CraftingMaterialFiled : CraftingTableCompleteItemFiled["CraftingMaterial"].GetArray())
 			{
-				st_CraftingMaterialItemInfo CraftingMaterialData;
+				st_CraftingMaterialItemInfo CraftingMaterialItemInfo;
 
 				string MaterialSmallCategory = CraftingMaterialFiled["MaterialSmallCategory"].GetString();
 				string MaterialName = CraftingMaterialFiled["MaterialName"].GetString();
@@ -2422,20 +2431,20 @@ void CDataManager::LoadDataCraftingTable(wstring LoadFileName)
 
 				if (MaterialSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG")
 				{
-					CraftingMaterialData.MaterialItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG;
+					CraftingMaterialItemInfo.MaterialItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG;
 				}
 
-				CraftingMaterialData.MaterialItemName = (LPWSTR)CA2W(MaterialName.c_str());
-				CraftingMaterialData.ItemCount = MaterialCount;
-				CraftingMaterialData.MaterialItemImagePath = (LPWSTR)CA2W(MaterialThumbnailImagePath.c_str());
+				CraftingMaterialItemInfo.MaterialItemName = (LPWSTR)CA2W(MaterialName.c_str());
+				CraftingMaterialItemInfo.ItemCount = MaterialCount;
+				CraftingMaterialItemInfo.MaterialItemImagePath = (LPWSTR)CA2W(MaterialThumbnailImagePath.c_str());
 
-				CraftingCompleteItemData.Materials.push_back(CraftingMaterialData);
+				CraftingCompleteItem->_ItemInfo.Materials.push_back(CraftingMaterialItemInfo);				
 			}			
 
-			CraftingTableData->CraftingTableCompleteItems.push_back(CraftingCompleteItemData);
+			CraftingTableRecipe->CraftingTableCompleteItems.push_back(CraftingCompleteItem);
 		}		
 		
-		_CraftingTableData.insert(pair<int16, st_CraftingTable*>((int16)CraftingTableData->CraftingTableType, CraftingTableData));
+		_CraftingTableData.insert(pair<int16, st_CraftingTableRecipe*>((int16)CraftingTableRecipe->CraftingTableType, CraftingTableRecipe));
 	}
 }
 
