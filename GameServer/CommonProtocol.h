@@ -3,14 +3,14 @@
 enum en_GAME_SERVER_PACKET_TYPE
 {
 	////////////////////////////////////////////////////////
-	//
-	//	Client & GameServer Protocol
-	//
-	////////////////////////////////////////////////////////
+		//
+		//	Client & GameServer Protocol
+		//
+		////////////////////////////////////////////////////////
 
-	//------------------------------------------------------
-	// Game Server
-	//------------------------------------------------------
+		//------------------------------------------------------
+		// Game Server
+		//------------------------------------------------------
 	en_PACKET_CS_GAME_SERVER = 0,
 
 	//------------------------------------------------------------
@@ -38,7 +38,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	//------------------------------------------------------------
 	// 게임서버 로그인 요청
 	//	{
-    //		WORD	Type
+	//		WORD	Type
 	//
 	//		int 	AccountNo
 	//		WCHAR	ClientID[20];		
@@ -57,14 +57,14 @@ enum en_GAME_SERVER_PACKET_TYPE
 	//	}
 	//------------------------------------------------------------
 	en_PACKET_S2C_GAME_RES_LOGIN,
-	
+
 	//------------------------------------------------------------
 	// 게임서버 캐릭터 생성 요청
 	// int32 CharacterNameLen
 	// WCHAR CharacterName
 	//------------------------------------------------------------
 	en_PACKET_C2S_GAME_CREATE_CHARACTER,
-	
+
 	//------------------------------------------------------------
 	// 게임서버 캐릭터 생성 요청 응답
 	// int32 PlayerDBId
@@ -80,7 +80,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// wstring EnterGameCharacterName
 	//------------------------------------------------------------
 	en_PACKET_C2S_GAME_ENTER,
-	
+
 	//------------------------------------------------------------
 	// 게임서버 캐릭터 입장 요청 응답
 	// int64 AccountId
@@ -89,7 +89,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// st_GameObjectInfo ObjectInfo
 	//------------------------------------------------------------
 	en_PACKET_S2C_GAME_ENTER,
-	
+
 	//------------------------------------------------------------
 	// 게임서버 캐릭터 정보 요청
 	// int64 AccountId
@@ -110,7 +110,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int8 Dir
 	//------------------------------------------------------------
 	en_PACKET_C2S_MOVE,
-	
+
 	//------------------------------------------------------------
 	// 게임서버 캐릭터 움직이기 요청 응답	
 	// int32 PlayerDBId
@@ -141,7 +141,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// en_GameObjectType ObjectType
 	// st_PositionInfo PositionInfo
 	//------------------------------------------------------------
-	en_PACKET_S2C_MONSTER_MOVE, 
+	en_PACKET_S2C_MONSTER_MOVE,
 
 	//------------------------------------------------------------
 	// 게임서버 오브젝트 순찰 
@@ -159,7 +159,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int8 RangeDistance;
 	//------------------------------------------------------------	
 	en_PACKET_C2S_ATTACK,
-	
+
 	//------------------------------------------------------------
 	// 게임서버 캐릭터 공격 요청 응답
 	// int64 AccountId
@@ -167,7 +167,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int8 Dir
 	//------------------------------------------------------------	
 	en_PACKET_S2C_ATTACK,
-	
+
 	//------------------------------------------------------------
 	// 게임서버 캐릭터 마법 요청
 	// int64 AccountId
@@ -177,7 +177,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int8 RangeDitance;
 	//------------------------------------------------------------
 	en_PACKET_C2S_MAGIC,
-	
+
 	//------------------------------------------------------------
 	// 게임서버 캐릭터 마법 요청 응답
 	// int64 AccountId
@@ -221,7 +221,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int64 ObjectID
 	//------------------------------------------------------------
 	en_PACKET_C2S_GATHERING_CANCEL,
-	
+
 	//------------------------------------------------------------
 	// 게임서버 채집 취소 요청 응답
 	// int64 AccountID
@@ -245,14 +245,14 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// st_GameObjectInfo GameObjectInfo
 	//------------------------------------------------------------	
 	en_PACKET_S2C_SPAWN,
-	
+
 	//------------------------------------------------------------
 	// 게임서버 캐릭터 디스폰
 	// int64 AccountId
 	// int32 PlayerDBId
 	//------------------------------------------------------------
 	en_PACKET_S2C_DESPAWN,
-	
+
 	//------------------------------------------------------------
 	// 게임서버 오브젝트 스탯 변경
 	// int64 AccountId
@@ -260,7 +260,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// st_StatInfo ChangeStatInfo
 	//------------------------------------------------------------
 	en_PACKET_S2C_OBJECT_STAT_CHANGE,
-	
+
 	//------------------------------------------------------------
 	// 게임서버 왼쪽 월드 마우스 정보 요청	
 	// int64 AccountId
@@ -269,24 +269,23 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int16 ObjectType
 	//------------------------------------------------------------
 	en_PACKET_C2S_LEFT_MOUSE_OBJECT_INFO,
-	
+
 	//------------------------------------------------------------
 	// 게임서버 왼쪽 월드 마우스 정보 요청 응답
 	// int64 AccountId
 	// int64 PlayerDBId
 	// st_GameObjectInfo ObjectInfo
 	//------------------------------------------------------------
-	en_PACKET_S2C_LEFT_MOUSE_OBJECT_INFO,		
+	en_PACKET_S2C_LEFT_MOUSE_OBJECT_INFO,
 
 	//------------------------------------------------------------
 	// 게임서버 왼쪽 UI 마우스 정보 요청 
 	// int64 AccountID
 	// int64 PlayerID
-	// int64 OwnerID  ( UI를 표시하는 게임 오브젝트 ID )
-	// en_UIObjectInfo UIObjectInfo ( UI가 속한 UIObjectInfo )
+	// en_GameObjectType ObjectType
 	//------------------------------------------------------------
 	en_PACKET_C2S_LEFT_MOUSE_UI_OBJECT_INFO,
-	
+
 	//------------------------------------------------------------
 	// 게임서버 왼쪽 UI 마우스 정보 요청 응답
 	//------------------------------------------------------------
@@ -299,7 +298,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int64 ObjectID
 	// int16 ObjectType
 	//------------------------------------------------------------
-	en_PACKET_C2S_RIGHT_MOUSE_OBJECT_INFO,	
+	en_PACKET_C2S_RIGHT_MOUSE_OBJECT_INFO,
 
 	//------------------------------------------------------------
 	// 게임서버 오른쪽 마우스 정보 요청 응답
@@ -308,6 +307,13 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// inf16 FindObjectType
 	//------------------------------------------------------------
 	en_PACKET_S2C_RIGHT_MOUSE_OBJECT_INFO,
+
+	//------------------------------------------------------------
+	// 게임서버 제작대 제작 남은 시간
+	// int64 CraftingTableObjectID	
+	// st_ItemInfo CraftingItemInfo
+	//------------------------------------------------------------
+	en_PACKET_S2C_CRAFTING_TABLE_CRAFT_REMAIN_TIME,
 
 	//------------------------------------------------------------
 	// 게임서버 제작대 선택 풀림 요청
@@ -341,7 +347,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// en_CreatureState ObjectState	
 	//------------------------------------------------------------
 	en_PACKET_S2C_OBJECT_STATE_CHANGE,
-	
+
 	//------------------------------------------------------------
 	// 게임서버 몬스터 오브젝트 상태 변경 요청 응답
 	// int64 ObjectId
@@ -367,10 +373,10 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_DIE,
 
 	//------------------------------------------------------------
-    // 게임서버 채팅 메세지 요청
-    // int32 ObjectId
-    // string Message
-    //------------------------------------------------------------
+	// 게임서버 채팅 메세지 요청
+	// int32 ObjectId
+	// string Message
+	//------------------------------------------------------------
 	en_PACKET_C2S_MESSAGE,
 
 	//------------------------------------------------------------
@@ -378,8 +384,8 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int32 ObjectId
 	// string Message
 	//------------------------------------------------------------
-	en_PACKET_S2C_MESSAGE,	
-    
+	en_PACKET_S2C_MESSAGE,
+
 	//------------------------------------------------------------
 	// 게임서버 줍기 요청
 	// int64 AccountId
@@ -406,7 +412,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_C2S_CRAFTING_TABLE_INPUT_ITEM,
 
 	//------------------------------------------------------------
-	// 게임서버 아이템 제작대에 넣기 요청
+	// 게임서버 아이템 제작대에 넣기 요청 응답
 	// int64 CraftingTableObjectID
 	// int16 MaterialItemsSize
 	// map MaterialItems
@@ -438,14 +444,29 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_CRAFTING_TABLE_CRAFTING_START,
 
 	//------------------------------------------------------------
-	// 게임서버 제작대 재료 목록 보내기
+	// 게임서버 제작대 제작 시작 멈춤 요청
+	// int64 AccountID
+	// int64 PlayerID
+	// int64 CraftingTableObjectID
+	//------------------------------------------------------------
+	en_PACKET_C2S_CRAFTING_TABLE_CRAFTING_STOP,
+
+	//------------------------------------------------------------
+	// 게임서버 제작대 제작 시작 멈춤 요청 응답	
+	// int64 CraftingTableObjectID
+	// st_ItemInfo CraftingItemInfo
+	//------------------------------------------------------------
+	en_PACKET_S2C_CRAFTING_TABLE_CRAFTING_STOP,
+
+	//------------------------------------------------------------
+	// 게임서버 제작대 재료 목록 
 	// int64 CraftingTableObjectID
 	// map MaterialItems
 	//------------------------------------------------------------
 	en_PACKET_S2C_CRAFTING_TABLE_MATERIAL_ITEM_LIST,
 
 	//------------------------------------------------------------
-	// 게임서버 제작대 제작완료템 목록 보내기
+	// 게임서버 제작대 제작템 목록
 	// int64 CraftingtableObjectID
 	// map CompleteItems
 	//------------------------------------------------------------
@@ -466,7 +487,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int64 ObjectId
 	// CItem* SelectItem	
 	//------------------------------------------------------------
-	en_PACKET_S2C_ITEM_SELECT,	
+	en_PACKET_S2C_ITEM_SELECT,
 
 	//------------------------------------------------------------
 	// 게임서버 아이템 놓기 요청
@@ -515,7 +536,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// st_SkillInfo SkillInfo
 	//------------------------------------------------------------
 	en_PACKET_S2C_SKILL_TO_SKILLBOX,
-	
+
 	//------------------------------------------------------------
 	// 게임서버 퀵슬롯 생성 
 	// int8 QuickSlotBarSize
@@ -576,7 +597,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int8 QuickSlotBarSlotIndexA	
 	//------------------------------------------------------------
 	en_PACKET_C2S_QUICKSLOT_EMPTY,
-	
+
 	//------------------------------------------------------------
 	// 게임서버 퀵슬롯 초기화 요청 응답
 	// int64 ObjectId
@@ -591,7 +612,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// st_SkillInfo EffectSkillInfo
 	//------------------------------------------------------------
 	en_PACKET_S2C_EFFECT,
-	
+
 	//------------------------------------------------------------
 	// 게임서버 제작템 목록
 	// int64 ObjectId
@@ -608,7 +629,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// st_ItemInfo[] Materials
 	//------------------------------------------------------------
 	en_PACKET_C2S_CRAFTING_CONFIRM,
-	
+
 	//------------------------------------------------------------
 	// 게임서버 인벤토리 아이템 업데이트
 	// int64 AccountId
@@ -648,7 +669,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int64 RequireExp
 	// int64 TotalExp
 	//------------------------------------------------------------
-	en_PACKET_S2C_EXPERIENCE,	
+	en_PACKET_S2C_EXPERIENCE,
 
 	//------------------------------------------------------------
 	// 게임서버 버프 패킷
@@ -663,7 +684,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// en_SkillType OffSkillType
 	//------------------------------------------------------------
 	en_PACKET_S2C_BUF_DEBUF_OFF,
-	
+
 	//------------------------------------------------------------
 	// 게임서버 연속기 스킬 켜기 패킷
 	// int8 QuickSlotBarIndex
@@ -686,7 +707,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// wstring Messages	
 	//-----------------------------------------------------------
 	en_PACKET_S2C_PERSONAL_MESSAGE,
-			
+
 	//-----------------------------------------------------------
 	// 게임서버 클라 퐁 전송	
 	//-----------------------------------------------------------

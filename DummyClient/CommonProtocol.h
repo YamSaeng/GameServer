@@ -3,14 +3,14 @@
 enum en_GAME_SERVER_PACKET_TYPE
 {
 	////////////////////////////////////////////////////////
-	//
-	//	Client & GameServer Protocol
-	//
-	////////////////////////////////////////////////////////
+		//
+		//	Client & GameServer Protocol
+		//
+		////////////////////////////////////////////////////////
 
-	//------------------------------------------------------
-	// Game Server
-	//------------------------------------------------------
+		//------------------------------------------------------
+		// Game Server
+		//------------------------------------------------------
 	en_PACKET_CS_GAME_SERVER = 0,
 
 	//------------------------------------------------------------
@@ -285,7 +285,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// en_GameObjectType ObjectType
 	//------------------------------------------------------------
 	en_PACKET_C2S_LEFT_MOUSE_UI_OBJECT_INFO,
-	
+
 	//------------------------------------------------------------
 	// 게임서버 왼쪽 UI 마우스 정보 요청 응답
 	//------------------------------------------------------------
@@ -307,6 +307,13 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// inf16 FindObjectType
 	//------------------------------------------------------------
 	en_PACKET_S2C_RIGHT_MOUSE_OBJECT_INFO,
+
+	//------------------------------------------------------------
+	// 게임서버 제작대 제작 남은 시간
+	// int64 CraftingTableObjectID	
+	// st_ItemInfo CraftingItemInfo
+	//------------------------------------------------------------
+	en_PACKET_S2C_CRAFTING_TABLE_CRAFT_REMAIN_TIME,
 
 	//------------------------------------------------------------
 	// 게임서버 제작대 선택 풀림 요청
@@ -405,7 +412,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_C2S_CRAFTING_TABLE_INPUT_ITEM,
 
 	//------------------------------------------------------------
-	// 게임서버 아이템 제작대에 넣기 요청
+	// 게임서버 아이템 제작대에 넣기 요청 응답
 	// int64 CraftingTableObjectID
 	// int16 MaterialItemsSize
 	// map MaterialItems
@@ -430,21 +437,36 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int16 CraftingCount
 	//------------------------------------------------------------
 	en_PACKET_C2S_CRAFTING_TABLE_CRAFTING_START,
-		
+
 	//------------------------------------------------------------
 	// 게임서버 제작대 제작 시작 응답
 	//------------------------------------------------------------
 	en_PACKET_S2C_CRAFTING_TABLE_CRAFTING_START,
 
 	//------------------------------------------------------------
-	// 게임서버 제작대 재료 목록 보내기
+	// 게임서버 제작대 제작 시작 멈춤 요청
+	// int64 AccountID
+	// int64 PlayerID
+	// int64 CraftingTableObjectID
+	//------------------------------------------------------------
+	en_PACKET_C2S_CRAFTING_TABLE_CRAFTING_STOP,
+
+	//------------------------------------------------------------
+	// 게임서버 제작대 제작 시작 멈춤 요청 응답	
+	// int64 CraftingTableObjectID
+	// st_ItemInfo CraftingItemInfo
+	//------------------------------------------------------------
+	en_PACKET_S2C_CRAFTING_TABLE_CRAFTING_STOP,
+
+	//------------------------------------------------------------
+	// 게임서버 제작대 재료 목록 
 	// int64 CraftingTableObjectID
 	// map MaterialItems
 	//------------------------------------------------------------
 	en_PACKET_S2C_CRAFTING_TABLE_MATERIAL_ITEM_LIST,
 
 	//------------------------------------------------------------
-	// 게임서버 제작대 제작완료템 목록 보내기
+	// 게임서버 제작대 제작템 목록
 	// int64 CraftingtableObjectID
 	// map CompleteItems
 	//------------------------------------------------------------
@@ -761,4 +783,5 @@ enum en_LOGIN_SERVER_PACKET_TYPE
 	// en_LoginState LoginState
 	//--------------------------------
 	en_LOGIN_SERVER_C2S_LOGIN_STATE_CHANGE
+
 };
