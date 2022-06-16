@@ -14,12 +14,8 @@ public:
 	bool FindMaterialItem(en_SmallItemCategory FindSmallItemCategory, int16 ItemCount);
 
 	virtual void Update() override;
-
-	st_CraftingTable GetFurnaceCraftingTable();
+	
 protected:
-	virtual void UpdateCrafting() override;
-private:	
-	// 용광로 제작템 목록
-	st_CraftingTable _FurnaceCraftingTable;	
+	virtual void UpdateCrafting() override;		
 };
 

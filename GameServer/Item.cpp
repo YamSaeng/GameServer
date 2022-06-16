@@ -39,6 +39,24 @@ void CItem::Update()
 	}
 }
 
+void CItem::CraftingStart()
+{
+	_ItemCrafting = en_ItemCrafting::ITEM_CRAFTING_START;
+
+	_CraftingTick = _ItemInfo.ItemCraftingTime + GetTickCount64();
+
+	_ItemInfo.ItemCraftingRemainTime = _CraftingTick - GetTickCount64();
+}
+
+void CItem::CraftingStop()
+{
+	_ItemCrafting = en_ItemCrafting::ITEM_CRAFTING_STOP;
+
+	_CraftingTick = 0;
+
+	_ItemInfo.ItemCraftingRemainTime = 0;
+}
+
 void CItem::SetDestoryTime(int32 DestoryTime)
 {
 	_DestroyTime += (GetTickCount64() + DestoryTime);
@@ -77,7 +95,7 @@ void CItem::Init()
 
 void CItem::UpdateIdle()
 {
-	if (_Owner && _Owner->GetCellPosition() == GetCellPosition())
+	if (_Owner && _Owner->_GameObjectInfo.ObjectPositionInfo.CollisionPosition == _GameObjectInfo.ObjectPositionInfo.CollisionPosition)
 	{		
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;		
 	}
