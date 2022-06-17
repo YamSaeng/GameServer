@@ -414,7 +414,145 @@ void CGameObject::Update()
 
 				CraftingTableObject->_SelectedObject = nullptr;
 
-				CraftingTableObject->_SelectCraftingTableCompleteItem = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
+				CraftingTableObject->_SelectCraftingItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
+			}
+			break;
+		case en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_ITEM_ADD:
+			{
+				CGameObject* CraftingTableItemAddPlayerGO;
+				*GameObjectJob->GameObjectJobMessage >> &CraftingTableItemAddPlayerGO;
+
+				int16 AddItemSmallCategory;
+				*GameObjectJob->GameObjectJobMessage >> AddItemSmallCategory;
+
+				int16 AddItemCount;
+				*GameObjectJob->GameObjectJobMessage >> AddItemCount;
+
+				CCraftingTable* CraftingTable = (CCraftingTable*)this;
+
+				CPlayer* CraftingTableItemAddPlayer = (CPlayer*)CraftingTableItemAddPlayerGO;
+
+				// 넣을 아이템이 넣는 대상의 인벤토리에 있는지 확인
+				CItem* FindAddItem = CraftingTableItemAddPlayer->_InventoryManager.FindInventoryItem(0, (en_SmallItemCategory)AddItemSmallCategory);
+				if (FindAddItem != nullptr && FindAddItem->_ItemInfo.ItemCount > 0)
+				{
+					// 제작법을 가지고 옴
+					st_CraftingTableRecipe CraftingTableRecipe = CraftingTable->GetCraftingTableRecipe();
+
+					bool IsMaterial = false;
+
+					// 제작대 제작법 아이템 중
+					for (CItem* Item : CraftingTableRecipe.CraftingTableCompleteItems)
+					{
+						// 제작하고자 하는 제작 아이템을 찾고
+						if (Item->_ItemInfo.ItemSmallCategory == CraftingTable->_SelectCraftingItemType)
+						{
+							// 요청한 재료템이 제작 아이템의 재료로 들어가는지 최종확인
+							for (st_CraftingMaterialItemInfo MaterialItemInfo : Item->_ItemInfo.Materials)
+							{
+								if (MaterialItemInfo.MaterialItemType == (en_SmallItemCategory)AddItemSmallCategory)
+								{
+									IsMaterial = true;
+								}
+							}
+
+							break;
+						}
+					}
+
+					if (IsMaterial == true)
+					{
+						CraftingTable->InputMaterialItem(FindAddItem, AddItemCount);
+
+						FindAddItem->_ItemInfo.ItemCount -= AddItemCount;
+
+						if (FindAddItem->_ItemInfo.ItemCount < 0)
+						{
+							FindAddItem->_ItemInfo.ItemCount = 0;							
+						}
+
+						CMessage* ResInventoryItemUpdatePacket = G_ObjectManager->GameServer->MakePacketInventoryItemUpdate(CraftingTableItemAddPlayer->_GameObjectInfo.ObjectId,
+							FindAddItem->_ItemInfo);
+						G_ObjectManager->GameServer->SendPacket(CraftingTableItemAddPlayer->_SessionId, ResInventoryItemUpdatePacket);
+						ResInventoryItemUpdatePacket->Free();
+						
+						if (FindAddItem->_ItemInfo.ItemCount == 0)
+						{
+							CraftingTableItemAddPlayer->_InventoryManager.InitItem(0, FindAddItem->_ItemInfo.TileGridPositionX, FindAddItem->_ItemInfo.TileGridPositionY);
+						}
+
+						CMessage* ResCraftingTableAddItemPacket = G_ObjectManager->GameServer->MakePacketResCraftingTableInput(_GameObjectInfo.ObjectId, CraftingTable->GetMaterialItems());
+						G_ObjectManager->GameServer->SendPacket(CraftingTableItemAddPlayer->_SessionId, ResCraftingTableAddItemPacket);
+						ResCraftingTableAddItemPacket->Free();
+					}
+					else
+					{
+						CMessage* WrongItemInputMessage = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSOANL_MESSAGE_CRAFTING_TABLE_MATERIAL_WRONG_ITEM_ADD);
+						G_ObjectManager->GameServer->SendPacket(CraftingTableItemAddPlayer->_SessionId, WrongItemInputMessage);
+						WrongItemInputMessage->Free();
+					}
+				}
+			}
+			break;
+		case en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_ITEM_SUBTRACT:
+			{
+				CGameObject* CraftingTableItemSubtractPlayerGO;
+				*GameObjectJob->GameObjectJobMessage >> &CraftingTableItemSubtractPlayerGO;
+
+				int16 SubtractItemSmallCategory;
+				*GameObjectJob->GameObjectJobMessage >> SubtractItemSmallCategory;
+
+				int16 SubtractItemCount;
+				*GameObjectJob->GameObjectJobMessage >> SubtractItemCount;
+
+				CCraftingTable* CraftingTable = (CCraftingTable*)this;
+
+				CPlayer* CraftingTableItemSubtractPlayer = (CPlayer*)CraftingTableItemSubtractPlayerGO;
+
+				bool SubtractItemFind = false;
+
+				for (CItem* CraftingTableCompleteItem : CraftingTable->GetCraftingTableRecipe().CraftingTableCompleteItems)
+				{
+					if (CraftingTableCompleteItem->_ItemInfo.ItemSmallCategory == CraftingTable->_SelectCraftingItemType)
+					{
+						for (auto MaterialItemIter : CraftingTable->GetMaterialItems())
+						{
+							if (MaterialItemIter.second->_ItemInfo.ItemSmallCategory == (en_SmallItemCategory)SubtractItemSmallCategory)
+							{
+								SubtractItemFind = true;
+								MaterialItemIter.second->_ItemInfo.ItemCount -= SubtractItemCount;
+								break;
+							}
+						}
+
+						break;
+					}					
+				}
+
+				if (SubtractItemFind == true)
+				{
+					bool IsExistItem;
+					CItem* InsertItem = CraftingTableItemSubtractPlayer->_InventoryManager.InsertItem(0, (en_SmallItemCategory)SubtractItemSmallCategory, SubtractItemCount, &IsExistItem);
+										
+					CMessage* InsertItemToInventoryPacket = G_ObjectManager->GameServer->MakePacketResItemToInventory(CraftingTableItemSubtractPlayer->_GameObjectInfo.ObjectId,
+						InsertItem,
+						IsExistItem,
+						SubtractItemCount);
+					G_ObjectManager->GameServer->SendPacket(CraftingTableItemSubtractPlayer->_SessionId, InsertItemToInventoryPacket);
+					InsertItemToInventoryPacket->Free();					
+
+					CMessage* ResCraftingTableMaterialItemListPacket = G_ObjectManager->GameServer->MakePacketResCraftingTableMaterialItemList(
+						_GameObjectInfo.ObjectId,
+						_GameObjectInfo.ObjectType,
+						CraftingTable->_SelectCraftingItemType,
+						CraftingTable->GetMaterialItems());
+					G_ObjectManager->GameServer->SendPacket(CraftingTableItemSubtractPlayer->_SessionId, ResCraftingTableMaterialItemListPacket);
+					ResCraftingTableMaterialItemListPacket->Free();
+				}
+				else
+				{
+					CRASH("빼려는 아이템이 제작대에 존재하지 않음");
+				}
 			}
 			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_CRAFTING_START:
