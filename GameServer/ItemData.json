@@ -334,6 +334,54 @@
           "ItemMaxCount": 99,
           "ItemCraftingTime": 5000,
           "ImageFilePath": "Textures/Ore & Gem/CharCoal"
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET",
+          "ItemObjectType": "OBJECT_ITEM_MATERIAL_COPPER_NUGGET",
+          "ItemExplain": "Ã¤±¤ÇØ¼­ ¾òÀº ±¸¸® ±¤¼®",
+          "ItemName": "±¸¸® ±¤¼®",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
+          "ItemMaxCount": 99,
+          "ItemCraftingTime": 0,
+          "ImageFilePath": "Textures/Ore & Gem/Copper Nugget"
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT",
+          "ItemObjectType": "OBJECT_ITEM_MATERIAL_COPPER_INGOT",
+          "ItemExplain": "±¸¸® ¿ø¼®À» Á¤Á¦ÇØ ¸¸µç ÁÖ±«",
+          "ItemName": "±¸¸®",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
+          "ItemMaxCount": 99,
+          "ItemCraftingTime": 8000,
+          "ImageFilePath": "Textures/Ore & Gem/Copper Ingot"
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET",
+          "ItemObjectType": "OBJECT_ITEM_MATERIAL_IRON_NUGGET",
+          "ItemExplain": "Ã¤±¤ÇØ¼­ ¾òÀº Ã¶ ±¤¼®",
+          "ItemName": "Ã¶±¤¼®",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
+          "ItemMaxCount": 99,
+          "ItemCraftingTime": 8000,
+          "ImageFilePath": "Textures/Ore & Gem/Iron Nugget"
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT",
+          "ItemObjectType": "OBJECT_ITEM_MATERIAL_IRON_INGOT",
+          "ItemExplain": "Ã¶±¤¼®À» Á¤Á¦ÇØ ¸¸µç ÁÖ±«",
+          "ItemName": "Ã¶±«",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
+          "ItemMaxCount": 99,
+          "ItemCraftingTime": 8000,
+          "ImageFilePath": "Textures/Ore & Gem/Iron Ingot"
         }
       ]
     }    
