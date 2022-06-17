@@ -494,10 +494,10 @@ void CGameObject::Update()
 				}
 			}
 			break;
-		case en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_ITEM_SUBTRACT:
+		case en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_MATERIAL_ITEM_SUBTRACT:
 			{
-				CGameObject* CraftingTableItemSubtractPlayerGO;
-				*GameObjectJob->GameObjectJobMessage >> &CraftingTableItemSubtractPlayerGO;
+				CGameObject* CraftingTableMaterialItemSubtractPlayerGO;
+				*GameObjectJob->GameObjectJobMessage >> &CraftingTableMaterialItemSubtractPlayerGO;
 
 				int16 SubtractItemSmallCategory;
 				*GameObjectJob->GameObjectJobMessage >> SubtractItemSmallCategory;
@@ -507,7 +507,7 @@ void CGameObject::Update()
 
 				CCraftingTable* CraftingTable = (CCraftingTable*)this;
 
-				CPlayer* CraftingTableItemSubtractPlayer = (CPlayer*)CraftingTableItemSubtractPlayerGO;
+				CPlayer* CraftingTableItemSubtractPlayer = (CPlayer*)CraftingTableMaterialItemSubtractPlayerGO;
 
 				bool SubtractItemFind = false;
 
@@ -519,27 +519,30 @@ void CGameObject::Update()
 						{
 							if (MaterialItemIter.second->_ItemInfo.ItemSmallCategory == (en_SmallItemCategory)SubtractItemSmallCategory)
 							{
-								SubtractItemFind = true;
-								MaterialItemIter.second->_ItemInfo.ItemCount -= SubtractItemCount;
+								if (MaterialItemIter.second->_ItemInfo.ItemCount != 0)
+								{
+									SubtractItemFind = true;
+									MaterialItemIter.second->_ItemInfo.ItemCount -= SubtractItemCount;
+								}
 								break;
 							}
 						}
 
 						break;
-					}					
+					}
 				}
 
 				if (SubtractItemFind == true)
 				{
 					bool IsExistItem;
 					CItem* InsertItem = CraftingTableItemSubtractPlayer->_InventoryManager.InsertItem(0, (en_SmallItemCategory)SubtractItemSmallCategory, SubtractItemCount, &IsExistItem);
-										
+
 					CMessage* InsertItemToInventoryPacket = G_ObjectManager->GameServer->MakePacketResItemToInventory(CraftingTableItemSubtractPlayer->_GameObjectInfo.ObjectId,
 						InsertItem,
 						IsExistItem,
 						SubtractItemCount);
 					G_ObjectManager->GameServer->SendPacket(CraftingTableItemSubtractPlayer->_SessionId, InsertItemToInventoryPacket);
-					InsertItemToInventoryPacket->Free();					
+					InsertItemToInventoryPacket->Free();
 
 					CMessage* ResCraftingTableMaterialItemListPacket = G_ObjectManager->GameServer->MakePacketResCraftingTableMaterialItemList(
 						_GameObjectInfo.ObjectId,
@@ -549,9 +552,72 @@ void CGameObject::Update()
 					G_ObjectManager->GameServer->SendPacket(CraftingTableItemSubtractPlayer->_SessionId, ResCraftingTableMaterialItemListPacket);
 					ResCraftingTableMaterialItemListPacket->Free();
 				}
-				else
+			}
+			break;
+		case en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_COMPLETE_ITEM_SUBTRACT:
+			{
+				CGameObject* CraftingTableCompleteItemSubtractPlayerGO;
+				*GameObjectJob->GameObjectJobMessage >> &CraftingTableCompleteItemSubtractPlayerGO;
+
+				int16 SubtractItemSmallCategory;
+				*GameObjectJob->GameObjectJobMessage >> SubtractItemSmallCategory;
+
+				int16 SubtractItemCount;
+				*GameObjectJob->GameObjectJobMessage >> SubtractItemCount;
+
+				CCraftingTable* CraftingTable = (CCraftingTable*)this;
+
+				CPlayer* CraftingTableItemSubtractPlayer = (CPlayer*)CraftingTableCompleteItemSubtractPlayerGO;
+
+				bool SubtractItemFind = false;
+
+				for (CItem* CraftingTableCompleteItem : CraftingTable->GetCraftingTableRecipe().CraftingTableCompleteItems)
 				{
-					CRASH("빼려는 아이템이 제작대에 존재하지 않음");
+					if (CraftingTableCompleteItem->_ItemInfo.ItemSmallCategory == CraftingTable->_SelectCraftingItemType)
+					{
+						for (auto CompleteItemIter : CraftingTable->GetCompleteItems())
+						{
+							if (CompleteItemIter.second->_ItemInfo.ItemSmallCategory == (en_SmallItemCategory)SubtractItemSmallCategory)
+							{
+								if (CompleteItemIter.second->_ItemInfo.ItemCount != 0)
+								{
+									SubtractItemFind = true;
+									CompleteItemIter.second->_ItemInfo.ItemCount -= SubtractItemCount;
+
+									if (CompleteItemIter.second->_ItemInfo.ItemCount <= 0)
+									{
+										G_ObjectManager->ItemReturn(CompleteItemIter.second);
+										map<en_SmallItemCategory, CItem*> CraftingTableCompleteItems = CraftingTable->GetCompleteItems();
+										
+										CraftingTableCompleteItems.erase(CompleteItemIter.first);
+									}
+								}
+								break;
+							}
+						}
+
+						break;
+					}
+				}
+
+				if (SubtractItemFind == true)
+				{
+					bool IsExistItem;
+					CItem* InsertItem = CraftingTableItemSubtractPlayer->_InventoryManager.InsertItem(0, (en_SmallItemCategory)SubtractItemSmallCategory, SubtractItemCount, &IsExistItem);
+
+					CMessage* InsertItemToInventoryPacket = G_ObjectManager->GameServer->MakePacketResItemToInventory(CraftingTableItemSubtractPlayer->_GameObjectInfo.ObjectId,
+						InsertItem,
+						IsExistItem,
+						SubtractItemCount);
+					G_ObjectManager->GameServer->SendPacket(CraftingTableItemSubtractPlayer->_SessionId, InsertItemToInventoryPacket);
+					InsertItemToInventoryPacket->Free();
+
+					CMessage* ResCraftingTableMaterialItemListPacket = G_ObjectManager->GameServer->MakePacketResCraftingTableCompleteItemList(
+						_GameObjectInfo.ObjectId,
+						_GameObjectInfo.ObjectType,
+						CraftingTable->GetCompleteItems());
+					G_ObjectManager->GameServer->SendPacket(CraftingTableItemSubtractPlayer->_SessionId, ResCraftingTableMaterialItemListPacket);
+					ResCraftingTableMaterialItemListPacket->Free();
 				}
 			}
 			break;
