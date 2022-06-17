@@ -34,6 +34,10 @@ public:
 	// 루팅한 아이템 인벤토리에 순서대로 넣기
 	//--------------------------------------------------------------
 	void InsertItem(int8 SelectInventoryIndex, CItem* InsertNewItem);
+	//--------------------------------------------------------------------
+	// 아이템 가방에 넣기
+	//--------------------------------------------------------------------
+	CItem* InsertItem(int8 SelectInventoryIndex, en_SmallItemCategory InsertItemCategory, int16 InsertItemCount, bool *IsExistItem);
 	
 	//--------------------------------------------------------------
 	// DB에 기록된 아이템 인벤토리에 넣기

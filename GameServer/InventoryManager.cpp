@@ -1,5 +1,8 @@
 #include "pch.h"
 #include "InventoryManager.h"
+#include "ObjectManager.h"
+#include "DataManager.h"
+#include <atlbase.h>
 
 CInventoryManager::CInventoryManager()
 {
@@ -94,6 +97,53 @@ void CInventoryManager::InsertItem(int8 SelectInventoryIndex, CItem* InsertNewIt
 	{
 		CRASH("InsertItem InsertNewITem이 존재하지 않음");
 	}
+}
+
+CItem* CInventoryManager::InsertItem(int8 SelectInventoryIndex, en_SmallItemCategory InsertItemCategory, int16 InsertItemCount, bool* IsExistItem)
+{
+	CItem* ReturnItem = nullptr;
+
+	// 넣고자 하는 아이템이 인벤토리에 있는지 우선 확인
+	CItem* FindItem = FindInventoryItem(0, InsertItemCategory);
+	if (FindItem != nullptr)
+	{
+		*IsExistItem = true;
+		
+		FindItem->_ItemInfo.ItemCount += InsertItemCount;
+
+		ReturnItem = FindItem;
+	}
+	else
+	{
+		*IsExistItem = false;
+
+		CItem* NewItem = G_ObjectManager->ItemCreate(InsertItemCategory);
+
+		st_ItemData* ItemData = G_Datamanager->FindItemData(InsertItemCategory);
+
+		NewItem->_ItemInfo.ItemDBId = 0;
+		NewItem->_ItemInfo.Rotated = false;
+		NewItem->_ItemInfo.Width = ItemData->ItemWidth;
+		NewItem->_ItemInfo.Height = ItemData->ItemHeight;
+		NewItem->_ItemInfo.ItemLargeCategory = (en_LargeItemCategory)ItemData->LargeItemCategory;
+		NewItem->_ItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemData->MediumItemCategory;
+		NewItem->_ItemInfo.ItemSmallCategory = (en_SmallItemCategory)ItemData->SmallItemCategory;
+		NewItem->_ItemInfo.ItemName = (LPWSTR)CA2W(ItemData->ItemName.c_str());
+		NewItem->_ItemInfo.ItemExplain = (LPWSTR)CA2W(ItemData->ItemExplain.c_str());
+		NewItem->_ItemInfo.ItemCount = InsertItemCount;
+		NewItem->_ItemInfo.TileGridPositionX = 0;
+		NewItem->_ItemInfo.TileGridPositionY = 0;
+		NewItem->_ItemInfo.ItemThumbnailImagePath = (LPWSTR)CA2W(ItemData->ItemThumbnailImagePath.c_str());
+		NewItem->_ItemInfo.ItemIsEquipped = false;
+		NewItem->_ItemInfo.ItemMaxCount = ItemData->ItemMaxCount;
+		NewItem->_ItemInfo.ItemCount = InsertItemCount;		
+
+		InsertItem(SelectInventoryIndex, NewItem);
+
+		ReturnItem = NewItem;
+	}
+
+	return ReturnItem;
 }
 
 void CInventoryManager::DBItemInsertItem(int8 SelectInventoryIndex, CItem* NewItem)
