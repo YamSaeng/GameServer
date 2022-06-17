@@ -150,7 +150,7 @@ private:
 	//----------------------------------------------------------------------------
 	// 오른쪽 마우스 클릭 위치 오브젝트 정보 요청 처리
 	//----------------------------------------------------------------------------
-	void PacketProcReqRightMousePositionObjectInfo(int64 SessionId, CMessage* Message);
+	void PacketProcReqRightMouseObjectInfo(int64 SessionId, CMessage* Message);	
 	//--------------------------------------------------------------------------
 	// 제작대 선택 풀림 요청 처리
 	//--------------------------------------------------------------------------
@@ -196,9 +196,17 @@ private:
 	//------------------------------------------------------------------
 	void PacketProcReqItemLooting(int64 SessionId, CMessage* Message);
 	//--------------------------------------------------------------------------
-	// 제작대 아이템 넣기 요청 처리
+	// 제작대 재료 아이템 넣기 요청 처리
 	//---------------------------------------------------------------------------
-	void PacketProcReqCraftingTableInputItem(int64 SessionID, CMessage* Message);
+	void PacketProcReqCraftingTableItemAdd(int64 SessionID, CMessage* Message);
+	//----------------------------------------------------------------------------
+	// 제작대 재료 아이템 빼기 요청 처리
+	//----------------------------------------------------------------------------
+	void PacketProcReqCraftingTableMaterialItemSubtract(int64 SessionID, CMessage* Message);
+	//----------------------------------------------------------------------------
+	// 제작대 완성 아이템 빼기 요청 처리
+	//----------------------------------------------------------------------------
+	void PacketProcReqCraftingTableCompleteItemSubtract(int64 SessionID, CMessage* Message);
 	//--------------------------------------------------------------------------
 	// 제작대 제작 요청 처리
 	//--------------------------------------------------------------------------
@@ -311,6 +319,20 @@ private:
 	// 제작대 제작 시작 잡 생성 함수
 	//---------------------------------------------------------
 	st_GameObjectJob* MakeGameObjectJobCraftingTableStart(CGameObject* CraftingStartObject, en_SmallItemCategory CraftingCompleteItemType, int16 CraftingCount);
+	//---------------------------------------------------------------------------------------------------
+	// 제작대 아이템 재료 넣기 잡 생성 함수
+	//---------------------------------------------------------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobCraftingTableItemAdd(CGameObject* CraftingTableItemAddObject, int16 AddItemSmallCategory, int16 AddItemCount);
+	//---------------------------------------------------------------------------------------------------
+	// 제작대 아이템 재료 빼기 잡 생성 함수
+	//---------------------------------------------------------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobCraftingTableMaterialItemSubtract(CGameObject* CraftingTableItemSubtractObject, int16 SubtractItemSmallCategory, int16 SubtractItemCount);
+	//---------------------------------------------------------------------------------------------------
+	// 제작대 완성 아이템 빼기 잡 생성 함수
+	//---------------------------------------------------------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobCraftingTableCompleteItemSubtract(CGameObject* CraftingTableItemSubtractObject, int16 SubtractItemSmallCategory, int16 SubtractItemCount);
+
+
 	//---------------------------------------------------------
 	// 제작대 제작 멈춤 잡 생성 함수
 	//---------------------------------------------------------
@@ -360,15 +382,7 @@ private:
 	//------------------------------------------------------------------------------------------------------------------------------------------------------
 	// 게임서버 가방 돈 저장 요청 응답 패킷 조합
 	//------------------------------------------------------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResMoneyToInventory(int64 TargetObjectID, int64 GoldCoinCount, int16 SliverCoinCount, int16 BronzeCoinCount, en_SmallItemCategory ItemCategory, int16 ItemEach);
-	//-------------------------------------------------------------------------------------------------------------------------
-	// 게임서버 아이템 가방 저장 요청 응답 패킷 조합
-	//-------------------------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResItemToInventory(int64 TargetObjectId, CItem* InventoryItem, bool IsExist, int16 ItemEach, bool ItemGainPrint = true);
-	//-----------------------------------------------------------------------------------------
-	// 게임서버 가방 아이템 업데이트
-	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketInventoryItemUpdate(int64 PlayerId, st_ItemInfo UpdateItemInfo);
+	CGameServerMessage* MakePacketResMoneyToInventory(int64 TargetObjectID, int64 GoldCoinCount, int16 SliverCoinCount, int16 BronzeCoinCount, en_SmallItemCategory ItemCategory, int16 ItemEach);	
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 가방 아이템 사용 요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -396,11 +410,7 @@ private:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 제작템 목록 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketCraftingList(int64 AccountId, int64 PlayerId, vector<st_CraftingItemCategory> CraftingItemList);
-	//-----------------------------------------------------------------------------------------------
-	// 게임서버 제작대 아이템 넣기 응답 패킷 조합
-	//-----------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResCraftingTableInput(int64 CraftingTableObjectID, map<en_SmallItemCategory, CItem*> MaterialItems);
+	CGameServerMessage* MakePacketCraftingList(int64 AccountId, int64 PlayerId, vector<st_CraftingItemCategory> CraftingItemList);	
 	//-----------------------------------------------------------------------------------------------
 	// 게임서버 제작대 제작 아이템 선택 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------------
@@ -557,10 +567,22 @@ public:
 	// 게임 서버 상태이상 적용 패킷 조합
 	//------------------------------------------------------------
 	CGameServerMessage* MakePacketStatusAbnormal(int64 TargetId, en_GameObjectType ObjectType, en_MoveDir Dir, en_SkillType SkillType, bool SetStatusAbnormal, int8 StatusAbnormal);
+	//-----------------------------------------------------------------------------------------
+	// 게임서버 가방 아이템 업데이트
+	//-----------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketInventoryItemUpdate(int64 PlayerId, st_ItemInfo UpdateItemInfo);
+	//-------------------------------------------------------------------------------------------------------------------------
+	// 게임서버 아이템 가방 저장 요청 응답 패킷 조합
+	//-------------------------------------------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResItemToInventory(int64 TargetObjectId, CItem* InventoryItem, bool IsExist, int16 ItemEach, bool ItemGainPrint = true);
 	//-----------------------------------------------------------------------------------------------
 	// 게임서버 제작대 재료 아이템 목록 패킷 조합
 	//-----------------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResCraftingTableMaterialItemList(int64 CraftingTableObjectID, en_GameObjectType CraftingTableObjectType, en_SmallItemCategory SelectCompleteItemType, map<en_SmallItemCategory, CItem*> MaterialItems);
+	//-----------------------------------------------------------------------------------------------
+	// 게임서버 제작대 아이템 넣기 응답 패킷 조합
+	//-----------------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResCraftingTableInput(int64 CraftingTableObjectID, map<en_SmallItemCategory, CItem*> MaterialItems);
 	//-----------------------------------------------------------------------------------------------
 	// 게임서버 제작대 제작 시작 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------------
