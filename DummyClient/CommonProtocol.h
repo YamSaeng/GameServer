@@ -309,24 +309,6 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_RIGHT_MOUSE_OBJECT_INFO,
 
 	//------------------------------------------------------------
-	// 게임서버 오른쪽 UI 마우스 아이템 빼기 요청
-	// int64 AccountID
-	// int64 PlayerID
-	// int64 OwnerCraftingTableObjectID
-	// en_GameObjectType OwnerCraftingTableObjectType
-	// en_SmallCategory MaterialItemType
-	//------------------------------------------------------------
-	en_PACKET_C2S_RIGHT_MOUSE_UI_ITEM_SUBTRACT,
-
-	//------------------------------------------------------------
-	// 게임서버 오른쪽 UI 마우스 아이템 빼기 요청 응답
-	// int64 PlayerID
-	// int64 CraftingTableObjectID
-	// st_ItemInfo MaterialItemInfo
-	//------------------------------------------------------------
-	en_PACKET_S2C_RIGHT_MOUSE_UI_ITEM_SUBTRACT,
-
-	//------------------------------------------------------------
 	// 게임서버 제작대 제작 남은 시간
 	// int64 CraftingTableObjectID	
 	// st_ItemInfo CraftingItemInfo
@@ -427,7 +409,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int16 CraftingTableGameObjectType
 	// int16 InputItemSmallCategory 
 	//------------------------------------------------------------
-	en_PACKET_C2S_CRAFTING_TABLE_INPUT_ITEM,
+	en_PACKET_C2S_CRAFTING_TABLE_ITEM_ADD,
 
 	//------------------------------------------------------------
 	// 게임서버 아이템 제작대에 넣기 요청 응답
@@ -435,7 +417,25 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int16 MaterialItemsSize
 	// map MaterialItems
 	//------------------------------------------------------------
-	en_PACKET_S2C_CRAFTING_TABLE_INPUT_ITEM,
+	en_PACKET_S2C_CRAFTING_TABLE_ITEM_ADD,
+
+	//------------------------------------------------------------
+	// 게임서버 아이템 제작대에서 빼기 요청
+	// int64 AccountID
+	// int64 PlayerID
+	// int64 OwnerCraftingTableObjectID
+	// en_GameObjectType OwnerCraftingTableObjectType
+	// en_SmallCategory MaterialItemType
+	//------------------------------------------------------------
+	en_PACKET_C2S_CRAFTING_TABLE_ITEM_SUBTRACT,
+
+	//------------------------------------------------------------
+	// 게임서버 아이템 제작대에서 빼기 요청 응답
+	// int64 PlayerID
+	// int64 CraftingTableObjectID
+	// st_ItemInfo MaterialItemInfo
+	//------------------------------------------------------------
+	en_PACKET_S2C_CRAFTING_TABLE_ITEM_SUBTRACT,
 
 	//------------------------------------------------------------
 	// 게임서버 제작대 제작 아이템 선택 응답
