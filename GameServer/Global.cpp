@@ -24,6 +24,7 @@ public:
 		G_DBConnectionPool = new CDBConnectionPool();
 		G_DBConnectionPool->Init(1000);
 		G_Logger = new CLog();
+		G_ObjectManager = new CObjectManager();
 		G_Datamanager = new CDataManager();
 		// 아이템 데이터 파싱
 		G_Datamanager->LoadDataItem(L"ItemData.json");
@@ -49,9 +50,7 @@ public:
 		G_Datamanager->LoadDataMapInfo(L"MapInfoData.json");
 
 		G_MapManager = new CMapManager();
-		G_MapManager->MapSave();
-
-		G_ObjectManager = new CObjectManager();
+		G_MapManager->MapSave();		
 	}
 
 	~CGlobal()
