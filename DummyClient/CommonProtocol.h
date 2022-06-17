@@ -420,14 +420,24 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_CRAFTING_TABLE_ITEM_ADD,
 
 	//------------------------------------------------------------
-	// 게임서버 아이템 제작대에서 빼기 요청
+	// 게임서버 아이템 제작대에서 재료 아이템 빼기 요청
 	// int64 AccountID
 	// int64 PlayerID
 	// int64 OwnerCraftingTableObjectID
 	// en_GameObjectType OwnerCraftingTableObjectType
 	// en_SmallCategory MaterialItemType
 	//------------------------------------------------------------
-	en_PACKET_C2S_CRAFTING_TABLE_ITEM_SUBTRACT,
+	en_PACKET_C2S_CRAFTING_TABLE_MATERIAL_ITEM_SUBTRACT,
+
+	//------------------------------------------------------------
+	// 게임서버 아이템 제작대에서 완성 아이템 빼기 요청
+	// int64 AccountID
+	// int64 PlayerID
+	// int64 OwnerCraftingTableObjectID
+	// en_GameObjectType OwnerCraftingTableObjectType
+	// en_SmallCategory CompleteItemType
+	//------------------------------------------------------------
+	en_PACKET_C2S_CRAFTING_TABLE_COMPLETE_ITEM_SUBTRACT,
 
 	//------------------------------------------------------------
 	// 게임서버 아이템 제작대에서 빼기 요청 응답
