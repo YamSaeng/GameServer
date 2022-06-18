@@ -2077,14 +2077,13 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 							SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResSkillSystemMessagePacket);
 							ResSkillSystemMessagePacket->Free();
 
-							// 공격 응답 메세지 전송
-							CMessage* ResMyAttackOtherPacket = MakePacketResAttack(MyPlayer->_GameObjectInfo.ObjectId,
+							CMessage* ResDamagePacket = MakePacketResDamage(MyPlayer->_GameObjectInfo.ObjectId,
 								Target->_GameObjectInfo.ObjectId,
 								(en_SkillType)ReqSkillType,
 								FinalDamage,
 								IsCritical);
-							SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResMyAttackOtherPacket);
-							ResMyAttackOtherPacket->Free();
+							SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResDamagePacket);
+							ResDamagePacket->Free();							
 
 							// 이펙트 출력
 							CMessage* ResEffectPacket = MakePacketEffect(Target->_GameObjectInfo.ObjectId,
@@ -7199,6 +7198,42 @@ CGameServerMessage* CGameServer::MakePacketResEnterGame(bool EnterGameSuccess, s
 	}
 
 	return ResEnterGamePacket;
+}
+
+CGameServerMessage* CGameServer::MakePacketResDamage(int64 ObjectID, int64 TargetID, en_SkillType SkillType, int32 Damage, bool IsCritical)
+{
+	CGameServerMessage* ResDamageMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResDamageMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResDamageMessage->Clear();
+
+	*ResDamageMessage << (int16)en_PACKET_S2C_COMMON_DAMAGE;
+	*ResDamageMessage << ObjectID;
+	*ResDamageMessage << TargetID;
+	*ResDamageMessage << (int16)SkillType;
+	*ResDamageMessage << Damage;
+	*ResDamageMessage << IsCritical;
+
+	return ResDamageMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketResGatheringDamage(int64 TargetID)
+{
+	CGameServerMessage* ResGatheringDamage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResGatheringDamage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResGatheringDamage->Clear();
+
+	*ResGatheringDamage << (int16)en_PACKET_S2C_GATHERING_DAMAGE;
+	*ResGatheringDamage << TargetID;
+
+	return ResGatheringDamage;
 }
 
 CGameServerMessage* CGameServer::MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_SkillType SkillType, int32 Damage, bool IsCritical)
