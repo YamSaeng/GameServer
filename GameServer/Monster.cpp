@@ -622,12 +622,13 @@ void CMonster::UpdateAttack()
 
 		bool TargetIsDead = _Target->OnDamaged(this, FinalDamage);
 
-		CMessage* ResBearAttackPacket = G_ObjectManager->GameServer->MakePacketResAttack(_GameObjectInfo.ObjectId,
+		// 데미지 출력
+		CMessage* ResMonsterDamagePacket = G_ObjectManager->GameServer->MakePacketResDamage(_GameObjectInfo.ObjectId,
 			_Target->_GameObjectInfo.ObjectId,
 			en_SkillType::SKILL_SLIME_NORMAL,
 			FinalDamage, IsCritical);
-		G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResBearAttackPacket);
-		ResBearAttackPacket->Free();
+		G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResMonsterDamagePacket);
+		ResMonsterDamagePacket->Free();
 
 		wstring SlimeAttackAnimation = L"SLIME_ATTACK";
 
