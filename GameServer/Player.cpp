@@ -746,16 +746,15 @@ void CPlayer::UpdateSpell()
 				}
 			}
 
-			// 공격 응답
-			CMessage* ResAttackMagicPacket = G_ObjectManager->GameServer->MakePacketResAttack(
-				_GameObjectInfo.ObjectId,
+			// 데미지 출력
+			CMessage* ResMonsterDamagePacket = G_ObjectManager->GameServer->MakePacketResDamage(_GameObjectInfo.ObjectId,
 				_SelectTarget->_GameObjectInfo.ObjectId,
 				_CurrentSpellSkill->GetSkillInfo()->SkillType,
 				FinalDamage,
 				false);
-			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResAttackMagicPacket);
-			ResAttackMagicPacket->Free();
-
+			G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResMonsterDamagePacket);
+			ResMonsterDamagePacket->Free();
+			
 			// 이펙트 출력
 			CMessage* ResEffectPacket = G_ObjectManager->GameServer->MakePacketEffect(_SelectTarget->_GameObjectInfo.ObjectId, HitEffectType, _CurrentSpellSkill->GetSkillInfo()->SkillTargetEffectTime);
 			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResEffectPacket);
@@ -792,11 +791,15 @@ void CPlayer::UpdateGathering()
 
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
-		_GatheringTarget->OnDamaged(this, 1);
+		_GatheringTarget->OnDamaged(this, 1);		
 
 		CMessage* ResObjectStatChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_GatheringTarget->_GameObjectInfo.ObjectId, _GatheringTarget->_GameObjectInfo.ObjectStatInfo);
 		G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResObjectStatChangePacket);
 		ResObjectStatChangePacket->Free();
+
+		CMessage* ResGatheringDamagePacket = G_ObjectManager->GameServer->MakePacketResGatheringDamage(_GatheringTarget->_GameObjectInfo.ObjectId);
+		G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResGatheringDamagePacket);
+		ResGatheringDamagePacket->Free();
 
 		// 채집창 끝
 		CMessage* ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, false, L"");
