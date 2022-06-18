@@ -151,6 +151,22 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_MONSTER_PATROL,
 
 	//------------------------------------------------------------
+	// 게임서버 일반 데미지 출력
+	// int64 ObjectID
+	// int64 TargetObjectID
+	// en_SkillType SkillType
+	// int32 Damage
+	// bool IsCritical
+	//------------------------------------------------------------
+	en_PACKET_S2C_COMMON_DAMAGE,
+
+	//------------------------------------------------------------
+	// 게임서버 채집 데미지 출력	
+	// int64 TargetObjectID		
+	//------------------------------------------------------------
+	en_PACKET_S2C_GATHERING_DAMAGE,
+
+	//------------------------------------------------------------
 	// 게임서버 캐릭터 공격 요청
 	// int64 AccountId
 	// int32 PlayerDBId
