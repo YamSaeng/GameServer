@@ -365,6 +365,44 @@ void CGameObject::Update()
 				StatChangePacket->Free();
 			}
 			break;
+		case en_GameObjectJobType::GAMEOBJECT_JOB_ITEM_DROP:
+			{
+				int16 DropItemType;
+				*GameObjectJob->GameObjectJobMessage >> DropItemType;
+
+				int32 DropItemCount;
+				*GameObjectJob->GameObjectJobMessage >> DropItemCount;
+
+				CPlayer* Player = (CPlayer*)this;
+
+				// 가방에 버리고자 하는 아이템이 있는지 확인
+				CItem* FindDropItem = Player->_InventoryManager.FindInventoryItem(0, (en_SmallItemCategory)DropItemType);
+				if (FindDropItem != nullptr)
+				{				
+					// 아이템 개수가 맞는지 확인
+					if (FindDropItem->_ItemInfo.ItemCount >= DropItemCount)
+					{
+						G_ObjectManager->ObjectItemDropToSpawn((en_SmallItemCategory)DropItemType, DropItemCount, Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);					
+
+						FindDropItem->_ItemInfo.ItemCount -= DropItemCount;
+
+						if (FindDropItem->_ItemInfo.ItemCount < 0)
+						{
+							FindDropItem->_ItemInfo.ItemCount = 0;
+						}
+
+						CMessage* DropItemUpdatePacket = G_ObjectManager->GameServer->MakePacketInventoryItemUpdate(Player->_GameObjectInfo.ObjectId, FindDropItem->_ItemInfo);
+						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, DropItemUpdatePacket);
+						DropItemUpdatePacket->Free();
+
+						if (FindDropItem->_ItemInfo.ItemCount == 0)
+						{
+							Player->_InventoryManager.InitItem(0, FindDropItem->_ItemInfo.TileGridPositionX, FindDropItem->_ItemInfo.TileGridPositionY);
+						}						
+					}
+				}
+			}
+			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_SELECT:
 			{
 				CGameObject* SelectCraftingTableObject;
