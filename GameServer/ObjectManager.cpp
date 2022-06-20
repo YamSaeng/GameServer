@@ -1,11 +1,13 @@
 #include "pch.h"
 #include "ObjectManager.h"
+#include "DataManager.h"
 #include "GameServerMessage.h"
 #include "Item.h"
 #include "Skill.h"
 #include "MapManager.h"
 #include "CraftingTable.h"
 #include "Furnace.h"
+#include <atlbase.h>
 
 CObjectManager::CObjectManager()
 {
@@ -544,27 +546,232 @@ void CObjectManager::MapObjectSpawn(int64& MapID)
 	}
 }
 
-void CObjectManager::ItemSpawn(int64 KillerId, en_GameObjectType KillerObjectType, st_Vector2Int SpawnPosition, en_GameObjectType SpawnItemOwnerType, en_ObjectDataType MonsterDataType)
+void CObjectManager::ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObjectType, st_Vector2Int SpawnPosition, en_GameObjectType SpawnItemOwnerType, en_ObjectDataType MonsterDataType)
 {
-	// 아이템 생성 메세지 생성
-	CGameServerMessage* ReqItemCreateMessage = CGameServerMessage::GameServerMessageAlloc();
+	bool Find = false;
+	st_ItemData DropItemData;
 
-	ReqItemCreateMessage->Clear();
+	random_device RD;
+	mt19937 Gen(RD());
+	uniform_real_distribution<float> RandomDropPoint(0, 1); // 0.0 ~ 1.0
+	float RandomPoint = 100 * RandomDropPoint(Gen);
 
-	*ReqItemCreateMessage << KillerId;
-	*ReqItemCreateMessage << (int16)KillerObjectType;
-	*ReqItemCreateMessage << SpawnPosition._X;
-	*ReqItemCreateMessage << SpawnPosition._Y;
-	*ReqItemCreateMessage << (int16)SpawnItemOwnerType;
-	*ReqItemCreateMessage << (int32)MonsterDataType;
+	int32 Sum = 0;
 
-	st_GameServerJob* ReqDBaseItemCreateJob = GameServer->_GameServerJobMemoryPool->Alloc();
-	ReqDBaseItemCreateJob->Type = en_GameServerJobType::DATA_BASE_ITEM_CREATE;	
-	ReqDBaseItemCreateJob->Session = nullptr;
-	ReqDBaseItemCreateJob->Message = ReqItemCreateMessage;
+	switch ((en_GameObjectType)SpawnItemOwnerType)
+	{
+	case en_GameObjectType::OBJECT_SLIME:
+	case en_GameObjectType::OBJECT_BEAR:
+	{
+		auto FindMonsterDropItem = G_Datamanager->_Monsters.find(MonsterDataType);
+		st_MonsterData MonsterData = *(*FindMonsterDropItem).second;
 
-	GameServer->_GameServerWorldDBThreadMessageQue.Enqueue(ReqDBaseItemCreateJob);
-	SetEvent(GameServer->_WorldDataBaseWakeEvent);
+		for (st_DropData DropItem : MonsterData.DropItems)
+		{
+			Sum += DropItem.Probability;
+
+			if (Sum >= RandomPoint)
+			{
+				Find = true;
+				// 드랍 확정 되면 해당 아이템 읽어오기
+				auto FindDropItemInfo = G_Datamanager->_Items.find((int16)DropItem.DropItemSmallCategory);
+				if (FindDropItemInfo == G_Datamanager->_Items.end())
+				{
+					CRASH("DropItemInfo를 찾지 못함");
+				}
+
+				DropItemData = *(*FindDropItemInfo).second;
+
+				uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
+				DropItemData.ItemCount = RandomDropItemCount(Gen);
+				DropItemData.SmallItemCategory = DropItem.DropItemSmallCategory;
+				break;
+			}
+		}
+	}
+	break;
+	case en_GameObjectType::OBJECT_STONE:
+	case en_GameObjectType::OBJECT_TREE:
+	{
+		auto FindEnvironmentDropItem = G_Datamanager->_Environments.find(MonsterDataType);
+		st_EnvironmentData EnvironmentData = *(*FindEnvironmentDropItem).second;
+
+		for (st_DropData DropItem : EnvironmentData.DropItems)
+		{
+			Sum += DropItem.Probability;
+
+			if (Sum >= RandomPoint)
+			{
+				Find = true;
+				// 드랍 확정 되면 해당 아이템 읽어오기
+				auto FindDropItemInfo = G_Datamanager->_Items.find((int16)DropItem.DropItemSmallCategory);
+				if (FindDropItemInfo == G_Datamanager->_Items.end())
+				{
+					CRASH("DropItemInfo를 찾지 못함");
+				}
+
+				DropItemData = *(*FindDropItemInfo).second;
+
+				uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
+				DropItemData.ItemCount = RandomDropItemCount(Gen);
+				DropItemData.SmallItemCategory = DropItem.DropItemSmallCategory;
+				break;
+			}
+		}
+	}
+	break;
+	}
+
+	if (Find == true)
+	{
+		bool ItemIsQuickSlotUse = false;
+		bool ItemRotated = false;
+		int16 ItemWidth = 0;
+		int16 ItemHeight = 0;
+		int8 ItemLargeCategory = 0;
+		int8 ItemMediumCategory = 0;
+		int16 ItemSmallCategory = 0;
+		wstring ItemName;
+		int16 ItemCount = 0;
+		wstring ItemThumbnailImagePath;
+		bool ItemEquipped = false;
+		int16 ItemTilePositionX = 0;
+		int16 ItemTilePositionY = 0;
+		int32 ItemMinDamage = 0;
+		int32 ItemMaxDamage = 0;
+		int32 ItemDefence = 0;
+		int32 ItemMaxCount = 0;
+
+		switch (DropItemData.SmallItemCategory)
+		{
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:
+		{
+			ItemIsQuickSlotUse = false;
+			ItemLargeCategory = (int8)DropItemData.LargeItemCategory;
+			ItemMediumCategory = (int8)DropItemData.MediumItemCategory;
+			ItemSmallCategory = (int16)DropItemData.SmallItemCategory;
+			ItemName = (LPWSTR)CA2W(DropItemData.ItemName.c_str());
+			ItemCount = DropItemData.ItemCount;
+			ItemEquipped = false;
+			ItemThumbnailImagePath = (LPWSTR)CA2W(DropItemData.ItemThumbnailImagePath.c_str());
+
+			st_ItemData* WeaponItemData = (*G_Datamanager->_Items.find((int16)DropItemData.SmallItemCategory)).second;
+			ItemWidth = WeaponItemData->ItemWidth;
+			ItemHeight = WeaponItemData->ItemHeight;
+			ItemMinDamage = WeaponItemData->ItemMinDamage;
+			ItemMaxDamage = WeaponItemData->ItemMaxDamage;
+		}
+		break;
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:
+		{
+			ItemIsQuickSlotUse = false;
+			ItemLargeCategory = (int8)DropItemData.LargeItemCategory;
+			ItemMediumCategory = (int8)DropItemData.MediumItemCategory;
+			ItemSmallCategory = (int16)DropItemData.SmallItemCategory;
+			ItemName = (LPWSTR)CA2W(DropItemData.ItemName.c_str());
+			ItemCount = DropItemData.ItemCount;
+			ItemEquipped = false;
+			ItemThumbnailImagePath = (LPWSTR)CA2W(DropItemData.ItemThumbnailImagePath.c_str());
+
+			st_ItemData* ArmorItemData = (*G_Datamanager->_Items.find((int16)DropItemData.SmallItemCategory)).second;
+			ItemWidth = ArmorItemData->ItemWidth;
+			ItemHeight = ArmorItemData->ItemHeight;
+			ItemDefence = ArmorItemData->ItemDefence;
+		}
+		break;
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL:
+			break;
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK:
+			break;
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
+		{
+			ItemIsQuickSlotUse = false;
+			ItemLargeCategory = (int8)DropItemData.LargeItemCategory;
+			ItemMediumCategory = (int8)DropItemData.MediumItemCategory;
+			ItemSmallCategory = (int16)DropItemData.SmallItemCategory;
+			ItemName = (LPWSTR)CA2W(DropItemData.ItemName.c_str());
+			ItemCount = DropItemData.ItemCount;
+			ItemEquipped = false;
+			ItemThumbnailImagePath = (LPWSTR)CA2W(DropItemData.ItemThumbnailImagePath.c_str());
+
+			st_ItemData* MaterialItemData = (*G_Datamanager->_Items.find((int16)DropItemData.SmallItemCategory)).second;
+			ItemWidth = MaterialItemData->ItemWidth;
+			ItemHeight = MaterialItemData->ItemHeight;
+			ItemMaxCount = MaterialItemData->ItemMaxCount;
+		}
+		break;
+		}
+
+		// 아이템 생성
+		CItem* NewItem = ItemCreate((en_SmallItemCategory)ItemSmallCategory);
+
+		NewItem->_ItemInfo.ItemDBId = _GameServerObjectId++;		
+		NewItem->_ItemInfo.ItemIsQuickSlotUse = ItemIsQuickSlotUse;
+		NewItem->_ItemInfo.Width = ItemWidth;
+		NewItem->_ItemInfo.Height = ItemHeight;
+		NewItem->_ItemInfo.TileGridPositionX = ItemTilePositionX;
+		NewItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;
+		NewItem->_ItemInfo.ItemLargeCategory = (en_LargeItemCategory)ItemLargeCategory;
+		NewItem->_ItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemMediumCategory;
+		NewItem->_ItemInfo.ItemSmallCategory = (en_SmallItemCategory)ItemSmallCategory;
+		NewItem->_ItemInfo.ItemName = ItemName;
+		NewItem->_ItemInfo.ItemMaxCount = ItemMaxCount;
+		NewItem->_ItemInfo.ItemCount = ItemCount;
+		NewItem->_ItemInfo.ItemThumbnailImagePath = ItemThumbnailImagePath;
+		NewItem->_ItemInfo.ItemIsEquipped = ItemEquipped;
+
+		NewItem->_GameObjectInfo.ObjectType = DropItemData.ItemObjectType;
+		NewItem->_GameObjectInfo.ObjectId = NewItem->_ItemInfo.ItemDBId;
+		NewItem->_GameObjectInfo.OwnerObjectId = KillerId;
+		NewItem->_GameObjectInfo.OwnerObjectType = (en_GameObjectType)KillerObjectType;
+		NewItem->_SpawnPosition = SpawnPosition;
+
+		// 아이템 월드에 스폰
+		G_ObjectManager->ObjectEnterGame(NewItem, 1);	
+	}
+}
+
+void CObjectManager::ObjectItemDropToSpawn(en_SmallItemCategory DropItemType, int32 DropItemCount, st_Vector2Int SpawnPosition)
+{
+	CItem* NewItem = ItemCreate(DropItemType);
+	if (NewItem != nullptr)
+	{
+		st_ItemData* ItemData = G_Datamanager->FindItemData(DropItemType);
+		if (ItemData != nullptr)
+		{
+			NewItem->_ItemInfo.ItemDBId = _GameServerObjectId++;
+			NewItem->_ItemInfo.ItemIsQuickSlotUse = false;
+			NewItem->_ItemInfo.Width = ItemData->ItemWidth;
+			NewItem->_ItemInfo.Height = ItemData->ItemHeight;
+			NewItem->_ItemInfo.TileGridPositionX = 0;
+			NewItem->_ItemInfo.TileGridPositionY = 0;
+			NewItem->_ItemInfo.ItemLargeCategory = ItemData->LargeItemCategory;
+			NewItem->_ItemInfo.ItemMediumCategory = ItemData->MediumItemCategory;
+			NewItem->_ItemInfo.ItemSmallCategory = ItemData->SmallItemCategory;
+			NewItem->_ItemInfo.ItemName = (LPWSTR)CA2W(ItemData->ItemName.c_str());
+			NewItem->_ItemInfo.ItemCount = DropItemCount;
+			NewItem->_ItemInfo.ItemMaxCount = ItemData->ItemMaxCount;
+			NewItem->_ItemInfo.ItemThumbnailImagePath = (LPWSTR)CA2W(ItemData->ItemThumbnailImagePath.c_str());
+			NewItem->_ItemInfo.ItemIsEquipped = false;
+
+			NewItem->_GameObjectInfo.ObjectType = ItemData->ItemObjectType;
+			NewItem->_GameObjectInfo.OwnerObjectId = 0;
+			NewItem->_GameObjectInfo.OwnerObjectType = en_GameObjectType::NORMAL;
+			NewItem->_SpawnPosition = SpawnPosition;
+
+			G_ObjectManager->ObjectEnterGame(NewItem, 1);
+		}
+	}	
 }
 
 void CObjectManager::ObjectSpawn(en_GameObjectType ObjectType, st_Vector2Int SpawnPosition)
