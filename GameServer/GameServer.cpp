@@ -1068,6 +1068,9 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_LOOTING:
 		PacketProcReqItemLooting(SessionID, Message);
 		break;
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_ITEM_DROP:
+		PacketProcReqItemDrop(SessionID, Message);
+		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_CRAFTING_TABLE_ITEM_ADD:
 		PacketProcReqCraftingTableItemAdd(SessionID, Message);
 		break;
@@ -3322,10 +3325,10 @@ void CGameServer::PacketProcReqItemPlace(int64 SessionId, CMessage* Message)
 
 			int16 PlaceItemTilePositionX;
 			*Message >> PlaceItemTilePositionX;
-			int16 PlaceITemTilePositionY;
-			*Message >> PlaceITemTilePositionY;
+			int16 PlaceItemTilePositionY;
+			*Message >> PlaceItemTilePositionY;
 
-			CItem* PlaceItem = MyPlayer->_InventoryManager.SwapItem(0, PlaceItemTilePositionX, PlaceITemTilePositionY);
+			CItem* PlaceItem = MyPlayer->_InventoryManager.SwapItem(0, PlaceItemTilePositionX, PlaceItemTilePositionY);			
 
 			CMessage* ResPlaceItemPacket = MakePacketResPlaceItem(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, PlaceItem, MyPlayer->_InventoryManager._SelectItem);
 			SendPacket(Session->SessionId, ResPlaceItemPacket);
@@ -4085,6 +4088,67 @@ void CGameServer::PacketProcReqItemLooting(int64 SessionId, CMessage* Message)
 				}
 			}
 
+		} while (0);
+	}
+
+	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcReqItemDrop(int64 SessionID, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionID);
+
+	if (Session)
+	{
+		do
+		{
+			int64 AccountId;
+			int64 PlayerDBId;
+
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountId;
+
+			// AccountId가 맞는지 확인
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> PlayerDBId;
+
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			// 조종하고 있는 플레이어가 있는지 확인 
+			if (MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			int16 DropItemType;
+			*Message >> DropItemType;
+
+			int32 DropItemCount;
+			*Message >> DropItemCount;
+
+			st_GameObjectJob* DropItemJob = MakeGameObjectJobItemDrop(DropItemType, DropItemCount);
+			MyPlayer->_GameObjectJobQue.Enqueue(DropItemJob);
 		} while (0);
 	}
 
@@ -6560,6 +6624,22 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobBackTeleport()
 	BackTeleportJob->GameObjectJobMessage = nullptr;
 
 	return BackTeleportJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobItemDrop(int16 DropItemType, int32 DropItemCount)
+{
+	st_GameObjectJob* ItemDropJob = G_ObjectManager->GameObjectJobCreate();
+	ItemDropJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_ITEM_DROP;
+
+	CGameServerMessage* ItemDropJobMessage = CGameServerMessage::GameServerMessageAlloc();
+	ItemDropJobMessage->Clear();
+
+	*ItemDropJobMessage << DropItemType;
+	*ItemDropJobMessage << DropItemCount;
+
+	ItemDropJob->GameObjectJobMessage = ItemDropJobMessage;
+
+	return ItemDropJob;
 }
 
 st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableSelect(CGameObject* CraftingTableObject, CGameObject* OwnerObject)
