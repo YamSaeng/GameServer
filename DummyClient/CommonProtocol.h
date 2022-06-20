@@ -418,6 +418,21 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_LOOTING,
 
 	//------------------------------------------------------------
+	// 게임서버 아이템 버리기 요청
+	// int64 AccountID
+	// int64 PlayerID
+	// en_SmallItemType DropItemType
+	// int32 DropItemCount
+	//------------------------------------------------------------
+	en_PACKET_C2S_ITEM_DROP,
+
+	//------------------------------------------------------------
+	// 게임서버 아이템 버리기 요청 응답
+	// st_GameObjectInfo DropGameObjectInfo
+	//------------------------------------------------------------
+	en_PACKET_S2C_ITEM_DROP,
+
+	//------------------------------------------------------------
 	// 게임서버 아이템 제작대에 넣기 요청
 	// int64 AccountID
 	// int64 PlayerDBID
