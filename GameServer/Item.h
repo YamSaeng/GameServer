@@ -88,3 +88,12 @@ public:
 	CMaterial();
 	~CMaterial();
 };
+
+class CArchitecture : public CItem
+{
+public:
+	virtual void UpdateIdle() override;
+
+	CArchitecture();
+	~CArchitecture();
+};

@@ -142,3 +142,17 @@ void CMaterial::UpdateIdle()
 {
 	CItem::UpdateIdle();	
 }
+
+void CArchitecture::UpdateIdle()
+{
+	CItem::UpdateIdle();
+}
+
+CArchitecture::CArchitecture()
+{
+	
+}
+
+CArchitecture::~CArchitecture()
+{
+}
