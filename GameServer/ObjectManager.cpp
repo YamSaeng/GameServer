@@ -19,6 +19,7 @@ CObjectManager::CObjectManager()
 	_WeaponMemoryPool = new CMemoryPoolTLS<CWeapon>();
 	_ArmorMemoryPool = new CMemoryPoolTLS<CArmor>();
 	_MaterialMemoryPool = new CMemoryPoolTLS<CMaterial>();
+	_ArchitectureMemoryPool = new CMemoryPoolTLS<CArchitecture>();
 	_ConsumableMemoryPool = new CMemoryPoolTLS<CConsumable>();
 
 	_TreeMemoryPool = new CMemoryPoolTLS<CTree>();
@@ -203,7 +204,7 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int64 MapID)
 			ResSpawnPacket->Free();
 		}
 		break;
-	case en_GameObjectType::OBJECT_FURNACE:
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 		{
 			CCraftingTable* CraftingTable = (CCraftingTable*)EnterGameObject;
 
@@ -261,7 +262,7 @@ bool CObjectManager::ObjectLeaveGame(CGameObject* LeaveGameObject, int32 ObjectI
 
 		_EnvironmentsArrayIndexs.Push(ObjectIndex);
 		break;
-	case en_GameObjectType::OBJECT_FURNACE:
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 		LeaveGameObject->GetChannel()->LeaveChannel(LeaveGameObject);
 
 		_CraftingTableArrayIndexs.Push(ObjectIndex);
@@ -303,7 +304,7 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 	case en_GameObjectType::OBJECT_TREE:
 		NewObject = _TreeMemoryPool->Alloc();
 		break;
-	case en_GameObjectType::OBJECT_FURNACE:
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 		NewObject = _FurnaceMemoryPool->Alloc();
 		break;
 	}
@@ -335,7 +336,7 @@ void CObjectManager::ObjectReturn(en_GameObjectType ObjectType, CGameObject* Ret
 	case en_GameObjectType::OBJECT_TREE:
 		_TreeMemoryPool->Free((CTree*)ReturnObject);
 		break;
-	case en_GameObjectType::OBJECT_FURNACE:
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 		_FurnaceMemoryPool->Free((CFurnace*)ReturnObject);
 		break;
 	}
@@ -383,6 +384,9 @@ CItem* CObjectManager::ItemCreate(en_SmallItemCategory NewItemSmallCategory)
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT:
 		NewItem = _MaterialMemoryPool->Alloc();
 		break;
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE:
+		NewItem = _ArchitectureMemoryPool->Alloc();
+		break;
 	}
 
 	return NewItem;
@@ -417,6 +421,9 @@ void CObjectManager::ItemReturn(CItem* ReturnItem)
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT:
 		_MaterialMemoryPool->Free((CMaterial*)ReturnItem);
+		break;
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE:
+		_ArchitectureMemoryPool->Free((CArchitecture*)ReturnItem);
 		break;
 	}
 }
@@ -523,7 +530,7 @@ void CObjectManager::MapObjectSpawn(int64& MapID)
 				NewObject = (CBear*)ObjectCreate(en_GameObjectType::OBJECT_BEAR);
 				break;			
 			case en_TileMapEnvironment::TILE_MAP_FURNACE:
-				NewObject = (CFurnace*)ObjectCreate(en_GameObjectType::OBJECT_FURNACE);
+				NewObject = (CFurnace*)ObjectCreate(en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE);
 				break;
 			}
 
@@ -694,22 +701,22 @@ void CObjectManager::ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObj
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG:
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
-		{
-			ItemIsQuickSlotUse = false;
-			ItemLargeCategory = (int8)DropItemData.LargeItemCategory;
-			ItemMediumCategory = (int8)DropItemData.MediumItemCategory;
-			ItemSmallCategory = (int16)DropItemData.SmallItemCategory;
-			ItemName = (LPWSTR)CA2W(DropItemData.ItemName.c_str());
-			ItemCount = DropItemData.ItemCount;
-			ItemEquipped = false;
-			ItemThumbnailImagePath = (LPWSTR)CA2W(DropItemData.ItemThumbnailImagePath.c_str());
+			{
+				ItemIsQuickSlotUse = false;
+				ItemLargeCategory = (int8)DropItemData.LargeItemCategory;
+				ItemMediumCategory = (int8)DropItemData.MediumItemCategory;
+				ItemSmallCategory = (int16)DropItemData.SmallItemCategory;
+				ItemName = (LPWSTR)CA2W(DropItemData.ItemName.c_str());
+				ItemCount = DropItemData.ItemCount;
+				ItemEquipped = false;
+				ItemThumbnailImagePath = (LPWSTR)CA2W(DropItemData.ItemThumbnailImagePath.c_str());
 
-			st_ItemData* MaterialItemData = (*G_Datamanager->_Items.find((int16)DropItemData.SmallItemCategory)).second;
-			ItemWidth = MaterialItemData->ItemWidth;
-			ItemHeight = MaterialItemData->ItemHeight;
-			ItemMaxCount = MaterialItemData->ItemMaxCount;
-		}
-		break;
+				st_ItemData* MaterialItemData = (*G_Datamanager->_Items.find((int16)DropItemData.SmallItemCategory)).second;
+				ItemWidth = MaterialItemData->ItemWidth;
+				ItemHeight = MaterialItemData->ItemHeight;
+				ItemMaxCount = MaterialItemData->ItemMaxCount;
+			}
+			break;		
 		}
 
 		// 아이템 생성

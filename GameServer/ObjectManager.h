@@ -35,6 +35,7 @@ private:
 	CMemoryPoolTLS<CArmor>* _ArmorMemoryPool;
 	CMemoryPoolTLS<CConsumable>* _ConsumableMemoryPool;
 	CMemoryPoolTLS<CMaterial>* _MaterialMemoryPool;
+	CMemoryPoolTLS<CArchitecture>* _ArchitectureMemoryPool;
 
 	CMemoryPoolTLS<CTree>* _TreeMemoryPool;
 	CMemoryPoolTLS<CStone>* _StoneMemoryPool;	
