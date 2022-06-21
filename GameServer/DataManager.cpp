@@ -442,6 +442,56 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			_Items.insert(pair<int16, st_ItemData*>((int16)MaterialData->SmallItemCategory, MaterialData));
 		}
 	}
+
+	for (auto& Filed : Document["Architecture"].GetArray())
+	{
+		for (auto& ArchitectureListFiled : Filed["ArchitectureList"].GetArray())
+		{
+			string MediumCategory = ArchitectureListFiled["ItemMediumCategory"].GetString();
+			string SmallCategory = ArchitectureListFiled["ItemSmallCategory"].GetString();
+			string ItemObjectType = ArchitectureListFiled["ItemObjectType"].GetString();
+			string ItemExplain = ArchitectureListFiled["ItemExplain"].GetString();
+			string ItemName = ArchitectureListFiled["ItemName"].GetString();
+			int32 ItemWidth = ArchitectureListFiled["ItemWidth"].GetInt();
+			int32 ItemHeight = ArchitectureListFiled["ItemHeight"].GetInt();
+			int ItemMinDamage = ArchitectureListFiled["ItemMinDamage"].GetInt();
+			int ItemMaxDamage = ArchitectureListFiled["ItemMaxDamage"].GetInt();
+			int64 ItemCraftingTime = ArchitectureListFiled["ItemCraftingTime"].GetInt64();
+			string ImageFilePath = ArchitectureListFiled["ImageFilePath"].GetString();
+
+			st_ItemData* WeaponItemData = new st_ItemData();
+
+			WeaponItemData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARCHITECTURE;
+
+			if (MediumCategory == "ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE")
+			{
+				WeaponItemData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE;
+			}
+
+			if (SmallCategory == "ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE")
+			{
+				WeaponItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE;
+			}
+
+			if (ItemObjectType == "OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE")
+			{
+				WeaponItemData->ItemObjectType = en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE;
+			}
+
+			WeaponItemData->ItemExplain = ItemExplain;
+			WeaponItemData->ItemName = ItemName;
+			WeaponItemData->ItemWidth = ItemWidth;
+			WeaponItemData->ItemHeight = ItemHeight;
+			WeaponItemData->ItemMinDamage = ItemMinDamage;
+			WeaponItemData->ItemMaxDamage = ItemMaxDamage;
+			WeaponItemData->ItemDefence = 0;
+			WeaponItemData->ItemMaxCount = 1;
+			WeaponItemData->ItemCraftingTime = ItemCraftingTime;
+			WeaponItemData->ItemThumbnailImagePath = ImageFilePath;
+
+			_Items.insert(pair<int16, st_ItemData*>((int16)WeaponItemData->SmallItemCategory, WeaponItemData));
+		}
+	}
 }
 
 void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
@@ -2313,7 +2363,11 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 		string CraftingItemLargeCategory = Filed["CraftingCompleteItemLargeCategory"].GetString();
 		string CraftingTypeName = Filed["CraftingTypeName"].GetString();
 
-		if (CraftingItemLargeCategory == "ITEM_LARGE_CATEGORY_WEAPON")
+		if (CraftingItemLargeCategory == "ITEM_LARGE_CATEGORY_ARCHITECTURE")
+		{
+			CraftingItemCategory->CategoryType = en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARCHITECTURE;
+		}
+		else if (CraftingItemLargeCategory == "ITEM_LARGE_CATEGORY_WEAPON")
 		{
 			CraftingItemCategory->CategoryType = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
 		}
@@ -2330,7 +2384,7 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 
 		for (auto& CraftingCompleteItemFiled : Filed["CraftingCompleteItem"].GetArray())
 		{
-			st_CraftingCompleteItem CraftingCompleteItem;
+			CItem* CommonCraftingCompleteItem = nullptr;
 
 			string CraftingCompleteItemMediumCategory = CraftingCompleteItemFiled["CraftingCompleteItemMediumCategory"].GetString();
 			string CraftingCompleteItemSmallCategory = CraftingCompleteItemFiled["CraftingCompleteItemSmallCategory"].GetString();
@@ -2338,33 +2392,72 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 			string CraftingCompleteItemName = CraftingCompleteItemFiled["CraftingCompleteItemName"].GetString();
 			string CraftingCompleteItemThumbnailImagePath = CraftingCompleteItemFiled["CraftingCompleteItemThumbnailImagePath"].GetString();
 
-			if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD")
+			if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE")
 			{
-				CraftingCompleteItem.CompleteItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD;
+				CommonCraftingCompleteItem = G_ObjectManager->ItemCreate(en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE);
+				CommonCraftingCompleteItem->_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARCHITECTURE;
+				CommonCraftingCompleteItem->_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE;
+				CommonCraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE;
+				CommonCraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_COMMON;				
+			}
+			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD")
+			{
+				CommonCraftingCompleteItem = G_ObjectManager->ItemCreate(en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD);
+				CommonCraftingCompleteItem->_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
+				CommonCraftingCompleteItem->_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_SWORD;
+				CommonCraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD;
+				CommonCraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_COMMON;
 			}
 			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD")
 			{
-				CraftingCompleteItem.CompleteItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD;
+				CommonCraftingCompleteItem = G_ObjectManager->ItemCreate(en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD);
+				CommonCraftingCompleteItem->_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARMOR;
+				CommonCraftingCompleteItem->_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_WEAR;
+				CommonCraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD;
+				CommonCraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_COMMON;
 			}
 			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER")
 			{
-				CraftingCompleteItem.CompleteItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER;
+				CommonCraftingCompleteItem = G_ObjectManager->ItemCreate(en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER);
+				CommonCraftingCompleteItem->_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARMOR;
+				CommonCraftingCompleteItem->_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_WEAR;
+				CommonCraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER;
+				CommonCraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_COMMON;
 			}
 			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER")
 			{
-				CraftingCompleteItem.CompleteItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER;
+				CommonCraftingCompleteItem = G_ObjectManager->ItemCreate(en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER);
+				CommonCraftingCompleteItem->_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARMOR;
+				CommonCraftingCompleteItem->_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_WEAR;
+				CommonCraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER;
+				CommonCraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_COMMON;
 			}
 			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK")
 			{
-				CraftingCompleteItem.CompleteItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK;
+				CommonCraftingCompleteItem = G_ObjectManager->ItemCreate(en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK);
+				CommonCraftingCompleteItem->_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_MATERIAL;
+				CommonCraftingCompleteItem->_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
+				CommonCraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK;
+				CommonCraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_COMMON;
 			}
 			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_YARN")
 			{
-				CraftingCompleteItem.CompleteItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN;
+				CommonCraftingCompleteItem = G_ObjectManager->ItemCreate(en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN);
+				CommonCraftingCompleteItem->_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_MATERIAL;
+				CommonCraftingCompleteItem->_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
+				CommonCraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN;
+				CommonCraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_COMMON;
 			}			
 
-			CraftingCompleteItem.CompleteItemName = (LPWSTR)CA2W(CraftingCompleteItemName.c_str());
-			CraftingCompleteItem.CompleteItemImagePath = (LPWSTR)CA2W(CraftingCompleteItemThumbnailImagePath.c_str());
+			st_ItemData* CraftingCompleteItemData = FindItemData(CommonCraftingCompleteItem->_ItemInfo.ItemSmallCategory);
+
+			CommonCraftingCompleteItem->_ItemInfo.ItemExplain = (LPWSTR)CA2W(CraftingCompleteItemData->ItemExplain.c_str());
+			CommonCraftingCompleteItem->_ItemInfo.ItemName = (LPWSTR)CA2W(CraftingCompleteItemData->ItemName.c_str());
+			CommonCraftingCompleteItem->_ItemInfo.Width = CraftingCompleteItemData->ItemWidth;
+			CommonCraftingCompleteItem->_ItemInfo.Height = CraftingCompleteItemData->ItemHeight;
+			CommonCraftingCompleteItem->_ItemInfo.ItemCraftingTime = CraftingCompleteItemData->ItemCraftingTime;
+			CommonCraftingCompleteItem->_ItemInfo.ItemThumbnailImagePath = (LPWSTR)CA2W(CraftingCompleteItemData->ItemThumbnailImagePath.c_str());
+			CommonCraftingCompleteItem->_ItemInfo.ItemMaxCount = CraftingCompleteItemData->ItemMaxCount;
 
 			for (auto& CraftingMaterialFiled : CraftingCompleteItemFiled["CraftingMaterial"].GetArray())
 			{
@@ -2390,16 +2483,20 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 				else if (MaterialSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_YARN")
 				{
 					CraftingMaterialItemInfo.MaterialItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN;
-				}				
+				}
+				else if (MaterialSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_STONE")
+				{
+					CraftingMaterialItemInfo.MaterialItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE;
+				}
 
 				CraftingMaterialItemInfo.MaterialItemName = (LPWSTR)CA2W(MaterialName.c_str());
 				CraftingMaterialItemInfo.ItemCount = MaterialCount;
 				CraftingMaterialItemInfo.MaterialItemImagePath = (LPWSTR)CA2W(MaterialThumbnailImagePath.c_str());
 
-				CraftingCompleteItem.Materials.push_back(CraftingMaterialItemInfo);
+				CommonCraftingCompleteItem->_ItemInfo.Materials.push_back(CraftingMaterialItemInfo);
 			}
 
-			CraftingItemCategory->CompleteItems.push_back(CraftingCompleteItem);
+			CraftingItemCategory->CommonCraftingCompleteItems.push_back(CommonCraftingCompleteItem);
 		}
 
 		_CraftingData.insert(pair<int8, st_CraftingItemCategory*>((int8)CraftingItemCategory->CategoryType, CraftingItemCategory));
@@ -2423,7 +2520,7 @@ void CDataManager::LoadDataCraftingTable(wstring LoadFileName)
 
 		if (CraftingTableName == "¿ë±¤·Î")
 		{
-			CraftingTableRecipe->CraftingTableType = en_GameObjectType::OBJECT_FURNACE;
+			CraftingTableRecipe->CraftingTableType = en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE;
 		}
 
 		for (auto& CraftingTableCompleteItemFiled : Filed["CraftingTableCompleteItem"].GetArray())
