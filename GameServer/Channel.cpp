@@ -346,8 +346,9 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 			}
 		}
 		break;
-	case en_GameObjectType::OBJECT_CRAFTING_TABLE:
-	case en_GameObjectType::OBJECT_FURNACE:
+	case en_GameObjectType::OBJECT_ARCHITECTURE:
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE:
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 		{
 			for (int32 i = 0; i < en_Channel::CRAFTING_TABLE_MAX; i++)
 			{
@@ -405,17 +406,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(en_GameObjectType GameObjectTy
 				FindObjects.push_back(_ChannelEnvironmentArray[i]);
 			}
 		}
-		break;
-	case en_GameObjectType::OBJECT_CRAFTING_TABLE:
-	case en_GameObjectType::OBJECT_FURNACE:
-		for (int32 i = 0; i < en_Channel::CRAFTING_TABLE_MAX; i++)
-		{
-			if (_ChannelCraftingTableArray[i] != nullptr)
-			{
-				FindObjects.push_back(_ChannelCraftingTableArray[i]);
-			}
-		}
-		break;
+		break;	
 	case en_GameObjectType::OBJECT_ITEM:
 	case en_GameObjectType::OBJECT_ITEM_WEAPON:
 	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
@@ -457,7 +448,18 @@ vector<CGameObject*> CChannel::FindChannelObjects(en_GameObjectType GameObjectTy
 				FindObjects.push_back(_ChannelDummyPlayerArray[i]);				
 			}
 		}
-		break;	
+		break;
+	case en_GameObjectType::OBJECT_ARCHITECTURE:
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE:
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+		for (int32 i = 0; i < en_Channel::CRAFTING_TABLE_MAX; i++)
+		{
+			if (_ChannelCraftingTableArray[i] != nullptr)
+			{
+				FindObjects.push_back(_ChannelCraftingTableArray[i]);
+			}
+		}
+		break;
 	}
 
 	return FindObjects;
@@ -561,7 +563,9 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 				}
 			}
 			break;
-		case en_GameObjectType::OBJECT_FURNACE:
+		case en_GameObjectType::OBJECT_ARCHITECTURE:
+		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE:
+		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 			{
 				for (int32 i = 0; i < en_Channel::CRAFTING_TABLE_MAX; i++)
 				{
@@ -673,7 +677,9 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 			}
 		}
 		break;		
-		case en_GameObjectType::OBJECT_FURNACE:
+		case en_GameObjectType::OBJECT_ARCHITECTURE:
+		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE:
+		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 			{
 				for (int32 i = 0; i < en_Channel::CRAFTING_TABLE_MAX; i++)
 				{
@@ -878,7 +884,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			EnterSector->Insert(EnterChannelEnvironment);
 		}
 		break;
-	case en_GameObjectType::OBJECT_FURNACE:
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 		{
 			CCraftingTable* EnterChannelCraftingTable = (CCraftingTable*)EnterChannelGameObject;
 			EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
@@ -956,7 +962,7 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 
 		_Map->ApplyLeave(LeaveChannelGameObject);
 		break;
-	case en_GameObjectType::OBJECT_FURNACE:
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 		_ChannelCraftingTableArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
 
 		_Map->ApplyLeave(LeaveChannelGameObject);
