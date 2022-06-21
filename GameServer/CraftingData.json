@@ -1,6 +1,26 @@
 {
   "CraftingDatas": [
     {
+      "CraftingCompleteItemLargeCategory": "ITEM_LARGE_CATEGORY_ARCHITECTURE",
+      "CraftingTypeName": "제작대",
+      "CraftingCompleteItem": [
+        {
+          "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE",
+          "CraftingCompleteItemName": "용광로",
+          "CraftingCompleteItemThumbnailImagePath": "Textures/CraftingTable/Furnace",
+          "CraftingMaterial": [
+            {
+              "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_STONE",
+              "MaterialName": "암석",
+              "MaterialCount": 30,
+              "MaterialThumbnailImagePath": "Textures/Material/Stone"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "CraftingCompleteItemLargeCategory": "ITEM_LARGE_CATEGORY_WEAPON",
       "CraftingTypeName": "무기",
       "CraftingCompleteItem": [
