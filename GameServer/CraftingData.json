@@ -5,7 +5,7 @@
       "CraftingTypeName": "제작대",
       "CraftingCompleteItem": [
         {
-          "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE",
           "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE",
           "CraftingCompleteItemName": "용광로",
           "CraftingCompleteItemThumbnailImagePath": "Textures/CraftingTable/Furnace",
@@ -15,6 +15,20 @@
               "MaterialName": "암석",
               "MaterialCount": 30,
               "MaterialThumbnailImagePath": "Textures/Material/Stone"
+            }
+          ]
+        },
+        {
+          "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE",
+          "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL",
+          "CraftingCompleteItemName": "제재소",
+          "CraftingCompleteItemThumbnailImagePath": "Textures/CraftingTable/Sawmill",
+          "CraftingMaterial": [
+            {
+              "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG",
+              "MaterialName": "통나무",
+              "MaterialCount": 30,
+              "MaterialThumbnailImagePath": "Textures/Material/Wood Log"
             }
           ]
         }
@@ -35,12 +49,6 @@
               "MaterialName": "나무 판자",
               "MaterialCount": 30,
               "MaterialThumbnailImagePath": "Textures/Material/Wooden Plank"
-            },
-            {
-              "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_YARN",
-              "MaterialName": "실",
-              "MaterialCount": 15,
-              "MaterialThumbnailImagePath": "Textures/Material/Yarn"
             }
           ]
         }
@@ -61,12 +69,6 @@
               "MaterialName": "나무 판자",
               "MaterialCount": 40,
               "MaterialThumbnailImagePath": "Textures/Material/Wooden Plank"
-            },
-            {
-              "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_YARN",
-              "MaterialName": "실",
-              "MaterialCount": 20,
-              "MaterialThumbnailImagePath": "Textures/Material/Yarn"
             }
           ]
         },
@@ -81,12 +83,6 @@
               "MaterialName": "가죽",
               "MaterialCount": 20,
               "MaterialThumbnailImagePath": "Textures/Material/Leather"
-            },
-            {
-              "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_YARN",
-              "MaterialName": "실",
-              "MaterialCount": 10,
-              "MaterialThumbnailImagePath": "Textures/Material/Yarn"
             }
           ]
         },
@@ -101,46 +97,6 @@
               "MaterialName": "가죽",
               "MaterialCount": 10,
               "MaterialThumbnailImagePath": "Textures/Material/Leather"
-            },
-            {
-              "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_YARN",
-              "MaterialName": "실",
-              "MaterialCount": 5,
-              "MaterialThumbnailImagePath": "Textures/Material/Yarn"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "CraftingCompleteItemLargeCategory": "ITEM_LARGE_CATEGORY_MATERIAL",
-      "CraftingTypeName": "재료",
-      "CraftingCompleteItem": [
-        {
-          "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
-          "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK",
-          "CraftingCompleteItemName": "나무 판자",
-          "CraftingCompleteItemThumbnailImagePath": "Textures/Material/Wooden Plank",
-          "CraftingMaterial": [
-            {
-              "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG",
-              "MaterialName": "통나무",
-              "MaterialCount": 5,
-              "MaterialThumbnailImagePath": "Textures/Material/Wood Log"
-            }
-          ]
-        },
-        {
-          "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
-          "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_YARN",
-          "CraftingCompleteItemName": "실",
-          "CraftingCompleteItemThumbnailImagePath": "Textures/Material/Yarn",
-          "CraftingMaterial": [
-            {
-              "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG",
-              "MaterialName": "통나무",
-              "MaterialCount": 2,
-              "MaterialThumbnailImagePath": "Textures/Material/Wood Log"
             }
           ]
         }

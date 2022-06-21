@@ -58,6 +58,25 @@
           ]
         }
       ]
+    },
+    {
+      "CraftingTableName": "제재소",
+      "CraftingTableCompleteItem": [
+        {
+          "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK",
+          "CraftingCompleteItemName": "나무 판자",
+          "CraftingCompleteItemThumbnailImagePath": "Textures/Material/Wooden Plank",
+          "CraftingMaterial": [
+            {
+              "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG",
+              "MaterialName": "통나무",
+              "MaterialCount": 2,
+              "MaterialThumbnailImagePath": "Textures/Material/Wood Log"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
