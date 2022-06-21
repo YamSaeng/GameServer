@@ -25,8 +25,9 @@ enum class en_GameObjectType : int16
 	OBJECT_STONE,
 	OBJECT_TREE,
 
-	OBJECT_CRAFTING_TABLE,
-	OBJECT_CRAFTING_TABLE_FURNACE,
+	OBJECT_ARCHITECTURE,
+	OBJECT_ARCHITECTURE_CRAFTING_TABLE,
+	OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE,
 
 	OBJECT_ITEM,
 	OBJECT_ITEM_WEAPON,
@@ -138,7 +139,7 @@ enum class en_UIObjectInfo : int16
 enum class en_LargeItemCategory : int8
 {
 	ITEM_LARGE_CATEGORY_NONE = 0,
-	ITEM_LARGE_CATEGORY_CRAFTING_TABLE,
+	ITEM_LARGE_CATEGORY_ARCHITECTURE,
 	ITEM_LARGE_CATEGORY_WEAPON,
 	ITEM_LARGE_CATEGORY_ARMOR,
 	ITEM_LARGE_CATEGORY_FOOD,
@@ -150,6 +151,7 @@ enum class en_LargeItemCategory : int8
 enum class en_MediumItemCategory : int8
 {
 	ITEM_MEDIUM_CATEGORY_NONE = 0,
+	ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE,
 	ITEM_MEDIUM_CATEGORY_SWORD,
 	ITEM_MEDIUM_CATEGORY_HAT,
 	ITEM_MEDIUM_CATEGORY_WEAR,
@@ -197,7 +199,7 @@ enum class en_SmallItemCategory : int16
 	ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET,
 	ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT,
 
-	ITEM_SMALL_CATEGORY_MATERIAL_CRAFTING_TABLE_FURNACE = 5000
+	ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE = 5000
 };
 
 enum class en_SkillLargeCategory : int8
@@ -2151,7 +2153,7 @@ struct st_CraftingItemCategory
 {
 	en_LargeItemCategory CategoryType; // 제작템 범주
 	wstring CategoryName; // 제작템 범주 이름
-	vector<st_CraftingCompleteItem> CompleteItems; // 범주에 속한 완성 제작템들
+	vector<CItem*> CommonCraftingCompleteItems; // 범주에 속한 완성 제작템들
 };
 
 struct st_ItemInfo
