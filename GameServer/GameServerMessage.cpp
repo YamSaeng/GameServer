@@ -211,12 +211,12 @@ CGameServerMessage& CGameServerMessage::operator<<(st_CraftingItemCategory& Craf
     *this << CraftingItemCategoryNameLen;
     InsertData(CraftingItemCategory.CategoryName.c_str(), CraftingItemCategoryNameLen);
 
-    int8 CraftingItemCategoryCompleteItemCount = (int8)CraftingItemCategory.CompleteItems.size();
+    int8 CraftingItemCategoryCompleteItemCount = (int8)CraftingItemCategory.CommonCraftingCompleteItems.size();
     *this << CraftingItemCategoryCompleteItemCount;
 
-    for (st_CraftingCompleteItem CraftingCompleteItem : CraftingItemCategory.CompleteItems)
+    for (CItem* CraftingCompleteItem : CraftingItemCategory.CommonCraftingCompleteItems)
     {
-        *this << CraftingCompleteItem;
+        *this << CraftingCompleteItem->_ItemInfo;
     }
 
     return *(this);
