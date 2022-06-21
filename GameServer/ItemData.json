@@ -15,7 +15,7 @@
           "ItemCraftingTime": 5000,
           "ImageFilePath": "Textures/Weapon & Tool/Wooden Sword"
         }
-      ]      
+      ]
     }
   ],
   "Armors": [
@@ -57,11 +57,11 @@
           "ItemCraftingTime": 4000,
           "ImageFilePath": "Textures/Equipment/Leather Boot"
         }
-      ]      
-    }   
+      ]
+    }
   ],
   "Consumables": [
-    {      
+    {
       "PotionList": [
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_HEAL",
@@ -75,7 +75,7 @@
           "ItemCraftingTime": 0,
           "ImageFilePath": "Textures/Potion/Red Potion"
         }
-      ],      
+      ],
       "SkillBookList": [
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -384,6 +384,24 @@
           "ImageFilePath": "Textures/Ore & Gem/Iron Ingot"
         }
       ]
-    }    
+    }
+  ],
+  "Architecture": [
+    {
+      "ArchitectureList": [
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE",
+          "ItemObjectType": "OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE",
+          "ItemExplain": "±¤¼®À» Á¦·Ã ÇÒ ¼ö ÀÖ´Â ¿ë±¤·Î",
+          "ItemName": "¿ë±¤·Î",
+          "ItemWidth": 2,
+          "ItemHeight": 2,
+          "ItemMaxCount": 1,
+          "ItemCraftingTime": 10000,
+          "ImageFilePath": "Textures/CraftingTable/Furnace"
+        }
+      ]
+    }
   ]
 } 
