@@ -55,6 +55,7 @@ void CSector::Insert(CGameObject* InsertGameObject)
 		_Environment.insert((CEnvironment*)InsertGameObject);
 		break;
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 		_CraftingTables.insert((CCraftingTable*)InsertGameObject);
 		break;
 	default:
@@ -104,8 +105,9 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
 		_Environment.erase((CEnvironment*)RemoveGameObject);
-		break;
-	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE:
+		break;	
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 		_CraftingTables.erase((CCraftingTable*)RemoveGameObject);
 		break;
 	}
