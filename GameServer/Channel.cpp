@@ -349,6 +349,7 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 	case en_GameObjectType::OBJECT_ARCHITECTURE:
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE:
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 		{
 			for (int32 i = 0; i < en_Channel::CRAFTING_TABLE_MAX; i++)
 			{
@@ -452,6 +453,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(en_GameObjectType GameObjectTy
 	case en_GameObjectType::OBJECT_ARCHITECTURE:
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE:
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 		for (int32 i = 0; i < en_Channel::CRAFTING_TABLE_MAX; i++)
 		{
 			if (_ChannelCraftingTableArray[i] != nullptr)
@@ -566,6 +568,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 		case en_GameObjectType::OBJECT_ARCHITECTURE:
 		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE:
 		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 			{
 				for (int32 i = 0; i < en_Channel::CRAFTING_TABLE_MAX; i++)
 				{
@@ -680,6 +683,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 		case en_GameObjectType::OBJECT_ARCHITECTURE:
 		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE:
 		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 			{
 				for (int32 i = 0; i < en_Channel::CRAFTING_TABLE_MAX; i++)
 				{
@@ -885,6 +889,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 		}
 		break;
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 		{
 			CCraftingTable* EnterChannelCraftingTable = (CCraftingTable*)EnterChannelGameObject;
 			EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
@@ -963,6 +968,7 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 		_Map->ApplyLeave(LeaveChannelGameObject);
 		break;
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 		_ChannelCraftingTableArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
 
 		_Map->ApplyLeave(LeaveChannelGameObject);
