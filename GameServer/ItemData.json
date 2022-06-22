@@ -400,6 +400,18 @@
           "ItemMaxCount": 1,
           "ItemCraftingTime": 10000,
           "ImageFilePath": "Textures/CraftingTable/Furnace"
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL",
+          "ItemObjectType": "OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL",
+          "ItemExplain": "나무를 가공 할 수 있는 제재소",
+          "ItemName": "제재소",
+          "ItemWidth": 2,
+          "ItemHeight": 1,
+          "ItemMaxCount": 1,
+          "ItemCraftingTime": 10000,
+          "ImageFilePath": "Textures/CraftingTable/Sawmill"
         }
       ]
     }
