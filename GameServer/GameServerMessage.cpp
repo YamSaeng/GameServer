@@ -35,6 +35,8 @@ CGameServerMessage& CGameServerMessage::operator<<(st_GameObjectInfo& GameObject
     *this << (int16)GameObjectInfo.ObjectType;
     *this << GameObjectInfo.OwnerObjectId;
     *this << (int16)GameObjectInfo.OwnerObjectType;
+    *this << GameObjectInfo.ObjectWidth;
+    *this << GameObjectInfo.ObjectHeight;
     *this << GameObjectInfo.PlayerSlotIndex;
 
     return *(this);
