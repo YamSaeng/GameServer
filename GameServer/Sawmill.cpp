@@ -1,8 +1,8 @@
 #include "pch.h"
-#include "Samill.h"
+#include "Sawmill.h"
 #include "DataManager.h"
 
-CSamill::CSamill()
+CSawmill::CSawmill()
 {
 	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL;
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
@@ -16,10 +16,10 @@ CSamill::CSamill()
 	_CraftingTableRecipe = *(*FindSamillData).second;
 }
 
-void CSamill::Update()
+void CSawmill::Update()
 {
 }
 
-void CSamill::UpdateCrafting()
+void CSawmill::UpdateCrafting()
 {
 }
