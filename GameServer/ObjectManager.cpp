@@ -7,6 +7,7 @@
 #include "MapManager.h"
 #include "CraftingTable.h"
 #include "Furnace.h"
+#include "Samill.h"
 #include <atlbase.h>
 
 CObjectManager::CObjectManager()
@@ -25,6 +26,7 @@ CObjectManager::CObjectManager()
 	_TreeMemoryPool = new CMemoryPoolTLS<CTree>();
 	_StoneMemoryPool = new CMemoryPoolTLS<CStone>();
 	_FurnaceMemoryPool = new CMemoryPoolTLS<CFurnace>();
+	_SamillMemoryPool = new CMemoryPoolTLS<CSamill>();
 
 	_SkillMemoryPool = new CMemoryPoolTLS<CSkill>();
 
@@ -205,6 +207,7 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int64 MapID)
 		}
 		break;
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 		{
 			CCraftingTable* CraftingTable = (CCraftingTable*)EnterGameObject;
 
@@ -263,6 +266,7 @@ bool CObjectManager::ObjectLeaveGame(CGameObject* LeaveGameObject, int32 ObjectI
 		_EnvironmentsArrayIndexs.Push(ObjectIndex);
 		break;
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 		LeaveGameObject->GetChannel()->LeaveChannel(LeaveGameObject);
 
 		_CraftingTableArrayIndexs.Push(ObjectIndex);
@@ -307,6 +311,9 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 		NewObject = _FurnaceMemoryPool->Alloc();
 		break;
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
+		NewObject = _SamillMemoryPool->Alloc();
+		break;
 	}
 
 	return NewObject;
@@ -338,6 +345,9 @@ void CObjectManager::ObjectReturn(en_GameObjectType ObjectType, CGameObject* Ret
 		break;
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 		_FurnaceMemoryPool->Free((CFurnace*)ReturnObject);
+		break;
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:		
+		_SamillMemoryPool->Free((CSamill*)ReturnObject);
 		break;
 	}
 }
@@ -385,6 +395,7 @@ CItem* CObjectManager::ItemCreate(en_SmallItemCategory NewItemSmallCategory)
 		NewItem = _MaterialMemoryPool->Alloc();
 		break;
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL:
 		NewItem = _ArchitectureMemoryPool->Alloc();
 		break;
 	}
@@ -423,6 +434,7 @@ void CObjectManager::ItemReturn(CItem* ReturnItem)
 		_MaterialMemoryPool->Free((CMaterial*)ReturnItem);
 		break;
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL:
 		_ArchitectureMemoryPool->Free((CArchitecture*)ReturnItem);
 		break;
 	}
@@ -531,6 +543,9 @@ void CObjectManager::MapObjectSpawn(int64& MapID)
 				break;			
 			case en_TileMapEnvironment::TILE_MAP_FURNACE:
 				NewObject = (CFurnace*)ObjectCreate(en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE);
+				break;
+			case en_TileMapEnvironment::TILE_MAP_SAMILL:
+				NewObject = (CSamill*)ObjectCreate(en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL);
 				break;
 			}
 
