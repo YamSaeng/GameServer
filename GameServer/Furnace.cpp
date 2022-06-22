@@ -6,8 +6,11 @@
 
 CFurnace::CFurnace()
 {
-	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_FURNACE;
+	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE;
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+
+	_GameObjectInfo.ObjectWidth = 1;
+	_GameObjectInfo.ObjectHeight = 1;
 
 	_GameObjectInfo.ObjectName = L"¿ë±¤·Î";
 

@@ -19,6 +19,9 @@ CPlayer::CPlayer()
 	_NatureRecoveryTick = GetTickCount64() + 5000;
 	_FieldOfViewUpdateTick = GetTickCount64() + 50;
 
+	_GameObjectInfo.ObjectWidth = 1;
+	_GameObjectInfo.ObjectHeight = 1;
+
 	_ComboSkill = nullptr;
 	_CurrentSpellSkill = nullptr;		
 }

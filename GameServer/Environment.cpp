@@ -99,6 +99,9 @@ CStone::CStone()
 	_GameObjectInfo.ObjectStatInfo.MaxHP = EnvironmentData.MaxHP;
 	_GameObjectInfo.ObjectStatInfo.HP = _GameObjectInfo.ObjectStatInfo.MaxHP;
 	_GameObjectInfo.ObjectStatInfo.Level = EnvironmentData.Level;
+
+	_GameObjectInfo.ObjectWidth = 1;
+	_GameObjectInfo.ObjectHeight = 1;
 }
 
 void CStone::Start()
@@ -116,7 +119,7 @@ bool CStone::OnDamaged(CGameObject* Attacker, int32 Damage)
 
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::READY_DEAD;
 
-		G_ObjectManager->ItemSpawn(Attacker->_GameObjectInfo.ObjectId,
+		G_ObjectManager->ObjectItemSpawn(Attacker->_GameObjectInfo.ObjectId,
 			Attacker->_GameObjectInfo.ObjectType,
 			_GameObjectInfo.ObjectPositionInfo.CollisionPosition,
 			_GameObjectInfo.ObjectType,
@@ -142,6 +145,9 @@ CTree::CTree()
 	_GameObjectInfo.ObjectStatInfo.MaxHP = EnvironmentData.MaxHP;
 	_GameObjectInfo.ObjectStatInfo.HP = _GameObjectInfo.ObjectStatInfo.MaxHP;
 	_GameObjectInfo.ObjectStatInfo.Level = EnvironmentData.Level;
+
+	_GameObjectInfo.ObjectWidth = 1;
+	_GameObjectInfo.ObjectHeight = 1;
 }
 
 void CTree::Start()
@@ -166,7 +172,7 @@ bool CTree::OnDamaged(CGameObject* Attacker, int32 Damage)
 		G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResChangeStatePacket);
 		ResChangeStatePacket->Free();
 		
-		G_ObjectManager->ItemSpawn(Attacker->_GameObjectInfo.ObjectId,
+		G_ObjectManager->ObjectItemSpawn(Attacker->_GameObjectInfo.ObjectId,
 			Attacker->_GameObjectInfo.ObjectType,
 			_GameObjectInfo.ObjectPositionInfo.CollisionPosition,
 			_GameObjectInfo.ObjectType,

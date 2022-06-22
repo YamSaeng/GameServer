@@ -32,6 +32,9 @@ CSlime::CSlime()
 	_GameObjectInfo.ObjectStatInfo.Speed = MonsterData.MonsterStatInfo.Speed;
 	_GameObjectInfo.ObjectStatInfo.MaxSpeed = MonsterData.MonsterStatInfo.Speed;
 
+	_GameObjectInfo.ObjectWidth = 1;
+	_GameObjectInfo.ObjectHeight = 1;
+
 	_SearchCellDistance = MonsterData.MonsterStatInfo.SearchCellDistance;
 	_ChaseCellDistance = MonsterData.MonsterStatInfo.ChaseCellDistance;
 	_AttackRange = MonsterData.MonsterStatInfo.AttackRange;
@@ -78,7 +81,7 @@ bool CSlime::OnDamaged(CGameObject* Attacker, int32 Damage)
 		G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResChangeStatePacket);
 		ResChangeStatePacket->Free();
 
-		G_ObjectManager->ItemSpawn(Attacker->_GameObjectInfo.ObjectId,
+		G_ObjectManager->ObjectItemSpawn(Attacker->_GameObjectInfo.ObjectId,
 			Attacker->_GameObjectInfo.ObjectType,
 			_GameObjectInfo.ObjectPositionInfo.CollisionPosition,
 			_GameObjectInfo.ObjectType, en_ObjectDataType::SLIME_DATA);

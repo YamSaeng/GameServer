@@ -32,6 +32,9 @@ CBear::CBear()
 	_GameObjectInfo.ObjectStatInfo.Speed = MonsterData.MonsterStatInfo.Speed;	
 	_GameObjectInfo.ObjectStatInfo.MaxSpeed = MonsterData.MonsterStatInfo.Speed;
 
+	_GameObjectInfo.ObjectWidth = 1;
+	_GameObjectInfo.ObjectHeight = 1;
+
 	_SearchCellDistance = MonsterData.MonsterStatInfo.SearchCellDistance;
 	_ChaseCellDistance = MonsterData.MonsterStatInfo.ChaseCellDistance;
 	_AttackRange = MonsterData.MonsterStatInfo.AttackRange;
