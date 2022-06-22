@@ -134,7 +134,8 @@ enum class en_UIObjectInfo : int16
 	UI_OBJECT_INFO_NONE = 0,
 
 	UI_OBJECT_INFO_CRAFTING_TABLE_COMMON,
-	UI_OBJECT_INFO_CRAFTING_TABLE_FURNACE	
+	UI_OBJECT_INFO_CRAFTING_TABLE_FURNACE,
+	UI_OBJECT_INFO_CRAFTING_TABLE_SAWMILL
 };
 
 enum class en_LargeItemCategory : int8
@@ -380,7 +381,8 @@ enum class en_TileMapEnvironment : int8
 	TILE_MAP_STONE,
 	TILE_MAP_SLIME,
 	TILE_MAP_BEAR,
-	TILE_MAP_FURNACE
+	TILE_MAP_FURNACE,
+	TILE_MAP_SAMILL
 };
 
 enum class en_GameObjectJobType : int16
@@ -2110,6 +2112,8 @@ struct st_GameObjectInfo
 	en_GameObjectType ObjectType;
 	int64 OwnerObjectId;
 	en_GameObjectType OwnerObjectType;
+	int16 ObjectWidth;
+	int16 ObjectHeight;
 	int8 PlayerSlotIndex;
 };
 
