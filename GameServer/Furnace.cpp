@@ -2,7 +2,6 @@
 #include "Furnace.h"
 #include "ObjectManager.h"
 #include "DataManager.h"
-#include <atlbase.h>
 
 CFurnace::CFurnace()
 {

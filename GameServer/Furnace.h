@@ -1,8 +1,6 @@
 #pragma once
 #include "CraftingTable.h"
 
-class CItem;
-
 class CFurnace : public CCraftingTable
 {
 public:
