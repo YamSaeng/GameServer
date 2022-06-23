@@ -7,7 +7,7 @@
 #include "MapManager.h"
 #include "CraftingTable.h"
 #include "Furnace.h"
-#include "Samill.h"
+#include "Sawmill.h"
 #include <atlbase.h>
 
 CObjectManager::CObjectManager()
@@ -26,7 +26,7 @@ CObjectManager::CObjectManager()
 	_TreeMemoryPool = new CMemoryPoolTLS<CTree>();
 	_StoneMemoryPool = new CMemoryPoolTLS<CStone>();
 	_FurnaceMemoryPool = new CMemoryPoolTLS<CFurnace>();
-	_SamillMemoryPool = new CMemoryPoolTLS<CSamill>();
+	_SamillMemoryPool = new CMemoryPoolTLS<CSawmill>();
 
 	_SkillMemoryPool = new CMemoryPoolTLS<CSkill>();
 
@@ -347,7 +347,7 @@ void CObjectManager::ObjectReturn(en_GameObjectType ObjectType, CGameObject* Ret
 		_FurnaceMemoryPool->Free((CFurnace*)ReturnObject);
 		break;
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:		
-		_SamillMemoryPool->Free((CSamill*)ReturnObject);
+		_SamillMemoryPool->Free((CSawmill*)ReturnObject);
 		break;
 	}
 }
@@ -545,7 +545,7 @@ void CObjectManager::MapObjectSpawn(int64& MapID)
 				NewObject = (CFurnace*)ObjectCreate(en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE);
 				break;
 			case en_TileMapEnvironment::TILE_MAP_SAMILL:
-				NewObject = (CSamill*)ObjectCreate(en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL);
+				NewObject = (CSawmill*)ObjectCreate(en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL);
 				break;
 			}
 

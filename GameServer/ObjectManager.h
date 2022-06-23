@@ -13,7 +13,7 @@ class CConsumable;
 class CMaterial;
 class CSkill;
 class CFurnace;
-class CSamill;
+class CSawmill;
 
 class CObjectManager
 {
@@ -41,7 +41,7 @@ private:
 	CMemoryPoolTLS<CTree>* _TreeMemoryPool;
 	CMemoryPoolTLS<CStone>* _StoneMemoryPool;	
 	CMemoryPoolTLS<CFurnace>* _FurnaceMemoryPool;
-	CMemoryPoolTLS<CSamill>* _SamillMemoryPool;
+	CMemoryPoolTLS<CSawmill>* _SamillMemoryPool;
 
 	int64 _GameServerObjectId;
 
