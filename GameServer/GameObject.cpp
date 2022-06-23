@@ -674,30 +674,31 @@ void CGameObject::Update()
 
 					switch (_GameObjectInfo.ObjectType)
 					{
-					case en_GameObjectType::OBJECT_FURNACE:
+					case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+					case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 						{
-							CFurnace* Furnace = (CFurnace*)this;
+							CCraftingTable* CraftingTable = (CCraftingTable*)this;
 
 							// 용광로가 가지고 있는 제작법을 가지고옴
-							st_CraftingTableRecipe FurnaceCraftingTableRecipe = Furnace->GetCraftingTableRecipe();
+							st_CraftingTableRecipe CraftingTableRecipe = CraftingTable->GetCraftingTableRecipe();
 
 							// 제작법 중에서 요청한 아이템 타입의 제작법이 있는지 찾음
-							for (CItem* CraftingCompleteItem : FurnaceCraftingTableRecipe.CraftingTableCompleteItems)
+							for (CItem* CraftingCompleteItem : CraftingTableRecipe.CraftingTableCompleteItems)
 							{
 								if (CraftingCompleteItem->_ItemInfo.ItemSmallCategory == (en_SmallItemCategory)CraftingCompleteItemType)
 								{
 									bool IsCrafting = true;
 
 									// 찾으면 가방에 제작법 재료가 있는지 확인함
-									for (st_CraftingMaterialItemInfo FurnaceMaterialItemInfo : CraftingCompleteItem->_ItemInfo.Materials)
+									for (st_CraftingMaterialItemInfo CraftingMaterialItemInfo : CraftingCompleteItem->_ItemInfo.Materials)
 									{
 										// 제작템을 한개 만들떄 필요한 재료의 개수를 얻는다.
-										int16 OneReqMaterialcount = FurnaceMaterialItemInfo.ItemCount;
+										int16 OneReqMaterialcount = CraftingMaterialItemInfo.ItemCount;
 										// 클라가 요청한 제작템 제작갯수와 위에서 구한 개수를 곱해서 총 필요개수를 구한다.
 										int16 ReqCraftingItemTotalCount = CraftingCount * OneReqMaterialcount;
 
 										// 인벤토리에 제작템의 최소 재료 필요 개수만큼 용광로 재료템에 있는지 확인한다.
-										if (!Furnace->FindMaterialItem(FurnaceMaterialItemInfo.MaterialItemType, OneReqMaterialcount))
+										if (!CraftingTable->FindMaterialItem(CraftingMaterialItemInfo.MaterialItemType, OneReqMaterialcount))
 										{
 											IsCrafting = false;
 										}
@@ -706,19 +707,19 @@ void CGameObject::Update()
 									// 재료가 모두 있을 경우
 									if (IsCrafting == true)
 									{
-										Furnace->_CraftingStartCompleteItem = CraftingCompleteItem->_ItemInfo.ItemSmallCategory;										
+										CraftingTable->_CraftingStartCompleteItem = CraftingCompleteItem->_ItemInfo.ItemSmallCategory;										
 
 										// 아이템 제작 시작
 										CraftingCompleteItem->CraftingStart();
 
-										CPlayer* Player = (CPlayer*)Furnace->_SelectedObject;
+										CPlayer* Player = (CPlayer*)CraftingTable->_SelectedObject;
 										CMessage* ResCraftingstartPacket = G_ObjectManager->GameServer->MakePacketResCraftingStart(
 											_GameObjectInfo.ObjectId,
 											CraftingCompleteItem->_ItemInfo);
 										G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCraftingstartPacket);
 										
 										// 용광로 제작 상태 진입
-										Furnace->CraftingStart();
+										CraftingTable->CraftingStart();
 									}
 									else
 									{
@@ -732,7 +733,7 @@ void CGameObject::Update()
 								}
 							}							
 						}
-						break;
+						break;					
 					}
 				}				
 				else
