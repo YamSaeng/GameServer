@@ -548,6 +548,8 @@ bool CMap::CollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool
 	case en_TileMapEnvironment::TILE_MAP_STONE:
 	case en_TileMapEnvironment::TILE_MAP_SLIME:
 	case en_TileMapEnvironment::TILE_MAP_BEAR:	
+	case en_TileMapEnvironment::TILE_MAP_FURNACE:
+	case en_TileMapEnvironment::TILE_MAP_SAMILL:
 		IsCollisionMapInfo = true;
 		break;
 	case en_TileMapEnvironment::TILE_MAP_WALL:
@@ -616,8 +618,20 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 		// 목적지 위치 구해주고
 		X = DestPosition._X - _Left;
 		Y = _Down - DestPosition._Y;
+
 		// 목적지에 넣어준다.
 		_ObjectsInfos[Y][X] = GameObject;
+
+		int16 Width = GameObject->_GameObjectInfo.ObjectWidth;
+		int16 Height = GameObject->_GameObjectInfo.ObjectHeight;
+
+		for (int16 WidthX = 0; WidthX < Width; WidthX++)
+		{
+			for (int16 HeightY = 0; HeightY < Height; HeightY++)
+			{
+				_ObjectsInfos[Y + HeightY][X + WidthX] = GameObject;
+			}
+		}
 	}
 
 	// 섹터 작업
@@ -676,7 +690,8 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 			}
 		}
 		break;
-	case en_GameObjectType::OBJECT_FURNACE:
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 		{
 			CCraftingTable* MoveCraftingTable = (CCraftingTable*)GameObject;
 
@@ -792,10 +807,19 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 	int X = PositionInfo.CollisionPosition._X - _Left;
 	int Y = _Down - PositionInfo.CollisionPosition._Y;
 
+	int Width = GameObject->_GameObjectInfo.ObjectWidth;
+	int Height = GameObject->_GameObjectInfo.ObjectHeight;
+
 	// 맵에서 제거
 	if (_ObjectsInfos[Y][X] == GameObject)
 	{
-		_ObjectsInfos[Y][X] = nullptr;
+		for (int16 WidthX = 0; WidthX < Width; WidthX++)
+		{
+			for (int16 HeightY = 0; HeightY < Height; HeightY++)
+			{
+				_ObjectsInfos[Y][X] = nullptr;
+			}
+		}		
 	}
 	else
 	{
