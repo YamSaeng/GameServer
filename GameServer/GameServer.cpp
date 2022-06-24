@@ -195,10 +195,7 @@ unsigned __stdcall CGameServer::WorldDataBaseThreadProc(void* Argument)
 			}
 
 			switch (Job->Type)
-			{
-			case en_GameServerJobType::DATA_BASE_ITEM_CREATE:
-				Instance->PacketProcReqDBItemCreate(Job->Message);
-				break;
+			{	
 			default:
 				break;
 			}
@@ -5048,270 +5045,6 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 	ReturnSession(Session);
 }
 
-void CGameServer::PacketProcReqDBItemCreate(CMessage* Message)
-{
-	int64 KillerId;
-	*Message >> KillerId;
-
-	int16 KillerObjectType;
-	*Message >> KillerObjectType;
-
-	int32 SpawnPositionX;
-	*Message >> SpawnPositionX;
-
-	int32 SpawnPositionY;
-	*Message >> SpawnPositionY;
-
-	int16 SpawnItemOwnerType;
-	*Message >> SpawnItemOwnerType;
-
-	int32 DropItemDataType;
-	*Message >> DropItemDataType;
-
-	bool Find = false;
-	st_ItemData DropItemData;
-
-	random_device RD;
-	mt19937 Gen(RD());
-	uniform_real_distribution<float> RandomDropPoint(0, 1); // 0.0 ~ 1.0	
-	float RandomPoint = 100 * RandomDropPoint(Gen);
-
-	int32 Sum = 0;
-
-	switch ((en_GameObjectType)SpawnItemOwnerType)
-	{
-	case en_GameObjectType::OBJECT_SLIME:
-	case en_GameObjectType::OBJECT_BEAR:
-	{
-		auto FindMonsterDropItem = G_Datamanager->_Monsters.find(DropItemDataType);
-		st_MonsterData MonsterData = *(*FindMonsterDropItem).second;
-
-		for (st_DropData DropItem : MonsterData.DropItems)
-		{
-			Sum += DropItem.Probability;
-
-			if (Sum >= RandomPoint)
-			{
-				Find = true;
-				// 드랍 확정 되면 해당 아이템 읽어오기
-				auto FindDropItemInfo = G_Datamanager->_Items.find((int16)DropItem.DropItemSmallCategory);
-				if (FindDropItemInfo == G_Datamanager->_Items.end())
-				{
-					CRASH("DropItemInfo를 찾지 못함");
-				}
-
-				DropItemData = *(*FindDropItemInfo).second;
-
-				uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
-				DropItemData.ItemCount = RandomDropItemCount(Gen);
-				DropItemData.SmallItemCategory = DropItem.DropItemSmallCategory;
-				break;
-			}
-		}
-	}
-	break;
-	case en_GameObjectType::OBJECT_STONE:
-	case en_GameObjectType::OBJECT_TREE:
-	{
-		auto FindEnvironmentDropItem = G_Datamanager->_Environments.find(DropItemDataType);
-		st_EnvironmentData EnvironmentData = *(*FindEnvironmentDropItem).second;
-
-		for (st_DropData DropItem : EnvironmentData.DropItems)
-		{
-			Sum += DropItem.Probability;
-
-			if (Sum >= RandomPoint)
-			{
-				Find = true;
-				// 드랍 확정 되면 해당 아이템 읽어오기
-				auto FindDropItemInfo = G_Datamanager->_Items.find((int16)DropItem.DropItemSmallCategory);
-				if (FindDropItemInfo == G_Datamanager->_Items.end())
-				{
-					CRASH("DropItemInfo를 찾지 못함");
-				}
-
-				DropItemData = *(*FindDropItemInfo).second;
-
-				uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
-				DropItemData.ItemCount = RandomDropItemCount(Gen);
-				DropItemData.SmallItemCategory = DropItem.DropItemSmallCategory;
-				break;
-			}
-		}
-	}
-	break;
-	}
-
-	if (Find == true)
-	{
-		bool ItemIsQuickSlotUse = false;
-		bool ItemRotated = false;
-		int16 ItemWidth = 0;
-		int16 ItemHeight = 0;
-		int8 ItemLargeCategory = 0;
-		int8 ItemMediumCategory = 0;
-		int16 ItemSmallCategory = 0;
-		wstring ItemName;
-		int16 ItemCount = 0;
-		wstring ItemThumbnailImagePath;
-		bool ItemEquipped = false;
-		int16 ItemTilePositionX = 0;
-		int16 ItemTilePositionY = 0;
-		int32 ItemMinDamage = 0;
-		int32 ItemMaxDamage = 0;
-		int32 ItemDefence = 0;
-		int32 ItemMaxCount = 0;
-
-		switch (DropItemData.SmallItemCategory)
-		{
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:
-		{
-			ItemIsQuickSlotUse = false;
-			ItemLargeCategory = (int8)DropItemData.LargeItemCategory;
-			ItemMediumCategory = (int8)DropItemData.MediumItemCategory;
-			ItemSmallCategory = (int16)DropItemData.SmallItemCategory;
-			ItemName = (LPWSTR)CA2W(DropItemData.ItemName.c_str());
-			ItemCount = DropItemData.ItemCount;
-			ItemEquipped = false;
-			ItemThumbnailImagePath = (LPWSTR)CA2W(DropItemData.ItemThumbnailImagePath.c_str());
-
-			st_ItemData* WeaponItemData = (*G_Datamanager->_Items.find((int16)DropItemData.SmallItemCategory)).second;
-			ItemWidth = WeaponItemData->ItemWidth;
-			ItemHeight = WeaponItemData->ItemHeight;
-			ItemMinDamage = WeaponItemData->ItemMinDamage;
-			ItemMaxDamage = WeaponItemData->ItemMaxDamage;
-		}
-		break;
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:
-		{
-			ItemIsQuickSlotUse = false;
-			ItemLargeCategory = (int8)DropItemData.LargeItemCategory;
-			ItemMediumCategory = (int8)DropItemData.MediumItemCategory;
-			ItemSmallCategory = (int16)DropItemData.SmallItemCategory;
-			ItemName = (LPWSTR)CA2W(DropItemData.ItemName.c_str());
-			ItemCount = DropItemData.ItemCount;
-			ItemEquipped = false;
-			ItemThumbnailImagePath = (LPWSTR)CA2W(DropItemData.ItemThumbnailImagePath.c_str());
-
-			st_ItemData* ArmorItemData = (*G_Datamanager->_Items.find((int16)DropItemData.SmallItemCategory)).second;
-			ItemWidth = ArmorItemData->ItemWidth;
-			ItemHeight = ArmorItemData->ItemHeight;
-			ItemDefence = ArmorItemData->ItemDefence;
-		}
-		break;
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL:
-			break;
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK:
-			break;
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
-		{
-			ItemIsQuickSlotUse = false;
-			ItemLargeCategory = (int8)DropItemData.LargeItemCategory;
-			ItemMediumCategory = (int8)DropItemData.MediumItemCategory;
-			ItemSmallCategory = (int16)DropItemData.SmallItemCategory;
-			ItemName = (LPWSTR)CA2W(DropItemData.ItemName.c_str());
-			ItemCount = DropItemData.ItemCount;
-			ItemEquipped = false;
-			ItemThumbnailImagePath = (LPWSTR)CA2W(DropItemData.ItemThumbnailImagePath.c_str());
-
-			st_ItemData* MaterialItemData = (*G_Datamanager->_Items.find((int16)DropItemData.SmallItemCategory)).second;
-			ItemWidth = MaterialItemData->ItemWidth;
-			ItemHeight = MaterialItemData->ItemHeight;
-			ItemMaxCount = MaterialItemData->ItemMaxCount;
-		}
-		break;
-		}
-
-		int64 ItemDBId = 0;
-
-		// 아이템 DB에 생성
-		CDBConnection* DBCreateItemConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-		SP::CDBGameServerCreateItem CreateItem(*DBCreateItemConnection);
-
-		bool ItemUse = false;
-
-		CreateItem.InItemUse(ItemUse);
-		CreateItem.InIsQuickSlotUse(ItemIsQuickSlotUse);
-		CreateItem.InItemRotated(ItemRotated);
-		CreateItem.InItemWidth(ItemWidth);
-		CreateItem.InItemHeight(ItemHeight);
-		CreateItem.InItemLargeCategory(ItemLargeCategory);
-		CreateItem.InItemMediumCategory(ItemMediumCategory);
-		CreateItem.InItemSmallCategory(ItemSmallCategory);
-		CreateItem.InItemName(ItemName);
-		CreateItem.InItemMinDamage(ItemMinDamage);
-		CreateItem.InItemMaxDamage(ItemMaxDamage);
-		CreateItem.InItemDefence(ItemDefence);
-		CreateItem.InItemMaxCount(ItemMaxCount);
-		CreateItem.InItemCount(ItemCount);
-		CreateItem.InIsEquipped(ItemEquipped);
-		CreateItem.InThumbnailImagePath(ItemThumbnailImagePath);
-
-		bool CreateItemSuccess = CreateItem.Execute();
-
-		if (CreateItemSuccess == true)
-		{
-			G_DBConnectionPool->Push(en_DBConnect::GAME, DBCreateItemConnection);
-
-			CDBConnection* DBItemDBIdGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-			SP::CDBGameServerItemDBIdGet ItemDBIdGet(*DBItemDBIdGetConnection);
-			ItemDBIdGet.OutItemDBId(ItemDBId);
-
-			bool ItemDBIdGetSuccess = ItemDBIdGet.Execute();
-
-			if (ItemDBIdGetSuccess == true)
-			{
-				ItemDBIdGet.Fetch();
-
-				G_DBConnectionPool->Push(en_DBConnect::GAME, DBItemDBIdGetConnection);
-
-				G_Logger->WriteStdOut(en_Color::RED, L"ItemDBId %d\n", ItemDBId);
-
-				// 아이템이 스폰 될 위치 지정
-				st_Vector2Int SpawnPosition(SpawnPositionX, SpawnPositionY);
-
-				// 아이템 정보 셋팅
-				st_ItemInfo NewItemInfo;
-				NewItemInfo.ItemDBId = ItemDBId;
-				NewItemInfo.ItemIsQuickSlotUse = ItemIsQuickSlotUse;
-				NewItemInfo.Width = ItemWidth;
-				NewItemInfo.Height = ItemHeight;
-				NewItemInfo.TileGridPositionX = ItemTilePositionX;
-				NewItemInfo.TileGridPositionY = ItemTilePositionY;
-				NewItemInfo.ItemLargeCategory = (en_LargeItemCategory)ItemLargeCategory;
-				NewItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemMediumCategory;
-				NewItemInfo.ItemSmallCategory = (en_SmallItemCategory)ItemSmallCategory;
-				NewItemInfo.ItemName = ItemName;
-				NewItemInfo.ItemMaxCount = ItemMaxCount;
-				NewItemInfo.ItemCount = ItemCount;
-				NewItemInfo.ItemThumbnailImagePath = ItemThumbnailImagePath;
-				NewItemInfo.ItemIsEquipped = ItemEquipped;
-
-				// 아이템 생성
-				CItem* NewItem = NewItemCrate(NewItemInfo);
-				NewItem->_GameObjectInfo.ObjectType = DropItemData.ItemObjectType;
-				NewItem->_GameObjectInfo.ObjectId = ItemDBId;
-				NewItem->_GameObjectInfo.OwnerObjectId = KillerId;
-				NewItem->_GameObjectInfo.OwnerObjectType = (en_GameObjectType)KillerObjectType;
-				NewItem->_SpawnPosition = SpawnPosition;
-
-				// 아이템 월드에 스폰
-				G_ObjectManager->ObjectEnterGame(NewItem, 1);
-			}
-		}
-	}
-}
-
 void CGameServer::PacketProcReqDBCraftingItemToInventorySave(CGameServerMessage* Message)
 {
 	int64 SessionID;
@@ -5533,10 +5266,18 @@ void CGameServer::PacketProcReqDBItemUpdate(CGameServerMessage* Message)
 		break;
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN:
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE:
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG:
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT:
 		{
 			/*wstring ErrorDistance;
 
@@ -6176,7 +5917,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 						NewArmorItem->_ItemInfo.ItemIsEquipped = IsEquipped;
 						NewArmorItem->_ItemInfo.ItemDefence = ItemDefence;
 					}
-					break;
+					break;					
 					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL:
 						break;
 					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:
@@ -6188,6 +5929,11 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG:
 					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
 					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
+					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL:
+					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET:
+					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT:
+					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET:
+					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT:
 					{
 						CMaterial* NewMaterialItem = (CMaterial*)NewItem;
 
