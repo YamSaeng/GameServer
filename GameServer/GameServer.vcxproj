@@ -201,6 +201,7 @@
     <ClInclude Include="rapidxml_print.hpp" />
     <ClInclude Include="rapidxml_utils.hpp" />
     <ClInclude Include="RingBuffer.h" />
+    <ClInclude Include="Sawmill.h" />
     <ClInclude Include="Sector.h" />
     <ClInclude Include="SessionInfo.h" />
     <ClInclude Include="Skill.h" />
@@ -308,6 +309,7 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="QuickSlotBar.cpp" />
     <ClCompile Include="QuickSlotManager.cpp" />
+    <ClCompile Include="Sawmill.cpp" />
     <ClCompile Include="Sector.cpp" />
     <ClCompile Include="Skill.cpp" />
     <ClCompile Include="SkillBox.cpp" />
@@ -350,7 +352,7 @@
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties />
+      <UserProperties ItemData_1json__JsonSchema="https://github.com/fbecart/zinoma/releases/latest/download/zinoma-schema.json" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

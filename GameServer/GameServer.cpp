@@ -13,6 +13,7 @@
 #include "MapManager.h"
 #include "QuickSlotBar.h"
 #include "Furnace.h"
+#include "Sawmill.h"
 #include <WS2tcpip.h>
 #include <process.h>
 #include <atlbase.h>
@@ -2820,26 +2821,26 @@ void CGameServer::PacketProcReqLeftMouseUIObjectInfo(int64 SessionID, CMessage* 
 			switch ((en_UIObjectInfo)UIObjectInfo)
 			{
 			case en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_FURNACE:
+			case en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_SAWMILL:
 				{
 					CMap* Map = G_MapManager->GetMap(1);
 					CChannel* Channel = Map->GetChannelManager()->Find(1);
 
-					CGameObject* CraftingTable = Channel->FindChannelObject(OwnerObjectID, (en_GameObjectType)OwnerObjectType);
-					if (CraftingTable != nullptr)
-					{
-						CFurnace* Furnace = (CFurnace*)CraftingTable;
+					CGameObject* CraftingTableGO = Channel->FindChannelObject(OwnerObjectID, en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE);
+					if (CraftingTableGO != nullptr)
+					{						
+						CCraftingTable* CraftingTable = (CCraftingTable*)CraftingTableGO;
 
-						Furnace->_SelectCraftingItemType = (en_SmallItemCategory)LeftMouseItemCategory;
-
-						// 클라에게 용광로에서 선택된 아이템이 위 아이템이라고 추가적으로 알려줘야함
-						CMessage* ResCraftingTableCompleteItemSelectPacket = MakePacketResCraftingTableCompleteItemSelect(CraftingTable->_GameObjectInfo.ObjectId,
-							Furnace->_SelectCraftingItemType,
-							Furnace->GetMaterialItems());
+						CraftingTable->_SelectCraftingItemType = (en_SmallItemCategory)LeftMouseItemCategory;
+						
+						CMessage* ResCraftingTableCompleteItemSelectPacket = MakePacketResCraftingTableCompleteItemSelect(CraftingTableGO->_GameObjectInfo.ObjectId,
+							CraftingTable->_SelectCraftingItemType,
+							CraftingTable->GetMaterialItems());
 						SendPacket(Session->SessionId, ResCraftingTableCompleteItemSelectPacket);
 						ResCraftingTableCompleteItemSelectPacket->Free();						
 					}					
 				}				
-				break;			
+				break;		
 			}
 		}
 	} while (0);
@@ -2900,48 +2901,51 @@ void CGameServer::PacketProcReqRightMouseObjectInfo(int64 SessionId, CMessage* M
 			CGameObject* FindObject = MyPlayer->GetChannel()->FindChannelObject(ObjectId, (en_GameObjectType)ObjectType);
 			if (FindObject != nullptr)
 			{
+				CMap* Map = G_MapManager->GetMap(1);
+				CChannel* Channel = Map->GetChannelManager()->Find(1);
+
 				switch (FindObject->_GameObjectInfo.ObjectType)
 				{
-				case en_GameObjectType::OBJECT_FURNACE:
-					CFurnace* Furnace = (CFurnace*)FindObject;
-
-					// 사용중이 아님
-					if (Furnace->_SelectedCraftingTable == false)
+				case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+				case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 					{
-						// 요청한 플레이어가 전에 선택중이었던 용광로가 잇는지 확인
-						CMap* Map = G_MapManager->GetMap(1);
-						CChannel* Channel = Map->GetChannelManager()->Find(1);	
+						CCraftingTable* CraftingTable = (CCraftingTable*)FindObject;						
 
-						vector<CGameObject*> FindObjects = Channel->FindChannelObjects(FindObject->_GameObjectInfo.ObjectType);
-						for (CGameObject* FindObject : FindObjects)
+						// 사용중이 아님
+						if (CraftingTable->_SelectedCraftingTable == false)
 						{
-							CFurnace* FindFurnace = (CFurnace*)FindObject;
-
-							// 선택중이었던 용광로가 있으면
-							if (FindFurnace->_SelectedObject != nullptr)
+							// 요청한 플레이어가 전에 선택중이었던 제작대가 있는지 확인				
+							vector<CGameObject*> ChannelFindObjects = Channel->FindChannelObjects(en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE);
+							for (CGameObject* ChannelFindObject : ChannelFindObjects)
 							{
-								// 선택중인 용광로 선택해제
-								st_GameObjectJob* CraftingTableNonSelectJob = MakeGameObjectJobCraftingTableNonSelect(FindObject);
-								FindObject->_GameObjectJobQue.Enqueue(CraftingTableNonSelectJob);
-							}
-						}
+								CCraftingTable* FindCraftingTable = (CCraftingTable*)ChannelFindObject;
 
-						st_GameObjectJob* CraftingTableSelectJob = MakeGameObjectJobCraftingTableSelect(FindObject, MyPlayer);
-						FindObject->_GameObjectJobQue.Enqueue(CraftingTableSelectJob);						
-						
-						CMessage* ResRightMousePositionObjectInfoPacket = MakePacketResRightMousePositionObjectInfo(MyPlayer->_GameObjectInfo.ObjectId,
-							FindObject->_GameObjectInfo.ObjectId, FindObject->_GameObjectInfo.ObjectType);
-						SendPacket(Session->SessionId, ResRightMousePositionObjectInfoPacket);
-						ResRightMousePositionObjectInfoPacket->Free();
-					}
-					else
-					{
-						// 사용중임
-						CMessage* CommonErrorPacket = MakePacketCommonError(en_PersonalMessageType::PERSONAL_MEESAGE_CRAFTING_TABLE_OVERLAP_SELECT, FindObject->_GameObjectInfo.ObjectName.c_str());
-						SendPacket(Session->SessionId, CommonErrorPacket);
-						CommonErrorPacket->Free();
-					}											
-					break;
+								// 선택중이었던 용광로가 있으면
+								if (FindCraftingTable->_SelectedObject != nullptr)
+								{
+									// 선택중인 용광로 선택해제
+									st_GameObjectJob* CraftingTableNonSelectJob = MakeGameObjectJobCraftingTableNonSelect(ChannelFindObject);
+									ChannelFindObject->_GameObjectJobQue.Enqueue(CraftingTableNonSelectJob);
+								}
+							}
+
+							st_GameObjectJob* CraftingTableSelectJob = MakeGameObjectJobCraftingTableSelect(FindObject, MyPlayer);
+							FindObject->_GameObjectJobQue.Enqueue(CraftingTableSelectJob);
+
+							CMessage* ResRightMousePositionObjectInfoPacket = MakePacketResRightMousePositionObjectInfo(MyPlayer->_GameObjectInfo.ObjectId,
+								FindObject->_GameObjectInfo.ObjectId, FindObject->_GameObjectInfo.ObjectType);
+							SendPacket(Session->SessionId, ResRightMousePositionObjectInfoPacket);
+							ResRightMousePositionObjectInfoPacket->Free();
+						}
+						else
+						{
+							// 사용중임
+							CMessage* CommonErrorPacket = MakePacketCommonError(en_PersonalMessageType::PERSONAL_MEESAGE_CRAFTING_TABLE_OVERLAP_SELECT, FindObject->_GameObjectInfo.ObjectName.c_str());
+							SendPacket(Session->SessionId, CommonErrorPacket);
+							CommonErrorPacket->Free();
+						}
+					}					
+					break;				
 				}
 			}
 		}
@@ -3000,29 +3004,32 @@ void CGameServer::PacketProcReqCraftingTableNonSelect(int64 SessionID, CMessage*
 			int16 CraftingTableObjectType;
 			*Message >> CraftingTableObjectType;
 
-			CGameObject* FindObject = MyPlayer->GetChannel()->FindChannelObject(CraftingTableObjectID, (en_GameObjectType)CraftingTableObjectType);
+			CGameObject* FindObject = MyPlayer->GetChannel()->FindChannelObject(CraftingTableObjectID, en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE);
 			if (FindObject != nullptr)
 			{
 				switch (FindObject->_GameObjectInfo.ObjectType)
 				{
-				case en_GameObjectType::OBJECT_FURNACE:
-					CFurnace* Furnace = (CFurnace*)FindObject;
+				case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+				case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:					
+					{					
+						CCraftingTable* CraftingTable = (CCraftingTable*)FindObject;
 
-					if (Furnace->_SelectedCraftingTable == true)
-					{
-						st_GameObjectJob* CraftingTableSelectJob = MakeGameObjectJobCraftingTableNonSelect(FindObject);
-						FindObject->_GameObjectJobQue.Enqueue(CraftingTableSelectJob);						
+						if (CraftingTable->_SelectedCraftingTable == true)
+						{
+							st_GameObjectJob* CraftingTableSelectJob = MakeGameObjectJobCraftingTableNonSelect(FindObject);
+							FindObject->_GameObjectJobQue.Enqueue(CraftingTableSelectJob);
 
-						CMessage* ResCraftingTableNonSelectMessage = MakePacketResCraftingTableNonSelect(Furnace->_GameObjectInfo.ObjectId, Furnace->_GameObjectInfo.ObjectType);
-						SendPacket(Session->SessionId, ResCraftingTableNonSelectMessage);
-						ResCraftingTableNonSelectMessage->Free();
-					}
-					else
-					{
-						// 선택한 용광로 UI에서 다른 용광로 UI를 켤 경우 이전 용광로 UI는 닫는 작업이 필요함
-						CRASH("선택되어 있지 않은 대상을 선택 풀려고 함");
-					}
-					break;
+							CMessage* ResCraftingTableNonSelectMessage = MakePacketResCraftingTableNonSelect(CraftingTable->_GameObjectInfo.ObjectId, CraftingTable->_GameObjectInfo.ObjectType);
+							SendPacket(Session->SessionId, ResCraftingTableNonSelectMessage);
+							ResCraftingTableNonSelectMessage->Free();
+						}
+						else
+						{
+							// 선택한 용광로 UI에서 다른 용광로 UI를 켤 경우 이전 용광로 UI는 닫는 작업이 필요함
+							CRASH("선택되어 있지 않은 대상을 선택 풀려고 함");
+						}
+					}					
+					break;			
 				}
 			}
 		}
@@ -3714,11 +3721,11 @@ void CGameServer::PacketProcReqCraftingConfirm(int64 SessionId, CMessage* Messag
 
 			// 완성템 제작에 필요한 재료 목록 찾기
 			vector<st_CraftingMaterialItemInfo> RequireMaterialDatas;
-			for (st_CraftingCompleteItem CraftingCompleteItemData : FindCraftingCategoryData->CompleteItems)
+			for (CItem* CraftingCompleteItem : FindCraftingCategoryData->CommonCraftingCompleteItems)
 			{
-				if (CraftingCompleteItemData.CompleteItemType == (en_SmallItemCategory)ReqCraftingItemType)
+				if (CraftingCompleteItem->_ItemInfo.ItemSmallCategory == (en_SmallItemCategory)ReqCraftingItemType)
 				{
-					RequireMaterialDatas = CraftingCompleteItemData.Materials;
+					RequireMaterialDatas = CraftingCompleteItem->_ItemInfo.Materials;
 				}
 			}
 
@@ -4215,7 +4222,7 @@ void CGameServer::PacketProcReqCraftingTableItemAdd(int64 SessionID, CMessage* M
 			CChannel* Channel = Map->GetChannelManager()->Find(1);
 
 			// 제작대 찾음
-			CGameObject* CraftingTable = Channel->FindChannelObject(CraftingTableObjectID, en_GameObjectType::OBJECT_CRAFTING_TABLE);
+			CGameObject* CraftingTable = Channel->FindChannelObject(CraftingTableObjectID, en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE);
 			if (CraftingTable != nullptr)
 			{	
 				st_GameObjectJob* CraftingTableItemAddJob = MakeGameObjectJobCraftingTableItemAdd(MyPlayer, InputItemSmallCategory, InputItemCount);
@@ -4288,7 +4295,7 @@ void CGameServer::PacketProcReqCraftingTableMaterialItemSubtract(int64 SessionID
 			CMap* Map = G_MapManager->GetMap(1);
 			CChannel* Channel = Map->GetChannelManager()->Find(1);
 
-			CGameObject* CraftingTable = Channel->FindChannelObject(OwnerCraftingTableObjectID, en_GameObjectType::OBJECT_CRAFTING_TABLE);
+			CGameObject* CraftingTable = Channel->FindChannelObject(OwnerCraftingTableObjectID, en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE);
 			if (CraftingTable != nullptr)
 			{
 				st_GameObjectJob* CraftingTableItemSubtractJob = MakeGameObjectJobCraftingTableMaterialItemSubtract(MyPlayer, SubtractItemSmallCategory, SubtractItemCount);
@@ -4361,7 +4368,7 @@ void CGameServer::PacketProcReqCraftingTableCompleteItemSubtract(int64 SessionID
 			CMap* Map = G_MapManager->GetMap(1);
 			CChannel* Channel = Map->GetChannelManager()->Find(1);
 
-			CGameObject* CraftingTable = Channel->FindChannelObject(OwnerCraftingTableObjectID, en_GameObjectType::OBJECT_CRAFTING_TABLE);
+			CGameObject* CraftingTable = Channel->FindChannelObject(OwnerCraftingTableObjectID, en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE);
 			if (CraftingTable != nullptr)
 			{
 				st_GameObjectJob* CraftingTableItemSubtractJob = MakeGameObjectJobCraftingTableCompleteItemSubtract(MyPlayer, SubtractItemSmallCategory, SubtractItemCount);
@@ -4432,12 +4439,13 @@ void CGameServer::PacketProcReqCraftingTableCraftingStart(int64 SessionID, CMess
 			CMap* Map = G_MapManager->GetMap(1);
 			CChannel* Channel = Map->GetChannelManager()->Find(1);
 
-			CGameObject* CraftingTable = Channel->FindChannelObject(CraftingTableObjectID, en_GameObjectType::OBJECT_CRAFTING_TABLE);
+			CGameObject* CraftingTable = Channel->FindChannelObject(CraftingTableObjectID, en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE);
 			if (CraftingTable != nullptr)
 			{
 				switch (CraftingTable->_GameObjectInfo.ObjectType)
 				{
-				case en_GameObjectType::OBJECT_FURNACE:
+				case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+				case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 					{
 						st_GameObjectJob* CraftingTableCraftStratJob = MakeGameObjectJobCraftingTableStart(MyPlayer, (en_SmallItemCategory)CraftingCompleteItemType, CraftingCount);
 						CraftingTable->_GameObjectJobQue.Enqueue(CraftingTableCraftStratJob);
@@ -4504,12 +4512,13 @@ void CGameServer::PacketProcReqCraftingTableCraftingStop(int64 SessionID, CMessa
 			CMap* Map = G_MapManager->GetMap(1);
 			CChannel* Channel = Map->GetChannelManager()->Find(1);
 
-			CGameObject* CraftingTable = Channel->FindChannelObject(CraftingTableObjectID, en_GameObjectType::OBJECT_CRAFTING_TABLE);
+			CGameObject* CraftingTable = Channel->FindChannelObject(CraftingTableObjectID, en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE);
 			if (CraftingTable != nullptr)
 			{
 				switch (CraftingTable->_GameObjectInfo.ObjectType)
 				{
-				case en_GameObjectType::OBJECT_FURNACE:
+				case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+				case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 					{
 						st_GameObjectJob* CraftingTableCraftStratJob = MakeGameObjectJobCraftingTableCancel(MyPlayer);
 						CraftingTable->_GameObjectJobQue.Enqueue(CraftingTableCraftStratJob);					
@@ -5541,6 +5550,9 @@ void CGameServer::PacketProcReqDBItemUpdate(CGameServerMessage* Message)
 			ResErrorPacket->Free();*/
 		}
 		break;
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL:
+			break;
 		default:
 			CRASH("요청한 사용 아이템 타입이 올바르지 않음");
 			break;
@@ -6198,6 +6210,30 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 						NewMaterialItem->_ItemInfo.ItemMaxCount = ItemMaxCount;
 					}
 					break;
+					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE:
+					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL:
+						{
+							CArchitecture* NewMaterialItem = (CArchitecture*)NewItem;
+
+							st_ItemData* ItemData = G_Datamanager->FindItemData((en_SmallItemCategory)ItemSmallCategory);
+
+							NewMaterialItem->_ItemInfo.ItemDBId = 0;
+							NewMaterialItem->_ItemInfo.Rotated = ItemRotated;
+							NewMaterialItem->_ItemInfo.Width = ItemWidth;
+							NewMaterialItem->_ItemInfo.Height = ItemHeight;
+							NewMaterialItem->_ItemInfo.ItemLargeCategory = (en_LargeItemCategory)ItemLargeCategory;
+							NewMaterialItem->_ItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemMediumCategory;
+							NewMaterialItem->_ItemInfo.ItemSmallCategory = (en_SmallItemCategory)ItemSmallCategory;
+							NewMaterialItem->_ItemInfo.ItemName = ItemName;
+							NewMaterialItem->_ItemInfo.ItemExplain = (LPWSTR)CA2W(ItemData->ItemExplain.c_str());
+							NewMaterialItem->_ItemInfo.ItemCount = ItemCount;
+							NewMaterialItem->_ItemInfo.TileGridPositionX = ItemTilePositionX;
+							NewMaterialItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;
+							NewMaterialItem->_ItemInfo.ItemThumbnailImagePath = ItemThumbnailImagePath;
+							NewMaterialItem->_ItemInfo.ItemIsEquipped = IsEquipped;
+							NewMaterialItem->_ItemInfo.ItemMaxCount = ItemMaxCount;
+						}
+						break;
 					}
 
 					MyPlayer->_InventoryManager.DBItemInsertItem(0, NewItem);
@@ -6254,65 +6290,42 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 #pragma endregion	
 
 #pragma region 조합템 정보 보내기			
-			//vector<st_CraftingItemCategory> CraftingItemCategorys;
+			vector<st_CraftingItemCategory> CraftingItemCategorys;
 
-			//for (int8 Category = (int8)en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON; Category <= (int8)en_LargeItemCategory::ITEM_LARGE_CATEGORY_MATERIAL; ++Category)
-			//{
-			//	auto FindCraftingIterator = G_Datamanager->_CraftingData.find(Category);
-			//	if (FindCraftingIterator == G_Datamanager->_CraftingData.end())
-			//	{
-			//		continue;
-			//	}
+			for (int8 Category = (int8)en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARCHITECTURE;
+				Category <= (int8)en_LargeItemCategory::ITEM_LARGE_CATEGORY_MATERIAL; ++Category)
+			{
+				auto FindCraftingIterator = G_Datamanager->_CraftingData.find(Category);
+				if (FindCraftingIterator == G_Datamanager->_CraftingData.end())
+				{
+					continue;
+				}
 
-			//	st_CraftingItemCategoryData* CraftingData = (*FindCraftingIterator).second;
+				st_CraftingItemCategory* CraftingCategory = (*FindCraftingIterator).second;				
+				CraftingItemCategorys.push_back(*CraftingCategory);
+			}
 
-			//	// 제작템 카테고리 추출
-			//	st_CraftingItemCategory CraftingItemCategory;
-			//	CraftingItemCategory.CategoryType = CraftingData->CraftingType;
-			//	CraftingItemCategory.CategoryName = (LPWSTR)CA2W(CraftingData->CraftingTypeName.c_str());
+			*ResCharacterInfoMessage << (int8)CraftingItemCategorys.size();
 
-			//	// 제작템 카테고리에 속한 제작템 가져오기
-			//	for (st_CraftingCompleteItemData CraftingCompleteItemData : CraftingData->CraftingCompleteItems)
-			//	{
-			//		st_CraftingCompleteItem CraftingCompleteItem;
-			//		CraftingCompleteItem.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_COMMON;
-			//		CraftingCompleteItem.CompleteItemType = CraftingCompleteItemData.CraftingCompleteItemDataId;
-			//		CraftingCompleteItem.CompleteItemName = (LPWSTR)CA2W(CraftingCompleteItemData.CraftingCompleteName.c_str());
-			//		CraftingCompleteItem.CompleteItemImagePath = (LPWSTR)CA2W(CraftingCompleteItemData.CraftingCompleteThumbnailImagePath.c_str());
-
-			//		for (st_CraftingMaterialItemData CraftingMaterialItemData : CraftingCompleteItemData.CraftingMaterials)
-			//		{
-			//			st_CraftingMaterialItemInfo CraftingMaterialItem;						
-			//			CraftingMaterialItem.MaterialItemType = CraftingMaterialItemData.MaterialDataId;
-			//			CraftingMaterialItem.MaterialItemName = (LPWSTR)CA2W(CraftingMaterialItemData.MaterialName.c_str());
-			//			CraftingMaterialItem.ItemCount = CraftingMaterialItemData.MaterialCount;
-			//			CraftingMaterialItem.MaterialItemImagePath = (LPWSTR)CA2W(CraftingMaterialItemData.MaterialThumbnailImagePath.c_str());
-
-			//			CraftingCompleteItem.Materials.push_back(CraftingMaterialItem);
-			//		}
-
-			//		CraftingItemCategory.CompleteItems.push_back(CraftingCompleteItem);
-			//	}
-
-			//	CraftingItemCategorys.push_back(CraftingItemCategory);
-			//}
-
-			//*ResCharacterInfoMessage << (int8)CraftingItemCategorys.size();
-
-			//for (st_CraftingItemCategory CraftingItemCategory : CraftingItemCategorys)
-			//{
-			//	*ResCharacterInfoMessage << CraftingItemCategory;				
-			//}						
+			for (st_CraftingItemCategory CraftingItemCategory : CraftingItemCategorys)
+			{
+				*ResCharacterInfoMessage << CraftingItemCategory;				
+			}						
 #pragma endregion
 
 			G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterInfoGetConnection);
 
 #pragma region 제작대 조합템 정보 보내기
 			vector<st_CraftingTableRecipe*> CraftingTables;
-			auto FindFurnaceCraftingTable = G_Datamanager->_CraftingTableData.find((int16)en_GameObjectType::OBJECT_FURNACE);	
-			st_CraftingTableRecipe* FurnaceCraftingTable = (*FindFurnaceCraftingTable).second;
 
-			CraftingTables.push_back(FurnaceCraftingTable);			
+			for (int16 CraftingTableType = (int16)en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE;
+				CraftingTableType <= (int16)en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL; CraftingTableType++)
+			{
+				auto FindFurnaceCraftingTable = G_Datamanager->_CraftingTableData.find(CraftingTableType);
+				st_CraftingTableRecipe* FurnaceCraftingTable = (*FindFurnaceCraftingTable).second;
+
+				CraftingTables.push_back(FurnaceCraftingTable);
+			}			
 
 			*ResCharacterInfoMessage << (int8)CraftingTables.size();
 
@@ -7103,42 +7116,11 @@ CGameServerMessage* CGameServer::MakePacketCraftingList(int64 AccountId, int64 P
 		*ResCraftingListMessage << CraftingItemCategoryNameLen;
 		ResCraftingListMessage->InsertData(CraftingItemCategory.CategoryName.c_str(), CraftingItemCategoryNameLen);
 
-		*ResCraftingListMessage << (int8)CraftingItemCategory.CompleteItems.size();
+		*ResCraftingListMessage << (int8)CraftingItemCategory.CommonCraftingCompleteItems.size();
 
-		for (st_CraftingCompleteItem CraftingCompleteItem : CraftingItemCategory.CompleteItems)
+		for (CItem* CraftingCompleteItem : CraftingItemCategory.CommonCraftingCompleteItems)
 		{
-			*ResCraftingListMessage << (int16)CraftingCompleteItem.CompleteItemType;
-
-			// 제작 완성템 이름
-			int16 CraftingCompleteItemNameLen = (int16)(CraftingCompleteItem.CompleteItemName.length() * 2);
-			*ResCraftingListMessage << CraftingCompleteItemNameLen;
-			ResCraftingListMessage->InsertData(CraftingCompleteItem.CompleteItemName.c_str(), CraftingCompleteItemNameLen);
-
-			// 제작 완성템 이미지 경로
-			int16 CraftingCompleteItemImagePathLen = (int16)(CraftingCompleteItem.CompleteItemImagePath.length() * 2);
-			*ResCraftingListMessage << CraftingCompleteItemImagePathLen;
-			ResCraftingListMessage->InsertData(CraftingCompleteItem.CompleteItemImagePath.c_str(), CraftingCompleteItemImagePathLen);
-
-			*ResCraftingListMessage << (int8)CraftingCompleteItem.Materials.size();
-
-			for (st_CraftingMaterialItemInfo CraftingMaterialItem : CraftingCompleteItem.Materials)
-			{
-				*ResCraftingListMessage << AccountId;
-				*ResCraftingListMessage << PlayerId;
-				*ResCraftingListMessage << (int16)CraftingMaterialItem.MaterialItemType;
-
-				// 재료템 이름
-				int16 CraftingMaterialItemNameLen = (int16)(CraftingMaterialItem.MaterialItemName.length() * 2);
-				*ResCraftingListMessage << CraftingMaterialItemNameLen;
-				ResCraftingListMessage->InsertData(CraftingMaterialItem.MaterialItemName.c_str(), CraftingMaterialItemNameLen);
-
-				*ResCraftingListMessage << CraftingMaterialItem.ItemCount;
-
-				// 재료템 이미지 경로
-				int16 MaterialImagePathLen = (int16)(CraftingMaterialItem.MaterialItemImagePath.length() * 2);
-				*ResCraftingListMessage << MaterialImagePathLen;
-				ResCraftingListMessage->InsertData(CraftingMaterialItem.MaterialItemImagePath.c_str(), MaterialImagePathLen);
-			}
+			*ResCraftingListMessage << CraftingCompleteItem->_ItemInfo;			
 		}
 	}
 

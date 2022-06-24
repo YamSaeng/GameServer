@@ -260,6 +260,9 @@
     <ClInclude Include="CraftingTable.h">
       <Filter>ContentServer\Content\GameObject\CraftingTable</Filter>
     </ClInclude>
+    <ClInclude Include="Sawmill.h">
+      <Filter>ContentServer\Content\GameObject\CraftingTable</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -370,6 +373,9 @@
       <Filter>ContentServer\Content\GameObject\CraftingTable</Filter>
     </ClCompile>
     <ClCompile Include="CraftingTable.cpp">
+      <Filter>ContentServer\Content\GameObject\CraftingTable</Filter>
+    </ClCompile>
+    <ClCompile Include="Sawmill.cpp">
       <Filter>ContentServer\Content\GameObject\CraftingTable</Filter>
     </ClCompile>
   </ItemGroup>
