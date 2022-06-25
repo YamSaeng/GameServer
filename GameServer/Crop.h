@@ -1,11 +1,11 @@
 #pragma once
 #include "GameObject.h"
 
-class Crops : public CGameObject
+class CCrop : public CGameObject
 {
 public:
-	Crops();
-	~Crops();
+	CCrop();
+	~CCrop();
 
 	virtual void Update() override;
 
