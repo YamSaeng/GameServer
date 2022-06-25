@@ -6,6 +6,7 @@ class CMonster;
 class CItem;
 class CEnvironment;
 class CCraftingTable;
+class CCrop;
 
 class CSector
 {
@@ -16,6 +17,7 @@ private:
 	set<CItem*> _Items;
 	set<CEnvironment*> _Environment;	
 	set<CCraftingTable*> _CraftingTables;
+	set<CCrop*> _Crops;
 
 	SRWLOCK _SectorLock;
 public:
@@ -36,6 +38,7 @@ public:
 	set<CItem*> GetItems();
 	set<CEnvironment*> GetEnvironment();
 	set<CCraftingTable*> GetCraftingTable();
+	set<CCrop*> GetCrop();
 
 	void AcquireSectorLock();
 	void ReleaseSectorLock();

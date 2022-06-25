@@ -58,6 +58,9 @@ void CSector::Insert(CGameObject* InsertGameObject)
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 		_CraftingTables.insert((CCraftingTable*)InsertGameObject);
 		break;
+	case en_GameObjectType::OBJECT_CROP_POTATO:
+		_Crops.insert((CCrop*)InsertGameObject);
+		break;
 	default:
 		break;
 	}
@@ -110,6 +113,9 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 		_CraftingTables.erase((CCraftingTable*)RemoveGameObject);
 		break;
+	case en_GameObjectType::OBJECT_CROP_POTATO:
+		_Crops.erase((CCrop*)RemoveGameObject);
+		break;
 	}
 
 	ReleaseSRWLockExclusive(&_SectorLock);
@@ -138,6 +144,11 @@ set<CEnvironment*> CSector::GetEnvironment()
 set<CCraftingTable*> CSector::GetCraftingTable()
 {
 	return _CraftingTables;
+}
+
+set<CCrop*> CSector::GetCrop()
+{
+	return _Crops;
 }
 
 void CSector::AcquireSectorLock()
