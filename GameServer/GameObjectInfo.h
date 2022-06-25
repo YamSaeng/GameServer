@@ -30,6 +30,9 @@ enum class en_GameObjectType : int16
 	OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE,
 	OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL,	
 
+	OBJECT_CROP,
+	OBJECT_CROP_POTATO,
+
 	OBJECT_ITEM,
 	OBJECT_ITEM_WEAPON,
 	OBJECT_ITEM_WEAPON_WOOD_SWORD,
@@ -58,7 +61,9 @@ enum class en_GameObjectType : int16
 	OBJECT_ITEM_MATERIAL_COPPER_NUGGET,
 	OBJECT_ITEM_MATERIAL_COPPER_INGOT,
 	OBJECT_ITEM_MATERIAL_IRON_NUGGET,
-	OBJECT_ITEM_MATERIAL_IRON_INGOT,
+	OBJECT_ITEM_MATERIAL_IRON_INGOT,	
+
+	OBJECT_ITEM_CROPS_POTATO,
 
 	OBJECT_PLAYER_DUMMY = 32000
 };
@@ -382,7 +387,8 @@ enum class en_TileMapEnvironment : int8
 	TILE_MAP_SLIME,
 	TILE_MAP_BEAR,
 	TILE_MAP_FURNACE,
-	TILE_MAP_SAMILL
+	TILE_MAP_SAMILL,
+	TILE_MAP_POTATO	
 };
 
 enum class en_GameObjectJobType : int16
@@ -2107,6 +2113,7 @@ struct st_GameObjectInfo
 {
 	int64 ObjectId;
 	wstring ObjectName;
+	int8 ObjectStep;
 	st_PositionInfo ObjectPositionInfo;
 	st_StatInfo ObjectStatInfo;
 	en_GameObjectType ObjectType;
