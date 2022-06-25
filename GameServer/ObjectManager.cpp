@@ -400,6 +400,11 @@ CItem* CObjectManager::ItemCreate(en_SmallItemCategory NewItemSmallCategory)
 		break;
 	}
 
+	if (NewItem != nullptr)
+	{
+		NewItem->_GameObjectInfo.ObjectId = InterlockedIncrement64(&_GameServerObjectId);
+	}
+
 	return NewItem;
 }
 
@@ -558,7 +563,7 @@ void CObjectManager::MapObjectSpawn(int64& MapID)
 				NewPosition._Y = SpawnPositionY;
 				NewPosition._X = SpawnPositionX;
 
-				NewObject->_GameObjectInfo.ObjectId = _GameServerObjectId++;
+				NewObject->_GameObjectInfo.ObjectId = InterlockedIncrement64(&_GameServerObjectId);
 				NewObject->_SpawnPosition = NewPosition;
 				NewObject->_NetworkState = en_ObjectNetworkState::LIVE;
 
@@ -716,6 +721,11 @@ void CObjectManager::ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObj
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG:
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT:
 			{
 				ItemIsQuickSlotUse = false;
 				ItemLargeCategory = (int8)DropItemData.LargeItemCategory;
@@ -736,8 +746,8 @@ void CObjectManager::ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObj
 
 		// 아이템 생성
 		CItem* NewItem = ItemCreate((en_SmallItemCategory)ItemSmallCategory);
-
-		NewItem->_ItemInfo.ItemDBId = _GameServerObjectId++;		
+		
+		NewItem->_ItemInfo.ItemDBId = NewItem->_GameObjectInfo.ObjectId;
 		NewItem->_ItemInfo.ItemIsQuickSlotUse = ItemIsQuickSlotUse;
 		NewItem->_ItemInfo.Width = ItemWidth;
 		NewItem->_ItemInfo.Height = ItemHeight;
@@ -752,8 +762,7 @@ void CObjectManager::ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObj
 		NewItem->_ItemInfo.ItemThumbnailImagePath = ItemThumbnailImagePath;
 		NewItem->_ItemInfo.ItemIsEquipped = ItemEquipped;
 
-		NewItem->_GameObjectInfo.ObjectType = DropItemData.ItemObjectType;
-		NewItem->_GameObjectInfo.ObjectId = NewItem->_ItemInfo.ItemDBId;
+		NewItem->_GameObjectInfo.ObjectType = DropItemData.ItemObjectType;		
 		NewItem->_GameObjectInfo.OwnerObjectId = KillerId;
 		NewItem->_GameObjectInfo.OwnerObjectType = (en_GameObjectType)KillerObjectType;
 		NewItem->_SpawnPosition = SpawnPosition;
@@ -771,7 +780,7 @@ void CObjectManager::ObjectItemDropToSpawn(en_SmallItemCategory DropItemType, in
 		st_ItemData* ItemData = G_Datamanager->FindItemData(DropItemType);
 		if (ItemData != nullptr)
 		{
-			NewItem->_ItemInfo.ItemDBId = _GameServerObjectId++;
+			NewItem->_ItemInfo.ItemDBId = NewItem->_GameObjectInfo.ObjectId;
 			NewItem->_ItemInfo.ItemIsQuickSlotUse = false;
 			NewItem->_ItemInfo.Width = ItemData->ItemWidth;
 			NewItem->_ItemInfo.Height = ItemData->ItemHeight;
@@ -820,7 +829,7 @@ void CObjectManager::ObjectSpawn(en_GameObjectType ObjectType, st_Vector2Int Spa
 
 	if (SpawnGameObject != nullptr)
 	{
-		SpawnGameObject->_GameObjectInfo.ObjectId = _GameServerObjectId++;
+		SpawnGameObject->_GameObjectInfo.ObjectId = InterlockedIncrement64(&_GameServerObjectId);
 		SpawnGameObject->_SpawnPosition = SpawnPosition;
 		ObjectEnterGame(SpawnGameObject, 1);
 	}
