@@ -126,8 +126,20 @@
     <Column name="SkillMediumCategory" type="TinyInt"/>
     <Column name="SkillType" type="SmallInt"/>
     <Column name="SkillLevel" type="TinyInt"/>            
-  </Table> 
-  
+  </Table>  
+   
+  <!-- 농작물 테이블 -->
+	<Table name="Crop" desc="Crop Table">
+	 <Column name="OwnerAccountDBId" type="BigInt" notnull ="true"/>
+	 <Column name="OwnerPlayerDBId" type="BigInt" notnull ="true"/>
+	 <Column name="CropCategory" type="SmallInt" notnull ="true"/>
+	 <Column name="CropStep" type="TinyInt" notnull ="true"/>
+	 <Column name="CropCount" type="SmallInt" notnull="true"/>	
+	 <Column name="LastPositionY" type="int" notnull="true"/>
+	 <Column name="LastPositionX" type="int" notnull="true"/>
+	 <Column name="CropCreateTime" type="DateTime" notnull="true"/>
+	</Table>
+	
   <!-- AccountID를 기준으로 클라가 소유하고 있는 캐릭터를 찾는다. -->
   <Procedure name="spGetPlayers">
     <Param name="@AccountId" type="BigInt"/>
