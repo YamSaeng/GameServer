@@ -23,3 +23,12 @@ void CCrop::Update()
 		break;
 	}
 }
+
+void CCrop::CropStart(int8 CropStep)
+{
+}
+
+bool CCrop::OnDamaged(CGameObject* Attacker, int32 Damage)
+{
+	return CGameObject::OnDamaged(Attacker, Damage);	
+}
