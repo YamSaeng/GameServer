@@ -38,8 +38,6 @@ void CEnvironment::Update()
 
 bool CEnvironment::OnDamaged(CGameObject* Attacker, int32 Damage)
 {
-	_Owner = (CPlayer*)Attacker;
-
 	return CGameObject::OnDamaged(Attacker, Damage);	
 }
 
@@ -92,7 +90,7 @@ CStone::CStone()
 	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_STONE;
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
-	auto FindEnvironmentData = G_Datamanager->_Environments.find(en_ObjectDataType::STONE_DATA);
+	auto FindEnvironmentData = G_Datamanager->_Environments.find(en_GameObjectType::OBJECT_STONE);
 	st_EnvironmentData EnvironmentData = *(*FindEnvironmentData).second;
 
 	_GameObjectInfo.ObjectName = (LPWSTR)CA2W(EnvironmentData.EnvironmentName.c_str());
@@ -123,7 +121,7 @@ bool CStone::OnDamaged(CGameObject* Attacker, int32 Damage)
 			Attacker->_GameObjectInfo.ObjectType,
 			_GameObjectInfo.ObjectPositionInfo.CollisionPosition,
 			_GameObjectInfo.ObjectType,
-			en_ObjectDataType::STONE_DATA);
+			en_GameObjectType::OBJECT_STONE);
 	}
 
 	return IsDead;
@@ -138,7 +136,7 @@ CTree::CTree()
 	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_TREE;
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
-	auto FindEnvironmentData = G_Datamanager->_Environments.find(en_ObjectDataType::TREE_DATA);
+	auto FindEnvironmentData = G_Datamanager->_Environments.find(en_GameObjectType::OBJECT_TREE);
 	st_EnvironmentData EnvironmentData = *(*FindEnvironmentData).second;
 
 	_GameObjectInfo.ObjectName = (LPWSTR)CA2W(EnvironmentData.EnvironmentName.c_str());
@@ -176,7 +174,7 @@ bool CTree::OnDamaged(CGameObject* Attacker, int32 Damage)
 			Attacker->_GameObjectInfo.ObjectType,
 			_GameObjectInfo.ObjectPositionInfo.CollisionPosition,
 			_GameObjectInfo.ObjectType,
-			en_ObjectDataType::TREE_DATA);
+			en_GameObjectType::OBJECT_TREE);
 	}
 
 	return IsDead;
