@@ -7,41 +7,45 @@
 #include "Environment.h"
 
 class CItem;
-class CWeapon;
-class CArmor;
+class CWeaponItem;
+class CArmorItem;
 class CConsumable;
-class CMaterial;
+class CMaterialItem;
 class CSkill;
 class CFurnace;
 class CSawmill;
+class CPotato;
+class CCropItem;
 
 class CObjectManager
 {
 private:
 	enum en_ObjectCount
 	{
-		PLAYER_MAX = 15000,
-		MONSTER_MAX = 15000,
+		PLAYER_MAX = 15000,		
 		ITEM_MAX = 15000,
 		ENVIRONMENT_MAX = 15000,
 		CRAFTINGTABLE_MAX = 15000
-	};
+	};	
 
+	// 아이템 
+	CMemoryPoolTLS<CItem>* _ItemMemoryPool;
+	CMemoryPoolTLS<CWeaponItem>* _WeaponMemoryPool;
+	CMemoryPoolTLS<CArmorItem>* _ArmorMemoryPool;
+	CMemoryPoolTLS<CConsumable>* _ConsumableMemoryPool;
+	CMemoryPoolTLS<CMaterialItem>* _MaterialMemoryPool;
+	CMemoryPoolTLS<CArchitectureItem>* _ArchitectureMemoryPool;
+	CMemoryPoolTLS<CCropItem>* _CropMemoryPool;
+
+	// 오브젝트
 	CMemoryPoolTLS<CPlayer>* _PlayerMemoryPool;
 	CMemoryPoolTLS<CSlime>* _SlimeMemoryPool;
 	CMemoryPoolTLS<CBear>* _BearMemoryPool;
-
-	CMemoryPoolTLS<CItem>* _ItemMemoryPool;
-	CMemoryPoolTLS<CWeapon>* _WeaponMemoryPool;
-	CMemoryPoolTLS<CArmor>* _ArmorMemoryPool;
-	CMemoryPoolTLS<CConsumable>* _ConsumableMemoryPool;
-	CMemoryPoolTLS<CMaterial>* _MaterialMemoryPool;
-	CMemoryPoolTLS<CArchitecture>* _ArchitectureMemoryPool;
-
 	CMemoryPoolTLS<CTree>* _TreeMemoryPool;
 	CMemoryPoolTLS<CStone>* _StoneMemoryPool;	
 	CMemoryPoolTLS<CFurnace>* _FurnaceMemoryPool;
 	CMemoryPoolTLS<CSawmill>* _SamillMemoryPool;
+	CMemoryPoolTLS<CPotato>* _PotatoMemoryPool;
 
 	int64 _GameServerObjectId;
 
@@ -55,17 +59,15 @@ private:
 public:
 	CGameServer* GameServer;
 
-	CPlayer* _PlayersArray[PLAYER_MAX];
-	CMonster* _MonstersArray[MONSTER_MAX];
+	CPlayer* _PlayersArray[PLAYER_MAX];	
 	CItem* _ItemsArray[ITEM_MAX];
 	CEnvironment* _EnvironmentsArray[ENVIRONMENT_MAX];
 	CCraftingTable* _CraftingTablesArray[CRAFTINGTABLE_MAX];
 
-	CLockFreeStack<int32> _PlayersArrayIndexs;
-	CLockFreeStack<int32> _MonstersArrayIndexs;
+	CLockFreeStack<int32> _PlayersArrayIndexs;	
 	CLockFreeStack<int32> _ItemsArrayIndexs;
 	CLockFreeStack<int32> _EnvironmentsArrayIndexs;
-	CLockFreeStack<int32> _CraftingTableArrayIndexs;
+	CLockFreeStack<int32> _CraftingTableArrayIndexs;	
 
 	CObjectManager();
 	~CObjectManager();
