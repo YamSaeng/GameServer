@@ -8,6 +8,7 @@
 #include "CraftingTable.h"
 #include "Furnace.h"
 #include "Sawmill.h"
+#include "Potato.h"
 #include <atlbase.h>
 
 CObjectManager::CObjectManager()
@@ -17,16 +18,19 @@ CObjectManager::CObjectManager()
 	_BearMemoryPool = new CMemoryPoolTLS<CBear>();
 
 	_ItemMemoryPool = new CMemoryPoolTLS<CItem>();
-	_WeaponMemoryPool = new CMemoryPoolTLS<CWeapon>();
-	_ArmorMemoryPool = new CMemoryPoolTLS<CArmor>();
-	_MaterialMemoryPool = new CMemoryPoolTLS<CMaterial>();
-	_ArchitectureMemoryPool = new CMemoryPoolTLS<CArchitecture>();
+	_WeaponMemoryPool = new CMemoryPoolTLS<CWeaponItem>();
+	_ArmorMemoryPool = new CMemoryPoolTLS<CArmorItem>();
+	_MaterialMemoryPool = new CMemoryPoolTLS<CMaterialItem>();
+	_ArchitectureMemoryPool = new CMemoryPoolTLS<CArchitectureItem>();
+	_CropMemoryPool = new CMemoryPoolTLS<CCropItem>();
 	_ConsumableMemoryPool = new CMemoryPoolTLS<CConsumable>();
 
 	_TreeMemoryPool = new CMemoryPoolTLS<CTree>();
 	_StoneMemoryPool = new CMemoryPoolTLS<CStone>();
 	_FurnaceMemoryPool = new CMemoryPoolTLS<CFurnace>();
 	_SamillMemoryPool = new CMemoryPoolTLS<CSawmill>();
+		
+	_PotatoMemoryPool = new CMemoryPoolTLS<CPotato>();
 
 	_SkillMemoryPool = new CMemoryPoolTLS<CSkill>();
 
@@ -44,13 +48,7 @@ CObjectManager::CObjectManager()
 	{
 		_PlayersArray[PlayerCount] = (CPlayer*)ObjectCreate(en_GameObjectType::OBJECT_PLAYER);
 		_PlayersArrayIndexs.Push(PlayerCount);
-	}
-
-	for (int MonsterCount = MONSTER_MAX - 1; MonsterCount >= 0; --MonsterCount)
-	{
-		_MonstersArray[MonsterCount] = nullptr;
-		_MonstersArrayIndexs.Push(MonsterCount);
-	}
+	}	
 
 	for (int ItemCount = ITEM_MAX - 1; ItemCount >= 0; --ItemCount)
 	{
@@ -122,12 +120,7 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int64 MapID)
 	case en_GameObjectType::OBJECT_SLIME:
 	case en_GameObjectType::OBJECT_BEAR:
 	{
-		CMonster* Monster = (CMonster*)EnterGameObject;
-
-		// 인덱스 가져오기
-		_MonstersArrayIndexs.Pop(&EnterGameObject->_ObjectManagerArrayIndex);
-		// 배열에 저장
-		_MonstersArray[EnterGameObject->_ObjectManagerArrayIndex] = Monster;
+		CMonster* Monster = (CMonster*)EnterGameObject;		
 
 		// 몬스터 주위 오브젝트 정보 저장
 		Monster->_FieldOfViewPlayers = Map->GetFieldOfViewPlayer(Monster, Monster->_FieldOfViewDistance);
@@ -221,6 +214,17 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int64 MapID)
 			ResSpawnPacket->Free();
 		}
 		break;
+	case en_GameObjectType::OBJECT_CROP_POTATO:
+		{
+			CPotato* Potato = (CPotato*)EnterGameObject;
+
+			Map->GetChannelManager()->Find(1)->EnterChannel(EnterGameObject, &Potato->_SpawnPosition);
+
+			CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(Potato);
+			GameServer->SendPacketFieldOfView(Potato, ResSpawnPacket);
+			ResSpawnPacket->Free();
+		}
+		break;
 	}
 }
 
@@ -236,7 +240,6 @@ bool CObjectManager::ObjectLeaveGame(CGameObject* LeaveGameObject, int32 ObjectI
 	case en_GameObjectType::OBJECT_BEAR:
 		LeaveGameObject->GetChannel()->LeaveChannel(LeaveGameObject);
 
-		_MonstersArrayIndexs.Push(ObjectIndex);
 		break;
 	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
@@ -314,6 +317,9 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 		NewObject = _SamillMemoryPool->Alloc();
 		break;
+	case en_GameObjectType::OBJECT_CROP_POTATO:
+		NewObject = _PotatoMemoryPool->Alloc();
+		break;
 	}
 
 	return NewObject;
@@ -348,6 +354,9 @@ void CObjectManager::ObjectReturn(en_GameObjectType ObjectType, CGameObject* Ret
 		break;
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:		
 		_SamillMemoryPool->Free((CSawmill*)ReturnObject);
+		break;
+	case en_GameObjectType::OBJECT_CROP_POTATO:
+		_PotatoMemoryPool->Free((CPotato*)ReturnObject);
 		break;
 	}
 }
@@ -398,6 +407,9 @@ CItem* CObjectManager::ItemCreate(en_SmallItemCategory NewItemSmallCategory)
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL:
 		NewItem = _ArchitectureMemoryPool->Alloc();
 		break;
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_SEED_POTATO:
+		NewItem = _CropMemoryPool->Alloc();
+		break;		
 	}
 
 	if (NewItem != nullptr)
@@ -413,12 +425,12 @@ void CObjectManager::ItemReturn(CItem* ReturnItem)
 	switch (ReturnItem->_ItemInfo.ItemSmallCategory)
 	{
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:
-		_WeaponMemoryPool->Free((CWeapon*)ReturnItem);
+		_WeaponMemoryPool->Free((CWeaponItem*)ReturnItem);
 		break;
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:
-		_ArmorMemoryPool->Free((CArmor*)ReturnItem);
+		_ArmorMemoryPool->Free((CArmorItem*)ReturnItem);
 		break;
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL:
 		break;
@@ -436,11 +448,14 @@ void CObjectManager::ItemReturn(CItem* ReturnItem)
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT:
-		_MaterialMemoryPool->Free((CMaterial*)ReturnItem);
+		_MaterialMemoryPool->Free((CMaterialItem*)ReturnItem);
 		break;
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL:
-		_ArchitectureMemoryPool->Free((CArchitecture*)ReturnItem);
+		_ArchitectureMemoryPool->Free((CArchitectureItem*)ReturnItem);
+		break;
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_SEED_POTATO:
+		_CropMemoryPool->Free((CCropItem*)ReturnItem);
 		break;
 	}
 }
@@ -552,6 +567,9 @@ void CObjectManager::MapObjectSpawn(int64& MapID)
 			case en_TileMapEnvironment::TILE_MAP_SAMILL:
 				NewObject = (CSawmill*)ObjectCreate(en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL);
 				break;
+			case en_TileMapEnvironment::TILE_MAP_POTATO:
+				NewObject = (CPotato*)ObjectCreate(en_GameObjectType::OBJECT_CROP_POTATO);
+				break;
 			}
 
 			if (NewObject != nullptr)
@@ -589,64 +607,93 @@ void CObjectManager::ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObj
 	{
 	case en_GameObjectType::OBJECT_SLIME:
 	case en_GameObjectType::OBJECT_BEAR:
-	{
-		auto FindMonsterDropItem = G_Datamanager->_Monsters.find(MonsterDataType);
-		st_MonsterData MonsterData = *(*FindMonsterDropItem).second;
-
-		for (st_DropData DropItem : MonsterData.DropItems)
 		{
-			Sum += DropItem.Probability;
+			auto FindMonsterDropItem = G_Datamanager->_Monsters.find(MonsterDataType);
+			st_MonsterData MonsterData = *(*FindMonsterDropItem).second;
 
-			if (Sum >= RandomPoint)
+			for (st_DropData DropItem : MonsterData.DropItems)
 			{
-				Find = true;
-				// 드랍 확정 되면 해당 아이템 읽어오기
-				auto FindDropItemInfo = G_Datamanager->_Items.find((int16)DropItem.DropItemSmallCategory);
-				if (FindDropItemInfo == G_Datamanager->_Items.end())
+				Sum += DropItem.Probability;
+
+				if (Sum >= RandomPoint)
 				{
-					CRASH("DropItemInfo를 찾지 못함");
+					Find = true;
+					// 드랍 확정 되면 해당 아이템 읽어오기
+					auto FindDropItemInfo = G_Datamanager->_Items.find((int16)DropItem.DropItemSmallCategory);
+					if (FindDropItemInfo == G_Datamanager->_Items.end())
+					{
+						CRASH("DropItemInfo를 찾지 못함");
+					}
+
+					DropItemData = *(*FindDropItemInfo).second;
+
+					uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
+					DropItemData.ItemCount = RandomDropItemCount(Gen);
+					DropItemData.SmallItemCategory = DropItem.DropItemSmallCategory;
+					break;
 				}
-
-				DropItemData = *(*FindDropItemInfo).second;
-
-				uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
-				DropItemData.ItemCount = RandomDropItemCount(Gen);
-				DropItemData.SmallItemCategory = DropItem.DropItemSmallCategory;
-				break;
 			}
 		}
-	}
-	break;
+		break;
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
-	{
-		auto FindEnvironmentDropItem = G_Datamanager->_Environments.find(MonsterDataType);
-		st_EnvironmentData EnvironmentData = *(*FindEnvironmentDropItem).second;
-
-		for (st_DropData DropItem : EnvironmentData.DropItems)
 		{
-			Sum += DropItem.Probability;
+			auto FindEnvironmentDropItem = G_Datamanager->_Environments.find(MonsterDataType);
+			st_EnvironmentData EnvironmentData = *(*FindEnvironmentDropItem).second;
 
-			if (Sum >= RandomPoint)
+			for (st_DropData DropItem : EnvironmentData.DropItems)
 			{
-				Find = true;
-				// 드랍 확정 되면 해당 아이템 읽어오기
-				auto FindDropItemInfo = G_Datamanager->_Items.find((int16)DropItem.DropItemSmallCategory);
-				if (FindDropItemInfo == G_Datamanager->_Items.end())
+				Sum += DropItem.Probability;
+
+				if (Sum >= RandomPoint)
 				{
-					CRASH("DropItemInfo를 찾지 못함");
+					Find = true;
+					// 드랍 확정 되면 해당 아이템 읽어오기
+					auto FindDropItemInfo = G_Datamanager->_Items.find((int16)DropItem.DropItemSmallCategory);
+					if (FindDropItemInfo == G_Datamanager->_Items.end())
+					{
+						CRASH("DropItemInfo를 찾지 못함");
+					}
+
+					DropItemData = *(*FindDropItemInfo).second;
+
+					uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
+					DropItemData.ItemCount = RandomDropItemCount(Gen);
+					DropItemData.SmallItemCategory = DropItem.DropItemSmallCategory;
+					break;
 				}
-
-				DropItemData = *(*FindDropItemInfo).second;
-
-				uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
-				DropItemData.ItemCount = RandomDropItemCount(Gen);
-				DropItemData.SmallItemCategory = DropItem.DropItemSmallCategory;
-				break;
 			}
 		}
-	}
-	break;
+		break;
+	case en_GameObjectType::OBJECT_CROP_POTATO:
+		{
+			auto FindCropDropItemIter = G_Datamanager->_Crops.find(SpawnItemOwnerType);
+			st_CropData CropData = *(*FindCropDropItemIter).second;
+
+			for (st_DropData DropItem : CropData.DropItems)
+			{
+				Sum += DropItem.Probability;
+
+				if (Sum >= RandomPoint)
+				{
+					Find = true;
+					// 드랍 확정 되면 해당 아이템 읽어오기
+					auto FindDropItemInfo = G_Datamanager->_Items.find((int16)DropItem.DropItemSmallCategory);
+					if (FindDropItemInfo == G_Datamanager->_Items.end())
+					{
+						CRASH("DropItemInfo를 찾지 못함");
+					}
+
+					DropItemData = *(*FindDropItemInfo).second;
+
+					uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
+					DropItemData.ItemCount = RandomDropItemCount(Gen);
+					DropItemData.SmallItemCategory = DropItem.DropItemSmallCategory;
+					break;
+				}
+			}
+		}
+		break;
 	}
 
 	if (Find == true)
