@@ -1,16 +1,6 @@
 #pragma once
 #include "Item.h"
 
-enum en_ObjectDataType
-{
-	SLIME_DATA = 1,
-	BEAR_DATA,
-	STONE_DATA = 1,
-	TREE_DATA,
-	SEED_POTATO = 1,
-	FRUIT_POTATO = 1
-};
-
 struct st_ItemData
 {
 	string ItemName;
@@ -150,7 +140,6 @@ struct st_DropData
 
 struct st_MonsterData
 {
-	int32 MonsterDataId; // 몬스터 번호
 	string MonsterName;  // 몬스터 이름
 	st_ObjectStatusData MonsterStatInfo; // 몬스터 스탯 정보
 	int32 SearchTick; // 탐색 속도
@@ -174,8 +163,7 @@ struct st_MonsterAggroData
 };
 
 struct st_EnvironmentData
-{
-	int32 EnvironmentDataId;
+{	
 	string EnvironmentName;
 	int32 Level;
 	int32 MaxHP;
@@ -185,7 +173,6 @@ struct st_EnvironmentData
 
 struct st_CropData
 {
-	en_GameObjectType CropObjectType;
 	string CropName;
 	int32 MaxHP;
 	vector<st_DropData> DropItems;
