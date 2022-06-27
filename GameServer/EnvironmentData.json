@@ -1,7 +1,6 @@
 {
   "Environments": [
-    {
-      "EnvironmentDataId": 1,
+    {      
       "Name": "µ¹",
       "EnvironmentStatInfo": [
         {
@@ -18,8 +17,7 @@
         }
       ]
     },
-    {
-      "EnvironmentDataId": 2,
+    {      
       "Name": "³ª¹«",
       "EnvironmentStatInfo": [
         {

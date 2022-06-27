@@ -1,7 +1,6 @@
 {
   "Monsters": [
-    {
-      "MonsterDataId": 1,
+    {      
       "Name": "ΩΩ∂Û¿”",
       "MonsterStatInfo": [
         {
@@ -44,8 +43,7 @@
         }
       ]
     },
-    {
-      "MonsterDataId": 2,
+    {      
       "Name": "∞ı",
       "MonsterStatInfo": [
         {
