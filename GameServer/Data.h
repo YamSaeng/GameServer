@@ -6,7 +6,9 @@ enum en_ObjectDataType
 	SLIME_DATA = 1,
 	BEAR_DATA,
 	STONE_DATA = 1,
-	TREE_DATA
+	TREE_DATA,
+	SEED_POTATO = 1,
+	FRUIT_POTATO = 1
 };
 
 struct st_ItemData
@@ -17,7 +19,9 @@ struct st_ItemData
 	en_LargeItemCategory LargeItemCategory;
 	en_MediumItemCategory MediumItemCategory;
 	en_SmallItemCategory SmallItemCategory;
-	en_GameObjectType ItemObjectType;
+	en_GameObjectType ItemObjectType;	
+	int32 ItemMaxHP;
+	int32 ItemCraftingMaxHP;
 	string ItemExplain;
 	int32 ItemMinDamage;
 	int32 ItemMaxDamage;
@@ -176,6 +180,14 @@ struct st_EnvironmentData
 	int32 Level;
 	int32 MaxHP;
 	int64 RecoveryTime;
+	vector<st_DropData> DropItems;
+};
+
+struct st_CropData
+{
+	en_GameObjectType CropObjectType;
+	string CropName;
+	int32 MaxHP;
 	vector<st_DropData> DropItems;
 };
 
