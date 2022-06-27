@@ -10,6 +10,8 @@
           "ItemName": "나무 검",
           "ItemWidth": 1,
           "ItemHeight": 2,
+          "ItemMaxHP": 150,
+          "ItemCraftingMaxHP": 0,
           "ItemMinDamage": 5,
           "ItemMaxDamage": 10,
           "ItemCraftingTime": 5000,
@@ -29,6 +31,8 @@
           "ItemName": "가죽 모자",
           "ItemWidth": 2,
           "ItemHeight": 1,
+          "ItemMaxHP": 50,
+          "ItemCraftingMaxHP": 0,
           "ItemDefence": 5,
           "ItemCraftingTime": 5000,
           "ImageFilePath": "Textures/Equipment/Leather Helmet"
@@ -41,6 +45,8 @@
           "ItemName": "나무 갑옷",
           "ItemWidth": 2,
           "ItemHeight": 2,
+          "ItemMaxHP": 100,
+          "ItemCraftingMaxHP": 0,
           "ItemDefence": 15,
           "ItemCraftingTime": 8000,
           "ImageFilePath": "Textures/Equipment/Wooden Armor"
@@ -53,6 +59,8 @@
           "ItemName": "가죽 신발",
           "ItemWidth": 2,
           "ItemHeight": 1,
+          "ItemMaxHP": 50,
+          "ItemCraftingMaxHP": 0,
           "ItemDefence": 5,
           "ItemCraftingTime": 4000,
           "ImageFilePath": "Textures/Equipment/Leather Boot"
@@ -71,6 +79,8 @@
           "ItemName": "회복물약(소)",
           "ItemWidth": 1,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
           "ItemCraftingTime": 0,
           "ImageFilePath": "Textures/Potion/Red Potion"
@@ -85,6 +95,8 @@
           "ItemName": "맹렬한일격 스킬책",
           "ItemWidth": 1,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
           "ItemCraftingTime": 0,
           "ImageFilePath": "Textures/SkillBook/SkillBook"
@@ -97,6 +109,8 @@
           "ItemName": "회심의일격 스킬책",
           "ItemWidth": 1,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
           "ItemCraftingTime": 0,
           "ImageFilePath": "Textures/SkillBook/SkillBook"
@@ -109,6 +123,8 @@
           "ItemName": "쇄혼비무 스킬책",
           "ItemWidth": 1,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
           "ItemCraftingTime": 0,
           "ImageFilePath": "Textures/SkillBook/SkillBook"
@@ -121,6 +137,8 @@
           "ItemName": "초혼비무 스킬책",
           "ItemWidth": 1,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
           "ItemCraftingTime": 0,
           "ImageFilePath": "Textures/SkillBook/SkillBook"
@@ -133,6 +151,8 @@
           "ItemName": "분쇄파동 스킬책",
           "ItemWidth": 1,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
           "ItemCraftingTime": 0,
           "ImageFilePath": "Textures/SkillBook/SkillBook"
@@ -145,6 +165,8 @@
           "ItemName": "돌격자세 스킬책",
           "ItemWidth": 1,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
           "ItemCraftingTime": 0,
           "ImageFilePath": "Textures/SkillBook/SkillBook"
@@ -157,6 +179,8 @@
           "ItemName": "불꽃작살 스킬책",
           "ItemWidth": 1,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
           "ItemCraftingTime": 0,
           "ImageFilePath": "Textures/SkillBook/SkillBook"
@@ -169,6 +193,8 @@
           "ItemName": "지옥의화염 스킬책",
           "ItemWidth": 1,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
           "ItemCraftingTime": 0,
           "ImageFilePath": "Textures/SkillBook/SkillBook"
@@ -181,6 +207,8 @@
           "ItemName": "치유의빛 스킬책",
           "ItemWidth": 1,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
           "ItemCraftingTime": 0,
           "ImageFilePath": "Textures/SkillBook/SkillBook"
@@ -193,6 +221,8 @@
           "ItemName": "치유의바람 스킬책",
           "ItemWidth": 1,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
           "ItemCraftingTime": 0,
           "ImageFilePath": "Textures/SkillBook/SkillBook"
@@ -205,6 +235,8 @@
           "ItemName": "충격해제 스킬책",
           "ItemWidth": 1,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
           "ItemCraftingTime": 0,
           "ImageFilePath": "Textures/SkillBook/SkillBook"
@@ -223,6 +255,8 @@
           "ItemName": "가죽",
           "ItemWidth": 1,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
           "ItemCraftingTime": 0,
           "ImageFilePath": "Textures/Material/Leather"
@@ -235,6 +269,8 @@
           "ItemName": "슬라임젤리",
           "ItemWidth": 1,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
           "ItemCraftingTime": 0,
           "ImageFilePath": "Textures/MonsterPart/SlimeGel"
@@ -247,6 +283,8 @@
           "ItemName": "동전",
           "ItemWidth": 1,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
           "ItemCraftingTime": 0,
           "ImageFilePath": "Textures/Misc/CopperCoin"
@@ -259,6 +297,8 @@
           "ItemName": "은전",
           "ItemWidth": 1,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
           "ItemCraftingTime": 0,
           "ImageFilePath": "Textures/Misc/SliverCoin"
@@ -271,6 +311,8 @@
           "ItemName": "금전",
           "ItemWidth": 1,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
           "ItemCraftingTime": 0,
           "ImageFilePath": "Textures/Misc/GoldCoin"
@@ -283,6 +325,8 @@
           "ItemName": "암석",
           "ItemWidth": 1,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
           "ItemCraftingTime": 0,
           "ImageFilePath": "Textures/Material/Stone"
@@ -295,6 +339,8 @@
           "ItemName": "통나무",
           "ItemWidth": 2,
           "ItemHeight": 2,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
           "ItemCraftingTime": 0,
           "ImageFilePath": "Textures/Material/Wood Log"
@@ -305,8 +351,10 @@
           "ItemObjectType": "OBJECT_ITEM_MATERIAL_WOOD_FLANK",
           "ItemExplain": "통나무로 만든 나무판자",
           "ItemName": "나무판자",
-          "ItemWidth": 1,
+          "ItemWidth": 2,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
           "ItemCraftingTime": 4000,
           "ImageFilePath": "Textures/Material/Wooden Plank"
@@ -319,6 +367,8 @@
           "ItemName": "실",
           "ItemWidth": 1,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
           "ItemCraftingTime": 3000,
           "ImageFilePath": "Textures/Material/Yarn"
@@ -331,6 +381,8 @@
           "ItemName": "숯",
           "ItemWidth": 1,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
           "ItemCraftingTime": 5000,
           "ImageFilePath": "Textures/Ore & Gem/CharCoal"
@@ -343,6 +395,8 @@
           "ItemName": "구리 광석",
           "ItemWidth": 1,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
           "ItemCraftingTime": 0,
           "ImageFilePath": "Textures/Ore & Gem/Copper Nugget"
@@ -355,6 +409,8 @@
           "ItemName": "구리",
           "ItemWidth": 1,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
           "ItemCraftingTime": 8000,
           "ImageFilePath": "Textures/Ore & Gem/Copper Ingot"
@@ -367,6 +423,8 @@
           "ItemName": "철광석",
           "ItemWidth": 1,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
           "ItemCraftingTime": 8000,
           "ImageFilePath": "Textures/Ore & Gem/Iron Nugget"
@@ -379,6 +437,8 @@
           "ItemName": "철괴",
           "ItemWidth": 1,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
           "ItemCraftingTime": 8000,
           "ImageFilePath": "Textures/Ore & Gem/Iron Ingot"
@@ -397,6 +457,8 @@
           "ItemName": "용광로",
           "ItemWidth": 2,
           "ItemHeight": 2,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
           "ItemCraftingTime": 10000,
           "ImageFilePath": "Textures/CraftingTable/Furnace"
@@ -409,11 +471,53 @@
           "ItemName": "제재소",
           "ItemWidth": 2,
           "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
           "ItemCraftingTime": 10000,
           "ImageFilePath": "Textures/CraftingTable/Sawmill"
         }
       ]
     }
+  ],
+  "CropSeed": [
+    {
+      "CropSeedList": [
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_CROP_SEED",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_CROP_SEED_POTATO",
+          "ItemObjectType": "OBJECT_ITEM_CROP_SEED_POTATO",
+          "ItemExplain": "감자의 씨앗",
+          "ItemName": "감자 씨앗",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 0,
+          "ItemMaxCount": 99,
+          "ItemCraftingTime": 0,
+          "ImageFilePath": "Textures/Plant/Seed/PotatoSeed"
+        }
+      ]
+    }
+  ],
+  "CropFruit": [
+    {
+      "CropFruitList": [
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_CROP_FRUIT",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO",
+          "ItemObjectType": "OBJECT_ITEM_CROP_FRUIT_POTATO",
+          "ItemExplain": "감자 씨앗을 재배해 얻을 수 있는 열매",
+          "ItemName": "감자",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
+          "ItemMaxHP": 2,
+          "ItemCraftingMaxHP": 1,
+          "ItemMaxCount": 99,
+          "ItemCraftingTime": 0,
+          "ImageFilePath": "Textures/Plant/PotatoFruit"
+        }
+      ]
+    }
   ]
-} 
+}
