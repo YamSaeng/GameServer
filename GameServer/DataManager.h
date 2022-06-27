@@ -17,7 +17,10 @@ public:
 	map<int32, st_ObjectStatusData*> _ThiefStatus;
 	map<int32, st_ObjectStatusData*> _ArcherStatus;
 
-	map<int32, st_MonsterData*> _Monsters;
+	//------------------------------------------------------
+	// 몬스터 데이터
+	//------------------------------------------------------
+	map<en_GameObjectType, st_MonsterData*> _Monsters;
 
 	st_MonsterAggroData _MonsterAggroData;
 
@@ -63,11 +66,12 @@ public:
 	//------------------------------------------------------
 	// 환경 데이터
 	//------------------------------------------------------
-	map<int32, st_EnvironmentData*> _Environments;
+	map<en_GameObjectType, st_EnvironmentData*> _Environments;
 	//------------------------------------------------------
 	// 작물 데이터
 	//------------------------------------------------------
 	map<en_GameObjectType, st_CropData*> _Crops;
+
 	map<int16, st_CraftingTableRecipe*> _CraftingTableData;
 	map<int8,  st_CraftingItemCategory*> _CraftingData;
 	map<int32, st_LevelData*> _LevelDatas;

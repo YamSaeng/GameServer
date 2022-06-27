@@ -571,7 +571,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			
 			if (ItemObjectType == "OBJECT_ITEM_CROP_FRUIT_POTATO")
 			{
-				CropFruitData->ItemObjectType = en_GameObjectType::OBJECT_CROP_POTATO;
+				CropFruitData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO;
 			}
 
 			CropFruitData->ItemExplain = ItemExplain;
@@ -871,12 +871,21 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 	for (auto& Filed : Document["Monsters"].GetArray())
 	{
 		st_MonsterData* MonsterData = new st_MonsterData();
+				
+		string MonsterName = Filed["Name"].GetString();
+		
+		en_GameObjectType MonsterType = en_GameObjectType::NORMAL;
 
-		int MonsterDataId = Filed["MonsterDataId"].GetInt();
-		string Name = Filed["Name"].GetString();
-
-		MonsterData->MonsterDataId = MonsterDataId;
-		MonsterData->MonsterName = Name;
+		if (MonsterName == "슬라임")
+		{
+			MonsterType = en_GameObjectType::OBJECT_SLIME;
+		}
+		else if (MonsterName == "곰")
+		{
+			MonsterType = en_GameObjectType::OBJECT_BEAR;
+		}
+		
+		MonsterData->MonsterName = MonsterName;
 
 		for (auto& MonsterStatInfoFiled : Filed["MonsterStatInfo"].GetArray())
 		{
@@ -956,7 +965,7 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			MonsterData->DropItems.push_back(DropData);
 		}
 
-		_Monsters.insert(pair<int32, st_MonsterData*>(MonsterData->MonsterDataId, MonsterData));
+		_Monsters.insert(pair<en_GameObjectType, st_MonsterData*>(MonsterType, MonsterData));
 	}
 }
 
@@ -2398,12 +2407,21 @@ void CDataManager::LoadDataEnvironment(wstring LoadFileName)
 	for (auto& Filed : Document["Environments"].GetArray())
 	{
 		st_EnvironmentData* EnvironmentData = new st_EnvironmentData();
+				
+		string EnvironmentName = Filed["Name"].GetString();
+				
+		en_GameObjectType EnvironmentType = en_GameObjectType::NORMAL;
 
-		int EnvironmentDataId = Filed["EnvironmentDataId"].GetInt();
-		string Name = Filed["Name"].GetString();
+		if (EnvironmentName == "돌")
+		{
+			EnvironmentType = en_GameObjectType::OBJECT_STONE;
+		}
+		else if (EnvironmentName == "나무")
+		{
+			EnvironmentType = en_GameObjectType::OBJECT_TREE;
+		}
 
-		EnvironmentData->EnvironmentDataId = EnvironmentDataId;
-		EnvironmentData->EnvironmentName = Name;
+		EnvironmentData->EnvironmentName = EnvironmentName;
 
 		for (auto& EnvironmentStatInfoFiled : Filed["EnvironmentStatInfo"].GetArray())
 		{
@@ -2441,7 +2459,7 @@ void CDataManager::LoadDataEnvironment(wstring LoadFileName)
 			EnvironmentData->DropItems.push_back(DropData);
 		}
 
-		_Environments.insert(pair<int32, st_EnvironmentData*>(EnvironmentData->EnvironmentDataId, EnvironmentData));
+		_Environments.insert(pair<en_GameObjectType, st_EnvironmentData*>(EnvironmentType, EnvironmentData));
 	}
 }
 
@@ -2452,21 +2470,19 @@ void CDataManager::LoadDataCrop(wstring LoadFileName)
 	rapidjson::Document Document;
 	Document.Parse(FileStr);
 
-	for (auto& Filed : Document["CraftingDatas"].GetArray())
+	for (auto& Filed : Document["Crops"].GetArray())
 	{
 		st_CropData* CropData = new st_CropData();
-
-		string CropObjectType = Filed["CropObjectType"].GetString();
+				
 		string CropName = Filed["CropName"].GetString();
 
 		en_GameObjectType CropType = en_GameObjectType::NORMAL;
 
-		if (CropObjectType == "OBJECT_ITEM_CROP_FRUIT_POTATO")
+		if (CropName == "감자")
 		{
-			CropType = en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO;
+			CropType = en_GameObjectType::OBJECT_CROP_POTATO;			
 		}
-
-		CropData->CropObjectType = CropType;
+		
 		CropData->CropName = CropName;		
 
 		for (auto& CropStatInfoFiled : Filed["CropStatInfo"].GetArray())
@@ -2497,7 +2513,7 @@ void CDataManager::LoadDataCrop(wstring LoadFileName)
 			CropData->DropItems.push_back(DropData);
 		}
 
-		_Crops.insert(pair<en_GameObjectType, st_CropData*>(CropData->CropObjectType, CropData));
+		_Crops.insert(pair<en_GameObjectType, st_CropData*>(CropType, CropData));
 	}
 }
 
