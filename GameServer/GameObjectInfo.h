@@ -63,7 +63,8 @@ enum class en_GameObjectType : int16
 	OBJECT_ITEM_MATERIAL_IRON_NUGGET,
 	OBJECT_ITEM_MATERIAL_IRON_INGOT,	
 
-	OBJECT_ITEM_CROPS_POTATO,
+	OBJECT_ITEM_CROP_SEED_POTATO,
+	OBJECT_ITEM_CROP_FRUIT_POTATO,
 
 	OBJECT_PLAYER_DUMMY = 32000
 };
@@ -152,7 +153,8 @@ enum class en_LargeItemCategory : int8
 	ITEM_LARGE_CATEGORY_FOOD,
 	ITEM_LARGE_CATEGORY_POTION,
 	ITEM_LARGE_CATEGORY_SKILLBOOK,
-	ITEM_LARGE_CATEGORY_MATERIAL
+	ITEM_LARGE_CATEGORY_MATERIAL,
+	ITEM_LARGE_CATEGORY_CROP
 };
 
 enum class en_MediumItemCategory : int8
@@ -165,7 +167,9 @@ enum class en_MediumItemCategory : int8
 	ITEM_MEDIUM_CATEGORY_GLOVE,
 	ITEM_MEDIUM_CATEGORY_BOOT,
 	ITEM_MEDIUM_CATEGORY_HEAL,
-	ITEM_MEDIUM_CATEGORY_MANA
+	ITEM_MEDIUM_CATEGORY_MANA,
+	ITEM_MEDIUM_CATEGORY_CROP_SEED,
+	ITEM_MEDIUM_CATEGORY_CROP_FRUIT
 };
 
 enum class en_SmallItemCategory : int16
@@ -205,6 +209,9 @@ enum class en_SmallItemCategory : int16
 	ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT,
 	ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET,
 	ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT,
+
+	ITEM_SMALL_CATEGORY_CROP_SEED_POTATO,
+	ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO,
 
 	ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE = 5000,
 	ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL
@@ -359,6 +366,7 @@ enum class en_PersonalMessageType : int8
 	PERSONAL_MESSAGE_MYSELF_TARGET,
 		
 	PERSONAL_MESSAGE_DIR_DIFFERENT,
+	PERSONAL_MESSAGE_GATHERING_DISTANCE,
 
 	PERSONAL_MEESAGE_CRAFTING_TABLE_OVERLAP_SELECT,
 	PERSONAL_MESSAGE_CRAFTING_TABLE_OVERLAP_CRAFTING_START,
@@ -2183,6 +2191,10 @@ struct st_ItemInfo
 	en_LargeItemCategory ItemLargeCategory;   // 아이템 대분류
 	en_MediumItemCategory ItemMediumCategory; // 아이템 중분류
 	en_SmallItemCategory ItemSmallCategory;	  // 아이템 소분류
+	int32 MaxHP;							  // 아이템 최대 내구도
+	int32 CurrentHP;						  // 아이템 현재 내구도
+	int32 CraftingMaxHP;					  // 아이템 최대 채집 HP
+	int32 CraftingCurrentHP;				  // 아이템 현재 채집 HP
 	wstring ItemName;			              // 아이템 이름
 	wstring ItemExplain;		              // 아이템 설명문
 	int64 ItemCraftingTime;					  // 아이템 제작 시간
@@ -2209,6 +2221,10 @@ struct st_ItemInfo
 		ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_NONE;
 		ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
 		ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
+		MaxHP = 0;
+		CurrentHP = 0;
+		CraftingMaxHP = 0;
+		CraftingCurrentHP = 0;
 		ItemName = L"";
 		ItemExplain = L"";
 		ItemCraftingTime = 0;
