@@ -57,22 +57,22 @@ protected:
 private:	
 };
 
-class CWeapon : public CItem
+class CWeaponItem : public CItem
 {
 public:
 	virtual void UpdateIdle() override;
 
-	CWeapon();
-	~CWeapon();
+	CWeaponItem();
+	~CWeaponItem();
 };
 
-class CArmor : public CItem
+class CArmorItem : public CItem
 {
 public:
 	virtual void UpdateIdle() override;
 
-	CArmor();
-	~CArmor();
+	CArmorItem();
+	~CArmorItem();
 };
 
 class CConsumable : public CItem
@@ -80,20 +80,29 @@ class CConsumable : public CItem
 	
 };
 
-class CMaterial : public CItem
+class CMaterialItem : public CItem
 {
 public:
 	virtual void UpdateIdle() override;
 
-	CMaterial();
-	~CMaterial();
+	CMaterialItem();
+	~CMaterialItem();
 };
 
-class CArchitecture : public CItem
+class CArchitectureItem : public CItem
 {
 public:
 	virtual void UpdateIdle() override;
 
-	CArchitecture();
-	~CArchitecture();
+	CArchitectureItem();
+	~CArchitectureItem();
+};
+
+class CCropItem : public CItem
+{
+public:
+	virtual void UpdateIdle() override;
+
+	CCropItem();
+	~CCropItem();
 };

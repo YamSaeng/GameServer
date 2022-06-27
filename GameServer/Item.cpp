@@ -101,58 +101,71 @@ void CItem::UpdateIdle()
 	}
 }
 
-CWeapon::CWeapon()
+CWeaponItem::CWeaponItem()
 {
 	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_ITEM_WEAPON;
 }
 
-CWeapon::~CWeapon()
+CWeaponItem::~CWeaponItem()
 {
 }
 
-void CWeapon::UpdateIdle()
+void CWeaponItem::UpdateIdle()
 {
 	CItem::UpdateIdle();
 }
 
-CArmor::CArmor()
+CArmorItem::CArmorItem()
 {
 	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_ITEM_ARMOR;
 }
 
-CArmor::~CArmor()
+CArmorItem::~CArmorItem()
 {
 }
 
-void CArmor::UpdateIdle()
+void CArmorItem::UpdateIdle()
 {
 	CItem::UpdateIdle();
 }
 
-CMaterial::CMaterial()
+CMaterialItem::CMaterialItem()
 {
 	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL;
 }
 
-CMaterial::~CMaterial()
+CMaterialItem::~CMaterialItem()
 {
 }
 
-void CMaterial::UpdateIdle()
+void CMaterialItem::UpdateIdle()
 {
 	CItem::UpdateIdle();	
 }
 
-void CArchitecture::UpdateIdle()
+void CArchitectureItem::UpdateIdle()
 {
 	CItem::UpdateIdle();
 }
 
-CArchitecture::CArchitecture()
+CArchitectureItem::CArchitectureItem()
 {
 	
 }
 
-CArchitecture::~CArchitecture()
+CArchitectureItem::~CArchitectureItem()
+{
+}
+
+void CCropItem::UpdateIdle()
+{
+	CItem::UpdateIdle();
+}
+
+CCropItem::CCropItem()
+{
+}
+
+CCropItem::~CCropItem()
 {
 }
