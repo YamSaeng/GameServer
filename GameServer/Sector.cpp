@@ -48,6 +48,8 @@ void CSector::Insert(CGameObject* InsertGameObject)
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
+	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
+	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
 		_Items.insert((CItem*)InsertGameObject);
 		break;
 	case en_GameObjectType::OBJECT_STONE:
@@ -103,6 +105,8 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
+	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
+	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
 		_Items.erase((CItem*)RemoveGameObject);
 		break;
 	case en_GameObjectType::OBJECT_STONE:
