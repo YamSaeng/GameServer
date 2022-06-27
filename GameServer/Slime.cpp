@@ -10,7 +10,7 @@ CSlime::CSlime()
 	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_SLIME;
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_IDLE;
 
-	auto FindMonsterStat = G_Datamanager->_Monsters.find(en_ObjectDataType::SLIME_DATA);
+	auto FindMonsterStat = G_Datamanager->_Monsters.find(_GameObjectInfo.ObjectType);
 	st_MonsterData MonsterData = *(*FindMonsterStat).second;
 
 	// ½ºÅÈ ¼ÂÆÃ	
@@ -84,7 +84,7 @@ bool CSlime::OnDamaged(CGameObject* Attacker, int32 Damage)
 		G_ObjectManager->ObjectItemSpawn(Attacker->_GameObjectInfo.ObjectId,
 			Attacker->_GameObjectInfo.ObjectType,
 			_GameObjectInfo.ObjectPositionInfo.CollisionPosition,
-			_GameObjectInfo.ObjectType, en_ObjectDataType::SLIME_DATA);
+			_GameObjectInfo.ObjectType, en_GameObjectType::OBJECT_SLIME);
 
 		Attacker->_GameObjectInfo.ObjectStatInfo.DP += _GetDPPoint;
 

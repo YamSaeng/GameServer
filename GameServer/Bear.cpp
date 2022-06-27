@@ -10,7 +10,7 @@ CBear::CBear()
 	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_BEAR;
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_IDLE;
 
-	auto FindMonsterStat = G_Datamanager->_Monsters.find(en_ObjectDataType::BEAR_DATA);
+	auto FindMonsterStat = G_Datamanager->_Monsters.find(_GameObjectInfo.ObjectType);
 	st_MonsterData MonsterData = *(*FindMonsterStat).second;
 
 	// ½ºÅÈ ¼ÂÆÃ		
