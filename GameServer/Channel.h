@@ -22,6 +22,7 @@ private:
 		MONSTER_MAX = 100,
 		ENVIRONMENT_MAX = 100,
 		CRAFTING_TABLE_MAX = 100,
+		CROP_MAX = 100,
 		ITEM_MAX = 200		
 	};
 
@@ -33,14 +34,15 @@ private:
 	CMonster* _ChannelMonsterArray[MONSTER_MAX];
 	CEnvironment* _ChannelEnvironmentArray[ENVIRONMENT_MAX];
 	CCraftingTable* _ChannelCraftingTableArray[CRAFTING_TABLE_MAX];
-	CItem* _ChannelItemArray[ITEM_MAX];	
-	
+	CCrop* _ChannelCropArray[CROP_MAX];
+	CItem* _ChannelItemArray[ITEM_MAX];		
 
 	CLockFreeStack<int32> _ChannelPlayerArrayIndexs;
 	CLockFreeStack<int32> _ChannelDummyPlayerArrayIndexs;
 	CLockFreeStack<int32> _ChannelMonsterArrayIndexs;
 	CLockFreeStack<int32> _ChannelEnvironmentArrayIndexs;
 	CLockFreeStack<int32> _ChannelCraftingTableArrayIndexs;
+	CLockFreeStack<int32> _ChannelCropArrayIndexs;
 	CLockFreeStack<int32> _ChannelItemArrayIndexs;	
 
 	SRWLOCK _ChannelLock;

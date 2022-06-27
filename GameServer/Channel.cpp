@@ -7,6 +7,7 @@
 #include "Heap.h"
 #include "Environment.h"
 #include "CraftingTable.h"
+#include "Crop.h"
 #include "Map.h"
 #include "ObjectManager.h"
 
@@ -38,10 +39,16 @@ CChannel::CChannel()
 		_ChannelEnvironmentArrayIndexs.Push(Environment);
 	}
 
-	for (int32 Crafting = ENVIRONMENT_MAX - 1; Crafting >= 0; --Crafting)
+	for (int32 Crafting = CRAFTING_TABLE_MAX - 1; Crafting >= 0; --Crafting)
 	{
 		_ChannelCraftingTableArray[Crafting] = nullptr;
 		_ChannelCraftingTableArrayIndexs.Push(Crafting);
+	}
+
+	for (int32 CropCount = CROP_MAX - 1; CropCount >= 0; --CropCount)
+	{
+		_ChannelCropArray[CropCount] = nullptr;
+		_ChannelCropArrayIndexs.Push(CropCount);
 	}
 
 	for (int32 ItemCount = ITEM_MAX - 1; ItemCount >= 0; --ItemCount)
@@ -223,6 +230,14 @@ void CChannel::Update()
 		}
 	}
 
+	for (int16 i = 0; i < CROP_MAX; i++)
+	{
+		if (_ChannelCropArray[i] != nullptr)
+		{
+			_ChannelCropArray[i]->Update();
+		}
+	}
+
 	for (int16 i = 0; i < ITEM_MAX; i++)
 	{
 		if (_ChannelItemArray[i] != nullptr)
@@ -336,6 +351,8 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
+	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
+	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
 		{
 			for (int32 i = 0; i < en_Channel::ENVIRONMENT_MAX; i++)
 			{
@@ -356,6 +373,18 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 				if (_ChannelCraftingTableArray[i] != nullptr && _ChannelCraftingTableArray[i]->_GameObjectInfo.ObjectId == ObjectID)
 				{	
 					FindObject = _ChannelCraftingTableArray[i];
+				}
+			}
+		}
+		break;
+	case en_GameObjectType::OBJECT_CROP:
+	case en_GameObjectType::OBJECT_CROP_POTATO:		
+		{
+			for (int32 i = 0; i < en_Channel::CROP_MAX; i++)
+			{
+				if (_ChannelCropArray[i] != nullptr && _ChannelCropArray[i]->_GameObjectInfo.ObjectId == ObjectID)
+				{
+					FindObject = _ChannelCropArray[i];
 				}
 			}
 		}
@@ -433,6 +462,8 @@ vector<CGameObject*> CChannel::FindChannelObjects(en_GameObjectType GameObjectTy
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
+	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
+	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
 		for (int32 i = 0; i < en_Channel::ENVIRONMENT_MAX; i++)
 		{
 			if (_ChannelItemArray[i] != nullptr)
@@ -459,6 +490,16 @@ vector<CGameObject*> CChannel::FindChannelObjects(en_GameObjectType GameObjectTy
 			if (_ChannelCraftingTableArray[i] != nullptr)
 			{
 				FindObjects.push_back(_ChannelCraftingTableArray[i]);
+			}
+		}
+		break;
+	case en_GameObjectType::OBJECT_CROP:
+	case en_GameObjectType::OBJECT_CROP_POTATO:
+		for (int32 i = 0; i < en_Channel::CROP_MAX; i++)
+		{
+			if (_ChannelCropArray[i] != nullptr)
+			{
+				FindObjects.push_back(_ChannelCropArray[i]);
 			}
 		}
 		break;
@@ -555,6 +596,8 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
+		case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
+		case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
 			{
 				for (int32 i = 0; i < en_Channel::ENVIRONMENT_MAX; i++)
 				{
@@ -578,6 +621,18 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 					}
 				}
 			}
+			break;
+		case en_GameObjectType::OBJECT_CROP:
+		case en_GameObjectType::OBJECT_CROP_POTATO:
+			{
+				for (int32 i = 0; i < en_Channel::CROP_MAX; i++)
+				{
+					if (_ChannelCropArray[i] != nullptr && _ChannelCropArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
+					{
+						FindObjects.push_back(_ChannelCropArray[i]);
+					}
+				}
+			}			
 			break;
 		}
 	}	
@@ -690,6 +745,18 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 					if (_ChannelCraftingTableArray[i] != nullptr && _ChannelCraftingTableArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
 					{
 						FindObjects.push_back(_ChannelCraftingTableArray[i]);
+					}
+				}
+			}
+			break;
+		case en_GameObjectType::OBJECT_CROP:
+		case en_GameObjectType::OBJECT_CROP_POTATO:
+			{
+				for (int32 i = 0; i < en_Channel::CROP_MAX; i++)
+				{
+					if (_ChannelCropArray[i] != nullptr && _ChannelCropArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
+					{
+						FindObjects.push_back(_ChannelCropArray[i]);
 					}
 				}
 			}
@@ -839,6 +906,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
+	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
+	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
 	{
 		// 아이템으로 형변환
 		CItem* EnterChannelItem = (CItem*)EnterChannelGameObject;
@@ -909,6 +978,26 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			Entersector->Insert(EnterChannelCraftingTable);
 		}
 		break;
+	case en_GameObjectType::OBJECT_CROP_POTATO:
+		{
+			CCrop* Crop = (CCrop*)EnterChannelGameObject;
+			Crop->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
+			Crop->_GameObjectInfo.ObjectPositionInfo.Position._X = Crop->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
+			Crop->_GameObjectInfo.ObjectPositionInfo.Position._Y = Crop->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
+
+			Crop->Start();
+
+			_ChannelCropArrayIndexs.Pop(&Crop->_ChannelArrayIndex);
+			_ChannelCropArray[Crop->_ChannelArrayIndex] = Crop;
+
+			Crop->SetChannel(this);
+
+			IsEnterChannel = _Map->ApplyMove(Crop, SpawnPosition, true, false);
+
+			CSector* EnterSector = _Map->GetSector(SpawnPosition);
+			EnterSector->Insert(Crop);
+		}
+		break;
 	}
 
 	return IsEnterChannel;
@@ -957,6 +1046,8 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
+	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
+	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
 		_ChannelItemArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
 
 		_Map->ApplyPositionLeaveItem(LeaveChannelGameObject);
@@ -970,6 +1061,11 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 		_ChannelCraftingTableArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
+
+		_Map->ApplyLeave(LeaveChannelGameObject);
+		break;
+	case en_GameObjectType::OBJECT_CROP_POTATO:
+		_ChannelCropArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
 
 		_Map->ApplyLeave(LeaveChannelGameObject);
 		break;
