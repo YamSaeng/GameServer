@@ -500,6 +500,94 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			_Items.insert(pair<int16, st_ItemData*>((int16)WeaponItemData->SmallItemCategory, WeaponItemData));
 		}
 	}
+
+	for (auto& Filed : Document["CropSeed"].GetArray())
+	{
+		for (auto& CropSeedListFiled : Filed["CropSeedList"].GetArray())
+		{
+			string MediumCategory = CropSeedListFiled["ItemMediumCategory"].GetString();
+			string SmallCategory = CropSeedListFiled["ItemSmallCategory"].GetString();
+			string ItemObjectType = CropSeedListFiled["ItemObjectType"].GetString();
+			string ItemExplain = CropSeedListFiled["ItemExplain"].GetString();
+			string ItemName = CropSeedListFiled["ItemName"].GetString();
+			int32 ItemWidth = CropSeedListFiled["ItemWidth"].GetInt();
+			int32 ItemHeight = CropSeedListFiled["ItemHeight"].GetInt();
+			int ItemMaxCount = CropSeedListFiled["ItemMaxCount"].GetInt();
+			int64 ItemCraftingTime = CropSeedListFiled["ItemCraftingTime"].GetInt64();
+			string ImageFilePath = CropSeedListFiled["ImageFilePath"].GetString();
+
+			st_ItemData* CropFruitData = new st_ItemData();
+			CropFruitData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_CROP;
+			CropFruitData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_CROP_SEED;
+
+			if (SmallCategory == "ITEM_SMALL_CATEGORY_CROP_SEED_POTATO")
+			{
+				CropFruitData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_SEED_POTATO;
+			}
+
+			if (ItemObjectType == "OBJECT_ITEM_CROP_SEED_POTATO")
+			{
+				CropFruitData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO;
+			}
+
+			CropFruitData->ItemExplain = ItemExplain;
+			CropFruitData->ItemName = ItemName;
+			CropFruitData->ItemWidth = ItemWidth;
+			CropFruitData->ItemHeight = ItemHeight;
+			CropFruitData->ItemMinDamage = 0;
+			CropFruitData->ItemMaxDamage = 0;
+			CropFruitData->ItemDefence = 0;
+			CropFruitData->ItemMaxCount = ItemMaxCount;
+			CropFruitData->ItemCraftingTime = ItemCraftingTime;
+			CropFruitData->ItemThumbnailImagePath = ImageFilePath;
+
+			_Items.insert(pair<int16, st_ItemData*>((int16)CropFruitData->SmallItemCategory, CropFruitData));
+		}
+	}
+
+	for (auto& Filed : Document["CropFruit"].GetArray())
+	{
+		for (auto& CropFruitListFiled : Filed["CropFruitList"].GetArray())
+		{
+			string MediumCategory = CropFruitListFiled["ItemMediumCategory"].GetString();
+			string SmallCategory = CropFruitListFiled["ItemSmallCategory"].GetString();
+			string ItemObjectType = CropFruitListFiled["ItemObjectType"].GetString();
+			string ItemExplain = CropFruitListFiled["ItemExplain"].GetString();
+			string ItemName = CropFruitListFiled["ItemName"].GetString();
+			int32 ItemWidth = CropFruitListFiled["ItemWidth"].GetInt();
+			int32 ItemHeight = CropFruitListFiled["ItemHeight"].GetInt();
+			int ItemMaxCount = CropFruitListFiled["ItemMaxCount"].GetInt();
+			int64 ItemCraftingTime = CropFruitListFiled["ItemCraftingTime"].GetInt64();
+			string ImageFilePath = CropFruitListFiled["ImageFilePath"].GetString();
+
+			st_ItemData* CropFruitData = new st_ItemData();
+			CropFruitData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_CROP;
+			CropFruitData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_CROP_FRUIT;			
+
+			if (SmallCategory == "ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO")
+			{
+				CropFruitData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO;
+			}
+			
+			if (ItemObjectType == "OBJECT_ITEM_CROP_FRUIT_POTATO")
+			{
+				CropFruitData->ItemObjectType = en_GameObjectType::OBJECT_CROP_POTATO;
+			}
+
+			CropFruitData->ItemExplain = ItemExplain;
+			CropFruitData->ItemName = ItemName;
+			CropFruitData->ItemWidth = ItemWidth;
+			CropFruitData->ItemHeight = ItemHeight;
+			CropFruitData->ItemMinDamage = 0;
+			CropFruitData->ItemMaxDamage = 0;
+			CropFruitData->ItemDefence = 0;
+			CropFruitData->ItemMaxCount = ItemMaxCount;
+			CropFruitData->ItemCraftingTime = ItemCraftingTime;
+			CropFruitData->ItemThumbnailImagePath = ImageFilePath;
+
+			_Items.insert(pair<int16, st_ItemData*>((int16)CropFruitData->SmallItemCategory, CropFruitData));
+		}
+	}	
 }
 
 void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
@@ -2354,6 +2442,62 @@ void CDataManager::LoadDataEnvironment(wstring LoadFileName)
 		}
 
 		_Environments.insert(pair<int32, st_EnvironmentData*>(EnvironmentData->EnvironmentDataId, EnvironmentData));
+	}
+}
+
+void CDataManager::LoadDataCrop(wstring LoadFileName)
+{
+	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());
+
+	rapidjson::Document Document;
+	Document.Parse(FileStr);
+
+	for (auto& Filed : Document["CraftingDatas"].GetArray())
+	{
+		st_CropData* CropData = new st_CropData();
+
+		string CropObjectType = Filed["CropObjectType"].GetString();
+		string CropName = Filed["CropName"].GetString();
+
+		en_GameObjectType CropType = en_GameObjectType::NORMAL;
+
+		if (CropObjectType == "OBJECT_ITEM_CROP_FRUIT_POTATO")
+		{
+			CropType = en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO;
+		}
+
+		CropData->CropObjectType = CropType;
+		CropData->CropName = CropName;		
+
+		for (auto& CropStatInfoFiled : Filed["CropStatInfo"].GetArray())
+		{			
+			int MaxHP = CropStatInfoFiled["MaxHP"].GetInt();
+			
+			CropData->MaxHP = MaxHP;
+		}
+
+		for (auto& CropDropDataFiled : Filed["CropDropData"].GetArray())
+		{
+			int Probability = CropDropDataFiled["Probability"].GetInt();
+			string DropItemSmallCategory = CropDropDataFiled["DropItemSmallCategory"].GetString();
+			int8 MinCount = (int8)(CropDropDataFiled["MinCount"].GetInt());
+			int16 MaxCount = (int16)(CropDropDataFiled["MaxCount"].GetInt());
+
+			st_DropData DropData;
+
+			if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO")
+			{
+				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO;
+			}			
+
+			DropData.Probability = Probability;
+			DropData.MinCount = MinCount;
+			DropData.MaxCount = MaxCount;
+
+			CropData->DropItems.push_back(DropData);
+		}
+
+		_Crops.insert(pair<en_GameObjectType, st_CropData*>(CropData->CropObjectType, CropData));
 	}
 }
 

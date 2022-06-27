@@ -60,7 +60,14 @@ public:
 	map<int16, st_TacTicSkillData*> _ArcherTacTicSkillDatas;
 	map<int16, st_BufSkillData*> _ArcherBufSkillDatas;
 
+	//------------------------------------------------------
+	// 환경 데이터
+	//------------------------------------------------------
 	map<int32, st_EnvironmentData*> _Environments;
+	//------------------------------------------------------
+	// 작물 데이터
+	//------------------------------------------------------
+	map<en_GameObjectType, st_CropData*> _Crops;
 	map<int16, st_CraftingTableRecipe*> _CraftingTableData;
 	map<int8,  st_CraftingItemCategory*> _CraftingData;
 	map<int32, st_LevelData*> _LevelDatas;
@@ -89,6 +96,7 @@ public:
 	void LoadDataThiefSkill(wstring LoadFileName);
 	void LoadDataArcherSkill(wstring LoadFileName);
 	void LoadDataEnvironment(wstring LoadFileName);
+	void LoadDataCrop(wstring LoadFileName);
 	void LoadDataCrafting(wstring LoadFileName);
 	void LoadDataCraftingTable(wstring LoadFileName);
 	void LoadDataMapInfo(wstring LoadFileName);

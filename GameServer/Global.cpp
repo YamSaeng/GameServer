@@ -43,6 +43,8 @@ public:
 		G_Datamanager->LoadDataMonsterAggro(L"MonsterAggroData.json");
 		// 환경 오브젝트 데이터 파싱
 		G_Datamanager->LoadDataEnvironment(L"EnvironmentData.json");
+		// 작물 데이터 파싱
+		G_Datamanager->LoadDataCrop(L"CropData.json");
 		// 제작템 데이터 파싱
 		G_Datamanager->LoadDataCrafting(L"CraftingData.json");
 		G_Datamanager->LoadDataCraftingTable(L"CraftingTableData.json");
