@@ -59,8 +59,7 @@
     <Column name="MinDamage" type="int"/>
     <Column name="MaxDamage" type="int"/>
     <Column name="Defence" type="int"/>
-    <Column name="MaxCount" type="int"/>    
-    <Column name="ThumbnailImagePath" type="nvarchar(100)" notnull="true"/>    
+    <Column name="MaxCount" type="int"/>        
     <Index type="clustered">
       <PrimaryKey/>
       <Column name="ItemDBId"/>
@@ -84,8 +83,7 @@
     <Column name="MinDamage" type="int"/>
     <Column name="MaxDamage" type="int"/>
     <Column name="Defence" type="int"/>
-    <Column name="MaxCount" type="int"/>
-    <Column name="ThumbnailImagePath" type="nvarchar(100)" notnull="true"/>
+    <Column name="MaxCount" type="int"/>    
     <Column name="OwnerAccountDBId" type="BigInt" notnull="true"/>
     <Column name="OwnerPlayerDBId" type="BigInt" notnull="true"/>        
   </Table>
@@ -313,34 +311,7 @@
       ]]>
     </Body>
   </Procedure>
-  
-  <!-- 아이템 테이블에 새로운 아이템 생성 -->
-  <Procedure name="spItemCreate">
-    <Param name="@ItemUse" type="bit"/>
-    <Param name="@IsQuickSlotUse" type="bit"/>
-	<Param name="@ItemRotated" type="bit"/>
-	<Param name="@ItemWidth" type="SmallInt"/>
-	<Param name="@ItemHeight" type="SmallInt"/>  	
-    <Param name="@ItemLargeCategory" type="TinyInt" notnull="true"/>
-    <Param name="@ItemMediumCategory" type="TinyInt" notnull="true"/>
-    <Param name="@ItemSmallCategory" type="SmallInt"/>    
-    <Param name="@ItemName" type="nvarchar(20)"/>
-    <Param name="@ItemMinDamage" type="int"/>
-    <Param name="@ItemMaxDamage" type="int"/>
-    <Param name="@ItemDefence" type="int"/>
-    <Param name="@ItemMaxCount" type="int"/>
-    <Param name="@ItemCount" type="SmallInt"/>
-    <Param name="@IsEquipped" type="bit"/>    
-    <Param name="@ThumbnailImagePath" type="nvarchar(100)"/>
-    <Body>
-      <![CDATA[
-	     SET NOCOUNT ON
-         INSERT INTO [dbo].[Item]
-         VALUES ((@ItemUse), (@IsQuickSlotUse), (@ItemRotated), (@ItemWidth), (@ItemHeight), (@ItemLargeCategory), (@ItemMediumCategory), (@ItemSmallCategory), (@ItemName), (@ItemMinDamage), (@ItemMaxDamage), (@ItemDefence), (@ItemMaxCount), (@ItemCount), (@IsEquipped), (@ThumbnailImagePath))
-       ]]>
-    </Body>    
-  </Procedure>
-
+	
   <!-- 만든 아이템 DBId 가져오기 -->
   <Procedure name="spItemDBIdGet">
     <Body>
@@ -355,15 +326,14 @@
   <Procedure name="spItemToInventoryInit">
     <Param name="@ItemName" type="nvarchar(20)"/>    
 	<Param name="@ItemTileGridPositionX" type ="SmallInt"/>
-	<Param name="@ItemTileGridPositionY" type ="SmallInt"/>		  
-    <Param name="@ThumbnailImagePath" type="nvarchar(100)"/>
+	<Param name="@ItemTileGridPositionY" type ="SmallInt"/>		      
     <Param name="@OwnerAccountDBId" type="BigInt"/>
     <Param name="@OwnerPlayerDBId" type="BigInt"/>    
     <Body>
       <![CDATA[
 	    SET NOCOUNT ON
         INSERT INTO [dbo].[Inventory]
-        VALUES (0, 0, 0, 0, (@ItemTileGridPositionX), (@ItemTileGridPositionY), 0, 0, 0, (@ItemName), 0, 0, 0, 0, 0, 0, (@ThumbnailImagePath), (@OwnerAccountDBId), (@OwnerPlayerDBId))
+        VALUES (0, 0, 0, 0, (@ItemTileGridPositionX), (@ItemTileGridPositionY), 0, 0, 0, (@ItemName), 0, 0, 0, 0, 0, 0, (@OwnerAccountDBId), (@OwnerPlayerDBId))
       ]]>
     </Body>
   </Procedure> 
@@ -385,8 +355,7 @@
     <Param name="@ItemDefence" type="int"/>
     <Param name="@ItemMaxCount" type="int"/>
     <Param name="@ItemCount" type="SmallInt"/>        
-    <Param name="@IsEquipped" type="bit"/>    
-    <Param name="@ThumbnailImagePath" type="nvarchar(100)"/>
+    <Param name="@IsEquipped" type="bit"/>        
     <Param name="@OwnerAccountDBId" type="BigInt"/>
     <Param name="@OwnerPlayerDBId" type="BigInt"/>    
     <Body>
@@ -403,8 +372,7 @@
         ItemMediumCategory = (@ItemMediumCategory), ItemSmallCategory = (@ItemSmallCategory),
         ItemName = (@ItemName), ItemCount = (@ItemCount), IsEquipped = (@IsEquipped), 
         MinDamage = (@ItemMinDamage), MaxDamage = (@ItemMaxDamage),
-        Defence = (@ItemDefence), MaxCount = (@ItemMaxCount),
-        ThumbnailImagePath = (@ThumbnailImagePath) 
+        Defence = (@ItemDefence), MaxCount = (@ItemMaxCount)        
         WHERE ItemTileGridPositionX = (@ItemTileGridPositionX) AND ItemTileGridPositionY = (@ItemTileGridPositionY) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)        
       ]]>
     </Body>
@@ -440,50 +408,11 @@
         SELECT IsQuickSlotUse, ItemRotated, ItemWidth, ItemHeight, 
 		ItemLargeCategory, ItemMediumCategory, ItemSmallCategory,
 		ItemName,
-		MinDamage, MaxDamage, Defence, MaxCount, ItemCount, IsEquipped, ThumbnailImagePath 
+		MinDamage, MaxDamage, Defence, MaxCount, ItemCount, IsEquipped
         FROM [dbo].[Inventory] 
         WHERE OwnerAccountDBId = (@AccountDBId) AND OwnerPlayerDBId = (@PlayerDBId) AND ItemTileGridPositionX = (@ItemTileGridPositionX) AND ItemTileGridPositionY = (@ItemTileGridPositionY)
       ]]>
     </Body>    
-  </Procedure>
-  
-  <!-- 인벤토리 테이블에서 아이템 스왑 -->
-  <Procedure name="spInventoryItemSwap">
-    <Param name="@OwnerAccountDBId" type="BigInt"/>
-    <Param name="@OwnerPlayerDBId" type="BigInt"/>
-    <Param name="@AIsQuickSlotUse" type="bit"/>
-    <Param name="@AItemLargeCategory" type="TinyInt" notnull="true"/>
-    <Param name="@AItemMediumCategory" type="TinyInt" notnull="true"/>
-    <Param name="@AItemSmallCategory" type="SmallInt"/>    
-    <Param name="@AItemName" type="nvarchar(20)"/>
-    <Param name="@AMinDamage" type="int"/>
-    <Param name="@AMaxDamage" type="int"/>
-    <Param name="@ADefence" type="int"/>
-    <Param name="@AMaxCount" type="int"/>
-    <Param name="@AItemCount" type="SmallInt"/>
-    <Param name="@AItemIsEquipped" type="bit"/>    
-    <Param name="@AItemThumbnailImagePath" type="nvarchar(100)"/>
-    <Param name="@AItemSlotIndex" type="TinyInt"/>
-    <Param name="@BIsQuickSlotUse" type="bit"/>
-    <Param name="@BItemLargeCategory" type="TinyInt" notnull="true"/>
-    <Param name="@BItemMediumCategory" type="TinyInt" notnull="true"/>
-    <Param name="@BItemSmallCategory" type="SmallInt"/>    
-    <Param name="@BItemName" type="nvarchar(20)"/>
-    <Param name="@BMinDamage" type="int"/>
-    <Param name="@BMaxDamage" type="int"/>
-    <Param name="@BDefence" type="int"/>
-    <Param name="@BMaxCount" type="int"/>
-    <Param name="@BItemCount" type="SmallInt"/>
-    <Param name="@BItemIsEquipped" type="bit"/>    
-    <Param name="@BItemThumbnailImagePath" type="nvarchar(100)"/>
-    <Param name="@BItemSlotIndex" type="TinyInt"/>
-    <Body>
-      <![CDATA[
-	    SET NOCOUNT ON
-        UPDATE [dbo].[Inventory] SET IsQuickSlotUse = (@AIsQuickSlotUse), ItemLargeCategory = (@AItemLargeCategory), ItemMediumCategory = (@AItemMediumCategory), ItemSmallCategory = (@AItemSmallCategory), ItemName = (@AItemName), MinDamage = (@AMinDamage), MaxDamage = (@AMaxDamage), Defence = (@ADefence), MaxCount = (@AMaxCount), ItemCount = (@AItemCount), IsEquipped = (@AItemIsEquipped), ThumbnailImagePath = (@AItemThumbnailImagePath)  WHERE SlotIndex = (@AItemSlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
-        UPDATE [dbo].[Inventory] SET IsQuickSlotUse = (@BIsQuickSlotUse), ItemLargeCategory = (@BItemLargeCategory), ItemMediumCategory = (@BItemMediumCategory), ItemSmallCategory = (@BItemSmallCategory), ItemName = (@BItemName), MinDamage = (@BMinDamage), MaxDamage = (@BMaxDamage), Defence = (@BDefence), MaxCount = (@BMaxCount), ItemCount = (@BItemCount), IsEquipped = (@BItemIsEquipped), ThumbnailImagePath = (@BItemThumbnailImagePath)  WHERE SlotIndex = (@BItemSlotIndex) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
-      ]]>
-    </Body>
   </Procedure>
 	
   <!-- 인벤토리 테이블에 있는 아이템 가지고 옴-->
@@ -494,7 +423,7 @@
       <![CDATA[
 	    SET NOCOUNT ON
         SELECT ItemRotated, ItemWidth, ItemHeight,
-		ItemLargeCategory, ItemMediumCategory, ItemSmallCategory, ItemName, MinDamage, MaxDamage, Defence, MaxCount, ItemCount, ItemTileGridPositionX, ItemTileGridPositionY, IsEquipped, ThumbnailImagePath
+		ItemLargeCategory, ItemMediumCategory, ItemSmallCategory, ItemName, MinDamage, MaxDamage, Defence, MaxCount, ItemCount, ItemTileGridPositionX, ItemTileGridPositionY, IsEquipped
         FROM [dbo].[Inventory]
         WHERE OwnerAccountDBId = (@AccountDBId) AND OwnerPlayerDBId = (@PlayerDBId)
       ]]>
@@ -520,8 +449,7 @@
     <Param name="@OwnerPlayerDBId" type="BigInt"/>
 	<Param name="@ItemTileGridPositionX" type="SmallInt"/>
 	<Param name="@ItemTileGridPositionY" type="SmallInt"/>    
-    <Param name="@InitItemName" type="nvarchar(20)"/>
-    <Param name="@InitItemThumbnailImagePath" type="nvarchar(100)"/>
+    <Param name="@InitItemName" type="nvarchar(20)"/>    
     <Body>
       <![CDATA[
 	    SET NOCOUNT ON
@@ -531,8 +459,7 @@
 		ItemName = (@InitItemName),
 		ItemCount = 0,
 		IsEquipped = 0, 
-		MinDamage = 0, MaxDamage = 0, Defence = 0, MaxCount = 0,
-		ThumbnailImagePath = (@InitItemThumbnailImagePath)
+		MinDamage = 0, MaxDamage = 0, Defence = 0, MaxCount = 0		
         WHERE ItemTileGridPositionX = (@ItemTileGridPositionX) AND ItemTileGridPositionY = (@ItemTileGridPositionY) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
       ]]>
     </Body>
@@ -580,8 +507,7 @@
 	<Param name="@MinDamage" type="int"/>
 	<Param name="@MaxDamage" type="int"/>
 	<Param name="@Defence" type="int"/>
-	<Param name="@MaxCount" type="int"/>		
-	<Param name="@ThumbnailImagePath" type="nvarchar(100)"/>
+	<Param name="@MaxCount" type="int"/>			
 	<Body>
 	  <![CDATA[
 		SET NOCOUNT ON
@@ -590,7 +516,7 @@
 		ItemRotated = (@ItemRotated),
 		ItemWidth = (@ItemWidth), ItemHeight = (@ItemHeight),
 		ItemLargeCategory = (@ItemLargeCategory), ItemMediumCategory = (@ItemMediumCategory), ItemSmallCategory = (@ItemSmallCategory),
-		ItemName = (@ItemName), ItemCount = (@ItemCount), IsEquipped = (@IsEquipped), MinDamage = (@MinDamage), MaxDamage = (@MaxDamage), Defence = (@Defence), MaxCount = (@MaxCount), ThumbnailImagePath = (@ThumbnailImagePath)
+		ItemName = (@ItemName), ItemCount = (@ItemCount), IsEquipped = (@IsEquipped), MinDamage = (@MinDamage), MaxDamage = (@MaxDamage), Defence = (@Defence), MaxCount = (@MaxCount)
 		WHERE OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId) And ItemTileGridPositionX = (@ItemTileGridPositionX) AND ItemTileGridPositionY = (@ItemTileGridPositionY)
 		]]>
 	</Body>	
