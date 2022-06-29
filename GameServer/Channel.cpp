@@ -911,10 +911,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	{
 		// 아이템으로 형변환
 		CItem* EnterChannelItem = (CItem*)EnterChannelGameObject;
-		EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-
-		EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-		EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
+		EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;		
 
 		EnterChannelItem->SetChannel(this);
 
