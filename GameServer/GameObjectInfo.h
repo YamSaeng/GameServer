@@ -2158,7 +2158,6 @@ struct st_CraftingMaterialItemInfo
 	en_SmallItemCategory MaterialItemType; // 재료템 종류
 	wstring MaterialItemName; // 재료템 이름
 	int16 ItemCount; // 재료템 필요 개수
-	wstring MaterialItemImagePath; // 재료템 이미지 경로
 };
 
 struct st_CraftingCompleteItem
@@ -2166,7 +2165,6 @@ struct st_CraftingCompleteItem
 	en_UIObjectInfo OwnerCraftingTable;  // 완성 제작템을 소유한 제작대
 	en_SmallItemCategory CompleteItemType; // 완성 제작템 종류
 	wstring CompleteItemName; // 완성 제작템 이름
-	wstring CompleteItemImagePath; // 완성 제작템 이미지 경로
 	vector<st_CraftingMaterialItemInfo> Materials; // 제작템 만들때 필요한 재료들
 };
 
@@ -2203,8 +2201,7 @@ struct st_ItemInfo
 	int32 ItemMaxDamage;			          // 아이템 최대 공격력
 	int32 ItemDefence;				          // 아이템 방어력
 	int32 ItemMaxCount;				          // 아이템을 소유 할 수 있는 최대 개수
-	int16 ItemCount;			              // 개수	
-	wstring ItemThumbnailImagePath;           // 이미지 경로
+	int16 ItemCount;			              // 개수		
 	bool ItemIsEquipped;			          // 아이템을 착용할 수 있는지		
 	vector<st_CraftingMaterialItemInfo> Materials; // 제작 아이템일 경우 조합에 필요한 재료 아이템 목록
 
@@ -2233,8 +2230,7 @@ struct st_ItemInfo
 		ItemMaxDamage = 0;
 		ItemDefence = 0;
 		ItemMaxCount = 0;
-		ItemCount = 0;		
-		ItemThumbnailImagePath = L"";
+		ItemCount = 0;				
 		ItemIsEquipped = false;
 	}
 
@@ -2279,7 +2275,6 @@ struct st_SkillInfo
 	en_SkillType NextComboSkill;
 	map<en_MoveDir, wstring> SkillAnimations; // 스킬 애니메이션	
 	wstring SkillExplanation; // 스킬 설명 
-	wstring SkillImagePath;	 // 스킬 이미지 경로			
 
 	st_SkillInfo()
 	{
@@ -2299,7 +2294,6 @@ struct st_SkillInfo
 		NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
 		SkillTargetEffectTime = 0;
 		SkillExplanation = L"";
-		SkillImagePath = L"";
 	}
 };
 
