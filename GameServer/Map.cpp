@@ -7,6 +7,7 @@
 #include "ObjectManager.h"
 #include "Item.h"
 #include "CraftingTable.h"
+#include "Crop.h"
 
 CMap::CMap()
 {
@@ -306,6 +307,20 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object, int1
 			}
 		}
 
+		for (CCrop* Crop : Sector->GetCrop())
+		{
+			FieldOfViewInfo.ObjectID = Crop->_GameObjectInfo.ObjectId;
+			FieldOfViewInfo.SessionID = 0;
+			FieldOfViewInfo.ObjectType = Crop->_GameObjectInfo.ObjectType;
+
+			int16 Distance = st_Vector2Int::Distance(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Crop->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
+
+			if (Distance <= Object->_FieldOfViewDistance)
+			{
+				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
+			}
+		}
+
 		Sector->ReleaseSectorLock();
 	}
 
@@ -550,6 +565,7 @@ bool CMap::CollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool
 	case en_TileMapEnvironment::TILE_MAP_BEAR:	
 	case en_TileMapEnvironment::TILE_MAP_FURNACE:
 	case en_TileMapEnvironment::TILE_MAP_SAMILL:
+	case en_TileMapEnvironment::TILE_MAP_POTATO:
 		IsCollisionMapInfo = true;
 		break;
 	case en_TileMapEnvironment::TILE_MAP_WALL:
@@ -704,6 +720,8 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 				NextSector->Insert(MoveCraftingTable);
 			}
 		}
+		break;
+	case en_GameObjectType::OBJECT_CROP_POTATO:
 		break;
 	default:
 		CRASH("ApplyMove GameObject Type 이상한 값")
