@@ -597,7 +597,7 @@ void CObjectManager::MapObjectSpawn(int64& MapID)
 	}
 }
 
-void CObjectManager::ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObjectType, st_Vector2Int SpawnPosition, en_GameObjectType SpawnItemOwnerType, en_GameObjectType ItemDataType)
+void CObjectManager::ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObjectType, st_Vector2Int SpawnIntPosition, st_Vector2 SpawnPosition, en_GameObjectType SpawnItemOwnerType, en_GameObjectType ItemDataType)
 {
 	bool Find = false;
 	st_ItemData DropItemData;
@@ -794,14 +794,15 @@ void CObjectManager::ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObj
 		NewItem->_GameObjectInfo.ObjectType = DropItemData.ItemObjectType;		
 		NewItem->_GameObjectInfo.OwnerObjectId = KillerId;
 		NewItem->_GameObjectInfo.OwnerObjectType = (en_GameObjectType)KillerObjectType;
-		NewItem->_SpawnPosition = SpawnPosition;
+		NewItem->_SpawnPosition = SpawnIntPosition;
+		NewItem->_GameObjectInfo.ObjectPositionInfo.Position = SpawnPosition;
 
 		// 아이템 월드에 스폰
 		G_ObjectManager->ObjectEnterGame(NewItem, 1);	
 	}
 }
 
-void CObjectManager::ObjectItemDropToSpawn(en_SmallItemCategory DropItemType, int32 DropItemCount, st_Vector2Int SpawnPosition)
+void CObjectManager::ObjectItemDropToSpawn(en_SmallItemCategory DropItemType, int32 DropItemCount, st_Vector2Int SpawnIntPosition, st_Vector2 SpawnPosition)
 {
 	CItem* NewItem = ItemCreate(DropItemType);
 	if (NewItem != nullptr)
@@ -819,6 +820,7 @@ void CObjectManager::ObjectItemDropToSpawn(en_SmallItemCategory DropItemType, in
 			NewItem->_ItemInfo.ItemMediumCategory = ItemData->MediumItemCategory;
 			NewItem->_ItemInfo.ItemSmallCategory = ItemData->SmallItemCategory;
 			NewItem->_ItemInfo.ItemName = (LPWSTR)CA2W(ItemData->ItemName.c_str());
+			NewItem->_ItemInfo.ItemExplain = (LPWSTR)CA2W(ItemData->ItemExplain.c_str());
 			NewItem->_ItemInfo.ItemCount = DropItemCount;
 			NewItem->_ItemInfo.ItemMaxCount = ItemData->ItemMaxCount;
 			NewItem->_ItemInfo.ItemIsEquipped = false;
@@ -826,7 +828,8 @@ void CObjectManager::ObjectItemDropToSpawn(en_SmallItemCategory DropItemType, in
 			NewItem->_GameObjectInfo.ObjectType = ItemData->ItemObjectType;
 			NewItem->_GameObjectInfo.OwnerObjectId = 0;
 			NewItem->_GameObjectInfo.OwnerObjectType = en_GameObjectType::NORMAL;
-			NewItem->_SpawnPosition = SpawnPosition;
+			NewItem->_SpawnPosition = SpawnIntPosition;
+			NewItem->_GameObjectInfo.ObjectPositionInfo.Position = SpawnPosition;
 
 			G_ObjectManager->ObjectEnterGame(NewItem, 1);
 		}

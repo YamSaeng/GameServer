@@ -129,13 +129,12 @@ public:
 	//------------------------------------------------------------------------------------------------
 	// 게임오브젝트에서 아이템 스폰
 	//------------------------------------------------------------------------------------------------
-	void ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObjectType, st_Vector2Int SpawnPosition, en_GameObjectType SpawnItemOwnerType, en_GameObjectType ItemDataType);
+	void ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObjectType, st_Vector2Int SpawnIntPosition, st_Vector2 SpawnPosition, en_GameObjectType SpawnItemOwnerType, en_GameObjectType ItemDataType);
 	//------------------------------------------------------------------------------------------------
 	// 아이템 버리기
 	//------------------------------------------------------------------------------------------------
-	void ObjectItemDropToSpawn(en_SmallItemCategory DropItemType, int32 DropItemCount, st_Vector2Int SpawnPosition);
-
-	
+	void ObjectItemDropToSpawn(en_SmallItemCategory DropItemType, int32 DropItemCount, st_Vector2Int SpawnIntPosition, st_Vector2 SpawnPosition);
+		
 	//----------------------------------------------------------------------------
 	// 오브젝트 스폰
 	//----------------------------------------------------------------------------
