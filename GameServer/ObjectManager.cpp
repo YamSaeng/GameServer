@@ -156,6 +156,8 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int64 MapID)
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
+	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
+	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
 		{
 			CItem* Item = (CItem*)EnterGameObject;
 
@@ -224,7 +226,7 @@ void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int64 MapID)
 			GameServer->SendPacketFieldOfView(Potato, ResSpawnPacket);
 			ResSpawnPacket->Free();
 		}
-		break;
+		break;	
 	}
 }
 
@@ -258,6 +260,8 @@ bool CObjectManager::ObjectLeaveGame(CGameObject* LeaveGameObject, int32 ObjectI
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
+	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
+	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
 		LeaveGameObject->GetChannel()->LeaveChannel(LeaveGameObject);
 
 		_ItemsArrayIndexs.Push(ObjectIndex);
@@ -408,6 +412,7 @@ CItem* CObjectManager::ItemCreate(en_SmallItemCategory NewItemSmallCategory)
 		NewItem = _ArchitectureMemoryPool->Alloc();
 		break;
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_SEED_POTATO:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO:
 		NewItem = _CropMemoryPool->Alloc();
 		break;		
 	}
@@ -455,6 +460,7 @@ void CObjectManager::ItemReturn(CItem* ReturnItem)
 		_ArchitectureMemoryPool->Free((CArchitectureItem*)ReturnItem);
 		break;
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_SEED_POTATO:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO:
 		_CropMemoryPool->Free((CCropItem*)ReturnItem);
 		break;
 	}
@@ -591,7 +597,7 @@ void CObjectManager::MapObjectSpawn(int64& MapID)
 	}
 }
 
-void CObjectManager::ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObjectType, st_Vector2Int SpawnPosition, en_GameObjectType SpawnItemOwnerType, en_ObjectDataType MonsterDataType)
+void CObjectManager::ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObjectType, st_Vector2Int SpawnPosition, en_GameObjectType SpawnItemOwnerType, en_GameObjectType ItemDataType)
 {
 	bool Find = false;
 	st_ItemData DropItemData;
@@ -608,7 +614,7 @@ void CObjectManager::ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObj
 	case en_GameObjectType::OBJECT_SLIME:
 	case en_GameObjectType::OBJECT_BEAR:
 		{
-			auto FindMonsterDropItem = G_Datamanager->_Monsters.find(MonsterDataType);
+			auto FindMonsterDropItem = G_Datamanager->_Monsters.find(ItemDataType);
 			st_MonsterData MonsterData = *(*FindMonsterDropItem).second;
 
 			for (st_DropData DropItem : MonsterData.DropItems)
@@ -638,7 +644,7 @@ void CObjectManager::ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObj
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
 		{
-			auto FindEnvironmentDropItem = G_Datamanager->_Environments.find(MonsterDataType);
+			auto FindEnvironmentDropItem = G_Datamanager->_Environments.find(ItemDataType);
 			st_EnvironmentData EnvironmentData = *(*FindEnvironmentDropItem).second;
 
 			for (st_DropData DropItem : EnvironmentData.DropItems)
@@ -667,7 +673,7 @@ void CObjectManager::ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObj
 		break;
 	case en_GameObjectType::OBJECT_CROP_POTATO:
 		{
-			auto FindCropDropItemIter = G_Datamanager->_Crops.find(SpawnItemOwnerType);
+			auto FindCropDropItemIter = G_Datamanager->_Crops.find(ItemDataType);
 			st_CropData CropData = *(*FindCropDropItemIter).second;
 
 			for (st_DropData DropItem : CropData.DropItems)
@@ -707,7 +713,6 @@ void CObjectManager::ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObj
 		int16 ItemSmallCategory = 0;
 		wstring ItemName;
 		int16 ItemCount = 0;
-		wstring ItemThumbnailImagePath;
 		bool ItemEquipped = false;
 		int16 ItemTilePositionX = 0;
 		int16 ItemTilePositionY = 0;
@@ -717,44 +722,7 @@ void CObjectManager::ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObj
 		int32 ItemMaxCount = 0;
 
 		switch (DropItemData.SmallItemCategory)
-		{
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:
-		{
-			ItemIsQuickSlotUse = false;
-			ItemLargeCategory = (int8)DropItemData.LargeItemCategory;
-			ItemMediumCategory = (int8)DropItemData.MediumItemCategory;
-			ItemSmallCategory = (int16)DropItemData.SmallItemCategory;
-			ItemName = (LPWSTR)CA2W(DropItemData.ItemName.c_str());
-			ItemCount = DropItemData.ItemCount;
-			ItemEquipped = false;
-			ItemThumbnailImagePath = (LPWSTR)CA2W(DropItemData.ItemThumbnailImagePath.c_str());
-
-			st_ItemData* WeaponItemData = (*G_Datamanager->_Items.find((int16)DropItemData.SmallItemCategory)).second;
-			ItemWidth = WeaponItemData->ItemWidth;
-			ItemHeight = WeaponItemData->ItemHeight;
-			ItemMinDamage = WeaponItemData->ItemMinDamage;
-			ItemMaxDamage = WeaponItemData->ItemMaxDamage;
-		}
-		break;
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:
-		{
-			ItemIsQuickSlotUse = false;
-			ItemLargeCategory = (int8)DropItemData.LargeItemCategory;
-			ItemMediumCategory = (int8)DropItemData.MediumItemCategory;
-			ItemSmallCategory = (int16)DropItemData.SmallItemCategory;
-			ItemName = (LPWSTR)CA2W(DropItemData.ItemName.c_str());
-			ItemCount = DropItemData.ItemCount;
-			ItemEquipped = false;
-			ItemThumbnailImagePath = (LPWSTR)CA2W(DropItemData.ItemThumbnailImagePath.c_str());
-
-			st_ItemData* ArmorItemData = (*G_Datamanager->_Items.find((int16)DropItemData.SmallItemCategory)).second;
-			ItemWidth = ArmorItemData->ItemWidth;
-			ItemHeight = ArmorItemData->ItemHeight;
-			ItemDefence = ArmorItemData->ItemDefence;
-		}
-		break;
+		{		
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL:
 			break;
 		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK:
@@ -781,14 +749,29 @@ void CObjectManager::ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObj
 				ItemName = (LPWSTR)CA2W(DropItemData.ItemName.c_str());
 				ItemCount = DropItemData.ItemCount;
 				ItemEquipped = false;
-				ItemThumbnailImagePath = (LPWSTR)CA2W(DropItemData.ItemThumbnailImagePath.c_str());
 
 				st_ItemData* MaterialItemData = (*G_Datamanager->_Items.find((int16)DropItemData.SmallItemCategory)).second;
 				ItemWidth = MaterialItemData->ItemWidth;
 				ItemHeight = MaterialItemData->ItemHeight;
 				ItemMaxCount = MaterialItemData->ItemMaxCount;
 			}
-			break;		
+			break;	
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_SEED_POTATO:
+		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO:
+			{
+				ItemLargeCategory = (int8)DropItemData.LargeItemCategory;
+				ItemMediumCategory = (int8)DropItemData.MediumItemCategory;
+				ItemSmallCategory = (int16)DropItemData.SmallItemCategory;
+				ItemName = (LPWSTR)CA2W(DropItemData.ItemName.c_str());
+				ItemCount = DropItemData.ItemCount;
+				ItemEquipped = false;
+
+				st_ItemData* CropItemData = (*G_Datamanager->_Items.find((int16)DropItemData.SmallItemCategory)).second;
+				ItemWidth = CropItemData->ItemWidth;
+				ItemHeight = CropItemData->ItemHeight;
+				ItemMaxCount = CropItemData->ItemMaxCount;
+			}
+			break;
 		}
 
 		// 아이템 생성
@@ -806,7 +789,6 @@ void CObjectManager::ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObj
 		NewItem->_ItemInfo.ItemName = ItemName;
 		NewItem->_ItemInfo.ItemMaxCount = ItemMaxCount;
 		NewItem->_ItemInfo.ItemCount = ItemCount;
-		NewItem->_ItemInfo.ItemThumbnailImagePath = ItemThumbnailImagePath;
 		NewItem->_ItemInfo.ItemIsEquipped = ItemEquipped;
 
 		NewItem->_GameObjectInfo.ObjectType = DropItemData.ItemObjectType;		
@@ -839,7 +821,6 @@ void CObjectManager::ObjectItemDropToSpawn(en_SmallItemCategory DropItemType, in
 			NewItem->_ItemInfo.ItemName = (LPWSTR)CA2W(ItemData->ItemName.c_str());
 			NewItem->_ItemInfo.ItemCount = DropItemCount;
 			NewItem->_ItemInfo.ItemMaxCount = ItemData->ItemMaxCount;
-			NewItem->_ItemInfo.ItemThumbnailImagePath = (LPWSTR)CA2W(ItemData->ItemThumbnailImagePath.c_str());
 			NewItem->_ItemInfo.ItemIsEquipped = false;
 
 			NewItem->_GameObjectInfo.ObjectType = ItemData->ItemObjectType;
