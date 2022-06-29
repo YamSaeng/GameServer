@@ -16,8 +16,7 @@ struct st_ItemData
 	int32 ItemMinDamage;
 	int32 ItemMaxDamage;
 	int32 ItemDefence;
-	int32 ItemMaxCount;
-	string ItemThumbnailImagePath;
+	int32 ItemMaxCount;	
 	bool ItemIsEquipped;
 	int16 ItemCount;
 	int64 ItemCraftingTime;
@@ -45,8 +44,7 @@ struct st_SkillData
 	float SkillTargetEffectTime;
 	map<en_MoveDir, string> SkillAnimations; // 스킬 애니메이션
 	en_SkillType NextComboSkill;
-	string SkillExplanation;
-	string SkillThumbnailImagePath;
+	string SkillExplanation;	
 };
 
 struct st_AttackSkillData : public st_SkillData

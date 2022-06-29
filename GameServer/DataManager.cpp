@@ -24,7 +24,6 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int ItemMinDamage = WeaponListFiled["ItemMinDamage"].GetInt();
 			int ItemMaxDamage = WeaponListFiled["ItemMaxDamage"].GetInt();
 			int64 ItemCraftingTime = WeaponListFiled["ItemCraftingTime"].GetInt64();
-			string ImageFilePath = WeaponListFiled["ImageFilePath"].GetString();
 
 			st_ItemData* WeaponItemData = new st_ItemData();
 
@@ -54,7 +53,6 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			WeaponItemData->ItemDefence = 0;
 			WeaponItemData->ItemMaxCount = 1;
 			WeaponItemData->ItemCraftingTime = ItemCraftingTime;
-			WeaponItemData->ItemThumbnailImagePath = ImageFilePath;
 
 			_Items.insert(pair<int16, st_ItemData*>((int16)WeaponItemData->SmallItemCategory, WeaponItemData));
 		}
@@ -73,7 +71,6 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int32 ItemHeight = ArmorListFiled["ItemHeight"].GetInt();
 			int ItemDefence = ArmorListFiled["ItemDefence"].GetInt();
 			int64 ItemCraftingTime = ArmorListFiled["ItemCraftingTime"].GetInt64();
-			string ImageFilePath = ArmorListFiled["ImageFilePath"].GetString();
 
 			st_ItemData* ArmorItemData = new st_ItemData();
 
@@ -127,7 +124,6 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			ArmorItemData->ItemDefence = ItemDefence;
 			ArmorItemData->ItemMaxCount = 1;
 			ArmorItemData->ItemCraftingTime = ItemCraftingTime;
-			ArmorItemData->ItemThumbnailImagePath = ImageFilePath;
 
 			_Items.insert(pair<int16, st_ItemData*>((int16)ArmorItemData->SmallItemCategory, ArmorItemData));
 		}
@@ -146,7 +142,6 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int32 ItemHeight = PotionDataListFiled["ItemHeight"].GetInt();
 			int ItemMaxCount = PotionDataListFiled["ItemMaxCount"].GetInt();
 			int64 ItemCraftingTime = PotionDataListFiled["ItemCraftingTime"].GetInt64();
-			string ImageFilePath = PotionDataListFiled["ImageFilePath"].GetString();
 
 			st_ConsumableData* PotionItemData = new st_ConsumableData();
 			PotionItemData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_POTION;
@@ -176,7 +171,6 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			PotionItemData->ItemDefence = 0;
 			PotionItemData->ItemMaxCount = ItemMaxCount;
 			PotionItemData->ItemCraftingTime = ItemCraftingTime;
-			PotionItemData->ItemThumbnailImagePath = ImageFilePath;
 
 			_Consumables.insert(pair<int16, st_ConsumableData*>((int16)PotionItemData->SmallItemCategory, PotionItemData));
 		}
@@ -192,7 +186,6 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int32 ItemHeight = SkillBookDataListFiled["ItemHeight"].GetInt();
 			int ItemMaxCount = SkillBookDataListFiled["ItemMaxCount"].GetInt();
 			int64 ItemCraftingTime = SkillBookDataListFiled["ItemCraftingTime"].GetInt64();
-			string ImageFilePath = SkillBookDataListFiled["ImageFilePath"].GetString();
 
 			st_ConsumableData* SkillBookItemData = new st_ConsumableData();
 			SkillBookItemData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_SKILLBOOK;
@@ -283,7 +276,6 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			SkillBookItemData->ItemDefence = 0;
 			SkillBookItemData->ItemMaxCount = ItemMaxCount;
 			SkillBookItemData->ItemCraftingTime = ItemCraftingTime;
-			SkillBookItemData->ItemThumbnailImagePath = ImageFilePath;
 
 			_Consumables.insert(pair<int16, st_ConsumableData*>((int16)SkillBookItemData->SmallItemCategory, SkillBookItemData));
 		}
@@ -302,7 +294,6 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int32 ItemHeight = MaterialDataListFiled["ItemHeight"].GetInt();
 			int ItemMaxCount = MaterialDataListFiled["ItemMaxCount"].GetInt();
 			int64 ItemCraftingTime = MaterialDataListFiled["ItemCraftingTime"].GetInt64();
-			string ImageFilePath = MaterialDataListFiled["ImageFilePath"].GetString();
 
 			st_ItemData* MaterialData = new st_ItemData();
 			MaterialData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_MATERIAL;
@@ -437,7 +428,6 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			MaterialData->ItemDefence = 0;
 			MaterialData->ItemMaxCount = ItemMaxCount;
 			MaterialData->ItemCraftingTime = ItemCraftingTime;
-			MaterialData->ItemThumbnailImagePath = ImageFilePath;
 
 			_Items.insert(pair<int16, st_ItemData*>((int16)MaterialData->SmallItemCategory, MaterialData));
 		}
@@ -457,7 +447,6 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int ItemMinDamage = ArchitectureListFiled["ItemMinDamage"].GetInt();
 			int ItemMaxDamage = ArchitectureListFiled["ItemMaxDamage"].GetInt();
 			int64 ItemCraftingTime = ArchitectureListFiled["ItemCraftingTime"].GetInt64();
-			string ImageFilePath = ArchitectureListFiled["ImageFilePath"].GetString();
 
 			st_ItemData* WeaponItemData = new st_ItemData();
 
@@ -495,7 +484,6 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			WeaponItemData->ItemDefence = 0;
 			WeaponItemData->ItemMaxCount = 1;
 			WeaponItemData->ItemCraftingTime = ItemCraftingTime;
-			WeaponItemData->ItemThumbnailImagePath = ImageFilePath;
 
 			_Items.insert(pair<int16, st_ItemData*>((int16)WeaponItemData->SmallItemCategory, WeaponItemData));
 		}
@@ -514,7 +502,6 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int32 ItemHeight = CropSeedListFiled["ItemHeight"].GetInt();
 			int ItemMaxCount = CropSeedListFiled["ItemMaxCount"].GetInt();
 			int64 ItemCraftingTime = CropSeedListFiled["ItemCraftingTime"].GetInt64();
-			string ImageFilePath = CropSeedListFiled["ImageFilePath"].GetString();
 
 			st_ItemData* CropFruitData = new st_ItemData();
 			CropFruitData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_CROP;
@@ -539,7 +526,6 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			CropFruitData->ItemDefence = 0;
 			CropFruitData->ItemMaxCount = ItemMaxCount;
 			CropFruitData->ItemCraftingTime = ItemCraftingTime;
-			CropFruitData->ItemThumbnailImagePath = ImageFilePath;
 
 			_Items.insert(pair<int16, st_ItemData*>((int16)CropFruitData->SmallItemCategory, CropFruitData));
 		}
@@ -558,7 +544,6 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int32 ItemHeight = CropFruitListFiled["ItemHeight"].GetInt();
 			int ItemMaxCount = CropFruitListFiled["ItemMaxCount"].GetInt();
 			int64 ItemCraftingTime = CropFruitListFiled["ItemCraftingTime"].GetInt64();
-			string ImageFilePath = CropFruitListFiled["ImageFilePath"].GetString();
 
 			st_ItemData* CropFruitData = new st_ItemData();
 			CropFruitData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_CROP;
@@ -583,7 +568,6 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			CropFruitData->ItemDefence = 0;
 			CropFruitData->ItemMaxCount = ItemMaxCount;
 			CropFruitData->ItemCraftingTime = ItemCraftingTime;
-			CropFruitData->ItemThumbnailImagePath = ImageFilePath;
 
 			_Items.insert(pair<int16, st_ItemData*>((int16)CropFruitData->SmallItemCategory, CropFruitData));
 		}
@@ -1031,8 +1015,7 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				string SkillDownAnimation = PublicAttackSkillListFiled["SkillDownAnimation"].GetString();
 				string SkillLeftAnimation = PublicAttackSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = PublicAttackSkillListFiled["SkillRightAnimation"].GetString();
-				string SkillExplation = PublicAttackSkillListFiled["SkillExplanation"].GetString();
-				string SkillImagePath = PublicAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
+				string SkillExplation = PublicAttackSkillListFiled["SkillExplanation"].GetString();				
 
 				if (SkillType == "SKILL_DEFAULT_ATTACK")
 				{
@@ -1057,7 +1040,6 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				PublicAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				PublicAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
 				PublicAttackSkill->SkillExplanation = SkillExplation;
-				PublicAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_PublicAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)PublicAttackSkill->SkillType, PublicAttackSkill));
 			}
@@ -1083,7 +1065,6 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				string SkillRightAnimation = PublicTacTicSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = PublicTacTicSkillListFiled["NextComboSkill"].GetString();
 				string SkillExplation = PublicTacTicSkillListFiled["SkillExplanation"].GetString();
-				string SkillImagePath = PublicTacTicSkillListFiled["SkillThumbnailImagePath"].GetString();
 
 				if (SkillType == "")
 				{
@@ -1109,7 +1090,6 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				}
 
 				PublicTacTicSkill->SkillExplanation = SkillExplation;
-				PublicTacTicSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_PublicTacTicSkillDatas.insert(pair<int16, st_TacTicSkillData*>((int16)PublicTacTicSkill->SkillType, PublicTacTicSkill));
 			}
@@ -1136,7 +1116,6 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				string SkillLeftAnimation = PublicHealSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = PublicHealSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = PublicHealSkillListFiled["SkillExplanation"].GetString();
-				string SkillImagePath = PublicHealSkillListFiled["SkillThumbnailImagePath"].GetString();
 
 				PublicHealSkill->SkillName = SkillName;
 				PublicHealSkill->SkillLevel = SkillLevel;
@@ -1153,7 +1132,6 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				PublicHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				PublicHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
 				PublicHealSkill->SkillExplanation = SkillExplation;
-				PublicHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_PublicTacTicSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)PublicHealSkill->SkillType, PublicHealSkill));
 			}
@@ -1193,7 +1171,6 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				string SkillLeftAnimation = PublicBufSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = PublicBufSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = PublicBufSkillListFiled["SkillExplanation"].GetString();
-				string SkillImagePath = PublicBufSkillListFiled["SkillThumbnailImagePath"].GetString();
 
 				if (SkillType == "SKILL_SHOCK_RELEASE")
 				{
@@ -1226,7 +1203,6 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				PublicBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				PublicBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
 				PublicBufSkill->SkillExplanation = SkillExplation;
-				PublicBufSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_PublicBufSkillDatas.insert(pair<int16, st_BufSkillData*>((int16)PublicBufSkill->SkillType, PublicBufSkill));
 			}
@@ -1271,7 +1247,6 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				string SkillRightAnimation = WarriorAttackSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = WarriorAttackSkillListFiled["NextComboSkill"].GetString();
 				string SkillExplation = WarriorAttackSkillListFiled["SkillExplanation"].GetString();
-				string SkillImagePath = WarriorAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
 
 				if (SkillType == "SKILL_KNIGHT_FIERCE_ATTACK")
 				{
@@ -1321,8 +1296,7 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				WarriorAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				WarriorAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				WarriorAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
-				WarriorAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
-				WarriorAttackSkill->SkillThumbnailImagePath = SkillImagePath;
+				WarriorAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;				
 
 				_WarriorAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)WarriorAttackSkill->SkillType, WarriorAttackSkill));
 			}
@@ -1350,7 +1324,6 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				string SkillRightAnimation = WarriorHealSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = WarriorHealSkillListFiled["NextComboSkill"].GetString();
 				string SkillExplation = WarriorHealSkillListFiled["SkillExplanation"].GetString();
-				string SkillImagePath = WarriorHealSkillListFiled["SkillThumbnailImagePath"].GetString();
 
 				WarriorHealSkill->SkillName = SkillName;
 				WarriorHealSkill->SkillLevel = SkillLevel;
@@ -1373,7 +1346,6 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				WarriorHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
 				WarriorHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
 				WarriorHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
-				WarriorHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_WarriorTacTicSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)WarriorHealSkill->SkillType, WarriorHealSkill));
 			}
@@ -1414,7 +1386,6 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				string SkillRightAnimation = WarriorBufSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = WarriorBufSkillListFiled["NextComboSkill"].GetString();
 				string SkillExplation = WarriorBufSkillListFiled["SkillExplanation"].GetString();
-				string SkillImagePath = WarriorBufSkillListFiled["SkillThumbnailImagePath"].GetString();
 
 				if (SkillType == "SKILL_KNIGHT_CHARGE_POSE")
 				{
@@ -1453,7 +1424,6 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				}
 
 				WarriorBufSkill->SkillExplanation = SkillExplation;
-				WarriorBufSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_WarriorBufSkillDatas.insert(pair<int16, st_BufSkillData*>((int16)WarriorBufSkill->SkillType, WarriorBufSkill));
 			}
@@ -1498,7 +1468,6 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				string SkillRightAnimation = ShmanAttackSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = ShmanAttackSkillListFiled["NextComboSkill"].GetString();
 				string SkillExplation = ShmanAttackSkillListFiled["SkillExplanation"].GetString();
-				string SkillImagePath = ShmanAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
 
 				if (SkillType == "SKILL_SHAMAN_FLAME_HARPOON")
 				{
@@ -1553,7 +1522,6 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				}
 
 				ShamanAttackSkill->SkillExplanation = SkillExplation;
-				ShamanAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_ShamanAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)ShamanAttackSkill->SkillType, ShamanAttackSkill));
 			}
@@ -1579,7 +1547,6 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				string SkillRightAnimation = ShamanTacTicSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = ShamanTacTicSkillListFiled["NextComboSkill"].GetString();
 				string SkillExplation = ShamanTacTicSkillListFiled["SkillExplanation"].GetString();
-				string SkillImagePath = ShamanTacTicSkillListFiled["SkillThumbnailImagePath"].GetString();
 
 				if (SkillType == "SKILL_SHAMAN_BACK_TELEPORT")
 				{
@@ -1605,7 +1572,6 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				}
 
 				ShamanTacTicSkill->SkillExplanation = SkillExplation;
-				ShamanTacTicSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_ShamanTacTicSkillDatas.insert(pair<int16, st_TacTicSkillData*>((int16)ShamanTacTicSkill->SkillType, ShamanTacTicSkill));
 			}
@@ -1633,7 +1599,6 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				string SkillRightAnimation = ShamanHealSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = ShamanHealSkillListFiled["NextComboSkill"].GetString();
 				string SkillExplation = ShamanHealSkillListFiled["SkillExplanation"].GetString();
-				string SkillImagePath = ShamanHealSkillListFiled["SkillThumbnailImagePath"].GetString();
 
 				if (SkillType == "")
 				{
@@ -1662,7 +1627,6 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				}
 
 				ShamanHealSkill->SkillExplanation = SkillExplation;
-				ShamanHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_ShamanTacTicSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)ShamanHealSkill->SkillType, ShamanHealSkill));
 			}
@@ -1703,7 +1667,6 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				string SkillRightAnimation = ShmanBufSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = ShmanBufSkillListFiled["NextComboSkill"].GetString();
 				string SkillExplation = ShmanBufSkillListFiled["SkillExplanation"].GetString();
-				string SkillImagePath = ShmanBufSkillListFiled["SkillThumbnailImagePath"].GetString();
 
 				if (SkillType == "")
 				{
@@ -1742,7 +1705,6 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				}
 
 				ShamanBufSkill->SkillExplanation = SkillExplation;
-				ShamanBufSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_ShamanBufSkillDatas.insert(pair<int16, st_BufSkillData*>((int16)ShamanBufSkill->SkillType, ShamanBufSkill));
 			}
@@ -1787,8 +1749,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				string SkillLeftAnimation = TaioistAttackSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = TaioistAttackSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = TaioistAttackSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = TaioistAttackSkillListFiled["SkillExplanation"].GetString();
-				string SkillImagePath = TaioistAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
+				string SkillExplation = TaioistAttackSkillListFiled["SkillExplanation"].GetString();				
 
 				if (SkillType == "SKILL_TAIOIST_DIVINE_STRIKE")
 				{
@@ -1823,7 +1784,6 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				}
 
 				TaioistAttackSkill->SkillExplanation = SkillExplation;
-				TaioistAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_TaioistAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)TaioistAttackSkill->SkillType, TaioistAttackSkill));
 			}
@@ -1850,8 +1810,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				string SkillLeftAnimation = TaioistHealSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = TaioistHealSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = TaioistHealSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = TaioistHealSkillListFiled["SkillExplanation"].GetString();
-				string SkillImagePath = TaioistHealSkillListFiled["SkillThumbnailImagePath"].GetString();
+				string SkillExplation = TaioistHealSkillListFiled["SkillExplanation"].GetString();				
 
 				if (SkillType == "SKILL_TAIOIST_HEALING_LIGHT")
 				{
@@ -1883,7 +1842,6 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				}
 
 				TaioistHealSkill->SkillExplanation = SkillExplation;
-				TaioistHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_TaioistTacTicSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)TaioistHealSkill->SkillType, TaioistHealSkill));
 			}
@@ -1923,8 +1881,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				string SkillLeftAnimation = TaioistBufSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = TaioistBufSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = TaioistBufSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = TaioistBufSkillListFiled["SkillExplanation"].GetString();
-				string SkillImagePath = TaioistBufSkillListFiled["SkillThumbnailImagePath"].GetString();
+				string SkillExplation = TaioistBufSkillListFiled["SkillExplanation"].GetString();				
 
 				if (SkillType == "")
 				{
@@ -1963,7 +1920,6 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				}
 
 				TaioistBufSkill->SkillExplanation = SkillExplation;
-				TaioistBufSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_TaioistBufSkillDatas.insert(pair<int16, st_BufSkillData*>((int16)TaioistBufSkill->SkillType, TaioistBufSkill));
 			}
@@ -2008,8 +1964,7 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				string SkillLeftAnimation = ThiefAttackSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = ThiefAttackSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = ThiefAttackSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = ThiefAttackSkillListFiled["SkillExplanation"].GetString();
-				string SkillImagePath = ThiefAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
+				string SkillExplation = ThiefAttackSkillListFiled["SkillExplanation"].GetString();				
 
 				if (SkillType == "SKILL_THIEF_QUICK_CUT")
 				{
@@ -2040,7 +1995,6 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				}
 
 				ThiefAttackSkill->SkillExplanation = SkillExplation;
-				ThiefAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_ThiefAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)ThiefAttackSkill->SkillType, ThiefAttackSkill));
 			}
@@ -2067,8 +2021,7 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				string SkillLeftAnimation = ThiefHealSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = ThiefHealSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = ThiefHealSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = ThiefHealSkillListFiled["SkillExplanation"].GetString();
-				string SkillImagePath = ThiefHealSkillListFiled["SkillThumbnailImagePath"].GetString();
+				string SkillExplation = ThiefHealSkillListFiled["SkillExplanation"].GetString();				
 
 				if (SkillType == "")
 				{
@@ -2096,7 +2049,6 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				}
 
 				ThiefHealSkill->SkillExplanation = SkillExplation;
-				ThiefHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_ThiefTacTicSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)ThiefHealSkill->SkillType, ThiefHealSkill));
 			}
@@ -2136,8 +2088,7 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				string SkillLeftAnimation = ThiefBufSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = ThiefBufSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = ThiefBufSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = ThiefBufSkillListFiled["SkillExplanation"].GetString();
-				string SkillImagePath = ThiefBufSkillListFiled["SkillThumbnailImagePath"].GetString();
+				string SkillExplation = ThiefBufSkillListFiled["SkillExplanation"].GetString();				
 
 				if (SkillType == "")
 				{
@@ -2176,7 +2127,6 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				}
 
 				ThiefBufSkill->SkillExplanation = SkillExplation;
-				ThiefBufSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_ThiefBufSkillDatas.insert(pair<int16, st_BufSkillData*>((int16)ThiefBufSkill->SkillType, ThiefBufSkill));
 			}
@@ -2221,8 +2171,7 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				string SkillLeftAnimation = ArcherAttackSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = ArcherAttackSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = ArcherAttackSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = ArcherAttackSkillListFiled["SkillExplanation"].GetString();
-				string SkillImagePath = ArcherAttackSkillListFiled["SkillThumbnailImagePath"].GetString();
+				string SkillExplation = ArcherAttackSkillListFiled["SkillExplanation"].GetString();				
 
 				if (SkillType == "SKILL_ARCHER_SNIFING")
 				{
@@ -2253,7 +2202,6 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				}
 
 				ArcherAttackSkill->SkillExplanation = SkillExplation;
-				ArcherAttackSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_ArcherAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)ArcherAttackSkill->SkillType, ArcherAttackSkill));
 			}
@@ -2280,8 +2228,7 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				string SkillLeftAnimation = ArcherHealSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = ArcherHealSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = ArcherHealSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = ArcherHealSkillListFiled["SkillExplanation"].GetString();
-				string SkillImagePath = ArcherHealSkillListFiled["SkillThumbnailImagePath"].GetString();
+				string SkillExplation = ArcherHealSkillListFiled["SkillExplanation"].GetString();				
 
 				if (SkillType == "")
 				{
@@ -2309,7 +2256,6 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				}
 
 				ArcherHealSkill->SkillExplanation = SkillExplation;
-				ArcherHealSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_ArcherTacTicSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)ArcherHealSkill->SkillType, ArcherHealSkill));
 			}
@@ -2349,8 +2295,7 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				string SkillLeftAnimation = ArcherBufSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = ArcherBufSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = ArcherBufSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = ArcherBufSkillListFiled["SkillExplanation"].GetString();
-				string SkillImagePath = ArcherBufSkillListFiled["SkillThumbnailImagePath"].GetString();
+				string SkillExplation = ArcherBufSkillListFiled["SkillExplanation"].GetString();				
 
 				if (SkillType == "")
 				{
@@ -2389,7 +2334,6 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				}
 
 				ArcherBufSkill->SkillExplanation = SkillExplation;
-				ArcherBufSkill->SkillThumbnailImagePath = SkillImagePath;
 
 				_ArcherBufSkillDatas.insert(pair<int16, st_BufSkillData*>((int16)ArcherBufSkill->SkillType, ArcherBufSkill));
 			}
@@ -2632,7 +2576,6 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 			CommonCraftingCompleteItem->_ItemInfo.Width = CraftingCompleteItemData->ItemWidth;
 			CommonCraftingCompleteItem->_ItemInfo.Height = CraftingCompleteItemData->ItemHeight;
 			CommonCraftingCompleteItem->_ItemInfo.ItemCraftingTime = CraftingCompleteItemData->ItemCraftingTime;
-			CommonCraftingCompleteItem->_ItemInfo.ItemThumbnailImagePath = (LPWSTR)CA2W(CraftingCompleteItemData->ItemThumbnailImagePath.c_str());
 			CommonCraftingCompleteItem->_ItemInfo.ItemMaxCount = CraftingCompleteItemData->ItemMaxCount;
 
 			for (auto& CraftingMaterialFiled : CraftingCompleteItemFiled["CraftingMaterial"].GetArray())
@@ -2642,7 +2585,6 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 				string MaterialSmallCategory = CraftingMaterialFiled["MaterialSmallCategory"].GetString();
 				string MaterialName = CraftingMaterialFiled["MaterialName"].GetString();
 				int16 MaterialCount = (int16)CraftingMaterialFiled["MaterialCount"].GetInt();
-				string MaterialThumbnailImagePath = CraftingMaterialFiled["MaterialThumbnailImagePath"].GetString();
 
 				if (MaterialSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_LEATHER")
 				{
@@ -2667,7 +2609,6 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 
 				CraftingMaterialItemInfo.MaterialItemName = (LPWSTR)CA2W(MaterialName.c_str());
 				CraftingMaterialItemInfo.ItemCount = MaterialCount;
-				CraftingMaterialItemInfo.MaterialItemImagePath = (LPWSTR)CA2W(MaterialThumbnailImagePath.c_str());
 
 				CommonCraftingCompleteItem->_ItemInfo.Materials.push_back(CraftingMaterialItemInfo);
 			}
@@ -2748,7 +2689,6 @@ void CDataManager::LoadDataCraftingTable(wstring LoadFileName)
 			CraftingCompleteItem->_ItemInfo.Width = CraftingCompleteItemData->ItemWidth;
 			CraftingCompleteItem->_ItemInfo.Height = CraftingCompleteItemData->ItemHeight;
 			CraftingCompleteItem->_ItemInfo.ItemCraftingTime = CraftingCompleteItemData->ItemCraftingTime;
-			CraftingCompleteItem->_ItemInfo.ItemThumbnailImagePath = (LPWSTR)CA2W(CraftingCompleteItemData->ItemThumbnailImagePath.c_str());
 			CraftingCompleteItem->_ItemInfo.ItemMaxCount = CraftingCompleteItemData->ItemMaxCount;			
 
 			for (auto& CraftingMaterialFiled : CraftingTableCompleteItemFiled["CraftingMaterial"].GetArray())
@@ -2758,7 +2698,6 @@ void CDataManager::LoadDataCraftingTable(wstring LoadFileName)
 				string MaterialSmallCategory = CraftingMaterialFiled["MaterialSmallCategory"].GetString();
 				string MaterialName = CraftingMaterialFiled["MaterialName"].GetString();
 				int16 MaterialCount = (int16)CraftingMaterialFiled["MaterialCount"].GetInt();
-				string MaterialThumbnailImagePath = CraftingMaterialFiled["MaterialThumbnailImagePath"].GetString();
 
 				if (MaterialSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG")
 				{
@@ -2778,8 +2717,7 @@ void CDataManager::LoadDataCraftingTable(wstring LoadFileName)
 				}
 
 				CraftingMaterialItemInfo.MaterialItemName = (LPWSTR)CA2W(MaterialName.c_str());
-				CraftingMaterialItemInfo.ItemCount = MaterialCount;
-				CraftingMaterialItemInfo.MaterialItemImagePath = (LPWSTR)CA2W(MaterialThumbnailImagePath.c_str());
+				CraftingMaterialItemInfo.ItemCount = MaterialCount;				
 
 				CraftingCompleteItem->_ItemInfo.Materials.push_back(CraftingMaterialItemInfo);				
 			}			
