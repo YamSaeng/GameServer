@@ -2,9 +2,9 @@
 
 #include "Message.h"
 
-class CWeapon;
-class CArmor;
-class CMaterial;
+class CWeaponItem;
+class CArmorItem;
+class CMaterialItem;
 struct st_Session;
 struct st_CraftingTableData;
 

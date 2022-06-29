@@ -30,6 +30,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_GameObjectInfo& GameObject
     *this << GameObjectInfoNameLen;    
     InsertData(GameObjectInfo.ObjectName.c_str(), GameObjectInfoNameLen);      
 
+    *this << GameObjectInfo.ObjectStep;
     *this << GameObjectInfo.ObjectPositionInfo;
     *this << GameObjectInfo.ObjectStatInfo;
     *this << (int16)GameObjectInfo.ObjectType;
@@ -110,11 +111,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_SkillInfo& SkillInfo)
 
     int16 SkillExplanationLen = (int16)SkillInfo.SkillExplanation.length() * 2;
     *this << SkillExplanationLen;
-    InsertData(SkillInfo.SkillExplanation.c_str(), SkillExplanationLen);
-
-    int16 SkillImagePathLen = (int16)SkillInfo.SkillImagePath.length() * 2;
-    *this << SkillImagePathLen;
-    InsertData(SkillInfo.SkillImagePath.c_str(), SkillImagePathLen);
+    InsertData(SkillInfo.SkillExplanation.c_str(), SkillExplanationLen);    
 
     return *(this);
 }
@@ -149,11 +146,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_ItemInfo& ItemInfo)
     *this << ItemInfo.ItemDefence;
     *this << ItemInfo.ItemMaxCount;
 
-    *this << ItemInfo.ItemCount;
-
-    int16 ItemImagePathLen = (int16)ItemInfo.ItemThumbnailImagePath.length() * 2;
-    *this << ItemImagePathLen;
-    InsertData(ItemInfo.ItemThumbnailImagePath.c_str(), ItemImagePathLen);
+    *this << ItemInfo.ItemCount;    
 
     *this << ItemInfo.ItemIsEquipped;
 
@@ -231,11 +224,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_CraftingCompleteItem& Craf
 
     int16 CraftingCompleteItemNameLen = (int16)(CraftingCompleteItem.CompleteItemName.length() * 2);
     *this << CraftingCompleteItemNameLen;
-    InsertData(CraftingCompleteItem.CompleteItemName.c_str(), CraftingCompleteItemNameLen);
-
-    int16 CraftingCompleteItemImagePathLen = (int16)(CraftingCompleteItem.CompleteItemImagePath.length() * 2);
-    *this << CraftingCompleteItemImagePathLen;
-    InsertData(CraftingCompleteItem.CompleteItemImagePath.c_str(), CraftingCompleteItemImagePathLen);
+    InsertData(CraftingCompleteItem.CompleteItemName.c_str(), CraftingCompleteItemNameLen);    
 
     int8 CraftingCompleteItemCount = (int8)CraftingCompleteItem.Materials.size();
     *this << CraftingCompleteItemCount;
@@ -256,11 +245,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_CraftingMaterialItemInfo& 
 	*this << MaterialItemNameLen;
     InsertData(CraftingMaterialItemInfo.MaterialItemName.c_str(), MaterialItemNameLen);
 
-    *this << CraftingMaterialItemInfo.ItemCount;
-
-    int16 MaterialImagePathLen = CraftingMaterialItemInfo.MaterialItemImagePath.length() * 2;
-    *this << MaterialImagePathLen;
-    InsertData(CraftingMaterialItemInfo.MaterialItemImagePath.c_str(), MaterialImagePathLen);
+    *this << CraftingMaterialItemInfo.ItemCount;    
 
     return *(this);
 }
@@ -377,11 +362,7 @@ CGameServerMessage& CGameServerMessage::operator>>(st_SkillInfo& SkillInfo)
     *this >> SkillInfo.SkillCastingTime;
     *this >> SkillInfo.SkillDurationTime;
     *this >> SkillInfo.SkillDotTime;
-    *this >> SkillInfo.SkillRemainTime;
-
-    int16 SkillImagePath = 0;
-    *this >> SkillImagePath;
-    GetData(SkillInfo.SkillImagePath, SkillImagePath);
+    *this >> SkillInfo.SkillRemainTime;    
 
     return *(this);
 }
