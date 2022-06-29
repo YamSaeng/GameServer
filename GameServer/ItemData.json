@@ -14,8 +14,7 @@
           "ItemCraftingMaxHP": 0,
           "ItemMinDamage": 5,
           "ItemMaxDamage": 10,
-          "ItemCraftingTime": 5000,
-          "ImageFilePath": "Textures/Weapon & Tool/Wooden Sword"
+          "ItemCraftingTime": 5000
         }
       ]
     }
@@ -34,8 +33,7 @@
           "ItemMaxHP": 50,
           "ItemCraftingMaxHP": 0,
           "ItemDefence": 5,
-          "ItemCraftingTime": 5000,
-          "ImageFilePath": "Textures/Equipment/Leather Helmet"
+          "ItemCraftingTime": 5000
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_WEAR",
@@ -48,8 +46,7 @@
           "ItemMaxHP": 100,
           "ItemCraftingMaxHP": 0,
           "ItemDefence": 15,
-          "ItemCraftingTime": 8000,
-          "ImageFilePath": "Textures/Equipment/Wooden Armor"
+          "ItemCraftingTime": 8000
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_BOOT",
@@ -62,8 +59,7 @@
           "ItemMaxHP": 50,
           "ItemCraftingMaxHP": 0,
           "ItemDefence": 5,
-          "ItemCraftingTime": 4000,
-          "ImageFilePath": "Textures/Equipment/Leather Boot"
+          "ItemCraftingTime": 4000
         }
       ]
     }
@@ -82,8 +78,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
-          "ItemCraftingTime": 0,
-          "ImageFilePath": "Textures/Potion/Red Potion"
+          "ItemCraftingTime": 0
         }
       ],
       "SkillBookList": [
@@ -98,8 +93,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
-          "ItemCraftingTime": 0,
-          "ImageFilePath": "Textures/SkillBook/SkillBook"
+          "ItemCraftingTime": 0
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -112,8 +106,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
-          "ItemCraftingTime": 0,
-          "ImageFilePath": "Textures/SkillBook/SkillBook"
+          "ItemCraftingTime": 0
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -126,8 +119,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
-          "ItemCraftingTime": 0,
-          "ImageFilePath": "Textures/SkillBook/SkillBook"
+          "ItemCraftingTime": 0
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -140,8 +132,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
-          "ItemCraftingTime": 0,
-          "ImageFilePath": "Textures/SkillBook/SkillBook"
+          "ItemCraftingTime": 0
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -154,8 +145,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
-          "ItemCraftingTime": 0,
-          "ImageFilePath": "Textures/SkillBook/SkillBook"
+          "ItemCraftingTime": 0
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -168,8 +158,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
-          "ItemCraftingTime": 0,
-          "ImageFilePath": "Textures/SkillBook/SkillBook"
+          "ItemCraftingTime": 0
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -182,8 +171,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
-          "ItemCraftingTime": 0,
-          "ImageFilePath": "Textures/SkillBook/SkillBook"
+          "ItemCraftingTime": 0
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -196,8 +184,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
-          "ItemCraftingTime": 0,
-          "ImageFilePath": "Textures/SkillBook/SkillBook"
+          "ItemCraftingTime": 0
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -210,8 +197,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
-          "ItemCraftingTime": 0,
-          "ImageFilePath": "Textures/SkillBook/SkillBook"
+          "ItemCraftingTime": 0
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -224,8 +210,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
-          "ItemCraftingTime": 0,
-          "ImageFilePath": "Textures/SkillBook/SkillBook"
+          "ItemCraftingTime": 0
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -238,8 +223,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
-          "ItemCraftingTime": 0,
-          "ImageFilePath": "Textures/SkillBook/SkillBook"
+          "ItemCraftingTime": 0
         }
       ]
     }
@@ -258,8 +242,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
-          "ItemCraftingTime": 0,
-          "ImageFilePath": "Textures/Material/Leather"
+          "ItemCraftingTime": 0
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -272,8 +255,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
-          "ItemCraftingTime": 0,
-          "ImageFilePath": "Textures/MonsterPart/SlimeGel"
+          "ItemCraftingTime": 0
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -286,8 +268,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
-          "ItemCraftingTime": 0,
-          "ImageFilePath": "Textures/Misc/CopperCoin"
+          "ItemCraftingTime": 0
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -300,8 +281,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
-          "ItemCraftingTime": 0,
-          "ImageFilePath": "Textures/Misc/SliverCoin"
+          "ItemCraftingTime": 0
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -314,8 +294,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
-          "ItemCraftingTime": 0,
-          "ImageFilePath": "Textures/Misc/GoldCoin"
+          "ItemCraftingTime": 0
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -328,8 +307,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
-          "ItemCraftingTime": 0,
-          "ImageFilePath": "Textures/Material/Stone"
+          "ItemCraftingTime": 0
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -342,8 +320,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
-          "ItemCraftingTime": 0,
-          "ImageFilePath": "Textures/Material/Wood Log"
+          "ItemCraftingTime": 0
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -356,8 +333,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
-          "ItemCraftingTime": 4000,
-          "ImageFilePath": "Textures/Material/Wooden Plank"
+          "ItemCraftingTime": 4000
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -370,8 +346,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
-          "ItemCraftingTime": 3000,
-          "ImageFilePath": "Textures/Material/Yarn"
+          "ItemCraftingTime": 3000
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -384,8 +359,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
-          "ItemCraftingTime": 5000,
-          "ImageFilePath": "Textures/Ore & Gem/CharCoal"
+          "ItemCraftingTime": 5000
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -398,8 +372,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
-          "ItemCraftingTime": 0,
-          "ImageFilePath": "Textures/Ore & Gem/Copper Nugget"
+          "ItemCraftingTime": 0
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -412,8 +385,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
-          "ItemCraftingTime": 8000,
-          "ImageFilePath": "Textures/Ore & Gem/Copper Ingot"
+          "ItemCraftingTime": 8000
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -426,8 +398,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
-          "ItemCraftingTime": 8000,
-          "ImageFilePath": "Textures/Ore & Gem/Iron Nugget"
+          "ItemCraftingTime": 8000
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -440,8 +411,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
-          "ItemCraftingTime": 8000,
-          "ImageFilePath": "Textures/Ore & Gem/Iron Ingot"
+          "ItemCraftingTime": 8000
         }
       ]
     }
@@ -460,8 +430,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
-          "ItemCraftingTime": 10000,
-          "ImageFilePath": "Textures/CraftingTable/Furnace"
+          "ItemCraftingTime": 10000
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE",
@@ -474,8 +443,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 1,
-          "ItemCraftingTime": 10000,
-          "ImageFilePath": "Textures/CraftingTable/Sawmill"
+          "ItemCraftingTime": 10000
         }
       ]
     }
@@ -494,8 +462,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 0,
           "ItemMaxCount": 99,
-          "ItemCraftingTime": 0,
-          "ImageFilePath": "Textures/Plant/Seed/PotatoSeed"
+          "ItemCraftingTime": 0
         }
       ]
     }
@@ -514,8 +481,7 @@
           "ItemMaxHP": 2,
           "ItemCraftingMaxHP": 1,
           "ItemMaxCount": 99,
-          "ItemCraftingTime": 0,
-          "ImageFilePath": "Textures/Plant/PotatoFruit"
+          "ItemCraftingTime": 0
         }
       ]
     }

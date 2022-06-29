@@ -22,8 +22,7 @@
           "SkillDownAnimation": "SLIME_ATTACK",
           "SkillLeftAnimation": "SLIME_ATTACK",
           "SkillRightAnimation": "SLIME_ATTACK",
-          "NextComboSkill": "SKILL_TYPE_NONE",
-          "SkillThumbnailImagePath": ""
+          "NextComboSkill": "SKILL_TYPE_NONE",          
         },
         {
           "SkillType": "SKILL_BEAR_NORMAL",
@@ -44,8 +43,7 @@
           "SkillDownAnimation": "BEAR_ATTACK",
           "SkillLeftAnimation": "BEAR_ATTACK",
           "SkillRightAnimation": "BEAR_ATTACK",
-          "NextComboSkill": "SKILL_TYPE_NONE",
-          "SkillThumbnailImagePath": ""
+          "NextComboSkill": "SKILL_TYPE_NONE"          
         }
       ],
       "MonsterMagicSkills": [

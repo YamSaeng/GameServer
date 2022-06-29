@@ -7,13 +7,11 @@
           "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL",
           "CraftingCompleteItemName": "½¡",
-          "CraftingCompleteItemThumbnailImagePath": "Textures/Ore & Gem/CharCoal",
           "CraftingMaterial": [
             {
               "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG",
               "MaterialName": "Åë³ª¹«",
-              "MaterialCount": 2,
-              "MaterialThumbnailImagePath": "Textures/Material/Wood Log"
+              "MaterialCount": 2
             }
           ]
         },
@@ -21,19 +19,16 @@
           "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT",
           "CraftingCompleteItemName": "±¸¸®",
-          "CraftingCompleteItemThumbnailImagePath": "Textures/Ore & Gem/Copper Ingot",
           "CraftingMaterial": [
             {
               "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET",
               "MaterialName": "±¸¸® ¿ø¼®",
-              "MaterialCount": 5,
-              "MaterialThumbnailImagePath": "Textures/Ore & Gem/Copper Nugget"
+              "MaterialCount": 5
             },
             {
               "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL",
               "MaterialName": "½¡",
-              "MaterialCount": 5,
-              "MaterialThumbnailImagePath": "Textures/Ore & Gem/CharCoal"
+              "MaterialCount": 5
             }
           ]
         },
@@ -41,19 +36,16 @@
           "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT",
           "CraftingCompleteItemName": "Ã¶±«",
-          "CraftingCompleteItemThumbnailImagePath": "Textures/Ore & Gem/Iron Ingot",
           "CraftingMaterial": [
             {
               "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET",
               "MaterialName": "Ã¶±¤¼®",
-              "MaterialCount": 5,
-              "MaterialThumbnailImagePath": "Textures/Ore & Gem/Iron Nugget"
+              "MaterialCount": 5
             },
             {
               "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL",
               "MaterialName": "½¡",
-              "MaterialCount": 10,
-              "MaterialThumbnailImagePath": "Textures/Ore & Gem/CharCoal"
+              "MaterialCount": 10
             }
           ]
         }
@@ -65,14 +57,12 @@
         {
           "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK",
-          "CraftingCompleteItemName": "³ª¹« ÆÇÀÚ",
-          "CraftingCompleteItemThumbnailImagePath": "Textures/Material/Wooden Plank",
+          "CraftingCompleteItemName": "³ª¹« ÆÇÀÚ"
           "CraftingMaterial": [
             {
               "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG",
               "MaterialName": "Åë³ª¹«",
-              "MaterialCount": 2,
-              "MaterialThumbnailImagePath": "Textures/Material/Wood Log"
+              "MaterialCount": 2
             }
           ]
         }

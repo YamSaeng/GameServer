@@ -24,8 +24,7 @@
               "SkillLeftAnimation": "SPELL_LEFT",
               "SkillRightAnimation": "SPELL_LEFT",
               "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입힌다.",
-              "SkillThumbnailImagePath": "Textures/Spell/Icon/주술사/불꽃작살"
+              "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입힌다."
             },
             {
               "SkillType": "SKILL_SHAMAN_ROOT",
@@ -47,8 +46,7 @@
               "SkillLeftAnimation": "SPELL_LEFT",
               "SkillRightAnimation": "SPELL_LEFT",
               "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "%d 거리 안에 있는 대상을 %.1f초 동안 속박 시킨다.",
-              "SkillThumbnailImagePath": "Textures/Spell/Icon/주술사/주술사 속박"
+              "SkillExplanation": "%d 거리 안에 있는 대상을 %.1f초 동안 속박 시킨다."
             },
             {
               "SkillType": "SKILL_SHAMAN_ICE_CHAIN",
@@ -70,8 +68,7 @@
               "SkillLeftAnimation": "SPELL_LEFT",
               "SkillRightAnimation": "SPELL_LEFT",
               "NextComboSkill": "SKILL_SHAMAN_ICE_WAVE",
-              "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입히고 %d%% 만큼 상대방의 속도를 %.1f초동안 줄인다.",
-              "SkillThumbnailImagePath": "Textures/Spell/Icon/주술사/얼음사슬"
+              "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입히고 %d%% 만큼 상대방의 속도를 %.1f초동안 줄인다."
             },
             {
               "SkillType": "SKILL_SHAMAN_ICE_WAVE",
@@ -93,8 +90,7 @@
               "SkillLeftAnimation": "SPELL_LEFT",
               "SkillRightAnimation": "SPELL_LEFT",
               "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입히고 밀어낸다.",
-              "SkillThumbnailImagePath": "Textures/Spell/Icon/주술사/냉기파동"
+              "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입히고 밀어낸다."
             },
             {
               "SkillType": "SKILL_SHAMAN_LIGHTNING_STRIKE",
@@ -116,8 +112,7 @@
               "SkillLeftAnimation": "SPELL_LEFT",
               "SkillRightAnimation": "SPELL_LEFT",
               "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입히고 %.1f초 동안 기절 시킨다.",
-              "SkillThumbnailImagePath": "Textures/Spell/Icon/주술사/낙뢰"
+              "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입히고 %.1f초 동안 기절 시킨다."
             },
             {
               "SkillType": "SKILL_SHAMAN_HELL_FIRE",
@@ -139,8 +134,7 @@
               "SkillLeftAnimation": "SPELL_LEFT",
               "SkillRightAnimation": "SPELL_LEFT",
               "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입힌다.",
-              "SkillThumbnailImagePath": "Textures/Spell/Icon/주술사/지옥의화염"
+              "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입힌다."
             }
           ],
           "ShamanTacTicSkillList": [
@@ -159,8 +153,7 @@
               "SkillLeftAnimation": "SPELL_LEFT",
               "SkillRightAnimation": "SPELL_LEFT",
               "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "이동 불가와 이동 속도 감소를 삭제하고 %d칸 뒤로 이동한다.",
-              "SkillThumbnailImagePath": "Textures/Spell/Icon/주술사/시공의뒤틀림"
+              "SkillExplanation": "이동 불가와 이동 속도 감소를 삭제하고 %d칸 뒤로 이동한다."
             }
           ],
           "ShamanHealSkillList": [

@@ -24,8 +24,7 @@
               "SkillLeftAnimation": "ATTACK_WEAPON_LEFT",
               "SkillRightAnimation": "ATTACK_WEAPON_LEFT",
               "NextComboSkill": "SKILL_KNIGHT_CONVERSION_ATTACK",
-              "SkillExplanation": "전방 %d칸 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입힌다.",
-              "SkillThumbnailImagePath": "Textures/Spell/Icon/전사/맹렬한일격"
+              "SkillExplanation": "전방 %d칸 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입힌다.,
             },
             {
               "SkillType": "SKILL_KNIGHT_CONVERSION_ATTACK",
@@ -47,8 +46,7 @@
               "SkillLeftAnimation": "ATTACK_WEAPON_LEFT",
               "SkillRightAnimation": "ATTACK_WEAPON_LEFT",
               "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "전방 %d칸 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입힌다.",
-              "SkillThumbnailImagePath": "Textures/Spell/Icon/전사/회심의일격"
+              "SkillExplanation": "전방 %d칸 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입힌다."
             },
             {
               "SkillType": "SKILL_KNIGHT_SHAEHONE",
@@ -70,8 +68,7 @@
               "SkillLeftAnimation": "ATTACK_WEAPON_LEFT",
               "SkillRightAnimation": "ATTACK_WEAPON_LEFT",
               "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "전방 %d칸 안에 있는 대상에게 이동하면서 %.1f초만큼 이동불가 상태로 만들고 %d ~ %d 만큼의 피해를 입힌다.",
-              "SkillThumbnailImagePath": "Textures/Spell/Icon/전사/쇄혼비무"
+              "SkillExplanation": "전방 %d칸 안에 있는 대상에게 이동하면서 %.1f초만큼 이동불가 상태로 만들고 %d ~ %d 만큼의 피해를 입힌다."
             },
             {
               "SkillType": "SKILL_KNIGHT_CHOHONE",
@@ -93,8 +90,7 @@
               "SkillLeftAnimation": "ATTACK_WEAPON_LEFT",
               "SkillRightAnimation": "ATTACK_WEAPON_LEFT",
               "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "전방 %d칸 안에 있는 대상을 자신 앞으로 끌어 당기면서 %.1f초간 기절 상태로 만들고 %d ~ %d 만큼의 피해를 입힌다.",
-              "SkillThumbnailImagePath": "Textures/Spell/Icon/전사/초혼비무"
+              "SkillExplanation": "전방 %d칸 안에 있는 대상을 자신 앞으로 끌어 당기면서 %.1f초간 기절 상태로 만들고 %d ~ %d 만큼의 피해를 입힌다."
             },
             {
               "SkillType": "SKILL_KNIGHT_SMASH_WAVE",
@@ -116,8 +112,7 @@
               "SkillLeftAnimation": "ATTACK_WEAPON_LEFT",
               "SkillRightAnimation": "ATTACK_WEAPON_LEFT",
               "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "주위 %d칸 안에 있는 대상들에게 %d ~ %d 만큼의 피해를 입힌다.",
-              "SkillThumbnailImagePath": "Textures/Spell/Icon/전사/분쇄파동"
+              "SkillExplanation": "주위 %d칸 안에 있는 대상들에게 %d ~ %d 만큼의 피해를 입힌다."
             }
           ],
           "WarriorTacTicSkillList": [
@@ -153,8 +148,7 @@
               "SkillLeftAnimation": "IDLE_LEFT",
               "SkillRightAnimation": "IDLE_LEFT",
               "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "공격력을 %d%% 만큼 %.1f 초 동안 증가시킨다.",
-              "SkillThumbnailImagePath": "Textures/Spell/Icon/전사/돌격자세"
+              "SkillExplanation": "공격력을 %d%% 만큼 %.1f 초 동안 증가시킨다."
             }
           ]
         }

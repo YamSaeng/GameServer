@@ -24,8 +24,7 @@
               "SkillLeftAnimation": "SPELL_LEFT",
               "SkillRightAnimation": "SPELL_LEFT",
               "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입힌다.",
-              "SkillThumbnailImagePath": "Textures/Spell/Icon/도사/신성한일격"
+              "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입힌다."
             },
             {
               "SkillType": "SKILL_TAIOIST_ROOT",
@@ -47,8 +46,7 @@
               "SkillLeftAnimation": "SPELL_LEFT",
               "SkillRightAnimation": "SPELL_LEFT",
               "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "%d 거리 안에 있는 대상을 %.1f초 동안 속박 시킨다.",
-              "SkillThumbnailImagePath": "Textures/Spell/Icon/도사/도사 속박"
+              "SkillExplanation": "%d 거리 안에 있는 대상을 %.1f초 동안 속박 시킨다."
             }
           ],
           "TaioistTacTicSkillList": [
@@ -71,8 +69,7 @@
               "SkillLeftAnimation": "SPELL_LEFT",
               "SkillRightAnimation": "SPELL_LEFT",
               "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "%d 거리 안에 있는 대상 %d ~ %d 만큼 회복시킨다.",
-              "SkillThumbnailImagePath": "Textures/Spell/Icon/도사/치유의빛"
+              "SkillExplanation": "%d 거리 안에 있는 대상 %d ~ %d 만큼 회복시킨다."
             },
             {
               "SkillType": "SKILL_TAIOIST_HEALING_WIND",
@@ -91,8 +88,7 @@
               "SkillLeftAnimation": "SPELL_LEFT",
               "SkillRightAnimation": "SPELL_LEFT",
               "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "%d 거리 안에 있는 대상 %d ~ %d 만큼 회복시킨다.",
-              "SkillThumbnailImagePath": "Textures/Spell/Icon/도사/치유의바람"
+              "SkillExplanation": "%d 거리 안에 있는 대상 %d ~ %d 만큼 회복시킨다."
             }
           ],          
           "TaioistBufSkillList": [

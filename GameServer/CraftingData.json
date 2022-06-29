@@ -7,28 +7,24 @@
         {
           "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE",
           "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE",
-          "CraftingCompleteItemName": "¿ë±¤·Î",
-          "CraftingCompleteItemThumbnailImagePath": "Textures/CraftingTable/Furnace",
+          "CraftingCompleteItemName": "¿ë±¤·Î"
           "CraftingMaterial": [
             {
               "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_STONE",
               "MaterialName": "¾Ï¼®",
-              "MaterialCount": 30,
-              "MaterialThumbnailImagePath": "Textures/Material/Stone"
+              "MaterialCount": 30
             }
           ]
         },
         {
           "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE",
           "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL",
-          "CraftingCompleteItemName": "Á¦Àç¼Ò",
-          "CraftingCompleteItemThumbnailImagePath": "Textures/CraftingTable/Sawmill",
+          "CraftingCompleteItemName": "Á¦Àç¼Ò"
           "CraftingMaterial": [
             {
               "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG",
               "MaterialName": "Åë³ª¹«",
-              "MaterialCount": 30,
-              "MaterialThumbnailImagePath": "Textures/Material/Wood Log"
+              "MaterialCount": 30
             }
           ]
         }
@@ -41,14 +37,12 @@
         {
           "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_SWORD",
           "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD",
-          "CraftingCompleteItemName": "³ª¹« °Ë",
-          "CraftingCompleteItemThumbnailImagePath": "Textures/Weapon & Tool/Wooden Sword",
+          "CraftingCompleteItemName": "³ª¹« °Ë"
           "CraftingMaterial": [
             {
               "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK",
               "MaterialName": "³ª¹« ÆÇÀÚ",
-              "MaterialCount": 30,
-              "MaterialThumbnailImagePath": "Textures/Material/Wooden Plank"
+              "MaterialCount": 30
             }
           ]
         }
@@ -61,42 +55,36 @@
         {
           "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_WEAR",
           "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD",
-          "CraftingCompleteItemName": "³ª¹« °©¿Ê",
-          "CraftingCompleteItemThumbnailImagePath": "Textures/Equipment/Wooden Armor",
+          "CraftingCompleteItemName": "³ª¹« °©¿Ê"
           "CraftingMaterial": [
             {
               "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK",
               "MaterialName": "³ª¹« ÆÇÀÚ",
-              "MaterialCount": 40,
-              "MaterialThumbnailImagePath": "Textures/Material/Wooden Plank"
+              "MaterialCount": 40
             }
           ]
         },
         {
           "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_HAT",
           "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER",
-          "CraftingCompleteItemName": "°¡Á× ¸ðÀÚ",
-          "CraftingCompleteItemThumbnailImagePath": "Textures/Equipment/Leather Helmet",
+          "CraftingCompleteItemName": "°¡Á× ¸ðÀÚ"
           "CraftingMaterial": [
             {
               "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_LEATHER",
               "MaterialName": "°¡Á×",
-              "MaterialCount": 20,
-              "MaterialThumbnailImagePath": "Textures/Material/Leather"
+              "MaterialCount": 20
             }
           ]
         },
         {
           "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_BOOT",
           "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER",
-          "CraftingCompleteItemName": "°¡Á× ½Å¹ß",
-          "CraftingCompleteItemThumbnailImagePath": "Textures/Equipment/Leather Boot",
+          "CraftingCompleteItemName": "°¡Á× ½Å¹ß"
           "CraftingMaterial": [
             {
               "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_LEATHER",
               "MaterialName": "°¡Á×",
-              "MaterialCount": 10,
-              "MaterialThumbnailImagePath": "Textures/Material/Leather"
+              "MaterialCount": 10
             }
           ]
         }

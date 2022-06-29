@@ -24,8 +24,7 @@
               "SkillLeftAnimation": "ATTACK_WEAPON_LEFT",
               "SkillRightAnimation": "ATTACK_WEAPON_LEFT",
               "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "전방 대상에게 피해를 입힌다.",
-              "SkillThumbnailImagePath": "Textures/Spell/Icon/도적/빠른베기"
+              "SkillExplanation": "전방 대상에게 피해를 입힌다."
             }
           ],
           "ThiefTacTicSkillList": [
