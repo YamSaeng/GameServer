@@ -13,6 +13,9 @@ public:
 	
 	virtual bool OnDamaged(CGameObject* Attacker, int32 Damage) override;
 
+	virtual void UpdateIdle() override;
+	virtual void UpdateReadyDead() override;
+	virtual void UpdateDead() override;
 private:
 	int8 _CropStep;
 };
