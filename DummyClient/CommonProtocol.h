@@ -563,17 +563,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int64 ObjectId
 	// st_ItemInfo OverlapItemInfo
 	//------------------------------------------------------------
-	en_PACKET_S2C_ITEM_PLACE,
-
-	//------------------------------------------------------------
-	// 게임서버 골드 인벤토리 저장 요청 응답
-	// int64 AccountId
-	// int64 ObjectId
-	// int64 GoldCount
-	// int8 SliverCount
-	// int8 BronzeCount
-	//------------------------------------------------------------
-	en_PACKET_S2C_GOLD_SAVE,
+	en_PACKET_S2C_ITEM_PLACE,	
 
 	//------------------------------------------------------------
 	// 게임서버 오브젝트 위치 강제 조정
