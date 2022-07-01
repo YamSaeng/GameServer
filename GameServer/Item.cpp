@@ -88,8 +88,7 @@ void CItem::Init()
 	_ItemInfo.ItemMaxDamage = 0;
 	_ItemInfo.ItemDefence = 0;
 	_ItemInfo.ItemMaxCount = 0;
-	_ItemInfo.ItemCount = 0;
-	_ItemInfo.ItemThumbnailImagePath = L"";
+	_ItemInfo.ItemCount = 0;	
 	_ItemInfo.ItemIsEquipped = false;
 }
 

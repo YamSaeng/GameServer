@@ -1,5 +1,5 @@
 {
-  "CraftingTable": [
+  "CraftingTableData": [
     {
       "CraftingTableName": "용광로",
       "CraftingTableCompleteItem": [
@@ -57,8 +57,8 @@
         {
           "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK",
-          "CraftingCompleteItemName": "나무 판자"
-          "CraftingMaterial": [
+          "CraftingCompleteItemName": "나무 판자",
+            "CraftingMaterial": [
             {
               "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG",
               "MaterialName": "통나무",

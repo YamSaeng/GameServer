@@ -133,7 +133,6 @@ CItem* CInventoryManager::InsertItem(int8 SelectInventoryIndex, en_SmallItemCate
 		NewItem->_ItemInfo.ItemCount = InsertItemCount;
 		NewItem->_ItemInfo.TileGridPositionX = 0;
 		NewItem->_ItemInfo.TileGridPositionY = 0;
-		NewItem->_ItemInfo.ItemThumbnailImagePath = (LPWSTR)CA2W(ItemData->ItemThumbnailImagePath.c_str());
 		NewItem->_ItemInfo.ItemIsEquipped = false;
 		NewItem->_ItemInfo.ItemMaxCount = ItemData->ItemMaxCount;
 		NewItem->_ItemInfo.ItemCount = InsertItemCount;		

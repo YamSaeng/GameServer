@@ -2468,7 +2468,7 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 	rapidjson::Document Document;
 	Document.Parse(FileStr);
 
-	for (auto& Filed : Document["CraftingDatas"].GetArray())
+	for (auto& Filed : Document["CraftingData"].GetArray())
 	{
 		st_CraftingItemCategory* CraftingItemCategory = new st_CraftingItemCategory();
 
@@ -2627,7 +2627,7 @@ void CDataManager::LoadDataCraftingTable(wstring LoadFileName)
 	rapidjson::Document Document;
 	Document.Parse(FileStr);
 
-	for (auto& Filed : Document["CraftingTable"].GetArray())
+	for (auto& Filed : Document["CraftingTableData"].GetArray())
 	{
 		st_CraftingTableRecipe* CraftingTableRecipe = new st_CraftingTableRecipe();
 
