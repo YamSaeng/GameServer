@@ -30,6 +30,8 @@ enum class en_GameObjectType : int16
 	OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE,
 	OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL,	
 
+	OBJECT_TILE,
+
 	OBJECT_CROP,
 	OBJECT_CROP_POTATO,
 
@@ -386,7 +388,7 @@ enum class en_ConsumableType : int16
 	SKILL_BOOK
 };
 
-enum class en_TileMapEnvironment : int8
+enum class en_MapObjectInfo : int8
 {
 	TILE_MAP_NONE = 0,
 	TILE_MAP_WALL,
@@ -397,6 +399,12 @@ enum class en_TileMapEnvironment : int8
 	TILE_MAP_FURNACE,
 	TILE_MAP_SAMILL,
 	TILE_MAP_POTATO	
+};
+
+enum class en_MapTileInfo : int8
+{
+	MAP_TILE_USER_FREE = 0,
+	MAP_TILE_USER_ALLOC
 };
 
 enum class en_GameObjectJobType : int16
@@ -443,6 +451,18 @@ enum class en_AggroCategory : int8
 {
 	AGGRO_CATEGORY_DAMAGE,
 	AGGRO_CATEGORY_HEAL
+};
+
+// 한 타일에 존재 할 수 있는 아이템의 최대 종류 개수
+enum class en_MapItemInfo : int8
+{
+	MAP_ITEM_COUNT_MAX = 20
+};
+
+enum class en_OptionType : int8
+{
+	OPTION_TYPE_NONE = 0,
+	OPTION_TYPE_TILE_BUY
 };
 
 namespace UnityEngine
@@ -1756,12 +1776,6 @@ namespace UnityEngine
 	};
 }
 
-// 한 타일에 존재 할 수 있는 아이템의 최대 종류 개수
-enum class en_MapItemInfo : int8
-{
-	MAP_ITEM_COUNT_MAX = 20
-};
-
 struct st_Vector2
 {
 	static constexpr float PI = { 3.14159265358979323846f };
@@ -2432,4 +2446,17 @@ struct st_MapInfo
 	wstring MapName;
 	int32 MapSectorSize;
 	int8 ChannelCount;
+};
+
+struct st_TileMapInfo
+{	
+	en_MapTileInfo MapTileType;
+	int64 AccountID;
+	int64 PlayerID;
+};
+
+struct st_OptionItemInfo
+{
+	en_OptionType OptionType;
+	wstring OptionName;
 };
