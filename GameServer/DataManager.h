@@ -78,6 +78,8 @@ public:
 
 	map<int64, st_MapInfoData*> _MapInfoDatas;
 
+	map<int8, st_OptionItemInfo*> _OptionItemInfoDatas;
+
 	CDataManager()
 	{
 
@@ -104,6 +106,7 @@ public:
 	void LoadDataCrafting(wstring LoadFileName);
 	void LoadDataCraftingTable(wstring LoadFileName);
 	void LoadDataMapInfo(wstring LoadFileName);
+	void LoadDataOptionInfo(wstring LoadFileName);
 
 	st_SkillData* FindSkillData(en_SkillMediumCategory FindSkillMediumCategory, en_SkillType FindSkillType);
 	st_ObjectStatusData* FindObjectStatusData(en_GameObjectType GameObjectType, int16 Level);

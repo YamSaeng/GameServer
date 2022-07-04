@@ -2754,6 +2754,31 @@ void CDataManager::LoadDataMapInfo(wstring LoadFileName)
 	}
 }
 
+void CDataManager::LoadDataOptionInfo(wstring LoadFileName)
+{
+	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());
+
+	rapidjson::Document Document;
+	Document.Parse(FileStr);
+
+	for (auto& Field : Document["OptionInfo"].GetArray())
+	{
+		st_OptionItemInfo* OptionItemInfo = new	st_OptionItemInfo();
+
+		string OptionName = Field["OptionName"].GetString();
+		string OptionType = Field["OptionType"].GetString();
+		
+		OptionItemInfo->OptionName = (LPWSTR)CA2W(OptionName.c_str());
+
+		if (OptionType == "TileBuy")
+		{
+			OptionItemInfo->OptionType = en_OptionType::OPTION_TYPE_TILE_BUY;
+		}
+		
+		_OptionItemInfoDatas.insert(pair<int8, st_OptionItemInfo*>((int8)OptionItemInfo->OptionType, OptionItemInfo));
+	}
+}
+
 st_SkillData* CDataManager::FindSkillData(en_SkillMediumCategory FindAttackSkillMediumCategory, en_SkillType FindSkillType)
 {
 	switch (FindAttackSkillMediumCategory)
