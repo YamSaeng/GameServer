@@ -234,6 +234,9 @@ void CGameObject::Update()
 					case en_GameObjectType::OBJECT_TREE:
 						ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"나무 벌목");
 						break;
+					case en_GameObjectType::OBJECT_CROP_POTATO:
+						ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"감자 수확");
+						break;
 					default:
 						CRASH("채집할 수 없는 채집물 채집 요청");
 						break;
@@ -382,7 +385,10 @@ void CGameObject::Update()
 					// 아이템 개수가 맞는지 확인
 					if (FindDropItem->_ItemInfo.ItemCount >= DropItemCount)
 					{
-						G_ObjectManager->ObjectItemDropToSpawn((en_SmallItemCategory)DropItemType, DropItemCount, Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);					
+						G_ObjectManager->ObjectItemDropToSpawn((en_SmallItemCategory)DropItemType, 
+							DropItemCount,
+							Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition,
+							Player->_GameObjectInfo.ObjectPositionInfo.Position);					
 
 						FindDropItem->_ItemInfo.ItemCount -= DropItemCount;
 
@@ -576,7 +582,7 @@ void CGameObject::Update()
 					CItem* InsertItem = CraftingTableItemSubtractPlayer->_InventoryManager.InsertItem(0, (en_SmallItemCategory)SubtractItemSmallCategory, SubtractItemCount, &IsExistItem);
 
 					CMessage* InsertItemToInventoryPacket = G_ObjectManager->GameServer->MakePacketResItemToInventory(CraftingTableItemSubtractPlayer->_GameObjectInfo.ObjectId,
-						InsertItem,
+						InsertItem->_ItemInfo,
 						IsExistItem,
 						SubtractItemCount);
 					G_ObjectManager->GameServer->SendPacket(CraftingTableItemSubtractPlayer->_SessionId, InsertItemToInventoryPacket);
@@ -644,7 +650,7 @@ void CGameObject::Update()
 					CItem* InsertItem = CraftingTableItemSubtractPlayer->_InventoryManager.InsertItem(0, (en_SmallItemCategory)SubtractItemSmallCategory, SubtractItemCount, &IsExistItem);
 
 					CMessage* InsertItemToInventoryPacket = G_ObjectManager->GameServer->MakePacketResItemToInventory(CraftingTableItemSubtractPlayer->_GameObjectInfo.ObjectId,
-						InsertItem,
+						InsertItem->_ItemInfo,
 						IsExistItem,
 						SubtractItemCount);
 					G_ObjectManager->GameServer->SendPacket(CraftingTableItemSubtractPlayer->_SessionId, InsertItemToInventoryPacket);
