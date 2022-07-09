@@ -470,4 +470,17 @@ namespace SP
 		void InRequireExperience(int64& RequireExperience) { BindParam(21, RequireExperience); }
 		void InTotalExperience(int64& TotalExperience) { BindParam(22, TotalExperience); }
 	};
+
+	// 타일 맵 정보 할당 및 해제
+	class CDBGameServerTileMapInfoSave : public CDBBind<6, 0>
+	{
+	public:
+		CDBGameServerTileMapInfoSave(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spTileMapInfoSave(?,?,?,?,?,?)}") {}
+		void InMapID(int16& MapID) { BindParam(0, MapID); }
+		void InMapTileAllocFree(bool& MapTileAllocFree) { BindParam(1, MapTileAllocFree); }
+		void InMapTileAccountID(int64& MapTileAccountID) { BindParam(2, MapTileAccountID); }
+		void InMapTilePlayerID(int64& MapTilePlayerID) { BindParam(3, MapTilePlayerID); }
+		void InMapTilePositionX(int32& MapTilePositionX) { BindParam(4, MapTilePositionX); }
+		void InMapTilePositionY(int32& MapTilePositionY) { BindParam(5, MapTilePositionY); }
+	};
 }
