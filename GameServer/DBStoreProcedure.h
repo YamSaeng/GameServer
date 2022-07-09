@@ -483,4 +483,17 @@ namespace SP
 		void InMapTilePositionX(int32& MapTilePositionX) { BindParam(4, MapTilePositionX); }
 		void InMapTilePositionY(int32& MapTilePositionY) { BindParam(5, MapTilePositionY); }
 	};
+
+	// 타일 맵 할당 및 해제 정보 가져오기
+	class CDBGameServerGetTileMapInfoAllocFree : public CDBBind<1, 5>
+	{
+	public:
+		CDBGameServerGetTileMapInfoAllocFree(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spGetTileMapInfoAllocFree(?)}") {}
+		void InMapID(int16& MapID) { BindParam(0, MapID); }
+		void OutMapTileAllocFree(bool& MapTileAllocFree) { BindCol(0, MapTileAllocFree); }
+		void OutMapTileAccountID(int64& MapTileAccountID) { BindCol(1, MapTileAccountID); }
+		void OutMapTilePlayerID(int64& MapTilePlayerID) { BindCol(2, MapTilePlayerID); }
+		void OutMapTilePositionX(int32& MapTilePositionX) { BindCol(3, MapTilePositionX); }
+		void OutMapTilePositionY(int32& MapTilePositionY) { BindCol(4, MapTilePositionY); }
+	};
 }

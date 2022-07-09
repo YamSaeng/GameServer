@@ -759,4 +759,17 @@
 		  ]]>
 	  </Body>
   </Procedure>
+	
+  <!-- 지도 타일 정보 가져오기 -->
+	<Procedure name="spGetTileMapInfoAllocFree">
+		<Param name="@MapID" type="SmallInt"/>
+		<Body>
+			<![CDATA[
+			    SET NOCOUNT ON
+				SELECT MapTileAllocFree, MapTileAccountID, MapTilePlayerID, MapTilePositionX, MapTilePositionY
+                FROM [dbo].[MapTile]
+                WHERE MapID = (@MapID)
+			]]>
+		</Body>
+	</Procedure>
 </GameServerDB>
