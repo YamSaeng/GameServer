@@ -120,6 +120,7 @@ bool CStone::OnDamaged(CGameObject* Attacker, int32 Damage)
 		G_ObjectManager->ObjectItemSpawn(Attacker->_GameObjectInfo.ObjectId,
 			Attacker->_GameObjectInfo.ObjectType,
 			_GameObjectInfo.ObjectPositionInfo.CollisionPosition,
+			_GameObjectInfo.ObjectPositionInfo.Position,
 			_GameObjectInfo.ObjectType,
 			en_GameObjectType::OBJECT_STONE);
 	}
@@ -173,6 +174,7 @@ bool CTree::OnDamaged(CGameObject* Attacker, int32 Damage)
 		G_ObjectManager->ObjectItemSpawn(Attacker->_GameObjectInfo.ObjectId,
 			Attacker->_GameObjectInfo.ObjectType,
 			_GameObjectInfo.ObjectPositionInfo.CollisionPosition,
+			_GameObjectInfo.ObjectPositionInfo.Position,
 			_GameObjectInfo.ObjectType,
 			en_GameObjectType::OBJECT_TREE);
 	}

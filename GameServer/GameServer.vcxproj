@@ -158,6 +158,7 @@
     <ClInclude Include="ChannelManager.h" />
     <ClInclude Include="CommonProtocol.h" />
     <ClInclude Include="CraftingTable.h" />
+    <ClInclude Include="Crop.h" />
     <ClInclude Include="Data.h" />
     <ClInclude Include="DataManager.h" />
     <ClInclude Include="DBBind.h" />
@@ -186,6 +187,7 @@
     <ClInclude Include="Macro.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="MapManager.h" />
+    <ClInclude Include="MapTile.h" />
     <ClInclude Include="MemoryPoolTLS.h" />
     <ClInclude Include="Message.h" />
     <ClInclude Include="Monster.h" />
@@ -194,6 +196,7 @@
     <ClInclude Include="ObjectPoolFreeList.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Potato.h" />
     <ClInclude Include="QuickSlotBar.h" />
     <ClInclude Include="QuickSlotManager.h" />
     <ClInclude Include="rapidxml.hpp" />
@@ -220,6 +223,7 @@
     </ClCompile>
     <ClCompile Include="ChannelManager.cpp" />
     <ClCompile Include="CraftingTable.cpp" />
+    <ClCompile Include="Crop.cpp" />
     <ClCompile Include="Data.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -291,6 +295,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="MapManager.cpp" />
+    <ClCompile Include="MapTile.cpp" />
     <ClCompile Include="Message.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -307,6 +312,7 @@
     <ClCompile Include="ObjectManager.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Potato.cpp" />
     <ClCompile Include="QuickSlotBar.cpp" />
     <ClCompile Include="QuickSlotManager.cpp" />
     <ClCompile Include="Sawmill.cpp" />
@@ -330,6 +336,7 @@
     <None Include="ArcherSkillDatas.json" />
     <None Include="CraftingData.json" />
     <None Include="CraftingTableData.json" />
+    <None Include="CropData.json" />
     <None Include="EnvironmentData.json" />
     <None Include="ItemData.json" />
     <None Include="CharacterLevelingData.json" />
@@ -337,6 +344,7 @@
     <None Include="MonsterAggroData.json" />
     <None Include="MonsterData.json" />
     <None Include="MonsterSkillDatas.json" />
+    <None Include="OptionData.json" />
     <None Include="PublicSkillDatas.json" />
     <None Include="ShamanSkillDatas.json" />
     <None Include="PlayerCharacterStatus.json" />
@@ -345,14 +353,15 @@
     <None Include="WarriorSkillDatas.json" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="MapData.txt" />
+    <Text Include="Start_FieldObjectInfoData.txt" />
+    <Text Include="Start_FieldTileInfoData.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties ItemData_1json__JsonSchema="https://github.com/fbecart/zinoma/releases/latest/download/zinoma-schema.json" />
+      <UserProperties />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

@@ -192,6 +192,14 @@ private:
 	//------------------------------------------------------------------
 	void PacketProcReqItemUse(int64 SessionId, CMessage* Message);
 	//------------------------------------------------------------------
+	// 사유지 구입 UI 요청 처리
+	//------------------------------------------------------------------
+	void PacketProcReqUIMenuTileBuy(int64 SessionID, CMessage* Message);
+	//------------------------------------------------------------------
+	// 사유지 구입 요청 처리
+	//------------------------------------------------------------------
+	void PacketProcReqTileBuy(int64 SessionID, CMessage* Message);
+	//------------------------------------------------------------------
 	// 아이템 줍기 요청 처리
 	//------------------------------------------------------------------
 	void PacketProcReqItemLooting(int64 SessionId, CMessage* Message);
@@ -236,18 +244,10 @@ private:
 	// 생성요청한 캐릭터가 DB에 있는지 확인 후 캐릭터 생성
 	//-------------------------------------------------------------------------------
 	void PacketProcReqDBCreateCharacterNameCheck(CMessage* Message);	
-	//------------------------------------------------------------------
-	// 가방 테이블에 제작템 저장
-	//------------------------------------------------------------------
-	void PacketProcReqDBCraftingItemToInventorySave(CGameServerMessage* Message);	
 	//---------------------------------------------------------------
 	// 가방 테이블에 아이템 업데이트
 	//---------------------------------------------------------------
-	void PacketProcReqDBItemUpdate(CGameServerMessage* Message);
-	//---------------------------------------------------------------
-	// 가방에 돈 저장
-	//---------------------------------------------------------------
-	void PacketProcReqDBGoldSave(CMessage* Message);
+	void PacketProcReqDBItemUpdate(CGameServerMessage* Message);	
 	//-----------------------------------------------------------------------
 	// 게임 서버 접속시 캐릭터 정보를 DB에서 가져와서 클라에 전송
 	//-----------------------------------------------------------------------
@@ -370,11 +370,7 @@ private:
 	//-----------------------------------------------------------------------------------------------------------------------------
 	// 게임서버 제작대 선택풀림 요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResCraftingTableNonSelect(int64 CraftingTableObjectID, en_GameObjectType CraftingTableObjectType);
-	//-------------------------------------------------------------------------------------------------------------------------
-	// 게임서버 돈 저장 요청 응답 패킷 조합
-	//-------------------------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResGoldSave(int64 AccountId, int64 ObjectId, int64 GoldCount, int16 SliverCount, int16 BronzeCount, int16 ItemCount, int16 ItemType, bool ItemGainPrint = true);
+	CGameServerMessage* MakePacketResCraftingTableNonSelect(int64 CraftingTableObjectID, en_GameObjectType CraftingTableObjectType);	
 	//---------------------------------------------------------------------------------------------
 	// 게임서버 가방 아이템 선택 요청 응답 패킷 조합
 	//---------------------------------------------------------------------------------------------
@@ -386,7 +382,7 @@ private:
 	//------------------------------------------------------------------------------------------------------------------------------------------------------
 	// 게임서버 가방 돈 저장 요청 응답 패킷 조합
 	//------------------------------------------------------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResMoneyToInventory(int64 TargetObjectID, int64 GoldCoinCount, int16 SliverCoinCount, int16 BronzeCoinCount, en_SmallItemCategory ItemCategory, int16 ItemEach);	
+	CGameServerMessage* MakePacketResMoneyToInventory(int64 TargetObjectID, int64 GoldCoinCount, int16 SliverCoinCount, int16 BronzeCoinCount, st_ItemInfo ItemInfo, int16 ItemEach);	
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 가방 아이템 사용 요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -419,6 +415,14 @@ private:
 	// 게임서버 제작대 제작 아이템 선택 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResCraftingTableCompleteItemSelect(int64 CraftingTableObjectID, en_SmallItemCategory SelectCompleteType, map<en_SmallItemCategory, CItem*> MaterialItems);	
+	//----------------------------------------------------------------------------------------------	
+	// 게임서버 메뉴 UI 타일 구입 응답 패킷 조합
+	//----------------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResMenuTileBuy(vector<st_TileMapInfo> AroundMapTile);
+	//-----------------------------------------------------------------------------------------
+	// 게임서버 타일 구입 응답 패킷 조합
+	//-----------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResTileBuy(st_Vector2Int BuyTilePosition);
 	
 	//-------------------------------------------------
 	// 게임서버 핑 패킷 조합
@@ -443,6 +447,11 @@ public:
 	// 데미지 처리 잡 생성 함수
 	//-------------------------------------------------------------------------------
 	st_GameObjectJob* MakeGameObjectDamage(CGameObject* Attacker, int32 Damage);
+	//-------------------------------------------------------------------------------
+	// 체력 회복 잡 생성 함수
+	//-------------------------------------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobHeal(CGameObject* Healer, int32 HealPoint);
+
 	//-------------------------------------------------------------
 	// 게임서버 입장 요청 응답 패킷 조합
 	//-------------------------------------------------------------
@@ -586,7 +595,7 @@ public:
 	//-------------------------------------------------------------------------------------------------------------------------
 	// 게임서버 아이템 가방 저장 요청 응답 패킷 조합
 	//-------------------------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResItemToInventory(int64 TargetObjectId, CItem* InventoryItem, bool IsExist, int16 ItemEach, bool ItemGainPrint = true);
+	CGameServerMessage* MakePacketResItemToInventory(int64 TargetObjectId, st_ItemInfo InventoryItem, bool IsExist, int16 ItemEach, bool ItemGainPrint = true);
 	//-----------------------------------------------------------------------------------------------
 	// 게임서버 제작대 재료 아이템 목록 패킷 조합
 	//-----------------------------------------------------------------------------------------------

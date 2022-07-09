@@ -97,6 +97,24 @@
     <Filter Include="Util\Json,Xml\Data\Monster">
       <UniqueIdentifier>{7da3bb6d-d535-4bd8-a627-4b2d8958413e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ContentServer\Content\GameObject\Crops">
+      <UniqueIdentifier>{24836bc5-013d-4578-867b-58b7159bc0e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util\Json,Xml\Data\Crop">
+      <UniqueIdentifier>{09e277f0-eaa0-4510-9869-5230e0eeeabf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util\Json,Xml\Data\Environment">
+      <UniqueIdentifier>{24440327-9226-4430-b564-e53e286f89d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util\Json,Xml\Data\Item">
+      <UniqueIdentifier>{30bd0dcb-e498-4466-b369-27dc88302a86}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util\Json,Xml\Data\OptionData">
+      <UniqueIdentifier>{28b4cf46-a5c4-4846-ba53-b248d761eced}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util\Json,Xml\Data\MapData">
+      <UniqueIdentifier>{ebf7066d-d5df-4931-a9ca-4a9c65858d2e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Type.h">
@@ -263,6 +281,15 @@
     <ClInclude Include="Sawmill.h">
       <Filter>ContentServer\Content\GameObject\CraftingTable</Filter>
     </ClInclude>
+    <ClInclude Include="Crop.h">
+      <Filter>ContentServer\Content\GameObject\Crops</Filter>
+    </ClInclude>
+    <ClInclude Include="Potato.h">
+      <Filter>ContentServer\Content\GameObject\Crops</Filter>
+    </ClInclude>
+    <ClInclude Include="MapTile.h">
+      <Filter>ContentServer\Content\Map</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -378,6 +405,15 @@
     <ClCompile Include="Sawmill.cpp">
       <Filter>ContentServer\Content\GameObject\CraftingTable</Filter>
     </ClCompile>
+    <ClCompile Include="Crop.cpp">
+      <Filter>ContentServer\Content\GameObject\Crops</Filter>
+    </ClCompile>
+    <ClCompile Include="Potato.cpp">
+      <Filter>ContentServer\Content\GameObject\Crops</Filter>
+    </ClCompile>
+    <ClCompile Include="MapTile.cpp">
+      <Filter>ContentServer\Content\Map</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="DBConfig.xml">
@@ -387,17 +423,11 @@
       <Filter>Util\Json,Xml\Server</Filter>
     </Xml>
     <Xml Include="GameServerDB.xml">
-      <Filter>Util\Json,Xml\Server</Filter>
+      <Filter>Util\Json,Xml\DB</Filter>
     </Xml>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ItemData.json">
-      <Filter>Util\Json,Xml\Data</Filter>
-    </None>
     <None Include="PlayerCharacterStatus.json">
-      <Filter>Util\Json,Xml\Data</Filter>
-    </None>
-    <None Include="EnvironmentData.json">
       <Filter>Util\Json,Xml\Data</Filter>
     </None>
     <None Include="CharacterLevelingData.json">
@@ -424,9 +454,6 @@
     <None Include="ThiefSkillDatas.json">
       <Filter>Util\Json,Xml\Data\SkillData</Filter>
     </None>
-    <None Include="MapInfoData.json">
-      <Filter>Util\Json,Xml\Data</Filter>
-    </None>
     <None Include="CraftingTableData.json">
       <Filter>Util\Json,Xml\Data\CraftingData</Filter>
     </None>
@@ -439,10 +466,28 @@
     <None Include="MonsterAggroData.json">
       <Filter>Util\Json,Xml\Data\Monster</Filter>
     </None>
+    <None Include="CropData.json">
+      <Filter>Util\Json,Xml\Data\Crop</Filter>
+    </None>
+    <None Include="EnvironmentData.json">
+      <Filter>Util\Json,Xml\Data\Environment</Filter>
+    </None>
+    <None Include="ItemData.json">
+      <Filter>Util\Json,Xml\Data\Item</Filter>
+    </None>
+    <None Include="OptionData.json">
+      <Filter>Util\Json,Xml\Data\OptionData</Filter>
+    </None>
+    <None Include="MapInfoData.json">
+      <Filter>Util\Json,Xml\Data\MapData</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="MapData.txt">
-      <Filter>Util\Json,Xml\Data</Filter>
+    <Text Include="Start_FieldObjectInfoData.txt">
+      <Filter>Util\Json,Xml\Data\MapData</Filter>
+    </Text>
+    <Text Include="Start_FieldTileInfoData.txt">
+      <Filter>Util\Json,Xml\Data\MapData</Filter>
     </Text>
   </ItemGroup>
 </Project>

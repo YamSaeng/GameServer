@@ -84,6 +84,7 @@ bool CSlime::OnDamaged(CGameObject* Attacker, int32 Damage)
 		G_ObjectManager->ObjectItemSpawn(Attacker->_GameObjectInfo.ObjectId,
 			Attacker->_GameObjectInfo.ObjectType,
 			_GameObjectInfo.ObjectPositionInfo.CollisionPosition,
+			_GameObjectInfo.ObjectPositionInfo.Position,
 			_GameObjectInfo.ObjectType, en_GameObjectType::OBJECT_SLIME);
 
 		Attacker->_GameObjectInfo.ObjectStatInfo.DP += _GetDPPoint;
