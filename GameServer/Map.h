@@ -61,7 +61,7 @@ struct st_AStarNodeInt
 class CMap
 {
 public:
-	int64 _MapID;
+	int16 _MapID;
 
 	wstring _MapName;
 
@@ -97,7 +97,7 @@ public:
 	CMap();
 	~CMap();
 
-	void MapInit(int64 MapID, wstring MapName, int32 SectorSize, int8 ChannelCount);
+	void MapInit(int16 MapID, wstring MapName, int32 SectorSize, int8 ChannelCount);
 
 	CSector* GetSector(st_Vector2Int CellPosition);
 	CSector* GetSector(int32 IndexY, int32 IndexX);

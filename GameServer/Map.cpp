@@ -8,6 +8,8 @@
 #include "Item.h"
 #include "CraftingTable.h"
 #include "Crop.h"
+#include "DBConnectionPool.h"
+#include "DBStoreProcedure.h"
 
 CMap::CMap()
 {
@@ -34,7 +36,7 @@ CMap::~CMap()
 	}
 }
 
-void CMap::MapInit(int64 MapID, wstring MapName, int32 SectorSize, int8 ChannelCount)
+void CMap::MapInit(int16 MapID, wstring MapName, int32 SectorSize, int8 ChannelCount)
 {
 	_MapID = MapID;
 	_MapName = MapName;
@@ -112,7 +114,46 @@ void CMap::MapInit(int64 MapID, wstring MapName, int32 SectorSize, int8 ChannelC
 #pragma endregion	
 
 #pragma region 맵 타일 정보 읽기
+	// DB에서 맵 타일 정보를 읽어옴
+	CDBConnection* GetTileMapInfoAllocFreeDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+	SP::CDBGameServerGetTileMapInfoAllocFree GetTileMapInfoAllocFree(*GetTileMapInfoAllocFreeDBConnection);	
+
+	GetTileMapInfoAllocFree.InMapID(_MapID);
+
+	bool MapTileAllocFree;
+	int64 MapTileAccountID;
+	int64 MapTilePlayerID;
+	int32 MapTilePositionX;
+	int32 MapTilePositionY;
+
+	GetTileMapInfoAllocFree.OutMapTileAllocFree(MapTileAllocFree);
+	GetTileMapInfoAllocFree.OutMapTileAccountID(MapTileAccountID);
+	GetTileMapInfoAllocFree.OutMapTilePlayerID(MapTilePlayerID);
+	GetTileMapInfoAllocFree.OutMapTilePositionX(MapTilePositionX);
+	GetTileMapInfoAllocFree.OutMapTilePositionY(MapTilePositionY);
+
+	GetTileMapInfoAllocFree.Execute();
+
 	vector<st_TileMapInfo> TileMapInfos;
+
+	while (GetTileMapInfoAllocFree.Fetch())
+	{		
+		st_TileMapInfo TileMapInfo;
+
+		if (MapTileAllocFree == true)
+		{
+			TileMapInfo.MapTileType = en_MapTileInfo::MAP_TILE_USER_ALLOC;
+
+			TileMapInfo.AccountID = MapTileAccountID;
+			TileMapInfo.PlayerID = MapTilePlayerID;
+			TileMapInfo.TilePosition._X = MapTilePositionX;
+			TileMapInfo.TilePosition._Y = MapTilePositionY;
+
+			TileMapInfos.push_back(TileMapInfo);
+		}
+	}
+
+	G_DBConnectionPool->Push(en_DBConnect::GAME, GetTileMapInfoAllocFreeDBConnection);	
 
 	_TileMapInfos = new st_TileMapInfo * [YCount];
 
@@ -148,6 +189,13 @@ void CMap::MapInit(int64 MapID, wstring MapName, int32 SectorSize, int8 ChannelC
 		}
 
 		TileInfoDataConvertP += 2;
+	}
+
+	for (st_TileMapInfo TileMapInfo : TileMapInfos)
+	{
+		_TileMapInfos[TileMapInfo.TilePosition._Y][TileMapInfo.TilePosition._X].MapTileType = TileMapInfo.MapTileType;
+		_TileMapInfos[TileMapInfo.TilePosition._Y][TileMapInfo.TilePosition._X].AccountID = TileMapInfo.AccountID;
+		_TileMapInfos[TileMapInfo.TilePosition._Y][TileMapInfo.TilePosition._X].PlayerID = TileMapInfo.PlayerID;		
 	}
 #pragma endregion
 
