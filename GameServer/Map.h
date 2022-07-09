@@ -74,9 +74,14 @@ public:
 	int32 _SizeY;
 
 	//-----------------------------------------
-	// 맵 타일의 정보를 보관
+	// 맵 환경 오브젝트의 정보를 보관
 	//-----------------------------------------
-	en_TileMapEnvironment** _CollisionMapInfos;
+	en_MapObjectInfo** _CollisionMapInfos;
+
+	//-----------------------------------------
+	// 맵의 타일 정보를 보관 ( 할당되었는지 아닌지 )
+	//-----------------------------------------
+	st_TileMapInfo** _TileMapInfos;
 
 	//-------------------------------------
 	//맵 타일에 존재하는 게임 오브젝트 정보
@@ -133,6 +138,11 @@ public:
 	//-------------------------------------------
 	CItem** FindItem(st_Vector2Int& ItemCellPosition);
 
+	//----------------------------------------------------------------------
+	// 요청한 오브젝트 시야 범위 안에 있는 타일 정보 반환
+	//----------------------------------------------------------------------
+	vector<st_TileMapInfo> FindMapTileInfo(CGameObject* Player);
+
 	bool Cango(CGameObject* Object, float X, float Y);
 	//----------------------------------------------------------------------------
 	// 위치로 갈 수 있는지 확인
@@ -147,16 +157,29 @@ public:
 	// ApplyCollision = 해당 함수를 호출 해준 오브젝트를 충돌 대상으로 여길 것인지에 대한 여부
 	//------------------------------------------------------------------------------------------------------------------------
 	bool ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool CheckObject = true, bool Applycollision = true);
-
-	bool ApplyPositionUpdateItem(CItem* ItemObject, st_Vector2Int& NewPosition);
-
 	//---------------------------------------
 	// 맵에서 오브젝트 퇴장
 	//---------------------------------------
 	bool ApplyLeave(CGameObject* GameObject);
 
+	//--------------------------------------------------------------------------
+	// 아이템을 맵에 저장
+	//--------------------------------------------------------------------------
+	bool ApplyPositionUpdateItem(CItem* ItemObject, st_Vector2Int& NewPosition);
+	//---------------------------------------------------
+	// 아이템을 맵에서 퇴장
+	//---------------------------------------------------
 	bool ApplyPositionLeaveItem(CGameObject* GameObject);
 
+	//-----------------------------------------------------------------------------------------------
+	// 등록하고자 하는 사유지의 좌표값을 받아서 등록
+	//-----------------------------------------------------------------------------------------------
+	bool ApplyTileUserAlloc(CGameObject* ReqTileUserAllocObject, st_Vector2Int TileUserAllocPosition);
+	//-----------------------------------------------------------------------------------------------
+	// 해제하고자 하는 사유지의 좌표값을 받아서 해제
+	//-----------------------------------------------------------------------------------------------
+	bool ApplyTileUseFree(CGameObject* ReqTileUserFreeObject, st_Vector2Int TileUserFreePosition);
+	
 	st_PositionInt CellToPositionInt(st_Vector2Int CellPosition);
 	st_Vector2Int PositionToCellInt(st_PositionInt Position);
 

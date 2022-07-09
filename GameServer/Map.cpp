@@ -11,100 +11,7 @@
 
 CMap::CMap()
 {
-	char* FileStr = FileUtils::LoadFile(L"MapData.txt");
-	char* MovingFileP = FileStr;
-	char* ConvertP = FileStr;
-
-	int i = 0;
-	while (true)
-	{
-		if (*MovingFileP == '\n')
-		{
-			if (i == 0)
-			{
-				_Left = atoi(ConvertP);
-				ConvertP = MovingFileP;
-				i++;
-			}
-			else if (i == 1)
-			{
-				_Right = atoi(ConvertP);
-				ConvertP = MovingFileP;
-				i++;
-			}
-			else if (i == 2)
-			{
-				_Up = atoi(ConvertP);
-				ConvertP = MovingFileP;
-				i++;
-			}
-			else if (i == 3)
-			{
-				_Down = atoi(ConvertP);
-				ConvertP = MovingFileP + 1;
-				i++;
-				break;
-			}
-		}
-
-		MovingFileP++;
-	}
-
-	int XCount = _Right - _Left + 1;
-	int YCount = _Down - _Up + 1;
-
-	_CollisionMapInfos = new en_TileMapEnvironment*[YCount];
-
-	for (int i = 0; i < YCount; i++)
-	{
-		_CollisionMapInfos[i] = new en_TileMapEnvironment[XCount];
-	}
-
-	_ObjectsInfos = new CGameObject**[YCount];
-
-	for (int i = 0; i < YCount; i++)
-	{
-		_ObjectsInfos[i] = new CGameObject*[XCount];
-		for (int j = 0; j < XCount; j++)
-		{
-			_ObjectsInfos[i][j] = nullptr;
-		}
-	}
-
-	_Items = new CItem***[YCount];
-
-	for (int i = 0; i < YCount; i++)
-	{
-		_Items[i] = new CItem**[XCount];
-		for (int j = 0; j < XCount; j++)
-		{
-			_Items[i][j] = new CItem*[(int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX];
-
-			for (int8 k = 0; k < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; k++)
-			{
-				_Items[i][j][k] = nullptr;
-			}
-		}
-	}
-
-	for (int Y = 0; Y < YCount; Y++)
-	{
-		for (int X = 0; X < XCount; X++)
-		{
-			if (*ConvertP == '\r')
-			{
-				break;
-			}
-
-			_CollisionMapInfos[Y][X] = (en_TileMapEnvironment)(*ConvertP - 48);
-
-			ConvertP++;
-		}
-		ConvertP += 2;
-	}
-
-	_SizeX = _Right - _Left + 1;
-	_SizeY = _Down - _Up + 1;
+	
 }
 
 CMap::~CMap()
@@ -131,6 +38,148 @@ void CMap::MapInit(int64 MapID, wstring MapName, int32 SectorSize, int8 ChannelC
 {
 	_MapID = MapID;
 	_MapName = MapName;
+
+	// 맵 오브젝트 정보 읽기
+#pragma region 맵 오브젝트 정보 읽기
+	wstring ObjectInfoData = MapName + L"ObjectInfoData.txt";
+
+	char* MapObjectInfoDataFileStr = FileUtils::LoadFile(ObjectInfoData.c_str());
+	char* MapObjectInfoDataMovingFileP = MapObjectInfoDataFileStr;
+	char* MapObjectInfoDataConvertP = MapObjectInfoDataFileStr;
+
+	int MapObjectInfoDataCount = 0;
+	while (true)
+	{
+		if (*MapObjectInfoDataMovingFileP == '\n')
+		{
+			if (MapObjectInfoDataCount == 0)
+			{
+				_Left = atoi(MapObjectInfoDataConvertP);
+				MapObjectInfoDataConvertP = MapObjectInfoDataMovingFileP;
+				MapObjectInfoDataCount++;
+			}
+			else if (MapObjectInfoDataCount == 1)
+			{
+				_Right = atoi(MapObjectInfoDataConvertP);
+				MapObjectInfoDataConvertP = MapObjectInfoDataMovingFileP;
+				MapObjectInfoDataCount++;
+			}
+			else if (MapObjectInfoDataCount == 2)
+			{
+				_Up = atoi(MapObjectInfoDataConvertP);
+				MapObjectInfoDataConvertP = MapObjectInfoDataMovingFileP;
+				MapObjectInfoDataCount++;
+			}
+			else if (MapObjectInfoDataCount == 3)
+			{
+				_Down = atoi(MapObjectInfoDataConvertP);
+				MapObjectInfoDataConvertP = MapObjectInfoDataMovingFileP + 1;
+				MapObjectInfoDataCount++;
+				break;
+			}
+		}
+
+		MapObjectInfoDataMovingFileP++;
+	}
+
+	int XCount = _Right - _Left + 1;
+	int YCount = _Down - _Up + 1;
+
+	int YCountXCount = YCount * XCount;
+
+	_CollisionMapInfos = new en_MapObjectInfo * [YCount];
+
+	for (int i = 0; i < YCount; i++)
+	{
+		_CollisionMapInfos[i] = new en_MapObjectInfo[XCount];
+	}	
+
+	for (int Y = 0; Y < YCount; Y++)
+	{
+		for (int X = 0; X < XCount; X++)
+		{
+			if (*MapObjectInfoDataConvertP == '\r')
+			{
+				break;
+			}
+
+			_CollisionMapInfos[Y][X] = (en_MapObjectInfo)(*MapObjectInfoDataConvertP - 48);			
+
+			MapObjectInfoDataConvertP++;
+		}
+		MapObjectInfoDataConvertP += 2;
+	}	
+#pragma endregion	
+
+#pragma region 맵 타일 정보 읽기
+	vector<st_TileMapInfo> TileMapInfos;
+
+	_TileMapInfos = new st_TileMapInfo * [YCount];
+
+	for (int i = 0; i < YCount; i++)
+	{
+		_TileMapInfos[i] = new st_TileMapInfo[XCount];		
+	}
+
+	// DB TileMap 정보에 접근 타일 기록 읽어옴
+	wstring TileInfoInfoData = MapName + L"TileInfoData.txt";
+
+	char* TileInfoDataFileStr = FileUtils::LoadFile(TileInfoInfoData.c_str());
+	char* TileInfoDataMovingFileP = TileInfoDataFileStr;
+	char* TileInfoDataConvertP = TileInfoDataFileStr;
+	
+	for (int Y = 0; Y < YCount; Y++)
+	{
+		for (int X = 0; X < XCount; X++)
+		{
+			if (*TileInfoDataConvertP == '\r')
+			{
+				break;
+			}
+
+			_TileMapInfos[Y][X].MapTileType = (en_MapTileInfo)(*TileInfoDataConvertP - 48);
+			_TileMapInfos[Y][X].AccountID = 0;
+			_TileMapInfos[Y][X].PlayerID = 0;
+
+			_TileMapInfos[Y][X].TilePosition._Y = _Down - Y;
+			_TileMapInfos[Y][X].TilePosition._X = X + _Left;
+
+			TileInfoDataConvertP++;
+		}
+
+		TileInfoDataConvertP += 2;
+	}
+#pragma endregion
+
+	_ObjectsInfos = new CGameObject * *[YCount];
+
+	for (int i = 0; i < YCount; i++)
+	{
+		_ObjectsInfos[i] = new CGameObject * [XCount];
+		for (int j = 0; j < XCount; j++)
+		{
+			_ObjectsInfos[i][j] = nullptr;
+		}
+	}
+
+	_Items = new CItem * **[YCount];
+
+	for (int i = 0; i < YCount; i++)
+	{
+		_Items[i] = new CItem * *[XCount];
+		for (int j = 0; j < XCount; j++)
+		{
+			_Items[i][j] = new CItem * [(int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX];
+
+			for (int8 k = 0; k < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; k++)
+			{
+				_Items[i][j][k] = nullptr;
+			}
+		}
+	}
+
+	_SizeX = _Right - _Left + 1;
+	_SizeY = _Down - _Up + 1;
 
 	_ChannelManager = new CChannelManager();
 	_ChannelManager->Init(this, ChannelCount);
@@ -527,6 +576,32 @@ CItem** CMap::FindItem(st_Vector2Int& ItemCellPosition)
 	return _Items[Y][X];
 }
 
+vector<st_TileMapInfo> CMap::FindMapTileInfo(CGameObject* Player)
+{
+	vector<st_TileMapInfo> TileInfos;
+
+	int X = Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X - _Left;
+	int Y = _Down - Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y;
+
+	// 캐릭터 위치에서 상하좌우 10 크기 만큼 타일 정보 반환
+	int LeftX = X - 5;
+	int UpY = Y + 5;
+	int RightX = X + 5;
+	int DownY = Y - 5;
+	
+	for (; LeftX < RightX; LeftX++)
+	{
+		UpY = Y + 5;
+
+		for (; UpY > DownY; UpY--)
+		{
+			TileInfos.push_back(_TileMapInfos[UpY][LeftX]);
+		}
+	}
+	
+	return TileInfos;
+}
+
 bool CMap::Cango(CGameObject* Object, float X, float Y)
 {
 	st_Vector2Int CollisionPosition;
@@ -558,17 +633,17 @@ bool CMap::CollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool
 	bool IsCollisionMapInfo = false;
 	switch (_CollisionMapInfos[Y][X])
 	{
-	case en_TileMapEnvironment::TILE_MAP_NONE:
-	case en_TileMapEnvironment::TILE_MAP_TREE:
-	case en_TileMapEnvironment::TILE_MAP_STONE:
-	case en_TileMapEnvironment::TILE_MAP_SLIME:
-	case en_TileMapEnvironment::TILE_MAP_BEAR:	
-	case en_TileMapEnvironment::TILE_MAP_FURNACE:
-	case en_TileMapEnvironment::TILE_MAP_SAMILL:
-	case en_TileMapEnvironment::TILE_MAP_POTATO:
+	case en_MapObjectInfo::TILE_MAP_NONE:
+	case en_MapObjectInfo::TILE_MAP_TREE:
+	case en_MapObjectInfo::TILE_MAP_STONE:
+	case en_MapObjectInfo::TILE_MAP_SLIME:
+	case en_MapObjectInfo::TILE_MAP_BEAR:	
+	case en_MapObjectInfo::TILE_MAP_FURNACE:
+	case en_MapObjectInfo::TILE_MAP_SAMILL:
+	case en_MapObjectInfo::TILE_MAP_POTATO:
 		IsCollisionMapInfo = true;
 		break;
-	case en_TileMapEnvironment::TILE_MAP_WALL:
+	case en_MapObjectInfo::TILE_MAP_WALL:
 		IsCollisionMapInfo = false;
 	}
 
@@ -736,6 +811,65 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	return true;
 }
 
+bool CMap::ApplyLeave(CGameObject* GameObject)
+{
+	if (GameObject->GetChannel() == nullptr)
+	{
+		G_Logger->WriteStdOut(en_Color::RED, L"ApplyLeave Channel is nullptr");
+		return false;
+	}
+
+	if (GameObject->GetChannel()->GetMap() != this)
+	{
+		G_Logger->WriteStdOut(en_Color::RED, L"ApplyLeave Channel _Map Error");
+		return false;
+	}
+
+	st_PositionInfo PositionInfo = GameObject->GetPositionInfo();
+	// 좌우 좌표 검사
+	if (PositionInfo.CollisionPosition._X < _Left || PositionInfo.CollisionPosition._X > _Right)
+	{
+		return false;
+	}
+
+	// 상하 좌표 검사
+	if (PositionInfo.CollisionPosition._Y < _Up || PositionInfo.CollisionPosition._Y > _Down)
+	{
+		return false;
+	}
+
+	// 섹터에서 오브젝트 제거
+	CSector* Sector = GetSector(GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
+	Sector->Remove(GameObject);
+
+	int X = PositionInfo.CollisionPosition._X - _Left;
+	int Y = _Down - PositionInfo.CollisionPosition._Y;
+
+	int Width = GameObject->_GameObjectInfo.ObjectWidth;
+	int Height = GameObject->_GameObjectInfo.ObjectHeight;
+
+	// 맵에서 제거
+	if (_ObjectsInfos[Y][X] == GameObject)
+	{
+		for (int16 WidthX = 0; WidthX < Width; WidthX++)
+		{
+			for (int16 HeightY = 0; HeightY < Height; HeightY++)
+			{
+				_ObjectsInfos[Y][X] = nullptr;
+			}
+		}
+	}
+	else
+	{
+		if (GameObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE)
+		{
+			//CRASH("ApplyLeave 삭제하려는 오브젝트가 저장되어 있는 오브젝트와 다름");
+		}
+	}
+
+	return true;
+}
+
 bool CMap::ApplyPositionUpdateItem(CItem* ItemObject, st_Vector2Int& NewPosition)
 {
 	int32 X = NewPosition._X - _Left;
@@ -791,65 +925,6 @@ bool CMap::ApplyPositionUpdateItem(CItem* ItemObject, st_Vector2Int& NewPosition
 	return true;
 }
 
-bool CMap::ApplyLeave(CGameObject* GameObject)
-{
-	if (GameObject->GetChannel() == nullptr)
-	{
-		G_Logger->WriteStdOut(en_Color::RED, L"ApplyLeave Channel is nullptr");
-		return false;
-	}
-
-	if (GameObject->GetChannel()->GetMap() != this)
-	{
-		G_Logger->WriteStdOut(en_Color::RED, L"ApplyLeave Channel _Map Error");
-		return false;
-	}
-
-	st_PositionInfo PositionInfo = GameObject->GetPositionInfo();
-	// 좌우 좌표 검사
-	if (PositionInfo.CollisionPosition._X < _Left || PositionInfo.CollisionPosition._X > _Right)
-	{
-		return false;
-	}
-
-	// 상하 좌표 검사
-	if (PositionInfo.CollisionPosition._Y < _Up || PositionInfo.CollisionPosition._Y > _Down)
-	{
-		return false;
-	}
-
-	// 섹터에서 오브젝트 제거
-	CSector* Sector = GetSector(GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
-	Sector->Remove(GameObject);
-
-	int X = PositionInfo.CollisionPosition._X - _Left;
-	int Y = _Down - PositionInfo.CollisionPosition._Y;
-
-	int Width = GameObject->_GameObjectInfo.ObjectWidth;
-	int Height = GameObject->_GameObjectInfo.ObjectHeight;
-
-	// 맵에서 제거
-	if (_ObjectsInfos[Y][X] == GameObject)
-	{
-		for (int16 WidthX = 0; WidthX < Width; WidthX++)
-		{
-			for (int16 HeightY = 0; HeightY < Height; HeightY++)
-			{
-				_ObjectsInfos[Y][X] = nullptr;
-			}
-		}		
-	}
-	else
-	{
-		if (GameObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE)
-		{
-			//CRASH("ApplyLeave 삭제하려는 오브젝트가 저장되어 있는 오브젝트와 다름");
-		}
-	}
-
-	return true;
-}
-
 bool CMap::ApplyPositionLeaveItem(CGameObject* GameObject)
 {
 	int32 X = GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X - _Left;
@@ -895,6 +970,50 @@ bool CMap::ApplyPositionLeaveItem(CGameObject* GameObject)
 			break;
 		}
 	}
+
+	return true;
+}
+
+bool CMap::ApplyTileUserAlloc(CGameObject* ReqTileUserAllocObject, st_Vector2Int TileUserAllocPosition)
+{
+	// 좌우 좌표 검사
+	if (TileUserAllocPosition._X < _Left || TileUserAllocPosition._X > _Right)
+	{
+		return false;
+	}
+
+	// 상하 좌표 검사
+	if (TileUserAllocPosition._Y < _Up || TileUserAllocPosition._Y > _Down)
+	{
+		return false;
+	}
+
+	int X = TileUserAllocPosition._X - _Left;
+	int Y = _Down - TileUserAllocPosition._Y;
+
+	_TileMapInfos[Y][X].MapTileType = en_MapTileInfo::MAP_TILE_USER_ALLOC;
+
+	return true;
+}
+
+bool CMap::ApplyTileUseFree(CGameObject* ReqTileUserFreeObject, st_Vector2Int TileUserFreePosition)
+{
+	// 좌우 좌표 검사
+	if (TileUserFreePosition._X < _Left || TileUserFreePosition._X > _Right)
+	{
+		return false;
+	}
+
+	// 상하 좌표 검사
+	if (TileUserFreePosition._Y < _Up || TileUserFreePosition._Y > _Down)
+	{
+		return false;
+	}
+
+	int X = TileUserFreePosition._X - _Left;
+	int Y = _Down - TileUserFreePosition._Y;
+
+	_TileMapInfos[Y][X].MapTileType = en_MapTileInfo::MAP_TILE_USER_FREE;
 
 	return true;
 }
