@@ -402,8 +402,9 @@ enum class en_MapObjectInfo : int8
 };
 
 enum class en_MapTileInfo : int8
-{
+{	
 	MAP_TILE_USER_FREE = 0,
+	MAP_TILE_SYSTEM_ALLOC,
 	MAP_TILE_USER_ALLOC
 };
 
@@ -2453,6 +2454,7 @@ struct st_TileMapInfo
 	en_MapTileInfo MapTileType;
 	int64 AccountID;
 	int64 PlayerID;
+	st_Vector2Int TilePosition;
 };
 
 struct st_OptionItemInfo
