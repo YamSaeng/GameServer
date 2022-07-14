@@ -151,6 +151,13 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_MONSTER_PATROL,
 
 	//------------------------------------------------------------
+	// 게임서버 아이템 움직임 응답 요청
+	// int64 ObjectID
+	// st_PositionInfo PositionInfo
+	//------------------------------------------------------------
+	en_PACKET_S2C_ITEM_MOVE,
+
+	//------------------------------------------------------------
 	// 게임서버 일반 데미지 출력
 	// int64 ObjectID
 	// int64 TargetObjectID
