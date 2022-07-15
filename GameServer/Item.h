@@ -52,8 +52,11 @@ public:
 protected:	
 	// 파괴될 시간	
 	int64 _DestroyTime;
+	// 추적 대기 시간
+	int64 _ChaseWaitTime;
 
-	virtual void UpdateIdle();
+	virtual void UpdateIdle() override;
+	virtual void UpdateMoving() override;
 private:	
 };
 

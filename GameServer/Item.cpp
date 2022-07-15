@@ -2,6 +2,7 @@
 #include "Item.h"
 #include "ObjectManager.h"
 #include "GameServerMessage.h"
+#include <math.h>
 
 CItem::CItem()
 {
@@ -9,6 +10,8 @@ CItem::CItem()
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
 	_FieldOfViewDistance = 10;
+
+	_ChaseWaitTime = 0;
 }
 
 CItem::~CItem()
@@ -33,6 +36,9 @@ void CItem::Update()
 	{
 	case en_CreatureState::IDLE:
 		UpdateIdle();
+		break;
+	case en_CreatureState::MOVING:
+		UpdateMoving();
 		break;
 	default:
 		break;
@@ -98,6 +104,52 @@ void CItem::UpdateIdle()
 	{		
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;		
 	}
+
+	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
+
+	_ChaseWaitTime = GetTickCount64() + 1000;
+}
+
+void CItem::UpdateMoving()
+{
+	if (_ChaseWaitTime < GetTickCount64())
+	{
+		float TargetDistance = st_Vector2::Distance(_Owner->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position);
+
+		if (TargetDistance > 0.5f)
+		{
+			float num = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._X - _GameObjectInfo.ObjectPositionInfo.Position._X;
+			float num2 = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._Y - _GameObjectInfo.ObjectPositionInfo.Position._Y;
+
+			float num4 = num * num + num2 * num2;
+
+			float num5 = (float)sqrt(num4);
+
+			_GameObjectInfo.ObjectPositionInfo.Position._X = _GameObjectInfo.ObjectPositionInfo.Position._X + num / num5 * _Owner->_GameObjectInfo.ObjectStatInfo.Speed * 2.0f * 0.02f;
+			_GameObjectInfo.ObjectPositionInfo.Position._Y = _GameObjectInfo.ObjectPositionInfo.Position._Y + num2 / num5 * _Owner->_GameObjectInfo.ObjectStatInfo.Speed * 2.0f * 0.02f;
+
+			st_Vector2Int CollisionPosition;
+			CollisionPosition._X = _GameObjectInfo.ObjectPositionInfo.Position._X;
+			CollisionPosition._Y = _GameObjectInfo.ObjectPositionInfo.Position._Y;
+
+			if (CollisionPosition._X != _GameObjectInfo.ObjectPositionInfo.CollisionPosition._X
+				|| CollisionPosition._Y != _GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y)
+			{
+				_Channel->GetMap()->ApplyPositionUpdateItem(this, CollisionPosition);
+			}
+
+			CMessage* S2CMoveMessage = G_ObjectManager->GameServer->MakePacketItemMove(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo);
+			G_ObjectManager->GameServer->SendPacket(((CPlayer*)_Owner)->_SessionId, S2CMoveMessage);
+			S2CMoveMessage->Free();
+		}
+		else
+		{
+			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
+
+			st_GameObjectJob* ItemSaveJob = G_ObjectManager->GameServer->MakeGameObjectJobItemSave(this);
+			_Owner->_GameObjectJobQue.Enqueue(ItemSaveJob);
+		}
+	}	
 }
 
 CWeaponItem::CWeaponItem()
