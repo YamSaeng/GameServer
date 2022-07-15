@@ -3,6 +3,7 @@
 
 enum class en_CreatureState : int8
 {
+	SPAWN_READY,
 	SPAWN_IDLE,
 	IDLE,
 	PATROL,
@@ -181,7 +182,7 @@ enum class en_QuickSlotBar : int8
 	QUICK_SLOT_BAR_SLOT_SIZE = 5
 };
 
-enum class en_TileMapEnvironment : int8
+enum class en_MapObjectInfo : int8
 {
 	TILE_MAP_NONE = 0,
 	TILE_MAP_WALL,
