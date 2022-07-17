@@ -520,10 +520,10 @@ vector<CPlayer*> CMap::GetFieldOfViewPlayer(CGameObject* Object, int16 Range, bo
 	return FieldOfViewPlayers;
 }
 
-CGameObject* CMap::FindNearPlayer(CGameObject* Object, int32 Range, bool* CollisionCango)
+CGameObject* CMap::MonsterReqFindNearPlayer(CMonster* Monster, en_MonsterAggroType* AggroType, int32 Range, bool* CollisionCango)
 {
 	// 주위 시야 범위 안에 있는 플레이어들을 받아온다.
-	vector<CPlayer*> Players = GetFieldOfViewPlayer(Object, Range);
+	vector<CPlayer*> Players = GetFieldOfViewPlayer(Monster, Range);
 
 	// 받아온 플레이어 정보를 토대로 거리를 구해서 우선순위 큐에 담는다.
 	CHeap<int16, CPlayer*> Distances((int32)Players.size()); // 가까운 순서대로 
@@ -531,7 +531,7 @@ CGameObject* CMap::FindNearPlayer(CGameObject* Object, int32 Range, bool* Collis
 	{
 		if (Player->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::READY_DEAD && Player->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 		{
-			Distances.InsertHeap(st_Vector2Int::Distance(Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition), Player);
+			Distances.InsertHeap(st_Vector2Int::Distance(Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Monster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition), Player);
 		}		
 	}
 
@@ -540,32 +540,39 @@ CGameObject* CMap::FindNearPlayer(CGameObject* Object, int32 Range, bool* Collis
 	// 갈 수 있는 대상이면 해당 플레이어를 반환해준다.
 	if (Distances.GetUseSize() != 0)
 	{
-		Player = Distances.PopHeap();
+		Player = Distances.PopHeap();			
 
-		vector<st_Vector2Int> FirstPaths = FindPath(Object, Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
+		*AggroType = en_MonsterAggroType::MONSTER_AGGRO_FIRST_TARGET;
+
+		vector<st_Vector2Int> FirstPaths = FindPath(Monster, Monster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
+		// 타겟은 있지만 갈수는 없는 상태 ( 주위에 오브젝트들로 막혀서 )
 		if (FirstPaths.size() < 2)
-		{
-			// 타겟은 있지만 갈수는 없는 상태 ( 주위에 오브젝트들로 막혀서 )
+		{			
 			if (Player != nullptr)
 			{
 				// 주위 다른 대상중에서 갈 수 있는 대상이 있는지 추가로 판단
 				while (Distances.GetUseSize() != 0)
 				{
 					Player = Distances.PopHeap();
-					vector<st_Vector2Int> SecondPaths = FindPath(Object, Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
+					vector<st_Vector2Int> SecondPaths = FindPath(Monster, Monster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
 					if (SecondPaths.size() < 2)
 					{
 						continue;
 					}
 
-					*CollisionCango = true;
+					*AggroType = en_MonsterAggroType::MONSTER_AGGRO_SECOND_TARGET;
+					*CollisionCango = true;					
+					
+					break;					
 				}
 
 				*CollisionCango = false;
 			}
 		}
-
-		*CollisionCango = true;
+		else
+		{
+			*CollisionCango = true;
+		}		
 	}
 	else
 	{
@@ -920,8 +927,22 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 
 bool CMap::ApplyPositionUpdateItem(CItem* ItemObject, st_Vector2Int& NewPosition)
 {
+	// 이동 하기전 있었던 좌표 계산
+	int32 PreviousX = ItemObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X - _Left;
+	int32 PreviousY = _Down - ItemObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y;
+
+	// 이동하고자 하는 좌표 계산
 	int32 X = NewPosition._X - _Left;
 	int32 Y = _Down - NewPosition._Y;
+
+	// 기존 위치에서 움직이는 대상은 제거하고
+	for (int8 i = 0; i < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; i++)
+	{
+		if (_Items[PreviousY][PreviousX][i] == ItemObject)
+		{
+			_Items[PreviousY][PreviousX][i] = nullptr;
+		}
+	}
 
 	// 우선 해당 위치에 아이템들과 새로 얻은 아이템의 종류를 비교한다.
 	// 새로 얻은 아이템의 종류가 이미 해당 위치에 있을 경우에
@@ -955,7 +976,7 @@ bool CMap::ApplyPositionUpdateItem(CItem* ItemObject, st_Vector2Int& NewPosition
 	}
 
 	// 아이템을 저장한다.
-	_Items[Y][X][NewItemInfoIndex] = ItemObject;
+	_Items[Y][X][NewItemInfoIndex] = ItemObject;	
 
 	// 아이템 섹터처리
 	CSector* CurrentSector = GetSector(ItemObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
@@ -965,7 +986,7 @@ bool CMap::ApplyPositionUpdateItem(CItem* ItemObject, st_Vector2Int& NewPosition
 	{
 		CurrentSector->Remove(ItemObject);
 		NextSector->Insert(ItemObject);
-	}
+	}	
 
 	ItemObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X = NewPosition._X;
 	ItemObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y = NewPosition._Y;
@@ -1038,6 +1059,12 @@ bool CMap::ApplyTileUserAlloc(CGameObject* ReqTileUserAllocObject, st_Vector2Int
 
 	int X = TileUserAllocPosition._X - _Left;
 	int Y = _Down - TileUserAllocPosition._Y;
+
+	if (_TileMapInfos[Y][X].MapTileType == en_MapTileInfo::MAP_TILE_USER_ALLOC
+		|| _TileMapInfos[Y][X].MapTileType == en_MapTileInfo::MAP_TILE_SYSTEM_ALLOC)
+	{
+		return false;
+	}	
 
 	_TileMapInfos[Y][X].MapTileType = en_MapTileInfo::MAP_TILE_USER_ALLOC;
 

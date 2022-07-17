@@ -126,7 +126,7 @@ public:
 	//-------------------------------------------------------
 	// 내 근처 플레이어 반환
 	//-------------------------------------------------------
-	CGameObject* FindNearPlayer(CGameObject* Object, int32 Range, bool* CollisionCango);
+	CGameObject* MonsterReqFindNearPlayer(CMonster* Monster, en_MonsterAggroType* AggroType, int32 Range, bool* CollisionCango);
 
 	//-------------------------------------------
 	// 좌표 위치에 있는 오브젝트 반환
@@ -142,7 +142,7 @@ public:
 	// 요청한 오브젝트 시야 범위 안에 있는 타일 정보 반환
 	//----------------------------------------------------------------------
 	vector<st_TileMapInfo> FindMapTileInfo(CGameObject* Player);
-
+		
 	bool Cango(CGameObject* Object, float X, float Y);
 	//----------------------------------------------------------------------------
 	// 위치로 갈 수 있는지 확인
@@ -150,6 +150,7 @@ public:
 	// ( true : 해당위치에 오브젝트가 있는지 확인해서 있으면 충돌체로 판단한다. )
 	//----------------------------------------------------------------------------
 	bool CollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool CheckObjects = true);
+
 
 	//------------------------------------------------------------------------------------------------------------------------
 	// 목적지 좌표값을 받아서 해당 좌표로 갈 수 있는지 없는지 판단
