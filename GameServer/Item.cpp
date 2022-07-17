@@ -103,11 +103,18 @@ void CItem::UpdateIdle()
 	if (_Owner && _Owner->_GameObjectInfo.ObjectPositionInfo.CollisionPosition == _GameObjectInfo.ObjectPositionInfo.CollisionPosition)
 	{		
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;		
-	}
+	}	
 
-	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
+	if (_Owner != nullptr)
+	{
+		float TargetDistance = st_Vector2::Distance(_Owner->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position);
+		if (TargetDistance <= 5.0f)
+		{
+			_ChaseWaitTime = GetTickCount64() + 1000;
 
-	_ChaseWaitTime = GetTickCount64() + 1000;
+			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
+		}
+	}	
 }
 
 void CItem::UpdateMoving()
@@ -144,10 +151,10 @@ void CItem::UpdateMoving()
 		}
 		else
 		{
-			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
-
 			st_GameObjectJob* ItemSaveJob = G_ObjectManager->GameServer->MakeGameObjectJobItemSave(this);
 			_Owner->_GameObjectJobQue.Enqueue(ItemSaveJob);
+
+			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;				
 		}
 	}	
 }
