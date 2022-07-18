@@ -9,6 +9,7 @@
 #include "CraftingTable.h"
 #include "Crop.h"
 #include "Map.h"
+#include "Potato.h"
 #include "ObjectManager.h"
 
 CChannel::CChannel()
@@ -90,6 +91,36 @@ void CChannel::Update()
 		{
 			switch ((en_GameObjectJobType)GameObjectJob->GameObjectJobType)
 			{
+			case en_GameObjectJobType::GAMEOBJECT_JOB_OBJECT_SPAWN_CHANNEL:
+				break;
+			case en_GameObjectJobType::GAMEOBJECT_JOB_OBJECT_DESPAWN_CHANNEL:
+				{
+					CGameObject* DeSpawnObject;
+					*GameObjectJob->GameObjectJobMessage >> &DeSpawnObject;					
+
+					// 나 포함해서 주위 시야범위 플레이어 조사
+					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Map->GetFieldOfViewPlayers(DeSpawnObject, 1, false);
+
+					// 주위 시야범위 플레이어들에게 해당 오브젝트를 소환해제 하라고 알림
+					CMessage* ResObjectDeSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(DeSpawnObject->_GameObjectInfo.ObjectId);
+					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResObjectDeSpawnPacket);
+					ResObjectDeSpawnPacket->Free();
+
+					// 맵에서 퇴장
+					switch (DeSpawnObject->_GameObjectInfo.ObjectType)
+					{
+					case en_GameObjectType::OBJECT_SLIME:
+						_Map->ApplyLeave(DeSpawnObject);
+						break;
+					case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
+					case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+						_Map->ApplyPositionLeaveItem(DeSpawnObject);						
+						break;
+					default:
+						break;
+					}									
+				}
+				break;
 			case en_GameObjectJobType::GAMEOBJECT_JOB_PLAYER_ENTER_CHANNEL:
 				{				
 					CPlayer* EnterPlayer;
@@ -129,37 +160,98 @@ void CChannel::Update()
 			case en_GameObjectJobType::GAMEOBJECT_JOB_OBJECT_ENTER_CHANNEL:
 				{
 					CGameObject* EnterObject;
-					*GameObjectJob->GameObjectJobMessage >> &EnterObject;
+					*GameObjectJob->GameObjectJobMessage >> &EnterObject;					
 
-					EnterObject->_SpawnIdleTick = GetTickCount64() + 5000;
-					EnterObject->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_IDLE;
+					switch (EnterObject->_GameObjectInfo.ObjectType)
+					{
+					case en_GameObjectType::OBJECT_SLIME:
+					case en_GameObjectType::OBJECT_BEAR:
+						{
+							CMonster* EnterChannelMonster = (CMonster*)EnterObject;
 
-					EnterChannel(EnterObject, &EnterObject->_SpawnPosition);
+							EnterChannelMonster->_FieldOfViewPlayers = _Map->GetFieldOfViewPlayer(EnterChannelMonster, EnterChannelMonster->_FieldOfViewDistance);						
+							
+							EnterChannel(EnterChannelMonster, &EnterChannelMonster->_SpawnPosition);
+						}
+						break;
+					case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
+					case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
+					case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
+					case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
+					case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
+					case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
+					case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+					case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
+					case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
+					case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
+					case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
+					case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
+					case en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL:
+					case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET:
+					case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
+					case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
+					case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
+					case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
+					case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
+						{
+							CItem* Item = (CItem*)EnterObject;
+
+							bool IsItemEnterChannel = EnterChannel(EnterObject, &EnterObject->_SpawnPosition);
+							if (IsItemEnterChannel == true)
+							{			
+								Item->SetDestoryTime(30000);
+								Item->ItemSetTarget(Item->_GameObjectInfo.OwnerObjectType, Item->_GameObjectInfo.OwnerObjectId);
+							}
+							else
+							{
+								G_ObjectManager->ObjectReturn(Item->_GameObjectInfo.ObjectType, Item);
+							}
+						}
+						break;	
+					case en_GameObjectType::OBJECT_STONE:
+					case en_GameObjectType::OBJECT_TREE:
+						{
+							CEnvironment* Entervironment = (CEnvironment*)EnterObject;
+
+							EnterChannel(Entervironment, &Entervironment->_SpawnPosition);
+						}
+						break;
+					case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+					case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
+						{
+							CCraftingTable* CraftingTable = (CCraftingTable*)EnterObject;
+
+							EnterChannel(CraftingTable, &CraftingTable->_SpawnPosition);
+						}
+						break;
+					case en_GameObjectType::OBJECT_CROP_POTATO:
+						{
+							CPotato* Potato = (CPotato*)EnterObject;
+
+							EnterChannel(Potato, &Potato->_SpawnPosition);
+						}
+						break;
+					}										
+
+					//G_Logger->WriteStdOut(en_Color::RED, L"ObjectID %d EnterChannel\n", EnterObject->_GameObjectInfo.ObjectId);
 
 					CMessage* SpawnObjectPacket = G_ObjectManager->GameServer->MakePacketResObjectSpawn(EnterObject);
 					G_ObjectManager->GameServer->SendPacketFieldOfView(EnterObject, SpawnObjectPacket);
-					SpawnObjectPacket->Free();
+					SpawnObjectPacket->Free();					
 				}
 				break;
 			case en_GameObjectJobType::GAMEOBJECT_JOB_LEAVE_CHANNEL:
 				{
 					CGameObject* LeaveGameObject;
-					*GameObjectJob->GameObjectJobMessage >> &LeaveGameObject;
+					*GameObjectJob->GameObjectJobMessage >> &LeaveGameObject;										
 
 					LeaveChannel(LeaveGameObject);
-
-					// 나 포함해서 주위 시야범위 플레이어 조사
-					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Map->GetFieldOfViewPlayers(LeaveGameObject, 1, false);
-
-					CMessage* ResObjectDeSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(LeaveGameObject->_GameObjectInfo.ObjectId);
-					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResObjectDeSpawnPacket);
-					ResObjectDeSpawnPacket->Free();
 				}
 				break;
 			case en_GameObjectJobType::GAMEOBJECT_JOB_PLAYER_LEAVE_CHANNEL:
 				{
 					CGameObject* LeaveGameObject;
-					*GameObjectJob->GameObjectJobMessage >> &LeaveGameObject;
+					*GameObjectJob->GameObjectJobMessage >> &LeaveGameObject;			
 
 					LeaveChannel(LeaveGameObject);
 
@@ -865,18 +957,19 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 		break;
 	case en_GameObjectType::OBJECT_SLIME:
 	case en_GameObjectType::OBJECT_BEAR:
-	{
-		// 몬스터로 형변환
-		CMonster* EnterChannelMonster = (CMonster*)EnterChannelGameObject;
+	{		
+		// 몬스터로 형변환	
+		CMonster* EnterChannelMonster = (CMonster*)EnterChannelGameObject;		
 		EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 		EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
 		EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
 
 		EnterChannelMonster->Start();		
-
+				
 		// 몬스터 저장
 		_ChannelMonsterArrayIndexs.Pop(&EnterChannelMonster->_ChannelArrayIndex);
 		_ChannelMonsterArray[EnterChannelMonster->_ChannelArrayIndex] = EnterChannelMonster;
+		//G_Logger->WriteStdOut(en_Color::RED, L"ObjectID %d EnterChannelIndex %d\n", EnterChannelMonster->_GameObjectInfo.ObjectId, EnterChannelMonster->_ChannelArrayIndex);		
 
 		// 채널 저장
 		EnterChannelMonster->SetChannel(this);
@@ -921,12 +1014,12 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 		// 중복되지 않는 아이템의 경우에만 채널에 해당 아이템을 채널과 섹터에 저장
 		if (IsEnterChannel == true)
 		{
-			// 몬스터 저장
+			// 아이템 저장
 			_ChannelItemArrayIndexs.Pop(&EnterChannelItem->_ChannelArrayIndex);
 			_ChannelItemArray[EnterChannelItem->_ChannelArrayIndex] = EnterChannelItem;
-
+						
 			// 섹터 얻어서 해당 섹터에도 저장
-			CSector* EnterSector = _Map->GetSector(SpawnPosition);
+			CSector* EnterSector = _Map->GetSector(SpawnPosition);	
 			EnterSector->Insert(EnterChannelItem);
 		}
 	}
@@ -1012,19 +1105,13 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 	case en_GameObjectType::OBJECT_THIEF_PLAYER:
 	case en_GameObjectType::OBJECT_ARCHER_PLAYER:	
 		_ChannelPlayerArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
-
-		_Map->ApplyLeave(LeaveChannelGameObject);
 		break;
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 		_ChannelDummyPlayerArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
-
-		_Map->ApplyLeave(LeaveChannelGameObject);
 		break;
 	case en_GameObjectType::OBJECT_SLIME:
-	case en_GameObjectType::OBJECT_BEAR:
+	case en_GameObjectType::OBJECT_BEAR:		
 		_ChannelMonsterArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
-
-		_Map->ApplyLeave(LeaveChannelGameObject);
 		break;
 	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
@@ -1045,26 +1132,20 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
 	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
 	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
-		_ChannelItemArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
+		G_ObjectManager->ItemReturn((CItem*)LeaveChannelGameObject);
 
-		_Map->ApplyPositionLeaveItem(LeaveChannelGameObject);
+		_ChannelItemArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
 		break;
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
 		_ChannelEnvironmentArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
-
-		_Map->ApplyLeave(LeaveChannelGameObject);
 		break;
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 		_ChannelCraftingTableArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
-
-		_Map->ApplyLeave(LeaveChannelGameObject);
 		break;
 	case en_GameObjectType::OBJECT_CROP_POTATO:
 		_ChannelCropArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
-
-		_Map->ApplyLeave(LeaveChannelGameObject);
 		break;
 	}	
 }

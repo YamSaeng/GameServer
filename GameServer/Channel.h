@@ -35,7 +35,7 @@ private:
 	CEnvironment* _ChannelEnvironmentArray[ENVIRONMENT_MAX];
 	CCraftingTable* _ChannelCraftingTableArray[CRAFTING_TABLE_MAX];
 	CCrop* _ChannelCropArray[CROP_MAX];
-	CItem* _ChannelItemArray[ITEM_MAX];		
+	CItem* _ChannelItemArray[ITEM_MAX];	
 
 	CLockFreeStack<int32> _ChannelPlayerArrayIndexs;
 	CLockFreeStack<int32> _ChannelDummyPlayerArrayIndexs;
@@ -111,8 +111,7 @@ public:
 	bool EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* ObjectSpawnPosition = nullptr);
 	//----------------------------------------------------
 	// 채널 나가기
-	// - Object를 채널에 퇴장시키면서 자료구조에 제거한 후
-	// - Map에도 해당 오브젝트의 위치를 제거한다.
+	// - Object가 채널에 속해 있는 Index를 반납
 	//----------------------------------------------------
-	void LeaveChannel(CGameObject* LeaveChannelGameObject);
+	void LeaveChannel(CGameObject* LeaveChannelGameObject);	
 };
