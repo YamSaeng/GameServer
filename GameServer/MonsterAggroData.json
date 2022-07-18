@@ -2,6 +2,7 @@
   "MonsterAggro": [
     {
       "MonsterAggroFirstTarget": 0.01,
+      "MonsterAggroSecondTarget": 0.02,
       "MonsterAggroFirstAttacker": 0.05,
       "MonsterAggroAttacker": 0.2,      
       "MonsterAggroHeal": 1.0,

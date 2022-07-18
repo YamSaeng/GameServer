@@ -152,6 +152,7 @@ struct st_MonsterData
 struct st_MonsterAggroData
 {
 	float MonsterAggroFirstTarget; // 최초 공격 목표 어그로 값
+	float MonsterAggroSecondTarget; // 최초 공격 목표 대상에게 갈 수 없을 때 두번째로 발견한 목표 어그로 값
 	float MonsterAggroFirstAttacker; // 최초 공격자 어그로 값
 	float MonsterAggroAttacker; // 공격자 어그로 값
 	float MonsterAggroHeal; // 힐 어그로 값

@@ -963,6 +963,7 @@ void CDataManager::LoadDataMonsterAggro(wstring LoadFileName)
 	for (auto& Filed : Document["MonsterAggro"].GetArray())
 	{
 		float MonsterAggroFirstTarget = Filed["MonsterAggroFirstTarget"].GetFloat();
+		float MonsterAggroSecondTarget = Filed["MonsterAggroSecondTarget"].GetFloat();
 		float MonsterAggroFirstAttacker = Filed["MonsterAggroFirstAttacker"].GetFloat();
 		float MonsterAggroAttacker = Filed["MonsterAggroAttacker"].GetFloat();
 		float MonsterAggroHeal = Filed["MonsterAggroHeal"].GetFloat();
@@ -971,6 +972,7 @@ void CDataManager::LoadDataMonsterAggro(wstring LoadFileName)
 		float MonsterAggroDebuf = Filed["MonsterAggroDebuf"].GetFloat();
 
 		_MonsterAggroData.MonsterAggroFirstTarget = MonsterAggroFirstTarget;
+		_MonsterAggroData.MonsterAggroSecondTarget = MonsterAggroSecondTarget;
 		_MonsterAggroData.MonsterAggroFirstAttacker = MonsterAggroFirstAttacker;
 		_MonsterAggroData.MonsterAggroAttacker = MonsterAggroAttacker;
 		_MonsterAggroData.MonsterAggroHeal = MonsterAggroHeal;
