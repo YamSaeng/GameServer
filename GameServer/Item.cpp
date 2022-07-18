@@ -145,9 +145,11 @@ void CItem::UpdateMoving()
 				_Channel->GetMap()->ApplyPositionUpdateItem(this, CollisionPosition);
 			}
 
-			CMessage* S2CMoveMessage = G_ObjectManager->GameServer->MakePacketItemMove(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo);
-			G_ObjectManager->GameServer->SendPacket(((CPlayer*)_Owner)->_SessionId, S2CMoveMessage);
-			S2CMoveMessage->Free();
+			vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetFieldOfViewPlayers(this, 1, false);
+
+			CMessage* S2CItemMoveMessage = G_ObjectManager->GameServer->MakePacketItemMove(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo);
+			G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, S2CItemMoveMessage);
+			S2CItemMoveMessage->Free();
 		}
 		else
 		{
