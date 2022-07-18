@@ -4,6 +4,7 @@
 #include "DataManager.h"
 #include "ObjectManager.h"
 #include "MapManager.h"
+#include "ChannelManager.h"
 #include "Skill.h"
 
 CMonster::CMonster()
@@ -149,6 +150,8 @@ bool CMonster::OnDamaged(CGameObject* Attacker, int32 Damage)
 
 void CMonster::Start()
 {	
+	_SpawnIdleTick = GetTickCount64() + 5000;
+
 	_SpawnPosition = _GameObjectInfo.ObjectPositionInfo.CollisionPosition;
 
 	_GameObjectInfo.ObjectStatInfo.HP = _GameObjectInfo.ObjectStatInfo.MaxHP;
@@ -210,10 +213,10 @@ void CMonster::SelectTarget()
 	_Target = Target;
 }
 
-CGameObject* CMonster::FindTarget()
-{
+CGameObject* CMonster::FindTarget(en_MonsterAggroType* AggroType)
+{	
 	bool Cango = false;
-	CGameObject* Target = _Channel->GetMap()->FindNearPlayer(this, 1, &Cango);
+	CGameObject* Target = _Channel->GetMap()->MonsterReqFindNearPlayer(this, AggroType, 1, &Cango);
 	if (Target == nullptr)
 	{
 		_PatrolTick = GetTickCount64() + _PatrolTickPoint;
@@ -306,7 +309,9 @@ void CMonster::ReadyPatrol()
 		return;
 	}
 
-	CGameObject* Target = FindTarget();
+	en_MonsterAggroType MonsterAggroType;
+
+	CGameObject* Target = FindTarget(&MonsterAggroType);
 	if (Target != nullptr)
 	{
 		int16 Distance = st_Vector2Int::Distance(Target->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, _GameObjectInfo.ObjectPositionInfo.CollisionPosition);
@@ -314,7 +319,16 @@ void CMonster::ReadyPatrol()
 		{
 			st_Aggro Aggro;
 			Aggro.AggroTarget = Target;
-			Aggro.AggroPoint = _GameObjectInfo.ObjectStatInfo.MaxHP * G_Datamanager->_MonsterAggroData.MonsterAggroFirstTarget;
+
+			switch (MonsterAggroType)
+			{
+			case en_MonsterAggroType::MONSTER_AGGRO_FIRST_TARGET:
+				Aggro.AggroPoint = _GameObjectInfo.ObjectStatInfo.MaxHP * G_Datamanager->_MonsterAggroData.MonsterAggroFirstTarget;
+				break;
+			case en_MonsterAggroType::MONSTER_AGGRO_SECOND_TARGET:
+				Aggro.AggroPoint = _GameObjectInfo.ObjectStatInfo.MaxHP * G_Datamanager->_MonsterAggroData.MonsterAggroSecondTarget;
+				break;							
+			}			
 
 			_AggroTargetList.insert(pair<int64, st_Aggro>(Target->_GameObjectInfo.ObjectId, Aggro));
 
@@ -681,10 +695,11 @@ void CMonster::UpdateReadyDead()
 		if (_Channel == nullptr)
 		{
 			CRASH("퇴장하려는 채널이 존재하지 않음");
-		}
+		}		
 
-		st_GameObjectJob* LeaveChannelEnvironmentJob = G_ObjectManager->GameServer->MakeGameObjectJobLeaveChannel(this);
-		_Channel->_ChannelJobQue.Enqueue(LeaveChannelEnvironmentJob);
+		// 몬스터가 있었던 자리를 비우고 소환해제
+		st_GameObjectJob* DeSpawnMonsterChannelJob = G_ObjectManager->GameServer->MakeGameObjectJobObjectDeSpawnObjectChannel(this);
+		_Channel->_ChannelJobQue.Enqueue(DeSpawnMonsterChannelJob);
 	}		
 }
 
@@ -697,9 +712,15 @@ void CMonster::UpdateDead()
 		{
 			CGameObject* FindObject = Map->Find(_SpawnPosition);
 			if (FindObject == nullptr)
-			{
-				st_GameObjectJob* ObjectEnterChannelJob = G_ObjectManager->GameServer->MakeGameObjectJobObjectEnterChannel(this);
-				Map->GetChannelManager()->Find(1)->_ChannelJobQue.Enqueue(ObjectEnterChannelJob);
+			{				
+				_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_READY;				
+				
+				// 채널에서 퇴장
+				st_GameObjectJob* LeaveChannerMonsterJob = G_ObjectManager->GameServer->MakeGameObjectJobLeaveChannel(this);
+				_Channel->_ChannelJobQue.Enqueue(LeaveChannerMonsterJob);				
+				// 채널에서 퇴장하고 다시 입장
+				st_GameObjectJob* EnterChannelMonsterJob = G_ObjectManager->GameServer->MakeGameObjectJobObjectEnterChannel(this);
+				_Channel->_ChannelJobQue.Enqueue(EnterChannelMonsterJob);				
 			}
 			else
 			{
