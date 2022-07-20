@@ -471,6 +471,16 @@ enum class en_OptionType : int8
 	OPTION_TYPE_TILE_BUY
 };
 
+enum class en_DayType : int8
+{
+	DAY_NONE = 0,
+	DAY_DAWN,
+	DAY_MORNING,
+	DAY_AFTERNOON,
+	DAY_EVENING,
+	DAY_NIGHT
+};
+
 namespace UnityEngine
 {
 	enum en_UnityKeyCode
@@ -2466,4 +2476,13 @@ struct st_OptionItemInfo
 {
 	en_OptionType OptionType;
 	wstring OptionName;
+};
+
+struct st_Day
+{
+	float DayTimeCycle;
+	float DayTimeCheck;
+	float DayRatio;
+
+	en_DayType DayType;
 };
