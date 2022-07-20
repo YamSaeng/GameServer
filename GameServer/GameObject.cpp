@@ -385,10 +385,8 @@ void CGameObject::Update()
 					// 아이템 개수가 맞는지 확인
 					if (FindDropItem->_ItemInfo.ItemCount >= DropItemCount)
 					{
-						G_ObjectManager->ObjectItemDropToSpawn((en_SmallItemCategory)DropItemType, 
-							DropItemCount,
-							Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition,
-							Player->_GameObjectInfo.ObjectPositionInfo.Position);					
+						G_ObjectManager->ObjectItemDropToSpawn(Player, Player->GetChannel(), (en_SmallItemCategory)DropItemType,
+							DropItemCount);
 
 						FindDropItem->_ItemInfo.ItemCount -= DropItemCount;
 
@@ -407,6 +405,67 @@ void CGameObject::Update()
 						}						
 					}
 				}
+			}
+			break;
+		case en_GameObjectJobType::GAMEOBJECT_JOB_ITEM_INVENTORY_SAVE:
+			{
+				CGameObject* Item;
+				*GameObjectJob->GameObjectJobMessage >> &Item;
+								
+				CItem* InsertItem = (CItem*)Item;
+				CPlayer* Player = (CPlayer*)this;
+
+				int16 ItemEach = InsertItem->_ItemInfo.ItemCount;
+
+				bool IsExistItem = false;
+
+				switch (((CItem*)Item)->_ItemInfo.ItemSmallCategory)
+				{
+				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN:
+				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN:
+				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN:	
+					{
+						Player->_InventoryManager.InsertMoney(0, InsertItem);
+
+						CMessage* ResMoneyToInventoryPacket = G_ObjectManager->GameServer->MakePacketResMoneyToInventory(Player->_GameObjectInfo.ObjectId,
+							Player->_InventoryManager._GoldCoinCount,
+							Player->_InventoryManager._SliverCoinCount,
+							Player->_InventoryManager._BronzeCoinCount,
+							InsertItem->_ItemInfo,
+							ItemEach);
+						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResMoneyToInventoryPacket);
+						ResMoneyToInventoryPacket->Free();
+					}
+					break;
+				default:
+					{
+						CItem* FindItem = Player->_InventoryManager.FindInventoryItem(0, InsertItem->_ItemInfo.ItemSmallCategory);
+						if (FindItem == nullptr)
+						{
+							CItem* NewItem = G_ObjectManager->GameServer->NewItemCrate(InsertItem->_ItemInfo);
+							Player->_InventoryManager.InsertItem(0, NewItem);
+
+							FindItem = Player->_InventoryManager.GetItem(0, NewItem->_ItemInfo.TileGridPositionX, NewItem->_ItemInfo.TileGridPositionY);
+						}
+						else
+						{
+							IsExistItem = true;
+							FindItem->_ItemInfo.ItemCount += ItemEach;
+						}
+
+						CMessage* ResItemToInventoryPacket = G_ObjectManager->GameServer->MakePacketResItemToInventory(Player->_GameObjectInfo.ObjectId,
+							FindItem->_ItemInfo, IsExistItem, ItemEach);
+						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResItemToInventoryPacket);
+						ResItemToInventoryPacket->Free();
+					}
+					break;
+				}		
+
+				st_GameObjectJob* DeSpawnMonsterChannelJob = G_ObjectManager->GameServer->MakeGameObjectJobObjectDeSpawnObjectChannel(InsertItem);
+				_Channel->_ChannelJobQue.Enqueue(DeSpawnMonsterChannelJob);
+
+				st_GameObjectJob* LeaveChannerMonsterJob = G_ObjectManager->GameServer->MakeGameObjectJobLeaveChannel(InsertItem);
+				_Channel->_ChannelJobQue.Enqueue(LeaveChannerMonsterJob);				
 			}
 			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_SELECT:
