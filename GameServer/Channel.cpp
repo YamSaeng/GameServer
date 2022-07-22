@@ -106,19 +106,7 @@ void CChannel::Update()
 					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResObjectDeSpawnPacket);
 					ResObjectDeSpawnPacket->Free();
 
-					// 맵에서 퇴장
-					switch (DeSpawnObject->_GameObjectInfo.ObjectType)
-					{
-					case en_GameObjectType::OBJECT_SLIME:
-						_Map->ApplyLeave(DeSpawnObject);
-						break;
-					case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
-					case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
-						_Map->ApplyPositionLeaveItem(DeSpawnObject);						
-						break;
-					default:
-						break;
-					}									
+					_Map->ApplyLeave(DeSpawnObject);
 				}
 				break;
 			case en_GameObjectJobType::GAMEOBJECT_JOB_PLAYER_ENTER_CHANNEL:
@@ -793,7 +781,9 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 			{
 				if (_ChannelMonsterArray[i] != nullptr && _ChannelMonsterArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
 				{
-					if (st_Vector2::CheckFieldOfView(_ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->GetPositionInfo().MoveDir, 80))
+					if (st_Vector2::CheckFieldOfView(_ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.Position,
+						Object->_GameObjectInfo.ObjectPositionInfo.Position, 
+						Object->GetPositionInfo().MoveDir, 80))
 					{
 						// 시야각 안에 오브젝트가 존재
 						float TargetDistance = st_Vector2::Distance(_ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
@@ -1009,7 +999,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 		EnterChannelItem->SetChannel(this);
 
 		// 맵 정보에 보관			
-		IsEnterChannel = _Map->ApplyPositionUpdateItem(EnterChannelItem, SpawnPosition);
+		IsEnterChannel = _Map->ApplyMove(EnterChannelItem, SpawnPosition, false, false);
 
 		// 중복되지 않는 아이템의 경우에만 채널에 해당 아이템을 채널과 섹터에 저장
 		if (IsEnterChannel == true)
