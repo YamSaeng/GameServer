@@ -14,6 +14,7 @@
 #include "QuickSlotBar.h"
 #include "Furnace.h"
 #include "Sawmill.h"
+#include "Day.h"
 #include <WS2tcpip.h>
 #include <process.h>
 #include <atlbase.h>
@@ -74,6 +75,8 @@ void CGameServer::GameServerStart(const WCHAR* OpenIP, int32 Port)
 	GetSystemInfo(&SI);
 
 	int64 MapID = 1;
+
+	_Day = new CDay();
 
 	// 맵 정보를 읽어옴
 	G_MapManager->MapSave();
@@ -316,7 +319,11 @@ unsigned __stdcall CGameServer::LogicThreadProc(void* Argument)
 		{
 			LogicUpdatePreviousTime = LogicUpdateCurrentTime - (DeltaTime - 20);
 
-			G_MapManager->Update();
+			if (Instance->_Day != nullptr)
+			{
+				Instance->_Day->Update();
+				G_MapManager->Update();
+			}			
 
 			Instance->_LogicThreadFPS++;
 		}
@@ -1640,6 +1647,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 				CMap* Map = G_MapManager->GetMap(1);
 
 				vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetFieldOfViewPlayers(MyPlayer, 1, false);
+				vector<st_FieldOfViewInfo> CurrentFieldOfViewAttackObjectIDs = Map->GetFieldOfViewAttackObjects(MyPlayer, 1);
 
 				// 타겟 위치 확인
 				switch (ReqMeleeSkill->GetSkillInfo()->SkillType)
@@ -1650,7 +1658,8 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 
 						st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)ReqMeleeSkill->GetSkillInfo();
 						
-						vector<CGameObject*> FindObjects = Map->GetChannelManager()->Find(1)->FindChannelObjects(CurrentFieldOfViewObjectIDs, MyPlayer, 2);
+						// 전방 2미터 거리 안에 있는 공격 가능한 오브젝트들을 가져옴
+						vector<CGameObject*> FindObjects = MyPlayer->GetChannel()->FindChannelObjects(CurrentFieldOfViewAttackObjectIDs, MyPlayer, 2);
 						
 						for (CGameObject* FindOBJ : FindObjects)
 						{
@@ -1663,7 +1672,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 						SkillUseSuccess = true;
 
 						st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)ReqMeleeSkill->GetSkillInfo();
-												if (AttackSkillInfo->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
+						if (AttackSkillInfo->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
 						{
 							CSkill* FindNextComboSkill = MyPlayer->_SkillBox.FindSkill(AttackSkillInfo->NextComboSkill);
 							if (FindNextComboSkill->GetSkillInfo()->CanSkillUse == true)
@@ -4102,73 +4111,8 @@ void CGameServer::PacketProcReqItemLooting(int64 SessionId, CMessage* Message)
 					// 게임에 입장한 캐릭터를 가져온다.
 					CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
 
-					int64 TargetObjectId = MyPlayer->_GameObjectInfo.ObjectId;
-
-					CPlayer* TargetPlayer = (CPlayer*)(MyPlayer->GetChannel()->FindChannelObject(TargetObjectId, en_GameObjectType::OBJECT_PLAYER));
-					if (TargetPlayer == nullptr)
-					{
-						break;
-					}
-
-					// 줍은 아이템이 가방에 있는 아이템인지 아닌지 확인
-					bool IsExistItem = false;
-					// 가방에 저장할 아이템 개수 ( 맵에 스폰되어 있는 아이템의 개수 )
-					int16 ItemEach = Items[i]->_ItemInfo.ItemCount;
-
-					// 줍은 아이템의 아이템 타입을 확인
-					switch (Items[i]->_ItemInfo.ItemSmallCategory)
-					{
-					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN:
-					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN:
-					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN:
-						TargetPlayer->_InventoryManager.InsertMoney(0, Items[i]);
-
-						{
-							CMessage* ResMoneyToInventoryPacket = MakePacketResMoneyToInventory(TargetObjectId,								
-								TargetPlayer->_InventoryManager._GoldCoinCount,
-								TargetPlayer->_InventoryManager._SliverCoinCount,
-								TargetPlayer->_InventoryManager._BronzeCoinCount,
-								Items[i]->_ItemInfo,
-								ItemEach);
-							SendPacket(Session->SessionId, ResMoneyToInventoryPacket);
-							ResMoneyToInventoryPacket->Free();
-						}
-						break;						
-					default:
-						{
-							//TargetPlayer->_InventoryManager.InsertItem(0,Items[i]->_ItemInfo.ItemSmallCategory,)
-
-							// 아이템이 가방에 있는지 찾는다.						
-							CItem* FindItem = TargetPlayer->_InventoryManager.FindInventoryItem(0, Items[i]->_ItemInfo.ItemSmallCategory);
-							if (FindItem == nullptr)
-							{
-								// 찾지 못했을 경우
-								// 비어 있는 공간을 찾아서 해당 공간에 아이템을 넣는다.
-								CItem* NewItem = NewItemCrate(Items[i]->_ItemInfo);
-								TargetPlayer->_InventoryManager.InsertItem(0, NewItem);
-
-								FindItem = TargetPlayer->_InventoryManager.GetItem(0, NewItem->_ItemInfo.TileGridPositionX, NewItem->_ItemInfo.TileGridPositionY);
-							}
-							else
-							{
-								IsExistItem = true;
-								// 찾앗을 경우
-								FindItem->_ItemInfo.ItemCount += Items[i]->_ItemInfo.ItemCount;
-							}
-
-							CMessage* ResItemToInventoryPacket = MakePacketResItemToInventory(TargetObjectId, FindItem->_ItemInfo, IsExistItem, ItemEach);
-							SendPacket(Session->SessionId, ResItemToInventoryPacket);
-							ResItemToInventoryPacket->Free();
-						}
-						break;
-					}				
-
-					// 주운 아이템을 채널에서 퇴장시킴
-					st_GameObjectJob* LeaveChannelItemJob = MakeGameObjectJobLeaveChannel(Items[i]);
-
-					CMap* LeaveMap = G_MapManager->GetMap(1);
-					CChannel* LeaveChannel = LeaveMap->GetChannelManager()->Find(1);
-					LeaveChannel->_ChannelJobQue.Enqueue(LeaveChannelItemJob);
+					st_GameObjectJob* ItemSaveJob = MakeGameObjectJobItemSave(Items[i]);
+					MyPlayer->_GameObjectJobQue.Enqueue(ItemSaveJob);					
 				}
 			}
 
@@ -5936,6 +5880,15 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 			}
 #pragma endregion
 						
+#pragma region Day 시간 보내기			
+			st_Day DayInfo = _Day->GetDayInfo();
+			*ResCharacterInfoMessage << DayInfo.DayTimeCycle;
+			*ResCharacterInfoMessage << DayInfo.DayTimeCheck;
+			*ResCharacterInfoMessage << DayInfo.DayRatio;
+			*ResCharacterInfoMessage << (int8)DayInfo.DayType;
+
+#pragma endregion
+
 			SendPacket(MyPlayer->_SessionId, ResCharacterInfoMessage);
 
 			MyPlayer->_NetworkState = en_ObjectNetworkState::LIVE;			
@@ -6062,10 +6015,13 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 
 	if (MyPlayer->GetChannel() != nullptr)
 	{
-		st_GameObjectJob* LeaveGameJob = MakeGameObjectJobLeaveChannelPlayer(MyPlayer, LeaveSession->MyPlayerIndexes);
-
 		CMap* LeaveMap = G_MapManager->GetMap(1);
 		CChannel* LeaveChannel = LeaveMap->GetChannelManager()->Find(1);
+
+		st_GameObjectJob* DeSpawnMonsterChannelJob = MakeGameObjectJobObjectDeSpawnObjectChannel(MyPlayer);
+		LeaveChannel->_ChannelJobQue.Enqueue(DeSpawnMonsterChannelJob);
+
+		st_GameObjectJob* LeaveGameJob = MakeGameObjectJobLeaveChannelPlayer(MyPlayer, LeaveSession->MyPlayerIndexes);
 		LeaveChannel->_ChannelJobQue.Enqueue(LeaveGameJob);
 	}	
 	
@@ -6538,30 +6494,6 @@ CGameServerMessage* CGameServer::MakePacketResPlaceItem(int64 AccountId, int64 O
 	return ResPlaceItemMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResMoneyToInventory(int64 TargetObjectID, int64 GoldCoinCount, int16 SliverCoinCount, int16 BronzeCoinCount, st_ItemInfo ItemInfo, int16 ItemEach)
-{
-	CGameServerMessage* ResMoneyToInventoryMessage = CGameServerMessage::GameServerMessageAlloc();
-	if (ResMoneyToInventoryMessage == nullptr)
-	{
-		return nullptr;
-	}
-
-	ResMoneyToInventoryMessage->Clear();
-
-	*ResMoneyToInventoryMessage << (int16)en_PACKET_S2C_LOOTING;
-
-	*ResMoneyToInventoryMessage << TargetObjectID;
-	*ResMoneyToInventoryMessage << true;
-	*ResMoneyToInventoryMessage << GoldCoinCount;
-	*ResMoneyToInventoryMessage << SliverCoinCount;
-	*ResMoneyToInventoryMessage << BronzeCoinCount;
-	*ResMoneyToInventoryMessage << ItemInfo;
-	*ResMoneyToInventoryMessage << ItemEach;
-	*ResMoneyToInventoryMessage << true;
-
-	return ResMoneyToInventoryMessage;
-}
-
 CGameServerMessage* CGameServer::MakePacketInventoryItemUse(int64 PlayerId, st_ItemInfo& UseItemInfo)
 {
 	CGameServerMessage* ResInventoryItemUseMessage = CGameServerMessage::GameServerMessageAlloc();
@@ -6795,6 +6727,20 @@ CItem* CGameServer::NewItemCrate(st_ItemInfo& NewItemInfo)
 	return NewItem;
 }
 
+st_GameObjectJob* CGameServer::MakeGameObjectJobObjectDeSpawnObjectChannel(CGameObject* DeSpawnChannelObject)
+{
+	st_GameObjectJob* DeSpawnObjectChannelJob = G_ObjectManager->GameObjectJobCreate();
+	DeSpawnObjectChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_OBJECT_DESPAWN_CHANNEL;
+
+	CGameServerMessage* DeSpawnObjectChannelGameMessage = CGameServerMessage::GameServerMessageAlloc();
+	DeSpawnObjectChannelGameMessage->Clear();
+
+	*DeSpawnObjectChannelGameMessage << &DeSpawnChannelObject;
+	DeSpawnObjectChannelJob->GameObjectJobMessage = DeSpawnObjectChannelGameMessage;
+
+	return DeSpawnObjectChannelJob;
+}
+
 st_GameObjectJob* CGameServer::MakeGameObjectJobPlayerEnterChannel(CGameObject* EnterChannelObject)
 {
 	st_GameObjectJob* EnterChannelJob = G_ObjectManager->GameObjectJobCreate();
@@ -6817,7 +6763,8 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobObjectEnterChannel(CGameObject* 
 	CGameServerMessage* EnterChannelGameMessage = CGameServerMessage::GameServerMessageAlloc();
 	EnterChannelGameMessage->Clear();
 
-	*EnterChannelGameMessage << &EnterChannelObject;
+	*EnterChannelGameMessage << &EnterChannelObject;	
+
 	EnterChannelJob->GameObjectJobMessage = EnterChannelGameMessage;
 
 	return EnterChannelJob;
@@ -6830,7 +6777,8 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobLeaveChannel(CGameObject* LeaveC
 
 	CGameServerMessage* LeaveChannelMessage = CGameServerMessage::GameServerMessageAlloc();
 	LeaveChannelMessage->Clear();
-	*LeaveChannelMessage << &LeaveChannelObject;
+
+	*LeaveChannelMessage << &LeaveChannelObject;		
 
 	LeaveChannelJob->GameObjectJobMessage = LeaveChannelMessage;
 
@@ -6867,6 +6815,21 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobHeal(CGameObject* Healer, int32 
 	HealJob->GameObjectJobMessage = HealMessage;
 
 	return HealJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobItemSave(CGameObject* Item)
+{
+	st_GameObjectJob* ItemSaveJob = G_ObjectManager->GameObjectJobCreate();
+	ItemSaveJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_ITEM_INVENTORY_SAVE;
+
+	CGameServerMessage* ItemSaveMessage = CGameServerMessage::GameServerMessageAlloc();
+	ItemSaveMessage->Clear();
+
+	*ItemSaveMessage << &Item;
+
+	ItemSaveJob->GameObjectJobMessage = ItemSaveMessage;
+
+	return ItemSaveJob;
 }
 
 CGameServerMessage* CGameServer::MakePacketResEnterGame(bool EnterGameSuccess, st_GameObjectInfo* ObjectInfo, st_Vector2Int* SpawnPosition)
@@ -7145,6 +7108,23 @@ CGameServerMessage* CGameServer::MakePacketPatrol(int64 ObjectId, en_GameObjectT
 	*ResPatrolPacket << (int8)MonsterState;
 
 	return ResPatrolPacket;
+}
+
+CGameServerMessage* CGameServer::MakePacketItemMove(int64 ObjectID, st_PositionInfo PositionInfo)
+{
+	CGameServerMessage* ResItemMovePacket = CGameServerMessage::GameServerMessageAlloc();
+	if (ResItemMovePacket == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResItemMovePacket->Clear();
+
+	*ResItemMovePacket << (int16)en_PACKET_S2C_ITEM_MOVE;
+	*ResItemMovePacket << ObjectID;
+	*ResItemMovePacket << PositionInfo;
+
+	return ResItemMovePacket;
 }
 
 CGameServerMessage* CGameServer::MakePacketResObjectSpawn(CGameObject* SpawnObject)
@@ -7654,6 +7634,30 @@ CGameServerMessage* CGameServer::MakePacketResItemToInventory(int64 TargetObject
 	*ResItemToInventoryMessage << ItemGainPrint;
 
 	return ResItemToInventoryMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketResMoneyToInventory(int64 TargetObjectID, int64 GoldCoinCount, int16 SliverCoinCount, int16 BronzeCoinCount, st_ItemInfo ItemInfo, int16 ItemEach)
+{
+	CGameServerMessage* ResMoneyToInventoryMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResMoneyToInventoryMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResMoneyToInventoryMessage->Clear();
+
+	*ResMoneyToInventoryMessage << (int16)en_PACKET_S2C_LOOTING;
+
+	*ResMoneyToInventoryMessage << TargetObjectID;
+	*ResMoneyToInventoryMessage << true;
+	*ResMoneyToInventoryMessage << GoldCoinCount;
+	*ResMoneyToInventoryMessage << SliverCoinCount;
+	*ResMoneyToInventoryMessage << BronzeCoinCount;
+	*ResMoneyToInventoryMessage << ItemInfo;
+	*ResMoneyToInventoryMessage << ItemEach;
+	*ResMoneyToInventoryMessage << true;
+
+	return ResMoneyToInventoryMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketResCraftingTableMaterialItemList(int64 CraftingTableObjectID, en_GameObjectType CraftingTableObjectType, en_SmallItemCategory SelectCompleteItemType, map<en_SmallItemCategory, CItem*> MaterialItems)
