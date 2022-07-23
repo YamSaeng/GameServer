@@ -7,13 +7,13 @@
 #include "QuickSlotManager.h"
 #include "SkillBox.h"
 
-#define DUMMY_CLIENT_MAX 500
+#define DUMMY_CLIENT_MAX 600
 
 #define DUMMY_CLIENT_RE_CONNECT_TIME 200
 #define DUMMY_CLIENT_SEND_TIME 200
 #define DUMMY_CLIENT_LOGIN_TIME 500
 
-#define DUMMY_CLIENT_DISCONNECT 10//50
+#define DUMMY_CLIENT_DISCONNECT 20//50
 
 enum en_DummyClientNetworkState
 {

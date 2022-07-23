@@ -3,7 +3,7 @@
 
 CMap::CMap(int MapId)
 {
-	char* FileStr = FileUtils::LoadFile(L"MapData.txt");
+	char* FileStr = FileUtils::LoadFile(L"MapObjectInfoData.txt");
 	char* MovingFileP = FileStr;
 	char* ConvertP = FileStr;
 
@@ -45,11 +45,11 @@ CMap::CMap(int MapId)
 	int XCount = _Right - _Left + 1;
 	int YCount = _Down - _Up + 1;
 
-	_CollisionMapInfos = new en_TileMapEnvironment * [YCount];
+	_CollisionMapInfos = new en_MapObjectInfo * [YCount];
 
 	for (int i = 0; i < YCount; i++)
 	{
-		_CollisionMapInfos[i] = new en_TileMapEnvironment[XCount];
+		_CollisionMapInfos[i] = new en_MapObjectInfo[XCount];
 	}
 
 	_ObjectsInfos = new st_Client**[YCount];
@@ -72,7 +72,7 @@ CMap::CMap(int MapId)
 				break;
 			}
 
-			_CollisionMapInfos[Y][X] = (en_TileMapEnvironment)(*ConvertP - 48);
+			_CollisionMapInfos[Y][X] = (en_MapObjectInfo)(*ConvertP - 48);
 
 			ConvertP++;
 		}
@@ -82,6 +82,7 @@ CMap::CMap(int MapId)
 	_SizeX = _Right - _Left + 1;
 	_SizeY = _Down - _Up + 1;
 }
+
 
 st_Client* CMap::Find(st_Vector2Int& CellPosition)
 {
@@ -133,14 +134,14 @@ bool CMap::CollisionCango(st_Client* Object, st_Vector2Int& CellPosition, bool C
 	bool IsCollisionMapInfo = false;
 	switch (_CollisionMapInfos[Y][X])
 	{
-	case en_TileMapEnvironment::TILE_MAP_NONE:
-	case en_TileMapEnvironment::TILE_MAP_TREE:
-	case en_TileMapEnvironment::TILE_MAP_STONE:
-	case en_TileMapEnvironment::TILE_MAP_SLIME:
-	case en_TileMapEnvironment::TILE_MAP_BEAR:
+	case en_MapObjectInfo::TILE_MAP_NONE:
+	case en_MapObjectInfo::TILE_MAP_TREE:
+	case en_MapObjectInfo::TILE_MAP_STONE:
+	case en_MapObjectInfo::TILE_MAP_SLIME:
+	case en_MapObjectInfo::TILE_MAP_BEAR:
 		IsCollisionMapInfo = true;
 		break;
-	case en_TileMapEnvironment::TILE_MAP_WALL:
+	case en_MapObjectInfo::TILE_MAP_WALL:
 		IsCollisionMapInfo = false;
 	}
 

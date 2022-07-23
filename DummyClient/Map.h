@@ -184,9 +184,9 @@ public:
 	int32 _SizeY;
 
 	//-----------------------------------------
-	// 맵 타일의 정보를 보관
+	// 맵 환경 오브젝트의 정보를 보관
 	//-----------------------------------------
-	en_TileMapEnvironment** _CollisionMapInfos;
+	en_MapObjectInfo** _CollisionMapInfos;
 
 	//-------------------------------------
 	//맵 타일에 존재하는 게임 오브젝트 정보
@@ -198,7 +198,7 @@ public:
 	// 한 타일에 존재 할 수 있는 아이템의 종류는 20개로 제한한다.
 	//-----------------------------------------------------------
 	CMap(int MapId);
-
+	
 	//-------------------------------------------
 	// 좌표 위치에 있는 오브젝트 반환
 	//-------------------------------------------
@@ -222,9 +222,7 @@ public:
 	//---------------------------------------
 	// 맵에서 오브젝트 퇴장
 	//---------------------------------------
-	bool ApplyLeave(st_Client* GameObject);
-
-	bool ApplyPositionLeaveItem(st_Client* GameObject);
+	bool ApplyLeave(st_Client* GameObject);	
 
 	st_Position CellToPosition(st_Vector2Int CellPosition);
 	st_Vector2Int PositionToCell(st_Position Position);
