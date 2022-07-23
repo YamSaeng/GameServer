@@ -7,6 +7,7 @@
 #include "LockFreeQue.h"
 
 class CSkill;
+class CRectCollision;
 
 #define STATUS_ABNORMAL_WARRIOR_CHOHONE         0b00000001
 #define STATUS_ABNORMAL_WARRIOR_SHAEHONE        0b00000010
@@ -122,9 +123,13 @@ public:
 	CChannel* GetChannel();
 	void SetChannel(CChannel* Channel);
 
+	CRectCollision* GetRectCollision();
+
 	virtual void Start();
 	virtual void End();
 protected:
+	CRectCollision* _RectCollision;
+
 	map<int64, st_Aggro> _AggroTargetList;
 
 	int64 _ReSpawnTime;

@@ -20,6 +20,8 @@ CGameObject::CGameObject()
 	_NatureRecoveryTick = 0;
 	_FieldOfViewUpdateTick = 0;
 	_IsSendPacketTarget = false;
+
+	_RectCollision = nullptr;
 }
 
 CGameObject::CGameObject(st_GameObjectInfo GameObjectInfo)
@@ -1070,6 +1072,11 @@ CChannel* CGameObject::GetChannel()
 void CGameObject::SetChannel(CChannel* Channel)
 {
 	_Channel = Channel;
+}
+
+CRectCollision* CGameObject::GetRectCollision()
+{
+	return _RectCollision;
 }
 
 void CGameObject::Start()
