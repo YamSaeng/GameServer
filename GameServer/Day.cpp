@@ -4,10 +4,10 @@
 CDay::CDay()
 {
 	_DayInfo.DayTimeCycle = 0;
-	_DayInfo.DayTimeCheck = 0;
-	_DayInfo.DayRatio = 0;
+	_DayInfo.DayTimeCheck = 540.0f;
+	_DayInfo.DayRatio = 1.0f;
 
-	_DayInfo.DayType = en_DayType::DAY_NONE;
+	_DayInfo.DayType = en_DayType::DAY_AFTERNOON;
 }
 
 CDay::~CDay()
