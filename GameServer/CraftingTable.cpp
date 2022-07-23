@@ -2,10 +2,13 @@
 #include "CraftingTable.h"
 #include "Item.h"
 #include "ObjectManager.h"
+#include "RectCollision.h"
 
 CCraftingTable::CCraftingTable()
 {
 	_SelectedCraftingTable = false;
+
+	_RectCollision = new CRectCollision(this);
 }
 
 void CCraftingTable::Start()

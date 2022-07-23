@@ -3,11 +3,14 @@
 #include "DataManager.h"
 #include "ObjectManager.h"
 #include "MapManager.h"
+#include "RectCollision.h"
 #include <atlbase.h>
 
 CEnvironment::CEnvironment()
 {
 	_FieldOfViewDistance = 10;
+
+	_RectCollision = new CRectCollision(this);
 }
 
 void CEnvironment::Start()
@@ -117,7 +120,7 @@ bool CStone::OnDamaged(CGameObject* Attacker, int32 Damage)
 
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::READY_DEAD;
 
-		G_ObjectManager->ObjectItemSpawn(Attacker->_GameObjectInfo.ObjectId,
+		G_ObjectManager->ObjectItemSpawn(_Channel, Attacker->_GameObjectInfo.ObjectId,
 			Attacker->_GameObjectInfo.ObjectType,
 			_GameObjectInfo.ObjectPositionInfo.CollisionPosition,
 			_GameObjectInfo.ObjectPositionInfo.Position,
@@ -171,7 +174,7 @@ bool CTree::OnDamaged(CGameObject* Attacker, int32 Damage)
 		G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResChangeStatePacket);
 		ResChangeStatePacket->Free();
 		
-		G_ObjectManager->ObjectItemSpawn(Attacker->_GameObjectInfo.ObjectId,
+		G_ObjectManager->ObjectItemSpawn(_Channel, Attacker->_GameObjectInfo.ObjectId,
 			Attacker->_GameObjectInfo.ObjectType,
 			_GameObjectInfo.ObjectPositionInfo.CollisionPosition,
 			_GameObjectInfo.ObjectPositionInfo.Position,
