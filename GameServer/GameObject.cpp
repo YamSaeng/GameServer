@@ -33,7 +33,11 @@ CGameObject::CGameObject(st_GameObjectInfo GameObjectInfo)
 
 CGameObject::~CGameObject()
 {
-
+	if (_RectCollision != nullptr)
+	{
+		delete _RectCollision;
+		_RectCollision = nullptr;
+	}
 }
 
 void CGameObject::StatusAbnormalCheck()

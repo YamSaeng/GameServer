@@ -5,6 +5,7 @@
 #include "Skill.h"
 #include "SkillBox.h"
 #include "MapManager.h"
+#include "RectCollision.h"
 
 CPlayer::CPlayer()
 {
@@ -24,11 +25,17 @@ CPlayer::CPlayer()
 
 	_ComboSkill = nullptr;
 	_CurrentSpellSkill = nullptr;		
+
+	_RectCollision = new CRectCollision(this);
 }
 
 CPlayer::~CPlayer()
 {
-
+	if (_RectCollision != nullptr)
+	{
+		delete _RectCollision;
+		_RectCollision = nullptr;
+	}
 }
 
 void CPlayer::Update()
@@ -293,26 +300,30 @@ void CPlayer::End()
 }
 
 void CPlayer::PositionReset()
-{
+{	
 	switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
 	{
-	case en_MoveDir::LEFT:
-		_GameObjectInfo.ObjectPositionInfo.Position._X =
-			_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.3f;
-		break;
-	case en_MoveDir::RIGHT:
-		_GameObjectInfo.ObjectPositionInfo.Position._X =
-			_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.7f;
-		break;
 	case en_MoveDir::UP:
-		_GameObjectInfo.ObjectPositionInfo.Position._Y =
-			_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.7f;
+		_GameObjectInfo.ObjectPositionInfo.Position._Y +=
+			(st_Vector2::Down()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 		break;
 	case en_MoveDir::DOWN:
-		_GameObjectInfo.ObjectPositionInfo.Position._Y =
-			_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.3f;
+		_GameObjectInfo.ObjectPositionInfo.Position._Y +=
+			(st_Vector2::Up()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		break;
+	case en_MoveDir::LEFT:
+		_GameObjectInfo.ObjectPositionInfo.Position._X +=
+			(st_Vector2::Right()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		break;
+	case en_MoveDir::RIGHT:
+		_GameObjectInfo.ObjectPositionInfo.Position._X +=
+			(st_Vector2::Left()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 		break;
 	}
+
+	_RectCollision->CollisionUpdate();
+
+	//G_Logger->WriteStdOut(en_Color::RED, L"PX : %0.2f PY : %0.2f CX : %0.2f CY : 0.2f\n", PreviousXYPosition._X, PreviousXYPosition._Y, _GameObjectInfo.ObjectPositionInfo.Position._X, _GameObjectInfo.ObjectPositionInfo.Position._Y);
 }
 
 bool CPlayer::UpdateSpawnIdle()
@@ -358,6 +369,8 @@ void CPlayer::UpdateMoving()
 			(st_Vector2::Right()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 		break;
 	}	
+
+	_RectCollision->CollisionUpdate();
 
 	bool CanMove = _Channel->GetMap()->Cango(this, _GameObjectInfo.ObjectPositionInfo.Position._X, _GameObjectInfo.ObjectPositionInfo.Position._Y);
 	if (CanMove == true)
