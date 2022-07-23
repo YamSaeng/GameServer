@@ -6,6 +6,7 @@
 #include "MapManager.h"
 #include "ChannelManager.h"
 #include "Skill.h"
+#include "RectCollision.h"
 
 CMonster::CMonster()
 {
@@ -20,11 +21,13 @@ CMonster::CMonster()
 	_DeadReadyTick = 0;
 
 	_Target = nullptr;	
+
+	_RectCollision = new CRectCollision(this);
 }
 
 CMonster::~CMonster()
 {
-
+	
 }
 
 void CMonster::Update()	
@@ -610,7 +613,8 @@ void CMonster::UpdateAttack()
 
 		SendMonsterChangeObjectState();
 
-		float Distance = st_Vector2::Distance(_Target->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position);
+		int Distance = st_Vector2Int::Distance(_Target->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, _GameObjectInfo.ObjectPositionInfo.CollisionPosition);
+		//float Distance = st_Vector2::Distance(_Target->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position);
 		// 타겟과의 거리가 공격 범위 안에 속하고 X==0 || Y ==0 일때( 대각선은 제한) 공격
 		bool CanUseAttack = (Distance <= _AttackRange && (Direction._X == 0 || Direction._Y == 0));
 		if (CanUseAttack == false)
@@ -735,18 +739,24 @@ void CMonster::Move()
 	switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
 	{
 	case en_MoveDir::UP:
-		_GameObjectInfo.ObjectPositionInfo.Position._Y += (st_Vector2::Up()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		_GameObjectInfo.ObjectPositionInfo.Position._Y +=
+			(st_Vector2::Up()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 		break;
 	case en_MoveDir::DOWN:
-		_GameObjectInfo.ObjectPositionInfo.Position._Y += (st_Vector2::Down()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		_GameObjectInfo.ObjectPositionInfo.Position._Y += 
+			(st_Vector2::Down()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 		break;
 	case en_MoveDir::LEFT:
-		_GameObjectInfo.ObjectPositionInfo.Position._X += (st_Vector2::Left()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		_GameObjectInfo.ObjectPositionInfo.Position._X += 
+			(st_Vector2::Left()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 		break;
 	case en_MoveDir::RIGHT:
-		_GameObjectInfo.ObjectPositionInfo.Position._X += (st_Vector2::Right()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		_GameObjectInfo.ObjectPositionInfo.Position._X +=
+			(st_Vector2::Right()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 		break;
 	}
+
+	_RectCollision->CollisionUpdate();
 
 	bool CanMove = _Channel->GetMap()->Cango(this, _GameObjectInfo.ObjectPositionInfo.Position._X, _GameObjectInfo.ObjectPositionInfo.Position._Y);
 	if (CanMove == true)
@@ -881,7 +891,7 @@ void CMonster::Move()
 		case en_CreatureState::ATTACK:
 			_MonsterState = en_MonsterState::MONSTER_ATTACK;
 			break;
-		}
+		}		
 
 		PositionReset();
 	}
@@ -954,30 +964,47 @@ bool CMonster::TargetAttackCheck()
 	// 다음 위치가 타겟 위치일 경우 
 	if (Path[1] == _Target->_GameObjectInfo.ObjectPositionInfo.CollisionPosition)
 	{
-		// 거리를 잰다.
-		float Distance = st_Vector2::Distance(_Target->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position);
-		// 거리가 특정 거리 안이라면
-		if (Distance <= _AttackRange)
-		{
-			// 방향값 설정
-			st_Vector2 DirectionVector = _Target->_GameObjectInfo.ObjectPositionInfo.Position - _GameObjectInfo.ObjectPositionInfo.Position;
-			st_Vector2 NormalVector = DirectionVector.Normalize();
+		// 방향값 설정
+		st_Vector2 DirectionVector = _Target->_GameObjectInfo.ObjectPositionInfo.Position - _GameObjectInfo.ObjectPositionInfo.Position;
+		st_Vector2 NormalVector = DirectionVector.Normalize();
 
-			en_MoveDir Dir = st_Vector2::GetMoveDir(NormalVector);
+		en_MoveDir Dir = st_Vector2::GetMoveDir(NormalVector);
 
-			_GameObjectInfo.ObjectPositionInfo.MoveDir = Dir;
-			// 공격 상태로 바꾼다.
-			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;
-			_MonsterState = en_MonsterState::MONSTER_ATTACK;
+		_GameObjectInfo.ObjectPositionInfo.MoveDir = Dir;
+		// 공격 상태로 바꾼다.
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;
+		_MonsterState = en_MonsterState::MONSTER_ATTACK;
 
-			_DefaultAttackTick = GetTickCount64() + _AttackTickPoint;
+		_DefaultAttackTick = GetTickCount64() + _AttackTickPoint;
 
-			SendMonsterChangeObjectState();
+		SendMonsterChangeObjectState();
 
-			return true;
-		}
+		return true;
 
-		return false;
+		//// 거리를 잰다.
+		//float Distance = st_Vector2::Distance(_Target->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position);
+		//// 거리가 특정 거리 안이라면
+		//if (Distance <= _AttackRange)
+		//{
+		//	// 방향값 설정
+		//	st_Vector2 DirectionVector = _Target->_GameObjectInfo.ObjectPositionInfo.Position - _GameObjectInfo.ObjectPositionInfo.Position;
+		//	st_Vector2 NormalVector = DirectionVector.Normalize();
+
+		//	en_MoveDir Dir = st_Vector2::GetMoveDir(NormalVector);
+
+		//	_GameObjectInfo.ObjectPositionInfo.MoveDir = Dir;
+		//	// 공격 상태로 바꾼다.
+		//	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;
+		//	_MonsterState = en_MonsterState::MONSTER_ATTACK;
+
+		//	_DefaultAttackTick = GetTickCount64() + _AttackTickPoint;
+
+		//	SendMonsterChangeObjectState();
+
+		//	return true;
+		//}
+
+		//return false;		
 	}
 
 	return false;	
