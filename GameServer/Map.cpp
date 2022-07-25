@@ -10,6 +10,7 @@
 #include "Crop.h"
 #include "DBConnectionPool.h"
 #include "DBStoreProcedure.h"
+#include "RectCollision.h"
 
 CMap::CMap()
 {
@@ -689,15 +690,15 @@ vector<st_TileMapInfo> CMap::FindMapTileInfo(CGameObject* Player)
 	int X = Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X - _Left;
 	int Y = _Down - Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y;
 
-	// 캐릭터 위치에서 상하좌우 10 크기 만큼 타일 정보 반환
-	int LeftX = X - 5;
-	int UpY = Y + 5;
-	int RightX = X + 5;
-	int DownY = Y - 5;
+	// 캐릭터 위치에서 상하좌우 20 크기 만큼 타일 정보 반환
+	int LeftX = X - 10;
+	int UpY = Y + 10;
+	int RightX = X + 10;
+	int DownY = Y - 10;
 	
 	for (; LeftX < RightX; LeftX++)
 	{
-		UpY = Y + 5;
+		UpY = Y + 10;
 
 		for (; UpY > DownY; UpY--)
 		{
@@ -751,25 +752,46 @@ bool CMap::CollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool
 		break;
 	case en_MapObjectInfo::TILE_MAP_WALL:
 		IsCollisionMapInfo = false;
-	}
-
+	}	
+	
 	bool ObjectCheck = false;
+		
+	switch (Object->_GameObjectInfo.ObjectType)
+	{
+	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
+	case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
+	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
+	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
+	case en_GameObjectType::OBJECT_THIEF_PLAYER:
+	case en_GameObjectType::OBJECT_ARCHER_PLAYER:		
+		ObjectCheck = Object->GetChannel()->ChannelColliderCheck(Object);
+		break;
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
+	case en_GameObjectType::OBJECT_STONE:
+	case en_GameObjectType::OBJECT_TREE:	
+	case en_GameObjectType::OBJECT_SLIME:
+		ObjectCheck = false;
 
-	if (_ObjectsInfos[Y][X] == nullptr)
-	{
-		ObjectCheck = true;
-	}
-	else
-	{
-		if (_ObjectsInfos[Y][X]->_GameObjectInfo.ObjectId == Object->_GameObjectInfo.ObjectId)
+		// 오브젝트 위치 배열이 비워 있을 경우 true 반환
+		if (_ObjectsInfos[Y][X] == nullptr)
 		{
 			ObjectCheck = true;
 		}
 		else
 		{
-			ObjectCheck = false;
+			// 비워 있지는 않지만 안에 있는 오브젝트가 이동하고자 하는 오브젝트일 경우
+			if (_ObjectsInfos[Y][X]->_GameObjectInfo.ObjectId == Object->_GameObjectInfo.ObjectId)
+			{
+				ObjectCheck = true;
+			}
+			else // 안에 있는 오브젝트가 다른 오브젝트일 경우
+			{
+				ObjectCheck = false;
+			}
 		}
-	}
+		break;
+	}	
 
 	return IsCollisionMapInfo && (!CheckObjects || ObjectCheck);
 }
@@ -802,6 +824,8 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 	case en_GameObjectType::OBJECT_SLIME:	
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 		{
 			// 목적지로 갈 수 있는지 검사한다.
 			if (CollisionCango(GameObject, DestPosition, CheckObject) == false)
@@ -841,7 +865,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 				}
 			}
 		}
-		break;
+		break;		
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:	
 		{
