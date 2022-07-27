@@ -11,6 +11,7 @@
 #include "Map.h"
 #include "Potato.h"
 #include "ObjectManager.h"
+#include "RectCollision.h"
 
 CChannel::CChannel()
 {	
@@ -101,6 +102,19 @@ void CChannel::Update()
 					// 나 포함해서 주위 시야범위 플레이어 조사
 					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Map->GetFieldOfViewPlayers(DeSpawnObject, 1, false);
 
+					switch (DeSpawnObject->_GameObjectInfo.ObjectType)
+					{
+					case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
+					case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
+					case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
+					case en_GameObjectType::OBJECT_THIEF_PLAYER:
+					case en_GameObjectType::OBJECT_ARCHER_PLAYER:
+					case en_GameObjectType::OBJECT_SLIME:						
+						// 충돌 감지 박스 비활성화
+						DeSpawnObject->GetRectCollision()->SetActive(false);
+						break;					
+					}					
+
 					// 주위 시야범위 플레이어들에게 해당 오브젝트를 소환해제 하라고 알림
 					CMessage* ResObjectDeSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(DeSpawnObject->_GameObjectInfo.ObjectId);
 					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResObjectDeSpawnPacket);
@@ -113,11 +127,14 @@ void CChannel::Update()
 				{				
 					CPlayer* EnterPlayer;
 					*GameObjectJob->GameObjectJobMessage >> &EnterPlayer;
-					
-					EnterPlayer->_SpawnIdleTick = GetTickCount64() + 5000;
-					EnterPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_IDLE;				
 
-					EnterChannel(EnterPlayer, &EnterPlayer->_SpawnPosition);
+					EnterPlayer->_SpawnIdleTick = GetTickCount64() + 5000;
+					EnterPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_IDLE;									
+
+					// 충돌 감지 활성화
+					EnterPlayer->GetRectCollision()->SetActive(true);
+
+					EnterChannel(EnterPlayer, &EnterPlayer->_SpawnPosition);					
 
 					// 나한테 나 생성하라고 알려줌
 					CMessage* ResEnterGamePacket = G_ObjectManager->GameServer->MakePacketResEnterGame(true, &EnterPlayer->_GameObjectInfo, &EnterPlayer->_SpawnPosition);
@@ -148,14 +165,17 @@ void CChannel::Update()
 			case en_GameObjectJobType::GAMEOBJECT_JOB_OBJECT_ENTER_CHANNEL:
 				{
 					CGameObject* EnterObject;
-					*GameObjectJob->GameObjectJobMessage >> &EnterObject;					
-
+					*GameObjectJob->GameObjectJobMessage >> &EnterObject;										
+										
 					switch (EnterObject->_GameObjectInfo.ObjectType)
 					{
 					case en_GameObjectType::OBJECT_SLIME:
 					case en_GameObjectType::OBJECT_BEAR:
 						{
 							CMonster* EnterChannelMonster = (CMonster*)EnterObject;
+
+							// 충돌 감지 박스 활성화
+							EnterChannelMonster->GetRectCollision()->SetActive(true);
 
 							EnterChannelMonster->_FieldOfViewPlayers = _Map->GetFieldOfViewPlayer(EnterChannelMonster, EnterChannelMonster->_FieldOfViewDistance);						
 							
@@ -201,6 +221,8 @@ void CChannel::Update()
 						{
 							CEnvironment* Entervironment = (CEnvironment*)EnterObject;
 
+							Entervironment->GetRectCollision()->SetActive(true);
+
 							EnterChannel(Entervironment, &Entervironment->_SpawnPosition);
 						}
 						break;
@@ -208,6 +230,8 @@ void CChannel::Update()
 					case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 						{
 							CCraftingTable* CraftingTable = (CCraftingTable*)EnterObject;
+
+							CraftingTable->GetRectCollision()->SetActive(true);
 
 							EnterChannel(CraftingTable, &CraftingTable->_SpawnPosition);
 						}
@@ -849,6 +873,93 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 	return FindObjects;
 }
 
+bool CChannel::ChannelColliderCheck(CGameObject* Object)
+{	
+	// 플레이어들과 충돌하는지 검사
+	bool IsPlayerCollision = true;
+	for (int32 i = 0; i < en_Channel::PLAYER_MAX; i++)
+	{
+		if (_ChannelPlayerArray[i] != nullptr
+			&& _ChannelPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE)
+		{
+			if (Object->_GameObjectInfo.ObjectId != _ChannelPlayerArray[i]->_GameObjectInfo.ObjectId 
+				&& _ChannelPlayerArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsCollision(Object->GetRectCollision(), _ChannelPlayerArray[i]->GetRectCollision()) == true)
+			{
+				// 충돌
+				IsPlayerCollision = false;
+				//G_Logger->WriteStdOut(en_Color::RED, L"%s와 %s 충돌\n", Object->_GameObjectInfo.ObjectName.c_str(), _ChannelPlayerArray[i]->_GameObjectInfo.ObjectName.c_str());
+				break;
+			}
+		}
+	}
+
+	bool IsDummyPlayerCollision = true;
+	for (int32 i = 0; i < en_Channel::DUMMY_PLAYER_MAX; i++)
+	{
+		if (_ChannelDummyPlayerArray[i] != nullptr
+			&& _ChannelDummyPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE)
+		{
+			if (Object->_GameObjectInfo.ObjectId != _ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectId 
+				&& _ChannelDummyPlayerArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsCollision(Object->GetRectCollision(), _ChannelDummyPlayerArray[i]->GetRectCollision()) == true)
+			{
+				IsDummyPlayerCollision = false;
+				break;
+			}
+		}
+	}
+
+	bool IsMonsterCollision = true;
+	for (int32 i = 0; i < en_Channel::MONSTER_MAX; i++)
+	{
+		if (_ChannelMonsterArray[i] != nullptr)
+		{
+			if (Object->_GameObjectInfo.ObjectId != _ChannelMonsterArray[i]->_GameObjectInfo.ObjectId 
+				&& _ChannelMonsterArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsCollision(Object->GetRectCollision(), _ChannelMonsterArray[i]->GetRectCollision()) == true)
+			{
+				IsMonsterCollision = false;
+				break;
+			}
+		}
+	}
+
+	bool IsCraftingTableCollision = true;
+	for (int32 i = 0; i < en_Channel::CRAFTING_TABLE_MAX; i++)
+	{
+		if (_ChannelCraftingTableArray[i] != nullptr)
+		{
+			if (Object->_GameObjectInfo.ObjectId != _ChannelCraftingTableArray[i]->_GameObjectInfo.ObjectId 
+				&& _ChannelCraftingTableArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsCollision(Object->GetRectCollision(), _ChannelCraftingTableArray[i]->GetRectCollision()) == true)
+			{
+				IsCraftingTableCollision = false;
+				break;
+			}
+		}
+	}
+
+	bool IsEnvironmentCollision = true;
+	for (int32 i = 0; i < en_Channel::ENVIRONMENT_MAX; i++)
+	{
+		if (_ChannelEnvironmentArray[i] != nullptr)
+		{
+			if (Object->_GameObjectInfo.ObjectId != _ChannelEnvironmentArray[i]->_GameObjectInfo.ObjectId 
+				&& _ChannelEnvironmentArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsCollision(Object->GetRectCollision(), _ChannelEnvironmentArray[i]->GetRectCollision()) == true)
+			{
+				IsEnvironmentCollision = false;
+				break;
+			}
+		}
+	}
+
+	bool IsCollision = (IsPlayerCollision) && (IsDummyPlayerCollision) && (IsMonsterCollision) && (IsCraftingTableCollision) && (IsEnvironmentCollision);
+	
+	return IsCollision;
+}
+
 bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* ObjectSpawnPosition)
 {
 	bool IsEnterChannel = false;
@@ -903,6 +1014,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
 			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
 
+			EnterChannelPlayer->GetRectCollision()->CollisionUpdate();
+
 			// 플레이어 저장
 			_ChannelPlayerArrayIndexs.Pop(&EnterChannelPlayer->_ChannelArrayIndex);
 			_ChannelPlayerArray[EnterChannelPlayer->_ChannelArrayIndex] = EnterChannelPlayer;		
@@ -930,6 +1043,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
 			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
 
+			EnterChannelPlayer->GetRectCollision()->CollisionUpdate();
+
 			// 플레이어 저장
 			_ChannelDummyPlayerArrayIndexs.Pop(&EnterChannelPlayer->_ChannelArrayIndex);
 			_ChannelDummyPlayerArray[EnterChannelPlayer->_ChannelArrayIndex] = EnterChannelPlayer;
@@ -953,6 +1068,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 		EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 		EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
 		EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
+
+		EnterChannelMonster->GetRectCollision()->CollisionUpdate();
 
 		EnterChannelMonster->Start();		
 				
@@ -1022,6 +1139,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
 			EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;		
 
+			EnterChannelEnvironment->GetRectCollision()->CollisionUpdate();
+
 			EnterChannelEnvironment->Start();
 
 			// 환경 오브젝트 저장
@@ -1044,6 +1163,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 			EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
 			EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
+
+			EnterChannelCraftingTable->GetRectCollision()->CollisionUpdate();
 
 			EnterChannelCraftingTable->Start();
 
