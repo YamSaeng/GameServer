@@ -119,11 +119,15 @@
     <Column name="PlayerDBId" type="BigInt" notnull ="true"/>
     <Column name="QuickSlotBarIndex" type="TinyInt" notnull ="true"/>
     <Column name="QuickSlotBarSlotIndex" type="TinyInt" notnull ="true"/>
-    <Column name="QuickSlotKey" type="SmallInt"/>
+    <Column name="QuickSlotKey" type="SmallInt"/>	
     <Column name="SkillLargeCategory" type="TinyInt"/>
     <Column name="SkillMediumCategory" type="TinyInt"/>
     <Column name="SkillType" type="SmallInt"/>
-    <Column name="SkillLevel" type="TinyInt"/>            
+    <Column name="SkillLevel" type="TinyInt"/>
+	<Column name="ItemLargeCategory" type="TinyInt"/>
+	<Column name="ItemMediumCategory" type="TinyInt"/>
+	<Column name="ItemSmallCategory" type="TinyInt"/>
+	<Column name="ItemCount" type="SmallInt"/>
   </Table>  
    
   <!-- 농작물 테이블 -->
@@ -593,11 +597,15 @@
     <Param name="@SkillLargeCategory" type="TinyInt"/>
     <Param name="@SkillMediumCategory" type="TinyInt"/>
     <Param name="@SkillType" type="SmallInt"/>
-    <Param name="@SkillLevel" type="TinyInt"/>    
+    <Param name="@SkillLevel" type="TinyInt"/>  
+	<Param name="@ItemLargeCategory" type="TinyInt"/>    
+	<Param name="@ItemMediumCategory" type="TinyInt"/>  
+	<Param name="@ItemSmallCategory" type="SmallInt"/>  
     <Body>
       <![CDATA[
 	    SET NOCOUNT ON
-        UPDATE [dbo].[QuickSlotBar] SET QuickSlotKey = (@QuickSlotKey), SkillLargeCategory = (@SkillLargeCategory), SkillMediumCategory = (@SkillMediumCategory), SkillType = (@SkillType), SkillLevel = (@SkillLevel)
+        UPDATE [dbo].[QuickSlotBar] 
+		SET QuickSlotKey = (@QuickSlotKey), SkillLargeCategory = (@SkillLargeCategory), SkillMediumCategory = (@SkillMediumCategory), SkillType = (@SkillType), SkillLevel = (@SkillLevel), ItemLargeCategory = (@ItemLargeCategory), ItemMediumCategory = (@ItemMediumCategory), ItemSmallCategory = (@ItemSmallCategory)
         WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
     </Body>
