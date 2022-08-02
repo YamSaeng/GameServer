@@ -379,7 +379,10 @@ enum class en_PersonalMessageType : int8
 	PERSONAL_MESSAGE_LOGIN_ACCOUNT_NOT_EXIST,
 	PERSONAL_MESSAGE_LOGIN_ACCOUNT_OVERLAP,
 	PERSONAL_MESSAGE_LOGIN_ACCOUNT_DB_WORKING,
-	PERSONAL_MESSAGE_LOGIN_ACCOUNT_DIFFERENT_PASSWORD
+	PERSONAL_MESSAGE_LOGIN_ACCOUNT_DIFFERENT_PASSWORD,
+
+	PERSONAL_MESSAGE_SYSTEM_SYSTEM_ALLOC_TILE,
+	PERSONAL_MESSAGE_SYSTEM_ALLOC_TILE
 };
 
 enum class en_ConsumableType : int16
@@ -2413,7 +2416,8 @@ struct st_QuickSlotBarSlotInfo
 	int8 QuickSlotBarIndex;          // 퀵슬롯 Index
 	int8 QuickSlotBarSlotIndex;      // 퀵슬롯 슬롯 Index
 	int16 QuickSlotKey;              // 퀵슬롯에 연동된 키값
-	CSkill* QuickBarSkill = nullptr; // 퀵슬롯에 등록할 스킬 정보	
+	CSkill* QuickBarSkill = nullptr; // 퀵슬롯에 등록할 스킬 정보		
+	CItem* QuickBarItem = nullptr;	 // 퀵슬롯에 등록할 아이템 정보
 	bool CanQuickSlotUse = true;     // 퀵슬롯을 사용할 수 있는지 없는지
 };
 
