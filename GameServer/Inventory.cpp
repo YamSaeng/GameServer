@@ -123,7 +123,7 @@ bool CInventory::FindItemSpaceEmpty(CItem* Item)
 	return CheckEmptySpace(Item->_ItemInfo.TileGridPositionX, Item->_ItemInfo.TileGridPositionY, Item->_ItemInfo.Width, Item->_ItemInfo.Height);
 }
 
-bool CInventory::CheckEmptySpace(int8 PositionX, int8 PositionY, int32 Width, int32 Height)
+bool CInventory::CheckEmptySpace(int16 PositionX, int16 PositionY, int32 Width, int32 Height)
 {
 	// 매개변수로 받은 시작 위치부터 넓이만큼 인벤토리가 비어 있는지 확인한다.
 	for(int X = 0; X < Width; X++)
@@ -189,7 +189,7 @@ void CInventory::PlaceItem(CItem* PlaceItemInfo, int16 PositionX, int16 Position
 	_InventoryItemNumber++;
 }
 
-void CInventory::InitItem(int8 TilePositionX, int8 TilePositionY)
+void CInventory::InitItem(int16 TilePositionX, int16 TilePositionY)
 {
 	if (_Items[TilePositionX][TilePositionY] != nullptr)
 	{
@@ -255,7 +255,7 @@ bool CInventory::PositionCheck(int16 TilePositionX, int16 TilePositionY)
 	return true;
 }
 
-bool CInventory::OverlapCheck(int8 TilePositionX, int8 TilePositionY, int16 Width, int16 Height, CItem** OverlapItem)
+bool CInventory::OverlapCheck(int16 TilePositionX, int16 TilePositionY, int16 Width, int16 Height, CItem** OverlapItem)
 {
 	// 매개 변수로 받은 시작 위치로부터 넓이만큼 검사한다.
 	for (int X = 0; X < Width; X++)
