@@ -677,7 +677,7 @@
       <![CDATA[
 	    SET NOCOUNT ON
         UPDATE [dbo].[QuickSlotBar]
-        SET SkillLargeCategory = 0, SkillMediumCategory = 0, SkillType = 0, SkillLevel = 0
+        SET SkillLargeCategory = 0, SkillMediumCategory = 0, SkillType = 0, SkillLevel = 0, ItemLargeCategory = 0, ItemMediumCategory = 0, ItemSmallCategory = 0, ItemCount = 0
         WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
     </Body>
