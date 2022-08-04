@@ -100,7 +100,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="MapData.txt">
+    <Text Include="MapObjectInfoData.txt">
       <Filter>Client</Filter>
     </Text>
   </ItemGroup>

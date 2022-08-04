@@ -320,6 +320,7 @@ unsigned __stdcall CDummyClient::LogicThreadProc(void* Argument)
 							*ReqMoveStopPacket << (int16)en_PACKET_C2S_MOVE_STOP;
 							*ReqMoveStopPacket << Instance->_ClientArray[i]->AccountId;
 							*ReqMoveStopPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId;
+							*ReqMoveStopPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectStep;
 							*ReqMoveStopPacket << (int8)Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.State;
 							*ReqMoveStopPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionX;
 							*ReqMoveStopPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionY;
@@ -449,6 +450,7 @@ unsigned __stdcall CDummyClient::SendThreadProc(void* Argument)
 									*RandPacket << (int16)en_PACKET_C2S_MOVE;
 									*RandPacket << Instance->_ClientArray[i]->AccountId;
 									*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId;
+									//*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectStep;
 									*RandPacket << (int8)Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.State;
 									*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionX;
 									*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionY;
@@ -819,6 +821,8 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 					int16 CharacterNameLen;
 					*Packet >> CharacterNameLen;
 					Packet->GetData(RecvClient->MyCharacterGameObjectInfo.ObjectName, CharacterNameLen);
+					
+					*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectStep;
 
 					int8 CharacterState;
 					*Packet >> CharacterState;
@@ -862,6 +866,9 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 					int16 CharacterOwnerObjectType;
 					*Packet >> CharacterOwnerObjectType;
 					RecvClient->MyCharacterGameObjectInfo.OwnerObjectType = (en_GameObjectType)CharacterOwnerObjectType;
+
+					*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectWidth;
+					*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectHeight;
 
 					*Packet >> RecvClient->MyCharacterGameObjectInfo.PlayerSlotIndex;
 
@@ -918,6 +925,8 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 				*Packet >> CharacterNameLen;
 				Packet->GetData(RecvClient->MyCharacterGameObjectInfo.ObjectName, CharacterNameLen);
 
+				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectStep;
+
 				int8 CharacterState;
 				*Packet >> CharacterState;
 
@@ -953,6 +962,10 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 
 				int16 CharacterOwnerObjectType;
 				*Packet >> CharacterOwnerObjectType;
+
+				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectWidth;
+				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectHeight;
+
 				*Packet >> RecvClient->MyCharacterGameObjectInfo.PlayerSlotIndex;
 
 				CMessage* ReqEnterGamePacket = CMessage::Alloc();
@@ -982,6 +995,8 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 				int16 CharacterNameLen;
 				*Packet >> CharacterNameLen;
 				Packet->GetData(RecvClient->MyCharacterGameObjectInfo.ObjectName, CharacterNameLen);
+
+				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectStep;
 
 				int8 CharacterState;
 				*Packet >> CharacterState;
@@ -1022,6 +1037,10 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 
 				int16 CharacterOwnerObjectType;
 				*Packet >> CharacterOwnerObjectType;
+
+				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectWidth;
+				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectHeight;
+
 				*Packet >> RecvClient->MyCharacterGameObjectInfo.PlayerSlotIndex;
 
 				st_Vector2Int ServerPlayerPosition;
@@ -1109,11 +1128,11 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 			int8 CreatureState;
 			int32 CollsitionPositionX;
 			int32 CollsitionPositionY;
-			int8 MoveDir;
+			int8 MoveDir;			
 			float PositionX;
 			float PositionY;
 			
-			*Packet >> ObjectId;
+			*Packet >> ObjectId;			
 			*Packet >> CreatureState;
 			*Packet >> CollsitionPositionX;
 			*Packet >> CollsitionPositionY;
