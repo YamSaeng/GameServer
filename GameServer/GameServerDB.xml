@@ -126,7 +126,7 @@
     <Column name="SkillLevel" type="TinyInt"/>
 	<Column name="ItemLargeCategory" type="TinyInt"/>
 	<Column name="ItemMediumCategory" type="TinyInt"/>
-	<Column name="ItemSmallCategory" type="TinyInt"/>
+	<Column name="ItemSmallCategory" type="SmallInt"/>
 	<Column name="ItemCount" type="SmallInt"/>
   </Table>  
    
@@ -578,11 +578,16 @@
     <Param name="@SkillLargeCategory" type="TinyInt"/>
     <Param name="@SkillMediumCategory" type="TinyInt"/>
     <Param name="@SkillType" type="SmallInt"/>
-    <Param name="@SkillLevel" type="TinyInt"/>    
+    <Param name="@SkillLevel" type="TinyInt"/>  	
+    <Param name="@ItemLargeCategory" type="TinyInt"/>  	
+    <Param name="@ItemMediumCategory" type="TinyInt"/>  	
+    <Param name="@ItemSmallCategory" type="SmallInt"/>  	
+    <Param name="@ItemCount" type="SmallInt"/>  	
     <Body>
       <![CDATA[   
 	    SET NOCOUNT ON
-        INSERT INTO [dbo].[QuickSlotBar] VALUES ((@AccountDBId), (@PlayerDBId), (@QuickSlotBarIndex), (@QuickSlotBarSlotIndex), (@QuickSlotKey), (@SkillLargeCategory), (@SkillMediumCategory), (@SkillType), (@SkillLevel))
+        INSERT INTO [dbo].[QuickSlotBar] 
+		VALUES ((@AccountDBId), (@PlayerDBId), (@QuickSlotBarIndex), (@QuickSlotBarSlotIndex), (@QuickSlotKey), (@SkillLargeCategory), (@SkillMediumCategory), (@SkillType), (@SkillLevel), (@ItemLargeCategory), (@ItemMediumCategory), (@ItemSmallCategory), (@ItemCount))
       ]]>
     </Body>   
   </Procedure>
@@ -601,11 +606,12 @@
 	<Param name="@ItemLargeCategory" type="TinyInt"/>    
 	<Param name="@ItemMediumCategory" type="TinyInt"/>  
 	<Param name="@ItemSmallCategory" type="SmallInt"/>  
+	<Param name="@ItemCount" type="SmallInt"/>
     <Body>
       <![CDATA[
 	    SET NOCOUNT ON
         UPDATE [dbo].[QuickSlotBar] 
-		SET QuickSlotKey = (@QuickSlotKey), SkillLargeCategory = (@SkillLargeCategory), SkillMediumCategory = (@SkillMediumCategory), SkillType = (@SkillType), SkillLevel = (@SkillLevel), ItemLargeCategory = (@ItemLargeCategory), ItemMediumCategory = (@ItemMediumCategory), ItemSmallCategory = (@ItemSmallCategory)
+		SET QuickSlotKey = (@QuickSlotKey), SkillLargeCategory = (@SkillLargeCategory), SkillMediumCategory = (@SkillMediumCategory), SkillType = (@SkillType), SkillLevel = (@SkillLevel), ItemLargeCategory = (@ItemLargeCategory), ItemMediumCategory = (@ItemMediumCategory), ItemSmallCategory = (@ItemSmallCategory), ItemCount = (@ItemCount)
         WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
     </Body>
