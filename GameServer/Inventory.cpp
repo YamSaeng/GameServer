@@ -340,26 +340,26 @@ vector<CItem*> CInventory::FindAllInventoryItem(en_SmallItemCategory FindItemSma
 
 vector<st_ItemInfo> CInventory::DBInventorySaveReturnItems()
 {
-	st_ItemInfo InitItemInfo;
-
+	st_ItemInfo SaveItemInfo;
+	
 	vector<st_ItemInfo> ReturnItem;
 	
-	for (int Y = 0; Y < _InventoryHeight; Y++)
+	for (int X = 0; X < _InventoryWidth; X++)
 	{
-		for (int X = 0; X < _InventoryWidth; X++)
+		for (int Y = 0; Y < _InventoryHeight; Y++)
 		{
-			if (_Items[Y][X]->IsEmptySlot == false)
+			if (_Items[X][Y]->IsEmptySlot == false)
 			{
-				ReturnItem.push_back(_Items[Y][X]->InventoryItem->_ItemInfo);
+				ReturnItem.push_back(_Items[X][Y]->InventoryItem->_ItemInfo);
 				// 사용 다한 아이템 메모리 반납
-				G_ObjectManager->ObjectReturn(_Items[Y][X]->InventoryItem->_GameObjectInfo.ObjectType, (CGameObject*)_Items[Y][X]);
+				G_ObjectManager->ObjectReturn(_Items[X][Y]->InventoryItem->_GameObjectInfo.ObjectType, (CGameObject*)_Items[X][Y]);
 			}
 			else
 			{
-				InitItemInfo.TileGridPositionY = Y;
-				InitItemInfo.TileGridPositionX = X;				
+				SaveItemInfo.TileGridPositionX = X;
+				SaveItemInfo.TileGridPositionY = Y;				
 
-				ReturnItem.push_back(InitItemInfo);
+				ReturnItem.push_back(SaveItemInfo);
 			}
 		}
 	}
