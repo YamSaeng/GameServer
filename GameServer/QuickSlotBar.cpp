@@ -19,6 +19,7 @@ void CQuickSlotBar::Init()
 	for (int8 SlotIndex = 0; SlotIndex < (int8)en_QuickSlotBar::QUICK_SLOT_BAR_SLOT_SIZE; ++SlotIndex)
 	{
 		st_QuickSlotBarSlotInfo* QuickSlotBarSlotInfo = new st_QuickSlotBarSlotInfo();
+		QuickSlotBarSlotInfo->QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_NONE;
 		QuickSlotBarSlotInfo->QuickSlotBarIndex = _QuickSlotBarIndex;
 		QuickSlotBarSlotInfo->QuickSlotBarSlotIndex = SlotIndex;
 		QuickSlotBarSlotInfo->QuickSlotKey = SlotIndex + 1;		
