@@ -484,6 +484,13 @@ enum class en_DayType : int8
 	DAY_NIGHT
 };
 
+enum class en_QuickSlotBarType : int8
+{
+	QUICK_SLOT_BAR_TYPE_NONE = 0,
+	QUICK_SLOT_BAR_TYPE_SKILL,
+	QUICK_SLOT_BAR_TYPE_ITEM
+};
+
 namespace UnityEngine
 {
 	enum en_UnityKeyCode
@@ -2411,14 +2418,15 @@ struct st_BufSkillInfo : public st_SkillInfo
 
 struct st_QuickSlotBarSlotInfo
 {
-	int64 AccountDBId;               // 퀵슬롯 슬롯 소유한 Account
-	int64 PlayerDBId;                // 퀵슬롯 슬롯 소유한 Player	
-	int8 QuickSlotBarIndex;          // 퀵슬롯 Index
-	int8 QuickSlotBarSlotIndex;      // 퀵슬롯 슬롯 Index
-	int16 QuickSlotKey;              // 퀵슬롯에 연동된 키값
-	CSkill* QuickBarSkill = nullptr; // 퀵슬롯에 등록할 스킬 정보		
-	CItem* QuickBarItem = nullptr;	 // 퀵슬롯에 등록할 아이템 정보
-	bool CanQuickSlotUse = true;     // 퀵슬롯을 사용할 수 있는지 없는지
+	en_QuickSlotBarType QuickSlotBarType; // 퀵슬롯이 담고 있는
+	int64 AccountDBId;					 // 퀵슬롯 슬롯 소유한 Account
+	int64 PlayerDBId;			         // 퀵슬롯 슬롯 소유한 Player	
+	int8 QuickSlotBarIndex;			     // 퀵슬롯 Index
+	int8 QuickSlotBarSlotIndex;			 // 퀵슬롯 슬롯 Index
+	int16 QuickSlotKey;					 // 퀵슬롯에 연동된 키값
+	CSkill* QuickBarSkill = nullptr;	 // 퀵슬롯에 등록할 스킬 정보		
+	CItem* QuickBarItem = nullptr;		 // 퀵슬롯에 등록할 아이템 정보
+	bool CanQuickSlotUse = true;		 // 퀵슬롯을 사용할 수 있는지 없는지
 };
 
 struct st_QuickSlotBarPosition
