@@ -166,6 +166,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_ItemInfo& ItemInfo)
 
 CGameServerMessage& CGameServerMessage::operator<<(st_QuickSlotBarSlotInfo& QuickSlotBarSlotInfo)
 {
+    *this << (int8)QuickSlotBarSlotInfo.QuickSlotBarType;
     *this << QuickSlotBarSlotInfo.AccountDBId;
     *this << QuickSlotBarSlotInfo.PlayerDBId;
     *this << QuickSlotBarSlotInfo.QuickSlotBarIndex;
@@ -173,7 +174,6 @@ CGameServerMessage& CGameServerMessage::operator<<(st_QuickSlotBarSlotInfo& Quic
     *this << QuickSlotBarSlotInfo.QuickSlotKey;   
     
     bool EmptyQuickSlotSkillInfo;
-
     if (QuickSlotBarSlotInfo.QuickBarSkill == nullptr)
     {
         EmptyQuickSlotSkillInfo = true;
@@ -185,6 +185,19 @@ CGameServerMessage& CGameServerMessage::operator<<(st_QuickSlotBarSlotInfo& Quic
         *this << EmptyQuickSlotSkillInfo;
         *this << *(QuickSlotBarSlotInfo.QuickBarSkill->GetSkillInfo());
     }   
+
+    bool EmptyQuickSlotItemInfo;
+    if (QuickSlotBarSlotInfo.QuickBarItem == nullptr)
+    {
+        EmptyQuickSlotItemInfo = true;
+        *this << EmptyQuickSlotItemInfo;
+    }
+    else
+    {
+        EmptyQuickSlotItemInfo = false;
+        *this << EmptyQuickSlotItemInfo;
+        *this << QuickSlotBarSlotInfo.QuickBarItem->_ItemInfo;
+    }
 
     return *(this);
 }
