@@ -6017,75 +6017,81 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 		{
 			st_QuickSlotBarSlotInfo* SaveQuickSlotInfo = QuickSlotBarSlotIterator.second;
 
-			if (SaveQuickSlotInfo->QuickBarSkill != nullptr)
+			switch (SaveQuickSlotInfo->QuickSlotBarType)
 			{
-				SP::CDBGameServerQuickSlotBarSlotUpdate QuickSlotDBUpdate(*PlayerInfoSaveDBConnection);
+			case en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_NONE:
+				{
+					SP::CDBGameServerQuickSlotInit QuickSlotInit(*PlayerInfoSaveDBConnection);
 
-				int8 SaveQuickSlotInfoSkillLargeCategory = (int8)SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillLargeCategory;
-				int8 SaveQuickSlotInfoSkillMediumCategory = (int8)SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillMediumCategory;
-				int16 SaveQuickSlotInfoSkillSkillType = (int8)SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillType;
+					QuickSlotInit.InAccountDBId(MyPlayer->_AccountId);
+					QuickSlotInit.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
+					QuickSlotInit.InQuickSlotBarIndex(SaveQuickSlotInfo->QuickSlotBarIndex);
+					QuickSlotInit.InQuickSlotBarSlotIndex(SaveQuickSlotInfo->QuickSlotBarSlotIndex);
 
-				int8 SaveItemLargeCategory = 0;
-				int8 SaveItemMediumCategory = 0;
-				int16 SaveItemSmallCategory = 0;
-				int16 SaveItemCount = 0;
+					QuickSlotInit.Execute();
+				}
+				break;
+			case en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_SKILL:
+				{
+					SP::CDBGameServerQuickSlotBarSlotUpdate QuickSlotDBUpdate(*PlayerInfoSaveDBConnection);
 
-				QuickSlotDBUpdate.InAccountDBId(MyPlayer->_AccountId);
-				QuickSlotDBUpdate.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
-				QuickSlotDBUpdate.InQuickSlotBarIndex(SaveQuickSlotInfo->QuickSlotBarIndex);
-				QuickSlotDBUpdate.InQuickSlotBarSlotIndex(SaveQuickSlotInfo->QuickSlotBarSlotIndex);
-				QuickSlotDBUpdate.InQuickSlotKey(SaveQuickSlotInfo->QuickSlotKey);
-				QuickSlotDBUpdate.InSkillLargeCategory(SaveQuickSlotInfoSkillLargeCategory);
-				QuickSlotDBUpdate.InSkillMediumCategory(SaveQuickSlotInfoSkillMediumCategory);
-				QuickSlotDBUpdate.InSkillType(SaveQuickSlotInfoSkillSkillType);
-				QuickSlotDBUpdate.InSkillLevel(SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillLevel);
-				QuickSlotDBUpdate.InItemLargeCategory(SaveItemLargeCategory);
-				QuickSlotDBUpdate.InItemMediumCategory(SaveItemMediumCategory);
-				QuickSlotDBUpdate.InItemSmallCategory(SaveItemSmallCategory);
-				QuickSlotDBUpdate.InItemCount(SaveItemCount);
+					int8 SaveQuickSlotInfoSkillLargeCategory = (int8)SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillLargeCategory;
+					int8 SaveQuickSlotInfoSkillMediumCategory = (int8)SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillMediumCategory;
+					int16 SaveQuickSlotInfoSkillSkillType = (int8)SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillType;
 
-				QuickSlotDBUpdate.Execute();
-			}
-			else if (SaveQuickSlotInfo->QuickBarItem != nullptr)
-			{
-				SP::CDBGameServerQuickSlotBarSlotUpdate QuickSlotDBUpdate(*PlayerInfoSaveDBConnection);
+					int8 SaveItemLargeCategory = 0;
+					int8 SaveItemMediumCategory = 0;
+					int16 SaveItemSmallCategory = 0;
+					int16 SaveItemCount = 0;
 
-				int8 SaveQuickSlotInfoSkillLargeCategory = 0;
-				int8 SaveQuickSlotInfoSkillMediumCategory = 0;
-				int16 SaveQuickSlotInfoSkillSkillType = 0;
+					QuickSlotDBUpdate.InAccountDBId(MyPlayer->_AccountId);
+					QuickSlotDBUpdate.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
+					QuickSlotDBUpdate.InQuickSlotBarIndex(SaveQuickSlotInfo->QuickSlotBarIndex);
+					QuickSlotDBUpdate.InQuickSlotBarSlotIndex(SaveQuickSlotInfo->QuickSlotBarSlotIndex);
+					QuickSlotDBUpdate.InQuickSlotKey(SaveQuickSlotInfo->QuickSlotKey);
+					QuickSlotDBUpdate.InSkillLargeCategory(SaveQuickSlotInfoSkillLargeCategory);
+					QuickSlotDBUpdate.InSkillMediumCategory(SaveQuickSlotInfoSkillMediumCategory);
+					QuickSlotDBUpdate.InSkillType(SaveQuickSlotInfoSkillSkillType);
+					QuickSlotDBUpdate.InSkillLevel(SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillLevel);
+					QuickSlotDBUpdate.InItemLargeCategory(SaveItemLargeCategory);
+					QuickSlotDBUpdate.InItemMediumCategory(SaveItemMediumCategory);
+					QuickSlotDBUpdate.InItemSmallCategory(SaveItemSmallCategory);
+					QuickSlotDBUpdate.InItemCount(SaveItemCount);
 
-				int8 SaveItemLargeCategory = (int8)SaveQuickSlotInfo->QuickBarItem->_ItemInfo.ItemLargeCategory;
-				int8 SaveItemMediumCategory = (int8)SaveQuickSlotInfo->QuickBarItem->_ItemInfo.ItemMediumCategory;
-				int16 SaveItemSmallCategory = (int16)SaveQuickSlotInfo->QuickBarItem->_ItemInfo.ItemSmallCategory;
-				int16 SaveItemCount = SaveQuickSlotInfo->QuickBarItem->_ItemInfo.ItemCount;
+					QuickSlotDBUpdate.Execute();
+				}
+				break;
+			case en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_ITEM:
+				{
+					SP::CDBGameServerQuickSlotBarSlotUpdate QuickSlotDBUpdate(*PlayerInfoSaveDBConnection);
 
-				QuickSlotDBUpdate.InAccountDBId(MyPlayer->_AccountId);
-				QuickSlotDBUpdate.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
-				QuickSlotDBUpdate.InQuickSlotBarIndex(SaveQuickSlotInfo->QuickSlotBarIndex);
-				QuickSlotDBUpdate.InQuickSlotBarSlotIndex(SaveQuickSlotInfo->QuickSlotBarSlotIndex);
-				QuickSlotDBUpdate.InQuickSlotKey(SaveQuickSlotInfo->QuickSlotKey);
-				QuickSlotDBUpdate.InSkillLargeCategory(SaveQuickSlotInfoSkillLargeCategory);
-				QuickSlotDBUpdate.InSkillMediumCategory(SaveQuickSlotInfoSkillMediumCategory);
-				QuickSlotDBUpdate.InSkillType(SaveQuickSlotInfoSkillSkillType);
-				QuickSlotDBUpdate.InSkillLevel(SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillLevel);
-				QuickSlotDBUpdate.InItemLargeCategory(SaveItemLargeCategory);
-				QuickSlotDBUpdate.InItemMediumCategory(SaveItemMediumCategory);
-				QuickSlotDBUpdate.InItemSmallCategory(SaveItemSmallCategory);
-				QuickSlotDBUpdate.InItemCount(SaveItemCount);
+					int8 SaveQuickSlotInfoSkillLargeCategory = 0;
+					int8 SaveQuickSlotInfoSkillMediumCategory = 0;
+					int16 SaveQuickSlotInfoSkillSkillType = 0;
 
-				QuickSlotDBUpdate.Execute();
-			}
-			else
-			{
-				SP::CDBGameServerQuickSlotInit QuickSlotInit(*PlayerInfoSaveDBConnection);				
+					int8 SaveItemLargeCategory = (int8)SaveQuickSlotInfo->QuickBarItem->_ItemInfo.ItemLargeCategory;
+					int8 SaveItemMediumCategory = (int8)SaveQuickSlotInfo->QuickBarItem->_ItemInfo.ItemMediumCategory;
+					int16 SaveItemSmallCategory = (int16)SaveQuickSlotInfo->QuickBarItem->_ItemInfo.ItemSmallCategory;
+					int16 SaveItemCount = SaveQuickSlotInfo->QuickBarItem->_ItemInfo.ItemCount;
 
-				QuickSlotInit.InAccountDBId(MyPlayer->_AccountId);
-				QuickSlotInit.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
-				QuickSlotInit.InQuickSlotBarIndex(SaveQuickSlotInfo->QuickSlotBarIndex);
-				QuickSlotInit.InQuickSlotBarSlotIndex(SaveQuickSlotInfo->QuickSlotBarSlotIndex);
+					QuickSlotDBUpdate.InAccountDBId(MyPlayer->_AccountId);
+					QuickSlotDBUpdate.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
+					QuickSlotDBUpdate.InQuickSlotBarIndex(SaveQuickSlotInfo->QuickSlotBarIndex);
+					QuickSlotDBUpdate.InQuickSlotBarSlotIndex(SaveQuickSlotInfo->QuickSlotBarSlotIndex);
+					QuickSlotDBUpdate.InQuickSlotKey(SaveQuickSlotInfo->QuickSlotKey);
+					QuickSlotDBUpdate.InSkillLargeCategory(SaveQuickSlotInfoSkillLargeCategory);
+					QuickSlotDBUpdate.InSkillMediumCategory(SaveQuickSlotInfoSkillMediumCategory);
+					QuickSlotDBUpdate.InSkillType(SaveQuickSlotInfoSkillSkillType);
+					QuickSlotDBUpdate.InSkillLevel(SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillLevel);
+					QuickSlotDBUpdate.InItemLargeCategory(SaveItemLargeCategory);
+					QuickSlotDBUpdate.InItemMediumCategory(SaveItemMediumCategory);
+					QuickSlotDBUpdate.InItemSmallCategory(SaveItemSmallCategory);
+					QuickSlotDBUpdate.InItemCount(SaveItemCount);
 
-				QuickSlotInit.Execute();
-			}
+					QuickSlotDBUpdate.Execute();
+				}
+				break;			
+			}			
 		}
 	}
 
