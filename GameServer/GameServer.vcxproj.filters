@@ -61,9 +61,6 @@
     <Filter Include="ContentServer\Content\GameObject\Environment">
       <UniqueIdentifier>{4abef9f1-ac7f-43fc-86d5-a4cadaaadce3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ContentServer\Content\QuickSlotBar">
-      <UniqueIdentifier>{f784ae9e-5bca-4c1e-8f88-545e6f15b532}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ContentServer\Content\Equiment">
       <UniqueIdentifier>{ad620a1c-6f26-4d33-b623-da20f3ff6f50}</UniqueIdentifier>
     </Filter>
@@ -114,6 +111,18 @@
     </Filter>
     <Filter Include="Util\Json,Xml\Data\MapData">
       <UniqueIdentifier>{ebf7066d-d5df-4931-a9ca-4a9c65858d2e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ContentServer\Content\Collision">
+      <UniqueIdentifier>{70d82b95-bfce-46fb-bb10-c6f9d6245801}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ContentServer\Content\Collision\QuickSlotBar">
+      <UniqueIdentifier>{f784ae9e-5bca-4c1e-8f88-545e6f15b532}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ContentServer\Content\Day">
+      <UniqueIdentifier>{e53f1ebf-a98b-4aca-a0e4-16993061348e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ContentServer\Content\GameObject\Installation">
+      <UniqueIdentifier>{d6aced22-a668-4fd0-bc76-7335346cda7d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -245,10 +254,10 @@
       <Filter>ContentServer\Content\GameObject\Environment</Filter>
     </ClInclude>
     <ClInclude Include="QuickSlotManager.h">
-      <Filter>ContentServer\Content\QuickSlotBar</Filter>
+      <Filter>ContentServer\Content\Collision\QuickSlotBar</Filter>
     </ClInclude>
     <ClInclude Include="QuickSlotBar.h">
-      <Filter>ContentServer\Content\QuickSlotBar</Filter>
+      <Filter>ContentServer\Content\Collision\QuickSlotBar</Filter>
     </ClInclude>
     <ClInclude Include="pch.h" />
     <ClInclude Include="GameServerMessage.h">
@@ -289,6 +298,15 @@
     </ClInclude>
     <ClInclude Include="MapTile.h">
       <Filter>ContentServer\Content\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="RectCollision.h">
+      <Filter>ContentServer\Content\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Day.h">
+      <Filter>ContentServer\Content\Day</Filter>
+    </ClInclude>
+    <ClInclude Include="StorageBox.h">
+      <Filter>ContentServer\Content\GameObject\Installation</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -373,10 +391,10 @@
       <Filter>ContentServer\Content\GameObject\Environment</Filter>
     </ClCompile>
     <ClCompile Include="QuickSlotManager.cpp">
-      <Filter>ContentServer\Content\QuickSlotBar</Filter>
+      <Filter>ContentServer\Content\Collision\QuickSlotBar</Filter>
     </ClCompile>
     <ClCompile Include="QuickSlotBar.cpp">
-      <Filter>ContentServer\Content\QuickSlotBar</Filter>
+      <Filter>ContentServer\Content\Collision\QuickSlotBar</Filter>
     </ClCompile>
     <ClCompile Include="GameServerMessage.cpp">
       <Filter>Message</Filter>
@@ -413,6 +431,12 @@
     </ClCompile>
     <ClCompile Include="MapTile.cpp">
       <Filter>ContentServer\Content\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="RectCollision.cpp">
+      <Filter>ContentServer\Content\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="Day.cpp">
+      <Filter>ContentServer\Content\Day</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

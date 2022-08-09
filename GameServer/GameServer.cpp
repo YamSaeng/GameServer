@@ -1659,8 +1659,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 						st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)ReqMeleeSkill->GetSkillInfo();
 						
 						// 전방 2미터 거리 안에 있는 공격 가능한 오브젝트들을 가져옴
-						vector<CGameObject*> FindObjects = MyPlayer->GetChannel()->FindChannelObjects(CurrentFieldOfViewAttackObjectIDs, MyPlayer, 2);
-						
+						vector<CGameObject*> FindObjects = MyPlayer->GetChannel()->FindChannelObjects(CurrentFieldOfViewAttackObjectIDs, MyPlayer, 2);						
 						for (CGameObject* FindOBJ : FindObjects)
 						{
 							Targets.push_back(FindOBJ);
@@ -1668,6 +1667,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 					}
 					break;
 				case en_SkillType::SKILL_KNIGHT_FIERCE_ATTACK:
+				case en_SkillType::SKILL_KNIGHT_CONVERSION_ATTACK:
 					{
 						SkillUseSuccess = true;
 
@@ -1680,36 +1680,15 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 								st_GameObjectJob* ComboAttackCreateJob = MakeGameObjectJobComboSkillCreate(QuickSlotBarIndex, QuickSlotBarSlotIndex, ReqMeleeSkill);
 								MyPlayer->_GameObjectJobQue.Enqueue(ComboAttackCreateJob);
 							}						
-						}
-
-						st_Vector2Int FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
-						CGameObject* Target = MyPlayer->GetChannel()->GetMap()->Find(FrontCell);
-
-						if (Target != nullptr && Target->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE)
+						}						
+						
+						vector<CGameObject*> FindObjects = MyPlayer->GetChannel()->FindChannelObjects(CurrentFieldOfViewObjectIDs, MyPlayer, 2);
+						for (CGameObject* FindObject : FindObjects)
 						{
-							Targets.push_back(Target);
-						}
-					}
-					break;
-				case en_SkillType::SKILL_KNIGHT_CONVERSION_ATTACK:
-					{
-						if (MyPlayer->_ComboSkill != nullptr && MyPlayer->_ComboSkill->GetSkillInfo()->SkillType == en_SkillType::SKILL_KNIGHT_CONVERSION_ATTACK)
-						{
-							SkillUseSuccess = true;
-							GlobalSkillCooltime = false;							
-
-							st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)ReqMeleeSkill->GetSkillInfo();
-
-							st_Vector2Int FrontCell = MyPlayer->GetFrontCellPosition(MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
-							CGameObject* Target = MyPlayer->GetChannel()->GetMap()->Find(FrontCell);
-
-							if (Target != nullptr && Target->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE)
-							{
-								Targets.push_back(Target);
-							}
+							Targets.push_back(FindObject);
 						}						
 					}
-					break;
+					break;				
 				case en_SkillType::SKILL_KNIGHT_CHOHONE:
 				{
 					if (MyPlayer->_SelectTarget != nullptr)
@@ -3417,30 +3396,69 @@ void CGameServer::PacketProcReqQuickSlotSave(int64 SessionId, CMessage* Message)
 			*Message >> QuickSlotBarSlotIndex;
 			int16 QuickSlotKey;
 			*Message >> QuickSlotKey;
-			int8 QuickSlotSkillLargetCategory;
-			*Message >> QuickSlotSkillLargetCategory;
-			int8 QuickSlotSkillMediumCategory;
-			*Message >> QuickSlotSkillMediumCategory;
-			int16 QuickSlotSkillType;
-			*Message >> QuickSlotSkillType;
+			bool IsSkilQuickSlot;
+			*Message >> IsSkilQuickSlot;
 
-			st_QuickSlotBarSlotInfo* FindQuickSlotInfo = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarIndex, QuickSlotBarSlotIndex);
-			if (FindQuickSlotInfo != nullptr)
+			if (IsSkilQuickSlot == true)
 			{
-				CSkill* FindSkill = MyPlayer->_SkillBox.FindSkill((en_SkillType)QuickSlotSkillType);
-				if (FindSkill != nullptr)
+				// 저장할 기술 정보 파싱
+				int8 QuickSlotSkillLargetCategory;
+				*Message >> QuickSlotSkillLargetCategory;
+				int8 QuickSlotSkillMediumCategory;
+				*Message >> QuickSlotSkillMediumCategory;
+				int16 QuickSlotSkillType;
+				*Message >> QuickSlotSkillType;
+
+				st_QuickSlotBarSlotInfo* FindQuickSlotInfo = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarIndex, QuickSlotBarSlotIndex);
+				if (FindQuickSlotInfo != nullptr)
 				{
-					FindQuickSlotInfo->QuickBarSkill = FindSkill;
+					CSkill* FindSkill = MyPlayer->_SkillBox.FindSkill((en_SkillType)QuickSlotSkillType);
+					if (FindSkill != nullptr)
+					{
+						FindQuickSlotInfo->QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_SKILL;
+						FindQuickSlotInfo->QuickBarSkill = FindSkill;
+						FindQuickSlotInfo->QuickBarItem = nullptr;
+					}
+					else
+					{
+						CRASH(L"스킬 박스에 없는 스킬을 퀵슬롯에 등록하려고 시도");
+					}
 				}
-				else
-				{
-					CRASH(L"스킬 박스에 없는 스킬을 퀵슬롯에 등록하려고 시도");
-				}
+
+				CMessage* ResQuickSlotUpdateMessage = MakePacketResQuickSlotBarSlotSave(*FindQuickSlotInfo);
+				SendPacket(Session->SessionId, ResQuickSlotUpdateMessage);
+				ResQuickSlotUpdateMessage->Free();
 			}
 
-			CMessage* ResQuickSlotUpdateMessage = MakePacketResQuickSlotBarSlotSave(*FindQuickSlotInfo);
-			SendPacket(Session->SessionId, ResQuickSlotUpdateMessage);
-			ResQuickSlotUpdateMessage->Free();
+			bool IsItemQuickSlot;
+			*Message >> IsItemQuickSlot;
+
+			if (IsItemQuickSlot == true)
+			{
+				// 저장할 아이템 정보 파싱
+				int8 ItemLargeCategory;
+				*Message >> ItemLargeCategory;
+				int8 ItemMediumCategory;
+				*Message >> ItemMediumCategory;
+				int16 ItemSmallCategory;
+				*Message >> ItemSmallCategory;
+
+				st_QuickSlotBarSlotInfo* FindQuickSlotInfo = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarIndex, QuickSlotBarSlotIndex);
+				if (FindQuickSlotInfo != nullptr)
+				{
+					CItem* FindItem = MyPlayer->_InventoryManager.FindInventoryItem(0, (en_SmallItemCategory)ItemSmallCategory);
+					if (FindItem != nullptr)
+					{
+						FindQuickSlotInfo->QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_ITEM;
+						FindQuickSlotInfo->QuickBarItem = FindItem;
+						FindQuickSlotInfo->QuickBarSkill = nullptr;
+					}					
+				}
+
+				CMessage* ResQuickSlotUpdateMessage = MakePacketResQuickSlotBarSlotSave(*FindQuickSlotInfo);
+				SendPacket(Session->SessionId, ResQuickSlotUpdateMessage);
+				ResQuickSlotUpdateMessage->Free();
+			}					
 		} while (0);
 	}
 
@@ -3517,16 +3535,22 @@ void CGameServer::PacketProcReqQuickSlotSwap(int64 SessionId, CMessage* Message)
 			st_QuickSlotBarSlotInfo* FindBQuickslotInfo = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarSwapIndexB, QuickSlotBarSlotSwapIndexB);
 			if (FindBQuickslotInfo != nullptr)
 			{
-				// 비어 있지 않다면 스킬 정보를 바꾼다.
-				if (FindBQuickslotInfo->QuickBarSkill != nullptr)
+				switch (FindBQuickslotInfo->QuickSlotBarType)
 				{
-					SwapAQuickSlotBarInfo.QuickBarSkill = FindBQuickslotInfo->QuickBarSkill;
-					SwapAQuickSlotBarInfo.QuickSlotKey = FindBQuickslotInfo->QuickSlotKey;
-				}
-				else // 비어 있을 경우엔 스킬 정보를 초기화한다.
-				{
+				case en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_NONE:
+					SwapAQuickSlotBarInfo.QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_NONE;
 					SwapAQuickSlotBarInfo.QuickBarSkill = nullptr;
-				}
+					SwapAQuickSlotBarInfo.QuickBarItem = nullptr;					
+					break;
+				case en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_SKILL:
+					SwapAQuickSlotBarInfo.QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_SKILL;
+					SwapAQuickSlotBarInfo.QuickBarSkill = FindBQuickslotInfo->QuickBarSkill;					
+					break;
+				case en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_ITEM:
+					SwapAQuickSlotBarInfo.QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_ITEM;
+					SwapAQuickSlotBarInfo.QuickBarItem = FindBQuickslotInfo->QuickBarItem;					
+					break;
+				}					
 			}
 			else
 			{
@@ -3543,14 +3567,21 @@ void CGameServer::PacketProcReqQuickSlotSwap(int64 SessionId, CMessage* Message)
 			st_QuickSlotBarSlotInfo* FindAQuickslotInfo = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarSwapIndexA, QuickSlotBarSlotSwapIndexA);
 			if (FindAQuickslotInfo != nullptr)
 			{
-				if (FindAQuickslotInfo->QuickBarSkill != nullptr)
+				switch (FindAQuickslotInfo->QuickSlotBarType)
 				{
-					SwapBQuickSlotBarInfo.QuickBarSkill = FindAQuickslotInfo->QuickBarSkill;
-					SwapAQuickSlotBarInfo.QuickSlotKey = FindAQuickslotInfo->QuickSlotKey;
-				}
-				else
-				{
+				case en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_NONE:
+					SwapBQuickSlotBarInfo.QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_NONE;
 					SwapBQuickSlotBarInfo.QuickBarSkill = nullptr;
+					SwapBQuickSlotBarInfo.QuickBarItem = nullptr;					
+					break;
+				case en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_SKILL:
+					SwapBQuickSlotBarInfo.QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_SKILL;
+					SwapBQuickSlotBarInfo.QuickBarSkill = FindAQuickslotInfo->QuickBarSkill;					
+					break;
+				case en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_ITEM:
+					SwapBQuickSlotBarInfo.QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_ITEM;
+					SwapBQuickSlotBarInfo.QuickBarItem = FindAQuickslotInfo->QuickBarItem;					
+					break;
 				}
 			}
 			else
@@ -3634,6 +3665,7 @@ void CGameServer::PacketProcReqQuickSlotInit(int64 SessionId, CMessage* Message)
 			{
 				// 퀵슬롯에서 스킬 연결 해제
 				InitQuickSlotBarSlot->QuickBarSkill = nullptr;
+				InitQuickSlotBarSlot->QuickBarItem = nullptr;
 			}
 			else
 			{
@@ -4049,7 +4081,14 @@ void CGameServer::PacketProcReqTileBuy(int64 SessionID, CMessage* Message)
 			CMap* Map = G_MapManager->GetMap(1);
 			if (Map->ApplyTileUserAlloc(MyPlayer, TileBuyPosition) == true)
 			{
-				CMessage* ResTileBuyMessage = MakePacketResTileBuy(TileBuyPosition);
+				st_TileMapInfo TileMapInfo;
+				TileMapInfo.TilePosition._X = TilePositionX;
+				TileMapInfo.TilePosition._Y = TilePositionY;
+				TileMapInfo.AccountID = AccountID;
+				TileMapInfo.PlayerID = PlayerID;
+				TileMapInfo.MapTileType = en_MapTileInfo::MAP_TILE_USER_ALLOC;
+
+				CMessage* ResTileBuyMessage = MakePacketResTileBuy(TileMapInfo);
 				SendPacketFieldOfView(MyPlayer, ResTileBuyMessage);
 				ResTileBuyMessage->Free();
 			}			
@@ -4975,11 +5014,11 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 						int8 SkillLargeCategory = (int8)(en_SkillLargeCategory::SKILL_LARGE_CATEGORY_NONE);
 						int8 SkillMediumCategory = (int8)(en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE);
 						int16 SkillType = (int16)(en_SkillType::SKILL_TYPE_NONE);
-						int8 SkillLevel = 0;
-						wstring SkillName = L"";
-						int32 SkillCoolTime = 0;
-						int32 SkillCastingTime = 0;
-						wstring SkillThumbnailImagePath;
+						int8 SkillLevel = 0;				
+						int8 EmptyItemLargeCategory = 0;
+						int8 EmptyItemMediumCategory = 0;
+						int16 EmptyItemSmallCategory = 0;
+						int16 EmptyItemCount = 0;
 
 						for (int8 i = 0; i < (int8)en_QuickSlotBar::QUICK_SLOT_BAR_SLOT_SIZE; ++i)
 						{
@@ -5001,6 +5040,10 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 							QuickSlotBarSlotCreate.InSkillMediumCategory(SkillMediumCategory);
 							QuickSlotBarSlotCreate.InSkillType(SkillType);
 							QuickSlotBarSlotCreate.InSkillLevel(SkillLevel);
+							QuickSlotBarSlotCreate.InItemLargeCategory(EmptyItemLargeCategory);
+							QuickSlotBarSlotCreate.InItemMediumCategory(EmptyItemMediumCategory);
+							QuickSlotBarSlotCreate.InItemSmallCategory(EmptyItemSmallCategory);
+							QuickSlotBarSlotCreate.InItemCount(EmptyItemCount);							
 
 							QuickSlotBarSlotCreate.Execute();
 
@@ -5025,6 +5068,10 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 					int8 DefaultSkillMediumCategory = (int8)en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK;
 					int16 DefaultSkillType = (int16)en_SkillType::SKILL_DEFAULT_ATTACK;
 					int8 DefaultAttackSkillLevel = 1;
+					int8 ItemLargeCategory = 0;
+					int8 ItemMediumCategory = 0;
+					int16 ItemSmallCategory = 0;
+					int16 ItemCount = 0;
 
 					CDBConnection* DBQuickSlotSaveConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 					SP::CDBGameServerQuickSlotBarSlotUpdate QuickSlotUpdate(*DBQuickSlotSaveConnection);
@@ -5037,6 +5084,13 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 					QuickSlotUpdate.InSkillMediumCategory(DefaultSkillMediumCategory);
 					QuickSlotUpdate.InSkillType(DefaultSkillType);
 					QuickSlotUpdate.InSkillLevel(DefaultAttackSkillLevel);
+					QuickSlotUpdate.InSkillLevel(DefaultAttackSkillLevel);
+					QuickSlotUpdate.InSkillLevel(DefaultAttackSkillLevel);
+					QuickSlotUpdate.InSkillLevel(DefaultAttackSkillLevel);
+					QuickSlotUpdate.InItemLargeCategory(ItemLargeCategory);
+					QuickSlotUpdate.InItemMediumCategory(ItemMediumCategory);
+					QuickSlotUpdate.InItemSmallCategory(ItemSmallCategory);
+					QuickSlotUpdate.InItemCount(ItemCount);
 
 					QuickSlotUpdate.Execute();
 
@@ -5525,74 +5579,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 			}			
 #pragma endregion
 
-#pragma region 퀵슬롯 정보 가져와서 클라에 보내기
-			// 퀵슬롯 정보 초기화
-			MyPlayer->_QuickSlotManager.Init();
-
-			vector<st_QuickSlotBarSlotInfo> QuickSlotBarSlotInfos;
-
-			// 퀵슬롯 테이블 접근해서 해당 스킬이 등록되어 있는 모든 퀵슬롯 번호 가지고옴			
-			SP::CDBGameServerQuickSlotBarGet QuickSlotBarGet(*DBCharacterInfoGetConnection);
-			QuickSlotBarGet.InAccountDBId(MyPlayer->_AccountId);
-			QuickSlotBarGet.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
-
-			int8 QuickSlotBarIndex;
-			int8 QuickSlotBarSlotIndex;
-			int16 QuickSlotKey;
-			int8 QuickSlotSkillLargeCategory;
-			int8 QuickSlotSkillMediumCategory;
-			int16 QuickSlotSkillType;
-			int8 QuickSlotSkillLevel;
-
-			QuickSlotBarGet.OutQuickSlotBarIndex(QuickSlotBarIndex);
-			QuickSlotBarGet.OutQuickSlotBarItemIndex(QuickSlotBarSlotIndex);
-			QuickSlotBarGet.OutQuickSlotKey(QuickSlotKey);
-			QuickSlotBarGet.OutQuickSlotSkillLargeCategory(QuickSlotSkillLargeCategory);
-			QuickSlotBarGet.OutQuickSlotSkillMediumCategory(QuickSlotSkillMediumCategory);
-			QuickSlotBarGet.OutQuickSlotSkillType(QuickSlotSkillType);
-			QuickSlotBarGet.OutQuickSlotSkillLevel(QuickSlotSkillLevel);
-
-			QuickSlotBarGet.Execute();
-
-			while (QuickSlotBarGet.Fetch())
-			{
-				st_QuickSlotBarSlotInfo NewQuickSlotBarSlot;
-				NewQuickSlotBarSlot.AccountDBId = MyPlayer->_AccountId;
-				NewQuickSlotBarSlot.PlayerDBId = MyPlayer->_GameObjectInfo.ObjectId;
-				NewQuickSlotBarSlot.QuickSlotBarIndex = QuickSlotBarIndex;
-				NewQuickSlotBarSlot.QuickSlotBarSlotIndex = QuickSlotBarSlotIndex;
-				NewQuickSlotBarSlot.QuickSlotKey = QuickSlotKey;
-
-				CSkill* FindSkill = MyPlayer->_SkillBox.FindSkill((en_SkillType)QuickSlotSkillType);
-				if (FindSkill != nullptr)
-				{
-					NewQuickSlotBarSlot.QuickBarSkill = FindSkill;
-				}
-				else
-				{
-					NewQuickSlotBarSlot.QuickBarSkill = nullptr;
-				}
-
-				// 퀵슬롯에 등록한다.
-				MyPlayer->_QuickSlotManager.UpdateQuickSlotBar(NewQuickSlotBarSlot);
-				QuickSlotBarSlotInfos.push_back(NewQuickSlotBarSlot);
-			}			
-
-			// 캐릭터 퀵슬롯 정보 담기
-			*ResCharacterInfoMessage << (int8)en_QuickSlotBar::QUICK_SLOT_BAR_SIZE;
-			*ResCharacterInfoMessage << (int8)en_QuickSlotBar::QUICK_SLOT_BAR_SLOT_SIZE;
-			*ResCharacterInfoMessage << (int8)QuickSlotBarSlotInfos.size();
-
-			for (st_QuickSlotBarSlotInfo QuickSlotBarSlotInfo : QuickSlotBarSlotInfos)
-			{
-				*ResCharacterInfoMessage << QuickSlotBarSlotInfo;
-			}
-
-#pragma endregion
-
-
-#pragma region 가방 아이템 정보 읽어오기
-			vector<st_ItemInfo> Equipments;
+#pragma region 가방 아이템 정보 읽어오기			
 			// 인벤토리 생성
 			MyPlayer->_InventoryManager.InventoryCreate((int8)en_InventoryManager::INVENTORY_DEFAULT_WIDH_SIZE, (int8)en_InventoryManager::INVENTORY_DEFAULT_HEIGHT_SIZE);
 
@@ -5621,7 +5608,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 			int32 ItemDefence = 0;
 			int32 ItemMaxCount = 0;
 			int16 ItemTilePositionX = 0;
-			int16 ItemTilePositionY = 0;			
+			int16 ItemTilePositionY = 0;
 
 			CharacterInventoryItem.OutIsRotated(ItemRotated);
 			CharacterInventoryItem.OutItemWidth(ItemWidth);
@@ -5637,7 +5624,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 			CharacterInventoryItem.OutItemCount(ItemCount);
 			CharacterInventoryItem.OutItemTileGridPositionX(ItemTilePositionX);
 			CharacterInventoryItem.OutItemTileGridPositionY(ItemTilePositionY);
-			CharacterInventoryItem.OutIsEquipped(IsEquipped);			
+			CharacterInventoryItem.OutIsEquipped(IsEquipped);
 
 			CharacterInventoryItem.Execute();
 
@@ -5663,7 +5650,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 						NewWeaponItem->_ItemInfo.ItemName = ItemName;
 						NewWeaponItem->_ItemInfo.ItemCount = ItemCount;
 						NewWeaponItem->_ItemInfo.TileGridPositionX = ItemTilePositionX;
-						NewWeaponItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;						
+						NewWeaponItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;
 						NewWeaponItem->_ItemInfo.ItemIsEquipped = IsEquipped;
 						NewWeaponItem->_ItemInfo.ItemMinDamage = ItemMinDamage;
 						NewWeaponItem->_ItemInfo.ItemMaxDamage = ItemMaxDamage;
@@ -5691,11 +5678,11 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 						NewArmorItem->_ItemInfo.ItemName = ItemName;
 						NewArmorItem->_ItemInfo.ItemCount = ItemCount;
 						NewArmorItem->_ItemInfo.TileGridPositionX = ItemTilePositionX;
-						NewArmorItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;						
+						NewArmorItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;
 						NewArmorItem->_ItemInfo.ItemIsEquipped = IsEquipped;
 						NewArmorItem->_ItemInfo.ItemDefence = ItemDefence;
 					}
-					break;					
+					break;
 					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL:
 						break;
 					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:
@@ -5728,63 +5715,63 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 						NewMaterialItem->_ItemInfo.ItemExplain = (LPWSTR)CA2W(ItemData->ItemExplain.c_str());
 						NewMaterialItem->_ItemInfo.ItemCount = ItemCount;
 						NewMaterialItem->_ItemInfo.TileGridPositionX = ItemTilePositionX;
-						NewMaterialItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;						
+						NewMaterialItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;
 						NewMaterialItem->_ItemInfo.ItemIsEquipped = IsEquipped;
 						NewMaterialItem->_ItemInfo.ItemMaxCount = ItemMaxCount;
 					}
 					break;
 					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE:
 					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL:
-						{
-							CArchitectureItem* NewMaterialItem = (CArchitectureItem*)NewItem;
+					{
+						CArchitectureItem* NewMaterialItem = (CArchitectureItem*)NewItem;
 
-							st_ItemData* ItemData = G_Datamanager->FindItemData((en_SmallItemCategory)ItemSmallCategory);
+						st_ItemData* ItemData = G_Datamanager->FindItemData((en_SmallItemCategory)ItemSmallCategory);
 
-							NewMaterialItem->_ItemInfo.ItemDBId = 0;
-							NewMaterialItem->_ItemInfo.Rotated = ItemRotated;
-							NewMaterialItem->_ItemInfo.Width = ItemWidth;
-							NewMaterialItem->_ItemInfo.Height = ItemHeight;
-							NewMaterialItem->_ItemInfo.ItemLargeCategory = (en_LargeItemCategory)ItemLargeCategory;
-							NewMaterialItem->_ItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemMediumCategory;
-							NewMaterialItem->_ItemInfo.ItemSmallCategory = (en_SmallItemCategory)ItemSmallCategory;
-							NewMaterialItem->_ItemInfo.ItemName = ItemName;
-							NewMaterialItem->_ItemInfo.ItemExplain = (LPWSTR)CA2W(ItemData->ItemExplain.c_str());
-							NewMaterialItem->_ItemInfo.ItemCount = ItemCount;
-							NewMaterialItem->_ItemInfo.TileGridPositionX = ItemTilePositionX;
-							NewMaterialItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;							
-							NewMaterialItem->_ItemInfo.ItemIsEquipped = IsEquipped;
-							NewMaterialItem->_ItemInfo.ItemMaxCount = ItemMaxCount;
-						}
-						break;
+						NewMaterialItem->_ItemInfo.ItemDBId = 0;
+						NewMaterialItem->_ItemInfo.Rotated = ItemRotated;
+						NewMaterialItem->_ItemInfo.Width = ItemWidth;
+						NewMaterialItem->_ItemInfo.Height = ItemHeight;
+						NewMaterialItem->_ItemInfo.ItemLargeCategory = (en_LargeItemCategory)ItemLargeCategory;
+						NewMaterialItem->_ItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemMediumCategory;
+						NewMaterialItem->_ItemInfo.ItemSmallCategory = (en_SmallItemCategory)ItemSmallCategory;
+						NewMaterialItem->_ItemInfo.ItemName = ItemName;
+						NewMaterialItem->_ItemInfo.ItemExplain = (LPWSTR)CA2W(ItemData->ItemExplain.c_str());
+						NewMaterialItem->_ItemInfo.ItemCount = ItemCount;
+						NewMaterialItem->_ItemInfo.TileGridPositionX = ItemTilePositionX;
+						NewMaterialItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;
+						NewMaterialItem->_ItemInfo.ItemIsEquipped = IsEquipped;
+						NewMaterialItem->_ItemInfo.ItemMaxCount = ItemMaxCount;
+					}
+					break;
 					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_SEED_POTATO:
 					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO:
-						{
-							CCropItem* NewCropItem = (CCropItem*)NewItem;
+					{
+						CCropItem* NewCropItem = (CCropItem*)NewItem;
 
-							st_ItemData* ItemData = G_Datamanager->FindItemData((en_SmallItemCategory)ItemSmallCategory);
+						st_ItemData* ItemData = G_Datamanager->FindItemData((en_SmallItemCategory)ItemSmallCategory);
 
-							NewCropItem->_ItemInfo.ItemDBId = 0;
-							NewCropItem->_ItemInfo.Rotated = ItemRotated;
-							NewCropItem->_ItemInfo.Width = ItemWidth;
-							NewCropItem->_ItemInfo.Height = ItemHeight;
-							NewCropItem->_ItemInfo.ItemLargeCategory = (en_LargeItemCategory)ItemLargeCategory;
-							NewCropItem->_ItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemMediumCategory;
-							NewCropItem->_ItemInfo.ItemSmallCategory = (en_SmallItemCategory)ItemSmallCategory;
-							NewCropItem->_ItemInfo.ItemName = ItemName;
-							NewCropItem->_ItemInfo.ItemExplain = (LPWSTR)CA2W(ItemData->ItemExplain.c_str());
-							NewCropItem->_ItemInfo.ItemCount = ItemCount;
-							NewCropItem->_ItemInfo.TileGridPositionX = ItemTilePositionX;
-							NewCropItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;							
-							NewCropItem->_ItemInfo.ItemIsEquipped = IsEquipped;
-							NewCropItem->_ItemInfo.ItemMaxCount = ItemMaxCount;
-						}
-						break;
+						NewCropItem->_ItemInfo.ItemDBId = 0;
+						NewCropItem->_ItemInfo.Rotated = ItemRotated;
+						NewCropItem->_ItemInfo.Width = ItemWidth;
+						NewCropItem->_ItemInfo.Height = ItemHeight;
+						NewCropItem->_ItemInfo.ItemLargeCategory = (en_LargeItemCategory)ItemLargeCategory;
+						NewCropItem->_ItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemMediumCategory;
+						NewCropItem->_ItemInfo.ItemSmallCategory = (en_SmallItemCategory)ItemSmallCategory;
+						NewCropItem->_ItemInfo.ItemName = ItemName;
+						NewCropItem->_ItemInfo.ItemExplain = (LPWSTR)CA2W(ItemData->ItemExplain.c_str());
+						NewCropItem->_ItemInfo.ItemCount = ItemCount;
+						NewCropItem->_ItemInfo.TileGridPositionX = ItemTilePositionX;
+						NewCropItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;
+						NewCropItem->_ItemInfo.ItemIsEquipped = IsEquipped;
+						NewCropItem->_ItemInfo.ItemMaxCount = ItemMaxCount;
+					}
+					break;
 					}
 
 					MyPlayer->_InventoryManager.DBItemInsertItem(0, NewItem);
 					InventoryItems.push_back(NewItem);
-				}							
-			}			
+				}
+			}
 
 			// 클라 인벤토리 정보 담기			
 			*ResCharacterInfoMessage << (int8)InventoryItems.size();
@@ -5796,7 +5783,95 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 
 #pragma endregion			
 
+#pragma region 퀵슬롯 정보 가져와서 클라에 보내기
+			// 퀵슬롯 정보 초기화
+			MyPlayer->_QuickSlotManager.Init();
+
+			vector<st_QuickSlotBarSlotInfo> QuickSlotBarSlotInfos;
+
+			// 퀵슬롯 테이블 접근해서 해당 스킬이 등록되어 있는 모든 퀵슬롯 번호 가지고옴			
+			SP::CDBGameServerQuickSlotBarGet QuickSlotBarGet(*DBCharacterInfoGetConnection);
+			QuickSlotBarGet.InAccountDBId(MyPlayer->_AccountId);
+			QuickSlotBarGet.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
+
+			int8 QuickSlotBarIndex;
+			int8 QuickSlotBarSlotIndex;
+			int16 QuickSlotKey;
+			int8 QuickSlotSkillLargeCategory;
+			int8 QuickSlotSkillMediumCategory;
+			int16 QuickSlotSkillType;
+			int8 QuickSlotSkillLevel;
+			int8 QuickSlotItemLargeCategory;
+			int8 QuickSlotItemMediumCategory;
+			int16 QuickSlotItemSmallCategory;
+			int16 QuickSlotItemCount;
+
+			QuickSlotBarGet.OutQuickSlotBarIndex(QuickSlotBarIndex);
+			QuickSlotBarGet.OutQuickSlotBarItemIndex(QuickSlotBarSlotIndex);
+			QuickSlotBarGet.OutQuickSlotKey(QuickSlotKey);
+			QuickSlotBarGet.OutQuickSlotSkillLargeCategory(QuickSlotSkillLargeCategory);
+			QuickSlotBarGet.OutQuickSlotSkillMediumCategory(QuickSlotSkillMediumCategory);
+			QuickSlotBarGet.OutQuickSlotSkillType(QuickSlotSkillType);
+			QuickSlotBarGet.OutQuickSlotSkillLevel(QuickSlotSkillLevel);
+			QuickSlotBarGet.OutQuickSlotItemLargeCategory(QuickSlotItemLargeCategory);
+			QuickSlotBarGet.OutQuickSlotItemMediumCategory(QuickSlotItemMediumCategory);
+			QuickSlotBarGet.OutQuickSlotItemSmallCategory(QuickSlotItemSmallCategory);
+			QuickSlotBarGet.OutQuickSlotItemCount(QuickSlotItemCount);
+
+			QuickSlotBarGet.Execute();
+
+			while (QuickSlotBarGet.Fetch())
+			{
+				st_QuickSlotBarSlotInfo NewQuickSlotBarSlot;
+				NewQuickSlotBarSlot.QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_NONE;
+				NewQuickSlotBarSlot.AccountDBId = MyPlayer->_AccountId;
+				NewQuickSlotBarSlot.PlayerDBId = MyPlayer->_GameObjectInfo.ObjectId;
+				NewQuickSlotBarSlot.QuickSlotBarIndex = QuickSlotBarIndex;
+				NewQuickSlotBarSlot.QuickSlotBarSlotIndex = QuickSlotBarSlotIndex;
+				NewQuickSlotBarSlot.QuickSlotKey = QuickSlotKey;				
+
+				CSkill* FindSkill = MyPlayer->_SkillBox.FindSkill((en_SkillType)QuickSlotSkillType);
+				if (FindSkill != nullptr)
+				{
+					NewQuickSlotBarSlot.QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_SKILL;
+					NewQuickSlotBarSlot.QuickBarSkill = FindSkill;
+				}
+				else
+				{
+					NewQuickSlotBarSlot.QuickBarSkill = nullptr;
+				}
+
+				CItem* FindItem = MyPlayer->_InventoryManager.FindInventoryItem(0, (en_SmallItemCategory)QuickSlotItemSmallCategory);
+				if (FindItem != nullptr)
+				{
+					NewQuickSlotBarSlot.QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_ITEM;
+					NewQuickSlotBarSlot.QuickBarItem = FindItem;
+				}
+				else
+				{
+					NewQuickSlotBarSlot.QuickBarItem = nullptr;
+				}
+
+				// 퀵슬롯에 등록한다.
+				MyPlayer->_QuickSlotManager.UpdateQuickSlotBar(NewQuickSlotBarSlot);
+				QuickSlotBarSlotInfos.push_back(NewQuickSlotBarSlot);
+			}			
+
+			// 캐릭터 퀵슬롯 정보 담기
+			*ResCharacterInfoMessage << (int8)en_QuickSlotBar::QUICK_SLOT_BAR_SIZE;
+			*ResCharacterInfoMessage << (int8)en_QuickSlotBar::QUICK_SLOT_BAR_SLOT_SIZE;
+			*ResCharacterInfoMessage << (int8)QuickSlotBarSlotInfos.size();
+
+			for (st_QuickSlotBarSlotInfo QuickSlotBarSlotInfo : QuickSlotBarSlotInfos)
+			{
+				*ResCharacterInfoMessage << QuickSlotBarSlotInfo;
+			}
+
+#pragma endregion
+
 #pragma region 장비 정보 보내주기
+			vector<st_ItemInfo> Equipments;
+
 			// 장비 정보 담기
 			*ResCharacterInfoMessage << (int8)Equipments.size();
 			for (st_ItemInfo EquipmentItemInfo : Equipments)
@@ -5935,6 +6010,7 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 
 	LeavePlayerStatInfoSave.Execute();		
 
+	// 퀵슬롯 정보 업데이트
 	for (auto QuickSlotIterator : MyPlayer->_QuickSlotManager.GetQuickSlotBar())
 	{
 		for (auto QuickSlotBarSlotIterator : QuickSlotIterator.second->_QuickSlotBarSlotInfos)
@@ -5943,23 +6019,61 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 
 			if (SaveQuickSlotInfo->QuickBarSkill != nullptr)
 			{
-				SP::CDBGameServerQuickSlotBarSlotUpdate QuickSlotDBupdate(*PlayerInfoSaveDBConnection);
+				SP::CDBGameServerQuickSlotBarSlotUpdate QuickSlotDBUpdate(*PlayerInfoSaveDBConnection);
 
 				int8 SaveQuickSlotInfoSkillLargeCategory = (int8)SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillLargeCategory;
 				int8 SaveQuickSlotInfoSkillMediumCategory = (int8)SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillMediumCategory;
 				int16 SaveQuickSlotInfoSkillSkillType = (int8)SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillType;
 
-;				QuickSlotDBupdate.InAccountDBId(MyPlayer->_AccountId);
-				QuickSlotDBupdate.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
-				QuickSlotDBupdate.InQuickSlotBarIndex(SaveQuickSlotInfo->QuickSlotBarIndex);
-				QuickSlotDBupdate.InQuickSlotBarSlotIndex(SaveQuickSlotInfo->QuickSlotBarSlotIndex);
-				QuickSlotDBupdate.InQuickSlotKey(SaveQuickSlotInfo->QuickSlotKey);
-				QuickSlotDBupdate.InSkillLargeCategory(SaveQuickSlotInfoSkillLargeCategory);
-				QuickSlotDBupdate.InSkillMediumCategory(SaveQuickSlotInfoSkillMediumCategory);
-				QuickSlotDBupdate.InSkillType(SaveQuickSlotInfoSkillSkillType);
-				QuickSlotDBupdate.InSkillLevel(SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillLevel);
+				int8 SaveItemLargeCategory = 0;
+				int8 SaveItemMediumCategory = 0;
+				int16 SaveItemSmallCategory = 0;
+				int16 SaveItemCount = 0;
 
-				QuickSlotDBupdate.Execute();
+				QuickSlotDBUpdate.InAccountDBId(MyPlayer->_AccountId);
+				QuickSlotDBUpdate.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
+				QuickSlotDBUpdate.InQuickSlotBarIndex(SaveQuickSlotInfo->QuickSlotBarIndex);
+				QuickSlotDBUpdate.InQuickSlotBarSlotIndex(SaveQuickSlotInfo->QuickSlotBarSlotIndex);
+				QuickSlotDBUpdate.InQuickSlotKey(SaveQuickSlotInfo->QuickSlotKey);
+				QuickSlotDBUpdate.InSkillLargeCategory(SaveQuickSlotInfoSkillLargeCategory);
+				QuickSlotDBUpdate.InSkillMediumCategory(SaveQuickSlotInfoSkillMediumCategory);
+				QuickSlotDBUpdate.InSkillType(SaveQuickSlotInfoSkillSkillType);
+				QuickSlotDBUpdate.InSkillLevel(SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillLevel);
+				QuickSlotDBUpdate.InItemLargeCategory(SaveItemLargeCategory);
+				QuickSlotDBUpdate.InItemMediumCategory(SaveItemMediumCategory);
+				QuickSlotDBUpdate.InItemSmallCategory(SaveItemSmallCategory);
+				QuickSlotDBUpdate.InItemCount(SaveItemCount);
+
+				QuickSlotDBUpdate.Execute();
+			}
+			else if (SaveQuickSlotInfo->QuickBarItem != nullptr)
+			{
+				SP::CDBGameServerQuickSlotBarSlotUpdate QuickSlotDBUpdate(*PlayerInfoSaveDBConnection);
+
+				int8 SaveQuickSlotInfoSkillLargeCategory = 0;
+				int8 SaveQuickSlotInfoSkillMediumCategory = 0;
+				int16 SaveQuickSlotInfoSkillSkillType = 0;
+
+				int8 SaveItemLargeCategory = (int8)SaveQuickSlotInfo->QuickBarItem->_ItemInfo.ItemLargeCategory;
+				int8 SaveItemMediumCategory = (int8)SaveQuickSlotInfo->QuickBarItem->_ItemInfo.ItemMediumCategory;
+				int16 SaveItemSmallCategory = (int16)SaveQuickSlotInfo->QuickBarItem->_ItemInfo.ItemSmallCategory;
+				int16 SaveItemCount = SaveQuickSlotInfo->QuickBarItem->_ItemInfo.ItemCount;
+
+				QuickSlotDBUpdate.InAccountDBId(MyPlayer->_AccountId);
+				QuickSlotDBUpdate.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
+				QuickSlotDBUpdate.InQuickSlotBarIndex(SaveQuickSlotInfo->QuickSlotBarIndex);
+				QuickSlotDBUpdate.InQuickSlotBarSlotIndex(SaveQuickSlotInfo->QuickSlotBarSlotIndex);
+				QuickSlotDBUpdate.InQuickSlotKey(SaveQuickSlotInfo->QuickSlotKey);
+				QuickSlotDBUpdate.InSkillLargeCategory(SaveQuickSlotInfoSkillLargeCategory);
+				QuickSlotDBUpdate.InSkillMediumCategory(SaveQuickSlotInfoSkillMediumCategory);
+				QuickSlotDBUpdate.InSkillType(SaveQuickSlotInfoSkillSkillType);
+				QuickSlotDBUpdate.InSkillLevel(SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillLevel);
+				QuickSlotDBUpdate.InItemLargeCategory(SaveItemLargeCategory);
+				QuickSlotDBUpdate.InItemMediumCategory(SaveItemMediumCategory);
+				QuickSlotDBUpdate.InItemSmallCategory(SaveItemSmallCategory);
+				QuickSlotDBUpdate.InItemCount(SaveItemCount);
+
+				QuickSlotDBUpdate.Execute();
 			}
 			else
 			{
@@ -6684,7 +6798,7 @@ CGameServerMessage* CGameServer::MakePacketResMenuTileBuy(vector<st_TileMapInfo>
 	return ResMenuTileBuyMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResTileBuy(st_Vector2Int BuyTilePosition)
+CGameServerMessage* CGameServer::MakePacketResTileBuy(st_TileMapInfo TileMapInfo)
 {
 	CGameServerMessage* TileBuyMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (TileBuyMessage == nullptr)
@@ -6695,8 +6809,11 @@ CGameServerMessage* CGameServer::MakePacketResTileBuy(st_Vector2Int BuyTilePosit
 	TileBuyMessage->Clear();
 
 	*TileBuyMessage << (int16)en_PACKET_S2C_TILE_BUY;
-	*TileBuyMessage << BuyTilePosition._X;
-	*TileBuyMessage << BuyTilePosition._Y;
+	*TileBuyMessage << (int8)TileMapInfo.MapTileType;
+	*TileBuyMessage << TileMapInfo.AccountID;
+	*TileBuyMessage << TileMapInfo.PlayerID;
+	*TileBuyMessage << TileMapInfo.TilePosition._X;
+	*TileBuyMessage << TileMapInfo.TilePosition._Y;			
 
 	return TileBuyMessage;
 }

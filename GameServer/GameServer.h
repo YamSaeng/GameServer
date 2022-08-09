@@ -422,7 +422,7 @@ private:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 타일 구입 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResTileBuy(st_Vector2Int BuyTilePosition);
+	CGameServerMessage* MakePacketResTileBuy(st_TileMapInfo TileMapInfo);
 	
 	//-------------------------------------------------
 	// 게임서버 핑 패킷 조합
