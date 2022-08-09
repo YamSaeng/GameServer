@@ -381,7 +381,7 @@ namespace SP
 	};
 
 	// QuickSlotBarTable에 있는 QuickSlotBar 정보 모두 긁어온다.
-	class CDBGameServerQuickSlotBarGet : public CDBBind<2, 7>
+	class CDBGameServerQuickSlotBarGet : public CDBBind<2, 11>
 	{
 	public:
 		CDBGameServerQuickSlotBarGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetQuickSlotBarSlot(?,?)}") {}
@@ -395,6 +395,10 @@ namespace SP
 		void OutQuickSlotSkillMediumCategory(int8& SkillMediumCategory) { BindCol(4, SkillMediumCategory); }
 		void OutQuickSlotSkillType(int16& SkillType) { BindCol(5, SkillType); }
 		void OutQuickSlotSkillLevel(int8& SkillLevel) { BindCol(6, SkillLevel); }		
+		void OutQuickSlotItemLargeCategory(int8& ItemLargeCategory) { BindCol(7, ItemLargeCategory); }
+		void OutQuickSlotItemMediumCategory(int8& ItemMediumCategory) { BindCol(8, ItemMediumCategory); }
+		void OutQuickSlotItemSmallCategory(int16& ItemSmallCategory) { BindCol(9, ItemSmallCategory); }
+		void OutQuickSlotItemCount(int16& ItemCount) { BindCol(10, ItemCount); }
 	};
 
 	// Swap 요청한 아이템이 QuickSlot에 있는지 확인하고

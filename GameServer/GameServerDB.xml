@@ -624,7 +624,7 @@
     <Body>
       <![CDATA[
 	    SET NOCOUNT ON
-        SELECT QuickSlotBarIndex, QuickSlotBarSlotIndex, QuickSlotKey, SkillLargeCategory, SkillMediumCategory, SkillType, SkillLevel
+        SELECT QuickSlotBarIndex, QuickSlotBarSlotIndex, QuickSlotKey, SkillLargeCategory, SkillMediumCategory, SkillType, SkillLevel, ItemLargeCategory, ItemMediumCategory, ItemSmallCategory, ItemCount
         FROM [dbo].[QuickSlotBar]
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
