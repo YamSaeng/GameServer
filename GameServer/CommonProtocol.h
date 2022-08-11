@@ -151,11 +151,10 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_MONSTER_PATROL,
 
 	//------------------------------------------------------------
-	// 게임서버 아이템 움직임 응답 요청
-	// int64 ObjectID
-	// st_PositionInfo PositionInfo
+	// 게임서버 아이템 움직임 응답 
+	// st_GameObjectInfo ItemObjectInfo	
 	//------------------------------------------------------------
-	en_PACKET_S2C_ITEM_MOVE,
+	en_PACKET_S2C_ITEM_MOVE_START,
 
 	//------------------------------------------------------------
 	// 게임서버 일반 데미지 출력
