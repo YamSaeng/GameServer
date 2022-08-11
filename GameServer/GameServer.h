@@ -515,9 +515,9 @@ public:
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketPatrol(int64 ObjectId, en_GameObjectType ObjectType, bool CanMove, st_PositionInfo PositionInfo, en_MonsterState MonsterState);
 	//-----------------------------------------------------------------------------------------
-	// 게임서버 아이템 움직임 패킷 조합
+	// 게임서버 아이템 움직임 시작 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketItemMove(int64 ObjectID, st_PositionInfo PositionInfo);
+	CGameServerMessage* MakePacketItemMove(st_GameObjectInfo ItemMoveObjectInfo);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 오브젝트 스폰 패킷 조합 ( 단일 대상 )
 	//-----------------------------------------------------------------------------------------

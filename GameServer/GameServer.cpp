@@ -3452,7 +3452,11 @@ void CGameServer::PacketProcReqQuickSlotSave(int64 SessionId, CMessage* Message)
 						FindQuickSlotInfo->QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_ITEM;
 						FindQuickSlotInfo->QuickBarItem = FindItem;
 						FindQuickSlotInfo->QuickBarSkill = nullptr;
-					}					
+					}	
+					else
+					{
+						CRASH(L"스킬 박스에 없는 스킬을 퀵슬롯에 등록하려고 시도");
+					}
 				}
 
 				CMessage* ResQuickSlotUpdateMessage = MakePacketResQuickSlotBarSlotSave(*FindQuickSlotInfo);
@@ -3662,8 +3666,9 @@ void CGameServer::PacketProcReqQuickSlotInit(int64 SessionId, CMessage* Message)
 			// 퀵슬롯에서 정보 찾기
 			st_QuickSlotBarSlotInfo* InitQuickSlotBarSlot = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarIndex, QuickSlotBarSlotIndex);
 			if (InitQuickSlotBarSlot != nullptr)
-			{
+			{				
 				// 퀵슬롯에서 스킬 연결 해제
+				InitQuickSlotBarSlot->QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_NONE;
 				InitQuickSlotBarSlot->QuickBarSkill = nullptr;
 				InitQuickSlotBarSlot->QuickBarItem = nullptr;
 			}
@@ -3947,8 +3952,13 @@ void CGameServer::PacketProcReqItemUse(int64 SessionId, CMessage* Message)
 						st_GameObjectJob* HealJob = MakeGameObjectJobHeal(MyPlayer, 50);
 						MyPlayer->_GameObjectJobQue.Enqueue(HealJob);
 					}
-					break;
+					break;			
 				default:
+					{
+						CMessage* CommonErrorPacket = MakePacketCommonError(en_PersonalMessageType::PERSONAL_FAULT_ITEM_USE, UseItem->_ItemInfo.ItemName.c_str());
+						SendPacket(Session->SessionId, CommonErrorPacket);
+						CommonErrorPacket->Free();
+					}
 					break;
 				}
 			}
@@ -6068,6 +6078,7 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 					int8 SaveQuickSlotInfoSkillLargeCategory = 0;
 					int8 SaveQuickSlotInfoSkillMediumCategory = 0;
 					int16 SaveQuickSlotInfoSkillSkillType = 0;
+					int8 SkillLevel = 0;
 
 					int8 SaveItemLargeCategory = (int8)SaveQuickSlotInfo->QuickBarItem->_ItemInfo.ItemLargeCategory;
 					int8 SaveItemMediumCategory = (int8)SaveQuickSlotInfo->QuickBarItem->_ItemInfo.ItemMediumCategory;
@@ -6082,7 +6093,7 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 					QuickSlotDBUpdate.InSkillLargeCategory(SaveQuickSlotInfoSkillLargeCategory);
 					QuickSlotDBUpdate.InSkillMediumCategory(SaveQuickSlotInfoSkillMediumCategory);
 					QuickSlotDBUpdate.InSkillType(SaveQuickSlotInfoSkillSkillType);
-					QuickSlotDBUpdate.InSkillLevel(SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillLevel);
+					QuickSlotDBUpdate.InSkillLevel(SkillLevel);
 					QuickSlotDBUpdate.InItemLargeCategory(SaveItemLargeCategory);
 					QuickSlotDBUpdate.InItemMediumCategory(SaveItemMediumCategory);
 					QuickSlotDBUpdate.InItemSmallCategory(SaveItemSmallCategory);
@@ -6200,7 +6211,7 @@ void CGameServer::PacketProcTimerPing(int64 SessionId)
 st_GameObjectJob* CGameServer::MakeGameObjectJobLeaveChannelPlayer(CGameObject* LeavePlayerObject, int32* PlayerIndexes)
 {
 	st_GameObjectJob* LeaveChannelJob = G_ObjectManager->GameObjectJobCreate();
-	LeaveChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_PLAYER_LEAVE_CHANNEL;
+	LeaveChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_PLAYER_LEAVE_CHANNEL;
 
 	CGameServerMessage* LeaveChannelMessage = CGameServerMessage::GameServerMessageAlloc();
 	*LeaveChannelMessage << &LeavePlayerObject;
@@ -6318,7 +6329,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobBackTeleport()
 st_GameObjectJob* CGameServer::MakeGameObjectJobItemDrop(int16 DropItemType, int32 DropItemCount)
 {
 	st_GameObjectJob* ItemDropJob = G_ObjectManager->GameObjectJobCreate();
-	ItemDropJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_ITEM_DROP;
+	ItemDropJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_ITEM_DROP;
 
 	CGameServerMessage* ItemDropJobMessage = CGameServerMessage::GameServerMessageAlloc();
 	ItemDropJobMessage->Clear();
@@ -6334,7 +6345,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobItemDrop(int16 DropItemType, int
 st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableSelect(CGameObject* CraftingTableObject, CGameObject* OwnerObject)
 {
 	st_GameObjectJob* CraftingTableSelectJob = G_ObjectManager->GameObjectJobCreate();
-	CraftingTableSelectJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_SELECT;
+	CraftingTableSelectJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CRAFTING_TABLE_SELECT;
 
 	CGameServerMessage* CraftingTableSelectJobMessage = CGameServerMessage::GameServerMessageAlloc();
 	CraftingTableSelectJobMessage->Clear();
@@ -6350,7 +6361,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableSelect(CGameObject*
 st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableNonSelect(CGameObject* CraftingTableObject)
 {
 	st_GameObjectJob* CraftingTableSelectJob = G_ObjectManager->GameObjectJobCreate();
-	CraftingTableSelectJob->GameObjectJobType = en_GameObjectJobType::GAMEOJBECT_JOB_CRAFTING_TABLE_NON_SELECT;
+	CraftingTableSelectJob->GameObjectJobType = en_GameObjectJobType::GAMEOJBECT_JOB_TYPE_CRAFTING_TABLE_NON_SELECT;
 
 	CGameServerMessage* CraftingTableSelectJobMessage = CGameServerMessage::GameServerMessageAlloc();
 	CraftingTableSelectJobMessage->Clear();
@@ -6365,7 +6376,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableNonSelect(CGameObje
 st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableStart(CGameObject* CraftingStartObject, en_SmallItemCategory CraftingCompleteItemType, int16 CraftingCount)
 {
 	st_GameObjectJob* CraftingTableStartJob = G_ObjectManager->GameObjectJobCreate();
-	CraftingTableStartJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_CRAFTING_START;
+	CraftingTableStartJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CRAFTING_TABLE_CRAFTING_START;
 
 	CGameServerMessage* CraftingTableStartJobMessage = CGameServerMessage::GameServerMessageAlloc();
 	CraftingTableStartJobMessage->Clear();
@@ -6382,7 +6393,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableStart(CGameObject* 
 st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableItemAdd(CGameObject* CraftingTableItemAddObject, int16 AddItemSmallCategory, int16 AddItemCount)
 {
 	st_GameObjectJob* CraftingTableItemInputJob = G_ObjectManager->GameObjectJobCreate();
-	CraftingTableItemInputJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_ITEM_ADD;
+	CraftingTableItemInputJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CRAFTING_TABLE_ITEM_ADD;
 
 	CGameServerMessage* CraftingTableItemInputJobMessage = CGameServerMessage::GameServerMessageAlloc();
 	CraftingTableItemInputJobMessage->Clear();
@@ -6399,7 +6410,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableItemAdd(CGameObject
 st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableMaterialItemSubtract(CGameObject* CraftingTableItemSubtractObject, int16 SubtractItemSmallCategory, int16 SubtractItemCount)
 {
 	st_GameObjectJob* CraftingTableMaterialItemInputJob = G_ObjectManager->GameObjectJobCreate();
-	CraftingTableMaterialItemInputJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_MATERIAL_ITEM_SUBTRACT;
+	CraftingTableMaterialItemInputJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CRAFTING_TABLE_MATERIAL_ITEM_SUBTRACT;
 
 	CGameServerMessage* CraftingTableItemInputJobMessage = CGameServerMessage::GameServerMessageAlloc();
 	CraftingTableItemInputJobMessage->Clear();
@@ -6416,7 +6427,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableMaterialItemSubtrac
 st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableCompleteItemSubtract(CGameObject* CraftingTableItemSubtractObject, int16 SubtractItemSmallCategory, int16 SubtractItemCount)
 {
 	st_GameObjectJob* CraftingTableCompleteItemInputJob = G_ObjectManager->GameObjectJobCreate();
-	CraftingTableCompleteItemInputJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_COMPLETE_ITEM_SUBTRACT;
+	CraftingTableCompleteItemInputJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CRAFTING_TABLE_COMPLETE_ITEM_SUBTRACT;
 
 	CGameServerMessage* CraftingTableItemInputJobMessage = CGameServerMessage::GameServerMessageAlloc();
 	CraftingTableItemInputJobMessage->Clear();
@@ -6433,7 +6444,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableCompleteItemSubtrac
 st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableCancel(CGameObject* CraftingStopObject)
 {
 	st_GameObjectJob* CraftingTableStopJob = G_ObjectManager->GameObjectJobCreate();
-	CraftingTableStopJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_CRAFTING_STOP;
+	CraftingTableStopJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CRAFTING_TABLE_CRAFTING_STOP;
 
 	CGameServerMessage* CraftingTableStopJobMessage = CGameServerMessage::GameServerMessageAlloc();
 	CraftingTableStopJobMessage->Clear();
@@ -6853,7 +6864,7 @@ CItem* CGameServer::NewItemCrate(st_ItemInfo& NewItemInfo)
 st_GameObjectJob* CGameServer::MakeGameObjectJobObjectDeSpawnObjectChannel(CGameObject* DeSpawnChannelObject)
 {
 	st_GameObjectJob* DeSpawnObjectChannelJob = G_ObjectManager->GameObjectJobCreate();
-	DeSpawnObjectChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_OBJECT_DESPAWN_CHANNEL;
+	DeSpawnObjectChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_OBJECT_DESPAWN_CHANNEL;
 
 	CGameServerMessage* DeSpawnObjectChannelGameMessage = CGameServerMessage::GameServerMessageAlloc();
 	DeSpawnObjectChannelGameMessage->Clear();
@@ -6867,7 +6878,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobObjectDeSpawnObjectChannel(CGame
 st_GameObjectJob* CGameServer::MakeGameObjectJobPlayerEnterChannel(CGameObject* EnterChannelObject)
 {
 	st_GameObjectJob* EnterChannelJob = G_ObjectManager->GameObjectJobCreate();
-	EnterChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_PLAYER_ENTER_CHANNEL;
+	EnterChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_PLAYER_ENTER_CHANNEL;
 
 	CGameServerMessage* EnterChannelGameMessage = CGameServerMessage::GameServerMessageAlloc();
 	EnterChannelGameMessage->Clear();
@@ -6881,7 +6892,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobPlayerEnterChannel(CGameObject* 
 st_GameObjectJob* CGameServer::MakeGameObjectJobObjectEnterChannel(CGameObject* EnterChannelObject)
 {
 	st_GameObjectJob* EnterChannelJob = G_ObjectManager->GameObjectJobCreate();
-	EnterChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_OBJECT_ENTER_CHANNEL;
+	EnterChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_OBJECT_ENTER_CHANNEL;
 
 	CGameServerMessage* EnterChannelGameMessage = CGameServerMessage::GameServerMessageAlloc();
 	EnterChannelGameMessage->Clear();
@@ -6896,7 +6907,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobObjectEnterChannel(CGameObject* 
 st_GameObjectJob* CGameServer::MakeGameObjectJobLeaveChannel(CGameObject* LeaveChannelObject)
 {
 	st_GameObjectJob* LeaveChannelJob = G_ObjectManager->GameObjectJobCreate();
-	LeaveChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_LEAVE_CHANNEL;
+	LeaveChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_LEAVE_CHANNEL;
 
 	CGameServerMessage* LeaveChannelMessage = CGameServerMessage::GameServerMessageAlloc();
 	LeaveChannelMessage->Clear();
@@ -6911,7 +6922,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobLeaveChannel(CGameObject* LeaveC
 st_GameObjectJob* CGameServer::MakeGameObjectDamage(CGameObject* Attacker, int32 Damage)
 {
 	st_GameObjectJob* DamageJob = G_ObjectManager->GameObjectJobCreate();
-	DamageJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_DAMAGE;
+	DamageJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_DAMAGE;
 
 	CGameServerMessage* DamageMessage = CGameServerMessage::GameServerMessageAlloc();
 	DamageMessage->Clear();
@@ -6927,7 +6938,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectDamage(CGameObject* Attacker, int32
 st_GameObjectJob* CGameServer::MakeGameObjectJobHeal(CGameObject* Healer, int32 HealPoint)
 {
 	st_GameObjectJob* HealJob = G_ObjectManager->GameObjectJobCreate();
-	HealJob->GameObjectJobType = en_GameObjectJobType::GAMEOJBECT_JOB_HEAL;
+	HealJob->GameObjectJobType = en_GameObjectJobType::GAMEOJBECT_JOB_TYPE_HEAL;
 
 	CGameServerMessage* HealMessage = CGameServerMessage::GameServerMessageAlloc();
 	HealMessage->Clear();
@@ -6943,7 +6954,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobHeal(CGameObject* Healer, int32 
 st_GameObjectJob* CGameServer::MakeGameObjectJobItemSave(CGameObject* Item)
 {
 	st_GameObjectJob* ItemSaveJob = G_ObjectManager->GameObjectJobCreate();
-	ItemSaveJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_ITEM_INVENTORY_SAVE;
+	ItemSaveJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_ITEM_INVENTORY_SAVE;
 
 	CGameServerMessage* ItemSaveMessage = CGameServerMessage::GameServerMessageAlloc();
 	ItemSaveMessage->Clear();
@@ -7233,7 +7244,7 @@ CGameServerMessage* CGameServer::MakePacketPatrol(int64 ObjectId, en_GameObjectT
 	return ResPatrolPacket;
 }
 
-CGameServerMessage* CGameServer::MakePacketItemMove(int64 ObjectID, st_PositionInfo PositionInfo)
+CGameServerMessage* CGameServer::MakePacketItemMove(st_GameObjectInfo ItemMoveObjectInfo)
 {
 	CGameServerMessage* ResItemMovePacket = CGameServerMessage::GameServerMessageAlloc();
 	if (ResItemMovePacket == nullptr)
@@ -7243,9 +7254,8 @@ CGameServerMessage* CGameServer::MakePacketItemMove(int64 ObjectID, st_PositionI
 
 	ResItemMovePacket->Clear();
 
-	*ResItemMovePacket << (int16)en_PACKET_S2C_ITEM_MOVE;
-	*ResItemMovePacket << ObjectID;
-	*ResItemMovePacket << PositionInfo;
+	*ResItemMovePacket << (int16)en_PACKET_S2C_ITEM_MOVE_START;
+	*ResItemMovePacket << ItemMoveObjectInfo;	
 
 	return ResItemMovePacket;
 }
@@ -7681,6 +7691,9 @@ CGameServerMessage* CGameServer::MakePacketCommonError(en_PersonalMessageType Pe
 		break;
 	case en_PersonalMessageType::PERSOANL_MESSAGE_CRAFTING_TABLE_MATERIAL_WRONG_ITEM_ADD:
 		wsprintf(ErrorMessage, L"선택된 제작법에 넣을 수 없는 재료입니다.");
+		break;
+	case en_PersonalMessageType::PERSONAL_FAULT_ITEM_USE:
+		wsprintf(ErrorMessage, L"[%s]를 사용 할 수 없습니다.", Name);
 		break;
 	}
 
