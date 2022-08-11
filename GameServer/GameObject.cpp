@@ -260,7 +260,7 @@ void CGameObject::Update()
 				ResGatheringCancelPacket->Free();
 			}
 			break;
-		case en_GameObjectJobType::GAMEOBJECT_JOB_AGGRO_LIST_INSERT_OR_UPDATE:
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_AGGRO_LIST_INSERT_OR_UPDATE:
 			{
 				int8 AggroCategory;
 				*GameObjectJob->GameObjectJobMessage >> AggroCategory;
@@ -302,7 +302,7 @@ void CGameObject::Update()
 				}
 			}
 			break;
-		case en_GameObjectJobType::GAMEOBJECT_JOB_AGGRO_LIST_REMOVE:
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_AGGRO_LIST_REMOVE:
 			{
 				int64 RemoveAggroListGameObjectId;
 				*GameObjectJob->GameObjectJobMessage >> RemoveAggroListGameObjectId;
@@ -314,7 +314,7 @@ void CGameObject::Update()
 				}
 			}
 			break;
-		case en_GameObjectJobType::GAMEOBJECT_JOB_DAMAGE:
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_DAMAGE:
 			{
 				CGameObject* Attacker;
 				*GameObjectJob->GameObjectJobMessage >> &Attacker;
@@ -336,7 +336,7 @@ void CGameObject::Update()
 				StatChangePacket->Free();
 			}
 			break;
-		case en_GameObjectJobType::GAMEOJBECT_JOB_HEAL:
+		case en_GameObjectJobType::GAMEOJBECT_JOB_TYPE_HEAL:
 			{
 				CGameObject* Healer;
 				*GameObjectJob->GameObjectJobMessage >> &Healer;
@@ -351,7 +351,7 @@ void CGameObject::Update()
 				StatChangePacket->Free();
 			}
 			break;
-		case en_GameObjectJobType::GAMEOBJECT_JOB_FULL_RECOVERY:
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_FULL_RECOVERY:
 			{
 				for (auto DebufSkillIter : _DeBufs)
 				{
@@ -374,7 +374,7 @@ void CGameObject::Update()
 				StatChangePacket->Free();
 			}
 			break;
-		case en_GameObjectJobType::GAMEOBJECT_JOB_ITEM_DROP:
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_ITEM_DROP:
 			{
 				int16 DropItemType;
 				*GameObjectJob->GameObjectJobMessage >> DropItemType;
@@ -413,7 +413,7 @@ void CGameObject::Update()
 				}
 			}
 			break;
-		case en_GameObjectJobType::GAMEOBJECT_JOB_ITEM_INVENTORY_SAVE:
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_ITEM_INVENTORY_SAVE:
 			{
 				CGameObject* Item;
 				*GameObjectJob->GameObjectJobMessage >> &Item;
@@ -474,7 +474,7 @@ void CGameObject::Update()
 				_Channel->_ChannelJobQue.Enqueue(LeaveChannerMonsterJob);				
 			}
 			break;
-		case en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_SELECT:
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CRAFTING_TABLE_SELECT:
 			{
 				CGameObject* SelectCraftingTableObject;
 				*GameObjectJob->GameObjectJobMessage >> &SelectCraftingTableObject;
@@ -512,7 +512,7 @@ void CGameObject::Update()
 				}				
 			}
 			break;
-		case en_GameObjectJobType::GAMEOJBECT_JOB_CRAFTING_TABLE_NON_SELECT:
+		case en_GameObjectJobType::GAMEOJBECT_JOB_TYPE_CRAFTING_TABLE_NON_SELECT:
 			{
 				CGameObject* SelectCraftingTableObject;
 				*GameObjectJob->GameObjectJobMessage >> &SelectCraftingTableObject;
@@ -526,7 +526,7 @@ void CGameObject::Update()
 				CraftingTableObject->_SelectCraftingItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
 			}
 			break;
-		case en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_ITEM_ADD:
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CRAFTING_TABLE_ITEM_ADD:
 			{
 				CGameObject* CraftingTableItemAddPlayerGO;
 				*GameObjectJob->GameObjectJobMessage >> &CraftingTableItemAddPlayerGO;
@@ -603,7 +603,7 @@ void CGameObject::Update()
 				}
 			}
 			break;
-		case en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_MATERIAL_ITEM_SUBTRACT:
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CRAFTING_TABLE_MATERIAL_ITEM_SUBTRACT:
 			{
 				CGameObject* CraftingTableMaterialItemSubtractPlayerGO;
 				*GameObjectJob->GameObjectJobMessage >> &CraftingTableMaterialItemSubtractPlayerGO;
@@ -663,7 +663,7 @@ void CGameObject::Update()
 				}
 			}
 			break;
-		case en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_COMPLETE_ITEM_SUBTRACT:
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CRAFTING_TABLE_COMPLETE_ITEM_SUBTRACT:
 			{
 				CGameObject* CraftingTableCompleteItemSubtractPlayerGO;
 				*GameObjectJob->GameObjectJobMessage >> &CraftingTableCompleteItemSubtractPlayerGO;
@@ -730,7 +730,7 @@ void CGameObject::Update()
 				}
 			}
 			break;
-		case en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_CRAFTING_START:
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CRAFTING_TABLE_CRAFTING_START:
 			{
 				CGameObject* CraftingStartObject;
 				*GameObjectJob->GameObjectJobMessage >> &CraftingStartObject;
@@ -815,7 +815,7 @@ void CGameObject::Update()
 				}
 			}
 			break;
-		case en_GameObjectJobType::GAMEOBJECT_JOB_CRAFTING_TABLE_CRAFTING_STOP:
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CRAFTING_TABLE_CRAFTING_STOP:
 			{
 				CGameObject* CraftingStoptObject;
 				*GameObjectJob->GameObjectJobMessage >> &CraftingStoptObject;
@@ -876,7 +876,7 @@ void CGameObject::OnHeal(CGameObject* Healer, int32 HealPoint)
 	for (CMonster* AroundMonster : AroundMonsters)
 	{
 		st_GameObjectJob* AggroUpdateJob = G_ObjectManager->GameObjectJobCreate();
-		AggroUpdateJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_AGGRO_LIST_INSERT_OR_UPDATE;
+		AggroUpdateJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_AGGRO_LIST_INSERT_OR_UPDATE;
 
 		CGameServerMessage* AggroUpdateJobMessage = CGameServerMessage::GameServerMessageAlloc();
 		AggroUpdateJobMessage->Clear();
