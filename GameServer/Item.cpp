@@ -12,6 +12,8 @@ CItem::CItem()
 	_FieldOfViewDistance = 10;
 
 	_ChaseWaitTime = 0;
+
+	ItemMoveStart = false;
 }
 
 CItem::~CItem()
@@ -113,6 +115,8 @@ void CItem::UpdateIdle()
 			_ChaseWaitTime = GetTickCount64() + 1000;
 
 			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
+
+			ItemMoveStart = true;
 		}
 	}	
 }
@@ -121,6 +125,17 @@ void CItem::UpdateMoving()
 {
 	if (_ChaseWaitTime < GetTickCount64())
 	{
+		if (ItemMoveStart == true)
+		{
+			vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetFieldOfViewPlayers(this, 1, false);
+
+			CMessage* S2CItemMoveMessage = G_ObjectManager->GameServer->MakePacketItemMove(_GameObjectInfo);
+			G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, S2CItemMoveMessage);
+			S2CItemMoveMessage->Free();
+
+			ItemMoveStart = false;
+		}
+
 		float TargetDistance = st_Vector2::Distance(_Owner->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position);
 
 		if (TargetDistance > 0.5f)
@@ -142,14 +157,8 @@ void CItem::UpdateMoving()
 			if (CollisionPosition._X != _GameObjectInfo.ObjectPositionInfo.CollisionPosition._X
 				|| CollisionPosition._Y != _GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y)
 			{
-				_Channel->GetMap()->ApplyPositionUpdateItem(this, CollisionPosition);
-			}
-
-			vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetFieldOfViewPlayers(this, 1, false);
-
-			CMessage* S2CItemMoveMessage = G_ObjectManager->GameServer->MakePacketItemMove(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo);
-			G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, S2CItemMoveMessage);
-			S2CItemMoveMessage->Free();
+				_Channel->GetMap()->ApplyMove(this, CollisionPosition, false, false);
+			}			
 		}
 		else
 		{

@@ -3,7 +3,7 @@
 
 class CItem : public CGameObject
 {	
-public:			
+public:		
 	enum class en_ItemCrafting : int8
 	{
 		ITEM_CRAFTING_NONE,
@@ -58,6 +58,7 @@ protected:
 	virtual void UpdateIdle() override;
 	virtual void UpdateMoving() override;
 private:	
+	bool ItemMoveStart;
 };
 
 class CWeaponItem : public CItem
