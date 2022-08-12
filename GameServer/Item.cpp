@@ -9,11 +9,11 @@ CItem::CItem()
 	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_ITEM;
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
+	_ItemState = en_ItemState::ITEM_IDLE;
+
 	_FieldOfViewDistance = 10;
 
-	_ChaseWaitTime = 0;
-
-	ItemMoveStart = false;
+	_ChaseWaitTime = 0;	
 }
 
 CItem::~CItem()
@@ -40,7 +40,17 @@ void CItem::Update()
 		UpdateIdle();
 		break;
 	case en_CreatureState::MOVING:
-		UpdateMoving();
+		switch (_ItemState)
+		{
+		case en_ItemState::ITEM_IDLE:			
+			break;
+		case en_ItemState::ITEM_READY_MOVE:
+			UpdateReadyMoving();
+			break;
+		case en_ItemState::ITEM_MOVE:
+			UpdateMoving();
+			break;		
+		}		
 		break;
 	default:
 		break;
@@ -112,30 +122,29 @@ void CItem::UpdateIdle()
 		float TargetDistance = st_Vector2::Distance(_Owner->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position);
 		if (TargetDistance <= 5.0f)
 		{
-			_ChaseWaitTime = GetTickCount64() + 1000;
-
 			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
-
-			ItemMoveStart = true;
+			_ItemState = en_ItemState::ITEM_READY_MOVE;			
 		}
 	}	
+}
+
+void CItem::UpdateReadyMoving()
+{
+	_ChaseWaitTime = GetTickCount64() + 1000;
+
+	vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetFieldOfViewPlayers(this, 1, false);
+
+	CMessage* S2CItemMoveMessage = G_ObjectManager->GameServer->MakePacketItemMove(_GameObjectInfo);
+	G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, S2CItemMoveMessage);
+	S2CItemMoveMessage->Free();
+
+	_ItemState = en_ItemState::ITEM_MOVE;
 }
 
 void CItem::UpdateMoving()
 {
 	if (_ChaseWaitTime < GetTickCount64())
 	{
-		if (ItemMoveStart == true)
-		{
-			vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetFieldOfViewPlayers(this, 1, false);
-
-			CMessage* S2CItemMoveMessage = G_ObjectManager->GameServer->MakePacketItemMove(_GameObjectInfo);
-			G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, S2CItemMoveMessage);
-			S2CItemMoveMessage->Free();
-
-			ItemMoveStart = false;
-		}
-
 		float TargetDistance = st_Vector2::Distance(_Owner->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position);
 
 		if (TargetDistance > 0.5f)

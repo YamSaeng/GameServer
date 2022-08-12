@@ -20,6 +20,9 @@ public:
 	// 아이템 소유자 ID
 	int64 _OwnerObjectId;
 
+	// 아이템 상태
+	en_ItemState _ItemState;
+
 	en_GameObjectType _OwnerObjectType;
 
 	en_ItemCrafting _ItemCrafting;
@@ -56,9 +59,9 @@ protected:
 	int64 _ChaseWaitTime;
 
 	virtual void UpdateIdle() override;
+	void UpdateReadyMoving();
 	virtual void UpdateMoving() override;
-private:	
-	bool ItemMoveStart;
+private:		
 };
 
 class CWeaponItem : public CItem
