@@ -107,6 +107,13 @@ enum class en_MonsterState : int8
 	MONSTER_ATTACK
 };
 
+enum class en_ItemState : int8
+{
+	ITEM_IDLE,
+	ITEM_READY_MOVE,
+	ITEM_MOVE
+};
+
 enum class en_MessageType : int8
 {
 	CHATTING,
