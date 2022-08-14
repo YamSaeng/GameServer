@@ -291,13 +291,13 @@ bool CInventory::OverlapCheck(int16 TilePositionX, int16 TilePositionY, int16 Wi
 
 CItem* CInventory::FindInventoryItem(en_SmallItemCategory FindItemSmallItemCategory)
 {
-	for (int Y = 0; Y < _InventoryHeight; Y++)
+	for (int X = 0; X < _InventoryWidth; X++)
 	{
-		for (int X = 0; X < _InventoryWidth; X++)
+		for (int Y = 0; Y < _InventoryHeight; Y++)
 		{
-			if (_Items[Y][X]->IsEmptySlot == false && _Items[Y][X]->InventoryItem->_ItemInfo.ItemSmallCategory == FindItemSmallItemCategory)
+			if (_Items[X][Y]->IsEmptySlot == false && _Items[X][Y]->InventoryItem->_ItemInfo.ItemSmallCategory == FindItemSmallItemCategory)
 			{
-				return _Items[Y][X]->InventoryItem;
+				return _Items[X][Y]->InventoryItem;
 			}			
 		}
 	}	
