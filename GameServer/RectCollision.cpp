@@ -42,11 +42,11 @@ void CRectCollision::CollisionUpdate()
 			_RightDown._Y = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._Y + 0.4f;
 			break;
 		case en_GameObjectType::OBJECT_SLIME:
-			_LeftTop._X = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._X - 0.3f;
-			_LeftTop._Y = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._Y - 0.3f;
+			_LeftTop._X = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._X - 0.25f;
+			_LeftTop._Y = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._Y - 0.25f;
 
-			_RightDown._X = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._X + 0.3f;
-			_RightDown._Y = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._Y + 0.3f;
+			_RightDown._X = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._X + 0.25f;
+			_RightDown._Y = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._Y + 0.25f;
 			break;
 		}		
 
