@@ -92,9 +92,9 @@ void CChannel::Update()
 		{
 			switch ((en_GameObjectJobType)GameObjectJob->GameObjectJobType)
 			{
-			case en_GameObjectJobType::GAMEOBJECT_JOB_OBJECT_SPAWN_CHANNEL:
+			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_OBJECT_SPAWN_CHANNEL:
 				break;
-			case en_GameObjectJobType::GAMEOBJECT_JOB_OBJECT_DESPAWN_CHANNEL:
+			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_OBJECT_DESPAWN_CHANNEL:
 				{
 					CGameObject* DeSpawnObject;
 					*GameObjectJob->GameObjectJobMessage >> &DeSpawnObject;					
@@ -123,7 +123,7 @@ void CChannel::Update()
 					_Map->ApplyLeave(DeSpawnObject);
 				}
 				break;
-			case en_GameObjectJobType::GAMEOBJECT_JOB_PLAYER_ENTER_CHANNEL:
+			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_PLAYER_ENTER_CHANNEL:
 				{				
 					CPlayer* EnterPlayer;
 					*GameObjectJob->GameObjectJobMessage >> &EnterPlayer;
@@ -162,7 +162,7 @@ void CChannel::Update()
 					}
 				}
 				break;
-			case en_GameObjectJobType::GAMEOBJECT_JOB_OBJECT_ENTER_CHANNEL:
+			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_OBJECT_ENTER_CHANNEL:
 				{
 					CGameObject* EnterObject;
 					*GameObjectJob->GameObjectJobMessage >> &EnterObject;										
@@ -252,7 +252,7 @@ void CChannel::Update()
 					SpawnObjectPacket->Free();					
 				}
 				break;
-			case en_GameObjectJobType::GAMEOBJECT_JOB_LEAVE_CHANNEL:
+			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_LEAVE_CHANNEL:
 				{
 					CGameObject* LeaveGameObject;
 					*GameObjectJob->GameObjectJobMessage >> &LeaveGameObject;										
@@ -260,7 +260,7 @@ void CChannel::Update()
 					LeaveChannel(LeaveGameObject);
 				}
 				break;
-			case en_GameObjectJobType::GAMEOBJECT_JOB_PLAYER_LEAVE_CHANNEL:
+			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_PLAYER_LEAVE_CHANNEL:
 				{
 					CGameObject* LeaveGameObject;
 					*GameObjectJob->GameObjectJobMessage >> &LeaveGameObject;			
