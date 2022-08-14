@@ -31,11 +31,7 @@ CPlayer::CPlayer()
 
 CPlayer::~CPlayer()
 {
-	if (_RectCollision != nullptr)
-	{
-		delete _RectCollision;
-		_RectCollision = nullptr;
-	}
+	
 }
 
 void CPlayer::Update()
