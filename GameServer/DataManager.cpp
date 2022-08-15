@@ -224,7 +224,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 				SkillBookItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SMASH_WAVE_ATTACK;
 				SkillBookItemData->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK;
 				SkillBookItemData->SkillType = en_SkillType::SKILL_KNIGHT_SMASH_WAVE;
-			}
+			}						
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHARGE_POSE")
 			{
 				SkillBookItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHARGE_POSE;
@@ -1269,6 +1269,10 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				else if (SkillType == "SKILL_KNIGHT_SMASH_WAVE")
 				{
 					WarriorAttackSkill->SkillType = en_SkillType::SKILL_KNIGHT_SMASH_WAVE;
+				}
+				else if (SkillType == "SKILL_KNIGHT_SHIELD_SMASH")
+				{
+					WarriorAttackSkill->SkillType = en_SkillType::SKILL_KNIGHT_SHIELD_SMASH;
 				}
 
 				WarriorAttackSkill->SkillName = SkillName;
