@@ -973,8 +973,9 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	random_device RD;
 	mt19937 Gen(RD());
 
-	st_Vector2Int SpawnPosition;
-		
+	st_Vector2Int SpawnPosition;		
+	EnterChannelGameObject->SetChannel(this);
+
 	if (EnterChannelGameObject->_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_PLAYER_DUMMY)
 	{
 		// 더미를 대상으로 랜덤 좌표 받아서 채널에 입장
@@ -985,6 +986,14 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 
 			SpawnPosition._X = RandomXPosition(Gen);
 			SpawnPosition._Y = RandomYPosition(Gen);
+
+			EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X = SpawnPosition._X;
+			EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y = SpawnPosition._Y;
+
+			EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
+			EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
+
+			EnterChannelGameObject->GetRectCollision()->CollisionUpdate();
 
 			if (_Map->CollisionCango(EnterChannelGameObject, SpawnPosition) == true)
 			{
@@ -1022,9 +1031,6 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 											
 			//_Players.insert(pair<int64, CPlayer*>(EnterChannelPlayer->_GameObjectInfo.ObjectId, EnterChannelPlayer));			
 
-			// 채널 저장
-			EnterChannelPlayer->SetChannel(this);
-
 			// 맵에 적용
 			IsEnterChannel = _Map->ApplyMove(EnterChannelPlayer, SpawnPosition);
 
@@ -1041,17 +1047,12 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 
 			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
-
-			EnterChannelPlayer->GetRectCollision()->CollisionUpdate();
+			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;			
 
 			// 플레이어 저장
 			_ChannelDummyPlayerArrayIndexs.Pop(&EnterChannelPlayer->_ChannelArrayIndex);
 			_ChannelDummyPlayerArray[EnterChannelPlayer->_ChannelArrayIndex] = EnterChannelPlayer;
-
-			// 채널 저장
-			EnterChannelPlayer->SetChannel(this);
-
+			
 			// 맵에 적용
 			IsEnterChannel = _Map->ApplyMove(EnterChannelPlayer, SpawnPosition);
 
@@ -1062,33 +1063,30 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 		break;
 	case en_GameObjectType::OBJECT_SLIME:
 	case en_GameObjectType::OBJECT_BEAR:
-	{		
-		// 몬스터로 형변환	
-		CMonster* EnterChannelMonster = (CMonster*)EnterChannelGameObject;		
-		EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-		EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-		EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
+		{		
+			// 몬스터로 형변환	
+			CMonster* EnterChannelMonster = (CMonster*)EnterChannelGameObject;		
+			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
+			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
+			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
 
-		EnterChannelMonster->GetRectCollision()->CollisionUpdate();
+			EnterChannelMonster->GetRectCollision()->CollisionUpdate();
 
-		EnterChannelMonster->Start();		
-				
-		// 몬스터 저장
-		_ChannelMonsterArrayIndexs.Pop(&EnterChannelMonster->_ChannelArrayIndex);
-		_ChannelMonsterArray[EnterChannelMonster->_ChannelArrayIndex] = EnterChannelMonster;
-		//G_Logger->WriteStdOut(en_Color::RED, L"ObjectID %d EnterChannelIndex %d\n", EnterChannelMonster->_GameObjectInfo.ObjectId, EnterChannelMonster->_ChannelArrayIndex);		
+			EnterChannelMonster->Start();		
+					
+			// 몬스터 저장
+			_ChannelMonsterArrayIndexs.Pop(&EnterChannelMonster->_ChannelArrayIndex);
+			_ChannelMonsterArray[EnterChannelMonster->_ChannelArrayIndex] = EnterChannelMonster;
+			//G_Logger->WriteStdOut(en_Color::RED, L"ObjectID %d EnterChannelIndex %d\n", EnterChannelMonster->_GameObjectInfo.ObjectId, EnterChannelMonster->_ChannelArrayIndex);					
 
-		// 채널 저장
-		EnterChannelMonster->SetChannel(this);
+			// 맵에 적용
+			IsEnterChannel = _Map->ApplyMove(EnterChannelMonster, SpawnPosition);
 
-		// 맵에 적용
-		IsEnterChannel = _Map->ApplyMove(EnterChannelMonster, SpawnPosition);
-
-		// 섹터 얻어서 해당 섹터에도 저장
-		CSector* EnterSector = _Map->GetSector(SpawnPosition);
-		EnterSector->Insert(EnterChannelMonster);
-	}
-	break;
+			// 섹터 얻어서 해당 섹터에도 저장
+			CSector* EnterSector = _Map->GetSector(SpawnPosition);
+			EnterSector->Insert(EnterChannelMonster);
+		}
+		break;
 	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
@@ -1108,29 +1106,27 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
 	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
 	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
-	{
-		// 아이템으로 형변환
-		CItem* EnterChannelItem = (CItem*)EnterChannelGameObject;
-		EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;		
-
-		EnterChannelItem->SetChannel(this);
-
-		// 맵 정보에 보관			
-		IsEnterChannel = _Map->ApplyMove(EnterChannelItem, SpawnPosition, false, false);
-
-		// 중복되지 않는 아이템의 경우에만 채널에 해당 아이템을 채널과 섹터에 저장
-		if (IsEnterChannel == true)
 		{
-			// 아이템 저장
-			_ChannelItemArrayIndexs.Pop(&EnterChannelItem->_ChannelArrayIndex);
-			_ChannelItemArray[EnterChannelItem->_ChannelArrayIndex] = EnterChannelItem;
-						
-			// 섹터 얻어서 해당 섹터에도 저장
-			CSector* EnterSector = _Map->GetSector(SpawnPosition);	
-			EnterSector->Insert(EnterChannelItem);
+			// 아이템으로 형변환
+			CItem* EnterChannelItem = (CItem*)EnterChannelGameObject;
+			EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;					
+
+			// 맵 정보에 보관			
+			IsEnterChannel = _Map->ApplyMove(EnterChannelItem, SpawnPosition, false, false);
+
+			// 중복되지 않는 아이템의 경우에만 채널에 해당 아이템을 채널과 섹터에 저장
+			if (IsEnterChannel == true)
+			{
+				// 아이템 저장
+				_ChannelItemArrayIndexs.Pop(&EnterChannelItem->_ChannelArrayIndex);
+				_ChannelItemArray[EnterChannelItem->_ChannelArrayIndex] = EnterChannelItem;
+							
+				// 섹터 얻어서 해당 섹터에도 저장
+				CSector* EnterSector = _Map->GetSector(SpawnPosition);	
+				EnterSector->Insert(EnterChannelItem);
+			}
 		}
-	}
-	break;
+		break;
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
 		{
@@ -1145,9 +1141,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 
 			// 환경 오브젝트 저장
 			_ChannelEnvironmentArrayIndexs.Pop(&EnterChannelEnvironment->_ChannelArrayIndex);
-			_ChannelEnvironmentArray[EnterChannelEnvironment->_ChannelArrayIndex] = EnterChannelEnvironment;
-
-			EnterChannelEnvironment->SetChannel(this);
+			_ChannelEnvironmentArray[EnterChannelEnvironment->_ChannelArrayIndex] = EnterChannelEnvironment;			
 
 			IsEnterChannel = _Map->ApplyMove(EnterChannelEnvironment, SpawnPosition);
 
@@ -1169,9 +1163,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			EnterChannelCraftingTable->Start();
 
 			_ChannelCraftingTableArrayIndexs.Pop(&EnterChannelCraftingTable->_ChannelArrayIndex);
-			_ChannelCraftingTableArray[EnterChannelCraftingTable->_ChannelArrayIndex] = EnterChannelCraftingTable;
-
-			EnterChannelCraftingTable->SetChannel(this);
+			_ChannelCraftingTableArray[EnterChannelCraftingTable->_ChannelArrayIndex] = EnterChannelCraftingTable;			
 
 			IsEnterChannel = _Map->ApplyMove(EnterChannelCraftingTable, SpawnPosition);
 			
@@ -1189,9 +1181,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			Crop->Start();
 
 			_ChannelCropArrayIndexs.Pop(&Crop->_ChannelArrayIndex);
-			_ChannelCropArray[Crop->_ChannelArrayIndex] = Crop;
-
-			Crop->SetChannel(this);
+			_ChannelCropArray[Crop->_ChannelArrayIndex] = Crop;			
 
 			IsEnterChannel = _Map->ApplyMove(Crop, SpawnPosition, true, false);
 
