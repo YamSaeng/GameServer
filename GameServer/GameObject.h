@@ -29,8 +29,7 @@ class CGameObject
 {
 private:
 public:
-	int8 _StatusAbnormal;
-	bool _IsSendPacketTarget;
+	int8 _StatusAbnormal;	
 
 	int32 _ObjectManagerArrayIndex;
 	int32 _ChannelArrayIndex;

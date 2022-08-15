@@ -18,8 +18,7 @@ CGameObject::CGameObject()
 	_SelectTarget = nullptr;	
 
 	_NatureRecoveryTick = 0;
-	_FieldOfViewUpdateTick = 0;
-	_IsSendPacketTarget = false;
+	_FieldOfViewUpdateTick = 0;	
 
 	_RectCollision = nullptr;
 }
