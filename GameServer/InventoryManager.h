@@ -3,31 +3,33 @@
 
 class CInventoryManager
 {
-private:
-	enum en_InventoryManager
-	{
-		INVENTORY_COUNT = 1
-	};
-
 public:	
 	CItem* _SelectItem;	
-
-	//---------------------
-	// 보유하고 있는 동전
-	//---------------------
+		
+	// 보유하고 있는 동전, 은전, 금전
 	int16 _BronzeCoinCount;
 	int16 _SliverCoinCount;
-	int64 _GoldCoinCount;
-
-	CInventory* _Inventorys[en_InventoryManager::INVENTORY_COUNT];	
+	int64 _GoldCoinCount;	
 
 	CInventoryManager();
 	~CInventoryManager();
 
-	void InventoryCreate(int8 Width, int8 Height);		
+	//-----------------------------------------------------------------
+	// Inventory 개수 반환
+	//-----------------------------------------------------------------
+	int8 GetInventoryCount();
+	//-----------------------------------------------------------------
+	// 관리중인 Inventory 목록 반환
+	//-----------------------------------------------------------------
+	CInventory** GetInventory();
 
 	//-----------------------------------------------------------------
-	// 주운 돈 아이템 인벤토리에 넣기
+	// Inventory 생성
+	//-----------------------------------------------------------------
+	void InventoryCreate(int8 InventoryCount, int8 Width, int8 Height);		
+
+	//-----------------------------------------------------------------
+	// 주운 돈 아이템 Inventory에 넣기
 	//-----------------------------------------------------------------
 	void InsertMoney(int8 SelectInventoryIndex, CItem* InsertMoneyItem);
 	//--------------------------------------------------------------
@@ -78,4 +80,10 @@ public:
 	// 인벤토리에 조건에 맞는 아이템을 모두 찾는다.
 	//------------------------------------------------------------------------------------------------------------
 	vector<CItem*> FindAllInventoryItem(int8 SelectInventoryIndex, en_SmallItemCategory FindItemSmallItemCategory);	
+private:
+	// 관리하는 Inventory 개수
+	int8 _InventoryCount;
+
+	// 관리하는 Inventory 목록
+	CInventory** _Inventorys;
 };

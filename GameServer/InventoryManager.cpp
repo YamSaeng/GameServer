@@ -10,25 +10,44 @@ CInventoryManager::CInventoryManager()
 
 CInventoryManager::~CInventoryManager()
 {
-	for (int i = 0; i < en_InventoryManager::INVENTORY_COUNT; i++)
+	for (int i = 0; i < _InventoryCount; i++)
 	{
 		if (_Inventorys[i] != nullptr)
 		{
 			delete _Inventorys[i];
+			_Inventorys[i] = nullptr;
 		}
 	}
+
+	delete _Inventorys;
+	_Inventorys = nullptr;
 }
 
-void CInventoryManager::InventoryCreate(int8 Width, int8 Height)
+int8 CInventoryManager::GetInventoryCount()
 {
+	return _InventoryCount;
+}
+
+CInventory** CInventoryManager::GetInventory()
+{
+	return _Inventorys;
+}
+
+void CInventoryManager::InventoryCreate(int8 InventoryCount, int8 Width, int8 Height)
+{
+	_InventoryCount = InventoryCount;
+
 	_BronzeCoinCount = 0;
 	_SliverCoinCount = 0;
 	_GoldCoinCount = 0;
-
-	CInventory* NewInventory = new CInventory();
 	
-	NewInventory->Init(Width, Height);
-	_Inventorys[0] = NewInventory;
+	_Inventorys = new CInventory*[_InventoryCount];
+
+	for (int i = 0; i < InventoryCount; i++)
+	{
+		_Inventorys[i] = new CInventory;
+		_Inventorys[i]->Init(Width, Height);
+	}	
 }
 
 void CInventoryManager::InsertMoney(int8 SelectInventoryIndex, CItem* InsertMoneyItem)
