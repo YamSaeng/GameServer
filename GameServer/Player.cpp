@@ -13,9 +13,7 @@ CPlayer::CPlayer()
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 	_DefaultAttackTick = 0;
 
-	_FieldOfViewDistance = 10;
-
-	_IsSendPacketTarget = true;
+	_FieldOfViewDistance = 10;	
 
 	_NatureRecoveryTick = GetTickCount64() + 5000;
 	_FieldOfViewUpdateTick = GetTickCount64() + 50;
