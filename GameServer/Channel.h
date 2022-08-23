@@ -99,9 +99,9 @@ public:
 	//------------------------------------------------------------------------------
 	vector<CGameObject*> FindChannelObjects(vector<st_FieldOfViewInfo>& FindObjectIDs);
 	//-----------------------------------------------------
-	// 채널에 있는 오브젝트들 찾기 ( 거리 기준 )
+	// 채널에 있는 공격 가능한 오브젝트들 찾기 ( 거리 기준 )
 	//-----------------------------------------------------
-	vector<CGameObject*> FindChannelObjects(vector<st_FieldOfViewInfo>& FindObjectIDs, CGameObject* Object, int16 Distance);
+	vector<CGameObject*> FindAttackChannelObjects(vector<st_FieldOfViewInfo>& FindObjectIDs, CGameObject* Object, int16 Distance);
 
 	//-----------------------------------------------------
 	// 채널에 있는 오브젝트들과 검사해서 충돌 판단

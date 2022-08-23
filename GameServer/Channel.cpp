@@ -744,7 +744,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 	return FindObjects;
 }
 
-vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& FindObjectIDs, CGameObject* Object, int16 Distance)
+vector<CGameObject*> CChannel::FindAttackChannelObjects(vector<st_FieldOfViewInfo>& FindObjectIDs, CGameObject* Object, int16 Distance)
 {
 	vector<CGameObject*> FindObjects;
 
@@ -758,115 +758,73 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 		case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 		case en_GameObjectType::OBJECT_THIEF_PLAYER:
 		case en_GameObjectType::OBJECT_ARCHER_PLAYER:
-		{
-			for (int32 i = 0; i < en_Channel::PLAYER_MAX; i++)
 			{
-				if (_ChannelPlayerArray[i] != nullptr
-					&& _ChannelPlayerArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID
-					&& _ChannelPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE)
-				{	
-					if (st_Vector2::CheckFieldOfView(_ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->GetPositionInfo().MoveDir, 80))
-					{
-						// 시야각 안에 오브젝트가 존재
-						float TargetDistance = st_Vector2::Distance(_ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
-						if (TargetDistance <= Distance)
-						{
-							FindObjects.push_back(_ChannelPlayerArray[i]);
-						}
-					}				
-				}
-			}
-		}
-		break;
-		case en_GameObjectType::OBJECT_PLAYER_DUMMY:
-		{
-			for (int32 i = 0; i < en_Channel::DUMMY_PLAYER_MAX; i++)
-			{
-				if (_ChannelDummyPlayerArray[i] != nullptr && _ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
+				for (int32 i = 0; i < en_Channel::PLAYER_MAX; i++)
 				{
-					if (st_Vector2::CheckFieldOfView(_ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->GetPositionInfo().MoveDir, 80))
-					{
-						// 시야각 안에 오브젝트가 존재
-						float TargetDistance = st_Vector2::Distance(_ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
-						if (TargetDistance <= Distance)
+					if (_ChannelPlayerArray[i] != nullptr
+						&& _ChannelPlayerArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID
+						&& _ChannelPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE
+						&& _ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::READY_DEAD
+						&& _ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
+					{	
+						if (st_Vector2::CheckFieldOfView(_ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->GetPositionInfo().MoveDir, 80))
 						{
-							FindObjects.push_back(_ChannelDummyPlayerArray[i]);
-						}
-					}					
+							// 시야각 안에 오브젝트가 존재
+							float TargetDistance = st_Vector2::Distance(_ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
+							if (TargetDistance <= Distance)
+							{
+								FindObjects.push_back(_ChannelPlayerArray[i]);
+							}
+						}				
+					}
 				}
 			}
-		}
-		break;
+			break;
+		case en_GameObjectType::OBJECT_PLAYER_DUMMY:
+			{
+				for (int32 i = 0; i < en_Channel::DUMMY_PLAYER_MAX; i++)
+				{
+					if (_ChannelDummyPlayerArray[i] != nullptr && _ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
+					{
+						if (st_Vector2::CheckFieldOfView(_ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->GetPositionInfo().MoveDir, 80))
+						{
+							// 시야각 안에 오브젝트가 존재
+							float TargetDistance = st_Vector2::Distance(_ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
+							if (TargetDistance <= Distance)
+							{
+								FindObjects.push_back(_ChannelDummyPlayerArray[i]);
+							}
+						}					
+					}
+				}
+			}
+			break;
 		case en_GameObjectType::OBJECT_MONSTER:
 		case en_GameObjectType::OBJECT_SLIME:
 		case en_GameObjectType::OBJECT_BEAR:
-		{
-			for (int32 i = 0; i < en_Channel::MONSTER_MAX; i++)
 			{
-				if (_ChannelMonsterArray[i] != nullptr && _ChannelMonsterArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
+				for (int32 i = 0; i < en_Channel::MONSTER_MAX; i++)
 				{
-					if (st_Vector2::CheckFieldOfView(_ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.Position,
-						Object->_GameObjectInfo.ObjectPositionInfo.Position, 
-						Object->GetPositionInfo().MoveDir, 80))
+					if (_ChannelMonsterArray[i] != nullptr 
+						&& _ChannelMonsterArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID
+						&& _ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::READY_DEAD
+						&& _ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 					{
-						// 시야각 안에 오브젝트가 존재
-						float TargetDistance = st_Vector2::Distance(_ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
-						if (TargetDistance <= Distance)
+						if (st_Vector2::CheckFieldOfView(_ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.Position,
+							Object->_GameObjectInfo.ObjectPositionInfo.Position, 
+							Object->GetPositionInfo().MoveDir, 80))
 						{
-							FindObjects.push_back(_ChannelMonsterArray[i]);
+							// 시야각 안에 오브젝트가 존재
+							float TargetDistance = st_Vector2::Distance(_ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
+							if (TargetDistance <= Distance)
+							{
+								FindObjects.push_back(_ChannelMonsterArray[i]);
+							}
 						}
 					}
 				}
 			}
-		}
-		break;
-		case en_GameObjectType::OBJECT_ENVIRONMENT:
-		case en_GameObjectType::OBJECT_STONE:
-		case en_GameObjectType::OBJECT_TREE:
-		{
-			for (int32 i = 0; i < en_Channel::ENVIRONMENT_MAX; i++)
-			{
-				if (_ChannelEnvironmentArray[i] != nullptr && _ChannelEnvironmentArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
-				{
-					if (st_Vector2::CheckFieldOfView(_ChannelEnvironmentArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->GetPositionInfo().MoveDir, 80))
-					{
-						// 시야각 안에 오브젝트가 존재
-						float TargetDistance = st_Vector2::Distance(_ChannelEnvironmentArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
-						if (TargetDistance <= Distance)
-						{
-							FindObjects.push_back(_ChannelEnvironmentArray[i]);
-						}
-					}
-				}
-			}
-		}
-		break;		
-		case en_GameObjectType::OBJECT_ARCHITECTURE:
-		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE:
-		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
-		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
-			{
-				for (int32 i = 0; i < en_Channel::CRAFTING_TABLE_MAX; i++)
-				{
-					if (_ChannelCraftingTableArray[i] != nullptr && _ChannelCraftingTableArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
-					{
-						FindObjects.push_back(_ChannelCraftingTableArray[i]);
-					}
-				}
-			}
-			break;
-		case en_GameObjectType::OBJECT_CROP:
-		case en_GameObjectType::OBJECT_CROP_POTATO:
-			{
-				for (int32 i = 0; i < en_Channel::CROP_MAX; i++)
-				{
-					if (_ChannelCropArray[i] != nullptr && _ChannelCropArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
-					{
-						FindObjects.push_back(_ChannelCropArray[i]);
-					}
-				}
-			}
-			break;
+			break;			
 		}
 	}
 
