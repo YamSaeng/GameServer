@@ -15,6 +15,20 @@
           "ItemMinDamage": 5,
           "ItemMaxDamage": 10,
           "ItemCraftingTime": 5000
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_SHIELD",
+          "ItemSmallCategory": "ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD",
+          "ItemObjectType": "OBJECT_ITEM_WEAPON_WOOD_SHIELD",
+          "ItemExplain": "나무로 만든 방패",
+          "ItemName": "나무 방패",
+          "ItemWidth": 2,
+          "ItemHeight": 2,
+          "ItemMaxHP": 150,
+          "ItemCraftingMaxHP": 0,
+          "ItemMinDamage": 1,
+          "ItemMaxDamage": 2,
+          "ItemCraftingTime": 5000
         }
       ]
     }
