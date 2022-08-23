@@ -33,15 +33,27 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			{
 				WeaponItemData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_SWORD;
 			}
+			else if (MediumCategory == "ITEM_MEDIUM_CATEGORY_SHIELD")
+			{
+				WeaponItemData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_SHIELD;
+			}
 
 			if (SmallCategory == "ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD")
 			{
 				WeaponItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD;
 			}
+			else if (SmallCategory == "ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD")
+			{
+				WeaponItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD;
+			}
 
 			if (ItemObjectType == "OBJECT_ITEM_WEAPON_WOOD_SWORD")
 			{
 				WeaponItemData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD;
+			}
+			else if (ItemObjectType == "OBJECT_ITEM_WEAPON_WOOD_SHIELD")
+			{
+				WeaponItemData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SHIELD;
 			}
 
 			WeaponItemData->ItemExplain = ItemExplain;
