@@ -152,6 +152,17 @@
 		<Column name="MapTilePositionY" type="int" notnull ="true"/>
 	</Table>
 	
+  <!-- 장비 테이블 -->
+	<Table name="Equipment" desc="Equipment Table">		
+		<Column name="EquipmentAccountDBId" type="BigInt" notnull="true"/>
+		<Column name="EquipmentPlayerDBId" type="BigInt" notnull="true"/>
+		<Column name="EquipmentLargeCategory" type="nvarchar(50)" notnull="true"/>
+	    <Column name="EquipmentMediumCategory" type="nvarchar(50)" notnull="true"/>
+	    <Column name="EquipmentSmallCategory" type="nvarchar(50)" notnull="true"/>	
+	    <Column name="EquipmentDurability" type="SmallInt" notnull="true"/>	
+	    <Column name="EquipmentEnchantPoint" type="TinyInt" notnull="true"/>
+	</Table>
+	
   <!-- AccountID를 기준으로 클라가 소유하고 있는 캐릭터를 찾는다. -->
   <Procedure name="spGetPlayers">
     <Param name="@AccountId" type="BigInt"/>
@@ -786,4 +797,45 @@
 			]]>
 		</Body>
 	</Procedure>
+
+    <!-- 퀵슬롯바 테이블에서 퀵슬롯바 슬롯 초기화-->
+  <Procedure name="spEquipmentWearing">
+    <Param name="@EquipmentAccountDBId" type="BigInt"/>
+    <Param name="@EquipmentPlayerDBId" type="BigInt"/>
+    <Param name="@EquipmentLargeCategory" type="TinyInt"/>
+    <Param name="@EquipmentMediumCategory" type="TinyInt"/>
+	<Param name="@EquipmentSmallCategory" type="SmallInt"/>
+	<Param name="@EquipmentDurability" type="SmallInt"/>
+	<Param name="@EquipmentEnchantPoint" type="TinyInt"/>
+    <Body>
+      <![CDATA[
+	    SET NOCOUNT ON     
+		INSERT INTO [dbo].Equipment
+		VALUES (
+		(@EquipmentAccountDBId),
+		(@EquipmentPlayerDBId),
+		(CASE WHEN @EquipmentLargeCategory = 2 THEN 'ITEM_LARGE_CATEGORY_WEAPON'
+		                                   WHEN @EquipmentLargeCategory = 3 THEN 'ITEM_LARGE_CATEGORY_ARMOR'
+							               ELSE ' '
+							               END),
+		(CASE WHEN @EquipmentMediumCategory = 2 THEN 'ITEM_MEDIUM_CATEGORY_SWORD'
+		                                    WHEN @EquipmentMediumCategory = 3 THEN 'ITEM_MEDIUM_CATEGORY_SHIELD'
+		                                    WHEN @EquipmentMediumCategory = 4 THEN 'ITEM_MEDIUM_CATEGORY_HAT'
+		                                    WHEN @EquipmentMediumCategory = 5 THEN 'ITEM_MEDIUM_CATEGORY_WEAR'
+		                                    WHEN @EquipmentMediumCategory = 6 THEN 'ITEM_MEDIUM_CATEGORY_GLOVE'
+		                                    WHEN @EquipmentMediumCategory = 7 THEN 'ITEM_MEDIUM_CATEGORY_BOOT'
+							                ELSE ' '
+							                END),
+		(CASE WHEN @EquipmentSmallCategory = 1 THEN 'ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD'
+		                                   WHEN @EquipmentSmallCategory = 2 THEN 'ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD'
+		                                   WHEN @EquipmentSmallCategory = 100 THEN 'ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD'
+		                                   WHEN @EquipmentSmallCategory = 101 THEN 'ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER'
+		                                   WHEN @EquipmentSmallCategory = 102 THEN 'ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER'
+							               ELSE ' '
+							               END),
+		(@EquipmentDurability),
+		(@EquipmentEnchantPoint))		
+      ]]>
+    </Body>
+  </Procedure> 
 </GameServerDB>

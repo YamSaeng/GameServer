@@ -508,4 +508,18 @@ namespace SP
 		void OutMapTilePositionX(int32& MapTilePositionX) { BindCol(3, MapTilePositionX); }
 		void OutMapTilePositionY(int32& MapTilePositionY) { BindCol(4, MapTilePositionY); }
 	};
+
+	// 장비 착용 여부 DB에 저장하기
+	class CDBGameServerSaveEquipmentInfo : public CDBBind<7, 0>
+	{
+	public:
+		CDBGameServerSaveEquipmentInfo(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spEquipmentWearing(?,?,?,?,?,?,?)}") {}
+		void InAccountDBID(int64& AccountDBID) { BindParam(0, AccountDBID); }
+		void InPlayerDBID(int64& AccountDBID) { BindParam(1, AccountDBID); }
+		void InEquipmentLargeCategory(int8& EquipmentLargeCategory) { BindParam(2, EquipmentLargeCategory); }
+		void InEquipmentMediumCategory(int8& EquipmentMediumCategory) { BindParam(3, EquipmentMediumCategory); }
+		void InEquipmentSmallCategory(int16& EquipmentSmallCategory) { BindParam(4, EquipmentSmallCategory); }
+		void InEquipmentDurability(int16& EquipmentDurability) { BindParam(5, EquipmentDurability); }
+		void InEquipmentEnchantPoint(int8& EquipmentEnchantPoint) { BindParam(6, EquipmentEnchantPoint); }
+	};
 }
