@@ -1,34 +1,6 @@
 #pragma once
 #include "Item.h"
 
-struct st_ItemData
-{
-	string ItemName;
-	int32 ItemWidth;
-	int32 ItemHeight;
-	en_LargeItemCategory LargeItemCategory;
-	en_MediumItemCategory MediumItemCategory;
-	en_SmallItemCategory SmallItemCategory;
-	en_GameObjectType ItemObjectType;	
-	int32 ItemMaxHP;
-	int32 ItemCraftingMaxHP;
-	string ItemExplain;
-	int32 ItemMinDamage;
-	int32 ItemMaxDamage;
-	int32 ItemDefence;
-	int32 ItemMaxCount;	
-	bool ItemIsEquipped;
-	int16 ItemCount;
-	int64 ItemCraftingTime;
-};
-
-struct st_ConsumableData : public st_ItemData
-{
-	int16 HealPoint;
-	en_SkillMediumCategory SkillMediumCategory;
-	en_SkillType SkillType;
-};
-
 struct st_SkillData
 {
 	en_SkillLargeCategory SkillLargeCategory;
