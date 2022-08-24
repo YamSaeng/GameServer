@@ -25,48 +25,49 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int ItemMaxDamage = WeaponListFiled["ItemMaxDamage"].GetInt();
 			int64 ItemCraftingTime = WeaponListFiled["ItemCraftingTime"].GetInt64();
 
-			st_ItemData* WeaponItemData = new st_ItemData();
+			st_ItemInfo* WeaponItemInfo = new st_ItemInfo();
 
-			WeaponItemData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
+			WeaponItemInfo->ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
 
 			if (MediumCategory == "ITEM_MEDIUM_CATEGORY_SWORD")
 			{
-				WeaponItemData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_SWORD;
+				WeaponItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_SWORD;
 			}
 			else if (MediumCategory == "ITEM_MEDIUM_CATEGORY_SHIELD")
 			{
-				WeaponItemData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_SHIELD;
+				WeaponItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_SHIELD;
 			}
 
 			if (SmallCategory == "ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD")
 			{
-				WeaponItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD;
+				WeaponItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD;
 			}
 			else if (SmallCategory == "ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD")
 			{
-				WeaponItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD;
+				WeaponItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD;
 			}
 
 			if (ItemObjectType == "OBJECT_ITEM_WEAPON_WOOD_SWORD")
 			{
-				WeaponItemData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD;
+				WeaponItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD;
 			}
 			else if (ItemObjectType == "OBJECT_ITEM_WEAPON_WOOD_SHIELD")
 			{
-				WeaponItemData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SHIELD;
+				WeaponItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SHIELD;
 			}
 
-			WeaponItemData->ItemExplain = ItemExplain;
-			WeaponItemData->ItemName = ItemName;
-			WeaponItemData->ItemWidth = ItemWidth;
-			WeaponItemData->ItemHeight = ItemHeight;
-			WeaponItemData->ItemMinDamage = ItemMinDamage;
-			WeaponItemData->ItemMaxDamage = ItemMaxDamage;
-			WeaponItemData->ItemDefence = 0;
-			WeaponItemData->ItemMaxCount = 1;
-			WeaponItemData->ItemCraftingTime = ItemCraftingTime;
+			WeaponItemInfo->ItemHealPoint = 0;
+			WeaponItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
+			WeaponItemInfo->ItemName = (LPWSTR)CA2W(ItemName.c_str());
+			WeaponItemInfo->ItemWidth = ItemWidth;
+			WeaponItemInfo->ItemHeight = ItemHeight;
+			WeaponItemInfo->ItemMinDamage = ItemMinDamage;
+			WeaponItemInfo->ItemMaxDamage = ItemMaxDamage;
+			WeaponItemInfo->ItemDefence = 0;
+			WeaponItemInfo->ItemMaxCount = 1;
+			WeaponItemInfo->ItemCraftingTime = ItemCraftingTime;
 
-			_Items.insert(pair<int16, st_ItemData*>((int16)WeaponItemData->SmallItemCategory, WeaponItemData));
+			_Items.insert(pair<int16, st_ItemInfo*>((int16)WeaponItemInfo->ItemSmallCategory, WeaponItemInfo));
 		}
 	}
 
@@ -84,60 +85,61 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int ItemDefence = ArmorListFiled["ItemDefence"].GetInt();
 			int64 ItemCraftingTime = ArmorListFiled["ItemCraftingTime"].GetInt64();
 
-			st_ItemData* ArmorItemData = new st_ItemData();
+			st_ItemInfo* ArmorItemInfo = new st_ItemInfo();
 
-			ArmorItemData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARMOR;
+			ArmorItemInfo->ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARMOR;
 
 			if (MediumCategory == "ITEM_MEDIUM_CATEGORY_HAT")
 			{
-				ArmorItemData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_HAT;
+				ArmorItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_HAT;
 			}
 			else if (MediumCategory == "ITEM_MEDIUM_CATEGORY_WEAR")
 			{
-				ArmorItemData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_WEAR;
+				ArmorItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_WEAR;
 			}
 			else if (MediumCategory == "ITEM_MEDIUM_CATEGORY_BOOT")
 			{
-				ArmorItemData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_BOOT;
+				ArmorItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_BOOT;
 			}
 
 			if (SmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER")
 			{
-				ArmorItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER;
+				ArmorItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD")
 			{
-				ArmorItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD;
+				ArmorItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER")
 			{
-				ArmorItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER;
+				ArmorItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER;
 			}
 
 			if (ItemObjectType == "OBJECT_ITEM_ARMOR_LEATHER_HELMET")
 			{
-				ArmorItemData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET;
+				ArmorItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET;
 			}
 			else if (ItemObjectType == "OBJECT_ITEM_ARMOR_WOOD_ARMOR")
 			{
-				ArmorItemData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR;
+				ArmorItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR;
 			}
 			else if (ItemObjectType == "OBJECT_ITEM_ARMOR_LEATHER_BOOT")
 			{
-				ArmorItemData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT;
+				ArmorItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT;
 			}
 
-			ArmorItemData->ItemExplain = ItemExplain;
-			ArmorItemData->ItemName = ItemName;
-			ArmorItemData->ItemWidth = ItemWidth;
-			ArmorItemData->ItemHeight = ItemHeight;
-			ArmorItemData->ItemMinDamage = 0;
-			ArmorItemData->ItemMaxDamage = 0;
-			ArmorItemData->ItemDefence = ItemDefence;
-			ArmorItemData->ItemMaxCount = 1;
-			ArmorItemData->ItemCraftingTime = ItemCraftingTime;
+			ArmorItemInfo->ItemHealPoint = 0;
+			ArmorItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
+			ArmorItemInfo->ItemName = (LPWSTR)CA2W(ItemName.c_str());
+			ArmorItemInfo->ItemWidth = ItemWidth;
+			ArmorItemInfo->ItemHeight = ItemHeight;
+			ArmorItemInfo->ItemMinDamage = 0;
+			ArmorItemInfo->ItemMaxDamage = 0;
+			ArmorItemInfo->ItemDefence = ItemDefence;
+			ArmorItemInfo->ItemMaxCount = 1;
+			ArmorItemInfo->ItemCraftingTime = ItemCraftingTime;
 
-			_Items.insert(pair<int16, st_ItemData*>((int16)ArmorItemData->SmallItemCategory, ArmorItemData));
+			_Items.insert(pair<int16, st_ItemInfo*>((int16)ArmorItemInfo->ItemSmallCategory, ArmorItemInfo));
 		}
 	}
 
@@ -155,36 +157,36 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int ItemMaxCount = PotionDataListFiled["ItemMaxCount"].GetInt();
 			int64 ItemCraftingTime = PotionDataListFiled["ItemCraftingTime"].GetInt64();
 
-			st_ConsumableData* PotionItemData = new st_ConsumableData();
-			PotionItemData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_POTION;
+			st_ItemInfo* PotionItemInfo = new st_ItemInfo();
+			PotionItemInfo->ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_POTION;
 
 			if (MediumCategory == "ITEM_MEDIUM_CATEGORY_HEAL")
 			{
-				PotionItemData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_HEAL;
+				PotionItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_HEAL;
 			}
 
 			if (SmallCategory == "ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL")
 			{
-				PotionItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL;
-				PotionItemData->HealPoint = 50;
+				PotionItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL;
+				PotionItemInfo->ItemHealPoint = 50;
 			}
 
 			if (ItemObjectType == "OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL")
 			{
-				PotionItemData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL;
+				PotionItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL;
 			}
 
-			PotionItemData->ItemExplain = ItemExplain;
-			PotionItemData->ItemName = ItemName;
-			PotionItemData->ItemWidth = ItemWidth;
-			PotionItemData->ItemHeight = ItemHeight;
-			PotionItemData->ItemMinDamage = 0;
-			PotionItemData->ItemMaxDamage = 0;
-			PotionItemData->ItemDefence = 0;
-			PotionItemData->ItemMaxCount = ItemMaxCount;
-			PotionItemData->ItemCraftingTime = ItemCraftingTime;
+			PotionItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
+			PotionItemInfo->ItemName = (LPWSTR)CA2W(ItemName.c_str());
+			PotionItemInfo->ItemWidth = ItemWidth;
+			PotionItemInfo->ItemHeight = ItemHeight;
+			PotionItemInfo->ItemMinDamage = 0;
+			PotionItemInfo->ItemMaxDamage = 0;
+			PotionItemInfo->ItemDefence = 0;
+			PotionItemInfo->ItemMaxCount = ItemMaxCount;
+			PotionItemInfo->ItemCraftingTime = ItemCraftingTime;
 
-			_Consumables.insert(pair<int16, st_ConsumableData*>((int16)PotionItemData->SmallItemCategory, PotionItemData));
+			_Items.insert(pair<int16, st_ItemInfo*>((int16)PotionItemInfo->ItemSmallCategory, PotionItemInfo));
 		}
 
 		for (auto& SkillBookDataListFiled : Filed["SkillBookList"].GetArray())
@@ -199,97 +201,109 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int ItemMaxCount = SkillBookDataListFiled["ItemMaxCount"].GetInt();
 			int64 ItemCraftingTime = SkillBookDataListFiled["ItemCraftingTime"].GetInt64();
 
-			st_ConsumableData* SkillBookItemData = new st_ConsumableData();
-			SkillBookItemData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_SKILLBOOK;
+			st_ItemInfo* SkillBookItemInfo = new st_ItemInfo();
+			SkillBookItemInfo->ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_SKILLBOOK;
 
 			if (MediumCategory == "ITEM_MEDIUM_CATEGORY_NONE")
 			{
-				SkillBookItemData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
+				SkillBookItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
 			}
 
 			if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_FIERCE_ATTACK")
 			{
-				SkillBookItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_FIERCE_ATTACK;
-				SkillBookItemData->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK;
-				SkillBookItemData->SkillType = en_SkillType::SKILL_KNIGHT_FIERCE_ATTACK;
+				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_FIERCE_ATTACK;
+				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
+				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK;
+				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_KNIGHT_FIERCE_ATTACK;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CONVERSION_ATTACK")
 			{
-				SkillBookItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CONVERSION_ATTACK;
-				SkillBookItemData->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK;
-				SkillBookItemData->SkillType = en_SkillType::SKILL_KNIGHT_CONVERSION_ATTACK;
+				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CONVERSION_ATTACK;
+				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
+				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK;
+				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_KNIGHT_CONVERSION_ATTACK;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SHAEHONE_ATTACK")
 			{
-				SkillBookItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SHAEHONE_ATTACK;
-				SkillBookItemData->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK;
-				SkillBookItemData->SkillType = en_SkillType::SKILL_KNIGHT_SHAEHONE;
+				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SHAEHONE_ATTACK;
+				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
+				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK;
+				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_KNIGHT_SHAEHONE;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK")
 			{
-				SkillBookItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK;
-				SkillBookItemData->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK;
-				SkillBookItemData->SkillType = en_SkillType::SKILL_KNIGHT_CHOHONE;
+				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK;
+				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
+				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK;
+				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_KNIGHT_CHOHONE;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SMASH_WAVE_ATTACK")
 			{
-				SkillBookItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SMASH_WAVE_ATTACK;
-				SkillBookItemData->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK;
-				SkillBookItemData->SkillType = en_SkillType::SKILL_KNIGHT_SMASH_WAVE;
-			}						
+				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SMASH_WAVE_ATTACK;
+				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
+				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK;
+				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_KNIGHT_SMASH_WAVE;
+			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHARGE_POSE")
 			{
-				SkillBookItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHARGE_POSE;
-				SkillBookItemData->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_BUF;
-				SkillBookItemData->SkillType = en_SkillType::SKILL_KNIGHT_CHARGE_POSE;
+				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHARGE_POSE;
+				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
+				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_BUF;
+				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_KNIGHT_CHARGE_POSE;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_FLAME_HARPOON")
 			{
-				SkillBookItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_FLAME_HARPOON;
-				SkillBookItemData->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK;
-				SkillBookItemData->SkillType = en_SkillType::SKILL_SHAMAN_FLAME_HARPOON;
+				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_FLAME_HARPOON;
+				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
+				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK;
+				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_SHAMAN_FLAME_HARPOON;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HELL_FIRE")
 			{
-				SkillBookItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HELL_FIRE;
-				SkillBookItemData->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK;
-				SkillBookItemData->SkillType = en_SkillType::SKILL_SHAMAN_HELL_FIRE;
+				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HELL_FIRE;
+				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
+				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK;
+				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_SHAMAN_HELL_FIRE;
 			}
-			else if (SmallCategory == "ITEM_SMALL_CATEOGRY_SKILLBOOK_SHAMAN_HEALING_LIGHT")
+			else if (SmallCategory == "ITEM_SMALL_CATEOGRY_SKILLBOOK_TAIOIST_HEALING_LIGHT")
 			{
-				SkillBookItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEOGRY_SKILLBOOK_SHAMAN_HEALING_LIGHT;
-				SkillBookItemData->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_HEAL;
-				SkillBookItemData->SkillType = en_SkillType::SKILL_TAIOIST_HEALING_LIGHT;
+				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEOGRY_SKILLBOOK_TAIOIST_HEALING_LIGHT;
+				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_TAOIST;
+				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_HEAL;
+				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_TAIOIST_HEALING_LIGHT;
 			}
-			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HEALING_WIND")
+			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_TAIOIST_HEALING_WIND")
 			{
-				SkillBookItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HEALING_WIND;
-				SkillBookItemData->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_HEAL;
-				SkillBookItemData->SkillType = en_SkillType::SKILL_TAIOIST_HEALING_WIND;
+				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_TAIOIST_HEALING_WIND;
+				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_TAOIST;
+				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_HEAL;
+				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_TAIOIST_HEALING_WIND;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_SHOCK_RELEASE")
 			{
-				SkillBookItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHOCK_RELEASE;
-				SkillBookItemData->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF;
-				SkillBookItemData->SkillType = en_SkillType::SKILL_SHOCK_RELEASE;
+				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHOCK_RELEASE;
+				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_PUBLIC;
+				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF;
+				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_SHOCK_RELEASE;
 			}
 
 			if (ItemObjectType == "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK")
 			{
-				SkillBookItemData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK;
+				SkillBookItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK;
 			}
 
-			SkillBookItemData->ItemExplain = ItemExplain;
-			SkillBookItemData->ItemName = ItemName;
-			SkillBookItemData->ItemWidth = ItemWidth;
-			SkillBookItemData->ItemHeight = ItemHeight;
-			SkillBookItemData->ItemMinDamage = 0;
-			SkillBookItemData->ItemMaxDamage = 0;
-			SkillBookItemData->ItemDefence = 0;
-			SkillBookItemData->ItemMaxCount = ItemMaxCount;
-			SkillBookItemData->ItemCraftingTime = ItemCraftingTime;
+			SkillBookItemInfo->ItemHealPoint = 0;
+			SkillBookItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
+			SkillBookItemInfo->ItemName = (LPWSTR)CA2W(ItemName.c_str());
+			SkillBookItemInfo->ItemWidth = ItemWidth;
+			SkillBookItemInfo->ItemHeight = ItemHeight;
+			SkillBookItemInfo->ItemMinDamage = 0;
+			SkillBookItemInfo->ItemMaxDamage = 0;
+			SkillBookItemInfo->ItemDefence = 0;
+			SkillBookItemInfo->ItemMaxCount = ItemMaxCount;
+			SkillBookItemInfo->ItemCraftingTime = ItemCraftingTime;
 
-			_Consumables.insert(pair<int16, st_ConsumableData*>((int16)SkillBookItemData->SmallItemCategory, SkillBookItemData));
+			_Items.insert(pair<int16, st_ItemInfo*>((int16)SkillBookItemInfo->ItemSmallCategory, SkillBookItemInfo));
 		}
 	}
 
@@ -307,141 +321,142 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int ItemMaxCount = MaterialDataListFiled["ItemMaxCount"].GetInt();
 			int64 ItemCraftingTime = MaterialDataListFiled["ItemCraftingTime"].GetInt64();
 
-			st_ItemData* MaterialData = new st_ItemData();
-			MaterialData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_MATERIAL;
+			st_ItemInfo* MaterialItemInfo = new st_ItemInfo();
+			MaterialItemInfo->ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_MATERIAL;
 
 			if (MediumCategory == "ITEM_MEDIUM_CATEGORY_NONE")
 			{
-				MaterialData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
+				MaterialItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
 			}
 
 			if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_LEATHER")
 			{
-				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER;
+				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL")
 			{
-				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL;
+				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN")
 			{
-				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN;
+				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN")
 			{
-				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN;
+				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN")
 			{
-				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN;
+				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_STONE")
 			{
-				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE;
+				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG")
 			{
-				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG;
+				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK")
 			{
-				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK;
+				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_YARN")
 			{
-				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN;
+				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL")
 			{
-				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL;
+				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET")
 			{
-				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET;
+				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT")
 			{
-				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT;
+				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET")
 			{
-				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET;
+				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT")
 			{
-				MaterialData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT;
+				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT;
 			}
 
 
 			// 재료 아이템의 스폰 오브젝트 타입
 			if (ItemObjectType == "OBJECT_ITEM_MATERIAL_LEATHER")
 			{
-				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER;
+				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER;
 			}
 			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_SLIME_GEL")
 			{
-				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL;
+				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL;
 			}
 			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_BRONZE_COIN")
 			{
-				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN;
+				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN;
 			}
 			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_SLIVER_COIN")
 			{
-				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIVER_COIN;
+				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIVER_COIN;
 			}
 			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_GOLD_COIN")
 			{
-				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_GOLD_COIN;
+				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_GOLD_COIN;
 			}
 			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_STONE")
 			{
-				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE;
+				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE;
 			}
 			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_WOOD_LOG")
 			{
-				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG;
+				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG;
 			}
 			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_WOOD_FLANK")
 			{
-				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK;
+				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK;
 			}
 			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_YARN")
 			{
-				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN;
+				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN;
 			}
 			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_CHAR_COAL")
 			{
-				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL;
+				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL;
 			}
 			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_COPPER_NUGGET")
 			{
-				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET;
+				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET;
 			}
 			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_COPPER_INGOT")
 			{
-				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT;
+				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT;
 			}
 			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_IRON_NUGGET")
 			{
-				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET;
+				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET;
 			}
 			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_IRON_INGOT")
 			{
-				MaterialData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT;
+				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT;
 			}
 
-			MaterialData->ItemExplain = ItemExplain;
-			MaterialData->ItemName = ItemName;
-			MaterialData->ItemWidth = ItemWidth;
-			MaterialData->ItemHeight = ItemHeight;
-			MaterialData->ItemMinDamage = 0;
-			MaterialData->ItemMaxDamage = 0;
-			MaterialData->ItemDefence = 0;
-			MaterialData->ItemMaxCount = ItemMaxCount;
-			MaterialData->ItemCraftingTime = ItemCraftingTime;
+			MaterialItemInfo->ItemHealPoint = 0;
+			MaterialItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
+			MaterialItemInfo->ItemName = (LPWSTR)CA2W(ItemName.c_str());
+			MaterialItemInfo->ItemWidth = ItemWidth;
+			MaterialItemInfo->ItemHeight = ItemHeight;
+			MaterialItemInfo->ItemMinDamage = 0;
+			MaterialItemInfo->ItemMaxDamage = 0;
+			MaterialItemInfo->ItemDefence = 0;
+			MaterialItemInfo->ItemMaxCount = ItemMaxCount;
+			MaterialItemInfo->ItemCraftingTime = ItemCraftingTime;
 
-			_Items.insert(pair<int16, st_ItemData*>((int16)MaterialData->SmallItemCategory, MaterialData));
+			_Items.insert(pair<int16, st_ItemInfo*>((int16)MaterialItemInfo->ItemSmallCategory, MaterialItemInfo));
 		}
 	}
 
@@ -460,44 +475,45 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int ItemMaxDamage = ArchitectureListFiled["ItemMaxDamage"].GetInt();
 			int64 ItemCraftingTime = ArchitectureListFiled["ItemCraftingTime"].GetInt64();
 
-			st_ItemData* WeaponItemData = new st_ItemData();
+			st_ItemInfo* ArchitectureItemInfo = new st_ItemInfo();
 
-			WeaponItemData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARCHITECTURE;
+			ArchitectureItemInfo->ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARCHITECTURE;
 
 			if (MediumCategory == "ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE")
 			{
-				WeaponItemData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE;
+				ArchitectureItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE;
 			}
 
 			if (SmallCategory == "ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE")
 			{
-				WeaponItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE;
+				ArchitectureItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE;
 			}
-			else if(SmallCategory == "ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL")
+			else if (SmallCategory == "ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL")
 			{
-				WeaponItemData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL;
+				ArchitectureItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL;
 			}
 
 			if (ItemObjectType == "OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE")
 			{
-				WeaponItemData->ItemObjectType = en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE;
+				ArchitectureItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE;
 			}
 			else if (ItemObjectType == "OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL")
 			{
-				WeaponItemData->ItemObjectType = en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL;
+				ArchitectureItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL;
 			}
 
-			WeaponItemData->ItemExplain = ItemExplain;
-			WeaponItemData->ItemName = ItemName;
-			WeaponItemData->ItemWidth = ItemWidth;
-			WeaponItemData->ItemHeight = ItemHeight;
-			WeaponItemData->ItemMinDamage = ItemMinDamage;
-			WeaponItemData->ItemMaxDamage = ItemMaxDamage;
-			WeaponItemData->ItemDefence = 0;
-			WeaponItemData->ItemMaxCount = 1;
-			WeaponItemData->ItemCraftingTime = ItemCraftingTime;
+			ArchitectureItemInfo->ItemHealPoint = 0;
+			ArchitectureItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
+			ArchitectureItemInfo->ItemName = (LPWSTR)CA2W(ItemName.c_str());
+			ArchitectureItemInfo->ItemWidth = ItemWidth;
+			ArchitectureItemInfo->ItemHeight = ItemHeight;
+			ArchitectureItemInfo->ItemMinDamage = ItemMinDamage;
+			ArchitectureItemInfo->ItemMaxDamage = ItemMaxDamage;
+			ArchitectureItemInfo->ItemDefence = 0;
+			ArchitectureItemInfo->ItemMaxCount = 1;
+			ArchitectureItemInfo->ItemCraftingTime = ItemCraftingTime;
 
-			_Items.insert(pair<int16, st_ItemData*>((int16)WeaponItemData->SmallItemCategory, WeaponItemData));
+			_Items.insert(pair<int16, st_ItemInfo*>((int16)ArchitectureItemInfo->ItemSmallCategory, ArchitectureItemInfo));
 		}
 	}
 
@@ -515,31 +531,32 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int ItemMaxCount = CropSeedListFiled["ItemMaxCount"].GetInt();
 			int64 ItemCraftingTime = CropSeedListFiled["ItemCraftingTime"].GetInt64();
 
-			st_ItemData* CropFruitData = new st_ItemData();
-			CropFruitData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_CROP;
-			CropFruitData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_CROP_SEED;
+			st_ItemInfo* CropSeedItemInfo = new st_ItemInfo();
+			CropSeedItemInfo->ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_CROP;
+			CropSeedItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_CROP_SEED;
 
 			if (SmallCategory == "ITEM_SMALL_CATEGORY_CROP_SEED_POTATO")
 			{
-				CropFruitData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_SEED_POTATO;
+				CropSeedItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_SEED_POTATO;
 			}
 
 			if (ItemObjectType == "OBJECT_ITEM_CROP_SEED_POTATO")
 			{
-				CropFruitData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO;
+				CropSeedItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO;
 			}
 
-			CropFruitData->ItemExplain = ItemExplain;
-			CropFruitData->ItemName = ItemName;
-			CropFruitData->ItemWidth = ItemWidth;
-			CropFruitData->ItemHeight = ItemHeight;
-			CropFruitData->ItemMinDamage = 0;
-			CropFruitData->ItemMaxDamage = 0;
-			CropFruitData->ItemDefence = 0;
-			CropFruitData->ItemMaxCount = ItemMaxCount;
-			CropFruitData->ItemCraftingTime = ItemCraftingTime;
+			CropSeedItemInfo->ItemHealPoint = 0;
+			CropSeedItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
+			CropSeedItemInfo->ItemName = (LPWSTR)CA2W(ItemName.c_str());
+			CropSeedItemInfo->ItemWidth = ItemWidth;
+			CropSeedItemInfo->ItemHeight = ItemHeight;
+			CropSeedItemInfo->ItemMinDamage = 0;
+			CropSeedItemInfo->ItemMaxDamage = 0;
+			CropSeedItemInfo->ItemDefence = 0;
+			CropSeedItemInfo->ItemMaxCount = ItemMaxCount;
+			CropSeedItemInfo->ItemCraftingTime = ItemCraftingTime;
 
-			_Items.insert(pair<int16, st_ItemData*>((int16)CropFruitData->SmallItemCategory, CropFruitData));
+			_Items.insert(pair<int16, st_ItemInfo*>((int16)CropSeedItemInfo->ItemSmallCategory, CropSeedItemInfo));
 		}
 	}
 
@@ -557,33 +574,34 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int ItemMaxCount = CropFruitListFiled["ItemMaxCount"].GetInt();
 			int64 ItemCraftingTime = CropFruitListFiled["ItemCraftingTime"].GetInt64();
 
-			st_ItemData* CropFruitData = new st_ItemData();
-			CropFruitData->LargeItemCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_CROP;
-			CropFruitData->MediumItemCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_CROP_FRUIT;			
+			st_ItemInfo* CropFruitItemInfo = new st_ItemInfo();
+			CropFruitItemInfo->ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_CROP;
+			CropFruitItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_CROP_FRUIT;
 
 			if (SmallCategory == "ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO")
 			{
-				CropFruitData->SmallItemCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO;
+				CropFruitItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO;
 			}
-			
+
 			if (ItemObjectType == "OBJECT_ITEM_CROP_FRUIT_POTATO")
 			{
-				CropFruitData->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO;
+				CropFruitItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO;
 			}
 
-			CropFruitData->ItemExplain = ItemExplain;
-			CropFruitData->ItemName = ItemName;
-			CropFruitData->ItemWidth = ItemWidth;
-			CropFruitData->ItemHeight = ItemHeight;
-			CropFruitData->ItemMinDamage = 0;
-			CropFruitData->ItemMaxDamage = 0;
-			CropFruitData->ItemDefence = 0;
-			CropFruitData->ItemMaxCount = ItemMaxCount;
-			CropFruitData->ItemCraftingTime = ItemCraftingTime;
+			CropFruitItemInfo->ItemHealPoint = 0;
+			CropFruitItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
+			CropFruitItemInfo->ItemName = (LPWSTR)CA2W(ItemName.c_str());
+			CropFruitItemInfo->ItemWidth = ItemWidth;
+			CropFruitItemInfo->ItemHeight = ItemHeight;
+			CropFruitItemInfo->ItemMinDamage = 0;
+			CropFruitItemInfo->ItemMaxDamage = 0;
+			CropFruitItemInfo->ItemDefence = 0;
+			CropFruitItemInfo->ItemMaxCount = ItemMaxCount;
+			CropFruitItemInfo->ItemCraftingTime = ItemCraftingTime;
 
-			_Items.insert(pair<int16, st_ItemData*>((int16)CropFruitData->SmallItemCategory, CropFruitData));
+			_Items.insert(pair<int16, st_ItemInfo*>((int16)CropFruitItemInfo->ItemSmallCategory, CropFruitItemInfo));
 		}
-	}	
+	}
 }
 
 void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
@@ -867,9 +885,9 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 	for (auto& Filed : Document["Monsters"].GetArray())
 	{
 		st_MonsterData* MonsterData = new st_MonsterData();
-				
+
 		string MonsterName = Filed["Name"].GetString();
-		
+
 		en_GameObjectType MonsterType = en_GameObjectType::NORMAL;
 
 		if (MonsterName == "슬라임")
@@ -880,7 +898,7 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 		{
 			MonsterType = en_GameObjectType::OBJECT_BEAR;
 		}
-		
+
 		MonsterData->MonsterName = MonsterName;
 
 		for (auto& MonsterStatInfoFiled : Filed["MonsterStatInfo"].GetArray())
@@ -1007,7 +1025,7 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 		{
 			for (auto& PublicAttackSkillListFiled : PublicSkillListFiled["PublicAttackSkillList"].GetArray())
 			{
-				st_AttackSkillData* PublicAttackSkill = new st_AttackSkillData();
+				st_AttackSkillInfo* PublicAttackSkill = new st_AttackSkillInfo();
 				PublicAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_PUBLIC;
 				PublicAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK;
 
@@ -1029,14 +1047,15 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				string SkillDownAnimation = PublicAttackSkillListFiled["SkillDownAnimation"].GetString();
 				string SkillLeftAnimation = PublicAttackSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = PublicAttackSkillListFiled["SkillRightAnimation"].GetString();
-				string SkillExplation = PublicAttackSkillListFiled["SkillExplanation"].GetString();				
+				string SkillExplation = PublicAttackSkillListFiled["SkillExplanation"].GetString();
 
 				if (SkillType == "SKILL_DEFAULT_ATTACK")
 				{
 					PublicAttackSkill->SkillType = en_SkillType::SKILL_DEFAULT_ATTACK;
 				}
 
-				PublicAttackSkill->SkillName = SkillName;
+				PublicAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+				PublicAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 				PublicAttackSkill->SkillLevel = SkillLevel;
 				PublicAttackSkill->SkillMinDamage = SkillMinDamage;
 				PublicAttackSkill->SkillMaxDamage = SkillMaxDamage;
@@ -1049,18 +1068,17 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				PublicAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 				PublicAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
 				PublicAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
-				PublicAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
-				PublicAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
-				PublicAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
-				PublicAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
-				PublicAttackSkill->SkillExplanation = SkillExplation;
+				PublicAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP,    (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+				PublicAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN,  (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+				PublicAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT,  (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+				PublicAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));				
 
-				_PublicAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)PublicAttackSkill->SkillType, PublicAttackSkill));
+				_PublicAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)PublicAttackSkill->SkillType, PublicAttackSkill));
 			}
 
 			for (auto& PublicTacTicSkillListFiled : PublicSkillListFiled["PublicTacTicSkillList"].GetArray())
 			{
-				st_TacTicSkillData* PublicTacTicSkill = new st_TacTicSkillData();
+				st_TacTicSkillInfo* PublicTacTicSkill = new st_TacTicSkillInfo();
 				PublicTacTicSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_PUBLIC;
 				PublicTacTicSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_TACTIC;
 
@@ -1085,7 +1103,8 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 
 				}
 
-				PublicTacTicSkill->SkillName = SkillName;
+				PublicTacTicSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+				PublicTacTicSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 				PublicTacTicSkill->SkillLevel = SkillLevel;
 				PublicTacTicSkill->SkillCoolTime = SkillCoolTime;
 				PublicTacTicSkill->SkillCastingTime = SkillCastingTime;
@@ -1093,24 +1112,22 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				PublicTacTicSkill->SkillDotTime = SkillDotTime;
 				PublicTacTicSkill->SkillDistance = SkillDistance;
 				PublicTacTicSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				PublicTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
-				PublicTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
-				PublicTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
-				PublicTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				PublicTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+				PublicTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+				PublicTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+				PublicTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
 					PublicTacTicSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}
+				}				
 
-				PublicTacTicSkill->SkillExplanation = SkillExplation;
-
-				_PublicTacTicSkillDatas.insert(pair<int16, st_TacTicSkillData*>((int16)PublicTacTicSkill->SkillType, PublicTacTicSkill));
+				_PublicTacTicSkillDatas.insert(pair<int16, st_TacTicSkillInfo*>((int16)PublicTacTicSkill->SkillType, PublicTacTicSkill));
 			}
 
 			for (auto& PublicHealSkillListFiled : PublicSkillListFiled["PublicHealSkillList"].GetArray())
 			{
-				st_HealSkillData* PublicHealSkill = new st_HealSkillData();
+				st_HealSkillInfo* PublicHealSkill = new st_HealSkillInfo();
 				PublicHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_PUBLIC;
 				PublicHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL;
 
@@ -1131,7 +1148,8 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				string SkillRightAnimation = PublicHealSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = PublicHealSkillListFiled["SkillExplanation"].GetString();
 
-				PublicHealSkill->SkillName = SkillName;
+				PublicHealSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+				PublicHealSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 				PublicHealSkill->SkillLevel = SkillLevel;
 				PublicHealSkill->SkillMinHealPoint = SkillMinHeal;
 				PublicHealSkill->SkillMaxHealPoint = SkillMaxHeal;
@@ -1141,18 +1159,17 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				PublicHealSkill->SkillDotTime = SkillDotTime;
 				PublicHealSkill->SkillDistance = SkillDistance;
 				PublicHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				PublicHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
-				PublicHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
-				PublicHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
-				PublicHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
-				PublicHealSkill->SkillExplanation = SkillExplation;
+				PublicHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+				PublicHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+				PublicHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+				PublicHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));				
 
-				_PublicTacTicSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)PublicHealSkill->SkillType, PublicHealSkill));
+				_PublicTacTicSkillDatas.insert(pair<int16, st_HealSkillInfo*>((int16)PublicHealSkill->SkillType, PublicHealSkill));
 			}
 
 			for (auto& PublicBufSkillListFiled : PublicSkillListFiled["PublicBufSkillList"].GetArray())
 			{
-				st_BufSkillData* PublicBufSkill = new st_BufSkillData();
+				st_BufSkillInfo* PublicBufSkill = new st_BufSkillInfo();
 				PublicBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_PUBLIC;
 				PublicBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF;
 
@@ -1191,7 +1208,8 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 					PublicBufSkill->SkillType = en_SkillType::SKILL_SHOCK_RELEASE;
 				}
 
-				PublicBufSkill->SkillName = SkillName;
+				PublicBufSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+				PublicBufSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 				PublicBufSkill->SkillLevel = SkillLevel;
 				PublicBufSkill->IncreaseMinAttackPoint = IncreaseMinAttackPoint;
 				PublicBufSkill->IncreaseMaxAttackPoint = IncreaseMaxAttackPoint;
@@ -1212,13 +1230,12 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				PublicBufSkill->SkillDotTime = SkillDotTime;
 				PublicBufSkill->SkillDistance = SkillDistance;
 				PublicBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				PublicBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
-				PublicBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
-				PublicBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
-				PublicBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
-				PublicBufSkill->SkillExplanation = SkillExplation;
+				PublicBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+				PublicBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+				PublicBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+				PublicBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));				
 
-				_PublicBufSkillDatas.insert(pair<int16, st_BufSkillData*>((int16)PublicBufSkill->SkillType, PublicBufSkill));
+				_PublicBufSkillDatas.insert(pair<int16, st_BufSkillInfo*>((int16)PublicBufSkill->SkillType, PublicBufSkill));
 			}
 		}
 	}
@@ -1237,7 +1254,7 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 		{
 			for (auto& WarriorAttackSkillListFiled : WarriorSkillListFiled["WarriorAttackSkillList"].GetArray())
 			{
-				st_AttackSkillData* WarriorAttackSkill = new st_AttackSkillData();
+				st_AttackSkillInfo* WarriorAttackSkill = new st_AttackSkillInfo();
 				WarriorAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
 				WarriorAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK;
 
@@ -1287,7 +1304,8 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 					WarriorAttackSkill->SkillType = en_SkillType::SKILL_KNIGHT_SHIELD_SMASH;
 				}
 
-				WarriorAttackSkill->SkillName = SkillName;
+				WarriorAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+				WarriorAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 				WarriorAttackSkill->SkillLevel = SkillLevel;
 				WarriorAttackSkill->SkillMinDamage = SkillMinDamage;
 				WarriorAttackSkill->SkillMaxDamage = SkillMaxDamage;
@@ -1308,20 +1326,19 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				{
 					WarriorAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
 				}
+				
+				WarriorAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+				WarriorAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+				WarriorAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+				WarriorAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
+				WarriorAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
 
-				WarriorAttackSkill->SkillExplanation = SkillExplation;
-				WarriorAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
-				WarriorAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
-				WarriorAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
-				WarriorAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
-				WarriorAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;				
-
-				_WarriorAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)WarriorAttackSkill->SkillType, WarriorAttackSkill));
+				_WarriorAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)WarriorAttackSkill->SkillType, WarriorAttackSkill));
 			}
 
 			for (auto& WarriorHealSkillListFiled : WarriorSkillListFiled["WarriorHealSkillList"].GetArray())
 			{
-				st_HealSkillData* WarriorHealSkill = new st_HealSkillData();
+				st_HealSkillInfo* WarriorHealSkill = new st_HealSkillInfo();
 				WarriorHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
 				WarriorHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_HEAL;
 
@@ -1343,7 +1360,8 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				string NextComboSkill = WarriorHealSkillListFiled["NextComboSkill"].GetString();
 				string SkillExplation = WarriorHealSkillListFiled["SkillExplanation"].GetString();
 
-				WarriorHealSkill->SkillName = SkillName;
+				WarriorHealSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+				WarriorHealSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 				WarriorHealSkill->SkillLevel = SkillLevel;
 				WarriorHealSkill->SkillMinHealPoint = SkillMinHeal;
 				WarriorHealSkill->SkillMaxHealPoint = SkillMaxHeal;
@@ -1358,19 +1376,18 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				{
 					WarriorHealSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
 				}
+				
+				WarriorHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+				WarriorHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+				WarriorHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+				WarriorHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 
-				WarriorHealSkill->SkillExplanation = SkillExplation;
-				WarriorHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
-				WarriorHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
-				WarriorHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
-				WarriorHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
-
-				_WarriorTacTicSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)WarriorHealSkill->SkillType, WarriorHealSkill));
+				_WarriorTacTicSkillDatas.insert(pair<int16, st_HealSkillInfo*>((int16)WarriorHealSkill->SkillType, WarriorHealSkill));
 			}
 
 			for (auto& WarriorBufSkillListFiled : WarriorSkillListFiled["WarriorBufSkillList"].GetArray())
 			{
-				st_BufSkillData* WarriorBufSkill = new st_BufSkillData();
+				st_BufSkillInfo* WarriorBufSkill = new st_BufSkillInfo();
 				WarriorBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
 				WarriorBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_BUF;
 
@@ -1410,7 +1427,8 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 					WarriorBufSkill->SkillType = en_SkillType::SKILL_KNIGHT_CHARGE_POSE;
 				}
 
-				WarriorBufSkill->SkillName = SkillName;
+				WarriorBufSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+				WarriorBufSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 				WarriorBufSkill->SkillLevel = SkillLevel;
 				WarriorBufSkill->IncreaseMinAttackPoint = IncreaseMinAttackPoint;
 				WarriorBufSkill->IncreaseMaxAttackPoint = IncreaseMaxAttackPoint;
@@ -1431,19 +1449,17 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				WarriorBufSkill->SkillDotTime = SkillDotTime;
 				WarriorBufSkill->SkillDistance = SkillDistance;
 				WarriorBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				WarriorBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
-				WarriorBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
-				WarriorBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
-				WarriorBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				WarriorBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+				WarriorBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+				WarriorBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+				WarriorBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
 					WarriorBufSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}
+				}				
 
-				WarriorBufSkill->SkillExplanation = SkillExplation;
-
-				_WarriorBufSkillDatas.insert(pair<int16, st_BufSkillData*>((int16)WarriorBufSkill->SkillType, WarriorBufSkill));
+				_WarriorBufSkillDatas.insert(pair<int16, st_BufSkillInfo*>((int16)WarriorBufSkill->SkillType, WarriorBufSkill));
 			}
 		}
 	}
@@ -1462,7 +1478,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 		{
 			for (auto& ShmanAttackSkillListFiled : ShamanSkillListFiled["ShamanAttackSkillList"].GetArray())
 			{
-				st_AttackSkillData* ShamanAttackSkill = new st_AttackSkillData();
+				st_AttackSkillInfo* ShamanAttackSkill = new st_AttackSkillInfo();
 				ShamanAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
 				ShamanAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK;
 
@@ -1512,7 +1528,8 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 					ShamanAttackSkill->SkillType = en_SkillType::SKILL_SHAMAN_HELL_FIRE;
 				}
 
-				ShamanAttackSkill->SkillName = SkillName;
+				ShamanAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+				ShamanAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 				ShamanAttackSkill->SkillLevel = SkillLevel;
 				ShamanAttackSkill->SkillMinDamage = SkillMinDamage;
 				ShamanAttackSkill->SkillMaxDamage = SkillMaxDamage;
@@ -1525,10 +1542,10 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 				ShamanAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
 				ShamanAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
-				ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
-				ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
-				ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
-				ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+				ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+				ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+				ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
@@ -1537,16 +1554,14 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				else if (NextComboSkill == "SKILL_SHAMAN_ICE_WAVE")
 				{
 					ShamanAttackSkill->NextComboSkill = en_SkillType::SKILL_SHAMAN_ICE_WAVE;
-				}
+				}				
 
-				ShamanAttackSkill->SkillExplanation = SkillExplation;
-
-				_ShamanAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)ShamanAttackSkill->SkillType, ShamanAttackSkill));
+				_ShamanAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)ShamanAttackSkill->SkillType, ShamanAttackSkill));
 			}
 
 			for (auto& ShamanTacTicSkillListFiled : ShamanSkillListFiled["ShamanTacTicSkillList"].GetArray())
 			{
-				st_TacTicSkillData* ShamanTacTicSkill = new st_TacTicSkillData();
+				st_TacTicSkillInfo* ShamanTacTicSkill = new st_TacTicSkillInfo();
 				ShamanTacTicSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
 				ShamanTacTicSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_TACTIC;
 
@@ -1571,7 +1586,8 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 					ShamanTacTicSkill->SkillType = en_SkillType::SKILL_SHAMAN_BACK_TELEPORT;
 				}
 
-				ShamanTacTicSkill->SkillName = SkillName;
+				ShamanTacTicSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+				ShamanTacTicSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 				ShamanTacTicSkill->SkillLevel = SkillLevel;
 				ShamanTacTicSkill->SkillCoolTime = SkillCoolTime;
 				ShamanTacTicSkill->SkillCastingTime = SkillCastingTime;
@@ -1579,24 +1595,22 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanTacTicSkill->SkillDotTime = SkillDotTime;
 				ShamanTacTicSkill->SkillDistance = SkillDistance;
 				ShamanTacTicSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
-				ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
-				ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
-				ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+				ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+				ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+				ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
 					ShamanTacTicSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}
+				}				
 
-				ShamanTacTicSkill->SkillExplanation = SkillExplation;
-
-				_ShamanTacTicSkillDatas.insert(pair<int16, st_TacTicSkillData*>((int16)ShamanTacTicSkill->SkillType, ShamanTacTicSkill));
+				_ShamanTacTicSkillDatas.insert(pair<int16, st_TacTicSkillInfo*>((int16)ShamanTacTicSkill->SkillType, ShamanTacTicSkill));
 			}
 
 			for (auto& ShamanHealSkillListFiled : ShamanSkillListFiled["ShamanHealSkillList"].GetArray())
 			{
-				st_HealSkillData* ShamanHealSkill = new st_HealSkillData();
+				st_HealSkillInfo* ShamanHealSkill = new st_HealSkillInfo();
 				ShamanHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
 				ShamanHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_HEAL;
 
@@ -1623,7 +1637,8 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 
 				}
 
-				ShamanHealSkill->SkillName = SkillName;
+				ShamanHealSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+				ShamanHealSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 				ShamanHealSkill->SkillLevel = SkillLevel;
 				ShamanHealSkill->SkillMinHealPoint = SkillMinHeal;
 				ShamanHealSkill->SkillMaxHealPoint = SkillMaxHeal;
@@ -1633,25 +1648,23 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanHealSkill->SkillDotTime = SkillDotTime;
 				ShamanHealSkill->SkillDistance = SkillDistance;
 				ShamanHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				ShamanHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
-				ShamanHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
-				ShamanHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
-				ShamanHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				ShamanHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+				ShamanHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+				ShamanHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+				ShamanHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 
 
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
 					ShamanHealSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}
+				}				
 
-				ShamanHealSkill->SkillExplanation = SkillExplation;
-
-				_ShamanTacTicSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)ShamanHealSkill->SkillType, ShamanHealSkill));
+				_ShamanTacTicSkillDatas.insert(pair<int16, st_HealSkillInfo*>((int16)ShamanHealSkill->SkillType, ShamanHealSkill));
 			}
 
 			for (auto& ShmanBufSkillListFiled : ShamanSkillListFiled["ShamanBufSkillList"].GetArray())
 			{
-				st_BufSkillData* ShamanBufSkill = new st_BufSkillData();
+				st_BufSkillInfo* ShamanBufSkill = new st_BufSkillInfo();
 				ShamanBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
 				ShamanBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_BUF;
 
@@ -1691,7 +1704,8 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 
 				}
 
-				ShamanBufSkill->SkillName = SkillName;
+				ShamanBufSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+				ShamanBufSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 				ShamanBufSkill->SkillLevel = SkillLevel;
 				ShamanBufSkill->IncreaseMinAttackPoint = IncreaseMinAttackPoint;
 				ShamanBufSkill->IncreaseMaxAttackPoint = IncreaseMaxAttackPoint;
@@ -1712,19 +1726,17 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanBufSkill->SkillDotTime = SkillDotTime;
 				ShamanBufSkill->SkillDistance = SkillDistance;
 				ShamanBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				ShamanBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
-				ShamanBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
-				ShamanBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
-				ShamanBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				ShamanBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+				ShamanBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+				ShamanBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+				ShamanBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
 					ShamanBufSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}
+				}				
 
-				ShamanBufSkill->SkillExplanation = SkillExplation;
-
-				_ShamanBufSkillDatas.insert(pair<int16, st_BufSkillData*>((int16)ShamanBufSkill->SkillType, ShamanBufSkill));
+				_ShamanBufSkillDatas.insert(pair<int16, st_BufSkillInfo*>((int16)ShamanBufSkill->SkillType, ShamanBufSkill));
 			}
 		}
 	}
@@ -1743,7 +1755,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 		{
 			for (auto& TaioistAttackSkillListFiled : TaioistSkillListFiled["TaioistAttackSkillList"].GetArray())
 			{
-				st_AttackSkillData* TaioistAttackSkill = new st_AttackSkillData();
+				st_AttackSkillInfo* TaioistAttackSkill = new st_AttackSkillInfo();
 				TaioistAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_TAOIST;
 				TaioistAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK;
 
@@ -1767,7 +1779,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				string SkillLeftAnimation = TaioistAttackSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = TaioistAttackSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = TaioistAttackSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = TaioistAttackSkillListFiled["SkillExplanation"].GetString();				
+				string SkillExplation = TaioistAttackSkillListFiled["SkillExplanation"].GetString();
 
 				if (SkillType == "SKILL_TAIOIST_DIVINE_STRIKE")
 				{
@@ -1778,7 +1790,8 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 					TaioistAttackSkill->SkillType = en_SkillType::SKILL_TAIOIST_ROOT;
 				}
 
-				TaioistAttackSkill->SkillName = SkillName;
+				TaioistAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+				TaioistAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 				TaioistAttackSkill->SkillLevel = SkillLevel;
 				TaioistAttackSkill->SkillMinDamage = SkillMinDamage;
 				TaioistAttackSkill->SkillMaxDamage = SkillMaxDamage;
@@ -1791,24 +1804,22 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				TaioistAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 				TaioistAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
 				TaioistAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
-				TaioistAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
-				TaioistAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
-				TaioistAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
-				TaioistAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				TaioistAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+				TaioistAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+				TaioistAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+				TaioistAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
 					TaioistAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}
+				}				
 
-				TaioistAttackSkill->SkillExplanation = SkillExplation;
-
-				_TaioistAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)TaioistAttackSkill->SkillType, TaioistAttackSkill));
+				_TaioistAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)TaioistAttackSkill->SkillType, TaioistAttackSkill));
 			}
 
 			for (auto& TaioistHealSkillListFiled : TaioistSkillListFiled["TaioistHealSkillList"].GetArray())
 			{
-				st_HealSkillData* TaioistHealSkill = new st_HealSkillData();
+				st_HealSkillInfo* TaioistHealSkill = new st_HealSkillInfo();
 				TaioistHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_TAOIST;
 				TaioistHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_HEAL;
 
@@ -1828,7 +1839,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				string SkillLeftAnimation = TaioistHealSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = TaioistHealSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = TaioistHealSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = TaioistHealSkillListFiled["SkillExplanation"].GetString();				
+				string SkillExplation = TaioistHealSkillListFiled["SkillExplanation"].GetString();
 
 				if (SkillType == "SKILL_TAIOIST_HEALING_LIGHT")
 				{
@@ -1839,7 +1850,8 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 					TaioistHealSkill->SkillType = en_SkillType::SKILL_TAIOIST_HEALING_WIND;
 				}
 
-				TaioistHealSkill->SkillName = SkillName;
+				TaioistHealSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+				TaioistHealSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 				TaioistHealSkill->SkillLevel = SkillLevel;
 				TaioistHealSkill->SkillMinHealPoint = SkillMinHeal;
 				TaioistHealSkill->SkillMaxHealPoint = SkillMaxHeal;
@@ -1849,24 +1861,22 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				TaioistHealSkill->SkillDotTime = SkillDotTime;
 				TaioistHealSkill->SkillDistance = SkillDistance;
 				TaioistHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				TaioistHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
-				TaioistHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
-				TaioistHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
-				TaioistHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				TaioistHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+				TaioistHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+				TaioistHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+				TaioistHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
 					TaioistHealSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}
+				}				
 
-				TaioistHealSkill->SkillExplanation = SkillExplation;
-
-				_TaioistTacTicSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)TaioistHealSkill->SkillType, TaioistHealSkill));
+				_TaioistTacTicSkillDatas.insert(pair<int16, st_HealSkillInfo*>((int16)TaioistHealSkill->SkillType, TaioistHealSkill));
 			}
 
 			for (auto& TaioistBufSkillListFiled : TaioistSkillListFiled["TaioistBufSkillList"].GetArray())
 			{
-				st_BufSkillData* TaioistBufSkill = new st_BufSkillData();
+				st_BufSkillInfo* TaioistBufSkill = new st_BufSkillInfo();
 				TaioistBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_TAOIST;
 				TaioistBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_BUF;
 
@@ -1899,14 +1909,15 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				string SkillLeftAnimation = TaioistBufSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = TaioistBufSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = TaioistBufSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = TaioistBufSkillListFiled["SkillExplanation"].GetString();				
+				string SkillExplation = TaioistBufSkillListFiled["SkillExplanation"].GetString();
 
 				if (SkillType == "")
 				{
 
 				}
 
-				TaioistBufSkill->SkillName = SkillName;
+				TaioistBufSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+				TaioistBufSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 				TaioistBufSkill->SkillLevel = SkillLevel;
 				TaioistBufSkill->IncreaseMinAttackPoint = IncreaseMinAttackPoint;
 				TaioistBufSkill->IncreaseMaxAttackPoint = IncreaseMaxAttackPoint;
@@ -1927,19 +1938,17 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				TaioistBufSkill->SkillDotTime = SkillDotTime;
 				TaioistBufSkill->SkillDistance = SkillDistance;
 				TaioistBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				TaioistBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
-				TaioistBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
-				TaioistBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
-				TaioistBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				TaioistBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+				TaioistBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+				TaioistBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+				TaioistBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
 					TaioistBufSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}
+				}				
 
-				TaioistBufSkill->SkillExplanation = SkillExplation;
-
-				_TaioistBufSkillDatas.insert(pair<int16, st_BufSkillData*>((int16)TaioistBufSkill->SkillType, TaioistBufSkill));
+				_TaioistBufSkillDatas.insert(pair<int16, st_BufSkillInfo*>((int16)TaioistBufSkill->SkillType, TaioistBufSkill));
 			}
 		}
 	}
@@ -1958,7 +1967,7 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 		{
 			for (auto& ThiefAttackSkillListFiled : ThiefSkillListFiled["ThiefAttackSkillList"].GetArray())
 			{
-				st_AttackSkillData* ThiefAttackSkill = new st_AttackSkillData();
+				st_AttackSkillInfo* ThiefAttackSkill = new st_AttackSkillInfo();
 				ThiefAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_THIEF;
 				ThiefAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_ATTACK;
 
@@ -1982,14 +1991,15 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				string SkillLeftAnimation = ThiefAttackSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = ThiefAttackSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = ThiefAttackSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = ThiefAttackSkillListFiled["SkillExplanation"].GetString();				
+				string SkillExplation = ThiefAttackSkillListFiled["SkillExplanation"].GetString();
 
 				if (SkillType == "SKILL_THIEF_QUICK_CUT")
 				{
 					ThiefAttackSkill->SkillType = en_SkillType::SKILL_THIEF_QUICK_CUT;
 				}
 
-				ThiefAttackSkill->SkillName = SkillName;
+				ThiefAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+				ThiefAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 				ThiefAttackSkill->SkillLevel = SkillLevel;
 				ThiefAttackSkill->SkillMinDamage = SkillMinDamage;
 				ThiefAttackSkill->SkillMaxDamage = SkillMaxDamage;
@@ -2002,24 +2012,22 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				ThiefAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 				ThiefAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
 				ThiefAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
-				ThiefAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
-				ThiefAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
-				ThiefAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
-				ThiefAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				ThiefAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+				ThiefAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+				ThiefAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+				ThiefAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
 					ThiefAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}
+				}				
 
-				ThiefAttackSkill->SkillExplanation = SkillExplation;
-
-				_ThiefAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)ThiefAttackSkill->SkillType, ThiefAttackSkill));
+				_ThiefAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)ThiefAttackSkill->SkillType, ThiefAttackSkill));
 			}
 
 			for (auto& ThiefHealSkillListFiled : ThiefSkillListFiled["ThiefHealSkillList"].GetArray())
 			{
-				st_HealSkillData* ThiefHealSkill = new st_HealSkillData();
+				st_HealSkillInfo* ThiefHealSkill = new st_HealSkillInfo();
 				ThiefHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_THIEF;
 				ThiefHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_HEAL;
 
@@ -2039,14 +2047,15 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				string SkillLeftAnimation = ThiefHealSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = ThiefHealSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = ThiefHealSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = ThiefHealSkillListFiled["SkillExplanation"].GetString();				
+				string SkillExplation = ThiefHealSkillListFiled["SkillExplanation"].GetString();
 
 				if (SkillType == "")
 				{
 
 				}
 
-				ThiefHealSkill->SkillName = SkillName;
+				ThiefHealSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+				ThiefHealSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 				ThiefHealSkill->SkillLevel = SkillLevel;
 				ThiefHealSkill->SkillMinHealPoint = SkillMinHeal;
 				ThiefHealSkill->SkillMaxHealPoint = SkillMaxHeal;
@@ -2056,24 +2065,22 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				ThiefHealSkill->SkillDotTime = SkillDotTime;
 				ThiefHealSkill->SkillDistance = SkillDistance;
 				ThiefHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				ThiefHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
-				ThiefHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
-				ThiefHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
-				ThiefHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				ThiefHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+				ThiefHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+				ThiefHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+				ThiefHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
 					ThiefHealSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}
+				}				
 
-				ThiefHealSkill->SkillExplanation = SkillExplation;
-
-				_ThiefTacTicSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)ThiefHealSkill->SkillType, ThiefHealSkill));
+				_ThiefTacTicSkillDatas.insert(pair<int16, st_HealSkillInfo*>((int16)ThiefHealSkill->SkillType, ThiefHealSkill));
 			}
 
 			for (auto& ThiefBufSkillListFiled : ThiefSkillListFiled["ThiefBufSkillList"].GetArray())
 			{
-				st_BufSkillData* ThiefBufSkill = new st_BufSkillData();
+				st_BufSkillInfo* ThiefBufSkill = new st_BufSkillInfo();
 				ThiefBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_THIEF;
 				ThiefBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_BUF;
 
@@ -2106,14 +2113,15 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				string SkillLeftAnimation = ThiefBufSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = ThiefBufSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = ThiefBufSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = ThiefBufSkillListFiled["SkillExplanation"].GetString();				
+				string SkillExplation = ThiefBufSkillListFiled["SkillExplanation"].GetString();
 
 				if (SkillType == "")
 				{
 
 				}
 
-				ThiefBufSkill->SkillName = SkillName;
+				ThiefBufSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+				ThiefBufSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 				ThiefBufSkill->SkillLevel = SkillLevel;
 				ThiefBufSkill->IncreaseMinAttackPoint = IncreaseMinAttackPoint;
 				ThiefBufSkill->IncreaseMaxAttackPoint = IncreaseMaxAttackPoint;
@@ -2134,19 +2142,17 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				ThiefBufSkill->SkillDotTime = SkillDotTime;
 				ThiefBufSkill->SkillDistance = SkillDistance;
 				ThiefBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				ThiefBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
-				ThiefBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
-				ThiefBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
-				ThiefBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				ThiefBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+				ThiefBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+				ThiefBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+				ThiefBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
 					ThiefBufSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}
+				}				
 
-				ThiefBufSkill->SkillExplanation = SkillExplation;
-
-				_ThiefBufSkillDatas.insert(pair<int16, st_BufSkillData*>((int16)ThiefBufSkill->SkillType, ThiefBufSkill));
+				_ThiefBufSkillDatas.insert(pair<int16, st_BufSkillInfo*>((int16)ThiefBufSkill->SkillType, ThiefBufSkill));
 			}
 		}
 	}
@@ -2165,7 +2171,7 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 		{
 			for (auto& ArcherAttackSkillListFiled : ArcherSkillListFiled["ArcherAttackSkillList"].GetArray())
 			{
-				st_AttackSkillData* ArcherAttackSkill = new st_AttackSkillData();
+				st_AttackSkillInfo* ArcherAttackSkill = new st_AttackSkillInfo();
 				ArcherAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_ARCHER;
 				ArcherAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_ATTACK;
 
@@ -2189,14 +2195,15 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				string SkillLeftAnimation = ArcherAttackSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = ArcherAttackSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = ArcherAttackSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = ArcherAttackSkillListFiled["SkillExplanation"].GetString();				
+				string SkillExplation = ArcherAttackSkillListFiled["SkillExplanation"].GetString();
 
 				if (SkillType == "SKILL_ARCHER_SNIFING")
 				{
 					ArcherAttackSkill->SkillType = en_SkillType::SKILL_ARCHER_SNIFING;
 				}
 
-				ArcherAttackSkill->SkillName = SkillName;
+				ArcherAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+				ArcherAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 				ArcherAttackSkill->SkillLevel = SkillLevel;
 				ArcherAttackSkill->SkillMinDamage = SkillMinDamage;
 				ArcherAttackSkill->SkillMaxDamage = SkillMaxDamage;
@@ -2209,24 +2216,22 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				ArcherAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 				ArcherAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
 				ArcherAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
-				ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
-				ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
-				ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
-				ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+				ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+				ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+				ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
 					ArcherAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}
+				}				
 
-				ArcherAttackSkill->SkillExplanation = SkillExplation;
-
-				_ArcherAttackSkillDatas.insert(pair<int16, st_AttackSkillData*>((int16)ArcherAttackSkill->SkillType, ArcherAttackSkill));
+				_ArcherAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)ArcherAttackSkill->SkillType, ArcherAttackSkill));
 			}
 
 			for (auto& ArcherHealSkillListFiled : ArcherSkillListFiled["ArcherHealSkillList"].GetArray())
 			{
-				st_HealSkillData* ArcherHealSkill = new st_HealSkillData();
+				st_HealSkillInfo* ArcherHealSkill = new st_HealSkillInfo();
 				ArcherHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_ARCHER;
 				ArcherHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_HEAL;
 
@@ -2246,14 +2251,15 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				string SkillLeftAnimation = ArcherHealSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = ArcherHealSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = ArcherHealSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = ArcherHealSkillListFiled["SkillExplanation"].GetString();				
+				string SkillExplation = ArcherHealSkillListFiled["SkillExplanation"].GetString();
 
 				if (SkillType == "")
 				{
 
 				}
 
-				ArcherHealSkill->SkillName = SkillName;
+				ArcherHealSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+				ArcherHealSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 				ArcherHealSkill->SkillLevel = SkillLevel;
 				ArcherHealSkill->SkillMinHealPoint = SkillMinHeal;
 				ArcherHealSkill->SkillMaxHealPoint = SkillMaxHeal;
@@ -2263,24 +2269,22 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				ArcherHealSkill->SkillDotTime = SkillDotTime;
 				ArcherHealSkill->SkillDistance = SkillDistance;
 				ArcherHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				ArcherHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
-				ArcherHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
-				ArcherHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
-				ArcherHealSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				ArcherHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+				ArcherHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+				ArcherHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+				ArcherHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
 					ArcherHealSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}
+				}				
 
-				ArcherHealSkill->SkillExplanation = SkillExplation;
-
-				_ArcherTacTicSkillDatas.insert(pair<int16, st_HealSkillData*>((int16)ArcherHealSkill->SkillType, ArcherHealSkill));
+				_ArcherTacTicSkillDatas.insert(pair<int16, st_HealSkillInfo*>((int16)ArcherHealSkill->SkillType, ArcherHealSkill));
 			}
 
 			for (auto& ArcherBufSkillListFiled : ArcherSkillListFiled["ArcherBufSkillList"].GetArray())
 			{
-				st_BufSkillData* ArcherBufSkill = new st_BufSkillData();
+				st_BufSkillInfo* ArcherBufSkill = new st_BufSkillInfo();
 				ArcherBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_ARCHER;
 				ArcherBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_BUF;
 
@@ -2313,14 +2317,15 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				string SkillLeftAnimation = ArcherBufSkillListFiled["SkillLeftAnimation"].GetString();
 				string SkillRightAnimation = ArcherBufSkillListFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = ArcherBufSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = ArcherBufSkillListFiled["SkillExplanation"].GetString();				
+				string SkillExplation = ArcherBufSkillListFiled["SkillExplanation"].GetString();
 
 				if (SkillType == "")
 				{
 
 				}
 
-				ArcherBufSkill->SkillName = SkillName;
+				ArcherBufSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+				ArcherBufSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 				ArcherBufSkill->SkillLevel = SkillLevel;
 				ArcherBufSkill->IncreaseMinAttackPoint = IncreaseMinAttackPoint;
 				ArcherBufSkill->IncreaseMaxAttackPoint = IncreaseMaxAttackPoint;
@@ -2341,19 +2346,17 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				ArcherBufSkill->SkillDotTime = SkillDotTime;
 				ArcherBufSkill->SkillDistance = SkillDistance;
 				ArcherBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				ArcherBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::UP, SkillUpAnimation));
-				ArcherBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::DOWN, SkillDownAnimation));
-				ArcherBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::LEFT, SkillLeftAnimation));
-				ArcherBufSkill->SkillAnimations.insert(pair<en_MoveDir, string>(en_MoveDir::RIGHT, SkillRightAnimation));
+				ArcherBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+				ArcherBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+				ArcherBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+				ArcherBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
 					ArcherBufSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}
+				}				
 
-				ArcherBufSkill->SkillExplanation = SkillExplation;
-
-				_ArcherBufSkillDatas.insert(pair<int16, st_BufSkillData*>((int16)ArcherBufSkill->SkillType, ArcherBufSkill));
+				_ArcherBufSkillDatas.insert(pair<int16, st_BufSkillInfo*>((int16)ArcherBufSkill->SkillType, ArcherBufSkill));
 			}
 		}
 	}
@@ -2369,9 +2372,9 @@ void CDataManager::LoadDataEnvironment(wstring LoadFileName)
 	for (auto& Filed : Document["Environments"].GetArray())
 	{
 		st_EnvironmentData* EnvironmentData = new st_EnvironmentData();
-				
+
 		string EnvironmentName = Filed["Name"].GetString();
-				
+
 		en_GameObjectType EnvironmentType = en_GameObjectType::NORMAL;
 
 		if (EnvironmentName == "돌")
@@ -2435,22 +2438,22 @@ void CDataManager::LoadDataCrop(wstring LoadFileName)
 	for (auto& Filed : Document["Crops"].GetArray())
 	{
 		st_CropData* CropData = new st_CropData();
-				
+
 		string CropName = Filed["CropName"].GetString();
 
 		en_GameObjectType CropType = en_GameObjectType::NORMAL;
 
 		if (CropName == "감자")
 		{
-			CropType = en_GameObjectType::OBJECT_CROP_POTATO;			
+			CropType = en_GameObjectType::OBJECT_CROP_POTATO;
 		}
-		
-		CropData->CropName = CropName;		
+
+		CropData->CropName = CropName;
 
 		for (auto& CropStatInfoFiled : Filed["CropStatInfo"].GetArray())
-		{			
+		{
 			int MaxHP = CropStatInfoFiled["MaxHP"].GetInt();
-			
+
 			CropData->MaxHP = MaxHP;
 		}
 
@@ -2466,7 +2469,7 @@ void CDataManager::LoadDataCrop(wstring LoadFileName)
 			if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO")
 			{
 				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO;
-			}			
+			}
 
 			DropData.Probability = Probability;
 			DropData.MinCount = MinCount;
@@ -2585,14 +2588,14 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 				CommonCraftingCompleteItem->_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
 				CommonCraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN;
 				CommonCraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_COMMON;
-			}			
+			}
 
-			st_ItemData* CraftingCompleteItemData = FindItemData(CommonCraftingCompleteItem->_ItemInfo.ItemSmallCategory);
+			st_ItemInfo* CraftingCompleteItemData = FindItemData(CommonCraftingCompleteItem->_ItemInfo.ItemSmallCategory);
 
-			CommonCraftingCompleteItem->_ItemInfo.ItemExplain = (LPWSTR)CA2W(CraftingCompleteItemData->ItemExplain.c_str());
-			CommonCraftingCompleteItem->_ItemInfo.ItemName = (LPWSTR)CA2W(CraftingCompleteItemData->ItemName.c_str());
-			CommonCraftingCompleteItem->_ItemInfo.Width = CraftingCompleteItemData->ItemWidth;
-			CommonCraftingCompleteItem->_ItemInfo.Height = CraftingCompleteItemData->ItemHeight;
+			CommonCraftingCompleteItem->_ItemInfo.ItemExplain = CraftingCompleteItemData->ItemExplain;
+			CommonCraftingCompleteItem->_ItemInfo.ItemName = CraftingCompleteItemData->ItemName;
+			CommonCraftingCompleteItem->_ItemInfo.ItemWidth = CraftingCompleteItemData->ItemWidth;
+			CommonCraftingCompleteItem->_ItemInfo.ItemHeight = CraftingCompleteItemData->ItemHeight;
 			CommonCraftingCompleteItem->_ItemInfo.ItemCraftingTime = CraftingCompleteItemData->ItemCraftingTime;
 			CommonCraftingCompleteItem->_ItemInfo.ItemMaxCount = CraftingCompleteItemData->ItemMaxCount;
 
@@ -2664,15 +2667,15 @@ void CDataManager::LoadDataCraftingTable(wstring LoadFileName)
 
 		for (auto& CraftingTableCompleteItemFiled : Filed["CraftingTableCompleteItem"].GetArray())
 		{
-			CItem* CraftingCompleteItem = nullptr;			
-			
+			CItem* CraftingCompleteItem = nullptr;
+
 			string CraftingCompleteItemMediumCategory = CraftingTableCompleteItemFiled["CraftingCompleteItemMediumCategory"].GetString();
 			string CraftingCompleteItemSmallCategory = CraftingTableCompleteItemFiled["CraftingCompleteItemSmallCategory"].GetString();
 
-			string CraftingCompleteItemName = CraftingTableCompleteItemFiled["CraftingCompleteItemName"].GetString();			
+			string CraftingCompleteItemName = CraftingTableCompleteItemFiled["CraftingCompleteItemName"].GetString();
 
 			if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL")
-			{				
+			{
 				CraftingCompleteItem = G_ObjectManager->ItemCreate(en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL);
 				CraftingCompleteItem->_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_MATERIAL;
 				CraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL;
@@ -2700,14 +2703,14 @@ void CDataManager::LoadDataCraftingTable(wstring LoadFileName)
 				CraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_SAWMILL;
 			}
 
-			st_ItemData* CraftingCompleteItemData = FindItemData(CraftingCompleteItem->_ItemInfo.ItemSmallCategory);
-						
-			CraftingCompleteItem->_ItemInfo.ItemExplain = (LPWSTR)CA2W(CraftingCompleteItemData->ItemExplain.c_str());
-			CraftingCompleteItem->_ItemInfo.ItemName = (LPWSTR)CA2W(CraftingCompleteItemData->ItemName.c_str());			
-			CraftingCompleteItem->_ItemInfo.Width = CraftingCompleteItemData->ItemWidth;
-			CraftingCompleteItem->_ItemInfo.Height = CraftingCompleteItemData->ItemHeight;
+			st_ItemInfo* CraftingCompleteItemData = FindItemData(CraftingCompleteItem->_ItemInfo.ItemSmallCategory);
+
+			CraftingCompleteItem->_ItemInfo.ItemExplain = CraftingCompleteItemData->ItemExplain;
+			CraftingCompleteItem->_ItemInfo.ItemName = CraftingCompleteItemData->ItemName;
+			CraftingCompleteItem->_ItemInfo.ItemWidth = CraftingCompleteItemData->ItemWidth;
+			CraftingCompleteItem->_ItemInfo.ItemHeight = CraftingCompleteItemData->ItemHeight;
 			CraftingCompleteItem->_ItemInfo.ItemCraftingTime = CraftingCompleteItemData->ItemCraftingTime;
-			CraftingCompleteItem->_ItemInfo.ItemMaxCount = CraftingCompleteItemData->ItemMaxCount;			
+			CraftingCompleteItem->_ItemInfo.ItemMaxCount = CraftingCompleteItemData->ItemMaxCount;
 
 			for (auto& CraftingMaterialFiled : CraftingTableCompleteItemFiled["CraftingMaterial"].GetArray())
 			{
@@ -2735,14 +2738,14 @@ void CDataManager::LoadDataCraftingTable(wstring LoadFileName)
 				}
 
 				CraftingMaterialItemInfo.MaterialItemName = (LPWSTR)CA2W(MaterialName.c_str());
-				CraftingMaterialItemInfo.ItemCount = MaterialCount;				
+				CraftingMaterialItemInfo.ItemCount = MaterialCount;
 
-				CraftingCompleteItem->_ItemInfo.Materials.push_back(CraftingMaterialItemInfo);				
-			}			
+				CraftingCompleteItem->_ItemInfo.Materials.push_back(CraftingMaterialItemInfo);
+			}
 
 			CraftingTableRecipe->CraftingTableCompleteItems.push_back(CraftingCompleteItem);
-		}		
-		
+		}
+
 		_CraftingTableData.insert(pair<int16, st_CraftingTableRecipe*>((int16)CraftingTableRecipe->CraftingTableType, CraftingTableRecipe));
 	}
 }
@@ -2785,19 +2788,19 @@ void CDataManager::LoadDataOptionInfo(wstring LoadFileName)
 
 		string OptionName = Field["OptionName"].GetString();
 		string OptionType = Field["OptionType"].GetString();
-		
+
 		OptionItemInfo->OptionName = (LPWSTR)CA2W(OptionName.c_str());
 
 		if (OptionType == "TileBuy")
 		{
 			OptionItemInfo->OptionType = en_OptionType::OPTION_TYPE_TILE_BUY;
 		}
-		
+
 		_OptionItemInfoDatas.insert(pair<int8, st_OptionItemInfo*>((int8)OptionItemInfo->OptionType, OptionItemInfo));
 	}
 }
 
-st_SkillData* CDataManager::FindSkillData(en_SkillMediumCategory FindAttackSkillMediumCategory, en_SkillType FindSkillType)
+st_SkillInfo* CDataManager::FindSkillData(en_SkillMediumCategory FindAttackSkillMediumCategory, en_SkillType FindSkillType)
 {
 	switch (FindAttackSkillMediumCategory)
 	{
@@ -2877,7 +2880,7 @@ st_ObjectStatusData* CDataManager::FindObjectStatusData(en_GameObjectType GameOb
 	}
 }
 
-st_ItemData* CDataManager::FindItemData(en_SmallItemCategory FindItemCategory)
+st_ItemInfo* CDataManager::FindItemData(en_SmallItemCategory FindItemCategory)
 {
 	return (*_Items.find((int16)FindItemCategory)).second;
 }
