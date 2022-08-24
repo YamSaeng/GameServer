@@ -121,10 +121,10 @@ CGameServerMessage& CGameServerMessage::operator<<(st_ItemInfo& ItemInfo)
     *this << ItemInfo.ItemDBId;
     *this << ItemInfo.ItemIsQuickSlotUse;
     *this << ItemInfo.Rotated;
-    *this << ItemInfo.Width;
-    *this << ItemInfo.Height;
-    *this << ItemInfo.TileGridPositionX;
-    *this << ItemInfo.TileGridPositionY;
+    *this << ItemInfo.ItemWidth;
+    *this << ItemInfo.ItemHeight;
+    *this << ItemInfo.ItemTileGridPositionX;
+    *this << ItemInfo.ItemTileGridPositionY;
 
     *this << (int16)ItemInfo.OwnerCraftingTable;
     *this << (int8)ItemInfo.ItemLargeCategory;
