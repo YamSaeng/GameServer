@@ -210,8 +210,8 @@ enum class en_SmallItemCategory : int16
 	ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHARGE_POSE,
 	ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_FLAME_HARPOON,
 	ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HELL_FIRE,
-	ITEM_SMALL_CATEOGRY_SKILLBOOK_SHAMAN_HEALING_LIGHT,
-	ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HEALING_WIND,
+	ITEM_SMALL_CATEOGRY_SKILLBOOK_TAIOIST_HEALING_LIGHT,
+	ITEM_SMALL_CATEGORY_SKILLBOOK_TAIOIST_HEALING_WIND,
 	ITEM_SMALL_CATEGORY_SKILLBOOK_SHOCK_RELEASE,
 
 	ITEM_SMALL_CATEGORY_MATERIAL_LEATHER = 2000,
@@ -323,6 +323,16 @@ enum class en_SkillType : int16
 
 	SKILL_SLIME_NORMAL = 3000,
 	SKILL_BEAR_NORMAL
+};
+
+enum en_EquipmentParts
+{
+	EQUIPMENT_PARTS_NONE,
+	EQUIPMENT_PARTS_HEAD,
+	EQUIPMENT_PARTS_BODY,
+	EQUIPMENT_PARTS_LEFT_HAND,
+	EQUIPMENT_PARTS_RIGHT_HAND,
+	EQUIPMENT_PARTS_BOOT
 };
 
 enum class en_SkillCategory : int8
@@ -2247,18 +2257,20 @@ struct st_ItemInfo
 	int64 InventoryItemNumber;				  // 아이템이 인벤토리에 속할때 구분할 숫자
 	bool ItemIsQuickSlotUse;				  // 퀵슬롯에 등록되어 있는지 여부 
 	bool Rotated;							  // 아이템이 회전 되어 있는지 아닌지 여부
-	int16 Width;			     			  // 아이템 너비
-	int16 Height;							  // 아이템 높이	
-	int16 TileGridPositionX;				  // 인벤토리 위치 X
-	int16 TileGridPositionY;				  // 인벤토리 위치 Y
+	int16 ItemWidth;			     			  // 아이템 너비
+	int16 ItemHeight;							  // 아이템 높이	
+	int16 ItemTileGridPositionX;				  // 인벤토리 위치 X
+	int16 ItemTileGridPositionY;				  // 인벤토리 위치 Y
 	en_UIObjectInfo OwnerCraftingTable;		  // 아이템이 제작 가능한 아이템이라면 아이템이 속한 제작대
 	en_LargeItemCategory ItemLargeCategory;   // 아이템 대분류
 	en_MediumItemCategory ItemMediumCategory; // 아이템 중분류
 	en_SmallItemCategory ItemSmallCategory;	  // 아이템 소분류
+	en_GameObjectType ItemObjectType;		  // 아이템 ObjectType
+	en_SkillLargeCategory ItemSkillLargeCategory; // 아이템 스킬 대분류
+	en_SkillMediumCategory ItemSkillMediumCategory; // 아이템 스킬 중분류
+	en_SkillType ItemSkillType;				  // 아이템 스킬 소분류
 	int32 MaxHP;							  // 아이템 최대 내구도
-	int32 CurrentHP;						  // 아이템 현재 내구도
-	int32 CraftingMaxHP;					  // 아이템 최대 채집 HP
-	int32 CraftingCurrentHP;				  // 아이템 현재 채집 HP
+	int32 CurrentHP;						  // 아이템 현재 내구도	
 	wstring ItemName;			              // 아이템 이름
 	wstring ItemExplain;		              // 아이템 설명문
 	int64 ItemCraftingTime;					  // 아이템 제작 시간
@@ -2266,28 +2278,32 @@ struct st_ItemInfo
 	int32 ItemMinDamage;			          // 아이템 최소 공격력
 	int32 ItemMaxDamage;			          // 아이템 최대 공격력
 	int32 ItemDefence;				          // 아이템 방어력
+	int16 ItemHealPoint;					  // 아이템 체력 회복 점수
 	int32 ItemMaxCount;				          // 아이템을 소유 할 수 있는 최대 개수
-	int16 ItemCount;			              // 개수		
+	int16 ItemCount;			              // 개수			
 	bool ItemIsEquipped;			          // 아이템을 착용할 수 있는지		
-	vector<st_CraftingMaterialItemInfo> Materials; // 제작 아이템일 경우 조합에 필요한 재료 아이템 목록
+	vector<st_CraftingMaterialItemInfo> Materials; // 제작 아이템일 경우 조합에 필요한 재료 아이템 목록	
 
 	st_ItemInfo()
 	{
 		ItemDBId = 0;
+		InventoryItemNumber = 0;
 		ItemIsQuickSlotUse = false;
-		Width = 0;
-		Height = 0;
 		Rotated = false;
-		TileGridPositionX = 0;
-		TileGridPositionY = 0;
+		ItemWidth = 0;
+		ItemHeight = 0;		
+		ItemTileGridPositionX = 0;
+		ItemTileGridPositionY = 0;
 		OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_NONE;
 		ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_NONE;
 		ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
 		ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
+		ItemObjectType = en_GameObjectType::NORMAL;
+		ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_NONE;
+		ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
+		ItemSkillType = en_SkillType::SKILL_TYPE_NONE;
 		MaxHP = 0;
-		CurrentHP = 0;
-		CraftingMaxHP = 0;
-		CraftingCurrentHP = 0;
+		CurrentHP = 0;		
 		ItemName = L"";
 		ItemExplain = L"";
 		ItemCraftingTime = 0;
@@ -2302,8 +2318,8 @@ struct st_ItemInfo
 
 	bool operator == (st_ItemInfo OtherItemInfo)
 	{
-		if (TileGridPositionX == OtherItemInfo.TileGridPositionX
-			&& TileGridPositionY == OtherItemInfo.TileGridPositionY
+		if (ItemTileGridPositionX == OtherItemInfo.ItemTileGridPositionX
+			&& ItemTileGridPositionY == OtherItemInfo.ItemTileGridPositionY
 			&& ItemLargeCategory == OtherItemInfo.ItemLargeCategory
 			&& ItemMediumCategory == OtherItemInfo.ItemMediumCategory
 			&& ItemSmallCategory == OtherItemInfo.ItemSmallCategory
@@ -2332,15 +2348,16 @@ struct st_SkillInfo
 	en_SkillType SkillType;	 // 스킬 종류
 	int8 SkillLevel;		 // 스킬 레벨
 	wstring SkillName;		 // 스킬 이름
+	int32 SkillDistance;	 // 스킬 유효 거리
 	int32 SkillCoolTime;	 // 스킬 쿨타임		
 	int32 SkillCastingTime;  // 스킬 캐스팅 타임
 	int64 SkillDurationTime; // 스킬 지속 시간
 	int64 SkillDotTime;      // 스킬 도트 시간 
 	int64 SkillRemainTime;   // 스킬 남은 시간
-	float SkillTargetEffectTime;
-	en_SkillType NextComboSkill;
+	float SkillTargetEffectTime; // 스킬 이펙트 시간
+	en_SkillType NextComboSkill; // 다음 연속기 스킬
 	map<en_MoveDir, wstring> SkillAnimations; // 스킬 애니메이션	
-	wstring SkillExplanation; // 스킬 설명 
+	wstring SkillExplanation; // 스킬 설명 	
 
 	st_SkillInfo()
 	{
@@ -2352,6 +2369,7 @@ struct st_SkillInfo
 		SkillType = en_SkillType::SKILL_TYPE_NONE;
 		SkillLevel = 0;
 		SkillName = L"";
+		SkillDistance = 0;
 		SkillCoolTime = 0;		
 		SkillCastingTime = 0;
 		SkillDurationTime = 0;
@@ -2366,7 +2384,7 @@ struct st_SkillInfo
 struct st_AttackSkillInfo : public st_SkillInfo
 {
 	int32 SkillMinDamage;		// 최소 공격력
-	int32 SkillMaxDamage;		// 최대 공격력
+	int32 SkillMaxDamage;		// 최대 공격력	
 	bool SkillDebuf;			// 스킬 디버프 여부	
 	int8 SkillDebufAttackSpeed; // 스킬 공격속도 감소 수치
 	int8 SkillDebufMovingSpeed; // 스킬 이동속도 감소 수치
