@@ -1,61 +1,6 @@
 #pragma once
 #include "Item.h"
 
-struct st_SkillData
-{
-	en_SkillLargeCategory SkillLargeCategory;
-	en_SkillMediumCategory SkillMediumCategory;
-	en_SkillType SkillType;
-	string SkillName;
-	int8 SkillLevel;
-	int32 SkillCoolTime;
-	int32 SkillCastingTime;
-	int64 SkillDurationTime;
-	int64 SkillDotTime;
-	int SkillDistance;
-	float SkillTargetEffectTime;
-	map<en_MoveDir, string> SkillAnimations; // 스킬 애니메이션
-	en_SkillType NextComboSkill;
-	string SkillExplanation;	
-};
-
-struct st_AttackSkillData : public st_SkillData
-{
-	int32 SkillMinDamage;		// 최소 공격력
-	int32 SkillMaxDamage;		// 최대 공격력
-	int8 SkillDebufAttackSpeed; // 스킬 공격속도 감소 수치
-	int8 SkillDebufMovingSpeed; // 스킬 이동속도 감소 수치
-	int8 StatusAbnormalityProbability; // 상태 이상 적용 확률
-};
-
-struct st_TacTicSkillData : public st_SkillData
-{
-
-};
-
-struct st_HealSkillData : public st_TacTicSkillData
-{
-	int32 SkillMinHealPoint; // 최소 치유량
-	int32 SkillMaxHealPoint; // 최대 치유량
-};
-
-struct st_BufSkillData : public st_SkillData
-{
-	int32 IncreaseMinAttackPoint; // 증가하는 최소 근접 공격력
-	int32 IncreaseMaxAttackPoint; // 증가하는 최대 근접 공격력
-	int32 IncreaseMeleeAttackSpeedPoint; // 증가하는 근접 공격 속도
-	int16 IncreaseMeleeAttackHitRate; // 증가하는 근접 명중률	
-	int16 IncreaseMagicAttackPoint; // 증가하는 마법 공격력
-	int16 IncreaseMagicCastingPoint; // 증가하는 마법 캐스팅 속도
-	int16 IncreaseMagicAttackHitRate; // 증가하는 마법 명중률		
-	int32 IncreaseDefencePoint; // 증가하는 방어력 
-	int16 IncreaseEvasionRate; // 증가하는 회피율
-	int16 IncreaseMeleeCriticalPoint; // 증가하는 근접 치명타율
-	int16 IncreaseMagicCriticalPoint; // 증가하는 마법 치명타율
-	float IncreaseSpeedPoint; // 증가하는 이동 속도	
-	int16 IncreaseStatusAbnormalityResistance; // 증가하는 상태이상저항값
-};
-
 struct st_GameObjectUIPositionData
 {
 	float NameBarPositionX;
