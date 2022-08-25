@@ -51,7 +51,8 @@ enum class en_GameObjectType : int16
 
 	OBJECT_ITEM_CONSUMABLE,
 	OBJECT_ITEM_CONSUMABLE_SKILL_BOOK,
-	OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL,
+	OBJECT_ITEM_CONSUMABLE_HEALTH_RESTORATION_POTION_SMALL,
+	OBJECT_ITEM_CONSUMABLE_MANA_RESTORATION_POTION_SMALL,
 
 	OBJECT_ITEM_MATERIAL,
 	OBJECT_ITEM_MATERIAL_SLIME_GEL,
@@ -201,7 +202,9 @@ enum class en_SmallItemCategory : int16
 	ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER,
 	ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER,
 
-	ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL = 200,
+	ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL = 200,
+	ITEM_SMALL_CATEGORY_POTION_MANA_RESTORATION_POTION_SMALL,
+
 	ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_FIERCE_ATTACK = 300,
 	ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CONVERSION_ATTACK,
 	ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SHAEHONE_ATTACK,
@@ -2256,6 +2259,7 @@ struct st_ItemInfo
 	int64 ItemDBId;							  // 아이템 DB에 저장되어 있는 ID		
 	int64 InventoryItemNumber;				  // 아이템이 인벤토리에 속할때 구분할 숫자
 	bool ItemIsQuickSlotUse;				  // 퀵슬롯에 등록되어 있는지 여부 
+	bool ItemIsEquipped;			          // 아이템을 착용할 수 있는지		
 	bool ItemRotated;							  // 아이템이 회전 되어 있는지 아닌지 여부
 	int16 ItemWidth;			     			  // 아이템 너비
 	int16 ItemHeight;							  // 아이템 높이	
@@ -2282,8 +2286,8 @@ struct st_ItemInfo
 	int32 ItemDefence;				          // 아이템 방어력
 	int16 ItemHealPoint;					  // 아이템 체력 회복 점수
 	int32 ItemMaxCount;				          // 아이템을 소유 할 수 있는 최대 개수
-	int16 ItemCount;			              // 개수			
-	bool ItemIsEquipped;			          // 아이템을 착용할 수 있는지		
+	int16 ItemCount;			              // 개수				
+	int8 ItemEnchantPoint;					  // 아이템 강화 수치
 	vector<st_CraftingMaterialItemInfo> Materials; // 제작 아이템일 경우 조합에 필요한 재료 아이템 목록	
 
 	st_ItemInfo()
@@ -2329,6 +2333,8 @@ struct st_ItemInfo
 		ItemCount = 0;				
 
 		ItemIsEquipped = false;
+
+		ItemEnchantPoint = 0;
 	}
 
 	bool operator == (st_ItemInfo OtherItemInfo)
