@@ -2256,7 +2256,7 @@ struct st_ItemInfo
 	int64 ItemDBId;							  // 아이템 DB에 저장되어 있는 ID		
 	int64 InventoryItemNumber;				  // 아이템이 인벤토리에 속할때 구분할 숫자
 	bool ItemIsQuickSlotUse;				  // 퀵슬롯에 등록되어 있는지 여부 
-	bool Rotated;							  // 아이템이 회전 되어 있는지 아닌지 여부
+	bool ItemRotated;							  // 아이템이 회전 되어 있는지 아닌지 여부
 	int16 ItemWidth;			     			  // 아이템 너비
 	int16 ItemHeight;							  // 아이템 높이	
 	int16 ItemTileGridPositionX;				  // 인벤토리 위치 X
@@ -2269,8 +2269,10 @@ struct st_ItemInfo
 	en_SkillLargeCategory ItemSkillLargeCategory; // 아이템 스킬 대분류
 	en_SkillMediumCategory ItemSkillMediumCategory; // 아이템 스킬 중분류
 	en_SkillType ItemSkillType;				  // 아이템 스킬 소분류
-	int32 MaxHP;							  // 아이템 최대 내구도
-	int32 CurrentHP;						  // 아이템 현재 내구도	
+	int32 ItemMaxDurability;				  // 아이템 최대 내구도
+	int32 ItemCurrentDurability;			  // 아이템 현재 내구도	
+	int8 ItemMaxGatheringHP;				  // 아이템 최대 채집 내구도 ( 채집물을 채집할 때 소모되는 점수 값 )
+	int8 ItemCurrentGatheringHP;			  // 아이템 현재 채집 내구도
 	wstring ItemName;			              // 아이템 이름
 	wstring ItemExplain;		              // 아이템 설명문
 	int64 ItemCraftingTime;					  // 아이템 제작 시간
@@ -2289,7 +2291,7 @@ struct st_ItemInfo
 		ItemDBId = 0;
 		InventoryItemNumber = 0;
 		ItemIsQuickSlotUse = false;
-		Rotated = false;
+		ItemRotated = false;
 		ItemWidth = 0;
 		ItemHeight = 0;		
 		ItemTileGridPositionX = 0;
@@ -2302,17 +2304,30 @@ struct st_ItemInfo
 		ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_NONE;
 		ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
 		ItemSkillType = en_SkillType::SKILL_TYPE_NONE;
-		MaxHP = 0;
-		CurrentHP = 0;		
+
+		ItemMaxDurability = 0;
+		ItemCurrentDurability = 0;
+
+		ItemMaxGatheringHP = 0;
+		ItemCurrentGatheringHP = 0;
+
 		ItemName = L"";
+
 		ItemExplain = L"";
+
 		ItemCraftingTime = 0;
 		ItemCraftingRemainTime = 0;
+
 		ItemMinDamage = 0;
 		ItemMaxDamage = 0;
+
 		ItemDefence = 0;
+
+		ItemHealPoint = 0;
+
 		ItemMaxCount = 0;
 		ItemCount = 0;				
+
 		ItemIsEquipped = false;
 	}
 
