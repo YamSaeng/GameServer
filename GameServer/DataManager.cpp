@@ -21,8 +21,10 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string ItemName = WeaponListFiled["ItemName"].GetString();
 			int32 ItemWidth = WeaponListFiled["ItemWidth"].GetInt();
 			int32 ItemHeight = WeaponListFiled["ItemHeight"].GetInt();
-			int ItemMinDamage = WeaponListFiled["ItemMinDamage"].GetInt();
-			int ItemMaxDamage = WeaponListFiled["ItemMaxDamage"].GetInt();
+			int32 ItemMinDamage = WeaponListFiled["ItemMinDamage"].GetInt();
+			int32 ItemMaxDamage = WeaponListFiled["ItemMaxDamage"].GetInt();
+			int32 ItemMaxDurability = WeaponListFiled["ItemMaxDurability"].GetInt();
+			int32 ItemMaxCount = WeaponListFiled["ItemMaxCount"].GetInt();
 			int64 ItemCraftingTime = WeaponListFiled["ItemCraftingTime"].GetInt64();
 
 			st_ItemInfo* WeaponItemInfo = new st_ItemInfo();
@@ -55,16 +57,15 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			{
 				WeaponItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SHIELD;
 			}
-
-			WeaponItemInfo->ItemHealPoint = 0;
+						
 			WeaponItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
 			WeaponItemInfo->ItemName = (LPWSTR)CA2W(ItemName.c_str());
 			WeaponItemInfo->ItemWidth = ItemWidth;
 			WeaponItemInfo->ItemHeight = ItemHeight;
 			WeaponItemInfo->ItemMinDamage = ItemMinDamage;
-			WeaponItemInfo->ItemMaxDamage = ItemMaxDamage;
-			WeaponItemInfo->ItemDefence = 0;
-			WeaponItemInfo->ItemMaxCount = 1;
+			WeaponItemInfo->ItemMaxDamage = ItemMaxDamage;			
+			WeaponItemInfo->ItemMaxDurability = ItemMaxDurability;
+			WeaponItemInfo->ItemMaxCount = ItemMaxCount;
 			WeaponItemInfo->ItemCraftingTime = ItemCraftingTime;
 
 			_Items.insert(pair<int16, st_ItemInfo*>((int16)WeaponItemInfo->ItemSmallCategory, WeaponItemInfo));
@@ -82,7 +83,9 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string ItemName = ArmorListFiled["ItemName"].GetString();
 			int32 ItemWidth = ArmorListFiled["ItemWidth"].GetInt();
 			int32 ItemHeight = ArmorListFiled["ItemHeight"].GetInt();
-			int ItemDefence = ArmorListFiled["ItemDefence"].GetInt();
+			int32 ItemDefence = ArmorListFiled["ItemDefence"].GetInt();
+			int32 ItemMaxDurability = ArmorListFiled["ItemMaxDurability"].GetInt();
+			int32 ItemMaxCount = ArmorListFiled["ItemMaxCount"].GetInt();
 			int64 ItemCraftingTime = ArmorListFiled["ItemCraftingTime"].GetInt64();
 
 			st_ItemInfo* ArmorItemInfo = new st_ItemInfo();
@@ -128,15 +131,13 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 				ArmorItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT;
 			}
 
-			ArmorItemInfo->ItemHealPoint = 0;
 			ArmorItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
 			ArmorItemInfo->ItemName = (LPWSTR)CA2W(ItemName.c_str());
 			ArmorItemInfo->ItemWidth = ItemWidth;
-			ArmorItemInfo->ItemHeight = ItemHeight;
-			ArmorItemInfo->ItemMinDamage = 0;
-			ArmorItemInfo->ItemMaxDamage = 0;
+			ArmorItemInfo->ItemHeight = ItemHeight;			
 			ArmorItemInfo->ItemDefence = ItemDefence;
-			ArmorItemInfo->ItemMaxCount = 1;
+			ArmorItemInfo->ItemMaxDurability = ItemMaxDurability;
+			ArmorItemInfo->ItemMaxCount = ItemMaxCount;
 			ArmorItemInfo->ItemCraftingTime = ItemCraftingTime;
 
 			_Items.insert(pair<int16, st_ItemInfo*>((int16)ArmorItemInfo->ItemSmallCategory, ArmorItemInfo));
@@ -154,7 +155,9 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string ItemName = PotionDataListFiled["ItemName"].GetString();
 			int32 ItemWidth = PotionDataListFiled["ItemWidth"].GetInt();
 			int32 ItemHeight = PotionDataListFiled["ItemHeight"].GetInt();
-			int ItemMaxCount = PotionDataListFiled["ItemMaxCount"].GetInt();
+			int16 ItemHealPoint = PotionDataListFiled["ItemHealPoint"].GetInt();
+			int32 ItemMaxDurability = PotionDataListFiled["ItemMaxDurability"].GetInt();
+			int32 ItemMaxCount = PotionDataListFiled["ItemMaxCount"].GetInt();
 			int64 ItemCraftingTime = PotionDataListFiled["ItemCraftingTime"].GetInt64();
 
 			st_ItemInfo* PotionItemInfo = new st_ItemInfo();
@@ -167,8 +170,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 
 			if (SmallCategory == "ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL")
 			{
-				PotionItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL;
-				PotionItemInfo->ItemHealPoint = 50;
+				PotionItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL;				
 			}
 
 			if (ItemObjectType == "OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL")
@@ -180,9 +182,8 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			PotionItemInfo->ItemName = (LPWSTR)CA2W(ItemName.c_str());
 			PotionItemInfo->ItemWidth = ItemWidth;
 			PotionItemInfo->ItemHeight = ItemHeight;
-			PotionItemInfo->ItemMinDamage = 0;
-			PotionItemInfo->ItemMaxDamage = 0;
-			PotionItemInfo->ItemDefence = 0;
+			PotionItemInfo->ItemHealPoint = ItemHealPoint;
+			PotionItemInfo->ItemMaxDurability = ItemMaxDurability;
 			PotionItemInfo->ItemMaxCount = ItemMaxCount;
 			PotionItemInfo->ItemCraftingTime = ItemCraftingTime;
 
@@ -198,8 +199,8 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string ItemName = SkillBookDataListFiled["ItemName"].GetString();
 			int32 ItemWidth = SkillBookDataListFiled["ItemWidth"].GetInt();
 			int32 ItemHeight = SkillBookDataListFiled["ItemHeight"].GetInt();
-			int ItemMaxCount = SkillBookDataListFiled["ItemMaxCount"].GetInt();
-			int64 ItemCraftingTime = SkillBookDataListFiled["ItemCraftingTime"].GetInt64();
+			int32 ItemMaxDurability = SkillBookDataListFiled["ItemMaxDurability"].GetInt();
+			int32 ItemMaxCount = SkillBookDataListFiled["ItemMaxCount"].GetInt();			
 
 			st_ItemInfo* SkillBookItemInfo = new st_ItemInfo();
 			SkillBookItemInfo->ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_SKILLBOOK;
@@ -291,17 +292,13 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			{
 				SkillBookItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK;
 			}
-
-			SkillBookItemInfo->ItemHealPoint = 0;
+			
 			SkillBookItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
 			SkillBookItemInfo->ItemName = (LPWSTR)CA2W(ItemName.c_str());
 			SkillBookItemInfo->ItemWidth = ItemWidth;
-			SkillBookItemInfo->ItemHeight = ItemHeight;
-			SkillBookItemInfo->ItemMinDamage = 0;
-			SkillBookItemInfo->ItemMaxDamage = 0;
-			SkillBookItemInfo->ItemDefence = 0;
-			SkillBookItemInfo->ItemMaxCount = ItemMaxCount;
-			SkillBookItemInfo->ItemCraftingTime = ItemCraftingTime;
+			SkillBookItemInfo->ItemHeight = ItemHeight;			
+			SkillBookItemInfo->ItemMaxDurability = ItemMaxDurability;
+			SkillBookItemInfo->ItemMaxCount = ItemMaxCount;			
 
 			_Items.insert(pair<int16, st_ItemInfo*>((int16)SkillBookItemInfo->ItemSmallCategory, SkillBookItemInfo));
 		}
@@ -318,7 +315,8 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string ItemName = MaterialDataListFiled["ItemName"].GetString();
 			int32 ItemWidth = MaterialDataListFiled["ItemWidth"].GetInt();
 			int32 ItemHeight = MaterialDataListFiled["ItemHeight"].GetInt();
-			int ItemMaxCount = MaterialDataListFiled["ItemMaxCount"].GetInt();
+			int32 ItemMaxDurability = MaterialDataListFiled["ItemMaxDurability"].GetInt();
+			int32 ItemMaxCount = MaterialDataListFiled["ItemMaxCount"].GetInt();
 			int64 ItemCraftingTime = MaterialDataListFiled["ItemCraftingTime"].GetInt64();
 
 			st_ItemInfo* MaterialItemInfo = new st_ItemInfo();
@@ -444,15 +442,12 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			{
 				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT;
 			}
-
-			MaterialItemInfo->ItemHealPoint = 0;
+						
 			MaterialItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
 			MaterialItemInfo->ItemName = (LPWSTR)CA2W(ItemName.c_str());
 			MaterialItemInfo->ItemWidth = ItemWidth;
 			MaterialItemInfo->ItemHeight = ItemHeight;
-			MaterialItemInfo->ItemMinDamage = 0;
-			MaterialItemInfo->ItemMaxDamage = 0;
-			MaterialItemInfo->ItemDefence = 0;
+			MaterialItemInfo->ItemMaxDurability = ItemMaxDurability;
 			MaterialItemInfo->ItemMaxCount = ItemMaxCount;
 			MaterialItemInfo->ItemCraftingTime = ItemCraftingTime;
 
@@ -471,8 +466,8 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string ItemName = ArchitectureListFiled["ItemName"].GetString();
 			int32 ItemWidth = ArchitectureListFiled["ItemWidth"].GetInt();
 			int32 ItemHeight = ArchitectureListFiled["ItemHeight"].GetInt();
-			int ItemMinDamage = ArchitectureListFiled["ItemMinDamage"].GetInt();
-			int ItemMaxDamage = ArchitectureListFiled["ItemMaxDamage"].GetInt();
+			int32 ItemMaxDurability = ArchitectureListFiled["ItemMaxDurability"].GetInt();
+			int32 ItemMaxCount = ArchitectureListFiled["ItemMaxCount"].GetInt();
 			int64 ItemCraftingTime = ArchitectureListFiled["ItemCraftingTime"].GetInt64();
 
 			st_ItemInfo* ArchitectureItemInfo = new st_ItemInfo();
@@ -501,16 +496,13 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			{
 				ArchitectureItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL;
 			}
-
-			ArchitectureItemInfo->ItemHealPoint = 0;
+						
 			ArchitectureItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
 			ArchitectureItemInfo->ItemName = (LPWSTR)CA2W(ItemName.c_str());
 			ArchitectureItemInfo->ItemWidth = ItemWidth;
 			ArchitectureItemInfo->ItemHeight = ItemHeight;
-			ArchitectureItemInfo->ItemMinDamage = ItemMinDamage;
-			ArchitectureItemInfo->ItemMaxDamage = ItemMaxDamage;
-			ArchitectureItemInfo->ItemDefence = 0;
-			ArchitectureItemInfo->ItemMaxCount = 1;
+			ArchitectureItemInfo->ItemMaxDurability = ItemMaxDurability;
+			ArchitectureItemInfo->ItemMaxCount = ItemMaxCount;
 			ArchitectureItemInfo->ItemCraftingTime = ItemCraftingTime;
 
 			_Items.insert(pair<int16, st_ItemInfo*>((int16)ArchitectureItemInfo->ItemSmallCategory, ArchitectureItemInfo));
@@ -528,8 +520,8 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string ItemName = CropSeedListFiled["ItemName"].GetString();
 			int32 ItemWidth = CropSeedListFiled["ItemWidth"].GetInt();
 			int32 ItemHeight = CropSeedListFiled["ItemHeight"].GetInt();
-			int ItemMaxCount = CropSeedListFiled["ItemMaxCount"].GetInt();
-			int64 ItemCraftingTime = CropSeedListFiled["ItemCraftingTime"].GetInt64();
+			int32 ItemMaxDurability = CropSeedListFiled["ItemMaxDurability"].GetInt();			
+			int32 ItemMaxCount = CropSeedListFiled["ItemMaxCount"].GetInt();			
 
 			st_ItemInfo* CropSeedItemInfo = new st_ItemInfo();
 			CropSeedItemInfo->ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_CROP;
@@ -544,17 +536,13 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			{
 				CropSeedItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO;
 			}
-
-			CropSeedItemInfo->ItemHealPoint = 0;
+			
 			CropSeedItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
 			CropSeedItemInfo->ItemName = (LPWSTR)CA2W(ItemName.c_str());
 			CropSeedItemInfo->ItemWidth = ItemWidth;
-			CropSeedItemInfo->ItemHeight = ItemHeight;
-			CropSeedItemInfo->ItemMinDamage = 0;
-			CropSeedItemInfo->ItemMaxDamage = 0;
-			CropSeedItemInfo->ItemDefence = 0;
-			CropSeedItemInfo->ItemMaxCount = ItemMaxCount;
-			CropSeedItemInfo->ItemCraftingTime = ItemCraftingTime;
+			CropSeedItemInfo->ItemHeight = ItemHeight;		
+			CropSeedItemInfo->ItemMaxDurability = ItemMaxDurability;
+			CropSeedItemInfo->ItemMaxCount = ItemMaxCount;			
 
 			_Items.insert(pair<int16, st_ItemInfo*>((int16)CropSeedItemInfo->ItemSmallCategory, CropSeedItemInfo));
 		}
@@ -571,8 +559,8 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string ItemName = CropFruitListFiled["ItemName"].GetString();
 			int32 ItemWidth = CropFruitListFiled["ItemWidth"].GetInt();
 			int32 ItemHeight = CropFruitListFiled["ItemHeight"].GetInt();
-			int ItemMaxCount = CropFruitListFiled["ItemMaxCount"].GetInt();
-			int64 ItemCraftingTime = CropFruitListFiled["ItemCraftingTime"].GetInt64();
+			int32 ItemMaxDurability = CropFruitListFiled["ItemMaxDurability"].GetInt();
+			int32 ItemMaxCount = CropFruitListFiled["ItemMaxCount"].GetInt();			
 
 			st_ItemInfo* CropFruitItemInfo = new st_ItemInfo();
 			CropFruitItemInfo->ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_CROP;
@@ -587,17 +575,13 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			{
 				CropFruitItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO;
 			}
-
-			CropFruitItemInfo->ItemHealPoint = 0;
+			
 			CropFruitItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
 			CropFruitItemInfo->ItemName = (LPWSTR)CA2W(ItemName.c_str());
 			CropFruitItemInfo->ItemWidth = ItemWidth;
 			CropFruitItemInfo->ItemHeight = ItemHeight;
-			CropFruitItemInfo->ItemMinDamage = 0;
-			CropFruitItemInfo->ItemMaxDamage = 0;
-			CropFruitItemInfo->ItemDefence = 0;
-			CropFruitItemInfo->ItemMaxCount = ItemMaxCount;
-			CropFruitItemInfo->ItemCraftingTime = ItemCraftingTime;
+			CropFruitItemInfo->ItemMaxDurability = ItemMaxDurability;
+			CropFruitItemInfo->ItemMaxCount = ItemMaxCount;			
 
 			_Items.insert(pair<int16, st_ItemInfo*>((int16)CropFruitItemInfo->ItemSmallCategory, CropFruitItemInfo));
 		}
