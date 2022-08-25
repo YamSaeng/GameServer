@@ -11,6 +11,8 @@ CItem::CItem()
 
 	_ItemState = en_ItemState::ITEM_IDLE;
 
+	_EquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_NONE;
+
 	_FieldOfViewDistance = 10;
 
 	_ChaseWaitTime = 0;	
@@ -92,11 +94,11 @@ void CItem::Init()
 {
 	_ItemInfo.ItemDBId = 0;
 	_ItemInfo.ItemIsQuickSlotUse = false;
-	_ItemInfo.Width = 0;
-	_ItemInfo.Height = 0;
+	_ItemInfo.ItemWidth = 0;
+	_ItemInfo.ItemHeight = 0;
 	_ItemInfo.Rotated = false;
-	_ItemInfo.TileGridPositionX = 0;
-	_ItemInfo.TileGridPositionY = 0;
+	_ItemInfo.ItemTileGridPositionX = 0;
+	_ItemInfo.ItemTileGridPositionY = 0;
 	_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_NONE;
 	_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
 	_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;

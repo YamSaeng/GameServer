@@ -61,7 +61,8 @@ protected:
 	virtual void UpdateIdle() override;
 	void UpdateReadyMoving();
 	virtual void UpdateMoving() override;
-private:		
+private:	
+	en_EquipmentParts _EquipmentPart;
 };
 
 class CWeaponItem : public CItem
