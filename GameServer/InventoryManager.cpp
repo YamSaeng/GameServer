@@ -138,20 +138,20 @@ CItem* CInventoryManager::InsertItem(int8 SelectInventoryIndex, en_SmallItemCate
 
 		CItem* NewItem = G_ObjectManager->ItemCreate(InsertItemCategory);
 
-		st_ItemData* ItemData = G_Datamanager->FindItemData(InsertItemCategory);
+		st_ItemInfo* ItemData = G_Datamanager->FindItemData(InsertItemCategory);
 
 		NewItem->_ItemInfo.ItemDBId = 0;
 		NewItem->_ItemInfo.Rotated = false;
-		NewItem->_ItemInfo.Width = ItemData->ItemWidth;
-		NewItem->_ItemInfo.Height = ItemData->ItemHeight;
-		NewItem->_ItemInfo.ItemLargeCategory = (en_LargeItemCategory)ItemData->LargeItemCategory;
-		NewItem->_ItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemData->MediumItemCategory;
-		NewItem->_ItemInfo.ItemSmallCategory = (en_SmallItemCategory)ItemData->SmallItemCategory;
-		NewItem->_ItemInfo.ItemName = (LPWSTR)CA2W(ItemData->ItemName.c_str());
-		NewItem->_ItemInfo.ItemExplain = (LPWSTR)CA2W(ItemData->ItemExplain.c_str());
+		NewItem->_ItemInfo.ItemWidth = ItemData->ItemWidth;
+		NewItem->_ItemInfo.ItemHeight = ItemData->ItemHeight;
+		NewItem->_ItemInfo.ItemLargeCategory = ItemData->ItemLargeCategory;
+		NewItem->_ItemInfo.ItemMediumCategory = ItemData->ItemMediumCategory;
+		NewItem->_ItemInfo.ItemSmallCategory = ItemData->ItemSmallCategory;
+		NewItem->_ItemInfo.ItemName = ItemData->ItemName;
+		NewItem->_ItemInfo.ItemExplain = ItemData->ItemExplain;
 		NewItem->_ItemInfo.ItemCount = InsertItemCount;
-		NewItem->_ItemInfo.TileGridPositionX = 0;
-		NewItem->_ItemInfo.TileGridPositionY = 0;
+		NewItem->_ItemInfo.ItemTileGridPositionX = 0;
+		NewItem->_ItemInfo.ItemTileGridPositionY = 0;
 		NewItem->_ItemInfo.ItemIsEquipped = false;
 		NewItem->_ItemInfo.ItemMaxCount = ItemData->ItemMaxCount;
 		NewItem->_ItemInfo.ItemCount = InsertItemCount;		
@@ -168,7 +168,7 @@ void CInventoryManager::DBItemInsertItem(int8 SelectInventoryIndex, CItem* NewIt
 {
 	if (_Inventorys[SelectInventoryIndex]->FindItemSpaceEmpty(NewItem))
 	{
-		_Inventorys[SelectInventoryIndex]->PlaceItem(NewItem, NewItem->_ItemInfo.TileGridPositionX, NewItem->_ItemInfo.TileGridPositionY);
+		_Inventorys[SelectInventoryIndex]->PlaceItem(NewItem, NewItem->_ItemInfo.ItemTileGridPositionX, NewItem->_ItemInfo.ItemTileGridPositionY);
 	}	
 }
 
@@ -186,7 +186,7 @@ CItem* CInventoryManager::SwapItem(int8 SelectInventoryIndex, int16 PlaceItemTil
 
 	if (_Inventorys[SelectInventoryIndex]->PlaceItem(_SelectItem, PlaceItemTileGridPositionX, PlaceItemTileGridPositionY, &BItem) == false)
 	{
-		_Inventorys[SelectInventoryIndex]->PlaceItem(_SelectItem, _SelectItem->_ItemInfo.TileGridPositionX, _SelectItem->_ItemInfo.TileGridPositionY);		
+		_Inventorys[SelectInventoryIndex]->PlaceItem(_SelectItem, _SelectItem->_ItemInfo.ItemTileGridPositionX, _SelectItem->_ItemInfo.ItemTileGridPositionY);		
 	}
 
 	_SelectItem = BItem;

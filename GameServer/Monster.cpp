@@ -129,7 +129,7 @@ bool CMonster::OnDamaged(CGameObject* Attacker, int32 Damage)
 		CGameObject::OnDamaged(Attacker, Damage);
 
 		st_GameObjectJob* AggroJob = G_ObjectManager->GameObjectJobCreate();
-		AggroJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_AGGRO_LIST_INSERT_OR_UPDATE;
+		AggroJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_AGGRO_LIST_INSERT_OR_UPDATE;
 
 		CGameServerMessage* AggroJobMessage = CGameServerMessage::GameServerMessageAlloc();
 		AggroJobMessage->Clear();

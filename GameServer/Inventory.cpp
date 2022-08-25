@@ -78,11 +78,11 @@ CItem* CInventory::SelectItem(int8 TilePositionX, int8 TilePositionY)
 void CInventory::CleanGridReference(CItem* CleanItem)
 {
 	// 아이템의 넓이 만큼 인벤토리 위치 타일을 정리한다.
-	for (int X = 0; X < CleanItem->_ItemInfo.Width; X++)
+	for (int X = 0; X < CleanItem->_ItemInfo.ItemWidth; X++)
 	{
-		for (int Y = 0; Y < CleanItem->_ItemInfo.Height; Y++)
+		for (int Y = 0; Y < CleanItem->_ItemInfo.ItemHeight; Y++)
 		{
-			_Items[CleanItem->_ItemInfo.TileGridPositionX + X][CleanItem->_ItemInfo.TileGridPositionY + Y]->IsEmptySlot = true;
+			_Items[CleanItem->_ItemInfo.ItemTileGridPositionX + X][CleanItem->_ItemInfo.ItemTileGridPositionY + Y]->IsEmptySlot = true;
 		}
 	}
 }
@@ -98,14 +98,14 @@ st_Vector2Int CInventory::FindEmptySpace(CItem* ItemInfo)
 	FindTilePosition._X = -1;
 	FindTilePosition._Y = -1;
 
-	int SearchingHeight = _InventoryHeight - ItemInfo->_ItemInfo.Height + 1;
-	int SearchingWidth = _InventoryWidth - ItemInfo->_ItemInfo.Width + 1;
+	int SearchingHeight = _InventoryHeight - ItemInfo->_ItemInfo.ItemHeight + 1;
+	int SearchingWidth = _InventoryWidth - ItemInfo->_ItemInfo.ItemWidth + 1;
 
 	for (int Y = 0; Y < SearchingHeight; Y++)
 	{
 		for (int X = 0; X < SearchingWidth; X++)
 		{
-			if (CheckEmptySpace(X, Y, ItemInfo->_ItemInfo.Width, ItemInfo->_ItemInfo.Height) == true)
+			if (CheckEmptySpace(X, Y, ItemInfo->_ItemInfo.ItemWidth, ItemInfo->_ItemInfo.ItemHeight) == true)
 			{
 				FindTilePosition._X = X;
 				FindTilePosition._Y = Y;
@@ -120,7 +120,7 @@ st_Vector2Int CInventory::FindEmptySpace(CItem* ItemInfo)
 
 bool CInventory::FindItemSpaceEmpty(CItem* Item)
 {
-	return CheckEmptySpace(Item->_ItemInfo.TileGridPositionX, Item->_ItemInfo.TileGridPositionY, Item->_ItemInfo.Width, Item->_ItemInfo.Height);
+	return CheckEmptySpace(Item->_ItemInfo.ItemTileGridPositionX, Item->_ItemInfo.ItemTileGridPositionY, Item->_ItemInfo.ItemWidth, Item->_ItemInfo.ItemHeight);
 }
 
 bool CInventory::CheckEmptySpace(int16 PositionX, int16 PositionY, int32 Width, int32 Height)
@@ -143,13 +143,13 @@ bool CInventory::CheckEmptySpace(int16 PositionX, int16 PositionY, int32 Width, 
 bool CInventory::PlaceItem(CItem* PlaceItemInfo, int16 PositionX, int16 PositionY, CItem** OverlapItem)
 {
 	// 아이템 범위 체크
-	if (BoundryCheck(PositionX, PositionY, PlaceItemInfo->_ItemInfo.Width, PlaceItemInfo->_ItemInfo.Height) == false)
+	if (BoundryCheck(PositionX, PositionY, PlaceItemInfo->_ItemInfo.ItemWidth, PlaceItemInfo->_ItemInfo.ItemHeight) == false)
 	{
 		return false;
 	}
 
 	// 아이템을 넣을 위치에 아이템이 이미 있는지 확인한다.
-	if (OverlapCheck(PositionX, PositionY, PlaceItemInfo->_ItemInfo.Width, PlaceItemInfo->_ItemInfo.Height, OverlapItem) == false)
+	if (OverlapCheck(PositionX, PositionY, PlaceItemInfo->_ItemInfo.ItemWidth, PlaceItemInfo->_ItemInfo.ItemHeight, OverlapItem) == false)
 	{
 		// 넣을 위치에 2가지 이상 아이템이 존재할 경우 아이템을 넣을 수 없다고 판단한다.
 		*OverlapItem = nullptr;
@@ -172,13 +172,13 @@ bool CInventory::PlaceItem(CItem* PlaceItemInfo, int16 PositionX, int16 Position
 void CInventory::PlaceItem(CItem* PlaceItemInfo, int16 PositionX, int16 PositionY)
 {
 	// 넣을 아이템의 위치를 설정한다.
-	PlaceItemInfo->_ItemInfo.TileGridPositionX = PositionX;
-	PlaceItemInfo->_ItemInfo.TileGridPositionY = PositionY;
+	PlaceItemInfo->_ItemInfo.ItemTileGridPositionX = PositionX;
+	PlaceItemInfo->_ItemInfo.ItemTileGridPositionY = PositionY;
 
 	// 아이템의 넓이만큼 시작 위치에서 슬롯에 채워넣는다.
-	for (int X = 0; X < PlaceItemInfo->_ItemInfo.Width; X++)
+	for (int X = 0; X < PlaceItemInfo->_ItemInfo.ItemWidth; X++)
 	{
-		for (int Y = 0; Y < PlaceItemInfo->_ItemInfo.Height; Y++)
+		for (int Y = 0; Y < PlaceItemInfo->_ItemInfo.ItemHeight; Y++)
 		{			
 			_Items[PositionX + X][PositionY + Y]->IsEmptySlot = false;							
 			_Items[PositionX + X][PositionY + Y]->InventoryItem = PlaceItemInfo;			
@@ -195,8 +195,8 @@ void CInventory::InitItem(int16 TilePositionX, int16 TilePositionY)
 	{
 		st_InventoryItem* InitInventoryItem = _Items[TilePositionX][TilePositionY];
 		
-		int16 InitTileWidth = InitInventoryItem->InventoryItem->_ItemInfo.Width;
-		int16 InitTileHeight = InitInventoryItem->InventoryItem->_ItemInfo.Height;
+		int16 InitTileWidth = InitInventoryItem->InventoryItem->_ItemInfo.ItemWidth;
+		int16 InitTileHeight = InitInventoryItem->InventoryItem->_ItemInfo.ItemHeight;
 
 		CItem* Item = InitInventoryItem->InventoryItem;
 		G_ObjectManager->ItemReturn(Item);
@@ -215,8 +215,8 @@ void CInventory::InitItem(int16 TilePositionX, int16 TilePositionY)
 st_Vector2Int CInventory::CalculatePositionOnGrid(CItem* Item, int8 TilePositionX, int8 TilePositionY)
 {
 	st_Vector2Int TilePosition;
-	TilePosition._X = TilePositionX * en_Inventory::TILE_SIZE_WIDTH + en_Inventory::TILE_SIZE_WIDTH * Item->_ItemInfo.Width / 2;
-	TilePosition._Y = -(TilePositionY * en_Inventory::TILE_SIZE_HEIGHT + en_Inventory::TILE_SIZE_HEIGHT * Item->_ItemInfo.Height / 2);
+	TilePosition._X = TilePositionX * en_Inventory::TILE_SIZE_WIDTH + en_Inventory::TILE_SIZE_WIDTH * Item->_ItemInfo.ItemWidth / 2;
+	TilePosition._Y = -(TilePositionY * en_Inventory::TILE_SIZE_HEIGHT + en_Inventory::TILE_SIZE_HEIGHT * Item->_ItemInfo.ItemHeight / 2);
 
 	return TilePosition;
 }
@@ -291,7 +291,7 @@ bool CInventory::OverlapCheck(int16 TilePositionX, int16 TilePositionY, int16 Wi
 
 CItem* CInventory::FindInventoryItem(en_SmallItemCategory FindItemSmallItemCategory)
 {
-	for (int X = 0; X < _InventoryWidth; X++)
+ 	for (int X = 0; X < _InventoryWidth; X++)
 	{
 		for (int Y = 0; Y < _InventoryHeight; Y++)
 		{
@@ -319,8 +319,8 @@ vector<CItem*> CInventory::FindAllInventoryItem(en_SmallItemCategory FindItemSma
 			{
 				for (CItem* FindItem : FindItems)
 				{
-					if (FindItem->_ItemInfo.TileGridPositionX == _Items[Y][X]->InventoryItem->_ItemInfo.TileGridPositionX
-						&& FindItem->_ItemInfo.TileGridPositionY == _Items[Y][X]->InventoryItem->_ItemInfo.TileGridPositionY)
+					if (FindItem->_ItemInfo.ItemTileGridPositionX == _Items[Y][X]->InventoryItem->_ItemInfo.ItemTileGridPositionX
+						&& FindItem->_ItemInfo.ItemTileGridPositionY == _Items[Y][X]->InventoryItem->_ItemInfo.ItemTileGridPositionY)
 					{
 						FindItemCheck = false;
 						break;
@@ -356,8 +356,8 @@ vector<st_ItemInfo> CInventory::DBInventorySaveReturnItems()
 			}
 			else
 			{
-				SaveItemInfo.TileGridPositionX = X;
-				SaveItemInfo.TileGridPositionY = Y;				
+				SaveItemInfo.ItemTileGridPositionX = X;
+				SaveItemInfo.ItemTileGridPositionY = Y;				
 
 				ReturnItem.push_back(SaveItemInfo);
 			}

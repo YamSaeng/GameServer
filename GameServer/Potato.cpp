@@ -9,11 +9,11 @@ CPotato::CPotato()
 	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_CROP_POTATO;
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
-	st_ItemData* FindCropData = G_Datamanager->FindItemData(en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO);
+	st_ItemInfo* FindCropItemInfo = G_Datamanager->FindItemData(en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO);
 
-	_GameObjectInfo.ObjectName = (LPWSTR)CA2W(FindCropData->ItemName.c_str());
+	_GameObjectInfo.ObjectName = FindCropItemInfo->ItemName;
 
-	_GameObjectInfo.ObjectStatInfo.MaxHP = FindCropData->ItemCraftingMaxHP;
+	_GameObjectInfo.ObjectStatInfo.MaxHP = FindCropItemInfo->MaxHP;
 	_GameObjectInfo.ObjectStatInfo.HP = _GameObjectInfo.ObjectStatInfo.MaxHP;
 
 	_GameObjectInfo.ObjectWidth = 1;
@@ -41,7 +41,7 @@ bool CPotato::OnDamaged(CGameObject* Attacker, int32 Damage)
 		G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResChangeStatePacket);
 		ResChangeStatePacket->Free();
 
-		G_ObjectManager->ObjectItemSpawn(Attacker->_GameObjectInfo.ObjectId,
+		G_ObjectManager->ObjectItemSpawn(_Channel, Attacker->_GameObjectInfo.ObjectId,
 			Attacker->_GameObjectInfo.ObjectType,
 			_GameObjectInfo.ObjectPositionInfo.CollisionPosition,
 			_GameObjectInfo.ObjectPositionInfo.Position,

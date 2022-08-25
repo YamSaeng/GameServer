@@ -56,10 +56,10 @@ void CCraftingTable::InputMaterialItem(CItem* MaterialItem, int16 MaterialItemCo
 			NewMaterialItem->_ItemInfo.InventoryItemNumber = 0;
 			NewMaterialItem->_ItemInfo.ItemIsQuickSlotUse = false;
 			NewMaterialItem->_ItemInfo.Rotated = false;
-			NewMaterialItem->_ItemInfo.Width = 1;
-			NewMaterialItem->_ItemInfo.Height = 1;
-			NewMaterialItem->_ItemInfo.TileGridPositionX = MaterialItem->_ItemInfo.TileGridPositionX;
-			NewMaterialItem->_ItemInfo.TileGridPositionY = MaterialItem->_ItemInfo.TileGridPositionY;
+			NewMaterialItem->_ItemInfo.ItemWidth = 1;
+			NewMaterialItem->_ItemInfo.ItemHeight = 1;
+			NewMaterialItem->_ItemInfo.ItemTileGridPositionX = MaterialItem->_ItemInfo.ItemTileGridPositionX;
+			NewMaterialItem->_ItemInfo.ItemTileGridPositionY = MaterialItem->_ItemInfo.ItemTileGridPositionY;
 			NewMaterialItem->_ItemInfo.ItemLargeCategory = MaterialItem->_ItemInfo.ItemLargeCategory;
 			NewMaterialItem->_ItemInfo.ItemMediumCategory = MaterialItem->_ItemInfo.ItemMediumCategory;
 			NewMaterialItem->_ItemInfo.ItemSmallCategory = MaterialItem->_ItemInfo.ItemSmallCategory;

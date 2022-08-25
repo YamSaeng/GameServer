@@ -406,7 +406,7 @@ void CGameObject::Update()
 
 						if (FindDropItem->_ItemInfo.ItemCount == 0)
 						{
-							Player->_InventoryManager.InitItem(0, FindDropItem->_ItemInfo.TileGridPositionX, FindDropItem->_ItemInfo.TileGridPositionY);
+							Player->_InventoryManager.InitItem(0, FindDropItem->_ItemInfo.ItemTileGridPositionX, FindDropItem->_ItemInfo.ItemTileGridPositionY);
 						}						
 					}
 				}
@@ -450,7 +450,7 @@ void CGameObject::Update()
 							CItem* NewItem = G_ObjectManager->GameServer->NewItemCrate(InsertItem->_ItemInfo);
 							Player->_InventoryManager.InsertItem(0, NewItem);
 
-							FindItem = Player->_InventoryManager.GetItem(0, NewItem->_ItemInfo.TileGridPositionX, NewItem->_ItemInfo.TileGridPositionY);
+							FindItem = Player->_InventoryManager.GetItem(0, NewItem->_ItemInfo.ItemTileGridPositionX, NewItem->_ItemInfo.ItemTileGridPositionY);
 						}
 						else
 						{
@@ -586,7 +586,7 @@ void CGameObject::Update()
 						
 						if (FindAddItem->_ItemInfo.ItemCount == 0)
 						{
-							CraftingTableItemAddPlayer->_InventoryManager.InitItem(0, FindAddItem->_ItemInfo.TileGridPositionX, FindAddItem->_ItemInfo.TileGridPositionY);
+							CraftingTableItemAddPlayer->_InventoryManager.InitItem(0, FindAddItem->_ItemInfo.ItemTileGridPositionX, FindAddItem->_ItemInfo.ItemTileGridPositionY);
 						}
 
 						CMessage* ResCraftingTableAddItemPacket = G_ObjectManager->GameServer->MakePacketResCraftingTableInput(_GameObjectInfo.ObjectId, CraftingTable->GetMaterialItems());
