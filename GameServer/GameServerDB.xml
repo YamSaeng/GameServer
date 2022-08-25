@@ -68,24 +68,19 @@
   
   <!-- 인벤토리 아이템 테이블 -->
   <Table name="Inventory" desc="Inventory Table">
-    <Column name="IsQuickSlotUse" type="bit"/>
-	<Column name="ItemRotated" type="bit"/>
-	<Column name="ItemWidth" type="SmallInt"/>
-	<Column name="ItemHeight" type="SmallInt"/>  
+	<Column name="OwnerAccountDBId" type="BigInt" notnull="true"/>
+	<Column name="OwnerPlayerDBId" type="BigInt" notnull="true"/>
+	<Column name="ItemIsQuickSlotUse" type="bit"/>
+	<Column name="ItemIsEquipped" type="bit"/>
+	<Column name="ItemRotated" type="bit"/>	
 	<Column name="ItemTileGridPositionX" type="SmallInt"/>
 	<Column name="ItemTileGridPositionY" type="SmallInt"/>
     <Column name="ItemLargeCategory" type="TinyInt" notnull="true"/>
     <Column name="ItemMediumCategory" type="TinyInt" notnull="true"/>
-    <Column name="ItemSmallCategory" type="SmallInt" notnull="true"/>    
-    <Column name="ItemName" type="nvarchar(20)" notnull="true"/>
-    <Column name="ItemCount" type="SmallInt" notnull="true"/>    
-    <Column name="IsEquipped" type="bit"/>
-    <Column name="MinDamage" type="int"/>
-    <Column name="MaxDamage" type="int"/>
-    <Column name="Defence" type="int"/>
-    <Column name="MaxCount" type="int"/>    
-    <Column name="OwnerAccountDBId" type="BigInt" notnull="true"/>
-    <Column name="OwnerPlayerDBId" type="BigInt" notnull="true"/>        
+    <Column name="ItemSmallCategory" type="SmallInt" notnull="true"/>       
+    <Column name="ItemCount" type="SmallInt" notnull="true"/>	    
+	<Column name="ItemDurability" type="int" notnull="true"/>
+	<Column name="ItemEnchantPoint" type="TinyInt" notnull="true"/>           
   </Table>
 
   <!-- 골드 테이블 -->
@@ -361,84 +356,7 @@
         VALUES (0, 0, 0, 0, (@ItemTileGridPositionX), (@ItemTileGridPositionY), 0, 0, 0, (@ItemName), 0, 0, 0, 0, 0, 0, (@OwnerAccountDBId), (@OwnerPlayerDBId))
       ]]>
     </Body>
-  </Procedure> 
-  
-  <!-- 인벤토리 테이블에 새로운 아이템 저장 -->
-  <Procedure name="spItemToInventorySave">
-    <Param name="@IsQuickSlotUse" type="bit"/>
-	<Param name="@ItemRotated" type="bit"/>
-	<Param name="@ItemWidth" type="SmallInt"/>
-	<Param name="@ItemHeight" type="SmallInt"/>  
-	<Param name="@ItemTileGridPositionX" type="SmallInt"/>
-	<Param name="@ItemTileGridPositionY" type="SmallInt"/>
-    <Param name="@ItemLargeCategory" type="TinyInt" notnull="true"/>
-    <Param name="@ItemMediumCategory" type="TinyInt" notnull="true"/>
-    <Param name="@ItemSmallCategory" type="SmallInt"/>    
-    <Param name="@ItemName" type="nvarchar(20)"/>
-    <Param name="@ItemMinDamage" type="int"/>
-    <Param name="@ItemMaxDamage" type="int"/>
-    <Param name="@ItemDefence" type="int"/>
-    <Param name="@ItemMaxCount" type="int"/>
-    <Param name="@ItemCount" type="SmallInt"/>        
-    <Param name="@IsEquipped" type="bit"/>        
-    <Param name="@OwnerAccountDBId" type="BigInt"/>
-    <Param name="@OwnerPlayerDBId" type="BigInt"/>    
-    <Body>
-      <![CDATA[
-	    SET NOCOUNT ON
-        UPDATE [dbo].[Inventory] 
-        SET IsQuickSlotUse = (@IsQuickSlotUse),
-		ItemRotated = (@ItemRotated),
-		ItemWidth = (@ItemWidth),
-		ItemHeight = (@ItemHeight),
-		ItemTileGridPositionX = (@ItemTileGridPositionX),
-		ItemTileGridPositionY = (@ItemTileGridPositionY),
-		ItemLargeCategory = (@ItemLargeCategory),
-        ItemMediumCategory = (@ItemMediumCategory), ItemSmallCategory = (@ItemSmallCategory),
-        ItemName = (@ItemName), ItemCount = (@ItemCount), IsEquipped = (@IsEquipped), 
-        MinDamage = (@ItemMinDamage), MaxDamage = (@ItemMaxDamage),
-        Defence = (@ItemDefence), MaxCount = (@ItemMaxCount)        
-        WHERE ItemTileGridPositionX = (@ItemTileGridPositionX) AND ItemTileGridPositionY = (@ItemTileGridPositionY) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)        
-      ]]>
-    </Body>
-  </Procedure> 
-  
-  <!-- 아이템 테이블에 아이템 갱신 -->
-  <Procedure name="spItemRefreshCount">
-    <Param name="@OwnerAccountDBId" type="BigInt"/>
-    <Param name="@OwnerPlayerDBId" type="BigInt"/>
-    <Param name="@ItemSmallCategory" type="SmallInt"/>
-    <Param name="@ItemCount" type="SmallInt"/>
-    <Param name="@ItemTileGridPositionX" type="SmallInt"/>
-	<Param name="@ItemTileGridPositionY" type="SmallInt"/>
-    <Body>
-      <![CDATA[
-	    SET NOCOUNT ON
-        UPDATE [dbo].[Inventory]
-        SET ItemCount = (@ItemCount)
-        WHERE ItemSmallCategory = (@ItemSmallCategory) AND ItemTileGridPositionX = (@ItemTileGridPositionX) AND ItemTileGridPositionY = (@ItemTileGridPositionY) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
-      ]]>
-    </Body>
   </Procedure>  
-  
-  <!-- 인벤토리 테이블에 아이템 있는지 확인 -->
-  <Procedure name="spInventoryItemCheck">
-    <Param name="@AccountDBId" type="BigInt"/>
-    <Param name="@PlayerDbId" type="BigInt"/>
-    <Param name="@ItemTileGridPositionX" type="SmallInt"/>
-	<Param name="@ItemTileGridPositionY" type="SmallInt"/>
-    <Body>      
-      <![CDATA[
-	    SET NOCOUNT ON
-        SELECT IsQuickSlotUse, ItemRotated, ItemWidth, ItemHeight, 
-		ItemLargeCategory, ItemMediumCategory, ItemSmallCategory,
-		ItemName,
-		MinDamage, MaxDamage, Defence, MaxCount, ItemCount, IsEquipped
-        FROM [dbo].[Inventory] 
-        WHERE OwnerAccountDBId = (@AccountDBId) AND OwnerPlayerDBId = (@PlayerDBId) AND ItemTileGridPositionX = (@ItemTileGridPositionX) AND ItemTileGridPositionY = (@ItemTileGridPositionY)
-      ]]>
-    </Body>    
-  </Procedure>
 	
   <!-- 인벤토리 테이블에 있는 아이템 가지고 옴-->
   <Procedure name="spGetItemTableInfoToInventory">
@@ -447,8 +365,10 @@
     <Body>
       <![CDATA[
 	    SET NOCOUNT ON
-        SELECT ItemRotated, ItemWidth, ItemHeight,
-		ItemLargeCategory, ItemMediumCategory, ItemSmallCategory, ItemName, MinDamage, MaxDamage, Defence, MaxCount, ItemCount, ItemTileGridPositionX, ItemTileGridPositionY, IsEquipped
+        SELECT ItemIsQuickSlotUse, ItemIsEquipped, ItemRotated,
+		ItemTileGridPositionX, ItemTileGridPositionY,
+		ItemLargeCategory, ItemMediumCategory, ItemSmallCategory,
+		ItemCount, ItemDurability, ItemEnchantPoint
         FROM [dbo].[Inventory]
         WHERE OwnerAccountDBId = (@AccountDBId) AND OwnerPlayerDBId = (@PlayerDBId)
       ]]>
@@ -473,42 +393,15 @@
     <Param name="@OwnerAccountDBId" type="BigInt"/>
     <Param name="@OwnerPlayerDBId" type="BigInt"/>
 	<Param name="@ItemTileGridPositionX" type="SmallInt"/>
-	<Param name="@ItemTileGridPositionY" type="SmallInt"/>    
-    <Param name="@InitItemName" type="nvarchar(20)"/>    
+	<Param name="@ItemTileGridPositionY" type="SmallInt"/>        
     <Body>
       <![CDATA[
 	    SET NOCOUNT ON
         UPDATE [dbo].[Inventory]
-        SET ItemRotated = 0, ItemWidth = 0, ItemHeight = 0,		
-		ItemLargeCategory = 0, ItemMediumCategory = 0, ItemSmallCategory = 0,
-		ItemName = (@InitItemName),
-		ItemCount = 0,
-		IsEquipped = 0, 
-		MinDamage = 0, MaxDamage = 0, Defence = 0, MaxCount = 0		
+        SET ItemIsQuickSlotUse = 0, IsEquipped = 0, ItemRotated = 0,
+		ItemLargeCategory = 0, ItemMediumCategory = 0, ItemSmallCategory = 0,		
+		ItemCount = 0, ItemDurability = 0, ItemEnchantPoint = 0		 
         WHERE ItemTileGridPositionX = (@ItemTileGridPositionX) AND ItemTileGridPositionY = (@ItemTileGridPositionY) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
-      ]]>
-    </Body>
-  </Procedure>
-  
-  <!-- 인벤토리 아이템 업데이트 -->
-ㅇ  <Procedure name="spInventoryItemUpdate">
-    <Param name="@OwnerAccountDBId" type="BigInt"/>
-    <Param name="@OwnerPlayerDBId" type="BigInt"/>    
-	<Param name="@ItemRotated" type="bit"/>
-	<Param name="@ItemTileGridPositionX" type="SmallInt"/>
-	<Param name="@ItemTileGridPositionY" type="SmallInt"/>
-    <Param name="@ItemCount" type="SmallInt"/>
-    <Param name="@IsEquipped" type="bit"/>
-    <Body>
-      <![CDATA[
-	    SET NOCOUNT ON
-        UPDATE [dbo].[Inventory]
-		SET ItemRotated = (@ItemRotated),
-		ItemTileGridPositionX = (@ItemTileGridPositionX),
-		ItemTileGridPositionY = (@ItemTileGridPositionY),
-		ItemCount = (@ItemCount),
-		IsEquipped = (@IsEquipped)
-		WHERE OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId) And ItemTileGridPositionX = (@ItemTileGridPositionX) AND ItemTileGridPositionY = (@ItemTileGridPositionY)
       ]]>
     </Body>
   </Procedure>
@@ -517,31 +410,26 @@
 	<Procedure name="spInventoryItemPlace">
 	<Param name="@OwnerAccountDBId" type="BigInt"/>
 	<Param name="@OwnerPlayerDBId" type="BigInt"/>
-	<Param name="@IsQuickSlotUse" type="bit"/>
-	<Param name="@ItemRotated" type="bit"/>
-	<Param name="@ItemWidth" type="SmallInt"/>
-	<Param name="@ItemHeight" type="SmallInt"/>
+	<Param name="@ItemIsQuickSlotUse" type="bit"/>
+    <Param name="@ItemIsEquipped" type="bit"/>
+	<Param name="@ItemRotated" type="bit"/>			
 	<Param name="@ItemTileGridPositionX" type="SmallInt"/>
 	<Param name="@ItemTileGridPositionY" type="SmallInt"/>
-	<Param name="@ItemLargeCategory" type="TinyInt" notnull="true"/>
-	<Param name="@ItemMediumCategory" type="TinyInt" notnull="true"/>
-	<Param name="@ItemSmallCategory" type="SmallInt"/>
-	<Param name="@ItemName" type="nvarchar(20)"/>
-	<Param name="@ItemCount" type="SmallInt"/>
-	<Param name="@IsEquipped" type="bit"/>
-	<Param name="@MinDamage" type="int"/>
-	<Param name="@MaxDamage" type="int"/>
-	<Param name="@Defence" type="int"/>
-	<Param name="@MaxCount" type="int"/>			
+	<Param name="@ItemLargeCategory" type="TinyInt"/>
+	<Param name="@ItemMediumCategory" type="TinyInt"/>
+	<Param name="@ItemSmallCategory" type="SmallInt"/>	
+	<Param name="@ItemCount" type="SmallInt"/>	
+	<Param name="@ItemDurability" type="int"/>	
+	<Param name="@ItemEnchantPoint" type="TinyInt"/>		
 	<Body>
 	  <![CDATA[
 		SET NOCOUNT ON
 		UPDATE [dbo].[Inventory]
 		SET IsQuickSlotUse = (@IsQuickSlotUse),
-		ItemRotated = (@ItemRotated),
-		ItemWidth = (@ItemWidth), ItemHeight = (@ItemHeight),
+		IsEquipped = (@IsEquipped),
+		ItemRotated = (@ItemRotated)		
 		ItemLargeCategory = (@ItemLargeCategory), ItemMediumCategory = (@ItemMediumCategory), ItemSmallCategory = (@ItemSmallCategory),
-		ItemName = (@ItemName), ItemCount = (@ItemCount), IsEquipped = (@IsEquipped), MinDamage = (@MinDamage), MaxDamage = (@MaxDamage), Defence = (@Defence), MaxCount = (@MaxCount)
+		ItemCount = (@ItemCount), ItemDurability = (@ItemDurability), ItemEnchantPoint = (@ItemEnchantPoint)
 		WHERE OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId) And ItemTileGridPositionX = (@ItemTileGridPositionX) AND ItemTileGridPositionY = (@ItemTileGridPositionY)
 		]]>
 	</Body>	
