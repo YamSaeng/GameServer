@@ -168,14 +168,22 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 				PotionItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_HEAL;
 			}
 
-			if (SmallCategory == "ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL")
+			if (SmallCategory == "ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL")
 			{
-				PotionItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL;				
+				PotionItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL;				
+			}
+			else if(SmallCategory == "ITEM_SMALL_CATEGORY_POTION_MANA_RESTORATION_POTION_SMALL")
+			{
+				PotionItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_MANA_RESTORATION_POTION_SMALL;
 			}
 
-			if (ItemObjectType == "OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL")
+			if (ItemObjectType == "OBJECT_ITEM_CONSUMABLE_HEALTH_RESTORATION_POTION_SMALL")
 			{
-				PotionItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL;
+				PotionItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEALTH_RESTORATION_POTION_SMALL;
+			}
+			else if (ItemObjectType == "OBJECT_ITEM_CONSUMABLE_MANA_RESTORATION_POTION_SMALL")
+			{
+				PotionItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CONSUMABLE_MANA_RESTORATION_POTION_SMALL;
 			}
 
 			PotionItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
