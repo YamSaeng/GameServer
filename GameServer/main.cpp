@@ -44,6 +44,13 @@ vector<st_ServerInfo> ServerConfigParser(const wchar_t* FileName)
 
 void ServerInfoInit()
 {
+	// DB 동기화 
+	CDBConnection* GameServerDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+	DBSynchronizer GameServerDBSync(*GameServerDBConnection);
+	GameServerDBSync.Synchronize(L"GameServerDB.xml");
+
+	G_DBConnectionPool->Push(en_DBConnect::GAME, GameServerDBConnection);
+
 	// 서버 초기화
 	vector<st_ServerInfo> ServerInfos = ServerConfigParser(L"GameServerConfig.xml");
 
@@ -58,13 +65,7 @@ void ServerInfoInit()
 		{
 			G_GameServer.LoginServerConnect(ServerInfos[i].IP.c_str(), ServerInfos[i].Port);
 		}
-	}	
-
-	CDBConnection* GameServerDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-	DBSynchronizer GameServerDBSync(*GameServerDBConnection);
-	GameServerDBSync.Synchronize(L"GameServerDB.xml");
-
-	G_DBConnectionPool->Push(en_DBConnect::GAME, GameServerDBConnection);
+	}		
 }
 
 int main()
@@ -107,6 +108,8 @@ int main()
 		G_GameServer._AcceptTPS = 0;
 		G_GameServer._RecvPacketTPS = 0;
 		G_GameServer._SendPacketTPS = 0;
+		G_GameServer._UserDBThreadTPS = 0;
+		G_GameServer._LogicThreadFPS = 0;
 		G_GameServer._TimerJobThreadTPS = 0;
 
 		Sleep(1000);
