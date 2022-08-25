@@ -10,10 +10,10 @@
           "ItemName": "나무 검",
           "ItemWidth": 1,
           "ItemHeight": 2,
-          "ItemMaxHP": 150,
-          "ItemCraftingMaxHP": 0,
           "ItemMinDamage": 5,
           "ItemMaxDamage": 10,
+          "ItemMaxDurability": 150,
+          "ItemMaxCount": 1,
           "ItemCraftingTime": 5000
         },
         {
@@ -23,11 +23,11 @@
           "ItemExplain": "나무로 만든 방패",
           "ItemName": "나무 방패",
           "ItemWidth": 2,
-          "ItemHeight": 2,
-          "ItemMaxHP": 150,
-          "ItemCraftingMaxHP": 0,
+          "ItemHeight": 2,          
           "ItemMinDamage": 1,
           "ItemMaxDamage": 2,
+          "ItemMaxDurability": 150,
+          "ItemMaxCount": 1,
           "ItemCraftingTime": 5000
         }
       ]
@@ -44,9 +44,9 @@
           "ItemName": "가죽 모자",
           "ItemWidth": 2,
           "ItemHeight": 1,
-          "ItemMaxHP": 50,
-          "ItemCraftingMaxHP": 0,
           "ItemDefence": 5,
+          "ItemMaxDurability": 50,
+          "ItemMaxCount": 1,
           "ItemCraftingTime": 5000
         },
         {
@@ -57,9 +57,9 @@
           "ItemName": "나무 갑옷",
           "ItemWidth": 2,
           "ItemHeight": 2,
-          "ItemMaxHP": 100,
-          "ItemCraftingMaxHP": 0,
           "ItemDefence": 15,
+          "ItemMaxDurability": 100,
+          "ItemMaxCount": 1,
           "ItemCraftingTime": 8000
         },
         {
@@ -70,9 +70,9 @@
           "ItemName": "가죽 신발",
           "ItemWidth": 2,
           "ItemHeight": 1,
-          "ItemMaxHP": 50,
-          "ItemCraftingMaxHP": 0,
           "ItemDefence": 5,
+          "ItemMaxDurability": 50,
+          "ItemMaxCount": 1,
           "ItemCraftingTime": 4000
         }
       ]
@@ -89,10 +89,10 @@
           "ItemName": "회복물약(소)",
           "ItemWidth": 1,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
+          "ItemHealPoint": 50,
+          "ItemMaxDurability": 10,
           "ItemMaxCount": 99,
-          "ItemCraftingTime": 0
+          "ItemCraftingTime": 1000
         }
       ],
       "SkillBookList": [
@@ -104,10 +104,8 @@
           "ItemName": "맹렬한일격 스킬책",
           "ItemWidth": 1,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
-          "ItemMaxCount": 1,
-          "ItemCraftingTime": 0
+          "ItemMaxDurability": 100,
+          "ItemMaxCount": 1
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -117,10 +115,8 @@
           "ItemName": "회심의일격 스킬책",
           "ItemWidth": 1,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
-          "ItemMaxCount": 1,
-          "ItemCraftingTime": 0
+          "ItemMaxDurability": 100,
+          "ItemMaxCount": 1          
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -130,10 +126,8 @@
           "ItemName": "쇄혼비무 스킬책",
           "ItemWidth": 1,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
-          "ItemMaxCount": 1,
-          "ItemCraftingTime": 0
+          "ItemMaxDurability": 100,
+          "ItemMaxCount": 1          
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -143,10 +137,8 @@
           "ItemName": "초혼비무 스킬책",
           "ItemWidth": 1,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
-          "ItemMaxCount": 1,
-          "ItemCraftingTime": 0
+          "ItemMaxDurability": 100,
+          "ItemMaxCount": 1          
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -156,10 +148,8 @@
           "ItemName": "분쇄파동 스킬책",
           "ItemWidth": 1,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
-          "ItemMaxCount": 1,
-          "ItemCraftingTime": 0
+          "ItemMaxDurability": 100,
+          "ItemMaxCount": 1          
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -169,10 +159,8 @@
           "ItemName": "돌격자세 스킬책",
           "ItemWidth": 1,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
-          "ItemMaxCount": 1,
-          "ItemCraftingTime": 0
+          "ItemMaxDurability": 100,
+          "ItemMaxCount": 1          
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -182,10 +170,8 @@
           "ItemName": "불꽃작살 스킬책",
           "ItemWidth": 1,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
-          "ItemMaxCount": 1,
-          "ItemCraftingTime": 0
+          "ItemMaxDurability": 100,
+          "ItemMaxCount": 1          
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -195,10 +181,8 @@
           "ItemName": "지옥의화염 스킬책",
           "ItemWidth": 1,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
-          "ItemMaxCount": 1,
-          "ItemCraftingTime": 0
+          "ItemMaxDurability": 100,
+          "ItemMaxCount": 1          
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -208,10 +192,8 @@
           "ItemName": "치유의빛 스킬책",
           "ItemWidth": 1,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
-          "ItemMaxCount": 1,
-          "ItemCraftingTime": 0
+          "ItemMaxDurability": 100,
+          "ItemMaxCount": 1          
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -221,10 +203,8 @@
           "ItemName": "치유의바람 스킬책",
           "ItemWidth": 1,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
-          "ItemMaxCount": 1,
-          "ItemCraftingTime": 0
+          "ItemMaxDurability": 100,
+          "ItemMaxCount": 1          
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -234,10 +214,8 @@
           "ItemName": "충격해제 스킬책",
           "ItemWidth": 1,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
-          "ItemMaxCount": 1,
-          "ItemCraftingTime": 0
+          "ItemMaxDurability": 100,
+          "ItemMaxCount": 1          
         }
       ]
     }
@@ -253,10 +231,8 @@
           "ItemName": "가죽",
           "ItemWidth": 1,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
-          "ItemMaxCount": 99,
-          "ItemCraftingTime": 0
+          "ItemMaxDurability": 50,
+          "ItemMaxCount": 99
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -266,10 +242,8 @@
           "ItemName": "슬라임젤리",
           "ItemWidth": 1,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
-          "ItemMaxCount": 99,
-          "ItemCraftingTime": 0
+          "ItemMaxDurability": 50,
+          "ItemMaxCount": 99
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -279,10 +253,7 @@
           "ItemName": "동전",
           "ItemWidth": 1,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
-          "ItemMaxCount": 99,
-          "ItemCraftingTime": 0
+          "ItemMaxCount": 99
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -291,11 +262,8 @@
           "ItemExplain": "",
           "ItemName": "은전",
           "ItemWidth": 1,
-          "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
-          "ItemMaxCount": 99,
-          "ItemCraftingTime": 0
+          "ItemHeight": 1,          
+          "ItemMaxCount": 99
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -304,11 +272,8 @@
           "ItemExplain": "",
           "ItemName": "금전",
           "ItemWidth": 1,
-          "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
-          "ItemMaxCount": 99,
-          "ItemCraftingTime": 0
+          "ItemHeight": 1,          
+          "ItemMaxCount": 99
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -318,10 +283,8 @@
           "ItemName": "암석",
           "ItemWidth": 1,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
-          "ItemMaxCount": 99,
-          "ItemCraftingTime": 0
+          "ItemMaxDurability": 50,
+          "ItemMaxCount": 99
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -331,10 +294,8 @@
           "ItemName": "통나무",
           "ItemWidth": 2,
           "ItemHeight": 2,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
-          "ItemMaxCount": 99,
-          "ItemCraftingTime": 0
+          "ItemMaxDurability": 50,
+          "ItemMaxCount": 99
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -344,8 +305,7 @@
           "ItemName": "나무판자",
           "ItemWidth": 2,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
+          "ItemMaxDurability": 50,
           "ItemMaxCount": 99,
           "ItemCraftingTime": 4000
         },
@@ -357,8 +317,7 @@
           "ItemName": "실",
           "ItemWidth": 1,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
+          "ItemMaxDurability": 50,
           "ItemMaxCount": 99,
           "ItemCraftingTime": 3000
         },
@@ -370,8 +329,7 @@
           "ItemName": "숯",
           "ItemWidth": 1,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
+          "ItemMaxDurability": 50,
           "ItemMaxCount": 99,
           "ItemCraftingTime": 5000
         },
@@ -383,10 +341,8 @@
           "ItemName": "구리 광석",
           "ItemWidth": 1,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
-          "ItemMaxCount": 99,
-          "ItemCraftingTime": 0
+          "ItemMaxDurability": 50,
+          "ItemMaxCount": 99
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -396,8 +352,7 @@
           "ItemName": "구리",
           "ItemWidth": 1,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
+          "ItemMaxDurability": 50,
           "ItemMaxCount": 99,
           "ItemCraftingTime": 8000
         },
@@ -409,10 +364,8 @@
           "ItemName": "철광석",
           "ItemWidth": 1,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
-          "ItemMaxCount": 99,
-          "ItemCraftingTime": 8000
+          "ItemMaxDurability": 50,
+          "ItemMaxCount": 99
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
@@ -422,8 +375,7 @@
           "ItemName": "철괴",
           "ItemWidth": 1,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
+          "ItemMaxDurability": 50,
           "ItemMaxCount": 99,
           "ItemCraftingTime": 8000
         }
@@ -441,8 +393,7 @@
           "ItemName": "용광로",
           "ItemWidth": 2,
           "ItemHeight": 2,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
+          "ItemMaxDurability": 2,
           "ItemMaxCount": 1,
           "ItemCraftingTime": 10000
         },
@@ -454,8 +405,7 @@
           "ItemName": "제재소",
           "ItemWidth": 2,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
+          "ItemMaxDurability": 2,
           "ItemMaxCount": 1,
           "ItemCraftingTime": 10000
         }
@@ -473,10 +423,8 @@
           "ItemName": "감자 씨앗",
           "ItemWidth": 1,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 0,
-          "ItemMaxCount": 99,
-          "ItemCraftingTime": 0
+          "ItemMaxDurability": 100,
+          "ItemMaxCount": 99          
         }
       ]
     }
@@ -492,10 +440,8 @@
           "ItemName": "감자",
           "ItemWidth": 1,
           "ItemHeight": 1,
-          "ItemMaxHP": 2,
-          "ItemCraftingMaxHP": 1,
-          "ItemMaxCount": 99,
-          "ItemCraftingTime": 0
+          "ItemMaxDurability": 10,          
+          "ItemMaxCount": 99          
         }
       ]
     }
