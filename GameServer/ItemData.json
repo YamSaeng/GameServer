@@ -83,10 +83,23 @@
       "PotionList": [
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_HEAL",
-          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL",
-          "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL",
-          "ItemExplain": "슬라임 젤을 농축해서 만든 물약",
-          "ItemName": "회복물약(소)",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL",
+          "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_HEALTH_RESTORATION_POTION_SMALL",
+          "ItemExplain": "슬라임 젤을 농축해서 만든 체력 물약",
+          "ItemName": "체력회복물약(소)",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
+          "ItemHealPoint": 50,
+          "ItemMaxDurability": 10,
+          "ItemMaxCount": 99,
+          "ItemCraftingTime": 1000
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_HEAL",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_POTION_MANA_RESTORATION_POTION_SMALL",
+          "ItemObjectType": "OBJECT_ITEM_CONSUMABLE_MANA_RESTORATION_POTION_SMALL",
+          "ItemExplain": "슬라임 젤을 농축해서 만든 마력 물약",
+          "ItemName": "마력회복물약(소)",
           "ItemWidth": 1,
           "ItemHeight": 1,
           "ItemHealPoint": 50,
