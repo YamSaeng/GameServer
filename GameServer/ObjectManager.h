@@ -16,6 +16,7 @@ class CFurnace;
 class CSawmill;
 class CPotato;
 class CCropItem;
+class CMapTile;
 
 class CObjectManager
 {
@@ -46,6 +47,7 @@ private:
 	CMemoryPoolTLS<CFurnace>* _FurnaceMemoryPool;
 	CMemoryPoolTLS<CSawmill>* _SamillMemoryPool;
 	CMemoryPoolTLS<CPotato>* _PotatoMemoryPool;
+	CMemoryPoolTLS<CMapTile>* _MapTileMemoryPool;
 
 	int64 _GameServerObjectId;
 
@@ -71,14 +73,6 @@ public:
 
 	CObjectManager();
 	~CObjectManager();
-	//-----------------------------------------------------------
-	// Object를 게임에 입장시켜준다. ( 입장할 맵의 아이디를 받는다 )
-	//-----------------------------------------------------------
-	void ObjectEnterGame(CGameObject* EnterGameObject, int64 MapID);
-	//-----------------------------------------------------------
-	// Object를 게임에서 퇴장시켜준다. ( 퇴장할 맵의 아이디를 받는다 )
-	//-----------------------------------------------------------
-	bool ObjectLeaveGame(CGameObject* LeaveGameObject, int32 ObjectIndex, int32 _ChannelId, bool IsObjectReturn = true);
 
 	//----------------------------------------
 	// 플레이어 배열 인덱스 반납
@@ -126,19 +120,19 @@ public:
 	//-----------------------------------
 	void MapObjectSpawn(int64& MapID);
 
+	//-------------------------------------------
+	// 맵에 할당되어 있는 타일 정보 가져와서 스폰
+	//-------------------------------------------
+	void MapTileInfoSpawn(int64& MapID);
+
 	//------------------------------------------------------------------------------------------------
 	// 게임오브젝트에서 아이템 스폰
 	//------------------------------------------------------------------------------------------------
-	void ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObjectType, st_Vector2Int SpawnIntPosition, st_Vector2 SpawnPosition, en_GameObjectType SpawnItemOwnerType, en_GameObjectType ItemDataType);
+	void ObjectItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_GameObjectType KillerObjectType, st_Vector2Int SpawnIntPosition, st_Vector2 SpawnPosition, en_GameObjectType SpawnItemOwnerType, en_GameObjectType ItemDataType);
 	//------------------------------------------------------------------------------------------------
 	// 아이템 버리기
 	//------------------------------------------------------------------------------------------------
-	void ObjectItemDropToSpawn(en_SmallItemCategory DropItemType, int32 DropItemCount, st_Vector2Int SpawnIntPosition, st_Vector2 SpawnPosition);
-		
-	//----------------------------------------------------------------------------
-	// 오브젝트 스폰
-	//----------------------------------------------------------------------------
-	void ObjectSpawn(en_GameObjectType ObjectType, st_Vector2Int SpawnPosition);
+	void ObjectItemDropToSpawn(CGameObject* DropOwnerObject, CChannel* SpawnChannel, en_SmallItemCategory DropItemType, int32 DropItemCount);		
 
 	//-------------------------------------
 	// 게임 오브젝트 Job 생성

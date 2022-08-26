@@ -9,6 +9,8 @@
 #include "Furnace.h"
 #include "Sawmill.h"
 #include "Potato.h"
+#include "MapTile.h"
+#include "ChannelManager.h"
 #include <atlbase.h>
 
 CObjectManager::CObjectManager()
@@ -81,214 +83,6 @@ CObjectManager::~CObjectManager()
 	delete _StoneMemoryPool;
 }
 
-void CObjectManager::ObjectEnterGame(CGameObject* EnterGameObject, int64 MapID)
-{
-	bool IsEnterChannel = true;
-
-	// 채널 찾는다.
-	CMap* Map = G_MapManager->GetMap(MapID);
-	if (Map == nullptr)
-	{
-		CRASH("ObjectManager Add EnterChannel이 nullptr");
-	}
-
-	switch (EnterGameObject->_GameObjectInfo.ObjectType)
-	{
-	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
-	{
-		CPlayer* Player = (CPlayer*)EnterGameObject;
-
-		Player->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_IDLE;
-	
-		Map->GetChannelManager()->Find(1)->EnterChannel(EnterGameObject);
-	}
-	break;
-	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-	case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
-	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
-	case en_GameObjectType::OBJECT_THIEF_PLAYER:
-	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
-	{
-		CPlayer* Player = (CPlayer*)EnterGameObject;
-
-		Player->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_IDLE;
-
-		// 채널 입장
-		Map->GetChannelManager()->Find(1)->EnterChannel(EnterGameObject, &Player->_SpawnPosition);
-	}
-	break;
-	case en_GameObjectType::OBJECT_SLIME:
-	case en_GameObjectType::OBJECT_BEAR:
-	{
-		CMonster* Monster = (CMonster*)EnterGameObject;		
-
-		// 몬스터 주위 오브젝트 정보 저장
-		Monster->_FieldOfViewPlayers = Map->GetFieldOfViewPlayer(Monster, Monster->_FieldOfViewDistance);
-		
-		// 채널 입장
-		Map->GetChannelManager()->Find(1)->EnterChannel(EnterGameObject, &Monster->_SpawnPosition);		
-
-		// 몬스터 추가하면 몬스터 주위 플레이어들에게 몬스터를 소환하라고 알림
-		CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(Monster);
-		GameServer->SendPacketFieldOfView(Monster, ResSpawnPacket);
-		ResSpawnPacket->Free();
-
-		// 몬스터 소환할때 소환 이펙트 출력
-		CMessage* ResEffectPacket = GameServer->MakePacketEffect(Monster->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_OBJECT_SPAWN, 0.5f);
-		GameServer->SendPacketFieldOfView(Monster, ResEffectPacket);
-		ResEffectPacket->Free();
-	}
-	break;
-	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
-	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
-	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
-	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
-		{
-			CItem* Item = (CItem*)EnterGameObject;
-
-			IsEnterChannel = Map->GetChannelManager()->Find(1)->EnterChannel(EnterGameObject, &Item->_SpawnPosition);
-			if (IsEnterChannel == true)
-			{
-				// 중복되지 않은 아이템 스폰
-				// 인덱스 가져오기	
-				_ItemsArrayIndexs.Pop(&EnterGameObject->_ObjectManagerArrayIndex);
-				// 배열에 저장
-				_ItemsArray[EnterGameObject->_ObjectManagerArrayIndex] = Item;			
-
-				Item->SetDestoryTime(1800);
-				Item->ItemSetTarget(Item->_GameObjectInfo.OwnerObjectType, Item->_GameObjectInfo.OwnerObjectId);
-
-				CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(Item);
-				GameServer->SendPacketFieldOfView(Item, ResSpawnPacket);
-				ResSpawnPacket->Free();
-			}
-			else
-			{
-				// 중복된 아이템의 경우 메모리에 반납
-				ObjectReturn(Item->_GameObjectInfo.ObjectType, Item);
-			}
-		}
-		break;
-	case en_GameObjectType::OBJECT_STONE:
-	case en_GameObjectType::OBJECT_TREE:
-		{
-			CEnvironment* Environment = (CEnvironment*)EnterGameObject;
-
-			// 인덱스 가져오기
-			_EnvironmentsArrayIndexs.Pop(&EnterGameObject->_ObjectManagerArrayIndex);
-			// 배열에 저장
-			_EnvironmentsArray[EnterGameObject->_ObjectManagerArrayIndex] = Environment;
-
-			Map->GetChannelManager()->Find(1)->EnterChannel(EnterGameObject, &Environment->_SpawnPosition);		
-
-			CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(Environment);
-			GameServer->SendPacketFieldOfView(Environment, ResSpawnPacket);
-			ResSpawnPacket->Free();
-		}
-		break;
-	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
-	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
-		{
-			CCraftingTable* CraftingTable = (CCraftingTable*)EnterGameObject;
-
-			_CraftingTableArrayIndexs.Pop(&EnterGameObject->_ObjectManagerArrayIndex);
-			_CraftingTablesArray[EnterGameObject->_ObjectManagerArrayIndex] = CraftingTable;
-
-			Map->GetChannelManager()->Find(1)->EnterChannel(EnterGameObject, &CraftingTable->_SpawnPosition);
-
-			CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(CraftingTable);
-			GameServer->SendPacketFieldOfView(CraftingTable, ResSpawnPacket);
-			ResSpawnPacket->Free();
-		}
-		break;
-	case en_GameObjectType::OBJECT_CROP_POTATO:
-		{
-			CPotato* Potato = (CPotato*)EnterGameObject;
-
-			Map->GetChannelManager()->Find(1)->EnterChannel(EnterGameObject, &Potato->_SpawnPosition);
-
-			CMessage* ResSpawnPacket = GameServer->MakePacketResObjectSpawn(Potato);
-			GameServer->SendPacketFieldOfView(Potato, ResSpawnPacket);
-			ResSpawnPacket->Free();
-		}
-		break;	
-	}
-}
-
-bool CObjectManager::ObjectLeaveGame(CGameObject* LeaveGameObject, int32 ObjectIndex, int32 _ChannelId, bool IsObjectReturn)
-{
-	bool RemoveSuccess = false;
-
-	// 타입에 따라 관리당하고 있는 자료구조에서 자신을 삭제
-	// 채널에서 삭제	
-	switch (LeaveGameObject->_GameObjectInfo.ObjectType)
-	{	
-	case en_GameObjectType::OBJECT_SLIME:
-	case en_GameObjectType::OBJECT_BEAR:
-		LeaveGameObject->GetChannel()->LeaveChannel(LeaveGameObject);
-
-		break;
-	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
-	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
-	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
-	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
-		LeaveGameObject->GetChannel()->LeaveChannel(LeaveGameObject);
-
-		_ItemsArrayIndexs.Push(ObjectIndex);
-		break;
-	case en_GameObjectType::OBJECT_STONE:
-	case en_GameObjectType::OBJECT_TREE:
-		LeaveGameObject->GetChannel()->LeaveChannel(LeaveGameObject);
-
-		_EnvironmentsArrayIndexs.Push(ObjectIndex);
-		break;
-	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
-	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
-		LeaveGameObject->GetChannel()->LeaveChannel(LeaveGameObject);
-
-		_CraftingTableArrayIndexs.Push(ObjectIndex);
-		break;
-	}
-
-	if (IsObjectReturn == true)
-	{
-		// 오브젝트 메모리 풀에 반환
-		ObjectReturn(LeaveGameObject->_GameObjectInfo.ObjectType, LeaveGameObject);
-	}
-
-	return RemoveSuccess;
-}
-
 void CObjectManager::PlayerIndexReturn(int32 PlayerIndex)
 {
 	_PlayersArrayIndexs.Push(PlayerIndex);
@@ -324,7 +118,15 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 	case en_GameObjectType::OBJECT_CROP_POTATO:
 		NewObject = _PotatoMemoryPool->Alloc();
 		break;
+	case en_GameObjectType::OBJECT_TILE:
+		NewObject = _MapTileMemoryPool->Alloc();
+		break;
 	}
+
+	if (NewObject != nullptr)
+	{
+		NewObject->_GameObjectInfo.ObjectId = InterlockedIncrement64(&_GameServerObjectId);
+	}	
 
 	return NewObject;
 }
@@ -362,6 +164,9 @@ void CObjectManager::ObjectReturn(en_GameObjectType ObjectType, CGameObject* Ret
 	case en_GameObjectType::OBJECT_CROP_POTATO:
 		_PotatoMemoryPool->Free((CPotato*)ReturnObject);
 		break;
+	case en_GameObjectType::OBJECT_TILE:	
+		_MapTileMemoryPool->Free((CMapTile*)ReturnObject);		
+		break;
 	}
 }
 
@@ -389,7 +194,9 @@ CItem* CObjectManager::ItemCreate(en_SmallItemCategory NewItemSmallCategory)
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:
 		NewItem = _ArmorMemoryPool->Alloc();
 		break;
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_MANA_RESTORATION_POTION_SMALL:
+		NewItem = _ConsumableMemoryPool->Alloc();
 		break;
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL:
@@ -437,7 +244,9 @@ void CObjectManager::ItemReturn(CItem* ReturnItem)
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:
 		_ArmorMemoryPool->Free((CArmorItem*)ReturnItem);
 		break;
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_MANA_RESTORATION_POTION_SMALL:
+		_ConsumableMemoryPool->Free((CConsumable*)ReturnItem);
 		break;
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL:
@@ -555,25 +364,27 @@ void CObjectManager::MapObjectSpawn(int64& MapID)
 
 			switch (Map->_CollisionMapInfos[Y][X])
 			{
-			case en_TileMapEnvironment::TILE_MAP_TREE:
+			case en_MapObjectInfo::TILE_MAP_NONE:				
+				break;
+			case en_MapObjectInfo::TILE_MAP_TREE:
 				NewObject = (CTree*)ObjectCreate(en_GameObjectType::OBJECT_TREE);
 				break;
-			case en_TileMapEnvironment::TILE_MAP_STONE:
+			case en_MapObjectInfo::TILE_MAP_STONE:
 				NewObject = (CTree*)ObjectCreate(en_GameObjectType::OBJECT_STONE);
 				break;
-			case en_TileMapEnvironment::TILE_MAP_SLIME:
+			case en_MapObjectInfo::TILE_MAP_SLIME:
 				NewObject = (CSlime*)ObjectCreate(en_GameObjectType::OBJECT_SLIME);
 				break;
-			case en_TileMapEnvironment::TILE_MAP_BEAR:
+			case en_MapObjectInfo::TILE_MAP_BEAR:
 				NewObject = (CBear*)ObjectCreate(en_GameObjectType::OBJECT_BEAR);
 				break;			
-			case en_TileMapEnvironment::TILE_MAP_FURNACE:
+			case en_MapObjectInfo::TILE_MAP_FURNACE:
 				NewObject = (CFurnace*)ObjectCreate(en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE);
 				break;
-			case en_TileMapEnvironment::TILE_MAP_SAMILL:
+			case en_MapObjectInfo::TILE_MAP_SAMILL:
 				NewObject = (CSawmill*)ObjectCreate(en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL);
 				break;
-			case en_TileMapEnvironment::TILE_MAP_POTATO:
+			case en_MapObjectInfo::TILE_MAP_POTATO:
 				NewObject = (CPotato*)ObjectCreate(en_GameObjectType::OBJECT_CROP_POTATO);
 				break;
 			}
@@ -587,20 +398,25 @@ void CObjectManager::MapObjectSpawn(int64& MapID)
 				NewPosition._Y = SpawnPositionY;
 				NewPosition._X = SpawnPositionX;
 
-				NewObject->_GameObjectInfo.ObjectId = InterlockedIncrement64(&_GameServerObjectId);
 				NewObject->_SpawnPosition = NewPosition;
 				NewObject->_NetworkState = en_ObjectNetworkState::LIVE;
-
-				ObjectEnterGame(NewObject, Map->_MapID);
+							
+				CChannel* Channel = Map->GetChannelManager()->Find(1);
+				Channel->EnterChannel(NewObject, &NewObject->_SpawnPosition);
 			}
 		}
 	}
 }
 
-void CObjectManager::ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObjectType, st_Vector2Int SpawnIntPosition, st_Vector2 SpawnPosition, en_GameObjectType SpawnItemOwnerType, en_GameObjectType ItemDataType)
+void CObjectManager::MapTileInfoSpawn(int64& MapID)
+{
+
+}
+
+void CObjectManager::ObjectItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_GameObjectType KillerObjectType, st_Vector2Int SpawnIntPosition, st_Vector2 SpawnPosition, en_GameObjectType SpawnItemOwnerType, en_GameObjectType ItemDataType)
 {
 	bool Find = false;
-	st_ItemData DropItemData;
+	st_ItemInfo DropItemInfo;
 
 	random_device RD;
 	mt19937 Gen(RD());
@@ -631,11 +447,11 @@ void CObjectManager::ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObj
 						CRASH("DropItemInfo를 찾지 못함");
 					}
 
-					DropItemData = *(*FindDropItemInfo).second;
+					DropItemInfo = *(*FindDropItemInfo).second;
 
 					uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
-					DropItemData.ItemCount = RandomDropItemCount(Gen);
-					DropItemData.SmallItemCategory = DropItem.DropItemSmallCategory;
+					DropItemInfo.ItemCount = RandomDropItemCount(Gen);
+					DropItemInfo.ItemSmallCategory = DropItem.DropItemSmallCategory;
 					break;
 				}
 			}
@@ -661,11 +477,11 @@ void CObjectManager::ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObj
 						CRASH("DropItemInfo를 찾지 못함");
 					}
 
-					DropItemData = *(*FindDropItemInfo).second;
+					DropItemInfo = *(*FindDropItemInfo).second;
 
 					uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
-					DropItemData.ItemCount = RandomDropItemCount(Gen);
-					DropItemData.SmallItemCategory = DropItem.DropItemSmallCategory;
+					DropItemInfo.ItemCount = RandomDropItemCount(Gen);
+					DropItemInfo.ItemSmallCategory = DropItem.DropItemSmallCategory;
 					break;
 				}
 			}
@@ -690,11 +506,11 @@ void CObjectManager::ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObj
 						CRASH("DropItemInfo를 찾지 못함");
 					}
 
-					DropItemData = *(*FindDropItemInfo).second;
+					DropItemInfo = *(*FindDropItemInfo).second;
 
 					uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
-					DropItemData.ItemCount = RandomDropItemCount(Gen);
-					DropItemData.SmallItemCategory = DropItem.DropItemSmallCategory;
+					DropItemInfo.ItemCount = RandomDropItemCount(Gen);
+					DropItemInfo.ItemSmallCategory = DropItem.DropItemSmallCategory;
 					break;
 				}
 			}
@@ -704,166 +520,39 @@ void CObjectManager::ObjectItemSpawn(int64 KillerId, en_GameObjectType KillerObj
 
 	if (Find == true)
 	{
-		bool ItemIsQuickSlotUse = false;
-		bool ItemRotated = false;
-		int16 ItemWidth = 0;
-		int16 ItemHeight = 0;
-		int8 ItemLargeCategory = 0;
-		int8 ItemMediumCategory = 0;
-		int16 ItemSmallCategory = 0;
-		wstring ItemName;
-		int16 ItemCount = 0;
-		bool ItemEquipped = false;
-		int16 ItemTilePositionX = 0;
-		int16 ItemTilePositionY = 0;
-		int32 ItemMinDamage = 0;
-		int32 ItemMaxDamage = 0;
-		int32 ItemDefence = 0;
-		int32 ItemMaxCount = 0;
-
-		switch (DropItemData.SmallItemCategory)
-		{		
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEAL_SMALL:
-			break;
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK:
-			break;
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT:
-			{
-				ItemIsQuickSlotUse = false;
-				ItemLargeCategory = (int8)DropItemData.LargeItemCategory;
-				ItemMediumCategory = (int8)DropItemData.MediumItemCategory;
-				ItemSmallCategory = (int16)DropItemData.SmallItemCategory;
-				ItemName = (LPWSTR)CA2W(DropItemData.ItemName.c_str());
-				ItemCount = DropItemData.ItemCount;
-				ItemEquipped = false;
-
-				st_ItemData* MaterialItemData = (*G_Datamanager->_Items.find((int16)DropItemData.SmallItemCategory)).second;
-				ItemWidth = MaterialItemData->ItemWidth;
-				ItemHeight = MaterialItemData->ItemHeight;
-				ItemMaxCount = MaterialItemData->ItemMaxCount;
-			}
-			break;	
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_SEED_POTATO:
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO:
-			{
-				ItemLargeCategory = (int8)DropItemData.LargeItemCategory;
-				ItemMediumCategory = (int8)DropItemData.MediumItemCategory;
-				ItemSmallCategory = (int16)DropItemData.SmallItemCategory;
-				ItemName = (LPWSTR)CA2W(DropItemData.ItemName.c_str());
-				ItemCount = DropItemData.ItemCount;
-				ItemEquipped = false;
-
-				st_ItemData* CropItemData = (*G_Datamanager->_Items.find((int16)DropItemData.SmallItemCategory)).second;
-				ItemWidth = CropItemData->ItemWidth;
-				ItemHeight = CropItemData->ItemHeight;
-				ItemMaxCount = CropItemData->ItemMaxCount;
-			}
-			break;
-		}
-
 		// 아이템 생성
-		CItem* NewItem = ItemCreate((en_SmallItemCategory)ItemSmallCategory);
-		
-		NewItem->_ItemInfo.ItemDBId = NewItem->_GameObjectInfo.ObjectId;
-		NewItem->_ItemInfo.ItemIsQuickSlotUse = ItemIsQuickSlotUse;
-		NewItem->_ItemInfo.Width = ItemWidth;
-		NewItem->_ItemInfo.Height = ItemHeight;
-		NewItem->_ItemInfo.TileGridPositionX = ItemTilePositionX;
-		NewItem->_ItemInfo.TileGridPositionY = ItemTilePositionY;
-		NewItem->_ItemInfo.ItemLargeCategory = (en_LargeItemCategory)ItemLargeCategory;
-		NewItem->_ItemInfo.ItemMediumCategory = (en_MediumItemCategory)ItemMediumCategory;
-		NewItem->_ItemInfo.ItemSmallCategory = (en_SmallItemCategory)ItemSmallCategory;
-		NewItem->_ItemInfo.ItemName = ItemName;
-		NewItem->_ItemInfo.ItemMaxCount = ItemMaxCount;
-		NewItem->_ItemInfo.ItemCount = ItemCount;
-		NewItem->_ItemInfo.ItemIsEquipped = ItemEquipped;
+		CItem* NewItem = ItemCreate(DropItemInfo.ItemSmallCategory);
+		NewItem->_ItemInfo = DropItemInfo;		
 
-		NewItem->_GameObjectInfo.ObjectType = DropItemData.ItemObjectType;		
+		NewItem->_GameObjectInfo.ObjectType = DropItemInfo.ItemObjectType;
 		NewItem->_GameObjectInfo.OwnerObjectId = KillerId;
 		NewItem->_GameObjectInfo.OwnerObjectType = (en_GameObjectType)KillerObjectType;
 		NewItem->_SpawnPosition = SpawnIntPosition;
-		NewItem->_GameObjectInfo.ObjectPositionInfo.Position = SpawnPosition;
+		NewItem->_GameObjectInfo.ObjectPositionInfo.Position = SpawnPosition;			
 
-		// 아이템 월드에 스폰
-		G_ObjectManager->ObjectEnterGame(NewItem, 1);	
+		st_GameObjectJob* EnterChannelItemJob = GameServer->MakeGameObjectJobObjectEnterChannel(NewItem);
+		SpawnChannel->_ChannelJobQue.Enqueue(EnterChannelItemJob);
 	}
 }
 
-void CObjectManager::ObjectItemDropToSpawn(en_SmallItemCategory DropItemType, int32 DropItemCount, st_Vector2Int SpawnIntPosition, st_Vector2 SpawnPosition)
+void CObjectManager::ObjectItemDropToSpawn(CGameObject* DropOwnerObject, CChannel* SpawnChannel, en_SmallItemCategory DropItemType, int32 DropItemCount)
 {
 	CItem* NewItem = ItemCreate(DropItemType);
 	if (NewItem != nullptr)
 	{
-		st_ItemData* ItemData = G_Datamanager->FindItemData(DropItemType);
-		if (ItemData != nullptr)
-		{
-			NewItem->_ItemInfo.ItemDBId = NewItem->_GameObjectInfo.ObjectId;
-			NewItem->_ItemInfo.ItemIsQuickSlotUse = false;
-			NewItem->_ItemInfo.Width = ItemData->ItemWidth;
-			NewItem->_ItemInfo.Height = ItemData->ItemHeight;
-			NewItem->_ItemInfo.TileGridPositionX = 0;
-			NewItem->_ItemInfo.TileGridPositionY = 0;
-			NewItem->_ItemInfo.ItemLargeCategory = ItemData->LargeItemCategory;
-			NewItem->_ItemInfo.ItemMediumCategory = ItemData->MediumItemCategory;
-			NewItem->_ItemInfo.ItemSmallCategory = ItemData->SmallItemCategory;
-			NewItem->_ItemInfo.ItemName = (LPWSTR)CA2W(ItemData->ItemName.c_str());
-			NewItem->_ItemInfo.ItemExplain = (LPWSTR)CA2W(ItemData->ItemExplain.c_str());
-			NewItem->_ItemInfo.ItemCount = DropItemCount;
-			NewItem->_ItemInfo.ItemMaxCount = ItemData->ItemMaxCount;
-			NewItem->_ItemInfo.ItemIsEquipped = false;
+		st_ItemInfo DropItemInfo = *(G_Datamanager->FindItemData(DropItemType));
+		DropItemInfo.ItemDBId = NewItem->_GameObjectInfo.ObjectId;
+		DropItemInfo.ItemCount = DropItemCount;
+		
+		NewItem->_GameObjectInfo.ObjectType = DropItemInfo.ItemObjectType;
+		NewItem->_GameObjectInfo.OwnerObjectId = DropOwnerObject->_GameObjectInfo.ObjectId;
+		NewItem->_GameObjectInfo.OwnerObjectType = DropOwnerObject->_GameObjectInfo.ObjectType;
+		NewItem->_SpawnPosition = DropOwnerObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition;
+		NewItem->_GameObjectInfo.ObjectPositionInfo.Position = DropOwnerObject->_GameObjectInfo.ObjectPositionInfo.Position;
 
-			NewItem->_GameObjectInfo.ObjectType = ItemData->ItemObjectType;
-			NewItem->_GameObjectInfo.OwnerObjectId = 0;
-			NewItem->_GameObjectInfo.OwnerObjectType = en_GameObjectType::NORMAL;
-			NewItem->_SpawnPosition = SpawnIntPosition;
-			NewItem->_GameObjectInfo.ObjectPositionInfo.Position = SpawnPosition;
-
-			G_ObjectManager->ObjectEnterGame(NewItem, 1);
-		}
+		st_GameObjectJob* EnterChannelItemJob = GameServer->MakeGameObjectJobObjectEnterChannel(NewItem);
+		SpawnChannel->_ChannelJobQue.Enqueue(EnterChannelItemJob);		
 	}	
-}
-
-void CObjectManager::ObjectSpawn(en_GameObjectType ObjectType, st_Vector2Int SpawnPosition)
-{
-	CGameObject* SpawnGameObject = nullptr;
-
-	switch (ObjectType)
-	{
-	case en_GameObjectType::OBJECT_SLIME:
-		SpawnGameObject = ObjectCreate(en_GameObjectType::OBJECT_SLIME);
-		break;
-	case en_GameObjectType::OBJECT_BEAR:
-		SpawnGameObject = ObjectCreate(en_GameObjectType::OBJECT_BEAR);
-		break;
-	case en_GameObjectType::OBJECT_STONE:
-		SpawnGameObject = ObjectCreate(en_GameObjectType::OBJECT_STONE);
-		break;
-	case en_GameObjectType::OBJECT_TREE:
-		SpawnGameObject = ObjectCreate(en_GameObjectType::OBJECT_TREE);
-		break;
-	default:
-		break;
-	}
-
-	if (SpawnGameObject != nullptr)
-	{
-		SpawnGameObject->_GameObjectInfo.ObjectId = InterlockedIncrement64(&_GameServerObjectId);
-		SpawnGameObject->_SpawnPosition = SpawnPosition;
-		ObjectEnterGame(SpawnGameObject, 1);
-	}
 }
 
 st_GameObjectJob* CObjectManager::GameObjectJobCreate()
