@@ -60,6 +60,7 @@ CSkill* CSkillBox::FindSkill(en_SkillType SkillType)
 	case en_SkillType::SKILL_KNIGHT_SMASH_WAVE:
 	case en_SkillType::SKILL_KNIGHT_SHAEHONE:
 	case en_SkillType::SKILL_KNIGHT_CHOHONE:
+	case en_SkillType::SKILL_KNIGHT_SHIELD_SMASH:
 		// 주술사 공격
 	case en_SkillType::SKILL_SHAMAN_FLAME_HARPOON:
 	case en_SkillType::SKILL_SHAMAN_ROOT:
