@@ -120,7 +120,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_ItemInfo& ItemInfo)
 {
     *this << ItemInfo.ItemDBId;
     *this << ItemInfo.ItemIsQuickSlotUse;
-    *this << ItemInfo.Rotated;
+    *this << ItemInfo.ItemRotated;
     *this << ItemInfo.ItemWidth;
     *this << ItemInfo.ItemHeight;
     *this << ItemInfo.ItemTileGridPositionX;
