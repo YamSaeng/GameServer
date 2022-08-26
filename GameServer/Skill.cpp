@@ -57,6 +57,7 @@ void CSkill::SetSkillInfo(en_SkillCategory SkillCategory, st_SkillInfo* SkillInf
 		case en_SkillType::SKILL_KNIGHT_SMASH_WAVE:
 		case en_SkillType::SKILL_KNIGHT_SHAEHONE:
 		case en_SkillType::SKILL_KNIGHT_CHOHONE:
+		case en_SkillType::SKILL_KNIGHT_SHIELD_SMASH:
 			_SkillKind = en_SkillKinds::MELEE_SKILL;
 			break;
 		case en_SkillType::SKILL_KNIGHT_CHARGE_POSE:
