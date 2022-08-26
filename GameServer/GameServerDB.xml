@@ -42,30 +42,6 @@
     </Index>
   </Table>
   
-  <!-- 아이템 테이블 -->
-  <Table name="Item" desc="Item Table">
-    <Column name="ItemDBId" type="BigInt" notnull="true" identity="10000000,1"/>
-    <Column name="IsQuickSlotUse" type="bit"/>
-	<Column name="ItemRotated" type="bit"/>
-	<Column name="ItemWidth" type="SmallInt"/>
-	<Column name="ItemHeight" type="SmallInt"/>  	
-    <Column name="ItemUse" type="bit" notnull="true"/>
-    <Column name="ItemLargeCategory" type="TinyInt" notnull="true"/>
-    <Column name="ItemMediumCategory" type="TinyInt" notnull="true"/>
-    <Column name="ItemSmallCategory" type="SmallInt" notnull="true"/>    
-    <Column name="ItemName" type="nvarchar(20)" notnull="true"/>    
-    <Column name="ItemCount" type="SmallInt" notnull="true"/>
-    <Column name="IsEquipped" type="bit"/>
-    <Column name="MinDamage" type="int"/>
-    <Column name="MaxDamage" type="int"/>
-    <Column name="Defence" type="int"/>
-    <Column name="MaxCount" type="int"/>        
-    <Index type="clustered">
-      <PrimaryKey/>
-      <Column name="ItemDBId"/>
-    </Index>    
-  </Table>
-  
   <!-- 인벤토리 아이템 테이블 -->
   <Table name="Inventory" desc="Inventory Table">
 	<Column name="OwnerAccountDBId" type="BigInt" notnull="true"/>
@@ -343,8 +319,7 @@
   </Procedure>
   
   <!-- 인벤토리 테이블 빈껍데기 아이템 정보 생성-->  
-  <Procedure name="spItemToInventoryInit">
-    <Param name="@ItemName" type="nvarchar(20)"/>    
+  <Procedure name="spItemToInventoryInit">    
 	<Param name="@ItemTileGridPositionX" type ="SmallInt"/>
 	<Param name="@ItemTileGridPositionY" type ="SmallInt"/>		      
     <Param name="@OwnerAccountDBId" type="BigInt"/>
@@ -353,7 +328,7 @@
       <![CDATA[
 	    SET NOCOUNT ON
         INSERT INTO [dbo].[Inventory]
-        VALUES (0, 0, 0, 0, (@ItemTileGridPositionX), (@ItemTileGridPositionY), 0, 0, 0, (@ItemName), 0, 0, 0, 0, 0, 0, (@OwnerAccountDBId), (@OwnerPlayerDBId))
+        VALUES ((@OwnerAccountDBId), (@OwnerPlayerDBId), 0, 0, 0, (@ItemTileGridPositionX), (@ItemTileGridPositionY), 0, 0, 0, 0, 0, 0)
       ]]>
     </Body>
   </Procedure>  
@@ -374,20 +349,7 @@
       ]]>
     </Body>
   </Procedure>
-  
-  <!-- 아이템 테이블에 있는 아이템 삭제 -->
-  <Procedure name="spItemDelete">
-    <Param name="@ItemDBId" type="BigInt"/>
-    <Param name="@ItemUse" type="bit"/>
-    <Body>
-      <![CDATA[
-	    SET NOCOUNT ON
-        UPDATE [dbo].[Item] SET ItemUse = (@ItemUse)
-        WHERE ItemDBId = (@ItemDBId)
-      ]]>
-    </Body>
-  </Procedure>
-
+	
   <!-- 인벤토리 아이템 초기화 -->
   <Procedure name="spInventorySlotInit">
     <Param name="@OwnerAccountDBId" type="BigInt"/>
@@ -398,7 +360,7 @@
       <![CDATA[
 	    SET NOCOUNT ON
         UPDATE [dbo].[Inventory]
-        SET ItemIsQuickSlotUse = 0, IsEquipped = 0, ItemRotated = 0,
+        SET ItemIsQuickSlotUse = 0, ItemIsEquipped = 0, ItemRotated = 0,
 		ItemLargeCategory = 0, ItemMediumCategory = 0, ItemSmallCategory = 0,		
 		ItemCount = 0, ItemDurability = 0, ItemEnchantPoint = 0		 
         WHERE ItemTileGridPositionX = (@ItemTileGridPositionX) AND ItemTileGridPositionY = (@ItemTileGridPositionY) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
@@ -425,9 +387,9 @@
 	  <![CDATA[
 		SET NOCOUNT ON
 		UPDATE [dbo].[Inventory]
-		SET IsQuickSlotUse = (@IsQuickSlotUse),
-		IsEquipped = (@IsEquipped),
-		ItemRotated = (@ItemRotated)		
+		SET ItemIsQuickSlotUse = (@ItemIsQuickSlotUse),
+		ItemIsEquipped = (@ItemIsEquipped),
+		ItemRotated = (@ItemRotated),		
 		ItemLargeCategory = (@ItemLargeCategory), ItemMediumCategory = (@ItemMediumCategory), ItemSmallCategory = (@ItemSmallCategory),
 		ItemCount = (@ItemCount), ItemDurability = (@ItemDurability), ItemEnchantPoint = (@ItemEnchantPoint)
 		WHERE OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId) And ItemTileGridPositionX = (@ItemTileGridPositionX) AND ItemTileGridPositionY = (@ItemTileGridPositionY)

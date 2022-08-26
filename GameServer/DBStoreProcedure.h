@@ -112,25 +112,15 @@ namespace SP
 	};
 
 	// 인벤토리 초기화 할때 빈껍데기 생성해서 넣는 프로시저 클래스
-	class CDBGameServerItemCreateToInventory : public CDBBind<5, 0>
+	class CDBGameServerItemCreateToInventory : public CDBBind<4, 0>
 	{
 	public:
-		CDBGameServerItemCreateToInventory(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spItemToInventoryInit(?,?,?,?,?)}") {}
-		void InItemName(wstring& ItemName) { BindParam(0, ItemName.c_str()); }	
-		void InItemTileGridPositionX(int16& ItemTileGridPositionX) { BindParam(1, ItemTileGridPositionX); }
-		void InItemTileGridPositionY(int16& ItemTileGridPositionY) { BindParam(2, ItemTileGridPositionY); }					
-		void InOwnerAccountId(int64& OwnerAccountId) { BindParam(3, OwnerAccountId); }
-		void InOwnerPlayerId(int64& OwnerPlayerId) { BindParam(4, OwnerPlayerId); }
-	};		
-
-	// 아이템 삭제
-	class CDBGameServerItemDelete : public CDBBind<2, 0>
-	{
-	public:
-		CDBGameServerItemDelete(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spItemDelete(?,?)}") {}
-		void InItemDBId(int64& ItemDBId) { BindParam(0, ItemDBId); }
-		void InItemUse(bool& ItemUse) { BindParam(1, ItemUse); }
-	};
+		CDBGameServerItemCreateToInventory(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spItemToInventoryInit(?,?,?,?)}") {}		
+		void InItemTileGridPositionX(int16& ItemTileGridPositionX) { BindParam(0, ItemTileGridPositionX); }
+		void InItemTileGridPositionY(int16& ItemTileGridPositionY) { BindParam(1, ItemTileGridPositionY); }					
+		void InOwnerAccountId(int64& OwnerAccountId) { BindParam(2, OwnerAccountId); }
+		void InOwnerPlayerId(int64& OwnerPlayerId) { BindParam(3, OwnerPlayerId); }
+	};	
 
 	// 인벤토리 아이템 초기화
 	class CDBGameServerInventorySlotInit : public CDBBind<5, 0>
