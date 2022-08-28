@@ -122,6 +122,17 @@ namespace SP
 		void InOwnerPlayerId(int64& OwnerPlayerId) { BindParam(3, OwnerPlayerId); }
 	};	
 
+	// 가방 초기화
+	class CDBGameServerInventoryAllSlotInit : public CDBBind<4, 0>
+	{
+	public:
+		CDBGameServerInventoryAllSlotInit(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spInventoryInit(?,?,?,?)}") {}
+		void InOwnerAccountID(int64& OwnerAccountID) { BindParam(0, OwnerAccountID); }
+		void InOwnerPlayerID(int64& OwnerAccountID) { BindParam(1, OwnerAccountID); }
+		void InInventoryWidth(int32& InventoryWidth) { BindParam(2, InventoryWidth); }
+		void InInventoryHeight(int32& InventoryHeight) { BindParam(3, InventoryHeight); }
+	};
+
 	// 인벤토리 아이템 초기화
 	class CDBGameServerInventorySlotInit : public CDBBind<5, 0>
 	{

@@ -648,7 +648,7 @@
 		</Body>
 	</Procedure>
 
-    <!-- 퀵슬롯바 테이블에서 퀵슬롯바 슬롯 초기화-->
+  <!-- 장비 착용 프로시저 -->
   <Procedure name="spEquipmentWearing">
     <Param name="@EquipmentAccountDBId" type="BigInt"/>
     <Param name="@EquipmentPlayerDBId" type="BigInt"/>
@@ -687,5 +687,32 @@
 		(@EquipmentEnchantPoint))		
       ]]>
     </Body>
-  </Procedure> 
+  </Procedure>
+
+  <!-- 가방 초기화 -->
+  <Procedure name="spInventoryInit">
+	<Param name="@OwnerAccountDBId" type="BigInt"/>
+	<Param name="@OwnerPlayerDBId" type="BigInt"/>
+	<Param name="@InventoryWidth" type="int"/>
+	<Param name="@InventoryHeight" type="int"/>	
+	<Body>
+		<![CDATA[
+		   SET NOCOUNT ON
+           DECLARE @width int
+           DECLARE @height int
+           SET @width = 0
+           SET @height = 0
+           while @width < @InventoryWidth BEGIN
+		   SET @height = 0
+                    while @height < @InventoryHeight BEGIN
+                            UPDATE [dbo].[Inventory]
+                            SET ItemIsQuickSlotUse = 0, ItemIsEquipped = 0, ItemRotated = 0, ItemLargeCategory = 0, ItemMediumCategory = 0, ItemSmallCategory = 0, ItemCount = 0, ItemDurability = 0, ItemEnchantPoint = 0
+                            WHERE OwnerAccountDBId = @OwnerAccountDBId AND OwnerPlayerDBId = @OwnerPlayerDBId AND ItemTileGridPositionX = @width AND ItemTileGridPositionY = @height        
+                        SET @height = @height + 1
+                    END
+                SET @width = @width + 1
+            END
+		]]>
+	</Body>	   
+  </Procedure>	
 </GameServerDB>
