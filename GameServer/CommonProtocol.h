@@ -564,6 +564,21 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_C2S_ITEM_PLACE,
 
 	//------------------------------------------------------------
+	// 게임서버 아이템 회전 요청
+	// int64 AccountId
+	// int64 ObjectId	
+	// en_SmallItemCategory RotateItemSmallCategory
+	//------------------------------------------------------------
+	en_PACKET_C2S_ITEM_ROTATE,
+
+	//------------------------------------------------------------
+	// 게임서버 아이템 회전 요청 응답
+	// int16 AccountID
+	// int64 ObjectID	
+	//------------------------------------------------------------
+	en_PACKET_S2C_ITEM_ROTATE,
+
+	//------------------------------------------------------------
 	// 게임서버 아이템 놓기 요청 응답
 	// int64 AccountId
 	// int64 ObjectId
