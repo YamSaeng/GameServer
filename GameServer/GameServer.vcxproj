@@ -325,6 +325,7 @@
     <ClCompile Include="Skill.cpp" />
     <ClCompile Include="SkillBox.cpp" />
     <ClCompile Include="Slime.cpp" />
+    <ClCompile Include="StorageBox.cpp" />
     <ClCompile Include="XmlParser.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

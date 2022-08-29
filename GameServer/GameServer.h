@@ -31,6 +31,8 @@ private:
 
 	// WorkerThread 종료용 변수
 	bool _NetworkThreadEnd;
+	// UpdateThrad 종료용 변수
+	bool _UpdateThreadEnd;
 	// User DataBaseThread 종료용 변수
 	bool _UserDataBaseThreadEnd;
 	// World DataBaseThread 종료용 변수
@@ -49,6 +51,10 @@ private:
 	// 하루 관리
 	CDay* _Day;
 
+	//----------------------------------------------------------
+	// Update 쓰레드
+	//----------------------------------------------------------
+	static unsigned __stdcall UpdateThreadProc(void* Argument);
 	//----------------------------------------------------------
 	// 유저 데이터베이스 쓰레드 ( 유저 데이터 베이스 작업 처리 )
 	//----------------------------------------------------------
@@ -72,9 +78,9 @@ private:
 	static unsigned __stdcall LogicThreadProc(void* Argument);
 
 	//---------------------------------
-	// 캐릭터 스킬 생성
+	// 캐릭터 생성 시 기본 셋팅
 	//---------------------------------
-	void PlayerSkillCreate(int64& AccountId, st_GameObjectInfo& NewCharacterInfo, int8& CharacterCreateSlotIndex);
+	void PlayerDefaultSetting(int64& AccountId, st_GameObjectInfo& NewCharacterInfo, int8& CharacterCreateSlotIndex);
 
 	//------------------------------------
 	// 클라 접속 기본 정보 셋팅
@@ -175,6 +181,10 @@ private:
 	// 아이템 놓기 요청 처리
 	//------------------------------------------------------------
 	void PacketProcReqItemPlace(int64 SessionId, CMessage* Message);
+	//------------------------------------------------------------
+	// 아이템 회전 요청 처리
+	//------------------------------------------------------------
+	void PacketProcReqItemRotate(int64 SessionID, CMessage* Message);
 	//------------------------------------------------------------------
 	// 퀵슬롯 저장 요청 처리
 	//------------------------------------------------------------------
@@ -247,11 +257,7 @@ private:
 	//-------------------------------------------------------------------------------
 	// 생성요청한 캐릭터가 DB에 있는지 확인 후 캐릭터 생성
 	//-------------------------------------------------------------------------------
-	void PacketProcReqDBCreateCharacterNameCheck(CMessage* Message);	
-	//---------------------------------------------------------------
-	// 가방 테이블에 아이템 업데이트
-	//---------------------------------------------------------------
-	void PacketProcReqDBItemUpdate(CGameServerMessage* Message);	
+	void PacketProcReqDBCreateCharacterNameCheck(CMessage* Message);		
 	//-----------------------------------------------------------------------
 	// 게임 서버 접속시 캐릭터 정보를 DB에서 가져와서 클라에 전송
 	//-----------------------------------------------------------------------
@@ -379,6 +385,10 @@ private:
 	// 게임서버 가방 아이템 선택 요청 응답 패킷 조합
 	//---------------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResSelectItem(int64 AccountId, int64 ObjectId, CItem* SelectItem);
+	//---------------------------------------------------------------------------------------------
+	// 게임서버 아이템 회전 요청 응답 패킷 조합
+	//---------------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResItemRotate(int64 AccountID, int64 PlayerID);
 	//---------------------------------------------------------------------------------------------
 	// 게임서버 가방 아이템 놓기 요청 응답 패킷 조합
 	//---------------------------------------------------------------------------------------------
@@ -672,10 +682,13 @@ public:
 	// 네트워크 쓰레드 TPS
 	int64 _NetworkThreadTPS;
 	
+	// UpdateThread 쓰레드 깨우기 이벤트
+	HANDLE _UpdateThreadWakeEvent;
 	// User DB 쓰레드 깨우기 이벤트
 	HANDLE _UserDataBaseWakeEvent;
 	// World DB 쓰레드 깨우기 이벤트
 	HANDLE _WorldDataBaseWakeEvent;
+	// ClientLeaveDB 쓰레드 깨우기 이벤트
 	HANDLE _ClientLeaveDBThreadWakeEvent;
 	// DB 쓰레드 활성화된 횟수
 	int64 _UserDBThreadWakeCount;

@@ -438,6 +438,9 @@
     <ClCompile Include="Day.cpp">
       <Filter>ContentServer\Content\Day</Filter>
     </ClCompile>
+    <ClCompile Include="StorageBox.cpp">
+      <Filter>ContentServer\Content\GameObject\Installation</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="DBConfig.xml">
