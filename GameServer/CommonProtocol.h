@@ -555,15 +555,6 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_ITEM_SELECT,
 
 	//------------------------------------------------------------
-	// 게임서버 아이템 놓기 요청
-	// int64 AccountId
-	// int64 ObjectId	
-	// int16 PlaceTileGridPositionX
-	// int16 PlaceTileGridPositionY
-	//------------------------------------------------------------
-	en_PACKET_C2S_ITEM_PLACE,
-
-	//------------------------------------------------------------
 	// 게임서버 아이템 회전 요청
 	// int64 AccountId
 	// int64 ObjectId	
@@ -578,6 +569,15 @@ enum en_GAME_SERVER_PACKET_TYPE
 	//------------------------------------------------------------
 	en_PACKET_S2C_ITEM_ROTATE,
 
+	//------------------------------------------------------------
+	// 게임서버 아이템 놓기 요청
+	// int64 AccountId
+	// int64 ObjectId	
+	// int16 PlaceTileGridPositionX
+	// int16 PlaceTileGridPositionY
+	//------------------------------------------------------------
+	en_PACKET_C2S_ITEM_PLACE,
+	
 	//------------------------------------------------------------
 	// 게임서버 아이템 놓기 요청 응답
 	// int64 AccountId
@@ -726,6 +726,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	//------------------------------------------------------------
 	// 게임서버 장비착용 응답
 	// int64 PlayerId
+	// bool EquipmentEmpty
 	// st_ItemInfo Equipment
 	//------------------------------------------------------------
 	en_PACKET_S2C_EQUIPMENT_UPDATE,
