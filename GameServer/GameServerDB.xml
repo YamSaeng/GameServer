@@ -47,8 +47,9 @@
 	<Column name="OwnerAccountDBId" type="BigInt" notnull="true"/>
 	<Column name="OwnerPlayerDBId" type="BigInt" notnull="true"/>
 	<Column name="ItemIsQuickSlotUse" type="bit"/>
-	<Column name="ItemIsEquipped" type="bit"/>
-	<Column name="ItemRotated" type="bit"/>	
+	<Column name="ItemIsEquipped" type="bit"/>	
+	<Column name="ItemWidth" type="SmallInt"/>
+	<Column name="ItemHeight" type="SmallInt"/>
 	<Column name="ItemTileGridPositionX" type="SmallInt"/>
 	<Column name="ItemTileGridPositionY" type="SmallInt"/>
     <Column name="ItemLargeCategory" type="TinyInt" notnull="true"/>
@@ -328,7 +329,7 @@
       <![CDATA[
 	    SET NOCOUNT ON
         INSERT INTO [dbo].[Inventory]
-        VALUES ((@OwnerAccountDBId), (@OwnerPlayerDBId), 0, 0, 0, (@ItemTileGridPositionX), (@ItemTileGridPositionY), 0, 0, 0, 0, 0, 0)
+        VALUES ((@OwnerAccountDBId), (@OwnerPlayerDBId), 0, 0, 0, 0, (@ItemTileGridPositionX), (@ItemTileGridPositionY), 0, 0, 0, 0, 0, 0)
       ]]>
     </Body>
   </Procedure>  
@@ -340,7 +341,7 @@
     <Body>
       <![CDATA[
 	    SET NOCOUNT ON
-        SELECT ItemIsQuickSlotUse, ItemIsEquipped, ItemRotated,
+        SELECT ItemIsQuickSlotUse, ItemIsEquipped, ItemWidth, ItemHeight,
 		ItemTileGridPositionX, ItemTileGridPositionY,
 		ItemLargeCategory, ItemMediumCategory, ItemSmallCategory,
 		ItemCount, ItemDurability, ItemEnchantPoint
@@ -360,7 +361,7 @@
       <![CDATA[
 	    SET NOCOUNT ON
         UPDATE [dbo].[Inventory]
-        SET ItemIsQuickSlotUse = 0, ItemIsEquipped = 0, ItemRotated = 0,
+        SET ItemIsQuickSlotUse = 0, ItemIsEquipped = 0, ItemWidth = 0, ItemHeight = 0,
 		ItemLargeCategory = 0, ItemMediumCategory = 0, ItemSmallCategory = 0,		
 		ItemCount = 0, ItemDurability = 0, ItemEnchantPoint = 0		 
         WHERE ItemTileGridPositionX = (@ItemTileGridPositionX) AND ItemTileGridPositionY = (@ItemTileGridPositionY) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
@@ -374,7 +375,8 @@
 	<Param name="@OwnerPlayerDBId" type="BigInt"/>
 	<Param name="@ItemIsQuickSlotUse" type="bit"/>
     <Param name="@ItemIsEquipped" type="bit"/>
-	<Param name="@ItemRotated" type="bit"/>			
+    <Param name="@ItemWidth" type="SmallInt"/>
+	<Param name="@ItemHeight" type="SmallInt"/>
 	<Param name="@ItemTileGridPositionX" type="SmallInt"/>
 	<Param name="@ItemTileGridPositionY" type="SmallInt"/>
 	<Param name="@ItemLargeCategory" type="TinyInt"/>
@@ -389,7 +391,7 @@
 		UPDATE [dbo].[Inventory]
 		SET ItemIsQuickSlotUse = (@ItemIsQuickSlotUse),
 		ItemIsEquipped = (@ItemIsEquipped),
-		ItemRotated = (@ItemRotated),		
+		ItemWidth = (@ItemWidth), ItemHeight = (@ItemHeight),
 		ItemLargeCategory = (@ItemLargeCategory), ItemMediumCategory = (@ItemMediumCategory), ItemSmallCategory = (@ItemSmallCategory),
 		ItemCount = (@ItemCount), ItemDurability = (@ItemDurability), ItemEnchantPoint = (@ItemEnchantPoint)
 		WHERE OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId) And ItemTileGridPositionX = (@ItemTileGridPositionX) AND ItemTileGridPositionY = (@ItemTileGridPositionY)
@@ -706,7 +708,7 @@
 		   SET @height = 0
                     while @height < @InventoryHeight BEGIN
                             UPDATE [dbo].[Inventory]
-                            SET ItemIsQuickSlotUse = 0, ItemIsEquipped = 0, ItemRotated = 0, ItemLargeCategory = 0, ItemMediumCategory = 0, ItemSmallCategory = 0, ItemCount = 0, ItemDurability = 0, ItemEnchantPoint = 0
+                            SET ItemIsQuickSlotUse = 0, ItemIsEquipped = 0, ItemWidth = 0, ItemHeight = 0, ItemLargeCategory = 0, ItemMediumCategory = 0, ItemSmallCategory = 0, ItemCount = 0, ItemDurability = 0, ItemEnchantPoint = 0
                             WHERE OwnerAccountDBId = @OwnerAccountDBId AND OwnerPlayerDBId = @OwnerPlayerDBId AND ItemTileGridPositionX = @width AND ItemTileGridPositionY = @height        
                         SET @height = @height + 1
                     END

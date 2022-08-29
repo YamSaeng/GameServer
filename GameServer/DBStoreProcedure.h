@@ -146,23 +146,24 @@ namespace SP
 	};
 
 	// 인벤토리 아이템 넣기 프로시저
-	class CDBGameServerInventoryPlace : public CDBBind<13, 0>
+	class CDBGameServerInventoryPlace : public CDBBind<14, 0>
 	{
 	public:
-		CDBGameServerInventoryPlace(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spInventoryItemPlace(?,?,?,?,?,?,?,?,?,?,?,?,?)}") {}
+		CDBGameServerInventoryPlace(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spInventoryItemPlace(?,?,?,?,?,?,?,?,?,?,?,?,?,?)}") {}
 		void InOwnerAccountId(int64& OwnerAccountId) { BindParam(0, OwnerAccountId); }
 		void InOwnerPlayerId(int64& OwnerPlayerId) { BindParam(1, OwnerPlayerId); }
 		void InItemIsQuickSlotUse(bool& IsQuickSlotUse) { BindParam(2, IsQuickSlotUse); }		
 		void InIsEquipped(bool& IsEquipped) { BindParam(3, IsEquipped); }
-		void InItemRotated(bool& ItemRotated) { BindParam(4, ItemRotated); }		
-		void InItemTileGridPositionX(int16& TileGridPositionX) { BindParam(5, TileGridPositionX); }
-		void InItemTileGridPositionY(int16& TileGridPositionY) { BindParam(6, TileGridPositionY); }
-		void InItemLargeCategory(int8& ItemCategoryType) { BindParam(7, ItemCategoryType); }
-		void InItemMediumCategory(int8& ItemMediumCategory) { BindParam(8, ItemMediumCategory); }
-		void InItemSmallCategory(int16& ItemType) { BindParam(9, ItemType); }		
-		void InItemCount(int16& ItemCount) { BindParam(10, ItemCount); }				
-		void InItemDurability(int32& ItemDurability) { BindParam(11, ItemDurability); }
-		void InItemEnchantPoint(int8& ItemEnchantPoint) { BindParam(12, ItemEnchantPoint); }
+		void InItemWidth(int16& ItemWidth) { BindParam(4, ItemWidth); }
+		void InItemHeight(int16& ItemHeight) { BindParam(5, ItemHeight); }
+		void InItemTileGridPositionX(int16& TileGridPositionX) { BindParam(6, TileGridPositionX); }
+		void InItemTileGridPositionY(int16& TileGridPositionY) { BindParam(7, TileGridPositionY); }
+		void InItemLargeCategory(int8& ItemCategoryType) { BindParam(8, ItemCategoryType); }
+		void InItemMediumCategory(int8& ItemMediumCategory) { BindParam(9, ItemMediumCategory); }
+		void InItemSmallCategory(int16& ItemType) { BindParam(10, ItemType); }		
+		void InItemCount(int16& ItemCount) { BindParam(11, ItemCount); }				
+		void InItemDurability(int32& ItemDurability) { BindParam(12, ItemDurability); }
+		void InItemEnchantPoint(int8& ItemEnchantPoint) { BindParam(13, ItemEnchantPoint); }
 	};
 
 	// GoldTable 생성
@@ -200,7 +201,7 @@ namespace SP
 	};
 
 	// InventoryTable에 있는 Item 모두 긁어옴
-	class CDBGameServerInventoryItemGet : public CDBBind<2, 11>
+	class CDBGameServerInventoryItemGet : public CDBBind<2, 12>
 	{
 	public:
 		CDBGameServerInventoryItemGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetItemTableInfoToInventory(?,?)}") {}
@@ -209,15 +210,16 @@ namespace SP
 
 		void OutItemIsQuickSlotUse(bool& ItemIsQuickSlotUse) { BindCol(0, ItemIsQuickSlotUse); }
 		void OutItemIsEquipped(bool& ItemIsEquipped) { BindCol(1, ItemIsEquipped); }
-		void OutIsRotated(bool& IsRotated) { BindCol(2, IsRotated); }	
-		void OutItemTileGridPositionX(int16& TileGridPositionX) { BindCol(3, TileGridPositionX); }
-		void OutItemTileGridPositionY(int16& TileGridPositionY) { BindCol(4, TileGridPositionY); }
-		void OutItemLargeCategory(int8& ItemLargeCategory) { BindCol(5, ItemLargeCategory); }
-		void OutItemMediumCategory(int8& ItemMediumCategory) { BindCol(6, ItemMediumCategory); }	
-		void OutItemSmallCategory(int16& ItemSmallCategory) { BindCol(7, ItemSmallCategory); }				
-		void OutItemCount(int16& itemCount) { BindCol(8, itemCount); }		
-		void OutItemDurability(int32& ItemDurability) { BindCol(9, ItemDurability); }
-		void OutItemEnchantPoint(int8& ItemEnchantPoint) { BindCol(10, ItemEnchantPoint); }
+		void OutItemWidth(int16& ItemWidth) { BindCol(2, ItemWidth); }
+		void OutItemHeight(int16& ItemHeight) { BindCol(3, ItemHeight); }		
+		void OutItemTileGridPositionX(int16& TileGridPositionX) { BindCol(4, TileGridPositionX); }
+		void OutItemTileGridPositionY(int16& TileGridPositionY) { BindCol(5, TileGridPositionY); }
+		void OutItemLargeCategory(int8& ItemLargeCategory) { BindCol(6, ItemLargeCategory); }
+		void OutItemMediumCategory(int8& ItemMediumCategory) { BindCol(7, ItemMediumCategory); }	
+		void OutItemSmallCategory(int16& ItemSmallCategory) { BindCol(8, ItemSmallCategory); }				
+		void OutItemCount(int16& itemCount) { BindCol(9, itemCount); }		
+		void OutItemDurability(int32& ItemDurability) { BindCol(10, ItemDurability); }
+		void OutItemEnchantPoint(int8& ItemEnchantPoint) { BindCol(11, ItemEnchantPoint); }
 	};
 
 	// 스킬 테이블에 있는 스킬 모두 긁어옴
