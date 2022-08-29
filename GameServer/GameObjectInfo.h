@@ -2259,8 +2259,7 @@ struct st_ItemInfo
 	int64 ItemDBId;							  // 아이템 DB에 저장되어 있는 ID		
 	int64 InventoryItemNumber;				  // 아이템이 인벤토리에 속할때 구분할 숫자
 	bool ItemIsQuickSlotUse;				  // 퀵슬롯에 등록되어 있는지 여부 
-	bool ItemIsEquipped;			          // 아이템을 착용할 수 있는지		
-	bool ItemRotated;							  // 아이템이 회전 되어 있는지 아닌지 여부
+	bool ItemIsEquipped;			          // 아이템을 착용할 수 있는지			
 	int16 ItemWidth;			     			  // 아이템 너비
 	int16 ItemHeight;							  // 아이템 높이	
 	int16 ItemTileGridPositionX;				  // 인벤토리 위치 X
@@ -2294,8 +2293,7 @@ struct st_ItemInfo
 	{
 		ItemDBId = 0;
 		InventoryItemNumber = 0;
-		ItemIsQuickSlotUse = false;
-		ItemRotated = false;
+		ItemIsQuickSlotUse = false;		
 		ItemWidth = 0;
 		ItemHeight = 0;		
 		ItemTileGridPositionX = 0;

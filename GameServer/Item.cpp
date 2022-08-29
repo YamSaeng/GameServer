@@ -95,8 +95,7 @@ void CItem::Init()
 	_ItemInfo.ItemDBId = 0;
 	_ItemInfo.ItemIsQuickSlotUse = false;
 	_ItemInfo.ItemWidth = 0;
-	_ItemInfo.ItemHeight = 0;
-	_ItemInfo.Rotated = false;
+	_ItemInfo.ItemHeight = 0;	
 	_ItemInfo.ItemTileGridPositionX = 0;
 	_ItemInfo.ItemTileGridPositionY = 0;
 	_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_NONE;

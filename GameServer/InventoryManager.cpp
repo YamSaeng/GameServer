@@ -140,8 +140,7 @@ CItem* CInventoryManager::InsertItem(int8 SelectInventoryIndex, en_SmallItemCate
 
 		st_ItemInfo* ItemData = G_Datamanager->FindItemData(InsertItemCategory);
 
-		NewItem->_ItemInfo.ItemDBId = 0;
-		NewItem->_ItemInfo.Rotated = false;
+		NewItem->_ItemInfo.ItemDBId = 0;		
 		NewItem->_ItemInfo.ItemWidth = ItemData->ItemWidth;
 		NewItem->_ItemInfo.ItemHeight = ItemData->ItemHeight;
 		NewItem->_ItemInfo.ItemLargeCategory = ItemData->ItemLargeCategory;
