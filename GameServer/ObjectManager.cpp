@@ -187,6 +187,7 @@ CItem* CObjectManager::ItemCreate(en_SmallItemCategory NewItemSmallCategory)
 	switch (NewItemSmallCategory)
 	{
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:
+	case en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD:
 		NewItem = _WeaponMemoryPool->Alloc();
 		break;
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD:
@@ -237,6 +238,7 @@ void CObjectManager::ItemReturn(CItem* ReturnItem)
 	switch (ReturnItem->_ItemInfo.ItemSmallCategory)
 	{
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:
+	case en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD:
 		_WeaponMemoryPool->Free((CWeaponItem*)ReturnItem);
 		break;
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD:
