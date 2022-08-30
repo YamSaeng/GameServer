@@ -19,6 +19,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string ItemObjectType = WeaponListFiled["ItemObjectType"].GetString();
 			string ItemExplain = WeaponListFiled["ItemExplain"].GetString();
 			string ItemName = WeaponListFiled["ItemName"].GetString();
+			string ItemEquipmentPart = WeaponListFiled["ItemEquipmentPart"].GetString();
 			int32 ItemWidth = WeaponListFiled["ItemWidth"].GetInt();
 			int32 ItemHeight = WeaponListFiled["ItemHeight"].GetInt();
 			int32 ItemMinDamage = WeaponListFiled["ItemMinDamage"].GetInt();
@@ -33,7 +34,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 
 			if (MediumCategory == "ITEM_MEDIUM_CATEGORY_SWORD")
 			{
-				WeaponItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_SWORD;
+				WeaponItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_SWORD;				
 			}
 			else if (MediumCategory == "ITEM_MEDIUM_CATEGORY_SHIELD")
 			{
@@ -60,6 +61,16 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 						
 			WeaponItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
 			WeaponItemInfo->ItemName = (LPWSTR)CA2W(ItemName.c_str());
+
+			if (ItemEquipmentPart == "EQUIPMENT_PARTS_LEFT_HAND")
+			{
+				WeaponItemInfo->EquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_LEFT_HAND;
+			}
+			else if (ItemEquipmentPart == "EQUIPMENT_PARTS_RIGHT_HAND")
+			{
+				WeaponItemInfo->EquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_RIGHT_HAND;
+			}
+
 			WeaponItemInfo->ItemWidth = ItemWidth;
 			WeaponItemInfo->ItemHeight = ItemHeight;
 			WeaponItemInfo->ItemMinDamage = ItemMinDamage;
@@ -81,6 +92,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string ItemObjectType = ArmorListFiled["ItemObjectType"].GetString();
 			string ItemExplain = ArmorListFiled["ItemExplain"].GetString();
 			string ItemName = ArmorListFiled["ItemName"].GetString();
+			string ItemEquipmentPart = ArmorListFiled["ItemEquipmentPart"].GetString();
 			int32 ItemWidth = ArmorListFiled["ItemWidth"].GetInt();
 			int32 ItemHeight = ArmorListFiled["ItemHeight"].GetInt();
 			int32 ItemDefence = ArmorListFiled["ItemDefence"].GetInt();
@@ -133,6 +145,20 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 
 			ArmorItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
 			ArmorItemInfo->ItemName = (LPWSTR)CA2W(ItemName.c_str());
+
+			if (ItemEquipmentPart == "EQUIPMENT_PARTS_HEAD")
+			{
+				ArmorItemInfo->EquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_HEAD;
+			}
+			else if (ItemEquipmentPart == "EQUIPMENT_PARTS_BODY")
+			{
+				ArmorItemInfo->EquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_BODY;
+			}
+			else if (ItemEquipmentPart == "EQUIPMENT_PARTS_BOOT")
+			{
+				ArmorItemInfo->EquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_BOOT;
+			}
+
 			ArmorItemInfo->ItemWidth = ItemWidth;
 			ArmorItemInfo->ItemHeight = ItemHeight;			
 			ArmorItemInfo->ItemDefence = ItemDefence;
