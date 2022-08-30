@@ -728,7 +728,23 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int64 PlayerId
 	// st_ItemInfo Equipment
 	//------------------------------------------------------------
-	en_PACKET_S2C_EQUIPMENT_UPDATE,
+	en_PACKET_S2C_ON_EQUIPMENT,
+
+	//------------------------------------------------------------
+	// 게임서버 장비 해제 요청
+	// int64 AccountID	
+	// int64 PlayerID
+	// st_ItemInfo OffEquipmentItemInfo
+	//------------------------------------------------------------
+	en_PACKET_C2S_OFF_EQUIPMENT,
+
+	//------------------------------------------------------------
+	// 게임서버 장비 해제 요청 응답
+	// int64 AccountID
+	// int64 PlayerID
+	// en_EquipmentPart EquipmentPart
+	//------------------------------------------------------------
+	en_PACKET_S2C_OFF_EQUIPMENT,
 
 	//------------------------------------------------------------
 	// 게임서버 경험치 응답
