@@ -460,7 +460,11 @@ enum class en_GameObjectJobType : int16
 	GAMEOBJECT_JOB_TYPE_AGGRO_LIST_REMOVE,
 
 	GAMEOBJECT_JOB_TYPE_DAMAGE,
-	GAMEOJBECT_JOB_TYPE_HEAL,
+	GAMEOJBECT_JOB_TYPE_HP_HEAL,
+	GAMEOJBECT_JOB_TYPE_MP_HEAL,
+
+	GAMEOBJECT_JOB_TYPE_ON_EQUIPMENT,	
+	GAMEOBJECT_JOB_TYPE_OFF_EQUIPMENT,
 
 	GAMEOBJECT_JOB_TYPE_OBJECT_SPAWN_CHANNEL,
 	GAMEOBJECT_JOB_TYPE_OBJECT_DESPAWN_CHANNEL,
@@ -2260,10 +2264,10 @@ struct st_ItemInfo
 	int64 InventoryItemNumber;				  // 아이템이 인벤토리에 속할때 구분할 숫자
 	bool ItemIsQuickSlotUse;				  // 퀵슬롯에 등록되어 있는지 여부 
 	bool ItemIsEquipped;			          // 아이템을 착용할 수 있는지			
-	int16 ItemWidth;			     			  // 아이템 너비
-	int16 ItemHeight;							  // 아이템 높이	
-	int16 ItemTileGridPositionX;				  // 인벤토리 위치 X
-	int16 ItemTileGridPositionY;				  // 인벤토리 위치 Y
+	int16 ItemWidth;			     		  // 아이템 너비
+	int16 ItemHeight;						  // 아이템 높이	
+	int16 ItemTileGridPositionX;			  // 인벤토리 위치 X
+	int16 ItemTileGridPositionY;			  // 인벤토리 위치 Y
 	en_UIObjectInfo OwnerCraftingTable;		  // 아이템이 제작 가능한 아이템이라면 아이템이 속한 제작대
 	en_LargeItemCategory ItemLargeCategory;   // 아이템 대분류
 	en_MediumItemCategory ItemMediumCategory; // 아이템 중분류
@@ -2272,6 +2276,7 @@ struct st_ItemInfo
 	en_SkillLargeCategory ItemSkillLargeCategory; // 아이템 스킬 대분류
 	en_SkillMediumCategory ItemSkillMediumCategory; // 아이템 스킬 중분류
 	en_SkillType ItemSkillType;				  // 아이템 스킬 소분류
+	en_EquipmentParts EquipmentPart;          // 아이템 장비 분류
 	int32 ItemMaxDurability;				  // 아이템 최대 내구도
 	int32 ItemCurrentDurability;			  // 아이템 현재 내구도	
 	int8 ItemMaxGatheringHP;				  // 아이템 최대 채집 내구도 ( 채집물을 채집할 때 소모되는 점수 값 )
@@ -2306,6 +2311,8 @@ struct st_ItemInfo
 		ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_NONE;
 		ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
 		ItemSkillType = en_SkillType::SKILL_TYPE_NONE;
+		
+		EquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_NONE;
 
 		ItemMaxDurability = 0;
 		ItemCurrentDurability = 0;
