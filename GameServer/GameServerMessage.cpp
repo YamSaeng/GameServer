@@ -119,7 +119,8 @@ CGameServerMessage& CGameServerMessage::operator<<(st_SkillInfo& SkillInfo)
 CGameServerMessage& CGameServerMessage::operator<<(st_ItemInfo& ItemInfo)
 {
     *this << ItemInfo.ItemDBId;
-    *this << ItemInfo.ItemIsQuickSlotUse;    
+    *this << ItemInfo.ItemIsQuickSlotUse;   
+    *this << ItemInfo.ItemIsEquipped;
     *this << ItemInfo.ItemWidth;
     *this << ItemInfo.ItemHeight;
     *this << ItemInfo.ItemTileGridPositionX;
@@ -128,7 +129,9 @@ CGameServerMessage& CGameServerMessage::operator<<(st_ItemInfo& ItemInfo)
     *this << (int16)ItemInfo.OwnerCraftingTable;
     *this << (int8)ItemInfo.ItemLargeCategory;
     *this << (int8)ItemInfo.ItemMediumCategory;
-    *this << (int16)ItemInfo.ItemSmallCategory;    
+    *this << (int16)ItemInfo.ItemSmallCategory; 
+
+    *this << (int8)ItemInfo.ItemEquipmentPart;
 
     int16 ItemNameLen = (int16)ItemInfo.ItemName.length() * 2;
     *this << ItemNameLen;
