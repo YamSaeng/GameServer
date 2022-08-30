@@ -131,7 +131,7 @@
 		<Column name="EquipmentLargeCategory" type="nvarchar(50)" notnull="true"/>
 	    <Column name="EquipmentMediumCategory" type="nvarchar(50)" notnull="true"/>
 	    <Column name="EquipmentSmallCategory" type="nvarchar(50)" notnull="true"/>	
-	    <Column name="EquipmentDurability" type="SmallInt" notnull="true"/>	
+	    <Column name="EquipmentDurability" type="int" notnull="true"/>	
 	    <Column name="EquipmentEnchantPoint" type="TinyInt" notnull="true"/>
 	</Table>
 	
@@ -657,12 +657,12 @@
     <Param name="@EquipmentLargeCategory" type="TinyInt"/>
     <Param name="@EquipmentMediumCategory" type="TinyInt"/>
 	<Param name="@EquipmentSmallCategory" type="SmallInt"/>
-	<Param name="@EquipmentDurability" type="SmallInt"/>
+	<Param name="@EquipmentDurability" type="Int"/>
 	<Param name="@EquipmentEnchantPoint" type="TinyInt"/>
     <Body>
       <![CDATA[
 	    SET NOCOUNT ON     
-		INSERT INTO [dbo].Equipment
+		INSERT INTO [dbo].[Equipment]
 		VALUES (
 		(@EquipmentAccountDBId),
 		(@EquipmentPlayerDBId),

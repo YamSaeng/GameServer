@@ -434,7 +434,7 @@ namespace SP
 		void InEquipmentLargeCategory(int8& EquipmentLargeCategory) { BindParam(2, EquipmentLargeCategory); }
 		void InEquipmentMediumCategory(int8& EquipmentMediumCategory) { BindParam(3, EquipmentMediumCategory); }
 		void InEquipmentSmallCategory(int16& EquipmentSmallCategory) { BindParam(4, EquipmentSmallCategory); }
-		void InEquipmentDurability(int16& EquipmentDurability) { BindParam(5, EquipmentDurability); }
+		void InEquipmentDurability(int32& EquipmentDurability) { BindParam(5, EquipmentDurability); }
 		void InEquipmentEnchantPoint(int8& EquipmentEnchantPoint) { BindParam(6, EquipmentEnchantPoint); }
 	};
 }
