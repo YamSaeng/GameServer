@@ -1,4 +1,5 @@
 #pragma once
+#include "GameObjectInfo.h"
 
 class CItem;
 class CPlayer;
@@ -15,7 +16,8 @@ public:
 	CEquipment();
 	~CEquipment();
 
-	void ItemEquip(CItem* EquipItem, CPlayer* ReqEquipItemPlayer);
+	CItem* ItemOnEquipment(CItem* OnEquipItem);
+	CItem* ItemOffEquipment(en_EquipmentParts OffEquipmentParts);	
 private:
 	enum en_Equipment
 	{
