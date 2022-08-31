@@ -50,8 +50,7 @@ public:
 	// 아이템을 루팅 할 수 있는 대상을 지정한다.
 	//-----------------------------------------------------------------
 	void ItemSetTarget(en_GameObjectType TargetType, int64 TargetDBId);
-
-	void Init();
+	
 protected:	
 	// 파괴될 시간	
 	int64 _DestroyTime;
@@ -61,8 +60,7 @@ protected:
 	virtual void UpdateIdle() override;
 	void UpdateReadyMoving();
 	virtual void UpdateMoving() override;
-private:	
-	en_EquipmentParts _EquipmentPart;
+private:		
 };
 
 class CWeaponItem : public CItem

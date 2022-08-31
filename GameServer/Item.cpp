@@ -9,9 +9,7 @@ CItem::CItem()
 	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_ITEM;
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
-	_ItemState = en_ItemState::ITEM_IDLE;
-
-	_EquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_NONE;
+	_ItemState = en_ItemState::ITEM_IDLE;	
 
 	_FieldOfViewDistance = 10;
 
@@ -88,27 +86,6 @@ void CItem::ItemSetTarget(en_GameObjectType TargetType, int64 TargetDBId)
 	{
 		_Owner = _Channel->FindChannelObject(TargetDBId, TargetType);
 	}	
-}
-
-void CItem::Init()
-{
-	_ItemInfo.ItemDBId = 0;
-	_ItemInfo.ItemIsQuickSlotUse = false;
-	_ItemInfo.ItemWidth = 0;
-	_ItemInfo.ItemHeight = 0;	
-	_ItemInfo.ItemTileGridPositionX = 0;
-	_ItemInfo.ItemTileGridPositionY = 0;
-	_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_NONE;
-	_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
-	_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
-	_ItemInfo.ItemName = L"";
-	_ItemInfo.ItemExplain = L"";
-	_ItemInfo.ItemMinDamage = 0;
-	_ItemInfo.ItemMaxDamage = 0;
-	_ItemInfo.ItemDefence = 0;
-	_ItemInfo.ItemMaxCount = 0;
-	_ItemInfo.ItemCount = 0;	
-	_ItemInfo.ItemIsEquipped = false;
 }
 
 void CItem::UpdateIdle()
