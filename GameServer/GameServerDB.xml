@@ -128,6 +128,7 @@
 	<Table name="Equipment" desc="Equipment Table">		
 		<Column name="EquipmentAccountDBId" type="BigInt" notnull="true"/>
 		<Column name="EquipmentPlayerDBId" type="BigInt" notnull="true"/>
+		<Column name="EquipmentParts" type="nvarchar(20)" notnull="true"/>
 		<Column name="EquipmentLargeCategory" type="nvarchar(50)" notnull="true"/>
 	    <Column name="EquipmentMediumCategory" type="nvarchar(50)" notnull="true"/>
 	    <Column name="EquipmentSmallCategory" type="nvarchar(50)" notnull="true"/>	
@@ -654,6 +655,7 @@
   <Procedure name="spEquipmentWearing">
     <Param name="@EquipmentAccountDBId" type="BigInt"/>
     <Param name="@EquipmentPlayerDBId" type="BigInt"/>
+	<Param name="@EquipmentParts" type="TinyInt"/>
     <Param name="@EquipmentLargeCategory" type="TinyInt"/>
     <Param name="@EquipmentMediumCategory" type="TinyInt"/>
 	<Param name="@EquipmentSmallCategory" type="SmallInt"/>
@@ -666,24 +668,31 @@
 		VALUES (
 		(@EquipmentAccountDBId),
 		(@EquipmentPlayerDBId),
+		(CASE WHEN @EquipmentParts = 1 THEN 'EQUIPMENT_PARTS_HEAD'
+		      WHEN @EquipmentParts = 2 THEN 'EQUIPMENT_PARTS_BODY'
+		      WHEN @EquipmentParts = 3 THEN 'EQUIPMENT_PARTS_LEFT_HAND'
+		      WHEN @EquipmentParts = 4 THEN 'EQUIPMENT_PARTS_RIGHT_HAND'
+		      WHEN @EquipmentParts = 5 THEN 'EQUIPMENT_PARTS_BOOT'
+			  ELSE ' '
+							                   END),
 		(CASE WHEN @EquipmentLargeCategory = 2 THEN 'ITEM_LARGE_CATEGORY_WEAPON'
-		                                   WHEN @EquipmentLargeCategory = 3 THEN 'ITEM_LARGE_CATEGORY_ARMOR'
-							               ELSE ' '
+		      WHEN @EquipmentLargeCategory = 3 THEN 'ITEM_LARGE_CATEGORY_ARMOR'
+			  ELSE ' '
 							               END),
 		(CASE WHEN @EquipmentMediumCategory = 2 THEN 'ITEM_MEDIUM_CATEGORY_SWORD'
-		                                    WHEN @EquipmentMediumCategory = 3 THEN 'ITEM_MEDIUM_CATEGORY_SHIELD'
-		                                    WHEN @EquipmentMediumCategory = 4 THEN 'ITEM_MEDIUM_CATEGORY_HAT'
-		                                    WHEN @EquipmentMediumCategory = 5 THEN 'ITEM_MEDIUM_CATEGORY_WEAR'
-		                                    WHEN @EquipmentMediumCategory = 6 THEN 'ITEM_MEDIUM_CATEGORY_GLOVE'
-		                                    WHEN @EquipmentMediumCategory = 7 THEN 'ITEM_MEDIUM_CATEGORY_BOOT'
-							                ELSE ' '
+		      WHEN @EquipmentMediumCategory = 3 THEN 'ITEM_MEDIUM_CATEGORY_SHIELD'
+		      WHEN @EquipmentMediumCategory = 4 THEN 'ITEM_MEDIUM_CATEGORY_HAT'
+		      WHEN @EquipmentMediumCategory = 5 THEN 'ITEM_MEDIUM_CATEGORY_WEAR'
+		      WHEN @EquipmentMediumCategory = 6 THEN 'ITEM_MEDIUM_CATEGORY_GLOVE'
+		      WHEN @EquipmentMediumCategory = 7 THEN 'ITEM_MEDIUM_CATEGORY_BOOT'
+			  ELSE ' '
 							                END),
 		(CASE WHEN @EquipmentSmallCategory = 1 THEN 'ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD'
-		                                   WHEN @EquipmentSmallCategory = 2 THEN 'ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD'
-		                                   WHEN @EquipmentSmallCategory = 100 THEN 'ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD'
-		                                   WHEN @EquipmentSmallCategory = 101 THEN 'ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER'
-		                                   WHEN @EquipmentSmallCategory = 102 THEN 'ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER'
-							               ELSE ' '
+		      WHEN @EquipmentSmallCategory = 2 THEN 'ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD'
+		      WHEN @EquipmentSmallCategory = 100 THEN 'ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER'
+		      WHEN @EquipmentSmallCategory = 101 THEN 'ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER'
+		      WHEN @EquipmentSmallCategory = 102 THEN 'ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER'
+			  ELSE ' '
 							               END),
 		(@EquipmentDurability),
 		(@EquipmentEnchantPoint))		
@@ -691,6 +700,28 @@
     </Body>
   </Procedure>
 
+  <!-- 장비 테이블 빈껍데기 아이템 정보 생성-->
+	<Procedure name="spEquipmentItemInit">
+		<Param name="@EquipmentAccountDBId" type="BigInt"/>
+		<Param name="@EquipmentPlayerDBId" type="BigInt"/>
+		<Param name="@EquipmentParts" type="TinyInt"/>
+		<Body>
+			<![CDATA[
+	             SET NOCOUNT ON
+                 INSERT INTO [dbo].[Equipment]
+                 VALUES ((@EquipmentAccountDBId),
+				 (@EquipmentPlayerDBId), (CASE WHEN @EquipmentParts = 1 THEN 'EQUIPMENT_PARTS_HEAD'
+		                                       WHEN @EquipmentParts = 2 THEN 'EQUIPMENT_PARTS_BODY'
+		                                       WHEN @EquipmentParts = 3 THEN 'EQUIPMENT_PARTS_LEFT_HAND'
+		                                       WHEN @EquipmentParts = 4 THEN 'EQUIPMENT_PARTS_RIGHT_HAND'
+		                                       WHEN @EquipmentParts = 5 THEN 'EQUIPMENT_PARTS_BOOT'
+							                   ELSE ' '
+							                   END), 
+				 ' ', ' ', ' ', 0, 0)
+            ]]>
+		</Body>
+	 </Procedure>
+	
   <!-- 가방 초기화 -->
   <Procedure name="spInventoryInit">
 	<Param name="@OwnerAccountDBId" type="BigInt"/>
@@ -716,5 +747,5 @@
             END
 		]]>
 	</Body>	   
-  </Procedure>	
+  </Procedure> 
 </GameServerDB>

@@ -424,17 +424,28 @@ namespace SP
 		void OutMapTilePositionY(int32& MapTilePositionY) { BindCol(4, MapTilePositionY); }
 	};
 
-	// 장비 착용 여부 DB에 저장하기
-	class CDBGameServerSaveEquipmentInfo : public CDBBind<7, 0>
+	// 장비 테이블 빈 껍데기 채우기
+	class CDBGameServerInitEquipment : public CDBBind<3, 0>
 	{
 	public:
-		CDBGameServerSaveEquipmentInfo(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spEquipmentWearing(?,?,?,?,?,?,?)}") {}
+		CDBGameServerInitEquipment(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spEquipmentItemInit(?,?,?)}") {}
+		void InAccountDBID(int64& AccountDBID) { BindParam(0, AccountDBID); }
+		void InPlayerDBID(int64& PlayerDBID) { BindParam(1, PlayerDBID); }
+		void InEquipmentParts(int8& EquipmentParts) { BindParam(2, EquipmentParts); }
+	};
+
+	// 장비 착용 여부 DB에 저장하기
+	class CDBGameServerSaveEquipmentInfo : public CDBBind<8, 0>
+	{
+	public:
+		CDBGameServerSaveEquipmentInfo(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spEquipmentWearing(?,?,?,?,?,?,?,?)}") {}
 		void InAccountDBID(int64& AccountDBID) { BindParam(0, AccountDBID); }
 		void InPlayerDBID(int64& AccountDBID) { BindParam(1, AccountDBID); }
-		void InEquipmentLargeCategory(int8& EquipmentLargeCategory) { BindParam(2, EquipmentLargeCategory); }
-		void InEquipmentMediumCategory(int8& EquipmentMediumCategory) { BindParam(3, EquipmentMediumCategory); }
-		void InEquipmentSmallCategory(int16& EquipmentSmallCategory) { BindParam(4, EquipmentSmallCategory); }
-		void InEquipmentDurability(int32& EquipmentDurability) { BindParam(5, EquipmentDurability); }
-		void InEquipmentEnchantPoint(int8& EquipmentEnchantPoint) { BindParam(6, EquipmentEnchantPoint); }
+		void InEquipmentParts(int8& EquipmentParts) { BindParam(2, EquipmentParts); }
+		void InEquipmentLargeCategory(int8& EquipmentLargeCategory) { BindParam(3, EquipmentLargeCategory); }
+		void InEquipmentMediumCategory(int8& EquipmentMediumCategory) { BindParam(4, EquipmentMediumCategory); }
+		void InEquipmentSmallCategory(int16& EquipmentSmallCategory) { BindParam(5, EquipmentSmallCategory); }
+		void InEquipmentDurability(int32& EquipmentDurability) { BindParam(6, EquipmentDurability); }
+		void InEquipmentEnchantPoint(int8& EquipmentEnchantPoint) { BindParam(7, EquipmentEnchantPoint); }
 	};
 }
