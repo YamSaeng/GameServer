@@ -2276,7 +2276,7 @@ struct st_ItemInfo
 	en_SkillLargeCategory ItemSkillLargeCategory; // 아이템 스킬 대분류
 	en_SkillMediumCategory ItemSkillMediumCategory; // 아이템 스킬 중분류
 	en_SkillType ItemSkillType;				  // 아이템 스킬 소분류
-	en_EquipmentParts EquipmentPart;          // 아이템 장비 분류
+	en_EquipmentParts ItemEquipmentPart;      // 아이템 장비 분류
 	int32 ItemMaxDurability;				  // 아이템 최대 내구도
 	int32 ItemCurrentDurability;			  // 아이템 현재 내구도	
 	int8 ItemMaxGatheringHP;				  // 아이템 최대 채집 내구도 ( 채집물을 채집할 때 소모되는 점수 값 )
@@ -2312,7 +2312,7 @@ struct st_ItemInfo
 		ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
 		ItemSkillType = en_SkillType::SKILL_TYPE_NONE;
 		
-		EquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_NONE;
+		ItemEquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_NONE;
 
 		ItemMaxDurability = 0;
 		ItemCurrentDurability = 0;
