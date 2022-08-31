@@ -335,11 +335,11 @@ void CGameObject::Update()
 				StatChangePacket->Free();
 			}
 			break;
-		case en_GameObjectJobType::GAMEOJBECT_JOB_TYPE_HEAL:
+		case en_GameObjectJobType::GAMEOJBECT_JOB_TYPE_HP_HEAL:
 			{
 				CGameObject* Healer;
 				*GameObjectJob->GameObjectJobMessage >> &Healer;
-				
+
 				int32 HealPoint;
 				*GameObjectJob->GameObjectJobMessage >> HealPoint;
 
@@ -348,6 +348,65 @@ void CGameObject::Update()
 				CMessage* StatChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectStatInfo);
 				G_ObjectManager->GameServer->SendPacketFieldOfView(this, StatChangePacket);
 				StatChangePacket->Free();
+			}
+			break;
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_ON_EQUIPMENT:
+			{
+				// 착용할 장비 
+				CItem* EquipmentItem;
+				*GameObjectJob->GameObjectJobMessage >> &EquipmentItem;				
+
+				// 장비 착용
+				CPlayer* Player = (CPlayer*)this;
+				CItem* ReturnEquipmentItem = Player->_Equipment.ItemEquip(EquipmentItem);
+
+				CMessage* EquipmentUpdateMessage = G_ObjectManager->GameServer->MakePacketOnEquipment(_GameObjectInfo.ObjectId, EquipmentItem->_ItemInfo);
+				G_ObjectManager->GameServer->SendPacket(Player->_SessionId, EquipmentUpdateMessage);
+				EquipmentUpdateMessage->Free();
+
+				// 가방에서 착용한 장비 없애기
+				Player->_InventoryManager.InitItem(0, EquipmentItem->_ItemInfo.ItemTileGridPositionX, EquipmentItem->_ItemInfo.ItemTileGridPositionY);
+				
+				// 장비 해제한 아이템이 있을 경우 가방에 해당 아이템을 새로 넣음
+				if (ReturnEquipmentItem != nullptr)
+				{
+					Player->_InventoryManager.InsertItem(0, ReturnEquipmentItem);
+
+					CMessage* ResItemToInventoryPacket = G_ObjectManager->GameServer->MakePacketResItemToInventory(Player->_GameObjectInfo.ObjectId,
+						ReturnEquipmentItem->_ItemInfo, false, ReturnEquipmentItem->_ItemInfo.ItemCount);
+					G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResItemToInventoryPacket);
+					ResItemToInventoryPacket->Free();
+				}														
+			}
+			break;	
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_OFF_EQUIPMENT:
+			{
+				int8 EquipmentParts;
+				*GameObjectJob->GameObjectJobMessage >> EquipmentParts;
+
+				CPlayer* Player = (CPlayer*)this;
+				CItem* ReturnEquipmentItem = Player->_Equipment.ItemUnEquip((en_EquipmentParts)EquipmentParts);
+				
+				if (ReturnEquipmentItem != nullptr)
+				{
+					// 클라 장비창에서 장비 해제
+					CMessage* OffEquipmentMessage = G_ObjectManager->GameServer->MakePacketOffEquipment(Player->_GameObjectInfo.ObjectId, ReturnEquipmentItem->_ItemInfo.ItemEquipmentPart);
+					G_ObjectManager->GameServer->SendPacket(Player->_SessionId, OffEquipmentMessage);
+					OffEquipmentMessage->Free();
+
+					// 클라 인벤토리에 장비 해제한 아이템 넣음
+					Player->_InventoryManager.InsertItem(0, ReturnEquipmentItem);
+
+					// 클라에게 알려줌
+					CMessage* ResItemToInventoryPacket = G_ObjectManager->GameServer->MakePacketResItemToInventory(Player->_GameObjectInfo.ObjectId,
+						ReturnEquipmentItem->_ItemInfo, false, ReturnEquipmentItem->_ItemInfo.ItemCount);
+					G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResItemToInventoryPacket);
+					ResItemToInventoryPacket->Free();
+				}
+				else
+				{
+					CRASH("착용한 장비가 없는데 장비해제 요청");
+				}
 			}
 			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_FULL_RECOVERY:
