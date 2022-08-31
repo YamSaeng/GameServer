@@ -985,18 +985,39 @@ void CGameServer::PlayerDefaultSetting(int64& AccountId, st_GameObjectInfo& NewC
 	WoodShield.ItemCount = 1;
 	WoodShield.ItemCurrentDurability = WoodSword.ItemMaxDurability;
 
+	st_ItemInfo LeatherHelmet = *(G_Datamanager->FindItemData(en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER));
+	LeatherHelmet.ItemTileGridPositionX = 3;
+	LeatherHelmet.ItemTileGridPositionY = 0;
+	LeatherHelmet.ItemCount = 1;
+	LeatherHelmet.ItemCurrentDurability = LeatherHelmet.ItemMaxDurability;
+
+	st_ItemInfo WoodArmor = *(G_Datamanager->FindItemData(en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD));
+	WoodArmor.ItemTileGridPositionX = 5;
+	WoodArmor.ItemTileGridPositionY = 0;
+	WoodArmor.ItemCount = 1;
+	WoodArmor.ItemCurrentDurability = LeatherHelmet.ItemMaxDurability;
+
+	st_ItemInfo LeatherBoot = *(G_Datamanager->FindItemData(en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER));
+	LeatherBoot.ItemTileGridPositionX = 7;
+	LeatherBoot.ItemTileGridPositionY = 0;
+	LeatherBoot.ItemCount = 1;
+	LeatherBoot.ItemCurrentDurability = LeatherHelmet.ItemMaxDurability;
+
 	st_ItemInfo SmallHPPotion = *(G_Datamanager->FindItemData(en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL));
-	SmallHPPotion.ItemTileGridPositionX = 3;
-	SmallHPPotion.ItemTileGridPositionY = 0;
+	SmallHPPotion.ItemTileGridPositionX = 0;
+	SmallHPPotion.ItemTileGridPositionY = 2;
 	SmallHPPotion.ItemCount = 5;
 
 	st_ItemInfo SmallMPPotion = *(G_Datamanager->FindItemData(en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_MANA_RESTORATION_POTION_SMALL));
-	SmallMPPotion.ItemTileGridPositionX = 4;
-	SmallMPPotion.ItemTileGridPositionY = 0;
+	SmallMPPotion.ItemTileGridPositionX = 1;
+	SmallMPPotion.ItemTileGridPositionY = 2;
 	SmallMPPotion.ItemCount = 5;
 
 	NewPlayerDefaultItems.push_back(WoodSword);
 	NewPlayerDefaultItems.push_back(WoodShield);
+	NewPlayerDefaultItems.push_back(LeatherHelmet);
+	NewPlayerDefaultItems.push_back(WoodArmor);
+	NewPlayerDefaultItems.push_back(LeatherBoot);
 	NewPlayerDefaultItems.push_back(SmallHPPotion);
 	NewPlayerDefaultItems.push_back(SmallMPPotion);	
 
@@ -1218,6 +1239,9 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_INVENTORY_ITEM_USE:
 		PacketProcReqItemUse(SessionID, Message);
+		break;
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_OFF_EQUIPMENT:
+		PacketProcReqOffEquipment(SessionID, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_UI_MENU_TILE_BUY:
 		PacketProcReqUIMenuTileBuy(SessionID, Message);
@@ -4126,18 +4150,31 @@ void CGameServer::PacketProcReqItemUse(int64 SessionId, CMessage* Message)
 			{
 				switch (UseItem->_ItemInfo.ItemSmallCategory)
 				{
+				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:
+				case en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD:
+				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
+				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD:
+				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:
+					{
+						st_GameObjectJob* DoItemEquipmentJob = MakeGameObjectJobOnEquipment(UseItem);
+						MyPlayer->_GameObjectJobQue.Enqueue(DoItemEquipmentJob);
+					}					
+					break;									
 				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_SEED_POTATO:
 					// 씨앗 배치 
 					break;
 				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL:
 					{						
 						// 체력 포션 사용
-						st_GameObjectJob* HealJob = MakeGameObjectJobHeal(MyPlayer, UseItem->_ItemInfo.ItemHealPoint);
-						MyPlayer->_GameObjectJobQue.Enqueue(HealJob);
+						st_GameObjectJob* HPHealJob = MakeGameObjectJobHPHeal(MyPlayer, UseItem->_ItemInfo.ItemHealPoint);
+						MyPlayer->_GameObjectJobQue.Enqueue(HPHealJob);
 					}
 					break;		
 				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_MANA_RESTORATION_POTION_SMALL:
-
+					{
+						st_GameObjectJob* MPHealJob = MakeGameObjectJobMPHeal(MyPlayer, UseItem->_ItemInfo.ItemHealPoint);
+						MyPlayer->_GameObjectJobQue.Enqueue(MPHealJob);
+					}
 					break;
 				default:
 					{
@@ -4149,6 +4186,64 @@ void CGameServer::PacketProcReqItemUse(int64 SessionId, CMessage* Message)
 				}
 			}
 			
+		} while (0);
+	}
+
+	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcReqOffEquipment(int64 SessionID, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionID);
+
+	if (Session)
+	{
+		do
+		{
+			int64 AccountID;
+			int64 PlayerID;
+
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountID;
+
+			// AccountId가 맞는지 확인
+			if (Session->AccountId != AccountID)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> PlayerID;
+
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			// 조종하고 있는 플레이어가 있는지 확인 
+			if (MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerID)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			int8 EquipmentParts;
+			*Message >> EquipmentParts;
+
+			st_GameObjectJob* OffEquipmentParts = MakeGameObjectJobOffEquipment(EquipmentParts);
+			MyPlayer->_GameObjectJobQue.Enqueue(OffEquipmentParts);
 		} while (0);
 	}
 
@@ -5718,6 +5813,10 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 
 #pragma endregion			
 
+#pragma region 장비 아이템 정보 읽어오기
+
+#pragma endregion
+
 #pragma region 퀵슬롯 정보 가져와서 클라에 보내기
 			// 퀵슬롯 정보 초기화
 			MyPlayer->_QuickSlotManager.Init();
@@ -6075,7 +6174,7 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 				LeavePlayerInventoryItemSave.Execute();
 			}
 		}
-	}	
+	}		
 
 	G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerInfoSaveDBConnection);			
 
@@ -6594,23 +6693,6 @@ CGameServerMessage* CGameServer::MakePacketInventoryItemUse(int64 PlayerId, st_I
 	return ResInventoryItemUseMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketEquipmentUpdate(int64 PlayerId, st_ItemInfo& EquipmentItemInfo)
-{
-	CGameServerMessage* ResEquipmentUpdateMessage = CGameServerMessage::GameServerMessageAlloc();
-	if (ResEquipmentUpdateMessage == nullptr)
-	{
-		return nullptr;
-	}
-
-	ResEquipmentUpdateMessage->Clear();
-
-	*ResEquipmentUpdateMessage << (int16)en_PACKET_S2C_EQUIPMENT_UPDATE;
-	*ResEquipmentUpdateMessage << PlayerId;
-	*ResEquipmentUpdateMessage << EquipmentItemInfo;
-
-	return ResEquipmentUpdateMessage;
-}
-
 CGameServerMessage* CGameServer::MakePacketResQuickSlotBarSlotSave(st_QuickSlotBarSlotInfo QuickSlotBarSlotInfo)
 {
 	CGameServerMessage* ResQuickSlotBarSlotMessage = CGameServerMessage::GameServerMessageAlloc();
@@ -6887,20 +6969,66 @@ st_GameObjectJob* CGameServer::MakeGameObjectDamage(CGameObject* Attacker, int32
 	return DamageJob;
 }
 
-st_GameObjectJob* CGameServer::MakeGameObjectJobHeal(CGameObject* Healer, int32 HealPoint)
+st_GameObjectJob* CGameServer::MakeGameObjectJobHPHeal(CGameObject* Healer, int32 HPHealPoint)
 {
-	st_GameObjectJob* HealJob = G_ObjectManager->GameObjectJobCreate();
-	HealJob->GameObjectJobType = en_GameObjectJobType::GAMEOJBECT_JOB_TYPE_HEAL;
+	st_GameObjectJob* HPHealJob = G_ObjectManager->GameObjectJobCreate();
+	HPHealJob->GameObjectJobType = en_GameObjectJobType::GAMEOJBECT_JOB_TYPE_HP_HEAL;
 
-	CGameServerMessage* HealMessage = CGameServerMessage::GameServerMessageAlloc();
-	HealMessage->Clear();
+	CGameServerMessage* HPHealMessage = CGameServerMessage::GameServerMessageAlloc();
+	HPHealMessage->Clear();
 
-	*HealMessage << &Healer;
-	*HealMessage << HealPoint;
+	*HPHealMessage << &Healer;
+	*HPHealMessage << HPHealPoint;
 
-	HealJob->GameObjectJobMessage = HealMessage;
+	HPHealJob->GameObjectJobMessage = HPHealMessage;
 
-	return HealJob;
+	return HPHealJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobMPHeal(CGameObject* Healer, int32 MPHealPoint)
+{
+	st_GameObjectJob* MPHealJob = G_ObjectManager->GameObjectJobCreate();
+	MPHealJob->GameObjectJobType = en_GameObjectJobType::GAMEOJBECT_JOB_TYPE_MP_HEAL;
+
+	CGameServerMessage* MPHealMessage = CGameServerMessage::GameServerMessageAlloc();
+	MPHealMessage->Clear();
+
+	*MPHealMessage << &Healer;
+	*MPHealMessage << MPHealPoint;
+
+	MPHealJob->GameObjectJobMessage = MPHealMessage;
+
+	return MPHealJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobOnEquipment(CItem* EquipmentItem)
+{
+	st_GameObjectJob* DoEquipmentJob = G_ObjectManager->GameObjectJobCreate();
+	DoEquipmentJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_ON_EQUIPMENT;
+
+	CGameServerMessage* DoEquipmentMessage = CGameServerMessage::GameServerMessageAlloc();
+	DoEquipmentMessage->Clear();
+
+	*DoEquipmentMessage << &EquipmentItem;
+
+	DoEquipmentJob->GameObjectJobMessage = DoEquipmentMessage;
+
+	return DoEquipmentJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobOffEquipment(int8& EquipmentParts)
+{
+	st_GameObjectJob* UnDoEquipmentJob = G_ObjectManager->GameObjectJobCreate();
+	UnDoEquipmentJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_OFF_EQUIPMENT;
+
+	CGameServerMessage* UnDoEquipmentMessage = CGameServerMessage::GameServerMessageAlloc();
+	UnDoEquipmentMessage->Clear();
+
+	*UnDoEquipmentMessage << EquipmentParts;
+
+	UnDoEquipmentJob->GameObjectJobMessage = UnDoEquipmentMessage;
+
+	return UnDoEquipmentJob;
 }
 
 st_GameObjectJob* CGameServer::MakeGameObjectJobItemSave(CGameObject* Item)
@@ -7873,6 +8001,40 @@ CGameServerMessage* CGameServer::MakePacketResCraftingTableCompleteItemList(int6
 	}
 
 	return ResCraftingTableCompleteItemListMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketOnEquipment(int64 PlayerId, st_ItemInfo& EquipmentItemInfo)
+{
+	CGameServerMessage* ResOnEquipmentMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResOnEquipmentMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResOnEquipmentMessage->Clear();
+
+	*ResOnEquipmentMessage << (int16)en_PACKET_S2C_ON_EQUIPMENT;
+	*ResOnEquipmentMessage << PlayerId;	
+	*ResOnEquipmentMessage << EquipmentItemInfo;
+
+	return ResOnEquipmentMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketOffEquipment(int64 PlayerID, en_EquipmentParts OffEquipmentParts)
+{
+	CGameServerMessage* ResOffEquipmentMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResOffEquipmentMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResOffEquipmentMessage->Clear();
+
+	*ResOffEquipmentMessage << (int16)en_PACKET_S2C_OFF_EQUIPMENT;
+	*ResOffEquipmentMessage << PlayerID;
+	*ResOffEquipmentMessage << (int8)OffEquipmentParts;
+
+	return ResOffEquipmentMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketLoginServerLogOut(int64 AccountID)
