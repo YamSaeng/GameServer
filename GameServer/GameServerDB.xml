@@ -52,9 +52,9 @@
 	<Column name="ItemHeight" type="SmallInt"/>
 	<Column name="ItemTileGridPositionX" type="SmallInt"/>
 	<Column name="ItemTileGridPositionY" type="SmallInt"/>
-    <Column name="ItemLargeCategory" type="TinyInt" notnull="true"/>
-    <Column name="ItemMediumCategory" type="TinyInt" notnull="true"/>
-    <Column name="ItemSmallCategory" type="SmallInt" notnull="true"/>       
+    <Column name="ItemLargeCategory" type="nvarchar(50)" notnull="true"/>
+    <Column name="ItemMediumCategory" type="nvarchar(50)" notnull="true"/>
+    <Column name="ItemSmallCategory" type="nvarchar(80)" notnull="true"/>       
     <Column name="ItemCount" type="SmallInt" notnull="true"/>	    
 	<Column name="ItemDurability" type="int" notnull="true"/>
 	<Column name="ItemEnchantPoint" type="TinyInt" notnull="true"/>           
@@ -79,9 +79,9 @@
     <Column name="PlayerDBId" type="BigInt"  notnull ="true"/>
 	<Column name="IsSkillLearn" type="bit" notnull="true"/>
     <Column name="IsQuickSlotUse" type="bit" notnull ="true"/>
-    <Column name="SkillLargeCategory" type="TinyInt" notnull="true"/>
-    <Column name="SkillMediumCategory" type="TinyInt" noutnull="true"/>
-    <Column name="SkillType" type="SmallInt" notnull ="true"/>
+    <Column name="SkillLargeCategory" type="nvarchar(50)" notnull="true"/>
+    <Column name="SkillMediumCategory" type="nvarchar(50)" noutnull="true"/>
+    <Column name="SkillType" type="nvarchar(50)" notnull ="true"/>
     <Column name="SkillLevel" type="TinyInt" notnull ="true"/>    
   </Table>
   
@@ -92,13 +92,13 @@
     <Column name="QuickSlotBarIndex" type="TinyInt" notnull ="true"/>
     <Column name="QuickSlotBarSlotIndex" type="TinyInt" notnull ="true"/>
     <Column name="QuickSlotKey" type="SmallInt"/>	
-    <Column name="SkillLargeCategory" type="TinyInt"/>
-    <Column name="SkillMediumCategory" type="TinyInt"/>
-    <Column name="SkillType" type="SmallInt"/>
+    <Column name="SkillLargeCategory" type="nvarchar(50)"/>
+    <Column name="SkillMediumCategory" type="nvarchar(50)"/>
+    <Column name="SkillType" type="nvarchar(50)"/>
     <Column name="SkillLevel" type="TinyInt"/>
-	<Column name="ItemLargeCategory" type="TinyInt"/>
-	<Column name="ItemMediumCategory" type="TinyInt"/>
-	<Column name="ItemSmallCategory" type="SmallInt"/>
+	<Column name="ItemLargeCategory" type="nvarchar(50)"/>
+	<Column name="ItemMediumCategory" type="nvarchar(50)"/>
+	<Column name="ItemSmallCategory" type="nvarchar(80)"/>
 	<Column name="ItemCount" type="SmallInt"/>
   </Table>  
    
@@ -106,7 +106,7 @@
 	<Table name="Crop" desc="Crop Table">
 	 <Column name="OwnerAccountDBId" type="BigInt" notnull ="true"/>
 	 <Column name="OwnerPlayerDBId" type="BigInt" notnull ="true"/>
-	 <Column name="CropCategory" type="SmallInt" notnull ="true"/>
+	 <Column name="CropCategory" type="nvarchar(50)" notnull ="true"/>
 	 <Column name="CropStep" type="TinyInt" notnull ="true"/>
 	 <Column name="CropCount" type="SmallInt" notnull="true"/>	
 	 <Column name="LastPositionY" type="int" notnull="true"/>
@@ -330,7 +330,11 @@
       <![CDATA[
 	    SET NOCOUNT ON
         INSERT INTO [dbo].[Inventory]
-        VALUES ((@OwnerAccountDBId), (@OwnerPlayerDBId), 0, 0, 0, 0, (@ItemTileGridPositionX), (@ItemTileGridPositionY), 0, 0, 0, 0, 0, 0)
+        VALUES ((@OwnerAccountDBId), (@OwnerPlayerDBId),
+		0, 0, 0, 0, 
+		(@ItemTileGridPositionX), (@ItemTileGridPositionY), 
+		' ',' ',' ', 
+		0, 0, 0)
       ]]>
     </Body>
   </Procedure>  
@@ -344,7 +348,67 @@
 	    SET NOCOUNT ON
         SELECT ItemIsQuickSlotUse, ItemIsEquipped, ItemWidth, ItemHeight,
 		ItemTileGridPositionX, ItemTileGridPositionY,
-		ItemLargeCategory, ItemMediumCategory, ItemSmallCategory,
+		(CASE WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_ARCHITECTURE' THEN 1
+	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_WEAPON' THEN 2
+	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_ARMOR' THEN 3
+	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_FOOD' THEN 4
+	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_POTION' THEN 5
+	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_SKILLBOOK' THEN 6
+	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_MATERIAL' THEN 7
+	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_CROP' THEN 8
+	          ELSE ' '
+	          END), 
+	    (CASE WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE' THEN 1
+	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_SWORD' THEN 2
+	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_SHIELD' THEN 3
+	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_HAT' THEN 4
+	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_WEAR' THEN 5
+	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_GLOVE' THEN 6
+	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_BOOT' THEN 7
+	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_HEAL' THEN 8
+	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_MANA' THEN 9
+	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_CROP_SEED' THEN 10
+	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_CROP_FRUIT' THEN 11
+	          ELSE ' '
+	          END), 
+		(CASE WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD' THEN 1
+	          WHEN ItemSmallCategory = 'ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD' THEN 2
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER' THEN 100
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER' THEN 101
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER' THEN 102
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL' THEN 200
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_POTION_MANA_RESTORATION_POTION_SMALL' THEN 201
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_FIERCE_ATTACK' THEN 300
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CONVERSION_ATTACK' THEN 301
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SHAEHONE_ATTACK' THEN 302
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK' THEN 303
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SMASH_WAVE_ATTACK' THEN 304
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHARGE_POSE' THEN 305
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_FLAME_HARPOON' THEN 306
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HELL_FIRE' THEN 307
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEOGRY_SKILLBOOK_TAIOIST_HEALING_LIGHT' THEN 308
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_TAIOIST_HEALING_WIND' THEN 309
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_SHOCK_RELEASE' THEN 310
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_LEATHER' THEN 2000
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL' THEN 2001
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN' THEN 2002
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN' THEN 2003
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN' THEN 2004
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_STONE' THEN 2005
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG' THEN 2006
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK' THEN 2007
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_YARN' THEN 2008
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL' THEN 2009
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET' THEN 2010
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT' THEN 2011
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET' THEN 2012
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT' THEN 2013
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CROP_SEED_POTATO' THEN 2014
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO' THEN 2015
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE' THEN 5000
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL' THEN 5001
+	          ELSE ' '
+	          END),
 		ItemCount, ItemDurability, ItemEnchantPoint
         FROM [dbo].[Inventory]
         WHERE OwnerAccountDBId = (@AccountDBId) AND OwnerPlayerDBId = (@PlayerDBId)
@@ -363,7 +427,7 @@
 	    SET NOCOUNT ON
         UPDATE [dbo].[Inventory]
         SET ItemIsQuickSlotUse = 0, ItemIsEquipped = 0, ItemWidth = 0, ItemHeight = 0,
-		ItemLargeCategory = 0, ItemMediumCategory = 0, ItemSmallCategory = 0,		
+		ItemLargeCategory = ' ', ItemMediumCategory = ' ', ItemSmallCategory = ' ',		
 		ItemCount = 0, ItemDurability = 0, ItemEnchantPoint = 0		 
         WHERE ItemTileGridPositionX = (@ItemTileGridPositionX) AND ItemTileGridPositionY = (@ItemTileGridPositionY) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
       ]]>
@@ -393,21 +457,171 @@
 		SET ItemIsQuickSlotUse = (@ItemIsQuickSlotUse),
 		ItemIsEquipped = (@ItemIsEquipped),
 		ItemWidth = (@ItemWidth), ItemHeight = (@ItemHeight),
-		ItemLargeCategory = (@ItemLargeCategory), ItemMediumCategory = (@ItemMediumCategory), ItemSmallCategory = (@ItemSmallCategory),
+		ItemLargeCategory = (CASE WHEN @ItemLargeCategory = 1 THEN 'ITEM_LARGE_CATEGORY_ARCHITECTURE'
+	                              WHEN @ItemLargeCategory = 2 THEN 'ITEM_LARGE_CATEGORY_WEAPON'
+	                              WHEN @ItemLargeCategory = 3 THEN 'ITEM_LARGE_CATEGORY_ARMOR'
+	                              WHEN @ItemLargeCategory = 4 THEN 'ITEM_LARGE_CATEGORY_FOOD'
+	                              WHEN @ItemLargeCategory = 5 THEN 'ITEM_LARGE_CATEGORY_POTION'
+	                              WHEN @ItemLargeCategory = 6 THEN 'ITEM_LARGE_CATEGORY_SKILLBOOK'
+	                              WHEN @ItemLargeCategory = 7 THEN 'ITEM_LARGE_CATEGORY_MATERIAL'
+	                              WHEN @ItemLargeCategory = 8 THEN 'ITEM_LARGE_CATEGORY_CROP'
+	                              ELSE ' '
+                         	      END),
+		ItemMediumCategory = (CASE WHEN @ItemMediumCategory = 1 THEN 'ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE'
+	                               WHEN @ItemMediumCategory = 2 THEN 'ITEM_MEDIUM_CATEGORY_SWORD'
+	                               WHEN @ItemMediumCategory = 3 THEN 'ITEM_MEDIUM_CATEGORY_SHIELD'
+	                               WHEN @ItemMediumCategory = 4 THEN 'ITEM_MEDIUM_CATEGORY_HAT'
+	                               WHEN @ItemMediumCategory = 5 THEN 'ITEM_MEDIUM_CATEGORY_WEAR'
+	                               WHEN @ItemMediumCategory = 6 THEN 'ITEM_MEDIUM_CATEGORY_GLOVE'
+	                               WHEN @ItemMediumCategory = 7 THEN 'ITEM_MEDIUM_CATEGORY_BOOT'
+	                               WHEN @ItemMediumCategory = 8 THEN 'ITEM_MEDIUM_CATEGORY_HEAL'
+	                               WHEN @ItemMediumCategory = 9 THEN 'ITEM_MEDIUM_CATEGORY_MANA'
+	                               WHEN @ItemMediumCategory = 10 THEN 'ITEM_MEDIUM_CATEGORY_CROP_SEED'
+	                               WHEN @ItemMediumCategory = 11 THEN 'ITEM_MEDIUM_CATEGORY_CROP_FRUIT'
+	                               ELSE ' '
+	                               END),
+		ItemSmallCategory = (CASE WHEN @ItemSmallCategory = 1 THEN 'ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD'
+	                              WHEN @ItemSmallCategory = 2 THEN 'ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD'
+	                              WHEN @ItemSmallCategory = 100 THEN 'ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER'
+	                              WHEN @ItemSmallCategory = 101 THEN 'ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER'
+	                              WHEN @ItemSmallCategory = 102 THEN 'ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER'
+	                              WHEN @ItemSmallCategory = 200 THEN 'ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL'
+	                              WHEN @ItemSmallCategory = 201 THEN 'ITEM_SMALL_CATEGORY_POTION_MANA_RESTORATION_POTION_SMALL'
+	                              WHEN @ItemSmallCategory = 300 THEN 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_FIERCE_ATTACK'
+	                              WHEN @ItemSmallCategory = 301 THEN 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CONVERSION_ATTACK'
+	                              WHEN @ItemSmallCategory = 302 THEN 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SHAEHONE_ATTACK'
+	                              WHEN @ItemSmallCategory = 303 THEN 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK'
+	                              WHEN @ItemSmallCategory = 304 THEN 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SMASH_WAVE_ATTACK'
+	                              WHEN @ItemSmallCategory = 305 THEN 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHARGE_POSE'
+	                              WHEN @ItemSmallCategory = 306 THEN 'ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_FLAME_HARPOON'
+	                              WHEN @ItemSmallCategory = 307 THEN 'ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HELL_FIRE'
+	                              WHEN @ItemSmallCategory = 308 THEN 'ITEM_SMALL_CATEOGRY_SKILLBOOK_TAIOIST_HEALING_LIGHT'
+	                              WHEN @ItemSmallCategory = 309 THEN 'ITEM_SMALL_CATEGORY_SKILLBOOK_TAIOIST_HEALING_WIND'
+	                              WHEN @ItemSmallCategory = 310 THEN 'ITEM_SMALL_CATEGORY_SKILLBOOK_SHOCK_RELEASE'
+	                              WHEN @ItemSmallCategory = 2000 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_LEATHER'
+	                              WHEN @ItemSmallCategory = 2001 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL'
+	                              WHEN @ItemSmallCategory = 2002 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN'
+	                              WHEN @ItemSmallCategory = 2003 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN'
+	                              WHEN @ItemSmallCategory = 2004 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN'
+	                              WHEN @ItemSmallCategory = 2005 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_STONE'
+	                              WHEN @ItemSmallCategory = 2006 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG'
+	                              WHEN @ItemSmallCategory = 2007 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK'
+	                              WHEN @ItemSmallCategory = 2008 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_YARN'
+	                              WHEN @ItemSmallCategory = 2009 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL'
+	                              WHEN @ItemSmallCategory = 2010 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET'
+	                              WHEN @ItemSmallCategory = 2011 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT'
+	                              WHEN @ItemSmallCategory = 2012 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET'
+	                              WHEN @ItemSmallCategory = 2013 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT'
+	                              WHEN @ItemSmallCategory = 2014 THEN 'ITEM_SMALL_CATEGORY_CROP_SEED_POTATO'
+	                              WHEN @ItemSmallCategory = 2015 THEN 'ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO'
+	                              WHEN @ItemSmallCategory = 5000 THEN 'ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE'
+	                              WHEN @ItemSmallCategory = 5001 THEN 'ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL'
+	                              ELSE ' '
+	                              END),
 		ItemCount = (@ItemCount), ItemDurability = (@ItemDurability), ItemEnchantPoint = (@ItemEnchantPoint)
 		WHERE OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId) And ItemTileGridPositionX = (@ItemTileGridPositionX) AND ItemTileGridPositionY = (@ItemTileGridPositionY)
 		]]>
 	</Body>	
  </Procedure>
-  
-  <!-- 스킬 테이블에 있는 스킬 가지고 오기 -->
+
+  <!-- 가방 초기화 -->
+  <Procedure name="spInventoryInit">
+  	<Param name="@OwnerAccountDBId" type="BigInt"/>
+  	<Param name="@OwnerPlayerDBId" type="BigInt"/>
+  	<Param name="@InventoryWidth" type="int"/>
+  	<Param name="@InventoryHeight" type="int"/>
+  	<Body>
+  		<![CDATA[
+  	   SET NOCOUNT ON
+            DECLARE @width int
+            DECLARE @height int
+            SET @width = 0
+            SET @height = 0
+            while @width < @InventoryWidth BEGIN
+  	                 SET @height = 0
+                     while @height < @InventoryHeight BEGIN
+                             UPDATE [dbo].[Inventory]
+                             SET ItemIsQuickSlotUse = 0, ItemIsEquipped = 0, 
+  					         ItemWidth = 0, ItemHeight = 0,
+  						     ItemLargeCategory = ' ', ItemMediumCategory = ' ', ItemSmallCategory = ' ',
+  						     ItemCount = 0, ItemDurability = 0, ItemEnchantPoint = 0
+                             WHERE OwnerAccountDBId = @OwnerAccountDBId AND OwnerPlayerDBId = @OwnerPlayerDBId AND ItemTileGridPositionX = @width AND ItemTileGridPositionY = @height        
+                            SET @height = @height + 1
+                     END
+                 SET @width = @width + 1
+             END
+  	]]>
+  	</Body>
+  </Procedure>
+	
+	<!-- 스킬 테이블에 있는 스킬 가지고 오기 -->
   <Procedure name="spGetSkill">
     <Param name="@AccountDBId" type="BigInt"/>
     <Param name="@PlayerDBId" type="BigInt"/>
     <Body>
       <![CDATA[
 	    SET NOCOUNT ON
-        SELECT IsSkillLearn ,IsQuickSlotUse, SkillLargeCategory, SkillMediumCategory, SkillType, SkillLevel
+        SELECT IsSkillLearn ,IsQuickSlotUse,
+		(CASE WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_PUBLIC' THEN 1
+	          WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_WARRIOR' THEN 2
+	          WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_SHMAN' THEN 3
+	          WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_TAOIST' THEN 4
+	          WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_THIEF' THEN 5
+	          WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_ARCHER' THEN 6
+	          WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_MONSTER_MELEE' THEN 7
+	          WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_MONSTER_MAGIC' THEN 8
+	          ELSE ' '
+	          END),
+		(CASE WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK' THEN 1
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_PUBLIC_TACTIC' THEN 2
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL' THEN 3
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_PUBLIC_BUF' THEN 4
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK' THEN 5
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_WARRIOR_TACTIC' THEN 6
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_WARRIOR_HEAL' THEN 7
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_WARRIOR_BUF' THEN 8
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK' THEN 9
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_SHMAN_TACTIC' THEN 10
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_SHMAN_HEAL' THEN 11
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_SHMAN_BUF' THEN 12
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK' THEN 13
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_TAOIST_TACTIC' THEN 14
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_TAOIST_HEAL' THEN 15
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_TAOIST_BUF' THEN 16
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_THIEF_ATTACK' THEN 17
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_THIEF_TACTIC' THEN 18
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_THIEF_HEAL' THEN 19
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_THIEF_BUF' THEN 20
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_ARCHER_ATTACK' THEN 21
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_ARCHER_TACTIC' THEN 22
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_ARCHER_HEAL' THEN 23
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_ARCHER_BUF' THEN 24
+	          ELSE ' '
+	          END),
+		(CASE WHEN SkillType = 'SKILL_DEFAULT_ATTACK' THEN 1
+	          WHEN SkillType = 'SKILL_KNIGHT_FIERCE_ATTACK' THEN 2
+	          WHEN SkillType = 'SKILL_KNIGHT_CONVERSION_ATTACK' THEN 3
+	          WHEN SkillType = 'SKILL_KNIGHT_SMASH_WAVE' THEN 4
+	          WHEN SkillType = 'SKILL_KNIGHT_SHAEHONE' THEN 5
+	          WHEN SkillType = 'SKILL_KNIGHT_CHOHONE' THEN 6
+	          WHEN SkillType = 'SKILL_KNIGHT_SHIELD_SMASH' THEN 7
+	          WHEN SkillType = 'SKILL_KNIGHT_CHARGE_POSE' THEN 8
+	          WHEN SkillType = 'SKILL_SHAMAN_FLAME_HARPOON' THEN 89
+	          WHEN SkillType = 'SKILL_SHAMAN_ROOT' THEN 10
+	          WHEN SkillType = 'SKILL_SHAMAN_ICE_CHAIN' THEN 11
+	          WHEN SkillType = 'SKILL_SHAMAN_ICE_WAVE' THEN 12
+	          WHEN SkillType = 'SKILL_SHAMAN_LIGHTNING_STRIKE' THEN 13
+	          WHEN SkillType = 'SKILL_SHAMAN_HELL_FIRE' THEN 14
+	          WHEN SkillType = 'SKILL_SHAMAN_BACK_TELEPORT' THEN 15
+	          WHEN SkillType = 'SKILL_TAIOIST_DIVINE_STRIKE' THEN 16
+	          WHEN SkillType = 'SKILL_TAIOIST_HEALING_LIGHT' THEN 17
+	          WHEN SkillType = 'SKILL_TAIOIST_HEALING_WIND' THEN 18
+	          WHEN SkillType = 'SKILL_TAIOIST_ROOT' THEN 19
+	          WHEN SkillType = 'SKILL_THIEF_QUICK_CUT' THEN 20
+	          WHEN SkillType = 'SKILL_ARCHER_SNIFING' THEN 21
+	          WHEN SkillType = 'SKILL_SHOCK_RELEASE' THEN 22         
+	          ELSE ' '
+	          END)
         FROM [dbo].[Skill]
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
@@ -427,31 +641,92 @@
     <Body>
       <![CDATA[
 	    SET NOCOUNT ON
-        INSERT INTO [dbo].[Skill] VALUES ((@AccountDBId), (@PlayerDBId), (@IsSkillLearn), (@IsQuickSlotUse), (@SkillLargeCategory), (@SkillMediumCategory), (@SkillType), (@SkillLevel))
+        INSERT INTO [dbo].[Skill] VALUES ((@AccountDBId), (@PlayerDBId), (@IsSkillLearn), (@IsQuickSlotUse), 
+		(CASE WHEN @SkillLargeCategory = 1 THEN 'SKILL_LARGE_CATEGORY_PUBLIC'
+	          WHEN @SkillLargeCategory = 2 THEN 'SKILL_LARGE_CATEGORY_WARRIOR'
+	          WHEN @SkillLargeCategory = 3 THEN 'SKILL_LARGE_CATEGORY_SHMAN'
+	          WHEN @SkillLargeCategory = 4 THEN 'SKILL_LARGE_CATEGORY_TAOIST'
+	          WHEN @SkillLargeCategory = 5 THEN 'SKILL_LARGE_CATEGORY_THIEF'
+	          WHEN @SkillLargeCategory = 6 THEN 'SKILL_LARGE_CATEGORY_ARCHER'
+	          WHEN @SkillLargeCategory = 7 THEN 'SKILL_LARGE_CATEGORY_MONSTER_MELEE'
+	          WHEN @SkillLargeCategory = 8 THEN 'SKILL_LARGE_CATEGORY_MONSTER_MAGIC'
+	          ELSE ' '
+	          END),
+	    (CASE WHEN @SkillMediumCategory = 1 THEN 'SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK'
+	          WHEN @SkillMediumCategory = 2 THEN 'SKILL_MEDIUM_CATEGORY_PUBLIC_TACTIC'
+	          WHEN @SkillMediumCategory = 3 THEN 'SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL'
+	          WHEN @SkillMediumCategory = 4 THEN 'SKILL_MEDIUM_CATEGORY_PUBLIC_BUF'
+	          WHEN @SkillMediumCategory = 5 THEN 'SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK'
+	          WHEN @SkillMediumCategory = 6 THEN 'SKILL_MEDIUM_CATEGORY_WARRIOR_TACTIC'
+	          WHEN @SkillMediumCategory = 7 THEN 'SKILL_MEDIUM_CATEGORY_WARRIOR_HEAL'
+	          WHEN @SkillMediumCategory = 8 THEN 'SKILL_MEDIUM_CATEGORY_WARRIOR_BUF'
+	          WHEN @SkillMediumCategory = 9 THEN 'SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK'
+	          WHEN @SkillMediumCategory = 10 THEN 'SKILL_MEDIUM_CATEGORY_SHMAN_TACTIC'
+	          WHEN @SkillMediumCategory = 11 THEN 'SKILL_MEDIUM_CATEGORY_SHMAN_HEAL'
+	          WHEN @SkillMediumCategory = 12 THEN 'SKILL_MEDIUM_CATEGORY_SHMAN_BUF'
+	          WHEN @SkillMediumCategory = 13 THEN 'SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK'
+	          WHEN @SkillMediumCategory = 14 THEN 'SKILL_MEDIUM_CATEGORY_TAOIST_TACTIC'
+	          WHEN @SkillMediumCategory = 15 THEN 'SKILL_MEDIUM_CATEGORY_TAOIST_HEAL'
+	          WHEN @SkillMediumCategory = 16 THEN 'SKILL_MEDIUM_CATEGORY_TAOIST_BUF'
+	          WHEN @SkillMediumCategory = 17 THEN 'SKILL_MEDIUM_CATEGORY_THIEF_ATTACK'
+	          WHEN @SkillMediumCategory = 18 THEN 'SKILL_MEDIUM_CATEGORY_THIEF_TACTIC'
+	          WHEN @SkillMediumCategory = 19 THEN 'SKILL_MEDIUM_CATEGORY_THIEF_HEAL'
+	          WHEN @SkillMediumCategory = 20 THEN 'SKILL_MEDIUM_CATEGORY_THIEF_BUF'
+	          WHEN @SkillMediumCategory = 21 THEN 'SKILL_MEDIUM_CATEGORY_ARCHER_ATTACK'
+	          WHEN @SkillMediumCategory = 22 THEN 'SKILL_MEDIUM_CATEGORY_ARCHER_TACTIC'
+	          WHEN @SkillMediumCategory = 23 THEN 'SKILL_MEDIUM_CATEGORY_ARCHER_HEAL'
+	          WHEN @SkillMediumCategory = 24 THEN 'SKILL_MEDIUM_CATEGORY_ARCHER_BUF'
+	          ELSE ' '
+	          END),
+		(CASE WHEN @SkillType = 1 THEN 'SKILL_DEFAULT_ATTACK'
+	          WHEN @SkillType = 2 THEN 'SKILL_KNIGHT_FIERCE_ATTACK'
+	          WHEN @SkillType = 3 THEN 'SKILL_KNIGHT_CONVERSION_ATTACK'
+	          WHEN @SkillType = 4 THEN 'SKILL_KNIGHT_SMASH_WAVE'
+	          WHEN @SkillType = 5 THEN 'SKILL_KNIGHT_SHAEHONE'
+	          WHEN @SkillType = 6 THEN 'SKILL_KNIGHT_CHOHONE'
+	          WHEN @SkillType = 7 THEN 'SKILL_KNIGHT_SHIELD_SMASH'
+	          WHEN @SkillType = 8 THEN 'SKILL_KNIGHT_CHARGE_POSE'
+	          WHEN @SkillType = 9 THEN 'SKILL_SHAMAN_FLAME_HARPOON'
+	          WHEN @SkillType = 10 THEN 'SKILL_SHAMAN_ROOT'
+	          WHEN @SkillType = 11 THEN 'SKILL_SHAMAN_ICE_CHAIN'
+	          WHEN @SkillType = 12 THEN 'SKILL_SHAMAN_ICE_WAVE'
+	          WHEN @SkillType = 13 THEN 'SKILL_SHAMAN_LIGHTNING_STRIKE'
+	          WHEN @SkillType = 14 THEN 'SKILL_SHAMAN_HELL_FIRE'
+	          WHEN @SkillType = 15 THEN 'SKILL_SHAMAN_BACK_TELEPORT'
+	          WHEN @SkillType = 16 THEN 'SKILL_TAIOIST_DIVINE_STRIKE'
+	          WHEN @SkillType = 17 THEN 'SKILL_TAIOIST_HEALING_LIGHT'
+	          WHEN @SkillType = 18 THEN 'SKILL_TAIOIST_HEALING_WIND'
+	          WHEN @SkillType = 19 THEN 'SKILL_TAIOIST_ROOT'
+	          WHEN @SkillType = 20 THEN 'SKILL_THIEF_QUICK_CUT'
+	          WHEN @SkillType = 21 THEN 'SKILL_ARCHER_SNIFING'
+	          WHEN @SkillType = 22 THEN 'SKILL_SHOCK_RELEASE'
+	          ELSE ' '
+	          END),
+		(@SkillLevel))
       ]]>
     </Body>
   </Procedure> 
 	
   <!-- 퀵슬롯바 테이블에 새로운 퀵슬롯바 슬롯 생성 -->
-  <Procedure name="spQuickSlotBarSlotCreate">
+  <Procedure name="spQuickSlotBarSlotInit">
     <Param name="@AccountDBId" type="BigInt"/>
     <Param name="@PlayerDBId" type="BigInt"/>
     <Param name="@QuickSlotBarIndex" type="TinyInt"/>
     <Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
-    <Param name="@QuickSlotKey" type="SmallInt"/>
-    <Param name="@SkillLargeCategory" type="TinyInt"/>
-    <Param name="@SkillMediumCategory" type="TinyInt"/>
-    <Param name="@SkillType" type="SmallInt"/>
-    <Param name="@SkillLevel" type="TinyInt"/>  	
-    <Param name="@ItemLargeCategory" type="TinyInt"/>  	
-    <Param name="@ItemMediumCategory" type="TinyInt"/>  	
-    <Param name="@ItemSmallCategory" type="SmallInt"/>  	
-    <Param name="@ItemCount" type="SmallInt"/>  	
+    <Param name="@QuickSlotKey" type="SmallInt"/>    
     <Body>
       <![CDATA[   
 	    SET NOCOUNT ON
         INSERT INTO [dbo].[QuickSlotBar] 
-		VALUES ((@AccountDBId), (@PlayerDBId), (@QuickSlotBarIndex), (@QuickSlotBarSlotIndex), (@QuickSlotKey), (@SkillLargeCategory), (@SkillMediumCategory), (@SkillType), (@SkillLevel), (@ItemLargeCategory), (@ItemMediumCategory), (@ItemSmallCategory), (@ItemCount))
+		VALUES ((@AccountDBId), (@PlayerDBId), (@QuickSlotBarIndex), (@QuickSlotBarSlotIndex), (@QuickSlotKey),
+		' ',
+	    ' ',
+		' ',
+		0,
+		' ',
+		' ',
+		' ',
+		0)
       ]]>
     </Body>   
   </Procedure>
@@ -475,7 +750,130 @@
       <![CDATA[
 	    SET NOCOUNT ON
         UPDATE [dbo].[QuickSlotBar] 
-		SET QuickSlotKey = (@QuickSlotKey), SkillLargeCategory = (@SkillLargeCategory), SkillMediumCategory = (@SkillMediumCategory), SkillType = (@SkillType), SkillLevel = (@SkillLevel), ItemLargeCategory = (@ItemLargeCategory), ItemMediumCategory = (@ItemMediumCategory), ItemSmallCategory = (@ItemSmallCategory), ItemCount = (@ItemCount)
+		SET QuickSlotKey = (@QuickSlotKey), 
+		SkillLargeCategory = (CASE WHEN @SkillLargeCategory = 1 THEN 'SKILL_LARGE_CATEGORY_PUBLIC'
+								   WHEN @SkillLargeCategory = 2 THEN 'SKILL_LARGE_CATEGORY_WARRIOR'
+								   WHEN @SkillLargeCategory = 3 THEN 'SKILL_LARGE_CATEGORY_SHMAN'
+								   WHEN @SkillLargeCategory = 4 THEN 'SKILL_LARGE_CATEGORY_TAOIST'
+								   WHEN @SkillLargeCategory = 5 THEN 'SKILL_LARGE_CATEGORY_THIEF'
+								   WHEN @SkillLargeCategory = 6 THEN 'SKILL_LARGE_CATEGORY_ARCHER'
+								   WHEN @SkillLargeCategory = 7 THEN 'SKILL_LARGE_CATEGORY_MONSTER_MELEE'
+								   WHEN @SkillLargeCategory = 8 THEN 'SKILL_LARGE_CATEGORY_MONSTER_MAGIC'
+								   ELSE ' '
+								   END),
+	    SkillMediumCategory = (CASE WHEN @SkillMediumCategory = 1 THEN 'SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK'
+									WHEN @SkillMediumCategory = 2 THEN 'SKILL_MEDIUM_CATEGORY_PUBLIC_TACTIC'
+									WHEN @SkillMediumCategory = 3 THEN 'SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL'
+									WHEN @SkillMediumCategory = 4 THEN 'SKILL_MEDIUM_CATEGORY_PUBLIC_BUF'
+									WHEN @SkillMediumCategory = 5 THEN 'SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK'
+									WHEN @SkillMediumCategory = 6 THEN 'SKILL_MEDIUM_CATEGORY_WARRIOR_TACTIC'
+									WHEN @SkillMediumCategory = 7 THEN 'SKILL_MEDIUM_CATEGORY_WARRIOR_HEAL'
+									WHEN @SkillMediumCategory = 8 THEN 'SKILL_MEDIUM_CATEGORY_WARRIOR_BUF'
+									WHEN @SkillMediumCategory = 9 THEN 'SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK'
+									WHEN @SkillMediumCategory = 10 THEN 'SKILL_MEDIUM_CATEGORY_SHMAN_TACTIC'
+									WHEN @SkillMediumCategory = 11 THEN 'SKILL_MEDIUM_CATEGORY_SHMAN_HEAL'
+									WHEN @SkillMediumCategory = 12 THEN 'SKILL_MEDIUM_CATEGORY_SHMAN_BUF'
+									WHEN @SkillMediumCategory = 13 THEN 'SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK'
+									WHEN @SkillMediumCategory = 14 THEN 'SKILL_MEDIUM_CATEGORY_TAOIST_TACTIC'
+									WHEN @SkillMediumCategory = 15 THEN 'SKILL_MEDIUM_CATEGORY_TAOIST_HEAL'
+									WHEN @SkillMediumCategory = 16 THEN 'SKILL_MEDIUM_CATEGORY_TAOIST_BUF'
+									WHEN @SkillMediumCategory = 17 THEN 'SKILL_MEDIUM_CATEGORY_THIEF_ATTACK'
+									WHEN @SkillMediumCategory = 18 THEN 'SKILL_MEDIUM_CATEGORY_THIEF_TACTIC'
+									WHEN @SkillMediumCategory = 19 THEN 'SKILL_MEDIUM_CATEGORY_THIEF_HEAL'
+									WHEN @SkillMediumCategory = 20 THEN 'SKILL_MEDIUM_CATEGORY_THIEF_BUF'
+									WHEN @SkillMediumCategory = 21 THEN 'SKILL_MEDIUM_CATEGORY_ARCHER_ATTACK'
+									WHEN @SkillMediumCategory = 22 THEN 'SKILL_MEDIUM_CATEGORY_ARCHER_TACTIC'
+									WHEN @SkillMediumCategory = 23 THEN 'SKILL_MEDIUM_CATEGORY_ARCHER_HEAL'
+									WHEN @SkillMediumCategory = 24 THEN 'SKILL_MEDIUM_CATEGORY_ARCHER_BUF'
+									ELSE ' '
+									END),
+		SkillType = (CASE WHEN @SkillType = 1 THEN 'SKILL_DEFAULT_ATTACK'
+						  WHEN @SkillType = 2 THEN 'SKILL_KNIGHT_FIERCE_ATTACK'
+						  WHEN @SkillType = 3 THEN 'SKILL_KNIGHT_CONVERSION_ATTACK'
+						  WHEN @SkillType = 4 THEN 'SKILL_KNIGHT_SMASH_WAVE'
+						  WHEN @SkillType = 5 THEN 'SKILL_KNIGHT_SHAEHONE'
+						  WHEN @SkillType = 6 THEN 'SKILL_KNIGHT_CHOHONE'
+						  WHEN @SkillType = 7 THEN 'SKILL_KNIGHT_SHIELD_SMASH'
+						  WHEN @SkillType = 8 THEN 'SKILL_KNIGHT_CHARGE_POSE'
+						  WHEN @SkillType = 9 THEN 'SKILL_SHAMAN_FLAME_HARPOON'
+						  WHEN @SkillType = 10 THEN 'SKILL_SHAMAN_ROOT'
+						  WHEN @SkillType = 11 THEN 'SKILL_SHAMAN_ICE_CHAIN'
+						  WHEN @SkillType = 12 THEN 'SKILL_SHAMAN_ICE_WAVE'
+						  WHEN @SkillType = 13 THEN 'SKILL_SHAMAN_LIGHTNING_STRIKE'
+						  WHEN @SkillType = 14 THEN 'SKILL_SHAMAN_HELL_FIRE'
+						  WHEN @SkillType = 15 THEN 'SKILL_SHAMAN_BACK_TELEPORT'
+						  WHEN @SkillType = 16 THEN 'SKILL_TAIOIST_DIVINE_STRIKE'
+						  WHEN @SkillType = 17 THEN 'SKILL_TAIOIST_HEALING_LIGHT'
+						  WHEN @SkillType = 18 THEN 'SKILL_TAIOIST_HEALING_WIND'
+						  WHEN @SkillType = 19 THEN 'SKILL_TAIOIST_ROOT'
+						  WHEN @SkillType = 20 THEN 'SKILL_THIEF_QUICK_CUT'
+						  WHEN @SkillType = 21 THEN 'SKILL_ARCHER_SNIFING'
+						  WHEN @SkillType = 22 THEN 'SKILL_SHOCK_RELEASE'
+						  ELSE ' '
+						  END),
+		SkillLevel = (@SkillLevel),
+		ItemLargeCategory = (CASE WHEN @ItemLargeCategory = 1 THEN 'ITEM_LARGE_CATEGORY_ARCHITECTURE'
+	                              WHEN @ItemLargeCategory = 2 THEN 'ITEM_LARGE_CATEGORY_WEAPON'
+	                              WHEN @ItemLargeCategory = 3 THEN 'ITEM_LARGE_CATEGORY_ARMOR'
+	                              WHEN @ItemLargeCategory = 4 THEN 'ITEM_LARGE_CATEGORY_FOOD'
+	                              WHEN @ItemLargeCategory = 5 THEN 'ITEM_LARGE_CATEGORY_POTION'
+	                              WHEN @ItemLargeCategory = 6 THEN 'ITEM_LARGE_CATEGORY_SKILLBOOK'
+	                              WHEN @ItemLargeCategory = 7 THEN 'ITEM_LARGE_CATEGORY_MATERIAL'
+	                              WHEN @ItemLargeCategory = 8 THEN 'ITEM_LARGE_CATEGORY_CROP'
+	                              ELSE ' '
+                         	      END),
+		ItemMediumCategory = (CASE WHEN @ItemMediumCategory = 1 THEN 'ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE'
+	                               WHEN @ItemMediumCategory = 2 THEN 'ITEM_MEDIUM_CATEGORY_SWORD'
+	                               WHEN @ItemMediumCategory = 3 THEN 'ITEM_MEDIUM_CATEGORY_SHIELD'
+	                               WHEN @ItemMediumCategory = 4 THEN 'ITEM_MEDIUM_CATEGORY_HAT'
+	                               WHEN @ItemMediumCategory = 5 THEN 'ITEM_MEDIUM_CATEGORY_WEAR'
+	                               WHEN @ItemMediumCategory = 6 THEN 'ITEM_MEDIUM_CATEGORY_GLOVE'
+	                               WHEN @ItemMediumCategory = 7 THEN 'ITEM_MEDIUM_CATEGORY_BOOT'
+	                               WHEN @ItemMediumCategory = 8 THEN 'ITEM_MEDIUM_CATEGORY_HEAL'
+	                               WHEN @ItemMediumCategory = 9 THEN 'ITEM_MEDIUM_CATEGORY_MANA'
+	                               WHEN @ItemMediumCategory = 10 THEN 'ITEM_MEDIUM_CATEGORY_CROP_SEED'
+	                               WHEN @ItemMediumCategory = 11 THEN 'ITEM_MEDIUM_CATEGORY_CROP_FRUIT'
+	                               ELSE ' '
+	                               END),
+		ItemSmallCategory = (CASE WHEN @ItemSmallCategory = 1 THEN 'ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD'
+	                              WHEN @ItemSmallCategory = 2 THEN 'ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD'
+	                              WHEN @ItemSmallCategory = 100 THEN 'ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER'
+	                              WHEN @ItemSmallCategory = 101 THEN 'ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER'
+	                              WHEN @ItemSmallCategory = 102 THEN 'ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER'
+	                              WHEN @ItemSmallCategory = 200 THEN 'ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL'
+	                              WHEN @ItemSmallCategory = 201 THEN 'ITEM_SMALL_CATEGORY_POTION_MANA_RESTORATION_POTION_SMALL'
+	                              WHEN @ItemSmallCategory = 300 THEN 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_FIERCE_ATTACK'
+	                              WHEN @ItemSmallCategory = 301 THEN 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CONVERSION_ATTACK'
+	                              WHEN @ItemSmallCategory = 302 THEN 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SHAEHONE_ATTACK'
+	                              WHEN @ItemSmallCategory = 303 THEN 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK'
+	                              WHEN @ItemSmallCategory = 304 THEN 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SMASH_WAVE_ATTACK'
+	                              WHEN @ItemSmallCategory = 305 THEN 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHARGE_POSE'
+	                              WHEN @ItemSmallCategory = 306 THEN 'ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_FLAME_HARPOON'
+	                              WHEN @ItemSmallCategory = 307 THEN 'ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HELL_FIRE'
+	                              WHEN @ItemSmallCategory = 308 THEN 'ITEM_SMALL_CATEOGRY_SKILLBOOK_TAIOIST_HEALING_LIGHT'
+	                              WHEN @ItemSmallCategory = 309 THEN 'ITEM_SMALL_CATEGORY_SKILLBOOK_TAIOIST_HEALING_WIND'
+	                              WHEN @ItemSmallCategory = 310 THEN 'ITEM_SMALL_CATEGORY_SKILLBOOK_SHOCK_RELEASE'
+	                              WHEN @ItemSmallCategory = 2000 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_LEATHER'
+	                              WHEN @ItemSmallCategory = 2001 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL'
+	                              WHEN @ItemSmallCategory = 2002 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN'
+	                              WHEN @ItemSmallCategory = 2003 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN'
+	                              WHEN @ItemSmallCategory = 2004 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN'
+	                              WHEN @ItemSmallCategory = 2005 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_STONE'
+	                              WHEN @ItemSmallCategory = 2006 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG'
+	                              WHEN @ItemSmallCategory = 2007 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK'
+	                              WHEN @ItemSmallCategory = 2008 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_YARN'
+	                              WHEN @ItemSmallCategory = 2009 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL'
+	                              WHEN @ItemSmallCategory = 2010 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET'
+	                              WHEN @ItemSmallCategory = 2011 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT'
+	                              WHEN @ItemSmallCategory = 2012 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET'
+	                              WHEN @ItemSmallCategory = 2013 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT'
+	                              WHEN @ItemSmallCategory = 2014 THEN 'ITEM_SMALL_CATEGORY_CROP_SEED_POTATO'
+	                              WHEN @ItemSmallCategory = 2015 THEN 'ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO'
+	                              WHEN @ItemSmallCategory = 5000 THEN 'ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE'
+	                              WHEN @ItemSmallCategory = 5001 THEN 'ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL'
+	                              ELSE ' '
+	                              END),
+		ItemCount = (@ItemCount)
         WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
     </Body>
@@ -488,7 +886,130 @@
     <Body>
       <![CDATA[
 	    SET NOCOUNT ON
-        SELECT QuickSlotBarIndex, QuickSlotBarSlotIndex, QuickSlotKey, SkillLargeCategory, SkillMediumCategory, SkillType, SkillLevel, ItemLargeCategory, ItemMediumCategory, ItemSmallCategory, ItemCount
+        SELECT QuickSlotBarIndex, QuickSlotBarSlotIndex, QuickSlotKey, 
+		(CASE WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_PUBLIC' THEN 1
+	          WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_WARRIOR' THEN 2
+	          WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_SHMAN' THEN 3
+	          WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_TAOIST' THEN 4
+	          WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_THIEF' THEN 5
+	          WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_ARCHER' THEN 6
+	          WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_MONSTER_MELEE' THEN 7
+	          WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_MONSTER_MAGIC' THEN 8
+	          ELSE ' '
+	          END),
+		(CASE WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK' THEN 1
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_PUBLIC_TACTIC' THEN 2
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL' THEN 3
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_PUBLIC_BUF' THEN 4
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK' THEN 5
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_WARRIOR_TACTIC' THEN 6
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_WARRIOR_HEAL' THEN 7
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_WARRIOR_BUF' THEN 8
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK' THEN 9
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_SHMAN_TACTIC' THEN 10
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_SHMAN_HEAL' THEN 11
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_SHMAN_BUF' THEN 12
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK' THEN 13
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_TAOIST_TACTIC' THEN 14
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_TAOIST_HEAL' THEN 15
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_TAOIST_BUF' THEN 16
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_THIEF_ATTACK' THEN 17
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_THIEF_TACTIC' THEN 18
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_THIEF_HEAL' THEN 19
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_THIEF_BUF' THEN 20
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_ARCHER_ATTACK' THEN 21
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_ARCHER_TACTIC' THEN 22
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_ARCHER_HEAL' THEN 23
+	          WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_ARCHER_BUF' THEN 24
+	          ELSE ' '
+	          END),
+		(CASE WHEN SkillType = 'SKILL_DEFAULT_ATTACK' THEN 1
+	          WHEN SkillType = 'SKILL_KNIGHT_FIERCE_ATTACK' THEN 2
+	          WHEN SkillType = 'SKILL_KNIGHT_CONVERSION_ATTACK' THEN 3
+	          WHEN SkillType = 'SKILL_KNIGHT_SMASH_WAVE' THEN 4
+	          WHEN SkillType = 'SKILL_KNIGHT_SHAEHONE' THEN 5
+	          WHEN SkillType = 'SKILL_KNIGHT_CHOHONE' THEN 6
+	          WHEN SkillType = 'SKILL_KNIGHT_SHIELD_SMASH' THEN 7
+	          WHEN SkillType = 'SKILL_KNIGHT_CHARGE_POSE' THEN 8
+	          WHEN SkillType = 'SKILL_SHAMAN_FLAME_HARPOON' THEN 89
+	          WHEN SkillType = 'SKILL_SHAMAN_ROOT' THEN 10
+	          WHEN SkillType = 'SKILL_SHAMAN_ICE_CHAIN' THEN 11
+	          WHEN SkillType = 'SKILL_SHAMAN_ICE_WAVE' THEN 12
+	          WHEN SkillType = 'SKILL_SHAMAN_LIGHTNING_STRIKE' THEN 13
+	          WHEN SkillType = 'SKILL_SHAMAN_HELL_FIRE' THEN 14
+	          WHEN SkillType = 'SKILL_SHAMAN_BACK_TELEPORT' THEN 15
+	          WHEN SkillType = 'SKILL_TAIOIST_DIVINE_STRIKE' THEN 16
+	          WHEN SkillType = 'SKILL_TAIOIST_HEALING_LIGHT' THEN 17
+	          WHEN SkillType = 'SKILL_TAIOIST_HEALING_WIND' THEN 18
+	          WHEN SkillType = 'SKILL_TAIOIST_ROOT' THEN 19
+	          WHEN SkillType = 'SKILL_THIEF_QUICK_CUT' THEN 20
+	          WHEN SkillType = 'SKILL_ARCHER_SNIFING' THEN 21
+	          WHEN SkillType = 'SKILL_SHOCK_RELEASE' THEN 22         
+	          ELSE ' '
+	          END), 
+		SkillLevel, 
+		(CASE WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_ARCHITECTURE1' THEN 1
+	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_WEAPON' THEN 2
+	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_ARMOR' THEN 3
+	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_FOOD' THEN 4
+	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_POTION' THEN 5
+	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_SKILLBOOK' THEN 6
+	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_MATERIAL' THEN 7
+	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_CROP' THEN 8
+	          ELSE ' '
+              END),
+		(CASE WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE' THEN 1
+	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_SWORD' THEN 2
+	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_SHIELD' THEN 3
+	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_HAT' THEN 4
+	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_WEAR' THEN 5
+	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_GLOVE' THEN 6
+	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_BOOT' THEN 7
+	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_HEAL' THEN 8
+	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_MANA' THEN 9
+	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_CROP_SEED' THEN 10
+	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_CROP_FRUIT' THEN 11
+	          ELSE ' '
+	          END),
+		(CASE WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD' THEN 1
+	          WHEN ItemSmallCategory = 'ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD' THEN 2
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER' THEN 100
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER' THEN 101
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER' THEN 102
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL' THEN 200
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_POTION_MANA_RESTORATION_POTION_SMALL' THEN 201
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_FIERCE_ATTACK' THEN 300
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CONVERSION_ATTACK' THEN 301
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SHAEHONE_ATTACK' THEN 302
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK' THEN 303
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SMASH_WAVE_ATTACK' THEN 304
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHARGE_POSE' THEN 305
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_FLAME_HARPOON' THEN 306
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HELL_FIRE' THEN 307
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEOGRY_SKILLBOOK_TAIOIST_HEALING_LIGHT' THEN 308
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_TAIOIST_HEALING_WIND' THEN 309
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_SHOCK_RELEASE' THEN 310
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_LEATHER' THEN 2000
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL' THEN 2001
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN' THEN 2002
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN' THEN 2003
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN' THEN 2004
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_STONE' THEN 2005
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG' THEN 2006
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK' THEN 2007
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_YARN' THEN 2008
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL' THEN 2009
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET' THEN 2010
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT' THEN 2011
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET' THEN 2012
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT' THEN 2013
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CROP_SEED_POTATO' THEN 2014
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO' THEN 2015
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE' THEN 5000
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL' THEN 5001
+	          ELSE ' '
+	          END),
+		ItemCount
         FROM [dbo].[QuickSlotBar]
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
@@ -743,32 +1264,5 @@
 				 ' ', ' ', ' ', 0, 0)
             ]]>
 		</Body>
-	 </Procedure>
-	
-  <!-- 가방 초기화 -->
-  <Procedure name="spInventoryInit">
-	<Param name="@OwnerAccountDBId" type="BigInt"/>
-	<Param name="@OwnerPlayerDBId" type="BigInt"/>
-	<Param name="@InventoryWidth" type="int"/>
-	<Param name="@InventoryHeight" type="int"/>	
-	<Body>
-		<![CDATA[
-		   SET NOCOUNT ON
-           DECLARE @width int
-           DECLARE @height int
-           SET @width = 0
-           SET @height = 0
-           while @width < @InventoryWidth BEGIN
-		   SET @height = 0
-                    while @height < @InventoryHeight BEGIN
-                            UPDATE [dbo].[Inventory]
-                            SET ItemIsQuickSlotUse = 0, ItemIsEquipped = 0, ItemWidth = 0, ItemHeight = 0, ItemLargeCategory = 0, ItemMediumCategory = 0, ItemSmallCategory = 0, ItemCount = 0, ItemDurability = 0, ItemEnchantPoint = 0
-                            WHERE OwnerAccountDBId = @OwnerAccountDBId AND OwnerPlayerDBId = @OwnerPlayerDBId AND ItemTileGridPositionX = @width AND ItemTileGridPositionY = @height        
-                        SET @height = @height + 1
-                    END
-                SET @width = @width + 1
-            END
-		]]>
-	</Body>	   
-  </Procedure> 
+	 </Procedure> 
 </GameServerDB>
