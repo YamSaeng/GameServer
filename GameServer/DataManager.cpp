@@ -64,11 +64,11 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 
 			if (ItemEquipmentPart == "EQUIPMENT_PARTS_LEFT_HAND")
 			{
-				WeaponItemInfo->EquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_LEFT_HAND;
+				WeaponItemInfo->ItemEquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_LEFT_HAND;
 			}
 			else if (ItemEquipmentPart == "EQUIPMENT_PARTS_RIGHT_HAND")
 			{
-				WeaponItemInfo->EquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_RIGHT_HAND;
+				WeaponItemInfo->ItemEquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_RIGHT_HAND;
 			}
 
 			WeaponItemInfo->ItemWidth = ItemWidth;
@@ -121,9 +121,9 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			{
 				ArmorItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER;
 			}
-			else if (SmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD")
+			else if (SmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER")
 			{
-				ArmorItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD;
+				ArmorItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER")
 			{
@@ -134,9 +134,9 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			{
 				ArmorItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET;
 			}
-			else if (ItemObjectType == "OBJECT_ITEM_ARMOR_WOOD_ARMOR")
+			else if (ItemObjectType == "OBJECT_ITEM_ARMOR_LEATHER_ARMOR")
 			{
-				ArmorItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR;
+				ArmorItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR;
 			}
 			else if (ItemObjectType == "OBJECT_ITEM_ARMOR_LEATHER_BOOT")
 			{
@@ -148,15 +148,15 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 
 			if (ItemEquipmentPart == "EQUIPMENT_PARTS_HEAD")
 			{
-				ArmorItemInfo->EquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_HEAD;
+				ArmorItemInfo->ItemEquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_HEAD;
 			}
 			else if (ItemEquipmentPart == "EQUIPMENT_PARTS_BODY")
 			{
-				ArmorItemInfo->EquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_BODY;
+				ArmorItemInfo->ItemEquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_BODY;
 			}
 			else if (ItemEquipmentPart == "EQUIPMENT_PARTS_BOOT")
 			{
-				ArmorItemInfo->EquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_BOOT;
+				ArmorItemInfo->ItemEquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_BOOT;
 			}
 
 			ArmorItemInfo->ItemWidth = ItemWidth;
@@ -2567,12 +2567,12 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 				CommonCraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD;
 				CommonCraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_COMMON;
 			}
-			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD")
+			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER")
 			{
-				CommonCraftingCompleteItem = G_ObjectManager->ItemCreate(en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD);
+				CommonCraftingCompleteItem = G_ObjectManager->ItemCreate(en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER);
 				CommonCraftingCompleteItem->_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARMOR;
 				CommonCraftingCompleteItem->_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_WEAR;
-				CommonCraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD;
+				CommonCraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER;
 				CommonCraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_COMMON;
 			}
 			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER")
