@@ -434,11 +434,11 @@ namespace SP
 		void InEquipmentParts(int8& EquipmentParts) { BindParam(2, EquipmentParts); }
 	};
 
-	// 장비 착용 여부 DB에 저장하기
-	class CDBGameServerSaveEquipmentInfo : public CDBBind<8, 0>
+	// 장비 착용 DB에 저장하기
+	class CDBGameServerOnEquipment : public CDBBind<8, 0>
 	{
 	public:
-		CDBGameServerSaveEquipmentInfo(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spEquipmentWearing(?,?,?,?,?,?,?,?)}") {}
+		CDBGameServerOnEquipment(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spOnEquipment(?,?,?,?,?,?,?,?)}") {}
 		void InAccountDBID(int64& AccountDBID) { BindParam(0, AccountDBID); }
 		void InPlayerDBID(int64& AccountDBID) { BindParam(1, AccountDBID); }
 		void InEquipmentParts(int8& EquipmentParts) { BindParam(2, EquipmentParts); }
@@ -447,5 +447,16 @@ namespace SP
 		void InEquipmentSmallCategory(int16& EquipmentSmallCategory) { BindParam(5, EquipmentSmallCategory); }
 		void InEquipmentDurability(int32& EquipmentDurability) { BindParam(6, EquipmentDurability); }
 		void InEquipmentEnchantPoint(int8& EquipmentEnchantPoint) { BindParam(7, EquipmentEnchantPoint); }
+	};
+
+	// 장비 착용 해제 DB에 저장하기
+	class CDBGameServerOffEquipment : public CDBBind<2, 0>
+	{
+	public:
+		CDBGameServerOffEquipment(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spOffEquipment(?,?)}") {}
+
+		void InAccountDBID(int64& AccountDBID) { BindParam(0, AccountDBID); }
+		void InPlayerDBID(int64& PlayerDBID) { BindParam(1, PlayerDBID); }
+		void InEquipmentParts(int8& EquipmentParts) { BindParam(2, EquipmentParts); }
 	};
 }
