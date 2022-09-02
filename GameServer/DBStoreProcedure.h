@@ -451,4 +451,21 @@ namespace SP
 		void InPlayerDBID(int64& PlayerDBID) { BindParam(1, PlayerDBID); }
 		void InEquipmentParts(int8& EquipmentParts) { BindParam(2, EquipmentParts); }
 	};
+
+	// 장비 테이블에서 정보 가져오기
+	class CDBGameServerGetEquipment : public CDBBind<2, 6>
+	{
+	public:
+		CDBGameServerGetEquipment(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spGetEquipemt(?,?)}") {}
+
+		void InAccountDBID(int64& AccountDBID) { BindParam(0, AccountDBID); }
+		void InPlayerDBID(int64& PlayerDBID) { BindParam(1, PlayerDBID); }
+
+		void OutEquipmentParts(int8& EquipmentParts) { BindCol(0, EquipmentParts); }
+		void OutEquipmentLargeCategory(int8& EquipmentLargeCategory) { BindCol(1, EquipmentLargeCategory); }
+		void OutEquipmentMediumCateogry(int8& EquipmentMediumCategory){ BindCol(2, EquipmentMediumCategory); }
+		void OutEquipmentSmallCategory(int16& EquipmentSmallCategory) { BindCol(3, EquipmentSmallCategory); }
+		void OutEquipmentDurability(int32& EquipmentDurability) { BindCol(4, EquipmentDurability); }
+		void OutEquipmentEnchantPoint(int8& EquipmentEnchantPoint) { BindCol(5, EquipmentEnchantPoint); }
+	};
 }

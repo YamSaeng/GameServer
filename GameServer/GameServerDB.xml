@@ -1265,4 +1265,88 @@
             ]]>
 		</Body>
 	 </Procedure> 
+	
+  <!-- 장비 테이블 정보 가져오기 -->
+	<Procedure name="spEquipmentGet">
+		<Param name="@EquipmentAccountDBId" type="BigInt"/>
+		<Param name="@EquipmentPlayerDBId" type="BigInt"/>
+		<Body>
+			<![CDATA[
+				SET NOCOUNT ON
+				SELECT 
+				(CASE WHEN EquipmentParts = 'EQUIPMENT_PARTS_HEAD' THEN 1
+				      WHEN EquipmentParts = 'EQUIPMENT_PARTS_BODY' THEN 2
+					  WHEN EquipmentParts = 'EQUIPMENT_PARTS_LEFT_HAND' THEN 3
+					  WHEN EquipmentParts = 'EQUIPMENT_PARTS_RIGHT_HAND' THEN 4
+					  WHEN EquipmentParts = 'EQUIPMENT_PARTS_BOOT' THEN 5
+					  ELSE ' '
+					  END),
+		(CASE WHEN EquipmentLargeCategory = 'ITEM_LARGE_CATEGORY_ARCHITECTURE' THEN 1
+	          WHEN EquipmentLargeCategory = 'ITEM_LARGE_CATEGORY_WEAPON' THEN 2
+	          WHEN EquipmentLargeCategory = 'ITEM_LARGE_CATEGORY_ARMOR' THEN 3
+	          WHEN EquipmentLargeCategory = 'ITEM_LARGE_CATEGORY_FOOD' THEN 4
+	          WHEN EquipmentLargeCategory = 'ITEM_LARGE_CATEGORY_POTION' THEN 5
+	          WHEN EquipmentLargeCategory = 'ITEM_LARGE_CATEGORY_SKILLBOOK' THEN 6
+	          WHEN EquipmentLargeCategory = 'ITEM_LARGE_CATEGORY_MATERIAL' THEN 7
+	          WHEN EquipmentLargeCategory = 'ITEM_LARGE_CATEGORY_CROP' THEN 8
+	          ELSE ' '
+	          END), 
+	    (CASE WHEN EquipmentMediumCategory = 'ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE' THEN 1
+	          WHEN EquipmentMediumCategory = 'ITEM_MEDIUM_CATEGORY_SWORD' THEN 2
+	          WHEN EquipmentMediumCategory = 'ITEM_MEDIUM_CATEGORY_SHIELD' THEN 3
+	          WHEN EquipmentMediumCategory = 'ITEM_MEDIUM_CATEGORY_HAT' THEN 4
+	          WHEN EquipmentMediumCategory = 'ITEM_MEDIUM_CATEGORY_WEAR' THEN 5
+	          WHEN EquipmentMediumCategory = 'ITEM_MEDIUM_CATEGORY_GLOVE' THEN 6
+	          WHEN EquipmentMediumCategory = 'ITEM_MEDIUM_CATEGORY_BOOT' THEN 7
+	          WHEN EquipmentMediumCategory = 'ITEM_MEDIUM_CATEGORY_HEAL' THEN 8
+	          WHEN EquipmentMediumCategory = 'ITEM_MEDIUM_CATEGORY_MANA' THEN 9
+	          WHEN EquipmentMediumCategory = 'ITEM_MEDIUM_CATEGORY_CROP_SEED' THEN 10
+	          WHEN EquipmentMediumCategory = 'ITEM_MEDIUM_CATEGORY_CROP_FRUIT' THEN 11
+	          ELSE ' '
+	          END), 
+		(CASE WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD' THEN 1
+	          WHEN EquipmentSmallCategory = 'ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD' THEN 2
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER' THEN 100
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER' THEN 101
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER' THEN 102
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL' THEN 200
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_POTION_MANA_RESTORATION_POTION_SMALL' THEN 201
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_FIERCE_ATTACK' THEN 300
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CONVERSION_ATTACK' THEN 301
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SHAEHONE_ATTACK' THEN 302
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK' THEN 303
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SMASH_WAVE_ATTACK' THEN 304
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHARGE_POSE' THEN 305
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_FLAME_HARPOON' THEN 306
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HELL_FIRE' THEN 307
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEOGRY_SKILLBOOK_TAIOIST_HEALING_LIGHT' THEN 308
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_TAIOIST_HEALING_WIND' THEN 309
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_SKILLBOOK_SHOCK_RELEASE' THEN 310
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_LEATHER' THEN 2000
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL' THEN 2001
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN' THEN 2002
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN' THEN 2003
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN' THEN 2004
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_STONE' THEN 2005
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG' THEN 2006
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK' THEN 2007
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_YARN' THEN 2008
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL' THEN 2009
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET' THEN 2010
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT' THEN 2011
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET' THEN 2012
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT' THEN 2013
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_CROP_SEED_POTATO' THEN 2014
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO' THEN 2015
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE' THEN 5000
+	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL' THEN 5001
+	          ELSE ' '
+	          END),
+			EquipmentDurability,
+			EquipmentEnchantPoint
+			FROM [dbo].[Equipment]
+			WHERE EquipmentAccountDBId = (@EquipmentAccountDBId) AND EquipmentPlayerDBId = (@EquipmentPlayerDBId)
+			]]>
+		</Body>
+	</Procedure>
 </GameServerDB>
