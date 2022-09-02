@@ -18,6 +18,8 @@ public:
 
 	CItem* ItemOnEquipment(CItem* OnEquipItem);
 	CItem* ItemOffEquipment(en_EquipmentParts OffEquipmentParts);	
+
+	CItem** GetEquipmentParts();
 private:
 	enum en_Equipment
 	{

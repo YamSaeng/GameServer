@@ -10,7 +10,6 @@ CEquipment::CEquipment()
 	_HeadArmorDefence = 0;
 	_WearArmorDefence = 0;
 	_BootArmorDefence = 0;
-
 }
 
 CEquipment::~CEquipment()
@@ -44,4 +43,9 @@ CItem* CEquipment::ItemOffEquipment(en_EquipmentParts OffEquipmentParts)
 	_EquipmentParts[OffEquipmentParts] = nullptr;
 
 	return ReturnEquipItem;
+}
+
+CItem** CEquipment::GetEquipmentParts()
+{
+	return _EquipmentParts;
 }
