@@ -442,10 +442,10 @@ namespace SP
 	};
 
 	// 장비 착용 해제 DB에 저장하기
-	class CDBGameServerOffEquipment : public CDBBind<2, 0>
+	class CDBGameServerOffEquipment : public CDBBind<3, 0>
 	{
 	public:
-		CDBGameServerOffEquipment(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spOffEquipment(?,?)}") {}
+		CDBGameServerOffEquipment(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spOffEquipment(?,?,?)}") {}
 
 		void InAccountDBID(int64& AccountDBID) { BindParam(0, AccountDBID); }
 		void InPlayerDBID(int64& PlayerDBID) { BindParam(1, PlayerDBID); }
