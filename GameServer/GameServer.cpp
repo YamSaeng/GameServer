@@ -966,6 +966,18 @@ void CGameServer::PlayerDefaultSetting(int64& AccountId, st_GameObjectInfo& NewC
 
 	QuickSlotUpdate.Execute();
 		
+	SP::CDBGameServerInitEquipment EquipmentInit(*DBQuickSlotSaveConnection);
+
+	for (int8 EquipmentPart = (int8)en_EquipmentParts::EQUIPMENT_PARTS_HEAD;
+		EquipmentPart <= (int8)en_EquipmentParts::EQUIPMENT_PARTS_BOOT; EquipmentPart++)
+	{
+		EquipmentInit.InAccountDBID(AccountId);
+		EquipmentInit.InPlayerDBID(NewCharacterInfo.ObjectId);
+		EquipmentInit.InEquipmentParts(EquipmentPart);
+
+		EquipmentInit.Execute();
+	}	
+
 	// 기본 아이템 지급
 	SP::CDBGameServerInventoryPlace LeavePlayerInventoryItemSave(*DBQuickSlotSaveConnection);
 	LeavePlayerInventoryItemSave.InOwnerAccountId(AccountId);
@@ -991,17 +1003,17 @@ void CGameServer::PlayerDefaultSetting(int64& AccountId, st_GameObjectInfo& NewC
 	LeatherHelmet.ItemCount = 1;
 	LeatherHelmet.ItemCurrentDurability = LeatherHelmet.ItemMaxDurability;
 
-	st_ItemInfo WoodArmor = *(G_Datamanager->FindItemData(en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD));
-	WoodArmor.ItemTileGridPositionX = 5;
-	WoodArmor.ItemTileGridPositionY = 0;
-	WoodArmor.ItemCount = 1;
-	WoodArmor.ItemCurrentDurability = LeatherHelmet.ItemMaxDurability;
+	st_ItemInfo LeatherArmor = *(G_Datamanager->FindItemData(en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER));
+	LeatherArmor.ItemTileGridPositionX = 5;
+	LeatherArmor.ItemTileGridPositionY = 0;
+	LeatherArmor.ItemCount = 1;
+	LeatherArmor.ItemCurrentDurability = LeatherArmor.ItemMaxDurability;
 
 	st_ItemInfo LeatherBoot = *(G_Datamanager->FindItemData(en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER));
 	LeatherBoot.ItemTileGridPositionX = 7;
 	LeatherBoot.ItemTileGridPositionY = 0;
 	LeatherBoot.ItemCount = 1;
-	LeatherBoot.ItemCurrentDurability = LeatherHelmet.ItemMaxDurability;
+	LeatherBoot.ItemCurrentDurability = LeatherBoot.ItemMaxDurability;
 
 	st_ItemInfo SmallHPPotion = *(G_Datamanager->FindItemData(en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL));
 	SmallHPPotion.ItemTileGridPositionX = 0;
@@ -1016,7 +1028,7 @@ void CGameServer::PlayerDefaultSetting(int64& AccountId, st_GameObjectInfo& NewC
 	NewPlayerDefaultItems.push_back(WoodSword);
 	NewPlayerDefaultItems.push_back(WoodShield);
 	NewPlayerDefaultItems.push_back(LeatherHelmet);
-	NewPlayerDefaultItems.push_back(WoodArmor);
+	NewPlayerDefaultItems.push_back(LeatherArmor);
 	NewPlayerDefaultItems.push_back(LeatherBoot);
 	NewPlayerDefaultItems.push_back(SmallHPPotion);
 	NewPlayerDefaultItems.push_back(SmallMPPotion);	
@@ -4153,7 +4165,7 @@ void CGameServer::PacketProcReqItemUse(int64 SessionId, CMessage* Message)
 				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:
 				case en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD:
 				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD:
+				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER:
 				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:
 					{
 						st_GameObjectJob* DoItemEquipmentJob = MakeGameObjectJobOnEquipment(UseItem);
@@ -5294,19 +5306,11 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 					for (int8 SlotIndex = 0; SlotIndex < (int8)en_QuickSlotBar::QUICK_SLOT_BAR_SIZE; ++SlotIndex)
 					{
 						CDBConnection* DBQuickSlotCreateConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-						SP::CDBGameServerQuickSlotBarSlotCreate QuickSlotBarSlotCreate(*DBQuickSlotCreateConnection);
+						SP::CDBGameServerQuickSlotBarSlotInit QuickSlotBarSlotCreate(*DBQuickSlotCreateConnection);
 
 						int8 QuickSlotBarIndex = SlotIndex;
 						int8 QuickSlotBarSlotIndex;
-						int16 QuickSlotBarKey = 0;
-						int8 SkillLargeCategory = (int8)(en_SkillLargeCategory::SKILL_LARGE_CATEGORY_NONE);
-						int8 SkillMediumCategory = (int8)(en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE);
-						int16 SkillType = (int16)(en_SkillType::SKILL_TYPE_NONE);
-						int8 SkillLevel = 0;				
-						int8 EmptyItemLargeCategory = 0;
-						int8 EmptyItemMediumCategory = 0;
-						int16 EmptyItemSmallCategory = 0;
-						int16 EmptyItemCount = 0;
+						int16 QuickSlotBarKey = 0;						
 
 						for (int8 i = 0; i < (int8)en_QuickSlotBar::QUICK_SLOT_BAR_SLOT_SIZE; ++i)
 						{
@@ -5323,15 +5327,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 							QuickSlotBarSlotCreate.InPlayerDBId(PlayerDBId);
 							QuickSlotBarSlotCreate.InQuickSlotBarIndex(SlotIndex);
 							QuickSlotBarSlotCreate.InQuickSlotBarSlotIndex(QuickSlotBarSlotIndex);
-							QuickSlotBarSlotCreate.InQuickSlotKey(QuickSlotBarKey);
-							QuickSlotBarSlotCreate.InSkillLargeCategory(SkillLargeCategory);
-							QuickSlotBarSlotCreate.InSkillMediumCategory(SkillMediumCategory);
-							QuickSlotBarSlotCreate.InSkillType(SkillType);
-							QuickSlotBarSlotCreate.InSkillLevel(SkillLevel);
-							QuickSlotBarSlotCreate.InItemLargeCategory(EmptyItemLargeCategory);
-							QuickSlotBarSlotCreate.InItemMediumCategory(EmptyItemMediumCategory);
-							QuickSlotBarSlotCreate.InItemSmallCategory(EmptyItemSmallCategory);
-							QuickSlotBarSlotCreate.InItemCount(EmptyItemCount);							
+							QuickSlotBarSlotCreate.InQuickSlotKey(QuickSlotBarKey);										
 
 							QuickSlotBarSlotCreate.Execute();
 
@@ -5342,9 +5338,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 					}
 
 					// 기본 스킬 생성
-					PlayerDefaultSetting(Session->AccountId, NewPlayerCharacter->_GameObjectInfo, ReqCharacterCreateSlotIndex);					
-
-					// 기본 장비 생성 
+					PlayerDefaultSetting(Session->AccountId, NewPlayerCharacter->_GameObjectInfo, ReqCharacterCreateSlotIndex);								
 
 					// 캐릭터 생성 응답 보냄
 					CMessage* ResCreateCharacterMessage = MakePacketResCreateCharacter(!CharacterNameFind, NewPlayerCharacter->_GameObjectInfo);
@@ -6129,6 +6123,43 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 			}			
 		}
 	}
+
+	// 장비 정보 DB에 저장
+	CItem** EquipmentPartsItem = MyPlayer->_Equipment.GetEquipmentParts();
+	for (int8 i = 1; i <= (int8)en_EquipmentParts::EQUIPMENT_PARTS_BOOT; i++)
+	{
+		if (EquipmentPartsItem[i] != nullptr)
+		{
+			SP::CDBGameServerOnEquipment SaveEquipmentInfo(*PlayerInfoSaveDBConnection);
+			
+			int8 EquipmentParts = (int8)EquipmentPartsItem[i]->_ItemInfo.ItemEquipmentPart;
+			int8 EquipmentLargeCategory = (int8)EquipmentPartsItem[i]->_ItemInfo.ItemLargeCategory;
+			int8 EquipmentMediumCategory = (int8)EquipmentPartsItem[i]->_ItemInfo.ItemMediumCategory;
+			int16 EquipmentSmallCategory = (int16)EquipmentPartsItem[i]->_ItemInfo.ItemSmallCategory;
+
+			SaveEquipmentInfo.InAccountDBID(MyPlayer->_AccountId);
+			SaveEquipmentInfo.InPlayerDBID(MyPlayer->_GameObjectInfo.ObjectId);
+			SaveEquipmentInfo.InEquipmentParts(EquipmentParts);
+			SaveEquipmentInfo.InEquipmentLargeCategory(EquipmentLargeCategory);
+			SaveEquipmentInfo.InEquipmentMediumCategory(EquipmentMediumCategory);
+			SaveEquipmentInfo.InEquipmentSmallCategory(EquipmentSmallCategory);
+			SaveEquipmentInfo.InEquipmentDurability(EquipmentPartsItem[i]->_ItemInfo.ItemCurrentDurability);
+			SaveEquipmentInfo.InEquipmentEnchantPoint(EquipmentPartsItem[i]->_ItemInfo.ItemEnchantPoint);
+
+			SaveEquipmentInfo.Execute();
+		}
+		else
+		{
+			SP::CDBGameServerOffEquipment OffEquipment(*PlayerInfoSaveDBConnection);
+
+			int8 EquipmentParts = i;
+
+			OffEquipment.InAccountDBID(MyPlayer->_AccountId);
+			OffEquipment.InPlayerDBID(MyPlayer->_GameObjectInfo.ObjectId);
+			OffEquipment.InEquipmentParts(EquipmentParts);
+		}
+	}
+
 
 	// 가방 정보 DB에 저장	
 	CInventory** MyPlayerInventorys = MyPlayer->_InventoryManager.GetInventory();	
