@@ -164,11 +164,11 @@ wstring CProcedure::GenerateParamWString()
 
 wstring Helpers::Format(const WCHAR* format, ...)
 {
-	WCHAR buf[4096];
+	WCHAR buf[20480];
 
 	va_list ap;
 	va_start(ap, format);
-	::vswprintf_s(buf, 4096, format, ap);
+	::vswprintf_s(buf, 20480, format, ap);
 	va_end(ap);
 
 	return wstring(buf);
