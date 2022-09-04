@@ -5805,11 +5805,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 				*ResCharacterInfoMessage << Item;
 			}
 
-#pragma endregion			
-
-#pragma region 장비 아이템 정보 읽어오기
-
-#pragma endregion
+#pragma endregion		
 
 #pragma region 퀵슬롯 정보 가져와서 클라에 보내기
 			// 퀵슬롯 정보 초기화
@@ -5897,8 +5893,39 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 
 #pragma endregion
 
-#pragma region 장비 정보 보내주기
+#pragma region 장비 아이템 정보 읽어오기
 			vector<st_ItemInfo> Equipments;
+			SP::CDBGameServerGetEquipment EquipmentGet(*DBCharacterInfoGetConnection);
+			EquipmentGet.InAccountDBID(MyPlayer->_AccountId);
+			EquipmentGet.InPlayerDBID(MyPlayer->_GameObjectInfo.ObjectId);
+
+			int8 EquipmentParts;
+			int8 EquipmentLargeItemCategory = 0;
+			int8 EquipmentMediumCategory = 0;
+			int16 EquipmentSmallCategory = 0;
+			int32 EquipmentDurability = 0;
+			int8 EquipmentEnchantPoint = 0;
+
+			EquipmentGet.OutEquipmentParts(EquipmentParts);
+			EquipmentGet.OutEquipmentLargeCategory(EquipmentLargeItemCategory);
+			EquipmentGet.OutEquipmentMediumCateogry(EquipmentMediumCategory);
+			EquipmentGet.OutEquipmentSmallCategory(EquipmentSmallCategory);
+			EquipmentGet.OutEquipmentDurability(EquipmentDurability);
+			EquipmentGet.OutEquipmentEnchantPoint(EquipmentEnchantPoint);
+
+			EquipmentGet.Execute();
+
+			while (EquipmentGet.Fetch())
+			{
+				if ((en_SmallItemCategory)EquipmentSmallCategory != en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE)
+				{
+					CItem* NewEquipmentItem = G_ObjectManager->ItemCreate((en_SmallItemCategory)EquipmentSmallCategory);
+					NewEquipmentItem->_ItemInfo.ItemCurrentDurability = EquipmentDurability;
+					NewEquipmentItem->_ItemInfo.ItemEnchantPoint = EquipmentEnchantPoint;
+
+					MyPlayer->_Equipment.ItemOnEquipment(NewEquipmentItem);					
+				}				
+			}						
 
 			// 장비 정보 담기
 			*ResCharacterInfoMessage << (int8)Equipments.size();
@@ -6157,6 +6184,8 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 			OffEquipment.InAccountDBID(MyPlayer->_AccountId);
 			OffEquipment.InPlayerDBID(MyPlayer->_GameObjectInfo.ObjectId);
 			OffEquipment.InEquipmentParts(EquipmentParts);
+
+			OffEquipment.Execute();
 		}
 	}
 
