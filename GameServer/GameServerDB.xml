@@ -1270,7 +1270,7 @@
 	 </Procedure> 
 	
   <!-- 장비 테이블 정보 가져오기 -->
-	<Procedure name="spEquipmentGet">
+	<Procedure name="spGetEquipemt">
 		<Param name="@EquipmentAccountDBId" type="BigInt"/>
 		<Param name="@EquipmentPlayerDBId" type="BigInt"/>
 		<Body>
