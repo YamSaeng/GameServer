@@ -183,7 +183,7 @@ void CChannel::Update()
 						}
 						break;
 					case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
-					case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
+					case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
 					case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
 					case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
 					case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
@@ -434,12 +434,13 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 	case en_GameObjectType::OBJECT_ITEM_WEAPON:
 	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE:
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
-	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEALTH_RESTORATION_POTION_SMALL:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_MANA_RESTORATION_POTION_SMALL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
@@ -545,12 +546,13 @@ vector<CGameObject*> CChannel::FindChannelObjects(en_GameObjectType GameObjectTy
 	case en_GameObjectType::OBJECT_ITEM_WEAPON:
 	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE:
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
-	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEALTH_RESTORATION_POTION_SMALL:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_MANA_RESTORATION_POTION_SMALL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
@@ -679,12 +681,13 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 		case en_GameObjectType::OBJECT_ITEM_WEAPON:
 		case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
 		case en_GameObjectType::OBJECT_ITEM_ARMOR:
-		case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
+		case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
 		case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
 		case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
 		case en_GameObjectType::OBJECT_ITEM_CONSUMABLE:
 		case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
-		case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEAL_POTION_SMALL:
+		case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEALTH_RESTORATION_POTION_SMALL:
+		case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_MANA_RESTORATION_POTION_SMALL:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
@@ -1046,7 +1049,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 		}
 		break;
 	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
@@ -1173,7 +1176,7 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 		_ChannelMonsterArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
 		break;
 	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
