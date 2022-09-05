@@ -190,7 +190,7 @@ CItem* CObjectManager::ItemCreate(en_SmallItemCategory NewItemSmallCategory)
 	case en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD:
 		NewItem = _WeaponMemoryPool->Alloc();
 		break;
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:
 		NewItem = _ArmorMemoryPool->Alloc();
@@ -227,6 +227,10 @@ CItem* CObjectManager::ItemCreate(en_SmallItemCategory NewItemSmallCategory)
 
 	if (NewItem != nullptr)
 	{
+		// 기본 아이템 정보 저장		
+		st_ItemInfo NewItemInfo = *G_Datamanager->FindItemData(NewItemSmallCategory);
+		NewItem->_ItemInfo = NewItemInfo;
+
 		NewItem->_GameObjectInfo.ObjectId = InterlockedIncrement64(&_GameServerObjectId);
 	}
 
@@ -241,7 +245,7 @@ void CObjectManager::ItemReturn(CItem* ReturnItem)
 	case en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD:
 		_WeaponMemoryPool->Free((CWeaponItem*)ReturnItem);
 		break;
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:
 		_ArmorMemoryPool->Free((CArmorItem*)ReturnItem);
@@ -418,7 +422,8 @@ void CObjectManager::MapTileInfoSpawn(int64& MapID)
 void CObjectManager::ObjectItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_GameObjectType KillerObjectType, st_Vector2Int SpawnIntPosition, st_Vector2 SpawnPosition, en_GameObjectType SpawnItemOwnerType, en_GameObjectType ItemDataType)
 {
 	bool Find = false;
-	st_ItemInfo DropItemInfo;
+	en_SmallItemCategory DropItemCategory;
+	int16 DropItemCount = 0;	
 
 	random_device RD;
 	mt19937 Gen(RD());
@@ -449,11 +454,9 @@ void CObjectManager::ObjectItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_
 						CRASH("DropItemInfo를 찾지 못함");
 					}
 
-					DropItemInfo = *(*FindDropItemInfo).second;
-
 					uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
-					DropItemInfo.ItemCount = RandomDropItemCount(Gen);
-					DropItemInfo.ItemSmallCategory = DropItem.DropItemSmallCategory;
+					DropItemCount = RandomDropItemCount(Gen);
+					DropItemCategory = DropItem.DropItemSmallCategory;
 					break;
 				}
 			}
@@ -477,13 +480,11 @@ void CObjectManager::ObjectItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_
 					if (FindDropItemInfo == G_Datamanager->_Items.end())
 					{
 						CRASH("DropItemInfo를 찾지 못함");
-					}
-
-					DropItemInfo = *(*FindDropItemInfo).second;
+					}					
 
 					uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
-					DropItemInfo.ItemCount = RandomDropItemCount(Gen);
-					DropItemInfo.ItemSmallCategory = DropItem.DropItemSmallCategory;
+					DropItemCount = RandomDropItemCount(Gen);
+					DropItemCategory = DropItem.DropItemSmallCategory;
 					break;
 				}
 			}
@@ -506,13 +507,11 @@ void CObjectManager::ObjectItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_
 					if (FindDropItemInfo == G_Datamanager->_Items.end())
 					{
 						CRASH("DropItemInfo를 찾지 못함");
-					}
-
-					DropItemInfo = *(*FindDropItemInfo).second;
+					}					
 
 					uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
-					DropItemInfo.ItemCount = RandomDropItemCount(Gen);
-					DropItemInfo.ItemSmallCategory = DropItem.DropItemSmallCategory;
+					DropItemCount = RandomDropItemCount(Gen);
+					DropItemCategory = DropItem.DropItemSmallCategory;
 					break;
 				}
 			}
@@ -523,10 +522,10 @@ void CObjectManager::ObjectItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_
 	if (Find == true)
 	{
 		// 아이템 생성
-		CItem* NewItem = ItemCreate(DropItemInfo.ItemSmallCategory);
-		NewItem->_ItemInfo = DropItemInfo;		
+		CItem* NewItem = ItemCreate(DropItemCategory);
+		NewItem->_ItemInfo.ItemCount = DropItemCount;		
 
-		NewItem->_GameObjectInfo.ObjectType = DropItemInfo.ItemObjectType;
+		NewItem->_GameObjectInfo.ObjectType = NewItem->_ItemInfo.ItemObjectType;
 		NewItem->_GameObjectInfo.OwnerObjectId = KillerId;
 		NewItem->_GameObjectInfo.OwnerObjectType = (en_GameObjectType)KillerObjectType;
 		NewItem->_SpawnPosition = SpawnIntPosition;
@@ -542,11 +541,10 @@ void CObjectManager::ObjectItemDropToSpawn(CGameObject* DropOwnerObject, CChanne
 	CItem* NewItem = ItemCreate(DropItemType);
 	if (NewItem != nullptr)
 	{
-		st_ItemInfo DropItemInfo = *(G_Datamanager->FindItemData(DropItemType));
-		DropItemInfo.ItemDBId = NewItem->_GameObjectInfo.ObjectId;
-		DropItemInfo.ItemCount = DropItemCount;
+		NewItem->_ItemInfo.ItemCount = DropItemCount;
+		NewItem->_ItemInfo.ItemDBId = NewItem->_GameObjectInfo.ObjectId;		
 		
-		NewItem->_GameObjectInfo.ObjectType = DropItemInfo.ItemObjectType;
+		NewItem->_GameObjectInfo.ObjectType = NewItem->_ItemInfo.ItemObjectType;
 		NewItem->_GameObjectInfo.OwnerObjectId = DropOwnerObject->_GameObjectInfo.ObjectId;
 		NewItem->_GameObjectInfo.OwnerObjectType = DropOwnerObject->_GameObjectInfo.ObjectType;
 		NewItem->_SpawnPosition = DropOwnerObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition;
