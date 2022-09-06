@@ -164,11 +164,7 @@ private:
 	//--------------------------------------------------------------------------
 	// 제작대 선택 풀림 요청 처리
 	//--------------------------------------------------------------------------
-	void PacketProcReqCraftingTableNonSelect(int64 SessionID, CMessage* Message);
-	//----------------------------------------------------------------------
-	// 오브젝트 상태 변경 요청 처리
-	//----------------------------------------------------------------------
-	void PacketProcReqObjectStateChange(int64 SessionId, CMessage* Message);
+	void PacketProcReqCraftingTableNonSelect(int64 SessionID, CMessage* Message);	
 	//--------------------------------------------------------------------
 	// 채팅 메세지 요청 처리
 	//--------------------------------------------------------------------
@@ -324,15 +320,7 @@ private:
 	//-----------------------------------------------------------------------------------
 	// 아이템 버리기 잡 생성 함수
 	//-----------------------------------------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobItemDrop(int16 DropItemType, int32 DropItemCount);	
-	//------------------------------------------------------
-	// 제작대 선택 잡 생성 함수
-	//------------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobCraftingTableSelect(CGameObject* CraftingTableObject, CGameObject* OwnerObject);
-	//---------------------------------------------------------
-	// 제작대 선택 풀림 잡 생성 함수
-	//---------------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobCraftingTableNonSelect(CGameObject* CraftingTableObject);
+	st_GameObjectJob* MakeGameObjectJobItemDrop(int16 DropItemType, int32 DropItemCount);		
 	//---------------------------------------------------------
 	// 제작대 제작 시작 잡 생성 함수
 	//---------------------------------------------------------
@@ -371,20 +359,7 @@ private:
 	//--------------------------------------------------------------------------------------------------
 	// 캐릭터 생성 요청 응답 패킷 조합
 	//--------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResCreateCharacter(bool IsSuccess, st_GameObjectInfo& CreateCharacterObjectInfo);	
-	//-------------------------------------------------------------------------------------------------------------------------
-	// 게임서버 왼쪽 마우스 오브젝트 정보 요청 응답 패킷 조합
-	//-------------------------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResLeftMousePositionObjectInfo(int64 AccountId, int64 PreviousChoiceObjectId, int64 FindObjectId,
-		map<en_SkillType, CSkill*> BufSkillInfo, map<en_SkillType, CSkill*> DeBufSkillInfo);
-	//-------------------------------------------------------------------------------------------------------------------------
-	// 게임서버 오른쪽 마우스 오브젝트 정보 요청 응답 패킷 조합
-	//-------------------------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResRightMousePositionObjectInfo(int64 ReqPlayerID, int64 FindObjectID, en_GameObjectType FindObjectType);
-	//-----------------------------------------------------------------------------------------------------------------------------
-	// 게임서버 제작대 선택풀림 요청 응답 패킷 조합
-	//-----------------------------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResCraftingTableNonSelect(int64 CraftingTableObjectID, en_GameObjectType CraftingTableObjectType);	
+	CGameServerMessage* MakePacketResCreateCharacter(bool IsSuccess, st_GameObjectInfo& CreateCharacterObjectInfo);				
 	//---------------------------------------------------------------------------------------------
 	// 게임서버 가방 아이템 선택 요청 응답 패킷 조합
 	//---------------------------------------------------------------------------------------------
@@ -420,11 +395,7 @@ private:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 제작템 목록 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketCraftingList(int64 AccountId, int64 PlayerId, vector<st_CraftingItemCategory> CraftingItemList);	
-	//-----------------------------------------------------------------------------------------------
-	// 게임서버 제작대 제작 아이템 선택 응답 패킷 조합
-	//-----------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResCraftingTableCompleteItemSelect(int64 CraftingTableObjectID, en_SmallItemCategory SelectCompleteType, map<en_SmallItemCategory, CItem*> MaterialItems);	
+	CGameServerMessage* MakePacketCraftingList(int64 AccountId, int64 PlayerId, vector<st_CraftingItemCategory> CraftingItemList);		
 	//----------------------------------------------------------------------------------------------	
 	// 게임서버 메뉴 UI 타일 구입 응답 패킷 조합
 	//----------------------------------------------------------------------------------------------
@@ -452,6 +423,22 @@ public:
 	//-------------------------------------------------------------------------------
 	st_GameObjectJob* MakeGameObjectJobObjectEnterChannel(CGameObject* EnterChannelObject);
 	//-------------------------------------------------------------------------------
+	// 채널에서 일반 오브젝트 찾기 잡 생성 함수
+	//-------------------------------------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobFindObjectChannel(CGameObject* ReqPlayer, int64& FindObjectID, int16& FindObjectType);
+	//-----------------------------------------------------------------------------------------------------------------------------
+	// 게임서버 제작대 선택풀림 요청 응답 패킷 조합
+	//-----------------------------------------------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResCraftingTableNonSelect(int64 CraftingTableObjectID, en_GameObjectType CraftingTableObjectType);
+	//-------------------------------------------------------------------------------
+	// 채널에서 제작대 제작 아이템 선택 잡 생성 함수
+	//-------------------------------------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobFindCraftingTableSelectItem(CGameObject* ReqPlayer, int64& FindCraftingTableObjectID, int16& FindCraftingTableObjectType, int16& LeftMouseItemCategory);
+	//-------------------------------------------------------------------------------
+	// 채널에서 제작대 제작 아이템 선택 잡 생성 함수
+	//-------------------------------------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobRightMouseObjectInfo(CGameObject* ReqPlayer, int64& FindObjectID, int16& FindObjectType);
+	//-------------------------------------------------------------------------------
 	// 플레이어 제외 오브젝트 채널 퇴장 잡 생성 함수
 	//-------------------------------------------------------------------------------
 	st_GameObjectJob* MakeGameObjectJobLeaveChannel(CGameObject* LeaveChannelObject);
@@ -475,7 +462,16 @@ public:
 	// 장비 아이템 착용해제 잡 생성 함수
 	//-------------------------------------------------------------------------------
 	st_GameObjectJob* MakeGameObjectJobOffEquipment(int8& EquipmentParts);
-						
+				
+	//------------------------------------------------------
+	// 제작대 선택 잡 생성 함수
+	//------------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobCraftingTableSelect(CGameObject* CraftingTableObject, CGameObject* OwnerObject);	
+	//---------------------------------------------------------
+	// 제작대 선택 풀림 잡 생성 함수
+	//---------------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobCraftingTableNonSelect(CGameObject* CraftingTableObject, int64& CraftingTableObjectID, int16& CraftingTableObjectType);
+
 	//-------------------------------------------------------------
 	// 아이템 가방 저장 잡 생성 함수
 	//-------------------------------------------------------------
@@ -505,6 +501,19 @@ public:
 	// 게임서버 채집요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResGathering(int64 ObjectID, bool GatheringStart, wstring GatheringName);
+	//-------------------------------------------------------------------------------------------------------------------------
+	// 게임서버 오른쪽 마우스 오브젝트 정보 요청 응답 패킷 조합
+	//-------------------------------------------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResRightMousePositionObjectInfo(int64 ReqPlayerID, int64 FindObjectID, en_GameObjectType FindObjectType);
+	//-------------------------------------------------------------------------------------------------------------------------
+	// 게임서버 왼쪽 마우스 오브젝트 정보 요청 응답 패킷 조합
+	//-------------------------------------------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResLeftMousePositionObjectInfo(int64 AccountId, int64 PreviousChoiceObjectId, int64 FindObjectId,
+		map<en_SkillType, CSkill*> BufSkillInfo, map<en_SkillType, CSkill*> DeBufSkillInfo);
+	//-----------------------------------------------------------------------------------------------
+	// 게임서버 제작대 제작 아이템 선택 응답 패킷 조합
+	//-----------------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResCraftingTableCompleteItemSelect(int64 CraftingTableObjectID, en_SmallItemCategory SelectCompleteType, map<en_SmallItemCategory, CItem*> MaterialItems);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 애니메이션 출력 패킷 조합
 	//-----------------------------------------------------------------------------------------

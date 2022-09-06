@@ -143,7 +143,7 @@ unsigned __stdcall CGameServer::UpdateThreadProc(void* Argument)
 	{
 		WaitForSingleObject(Instance->_UpdateThreadWakeEvent, INFINITE);
 
-
+		
 	}
 	return 0;
 }
@@ -1200,10 +1200,7 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_GATHERING:
 		PacketProcReqGathering(SessionID, Message);
-		break;
-	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_OBJECT_STATE_CHANGE:
-		PacketProcReqObjectStateChange(SessionID, Message);
-		break;
+		break;	
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_MESSAGE:
 		PacketProcReqChattingMessage(SessionID, Message);
 		break;
@@ -1387,7 +1384,7 @@ void CGameServer::PacketProcReqCreateCharacter(int64 SessionID, CMessage* Messag
 		DBCharacterCreateJob->Message = DBReqChatacerCreateMessage;		
 
 		_GameServerUserDBThreadMessageQue.Enqueue(DBCharacterCreateJob);
-		SetEvent(_UserDataBaseWakeEvent);
+		SetEvent(_UserDataBaseWakeEvent);		
 	}
 	else
 	{
@@ -2884,26 +2881,10 @@ void CGameServer::PacketProcReqLeftMouseObjectInfo(int64 SessionId, CMessage* Me
 			*Message >> ObjectId;
 
 			int16 ObjectType;
-			*Message >> ObjectType;			
+			*Message >> ObjectType;
 
-			CGameObject* FindObject = MyPlayer->GetChannel()->FindChannelObject(ObjectId, (en_GameObjectType)ObjectType);
-			if (FindObject != nullptr)
-			{
-				int64 PreviousChoiceObject = 0;
-
-				if (MyPlayer->_SelectTarget != nullptr)
-				{
-					PreviousChoiceObject = MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId;
-				}
-
-				MyPlayer->_SelectTarget = FindObject;
-
-				CMessage* ResMousePositionObjectInfo = MakePacketResLeftMousePositionObjectInfo(Session->AccountId,
-					PreviousChoiceObject, FindObject->_GameObjectInfo.ObjectId,
-					FindObject->_Bufs, FindObject->_DeBufs);
-				SendPacket(Session->SessionId, ResMousePositionObjectInfo);
-				ResMousePositionObjectInfo->Free();
-			}
+			st_GameObjectJob* DeSpawnMonsterChannelJob = MakeGameObjectJobFindObjectChannel(MyPlayer, ObjectId, ObjectType);
+			MyPlayer->GetChannel()->_ChannelJobQue.Enqueue(DeSpawnMonsterChannelJob);					
 		}
 	} while (0);
 
@@ -2970,23 +2951,9 @@ void CGameServer::PacketProcReqLeftMouseUIObjectInfo(int64 SessionID, CMessage* 
 			{
 			case en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_FURNACE:
 			case en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_SAWMILL:
-				{
-					CMap* Map = G_MapManager->GetMap(1);
-					CChannel* Channel = Map->GetChannelManager()->Find(1);
-
-					CGameObject* CraftingTableGO = Channel->FindChannelObject(OwnerObjectID, en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE);
-					if (CraftingTableGO != nullptr)
-					{						
-						CCraftingTable* CraftingTable = (CCraftingTable*)CraftingTableGO;
-
-						CraftingTable->_SelectCraftingItemType = (en_SmallItemCategory)LeftMouseItemCategory;
-						
-						CMessage* ResCraftingTableCompleteItemSelectPacket = MakePacketResCraftingTableCompleteItemSelect(CraftingTableGO->_GameObjectInfo.ObjectId,
-							CraftingTable->_SelectCraftingItemType,
-							CraftingTable->GetMaterialItems());
-						SendPacket(Session->SessionId, ResCraftingTableCompleteItemSelectPacket);
-						ResCraftingTableCompleteItemSelectPacket->Free();						
-					}					
+				{	
+					st_GameObjectJob* FindCraftingTableJob = MakeGameObjectJobFindCraftingTableSelectItem(MyPlayer, OwnerObjectID, OwnerObjectType, LeftMouseItemCategory);
+					MyPlayer->GetChannel()->_ChannelJobQue.Enqueue(FindCraftingTableJob);					
 				}				
 				break;		
 			}
@@ -3045,57 +3012,9 @@ void CGameServer::PacketProcReqRightMouseObjectInfo(int64 SessionId, CMessage* M
 
 			int16 ObjectType;
 			*Message >> ObjectType;
-
-			CGameObject* FindObject = MyPlayer->GetChannel()->FindChannelObject(ObjectId, (en_GameObjectType)ObjectType);
-			if (FindObject != nullptr)
-			{
-				CMap* Map = G_MapManager->GetMap(1);
-				CChannel* Channel = Map->GetChannelManager()->Find(1);
-
-				switch (FindObject->_GameObjectInfo.ObjectType)
-				{
-				case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
-				case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
-					{
-						CCraftingTable* CraftingTable = (CCraftingTable*)FindObject;						
-
-						// 사용중이 아님
-						if (CraftingTable->_SelectedCraftingTable == false)
-						{
-							// 요청한 플레이어가 전에 선택중이었던 제작대가 있는지 확인				
-							vector<CGameObject*> ChannelFindObjects = Channel->FindChannelObjects(en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE);
-							for (CGameObject* ChannelFindObject : ChannelFindObjects)
-							{
-								CCraftingTable* FindCraftingTable = (CCraftingTable*)ChannelFindObject;
-
-								// 선택중이었던 용광로가 있으면
-								if (FindCraftingTable->_SelectedObject != nullptr)
-								{
-									// 선택중인 용광로 선택해제
-									st_GameObjectJob* CraftingTableNonSelectJob = MakeGameObjectJobCraftingTableNonSelect(ChannelFindObject);
-									ChannelFindObject->_GameObjectJobQue.Enqueue(CraftingTableNonSelectJob);
-								}
-							}
-
-							st_GameObjectJob* CraftingTableSelectJob = MakeGameObjectJobCraftingTableSelect(FindObject, MyPlayer);
-							FindObject->_GameObjectJobQue.Enqueue(CraftingTableSelectJob);
-
-							CMessage* ResRightMousePositionObjectInfoPacket = MakePacketResRightMousePositionObjectInfo(MyPlayer->_GameObjectInfo.ObjectId,
-								FindObject->_GameObjectInfo.ObjectId, FindObject->_GameObjectInfo.ObjectType);
-							SendPacket(Session->SessionId, ResRightMousePositionObjectInfoPacket);
-							ResRightMousePositionObjectInfoPacket->Free();
-						}
-						else
-						{
-							// 사용중임
-							CMessage* CommonErrorPacket = MakePacketCommonError(en_PersonalMessageType::PERSONAL_MEESAGE_CRAFTING_TABLE_OVERLAP_SELECT, FindObject->_GameObjectInfo.ObjectName.c_str());
-							SendPacket(Session->SessionId, CommonErrorPacket);
-							CommonErrorPacket->Free();
-						}
-					}					
-					break;				
-				}
-			}
+						
+			st_GameObjectJob* RightMouseObjectInfoJob = MakeGameObjectJobRightMouseObjectInfo(MyPlayer, ObjectId, ObjectType);
+			MyPlayer->GetChannel()->_ChannelJobQue.Enqueue(RightMouseObjectInfoJob);			
 		}
 	} while (0);
 
@@ -3152,147 +3071,10 @@ void CGameServer::PacketProcReqCraftingTableNonSelect(int64 SessionID, CMessage*
 			int16 CraftingTableObjectType;
 			*Message >> CraftingTableObjectType;
 
-			CGameObject* FindObject = MyPlayer->GetChannel()->FindChannelObject(CraftingTableObjectID, en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE);
-			if (FindObject != nullptr)
-			{
-				switch (FindObject->_GameObjectInfo.ObjectType)
-				{
-				case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
-				case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:					
-					{					
-						CCraftingTable* CraftingTable = (CCraftingTable*)FindObject;
-
-						if (CraftingTable->_SelectedCraftingTable == true)
-						{
-							st_GameObjectJob* CraftingTableSelectJob = MakeGameObjectJobCraftingTableNonSelect(FindObject);
-							FindObject->_GameObjectJobQue.Enqueue(CraftingTableSelectJob);
-
-							CMessage* ResCraftingTableNonSelectMessage = MakePacketResCraftingTableNonSelect(CraftingTable->_GameObjectInfo.ObjectId, CraftingTable->_GameObjectInfo.ObjectType);
-							SendPacket(Session->SessionId, ResCraftingTableNonSelectMessage);
-							ResCraftingTableNonSelectMessage->Free();
-						}
-						else
-						{
-							// 선택한 용광로 UI에서 다른 용광로 UI를 켤 경우 이전 용광로 UI는 닫는 작업이 필요함
-							CRASH("선택되어 있지 않은 대상을 선택 풀려고 함");
-						}
-					}					
-					break;			
-				}
-			}
+			st_GameObjectJob* CraftingTableNonSelectJob = MakeGameObjectJobCraftingTableNonSelect(MyPlayer, CraftingTableObjectID, CraftingTableObjectType);
+			MyPlayer->GetChannel()->_ChannelJobQue.Enqueue(CraftingTableNonSelectJob);			
 		}
 	} while (0);
-
-	ReturnSession(Session);
-}
-
-void CGameServer::PacketProcReqObjectStateChange(int64 SessionId, CMessage* Message)
-{
-	// 세션 얻기
-	st_Session* Session = FindSession(SessionId);
-
-	int64 AccountId;
-	int64 PlayerDBId;
-	int16 StateChange;
-
-	if (Session)
-	{
-		do
-		{
-			// 로그인 중인지 확인
-			if (!Session->IsLogin)
-			{
-				Disconnect(Session->SessionId);
-				return;
-			}
-
-			*Message >> AccountId;
-
-			// AccountId가 맞는지 확인
-			if (Session->AccountId != AccountId)
-			{
-				Disconnect(Session->SessionId);
-				return;
-			}
-
-			*Message >> PlayerDBId;
-
-			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
-
-			// 조종하고 있는 플레이어가 있는지 확인 
-			if (MyPlayer == nullptr)
-			{
-				Disconnect(Session->SessionId);
-				return;
-			}
-			else
-			{
-				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
-				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
-				{
-					Disconnect(Session->SessionId);
-					return;
-				}
-			}
-
-			int16 ObjectType;
-			*Message >> ObjectType;
-
-			int64 ObjectId;
-			*Message >> ObjectId;
-
-			*Message >> StateChange;
-
-			CMessage* ResObjectStatePakcet = nullptr;
-
-			CGameObject* FindGameObject = MyPlayer->GetChannel()->FindChannelObject(ObjectId, (en_GameObjectType)ObjectType);
-			if (FindGameObject != nullptr)
-			{
-				CMap* Map = G_MapManager->GetMap(1);
-
-				vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetFieldOfViewPlayers(MyPlayer, 1, false);
-
-				switch ((en_StateChange)StateChange)
-				{
-				case en_StateChange::MOVE_TO_STOP:
-					if (FindGameObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::MOVING
-						|| FindGameObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::SPAWN_IDLE
-						|| FindGameObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::IDLE
-						|| FindGameObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::PATROL
-						|| FindGameObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::ATTACK)
-					{
-						FindGameObject->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-
-						ResObjectStatePakcet = MakePacketResChangeObjectState(FindGameObject->_GameObjectInfo.ObjectId, FindGameObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, FindGameObject->_GameObjectInfo.ObjectType, FindGameObject->_GameObjectInfo.ObjectPositionInfo.State);
-						SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResObjectStatePakcet);
-						ResObjectStatePakcet->Free();
-					}
-					else
-					{
-						Disconnect(Session->SessionId);
-						break;
-					}
-					break;
-				case en_StateChange::SPELL_TO_IDLE:
-					if (FindGameObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::ATTACK
-						|| FindGameObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::SPELL)
-					{
-						FindGameObject->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-
-						ResObjectStatePakcet = MakePacketResChangeObjectState(FindGameObject->_GameObjectInfo.ObjectId, FindGameObject->_GameObjectInfo.ObjectPositionInfo.MoveDir, FindGameObject->_GameObjectInfo.ObjectType, FindGameObject->_GameObjectInfo.ObjectPositionInfo.State);
-						SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResObjectStatePakcet);
-						ResObjectStatePakcet->Free();
-					}
-					else
-					{
-						Disconnect(Session->SessionId);
-						break;
-					}
-					break;
-				}
-			}
-		} while (0);
-	}
 
 	ReturnSession(Session);
 }
@@ -4045,31 +3827,7 @@ void CGameServer::PacketProcReqCraftingConfirm(int64 SessionId, CMessage* Messag
 			}
 
 			// 재료템 확인작업 완료
-			// 아이템 생성 후 인벤토리에 넣고 클라에게도 전송
-
-			// 만들고자 하는 제작템을 DataManager에서 가져온다.
-			auto ItemDataIterator = G_Datamanager->_Items.find((int16)ReqCraftingItemType);
-			if (ItemDataIterator == G_Datamanager->_Items.end())
-			{
-				break;
-			}
-
-			st_ItemInfo* FindReqCompleteItemData = (*ItemDataIterator).second;
-
-			st_ItemInfo CraftingItemInfo;
-			CraftingItemInfo.ItemDBId = 0;
-			CraftingItemInfo.ItemIsQuickSlotUse = FindReqCompleteItemData->ItemIsEquipped;
-			CraftingItemInfo.ItemLargeCategory = FindReqCompleteItemData->ItemLargeCategory;
-			CraftingItemInfo.ItemMediumCategory = FindReqCompleteItemData->ItemMediumCategory;
-			CraftingItemInfo.ItemSmallCategory = FindReqCompleteItemData->ItemSmallCategory;
-			CraftingItemInfo.ItemName = FindReqCompleteItemData->ItemName;
-			CraftingItemInfo.ItemExplain = FindReqCompleteItemData->ItemExplain;
-			CraftingItemInfo.ItemMinDamage = FindReqCompleteItemData->ItemMinDamage;
-			CraftingItemInfo.ItemMaxDamage = FindReqCompleteItemData->ItemMaxDamage;
-			CraftingItemInfo.ItemDefence = FindReqCompleteItemData->ItemDefence;
-			CraftingItemInfo.ItemMaxCount = FindReqCompleteItemData->ItemMaxCount;
-			CraftingItemInfo.ItemCount = ReqCraftingItemCount;			
-			CraftingItemInfo.ItemIsEquipped = FindReqCompleteItemData->ItemIsEquipped;
+			// 아이템 생성 후 인벤토리에 넣고 클라에게도 전송			
 
 			bool IsExistItem = false;
 			int8 SlotIndex = 0;
@@ -4077,13 +3835,14 @@ void CGameServer::PacketProcReqCraftingConfirm(int64 SessionId, CMessage* Messag
 			int16 FindItemGridPositionX = -1;
 			int16 FindItemGridPositionY = -1;
 
-			CItem* FindItem = MyPlayer->_InventoryManager.FindInventoryItem(0, CraftingItemInfo.ItemSmallCategory);
+			CItem* FindItem = MyPlayer->_InventoryManager.FindInventoryItem(0, (en_SmallItemCategory)ReqCraftingItemType);
 			if (FindItem == nullptr)
 			{
-				CItem* CraftingItem = G_ObjectManager->ItemCreate(FindReqCompleteItemData->ItemSmallCategory);
-				CraftingItem->_ItemInfo = CraftingItemInfo;
+				// 가방에 완성한 제작템이 없을 경우 새로 생성해준다.
+				CItem* CraftingItem = G_ObjectManager->ItemCreate((en_SmallItemCategory)ReqCraftingItemType);
 
 				MyPlayer->_InventoryManager.InsertItem(0, CraftingItem);
+
 				FindItemGridPositionX = CraftingItem->_ItemInfo.ItemTileGridPositionX;
 				FindItemGridPositionY = CraftingItem->_ItemInfo.ItemTileGridPositionY;				
 			}
@@ -5775,22 +5534,20 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 
 			while (CharacterInventoryItem.Fetch())
 			{
+				// DB에서 읽어온 데이터로 아이템 생성
 				CItem* NewItem = G_ObjectManager->ItemCreate((en_SmallItemCategory)ItemSmallCategory);		
 
 				if (NewItem != nullptr)
-				{
-					st_ItemInfo NewItemInfo = *(G_Datamanager->FindItemData((en_SmallItemCategory)ItemSmallCategory));
-					
-					NewItemInfo.ItemIsQuickSlotUse = ItemQuickSlotUse;
-					NewItemInfo.ItemIsEquipped = ItemEquipped;
-					NewItemInfo.ItemWidth = ItemWidth;
-					NewItemInfo.ItemHeight = ItemHeight;
-					NewItemInfo.ItemTileGridPositionX = ItemTilePositionX;
-					NewItemInfo.ItemTileGridPositionY = ItemTilePositionY;
-					NewItemInfo.ItemCount = ItemCount;
-					NewItemInfo.ItemCurrentDurability = ItemDurability;
-					NewItemInfo.ItemEnchantPoint = ItemEnchantPoint;
-					NewItem->_ItemInfo = NewItemInfo;
+				{					
+					NewItem->_ItemInfo.ItemIsQuickSlotUse = ItemQuickSlotUse;
+					NewItem->_ItemInfo.ItemIsEquipped = ItemEquipped;
+					NewItem->_ItemInfo.ItemWidth = ItemWidth;
+					NewItem->_ItemInfo.ItemHeight = ItemHeight;
+					NewItem->_ItemInfo.ItemTileGridPositionX = ItemTilePositionX;
+					NewItem->_ItemInfo.ItemTileGridPositionY = ItemTilePositionY;
+					NewItem->_ItemInfo.ItemCount = ItemCount;
+					NewItem->_ItemInfo.ItemCurrentDurability = ItemDurability;
+					NewItem->_ItemInfo.ItemEnchantPoint = ItemEnchantPoint;					
 
 					MyPlayer->_InventoryManager.DBItemInsertItem(0, NewItem);
 					InventoryItems.push_back(NewItem);
@@ -5921,9 +5678,11 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 				{
 					CItem* NewEquipmentItem = G_ObjectManager->ItemCreate((en_SmallItemCategory)EquipmentSmallCategory);
 					NewEquipmentItem->_ItemInfo.ItemCurrentDurability = EquipmentDurability;
-					NewEquipmentItem->_ItemInfo.ItemEnchantPoint = EquipmentEnchantPoint;
+					NewEquipmentItem->_ItemInfo.ItemEnchantPoint = EquipmentEnchantPoint;					
 
-					MyPlayer->_Equipment.ItemOnEquipment(NewEquipmentItem);					
+					MyPlayer->_Equipment.ItemOnEquipment(NewEquipmentItem);	
+
+					Equipments.push_back(NewEquipmentItem->_ItemInfo);
 				}				
 			}						
 
@@ -6305,7 +6064,7 @@ void CGameServer::PacketProcTimerPing(int64 SessionId)
 st_GameObjectJob* CGameServer::MakeGameObjectJobLeaveChannelPlayer(CGameObject* LeavePlayerObject, int32* PlayerIndexes)
 {
 	st_GameObjectJob* LeaveChannelJob = G_ObjectManager->GameObjectJobCreate();
-	LeaveChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_PLAYER_LEAVE_CHANNEL;
+	LeaveChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_PLAYER_LEAVE;
 
 	CGameServerMessage* LeaveChannelMessage = CGameServerMessage::GameServerMessageAlloc();
 	*LeaveChannelMessage << &LeavePlayerObject;
@@ -6434,37 +6193,6 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobItemDrop(int16 DropItemType, int
 	ItemDropJob->GameObjectJobMessage = ItemDropJobMessage;
 
 	return ItemDropJob;
-}
-
-st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableSelect(CGameObject* CraftingTableObject, CGameObject* OwnerObject)
-{
-	st_GameObjectJob* CraftingTableSelectJob = G_ObjectManager->GameObjectJobCreate();
-	CraftingTableSelectJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CRAFTING_TABLE_SELECT;
-
-	CGameServerMessage* CraftingTableSelectJobMessage = CGameServerMessage::GameServerMessageAlloc();
-	CraftingTableSelectJobMessage->Clear();
-
-	*CraftingTableSelectJobMessage << &CraftingTableObject;
-	*CraftingTableSelectJobMessage << &OwnerObject;
-
-	CraftingTableSelectJob->GameObjectJobMessage = CraftingTableSelectJobMessage;
-
-	return CraftingTableSelectJob;
-}
-
-st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableNonSelect(CGameObject* CraftingTableObject)
-{
-	st_GameObjectJob* CraftingTableSelectJob = G_ObjectManager->GameObjectJobCreate();
-	CraftingTableSelectJob->GameObjectJobType = en_GameObjectJobType::GAMEOJBECT_JOB_TYPE_CRAFTING_TABLE_NON_SELECT;
-
-	CGameServerMessage* CraftingTableSelectJobMessage = CGameServerMessage::GameServerMessageAlloc();
-	CraftingTableSelectJobMessage->Clear();
-
-	*CraftingTableSelectJobMessage << &CraftingTableObject;
-
-	CraftingTableSelectJob->GameObjectJobMessage = CraftingTableSelectJobMessage;
-
-	return CraftingTableSelectJob;
 }
 
 st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableStart(CGameObject* CraftingStartObject, en_SmallItemCategory CraftingCompleteItemType, int16 CraftingCount)
@@ -6606,76 +6334,6 @@ CGameServerMessage* CGameServer::MakePacketResCreateCharacter(bool IsSuccess, st
 	*ResCreateCharacter << CreateCharacterObjectInfo;
 
 	return ResCreateCharacter;
-}
-
-CGameServerMessage* CGameServer::MakePacketResLeftMousePositionObjectInfo(int64 AccountId, int64 PreviousChoiceObjectId, int64 FindObjectId,
-	map<en_SkillType, CSkill*> BufSkillInfo, map<en_SkillType, CSkill*> DeBufSkillInfo)
-{
-	CGameServerMessage* ResMousePositionObjectInfoPacket = CGameServerMessage::GameServerMessageAlloc();
-	if (ResMousePositionObjectInfoPacket == nullptr)
-	{
-		return nullptr;
-	}
-
-	ResMousePositionObjectInfoPacket->Clear();
-
-	*ResMousePositionObjectInfoPacket << (int16)en_PACKET_S2C_LEFT_MOUSE_OBJECT_INFO;
-	*ResMousePositionObjectInfoPacket << AccountId;
-	*ResMousePositionObjectInfoPacket << PreviousChoiceObjectId;
-	*ResMousePositionObjectInfoPacket << FindObjectId;
-
-	int16 BufSize = BufSkillInfo.size();
-	*ResMousePositionObjectInfoPacket << BufSize;
-
-	for (auto BufSkillIterator : BufSkillInfo)
-	{
-		*ResMousePositionObjectInfoPacket << *(BufSkillIterator.second->GetSkillInfo());
-	}
-
-	int16 DeBufSize = DeBufSkillInfo.size();
-	*ResMousePositionObjectInfoPacket << DeBufSize;
-
-	for (auto DeBufSkillIterator : DeBufSkillInfo)
-	{
-		*ResMousePositionObjectInfoPacket << *(DeBufSkillIterator.second->GetSkillInfo());
-	}
-
-	return ResMousePositionObjectInfoPacket;
-}
-
-CGameServerMessage* CGameServer::MakePacketResRightMousePositionObjectInfo(int64 ReqPlayerID, int64 FindObjectID, en_GameObjectType FindObjectType)
-{
-	CGameServerMessage* ResRightMousePositionObjectInfoMessage = CGameServerMessage::GameServerMessageAlloc();
-	if (ResRightMousePositionObjectInfoMessage == nullptr)
-	{
-		return nullptr;
-	}
-
-	ResRightMousePositionObjectInfoMessage->Clear();
-
-	*ResRightMousePositionObjectInfoMessage << (int16)en_PACKET_S2C_RIGHT_MOUSE_OBJECT_INFO;
-	*ResRightMousePositionObjectInfoMessage << ReqPlayerID;
-	*ResRightMousePositionObjectInfoMessage << FindObjectID;
-	*ResRightMousePositionObjectInfoMessage << (int16)FindObjectType;
-
-	return ResRightMousePositionObjectInfoMessage;
-}
-
-CGameServerMessage* CGameServer::MakePacketResCraftingTableNonSelect(int64 CraftingTableObjectID, en_GameObjectType CraftingTableObjectType)
-{
-	CGameServerMessage* ResCraftingTableNonSelectMessage = CGameServerMessage::GameServerMessageAlloc();
-	if (ResCraftingTableNonSelectMessage == nullptr)
-	{
-		return nullptr;
-	}
-
-	ResCraftingTableNonSelectMessage->Clear();
-
-	*ResCraftingTableNonSelectMessage << (int16)en_PACKET_S2C_CRAFTING_TABLE_NON_SELECT;
-	*ResCraftingTableNonSelectMessage << CraftingTableObjectID;
-	*ResCraftingTableNonSelectMessage << (int16)CraftingTableObjectType;
-
-	return ResCraftingTableNonSelectMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketResSelectItem(int64 AccountId, int64 ObjectId, CItem* SelectItem)
@@ -6861,31 +6519,6 @@ CGameServerMessage* CGameServer::MakePacketCraftingList(int64 AccountId, int64 P
 	return ResCraftingListMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResCraftingTableCompleteItemSelect(int64 CraftingTableObjectID, en_SmallItemCategory SelectCompleteType, map<en_SmallItemCategory, CItem*> MaterialItems)
-{
-	CGameServerMessage* ResCraftingTableCompleteItemSelectMessage = CGameServerMessage::GameServerMessageAlloc();
-	if (ResCraftingTableCompleteItemSelectMessage == nullptr)
-	{
-		return nullptr;
-	}
-
-	ResCraftingTableCompleteItemSelectMessage->Clear();
-
-	*ResCraftingTableCompleteItemSelectMessage << (int16)en_PACKET_S2C_CRAFTING_TABLE_COMPLETE_ITEM_SELECT;
-	*ResCraftingTableCompleteItemSelectMessage << CraftingTableObjectID;
-	*ResCraftingTableCompleteItemSelectMessage << (int16)SelectCompleteType;
-
-	int16 MaterialItemCount = MaterialItems.size();
-	*ResCraftingTableCompleteItemSelectMessage << MaterialItemCount;
-
-	for (auto MaterialItemIter : MaterialItems)
-	{
-		*ResCraftingTableCompleteItemSelectMessage << MaterialItemIter.second->_ItemInfo;
-	}
-
-	return ResCraftingTableCompleteItemSelectMessage;
-}
-
 CGameServerMessage* CGameServer::MakePacketResMenuTileBuy(vector<st_TileMapInfo> AroundMapTile)
 {
 	CGameServerMessage* ResMenuTileBuyMessage = CGameServerMessage::GameServerMessageAlloc();
@@ -6958,7 +6591,7 @@ CItem* CGameServer::NewItemCrate(st_ItemInfo& NewItemInfo)
 st_GameObjectJob* CGameServer::MakeGameObjectJobObjectDeSpawnObjectChannel(CGameObject* DeSpawnChannelObject)
 {
 	st_GameObjectJob* DeSpawnObjectChannelJob = G_ObjectManager->GameObjectJobCreate();
-	DeSpawnObjectChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_OBJECT_DESPAWN_CHANNEL;
+	DeSpawnObjectChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_OBJECT_DESPAWN;
 
 	CGameServerMessage* DeSpawnObjectChannelGameMessage = CGameServerMessage::GameServerMessageAlloc();
 	DeSpawnObjectChannelGameMessage->Clear();
@@ -6972,7 +6605,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobObjectDeSpawnObjectChannel(CGame
 st_GameObjectJob* CGameServer::MakeGameObjectJobPlayerEnterChannel(CGameObject* EnterChannelObject)
 {
 	st_GameObjectJob* EnterChannelJob = G_ObjectManager->GameObjectJobCreate();
-	EnterChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_PLAYER_ENTER_CHANNEL;
+	EnterChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_PLAYER_ENTER;
 
 	CGameServerMessage* EnterChannelGameMessage = CGameServerMessage::GameServerMessageAlloc();
 	EnterChannelGameMessage->Clear();
@@ -6986,7 +6619,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobPlayerEnterChannel(CGameObject* 
 st_GameObjectJob* CGameServer::MakeGameObjectJobObjectEnterChannel(CGameObject* EnterChannelObject)
 {
 	st_GameObjectJob* EnterChannelJob = G_ObjectManager->GameObjectJobCreate();
-	EnterChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_OBJECT_ENTER_CHANNEL;
+	EnterChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_OBJECT_ENTER;
 
 	CGameServerMessage* EnterChannelGameMessage = CGameServerMessage::GameServerMessageAlloc();
 	EnterChannelGameMessage->Clear();
@@ -6998,10 +6631,79 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobObjectEnterChannel(CGameObject* 
 	return EnterChannelJob;
 }
 
+st_GameObjectJob* CGameServer::MakeGameObjectJobFindObjectChannel(CGameObject* ReqPlayer, int64& FindObjectID, int16& FindObjectType)
+{
+	st_GameObjectJob* FindChannelObjectJob = G_ObjectManager->GameObjectJobCreate();
+	FindChannelObjectJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_FIND_OBJECT;
+
+	CGameServerMessage* FindChannObjectMessage = CGameServerMessage::GameServerMessageAlloc();
+	FindChannObjectMessage->Clear();
+
+	*FindChannObjectMessage << &ReqPlayer;
+	*FindChannObjectMessage << FindObjectID;
+	*FindChannObjectMessage << FindObjectType;
+
+	FindChannelObjectJob->GameObjectJobMessage = FindChannObjectMessage;
+
+	return FindChannelObjectJob;
+}
+
+CGameServerMessage* CGameServer::MakePacketResCraftingTableNonSelect(int64 CraftingTableObjectID, en_GameObjectType CraftingTableObjectType)
+{
+	CGameServerMessage* ResCraftingTableNonSelectMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResCraftingTableNonSelectMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResCraftingTableNonSelectMessage->Clear();
+
+	*ResCraftingTableNonSelectMessage << (int16)en_PACKET_S2C_CRAFTING_TABLE_NON_SELECT;
+	*ResCraftingTableNonSelectMessage << CraftingTableObjectID;
+	*ResCraftingTableNonSelectMessage << (int16)CraftingTableObjectType;
+
+	return ResCraftingTableNonSelectMessage;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobFindCraftingTableSelectItem(CGameObject* ReqPlayer, int64& FindCraftingTableObjectID, int16& FindCraftingTableObjectType, int16& LeftMouseItemCategory)
+{
+	st_GameObjectJob* FindCraftingTableJob = G_ObjectManager->GameObjectJobCreate();
+	FindCraftingTableJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_CRAFTING_TABLE_SELECT_ITEM;
+
+	CGameServerMessage* FindCraftingTableMessage = CGameServerMessage::GameServerMessageAlloc();
+	FindCraftingTableMessage->Clear();
+
+	*FindCraftingTableMessage << &ReqPlayer;
+	*FindCraftingTableMessage << FindCraftingTableObjectID;
+	*FindCraftingTableMessage << FindCraftingTableObjectType;
+	*FindCraftingTableMessage << LeftMouseItemCategory;
+
+	FindCraftingTableJob->GameObjectJobMessage = FindCraftingTableMessage;
+
+	return FindCraftingTableJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobRightMouseObjectInfo(CGameObject* ReqPlayer, int64& FindObjectID, int16& FindObjectType)
+{
+	st_GameObjectJob* RightMouseObjectInfoJob = G_ObjectManager->GameObjectJobCreate();
+	RightMouseObjectInfoJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_RIGHT_MOUSE_OBJECT_INFO;
+
+	CGameServerMessage* RightMouseObjectInfoMessage = CGameServerMessage::GameServerMessageAlloc();
+	RightMouseObjectInfoMessage->Clear();
+
+	*RightMouseObjectInfoMessage << &ReqPlayer;
+	*RightMouseObjectInfoMessage << FindObjectID;
+	*RightMouseObjectInfoMessage << FindObjectType;
+
+	RightMouseObjectInfoJob->GameObjectJobMessage = RightMouseObjectInfoMessage;
+
+	return RightMouseObjectInfoJob;
+}
+
 st_GameObjectJob* CGameServer::MakeGameObjectJobLeaveChannel(CGameObject* LeaveChannelObject)
 {
 	st_GameObjectJob* LeaveChannelJob = G_ObjectManager->GameObjectJobCreate();
-	LeaveChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_LEAVE_CHANNEL;
+	LeaveChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_LEAVE;
 
 	CGameServerMessage* LeaveChannelMessage = CGameServerMessage::GameServerMessageAlloc();
 	LeaveChannelMessage->Clear();
@@ -7089,6 +6791,39 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobOffEquipment(int8& EquipmentPart
 	UnDoEquipmentJob->GameObjectJobMessage = UnDoEquipmentMessage;
 
 	return UnDoEquipmentJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableSelect(CGameObject* CraftingTableObject, CGameObject* OwnerObject)
+{
+	st_GameObjectJob* CraftingTableSelectJob = G_ObjectManager->GameObjectJobCreate();
+	CraftingTableSelectJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_CRAFTING_TABLE_SELECT_ITEM;
+
+	CGameServerMessage* CraftingTableSelectJobMessage = CGameServerMessage::GameServerMessageAlloc();
+	CraftingTableSelectJobMessage->Clear();
+
+	*CraftingTableSelectJobMessage << &CraftingTableObject;
+	*CraftingTableSelectJobMessage << &OwnerObject;
+
+	CraftingTableSelectJob->GameObjectJobMessage = CraftingTableSelectJobMessage;
+
+	return CraftingTableSelectJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableNonSelect(CGameObject* CraftingTableObject, int64& CraftingTableObjectID, int16& CraftingTableObjectType)
+{
+	st_GameObjectJob* CraftingTableSelectJob = G_ObjectManager->GameObjectJobCreate();
+	CraftingTableSelectJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_CRAFTING_TABLE_NON_SELECT;
+
+	CGameServerMessage* CraftingTableSelectJobMessage = CGameServerMessage::GameServerMessageAlloc();
+	CraftingTableSelectJobMessage->Clear();
+
+	*CraftingTableSelectJobMessage << &CraftingTableObject;
+	*CraftingTableSelectJobMessage << CraftingTableObjectID;
+	*CraftingTableSelectJobMessage << CraftingTableObjectType;
+
+	CraftingTableSelectJob->GameObjectJobMessage = CraftingTableSelectJobMessage;
+
+	return CraftingTableSelectJob;
 }
 
 st_GameObjectJob* CGameServer::MakeGameObjectJobItemSave(CGameObject* Item)
@@ -7229,6 +6964,84 @@ CGameServerMessage* CGameServer::MakePacketResGathering(int64 ObjectID, bool Gat
 	}
 
 	return ResGatheringMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketResRightMousePositionObjectInfo(int64 ReqPlayerID, int64 FindObjectID, en_GameObjectType FindObjectType)
+{
+	CGameServerMessage* ResRightMousePositionObjectInfoMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResRightMousePositionObjectInfoMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResRightMousePositionObjectInfoMessage->Clear();
+
+	*ResRightMousePositionObjectInfoMessage << (int16)en_PACKET_S2C_RIGHT_MOUSE_OBJECT_INFO;
+	*ResRightMousePositionObjectInfoMessage << ReqPlayerID;
+	*ResRightMousePositionObjectInfoMessage << FindObjectID;
+	*ResRightMousePositionObjectInfoMessage << (int16)FindObjectType;
+
+	return ResRightMousePositionObjectInfoMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketResLeftMousePositionObjectInfo(int64 AccountId, int64 PreviousChoiceObjectId, int64 FindObjectId,
+	map<en_SkillType, CSkill*> BufSkillInfo, map<en_SkillType, CSkill*> DeBufSkillInfo)
+{
+	CGameServerMessage* ResMousePositionObjectInfoPacket = CGameServerMessage::GameServerMessageAlloc();
+	if (ResMousePositionObjectInfoPacket == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResMousePositionObjectInfoPacket->Clear();
+
+	*ResMousePositionObjectInfoPacket << (int16)en_PACKET_S2C_LEFT_MOUSE_OBJECT_INFO;
+	*ResMousePositionObjectInfoPacket << AccountId;
+	*ResMousePositionObjectInfoPacket << PreviousChoiceObjectId;
+	*ResMousePositionObjectInfoPacket << FindObjectId;
+
+	int16 BufSize = BufSkillInfo.size();
+	*ResMousePositionObjectInfoPacket << BufSize;
+
+	for (auto BufSkillIterator : BufSkillInfo)
+	{
+		*ResMousePositionObjectInfoPacket << *(BufSkillIterator.second->GetSkillInfo());
+	}
+
+	int16 DeBufSize = DeBufSkillInfo.size();
+	*ResMousePositionObjectInfoPacket << DeBufSize;
+
+	for (auto DeBufSkillIterator : DeBufSkillInfo)
+	{
+		*ResMousePositionObjectInfoPacket << *(DeBufSkillIterator.second->GetSkillInfo());
+	}
+
+	return ResMousePositionObjectInfoPacket;
+}
+
+CGameServerMessage* CGameServer::MakePacketResCraftingTableCompleteItemSelect(int64 CraftingTableObjectID, en_SmallItemCategory SelectCompleteType, map<en_SmallItemCategory, CItem*> MaterialItems)
+{
+	CGameServerMessage* ResCraftingTableCompleteItemSelectMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResCraftingTableCompleteItemSelectMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResCraftingTableCompleteItemSelectMessage->Clear();
+
+	*ResCraftingTableCompleteItemSelectMessage << (int16)en_PACKET_S2C_CRAFTING_TABLE_COMPLETE_ITEM_SELECT;
+	*ResCraftingTableCompleteItemSelectMessage << CraftingTableObjectID;
+	*ResCraftingTableCompleteItemSelectMessage << (int16)SelectCompleteType;
+
+	int16 MaterialItemCount = MaterialItems.size();
+	*ResCraftingTableCompleteItemSelectMessage << MaterialItemCount;
+
+	for (auto MaterialItemIter : MaterialItems)
+	{
+		*ResCraftingTableCompleteItemSelectMessage << MaterialItemIter.second->_ItemInfo;
+	}
+
+	return ResCraftingTableCompleteItemSelectMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketResAnimationPlay(int64 ObjectId, en_MoveDir Dir, wstring AnimationName)
