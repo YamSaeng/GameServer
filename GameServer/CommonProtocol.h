@@ -354,14 +354,6 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_CRAFTING_TABLE_NON_SELECT,
 
 	//------------------------------------------------------------
-	// 게임서버 오브젝트 상태 변경 요청
-	// int64 AccountId
-	// int64 ObjectId
-	// en_CreatureState ObjectState
-	//------------------------------------------------------------
-	en_PACKET_C2S_OBJECT_STATE_CHANGE,
-
-	//------------------------------------------------------------
 	// 게임서버 오브젝트 상태 변경 요청 응답
 	// int64 ObjectId
 	// en_MoveDir Direction
