@@ -358,7 +358,7 @@ void CGameObject::Update()
 
 				// 장비 착용
 				CPlayer* Player = (CPlayer*)this;
-				CItem* ReturnEquipmentItem = Player->_Equipment.ItemEquip(EquipmentItem);
+				CItem* ReturnEquipmentItem = Player->_Equipment.ItemOnEquipment(EquipmentItem);
 
 				CMessage* EquipmentUpdateMessage = G_ObjectManager->GameServer->MakePacketOnEquipment(_GameObjectInfo.ObjectId, EquipmentItem->_ItemInfo);
 				G_ObjectManager->GameServer->SendPacket(Player->_SessionId, EquipmentUpdateMessage);
@@ -366,7 +366,7 @@ void CGameObject::Update()
 
 				// 가방에서 착용한 장비 없애기
 				Player->_InventoryManager.InitItem(0, EquipmentItem->_ItemInfo.ItemTileGridPositionX, EquipmentItem->_ItemInfo.ItemTileGridPositionY);
-				
+
 				// 장비 해제한 아이템이 있을 경우 가방에 해당 아이템을 새로 넣음
 				if (ReturnEquipmentItem != nullptr)
 				{
@@ -376,7 +376,7 @@ void CGameObject::Update()
 						ReturnEquipmentItem->_ItemInfo, false, ReturnEquipmentItem->_ItemInfo.ItemCount);
 					G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResItemToInventoryPacket);
 					ResItemToInventoryPacket->Free();
-				}														
+				}
 			}
 			break;	
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_OFF_EQUIPMENT:
@@ -385,7 +385,7 @@ void CGameObject::Update()
 				*GameObjectJob->GameObjectJobMessage >> EquipmentParts;
 
 				CPlayer* Player = (CPlayer*)this;
-				CItem* ReturnEquipmentItem = Player->_Equipment.ItemUnEquip((en_EquipmentParts)EquipmentParts);
+				CItem* ReturnEquipmentItem = Player->_Equipment.ItemOffEquipment((en_EquipmentParts)EquipmentParts);
 				
 				if (ReturnEquipmentItem != nullptr)
 				{
@@ -531,59 +531,7 @@ void CGameObject::Update()
 				st_GameObjectJob* LeaveChannerMonsterJob = G_ObjectManager->GameServer->MakeGameObjectJobLeaveChannel(InsertItem);
 				_Channel->_ChannelJobQue.Enqueue(LeaveChannerMonsterJob);				
 			}
-			break;
-		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CRAFTING_TABLE_SELECT:
-			{
-				CGameObject* SelectCraftingTableObject;
-				*GameObjectJob->GameObjectJobMessage >> &SelectCraftingTableObject;
-				CGameObject* OwnerObject;
-				*GameObjectJob->GameObjectJobMessage >> &OwnerObject;
-
-				CCraftingTable* CraftingTableObject = (CCraftingTable*)SelectCraftingTableObject;
-				
-				CraftingTableObject->_SelectedCraftingTable = true;		
-
-				CraftingTableObject->_SelectedObject = OwnerObject;				
-								
-				// 제작대가 제작중이라면 제작중인 아이템의 정보를 클라에게 보냄
-				if (CraftingTableObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::CRAFTING)
-				{
-					for (CItem* CraftingTableItem : CraftingTableObject->GetCraftingTableRecipe().CraftingTableCompleteItems)
-					{
-						CMessage* ResCraftingTableSelectPacket = G_ObjectManager->GameServer->MakePacketResCraftingTableCraftRemainTime(
-							CraftingTableObject->_GameObjectInfo.ObjectId,
-							CraftingTableItem->_ItemInfo);
-						G_ObjectManager->GameServer->SendPacket(((CPlayer*)CraftingTableObject->_SelectedObject)->_SessionId, ResCraftingTableSelectPacket);
-						ResCraftingTableSelectPacket->Free();
-					}			
-				}
-
-				// 완성된 제작품이 있을 경우 목록을 보내준다.
-				if (CraftingTableObject->GetCompleteItems().size() > 0)
-				{
-					CMessage* ResCrafintgTableCompleteItemListPacket = G_ObjectManager->GameServer->MakePacketResCraftingTableCompleteItemList(
-						_GameObjectInfo.ObjectId,
-						_GameObjectInfo.ObjectType,
-						CraftingTableObject->GetCompleteItems());
-					G_ObjectManager->GameServer->SendPacket(((CPlayer*)CraftingTableObject->_SelectedObject)->_SessionId, ResCrafintgTableCompleteItemListPacket);
-					ResCrafintgTableCompleteItemListPacket->Free();
-				}				
-			}
-			break;
-		case en_GameObjectJobType::GAMEOJBECT_JOB_TYPE_CRAFTING_TABLE_NON_SELECT:
-			{
-				CGameObject* SelectCraftingTableObject;
-				*GameObjectJob->GameObjectJobMessage >> &SelectCraftingTableObject;
-
-				CCraftingTable* CraftingTableObject = (CCraftingTable*)SelectCraftingTableObject;
-
-				CraftingTableObject->_SelectedCraftingTable = false;
-
-				CraftingTableObject->_SelectedObject = nullptr;
-
-				CraftingTableObject->_SelectCraftingItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
-			}
-			break;
+			break;		
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CRAFTING_TABLE_ITEM_ADD:
 			{
 				CGameObject* CraftingTableItemAddPlayerGO;
