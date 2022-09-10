@@ -89,6 +89,7 @@ enum class en_GameObjectType : int16
 	OBJECT_ITEM_MATERIAL_IRON_NUGGET,
 	OBJECT_ITEM_MATERIAL_IRON_INGOT,
 
+	OBJECT_ITEM_CROP_SEED,
 	OBJECT_ITEM_CROP_SEED_POTATO,
 	OBJECT_ITEM_CROP_FRUIT_POTATO,
 
@@ -247,7 +248,8 @@ struct st_GameObjectInfo
 {
 	int64 ObjectId;
 	wstring ObjectName;
-	int8 ObjectStep;
+	int8 ObjectCropStep;
+	int8 ObjectCropMaxStep;
 	st_PositionInfo ObjectPositionInfo;
 	st_StatInfo ObjectStatInfo;
 	en_GameObjectType ObjectType;

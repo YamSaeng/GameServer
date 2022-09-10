@@ -70,6 +70,7 @@ enum class en_GameObjectType : int16
 	OBJECT_ITEM_MATERIAL_IRON_NUGGET,
 	OBJECT_ITEM_MATERIAL_IRON_INGOT,	
 
+	OBJECT_ITEM_CROP_SEED,
 	OBJECT_ITEM_CROP_SEED_POTATO,
 	OBJECT_ITEM_CROP_FRUIT_POTATO,	
 
@@ -478,6 +479,7 @@ enum class en_GameObjectJobType : int16
 	GAMEOBJECT_JOB_TYPE_CHANNEL_CRAFTING_TABLE_SELECT_ITEM,
 	GAMEOBJECT_JOB_TYPE_CHANNEL_CRAFTING_TABLE_NON_SELECT,
 	GAMEOBJECT_JOB_TYPE_CHANNEL_RIGHT_MOUSE_OBJECT_INFO,
+	GAMEOBJECT_JOB_TYPE_CHANNEL_SEED_FARMING,
 
 	GAMEOBJECT_JOB_TYPE_FULL_RECOVERY,
 
@@ -2207,7 +2209,8 @@ struct st_GameObjectInfo
 {
 	int64 ObjectId;
 	wstring ObjectName;
-	int8 ObjectStep;
+	int8 ObjectCropStep;
+	int8 ObjectCropMaxStep;
 	st_PositionInfo ObjectPositionInfo;
 	st_StatInfo ObjectStatInfo;
 	en_GameObjectType ObjectType;
