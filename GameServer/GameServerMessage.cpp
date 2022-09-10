@@ -30,7 +30,8 @@ CGameServerMessage& CGameServerMessage::operator<<(st_GameObjectInfo& GameObject
     *this << GameObjectInfoNameLen;    
     InsertData(GameObjectInfo.ObjectName.c_str(), GameObjectInfoNameLen);      
 
-    *this << GameObjectInfo.ObjectStep;
+    *this << GameObjectInfo.ObjectCropStep;
+    *this << GameObjectInfo.ObjectCropMaxStep;
     *this << GameObjectInfo.ObjectPositionInfo;
     *this << GameObjectInfo.ObjectStatInfo;
     *this << (int16)GameObjectInfo.ObjectType;
