@@ -415,6 +415,8 @@ enum class en_PersonalMessageType : int8
 	PERSONAL_MESSAGE_SYSTEM_SYSTEM_ALLOC_TILE,
 	PERSONAL_MESSAGE_SYSTEM_ALLOC_TILE,
 
+	PERSOANL_MESSAGE_SEED_FARMING_EXIST,
+
 	PERSONAL_FAULT_ITEM_USE,
 
 	PERSONAL_UI_CLOSE
@@ -2297,6 +2299,7 @@ struct st_ItemInfo
 	int16 ItemHealPoint;					  // 아이템 체력 회복 점수
 	int32 ItemMaxCount;				          // 아이템을 소유 할 수 있는 최대 개수
 	int16 ItemCount;			              // 개수				
+	int8 ItemMaxstep;						  // 아이템 단계 최대값
 	int8 ItemEnchantPoint;					  // 아이템 강화 수치
 	vector<st_CraftingMaterialItemInfo> Materials; // 제작 아이템일 경우 조합에 필요한 재료 아이템 목록	
 
@@ -2342,6 +2345,8 @@ struct st_ItemInfo
 
 		ItemMaxCount = 0;
 		ItemCount = 0;				
+
+		ItemMaxstep = 0;
 
 		ItemIsEquipped = false;
 
