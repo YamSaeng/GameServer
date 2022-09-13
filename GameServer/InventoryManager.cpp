@@ -136,25 +136,9 @@ CItem* CInventoryManager::InsertItem(int8 SelectInventoryIndex, en_SmallItemCate
 	{
 		*IsExistItem = false;
 
-		CItem* NewItem = G_ObjectManager->ItemCreate(InsertItemCategory);
-
-		st_ItemInfo* ItemData = G_Datamanager->FindItemData(InsertItemCategory);
-
-		NewItem->_ItemInfo.ItemDBId = 0;		
-		NewItem->_ItemInfo.ItemWidth = ItemData->ItemWidth;
-		NewItem->_ItemInfo.ItemHeight = ItemData->ItemHeight;
-		NewItem->_ItemInfo.ItemLargeCategory = ItemData->ItemLargeCategory;
-		NewItem->_ItemInfo.ItemMediumCategory = ItemData->ItemMediumCategory;
-		NewItem->_ItemInfo.ItemSmallCategory = ItemData->ItemSmallCategory;
-		NewItem->_ItemInfo.ItemName = ItemData->ItemName;
-		NewItem->_ItemInfo.ItemExplain = ItemData->ItemExplain;
+		CItem* NewItem = G_ObjectManager->ItemCreate(InsertItemCategory);		
 		NewItem->_ItemInfo.ItemCount = InsertItemCount;
-		NewItem->_ItemInfo.ItemTileGridPositionX = 0;
-		NewItem->_ItemInfo.ItemTileGridPositionY = 0;
-		NewItem->_ItemInfo.ItemIsEquipped = false;
-		NewItem->_ItemInfo.ItemMaxCount = ItemData->ItemMaxCount;
-		NewItem->_ItemInfo.ItemCount = InsertItemCount;		
-
+		
 		InsertItem(SelectInventoryIndex, NewItem);
 
 		ReturnItem = NewItem;
