@@ -458,8 +458,10 @@
           "ItemName": "°¨ÀÚ",
           "ItemWidth": 1,
           "ItemHeight": 1,
-          "ItemMaxDurability": 10,          
-          "ItemMaxCount": 99          
+          "ItemMaxDurability": 10,
+          "ItemMaxCount": 99,
+          "ItemMaxStep": 3,
+          "ItemGrowTime": 30000
         }
       ]
     }
