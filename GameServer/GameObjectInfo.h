@@ -2300,6 +2300,7 @@ struct st_ItemInfo
 	int32 ItemMaxCount;				          // 아이템을 소유 할 수 있는 최대 개수
 	int16 ItemCount;			              // 개수				
 	int8 ItemMaxstep;						  // 아이템 단계 최대값
+	int32 ItemGrowTime;						  // 작물 성장 시간
 	int8 ItemEnchantPoint;					  // 아이템 강화 수치
 	vector<st_CraftingMaterialItemInfo> Materials; // 제작 아이템일 경우 조합에 필요한 재료 아이템 목록	
 
@@ -2347,6 +2348,7 @@ struct st_ItemInfo
 		ItemCount = 0;				
 
 		ItemMaxstep = 0;
+		ItemGrowTime = 0;
 
 		ItemIsEquipped = false;
 
