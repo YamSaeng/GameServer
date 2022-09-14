@@ -594,7 +594,9 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int32 ItemWidth = CropFruitListFiled["ItemWidth"].GetInt();
 			int32 ItemHeight = CropFruitListFiled["ItemHeight"].GetInt();
 			int32 ItemMaxDurability = CropFruitListFiled["ItemMaxDurability"].GetInt();
-			int32 ItemMaxCount = CropFruitListFiled["ItemMaxCount"].GetInt();			
+			int32 ItemMaxCount = CropFruitListFiled["ItemMaxCount"].GetInt();
+			int8 ItemMaxStep = (int8)CropFruitListFiled["ItemMaxStep"].GetInt();
+			int32 ItemGrowTime = CropFruitListFiled["ItemGrowTime"].GetInt();
 
 			st_ItemInfo* CropFruitItemInfo = new st_ItemInfo();
 			CropFruitItemInfo->ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_CROP;
@@ -616,6 +618,8 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			CropFruitItemInfo->ItemHeight = ItemHeight;
 			CropFruitItemInfo->ItemMaxDurability = ItemMaxDurability;
 			CropFruitItemInfo->ItemMaxCount = ItemMaxCount;			
+			CropFruitItemInfo->ItemMaxstep = ItemMaxStep;
+			CropFruitItemInfo->ItemGrowTime = ItemGrowTime;
 
 			_Items.insert(pair<int16, st_ItemInfo*>((int16)CropFruitItemInfo->ItemSmallCategory, CropFruitItemInfo));
 		}
