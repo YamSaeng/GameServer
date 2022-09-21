@@ -2295,7 +2295,7 @@ struct st_ItemInfo
 	wstring ItemName;			              // 아이템 이름
 	wstring ItemExplain;		              // 아이템 설명문
 	int64 ItemCraftingTime;					  // 아이템 제작 시간
-	int64 ItemCraftingRemainTime;			  // 아이템 제작 남은 시간
+	int64 ItemCraftingRemainTime;			  // 아이템 제작 남은 시간	
 	int32 ItemMinDamage;			          // 아이템 최소 공격력
 	int32 ItemMaxDamage;			          // 아이템 최대 공격력
 	int32 ItemDefence;				          // 아이템 방어력
@@ -2396,6 +2396,7 @@ struct st_SkillInfo
 	int64 SkillDurationTime; // 스킬 지속 시간
 	int64 SkillDotTime;      // 스킬 도트 시간 
 	int64 SkillRemainTime;   // 스킬 남은 시간
+	int32 SkillMotionTime;	 // 스킬 모션 시간
 	float SkillTargetEffectTime; // 스킬 이펙트 시간
 	en_SkillType NextComboSkill; // 다음 연속기 스킬
 	map<en_MoveDir, wstring> SkillAnimations; // 스킬 애니메이션	
@@ -2417,6 +2418,7 @@ struct st_SkillInfo
 		SkillDurationTime = 0;
 		SkillDotTime = 0;
 		SkillRemainTime = 0;
+		SkillMotionTime = 0;
 		NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
 		SkillTargetEffectTime = 0;
 		SkillExplanation = L"";
