@@ -27,7 +27,10 @@ public:
 	vector<st_FieldOfViewInfo> _FieldOfViewInfos;	
 	
 	// 연속기 스킬
-	CSkill* _ComboSkill;		
+	CSkill* _ComboSkill;	
+
+	// 기본 공격 활성화 여부
+	bool _OnPlayerDefaultAttack;
 
 	CPlayer();	
 	~CPlayer();		

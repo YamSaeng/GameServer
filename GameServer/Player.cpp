@@ -25,6 +25,8 @@ CPlayer::CPlayer()
 	_CurrentSpellSkill = nullptr;		
 
 	_RectCollision = new CRectCollision(this);
+
+	_OnPlayerDefaultAttack = false;
 }
 
 CPlayer::~CPlayer()
@@ -240,6 +242,63 @@ void CPlayer::Update()
 	case en_CreatureState::DEAD:
 		break;
 	}
+
+	if (_OnPlayerDefaultAttack)
+	{
+		if (_SelectTarget != nullptr)
+		{
+			float Distance = st_Vector2::Distance(_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position);
+			if (Distance < 2.0f)
+			{
+				if (_DefaultAttackTick < GetTickCount64())
+				{
+					CSkill* DefaultAttackSkill = _SkillBox.FindSkill(en_SkillType::SKILL_DEFAULT_ATTACK);
+					if (DefaultAttackSkill != nullptr)
+					{
+						_DefaultAttackTick = GetTickCount64() + _GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate;
+
+						st_AttackSkillInfo* DefaultAttackSkillInfo = (st_AttackSkillInfo*)DefaultAttackSkill->GetSkillInfo();
+
+						bool IsCritical = true;
+						// 데미지 판단
+						int32 Damage = CMath::CalculateMeleeDamage(
+							_SelectTarget->_GameObjectInfo.ObjectStatInfo.Defence,
+							_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage + _Equipment._WeaponMinDamage + DefaultAttackSkillInfo->SkillMinDamage,
+							_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage + _Equipment._WeaponMaxDamage + DefaultAttackSkillInfo->SkillMaxDamage,
+							_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint, &IsCritical);
+
+						st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, IsCritical, Damage,DefaultAttackSkill->GetSkillInfo()->SkillType);
+						_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
+
+						// 애니메이션 출력
+						vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetFieldOfViewPlayers(this, 1, false);
+
+						CMessage* AnimationPlayPacket = G_ObjectManager->GameServer->MakePacketResAnimationPlay(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo.MoveDir,
+							(*DefaultAttackSkill->GetSkillInfo()->SkillAnimations.find(_GameObjectInfo.ObjectPositionInfo.MoveDir)).second);
+						G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, AnimationPlayPacket);
+						AnimationPlayPacket->Free();
+
+						DefaultAttackSkill->CoolTimeStart();
+
+						// 쿨타임 표시 ( 퀵술롯 바에 등록되어 있는 같은 종류의 스킬을 모두 쿨타임 표시 시켜 준다 )
+						for (auto QuickSlotBarPosition : _QuickSlotManager.FindQuickSlotBar(DefaultAttackSkill->GetSkillInfo()->SkillType))
+						{
+							// 클라에게 쿨타임 표시
+							CMessage* ResCoolTimeStartPacket = G_ObjectManager->GameServer->MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
+								QuickSlotBarPosition.QuickSlotBarSlotIndex,
+								1.0f, DefaultAttackSkill);
+							G_ObjectManager->GameServer->SendPacket(_SessionId, ResCoolTimeStartPacket);
+							ResCoolTimeStartPacket->Free();
+						}									
+					}
+				}				
+			}
+			else
+			{
+				_OnPlayerDefaultAttack = false;
+			}
+		}
+	}
 }
 
 bool CPlayer::OnDamaged(CGameObject* Attacker, int32 Damage)
@@ -397,7 +456,7 @@ void CPlayer::UpdateMoving()
 
 void CPlayer::UpdateAttack()
 {
-
+	
 }
 
 void CPlayer::UpdateSpell()
@@ -450,8 +509,8 @@ void CPlayer::UpdateSpell()
 
 				wsprintf(SpellMessage, L"%s가 %s을 사용해 %s에게 %d의 데미지를 줬습니다.", this->_GameObjectInfo.ObjectName.c_str(), _CurrentSpellSkill->GetSkillInfo()->SkillName.c_str(), _SelectTarget->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
 
-				st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, FinalDamage);
-				_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
+				//st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, FinalDamage);
+				//_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
 
 				MagicSystemString = SpellMessage;
 			}
@@ -505,8 +564,8 @@ void CPlayer::UpdateSpell()
 				int32 ChoiceDamage = DamageChoiceRandom(Gen);
 				FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
 
-				st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, FinalDamage);
-				_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
+				//st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, FinalDamage);
+				//_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
 
 				if (AttackSkillInfo->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
 				{
@@ -575,8 +634,8 @@ void CPlayer::UpdateSpell()
 				int32 ChoiceDamage = DamageChoiceRandom(Gen);
 				FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
 
-				st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, FinalDamage);
-				_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);				
+				//st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, FinalDamage);
+				//_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);				
 
 				bool IsLightningStrike = _StatusAbnormal & STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE;
 				if (IsLightningStrike == false)
@@ -630,8 +689,8 @@ void CPlayer::UpdateSpell()
 
 				wsprintf(SpellMessage, L"%s가 %s을 사용해 %s에게 %d의 데미지를 줬습니다.", _GameObjectInfo.ObjectName.c_str(), _CurrentSpellSkill->GetSkillInfo()->SkillName.c_str(), _SelectTarget->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
 
-				st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, FinalDamage);
-				_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
+				//st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, FinalDamage);
+				//_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
 
 				MagicSystemString = SpellMessage;
 			}
@@ -650,8 +709,8 @@ void CPlayer::UpdateSpell()
 
 				wsprintf(SpellMessage, L"%s가 %s을 사용해 %s에게 %d의 데미지를 줬습니다.", _GameObjectInfo.ObjectName.c_str(), _CurrentSpellSkill->GetSkillInfo()->SkillName.c_str(), _SelectTarget->_GameObjectInfo.ObjectName.c_str(), FinalDamage);
 
-				st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, FinalDamage);
-				_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
+				//st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, FinalDamage);
+				//_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
 
 				MagicSystemString = SpellMessage;
 			}
