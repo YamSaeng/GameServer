@@ -15,6 +15,7 @@
               "SkillDurationTime": 0,
               "SkillDotTime": 0,
               "SkillDistance": 6,
+              "SkillMotionTime": 1000,
               "SkillTargetEffectTime": 0,
               "SkillDebufAttackSpeed": 0,
               "SkillDebufMovingSpeed": 0,
@@ -24,7 +25,7 @@
               "SkillLeftAnimation": "ATTACK_WEAPON_LEFT",
               "SkillRightAnimation": "ATTACK_WEAPON_LEFT",
               "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "%d 거리 안의 대상에게 %d ~ %d 만큼의 피해를 입힌다."              
+              "SkillExplanation": "%d 거리 안의 대상에게 %d ~ %d 만큼의 피해를 입힌다."
             }
           ],
           "ArcherTacTicSkillList": [

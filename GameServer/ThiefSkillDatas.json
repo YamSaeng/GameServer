@@ -15,6 +15,7 @@
               "SkillDurationTime": 0,
               "SkillDotTime": 0,
               "SkillDistance": 1,
+              "SkillMotionTime": 1000,
               "SkillTargetEffectTime": 0,
               "SkillDebufAttackSpeed": 0,
               "SkillDebufMovingSpeed": 0,
