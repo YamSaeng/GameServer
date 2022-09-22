@@ -1290,6 +1290,7 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				int64 SkillDurationTime = WarriorAttackSkillListFiled["SkillDurationTime"].GetInt64();
 				int64 SkillDotTime = WarriorAttackSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = WarriorAttackSkillListFiled["SkillDistance"].GetInt();
+				int32 SkillMotionTime = WarriorAttackSkillListFiled["SkillMotionTime"].GetInt();
 				float SkillTargetEffectTime = WarriorAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				int8 SkillDebufAttackSpeed = (int8)WarriorAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
 				int8 SkillDebufMovingSpeed = (int8)WarriorAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
@@ -1335,6 +1336,7 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				WarriorAttackSkill->SkillCastingTime = SkillCastingTime;
 				WarriorAttackSkill->SkillDurationTime = SkillDurationTime;
 				WarriorAttackSkill->SkillDotTime = SkillDotTime;
+				WarriorAttackSkill->SkillMotionTime = SkillMotionTime;
 				WarriorAttackSkill->SkillDistance = SkillDistance;
 				WarriorAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				WarriorAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
@@ -1374,6 +1376,7 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				int64 SkillDurationTime = WarriorHealSkillListFiled["SkillDurationTime"].GetInt64();
 				int64 SkillDotTime = WarriorHealSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = WarriorHealSkillListFiled["SkillDistance"].GetInt();
+				int32 SkillMotionTime = WarriorHealSkillListFiled["SkillMotionTime"].GetInt();
 				float SkillTargetEffectTime = WarriorHealSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				string SkillUpAnimation = WarriorHealSkillListFiled["SkillUpAnimation"].GetString();
 				string SkillDownAnimation = WarriorHealSkillListFiled["SkillDownAnimation"].GetString();
@@ -1392,6 +1395,7 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				WarriorHealSkill->SkillDurationTime = SkillDurationTime;
 				WarriorHealSkill->SkillDotTime = SkillDotTime;
 				WarriorHealSkill->SkillDistance = SkillDistance;
+				WarriorHealSkill->SkillMotionTime = SkillMotionTime;
 				WarriorHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 
 				if (NextComboSkill == "SKILL_TYPE_NONE")
@@ -1436,6 +1440,7 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				int64 SkillDurationTime = WarriorBufSkillListFiled["SkillDurationTime"].GetInt64();
 				int64 SkillDotTime = WarriorBufSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = WarriorBufSkillListFiled["SkillDistance"].GetInt();
+				int32 SkillMotionTime = WarriorBufSkillListFiled["SkillMotionTime"].GetInt();
 				float SkillTargetEffectTime = WarriorBufSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				string SkillUpAnimation = WarriorBufSkillListFiled["SkillUpAnimation"].GetString();
 				string SkillDownAnimation = WarriorBufSkillListFiled["SkillDownAnimation"].GetString();
@@ -1470,6 +1475,7 @@ void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
 				WarriorBufSkill->SkillDurationTime = SkillDurationTime;
 				WarriorBufSkill->SkillDotTime = SkillDotTime;
 				WarriorBufSkill->SkillDistance = SkillDistance;
+				WarriorBufSkill->SkillMotionTime = SkillMotionTime;
 				WarriorBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				WarriorBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
 				WarriorBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
@@ -1514,6 +1520,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				int64 SkillDurationTime = ShmanAttackSkillListFiled["SkillDurationTime"].GetInt64();
 				int64 SkillDotTime = ShmanAttackSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ShmanAttackSkillListFiled["SkillDistance"].GetInt();
+				int32 SkillMotionTime = ShmanAttackSkillListFiled["SkillMotionTime"].GetInt();
 				float SkillTargetEffectTime = ShmanAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				int8 SkillDebufAttackSpeed = (int8)ShmanAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
 				int8 SkillDebufMovingSpeed = (int8)ShmanAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
@@ -1560,6 +1567,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanAttackSkill->SkillDurationTime = SkillDurationTime;
 				ShamanAttackSkill->SkillDotTime = SkillDotTime;
 				ShamanAttackSkill->SkillDistance = SkillDistance;
+				ShamanAttackSkill->SkillMotionTime = SkillMotionTime;
 				ShamanAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				ShamanAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 				ShamanAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
@@ -1595,6 +1603,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				int64 SkillDurationTime = ShamanTacTicSkillListFiled["SkillDurationTime"].GetInt64();
 				int64 SkillDotTime = ShamanTacTicSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ShamanTacTicSkillListFiled["SkillDistance"].GetInt();
+				int32 SkillMotionTime = ShamanTacTicSkillListFiled["SkillMotionTime"].GetInt();
 				float SkillTargetEffectTime = ShamanTacTicSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				string SkillUpAnimation = ShamanTacTicSkillListFiled["SkillUpAnimation"].GetString();
 				string SkillDownAnimation = ShamanTacTicSkillListFiled["SkillDownAnimation"].GetString();
@@ -1616,6 +1625,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanTacTicSkill->SkillDurationTime = SkillDurationTime;
 				ShamanTacTicSkill->SkillDotTime = SkillDotTime;
 				ShamanTacTicSkill->SkillDistance = SkillDistance;
+				ShamanTacTicSkill->SkillMotionTime = SkillMotionTime;
 				ShamanTacTicSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
 				ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
@@ -1646,6 +1656,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				int64 SkillDurationTime = ShamanHealSkillListFiled["SkillDurationTime"].GetInt64();
 				int64 SkillDotTime = ShamanHealSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ShamanHealSkillListFiled["SkillDistance"].GetInt();
+				int32 SkillMotionTime = ShamanHealSkillListFiled["SkillMotionTime"].GetInt();
 				float SkillTargetEffectTime = ShamanHealSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				string SkillUpAnimation = ShamanHealSkillListFiled["SkillUpAnimation"].GetString();
 				string SkillDownAnimation = ShamanHealSkillListFiled["SkillDownAnimation"].GetString();
@@ -1669,6 +1680,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanHealSkill->SkillDurationTime = SkillDurationTime;
 				ShamanHealSkill->SkillDotTime = SkillDotTime;
 				ShamanHealSkill->SkillDistance = SkillDistance;
+				ShamanHealSkill->SkillMotionTime = SkillMotionTime;
 				ShamanHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				ShamanHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
 				ShamanHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
@@ -1713,6 +1725,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				int64 SkillDurationTime = ShmanBufSkillListFiled["SkillDurationTime"].GetInt64();
 				int64 SkillDotTime = ShmanBufSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ShmanBufSkillListFiled["SkillDistance"].GetInt();
+				int32 SkillMotionTime = ShmanBufSkillListFiled["SkillMotionTime"].GetInt();
 				float SkillTargetEffectTime = ShmanBufSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				string SkillUpAnimation = ShmanBufSkillListFiled["SkillUpAnimation"].GetString();
 				string SkillDownAnimation = ShmanBufSkillListFiled["SkillDownAnimation"].GetString();
@@ -1747,6 +1760,7 @@ void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
 				ShamanBufSkill->SkillDurationTime = SkillDurationTime;
 				ShamanBufSkill->SkillDotTime = SkillDotTime;
 				ShamanBufSkill->SkillDistance = SkillDistance;
+				ShamanBufSkill->SkillMotionTime = SkillMotionTime;
 				ShamanBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				ShamanBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
 				ShamanBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
@@ -1791,6 +1805,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				int64 SkillDurationTime = TaioistAttackSkillListFiled["SkillDurationTime"].GetInt64();
 				int64 SkillDotTime = TaioistAttackSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = TaioistAttackSkillListFiled["SkillDistance"].GetInt();
+				int32 SkillMotionTime = TaioistAttackSkillListFiled["SkillMotionTime"].GetInt();
 				float SkillTargetEffectTime = TaioistAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				int64 SkillDebufTime = TaioistAttackSkillListFiled["SkillDebufTime"].GetInt64();
 				int8 SkillDebufAttackSpeed = (int8)TaioistAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
@@ -1822,6 +1837,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				TaioistAttackSkill->SkillDurationTime = SkillDurationTime;
 				TaioistAttackSkill->SkillDotTime = SkillDotTime;
 				TaioistAttackSkill->SkillDistance = SkillDistance;
+				TaioistAttackSkill->SkillMotionTime = SkillMotionTime;
 				TaioistAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				TaioistAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 				TaioistAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
@@ -1855,6 +1871,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				int64 SkillDurationTime = TaioistHealSkillListFiled["SkillDurationTime"].GetInt64();
 				int64 SkillDotTime = TaioistHealSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = TaioistHealSkillListFiled["SkillDistance"].GetInt();
+				int32 SkillMotionTime = TaioistHealSkillListFiled["SkillMotionTime"].GetInt();
 				float SkillTargetEffectTime = TaioistHealSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				string SkillUpAnimation = TaioistHealSkillListFiled["SkillUpAnimation"].GetString();
 				string SkillDownAnimation = TaioistHealSkillListFiled["SkillDownAnimation"].GetString();
@@ -1882,6 +1899,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				TaioistHealSkill->SkillDurationTime = SkillDurationTime;
 				TaioistHealSkill->SkillDotTime = SkillDotTime;
 				TaioistHealSkill->SkillDistance = SkillDistance;
+				TaioistHealSkill->SkillMotionTime = SkillMotionTime;
 				TaioistHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				TaioistHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
 				TaioistHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
@@ -1925,6 +1943,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				int64 SkillDurationTime = TaioistBufSkillListFiled["SkillDurationTime"].GetInt64();
 				int64 SkillDotTime = TaioistBufSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = TaioistBufSkillListFiled["SkillDistance"].GetInt();
+				int32 SkillMotionTime = TaioistBufSkillListFiled["SkillMotionTime"].GetInt();
 				float SkillTargetEffectTime = TaioistBufSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				string SkillUpAnimation = TaioistBufSkillListFiled["SkillUpAnimation"].GetString();
 				string SkillDownAnimation = TaioistBufSkillListFiled["SkillDownAnimation"].GetString();
@@ -1959,6 +1978,7 @@ void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
 				TaioistBufSkill->SkillDurationTime = SkillDurationTime;
 				TaioistBufSkill->SkillDotTime = SkillDotTime;
 				TaioistBufSkill->SkillDistance = SkillDistance;
+				TaioistBufSkill->SkillMotionTime = SkillMotionTime;
 				TaioistBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				TaioistBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
 				TaioistBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
@@ -2003,6 +2023,7 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				int64 SkillDurationTime = ThiefAttackSkillListFiled["SkillDurationTime"].GetInt64();
 				int64 SkillDotTime = ThiefAttackSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ThiefAttackSkillListFiled["SkillDistance"].GetInt();
+				int32 SkillMotionTime = ThiefAttackSkillListFiled["SkillMotionTime"].GetInt();
 				float SkillTargetEffectTime = ThiefAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				int8 SkillDebufAttackSpeed = (int8)ThiefAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
 				int8 SkillDebufMovingSpeed = (int8)ThiefAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
@@ -2030,6 +2051,7 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				ThiefAttackSkill->SkillDurationTime = SkillDurationTime;
 				ThiefAttackSkill->SkillDotTime = SkillDotTime;
 				ThiefAttackSkill->SkillDistance = SkillDistance;
+				ThiefAttackSkill->SkillMotionTime = SkillMotionTime;
 				ThiefAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				ThiefAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 				ThiefAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
@@ -2063,6 +2085,7 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				int64 SkillDurationTime = ThiefHealSkillListFiled["SkillDurationTime"].GetInt64();
 				int64 SkillDotTime = ThiefHealSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ThiefHealSkillListFiled["SkillDistance"].GetInt();
+				int32 SkillMotionTime = ThiefHealSkillListFiled["SkillMotionTime"].GetInt();
 				float SkillTargetEffectTime = ThiefHealSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				string SkillUpAnimation = ThiefHealSkillListFiled["SkillUpAnimation"].GetString();
 				string SkillDownAnimation = ThiefHealSkillListFiled["SkillDownAnimation"].GetString();
@@ -2086,6 +2109,7 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				ThiefHealSkill->SkillDurationTime = SkillDurationTime;
 				ThiefHealSkill->SkillDotTime = SkillDotTime;
 				ThiefHealSkill->SkillDistance = SkillDistance;
+				ThiefHealSkill->SkillMotionTime = SkillMotionTime;
 				ThiefHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				ThiefHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
 				ThiefHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
@@ -2129,6 +2153,7 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				int64 SkillDurationTime = ThiefBufSkillListFiled["SkillDurationTime"].GetInt64();
 				int64 SkillDotTime = ThiefBufSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ThiefBufSkillListFiled["SkillDistance"].GetInt();
+				int32 SkillMotionTime = ThiefBufSkillListFiled["SkillMotionTime"].GetInt();
 				float SkillTargetEffectTime = ThiefBufSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				string SkillUpAnimation = ThiefBufSkillListFiled["SkillUpAnimation"].GetString();
 				string SkillDownAnimation = ThiefBufSkillListFiled["SkillDownAnimation"].GetString();
@@ -2163,6 +2188,7 @@ void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
 				ThiefBufSkill->SkillDurationTime = SkillDurationTime;
 				ThiefBufSkill->SkillDotTime = SkillDotTime;
 				ThiefBufSkill->SkillDistance = SkillDistance;
+				ThiefBufSkill->SkillMotionTime = SkillMotionTime;
 				ThiefBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				ThiefBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
 				ThiefBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
@@ -2207,6 +2233,7 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				int64 SkillDurationTime = ArcherAttackSkillListFiled["SkillDurationTime"].GetInt64();
 				int64 SkillDotTime = ArcherAttackSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ArcherAttackSkillListFiled["SkillDistance"].GetInt();
+				int32 SkillMotionTime = ArcherAttackSkillListFiled["SkillMotionTime"].GetInt();
 				float SkillTargetEffectTime = ArcherAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				int64 SkillDebufTime = ArcherAttackSkillListFiled["SkillDebufTime"].GetInt64();
 				int8 SkillDebufAttackSpeed = (int8)ArcherAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
@@ -2234,6 +2261,7 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				ArcherAttackSkill->SkillDurationTime = SkillDurationTime;
 				ArcherAttackSkill->SkillDotTime = SkillDotTime;
 				ArcherAttackSkill->SkillDistance = SkillDistance;
+				ArcherAttackSkill->SkillMotionTime = SkillMotionTime;
 				ArcherAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				ArcherAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 				ArcherAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
@@ -2267,6 +2295,7 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				int64 SkillDurationTime = ArcherHealSkillListFiled["SkillDurationTime"].GetInt64();
 				int64 SkillDotTime = ArcherHealSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ArcherHealSkillListFiled["SkillDistance"].GetInt();
+				int32 SkillMotionTime = ArcherHealSkillListFiled["SkillMotionTime"].GetInt();
 				float SkillTargetEffectTime = ArcherHealSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				string SkillUpAnimation = ArcherHealSkillListFiled["SkillUpAnimation"].GetString();
 				string SkillDownAnimation = ArcherHealSkillListFiled["SkillDownAnimation"].GetString();
@@ -2290,6 +2319,7 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				ArcherHealSkill->SkillDurationTime = SkillDurationTime;
 				ArcherHealSkill->SkillDotTime = SkillDotTime;
 				ArcherHealSkill->SkillDistance = SkillDistance;
+				ArcherHealSkill->SkillMotionTime = SkillMotionTime;
 				ArcherHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				ArcherHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
 				ArcherHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
@@ -2333,6 +2363,7 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				int64 SkillDurationTime = ArcherBufSkillListFiled["SkillDurationTime"].GetInt64();
 				int64 SkillDotTime = ArcherBufSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = ArcherBufSkillListFiled["SkillDistance"].GetInt();
+				int32 SkillMotionTime = ArcherBufSkillListFiled["SkillMotionTime"].GetInt();
 				float SkillTargetEffectTime = ArcherBufSkillListFiled["SkillTargetEffectTime"].GetFloat();
 				string SkillUpAnimation = ArcherBufSkillListFiled["SkillUpAnimation"].GetString();
 				string SkillDownAnimation = ArcherBufSkillListFiled["SkillDownAnimation"].GetString();
@@ -2367,6 +2398,7 @@ void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
 				ArcherBufSkill->SkillDurationTime = SkillDurationTime;
 				ArcherBufSkill->SkillDotTime = SkillDotTime;
 				ArcherBufSkill->SkillDistance = SkillDistance;
+				ArcherBufSkill->SkillMotionTime = SkillMotionTime;
 				ArcherBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				ArcherBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
 				ArcherBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
