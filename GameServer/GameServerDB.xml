@@ -45,8 +45,7 @@
   <!-- 인벤토리 아이템 테이블 -->
   <Table name="Inventory" desc="Inventory Table">
 	<Column name="OwnerAccountDBId" type="BigInt" notnull="true"/>
-	<Column name="OwnerPlayerDBId" type="BigInt" notnull="true"/>
-	<Column name="ItemIsQuickSlotUse" type="bit"/>
+	<Column name="OwnerPlayerDBId" type="BigInt" notnull="true"/>	
 	<Column name="ItemIsEquipped" type="bit"/>	
 	<Column name="ItemWidth" type="SmallInt"/>
 	<Column name="ItemHeight" type="SmallInt"/>
@@ -77,8 +76,7 @@
   <Table name="Skill" desc="Skill Table">
     <Column name="AccountDBId" type="BigInt" notnull ="true"/>
     <Column name="PlayerDBId" type="BigInt"  notnull ="true"/>
-	<Column name="IsSkillLearn" type="bit" notnull="true"/>
-    <Column name="IsQuickSlotUse" type="bit" notnull ="true"/>
+	<Column name="IsSkillLearn" type="bit" notnull="true"/>    
     <Column name="SkillLargeCategory" type="nvarchar(50)" notnull="true"/>
     <Column name="SkillMediumCategory" type="nvarchar(50)" noutnull="true"/>
     <Column name="SkillType" type="nvarchar(50)" notnull ="true"/>
@@ -346,7 +344,7 @@
     <Body>
       <![CDATA[
 	    SET NOCOUNT ON
-        SELECT ItemIsQuickSlotUse, ItemIsEquipped, ItemWidth, ItemHeight,
+        SELECT ItemIsEquipped, ItemWidth, ItemHeight,
 		ItemTileGridPositionX, ItemTileGridPositionY,
 		(CASE WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_ARCHITECTURE' THEN 1
 	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_WEAPON' THEN 2
@@ -426,7 +424,7 @@
       <![CDATA[
 	    SET NOCOUNT ON
         UPDATE [dbo].[Inventory]
-        SET ItemIsQuickSlotUse = 0, ItemIsEquipped = 0, ItemWidth = 0, ItemHeight = 0,
+        SET ItemIsEquipped = 0, ItemWidth = 0, ItemHeight = 0,
 		ItemLargeCategory = ' ', ItemMediumCategory = ' ', ItemSmallCategory = ' ',		
 		ItemCount = 0, ItemDurability = 0, ItemEnchantPoint = 0		 
         WHERE ItemTileGridPositionX = (@ItemTileGridPositionX) AND ItemTileGridPositionY = (@ItemTileGridPositionY) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
@@ -438,7 +436,6 @@
 	<Procedure name="spInventoryItemPlace">
 	<Param name="@OwnerAccountDBId" type="BigInt"/>
 	<Param name="@OwnerPlayerDBId" type="BigInt"/>
-	<Param name="@ItemIsQuickSlotUse" type="bit"/>
     <Param name="@ItemIsEquipped" type="bit"/>
     <Param name="@ItemWidth" type="SmallInt"/>
 	<Param name="@ItemHeight" type="SmallInt"/>
@@ -454,8 +451,7 @@
 	  <![CDATA[
 		SET NOCOUNT ON
 		UPDATE [dbo].[Inventory]
-		SET ItemIsQuickSlotUse = (@ItemIsQuickSlotUse),
-		ItemIsEquipped = (@ItemIsEquipped),
+		SET ItemIsEquipped = (@ItemIsEquipped),
 		ItemWidth = (@ItemWidth), ItemHeight = (@ItemHeight),
 		ItemLargeCategory = (CASE WHEN @ItemLargeCategory = 1 THEN 'ITEM_LARGE_CATEGORY_ARCHITECTURE'
 	                              WHEN @ItemLargeCategory = 2 THEN 'ITEM_LARGE_CATEGORY_WEAPON'
@@ -541,7 +537,7 @@
   	                 SET @height = 0
                      while @height < @InventoryHeight BEGIN
                              UPDATE [dbo].[Inventory]
-                             SET ItemIsQuickSlotUse = 0, ItemIsEquipped = 0, 
+                             SET ItemIsEquipped = 0, 
   					         ItemWidth = 0, ItemHeight = 0,
   						     ItemLargeCategory = ' ', ItemMediumCategory = ' ', ItemSmallCategory = ' ',
   						     ItemCount = 0, ItemDurability = 0, ItemEnchantPoint = 0
@@ -561,7 +557,7 @@
     <Body>
       <![CDATA[
 	    SET NOCOUNT ON
-        SELECT IsSkillLearn ,IsQuickSlotUse,
+        SELECT IsSkillLearn,
 		(CASE WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_PUBLIC' THEN 1
 	          WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_WARRIOR' THEN 2
 	          WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_SHMAN' THEN 3
@@ -633,7 +629,6 @@
     <Param name="@AccountDBId" type="BigInt"/>
     <Param name="@PlayerDBId" type="BigInt"/>
 	<Param name="@IsSkillLearn" type="Bit"/>
-    <Param name="@IsQuickSlotUse" type="Bit"/>
     <Param name="@SkillLargeCategory" type="TinyInt"/>
     <Param name="@SkillMediumCategory" type="TinyInt"/>
     <Param name="@SkillType" type="SmallInt"/>    
@@ -641,7 +636,7 @@
     <Body>
       <![CDATA[
 	    SET NOCOUNT ON
-        INSERT INTO [dbo].[Skill] VALUES ((@AccountDBId), (@PlayerDBId), (@IsSkillLearn), (@IsQuickSlotUse), 
+        INSERT INTO [dbo].[Skill] VALUES ((@AccountDBId), (@PlayerDBId), (@IsSkillLearn), 
 		(CASE WHEN @SkillLargeCategory = 1 THEN 'SKILL_LARGE_CATEGORY_PUBLIC'
 	          WHEN @SkillLargeCategory = 2 THEN 'SKILL_LARGE_CATEGORY_WARRIOR'
 	          WHEN @SkillLargeCategory = 3 THEN 'SKILL_LARGE_CATEGORY_SHMAN'
