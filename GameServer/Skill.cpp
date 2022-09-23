@@ -6,10 +6,7 @@ CSkill::CSkill()
 {
 	_Owner = nullptr;
 
-	_SkillInfo = nullptr;
-
-	_QuickSlotBarIndex = -1;
-	_QuickSlotBarSlotIndex = -1;
+	_SkillInfo = nullptr;	
 
 	_ComboSkillType = en_SkillType::SKILL_TYPE_NONE;
 
@@ -102,10 +99,9 @@ void CSkill::StatusAbnormalDurationTimeStart()
 	_SkillInfo->SkillRemainTime = _SkillDurationTick - GetTickCount64();
 }
 
-void CSkill::ComboSkillStart(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, en_SkillType ComboSkilltype)
+void CSkill::ComboSkillStart(vector<st_Vector2Int> ComboSkillQuickSlotIndex, en_SkillType ComboSkilltype)
 {
-	_QuickSlotBarIndex = QuickSlotBarIndex;
-	_QuickSlotBarSlotIndex = QuickSlotBarSlotIndex;
+	_ComboSkillQuickSlotBarIndex = ComboSkillQuickSlotIndex;
 
 	_ComboSkillTick = GetTickCount64() + 3000;
 
@@ -329,13 +325,14 @@ bool CSkill::Update()
 	case en_SkillCategory::COMBO_SKILL:
 		if (_ComboSkillTick < GetTickCount64())
 		{			
-			CMessage* ResNextComboSkillOff = G_ObjectManager->GameServer->MakePacketComboSkillOff(_QuickSlotBarIndex,
-				_QuickSlotBarSlotIndex,
+			CMessage* ResNextComboSkillOff = G_ObjectManager->GameServer->MakePacketComboSkillOff(_ComboSkillQuickSlotBarIndex,
 				*_PreviousSkillInfo,
 				_ComboSkillType);	
 
 			G_ObjectManager->GameServer->SendPacket(((CPlayer*)_Owner)->_SessionId, ResNextComboSkillOff);
-			ResNextComboSkillOff->Free();			
+			ResNextComboSkillOff->Free();
+
+			_ComboSkillQuickSlotBarIndex.clear();
 			return true;
 		}
 		break;		
