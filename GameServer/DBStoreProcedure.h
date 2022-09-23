@@ -149,7 +149,7 @@ namespace SP
 	class CDBGameServerInventoryPlace : public CDBBind<13, 0>
 	{
 	public:
-		CDBGameServerInventoryPlace(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spInventoryItemPlace(?,?,?,?,?,?,?,?,?,?,?,?,?,?)}") {}
+		CDBGameServerInventoryPlace(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spInventoryItemPlace(?,?,?,?,?,?,?,?,?,?,?,?,?)}") {}
 		void InOwnerAccountId(int64& OwnerAccountId) { BindParam(0, OwnerAccountId); }
 		void InOwnerPlayerId(int64& OwnerPlayerId) { BindParam(1, OwnerPlayerId); }		
 		void InIsEquipped(bool& IsEquipped) { BindParam(2, IsEquipped); }
@@ -239,7 +239,7 @@ namespace SP
 	class CDBGameServerSkillToSkillBox : public CDBBind<7, 0>
 	{
 	public:
-		CDBGameServerSkillToSkillBox(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spSkillToSkillBox(?,?,?,?,?,?,?,?)}") {}
+		CDBGameServerSkillToSkillBox(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spSkillToSkillBox(?,?,?,?,?,?,?)}") {}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
 		void InIsSkillLearn(bool& IsSkillLearn) { BindParam(2, IsSkillLearn); }		

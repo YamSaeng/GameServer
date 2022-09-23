@@ -329,7 +329,7 @@
 	    SET NOCOUNT ON
         INSERT INTO [dbo].[Inventory]
         VALUES ((@OwnerAccountDBId), (@OwnerPlayerDBId),
-		0, 0, 0, 0, 
+		0, 0, 0, 
 		(@ItemTileGridPositionX), (@ItemTileGridPositionY), 
 		' ',' ',' ', 
 		0, 0, 0)
@@ -617,7 +617,8 @@
 	          WHEN SkillType = 'SKILL_ARCHER_SNIFING' THEN 21
 	          WHEN SkillType = 'SKILL_SHOCK_RELEASE' THEN 22         
 	          ELSE ' '
-	          END)
+	          END),
+		SkillLevel
         FROM [dbo].[Skill]
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
