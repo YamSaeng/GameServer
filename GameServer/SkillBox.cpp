@@ -148,6 +148,47 @@ vector<CSkill*> CSkillBox::GetBufSkill()
 	return _BufSkills;
 }
 
+vector<CSkill*> CSkillBox::GetGlobalSkills(en_SkillType ExceptSkillType, en_SkillKinds SkillKind)
+{
+	vector<CSkill*> GlobalSkills;
+
+	// 기본 공격 스킬은 제외함
+
+	// 요청한 스킬과 같은 종류의 스킬을 가져옴
+	for (CSkill* Skill : _AttackSkills)
+	{
+		if (Skill->GetSkillInfo()->SkillType != en_SkillType::SKILL_DEFAULT_ATTACK 
+			&& Skill->GetSkillInfo()->SkillType != ExceptSkillType
+			&& Skill->GetSkillKind() == SkillKind
+			&& Skill->GetSkillInfo()->CanSkillUse == true)
+		{
+			GlobalSkills.push_back(Skill);
+		}
+	}
+
+	for (CSkill* Skill : _TacTicSkills)
+	{
+		if (Skill->GetSkillInfo()->SkillType != ExceptSkillType
+			&& Skill->GetSkillKind() == SkillKind
+			&& Skill->GetSkillInfo()->CanSkillUse == true)
+		{
+			GlobalSkills.push_back(Skill);
+		}
+	}
+
+	for (CSkill* Skill : _BufSkills)
+	{
+		if (Skill->GetSkillInfo()->SkillType != ExceptSkillType
+			&& Skill->GetSkillKind() == SkillKind
+			&& Skill->GetSkillInfo()->CanSkillUse == true)
+		{
+			GlobalSkills.push_back(Skill);
+		}
+	}
+
+	return GlobalSkills;
+}
+
 CSkill* CSkillBox::FindAttackSkill(en_SkillType FindAttackSkillType)
 {
 	for (int SlotIndex = 0; SlotIndex < _AttackSkills.size(); SlotIndex++)

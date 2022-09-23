@@ -27,6 +27,8 @@ public:
 	vector<CSkill*> GetAttackSkill();
 	vector<CSkill*> GetTacTicSkill();
 	vector<CSkill*> GetBufSkill();
+
+	vector<CSkill*> GetGlobalSkills(en_SkillType ExceptSkillType, en_SkillKinds SkillKind);
 private:
 	//------------------------------
 	// 스킬박스가 소유중인 스킬 목록
