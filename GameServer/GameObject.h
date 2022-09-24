@@ -5,6 +5,7 @@
 #include "CommonProtocol.h"
 #include "GameObjectInfo.h"
 #include "LockFreeQue.h"
+#include "Math.h"
 
 class CSkill;
 class CRectCollision;
@@ -133,15 +134,14 @@ protected:
 
 	int64 _ReSpawnTime;
 
-	//-------------------------
-	// 게임오브젝트가 속한 채널
-	//-------------------------
+	// 게임오브젝트가 속한 채널	
 	CChannel* _Channel;
 
-	//--------------------
-	// 현재 시전중인 마법스킬
-	//--------------------
-	CSkill* _CurrentSpellSkill;
+	// 시전 중인 근접 기술
+	CSkill* _MeleeSkill;
+	
+	// 시전 중인 마법스킬	
+	CSkill* _SpellSkill;
 
 	//-------------------------
 	// 재생력 Tick
