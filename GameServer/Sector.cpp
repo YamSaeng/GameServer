@@ -16,7 +16,7 @@ CSector::CSector(int32 SectorY, int32 SectorX)
 void CSector::Insert(CGameObject* InsertGameObject)
 {
 	AcquireSRWLockExclusive(&_SectorLock);
-
+		
 	switch (InsertGameObject->_GameObjectInfo.ObjectType)
 	{
 	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
@@ -32,7 +32,7 @@ void CSector::Insert(CGameObject* InsertGameObject)
 		_Monsters.insert((CMonster*)InsertGameObject);
 		break;
 	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
@@ -60,6 +60,7 @@ void CSector::Insert(CGameObject* InsertGameObject)
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 		_CraftingTables.insert((CCraftingTable*)InsertGameObject);
 		break;
+	case en_GameObjectType::OBJECT_ITEM_CROP_SEED:
 	case en_GameObjectType::OBJECT_CROP_POTATO:
 		_Crops.insert((CCrop*)InsertGameObject);
 		break;
@@ -89,7 +90,7 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 		_Monsters.erase((CMonster*)RemoveGameObject);
 		break;
 	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_WOOD_ARMOR:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
@@ -117,6 +118,7 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 		_CraftingTables.erase((CCraftingTable*)RemoveGameObject);
 		break;
+	case en_GameObjectType::OBJECT_ITEM_CROP_SEED:
 	case en_GameObjectType::OBJECT_CROP_POTATO:
 		_Crops.erase((CCrop*)RemoveGameObject);
 		break;

@@ -120,7 +120,6 @@ CGameServerMessage& CGameServerMessage::operator<<(st_SkillInfo& SkillInfo)
 CGameServerMessage& CGameServerMessage::operator<<(st_ItemInfo& ItemInfo)
 {
     *this << ItemInfo.ItemDBId;
-    *this << ItemInfo.ItemIsQuickSlotUse;   
     *this << ItemInfo.ItemIsEquipped;
     *this << ItemInfo.ItemWidth;
     *this << ItemInfo.ItemHeight;
