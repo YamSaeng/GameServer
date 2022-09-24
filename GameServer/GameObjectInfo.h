@@ -2272,8 +2272,7 @@ struct st_CraftingItemCategory
 struct st_ItemInfo
 {
 	int64 ItemDBId;							  // 아이템 DB에 저장되어 있는 ID		
-	int64 InventoryItemNumber;				  // 아이템이 인벤토리에 속할때 구분할 숫자
-	bool ItemIsQuickSlotUse;				  // 퀵슬롯에 등록되어 있는지 여부 
+	int64 InventoryItemNumber;				  // 아이템이 인벤토리에 속할때 구분할 숫자	
 	bool ItemIsEquipped;			          // 아이템을 착용할 수 있는지			
 	int16 ItemWidth;			     		  // 아이템 너비
 	int16 ItemHeight;						  // 아이템 높이	
@@ -2310,8 +2309,7 @@ struct st_ItemInfo
 	st_ItemInfo()
 	{
 		ItemDBId = 0;
-		InventoryItemNumber = 0;
-		ItemIsQuickSlotUse = false;		
+		InventoryItemNumber = 0;		
 		ItemWidth = 0;
 		ItemHeight = 0;		
 		ItemTileGridPositionX = 0;
@@ -2384,7 +2382,6 @@ struct st_SkillInfo
 {
 	bool IsSkillLearn;       // 스킬을 배웠는지에 대한 여부
 	bool CanSkillUse;		 // 스킬을 사용 할 수 있는지 여부	
-	bool IsQuickSlotUse;	 // 퀵슬롯에 등록되어 있는지 여부	
 	en_SkillLargeCategory SkillLargeCategory; // 스킬 대분류
 	en_SkillMediumCategory SkillMediumCategory; // 스킬 중분류
 	en_SkillType SkillType;	 // 스킬 종류
@@ -2406,7 +2403,6 @@ struct st_SkillInfo
 	{
 		IsSkillLearn = false;
 		CanSkillUse = true;
-		IsQuickSlotUse = false;
 		SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_NONE;
 		SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
 		SkillType = en_SkillType::SKILL_TYPE_NONE;
