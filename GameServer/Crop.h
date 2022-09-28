@@ -7,9 +7,9 @@ public:
 	CCrop();
 	~CCrop();
 
-	virtual void Update() override;
+	void Init(en_SmallItemCategory CropItemCategory);
 
-	virtual void CropStart(int8 CropStep);
+	virtual void Update() override;
 	
 	virtual bool OnDamaged(CGameObject* Attacker, int32 Damage) override;
 
@@ -17,6 +17,22 @@ public:
 	virtual void UpdateReadyDead() override;
 	virtual void UpdateDead() override;
 private:
-	int8 _CropStep;
+	enum en_CropState
+	{
+		CROP_IDLE,
+		CROP_GROWING,
+		CROP_GROW_END
+	};
+
+	st_ItemInfo _CropItemInfo;
+
+	float _CropRatio;	
+
+	int64 _CropIdleTick;
+	int16 _CropTime;
+
+	en_CropState _CropState;
+
+	vector<wstring> _CropStepString;
 };
 

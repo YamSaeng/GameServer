@@ -1,15 +1,36 @@
 #include "pch.h"
 #include "Crop.h"
 #include "ObjectManager.h"
+#include "DataManager.h"
 
 CCrop::CCrop()
 {
 	_FieldOfViewDistance = 10;
+
+	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;	
+
+	_CropState = en_CropState::CROP_IDLE;
 }
 
 CCrop::~CCrop()
 {
 
+}
+
+void CCrop::Init(en_SmallItemCategory CropItemCategory)
+{
+	_CropItemInfo = *G_Datamanager->FindItemData(CropItemCategory);
+
+	_CropIdleTick = GetTickCount64() + 1000;	
+
+	_GameObjectInfo.ObjectCropMaxStep = (int8)_CropItemInfo.CropStepString.size();
+	_GameObjectInfo.ObjectCropStep = 0;	
+
+	_CropRatio = 0;
+
+	_CropTime = 0;	
+
+	_CropState = en_CropState::CROP_GROWING;
 }
 
 void CCrop::Update()
@@ -32,10 +53,6 @@ void CCrop::Update()
 	}
 }
 
-void CCrop::CropStart(int8 CropStep)
-{
-}
-
 bool CCrop::OnDamaged(CGameObject* Attacker, int32 Damage)
 {
 	return CGameObject::OnDamaged(Attacker, Damage);	
@@ -43,6 +60,39 @@ bool CCrop::OnDamaged(CGameObject* Attacker, int32 Damage)
 
 void CCrop::UpdateIdle()
 {
+	if (_CropIdleTick < GetTickCount64() && _GameObjectInfo.ObjectCropStep < _GameObjectInfo.ObjectCropMaxStep)
+	{
+		_CropIdleTick = GetTickCount64() + 1000;
+
+		_CropTime += 1;
+		
+		float Ratio = 1 / (float)_CropItemInfo.ItemGrowTime;
+
+		_CropRatio += Ratio;
+
+		if (_CropRatio > (1 / (float)_GameObjectInfo.ObjectCropMaxStep))
+		{			
+			_GameObjectInfo.ObjectCropStep += 1;			
+			
+			_CropRatio = 0;
+		}				
+
+		switch (_CropState)
+		{
+		case en_CropState::CROP_IDLE:
+			break;
+		case en_CropState::CROP_GROWING:			
+			if (_CropTime >= _CropItemInfo.ItemGrowTime)
+			{
+				_CropState = en_CropState::CROP_GROW_END;
+			}
+			break;
+		case en_CropState::CROP_GROW_END:
+			break;
+		default:
+			break;
+		}
+	}
 }
 
 void CCrop::UpdateReadyDead()
@@ -65,5 +115,8 @@ void CCrop::UpdateReadyDead()
 
 void CCrop::UpdateDead()
 {
-
+	if (_DeadTick < GetTickCount64())
+	{
+		
+	}
 }
