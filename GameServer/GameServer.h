@@ -214,6 +214,10 @@ private:
 	//------------------------------------------------------------------
 	void PacketProcReqTileBuy(int64 SessionID, CMessage* Message);
 	//------------------------------------------------------------------
+	// 씨앗 심기 요청 처리
+	//------------------------------------------------------------------
+	void PacketProcReqSeedFarming(int64 SessionID, CMessage* Message);
+	//------------------------------------------------------------------
 	// 아이템 줍기 요청 처리
 	//------------------------------------------------------------------
 	void PacketProcReqItemLooting(int64 SessionId, CMessage* Message);
@@ -284,14 +288,14 @@ private:
 	// 플레이어 채널 퇴장 잡 생성 함수
 	//------------------------------------------------------------------------------
 	st_GameObjectJob* MakeGameObjectJobLeaveChannelPlayer(CGameObject* LeavePlayerObject, int32* PlayerIndexes);
-	//--------------------------------------------------------------------------------------------------------------------------
-	// 연속기 공격 켜기 잡 생성 함수
-	//--------------------------------------------------------------------------------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobComboSkillCreate(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex,  CSkill* ComboSkill);
-	//------------------------------------------------
-	// 연속기 공격 끄기 잡 생성 함수
-	//------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobComboSkillOff();	
+	//-------------------------------------------------
+	// 일반 공격 켜기 잡 생성 함수
+	//-------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobDefaultAttack();		
+	//-------------------------------------------------
+	// 근접 기술 처리 잡 생성 함수
+	//-------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobMeleeAttack(int16 MeleeSkillType);
 	//------------------------------------------------
 	// 마법 공격 시작 잡 생성 함수
 	//------------------------------------------------
@@ -442,10 +446,18 @@ public:
 	// 플레이어 제외 오브젝트 채널 퇴장 잡 생성 함수
 	//-------------------------------------------------------------------------------
 	st_GameObjectJob* MakeGameObjectJobLeaveChannel(CGameObject* LeaveChannelObject);
+	//--------------------------------------------------------------------------------------------------------------------------
+	// 연속기 공격 켜기 잡 생성 함수
+	//--------------------------------------------------------------------------------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobComboSkillCreate(CSkill* ComboSkill);
+	//------------------------------------------------
+	// 연속기 공격 끄기 잡 생성 함수
+	//------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobComboSkillOff();
 	//-------------------------------------------------------------------------------
 	// 데미지 처리 잡 생성 함수
 	//-------------------------------------------------------------------------------
-	st_GameObjectJob* MakeGameObjectDamage(CGameObject* Attacker, int32 Damage);
+	st_GameObjectJob* MakeGameObjectDamage(CGameObject* Attacker, bool IsCritical, int32 Damage, en_SkillType SkillType);
 	//-------------------------------------------------------------------------------
 	// 체력 회복 잡 생성 함수
 	//-------------------------------------------------------------------------------
@@ -462,7 +474,11 @@ public:
 	// 장비 아이템 착용해제 잡 생성 함수
 	//-------------------------------------------------------------------------------
 	st_GameObjectJob* MakeGameObjectJobOffEquipment(int8& EquipmentParts);
-				
+	//-------------------------------------------------------------------------------
+	// 씨앗 심기 잡 생성 함수
+	//-------------------------------------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobSeedFarming(CGameObject* ReqSeedFarmingObject, int16 SeedItemCategory);
+
 	//------------------------------------------------------
 	// 제작대 선택 잡 생성 함수
 	//------------------------------------------------------
@@ -597,11 +613,11 @@ public:
 	//--------------------------------------------------------------------------------------------------------
 	// 게임서버 연속기 스킬 켜기 패킷 조합
 	//--------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketComboSkillOn(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, st_SkillInfo ComboSkillInfo);
+	CGameServerMessage* MakePacketComboSkillOn(vector<st_Vector2Int> ComboSkillQuickSlotPositions, st_SkillInfo ComboSkillInfo);
 	//--------------------------------------------------------------------------------------------------------
 	// 게임서버 연속기 스킬 끄기 패킷 조합
 	//--------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketComboSkillOff(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, st_SkillInfo ComboSkillInfo, en_SkillType OffComboSkillType);
+	CGameServerMessage* MakePacketComboSkillOff(vector<st_Vector2Int> ComboSkillQuickSlotPositions, st_SkillInfo ComboSkillInfo, en_SkillType OffComboSkillType);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 경험치 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -674,6 +690,10 @@ public:
 	// 게임서버 장비 해제 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketOffEquipment(int64 PlayerID, en_EquipmentParts OffEquipmentParts);
+	//-----------------------------------------------------------------------------------------
+	// 게임서버 씨앗 심기 응답 패킷 조합
+	//-----------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketSeedFarming(st_ItemInfo SeedItem);
 	//---------------------------------------------------
 	// 로그인 서버 로그아웃 요청 패킷 조합
 	//---------------------------------------------------
