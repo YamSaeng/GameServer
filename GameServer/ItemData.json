@@ -442,7 +442,9 @@
           "ItemWidth": 1,
           "ItemHeight": 1,
           "ItemMaxDurability": 100,
-          "ItemMaxCount": 99          
+          "ItemMaxCount": 99,
+          "ItemMaxStep": 3,
+          "ItemGrowTime": 60
         }
       ]
     }
@@ -459,9 +461,7 @@
           "ItemWidth": 1,
           "ItemHeight": 1,
           "ItemMaxDurability": 10,
-          "ItemMaxCount": 99,
-          "ItemMaxStep": 3,
-          "ItemGrowTime": 30000
+          "ItemMaxCount": 99          
         }
       ]
     }

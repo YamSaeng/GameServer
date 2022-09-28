@@ -555,7 +555,9 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int32 ItemWidth = CropSeedListFiled["ItemWidth"].GetInt();
 			int32 ItemHeight = CropSeedListFiled["ItemHeight"].GetInt();
 			int32 ItemMaxDurability = CropSeedListFiled["ItemMaxDurability"].GetInt();			
-			int32 ItemMaxCount = CropSeedListFiled["ItemMaxCount"].GetInt();			
+			int32 ItemMaxCount = CropSeedListFiled["ItemMaxCount"].GetInt();	
+			int8 ItemMaxStep = (int8)CropSeedListFiled["ItemMaxStep"].GetInt();
+			int32 ItemGrowTime = CropSeedListFiled["ItemGrowTime"].GetInt();
 
 			st_ItemInfo* CropSeedItemInfo = new st_ItemInfo();
 			CropSeedItemInfo->ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_CROP;
@@ -576,7 +578,9 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			CropSeedItemInfo->ItemWidth = ItemWidth;
 			CropSeedItemInfo->ItemHeight = ItemHeight;		
 			CropSeedItemInfo->ItemMaxDurability = ItemMaxDurability;
-			CropSeedItemInfo->ItemMaxCount = ItemMaxCount;			
+			CropSeedItemInfo->ItemMaxCount = ItemMaxCount;		
+			CropSeedItemInfo->ItemMaxstep = ItemMaxStep;
+			CropSeedItemInfo->ItemGrowTime = ItemGrowTime;
 
 			_Items.insert(pair<int16, st_ItemInfo*>((int16)CropSeedItemInfo->ItemSmallCategory, CropSeedItemInfo));
 		}
@@ -595,8 +599,6 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int32 ItemHeight = CropFruitListFiled["ItemHeight"].GetInt();
 			int32 ItemMaxDurability = CropFruitListFiled["ItemMaxDurability"].GetInt();
 			int32 ItemMaxCount = CropFruitListFiled["ItemMaxCount"].GetInt();
-			int8 ItemMaxStep = (int8)CropFruitListFiled["ItemMaxStep"].GetInt();
-			int32 ItemGrowTime = CropFruitListFiled["ItemGrowTime"].GetInt();
 
 			st_ItemInfo* CropFruitItemInfo = new st_ItemInfo();
 			CropFruitItemInfo->ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_CROP;
@@ -617,9 +619,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			CropFruitItemInfo->ItemWidth = ItemWidth;
 			CropFruitItemInfo->ItemHeight = ItemHeight;
 			CropFruitItemInfo->ItemMaxDurability = ItemMaxDurability;
-			CropFruitItemInfo->ItemMaxCount = ItemMaxCount;			
-			CropFruitItemInfo->ItemMaxstep = ItemMaxStep;
-			CropFruitItemInfo->ItemGrowTime = ItemGrowTime;
+			CropFruitItemInfo->ItemMaxCount = ItemMaxCount;						
 
 			_Items.insert(pair<int16, st_ItemInfo*>((int16)CropFruitItemInfo->ItemSmallCategory, CropFruitItemInfo));
 		}
