@@ -14,7 +14,7 @@ class DBSynchronizer
 {
 	enum
 	{
-		PROCEDURE_MAX_LEN = 10000
+		PROCEDURE_MAX_LEN = 30000
 	};
 
 	// DB 업데이트 순서
