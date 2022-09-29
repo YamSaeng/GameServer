@@ -485,6 +485,7 @@ enum class en_GameObjectJobType : int16
 	GAMEOBJECT_JOB_TYPE_CHANNEL_CRAFTING_TABLE_NON_SELECT,
 	GAMEOBJECT_JOB_TYPE_CHANNEL_RIGHT_MOUSE_OBJECT_INFO,
 	GAMEOBJECT_JOB_TYPE_CHANNEL_SEED_FARMING,
+	GAMEOBJECT_JOB_TYPE_CHANNEL_PLANT_GROWTH_CHECK,
 
 	GAMEOBJECT_JOB_TYPE_FULL_RECOVERY,
 
@@ -2305,6 +2306,7 @@ struct st_ItemInfo
 	int32 ItemGrowTime;						  // 작물 성장 시간
 	int8 ItemEnchantPoint;					  // 아이템 강화 수치
 	vector<st_CraftingMaterialItemInfo> Materials; // 제작 아이템일 경우 조합에 필요한 재료 아이템 목록	
+	vector<wstring> CropStepString;			  // 작물 성장 단계 
 
 	st_ItemInfo()
 	{
