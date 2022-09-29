@@ -2305,8 +2305,7 @@ struct st_ItemInfo
 	int8 ItemMaxstep;						  // 아이템 단계 최대값
 	int32 ItemGrowTime;						  // 작물 성장 시간
 	int8 ItemEnchantPoint;					  // 아이템 강화 수치
-	vector<st_CraftingMaterialItemInfo> Materials; // 제작 아이템일 경우 조합에 필요한 재료 아이템 목록	
-	vector<wstring> CropStepString;			  // 작물 성장 단계 
+	vector<st_CraftingMaterialItemInfo> Materials; // 제작 아이템일 경우 조합에 필요한 재료 아이템 목록		
 
 	st_ItemInfo()
 	{
