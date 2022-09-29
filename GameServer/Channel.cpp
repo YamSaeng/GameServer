@@ -436,41 +436,31 @@ void CChannel::Update()
 										}
 									}
 
-									st_GameObjectJob* CraftingTableSelectJob = G_ObjectManager->GameServer->MakeGameObjectJobCraftingTableSelect(FindObject, Player);
-									FindObject->_GameObjectJobQue.Enqueue(CraftingTableSelectJob);
+									CraftingTable->_SelectedCraftingTable = true;
 
-									CGameObject* SelectCraftingTableObject;
-									*GameObjectJob->GameObjectJobMessage >> &SelectCraftingTableObject;
-									CGameObject* OwnerObject;
-									*GameObjectJob->GameObjectJobMessage >> &OwnerObject;
-
-									CCraftingTable* CraftingTableObject = (CCraftingTable*)SelectCraftingTableObject;
-
-									CraftingTableObject->_SelectedCraftingTable = true;
-
-									CraftingTableObject->_SelectedObject = OwnerObject;
+									CraftingTable->_SelectedObject = Player;
 
 									// 제작대가 제작중이라면 제작중인 아이템의 정보를 클라에게 보냄
-									if (CraftingTableObject->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::CRAFTING)
+									if (CraftingTable->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::CRAFTING)
 									{
-										for (CItem* CraftingTableItem : CraftingTableObject->GetCraftingTableRecipe().CraftingTableCompleteItems)
+										for (CItem* CraftingTableItem : CraftingTable->GetCraftingTableRecipe().CraftingTableCompleteItems)
 										{
 											CMessage* ResCraftingTableSelectPacket = G_ObjectManager->GameServer->MakePacketResCraftingTableCraftRemainTime(
-												CraftingTableObject->_GameObjectInfo.ObjectId,
+												CraftingTable->_GameObjectInfo.ObjectId,
 												CraftingTableItem->_ItemInfo);
-											G_ObjectManager->GameServer->SendPacket(((CPlayer*)CraftingTableObject->_SelectedObject)->_SessionId, ResCraftingTableSelectPacket);
+											G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCraftingTableSelectPacket);
 											ResCraftingTableSelectPacket->Free();
 										}
 									}
 
 									// 완성된 제작품이 있을 경우 목록을 보내준다.
-									if (CraftingTableObject->GetCompleteItems().size() > 0)
+									if (CraftingTable->GetCompleteItems().size() > 0)
 									{
 										CMessage* ResCrafintgTableCompleteItemListPacket = G_ObjectManager->GameServer->MakePacketResCraftingTableCompleteItemList(
-											CraftingTableObject->_GameObjectInfo.ObjectId,
-											CraftingTableObject->_GameObjectInfo.ObjectType,
-											CraftingTableObject->GetCompleteItems());
-										G_ObjectManager->GameServer->SendPacket(((CPlayer*)CraftingTableObject->_SelectedObject)->_SessionId, ResCrafintgTableCompleteItemListPacket);
+											CraftingTable->_GameObjectInfo.ObjectId,
+											CraftingTable->_GameObjectInfo.ObjectType,
+											CraftingTable->GetCompleteItems());
+										G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCrafintgTableCompleteItemListPacket);
 										ResCrafintgTableCompleteItemListPacket->Free();
 									}
 
@@ -490,6 +480,77 @@ void CChannel::Update()
 						default:
 							break;
 						}
+					}
+				}
+				break;
+			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_SEED_FARMING:
+				{
+					// 심고자 하는 씨앗 위치에 다른 오브젝트가 심어져 있는지 확인
+					// 없을 경우 씨앗 생성
+					CGameObject* ReqPlayer;
+					*GameObjectJob->GameObjectJobMessage >> &ReqPlayer;
+					
+					CPlayer* Player = (CPlayer*)ReqPlayer;
+
+					// 요청 씨앗 아이템
+					int16 SeedItemSmallCategory;
+					*GameObjectJob->GameObjectJobMessage >> SeedItemSmallCategory;
+
+					// 가방에 요청한 씨앗 아이템이 있는지 먼저 확인
+					CItem* SeedItem = Player->_InventoryManager.FindInventoryItem(0, (en_SmallItemCategory)SeedItemSmallCategory);
+					if (SeedItem != nullptr)
+					{
+						// 심고자 하는 자리에 다른 작물이 잇는지 확인
+						CMap* SeedFarmingMap = _Map;
+						CGameObject* Plant = SeedFarmingMap->FindPlant(ReqPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
+						if (Plant == nullptr)
+						{
+							CCrop* SeedObject = nullptr;
+
+							switch ((en_SmallItemCategory)SeedItemSmallCategory)
+							{
+							case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_SEED_POTATO:
+								SeedObject = (CPotato*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_CROP_POTATO);
+								break;							
+							}
+						
+							SeedObject->Init((en_SmallItemCategory)SeedItemSmallCategory);
+
+							EnterChannel(SeedObject, &ReqPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
+						}
+						else
+						{
+							CMessage* SeedFarmingExistError = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSOANL_MESSAGE_SEED_FARMING_EXIST, Plant->_GameObjectInfo.ObjectName.c_str());
+							G_ObjectManager->GameServer->SendPacket(Player->_SessionId, SeedFarmingExistError);
+							SeedFarmingExistError->Free();
+						}
+					}		
+					else
+					{
+						G_ObjectManager->GameServer->Disconnect(Player->_SessionId);
+						CRASH("가방에 요청한 씨앗이 없는데 심기 요청");
+					}
+				}
+				break;
+			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_PLANT_GROWTH_CHECK:
+				{
+					CGameObject* ReqPlayer;
+					*GameObjectJob->GameObjectJobMessage >> &ReqPlayer;
+
+					int64 PlantObjectID;
+					*GameObjectJob->GameObjectJobMessage >> PlantObjectID;
+
+					int16 PlantObjectType;
+					*GameObjectJob->GameObjectJobMessage >> PlantObjectType;
+
+					CPlayer* Player = (CPlayer*)ReqPlayer;
+
+					CGameObject* Plant = FindChannelObject(PlantObjectID, (en_GameObjectType)PlantObjectType);
+					if (Plant != nullptr)
+					{
+						CMessage* ResPlantGrowthCheckPacket = G_ObjectManager->GameServer->MakePacketPlantGrowthStep(Plant->_GameObjectInfo.ObjectId, Plant->_GameObjectInfo.ObjectCropStep);
+						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResPlantGrowthCheckPacket);
+						ResPlantGrowthCheckPacket->Free();
 					}
 				}
 				break;
@@ -1343,9 +1404,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			CCrop* Crop = (CCrop*)EnterChannelGameObject;
 			Crop->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 			Crop->_GameObjectInfo.ObjectPositionInfo.Position._X = Crop->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-			Crop->_GameObjectInfo.ObjectPositionInfo.Position._Y = Crop->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
-
-			Crop->Start();
+			Crop->_GameObjectInfo.ObjectPositionInfo.Position._Y = Crop->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;			
 
 			_ChannelCropArrayIndexs.Pop(&Crop->_ChannelArrayIndex);
 			_ChannelCropArray[Crop->_ChannelArrayIndex] = Crop;			
