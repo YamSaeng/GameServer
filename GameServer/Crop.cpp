@@ -23,8 +23,8 @@ void CCrop::Init(en_SmallItemCategory CropItemCategory)
 
 	_CropIdleTick = GetTickCount64() + 1000;	
 
-	_GameObjectInfo.ObjectCropMaxStep = (int8)_CropItemInfo.CropStepString.size();
-	_GameObjectInfo.ObjectCropStep = 0;	
+	_GameObjectInfo.ObjectCropMaxStep = _CropItemInfo.ItemMaxstep;
+	_GameObjectInfo.ObjectCropStep = 1;	
 
 	_CropRatio = 0;
 
