@@ -124,6 +124,9 @@
     <Filter Include="ContentServer\Content\GameObject\Installation">
       <UniqueIdentifier>{d6aced22-a668-4fd0-bc76-7335346cda7d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ContentServer\Content\Math">
+      <UniqueIdentifier>{4d1fab75-bf5d-4139-a644-53cfeda37f65}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Type.h">
@@ -307,6 +310,9 @@
     </ClInclude>
     <ClInclude Include="StorageBox.h">
       <Filter>ContentServer\Content\GameObject\Installation</Filter>
+    </ClInclude>
+    <ClInclude Include="Math.h">
+      <Filter>ContentServer\Content\Math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

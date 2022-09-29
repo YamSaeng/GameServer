@@ -1231,6 +1231,9 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_SEED_FARMING:
 		PacketProcReqSeedFarming(SessionID, Message);
 		break;
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_PLANT_GROWTH_CHECK:
+		PacketProcReqPlantGrowthCheck(SessionID, Message);
+		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_CS_GAME_REQ_HEARTBEAT:
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_PONG:
@@ -3832,6 +3835,72 @@ void CGameServer::PacketProcReqSeedFarming(int64 SessionID, CMessage* Message)
 
 			st_GameObjectJob* ChannelReqSeedFarming = MakeGameObjectJobSeedFarming(MyPlayer, ReqSeedItemSmallCategory);
 			MyPlayer->GetChannel()->_ChannelJobQue.Enqueue(ChannelReqSeedFarming);
+		} while (0);
+	}
+
+	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcReqPlantGrowthCheck(int64 SessionID, CMessage* Message)
+{	
+	st_Session* Session = FindSession(SessionID);
+
+	if (Session)
+	{
+		do
+		{
+			int64 AccountId;
+			int64 PlayerDBId;
+
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountId;
+
+			// AccountId가 맞는지 확인DD
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> PlayerDBId;
+
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			// 조종하고 있는 플레이어가 있는지 확인 
+			if (MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			int64 PlantObjectID;
+			*Message >> PlantObjectID;
+
+			int16 PlantObjectType;
+			*Message >> PlantObjectType;
+
+			CChannel* Channel = MyPlayer->GetChannel();
+			if (Channel != nullptr)
+			{
+				st_GameObjectJob* PlantGrowthCheckJob = MakeGameObjectJobPlantGrowthCheck(MyPlayer, PlantObjectID, PlantObjectType);
+				Channel->_ChannelJobQue.Enqueue(PlantGrowthCheckJob);
+			}
+			
 		} while (0);
 	}
 
@@ -6517,6 +6586,23 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobSeedFarming(CGameObject* ReqSeed
 	return SeedFarmingJob;
 }
 
+st_GameObjectJob* CGameServer::MakeGameObjectJobPlantGrowthCheck(CGameObject* ReqPlantGrowthCheckObject, int64 PlantObjectID, int16 PlantObjectType)
+{
+	st_GameObjectJob* PlantGrowthCheckJob = G_ObjectManager->GameObjectJobCreate();
+	PlantGrowthCheckJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_PLANT_GROWTH_CHECK;
+
+	CGameServerMessage* PlantGrowthCheckMessage = CGameServerMessage::GameServerMessageAlloc();
+	PlantGrowthCheckMessage->Clear();
+
+	*PlantGrowthCheckMessage << &ReqPlantGrowthCheckObject;
+	*PlantGrowthCheckMessage << PlantObjectID;
+	*PlantGrowthCheckMessage << PlantObjectType;
+
+	PlantGrowthCheckJob->GameObjectJobMessage = PlantGrowthCheckMessage;
+
+	return PlantGrowthCheckJob;
+}
+
 st_GameObjectJob* CGameServer::MakeGameObjectJobCraftingTableSelect(CGameObject* CraftingTableObject, CGameObject* OwnerObject)
 {
 	st_GameObjectJob* CraftingTableSelectJob = G_ObjectManager->GameObjectJobCreate();
@@ -7394,6 +7480,9 @@ CGameServerMessage* CGameServer::MakePacketCommonError(en_PersonalMessageType Pe
 	case en_PersonalMessageType::PERSONAL_FAULT_ITEM_USE:
 		wsprintf(ErrorMessage, L"[%s]를 사용 할 수 없습니다.", Name);
 		break;
+	case en_PersonalMessageType::PERSOANL_MESSAGE_SEED_FARMING_EXIST:
+		wsprintf(ErrorMessage, L"[%s]가 심어져 있어서 심을 수 없습니다.", Name);
+		break;
 	}
 
 	wstring ErrorMessageString = ErrorMessage;
@@ -7670,6 +7759,23 @@ CGameServerMessage* CGameServer::MakePacketSeedFarming(st_ItemInfo SeedItem)
 	*ResSeedFarmingMessage << SeedItem;
 
 	return ResSeedFarmingMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketPlantGrowthStep(int64 PlantObjectID, int8 PlantGrowthStep)
+{
+	CGameServerMessage* ResPlantGrowthStepMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResPlantGrowthStepMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResPlantGrowthStepMessage->Clear();
+
+	*ResPlantGrowthStepMessage << (int16)en_PACKET_S2C_PLANT_GROWTH_CHECK;
+	*ResPlantGrowthStepMessage << PlantObjectID;
+	*ResPlantGrowthStepMessage << PlantGrowthStep;
+
+	return ResPlantGrowthStepMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketLoginServerLogOut(int64 AccountID)

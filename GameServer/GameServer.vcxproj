@@ -189,6 +189,7 @@
     <ClInclude Include="Map.h" />
     <ClInclude Include="MapManager.h" />
     <ClInclude Include="MapTile.h" />
+    <ClInclude Include="Math.h" />
     <ClInclude Include="MemoryPoolTLS.h" />
     <ClInclude Include="Message.h" />
     <ClInclude Include="Monster.h" />
