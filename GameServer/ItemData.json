@@ -444,7 +444,20 @@
           "ItemMaxDurability": 100,
           "ItemMaxCount": 99,
           "ItemMaxStep": 7,
-          "ItemGrowTime": 60          
+          "ItemGrowTime": 60
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_CROP_SEED",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_CROP_SEED_POTATO",
+          "ItemObjectType": "OBJECT_ITEM_CROP_SEED_POTATO",
+          "ItemExplain": "¿Á¼ö¼öÀÇ ¾¾¾Ñ",
+          "ItemName": "¿Á¼ö¼ö ¾¾¾Ñ",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
+          "ItemMaxDurability": 100,
+          "ItemMaxCount": 99,
+          "ItemMaxStep": 8,
+          "ItemGrowTime": 120
         }
       ]
     }
@@ -461,7 +474,18 @@
           "ItemWidth": 1,
           "ItemHeight": 1,
           "ItemMaxDurability": 10,
-          "ItemMaxCount": 99          
+          "ItemMaxCount": 99
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_CROP_FRUIT",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_CROP_FRUIT_CORN",
+          "ItemObjectType": "OBJECT_ITEM_CROP_FRUIT_CORN",
+          "ItemExplain": "¿Á¼ö¼ö ¾¾¾ÑÀ» Àç¹èÇØ ¾òÀ» ¼ö ÀÖ´Â ¿­¸Å",
+          "ItemName": "¿Á¼ö¼ö",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
+          "ItemMaxDurability": 10,
+          "ItemMaxCount": 99
         }
       ]
     }
