@@ -559,7 +559,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			int8 ItemMaxStep = (int8)CropSeedListFiled["ItemMaxStep"].GetInt();
 			int32 ItemGrowTime = CropSeedListFiled["ItemGrowTime"].GetInt();
 
-			st_ItemInfo* CropSeedItemInfo = new st_ItemInfo();
+			st_ItemInfo* CropSeedItemInfo = new st_ItemInfo();			
 			CropSeedItemInfo->ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_CROP;
 			CropSeedItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_CROP_SEED;
 
@@ -567,10 +567,18 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			{
 				CropSeedItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_SEED_POTATO;
 			}
+			else if (SmallCategory == "ITEM_SMALL_CATEGORY_CROP_SEED_CORN")
+			{
+				CropSeedItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_SEED_CORN;
+			}
 
 			if (ItemObjectType == "OBJECT_ITEM_CROP_SEED_POTATO")
 			{
 				CropSeedItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO;
+			}
+			else if (ItemObjectType == "OBJECT_ITEM_CROP_SEED_CORN")
+			{
+				CropSeedItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CROP_SEED_CORN;
 			}
 			
 			CropSeedItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
@@ -608,10 +616,18 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			{
 				CropFruitItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO;
 			}
+			else if (SmallCategory == "ITEM_SMALL_CATEGORY_CROP_FRUIT_CORN")
+			{
+				CropFruitItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_FRUIT_CORN;
+			}
 
 			if (ItemObjectType == "OBJECT_ITEM_CROP_FRUIT_POTATO")
 			{
 				CropFruitItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO;
+			}
+			else if (ItemObjectType == "OBJECT_ITEM_CROP_FRUIT_CORN")
+			{
+				CropFruitItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_CORN;
 			}
 			
 			CropFruitItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
@@ -2501,6 +2517,10 @@ void CDataManager::LoadDataCrop(wstring LoadFileName)
 		{
 			CropType = en_GameObjectType::OBJECT_CROP_POTATO;
 		}
+		else if (CropName == "¿Á¼ö¼ö")
+		{
+			CropType = en_GameObjectType::OBJECT_CROP_CORN;
+		}
 
 		CropData->CropName = CropName;
 
@@ -2523,6 +2543,10 @@ void CDataManager::LoadDataCrop(wstring LoadFileName)
 			if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO")
 			{
 				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO;
+			}
+			else if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_CROP_FRUIT_CORN")
+			{
+				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_FRUIT_CORN;
 			}
 
 			DropData.Probability = Probability;
