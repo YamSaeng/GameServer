@@ -1,6 +1,6 @@
 {
   "Crops": [
-    {      
+    {
       "CropName": "°¨ÀÚ",
       "CropStatInfo": [
         {
@@ -11,8 +11,24 @@
         {
           "Probability": 99,
           "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO",
-          "MinCount": 5,
-          "MaxCount": 15
+          "MinCount": 1,
+          "MaxCount": 3
+        }
+      ]
+    },
+    {
+      "CropName": "¿Á¼ö¼ö",
+      "CropStatInfo": [
+        {
+          "MaxHP": 1
+        }
+      ],
+      "CropDropData": [
+        {
+          "Probability": 99,
+          "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_CROP_FRUIT_CORN",
+          "MinCount": 1,
+          "MaxCount": 10
         }
       ]
     }
