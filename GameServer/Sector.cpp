@@ -62,6 +62,7 @@ void CSector::Insert(CGameObject* InsertGameObject)
 		break;
 	case en_GameObjectType::OBJECT_ITEM_CROP_SEED:
 	case en_GameObjectType::OBJECT_CROP_POTATO:
+	case en_GameObjectType::OBJECT_CROP_CORN:
 		_Crops.insert((CCrop*)InsertGameObject);
 		break;
 	default:
@@ -120,6 +121,7 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 		break;
 	case en_GameObjectType::OBJECT_ITEM_CROP_SEED:
 	case en_GameObjectType::OBJECT_CROP_POTATO:
+	case en_GameObjectType::OBJECT_CROP_CORN:
 		_Crops.erase((CCrop*)RemoveGameObject);
 		break;
 	}
