@@ -225,3 +225,15 @@ CCropItem::CCropItem()
 CCropItem::~CCropItem()
 {
 }
+
+void CToolItem::UpdateIdle()
+{
+}
+
+CToolItem::CToolItem()
+{
+}
+
+CToolItem::~CToolItem()
+{
+}

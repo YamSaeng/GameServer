@@ -81,6 +81,15 @@ public:
 	~CArmorItem();
 };
 
+class CToolItem : public CItem
+{
+public:
+	virtual void UpdateIdle() override;
+
+	CToolItem();
+	~CToolItem();
+};
+
 class CConsumable : public CItem
 {
 	
