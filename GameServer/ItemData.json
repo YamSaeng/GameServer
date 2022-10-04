@@ -83,6 +83,27 @@
       ]
     }
   ],
+  "Tools": [
+    {
+      "ToolList": [
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEOGRY_FARMING",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_TOOL_FARMING_SHOVEL",
+          "ItemObjectType": "OBJECT_ITEM_WEAPON_FARMING_TOOL_SHOVEL",
+          "ItemExplain": "¶¥À» ÆÄ°í ³ó»ç ÁöÀ» ¼ö ÀÖµµ·Ï ¸¸µé ¼ö ÀÖ´Â µµ±¸",
+          "ItemName": "»ð",
+          "ItemEquipmentPart": "EQUIPMENT_PARTS_BOTH_HAND",
+          "ItemWidth": 1,
+          "ItemHeight": 2,
+          "ItemMinDamage": 1,
+          "ItemMaxDamage": 2,
+          "ItemMaxDurability": 150,
+          "ItemMaxCount": 1,
+          "ItemCraftingTime": 5000
+        }
+      ]
+    }
+  ],
   "Consumables": [
     {
       "PotionList": [
@@ -448,8 +469,8 @@
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_CROP_SEED",
-          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_CROP_SEED_POTATO",
-          "ItemObjectType": "OBJECT_ITEM_CROP_SEED_POTATO",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_CROP_SEED_CORN",
+          "ItemObjectType": "OBJECT_ITEM_CROP_SEED_CORN",
           "ItemExplain": "¿Á¼ö¼öÀÇ ¾¾¾Ñ",
           "ItemName": "¿Á¼ö¼ö ¾¾¾Ñ",
           "ItemWidth": 1,

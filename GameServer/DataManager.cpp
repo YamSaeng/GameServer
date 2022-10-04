@@ -39,7 +39,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			else if (MediumCategory == "ITEM_MEDIUM_CATEGORY_SHIELD")
 			{
 				WeaponItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_SHIELD;
-			}
+			}			
 
 			if (SmallCategory == "ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD")
 			{
@@ -48,7 +48,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			else if (SmallCategory == "ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD")
 			{
 				WeaponItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD;
-			}
+			}			
 
 			if (ItemObjectType == "OBJECT_ITEM_WEAPON_WOOD_SWORD")
 			{
@@ -57,18 +57,22 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			else if (ItemObjectType == "OBJECT_ITEM_WEAPON_WOOD_SHIELD")
 			{
 				WeaponItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SHIELD;
-			}
+			}			
 						
 			WeaponItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
 			WeaponItemInfo->ItemName = (LPWSTR)CA2W(ItemName.c_str());
 
 			if (ItemEquipmentPart == "EQUIPMENT_PARTS_LEFT_HAND")
-			{
+			{	
 				WeaponItemInfo->ItemEquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_LEFT_HAND;
 			}
 			else if (ItemEquipmentPart == "EQUIPMENT_PARTS_RIGHT_HAND")
 			{
 				WeaponItemInfo->ItemEquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_RIGHT_HAND;
+			}
+			else if (ItemEquipmentPart == "EQUIPMENT_PARTS_BOTH_HAND")
+			{
+				WeaponItemInfo->ItemEquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_BOTH_HAND;
 			}
 
 			WeaponItemInfo->ItemWidth = ItemWidth;
@@ -167,6 +171,71 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			ArmorItemInfo->ItemCraftingTime = ItemCraftingTime;
 
 			_Items.insert(pair<int16, st_ItemInfo*>((int16)ArmorItemInfo->ItemSmallCategory, ArmorItemInfo));
+		}
+	}
+
+	for (auto& Filed : Document["Tools"].GetArray())
+	{
+		for (auto& ToolsListFiled : Filed["ToolList"].GetArray())
+		{
+			string MediumCategory = ToolsListFiled["ItemMediumCategory"].GetString();
+			string SmallCategory = ToolsListFiled["ItemSmallCategory"].GetString();
+			string ItemObjectType = ToolsListFiled["ItemObjectType"].GetString();
+			string ItemExplain = ToolsListFiled["ItemExplain"].GetString();
+			string ItemName = ToolsListFiled["ItemName"].GetString();
+			string ItemEquipmentPart = ToolsListFiled["ItemEquipmentPart"].GetString();
+			int32 ItemWidth = ToolsListFiled["ItemWidth"].GetInt();
+			int32 ItemHeight = ToolsListFiled["ItemHeight"].GetInt();
+			int32 ItemMinDamage = ToolsListFiled["ItemMinDamage"].GetInt();
+			int32 ItemMaxDamage = ToolsListFiled["ItemMaxDamage"].GetInt();
+			int32 ItemMaxDurability = ToolsListFiled["ItemMaxDurability"].GetInt();
+			int32 ItemMaxCount = ToolsListFiled["ItemMaxCount"].GetInt();
+			int64 ItemCraftingTime = ToolsListFiled["ItemCraftingTime"].GetInt64();
+
+			st_ItemInfo* ToolItemInfo = new st_ItemInfo();
+
+			ToolItemInfo->ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_TOOL;
+			
+			if (MediumCategory == "ITEM_MEDIUM_CATEOGRY_FARMING")
+			{
+				ToolItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEOGRY_FARMING;
+			}
+
+			if (SmallCategory == "ITEM_SMALL_CATEGORY_TOOL_FARMING_SHOVEL")
+			{
+				ToolItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_TOOL_FARMING_SHOVEL;
+			}
+
+			if (ItemObjectType == "OBJECT_ITEM_WEAPON_FARMING_TOOL_SHOVEL")
+			{
+				ToolItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_WEAPON_FARMING_TOOL_SHOVEL;
+			}
+
+			ToolItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
+			ToolItemInfo->ItemName = (LPWSTR)CA2W(ItemName.c_str());
+
+			if (ItemEquipmentPart == "EQUIPMENT_PARTS_LEFT_HAND")
+			{
+				ToolItemInfo->ItemEquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_LEFT_HAND;
+			}
+			else if (ItemEquipmentPart == "EQUIPMENT_PARTS_RIGHT_HAND")
+			{
+				ToolItemInfo->ItemEquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_RIGHT_HAND;
+			}
+			else if (ItemEquipmentPart == "EQUIPMENT_PARTS_BOTH_HAND")
+			{
+				ToolItemInfo->ItemEquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_BOTH_HAND;
+			}
+
+			ToolItemInfo->ItemWidth = ItemWidth;
+			ToolItemInfo->ItemHeight = ItemHeight;
+			ToolItemInfo->ItemMinDamage = ItemMinDamage;
+			ToolItemInfo->ItemMaxDamage = ItemMaxDamage;
+			ToolItemInfo->ItemMaxDurability = ItemMaxDurability;
+			ToolItemInfo->ItemMaxCount = ItemMaxCount;
+			ToolItemInfo->ItemCraftingTime = ItemCraftingTime;
+
+			_Items.insert(pair<int16, st_ItemInfo*>((int16)ToolItemInfo->ItemSmallCategory, ToolItemInfo));
 		}
 	}
 
