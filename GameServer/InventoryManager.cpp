@@ -189,7 +189,18 @@ st_Vector2Int CInventoryManager::FindEmptySpace(int8 SelectInventoryIndex, CItem
 
 CItem* CInventoryManager::FindInventoryItem(int8 SelectInventoryIndex, en_SmallItemCategory FindItemSmallItemCategory)
 {
-	return _Inventorys[SelectInventoryIndex]->FindInventoryItem(FindItemSmallItemCategory);
+	// 가방 안에 찾고자 하는 아이템이 있는지 확인
+	CItem* FindItem = _Inventorys[SelectInventoryIndex]->FindInventoryItem(FindItemSmallItemCategory);
+	if (FindItem == nullptr)
+	{
+		// 없을 경우 선택하고 잇는 아이템을 추가로 검사
+		if (_SelectItem != nullptr && _SelectItem->_ItemInfo.ItemSmallCategory == FindItemSmallItemCategory)
+		{
+			return _SelectItem;
+		}		
+	}	
+
+	return FindItem;
 }
 
 void CInventoryManager::InitItem(int8 SelectInventoryIndex, int8 TilePositionX, int8 TilePositionY)

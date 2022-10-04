@@ -301,7 +301,7 @@ CItem* CInventory::FindInventoryItem(en_SmallItemCategory FindItemSmallItemCateg
 			}			
 		}
 	}	
-	 
+
 	return nullptr;
 }
 
