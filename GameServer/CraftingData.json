@@ -54,12 +54,12 @@
       "CraftingCompleteItem": [
         {
           "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_WEAR",
-          "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_ARMOR_WEAR_WOOD",
-          "CraftingCompleteItemName": "³ª¹« °©¿Ê"
+          "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER",
+          "CraftingCompleteItemName": "°¡Á× °©¿Ê",
           "CraftingMaterial": [
             {
-              "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK",
-              "MaterialName": "³ª¹« ÆÇÀÚ",
+              "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_LEATHER",
+              "MaterialName": "°¡Á×",
               "MaterialCount": 40
             }
           ]
