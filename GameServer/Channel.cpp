@@ -237,6 +237,7 @@ void CChannel::Update()
 						}
 						break;
 					case en_GameObjectType::OBJECT_CROP_POTATO:
+					case en_GameObjectType::OBJECT_CROP_CORN:
 						{
 							CPotato* Potato = (CPotato*)EnterObject;
 
@@ -509,9 +510,12 @@ void CChannel::Update()
 
 							switch ((en_SmallItemCategory)SeedItemSmallCategory)
 							{
-							case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_SEED_POTATO:
+							case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_SEED_POTATO:							
 								SeedObject = (CPotato*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_CROP_POTATO);
 								break;							
+							case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_SEED_CORN:
+								SeedObject = (CPotato*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_CROP_CORN);
+								break;
 							}
 						
 							SeedObject->Init((en_SmallItemCategory)SeedItemSmallCategory);
@@ -524,10 +528,15 @@ void CChannel::Update()
 							G_ObjectManager->GameServer->SendPacket(Player->_SessionId, SeedFarmingExistError);
 							SeedFarmingExistError->Free();
 						}
+
+						SeedItem->_ItemInfo.ItemCount -= 1;
+
+						CMessage* ResSeedItemUpdatePacket = G_ObjectManager->GameServer->MakePacketInventoryItemUpdate(Player->_GameObjectInfo.ObjectId, SeedItem->_ItemInfo);
+						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSeedItemUpdatePacket);
+						ResSeedItemUpdatePacket->Free();
 					}		
 					else
 					{
-						G_ObjectManager->GameServer->Disconnect(Player->_SessionId);
 						CRASH("가방에 요청한 씨앗이 없는데 심기 요청");
 					}
 				}
@@ -751,6 +760,7 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 		break;
 	case en_GameObjectType::OBJECT_CROP:
 	case en_GameObjectType::OBJECT_CROP_POTATO:		
+	case en_GameObjectType::OBJECT_CROP_CORN:
 		{
 			for (int32 i = 0; i < en_Channel::CROP_MAX; i++)
 			{
@@ -868,6 +878,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(en_GameObjectType GameObjectTy
 		break;
 	case en_GameObjectType::OBJECT_CROP:
 	case en_GameObjectType::OBJECT_CROP_POTATO:
+	case en_GameObjectType::OBJECT_CROP_CORN:
 		for (int32 i = 0; i < en_Channel::CROP_MAX; i++)
 		{
 			if (_ChannelCropArray[i] != nullptr)
@@ -998,6 +1009,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 			break;
 		case en_GameObjectType::OBJECT_CROP:
 		case en_GameObjectType::OBJECT_CROP_POTATO:
+		case en_GameObjectType::OBJECT_CROP_CORN:
 			{
 				for (int32 i = 0; i < en_Channel::CROP_MAX; i++)
 				{
@@ -1400,6 +1412,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 		}
 		break;
 	case en_GameObjectType::OBJECT_CROP_POTATO:
+	case en_GameObjectType::OBJECT_CROP_CORN:
 		{
 			CCrop* Crop = (CCrop*)EnterChannelGameObject;
 			Crop->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
@@ -1472,6 +1485,7 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 		_ChannelCraftingTableArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
 		break;
 	case en_GameObjectType::OBJECT_CROP_POTATO:
+	case en_GameObjectType::OBJECT_CROP_CORN:
 		_ChannelCropArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
 		break;
 	}	
