@@ -9,12 +9,14 @@
 class CItem;
 class CWeaponItem;
 class CArmorItem;
+class CToolItem;
 class CConsumable;
 class CMaterialItem;
 class CSkill;
 class CFurnace;
 class CSawmill;
 class CPotato;
+class CCorn;
 class CCropItem;
 class CMapTile;
 
@@ -33,10 +35,11 @@ private:
 	CMemoryPoolTLS<CItem>* _ItemMemoryPool;
 	CMemoryPoolTLS<CWeaponItem>* _WeaponMemoryPool;
 	CMemoryPoolTLS<CArmorItem>* _ArmorMemoryPool;
+	CMemoryPoolTLS<CToolItem>* _ToolMemoryPool;
 	CMemoryPoolTLS<CConsumable>* _ConsumableMemoryPool;
 	CMemoryPoolTLS<CMaterialItem>* _MaterialMemoryPool;
 	CMemoryPoolTLS<CArchitectureItem>* _ArchitectureMemoryPool;
-	CMemoryPoolTLS<CCropItem>* _CropMemoryPool;
+	CMemoryPoolTLS<CCropItem>* _CropItemMemoryPool;
 
 	// 오브젝트
 	CMemoryPoolTLS<CPlayer>* _PlayerMemoryPool;
@@ -45,8 +48,9 @@ private:
 	CMemoryPoolTLS<CTree>* _TreeMemoryPool;
 	CMemoryPoolTLS<CStone>* _StoneMemoryPool;	
 	CMemoryPoolTLS<CFurnace>* _FurnaceMemoryPool;
-	CMemoryPoolTLS<CSawmill>* _SamillMemoryPool;
+	CMemoryPoolTLS<CSawmill>* _SamillMemoryPool;	
 	CMemoryPoolTLS<CPotato>* _PotatoMemoryPool;
+	CMemoryPoolTLS<CCorn>* _CornMemoryPool;
 	CMemoryPoolTLS<CMapTile>* _MapTileMemoryPool;
 
 	int64 _GameServerObjectId;

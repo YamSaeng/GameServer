@@ -9,6 +9,7 @@
 #include "Furnace.h"
 #include "Sawmill.h"
 #include "Potato.h"
+#include "Corn.h"
 #include "MapTile.h"
 #include "ChannelManager.h"
 #include <atlbase.h>
@@ -22,17 +23,19 @@ CObjectManager::CObjectManager()
 	_ItemMemoryPool = new CMemoryPoolTLS<CItem>();
 	_WeaponMemoryPool = new CMemoryPoolTLS<CWeaponItem>();
 	_ArmorMemoryPool = new CMemoryPoolTLS<CArmorItem>();
+	_ToolMemoryPool = new CMemoryPoolTLS<CToolItem>();
 	_MaterialMemoryPool = new CMemoryPoolTLS<CMaterialItem>();
 	_ArchitectureMemoryPool = new CMemoryPoolTLS<CArchitectureItem>();
-	_CropMemoryPool = new CMemoryPoolTLS<CCropItem>();
+	_CropItemMemoryPool = new CMemoryPoolTLS<CCropItem>();
 	_ConsumableMemoryPool = new CMemoryPoolTLS<CConsumable>();
 
 	_TreeMemoryPool = new CMemoryPoolTLS<CTree>();
 	_StoneMemoryPool = new CMemoryPoolTLS<CStone>();
 	_FurnaceMemoryPool = new CMemoryPoolTLS<CFurnace>();
-	_SamillMemoryPool = new CMemoryPoolTLS<CSawmill>();
-		
+	_SamillMemoryPool = new CMemoryPoolTLS<CSawmill>();	
+	
 	_PotatoMemoryPool = new CMemoryPoolTLS<CPotato>();
+	_CornMemoryPool = new CMemoryPoolTLS<CCorn>();
 
 	_SkillMemoryPool = new CMemoryPoolTLS<CSkill>();
 
@@ -114,9 +117,12 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 		break;
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 		NewObject = _SamillMemoryPool->Alloc();
-		break;
+		break;	
 	case en_GameObjectType::OBJECT_CROP_POTATO:
 		NewObject = _PotatoMemoryPool->Alloc();
+		break;
+	case en_GameObjectType::OBJECT_CROP_CORN:
+		NewObject = _CornMemoryPool->Alloc();
 		break;
 	case en_GameObjectType::OBJECT_TILE:
 		NewObject = _MapTileMemoryPool->Alloc();
@@ -160,9 +166,12 @@ void CObjectManager::ObjectReturn(en_GameObjectType ObjectType, CGameObject* Ret
 		break;
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:		
 		_SamillMemoryPool->Free((CSawmill*)ReturnObject);
-		break;
+		break;	
 	case en_GameObjectType::OBJECT_CROP_POTATO:
 		_PotatoMemoryPool->Free((CPotato*)ReturnObject);
+		break;
+	case en_GameObjectType::OBJECT_CROP_CORN:
+		_CornMemoryPool->Free((CCorn*)ReturnObject);
 		break;
 	case en_GameObjectType::OBJECT_TILE:	
 		_MapTileMemoryPool->Free((CMapTile*)ReturnObject);		
@@ -187,13 +196,16 @@ CItem* CObjectManager::ItemCreate(en_SmallItemCategory NewItemSmallCategory)
 	switch (NewItemSmallCategory)
 	{
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:
-	case en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD:
+	case en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD:	
 		NewItem = _WeaponMemoryPool->Alloc();
 		break;
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:
 		NewItem = _ArmorMemoryPool->Alloc();
+		break;
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_TOOL_FARMING_SHOVEL:
+		NewItem = _ToolMemoryPool->Alloc();
 		break;
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_MANA_RESTORATION_POTION_SMALL:
@@ -221,7 +233,9 @@ CItem* CObjectManager::ItemCreate(en_SmallItemCategory NewItemSmallCategory)
 		break;
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_SEED_POTATO:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO:
-		NewItem = _CropMemoryPool->Alloc();
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_SEED_CORN:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_FRUIT_CORN:
+		NewItem = _CropItemMemoryPool->Alloc();
 		break;		
 	}
 
@@ -242,13 +256,16 @@ void CObjectManager::ItemReturn(CItem* ReturnItem)
 	switch (ReturnItem->_ItemInfo.ItemSmallCategory)
 	{
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:
-	case en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD:
+	case en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD:	
 		_WeaponMemoryPool->Free((CWeaponItem*)ReturnItem);
 		break;
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:
 		_ArmorMemoryPool->Free((CArmorItem*)ReturnItem);
+		break;
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_TOOL_FARMING_SHOVEL:
+		_ToolMemoryPool->Free((CToolItem*)ReturnItem);
 		break;
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_MANA_RESTORATION_POTION_SMALL:
@@ -276,7 +293,9 @@ void CObjectManager::ItemReturn(CItem* ReturnItem)
 		break;
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_SEED_POTATO:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO:
-		_CropMemoryPool->Free((CCropItem*)ReturnItem);
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_SEED_CORN:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_FRUIT_CORN:
+		_CropItemMemoryPool->Free((CCropItem*)ReturnItem);
 		break;
 	}
 }
@@ -491,6 +510,7 @@ void CObjectManager::ObjectItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_
 		}
 		break;
 	case en_GameObjectType::OBJECT_CROP_POTATO:
+	case en_GameObjectType::OBJECT_CROP_CORN:
 		{
 			auto FindCropDropItemIter = G_Datamanager->_Crops.find(ItemDataType);
 			st_CropData CropData = *(*FindCropDropItemIter).second;
