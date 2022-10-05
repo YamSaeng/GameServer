@@ -31,8 +31,6 @@ private:
 	int64 _CropIdleTick;
 	int16 _CropTime;
 
-	en_CropState _CropState;
-
-	vector<wstring> _CropStepString;
+	en_CropState _CropState;	
 };
 

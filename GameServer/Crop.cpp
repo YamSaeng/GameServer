@@ -108,8 +108,8 @@ void CCrop::UpdateReadyDead()
 			CRASH("퇴장하려는 채널이 존재하지 않음");
 		}
 
-		st_GameObjectJob* LeaveChannelEnvironmentJob = G_ObjectManager->GameServer->MakeGameObjectJobLeaveChannel(this);
-		_Channel->_ChannelJobQue.Enqueue(LeaveChannelEnvironmentJob);
+		st_GameObjectJob* DeSpawnCropChanelJob = G_ObjectManager->GameServer->MakeGameObjectJobObjectDeSpawnObjectChannel(this);
+		_Channel->_ChannelJobQue.Enqueue(DeSpawnCropChanelJob);		
 	}
 }
 
@@ -117,6 +117,7 @@ void CCrop::UpdateDead()
 {
 	if (_DeadTick < GetTickCount64())
 	{
-		
+		st_GameObjectJob* LeaveChannelEnvironmentJob = G_ObjectManager->GameServer->MakeGameObjectJobLeaveChannel(this);
+		_Channel->_ChannelJobQue.Enqueue(LeaveChannelEnvironmentJob);
 	}
 }
