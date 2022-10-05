@@ -112,7 +112,7 @@ void CChannel::Update()
 					case en_GameObjectType::OBJECT_SLIME:						
 						// 충돌 감지 박스 비활성화
 						DeSpawnObject->GetRectCollision()->SetActive(false);
-						break;					
+						break;							
 					}					
 
 					// 주위 시야범위 플레이어들에게 해당 오브젝트를 소환해제 하라고 알림
@@ -212,7 +212,7 @@ void CChannel::Update()
 							}
 							else
 							{
-								G_ObjectManager->ObjectReturn(Item->_GameObjectInfo.ObjectType, Item);
+								G_ObjectManager->ObjectReturn(Item);
 							}
 						}
 						break;	
@@ -1478,6 +1478,8 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 		break;
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
+		G_ObjectManager->ObjectReturn(LeaveChannelGameObject);
+
 		_ChannelEnvironmentArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
 		break;
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
@@ -1486,6 +1488,8 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 		break;
 	case en_GameObjectType::OBJECT_CROP_POTATO:
 	case en_GameObjectType::OBJECT_CROP_CORN:
+		G_ObjectManager->ObjectReturn(LeaveChannelGameObject);
+
 		_ChannelCropArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
 		break;
 	}	
