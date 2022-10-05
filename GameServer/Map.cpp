@@ -211,6 +211,17 @@ void CMap::MapInit(int16 MapID, wstring MapName, int32 SectorSize, int8 ChannelC
 		}
 	}
 
+	_SeedObjectInfos = new CGameObject * *[YCount];
+
+	for (int i = 0; i < YCount; i++)
+	{
+		_SeedObjectInfos[i] = new CGameObject * [XCount];
+		for (int j = 0; j < XCount; j++)
+		{
+			_SeedObjectInfos[i][j] = nullptr;
+		}
+	}
+
 	_Items = new CItem * **[YCount];
 
 	for (int i = 0; i < YCount; i++)
@@ -660,6 +671,26 @@ CGameObject* CMap::Find(st_Vector2Int& CellPosition)
 	return _ObjectsInfos[Y][X];
 }
 
+CGameObject* CMap::FindPlant(st_Vector2Int& PlantPosition)
+{
+	// 좌우 좌표 검사
+	if (PlantPosition._X < _Left || PlantPosition._X > _Right)
+	{
+		return nullptr;
+	}
+
+	// 상하 좌표 검사
+	if (PlantPosition._Y < _Up || PlantPosition._Y > _Down)
+	{
+		return nullptr;
+	}
+
+	int X = PlantPosition._X - _Left;
+	int Y = _Down - PlantPosition._Y;
+
+	return _SeedObjectInfos[Y][X];
+}
+
 CItem** CMap::FindItem(st_Vector2Int& ItemCellPosition)
 {
 	int32 X = ItemCellPosition._X - _Left;
@@ -829,103 +860,116 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	case en_GameObjectType::OBJECT_SLIME:
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
-	{
-		// 목적지로 갈 수 있는지 검사한다.
-		if (CollisionCango(GameObject, DestPosition, CheckObject) == false)
 		{
-			//G_Logger->WriteStdOut(en_Color::RED, L"Cant Go ApplyMove Y (%d) X (%d) ",DestPosition._Y,DestPosition._X);
-			return false;
-		}
-
-		// 호출해준 대상을 충돌체로 여긴다면
-		if (Applycollision == true)
-		{
-			int X = PositionInfo.CollisionPosition._X - _Left;
-			int Y = _Down - PositionInfo.CollisionPosition._Y;
-
-			// 기존위치 데이터는 날리고
-			if (_ObjectsInfos[Y][X] == GameObject)
+			// 목적지로 갈 수 있는지 검사한다.
+			if (CollisionCango(GameObject, DestPosition, CheckObject) == false)
 			{
-				_ObjectsInfos[Y][X] = nullptr;
-			}
-
-			// 목적지 위치 구해주고
-			X = DestPosition._X - _Left;
-			Y = _Down - DestPosition._Y;
-
-			// 목적지에 넣어준다.
-			_ObjectsInfos[Y][X] = GameObject;
-
-			int16 Width = GameObject->_GameObjectInfo.ObjectWidth;
-			int16 Height = GameObject->_GameObjectInfo.ObjectHeight;
-
-			for (int16 WidthX = 0; WidthX < Width; WidthX++)
-			{
-				for (int16 HeightY = 0; HeightY < Height; HeightY++)
-				{
-					_ObjectsInfos[Y + HeightY][X + WidthX] = GameObject;
-				}
-			}
-		}
-	}
-	break;
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
-	{
-		CItem* ItemObject = (CItem*)GameObject;
-
-		// 이동 하기전 있었던 좌표 계산
-		int32 PreviousX = ItemObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X - _Left;
-		int32 PreviousY = _Down - ItemObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y;
-
-		// 이동하고자 하는 좌표 계산
-		int32 X = DestPosition._X - _Left;
-		int32 Y = _Down - DestPosition._Y;
-
-		// 기존 위치에서 움직이는 대상은 제거하고
-		for (int8 i = 0; i < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; i++)
-		{
-			if (_Items[PreviousY][PreviousX][i] == ItemObject)
-			{
-				_Items[PreviousY][PreviousX][i] = nullptr;
-			}
-		}
-
-		// 우선 해당 위치에 아이템들과 새로 얻은 아이템의 종류를 비교한다.
-		// 새로 얻은 아이템의 종류가 이미 해당 위치에 있을 경우에
-		// 카운트를 증가시키고 새로 얻은 아이템은 맵에 스폰시키지 않는다.
-		for (int8 i = 0; i < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; i++)
-		{
-			if (_Items[Y][X][i] != nullptr && _Items[Y][X][i]->_ItemInfo.ItemSmallCategory == ItemObject->_ItemInfo.ItemSmallCategory)
-			{
-				_Items[Y][X][i]->_ItemInfo.ItemCount += ItemObject->_ItemInfo.ItemCount;
-
-				CItem* FindItem = (CItem*)(ItemObject->GetChannel()->FindChannelObject(_Items[Y][X][i]->_ItemInfo.ItemDBId, en_GameObjectType::OBJECT_ITEM));
-				if (FindItem != nullptr)
-				{
-					FindItem->_ItemInfo.ItemCount = _Items[Y][X][i]->_ItemInfo.ItemCount;
-				}
-
+				//G_Logger->WriteStdOut(en_Color::RED, L"Cant Go ApplyMove Y (%d) X (%d) ",DestPosition._Y,DestPosition._X);
 				return false;
 			}
-		}
 
-		// 새로 얻은 아이템의 종류가 해당 위치에 없다면
-		// 빈 자리(Index)를 찾는다.
-		int NewItemInfoIndex = -1;
-		for (int8 i = 0; i < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; i++)
-		{
-			if (_Items[Y][X][i] == nullptr)
+			// 호출해준 대상을 충돌체로 여긴다면
+			if (Applycollision == true)
 			{
-				NewItemInfoIndex = i;
-				break;
+				int X = PositionInfo.CollisionPosition._X - _Left;
+				int Y = _Down - PositionInfo.CollisionPosition._Y;
+
+				// 기존위치 데이터는 날리고
+				if (_ObjectsInfos[Y][X] == GameObject)
+				{
+					_ObjectsInfos[Y][X] = nullptr;
+				}
+
+				// 목적지 위치 구해주고
+				X = DestPosition._X - _Left;
+				Y = _Down - DestPosition._Y;
+
+				// 목적지에 넣어준다.
+				_ObjectsInfos[Y][X] = GameObject;
+
+				int16 Width = GameObject->_GameObjectInfo.ObjectWidth;
+				int16 Height = GameObject->_GameObjectInfo.ObjectHeight;
+
+				for (int16 WidthX = 0; WidthX < Width; WidthX++)
+				{
+					for (int16 HeightY = 0; HeightY < Height; HeightY++)
+					{
+						_ObjectsInfos[Y + HeightY][X + WidthX] = GameObject;
+					}
+				}
 			}
 		}
+		break;
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
+	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_CORN:
+		{
+			CItem* ItemObject = (CItem*)GameObject;
 
-		// 아이템을 저장한다.
-		_Items[Y][X][NewItemInfoIndex] = ItemObject;
-	}
-	break;
+			// 이동 하기전 있었던 좌표 계산
+			int32 PreviousX = ItemObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X - _Left;
+			int32 PreviousY = _Down - ItemObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y;
+
+			// 이동하고자 하는 좌표 계산
+			int32 X = DestPosition._X - _Left;
+			int32 Y = _Down - DestPosition._Y;
+
+			// 기존 위치에서 움직이는 대상은 제거하고
+			for (int8 i = 0; i < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; i++)
+			{
+				if (_Items[PreviousY][PreviousX][i] == ItemObject)
+				{
+					_Items[PreviousY][PreviousX][i] = nullptr;
+				}
+			}
+
+			// 우선 해당 위치에 아이템들과 새로 얻은 아이템의 종류를 비교한다.
+			// 새로 얻은 아이템의 종류가 이미 해당 위치에 있을 경우에
+			// 카운트를 증가시키고 새로 얻은 아이템은 맵에 스폰시키지 않는다.
+			for (int8 i = 0; i < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; i++)
+			{
+				if (_Items[Y][X][i] != nullptr && _Items[Y][X][i]->_ItemInfo.ItemSmallCategory == ItemObject->_ItemInfo.ItemSmallCategory)
+				{
+					_Items[Y][X][i]->_ItemInfo.ItemCount += ItemObject->_ItemInfo.ItemCount;
+
+					CItem* FindItem = (CItem*)(ItemObject->GetChannel()->FindChannelObject(_Items[Y][X][i]->_ItemInfo.ItemDBId, en_GameObjectType::OBJECT_ITEM));
+					if (FindItem != nullptr)
+					{
+						FindItem->_ItemInfo.ItemCount = _Items[Y][X][i]->_ItemInfo.ItemCount;
+					}
+
+					return false;
+				}
+			}
+
+			// 새로 얻은 아이템의 종류가 해당 위치에 없다면
+			// 빈 자리(Index)를 찾는다.
+			int NewItemInfoIndex = -1;
+			for (int8 i = 0; i < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; i++)
+			{
+				if (_Items[Y][X][i] == nullptr)
+				{
+					NewItemInfoIndex = i;
+					break;
+				}
+			}
+
+			// 아이템을 저장한다.
+			_Items[Y][X][NewItemInfoIndex] = ItemObject;
+		}
+		break;
+	case en_GameObjectType::OBJECT_CROP_POTATO:	
+	case en_GameObjectType::OBJECT_CROP_CORN:
+		{
+			CCrop* CropObject = (CCrop*)GameObject;
+
+			int32 X = DestPosition._X - _Left;
+			int32 Y = _Down - DestPosition._Y;
+
+			_SeedObjectInfos[Y][X] = GameObject;
+		}
+		break;
 	}
 
 	CSector* CurrentSector = GetSector(GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
@@ -987,44 +1031,61 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 	case en_GameObjectType::OBJECT_SLIME:
-	{
-		// 맵에서 제거
-		if (_ObjectsInfos[Y][X] == GameObject)
 		{
-			for (int16 WidthX = 0; WidthX < Width; WidthX++)
+			// 맵에서 제거
+			if (_ObjectsInfos[Y][X] == GameObject)
 			{
-				for (int16 HeightY = 0; HeightY < Height; HeightY++)
+				for (int16 WidthX = 0; WidthX < Width; WidthX++)
 				{
-					_ObjectsInfos[Y][X] = nullptr;
+					for (int16 HeightY = 0; HeightY < Height; HeightY++)
+					{
+						_ObjectsInfos[Y][X] = nullptr;
+					}
+				}
+			}
+			else
+			{
+				if (GameObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE)
+				{
+					//CRASH("ApplyLeave 삭제하려는 오브젝트가 저장되어 있는 오브젝트와 다름");
 				}
 			}
 		}
-		else
+		break;
+	case en_GameObjectType::OBJECT_CROP_CORN:
+	case en_GameObjectType::OBJECT_CROP_POTATO:
 		{
-			if (GameObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE)
+			if (_SeedObjectInfos[Y][X] == GameObject)
 			{
-				//CRASH("ApplyLeave 삭제하려는 오브젝트가 저장되어 있는 오브젝트와 다름");
+				for (int16 WidthX = 0; WidthX < Width; WidthX++)
+				{
+					for (int16 HeightY = 0; HeightY < Height; HeightY++)
+					{
+						_SeedObjectInfos[Y][X] = nullptr;
+					}
+				}				
 			}
 		}
-	}
-	break;
+		break;
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
-	{
-		CItem* Item = (CItem*)GameObject;
-
-		for (int8 i = 0; i < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; i++)
+	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
+	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_CORN:
 		{
-			if (_Items[Y][X][i] != nullptr &&
-				_Items[Y][X][i]->_ItemInfo.ItemSmallCategory == Item->_ItemInfo.ItemSmallCategory)
+			CItem* Item = (CItem*)GameObject;
+
+			for (int8 i = 0; i < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; i++)
 			{
-				_Items[Y][X][i] = nullptr;
-				break;
+				if (_Items[Y][X][i] != nullptr &&
+					_Items[Y][X][i]->_ItemInfo.ItemSmallCategory == Item->_ItemInfo.ItemSmallCategory)
+				{
+					_Items[Y][X][i] = nullptr;
+					break;
+				}
 			}
 		}
-	}
-	break;
+		break;	
 	}
 
 	return true;
