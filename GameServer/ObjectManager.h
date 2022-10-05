@@ -90,7 +90,7 @@ public:
 	//------------------------------------------------------------------------
 	// 오브젝트 반납
 	//------------------------------------------------------------------------
-	void ObjectReturn(en_GameObjectType ObjectType, CGameObject* ReturnObject);
+	void ObjectReturn(CGameObject* ReturnObject);
 
 	//--------------------
 	// 스킬 생성

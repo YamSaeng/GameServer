@@ -137,45 +137,52 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 	return NewObject;
 }
 
-void CObjectManager::ObjectReturn(en_GameObjectType ObjectType, CGameObject* ReturnObject)
+void CObjectManager::ObjectReturn(CGameObject* ReturnObject)
 {
-	switch (ObjectType)
+	if (ReturnObject != nullptr)
 	{
-	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-	case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
-	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
-	case en_GameObjectType::OBJECT_THIEF_PLAYER:
-	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
-	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
-		_PlayerMemoryPool->Free((CPlayer*)ReturnObject);
-		break;
-	case en_GameObjectType::OBJECT_SLIME:
-		_SlimeMemoryPool->Free((CSlime*)ReturnObject);
-		break;
-	case en_GameObjectType::OBJECT_BEAR:
-		_BearMemoryPool->Free((CBear*)ReturnObject);
-		break;	
-	case en_GameObjectType::OBJECT_STONE:
-		_StoneMemoryPool->Free((CStone*)ReturnObject);
-		break;
-	case en_GameObjectType::OBJECT_TREE:
-		_TreeMemoryPool->Free((CTree*)ReturnObject);
-		break;
-	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
-		_FurnaceMemoryPool->Free((CFurnace*)ReturnObject);
-		break;
-	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:		
-		_SamillMemoryPool->Free((CSawmill*)ReturnObject);
-		break;	
-	case en_GameObjectType::OBJECT_CROP_POTATO:
-		_PotatoMemoryPool->Free((CPotato*)ReturnObject);
-		break;
-	case en_GameObjectType::OBJECT_CROP_CORN:
-		_CornMemoryPool->Free((CCorn*)ReturnObject);
-		break;
-	case en_GameObjectType::OBJECT_TILE:	
-		_MapTileMemoryPool->Free((CMapTile*)ReturnObject);		
-		break;
+		switch (ReturnObject->_GameObjectInfo.ObjectType)
+		{
+		case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
+		case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
+		case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
+		case en_GameObjectType::OBJECT_THIEF_PLAYER:
+		case en_GameObjectType::OBJECT_ARCHER_PLAYER:
+		case en_GameObjectType::OBJECT_PLAYER_DUMMY:
+			_PlayerMemoryPool->Free((CPlayer*)ReturnObject);
+			break;
+		case en_GameObjectType::OBJECT_SLIME:
+			_SlimeMemoryPool->Free((CSlime*)ReturnObject);
+			break;
+		case en_GameObjectType::OBJECT_BEAR:
+			_BearMemoryPool->Free((CBear*)ReturnObject);
+			break;
+		case en_GameObjectType::OBJECT_STONE:
+			_StoneMemoryPool->Free((CStone*)ReturnObject);
+			break;
+		case en_GameObjectType::OBJECT_TREE:
+			_TreeMemoryPool->Free((CTree*)ReturnObject);
+			break;
+		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+			_FurnaceMemoryPool->Free((CFurnace*)ReturnObject);
+			break;
+		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
+			_SamillMemoryPool->Free((CSawmill*)ReturnObject);
+			break;
+		case en_GameObjectType::OBJECT_CROP_POTATO:
+			_PotatoMemoryPool->Free((CPotato*)ReturnObject);
+			break;
+		case en_GameObjectType::OBJECT_CROP_CORN:
+			_CornMemoryPool->Free((CCorn*)ReturnObject);
+			break;
+		case en_GameObjectType::OBJECT_TILE:
+			_MapTileMemoryPool->Free((CMapTile*)ReturnObject);
+			break;
+		}
+	}	
+	else
+	{
+		CRASH("빈 오브젝트를 반납하려고 시도");
 	}
 }
 
