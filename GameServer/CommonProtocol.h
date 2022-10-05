@@ -194,19 +194,19 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// 게임서버 캐릭터 마법 요청
 	// int64 AccountId
 	// int64 PlayerDBId
-	// int8 Dir
-	// en_AttackRange RangeAttack;
-	// int8 RangeDitance;
+	// en_MoveDir Dir
+	// en_SkillType SpellSkillType
 	//------------------------------------------------------------
-	en_PACKET_C2S_MAGIC,
+	en_PACKET_C2S_SPELL,
 
 	//------------------------------------------------------------
-	// 게임서버 캐릭터 마법 요청 응답
-	// int64 AccountId
+	// 게임서버 캐릭터 마법 요청 응답	
 	// int64 PlayerDBId
-	// int8 Dir	
+	// bool SpellStart
+	// en_SkillType SpellSkillType
+	// float SpellTime
 	//------------------------------------------------------------
-	en_PACKET_S2C_MAGIC,
+	en_PACKET_S2C_SPELL,
 
 	//------------------------------------------------------------
 	// 게임서버 캐릭터 마법 취소 요청
