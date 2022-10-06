@@ -90,7 +90,7 @@
           "ItemMediumCategory": "ITEM_MEDIUM_CATEOGRY_FARMING",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_TOOL_FARMING_SHOVEL",
           "ItemObjectType": "OBJECT_ITEM_WEAPON_FARMING_TOOL_SHOVEL",
-          "ItemExplain": "땅을 파고 농사 지을 수 있도록 만들 수 있는 도구",
+          "ItemExplain": "땅을 개간 할 수 있는 도구",
           "ItemName": "삽",
           "ItemEquipmentPart": "EQUIPMENT_PARTS_BOTH_HAND",
           "ItemWidth": 1,
