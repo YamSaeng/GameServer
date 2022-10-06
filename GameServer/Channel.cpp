@@ -520,7 +520,11 @@ void CChannel::Update()
 						
 							SeedObject->Init((en_SmallItemCategory)SeedItemSmallCategory);
 
-							EnterChannel(SeedObject, &ReqPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
+							EnterChannel(SeedObject, &ReqPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);							
+
+							CMessage* ResSeedFarmingPacket = G_ObjectManager->GameServer->MakePacketSeedFarming(SeedItem->_ItemInfo, SeedObject->_GameObjectInfo.ObjectId);
+							G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSeedFarmingPacket);
+							ResSeedFarmingPacket->Free();
 						}
 						else
 						{
@@ -554,10 +558,12 @@ void CChannel::Update()
 
 					CPlayer* Player = (CPlayer*)ReqPlayer;
 
-					CGameObject* Plant = FindChannelObject(PlantObjectID, (en_GameObjectType)PlantObjectType);
+					CCrop* Plant = (CCrop*)FindChannelObject(PlantObjectID, (en_GameObjectType)PlantObjectType);
 					if (Plant != nullptr)
 					{
-						CMessage* ResPlantGrowthCheckPacket = G_ObjectManager->GameServer->MakePacketPlantGrowthStep(Plant->_GameObjectInfo.ObjectId, Plant->_GameObjectInfo.ObjectCropStep);
+						CMessage* ResPlantGrowthCheckPacket = G_ObjectManager->GameServer->MakePacketPlantGrowthStep(Plant->_GameObjectInfo.ObjectId,
+							Plant->_GameObjectInfo.ObjectCropStep,
+							Plant->_CropGrowthRatio);
 						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResPlantGrowthCheckPacket);
 						ResPlantGrowthCheckPacket->Free();
 					}
