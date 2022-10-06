@@ -157,6 +157,7 @@
     <ClInclude Include="Channel.h" />
     <ClInclude Include="ChannelManager.h" />
     <ClInclude Include="CommonProtocol.h" />
+    <ClInclude Include="Corn.h" />
     <ClInclude Include="CraftingTable.h" />
     <ClInclude Include="Crop.h" />
     <ClInclude Include="Data.h" />
@@ -226,6 +227,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="ChannelManager.cpp" />
+    <ClCompile Include="Corn.cpp" />
     <ClCompile Include="CraftingTable.cpp" />
     <ClCompile Include="Crop.cpp" />
     <ClCompile Include="Data.cpp">

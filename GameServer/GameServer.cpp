@@ -1147,7 +1147,7 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_ATTACK:
 		PacketProcReqMelee(SessionID, Message);
 		break;
-	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_MAGIC:
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_SPELL:
 		PacketProcReqMagic(SessionID, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_MAGIC_CANCEL:
@@ -1844,13 +1844,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 					Disconnect(Session->SessionId);
 					break;
 				}
-			}
-
-			int8 QuickSlotBarIndex;
-			*Message >> QuickSlotBarIndex;
-
-			int8 QuickSlotBarSlotIndex;
-			*Message >> QuickSlotBarSlotIndex;
+			}			
 
 			// 공격한 방향
 			int8 ReqMoveDir;
@@ -1860,325 +1854,8 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 			int16 ReqSkillType;
 			*Message >> ReqSkillType;			
 
-			if ((en_SkillType)ReqSkillType == en_SkillType::SKILL_SHOCK_RELEASE)
-			{
-				CSkill* ReqMagicSkill = MyPlayer->_SkillBox.FindSkill((en_SkillType)ReqSkillType);
-				if (ReqMagicSkill != nullptr && ReqMagicSkill->GetSkillInfo()->CanSkillUse == true)
-				{
-					CMap* Map = G_MapManager->GetMap(1);
-
-					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetFieldOfViewPlayers(MyPlayer, 1, false);
-
-					st_GameObjectJob* ShockReleaseJob = MakeGameObjectJobShockRelease();
-					MyPlayer->_GameObjectJobQue.Enqueue(ShockReleaseJob);
-
-					CSkill* NewBufSkill = G_ObjectManager->SkillCreate();
-
-					st_BufSkillInfo* NewShockReleaseSkillInfo = (st_BufSkillInfo*)G_ObjectManager->SkillInfoCreate(ReqMagicSkill->GetSkillInfo()->SkillMediumCategory);
-
-					*NewShockReleaseSkillInfo = *((st_BufSkillInfo*)ReqMagicSkill->GetSkillInfo());
-					NewBufSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewShockReleaseSkillInfo);
-					NewBufSkill->StatusAbnormalDurationTimeStart();
-
-					MyPlayer->AddBuf(NewBufSkill);
-
-					CMessage* ResBufDebufSkillPacket = MakePacketBufDeBuf(MyPlayer->_GameObjectInfo.ObjectId, true, NewBufSkill->GetSkillInfo());
-					SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDebufSkillPacket);
-					ResBufDebufSkillPacket->Free();
-
-					ReqMagicSkill->CoolTimeStart();
-
-					// 클라에게 쿨타임 표시
-					CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarIndex,
-						QuickSlotBarSlotIndex,
-						1.0f, ReqMagicSkill);
-					SendPacket(Session->SessionId, ResCoolTimeStartPacket);
-					ResCoolTimeStartPacket->Free();
-
-					CMessage* ResObjectStateChangePacket = MakePacketResChangeObjectState(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir, MyPlayer->_GameObjectInfo.ObjectType, MyPlayer->_GameObjectInfo.ObjectPositionInfo.State);
-					SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResObjectStateChangePacket);
-					ResObjectStateChangePacket->Free();
-				}				
-			}
-			else
-			{
-				// 충격 해제 마법을 제외하고 상태이상값을 판단
-				bool IsWarriorChohone = MyPlayer->_StatusAbnormal & STATUS_ABNORMAL_WARRIOR_CHOHONE;
-				bool IsShamanLightningStrike = MyPlayer->_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE;
-				bool IsShamanIceWave = MyPlayer->_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ICE_WAVE;
-
-				if (IsWarriorChohone || IsShamanLightningStrike || IsShamanIceWave)
-				{
-					break;
-				}				
-
-				CGameObject* FindGameObject = nullptr;
-				float SpellCastingTime = 0.0f;
-
-				CMessage* ResEffectPacket = nullptr;
-				CMessage* ResMagicPacket = nullptr;
-
-				vector<CGameObject*> Targets;				
-								
-				// 요청 스킬을 스킬창에서 찾음
-				CSkill* ReqMagicSkill = MyPlayer->_SkillBox.FindSkill((en_SkillType)ReqSkillType);
-				if (ReqMagicSkill != nullptr && ReqMagicSkill->GetSkillInfo()->CanSkillUse == true)
-				{
-					if (MyPlayer->_ComboSkill != nullptr)
-					{
-						st_GameObjectJob* ComboAttackOffJob = MakeGameObjectJobComboSkillOff();
-						MyPlayer->_GameObjectJobQue.Enqueue(ComboAttackOffJob);
-					}
-
-					CMap* Map = G_MapManager->GetMap(1);
-
-					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetFieldOfViewPlayers(MyPlayer, 1, false);
-					
-					// 요청한 스킬이 퀵슬롯에 등록이 되어 있는지 확인
-					st_QuickSlotBarSlotInfo* QuickSlotInfo = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarIndex, QuickSlotBarSlotIndex);
-					if (QuickSlotInfo->QuickBarSkill != nullptr)
-					{
-						// 요청한 스킬을 사용 할 수 있는지 확인
-						if (ReqMagicSkill->GetSkillInfo()->CanSkillUse)
-						{
-							en_SkillType ReqMagicSkillType = ReqMagicSkill->GetSkillInfo()->SkillType;
-							switch (ReqMagicSkillType)
-							{
-							case en_SkillType::SKILL_KNIGHT_CHARGE_POSE:
-							{
-								st_BufSkillInfo* ChargePoseSkillInfo = (st_BufSkillInfo*)ReqMagicSkill->GetSkillInfo();
-
-								CSkill* ChargePoseSkill = G_ObjectManager->SkillCreate();
-
-								st_BufSkillInfo* NewChargePoseSkillInfo = (st_BufSkillInfo*)G_ObjectManager->SkillInfoCreate(ReqMagicSkill->GetSkillInfo()->SkillMediumCategory);
-								*NewChargePoseSkillInfo = *((st_BufSkillInfo*)ReqMagicSkill->GetSkillInfo());
-								ChargePoseSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewChargePoseSkillInfo);
-								ChargePoseSkill->StatusAbnormalDurationTimeStart();
-
-								MyPlayer->AddBuf(ChargePoseSkill);
-
-								CMessage* ResBufDeBufSkillPacket = MakePacketBufDeBuf(MyPlayer->_GameObjectInfo.ObjectId, true, ChargePoseSkill->GetSkillInfo());
-								SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
-								ResBufDeBufSkillPacket->Free();
-
-								ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_CHARGE_POSE, 2.8f);
-								SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResEffectPacket);
-								ResEffectPacket->Free();
-
-								ReqMagicSkill->CoolTimeStart();
-
-								// 클라에게 쿨타임 표시
-								CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarIndex,
-									QuickSlotBarSlotIndex,
-									1.0f, ReqMagicSkill);
-								SendPacket(Session->SessionId, ResCoolTimeStartPacket);
-								ResCoolTimeStartPacket->Free();
-							}
-							break;
-							case en_SkillType::SKILL_SHAMAN_BACK_TELEPORT:
-							{								
-								st_GameObjectJob* BackTelePortJob = MakeGameObjectJobBackTeleport();
-								MyPlayer->_GameObjectJobQue.Enqueue(BackTelePortJob);								
-
-								en_MoveDir TelePortDir;
-
-								switch (MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir)
-								{
-								case en_MoveDir::UP:
-									TelePortDir = en_MoveDir::DOWN;
-									break;
-								case en_MoveDir::DOWN:
-									TelePortDir = en_MoveDir::UP;
-									break;
-								case en_MoveDir::LEFT:
-									TelePortDir = en_MoveDir::RIGHT;
-									break;
-								case en_MoveDir::RIGHT:
-									TelePortDir = en_MoveDir::LEFT;
-									break;
-								}
-
-								st_Vector2Int MovePosition;
-								MovePosition = MyPlayer->GetFrontCellPosition(TelePortDir, 5);
-
-								MyPlayer->GetChannel()->GetMap()->ApplyMove(MyPlayer, MovePosition);
-
-								MyPlayer->_GameObjectInfo.ObjectPositionInfo.Position._X = MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-								MyPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y = MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
-
-								CMessage* ResSyncPositionPacket = MakePacketResSyncPosition(MyPlayer->_GameObjectInfo.ObjectId, MyPlayer->_GameObjectInfo.ObjectPositionInfo);
-								SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResSyncPositionPacket);
-								ResSyncPositionPacket->Free();
-
-								ResEffectPacket = MakePacketEffect(MyPlayer->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_BACK_TELEPORT, 0.5f);
-								SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResEffectPacket);
-								ResEffectPacket->Free();
-
-								ReqMagicSkill->CoolTimeStart();
-
-								// 클라에게 쿨타임 표시
-								CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarIndex,
-									QuickSlotBarSlotIndex,
-									1.0f, ReqMagicSkill);
-								SendPacket(Session->SessionId, ResCoolTimeStartPacket);
-								ResCoolTimeStartPacket->Free();
-							}
-							break;
-							case en_SkillType::SKILL_SHAMAN_FLAME_HARPOON:
-							case en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE:
-							case en_SkillType::SKILL_SHAMAN_HELL_FIRE:
-							case en_SkillType::SKILL_SHAMAN_ROOT:
-							case en_SkillType::SKILL_SHAMAN_ICE_CHAIN:
-							case en_SkillType::SKILL_TAIOIST_DIVINE_STRIKE:
-							case en_SkillType::SKILL_TAIOIST_ROOT:
-								if (MyPlayer->_SelectTarget != nullptr)
-								{
-									if (MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId != MyPlayer->_GameObjectInfo.ObjectId)
-									{
-										SpellCastingTime = ReqMagicSkill->GetSkillInfo()->SkillCastingTime / 1000.0f;
-
-										int16 Distance = st_Vector2Int::Distance(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
-
-										if (Distance <= 6)
-										{
-											FindGameObject = MyPlayer->GetChannel()->FindChannelObject(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId,
-												MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType);
-											if (FindGameObject != nullptr)
-											{
-												Targets.push_back(FindGameObject);
-											}
-
-											// 스펠창 시작
-											ResMagicPacket = MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId, true, ReqMagicSkill->GetSkillInfo()->SkillType, SpellCastingTime);
-											SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResMagicPacket);
-											ResMagicPacket->Free();
-										}
-										else
-										{
-											CMessage* ResErrorPacket = MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_PLACE_DISTANCE, ReqMagicSkill->GetSkillInfo()->SkillName.c_str(), Distance);
-											SendPacket(MyPlayer->_SessionId, ResErrorPacket);
-											ResErrorPacket->Free();
-										}
-									}
-									else
-									{
-										CMessage* ResErrorPacket = MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_MYSELF_TARGET, ReqMagicSkill->GetSkillInfo()->SkillName.c_str());
-										SendPacket(MyPlayer->_SessionId, ResErrorPacket);
-										ResErrorPacket->Free();
-									}
-								}
-								else
-								{
-									CMessage* ResErrorPacket = MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT, ReqMagicSkill->GetSkillInfo()->SkillName.c_str());
-									SendPacket(MyPlayer->_SessionId, ResErrorPacket);
-									ResErrorPacket->Free();
-								}
-								break;
-							case en_SkillType::SKILL_SHAMAN_ICE_WAVE:
-								{
-									if (MyPlayer->_SelectTarget != nullptr)
-									{
-										if (MyPlayer->_ComboSkill != nullptr && MyPlayer->_ComboSkill->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_ICE_WAVE)
-										{
-											CSkill* NewDebufSkill = G_ObjectManager->SkillCreate();
-
-											st_AttackSkillInfo* NewDebufSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(ReqMagicSkill->GetSkillInfo()->SkillMediumCategory);
-											*NewDebufSkillInfo = *((st_AttackSkillInfo*)ReqMagicSkill->GetSkillInfo());
-
-											NewDebufSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewDebufSkillInfo);
-											NewDebufSkill->StatusAbnormalDurationTimeStart();
-
-											MyPlayer->_SelectTarget->AddDebuf(NewDebufSkill);
-											MyPlayer->_SelectTarget->SetStatusAbnormal(STATUS_ABNORMAL_SHAMAN_ICE_WAVE);
-
-											CMessage* ResStatusAbnormalPacket = MakePacketStatusAbnormal(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId,
-												MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType,
-												MyPlayer->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
-												NewDebufSkill->GetSkillInfo()->SkillType,
-												true, STATUS_ABNORMAL_SHAMAN_ICE_WAVE);
-											SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
-											ResStatusAbnormalPacket->Free();
-
-											CMessage* ResBufDeBufSkillPacket = MakePacketBufDeBuf(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, false, NewDebufSkill->GetSkillInfo());
-											SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
-											ResBufDeBufSkillPacket->Free();
-
-											ReqMagicSkill->CoolTimeStart();
-
-											for (auto QuickSlotBarPosition : MyPlayer->_QuickSlotManager.FindQuickSlotBar(ReqMagicSkill->GetSkillInfo()->SkillType))
-											{
-												// 클라에게 쿨타임 표시
-												CMessage* ResCoolTimeStartPacket = MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
-													QuickSlotBarPosition.QuickSlotBarSlotIndex,
-													1.0f, ReqMagicSkill);
-												SendPacket(Session->SessionId, ResCoolTimeStartPacket);
-												ResCoolTimeStartPacket->Free();
-											}
-										}
-									}
-									else
-									{
-										CMessage* ResErrorPacket = MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT, ReqMagicSkill->GetSkillInfo()->SkillName.c_str());
-										SendPacket(MyPlayer->_SessionId, ResErrorPacket);
-										ResErrorPacket->Free();
-									}																		
-								}
-								break;
-							case en_SkillType::SKILL_TAIOIST_HEALING_LIGHT:
-							case en_SkillType::SKILL_TAIOIST_HEALING_WIND:
-								SpellCastingTime = ReqMagicSkill->GetSkillInfo()->SkillCastingTime / 1000.0f;
-
-								if (MyPlayer->_SelectTarget != nullptr)
-								{
-									FindGameObject = MyPlayer->GetChannel()->FindChannelObject(MyPlayer->_SelectTarget->_GameObjectInfo.ObjectId, MyPlayer->_SelectTarget->_GameObjectInfo.ObjectType);
-									if (FindGameObject != nullptr)
-									{
-										Targets.push_back(FindGameObject);
-									}
-
-									// 스펠창 시작
-									ResMagicPacket = MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId,
-										true, ReqMagicSkill->GetSkillInfo()->SkillType, SpellCastingTime);
-									SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResMagicPacket);
-									ResMagicPacket->Free();
-								}
-								else
-								{
-									MyPlayer->_SelectTarget = MyPlayer;
-
-									Targets.push_back(MyPlayer);
-
-									CMessage* ResErrorPacket = MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_HEAL_NON_SELECT_OBJECT, ReqMagicSkill->GetSkillInfo()->SkillName.c_str());
-									SendPacket(MyPlayer->_SessionId, ResErrorPacket);
-									ResErrorPacket->Free();
-
-									// 스펠창 시작
-									ResMagicPacket = MakePacketResMagic(MyPlayer->_GameObjectInfo.ObjectId,
-										true, ReqMagicSkill->GetSkillInfo()->SkillType, SpellCastingTime);
-									SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResMagicPacket);
-									ResMagicPacket->Free();
-								}
-								break;
-							}
-
-							if (Targets.size() >= 1)
-							{
-								MyPlayer->_Owner = Targets[0];								
-
-								st_GameObjectJob* SpellStartJob = MakeGameObjectJobSpellStart(ReqMagicSkill);
-								MyPlayer->_GameObjectJobQue.Enqueue(SpellStartJob);								
-							}
-						}
-						else
-						{
-							CMessage* ResErrorPacket = MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_SKILL_COOLTIME,
-								ReqMagicSkill->GetSkillInfo()->SkillName.c_str());
-							SendPacket(MyPlayer->_SessionId, ResErrorPacket);
-							ResErrorPacket->Free();
-						}
-					}
-				}				
-			}			
+			st_GameObjectJob* SpellStartJob = MakeGameObjectJobSpellStart((en_SkillType)ReqSkillType);
+			MyPlayer->_GameObjectJobQue.Enqueue(SpellStartJob);			
 		} while (0);
 	}
 
@@ -2742,7 +2419,7 @@ void CGameServer::PacketProcReqItemSelect(int64 SessionId, CMessage* Message)
 			int16 SelectItemTileGridPositionY;
 			*Message >> SelectItemTileGridPositionX;
 			*Message >> SelectItemTileGridPositionY;
-
+						
 			CItem* SelectItem = MyPlayer->_InventoryManager.SelectItem(0, SelectItemTileGridPositionX, SelectItemTileGridPositionY);
 
 			if (SelectItem != nullptr)
@@ -3562,8 +3239,8 @@ void CGameServer::PacketProcReqItemUse(int64 SessionId, CMessage* Message)
 				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL:
 					{						
 						// 체력 포션 사용
-						st_GameObjectJob* HPHealJob = MakeGameObjectJobHPHeal(MyPlayer, UseItem->_ItemInfo.ItemHealPoint);
-						MyPlayer->_GameObjectJobQue.Enqueue(HPHealJob);
+						st_GameObjectJob* ItemHPHealJob = MakeGameObjectJobItemHPHeal(UseItem->_ItemInfo.ItemSmallCategory);
+						MyPlayer->_GameObjectJobQue.Enqueue(ItemHPHealJob);
 					}
 					break;		
 				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_MANA_RESTORATION_POTION_SMALL:
@@ -5858,7 +5535,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobMeleeAttack(int16 MeleeSkillType
 	return MeleeAttackJob;
 }
 
-st_GameObjectJob* CGameServer::MakeGameObjectJobSpellStart(CSkill* StartSpellSkill)
+st_GameObjectJob* CGameServer::MakeGameObjectJobSpellStart(en_SkillType StartSpellSkilltype)
 {
 	st_GameObjectJob* SpellStartJob = G_ObjectManager->GameObjectJobCreate();
 	SpellStartJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SPELL_START;
@@ -5866,7 +5543,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobSpellStart(CSkill* StartSpellSki
 	CGameServerMessage* SpellStartMessage = CGameServerMessage::GameServerMessageAlloc();
 	SpellStartMessage->Clear();
 
-	*SpellStartMessage << &StartSpellSkill;
+	*SpellStartMessage << (int16)StartSpellSkilltype;
 
 	SpellStartJob->GameObjectJobMessage = SpellStartMessage;
 
@@ -5906,26 +5583,6 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobGatheringCancel()
 	SpellCancelJob->GameObjectJobMessage = nullptr;
 
 	return SpellCancelJob;
-}
-
-st_GameObjectJob* CGameServer::MakeGameObjectJobShockRelease()
-{
-	st_GameObjectJob* ShockReleaseJob = G_ObjectManager->GameObjectJobCreate();
-	ShockReleaseJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SHOCK_RELEASE;
-
-	ShockReleaseJob->GameObjectJobMessage = nullptr;
-
-	return ShockReleaseJob;
-}
-
-st_GameObjectJob* CGameServer::MakeGameObjectJobBackTeleport()
-{
-	st_GameObjectJob* BackTeleportJob = G_ObjectManager->GameObjectJobCreate();
-	BackTeleportJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_BACK_TELEPORT;
-
-	BackTeleportJob->GameObjectJobMessage = nullptr;
-
-	return BackTeleportJob;
 }
 
 st_GameObjectJob* CGameServer::MakeGameObjectJobItemDrop(int16 DropItemType, int32 DropItemCount)
@@ -6508,26 +6165,43 @@ st_GameObjectJob* CGameServer::MakeGameObjectDamage(CGameObject* Attacker, bool 
 	return DamageJob;
 }
 
-st_GameObjectJob* CGameServer::MakeGameObjectJobHPHeal(CGameObject* Healer, int32 HPHealPoint)
+st_GameObjectJob* CGameServer::MakeGameObjectJobHPHeal(CGameObject* Healer, bool IsCritical, int32 HealPoint, en_SkillType SkillType)
 {
-	st_GameObjectJob* HPHealJob = G_ObjectManager->GameObjectJobCreate();
-	HPHealJob->GameObjectJobType = en_GameObjectJobType::GAMEOJBECT_JOB_TYPE_HP_HEAL;
+	st_GameObjectJob* SkillHealJob = G_ObjectManager->GameObjectJobCreate();
+	SkillHealJob->GameObjectJobType = en_GameObjectJobType::GAMEOJBECT_JOB_TYPE_SKILL_HP_HEAL;
 
-	CGameServerMessage* HPHealMessage = CGameServerMessage::GameServerMessageAlloc();
-	HPHealMessage->Clear();
+	CGameServerMessage* SkillHealMessage = CGameServerMessage::GameServerMessageAlloc();
+	SkillHealMessage->Clear();
 
-	*HPHealMessage << &Healer;
-	*HPHealMessage << HPHealPoint;
+	*SkillHealMessage << &Healer;
+	*SkillHealMessage << IsCritical;
+	*SkillHealMessage << HealPoint;
+	*SkillHealMessage << (int16)SkillType;
 
-	HPHealJob->GameObjectJobMessage = HPHealMessage;
+	SkillHealJob->GameObjectJobMessage = SkillHealMessage;
 
-	return HPHealJob;
+	return SkillHealJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobItemHPHeal(en_SmallItemCategory HealItemCategory)
+{
+	st_GameObjectJob* ItemHealJob = G_ObjectManager->GameObjectJobCreate();
+	ItemHealJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_ITEM_HP_HEAL;
+
+	CGameServerMessage* ItemHealMessage = CGameServerMessage::GameServerMessageAlloc();
+	ItemHealMessage->Clear();
+
+	*ItemHealMessage << (int16)HealItemCategory;	
+
+	ItemHealJob->GameObjectJobMessage = ItemHealMessage;
+
+	return ItemHealJob;
 }
 
 st_GameObjectJob* CGameServer::MakeGameObjectJobMPHeal(CGameObject* Healer, int32 MPHealPoint)
 {
 	st_GameObjectJob* MPHealJob = G_ObjectManager->GameObjectJobCreate();
-	MPHealJob->GameObjectJobType = en_GameObjectJobType::GAMEOJBECT_JOB_TYPE_MP_HEAL;
+	MPHealJob->GameObjectJobType = en_GameObjectJobType::GAMEOJBECT_JOB_TYPE_SKILL_MP_HEAL;
 
 	CGameServerMessage* MPHealMessage = CGameServerMessage::GameServerMessageAlloc();
 	MPHealMessage->Clear();
@@ -6743,7 +6417,7 @@ CGameServerMessage* CGameServer::MakePacketResMagic(int64 ObjectId, bool SpellSt
 
 	ResMagicMessage->Clear();
 
-	*ResMagicMessage << (int16)en_PACKET_S2C_MAGIC;
+	*ResMagicMessage << (int16)en_PACKET_S2C_SPELL;
 	*ResMagicMessage << ObjectId;
 	*ResMagicMessage << SpellStart;
 	*ResMagicMessage << (int16)SkillType;
@@ -7453,6 +7127,9 @@ CGameServerMessage* CGameServer::MakePacketCommonError(en_PersonalMessageType Pe
 
 	switch (PersonalMessageType)
 	{	
+	case en_PersonalMessageType::PERSOANL_MESSAGE_STATUS_ABNORMAL_SPELL:
+		wsprintf(ErrorMessage, L"상태이상에 걸려 [%s]를 사용 할 수 없습니다.", Name);
+		break;
 	case en_PersonalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT:
 		wsprintf(ErrorMessage, L"대상을 선택하고 사용해야 합니다.");
 		break;

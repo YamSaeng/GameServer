@@ -301,9 +301,9 @@ private:
 	//-------------------------------------------------
 	st_GameObjectJob* MakeGameObjectJobMeleeAttack(int16 MeleeSkillType);
 	//------------------------------------------------
-	// 마법 공격 시작 잡 생성 함수
+	// 마법 시작 잡 생성 함수
 	//------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobSpellStart(CSkill* StartSpellSkill);
+	st_GameObjectJob* MakeGameObjectJobSpellStart(en_SkillType StartSpellSkilltype);
 	//------------------------------------------------
 	// 마법 공격 취소 잡 생성 함수
 	//------------------------------------------------
@@ -316,15 +316,7 @@ private:
 	// 채집 취소 잡 생성 함수
 	//---------------------------------------------------
 	st_GameObjectJob* MakeGameObjectJobGatheringCancel();	
-
-	//------------------------------------------------
-	// 충격해제 잡 생성 함수
-	//------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobShockRelease();
-	//------------------------------------------------
-	// 시공의 뒤틀림 잡 생성 함수
-	//------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobBackTeleport();
+	
 	//-----------------------------------------------------------------------------------
 	// 아이템 버리기 잡 생성 함수
 	//-----------------------------------------------------------------------------------
@@ -463,9 +455,13 @@ public:
 	//-------------------------------------------------------------------------------
 	st_GameObjectJob* MakeGameObjectDamage(CGameObject* Attacker, bool IsCritical, int32 Damage, en_SkillType SkillType);
 	//-------------------------------------------------------------------------------
-	// 체력 회복 잡 생성 함수
+	// 기술 체력 회복 잡 생성 함수
 	//-------------------------------------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobHPHeal(CGameObject* Healer, int32 HPHealPoint);
+	st_GameObjectJob* MakeGameObjectJobHPHeal(CGameObject* Healer, bool IsCritical, int32 HealPoint, en_SkillType SkillType);
+	//-------------------------------------------------------------------------------
+	// 아이템 체력 회복 잡 생성 함수
+	//-------------------------------------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobItemHPHeal(en_SmallItemCategory HealItemCategory);
 	//-------------------------------------------------------------------------------
 	// 마력 회복 잡 생성 함수
 	//-------------------------------------------------------------------------------
