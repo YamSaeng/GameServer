@@ -77,7 +77,11 @@ public:
 	CGameObject(st_GameObjectInfo GameObjectInfo);
 	virtual ~CGameObject();
 
+	//-----------------------------
+	// 상태 이상에 걸려 있는지 확인
+	//-----------------------------
 	void StatusAbnormalCheck();
+
 	virtual void Update();
 	virtual bool OnDamaged(CGameObject* Attacker, int32 DamagePoint);
 	virtual void OnHeal(CGameObject* Healer, int32 HealPoint);	
@@ -118,7 +122,18 @@ public:
 	void SetStatusAbnormal(int8 StatusAbnormalValue);
 	void ReleaseStatusAbnormal(int8 StatusAbnormalValue);
 
-	int8 CheckStatusAbnormal();
+	//--------------------------------------------
+	// 모든 상태이상 체크
+	//--------------------------------------------
+	int8 CheckAllStatusAbnormal();
+	//--------------------------------------------
+	// 제어 할 수 없는 상태이상 체크
+	//--------------------------------------------
+	int8 CheckCantControlStatusAbnormal();
+	//--------------------------------------------
+	// 제어 할 수 있는 상태이상 체크
+	//--------------------------------------------
+	int8 CheckCanControlStatusAbnormal();
 
 	CChannel* GetChannel();
 	void SetChannel(CChannel* Channel);
