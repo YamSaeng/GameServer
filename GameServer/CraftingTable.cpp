@@ -51,20 +51,9 @@ void CCraftingTable::InputMaterialItem(CItem* MaterialItem, int16 MaterialItemCo
 		// 아이템 생성
 		CItem* NewMaterialItem = G_ObjectManager->ItemCreate(MaterialItem->_ItemInfo.ItemSmallCategory);
 		if (NewMaterialItem != nullptr)
-		{
-			NewMaterialItem->_ItemInfo.ItemDBId = 0;
-			NewMaterialItem->_ItemInfo.InventoryItemNumber = 0;
-			NewMaterialItem->_ItemInfo.ItemIsQuickSlotUse = false;			
-			NewMaterialItem->_ItemInfo.ItemWidth = MaterialItem->_ItemInfo.ItemWidth;
-			NewMaterialItem->_ItemInfo.ItemHeight = MaterialItem->_ItemInfo.ItemHeight;
+		{				
 			NewMaterialItem->_ItemInfo.ItemTileGridPositionX = MaterialItem->_ItemInfo.ItemTileGridPositionX;
-			NewMaterialItem->_ItemInfo.ItemTileGridPositionY = MaterialItem->_ItemInfo.ItemTileGridPositionY;
-			NewMaterialItem->_ItemInfo.ItemLargeCategory = MaterialItem->_ItemInfo.ItemLargeCategory;
-			NewMaterialItem->_ItemInfo.ItemMediumCategory = MaterialItem->_ItemInfo.ItemMediumCategory;
-			NewMaterialItem->_ItemInfo.ItemSmallCategory = MaterialItem->_ItemInfo.ItemSmallCategory;
-			NewMaterialItem->_ItemInfo.ItemName = MaterialItem->_ItemInfo.ItemName;
-			NewMaterialItem->_ItemInfo.ItemExplain = MaterialItem->_ItemInfo.ItemExplain;
-			NewMaterialItem->_ItemInfo.ItemMaxCount = MaterialItem->_ItemInfo.ItemMaxCount;
+			NewMaterialItem->_ItemInfo.ItemTileGridPositionY = MaterialItem->_ItemInfo.ItemTileGridPositionY;									
 			NewMaterialItem->_ItemInfo.ItemCount = MaterialItemCount;
 			NewMaterialItem->_ItemInfo.ItemIsEquipped = MaterialItem->_ItemInfo.ItemIsEquipped;
 
