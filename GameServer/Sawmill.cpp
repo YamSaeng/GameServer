@@ -106,8 +106,7 @@ void CSawmill::UpdateCrafting()
 						if (CompleteItemIter == _CompleteItems.end())
 						{
 							CItem* CompleteItemCharCoal = G_ObjectManager->ItemCreate(CraftingCompleteItem->_ItemInfo.ItemSmallCategory);
-							CompleteItemCharCoal->_ItemInfo = CraftingCompleteItem->_ItemInfo;
-							CompleteItemCharCoal->_ItemInfo.ItemCount = 1;
+							CompleteItemCharCoal->_ItemInfo.ItemCount = 1;				
 
 							_CompleteItems.insert(pair<en_SmallItemCategory, CItem*>(CompleteItemCharCoal->_ItemInfo.ItemSmallCategory, CompleteItemCharCoal));
 						}
