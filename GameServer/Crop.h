@@ -7,6 +7,8 @@ public:
 	CCrop();
 	~CCrop();
 
+	float _CropGrowthRatio;
+
 	void Init(en_SmallItemCategory CropItemCategory);
 
 	virtual void Update() override;
@@ -26,7 +28,7 @@ private:
 
 	st_ItemInfo _CropItemInfo;
 
-	float _CropRatio;	
+	float _CropRatio;		
 
 	int64 _CropIdleTick;
 	int16 _CropTime;

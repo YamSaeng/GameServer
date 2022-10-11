@@ -26,6 +26,8 @@ void CCrop::Init(en_SmallItemCategory CropItemCategory)
 	_GameObjectInfo.ObjectCropMaxStep = _CropItemInfo.ItemMaxstep;
 	_GameObjectInfo.ObjectCropStep = 1;	
 
+	_CropGrowthRatio = 0.1;
+
 	_CropRatio = 0;
 
 	_CropTime = 0;	
@@ -68,6 +70,7 @@ void CCrop::UpdateIdle()
 		
 		float Ratio = 1 / (float)_CropItemInfo.ItemGrowTime;
 
+		_CropGrowthRatio += Ratio;
 		_CropRatio += Ratio;
 
 		if (_CropRatio > (1 / (float)_GameObjectInfo.ObjectCropMaxStep))
@@ -75,7 +78,7 @@ void CCrop::UpdateIdle()
 			_GameObjectInfo.ObjectCropStep += 1;			
 			
 			_CropRatio = 0;
-		}				
+		}					
 
 		switch (_CropState)
 		{
