@@ -697,11 +697,11 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 씨앗 심기 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketSeedFarming(st_ItemInfo SeedItem);
+	CGameServerMessage* MakePacketSeedFarming(st_ItemInfo SeedItem, int64 SeedObjectID);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 작물 성장 단계 확인 요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketPlantGrowthStep(int64 PlantObjectID, int8 PlantGrowthStep);
+	CGameServerMessage* MakePacketPlantGrowthStep(int64 PlantObjectID, int8 PlantGrowthStep, float PlantGrowthRatio);
 
 	//---------------------------------------------------
 	// 로그인 서버 로그아웃 요청 패킷 조합

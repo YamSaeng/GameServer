@@ -1152,10 +1152,7 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_MAGIC_CANCEL:
 		PacketProcReqMagicCancel(SessionID, Message);
-		break;
-	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_GATHERING_CANCEL:
-		PacketProcReqGatheringCancel(SessionID, Message);
-		break;
+		break;	
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_LEFT_MOUSE_OBJECT_INFO:
 		PacketProcReqLeftMouseObjectInfo(SessionID, Message);
 		break;
@@ -1170,7 +1167,10 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_GATHERING:
 		PacketProcReqGathering(SessionID, Message);
-		break;	
+		break;
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_GATHERING_CANCEL:
+		PacketProcReqGatheringCancel(SessionID, Message);
+		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_MESSAGE:
 		PacketProcReqChattingMessage(SessionID, Message);
 		break;
@@ -1964,37 +1964,27 @@ void CGameServer::PacketProcReqGathering(int64 SessionID, CMessage* Message)
 			int16 ObjectType;
 			*Message >> ObjectType;
 
+			switch ((en_GameObjectType)ObjectType)
+			{
+			case en_GameObjectType::OBJECT_CROP_CORN:
+			case en_GameObjectType::OBJECT_CROP_POTATO:
+				break;			
+			case en_GameObjectType::OBJECT_TREE:
+			case en_GameObjectType::OBJECT_STONE:
+				{
+					CGameObject* FindObject = MyPlayer->GetChannel()->FindChannelObject(ObjectId, (en_GameObjectType)ObjectType);
+	
+					st_GameObjectJob* GatheringStartJob = MakeGameObjectJobGatheringStart(FindObject);
+					MyPlayer->_GameObjectJobQue.Enqueue(GatheringStartJob);
+				}				
+				break;
+			}
+
 			CGameObject* FindObject = MyPlayer->GetChannel()->FindChannelObject(ObjectId, (en_GameObjectType)ObjectType);
 			if (FindObject != nullptr && FindObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::GATHERING)
 			{
-				st_Vector2 DirNormalVector = (FindObject->_GameObjectInfo.ObjectPositionInfo.Position - MyPlayer->_GameObjectInfo.ObjectPositionInfo.Position).Normalize();
-
-				en_MoveDir Dir = st_Vector2::GetMoveDir(DirNormalVector);
-
-				float Distance = st_Vector2::Distance(FindObject->_GameObjectInfo.ObjectPositionInfo.Position, MyPlayer->_GameObjectInfo.ObjectPositionInfo.Position);
-
-				if (MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir != Dir)
-				{
-					CMessage* DirErrorPacket = MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_DIR_DIFFERENT, FindObject->_GameObjectInfo.ObjectName.c_str());
-					SendPacket(Session->SessionId, DirErrorPacket);
-					DirErrorPacket->Clear();
-					break;
-				}
-
-				if (Distance > 1.0f)
-				{
-					CMessage* DirErrorPacket = MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_GATHERING_DISTANCE, FindObject->_GameObjectInfo.ObjectName.c_str());
-					SendPacket(Session->SessionId, DirErrorPacket);
-					DirErrorPacket->Clear();
-					break;
-				}
-
-				CMap* Map = G_MapManager->GetMap(1);
-
-				vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetFieldOfViewPlayers(MyPlayer, 1, false);
-
 				st_GameObjectJob* GatheringStartJob = MakeGameObjectJobGatheringStart(FindObject);
-				MyPlayer->_GameObjectJobQue.Enqueue(GatheringStartJob);
+				MyPlayer->_GameObjectJobQue.Enqueue(GatheringStartJob);								
 			}
 		}
 	} while (0);
@@ -3228,14 +3218,7 @@ void CGameServer::PacketProcReqItemUse(int64 SessionId, CMessage* Message)
 						st_GameObjectJob* DoItemEquipmentJob = MakeGameObjectJobOnEquipment(UseItem);
 						MyPlayer->_GameObjectJobQue.Enqueue(DoItemEquipmentJob);
 					}					
-					break;									
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_SEED_POTATO:
-					{
-						CMessage* ResSeedFarmingPacket = MakePacketSeedFarming(UseItem->_ItemInfo);
-						SendPacket(Session->SessionId, ResSeedFarmingPacket);
-						ResSeedFarmingPacket->Free();
-					}	
-					break;
+					break;												
 				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL:
 					{						
 						// 체력 포션 사용
@@ -7422,7 +7405,7 @@ CGameServerMessage* CGameServer::MakePacketOffEquipment(int64 PlayerID, en_Equip
 	return ResOffEquipmentMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketSeedFarming(st_ItemInfo SeedItem)
+CGameServerMessage* CGameServer::MakePacketSeedFarming(st_ItemInfo SeedItem, int64 SeedObjectID)
 {
 	CGameServerMessage* ResSeedFarmingMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResSeedFarmingMessage == nullptr)
@@ -7434,11 +7417,12 @@ CGameServerMessage* CGameServer::MakePacketSeedFarming(st_ItemInfo SeedItem)
 
 	*ResSeedFarmingMessage << (int16)en_PACKET_S2C_SEED_FARMING;
 	*ResSeedFarmingMessage << SeedItem;
+	*ResSeedFarmingMessage << SeedObjectID;
 
 	return ResSeedFarmingMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketPlantGrowthStep(int64 PlantObjectID, int8 PlantGrowthStep)
+CGameServerMessage* CGameServer::MakePacketPlantGrowthStep(int64 PlantObjectID, int8 PlantGrowthStep, float PlantGrowthRatio)
 {
 	CGameServerMessage* ResPlantGrowthStepMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResPlantGrowthStepMessage == nullptr)
@@ -7451,6 +7435,7 @@ CGameServerMessage* CGameServer::MakePacketPlantGrowthStep(int64 PlantObjectID, 
 	*ResPlantGrowthStepMessage << (int16)en_PACKET_S2C_PLANT_GROWTH_CHECK;
 	*ResPlantGrowthStepMessage << PlantObjectID;
 	*ResPlantGrowthStepMessage << PlantGrowthStep;
+	*ResPlantGrowthStepMessage << PlantGrowthRatio;
 
 	return ResPlantGrowthStepMessage;
 }
