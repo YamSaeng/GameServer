@@ -4,6 +4,7 @@
 #include "DataManager.h"
 #include "Skill.h"
 #include "Furnace.h"
+#include "Crop.h"
 
 CGameObject::CGameObject()
 {
@@ -915,12 +916,32 @@ void CGameObject::Update()
 				if (_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::GATHERING)
 				{
 					CGameObject* GatheringTarget;
-					*GameObjectJob->GameObjectJobMessage >> &GatheringTarget;
+					*GameObjectJob->GameObjectJobMessage >> &GatheringTarget;				
+
+					CCrop* Crop = (CCrop*)GatheringTarget;
 
 					if (GatheringTarget != nullptr 
-						&& GatheringTarget->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::READY_DEAD
-						&& GatheringTarget->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
+						&& Crop->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::READY_DEAD
+						&& Crop->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 					{
+						CMessage* ResGatheringPacket = nullptr;
+
+						switch (GatheringTarget->_GameObjectInfo.ObjectType)
+						{
+						case en_GameObjectType::OBJECT_STONE:
+							ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"돌 채집");
+							break;
+						case en_GameObjectType::OBJECT_TREE:
+							ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"나무 벌목");
+							break;
+						case en_GameObjectType::OBJECT_CROP_CORN:
+							ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"옥수수 수확");
+							break;
+						case en_GameObjectType::OBJECT_CROP_POTATO:
+							ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"감자 수확");
+							break;						
+						}
+
 						_GatheringTarget = GatheringTarget;
 
 						_GatheringTick = GetTickCount64() + 1000;
@@ -932,28 +953,7 @@ void CGameObject::Update()
 							_GameObjectInfo.ObjectType,
 							_GameObjectInfo.ObjectPositionInfo.State);
 						G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResObjectStateChangePacket);
-						ResObjectStateChangePacket->Free();
-
-						CMessage* ResGatheringPacket = nullptr;
-
-						switch (GatheringTarget->_GameObjectInfo.ObjectType)
-						{
-						case en_GameObjectType::OBJECT_STONE:
-							ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"돌 채집");
-							break;
-						case en_GameObjectType::OBJECT_TREE:
-							ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"나무 벌목");
-							break;
-						case en_GameObjectType::OBJECT_CROP_POTATO:
-							ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"감자 수확");
-							break;
-						case en_GameObjectType::OBJECT_CROP_CORN:
-							ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"옥수수 수확");
-							break;
-						default:
-							CRASH("채집할 수 없는 채집물 채집 요청");
-							break;
-						}
+						ResObjectStateChangePacket->Free();				
 
 						G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResGatheringPacket);
 						ResGatheringPacket->Free();
