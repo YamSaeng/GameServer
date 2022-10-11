@@ -920,43 +920,66 @@ void CGameObject::Update()
 
 					CCrop* Crop = (CCrop*)GatheringTarget;
 
+					CPlayer* Player = (CPlayer*)this;
+
 					if (GatheringTarget != nullptr 
 						&& Crop->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::READY_DEAD
 						&& Crop->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 					{
-						CMessage* ResGatheringPacket = nullptr;
+						st_Vector2 DirNormalVector = (Crop->_GameObjectInfo.ObjectPositionInfo.Position - _GameObjectInfo.ObjectPositionInfo.Position).Normalize();
+						en_MoveDir Dir = st_Vector2::GetMoveDir(DirNormalVector);						
 
-						switch (GatheringTarget->_GameObjectInfo.ObjectType)
+						if (_GameObjectInfo.ObjectPositionInfo.MoveDir != Dir)
 						{
-						case en_GameObjectType::OBJECT_STONE:
-							ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"돌 채집");
+							CMessage* DirErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_DIR_DIFFERENT, Crop->_GameObjectInfo.ObjectName.c_str());
+							G_ObjectManager->GameServer->SendPacket(Player->_SessionId, DirErrorPacket);
+							DirErrorPacket->Clear();
 							break;
-						case en_GameObjectType::OBJECT_TREE:
-							ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"나무 벌목");
-							break;
-						case en_GameObjectType::OBJECT_CROP_CORN:
-							ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"옥수수 수확");
-							break;
-						case en_GameObjectType::OBJECT_CROP_POTATO:
-							ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"감자 수확");
-							break;						
 						}
 
-						_GatheringTarget = GatheringTarget;
+						float Distance = st_Vector2::Distance(_GameObjectInfo.ObjectPositionInfo.Position, Crop->_GameObjectInfo.ObjectPositionInfo.Position);
+						if (Distance < 1.2f)
+						{
+							CMessage* ResGatheringPacket = nullptr;
 
-						_GatheringTick = GetTickCount64() + 1000;
+							switch (GatheringTarget->_GameObjectInfo.ObjectType)
+							{
+							case en_GameObjectType::OBJECT_STONE:
+								ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"돌 채집");
+								break;
+							case en_GameObjectType::OBJECT_TREE:
+								ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"나무 벌목");
+								break;
+							case en_GameObjectType::OBJECT_CROP_CORN:
+								ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"옥수수 수확");
+								break;
+							case en_GameObjectType::OBJECT_CROP_POTATO:
+								ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"감자 수확");
+								break;
+							}
 
-						_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::GATHERING;
+							_GatheringTarget = GatheringTarget;
 
-						CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
-							_GameObjectInfo.ObjectPositionInfo.MoveDir,
-							_GameObjectInfo.ObjectType,
-							_GameObjectInfo.ObjectPositionInfo.State);
-						G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResObjectStateChangePacket);
-						ResObjectStateChangePacket->Free();				
+							_GatheringTick = GetTickCount64() + 1000;
 
-						G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResGatheringPacket);
-						ResGatheringPacket->Free();
+							_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::GATHERING;
+
+							CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
+								_GameObjectInfo.ObjectPositionInfo.MoveDir,
+								_GameObjectInfo.ObjectType,
+								_GameObjectInfo.ObjectPositionInfo.State);
+							G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResObjectStateChangePacket);
+							ResObjectStateChangePacket->Free();
+
+							G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResGatheringPacket);
+							ResGatheringPacket->Free();
+						}	
+						else
+						{
+							CMessage* DirErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_GATHERING_DISTANCE, Crop->_GameObjectInfo.ObjectName.c_str());
+							G_ObjectManager->GameServer->SendPacket(Player->_SessionId, DirErrorPacket);
+							DirErrorPacket->Clear();
+						}
 					}					
 				}				
 			}
