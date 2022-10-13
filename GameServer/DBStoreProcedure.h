@@ -220,33 +220,38 @@ namespace SP
 		void OutItemEnchantPoint(int8& ItemEnchantPoint) { BindCol(10, ItemEnchantPoint); }
 	};
 
+	// 캐릭터 새로 생성시 기본적인 정보 셋팅
+	class CDBGameCharacterDefaultInfoCreate : public CDBBind<2, 0>
+	{
+	public:
+
+	};
+
 	// 스킬 테이블에 있는 스킬 모두 긁어옴
-	class CDBGameServerSkillGet : public CDBBind<2, 5>
+	class CDBGameServerSkillGet : public CDBBind<2, 4>
 	{
 	public:
 		CDBGameServerSkillGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetSkill(?,?)}") {}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
-
-		void OutIsSkillLearn(bool& OutIsSkillLearn) { BindCol(0, OutIsSkillLearn); }		
-		void OutSkillLargeCategory(int8& SkillLargeCategory) { BindCol(1, SkillLargeCategory); }
-		void OutSkillMediumCategory(int8& SkillMediumCategory) { BindCol(2, SkillMediumCategory); }
-		void OutSkillType(int16& SkillType) { BindCol(3, SkillType); }
-		void OutSkillLevel(int8& SkillLevel) { BindCol(4, SkillLevel); }		
+		
+		void OutSkillLargeCategory(int8& SkillLargeCategory) { BindCol(0, SkillLargeCategory); }
+		void OutSkillMediumCategory(int8& SkillMediumCategory) { BindCol(1, SkillMediumCategory); }
+		void OutSkillType(int16& SkillType) { BindCol(2, SkillType); }
+		void OutSkillLevel(int8& SkillLevel) { BindCol(3, SkillLevel); }		
 	};
 
 	// 스킬 테이블에 스킬 넣기
-	class CDBGameServerSkillToSkillBox : public CDBBind<7, 0>
+	class CDBGameServerSkillToSkillBox : public CDBBind<6, 0>
 	{
 	public:
 		CDBGameServerSkillToSkillBox(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spSkillToSkillBox(?,?,?,?,?,?,?)}") {}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
-		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
-		void InIsSkillLearn(bool& IsSkillLearn) { BindParam(2, IsSkillLearn); }		
-		void InSkillLargeCategory(int8& SkillLargeCategory) { BindParam(3, SkillLargeCategory); };
-		void InSkillMediumCategory(int8& SkillMediumCategory) { BindParam(4, SkillMediumCategory); };
-		void InSkillType(int16& SkillType) { BindParam(5, SkillType); }
-		void InSkillLevel(int8& SkillLevel) { BindParam(6, SkillLevel); }		
+		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }		
+		void InSkillLargeCategory(int8& SkillLargeCategory) { BindParam(2, SkillLargeCategory); };
+		void InSkillMediumCategory(int8& SkillMediumCategory) { BindParam(3, SkillMediumCategory); };
+		void InSkillType(int16& SkillType) { BindParam(4, SkillType); }
+		void InSkillLevel(int8& SkillLevel) { BindParam(5, SkillLevel); }		
 	};
 
 	// QuickSlotBarSlot정보 새로 생성

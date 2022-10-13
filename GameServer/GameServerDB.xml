@@ -75,8 +75,7 @@
   <!-- 보유중인 스킬 테이블 -->
   <Table name="Skill" desc="Skill Table">
     <Column name="AccountDBId" type="BigInt" notnull ="true"/>
-    <Column name="PlayerDBId" type="BigInt"  notnull ="true"/>
-	<Column name="IsSkillLearn" type="bit" notnull="true"/>    
+    <Column name="PlayerDBId" type="BigInt"  notnull ="true"/>	
     <Column name="SkillLargeCategory" type="nvarchar(50)" notnull="true"/>
     <Column name="SkillMediumCategory" type="nvarchar(50)" noutnull="true"/>
     <Column name="SkillType" type="nvarchar(50)" notnull ="true"/>
@@ -316,7 +315,7 @@
         SELECT IDENT_CURRENT('Item')
       ]]>
     </Body>
-  </Procedure>
+  </Procedure>  
   
   <!-- 인벤토리 테이블 빈껍데기 아이템 정보 생성-->  
   <Procedure name="spItemToInventoryInit">    
@@ -563,17 +562,16 @@
     <Body>
       <![CDATA[
 	    SET NOCOUNT ON
-        SELECT IsSkillLearn,
-		(CASE WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_PUBLIC' THEN 1
-	          WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_WARRIOR' THEN 2
-	          WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_SHMAN' THEN 3
-	          WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_TAOIST' THEN 4
-	          WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_THIEF' THEN 5
-	          WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_ARCHER' THEN 6
-	          WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_MONSTER_MELEE' THEN 7
-	          WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_MONSTER_MAGIC' THEN 8
-	          ELSE ' '
-	          END),
+        SELECT (CASE WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_PUBLIC' THEN 1
+	                 WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_WARRIOR' THEN 2
+					 WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_SHMAN' THEN 3
+					 WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_TAOIST' THEN 4
+					 WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_THIEF' THEN 5
+					 WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_ARCHER' THEN 6
+					 WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_MONSTER_MELEE' THEN 7
+					 WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_MONSTER_MAGIC' THEN 8
+					 ELSE ' '
+					 END),
 		(CASE WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_ATTACK' THEN 1	          	               	         
 		      WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_BUF' THEN 2
 			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_PUBLIC_PASSIVE' THEN 3
@@ -632,8 +630,7 @@
   <!-- 스킬 테이블에 새로운 스킬 넣기 -->
   <Procedure name="spSkillToSkillBox">
     <Param name="@AccountDBId" type="BigInt"/>
-    <Param name="@PlayerDBId" type="BigInt"/>
-	<Param name="@IsSkillLearn" type="Bit"/>
+    <Param name="@PlayerDBId" type="BigInt"/>	
     <Param name="@SkillLargeCategory" type="TinyInt"/>
     <Param name="@SkillMediumCategory" type="TinyInt"/>
     <Param name="@SkillType" type="SmallInt"/>    
@@ -641,7 +638,7 @@
     <Body>
       <![CDATA[
 	    SET NOCOUNT ON
-        INSERT INTO [dbo].[Skill] VALUES ((@AccountDBId), (@PlayerDBId), (@IsSkillLearn), 
+        INSERT INTO [dbo].[Skill] VALUES ((@AccountDBId), (@PlayerDBId),
 		(CASE WHEN @SkillLargeCategory = 1 THEN 'SKILL_LARGE_CATEGORY_PUBLIC'
 	          WHEN @SkillLargeCategory = 2 THEN 'SKILL_LARGE_CATEGORY_WARRIOR'
 	          WHEN @SkillLargeCategory = 3 THEN 'SKILL_LARGE_CATEGORY_SHMAN'
