@@ -39,8 +39,8 @@ CObjectManager::CObjectManager()
 
 	_SkillMemoryPool = new CMemoryPoolTLS<CSkill>();
 
-	_AttackSkillInfoMemoryPool = new CMemoryPoolTLS<st_AttackSkillInfo>();
-	_TacTicSkillInfoMemoryPool = new CMemoryPoolTLS<st_TacTicSkillInfo>();
+	_PassiveSkillInfoMemoryPool = new CMemoryPoolTLS<st_PassiveSkillInfo>();
+	_AttackSkillInfoMemoryPool = new CMemoryPoolTLS<st_AttackSkillInfo>();	
 	_HealSkillInfoMemoryPool = new CMemoryPoolTLS<st_HealSkillInfo>();
 	_BufSkillInfoMemoryPool = new CMemoryPoolTLS<st_BufSkillInfo>();
 
@@ -311,33 +311,31 @@ st_SkillInfo* CObjectManager::SkillInfoCreate(en_SkillMediumCategory SkillMedium
 {
 	switch (SkillMediumCategory)
 	{
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_ATTACK:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_ATTACK:
-		return _AttackSkillInfoMemoryPool->Alloc();
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_TACTIC:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_TACTIC:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_TACTIC:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_TACTIC:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_TACTIC:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_TACTIC:
-		return _TacTicSkillInfoMemoryPool->Alloc();
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_HEAL:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_HEAL:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_HEAL:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_HEAL:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_HEAL:
-		return _HealSkillInfoMemoryPool->Alloc();
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_BUF:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_BUF:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_BUF:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_BUF:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_BUF:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_PASSIVE:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_PASSIVE:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEOGRY_PROTECTION_PASSIVE:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ASSASSINATION_PASSIVE:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_PASSIVE:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHOOTING_PASSIVE:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_PASSIVE:
+		return _PassiveSkillInfoMemoryPool->Alloc();
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_ATTACK:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_ATTACK:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PROTECTION_ACTIVE_ATTACK:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ASSASSINATION_ACTIVE_ATTACK:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_ATTACK:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHOOTING_ACTIVE_ATTACK:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_ATTACK:
+		return _AttackSkillInfoMemoryPool->Alloc();		
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_HEAL:	
+		return _HealSkillInfoMemoryPool->Alloc();	
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_BUF:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_BUF:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PROTECTION_ACTIVE_BUF:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ASSASSINATION_ACTIVE_BUF:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_BUF:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHOOTING_ACTIVE_BUF:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_BUF:
 		return _BufSkillInfoMemoryPool->Alloc();
 	}
 }
@@ -346,36 +344,34 @@ void CObjectManager::SkillInfoReturn(en_SkillMediumCategory SkillMediumCategory,
 {
 	switch (SkillMediumCategory)
 	{
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_ATTACK:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_ATTACK:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_PASSIVE:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_PASSIVE:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEOGRY_PROTECTION_PASSIVE:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ASSASSINATION_PASSIVE:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_PASSIVE:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHOOTING_PASSIVE:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_PASSIVE:		
+		_PassiveSkillInfoMemoryPool->Free((st_PassiveSkillInfo*)ReturnSkillInfo);
+		break;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_ATTACK:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_ATTACK:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PROTECTION_ACTIVE_ATTACK:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ASSASSINATION_ACTIVE_ATTACK:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_ATTACK:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHOOTING_ACTIVE_ATTACK:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_ATTACK:
 		_AttackSkillInfoMemoryPool->Free((st_AttackSkillInfo*)ReturnSkillInfo);
-		break;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_TACTIC:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_TACTIC:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_TACTIC:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_TACTIC:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_TACTIC:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_TACTIC:
-		_TacTicSkillInfoMemoryPool->Free((st_TacTicSkillInfo*)ReturnSkillInfo);
-		return;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_HEAL:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_HEAL:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_HEAL:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_HEAL:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_HEAL:
+		break;		
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_HEAL:	
 		_HealSkillInfoMemoryPool->Free((st_HealSkillInfo*)ReturnSkillInfo);
-		break;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_BUF:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_BUF:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_BUF:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_BUF:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_BUF:
+		break;	
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_BUF:	
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_BUF:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PROTECTION_ACTIVE_BUF:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ASSASSINATION_ACTIVE_BUF:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_BUF:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHOOTING_ACTIVE_BUF:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_BUF:
 		_BufSkillInfoMemoryPool->Free((st_BufSkillInfo*)ReturnSkillInfo);
 		break;
 	}

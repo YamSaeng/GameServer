@@ -56,8 +56,8 @@ private:
 	int64 _GameServerObjectId;
 
 	CMemoryPoolTLS<CSkill>* _SkillMemoryPool;
-	CMemoryPoolTLS<st_AttackSkillInfo>* _AttackSkillInfoMemoryPool;
-	CMemoryPoolTLS<st_TacTicSkillInfo>* _TacTicSkillInfoMemoryPool;
+	CMemoryPoolTLS<st_PassiveSkillInfo>* _PassiveSkillInfoMemoryPool;
+	CMemoryPoolTLS<st_AttackSkillInfo>* _AttackSkillInfoMemoryPool;	
 	CMemoryPoolTLS<st_HealSkillInfo>* _HealSkillInfoMemoryPool;
 	CMemoryPoolTLS<st_BufSkillInfo>* _BufSkillInfoMemoryPool;
 
