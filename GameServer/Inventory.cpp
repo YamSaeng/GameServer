@@ -15,7 +15,7 @@ CInventory::~CInventory()
 		{
 			for (int X = 0; X < _InventoryWidth; X++)
 			{
-				G_ObjectManager->ObjectReturn(en_GameObjectType::OBJECT_ITEM, _Items[Y][X]->InventoryItem);				
+				G_ObjectManager->ObjectReturn(_Items[Y][X]->InventoryItem);
 				delete _Items[Y][X];
 			}
 
@@ -352,7 +352,7 @@ vector<st_ItemInfo> CInventory::DBInventorySaveReturnItems()
 			{
 				ReturnItem.push_back(_Items[X][Y]->InventoryItem->_ItemInfo);
 				// 사용 다한 아이템 메모리 반납
-				G_ObjectManager->ObjectReturn(_Items[X][Y]->InventoryItem->_GameObjectInfo.ObjectType, (CGameObject*)_Items[X][Y]);
+				G_ObjectManager->ObjectReturn((CGameObject*)_Items[X][Y]);
 			}
 			else
 			{
