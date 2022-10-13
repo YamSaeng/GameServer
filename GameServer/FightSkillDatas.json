@@ -1,0 +1,154 @@
+{
+  "FightSkills": [
+    {
+      "FightSkillList": [
+        {
+          "PassiveSkillList": [
+            {
+              "SkillNumber": 0,
+              "SkillType": "SKILL_FIGHT_TWO_HAND_SWORD_MASTER",
+              "SkillName": "양손무기 연마",
+              "SkillMaxLevel": 1
+            }
+          ],
+          "ActiveSkillList": [
+            {
+              "AttackSkill": [
+                {
+                  "SkillNumber": 0,
+                  "SkillType": "SKILL_KNIGHT_FIERCE_ATTACK",
+                  "SkillName": "맹렬한일격",
+                  "SkillMaxLevel": 1,
+                  "SkillMinDamage": 2,
+                  "SkillMaxDamage": 5,
+                  "SkillCoolTime": 2000,
+                  "SkillCastingTime": 0,
+                  "SkillDurationTime": 0,
+                  "SkillDotTime": 0,
+                  "SkillDistance": 1,
+                  "SkillMotionTime": 1000,
+                  "SkillTargetEffectTime": 0.5,
+                  "SkillDebufAttackSpeed": 0,
+                  "SkillDebufMovingSpeed": 0,
+                  "StatusAbnormalityProbability": 0,
+                  "SkillUpAnimation": "ATTACK_WEAPON_BACK",
+                  "SkillDownAnimation": "ATTACK_WEAPON_FRONT",
+                  "SkillLeftAnimation": "ATTACK_WEAPON_LEFT",
+                  "SkillRightAnimation": "ATTACK_WEAPON_LEFT",
+                  "NextComboSkill": "SKILL_KNIGHT_CONVERSION_ATTACK",
+                  "SkillExplanation": "전방 %d칸 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입히고, 회심의일격을 활성화 한다."
+                },
+                {
+                  "SkillNumber": 0,
+                  "SkillType": "SKILL_KNIGHT_CONVERSION_ATTACK",
+                  "SkillName": "회심의일격",
+                  "SkillMaxLevel": 1,
+                  "SkillMinDamage": 2,
+                  "SkillMaxDamage": 5,
+                  "SkillCoolTime": 1000,
+                  "SkillCastingTime": 0,
+                  "SkillDurationTime": 0,
+                  "SkillDotTime": 0,
+                  "SkillDistance": 1,
+                  "SkillMotionTime": 1000,
+                  "SkillTargetEffectTime": 0.5,
+                  "SkillDebufAttackSpeed": 0,
+                  "SkillDebufMovingSpeed": 0,
+                  "StatusAbnormalityProbability": 0,
+                  "SkillUpAnimation": "ATTACK_WEAPON_BACK",
+                  "SkillDownAnimation": "ATTACK_WEAPON_FRONT",
+                  "SkillLeftAnimation": "ATTACK_WEAPON_LEFT",
+                  "SkillRightAnimation": "ATTACK_WEAPON_LEFT",
+                  "NextComboSkill": "SKILL_TYPE_NONE",
+                  "SkillExplanation": "전방 %d칸 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입힌다."
+                },
+                {
+                  "SkillNumber": 1,
+                  "SkillType": "SKILL_KNIGHT_SHAEHONE",
+                  "SkillName": "쇄혼비무",
+                  "SkillMaxLevel": 1,
+                  "SkillMinDamage": 10,
+                  "SkillMaxDamage": 15,
+                  "SkillCoolTime": 5000,
+                  "SkillCastingTime": 0,
+                  "SkillDurationTime": 1000,
+                  "SkillDotTime": 0,
+                  "SkillDistance": 4,
+                  "SkillMotionTime": 1000,
+                  "SkillTargetEffectTime": 1.1,
+                  "SkillDebufAttackSpeed": 0,
+                  "SkillDebufMovingSpeed": 0,
+                  "StatusAbnormalityProbability": 0,
+                  "SkillUpAnimation": "ATTACK_WEAPON_BACK",
+                  "SkillDownAnimation": "ATTACK_WEAPON_FRONT",
+                  "SkillLeftAnimation": "ATTACK_WEAPON_LEFT",
+                  "SkillRightAnimation": "ATTACK_WEAPON_LEFT",
+                  "NextComboSkill": "SKILL_TYPE_NONE",
+                  "SkillExplanation": "전방 %d칸 안에 있는 대상에게 이동하면서 %.1f초만큼 이동불가 상태로 만들고 %d ~ %d 만큼의 피해를 입힌다."
+                },
+                {
+                  "SkillNumber": 2,
+                  "SkillType": "SKILL_KNIGHT_CHOHONE",
+                  "SkillName": "초혼비무",
+                  "SkillMaxLevel": 1,
+                  "SkillMinDamage": 10,
+                  "SkillMaxDamage": 15,
+                  "SkillCoolTime": 5000,
+                  "SkillCastingTime": 0,
+                  "SkillDurationTime": 2000,
+                  "SkillDotTime": 0,
+                  "SkillDistance": 4,
+                  "SkillMotionTime": 1000,
+                  "SkillTargetEffectTime": 1.1,
+                  "SkillDebufAttackSpeed": 0,
+                  "SkillDebufMovingSpeed": 0,
+                  "StatusAbnormalityProbability": 0,
+                  "SkillUpAnimation": "ATTACK_WEAPON_BACK",
+                  "SkillDownAnimation": "ATTACK_WEAPON_FRONT",
+                  "SkillLeftAnimation": "ATTACK_WEAPON_LEFT",
+                  "SkillRightAnimation": "ATTACK_WEAPON_LEFT",
+                  "NextComboSkill": "SKILL_TYPE_NONE",
+                  "SkillExplanation": "전방 %d칸 안에 있는 대상을 자신 앞으로 끌어 당기면서 %.1f초간 기절 상태로 만들고 %d ~ %d 만큼의 피해를 입힌다."
+                }
+              ],
+              "BufSkill": [
+                {
+                  "SkillNumber": 3,
+                  "SkillType": "SKILL_KNIGHT_CHARGE_POSE",
+                  "SkillName": "돌격자세",
+                  "SkillMaxLevel": 1,
+                  "IncreaseMinAttackPoint": 50,
+                  "IncreaseMaxAttackPoint": 100,
+                  "IncreaseMeleeAttackSpeedPoint": 0,
+                  "IncreaseMeleeAttackHitRate": 0,
+                  "IncreaseMagicAttackPoint": 0,
+                  "IncreaseMagicCastingPoint": 0,
+                  "IncreaseMagicAttackHitRate": 0,
+                  "IncreaseDefencePoint": 0,
+                  "IncreaseEvasionRate": 0,
+                  "IncreaseMeleeCriticalPoint": 0,
+                  "IncreaseMagicCriticalPoint": 0,
+                  "IncreaseSpeedPoint": 0,
+                  "IncreaseStatusAbnormalityResistance": 0,
+                  "SkillCoolTime": 15000,
+                  "SkillCastingTime": 0,
+                  "SkillDurationTime": 10000,
+                  "SkillDotTime": 0,
+                  "SkillDistance": 0,
+                  "SkillMotionTime": 1000,
+                  "SkillTargetEffectTime": 2.7,
+                  "SkillUpAnimation": "IDLE_BACK",
+                  "SkillDownAnimation": "IDLE_FRONT",
+                  "SkillLeftAnimation": "IDLE_LEFT",
+                  "SkillRightAnimation": "IDLE_LEFT",
+                  "NextComboSkill": "SKILL_TYPE_NONE",
+                  "SkillExplanation": "공격력을 %d%% 만큼 %.1f 초 동안 증가시킨다."
+                }
+              ]
+            }            
+          ]
+        }
+      ]
+    }
+  ]
+}

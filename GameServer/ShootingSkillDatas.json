@@ -1,0 +1,43 @@
+{
+  "ShootingSkills": [
+    {
+      "ShootingSkillList": [
+        {
+          "PassiveSkillList": [
+          ],
+          "ActiveSkillList": [
+            {
+              "AttackSkill": [
+                {
+                  "SkillType": "SKILL_ARCHER_SNIFING",
+                  "SkillName": "저격",
+                  "SkillLevel": 1,
+                  "SkillMinDamage": 25,
+                  "SkillMaxDamage": 35,
+                  "SkillCoolTime": 2000,
+                  "SkillCastingTime": 0,
+                  "SkillDurationTime": 0,
+                  "SkillDotTime": 0,
+                  "SkillDistance": 6,
+                  "SkillMotionTime": 1000,
+                  "SkillTargetEffectTime": 0,
+                  "SkillDebufAttackSpeed": 0,
+                  "SkillDebufMovingSpeed": 0,
+                  "StatusAbnormalityProbability": 0,
+                  "SkillUpAnimation": "ATTACK_WEAPON_BACK",
+                  "SkillDownAnimation": "ATTACK_WEAPON_FRONT",
+                  "SkillLeftAnimation": "ATTACK_WEAPON_LEFT",
+                  "SkillRightAnimation": "ATTACK_WEAPON_LEFT",
+                  "NextComboSkill": "SKILL_TYPE_NONE",
+                  "SkillExplanation": "%d 거리 안의 대상에게 %d ~ %d 만큼의 피해를 입힌다."
+                }
+              ],
+              "BufSkill": [
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
