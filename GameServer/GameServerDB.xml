@@ -1,117 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <GameServerDB>
-  <!-- 플레이어 테이블 -->
-  <Table name="Player" desc="Player Table">
-    <Column name="PlayerDBId" type="BigInt" notnull="true" identity="1,1"/>
-    <Column name="AccountDBId" type="BigInt" notnull="true"/>
-    <Column name="PlayerName" type="nvarchar(20)" notnull="true"/>
-    <Column name="PlayerType" type="SmallInt" notnull="true"/>
-    <Column name="PlayerIndex" type="TinyInt" notnull="true"/>
-    <Column name="Level" type="int" notnull="true"/>
-    <Column name="CurrentHP" type="int" notnull="true"/>
-    <Column name="MaxHP" type="int" notnull="true"/>
-    <Column name="CurrentMP" type="int" notnull="true"/>
-    <Column name="MaxMP" type="int" notnull="true"/>
-    <Column name="CurrentDP" type="int" notnull="true"/>
-    <Column name="MaxDP" type="int" notnull="true"/>
-    <Column name="AutoRecoveryHPPercent" type="SmallInt" notnull="true"/>
-    <Column name="AutoRecoveryMPPercent" type="SmallInt" notnull="true"/>
-    <Column name="MinMeleeAttackDamage" type="int" notnull="true"/>
-    <Column name="MaxMeleeAttackDamage" type="int" notnull="true"/>
-    <Column name="MeleeAttackHitRate" type="SmallInt" notnull="true"/>
-    <Column name="MagicDamage" type="SmallInt" notnull="true"/>
-    <Column name="MagicHitRate" type="float" notnull="true"/>
-    <Column name="Defence" type="int" notnull="true"/>
-    <Column name="EvasionRate" type="SmallInt" notnull="true"/>
-    <Column name="MeleeCriticalPoint" type="SmallInt" notnull="true"/>
-    <Column name="MagicCriticalPoint" type="SmallInt" notnull="true"/>
-    <Column name="Speed" type="float" notnull="true"/>
-    <Column name="LastPositionY" type="int" notnull="true"/>
-    <Column name="LastPositionX" type="int" notnull="true"/>
-    <Column name="CurrentExperience" type="BigInt" notnull="true"/>
-    <Column name="RequireExperience" type="BigInt" notnull="true"/>
-    <Column name="TotalExperience" type="BigInt" notnull="true"/>
-    <Index type="clustered"> 
-      <PrimaryKey/>
-      <Column name="PlayerDBId"/>
-    </Index>    
-    <Index type="nonclustered">
-      <UniqueKey/>
-      <Column name="PlayerName"/>
-    </Index>
-  </Table>
-  
-  <!-- 인벤토리 아이템 테이블 -->
-  <Table name="Inventory" desc="Inventory Table">
-	<Column name="OwnerAccountDBId" type="BigInt" notnull="true"/>
-	<Column name="OwnerPlayerDBId" type="BigInt" notnull="true"/>	
-	<Column name="ItemIsEquipped" type="bit"/>	
-	<Column name="ItemWidth" type="SmallInt"/>
-	<Column name="ItemHeight" type="SmallInt"/>
-	<Column name="ItemTileGridPositionX" type="SmallInt"/>
-	<Column name="ItemTileGridPositionY" type="SmallInt"/>
-    <Column name="ItemLargeCategory" type="nvarchar(50)" notnull="true"/>
-    <Column name="ItemMediumCategory" type="nvarchar(50)" notnull="true"/>
-    <Column name="ItemSmallCategory" type="nvarchar(80)" notnull="true"/>       
-    <Column name="ItemCount" type="SmallInt" notnull="true"/>	    
-	<Column name="ItemDurability" type="int" notnull="true"/>
-	<Column name="ItemEnchantPoint" type="TinyInt" notnull="true"/>           
-  </Table>
-
-  <!-- 골드 테이블 -->
-  <Table name="Gold" desc="Gold Table">
-    <Column name="AccountDBId" type="BigInt" notnull="true"/>
-    <Column name="PlayerDBId" type="BigInt" notnull="true"/>
-    <Column name="GoldCoin" type="BigInt" notnull="true"/>
-    <Column name="SliverCoin" type="SmallInt" notnull="true"/>
-    <Column name="BronzeCoin" type="SmallInt" notnull="true"/>
-    <Index type="clustered">
-      <PrimaryKey/>
-      <Column name="PlayerDBId"/>
-    </Index>
-  </Table>
-
-  <!-- 보유중인 스킬 테이블 -->
-  <Table name="Skill" desc="Skill Table">
-    <Column name="AccountDBId" type="BigInt" notnull ="true"/>
-    <Column name="PlayerDBId" type="BigInt"  notnull ="true"/>	
-    <Column name="SkillLargeCategory" type="nvarchar(50)" notnull="true"/>
-    <Column name="SkillMediumCategory" type="nvarchar(50)" noutnull="true"/>
-    <Column name="SkillType" type="nvarchar(50)" notnull ="true"/>
-    <Column name="SkillLevel" type="TinyInt" notnull ="true"/>    
-  </Table>
-  
-  <!-- 보유중인 퀵슬롯바 목록 테이블 -->
-  <Table name="QuickSlotBar" desc="QuickSlotBar Table">
-    <Column name="AccountDBId" type="BigInt" notnull ="true"/>
-    <Column name="PlayerDBId" type="BigInt" notnull ="true"/>
-    <Column name="QuickSlotBarIndex" type="TinyInt" notnull ="true"/>
-    <Column name="QuickSlotBarSlotIndex" type="TinyInt" notnull ="true"/>
-    <Column name="QuickSlotKey" type="SmallInt"/>	
-    <Column name="SkillLargeCategory" type="nvarchar(50)"/>
-    <Column name="SkillMediumCategory" type="nvarchar(50)"/>
-    <Column name="SkillType" type="nvarchar(50)"/>
-    <Column name="SkillLevel" type="TinyInt"/>
-	<Column name="ItemLargeCategory" type="nvarchar(50)"/>
-	<Column name="ItemMediumCategory" type="nvarchar(50)"/>
-	<Column name="ItemSmallCategory" type="nvarchar(80)"/>
-	<Column name="ItemCount" type="SmallInt"/>
-  </Table>  
-   
-  <!-- 농작물 테이블 -->
-	<Table name="Crop" desc="Crop Table">
-	 <Column name="OwnerAccountDBId" type="BigInt" notnull ="true"/>
-	 <Column name="OwnerPlayerDBId" type="BigInt" notnull ="true"/>
-	 <Column name="CropCategory" type="nvarchar(50)" notnull ="true"/>
-	 <Column name="CropStep" type="TinyInt" notnull ="true"/>
-	 <Column name="CropCount" type="SmallInt" notnull="true"/>	
-	 <Column name="LastPositionY" type="int" notnull="true"/>
-	 <Column name="LastPositionX" type="int" notnull="true"/>
-	 <Column name="CropCreateTime" type="DateTime" notnull="true"/>
+	<!-- 플레이어 테이블 -->
+	<Table name="Player" desc="Player Table">
+		<Column name="PlayerDBId" type="BigInt" notnull="true" identity="1,1"/>
+		<Column name="AccountDBId" type="BigInt" notnull="true"/>
+		<Column name="PlayerName" type="nvarchar(20)" notnull="true"/>
+		<Column name="PlayerType" type="SmallInt" notnull="true"/>
+		<Column name="PlayerIndex" type="TinyInt" notnull="true"/>
+		<Column name="Level" type="int" notnull="true"/>
+		<Column name="CurrentHP" type="int" notnull="true"/>
+		<Column name="MaxHP" type="int" notnull="true"/>
+		<Column name="CurrentMP" type="int" notnull="true"/>
+		<Column name="MaxMP" type="int" notnull="true"/>
+		<Column name="CurrentDP" type="int" notnull="true"/>
+		<Column name="MaxDP" type="int" notnull="true"/>
+		<Column name="AutoRecoveryHPPercent" type="SmallInt" notnull="true"/>
+		<Column name="AutoRecoveryMPPercent" type="SmallInt" notnull="true"/>
+		<Column name="MinMeleeAttackDamage" type="int" notnull="true"/>
+		<Column name="MaxMeleeAttackDamage" type="int" notnull="true"/>
+		<Column name="MeleeAttackHitRate" type="SmallInt" notnull="true"/>
+		<Column name="MagicDamage" type="SmallInt" notnull="true"/>
+		<Column name="MagicHitRate" type="float" notnull="true"/>
+		<Column name="Defence" type="int" notnull="true"/>
+		<Column name="EvasionRate" type="SmallInt" notnull="true"/>
+		<Column name="MeleeCriticalPoint" type="SmallInt" notnull="true"/>
+		<Column name="MagicCriticalPoint" type="SmallInt" notnull="true"/>
+		<Column name="Speed" type="float" notnull="true"/>
+		<Column name="LastPositionY" type="int" notnull="true"/>
+		<Column name="LastPositionX" type="int" notnull="true"/>
+		<Column name="CurrentExperience" type="BigInt" notnull="true"/>
+		<Column name="RequireExperience" type="BigInt" notnull="true"/>
+		<Column name="TotalExperience" type="BigInt" notnull="true"/>
+		<Index type="clustered">
+			<PrimaryKey/>
+			<Column name="PlayerDBId"/>
+		</Index>
+		<Index type="nonclustered">
+			<UniqueKey/>
+			<Column name="PlayerName"/>
+		</Index>
 	</Table>
 
-  <!-- 지도 타일 테이블 -->
+	<!-- 인벤토리 아이템 테이블 -->
+	<Table name="Inventory" desc="Inventory Table">
+		<Column name="OwnerAccountDBId" type="BigInt" notnull="true"/>
+		<Column name="OwnerPlayerDBId" type="BigInt" notnull="true"/>
+		<Column name="ItemIsEquipped" type="bit"/>		
+		<Column name="ItemTileGridPositionX" type="SmallInt"/>
+		<Column name="ItemTileGridPositionY" type="SmallInt"/>
+		<Column name="ItemLargeCategory" type="nvarchar(50)" notnull="true"/>
+		<Column name="ItemMediumCategory" type="nvarchar(50)" notnull="true"/>
+		<Column name="ItemSmallCategory" type="nvarchar(80)" notnull="true"/>
+		<Column name="ItemCount" type="SmallInt" notnull="true"/>
+		<Column name="ItemDurability" type="int" notnull="true"/>
+		<Column name="ItemEnchantPoint" type="TinyInt" notnull="true"/>
+	</Table>
+
+	<!-- 골드 테이블 -->
+	<Table name="Gold" desc="Gold Table">
+		<Column name="AccountDBId" type="BigInt" notnull="true"/>
+		<Column name="PlayerDBId" type="BigInt" notnull="true"/>
+		<Column name="GoldCoin" type="BigInt" notnull="true"/>
+		<Column name="SliverCoin" type="SmallInt" notnull="true"/>
+		<Column name="BronzeCoin" type="SmallInt" notnull="true"/>
+		<Index type="clustered">
+			<PrimaryKey/>
+			<Column name="PlayerDBId"/>
+		</Index>
+	</Table>
+
+	<!-- 보유중인 스킬 테이블 -->
+	<Table name="Skill" desc="Skill Table">
+		<Column name="AccountDBId" type="BigInt" notnull ="true"/>
+		<Column name="PlayerDBId" type="BigInt"  notnull ="true"/>
+		<Column name="SkillLargeCategory" type="nvarchar(50)" notnull="true"/>
+		<Column name="SkillMediumCategory" type="nvarchar(50)" noutnull="true"/>
+		<Column name="SkillType" type="nvarchar(50)" notnull ="true"/>
+		<Column name="SkillLevel" type="TinyInt" notnull ="true"/>
+	</Table>
+
+	<!-- 보유중인 퀵슬롯바 목록 테이블 -->
+	<Table name="QuickSlotBar" desc="QuickSlotBar Table">
+		<Column name="AccountDBId" type="BigInt" notnull ="true"/>
+		<Column name="PlayerDBId" type="BigInt" notnull ="true"/>
+		<Column name="QuickSlotBarIndex" type="TinyInt" notnull ="true"/>
+		<Column name="QuickSlotBarSlotIndex" type="TinyInt" notnull ="true"/>
+		<Column name="QuickSlotKey" type="SmallInt"/>
+		<Column name="SkillLargeCategory" type="nvarchar(50)"/>
+		<Column name="SkillMediumCategory" type="nvarchar(50)"/>
+		<Column name="SkillType" type="nvarchar(50)"/>
+		<Column name="SkillLevel" type="TinyInt"/>
+		<Column name="ItemLargeCategory" type="nvarchar(50)"/>
+		<Column name="ItemMediumCategory" type="nvarchar(50)"/>
+		<Column name="ItemSmallCategory" type="nvarchar(80)"/>
+		<Column name="ItemCount" type="SmallInt"/>
+	</Table>
+
+	<!-- 농작물 테이블 -->
+	<Table name="Crop" desc="Crop Table">
+		<Column name="OwnerAccountDBId" type="BigInt" notnull ="true"/>
+		<Column name="OwnerPlayerDBId" type="BigInt" notnull ="true"/>
+		<Column name="CropCategory" type="nvarchar(50)" notnull ="true"/>
+		<Column name="CropStep" type="TinyInt" notnull ="true"/>
+		<Column name="CropCount" type="SmallInt" notnull="true"/>
+		<Column name="LastPositionY" type="int" notnull="true"/>
+		<Column name="LastPositionX" type="int" notnull="true"/>
+		<Column name="CropCreateTime" type="DateTime" notnull="true"/>
+	</Table>
+
+	<!-- 지도 타일 테이블 -->
 	<Table name="MapTile" desc="MapTile Table">
 		<Column name="MapID" type="SmallInt" notnull="true"/>
 		<Column name="MapTileAllocFree" type="bit" notnull="true"/>
@@ -120,24 +118,24 @@
 		<Column name="MapTilePositionX" type="int" notnull ="true"/>
 		<Column name="MapTilePositionY" type="int" notnull ="true"/>
 	</Table>
-	
-  <!-- 장비 테이블 -->
-	<Table name="Equipment" desc="Equipment Table">		
+
+	<!-- 장비 테이블 -->
+	<Table name="Equipment" desc="Equipment Table">
 		<Column name="EquipmentAccountDBId" type="BigInt" notnull="true"/>
 		<Column name="EquipmentPlayerDBId" type="BigInt" notnull="true"/>
 		<Column name="EquipmentParts" type="nvarchar(40)" notnull="true"/>
 		<Column name="EquipmentLargeCategory" type="nvarchar(50)" notnull="true"/>
-	    <Column name="EquipmentMediumCategory" type="nvarchar(50)" notnull="true"/>
-	    <Column name="EquipmentSmallCategory" type="nvarchar(50)" notnull="true"/>	
-	    <Column name="EquipmentDurability" type="int" notnull="true"/>	
-	    <Column name="EquipmentEnchantPoint" type="TinyInt" notnull="true"/>
+		<Column name="EquipmentMediumCategory" type="nvarchar(50)" notnull="true"/>
+		<Column name="EquipmentSmallCategory" type="nvarchar(50)" notnull="true"/>
+		<Column name="EquipmentDurability" type="int" notnull="true"/>
+		<Column name="EquipmentEnchantPoint" type="TinyInt" notnull="true"/>
 	</Table>
-	
-  <!-- AccountID를 기준으로 클라가 소유하고 있는 캐릭터를 찾는다. -->
-  <Procedure name="spGetPlayers">
-    <Param name="@AccountId" type="BigInt"/>
-    <Body>
-      <![CDATA[
+
+	<!-- AccountID를 기준으로 클라가 소유하고 있는 캐릭터를 찾는다. -->
+	<Procedure name="spGetPlayers">
+		<Param name="@AccountId" type="BigInt"/>
+		<Body>
+			<![CDATA[
 	    SET NOCOUNT ON
         SELECT PlayerDBId,
         PlayerName,
@@ -169,52 +167,52 @@
         TotalExperience 
         FROM [dbo].[Player] WHERE AccountDBId = (@AccountId)
       ]]>
-    </Body>
-  </Procedure>
+		</Body>
+	</Procedure>
 
-  <!-- 입력한 캐릭터의 이름이 DB에 있는지 확인한다. -->
-  <Procedure name="spGetCharacterName">
-    <Param name="@CharacterName" type="nvarchar(20)"/>
-    <Body>
-      <![CDATA[
+	<!-- 입력한 캐릭터의 이름이 DB에 있는지 확인한다. -->
+	<Procedure name="spGetCharacterName">
+		<Param name="@CharacterName" type="nvarchar(20)"/>
+		<Body>
+			<![CDATA[
 	    SET NOCOUNT ON
         SELECT * FROM [dbo].[Player] WHERE EXISTS (SELECT PlayerName FROM [dbo].[Player] WHERE PlayerName = (@CharacterName))
       ]]>
-    </Body>
-  </Procedure>
+		</Body>
+	</Procedure>
 
-  <!-- 새로운 캐릭터 DB에 넣기 -->
-  <Procedure name="spNewCharacterPush">
-    <Param name="@AccountId" type="BigInt"/>
-    <Param name="@PlayerName" type="nvarchar(20)"/>
-    <Param name="@PlayerType" type="SmallInt"/>
-    <Param name="@PlayerIndex" type="TinyInt"/>
-    <Param name="@Level" type="int"/>
-    <Param name="@CurrentHP" type="int"/>
-    <Param name="@MaxHP" type="int"/>
-    <Param name="@CurrentMP" type="int"/>
-    <Param name="@MaxMP" type="int"/>
-    <Param name="@CurrentDP" type="int"/>
-    <Param name="@MaxDP" type="int"/>
-    <Param name="@AutoRecoveryHPPercent" type="SmallInt"/>
-    <Param name="@AutoRecoveryMPPercent" type="SmallInt"/>
-    <Param name="@MinMeleeAttackDamage" type="int"/>
-    <Param name="@MaxMeleeAttackDamage" type="int"/>
-    <Param name="@MeleeAttackHitRate" type="SmallInt"/>
-    <Param name="@MagicDamage" type="SmallInt"/>
-    <Param name="@MagicHitRate" type="float"/>
-    <Param name="@Defence" type="int"/>
-    <Param name="@EvasionRate" type="SmallInt"/>
-    <Param name="@MeleeCriticalPoint" type="SmallInt"/>
-    <Param name="@MagicCriticalPoint" type="SmallInt"/>
-    <Param name="@Speed" type="float"/>
-    <Param name="@LastPositionY" type="int"/>
-    <Param name="@LastPositionX" type="int"/>
-    <Param name="@CurrentExperience" type="BigInt"/>
-    <Param name="@RequireExperience" type="BigInt"/>
-    <Param name="@TotalExperience" type="BigInt"/>
-    <Body>
-      <![CDATA[
+	<!-- 새로운 캐릭터 DB에 넣기 -->
+	<Procedure name="spNewCharacterPush">
+		<Param name="@AccountId" type="BigInt"/>
+		<Param name="@PlayerName" type="nvarchar(20)"/>
+		<Param name="@PlayerType" type="SmallInt"/>
+		<Param name="@PlayerIndex" type="TinyInt"/>
+		<Param name="@Level" type="int"/>
+		<Param name="@CurrentHP" type="int"/>
+		<Param name="@MaxHP" type="int"/>
+		<Param name="@CurrentMP" type="int"/>
+		<Param name="@MaxMP" type="int"/>
+		<Param name="@CurrentDP" type="int"/>
+		<Param name="@MaxDP" type="int"/>
+		<Param name="@AutoRecoveryHPPercent" type="SmallInt"/>
+		<Param name="@AutoRecoveryMPPercent" type="SmallInt"/>
+		<Param name="@MinMeleeAttackDamage" type="int"/>
+		<Param name="@MaxMeleeAttackDamage" type="int"/>
+		<Param name="@MeleeAttackHitRate" type="SmallInt"/>
+		<Param name="@MagicDamage" type="SmallInt"/>
+		<Param name="@MagicHitRate" type="float"/>
+		<Param name="@Defence" type="int"/>
+		<Param name="@EvasionRate" type="SmallInt"/>
+		<Param name="@MeleeCriticalPoint" type="SmallInt"/>
+		<Param name="@MagicCriticalPoint" type="SmallInt"/>
+		<Param name="@Speed" type="float"/>
+		<Param name="@LastPositionY" type="int"/>
+		<Param name="@LastPositionX" type="int"/>
+		<Param name="@CurrentExperience" type="BigInt"/>
+		<Param name="@RequireExperience" type="BigInt"/>
+		<Param name="@TotalExperience" type="BigInt"/>
+		<Body>
+			<![CDATA[
 	    SET NOCOUNT ON
         INSERT INTO [dbo].[Player]
         VALUES (
@@ -247,84 +245,103 @@
         (@RequireExperience),
         (@TotalExperience))        
       ]]>
-    </Body>
-  </Procedure>
+		</Body>
+	</Procedure>
 
-  <!-- 만든 캐릭터 DBId 가져오기 -->
-  <Procedure name="spPlayerDBIdGet">
-    <Param name="@AccountDBId" type="BigInt"/>
-    <Param name="@PlayerIndex" type="TinyInt"/>
-    <Body>
-      <![CDATA[
+	<!-- 만든 캐릭터 DBId 가져오기 -->
+	<Procedure name="spPlayerDBIdGet">
+		<Param name="@AccountDBId" type="BigInt"/>
+		<Param name="@PlayerIndex" type="TinyInt"/>
+		<Body>
+			<![CDATA[
 	    SET NOCOUNT ON
         SELECT PlayerDBId
         FROM [dbo].[Player]
         WHERE AccountDBId = (@AccountDBId) AND PlayerIndex = (@PlayerIndex)
       ]]>
-    </Body>
-  </Procedure>
+		</Body>
+	</Procedure>
 
-  <!-- 골드 테이블 생성-->
-  <Procedure name="spGoldTableCreate">
-    <Param name="@AccountDBId" type="BigInt"/>
-    <Param name="@PlayerDBId" type="BigInt"/>    
-    <Body>
-      <![CDATA[
+	<!-- 캐릭터 새로 생성시 정보 설정 -->
+	<Procedure name="spNewGameCharacterDefaultInfoCreate">
+		<Param name="@AccountID" type="BigInt"/>
+		<Param name="@PlayerID" type="BigInt"/>
+		<Body>
+			<![CDATA[
+				SET NOCOUNT ON
+				INSERT INTO [dbo].[Skill] VALUES ((@AccountID), (@PlayerID), ('SKILL_LARGE_CATEGORY_PUBLIC'), ('SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_ATTACK'), ('SKILL_DEFAULT_ATTACK'), (1))
+				INSERT INTO [dbo].[Skill] VALUES ((@AccountID), (@PlayerID), ('SKILL_LARGE_CATEGORY_PUBLIC'), ('SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_BUF'), ('SKILL_SHOCK_RELEASE'), (1))									
+				UPDATE [dbo].[Inventory]
+				SET ItemLargeCategory = ('ITEM_LARGE_CATEGORY_WEAPON'), ItemMediumCategory = ('ITEM_MEDIUM_CATEGORY_SWORD'), ItemSmallCategory = ('ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD'), ItemCount = (1), ItemDurability = (150), ItemEnchantPoint = (1)
+				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (0) AND ItemTileGridPositionY = (0)								
+				UPDATE [dbo].[Inventory]
+				SET ItemLargeCategory = ('ITEM_LARGE_CATEGORY_ARMOR'), ItemMediumCategory = ('ITEM_MEDIUM_CATEGORY_WEAR'), ItemSmallCategory = ('ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER'), ItemCount = (1), ItemDurability = (150), ItemEnchantPoint = (1)
+				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (1) AND ItemTileGridPositionY = (0)		
+			]]>
+		</Body>
+	</Procedure>
+
+	<!-- 골드 테이블 생성-->
+	<Procedure name="spGoldTableCreate">
+		<Param name="@AccountDBId" type="BigInt"/>
+		<Param name="@PlayerDBId" type="BigInt"/>
+		<Body>
+			<![CDATA[
 	    SET NOCOUNT ON
         INSERT INTO [dbo].[Gold] VALUES ((@AccountDBId),(@PlayerDBId),(0),(0),(0))
       ]]>
-    </Body>
-  </Procedure>
-  
-  <!-- 골드 테이블에 골드 저장 -->
-  <Procedure name="spGoldSave">
-    <Param name="@AccountDBId" type="BigInt"/>
-    <Param name="@PlayerDBId" type="BigInt"/>    
-    <Param name="@GoldCount" type="BigInt"/>
-    <Param name="@SliverCount" type="SmallInt"/>
-    <Param name="@BronzeCount" type="SmallInt"/>
-    <Body>
-      <![CDATA[
+		</Body>
+	</Procedure>
+
+	<!-- 골드 테이블에 골드 저장 -->
+	<Procedure name="spGoldSave">
+		<Param name="@AccountDBId" type="BigInt"/>
+		<Param name="@PlayerDBId" type="BigInt"/>
+		<Param name="@GoldCount" type="BigInt"/>
+		<Param name="@SliverCount" type="SmallInt"/>
+		<Param name="@BronzeCount" type="SmallInt"/>
+		<Body>
+			<![CDATA[
 	    SET NOCOUNT ON
         UPDATE [dbo].[Gold]
         SET GoldCoin = (@GoldCount), SliverCoin = (@SliverCount), BronzeCoin = (@BronzeCount)
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
-    </Body>    
-  </Procedure>
+		</Body>
+	</Procedure>
 
-  <!-- 골드 테이블에 저장되어 있는 정보 긁어오기 -->
-  <Procedure name="spGetGoldTableInfoToInventory">
-    <Param name="@AccountDBId" type="BigInt"/>
-    <Param name="@PlayerDBId" type="BigInt"/>
-    <Body>
-      <![CDATA[
+	<!-- 골드 테이블에 저장되어 있는 정보 긁어오기 -->
+	<Procedure name="spGetGoldTableInfoToInventory">
+		<Param name="@AccountDBId" type="BigInt"/>
+		<Param name="@PlayerDBId" type="BigInt"/>
+		<Body>
+			<![CDATA[
 	    SET NOCOUNT ON
         SELECT GoldCoin, SliverCoin, BronzeCoin
         FROM [dbo].[Gold]
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
-    </Body>
-  </Procedure>
-	
-  <!-- 만든 아이템 DBId 가져오기 -->
-  <Procedure name="spItemDBIdGet">
-    <Body>
-      <![CDATA[
+		</Body>
+	</Procedure>
+
+	<!-- 만든 아이템 DBId 가져오기 -->
+	<Procedure name="spItemDBIdGet">
+		<Body>
+			<![CDATA[
 	    SET NOCOUNT ON
         SELECT IDENT_CURRENT('Item')
       ]]>
-    </Body>
-  </Procedure>  
-  
-  <!-- 인벤토리 테이블 빈껍데기 아이템 정보 생성-->  
-  <Procedure name="spItemToInventoryInit">    
-	<Param name="@ItemTileGridPositionX" type ="SmallInt"/>
-	<Param name="@ItemTileGridPositionY" type ="SmallInt"/>		      
-    <Param name="@OwnerAccountDBId" type="BigInt"/>
-    <Param name="@OwnerPlayerDBId" type="BigInt"/>    
-    <Body>
-      <![CDATA[
+		</Body>
+	</Procedure>
+
+	<!-- 인벤토리 테이블 빈껍데기 아이템 정보 생성-->
+	<Procedure name="spItemToInventoryInit">
+		<Param name="@ItemTileGridPositionX" type ="SmallInt"/>
+		<Param name="@ItemTileGridPositionY" type ="SmallInt"/>
+		<Param name="@OwnerAccountDBId" type="BigInt"/>
+		<Param name="@OwnerPlayerDBId" type="BigInt"/>
+		<Body>
+			<![CDATA[
 	    SET NOCOUNT ON
         INSERT INTO [dbo].[Inventory]
         VALUES ((@OwnerAccountDBId), (@OwnerPlayerDBId),
@@ -333,17 +350,17 @@
 		' ',' ',' ', 
 		0, 0, 0)
       ]]>
-    </Body>
-  </Procedure>  
-	
-  <!-- 인벤토리 테이블에 있는 아이템 가지고 옴-->
-  <Procedure name="spGetItemTableInfoToInventory">
-    <Param name="@AccountDBId" type="BigInt"/>
-    <Param name="@PlayerDBId" type="BigInt"/>
-    <Body>
-      <![CDATA[
+		</Body>
+	</Procedure>
+
+	<!-- 인벤토리 테이블에 있는 아이템 가지고 옴-->
+	<Procedure name="spGetItemTableInfoToInventory">
+		<Param name="@AccountDBId" type="BigInt"/>
+		<Param name="@PlayerDBId" type="BigInt"/>
+		<Body>
+			<![CDATA[
 	    SET NOCOUNT ON
-        SELECT ItemIsEquipped, ItemWidth, ItemHeight,
+        SELECT ItemIsEquipped,
 		ItemTileGridPositionX, ItemTileGridPositionY,
 		(CASE WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_ARCHITECTURE' THEN 1
 	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_WEAPON' THEN 2
@@ -413,48 +430,45 @@
         FROM [dbo].[Inventory]
         WHERE OwnerAccountDBId = (@AccountDBId) AND OwnerPlayerDBId = (@PlayerDBId)
       ]]>
-    </Body>
-  </Procedure>
-	
-  <!-- 인벤토리 아이템 초기화 -->
-  <Procedure name="spInventorySlotInit">
-    <Param name="@OwnerAccountDBId" type="BigInt"/>
-    <Param name="@OwnerPlayerDBId" type="BigInt"/>
-	<Param name="@ItemTileGridPositionX" type="SmallInt"/>
-	<Param name="@ItemTileGridPositionY" type="SmallInt"/>        
-    <Body>
-      <![CDATA[
+		</Body>
+	</Procedure>
+
+	<!-- 인벤토리 아이템 초기화 -->
+	<Procedure name="spInventorySlotInit">
+		<Param name="@OwnerAccountDBId" type="BigInt"/>
+		<Param name="@OwnerPlayerDBId" type="BigInt"/>
+		<Param name="@ItemTileGridPositionX" type="SmallInt"/>
+		<Param name="@ItemTileGridPositionY" type="SmallInt"/>
+		<Body>
+			<![CDATA[
 	    SET NOCOUNT ON
         UPDATE [dbo].[Inventory]
-        SET ItemIsEquipped = 0, ItemWidth = 0, ItemHeight = 0,
+        SET ItemIsEquipped = 0,
 		ItemLargeCategory = ' ', ItemMediumCategory = ' ', ItemSmallCategory = ' ',		
 		ItemCount = 0, ItemDurability = 0, ItemEnchantPoint = 0		 
         WHERE ItemTileGridPositionX = (@ItemTileGridPositionX) AND ItemTileGridPositionY = (@ItemTileGridPositionY) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
       ]]>
-    </Body>
-  </Procedure>
-	
-  <!-- 인벤토리 아이템 놓기 -->
+		</Body>
+	</Procedure>
+
+	<!-- 인벤토리 아이템 놓기 -->
 	<Procedure name="spInventoryItemPlace">
-	<Param name="@OwnerAccountDBId" type="BigInt"/>
-	<Param name="@OwnerPlayerDBId" type="BigInt"/>
-    <Param name="@ItemIsEquipped" type="bit"/>
-    <Param name="@ItemWidth" type="SmallInt"/>
-	<Param name="@ItemHeight" type="SmallInt"/>
-	<Param name="@ItemTileGridPositionX" type="SmallInt"/>
-	<Param name="@ItemTileGridPositionY" type="SmallInt"/>
-	<Param name="@ItemLargeCategory" type="TinyInt"/>
-	<Param name="@ItemMediumCategory" type="TinyInt"/>
-	<Param name="@ItemSmallCategory" type="SmallInt"/>	
-	<Param name="@ItemCount" type="SmallInt"/>	
-	<Param name="@ItemDurability" type="int"/>	
-	<Param name="@ItemEnchantPoint" type="TinyInt"/>		
-	<Body>
-	  <![CDATA[
+		<Param name="@OwnerAccountDBId" type="BigInt"/>
+		<Param name="@OwnerPlayerDBId" type="BigInt"/>
+		<Param name="@ItemIsEquipped" type="bit"/>		
+		<Param name="@ItemTileGridPositionX" type="SmallInt"/>
+		<Param name="@ItemTileGridPositionY" type="SmallInt"/>
+		<Param name="@ItemLargeCategory" type="TinyInt"/>
+		<Param name="@ItemMediumCategory" type="TinyInt"/>
+		<Param name="@ItemSmallCategory" type="SmallInt"/>
+		<Param name="@ItemCount" type="SmallInt"/>
+		<Param name="@ItemDurability" type="int"/>
+		<Param name="@ItemEnchantPoint" type="TinyInt"/>
+		<Body>
+			<![CDATA[
 		SET NOCOUNT ON
 		UPDATE [dbo].[Inventory]
-		SET ItemIsEquipped = (@ItemIsEquipped),
-		ItemWidth = (@ItemWidth), ItemHeight = (@ItemHeight),
+		SET ItemIsEquipped = (@ItemIsEquipped),		
 		ItemLargeCategory = (CASE WHEN @ItemLargeCategory = 1 THEN 'ITEM_LARGE_CATEGORY_ARCHITECTURE'
 	                              WHEN @ItemLargeCategory = 2 THEN 'ITEM_LARGE_CATEGORY_WEAPON'
 	                              WHEN @ItemLargeCategory = 3 THEN 'ITEM_LARGE_CATEGORY_ARMOR'
@@ -522,17 +536,17 @@
 		ItemCount = (@ItemCount), ItemDurability = (@ItemDurability), ItemEnchantPoint = (@ItemEnchantPoint)
 		WHERE OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId) And ItemTileGridPositionX = (@ItemTileGridPositionX) AND ItemTileGridPositionY = (@ItemTileGridPositionY)
 		]]>
-	</Body>	
- </Procedure>
+		</Body>
+	</Procedure>
 
-  <!-- 가방 초기화 -->
-  <Procedure name="spInventoryInit">
-  	<Param name="@OwnerAccountDBId" type="BigInt"/>
-  	<Param name="@OwnerPlayerDBId" type="BigInt"/>
-  	<Param name="@InventoryWidth" type="int"/>
-  	<Param name="@InventoryHeight" type="int"/>
-  	<Body>
-  		<![CDATA[
+	<!-- 가방 초기화 -->
+	<Procedure name="spInventoryInit">
+		<Param name="@OwnerAccountDBId" type="BigInt"/>
+		<Param name="@OwnerPlayerDBId" type="BigInt"/>
+		<Param name="@InventoryWidth" type="int"/>
+		<Param name="@InventoryHeight" type="int"/>
+		<Body>
+			<![CDATA[
   	   SET NOCOUNT ON
             DECLARE @width int
             DECLARE @height int
@@ -542,8 +556,7 @@
   	                 SET @height = 0
                      while @height < @InventoryHeight BEGIN
                              UPDATE [dbo].[Inventory]
-                             SET ItemIsEquipped = 0, 
-  					         ItemWidth = 0, ItemHeight = 0,
+                             SET ItemIsEquipped = 0,   					         
   						     ItemLargeCategory = ' ', ItemMediumCategory = ' ', ItemSmallCategory = ' ',
   						     ItemCount = 0, ItemDurability = 0, ItemEnchantPoint = 0
                              WHERE OwnerAccountDBId = @OwnerAccountDBId AND OwnerPlayerDBId = @OwnerPlayerDBId AND ItemTileGridPositionX = @width AND ItemTileGridPositionY = @height        
@@ -552,15 +565,15 @@
                  SET @width = @width + 1
              END
   	]]>
-  	</Body>
-  </Procedure>
-	
+		</Body>
+	</Procedure>
+
 	<!-- 스킬 테이블에 있는 스킬 가지고 오기 -->
-  <Procedure name="spGetSkill">
-    <Param name="@AccountDBId" type="BigInt"/>
-    <Param name="@PlayerDBId" type="BigInt"/>
-    <Body>
-      <![CDATA[
+	<Procedure name="spGetSkill">
+		<Param name="@AccountDBId" type="BigInt"/>
+		<Param name="@PlayerDBId" type="BigInt"/>
+		<Body>
+			<![CDATA[
 	    SET NOCOUNT ON
         SELECT (CASE WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_PUBLIC' THEN 1
 	                 WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_WARRIOR' THEN 2
@@ -624,19 +637,19 @@
         FROM [dbo].[Skill]
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
-    </Body>
-  </Procedure>  
-    
-  <!-- 스킬 테이블에 새로운 스킬 넣기 -->
-  <Procedure name="spSkillToSkillBox">
-    <Param name="@AccountDBId" type="BigInt"/>
-    <Param name="@PlayerDBId" type="BigInt"/>	
-    <Param name="@SkillLargeCategory" type="TinyInt"/>
-    <Param name="@SkillMediumCategory" type="TinyInt"/>
-    <Param name="@SkillType" type="SmallInt"/>    
-    <Param name="@SkillLevel" type="TinyInt"/>        
-    <Body>
-      <![CDATA[
+		</Body>
+	</Procedure>
+
+	<!-- 스킬 테이블에 새로운 스킬 넣기 -->
+	<Procedure name="spSkillToSkillBox">
+		<Param name="@AccountDBId" type="BigInt"/>
+		<Param name="@PlayerDBId" type="BigInt"/>
+		<Param name="@SkillLargeCategory" type="TinyInt"/>
+		<Param name="@SkillMediumCategory" type="TinyInt"/>
+		<Param name="@SkillType" type="SmallInt"/>
+		<Param name="@SkillLevel" type="TinyInt"/>
+		<Body>
+			<![CDATA[
 	    SET NOCOUNT ON
         INSERT INTO [dbo].[Skill] VALUES ((@AccountDBId), (@PlayerDBId),
 		(CASE WHEN @SkillLargeCategory = 1 THEN 'SKILL_LARGE_CATEGORY_PUBLIC'
@@ -699,18 +712,18 @@
 	          END),
 		(@SkillLevel))
       ]]>
-    </Body>
-  </Procedure> 
-	
-  <!-- 퀵슬롯바 테이블에 새로운 퀵슬롯바 슬롯 생성 -->
-  <Procedure name="spQuickSlotBarSlotInit">
-    <Param name="@AccountDBId" type="BigInt"/>
-    <Param name="@PlayerDBId" type="BigInt"/>
-    <Param name="@QuickSlotBarIndex" type="TinyInt"/>
-    <Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
-    <Param name="@QuickSlotKey" type="SmallInt"/>    
-    <Body>
-      <![CDATA[   
+		</Body>
+	</Procedure>
+
+	<!-- 퀵슬롯바 테이블에 새로운 퀵슬롯바 슬롯 생성 -->
+	<Procedure name="spQuickSlotBarSlotInit">
+		<Param name="@AccountDBId" type="BigInt"/>
+		<Param name="@PlayerDBId" type="BigInt"/>
+		<Param name="@QuickSlotBarIndex" type="TinyInt"/>
+		<Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
+		<Param name="@QuickSlotKey" type="SmallInt"/>
+		<Body>
+			<![CDATA[   
 	    SET NOCOUNT ON
         INSERT INTO [dbo].[QuickSlotBar] 
 		VALUES ((@AccountDBId), (@PlayerDBId), (@QuickSlotBarIndex), (@QuickSlotBarSlotIndex), (@QuickSlotKey),
@@ -723,26 +736,26 @@
 		' ',
 		0)
       ]]>
-    </Body>   
-  </Procedure>
+		</Body>
+	</Procedure>
 
-  <!-- 퀵슬롯바 테이블에 새로운 퀵슬롯바 슬롯 저장 -->
-  <Procedure name="spQuickSlotBarSlotUpdate">
-    <Param name="@AccountDBId" type="BigInt"/>
-    <Param name="@PlayerDBId" type="BigInt"/>
-    <Param name="@QuickSlotBarIndex" type="TinyInt"/>
-    <Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
-    <Param name="@QuickSlotKey" type="SmallInt"/>
-    <Param name="@SkillLargeCategory" type="TinyInt"/>
-    <Param name="@SkillMediumCategory" type="TinyInt"/>
-    <Param name="@SkillType" type="SmallInt"/>
-    <Param name="@SkillLevel" type="TinyInt"/>  
-	<Param name="@ItemLargeCategory" type="TinyInt"/>    
-	<Param name="@ItemMediumCategory" type="TinyInt"/>  
-	<Param name="@ItemSmallCategory" type="SmallInt"/>  
-	<Param name="@ItemCount" type="SmallInt"/>
-    <Body>
-      <![CDATA[
+	<!-- 퀵슬롯바 테이블에 새로운 퀵슬롯바 슬롯 저장 -->
+	<Procedure name="spQuickSlotBarSlotUpdate">
+		<Param name="@AccountDBId" type="BigInt"/>
+		<Param name="@PlayerDBId" type="BigInt"/>
+		<Param name="@QuickSlotBarIndex" type="TinyInt"/>
+		<Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
+		<Param name="@QuickSlotKey" type="SmallInt"/>
+		<Param name="@SkillLargeCategory" type="TinyInt"/>
+		<Param name="@SkillMediumCategory" type="TinyInt"/>
+		<Param name="@SkillType" type="SmallInt"/>
+		<Param name="@SkillLevel" type="TinyInt"/>
+		<Param name="@ItemLargeCategory" type="TinyInt"/>
+		<Param name="@ItemMediumCategory" type="TinyInt"/>
+		<Param name="@ItemSmallCategory" type="SmallInt"/>
+		<Param name="@ItemCount" type="SmallInt"/>
+		<Body>
+			<![CDATA[
 	    SET NOCOUNT ON
         UPDATE [dbo].[QuickSlotBar] 
 		SET QuickSlotKey = (@QuickSlotKey), 
@@ -872,15 +885,15 @@
 		ItemCount = (@ItemCount)
         WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
-    </Body>
-  </Procedure>
-  
-  <!-- 퀵슬롯바 테이블에 있는 퀵슬롯 정보 가져오기 -->
-  <Procedure name="spGetQuickSlotBarSlot">
-    <Param name="@AccountDBId" type="BigInt"/>
-    <Param name="@PlayerDBId" type="BigInt"/>    
-    <Body>
-      <![CDATA[
+		</Body>
+	</Procedure>
+
+	<!-- 퀵슬롯바 테이블에 있는 퀵슬롯 정보 가져오기 -->
+	<Procedure name="spGetQuickSlotBarSlot">
+		<Param name="@AccountDBId" type="BigInt"/>
+		<Param name="@PlayerDBId" type="BigInt"/>
+		<Body>
+			<![CDATA[
 	    SET NOCOUNT ON
         SELECT QuickSlotBarIndex, QuickSlotBarSlotIndex, QuickSlotKey, 
 		(CASE WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_PUBLIC' THEN 1
@@ -1010,94 +1023,94 @@
         FROM [dbo].[QuickSlotBar]
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
-    </Body>
-  </Procedure>
+		</Body>
+	</Procedure>
 
-  <!-- 퀵슬롯바 테이블에 퀵슬롯이 있는지 확인하기 -->
-  <Procedure name="spQuickSlotCheck">
-    <Param name="@AccountDBId" type="BigInt"/>
-    <Param name="@PlayerDBId" type="BigInt"/>
-    <Param name="@QuickSlotBarIndex" type="TinyInt"/>
-    <Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
-    <Body>
-      <![CDATA[
+	<!-- 퀵슬롯바 테이블에 퀵슬롯이 있는지 확인하기 -->
+	<Procedure name="spQuickSlotCheck">
+		<Param name="@AccountDBId" type="BigInt"/>
+		<Param name="@PlayerDBId" type="BigInt"/>
+		<Param name="@QuickSlotBarIndex" type="TinyInt"/>
+		<Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
+		<Body>
+			<![CDATA[
 	    SET NOCOUNT ON
         SELECT QuickSlotKey, SkillLargeCategory, SkillMediumCategory, SkillType, SkillLevel
         FROM [dbo].[QuickSlotBar]
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId) AND QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex)
       ]]>
-    </Body>
-  </Procedure>
-  
-  <!-- 퀵슬롯바 테이블에서 퀵슬롯바 슬롯 스왑 -->
-  <Procedure name="spQuickSlotSwap">
-    <Param name="@AccountDBId" type="BigInt"/>
-    <Param name="@PlayerDBId" type="BigInt"/>
-    <Param name="@AQuickSlotBarIndex" type="TinyInt"/>
-    <Param name="@AQuickSlotBarSlotIndex" type="TinyInt"/>
-    <Param name="@ASkillLargeCategory" type="TinyInt"/>    
-    <Param name="@ASkillMediumCategory" type="TinyInt"/>
-    <Param name="@AQuickSlotSkillType" type="SmallInt"/>
-    <Param name="@AQuickSlotSkillLevel" type="TinyInt"/>     
-    
-    <Param name="@BQuickSlotBarIndex" type="TinyInt"/>
-    <Param name="@BQuickSlotBarSlotIndex" type="TinyInt"/>
-    <Param name="@BSkillLargeCategory" type="TinyInt"/>
-    <Param name="@BSkillMediumCategory" type="TinyInt"/>
-    <Param name="@BQuickSlotSkillType" type="SmallInt"/>
-    <Param name="@BQuickSlotSkillLevel" type="TinyInt"/>    
-    <Body>
-      <![CDATA[
+		</Body>
+	</Procedure>
+
+	<!-- 퀵슬롯바 테이블에서 퀵슬롯바 슬롯 스왑 -->
+	<Procedure name="spQuickSlotSwap">
+		<Param name="@AccountDBId" type="BigInt"/>
+		<Param name="@PlayerDBId" type="BigInt"/>
+		<Param name="@AQuickSlotBarIndex" type="TinyInt"/>
+		<Param name="@AQuickSlotBarSlotIndex" type="TinyInt"/>
+		<Param name="@ASkillLargeCategory" type="TinyInt"/>
+		<Param name="@ASkillMediumCategory" type="TinyInt"/>
+		<Param name="@AQuickSlotSkillType" type="SmallInt"/>
+		<Param name="@AQuickSlotSkillLevel" type="TinyInt"/>
+
+		<Param name="@BQuickSlotBarIndex" type="TinyInt"/>
+		<Param name="@BQuickSlotBarSlotIndex" type="TinyInt"/>
+		<Param name="@BSkillLargeCategory" type="TinyInt"/>
+		<Param name="@BSkillMediumCategory" type="TinyInt"/>
+		<Param name="@BQuickSlotSkillType" type="SmallInt"/>
+		<Param name="@BQuickSlotSkillLevel" type="TinyInt"/>
+		<Body>
+			<![CDATA[
 	    SET NOCOUNT ON
         UPDATE [dbo].[QuickSlotBar] SET SkillLargeCategory = (@ASkillLargeCategory), SkillMediumCategory = (@ASkillMediumCategory), SkillType = (@AQuickSlotSkillType), SkillLevel = (@AQuickSlotSkillLevel) WHERE QuickSlotBarIndex = (@AQuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@AQuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
         UPDATE [dbo].[QuickSlotBar] SET SkillLargeCategory = (@BSkillLargeCategory), SkillMediumCategory = (@BSkillMediumCategory), SkillType = (@BQuickSlotSkillType), SkillLevel = (@BQuickSlotSkillLevel) WHERE QuickSlotBarIndex = (@BQuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@BQuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
-    </Body>
-  </Procedure>
+		</Body>
+	</Procedure>
 
-  <!-- 퀵슬롯바 테이블에서 퀵슬롯바 슬롯 초기화-->
-  <Procedure name="spQuickSlotInit">
-    <Param name="@AccountDBId" type="BigInt"/>
-    <Param name="@PlayerDBId" type="BigInt"/>
-    <Param name="@QuickSlotBarIndex" type="TinyInt"/>
-    <Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>    
-    <Body>
-      <![CDATA[
+	<!-- 퀵슬롯바 테이블에서 퀵슬롯바 슬롯 초기화-->
+	<Procedure name="spQuickSlotInit">
+		<Param name="@AccountDBId" type="BigInt"/>
+		<Param name="@PlayerDBId" type="BigInt"/>
+		<Param name="@QuickSlotBarIndex" type="TinyInt"/>
+		<Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
+		<Body>
+			<![CDATA[
 	    SET NOCOUNT ON
         UPDATE [dbo].[QuickSlotBar]
         SET SkillLargeCategory = 0, SkillMediumCategory = 0, SkillType = 0, SkillLevel = 0, ItemLargeCategory = 0, ItemMediumCategory = 0, ItemSmallCategory = 0, ItemCount = 0
         WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
-    </Body>
-  </Procedure> 
-  
-  <!-- 접속 종료시 플레이어 정보 DB에 기록 -->
-  <Procedure name="spPlayerLeaveInfoSave">
-    <Param name="@AccountDBId" type="BigInt"/>
-    <Param name="@PlayerDBId" type="BigInt"/>    
-    <Param name="@Level" type="Int"/>
-    <Param name="@MaxHP" type="Int"/>
-    <Param name="@MaxMP" type="Int"/>
-    <Param name="@MaxDP" type="Int"/>    
-    <Param name="@AutoRecoveryHPPercent" type="SmallInt"/>
-    <Param name="@AutoRecoveryMPPercent" type="SmallInt"/>
-    <Param name="@MinMeleeAttackDamage" type="int"/>
-    <Param name="@MaxMeleeAttackDamage" type="int"/>
-    <Param name="@MeleeAttackHitRate" type="SmallInt"/>
-    <Param name="@MagicDamage" type="SmallInt"/>
-    <Param name="@MagicHitRate" type="float"/>
-    <Param name="@Defence" type="int"/>
-    <Param name="@EvasionRate" type="SmallInt"/>
-    <Param name="@MeleeCriticalPoint" type="SmallInt"/>
-    <Param name="@MagicCriticalPoint" type="SmallInt"/>    
-    <Param name="@Speed" type="float"/>
-    <Param name="@LastPositionY" type="Int"/>
-    <Param name="@LastPositionX" type="Int"/>
-    <Param name="@CurrentExperience" type="BigInt"/>
-    <Param name="@RequireExperience" type="BigInt"/>
-    <Param name="@TotalExperience" type="BigInt"/>
-    <Body>
-      <![CDATA[
+		</Body>
+	</Procedure>
+
+	<!-- 접속 종료시 플레이어 정보 DB에 기록 -->
+	<Procedure name="spPlayerLeaveInfoSave">
+		<Param name="@AccountDBId" type="BigInt"/>
+		<Param name="@PlayerDBId" type="BigInt"/>
+		<Param name="@Level" type="Int"/>
+		<Param name="@MaxHP" type="Int"/>
+		<Param name="@MaxMP" type="Int"/>
+		<Param name="@MaxDP" type="Int"/>
+		<Param name="@AutoRecoveryHPPercent" type="SmallInt"/>
+		<Param name="@AutoRecoveryMPPercent" type="SmallInt"/>
+		<Param name="@MinMeleeAttackDamage" type="int"/>
+		<Param name="@MaxMeleeAttackDamage" type="int"/>
+		<Param name="@MeleeAttackHitRate" type="SmallInt"/>
+		<Param name="@MagicDamage" type="SmallInt"/>
+		<Param name="@MagicHitRate" type="float"/>
+		<Param name="@Defence" type="int"/>
+		<Param name="@EvasionRate" type="SmallInt"/>
+		<Param name="@MeleeCriticalPoint" type="SmallInt"/>
+		<Param name="@MagicCriticalPoint" type="SmallInt"/>
+		<Param name="@Speed" type="float"/>
+		<Param name="@LastPositionY" type="Int"/>
+		<Param name="@LastPositionX" type="Int"/>
+		<Param name="@CurrentExperience" type="BigInt"/>
+		<Param name="@RequireExperience" type="BigInt"/>
+		<Param name="@TotalExperience" type="BigInt"/>
+		<Body>
+			<![CDATA[
 	    SET NOCOUNT ON
         UPDATE [dbo].[Player]
         SET Level = (@Level),
@@ -1122,41 +1135,41 @@
         TotalExperience = (@TotalExperience)
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
-    </Body>
-  </Procedure>
+		</Body>
+	</Procedure>
 
-  <!--토큰 정보 있는지 확인 -->
-  <Procedure name="spIsToken">
-	  <Param name="@AccountDBId" type="BigInt"/>
-	  <Body>
-		  <![CDATA[
+	<!--토큰 정보 있는지 확인 -->
+	<Procedure name="spIsToken">
+		<Param name="@AccountDBId" type="BigInt"/>
+		<Body>
+			<![CDATA[
 			SET NOCOUNT ON
 			SELECT TokenCreateTime, Token
 			FROM [dbo].[Token]
 			WHERE AccountDBId = (@AccountDBId)
 		  ]]>
-	  </Body>
-  </Procedure>
-	
-  <!-- 지도 타일 할당 및 해제 -->
-  <Procedure name="spTileMapInfoAllocFree">
-	  <Param name="@MapID" type="SmallInt"/>
-	  <Param name="@MapTileAllocFree" type="bit"/>
-	  <Param name="@MapTileAccountID" type="BigInt"/>
-	  <Param name="@MapTilePlayerID" type="BigInt"/>
-	  <Param name="@MapTilePositionX" type="Int"/>
-	  <Param name="@MapTilePositionY" type="Int"/>
-	  <Body>
-		  <![CDATA[
+		</Body>
+	</Procedure>
+
+	<!-- 지도 타일 할당 및 해제 -->
+	<Procedure name="spTileMapInfoAllocFree">
+		<Param name="@MapID" type="SmallInt"/>
+		<Param name="@MapTileAllocFree" type="bit"/>
+		<Param name="@MapTileAccountID" type="BigInt"/>
+		<Param name="@MapTilePlayerID" type="BigInt"/>
+		<Param name="@MapTilePositionX" type="Int"/>
+		<Param name="@MapTilePositionY" type="Int"/>
+		<Body>
+			<![CDATA[
 		     SET NOCOUNT ON
              UPDATE [dbo].[MapTile]
              SET MapID = (@MapID), MapTileAllocFree = (@MapTileAllocFree), MapTileAccountID = (@MapTileAccountID), MapTilePlayerID = (@MapTilePlayerID)
              WHERE MapTilePositionX = (@MapTilePositionX) AND MapTilePositionY = (@MapTilePositionY)
 		  ]]>
-	  </Body>
-  </Procedure>
-	
-  <!-- 지도 타일 정보 가져오기 -->
+		</Body>
+	</Procedure>
+
+	<!-- 지도 타일 정보 가져오기 -->
 	<Procedure name="spGetTileMapInfoAllocFree">
 		<Param name="@MapID" type="SmallInt"/>
 		<Body>
@@ -1169,18 +1182,18 @@
 		</Body>
 	</Procedure>
 
-  <!-- 장비 착용 프로시저 -->
-  <Procedure name="spOnEquipment">
-    <Param name="@EquipmentAccountDBId" type="BigInt"/>
-    <Param name="@EquipmentPlayerDBId" type="BigInt"/>
-	<Param name="@EquipmentParts" type="TinyInt"/>
-    <Param name="@EquipmentLargeCategory" type="TinyInt"/>
-    <Param name="@EquipmentMediumCategory" type="TinyInt"/>
-	<Param name="@EquipmentSmallCategory" type="SmallInt"/>
-	<Param name="@EquipmentDurability" type="Int"/>
-	<Param name="@EquipmentEnchantPoint" type="TinyInt"/>
-    <Body>
-      <![CDATA[
+	<!-- 장비 착용 프로시저 -->
+	<Procedure name="spOnEquipment">
+		<Param name="@EquipmentAccountDBId" type="BigInt"/>
+		<Param name="@EquipmentPlayerDBId" type="BigInt"/>
+		<Param name="@EquipmentParts" type="TinyInt"/>
+		<Param name="@EquipmentLargeCategory" type="TinyInt"/>
+		<Param name="@EquipmentMediumCategory" type="TinyInt"/>
+		<Param name="@EquipmentSmallCategory" type="SmallInt"/>
+		<Param name="@EquipmentDurability" type="Int"/>
+		<Param name="@EquipmentEnchantPoint" type="TinyInt"/>
+		<Body>
+			<![CDATA[
 	    SET NOCOUNT ON     
 		UPDATE [dbo].[Equipment]
 		SET EquipmentAccountDBId = (@EquipmentAccountDBId),
@@ -1215,10 +1228,10 @@
 							                   ELSE ' '
 							                   END) 
       ]]>
-    </Body>
-  </Procedure>
+		</Body>
+	</Procedure>
 
-  <!-- 장비 해제 프로시저 -->
+	<!-- 장비 해제 프로시저 -->
 	<Procedure name="spOffEquipment">
 		<Param name="@EquipmentAccountDBId" type="BigInt"/>
 		<Param name="@EquipmentPlayerDBId" type="BigInt"/>
@@ -1242,7 +1255,7 @@
 			]]>
 		</Body>
 	</Procedure>
-  <!-- 장비 테이블 빈껍데기 아이템 정보 생성-->
+	<!-- 장비 테이블 빈껍데기 아이템 정보 생성-->
 	<Procedure name="spEquipmentItemInit">
 		<Param name="@EquipmentAccountDBId" type="BigInt"/>
 		<Param name="@EquipmentPlayerDBId" type="BigInt"/>
@@ -1265,9 +1278,9 @@
 				 'ITEM_SMALL_CATEGORY_NONE', 0, 0)
             ]]>
 		</Body>
-	 </Procedure> 
-	
-  <!-- 장비 테이블 정보 가져오기 -->
+	</Procedure>
+
+	<!-- 장비 테이블 정보 가져오기 -->
 	<Procedure name="spGetEquipemt">
 		<Param name="@EquipmentAccountDBId" type="BigInt"/>
 		<Param name="@EquipmentPlayerDBId" type="BigInt"/>
