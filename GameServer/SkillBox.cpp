@@ -55,34 +55,34 @@ CSkill* CSkillBox::FindSkill(en_SkillType SkillType)
 		// 기본 공격
 	case en_SkillType::SKILL_DEFAULT_ATTACK:
 		// 전사 공격
-	case en_SkillType::SKILL_KNIGHT_FIERCE_ATTACK:
-	case en_SkillType::SKILL_KNIGHT_CONVERSION_ATTACK:
-	case en_SkillType::SKILL_KNIGHT_SMASH_WAVE:
-	case en_SkillType::SKILL_KNIGHT_SHAEHONE:
-	case en_SkillType::SKILL_KNIGHT_CHOHONE:
-	case en_SkillType::SKILL_KNIGHT_SHIELD_SMASH:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
+	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
 		// 주술사 공격
-	case en_SkillType::SKILL_SHAMAN_FLAME_HARPOON:
-	case en_SkillType::SKILL_SHAMAN_ROOT:
-	case en_SkillType::SKILL_SHAMAN_ICE_CHAIN:
-	case en_SkillType::SKILL_SHAMAN_ICE_WAVE:
-	case en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE:
-	case en_SkillType::SKILL_SHAMAN_HELL_FIRE:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:
 		// 도사 공격
-	case en_SkillType::SKILL_TAIOIST_DIVINE_STRIKE:
-	case en_SkillType::SKILL_TAIOIST_ROOT:
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:
 		FindSkill = FindAttackSkill((en_SkillType)SkillType);
 		break;
 		// 주술사 전술
-	case en_SkillType::SKILL_SHAMAN_BACK_TELEPORT:
+	case en_SkillType::SKILL_SPELL_ACTIVE_BUF_TELEPORT:
 		// 도사 전술
-	case en_SkillType::SKILL_TAIOIST_HEALING_LIGHT:
-	case en_SkillType::SKILL_TAIOIST_HEALING_WIND:
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:
 		FindSkill = FindTacTicSkill((en_SkillType)SkillType);
 		break;
 		// 전사 버프
-	case en_SkillType::SKILL_KNIGHT_CHARGE_POSE:
-	case en_SkillType::SKILL_SHOCK_RELEASE:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
+	case en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE:
 		FindSkill = FindBufSkill((en_SkillType)SkillType);
 		break;
 	}

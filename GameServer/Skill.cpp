@@ -49,27 +49,27 @@ void CSkill::SetSkillInfo(en_SkillCategory SkillCategory, st_SkillInfo* SkillInf
 		switch (_SkillInfo->SkillType)
 		{
 		case en_SkillType::SKILL_DEFAULT_ATTACK:			
-		case en_SkillType::SKILL_KNIGHT_FIERCE_ATTACK:
-		case en_SkillType::SKILL_KNIGHT_CONVERSION_ATTACK:
-		case en_SkillType::SKILL_KNIGHT_SMASH_WAVE:
-		case en_SkillType::SKILL_KNIGHT_SHAEHONE:
-		case en_SkillType::SKILL_KNIGHT_CHOHONE:
-		case en_SkillType::SKILL_KNIGHT_SHIELD_SMASH:
+		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
+		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
+		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:
+		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE:
+		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
+		case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
 			_SkillKind = en_SkillKinds::MELEE_SKILL;
 			break;
-		case en_SkillType::SKILL_KNIGHT_CHARGE_POSE:
-		case en_SkillType::SKILL_SHAMAN_FLAME_HARPOON:
-		case en_SkillType::SKILL_SHAMAN_ROOT:
-		case en_SkillType::SKILL_SHAMAN_ICE_CHAIN:
-		case en_SkillType::SKILL_SHAMAN_ICE_WAVE:
-		case en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE:
-		case en_SkillType::SKILL_SHAMAN_HELL_FIRE:
-		case en_SkillType::SKILL_TAIOIST_DIVINE_STRIKE:
-		case en_SkillType::SKILL_TAIOIST_ROOT:
-		case en_SkillType::SKILL_SHAMAN_BACK_TELEPORT:
-		case en_SkillType::SKILL_TAIOIST_HEALING_LIGHT:
-		case en_SkillType::SKILL_TAIOIST_HEALING_WIND:
-		case en_SkillType::SKILL_SHOCK_RELEASE:
+		case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
+		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:
+		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:
+		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
+		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:
+		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
+		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:
+		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
+		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:
+		case en_SkillType::SKILL_SPELL_ACTIVE_BUF_TELEPORT:
+		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:
+		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:
+		case en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE:
 			_SkillKind = en_SkillKinds::MAGIC_SKILL;
 			break;
 		}
@@ -166,7 +166,7 @@ bool CSkill::Update()
 
 				switch (_SkillInfo->SkillType)
 				{
-				case en_SkillType::SKILL_SHOCK_RELEASE:
+				case en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE:
 					{
 						// 충격해제 버프 삭제
 						CMessage* ResBufDeBufOffPacket = G_ObjectManager->GameServer->MakePacketBufDeBufOff(_Owner->_GameObjectInfo.ObjectId, true, _SkillInfo->SkillType);
@@ -174,7 +174,7 @@ bool CSkill::Update()
 						ResBufDeBufOffPacket->Free();
 					}
 					break;
-				case en_SkillType::SKILL_KNIGHT_CHARGE_POSE:
+				case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
 					{					
 						// 돌격자세 버프 삭제
 						CMessage* ResBufDeBufOffPacket = G_ObjectManager->GameServer->MakePacketBufDeBufOff(_Owner->_GameObjectInfo.ObjectId, true, _SkillInfo->SkillType);
@@ -182,7 +182,7 @@ bool CSkill::Update()
 						ResBufDeBufOffPacket->Free();
 					}
 					break;			
-				case en_SkillType::SKILL_KNIGHT_SHAEHONE:
+				case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE:
 					{
 						// 전사 쇄혼비무 상태이상 해제
 						_Owner->ReleaseStatusAbnormal(STATUS_ABNORMAL_WARRIOR_SHAEHONE_MASK);
@@ -200,7 +200,7 @@ bool CSkill::Update()
 						ResBufDeBufOffPacket->Free();
 					}
 					break;
-				case en_SkillType::SKILL_KNIGHT_CHOHONE:
+				case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
 					{
 						// 전사 초혼비무 상태이상 해제
 						_Owner->ReleaseStatusAbnormal(STATUS_ABNORMAL_WARRIOR_CHOHONE_MASK);
@@ -218,7 +218,7 @@ bool CSkill::Update()
 						ResBufDeBufOffPacket->Free();
 					}
 					break;
-				case en_SkillType::SKILL_SHAMAN_ROOT:
+				case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:
 					{
 						// 주술사 속박 상태이상 해제
 						_Owner->ReleaseStatusAbnormal(STATUS_ABNORMAL_SHAMAN_ROOT_MASK);
@@ -235,7 +235,7 @@ bool CSkill::Update()
 						ResBufDeBufOffPacket->Free();
 					}
 					break;
-				case en_SkillType::SKILL_SHAMAN_ICE_CHAIN:
+				case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
 					{
 						// 주술사 얼음사슬 상태이상 해제
 						_Owner->ReleaseStatusAbnormal(STATUS_ABNORMAL_SHAMAN_ICE_CHAIN_MASK);
@@ -262,7 +262,7 @@ bool CSkill::Update()
 						ResBufDeBufOffPacket->Free();
 					}
 					break;
-				case en_SkillType::SKILL_SHAMAN_ICE_WAVE:
+				case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:
 					{
 						// 주술사 냉기파동 상태이상 해제
 						_Owner->ReleaseStatusAbnormal(STATUS_ABNORMAL_SHAMAN_ICE_WAVE_MASK);
@@ -279,7 +279,7 @@ bool CSkill::Update()
 						ResBufDeBufOffPacket->Free();
 					}
 					break;
-				case en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE:
+				case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
 					{
 						// 주술사 낙뢰 상태이상 해제
 						_Owner->ReleaseStatusAbnormal(STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE_MASK);
@@ -296,7 +296,7 @@ bool CSkill::Update()
 						ResBufDeBufOffPacket->Free();
 					}
 					break;
-				case en_SkillType::SKILL_TAIOIST_ROOT:
+				case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:
 					{
 						// 도사 속박 상태이상 해제
 						_Owner->ReleaseStatusAbnormal(STATUS_ABNORMAL_TAIOIST_ROOT_MASK);
