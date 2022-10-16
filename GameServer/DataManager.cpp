@@ -206,9 +206,9 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 				ToolItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_TOOL_FARMING_SHOVEL;
 			}
 
-			if (ItemObjectType == "OBJECT_ITEM_WEAPON_FARMING_TOOL_SHOVEL")
+			if (ItemObjectType == "OBJECT_ITEM_TOOL_FARMING_SHOVEL")
 			{
-				ToolItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_WEAPON_FARMING_TOOL_SHOVEL;
+				ToolItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_TOOL_FARMING_SHOVEL;
 			}
 
 			ToolItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
@@ -317,78 +317,78 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			{
 				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_FIERCE_ATTACK;
 				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
-				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK;
-				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_KNIGHT_FIERCE_ATTACK;
+				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_ATTACK;
+				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CONVERSION_ATTACK")
 			{
 				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CONVERSION_ATTACK;
 				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
-				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK;
-				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_KNIGHT_CONVERSION_ATTACK;
+				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_ATTACK;
+				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SHAEHONE_ATTACK")
 			{
 				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SHAEHONE_ATTACK;
 				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
-				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK;
-				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_KNIGHT_SHAEHONE;
+				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_ATTACK;
+				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK")
 			{
 				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK;
 				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
-				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK;
-				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_KNIGHT_CHOHONE;
+				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_ATTACK;
+				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SMASH_WAVE_ATTACK")
 			{
 				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SMASH_WAVE_ATTACK;
 				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
-				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK;
-				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_KNIGHT_SMASH_WAVE;
+				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_ATTACK;
+				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHARGE_POSE")
 			{
 				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHARGE_POSE;
 				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
-				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_BUF;
-				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_KNIGHT_CHARGE_POSE;
+				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_BUF;
+				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_FLAME_HARPOON")
 			{
 				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_FLAME_HARPOON;
 				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
-				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK;
-				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_SHAMAN_FLAME_HARPOON;
+				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_ATTACK;
+				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HELL_FIRE")
 			{
 				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HELL_FIRE;
 				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
-				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK;
-				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_SHAMAN_HELL_FIRE;
+				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_ATTACK;
+				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEOGRY_SKILLBOOK_TAIOIST_HEALING_LIGHT")
 			{
 				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEOGRY_SKILLBOOK_TAIOIST_HEALING_LIGHT;
 				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_TAOIST;
-				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_HEAL;
-				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_TAIOIST_HEALING_LIGHT;
+				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_HEAL;
+				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_TAIOIST_HEALING_WIND")
 			{
 				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_TAIOIST_HEALING_WIND;
 				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_TAOIST;
-				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_HEAL;
-				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_TAIOIST_HEALING_WIND;
+				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_HEAL;
+				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND;
 			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_SHOCK_RELEASE")
 			{
 				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHOCK_RELEASE;
 				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_PUBLIC;
-				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF;
-				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_SHOCK_RELEASE;
+				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_BUF;
+				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE;
 			}
 
 			if (ItemObjectType == "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK")
@@ -1134,7 +1134,7 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 			{
 				st_AttackSkillInfo* PublicAttackSkill = new st_AttackSkillInfo();
 				PublicAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_PUBLIC;
-				PublicAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK;
+				PublicAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_ATTACK;
 
 				string SkillType = PublicAttackSkillListFiled["SkillType"].GetString();
 				string SkillName = PublicAttackSkillListFiled["SkillName"].GetString();
@@ -1181,104 +1181,13 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				PublicAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));				
 
 				_PublicAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)PublicAttackSkill->SkillType, PublicAttackSkill));
-			}
-
-			for (auto& PublicTacTicSkillListFiled : PublicSkillListFiled["PublicTacTicSkillList"].GetArray())
-			{
-				st_TacTicSkillInfo* PublicTacTicSkill = new st_TacTicSkillInfo();
-				PublicTacTicSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_PUBLIC;
-				PublicTacTicSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_TACTIC;
-
-				string SkillType = PublicTacTicSkillListFiled["SkillType"].GetString();
-				string SkillName = PublicTacTicSkillListFiled["SkillName"].GetString();
-				int SkillLevel = PublicTacTicSkillListFiled["SkillLevel"].GetInt();
-				int SkillCoolTime = PublicTacTicSkillListFiled["SkillCoolTime"].GetInt();
-				int SkillCastingTime = PublicTacTicSkillListFiled["SkillCastingTime"].GetInt();
-				int64 SkillDurationTime = PublicTacTicSkillListFiled["SkillDurationTime"].GetInt64();
-				int64 SkillDotTime = PublicTacTicSkillListFiled["SkillDotTime"].GetInt64();
-				int SkillDistance = PublicTacTicSkillListFiled["SkillDistance"].GetInt();
-				float SkillTargetEffectTime = PublicTacTicSkillListFiled["SkillTargetEffectTime"].GetFloat();
-				string SkillUpAnimation = PublicTacTicSkillListFiled["SkillUpAnimation"].GetString();
-				string SkillDownAnimation = PublicTacTicSkillListFiled["SkillDownAnimation"].GetString();
-				string SkillLeftAnimation = PublicTacTicSkillListFiled["SkillLeftAnimation"].GetString();
-				string SkillRightAnimation = PublicTacTicSkillListFiled["SkillRightAnimation"].GetString();
-				string NextComboSkill = PublicTacTicSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = PublicTacTicSkillListFiled["SkillExplanation"].GetString();
-
-				if (SkillType == "")
-				{
-
-				}
-
-				PublicTacTicSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
-				PublicTacTicSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
-				PublicTacTicSkill->SkillLevel = SkillLevel;
-				PublicTacTicSkill->SkillCoolTime = SkillCoolTime;
-				PublicTacTicSkill->SkillCastingTime = SkillCastingTime;
-				PublicTacTicSkill->SkillDurationTime = SkillDurationTime;
-				PublicTacTicSkill->SkillDotTime = SkillDotTime;
-				PublicTacTicSkill->SkillDistance = SkillDistance;
-				PublicTacTicSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				PublicTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-				PublicTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-				PublicTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-				PublicTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
-
-				if (NextComboSkill == "SKILL_TYPE_NONE")
-				{
-					PublicTacTicSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}				
-
-				_PublicTacTicSkillDatas.insert(pair<int16, st_TacTicSkillInfo*>((int16)PublicTacTicSkill->SkillType, PublicTacTicSkill));
-			}
-
-			for (auto& PublicHealSkillListFiled : PublicSkillListFiled["PublicHealSkillList"].GetArray())
-			{
-				st_HealSkillInfo* PublicHealSkill = new st_HealSkillInfo();
-				PublicHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_PUBLIC;
-				PublicHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL;
-
-				string SkillType = PublicHealSkillListFiled["SkillType"].GetString();
-				string SkillName = PublicHealSkillListFiled["SkillName"].GetString();
-				int SkillLevel = PublicHealSkillListFiled["SkillLevel"].GetInt();
-				int SkillMinHeal = PublicHealSkillListFiled["SkillMinHeal"].GetInt();
-				int SkillMaxHeal = PublicHealSkillListFiled["SkillMaxHeal"].GetInt();
-				int SkillCoolTime = PublicHealSkillListFiled["SkillCoolTime"].GetInt();
-				int SkillCastingTime = PublicHealSkillListFiled["SkillCastingTime"].GetInt();
-				int64 SkillDurationTime = PublicHealSkillListFiled["SkillDurationTime"].GetInt64();
-				int64 SkillDotTime = PublicHealSkillListFiled["SkillDotTime"].GetInt64();
-				int SkillDistance = PublicHealSkillListFiled["SkillDistance"].GetInt();
-				float SkillTargetEffectTime = PublicHealSkillListFiled["SkillTargetEffectTime"].GetFloat();
-				string SkillUpAnimation = PublicHealSkillListFiled["SkillUpAnimation"].GetString();
-				string SkillDownAnimation = PublicHealSkillListFiled["SkillDownAnimation"].GetString();
-				string SkillLeftAnimation = PublicHealSkillListFiled["SkillLeftAnimation"].GetString();
-				string SkillRightAnimation = PublicHealSkillListFiled["SkillRightAnimation"].GetString();
-				string SkillExplation = PublicHealSkillListFiled["SkillExplanation"].GetString();
-
-				PublicHealSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
-				PublicHealSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
-				PublicHealSkill->SkillLevel = SkillLevel;
-				PublicHealSkill->SkillMinHealPoint = SkillMinHeal;
-				PublicHealSkill->SkillMaxHealPoint = SkillMaxHeal;
-				PublicHealSkill->SkillCoolTime = SkillCoolTime;
-				PublicHealSkill->SkillCastingTime = SkillCastingTime;
-				PublicHealSkill->SkillDurationTime = SkillDurationTime;
-				PublicHealSkill->SkillDotTime = SkillDotTime;
-				PublicHealSkill->SkillDistance = SkillDistance;
-				PublicHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				PublicHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-				PublicHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-				PublicHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-				PublicHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));				
-
-				_PublicTacTicSkillDatas.insert(pair<int16, st_HealSkillInfo*>((int16)PublicHealSkill->SkillType, PublicHealSkill));
-			}
+			}					
 
 			for (auto& PublicBufSkillListFiled : PublicSkillListFiled["PublicBufSkillList"].GetArray())
 			{
 				st_BufSkillInfo* PublicBufSkill = new st_BufSkillInfo();
 				PublicBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_PUBLIC;
-				PublicBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF;
+				PublicBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_BUF;
 
 				string SkillType = PublicBufSkillListFiled["SkillType"].GetString();
 				string SkillName = PublicBufSkillListFiled["SkillName"].GetString();
@@ -1310,9 +1219,9 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				string SkillRightAnimation = PublicBufSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = PublicBufSkillListFiled["SkillExplanation"].GetString();
 
-				if (SkillType == "SKILL_SHOCK_RELEASE")
+				if (SkillType == "SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE")
 				{
-					PublicBufSkill->SkillType = en_SkillType::SKILL_SHOCK_RELEASE;
+					PublicBufSkill->SkillType = en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE;
 				}
 
 				PublicBufSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
@@ -1348,1154 +1257,726 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 	}
 }
 
-void CDataManager::LoadDataWarriorSkill(wstring LoadFileName)
+void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 {
 	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());
 
 	rapidjson::Document Document;
 	Document.Parse(FileStr);
 
-	for (auto& Filed : Document["WarriorSkills"].GetArray())
+	for (auto& Filed : Document["FightSkills"].GetArray())
 	{
-		for (auto& WarriorSkillListFiled : Filed["WarriorSkillList"].GetArray())
+		for (auto& FightSkillListFiled : Filed["FightSkillList"].GetArray())
 		{
-			for (auto& WarriorAttackSkillListFiled : WarriorSkillListFiled["WarriorAttackSkillList"].GetArray())
+			for (auto& PassiveSkillListFiled : FightSkillListFiled["PassiveSkillList"].GetArray())
 			{
-				st_AttackSkillInfo* WarriorAttackSkill = new st_AttackSkillInfo();
-				WarriorAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
-				WarriorAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK;
+				st_PassiveSkillInfo* PassiveSkill = new st_PassiveSkillInfo();
 
-				string SkillType = WarriorAttackSkillListFiled["SkillType"].GetString();
-				string SkillName = WarriorAttackSkillListFiled["SkillName"].GetString();
-				int SkillLevel = WarriorAttackSkillListFiled["SkillLevel"].GetInt();
-				int SkillMinDamage = WarriorAttackSkillListFiled["SkillMinDamage"].GetInt();
-				int SkillMaxDamage = WarriorAttackSkillListFiled["SkillMaxDamage"].GetInt();
-				int SkillCoolTime = WarriorAttackSkillListFiled["SkillCoolTime"].GetInt();
-				int SkillCastingTime = WarriorAttackSkillListFiled["SkillCastingTime"].GetInt();
-				int64 SkillDurationTime = WarriorAttackSkillListFiled["SkillDurationTime"].GetInt64();
-				int64 SkillDotTime = WarriorAttackSkillListFiled["SkillDotTime"].GetInt64();
-				int SkillDistance = WarriorAttackSkillListFiled["SkillDistance"].GetInt();
-				int32 SkillMotionTime = WarriorAttackSkillListFiled["SkillMotionTime"].GetInt();
-				float SkillTargetEffectTime = WarriorAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
-				int8 SkillDebufAttackSpeed = (int8)WarriorAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
-				int8 SkillDebufMovingSpeed = (int8)WarriorAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
-				int8 StatusAbnormalityProbability = (int8)WarriorAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
-				string SkillUpAnimation = WarriorAttackSkillListFiled["SkillUpAnimation"].GetString();
-				string SkillDownAnimation = WarriorAttackSkillListFiled["SkillDownAnimation"].GetString();
-				string SkillLeftAnimation = WarriorAttackSkillListFiled["SkillLeftAnimation"].GetString();
-				string SkillRightAnimation = WarriorAttackSkillListFiled["SkillRightAnimation"].GetString();
-				string NextComboSkill = WarriorAttackSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = WarriorAttackSkillListFiled["SkillExplanation"].GetString();
+				int8 SkillNumber = (int8)PassiveSkillListFiled["SkillNumber"].GetInt();
+				string SkillType = PassiveSkillListFiled["SkillType"].GetString();
+				string SkillName = PassiveSkillListFiled["SkillName"].GetString();
+				int8 SkillMaxLevel = PassiveSkillListFiled["SkillMaxLevel"].GetInt();
+				string SkillExplation = PassiveSkillListFiled["SkillExplanation"].GetString();
 
-				if (SkillType == "SKILL_KNIGHT_FIERCE_ATTACK")
-				{
-					WarriorAttackSkill->SkillType = en_SkillType::SKILL_KNIGHT_FIERCE_ATTACK;
-				}
-				else if (SkillType == "SKILL_KNIGHT_CONVERSION_ATTACK")
-				{
-					WarriorAttackSkill->SkillType = en_SkillType::SKILL_KNIGHT_CONVERSION_ATTACK;
-				}
-				else if (SkillType == "SKILL_KNIGHT_SHAEHONE")
-				{
-					WarriorAttackSkill->SkillType = en_SkillType::SKILL_KNIGHT_SHAEHONE;
-				}
-				else if (SkillType == "SKILL_KNIGHT_CHOHONE")
-				{
-					WarriorAttackSkill->SkillType = en_SkillType::SKILL_KNIGHT_CHOHONE;
-				}
-				else if (SkillType == "SKILL_KNIGHT_SMASH_WAVE")
-				{
-					WarriorAttackSkill->SkillType = en_SkillType::SKILL_KNIGHT_SMASH_WAVE;
-				}
-				else if (SkillType == "SKILL_KNIGHT_SHIELD_SMASH")
-				{
-					WarriorAttackSkill->SkillType = en_SkillType::SKILL_KNIGHT_SHIELD_SMASH;
-				}
+				PassiveSkill->SkillNumber = SkillNumber;
+				PassiveSkill->SkillMaxLevel = SkillMaxLevel;
+				PassiveSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+				PassiveSkill->SkillName = (LPWSTR)CA2W(SkillExplation.c_str());
 
-				WarriorAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
-				WarriorAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
-				WarriorAttackSkill->SkillLevel = SkillLevel;
-				WarriorAttackSkill->SkillMinDamage = SkillMinDamage;
-				WarriorAttackSkill->SkillMaxDamage = SkillMaxDamage;
-				WarriorAttackSkill->SkillCoolTime = SkillCoolTime;
-				WarriorAttackSkill->SkillCastingTime = SkillCastingTime;
-				WarriorAttackSkill->SkillDurationTime = SkillDurationTime;
-				WarriorAttackSkill->SkillDotTime = SkillDotTime;
-				WarriorAttackSkill->SkillMotionTime = SkillMotionTime;
-				WarriorAttackSkill->SkillDistance = SkillDistance;
-				WarriorAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				WarriorAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
-				WarriorAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
-
-				if (NextComboSkill == "SKILL_KNIGHT_CONVERSION_ATTACK")
+				if (SkillType == "SKILL_FIGHT_TWO_HAND_SWORD_MASTER")
 				{
-					WarriorAttackSkill->NextComboSkill = en_SkillType::SKILL_KNIGHT_CONVERSION_ATTACK;
-				}
-				else if (NextComboSkill == "SKILL_TYPE_NONE")
-				{
-					WarriorAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}
-				
-				WarriorAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-				WarriorAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-				WarriorAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-				WarriorAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
-				WarriorAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
+					PassiveSkill->SkillType = en_SkillType::SKILL_FIGHT_TWO_HAND_SWORD_MASTER;
+				}					
 
-				_WarriorAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)WarriorAttackSkill->SkillType, WarriorAttackSkill));
+				_FightPassiveSkillDatas.insert(pair<int16, st_PassiveSkillInfo*>((int16)PassiveSkill->SkillType, PassiveSkill));
 			}
 
-			for (auto& WarriorHealSkillListFiled : WarriorSkillListFiled["WarriorHealSkillList"].GetArray())
+			for (auto& ActiveSkillListFiled : FightSkillListFiled["ActiveSkillList"].GetArray())
 			{
-				st_HealSkillInfo* WarriorHealSkill = new st_HealSkillInfo();
-				WarriorHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
-				WarriorHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_HEAL;
-
-				string SkillType = WarriorHealSkillListFiled["SkillType"].GetString();
-				string SkillName = WarriorHealSkillListFiled["SkillName"].GetString();
-				int SkillLevel = WarriorHealSkillListFiled["SkillLevel"].GetInt();
-				int SkillMinHeal = WarriorHealSkillListFiled["SkillMinHeal"].GetInt();
-				int SkillMaxHeal = WarriorHealSkillListFiled["SkillMaxHeal"].GetInt();
-				int SkillCoolTime = WarriorHealSkillListFiled["SkillCoolTime"].GetInt();
-				int SkillCastingTime = WarriorHealSkillListFiled["SkillCastingTime"].GetInt();
-				int64 SkillDurationTime = WarriorHealSkillListFiled["SkillDurationTime"].GetInt64();
-				int64 SkillDotTime = WarriorHealSkillListFiled["SkillDotTime"].GetInt64();
-				int SkillDistance = WarriorHealSkillListFiled["SkillDistance"].GetInt();
-				int32 SkillMotionTime = WarriorHealSkillListFiled["SkillMotionTime"].GetInt();
-				float SkillTargetEffectTime = WarriorHealSkillListFiled["SkillTargetEffectTime"].GetFloat();
-				string SkillUpAnimation = WarriorHealSkillListFiled["SkillUpAnimation"].GetString();
-				string SkillDownAnimation = WarriorHealSkillListFiled["SkillDownAnimation"].GetString();
-				string SkillLeftAnimation = WarriorHealSkillListFiled["SkillLeftAnimation"].GetString();
-				string SkillRightAnimation = WarriorHealSkillListFiled["SkillRightAnimation"].GetString();
-				string NextComboSkill = WarriorHealSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = WarriorHealSkillListFiled["SkillExplanation"].GetString();
-
-				WarriorHealSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
-				WarriorHealSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
-				WarriorHealSkill->SkillLevel = SkillLevel;
-				WarriorHealSkill->SkillMinHealPoint = SkillMinHeal;
-				WarriorHealSkill->SkillMaxHealPoint = SkillMaxHeal;
-				WarriorHealSkill->SkillCoolTime = SkillCoolTime;
-				WarriorHealSkill->SkillCastingTime = SkillCastingTime;
-				WarriorHealSkill->SkillDurationTime = SkillDurationTime;
-				WarriorHealSkill->SkillDotTime = SkillDotTime;
-				WarriorHealSkill->SkillDistance = SkillDistance;
-				WarriorHealSkill->SkillMotionTime = SkillMotionTime;
-				WarriorHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-
-				if (NextComboSkill == "SKILL_TYPE_NONE")
+				for (auto& AttackSkillFiled : ActiveSkillListFiled["AttackSkill"].GetArray())
 				{
-					WarriorHealSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}
-				
-				WarriorHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-				WarriorHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-				WarriorHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-				WarriorHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
+					st_AttackSkillInfo* FightAttackSkill = new st_AttackSkillInfo();
 
-				_WarriorTacTicSkillDatas.insert(pair<int16, st_HealSkillInfo*>((int16)WarriorHealSkill->SkillType, WarriorHealSkill));
-			}
+					int8 SkillNumber = (int8)AttackSkillFiled["SkillNumber"].GetInt();
+					string SkillType = AttackSkillFiled["SkillType"].GetString();
+					string SkillName = AttackSkillFiled["SkillName"].GetString();
+					int8 SkillMaxLevel = AttackSkillFiled["SkillMaxLevel"].GetInt();
+					int SkillMinDamage = AttackSkillFiled["SkillMinDamage"].GetInt();
+					int SkillMaxDamage = AttackSkillFiled["SkillMaxDamage"].GetInt();
+					int SkillCoolTime = AttackSkillFiled["SkillCoolTime"].GetInt();
+					int SkillCastingTime = AttackSkillFiled["SkillCastingTime"].GetInt();
+					int64 SkillDurationTime = AttackSkillFiled["SkillDurationTime"].GetInt64();
+					int64 SkillDotTime = AttackSkillFiled["SkillDotTime"].GetInt64();
+					int SkillDistance = AttackSkillFiled["SkillDistance"].GetInt();
+					int32 SkillMotionTime = AttackSkillFiled["SkillMotionTime"].GetInt();
+					float SkillTargetEffectTime = AttackSkillFiled["SkillTargetEffectTime"].GetFloat();
+					int8 SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetInt();
+					int8 SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetInt();
+					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();
+					string SkillUpAnimation = AttackSkillFiled["SkillUpAnimation"].GetString();
+					string SkillDownAnimation = AttackSkillFiled["SkillDownAnimation"].GetString();
+					string SkillLeftAnimation = AttackSkillFiled["SkillLeftAnimation"].GetString();
+					string SkillRightAnimation = AttackSkillFiled["SkillRightAnimation"].GetString();
+					string NextComboSkill = AttackSkillFiled["NextComboSkill"].GetString();
+					string SkillExplation = AttackSkillFiled["SkillExplanation"].GetString();
 
-			for (auto& WarriorBufSkillListFiled : WarriorSkillListFiled["WarriorBufSkillList"].GetArray())
-			{
-				st_BufSkillInfo* WarriorBufSkill = new st_BufSkillInfo();
-				WarriorBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
-				WarriorBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_BUF;
+					if (SkillType == "SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK")
+					{
+						FightAttackSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK;
+					}
+					else if (SkillType == "SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK")
+					{
+						FightAttackSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK;
+					}
+					else if (SkillType == "SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE")
+					{
+						FightAttackSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE;
+					}
+					else if (SkillType == "SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE")
+					{
+						FightAttackSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE;
+					}
+					else if (SkillType == "SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE")
+					{
+						FightAttackSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE;
+					}
+					else if (SkillType == "SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH")
+					{
+						FightAttackSkill->SkillType = en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH;
+					}
 
-				string SkillType = WarriorBufSkillListFiled["SkillType"].GetString();
-				string SkillName = WarriorBufSkillListFiled["SkillName"].GetString();
-				int SkillLevel = WarriorBufSkillListFiled["SkillLevel"].GetInt();
+					FightAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+					FightAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
+					FightAttackSkill->SkillMaxLevel = SkillMaxLevel;					
+					FightAttackSkill->SkillMinDamage = SkillMinDamage;
+					FightAttackSkill->SkillMaxDamage = SkillMaxDamage;
+					FightAttackSkill->SkillCoolTime = SkillCoolTime;
+					FightAttackSkill->SkillCastingTime = SkillCastingTime;
+					FightAttackSkill->SkillDurationTime = SkillDurationTime;
+					FightAttackSkill->SkillDotTime = SkillDotTime;
+					FightAttackSkill->SkillMotionTime = SkillMotionTime;
+					FightAttackSkill->SkillDistance = SkillDistance;
+					FightAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+					FightAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
+					FightAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
 
-				int IncreaseMinAttackPoint = WarriorBufSkillListFiled["IncreaseMinAttackPoint"].GetInt();
-				int IncreaseMaxAttackPoint = WarriorBufSkillListFiled["IncreaseMaxAttackPoint"].GetInt();
-				int IncreaseMeleeAttackSpeedPoint = WarriorBufSkillListFiled["IncreaseMeleeAttackSpeedPoint"].GetInt();
-				int16 IncreaseMeleeAttackHitRate = (int16)WarriorBufSkillListFiled["IncreaseMeleeAttackHitRate"].GetInt();
-				int16 IncreaseMagicAttackPoint = (int16)WarriorBufSkillListFiled["IncreaseMagicAttackPoint"].GetInt();
-				int16 IncreaseMagicCastingPoint = (int16)WarriorBufSkillListFiled["IncreaseMagicCastingPoint"].GetInt();
-				int16 IncreaseMagicAttackHitRate = (int16)WarriorBufSkillListFiled["IncreaseMagicAttackHitRate"].GetInt();
-				int IncreaseDefencePoint = WarriorBufSkillListFiled["IncreaseDefencePoint"].GetInt();
-				int16 IncreaseEvasionRate = (int16)WarriorBufSkillListFiled["IncreaseEvasionRate"].GetInt();
-				int16 IncreaseMeleeCriticalPoint = (int16)WarriorBufSkillListFiled["IncreaseMeleeCriticalPoint"].GetInt();
-				int16 IncreaseMagicCriticalPoint = (int16)WarriorBufSkillListFiled["IncreaseMagicCriticalPoint"].GetInt();
-				float IncreaseSpeedPoint = WarriorBufSkillListFiled["IncreaseSpeedPoint"].GetFloat();
-				int16 IncreaseStatusAbnormalityResistance = (int16)WarriorBufSkillListFiled["IncreaseStatusAbnormalityResistance"].GetInt();
+					if (NextComboSkill == "SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK")
+					{
+						FightAttackSkill->NextComboSkill = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK;
+					}
+					else if (NextComboSkill == "SKILL_TYPE_NONE")
+					{
+						FightAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+					}
 
-				int SkillCoolTime = WarriorBufSkillListFiled["SkillCoolTime"].GetInt();
-				int SkillCastingTime = WarriorBufSkillListFiled["SkillCastingTime"].GetInt();
-				int64 SkillDurationTime = WarriorBufSkillListFiled["SkillDurationTime"].GetInt64();
-				int64 SkillDotTime = WarriorBufSkillListFiled["SkillDotTime"].GetInt64();
-				int SkillDistance = WarriorBufSkillListFiled["SkillDistance"].GetInt();
-				int32 SkillMotionTime = WarriorBufSkillListFiled["SkillMotionTime"].GetInt();
-				float SkillTargetEffectTime = WarriorBufSkillListFiled["SkillTargetEffectTime"].GetFloat();
-				string SkillUpAnimation = WarriorBufSkillListFiled["SkillUpAnimation"].GetString();
-				string SkillDownAnimation = WarriorBufSkillListFiled["SkillDownAnimation"].GetString();
-				string SkillLeftAnimation = WarriorBufSkillListFiled["SkillLeftAnimation"].GetString();
-				string SkillRightAnimation = WarriorBufSkillListFiled["SkillRightAnimation"].GetString();
-				string NextComboSkill = WarriorBufSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = WarriorBufSkillListFiled["SkillExplanation"].GetString();
+					FightAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+					FightAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+					FightAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+					FightAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
+					FightAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
 
-				if (SkillType == "SKILL_KNIGHT_CHARGE_POSE")
-				{
-					WarriorBufSkill->SkillType = en_SkillType::SKILL_KNIGHT_CHARGE_POSE;
+					_FightAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)FightAttackSkill->SkillType, FightAttackSkill));
 				}
 
-				WarriorBufSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
-				WarriorBufSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
-				WarriorBufSkill->SkillLevel = SkillLevel;
-				WarriorBufSkill->IncreaseMinAttackPoint = IncreaseMinAttackPoint;
-				WarriorBufSkill->IncreaseMaxAttackPoint = IncreaseMaxAttackPoint;
-				WarriorBufSkill->IncreaseMeleeAttackSpeedPoint = IncreaseMeleeAttackSpeedPoint;
-				WarriorBufSkill->IncreaseMeleeAttackHitRate = IncreaseMeleeAttackHitRate;
-				WarriorBufSkill->IncreaseMagicAttackPoint = IncreaseMagicAttackPoint;
-				WarriorBufSkill->IncreaseMagicCastingPoint = IncreaseMagicCastingPoint;
-				WarriorBufSkill->IncreaseMagicAttackHitRate = IncreaseMagicAttackHitRate;
-				WarriorBufSkill->IncreaseDefencePoint = IncreaseDefencePoint;
-				WarriorBufSkill->IncreaseEvasionRate = IncreaseEvasionRate;
-				WarriorBufSkill->IncreaseMeleeCriticalPoint = IncreaseMeleeCriticalPoint;
-				WarriorBufSkill->IncreaseMagicCriticalPoint = IncreaseMagicCriticalPoint;
-				WarriorBufSkill->IncreaseSpeedPoint = IncreaseSpeedPoint;
-				WarriorBufSkill->IncreaseStatusAbnormalityResistance = IncreaseStatusAbnormalityResistance;
-				WarriorBufSkill->SkillCoolTime = SkillCoolTime;
-				WarriorBufSkill->SkillCastingTime = SkillCastingTime;
-				WarriorBufSkill->SkillDurationTime = SkillDurationTime;
-				WarriorBufSkill->SkillDotTime = SkillDotTime;
-				WarriorBufSkill->SkillDistance = SkillDistance;
-				WarriorBufSkill->SkillMotionTime = SkillMotionTime;
-				WarriorBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				WarriorBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-				WarriorBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-				WarriorBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-				WarriorBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
-
-				if (NextComboSkill == "SKILL_TYPE_NONE")
+				for (auto& BufSkillFiled : ActiveSkillListFiled["BufSkill"].GetArray())
 				{
-					WarriorBufSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}				
+					st_BufSkillInfo* FightBufSkill = new st_BufSkillInfo();
+					FightBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
+					FightBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_BUF;
 
-				_WarriorBufSkillDatas.insert(pair<int16, st_BufSkillInfo*>((int16)WarriorBufSkill->SkillType, WarriorBufSkill));
+					int8 SkillNumber = (int8)BufSkillFiled["SkillNumber"].GetInt();
+					string SkillType = BufSkillFiled["SkillType"].GetString();
+					string SkillName = BufSkillFiled["SkillName"].GetString();
+					int SkillMaxLevel = BufSkillFiled["SkillMaxLevel"].GetInt();
+
+					int IncreaseMinAttackPoint = BufSkillFiled["IncreaseMinAttackPoint"].GetInt();
+					int IncreaseMaxAttackPoint = BufSkillFiled["IncreaseMaxAttackPoint"].GetInt();
+					int IncreaseMeleeAttackSpeedPoint = BufSkillFiled["IncreaseMeleeAttackSpeedPoint"].GetInt();
+					int16 IncreaseMeleeAttackHitRate = (int16)BufSkillFiled["IncreaseMeleeAttackHitRate"].GetInt();
+					int16 IncreaseMagicAttackPoint = (int16)BufSkillFiled["IncreaseMagicAttackPoint"].GetInt();
+					int16 IncreaseMagicCastingPoint = (int16)BufSkillFiled["IncreaseMagicCastingPoint"].GetInt();
+					int16 IncreaseMagicAttackHitRate = (int16)BufSkillFiled["IncreaseMagicAttackHitRate"].GetInt();
+					int IncreaseDefencePoint = BufSkillFiled["IncreaseDefencePoint"].GetInt();
+					int16 IncreaseEvasionRate = (int16)BufSkillFiled["IncreaseEvasionRate"].GetInt();
+					int16 IncreaseMeleeCriticalPoint = (int16)BufSkillFiled["IncreaseMeleeCriticalPoint"].GetInt();
+					int16 IncreaseMagicCriticalPoint = (int16)BufSkillFiled["IncreaseMagicCriticalPoint"].GetInt();
+					float IncreaseSpeedPoint = BufSkillFiled["IncreaseSpeedPoint"].GetFloat();
+					int16 IncreaseStatusAbnormalityResistance = (int16)BufSkillFiled["IncreaseStatusAbnormalityResistance"].GetInt();
+
+					int SkillCoolTime = BufSkillFiled["SkillCoolTime"].GetInt();
+					int SkillCastingTime = BufSkillFiled["SkillCastingTime"].GetInt();
+					int64 SkillDurationTime = BufSkillFiled["SkillDurationTime"].GetInt64();
+					int64 SkillDotTime = BufSkillFiled["SkillDotTime"].GetInt64();
+					int SkillDistance = BufSkillFiled["SkillDistance"].GetInt();
+					int32 SkillMotionTime = BufSkillFiled["SkillMotionTime"].GetInt();
+					float SkillTargetEffectTime = BufSkillFiled["SkillTargetEffectTime"].GetFloat();
+					string SkillUpAnimation = BufSkillFiled["SkillUpAnimation"].GetString();
+					string SkillDownAnimation = BufSkillFiled["SkillDownAnimation"].GetString();
+					string SkillLeftAnimation = BufSkillFiled["SkillLeftAnimation"].GetString();
+					string SkillRightAnimation = BufSkillFiled["SkillRightAnimation"].GetString();
+					string NextComboSkill = BufSkillFiled["NextComboSkill"].GetString();
+					string SkillExplation = BufSkillFiled["SkillExplanation"].GetString();
+
+					if (SkillType == "SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE")
+					{
+						FightBufSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE;
+					}
+
+					FightBufSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+					FightBufSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
+					FightBufSkill->SkillMaxLevel = SkillMaxLevel;
+					FightBufSkill->IncreaseMinAttackPoint = IncreaseMinAttackPoint;
+					FightBufSkill->IncreaseMaxAttackPoint = IncreaseMaxAttackPoint;
+					FightBufSkill->IncreaseMeleeAttackSpeedPoint = IncreaseMeleeAttackSpeedPoint;
+					FightBufSkill->IncreaseMeleeAttackHitRate = IncreaseMeleeAttackHitRate;
+					FightBufSkill->IncreaseMagicAttackPoint = IncreaseMagicAttackPoint;
+					FightBufSkill->IncreaseMagicCastingPoint = IncreaseMagicCastingPoint;
+					FightBufSkill->IncreaseMagicAttackHitRate = IncreaseMagicAttackHitRate;
+					FightBufSkill->IncreaseDefencePoint = IncreaseDefencePoint;
+					FightBufSkill->IncreaseEvasionRate = IncreaseEvasionRate;
+					FightBufSkill->IncreaseMeleeCriticalPoint = IncreaseMeleeCriticalPoint;
+					FightBufSkill->IncreaseMagicCriticalPoint = IncreaseMagicCriticalPoint;
+					FightBufSkill->IncreaseSpeedPoint = IncreaseSpeedPoint;
+					FightBufSkill->IncreaseStatusAbnormalityResistance = IncreaseStatusAbnormalityResistance;
+					FightBufSkill->SkillCoolTime = SkillCoolTime;
+					FightBufSkill->SkillCastingTime = SkillCastingTime;
+					FightBufSkill->SkillDurationTime = SkillDurationTime;
+					FightBufSkill->SkillDotTime = SkillDotTime;
+					FightBufSkill->SkillDistance = SkillDistance;
+					FightBufSkill->SkillMotionTime = SkillMotionTime;
+					FightBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+					FightBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+					FightBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+					FightBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+					FightBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
+
+					if (NextComboSkill == "SKILL_TYPE_NONE")
+					{
+						FightBufSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+					}
+
+					_FightBufSkillDatas.insert(pair<int16, st_BufSkillInfo*>((int16)FightBufSkill->SkillType, FightBufSkill));
+				}
 			}
 		}
 	}
 }
 
-void CDataManager::LoadDataShamanSkill(wstring LoadFileName)
+void CDataManager::LoadDataProtectionSkill(wstring LoadFileName)
 {
 	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());
 
 	rapidjson::Document Document;
 	Document.Parse(FileStr);
 
-	for (auto& Filed : Document["ShamanSkills"].GetArray())
+	for (auto& Filed : Document["ProtectionSkills"].GetArray())
 	{
-		for (auto& ShamanSkillListFiled : Filed["ShamanSkillList"].GetArray())
+		for (auto& ProtectionSkillListFiled : Filed["ProtectionSkillList"].GetArray())
 		{
-			for (auto& ShmanAttackSkillListFiled : ShamanSkillListFiled["ShamanAttackSkillList"].GetArray())
+			for (auto& PassiveSkillListFiled : ProtectionSkillListFiled["PassiveSkillList"].GetArray())
 			{
-				st_AttackSkillInfo* ShamanAttackSkill = new st_AttackSkillInfo();
-				ShamanAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
-				ShamanAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK;
 
-				string SkillType = ShmanAttackSkillListFiled["SkillType"].GetString();
-				string SkillName = ShmanAttackSkillListFiled["SkillName"].GetString();
-				int SkillLevel = ShmanAttackSkillListFiled["SkillLevel"].GetInt();
-				int SkillMinDamage = ShmanAttackSkillListFiled["SkillMinDamage"].GetInt();
-				int SkillMaxDamage = ShmanAttackSkillListFiled["SkillMaxDamage"].GetInt();
-				int SkillCoolTime = ShmanAttackSkillListFiled["SkillCoolTime"].GetInt();
-				int SkillCastingTime = ShmanAttackSkillListFiled["SkillCastingTime"].GetInt();
-				int64 SkillDurationTime = ShmanAttackSkillListFiled["SkillDurationTime"].GetInt64();
-				int64 SkillDotTime = ShmanAttackSkillListFiled["SkillDotTime"].GetInt64();
-				int SkillDistance = ShmanAttackSkillListFiled["SkillDistance"].GetInt();
-				int32 SkillMotionTime = ShmanAttackSkillListFiled["SkillMotionTime"].GetInt();
-				float SkillTargetEffectTime = ShmanAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
-				int8 SkillDebufAttackSpeed = (int8)ShmanAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
-				int8 SkillDebufMovingSpeed = (int8)ShmanAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
-				int8 StatusAbnormalityProbability = (int8)ShmanAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
-				string SkillUpAnimation = ShmanAttackSkillListFiled["SkillUpAnimation"].GetString();
-				string SkillDownAnimation = ShmanAttackSkillListFiled["SkillDownAnimation"].GetString();
-				string SkillLeftAnimation = ShmanAttackSkillListFiled["SkillLeftAnimation"].GetString();
-				string SkillRightAnimation = ShmanAttackSkillListFiled["SkillRightAnimation"].GetString();
-				string NextComboSkill = ShmanAttackSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = ShmanAttackSkillListFiled["SkillExplanation"].GetString();
-
-				if (SkillType == "SKILL_SHAMAN_FLAME_HARPOON")
-				{
-					ShamanAttackSkill->SkillType = en_SkillType::SKILL_SHAMAN_FLAME_HARPOON;
-				}
-				else if (SkillType == "SKILL_SHAMAN_ROOT")
-				{
-					ShamanAttackSkill->SkillType = en_SkillType::SKILL_SHAMAN_ROOT;
-				}
-				else if (SkillType == "SKILL_SHAMAN_ICE_CHAIN")
-				{
-					ShamanAttackSkill->SkillType = en_SkillType::SKILL_SHAMAN_ICE_CHAIN;
-				}
-				else if (SkillType == "SKILL_SHAMAN_ICE_WAVE")
-				{
-					ShamanAttackSkill->SkillType = en_SkillType::SKILL_SHAMAN_ICE_WAVE;
-				}
-				else if (SkillType == "SKILL_SHAMAN_LIGHTNING_STRIKE")
-				{
-					ShamanAttackSkill->SkillType = en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE;
-				}
-				else if (SkillType == "SKILL_SHAMAN_HELL_FIRE")
-				{
-					ShamanAttackSkill->SkillType = en_SkillType::SKILL_SHAMAN_HELL_FIRE;
-				}
-
-				ShamanAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
-				ShamanAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
-				ShamanAttackSkill->SkillLevel = SkillLevel;
-				ShamanAttackSkill->SkillMinDamage = SkillMinDamage;
-				ShamanAttackSkill->SkillMaxDamage = SkillMaxDamage;
-				ShamanAttackSkill->SkillCoolTime = SkillCoolTime;
-				ShamanAttackSkill->SkillCastingTime = SkillCastingTime;
-				ShamanAttackSkill->SkillDurationTime = SkillDurationTime;
-				ShamanAttackSkill->SkillDotTime = SkillDotTime;
-				ShamanAttackSkill->SkillDistance = SkillDistance;
-				ShamanAttackSkill->SkillMotionTime = SkillMotionTime;
-				ShamanAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				ShamanAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
-				ShamanAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
-				ShamanAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
-				ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-				ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-				ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-				ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
-
-				if (NextComboSkill == "SKILL_TYPE_NONE")
-				{
-					ShamanAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}
-				else if (NextComboSkill == "SKILL_SHAMAN_ICE_WAVE")
-				{
-					ShamanAttackSkill->NextComboSkill = en_SkillType::SKILL_SHAMAN_ICE_WAVE;
-				}				
-
-				_ShamanAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)ShamanAttackSkill->SkillType, ShamanAttackSkill));
 			}
 
-			for (auto& ShamanTacTicSkillListFiled : ShamanSkillListFiled["ShamanTacTicSkillList"].GetArray())
+			for (auto& ActiveSkillListFiled : ProtectionSkillListFiled["ActiveSkillList"].GetArray())
 			{
-				st_TacTicSkillInfo* ShamanTacTicSkill = new st_TacTicSkillInfo();
-				ShamanTacTicSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
-				ShamanTacTicSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_TACTIC;
-
-				string SkillType = ShamanTacTicSkillListFiled["SkillType"].GetString();
-				string SkillName = ShamanTacTicSkillListFiled["SkillName"].GetString();
-				int SkillLevel = ShamanTacTicSkillListFiled["SkillLevel"].GetInt();
-				int SkillCoolTime = ShamanTacTicSkillListFiled["SkillCoolTime"].GetInt();
-				int SkillCastingTime = ShamanTacTicSkillListFiled["SkillCastingTime"].GetInt();
-				int64 SkillDurationTime = ShamanTacTicSkillListFiled["SkillDurationTime"].GetInt64();
-				int64 SkillDotTime = ShamanTacTicSkillListFiled["SkillDotTime"].GetInt64();
-				int SkillDistance = ShamanTacTicSkillListFiled["SkillDistance"].GetInt();
-				int32 SkillMotionTime = ShamanTacTicSkillListFiled["SkillMotionTime"].GetInt();
-				float SkillTargetEffectTime = ShamanTacTicSkillListFiled["SkillTargetEffectTime"].GetFloat();
-				string SkillUpAnimation = ShamanTacTicSkillListFiled["SkillUpAnimation"].GetString();
-				string SkillDownAnimation = ShamanTacTicSkillListFiled["SkillDownAnimation"].GetString();
-				string SkillLeftAnimation = ShamanTacTicSkillListFiled["SkillLeftAnimation"].GetString();
-				string SkillRightAnimation = ShamanTacTicSkillListFiled["SkillRightAnimation"].GetString();
-				string NextComboSkill = ShamanTacTicSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = ShamanTacTicSkillListFiled["SkillExplanation"].GetString();
-
-				if (SkillType == "SKILL_SHAMAN_BACK_TELEPORT")
-				{
-					ShamanTacTicSkill->SkillType = en_SkillType::SKILL_SHAMAN_BACK_TELEPORT;
-				}
-
-				ShamanTacTicSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
-				ShamanTacTicSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
-				ShamanTacTicSkill->SkillLevel = SkillLevel;
-				ShamanTacTicSkill->SkillCoolTime = SkillCoolTime;
-				ShamanTacTicSkill->SkillCastingTime = SkillCastingTime;
-				ShamanTacTicSkill->SkillDurationTime = SkillDurationTime;
-				ShamanTacTicSkill->SkillDotTime = SkillDotTime;
-				ShamanTacTicSkill->SkillDistance = SkillDistance;
-				ShamanTacTicSkill->SkillMotionTime = SkillMotionTime;
-				ShamanTacTicSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-				ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-				ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-				ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
-
-				if (NextComboSkill == "SKILL_TYPE_NONE")
-				{
-					ShamanTacTicSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}				
-
-				_ShamanTacTicSkillDatas.insert(pair<int16, st_TacTicSkillInfo*>((int16)ShamanTacTicSkill->SkillType, ShamanTacTicSkill));
-			}
-
-			for (auto& ShamanHealSkillListFiled : ShamanSkillListFiled["ShamanHealSkillList"].GetArray())
-			{
-				st_HealSkillInfo* ShamanHealSkill = new st_HealSkillInfo();
-				ShamanHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
-				ShamanHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_HEAL;
-
-				string SkillType = ShamanHealSkillListFiled["SkillType"].GetString();
-				string SkillName = ShamanHealSkillListFiled["SkillName"].GetString();
-				int SkillLevel = ShamanHealSkillListFiled["SkillLevel"].GetInt();
-				int SkillMinHeal = ShamanHealSkillListFiled["SkillMinHeal"].GetInt();
-				int SkillMaxHeal = ShamanHealSkillListFiled["SkillMaxHeal"].GetInt();
-				int SkillCoolTime = ShamanHealSkillListFiled["SkillCoolTime"].GetInt();
-				int SkillCastingTime = ShamanHealSkillListFiled["SkillCastingTime"].GetInt();
-				int64 SkillDurationTime = ShamanHealSkillListFiled["SkillDurationTime"].GetInt64();
-				int64 SkillDotTime = ShamanHealSkillListFiled["SkillDotTime"].GetInt64();
-				int SkillDistance = ShamanHealSkillListFiled["SkillDistance"].GetInt();
-				int32 SkillMotionTime = ShamanHealSkillListFiled["SkillMotionTime"].GetInt();
-				float SkillTargetEffectTime = ShamanHealSkillListFiled["SkillTargetEffectTime"].GetFloat();
-				string SkillUpAnimation = ShamanHealSkillListFiled["SkillUpAnimation"].GetString();
-				string SkillDownAnimation = ShamanHealSkillListFiled["SkillDownAnimation"].GetString();
-				string SkillLeftAnimation = ShamanHealSkillListFiled["SkillLeftAnimation"].GetString();
-				string SkillRightAnimation = ShamanHealSkillListFiled["SkillRightAnimation"].GetString();
-				string NextComboSkill = ShamanHealSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = ShamanHealSkillListFiled["SkillExplanation"].GetString();
-
-				if (SkillType == "")
+				for (auto& AttackSkillFiled : ActiveSkillListFiled["AttackSkill"].GetArray())
 				{
 
 				}
 
-				ShamanHealSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
-				ShamanHealSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
-				ShamanHealSkill->SkillLevel = SkillLevel;
-				ShamanHealSkill->SkillMinHealPoint = SkillMinHeal;
-				ShamanHealSkill->SkillMaxHealPoint = SkillMaxHeal;
-				ShamanHealSkill->SkillCoolTime = SkillCoolTime;
-				ShamanHealSkill->SkillCastingTime = SkillCastingTime;
-				ShamanHealSkill->SkillDurationTime = SkillDurationTime;
-				ShamanHealSkill->SkillDotTime = SkillDotTime;
-				ShamanHealSkill->SkillDistance = SkillDistance;
-				ShamanHealSkill->SkillMotionTime = SkillMotionTime;
-				ShamanHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				ShamanHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-				ShamanHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-				ShamanHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-				ShamanHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
-
-
-				if (NextComboSkill == "SKILL_TYPE_NONE")
-				{
-					ShamanHealSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}				
-
-				_ShamanTacTicSkillDatas.insert(pair<int16, st_HealSkillInfo*>((int16)ShamanHealSkill->SkillType, ShamanHealSkill));
-			}
-
-			for (auto& ShmanBufSkillListFiled : ShamanSkillListFiled["ShamanBufSkillList"].GetArray())
-			{
-				st_BufSkillInfo* ShamanBufSkill = new st_BufSkillInfo();
-				ShamanBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
-				ShamanBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_BUF;
-
-				string SkillType = ShmanBufSkillListFiled["SkillType"].GetString();
-				string SkillName = ShmanBufSkillListFiled["SkillName"].GetString();
-				int SkillLevel = ShmanBufSkillListFiled["SkillLevel"].GetInt();
-
-				int IncreaseMinAttackPoint = ShmanBufSkillListFiled["IncreaseMinAttackPoint"].GetInt();
-				int IncreaseMaxAttackPoint = ShmanBufSkillListFiled["IncreaseMaxAttackPoint"].GetInt();
-				int IncreaseMeleeAttackSpeedPoint = ShmanBufSkillListFiled["IncreaseMeleeAttackSpeedPoint"].GetInt();
-				int16 IncreaseMeleeAttackHitRate = (int16)ShmanBufSkillListFiled["IncreaseMeleeAttackHitRate"].GetInt();
-				int16 IncreaseMagicAttackPoint = (int16)ShmanBufSkillListFiled["IncreaseMagicAttackPoint"].GetInt();
-				int16 IncreaseMagicCastingPoint = (int16)ShmanBufSkillListFiled["IncreaseMagicCastingPoint"].GetInt();
-				int16 IncreaseMagicAttackHitRate = (int16)ShmanBufSkillListFiled["IncreaseMagicAttackHitRate"].GetInt();
-				int IncreaseDefencePoint = ShmanBufSkillListFiled["IncreaseDefencePoint"].GetInt();
-				int16 IncreaseEvasionRate = (int16)ShmanBufSkillListFiled["IncreaseEvasionRate"].GetInt();
-				int16 IncreaseMeleeCriticalPoint = (int16)ShmanBufSkillListFiled["IncreaseMeleeCriticalPoint"].GetInt();
-				int16 IncreaseMagicCriticalPoint = (int16)ShmanBufSkillListFiled["IncreaseMagicCriticalPoint"].GetInt();
-				float IncreaseSpeedPoint = ShmanBufSkillListFiled["IncreaseSpeedPoint"].GetFloat();
-				int16 IncreaseStatusAbnormalityResistance = (int16)ShmanBufSkillListFiled["IncreaseStatusAbnormalityResistance"].GetInt();
-
-				int SkillCoolTime = ShmanBufSkillListFiled["SkillCoolTime"].GetInt();
-				int SkillCastingTime = ShmanBufSkillListFiled["SkillCastingTime"].GetInt();
-				int64 SkillDurationTime = ShmanBufSkillListFiled["SkillDurationTime"].GetInt64();
-				int64 SkillDotTime = ShmanBufSkillListFiled["SkillDotTime"].GetInt64();
-				int SkillDistance = ShmanBufSkillListFiled["SkillDistance"].GetInt();
-				int32 SkillMotionTime = ShmanBufSkillListFiled["SkillMotionTime"].GetInt();
-				float SkillTargetEffectTime = ShmanBufSkillListFiled["SkillTargetEffectTime"].GetFloat();
-				string SkillUpAnimation = ShmanBufSkillListFiled["SkillUpAnimation"].GetString();
-				string SkillDownAnimation = ShmanBufSkillListFiled["SkillDownAnimation"].GetString();
-				string SkillLeftAnimation = ShmanBufSkillListFiled["SkillLeftAnimation"].GetString();
-				string SkillRightAnimation = ShmanBufSkillListFiled["SkillRightAnimation"].GetString();
-				string NextComboSkill = ShmanBufSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = ShmanBufSkillListFiled["SkillExplanation"].GetString();
-
-				if (SkillType == "")
+				for (auto& BufSkillFiled : ActiveSkillListFiled["BufSkill"].GetArray())
 				{
 
 				}
-
-				ShamanBufSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
-				ShamanBufSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
-				ShamanBufSkill->SkillLevel = SkillLevel;
-				ShamanBufSkill->IncreaseMinAttackPoint = IncreaseMinAttackPoint;
-				ShamanBufSkill->IncreaseMaxAttackPoint = IncreaseMaxAttackPoint;
-				ShamanBufSkill->IncreaseMeleeAttackSpeedPoint = IncreaseMeleeAttackSpeedPoint;
-				ShamanBufSkill->IncreaseMeleeAttackHitRate = IncreaseMeleeAttackHitRate;
-				ShamanBufSkill->IncreaseMagicAttackPoint = IncreaseMagicAttackPoint;
-				ShamanBufSkill->IncreaseMagicCastingPoint = IncreaseMagicCastingPoint;
-				ShamanBufSkill->IncreaseMagicAttackHitRate = IncreaseMagicAttackHitRate;
-				ShamanBufSkill->IncreaseDefencePoint = IncreaseDefencePoint;
-				ShamanBufSkill->IncreaseEvasionRate = IncreaseEvasionRate;
-				ShamanBufSkill->IncreaseMeleeCriticalPoint = IncreaseMeleeCriticalPoint;
-				ShamanBufSkill->IncreaseMagicCriticalPoint = IncreaseMagicCriticalPoint;
-				ShamanBufSkill->IncreaseSpeedPoint = IncreaseSpeedPoint;
-				ShamanBufSkill->IncreaseStatusAbnormalityResistance = IncreaseStatusAbnormalityResistance;
-				ShamanBufSkill->SkillCoolTime = SkillCoolTime;
-				ShamanBufSkill->SkillCastingTime = SkillCastingTime;
-				ShamanBufSkill->SkillDurationTime = SkillDurationTime;
-				ShamanBufSkill->SkillDotTime = SkillDotTime;
-				ShamanBufSkill->SkillDistance = SkillDistance;
-				ShamanBufSkill->SkillMotionTime = SkillMotionTime;
-				ShamanBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				ShamanBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-				ShamanBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-				ShamanBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-				ShamanBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
-
-				if (NextComboSkill == "SKILL_TYPE_NONE")
-				{
-					ShamanBufSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}				
-
-				_ShamanBufSkillDatas.insert(pair<int16, st_BufSkillInfo*>((int16)ShamanBufSkill->SkillType, ShamanBufSkill));
 			}
 		}
 	}
 }
 
-void CDataManager::LoadDataTaioistSkill(wstring LoadFileName)
+void CDataManager::LoadDataAssassinationSkill(wstring LoadFileName)
 {
 	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());
 
 	rapidjson::Document Document;
 	Document.Parse(FileStr);
 
-	for (auto& Filed : Document["TaioistSkills"].GetArray())
+	for (auto& Filed : Document["AssassinationSkills"].GetArray())
 	{
-		for (auto& TaioistSkillListFiled : Filed["TaioistSkillList"].GetArray())
+		for (auto& AssassinationListFiled : Filed["AssassinationSkillList"].GetArray())
 		{
-			for (auto& TaioistAttackSkillListFiled : TaioistSkillListFiled["TaioistAttackSkillList"].GetArray())
+			for (auto& PassiveSkillListFiled : AssassinationListFiled["PassiveSkillList"].GetArray())
 			{
-				st_AttackSkillInfo* TaioistAttackSkill = new st_AttackSkillInfo();
-				TaioistAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_TAOIST;
-				TaioistAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK;
 
-				string SkillType = TaioistAttackSkillListFiled["SkillType"].GetString();
-				string SkillName = TaioistAttackSkillListFiled["SkillName"].GetString();
-				int SkillLevel = TaioistAttackSkillListFiled["SkillLevel"].GetInt();
-				int SkillMinDamage = TaioistAttackSkillListFiled["SkillMinDamage"].GetInt();
-				int SkillMaxDamage = TaioistAttackSkillListFiled["SkillMaxDamage"].GetInt();
-				int SkillCoolTime = TaioistAttackSkillListFiled["SkillCoolTime"].GetInt();
-				int SkillCastingTime = TaioistAttackSkillListFiled["SkillCastingTime"].GetInt();
-				int64 SkillDurationTime = TaioistAttackSkillListFiled["SkillDurationTime"].GetInt64();
-				int64 SkillDotTime = TaioistAttackSkillListFiled["SkillDotTime"].GetInt64();
-				int SkillDistance = TaioistAttackSkillListFiled["SkillDistance"].GetInt();
-				int32 SkillMotionTime = TaioistAttackSkillListFiled["SkillMotionTime"].GetInt();
-				float SkillTargetEffectTime = TaioistAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
-				int64 SkillDebufTime = TaioistAttackSkillListFiled["SkillDebufTime"].GetInt64();
-				int8 SkillDebufAttackSpeed = (int8)TaioistAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
-				int8 SkillDebufMovingSpeed = (int8)TaioistAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
-				int8 StatusAbnormalityProbability = (int8)TaioistAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
-				string SkillUpAnimation = TaioistAttackSkillListFiled["SkillUpAnimation"].GetString();
-				string SkillDownAnimation = TaioistAttackSkillListFiled["SkillDownAnimation"].GetString();
-				string SkillLeftAnimation = TaioistAttackSkillListFiled["SkillLeftAnimation"].GetString();
-				string SkillRightAnimation = TaioistAttackSkillListFiled["SkillRightAnimation"].GetString();
-				string NextComboSkill = TaioistAttackSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = TaioistAttackSkillListFiled["SkillExplanation"].GetString();
-
-				if (SkillType == "SKILL_TAIOIST_DIVINE_STRIKE")
-				{
-					TaioistAttackSkill->SkillType = en_SkillType::SKILL_TAIOIST_DIVINE_STRIKE;
-				}
-				else if (SkillType == "SKILL_TAIOIST_ROOT")
-				{
-					TaioistAttackSkill->SkillType = en_SkillType::SKILL_TAIOIST_ROOT;
-				}
-
-				TaioistAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
-				TaioistAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
-				TaioistAttackSkill->SkillLevel = SkillLevel;
-				TaioistAttackSkill->SkillMinDamage = SkillMinDamage;
-				TaioistAttackSkill->SkillMaxDamage = SkillMaxDamage;
-				TaioistAttackSkill->SkillCoolTime = SkillCoolTime;
-				TaioistAttackSkill->SkillCastingTime = SkillCastingTime;
-				TaioistAttackSkill->SkillDurationTime = SkillDurationTime;
-				TaioistAttackSkill->SkillDotTime = SkillDotTime;
-				TaioistAttackSkill->SkillDistance = SkillDistance;
-				TaioistAttackSkill->SkillMotionTime = SkillMotionTime;
-				TaioistAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				TaioistAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
-				TaioistAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
-				TaioistAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
-				TaioistAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-				TaioistAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-				TaioistAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-				TaioistAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
-
-				if (NextComboSkill == "SKILL_TYPE_NONE")
-				{
-					TaioistAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}				
-
-				_TaioistAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)TaioistAttackSkill->SkillType, TaioistAttackSkill));
 			}
 
-			for (auto& TaioistHealSkillListFiled : TaioistSkillListFiled["TaioistHealSkillList"].GetArray())
+			for (auto& ActiveSkillListFiled : AssassinationListFiled["ActiveSkillList"].GetArray())
 			{
-				st_HealSkillInfo* TaioistHealSkill = new st_HealSkillInfo();
-				TaioistHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_TAOIST;
-				TaioistHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_HEAL;
-
-				string SkillType = TaioistHealSkillListFiled["SkillType"].GetString();
-				string SkillName = TaioistHealSkillListFiled["SkillName"].GetString();
-				int SkillLevel = TaioistHealSkillListFiled["SkillLevel"].GetInt();
-				int SkillMinHeal = TaioistHealSkillListFiled["SkillMinHeal"].GetInt();
-				int SkillMaxHeal = TaioistHealSkillListFiled["SkillMaxHeal"].GetInt();
-				int SkillCoolTime = TaioistHealSkillListFiled["SkillCoolTime"].GetInt();
-				int SkillCastingTime = TaioistHealSkillListFiled["SkillCastingTime"].GetInt();
-				int64 SkillDurationTime = TaioistHealSkillListFiled["SkillDurationTime"].GetInt64();
-				int64 SkillDotTime = TaioistHealSkillListFiled["SkillDotTime"].GetInt64();
-				int SkillDistance = TaioistHealSkillListFiled["SkillDistance"].GetInt();
-				int32 SkillMotionTime = TaioistHealSkillListFiled["SkillMotionTime"].GetInt();
-				float SkillTargetEffectTime = TaioistHealSkillListFiled["SkillTargetEffectTime"].GetFloat();
-				string SkillUpAnimation = TaioistHealSkillListFiled["SkillUpAnimation"].GetString();
-				string SkillDownAnimation = TaioistHealSkillListFiled["SkillDownAnimation"].GetString();
-				string SkillLeftAnimation = TaioistHealSkillListFiled["SkillLeftAnimation"].GetString();
-				string SkillRightAnimation = TaioistHealSkillListFiled["SkillRightAnimation"].GetString();
-				string NextComboSkill = TaioistHealSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = TaioistHealSkillListFiled["SkillExplanation"].GetString();
-
-				if (SkillType == "SKILL_TAIOIST_HEALING_LIGHT")
+				for (auto& AttackSkillFiled : ActiveSkillListFiled["AttackSkill"].GetArray())
 				{
-					TaioistHealSkill->SkillType = en_SkillType::SKILL_TAIOIST_HEALING_LIGHT;
+					st_AttackSkillInfo* AssassinationAttackSkill = new st_AttackSkillInfo();
+					AssassinationAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_THIEF;
+					AssassinationAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ASSASSINATION_ACTIVE_ATTACK;
+
+					string SkillType = AttackSkillFiled["SkillType"].GetString();
+					string SkillName = AttackSkillFiled["SkillName"].GetString();
+					int SkillLevel = AttackSkillFiled["SkillLevel"].GetInt();
+					int SkillMinDamage = AttackSkillFiled["SkillMinDamage"].GetInt();
+					int SkillMaxDamage = AttackSkillFiled["SkillMaxDamage"].GetInt();
+					int SkillCoolTime = AttackSkillFiled["SkillCoolTime"].GetInt();
+					int SkillCastingTime = AttackSkillFiled["SkillCastingTime"].GetInt();
+					int64 SkillDurationTime = AttackSkillFiled["SkillDurationTime"].GetInt64();
+					int64 SkillDotTime = AttackSkillFiled["SkillDotTime"].GetInt64();
+					int SkillDistance = AttackSkillFiled["SkillDistance"].GetInt();
+					int32 SkillMotionTime = AttackSkillFiled["SkillMotionTime"].GetInt();
+					float SkillTargetEffectTime = AttackSkillFiled["SkillTargetEffectTime"].GetFloat();
+					int8 SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetInt();
+					int8 SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetInt();
+					int64 SkillDamageOverTime = AttackSkillFiled["SkillDebufDamageOverTime"].GetInt64();
+					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();
+					string SkillUpAnimation = AttackSkillFiled["SkillUpAnimation"].GetString();
+					string SkillDownAnimation = AttackSkillFiled["SkillDownAnimation"].GetString();
+					string SkillLeftAnimation = AttackSkillFiled["SkillLeftAnimation"].GetString();
+					string SkillRightAnimation = AttackSkillFiled["SkillRightAnimation"].GetString();
+					string NextComboSkill = AttackSkillFiled["NextComboSkill"].GetString();
+					string SkillExplation = AttackSkillFiled["SkillExplanation"].GetString();
+
+					if (SkillType == "SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT")
+					{
+						AssassinationAttackSkill->SkillType = en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT;
+					}
+
+					AssassinationAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+					AssassinationAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
+					AssassinationAttackSkill->SkillLevel = SkillLevel;
+					AssassinationAttackSkill->SkillMinDamage = SkillMinDamage;
+					AssassinationAttackSkill->SkillMaxDamage = SkillMaxDamage;
+					AssassinationAttackSkill->SkillCoolTime = SkillCoolTime;
+					AssassinationAttackSkill->SkillCastingTime = SkillCastingTime;
+					AssassinationAttackSkill->SkillDurationTime = SkillDurationTime;
+					AssassinationAttackSkill->SkillDotTime = SkillDotTime;
+					AssassinationAttackSkill->SkillDistance = SkillDistance;
+					AssassinationAttackSkill->SkillMotionTime = SkillMotionTime;
+					AssassinationAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+					AssassinationAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
+					AssassinationAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
+					AssassinationAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
+					AssassinationAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+					AssassinationAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+					AssassinationAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+					AssassinationAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
+
+					if (NextComboSkill == "SKILL_TYPE_NONE")
+					{
+						AssassinationAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+					}
+
+					_AssassinationAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)AssassinationAttackSkill->SkillType, AssassinationAttackSkill));
 				}
-				else if (SkillType == "SKILL_TAIOIST_HEALING_WIND")
-				{
-					TaioistHealSkill->SkillType = en_SkillType::SKILL_TAIOIST_HEALING_WIND;
-				}
 
-				TaioistHealSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
-				TaioistHealSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
-				TaioistHealSkill->SkillLevel = SkillLevel;
-				TaioistHealSkill->SkillMinHealPoint = SkillMinHeal;
-				TaioistHealSkill->SkillMaxHealPoint = SkillMaxHeal;
-				TaioistHealSkill->SkillCoolTime = SkillCoolTime;
-				TaioistHealSkill->SkillCastingTime = SkillCastingTime;
-				TaioistHealSkill->SkillDurationTime = SkillDurationTime;
-				TaioistHealSkill->SkillDotTime = SkillDotTime;
-				TaioistHealSkill->SkillDistance = SkillDistance;
-				TaioistHealSkill->SkillMotionTime = SkillMotionTime;
-				TaioistHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				TaioistHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-				TaioistHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-				TaioistHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-				TaioistHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
-
-				if (NextComboSkill == "SKILL_TYPE_NONE")
-				{
-					TaioistHealSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}				
-
-				_TaioistTacTicSkillDatas.insert(pair<int16, st_HealSkillInfo*>((int16)TaioistHealSkill->SkillType, TaioistHealSkill));
-			}
-
-			for (auto& TaioistBufSkillListFiled : TaioistSkillListFiled["TaioistBufSkillList"].GetArray())
-			{
-				st_BufSkillInfo* TaioistBufSkill = new st_BufSkillInfo();
-				TaioistBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_TAOIST;
-				TaioistBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_BUF;
-
-				string SkillType = TaioistBufSkillListFiled["SkillType"].GetString();
-				string SkillName = TaioistBufSkillListFiled["SkillName"].GetString();
-				int SkillLevel = TaioistBufSkillListFiled["SkillLevel"].GetInt();
-
-				int IncreaseMinAttackPoint = TaioistBufSkillListFiled["IncreaseMinAttackPoint"].GetInt();
-				int IncreaseMaxAttackPoint = TaioistBufSkillListFiled["IncreaseMaxAttackPoint"].GetInt();
-				int IncreaseMeleeAttackSpeedPoint = TaioistBufSkillListFiled["IncreaseMeleeAttackSpeedPoint"].GetInt();
-				int16 IncreaseMeleeAttackHitRate = (int16)TaioistBufSkillListFiled["IncreaseMeleeAttackHitRate"].GetInt();
-				int16 IncreaseMagicAttackPoint = (int16)TaioistBufSkillListFiled["IncreaseMagicAttackPoint"].GetInt();
-				int16 IncreaseMagicCastingPoint = (int16)TaioistBufSkillListFiled["IncreaseMagicCastingPoint"].GetInt();
-				int16 IncreaseMagicAttackHitRate = (int16)TaioistBufSkillListFiled["IncreaseMagicAttackHitRate"].GetInt();
-				int IncreaseDefencePoint = TaioistBufSkillListFiled["IncreaseDefencePoint"].GetInt();
-				int16 IncreaseEvasionRate = (int16)TaioistBufSkillListFiled["IncreaseEvasionRate"].GetInt();
-				int16 IncreaseMeleeCriticalPoint = (int16)TaioistBufSkillListFiled["IncreaseMeleeCriticalPoint"].GetInt();
-				int16 IncreaseMagicCriticalPoint = (int16)TaioistBufSkillListFiled["IncreaseMagicCriticalPoint"].GetInt();
-				float IncreaseSpeedPoint = TaioistBufSkillListFiled["IncreaseSpeedPoint"].GetFloat();
-				int16 IncreaseStatusAbnormalityResistance = (int16)TaioistBufSkillListFiled["IncreaseStatusAbnormalityResistance"].GetInt();
-
-				int SkillCoolTime = TaioistBufSkillListFiled["SkillCoolTime"].GetInt();
-				int SkillCastingTime = TaioistBufSkillListFiled["SkillCastingTime"].GetInt();
-				int64 SkillDurationTime = TaioistBufSkillListFiled["SkillDurationTime"].GetInt64();
-				int64 SkillDotTime = TaioistBufSkillListFiled["SkillDotTime"].GetInt64();
-				int SkillDistance = TaioistBufSkillListFiled["SkillDistance"].GetInt();
-				int32 SkillMotionTime = TaioistBufSkillListFiled["SkillMotionTime"].GetInt();
-				float SkillTargetEffectTime = TaioistBufSkillListFiled["SkillTargetEffectTime"].GetFloat();
-				string SkillUpAnimation = TaioistBufSkillListFiled["SkillUpAnimation"].GetString();
-				string SkillDownAnimation = TaioistBufSkillListFiled["SkillDownAnimation"].GetString();
-				string SkillLeftAnimation = TaioistBufSkillListFiled["SkillLeftAnimation"].GetString();
-				string SkillRightAnimation = TaioistBufSkillListFiled["SkillRightAnimation"].GetString();
-				string NextComboSkill = TaioistBufSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = TaioistBufSkillListFiled["SkillExplanation"].GetString();
-
-				if (SkillType == "")
+				for (auto& BufSkillFiled : ActiveSkillListFiled["BufSkill"].GetArray())
 				{
 
 				}
-
-				TaioistBufSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
-				TaioistBufSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
-				TaioistBufSkill->SkillLevel = SkillLevel;
-				TaioistBufSkill->IncreaseMinAttackPoint = IncreaseMinAttackPoint;
-				TaioistBufSkill->IncreaseMaxAttackPoint = IncreaseMaxAttackPoint;
-				TaioistBufSkill->IncreaseMeleeAttackSpeedPoint = IncreaseMeleeAttackSpeedPoint;
-				TaioistBufSkill->IncreaseMeleeAttackHitRate = IncreaseMeleeAttackHitRate;
-				TaioistBufSkill->IncreaseMagicAttackPoint = IncreaseMagicAttackPoint;
-				TaioistBufSkill->IncreaseMagicCastingPoint = IncreaseMagicCastingPoint;
-				TaioistBufSkill->IncreaseMagicAttackHitRate = IncreaseMagicAttackHitRate;
-				TaioistBufSkill->IncreaseDefencePoint = IncreaseDefencePoint;
-				TaioistBufSkill->IncreaseEvasionRate = IncreaseEvasionRate;
-				TaioistBufSkill->IncreaseMeleeCriticalPoint = IncreaseMeleeCriticalPoint;
-				TaioistBufSkill->IncreaseMagicCriticalPoint = IncreaseMagicCriticalPoint;
-				TaioistBufSkill->IncreaseSpeedPoint = IncreaseSpeedPoint;
-				TaioistBufSkill->IncreaseStatusAbnormalityResistance = IncreaseStatusAbnormalityResistance;
-				TaioistBufSkill->SkillCoolTime = SkillCoolTime;
-				TaioistBufSkill->SkillCastingTime = SkillCastingTime;
-				TaioistBufSkill->SkillDurationTime = SkillDurationTime;
-				TaioistBufSkill->SkillDotTime = SkillDotTime;
-				TaioistBufSkill->SkillDistance = SkillDistance;
-				TaioistBufSkill->SkillMotionTime = SkillMotionTime;
-				TaioistBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				TaioistBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-				TaioistBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-				TaioistBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-				TaioistBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
-
-				if (NextComboSkill == "SKILL_TYPE_NONE")
-				{
-					TaioistBufSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}				
-
-				_TaioistBufSkillDatas.insert(pair<int16, st_BufSkillInfo*>((int16)TaioistBufSkill->SkillType, TaioistBufSkill));
 			}
 		}
 	}
 }
 
-void CDataManager::LoadDataThiefSkill(wstring LoadFileName)
+void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 {
 	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());
 
 	rapidjson::Document Document;
 	Document.Parse(FileStr);
 
-	for (auto& Filed : Document["ThiefSkills"].GetArray())
+	for (auto& Filed : Document["SpellSkills"].GetArray())
 	{
-		for (auto& ThiefSkillListFiled : Filed["ThiefSkillList"].GetArray())
+		for (auto& SpellSkillListFiled : Filed["SpellSkillList"].GetArray())
 		{
-			for (auto& ThiefAttackSkillListFiled : ThiefSkillListFiled["ThiefAttackSkillList"].GetArray())
+			for (auto& PassiveSkillListFiled : SpellSkillListFiled["PassiveSkillList"].GetArray())
 			{
-				st_AttackSkillInfo* ThiefAttackSkill = new st_AttackSkillInfo();
-				ThiefAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_THIEF;
-				ThiefAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_ATTACK;
 
-				string SkillType = ThiefAttackSkillListFiled["SkillType"].GetString();
-				string SkillName = ThiefAttackSkillListFiled["SkillName"].GetString();
-				int SkillLevel = ThiefAttackSkillListFiled["SkillLevel"].GetInt();
-				int SkillMinDamage = ThiefAttackSkillListFiled["SkillMinDamage"].GetInt();
-				int SkillMaxDamage = ThiefAttackSkillListFiled["SkillMaxDamage"].GetInt();
-				int SkillCoolTime = ThiefAttackSkillListFiled["SkillCoolTime"].GetInt();
-				int SkillCastingTime = ThiefAttackSkillListFiled["SkillCastingTime"].GetInt();
-				int64 SkillDurationTime = ThiefAttackSkillListFiled["SkillDurationTime"].GetInt64();
-				int64 SkillDotTime = ThiefAttackSkillListFiled["SkillDotTime"].GetInt64();
-				int SkillDistance = ThiefAttackSkillListFiled["SkillDistance"].GetInt();
-				int32 SkillMotionTime = ThiefAttackSkillListFiled["SkillMotionTime"].GetInt();
-				float SkillTargetEffectTime = ThiefAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
-				int8 SkillDebufAttackSpeed = (int8)ThiefAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
-				int8 SkillDebufMovingSpeed = (int8)ThiefAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
-				int64 SkillDamageOverTime = ThiefAttackSkillListFiled["SkillDebufDamageOverTime"].GetInt64();
-				int8 StatusAbnormalityProbability = (int8)ThiefAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
-				string SkillUpAnimation = ThiefAttackSkillListFiled["SkillUpAnimation"].GetString();
-				string SkillDownAnimation = ThiefAttackSkillListFiled["SkillDownAnimation"].GetString();
-				string SkillLeftAnimation = ThiefAttackSkillListFiled["SkillLeftAnimation"].GetString();
-				string SkillRightAnimation = ThiefAttackSkillListFiled["SkillRightAnimation"].GetString();
-				string NextComboSkill = ThiefAttackSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = ThiefAttackSkillListFiled["SkillExplanation"].GetString();
-
-				if (SkillType == "SKILL_THIEF_QUICK_CUT")
-				{
-					ThiefAttackSkill->SkillType = en_SkillType::SKILL_THIEF_QUICK_CUT;
-				}
-
-				ThiefAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
-				ThiefAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
-				ThiefAttackSkill->SkillLevel = SkillLevel;
-				ThiefAttackSkill->SkillMinDamage = SkillMinDamage;
-				ThiefAttackSkill->SkillMaxDamage = SkillMaxDamage;
-				ThiefAttackSkill->SkillCoolTime = SkillCoolTime;
-				ThiefAttackSkill->SkillCastingTime = SkillCastingTime;
-				ThiefAttackSkill->SkillDurationTime = SkillDurationTime;
-				ThiefAttackSkill->SkillDotTime = SkillDotTime;
-				ThiefAttackSkill->SkillDistance = SkillDistance;
-				ThiefAttackSkill->SkillMotionTime = SkillMotionTime;
-				ThiefAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				ThiefAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
-				ThiefAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
-				ThiefAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
-				ThiefAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-				ThiefAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-				ThiefAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-				ThiefAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
-
-				if (NextComboSkill == "SKILL_TYPE_NONE")
-				{
-					ThiefAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}				
-
-				_ThiefAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)ThiefAttackSkill->SkillType, ThiefAttackSkill));
 			}
 
-			for (auto& ThiefHealSkillListFiled : ThiefSkillListFiled["ThiefHealSkillList"].GetArray())
+			for (auto& ActiveSkillListFiled : SpellSkillListFiled["ActiveSkillList"].GetArray())
 			{
-				st_HealSkillInfo* ThiefHealSkill = new st_HealSkillInfo();
-				ThiefHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_THIEF;
-				ThiefHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_HEAL;
-
-				string SkillType = ThiefHealSkillListFiled["SkillType"].GetString();
-				string SkillName = ThiefHealSkillListFiled["SkillName"].GetString();
-				int SkillLevel = ThiefHealSkillListFiled["SkillLevel"].GetInt();
-				int SkillMinHeal = ThiefHealSkillListFiled["SkillMinHeal"].GetInt();
-				int SkillMaxHeal = ThiefHealSkillListFiled["SkillMaxHeal"].GetInt();
-				int SkillCoolTime = ThiefHealSkillListFiled["SkillCoolTime"].GetInt();
-				int SkillCastingTime = ThiefHealSkillListFiled["SkillCastingTime"].GetInt();
-				int64 SkillDurationTime = ThiefHealSkillListFiled["SkillDurationTime"].GetInt64();
-				int64 SkillDotTime = ThiefHealSkillListFiled["SkillDotTime"].GetInt64();
-				int SkillDistance = ThiefHealSkillListFiled["SkillDistance"].GetInt();
-				int32 SkillMotionTime = ThiefHealSkillListFiled["SkillMotionTime"].GetInt();
-				float SkillTargetEffectTime = ThiefHealSkillListFiled["SkillTargetEffectTime"].GetFloat();
-				string SkillUpAnimation = ThiefHealSkillListFiled["SkillUpAnimation"].GetString();
-				string SkillDownAnimation = ThiefHealSkillListFiled["SkillDownAnimation"].GetString();
-				string SkillLeftAnimation = ThiefHealSkillListFiled["SkillLeftAnimation"].GetString();
-				string SkillRightAnimation = ThiefHealSkillListFiled["SkillRightAnimation"].GetString();
-				string NextComboSkill = ThiefHealSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = ThiefHealSkillListFiled["SkillExplanation"].GetString();
-
-				if (SkillType == "")
+				for (auto& AttackSkillFiled : ActiveSkillListFiled["AttackSkill"].GetArray())
 				{
+					st_AttackSkillInfo* ShamanAttackSkill = new st_AttackSkillInfo();
+					ShamanAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
+					ShamanAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_ATTACK;
 
+					string SkillType = AttackSkillFiled["SkillType"].GetString();
+					string SkillName = AttackSkillFiled["SkillName"].GetString();
+					int SkillLevel = AttackSkillFiled["SkillLevel"].GetInt();
+					int SkillMinDamage = AttackSkillFiled["SkillMinDamage"].GetInt();
+					int SkillMaxDamage = AttackSkillFiled["SkillMaxDamage"].GetInt();
+					int SkillCoolTime = AttackSkillFiled["SkillCoolTime"].GetInt();
+					int SkillCastingTime = AttackSkillFiled["SkillCastingTime"].GetInt();
+					int64 SkillDurationTime = AttackSkillFiled["SkillDurationTime"].GetInt64();
+					int64 SkillDotTime = AttackSkillFiled["SkillDotTime"].GetInt64();
+					int SkillDistance = AttackSkillFiled["SkillDistance"].GetInt();
+					int32 SkillMotionTime = AttackSkillFiled["SkillMotionTime"].GetInt();
+					float SkillTargetEffectTime = AttackSkillFiled["SkillTargetEffectTime"].GetFloat();
+					int8 SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetInt();
+					int8 SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetInt();
+					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();
+					string SkillUpAnimation = AttackSkillFiled["SkillUpAnimation"].GetString();
+					string SkillDownAnimation = AttackSkillFiled["SkillDownAnimation"].GetString();
+					string SkillLeftAnimation = AttackSkillFiled["SkillLeftAnimation"].GetString();
+					string SkillRightAnimation = AttackSkillFiled["SkillRightAnimation"].GetString();
+					string NextComboSkill = AttackSkillFiled["NextComboSkill"].GetString();
+					string SkillExplation = AttackSkillFiled["SkillExplanation"].GetString();
+
+					if (SkillType == "SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON")
+					{
+						ShamanAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON;
+					}
+					else if (SkillType == "SKILL_SPELL_ACTIVE_ATTACK_ROOT")
+					{
+						ShamanAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT;
+					}
+					else if (SkillType == "SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN")
+					{
+						ShamanAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN;
+					}
+					else if (SkillType == "SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE")
+					{
+						ShamanAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE;
+					}
+					else if (SkillType == "SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE")
+					{
+						ShamanAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE;
+					}
+					else if (SkillType == "SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE")
+					{
+						ShamanAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE;
+					}
+
+					ShamanAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+					ShamanAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
+					ShamanAttackSkill->SkillLevel = SkillLevel;
+					ShamanAttackSkill->SkillMinDamage = SkillMinDamage;
+					ShamanAttackSkill->SkillMaxDamage = SkillMaxDamage;
+					ShamanAttackSkill->SkillCoolTime = SkillCoolTime;
+					ShamanAttackSkill->SkillCastingTime = SkillCastingTime;
+					ShamanAttackSkill->SkillDurationTime = SkillDurationTime;
+					ShamanAttackSkill->SkillDotTime = SkillDotTime;
+					ShamanAttackSkill->SkillDistance = SkillDistance;
+					ShamanAttackSkill->SkillMotionTime = SkillMotionTime;
+					ShamanAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+					ShamanAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
+					ShamanAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
+					ShamanAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
+					ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+					ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+					ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+					ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
+
+					if (NextComboSkill == "SKILL_TYPE_NONE")
+					{
+						ShamanAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+					}
+					else if (NextComboSkill == "SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE")
+					{
+						ShamanAttackSkill->NextComboSkill = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE;
+					}
+
+					_SpellAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)ShamanAttackSkill->SkillType, ShamanAttackSkill));
 				}
 
-				ThiefHealSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
-				ThiefHealSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
-				ThiefHealSkill->SkillLevel = SkillLevel;
-				ThiefHealSkill->SkillMinHealPoint = SkillMinHeal;
-				ThiefHealSkill->SkillMaxHealPoint = SkillMaxHeal;
-				ThiefHealSkill->SkillCoolTime = SkillCoolTime;
-				ThiefHealSkill->SkillCastingTime = SkillCastingTime;
-				ThiefHealSkill->SkillDurationTime = SkillDurationTime;
-				ThiefHealSkill->SkillDotTime = SkillDotTime;
-				ThiefHealSkill->SkillDistance = SkillDistance;
-				ThiefHealSkill->SkillMotionTime = SkillMotionTime;
-				ThiefHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				ThiefHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-				ThiefHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-				ThiefHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-				ThiefHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
-
-				if (NextComboSkill == "SKILL_TYPE_NONE")
+				for (auto& BufSkillFiled : ActiveSkillListFiled["BufSkill"].GetArray())
 				{
-					ThiefHealSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}				
+					st_BufSkillInfo* ShamanTacTicSkill = new st_BufSkillInfo();
+					ShamanTacTicSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
+					ShamanTacTicSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_BUF;
 
-				_ThiefTacTicSkillDatas.insert(pair<int16, st_HealSkillInfo*>((int16)ThiefHealSkill->SkillType, ThiefHealSkill));
-			}
+					string SkillType = BufSkillFiled["SkillType"].GetString();
+					string SkillName = BufSkillFiled["SkillName"].GetString();
+					int SkillLevel = BufSkillFiled["SkillLevel"].GetInt();
+					int SkillCoolTime = BufSkillFiled["SkillCoolTime"].GetInt();
+					int SkillCastingTime = BufSkillFiled["SkillCastingTime"].GetInt();
+					int64 SkillDurationTime = BufSkillFiled["SkillDurationTime"].GetInt64();
+					int64 SkillDotTime = BufSkillFiled["SkillDotTime"].GetInt64();
+					int SkillDistance = BufSkillFiled["SkillDistance"].GetInt();
+					int32 SkillMotionTime = BufSkillFiled["SkillMotionTime"].GetInt();
+					float SkillTargetEffectTime = BufSkillFiled["SkillTargetEffectTime"].GetFloat();
+					string SkillUpAnimation = BufSkillFiled["SkillUpAnimation"].GetString();
+					string SkillDownAnimation = BufSkillFiled["SkillDownAnimation"].GetString();
+					string SkillLeftAnimation = BufSkillFiled["SkillLeftAnimation"].GetString();
+					string SkillRightAnimation = BufSkillFiled["SkillRightAnimation"].GetString();
+					string NextComboSkill = BufSkillFiled["NextComboSkill"].GetString();
+					string SkillExplation = BufSkillFiled["SkillExplanation"].GetString();
 
-			for (auto& ThiefBufSkillListFiled : ThiefSkillListFiled["ThiefBufSkillList"].GetArray())
-			{
-				st_BufSkillInfo* ThiefBufSkill = new st_BufSkillInfo();
-				ThiefBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_THIEF;
-				ThiefBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_BUF;
+					if (SkillType == "SKILL_SPELL_ACTIVE_BUF_TELEPORT")
+					{
+						ShamanTacTicSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_BUF_TELEPORT;
+					}
 
-				string SkillType = ThiefBufSkillListFiled["SkillType"].GetString();
-				string SkillName = ThiefBufSkillListFiled["SkillName"].GetString();
-				int SkillLevel = ThiefBufSkillListFiled["SkillLevel"].GetInt();
+					ShamanTacTicSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+					ShamanTacTicSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
+					ShamanTacTicSkill->SkillLevel = SkillLevel;
+					ShamanTacTicSkill->SkillCoolTime = SkillCoolTime;
+					ShamanTacTicSkill->SkillCastingTime = SkillCastingTime;
+					ShamanTacTicSkill->SkillDurationTime = SkillDurationTime;
+					ShamanTacTicSkill->SkillDotTime = SkillDotTime;
+					ShamanTacTicSkill->SkillDistance = SkillDistance;
+					ShamanTacTicSkill->SkillMotionTime = SkillMotionTime;
+					ShamanTacTicSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+					ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+					ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+					ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+					ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 
-				int IncreaseMinAttackPoint = ThiefBufSkillListFiled["IncreaseMinAttackPoint"].GetInt();
-				int IncreaseMaxAttackPoint = ThiefBufSkillListFiled["IncreaseMaxAttackPoint"].GetInt();
-				int IncreaseMeleeAttackSpeedPoint = ThiefBufSkillListFiled["IncreaseMeleeAttackSpeedPoint"].GetInt();
-				int16 IncreaseMeleeAttackHitRate = (int16)ThiefBufSkillListFiled["IncreaseMeleeAttackHitRate"].GetInt();
-				int16 IncreaseMagicAttackPoint = (int16)ThiefBufSkillListFiled["IncreaseMagicAttackPoint"].GetInt();
-				int16 IncreaseMagicCastingPoint = (int16)ThiefBufSkillListFiled["IncreaseMagicCastingPoint"].GetInt();
-				int16 IncreaseMagicAttackHitRate = (int16)ThiefBufSkillListFiled["IncreaseMagicAttackHitRate"].GetInt();
-				int IncreaseDefencePoint = ThiefBufSkillListFiled["IncreaseDefencePoint"].GetInt();
-				int16 IncreaseEvasionRate = (int16)ThiefBufSkillListFiled["IncreaseEvasionRate"].GetInt();
-				int16 IncreaseMeleeCriticalPoint = (int16)ThiefBufSkillListFiled["IncreaseMeleeCriticalPoint"].GetInt();
-				int16 IncreaseMagicCriticalPoint = (int16)ThiefBufSkillListFiled["IncreaseMagicCriticalPoint"].GetInt();
-				float IncreaseSpeedPoint = ThiefBufSkillListFiled["IncreaseSpeedPoint"].GetFloat();
-				int16 IncreaseStatusAbnormalityResistance = (int16)ThiefBufSkillListFiled["IncreaseStatusAbnormalityResistance"].GetInt();
+					if (NextComboSkill == "SKILL_TYPE_NONE")
+					{
+						ShamanTacTicSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+					}
 
-				int SkillCoolTime = ThiefBufSkillListFiled["SkillCoolTime"].GetInt();
-				int SkillCastingTime = ThiefBufSkillListFiled["SkillCastingTime"].GetInt();
-				int64 SkillDurationTime = ThiefBufSkillListFiled["SkillDurationTime"].GetInt64();
-				int64 SkillDotTime = ThiefBufSkillListFiled["SkillDotTime"].GetInt64();
-				int SkillDistance = ThiefBufSkillListFiled["SkillDistance"].GetInt();
-				int32 SkillMotionTime = ThiefBufSkillListFiled["SkillMotionTime"].GetInt();
-				float SkillTargetEffectTime = ThiefBufSkillListFiled["SkillTargetEffectTime"].GetFloat();
-				string SkillUpAnimation = ThiefBufSkillListFiled["SkillUpAnimation"].GetString();
-				string SkillDownAnimation = ThiefBufSkillListFiled["SkillDownAnimation"].GetString();
-				string SkillLeftAnimation = ThiefBufSkillListFiled["SkillLeftAnimation"].GetString();
-				string SkillRightAnimation = ThiefBufSkillListFiled["SkillRightAnimation"].GetString();
-				string NextComboSkill = ThiefBufSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = ThiefBufSkillListFiled["SkillExplanation"].GetString();
-
-				if (SkillType == "")
-				{
-
+					_SpellBufSkillDatas.insert(pair<int16, st_BufSkillInfo*>((int16)ShamanTacTicSkill->SkillType, ShamanTacTicSkill));
 				}
-
-				ThiefBufSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
-				ThiefBufSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
-				ThiefBufSkill->SkillLevel = SkillLevel;
-				ThiefBufSkill->IncreaseMinAttackPoint = IncreaseMinAttackPoint;
-				ThiefBufSkill->IncreaseMaxAttackPoint = IncreaseMaxAttackPoint;
-				ThiefBufSkill->IncreaseMeleeAttackSpeedPoint = IncreaseMeleeAttackSpeedPoint;
-				ThiefBufSkill->IncreaseMeleeAttackHitRate = IncreaseMeleeAttackHitRate;
-				ThiefBufSkill->IncreaseMagicAttackPoint = IncreaseMagicAttackPoint;
-				ThiefBufSkill->IncreaseMagicCastingPoint = IncreaseMagicCastingPoint;
-				ThiefBufSkill->IncreaseMagicAttackHitRate = IncreaseMagicAttackHitRate;
-				ThiefBufSkill->IncreaseDefencePoint = IncreaseDefencePoint;
-				ThiefBufSkill->IncreaseEvasionRate = IncreaseEvasionRate;
-				ThiefBufSkill->IncreaseMeleeCriticalPoint = IncreaseMeleeCriticalPoint;
-				ThiefBufSkill->IncreaseMagicCriticalPoint = IncreaseMagicCriticalPoint;
-				ThiefBufSkill->IncreaseSpeedPoint = IncreaseSpeedPoint;
-				ThiefBufSkill->IncreaseStatusAbnormalityResistance = IncreaseStatusAbnormalityResistance;
-				ThiefBufSkill->SkillCoolTime = SkillCoolTime;
-				ThiefBufSkill->SkillCastingTime = SkillCastingTime;
-				ThiefBufSkill->SkillDurationTime = SkillDurationTime;
-				ThiefBufSkill->SkillDotTime = SkillDotTime;
-				ThiefBufSkill->SkillDistance = SkillDistance;
-				ThiefBufSkill->SkillMotionTime = SkillMotionTime;
-				ThiefBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				ThiefBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-				ThiefBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-				ThiefBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-				ThiefBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
-
-				if (NextComboSkill == "SKILL_TYPE_NONE")
-				{
-					ThiefBufSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}				
-
-				_ThiefBufSkillDatas.insert(pair<int16, st_BufSkillInfo*>((int16)ThiefBufSkill->SkillType, ThiefBufSkill));
 			}
 		}
 	}
 }
 
-void CDataManager::LoadDataArcherSkill(wstring LoadFileName)
+void CDataManager::LoadDataShootingSkill(wstring LoadFileName)
 {
 	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());
 
 	rapidjson::Document Document;
 	Document.Parse(FileStr);
 
-	for (auto& Filed : Document["ArcherSkills"].GetArray())
+	for (auto& Filed : Document["ShootingSkills"].GetArray())
 	{
-		for (auto& ArcherSkillListFiled : Filed["ArcherSkillList"].GetArray())
+		for (auto& ShootingSkillListFiled : Filed["ShootingSkillList"].GetArray())
 		{
-			for (auto& ArcherAttackSkillListFiled : ArcherSkillListFiled["ArcherAttackSkillList"].GetArray())
+			for (auto& PassiveSkillListFiled : ShootingSkillListFiled["PassiveSkillList"].GetArray())
 			{
-				st_AttackSkillInfo* ArcherAttackSkill = new st_AttackSkillInfo();
-				ArcherAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_ARCHER;
-				ArcherAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_ATTACK;
 
-				string SkillType = ArcherAttackSkillListFiled["SkillType"].GetString();
-				string SkillName = ArcherAttackSkillListFiled["SkillName"].GetString();
-				int SkillLevel = ArcherAttackSkillListFiled["SkillLevel"].GetInt();
-				int SkillMinDamage = ArcherAttackSkillListFiled["SkillMinDamage"].GetInt();
-				int SkillMaxDamage = ArcherAttackSkillListFiled["SkillMaxDamage"].GetInt();
-				int SkillCoolTime = ArcherAttackSkillListFiled["SkillCoolTime"].GetInt();
-				int SkillCastingTime = ArcherAttackSkillListFiled["SkillCastingTime"].GetInt();
-				int64 SkillDurationTime = ArcherAttackSkillListFiled["SkillDurationTime"].GetInt64();
-				int64 SkillDotTime = ArcherAttackSkillListFiled["SkillDotTime"].GetInt64();
-				int SkillDistance = ArcherAttackSkillListFiled["SkillDistance"].GetInt();
-				int32 SkillMotionTime = ArcherAttackSkillListFiled["SkillMotionTime"].GetInt();
-				float SkillTargetEffectTime = ArcherAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();
-				int64 SkillDebufTime = ArcherAttackSkillListFiled["SkillDebufTime"].GetInt64();
-				int8 SkillDebufAttackSpeed = (int8)ArcherAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
-				int8 SkillDebufMovingSpeed = (int8)ArcherAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
-				int8 StatusAbnormalityProbability = (int8)ArcherAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
-				string SkillUpAnimation = ArcherAttackSkillListFiled["SkillUpAnimation"].GetString();
-				string SkillDownAnimation = ArcherAttackSkillListFiled["SkillDownAnimation"].GetString();
-				string SkillLeftAnimation = ArcherAttackSkillListFiled["SkillLeftAnimation"].GetString();
-				string SkillRightAnimation = ArcherAttackSkillListFiled["SkillRightAnimation"].GetString();
-				string NextComboSkill = ArcherAttackSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = ArcherAttackSkillListFiled["SkillExplanation"].GetString();
-
-				if (SkillType == "SKILL_ARCHER_SNIFING")
-				{
-					ArcherAttackSkill->SkillType = en_SkillType::SKILL_ARCHER_SNIFING;
-				}
-
-				ArcherAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
-				ArcherAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
-				ArcherAttackSkill->SkillLevel = SkillLevel;
-				ArcherAttackSkill->SkillMinDamage = SkillMinDamage;
-				ArcherAttackSkill->SkillMaxDamage = SkillMaxDamage;
-				ArcherAttackSkill->SkillCoolTime = SkillCoolTime;
-				ArcherAttackSkill->SkillCastingTime = SkillCastingTime;
-				ArcherAttackSkill->SkillDurationTime = SkillDurationTime;
-				ArcherAttackSkill->SkillDotTime = SkillDotTime;
-				ArcherAttackSkill->SkillDistance = SkillDistance;
-				ArcherAttackSkill->SkillMotionTime = SkillMotionTime;
-				ArcherAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				ArcherAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
-				ArcherAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
-				ArcherAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
-				ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-				ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-				ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-				ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
-
-				if (NextComboSkill == "SKILL_TYPE_NONE")
-				{
-					ArcherAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}				
-
-				_ArcherAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)ArcherAttackSkill->SkillType, ArcherAttackSkill));
 			}
 
-			for (auto& ArcherHealSkillListFiled : ArcherSkillListFiled["ArcherHealSkillList"].GetArray())
+			for (auto& ActiveSkillListFiled : ShootingSkillListFiled["ActiveSkillList"].GetArray())
 			{
-				st_HealSkillInfo* ArcherHealSkill = new st_HealSkillInfo();
-				ArcherHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_ARCHER;
-				ArcherHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_HEAL;
+				for (auto& AttackSkillFiled : ActiveSkillListFiled["AttackSkill"].GetArray())
+				{
+					st_AttackSkillInfo* ArcherAttackSkill = new st_AttackSkillInfo();
+					ArcherAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_ARCHER;
+					ArcherAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHOOTING_ACTIVE_ATTACK;
 
-				string SkillType = ArcherHealSkillListFiled["SkillType"].GetString();
-				string SkillName = ArcherHealSkillListFiled["SkillName"].GetString();
-				int SkillLevel = ArcherHealSkillListFiled["SkillLevel"].GetInt();
-				int SkillMinHeal = ArcherHealSkillListFiled["SkillMinHeal"].GetInt();
-				int SkillMaxHeal = ArcherHealSkillListFiled["SkillMaxHeal"].GetInt();
-				int SkillCoolTime = ArcherHealSkillListFiled["SkillCoolTime"].GetInt();
-				int SkillCastingTime = ArcherHealSkillListFiled["SkillCastingTime"].GetInt();
-				int64 SkillDurationTime = ArcherHealSkillListFiled["SkillDurationTime"].GetInt64();
-				int64 SkillDotTime = ArcherHealSkillListFiled["SkillDotTime"].GetInt64();
-				int SkillDistance = ArcherHealSkillListFiled["SkillDistance"].GetInt();
-				int32 SkillMotionTime = ArcherHealSkillListFiled["SkillMotionTime"].GetInt();
-				float SkillTargetEffectTime = ArcherHealSkillListFiled["SkillTargetEffectTime"].GetFloat();
-				string SkillUpAnimation = ArcherHealSkillListFiled["SkillUpAnimation"].GetString();
-				string SkillDownAnimation = ArcherHealSkillListFiled["SkillDownAnimation"].GetString();
-				string SkillLeftAnimation = ArcherHealSkillListFiled["SkillLeftAnimation"].GetString();
-				string SkillRightAnimation = ArcherHealSkillListFiled["SkillRightAnimation"].GetString();
-				string NextComboSkill = ArcherHealSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = ArcherHealSkillListFiled["SkillExplanation"].GetString();
+					string SkillType = AttackSkillFiled["SkillType"].GetString();
+					string SkillName = AttackSkillFiled["SkillName"].GetString();
+					int SkillLevel = AttackSkillFiled["SkillLevel"].GetInt();
+					int SkillMinDamage = AttackSkillFiled["SkillMinDamage"].GetInt();
+					int SkillMaxDamage = AttackSkillFiled["SkillMaxDamage"].GetInt();
+					int SkillCoolTime = AttackSkillFiled["SkillCoolTime"].GetInt();
+					int SkillCastingTime = AttackSkillFiled["SkillCastingTime"].GetInt();
+					int64 SkillDurationTime = AttackSkillFiled["SkillDurationTime"].GetInt64();
+					int64 SkillDotTime = AttackSkillFiled["SkillDotTime"].GetInt64();
+					int SkillDistance = AttackSkillFiled["SkillDistance"].GetInt();
+					int32 SkillMotionTime = AttackSkillFiled["SkillMotionTime"].GetInt();
+					float SkillTargetEffectTime = AttackSkillFiled["SkillTargetEffectTime"].GetFloat();
+					int64 SkillDebufTime = AttackSkillFiled["SkillDebufTime"].GetInt64();
+					int8 SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetInt();
+					int8 SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetInt();
+					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();
+					string SkillUpAnimation = AttackSkillFiled["SkillUpAnimation"].GetString();
+					string SkillDownAnimation = AttackSkillFiled["SkillDownAnimation"].GetString();
+					string SkillLeftAnimation = AttackSkillFiled["SkillLeftAnimation"].GetString();
+					string SkillRightAnimation = AttackSkillFiled["SkillRightAnimation"].GetString();
+					string NextComboSkill = AttackSkillFiled["NextComboSkill"].GetString();
+					string SkillExplation = AttackSkillFiled["SkillExplanation"].GetString();
 
-				if (SkillType == "")
+					if (SkillType == "SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING")
+					{
+						ArcherAttackSkill->SkillType = en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING;
+					}
+
+					ArcherAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+					ArcherAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
+					ArcherAttackSkill->SkillLevel = SkillLevel;
+					ArcherAttackSkill->SkillMinDamage = SkillMinDamage;
+					ArcherAttackSkill->SkillMaxDamage = SkillMaxDamage;
+					ArcherAttackSkill->SkillCoolTime = SkillCoolTime;
+					ArcherAttackSkill->SkillCastingTime = SkillCastingTime;
+					ArcherAttackSkill->SkillDurationTime = SkillDurationTime;
+					ArcherAttackSkill->SkillDotTime = SkillDotTime;
+					ArcherAttackSkill->SkillDistance = SkillDistance;
+					ArcherAttackSkill->SkillMotionTime = SkillMotionTime;
+					ArcherAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+					ArcherAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
+					ArcherAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
+					ArcherAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
+					ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+					ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+					ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+					ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
+
+					if (NextComboSkill == "SKILL_TYPE_NONE")
+					{
+						ArcherAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+					}
+
+					_ShootingAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)ArcherAttackSkill->SkillType, ArcherAttackSkill));
+				}
+
+				for (auto& BufSkillFiled : ActiveSkillListFiled["BufSkill"].GetArray())
 				{
 
 				}
+			}
+		}
+	}
+}
 
-				ArcherHealSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
-				ArcherHealSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
-				ArcherHealSkill->SkillLevel = SkillLevel;
-				ArcherHealSkill->SkillMinHealPoint = SkillMinHeal;
-				ArcherHealSkill->SkillMaxHealPoint = SkillMaxHeal;
-				ArcherHealSkill->SkillCoolTime = SkillCoolTime;
-				ArcherHealSkill->SkillCastingTime = SkillCastingTime;
-				ArcherHealSkill->SkillDurationTime = SkillDurationTime;
-				ArcherHealSkill->SkillDotTime = SkillDotTime;
-				ArcherHealSkill->SkillDistance = SkillDistance;
-				ArcherHealSkill->SkillMotionTime = SkillMotionTime;
-				ArcherHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				ArcherHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-				ArcherHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-				ArcherHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-				ArcherHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
+void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
+{
+	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());
 
-				if (NextComboSkill == "SKILL_TYPE_NONE")
-				{
-					ArcherHealSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}				
+	rapidjson::Document Document;
+	Document.Parse(FileStr);
 
-				_ArcherTacTicSkillDatas.insert(pair<int16, st_HealSkillInfo*>((int16)ArcherHealSkill->SkillType, ArcherHealSkill));
+	for (auto& Filed : Document["DisciplineSkills"].GetArray())
+	{
+		for (auto& DisciplineSkillListFiled : Filed["DisciplineSkillList"].GetArray())
+		{
+			for (auto& PassiveSkillListFiled : DisciplineSkillListFiled["PassiveSkillList"].GetArray())
+			{
+
 			}
 
-			for (auto& ArcherBufSkillListFiled : ArcherSkillListFiled["ArcherBufSkillList"].GetArray())
+			for (auto& ActiveSkillListFiled : DisciplineSkillListFiled["ActiveSkillList"].GetArray())
 			{
-				st_BufSkillInfo* ArcherBufSkill = new st_BufSkillInfo();
-				ArcherBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_ARCHER;
-				ArcherBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_BUF;
+				for (auto& AttackSkillFiled : ActiveSkillListFiled["AttackSkill"].GetArray())
+				{
+					st_AttackSkillInfo* DisciplineAttackSkill = new st_AttackSkillInfo();
+					DisciplineAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_TAOIST;
+					DisciplineAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_ATTACK;
 
-				string SkillType = ArcherBufSkillListFiled["SkillType"].GetString();
-				string SkillName = ArcherBufSkillListFiled["SkillName"].GetString();
-				int SkillLevel = ArcherBufSkillListFiled["SkillLevel"].GetInt();
+					string SkillType = AttackSkillFiled["SkillType"].GetString();
+					string SkillName = AttackSkillFiled["SkillName"].GetString();
+					int SkillLevel = AttackSkillFiled["SkillLevel"].GetInt();
+					int SkillMinDamage = AttackSkillFiled["SkillMinDamage"].GetInt();
+					int SkillMaxDamage = AttackSkillFiled["SkillMaxDamage"].GetInt();
+					int SkillCoolTime = AttackSkillFiled["SkillCoolTime"].GetInt();
+					int SkillCastingTime = AttackSkillFiled["SkillCastingTime"].GetInt();
+					int64 SkillDurationTime = AttackSkillFiled["SkillDurationTime"].GetInt64();
+					int64 SkillDotTime = AttackSkillFiled["SkillDotTime"].GetInt64();
+					int SkillDistance = AttackSkillFiled["SkillDistance"].GetInt();
+					int32 SkillMotionTime = AttackSkillFiled["SkillMotionTime"].GetInt();
+					float SkillTargetEffectTime = AttackSkillFiled["SkillTargetEffectTime"].GetFloat();
+					int64 SkillDebufTime = AttackSkillFiled["SkillDebufTime"].GetInt64();
+					int8 SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetInt();
+					int8 SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetInt();
+					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();
+					string SkillUpAnimation = AttackSkillFiled["SkillUpAnimation"].GetString();
+					string SkillDownAnimation = AttackSkillFiled["SkillDownAnimation"].GetString();
+					string SkillLeftAnimation = AttackSkillFiled["SkillLeftAnimation"].GetString();
+					string SkillRightAnimation = AttackSkillFiled["SkillRightAnimation"].GetString();
+					string NextComboSkill = AttackSkillFiled["NextComboSkill"].GetString();
+					string SkillExplation = AttackSkillFiled["SkillExplanation"].GetString();
 
-				int IncreaseMinAttackPoint = ArcherBufSkillListFiled["IncreaseMinAttackPoint"].GetInt();
-				int IncreaseMaxAttackPoint = ArcherBufSkillListFiled["IncreaseMaxAttackPoint"].GetInt();
-				int IncreaseMeleeAttackSpeedPoint = ArcherBufSkillListFiled["IncreaseMeleeAttackSpeedPoint"].GetInt();
-				int16 IncreaseMeleeAttackHitRate = (int16)ArcherBufSkillListFiled["IncreaseMeleeAttackHitRate"].GetInt();
-				int16 IncreaseMagicAttackPoint = (int16)ArcherBufSkillListFiled["IncreaseMagicAttackPoint"].GetInt();
-				int16 IncreaseMagicCastingPoint = (int16)ArcherBufSkillListFiled["IncreaseMagicCastingPoint"].GetInt();
-				int16 IncreaseMagicAttackHitRate = (int16)ArcherBufSkillListFiled["IncreaseMagicAttackHitRate"].GetInt();
-				int IncreaseDefencePoint = ArcherBufSkillListFiled["IncreaseDefencePoint"].GetInt();
-				int16 IncreaseEvasionRate = (int16)ArcherBufSkillListFiled["IncreaseEvasionRate"].GetInt();
-				int16 IncreaseMeleeCriticalPoint = (int16)ArcherBufSkillListFiled["IncreaseMeleeCriticalPoint"].GetInt();
-				int16 IncreaseMagicCriticalPoint = (int16)ArcherBufSkillListFiled["IncreaseMagicCriticalPoint"].GetInt();
-				float IncreaseSpeedPoint = ArcherBufSkillListFiled["IncreaseSpeedPoint"].GetFloat();
-				int16 IncreaseStatusAbnormalityResistance = (int16)ArcherBufSkillListFiled["IncreaseStatusAbnormalityResistance"].GetInt();
+					if (SkillType == "SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE")
+					{
+						DisciplineAttackSkill->SkillType = en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE;
+					}
+					else if (SkillType == "SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT")
+					{
+						DisciplineAttackSkill->SkillType = en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT;
+					}
 
-				int SkillCoolTime = ArcherBufSkillListFiled["SkillCoolTime"].GetInt();
-				int SkillCastingTime = ArcherBufSkillListFiled["SkillCastingTime"].GetInt();
-				int64 SkillDurationTime = ArcherBufSkillListFiled["SkillDurationTime"].GetInt64();
-				int64 SkillDotTime = ArcherBufSkillListFiled["SkillDotTime"].GetInt64();
-				int SkillDistance = ArcherBufSkillListFiled["SkillDistance"].GetInt();
-				int32 SkillMotionTime = ArcherBufSkillListFiled["SkillMotionTime"].GetInt();
-				float SkillTargetEffectTime = ArcherBufSkillListFiled["SkillTargetEffectTime"].GetFloat();
-				string SkillUpAnimation = ArcherBufSkillListFiled["SkillUpAnimation"].GetString();
-				string SkillDownAnimation = ArcherBufSkillListFiled["SkillDownAnimation"].GetString();
-				string SkillLeftAnimation = ArcherBufSkillListFiled["SkillLeftAnimation"].GetString();
-				string SkillRightAnimation = ArcherBufSkillListFiled["SkillRightAnimation"].GetString();
-				string NextComboSkill = ArcherBufSkillListFiled["NextComboSkill"].GetString();
-				string SkillExplation = ArcherBufSkillListFiled["SkillExplanation"].GetString();
+					DisciplineAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+					DisciplineAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
+					DisciplineAttackSkill->SkillLevel = SkillLevel;
+					DisciplineAttackSkill->SkillMinDamage = SkillMinDamage;
+					DisciplineAttackSkill->SkillMaxDamage = SkillMaxDamage;
+					DisciplineAttackSkill->SkillCoolTime = SkillCoolTime;
+					DisciplineAttackSkill->SkillCastingTime = SkillCastingTime;
+					DisciplineAttackSkill->SkillDurationTime = SkillDurationTime;
+					DisciplineAttackSkill->SkillDotTime = SkillDotTime;
+					DisciplineAttackSkill->SkillDistance = SkillDistance;
+					DisciplineAttackSkill->SkillMotionTime = SkillMotionTime;
+					DisciplineAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+					DisciplineAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
+					DisciplineAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
+					DisciplineAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
+					DisciplineAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+					DisciplineAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+					DisciplineAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+					DisciplineAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 
-				if (SkillType == "")
+					if (NextComboSkill == "SKILL_TYPE_NONE")
+					{
+						DisciplineAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+					}
+
+					_DisciplineAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)DisciplineAttackSkill->SkillType, DisciplineAttackSkill));
+				}
+
+				for (auto& HealSkillFiled : ActiveSkillListFiled["HealSkill"].GetArray())
+				{
+					st_HealSkillInfo* DisciplineHealSkill = new st_HealSkillInfo();
+					DisciplineHealSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_TAOIST;
+					DisciplineHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_HEAL;
+
+					string SkillType = HealSkillFiled["SkillType"].GetString();
+					string SkillName = HealSkillFiled["SkillName"].GetString();
+					int SkillLevel = HealSkillFiled["SkillLevel"].GetInt();
+					int SkillMinHeal = HealSkillFiled["SkillMinHeal"].GetInt();
+					int SkillMaxHeal = HealSkillFiled["SkillMaxHeal"].GetInt();
+					int SkillCoolTime = HealSkillFiled["SkillCoolTime"].GetInt();
+					int SkillCastingTime = HealSkillFiled["SkillCastingTime"].GetInt();
+					int64 SkillDurationTime = HealSkillFiled["SkillDurationTime"].GetInt64();
+					int64 SkillDotTime = HealSkillFiled["SkillDotTime"].GetInt64();
+					int SkillDistance = HealSkillFiled["SkillDistance"].GetInt();
+					int32 SkillMotionTime = HealSkillFiled["SkillMotionTime"].GetInt();
+					float SkillTargetEffectTime = HealSkillFiled["SkillTargetEffectTime"].GetFloat();
+					string SkillUpAnimation = HealSkillFiled["SkillUpAnimation"].GetString();
+					string SkillDownAnimation = HealSkillFiled["SkillDownAnimation"].GetString();
+					string SkillLeftAnimation = HealSkillFiled["SkillLeftAnimation"].GetString();
+					string SkillRightAnimation = HealSkillFiled["SkillRightAnimation"].GetString();
+					string NextComboSkill = HealSkillFiled["NextComboSkill"].GetString();
+					string SkillExplation = HealSkillFiled["SkillExplanation"].GetString();
+
+					if (SkillType == "SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT")
+					{
+						DisciplineHealSkill->SkillType = en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT;
+					}
+					else if (SkillType == "SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND")
+					{
+						DisciplineHealSkill->SkillType = en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND;
+					}
+
+					DisciplineHealSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+					DisciplineHealSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
+					DisciplineHealSkill->SkillLevel = SkillLevel;
+					DisciplineHealSkill->SkillMinHealPoint = SkillMinHeal;
+					DisciplineHealSkill->SkillMaxHealPoint = SkillMaxHeal;
+					DisciplineHealSkill->SkillCoolTime = SkillCoolTime;
+					DisciplineHealSkill->SkillCastingTime = SkillCastingTime;
+					DisciplineHealSkill->SkillDurationTime = SkillDurationTime;
+					DisciplineHealSkill->SkillDotTime = SkillDotTime;
+					DisciplineHealSkill->SkillDistance = SkillDistance;
+					DisciplineHealSkill->SkillMotionTime = SkillMotionTime;
+					DisciplineHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+					DisciplineHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+					DisciplineHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+					DisciplineHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+					DisciplineHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
+
+					if (NextComboSkill == "SKILL_TYPE_NONE")
+					{
+						DisciplineHealSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+					}
+
+					_DisciplineHealSkillDatas.insert(pair<int16, st_HealSkillInfo*>((int16)DisciplineHealSkill->SkillType, DisciplineHealSkill));
+				}
+
+				for (auto& BufSkillFiled : ActiveSkillListFiled["BufSkill"].GetArray())
 				{
 
 				}
-
-				ArcherBufSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
-				ArcherBufSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
-				ArcherBufSkill->SkillLevel = SkillLevel;
-				ArcherBufSkill->IncreaseMinAttackPoint = IncreaseMinAttackPoint;
-				ArcherBufSkill->IncreaseMaxAttackPoint = IncreaseMaxAttackPoint;
-				ArcherBufSkill->IncreaseMeleeAttackSpeedPoint = IncreaseMeleeAttackSpeedPoint;
-				ArcherBufSkill->IncreaseMeleeAttackHitRate = IncreaseMeleeAttackHitRate;
-				ArcherBufSkill->IncreaseMagicAttackPoint = IncreaseMagicAttackPoint;
-				ArcherBufSkill->IncreaseMagicCastingPoint = IncreaseMagicCastingPoint;
-				ArcherBufSkill->IncreaseMagicAttackHitRate = IncreaseMagicAttackHitRate;
-				ArcherBufSkill->IncreaseDefencePoint = IncreaseDefencePoint;
-				ArcherBufSkill->IncreaseEvasionRate = IncreaseEvasionRate;
-				ArcherBufSkill->IncreaseMeleeCriticalPoint = IncreaseMeleeCriticalPoint;
-				ArcherBufSkill->IncreaseMagicCriticalPoint = IncreaseMagicCriticalPoint;
-				ArcherBufSkill->IncreaseSpeedPoint = IncreaseSpeedPoint;
-				ArcherBufSkill->IncreaseStatusAbnormalityResistance = IncreaseStatusAbnormalityResistance;
-				ArcherBufSkill->SkillCoolTime = SkillCoolTime;
-				ArcherBufSkill->SkillCastingTime = SkillCastingTime;
-				ArcherBufSkill->SkillDurationTime = SkillDurationTime;
-				ArcherBufSkill->SkillDotTime = SkillDotTime;
-				ArcherBufSkill->SkillDistance = SkillDistance;
-				ArcherBufSkill->SkillMotionTime = SkillMotionTime;
-				ArcherBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				ArcherBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-				ArcherBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-				ArcherBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-				ArcherBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
-
-				if (NextComboSkill == "SKILL_TYPE_NONE")
-				{
-					ArcherBufSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}				
-
-				_ArcherBufSkillDatas.insert(pair<int16, st_BufSkillInfo*>((int16)ArcherBufSkill->SkillType, ArcherBufSkill));
 			}
 		}
 	}
@@ -2953,48 +2434,50 @@ st_SkillInfo* CDataManager::FindSkillData(en_SkillMediumCategory FindAttackSkill
 	{
 	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE:
 		return nullptr;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ATTACK:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_ATTACK:
 		return (*_PublicAttackSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_TACTIC:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_HEAL:
-		return (*_PublicTacTicSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_BUF:
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_BUF:
 		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_ATTACK:
-		return (*_WarriorAttackSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_TACTIC:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_HEAL:
-		return (*_WarriorTacTicSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_WARRIOR_BUF:
-		return (*_WarriorBufSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_ATTACK:
-		return (*_ShamanAttackSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_TACTIC:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_HEAL:
-		return (*_ShamanTacTicSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHMAN_BUF:
-		return (*_ShamanBufSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_ATTACK:
-		return (*_TaioistAttackSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_TACTIC:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_HEAL:
-		return (*_TaioistTacTicSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_TAOIST_BUF:
-		return (*_TaioistBufSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_ATTACK:
-		return (*_ThiefAttackSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_TACTIC:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_HEAL:
-		return (*_ThiefTacTicSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_THIEF_BUF:
-		return (*_ThiefBufSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_ATTACK:
-		return (*_ArcherAttackSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_TACTIC:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_HEAL:
-		return (*_ArcherTacTicSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ARCHER_BUF:
-		return (*_ArcherBufSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_PASSIVE:
+		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_ATTACK:
+		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_BUF:
+		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_PASSIVE:
+		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PROTECTION_ACTIVE_ATTACK:
+		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PROTECTION_ACTIVE_BUF:
+		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEOGRY_PROTECTION_PASSIVE:
+		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ASSASSINATION_ACTIVE_ATTACK:
+		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ASSASSINATION_ACTIVE_BUF:
+		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ASSASSINATION_PASSIVE:
+		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_ATTACK:
+		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_BUF:
+		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_PASSIVE:
+		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHOOTING_ACTIVE_ATTACK:
+		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHOOTING_ACTIVE_BUF:
+		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHOOTING_PASSIVE:
+		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_ATTACK:
+		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_HEAL:
+		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_BUF:
+		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_PASSIVE:
+		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
 	}
 }
 
