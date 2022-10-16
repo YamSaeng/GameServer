@@ -492,7 +492,7 @@ void CPlayer::UpdateSpell()
 
 			switch (_SpellSkill->GetSkillInfo()->SkillType)
 			{
-			case en_SkillType::SKILL_SHAMAN_FLAME_HARPOON:
+			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:
 			{
 				HitEffectType = en_EffectType::EFFECT_FLAME_HARPOON_TARGET;
 
@@ -508,7 +508,7 @@ void CPlayer::UpdateSpell()
 				_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);				
 			}
 			break;			
-			case en_SkillType::SKILL_SHAMAN_ICE_CHAIN:
+			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
 			{				
 				HitEffectType = en_EffectType::EFFECT_NORMAL_ATTACK_TARGET_HIT;
 
@@ -567,7 +567,7 @@ void CPlayer::UpdateSpell()
 				}				
 			}
 			break;
-			case en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE:
+			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
 			{
 				HitEffectType = en_EffectType::EFFECT_LIGHTNING;
 
@@ -620,7 +620,7 @@ void CPlayer::UpdateSpell()
 				ResEffectPacket->Free();
 			}
 			break;
-			case en_SkillType::SKILL_SHAMAN_HELL_FIRE:
+			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:
 			{
 				HitEffectType = en_EffectType::EFFECT_FLAME_HARPOON_TARGET;
 
@@ -636,7 +636,7 @@ void CPlayer::UpdateSpell()
 				_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);				
 			}
 			break;
-			case en_SkillType::SKILL_TAIOIST_DIVINE_STRIKE:
+			case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
 			{
 				HitEffectType = en_EffectType::EFFECT_FLAME_HARPOON_TARGET;
 
@@ -652,7 +652,7 @@ void CPlayer::UpdateSpell()
 				_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);				
 			}
 			break;			
-			case en_SkillType::SKILL_TAIOIST_HEALING_LIGHT:
+			case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:
 			{
 				HitEffectType = en_EffectType::EFFECT_HEALING_LIGHT_TARGET;
 
@@ -665,7 +665,7 @@ void CPlayer::UpdateSpell()
 				_SelectTarget->_GameObjectJobQue.Enqueue(HealJob);								
 			}
 			break;
-			case en_SkillType::SKILL_TAIOIST_HEALING_WIND:
+			case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:
 			{
 				HitEffectType = en_EffectType::EFFECT_HEALING_WIND_TARGET;
 
