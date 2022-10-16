@@ -345,8 +345,7 @@
 	    SET NOCOUNT ON
         INSERT INTO [dbo].[Inventory]
         VALUES ((@OwnerAccountDBId), (@OwnerPlayerDBId),
-		0, 0, 0, 
-		(@ItemTileGridPositionX), (@ItemTileGridPositionY), 
+		0, (@ItemTileGridPositionX), (@ItemTileGridPositionY), 
 		' ',' ',' ', 
 		0, 0, 0)
       ]]>
