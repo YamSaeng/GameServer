@@ -102,7 +102,7 @@ vector<st_QuickSlotBarPosition> CQuickSlotManager::GlobalCoolTimeFindQuickSlotBa
 				&& ((SearchingQuickSlotBarSlot->QuickSlotBarIndex == QuickSlotBarIndex
 					&& SearchingQuickSlotBarSlot->QuickSlotBarSlotIndex == QuickSlotBarSlotIndex) == false)
 				&& SearchingQuickSlotBarSlot->QuickBarSkill->GetSkillKind() == SkillKind
-				&& SearchingQuickSlotBarSlot->QuickBarSkill->GetSkillInfo()->SkillType != en_SkillType::SKILL_SHOCK_RELEASE)
+				&& SearchingQuickSlotBarSlot->QuickBarSkill->GetSkillInfo()->SkillType != en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE)
 			{
 				st_QuickSlotBarPosition SearchingCompleteQuickSlotPosition;
 				SearchingCompleteQuickSlotPosition.QuickSlotBarIndex = SearchingQuickSlotBarSlot->QuickSlotBarIndex;
