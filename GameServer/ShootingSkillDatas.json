@@ -9,7 +9,7 @@
             {
               "AttackSkill": [
                 {
-                  "SkillType": "SKILL_ARCHER_SNIFING",
+                  "SkillType": "SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING",
                   "SkillName": "РњАн",
                   "SkillLevel": 1,
                   "SkillMinDamage": 25,

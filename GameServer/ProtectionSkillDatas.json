@@ -9,7 +9,7 @@
             {
               "AttackSkill": [
                 {
-                  "SkillType": "SKILL_KNIGHT_SHIELD_SMASH",
+                  "SkillType": "SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH",
                   "SkillName": "방패강타",
                   "SkillLevel": 1,
                   "SkillMinDamage": 5,

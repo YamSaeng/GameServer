@@ -9,7 +9,7 @@
             {
               "AttackSkill": [
                 {
-                  "SkillType": "SKILL_TAIOIST_DIVINE_STRIKE",
+                  "SkillType": "SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE",
                   "SkillName": "신성한일격",
                   "SkillLevel": 1,
                   "SkillMinDamage": 10,
@@ -32,7 +32,7 @@
                   "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입힌다."
                 },
                 {
-                  "SkillType": "SKILL_TAIOIST_ROOT",
+                  "SkillType": "SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT",
                   "SkillName": "도사 속박",
                   "SkillLevel": 1,
                   "SkillMinDamage": 0,
@@ -57,7 +57,7 @@
               ],
               "HealSkill": [
                 {
-                  "SkillType": "SKILL_TAIOIST_HEALING_LIGHT",
+                  "SkillType": "SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT",
                   "SkillName": "치유의빛",
                   "SkillLevel": 1,
                   "SkillMinHeal": 100,
@@ -77,7 +77,7 @@
                   "SkillExplanation": "%d 거리 안에 있는 대상 %d ~ %d 만큼 회복시킨다."
                 },
                 {
-                  "SkillType": "SKILL_TAIOIST_HEALING_WIND",
+                  "SkillType": "SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND",
                   "SkillName": "치유의바람",
                   "SkillLevel": 1,
                   "SkillMinHeal": 200,

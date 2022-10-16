@@ -33,7 +33,7 @@
           ],
           "PublicBufSkillList": [
             {
-              "SkillType": "SKILL_SHOCK_RELEASE",
+              "SkillType": "SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE",
               "SkillName": "충격해제",
               "SkillLevel": 1,
               "IncreaseMinAttackPoint": 0,
@@ -60,7 +60,7 @@
               "SkillLeftAnimation": "IDLE_LEFT",
               "SkillRightAnimation": "IDLE_LEFT",
               "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "기절, 밀려남 상태이상을 해제하고 %.1f초 동안 상태이상 저항값을 1000만큼 증가시킨다."              
+              "SkillExplanation": "기절, 밀려남 상태이상을 해제하고 %.1f초 동안 상태이상 저항값을 1000만큼 증가시킨다."
             }
           ]
         }

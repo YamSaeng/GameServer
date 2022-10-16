@@ -9,7 +9,7 @@
             {
               "AttackSkill": [
                 {
-                  "SkillType": "SKILL_THIEF_QUICK_CUT",
+                  "SkillType": "SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT",
                   "SkillName": "빠른베기",
                   "SkillLevel": 1,
                   "SkillMinDamage": 20,

@@ -8,7 +8,8 @@
               "SkillNumber": 0,
               "SkillType": "SKILL_FIGHT_TWO_HAND_SWORD_MASTER",
               "SkillName": "양손무기 연마",
-              "SkillMaxLevel": 1
+              "SkillMaxLevel": 1,
+              "SkillExplanation": "양손무기를 연마한다."
             }
           ],
           "ActiveSkillList": [
@@ -16,7 +17,7 @@
               "AttackSkill": [
                 {
                   "SkillNumber": 0,
-                  "SkillType": "SKILL_KNIGHT_FIERCE_ATTACK",
+                  "SkillType": "SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK",
                   "SkillName": "맹렬한일격",
                   "SkillMaxLevel": 1,
                   "SkillMinDamage": 2,
@@ -35,12 +36,12 @@
                   "SkillDownAnimation": "ATTACK_WEAPON_FRONT",
                   "SkillLeftAnimation": "ATTACK_WEAPON_LEFT",
                   "SkillRightAnimation": "ATTACK_WEAPON_LEFT",
-                  "NextComboSkill": "SKILL_KNIGHT_CONVERSION_ATTACK",
+                  "NextComboSkill": "SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK",
                   "SkillExplanation": "전방 %d칸 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입히고, 회심의일격을 활성화 한다."
                 },
                 {
                   "SkillNumber": 0,
-                  "SkillType": "SKILL_KNIGHT_CONVERSION_ATTACK",
+                  "SkillType": "SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK",
                   "SkillName": "회심의일격",
                   "SkillMaxLevel": 1,
                   "SkillMinDamage": 2,
@@ -64,7 +65,7 @@
                 },
                 {
                   "SkillNumber": 1,
-                  "SkillType": "SKILL_KNIGHT_SHAEHONE",
+                  "SkillType": "SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE",
                   "SkillName": "쇄혼비무",
                   "SkillMaxLevel": 1,
                   "SkillMinDamage": 10,
@@ -88,7 +89,7 @@
                 },
                 {
                   "SkillNumber": 2,
-                  "SkillType": "SKILL_KNIGHT_CHOHONE",
+                  "SkillType": "SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE",
                   "SkillName": "초혼비무",
                   "SkillMaxLevel": 1,
                   "SkillMinDamage": 10,
@@ -114,7 +115,7 @@
               "BufSkill": [
                 {
                   "SkillNumber": 3,
-                  "SkillType": "SKILL_KNIGHT_CHARGE_POSE",
+                  "SkillType": "SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE",
                   "SkillName": "돌격자세",
                   "SkillMaxLevel": 1,
                   "IncreaseMinAttackPoint": 50,

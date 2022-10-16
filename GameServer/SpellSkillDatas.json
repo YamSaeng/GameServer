@@ -9,7 +9,7 @@
             {
               "AttackSkill": [
                 {
-                  "SkillType": "SKILL_SHAMAN_FLAME_HARPOON",
+                  "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON",
                   "SkillName": "불꽃작살",
                   "SkillLevel": 1,
                   "SkillMinDamage": 25,
@@ -32,7 +32,7 @@
                   "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입힌다."
                 },
                 {
-                  "SkillType": "SKILL_SHAMAN_ROOT",
+                  "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_ROOT",
                   "SkillName": "주술사 속박",
                   "SkillLevel": 1,
                   "SkillMinDamage": 0,
@@ -55,7 +55,7 @@
                   "SkillExplanation": "%d 거리 안에 있는 대상을 %.1f초 동안 속박 시킨다."
                 },
                 {
-                  "SkillType": "SKILL_SHAMAN_ICE_CHAIN",
+                  "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN",
                   "SkillName": "얼음사슬",
                   "SkillLevel": 1,
                   "SkillMinDamage": 20,
@@ -74,11 +74,11 @@
                   "SkillDownAnimation": "SPELL_FRONT",
                   "SkillLeftAnimation": "SPELL_LEFT",
                   "SkillRightAnimation": "SPELL_LEFT",
-                  "NextComboSkill": "SKILL_SHAMAN_ICE_WAVE",
+                  "NextComboSkill": "SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE",
                   "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입히고 %d%% 만큼 상대방의 속도를 %.1f초동안 줄인다."
                 },
                 {
-                  "SkillType": "SKILL_SHAMAN_ICE_WAVE",
+                  "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE",
                   "SkillName": "냉기파동",
                   "SkillLevel": 1,
                   "SkillMinDamage": 20,
@@ -101,7 +101,7 @@
                   "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입히고 밀어낸다."
                 },
                 {
-                  "SkillType": "SKILL_SHAMAN_LIGHTNING_STRIKE",
+                  "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE",
                   "SkillName": "낙뢰",
                   "SkillLevel": 1,
                   "SkillMinDamage": 50,
@@ -124,7 +124,7 @@
                   "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입히고 %.1f초 동안 기절 시킨다."
                 },
                 {
-                  "SkillType": "SKILL_SHAMAN_HELL_FIRE",
+                  "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE",
                   "SkillName": "지옥의화염",
                   "SkillLevel": 1,
                   "SkillMinDamage": 100,
@@ -149,7 +149,7 @@
               ],
               "BufSkill": [
                 {
-                  "SkillType": "SKILL_SHAMAN_BACK_TELEPORT",
+                  "SkillType": "SKILL_SPELL_ACTIVE_BUF_TELEPORT",
                   "SkillName": "시공의뒤틀림",
                   "SkillLevel": 1,
                   "SkillCoolTime": 10000,
