@@ -189,8 +189,8 @@ void CGameObject::Update()
 
 							switch (FindMeleeSkill->GetSkillInfo()->SkillType)
 							{
-							case en_SkillType::SKILL_KNIGHT_FIERCE_ATTACK:
-							case en_SkillType::SKILL_KNIGHT_CONVERSION_ATTACK:
+							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
+							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
 								{
 									if (AttackSkillInfo->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
 									{
@@ -203,9 +203,9 @@ void CGameObject::Update()
 									}
 								}
 								break;
-							case en_SkillType::SKILL_KNIGHT_SHIELD_SMASH:
+							case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
 								break;
-							case en_SkillType::SKILL_KNIGHT_CHOHONE:
+							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
 							{
 								st_Vector2 TargetPosition = _SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position;
 								st_Vector2 MyPosition = _GameObjectInfo.ObjectPositionInfo.Position;
@@ -288,7 +288,7 @@ void CGameObject::Update()
 								}
 							}
 							break;
-							case en_SkillType::SKILL_KNIGHT_SHAEHONE:
+							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE:
 							{
 								st_Vector2 TargetPosition = _SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position;
 								st_Vector2 MyPosition = _GameObjectInfo.ObjectPositionInfo.Position;
@@ -398,7 +398,7 @@ void CGameObject::Update()
 								}
 							}
 							break;
-							case en_SkillType::SKILL_KNIGHT_SMASH_WAVE:
+							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:
 							{
 
 							}
@@ -545,14 +545,14 @@ void CGameObject::Update()
 						_GameObjectJobQue.Enqueue(ComboAttackOffJob);
 					}
 
-					if (FindSpellSkill->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHOCK_RELEASE)
+					if (FindSpellSkill->GetSkillInfo()->SkillType == en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE)
 					{
 						for (auto DebufSkillIter : _DeBufs)
 						{
 							// 상태이상 해제
-							if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_KNIGHT_CHOHONE
-								|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE
-								|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_ICE_WAVE)
+							if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE
+								|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE
+								|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE)
 							{
 								DebufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
 							}
@@ -594,7 +594,7 @@ void CGameObject::Update()
 
 						switch (FindSpellSkill->GetSkillInfo()->SkillType)
 						{
-						case en_SkillType::SKILL_KNIGHT_CHARGE_POSE:
+						case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
 							{
 								st_BufSkillInfo* ChargePoseSkillInfo = (st_BufSkillInfo*)FindSpellSkill->GetSkillInfo();
 
@@ -621,14 +621,14 @@ void CGameObject::Update()
 								ResEffectPacket->Free();
 							}
 							break;
-						case en_SkillType::SKILL_SHAMAN_BACK_TELEPORT:
+						case en_SkillType::SKILL_SPELL_ACTIVE_BUF_TELEPORT:
 							{
 								// 이동 불가와 이동 속도 감소 효과를 모두 삭제
 								for (auto DebufSkillIter : _DeBufs)
 								{
-									if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_ICE_CHAIN
-										|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_ROOT
-										|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_TAIOIST_ROOT)
+									if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN
+										|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT
+										|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT)
 									{
 										DebufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
 									}
@@ -671,13 +671,13 @@ void CGameObject::Update()
 								ResEffectPacket->Free();
 							}
 							break;
-						case en_SkillType::SKILL_SHAMAN_FLAME_HARPOON:
-						case en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE:
-						case en_SkillType::SKILL_SHAMAN_HELL_FIRE:
-						case en_SkillType::SKILL_SHAMAN_ICE_CHAIN:
-						case en_SkillType::SKILL_TAIOIST_DIVINE_STRIKE:
-						case en_SkillType::SKILL_TAIOIST_HEALING_LIGHT:
-						case en_SkillType::SKILL_TAIOIST_HEALING_WIND:
+						case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:
+						case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
+						case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:
+						case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
+						case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
+						case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:
+						case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:
 						{
 							if (_SelectTarget != nullptr)
 							{
@@ -715,12 +715,12 @@ void CGameObject::Update()
 							}							
 						}
 						break;
-						case en_SkillType::SKILL_SHAMAN_ICE_WAVE:
+						case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:
 							{
 								if (_SelectTarget != nullptr)
 								{
 									// 냉기 파동의 경우 연속기 스킬로 활성화 된 경우에만 사용 할 수 있도록 조건 확인
-									if (Player->_ComboSkill != nullptr && Player->_ComboSkill->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_ICE_WAVE)
+									if (Player->_ComboSkill != nullptr && Player->_ComboSkill->GetSkillInfo()->SkillType == en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE)
 									{
 										// 냉기 파동 상태이상 인지 확인
 										bool IsIceWave = _SelectTarget->_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ICE_WAVE;
@@ -759,7 +759,7 @@ void CGameObject::Update()
 								}
 							}
 							break;
-						case en_SkillType::SKILL_SHAMAN_ROOT:						
+						case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:
 							{
 								if (_SelectTarget != nullptr)
 								{
@@ -807,7 +807,7 @@ void CGameObject::Update()
 								}
 							}
 							break;
-						case en_SkillType::SKILL_TAIOIST_ROOT:
+						case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:
 							{
 								if (_SelectTarget != nullptr)
 								{
@@ -1083,45 +1083,45 @@ void CGameObject::Update()
 					wsprintf(SkillTypeMessage, L"%s가 일반공격을 사용해 %s에게 %d의 데미지를 줬습니다.", Attacker->_GameObjectInfo.ObjectName.c_str(), _GameObjectInfo.ObjectName.c_str(), Damage);
 					HitEffectType = en_EffectType::EFFECT_NORMAL_ATTACK_TARGET_HIT;
 					break;
-				case en_SkillType::SKILL_KNIGHT_FIERCE_ATTACK:
+				case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
 					wsprintf(SkillTypeMessage, L"%s가 맹렬한 일격을 사용해 %s에게 %d의 데미지를 줬습니다.", Attacker->_GameObjectInfo.ObjectName.c_str(), _GameObjectInfo.ObjectName.c_str(), Damage);
 					HitEffectType = en_EffectType::EFFECT_NORMAL_ATTACK_TARGET_HIT;
 					break;
-				case en_SkillType::SKILL_KNIGHT_CONVERSION_ATTACK:
+				case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
 					wsprintf(SkillTypeMessage, L"%s가 회심의 일격을 사용해 %s에게 %d의 데미지를 줬습니다.", Attacker->_GameObjectInfo.ObjectName.c_str(), _GameObjectInfo.ObjectName.c_str(), Damage);
 					HitEffectType = en_EffectType::EFFECT_NORMAL_ATTACK_TARGET_HIT;
 					break;
-				case en_SkillType::SKILL_KNIGHT_CHOHONE:
+				case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
 					wsprintf(SkillTypeMessage, L"%s가 초혼비무를 사용해 %s에게 %d의 데미지를 줬습니다.", Attacker->_GameObjectInfo.ObjectName.c_str(), _GameObjectInfo.ObjectName.c_str(), Damage);
 					HitEffectType = en_EffectType::EFFECT_CHOHONE_TARGET_HIT;
 					break;
-				case en_SkillType::SKILL_KNIGHT_SHAEHONE:
+				case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE:
 					wsprintf(SkillTypeMessage, L"%s가 쇄혼비무를 사용해 %s에게 %d의 데미지를 줬습니다.", Attacker->_GameObjectInfo.ObjectName.c_str(), _GameObjectInfo.ObjectName.c_str(), Damage);
 					HitEffectType = en_EffectType::EFFECT_SHAHONE_TARGET_HIT;
 					break;
-				case en_SkillType::SKILL_KNIGHT_SMASH_WAVE:
+				case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:
 					wsprintf(SkillTypeMessage, L"%s가 분쇄파동을 사용해 %s에게 %d의 데미지를 줬습니다.", Attacker->_GameObjectInfo.ObjectName.c_str(), _GameObjectInfo.ObjectName.c_str(), Damage);
 					HitEffectType = en_EffectType::EFFECT_NORMAL_ATTACK_TARGET_HIT;
 					break;
-				case en_SkillType::SKILL_KNIGHT_SHIELD_SMASH:
+				case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
 					wsprintf(SkillTypeMessage, L"%s가 방패강타를 사용해 %s에게 %d의 데미지를 줬습니다.", Attacker->_GameObjectInfo.ObjectName.c_str(), _GameObjectInfo.ObjectName.c_str(), Damage);
 					break;
-				case en_SkillType::SKILL_SHAMAN_FLAME_HARPOON:
+				case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:
 					wsprintf(SkillTypeMessage, L"%s가 불꽃작살을 사용해 %s에게 %d의 데미지를 줬습니다.", Attacker->_GameObjectInfo.ObjectName.c_str(), _GameObjectInfo.ObjectName.c_str(), Damage);
 					break;
-				case en_SkillType::SKILL_SHAMAN_ICE_CHAIN:					
+				case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
 					wsprintf(SkillTypeMessage, L"%s가 얼음사슬을 사용해 %s에게 %d의 데미지를 줬습니다.", Attacker->_GameObjectInfo.ObjectName.c_str(), _GameObjectInfo.ObjectName.c_str(), Damage);
 					break;
-				case en_SkillType::SKILL_SHAMAN_ICE_WAVE:
+				case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:
 					wsprintf(SkillTypeMessage, L"%s가 냉기파동을 사용해 %s에게 %d의 데미지를 줬습니다.", Attacker->_GameObjectInfo.ObjectName.c_str(), _GameObjectInfo.ObjectName.c_str(), Damage);
 					break;
-				case en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE:
+				case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
 					wsprintf(SkillTypeMessage, L"%s가 낙뢰를 사용해 %s에게 %d의 데미지를 줬습니다.", Attacker->_GameObjectInfo.ObjectName.c_str(), _GameObjectInfo.ObjectName.c_str(), Damage);
 					break;
-				case en_SkillType::SKILL_SHAMAN_HELL_FIRE:
+				case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:
 					wsprintf(SkillTypeMessage, L"%s가 지옥의 화염을 사용해 %s에게 %d의 데미지를 줬습니다.", Attacker->_GameObjectInfo.ObjectName.c_str(), _GameObjectInfo.ObjectName.c_str(), Damage);
 					break;
-				case en_SkillType::SKILL_TAIOIST_DIVINE_STRIKE:
+				case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
 					wsprintf(SkillTypeMessage, L"%s가 신성한 일격을 사용해 %s에게 %d의 데미지를 줬습니다.", Attacker->_GameObjectInfo.ObjectName.c_str(), _GameObjectInfo.ObjectName.c_str(), Damage);
 					break;
 				default:
@@ -1177,10 +1177,10 @@ void CGameObject::Update()
 				case en_SkillType::SKILL_TYPE_NONE:
 					CRASH("SkillType None");
 					break;
-				case en_SkillType::SKILL_TAIOIST_HEALING_LIGHT:
+				case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:
 					wsprintf(SkillTypeMessage, L"%s가 치유의 빛을 사용해 %s를 %d만큼 회복했습니다.", Healer->_GameObjectInfo.ObjectName.c_str(), _GameObjectInfo.ObjectName.c_str(), HealPoint);
 					break;	
-				case en_SkillType::SKILL_TAIOIST_HEALING_WIND:
+				case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:
 					wsprintf(SkillTypeMessage, L"%s가 치유의 바람을 사용해 %s를 %d만큼 회복했습니다.", Healer->_GameObjectInfo.ObjectName.c_str(), _GameObjectInfo.ObjectName.c_str(), HealPoint);
 					break;
 				}								
@@ -1273,12 +1273,12 @@ void CGameObject::Update()
 			{
 				for (auto DebufSkillIter : _DeBufs)
 				{
-					if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_KNIGHT_CHOHONE
-						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_LIGHTNING_STRIKE
-						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_ICE_WAVE
-						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_ICE_CHAIN
-						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SHAMAN_ROOT
-						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_TAIOIST_ROOT)
+					if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE
+						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE
+						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE
+						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN
+						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT
+						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT)
 					{
 						DebufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
 					}
