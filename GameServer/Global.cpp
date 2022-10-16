@@ -28,13 +28,22 @@ public:
 		G_Datamanager = new CDataManager();
 		// 아이템 데이터 파싱
 		G_Datamanager->LoadDataItem(L"ItemData.json");
+		
 		// 스킬 데이터 파싱
-		G_Datamanager->LoadDataPublicSkill(L"PublicSkillDatas.json");
-		G_Datamanager->LoadDataWarriorSkill(L"WarriorSkillDatas.json");
-		G_Datamanager->LoadDataShamanSkill(L"ShamanSkillDatas.json");
-		G_Datamanager->LoadDataTaioistSkill(L"TaioistSkillDatas.json");
-		G_Datamanager->LoadDataThiefSkill(L"ThiefSkillDatas.json");
-		G_Datamanager->LoadDataArcherSkill(L"ArcherSkillDatas.json");
+		G_Datamanager->LoadDataPublicSkill(L"PublicSkillDatas.json");		
+		// 격투 스킬 데이터 파싱
+		G_Datamanager->LoadDataFightSkill(L"FightSkillDatas.json");	
+		// 방어 스킬 데이터 파싱
+		G_Datamanager->LoadDataProtectionSkill(L"ProtectionSkillDatas.json");
+		// 암살 스킬 데이터 파싱
+		G_Datamanager->LoadDataAssassinationSkill(L"AssassinationSkillDatas.json");
+		// 마법 스킬 데이터 파싱
+		G_Datamanager->LoadDataSpellSkill(L"SpellSkillDatas.json");
+		// 사격 스킬 데이터 파싱
+		G_Datamanager->LoadDataShootingSkill(L"ShootingSkillDatas.json");
+		// 수양 스킬 데이터 파싱
+		G_Datamanager->LoadDataDisCiplineSkill(L"DisciplineSkillDatas.json");
+		
 		// 플레이어 캐릭터 스테이터스 데이터 파싱
 		G_Datamanager->LoadDataPlayerCharacterStatus(L"PlayerCharacterStatus.json");
 		// 몬스터 데이터 파싱
