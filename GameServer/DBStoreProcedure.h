@@ -225,6 +225,29 @@ namespace SP
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
 	};	
 
+	// 캐릭터 스킬 특성 정보 가져오기
+	class CDBGameServerSkillCharacteristicGet : public CDBBind<2, 2>
+	{
+	public:
+		CDBGameServerSkillCharacteristicGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetSkillCharacteristicGet(?,?)}") {}
+		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
+		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
+		
+		void OutSkillCharacteristicIndex(int8& SkillCharacteristicIndex) { BindCol(0, SkillCharacteristicIndex); }
+		void OutSKillCharacteristicType(int16& SkillCharacteristicType) { BindCol(1, SkillCharacteristicType); }
+	};
+
+	// 캐릭터 스킬 특성 정보 업데이트 하기
+	class CDBGameServerSkillCharacteristicUpdate : public CDBBind<4, 0>
+	{
+	public:
+		CDBGameServerSkillCharacteristicUpdate(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetSkillCharacteristicUpdate(?,?,?,?)}") {}
+		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
+		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
+		void InSkillCharacteristicIndex(int8& SkillCharacteristicIndex) { BindParam(2, SkillCharacteristicIndex); }
+		void InSkillCharacteristicType(int8& SkillCharacteristicType) { BindParam(3, SkillCharacteristicType); }
+	};
+
 	// 스킬 테이블에 있는 스킬 모두 긁어옴
 	class CDBGameServerSkillGet : public CDBBind<2, 2>
 	{

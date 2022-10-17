@@ -572,7 +572,56 @@
   	]]>
 		</Body>
 	</Procedure>
-
+	
+	<!-- 스킬 특성 테이블에 있는 스킬 특성 정보 가져 오기-->
+	<Procedure name="spGetSkillCharacteristicGet">
+		<Param name="@AccountDBId" type="BigInt"/>
+		<Param name="@PlayerDBId" type="BigInt"/>
+		<Body>
+			<![CDATA[
+			SET NOCOUNT ON
+			SELECT SkillCharacteristicIndex,
+			(CASE WHEN SkillCharacteristicType = 'SKILL_CATEGORY_NONE' THEN 0
+				  WHEN SkillCharacteristicType = 'SKILL_CATEGORY_PUBLIC' THEN 1
+				  WHEN SkillCharacteristicType = 'SKILL_CATEGORY_FIGHT' THEN 2
+				  WHEN SkillCharacteristicType = 'SKILL_CATEGORY_PROTECTION' THEN 3
+				  WHEN SkillCharacteristicType = 'SKILL_CATEGORY_SPELL' THEN 4
+				  WHEN SkillCharacteristicType = 'SKILL_CATEGORY_SHOOTING' THEN 5
+				  WHEN SkillCharacteristicType = 'SKILL_CATEGORY_DISCIPLINE' THEN 6
+				  WHEN SkillCharacteristicType = 'SKILL_CATEGORY_ASSASSINATION' THEN 7
+				  ELSE ' '
+				  END)
+			FROM [dbo].[SkillCharacteristic]
+			WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
+		]]>
+		</Body>
+	</Procedure>
+	
+	<!-- 스킬 특성 테이블에 스킬 특성 업데이트 하기-->
+	<Procedure name="spGetSkillCharacteristicUpdate">
+		<Param name="@AccountDBId" type="BigInt"/>
+		<Param name="@PlayerDBId" type="BigInt"/>
+		<Param name="@SkillCharacteristicIndex" type="TinyInt"/>
+		<Param name="@SkillCharacteristicType" type="TinyInt"/>
+		<Body>
+			<![CDATA[
+				 SET NOCOUNT ON
+				 UPDATE [dbo].[SkillCharacteristic] 
+				 SET SkillCharacteristicType = (CASE WHEN @SkillCharacteristicType = 0 THEN 'SKILL_CATEGORY_NONE'
+													 WHEN @SkillCharacteristicType = 1 THEN 'SKILL_CATEGORY_PUBLIC'
+													 WHEN @SkillCharacteristicType = 2 THEN 'SKILL_CATEGORY_FIGHT'
+													 WHEN @SkillCharacteristicType = 3 THEN 'SKILL_CATEGORY_PROTECTION'
+													 WHEN @SkillCharacteristicType = 4 THEN 'SKILL_CATEGORY_SPELL'
+													 WHEN @SkillCharacteristicType = 5 THEN 'SKILL_CATEGORY_SHOOTING'
+													 WHEN @SkillCharacteristicType = 6 THEN 'SKILL_CATEGORY_DISCIPLINE'
+													 WHEN @SkillCharacteristicType = 7 THEN 'SKILL_CATEGORY_ASSASSINATION'
+													 ELSE ' '
+													 END)
+				 WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId) AND SkillCharacteristicIndex = (@SkillCharacteristicIndex)
+		]]>
+		</Body>
+	</Procedure>
+	
 	<!-- 스킬 테이블에 있는 스킬 가지고 오기 -->
 	<Procedure name="spGetSkill">
 		<Param name="@AccountDBId" type="BigInt"/>
