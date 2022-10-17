@@ -223,7 +223,7 @@ namespace SP
 		CDBGameCharacterDefaultInfoCreate(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spNewGameCharacterDefaultInfoCreate(?,?)}") {}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
-	};
+	};	
 
 	// 스킬 테이블에 있는 스킬 모두 긁어옴
 	class CDBGameServerSkillGet : public CDBBind<2, 2>
