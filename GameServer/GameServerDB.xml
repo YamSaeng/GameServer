@@ -70,12 +70,17 @@
 		</Index>
 	</Table>
 
+	<!-- 보유중인 기술 특성 테이블 -->
+	<Table name="SkillCharacteristic" desc="SkillCharacteristic Table">
+		<Column name="AccountDBId" type="BigInt" notnull ="true"/>
+		<Column name="PlayerDBId" type="BigInt"  notnull ="true"/>
+		<Column name="SkillCharacteristic" type="nvarchar(50)" notnull="true"/>
+	</Table>
+	
 	<!-- 보유중인 스킬 테이블 -->
 	<Table name="Skill" desc="Skill Table">
 		<Column name="AccountDBId" type="BigInt" notnull ="true"/>
-		<Column name="PlayerDBId" type="BigInt"  notnull ="true"/>
-		<Column name="SkillLargeCategory" type="nvarchar(50)" notnull="true"/>
-		<Column name="SkillMediumCategory" type="nvarchar(50)" noutnull="true"/>
+		<Column name="PlayerDBId" type="BigInt"  notnull ="true"/>		
 		<Column name="SkillType" type="nvarchar(50)" notnull ="true"/>
 		<Column name="SkillLevel" type="TinyInt" notnull ="true"/>
 	</Table>
@@ -86,9 +91,7 @@
 		<Column name="PlayerDBId" type="BigInt" notnull ="true"/>
 		<Column name="QuickSlotBarIndex" type="TinyInt" notnull ="true"/>
 		<Column name="QuickSlotBarSlotIndex" type="TinyInt" notnull ="true"/>
-		<Column name="QuickSlotKey" type="SmallInt"/>
-		<Column name="SkillLargeCategory" type="nvarchar(50)"/>
-		<Column name="SkillMediumCategory" type="nvarchar(50)"/>
+		<Column name="QuickSlotKey" type="SmallInt"/>		
 		<Column name="SkillType" type="nvarchar(50)"/>
 		<Column name="SkillLevel" type="TinyInt"/>
 		<Column name="ItemLargeCategory" type="nvarchar(50)"/>
@@ -269,8 +272,8 @@
 		<Body>
 			<![CDATA[
 				SET NOCOUNT ON
-				INSERT INTO [dbo].[Skill] VALUES ((@AccountID), (@PlayerID), ('SKILL_LARGE_CATEGORY_PUBLIC'), ('SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_ATTACK'), ('SKILL_DEFAULT_ATTACK'), (1))
-				INSERT INTO [dbo].[Skill] VALUES ((@AccountID), (@PlayerID), ('SKILL_LARGE_CATEGORY_PUBLIC'), ('SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_BUF'), ('SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE'), (1))									
+				INSERT INTO [dbo].[Skill] VALUES ((@AccountID), (@PlayerID), ('SKILL_DEFAULT_ATTACK'), (1))
+				INSERT INTO [dbo].[Skill] VALUES ((@AccountID), (@PlayerID), ('SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE'), (1))									
 				UPDATE [dbo].[Inventory]
 				SET ItemLargeCategory = ('ITEM_LARGE_CATEGORY_WEAPON'), ItemMediumCategory = ('ITEM_MEDIUM_CATEGORY_SWORD'), ItemSmallCategory = ('ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD'), ItemCount = (1), ItemDurability = (150), ItemEnchantPoint = (1)
 				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (0) AND ItemTileGridPositionY = (0)								
@@ -574,65 +577,31 @@
 		<Body>
 			<![CDATA[
 	    SET NOCOUNT ON
-        SELECT (CASE WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_PUBLIC' THEN 1
-	                 WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_WARRIOR' THEN 2
-					 WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_SHMAN' THEN 3
-					 WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_TAOIST' THEN 4
-					 WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_THIEF' THEN 5
-					 WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_ARCHER' THEN 6
-					 WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_MONSTER_MELEE' THEN 7
-					 WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_MONSTER_MAGIC' THEN 8
+        SELECT (CASE WHEN SkillType = 'SKILL_DEFAULT_ATTACK' THEN 1
+					 WHEN SkillType = 'SKILL_FIGHT_TWO_HAND_SWORD_MASTER' THEN 2
+					 WHEN SkillType = 'SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK' THEN 3
+					 WHEN SkillType = 'SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK' THEN 4
+					 WHEN SkillType = 'SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE' THEN 5
+					 WHEN SkillType = 'SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE' THEN 6
+					 WHEN SkillType = 'SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE' THEN 7	          
+					 WHEN SkillType = 'SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE' THEN 8
+					 WHEN SkillType = 'SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH' THEN 9
+					 WHEN SkillType = 'SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON' THEN 10
+					 WHEN SkillType = 'SKILL_SPELL_ACTIVE_ATTACK_ROOT' THEN 11
+					 WHEN SkillType = 'SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN' THEN 12
+					 WHEN SkillType = 'SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE' THEN 13
+					 WHEN SkillType = 'SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE' THEN 14
+					 WHEN SkillType = 'SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE' THEN 15
+					 WHEN SkillType = 'SKILL_SPELL_ACTIVE_BUF_TELEPORT' THEN 16
+					 WHEN SkillType = 'SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE' THEN 17
+					 WHEN SkillType = 'SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT' THEN 18
+					 WHEN SkillType = 'SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT' THEN 19
+					 WHEN SkillType = 'SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND' THEN 20          
+					 WHEN SkillType = 'SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT' THEN 21
+					 WHEN SkillType = 'SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING' THEN 22
+					 WHEN SkillType = 'SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE' THEN 23
 					 ELSE ' '
 					 END),
-		(CASE WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_ATTACK' THEN 1	          	               	         
-		      WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_BUF' THEN 2
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_PUBLIC_PASSIVE' THEN 3
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_ATTACK' THEN 4
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_BUF' THEN 5
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_FIGHT_PASSIVE' THEN 6
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_PROTECTION_ACTIVE_ATTACK' THEN 7
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_PROTECTION_ACTIVE_BUF' THEN 8
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEOGRY_PROTECTION_PASSIVE' THEN 9
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_ASSASSINATION_ACTIVE_ATTACK' THEN 10
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_ASSASSINATION_ACTIVE_BUF' THEN 11
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_ASSASSINATION_PASSIVE' THEN 12
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_ATTACK' THEN 13
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_BUF' THEN 14
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_SPELL_PASSIVE' THEN 15
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_SHOOTING_ACTIVE_ATTACK' THEN 16
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_SHOOTING_ACTIVE_BUF' THEN 17
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_SHOOTING_PASSIVE' THEN 18
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_ATTACK' THEN 19
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_HEAL' THEN 20
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_BUF' THEN 21
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_DISCIPLINE_PASSIVE' THEN 22
-	          ELSE ' '
-	          END),
-		(CASE WHEN SkillType = 'SKILL_DEFAULT_ATTACK' THEN 1
-			  WHEN SkillType = 'SKILL_FIGHT_TWO_HAND_SWORD_MASTER' THEN 2
-	          WHEN SkillType = 'SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK' THEN 3
-	          WHEN SkillType = 'SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK' THEN 4
-	          WHEN SkillType = 'SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE' THEN 5
-	          WHEN SkillType = 'SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE' THEN 6
-	          WHEN SkillType = 'SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE' THEN 7	          
-	          WHEN SkillType = 'SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE' THEN 8
-			  WHEN SkillType = 'SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH' THEN 9
-	          WHEN SkillType = 'SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON' THEN 10
-	          WHEN SkillType = 'SKILL_SPELL_ACTIVE_ATTACK_ROOT' THEN 11
-	          WHEN SkillType = 'SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN' THEN 12
-	          WHEN SkillType = 'SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE' THEN 13
-	          WHEN SkillType = 'SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE' THEN 14
-	          WHEN SkillType = 'SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE' THEN 15
-	          WHEN SkillType = 'SKILL_SPELL_ACTIVE_BUF_TELEPORT' THEN 16
-	          WHEN SkillType = 'SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE' THEN 17
-			  WHEN SkillType = 'SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT' THEN 18
-	          WHEN SkillType = 'SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT' THEN 19
-	          WHEN SkillType = 'SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND' THEN 20          
-	          WHEN SkillType = 'SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT' THEN 21
-	          WHEN SkillType = 'SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING' THEN 22
-	          WHEN SkillType = 'SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE' THEN 23
-	          ELSE ' '
-	          END),
 		SkillLevel
         FROM [dbo].[Skill]
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
@@ -643,49 +612,13 @@
 	<!-- 스킬 테이블에 새로운 스킬 넣기 -->
 	<Procedure name="spSkillToSkillBox">
 		<Param name="@AccountDBId" type="BigInt"/>
-		<Param name="@PlayerDBId" type="BigInt"/>
-		<Param name="@SkillLargeCategory" type="TinyInt"/>
-		<Param name="@SkillMediumCategory" type="TinyInt"/>
+		<Param name="@PlayerDBId" type="BigInt"/>		
 		<Param name="@SkillType" type="SmallInt"/>
 		<Param name="@SkillLevel" type="TinyInt"/>
 		<Body>
 			<![CDATA[
 	    SET NOCOUNT ON
-        INSERT INTO [dbo].[Skill] VALUES ((@AccountDBId), (@PlayerDBId),
-		(CASE WHEN @SkillLargeCategory = 1 THEN 'SKILL_LARGE_CATEGORY_PUBLIC'
-	          WHEN @SkillLargeCategory = 2 THEN 'SKILL_LARGE_CATEGORY_WARRIOR'
-	          WHEN @SkillLargeCategory = 3 THEN 'SKILL_LARGE_CATEGORY_SHMAN'
-	          WHEN @SkillLargeCategory = 4 THEN 'SKILL_LARGE_CATEGORY_TAOIST'
-	          WHEN @SkillLargeCategory = 5 THEN 'SKILL_LARGE_CATEGORY_THIEF'
-	          WHEN @SkillLargeCategory = 6 THEN 'SKILL_LARGE_CATEGORY_ARCHER'
-	          WHEN @SkillLargeCategory = 7 THEN 'SKILL_LARGE_CATEGORY_MONSTER_MELEE'
-	          WHEN @SkillLargeCategory = 8 THEN 'SKILL_LARGE_CATEGORY_MONSTER_MAGIC'
-	          ELSE ' '
-	          END),
-	    (CASE WHEN @SkillMediumCategory = 1 THEN 'SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_ATTACK'	         
-		      WHEN @SkillMediumCategory = 2 THEN 'SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_BUF'	         
-			  WHEN @SkillMediumCategory = 3 THEN 'SKILL_MEDIUM_CATEGORY_PUBLIC_PASSIVE'	         
-			  WHEN @SkillMediumCategory = 4 THEN 'SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_ATTACK'	         
-			  WHEN @SkillMediumCategory = 5 THEN 'SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_BUF'	         
-			  WHEN @SkillMediumCategory = 6 THEN 'SKILL_MEDIUM_CATEGORY_FIGHT_PASSIVE'	         
-			  WHEN @SkillMediumCategory = 7 THEN 'SKILL_MEDIUM_CATEGORY_PROTECTION_ACTIVE_ATTACK'	         
-			  WHEN @SkillMediumCategory = 8 THEN 'SKILL_MEDIUM_CATEGORY_PROTECTION_ACTIVE_BUF'	         
-			  WHEN @SkillMediumCategory = 9 THEN 'SKILL_MEDIUM_CATEOGRY_PROTECTION_PASSIVE'	         
-			  WHEN @SkillMediumCategory = 10 THEN 'SKILL_MEDIUM_CATEGORY_ASSASSINATION_ACTIVE_ATTACK'	         
-			  WHEN @SkillMediumCategory = 11 THEN 'SKILL_MEDIUM_CATEGORY_ASSASSINATION_ACTIVE_BUF'	         
-			  WHEN @SkillMediumCategory = 12 THEN 'SKILL_MEDIUM_CATEGORY_ASSASSINATION_PASSIVE'	         
-			  WHEN @SkillMediumCategory = 13 THEN 'SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_ATTACK'	         
-			  WHEN @SkillMediumCategory = 14 THEN 'SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_BUF'	         
-			  WHEN @SkillMediumCategory = 15 THEN 'SKILL_MEDIUM_CATEGORY_SPELL_PASSIVE'	         
-			  WHEN @SkillMediumCategory = 16 THEN 'SKILL_MEDIUM_CATEGORY_SHOOTING_ACTIVE_ATTACK'	         
-			  WHEN @SkillMediumCategory = 17 THEN 'SKILL_MEDIUM_CATEGORY_SHOOTING_ACTIVE_BUF'	         
-			  WHEN @SkillMediumCategory = 18 THEN 'SKILL_MEDIUM_CATEGORY_SHOOTING_PASSIVE'	         
-			  WHEN @SkillMediumCategory = 19 THEN 'SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_ATTACK'	         
-			  WHEN @SkillMediumCategory = 20 THEN 'SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_HEAL'	         
-			  WHEN @SkillMediumCategory = 21 THEN 'SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_BUF'	         
-			  WHEN @SkillMediumCategory = 22 THEN 'SKILL_MEDIUM_CATEGORY_DISCIPLINE_PASSIVE'	         
-	          ELSE ' '
-	          END),
+        INSERT INTO [dbo].[Skill] VALUES ((@AccountDBId), (@PlayerDBId),		
 		(CASE WHEN @SkillType = 1 THEN 'SKILL_DEFAULT_ATTACK'
 	          WHEN @SkillType = 2 THEN 'SKILL_FIGHT_TWO_HAND_SWORD_MASTER'
 	          WHEN @SkillType = 3 THEN 'SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK'
@@ -727,9 +660,10 @@
 			<![CDATA[   
 	    SET NOCOUNT ON
         INSERT INTO [dbo].[QuickSlotBar] 
-		VALUES ((@AccountDBId), (@PlayerDBId), (@QuickSlotBarIndex), (@QuickSlotBarSlotIndex), (@QuickSlotKey),
-		' ',
-	    ' ',
+		VALUES ((@AccountDBId), 
+		(@PlayerDBId),
+		(@QuickSlotBarIndex), (@QuickSlotBarSlotIndex),
+		(@QuickSlotKey),		
 		' ',
 		0,
 		' ',
@@ -746,9 +680,7 @@
 		<Param name="@PlayerDBId" type="BigInt"/>
 		<Param name="@QuickSlotBarIndex" type="TinyInt"/>
 		<Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
-		<Param name="@QuickSlotKey" type="SmallInt"/>
-		<Param name="@SkillLargeCategory" type="TinyInt"/>
-		<Param name="@SkillMediumCategory" type="TinyInt"/>
+		<Param name="@QuickSlotKey" type="SmallInt"/>		
 		<Param name="@SkillType" type="SmallInt"/>
 		<Param name="@SkillLevel" type="TinyInt"/>
 		<Param name="@ItemLargeCategory" type="TinyInt"/>
@@ -759,41 +691,7 @@
 			<![CDATA[
 	    SET NOCOUNT ON
         UPDATE [dbo].[QuickSlotBar] 
-		SET QuickSlotKey = (@QuickSlotKey), 
-		SkillLargeCategory = (CASE WHEN @SkillLargeCategory = 1 THEN 'SKILL_LARGE_CATEGORY_PUBLIC'
-								   WHEN @SkillLargeCategory = 2 THEN 'SKILL_LARGE_CATEGORY_WARRIOR'
-								   WHEN @SkillLargeCategory = 3 THEN 'SKILL_LARGE_CATEGORY_SHMAN'
-								   WHEN @SkillLargeCategory = 4 THEN 'SKILL_LARGE_CATEGORY_TAOIST'
-								   WHEN @SkillLargeCategory = 5 THEN 'SKILL_LARGE_CATEGORY_THIEF'
-								   WHEN @SkillLargeCategory = 6 THEN 'SKILL_LARGE_CATEGORY_ARCHER'
-								   WHEN @SkillLargeCategory = 7 THEN 'SKILL_LARGE_CATEGORY_MONSTER_MELEE'
-								   WHEN @SkillLargeCategory = 8 THEN 'SKILL_LARGE_CATEGORY_MONSTER_MAGIC'
-								   ELSE ' '
-								   END),
-	    SkillMediumCategory = (CASE WHEN @SkillMediumCategory = 1 THEN 'SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_ATTACK'									
-									WHEN @SkillMediumCategory = 2 THEN 'SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_BUF'	         
-									WHEN @SkillMediumCategory = 3 THEN 'SKILL_MEDIUM_CATEGORY_PUBLIC_PASSIVE'	         
-									WHEN @SkillMediumCategory = 4 THEN 'SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_ATTACK'	     
-									WHEN @SkillMediumCategory = 5 THEN 'SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_BUF'	         
-									WHEN @SkillMediumCategory = 6 THEN 'SKILL_MEDIUM_CATEGORY_FIGHT_PASSIVE'	         
-									WHEN @SkillMediumCategory = 7 THEN 'SKILL_MEDIUM_CATEGORY_PROTECTION_ACTIVE_ATTACK'	 
-									WHEN @SkillMediumCategory = 8 THEN 'SKILL_MEDIUM_CATEGORY_PROTECTION_ACTIVE_BUF'	     
-									WHEN @SkillMediumCategory = 9 THEN 'SKILL_MEDIUM_CATEOGRY_PROTECTION_PASSIVE'	         
-									WHEN @SkillMediumCategory = 10 THEN 'SKILL_MEDIUM_CATEGORY_ASSASSINATION_ACTIVE_ATTACK'
-									WHEN @SkillMediumCategory = 11 THEN 'SKILL_MEDIUM_CATEGORY_ASSASSINATION_ACTIVE_BUF'	 
-									WHEN @SkillMediumCategory = 12 THEN 'SKILL_MEDIUM_CATEGORY_ASSASSINATION_PASSIVE'	     
-									WHEN @SkillMediumCategory = 13 THEN 'SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_ATTACK'	     
-									WHEN @SkillMediumCategory = 14 THEN 'SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_BUF'	         
-									WHEN @SkillMediumCategory = 15 THEN 'SKILL_MEDIUM_CATEGORY_SPELL_PASSIVE'	         
-									WHEN @SkillMediumCategory = 16 THEN 'SKILL_MEDIUM_CATEGORY_SHOOTING_ACTIVE_ATTACK'	 
-									WHEN @SkillMediumCategory = 17 THEN 'SKILL_MEDIUM_CATEGORY_SHOOTING_ACTIVE_BUF'	     
-									WHEN @SkillMediumCategory = 18 THEN 'SKILL_MEDIUM_CATEGORY_SHOOTING_PASSIVE'	         
-									WHEN @SkillMediumCategory = 19 THEN 'SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_ATTACK'	 
-									WHEN @SkillMediumCategory = 20 THEN 'SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_HEAL'	 
-									WHEN @SkillMediumCategory = 21 THEN 'SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_BUF'	     
-									WHEN @SkillMediumCategory = 22 THEN 'SKILL_MEDIUM_CATEGORY_DISCIPLINE_PASSIVE'
-									ELSE ' '
-									END),
+		SET QuickSlotKey = (@QuickSlotKey), 		
 		SkillType = (CASE WHEN @SkillType = 1 THEN 'SKILL_DEFAULT_ATTACK'
 						  WHEN @SkillType = 2 THEN 'SKILL_FIGHT_TWO_HAND_SWORD_MASTER'
 						  WHEN @SkillType = 3 THEN 'SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK'
@@ -897,41 +795,8 @@
 		<Body>
 			<![CDATA[
 	    SET NOCOUNT ON
-        SELECT QuickSlotBarIndex, QuickSlotBarSlotIndex, QuickSlotKey, 
-		(CASE WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_PUBLIC' THEN 1
-	                 WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_WARRIOR' THEN 2
-					 WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_SHMAN' THEN 3
-					 WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_TAOIST' THEN 4
-					 WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_THIEF' THEN 5
-					 WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_ARCHER' THEN 6
-					 WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_MONSTER_MELEE' THEN 7
-					 WHEN SkillLargeCategory = 'SKILL_LARGE_CATEGORY_MONSTER_MAGIC' THEN 8
-					 ELSE ' '
-					 END),
-		(CASE WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_ATTACK' THEN 1	          	               	         
-		      WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_BUF' THEN 2
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_PUBLIC_PASSIVE' THEN 3
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_ATTACK' THEN 4
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_BUF' THEN 5
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_FIGHT_PASSIVE' THEN 6
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_PROTECTION_ACTIVE_ATTACK' THEN 7
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_PROTECTION_ACTIVE_BUF' THEN 8
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEOGRY_PROTECTION_PASSIVE' THEN 9
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_ASSASSINATION_ACTIVE_ATTACK' THEN 10
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_ASSASSINATION_ACTIVE_BUF' THEN 11
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_ASSASSINATION_PASSIVE' THEN 12
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_ATTACK' THEN 13
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_BUF' THEN 14
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_SPELL_PASSIVE' THEN 15
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_SHOOTING_ACTIVE_ATTACK' THEN 16
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_SHOOTING_ACTIVE_BUF' THEN 17
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_SHOOTING_PASSIVE' THEN 18
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_ATTACK' THEN 19
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_HEAL' THEN 20
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_BUF' THEN 21
-			  WHEN SkillMediumCategory = 'SKILL_MEDIUM_CATEGORY_DISCIPLINE_PASSIVE' THEN 22
-	          ELSE ' '
-	          END),
+        SELECT QuickSlotBarIndex, QuickSlotBarSlotIndex,
+		QuickSlotKey, 		
 		(CASE WHEN SkillType = 'SKILL_DEFAULT_ATTACK' THEN 1
 			  WHEN SkillType = 'SKILL_FIGHT_TWO_HAND_SWORD_MASTER' THEN 2
 	          WHEN SkillType = 'SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK' THEN 3
@@ -1038,7 +903,7 @@
 		<Body>
 			<![CDATA[
 	    SET NOCOUNT ON
-        SELECT QuickSlotKey, SkillLargeCategory, SkillMediumCategory, SkillType, SkillLevel
+        SELECT QuickSlotKey, SkillType, SkillLevel
         FROM [dbo].[QuickSlotBar]
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId) AND QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex)
       ]]>
@@ -1050,23 +915,19 @@
 		<Param name="@AccountDBId" type="BigInt"/>
 		<Param name="@PlayerDBId" type="BigInt"/>
 		<Param name="@AQuickSlotBarIndex" type="TinyInt"/>
-		<Param name="@AQuickSlotBarSlotIndex" type="TinyInt"/>
-		<Param name="@ASkillLargeCategory" type="TinyInt"/>
-		<Param name="@ASkillMediumCategory" type="TinyInt"/>
+		<Param name="@AQuickSlotBarSlotIndex" type="TinyInt"/>		
 		<Param name="@AQuickSlotSkillType" type="SmallInt"/>
 		<Param name="@AQuickSlotSkillLevel" type="TinyInt"/>
 
 		<Param name="@BQuickSlotBarIndex" type="TinyInt"/>
-		<Param name="@BQuickSlotBarSlotIndex" type="TinyInt"/>
-		<Param name="@BSkillLargeCategory" type="TinyInt"/>
-		<Param name="@BSkillMediumCategory" type="TinyInt"/>
+		<Param name="@BQuickSlotBarSlotIndex" type="TinyInt"/>		
 		<Param name="@BQuickSlotSkillType" type="SmallInt"/>
 		<Param name="@BQuickSlotSkillLevel" type="TinyInt"/>
 		<Body>
 			<![CDATA[
 	    SET NOCOUNT ON
-        UPDATE [dbo].[QuickSlotBar] SET SkillLargeCategory = (@ASkillLargeCategory), SkillMediumCategory = (@ASkillMediumCategory), SkillType = (@AQuickSlotSkillType), SkillLevel = (@AQuickSlotSkillLevel) WHERE QuickSlotBarIndex = (@AQuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@AQuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
-        UPDATE [dbo].[QuickSlotBar] SET SkillLargeCategory = (@BSkillLargeCategory), SkillMediumCategory = (@BSkillMediumCategory), SkillType = (@BQuickSlotSkillType), SkillLevel = (@BQuickSlotSkillLevel) WHERE QuickSlotBarIndex = (@BQuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@BQuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
+        UPDATE [dbo].[QuickSlotBar] SET SkillType = (@AQuickSlotSkillType), SkillLevel = (@AQuickSlotSkillLevel) WHERE QuickSlotBarIndex = (@AQuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@AQuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
+        UPDATE [dbo].[QuickSlotBar] SET SkillType = (@BQuickSlotSkillType), SkillLevel = (@BQuickSlotSkillLevel) WHERE QuickSlotBarIndex = (@BQuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@BQuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
 		</Body>
 	</Procedure>
@@ -1081,7 +942,7 @@
 			<![CDATA[
 	    SET NOCOUNT ON
         UPDATE [dbo].[QuickSlotBar]
-        SET SkillLargeCategory = 0, SkillMediumCategory = 0, SkillType = 0, SkillLevel = 0, ItemLargeCategory = 0, ItemMediumCategory = 0, ItemSmallCategory = 0, ItemCount = 0
+        SET SkillType = 0, SkillLevel = 0, ItemLargeCategory = 0, ItemMediumCategory = 0, ItemSmallCategory = 0, ItemCount = 0
         WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
 		</Body>
