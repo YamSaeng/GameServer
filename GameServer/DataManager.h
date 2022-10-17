@@ -38,6 +38,12 @@ public:
 	map<int16, st_AttackSkillInfo*> _FightAttackSkillDatas;		
 	map<int16, st_BufSkillInfo*> _FightBufSkillDatas;	
 	//------------------------------------------------------
+	// 방어 스킬 데이터
+	//------------------------------------------------------
+	map<int16, st_PassiveSkillInfo*> _ProtectionPassiveSkillDatas;
+	map<int16, st_AttackSkillInfo*> _ProtectionAttackSkillDatas;
+	map<int16, st_BufSkillInfo*> _ProtectionBufSkillDatas;
+	//------------------------------------------------------
 	// 암살 스킬 데이터
 	//------------------------------------------------------
 	map<int16, st_PassiveSkillInfo*> _AssassinationPassiveSkillDatas;
@@ -111,7 +117,7 @@ public:
 	void LoadDataMapInfo(wstring LoadFileName);
 	void LoadDataOptionInfo(wstring LoadFileName);
 
-	st_SkillInfo* FindSkillData(en_SkillMediumCategory FindSkillMediumCategory, en_SkillType FindSkillType);
+	st_SkillInfo* FindSkillData(en_SkillType FindSkillType);
 	st_ObjectStatusData* FindObjectStatusData(en_GameObjectType GameObjectType, int16 Level);
 	st_ItemInfo* FindItemData(en_SmallItemCategory FindItemCategory);	
 };

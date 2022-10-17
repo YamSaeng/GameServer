@@ -1482,7 +1482,63 @@ void CDataManager::LoadDataProtectionSkill(wstring LoadFileName)
 			{
 				for (auto& AttackSkillFiled : ActiveSkillListFiled["AttackSkill"].GetArray())
 				{
+					st_AttackSkillInfo* ProtectionAttackSkill = new st_AttackSkillInfo();
 
+					int8 SkillNumber = (int8)AttackSkillFiled["SkillNumber"].GetInt();
+					string SkillType = AttackSkillFiled["SkillType"].GetString();
+					string SkillName = AttackSkillFiled["SkillName"].GetString();
+					int8 SkillMaxLevel = AttackSkillFiled["SkillMaxLevel"].GetInt();
+					int SkillMinDamage = AttackSkillFiled["SkillMinDamage"].GetInt();
+					int SkillMaxDamage = AttackSkillFiled["SkillMaxDamage"].GetInt();
+					int SkillCoolTime = AttackSkillFiled["SkillCoolTime"].GetInt();
+					int SkillCastingTime = AttackSkillFiled["SkillCastingTime"].GetInt();
+					int64 SkillDurationTime = AttackSkillFiled["SkillDurationTime"].GetInt64();
+					int64 SkillDotTime = AttackSkillFiled["SkillDotTime"].GetInt64();
+					int SkillDistance = AttackSkillFiled["SkillDistance"].GetInt();
+					int32 SkillMotionTime = AttackSkillFiled["SkillMotionTime"].GetInt();
+					float SkillTargetEffectTime = AttackSkillFiled["SkillTargetEffectTime"].GetFloat();
+					int8 SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetInt();
+					int8 SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetInt();
+					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();
+					string SkillUpAnimation = AttackSkillFiled["SkillUpAnimation"].GetString();
+					string SkillDownAnimation = AttackSkillFiled["SkillDownAnimation"].GetString();
+					string SkillLeftAnimation = AttackSkillFiled["SkillLeftAnimation"].GetString();
+					string SkillRightAnimation = AttackSkillFiled["SkillRightAnimation"].GetString();
+					string NextComboSkill = AttackSkillFiled["NextComboSkill"].GetString();
+					string SkillExplation = AttackSkillFiled["SkillExplanation"].GetString();
+
+					if (SkillType == "SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH")
+					{
+						ProtectionAttackSkill->SkillType = en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH;
+					}					
+
+					ProtectionAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+					ProtectionAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
+					ProtectionAttackSkill->SkillMaxLevel = SkillMaxLevel;
+					ProtectionAttackSkill->SkillMinDamage = SkillMinDamage;
+					ProtectionAttackSkill->SkillMaxDamage = SkillMaxDamage;
+					ProtectionAttackSkill->SkillCoolTime = SkillCoolTime;
+					ProtectionAttackSkill->SkillCastingTime = SkillCastingTime;
+					ProtectionAttackSkill->SkillDurationTime = SkillDurationTime;
+					ProtectionAttackSkill->SkillDotTime = SkillDotTime;
+					ProtectionAttackSkill->SkillMotionTime = SkillMotionTime;
+					ProtectionAttackSkill->SkillDistance = SkillDistance;
+					ProtectionAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+					ProtectionAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
+					ProtectionAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
+
+					if (NextComboSkill == "SKILL_TYPE_NONE")
+					{
+						ProtectionAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+					}
+
+					ProtectionAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+					ProtectionAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+					ProtectionAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+					ProtectionAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
+					ProtectionAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
+
+					_ProtectionAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)ProtectionAttackSkill->SkillType, ProtectionAttackSkill));
 				}
 
 				for (auto& BufSkillFiled : ActiveSkillListFiled["BufSkill"].GetArray())
@@ -2428,57 +2484,48 @@ void CDataManager::LoadDataOptionInfo(wstring LoadFileName)
 	}
 }
 
-st_SkillInfo* CDataManager::FindSkillData(en_SkillMediumCategory FindAttackSkillMediumCategory, en_SkillType FindSkillType)
+st_SkillInfo* CDataManager::FindSkillData(en_SkillType FindSkillType)
 {
-	switch (FindAttackSkillMediumCategory)
+	switch (FindSkillType)
 	{
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE:
-		return nullptr;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_ATTACK:
+	case en_SkillType::SKILL_TYPE_NONE:
+		CRASH("None 스킬 데이터 찾기 요청");
+		break;
+	case en_SkillType::SKILL_DEFAULT_ATTACK:
 		return (*_PublicAttackSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_BUF:
+	case en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE:
 		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_PASSIVE:
-		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_ATTACK:
-		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_BUF:
-		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_PASSIVE:
-		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PROTECTION_ACTIVE_ATTACK:
-		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PROTECTION_ACTIVE_BUF:
-		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEOGRY_PROTECTION_PASSIVE:
-		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ASSASSINATION_ACTIVE_ATTACK:
-		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ASSASSINATION_ACTIVE_BUF:
-		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ASSASSINATION_PASSIVE:
-		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_ATTACK:
-		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_BUF:
-		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_PASSIVE:
-		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHOOTING_ACTIVE_ATTACK:
-		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHOOTING_ACTIVE_BUF:
-		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHOOTING_PASSIVE:
-		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_ATTACK:
-		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_HEAL:
-		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_BUF:
-		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_PASSIVE:
-		return (*_PublicBufSkillDatas.find((int16)FindSkillType)).second;
-	}
+	case en_SkillType::SKILL_FIGHT_TWO_HAND_SWORD_MASTER:
+		return (*_FightPassiveSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:		
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:		
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:		
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE:		
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
+		return (*_FightAttackSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:		
+		return (*_FightBufSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
+		return (*_ProtectionAttackSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:		
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:		
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:		
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:		
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:		
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:			
+		return (*_SpellAttackSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillType::SKILL_SPELL_ACTIVE_BUF_TELEPORT:
+		return (*_SpellBufSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:		
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:		
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:		
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:
+		return (*_DisciplineAttackSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT:
+		return (*_AssassinationAttackSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING:
+		return (*_ShootingAttackSkillDatas.find((int16)FindSkillType)).second;
+	}	
 }
 
 st_ObjectStatusData* CDataManager::FindObjectStatusData(en_GameObjectType GameObjectType, int16 Level)
