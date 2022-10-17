@@ -307,74 +307,162 @@ void CObjectManager::ItemReturn(CItem* ReturnItem)
 	}
 }
 
-st_SkillInfo* CObjectManager::SkillInfoCreate(en_SkillMediumCategory SkillMediumCategory)
+st_SkillInfo* CObjectManager::SkillInfoCreate(en_SkillType SkillType, st_SkillInfo* SkillInfoData, int8 SkillLevel)
 {
-	switch (SkillMediumCategory)
+	st_SkillInfo* NewSkillInfo = nullptr;
+
+	switch (SkillType)
 	{
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_PASSIVE:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_PASSIVE:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEOGRY_PROTECTION_PASSIVE:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ASSASSINATION_PASSIVE:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_PASSIVE:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHOOTING_PASSIVE:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_PASSIVE:
-		return _PassiveSkillInfoMemoryPool->Alloc();
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_ATTACK:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_ATTACK:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PROTECTION_ACTIVE_ATTACK:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ASSASSINATION_ACTIVE_ATTACK:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_ATTACK:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHOOTING_ACTIVE_ATTACK:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_ATTACK:
-		return _AttackSkillInfoMemoryPool->Alloc();		
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_HEAL:	
-		return _HealSkillInfoMemoryPool->Alloc();	
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_BUF:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_BUF:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PROTECTION_ACTIVE_BUF:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ASSASSINATION_ACTIVE_BUF:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_BUF:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHOOTING_ACTIVE_BUF:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_BUF:
-		return _BufSkillInfoMemoryPool->Alloc();
-	}
+	case en_SkillType::SKILL_TYPE_NONE:
+		CRASH("None 스킬 데이터 찾기 요청");
+		break;
+	case en_SkillType::SKILL_FIGHT_TWO_HAND_SWORD_MASTER:
+		NewSkillInfo = _PassiveSkillInfoMemoryPool->Alloc();		
+		break;		
+	case en_SkillType::SKILL_DEFAULT_ATTACK:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
+	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT:
+	case en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING:
+		{
+			st_AttackSkillInfo* NewAttackSkillInfo = _AttackSkillInfoMemoryPool->Alloc();
+			*NewAttackSkillInfo = *((st_AttackSkillInfo*)SkillInfoData);
+			NewAttackSkillInfo->SkillLevel = SkillLevel;
+			
+			TCHAR SkillExplanationMessage[256] = L"0";
+
+			switch (SkillType)
+			{
+			case en_SkillType::SKILL_DEFAULT_ATTACK:
+				wsprintf(SkillExplanationMessage, NewAttackSkillInfo->SkillExplanation.c_str());
+				break;
+			case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
+			case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
+			case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:
+				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewAttackSkillInfo->SkillExplanation.c_str(), NewAttackSkillInfo->SkillDistance, NewAttackSkillInfo->SkillMinDamage, NewAttackSkillInfo->SkillMaxDamage);
+				break;
+			case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
+				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewAttackSkillInfo->SkillExplanation.c_str(), NewAttackSkillInfo->SkillMinDamage, NewAttackSkillInfo->SkillMaxDamage);
+				break;
+			case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE:
+			case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
+				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewAttackSkillInfo->SkillExplanation.c_str(), NewAttackSkillInfo->SkillDistance, NewAttackSkillInfo->SkillDurationTime / 1000.0f, NewAttackSkillInfo->SkillMinDamage, NewAttackSkillInfo->SkillMaxDamage);
+				break;
+			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:
+				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewAttackSkillInfo->SkillExplanation.c_str(), NewAttackSkillInfo->SkillDistance, NewAttackSkillInfo->SkillMinDamage, NewAttackSkillInfo->SkillMaxDamage);
+				break;
+			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:
+				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewAttackSkillInfo->SkillExplanation.c_str(), NewAttackSkillInfo->SkillDistance, NewAttackSkillInfo->SkillDurationTime / 1000.0f);
+				break;
+			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
+				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewAttackSkillInfo->SkillExplanation.c_str(), NewAttackSkillInfo->SkillDistance, NewAttackSkillInfo->SkillMinDamage, NewAttackSkillInfo->SkillMaxDamage, NewAttackSkillInfo->SkillDebufMovingSpeed, NewAttackSkillInfo->SkillDurationTime / 1000.0f);
+				break;
+			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:
+				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewAttackSkillInfo->SkillExplanation.c_str(), NewAttackSkillInfo->SkillDistance, NewAttackSkillInfo->SkillMinDamage, NewAttackSkillInfo->SkillMaxDamage);
+				break;
+			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
+				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewAttackSkillInfo->SkillExplanation.c_str(), NewAttackSkillInfo->SkillDistance, NewAttackSkillInfo->SkillMinDamage, NewAttackSkillInfo->SkillMaxDamage, NewAttackSkillInfo->SkillDurationTime / 1000.0f);
+				break;
+			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:
+				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewAttackSkillInfo->SkillExplanation.c_str(), NewAttackSkillInfo->SkillDistance, NewAttackSkillInfo->SkillMinDamage, NewAttackSkillInfo->SkillMaxDamage);
+				break;
+			case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
+				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewAttackSkillInfo->SkillExplanation.c_str(), NewAttackSkillInfo->SkillDistance, NewAttackSkillInfo->SkillMinDamage, NewAttackSkillInfo->SkillMaxDamage);
+				break;
+			case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:
+				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewAttackSkillInfo->SkillExplanation.c_str(), NewAttackSkillInfo->SkillDistance, NewAttackSkillInfo->SkillDurationTime / 1000.0f);
+				break;
+			}
+
+			NewSkillInfo->SkillExplanation = SkillExplanationMessage;
+
+			NewSkillInfo = NewAttackSkillInfo;
+		}
+		break;		
+	case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
+	case en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE:
+	case en_SkillType::SKILL_SPELL_ACTIVE_BUF_TELEPORT:
+		{
+			st_BufSkillInfo* NewBufSkillInfo = _BufSkillInfoMemoryPool->Alloc();;
+			*NewBufSkillInfo = *((st_BufSkillInfo*)SkillInfoData);
+			NewBufSkillInfo->SkillLevel = SkillLevel;
+
+			TCHAR SkillExplanationMessage[256] = L"0";
+
+			switch (SkillType)
+			{
+			case en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE:
+				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewBufSkillInfo->SkillExplanation.c_str(), NewBufSkillInfo->SkillDurationTime / 1000.0f);
+				break;
+			case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
+				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewBufSkillInfo->SkillExplanation.c_str(), NewBufSkillInfo->IncreaseMaxAttackPoint, NewBufSkillInfo->SkillDurationTime / 1000.0f);
+				break;
+			}
+
+			NewSkillInfo->SkillExplanation = SkillExplanationMessage;
+
+			NewSkillInfo = NewBufSkillInfo;
+		}
+		break;
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:
+		return _HealSkillInfoMemoryPool->Alloc();
+	}		
+
+	return NewSkillInfo;
 }
 
-void CObjectManager::SkillInfoReturn(en_SkillMediumCategory SkillMediumCategory, st_SkillInfo* ReturnSkillInfo)
+void CObjectManager::SkillInfoReturn(en_SkillType SkillType, st_SkillInfo* ReturnSkillInfo)
 {
-	switch (SkillMediumCategory)
+	switch (SkillType)
 	{
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_PASSIVE:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_PASSIVE:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEOGRY_PROTECTION_PASSIVE:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ASSASSINATION_PASSIVE:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_PASSIVE:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHOOTING_PASSIVE:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_PASSIVE:		
+	case en_SkillType::SKILL_TYPE_NONE:
+		CRASH("None 스킬 데이터 찾기 요청");
+		break;
+	case en_SkillType::SKILL_FIGHT_TWO_HAND_SWORD_MASTER:
 		_PassiveSkillInfoMemoryPool->Free((st_PassiveSkillInfo*)ReturnSkillInfo);
 		break;
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_ATTACK:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_ATTACK:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PROTECTION_ACTIVE_ATTACK:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ASSASSINATION_ACTIVE_ATTACK:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_ATTACK:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHOOTING_ACTIVE_ATTACK:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_ATTACK:
+	case en_SkillType::SKILL_DEFAULT_ATTACK:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
+	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT:
+	case en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING:
 		_AttackSkillInfoMemoryPool->Free((st_AttackSkillInfo*)ReturnSkillInfo);
-		break;		
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_HEAL:	
-		_HealSkillInfoMemoryPool->Free((st_HealSkillInfo*)ReturnSkillInfo);
-		break;	
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_BUF:	
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_BUF:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PROTECTION_ACTIVE_BUF:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ASSASSINATION_ACTIVE_BUF:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_BUF:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHOOTING_ACTIVE_BUF:
-	case en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_BUF:
+		break;
+	case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
+	case en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE:
+	case en_SkillType::SKILL_SPELL_ACTIVE_BUF_TELEPORT:
 		_BufSkillInfoMemoryPool->Free((st_BufSkillInfo*)ReturnSkillInfo);
 		break;
-	}
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:
+		_HealSkillInfoMemoryPool->Free((st_HealSkillInfo*)ReturnSkillInfo);
+		break;
+	}	
 }
 
 void CObjectManager::MapObjectSpawn(int64& MapID)
