@@ -81,7 +81,8 @@
 	<!-- 보유중인 스킬 테이블 -->
 	<Table name="Skill" desc="Skill Table">
 		<Column name="AccountDBId" type="BigInt" notnull ="true"/>
-		<Column name="PlayerDBId" type="BigInt"  notnull ="true"/>		
+		<Column name="PlayerDBId" type="BigInt"  notnull ="true"/>
+		<Column name="CharacteristicType" type="nvarchar(50)" notnull ="true"/>
 		<Column name="SkillType" type="nvarchar(50)" notnull ="true"/>
 		<Column name="SkillLevel" type="TinyInt" notnull ="true"/>
 	</Table>
@@ -92,7 +93,8 @@
 		<Column name="PlayerDBId" type="BigInt" notnull ="true"/>
 		<Column name="QuickSlotBarIndex" type="TinyInt" notnull ="true"/>
 		<Column name="QuickSlotBarSlotIndex" type="TinyInt" notnull ="true"/>
-		<Column name="QuickSlotKey" type="SmallInt"/>		
+		<Column name="QuickSlotKey" type="SmallInt"/>
+		<Column name="CharacteristicType" type="nvarchar(50)" notnull ="true"/>
 		<Column name="SkillType" type="nvarchar(50)"/>
 		<Column name="SkillLevel" type="TinyInt"/>
 		<Column name="ItemLargeCategory" type="nvarchar(50)"/>
@@ -626,6 +628,7 @@
 	<Procedure name="spGetSkill">
 		<Param name="@AccountDBId" type="BigInt"/>
 		<Param name="@PlayerDBId" type="BigInt"/>
+		<Param name="@CharacteristicType" type="TinyInt"/>
 		<Body>
 			<![CDATA[
 	    SET NOCOUNT ON
@@ -654,9 +657,9 @@
 					 WHEN SkillType = 'SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE' THEN 23
 					 ELSE ' '
 					 END),
-		SkillLevel
+		SkillLevel			   
         FROM [dbo].[Skill]
-        WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
+        WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId) AND CharacteristicType = (@CharacteristicType)
       ]]>
 		</Body>
 	</Procedure>
@@ -664,13 +667,23 @@
 	<!-- 스킬 테이블에 새로운 스킬 넣기 -->
 	<Procedure name="spSkillToSkillBox">
 		<Param name="@AccountDBId" type="BigInt"/>
-		<Param name="@PlayerDBId" type="BigInt"/>		
+		<Param name="@PlayerDBId" type="BigInt"/>
+		<Param name="@CharacteristicType" type="TinyInt"/>
 		<Param name="@SkillType" type="SmallInt"/>
 		<Param name="@SkillLevel" type="TinyInt"/>
 		<Body>
 			<![CDATA[
 	    SET NOCOUNT ON
-        INSERT INTO [dbo].[Skill] VALUES ((@AccountDBId), (@PlayerDBId),		
+        INSERT INTO [dbo].[Skill] VALUES ((@AccountDBId), (@PlayerDBId),
+		(CASE WHEN @CharacteristicType = 1 THEN 'SKILL_CATEGORY_PUBLIC'
+			  WHEN @CharacteristicType = 2 THEN 'SKILL_CATEGORY_FIGHT'
+			  WHEN @CharacteristicType = 3 THEN 'SKILL_CATEGORY_PROTECTION'
+			  WHEN @CharacteristicType = 4 THEN 'SKILL_CATEGORY_SPELL'
+			  WHEN @CharacteristicType = 5 THEN 'SKILL_CATEGORY_SHOOTING'
+			  WHEN @CharacteristicType = 6 THEN 'SKILL_CATEGORY_DISCIPLINE'
+			  WHEN @CharacteristicType = 7 THEN 'SKILL_CATEGORY_ASSASSINATION'
+		      ELSE ' '
+			  END),
 		(CASE WHEN @SkillType = 1 THEN 'SKILL_DEFAULT_ATTACK'
 	          WHEN @SkillType = 2 THEN 'SKILL_FIGHT_TWO_HAND_SWORD_MASTER'
 	          WHEN @SkillType = 3 THEN 'SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK'
@@ -702,7 +715,7 @@
 	</Procedure>
 
 	<!-- 퀵슬롯바 테이블에 새로운 퀵슬롯바 슬롯 생성 -->
-	<Procedure name="spQuickSlotBarSlotInit">
+	<Procedure name="CDBGameServerQuickSlotBarSlotCreate">
 		<Param name="@AccountDBId" type="BigInt"/>
 		<Param name="@PlayerDBId" type="BigInt"/>
 		<Param name="@QuickSlotBarIndex" type="TinyInt"/>
@@ -715,12 +728,13 @@
 		VALUES ((@AccountDBId), 
 		(@PlayerDBId),
 		(@QuickSlotBarIndex), (@QuickSlotBarSlotIndex),
-		(@QuickSlotKey),		
-		' ',
+		(@QuickSlotKey),
+		'SKILL_CATEGORY_NONE',
+		'SKILL_TYPE_NONE',
 		0,
-		' ',
-		' ',
-		' ',
+		'ITEM_LARGE_CATEGORY_NONE',
+		'ITEM_MEDIUM_CATEGORY_NONE',
+		'ITEM_SMALL_CATEGORY_NONE',
 		0)
       ]]>
 		</Body>
@@ -732,7 +746,8 @@
 		<Param name="@PlayerDBId" type="BigInt"/>
 		<Param name="@QuickSlotBarIndex" type="TinyInt"/>
 		<Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
-		<Param name="@QuickSlotKey" type="SmallInt"/>		
+		<Param name="@QuickSlotKey" type="SmallInt"/>
+		<Param name="@CharacteristicType" type="TinyInt"/>
 		<Param name="@SkillType" type="SmallInt"/>
 		<Param name="@SkillLevel" type="TinyInt"/>
 		<Param name="@ItemLargeCategory" type="TinyInt"/>
@@ -743,8 +758,19 @@
 			<![CDATA[
 	    SET NOCOUNT ON
         UPDATE [dbo].[QuickSlotBar] 
-		SET QuickSlotKey = (@QuickSlotKey), 		
-		SkillType = (CASE WHEN @SkillType = 1 THEN 'SKILL_DEFAULT_ATTACK'
+		SET QuickSlotKey = (@QuickSlotKey),
+		CharacteristicType = (CASE WHEN CharacteristicType = 0 THEN 'SKILL_CATEGORY_NONE'
+								   WHEN CharacteristicType = 1 THEN 'SKILL_CATEGORY_PUBLIC'
+								   WHEN CharacteristicType = 2 THEN 'SKILL_CATEGORY_FIGHT'
+								   WHEN CharacteristicType = 3 THEN 'SKILL_CATEGORY_PROTECTION'
+								   WHEN CharacteristicType = 4 THEN 'SKILL_CATEGORY_SPELL'
+								   WHEN CharacteristicType = 5 THEN 'SKILL_CATEGORY_SHOOTING'
+								   WHEN CharacteristicType = 6 THEN 'SKILL_CATEGORY_DISCIPLINE'
+								   WHEN CharacteristicType = 7 THEN 'SKILL_CATEGORY_ASSASSINATION'
+								   ELSE ' '
+								   END),
+		SkillType = (CASE WHEN @SkillType = 0 THEN 'SKILL_TYPE_NONE'
+						  WHEN @SkillType = 1 THEN 'SKILL_DEFAULT_ATTACK'
 						  WHEN @SkillType = 2 THEN 'SKILL_FIGHT_TWO_HAND_SWORD_MASTER'
 						  WHEN @SkillType = 3 THEN 'SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK'
 						  WHEN @SkillType = 4 THEN 'SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK'
@@ -770,7 +796,8 @@
 						  ELSE ' '
 						  END),
 		SkillLevel = (@SkillLevel),
-		ItemLargeCategory = (CASE WHEN @ItemLargeCategory = 1 THEN 'ITEM_LARGE_CATEGORY_ARCHITECTURE'
+		ItemLargeCategory = (CASE WHEN @ItemLargeCategory = 0 THEN 'ITEM_LARGE_CATEGORY_NONE'
+								  WHEN @ItemLargeCategory = 1 THEN 'ITEM_LARGE_CATEGORY_ARCHITECTURE'
 	                              WHEN @ItemLargeCategory = 2 THEN 'ITEM_LARGE_CATEGORY_WEAPON'
 	                              WHEN @ItemLargeCategory = 3 THEN 'ITEM_LARGE_CATEGORY_ARMOR'
 	                              WHEN @ItemLargeCategory = 4 THEN 'ITEM_LARGE_CATEGORY_FOOD'
@@ -780,7 +807,8 @@
 	                              WHEN @ItemLargeCategory = 8 THEN 'ITEM_LARGE_CATEGORY_CROP'
 	                              ELSE ' '
                          	      END),
-		ItemMediumCategory = (CASE WHEN @ItemMediumCategory = 1 THEN 'ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE'
+		ItemMediumCategory = (CASE WHEN @ItemMediumCategory = 0 THEN 'ITEM_MEDIUM_CATEGORY_NONE'
+		                           WHEN @ItemMediumCategory = 1 THEN 'ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE'
 	                               WHEN @ItemMediumCategory = 2 THEN 'ITEM_MEDIUM_CATEGORY_SWORD'
 	                               WHEN @ItemMediumCategory = 3 THEN 'ITEM_MEDIUM_CATEGORY_SHIELD'
 	                               WHEN @ItemMediumCategory = 4 THEN 'ITEM_MEDIUM_CATEGORY_HAT'
@@ -793,7 +821,8 @@
 	                               WHEN @ItemMediumCategory = 11 THEN 'ITEM_MEDIUM_CATEGORY_CROP_FRUIT'
 	                               ELSE ' '
 	                               END),
-		ItemSmallCategory = (CASE WHEN @ItemSmallCategory = 1 THEN 'ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD'
+		ItemSmallCategory = (CASE WHEN @ItemSmallCategory = 0 THEN 'ITEM_SMALL_CATEGORY_NONE'
+		                          WHEN @ItemSmallCategory = 1 THEN 'ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD'
 	                              WHEN @ItemSmallCategory = 2 THEN 'ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD'
 								  WHEN @ItemSmallCategory = 3 THEN 'ITEM_SMALL_CATEGORY_TOOL_FARMING_SHOVEL'
 	                              WHEN @ItemSmallCategory = 100 THEN 'ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER'
@@ -848,8 +877,19 @@
 			<![CDATA[
 	    SET NOCOUNT ON
         SELECT QuickSlotBarIndex, QuickSlotBarSlotIndex,
-		QuickSlotKey, 		
-		(CASE WHEN SkillType = 'SKILL_DEFAULT_ATTACK' THEN 1
+		QuickSlotKey, 	
+		(CASE WHEN CharacteristicType 'SKILL_CATEGORY_NONE' THEN 0
+			  WHEN CharacteristicType 'SKILL_CATEGORY_PUBLIC' THEN 1
+			  WHEN CharacteristicType 'SKILL_CATEGORY_FIGHT' THEN 2
+			  WHEN CharacteristicType 'SKILL_CATEGORY_PROTECTION' THEN 3
+			  WHEN CharacteristicType 'SKILL_CATEGORY_SPELL' THEN 4
+			  WHEN CharacteristicType 'SKILL_CATEGORY_SHOOTING' THEN 5
+			  WHEN CharacteristicType 'SKILL_CATEGORY_DISCIPLINE' THEN 6
+			  WHEN CharacteristicType 'SKILL_CATEGORY_ASSASSINATION' THEN 7
+		      ELSE ' '
+			  END)
+		(CASE WHEN SkillType = 'SKILL_TYPE_NONE' THEN 0
+			  WHEN SkillType = 'SKILL_DEFAULT_ATTACK' THEN 1
 			  WHEN SkillType = 'SKILL_FIGHT_TWO_HAND_SWORD_MASTER' THEN 2
 	          WHEN SkillType = 'SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK' THEN 3
 	          WHEN SkillType = 'SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK' THEN 4
@@ -875,7 +915,8 @@
 	          ELSE ' '
 	          END), 
 		SkillLevel, 
-		(CASE WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_ARCHITECTURE1' THEN 1
+		(CASE WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_NONE' THEN 0
+			  WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_ARCHITECTURE1' THEN 1
 	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_WEAPON' THEN 2
 	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_ARMOR' THEN 3
 	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_FOOD' THEN 4
@@ -885,7 +926,8 @@
 	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_CROP' THEN 8
 	          ELSE ' '
               END),
-		(CASE WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE' THEN 1
+		(CASE WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_NONE' THEN 0
+		      WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE' THEN 1
 	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_SWORD' THEN 2
 	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_SHIELD' THEN 3
 	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_HAT' THEN 4
@@ -898,7 +940,8 @@
 	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_CROP_FRUIT' THEN 11
 	          ELSE ' '
 	          END),
-		(CASE WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD' THEN 1
+		(CASE WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_NONE' THEN 0
+		      WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD' THEN 1
 	          WHEN ItemSmallCategory = 'ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD' THEN 2
 			  WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_TOOL_FARMING_SHOVEL' THEN 3
 	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER' THEN 100
@@ -944,45 +987,7 @@
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
 		</Body>
-	</Procedure>
-
-	<!-- 퀵슬롯바 테이블에 퀵슬롯이 있는지 확인하기 -->
-	<Procedure name="spQuickSlotCheck">
-		<Param name="@AccountDBId" type="BigInt"/>
-		<Param name="@PlayerDBId" type="BigInt"/>
-		<Param name="@QuickSlotBarIndex" type="TinyInt"/>
-		<Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
-		<Body>
-			<![CDATA[
-	    SET NOCOUNT ON
-        SELECT QuickSlotKey, SkillType, SkillLevel
-        FROM [dbo].[QuickSlotBar]
-        WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId) AND QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex)
-      ]]>
-		</Body>
-	</Procedure>
-
-	<!-- 퀵슬롯바 테이블에서 퀵슬롯바 슬롯 스왑 -->
-	<Procedure name="spQuickSlotSwap">
-		<Param name="@AccountDBId" type="BigInt"/>
-		<Param name="@PlayerDBId" type="BigInt"/>
-		<Param name="@AQuickSlotBarIndex" type="TinyInt"/>
-		<Param name="@AQuickSlotBarSlotIndex" type="TinyInt"/>		
-		<Param name="@AQuickSlotSkillType" type="SmallInt"/>
-		<Param name="@AQuickSlotSkillLevel" type="TinyInt"/>
-
-		<Param name="@BQuickSlotBarIndex" type="TinyInt"/>
-		<Param name="@BQuickSlotBarSlotIndex" type="TinyInt"/>		
-		<Param name="@BQuickSlotSkillType" type="SmallInt"/>
-		<Param name="@BQuickSlotSkillLevel" type="TinyInt"/>
-		<Body>
-			<![CDATA[
-	    SET NOCOUNT ON
-        UPDATE [dbo].[QuickSlotBar] SET SkillType = (@AQuickSlotSkillType), SkillLevel = (@AQuickSlotSkillLevel) WHERE QuickSlotBarIndex = (@AQuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@AQuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
-        UPDATE [dbo].[QuickSlotBar] SET SkillType = (@BQuickSlotSkillType), SkillLevel = (@BQuickSlotSkillLevel) WHERE QuickSlotBarIndex = (@BQuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@BQuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
-      ]]>
-		</Body>
-	</Procedure>
+	</Procedure>		
 
 	<!-- 퀵슬롯바 테이블에서 퀵슬롯바 슬롯 초기화-->
 	<Procedure name="spQuickSlotInit">
@@ -994,7 +999,7 @@
 			<![CDATA[
 	    SET NOCOUNT ON
         UPDATE [dbo].[QuickSlotBar]
-        SET SkillType = 0, SkillLevel = 0, ItemLargeCategory = 0, ItemMediumCategory = 0, ItemSmallCategory = 0, ItemCount = 0
+        SET CharacteristicType = 'SKILL_CATEGORY_NONE', SkillType = 'SKILL_TYPE_NONE', SkillLevel = 0, ItemLargeCategory = 'ITEM_LARGE_CATEGORY_NONE', ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_NONE', ItemSmallCategory = 'ITEM_SMALL_CATEGORY_NONE', ItemCount = 0
         WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
 		</Body>
