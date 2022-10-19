@@ -20,9 +20,7 @@ void CSkillCharacteristic::SkillCharacteristicInit(en_SkillCharacteristic SkillC
 	switch (SkillCharacteristic)
 	{	
 	case en_SkillCharacteristic::SKILL_CATEGORY_NONE:
-		break;
-	case en_SkillCharacteristic::SKILL_CATEGORY_PUBLIC:
-		break;
+		break;	
 	case en_SkillCharacteristic::SKILL_CATEGORY_FIGHT:
 		{
 			int16 StartFightPassiveSkillType = (int16)en_SkillType::SKILL_FIGHT_TWO_HAND_SWORD_MASTER;
@@ -55,16 +53,95 @@ void CSkillCharacteristic::SkillCharacteristicInit(en_SkillCharacteristic SkillC
 		}
 		break;
 	case en_SkillCharacteristic::SKILL_CATEGORY_PROTECTION:
+		{
+			int16 StartFightPassiveSkillType = (int16)en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH;
+			int16 EndFightPassiveSkillType = (int16)en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON;
+
+			for (int16 i = StartFightPassiveSkillType; i < EndFightPassiveSkillType; i++)
+			{
+				CSkill* ActiveSkill = G_ObjectManager->SkillCreate();
+
+				st_SkillInfo* ActiveSkillInfo = G_Datamanager->FindSkillData((en_SkillType)i);
+				ActiveSkill->SetSkillInfo(en_SkillCategory::QUICK_SLOT_SKILL_COOLTIME, ActiveSkillInfo);
+
+				_ActiveSkills.push_back(ActiveSkill);
+			}
+		}
 		break;
 	case en_SkillCharacteristic::SKILL_CATEGORY_SPELL:
+		{
+			int16 StartFightPassiveSkillType = (int16)en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON;
+			int16 EndFightPassiveSkillType = (int16)en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE;
+
+			for (int16 i = StartFightPassiveSkillType; i < EndFightPassiveSkillType; i++)
+			{
+				CSkill* ActiveSkill = G_ObjectManager->SkillCreate();
+
+				st_SkillInfo* ActiveSkillInfo = G_Datamanager->FindSkillData((en_SkillType)i);
+				ActiveSkill->SetSkillInfo(en_SkillCategory::QUICK_SLOT_SKILL_COOLTIME, ActiveSkillInfo);
+
+				_ActiveSkills.push_back(ActiveSkill);
+			}
+		}
 		break;
 	case en_SkillCharacteristic::SKILL_CATEGORY_SHOOTING:
+		{
+			int16 StartFightPassiveSkillType = (int16)en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING;
+			int16 EndFightPassiveSkillType = (int16)en_SkillType::SKILL_SLIME_NORMAL;
+
+			for (int16 i = StartFightPassiveSkillType; i < EndFightPassiveSkillType; i++)
+			{
+				CSkill* ActiveSkill = G_ObjectManager->SkillCreate();
+
+				st_SkillInfo* ActiveSkillInfo = G_Datamanager->FindSkillData((en_SkillType)i);
+				ActiveSkill->SetSkillInfo(en_SkillCategory::QUICK_SLOT_SKILL_COOLTIME, ActiveSkillInfo);
+
+				_ActiveSkills.push_back(ActiveSkill);
+			}
+		}
 		break;
 	case en_SkillCharacteristic::SKILL_CATEGORY_DISCIPLINE:
+		{
+			int16 StartFightPassiveSkillType = (int16)en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE;
+			int16 EndFightPassiveSkillType = (int16)en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT;
+
+			for (int16 i = StartFightPassiveSkillType; i < EndFightPassiveSkillType; i++)
+			{
+				CSkill* ActiveSkill = G_ObjectManager->SkillCreate();
+
+				st_SkillInfo* ActiveSkillInfo = G_Datamanager->FindSkillData((en_SkillType)i);
+				ActiveSkill->SetSkillInfo(en_SkillCategory::QUICK_SLOT_SKILL_COOLTIME, ActiveSkillInfo);
+
+				_ActiveSkills.push_back(ActiveSkill);
+			}
+		}
 		break;
 	case en_SkillCharacteristic::SKILL_CATEGORY_ASSASSINATION:
-		break;	
+		{
+			int16 StartFightPassiveSkillType = (int16)en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT;
+			int16 EndFightPassiveSkillType = (int16)en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING;
+	
+			for (int16 i = StartFightPassiveSkillType; i < EndFightPassiveSkillType; i++)
+			{
+				CSkill* ActiveSkill = G_ObjectManager->SkillCreate();
+	
+				st_SkillInfo* ActiveSkillInfo = G_Datamanager->FindSkillData((en_SkillType)i);
+				ActiveSkill->SetSkillInfo(en_SkillCategory::QUICK_SLOT_SKILL_COOLTIME, ActiveSkillInfo);
+	
+				_ActiveSkills.push_back(ActiveSkill);
+			}
+		}
+		break;
 	}	
+}
+
+void CSkillCharacteristic::SkillCharacteristicActive(en_SkillType SkillType, int8 SkillLevel)
+{
+	CSkill* ActiveSkill = FindSkill(SkillType);
+	if (ActiveSkill != nullptr)
+	{
+		ActiveSkill->GetSkillInfo()->IsSkillLearn = true;
+	}
 }
 
 CSkill* CSkillCharacteristic::FindSkill(en_SkillType FindSkillType)
