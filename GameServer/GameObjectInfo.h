@@ -348,6 +348,7 @@ enum class en_SkillType : int16
 
 enum class en_SkillCategory : int8
 {
+	PASSIVE_SKILL,
 	QUICK_SLOT_SKILL_COOLTIME,
 	STATUS_ABNORMAL_SKILL,
 	COMBO_SKILL
@@ -2414,7 +2415,8 @@ struct st_ItemInfo
 struct st_SkillInfo
 {
 	bool IsSkillLearn;       // 스킬을 배웠는지에 대한 여부
-	bool CanSkillUse;		 // 스킬을 사용 할 수 있는지 여부		
+	bool CanSkillUse;		 // 스킬을 사용 할 수 있는지 여부
+	en_SkillCharacteristic SkillCharacteristic; // 스킬 특성
 	en_SkillLargeCategory SkillLargeCategory; // 스킬 대분류
 	en_SkillMediumCategory SkillMediumCategory; // 스킬 중분류
 	en_SkillType SkillType;	 // 스킬 종류
@@ -2439,6 +2441,7 @@ struct st_SkillInfo
 		IsSkillLearn = false;
 		CanSkillUse = true;
 		SkillNumber = 0;
+		SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_NONE;
 		SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_NONE;
 		SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
 		SkillType = en_SkillType::SKILL_TYPE_NONE;
