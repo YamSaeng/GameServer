@@ -307,11 +307,11 @@ void CObjectManager::ItemReturn(CItem* ReturnItem)
 	}
 }
 
-st_SkillInfo* CObjectManager::SkillInfoCreate(en_SkillType SkillType, st_SkillInfo* SkillInfoData, int8 SkillLevel)
+st_SkillInfo* CObjectManager::SkillInfoCreate(st_SkillInfo* SkillInfoData, int8 SkillLevel)
 {
 	st_SkillInfo* NewSkillInfo = nullptr;
 
-	switch (SkillType)
+	switch (SkillInfoData->SkillType)
 	{
 	case en_SkillType::SKILL_TYPE_NONE:
 		CRASH("None 스킬 데이터 찾기 요청");
@@ -343,7 +343,7 @@ st_SkillInfo* CObjectManager::SkillInfoCreate(en_SkillType SkillType, st_SkillIn
 			
 			TCHAR SkillExplanationMessage[256] = L"0";
 
-			switch (SkillType)
+			switch (NewAttackSkillInfo->SkillType)
 			{
 			case en_SkillType::SKILL_DEFAULT_ATTACK:
 				wsprintf(SkillExplanationMessage, NewAttackSkillInfo->SkillExplanation.c_str());
@@ -386,7 +386,7 @@ st_SkillInfo* CObjectManager::SkillInfoCreate(en_SkillType SkillType, st_SkillIn
 				break;
 			}
 
-			NewSkillInfo->SkillExplanation = SkillExplanationMessage;
+			NewAttackSkillInfo->SkillExplanation = SkillExplanationMessage;			
 
 			NewSkillInfo = NewAttackSkillInfo;
 		}
@@ -401,7 +401,7 @@ st_SkillInfo* CObjectManager::SkillInfoCreate(en_SkillType SkillType, st_SkillIn
 
 			TCHAR SkillExplanationMessage[256] = L"0";
 
-			switch (SkillType)
+			switch (NewBufSkillInfo->SkillType)
 			{
 			case en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE:
 				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewBufSkillInfo->SkillExplanation.c_str(), NewBufSkillInfo->SkillDurationTime / 1000.0f);
@@ -411,7 +411,7 @@ st_SkillInfo* CObjectManager::SkillInfoCreate(en_SkillType SkillType, st_SkillIn
 				break;
 			}
 
-			NewSkillInfo->SkillExplanation = SkillExplanationMessage;
+			NewBufSkillInfo->SkillExplanation = SkillExplanationMessage;
 
 			NewSkillInfo = NewBufSkillInfo;
 		}
