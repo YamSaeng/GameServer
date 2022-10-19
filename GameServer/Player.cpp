@@ -161,7 +161,8 @@ void CPlayer::Update()
 		{
 			DeleteBuf(BufSkillIterator.first);
 			// 강화효과 스킬 정보 메모리 반납
-			G_ObjectManager->SkillInfoReturn(BufSkillIterator.second->GetSkillInfo()->SkillMediumCategory, BufSkillIterator.second->GetSkillInfo());
+			G_ObjectManager->SkillInfoReturn(BufSkillIterator.second->GetSkillInfo()->SkillType,
+				BufSkillIterator.second->GetSkillInfo());
 			// 강화효과 스킬 메모리 반납
 			G_ObjectManager->SkillReturn(BufSkillIterator.second);
 		}
@@ -176,7 +177,8 @@ void CPlayer::Update()
 		{
 			DeleteDebuf(DebufSkillIterator.first);
 			// 약화효과 스킬 정보 메모리 반납
-			G_ObjectManager->SkillInfoReturn(DebufSkillIterator.second->GetSkillInfo()->SkillMediumCategory, DebufSkillIterator.second->GetSkillInfo());
+			G_ObjectManager->SkillInfoReturn(DebufSkillIterator.second->GetSkillInfo()->SkillType,
+				DebufSkillIterator.second->GetSkillInfo());
 			// 약화효과 스킬 메모리 반납
 			G_ObjectManager->SkillReturn(DebufSkillIterator.second);
 		}
@@ -253,7 +255,7 @@ void CPlayer::Update()
 			{
 				if (_DefaultAttackTick < GetTickCount64())
 				{
-					CSkill* DefaultAttackSkill = _SkillBox.FindSkill(en_SkillType::SKILL_DEFAULT_ATTACK);
+					CSkill* DefaultAttackSkill = _SkillBox.FindSkill(en_SkillCharacteristic::SKILL_CATEGORY_PUBLIC, en_SkillType::SKILL_DEFAULT_ATTACK);
 					if (DefaultAttackSkill != nullptr)
 					{
 						_DefaultAttackTick = GetTickCount64() + _GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate;
@@ -525,7 +527,7 @@ void CPlayer::UpdateSpell()
 
 				if (AttackSkillInfo->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
 				{
-					CSkill* FindNextComboSkill = _SkillBox.FindSkill(AttackSkillInfo->NextComboSkill);
+					CSkill* FindNextComboSkill = _SkillBox.FindSkill(AttackSkillInfo->SkillCharacteristic, AttackSkillInfo->NextComboSkill);
 					if (FindNextComboSkill->GetSkillInfo()->CanSkillUse == true)
 					{
 						st_GameObjectJob* ComboAttackCreateJob = G_ObjectManager->GameServer->MakeGameObjectJobComboSkillCreate(_SpellSkill); G_ObjectManager->GameObjectJobCreate();
@@ -546,8 +548,7 @@ void CPlayer::UpdateSpell()
 				{
 					CSkill* NewSkill = G_ObjectManager->SkillCreate();
 
-					st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(_SpellSkill->GetSkillInfo()->SkillMediumCategory);
-					*NewAttackSkillInfo = *((st_AttackSkillInfo*)_SpellSkill->GetSkillInfo());
+					st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(_SpellSkill->GetSkillInfo(), _SpellSkill->GetSkillInfo()->SkillLevel);					
 					NewSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
 					NewSkill->StatusAbnormalDurationTimeStart();
 
@@ -587,8 +588,7 @@ void CPlayer::UpdateSpell()
 				{
 					CSkill* NewSkill = G_ObjectManager->SkillCreate();
 
-					st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(_SpellSkill->GetSkillInfo()->SkillMediumCategory);
-					*NewAttackSkillInfo = *((st_AttackSkillInfo*)_SpellSkill->GetSkillInfo());
+					st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(_SpellSkill->GetSkillInfo(), _SpellSkill->GetSkillInfo()->SkillLevel);
 					NewSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
 					NewSkill->StatusAbnormalDurationTimeStart();
 
