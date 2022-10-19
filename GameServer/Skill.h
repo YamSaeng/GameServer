@@ -65,7 +65,9 @@ private:
 
 	en_SkillCategory _SkillCategory;
 	en_SkillKinds _SkillKind;
-	st_SkillInfo* _SkillInfo;
+	en_SkillCharacteristic _SkillCharacteristic;
+
+	st_SkillInfo* _SkillInfo;	
 	
 	// 연속기 스킬에 사용하는 스킬 정보로
 	// 연속기 스킬 활성화 이전 스킬의 정보를 담는다.

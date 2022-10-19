@@ -55,6 +55,7 @@ void CSkill::SetSkillInfo(en_SkillCategory SkillCategory, st_SkillInfo* SkillInf
 		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE:
 		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
 		case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
+		case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT:
 			_SkillKind = en_SkillKinds::MELEE_SKILL;
 			break;
 		case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
@@ -71,6 +72,49 @@ void CSkill::SetSkillInfo(en_SkillCategory SkillCategory, st_SkillInfo* SkillInf
 		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:
 		case en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE:
 			_SkillKind = en_SkillKinds::MAGIC_SKILL;
+			break;
+		case en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING:
+			_SkillKind = en_SkillKinds::RANGE_SKILL;
+			break;
+		}
+
+		switch (_SkillInfo->SkillType)
+		{
+		case en_SkillType::SKILL_DEFAULT_ATTACK:
+		case en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE:
+			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_PUBLIC;
+			break;
+		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
+		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
+		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:
+		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE:
+		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
+		case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
+			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_FIGHT;
+			break;
+		case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
+			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_PROTECTION;
+			break;		
+		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:
+		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:
+		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
+		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:
+		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
+		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:
+		case en_SkillType::SKILL_SPELL_ACTIVE_BUF_TELEPORT:
+			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_SPELL;
+			break;
+		case en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING:
+			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_SHOOTING;
+			break;
+		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
+		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:
+		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:
+		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:
+			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_DISCIPLINE;
+			break;			
+		case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT:
+			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_ASSASSINATION;
 			break;
 		}
 	}
