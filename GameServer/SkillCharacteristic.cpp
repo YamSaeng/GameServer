@@ -207,6 +207,11 @@ void CSkillCharacteristic::CharacteristicUpdate()
 	}	
 }
 
+vector<CSkill*> CSkillCharacteristic::GetPassiveSkill()
+{
+	return _PassiveSkills;
+}
+
 vector<CSkill*> CSkillCharacteristic::GetActiveSkill()
 {
 	return _ActiveSkills;

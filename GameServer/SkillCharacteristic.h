@@ -38,9 +38,13 @@ public:
 	void CharacteristicUpdate();
 
 	//-------------------------------
+	// 패시브 스킬 반환
+	//-------------------------------
+	vector<CSkill*> GetPassiveSkill();
+	//-------------------------------
 	// 액티브 스킬 반환
 	//-------------------------------
-	vector<CSkill*> GetActiveSkill();
+	vector<CSkill*> GetActiveSkill();	
 private:
 	vector<CSkill*> _PassiveSkills;
 	vector<CSkill*> _ActiveSkills;	
