@@ -128,7 +128,7 @@ void CGameObject::Update()
 					float Distance = st_Vector2::Distance(_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position, Player->_GameObjectInfo.ObjectPositionInfo.Position);
 					if (Distance < 2.0f)
 					{
-						CSkill* DefaultAttackSkill = Player->_SkillBox.FindSkill(en_SkillType::SKILL_DEFAULT_ATTACK);
+						CSkill* DefaultAttackSkill = Player->_SkillBox.FindSkill(en_SkillCharacteristic::SKILL_CATEGORY_PUBLIC, en_SkillType::SKILL_DEFAULT_ATTACK);
 						if (DefaultAttackSkill != nullptr)
 						{
 							if (DefaultAttackSkill->GetSkillInfo()->CanSkillUse == true)
@@ -158,6 +158,9 @@ void CGameObject::Update()
 			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SKILL_MELEE_ATTACK:
 			{
+				int8 MeleeChracteristicType;
+				*GameObjectJob->GameObjectJobMessage >> MeleeChracteristicType;
+
 				int16 MeleeSkillType;
 				*GameObjectJob->GameObjectJobMessage >> MeleeSkillType;
 
@@ -165,7 +168,7 @@ void CGameObject::Update()
 
 				if (_SelectTarget != nullptr)
 				{
-					CSkill* FindMeleeSkill = Player->_SkillBox.FindSkill((en_SkillType)MeleeSkillType);
+					CSkill* FindMeleeSkill = Player->_SkillBox.FindSkill((en_SkillCharacteristic)MeleeChracteristicType, (en_SkillType)MeleeSkillType);
 					if (FindMeleeSkill != nullptr)
 					{
 						st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)FindMeleeSkill->GetSkillInfo();
@@ -194,7 +197,7 @@ void CGameObject::Update()
 								{
 									if (AttackSkillInfo->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
 									{
-										CSkill* FindNextComboSkill = Player->_SkillBox.FindSkill(AttackSkillInfo->NextComboSkill);
+										CSkill* FindNextComboSkill = Player->_SkillBox.FindSkill(AttackSkillInfo->SkillCharacteristic, AttackSkillInfo->NextComboSkill);
 										if (FindNextComboSkill->GetSkillInfo()->CanSkillUse == true)
 										{
 											st_GameObjectJob* ComboAttackCreateJob = G_ObjectManager->GameServer->MakeGameObjectJobComboSkillCreate(FindMeleeSkill);
@@ -222,7 +225,7 @@ void CGameObject::Update()
 
 											if (NewDeBufSkill != nullptr)
 											{
-												st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(FindMeleeSkill->GetSkillInfo()->SkillType, FindMeleeSkill->GetSkillInfo(), FindMeleeSkill->GetSkillInfo()->SkillLevel);											
+												st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(FindMeleeSkill->GetSkillInfo(), FindMeleeSkill->GetSkillInfo()->SkillLevel);											
 												NewDeBufSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
 												NewDeBufSkill->StatusAbnormalDurationTimeStart();
 
@@ -319,7 +322,7 @@ void CGameObject::Update()
 									{
 										CSkill* NewDeBufSkill = G_ObjectManager->SkillCreate();
 
-										st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(FindMeleeSkill->GetSkillInfo()->SkillType, FindMeleeSkill->GetSkillInfo(), FindMeleeSkill->GetSkillInfo()->SkillLevel);									
+										st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(FindMeleeSkill->GetSkillInfo(), FindMeleeSkill->GetSkillInfo()->SkillLevel);									
 										NewDeBufSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, AttackSkillInfo);
 										NewDeBufSkill->StatusAbnormalDurationTimeStart();
 
@@ -444,7 +447,7 @@ void CGameObject::Update()
 						}
 
 						// 일반 공격 쿨타임을 새로 시작
-						CSkill* DefaultAttackSkill = Player->_SkillBox.FindSkill(en_SkillType::SKILL_DEFAULT_ATTACK);
+						CSkill* DefaultAttackSkill = Player->_SkillBox.FindSkill(en_SkillCharacteristic::SKILL_CATEGORY_PUBLIC, en_SkillType::SKILL_DEFAULT_ATTACK);
 						if (DefaultAttackSkill != nullptr)
 						{
 							Player->_OnPlayerDefaultAttack = true;
@@ -492,7 +495,7 @@ void CGameObject::Update()
 				CPlayer* MyPlayer = ((CPlayer*)this);
 
 				// 연속기 스킬이 스킬창에서 찾는다.
-				CSkill* FindComboSkill = MyPlayer->_SkillBox.FindSkill(ReqMeleeSkill->GetSkillInfo()->NextComboSkill);
+				CSkill* FindComboSkill = MyPlayer->_SkillBox.FindSkill(ReqMeleeSkill->GetSkillInfo()->SkillCharacteristic, ReqMeleeSkill->GetSkillInfo()->NextComboSkill);
 				if (FindComboSkill != nullptr)
 				{
 					// 연속기 스킬 생성
@@ -525,12 +528,15 @@ void CGameObject::Update()
 			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SPELL_START:
 			{
+				int8 SpellCharacteristicType;
+				*GameObjectJob->GameObjectJobMessage >> SpellCharacteristicType;
+
 				int16 SpellSkillType;
 				*GameObjectJob->GameObjectJobMessage >> SpellSkillType;
 
 				CPlayer* Player = (CPlayer*)this;
 
-				CSkill* FindSpellSkill = Player->_SkillBox.FindSkill((en_SkillType)SpellSkillType);
+				CSkill* FindSpellSkill = Player->_SkillBox.FindSkill((en_SkillCharacteristic)SpellCharacteristicType, (en_SkillType)SpellSkillType);
 				if (FindSpellSkill != nullptr && FindSpellSkill->GetSkillInfo()->CanSkillUse == true)
 				{
 					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetFieldOfViewPlayers(this, 1, false);
@@ -556,7 +562,7 @@ void CGameObject::Update()
 
 						// 충격해제 버프 생성
 						CSkill* NewBufSkill = G_ObjectManager->SkillCreate();
-						st_BufSkillInfo* NewShockReleaseSkillInfo = (st_BufSkillInfo*)G_ObjectManager->SkillInfoCreate(FindSpellSkill->GetSkillInfo()->SkillType, FindSpellSkill->GetSkillInfo(), FindSpellSkill->GetSkillInfo()->SkillLevel);
+						st_BufSkillInfo* NewShockReleaseSkillInfo = (st_BufSkillInfo*)G_ObjectManager->SkillInfoCreate(FindSpellSkill->GetSkillInfo(), FindSpellSkill->GetSkillInfo()->SkillLevel);
 						NewBufSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewShockReleaseSkillInfo);
 						NewBufSkill->StatusAbnormalDurationTimeStart();
 
@@ -596,7 +602,7 @@ void CGameObject::Update()
 								CSkill* CharPoseBufSkill = G_ObjectManager->SkillCreate();
 
 								// 돌격자세 버프 스킬 정보 생성 및 초기화
-								st_BufSkillInfo* ChargePoseBufSkillInfo = (st_BufSkillInfo*)G_ObjectManager->SkillInfoCreate(FindSpellSkill->GetSkillInfo()->SkillType, FindSpellSkill->GetSkillInfo(), FindSpellSkill->GetSkillInfo()->SkillLevel);								
+								st_BufSkillInfo* ChargePoseBufSkillInfo = (st_BufSkillInfo*)G_ObjectManager->SkillInfoCreate(FindSpellSkill->GetSkillInfo(), FindSpellSkill->GetSkillInfo()->SkillLevel);								
 								CharPoseBufSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, ChargePoseBufSkillInfo);
 								CharPoseBufSkill->StatusAbnormalDurationTimeStart();
 
@@ -721,7 +727,7 @@ void CGameObject::Update()
 										{
 											CSkill* NewDebufSkill = G_ObjectManager->SkillCreate();
 
-											st_AttackSkillInfo* NewDebufSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(FindSpellSkill->GetSkillInfo()->SkillType, FindSpellSkill->GetSkillInfo(), FindSpellSkill->GetSkillInfo()->SkillLevel );
+											st_AttackSkillInfo* NewDebufSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(FindSpellSkill->GetSkillInfo(), FindSpellSkill->GetSkillInfo()->SkillLevel );
 											NewDebufSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewDebufSkillInfo);
 											NewDebufSkill->StatusAbnormalDurationTimeStart();
 
@@ -761,7 +767,7 @@ void CGameObject::Update()
 									{
 										CSkill* NewSkill = G_ObjectManager->SkillCreate();
 
-										st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(FindSpellSkill->GetSkillInfo()->SkillType, FindSpellSkill->GetSkillInfo(), FindSpellSkill->GetSkillInfo()->SkillLevel);										
+										st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(FindSpellSkill->GetSkillInfo(), FindSpellSkill->GetSkillInfo()->SkillLevel);										
 										NewSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
 										NewSkill->StatusAbnormalDurationTimeStart();
 
@@ -808,7 +814,7 @@ void CGameObject::Update()
 									{
 										CSkill* NewSkill = G_ObjectManager->SkillCreate();
 
-										st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(FindSpellSkill->GetSkillInfo()->SkillType,FindSpellSkill->GetSkillInfo(),FindSpellSkill->GetSkillInfo()->SkillLevel);										
+										st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(FindSpellSkill->GetSkillInfo(), FindSpellSkill->GetSkillInfo()->SkillLevel);										
 										NewSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
 										NewSkill->StatusAbnormalDurationTimeStart();
 
