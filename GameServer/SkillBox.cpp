@@ -114,3 +114,13 @@ vector<CSkill*> CSkillBox::GetGlobalSkills(en_SkillType ExceptSkillType, en_Skil
 
 	return GlobalSkills;
 }
+
+CSkillCharacteristic* CSkillBox::GetSkillCharacteristicPublic()
+{
+	return &_SkillCharacteristicPublic;
+}
+
+CSkillCharacteristic* CSkillBox::GetSkillCharacteristics()
+{
+	return _SkillCharacteristics;
+}
