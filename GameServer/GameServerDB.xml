@@ -46,7 +46,7 @@
 	<Table name="Inventory" desc="Inventory Table">
 		<Column name="OwnerAccountDBId" type="BigInt" notnull="true"/>
 		<Column name="OwnerPlayerDBId" type="BigInt" notnull="true"/>
-		<Column name="ItemIsEquipped" type="bit"/>		
+		<Column name="ItemIsEquipped" type="bit"/>
 		<Column name="ItemTileGridPositionX" type="SmallInt"/>
 		<Column name="ItemTileGridPositionY" type="SmallInt"/>
 		<Column name="ItemLargeCategory" type="nvarchar(50)" notnull="true"/>
@@ -77,7 +77,7 @@
 		<Column name="SkillCharacteristicIndex" type="TinyInt" notnull="true"/>
 		<Column name="SkillCharacteristicType" type="nvarchar(50)" notnull="true"/>
 	</Table>
-	
+
 	<!-- 보유중인 스킬 테이블 -->
 	<Table name="Skill" desc="Skill Table">
 		<Column name="AccountDBId" type="BigInt" notnull ="true"/>
@@ -275,10 +275,8 @@
 		<Body>
 			<![CDATA[
 				SET NOCOUNT ON
-				INSERT INTO [dbo].[Skill] VALUES ((@AccountID), (@PlayerID), ('SKILL_DEFAULT_ATTACK'), (1))
-				INSERT INTO [dbo].[Skill] VALUES ((@AccountID), (@PlayerID), ('SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE'), (1))								
-				INSERT INTO [dbo].[SkillCharacteristic] VALUES ((@AccountID), (@PlayerID), (0), ('SKILL_CATEGORY_NONE'))
-				INSERT INTO [dbo].[SkillCharacteristic] VALUES ((@AccountID), (@PlayerID), (1), ('SKILL_CATEGORY_NONE'))				
+				INSERT INTO [dbo].[Skill] VALUES ((@AccountID), (@PlayerID), ('SKILL_CATEGORY_PUBLIC'), ('SKILL_DEFAULT_ATTACK'), (1))
+				INSERT INTO [dbo].[Skill] VALUES ((@AccountID), (@PlayerID), ('SKILL_CATEGORY_PUBLIC'), ('SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE'), (1))												
 				UPDATE [dbo].[Inventory]
 				SET ItemLargeCategory = ('ITEM_LARGE_CATEGORY_WEAPON'), ItemMediumCategory = ('ITEM_MEDIUM_CATEGORY_SWORD'), ItemSmallCategory = ('ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD'), ItemCount = (1), ItemDurability = (150), ItemEnchantPoint = (1)
 				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (0) AND ItemTileGridPositionY = (0)								
@@ -462,7 +460,7 @@
 	<Procedure name="spInventoryItemPlace">
 		<Param name="@OwnerAccountDBId" type="BigInt"/>
 		<Param name="@OwnerPlayerDBId" type="BigInt"/>
-		<Param name="@ItemIsEquipped" type="bit"/>		
+		<Param name="@ItemIsEquipped" type="bit"/>
 		<Param name="@ItemTileGridPositionX" type="SmallInt"/>
 		<Param name="@ItemTileGridPositionY" type="SmallInt"/>
 		<Param name="@ItemLargeCategory" type="TinyInt"/>
@@ -574,7 +572,7 @@
   	]]>
 		</Body>
 	</Procedure>
-	
+
 	<!-- 스킬 특성 테이블에 있는 스킬 특성 정보 가져 오기-->
 	<Procedure name="spGetSkillCharacteristicGet">
 		<Param name="@AccountDBId" type="BigInt"/>
@@ -598,7 +596,7 @@
 		]]>
 		</Body>
 	</Procedure>
-	
+
 	<!-- 스킬 특성 테이블에 스킬 특성 업데이트 하기-->
 	<Procedure name="spGetSkillCharacteristicUpdate">
 		<Param name="@AccountDBId" type="BigInt"/>
@@ -623,7 +621,7 @@
 		]]>
 		</Body>
 	</Procedure>
-	
+
 	<!-- 스킬 테이블에 있는 스킬 가지고 오기 -->
 	<Procedure name="spGetSkill">
 		<Param name="@AccountDBId" type="BigInt"/>
@@ -987,7 +985,7 @@
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
 		</Body>
-	</Procedure>		
+	</Procedure>
 
 	<!-- 퀵슬롯바 테이블에서 퀵슬롯바 슬롯 초기화-->
 	<Procedure name="spQuickSlotInit">
