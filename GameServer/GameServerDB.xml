@@ -878,16 +878,16 @@
 	    SET NOCOUNT ON
         SELECT QuickSlotBarIndex, QuickSlotBarSlotIndex,
 		QuickSlotKey, 	
-		(CASE WHEN CharacteristicType 'SKILL_CATEGORY_NONE' THEN 0
-			  WHEN CharacteristicType 'SKILL_CATEGORY_PUBLIC' THEN 1
-			  WHEN CharacteristicType 'SKILL_CATEGORY_FIGHT' THEN 2
-			  WHEN CharacteristicType 'SKILL_CATEGORY_PROTECTION' THEN 3
-			  WHEN CharacteristicType 'SKILL_CATEGORY_SPELL' THEN 4
-			  WHEN CharacteristicType 'SKILL_CATEGORY_SHOOTING' THEN 5
-			  WHEN CharacteristicType 'SKILL_CATEGORY_DISCIPLINE' THEN 6
-			  WHEN CharacteristicType 'SKILL_CATEGORY_ASSASSINATION' THEN 7
+		(CASE WHEN CharacteristicType = 'SKILL_CATEGORY_NONE' THEN 0
+			  WHEN CharacteristicType = 'SKILL_CATEGORY_PUBLIC' THEN 1
+			  WHEN CharacteristicType = 'SKILL_CATEGORY_FIGHT' THEN 2
+			  WHEN CharacteristicType = 'SKILL_CATEGORY_PROTECTION' THEN 3
+			  WHEN CharacteristicType = 'SKILL_CATEGORY_SPELL' THEN 4
+			  WHEN CharacteristicType = 'SKILL_CATEGORY_SHOOTING' THEN 5
+			  WHEN CharacteristicType = 'SKILL_CATEGORY_DISCIPLINE' THEN 6
+			  WHEN CharacteristicType = 'SKILL_CATEGORY_ASSASSINATION' THEN 7
 		      ELSE ' '
-			  END)
+			  END),
 		(CASE WHEN SkillType = 'SKILL_TYPE_NONE' THEN 0
 			  WHEN SkillType = 'SKILL_DEFAULT_ATTACK' THEN 1
 			  WHEN SkillType = 'SKILL_FIGHT_TWO_HAND_SWORD_MASTER' THEN 2
@@ -981,7 +981,7 @@
 	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE' THEN 5000
 	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL' THEN 5001
 	          ELSE ' '
-	          END),
+	          END)
 		ItemCount
         FROM [dbo].[QuickSlotBar]
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
