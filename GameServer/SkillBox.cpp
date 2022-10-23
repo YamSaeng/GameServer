@@ -72,6 +72,8 @@ CSkill* CSkillBox::FindSkill(en_SkillCharacteristic CharacteristicType, en_Skill
 
 void CSkillBox::Update()
 {
+	_SkillCharacteristicPublic.CharacteristicUpdate();
+
 	for (int8 i = 0; i < (int8)en_SkillCharacteristicCount::SKILL_CHARACTERISTIC_MAX_COUNT; i++)
 	{
 		if (_SkillCharacteristics[i]._SkillCharacteristic != en_SkillCharacteristic::SKILL_CATEGORY_NONE)
@@ -96,6 +98,18 @@ vector<CSkill*> CSkillBox::GetGlobalSkills(en_SkillType ExceptSkillType, en_Skil
 	vector<CSkill*> GlobalSkills;
 
 	// 기본 공격 스킬은 제외함
+	
+	vector<CSkill*> PubliChracteristicActiveSkill = _SkillCharacteristicPublic.GetActiveSkill();
+	for (CSkill* PublicActiveSkill : PubliChracteristicActiveSkill)
+	{
+		if (PublicActiveSkill->GetSkillInfo()->SkillType != en_SkillType::SKILL_DEFAULT_ATTACK
+			&& PublicActiveSkill->GetSkillInfo()->SkillType != ExceptSkillType
+			&& PublicActiveSkill->GetSkillKind() == SkillKind
+			&& PublicActiveSkill->GetSkillInfo()->CanSkillUse == true)
+		{
+			GlobalSkills.push_back(PublicActiveSkill);
+		}
+	}
 
 	// 요청한 스킬과 같은 종류의 스킬을 스킬특성 창에서 찾음
 	for (int i = 0; i < (int)en_SkillCharacteristicCount::SKILL_CHARACTERISTIC_MAX_COUNT; i++)
