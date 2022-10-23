@@ -45,7 +45,7 @@ void CMonster::Update()
 		if (DeleteBufSkill)
 		{
 			DeleteBuf(BufSkillIterator.first);
-			G_ObjectManager->SkillInfoReturn(BufSkillIterator.second->GetSkillInfo()->SkillMediumCategory,
+			G_ObjectManager->SkillInfoReturn(BufSkillIterator.second->GetSkillInfo()->SkillType,
 				BufSkillIterator.second->GetSkillInfo());
 			G_ObjectManager->SkillReturn(BufSkillIterator.second);
 		}
@@ -57,7 +57,7 @@ void CMonster::Update()
 		if (DeleteDebufSkill)
 		{
 			DeleteDebuf(DebufSkillIterator.first);
-			G_ObjectManager->SkillInfoReturn(DebufSkillIterator.second->GetSkillInfo()->SkillMediumCategory,
+			G_ObjectManager->SkillInfoReturn(DebufSkillIterator.second->GetSkillInfo()->SkillType,
 				DebufSkillIterator.second->GetSkillInfo());
 			G_ObjectManager->SkillReturn(DebufSkillIterator.second);
 		}
@@ -669,9 +669,9 @@ void CMonster::UpdateAttack()
 
 		wstring BearAttackString = BearAttackMessage;
 
-		CMessage* ResSlimeSystemMessage = G_ObjectManager->GameServer->MakePacketResChattingBoxMessage(_Target->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, IsCritical ? st_Color::Red() : st_Color::White(), IsCritical ? L"치명타! " + BearAttackString : BearAttackString);
+		/*CMessage* ResSlimeSystemMessage = G_ObjectManager->GameServer->MakePacketResChattingBoxMessage(_Target->_GameObjectInfo.ObjectId, en_MessageType::SYSTEM, IsCritical ? st_Color::Red() : st_Color::White(), IsCritical ? L"치명타! " + BearAttackString : BearAttackString);
 		G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResSlimeSystemMessage);
-		ResSlimeSystemMessage->Free();
+		ResSlimeSystemMessage->Free();*/
 	}
 
 	if (_DefaultAttackTick > GetTickCount64())
