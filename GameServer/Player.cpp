@@ -339,6 +339,8 @@ void CPlayer::Start()
 
 void CPlayer::End()
 {
+	CGameObject::End();
+
 	_FieldOfViewInfos.clear();
 
 	// 스킬 목록 정리
