@@ -127,6 +127,9 @@
     <Filter Include="ContentServer\Content\Math">
       <UniqueIdentifier>{4d1fab75-bf5d-4139-a644-53cfeda37f65}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ContentServer\Content\SkillBox\SkillCharacteristic">
+      <UniqueIdentifier>{652962d3-49f5-476b-bc2f-9f42c8e2312f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Type.h">
@@ -317,6 +320,9 @@
     <ClInclude Include="Corn.h">
       <Filter>ContentServer\Content\GameObject\Crops</Filter>
     </ClInclude>
+    <ClInclude Include="SkillCharacteristic.h">
+      <Filter>ContentServer\Content\SkillBox\SkillCharacteristic</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -453,6 +459,9 @@
     <ClCompile Include="Corn.cpp">
       <Filter>ContentServer\Content\GameObject\Crops</Filter>
     </ClCompile>
+    <ClCompile Include="SkillCharacteristic.cpp">
+      <Filter>ContentServer\Content\SkillBox\SkillCharacteristic</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="DBConfig.xml">
@@ -472,25 +481,10 @@
     <None Include="CharacterLevelingData.json">
       <Filter>Util\Json,Xml\Data</Filter>
     </None>
-    <None Include="ArcherSkillDatas.json">
-      <Filter>Util\Json,Xml\Data\SkillData</Filter>
-    </None>
     <None Include="PublicSkillDatas.json">
       <Filter>Util\Json,Xml\Data\SkillData</Filter>
     </None>
-    <None Include="ShamanSkillDatas.json">
-      <Filter>Util\Json,Xml\Data\SkillData</Filter>
-    </None>
-    <None Include="TaioistSkillDatas.json">
-      <Filter>Util\Json,Xml\Data\SkillData</Filter>
-    </None>
-    <None Include="WarriorSkillDatas.json">
-      <Filter>Util\Json,Xml\Data\SkillData</Filter>
-    </None>
     <None Include="MonsterSkillDatas.json">
-      <Filter>Util\Json,Xml\Data\SkillData</Filter>
-    </None>
-    <None Include="ThiefSkillDatas.json">
       <Filter>Util\Json,Xml\Data\SkillData</Filter>
     </None>
     <None Include="CraftingTableData.json">
@@ -519,6 +513,24 @@
     </None>
     <None Include="MapInfoData.json">
       <Filter>Util\Json,Xml\Data\MapData</Filter>
+    </None>
+    <None Include="FightSkillDatas.json">
+      <Filter>Util\Json,Xml\Data\SkillData</Filter>
+    </None>
+    <None Include="ProtectionSkillDatas.json">
+      <Filter>Util\Json,Xml\Data\SkillData</Filter>
+    </None>
+    <None Include="AssassinationSkillDatas.json">
+      <Filter>Util\Json,Xml\Data\SkillData</Filter>
+    </None>
+    <None Include="SpellSkillDatas.json">
+      <Filter>Util\Json,Xml\Data\SkillData</Filter>
+    </None>
+    <None Include="ShootingSkillDatas.json">
+      <Filter>Util\Json,Xml\Data\SkillData</Filter>
+    </None>
+    <None Include="DisciplineSkillDatas.json">
+      <Filter>Util\Json,Xml\Data\SkillData</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

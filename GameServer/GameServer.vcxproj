@@ -213,6 +213,7 @@
     <ClInclude Include="SessionInfo.h" />
     <ClInclude Include="Skill.h" />
     <ClInclude Include="SkillBox.h" />
+    <ClInclude Include="SkillCharacteristic.h" />
     <ClInclude Include="Slime.h" />
     <ClInclude Include="StorageBox.h" />
     <ClInclude Include="Type.h" />
@@ -327,6 +328,7 @@
     <ClCompile Include="Sector.cpp" />
     <ClCompile Include="Skill.cpp" />
     <ClCompile Include="SkillBox.cpp" />
+    <ClCompile Include="SkillCharacteristic.cpp" />
     <ClCompile Include="Slime.cpp" />
     <ClCompile Include="StorageBox.cpp" />
     <ClCompile Include="XmlParser.cpp">
@@ -342,11 +344,13 @@
     <Xml Include="GameServerConfig.xml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ArcherSkillDatas.json" />
+    <None Include="AssassinationSkillDatas.json" />
     <None Include="CraftingData.json" />
     <None Include="CraftingTableData.json" />
     <None Include="CropData.json" />
+    <None Include="DisciplineSkillDatas.json" />
     <None Include="EnvironmentData.json" />
+    <None Include="FightSkillDatas.json" />
     <None Include="ItemData.json" />
     <None Include="CharacterLevelingData.json" />
     <None Include="MapInfoData.json" />
@@ -354,12 +358,11 @@
     <None Include="MonsterData.json" />
     <None Include="MonsterSkillDatas.json" />
     <None Include="OptionData.json" />
+    <None Include="ProtectionSkillDatas.json" />
     <None Include="PublicSkillDatas.json" />
-    <None Include="ShamanSkillDatas.json" />
     <None Include="PlayerCharacterStatus.json" />
-    <None Include="TaioistSkillDatas.json" />
-    <None Include="ThiefSkillDatas.json" />
-    <None Include="WarriorSkillDatas.json" />
+    <None Include="ShootingSkillDatas.json" />
+    <None Include="SpellSkillDatas.json" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Start_FieldObjectInfoData.txt" />

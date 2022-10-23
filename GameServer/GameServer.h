@@ -299,11 +299,11 @@ private:
 	//-------------------------------------------------
 	// 근접 기술 처리 잡 생성 함수
 	//-------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobMeleeAttack(int16 MeleeSkillType);
+	st_GameObjectJob* MakeGameObjectJobMeleeAttack(int8 MeleeCharacteristicType, int16 MeleeSkillType);
 	//------------------------------------------------
 	// 마법 시작 잡 생성 함수
 	//------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobSpellStart(en_SkillType StartSpellSkilltype);
+	st_GameObjectJob* MakeGameObjectJobSpellStart(int8 SpellCharacteristicType, int16 StartSpellSkilltype);
 	//------------------------------------------------
 	// 마법 공격 취소 잡 생성 함수
 	//------------------------------------------------
