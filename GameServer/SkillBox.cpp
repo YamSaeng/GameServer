@@ -5,8 +5,6 @@
 
 CSkillBox::CSkillBox()
 {
-	_SkillCharacteristicPublic.SkillCharacteristicInit(en_SkillCharacteristic::SKILL_CATEGORY_PUBLIC);
-
 	for (int8 i = 0; i < (int8)en_SkillCharacteristicCount::SKILL_CHARACTERISTIC_MAX_COUNT; i++)
 	{
 		_SkillCharacteristics[i]._SkillBoxIndex = i;
@@ -85,6 +83,8 @@ void CSkillBox::Update()
 
 void CSkillBox::Empty()
 {
+	_SkillCharacteristicPublic.CharacteristicEmpty();
+
 	for (int i = 0; i < (int)en_SkillCharacteristicCount::SKILL_CHARACTERISTIC_MAX_COUNT; i++)
 	{
 		_SkillCharacteristics[i].CharacteristicEmpty();
