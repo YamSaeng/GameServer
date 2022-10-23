@@ -1161,6 +1161,7 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 					PublicAttackSkill->SkillType = en_SkillType::SKILL_DEFAULT_ATTACK;
 				}
 
+				PublicAttackSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_PUBLIC;
 				PublicAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
 				PublicAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 				PublicAttackSkill->SkillLevel = SkillLevel;
@@ -1224,6 +1225,7 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 					PublicBufSkill->SkillType = en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE;
 				}
 
+				PublicBufSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_PUBLIC;
 				PublicBufSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
 				PublicBufSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 				PublicBufSkill->SkillLevel = SkillLevel;
@@ -1270,7 +1272,7 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 		{
 			for (auto& PassiveSkillListFiled : FightSkillListFiled["PassiveSkillList"].GetArray())
 			{
-				st_PassiveSkillInfo* PassiveSkill = new st_PassiveSkillInfo();
+				st_PassiveSkillInfo* FightPassiveSkill = new st_PassiveSkillInfo();
 
 				int8 SkillNumber = (int8)PassiveSkillListFiled["SkillNumber"].GetInt();
 				string SkillType = PassiveSkillListFiled["SkillType"].GetString();
@@ -1278,17 +1280,18 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 				int8 SkillMaxLevel = PassiveSkillListFiled["SkillMaxLevel"].GetInt();
 				string SkillExplation = PassiveSkillListFiled["SkillExplanation"].GetString();
 
-				PassiveSkill->SkillNumber = SkillNumber;
-				PassiveSkill->SkillMaxLevel = SkillMaxLevel;
-				PassiveSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
-				PassiveSkill->SkillName = (LPWSTR)CA2W(SkillExplation.c_str());
+				FightPassiveSkill->SkillNumber = SkillNumber;
+				FightPassiveSkill->SkillMaxLevel = SkillMaxLevel;
+				FightPassiveSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+				FightPassiveSkill->SkillName = (LPWSTR)CA2W(SkillExplation.c_str());
+				FightPassiveSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_FIGHT;
 
 				if (SkillType == "SKILL_FIGHT_TWO_HAND_SWORD_MASTER")
 				{
-					PassiveSkill->SkillType = en_SkillType::SKILL_FIGHT_TWO_HAND_SWORD_MASTER;
+					FightPassiveSkill->SkillType = en_SkillType::SKILL_FIGHT_TWO_HAND_SWORD_MASTER;
 				}					
 
-				_FightPassiveSkillDatas.insert(pair<int16, st_PassiveSkillInfo*>((int16)PassiveSkill->SkillType, PassiveSkill));
+				_FightPassiveSkillDatas.insert(pair<int16, st_PassiveSkillInfo*>((int16)FightPassiveSkill->SkillType, FightPassiveSkill));
 			}
 
 			for (auto& ActiveSkillListFiled : FightSkillListFiled["ActiveSkillList"].GetArray())
@@ -1345,6 +1348,7 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 						FightAttackSkill->SkillType = en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH;
 					}
 
+					FightAttackSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_FIGHT;
 					FightAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
 					FightAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 					FightAttackSkill->SkillMaxLevel = SkillMaxLevel;					
@@ -1358,7 +1362,7 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 					FightAttackSkill->SkillDistance = SkillDistance;
 					FightAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 					FightAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
-					FightAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
+					FightAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;					
 
 					if (NextComboSkill == "SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK")
 					{
@@ -1422,6 +1426,7 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 						FightBufSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE;
 					}
 
+					FightBufSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_FIGHT;
 					FightBufSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
 					FightBufSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 					FightBufSkill->SkillMaxLevel = SkillMaxLevel;
@@ -1512,6 +1517,7 @@ void CDataManager::LoadDataProtectionSkill(wstring LoadFileName)
 						ProtectionAttackSkill->SkillType = en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH;
 					}					
 
+					ProtectionAttackSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_PROTECTION;
 					ProtectionAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
 					ProtectionAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 					ProtectionAttackSkill->SkillMaxLevel = SkillMaxLevel;
@@ -1602,6 +1608,7 @@ void CDataManager::LoadDataAssassinationSkill(wstring LoadFileName)
 						AssassinationAttackSkill->SkillType = en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT;
 					}
 
+					AssassinationAttackSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_ASSASSINATION;
 					AssassinationAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
 					AssassinationAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 					AssassinationAttackSkill->SkillLevel = SkillLevel;
@@ -1659,9 +1666,9 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 			{
 				for (auto& AttackSkillFiled : ActiveSkillListFiled["AttackSkill"].GetArray())
 				{
-					st_AttackSkillInfo* ShamanAttackSkill = new st_AttackSkillInfo();
-					ShamanAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
-					ShamanAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_ATTACK;
+					st_AttackSkillInfo* SpellAttackSkill = new st_AttackSkillInfo();
+					SpellAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
+					SpellAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_ATTACK;
 
 					string SkillType = AttackSkillFiled["SkillType"].GetString();
 					string SkillName = AttackSkillFiled["SkillName"].GetString();
@@ -1687,66 +1694,67 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 
 					if (SkillType == "SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON")
 					{
-						ShamanAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON;
+						SpellAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON;
 					}
 					else if (SkillType == "SKILL_SPELL_ACTIVE_ATTACK_ROOT")
 					{
-						ShamanAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT;
+						SpellAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT;
 					}
 					else if (SkillType == "SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN")
 					{
-						ShamanAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN;
+						SpellAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN;
 					}
 					else if (SkillType == "SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE")
 					{
-						ShamanAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE;
+						SpellAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE;
 					}
 					else if (SkillType == "SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE")
 					{
-						ShamanAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE;
+						SpellAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE;
 					}
 					else if (SkillType == "SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE")
 					{
-						ShamanAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE;
+						SpellAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE;
 					}
 
-					ShamanAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
-					ShamanAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
-					ShamanAttackSkill->SkillLevel = SkillLevel;
-					ShamanAttackSkill->SkillMinDamage = SkillMinDamage;
-					ShamanAttackSkill->SkillMaxDamage = SkillMaxDamage;
-					ShamanAttackSkill->SkillCoolTime = SkillCoolTime;
-					ShamanAttackSkill->SkillCastingTime = SkillCastingTime;
-					ShamanAttackSkill->SkillDurationTime = SkillDurationTime;
-					ShamanAttackSkill->SkillDotTime = SkillDotTime;
-					ShamanAttackSkill->SkillDistance = SkillDistance;
-					ShamanAttackSkill->SkillMotionTime = SkillMotionTime;
-					ShamanAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-					ShamanAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
-					ShamanAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
-					ShamanAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
-					ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-					ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-					ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-					ShamanAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
+					SpellAttackSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_SPELL;
+					SpellAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+					SpellAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
+					SpellAttackSkill->SkillLevel = SkillLevel;
+					SpellAttackSkill->SkillMinDamage = SkillMinDamage;
+					SpellAttackSkill->SkillMaxDamage = SkillMaxDamage;
+					SpellAttackSkill->SkillCoolTime = SkillCoolTime;
+					SpellAttackSkill->SkillCastingTime = SkillCastingTime;
+					SpellAttackSkill->SkillDurationTime = SkillDurationTime;
+					SpellAttackSkill->SkillDotTime = SkillDotTime;
+					SpellAttackSkill->SkillDistance = SkillDistance;
+					SpellAttackSkill->SkillMotionTime = SkillMotionTime;
+					SpellAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+					SpellAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
+					SpellAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
+					SpellAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
+					SpellAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+					SpellAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+					SpellAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+					SpellAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 
 					if (NextComboSkill == "SKILL_TYPE_NONE")
 					{
-						ShamanAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+						SpellAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
 					}
 					else if (NextComboSkill == "SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE")
 					{
-						ShamanAttackSkill->NextComboSkill = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE;
+						SpellAttackSkill->NextComboSkill = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE;
 					}
 
-					_SpellAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)ShamanAttackSkill->SkillType, ShamanAttackSkill));
+					_SpellAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)SpellAttackSkill->SkillType, SpellAttackSkill));
 				}
 
 				for (auto& BufSkillFiled : ActiveSkillListFiled["BufSkill"].GetArray())
 				{
-					st_BufSkillInfo* ShamanTacTicSkill = new st_BufSkillInfo();
-					ShamanTacTicSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
-					ShamanTacTicSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_BUF;
+					st_BufSkillInfo* SpellBufSkill = new st_BufSkillInfo();
+					SpellBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
+					SpellBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_BUF;
 
 					string SkillType = BufSkillFiled["SkillType"].GetString();
 					string SkillName = BufSkillFiled["SkillName"].GetString();
@@ -1767,30 +1775,31 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 
 					if (SkillType == "SKILL_SPELL_ACTIVE_BUF_TELEPORT")
 					{
-						ShamanTacTicSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_BUF_TELEPORT;
+						SpellBufSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_BUF_TELEPORT;
 					}
 
-					ShamanTacTicSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
-					ShamanTacTicSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
-					ShamanTacTicSkill->SkillLevel = SkillLevel;
-					ShamanTacTicSkill->SkillCoolTime = SkillCoolTime;
-					ShamanTacTicSkill->SkillCastingTime = SkillCastingTime;
-					ShamanTacTicSkill->SkillDurationTime = SkillDurationTime;
-					ShamanTacTicSkill->SkillDotTime = SkillDotTime;
-					ShamanTacTicSkill->SkillDistance = SkillDistance;
-					ShamanTacTicSkill->SkillMotionTime = SkillMotionTime;
-					ShamanTacTicSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-					ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-					ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-					ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-					ShamanTacTicSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
+					SpellBufSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_SPELL;
+					SpellBufSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+					SpellBufSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
+					SpellBufSkill->SkillLevel = SkillLevel;
+					SpellBufSkill->SkillCoolTime = SkillCoolTime;
+					SpellBufSkill->SkillCastingTime = SkillCastingTime;
+					SpellBufSkill->SkillDurationTime = SkillDurationTime;
+					SpellBufSkill->SkillDotTime = SkillDotTime;
+					SpellBufSkill->SkillDistance = SkillDistance;
+					SpellBufSkill->SkillMotionTime = SkillMotionTime;
+					SpellBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+					SpellBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+					SpellBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+					SpellBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+					SpellBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 
 					if (NextComboSkill == "SKILL_TYPE_NONE")
 					{
-						ShamanTacTicSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+						SpellBufSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
 					}
 
-					_SpellBufSkillDatas.insert(pair<int16, st_BufSkillInfo*>((int16)ShamanTacTicSkill->SkillType, ShamanTacTicSkill));
+					_SpellBufSkillDatas.insert(pair<int16, st_BufSkillInfo*>((int16)SpellBufSkill->SkillType, SpellBufSkill));
 				}
 			}
 		}
@@ -1817,9 +1826,9 @@ void CDataManager::LoadDataShootingSkill(wstring LoadFileName)
 			{
 				for (auto& AttackSkillFiled : ActiveSkillListFiled["AttackSkill"].GetArray())
 				{
-					st_AttackSkillInfo* ArcherAttackSkill = new st_AttackSkillInfo();
-					ArcherAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_ARCHER;
-					ArcherAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHOOTING_ACTIVE_ATTACK;
+					st_AttackSkillInfo* ShootingAttackSkill = new st_AttackSkillInfo();
+					ShootingAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_ARCHER;
+					ShootingAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHOOTING_ACTIVE_ATTACK;
 
 					string SkillType = AttackSkillFiled["SkillType"].GetString();
 					string SkillName = AttackSkillFiled["SkillName"].GetString();
@@ -1846,35 +1855,36 @@ void CDataManager::LoadDataShootingSkill(wstring LoadFileName)
 
 					if (SkillType == "SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING")
 					{
-						ArcherAttackSkill->SkillType = en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING;
+						ShootingAttackSkill->SkillType = en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING;
 					}
 
-					ArcherAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
-					ArcherAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
-					ArcherAttackSkill->SkillLevel = SkillLevel;
-					ArcherAttackSkill->SkillMinDamage = SkillMinDamage;
-					ArcherAttackSkill->SkillMaxDamage = SkillMaxDamage;
-					ArcherAttackSkill->SkillCoolTime = SkillCoolTime;
-					ArcherAttackSkill->SkillCastingTime = SkillCastingTime;
-					ArcherAttackSkill->SkillDurationTime = SkillDurationTime;
-					ArcherAttackSkill->SkillDotTime = SkillDotTime;
-					ArcherAttackSkill->SkillDistance = SkillDistance;
-					ArcherAttackSkill->SkillMotionTime = SkillMotionTime;
-					ArcherAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-					ArcherAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
-					ArcherAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
-					ArcherAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
-					ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-					ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-					ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-					ArcherAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
+					ShootingAttackSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_SHOOTING;
+					ShootingAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+					ShootingAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
+					ShootingAttackSkill->SkillLevel = SkillLevel;
+					ShootingAttackSkill->SkillMinDamage = SkillMinDamage;
+					ShootingAttackSkill->SkillMaxDamage = SkillMaxDamage;
+					ShootingAttackSkill->SkillCoolTime = SkillCoolTime;
+					ShootingAttackSkill->SkillCastingTime = SkillCastingTime;
+					ShootingAttackSkill->SkillDurationTime = SkillDurationTime;
+					ShootingAttackSkill->SkillDotTime = SkillDotTime;
+					ShootingAttackSkill->SkillDistance = SkillDistance;
+					ShootingAttackSkill->SkillMotionTime = SkillMotionTime;
+					ShootingAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+					ShootingAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
+					ShootingAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
+					ShootingAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
+					ShootingAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+					ShootingAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+					ShootingAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+					ShootingAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 
 					if (NextComboSkill == "SKILL_TYPE_NONE")
 					{
-						ArcherAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+						ShootingAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
 					}
 
-					_ShootingAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)ArcherAttackSkill->SkillType, ArcherAttackSkill));
+					_ShootingAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)ShootingAttackSkill->SkillType, ShootingAttackSkill));
 				}
 
 				for (auto& BufSkillFiled : ActiveSkillListFiled["BufSkill"].GetArray())
@@ -1942,6 +1952,7 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 						DisciplineAttackSkill->SkillType = en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT;
 					}
 
+					DisciplineAttackSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_DISCIPLINE;
 					DisciplineAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
 					DisciplineAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 					DisciplineAttackSkill->SkillLevel = SkillLevel;
@@ -2004,6 +2015,7 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 						DisciplineHealSkill->SkillType = en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND;
 					}
 
+					DisciplineHealSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_DISCIPLINE;
 					DisciplineHealSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
 					DisciplineHealSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
 					DisciplineHealSkill->SkillLevel = SkillLevel;
