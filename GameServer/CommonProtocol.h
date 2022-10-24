@@ -586,6 +586,19 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_SYNC_OBJECT_POSITION,
 
 	//------------------------------------------------------------
+	// 게임서버 스킬 특성 선택 요청
+	// int64 AccountID
+	// int64 PlayerID
+	// int8 SkillCharacteristicType
+	//------------------------------------------------------------
+	en_PACKET_C2S_SELECT_SKILL_CHARACTERISTIC,
+
+	//------------------------------------------------------------
+	// 게임서버 스킬 특성 선택 요청 응답
+	//------------------------------------------------------------
+	en_PACKET_S2C_SELECT_SKILL_CHARACTERISTIC,
+
+	//------------------------------------------------------------
 	// 게임서버 스킬 저장 요청
 	// int64 TargetObjectId
 	// st_SkillInfo SkillInfo
