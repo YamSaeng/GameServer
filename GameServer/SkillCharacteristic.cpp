@@ -17,26 +17,31 @@ CSkillCharacteristic::~CSkillCharacteristic()
 
 void CSkillCharacteristic::SkillCharacteristicInit(en_SkillCharacteristic SkillCharacteristic)
 {
-	switch (SkillCharacteristic)
+	_SkillCharacteristic = SkillCharacteristic;
+
+	switch (_SkillCharacteristic)
 	{	
 	case en_SkillCharacteristic::SKILL_CATEGORY_NONE:
 		break;	
-	case en_SkillCharacteristic::SKILL_CATEGORY_FIGHT:
+	case en_SkillCharacteristic::SKILL_CATEGORY_PUBLIC:
 		{
-			int16 StartFightPassiveSkillType = (int16)en_SkillType::SKILL_FIGHT_TWO_HAND_SWORD_MASTER;
-			int16 EndFightPassiveSkillType = (int16)en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK;
+			int16 StartFightPassiveSkillType = (int16)en_SkillType::SKILL_DEFAULT_ATTACK;
+			int16 EndFightPassiveSkillType = (int16)en_SkillType::SKILL_FIGHT_TWO_HAND_SWORD_MASTER;
 
-			// 격투 패시브 스킬 생성
+			// 공용 액티브 스킬 생성
 			for (int16 i = StartFightPassiveSkillType; i < EndFightPassiveSkillType; i++)
 			{
-				CSkill* PassiveSkill = G_ObjectManager->SkillCreate();
+				CSkill* ActiveSkill = G_ObjectManager->SkillCreate();
 
-				st_SkillInfo* SkillInfo = G_Datamanager->FindSkillData((en_SkillType)i);
-				PassiveSkill->SetSkillInfo(en_SkillCategory::PASSIVE_SKILL, SkillInfo);
+				st_SkillInfo* ActiveSkillInfo = G_Datamanager->FindSkillData((en_SkillType)i);
+				ActiveSkill->SetSkillInfo(en_SkillCategory::QUICK_SLOT_SKILL_COOLTIME, ActiveSkillInfo);
 
-				_PassiveSkills.push_back(PassiveSkill);
+				_ActiveSkills.push_back(ActiveSkill);
 			}
-
+		}
+		break;
+	case en_SkillCharacteristic::SKILL_CATEGORY_FIGHT:
+		{	
 			int16 StartFightActiveSkillType = (int16)en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK;
 			int16 EndFightActiveSkilltype = (int16)en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH;
 	
