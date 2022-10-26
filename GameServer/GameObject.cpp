@@ -119,6 +119,27 @@ void CGameObject::Update()
 
 		switch ((en_GameObjectJobType)GameObjectJob->GameObjectJobType)
 		{	
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SELECT_SKILL_CHARACTERISTIC:
+			{
+				int8 SelectSkillCharacterIndex;
+				*GameObjectJob->GameObjectJobMessage >> SelectSkillCharacterIndex;
+
+				int8 SkillCharacteristicType;
+				*GameObjectJob->GameObjectJobMessage >> SkillCharacteristicType;
+
+				CPlayer* Player = (CPlayer*)this;
+
+				Player->_SkillBox.CreateChracteristic(SelectSkillCharacterIndex, SkillCharacteristicType);
+								
+				CSkillCharacteristic* SkillCharacteristic =  Player->_SkillBox.FindCharacteristic(SelectSkillCharacterIndex, SkillCharacteristicType);				
+
+				CMessage* ResSkillCharacteristicPacket = G_ObjectManager->GameServer->MakePacketResSelectSkillCharacteristic(_GameObjectInfo.ObjectId,
+					SelectSkillCharacterIndex, SkillCharacteristicType,
+					SkillCharacteristic->GetPassiveSkill(), SkillCharacteristic->GetActiveSkill());
+				G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSkillCharacteristicPacket);
+				ResSkillCharacteristicPacket->Free();
+			}
+			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_DEAFLUT_ATTACK:
 			{
 				CPlayer* Player = (CPlayer*)this;
