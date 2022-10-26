@@ -59,11 +59,19 @@ CSkill* CSkillBox::FindSkill(en_SkillCharacteristic CharacteristicType, en_Skill
 	case en_SkillCharacteristic::SKILL_CATEGORY_DISCIPLINE:		
 	case en_SkillCharacteristic::SKILL_CATEGORY_ASSASSINATION:
 		{
-			for (int8 i = 0; i < (int8)en_SkillCharacteristicCount::SKILL_CHARACTERISTIC_MAX_COUNT; i++)
+			int8 CharacteristicIndex = 0;
+
+			for (int8 i = 0; i < 3; i++)
 			{
-				FindSkill = _SkillCharacteristics[i].FindSkill(SkillType);
+				if (_SkillCharacteristics[i]._SkillCharacteristic == CharacteristicType)
+				{
+					CharacteristicIndex = i;
+					break;
+				}
 			}
-		}
+
+			FindSkill = _SkillCharacteristics[CharacteristicIndex].FindSkill(SkillType);
+		}		
 		break;	
 	}	
 
