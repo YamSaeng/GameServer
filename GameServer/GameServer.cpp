@@ -533,6 +533,9 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_ITEM_ROTATE:
 		PacketProcReqItemRotate(SessionID, Message);
 		break;
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_SELECT_SKILL_CHARACTERISTIC:
+		PacketProcReqSelectSkillCharacteristic(SessionID, Message);
+		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_QUICKSLOT_SAVE:
 		PacketProcReqQuickSlotSave(SessionID, Message);
 		break;
@@ -1068,13 +1071,13 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 				break;
 			}			
 
+			int8 ReqMoveDir;
+			*Message >> ReqMoveDir;
+
 			int8 QuickSlotBarIndex;
 			*Message >> QuickSlotBarIndex;
 			int8 QuickSlotBarSlotIndex;
-			*Message >> QuickSlotBarSlotIndex;
-
-			int8 ReqMoveDir;
-			*Message >> ReqMoveDir;
+			*Message >> QuickSlotBarSlotIndex;						
 
 			int8 ReqCharacteristicType;
 			*Message >> ReqCharacteristicType;			
@@ -1890,6 +1893,74 @@ void CGameServer::PacketProcReqItemRotate(int64 SessionID, CMessage* Message)
 	ReturnSession(Session);
 }
 
+void CGameServer::PacketProcReqSelectSkillCharacteristic(int64 SessionID, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionID);
+
+	if (Session)
+	{
+		int64 AccountID;
+		int64 PlayerID;
+
+		do
+		{
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountID;
+
+			// AccountId가 맞는지 확인
+			if (Session->AccountId != AccountID)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> PlayerID;
+
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			// 조종하고 있는 플레이어가 있는지 확인 
+			if (MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerID)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			int8 SelectCharacteristicIndex;
+			*Message >> SelectCharacteristicIndex;
+
+			int8 SelectCharacteristicType;
+			*Message >> SelectCharacteristicType;
+
+			if (SelectCharacteristicIndex > 2)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			st_GameObjectJob* SkillCharacteristicJob = MakeGameObjectJobSelectSkillCharacteristic(SelectCharacteristicIndex, SelectCharacteristicType);
+			MyPlayer->_GameObjectJobQue.Enqueue(SkillCharacteristicJob);	
+
+		} while (0);
+	}
+
+	ReturnSession(Session);
+}
+
 void CGameServer::PacketProcReqQuickSlotSave(int64 SessionId, CMessage* Message)
 {
 	st_Session* Session = FindSession(SessionId);
@@ -1948,7 +2019,7 @@ void CGameServer::PacketProcReqQuickSlotSave(int64 SessionId, CMessage* Message)
 
 			if (IsSkilQuickSlot == true)
 			{
-				// 저장할 기술 정보 파싱
+				// 저장할 기술 정보 파싱				
 				int8 QuickSlotSkillLargetCategory;
 				*Message >> QuickSlotSkillLargetCategory;
 				int8 QuickSlotSkillMediumCategory;
@@ -4580,6 +4651,22 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobDefaultAttack()
 	return DefaultAttackJob;
 }
 
+st_GameObjectJob* CGameServer::MakeGameObjectJobSelectSkillCharacteristic(int8 SelectCharacteristicIndex, int8 SelectChracteristicType)
+{
+	st_GameObjectJob* SelectSkillCharacteristicJob = G_ObjectManager->GameObjectJobCreate();
+	SelectSkillCharacteristicJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SELECT_SKILL_CHARACTERISTIC;
+
+	CGameServerMessage* SelectSkillCharacteristicJobMessage = CGameServerMessage::GameServerMessageAlloc();
+	SelectSkillCharacteristicJobMessage->Clear();
+
+	*SelectSkillCharacteristicJobMessage << SelectCharacteristicIndex;
+	*SelectSkillCharacteristicJobMessage << SelectChracteristicType;
+
+	SelectSkillCharacteristicJob->GameObjectJobMessage = SelectSkillCharacteristicJobMessage;
+
+	return SelectSkillCharacteristicJob;
+}
+
 st_GameObjectJob* CGameServer::MakeGameObjectJobMeleeAttack(int8 MeleeCharacteristicType, int16 MeleeSkillType)
 {
 	st_GameObjectJob* MeleeAttackJob = G_ObjectManager->GameObjectJobCreate();
@@ -5900,6 +5987,40 @@ CGameServerMessage* CGameServer::MakePacketResSyncPosition(int64 TargetObjectId,
 	*ResSyncPositionMessage << SyncPosition;
 
 	return ResSyncPositionMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketResSelectSkillCharacteristic(int64 TargetObjectID, int8 SkillCharacteristicIndex, int8 SkillCharacteristicType, vector<CSkill*> PassiveSkills, vector<CSkill*> ActiveSkills)
+{
+	CGameServerMessage* ResSelectSkillCharacteristicMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResSelectSkillCharacteristicMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResSelectSkillCharacteristicMessage->Clear();
+
+	*ResSelectSkillCharacteristicMessage << (int16)en_PACKET_S2C_SELECT_SKILL_CHARACTERISTIC;
+	*ResSelectSkillCharacteristicMessage << TargetObjectID;
+	*ResSelectSkillCharacteristicMessage << SkillCharacteristicIndex;
+	*ResSelectSkillCharacteristicMessage << SkillCharacteristicType;
+
+	int8 PassiveSkillCount = (int8)PassiveSkills.size();
+	*ResSelectSkillCharacteristicMessage << PassiveSkillCount;
+
+	for (CSkill* PassiveSkill : PassiveSkills)
+	{
+		*ResSelectSkillCharacteristicMessage << *PassiveSkill->GetSkillInfo();
+	}
+
+	int8 ActiveSkillCount = (int8)ActiveSkills.size();
+	*ResSelectSkillCharacteristicMessage << ActiveSkillCount;
+
+	for (CSkill* ActiveSkill : ActiveSkills)
+	{
+		*ResSelectSkillCharacteristicMessage << *ActiveSkill->GetSkillInfo();
+	}
+
+	return ResSelectSkillCharacteristicMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketResSkillToSkillBox(int64 TargetObjectId, st_SkillInfo* SkillInfo)
