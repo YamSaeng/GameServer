@@ -14,7 +14,7 @@
 		<Column name="CurrentMP" type="int" notnull="true"/>
 		<Column name="MaxMP" type="int" notnull="true"/>
 		<Column name="CurrentDP" type="int" notnull="true"/>
-		<Column name="MaxDP" type="int" notnull="true"/>
+		<Column name="MaxDP" type="int" notnull="true"/>		
 		<Column name="AutoRecoveryHPPercent" type="SmallInt" notnull="true"/>
 		<Column name="AutoRecoveryMPPercent" type="SmallInt" notnull="true"/>
 		<Column name="MinMeleeAttackDamage" type="int" notnull="true"/>
@@ -32,6 +32,7 @@
 		<Column name="CurrentExperience" type="BigInt" notnull="true"/>
 		<Column name="RequireExperience" type="BigInt" notnull="true"/>
 		<Column name="TotalExperience" type="BigInt" notnull="true"/>
+		<Column name="SkillPoint" type="TinyInt" notnull="true"/>
 		<Index type="clustered">
 			<PrimaryKey/>
 			<Column name="PlayerDBId"/>
@@ -170,7 +171,8 @@
         LastPositionX,
         CurrentExperience,
         RequireExperience, 
-        TotalExperience 
+        TotalExperience,
+		SkillPoint
         FROM [dbo].[Player] WHERE AccountDBId = (@AccountId)
       ]]>
 		</Body>
@@ -217,6 +219,7 @@
 		<Param name="@CurrentExperience" type="BigInt"/>
 		<Param name="@RequireExperience" type="BigInt"/>
 		<Param name="@TotalExperience" type="BigInt"/>
+		<Param name="@SkillPoint" type="TinyInt"/>
 		<Body>
 			<![CDATA[
 	    SET NOCOUNT ON
@@ -249,7 +252,8 @@
         (@LastPositionX),
         (@CurrentExperience),
         (@RequireExperience),
-        (@TotalExperience))        
+        (@TotalExperience),
+		(@SkillPoint))        
       ]]>
 		</Body>
 	</Procedure>
@@ -1028,6 +1032,7 @@
 		<Param name="@CurrentExperience" type="BigInt"/>
 		<Param name="@RequireExperience" type="BigInt"/>
 		<Param name="@TotalExperience" type="BigInt"/>
+		<Param name="@SkillPoint" type="TinyInt"/>
 		<Body>
 			<![CDATA[
 	    SET NOCOUNT ON
@@ -1051,7 +1056,8 @@
         LastPositionX = (@LastPositionX),
         CurrentExperience = (@CurrentExperience),
         RequireExperience = (@RequireExperience),
-        TotalExperience = (@TotalExperience)
+        TotalExperience = (@TotalExperience),
+		SkillPoint = (@SkillPoint)
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
 		</Body>
