@@ -319,8 +319,7 @@ unsigned __stdcall CDummyClient::LogicThreadProc(void* Argument)
 
 							*ReqMoveStopPacket << (int16)en_PACKET_C2S_MOVE_STOP;
 							*ReqMoveStopPacket << Instance->_ClientArray[i]->AccountId;
-							*ReqMoveStopPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId;
-							*ReqMoveStopPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectStep;
+							*ReqMoveStopPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId;									
 							*ReqMoveStopPacket << (int8)Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.State;
 							*ReqMoveStopPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionX;
 							*ReqMoveStopPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionY;
@@ -450,7 +449,6 @@ unsigned __stdcall CDummyClient::SendThreadProc(void* Argument)
 									*RandPacket << (int16)en_PACKET_C2S_MOVE;
 									*RandPacket << Instance->_ClientArray[i]->AccountId;
 									*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectId;
-									//*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectStep;
 									*RandPacket << (int8)Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.State;
 									*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionX;
 									*RandPacket << Instance->_ClientArray[i]->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionY;
@@ -822,7 +820,10 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 					*Packet >> CharacterNameLen;
 					Packet->GetData(RecvClient->MyCharacterGameObjectInfo.ObjectName, CharacterNameLen);
 					
-					*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectStep;
+					*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectCropStep;
+					*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectCropMaxStep;
+
+					*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectSkillPoint;
 
 					int8 CharacterState;
 					*Packet >> CharacterState;
@@ -925,7 +926,10 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 				*Packet >> CharacterNameLen;
 				Packet->GetData(RecvClient->MyCharacterGameObjectInfo.ObjectName, CharacterNameLen);
 
-				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectStep;
+				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectCropStep;
+				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectCropMaxStep;
+
+				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectSkillPoint;
 
 				int8 CharacterState;
 				*Packet >> CharacterState;
@@ -996,7 +1000,10 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 				*Packet >> CharacterNameLen;
 				Packet->GetData(RecvClient->MyCharacterGameObjectInfo.ObjectName, CharacterNameLen);
 
-				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectStep;
+				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectCropStep;
+				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectCropMaxStep;
+
+				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectSkillPoint;
 
 				int8 CharacterState;
 				*Packet >> CharacterState;
