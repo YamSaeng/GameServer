@@ -595,8 +595,29 @@ enum en_GAME_SERVER_PACKET_TYPE
 
 	//------------------------------------------------------------
 	// 게임서버 스킬 특성 선택 요청 응답
+	// int8 SkillCharacteristicIndex
+	// en_SkillCharacteristic SkillCharacteristicType
+	// CSkill[] PassiveSkills
+	// CSkill[] ActiveSkills
 	//------------------------------------------------------------
 	en_PACKET_S2C_SELECT_SKILL_CHARACTERISTIC,
+
+	//------------------------------------------------------------
+	// 게임서버 스킬 배우기 요청
+	// int64 AccountID
+	// int64 PlayerID
+	// en_SkillCharacteristic SkillCharacteristicType
+	// en_SkillType SkillType
+	//------------------------------------------------------------
+	en_PACKET_C2S_LEARN_SKILL,
+
+	//------------------------------------------------------------
+	// 게임서버 스킬 배우기 요청 응답
+	// int8 SkillCharacteristicIndex	
+	// en_SkillCharacteristic SkillCharacteristicType
+	// en_SkillType SkillType
+	//------------------------------------------------------------
+	en_PACKET_S2C_LEARN_SKILL,
 
 	//------------------------------------------------------------
 	// 게임서버 스킬 저장 요청
