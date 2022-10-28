@@ -3563,6 +3563,7 @@ void CGameServer::PacketProcReqDBAccountCheck(CMessage* Message)
 			int64 PlayerCurrentExperience;
 			int64 PlayerRequireExperience;
 			int64 PlayerTotalExperience;
+			int8 PlayerSkillPoint;
 
 			ClientPlayersGet.OutPlayerDBID(PlayerId);
 			ClientPlayersGet.OutPlayerName(PlayerName);
@@ -3592,6 +3593,7 @@ void CGameServer::PacketProcReqDBAccountCheck(CMessage* Message)
 			ClientPlayersGet.OutCurrentExperience(PlayerCurrentExperience);
 			ClientPlayersGet.OutRequireExperience(PlayerRequireExperience);
 			ClientPlayersGet.OutTotalExperience(PlayerTotalExperience);
+			ClientPlayersGet.OutSkillPoint(PlayerSkillPoint);
 
 			bool FindPlyaerCharacter = ClientPlayersGet.Execute();
 
@@ -3635,7 +3637,7 @@ void CGameServer::PacketProcReqDBAccountCheck(CMessage* Message)
 				NewPlayerCharacter->_AccountId = Session->AccountId;
 				NewPlayerCharacter->_Experience.CurrentExperience = PlayerCurrentExperience;
 				NewPlayerCharacter->_Experience.RequireExperience = PlayerRequireExperience;
-				NewPlayerCharacter->_Experience.TotalExperience = PlayerTotalExperience;
+				NewPlayerCharacter->_Experience.TotalExperience = PlayerTotalExperience;				
 
 				PlayerCount++;
 			}
@@ -3757,6 +3759,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 
 			int32 NewCharacterPositionY = 26;
 			int32 NewCharacterPositionX = 17;
+			int8 NewCharacterSkillPoint = 1;
 
 			SP::CDBGameServerCreateCharacterPush NewCharacterPush(*NewCharacterPushDBConnection);
 			NewCharacterPush.InAccountID(Session->AccountId);
@@ -3787,6 +3790,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 			NewCharacterPush.InCurrentExperence(CurrentExperience);
 			NewCharacterPush.InRequireExperience(LevelData.RequireExperience);
 			NewCharacterPush.InTotalExperience(LevelData.TotalExperience);
+			NewCharacterPush.InSkillPoint(NewCharacterSkillPoint);
 
 			// DB 요청 실행
 			bool SaveNewCharacterQuery = NewCharacterPush.Execute();
@@ -4365,6 +4369,7 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 		
 	CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[LeaveSession->MyPlayerIndex];	
 
+	// 캐릭터 정보 DB에 저장
 	CDBConnection* PlayerInfoSaveDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 	SP::CDBGameServerLeavePlayerStatInfoSave LeavePlayerStatInfoSave(*PlayerInfoSaveDBConnection);
 
@@ -4391,8 +4396,45 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 	LeavePlayerStatInfoSave.InCurrentExperience(MyPlayer->_Experience.CurrentExperience);
 	LeavePlayerStatInfoSave.InRequireExperience(MyPlayer->_Experience.RequireExperience);
 	LeavePlayerStatInfoSave.InTotalExperience(MyPlayer->_Experience.TotalExperience);
+	LeavePlayerStatInfoSave.InSkillPoint(MyPlayer->_GameObjectInfo.ObjectSkillPoint);
 
 	LeavePlayerStatInfoSave.Execute();		
+
+	// 스킬 특성 정보 DB에 저장
+	SP::CDBGameServerSkillCharacteristicUpdate SkillCharacteristicUpdate(*PlayerInfoSaveDBConnection);
+	// 스킬 정보 DB에 저장
+	SP::CDBGameServerSkillToSkillBox SkillIntoSkillBox(*PlayerInfoSaveDBConnection);
+
+	SkillCharacteristicUpdate.InAccountDBId(MyPlayer->_AccountId);
+	SkillCharacteristicUpdate.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
+
+	SkillIntoSkillBox.InAccountDBId(MyPlayer->_AccountId);
+	SkillIntoSkillBox.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
+
+	CSkillCharacteristic* SkillCharacteristics = MyPlayer->_SkillBox.GetSkillCharacteristics();
+	for (int8 i = 0; i < 3; i++)
+	{
+		int8 SkillCharacterType = (int8)SkillCharacteristics[i]._SkillCharacteristic;
+
+		SkillCharacteristicUpdate.InSkillCharacteristicIndex(i);
+		SkillCharacteristicUpdate.InSkillCharacteristicType(SkillCharacterType);
+
+		SkillIntoSkillBox.InCharacteristicType(SkillCharacterType);
+		
+		vector<CSkill*> ActiveSkills = SkillCharacteristics[i].GetActiveSkill();
+		for (CSkill* ActiveSkill : ActiveSkills)
+		{
+			int16 ActiveSkillType = (int16)ActiveSkill->GetSkillInfo()->SkillType;
+			int8 ActiveSkillLevel = ActiveSkill->GetSkillInfo()->SkillLevel;
+
+			SkillIntoSkillBox.InSkillType(ActiveSkillType);
+			SkillIntoSkillBox.InSkillLevel(ActiveSkillLevel);
+
+			SkillIntoSkillBox.Execute();
+		}
+
+		SkillCharacteristicUpdate.Execute();
+	}
 
 	// 퀵슬롯 정보 업데이트
 	for (auto QuickSlotIterator : MyPlayer->_QuickSlotManager.GetQuickSlotBar())
@@ -4512,7 +4554,6 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 		}
 	}
 
-
 	// 가방 정보 DB에 저장	
 	CInventory** MyPlayerInventorys = MyPlayer->_InventoryManager.GetInventory();	
 
@@ -4554,7 +4595,7 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 				LeavePlayerInventoryItemSave.Execute();
 			}
 		}
-	}		
+	}			
 
 	G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerInfoSaveDBConnection);			
 
@@ -5989,7 +6030,7 @@ CGameServerMessage* CGameServer::MakePacketResSyncPosition(int64 TargetObjectId,
 	return ResSyncPositionMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResSelectSkillCharacteristic(int64 TargetObjectID, int8 SkillCharacteristicIndex, int8 SkillCharacteristicType, vector<CSkill*> PassiveSkills, vector<CSkill*> ActiveSkills)
+CGameServerMessage* CGameServer::MakePacketResSelectSkillCharacteristic(int8 SkillCharacteristicIndex, int8 SkillCharacteristicType, vector<CSkill*> PassiveSkills, vector<CSkill*> ActiveSkills)
 {
 	CGameServerMessage* ResSelectSkillCharacteristicMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResSelectSkillCharacteristicMessage == nullptr)
@@ -5999,8 +6040,7 @@ CGameServerMessage* CGameServer::MakePacketResSelectSkillCharacteristic(int64 Ta
 
 	ResSelectSkillCharacteristicMessage->Clear();
 
-	*ResSelectSkillCharacteristicMessage << (int16)en_PACKET_S2C_SELECT_SKILL_CHARACTERISTIC;
-	*ResSelectSkillCharacteristicMessage << TargetObjectID;
+	*ResSelectSkillCharacteristicMessage << (int16)en_PACKET_S2C_SELECT_SKILL_CHARACTERISTIC;	
 	*ResSelectSkillCharacteristicMessage << SkillCharacteristicIndex;
 	*ResSelectSkillCharacteristicMessage << SkillCharacteristicType;
 

@@ -609,7 +609,7 @@ public:
 	//------------------------------------------------------------------------------------------------------------
 	// 게임서버 스킬 선택 응답 패킷 조합
 	//------------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResSelectSkillCharacteristic(int64 TargetObjectID, int8 SkillCharacteristicIndex, int8 SkillCharacteristicType, vector<CSkill*> PassiveSkills, vector<CSkill*> ActiveSkills);
+	CGameServerMessage* MakePacketResSelectSkillCharacteristic(int8 SkillCharacteristicIndex, int8 SkillCharacteristicType, vector<CSkill*> PassiveSkills, vector<CSkill*> ActiveSkills);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 스킬 저장 패킷 조합
 	//-----------------------------------------------------------------------------------------
