@@ -35,6 +35,7 @@ void CSkillCharacteristic::SkillCharacteristicInit(en_SkillCharacteristic SkillC
 
 				st_SkillInfo* ActiveSkillInfo = G_Datamanager->FindSkillData((en_SkillType)i);
 				ActiveSkill->SetSkillInfo(en_SkillCategory::QUICK_SLOT_SKILL_COOLTIME, ActiveSkillInfo);
+				ActiveSkill->GetSkillInfo()->IsSkillLearn = true;
 
 				_ActiveSkills.push_back(ActiveSkill);
 			}
