@@ -133,11 +133,31 @@ void CGameObject::Update()
 								
 				CSkillCharacteristic* SkillCharacteristic =  Player->_SkillBox.FindCharacteristic(SelectSkillCharacterIndex, SkillCharacteristicType);				
 
-				CMessage* ResSkillCharacteristicPacket = G_ObjectManager->GameServer->MakePacketResSelectSkillCharacteristic(_GameObjectInfo.ObjectId,
-					SelectSkillCharacterIndex, SkillCharacteristicType,
+				CMessage* ResSkillCharacteristicPacket = G_ObjectManager->GameServer->MakePacketResSelectSkillCharacteristic(SelectSkillCharacterIndex,
+					SkillCharacteristicType,
 					SkillCharacteristic->GetPassiveSkill(), SkillCharacteristic->GetActiveSkill());
 				G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSkillCharacteristicPacket);
 				ResSkillCharacteristicPacket->Free();
+			}
+			break;
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SKILL_LEARN:
+			{
+				int8 SkillCharacteristicIndex;
+				*GameObjectJob->GameObjectJobMessage >> SkillCharacteristicIndex;
+
+				int8 LearnSkillChracteristicType;
+				*GameObjectJob->GameObjectJobMessage >> LearnSkillChracteristicType;
+
+				int8 LearnSkillType;
+				*GameObjectJob->GameObjectJobMessage >> LearnSkillType;
+
+				CPlayer* Player = (CPlayer*)this;				
+
+				Player->_SkillBox.SkillLearn(SkillCharacteristicIndex, LearnSkillType);
+
+				CMessage* ResSkillLearnPacket = G_ObjectManager->GameServer->MakePacketResSkillLearn((en_SkillType)LearnSkillType);
+				G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSkillLearnPacket);
+				ResSkillLearnPacket->Free();
 			}
 			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_DEAFLUT_ATTACK:
@@ -2038,6 +2058,7 @@ void CGameObject::ExperienceCalculate(CPlayer* TargetPlayer, CGameObject* Target
 		{
 			// 레벨 증가
 			TargetPlayer->_GameObjectInfo.ObjectStatInfo.Level += 1;
+			TargetPlayer->_GameObjectInfo.ObjectSkillPoint += 1;
 
 			// 증가한 레벨에 해당하는 능력치 정보를 읽어온 후 적용한다.
 			st_ObjectStatusData NewCharacterStatus;
