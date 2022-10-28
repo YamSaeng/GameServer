@@ -536,6 +536,9 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_SELECT_SKILL_CHARACTERISTIC:
 		PacketProcReqSelectSkillCharacteristic(SessionID, Message);
 		break;
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_LEARN_SKILL:
+		PacketProcReqLearnSkill(SessionID, Message);
+		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_QUICKSLOT_SAVE:
 		PacketProcReqQuickSlotSave(SessionID, Message);
 		break;
@@ -1955,6 +1958,70 @@ void CGameServer::PacketProcReqSelectSkillCharacteristic(int64 SessionID, CMessa
 			st_GameObjectJob* SkillCharacteristicJob = MakeGameObjectJobSelectSkillCharacteristic(SelectCharacteristicIndex, SelectCharacteristicType);
 			MyPlayer->_GameObjectJobQue.Enqueue(SkillCharacteristicJob);	
 
+		} while (0);
+	}
+
+	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcReqLearnSkill(int64 SessionID, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionID);
+
+	if (Session)
+	{
+		int64 AccountId;
+		int64 PlayerDBId;
+
+		do
+		{
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountId;
+
+			// AccountId가 맞는지 확인
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> PlayerDBId;
+
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			// 조종하고 있는 플레이어가 있는지 확인 
+			if (MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			int8 LearnSkillCharacteristicIndex;
+			*Message >> LearnSkillCharacteristicIndex;
+
+			int8 LearnSkillCharacteristicType;
+			*Message >> LearnSkillCharacteristicType;
+
+			int16 LearnSkillType;
+			*Message >> LearnSkillType;
+
+			st_GameObjectJob* SkillLearnJob = MakeGameObjectJobSkillLearn(LearnSkillCharacteristicIndex, LearnSkillCharacteristicType, LearnSkillType);
+			MyPlayer->_GameObjectJobQue.Enqueue(SkillLearnJob);
 		} while (0);
 	}
 
@@ -4708,6 +4775,23 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobSelectSkillCharacteristic(int8 S
 	return SelectSkillCharacteristicJob;
 }
 
+st_GameObjectJob* CGameServer::MakeGameObjectJobSkillLearn(int8 LearnSkillCharacterIndex, int8 LearnSkillCharacteristicType, int16 LearnSkillType)
+{
+	st_GameObjectJob* SkillLearnJob = G_ObjectManager->GameObjectJobCreate();
+	SkillLearnJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SELECT_SKILL_CHARACTERISTIC;
+
+	CGameServerMessage* SkillLearnJobMessage = CGameServerMessage::GameServerMessageAlloc();
+	SkillLearnJobMessage->Clear();
+
+	*SkillLearnJobMessage << LearnSkillCharacterIndex;
+	*SkillLearnJobMessage << LearnSkillCharacteristicType;
+	*SkillLearnJobMessage << LearnSkillType;
+
+	SkillLearnJob->GameObjectJobMessage = SkillLearnJobMessage;
+
+	return SkillLearnJob;
+}
+
 st_GameObjectJob* CGameServer::MakeGameObjectJobMeleeAttack(int8 MeleeCharacteristicType, int16 MeleeSkillType)
 {
 	st_GameObjectJob* MeleeAttackJob = G_ObjectManager->GameObjectJobCreate();
@@ -6079,6 +6163,23 @@ CGameServerMessage* CGameServer::MakePacketResSkillToSkillBox(int64 TargetObject
 	*ResSkillToSkillBoxMessage << *SkillInfo;
 
 	return ResSkillToSkillBoxMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketResSkillLearn(en_SkillType LearnSkillType)
+{
+	CGameServerMessage* ResSkillLearnMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResSkillLearnMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResSkillLearnMessage->Clear();
+
+	*ResSkillLearnMessage << (int16)en_PACKET_S2C_LEARN_SKILL;
+
+	*ResSkillLearnMessage << (int16)LearnSkillType;
+
+	return ResSkillLearnMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketEffect(int64 TargetObjectId, en_EffectType EffectType, float PrintEffectTime)

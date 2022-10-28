@@ -185,6 +185,10 @@ private:
 	// 스킬 특성 선택 요청 처리
 	//-----------------------------------------------------------------------------
 	void PacketProcReqSelectSkillCharacteristic(int64 SessionID, CMessage* Message);
+	//---------------------------------------------------------------
+	// 스킬 배우기 요청 처리
+	//---------------------------------------------------------------
+	void PacketProcReqLearnSkill(int64 SessionID, CMessage* Message);
 	//------------------------------------------------------------------
 	// 퀵슬롯 저장 요청 처리
 	//------------------------------------------------------------------
@@ -303,7 +307,11 @@ private:
 	//-------------------------------------------------
 	// 스킬 특성 선택 잡 생성 함수
 	//-------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobSelectSkillCharacteristic(int8 SelectCharacteristicIndex, int8 SelectChracteristicType);	
+	st_GameObjectJob* MakeGameObjectJobSelectSkillCharacteristic(int8 SelectCharacteristicIndex, int8 SelectChracteristicType);		
+	//------------------------------------------------------------------------------------------------------------------------------------
+	// 스킬 배우기 잡 생성 함수 
+	//------------------------------------------------------------------------------------------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobSkillLearn(int8 LearnSkillCharacterIndex, int8 LearnSkillCharacteristicType, int16 LearnSkillType);
 	//-------------------------------------------------
 	// 근접 기술 처리 잡 생성 함수
 	//-------------------------------------------------
@@ -614,6 +622,10 @@ public:
 	// 게임서버 스킬 저장 패킷 조합
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResSkillToSkillBox(int64 TargetObjectId, st_SkillInfo* SkillInfo);
+	//-------------------------------------------------------------------
+	// 게임서버 스킬 배우기 응답 패킷 조합
+	//-------------------------------------------------------------------
+	CGameServerMessage* MakePacketResSkillLearn(en_SkillType LearnSkillType);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 이펙트 출력 패킷 조합
 	//-----------------------------------------------------------------------------------------
