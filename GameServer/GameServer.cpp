@@ -40,7 +40,7 @@ CGameServer::CGameServer()
 	_WorldDataBaseThreadEnd = false;
 	_ClientLeaveSaveDBThreadEnd = false;
 	_LogicThreadEnd = false;
-	_TimerJobThreadEnd = false;
+	_TimerJobThreadEnd = false;	
 
 	// 타이머 잡 전용 SWRLock 초기화
 	InitializeSRWLock(&_TimerJobLock);
@@ -3693,6 +3693,7 @@ void CGameServer::PacketProcReqDBAccountCheck(CMessage* Message)
 				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = PlayerMagicCriticalPoint;
 				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.Speed = PlayerSpeed;
 				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxSpeed = PlayerSpeed;
+				NewPlayerCharacter->_GameObjectInfo.ObjectSkillPoint = PlayerSkillPoint;
 				NewPlayerCharacter->_SpawnPosition._Y = PlayerLastPositionY;
 				NewPlayerCharacter->_SpawnPosition._X = PlayerLastPositionX;
 				NewPlayerCharacter->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
@@ -4778,7 +4779,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobSelectSkillCharacteristic(int8 S
 st_GameObjectJob* CGameServer::MakeGameObjectJobSkillLearn(int8 LearnSkillCharacterIndex, int8 LearnSkillCharacteristicType, int16 LearnSkillType)
 {
 	st_GameObjectJob* SkillLearnJob = G_ObjectManager->GameObjectJobCreate();
-	SkillLearnJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SELECT_SKILL_CHARACTERISTIC;
+	SkillLearnJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SKILL_LEARN;
 
 	CGameServerMessage* SkillLearnJobMessage = CGameServerMessage::GameServerMessageAlloc();
 	SkillLearnJobMessage->Clear();
