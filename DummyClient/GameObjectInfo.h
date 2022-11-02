@@ -253,6 +253,7 @@ struct st_GameObjectInfo
 	wstring ObjectName;
 	int8 ObjectCropStep;
 	int8 ObjectCropMaxStep;
+	int8 ObjectSkillMaxPoint;
 	int8 ObjectSkillPoint;
 	st_PositionInfo ObjectPositionInfo;
 	st_StatInfo ObjectStatInfo;
