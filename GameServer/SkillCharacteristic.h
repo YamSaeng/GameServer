@@ -18,7 +18,7 @@ public:
 	//----------------------------------------------------------
 	// 스킬 특성 스킬 활성화
 	//----------------------------------------------------------
-	void SkillCharacteristicActive(en_SkillType SkillType, int8 SkillLevel);
+	void SkillCharacteristicActive(bool IsSkillLearn, en_SkillType SkillType, int8 SkillLevel);
 
 	//-----------------------------------------------------------
 	// 스킬 특성창에서 스킬 찾기

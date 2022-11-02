@@ -141,12 +141,12 @@ void CSkillCharacteristic::SkillCharacteristicInit(en_SkillCharacteristic SkillC
 	}	
 }
 
-void CSkillCharacteristic::SkillCharacteristicActive(en_SkillType SkillType, int8 SkillLevel)
+void CSkillCharacteristic::SkillCharacteristicActive(bool IsSkillLearn, en_SkillType SkillType, int8 SkillLevel)
 {
 	CSkill* ActiveSkill = FindSkill(SkillType);
 	if (ActiveSkill != nullptr)
 	{
-		ActiveSkill->GetSkillInfo()->IsSkillLearn = true;
+		ActiveSkill->GetSkillInfo()->IsSkillLearn = IsSkillLearn;
 	}
 }
 
