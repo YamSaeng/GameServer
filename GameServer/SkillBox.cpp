@@ -45,14 +45,23 @@ void CSkillBox::CreateChracteristic(int8 ChracteristicIndex, int8 Characteristic
 	_SkillCharacteristics[ChracteristicIndex].SkillCharacteristicInit((en_SkillCharacteristic)CharacteristicType);
 }
 
-void CSkillBox::SkillLearn(int8 ChracteristicIndex, int8 CharacteristicType)
+void CSkillBox::SkillLearn(bool IsSkillLearn, int8 ChracteristicIndex, int8 CharacteristicType)
 {
 	if (ChracteristicIndex > 2)
 	{
 		CRASH("OVerflow");
 	}
 
-	_SkillCharacteristics[ChracteristicIndex].SkillCharacteristicActive((en_SkillType)CharacteristicType, 1);
+	if (IsSkillLearn == true)
+	{
+		_SkillPoint--;
+	}
+	else
+	{
+		_SkillPoint++;
+	}
+
+	_SkillCharacteristics[ChracteristicIndex].SkillCharacteristicActive(IsSkillLearn, (en_SkillType)CharacteristicType, 1);
 }
 
 CSkill* CSkillBox::FindSkill(en_SkillCharacteristic CharacteristicType, en_SkillType SkillType)
