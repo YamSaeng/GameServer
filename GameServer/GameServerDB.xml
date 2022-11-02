@@ -33,6 +33,7 @@
 		<Column name="RequireExperience" type="BigInt" notnull="true"/>
 		<Column name="TotalExperience" type="BigInt" notnull="true"/>
 		<Column name="SkillPoint" type="TinyInt" notnull="true"/>
+		<Column name="SkillMaxPoint" type="TinyInt" notnull ="true"/>
 		<Index type="clustered">
 			<PrimaryKey/>
 			<Column name="PlayerDBId"/>
@@ -172,7 +173,8 @@
         CurrentExperience,
         RequireExperience, 
         TotalExperience,
-		SkillPoint
+		SkillPoint,
+		SkillMaxPoint
         FROM [dbo].[Player] WHERE AccountDBId = (@AccountId)
       ]]>
 		</Body>
@@ -220,6 +222,7 @@
 		<Param name="@RequireExperience" type="BigInt"/>
 		<Param name="@TotalExperience" type="BigInt"/>
 		<Param name="@SkillPoint" type="TinyInt"/>
+		<Param name="@SkillMaxPoint" type="TinyInt"/>
 		<Body>
 			<![CDATA[
 	    SET NOCOUNT ON
@@ -253,7 +256,8 @@
         (@CurrentExperience),
         (@RequireExperience),
         (@TotalExperience),
-		(@SkillPoint))        
+		(@SkillPoint),
+		(@SkillMaxPoint))        
       ]]>
 		</Body>
 	</Procedure>
@@ -1033,6 +1037,7 @@
 		<Param name="@RequireExperience" type="BigInt"/>
 		<Param name="@TotalExperience" type="BigInt"/>
 		<Param name="@SkillPoint" type="TinyInt"/>
+		<Param name="@SkillMaxPoint" type="TinyInt"/>
 		<Body>
 			<![CDATA[
 	    SET NOCOUNT ON
@@ -1057,7 +1062,8 @@
         CurrentExperience = (@CurrentExperience),
         RequireExperience = (@RequireExperience),
         TotalExperience = (@TotalExperience),
-		SkillPoint = (@SkillPoint)
+		SkillPoint = (@SkillPoint),
+		SkillMaxPoint = (@SkillMaxPoint)
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
 		</Body>

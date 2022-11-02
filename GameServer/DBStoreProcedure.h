@@ -14,7 +14,7 @@ namespace SP
 	};
 
 	// AccountID를 기준으로 클라가 소유하고 있는 캐릭터를 찾는다.
-	class CDBGameServerPlayersGet : public CDBBind<1, 29>
+	class CDBGameServerPlayersGet : public CDBBind<1, 30>
 	{
 	public:
 		CDBGameServerPlayersGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetPlayers(?)}") { }
@@ -49,6 +49,7 @@ namespace SP
 		void OutRequireExperience(int64& RequireExperience) { BindCol(26, RequireExperience); }
 		void OutTotalExperience(int64& TotalExperience) { BindCol(27, TotalExperience); }
 		void OutSkillPoint(int8& SkillPoint) { BindCol(28, SkillPoint); }
+		void OutSkillMaxPoint(int8& SkillMaxPoint) { BindCol(29, SkillMaxPoint); }
 	};
 
 	// DB에 입력한 해당 캐릭터가 있는지 확인
@@ -60,10 +61,10 @@ namespace SP
 	};
 
 	// DB에 새로운 캐릭 저장
-	class CDBGameServerCreateCharacterPush : public CDBBind<29, 0>
+	class CDBGameServerCreateCharacterPush : public CDBBind<30, 0>
 	{
 	public:
-		CDBGameServerCreateCharacterPush(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spNewCharacterPush(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}") {}
+		CDBGameServerCreateCharacterPush(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spNewCharacterPush(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}") {}
 		void InAccountID(int64& AccountID) { BindParam(0, AccountID); }
 		void InPlayerName(wstring& PlayerName) { BindParam(1, PlayerName.c_str()); }
 		void InPlayerType(int16& PlayerType) { BindParam(2, PlayerType); }
@@ -93,6 +94,7 @@ namespace SP
 		void InRequireExperience(int64& RequireExperience) { BindParam(26, RequireExperience); }
 		void InTotalExperience(int64& CurrentExperence) { BindParam(27, CurrentExperence); }
 		void InSkillPoint(int8& SkillPoint) { BindParam(28, SkillPoint); }
+		void InSkillMaxPoint(int8& SkillMaxPoint) { BindParam(29, SkillMaxPoint); }
 	};
 
 	// 캐릭터 DBid 얻기
@@ -340,10 +342,10 @@ namespace SP
 	};
 
 	// 접속 종료시 플레이어 정보 DB에 기록
-	class CDBGameServerLeavePlayerStatInfoSave : public CDBBind<24, 0>
+	class CDBGameServerLeavePlayerStatInfoSave : public CDBBind<25, 0>
 	{
 	public:
-		CDBGameServerLeavePlayerStatInfoSave(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spPlayerLeaveInfoSave(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}"){}
+		CDBGameServerLeavePlayerStatInfoSave(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spPlayerLeaveInfoSave(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}"){}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
 		void InLevel(int32& Level) { BindParam(2, Level); }
@@ -368,6 +370,7 @@ namespace SP
 		void InRequireExperience(int64& RequireExperience) { BindParam(21, RequireExperience); }
 		void InTotalExperience(int64& TotalExperience) { BindParam(22, TotalExperience); }
 		void InSkillPoint(int8& SkillPoint) { BindParam(23, SkillPoint); }
+		void InSkillMaxPoint(int8& SkillMaxPoint) { BindParam(24, SkillMaxPoint); }
 	};
 
 	// 타일 맵 정보 할당 및 해제
