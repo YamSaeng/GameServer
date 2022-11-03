@@ -172,7 +172,7 @@ void CGameObject::Update()
 					}					
 				}
 
-				CMessage* ResSkillLearnPacket = G_ObjectManager->GameServer->MakePacketResSkillLearn(IsSkillLearn, (en_SkillType)LearnSkillType);
+				CMessage* ResSkillLearnPacket = G_ObjectManager->GameServer->MakePacketResSkillLearn(IsSkillLearn, (en_SkillType)LearnSkillType, Player->_GameObjectInfo.ObjectSkillMaxPoint, Player->_GameObjectInfo.ObjectSkillPoint);
 				G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSkillLearnPacket);
 				ResSkillLearnPacket->Free();
 			}
