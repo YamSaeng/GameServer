@@ -6177,7 +6177,7 @@ CGameServerMessage* CGameServer::MakePacketResSkillToSkillBox(int64 TargetObject
 	return ResSkillToSkillBoxMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResSkillLearn(bool IsSkillLearn, en_SkillType LearnSkillType)
+CGameServerMessage* CGameServer::MakePacketResSkillLearn(bool IsSkillLearn, en_SkillType LearnSkillType, int8 SkillMaxPoint, int8 SkillPoint)
 {
 	CGameServerMessage* ResSkillLearnMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResSkillLearnMessage == nullptr)
@@ -6190,6 +6190,8 @@ CGameServerMessage* CGameServer::MakePacketResSkillLearn(bool IsSkillLearn, en_S
 	*ResSkillLearnMessage << (int16)en_PACKET_S2C_LEARN_SKILL;
 	*ResSkillLearnMessage << IsSkillLearn;
 	*ResSkillLearnMessage << (int16)LearnSkillType;
+	*ResSkillLearnMessage << SkillMaxPoint;
+	*ResSkillLearnMessage << SkillPoint;
 
 	return ResSkillLearnMessage;
 }

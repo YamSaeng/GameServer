@@ -625,7 +625,7 @@ public:
 	//-------------------------------------------------------------------
 	// 게임서버 스킬 배우기 응답 패킷 조합
 	//-------------------------------------------------------------------
-	CGameServerMessage* MakePacketResSkillLearn(bool IsSkillLearn, en_SkillType LearnSkillType);
+	CGameServerMessage* MakePacketResSkillLearn(bool IsSkillLearn, en_SkillType LearnSkillType, int8 SkillMaxPoint, int8 SkillPoint);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 이펙트 출력 패킷 조합
 	//-----------------------------------------------------------------------------------------
