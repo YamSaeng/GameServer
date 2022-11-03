@@ -5,8 +5,6 @@
 
 CSkillBox::CSkillBox()
 {
-	_SkillPoint = 0;
-
 	for (int8 i = 0; i < (int8)en_SkillCharacteristicCount::SKILL_CHARACTERISTIC_MAX_COUNT; i++)
 	{
 		_SkillCharacteristics[i]._SkillBoxIndex = i;
@@ -50,16 +48,7 @@ void CSkillBox::SkillLearn(bool IsSkillLearn, int8 ChracteristicIndex, int8 Char
 	if (ChracteristicIndex > 2)
 	{
 		CRASH("OVerflow");
-	}
-
-	if (IsSkillLearn == true)
-	{
-		_SkillPoint--;
-	}
-	else
-	{
-		_SkillPoint++;
-	}
+	}	
 
 	_SkillCharacteristics[ChracteristicIndex].SkillCharacteristicActive(IsSkillLearn, (en_SkillType)CharacteristicType, 1);
 }

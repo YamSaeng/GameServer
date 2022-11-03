@@ -30,7 +30,6 @@ private:
 		SKILL_CHARACTERISTIC_MAX_COUNT = 3
 	};
 
-	int8 _SkillPoint;
 	CSkillCharacteristic _SkillCharacteristicPublic;	
 	CSkillCharacteristic _SkillCharacteristics[SKILL_CHARACTERISTIC_MAX_COUNT];	
 };
