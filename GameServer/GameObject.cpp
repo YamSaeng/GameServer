@@ -160,6 +160,7 @@ void CGameObject::Update()
 					if (Player->_GameObjectInfo.ObjectSkillPoint > 0)
 					{
 						Player->_SkillBox.SkillLearn(IsSkillLearn, SkillCharacteristicIndex, LearnSkillType);
+						Player->_GameObjectInfo.ObjectSkillPoint--;
 					}
 				}
 				else
@@ -167,6 +168,7 @@ void CGameObject::Update()
 					if (Player->_GameObjectInfo.ObjectSkillPoint < Player->_GameObjectInfo.ObjectSkillMaxPoint)
 					{
 						Player->_SkillBox.SkillLearn(IsSkillLearn, SkillCharacteristicIndex, LearnSkillType);
+						Player->_GameObjectInfo.ObjectSkillPoint++;
 					}					
 				}
 
