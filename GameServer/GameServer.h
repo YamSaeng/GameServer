@@ -311,7 +311,7 @@ private:
 	//------------------------------------------------------------------------------------------------------------------------------------
 	// 스킬 배우기 잡 생성 함수 
 	//------------------------------------------------------------------------------------------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobSkillLearn(int8 LearnSkillCharacterIndex, int8 LearnSkillCharacteristicType, int16 LearnSkillType);
+	st_GameObjectJob* MakeGameObjectJobSkillLearn(bool IsSkillLearn, int8 LearnSkillCharacterIndex, int8 LearnSkillCharacteristicType, int16 LearnSkillType);
 	//-------------------------------------------------
 	// 근접 기술 처리 잡 생성 함수
 	//-------------------------------------------------
@@ -625,7 +625,7 @@ public:
 	//-------------------------------------------------------------------
 	// 게임서버 스킬 배우기 응답 패킷 조합
 	//-------------------------------------------------------------------
-	CGameServerMessage* MakePacketResSkillLearn(en_SkillType LearnSkillType);
+	CGameServerMessage* MakePacketResSkillLearn(bool IsSkillLearn, en_SkillType LearnSkillType);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 이펙트 출력 패킷 조합
 	//-----------------------------------------------------------------------------------------

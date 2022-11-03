@@ -2011,6 +2011,9 @@ void CGameServer::PacketProcReqLearnSkill(int64 SessionID, CMessage* Message)
 				}
 			}
 
+			bool IsSkillLearn;
+			*Message >> IsSkillLearn;
+
 			int8 LearnSkillCharacteristicIndex;
 			*Message >> LearnSkillCharacteristicIndex;
 
@@ -2020,7 +2023,7 @@ void CGameServer::PacketProcReqLearnSkill(int64 SessionID, CMessage* Message)
 			int16 LearnSkillType;
 			*Message >> LearnSkillType;
 
-			st_GameObjectJob* SkillLearnJob = MakeGameObjectJobSkillLearn(LearnSkillCharacteristicIndex, LearnSkillCharacteristicType, LearnSkillType);
+			st_GameObjectJob* SkillLearnJob = MakeGameObjectJobSkillLearn(IsSkillLearn, LearnSkillCharacteristicIndex, LearnSkillCharacteristicType, LearnSkillType);
 			MyPlayer->_GameObjectJobQue.Enqueue(SkillLearnJob);
 		} while (0);
 	}
@@ -3631,6 +3634,7 @@ void CGameServer::PacketProcReqDBAccountCheck(CMessage* Message)
 			int64 PlayerRequireExperience;
 			int64 PlayerTotalExperience;
 			int8 PlayerSkillPoint;
+			int8 PlayerSkillMaxPoint;
 
 			ClientPlayersGet.OutPlayerDBID(PlayerId);
 			ClientPlayersGet.OutPlayerName(PlayerName);
@@ -3661,6 +3665,7 @@ void CGameServer::PacketProcReqDBAccountCheck(CMessage* Message)
 			ClientPlayersGet.OutRequireExperience(PlayerRequireExperience);
 			ClientPlayersGet.OutTotalExperience(PlayerTotalExperience);
 			ClientPlayersGet.OutSkillPoint(PlayerSkillPoint);
+			ClientPlayersGet.OutSkillMaxPoint(PlayerSkillMaxPoint);
 
 			bool FindPlyaerCharacter = ClientPlayersGet.Execute();
 
@@ -3694,6 +3699,7 @@ void CGameServer::PacketProcReqDBAccountCheck(CMessage* Message)
 				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.Speed = PlayerSpeed;
 				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxSpeed = PlayerSpeed;
 				NewPlayerCharacter->_GameObjectInfo.ObjectSkillPoint = PlayerSkillPoint;
+				NewPlayerCharacter->_GameObjectInfo.ObjectSkillMaxPoint = PlayerSkillMaxPoint;
 				NewPlayerCharacter->_SpawnPosition._Y = PlayerLastPositionY;
 				NewPlayerCharacter->_SpawnPosition._X = PlayerLastPositionX;
 				NewPlayerCharacter->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
@@ -3859,6 +3865,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 			NewCharacterPush.InRequireExperience(LevelData.RequireExperience);
 			NewCharacterPush.InTotalExperience(LevelData.TotalExperience);
 			NewCharacterPush.InSkillPoint(NewCharacterSkillPoint);
+			NewCharacterPush.InSkillMaxPoint(NewCharacterSkillPoint);
 
 			// DB 요청 실행
 			bool SaveNewCharacterQuery = NewCharacterPush.Execute();
@@ -4091,7 +4098,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 						while (SkillGet.Fetch())
 						{
 							// 캐릭터 특성에서 스킬 활성화
-							Characteristic->SkillCharacteristicActive((en_SkillType)SkillType, SkillLevel);
+							Characteristic->SkillCharacteristicActive(true, (en_SkillType)SkillType, SkillLevel);
 						}
 					}
 				}				
@@ -4465,6 +4472,7 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 	LeavePlayerStatInfoSave.InRequireExperience(MyPlayer->_Experience.RequireExperience);
 	LeavePlayerStatInfoSave.InTotalExperience(MyPlayer->_Experience.TotalExperience);
 	LeavePlayerStatInfoSave.InSkillPoint(MyPlayer->_GameObjectInfo.ObjectSkillPoint);
+	LeavePlayerStatInfoSave.InSkillMaxPoint(MyPlayer->_GameObjectInfo.ObjectSkillMaxPoint);
 
 	LeavePlayerStatInfoSave.Execute();		
 
@@ -4776,7 +4784,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobSelectSkillCharacteristic(int8 S
 	return SelectSkillCharacteristicJob;
 }
 
-st_GameObjectJob* CGameServer::MakeGameObjectJobSkillLearn(int8 LearnSkillCharacterIndex, int8 LearnSkillCharacteristicType, int16 LearnSkillType)
+st_GameObjectJob* CGameServer::MakeGameObjectJobSkillLearn(bool IsSkillLearn, int8 LearnSkillCharacterIndex, int8 LearnSkillCharacteristicType, int16 LearnSkillType)
 {
 	st_GameObjectJob* SkillLearnJob = G_ObjectManager->GameObjectJobCreate();
 	SkillLearnJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SKILL_LEARN;
@@ -4784,6 +4792,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobSkillLearn(int8 LearnSkillCharac
 	CGameServerMessage* SkillLearnJobMessage = CGameServerMessage::GameServerMessageAlloc();
 	SkillLearnJobMessage->Clear();
 
+	*SkillLearnJobMessage << IsSkillLearn;
 	*SkillLearnJobMessage << LearnSkillCharacterIndex;
 	*SkillLearnJobMessage << LearnSkillCharacteristicType;
 	*SkillLearnJobMessage << LearnSkillType;
@@ -6166,7 +6175,7 @@ CGameServerMessage* CGameServer::MakePacketResSkillToSkillBox(int64 TargetObject
 	return ResSkillToSkillBoxMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResSkillLearn(en_SkillType LearnSkillType)
+CGameServerMessage* CGameServer::MakePacketResSkillLearn(bool IsSkillLearn, en_SkillType LearnSkillType)
 {
 	CGameServerMessage* ResSkillLearnMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResSkillLearnMessage == nullptr)
@@ -6177,7 +6186,7 @@ CGameServerMessage* CGameServer::MakePacketResSkillLearn(en_SkillType LearnSkill
 	ResSkillLearnMessage->Clear();
 
 	*ResSkillLearnMessage << (int16)en_PACKET_S2C_LEARN_SKILL;
-
+	*ResSkillLearnMessage << IsSkillLearn;
 	*ResSkillLearnMessage << (int16)LearnSkillType;
 
 	return ResSkillLearnMessage;
