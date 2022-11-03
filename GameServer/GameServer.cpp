@@ -3912,6 +3912,8 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
 					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
 					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxSpeed = NewCharacterStatus.Speed;
+					NewPlayerCharacter->_GameObjectInfo.ObjectSkillPoint = NewCharacterSkillPoint;
+					NewPlayerCharacter->_GameObjectInfo.ObjectSkillMaxPoint = NewCharacterSkillPoint;
 					NewPlayerCharacter->_SpawnPosition._Y = NewCharacterPositionY;
 					NewPlayerCharacter->_SpawnPosition._X = NewCharacterPositionX;
 					NewPlayerCharacter->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
