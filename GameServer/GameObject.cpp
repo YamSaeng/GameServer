@@ -142,6 +142,9 @@ void CGameObject::Update()
 			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SKILL_LEARN:
 			{
+				bool IsSkillLearn;
+				*GameObjectJob->GameObjectJobMessage >> IsSkillLearn;
+
 				int8 SkillCharacteristicIndex;
 				*GameObjectJob->GameObjectJobMessage >> SkillCharacteristicIndex;
 
@@ -151,11 +154,23 @@ void CGameObject::Update()
 				int8 LearnSkillType;
 				*GameObjectJob->GameObjectJobMessage >> LearnSkillType;
 
-				CPlayer* Player = (CPlayer*)this;				
+				CPlayer* Player = (CPlayer*)this;
+				if (IsSkillLearn == true)
+				{
+					if (Player->_GameObjectInfo.ObjectSkillPoint > 0)
+					{
+						Player->_SkillBox.SkillLearn(IsSkillLearn, SkillCharacteristicIndex, LearnSkillType);
+					}
+				}
+				else
+				{
+					if (Player->_GameObjectInfo.ObjectSkillPoint < Player->_GameObjectInfo.ObjectSkillMaxPoint)
+					{
+						Player->_SkillBox.SkillLearn(IsSkillLearn, SkillCharacteristicIndex, LearnSkillType);
+					}					
+				}
 
-				Player->_SkillBox.SkillLearn(SkillCharacteristicIndex, LearnSkillType);
-
-				CMessage* ResSkillLearnPacket = G_ObjectManager->GameServer->MakePacketResSkillLearn((en_SkillType)LearnSkillType);
+				CMessage* ResSkillLearnPacket = G_ObjectManager->GameServer->MakePacketResSkillLearn(IsSkillLearn, (en_SkillType)LearnSkillType);
 				G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSkillLearnPacket);
 				ResSkillLearnPacket->Free();
 			}
