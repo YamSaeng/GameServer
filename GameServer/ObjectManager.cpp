@@ -335,6 +335,9 @@ st_SkillInfo* CObjectManager::SkillInfoCreate(st_SkillInfo* SkillInfoData, int8 
 	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
 	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:
 	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_ATTACK:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP:	
 	case en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING:
 		{
 			st_AttackSkillInfo* NewAttackSkillInfo = _AttackSkillInfoMemoryPool->Alloc();
@@ -394,6 +397,7 @@ st_SkillInfo* CObjectManager::SkillInfoCreate(st_SkillInfo* SkillInfoData, int8 
 	case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
 	case en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE:
 	case en_SkillType::SKILL_SPELL_ACTIVE_BUF_TELEPORT:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_WEAPON_POISON:
 		{
 			st_BufSkillInfo* NewBufSkillInfo = _BufSkillInfoMemoryPool->Alloc();;
 			*NewBufSkillInfo = *((st_BufSkillInfo*)SkillInfoData);
@@ -450,12 +454,16 @@ void CObjectManager::SkillInfoReturn(en_SkillType SkillType, st_SkillInfo* Retur
 	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
 	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:
 	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_ATTACK:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP:
 	case en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING:
 		_AttackSkillInfoMemoryPool->Free((st_AttackSkillInfo*)ReturnSkillInfo);
 		break;
 	case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
 	case en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE:
 	case en_SkillType::SKILL_SPELL_ACTIVE_BUF_TELEPORT:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_WEAPON_POISON:
 		_BufSkillInfoMemoryPool->Free((st_BufSkillInfo*)ReturnSkillInfo);
 		break;
 	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:
