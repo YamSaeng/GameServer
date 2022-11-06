@@ -1453,12 +1453,7 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 					FightBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
 					FightBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
 					FightBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-					FightBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
-
-					if (NextComboSkill == "SKILL_TYPE_NONE")
-					{
-						FightBufSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-					}
+					FightBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));					
 
 					_FightBufSkillDatas.insert(pair<int16, st_BufSkillInfo*>((int16)FightBufSkill->SkillType, FightBufSkill));
 				}
@@ -1607,6 +1602,18 @@ void CDataManager::LoadDataAssassinationSkill(wstring LoadFileName)
 					{
 						AssassinationAttackSkill->SkillType = en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT;
 					}
+					else if (SkillType == "SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT")
+					{
+						AssassinationAttackSkill->SkillType = en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT;
+					}
+					else if (SkillType == "SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_ATTACK")
+					{
+						AssassinationAttackSkill->SkillType = en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_ATTACK;
+					}
+					else if (SkillType == "SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP")
+					{
+						AssassinationAttackSkill->SkillType = en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP;
+					}
 
 					AssassinationAttackSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_ASSASSINATION;
 					AssassinationAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
@@ -1633,13 +1640,88 @@ void CDataManager::LoadDataAssassinationSkill(wstring LoadFileName)
 					{
 						AssassinationAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
 					}
+					else if (NextComboSkill == "SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT")
+					{
+						AssassinationAttackSkill->NextComboSkill = en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT;
+					}
 
 					_AssassinationAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)AssassinationAttackSkill->SkillType, AssassinationAttackSkill));
 				}
 
 				for (auto& BufSkillFiled : ActiveSkillListFiled["BufSkill"].GetArray())
 				{
+					st_BufSkillInfo* AssassinationBufSkill = new st_BufSkillInfo();
+					AssassinationBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
+					AssassinationBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_BUF;
 
+					int8 SkillNumber = (int8)BufSkillFiled["SkillNumber"].GetInt();
+					string SkillType = BufSkillFiled["SkillType"].GetString();
+					string SkillName = BufSkillFiled["SkillName"].GetString();
+					int SkillMaxLevel = BufSkillFiled["SkillMaxLevel"].GetInt();
+
+					int IncreaseMinAttackPoint = BufSkillFiled["IncreaseMinAttackPoint"].GetInt();
+					int IncreaseMaxAttackPoint = BufSkillFiled["IncreaseMaxAttackPoint"].GetInt();
+					int IncreaseMeleeAttackSpeedPoint = BufSkillFiled["IncreaseMeleeAttackSpeedPoint"].GetInt();
+					int16 IncreaseMeleeAttackHitRate = (int16)BufSkillFiled["IncreaseMeleeAttackHitRate"].GetInt();
+					int16 IncreaseMagicAttackPoint = (int16)BufSkillFiled["IncreaseMagicAttackPoint"].GetInt();
+					int16 IncreaseMagicCastingPoint = (int16)BufSkillFiled["IncreaseMagicCastingPoint"].GetInt();
+					int16 IncreaseMagicAttackHitRate = (int16)BufSkillFiled["IncreaseMagicAttackHitRate"].GetInt();
+					int IncreaseDefencePoint = BufSkillFiled["IncreaseDefencePoint"].GetInt();
+					int16 IncreaseEvasionRate = (int16)BufSkillFiled["IncreaseEvasionRate"].GetInt();
+					int16 IncreaseMeleeCriticalPoint = (int16)BufSkillFiled["IncreaseMeleeCriticalPoint"].GetInt();
+					int16 IncreaseMagicCriticalPoint = (int16)BufSkillFiled["IncreaseMagicCriticalPoint"].GetInt();
+					float IncreaseSpeedPoint = BufSkillFiled["IncreaseSpeedPoint"].GetFloat();
+					int16 IncreaseStatusAbnormalityResistance = (int16)BufSkillFiled["IncreaseStatusAbnormalityResistance"].GetInt();
+
+					int SkillCoolTime = BufSkillFiled["SkillCoolTime"].GetInt();
+					int SkillCastingTime = BufSkillFiled["SkillCastingTime"].GetInt();
+					int64 SkillDurationTime = BufSkillFiled["SkillDurationTime"].GetInt64();
+					int64 SkillDotTime = BufSkillFiled["SkillDotTime"].GetInt64();
+					int SkillDistance = BufSkillFiled["SkillDistance"].GetInt();
+					int32 SkillMotionTime = BufSkillFiled["SkillMotionTime"].GetInt();
+					float SkillTargetEffectTime = BufSkillFiled["SkillTargetEffectTime"].GetFloat();
+					string SkillUpAnimation = BufSkillFiled["SkillUpAnimation"].GetString();
+					string SkillDownAnimation = BufSkillFiled["SkillDownAnimation"].GetString();
+					string SkillLeftAnimation = BufSkillFiled["SkillLeftAnimation"].GetString();
+					string SkillRightAnimation = BufSkillFiled["SkillRightAnimation"].GetString();
+					string NextComboSkill = BufSkillFiled["NextComboSkill"].GetString();
+					string SkillExplation = BufSkillFiled["SkillExplanation"].GetString();
+
+					if (SkillType == "SKILL_ASSASSINATION_ACTIVE_BUF_WEAPON_POISON")
+					{
+						AssassinationBufSkill->SkillType = en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_WEAPON_POISON;
+					}
+
+					AssassinationBufSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_FIGHT;
+					AssassinationBufSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+					AssassinationBufSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
+					AssassinationBufSkill->SkillMaxLevel = SkillMaxLevel;
+					AssassinationBufSkill->IncreaseMinAttackPoint = IncreaseMinAttackPoint;
+					AssassinationBufSkill->IncreaseMaxAttackPoint = IncreaseMaxAttackPoint;
+					AssassinationBufSkill->IncreaseMeleeAttackSpeedPoint = IncreaseMeleeAttackSpeedPoint;
+					AssassinationBufSkill->IncreaseMeleeAttackHitRate = IncreaseMeleeAttackHitRate;
+					AssassinationBufSkill->IncreaseMagicAttackPoint = IncreaseMagicAttackPoint;
+					AssassinationBufSkill->IncreaseMagicCastingPoint = IncreaseMagicCastingPoint;
+					AssassinationBufSkill->IncreaseMagicAttackHitRate = IncreaseMagicAttackHitRate;
+					AssassinationBufSkill->IncreaseDefencePoint = IncreaseDefencePoint;
+					AssassinationBufSkill->IncreaseEvasionRate = IncreaseEvasionRate;
+					AssassinationBufSkill->IncreaseMeleeCriticalPoint = IncreaseMeleeCriticalPoint;
+					AssassinationBufSkill->IncreaseMagicCriticalPoint = IncreaseMagicCriticalPoint;
+					AssassinationBufSkill->IncreaseSpeedPoint = IncreaseSpeedPoint;
+					AssassinationBufSkill->IncreaseStatusAbnormalityResistance = IncreaseStatusAbnormalityResistance;
+					AssassinationBufSkill->SkillCoolTime = SkillCoolTime;
+					AssassinationBufSkill->SkillCastingTime = SkillCastingTime;
+					AssassinationBufSkill->SkillDurationTime = SkillDurationTime;
+					AssassinationBufSkill->SkillDotTime = SkillDotTime;
+					AssassinationBufSkill->SkillDistance = SkillDistance;
+					AssassinationBufSkill->SkillMotionTime = SkillMotionTime;
+					AssassinationBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+					AssassinationBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+					AssassinationBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+					AssassinationBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+					AssassinationBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
+
+					_AssassinationBufSkillDatas.insert(pair<int16, st_BufSkillInfo*>((int16)AssassinationBufSkill->SkillType, AssassinationBufSkill));
 				}
 			}
 		}
@@ -2534,7 +2616,12 @@ st_SkillInfo* CDataManager::FindSkillData(en_SkillType FindSkillType)
 	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:
 		return (*_DisciplineAttackSkillDatas.find((int16)FindSkillType)).second;
 	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_ATTACK:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP:
 		return (*_AssassinationAttackSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_WEAPON_POISON:
+		return (*_AssassinationBufSkillDatas.find((int16)FindSkillType)).second;
 	case en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING:
 		return (*_ShootingAttackSkillDatas.find((int16)FindSkillType)).second;
 	}	
