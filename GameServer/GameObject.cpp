@@ -68,6 +68,30 @@ void CGameObject::StatusAbnormalCheck()
 			_GameObjectInfo.ObjectPositionInfo.Position._X +=
 				(st_Vector2::Left()._X * 4.0f * 0.02f);
 			break;
+		case en_MoveDir::LEFT_UP:
+			_GameObjectInfo.ObjectPositionInfo.Position._Y +=
+				(st_Vector2::Down()._Y * 4.0f * 0.02f);
+			_GameObjectInfo.ObjectPositionInfo.Position._X +=
+				(st_Vector2::Right()._X * 4.0f * 0.02f);
+			break;
+		case en_MoveDir::LEFT_DOWN:
+			_GameObjectInfo.ObjectPositionInfo.Position._Y +=
+				(st_Vector2::Up()._Y * 4.0f * 0.02f);
+			_GameObjectInfo.ObjectPositionInfo.Position._X +=
+				(st_Vector2::Right()._X * 4.0f * 0.02f);
+			break;
+		case en_MoveDir::RIGHT_UP:
+			_GameObjectInfo.ObjectPositionInfo.Position._Y +=
+				(st_Vector2::Down()._Y * 4.0f * 0.02f);
+			_GameObjectInfo.ObjectPositionInfo.Position._X +=
+				(st_Vector2::Left()._X * 4.0f * 0.02f);
+			break;
+		case en_MoveDir::RIGHT_DOWN:
+			_GameObjectInfo.ObjectPositionInfo.Position._Y +=
+				(st_Vector2::Up()._Y * 4.0f * 0.02f);
+			_GameObjectInfo.ObjectPositionInfo.Position._X +=
+				(st_Vector2::Left()._X * 4.0f * 0.02f);
+			break;
 		}
 
 		bool CanMove = _Channel->GetMap()->Cango(this, _GameObjectInfo.ObjectPositionInfo.Position._X, _GameObjectInfo.ObjectPositionInfo.Position._Y);
@@ -329,7 +353,7 @@ void CGameObject::Update()
 												case en_MoveDir::RIGHT:
 													_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X = MyFrontCellPosition._X + 0.5f;
 													_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y = _GameObjectInfo.ObjectPositionInfo.Position._Y;
-													break;
+													break;												
 												}
 
 												CMessage* ResSyncPositionPacket = G_ObjectManager->GameServer->MakePacketResSyncPosition(_SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
@@ -456,12 +480,12 @@ void CGameObject::Update()
 							}
 							break;
 							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:
-							{
+								{
 
+								}
+								break;							
 							}
-							break;
-							}
-
+							 
 							CMessage* AnimationPlayPacket = G_ObjectManager->GameServer->MakePacketResAnimationPlay(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo.MoveDir,
 								(*FindMeleeSkill->GetSkillInfo()->SkillAnimations.find(_GameObjectInfo.ObjectPositionInfo.MoveDir)).second);
 							G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, AnimationPlayPacket);
