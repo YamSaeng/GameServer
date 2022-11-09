@@ -22,7 +22,11 @@ enum class en_MoveDir : int8
 	UP,
 	DOWN,
 	LEFT,
-	RIGHT
+	RIGHT,
+	LEFT_UP,
+	LEFT_DOWN,
+	RIGHT_UP,
+	RIGHT_DOWN
 };
 
 enum class en_GameObjectType : int16
