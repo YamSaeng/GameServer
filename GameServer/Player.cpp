@@ -426,6 +426,30 @@ void CPlayer::UpdateMoving()
 		_GameObjectInfo.ObjectPositionInfo.Position._X +=
 			(st_Vector2::Right()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 		break;
+	case en_MoveDir::LEFT_UP:
+		_GameObjectInfo.ObjectPositionInfo.Position._X +=
+			(st_Vector2::Left()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		_GameObjectInfo.ObjectPositionInfo.Position._Y +=
+			(st_Vector2::Up()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		break;
+	case en_MoveDir::LEFT_DOWN:
+		_GameObjectInfo.ObjectPositionInfo.Position._X +=
+			(st_Vector2::Left()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		_GameObjectInfo.ObjectPositionInfo.Position._Y +=
+			(st_Vector2::Down()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		break;
+	case en_MoveDir::RIGHT_UP:
+		_GameObjectInfo.ObjectPositionInfo.Position._X +=
+			(st_Vector2::Right()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		_GameObjectInfo.ObjectPositionInfo.Position._Y +=
+			(st_Vector2::Up()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		break;
+	case en_MoveDir::RIGHT_DOWN:
+		_GameObjectInfo.ObjectPositionInfo.Position._X +=
+			(st_Vector2::Right()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		_GameObjectInfo.ObjectPositionInfo.Position._Y +=
+			(st_Vector2::Down()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		break;
 	}	
 
 	_RectCollision->CollisionUpdate();
