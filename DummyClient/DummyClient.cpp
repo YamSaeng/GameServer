@@ -823,7 +823,7 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 					*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectCropStep;
 					*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectCropMaxStep;
 
-					*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectSkillPoint;
+					*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectSkillMaxPoint;					
 
 					int8 CharacterState;
 					*Packet >> CharacterState;
@@ -929,7 +929,7 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectCropStep;
 				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectCropMaxStep;
 
-				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectSkillPoint;
+				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectSkillMaxPoint;				
 
 				int8 CharacterState;
 				*Packet >> CharacterState;
@@ -1003,7 +1003,7 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectCropStep;
 				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectCropMaxStep;
 
-				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectSkillPoint;
+				*Packet >> RecvClient->MyCharacterGameObjectInfo.ObjectSkillMaxPoint;				
 
 				int8 CharacterState;
 				*Packet >> CharacterState;
