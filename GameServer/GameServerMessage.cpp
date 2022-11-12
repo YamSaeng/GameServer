@@ -32,7 +32,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_GameObjectInfo& GameObject
 
     *this << GameObjectInfo.ObjectCropStep;
     *this << GameObjectInfo.ObjectCropMaxStep;
-    *this << GameObjectInfo.ObjectSkillPoint;
+    *this << GameObjectInfo.ObjectSkillMaxPoint;
     *this << GameObjectInfo.ObjectPositionInfo;
     *this << GameObjectInfo.ObjectStatInfo;
     *this << (int16)GameObjectInfo.ObjectType;
