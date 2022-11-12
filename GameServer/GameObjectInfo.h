@@ -588,6 +588,15 @@ enum class en_QuickSlotBarType : int8
 	QUICK_SLOT_BAR_TYPE_ITEM
 };
 
+enum class en_Season : int8
+{
+	SEASON_NONE,
+	SEASON_SPRING,
+	SEASON_SUMMER,
+	SEASON_FALL,
+	SEASON_WINTER
+};
+
 namespace UnityEngine
 {
 	enum en_UnityKeyCode
@@ -2260,7 +2269,7 @@ struct st_GameObjectInfo
 	wstring ObjectName;
 	int8 ObjectCropStep;
 	int8 ObjectCropMaxStep;
-	int8 ObjectSkillMaxPoint;
+	int8 ObjectSkillMaxPoint;	
 	int8 ObjectSkillPoint;
 	st_PositionInfo ObjectPositionInfo;
 	st_StatInfo ObjectStatInfo;
@@ -2289,6 +2298,7 @@ struct st_Color
 	static st_Color Red() { return st_Color(255, 0, 0); }
 	static st_Color Green() { return st_Color(0, 255, 0); }
 	static st_Color Blue() { return st_Color(0, 0, 255); }
+	static st_Color SkyBlue() { return st_Color(80, 188, 223); }
 	static st_Color Yellow() { return st_Color(255, 212, 255); }
 	static st_Color White() { return st_Color(255, 255, 255); }
 };
