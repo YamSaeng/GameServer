@@ -3632,8 +3632,7 @@ void CGameServer::PacketProcReqDBAccountCheck(CMessage* Message)
 			int32 PlayerLastPositionX;
 			int64 PlayerCurrentExperience;
 			int64 PlayerRequireExperience;
-			int64 PlayerTotalExperience;
-			int8 PlayerSkillPoint;
+			int64 PlayerTotalExperience;									
 			int8 PlayerSkillMaxPoint;
 
 			ClientPlayersGet.OutPlayerDBID(PlayerId);
@@ -3663,8 +3662,7 @@ void CGameServer::PacketProcReqDBAccountCheck(CMessage* Message)
 			ClientPlayersGet.OutLastPositionX(PlayerLastPositionX);
 			ClientPlayersGet.OutCurrentExperience(PlayerCurrentExperience);
 			ClientPlayersGet.OutRequireExperience(PlayerRequireExperience);
-			ClientPlayersGet.OutTotalExperience(PlayerTotalExperience);
-			ClientPlayersGet.OutSkillPoint(PlayerSkillPoint);
+			ClientPlayersGet.OutTotalExperience(PlayerTotalExperience);						
 			ClientPlayersGet.OutSkillMaxPoint(PlayerSkillMaxPoint);
 
 			bool FindPlyaerCharacter = ClientPlayersGet.Execute();
@@ -3698,8 +3696,8 @@ void CGameServer::PacketProcReqDBAccountCheck(CMessage* Message)
 				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = PlayerMagicCriticalPoint;
 				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.Speed = PlayerSpeed;
 				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxSpeed = PlayerSpeed;
-				NewPlayerCharacter->_GameObjectInfo.ObjectSkillPoint = PlayerSkillPoint;
 				NewPlayerCharacter->_GameObjectInfo.ObjectSkillMaxPoint = PlayerSkillMaxPoint;
+				NewPlayerCharacter->_GameObjectInfo.ObjectSkillPoint = PlayerSkillMaxPoint;
 				NewPlayerCharacter->_SpawnPosition._Y = PlayerLastPositionY;
 				NewPlayerCharacter->_SpawnPosition._X = PlayerLastPositionX;
 				NewPlayerCharacter->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
@@ -3863,8 +3861,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 			NewCharacterPush.InLastPositionX(NewCharacterPositionX);
 			NewCharacterPush.InCurrentExperence(CurrentExperience);
 			NewCharacterPush.InRequireExperience(LevelData.RequireExperience);
-			NewCharacterPush.InTotalExperience(LevelData.TotalExperience);
-			NewCharacterPush.InSkillPoint(NewCharacterSkillPoint);
+			NewCharacterPush.InTotalExperience(LevelData.TotalExperience);			
 			NewCharacterPush.InSkillMaxPoint(NewCharacterSkillPoint);
 
 			// DB 요청 실행
@@ -3935,8 +3932,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 						for (int16 X = 0; X < (int8)en_InventoryManager::INVENTORY_DEFAULT_WIDH_SIZE; X++)
 						{
 							CDBConnection* DBItemToInventoryConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-							SP::CDBGameServerItemCreateToInventory ItemToInventory(*DBItemToInventoryConnection);
-							st_ItemInfo NewItem;
+							SP::CDBGameServerItemCreateToInventory ItemToInventory(*DBItemToInventoryConnection);							
 
 							ItemToInventory.InItemTileGridPositionX(X);
 							ItemToInventory.InItemTileGridPositionY(Y);							
@@ -4472,8 +4468,7 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 	LeavePlayerStatInfoSave.InLastPositionX(MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X);
 	LeavePlayerStatInfoSave.InCurrentExperience(MyPlayer->_Experience.CurrentExperience);
 	LeavePlayerStatInfoSave.InRequireExperience(MyPlayer->_Experience.RequireExperience);
-	LeavePlayerStatInfoSave.InTotalExperience(MyPlayer->_Experience.TotalExperience);
-	LeavePlayerStatInfoSave.InSkillPoint(MyPlayer->_GameObjectInfo.ObjectSkillPoint);
+	LeavePlayerStatInfoSave.InTotalExperience(MyPlayer->_Experience.TotalExperience);	
 	LeavePlayerStatInfoSave.InSkillMaxPoint(MyPlayer->_GameObjectInfo.ObjectSkillMaxPoint);
 
 	LeavePlayerStatInfoSave.Execute();		
