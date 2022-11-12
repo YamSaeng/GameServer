@@ -31,8 +31,7 @@
 		<Column name="LastPositionX" type="int" notnull="true"/>
 		<Column name="CurrentExperience" type="BigInt" notnull="true"/>
 		<Column name="RequireExperience" type="BigInt" notnull="true"/>
-		<Column name="TotalExperience" type="BigInt" notnull="true"/>
-		<Column name="SkillPoint" type="TinyInt" notnull="true"/>
+		<Column name="TotalExperience" type="BigInt" notnull="true"/>		
 		<Column name="SkillMaxPoint" type="TinyInt" notnull ="true"/>
 		<Index type="clustered">
 			<PrimaryKey/>
@@ -172,8 +171,7 @@
         LastPositionX,
         CurrentExperience,
         RequireExperience, 
-        TotalExperience,
-		SkillPoint,
+        TotalExperience,			
 		SkillMaxPoint
         FROM [dbo].[Player] WHERE AccountDBId = (@AccountId)
       ]]>
@@ -220,8 +218,7 @@
 		<Param name="@LastPositionX" type="int"/>
 		<Param name="@CurrentExperience" type="BigInt"/>
 		<Param name="@RequireExperience" type="BigInt"/>
-		<Param name="@TotalExperience" type="BigInt"/>
-		<Param name="@SkillPoint" type="TinyInt"/>
+		<Param name="@TotalExperience" type="BigInt"/>		
 		<Param name="@SkillMaxPoint" type="TinyInt"/>
 		<Body>
 			<![CDATA[
@@ -255,8 +252,7 @@
         (@LastPositionX),
         (@CurrentExperience),
         (@RequireExperience),
-        (@TotalExperience),
-		(@SkillPoint),
+        (@TotalExperience),		
 		(@SkillMaxPoint))        
       ]]>
 		</Body>
@@ -1051,8 +1047,7 @@
 		<Param name="@LastPositionX" type="Int"/>
 		<Param name="@CurrentExperience" type="BigInt"/>
 		<Param name="@RequireExperience" type="BigInt"/>
-		<Param name="@TotalExperience" type="BigInt"/>
-		<Param name="@SkillPoint" type="TinyInt"/>
+		<Param name="@TotalExperience" type="BigInt"/>		
 		<Param name="@SkillMaxPoint" type="TinyInt"/>
 		<Body>
 			<![CDATA[
@@ -1077,8 +1072,7 @@
         LastPositionX = (@LastPositionX),
         CurrentExperience = (@CurrentExperience),
         RequireExperience = (@RequireExperience),
-        TotalExperience = (@TotalExperience),
-		SkillPoint = (@SkillPoint),
+        TotalExperience = (@TotalExperience),		
 		SkillMaxPoint = (@SkillMaxPoint)
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
