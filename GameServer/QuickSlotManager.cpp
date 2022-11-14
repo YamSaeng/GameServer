@@ -64,6 +64,20 @@ st_QuickSlotBarSlotInfo* CQuickSlotManager::FindQuickSlotBar(int8 QuickSlotBarIn
 	}
 }
 
+vector<st_QuickSlotBarSlotInfo*> CQuickSlotManager::FindQuickSlotBarInfo(en_SkillType FindSkillType)
+{
+	vector<st_QuickSlotBarSlotInfo*> QuickSlotBarInfos;
+	for (auto QuickSlotBarIterator : _QuickSlotBars)
+	{
+		for (auto QuickSlotBarSlotIterator : QuickSlotBarIterator.second->_QuickSlotBarSlotInfos)
+		{
+			QuickSlotBarInfos.push_back(QuickSlotBarSlotIterator.second);
+		}
+	}
+
+	return QuickSlotBarInfos;
+}
+
 vector<st_QuickSlotBarPosition> CQuickSlotManager::FindQuickSlotBar(en_SkillType FindSkillType)
 {
 	vector<st_QuickSlotBarPosition> QuickSlotSkillPositions;
