@@ -179,23 +179,70 @@ void CGameObject::Update()
 				*GameObjectJob->GameObjectJobMessage >> LearnSkillType;
 
 				CPlayer* Player = (CPlayer*)this;
-				if (IsSkillLearn == true)
-				{
-					if (Player->_GameObjectInfo.ObjectSkillPoint > 0)
-					{
-						Player->_SkillBox.SkillLearn(IsSkillLearn, SkillCharacteristicIndex, LearnSkillType);
-						Player->_GameObjectInfo.ObjectSkillPoint--;
-					}
-				}
-				else
-				{
-					if (Player->_GameObjectInfo.ObjectSkillPoint < Player->_GameObjectInfo.ObjectSkillMaxPoint)
-					{
-						Player->_SkillBox.SkillLearn(IsSkillLearn, SkillCharacteristicIndex, LearnSkillType);
-						Player->_GameObjectInfo.ObjectSkillPoint++;
-					}					
-				}
 
+				CSkill* Skill = Player->_SkillBox.FindSkill((en_SkillCharacteristic)LearnSkillChracteristicType, (en_SkillType)LearnSkillType);
+				if (Skill != nullptr)
+				{
+					if (IsSkillLearn == true)
+					{
+						if (Skill->GetSkillInfo()->IsSkillLearn == false)
+						{
+							if (Player->_GameObjectInfo.ObjectSkillPoint > 0)
+							{
+								Player->_SkillBox.SkillLearn(IsSkillLearn, SkillCharacteristicIndex, LearnSkillType);
+								Player->_GameObjectInfo.ObjectSkillPoint--;
+							}
+							else
+							{
+								IsSkillLearn = false;
+							}
+						}						
+					}
+					else
+					{
+						if (Skill->GetSkillInfo()->IsSkillLearn == true)
+						{
+							if (Player->_GameObjectInfo.ObjectSkillPoint < Player->_GameObjectInfo.ObjectSkillMaxPoint)
+							{
+								// 퀵슬롯에서 취소하고자 하는스킬을 찾고 퀵슬롯 등록 제거
+								vector<st_QuickSlotBarSlotInfo*> QuickSlotBars = Player->_QuickSlotManager.FindQuickSlotBarInfo((en_SkillType)LearnSkillType);
+								for (auto QuickSlotBar : QuickSlotBars)
+								{
+									for (auto QuickSlotPositionIter = Skill->_QuickSlotBarPosition.begin();
+										QuickSlotPositionIter != Skill->_QuickSlotBarPosition.end();
+										++QuickSlotPositionIter)
+									{
+										st_Vector2Int QuickSlotPosition = *QuickSlotPositionIter;
+
+										if (QuickSlotPosition._Y == QuickSlotBar->QuickSlotBarIndex && QuickSlotPosition._X == QuickSlotBar->QuickSlotBarSlotIndex)
+										{
+											QuickSlotBar->QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_NONE;
+											QuickSlotBar->QuickBarSkill = nullptr;
+											QuickSlotBar->QuickBarItem = nullptr;
+
+											Skill->_QuickSlotBarPosition.erase(QuickSlotPositionIter);
+
+											CMessage* ResQuickSlotInitMessage = G_ObjectManager->GameServer->MakePacketResQuickSlotInit(QuickSlotBar->QuickSlotBarIndex,
+												QuickSlotBar->QuickSlotBarSlotIndex);
+											G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResQuickSlotInitMessage);
+											ResQuickSlotInitMessage->Free();
+
+											break;
+										}
+									}									
+								}							
+
+								Player->_SkillBox.SkillLearn(IsSkillLearn, SkillCharacteristicIndex, LearnSkillType);
+								Player->_GameObjectInfo.ObjectSkillPoint++;
+							}
+							else
+							{
+								IsSkillLearn = false;
+							}
+						}
+					}
+				}								
+				
 				CMessage* ResSkillLearnPacket = G_ObjectManager->GameServer->MakePacketResSkillLearn(IsSkillLearn, (en_SkillType)LearnSkillType, Player->_GameObjectInfo.ObjectSkillMaxPoint, Player->_GameObjectInfo.ObjectSkillPoint);
 				G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSkillLearnPacket);
 				ResSkillLearnPacket->Free();
