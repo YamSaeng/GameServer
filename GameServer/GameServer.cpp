@@ -5156,23 +5156,6 @@ CGameServerMessage* CGameServer::MakePacketResQuickSlotSwap(st_QuickSlotBarSlotI
 	return ResQuickSlotSwapMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResQuickSlotInit(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex)
-{
-	CGameServerMessage* ResQuickSlotInitMessage = CGameServerMessage::GameServerMessageAlloc();
-	if (ResQuickSlotInitMessage == nullptr)
-	{
-		return nullptr;
-	}
-
-	ResQuickSlotInitMessage->Clear();
-
-	*ResQuickSlotInitMessage << (int16)en_PACKET_S2C_QUICKSLOT_EMPTY;
-	*ResQuickSlotInitMessage << QuickSlotBarIndex;
-	*ResQuickSlotInitMessage << QuickSlotBarSlotIndex;
-
-	return ResQuickSlotInitMessage;
-}
-
 CGameServerMessage* CGameServer::MakePacketCraftingList(int64 AccountId, int64 PlayerId, vector<st_CraftingItemCategory> CraftingItemList)
 {
 	CGameServerMessage* ResCraftingListMessage = CGameServerMessage::GameServerMessageAlloc();
@@ -6119,6 +6102,23 @@ CGameServerMessage* CGameServer::MakePacketResSyncPosition(int64 TargetObjectId,
 	*ResSyncPositionMessage << SyncPosition;
 
 	return ResSyncPositionMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketResQuickSlotInit(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex)
+{
+	CGameServerMessage* ResQuickSlotInitMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResQuickSlotInitMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResQuickSlotInitMessage->Clear();
+
+	*ResQuickSlotInitMessage << (int16)en_PACKET_S2C_QUICKSLOT_EMPTY;
+	*ResQuickSlotInitMessage << QuickSlotBarIndex;
+	*ResQuickSlotInitMessage << QuickSlotBarSlotIndex;
+
+	return ResQuickSlotInitMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketResSelectSkillCharacteristic(int8 SkillCharacteristicIndex, int8 SkillCharacteristicType, vector<CSkill*> PassiveSkills, vector<CSkill*> ActiveSkills)
