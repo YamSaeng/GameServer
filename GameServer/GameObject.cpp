@@ -151,17 +151,26 @@ void CGameObject::Update()
 				int8 SkillCharacteristicType;
 				*GameObjectJob->GameObjectJobMessage >> SkillCharacteristicType;
 
-				CPlayer* Player = (CPlayer*)this;
+				CPlayer* Player = (CPlayer*)this;				
 
-				Player->_SkillBox.CreateChracteristic(SelectSkillCharacterIndex, SkillCharacteristicType);
-								
-				CSkillCharacteristic* SkillCharacteristic =  Player->_SkillBox.FindCharacteristic(SelectSkillCharacterIndex, SkillCharacteristicType);				
+				if (Player->_SkillBox.CheckCharacteristic((en_SkillCharacteristic)SkillCharacteristicType) == true)
+				{
+					CMessage* ResReqCancel = G_ObjectManager->GameServer->MakePacketReqCancel(en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_SELECT_SKILL_CHARACTERISTIC);
+					G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResReqCancel);
+					ResReqCancel->Free();
+				}			
+				else
+				{
+					Player->_SkillBox.CreateChracteristic(SelectSkillCharacterIndex, SkillCharacteristicType);
 
-				CMessage* ResSkillCharacteristicPacket = G_ObjectManager->GameServer->MakePacketResSelectSkillCharacteristic(SelectSkillCharacterIndex,
-					SkillCharacteristicType,
-					SkillCharacteristic->GetPassiveSkill(), SkillCharacteristic->GetActiveSkill());
-				G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSkillCharacteristicPacket);
-				ResSkillCharacteristicPacket->Free();
+					CSkillCharacteristic* SkillCharacteristic = Player->_SkillBox.FindCharacteristic(SelectSkillCharacterIndex, SkillCharacteristicType);
+
+					CMessage* ResSkillCharacteristicPacket = G_ObjectManager->GameServer->MakePacketResSelectSkillCharacteristic(true, SelectSkillCharacterIndex,
+						SkillCharacteristicType,
+						SkillCharacteristic->GetPassiveSkill(), SkillCharacteristic->GetActiveSkill());
+					G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSkillCharacteristicPacket);
+					ResSkillCharacteristicPacket->Free();
+				}
 			}
 			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SKILL_LEARN:
