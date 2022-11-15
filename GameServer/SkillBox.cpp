@@ -156,3 +156,16 @@ CSkillCharacteristic* CSkillBox::GetSkillCharacteristics()
 {
 	return _SkillCharacteristics;
 }
+
+bool CSkillBox::CheckCharacteristic(en_SkillCharacteristic SkillCharacteristic)
+{	
+	for (int i = 0; i < 3; i++)
+	{
+		if (_SkillCharacteristics[i]._SkillCharacteristic == SkillCharacteristic)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}

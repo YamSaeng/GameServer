@@ -24,6 +24,8 @@ public:
 
 	CSkillCharacteristic* GetSkillCharacteristicPublic();
 	CSkillCharacteristic* GetSkillCharacteristics();
+
+	bool CheckCharacteristic(en_SkillCharacteristic SkillCharacteristic);
 private:
 	enum en_SkillCharacteristicCount
 	{
