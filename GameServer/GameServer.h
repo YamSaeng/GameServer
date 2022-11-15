@@ -615,9 +615,9 @@ public:
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResQuickSlotInit(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex);
 	//------------------------------------------------------------------------------------------------------------
-	// 게임서버 스킬 선택 응답 패킷 조합
+	// 게임서버 스킬 특성 선택 응답 패킷 조합
 	//------------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResSelectSkillCharacteristic(int8 SkillCharacteristicIndex, int8 SkillCharacteristicType, vector<CSkill*> PassiveSkills, vector<CSkill*> ActiveSkills);
+	CGameServerMessage* MakePacketResSelectSkillCharacteristic(bool IsSuccess, int8 SkillCharacteristicIndex, int8 SkillCharacteristicType, vector<CSkill*> PassiveSkills, vector<CSkill*> ActiveSkills);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 스킬 저장 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -726,6 +726,10 @@ public:
 	// 게임서버 작물 성장 단계 확인 요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketPlantGrowthStep(int64 PlantObjectID, int8 PlantGrowthStep, float PlantGrowthRatio);
+	//---------------------------------------------------
+	// 게임서버 요청 실패 응답 패킷 조합
+	//---------------------------------------------------
+	CGameServerMessage* MakePacketReqCancel(en_GAME_SERVER_PACKET_TYPE PacketType);
 
 	//---------------------------------------------------
 	// 로그인 서버 로그아웃 요청 패킷 조합

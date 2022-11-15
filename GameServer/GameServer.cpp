@@ -6121,7 +6121,7 @@ CGameServerMessage* CGameServer::MakePacketResQuickSlotInit(int8 QuickSlotBarInd
 	return ResQuickSlotInitMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResSelectSkillCharacteristic(int8 SkillCharacteristicIndex, int8 SkillCharacteristicType, vector<CSkill*> PassiveSkills, vector<CSkill*> ActiveSkills)
+CGameServerMessage* CGameServer::MakePacketResSelectSkillCharacteristic(bool IsSuccess, int8 SkillCharacteristicIndex, int8 SkillCharacteristicType, vector<CSkill*> PassiveSkills, vector<CSkill*> ActiveSkills)
 {
 	CGameServerMessage* ResSelectSkillCharacteristicMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResSelectSkillCharacteristicMessage == nullptr)
@@ -6132,6 +6132,7 @@ CGameServerMessage* CGameServer::MakePacketResSelectSkillCharacteristic(int8 Ski
 	ResSelectSkillCharacteristicMessage->Clear();
 
 	*ResSelectSkillCharacteristicMessage << (int16)en_PACKET_S2C_SELECT_SKILL_CHARACTERISTIC;	
+	*ResSelectSkillCharacteristicMessage << IsSuccess;
 	*ResSelectSkillCharacteristicMessage << SkillCharacteristicIndex;
 	*ResSelectSkillCharacteristicMessage << SkillCharacteristicType;
 
@@ -6786,6 +6787,22 @@ CGameServerMessage* CGameServer::MakePacketPlantGrowthStep(int64 PlantObjectID, 
 	*ResPlantGrowthStepMessage << PlantObjectID;
 	*ResPlantGrowthStepMessage << PlantGrowthStep;
 	*ResPlantGrowthStepMessage << PlantGrowthRatio;
+
+	return ResPlantGrowthStepMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketReqCancel(en_GAME_SERVER_PACKET_TYPE PacketType)
+{
+	CGameServerMessage* ResPlantGrowthStepMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResPlantGrowthStepMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResPlantGrowthStepMessage->Clear();
+
+	*ResPlantGrowthStepMessage << (int16)PacketType;
+	*ResPlantGrowthStepMessage << false;
 
 	return ResPlantGrowthStepMessage;
 }
