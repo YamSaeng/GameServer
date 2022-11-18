@@ -147,6 +147,7 @@ void CSkillCharacteristic::SkillCharacteristicActive(bool IsSkillLearn, en_Skill
 	if (ActiveSkill != nullptr)
 	{
 		ActiveSkill->GetSkillInfo()->IsSkillLearn = IsSkillLearn;
+		ActiveSkill->GetSkillInfo()->SkillLevel = SkillLevel;
 	}
 }
 
