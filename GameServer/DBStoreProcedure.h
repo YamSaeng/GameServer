@@ -264,15 +264,16 @@ namespace SP
 	};
 
 	// 스킬 테이블에 스킬 넣기
-	class CDBGameServerSkillToSkillBox : public CDBBind<5, 0>
+	class CDBGameServerSkillToSkillBox : public CDBBind<6, 0>
 	{
 	public:
-		CDBGameServerSkillToSkillBox(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spSkillToSkillBox(?,?,?,?,?)}") {}
+		CDBGameServerSkillToSkillBox(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spSkillToSkillBox(?,?,?,?,?,?)}") {}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
-		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }			
-		void InCharacteristicType(int8& CharacteristicType) { BindParam(2, CharacteristicType); }
-		void InSkillType(int16& SkillType) { BindParam(3, SkillType); }
-		void InSkillLevel(int8& SkillLevel) { BindParam(4, SkillLevel); }		
+		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }		
+		void InSkillLearn(bool& SkillLearn) { BindParam(2, SkillLearn); }
+		void InCharacteristicType(int8& CharacteristicType) { BindParam(3, CharacteristicType); }
+		void InSkillType(int16& SkillType) { BindParam(4, SkillType); }
+		void InSkillLevel(int8& SkillLevel) { BindParam(5, SkillLevel); }		
 	};
 
 	// QuickSlotBarSlot정보 새로 생성

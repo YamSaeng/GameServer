@@ -694,6 +694,7 @@
 	<Procedure name="spSkillToSkillBox">
 		<Param name="@AccountDBId" type="BigInt"/>
 		<Param name="@PlayerDBId" type="BigInt"/>
+		<Param name="@SkillLearn" type="bit"/>
 		<Param name="@CharacteristicType" type="TinyInt"/>
 		<Param name="@SkillType" type="SmallInt"/>
 		<Param name="@SkillLevel" type="TinyInt"/>
@@ -701,7 +702,7 @@
 			<![CDATA[
 	    SET NOCOUNT ON
 		UPDATE [dbo].[Skill] 		
-		SET IsSkillLearn = (1),	
+		SET IsSkillLearn = (@SkillLearn),	
 	    SkillLevel = (@SkillLevel)        
 		WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
 		AND CharacteristicType = (CASE WHEN @CharacteristicType = 1 THEN 'SKILL_CATEGORY_PUBLIC'
