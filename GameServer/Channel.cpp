@@ -92,6 +92,26 @@ void CChannel::Update()
 		{
 			switch ((en_GameObjectJobType)GameObjectJob->GameObjectJobType)
 			{
+			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_PARTY_INVITE:
+				{
+					CGameObject* ReqPartyPlayer;
+					*GameObjectJob->GameObjectJobMessage >> &ReqPartyPlayer;
+
+					int64 InvitePlayerID;
+					*GameObjectJob->GameObjectJobMessage >> InvitePlayerID;
+
+					CPlayer* PartyPlayer = (CPlayer*)ReqPartyPlayer;
+					CPlayer* InvitePlayer = (CPlayer*)FindChannelObject(InvitePlayerID, en_GameObjectType::OBJECT_PLAYER);
+					
+					PartyPlayer->_PartyManager.PartyLeaderInvite(InvitePlayer);
+					InvitePlayer->_PartyManager.PartyInvite(PartyPlayer);
+
+					vector<CPlayer*> PartyPlayers = PartyPlayer->_PartyManager.GetPartyPlayerArray();
+					CGameServerMessage* ResPartyInvitePacket = G_ObjectManager->GameServer->MakePacketResPartyInvite(PartyPlayers);
+					G_ObjectManager->GameServer->SendPacket(PartyPlayer->_SessionId, ResPartyInvitePacket);
+					G_ObjectManager->GameServer->SendPacket(InvitePlayer->_SessionId, ResPartyInvitePacket);
+				}
+				break;
 			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_OBJECT_SPAWN:
 				break;
 			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_OBJECT_DESPAWN:
