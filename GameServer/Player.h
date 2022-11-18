@@ -6,6 +6,7 @@
 #include "InventoryManager.h"
 #include "LockFreeQue.h"
 #include "GameServerMessage.h"
+#include "PartyManager.h"
 
 struct st_TimerJob;
 
@@ -13,7 +14,9 @@ class CPlayer : public CGameObject
 {
 public:			
 	int64 _SessionId;
-	int64 _AccountId;
+	int64 _AccountId;	
+
+	CPartyManager _PartyManager;
 
 	CEquipment _Equipment;	
 	CInventoryManager _InventoryManager;
@@ -52,4 +55,7 @@ protected:
 	virtual void UpdateGathering() override;
 	virtual void UpdateReadyDead() override;
 	virtual void UpdateDead() override;
+private:
+	void CheckFieldOfViewObject();
+	void CheckBufDebufSkill();
 };

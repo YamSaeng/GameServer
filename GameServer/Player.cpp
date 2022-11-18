@@ -44,145 +44,14 @@ void CPlayer::Update()
 		return;
 	}	
 
-	// 시야범위 객체 조사
-	if (_FieldOfViewUpdateTick < GetTickCount64() && _Channel != nullptr)
-	{
-		// 시야범위 오브젝트를 조사해서 저장
-		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldOfViewObjects(this, 1, false);
-		vector<st_FieldOfViewInfo> SpawnObjectIds;
-		vector<st_FieldOfViewInfo> DeSpawnObjectIds;
-
-		if (CurrentFieldOfViewObjectIds.size() > 1)
-		{ 
-			sort(CurrentFieldOfViewObjectIds.begin(), CurrentFieldOfViewObjectIds.end());
-		}
-
-		if (_FieldOfViewInfos.size() > 1)
-		{
-			sort(_FieldOfViewInfos.begin(), _FieldOfViewInfos.end());
-		}
-
-		SpawnObjectIds.resize(CurrentFieldOfViewObjectIds.size());
-
-		set_difference(CurrentFieldOfViewObjectIds.begin(), CurrentFieldOfViewObjectIds.end(),
-			_FieldOfViewInfos.begin(), _FieldOfViewInfos.end(),
-			SpawnObjectIds.begin());
-
-		DeSpawnObjectIds.resize(_FieldOfViewInfos.size());
-
-		set_difference(_FieldOfViewInfos.begin(), _FieldOfViewInfos.end(),
-			CurrentFieldOfViewObjectIds.begin(), CurrentFieldOfViewObjectIds.end(),
-			DeSpawnObjectIds.begin());
-
-		// 한번 더 검사
-		if (SpawnObjectIds.size() > 0)
-		{
-			// 스폰 해야할 대상들을 스폰
-			vector<CGameObject*> SpawnObjectInfos;
-			for (st_FieldOfViewInfo SpawnObject : SpawnObjectIds)
-			{
-				if (SpawnObject.ObjectID != 0 && SpawnObject.ObjectType != en_GameObjectType::NORMAL)
-				{
-					CGameObject* FindObject = _Channel->FindChannelObject(SpawnObject.ObjectID, SpawnObject.ObjectType);
-					if (FindObject != nullptr)
-					{
-						SpawnObjectInfos.push_back(FindObject);
-					}
-				}
-			}
-						
-			if (SpawnObjectInfos.size() > 0)
-			{				
-				// 스폰해야 할 대상들을 나에게 스폰하라고 알림
-				CMessage* ResOtherObjectSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectSpawn((int32)SpawnObjectInfos.size(), SpawnObjectInfos);
-				G_ObjectManager->GameServer->SendPacket(_SessionId, ResOtherObjectSpawnPacket);
-				ResOtherObjectSpawnPacket->Free();				
-			}
-		}
-
-		// 한번 더 검사
-		if (DeSpawnObjectIds.size() > 0)
-		{
-			vector<CGameObject*> DeSpawnObjectInfos;
-			for (st_FieldOfViewInfo DeSpawnObject : DeSpawnObjectIds)
-			{
-				if (DeSpawnObject.ObjectID != 0 && DeSpawnObject.ObjectType != en_GameObjectType::NORMAL)
-				{
-					CGameObject* FindObject = _Channel->FindChannelObject(DeSpawnObject.ObjectID, DeSpawnObject.ObjectType);
-										
-					// 추가적으로 검사
-					// 소환해제 해야할 대상이 죽음 준비 상태 또는 죽음 상태일 경우에는 알아서 소환해제 되기 때문에
-					// 죽음 준비 상태 그리고 죽음 상태가 아닐 경우에만 소환해제 하도록 설정					
-					if (FindObject != nullptr 
-						&& FindObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::READY_DEAD 
-						&& FindObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
-					{
-						if (_SelectTarget != nullptr && FindObject->_GameObjectInfo.ObjectId == _SelectTarget->_GameObjectInfo.ObjectId)
-						{
-							_SelectTarget = nullptr;
-						}
-
-						DeSpawnObjectInfos.push_back(FindObject);
-					}
-				}
-			}
-
-			// 소환해제해야 할 대상을 나에게 스폰 해제하라고 알림
-			if (DeSpawnObjectInfos.size() > 0)
-			{
-				CMessage* ResOtherObjectDeSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn((int32)DeSpawnObjectInfos.size(), DeSpawnObjectInfos);
-				G_ObjectManager->GameServer->SendPacket(_SessionId, ResOtherObjectDeSpawnPacket);
-				ResOtherObjectDeSpawnPacket->Free();
-			}
-		}
-
-		_FieldOfViewInfos = CurrentFieldOfViewObjectIds;
-	}		
+	// 주위 시야 오브젝트 점검
+	CheckFieldOfViewObject();
 
 	// 스킬목록 업데이트
 	_SkillBox.Update();
-
-	if (_ComboSkill != nullptr)
-	{
-		bool ReturnComboSkill = _ComboSkill->Update();
-		if (ReturnComboSkill)
-		{
-			G_ObjectManager->SkillReturn(_ComboSkill);			
-			_ComboSkill = nullptr;
-		}
-	}		
-
-	// 강화효과 스킬 리스트 순회
-	for (auto BufSkillIterator : _Bufs)
-	{
-		// 지속시간 끝난 강화효과 삭제
-		bool DeleteBufSkill = BufSkillIterator.second->Update();
-		if (DeleteBufSkill)
-		{
-			DeleteBuf(BufSkillIterator.first);
-			// 강화효과 스킬 정보 메모리 반납
-			G_ObjectManager->SkillInfoReturn(BufSkillIterator.second->GetSkillInfo()->SkillType,
-				BufSkillIterator.second->GetSkillInfo());
-			// 강화효과 스킬 메모리 반납
-			G_ObjectManager->SkillReturn(BufSkillIterator.second);
-		}
-	}
-
-	// 약화효과 스킬 리스트 순회
-	for (auto DebufSkillIterator : _DeBufs)
-	{
-		// 지속시간 끝난 약화효과 삭제
-		bool DeleteDebufSkill = DebufSkillIterator.second->Update();
-		if (DeleteDebufSkill)
-		{
-			DeleteDebuf(DebufSkillIterator.first);
-			// 약화효과 스킬 정보 메모리 반납
-			G_ObjectManager->SkillInfoReturn(DebufSkillIterator.second->GetSkillInfo()->SkillType,
-				DebufSkillIterator.second->GetSkillInfo());
-			// 약화효과 스킬 메모리 반납
-			G_ObjectManager->SkillReturn(DebufSkillIterator.second);
-		}
-	}
+	
+	// 버프, 디버프 기술 점검
+	CheckBufDebufSkill();			
 
 	if (_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::READY_DEAD && _GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 	{
@@ -792,4 +661,147 @@ void CPlayer::UpdateReadyDead()
 void CPlayer::UpdateDead()
 {
 
+}
+
+void CPlayer::CheckFieldOfViewObject()
+{
+	// 시야범위 객체 조사
+	if (_FieldOfViewUpdateTick < GetTickCount64() && _Channel != nullptr)
+	{
+		// 시야범위 오브젝트를 조사해서 저장
+		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldOfViewObjects(this, 1, false);
+		vector<st_FieldOfViewInfo> SpawnObjectIds;
+		vector<st_FieldOfViewInfo> DeSpawnObjectIds;
+
+		if (CurrentFieldOfViewObjectIds.size() > 1)
+		{
+			sort(CurrentFieldOfViewObjectIds.begin(), CurrentFieldOfViewObjectIds.end());
+		}
+
+		if (_FieldOfViewInfos.size() > 1)
+		{
+			sort(_FieldOfViewInfos.begin(), _FieldOfViewInfos.end());
+		}
+
+		SpawnObjectIds.resize(CurrentFieldOfViewObjectIds.size());
+
+		set_difference(CurrentFieldOfViewObjectIds.begin(), CurrentFieldOfViewObjectIds.end(),
+			_FieldOfViewInfos.begin(), _FieldOfViewInfos.end(),
+			SpawnObjectIds.begin());
+
+		DeSpawnObjectIds.resize(_FieldOfViewInfos.size());
+
+		set_difference(_FieldOfViewInfos.begin(), _FieldOfViewInfos.end(),
+			CurrentFieldOfViewObjectIds.begin(), CurrentFieldOfViewObjectIds.end(),
+			DeSpawnObjectIds.begin());
+
+		// 한번 더 검사
+		if (SpawnObjectIds.size() > 0)
+		{
+			// 스폰 해야할 대상들을 스폰
+			vector<CGameObject*> SpawnObjectInfos;
+			for (st_FieldOfViewInfo SpawnObject : SpawnObjectIds)
+			{
+				if (SpawnObject.ObjectID != 0 && SpawnObject.ObjectType != en_GameObjectType::NORMAL)
+				{
+					CGameObject* FindObject = _Channel->FindChannelObject(SpawnObject.ObjectID, SpawnObject.ObjectType);
+					if (FindObject != nullptr)
+					{
+						SpawnObjectInfos.push_back(FindObject);
+					}
+				}
+			}
+
+			if (SpawnObjectInfos.size() > 0)
+			{
+				// 스폰해야 할 대상들을 나에게 스폰하라고 알림
+				CMessage* ResOtherObjectSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectSpawn((int32)SpawnObjectInfos.size(), SpawnObjectInfos);
+				G_ObjectManager->GameServer->SendPacket(_SessionId, ResOtherObjectSpawnPacket);
+				ResOtherObjectSpawnPacket->Free();
+			}
+		}
+
+		// 한번 더 검사
+		if (DeSpawnObjectIds.size() > 0)
+		{
+			vector<CGameObject*> DeSpawnObjectInfos;
+			for (st_FieldOfViewInfo DeSpawnObject : DeSpawnObjectIds)
+			{
+				if (DeSpawnObject.ObjectID != 0 && DeSpawnObject.ObjectType != en_GameObjectType::NORMAL)
+				{
+					CGameObject* FindObject = _Channel->FindChannelObject(DeSpawnObject.ObjectID, DeSpawnObject.ObjectType);
+
+					// 추가적으로 검사
+					// 소환해제 해야할 대상이 죽음 준비 상태 또는 죽음 상태일 경우에는 알아서 소환해제 되기 때문에
+					// 죽음 준비 상태 그리고 죽음 상태가 아닐 경우에만 소환해제 하도록 설정					
+					if (FindObject != nullptr
+						&& FindObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::READY_DEAD
+						&& FindObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
+					{
+						if (_SelectTarget != nullptr && FindObject->_GameObjectInfo.ObjectId == _SelectTarget->_GameObjectInfo.ObjectId)
+						{
+							_SelectTarget = nullptr;
+						}
+
+						DeSpawnObjectInfos.push_back(FindObject);
+					}
+				}
+			}
+
+			// 소환해제해야 할 대상을 나에게 스폰 해제하라고 알림
+			if (DeSpawnObjectInfos.size() > 0)
+			{
+				CMessage* ResOtherObjectDeSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn((int32)DeSpawnObjectInfos.size(), DeSpawnObjectInfos);
+				G_ObjectManager->GameServer->SendPacket(_SessionId, ResOtherObjectDeSpawnPacket);
+				ResOtherObjectDeSpawnPacket->Free();
+			}
+		}
+
+		_FieldOfViewInfos = CurrentFieldOfViewObjectIds;
+	}
+}
+
+void CPlayer::CheckBufDebufSkill()
+{
+	// 강화효과 스킬 리스트 순회
+	for (auto BufSkillIterator : _Bufs)
+	{
+		// 지속시간 끝난 강화효과 삭제
+		bool DeleteBufSkill = BufSkillIterator.second->Update();
+		if (DeleteBufSkill)
+		{
+			DeleteBuf(BufSkillIterator.first);
+			// 강화효과 스킬 정보 메모리 반납
+			G_ObjectManager->SkillInfoReturn(BufSkillIterator.second->GetSkillInfo()->SkillType,
+				BufSkillIterator.second->GetSkillInfo());
+			// 강화효과 스킬 메모리 반납
+			G_ObjectManager->SkillReturn(BufSkillIterator.second);
+		}
+	}
+
+	// 약화효과 스킬 리스트 순회
+	for (auto DebufSkillIterator : _DeBufs)
+	{
+		// 지속시간 끝난 약화효과 삭제
+		bool DeleteDebufSkill = DebufSkillIterator.second->Update();
+		if (DeleteDebufSkill)
+		{
+			DeleteDebuf(DebufSkillIterator.first);
+			// 약화효과 스킬 정보 메모리 반납
+			G_ObjectManager->SkillInfoReturn(DebufSkillIterator.second->GetSkillInfo()->SkillType,
+				DebufSkillIterator.second->GetSkillInfo());
+			// 약화효과 스킬 메모리 반납
+			G_ObjectManager->SkillReturn(DebufSkillIterator.second);
+		}
+	}
+
+	if (_ComboSkill != nullptr)
+	{
+		bool ReturnComboSkill = _ComboSkill->Update();
+		if (ReturnComboSkill)
+		{
+			G_ObjectManager->SkillReturn(_ComboSkill);
+			_ComboSkill = nullptr;
+		}
+	}
 }
