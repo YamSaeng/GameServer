@@ -197,6 +197,7 @@
     <ClInclude Include="NetworkLib.h" />
     <ClInclude Include="ObjectManager.h" />
     <ClInclude Include="ObjectPoolFreeList.h" />
+    <ClInclude Include="PartyManager.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Potato.h" />
@@ -318,6 +319,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="ObjectManager.cpp" />
+    <ClCompile Include="PartyManager.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Potato.cpp" />

@@ -323,6 +323,9 @@
     <ClInclude Include="SkillCharacteristic.h">
       <Filter>ContentServer\Content\SkillBox\SkillCharacteristic</Filter>
     </ClInclude>
+    <ClInclude Include="PartyManager.h">
+      <Filter>ContentServer\Content\GameObject\Player</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -461,6 +464,9 @@
     </ClCompile>
     <ClCompile Include="SkillCharacteristic.cpp">
       <Filter>ContentServer\Content\SkillBox\SkillCharacteristic</Filter>
+    </ClCompile>
+    <ClCompile Include="PartyManager.cpp">
+      <Filter>ContentServer\Content\GameObject\Player</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

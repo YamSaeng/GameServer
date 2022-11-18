@@ -569,6 +569,9 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_PLANT_GROWTH_CHECK:
 		PacketProcReqPlantGrowthCheck(SessionID, Message);
 		break;
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_PARTY_INVITE:
+		PacketProcReqPartyInvite(SessionID, Message);
+		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_CS_GAME_REQ_HEARTBEAT:
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_PONG:
@@ -3048,6 +3051,65 @@ void CGameServer::PacketProcReqPlantGrowthCheck(int64 SessionID, CMessage* Messa
 	ReturnSession(Session);
 }
 
+void CGameServer::PacketProcReqPartyInvite(int64 SessionID, CMessage* Message)
+{
+	// 아이템 줍기 처리
+	st_Session* Session = FindSession(SessionID);
+
+	if (Session)
+	{
+		do
+		{
+			int64 AccountId;
+			int64 PlayerDBId;
+
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountId;
+
+			// AccountId가 맞는지 확인
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> PlayerDBId;
+
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			// 조종하고 있는 플레이어가 있는지 확인 
+			if (MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			int64 PartyPlayerID;
+			*Message >> PartyPlayerID;			
+
+			st_GameObjectJob* PartyInviteJob = MakeGameObjectJobPartyInvite(MyPlayer, PartyPlayerID);
+			MyPlayer->GetChannel()->_ChannelJobQue.Enqueue(PartyInviteJob);
+		} while (0);
+	}
+
+	ReturnSession(Session);
+}
+
 void CGameServer::PacketProcReqItemLooting(int64 SessionId, CMessage* Message)
 {
 	// 아이템 줍기 처리
@@ -4500,6 +4562,7 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 			int16 ActiveSkillType = (int16)ActiveSkill->GetSkillInfo()->SkillType;
 			int8 ActiveSkillLevel = ActiveSkill->GetSkillInfo()->SkillLevel;
 
+			SkillIntoSkillBox.InSkillLearn(ActiveSkill->GetSkillInfo()->IsSkillLearn);
 			SkillIntoSkillBox.InSkillType(ActiveSkillType);
 			SkillIntoSkillBox.InSkillLevel(ActiveSkillLevel);
 
@@ -5587,6 +5650,22 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobItemSave(CGameObject* Item)
 	ItemSaveJob->GameObjectJobMessage = ItemSaveMessage;
 
 	return ItemSaveJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobPartyInvite(CGameObject* ReqPartyPlayer, int64 InvitePlayerID)
+{
+	st_GameObjectJob* PartyInviteJob = G_ObjectManager->GameObjectJobCreate();
+	PartyInviteJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_PARTY_INVITE;
+
+	CGameServerMessage* PartyInviteMessage = CGameServerMessage::GameServerMessageAlloc();
+	PartyInviteMessage->Clear();
+
+	*PartyInviteMessage << &ReqPartyPlayer;
+	*PartyInviteMessage << InvitePlayerID;
+
+	PartyInviteJob->GameObjectJobMessage = PartyInviteMessage;
+
+	return PartyInviteJob;
 }
 
 CGameServerMessage* CGameServer::MakePacketResEnterGame(bool EnterGameSuccess, st_GameObjectInfo* ObjectInfo, st_Vector2Int* SpawnPosition)
@@ -6789,6 +6868,29 @@ CGameServerMessage* CGameServer::MakePacketPlantGrowthStep(int64 PlantObjectID, 
 	*ResPlantGrowthStepMessage << PlantGrowthRatio;
 
 	return ResPlantGrowthStepMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketResPartyInvite(vector<CPlayer*> PartyPlayerInfos)
+{
+	CGameServerMessage* ResPartyInviteMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResPartyInviteMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResPartyInviteMessage->Clear();
+
+	*ResPartyInviteMessage << (int16)en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_PARTY_INVITE;
+	
+	int8 PartyPlayerInfosSize = (int8)PartyPlayerInfos.size();
+	*ResPartyInviteMessage << PartyPlayerInfosSize;
+	
+	for (CPlayer* PartyPlayerInfo : PartyPlayerInfos)
+	{
+		*ResPartyInviteMessage << PartyPlayerInfo->_GameObjectInfo;
+	}
+
+	return ResPartyInviteMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketReqCancel(en_GAME_SERVER_PACKET_TYPE PacketType)
