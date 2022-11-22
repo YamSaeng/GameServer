@@ -4,6 +4,7 @@
 CPartyManager::CPartyManager()
 {
     _IsPartyLeader = false;
+    _IsParty = false;
 }
 
 CPartyManager::~CPartyManager()
@@ -30,6 +31,7 @@ bool CPartyManager::PartyLeaderInvite(CPlayer* PartyPlayer)
     }
 
     _IsPartyLeader = true;
+    _IsParty = true;
 
     _PartyPlayers.push_back(PartyPlayer);
 
@@ -43,6 +45,7 @@ bool CPartyManager::PartyInvite(CPlayer* PartyPlayer)
         return false;
     }
     
+    _IsParty = true;
 
     _PartyPlayers.push_back(PartyPlayer);
 
@@ -60,6 +63,8 @@ bool CPartyManager::PartyQuit(CPlayer* LeaderPartyPlayer)
     {
         return false;
     }
+
+    _IsParty = false;
 
     _PartyPlayers.clear();    
 

@@ -5,6 +5,7 @@ class CPartyManager
 {
 public:
 	bool _IsPartyLeader;
+	bool _IsParty;
 
 	CPartyManager();
 	~CPartyManager();
