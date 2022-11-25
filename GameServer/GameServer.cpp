@@ -4502,36 +4502,36 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 	st_Session* LeaveSession;
 	*Message >> &LeaveSession;
 		
-	CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[LeaveSession->MyPlayerIndex];	
+	CPlayer* LeavePlayer = G_ObjectManager->_PlayersArray[LeaveSession->MyPlayerIndex];	
 
 	// 캐릭터 정보 DB에 저장
 	CDBConnection* PlayerInfoSaveDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 	SP::CDBGameServerLeavePlayerStatInfoSave LeavePlayerStatInfoSave(*PlayerInfoSaveDBConnection);
 
-	LeavePlayerStatInfoSave.InAccountDBId(MyPlayer->_AccountId);
-	LeavePlayerStatInfoSave.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
-	LeavePlayerStatInfoSave.InLevel(MyPlayer->_GameObjectInfo.ObjectStatInfo.Level);
-	LeavePlayerStatInfoSave.InMaxHP(MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxHP);
-	LeavePlayerStatInfoSave.InMaxMP(MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMP);
-	LeavePlayerStatInfoSave.InMaxDP(MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxDP);
-	LeavePlayerStatInfoSave.InAutoRecoveryHPPercent(MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent);
-	LeavePlayerStatInfoSave.InAutoRecoveryMPPercent(MyPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent);
-	LeavePlayerStatInfoSave.InMinMeleeAttackDamage(MyPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage);
-	LeavePlayerStatInfoSave.InMaxMeleeAttackDamage(MyPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage);
-	LeavePlayerStatInfoSave.InMeleeAttackHitRate(MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate);
-	LeavePlayerStatInfoSave.InMagicDamage(MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage);
-	LeavePlayerStatInfoSave.InMagicHitRate(MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate);
-	LeavePlayerStatInfoSave.InDefence(MyPlayer->_GameObjectInfo.ObjectStatInfo.Defence);
-	LeavePlayerStatInfoSave.InEvasionRate(MyPlayer->_GameObjectInfo.ObjectStatInfo.EvasionRate);
-	LeavePlayerStatInfoSave.InMeleeCriticalPoint(MyPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint);
-	LeavePlayerStatInfoSave.InMagicCriticalPoint(MyPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint);
-	LeavePlayerStatInfoSave.InSpeed(MyPlayer->_GameObjectInfo.ObjectStatInfo.Speed);
-	LeavePlayerStatInfoSave.InLastPositionY(MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y);
-	LeavePlayerStatInfoSave.InLastPositionX(MyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X);
-	LeavePlayerStatInfoSave.InCurrentExperience(MyPlayer->_Experience.CurrentExperience);
-	LeavePlayerStatInfoSave.InRequireExperience(MyPlayer->_Experience.RequireExperience);
-	LeavePlayerStatInfoSave.InTotalExperience(MyPlayer->_Experience.TotalExperience);	
-	LeavePlayerStatInfoSave.InSkillMaxPoint(MyPlayer->_GameObjectInfo.ObjectSkillMaxPoint);
+	LeavePlayerStatInfoSave.InAccountDBId(LeavePlayer->_AccountId);
+	LeavePlayerStatInfoSave.InPlayerDBId(LeavePlayer->_GameObjectInfo.ObjectId);
+	LeavePlayerStatInfoSave.InLevel(LeavePlayer->_GameObjectInfo.ObjectStatInfo.Level);
+	LeavePlayerStatInfoSave.InMaxHP(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MaxHP);
+	LeavePlayerStatInfoSave.InMaxMP(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MaxMP);
+	LeavePlayerStatInfoSave.InMaxDP(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MaxDP);
+	LeavePlayerStatInfoSave.InAutoRecoveryHPPercent(LeavePlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent);
+	LeavePlayerStatInfoSave.InAutoRecoveryMPPercent(LeavePlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent);
+	LeavePlayerStatInfoSave.InMinMeleeAttackDamage(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage);
+	LeavePlayerStatInfoSave.InMaxMeleeAttackDamage(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage);
+	LeavePlayerStatInfoSave.InMeleeAttackHitRate(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate);
+	LeavePlayerStatInfoSave.InMagicDamage(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage);
+	LeavePlayerStatInfoSave.InMagicHitRate(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate);
+	LeavePlayerStatInfoSave.InDefence(LeavePlayer->_GameObjectInfo.ObjectStatInfo.Defence);
+	LeavePlayerStatInfoSave.InEvasionRate(LeavePlayer->_GameObjectInfo.ObjectStatInfo.EvasionRate);
+	LeavePlayerStatInfoSave.InMeleeCriticalPoint(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint);
+	LeavePlayerStatInfoSave.InMagicCriticalPoint(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint);
+	LeavePlayerStatInfoSave.InSpeed(LeavePlayer->_GameObjectInfo.ObjectStatInfo.Speed);
+	LeavePlayerStatInfoSave.InLastPositionY(LeavePlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y);
+	LeavePlayerStatInfoSave.InLastPositionX(LeavePlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X);
+	LeavePlayerStatInfoSave.InCurrentExperience(LeavePlayer->_Experience.CurrentExperience);
+	LeavePlayerStatInfoSave.InRequireExperience(LeavePlayer->_Experience.RequireExperience);
+	LeavePlayerStatInfoSave.InTotalExperience(LeavePlayer->_Experience.TotalExperience);	
+	LeavePlayerStatInfoSave.InSkillMaxPoint(LeavePlayer->_GameObjectInfo.ObjectSkillMaxPoint);
 
 	LeavePlayerStatInfoSave.Execute();		
 
@@ -4540,13 +4540,13 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 	// 스킬 정보 DB에 저장
 	SP::CDBGameServerSkillToSkillBox SkillIntoSkillBox(*PlayerInfoSaveDBConnection);
 
-	SkillCharacteristicUpdate.InAccountDBId(MyPlayer->_AccountId);
-	SkillCharacteristicUpdate.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
+	SkillCharacteristicUpdate.InAccountDBId(LeavePlayer->_AccountId);
+	SkillCharacteristicUpdate.InPlayerDBId(LeavePlayer->_GameObjectInfo.ObjectId);
 
-	SkillIntoSkillBox.InAccountDBId(MyPlayer->_AccountId);
-	SkillIntoSkillBox.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
+	SkillIntoSkillBox.InAccountDBId(LeavePlayer->_AccountId);
+	SkillIntoSkillBox.InPlayerDBId(LeavePlayer->_GameObjectInfo.ObjectId);
 
-	CSkillCharacteristic* SkillCharacteristics = MyPlayer->_SkillBox.GetSkillCharacteristics();
+	CSkillCharacteristic* SkillCharacteristics = LeavePlayer->_SkillBox.GetSkillCharacteristics();
 	for (int8 i = 0; i < 3; i++)
 	{
 		int8 SkillCharacterType = (int8)SkillCharacteristics[i]._SkillCharacteristic;
@@ -4573,7 +4573,7 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 	}
 
 	// 퀵슬롯 정보 업데이트
-	for (auto QuickSlotIterator : MyPlayer->_QuickSlotManager.GetQuickSlotBar())
+	for (auto QuickSlotIterator : LeavePlayer->_QuickSlotManager.GetQuickSlotBar())
 	{
 		for (auto QuickSlotBarSlotIterator : QuickSlotIterator.second->_QuickSlotBarSlotInfos)
 		{
@@ -4585,8 +4585,8 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 				{
 					SP::CDBGameServerQuickSlotInit QuickSlotInit(*PlayerInfoSaveDBConnection);
 
-					QuickSlotInit.InAccountDBId(MyPlayer->_AccountId);
-					QuickSlotInit.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
+					QuickSlotInit.InAccountDBId(LeavePlayer->_AccountId);
+					QuickSlotInit.InPlayerDBId(LeavePlayer->_GameObjectInfo.ObjectId);
 					QuickSlotInit.InQuickSlotBarIndex(SaveQuickSlotInfo->QuickSlotBarIndex);
 					QuickSlotInit.InQuickSlotBarSlotIndex(SaveQuickSlotInfo->QuickSlotBarSlotIndex);
 
@@ -4605,8 +4605,8 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 					int16 SaveItemSmallCategory = 0;
 					int16 SaveItemCount = 0;
 
-					QuickSlotDBUpdate.InAccountDBId(MyPlayer->_AccountId);
-					QuickSlotDBUpdate.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
+					QuickSlotDBUpdate.InAccountDBId(LeavePlayer->_AccountId);
+					QuickSlotDBUpdate.InPlayerDBId(LeavePlayer->_GameObjectInfo.ObjectId);
 					QuickSlotDBUpdate.InQuickSlotBarIndex(SaveQuickSlotInfo->QuickSlotBarIndex);
 					QuickSlotDBUpdate.InQuickSlotBarSlotIndex(SaveQuickSlotInfo->QuickSlotBarSlotIndex);
 					QuickSlotDBUpdate.InQuickSlotKey(SaveQuickSlotInfo->QuickSlotKey);		
@@ -4633,8 +4633,8 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 					int16 SaveItemSmallCategory = (int16)SaveQuickSlotInfo->QuickBarItem->_ItemInfo.ItemSmallCategory;
 					int16 SaveItemCount = SaveQuickSlotInfo->QuickBarItem->_ItemInfo.ItemCount;
 
-					QuickSlotDBUpdate.InAccountDBId(MyPlayer->_AccountId);
-					QuickSlotDBUpdate.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
+					QuickSlotDBUpdate.InAccountDBId(LeavePlayer->_AccountId);
+					QuickSlotDBUpdate.InPlayerDBId(LeavePlayer->_GameObjectInfo.ObjectId);
 					QuickSlotDBUpdate.InQuickSlotBarIndex(SaveQuickSlotInfo->QuickSlotBarIndex);
 					QuickSlotDBUpdate.InQuickSlotBarSlotIndex(SaveQuickSlotInfo->QuickSlotBarSlotIndex);
 					QuickSlotDBUpdate.InQuickSlotKey(SaveQuickSlotInfo->QuickSlotKey);					
@@ -4653,7 +4653,7 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 	}
 
 	// 장비 정보 DB에 저장
-	CItem** EquipmentPartsItem = MyPlayer->_Equipment.GetEquipmentParts();
+	CItem** EquipmentPartsItem = LeavePlayer->_Equipment.GetEquipmentParts();
 	for (int8 i = 1; i <= (int8)en_EquipmentParts::EQUIPMENT_PARTS_BOOT; i++)
 	{
 		if (EquipmentPartsItem[i] != nullptr)
@@ -4665,8 +4665,8 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 			int8 EquipmentMediumCategory = (int8)EquipmentPartsItem[i]->_ItemInfo.ItemMediumCategory;
 			int16 EquipmentSmallCategory = (int16)EquipmentPartsItem[i]->_ItemInfo.ItemSmallCategory;
 
-			SaveEquipmentInfo.InAccountDBID(MyPlayer->_AccountId);
-			SaveEquipmentInfo.InPlayerDBID(MyPlayer->_GameObjectInfo.ObjectId);
+			SaveEquipmentInfo.InAccountDBID(LeavePlayer->_AccountId);
+			SaveEquipmentInfo.InPlayerDBID(LeavePlayer->_GameObjectInfo.ObjectId);
 			SaveEquipmentInfo.InEquipmentParts(EquipmentParts);
 			SaveEquipmentInfo.InEquipmentLargeCategory(EquipmentLargeCategory);
 			SaveEquipmentInfo.InEquipmentMediumCategory(EquipmentMediumCategory);
@@ -4682,8 +4682,8 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 
 			int8 EquipmentParts = i;
 
-			OffEquipment.InAccountDBID(MyPlayer->_AccountId);
-			OffEquipment.InPlayerDBID(MyPlayer->_GameObjectInfo.ObjectId);
+			OffEquipment.InAccountDBID(LeavePlayer->_AccountId);
+			OffEquipment.InPlayerDBID(LeavePlayer->_GameObjectInfo.ObjectId);
 			OffEquipment.InEquipmentParts(EquipmentParts);
 
 			OffEquipment.Execute();
@@ -4691,26 +4691,26 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 	}
 
 	// 가방 정보 DB에 저장	
-	CInventory** MyPlayerInventorys = MyPlayer->_InventoryManager.GetInventory();	
+	CInventory** LeavePlayerInventorys = LeavePlayer->_InventoryManager.GetInventory();	
 
 	// 가방 DB 청소 후 새로 저장
-	for (int i = 0; i < MyPlayer->_InventoryManager.GetInventoryCount(); i++)
+	for (int i = 0; i < LeavePlayer->_InventoryManager.GetInventoryCount(); i++)
 	{
 		SP::CDBGameServerInventoryAllSlotInit InventoryAllSlotInit(*PlayerInfoSaveDBConnection);
-		InventoryAllSlotInit.InOwnerAccountID(MyPlayer->_AccountId);
-		InventoryAllSlotInit.InOwnerPlayerID(MyPlayer->_GameObjectInfo.ObjectId);
-		InventoryAllSlotInit.InInventoryWidth(MyPlayerInventorys[i]->_InventoryWidth);
-		InventoryAllSlotInit.InInventoryHeight(MyPlayerInventorys[i]->_InventoryHeight);
+		InventoryAllSlotInit.InOwnerAccountID(LeavePlayer->_AccountId);
+		InventoryAllSlotInit.InOwnerPlayerID(LeavePlayer->_GameObjectInfo.ObjectId);
+		InventoryAllSlotInit.InInventoryWidth(LeavePlayerInventorys[i]->_InventoryWidth);
+		InventoryAllSlotInit.InInventoryHeight(LeavePlayerInventorys[i]->_InventoryHeight);
 
 		InventoryAllSlotInit.Execute();
 
-		if (MyPlayerInventorys[i] != nullptr)
+		if (LeavePlayerInventorys[i] != nullptr)
 		{
 			SP::CDBGameServerInventoryPlace LeavePlayerInventoryItemSave(*PlayerInfoSaveDBConnection);
-			LeavePlayerInventoryItemSave.InOwnerAccountId(MyPlayer->_AccountId);
-			LeavePlayerInventoryItemSave.InOwnerPlayerId(MyPlayer->_GameObjectInfo.ObjectId);
+			LeavePlayerInventoryItemSave.InOwnerAccountId(LeavePlayer->_AccountId);
+			LeavePlayerInventoryItemSave.InOwnerPlayerId(LeavePlayer->_GameObjectInfo.ObjectId);
 
-			vector<st_ItemInfo> PlayerInventoryItems = MyPlayerInventorys[i]->DBInventorySaveReturnItems();
+			vector<st_ItemInfo> PlayerInventoryItems = LeavePlayerInventorys[i]->DBInventorySaveReturnItems();
 
 			for (st_ItemInfo InventoryItem : PlayerInventoryItems)
 			{				
@@ -4735,16 +4735,19 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 
 	G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerInfoSaveDBConnection);			
 
-	if (MyPlayer->GetChannel() != nullptr)
+	if (LeavePlayer->GetChannel() != nullptr)
 	{
 		CMap* LeaveMap = G_MapManager->GetMap(1);
 		CChannel* LeaveChannel = LeaveMap->GetChannelManager()->Find(1);
 
-		st_GameObjectJob* DeSpawnMonsterChannelJob = MakeGameObjectJobObjectDeSpawnObjectChannel(MyPlayer);
+		st_GameObjectJob* PartyQuitJob = MakeGameObjectJobPartyQuit(LeavePlayer->_GameObjectInfo.ObjectId);
+		LeaveChannel->_ChannelJobQue.Enqueue(PartyQuitJob);		
+
+		st_GameObjectJob* DeSpawnMonsterChannelJob = MakeGameObjectJobObjectDeSpawnObjectChannel(LeavePlayer);
 		LeaveChannel->_ChannelJobQue.Enqueue(DeSpawnMonsterChannelJob);
 
-		st_GameObjectJob* LeaveGameJob = MakeGameObjectJobLeaveChannelPlayer(MyPlayer, LeaveSession->MyPlayerIndexes);
-		LeaveChannel->_ChannelJobQue.Enqueue(LeaveGameJob);
+		st_GameObjectJob* LeaveGameJob = MakeGameObjectJobLeaveChannelPlayer(LeavePlayer, LeaveSession->MyPlayerIndexes);
+		LeaveChannel->_ChannelJobQue.Enqueue(LeaveGameJob);				
 	}	
 	
 	// GameServer와 관련된 Session 정보 초기화
@@ -5662,6 +5665,21 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobPartyInvite(CGameObject* ReqPart
 
 	*PartyInviteMessage << &ReqPartyPlayer;
 	*PartyInviteMessage << InvitePlayerID;
+
+	PartyInviteJob->GameObjectJobMessage = PartyInviteMessage;
+
+	return PartyInviteJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobPartyQuit(int64 PartyQuitPlayerID)
+{
+	st_GameObjectJob* PartyInviteJob = G_ObjectManager->GameObjectJobCreate();
+	PartyInviteJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_PARTY_QUIT;
+
+	CGameServerMessage* PartyInviteMessage = CGameServerMessage::GameServerMessageAlloc();
+	PartyInviteMessage->Clear();
+
+	*PartyInviteMessage << PartyQuitPlayerID;	
 
 	PartyInviteJob->GameObjectJobMessage = PartyInviteMessage;
 
@@ -6889,6 +6907,22 @@ CGameServerMessage* CGameServer::MakePacketResPartyInvite(vector<CPlayer*> Party
 	{
 		*ResPartyInviteMessage << PartyPlayerInfo->_GameObjectInfo;
 	}
+
+	return ResPartyInviteMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketResPartyQuit(int64 QuitPartyPlayerID)
+{
+	CGameServerMessage* ResPartyInviteMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResPartyInviteMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResPartyInviteMessage->Clear();
+
+	*ResPartyInviteMessage << (int16)en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_PARTY_QUIT;
+	*ResPartyInviteMessage << QuitPartyPlayerID;
 
 	return ResPartyInviteMessage;
 }
