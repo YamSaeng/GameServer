@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "PartyManager.h"
+#include "Player.h"
 
 CPartyManager::CPartyManager()
 {
@@ -24,7 +25,7 @@ void CPartyManager::PartyManagerInit(CPlayer* InitPlayer)
 }
 
 bool CPartyManager::PartyLeaderInvite(CPlayer* PartyPlayer)
-{
+{    
     if (_PartyPlayers.size() == 5)
     {
         return false;
@@ -57,7 +58,7 @@ void CPartyManager::PartyInvited(CPlayer* InvitePlayer)
     _PartyPlayers.push_back(InvitePlayer);
 }
 
-bool CPartyManager::PartyQuit(CPlayer* LeaderPartyPlayer)
+bool CPartyManager::PartyQuit()
 {
     if (_PartyPlayers.size() < 2)
     {
@@ -66,9 +67,22 @@ bool CPartyManager::PartyQuit(CPlayer* LeaderPartyPlayer)
 
     _IsParty = false;
 
-    _PartyPlayers.clear();    
-
-    _PartyPlayers.push_back(_OwnerPlayer);
+    _PartyPlayers.clear();       
 
     return true;
+}
+
+void CPartyManager::PartyQuited(int64 QuitPartyPlayerID)
+{    
+    for (auto PartyPlayerIter = _PartyPlayers.begin(); 
+        PartyPlayerIter != _PartyPlayers.end(); ++PartyPlayerIter)
+    {
+        CPlayer* Player = *PartyPlayerIter;
+
+        if (Player->_GameObjectInfo.ObjectId == QuitPartyPlayerID)
+        {
+            _PartyPlayers.erase(PartyPlayerIter);
+            break;
+        }
+    }    
 }

@@ -19,7 +19,8 @@ public:
 	bool PartyInvite(CPlayer* PartyPlayer);
 	void PartyInvited(CPlayer* InvitePlayer);
 
-	bool PartyQuit(CPlayer* LeaderPartyPlayer);
+	bool PartyQuit();	
+	void PartyQuited(int64 QuitPartyPlayerID);
 private:
 	vector<CPlayer*> _PartyPlayers;	
 	CPlayer* _OwnerPlayer;

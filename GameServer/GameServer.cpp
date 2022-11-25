@@ -4740,8 +4740,11 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 		CMap* LeaveMap = G_MapManager->GetMap(1);
 		CChannel* LeaveChannel = LeaveMap->GetChannelManager()->Find(1);
 
-		st_GameObjectJob* PartyQuitJob = MakeGameObjectJobPartyQuit(LeavePlayer->_GameObjectInfo.ObjectId);
-		LeaveChannel->_ChannelJobQue.Enqueue(PartyQuitJob);		
+		if (LeavePlayer->_PartyManager._IsParty == true)
+		{
+			st_GameObjectJob* PartyQuitJob = MakeGameObjectJobPartyQuit(LeavePlayer->_GameObjectInfo.ObjectId);
+			LeaveChannel->_ChannelJobQue.Enqueue(PartyQuitJob);
+		}		
 
 		st_GameObjectJob* DeSpawnMonsterChannelJob = MakeGameObjectJobObjectDeSpawnObjectChannel(LeavePlayer);
 		LeaveChannel->_ChannelJobQue.Enqueue(DeSpawnMonsterChannelJob);
