@@ -102,14 +102,83 @@ void CChannel::Update()
 
 					CPlayer* PartyPlayer = (CPlayer*)ReqPartyPlayer;
 					CPlayer* InvitePlayer = (CPlayer*)FindChannelObject(InvitePlayerID, en_GameObjectType::OBJECT_PLAYER);
-					
-					PartyPlayer->_PartyManager.PartyLeaderInvite(InvitePlayer);
-					InvitePlayer->_PartyManager.PartyInvite(PartyPlayer);
+
+					// 그룹에 몇명있는지 조사
+					int8 PartySize = (int8)PartyPlayer->_PartyManager.GetPartyPlayerArray().size();
+					if (PartySize == 0) // 0 명일 경우
+					{						
+						// 그룹초대 대상이 그룹중이 아닌지 확인
+						if (InvitePlayer->_PartyManager._IsParty == false)
+						{
+							PartyPlayer->_PartyManager.PartyManagerInit(PartyPlayer);
+							InvitePlayer->_PartyManager.PartyManagerInit(InvitePlayer);
+
+							// 그룹초대 요청 대상을 그룹장으로 정하고 그룹초대 대상을 그룹에 초대
+							PartyPlayer->_PartyManager.PartyLeaderInvite(InvitePlayer);
+							InvitePlayer->_PartyManager.PartyInvite(PartyPlayer);
+						}						
+					}
+					else
+					{
+						// 그룹초대 요청 대상이 파티장인지, 그룹초대 대상이 그룹 중인지 확인
+						if (PartyPlayer->_PartyManager._IsPartyLeader == true && InvitePlayer->_PartyManager._IsParty == false)
+						{
+							vector<CPlayer*> PartyPlayers = PartyPlayer->_PartyManager.GetPartyPlayerArray();
+							for (CPlayer* PartyPlayer : PartyPlayers)
+							{
+								PartyPlayer->_PartyManager.PartyInvite(InvitePlayer);
+							}							
+						}
+					}					
 
 					vector<CPlayer*> PartyPlayers = PartyPlayer->_PartyManager.GetPartyPlayerArray();
 					CGameServerMessage* ResPartyInvitePacket = G_ObjectManager->GameServer->MakePacketResPartyInvite(PartyPlayers);
-					G_ObjectManager->GameServer->SendPacket(PartyPlayer->_SessionId, ResPartyInvitePacket);
-					G_ObjectManager->GameServer->SendPacket(InvitePlayer->_SessionId, ResPartyInvitePacket);
+					for (CPlayer* PartyPlayer : PartyPlayers)
+					{
+						G_ObjectManager->GameServer->SendPacket(PartyPlayer->_SessionId, ResPartyInvitePacket);
+					}					
+					
+					ResPartyInvitePacket->Free();
+				}
+				break;
+			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_PARTY_QUIT:
+				{
+					int64 PartyQuitPlayerID;
+					*GameObjectJob->GameObjectJobMessage >> PartyQuitPlayerID;
+
+					// 탈퇴 요청 캐릭터를 찾음
+					CPlayer* PartyQuitPlayer = dynamic_cast<CPlayer*>(FindChannelObject(PartyQuitPlayerID, en_GameObjectType::OBJECT_PLAYER));
+					if (PartyQuitPlayer != nullptr)
+					{
+						// 탈퇴 요청 캐릭터가 파티중인지 확인
+						if (PartyQuitPlayer->_PartyManager._IsParty == true)
+						{
+							// 탈퇴 요청 캐릭터를 제외한 플레이어를 찾음
+							for (CPlayer* PartyPlayer : PartyQuitPlayer->_PartyManager.GetPartyPlayerArray())
+							{
+								// 탈퇴 요청 캐릭터를 제외한 나머지 플레이어 그룹에서 탈퇴 요청 캐릭터를 제외
+								if (PartyPlayer->_GameObjectInfo.ObjectId != PartyQuitPlayerID)
+								{
+									PartyPlayer->_PartyManager.PartyQuited(PartyQuitPlayerID);
+								}
+							}							
+
+							// 탈퇴 요청 캐릭터 파티에서 나감
+							PartyQuitPlayer->_PartyManager.PartyQuit();
+
+							CMessage* ResPartyQuitPacket = G_ObjectManager->GameServer->MakePacketResPartyQuit(PartyQuitPlayerID);
+							G_ObjectManager->GameServer->SendPacket(PartyQuitPlayer->_SessionId, ResPartyQuitPacket);
+							ResPartyQuitPacket->Free();
+						}
+						else
+						{
+							CRASH("그룹 중이 아닌데 그룹 탈퇴 요청");
+						}
+					}
+					else
+					{
+						CRASH("그룹 탈퇴 요청 플레이어를 찾을 수 없음");
+					}
 				}
 				break;
 			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_OBJECT_SPAWN:
