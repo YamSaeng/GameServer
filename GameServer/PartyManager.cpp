@@ -84,5 +84,12 @@ void CPartyManager::PartyQuited(int64 QuitPartyPlayerID)
             _PartyPlayers.erase(PartyPlayerIter);
             break;
         }
-    }    
+    }   
+
+    if (_PartyPlayers.size() == 1)
+    {
+        _PartyPlayers.clear();
+
+        _IsParty = false;
+    }
 }
