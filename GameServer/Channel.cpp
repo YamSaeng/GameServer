@@ -151,22 +151,27 @@ void CChannel::Update()
 					if (PartyQuitPlayer != nullptr)
 					{
 						// 탈퇴 요청 캐릭터가 파티중인지 확인
-						if (PartyQuitPlayer->_PartyManager._IsParty == true)
+						if (PartyQuitPlayer->_PartyManager._IsParty == true)	
 						{
 							// 탈퇴 요청 캐릭터를 제외한 플레이어를 찾음
 							for (CPlayer* PartyPlayer : PartyQuitPlayer->_PartyManager.GetPartyPlayerArray())
 							{
-								// 탈퇴 요청 캐릭터를 제외한 나머지 플레이어 그룹에서 탈퇴 요청 캐릭터를 제외
+								// 탈퇴 요청 캐릭터를 제외한 나머지 플레이어 그룹에서 탈퇴 요청 캐릭터를 그룹 탈퇴 시킴
 								if (PartyPlayer->_GameObjectInfo.ObjectId != PartyQuitPlayerID)
 								{
 									PartyPlayer->_PartyManager.PartyQuited(PartyQuitPlayerID);
+
+									CMessage* ResPartyPlaryerOneQuitPacket = G_ObjectManager->GameServer->MakePacketResPartyQuit(false, PartyQuitPlayerID);
+									G_ObjectManager->GameServer->SendPacket(PartyPlayer->_SessionId, ResPartyPlaryerOneQuitPacket);
+									ResPartyPlaryerOneQuitPacket->Free();
 								}
 							}							
 
 							// 탈퇴 요청 캐릭터 파티에서 나감
 							PartyQuitPlayer->_PartyManager.PartyQuit();
 
-							CMessage* ResPartyQuitPacket = G_ObjectManager->GameServer->MakePacketResPartyQuit(PartyQuitPlayerID);
+							// 탈퇴 요청 플레이어에게 그룹 탈퇴 패킷 전송
+							CMessage* ResPartyQuitPacket = G_ObjectManager->GameServer->MakePacketResPartyQuit(true, PartyQuitPlayerID);
 							G_ObjectManager->GameServer->SendPacket(PartyQuitPlayer->_SessionId, ResPartyQuitPacket);
 							ResPartyQuitPacket->Free();
 						}
@@ -181,7 +186,38 @@ void CChannel::Update()
 					}
 				}
 				break;
+			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_PARTY_BANISH:
+				{
+					CGameObject* PartyBanishReqGameObject;
+					*GameObjectJob->GameObjectJobMessage >> &PartyBanishReqGameObject;
+
+					int64 PartyBanishPlayerID;
+					*GameObjectJob->GameObjectJobMessage >> PartyBanishPlayerID;
+
+					CPlayer* PartyBanishReqPlayer = dynamic_cast<CPlayer*>(PartyBanishReqGameObject);
+
+					CPlayer* PartyBanishPlayer = dynamic_cast<CPlayer*>(FindChannelObject(PartyBanishPlayerID, en_GameObjectType::OBJECT_PLAYER));
+					if (PartyBanishPlayer != nullptr)
+					{
+						for (CPlayer* PartyPlayer : PartyBanishPlayer->_PartyManager.GetPartyPlayerArray())
+						{
+							PartyPlayer->_PartyManager.PartyQuited(PartyBanishPlayer->_GameObjectInfo.ObjectId);
+
+							CMessage* ResPartyBanishPacekt = G_ObjectManager->GameServer->MakePacketResPartyBanish(PartyBanishPlayerID);
+							G_ObjectManager->GameServer->SendPacket(PartyPlayer->_SessionId,ResPartyBanishPacekt);
+							ResPartyBanishPacekt->Free();
+						}				
+					}
+					else
+					{
+						CRASH("파티 추방 캐릭을 찾을수 없음");
+					}
+				}
+				break;
 			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_OBJECT_SPAWN:
+				{
+					
+				}
 				break;
 			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_OBJECT_DESPAWN:
 				{
