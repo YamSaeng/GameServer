@@ -93,3 +93,14 @@ void CPartyManager::PartyQuited(int64 QuitPartyPlayerID)
         _IsParty = false;
     }
 }
+
+void CPartyManager::PartyAllQuit()
+{
+    if (_PartyPlayers.size() == 0)
+    {
+        CRASH("그룹에 아무도 없는데 추방 요청");
+    }
+
+    _PartyPlayers.clear();
+    _IsParty = false;
+}

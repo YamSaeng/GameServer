@@ -21,6 +21,7 @@ public:
 
 	bool PartyQuit();	
 	void PartyQuited(int64 QuitPartyPlayerID);
+	void PartyAllQuit();
 private:
 	vector<CPlayer*> _PartyPlayers;	
 	CPlayer* _OwnerPlayer;
