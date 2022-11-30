@@ -531,7 +531,7 @@ public:
 	//-------------------------------------------------------------
 	// 그룹 추방 잡 생성 함수
 	//-------------------------------------------------------------
-	st_GameObjectJob* MakeGameOBjectJobPartyBanish(int64 PartyBanishPlayerID);
+	st_GameObjectJob* MakeGameObjectJobPartyBanish(CGameObject* ReqPartyBanishPlayer, int64 PartyBanishPlayerID);
 
 	//-------------------------------------------------------------
 	// 게임서버 입장 요청 응답 패킷 조합

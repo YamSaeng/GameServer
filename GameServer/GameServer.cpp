@@ -3221,7 +3221,7 @@ void CGameServer::PacketProcReqPartyBanish(int64 SessionID, CMessage* Message)
 			int64 PartyBanishPlayerID;
 			*Message >> PartyBanishPlayerID;
 
-			st_GameObjectJob* PartyBanishJob = MakeGameOBjectJobPartyBanish(PartyBanishPlayerID);
+			st_GameObjectJob* PartyBanishJob = MakeGameObjectJobPartyBanish(MyPlayer, PartyBanishPlayerID);
 			MyPlayer->GetChannel()->_ChannelJobQue.Enqueue(PartyBanishJob);
 		} while (0);
 	}
@@ -5808,7 +5808,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobPartyQuit(int64 PartyQuitPlayerI
 	return PartyInviteJob;
 }
 
-st_GameObjectJob* CGameServer::MakeGameOBjectJobPartyBanish(int64 PartyBanishPlayerID)
+st_GameObjectJob* CGameServer::MakeGameObjectJobPartyBanish(CGameObject* ReqPartyBanishPlayer, int64 PartyBanishPlayerID)
 {
 	st_GameObjectJob* PartyBanishJob = G_ObjectManager->GameObjectJobCreate();
 	PartyBanishJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_PARTY_BANISH;
@@ -5816,6 +5816,7 @@ st_GameObjectJob* CGameServer::MakeGameOBjectJobPartyBanish(int64 PartyBanishPla
 	CGameServerMessage* PartyInviteMessage = CGameServerMessage::GameServerMessageAlloc();
 	PartyInviteMessage->Clear();
 
+	*PartyInviteMessage << &ReqPartyBanishPlayer;
 	*PartyInviteMessage << PartyBanishPlayerID;
 
 	PartyBanishJob->GameObjectJobMessage = PartyInviteMessage;
@@ -7067,7 +7068,18 @@ CGameServerMessage* CGameServer::MakePacketResPartyQuit(bool IsAllQuit, int64 Qu
 
 CGameServerMessage* CGameServer::MakePacketResPartyBanish(int64 BanishPlayerID)
 {
-	return nullptr;
+	CGameServerMessage* ResBanishMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResBanishMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResBanishMessage->Clear();
+
+	*ResBanishMessage << (int16)en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_PARTY_BANISH;
+	*ResBanishMessage << BanishPlayerID;	
+
+	return ResBanishMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketReqCancel(en_GAME_SERVER_PACKET_TYPE PacketType)
