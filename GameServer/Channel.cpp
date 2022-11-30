@@ -194,19 +194,39 @@ void CChannel::Update()
 					int64 PartyBanishPlayerID;
 					*GameObjectJob->GameObjectJobMessage >> PartyBanishPlayerID;
 
+					// 그룹 추방 요청 캐릭터를 가져옴
 					CPlayer* PartyBanishReqPlayer = dynamic_cast<CPlayer*>(PartyBanishReqGameObject);
 
+					// 그룹 추방 할 대상을 가져옴
 					CPlayer* PartyBanishPlayer = dynamic_cast<CPlayer*>(FindChannelObject(PartyBanishPlayerID, en_GameObjectType::OBJECT_PLAYER));
 					if (PartyBanishPlayer != nullptr)
 					{
-						for (CPlayer* PartyPlayer : PartyBanishPlayer->_PartyManager.GetPartyPlayerArray())
+						// 그룹 추방 요청 캐릭터가 그룹장인지 확인
+						if (PartyBanishReqPlayer->_PartyManager._IsPartyLeader == true)
 						{
-							PartyPlayer->_PartyManager.PartyQuited(PartyBanishPlayer->_GameObjectInfo.ObjectId);
+							// 그룹 추방 대상을 제외한 나머지 플레이어들에게 그룹 추방 대상을 추방시키고, 메세지 전송
+							for (CPlayer* PartyPlayer : PartyBanishPlayer->_PartyManager.GetPartyPlayerArray())
+							{
+								if (PartyPlayer->_GameObjectInfo.ObjectId != PartyBanishPlayerID)
+								{
+									PartyPlayer->_PartyManager.PartyQuited(PartyBanishPlayer->_GameObjectInfo.ObjectId);
 
-							CMessage* ResPartyBanishPacekt = G_ObjectManager->GameServer->MakePacketResPartyBanish(PartyBanishPlayerID);
-							G_ObjectManager->GameServer->SendPacket(PartyPlayer->_SessionId,ResPartyBanishPacekt);
-							ResPartyBanishPacekt->Free();
-						}				
+									CMessage* ResPartyBanishPacekt = G_ObjectManager->GameServer->MakePacketResPartyBanish(PartyBanishPlayerID);
+									G_ObjectManager->GameServer->SendPacket(PartyPlayer->_SessionId, ResPartyBanishPacekt);
+									ResPartyBanishPacekt->Free();
+								}								
+							}
+
+							PartyBanishPlayer->_PartyManager.PartyAllQuit();
+
+							CMessage* ResPartyQuitPacket = G_ObjectManager->GameServer->MakePacketResPartyQuit(true, PartyBanishPlayerID);
+							G_ObjectManager->GameServer->SendPacket(PartyBanishPlayer->_SessionId, ResPartyQuitPacket);
+							ResPartyQuitPacket->Free();
+						}
+						else
+						{
+							CRASH("그룹장이 아닌데 그룹 추방 요청");
+						}						
 					}
 					else
 					{
