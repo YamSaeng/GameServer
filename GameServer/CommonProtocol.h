@@ -919,6 +919,20 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_PARTY_BANISH,
 
 	//-----------------------------------------------------------
+	// 게임서버 그룹장 위임 요청
+	// int64 PlayerID
+	// int64 AccountID
+	// int64 PartyLeaderMandatePlayerID
+	//-----------------------------------------------------------
+	en_PACKET_C2S_PARTY_LEADER_MANDATE,
+
+	//-----------------------------------------------------------
+	// 게임서버 그룹장 위임 요청	
+	// int64 PartyLeaderMandatePlayerID
+	//-----------------------------------------------------------
+	en_PACKET_S2C_PARTY_LEADER_MANDATE,
+
+	//-----------------------------------------------------------
 	// 게임서버 시간 요청 
 	// int64 AccountID
 	// int64 PlayerID

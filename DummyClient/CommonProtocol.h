@@ -194,17 +194,17 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// 게임서버 캐릭터 마법 요청
 	// int64 AccountId
 	// int64 PlayerDBId
-	// int8 Dir
-	// en_AttackRange RangeAttack;
-	// int8 RangeDitance;
+	// en_MoveDir Dir
+	// en_SkillType SpellSkillType
 	//------------------------------------------------------------
 	en_PACKET_C2S_SPELL,
 
 	//------------------------------------------------------------
-	// 게임서버 캐릭터 마법 요청 응답
-	// int64 AccountId
+	// 게임서버 캐릭터 마법 요청 응답	
 	// int64 PlayerDBId
-	// int8 Dir	
+	// bool SpellStart
+	// en_SkillType SpellSkillType
+	// float SpellTime
 	//------------------------------------------------------------
 	en_PACKET_S2C_SPELL,
 
@@ -589,7 +589,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// 게임서버 스킬 특성 선택 요청
 	// int64 AccountID
 	// int64 PlayerID
-	// int8 SkillCharacteristicType
+	// en_SkillCharacteristic SkillCharacteristicType
 	//------------------------------------------------------------
 	en_PACKET_C2S_SELECT_SKILL_CHARACTERISTIC,
 
@@ -878,7 +878,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_PLANT_GROWTH_CHECK,
 
 	//-----------------------------------------------------------
-	// 게임서버 파티 요청 
+	// 게임서버 그룹 요청 
 	// int64 AccountID
 	// int64 PlayerID
 	// int64 PartyPlayerID
@@ -886,10 +886,51 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_C2S_PARTY_INVITE,
 
 	//-----------------------------------------------------------
-	// 게임서버 파티 요청 응답
+	// 게임서버 그룹 요청 응답
 	// int64 PartyPlayerID
 	//-----------------------------------------------------------
 	en_PACKET_S2C_PARTY_INVITE,
+
+	//-----------------------------------------------------------
+	// 게임서버 그룹 탈퇴 요청
+	// int64 PlayerID
+	// int64 AccountID
+	//-----------------------------------------------------------
+	en_PACKET_C2S_PARTY_QUIT,
+
+	//----------------------------------------------------------
+	// 게임서버 그룹 탈퇴 요청 응답
+	// int64 QuitPartyPlayer
+	//----------------------------------------------------------
+	en_PACKET_S2C_PARTY_QUIT,
+
+	//-----------------------------------------------------------
+	// 게임서버 그룹 추방 요청
+	// int64 PlayerID
+	// int64 AccountID
+	// int64 BanishPlayerID
+	//-----------------------------------------------------------
+	en_PACKET_C2S_PARTY_BANISH,
+
+	//-----------------------------------------------------------
+	// 게임서버 그룹 추방 요청 응답	
+	// int64 BanishPlayerID
+	//-----------------------------------------------------------
+	en_PACKET_S2C_PARTY_BANISH,
+
+	//-----------------------------------------------------------
+	// 게임서버 그룹장 위임 요청
+	// int64 PlayerID
+	// int64 AccountID
+	// int64 PartyLeaderMandatePlayerID
+	//-----------------------------------------------------------
+	en_PACKET_C2S_PARTY_LEADER_MANDATE,
+
+	//-----------------------------------------------------------
+	// 게임서버 그룹장 위임 요청	
+	// int64 PartyLeaderMandatePlayerID
+	//-----------------------------------------------------------
+	en_PACKET_S2C_PARTY_LEADER_MANDATE,
 
 	//-----------------------------------------------------------
 	// 게임서버 시간 요청 
