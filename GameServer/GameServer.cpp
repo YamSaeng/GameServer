@@ -6729,6 +6729,9 @@ CGameServerMessage* CGameServer::MakePacketCommonError(en_PersonalMessageType Pe
 	case en_PersonalMessageType::PERSOANL_MESSAGE_SEED_FARMING_EXIST:
 		wsprintf(ErrorMessage, L"[%s]가 심어져 있어서 심을 수 없습니다.", Name);
 		break;
+	case en_PersonalMessageType::PERSONAL_MESSAGE_EXIST_PARTY_PLAYER:
+		wsprintf(ErrorMessage, L"[%s]이 그룹 중이라서 초대 할 수 없습니다.", Name);
+		break;
 	}
 
 	wstring ErrorMessageString = ErrorMessage;
@@ -7080,6 +7083,23 @@ CGameServerMessage* CGameServer::MakePacketResPartyBanish(int64 BanishPlayerID)
 	*ResBanishMessage << BanishPlayerID;	
 
 	return ResBanishMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketResPartyLeaderMandate(int64 PerviousPartyLeaderObjectID, int64 NewPartyLeaderObjectID)
+{
+	CGameServerMessage* ResPartyLeaderMandateMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResPartyLeaderMandateMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResPartyLeaderMandateMessage->Clear();
+
+	*ResPartyLeaderMandateMessage << (int16)en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_PARTY_LEADER_MANDATE;
+	*ResPartyLeaderMandateMessage << PerviousPartyLeaderObjectID;
+	*ResPartyLeaderMandateMessage << NewPartyLeaderObjectID;
+
+	return ResPartyLeaderMandateMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketReqCancel(en_GAME_SERVER_PACKET_TYPE PacketType)
