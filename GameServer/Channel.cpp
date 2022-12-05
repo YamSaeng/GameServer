@@ -116,7 +116,15 @@ void CChannel::Update()
 							// 그룹초대 요청 대상을 그룹장으로 정하고 그룹초대 대상을 그룹에 초대
 							PartyPlayer->_PartyManager.PartyLeaderInvite(InvitePlayer);
 							InvitePlayer->_PartyManager.PartyInvite(PartyPlayer);
-						}						
+						}		
+						else
+						{
+							// 그룹중이라면 그룹중이라고 메세지 보냄
+							CMessage* ResExistPartyPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_EXIST_PARTY_PLAYER,
+								InvitePlayer->_GameObjectInfo.ObjectName.c_str());
+							G_ObjectManager->GameServer->SendPacket(PartyPlayer->_SessionId, ResExistPartyPacket);
+							ResExistPartyPacket->Free();
+						}
 					}
 					else
 					{
@@ -232,6 +240,38 @@ void CChannel::Update()
 					{
 						CRASH("파티 추방 캐릭을 찾을수 없음");
 					}
+				}
+				break;
+			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_PARTY_LEADER_MANDATE:
+				{
+					int64 ReqPartyLeaderMandatePlayerID;
+					*GameObjectJob->GameObjectJobMessage >> ReqPartyLeaderMandatePlayerID;
+
+					int64 PartyLeaderMandatePlayerID;
+					*GameObjectJob->GameObjectJobMessage >> PartyLeaderMandatePlayerID;
+
+					// 그룹장 위임 요청 캐릭터가 채널에 있는지 찾는다.
+					CPlayer* ReqPartyLeader = dynamic_cast<CPlayer*>(FindChannelObject(ReqPartyLeaderMandatePlayerID, en_GameObjectType::OBJECT_PLAYER));
+					if (ReqPartyLeader != nullptr)
+					{
+						// 새로운 그룹장 캐릭터가 채널에 있는지 찾는다.
+						CPlayer* NewPartyLeader = dynamic_cast<CPlayer*>(FindChannelObject(PartyLeaderMandatePlayerID, en_GameObjectType::OBJECT_PLAYER));
+						if (NewPartyLeader != nullptr)
+						{
+							// 요청 캐릭터가 그룹장인지 확인하고
+							// 새로운 그룹장 캐릭터가 요청 캐릭터 그룹에 있는지 확인한다.
+							if (ReqPartyLeader->_PartyManager._IsPartyLeader == true && ReqPartyLeader->_PartyManager.IsPartyMember(NewPartyLeader->_GameObjectInfo.ObjectId) == true)
+							{								
+								ReqPartyLeader->_PartyManager._IsPartyLeader = false;
+								NewPartyLeader->_PartyManager._IsPartyLeader = true;
+
+								CMessage* ResPartyLeaderMandatePacket = G_ObjectManager->GameServer->MakePacketResPartyLeaderMandate(ReqPartyLeader->_GameObjectInfo.ObjectId, NewPartyLeader->_GameObjectInfo.ObjectId);
+								G_ObjectManager->GameServer->SendPacket(ReqPartyLeader->_SessionId, ResPartyLeaderMandatePacket);
+								G_ObjectManager->GameServer->SendPacket(NewPartyLeader->_SessionId, ResPartyLeaderMandatePacket);
+								ResPartyLeaderMandatePacket->Free();
+							}
+						}
+					}					
 				}
 				break;
 			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_OBJECT_SPAWN:
