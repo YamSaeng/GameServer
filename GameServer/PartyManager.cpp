@@ -104,3 +104,16 @@ void CPartyManager::PartyAllQuit()
     _PartyPlayers.clear();
     _IsParty = false;
 }
+
+bool CPartyManager::IsPartyMember(int64& PartyMemberID)
+{
+    for (CPlayer* PartyPlayer : _PartyPlayers)
+    {
+        if (PartyPlayer->_GameObjectInfo.ObjectId == PartyMemberID)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
