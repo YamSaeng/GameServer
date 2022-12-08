@@ -4,6 +4,11 @@
 class CPartyManager
 {
 public:
+	enum en_PartyManager
+	{
+		PARTY_MAX = 5
+	};
+
 	bool _IsPartyLeader;
 	bool _IsParty;
 
