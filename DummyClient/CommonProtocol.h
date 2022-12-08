@@ -892,6 +892,34 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_PARTY_INVITE,
 
 	//-----------------------------------------------------------
+	// 게임서버 그룹 요청 수락 
+	// int64 AccountID
+	// int64 PlayerID
+	// int64 ReqPartyPlayerID
+	//-----------------------------------------------------------
+	en_PACKET_C2S_PARTY_INVITE_ACCEPT,
+
+	//-----------------------------------------------------------
+	// 게임서버 그룹 요청 수락 응답	
+	// int64 ReqPartyPlayerID	
+	//-----------------------------------------------------------
+	en_PACKET_S2C_PARTY_INVITE_ACCEPT,
+
+	//-----------------------------------------------------------
+	// 게임서버 그룹 요청 거절
+	// int64 AccountID
+	// int64 PlayerID		
+	// int64 ReqPartyInvitePlayerObjectID
+	//-----------------------------------------------------------
+	en_PACKET_C2S_PARTY_INVITE_REJECT,
+
+	//-----------------------------------------------------------
+	// 게임서버 그룹 요청 거절 응답
+	// string PartyInviteRejectPlayerName
+	//-----------------------------------------------------------
+	en_PACKET_S2C_PARTY_INVITE_REJECT,
+
+	//-----------------------------------------------------------
 	// 게임서버 그룹 탈퇴 요청
 	// int64 PlayerID
 	// int64 AccountID
