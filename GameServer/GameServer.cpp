@@ -572,6 +572,12 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_PARTY_INVITE:
 		PacketProcReqPartyInvite(SessionID, Message);
 		break;
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_PARTY_INVITE_ACCEPT:
+		PacketProcReqPartyAccept(SessionID, Message);
+		break;
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_PARTY_INVITE_REJECT:
+		PacketProcReqPartyReject(SessionID, Message);
+		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_PARTY_QUIT:
 		PacketProcReqPartyQuit(SessionID, Message);
 		break;
@@ -3059,7 +3065,7 @@ void CGameServer::PacketProcReqPlantGrowthCheck(int64 SessionID, CMessage* Messa
 
 void CGameServer::PacketProcReqPartyInvite(int64 SessionID, CMessage* Message)
 {
-	// 아이템 줍기 처리
+	// 그룹 초대 요청 처리
 	st_Session* Session = FindSession(SessionID);
 
 	if (Session)
@@ -3116,8 +3122,127 @@ void CGameServer::PacketProcReqPartyInvite(int64 SessionID, CMessage* Message)
 	ReturnSession(Session);
 }
 
+void CGameServer::PacketProcReqPartyAccept(int64 SessionID, CMessage* Message)
+{
+	// 그룹 초대 수락 요청 처리
+	st_Session* Session = FindSession(SessionID);
+
+	if (Session)
+	{
+		do
+		{
+			int64 AccountId;
+			int64 PlayerDBId;
+
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountId;
+
+			// AccountId가 맞는지 확인
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> PlayerDBId;
+
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			// 조종하고 있는 플레이어가 있는지 확인 
+			if (MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			int64 ReqPartyPlayerID;
+			*Message >> ReqPartyPlayerID;
+
+			st_GameObjectJob* PartyAcceptJob = MakeGameObjectJobPartyAccept(ReqPartyPlayerID, MyPlayer->_GameObjectInfo.ObjectId);
+			MyPlayer->GetChannel()->_ChannelJobQue.Enqueue(PartyAcceptJob);
+		} while (0);
+	}
+
+	ReturnSession(Session);	
+}
+
+void CGameServer::PacketProcReqPartyReject(int64 SessionID, CMessage* Message)
+{
+	// 그룹 초대 수락 요청 처리
+	st_Session* Session = FindSession(SessionID);
+
+	if (Session)
+	{
+		do
+		{
+			int64 AccountId;
+			int64 PlayerDBId;
+
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountId;
+
+			// AccountId가 맞는지 확인
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> PlayerDBId;
+
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			// 조종하고 있는 플레이어가 있는지 확인 
+			if (MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			int64 ReqPartyInvitePlayerID;
+			*Message >> ReqPartyInvitePlayerID;
+
+			st_GameObjectJob* PartyAcceptJob = MakeGameObjectJobPartyReject(MyPlayer->_GameObjectInfo.ObjectId, ReqPartyInvitePlayerID);
+			MyPlayer->GetChannel()->_ChannelJobQue.Enqueue(PartyAcceptJob);
+		} while (0);
+	}
+
+	ReturnSession(Session);
+}
+
 void CGameServer::PacketProcReqPartyQuit(int64 SessionID, CMessage* Message)
 {
+	// 그룹 탈퇴 요청 처리
 	st_Session* Session = FindSession(SessionID);
 
 	if (Session)
@@ -3173,6 +3298,7 @@ void CGameServer::PacketProcReqPartyQuit(int64 SessionID, CMessage* Message)
 
 void CGameServer::PacketProcReqPartyBanish(int64 SessionID, CMessage* Message)
 {
+	// 그룹 추방 요청 처리
 	st_Session* Session = FindSession(SessionID);
 
 	if (Session)
@@ -5793,6 +5919,38 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobPartyInvite(CGameObject* ReqPart
 	return PartyInviteJob;
 }
 
+st_GameObjectJob* CGameServer::MakeGameObjectJobPartyAccept(int64 PartyReqPlayerID, int64 PartyAcceptPlayerID)
+{
+	st_GameObjectJob* PartyAcceptJob = G_ObjectManager->GameObjectJobCreate();
+	PartyAcceptJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_PARTY_INVITE_ACCEPT;
+
+	CGameServerMessage* PartyAcceptMessage = CGameServerMessage::GameServerMessageAlloc();
+	PartyAcceptMessage->Clear();
+
+	*PartyAcceptMessage << PartyReqPlayerID;
+	*PartyAcceptMessage << PartyAcceptPlayerID;
+
+	PartyAcceptJob->GameObjectJobMessage = PartyAcceptMessage;
+
+	return PartyAcceptJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobPartyReject(int64 PartyRejectPlayerID, int64 ReqPartyInvitePlayerID)
+{
+	st_GameObjectJob* PartyRejectJob = G_ObjectManager->GameObjectJobCreate();
+	PartyRejectJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_PARTY_INVITE_REJECT;
+
+	CGameServerMessage* PartyRejectMessage = CGameServerMessage::GameServerMessageAlloc();
+	PartyRejectMessage->Clear();
+
+	*PartyRejectMessage << PartyRejectPlayerID;
+	*PartyRejectMessage << ReqPartyInvitePlayerID;
+
+	PartyRejectJob->GameObjectJobMessage = PartyRejectMessage;
+
+	return PartyRejectJob;
+}
+
 st_GameObjectJob* CGameServer::MakeGameObjectJobPartyQuit(int64 PartyQuitPlayerID)
 {
 	st_GameObjectJob* PartyInviteJob = G_ObjectManager->GameObjectJobCreate();
@@ -6732,6 +6890,12 @@ CGameServerMessage* CGameServer::MakePacketCommonError(en_PersonalMessageType Pe
 	case en_PersonalMessageType::PERSONAL_MESSAGE_EXIST_PARTY_PLAYER:
 		wsprintf(ErrorMessage, L"[%s]이 그룹 중이라서 초대 할 수 없습니다.", Name);
 		break;
+	case en_PersonalMessageType::PERSONAL_MESSAGE_PARTY_INVITE_REJECT:
+		wsprintf(ErrorMessage, L"[%s]가 그룹 초대를 거절 했습니다.", Name);
+		break;
+	case en_PersonalMessageType::PERSONAL_MESSAGE_PARTY_MAX:
+		wsprintf(ErrorMessage, L"그룹에 빈 자리가 없습니다.", Name);
+		break;
 	}
 
 	wstring ErrorMessageString = ErrorMessage;
@@ -7029,7 +7193,7 @@ CGameServerMessage* CGameServer::MakePacketPlantGrowthStep(int64 PlantObjectID, 
 	return ResPlantGrowthStepMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResPartyInvite(vector<CPlayer*> PartyPlayerInfos)
+CGameServerMessage* CGameServer::MakePacketResPartyInvite(int64 ReqPartyPlayerObjectID, wstring ReqPartyPlayerName)
 {
 	CGameServerMessage* ResPartyInviteMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResPartyInviteMessage == nullptr)
@@ -7040,16 +7204,55 @@ CGameServerMessage* CGameServer::MakePacketResPartyInvite(vector<CPlayer*> Party
 	ResPartyInviteMessage->Clear();
 
 	*ResPartyInviteMessage << (int16)en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_PARTY_INVITE;
-	
-	int8 PartyPlayerInfosSize = (int8)PartyPlayerInfos.size();
-	*ResPartyInviteMessage << PartyPlayerInfosSize;
-	
-	for (CPlayer* PartyPlayerInfo : PartyPlayerInfos)
+	*ResPartyInviteMessage << ReqPartyPlayerObjectID;
+
+	int16 GameObjectInfoNameLen = (int16)ReqPartyPlayerName.length() * 2;
+	*ResPartyInviteMessage << GameObjectInfoNameLen;
+	ResPartyInviteMessage->InsertData(ReqPartyPlayerName.c_str(), GameObjectInfoNameLen);
+
+	return ResPartyInviteMessage;	
+}
+
+CGameServerMessage* CGameServer::MakePacketResPartyAccept(vector<CPlayer*> PartyPlayerInfos)
+{
+	CGameServerMessage* ResPartyAcceptMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResPartyAcceptMessage == nullptr)
 	{
-		*ResPartyInviteMessage << PartyPlayerInfo->_GameObjectInfo;
+		return nullptr;
 	}
 
-	return ResPartyInviteMessage;
+	ResPartyAcceptMessage->Clear();
+
+	*ResPartyAcceptMessage << (int16)en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_PARTY_INVITE_ACCEPT;
+
+	int8 PartyPlayerInfosSize = (int8)PartyPlayerInfos.size();
+	*ResPartyAcceptMessage << PartyPlayerInfosSize;
+
+	for (CPlayer* PartyPlayerInfo : PartyPlayerInfos)
+	{
+		*ResPartyAcceptMessage << PartyPlayerInfo->_GameObjectInfo;
+	}
+
+	return ResPartyAcceptMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketResPartyReject(wstring PartyInviteRejectName)
+{
+	CGameServerMessage* ResPartyRejectMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResPartyRejectMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResPartyRejectMessage->Clear();
+
+	*ResPartyRejectMessage << (int16)en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_PARTY_INVITE_REJECT;
+
+	int16 GameObjectInfoNameLen = (int16)PartyInviteRejectName.length() * 2;
+	*ResPartyRejectMessage << GameObjectInfoNameLen;
+	ResPartyRejectMessage->InsertData(PartyInviteRejectName.c_str(), GameObjectInfoNameLen);
+
+	return ResPartyRejectMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketResPartyQuit(bool IsAllQuit, int64 QuitPartyPlayerID)

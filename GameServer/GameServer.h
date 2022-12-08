@@ -234,6 +234,14 @@ private:
 	//------------------------------------------------------------------
 	void PacketProcReqPartyInvite(int64 SessionID, CMessage* Message);
 	//------------------------------------------------------------------
+	// 그룹 초대 수락 요청 처리
+	//------------------------------------------------------------------
+	void PacketProcReqPartyAccept(int64 SessionID, CMessage* Message);
+	//------------------------------------------------------------------
+	// 그룹 초대 거절 요청 처리
+	//------------------------------------------------------------------
+	void PacketProcReqPartyReject(int64 SessionID, CMessage* Message);
+	//------------------------------------------------------------------
 	// 그룹 탈퇴 요청 처리
 	//------------------------------------------------------------------
 	void PacketProcReqPartyQuit(int64 SessionID, CMessage* Message);
@@ -525,6 +533,14 @@ public:
 	//-------------------------------------------------------------
 	st_GameObjectJob* MakeGameObjectJobPartyInvite(CGameObject* ReqPartyPlayer, int64 InvitePlayerID);
 	//-------------------------------------------------------------
+	// 그룹 초대 수락 잡 생성 함수
+	//-------------------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobPartyAccept(int64 PartyReqPlayerID, int64 PartyAcceptPlayerID);
+	//-------------------------------------------------------------
+	// 그룹 초대 거절 잡 생성 함수
+	//-------------------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobPartyReject(int64 PartyRejectPlayerID, int64 ReqPartyInvitePlayerID);
+	//-------------------------------------------------------------
 	// 그룹 탈퇴 잡 생성 함수
 	//-------------------------------------------------------------
 	st_GameObjectJob* MakeGameObjectJobPartyQuit(int64 PartyQuitPlayerID);
@@ -751,9 +767,17 @@ public:
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketPlantGrowthStep(int64 PlantObjectID, int8 PlantGrowthStep, float PlantGrowthRatio);
 	//-----------------------------------------------------------------------------------------
-	// 게임서버 파티 초대 응답 패킷 조합
+	// 게임서버 그룹 초대 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResPartyInvite(vector<CPlayer*> PartyPlayerInfos);
+	CGameServerMessage* MakePacketResPartyInvite(int64 ReqPartyPlayerObjectID, wstring ReqPartyPlayerName);
+	//-----------------------------------------------------------------------------------------
+	// 게임서버 그룹 초대 수락 응답 패킷 조합
+	//-----------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResPartyAccept(vector<CPlayer*> PartyPlayerInfos);
+	//-----------------------------------------------------------------------------------------
+	// 게임서버 그룹 거절 응답 패킷 조합
+	//-----------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResPartyReject(wstring PartyInviteRejectName);	
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 그룹 탈퇴 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
