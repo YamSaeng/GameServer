@@ -100,8 +100,8 @@ void CChannel::Update()
 					int64 InvitePlayerID;
 					*GameObjectJob->GameObjectJobMessage >> InvitePlayerID;
 
-					CPlayer* PartyPlayer = (CPlayer*)ReqPartyPlayer;
-					CPlayer* InvitePlayer = (CPlayer*)FindChannelObject(InvitePlayerID, en_GameObjectType::OBJECT_PLAYER);
+					CPlayer* PartyPlayer = dynamic_cast<CPlayer*>(ReqPartyPlayer);
+					CPlayer* InvitePlayer = dynamic_cast<CPlayer*>(FindChannelObject(InvitePlayerID, en_GameObjectType::OBJECT_PLAYER));
 
 					// 그룹에 몇명있는지 조사
 					int8 PartySize = (int8)PartyPlayer->_PartyManager.GetPartyPlayerArray().size();
@@ -110,12 +110,9 @@ void CChannel::Update()
 						// 그룹초대 대상이 그룹중이 아닌지 확인
 						if (InvitePlayer->_PartyManager._IsParty == false)
 						{
-							PartyPlayer->_PartyManager.PartyManagerInit(PartyPlayer);
-							InvitePlayer->_PartyManager.PartyManagerInit(InvitePlayer);
-
-							// 그룹초대 요청 대상을 그룹장으로 정하고 그룹초대 대상을 그룹에 초대
-							PartyPlayer->_PartyManager.PartyLeaderInvite(InvitePlayer);
-							InvitePlayer->_PartyManager.PartyInvite(PartyPlayer);
+							CMessage* ResPartyInvitePacket = G_ObjectManager->GameServer->MakePacketResPartyInvite(PartyPlayer->_GameObjectInfo.ObjectId, PartyPlayer->_GameObjectInfo.ObjectName);
+							G_ObjectManager->GameServer->SendPacket(InvitePlayer->_SessionId, ResPartyInvitePacket);
+							ResPartyInvitePacket->Free();							
 						}		
 						else
 						{
@@ -137,16 +134,93 @@ void CChannel::Update()
 								PartyPlayer->_PartyManager.PartyInvite(InvitePlayer);
 							}							
 						}
-					}					
+					}									
+				}
+				break;			
+			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_PARTY_INVITE_ACCEPT:
+				{
+					int64 PartyReqPlayerID;
+					*GameObjectJob->GameObjectJobMessage >> PartyReqPlayerID;
 
-					vector<CPlayer*> PartyPlayers = PartyPlayer->_PartyManager.GetPartyPlayerArray();
-					CGameServerMessage* ResPartyInvitePacket = G_ObjectManager->GameServer->MakePacketResPartyInvite(PartyPlayers);
-					for (CPlayer* PartyPlayer : PartyPlayers)
+					int64 PartyAcceptPlayerID;
+					*GameObjectJob->GameObjectJobMessage >> PartyAcceptPlayerID;					
+
+					// 그룹 요청한 대상이 채널에 있는지 확인
+					CPlayer* PartyReqPlayer = dynamic_cast<CPlayer*>(FindChannelObject(PartyReqPlayerID, en_GameObjectType::OBJECT_PLAYER));
+					if (PartyReqPlayer != nullptr)
 					{
-						G_ObjectManager->GameServer->SendPacket(PartyPlayer->_SessionId, ResPartyInvitePacket);
+						// 그룹 요청 수락한 대상이 채널에 있는지 확인
+						CPlayer* PartyAcceptPlayer = dynamic_cast<CPlayer*>(FindChannelObject(PartyAcceptPlayerID, en_GameObjectType::OBJECT_PLAYER));
+						if (PartyAcceptPlayer != nullptr)
+						{
+							// 그룹이 다 찼는지 확인
+							int8 PartySize = (int8)PartyReqPlayer->_PartyManager.GetPartyPlayerArray().size();
+							if (PartySize == CPartyManager::en_PartyManager::PARTY_MAX)
+							{
+								// 그룹에 빈 자리가 없을 경우
+								CMessage* ResExistPartyPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_PARTY_MAX);
+								G_ObjectManager->GameServer->SendPacket(PartyAcceptPlayer->_SessionId, ResExistPartyPacket);
+								ResExistPartyPacket->Free();
+							}
+							else
+							{
+								PartyReqPlayer->_PartyManager.PartyManagerInit(PartyReqPlayer);
+								PartyAcceptPlayer->_PartyManager.PartyManagerInit(PartyAcceptPlayer);
+
+								// 그룹초대 요청 대상을 그룹장으로 정하고 그룹초대 대상을 그룹에 초대
+								PartyReqPlayer->_PartyManager.PartyLeaderInvite(PartyAcceptPlayer);
+								PartyAcceptPlayer->_PartyManager.PartyInvite(PartyReqPlayer);
+
+								vector<CPlayer*> PartyPlayers = PartyReqPlayer->_PartyManager.GetPartyPlayerArray();
+								CGameServerMessage* ResPartyAcceptPacket = G_ObjectManager->GameServer->MakePacketResPartyAccept(PartyPlayers);
+								for (CPlayer* PartyPlayer : PartyPlayers)
+								{
+									G_ObjectManager->GameServer->SendPacket(PartyPlayer->_SessionId, ResPartyAcceptPacket);
+								}
+
+								ResPartyAcceptPacket->Free();
+							}							
+						}
+						else
+						{
+
+						}
+					}
+					else
+					{
+
+					}
+				}
+				break;
+			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_PARTY_INVITE_REJECT:
+				{
+					int64 PartyRejectPlayerID;
+					*GameObjectJob->GameObjectJobMessage >> PartyRejectPlayerID;
+
+					int64 ReqPartyInvitePlayerID;
+					*GameObjectJob->GameObjectJobMessage >> ReqPartyInvitePlayerID;
+
+					CPlayer* PartyRejectPlayer = dynamic_cast<CPlayer*>(FindChannelObject(PartyRejectPlayerID, en_GameObjectType::OBJECT_PLAYER));
+					if (PartyRejectPlayer != nullptr)
+					{
+						CPlayer* ReqPartyInvitePlayer = dynamic_cast<CPlayer*>(FindChannelObject(ReqPartyInvitePlayerID, en_GameObjectType::OBJECT_PLAYER));
+						if (ReqPartyInvitePlayer != nullptr)
+						{
+							// 그룹중이라면 그룹중이라고 메세지 보냄
+							CMessage* ResExistPartyPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_PARTY_INVITE_REJECT,
+								PartyRejectPlayer->_GameObjectInfo.ObjectName.c_str());
+							G_ObjectManager->GameServer->SendPacket(ReqPartyInvitePlayer->_SessionId, ResExistPartyPacket);
+							ResExistPartyPacket->Free();
+						}
+						else
+						{
+
+						}
 					}					
-					
-					ResPartyInvitePacket->Free();
+					else
+					{
+
+					}
 				}
 				break;
 			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_PARTY_QUIT:
