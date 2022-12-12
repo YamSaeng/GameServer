@@ -102,13 +102,13 @@
                   "SkillLeftAnimation": "ATTACK_WEAPON_LEFT",
                   "SkillRightAnimation": "ATTACK_WEAPON_LEFT",
                   "NextComboSkill": "SKILL_TYPE_NONE",
-                  "SkillExplanation": "선택한 대상의 뒤로 이동하여 %d ~ %d 만큼의 피해를 입히면서 1초 동안 기절시킨다."
+                  "SkillExplanation": "선택한 대상의 뒤로 이동하고 %d ~ %d 만큼의 피해를 입히면서 1초 동안 기절시킨다."
                 }
               ],
               "BufSkill": [
                 {
                   "SkillNumber": 4,
-                  "SkillType": "SKILL_FIGHT_ACTIVE_BUF_WEAPON_POISON",
+                  "SkillType": "SKILL_ASSASSINATION_ACTIVE_BUF_WEAPON_POISON",
                   "SkillName": "독 바르기",
                   "SkillMaxLevel": 1,
                   "IncreaseMinAttackPoint": 50,
