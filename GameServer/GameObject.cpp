@@ -328,6 +328,8 @@ void CGameObject::Update()
 						CSkill* FindMeleeSkill = Player->_SkillBox.FindSkill((en_SkillCharacteristic)MeleeChracteristicType, (en_SkillType)MeleeSkillType);
 						if (FindMeleeSkill != nullptr)
 						{
+							Player->_DefaultAttackTick = GetTickCount64() + _GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate;
+
 							st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)FindMeleeSkill->GetSkillInfo();
 
 							if (FindMeleeSkill->GetSkillInfo()->CanSkillUse == true)
