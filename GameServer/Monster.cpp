@@ -275,21 +275,10 @@ bool CMonster::UpdateSpawnIdle()
 
 void CMonster::UpdateIdle()
 {
-	bool IsChohoneStun = _StatusAbnormal & STATUS_ABNORMAL_WARRIOR_CHOHONE;
-	bool IsLightNingStun = _StatusAbnormal & STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE;
-	bool IsShaeHoneRoot = _StatusAbnormal & STATUS_ABNORMAL_WARRIOR_SHAEHONE;
-	bool IsShmanRoot = _StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ROOT;
-	bool IsTaioistRoot = _StatusAbnormal & STATUS_ABNORMAL_TAIOIST_ROOT;
-
-	if (IsChohoneStun == true
-		|| IsLightNingStun == true
-		|| IsShaeHoneRoot == true
-		|| IsShmanRoot == true
-		|| IsTaioistRoot == true)
+	if (CheckCantControlStatusAbnormal())
 	{
 		return;
 	}
-
 
 	if (_SearchTick > GetTickCount64())
 	{
@@ -487,20 +476,13 @@ void CMonster::UpdateMoving()
 		return;
 	}
 
-	bool IsChohoneStun = _StatusAbnormal & STATUS_ABNORMAL_WARRIOR_CHOHONE;
-	bool IsLightNingStun = _StatusAbnormal & STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE;
-	bool IsShaeHoneRoot = _StatusAbnormal & STATUS_ABNORMAL_WARRIOR_SHAEHONE;
-	bool IsShmanRoot = _StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ROOT;
-	bool IsTaioistRoot = _StatusAbnormal & STATUS_ABNORMAL_TAIOIST_ROOT;
-
-	// 기절 상태일 경우 
-	if (IsChohoneStun || IsLightNingStun)
+	if (CheckCantControlStatusAbnormal())
 	{
 		return;
-	}
+	}	
 
-	// 발묶임 상태일 경우
-	if (IsShaeHoneRoot || IsShmanRoot || IsTaioistRoot)
+	// 묶임 상태일 경우
+	if (CheckCanControlStatusAbnormal())
 	{
 		if (_Target != nullptr)
 		{
@@ -581,13 +563,10 @@ void CMonster::UpdateReturnSpawnPosition()
 
 void CMonster::UpdateAttack()
 {
-	bool IsChohoneStun = _StatusAbnormal & STATUS_ABNORMAL_WARRIOR_CHOHONE;
-	bool IsLightNingStun = _StatusAbnormal & STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE;
-
-	if (IsChohoneStun == true || IsLightNingStun == true)
+	if (CheckCantControlStatusAbnormal())
 	{
 		return;
-	}
+	}	
 
 	if (_DefaultAttackTick == 0)
 	{
