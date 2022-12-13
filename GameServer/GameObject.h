@@ -10,27 +10,11 @@
 class CSkill;
 class CRectCollision;
 
-#define STATUS_ABNORMAL_WARRIOR_CHOHONE         0b00000001
-#define STATUS_ABNORMAL_WARRIOR_SHAEHONE        0b00000010
-#define STATUS_ABNORMAL_SHAMAN_ROOT             0b00000100
-#define STATUS_ABNORMAL_SHAMAN_ICE_CHAIN        0b00001000
-#define STATUS_ABNORMAL_SHAMAN_ICE_WAVE         0b00010000
-#define STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE 0b00100000
-#define STATUS_ABNORMAL_TAIOIST_ROOT			0b01000000
-
-#define STATUS_ABNORMAL_WARRIOR_CHOHONE_MASK         0b11111110
-#define STATUS_ABNORMAL_WARRIOR_SHAEHONE_MASK        0b11111101
-#define STATUS_ABNORMAL_SHAMAN_ROOT_MASK             0b11111011
-#define STATUS_ABNORMAL_SHAMAN_ICE_CHAIN_MASK        0b11110111
-#define STATUS_ABNORMAL_SHAMAN_ICE_WAVE_MASK         0b11101111
-#define STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE_MASK 0b11011111
-#define STATUS_ABNORMAL_TAIOIST_ROOT_MASK            0b10111111
-
 class CGameObject
 {
 private:
 public:
-	int8 _StatusAbnormal;	
+	int32 _StatusAbnormal;	
 
 	int32 _ObjectManagerArrayIndex;
 	int32 _ChannelArrayIndex;
@@ -77,10 +61,8 @@ public:
 	CGameObject(st_GameObjectInfo GameObjectInfo);
 	virtual ~CGameObject();
 
-	//-----------------------------
-	// 상태 이상에 걸려 있는지 확인
-	//-----------------------------
-	void StatusAbnormalCheck();
+	// 밀려남 상태이상에 걸려 있는지 확인
+	void PushedOutStatusAbnormalCheck();
 
 	virtual void Update();
 	virtual bool OnDamaged(CGameObject* Attacker, int32 DamagePoint);
@@ -119,21 +101,17 @@ public:
 	//--------------------------------------------------
 	// 상태이상 값 설정 및 해제
 	//--------------------------------------------------
-	void SetStatusAbnormal(int8 StatusAbnormalValue);
-	void ReleaseStatusAbnormal(int8 StatusAbnormalValue);
-
-	//--------------------------------------------
-	// 모든 상태이상 체크
-	//--------------------------------------------
-	int8 CheckAllStatusAbnormal();
+	void SetStatusAbnormal(int32 StatusAbnormalValue);
+	void ReleaseStatusAbnormal(int32 StatusAbnormalValue);
+		
 	//--------------------------------------------
 	// 제어 할 수 없는 상태이상 체크
 	//--------------------------------------------
-	int8 CheckCantControlStatusAbnormal();
+	int32 CheckCantControlStatusAbnormal();
 	//--------------------------------------------
 	// 제어 할 수 있는 상태이상 체크
 	//--------------------------------------------
-	int8 CheckCanControlStatusAbnormal();
+	int32 CheckCanControlStatusAbnormal();
 
 	CChannel* GetChannel();
 	void SetChannel(CChannel* Channel);

@@ -45,9 +45,9 @@ CGameObject::~CGameObject()
 	}
 }
 
-void CGameObject::StatusAbnormalCheck()
+void CGameObject::PushedOutStatusAbnormalCheck()
 {
-	bool IsShamanIceWave = _StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ICE_WAVE;
+	bool IsShamanIceWave = _StatusAbnormal & (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_WAVE;
 	if (IsShamanIceWave == true)
 	{
 		switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
@@ -364,6 +364,30 @@ void CGameObject::Update()
 								}
 								break;
 								case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
+									{
+										CSkill* NewDeBufSkill = G_ObjectManager->SkillCreate();
+										if (NewDeBufSkill != nullptr)
+										{
+											st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(FindMeleeSkill->GetSkillInfo(), FindMeleeSkill->GetSkillInfo()->SkillLevel);
+											NewDeBufSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
+											NewDeBufSkill->StatusAbnormalDurationTimeStart();
+
+											_SelectTarget->AddDebuf(NewDeBufSkill);
+											_SelectTarget->SetStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_PROTECTION_SHIELD_SMASH);
+
+											CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
+												_SelectTarget->_GameObjectInfo.ObjectType,
+												_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
+												FindMeleeSkill->GetSkillInfo()->SkillType,
+												true, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_PROTECTION_SHIELD_SMASH);
+											G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
+											ResStatusAbnormalPacket->Free();
+
+											CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewDeBufSkill->GetSkillInfo());
+											G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
+											ResBufDeBufSkillPacket->Free();
+										}
+									}
 									break;
 								case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
 								{
@@ -387,7 +411,7 @@ void CGameObject::Update()
 													NewDeBufSkill->StatusAbnormalDurationTimeStart();
 
 													_SelectTarget->AddDebuf(NewDeBufSkill);
-													_SelectTarget->SetStatusAbnormal(STATUS_ABNORMAL_WARRIOR_CHOHONE);
+													_SelectTarget->SetStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_CHOHONE);
 
 													_SelectTarget->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
@@ -399,7 +423,7 @@ void CGameObject::Update()
 														_SelectTarget->_GameObjectInfo.ObjectType,
 														_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
 														FindMeleeSkill->GetSkillInfo()->SkillType,
-														true, STATUS_ABNORMAL_WARRIOR_CHOHONE);
+														true, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_CHOHONE);
 													G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
 													ResStatusAbnormalPacket->Free();
 
@@ -484,7 +508,7 @@ void CGameObject::Update()
 											NewDeBufSkill->StatusAbnormalDurationTimeStart();
 
 											_SelectTarget->AddDebuf(NewDeBufSkill);
-											_SelectTarget->SetStatusAbnormal(STATUS_ABNORMAL_WARRIOR_SHAEHONE);
+											_SelectTarget->SetStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_SHAEHONE);
 
 											_SelectTarget->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
@@ -496,7 +520,7 @@ void CGameObject::Update()
 												_SelectTarget->_GameObjectInfo.ObjectType,
 												_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
 												FindMeleeSkill->GetSkillInfo()->SkillType,
-												true, STATUS_ABNORMAL_WARRIOR_SHAEHONE);
+												true, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_SHAEHONE);
 											G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
 											ResStatusAbnormalPacket->Free();
 
@@ -558,7 +582,7 @@ void CGameObject::Update()
 								{
 
 								}
-								break;
+								break;							
 								}
 
 								CMessage* AnimationPlayPacket = G_ObjectManager->GameServer->MakePacketResAnimationPlay(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo.MoveDir,
@@ -891,7 +915,7 @@ void CGameObject::Update()
 									if (Player->_ComboSkill != nullptr && Player->_ComboSkill->GetSkillInfo()->SkillType == en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE)
 									{
 										// 냉기 파동 상태이상 인지 확인
-										bool IsIceWave = _SelectTarget->_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ICE_WAVE;
+										bool IsIceWave = _SelectTarget->_StatusAbnormal & (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_WAVE;
 										if (IsIceWave == false)
 										{
 											CSkill* NewDebufSkill = G_ObjectManager->SkillCreate();
@@ -901,13 +925,13 @@ void CGameObject::Update()
 											NewDebufSkill->StatusAbnormalDurationTimeStart();
 
 											_SelectTarget->AddDebuf(NewDebufSkill);
-											_SelectTarget->SetStatusAbnormal(STATUS_ABNORMAL_SHAMAN_ICE_WAVE);
+											_SelectTarget->SetStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_WAVE);
 
 											CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
 												_SelectTarget->_GameObjectInfo.ObjectType,
 												_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
 												NewDebufSkill->GetSkillInfo()->SkillType,
-												true, STATUS_ABNORMAL_SHAMAN_ICE_WAVE);
+												true, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_WAVE);
 											G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
 											ResStatusAbnormalPacket->Free();
 
@@ -931,7 +955,7 @@ void CGameObject::Update()
 								{
 									st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)FindSpellSkill->GetSkillInfo();
 
-									bool IsShmanRoot = _SelectTarget->_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ROOT;
+									bool IsShmanRoot = _SelectTarget->_StatusAbnormal & (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ROOT;
 									if (IsShmanRoot == false)
 									{
 										CSkill* NewSkill = G_ObjectManager->SkillCreate();
@@ -941,7 +965,7 @@ void CGameObject::Update()
 										NewSkill->StatusAbnormalDurationTimeStart();
 
 										_SelectTarget->AddDebuf(NewSkill);
-										_SelectTarget->SetStatusAbnormal(STATUS_ABNORMAL_SHAMAN_ROOT);
+										_SelectTarget->SetStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ROOT);
 
 										CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
 										G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, SelectTargetMoveStopMessage);
@@ -951,7 +975,7 @@ void CGameObject::Update()
 											_SelectTarget->_GameObjectInfo.ObjectType,
 											_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
 											FindSpellSkill->GetSkillInfo()->SkillType,
-											true, STATUS_ABNORMAL_SHAMAN_ROOT);
+											true, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ROOT);
 										G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
 										ResStatusAbnormalPacket->Free();
 
@@ -978,7 +1002,7 @@ void CGameObject::Update()
 								{
 									st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)FindSpellSkill->GetSkillInfo();
 
-									bool IsTaioistRoot = _SelectTarget->_StatusAbnormal & STATUS_ABNORMAL_TAIOIST_ROOT;
+									bool IsTaioistRoot = _SelectTarget->_StatusAbnormal & (int32)en_GameObjectStatusType::STATUS_ABNORMAL_DISCIPLINE_ROOT;
 									if (IsTaioistRoot == false)
 									{
 										CSkill* NewSkill = G_ObjectManager->SkillCreate();
@@ -992,13 +1016,13 @@ void CGameObject::Update()
 										SelectTargetMoveStopMessage->Free();
 
 										_SelectTarget->AddDebuf(NewSkill);
-										_SelectTarget->SetStatusAbnormal(STATUS_ABNORMAL_TAIOIST_ROOT);
+										_SelectTarget->SetStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_DISCIPLINE_ROOT);
 
 										CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
 											_SelectTarget->_GameObjectInfo.ObjectType,
 											_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
 											FindSpellSkill->GetSkillInfo()->SkillType,
-											true, STATUS_ABNORMAL_TAIOIST_ROOT);
+											true, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_DISCIPLINE_ROOT);
 										G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
 										ResStatusAbnormalPacket->Free();
 
@@ -1932,7 +1956,7 @@ void CGameObject::Update()
 		G_ObjectManager->GameObjectJobReturn(GameObjectJob);
 	}
 
-	StatusAbnormalCheck();
+	PushedOutStatusAbnormalCheck();
 }
 
 bool CGameObject::OnDamaged(CGameObject* Attacker, int32 DamagePoint)
@@ -2112,42 +2136,41 @@ void CGameObject::DeleteDebuf(en_SkillType DeleteDebufSkillType)
 	_DeBufs.erase(DeleteDebufSkillType);
 }
 
-void CGameObject::SetStatusAbnormal(int8 StatusAbnormalValue)
+void CGameObject::SetStatusAbnormal(int32 StatusAbnormalValue)
 {
 	_StatusAbnormal |= StatusAbnormalValue;
 }
 
-void CGameObject::ReleaseStatusAbnormal(int8 StatusAbnormalValue)
+void CGameObject::ReleaseStatusAbnormal(int32 StatusAbnormalValue)
 {
 	_StatusAbnormal &= StatusAbnormalValue;
 }
 
-int8 CGameObject::CheckAllStatusAbnormal()
+int32 CGameObject::CheckCantControlStatusAbnormal()
 {
-	int8 StatusAbnormalCount = 0;
+	int32 StatusAbnormalCount = 0;
 
-	if (_StatusAbnormal & STATUS_ABNORMAL_WARRIOR_CHOHONE)
+	if (_StatusAbnormal & (int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_CHOHONE)
 	{
 		StatusAbnormalCount++;
 	}
 
-	if (_StatusAbnormal & STATUS_ABNORMAL_WARRIOR_SHAEHONE)
+	if (_StatusAbnormal & (int32)en_GameObjectStatusType::STATUS_ABNORMAL_PROTECTION_SHIELD_SMASH)
 	{
 		StatusAbnormalCount++;
 	}
 
-	if ((_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ROOT)
-		|| (_StatusAbnormal & STATUS_ABNORMAL_TAIOIST_ROOT))
+	if (_StatusAbnormal & (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_WAVE)
 	{
 		StatusAbnormalCount++;
 	}
 
-	if (_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ICE_WAVE)
+	if (_StatusAbnormal & (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE)
 	{
 		StatusAbnormalCount++;
 	}
 
-	if (_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE)
+	if (_StatusAbnormal & (int32)en_GameObjectStatusType::STATUS_ABNORMAL_ASSASSINATION_BACK_STEP)
 	{
 		StatusAbnormalCount++;
 	}
@@ -2155,39 +2178,17 @@ int8 CGameObject::CheckAllStatusAbnormal()
 	return StatusAbnormalCount;
 }
 
-int8 CGameObject::CheckCantControlStatusAbnormal()
+int32 CGameObject::CheckCanControlStatusAbnormal()
 {
-	int8 StatusAbnormalCount = 0;
+	int32 StatusAbnormalCount = 0;
 
-	if (_StatusAbnormal & STATUS_ABNORMAL_WARRIOR_CHOHONE)
+	if (_StatusAbnormal & (int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_SHAEHONE)
 	{
 		StatusAbnormalCount++;
 	}
 
-	if (_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ICE_WAVE)
-	{
-		StatusAbnormalCount++;
-	}
-
-	if (_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE)
-	{
-		StatusAbnormalCount++;
-	}
-
-	return StatusAbnormalCount;
-}
-
-int8 CGameObject::CheckCanControlStatusAbnormal()
-{
-	int8 StatusAbnormalCount = 0;
-
-	if (_StatusAbnormal & STATUS_ABNORMAL_WARRIOR_SHAEHONE)
-	{
-		StatusAbnormalCount++;
-	}
-
-	if ((_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ROOT)
-		|| (_StatusAbnormal & STATUS_ABNORMAL_TAIOIST_ROOT))
+	if ((_StatusAbnormal & (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ROOT)
+		|| (_StatusAbnormal & (int32)en_GameObjectStatusType::STATUS_ABNORMAL_DISCIPLINE_ROOT))
 	{
 		StatusAbnormalCount++;
 	}
