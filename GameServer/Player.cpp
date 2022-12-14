@@ -122,48 +122,57 @@ void CPlayer::Update()
 			float Distance = st_Vector2::Distance(_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position);
 			if (Distance < 2.0f)
 			{
-				if (_DefaultAttackTick < GetTickCount64())
+				if (st_Vector2::CheckFieldOfView(_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.MoveDir, 90))
 				{
-					CSkill* DefaultAttackSkill = _SkillBox.FindSkill(en_SkillCharacteristic::SKILL_CATEGORY_PUBLIC, en_SkillType::SKILL_DEFAULT_ATTACK);
-					if (DefaultAttackSkill != nullptr)
+					if (_DefaultAttackTick < GetTickCount64())
 					{
-						_DefaultAttackTick = GetTickCount64() + _GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate;
-
-						st_AttackSkillInfo* DefaultAttackSkillInfo = (st_AttackSkillInfo*)DefaultAttackSkill->GetSkillInfo();
-
-						bool IsCritical = true;
-						// 데미지 판단
-						int32 Damage = CMath::CalculateMeleeDamage(
-							_SelectTarget->_GameObjectInfo.ObjectStatInfo.Defence,
-							_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage + _Equipment._WeaponMinDamage + DefaultAttackSkillInfo->SkillMinDamage,
-							_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage + _Equipment._WeaponMaxDamage + DefaultAttackSkillInfo->SkillMaxDamage,
-							_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint, &IsCritical);
-
-						st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, IsCritical, Damage,DefaultAttackSkill->GetSkillInfo()->SkillType);
-						_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
-
-						// 애니메이션 출력
-						vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetFieldOfViewPlayers(this, 1, false);
-
-						CMessage* AnimationPlayPacket = G_ObjectManager->GameServer->MakePacketResAnimationPlay(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo.MoveDir,
-							(*DefaultAttackSkill->GetSkillInfo()->SkillAnimations.find(_GameObjectInfo.ObjectPositionInfo.MoveDir)).second);
-						G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, AnimationPlayPacket);
-						AnimationPlayPacket->Free();
-
-						DefaultAttackSkill->CoolTimeStart();
-
-						// 쿨타임 표시 ( 퀵술롯 바에 등록되어 있는 같은 종류의 스킬을 모두 쿨타임 표시 시켜 준다 )
-						for (auto QuickSlotBarPosition : _QuickSlotManager.FindQuickSlotBar(DefaultAttackSkill->GetSkillInfo()->SkillType))
+						CSkill* DefaultAttackSkill = _SkillBox.FindSkill(en_SkillCharacteristic::SKILL_CATEGORY_PUBLIC, en_SkillType::SKILL_DEFAULT_ATTACK);
+						if (DefaultAttackSkill != nullptr)
 						{
-							// 클라에게 쿨타임 표시
-							CMessage* ResCoolTimeStartPacket = G_ObjectManager->GameServer->MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
-								QuickSlotBarPosition.QuickSlotBarSlotIndex,
-								1.0f, DefaultAttackSkill);
-							G_ObjectManager->GameServer->SendPacket(_SessionId, ResCoolTimeStartPacket);
-							ResCoolTimeStartPacket->Free();
-						}									
+							_DefaultAttackTick = GetTickCount64() + _GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate;
+
+							st_AttackSkillInfo* DefaultAttackSkillInfo = (st_AttackSkillInfo*)DefaultAttackSkill->GetSkillInfo();
+
+							bool IsCritical = true;
+							// 데미지 판단
+							int32 Damage = CMath::CalculateMeleeDamage(
+								_SelectTarget->_GameObjectInfo.ObjectStatInfo.Defence,
+								_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage + _Equipment._WeaponMinDamage + DefaultAttackSkillInfo->SkillMinDamage,
+								_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage + _Equipment._WeaponMaxDamage + DefaultAttackSkillInfo->SkillMaxDamage,
+								_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint, &IsCritical);
+
+							st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, IsCritical, Damage, DefaultAttackSkill->GetSkillInfo()->SkillType);
+							_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
+
+							// 애니메이션 출력
+							vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetFieldOfViewPlayers(this, 1, false);
+
+							CMessage* AnimationPlayPacket = G_ObjectManager->GameServer->MakePacketResAnimationPlay(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo.MoveDir,
+								(*DefaultAttackSkill->GetSkillInfo()->SkillAnimations.find(_GameObjectInfo.ObjectPositionInfo.MoveDir)).second);
+							G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, AnimationPlayPacket);
+							AnimationPlayPacket->Free();
+
+							DefaultAttackSkill->CoolTimeStart();
+
+							// 쿨타임 표시 ( 퀵술롯 바에 등록되어 있는 같은 종류의 스킬을 모두 쿨타임 표시 시켜 준다 )
+							for (auto QuickSlotBarPosition : _QuickSlotManager.FindQuickSlotBar(DefaultAttackSkill->GetSkillInfo()->SkillType))
+							{
+								// 클라에게 쿨타임 표시
+								CMessage* ResCoolTimeStartPacket = G_ObjectManager->GameServer->MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
+									QuickSlotBarPosition.QuickSlotBarSlotIndex,
+									1.0f, DefaultAttackSkill);
+								G_ObjectManager->GameServer->SendPacket(_SessionId, ResCoolTimeStartPacket);
+								ResCoolTimeStartPacket->Free();
+							}
+						}
 					}
-				}				
+				}
+				else
+				{
+					CMessage* ResDefaultAttackAngleErrPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_ATTACK_ANGLE);
+					G_ObjectManager->GameServer->SendPacket(_SessionId, ResDefaultAttackAngleErrPacket);
+					ResDefaultAttackAngleErrPacket->Free();
+				}					
 			}
 			else
 			{
@@ -438,7 +447,7 @@ void CPlayer::UpdateSpell()
 				G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResObjectStatChange);
 				ResObjectStatChange->Free();
 
-				bool IsShamanIceChain = _StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ICE_CHAIN;
+				bool IsShamanIceChain = _StatusAbnormal & (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_CHAIN;
 				if (IsShamanIceChain == false)
 				{
 					CSkill* NewSkill = G_ObjectManager->SkillCreate();
@@ -448,12 +457,12 @@ void CPlayer::UpdateSpell()
 					NewSkill->StatusAbnormalDurationTimeStart();
 
 					_SelectTarget->AddDebuf(NewSkill);
-					_SelectTarget->SetStatusAbnormal(STATUS_ABNORMAL_SHAMAN_ICE_CHAIN);
+					_SelectTarget->SetStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_CHAIN);
 
 					CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
 						_SelectTarget->_GameObjectInfo.ObjectType,
 						_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
-						_SpellSkill->GetSkillInfo()->SkillType, true, STATUS_ABNORMAL_SHAMAN_ICE_CHAIN);
+						_SpellSkill->GetSkillInfo()->SkillType, true, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_CHAIN);
 					G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResStatusAbnormalPacket);
 					ResStatusAbnormalPacket->Free();
 
@@ -478,7 +487,7 @@ void CPlayer::UpdateSpell()
 				st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, IsCritical, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
 				_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
 
-				bool IsLightningStrike = _StatusAbnormal & STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE;
+				bool IsLightningStrike = _StatusAbnormal & (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE;
 				if (IsLightningStrike == false)
 				{
 					CSkill* NewSkill = G_ObjectManager->SkillCreate();
@@ -488,7 +497,7 @@ void CPlayer::UpdateSpell()
 					NewSkill->StatusAbnormalDurationTimeStart();
 
 					_SelectTarget->AddDebuf(NewSkill);
-					_SelectTarget->SetStatusAbnormal(STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE);
+					_SelectTarget->SetStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE);
 
 					CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
 					G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, SelectTargetMoveStopMessage);
@@ -498,7 +507,7 @@ void CPlayer::UpdateSpell()
 						_SelectTarget->_GameObjectInfo.ObjectType,
 						_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
 						_SpellSkill->GetSkillInfo()->SkillType,
-						true, STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE);
+						true, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE);
 					G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResStatusAbnormalPacket);
 					ResStatusAbnormalPacket->Free();
 
