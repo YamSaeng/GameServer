@@ -1377,6 +1377,57 @@ vector<CGameObject*> CChannel::FindAttackChannelObjects(vector<st_FieldOfViewInf
 
 	return FindObjects;
 }
+		
+vector<CGameObject*> CChannel::FindRangeAttackChannelObjects(CGameObject* Object, int16 Distance)
+{
+	vector<CGameObject*> FindObjects;
+
+	for (int32 i = 0; i < en_Channel::PLAYER_MAX; i++)
+	{
+		if (_ChannelPlayerArray[i] != nullptr			
+			&& _ChannelPlayerArray[i]->_GameObjectInfo.ObjectId != Object->_GameObjectInfo.ObjectId
+			&& _ChannelPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE
+			&& _ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::READY_DEAD
+			&& _ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
+		{
+			float TargetDistance = st_Vector2::Distance(_ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
+			if (TargetDistance <= Distance)
+			{
+				FindObjects.push_back(_ChannelPlayerArray[i]);
+			}
+		}
+	}
+
+	for (int32 i = 0; i < en_Channel::DUMMY_PLAYER_MAX; i++)
+	{
+		if (_ChannelDummyPlayerArray[i] != nullptr)
+		{
+			// 거리 안에 오브젝트가 존재
+			float TargetDistance = st_Vector2::Distance(_ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
+			if (TargetDistance <= Distance)
+			{
+				FindObjects.push_back(_ChannelDummyPlayerArray[i]);
+			}
+		}
+	}
+
+	for (int32 i = 0; i < en_Channel::MONSTER_MAX; i++)
+	{
+		if (_ChannelMonsterArray[i] != nullptr			
+			&& _ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::READY_DEAD
+			&& _ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
+		{
+			// 거리 안에 오브젝트가 존재
+			float TargetDistance = st_Vector2::Distance(_ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
+			if (TargetDistance <= Distance)
+			{
+				FindObjects.push_back(_ChannelMonsterArray[i]);
+			}
+		}
+	}
+
+	return FindObjects;
+}
 
 bool CChannel::ChannelColliderCheck(CGameObject* Object)
 {	
