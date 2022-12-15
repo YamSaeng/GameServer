@@ -323,49 +323,50 @@ void CGameObject::Update()
 				CPlayer* Player = dynamic_cast<CPlayer*>(this);
 				if(Player != nullptr)
 				{
-					if (_SelectTarget != nullptr)
-					{
-						CSkill* FindMeleeSkill = Player->_SkillBox.FindSkill((en_SkillCharacteristic)MeleeChracteristicType, (en_SkillType)MeleeSkillType);
-						if (FindMeleeSkill != nullptr)
+					CSkill* FindMeleeSkill = Player->_SkillBox.FindSkill((en_SkillCharacteristic)MeleeChracteristicType, (en_SkillType)MeleeSkillType);
+					if (FindMeleeSkill != nullptr)
+					{						
+						st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)FindMeleeSkill->GetSkillInfo();
+
+						if (FindMeleeSkill->GetSkillInfo()->CanSkillUse == true)
 						{
-							Player->_DefaultAttackTick = GetTickCount64() + _GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate;
+							_MeleeSkill = FindMeleeSkill;
 
-							st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)FindMeleeSkill->GetSkillInfo();
+							vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetFieldOfViewPlayers(this, 1, false);						
 
-							if (FindMeleeSkill->GetSkillInfo()->CanSkillUse == true)
+							// 데미지 적용할 대상들
+							vector<CGameObject*> DamageTargets;
+
+							switch (FindMeleeSkill->GetSkillInfo()->SkillType)
 							{
-								_MeleeSkill = FindMeleeSkill;
-
-								vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetFieldOfViewPlayers(this, 1, false);
-
-								bool IsCritical = true;
-								// 데미지 판단
-								int32 Damage = CMath::CalculateMeleeDamage(
-									_SelectTarget->_GameObjectInfo.ObjectStatInfo.Defence,
-									_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage + Player->_Equipment._WeaponMinDamage + AttackSkillInfo->SkillMinDamage,
-									_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage + Player->_Equipment._WeaponMaxDamage + AttackSkillInfo->SkillMaxDamage,
-									_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint, &IsCritical);
-
-								st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, IsCritical, Damage, FindMeleeSkill->GetSkillInfo()->SkillType);
-								_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
-
-								switch (FindMeleeSkill->GetSkillInfo()->SkillType)
-								{
-								case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
-								case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
-								{
-									if (AttackSkillInfo->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
+							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
+							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
+								{			
+									if (_SelectTarget != nullptr)
 									{
-										CSkill* FindNextComboSkill = Player->_SkillBox.FindSkill(AttackSkillInfo->SkillCharacteristic, AttackSkillInfo->NextComboSkill);
-										if (FindNextComboSkill->GetSkillInfo()->CanSkillUse == true)
+										if (AttackSkillInfo->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
 										{
-											st_GameObjectJob* ComboAttackCreateJob = G_ObjectManager->GameServer->MakeGameObjectJobComboSkillCreate(FindMeleeSkill);
-											_GameObjectJobQue.Enqueue(ComboAttackCreateJob);
+											CSkill* FindNextComboSkill = Player->_SkillBox.FindSkill(AttackSkillInfo->SkillCharacteristic, AttackSkillInfo->NextComboSkill);
+											if (FindNextComboSkill->GetSkillInfo()->CanSkillUse == true)
+											{
+												st_GameObjectJob* ComboAttackCreateJob = G_ObjectManager->GameServer->MakeGameObjectJobComboSkillCreate(FindMeleeSkill);
+												_GameObjectJobQue.Enqueue(ComboAttackCreateJob);
+											}
 										}
+
+										DamageTargets.push_back(_SelectTarget);
 									}
+									else
+									{
+										CMessage* NonSelectTargetErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT);
+										G_ObjectManager->GameServer->SendPacket(Player->_SessionId, NonSelectTargetErrorPacket);
+										NonSelectTargetErrorPacket->Free();
+									}									
 								}
 								break;
-								case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
+							case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
+								{
+									if (_SelectTarget != nullptr)
 									{
 										CSkill* NewDeBufSkill = G_ObjectManager->SkillCreate();
 										if (NewDeBufSkill != nullptr)
@@ -389,78 +390,207 @@ void CGameObject::Update()
 											G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
 											ResBufDeBufSkillPacket->Free();
 										}
-									}
-									break;
-								case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
-								{
-									st_Vector2 TargetPosition = _SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position;
-									st_Vector2 MyPosition = _GameObjectInfo.ObjectPositionInfo.Position;
 
-									float Distance = st_Vector2::Distance(TargetPosition, MyPosition);
-									if (Distance <= 4.0f)
+										DamageTargets.push_back(_SelectTarget);
+									}
+									else
 									{
-										st_Vector2Int MyFrontCellPosition = GetFrontCellPosition(_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
-										if (_Channel != nullptr)
+										CMessage* NonSelectTargetErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT);
+										G_ObjectManager->GameServer->SendPacket(Player->_SessionId, NonSelectTargetErrorPacket);
+										NonSelectTargetErrorPacket->Free();
+									}									
+								}
+								break;
+							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
+								{
+									if (_SelectTarget != nullptr)
+									{
+										st_Vector2 TargetPosition = _SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position;
+										st_Vector2 MyPosition = _GameObjectInfo.ObjectPositionInfo.Position;
+
+										float Distance = st_Vector2::Distance(TargetPosition, MyPosition);
+										if (Distance <= 4.0f)
 										{
-											if (_Channel->GetMap()->ApplyMove(_SelectTarget, MyFrontCellPosition))
+											st_Vector2Int MyFrontCellPosition = GetFrontCellPosition(_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
+											if (_Channel != nullptr)
 											{
+												if (_Channel->GetMap()->ApplyMove(_SelectTarget, MyFrontCellPosition))
+												{
+													DamageTargets.push_back(_SelectTarget);
+
+													CSkill* NewDeBufSkill = G_ObjectManager->SkillCreate();
+
+													if (NewDeBufSkill != nullptr)
+													{
+														st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(FindMeleeSkill->GetSkillInfo(), FindMeleeSkill->GetSkillInfo()->SkillLevel);
+														NewDeBufSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
+														NewDeBufSkill->StatusAbnormalDurationTimeStart();
+
+														_SelectTarget->AddDebuf(NewDeBufSkill);
+														_SelectTarget->SetStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_CHOHONE);
+
+														_SelectTarget->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+
+														CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
+														G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, SelectTargetMoveStopMessage);
+														SelectTargetMoveStopMessage->Free();
+
+														CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
+															_SelectTarget->_GameObjectInfo.ObjectType,
+															_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
+															FindMeleeSkill->GetSkillInfo()->SkillType,
+															true, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_CHOHONE);
+														G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
+														ResStatusAbnormalPacket->Free();
+
+														CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewDeBufSkill->GetSkillInfo());
+														G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
+														ResBufDeBufSkillPacket->Free();
+
+														CMessage* ResEffectPacket = G_ObjectManager->GameServer->MakePacketEffect(_SelectTarget->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_DEBUF_STUN, NewDeBufSkill->GetSkillInfo()->SkillDurationTime / 1000.0f);
+														G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResEffectPacket);
+														ResEffectPacket->Free();
+
+														switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
+														{
+														case en_MoveDir::UP:
+															_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X = _GameObjectInfo.ObjectPositionInfo.Position._X;
+															_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y = MyFrontCellPosition._Y + 0.5f;
+															break;
+														case en_MoveDir::DOWN:
+															_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X = _GameObjectInfo.ObjectPositionInfo.Position._X;
+															_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y = MyFrontCellPosition._Y + 0.5f;
+															break;
+														case en_MoveDir::LEFT:
+															_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X = MyFrontCellPosition._X + 0.5f;
+															_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y = _GameObjectInfo.ObjectPositionInfo.Position._Y;
+															break;
+														case en_MoveDir::RIGHT:
+															_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X = MyFrontCellPosition._X + 0.5f;
+															_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y = _GameObjectInfo.ObjectPositionInfo.Position._Y;
+															break;
+														}
+
+														CMessage* ResSyncPositionPacket = G_ObjectManager->GameServer->MakePacketResSyncPosition(_SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
+														G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResSyncPositionPacket);
+														ResSyncPositionPacket->Free();
+													}
+												}
+												else
+												{
+													CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_PLACE_BLOCK, FindMeleeSkill->GetSkillInfo()->SkillName.c_str());
+													G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResErrorPacket);
+													ResErrorPacket->Free();
+												}
+											}
+
+											DamageTargets.push_back(_SelectTarget);
+										}
+									}	
+									else
+									{
+										CMessage* NonSelectTargetErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT);
+										G_ObjectManager->GameServer->SendPacket(Player->_SessionId, NonSelectTargetErrorPacket);
+										NonSelectTargetErrorPacket->Free();
+									}
+								}
+								break;
+							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE:
+								{
+									if (_SelectTarget != nullptr)
+									{
+										st_Vector2 TargetPosition = _SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position;
+										st_Vector2 MyPosition = _GameObjectInfo.ObjectPositionInfo.Position;
+										st_Vector2 Direction = TargetPosition - MyPosition;
+
+										en_MoveDir Dir = st_Vector2::GetMoveDir(Direction);
+
+										float Distance = st_Vector2::Distance(TargetPosition, MyPosition);
+										if (Distance <= 4.0f)
+										{
+											st_Vector2Int MovePosition;
+
+											switch (Dir)
+											{
+											case en_MoveDir::UP:
+												MovePosition = _SelectTarget->GetFrontCellPosition(en_MoveDir::DOWN, 1);
+												break;
+											case en_MoveDir::DOWN:
+												MovePosition = _SelectTarget->GetFrontCellPosition(en_MoveDir::UP, 1);
+												break;
+											case en_MoveDir::LEFT:
+												MovePosition = _SelectTarget->GetFrontCellPosition(en_MoveDir::RIGHT, 1);
+												break;
+											case en_MoveDir::RIGHT:
+												MovePosition = _SelectTarget->GetFrontCellPosition(en_MoveDir::LEFT, 1);
+												break;
+											}
+
+											if (_Channel->GetMap()->ApplyMove(this, MovePosition))
+											{
+												DamageTargets.push_back(_SelectTarget);
+
 												CSkill* NewDeBufSkill = G_ObjectManager->SkillCreate();
 
-												if (NewDeBufSkill != nullptr)
+												st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(FindMeleeSkill->GetSkillInfo(), FindMeleeSkill->GetSkillInfo()->SkillLevel);
+												NewDeBufSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, AttackSkillInfo);
+												NewDeBufSkill->StatusAbnormalDurationTimeStart();
+
+												_SelectTarget->AddDebuf(NewDeBufSkill);
+												_SelectTarget->SetStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_SHAEHONE);
+
+												_SelectTarget->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+
+												CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
+												G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, SelectTargetMoveStopMessage);
+												SelectTargetMoveStopMessage->Free();
+
+												CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
+													_SelectTarget->_GameObjectInfo.ObjectType,
+													_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
+													FindMeleeSkill->GetSkillInfo()->SkillType,
+													true, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_SHAEHONE);
+												G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
+												ResStatusAbnormalPacket->Free();
+
+												CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewDeBufSkill->GetSkillInfo());
+												G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
+												ResBufDeBufSkillPacket->Free();
+
+												float EffectPrintTime = FindMeleeSkill->GetSkillInfo()->SkillDurationTime / 1000.0f;
+
+												// 이펙트 출력
+												CMessage* ResEffectPacket = G_ObjectManager->GameServer->MakePacketEffect(_SelectTarget->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_DEBUF_ROOT, EffectPrintTime);
+												G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResEffectPacket);
+												ResEffectPacket->Free();
+
+												switch (Dir)
 												{
-													st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(FindMeleeSkill->GetSkillInfo(), FindMeleeSkill->GetSkillInfo()->SkillLevel);
-													NewDeBufSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
-													NewDeBufSkill->StatusAbnormalDurationTimeStart();
-
-													_SelectTarget->AddDebuf(NewDeBufSkill);
-													_SelectTarget->SetStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_CHOHONE);
-
-													_SelectTarget->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-
-													CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
-													G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, SelectTargetMoveStopMessage);
-													SelectTargetMoveStopMessage->Free();
-
-													CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
-														_SelectTarget->_GameObjectInfo.ObjectType,
-														_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
-														FindMeleeSkill->GetSkillInfo()->SkillType,
-														true, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_CHOHONE);
-													G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
-													ResStatusAbnormalPacket->Free();
-
-													CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewDeBufSkill->GetSkillInfo());
-													G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
-													ResBufDeBufSkillPacket->Free();
-
-													CMessage* ResEffectPacket = G_ObjectManager->GameServer->MakePacketEffect(_SelectTarget->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_DEBUF_STUN, NewDeBufSkill->GetSkillInfo()->SkillDurationTime / 1000.0f);
-													G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResEffectPacket);
-													ResEffectPacket->Free();
-
-													switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
-													{
-													case en_MoveDir::UP:
-														_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X = _GameObjectInfo.ObjectPositionInfo.Position._X;
-														_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y = MyFrontCellPosition._Y + 0.5f;
-														break;
-													case en_MoveDir::DOWN:
-														_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X = _GameObjectInfo.ObjectPositionInfo.Position._X;
-														_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y = MyFrontCellPosition._Y + 0.5f;
-														break;
-													case en_MoveDir::LEFT:
-														_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X = MyFrontCellPosition._X + 0.5f;
-														_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y = _GameObjectInfo.ObjectPositionInfo.Position._Y;
-														break;
-													case en_MoveDir::RIGHT:
-														_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X = MyFrontCellPosition._X + 0.5f;
-														_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y = _GameObjectInfo.ObjectPositionInfo.Position._Y;
-														break;
-													}
-
-													CMessage* ResSyncPositionPacket = G_ObjectManager->GameServer->MakePacketResSyncPosition(_SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
-													G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResSyncPositionPacket);
-													ResSyncPositionPacket->Free();
+												case en_MoveDir::UP:
+													_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::UP;
+													_GameObjectInfo.ObjectPositionInfo.Position._X = _SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X;
+													_GameObjectInfo.ObjectPositionInfo.Position._Y = MovePosition._Y + 0.5f;
+													break;
+												case en_MoveDir::DOWN:
+													_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
+													_GameObjectInfo.ObjectPositionInfo.Position._X = _SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X;
+													_GameObjectInfo.ObjectPositionInfo.Position._Y = MovePosition._Y + 0.5f;
+													break;
+												case en_MoveDir::LEFT:
+													_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::LEFT;
+													_GameObjectInfo.ObjectPositionInfo.Position._X = MovePosition._X + 0.5f;
+													_GameObjectInfo.ObjectPositionInfo.Position._Y = _SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y;
+													break;
+												case en_MoveDir::RIGHT:
+													_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::RIGHT;
+													_GameObjectInfo.ObjectPositionInfo.Position._X = MovePosition._X + 0.5f;
+													_GameObjectInfo.ObjectPositionInfo.Position._Y = _SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y;
+													break;
 												}
+
+												CMessage* ResSyncPositionPacket = G_ObjectManager->GameServer->MakePacketResSyncPosition(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo);
+												G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResSyncPositionPacket);
+												ResSyncPositionPacket->Free();
 											}
 											else
 											{
@@ -469,183 +599,83 @@ void CGameObject::Update()
 												ResErrorPacket->Free();
 											}
 										}
-									}
-								}
-								break;
-								case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE:
-								{
-									st_Vector2 TargetPosition = _SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position;
-									st_Vector2 MyPosition = _GameObjectInfo.ObjectPositionInfo.Position;
-									st_Vector2 Direction = TargetPosition - MyPosition;
-
-									en_MoveDir Dir = st_Vector2::GetMoveDir(Direction);
-
-									float Distance = st_Vector2::Distance(TargetPosition, MyPosition);
-									if (Distance <= 4.0f)
-									{
-										st_Vector2Int MovePosition;
-
-										switch (Dir)
-										{
-										case en_MoveDir::UP:
-											MovePosition = _SelectTarget->GetFrontCellPosition(en_MoveDir::DOWN, 1);
-											break;
-										case en_MoveDir::DOWN:
-											MovePosition = _SelectTarget->GetFrontCellPosition(en_MoveDir::UP, 1);
-											break;
-										case en_MoveDir::LEFT:
-											MovePosition = _SelectTarget->GetFrontCellPosition(en_MoveDir::RIGHT, 1);
-											break;
-										case en_MoveDir::RIGHT:
-											MovePosition = _SelectTarget->GetFrontCellPosition(en_MoveDir::LEFT, 1);
-											break;
-										}
-
-										if (_Channel->GetMap()->ApplyMove(this, MovePosition))
-										{
-											CSkill* NewDeBufSkill = G_ObjectManager->SkillCreate();
-
-											st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(FindMeleeSkill->GetSkillInfo(), FindMeleeSkill->GetSkillInfo()->SkillLevel);
-											NewDeBufSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, AttackSkillInfo);
-											NewDeBufSkill->StatusAbnormalDurationTimeStart();
-
-											_SelectTarget->AddDebuf(NewDeBufSkill);
-											_SelectTarget->SetStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_SHAEHONE);
-
-											_SelectTarget->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-
-											CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
-											G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, SelectTargetMoveStopMessage);
-											SelectTargetMoveStopMessage->Free();
-
-											CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
-												_SelectTarget->_GameObjectInfo.ObjectType,
-												_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
-												FindMeleeSkill->GetSkillInfo()->SkillType,
-												true, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_SHAEHONE);
-											G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
-											ResStatusAbnormalPacket->Free();
-
-											CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewDeBufSkill->GetSkillInfo());
-											G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
-											ResBufDeBufSkillPacket->Free();
-
-											float EffectPrintTime = FindMeleeSkill->GetSkillInfo()->SkillDurationTime / 1000.0f;
-
-											// 이펙트 출력
-											CMessage* ResEffectPacket = G_ObjectManager->GameServer->MakePacketEffect(_SelectTarget->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_DEBUF_ROOT, EffectPrintTime);
-											G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResEffectPacket);
-											ResEffectPacket->Free();
-
-											switch (Dir)
-											{
-											case en_MoveDir::UP:
-												_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::UP;
-												_GameObjectInfo.ObjectPositionInfo.Position._X = _SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X;
-												_GameObjectInfo.ObjectPositionInfo.Position._Y = MovePosition._Y + 0.5f;
-												break;
-											case en_MoveDir::DOWN:
-												_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
-												_GameObjectInfo.ObjectPositionInfo.Position._X = _SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X;
-												_GameObjectInfo.ObjectPositionInfo.Position._Y = MovePosition._Y + 0.5f;
-												break;
-											case en_MoveDir::LEFT:
-												_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::LEFT;
-												_GameObjectInfo.ObjectPositionInfo.Position._X = MovePosition._X + 0.5f;
-												_GameObjectInfo.ObjectPositionInfo.Position._Y = _SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y;
-												break;
-											case en_MoveDir::RIGHT:
-												_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::RIGHT;
-												_GameObjectInfo.ObjectPositionInfo.Position._X = MovePosition._X + 0.5f;
-												_GameObjectInfo.ObjectPositionInfo.Position._Y = _SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y;
-												break;
-											}
-
-											CMessage* ResSyncPositionPacket = G_ObjectManager->GameServer->MakePacketResSyncPosition(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo);
-											G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResSyncPositionPacket);
-											ResSyncPositionPacket->Free();
-										}
 										else
 										{
-											CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_PLACE_BLOCK, FindMeleeSkill->GetSkillInfo()->SkillName.c_str());
+											CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_PLACE_DISTANCE, FindMeleeSkill->GetSkillInfo()->SkillName.c_str(), Distance);
 											G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResErrorPacket);
 											ResErrorPacket->Free();
 										}
-									}
+									}	
 									else
 									{
-										CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_PLACE_DISTANCE, FindMeleeSkill->GetSkillInfo()->SkillName.c_str(), Distance);
-										G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResErrorPacket);
-										ResErrorPacket->Free();
+										CMessage* NonSelectTargetErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT);
+										G_ObjectManager->GameServer->SendPacket(Player->_SessionId, NonSelectTargetErrorPacket);
+										NonSelectTargetErrorPacket->Free();
 									}
 								}
 								break;
-								case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:
+							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:
 								{
-
-								}
-								break;							
-								}
-
-								CMessage* AnimationPlayPacket = G_ObjectManager->GameServer->MakePacketResAnimationPlay(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo.MoveDir,
-									(*FindMeleeSkill->GetSkillInfo()->SkillAnimations.find(_GameObjectInfo.ObjectPositionInfo.MoveDir)).second);
-								G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, AnimationPlayPacket);
-								AnimationPlayPacket->Free();
-
-								// 쿨타임 시작
-								FindMeleeSkill->CoolTimeStart();
-
-								// 쿨타임 표시 ( 퀵술롯 바에 등록되어 있는 같은 종류의 스킬을 모두 쿨타임 표시 시켜 준다 )
-								for (auto QuickSlotBarPosition : Player->_QuickSlotManager.FindQuickSlotBar(FindMeleeSkill->GetSkillInfo()->SkillType))
-								{
-									// 클라에게 쿨타임 표시
-									CMessage* ResCoolTimeStartPacket = G_ObjectManager->GameServer->MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
-										QuickSlotBarPosition.QuickSlotBarSlotIndex,
-										1.0f, FindMeleeSkill);
-									G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
-									ResCoolTimeStartPacket->Free();
-								}
-
-								// 요청한 스킬과 기본 공격 스킬을 제외하고 스킬 창에서 가져옴
-								vector<CSkill*> GlobalSkills = Player->_SkillBox.GetGlobalSkills(FindMeleeSkill->GetSkillInfo()->SkillType, FindMeleeSkill->GetSkillKind());
-
-								// 전역 쿨타임 적용
-								for (CSkill* GlobalSkill : GlobalSkills)
-								{
-									GlobalSkill->GlobalCoolTimeStart(FindMeleeSkill->GetSkillInfo()->SkillMotionTime);
-
-									for (st_Vector2Int QuickSlotPosition : GlobalSkill->_QuickSlotBarPosition)
+									CChannel* Channel = Player->GetChannel();
+									if (Channel != nullptr)
 									{
-										CMessage* ResCoolTimeStartPacket = G_ObjectManager->GameServer->MakePacketCoolTime((int8)QuickSlotPosition._Y,
-											(int8)QuickSlotPosition._X,
-											1.0f, nullptr, FindMeleeSkill->GetSkillInfo()->SkillMotionTime);
-										G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
-										ResCoolTimeStartPacket->Free();
+										vector<CGameObject*> RangeAttackObjects = Channel->FindRangeAttackChannelObjects(Player, 2);
+										for (CGameObject* RangeAttackObject : RangeAttackObjects)
+										{
+											DamageTargets.push_back(RangeAttackObject);
+										}
 									}
 								}
-							}
-							else
-							{
-								G_Logger->WriteStdOut(en_Color::RED, L"%s 스킬을 아직 사용 할 수 없음\n", FindMeleeSkill->GetSkillInfo()->SkillName.c_str());
+								break;
 							}
 
-							// 일반 공격 쿨타임을 새로 시작
-							CSkill* DefaultAttackSkill = Player->_SkillBox.FindSkill(en_SkillCharacteristic::SKILL_CATEGORY_PUBLIC, en_SkillType::SKILL_DEFAULT_ATTACK);
-							if (DefaultAttackSkill != nullptr)
+							for (CGameObject* DamageTarget : DamageTargets)
 							{
-								Player->_OnPlayerDefaultAttack = true;
+								bool IsCritical = true;
 
-								Player->_DefaultAttackTick = GetTickCount64() + Player->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate;
+								// 데미지 판단
+								int32 Damage = CMath::CalculateMeleeDamage(
+									DamageTarget->_GameObjectInfo.ObjectStatInfo.Defence,
+									_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage + Player->_Equipment._WeaponMinDamage + AttackSkillInfo->SkillMinDamage,
+									_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage + Player->_Equipment._WeaponMaxDamage + AttackSkillInfo->SkillMaxDamage,
+									_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint, &IsCritical);
 
-								DefaultAttackSkill->CoolTimeStart();
+								st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, IsCritical, Damage, FindMeleeSkill->GetSkillInfo()->SkillType);
+								DamageTarget->_GameObjectJobQue.Enqueue(DamageJob);
+							}
 
-								// 쿨타임 표시 ( 퀵술롯 바에 등록되어 있는 같은 종류의 스킬을 모두 쿨타임 표시 시켜 준다 )
-								for (auto QuickSlotBarPosition : Player->_QuickSlotManager.FindQuickSlotBar(DefaultAttackSkill->GetSkillInfo()->SkillType))
+							CMessage* AnimationPlayPacket = G_ObjectManager->GameServer->MakePacketResAnimationPlay(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo.MoveDir,
+								(*FindMeleeSkill->GetSkillInfo()->SkillAnimations.find(_GameObjectInfo.ObjectPositionInfo.MoveDir)).second);
+							G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, AnimationPlayPacket);
+							AnimationPlayPacket->Free();
+
+							// 쿨타임 시작
+							FindMeleeSkill->CoolTimeStart();
+
+							// 쿨타임 표시 ( 퀵술롯 바에 등록되어 있는 같은 종류의 스킬을 모두 쿨타임 표시 시켜 준다 )
+							for (auto QuickSlotBarPosition : Player->_QuickSlotManager.FindQuickSlotBar(FindMeleeSkill->GetSkillInfo()->SkillType))
+							{
+								// 클라에게 쿨타임 표시
+								CMessage* ResCoolTimeStartPacket = G_ObjectManager->GameServer->MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
+									QuickSlotBarPosition.QuickSlotBarSlotIndex,
+									1.0f, FindMeleeSkill);
+								G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
+								ResCoolTimeStartPacket->Free();
+							}
+
+							// 요청한 스킬과 기본 공격 스킬을 제외하고 스킬 창에서 가져옴
+							vector<CSkill*> GlobalSkills = Player->_SkillBox.GetGlobalSkills(FindMeleeSkill->GetSkillInfo()->SkillType, FindMeleeSkill->GetSkillKind());
+
+							// 전역 쿨타임 적용
+							for (CSkill* GlobalSkill : GlobalSkills)
+							{
+								GlobalSkill->GlobalCoolTimeStart(FindMeleeSkill->GetSkillInfo()->SkillMotionTime);
+
+								for (st_Vector2Int QuickSlotPosition : GlobalSkill->_QuickSlotBarPosition)
 								{
-									// 클라에게 쿨타임 표시
-									CMessage* ResCoolTimeStartPacket = G_ObjectManager->GameServer->MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
-										QuickSlotBarPosition.QuickSlotBarSlotIndex,
-										1.0f, DefaultAttackSkill);
+									CMessage* ResCoolTimeStartPacket = G_ObjectManager->GameServer->MakePacketCoolTime((int8)QuickSlotPosition._Y,
+										(int8)QuickSlotPosition._X,
+										1.0f, nullptr, FindMeleeSkill->GetSkillInfo()->SkillMotionTime);
 									G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
 									ResCoolTimeStartPacket->Free();
 								}
@@ -653,15 +683,31 @@ void CGameObject::Update()
 						}
 						else
 						{
-							CRASH("근접 공격 스킬을 스킬창에서 발견 못함");
+							G_Logger->WriteStdOut(en_Color::RED, L"%s 스킬을 아직 사용 할 수 없음\n", FindMeleeSkill->GetSkillInfo()->SkillName.c_str());
+						}						
+
+						// 일반 공격 쿨타임을 새로 시작
+						CSkill* DefaultAttackSkill = Player->_SkillBox.FindSkill(en_SkillCharacteristic::SKILL_CATEGORY_PUBLIC, en_SkillType::SKILL_DEFAULT_ATTACK);
+						if (DefaultAttackSkill != nullptr)
+						{
+							Player->_OnPlayerDefaultAttack = true;
+
+							Player->_DefaultAttackTick = GetTickCount64() + Player->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate;
+
+							DefaultAttackSkill->CoolTimeStart();
+
+							// 쿨타임 표시 ( 퀵술롯 바에 등록되어 있는 같은 종류의 스킬을 모두 쿨타임 표시 시켜 준다 )
+							for (auto QuickSlotBarPosition : Player->_QuickSlotManager.FindQuickSlotBar(DefaultAttackSkill->GetSkillInfo()->SkillType))
+							{
+								// 클라에게 쿨타임 표시
+								CMessage* ResCoolTimeStartPacket = G_ObjectManager->GameServer->MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
+									QuickSlotBarPosition.QuickSlotBarSlotIndex,
+									1.0f, DefaultAttackSkill);
+								G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
+								ResCoolTimeStartPacket->Free();
+							}
 						}
-					}
-					else
-					{
-						CMessage* NonSelectTargetErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT);
-						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, NonSelectTargetErrorPacket);
-						NonSelectTargetErrorPacket->Free();
-					}
+					}				
 
 					if (Player->_ComboSkill != nullptr)
 					{
