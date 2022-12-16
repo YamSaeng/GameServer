@@ -685,7 +685,15 @@
 					 END),
 		SkillLevel			   
         FROM [dbo].[Skill]
-        WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId) AND CharacteristicType = (@CharacteristicType)
+        WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId) AND CharacteristicType = (CASE WHEN @CharacteristicType = 1 THEN 'SKILL_CATEGORY_PUBLIC'
+																										 WHEN @CharacteristicType = 2 THEN 'SKILL_CATEGORY_FIGHT'
+																										 WHEN @CharacteristicType = 2 THEN 'SKILL_CATEGORY_PROTECTION'
+																										 WHEN @CharacteristicType = 2 THEN 'SKILL_CATEGORY_SPELL'
+																										 WHEN @CharacteristicType = 2 THEN 'SKILL_CATEGORY_DISCIPLINE'
+																										 WHEN @CharacteristicType = 2 THEN 'SKILL_CATEGORY_ASSASSINATION'
+																										 WHEN @CharacteristicType = 2 THEN 'SKILL_CATEGORY_SHOOTING'
+																										 ELSE ' '
+																										 END)
       ]]>
 		</Body>
 	</Procedure>
