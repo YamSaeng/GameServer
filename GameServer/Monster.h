@@ -52,9 +52,9 @@ protected:
 	//--------------------------
 	int32 _ChaseCellDistance;
 
-	//-----------------
-	// 공격 거리
-	//-----------------
+	// 움직일때 공격 검사 거리
+	float _MovingAttackRange;
+	// 공격할때 재 공격 검사 거리
 	float _AttackRange;
 	
 	//------------------------------------
@@ -144,6 +144,6 @@ protected:
 
 	void SendMonsterChangeObjectState();		
 
-	bool TargetAttackCheck();
+	bool TargetAttackCheck(float CheckDistance);
 };
 

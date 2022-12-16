@@ -434,7 +434,7 @@ void CMonster::ReadMoving()
 		return;
 	}
 	
-	bool IsAttack = TargetAttackCheck();
+	bool IsAttack = TargetAttackCheck(_MovingAttackRange);
 	if (IsAttack == false)
 	{
 		// 타겟 위치까지 길을 찾는다.
@@ -486,7 +486,7 @@ void CMonster::UpdateMoving()
 	{
 		if (_Target != nullptr)
 		{
-			TargetAttackCheck();
+			TargetAttackCheck(_MovingAttackRange);
 		}
 		else
 		{
@@ -517,7 +517,7 @@ void CMonster::UpdateMoving()
 
 	if (_Target != nullptr)
 	{
-		TargetAttackCheck();
+		TargetAttackCheck(_MovingAttackRange);
 	}
 	else
 	{
@@ -595,7 +595,7 @@ void CMonster::UpdateAttack()
 		int Distance = st_Vector2Int::Distance(_Target->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, _GameObjectInfo.ObjectPositionInfo.CollisionPosition);
 		//float Distance = st_Vector2::Distance(_Target->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position);
 		// 타겟과의 거리가 공격 범위 안에 속하고 X==0 || Y ==0 일때( 대각선은 제한) 공격
-		bool CanUseAttack = (Distance <= _AttackRange && (Direction._X == 0 || Direction._Y == 0));
+		bool CanUseAttack = (Distance <= _AttackRange/* && (Direction._X == 0 || Direction._Y == 0)*/);
 		if (CanUseAttack == false)
 		{
 			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
@@ -935,15 +935,12 @@ void CMonster::SendMonsterChangeObjectState()
 	MonsterObjectStateChangePacket->Free();
 }
 
-bool CMonster::TargetAttackCheck()
+bool CMonster::TargetAttackCheck(float CheckDistance)
 {
-	// 공격 상태 판단
-	// 길찾기 실행
-	vector<st_Vector2Int> Path = _Channel->GetMap()->FindPath(this, _GameObjectInfo.ObjectPositionInfo.CollisionPosition, _Target->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
-	// 다음 위치가 타겟 위치일 경우 
-	if (Path[1] == _Target->_GameObjectInfo.ObjectPositionInfo.CollisionPosition)
-	{
-		// 방향값 설정
+	// 목표물과 거리를 계산해서 공격 여부 판단
+	float Distance = st_Vector2::Distance(_Target->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position);
+	if (Distance <= CheckDistance)
+	{		
 		st_Vector2 DirectionVector = _Target->_GameObjectInfo.ObjectPositionInfo.Position - _GameObjectInfo.ObjectPositionInfo.Position;
 		st_Vector2 NormalVector = DirectionVector.Normalize();
 
@@ -959,32 +956,29 @@ bool CMonster::TargetAttackCheck()
 		SendMonsterChangeObjectState();
 
 		return true;
-
-		//// 거리를 잰다.
-		//float Distance = st_Vector2::Distance(_Target->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position);
-		//// 거리가 특정 거리 안이라면
-		//if (Distance <= _AttackRange)
-		//{
-		//	// 방향값 설정
-		//	st_Vector2 DirectionVector = _Target->_GameObjectInfo.ObjectPositionInfo.Position - _GameObjectInfo.ObjectPositionInfo.Position;
-		//	st_Vector2 NormalVector = DirectionVector.Normalize();
-
-		//	en_MoveDir Dir = st_Vector2::GetMoveDir(NormalVector);
-
-		//	_GameObjectInfo.ObjectPositionInfo.MoveDir = Dir;
-		//	// 공격 상태로 바꾼다.
-		//	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;
-		//	_MonsterState = en_MonsterState::MONSTER_ATTACK;
-
-		//	_DefaultAttackTick = GetTickCount64() + _AttackTickPoint;
-
-		//	SendMonsterChangeObjectState();
-
-		//	return true;
-		//}
-
-		//return false;		
 	}
 
+	//// 공격 상태 판단
+	//// 길찾기 실행
+	//vector<st_Vector2Int> Path = _Channel->GetMap()->FindPath(this, _GameObjectInfo.ObjectPositionInfo.CollisionPosition, _Target->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
+	//// 다음 위치가 타겟 위치일 경우 
+	//if (Path[1] == _Target->_GameObjectInfo.ObjectPositionInfo.CollisionPosition)
+	//{
+	//	// 방향값 설정
+	//	st_Vector2 DirectionVector = _Target->_GameObjectInfo.ObjectPositionInfo.Position - _GameObjectInfo.ObjectPositionInfo.Position;
+	//	st_Vector2 NormalVector = DirectionVector.Normalize();
+
+	//	en_MoveDir Dir = st_Vector2::GetMoveDir(NormalVector);
+
+	//	_GameObjectInfo.ObjectPositionInfo.MoveDir = Dir;
+	//	// 공격 상태로 바꾼다.
+	//	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;
+	//	_MonsterState = en_MonsterState::MONSTER_ATTACK;
+
+	//	_DefaultAttackTick = GetTickCount64() + _AttackTickPoint;
+
+	//	SendMonsterChangeObjectState();
+
+	//	return true;
 	return false;	
 }
