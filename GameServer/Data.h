@@ -35,6 +35,7 @@ struct st_ObjectStatusData
 	float Speed;
 	int32 SearchCellDistance;
 	int32 ChaseCellDistance;
+	float MovingAttackRange;
 	float AttackRange;
 };
 
