@@ -1028,6 +1028,7 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			int SearchTick = MonsterStatInfoFiled["SearchTick"].GetInt();
 			int PatrolTick = MonsterStatInfoFiled["PatrolTick"].GetInt();
 			int AttackTick = MonsterStatInfoFiled["AttackTick"].GetInt();
+			float MovingAttackRange = MonsterStatInfoFiled["MovingAttackRange"].GetFloat();
 			float AttackRange = MonsterStatInfoFiled["AttackRange"].GetFloat();
 			int16 GetDPPoint = (int16)MonsterStatInfoFiled["GetDPPoint"].GetInt();
 			int GetExpPoint = MonsterStatInfoFiled["GetExpPoint"].GetInt();
@@ -1051,7 +1052,8 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			MonsterData->SearchTick = SearchTick;
 			MonsterData->PatrolTick = PatrolTick;
 			MonsterData->AttackTick = AttackTick;
-			MonsterData->MonsterStatInfo.AttackRange = AttackRange;
+			MonsterData->MonsterStatInfo.MovingAttackRange = MovingAttackRange;
+			MonsterData->MonsterStatInfo.AttackRange = AttackRange;			
 			MonsterData->GetDPPoint = GetDPPoint;
 			MonsterData->GetExpPoint = GetExpPoint;
 			MonsterData->ReSpawnTime = ReSpawnTime;
