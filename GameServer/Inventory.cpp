@@ -344,15 +344,32 @@ vector<st_ItemInfo> CInventory::DBInventorySaveReturnItems()
 	
 	vector<st_ItemInfo> ReturnItem;
 	
+	// 가방 아이템 반납	
 	for (int X = 0; X < _InventoryWidth; X++)
 	{
 		for (int Y = 0; Y < _InventoryHeight; Y++)
 		{
+			// 아이템이 들어가 있는 공간 확인		
 			if (_Items[X][Y]->IsEmptySlot == false)
 			{
+				// 아이템 반납 진행
 				ReturnItem.push_back(_Items[X][Y]->InventoryItem->_ItemInfo);
 				// 사용 다한 아이템 메모리 반납
-				G_ObjectManager->ObjectReturn((CGameObject*)_Items[X][Y]);
+				G_ObjectManager->ObjectReturn((CGameObject*)_Items[X][Y]);	
+
+				// 아이템 공간 크기 가져옴
+				int16 InitWidth = _Items[X][Y]->InventoryItem->_ItemInfo.ItemWidth;
+				int16 InitHeight = _Items[X][Y]->InventoryItem->_ItemInfo.ItemHeight;
+
+				// 가방에서 비움 처리
+				for (int16 WidthX = 0; WidthX < InitWidth; WidthX++)
+				{
+					for (int16 HeightY = 0; HeightY < InitHeight; HeightY++)
+					{
+						_Items[X + WidthX][Y + HeightY]->IsEmptySlot = true;
+						_Items[X + WidthX][Y + HeightY]->InventoryItem = nullptr;
+					}
+				}
 			}
 			else
 			{
