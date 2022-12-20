@@ -38,6 +38,7 @@ CSlime::CSlime()
 
 	_SearchCellDistance = MonsterData.MonsterStatInfo.SearchCellDistance;
 	_ChaseCellDistance = MonsterData.MonsterStatInfo.ChaseCellDistance;
+	_MovingAttackRange = MonsterData.MonsterStatInfo.MovingAttackRange;
 	_AttackRange = MonsterData.MonsterStatInfo.AttackRange;
 
 	_SearchTickPoint = MonsterData.SearchTick;
