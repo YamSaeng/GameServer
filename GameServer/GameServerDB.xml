@@ -653,7 +653,8 @@
 		<Body>
 			<![CDATA[
 	    SET NOCOUNT ON
-        SELECT (CASE WHEN SkillType = 'SKILL_TYPE_NONE' THEN 0
+        SELECT IsSkillLearn,
+			(CASE WHEN SkillType = 'SKILL_TYPE_NONE' THEN 0
 		             WHEN SkillType = 'SKILL_DEFAULT_ATTACK' THEN 1		
 					 WHEN Skilltype = 'SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE' THEN 2
 					 WHEN Skilltype = 'SKILL_FIGHT_TWO_HAND_SWORD_MASTER' THEN 3

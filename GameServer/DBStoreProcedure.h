@@ -251,7 +251,7 @@ namespace SP
 	};
 
 	// 스킬 특성 타입에 따라 스킬 테이블에 있는 스킬을 가져옴
-	class CDBGameServerSkillGet : public CDBBind<3, 2>
+	class CDBGameServerSkillGet : public CDBBind<3, 3>
 	{
 	public:
 		CDBGameServerSkillGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetSkill(?,?,?)}") {}
@@ -259,8 +259,9 @@ namespace SP
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }		
 		void InCharacteristicType(int8& CharacteristicType) { BindParam(2, CharacteristicType); }
 		
-		void OutSkillType(int16& SkillType) { BindCol(0, SkillType); }
-		void OutSkillLevel(int8& SkillLevel) { BindCol(1, SkillLevel); }		
+		void OutSkillLearn(bool& IsSkillLearn) { BindCol(0, IsSkillLearn); }
+		void OutSkillType(int16& SkillType) { BindCol(1, SkillType); }
+		void OutSkillLevel(int8& SkillLevel) { BindCol(2, SkillLevel); }		
 	};
 
 	// 스킬 테이블에 스킬 넣기
