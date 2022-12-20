@@ -307,11 +307,11 @@ void CObjectManager::ItemReturn(CItem* ReturnItem)
 	}
 }
 
-st_SkillInfo* CObjectManager::SkillInfoCreate(st_SkillInfo* SkillInfoData, int8 SkillLevel)
+st_SkillInfo* CObjectManager::SkillInfoCreate(en_SkillType SkillType, int8 SkillLevel)
 {
 	st_SkillInfo* NewSkillInfo = nullptr;
 
-	switch (SkillInfoData->SkillType)
+	switch (SkillType)
 	{
 	case en_SkillType::SKILL_TYPE_NONE:
 		CRASH("None 스킬 데이터 찾기 요청");
@@ -338,10 +338,11 @@ st_SkillInfo* CObjectManager::SkillInfoCreate(st_SkillInfo* SkillInfoData, int8 
 	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT:
 	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_ATTACK:
 	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP:	
-	case en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING:
+	case en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING:	
 		{
 			st_AttackSkillInfo* NewAttackSkillInfo = _AttackSkillInfoMemoryPool->Alloc();
-			*NewAttackSkillInfo = *((st_AttackSkillInfo*)SkillInfoData);
+			st_AttackSkillInfo* FindAttackSkillData = (st_AttackSkillInfo*)G_Datamanager->FindSkillData(SkillType);
+			*NewAttackSkillInfo = *FindAttackSkillData;			
 			NewAttackSkillInfo->SkillLevel = SkillLevel;
 			
 			TCHAR SkillExplanationMessage[256] = L"0";
@@ -400,7 +401,8 @@ st_SkillInfo* CObjectManager::SkillInfoCreate(st_SkillInfo* SkillInfoData, int8 
 	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_WEAPON_POISON:
 		{
 			st_BufSkillInfo* NewBufSkillInfo = _BufSkillInfoMemoryPool->Alloc();;
-			*NewBufSkillInfo = *((st_BufSkillInfo*)SkillInfoData);
+			st_BufSkillInfo* FindBufSkillData = (st_BufSkillInfo*)G_Datamanager->FindSkillData(SkillType);
+			*NewBufSkillInfo = *FindBufSkillData;
 			NewBufSkillInfo->SkillLevel = SkillLevel;
 
 			TCHAR SkillExplanationMessage[256] = L"0";

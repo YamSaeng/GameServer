@@ -113,11 +113,11 @@ public:
 	//-----------------------------------------------
 	// 스킬 정보 생성
 	//-----------------------------------------------
-	st_SkillInfo* SkillInfoCreate(st_SkillInfo* SkillInfoData, int8 SkillLevel);
+	st_SkillInfo* SkillInfoCreate(en_SkillType SkillType, int8 SkillLevel);
 	//-----------------------------------------------
 	// 스킬 정보 반납
 	//-----------------------------------------------
-	void SkillInfoReturn(en_SkillType SkillType, st_SkillInfo* ReturnSkillInfo);
+	void SkillInfoReturn(en_SkillType SkillType, st_SkillInfo* ReturnSkillInfo);	
 
 	//-----------------------------------
 	// 맵에 설정한 오브젝트 스폰
