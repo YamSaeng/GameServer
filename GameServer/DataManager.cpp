@@ -2134,6 +2134,87 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 	}
 }
 
+void CDataManager::LoadDataMonsterSkill(wstring LoadFileName)
+{
+	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());
+
+	rapidjson::Document Document;
+	Document.Parse(FileStr);
+
+	for (auto& Filed : Document["MonsterSkills"].GetArray())
+	{
+		for (auto& SlimeMonsterSkills : Filed["SlimeSkillList"].GetArray())
+		{
+			for (auto& SlimePassiveSkillFiled : SlimeMonsterSkills["PassiveSkillList"].GetArray())
+			{
+
+			}
+
+			for (auto& SlimeActiveSkillFiled : SlimeMonsterSkills["ActiveSkillList"].GetArray())
+			{
+				st_AttackSkillInfo* SlimeAttackSkill = new st_AttackSkillInfo();
+				SlimeAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_MONSTER_MELEE;
+				SlimeAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
+
+				string SkillType = SlimeActiveSkillFiled["SkillType"].GetString();
+				string SkillName = SlimeActiveSkillFiled["SkillName"].GetString();
+				int SkillLevel = SlimeActiveSkillFiled["SkillLevel"].GetInt();
+				int SkillMinDamage = SlimeActiveSkillFiled["SkillMinDamage"].GetInt();
+				int SkillMaxDamage = SlimeActiveSkillFiled["SkillMaxDamage"].GetInt();
+				int SkillCoolTime = SlimeActiveSkillFiled["SkillCoolTime"].GetInt();
+				int SkillCastingTime = SlimeActiveSkillFiled["SkillCastingTime"].GetInt();
+				int64 SkillDurationTime = SlimeActiveSkillFiled["SkillDurationTime"].GetInt64();
+				int64 SkillDotTime = SlimeActiveSkillFiled["SkillDotTime"].GetInt64();
+				int SkillDistance = SlimeActiveSkillFiled["SkillDistance"].GetInt();
+				int32 SkillMotionTime = SlimeActiveSkillFiled["SkillMotionTime"].GetInt();
+				float SkillTargetEffectTime = SlimeActiveSkillFiled["SkillTargetEffectTime"].GetFloat();
+				int8 SkillDebufAttackSpeed = (int8)SlimeActiveSkillFiled["SkillDebufAttackSpeed"].GetInt();
+				int8 SkillDebufMovingSpeed = (int8)SlimeActiveSkillFiled["SkillDebufMovingSpeed"].GetInt();
+				int8 StatusAbnormalityProbability = (int8)SlimeActiveSkillFiled["StatusAbnormalityProbability"].GetInt();
+				string SkillUpAnimation = SlimeActiveSkillFiled["SkillUpAnimation"].GetString();
+				string SkillDownAnimation = SlimeActiveSkillFiled["SkillDownAnimation"].GetString();
+				string SkillLeftAnimation = SlimeActiveSkillFiled["SkillLeftAnimation"].GetString();
+				string SkillRightAnimation = SlimeActiveSkillFiled["SkillRightAnimation"].GetString();
+				string NextComboSkill = SlimeActiveSkillFiled["NextComboSkill"].GetString();
+				string SkillExplation = SlimeActiveSkillFiled["SkillExplanation"].GetString();
+
+				if (SkillType == "SKILL_SLIME_ACTIVE_POISION_ATTACK")
+				{
+					SlimeAttackSkill->SkillType = en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK;
+				}
+
+				SlimeAttackSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_NONE;
+				SlimeAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+				SlimeAttackSkill->SkillExplanation = (LPWSTR)CA2W(SkillExplation.c_str());
+				SlimeAttackSkill->SkillLevel = SkillLevel;
+				SlimeAttackSkill->SkillMinDamage = SkillMinDamage;
+				SlimeAttackSkill->SkillMaxDamage = SkillMaxDamage;
+				SlimeAttackSkill->SkillCoolTime = SkillCoolTime;
+				SlimeAttackSkill->SkillCastingTime = SkillCastingTime;
+				SlimeAttackSkill->SkillDurationTime = SkillDurationTime;
+				SlimeAttackSkill->SkillDotTime = SkillDotTime;
+				SlimeAttackSkill->SkillDistance = SkillDistance;
+				SlimeAttackSkill->SkillMotionTime = SkillMotionTime;
+				SlimeAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+				SlimeAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
+				SlimeAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
+				SlimeAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
+				SlimeAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
+				SlimeAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
+				SlimeAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
+				SlimeAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
+
+				if (NextComboSkill == "SKILL_TYPE_NONE")
+				{
+					SlimeAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+				}
+
+				_SlimeAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)SlimeAttackSkill->SkillType, SlimeAttackSkill));
+			}
+		}		
+	}
+}
+
 void CDataManager::LoadDataEnvironment(wstring LoadFileName)
 {
 	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());

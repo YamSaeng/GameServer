@@ -1,59 +1,39 @@
 {
-  "MonsterMeleeSkills": [
+  "MonsterSkills": [
     {
-      "SkillLargeCategory": "SKILL_LARGE_CATEGORY_MONSTER_MELEE",
-      "MonsterMeleeSkillList": [
+      "SlimeSkillList": [
         {
-          "SkillType": "SKILL_SLIME_NORMAL",
-          "SkillName": "슬라임일반공격",
-          "SkillLevel": 1,
-          "SkillMinDamage": 0,
-          "SkillMaxDamage": 0,
-          "SkillCoolTime": 800,
-          "SkillCastingTime": 0,
-          "SkillDurationTime": 0,
-          "SkillDotTime": 0,
-          "SkillDistance": 1,
-          "SkillTargetEffectTime": 0,
-          "SkillDebufAttackSpeed": 0,
-          "SkillDebufMovingSpeed": 0,
-          "StatusAbnormalityProbability": 0,
-          "SkillUpAnimation": "SLIME_ATTACK",
-          "SkillDownAnimation": "SLIME_ATTACK",
-          "SkillLeftAnimation": "SLIME_ATTACK",
-          "SkillRightAnimation": "SLIME_ATTACK",
-          "NextComboSkill": "SKILL_TYPE_NONE",          
-        },
-        {
-          "SkillType": "SKILL_BEAR_NORMAL",
-          "SkillName": "곰일반공격",
-          "SkillLevel": 1,
-          "SkillMinDamage": 0,
-          "SkillMaxDamage": 0,
-          "SkillCoolTime": 1200,
-          "SkillCastingTime": 0,
-          "SkillDurationTime": 0,
-          "SkillDotTime": 0,
-          "SkillDistance": 1,
-          "SkillTargetEffectTime": 0,
-          "SkillDebufAttackSpeed": 0,
-          "SkillDebufMovingSpeed": 0,
-          "StatusAbnormalityProbability": 0,
-          "SkillUpAnimation": "BEAR_ATTACK",
-          "SkillDownAnimation": "BEAR_ATTACK",
-          "SkillLeftAnimation": "BEAR_ATTACK",
-          "SkillRightAnimation": "BEAR_ATTACK",
-          "NextComboSkill": "SKILL_TYPE_NONE"          
-        }
-      ],
-      "MonsterMagicSkills": [
-        {
-          "SkillLargeCategory": "SKILL_LARGE_CATEGORY_MONSTER_MAGIC",
-          "MonsterMagicList": [
+          "PassiveSkillList": [
+            {
 
+            }
+          ],
+          "ActiveSkillList": [
+            {
+              "SkillType": "SKILL_SLIME_ACTIVE_POISION_ATTACK",
+              "SkillName": "슬라임 독",
+              "SkillMinDamage": 1,
+              "SkillMaxDamage": 5,
+              "SkillCoolTime": 1000,
+              "SkillCastingTime": 500,
+              "SkillDurationTime": 10000,
+              "SkillDotTime": 1000,
+              "SkillDistance": 3,
+              "SkillMotionTime": 1000,
+              "SkillTargetEffectTime": 0.5,
+              "SkillDebufAttackSpeed": 0,
+              "SkillDebufMovingSpeed": 0,
+              "StatusAbnormalityProbability": 0,
+              "SkillUpAnimation": "ATTACK_WEAPON_BACK",
+              "SkillDownAnimation": "ATTACK_WEAPON_FRONT",
+              "SkillLeftAnimation": "ATTACK_WEAPON_LEFT",
+              "SkillRightAnimation": "ATTACK_WEAPON_LEFT",
+              "NextComboSkill": "SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK",
+              "SkillExplanation": "%d초 동안 %d초 마다 1 ~ 5 만큼 데미지를 입힌다."
+            }
           ]
         }
       ]
     }
-  ] 
+  ]
 }

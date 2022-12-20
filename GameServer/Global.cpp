@@ -43,6 +43,8 @@ public:
 		G_Datamanager->LoadDataShootingSkill(L"ShootingSkillDatas.json");
 		// 수양 스킬 데이터 파싱
 		G_Datamanager->LoadDataDisCiplineSkill(L"DisciplineSkillDatas.json");
+		// 몬스터 스킬 데이터 파싱
+		G_Datamanager->LoadDataMonsterSkill(L"MonsterSkillDatas.json");
 		
 		// 플레이어 캐릭터 스테이터스 데이터 파싱
 		G_Datamanager->LoadDataPlayerCharacterStatus(L"PlayerCharacterStatus.json");

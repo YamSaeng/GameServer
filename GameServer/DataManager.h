@@ -69,6 +69,9 @@ public:
 	map<int16, st_HealSkillInfo*> _DisciplineHealSkillDatas;
 	map<int16, st_BufSkillInfo*> _DisciplineBufSkillDatas;
 
+	// 슬라임 스킬 데이터
+	map<int16, st_AttackSkillInfo*> _SlimeAttackSkillDatas;
+
 	//------------------------------------------------------
 	// 환경 데이터
 	//------------------------------------------------------
@@ -109,6 +112,8 @@ public:
 	void LoadDataSpellSkill(wstring LoadFileName);
 	void LoadDataShootingSkill(wstring LoadFileName);	
 	void LoadDataDisCiplineSkill(wstring LoadFileName);	
+
+	void LoadDataMonsterSkill(wstring LoadFileName);
 
 	void LoadDataEnvironment(wstring LoadFileName);
 	void LoadDataCrop(wstring LoadFileName);
