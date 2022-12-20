@@ -5,7 +5,7 @@
       "MonsterStatInfo": [
         {
           "Level": 1,
-          "MaxHP": 200,
+          "MaxHP": 300,
           "MaxMP": 10,
           "MinMeleeAttackDamage": 1,
           "MaxMeleeAttackDamage": 10,
@@ -22,21 +22,22 @@
           "SearchTick": 500,
           "PatrolTick": 2000,
           "AttackTick": 800,
-          "AttackRange": 1,
+          "MovingAttackRange": 1.0,
+          "AttackRange": 1.5,
           "GetDPPoint": 10,
-          "GetExpPoint": 12,
+          "GetExpPoint": 20,
           "ReSpawnTime": 5000
         }
       ],
       "MonsterDropData": [
         {
-          "Probability": 10,
+          "Probability": 70,
           "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL",
           "MinCount": 1,
           "MaxCount": 3
         },
         {
-          "Probability": 20,
+          "Probability": 30,
           "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN",
           "MinCount": 1,
           "MaxCount": 10
@@ -65,7 +66,8 @@
           "SearchTick": 500,
           "PatrolTick": 1500,
           "AttackTick": 1100,
-          "AttackRange": 1,
+          "MovingAttackRange": 1.0,
+          "AttackRange": 1.0,
           "GetDPPoint": 20,
           "GetExpPoint": 33,
           "ReSpawnTime": 5000
