@@ -34,7 +34,7 @@ void CSkillCharacteristic::SkillCharacteristicInit(en_SkillCharacteristic SkillC
 				CSkill* ActiveSkill = G_ObjectManager->SkillCreate();
 
 				st_SkillInfo* ActiveSkillInfo = G_Datamanager->FindSkillData((en_SkillType)i);
-				ActiveSkill->SetSkillInfo(en_SkillCategory::QUICK_SLOT_SKILL_COOLTIME, ActiveSkillInfo);
+				ActiveSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_ACTIVE_SKILL, ActiveSkillInfo);
 				ActiveSkill->GetSkillInfo()->IsSkillLearn = true;
 
 				_ActiveSkills.push_back(ActiveSkill);
@@ -52,7 +52,7 @@ void CSkillCharacteristic::SkillCharacteristicInit(en_SkillCharacteristic SkillC
 				CSkill* ActiveSkill = G_ObjectManager->SkillCreate();
 
 				st_SkillInfo* ActiveSkillInfo = G_Datamanager->FindSkillData((en_SkillType)i);
-				ActiveSkill->SetSkillInfo(en_SkillCategory::QUICK_SLOT_SKILL_COOLTIME, ActiveSkillInfo);
+				ActiveSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_ACTIVE_SKILL, ActiveSkillInfo);
 
 				_ActiveSkills.push_back(ActiveSkill);
 			}
@@ -68,7 +68,7 @@ void CSkillCharacteristic::SkillCharacteristicInit(en_SkillCharacteristic SkillC
 				CSkill* ActiveSkill = G_ObjectManager->SkillCreate();
 
 				st_SkillInfo* ActiveSkillInfo = G_Datamanager->FindSkillData((en_SkillType)i);
-				ActiveSkill->SetSkillInfo(en_SkillCategory::QUICK_SLOT_SKILL_COOLTIME, ActiveSkillInfo);
+				ActiveSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_ACTIVE_SKILL, ActiveSkillInfo);
 
 				_ActiveSkills.push_back(ActiveSkill);
 			}
@@ -84,7 +84,7 @@ void CSkillCharacteristic::SkillCharacteristicInit(en_SkillCharacteristic SkillC
 				CSkill* ActiveSkill = G_ObjectManager->SkillCreate();
 
 				st_SkillInfo* ActiveSkillInfo = G_Datamanager->FindSkillData((en_SkillType)i);
-				ActiveSkill->SetSkillInfo(en_SkillCategory::QUICK_SLOT_SKILL_COOLTIME, ActiveSkillInfo);
+				ActiveSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_ACTIVE_SKILL, ActiveSkillInfo);
 
 				_ActiveSkills.push_back(ActiveSkill);
 			}
@@ -100,7 +100,7 @@ void CSkillCharacteristic::SkillCharacteristicInit(en_SkillCharacteristic SkillC
 				CSkill* ActiveSkill = G_ObjectManager->SkillCreate();
 
 				st_SkillInfo* ActiveSkillInfo = G_Datamanager->FindSkillData((en_SkillType)i);
-				ActiveSkill->SetSkillInfo(en_SkillCategory::QUICK_SLOT_SKILL_COOLTIME, ActiveSkillInfo);
+				ActiveSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_ACTIVE_SKILL, ActiveSkillInfo);
 
 				_ActiveSkills.push_back(ActiveSkill);
 			}
@@ -116,7 +116,7 @@ void CSkillCharacteristic::SkillCharacteristicInit(en_SkillCharacteristic SkillC
 				CSkill* ActiveSkill = G_ObjectManager->SkillCreate();
 
 				st_SkillInfo* ActiveSkillInfo = G_Datamanager->FindSkillData((en_SkillType)i);
-				ActiveSkill->SetSkillInfo(en_SkillCategory::QUICK_SLOT_SKILL_COOLTIME, ActiveSkillInfo);
+				ActiveSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_ACTIVE_SKILL, ActiveSkillInfo);
 
 				_ActiveSkills.push_back(ActiveSkill);
 			}
@@ -132,7 +132,7 @@ void CSkillCharacteristic::SkillCharacteristicInit(en_SkillCharacteristic SkillC
 				CSkill* ActiveSkill = G_ObjectManager->SkillCreate();
 	
 				st_SkillInfo* ActiveSkillInfo = G_Datamanager->FindSkillData((en_SkillType)i);
-				ActiveSkill->SetSkillInfo(en_SkillCategory::QUICK_SLOT_SKILL_COOLTIME, ActiveSkillInfo);
+				ActiveSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_ACTIVE_SKILL, ActiveSkillInfo);
 	
 				_ActiveSkills.push_back(ActiveSkill);
 			}
