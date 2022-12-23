@@ -53,6 +53,8 @@ CSlime::CSlime()
 	_FieldOfViewDistance = 10;
 
 	_SpawnIdleTick = GetTickCount64() + 2000;	
+
+	_MonsterSkillBox.Init(_GameObjectInfo.ObjectType);
 }
 
 CSlime::~CSlime()
