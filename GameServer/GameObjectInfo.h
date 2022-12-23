@@ -383,18 +383,27 @@ enum class en_SkillType : int16
 
 enum class en_SkillCategory : int8
 {
-	PASSIVE_SKILL,
-	QUICK_SLOT_SKILL_COOLTIME,
-	STATUS_ABNORMAL_SKILL,
-	COMBO_SKILL
+	SKILL_CATEGORY_NONE,
+	SKILL_CATEGORY_PASSIVE_SKILL,
+	SKILL_CATEGORY_ACTIVE_SKILL,
+	SKILL_CATEGORY_STATUS_ABNORMAL_SKILL,
+	SKILL_CATEGORY_COMBO_SKILL
 };
 
 enum class en_SkillKinds : int8
 {
 	SKILL_KIND_NONE,
-	MELEE_SKILL,
-	MAGIC_SKILL,
-	RANGE_SKILL
+	SKILL_KIND_MELEE_SKILL,
+	SKILL_KIND_SPELL_SKILL,
+	SKILL_KIND_RANGE_SKILL
+};
+
+enum class en_BufDeBufSkillKind : int8
+{
+	BUF_DEBUF_SKILL_KIND_NONE,
+	BUF_DEBUF_SKILL_KIND_NORMAL,
+	BUF_DEBUF_SKILL_KIND_BUF,
+	BUF_DEBUF_SKILL_KIND_DEBUF	
 };
 
 enum class en_SkillCharacteristic : int8
@@ -2486,7 +2495,8 @@ struct st_SkillInfo
 	int8 SkillNumber;		 // 스킬 배치 순서
 	int8 SkillMaxLevel;	     // 스킬 최대 레벨
 	int8 SkillLevel;		 // 스킬 레벨
-	wstring SkillName;		 // 스킬 이름
+	int8 SkillOverlapStep;   // 스킬 중첩 횟수
+	wstring SkillName;		 // 스킬 이름	
 	int32 SkillDistance;	 // 스킬 유효 거리
 	int32 SkillCoolTime;	 // 스킬 쿨타임		
 	int32 SkillCastingTime;  // 스킬 캐스팅 타임
@@ -2510,6 +2520,7 @@ struct st_SkillInfo
 		SkillType = en_SkillType::SKILL_TYPE_NONE;
 		SkillMaxLevel = 0;
 		SkillLevel = 0;
+		SkillOverlapStep = 0;
 		SkillName = L"";
 		SkillDistance = 0;
 		SkillCoolTime = 0;		
@@ -2518,8 +2529,8 @@ struct st_SkillInfo
 		SkillDotTime = 0;
 		SkillRemainTime = 0;
 		SkillMotionTime = 0;
-		NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
 		SkillTargetEffectTime = 0;
+		NextComboSkill = en_SkillType::SKILL_TYPE_NONE;		
 		SkillExplanation = L"";
 	}
 };
