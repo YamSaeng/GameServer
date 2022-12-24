@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Map.h"
 #include "Channel.h"
 #include "CommonProtocol.h"
@@ -188,5 +187,5 @@ protected:
 	virtual void UpdateGathering();
 	virtual void UpdateCrafting();
 	virtual void UpdateReadyDead();
-	virtual void UpdateDead();
+	virtual void UpdateDead();	
 };
