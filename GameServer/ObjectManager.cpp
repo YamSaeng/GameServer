@@ -425,6 +425,16 @@ st_SkillInfo* CObjectManager::SkillInfoCreate(en_SkillType SkillType, int8 Skill
 	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:
 	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:
 		return _HealSkillInfoMemoryPool->Alloc();
+	case en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK:
+		{
+			st_AttackSkillInfo* NewSlimeActivePoision = _AttackSkillInfoMemoryPool->Alloc();
+			st_AttackSkillInfo* FindSlimeData = (st_AttackSkillInfo*)G_Datamanager->FindSkillData(SkillType);
+			*NewSlimeActivePoision = *FindSlimeData;
+
+			NewSlimeActivePoision->SkillLevel = SkillLevel;
+
+			NewSkillInfo = NewSlimeActivePoision;
+		}	
 	}		
 
 	return NewSkillInfo;
