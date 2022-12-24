@@ -2707,6 +2707,8 @@ st_SkillInfo* CDataManager::FindSkillData(en_SkillType FindSkillType)
 		return (*_AssassinationBufSkillDatas.find((int16)FindSkillType)).second;
 	case en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING:
 		return (*_ShootingAttackSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK:
+		return (*_SlimeAttackSkillDatas.find((int16)FindSkillType)).second;
 	}	
 }
 
