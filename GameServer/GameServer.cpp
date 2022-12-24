@@ -896,11 +896,7 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 				}
 			}			
 
-			if (MyPlayer->_StatusAbnormal & STATUS_ABNORMAL_WARRIOR_CHOHONE
-				|| MyPlayer->_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE
-				|| MyPlayer->_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ICE_WAVE
-				|| MyPlayer->_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ROOT
-				|| MyPlayer->_StatusAbnormal & STATUS_ABNORMAL_TAIOIST_ROOT)
+			if (MyPlayer->CheckCantControlStatusAbnormal())
 			{
 				break;
 			}
@@ -1082,12 +1078,10 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 				}
 			}		
 
-			if (MyPlayer->_StatusAbnormal & STATUS_ABNORMAL_WARRIOR_CHOHONE
-				|| MyPlayer->_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_LIGHTNING_STRIKE
-				|| MyPlayer->_StatusAbnormal & STATUS_ABNORMAL_SHAMAN_ICE_WAVE)
+			if (MyPlayer->CheckCantControlStatusAbnormal())
 			{
 				break;
-			}			
+			}
 
 			int8 ReqMoveDir;
 			*Message >> ReqMoveDir;
@@ -1705,7 +1699,7 @@ void CGameServer::PacketProcReqChattingMessage(int64 SessionId, CMessage* Messag
 
 		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetFieldOfViewPlayers(MyPlayer, 1, false);
 				
-		CMessage* ResChattingMessage = MakePacketResChattingBoxMessage(PlayerDBId, en_MessageType::CHATTING, st_Color::White(), ChattingMessage);
+		CMessage* ResChattingMessage = MakePacketResChattingBoxMessage(en_MessageType::MESSAGE_TYPE_CHATTING, st_Color::White(), ChattingMessage);
 		SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResChattingMessage);
 		ResChattingMessage->Free();
 	}
@@ -4392,9 +4386,11 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 						SkillGet.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
 						SkillGet.InCharacteristicType(CharacteristicType);
 
+						bool IsSkillLearn = false;
 						int16 SkillType = 0;
 						int8 SkillLevel = 0;
 
+						SkillGet.OutSkillLearn(IsSkillLearn);
 						SkillGet.OutSkillType(SkillType);
 						SkillGet.OutSkillLevel(SkillLevel);
 
@@ -4403,11 +4399,18 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 						while (SkillGet.Fetch())
 						{
 							// 캐릭터 특성에서 스킬 활성화
-							Characteristic->SkillCharacteristicActive(true, (en_SkillType)SkillType, SkillLevel);
+							if (IsSkillLearn == true)
+							{								
+								MyPlayer->_GameObjectInfo.ObjectSkillPoint--;
+
+								Characteristic->SkillCharacteristicActive(IsSkillLearn, (en_SkillType)SkillType, SkillLevel);
+							}			
 						}
 					}
 				}				
-			}
+			}			
+
+			*ResCharacterInfoMessage << MyPlayer->_GameObjectInfo.ObjectSkillPoint;			
 
 			CSkillCharacteristic* SkillCharacteristicPublic = MyPlayer->_SkillBox.GetSkillCharacteristicPublic();			
 
@@ -4732,7 +4735,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 
 #pragma endregion
 
-			SendPacket(MyPlayer->_SessionId, ResCharacterInfoMessage);
+			SendPacket(MyPlayer->_SessionId, ResCharacterInfoMessage);			
 
 			MyPlayer->_NetworkState = en_ObjectNetworkState::LIVE;			
 
@@ -5725,7 +5728,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobComboSkillOff()
 	return ComboAttackOffJob;
 }
 
-st_GameObjectJob* CGameServer::MakeGameObjectDamage(CGameObject* Attacker, bool IsCritical, int32 Damage, en_SkillType SkillType)
+st_GameObjectJob* CGameServer::MakeGameObjectDamage(int64 AttackerID, bool IsCritical, int32 Damage, en_SkillType SkillType)
 {
 	st_GameObjectJob* DamageJob = G_ObjectManager->GameObjectJobCreate();
 	DamageJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_DAMAGE;
@@ -5733,7 +5736,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectDamage(CGameObject* Attacker, bool 
 	CGameServerMessage* DamageMessage = CGameServerMessage::GameServerMessageAlloc();
 	DamageMessage->Clear();
 	
-	*DamageMessage << &Attacker;
+	*DamageMessage << AttackerID;
 	*DamageMessage << IsCritical;
 	*DamageMessage << Damage;
 	*DamageMessage << (int16)SkillType;
@@ -6456,7 +6459,7 @@ CGameServerMessage* CGameServer::MakePacketObjectDie(int64 DieObjectId)
 	return ResDiePacket;
 }
 
-CGameServerMessage* CGameServer::MakePacketResChattingBoxMessage(int64 PlayerDBId, en_MessageType MessageType, st_Color Color, wstring ChattingMessage)
+CGameServerMessage* CGameServer::MakePacketResChattingBoxMessage(en_MessageType MessageType, st_Color Color, wstring ChattingMessage)
 {
 	CGameServerMessage* ResChattingMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResChattingMessage == nullptr)
@@ -6466,8 +6469,7 @@ CGameServerMessage* CGameServer::MakePacketResChattingBoxMessage(int64 PlayerDBI
 
 	ResChattingMessage->Clear();
 
-	*ResChattingMessage << (WORD)en_PACKET_S2C_MESSAGE;
-	*ResChattingMessage << PlayerDBId;
+	*ResChattingMessage << (int16)en_PACKET_S2C_MESSAGE;
 	*ResChattingMessage << (int8)MessageType;
 
 	*ResChattingMessage << Color;
@@ -6477,6 +6479,34 @@ CGameServerMessage* CGameServer::MakePacketResChattingBoxMessage(int64 PlayerDBI
 	ResChattingMessage->InsertData(ChattingMessage.c_str(), PlayerNameLen);
 
 	return ResChattingMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketResDamageChattingBoxMessage(en_MessageType MessageType, wstring AttackerName, wstring TargetName, en_SkillType DamageSkilltype, int32 Damage)
+{
+	CGameServerMessage* ResDamageChattingMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResDamageChattingMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResDamageChattingMessage->Clear();
+
+	*ResDamageChattingMessage << (int16)en_PACKET_S2C_MESSAGE;
+	*ResDamageChattingMessage << (int8)MessageType;	
+
+	int16 AttackerNameLen = (int16)(AttackerName.length() * 2);
+	*ResDamageChattingMessage << AttackerNameLen;
+	ResDamageChattingMessage->InsertData(AttackerName.c_str(), AttackerNameLen);
+
+	int16 TargetNameLen = (int16)(TargetName.length() * 2);
+	*ResDamageChattingMessage << TargetNameLen;
+	ResDamageChattingMessage->InsertData(TargetName.c_str(), TargetNameLen);
+
+	*ResDamageChattingMessage << (int16)DamageSkilltype;
+
+	*ResDamageChattingMessage << Damage;
+
+	return ResDamageChattingMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketResSyncPosition(int64 TargetObjectId, st_PositionInfo SyncPosition)
@@ -6866,6 +6896,9 @@ CGameServerMessage* CGameServer::MakePacketCommonError(en_PersonalMessageType Pe
 	case en_PersonalMessageType::PERSONAL_MESSAGE_DIR_DIFFERENT:
 		wsprintf(ErrorMessage, L"[%s]을 바라보아야 합니다.", Name);
 		break;
+	case en_PersonalMessageType::PERSONAL_MESSAGE_ATTACK_ANGLE:
+		wsprintf(ErrorMessage, L"대상이 앞에 있어야 합니다.");
+		break;
 	case en_PersonalMessageType::PERSONAL_MESSAGE_GATHERING_DISTANCE:
 		wsprintf(ErrorMessage, L"[%s]을 채집하려면 좀 더 가까이 다가가야합니다.", Name);
 		break;
@@ -6896,6 +6929,9 @@ CGameServerMessage* CGameServer::MakePacketCommonError(en_PersonalMessageType Pe
 	case en_PersonalMessageType::PERSONAL_MESSAGE_PARTY_MAX:
 		wsprintf(ErrorMessage, L"그룹에 빈 자리가 없습니다.", Name);
 		break;
+	case en_PersonalMessageType::PERSONAL_MESSAGE_SKILL_CANCEL_FAIL_COOLTIME:
+		wsprintf(ErrorMessage, L"[%s]이 재사용 대기시간 중이라 취소 할 수 없습니다.", Name);
+		break;
 	}
 
 	wstring ErrorMessageString = ErrorMessage;
@@ -6908,7 +6944,7 @@ CGameServerMessage* CGameServer::MakePacketCommonError(en_PersonalMessageType Pe
 	return ResCommonErrorMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketStatusAbnormal(int64 TargetId, en_GameObjectType ObjectType, en_MoveDir Dir, en_SkillType SkillType, bool SetStatusAbnormal, int8 StatusAbnormal)
+CGameServerMessage* CGameServer::MakePacketStatusAbnormal(int64 TargetId, en_GameObjectType ObjectType, en_MoveDir Dir, en_SkillType SkillType, bool SetStatusAbnormal, int32 StatusAbnormal)
 {
 	CGameServerMessage* ResStatusAbnormal = CGameServerMessage::GameServerMessageAlloc();
 	if (ResStatusAbnormal == nullptr)

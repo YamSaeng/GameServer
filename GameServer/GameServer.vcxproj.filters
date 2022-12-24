@@ -326,6 +326,9 @@
     <ClInclude Include="PartyManager.h">
       <Filter>ContentServer\Content\GameObject\Player</Filter>
     </ClInclude>
+    <ClInclude Include="MonsterSkillBox.h">
+      <Filter>ContentServer\Content\SkillBox</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -468,6 +471,9 @@
     <ClCompile Include="PartyManager.cpp">
       <Filter>ContentServer\Content\GameObject\Player</Filter>
     </ClCompile>
+    <ClCompile Include="MonsterSkillBox.cpp">
+      <Filter>ContentServer\Content\SkillBox</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="DBConfig.xml">
@@ -488,9 +494,6 @@
       <Filter>Util\Json,Xml\Data</Filter>
     </None>
     <None Include="PublicSkillDatas.json">
-      <Filter>Util\Json,Xml\Data\SkillData</Filter>
-    </None>
-    <None Include="MonsterSkillDatas.json">
       <Filter>Util\Json,Xml\Data\SkillData</Filter>
     </None>
     <None Include="CraftingTableData.json">
@@ -536,6 +539,9 @@
       <Filter>Util\Json,Xml\Data\SkillData</Filter>
     </None>
     <None Include="DisciplineSkillDatas.json">
+      <Filter>Util\Json,Xml\Data\SkillData</Filter>
+    </None>
+    <None Include="MonsterSkillDatas.json">
       <Filter>Util\Json,Xml\Data\SkillData</Filter>
     </None>
   </ItemGroup>

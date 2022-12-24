@@ -485,7 +485,7 @@ public:
 	//-------------------------------------------------------------------------------
 	// 데미지 처리 잡 생성 함수
 	//-------------------------------------------------------------------------------
-	st_GameObjectJob* MakeGameObjectDamage(CGameObject* Attacker, bool IsCritical, int32 Damage, en_SkillType SkillType);
+	st_GameObjectJob* MakeGameObjectDamage(int64 AttackerID, bool IsCritical, int32 Damage, en_SkillType SkillType);	
 	//-------------------------------------------------------------------------------
 	// 기술 체력 회복 잡 생성 함수
 	//-------------------------------------------------------------------------------
@@ -645,7 +645,12 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 메세지 ( 채팅, 시스템 ) 요청 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResChattingBoxMessage(int64 PlayerDBId, en_MessageType MessageType, st_Color Color, wstring ChattingMessage);
+	CGameServerMessage* MakePacketResChattingBoxMessage(en_MessageType MessageType, st_Color Color, wstring ChattingMessage);
+	//-----------------------------------------------------------------------------------------
+	// 게임서버 데미지 메세지 전송 패킷 조합
+	//-----------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResDamageChattingBoxMessage(en_MessageType MessageType,
+		wstring AttackerName, wstring TargetName, en_SkillType DamageSkilltype, int32 Damage);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 오브젝트 위치 싱크 맞추기 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -665,7 +670,7 @@ public:
 	//-------------------------------------------------------------------
 	// 게임서버 스킬 배우기 응답 패킷 조합
 	//-------------------------------------------------------------------
-	CGameServerMessage* MakePacketResSkillLearn(bool IsSkillLearn, en_SkillType LearnSkillType, int8 SkillMaxPoint, int8 SkillPoint);
+	CGameServerMessage* MakePacketResSkillLearn(bool IsSkillLearn, en_SkillType LearnSkillType, int8 SkillMaxPoint, int8 SkillPoint);	
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 이펙트 출력 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -713,7 +718,7 @@ public:
 	//------------------------------------------------------------
 	// 게임 서버 상태이상 적용 패킷 조합
 	//------------------------------------------------------------
-	CGameServerMessage* MakePacketStatusAbnormal(int64 TargetId, en_GameObjectType ObjectType, en_MoveDir Dir, en_SkillType SkillType, bool SetStatusAbnormal, int8 StatusAbnormal);
+	CGameServerMessage* MakePacketStatusAbnormal(int64 TargetId, en_GameObjectType ObjectType, en_MoveDir Dir, en_SkillType SkillType, bool SetStatusAbnormal, int32 StatusAbnormal);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 가방 아이템 업데이트
 	//-----------------------------------------------------------------------------------------

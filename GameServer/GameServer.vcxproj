@@ -194,6 +194,7 @@
     <ClInclude Include="MemoryPoolTLS.h" />
     <ClInclude Include="Message.h" />
     <ClInclude Include="Monster.h" />
+    <ClInclude Include="MonsterSkillBox.h" />
     <ClInclude Include="NetworkLib.h" />
     <ClInclude Include="ObjectManager.h" />
     <ClInclude Include="ObjectPoolFreeList.h" />
@@ -312,6 +313,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Monster.cpp" />
+    <ClCompile Include="MonsterSkillBox.cpp" />
     <ClCompile Include="NetworkLib.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -358,12 +360,12 @@
     <None Include="MapInfoData.json" />
     <None Include="MonsterAggroData.json" />
     <None Include="MonsterData.json" />
-    <None Include="MonsterSkillDatas.json" />
     <None Include="OptionData.json" />
     <None Include="ProtectionSkillDatas.json" />
     <None Include="PublicSkillDatas.json" />
     <None Include="PlayerCharacterStatus.json" />
     <None Include="ShootingSkillDatas.json" />
+    <None Include="MonsterSkillDatas.json" />
     <None Include="SpellSkillDatas.json" />
   </ItemGroup>
   <ItemGroup>
