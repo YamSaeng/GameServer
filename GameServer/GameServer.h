@@ -485,7 +485,7 @@ public:
 	//-------------------------------------------------------------------------------
 	// 데미지 처리 잡 생성 함수
 	//-------------------------------------------------------------------------------
-	st_GameObjectJob* MakeGameObjectDamage(int64 AttackerID, bool IsCritical, int32 Damage, en_SkillType SkillType);	
+	st_GameObjectJob* MakeGameObjectDamage(int64 AttackerID, en_GameObjectType AttackerType, bool IsCritical, int32 Damage, en_SkillType SkillType);	
 	//-------------------------------------------------------------------------------
 	// 기술 체력 회복 잡 생성 함수
 	//-------------------------------------------------------------------------------

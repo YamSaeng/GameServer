@@ -5728,7 +5728,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobComboSkillOff()
 	return ComboAttackOffJob;
 }
 
-st_GameObjectJob* CGameServer::MakeGameObjectDamage(int64 AttackerID, bool IsCritical, int32 Damage, en_SkillType SkillType)
+st_GameObjectJob* CGameServer::MakeGameObjectDamage(int64 AttackerID, en_GameObjectType AttackerType, bool IsCritical, int32 Damage, en_SkillType SkillType)
 {
 	st_GameObjectJob* DamageJob = G_ObjectManager->GameObjectJobCreate();
 	DamageJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_DAMAGE;
@@ -5737,6 +5737,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectDamage(int64 AttackerID, bool IsCri
 	DamageMessage->Clear();
 	
 	*DamageMessage << AttackerID;
+	*DamageMessage << (int16)AttackerType;
 	*DamageMessage << IsCritical;
 	*DamageMessage << Damage;
 	*DamageMessage << (int16)SkillType;
