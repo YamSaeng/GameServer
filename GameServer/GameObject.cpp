@@ -653,7 +653,7 @@ void CGameObject::Update()
 									_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage + Player->_Equipment._WeaponMaxDamage + AttackSkillInfo->SkillMaxDamage,
 									_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint);
 
-								st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_GameObjectInfo.ObjectId, IsCritical, Damage, FindMeleeSkill->GetSkillInfo()->SkillType);
+								st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType, IsCritical, Damage, FindMeleeSkill->GetSkillInfo()->SkillType);
 								DamageTarget->_GameObjectJobQue.Enqueue(DamageJob);
 							}
 
@@ -1306,9 +1306,12 @@ void CGameObject::Update()
 			}
 			break;	
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_DAMAGE:
-			{
+			{		
 				int64 AttackerID;
-				*GameObjectJob->GameObjectJobMessage >> AttackerID;				
+				*GameObjectJob->GameObjectJobMessage >> AttackerID;	
+
+				int16 AttackerType;
+				*GameObjectJob->GameObjectJobMessage >> AttackerType;
 
 				bool IsCritical;
 				*GameObjectJob->GameObjectJobMessage >> IsCritical;
@@ -1319,7 +1322,7 @@ void CGameObject::Update()
 				int16 SkillType;
 				*GameObjectJob->GameObjectJobMessage >> SkillType;
 
-				CGameObject* Attacker = _Channel->FindChannelObject(AttackerID, en_GameObjectType::OBJECT_PLAYER);
+				CGameObject* Attacker = _Channel->FindChannelObject(AttackerID, (en_GameObjectType)AttackerType);
 				if (Attacker != nullptr)
 				{
 					if (OnDamaged(Attacker, Damage))
