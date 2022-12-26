@@ -40,6 +40,14 @@ void CMonsterSkillBox::Init(en_GameObjectType MonsterObjctType)
 	}
 }
 
+void CMonsterSkillBox::Update()
+{
+	for (CSkill* MonsterSkill : _MonsterSkills)
+	{
+		MonsterSkill->Update();
+	}
+}
+
 vector<CSkill*> CMonsterSkillBox::GetMonsterSkills()
 {
 	return _MonsterSkills;
