@@ -22,7 +22,7 @@ CMonster::CMonster()
 
 	_Target = nullptr;	
 
-	_RectCollision = new CRectCollision(this);
+	_RectCollision = new CRectCollision(this);	
 }
 
 CMonster::~CMonster()
@@ -111,6 +111,10 @@ void CMonster::Update()
 		break;
 	}
 
+	// 몬스터 스킬 업데이트
+	_MonsterSkillBox.Update();
+
+	// 어그로 테이블 검사
 	AggroTargetListCheck();
 	SelectTarget();
 }
@@ -566,7 +570,39 @@ void CMonster::UpdateAttack()
 	if (CheckCantControlStatusAbnormal())
 	{
 		return;
-	}	
+	}		
+
+	// 몬스터가 가지고 있는 스킬 중에서 조건에 맞는 스킬 실행
+	for (auto MonsterSkill : _MonsterSkillBox.GetMonsterSkills())
+	{
+		st_SkillInfo* MonsterSkillInfo = MonsterSkill->GetSkillInfo();
+		if (MonsterSkillInfo != nullptr)
+		{
+			// 스킬이 사용 가능한지 확인
+			if (MonsterSkillInfo->CanSkillUse == true)
+			{
+				_SpellSkill = MonsterSkill;
+
+				_SpellTick = GetTickCount64() + MonsterSkill->GetSkillInfo()->SkillCastingTime;
+
+				float MonsterSkillCastingTime = MonsterSkill->GetSkillInfo()->SkillCastingTime / 1000.f;
+
+				// 마법 시전 바 시작
+				CMessage* ResMagicPacket = G_ObjectManager->GameServer->MakePacketResMagic(_GameObjectInfo.ObjectId,
+					true, _SpellSkill->GetSkillInfo()->SkillType, MonsterSkillCastingTime);
+				G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResMagicPacket);
+				ResMagicPacket->Free();
+
+				_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPELL;
+
+				return;
+			}
+		}
+		else
+		{
+			CRASH("Monster SkillInfo nullptr")
+		}
+	}
 
 	if (_DefaultAttackTick == 0)
 	{
@@ -663,7 +699,78 @@ void CMonster::UpdateAttack()
 
 void CMonster::UpdateSpell()
 {
+	if (_SpellTick < GetTickCount64())
+	{
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;		
 
+		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = GetChannel()->GetMap()->GetFieldOfViewPlayers(this, 1, false);
+
+		if (_SpellSkill != nullptr && _Target != nullptr)
+		{	
+			// 시전 완료된 스킬이 일반, 버프, 디버프 스킬인지 확인
+			switch (_SpellSkill->GetBufDeBufSkillKind())
+			{						
+			case en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_NORMAL:
+				break;
+			case en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_BUF:
+				break;
+			case en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_DEBUF:
+				{
+					auto DeBufsIter = _Target->_DeBufs.find(_SpellSkill->GetSkillInfo()->SkillType);
+					if (DeBufsIter != _Target->_DeBufs.end())
+					{
+						// 시전 완료된 스킬이 상대방의 디버프 목록에 있을 경우
+						CSkill* DeBufSkill = DeBufsIter->second;
+						if (DeBufSkill != nullptr)
+						{
+							DeBufSkill->GetSkillInfo()->SkillOverlapStep++;
+						}
+						else
+						{
+							CRASH("DeBufSkill nullptr")
+						}
+					}
+					else
+					{
+						// 시전 완료된 스킬이 상대방의 버프 목록에 없을 경우
+						switch (_SpellSkill->GetSkillInfo()->SkillType)
+						{
+						case en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK:
+							{								
+								CSkill* SlimePoisionAttack = G_ObjectManager->SkillCreate();
+								st_AttackSkillInfo* SlimePoisionSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK, _SpellSkill->GetSkillInfo()->SkillLevel);
+								SlimePoisionAttack->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_STATUS_ABNORMAL_SKILL, SlimePoisionSkillInfo);
+								SlimePoisionAttack->StatusAbnormalDurationTimeStart();
+								SlimePoisionAttack->SetCastingUserID(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType);
+
+								SlimePoisionAttack->GetSkillInfo()->SkillOverlapStep++;
+
+								_Target->AddDebuf(SlimePoisionAttack);
+
+								CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_Target->_GameObjectInfo.ObjectId, false, SlimePoisionAttack->GetSkillInfo());
+								G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
+								ResBufDeBufSkillPacket->Free();
+							}
+							break;
+						default:
+							break;
+						}
+					}
+				}
+				break;
+			default:
+				break;
+			}	
+
+			// 시전한 스킬 쿨타임 시작
+			_SpellSkill->CoolTimeStart();
+
+			// 스펠창 끝
+			CMessage* ResMagicPacket = G_ObjectManager->GameServer->MakePacketResMagic(_GameObjectInfo.ObjectId, false);
+			G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResMagicPacket);
+			ResMagicPacket->Free();
+		}
+	}
 }
 
 void CMonster::UpdateReadyDead()

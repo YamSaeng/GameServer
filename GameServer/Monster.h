@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject.h"
+#include "MonsterSkillBox.h"
 #include "Data.h"
 
 class CPlayer;
@@ -7,6 +8,9 @@ class CPlayer;
 class CMonster : public CGameObject
 {
 public:
+	// 몬스터 스킬
+	CMonsterSkillBox _MonsterSkillBox;
+
 	// 몬스터 데이터 시트 Id
 	int32 _DataSheetId;
 
@@ -33,14 +37,14 @@ public:
 	virtual void Start() override;
 	virtual void End() override;
 protected:
-	CGameObject* _Target;
-	//---------------------
-	// 정찰 위치
-	//---------------------
-	st_Vector2 _PatrolPoint;
-	//---------------------
-	// 이동 위치
-	//---------------------
+	// 시전 중인 스킬
+	CSkill* _CurrentSkill;	
+
+	// 목표물
+	CGameObject* _Target;	
+	// 정찰 위치	
+	st_Vector2 _PatrolPoint;	
+	// 이동 위치	
 	st_Vector2 _MovePoint;
 
 	//--------------------------
