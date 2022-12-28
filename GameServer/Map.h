@@ -9,43 +9,11 @@ class CPlayer;
 class CMonster;
 class CChannelManager;
 
-struct st_PositionInt
-{
-	int32 _Y;
-	int32 _X;
-
-	st_PositionInt() {}
-
-	st_PositionInt(int Y, int X)
-	{
-		_Y = Y;
-		_X = X;
-	}
-
-	bool operator ==(st_PositionInt& Position)
-	{
-		return (_Y == Position._Y) && (_X == Position._X);
-	}
-
-	bool operator !=(st_PositionInt& Position)
-	{
-		return !((*this) == Position);
-	}
-
-	bool operator <(const st_PositionInt& Position) const
-	{
-		return _X < Position._X || (_X == Position._X && _Y < Position._Y);
-	}
-};
-
 struct st_AStarNodeInt
 {
 	int32 _F;
 	int32 _G;
-	st_PositionInt _Position;
-
-	int32 _X;
-	int32 _Y;
+	st_Vector2Int _Position;	
 
 	st_AStarNodeInt() {}
 
@@ -163,8 +131,7 @@ public:
 	// CheckObjects = 벽을 제외한 오브젝트를 충돌 대상으로 여길 것인지에 대한 판단
 	// ( true : 해당위치에 오브젝트가 있는지 확인해서 있으면 충돌체로 판단한다. )
 	//----------------------------------------------------------------------------
-	bool CollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool CheckObjects = true);
-
+	bool CollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool CheckObjects = true);	
 
 	//------------------------------------------------------------------------------------------------------------------------
 	// 목적지 좌표값을 받아서 해당 좌표로 갈 수 있는지 없는지 판단
@@ -184,13 +151,10 @@ public:
 	//-----------------------------------------------------------------------------------------------
 	// 해제하고자 하는 사유지의 좌표값을 받아서 해제
 	//-----------------------------------------------------------------------------------------------
-	bool ApplyTileUseFree(CGameObject* ReqTileUserFreeObject, st_Vector2Int TileUserFreePosition);
-	
-	st_PositionInt CellToPositionInt(st_Vector2Int CellPosition);
-	st_Vector2Int PositionToCellInt(st_PositionInt Position);
+	bool ApplyTileUseFree(CGameObject* ReqTileUserFreeObject, st_Vector2Int TileUserFreePosition);	
 
 	vector<st_Vector2Int> FindPath(CGameObject* Object, st_Vector2Int StartCellPosition, st_Vector2Int DestCellPostion, bool CheckObjects = true, int32 MaxDistance = 10);
-	vector<st_Vector2Int> CompletePath(map<st_PositionInt, st_PositionInt> Parents, st_PositionInt DestPosition);
+	vector<st_Vector2Int> CompletePath(map<st_Vector2Int, st_Vector2Int> Parents, st_Vector2Int DestPosition);
 
 	CChannelManager* GetChannelManager();
 private:
