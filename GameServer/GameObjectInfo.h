@@ -2222,12 +2222,17 @@ struct st_Vector2Int
 
 	bool operator == (st_Vector2Int CellPosition)
 	{
-		if (_X == CellPosition._X && _Y == CellPosition._Y)
-		{
-			return true;
-		}
+		return (_X == CellPosition._X) && (_Y == CellPosition._Y);		
+	}
 
-		return false;
+	bool operator != (st_Vector2Int CellPosition)
+	{
+		return !((*this) == CellPosition);		
+	}
+
+	bool operator <(const st_Vector2Int& CellPosition) const
+	{
+		return _X < CellPosition._X || (_X == CellPosition._X && _Y < CellPosition._Y);
 	}
 
 	int CellDistanceFromZero()
