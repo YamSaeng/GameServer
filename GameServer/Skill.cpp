@@ -25,6 +25,9 @@ CSkill::CSkill()
 	_SkillKind = en_SkillKinds::SKILL_KIND_NONE;
 	_BufDeBufSkillKind = en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_NONE;
 	_ComboSkillType = en_SkillType::SKILL_TYPE_NONE;	
+
+	_CastingUserID = 0;
+	_CastingUserObjectType = en_GameObjectType::NORMAL;
 }
 
 CSkill::~CSkill()
@@ -184,9 +187,10 @@ void CSkill::SetSkillInfo(en_SkillCategory SkillCategory, st_SkillInfo* SkillInf
 	}
 }
 
-void CSkill::SetCastingUserID(int64 CastingUserID)
+void CSkill::SetCastingUserID(int64 CastingUserID, en_GameObjectType CastingUserObjectType)
 {
 	_CastingUserID = CastingUserID;
+	_CastingUserObjectType = CastingUserObjectType;
 }
 
 int64 CSkill::GetCastingUserID()
@@ -295,7 +299,7 @@ bool CSkill::Update()
 					case en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK:
 						{							
 							// 스킬 중첩 단계에 따라 데미지 적용							
-							st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_CastingUserID,
+							st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_CastingUserID, _CastingUserObjectType,
 								IsCritical, DotDamage * DotSkillInfo->SkillOverlapStep, en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK);
 							_Owner->_GameObjectJobQue.Enqueue(DamageJob);							
 						}

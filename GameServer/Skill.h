@@ -23,7 +23,7 @@ public:
 	// 스킬 정보 셋팅
 	void SetSkillInfo(en_SkillCategory SkillCategory, st_SkillInfo* SkillInfo = nullptr, st_SkillInfo* PreviousSkillInfo = nullptr);
 	
-	void SetCastingUserID(int64 CastingUserID);
+	void SetCastingUserID(int64 CastingUserID, en_GameObjectType CastingUserObjectType);
 	int64 GetCastingUserID();
 
 
@@ -52,6 +52,8 @@ private:
 	CGameObject* _Owner;	
 	// 스킬을 시전한 대상 ID
 	int64 _CastingUserID;
+	// 스킬을 시전한 대상의 ObjectType
+	en_GameObjectType _CastingUserObjectType;
 	// 스킬 정보
 	st_SkillInfo* _SkillInfo;
 	// 연속기 스킬에 사용하는 스킬 정보로
