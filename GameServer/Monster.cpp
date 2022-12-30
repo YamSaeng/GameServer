@@ -585,7 +585,7 @@ void CMonster::UpdateAttack()
 
 				_SpellTick = GetTickCount64() + MonsterSkill->GetSkillInfo()->SkillCastingTime;
 
-				float MonsterSkillCastingTime = MonsterSkill->GetSkillInfo()->SkillCastingTime / 1000.f;
+				float MonsterSkillCastingTime = MonsterSkill->GetSkillInfo()->SkillCastingTime / 1000.f;				
 
 				// 마법 시전 바 시작
 				CMessage* ResMagicPacket = G_ObjectManager->GameServer->MakePacketResMagic(_GameObjectInfo.ObjectId,
@@ -724,6 +724,12 @@ void CMonster::UpdateSpell()
 						if (DeBufSkill != nullptr)
 						{
 							DeBufSkill->GetSkillInfo()->SkillOverlapStep++;
+
+							DeBufSkill->StatusAbnormalDurationTimeStart();
+
+							CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_Target->_GameObjectInfo.ObjectId, false, DeBufSkill->GetSkillInfo());
+							G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
+							ResBufDeBufSkillPacket->Free();
 						}
 						else
 						{
@@ -840,6 +846,30 @@ void CMonster::Move()
 		_GameObjectInfo.ObjectPositionInfo.Position._X +=
 			(st_Vector2::Right()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 		break;
+	case en_MoveDir::LEFT_DOWN:
+		_GameObjectInfo.ObjectPositionInfo.Position._X +=
+			(st_Vector2::Left()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		_GameObjectInfo.ObjectPositionInfo.Position._Y +=
+			(st_Vector2::Down()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		break;
+	case en_MoveDir::LEFT_UP:
+		_GameObjectInfo.ObjectPositionInfo.Position._X +=
+			(st_Vector2::Left()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		_GameObjectInfo.ObjectPositionInfo.Position._Y +=
+			(st_Vector2::Up()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		break;
+	case en_MoveDir::RIGHT_DOWN:
+		_GameObjectInfo.ObjectPositionInfo.Position._X +=
+			(st_Vector2::Right()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		_GameObjectInfo.ObjectPositionInfo.Position._Y +=
+			(st_Vector2::Down()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		break;
+	case en_MoveDir::RIGHT_UP:
+		_GameObjectInfo.ObjectPositionInfo.Position._X +=
+			(st_Vector2::Right()._X * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		_GameObjectInfo.ObjectPositionInfo.Position._Y +=
+			(st_Vector2::Up()._Y * _GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		break;
 	}
 
 	_RectCollision->CollisionUpdate();
@@ -848,8 +878,8 @@ void CMonster::Move()
 	if (CanMove == true)
 	{
 		st_Vector2Int CollisionPosition;
-		CollisionPosition._X = _GameObjectInfo.ObjectPositionInfo.Position._X;
-		CollisionPosition._Y = _GameObjectInfo.ObjectPositionInfo.Position._Y;
+		CollisionPosition._X = (int32)_GameObjectInfo.ObjectPositionInfo.Position._X;
+		CollisionPosition._Y = (int32)_GameObjectInfo.ObjectPositionInfo.Position._Y;
 
 		if (CollisionPosition._X != _GameObjectInfo.ObjectPositionInfo.CollisionPosition._X
 			|| CollisionPosition._Y != _GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y)
