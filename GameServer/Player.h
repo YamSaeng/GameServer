@@ -56,6 +56,5 @@ protected:
 	virtual void UpdateReadyDead() override;
 	virtual void UpdateDead() override;
 private:
-	void CheckFieldOfViewObject();
-	void CheckBufDebufSkill();
+	void CheckFieldOfViewObject();	
 };

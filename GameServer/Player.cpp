@@ -50,8 +50,18 @@ void CPlayer::Update()
 	// 스킬목록 업데이트
 	_SkillBox.Update();
 	
-	// 버프, 디버프 기술 점검
-	CheckBufDebufSkill();			
+	// 버프, 디버프 업데이트
+	CheckBufDeBufSkill();
+
+	if (_ComboSkill != nullptr)
+	{
+		bool ReturnComboSkill = _ComboSkill->Update();
+		if (ReturnComboSkill)
+		{
+			G_ObjectManager->SkillReturn(_ComboSkill);
+			_ComboSkill = nullptr;
+		}
+	}
 
 	if (_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::READY_DEAD && _GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 	{
@@ -135,13 +145,13 @@ void CPlayer::Update()
 
 							bool IsCritical = true;
 							// 데미지 판단
-							int32 Damage = CMath::CalculateMeleeDamage(
+							int32 Damage = CMath::CalculateMeleeDamage(&IsCritical,
 								_SelectTarget->_GameObjectInfo.ObjectStatInfo.Defence,
 								_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage + _Equipment._WeaponMinDamage + DefaultAttackSkillInfo->SkillMinDamage,
 								_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage + _Equipment._WeaponMaxDamage + DefaultAttackSkillInfo->SkillMaxDamage,
-								_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint, &IsCritical);
+								_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint);
 
-							st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, IsCritical, Damage, DefaultAttackSkill->GetSkillInfo()->SkillType);
+							st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType, IsCritical, Damage, DefaultAttackSkill->GetSkillInfo()->SkillType);
 							_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
 
 							// 애니메이션 출력
@@ -336,8 +346,8 @@ void CPlayer::UpdateMoving()
 	if (CanMove == true)
 	{
 		st_Vector2Int CollisionPosition;
-		CollisionPosition._X = _GameObjectInfo.ObjectPositionInfo.Position._X;
-		CollisionPosition._Y = _GameObjectInfo.ObjectPositionInfo.Position._Y;
+		CollisionPosition._X = (int32)_GameObjectInfo.ObjectPositionInfo.Position._X;
+		CollisionPosition._Y = (int32)_GameObjectInfo.ObjectPositionInfo.Position._Y;
 
 		if (CollisionPosition._X != _GameObjectInfo.ObjectPositionInfo.CollisionPosition._X
 			|| CollisionPosition._Y != _GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y)
@@ -402,7 +412,7 @@ void CPlayer::UpdateSpell()
 			{
 				HitEffectType = en_EffectType::EFFECT_FLAME_HARPOON_TARGET;
 
-				int32 MagicDamage = _GameObjectInfo.ObjectStatInfo.MagicDamage * 0.6;
+				int32 MagicDamage = (int32)(_GameObjectInfo.ObjectStatInfo.MagicDamage * 0.6);
 
 				st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)_SpellSkill->GetSkillInfo();
 
@@ -410,7 +420,7 @@ void CPlayer::UpdateSpell()
 				int32 ChoiceDamage = DamageChoiceRandom(Gen);
 				FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;				
 
-				st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, IsCritical, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
+				st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType, IsCritical, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
 				_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);				
 			}
 			break;			
@@ -418,7 +428,7 @@ void CPlayer::UpdateSpell()
 			{				
 				HitEffectType = en_EffectType::EFFECT_NORMAL_ATTACK_TARGET_HIT;
 
-				int32 MagicDamage = _GameObjectInfo.ObjectStatInfo.MagicDamage * 0.6;
+				int32 MagicDamage = (int32)(_GameObjectInfo.ObjectStatInfo.MagicDamage * 0.6);
 
 				st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)_SpellSkill->GetSkillInfo();
 
@@ -426,7 +436,7 @@ void CPlayer::UpdateSpell()
 				int32 ChoiceDamage = DamageChoiceRandom(Gen);
 				FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
 
-				st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, IsCritical, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
+				st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType, IsCritical, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
 				_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
 
 				if (AttackSkillInfo->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
@@ -452,8 +462,8 @@ void CPlayer::UpdateSpell()
 				{
 					CSkill* NewSkill = G_ObjectManager->SkillCreate();
 
-					st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(_SpellSkill->GetSkillInfo(), _SpellSkill->GetSkillInfo()->SkillLevel);					
-					NewSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
+					st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(_SpellSkill->GetSkillInfo()->SkillType, _SpellSkill->GetSkillInfo()->SkillLevel);					
+					NewSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
 					NewSkill->StatusAbnormalDurationTimeStart();
 
 					_SelectTarget->AddDebuf(NewSkill);
@@ -484,7 +494,7 @@ void CPlayer::UpdateSpell()
 				int32 ChoiceDamage = DamageChoiceRandom(Gen);
 				FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
 
-				st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, IsCritical, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
+				st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType, IsCritical, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
 				_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
 
 				bool IsLightningStrike = _StatusAbnormal & (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE;
@@ -492,8 +502,8 @@ void CPlayer::UpdateSpell()
 				{
 					CSkill* NewSkill = G_ObjectManager->SkillCreate();
 
-					st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(_SpellSkill->GetSkillInfo(), _SpellSkill->GetSkillInfo()->SkillLevel);
-					NewSkill->SetSkillInfo(en_SkillCategory::STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
+					st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(_SpellSkill->GetSkillInfo()->SkillType, _SpellSkill->GetSkillInfo()->SkillLevel);
+					NewSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
 					NewSkill->StatusAbnormalDurationTimeStart();
 
 					_SelectTarget->AddDebuf(NewSkill);
@@ -536,7 +546,7 @@ void CPlayer::UpdateSpell()
 				int32 ChoiceDamage = DamageChoiceRandom(Gen);
 				FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;				
 
-				st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, IsCritical, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
+				st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType, IsCritical, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
 				_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);				
 			}
 			break;
@@ -552,7 +562,7 @@ void CPlayer::UpdateSpell()
 				int32 ChoiceDamage = DamageChoiceRandom(Gen);
 				FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;				
 
-				st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(this, IsCritical, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
+				st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType, IsCritical, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
 				_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);				
 			}
 			break;			
@@ -767,50 +777,5 @@ void CPlayer::CheckFieldOfViewObject()
 		}
 
 		_FieldOfViewInfos = CurrentFieldOfViewObjectIds;
-	}
-}
-
-void CPlayer::CheckBufDebufSkill()
-{
-	// 강화효과 스킬 리스트 순회
-	for (auto BufSkillIterator : _Bufs)
-	{
-		// 지속시간 끝난 강화효과 삭제
-		bool DeleteBufSkill = BufSkillIterator.second->Update();
-		if (DeleteBufSkill)
-		{
-			DeleteBuf(BufSkillIterator.first);
-			// 강화효과 스킬 정보 메모리 반납
-			G_ObjectManager->SkillInfoReturn(BufSkillIterator.second->GetSkillInfo()->SkillType,
-				BufSkillIterator.second->GetSkillInfo());
-			// 강화효과 스킬 메모리 반납
-			G_ObjectManager->SkillReturn(BufSkillIterator.second);
-		}
-	}
-
-	// 약화효과 스킬 리스트 순회
-	for (auto DebufSkillIterator : _DeBufs)
-	{
-		// 지속시간 끝난 약화효과 삭제
-		bool DeleteDebufSkill = DebufSkillIterator.second->Update();
-		if (DeleteDebufSkill)
-		{
-			DeleteDebuf(DebufSkillIterator.first);
-			// 약화효과 스킬 정보 메모리 반납
-			G_ObjectManager->SkillInfoReturn(DebufSkillIterator.second->GetSkillInfo()->SkillType,
-				DebufSkillIterator.second->GetSkillInfo());
-			// 약화효과 스킬 메모리 반납
-			G_ObjectManager->SkillReturn(DebufSkillIterator.second);
-		}
-	}
-
-	if (_ComboSkill != nullptr)
-	{
-		bool ReturnComboSkill = _ComboSkill->Update();
-		if (ReturnComboSkill)
-		{
-			G_ObjectManager->SkillReturn(_ComboSkill);
-			_ComboSkill = nullptr;
-		}
 	}
 }
