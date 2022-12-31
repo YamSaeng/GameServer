@@ -116,6 +116,8 @@ public:
 	void SetChannel(CChannel* Channel);
 
 	CRectCollision* GetRectCollision();
+	
+	bool IsPlayer();
 
 	virtual void Start();
 	virtual void End();
@@ -188,4 +190,6 @@ protected:
 	virtual void UpdateCrafting();
 	virtual void UpdateReadyDead();
 	virtual void UpdateDead();	
+
+	void CheckBufDeBufSkill();
 };

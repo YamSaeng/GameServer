@@ -1327,10 +1327,13 @@ void CGameObject::Update()
 				{
 					if (OnDamaged(Attacker, Damage))
 					{
-						End();
-
-						ExperienceCalculate((CPlayer*)Attacker, this);
-						// 캐릭터 죽으면 버프 디버프 창 관리해야함
+						End();					
+						
+						if (Attacker->IsPlayer())
+						{
+							ExperienceCalculate((CPlayer*)Attacker, this);
+						}					
+						
 						Attacker->_SelectTarget = nullptr;
 
 						((CPlayer*)Attacker)->_OnPlayerDefaultAttack = false;
@@ -2205,6 +2208,20 @@ CRectCollision* CGameObject::GetRectCollision()
 	return _RectCollision;
 }
 
+bool CGameObject::IsPlayer()
+{
+	if (_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_WARRIOR_PLAYER
+		|| _GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_SHAMAN_PLAYER
+		|| _GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_TAIOIST_PLAYER
+		|| _GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_THIEF_PLAYER
+		|| _GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_ARCHER_PLAYER)
+	{
+		return true;
+	}
+
+	return false;
+}
+
 void CGameObject::Start()
 {
 }
@@ -2220,6 +2237,8 @@ void CGameObject::End()
 	{
 		DebufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
 	}
+
+	CheckBufDeBufSkill();
 }
 
 void CGameObject::ExperienceCalculate(CPlayer* TargetPlayer, CGameObject* TargetObject)
@@ -2500,4 +2519,45 @@ void CGameObject::UpdateReadyDead()
 
 void CGameObject::UpdateDead()
 {
+}
+
+void CGameObject::CheckBufDeBufSkill()
+{
+	if (_Bufs.size() > 0)
+	{
+		// 강화효과 스킬 리스트 순회
+		for (auto BufSkillIterator : _Bufs)
+		{
+			// 지속시간 끝난 강화효과 삭제
+			bool DeleteBufSkill = BufSkillIterator.second->Update();
+			if (DeleteBufSkill)
+			{
+				DeleteBuf(BufSkillIterator.first);
+				// 강화효과 스킬 정보 메모리 반납
+				G_ObjectManager->SkillInfoReturn(BufSkillIterator.second->GetSkillInfo()->SkillType,
+					BufSkillIterator.second->GetSkillInfo());
+				// 강화효과 스킬 메모리 반납
+				G_ObjectManager->SkillReturn(BufSkillIterator.second);
+			}
+		}
+	}	
+
+	if (_DeBufs.size() > 0)
+	{
+		// 약화효과 스킬 리스트 순회
+		for (auto DebufSkillIterator : _DeBufs)
+		{
+			// 지속시간 끝난 약화효과 삭제
+			bool DeleteDebufSkill = DebufSkillIterator.second->Update();
+			if (DeleteDebufSkill)
+			{
+				DeleteDebuf(DebufSkillIterator.first);
+				// 약화효과 스킬 정보 메모리 반납
+				G_ObjectManager->SkillInfoReturn(DebufSkillIterator.second->GetSkillInfo()->SkillType,
+					DebufSkillIterator.second->GetSkillInfo());
+				// 약화효과 스킬 메모리 반납
+				G_ObjectManager->SkillReturn(DebufSkillIterator.second);
+			}
+		}
+	}	
 }
