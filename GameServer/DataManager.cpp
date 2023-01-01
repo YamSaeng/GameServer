@@ -2745,3 +2745,13 @@ st_ItemInfo* CDataManager::FindItemData(en_SmallItemCategory FindItemCategory)
 {
 	return (*_Items.find((int16)FindItemCategory)).second;
 }
+
+int32 CDataManager::FindMonsterExperienceData(en_GameObjectType MonsterGameObjectType)
+{
+	switch (MonsterGameObjectType)
+	{		
+	case en_GameObjectType::OBJECT_SLIME:		
+	case en_GameObjectType::OBJECT_BEAR:		
+		return (*_Monsters.find(MonsterGameObjectType)).second->GetExpPoint;
+	}
+}
