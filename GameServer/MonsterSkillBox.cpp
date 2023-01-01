@@ -20,12 +20,13 @@ void CMonsterSkillBox::Init(en_GameObjectType MonsterObjctType)
 		{			
 			for (auto SlimeSkillIter : G_Datamanager->_SlimeAttackSkillDatas)
 			{
-				CSkill* NewMonsterSkill = G_ObjectManager->SkillCreate();
+				CSkill* SlimeMonsterAttackSkill = G_ObjectManager->SkillCreate();
+				st_AttackSkillInfo* SlimeAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(SlimeSkillIter.second->SkillType, 1);
+				*SlimeAttackSkillInfo = *SlimeSkillIter.second;
 
-				st_AttackSkillInfo* NewMonsterSkillInfo = SlimeSkillIter.second;
-				NewMonsterSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_ACTIVE_SKILL, NewMonsterSkillInfo);
+				SlimeMonsterAttackSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_ACTIVE_SKILL, SlimeAttackSkillInfo);
 
-				_MonsterSkills.push_back(NewMonsterSkill);
+				_MonsterSkills.push_back(SlimeMonsterAttackSkill);
 			}			
 		}
 		break;
