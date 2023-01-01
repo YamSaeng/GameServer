@@ -6723,7 +6723,7 @@ CGameServerMessage* CGameServer::MakePacketComboSkillOff(vector<st_Vector2Int> C
 	return ResComboSkillMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketExperience(int64 AccountId, int64 PlayerId, int64 GainExp, int64 CurrentExp, int64 RequireExp, int64 TotalExp)
+CGameServerMessage* CGameServer::MakePacketExperience(en_GameObjectType TargetObjectType, int64 GainExp, int64 CurrentExp, int64 RequireExp, int64 TotalExp)
 {
 	CGameServerMessage* ResExperienceMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResExperienceMessage == nullptr)
@@ -6733,9 +6733,8 @@ CGameServerMessage* CGameServer::MakePacketExperience(int64 AccountId, int64 Pla
 
 	ResExperienceMessage->Clear();
 
-	*ResExperienceMessage << (int16)en_PACKET_S2C_EXPERIENCE;
-	*ResExperienceMessage << AccountId;
-	*ResExperienceMessage << PlayerId;
+	*ResExperienceMessage << (int16)en_PACKET_S2C_EXPERIENCE;	
+	*ResExperienceMessage << (int16)TargetObjectType;
 	*ResExperienceMessage << GainExp;
 	*ResExperienceMessage << CurrentExp;
 	*ResExperienceMessage << RequireExp;

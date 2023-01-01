@@ -548,6 +548,7 @@ public:
 	// 그룹 추방 잡 생성 함수
 	//-------------------------------------------------------------
 	st_GameObjectJob* MakeGameObjectJobPartyBanish(CGameObject* ReqPartyBanishPlayer, int64 PartyBanishPlayerID);
+	
 
 	//-------------------------------------------------------------
 	// 게임서버 입장 요청 응답 패킷 조합
@@ -694,7 +695,7 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 경험치 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketExperience(int64 AccountId, int64 PlayerId, int64 GainExp, int64 CurrentExp, int64 RequireExp, int64 TotalExp);
+	CGameServerMessage* MakePacketExperience(en_GameObjectType TargetObjectType, int64 GainExp, int64 CurrentExp, int64 RequireExp, int64 TotalExp);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 스킬 취소 패킷 조합
 	//-----------------------------------------------------------------------------------------
