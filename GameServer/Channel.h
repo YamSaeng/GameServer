@@ -123,4 +123,9 @@ public:
 	// - Object가 채널에 속해 있는 Index를 반납
 	//----------------------------------------------------
 	void LeaveChannel(CGameObject* LeaveChannelGameObject);	
+
+	//-------------------------------------------------------------------------
+	// 경험치 계산
+	//-------------------------------------------------------------------------
+	void ExperienceCalculate(CPlayer* TargetPlayer, en_GameObjectType TargetMonsterObjectType, int32 ExperiencePoint);
 };
