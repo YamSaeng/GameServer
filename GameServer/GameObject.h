@@ -172,12 +172,7 @@ protected:
 	//------------------------------------
 	// Á×À½ Æ½
 	//------------------------------------
-	uint64 _DeadTick;
-
-	//-------------------------------------------------------------------------
-	// °æÇèÄ¡ °è»ê
-	//-------------------------------------------------------------------------
-	void ExperienceCalculate(CPlayer* TargetPlayer, CGameObject* TargetObject);
+	uint64 _DeadTick;	
 
 	virtual bool UpdateSpawnIdle();
 	virtual void UpdateIdle();
