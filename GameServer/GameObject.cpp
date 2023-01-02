@@ -338,7 +338,7 @@ void CGameObject::Update()
 				{
 					CSkill* FindMeleeSkill = Player->_SkillBox.FindSkill((en_SkillCharacteristic)MeleeChracteristicType, (en_SkillType)MeleeSkillType);
 					if (FindMeleeSkill != nullptr)
-					{						
+					{	
 						st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)FindMeleeSkill->GetSkillInfo();
 
 						if (FindMeleeSkill->GetSkillInfo()->CanSkillUse == true)
@@ -699,27 +699,31 @@ void CGameObject::Update()
 							G_Logger->WriteStdOut(en_Color::RED, L"%s 스킬을 아직 사용 할 수 없음\n", FindMeleeSkill->GetSkillInfo()->SkillName.c_str());
 						}						
 
-						// 일반 공격 쿨타임을 새로 시작
-						CSkill* DefaultAttackSkill = Player->_SkillBox.FindSkill(en_SkillCharacteristic::SKILL_CATEGORY_PUBLIC, en_SkillType::SKILL_DEFAULT_ATTACK);
-						if (DefaultAttackSkill != nullptr)
+						// 선택한 대상이 있을 경우에 기본 공격 시작
+						if (_SelectTarget != nullptr)
 						{
-							Player->_OnPlayerDefaultAttack = true;
-
-							Player->_DefaultAttackTick = GetTickCount64() + Player->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate;
-
-							DefaultAttackSkill->CoolTimeStart();
-
-							// 쿨타임 표시 ( 퀵술롯 바에 등록되어 있는 같은 종류의 스킬을 모두 쿨타임 표시 시켜 준다 )
-							for (auto QuickSlotBarPosition : Player->_QuickSlotManager.FindQuickSlotBar(DefaultAttackSkill->GetSkillInfo()->SkillType))
+							// 일반 공격 쿨타임을 새로 시작
+							CSkill* DefaultAttackSkill = Player->_SkillBox.FindSkill(en_SkillCharacteristic::SKILL_CATEGORY_PUBLIC, en_SkillType::SKILL_DEFAULT_ATTACK);
+							if (DefaultAttackSkill != nullptr)
 							{
-								// 클라에게 쿨타임 표시
-								CMessage* ResCoolTimeStartPacket = G_ObjectManager->GameServer->MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
-									QuickSlotBarPosition.QuickSlotBarSlotIndex,
-									1.0f, DefaultAttackSkill);
-								G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
-								ResCoolTimeStartPacket->Free();
+								Player->_OnPlayerDefaultAttack = true;
+
+								Player->_DefaultAttackTick = GetTickCount64() + Player->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate;
+
+								DefaultAttackSkill->CoolTimeStart();
+
+								// 쿨타임 표시 ( 퀵술롯 바에 등록되어 있는 같은 종류의 스킬을 모두 쿨타임 표시 시켜 준다 )
+								for (auto QuickSlotBarPosition : Player->_QuickSlotManager.FindQuickSlotBar(DefaultAttackSkill->GetSkillInfo()->SkillType))
+								{
+									// 클라에게 쿨타임 표시
+									CMessage* ResCoolTimeStartPacket = G_ObjectManager->GameServer->MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
+										QuickSlotBarPosition.QuickSlotBarSlotIndex,
+										1.0f, DefaultAttackSkill);
+									G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
+									ResCoolTimeStartPacket->Free();
+								}
 							}
-						}
+						}						
 					}				
 
 					if (Player->_ComboSkill != nullptr)
