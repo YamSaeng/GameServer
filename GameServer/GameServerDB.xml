@@ -305,7 +305,10 @@
 				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (0) AND ItemTileGridPositionY = (0)								
 				UPDATE [dbo].[Inventory]
 				SET ItemLargeCategory = ('ITEM_LARGE_CATEGORY_ARMOR'), ItemMediumCategory = ('ITEM_MEDIUM_CATEGORY_WEAR'), ItemSmallCategory = ('ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER'), ItemCount = (1), ItemDurability = (150), ItemEnchantPoint = (1)
-				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (1) AND ItemTileGridPositionY = (0)						
+				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (1) AND ItemTileGridPositionY = (0)	
+				UPDATE [dbo].[Inventory]
+				SET ItemLargeCategory = ('ITEM_LARGE_CATEGORY_POTION'), ItemMediumCategory = ('ITEM_MEDIUM_CATEGORY_HEAL'), ItemSmallCategory = ('ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL'), ItemCount = (5), ItemDurability = (10), ItemEnchantPoint = (0)
+				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (3) AND ItemTileGridPositionY = (0)								
 			]]>
 		</Body>
 	</Procedure>
