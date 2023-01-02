@@ -720,12 +720,12 @@ vector<st_TileMapInfo> CMap::FindMapTileInfo(CGameObject* Player)
 
 	int X = Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X - _Left;
 	int Y = _Down - Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y;
-		
+
 	// 캐릭터 위치에서 상하좌우 20 크기 만큼 타일 정w보 반환
 	int LeftX = X - 20;
 	int UpY = Y + 20;
 	int RightX = X + 20;
-	int DownY = Y - 20;	
+	int DownY = Y - 20;
 
 	for (; LeftX < RightX; LeftX++)
 	{
@@ -736,7 +736,7 @@ vector<st_TileMapInfo> CMap::FindMapTileInfo(CGameObject* Player)
 			if (_TileMapInfos[UpY][LeftX].TilePosition._X >= 0 && _TileMapInfos[UpY][LeftX].TilePosition._Y >= 0)
 			{
 				TileInfos.push_back(_TileMapInfos[UpY][LeftX]);
-			}			
+			}
 		}
 	}
 
@@ -766,7 +766,6 @@ bool CMap::CollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool
 		return false;
 	}
 
-	// 이동하고자 하는 위치
 	int X = CellPosition._X - _Left;
 	int Y = _Down - CellPosition._Y;
 
@@ -780,12 +779,12 @@ bool CMap::CollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool
 	case en_MapObjectInfo::TILE_MAP_STONE:
 	case en_MapObjectInfo::TILE_MAP_SLIME:
 	case en_MapObjectInfo::TILE_MAP_BEAR:	
-	case en_MapObjectInfo::TILE_MAP_SAMILL:
 	case en_MapObjectInfo::TILE_MAP_POTATO:
 		IsCollisionMapInfo = true;
 		break;
-	case en_MapObjectInfo::TILE_MAP_FURNACE:
 	case en_MapObjectInfo::TILE_MAP_WALL:
+	case en_MapObjectInfo::TILE_MAP_FURNACE:
+	case en_MapObjectInfo::TILE_MAP_SAMILL:
 		IsCollisionMapInfo = false;
 	}
 
@@ -822,7 +821,15 @@ bool CMap::CollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool
 			}
 			else // 안에 있는 오브젝트가 다른 오브젝트일 경우
 			{
-				ObjectCheck = false;
+				if (_ObjectsInfos[Y][X]->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::READY_DEAD
+					|| _ObjectsInfos[Y][X]->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::DEAD)
+				{
+					ObjectCheck = true;
+				}
+				else
+				{
+					ObjectCheck = false;
+				}				
 			}
 		}
 		break;
@@ -960,7 +967,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 			_Items[Y][X][NewItemInfoIndex] = ItemObject;
 		}
 		break;
-	case en_GameObjectType::OBJECT_CROP_POTATO:	
+	case en_GameObjectType::OBJECT_CROP_POTATO:
 	case en_GameObjectType::OBJECT_CROP_CORN:
 		{
 			CCrop* CropObject = (CCrop*)GameObject;
@@ -1032,61 +1039,61 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 	case en_GameObjectType::OBJECT_SLIME:
+	{
+		// 맵에서 제거
+		if (_ObjectsInfos[Y][X] == GameObject)
 		{
-			// 맵에서 제거
-			if (_ObjectsInfos[Y][X] == GameObject)
+			for (int16 WidthX = 0; WidthX < Width; WidthX++)
 			{
-				for (int16 WidthX = 0; WidthX < Width; WidthX++)
+				for (int16 HeightY = 0; HeightY < Height; HeightY++)
 				{
-					for (int16 HeightY = 0; HeightY < Height; HeightY++)
-					{
-						_ObjectsInfos[Y][X] = nullptr;
-					}
-				}
-			}
-			else
-			{
-				if (GameObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE)
-				{
-					//CRASH("ApplyLeave 삭제하려는 오브젝트가 저장되어 있는 오브젝트와 다름");
+					_ObjectsInfos[Y][X] = nullptr;
 				}
 			}
 		}
-		break;
+		else
+		{
+			if (GameObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE)
+			{
+				//CRASH("ApplyLeave 삭제하려는 오브젝트가 저장되어 있는 오브젝트와 다름");
+			}
+		}
+	}
+	break;
 	case en_GameObjectType::OBJECT_CROP_CORN:
 	case en_GameObjectType::OBJECT_CROP_POTATO:
+	{
+		if (_SeedObjectInfos[Y][X] == GameObject)
 		{
-			if (_SeedObjectInfos[Y][X] == GameObject)
+			for (int16 WidthX = 0; WidthX < Width; WidthX++)
 			{
-				for (int16 WidthX = 0; WidthX < Width; WidthX++)
+				for (int16 HeightY = 0; HeightY < Height; HeightY++)
 				{
-					for (int16 HeightY = 0; HeightY < Height; HeightY++)
-					{
-						_SeedObjectInfos[Y][X] = nullptr;
-					}
-				}				
+					_SeedObjectInfos[Y][X] = nullptr;
+				}
 			}
 		}
-		break;
+	}
+	break;
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
 	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_CORN:
-		{
-			CItem* Item = (CItem*)GameObject;
+	{
+		CItem* Item = (CItem*)GameObject;
 
-			for (int8 i = 0; i < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; i++)
+		for (int8 i = 0; i < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; i++)
+		{
+			if (_Items[Y][X][i] != nullptr &&
+				_Items[Y][X][i]->_ItemInfo.ItemSmallCategory == Item->_ItemInfo.ItemSmallCategory)
 			{
-				if (_Items[Y][X][i] != nullptr &&
-					_Items[Y][X][i]->_ItemInfo.ItemSmallCategory == Item->_ItemInfo.ItemSmallCategory)
-				{
-					_Items[Y][X][i] = nullptr;
-					break;
-				}
+				_Items[Y][X][i] = nullptr;
+				break;
 			}
 		}
-		break;	
+	}
+	break;
 	}
 
 	return true;
@@ -1144,9 +1151,10 @@ bool CMap::ApplyTileUseFree(CGameObject* ReqTileUserFreeObject, st_Vector2Int Ti
 
 vector<st_Vector2Int> CMap::FindPath(CGameObject* Object, st_Vector2Int StartCellPosition, st_Vector2Int DestCellPostion, bool CheckObjects, int32 MaxDistance)
 {
-	int32 DeltaY[4] = { 1, -1, 0, 0 };
-	int32 DeltaX[4] = { 0, 0, -1, 1 };
-	int32 Cost[4] = { 10,10,10,10 };
+	// 상 하 좌 우 좌상 좌하 우상 우하
+	int32 DeltaY[8] = { 1, -1, 0, 0, 1, -1, 1, -1 };
+	int32 DeltaX[8] = { 0, 0, -1, 1, -1, -1, 1, 1 };
+	int32 Cost[8] = { 10,10,10,10,14,14,14,14 };
 
 	// 시작점 도착점 좌표변환
 	st_Vector2Int StartPosition = StartCellPosition;
@@ -1210,8 +1218,8 @@ vector<st_Vector2Int> CMap::FindPath(CGameObject* Object, st_Vector2Int StartCel
 		{
 			// 다음 위치를 알아낸다.
 			st_Vector2Int NextPosition;
-			NextPosition._X = AStarNode._Position._X + DeltaX[i];
 			NextPosition._Y = AStarNode._Position._Y + DeltaY[i];
+			NextPosition._X = AStarNode._Position._X + DeltaX[i];
 
 			// 다음으로 뽑아낸 위치가 시작점으로 지정해준 값보다 너무 멀다면 해당 좌표는 무시한다.
 			if (abs(StartPosition._Y - NextPosition._Y) + abs(StartPosition._X - NextPosition._X) > MaxDistance)
