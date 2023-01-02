@@ -688,11 +688,21 @@ void CMonster::UpdateSpell()
 
 		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = GetChannel()->GetMap()->GetFieldOfViewPlayers(this, 1, false);
 
-		if (_SpellSkill != nullptr && _Target != nullptr)
-		{	
-			switch (_SpellSkill->GetSkillInfo()->SkillType)
+		if (_SpellSkill != nullptr)
+		{
+			// 시전한 스킬 쿨타임 시작
+			_SpellSkill->CoolTimeStart();
+
+			// 스펠창 끝
+			CMessage* ResMagicPacket = G_ObjectManager->GameServer->MakePacketResMagic(_GameObjectInfo.ObjectId, false);
+			G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResMagicPacket);
+			ResMagicPacket->Free();
+
+			if (_Target != nullptr)
 			{
-			case en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK:
+				switch (_SpellSkill->GetSkillInfo()->SkillType)
+				{
+				case en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK:
 				{
 					float Distance = st_Vector2::Distance(_Target->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position);
 					if (Distance > _SpellSkill->GetSkillInfo()->SkillDistance)
@@ -701,82 +711,75 @@ void CMonster::UpdateSpell()
 					}
 				}
 				break;
-			default:
-				break;
-			}
-			
-			if (IsSpellSuccess == true)
-			{
-				// 일반, 버프, 디버프 처리			
-				switch (_SpellSkill->GetBufDeBufSkillKind())
-				{
-				case en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_NORMAL:
-					break;
-				case en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_BUF:
-					break;
-				case en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_DEBUF:
-					{
-						auto DeBufsIter = _Target->_DeBufs.find(_SpellSkill->GetSkillInfo()->SkillType);
-						if (DeBufsIter != _Target->_DeBufs.end())
-						{
-							// 시전 완료된 스킬이 상대방의 디버프 목록에 있을 경우
-							CSkill* DeBufSkill = DeBufsIter->second;
-							if (DeBufSkill != nullptr)
-							{
-								DeBufSkill->GetSkillInfo()->SkillOverlapStep++;
-
-								DeBufSkill->StatusAbnormalDurationTimeStart();
-
-								CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_Target->_GameObjectInfo.ObjectId, false, DeBufSkill->GetSkillInfo());
-								G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
-								ResBufDeBufSkillPacket->Free();
-							}
-							else
-							{
-								CRASH("DeBufSkill nullptr")
-							}
-						}
-						else
-						{
-							// 시전 완료된 스킬이 상대방의 버프 목록에 없을 경우
-							switch (_SpellSkill->GetSkillInfo()->SkillType)
-							{
-							case en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK:
-								{
-									CSkill* SlimePoisionAttack = G_ObjectManager->SkillCreate();
-									st_AttackSkillInfo* SlimePoisionSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK, _SpellSkill->GetSkillInfo()->SkillLevel);
-									SlimePoisionAttack->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_STATUS_ABNORMAL_SKILL, SlimePoisionSkillInfo);
-									SlimePoisionAttack->StatusAbnormalDurationTimeStart();
-									SlimePoisionAttack->SetCastingUserID(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType);
-
-									SlimePoisionAttack->GetSkillInfo()->SkillOverlapStep++;
-
-									_Target->AddDebuf(SlimePoisionAttack);
-
-									CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_Target->_GameObjectInfo.ObjectId, false, SlimePoisionAttack->GetSkillInfo());
-									G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
-									ResBufDeBufSkillPacket->Free();
-								}
-								break;
-							default:
-								break;
-							}
-						}
-					}
-					break;
 				default:
 					break;
 				}
-			}			
 
-			// 시전한 스킬 쿨타임 시작
-			_SpellSkill->CoolTimeStart();
+				if (IsSpellSuccess == true)
+				{
+					// 일반, 버프, 디버프 처리			
+					switch (_SpellSkill->GetBufDeBufSkillKind())
+					{
+					case en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_NORMAL:						
+						break;
+					case en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_BUF:
+						break;
+					case en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_DEBUF:
+						{
+							auto DeBufsIter = _Target->_DeBufs.find(_SpellSkill->GetSkillInfo()->SkillType);
+							if (DeBufsIter != _Target->_DeBufs.end())
+							{
+								// 시전 완료된 스킬이 상대방의 디버프 목록에 있을 경우
+								CSkill* DeBufSkill = DeBufsIter->second;
+								if (DeBufSkill != nullptr)
+								{
+									DeBufSkill->GetSkillInfo()->SkillOverlapStep++;
 
-			// 스펠창 끝
-			CMessage* ResMagicPacket = G_ObjectManager->GameServer->MakePacketResMagic(_GameObjectInfo.ObjectId, false);
-			G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResMagicPacket);
-			ResMagicPacket->Free();
-		}
+									DeBufSkill->StatusAbnormalDurationTimeStart();
+
+									CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_Target->_GameObjectInfo.ObjectId, false, DeBufSkill->GetSkillInfo());
+									G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
+									ResBufDeBufSkillPacket->Free();
+								}
+								else
+								{
+									CRASH("DeBufSkill nullptr")
+								}
+							}
+							else
+							{
+								// 시전 완료된 스킬이 상대방의 버프 목록에 없을 경우
+								switch (_SpellSkill->GetSkillInfo()->SkillType)
+								{
+								case en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK:
+									{
+										CSkill* SlimePoisionAttack = G_ObjectManager->SkillCreate();
+										st_AttackSkillInfo* SlimePoisionSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK, _SpellSkill->GetSkillInfo()->SkillLevel);
+										SlimePoisionAttack->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_STATUS_ABNORMAL_SKILL, SlimePoisionSkillInfo);
+										SlimePoisionAttack->StatusAbnormalDurationTimeStart();
+										SlimePoisionAttack->SetCastingUserID(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType);
+
+										SlimePoisionAttack->GetSkillInfo()->SkillOverlapStep++;
+
+										_Target->AddDebuf(SlimePoisionAttack);
+
+										CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_Target->_GameObjectInfo.ObjectId, false, SlimePoisionAttack->GetSkillInfo());
+										G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
+										ResBufDeBufSkillPacket->Free();
+									}
+									break;
+								default:
+									break;
+								}
+							}
+						}
+						break;
+					default:
+						break;
+					}
+				}
+			}
+		}			
 	}
 }
 
