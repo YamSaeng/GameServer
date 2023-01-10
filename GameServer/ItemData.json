@@ -426,6 +426,18 @@
       "ArchitectureList": [
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_CRAFTING_DEFAULT_CRAFTING_TABLE",
+          "ItemObjectType": "OBJECT_ARCHITECTURE_CRAFTING_DEFAULT_CRAFTING_TABLE",
+          "ItemExplain": "기초 제작대",
+          "ItemName": "기초 제작대",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
+          "ItemMaxDurability": 2,
+          "ItemMaxCount": 1,
+          "ItemCraftingTime": 10000
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE",
           "ItemObjectType": "OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE",
           "ItemExplain": "광석을 제련 할 수 있는 용광로",
