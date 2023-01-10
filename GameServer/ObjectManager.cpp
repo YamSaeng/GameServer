@@ -10,6 +10,7 @@
 #include "Sawmill.h"
 #include "Potato.h"
 #include "Corn.h"
+#include "NonPlayer.h"
 #include "MapTile.h"
 #include "ChannelManager.h"
 #include <atlbase.h>
@@ -17,6 +18,7 @@
 CObjectManager::CObjectManager()
 {
 	_PlayerMemoryPool = new CMemoryPoolTLS<CPlayer>();
+	_NonPlayerMemoryPool = new CMemoryPoolTLS<CNonPlayer>();
 	_SlimeMemoryPool = new CMemoryPoolTLS<CSlime>();
 	_BearMemoryPool = new CMemoryPoolTLS<CBear>();
 
@@ -100,6 +102,9 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 	case en_GameObjectType::OBJECT_PLAYER:
 		NewObject = _PlayerMemoryPool->Alloc();
 		break;
+	case en_GameObjectType::OBJECT_NON_PLAYER:
+		NewObject = _NonPlayerMemoryPool->Alloc();
+		break;
 	case en_GameObjectType::OBJECT_SLIME:
 		NewObject = _SlimeMemoryPool->Alloc();
 		break;
@@ -150,6 +155,9 @@ void CObjectManager::ObjectReturn(CGameObject* ReturnObject)
 		case en_GameObjectType::OBJECT_ARCHER_PLAYER:
 		case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 			_PlayerMemoryPool->Free((CPlayer*)ReturnObject);
+			break;
+		case en_GameObjectType::OBJECT_NON_PLAYER:
+			_NonPlayerMemoryPool->Free((CNonPlayer*)ReturnObject);
 			break;
 		case en_GameObjectType::OBJECT_SLIME:
 			_SlimeMemoryPool->Free((CSlime*)ReturnObject);
@@ -234,8 +242,9 @@ CItem* CObjectManager::ItemCreate(en_SmallItemCategory NewItemSmallCategory)
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT:
 		NewItem = _MaterialMemoryPool->Alloc();
 		break;
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_DEFAULT_CRAFTING_TABLE:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL:	
 		NewItem = _ArchitectureMemoryPool->Alloc();
 		break;
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_SEED_POTATO:
@@ -294,6 +303,7 @@ void CObjectManager::ItemReturn(CItem* ReturnItem)
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT:
 		_MaterialMemoryPool->Free((CMaterialItem*)ReturnItem);
 		break;
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_DEFAULT_CRAFTING_TABLE:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL:
 		_ArchitectureMemoryPool->Free((CArchitectureItem*)ReturnItem);
@@ -522,6 +532,9 @@ void CObjectManager::MapObjectSpawn(int64& MapID)
 				break;
 			case en_MapObjectInfo::TILE_MAP_POTATO:
 				NewObject = (CPotato*)ObjectCreate(en_GameObjectType::OBJECT_CROP_POTATO);
+				break;
+			case en_MapObjectInfo::TILE_MAP_GENERAL_MERCHANT:	
+				NewObject = (CNonPlayer*)ObjectCreate(en_GameObjectType::OBJECT_NON_PLAYER);
 				break;
 			}
 

@@ -19,6 +19,7 @@ class CPotato;
 class CCorn;
 class CCropItem;
 class CMapTile;
+class CNonPlayer;
 
 class CObjectManager
 {
@@ -31,7 +32,7 @@ private:
 		CRAFTINGTABLE_MAX = 15000
 	};	
 
-	// 아이템 
+	// 메모리 풀 
 	CMemoryPoolTLS<CItem>* _ItemMemoryPool;
 	CMemoryPoolTLS<CWeaponItem>* _WeaponMemoryPool;
 	CMemoryPoolTLS<CArmorItem>* _ArmorMemoryPool;
@@ -41,8 +42,8 @@ private:
 	CMemoryPoolTLS<CArchitectureItem>* _ArchitectureMemoryPool;
 	CMemoryPoolTLS<CCropItem>* _CropItemMemoryPool;
 
-	// 오브젝트
-	CMemoryPoolTLS<CPlayer>* _PlayerMemoryPool;
+	CMemoryPoolTLS<CPlayer>* _PlayerMemoryPool;	
+	CMemoryPoolTLS<CNonPlayer>* _NonPlayerMemoryPool;
 	CMemoryPoolTLS<CSlime>* _SlimeMemoryPool;
 	CMemoryPoolTLS<CBear>* _BearMemoryPool;
 	CMemoryPoolTLS<CTree>* _TreeMemoryPool;
