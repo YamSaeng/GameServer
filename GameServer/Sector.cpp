@@ -27,6 +27,9 @@ void CSector::Insert(CGameObject* InsertGameObject)
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 		_Players.insert((CPlayer*)InsertGameObject);
 		break;
+	case en_GameObjectType::OBJECT_NON_PLAYER:
+		_NonPlayers.insert((CNonPlayer*)InsertGameObject);
+		break;
 	case en_GameObjectType::OBJECT_SLIME:
 	case en_GameObjectType::OBJECT_BEAR:
 		_Monsters.insert((CMonster*)InsertGameObject);
@@ -86,6 +89,9 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 		_Players.erase((CPlayer*)RemoveGameObject);
 		break;
+	case en_GameObjectType::OBJECT_NON_PLAYER:
+		_NonPlayers.erase((CNonPlayer*)RemoveGameObject);
+		break;
 	case en_GameObjectType::OBJECT_SLIME:
 	case en_GameObjectType::OBJECT_BEAR:
 		_Monsters.erase((CMonster*)RemoveGameObject);
@@ -132,6 +138,11 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 set<CPlayer*> CSector::GetPlayers()
 {
 	return _Players;
+}
+
+set<CNonPlayer*> CSector::GetNonPlayers()
+{
+	return _NonPlayers;
 }
 
 set<CMonster*> CSector::GetMonsters()

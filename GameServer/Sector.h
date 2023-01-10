@@ -2,6 +2,7 @@
 
 class CGameObject;
 class CPlayer;
+class CNonPlayer;
 class CMonster;
 class CItem;
 class CEnvironment;
@@ -13,6 +14,7 @@ class CSector
 private:
 	// 섹터에서 관리하는 플레이어, 몬스터, 아이템 
 	set<CPlayer*> _Players;
+	set<CNonPlayer*> _NonPlayers;
 	set<CMonster*> _Monsters;
 	set<CItem*> _Items;
 	set<CEnvironment*> _Environment;	
@@ -34,6 +36,7 @@ public:
 	void Remove(CGameObject* RemoveGameObject);
 
 	set<CPlayer*> GetPlayers();
+	set<CNonPlayer*> GetNonPlayers();
 	set<CMonster*> GetMonsters();
 	set<CItem*> GetItems();
 	set<CEnvironment*> GetEnvironment();
