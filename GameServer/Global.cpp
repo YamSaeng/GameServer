@@ -60,6 +60,8 @@ public:
 		G_Datamanager->LoadDataCrafting(L"CraftingData.json");
 		// 제작대 제작법 데이터 파싱
 		G_Datamanager->LoadDataCraftingTable(L"CraftingTableData.json");
+		// 상인 데이터 파싱
+		G_Datamanager->LoadDataMerchant(L"MerchantItemData.json");
 		// 캐릭터 레벨링 데이터 파싱
 		G_Datamanager->LoadDataLevel(L"CharacterLevelingData.json");
 		// 맵 정보 데이터 파싱
