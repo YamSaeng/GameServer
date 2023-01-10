@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Channel.h"
 #include "Player.h"
+#include "NonPlayer.h"
 #include "Message.h"
 #include "Monster.h"
 #include "Item.h"
@@ -16,8 +17,6 @@
 
 CChannel::CChannel()
 {	
-	InitializeSRWLock(&_ChannelLock);
-
 	for (int32 PlayerCount = PLAYER_MAX - 1; PlayerCount >= 0; --PlayerCount)
 	{
 		_ChannelPlayerArray[PlayerCount] = nullptr;
@@ -28,6 +27,12 @@ CChannel::CChannel()
 	{
 		_ChannelDummyPlayerArray[DummyPlayerCount] = nullptr;
 		_ChannelDummyPlayerArrayIndexs.Push(DummyPlayerCount);
+	}
+
+	for (int32 NonPlayerCount = NON_PLAYER_MAX - 1; NonPlayerCount >= 0; --NonPlayerCount)
+	{
+		_ChannelNonPlayerArray[NonPlayerCount] = nullptr;
+		_ChannelNonPlayerArrayIndexs.Push(NonPlayerCount);
 	}
 
 	for (int32 MonsterCount = MONSTER_MAX - 1; MonsterCount >= 0; --MonsterCount)
@@ -62,15 +67,8 @@ CChannel::CChannel()
 }
 
 CChannel::~CChannel()
-{
-	for (int i = 0; i < _SectorCountY; i++)
-	{
-		delete _Sectors[i];
-		_Sectors[i] = nullptr;
-	}
-
-	delete _Map;
-	delete _Sectors;
+{	
+	delete _Map;	
 }
 
 void CChannel::Init()
@@ -860,6 +858,14 @@ void CChannel::Update()
 		}
 	}
 
+	for (int16 i = 0; i < NON_PLAYER_MAX; i++)
+	{
+		if (_ChannelNonPlayerArray[i] != nullptr)
+		{
+			_ChannelNonPlayerArray[i]->Update();
+		}
+	}
+
 	for (int16 i = 0; i < MONSTER_MAX; i++)
 	{
 		if (_ChannelMonsterArray[i] != nullptr)
@@ -901,14 +907,14 @@ void CChannel::Update()
 	}
 }
 
-CMap* CChannel::GetMap()
-{
-	return _Map;
-}
-
 void CChannel::SetMap(CMap* Map)
 {
 	_Map = Map;
+}
+
+CMap* CChannel::GetMap()
+{
+	return _Map;
 }
 
 CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameObjectType)
@@ -1573,75 +1579,120 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	case en_GameObjectType::OBJECT_ARCHER_PLAYER:	
 		{
 			// 플레이어로 형변환
-			CPlayer* EnterChannelPlayer = (CPlayer*)EnterChannelGameObject;
-			EnterChannelPlayer->_SpawnPosition = SpawnPosition;
-			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
+			CPlayer* EnterChannelPlayer = dynamic_cast<CPlayer*>(EnterChannelGameObject);
+			if (EnterChannelPlayer != nullptr)
+			{
+				EnterChannelPlayer->_SpawnPosition = SpawnPosition;
+				EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 
-			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
+				EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
+				EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
 
-			EnterChannelPlayer->GetRectCollision()->CollisionUpdate();
+				EnterChannelPlayer->GetRectCollision()->CollisionUpdate();
 
-			// 플레이어 저장
-			_ChannelPlayerArrayIndexs.Pop(&EnterChannelPlayer->_ChannelArrayIndex);
-			_ChannelPlayerArray[EnterChannelPlayer->_ChannelArrayIndex] = EnterChannelPlayer;		
-											
-			//_Players.insert(pair<int64, CPlayer*>(EnterChannelPlayer->_GameObjectInfo.ObjectId, EnterChannelPlayer));			
+				// 플레이어 저장
+				_ChannelPlayerArrayIndexs.Pop(&EnterChannelPlayer->_ChannelArrayIndex);
+				_ChannelPlayerArray[EnterChannelPlayer->_ChannelArrayIndex] = EnterChannelPlayer;				
 
-			// 맵에 적용
-			IsEnterChannel = _Map->ApplyMove(EnterChannelPlayer, SpawnPosition);
+				// 맵에 적용
+				IsEnterChannel = _Map->ApplyMove(EnterChannelPlayer, SpawnPosition);
 
-			// 섹터에 저장
-			CSector* EnterSector = _Map->GetSector(SpawnPosition);
-			EnterSector->Insert(EnterChannelPlayer);
+				// 섹터에 저장
+				CSector* EnterSector = _Map->GetSector(SpawnPosition);
+				EnterSector->Insert(EnterChannelPlayer);
+			}			
+			else
+			{
+				CRASH("EnterChannelDummyPlayer nullptr")
+			}
 		}
 		break;
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 		{
 			// 플레이어로 형변환
-			CPlayer* EnterChannelPlayer = (CPlayer*)EnterChannelGameObject;
-			EnterChannelPlayer->_SpawnPosition = SpawnPosition;
-			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
+			CPlayer* EnterChannelDummyPlayer = dynamic_cast<CPlayer*>(EnterChannelGameObject);
+			if (EnterChannelDummyPlayer != nullptr)
+			{
+				EnterChannelDummyPlayer->_SpawnPosition = SpawnPosition;
+				EnterChannelDummyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 
-			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-			EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;			
+				EnterChannelDummyPlayer->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelDummyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
+				EnterChannelDummyPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelDummyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
 
-			// 플레이어 저장
-			_ChannelDummyPlayerArrayIndexs.Pop(&EnterChannelPlayer->_ChannelArrayIndex);
-			_ChannelDummyPlayerArray[EnterChannelPlayer->_ChannelArrayIndex] = EnterChannelPlayer;
-			
-			// 맵에 적용
-			IsEnterChannel = _Map->ApplyMove(EnterChannelPlayer, SpawnPosition);
+				// 플레이어 저장
+				_ChannelDummyPlayerArrayIndexs.Pop(&EnterChannelDummyPlayer->_ChannelArrayIndex);
+				_ChannelDummyPlayerArray[EnterChannelDummyPlayer->_ChannelArrayIndex] = EnterChannelDummyPlayer;
 
-			// 섹터에 저장
-			CSector* EnterSector = _Map->GetSector(SpawnPosition);
-			EnterSector->Insert(EnterChannelPlayer);
+				// 맵에 적용
+				IsEnterChannel = _Map->ApplyMove(EnterChannelDummyPlayer, SpawnPosition);
+
+				// 섹터에 저장
+				CSector* EnterSector = _Map->GetSector(SpawnPosition);
+				EnterSector->Insert(EnterChannelDummyPlayer);
+			}	
+			else
+			{
+				CRASH("EnterChannelDummyPlayer nullptr")
+			}
 		}	
+		break;
+	case en_GameObjectType::OBJECT_NON_PLAYER:
+		{
+			CNonPlayer* NonPlayer = dynamic_cast<CNonPlayer*>(EnterChannelGameObject);
+			if (NonPlayer != nullptr)
+			{
+				NonPlayer->_SpawnPosition = SpawnPosition;
+				NonPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
+
+				NonPlayer->_GameObjectInfo.ObjectPositionInfo.Position._X = NonPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
+				NonPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y = NonPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
+
+				// 플레이어 저장
+				_ChannelNonPlayerArrayIndexs.Pop(&NonPlayer->_ChannelArrayIndex);
+				_ChannelNonPlayerArray[NonPlayer->_ChannelArrayIndex] = NonPlayer;
+
+				IsEnterChannel = _Map->ApplyMove(NonPlayer, SpawnPosition);
+
+				// 섹터에 저장
+				CSector* EnterSector = _Map->GetSector(SpawnPosition);
+				EnterSector->Insert(NonPlayer);
+			}		
+			else
+			{
+				CRASH("NonPlayer nullptr")
+			}
+		}
 		break;
 	case en_GameObjectType::OBJECT_SLIME:
 	case en_GameObjectType::OBJECT_BEAR:
 		{		
 			// 몬스터로 형변환	
-			CMonster* EnterChannelMonster = (CMonster*)EnterChannelGameObject;		
-			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-			EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
+			CMonster* EnterChannelMonster = dynamic_cast<CMonster*>(EnterChannelGameObject);
+			if (EnterChannelMonster != nullptr)
+			{
+				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
+				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
+				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
 
-			EnterChannelMonster->GetRectCollision()->CollisionUpdate();
+				EnterChannelMonster->GetRectCollision()->CollisionUpdate();
 
-			EnterChannelMonster->Start();		
-					
-			// 몬스터 저장
-			_ChannelMonsterArrayIndexs.Pop(&EnterChannelMonster->_ChannelArrayIndex);
-			_ChannelMonsterArray[EnterChannelMonster->_ChannelArrayIndex] = EnterChannelMonster;
-			//G_Logger->WriteStdOut(en_Color::RED, L"ObjectID %d EnterChannelIndex %d\n", EnterChannelMonster->_GameObjectInfo.ObjectId, EnterChannelMonster->_ChannelArrayIndex);					
+				EnterChannelMonster->Start();
 
-			// 맵에 적용
-			IsEnterChannel = _Map->ApplyMove(EnterChannelMonster, SpawnPosition);
+				// 몬스터 저장
+				_ChannelMonsterArrayIndexs.Pop(&EnterChannelMonster->_ChannelArrayIndex);
+				_ChannelMonsterArray[EnterChannelMonster->_ChannelArrayIndex] = EnterChannelMonster;				
 
-			// 섹터 얻어서 해당 섹터에도 저장
-			CSector* EnterSector = _Map->GetSector(SpawnPosition);
-			EnterSector->Insert(EnterChannelMonster);
+				// 맵에 적용
+				IsEnterChannel = _Map->ApplyMove(EnterChannelMonster, SpawnPosition);
+
+				// 섹터 얻어서 해당 섹터에도 저장
+				CSector* EnterSector = _Map->GetSector(SpawnPosition);
+				EnterSector->Insert(EnterChannelMonster);
+			}
+			else
+			{
+				CRASH("EnterChannelMonster nullptr")
+			}
 		}
 		break;
 	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
@@ -1665,84 +1716,112 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
 		{
 			// 아이템으로 형변환
-			CItem* EnterChannelItem = (CItem*)EnterChannelGameObject;
-			EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;					
-
-			// 맵 정보에 보관			
-			IsEnterChannel = _Map->ApplyMove(EnterChannelItem, SpawnPosition, false, false);
-
-			// 중복되지 않는 아이템의 경우에만 채널에 해당 아이템을 채널과 섹터에 저장
-			if (IsEnterChannel == true)
+			CItem* EnterChannelItem = dynamic_cast<CItem*>(EnterChannelGameObject);
+			if (EnterChannelItem != nullptr)
 			{
-				// 아이템 저장
-				_ChannelItemArrayIndexs.Pop(&EnterChannelItem->_ChannelArrayIndex);
-				_ChannelItemArray[EnterChannelItem->_ChannelArrayIndex] = EnterChannelItem;
-							
-				// 섹터 얻어서 해당 섹터에도 저장
-				CSector* EnterSector = _Map->GetSector(SpawnPosition);	
-				EnterSector->Insert(EnterChannelItem);
+				EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
+
+				// 맵 정보에 보관			
+				IsEnterChannel = _Map->ApplyMove(EnterChannelItem, SpawnPosition, false, false);
+
+				// 중복되지 않는 아이템의 경우에만 채널에 해당 아이템을 채널과 섹터에 저장
+				if (IsEnterChannel == true)
+				{
+					// 아이템 저장
+					_ChannelItemArrayIndexs.Pop(&EnterChannelItem->_ChannelArrayIndex);
+					_ChannelItemArray[EnterChannelItem->_ChannelArrayIndex] = EnterChannelItem;
+
+					// 섹터 얻어서 해당 섹터에도 저장
+					CSector* EnterSector = _Map->GetSector(SpawnPosition);
+					EnterSector->Insert(EnterChannelItem);
+				}
+			}	
+			else
+			{
+				CRASH("EnterChannelItem nullptr")
 			}
 		}
 		break;
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
 		{
-			CEnvironment* EnterChannelEnvironment = (CEnvironment*)EnterChannelGameObject;
-			EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-			EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-			EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;		
+			CEnvironment* EnterChannelEnvironment = dynamic_cast<CEnvironment*>(EnterChannelGameObject);
+			if (EnterChannelEnvironment != nullptr)
+			{
+				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
+				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
+				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
 
-			EnterChannelEnvironment->GetRectCollision()->CollisionUpdate();
+				EnterChannelEnvironment->GetRectCollision()->CollisionUpdate();
 
-			EnterChannelEnvironment->Start();
+				EnterChannelEnvironment->Start();
 
-			// 환경 오브젝트 저장
-			_ChannelEnvironmentArrayIndexs.Pop(&EnterChannelEnvironment->_ChannelArrayIndex);
-			_ChannelEnvironmentArray[EnterChannelEnvironment->_ChannelArrayIndex] = EnterChannelEnvironment;			
+				// 환경 오브젝트 저장
+				_ChannelEnvironmentArrayIndexs.Pop(&EnterChannelEnvironment->_ChannelArrayIndex);
+				_ChannelEnvironmentArray[EnterChannelEnvironment->_ChannelArrayIndex] = EnterChannelEnvironment;
 
-			IsEnterChannel = _Map->ApplyMove(EnterChannelEnvironment, SpawnPosition);
+				IsEnterChannel = _Map->ApplyMove(EnterChannelEnvironment, SpawnPosition);
 
-			// 섹터 얻어서 해당 섹터에도 저장
-			CSector* EnterSector = _Map->GetSector(SpawnPosition);
-			EnterSector->Insert(EnterChannelEnvironment);
+				// 섹터 얻어서 해당 섹터에도 저장
+				CSector* EnterSector = _Map->GetSector(SpawnPosition);
+				EnterSector->Insert(EnterChannelEnvironment);
+			}			
+			else
+			{
+				CRASH("EnterChannelEnvironment nullptr")
+			}
 		}
 		break;
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 		{
-			CCraftingTable* EnterChannelCraftingTable = (CCraftingTable*)EnterChannelGameObject;
-			EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-			EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-			EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
+			CCraftingTable* EnterChannelCraftingTable = dynamic_cast<CCraftingTable*>(EnterChannelGameObject);
+			if (EnterChannelCraftingTable != nullptr)
+			{
+				EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
+				EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
+				EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
 
-			EnterChannelCraftingTable->GetRectCollision()->CollisionUpdate();
+				EnterChannelCraftingTable->GetRectCollision()->CollisionUpdate();
 
-			EnterChannelCraftingTable->Start();
+				EnterChannelCraftingTable->Start();
 
-			_ChannelCraftingTableArrayIndexs.Pop(&EnterChannelCraftingTable->_ChannelArrayIndex);
-			_ChannelCraftingTableArray[EnterChannelCraftingTable->_ChannelArrayIndex] = EnterChannelCraftingTable;			
+				_ChannelCraftingTableArrayIndexs.Pop(&EnterChannelCraftingTable->_ChannelArrayIndex);
+				_ChannelCraftingTableArray[EnterChannelCraftingTable->_ChannelArrayIndex] = EnterChannelCraftingTable;
 
-			IsEnterChannel = _Map->ApplyMove(EnterChannelCraftingTable, SpawnPosition);
-			
-			CSector* Entersector = _Map->GetSector(SpawnPosition);
-			Entersector->Insert(EnterChannelCraftingTable);
+				IsEnterChannel = _Map->ApplyMove(EnterChannelCraftingTable, SpawnPosition);
+
+				CSector* Entersector = _Map->GetSector(SpawnPosition);
+				Entersector->Insert(EnterChannelCraftingTable);
+			}
+			else
+			{
+				CRASH("EnterChannelCraftingTable nullptr")
+			}
 		}
 		break;
 	case en_GameObjectType::OBJECT_CROP_POTATO:
 	case en_GameObjectType::OBJECT_CROP_CORN:
 		{
-			CCrop* Crop = (CCrop*)EnterChannelGameObject;
-			Crop->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-			Crop->_GameObjectInfo.ObjectPositionInfo.Position._X = Crop->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-			Crop->_GameObjectInfo.ObjectPositionInfo.Position._Y = Crop->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;			
+			CCrop* CropObject = dynamic_cast<CCrop*>(EnterChannelGameObject);
+			if (CropObject != nullptr)
+			{
+				CropObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
+				CropObject->_GameObjectInfo.ObjectPositionInfo.Position._X = CropObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
+				CropObject->_GameObjectInfo.ObjectPositionInfo.Position._Y = CropObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
 
-			_ChannelCropArrayIndexs.Pop(&Crop->_ChannelArrayIndex);
-			_ChannelCropArray[Crop->_ChannelArrayIndex] = Crop;			
+				_ChannelCropArrayIndexs.Pop(&CropObject->_ChannelArrayIndex);
+				_ChannelCropArray[CropObject->_ChannelArrayIndex] = CropObject;
 
-			IsEnterChannel = _Map->ApplyMove(Crop, SpawnPosition, true, false);
+				IsEnterChannel = _Map->ApplyMove(CropObject, SpawnPosition, true, false);
 
-			CSector* EnterSector = _Map->GetSector(SpawnPosition);
-			EnterSector->Insert(Crop);
+				CSector* EnterSector = _Map->GetSector(SpawnPosition);
+				EnterSector->Insert(CropObject);
+			}
+			else
+			{
+				CRASH("CropObject nullptr")
+			}			
 		}
 		break;
 	}
@@ -1765,6 +1844,9 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 		break;
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 		_ChannelDummyPlayerArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
+		break;
+	case en_GameObjectType::OBJECT_NON_PLAYER:
+		_ChannelNonPlayerArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
 		break;
 	case en_GameObjectType::OBJECT_SLIME:
 	case en_GameObjectType::OBJECT_BEAR:		
