@@ -8,7 +8,8 @@
 class CDataManager
 {
 public:
-	map<int16, st_ItemInfo*> _Items;	
+	map<int16, st_ItemInfo*> _Items;		
+	map<int16, st_ItemInfo*> _GeneralMerchantItems;
 
 	map<int32, st_ObjectStatusData*> _WarriorStatus;
 	map<int32, st_ObjectStatusData*> _ShamanStatus;
@@ -119,6 +120,7 @@ public:
 	void LoadDataCrop(wstring LoadFileName);
 	void LoadDataCrafting(wstring LoadFileName);
 	void LoadDataCraftingTable(wstring LoadFileName);
+	void LoadDataMerchant(wstring LoadFileName);
 	void LoadDataMapInfo(wstring LoadFileName);
 	void LoadDataOptionInfo(wstring LoadFileName);
 

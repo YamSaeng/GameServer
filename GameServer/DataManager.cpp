@@ -582,7 +582,11 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 				ArchitectureItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE;
 			}
 
-			if (SmallCategory == "ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE")
+			if (SmallCategory == "ITEM_SMALL_CATEGORY_CRAFTING_DEFAULT_CRAFTING_TABLE")
+			{
+				ArchitectureItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_DEFAULT_CRAFTING_TABLE;
+			}
+			else if (SmallCategory == "ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE")
 			{
 				ArchitectureItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE;
 			}
@@ -591,6 +595,10 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 				ArchitectureItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL;
 			}
 
+			if (ItemObjectType == "OBJECT_ARCHITECTURE_CRAFTING_DEFAULT_CRAFTING_TABLE")
+			{
+				ArchitectureItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_DEFAULT_CRAFTING_TABLE;
+			}
 			if (ItemObjectType == "OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE")
 			{
 				ArchitectureItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE;
@@ -2245,7 +2253,7 @@ void CDataManager::LoadDataEnvironment(wstring LoadFileName)
 		{
 			int Level = EnvironmentStatInfoFiled["Level"].GetInt();
 			int MaxHP = EnvironmentStatInfoFiled["MaxHP"].GetInt();
-			long RecoveryTime = EnvironmentStatInfoFiled["RecoveryTime"].GetInt64();
+			int64 RecoveryTime = (int64)EnvironmentStatInfoFiled["RecoveryTime"].GetInt64();
 
 			EnvironmentData->Level = Level;
 			EnvironmentData->MaxHP = MaxHP;
@@ -2383,10 +2391,17 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 			string CraftingCompleteItemMediumCategory = CraftingCompleteItemFiled["CraftingCompleteItemMediumCategory"].GetString();
 			string CraftingCompleteItemSmallCategory = CraftingCompleteItemFiled["CraftingCompleteItemSmallCategory"].GetString();
 
-			string CraftingCompleteItemName = CraftingCompleteItemFiled["CraftingCompleteItemName"].GetString();
-			string CraftingCompleteItemThumbnailImagePath = CraftingCompleteItemFiled["CraftingCompleteItemThumbnailImagePath"].GetString();
+			string CraftingCompleteItemName = CraftingCompleteItemFiled["CraftingCompleteItemName"].GetString();			
 
-			if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE")
+			if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_CRAFTING_DEFAULT_CRAFTING_TABLE")
+			{
+				CommonCraftingCompleteItem = G_ObjectManager->ItemCreate(en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_DEFAULT_CRAFTING_TABLE);
+				CommonCraftingCompleteItem->_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARCHITECTURE;
+				CommonCraftingCompleteItem->_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE;
+				CommonCraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_DEFAULT_CRAFTING_TABLE;
+				CommonCraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_COMMON;
+			}
+			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE")
 			{
 				CommonCraftingCompleteItem = G_ObjectManager->ItemCreate(en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE);
 				CommonCraftingCompleteItem->_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARCHITECTURE;
@@ -2608,6 +2623,36 @@ void CDataManager::LoadDataCraftingTable(wstring LoadFileName)
 		}
 
 		_CraftingTableData.insert(pair<int16, st_CraftingTableRecipe*>((int16)CraftingTableRecipe->CraftingTableType, CraftingTableRecipe));
+	}
+}
+
+void CDataManager::LoadDataMerchant(wstring LoadFileName)
+{
+	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());
+
+	rapidjson::Document Document;
+	Document.Parse(FileStr);
+
+	for (auto& Filed : Document["MerchantItems"].GetArray())
+	{
+		for (auto& GeneralMerchantItemsFiled : Filed["GeneralMerchantItemList"].GetArray())
+		{
+			string ItemName = GeneralMerchantItemsFiled["ItemName"].GetString();
+			string ItemSmallCategoryString = GeneralMerchantItemsFiled["ItemSmallCategory"].GetString();
+
+			int16 ItemSmallcategory;
+
+			if (ItemSmallCategoryString == "ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL")
+			{
+				ItemSmallcategory = (int16)en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL;
+			}
+			else if (ItemSmallCategoryString == "ITEM_SMALL_CATEGORY_POTION_MANA_RESTORATION_POTION_SMALL")
+			{
+				ItemSmallcategory = (int16)en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_MANA_RESTORATION_POTION_SMALL;
+			}			
+
+			_GeneralMerchantItems.insert(pair<int16, st_ItemInfo*>(ItemSmallcategory, FindItemData((en_SmallItemCategory)ItemSmallcategory)));
+		}		
 	}
 }
 
