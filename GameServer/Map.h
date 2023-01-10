@@ -78,11 +78,11 @@ public:
 	//-----------------------------------------------------------------
 	// 내 주위 섹터 반환
 	//-----------------------------------------------------------------
-	vector<CSector*> GetAroundSectors(st_Vector2Int CellPosition, int32 Range);
+	vector<CSector*> GetAroundSectors(st_Vector2Int CellPosition, int32 Range = 1);
 	//------------------------------------------------------------------------------------------------------
 	// 오브젝트 시야 범위 안에 있는 오브젝트 아이디 목록 반환
 	//------------------------------------------------------------------------------------------------------
-	vector<st_FieldOfViewInfo> GetFieldOfViewObjects(CGameObject* Object, int16 Range, bool ExceptMe = true);
+	vector<st_FieldOfViewInfo> GetFieldOfViewObjects(CGameObject* Object, bool ExceptMe = true, int16 Range = 1);
 	//---------------------------------------------------------------------------------
 	// 오브젝트 시야 범위 안에 있는 플레이어 아이디 목록 반환
 	//---------------------------------------------------------------------------------

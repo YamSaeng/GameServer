@@ -2,6 +2,7 @@
 #include "Map.h"
 #include "GameObject.h"
 #include "Player.h"
+#include "NonPlayer.h"
 #include "Monster.h"
 #include "Heap.h"
 #include "ObjectManager.h"
@@ -322,7 +323,7 @@ vector<CSector*> CMap::GetAroundSectors(st_Vector2Int CellPosition, int32 Range)
 	}
 }
 
-vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object, int16 Range, bool ExceptMe)
+vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object, bool ExceptMe, int16 Range)
 {
 	vector<st_FieldOfViewInfo> FieldOfViewGameObjects;
 
@@ -359,6 +360,20 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object, int1
 			}
 		}
 
+		// 주변 NPC 정보
+		for (CNonPlayer* NonPlayer : Sector->GetNonPlayers())
+		{
+			FieldOfViewInfo.ObjectID = NonPlayer->_GameObjectInfo.ObjectId;
+			FieldOfViewInfo.SessionID = 0;
+			FieldOfViewInfo.ObjectType = NonPlayer->_GameObjectInfo.ObjectType;
+
+			float Distance = st_Vector2::Distance(Object->_GameObjectInfo.ObjectPositionInfo.Position, NonPlayer->_GameObjectInfo.ObjectPositionInfo.Position);
+			if (Distance <= Object->_FieldOfViewDistance)
+			{
+				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
+			}
+		}
+
 		// 주변 섹터 몬스터 정보
 		for (CMonster* Monster : Sector->GetMonsters())
 		{
@@ -366,8 +381,7 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object, int1
 			FieldOfViewInfo.SessionID = 0;
 			FieldOfViewInfo.ObjectType = Monster->_GameObjectInfo.ObjectType;
 
-			int16 Distance = st_Vector2Int::Distance(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Monster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
-
+			float Distance = st_Vector2::Distance(Object->_GameObjectInfo.ObjectPositionInfo.Position, Monster->_GameObjectInfo.ObjectPositionInfo.Position);
 			if (Distance <= Object->_FieldOfViewDistance)
 			{
 				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
@@ -380,8 +394,7 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object, int1
 			FieldOfViewInfo.SessionID = 0;
 			FieldOfViewInfo.ObjectType = Environment->_GameObjectInfo.ObjectType;
 
-			int16 Distance = st_Vector2Int::Distance(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Environment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
-
+			float Distance = st_Vector2::Distance(Object->_GameObjectInfo.ObjectPositionInfo.Position, Environment->_GameObjectInfo.ObjectPositionInfo.Position);
 			if (Distance <= Object->_FieldOfViewDistance)
 			{
 				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
@@ -394,8 +407,7 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object, int1
 			FieldOfViewInfo.SessionID = 0;
 			FieldOfViewInfo.ObjectType = CraftingTable->_GameObjectInfo.ObjectType;
 
-			int16 Distance = st_Vector2Int::Distance(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, CraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
-
+			float Distance = st_Vector2::Distance(Object->_GameObjectInfo.ObjectPositionInfo.Position, CraftingTable->_GameObjectInfo.ObjectPositionInfo.Position);
 			if (Distance <= Object->_FieldOfViewDistance)
 			{
 				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
@@ -408,8 +420,7 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object, int1
 			FieldOfViewInfo.SessionID = 0;
 			FieldOfViewInfo.ObjectType = Item->_GameObjectInfo.ObjectType;
 
-			int16 Distance = st_Vector2Int::Distance(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Item->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
-
+			float Distance = st_Vector2::Distance(Object->_GameObjectInfo.ObjectPositionInfo.Position, Item->_GameObjectInfo.ObjectPositionInfo.Position);
 			if (Distance <= Object->_FieldOfViewDistance)
 			{
 				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
@@ -422,8 +433,7 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object, int1
 			FieldOfViewInfo.SessionID = 0;
 			FieldOfViewInfo.ObjectType = Crop->_GameObjectInfo.ObjectType;
 
-			int16 Distance = st_Vector2Int::Distance(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Crop->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
-
+			float Distance = st_Vector2::Distance(Object->_GameObjectInfo.ObjectPositionInfo.Position, Crop->_GameObjectInfo.ObjectPositionInfo.Position);
 			if (Distance <= Object->_FieldOfViewDistance)
 			{
 				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
@@ -457,8 +467,7 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewPlayers(CGameObject* Object, int1
 				FieldOfViewInfo.SessionID = Player->_SessionId;
 				FieldOfViewInfo.ObjectType = Player->_GameObjectInfo.ObjectType;
 
-				int16 Distance = st_Vector2Int::Distance(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
-
+				float Distance = st_Vector2::Distance(Object->_GameObjectInfo.ObjectPositionInfo.Position, Player->_GameObjectInfo.ObjectPositionInfo.Position);
 				// 함수 호출한 오브젝트를 포함할 것인지에 대한 여부 true면 제외 false면 포함
 				if (ExceptMe == true && Distance <= Object->_FieldOfViewDistance)
 				{
@@ -865,6 +874,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	case en_GameObjectType::OBJECT_THIEF_PLAYER:
 	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
+	case en_GameObjectType::OBJECT_NON_PLAYER:
 	case en_GameObjectType::OBJECT_SLIME:
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
