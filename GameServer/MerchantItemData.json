@@ -1,0 +1,16 @@
+{
+  "MerchantItems": [
+    {
+      "GeneralMerchantItemList": [
+        {
+          "ItemName": "체력회복물약(소)",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL"
+        },
+        {
+          "ItemName": "마력회복물약(소)",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_POTION_MANA_RESTORATION_POTION_SMALL"
+        }
+      ]
+    }
+  ]
+}
