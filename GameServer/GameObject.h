@@ -112,6 +112,9 @@ public:
 	//--------------------------------------------
 	int32 CheckCanControlStatusAbnormal();
 
+	//--------------------------------------------
+	// 채널 가져오기 및 설정
+	//--------------------------------------------
 	CChannel* GetChannel();
 	void SetChannel(CChannel* Channel);
 

@@ -98,8 +98,8 @@ void CGameObject::PushedOutStatusAbnormalCheck()
 		if (CanMove == true)
 		{
 			st_Vector2Int CollisionPosition;
-			CollisionPosition._X = _GameObjectInfo.ObjectPositionInfo.Position._X;
-			CollisionPosition._Y = _GameObjectInfo.ObjectPositionInfo.Position._Y;
+			CollisionPosition._X = (int32)_GameObjectInfo.ObjectPositionInfo.Position._X;
+			CollisionPosition._Y = (int32)_GameObjectInfo.ObjectPositionInfo.Position._Y;
 
 			if (CollisionPosition._X != _GameObjectInfo.ObjectPositionInfo.CollisionPosition._X
 				|| CollisionPosition._Y != _GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y)
@@ -1445,12 +1445,12 @@ void CGameObject::Update()
 					EquipmentUpdateMessage->Free();
 
 					// 가방에서 착용한 장비 없애기
-					Player->_InventoryManager.InitItem(0, EquipmentItem->_ItemInfo.ItemTileGridPositionX, EquipmentItem->_ItemInfo.ItemTileGridPositionY);
+					Player->GetInventoryManager().InitItem(0, EquipmentItem->_ItemInfo.ItemTileGridPositionX, EquipmentItem->_ItemInfo.ItemTileGridPositionY);
 
 					// 장비 해제한 아이템이 있을 경우 가방에 해당 아이템을 새로 넣음
 					if (ReturnEquipmentItem != nullptr)
 					{
-						Player->_InventoryManager.InsertItem(0, ReturnEquipmentItem);
+						Player->GetInventoryManager().InsertItem(0, ReturnEquipmentItem);
 
 						CMessage* ResItemToInventoryPacket = G_ObjectManager->GameServer->MakePacketResItemToInventory(Player->_GameObjectInfo.ObjectId,
 							ReturnEquipmentItem->_ItemInfo, false, ReturnEquipmentItem->_ItemInfo.ItemCount);
@@ -1482,7 +1482,7 @@ void CGameObject::Update()
 						OffEquipmentMessage->Free();
 
 						// 클라 인벤토리에 장비 해제한 아이템 넣음
-						Player->_InventoryManager.InsertItem(0, ReturnEquipmentItem);
+						Player->GetInventoryManager().InsertItem(0, ReturnEquipmentItem);
 
 						// 클라에게 알려줌
 						CMessage* ResItemToInventoryPacket = G_ObjectManager->GameServer->MakePacketResItemToInventory(Player->_GameObjectInfo.ObjectId,
@@ -1536,7 +1536,7 @@ void CGameObject::Update()
 				if (Player != nullptr)
 				{
 					// 가방에 버리고자 하는 아이템이 있는지 확인
-					CItem* FindDropItem = Player->_InventoryManager.FindInventoryItem(0, (en_SmallItemCategory)DropItemType);
+					CItem* FindDropItem = Player->GetInventoryManager().FindInventoryItem(0, (en_SmallItemCategory)DropItemType);
 					if (FindDropItem != nullptr)
 					{
 						// 아이템 개수가 맞는지 확인
@@ -1558,7 +1558,7 @@ void CGameObject::Update()
 
 							if (FindDropItem->_ItemInfo.ItemCount == 0)
 							{
-								Player->_InventoryManager.InitItem(0, FindDropItem->_ItemInfo.ItemTileGridPositionX, FindDropItem->_ItemInfo.ItemTileGridPositionY);
+								Player->GetInventoryManager().InitItem(0, FindDropItem->_ItemInfo.ItemTileGridPositionX, FindDropItem->_ItemInfo.ItemTileGridPositionY);
 							}
 						}
 					}
@@ -1589,12 +1589,12 @@ void CGameObject::Update()
 					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN:
 					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN:
 					{
-						Player->_InventoryManager.InsertMoney(0, InsertItem);
+						Player->GetInventoryManager().InsertMoney(0, InsertItem);
 
 						CMessage* ResMoneyToInventoryPacket = G_ObjectManager->GameServer->MakePacketResMoneyToInventory(Player->_GameObjectInfo.ObjectId,
-							Player->_InventoryManager._GoldCoinCount,
-							Player->_InventoryManager._SliverCoinCount,
-							Player->_InventoryManager._BronzeCoinCount,
+							Player->GetInventoryManager().GetGoldCoin(),
+							Player->GetInventoryManager().GetSliverCoin(),
+							Player->GetInventoryManager().GetBronzeCoin(),
 							InsertItem->_ItemInfo,
 							ItemEach);
 						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResMoneyToInventoryPacket);
@@ -1603,13 +1603,13 @@ void CGameObject::Update()
 					break;
 					default:
 					{
-						CItem* FindItem = Player->_InventoryManager.FindInventoryItem(0, InsertItem->_ItemInfo.ItemSmallCategory);
+						CItem* FindItem = Player->GetInventoryManager().FindInventoryItem(0, InsertItem->_ItemInfo.ItemSmallCategory);
 						if (FindItem == nullptr)
 						{
 							CItem* NewItem = G_ObjectManager->GameServer->NewItemCrate(InsertItem->_ItemInfo);
-							Player->_InventoryManager.InsertItem(0, NewItem);
+							Player->GetInventoryManager().InsertItem(0, NewItem);
 
-							FindItem = Player->_InventoryManager.GetItem(0, NewItem->_ItemInfo.ItemTileGridPositionX, NewItem->_ItemInfo.ItemTileGridPositionY);
+							FindItem = Player->GetInventoryManager().GetItem(0, NewItem->_ItemInfo.ItemTileGridPositionX, NewItem->_ItemInfo.ItemTileGridPositionY);
 						}
 						else
 						{
@@ -1655,7 +1655,7 @@ void CGameObject::Update()
 				if (CraftingTable != nullptr && CraftingTableItemAddPlayer != nullptr)
 				{
 					// 넣을 아이템이 넣는 대상의 인벤토리에 있는지 확인
-					CItem* FindAddItem = CraftingTableItemAddPlayer->_InventoryManager.FindInventoryItem(0, (en_SmallItemCategory)AddItemSmallCategory);
+					CItem* FindAddItem = CraftingTableItemAddPlayer->GetInventoryManager().FindInventoryItem(0, (en_SmallItemCategory)AddItemSmallCategory);
 					if (FindAddItem != nullptr && FindAddItem->_ItemInfo.ItemCount > 0)
 					{
 						// 제작법을 가지고 옴
@@ -1700,7 +1700,7 @@ void CGameObject::Update()
 
 							if (FindAddItem->_ItemInfo.ItemCount == 0)
 							{
-								CraftingTableItemAddPlayer->_InventoryManager.InitItem(0, FindAddItem->_ItemInfo.ItemTileGridPositionX, FindAddItem->_ItemInfo.ItemTileGridPositionY);
+								CraftingTableItemAddPlayer->GetInventoryManager().InitItem(0, FindAddItem->_ItemInfo.ItemTileGridPositionX, FindAddItem->_ItemInfo.ItemTileGridPositionY);
 							}
 
 							CMessage* ResCraftingTableAddItemPacket = G_ObjectManager->GameServer->MakePacketResCraftingTableInput(_GameObjectInfo.ObjectId, CraftingTable->GetMaterialItems());
@@ -1760,7 +1760,7 @@ void CGameObject::Update()
 					if (SubtractItemFind == true)
 					{
 						bool IsExistItem;
-						CItem* InsertItem = CraftingTableItemSubtractPlayer->_InventoryManager.InsertItem(0, (en_SmallItemCategory)SubtractItemSmallCategory, SubtractItemCount, &IsExistItem);
+						CItem* InsertItem = CraftingTableItemSubtractPlayer->GetInventoryManager().InsertItem(0, (en_SmallItemCategory)SubtractItemSmallCategory, SubtractItemCount, &IsExistItem);
 
 						CMessage* InsertItemToInventoryPacket = G_ObjectManager->GameServer->MakePacketResItemToInventory(CraftingTableItemSubtractPlayer->_GameObjectInfo.ObjectId,
 							InsertItem->_ItemInfo,
@@ -1831,7 +1831,7 @@ void CGameObject::Update()
 					if (SubtractItemFind == true)
 					{
 						bool IsExistItem;
-						CItem* InsertItem = CraftingTableItemSubtractPlayer->_InventoryManager.InsertItem(0, (en_SmallItemCategory)SubtractItemSmallCategory, SubtractItemCount, &IsExistItem);
+						CItem* InsertItem = CraftingTableItemSubtractPlayer->GetInventoryManager().InsertItem(0, (en_SmallItemCategory)SubtractItemSmallCategory, SubtractItemCount, &IsExistItem);
 
 						CMessage* InsertItemToInventoryPacket = G_ObjectManager->GameServer->MakePacketResItemToInventory(CraftingTableItemSubtractPlayer->_GameObjectInfo.ObjectId,
 							InsertItem->_ItemInfo,
