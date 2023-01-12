@@ -240,9 +240,7 @@ void CPlayer::End()
 	CGameObject::Update();
 
 	_GameObjectInfo.ObjectId = 0;
-	_GameObjectInfo.ObjectName = L"";
-
-	_NetworkState = en_ObjectNetworkState::READY;
+	_GameObjectInfo.ObjectName = L"";	
 }
 
 void CPlayer::PositionReset()
@@ -486,7 +484,7 @@ void CPlayer::UpdateSpell()
 			{
 				HitEffectType = en_EffectType::EFFECT_LIGHTNING;
 
-				int32 MagicDamage = _GameObjectInfo.ObjectStatInfo.MagicDamage * 0.6;
+				int32 MagicDamage = _GameObjectInfo.ObjectStatInfo.MagicDamage * 0.6f;
 
 				st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)_SpellSkill->GetSkillInfo();
 
@@ -538,7 +536,7 @@ void CPlayer::UpdateSpell()
 			{
 				HitEffectType = en_EffectType::EFFECT_FLAME_HARPOON_TARGET;
 
-				int32 MagicDamage = _GameObjectInfo.ObjectStatInfo.MagicDamage * 0.6;
+				int32 MagicDamage = _GameObjectInfo.ObjectStatInfo.MagicDamage * 0.6f;
 
 				st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)_SpellSkill->GetSkillInfo();
 
@@ -688,7 +686,7 @@ void CPlayer::CheckFieldOfViewObject()
 	if (_FieldOfViewUpdateTick < GetTickCount64() && _Channel != nullptr)
 	{
 		// 시야범위 오브젝트를 조사해서 저장
-		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldOfViewObjects(this, 1, false);
+		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldOfViewObjects(this, false);
 		vector<st_FieldOfViewInfo> SpawnObjectIds;
 		vector<st_FieldOfViewInfo> DeSpawnObjectIds;
 

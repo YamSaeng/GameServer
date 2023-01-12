@@ -1,5 +1,5 @@
 #pragma once
-#include "GameObject.h"
+#include "Creature.h"
 #include "Equipment.h"
 #include "SkillBox.h"
 #include "QuickSlotManager.h"
@@ -10,7 +10,7 @@
 
 struct st_TimerJob;
 
-class CPlayer : public CGameObject
+class CPlayer : public CCreature
 {
 public:			
 	int64 _SessionId;
@@ -18,8 +18,7 @@ public:
 
 	CPartyManager _PartyManager;
 
-	CEquipment _Equipment;	
-	CInventoryManager _InventoryManager;
+	CEquipment _Equipment;		
 	
 	CSkillBox _SkillBox;
 	CQuickSlotManager _QuickSlotManager;
