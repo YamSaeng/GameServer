@@ -6,8 +6,20 @@
       "CraftingCompleteItem": [
         {
           "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE",
+          "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_CRAFTING_DEFAULT_CRAFTING_TABLE",
+          "CraftingCompleteItemName": "기초 제작대",
+          "CraftingMaterial": [
+            {
+              "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG",
+              "MaterialName": "통나무",
+              "MaterialCount": 30
+            }
+          ]
+        },
+        {
+          "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE",
           "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE",
-          "CraftingCompleteItemName": "용광로"
+          "CraftingCompleteItemName": "용광로",
           "CraftingMaterial": [
             {
               "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_STONE",
@@ -19,7 +31,7 @@
         {
           "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE",
           "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL",
-          "CraftingCompleteItemName": "제재소"
+          "CraftingCompleteItemName": "제재소",
           "CraftingMaterial": [
             {
               "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG",
@@ -37,7 +49,7 @@
         {
           "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_SWORD",
           "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD",
-          "CraftingCompleteItemName": "나무 검"
+          "CraftingCompleteItemName": "나무 검",
           "CraftingMaterial": [
             {
               "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK",
@@ -67,7 +79,7 @@
         {
           "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_HAT",
           "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER",
-          "CraftingCompleteItemName": "가죽 모자"
+          "CraftingCompleteItemName": "가죽 모자",
           "CraftingMaterial": [
             {
               "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_LEATHER",
@@ -79,7 +91,7 @@
         {
           "CraftingCompleteItemMediumCategory": "ITEM_MEDIUM_CATEGORY_BOOT",
           "CraftingCompleteItemSmallCategory": "ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER",
-          "CraftingCompleteItemName": "가죽 신발"
+          "CraftingCompleteItemName": "가죽 신발",
           "CraftingMaterial": [
             {
               "MaterialSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_LEATHER",
