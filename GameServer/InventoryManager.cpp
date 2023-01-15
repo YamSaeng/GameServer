@@ -28,7 +28,7 @@ int8 CInventoryManager::GetInventoryCount()
 	return _InventoryCount;
 }
 
-CInventory** CInventoryManager::GetInventory()
+CInventory** CInventoryManager::GetInventoryManager()
 {
 	return _Inventorys;
 }
@@ -155,6 +155,13 @@ void CInventoryManager::DBItemInsertItem(int8 SelectInventoryIndex, CItem* NewIt
 	}	
 }
 
+void CInventoryManager::DBMoneyInsert(int64 GoldCoin, int16 SliverCoin, int16 BronzeCoin)
+{
+	_GoldCoinCount = GoldCoin;
+	_SliverCoinCount = SliverCoin;
+	_BronzeCoinCount = BronzeCoin;
+}
+
 CItem* CInventoryManager::SelectItem(int8 SelectInventoryIndex, int8 TilePositionX, int8 TilePositionY)
 {
 	_SelectItem = _Inventorys[SelectInventoryIndex]->SelectItem(TilePositionX, TilePositionY);	
@@ -211,5 +218,20 @@ void CInventoryManager::InitItem(int8 SelectInventoryIndex, int8 TilePositionX, 
 vector<CItem*> CInventoryManager::FindAllInventoryItem(int8 SelectInventoryIndex, en_SmallItemCategory FindItemSmallItemCategory)
 {
 	return _Inventorys[SelectInventoryIndex]->FindAllInventoryItem(FindItemSmallItemCategory);
+}
+
+int64 CInventoryManager::GetGoldCoin()
+{
+	return _GoldCoinCount;
+}
+
+int16 CInventoryManager::GetSliverCoin()
+{
+	return _SliverCoinCount;
+}
+
+int16 CInventoryManager::GetBronzeCoin()
+{
+	return _BronzeCoinCount;
 }
 
