@@ -119,9 +119,9 @@ enum class en_GameObjectType : int16
 
 enum class en_NonPlayerType : int8
 {
-	NON_OBJECT_PLAYER_NON_TYPE,
+	NON_PLAYER_CHARACTER_NON_TYPE,
 
-	NON_OBJECT_PLAYER_GENERAL_MERCHANT
+	NON_PLAYER_CHARACTER_일반_상인
 };
 
 enum class en_MoveDir : int8
