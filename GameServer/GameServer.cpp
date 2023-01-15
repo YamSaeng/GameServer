@@ -1760,7 +1760,7 @@ void CGameServer::PacketProcReqItemSelect(int64 SessionId, CMessage* Message)
 			*Message >> SelectItemTileGridPositionX;
 			*Message >> SelectItemTileGridPositionY;
 						
-			CItem* SelectItem = MyPlayer->_InventoryManager.SelectItem(0, SelectItemTileGridPositionX, SelectItemTileGridPositionY);
+			CItem* SelectItem = MyPlayer->GetInventoryManager().SelectItem(0, SelectItemTileGridPositionX, SelectItemTileGridPositionY);
 
 			if (SelectItem != nullptr)
 			{
@@ -1826,9 +1826,9 @@ void CGameServer::PacketProcReqItemPlace(int64 SessionId, CMessage* Message)
 			int16 PlaceItemTilePositionY;
 			*Message >> PlaceItemTilePositionY;
 
-			CItem* PlaceItem = MyPlayer->_InventoryManager.SwapItem(0, PlaceItemTilePositionX, PlaceItemTilePositionY);			
+			CItem* PlaceItem = MyPlayer->GetInventoryManager().SwapItem(0, PlaceItemTilePositionX, PlaceItemTilePositionY);
 
-			CMessage* ResPlaceItemPacket = MakePacketResPlaceItem(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, PlaceItem, MyPlayer->_InventoryManager._SelectItem);
+			CMessage* ResPlaceItemPacket = MakePacketResPlaceItem(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, PlaceItem, MyPlayer->GetInventoryManager()._SelectItem);
 			SendPacket(Session->SessionId, ResPlaceItemPacket);
 			ResPlaceItemPacket->Free();
 		} while (0);
@@ -1884,13 +1884,13 @@ void CGameServer::PacketProcReqItemRotate(int64 SessionID, CMessage* Message)
 				}
 			}
 
-			if (MyPlayer->_InventoryManager._SelectItem != nullptr)
+			if (MyPlayer->GetInventoryManager()._SelectItem != nullptr)
 			{
-				int16 ItemWidth = MyPlayer->_InventoryManager._SelectItem->_ItemInfo.ItemWidth;
-				int16 ItemHeight = MyPlayer->_InventoryManager._SelectItem->_ItemInfo.ItemHeight;
+				int16 ItemWidth = MyPlayer->GetInventoryManager()._SelectItem->_ItemInfo.ItemWidth;
+				int16 ItemHeight = MyPlayer->GetInventoryManager()._SelectItem->_ItemInfo.ItemHeight;
 
-				MyPlayer->_InventoryManager._SelectItem->_ItemInfo.ItemWidth = ItemHeight;
-				MyPlayer->_InventoryManager._SelectItem->_ItemInfo.ItemHeight = ItemWidth;
+				MyPlayer->GetInventoryManager()._SelectItem->_ItemInfo.ItemWidth = ItemHeight;
+				MyPlayer->GetInventoryManager()._SelectItem->_ItemInfo.ItemHeight = ItemWidth;
 
 				CMessage* ResItemRotatePacket = MakePacketResItemRotate(MyPlayer->_AccountId, MyPlayer->_GameObjectInfo.ObjectId);
 				SendPacket(Session->SessionId, ResItemRotatePacket);
@@ -2151,7 +2151,7 @@ void CGameServer::PacketProcReqQuickSlotSave(int64 SessionId, CMessage* Message)
 				st_QuickSlotBarSlotInfo* FindQuickSlotInfo = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarIndex, QuickSlotBarSlotIndex);
 				if (FindQuickSlotInfo != nullptr)
 				{
-					CItem* FindItem = MyPlayer->_InventoryManager.FindInventoryItem(0, (en_SmallItemCategory)ItemSmallCategory);
+					CItem* FindItem = MyPlayer->GetInventoryManager().FindInventoryItem(0, (en_SmallItemCategory)ItemSmallCategory);
 					if (FindItem != nullptr)
 					{
 						FindQuickSlotInfo->QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_ITEM;
@@ -2570,7 +2570,7 @@ void CGameServer::PacketProcReqCraftingConfirm(int64 SessionId, CMessage* Messag
 			{
 				// 인벤토리에 재료템 목록을 가지고 옴
 				vector<CItem*> FindMaterialItem;
-				vector<CItem*> FindMaterials = MyPlayer->_InventoryManager.FindAllInventoryItem(0, CraftingMaterialItemInfo.MaterialItemType);
+				vector<CItem*> FindMaterials = MyPlayer->GetInventoryManager().FindAllInventoryItem(0, CraftingMaterialItemInfo.MaterialItemType);
 
 				if (FindMaterials.size() > 0)
 				{
@@ -2613,13 +2613,13 @@ void CGameServer::PacketProcReqCraftingConfirm(int64 SessionId, CMessage* Messag
 			int16 FindItemGridPositionX = -1;
 			int16 FindItemGridPositionY = -1;
 
-			CItem* FindItem = MyPlayer->_InventoryManager.FindInventoryItem(0, (en_SmallItemCategory)ReqCraftingItemType);
+			CItem* FindItem = MyPlayer->GetInventoryManager().FindInventoryItem(0, (en_SmallItemCategory)ReqCraftingItemType);
 			if (FindItem == nullptr)
 			{
 				// 가방에 완성한 제작템이 없을 경우 새로 생성해준다.
 				CItem* CraftingItem = G_ObjectManager->ItemCreate((en_SmallItemCategory)ReqCraftingItemType);
 
-				MyPlayer->_InventoryManager.InsertItem(0, CraftingItem);
+				MyPlayer->GetInventoryManager().InsertItem(0, CraftingItem);
 
 				FindItemGridPositionX = CraftingItem->_ItemInfo.ItemTileGridPositionX;
 				FindItemGridPositionY = CraftingItem->_ItemInfo.ItemTileGridPositionY;				
@@ -2694,7 +2694,7 @@ void CGameServer::PacketProcReqItemUse(int64 SessionId, CMessage* Message)
 			int16 UseItemTileGridPositionY;
 			*Message >> UseItemTileGridPositionY;
 			
-			CItem* UseItem = MyPlayer->_InventoryManager.FindInventoryItem(0, (en_SmallItemCategory)UseItemSmallCategory);
+			CItem* UseItem = MyPlayer->GetInventoryManager().FindInventoryItem(0, (en_SmallItemCategory)UseItemSmallCategory);
 			if (UseItem != nullptr)
 			{
 				switch (UseItem->_ItemInfo.ItemSmallCategory)
@@ -4454,7 +4454,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 
 #pragma region 가방 아이템 정보 읽어오기			
 			// 인벤토리 생성
-			MyPlayer->_InventoryManager.InventoryCreate(1, (int8)en_InventoryManager::INVENTORY_DEFAULT_WIDH_SIZE, (int8)en_InventoryManager::INVENTORY_DEFAULT_HEIGHT_SIZE);
+			MyPlayer->GetInventoryManager().InventoryCreate(1, (int8)en_InventoryManager::INVENTORY_DEFAULT_WIDH_SIZE, (int8)en_InventoryManager::INVENTORY_DEFAULT_HEIGHT_SIZE);
 
 			*ResCharacterInfoMessage << (int8)en_InventoryManager::INVENTORY_DEFAULT_WIDH_SIZE;
 			*ResCharacterInfoMessage << (int8)en_InventoryManager::INVENTORY_DEFAULT_HEIGHT_SIZE;
@@ -4502,7 +4502,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 					NewItem->_ItemInfo.ItemCurrentDurability = ItemDurability;
 					NewItem->_ItemInfo.ItemEnchantPoint = ItemEnchantPoint;					
 
-					MyPlayer->_InventoryManager.DBItemInsertItem(0, NewItem);
+					MyPlayer->GetInventoryManager().DBItemInsertItem(0, NewItem);
 					InventoryItems.push_back(NewItem);
 				}
 			}
@@ -4579,7 +4579,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 					NewQuickSlotBarSlot.QuickBarSkill = nullptr;
 				}
 
-				CItem* FindItem = MyPlayer->_InventoryManager.FindInventoryItem(0, (en_SmallItemCategory)QuickSlotItemSmallCategory);
+				CItem* FindItem = MyPlayer->GetInventoryManager().FindInventoryItem(0, (en_SmallItemCategory)QuickSlotItemSmallCategory);
 				if (FindItem != nullptr)
 				{
 					NewQuickSlotBarSlot.QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_ITEM;
@@ -4669,9 +4669,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 			if (CharacterGoldGet.Execute() && CharacterGoldGet.Fetch())
 			{
 				// DB에서 읽어온 Gold를 Inventory에 저장한다.
-				MyPlayer->_InventoryManager._GoldCoinCount = GoldCoin;
-				MyPlayer->_InventoryManager._SliverCoinCount = SliverCoin;
-				MyPlayer->_InventoryManager._BronzeCoinCount = BronzeCoin;				
+				MyPlayer->GetInventoryManager().DBMoneyInsert(GoldCoin, SliverCoin, BronzeCoin);
 
 				// 골드 정보 담기
 				*ResCharacterInfoMessage << GoldCoin;
@@ -4939,10 +4937,10 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 	}
 
 	// 가방 정보 DB에 저장	
-	CInventory** LeavePlayerInventorys = LeavePlayer->_InventoryManager.GetInventory();	
+	CInventory** LeavePlayerInventorys = LeavePlayer->GetInventoryManager().GetInventoryManager();
 
 	// 가방 DB 청소 후 새로 저장
-	for (int i = 0; i < LeavePlayer->_InventoryManager.GetInventoryCount(); i++)
+	for (int i = 0; i < LeavePlayer->GetInventoryManager().GetInventoryCount(); i++)
 	{
 		SP::CDBGameServerInventoryAllSlotInit InventoryAllSlotInit(*PlayerInfoSaveDBConnection);
 		InventoryAllSlotInit.InOwnerAccountID(LeavePlayer->_AccountId);
@@ -7421,7 +7419,7 @@ void CGameServer::SendPacketFieldOfView(vector<st_FieldOfViewInfo> FieldOfViewOb
 void CGameServer::SendPacketFieldOfView(CGameObject* Object, CMessage* Message)
 {
 	// 섹터 얻어오기
-	vector<CSector*> AroundSectors = Object->GetChannel()->GetMap()->GetAroundSectors(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, 1);
+	vector<CSector*> AroundSectors = Object->GetChannel()->GetMap()->GetAroundSectors(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
 
 	for (CSector* AroundSector : AroundSectors)
 	{

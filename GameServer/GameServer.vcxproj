@@ -159,6 +159,7 @@
     <ClInclude Include="CommonProtocol.h" />
     <ClInclude Include="Corn.h" />
     <ClInclude Include="CraftingTable.h" />
+    <ClInclude Include="Creature.h" />
     <ClInclude Include="Crop.h" />
     <ClInclude Include="Data.h" />
     <ClInclude Include="DataManager.h" />
@@ -178,6 +179,7 @@
     <ClInclude Include="GameServer.h" />
     <ClInclude Include="GameServerInfo.h" />
     <ClInclude Include="GameServerMessage.h" />
+    <ClInclude Include="GeneralMerchantNPC.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="Heap.h" />
     <ClInclude Include="Inventory.h" />
@@ -196,6 +198,7 @@
     <ClInclude Include="Monster.h" />
     <ClInclude Include="MonsterSkillBox.h" />
     <ClInclude Include="NetworkLib.h" />
+    <ClInclude Include="NonPlayer.h" />
     <ClInclude Include="ObjectManager.h" />
     <ClInclude Include="ObjectPoolFreeList.h" />
     <ClInclude Include="PartyManager.h" />
@@ -232,6 +235,7 @@
     <ClCompile Include="ChannelManager.cpp" />
     <ClCompile Include="Corn.cpp" />
     <ClCompile Include="CraftingTable.cpp" />
+    <ClCompile Include="Creature.cpp" />
     <ClCompile Include="Crop.cpp" />
     <ClCompile Include="Data.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -287,6 +291,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="GameServerMessage.cpp" />
+    <ClCompile Include="GeneralMerchantNPC.cpp" />
     <ClCompile Include="Global.cpp" />
     <ClCompile Include="Inventory.cpp" />
     <ClCompile Include="InventoryManager.cpp" />
@@ -320,6 +325,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="NonPlayer.cpp" />
     <ClCompile Include="ObjectManager.cpp" />
     <ClCompile Include="PartyManager.cpp" />
     <ClCompile Include="pch.cpp" />
@@ -355,6 +361,7 @@
     <None Include="DisciplineSkillDatas.json" />
     <None Include="EnvironmentData.json" />
     <None Include="FightSkillDatas.json" />
+    <None Include="MerchantItemData.json" />
     <None Include="ItemData.json" />
     <None Include="CharacterLevelingData.json" />
     <None Include="MapInfoData.json" />

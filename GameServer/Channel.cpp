@@ -756,7 +756,7 @@ void CChannel::Update()
 					*GameObjectJob->GameObjectJobMessage >> SeedItemSmallCategory;
 
 					// 가방에 요청한 씨앗 아이템이 있는지 먼저 확인
-					CItem* SeedItem = Player->_InventoryManager.FindInventoryItem(0, (en_SmallItemCategory)SeedItemSmallCategory);
+					CItem* SeedItem = Player->GetInventoryManager().FindInventoryItem(0, (en_SmallItemCategory)SeedItemSmallCategory);
 					if (SeedItem != nullptr)
 					{
 						// 심고자 하는 자리에 다른 작물이 잇는지 확인

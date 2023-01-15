@@ -46,9 +46,6 @@
     <Filter Include="ContentServer\Content\GameObject">
       <UniqueIdentifier>{821a2af2-60a7-4c19-8f19-590f7bfe1ef6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ContentServer\Content\GameObject\Monster">
-      <UniqueIdentifier>{33925b0f-ac21-4ddd-875e-de847e8abf20}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ContentServer\Content\Inventory">
       <UniqueIdentifier>{d1d4b5ab-ae77-4157-93ab-b949d6eda307}</UniqueIdentifier>
     </Filter>
@@ -63,9 +60,6 @@
     </Filter>
     <Filter Include="ContentServer\Content\Equiment">
       <UniqueIdentifier>{ad620a1c-6f26-4d33-b623-da20f3ff6f50}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ContentServer\Content\GameObject\Player">
-      <UniqueIdentifier>{ae04998f-66c9-4da1-8bfd-9f8523536e46}</UniqueIdentifier>
     </Filter>
     <Filter Include="ContentServer\Content\Map">
       <UniqueIdentifier>{c58762ae-f81f-4697-8cde-0d52a640418b}</UniqueIdentifier>
@@ -93,9 +87,6 @@
     </Filter>
     <Filter Include="Util\Json,Xml\Data\Monster">
       <UniqueIdentifier>{7da3bb6d-d535-4bd8-a627-4b2d8958413e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ContentServer\Content\GameObject\Crops">
-      <UniqueIdentifier>{24836bc5-013d-4578-867b-58b7159bc0e9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Util\Json,Xml\Data\Crop">
       <UniqueIdentifier>{09e277f0-eaa0-4510-9869-5230e0eeeabf}</UniqueIdentifier>
@@ -129,6 +120,21 @@
     </Filter>
     <Filter Include="ContentServer\Content\SkillBox\SkillCharacteristic">
       <UniqueIdentifier>{652962d3-49f5-476b-bc2f-9f42c8e2312f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ContentServer\Content\GameObject\Creature">
+      <UniqueIdentifier>{a83f76f2-3f86-45cb-939c-750f1e423060}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ContentServer\Content\GameObject\Creature\Player">
+      <UniqueIdentifier>{ae04998f-66c9-4da1-8bfd-9f8523536e46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ContentServer\Content\GameObject\Creature\NonPlayer">
+      <UniqueIdentifier>{1b739023-37af-4da4-acbd-1525178173fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ContentServer\Content\GameObject\Creature\Monster">
+      <UniqueIdentifier>{33925b0f-ac21-4ddd-875e-de847e8abf20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ContentServer\Content\GameObject\Crops">
+      <UniqueIdentifier>{24836bc5-013d-4578-867b-58b7159bc0e9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -223,7 +229,7 @@
       <Filter>DB</Filter>
     </ClInclude>
     <ClInclude Include="Player.h">
-      <Filter>ContentServer\Content\GameObject\Player</Filter>
+      <Filter>ContentServer\Content\GameObject\Creature\Player</Filter>
     </ClInclude>
     <ClInclude Include="ChannelManager.h">
       <Filter>ContentServer\Content\Channel</Filter>
@@ -232,7 +238,7 @@
       <Filter>ContentServer\Content\GameObject</Filter>
     </ClInclude>
     <ClInclude Include="Monster.h">
-      <Filter>ContentServer\Content\GameObject\Monster</Filter>
+      <Filter>ContentServer\Content\GameObject\Creature\Monster</Filter>
     </ClInclude>
     <ClInclude Include="Heap.h" />
     <ClInclude Include="ObjectManager.h">
@@ -242,10 +248,10 @@
       <Filter>Message</Filter>
     </ClInclude>
     <ClInclude Include="Slime.h">
-      <Filter>ContentServer\Content\GameObject\Monster</Filter>
+      <Filter>ContentServer\Content\GameObject\Creature\Monster</Filter>
     </ClInclude>
     <ClInclude Include="Bear.h">
-      <Filter>ContentServer\Content\GameObject\Monster</Filter>
+      <Filter>ContentServer\Content\GameObject\Creature\Monster</Filter>
     </ClInclude>
     <ClInclude Include="Inventory.h">
       <Filter>ContentServer\Content\Inventory</Filter>
@@ -324,10 +330,19 @@
       <Filter>ContentServer\Content\SkillBox\SkillCharacteristic</Filter>
     </ClInclude>
     <ClInclude Include="PartyManager.h">
-      <Filter>ContentServer\Content\GameObject\Player</Filter>
+      <Filter>ContentServer\Content\GameObject\Creature\Player</Filter>
     </ClInclude>
     <ClInclude Include="MonsterSkillBox.h">
       <Filter>ContentServer\Content\SkillBox</Filter>
+    </ClInclude>
+    <ClInclude Include="NonPlayer.h">
+      <Filter>ContentServer\Content\GameObject\Creature\NonPlayer</Filter>
+    </ClInclude>
+    <ClInclude Include="Creature.h">
+      <Filter>ContentServer\Content\GameObject\Creature</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneralMerchantNPC.h">
+      <Filter>ContentServer\Content\GameObject\Creature\NonPlayer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -376,7 +391,7 @@
       <Filter>ContentServer\Content\Data</Filter>
     </ClCompile>
     <ClCompile Include="Player.cpp">
-      <Filter>ContentServer\Content\GameObject\Player</Filter>
+      <Filter>ContentServer\Content\GameObject\Creature\Player</Filter>
     </ClCompile>
     <ClCompile Include="ChannelManager.cpp">
       <Filter>ContentServer\Content\Channel</Filter>
@@ -385,7 +400,7 @@
       <Filter>ContentServer\Content\GameObject</Filter>
     </ClCompile>
     <ClCompile Include="Monster.cpp">
-      <Filter>ContentServer\Content\GameObject\Monster</Filter>
+      <Filter>ContentServer\Content\GameObject\Creature\Monster</Filter>
     </ClCompile>
     <ClCompile Include="ObjectManager.cpp">
       <Filter>ContentServer\Content\GameObject</Filter>
@@ -394,10 +409,10 @@
       <Filter>Message</Filter>
     </ClCompile>
     <ClCompile Include="Slime.cpp">
-      <Filter>ContentServer\Content\GameObject\Monster</Filter>
+      <Filter>ContentServer\Content\GameObject\Creature\Monster</Filter>
     </ClCompile>
     <ClCompile Include="Bear.cpp">
-      <Filter>ContentServer\Content\GameObject\Monster</Filter>
+      <Filter>ContentServer\Content\GameObject\Creature\Monster</Filter>
     </ClCompile>
     <ClCompile Include="Inventory.cpp">
       <Filter>ContentServer\Content\Inventory</Filter>
@@ -469,10 +484,19 @@
       <Filter>ContentServer\Content\SkillBox\SkillCharacteristic</Filter>
     </ClCompile>
     <ClCompile Include="PartyManager.cpp">
-      <Filter>ContentServer\Content\GameObject\Player</Filter>
+      <Filter>ContentServer\Content\GameObject\Creature\Player</Filter>
     </ClCompile>
     <ClCompile Include="MonsterSkillBox.cpp">
       <Filter>ContentServer\Content\SkillBox</Filter>
+    </ClCompile>
+    <ClCompile Include="NonPlayer.cpp">
+      <Filter>ContentServer\Content\GameObject\Creature\NonPlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="Creature.cpp">
+      <Filter>ContentServer\Content\GameObject\Creature</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneralMerchantNPC.cpp">
+      <Filter>ContentServer\Content\GameObject\Creature\NonPlayer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -543,6 +567,9 @@
     </None>
     <None Include="MonsterSkillDatas.json">
       <Filter>Util\Json,Xml\Data\SkillData</Filter>
+    </None>
+    <None Include="MerchantItemData.json">
+      <Filter>Util\Json,Xml\Data\Item</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
