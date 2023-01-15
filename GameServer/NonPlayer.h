@@ -1,20 +1,15 @@
 #pragma once
-#include "GameObject.h"
-#include "InventoryManager.h"
+#include"Creature.h"
 
-class CNonPlayer : public CGameObject
+class CNonPlayer : public CCreature
 {
 public:
-	CInventoryManager _InventoryManager;
-
 	CNonPlayer();
 	~CNonPlayer();
 
 	virtual void Update() override;
 	virtual bool OnDamaged(CGameObject* Attacker, int32 Damage) override;
-
-	void Init(en_NonPlayerType NonPlayerType);
-private:
+	
+protected:
 	en_NonPlayerType _NonPlayerType;
 };
-
