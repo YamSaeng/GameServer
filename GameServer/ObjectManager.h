@@ -26,10 +26,10 @@ class CObjectManager
 private:
 	enum en_ObjectCount
 	{
-		PLAYER_MAX = 15000,		
-		ITEM_MAX = 15000,
-		ENVIRONMENT_MAX = 15000,
-		CRAFTINGTABLE_MAX = 15000
+		OBJECT_MANAGER_PLAYER_MAX = 15000,		
+		OBJECT_MANAGER_ITEM_MAX = 15000,
+		OBJECT_MANAGER_ENVIRONMENT_MAX = 15000,
+		OBJECT_MANAGER_CRAFTINGTABLE_MAX = 15000
 	};	
 
 	// 메모리 풀 
@@ -65,11 +65,11 @@ private:
 	CMemoryPoolTLS<st_GameObjectJob>* _GameObjectJobMemoryPool;
 public:
 	CGameServer* GameServer;
-
-	CPlayer* _PlayersArray[PLAYER_MAX];	
-	CItem* _ItemsArray[ITEM_MAX];
-	CEnvironment* _EnvironmentsArray[ENVIRONMENT_MAX];
-	CCraftingTable* _CraftingTablesArray[CRAFTINGTABLE_MAX];
+	
+	array<CPlayer*, static_cast<size_t>(en_ObjectCount::OBJECT_MANAGER_PLAYER_MAX)> _PlayersArray = { nullptr };
+	array<CItem*, static_cast<size_t>(en_ObjectCount::OBJECT_MANAGER_ITEM_MAX)> _ItemsArray = { nullptr };
+	array<CEnvironment*, static_cast<size_t>(en_ObjectCount::OBJECT_MANAGER_ENVIRONMENT_MAX)> _EnvironmentsArray = { nullptr };
+	array<CCraftingTable*, static_cast<size_t>(en_ObjectCount::OBJECT_MANAGER_CRAFTINGTABLE_MAX)> _CraftingTablesArray = { nullptr };	
 
 	CLockFreeStack<int32> _PlayersArrayIndexs;	
 	CLockFreeStack<int32> _ItemsArrayIndexs;

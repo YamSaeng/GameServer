@@ -51,27 +51,28 @@ CObjectManager::CObjectManager()
 	_GameServerObjectId = 10000;
 
 	// 오브젝트 매니저가 소유중인 플레이어, 몬스터, 아이템 미리 할당해서 보관
-	for (int PlayerCount = PLAYER_MAX - 1; PlayerCount >= 0; --PlayerCount)
+	for (int PlayerCount = OBJECT_MANAGER_PLAYER_MAX - 1; PlayerCount >= 0; --PlayerCount)
 	{
-		_PlayersArray[PlayerCount] = (CPlayer*)ObjectCreate(en_GameObjectType::OBJECT_PLAYER);
-		_PlayersArrayIndexs.Push(PlayerCount);
+		CPlayer* InitPlayer = dynamic_cast<CPlayer*>(ObjectCreate(en_GameObjectType::OBJECT_PLAYER));
+		if (InitPlayer != nullptr)
+		{
+			_PlayersArray[PlayerCount] = InitPlayer;
+			_PlayersArrayIndexs.Push(PlayerCount);
+		}		 		
 	}	
 
-	for (int ItemCount = ITEM_MAX - 1; ItemCount >= 0; --ItemCount)
-	{
-		_ItemsArray[ItemCount] = nullptr;
+	for (int ItemCount = OBJECT_MANAGER_ITEM_MAX - 1; ItemCount >= 0; --ItemCount)
+	{		
 		_ItemsArrayIndexs.Push(ItemCount);
 	}
 
-	for (int EnvironmentCount = ENVIRONMENT_MAX - 1; EnvironmentCount >= 0; --EnvironmentCount)
-	{
-		_EnvironmentsArray[EnvironmentCount] = nullptr;
+	for (int EnvironmentCount = OBJECT_MANAGER_ENVIRONMENT_MAX - 1; EnvironmentCount >= 0; --EnvironmentCount)
+	{		
 		_EnvironmentsArrayIndexs.Push(EnvironmentCount);
 	}
 
-	for (int CraftingTableCount = CRAFTINGTABLE_MAX - 1; CraftingTableCount >= 0; --CraftingTableCount)
-	{
-		_CraftingTablesArray[CraftingTableCount] = nullptr;
+	for (int CraftingTableCount = OBJECT_MANAGER_CRAFTINGTABLE_MAX - 1; CraftingTableCount >= 0; --CraftingTableCount)
+	{		
 		_CraftingTableArrayIndexs.Push(CraftingTableCount);
 	}
 }
@@ -513,28 +514,28 @@ void CObjectManager::MapObjectSpawn(int64& MapID)
 			case en_MapObjectInfo::TILE_MAP_NONE:				
 				break;
 			case en_MapObjectInfo::TILE_MAP_TREE:
-				NewObject = (CTree*)ObjectCreate(en_GameObjectType::OBJECT_TREE);
+				NewObject = ObjectCreate(en_GameObjectType::OBJECT_TREE);
 				break;
 			case en_MapObjectInfo::TILE_MAP_STONE:
-				NewObject = (CTree*)ObjectCreate(en_GameObjectType::OBJECT_STONE);
+				NewObject = ObjectCreate(en_GameObjectType::OBJECT_STONE);
 				break;
 			case en_MapObjectInfo::TILE_MAP_SLIME:
-				NewObject = (CSlime*)ObjectCreate(en_GameObjectType::OBJECT_SLIME);
+				NewObject = ObjectCreate(en_GameObjectType::OBJECT_SLIME);
 				break;
 			case en_MapObjectInfo::TILE_MAP_BEAR:
-				NewObject = (CBear*)ObjectCreate(en_GameObjectType::OBJECT_BEAR);
+				NewObject = ObjectCreate(en_GameObjectType::OBJECT_BEAR);
 				break;			
 			case en_MapObjectInfo::TILE_MAP_FURNACE:
-				NewObject = (CFurnace*)ObjectCreate(en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE);
+				NewObject = ObjectCreate(en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE);
 				break;
 			case en_MapObjectInfo::TILE_MAP_SAMILL:
-				NewObject = (CSawmill*)ObjectCreate(en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL);
+				NewObject = ObjectCreate(en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL);
 				break;
 			case en_MapObjectInfo::TILE_MAP_POTATO:
-				NewObject = (CPotato*)ObjectCreate(en_GameObjectType::OBJECT_CROP_POTATO);
+				NewObject = ObjectCreate(en_GameObjectType::OBJECT_CROP_POTATO);
 				break;
 			case en_MapObjectInfo::TILE_MAP_GENERAL_MERCHANT:	
-				NewObject = (CNonPlayer*)ObjectCreate(en_GameObjectType::OBJECT_NON_PLAYER);
+				NewObject = ObjectCreate(en_GameObjectType::OBJECT_NON_PLAYER);
 				break;
 			}
 
