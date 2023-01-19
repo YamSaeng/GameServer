@@ -32,28 +32,41 @@ void CRectCollision::CollisionUpdate()
 		{
 		case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
 		case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
-		case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
+		case en_GameObjectType::OBJECT_TAIOIST_PLAYER:		
+		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:		
+			_LeftTop._X = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._X - 0.4f;
+			_LeftTop._Y = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._Y - 0.4f;
+
+			_RightDown._X = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._X + 0.4f;
+			_RightDown._Y = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._Y + 0.4f;						
+			break;
 		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
-		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
+			_LeftTop._X = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._X - 0.4f;
+			_LeftTop._Y = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._Y - 0.5f;
+
+			_RightDown._X = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._X + 0.4f;
+			_RightDown._Y = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._Y + 0.5f;
+			break;
+		case en_GameObjectType::OBJECT_SLIME:
+			_LeftTop._X = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._X - 0.3f;
+			_LeftTop._Y = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._Y - 0.2f;
+
+			_RightDown._X = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._X + 0.3f;
+			_RightDown._Y = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._Y + 0.2f;
+			break;
+		case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 			_LeftTop._X = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._X - 0.4f;
 			_LeftTop._Y = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._Y - 0.4f;
 
 			_RightDown._X = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._X + 0.4f;
 			_RightDown._Y = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._Y + 0.4f;
 			break;
-		case en_GameObjectType::OBJECT_SLIME:
-			_LeftTop._X = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._X - 0.25f;
-			_LeftTop._Y = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._Y - 0.25f;
-
-			_RightDown._X = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._X + 0.25f;
-			_RightDown._Y = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._Y + 0.25f;
-			break;
-		}		
-
-		/*G_Logger->WriteStdOut(en_Color::RED, L"X : %0.2f Y : %0.2f Collision LeftTopX : %0.2f LeftTopY : %0.2f RightDownX : %0.2f RightDownY : %0.2f\n"
-			, _Owner->_GameObjectInfo.ObjectPositionInfo.Position._X, _Owner->_GameObjectInfo.ObjectPositionInfo.Position._Y,
-			_LeftTop._X, _LeftTop._Y, _RightDown._X, _RightDown._Y);*/
+		}			
 	}
+
+	/*G_Logger->WriteStdOut(en_Color::RED, L"X : %0.2f Y : %0.2f Collision LeftTopX : %0.2f LeftTopY : %0.2f RightDownX : %0.2f RightDownY : %0.2f\n"
+				, _Owner->_GameObjectInfo.ObjectPositionInfo.Position._X, _Owner->_GameObjectInfo.ObjectPositionInfo.Position._Y,
+				_LeftTop._X, _LeftTop._Y, _RightDown._X, _RightDown._Y);*/
 }
 
 bool CRectCollision::IsCollision(CRectCollision* ARectCollision, CRectCollision* BRectCollision)
