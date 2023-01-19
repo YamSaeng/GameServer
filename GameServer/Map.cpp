@@ -15,7 +15,28 @@
 
 CMap::CMap()
 {
+	_MapID = 0;
 
+	_Left = 0;
+	_Right = 0;
+	_Up = 0;
+	_Down = 0;
+
+	_SizeX = 0;
+	_SizeY = 0;
+
+	_CollisionMapInfos = nullptr;
+	_TileMapInfos = nullptr;
+	_ObjectsInfos = nullptr;
+	_SeedObjectInfos = nullptr;
+	_Items = nullptr;
+
+	_ChannelManager = nullptr;
+
+	_Sectors = nullptr;
+	_SectorSize = 0;
+	_SectorCountX = 0;
+	_SectorCountY = 0;
 }
 
 CMap::~CMap()
@@ -788,7 +809,7 @@ bool CMap::CollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool
 	case en_MapObjectInfo::TILE_MAP_STONE:
 	case en_MapObjectInfo::TILE_MAP_SLIME:
 	case en_MapObjectInfo::TILE_MAP_BEAR:	
-	case en_MapObjectInfo::TILE_MAP_POTATO:
+	case en_MapObjectInfo::TILE_MAP_POTATO:		
 		IsCollisionMapInfo = true;
 		break;
 	case en_MapObjectInfo::TILE_MAP_WALL:
@@ -807,14 +828,13 @@ bool CMap::CollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 	case en_GameObjectType::OBJECT_THIEF_PLAYER:
 	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
-		ObjectCheck = true;
+		ObjectCheck = Object->GetChannel()->ChannelColliderCheck(Object);
 		break;
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
-	case en_GameObjectType::OBJECT_SLIME:
-		ObjectCheck = false;
+	case en_GameObjectType::OBJECT_SLIME:		
 
 		// 오브젝트 위치 배열이 비워 있을 경우 true 반환
 		if (_ObjectsInfos[Y][X] == nullptr)
