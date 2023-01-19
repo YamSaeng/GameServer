@@ -155,7 +155,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_ItemInfo& ItemInfo)
 
     *this << ItemInfo.ItemIsEquipped;
 
-    int16 ItemCraftingMaterialCount = ItemInfo.Materials.size();
+    int16 ItemCraftingMaterialCount = static_cast<int16>(ItemInfo.Materials.size());
     *this << ItemCraftingMaterialCount;
 
     if (ItemCraftingMaterialCount > 0)
@@ -259,7 +259,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_CraftingMaterialItemInfo& 
 {    
     *this << (int16)CraftingMaterialItemInfo.MaterialItemType;
         
-    int16 MaterialItemNameLen = CraftingMaterialItemInfo.MaterialItemName.length() * 2;
+    int16 MaterialItemNameLen = static_cast<int16>(CraftingMaterialItemInfo.MaterialItemName.length() * 2);
 	*this << MaterialItemNameLen;
     InsertData(CraftingMaterialItemInfo.MaterialItemName.c_str(), MaterialItemNameLen);
 
@@ -272,7 +272,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_CraftingTableRecipe& Craft
 {
     *this << (int16)CraftingTable.CraftingTableType;
 
-    int16 CraftingTableNameLen = CraftingTable.CraftingTableName.length() * 2;
+    int16 CraftingTableNameLen = static_cast<int16>(CraftingTable.CraftingTableName.length() * 2);
     *this << CraftingTableNameLen;
     InsertData(CraftingTable.CraftingTableName.c_str(), CraftingTableNameLen);
 
