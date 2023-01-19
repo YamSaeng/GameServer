@@ -8,7 +8,7 @@ public:
 	//--------------------------------------------
 	// 가방 반환
 	//--------------------------------------------
-	CInventoryManager GetInventoryManager();
+	CInventoryManager* GetInventoryManager();
 
 	//--------------------------------------------
 	// NPC 초기화

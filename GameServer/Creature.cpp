@@ -3,16 +3,16 @@
 #include "DataManager.h"
 #include "ObjectManager.h"
 
-CInventoryManager CCreature::GetInventoryManager()
+CInventoryManager* CCreature::GetInventoryManager()
 {
-    return _Inventory;
+    return &_Inventory;
 }
 
 void CCreature::NPCInit(en_NonPlayerType NonPlayerType)
 {
 	switch (NonPlayerType)
 	{
-	case en_NonPlayerType::NPC_일반_상인:
+	case en_NonPlayerType::NON_PLAYER_CHARACTER_일반_상인:
 		{
 			for (auto MerchantItemIter : G_Datamanager->_GeneralMerchantItems)
 			{
