@@ -773,16 +773,71 @@ vector<st_TileMapInfo> CMap::FindMapTileInfo(CGameObject* Player)
 	return TileInfos;
 }
 
-bool CMap::Cango(CGameObject* Object, float X, float Y)
+bool CMap::Cango(CGameObject* Object)
 {
 	st_Vector2Int CollisionPosition;
-	CollisionPosition._X = X;
-	CollisionPosition._Y = Y;
+	CollisionPosition._X = Object->_GameObjectInfo.ObjectPositionInfo.Position._X;
+	CollisionPosition._Y = Object->_GameObjectInfo.ObjectPositionInfo.Position._Y;
 
-	return CollisionCango(Object, CollisionPosition);
+	st_Vector2 CheckPosition; 
+	CheckPosition._X = Object->_GameObjectInfo.ObjectPositionInfo.Position._X;
+	CheckPosition._Y = Object->_GameObjectInfo.ObjectPositionInfo.Position._Y;
+
+	switch (Object->_GameObjectInfo.ObjectPositionInfo.MoveDir)
+	{
+	case en_MoveDir::UP:
+		CheckPosition._Y +=
+			(st_Vector2::Up()._Y * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		break;
+	case en_MoveDir::DOWN:
+		CheckPosition._Y +=
+			(st_Vector2::Down()._Y * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		break;
+	case en_MoveDir::LEFT:
+		CheckPosition._X +=
+			(st_Vector2::Left()._X * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		break;
+	case en_MoveDir::RIGHT:
+		CheckPosition._X +=
+			(st_Vector2::Right()._X * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		break;
+	case en_MoveDir::LEFT_UP:
+		CheckPosition._X +=
+			(st_Vector2::Left()._X * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		CheckPosition._Y +=
+			(st_Vector2::Up()._Y * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		break;
+	case en_MoveDir::LEFT_DOWN:
+		CheckPosition._X +=
+			(st_Vector2::Left()._X * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		CheckPosition._Y +=
+			(st_Vector2::Down()._Y * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		break;
+	case en_MoveDir::RIGHT_UP:
+		CheckPosition._X +=
+			(st_Vector2::Right()._X * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		CheckPosition._Y +=
+			(st_Vector2::Up()._Y * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		break;
+	case en_MoveDir::RIGHT_DOWN:
+		CheckPosition._X +=
+			(st_Vector2::Right()._X * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		CheckPosition._Y +=
+			(st_Vector2::Down()._Y * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+		break;
+	}
+
+	bool NextPositionMoveCheck = MoveCollisionCango(Object, CollisionPosition, CheckPosition);
+	if (NextPositionMoveCheck == true)
+	{
+		Object->_GameObjectInfo.ObjectPositionInfo.Position._X = CheckPosition._X;
+		Object->_GameObjectInfo.ObjectPositionInfo.Position._Y = CheckPosition._Y;			
+	}
+
+	return NextPositionMoveCheck;
 }
 
-bool CMap::CollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool CheckObjects)
+bool CMap::MoveCollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, st_Vector2& NextPosition, bool CheckObjects)
 {
 	// 좌우 좌표 검사
 	if (CellPosition._X < _Left || CellPosition._X > _Right)
@@ -818,54 +873,12 @@ bool CMap::CollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool
 		IsCollisionMapInfo = false;
 	}
 
-	bool ObjectCheck = false;
-
-	switch (Object->_GameObjectInfo.ObjectType)
-	{
-	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-	case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
-	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
-	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
-	case en_GameObjectType::OBJECT_THIEF_PLAYER:
-	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
-		ObjectCheck = Object->GetChannel()->ChannelColliderCheck(Object);
-		break;
-	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
-	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
-	case en_GameObjectType::OBJECT_STONE:
-	case en_GameObjectType::OBJECT_TREE:
-	case en_GameObjectType::OBJECT_SLIME:		
-
-		// 오브젝트 위치 배열이 비워 있을 경우 true 반환
-		if (_ObjectsInfos[Y][X] == nullptr)
-		{
-			ObjectCheck = true;
-		}
-		else
-		{
-			// 비워 있지는 않지만 안에 있는 오브젝트가 이동하고자 하는 오브젝트일 경우
-			if (_ObjectsInfos[Y][X]->_GameObjectInfo.ObjectId == Object->_GameObjectInfo.ObjectId)
-			{
-				ObjectCheck = true;
-			}
-			else // 안에 있는 오브젝트가 다른 오브젝트일 경우
-			{
-				if (_ObjectsInfos[Y][X]->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::READY_DEAD
-					|| _ObjectsInfos[Y][X]->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::DEAD)
-				{
-					ObjectCheck = true;
-				}
-				else
-				{
-					ObjectCheck = false;
-				}				
-			}
-		}
-		break;
-	}
+	bool ObjectCheck = Object->GetChannel()->ChannelColliderCheck(Object->_GameObjectInfo.ObjectId, NextPosition);	
 
 	return IsCollisionMapInfo && (!CheckObjects || ObjectCheck);
 }
+
+
 
 bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool CheckObject, bool Applycollision)
 {
@@ -900,11 +913,11 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 		{
 			// 목적지로 갈 수 있는지 검사한다.
-			if (CollisionCango(GameObject, DestPosition, CheckObject) == false)
-			{
-				//G_Logger->WriteStdOut(en_Color::RED, L"Cant Go ApplyMove Y (%d) X (%d) ",DestPosition._Y,DestPosition._X);
-				return false;
-			}
+			//if (MoveCollisionCango(GameObject, DestPosition, CheckObject) == false)
+			//{
+			//	//G_Logger->WriteStdOut(en_Color::RED, L"Cant Go ApplyMove Y (%d) X (%d) ",DestPosition._Y,DestPosition._X);
+			//	return false;
+			//}
 
 			// 호출해준 대상을 충돌체로 여긴다면
 			if (Applycollision == true)
@@ -1263,7 +1276,7 @@ vector<st_Vector2Int> CMap::FindPath(CGameObject* Object, st_Vector2Int StartCel
 				st_Vector2Int NextPositionVector = NextPosition;
 
 				// 갈 수 없으면 다음 위치를 검사한다.
-				if (CollisionCango(Object, NextPositionVector, CheckObjects) == false)
+				if (FindPathNextPositionCango(Object, NextPositionVector, CheckObjects) == false)
 				{
 					continue;
 				}
@@ -1372,6 +1385,78 @@ vector<st_Vector2Int> CMap::CompletePath(map<st_Vector2Int, st_Vector2Int> Paren
 	reverse(Cells.begin(), Cells.end());
 
 	return Cells;
+}
+
+bool CMap::FindPathNextPositionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool CheckObjects)
+{
+	// 좌우 좌표 검사
+	if (CellPosition._X < _Left || CellPosition._X > _Right)
+	{
+		return false;
+	}
+
+	// 상하 좌표 검사
+	if (CellPosition._Y < _Up || CellPosition._Y > _Down)
+	{
+		return false;
+	}
+
+	int X = CellPosition._X - _Left;
+	int Y = _Down - CellPosition._Y;
+
+	//G_Logger->WriteStdOut(en_Color::RED, L"X : %d Y : %d \n", X, Y);
+
+	bool IsCollisionMapInfo = false;
+	switch (_CollisionMapInfos[Y][X])
+	{
+	case en_MapObjectInfo::TILE_MAP_NONE:
+	case en_MapObjectInfo::TILE_MAP_TREE:
+	case en_MapObjectInfo::TILE_MAP_STONE:
+	case en_MapObjectInfo::TILE_MAP_SLIME:
+	case en_MapObjectInfo::TILE_MAP_BEAR:
+	case en_MapObjectInfo::TILE_MAP_POTATO:
+		IsCollisionMapInfo = true;
+		break;
+	case en_MapObjectInfo::TILE_MAP_WALL:
+	case en_MapObjectInfo::TILE_MAP_FURNACE:
+	case en_MapObjectInfo::TILE_MAP_SAMILL:
+		IsCollisionMapInfo = false;
+	}
+
+	bool ObjectCheck = false;
+
+	switch (Object->_GameObjectInfo.ObjectType)
+	{
+	case en_GameObjectType::OBJECT_SLIME:
+		// 오브젝트 위치 배열이 비워 있을 경우 true 반환
+		if (_ObjectsInfos[Y][X] == nullptr)
+		{
+			ObjectCheck = true;
+		}
+		else
+		{
+			// 비워 있지는 않지만 안에 있는 오브젝트가 이동하고자 하는 오브젝트일 경우
+			if (_ObjectsInfos[Y][X]->_GameObjectInfo.ObjectId == Object->_GameObjectInfo.ObjectId)
+			{
+				ObjectCheck = true;
+			}
+			else // 안에 있는 오브젝트가 다른 오브젝트일 경우
+			{
+				if (_ObjectsInfos[Y][X]->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::READY_DEAD
+					|| _ObjectsInfos[Y][X]->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::DEAD)
+				{
+					ObjectCheck = true;
+				}
+				else
+				{
+					ObjectCheck = false;
+				}
+			}
+		}
+		break;
+	}
+
+	return IsCollisionMapInfo && (!CheckObjects || ObjectCheck);
 }
 
 CChannelManager* CMap::GetChannelManager()

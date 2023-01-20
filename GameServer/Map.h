@@ -125,14 +125,13 @@ public:
 	//----------------------------------------------------------------------
 	vector<st_TileMapInfo> FindMapTileInfo(CGameObject* Player);
 
-	bool Cango(CGameObject* Object, float X, float Y);
+	bool Cango(CGameObject* Object);
 	//----------------------------------------------------------------------------
 	// 위치로 갈 수 있는지 확인
 	// CheckObjects = 벽을 제외한 오브젝트를 충돌 대상으로 여길 것인지에 대한 판단
 	// ( true : 해당위치에 오브젝트가 있는지 확인해서 있으면 충돌체로 판단한다. )
 	//----------------------------------------------------------------------------
-	bool CollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool CheckObjects = true);
-
+	bool MoveCollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, st_Vector2& NextPosition, bool CheckObjects = true);	
 
 	//------------------------------------------------------------------------------------------------------------------------
 	// 목적지 좌표값을 받아서 해당 좌표로 갈 수 있는지 없는지 판단
@@ -156,6 +155,7 @@ public:
 
 	vector<st_Vector2Int> FindPath(CGameObject* Object, st_Vector2Int StartCellPosition, st_Vector2Int DestCellPostion, bool CheckObjects = true, int32 MaxDistance = 10);
 	vector<st_Vector2Int> CompletePath(map<st_Vector2Int, st_Vector2Int> Parents, st_Vector2Int DestPosition);
+	bool FindPathNextPositionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool CheckObjects = true);
 
 	CChannelManager* GetChannelManager();
 private:
