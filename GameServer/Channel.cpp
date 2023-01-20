@@ -17,49 +17,49 @@
 
 CChannel::CChannel()
 {	
-	for (int32 PlayerCount = PLAYER_MAX - 1; PlayerCount >= 0; --PlayerCount)
+	for (int32 PlayerCount = CHANNEL_PLAYER_MAX - 1; PlayerCount >= 0; --PlayerCount)
 	{
 		_ChannelPlayerArray[PlayerCount] = nullptr;
 		_ChannelPlayerArrayIndexs.Push(PlayerCount);
 	}
 	
-	for (int32 DummyPlayerCount = DUMMY_PLAYER_MAX - 1; DummyPlayerCount >= 0; --DummyPlayerCount)
+	for (int32 DummyPlayerCount = CHANNEL_DUMMY_PLAYER_MAX - 1; DummyPlayerCount >= 0; --DummyPlayerCount)
 	{
 		_ChannelDummyPlayerArray[DummyPlayerCount] = nullptr;
 		_ChannelDummyPlayerArrayIndexs.Push(DummyPlayerCount);
 	}
 
-	for (int32 NonPlayerCount = NON_PLAYER_MAX - 1; NonPlayerCount >= 0; --NonPlayerCount)
+	for (int32 NonPlayerCount = CHANNEL_NON_PLAYER_MAX - 1; NonPlayerCount >= 0; --NonPlayerCount)
 	{
 		_ChannelNonPlayerArray[NonPlayerCount] = nullptr;
 		_ChannelNonPlayerArrayIndexs.Push(NonPlayerCount);
 	}
 
-	for (int32 MonsterCount = MONSTER_MAX - 1; MonsterCount >= 0; --MonsterCount)
+	for (int32 MonsterCount = CHANNEL_MONSTER_MAX - 1; MonsterCount >= 0; --MonsterCount)
 	{
 		_ChannelMonsterArray[MonsterCount] = nullptr;
 		_ChannelMonsterArrayIndexs.Push(MonsterCount);
 	}
 
-	for (int32 Environment = ENVIRONMENT_MAX - 1; Environment >= 0; --Environment)
+	for (int32 Environment = CHANNEL_ENVIRONMENT_MAX - 1; Environment >= 0; --Environment)
 	{
 		_ChannelEnvironmentArray[Environment] = nullptr;
 		_ChannelEnvironmentArrayIndexs.Push(Environment);
 	}
 
-	for (int32 Crafting = CRAFTING_TABLE_MAX - 1; Crafting >= 0; --Crafting)
+	for (int32 Crafting = CHANNEL_CRAFTING_TABLE_MAX - 1; Crafting >= 0; --Crafting)
 	{
 		_ChannelCraftingTableArray[Crafting] = nullptr;
 		_ChannelCraftingTableArrayIndexs.Push(Crafting);
 	}
 
-	for (int32 CropCount = CROP_MAX - 1; CropCount >= 0; --CropCount)
+	for (int32 CropCount = CHANNEL_CROP_MAX - 1; CropCount >= 0; --CropCount)
 	{
 		_ChannelCropArray[CropCount] = nullptr;
 		_ChannelCropArrayIndexs.Push(CropCount);
 	}
 
-	for (int32 ItemCount = ITEM_MAX - 1; ItemCount >= 0; --ItemCount)
+	for (int32 ItemCount = CHANNEL_ITEM_MAX - 1; ItemCount >= 0; --ItemCount)
 	{
 		_ChannelItemArray[ItemCount] = nullptr;
 		_ChannelItemArrayIndexs.Push(ItemCount);
@@ -756,7 +756,7 @@ void CChannel::Update()
 					*GameObjectJob->GameObjectJobMessage >> SeedItemSmallCategory;
 
 					// 가방에 요청한 씨앗 아이템이 있는지 먼저 확인
-					CItem* SeedItem = Player->GetInventoryManager().FindInventoryItem(0, (en_SmallItemCategory)SeedItemSmallCategory);
+					CItem* SeedItem = Player->GetInventoryManager()->FindInventoryItem(0, (en_SmallItemCategory)SeedItemSmallCategory);
 					if (SeedItem != nullptr)
 					{
 						// 심고자 하는 자리에 다른 작물이 잇는지 확인
@@ -838,7 +838,7 @@ void CChannel::Update()
 		}	
 	}		
 
-	for (int16 i = 0; i < PLAYER_MAX; i++)
+	for (int16 i = 0; i < CHANNEL_PLAYER_MAX; i++)
 	{
 		if (_ChannelPlayerArray[i]
 			&& _ChannelPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE
@@ -848,7 +848,7 @@ void CChannel::Update()
 		}
 	}
 
-	for (int16 i = 0; i < DUMMY_PLAYER_MAX; i++)
+	for (int16 i = 0; i < CHANNEL_DUMMY_PLAYER_MAX; i++)
 	{
 		if (_ChannelDummyPlayerArray[i]
 			&& _ChannelDummyPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE
@@ -858,7 +858,7 @@ void CChannel::Update()
 		}
 	}
 
-	for (int16 i = 0; i < NON_PLAYER_MAX; i++)
+	for (int16 i = 0; i < CHANNEL_NON_PLAYER_MAX; i++)
 	{
 		if (_ChannelNonPlayerArray[i] != nullptr)
 		{
@@ -866,7 +866,7 @@ void CChannel::Update()
 		}
 	}
 
-	for (int16 i = 0; i < MONSTER_MAX; i++)
+	for (int16 i = 0; i < CHANNEL_MONSTER_MAX; i++)
 	{
 		if (_ChannelMonsterArray[i] != nullptr)
 		{
@@ -874,7 +874,7 @@ void CChannel::Update()
 		}
 	}
 
-	for (int16 i = 0; i < CRAFTING_TABLE_MAX; i++)
+	for (int16 i = 0; i < CHANNEL_CRAFTING_TABLE_MAX; i++)
 	{
 		if (_ChannelCraftingTableArray[i] != nullptr)
 		{
@@ -882,7 +882,7 @@ void CChannel::Update()
 		}
 	}
 
-	for (int16 i = 0; i < CROP_MAX; i++)
+	for (int16 i = 0; i < CHANNEL_CROP_MAX; i++)
 	{
 		if (_ChannelCropArray[i] != nullptr)
 		{
@@ -890,7 +890,7 @@ void CChannel::Update()
 		}
 	}
 
-	for (int16 i = 0; i < ITEM_MAX; i++)
+	for (int16 i = 0; i < CHANNEL_ITEM_MAX; i++)
 	{
 		if (_ChannelItemArray[i] != nullptr)
 		{
@@ -898,7 +898,7 @@ void CChannel::Update()
 		}
 	}
 
-	for (int16 i = 0; i < ENVIRONMENT_MAX; i++)
+	for (int16 i = 0; i < CHANNEL_ENVIRONMENT_MAX; i++)
 	{
 		if (_ChannelEnvironmentArray[i] != nullptr)
 		{
@@ -930,7 +930,7 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 	case en_GameObjectType::OBJECT_THIEF_PLAYER:
 	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
 		{
-			for (int32 i = 0; i < en_Channel::PLAYER_MAX; i++)
+			for (int32 i = 0; i < en_Channel::CHANNEL_PLAYER_MAX; i++)
 			{
 				if (_ChannelPlayerArray[i] != nullptr 
 					&& _ChannelPlayerArray[i]->_GameObjectInfo.ObjectId == ObjectID
@@ -943,7 +943,7 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 		break;
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 		{
-			for (int32 i = 0; i < en_Channel::DUMMY_PLAYER_MAX; i++)
+			for (int32 i = 0; i < en_Channel::CHANNEL_DUMMY_PLAYER_MAX; i++)
 			{
 				if (_ChannelDummyPlayerArray[i] != nullptr && _ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectId == ObjectID)
 				{
@@ -956,7 +956,7 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 	case en_GameObjectType::OBJECT_SLIME:
 	case en_GameObjectType::OBJECT_BEAR:
 		{
-			for (int32 i = 0; i < en_Channel::MONSTER_MAX; i++)
+			for (int32 i = 0; i < en_Channel::CHANNEL_MONSTER_MAX; i++)
 			{
 				if (_ChannelMonsterArray[i] != nullptr && _ChannelMonsterArray[i]->_GameObjectInfo.ObjectId == ObjectID)
 				{
@@ -969,7 +969,7 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
 		{
-			for (int32 i = 0; i < en_Channel::ENVIRONMENT_MAX; i++)
+			for (int32 i = 0; i < en_Channel::CHANNEL_ENVIRONMENT_MAX; i++)
 			{
 				if (_ChannelEnvironmentArray[i] != nullptr && _ChannelEnvironmentArray[i]->_GameObjectInfo.ObjectId == ObjectID)
 				{
@@ -1007,7 +1007,7 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
 	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
 		{
-			for (int32 i = 0; i < en_Channel::ENVIRONMENT_MAX; i++)
+			for (int32 i = 0; i < en_Channel::CHANNEL_ITEM_MAX; i++)
 			{
 				if (_ChannelItemArray[i] != nullptr && _ChannelItemArray[i]->_GameObjectInfo.ObjectId == ObjectID)
 				{
@@ -1021,7 +1021,7 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 		{
-			for (int32 i = 0; i < en_Channel::CRAFTING_TABLE_MAX; i++)
+			for (int32 i = 0; i < en_Channel::CHANNEL_CRAFTING_TABLE_MAX; i++)
 			{
 				if (_ChannelCraftingTableArray[i] != nullptr && _ChannelCraftingTableArray[i]->_GameObjectInfo.ObjectId == ObjectID)
 				{	
@@ -1034,7 +1034,7 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 	case en_GameObjectType::OBJECT_CROP_POTATO:		
 	case en_GameObjectType::OBJECT_CROP_CORN:
 		{
-			for (int32 i = 0; i < en_Channel::CROP_MAX; i++)
+			for (int32 i = 0; i < en_Channel::CHANNEL_CROP_MAX; i++)
 			{
 				if (_ChannelCropArray[i] != nullptr && _ChannelCropArray[i]->_GameObjectInfo.ObjectId == ObjectID)
 				{
@@ -1060,7 +1060,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(en_GameObjectType GameObjectTy
 	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
 	case en_GameObjectType::OBJECT_THIEF_PLAYER:
 	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
-		for (int32 i = 0; i < en_Channel::PLAYER_MAX; i++)
+		for (int32 i = 0; i < en_Channel::CHANNEL_PLAYER_MAX; i++)
 		{
 			if (_ChannelPlayerArray[i] != nullptr
 				&& _ChannelPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE)
@@ -1072,7 +1072,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(en_GameObjectType GameObjectTy
 	case en_GameObjectType::OBJECT_MONSTER:
 	case en_GameObjectType::OBJECT_SLIME:
 	case en_GameObjectType::OBJECT_BEAR:
-		for (int32 i = 0; i < en_Channel::MONSTER_MAX; i++)
+		for (int32 i = 0; i < en_Channel::CHANNEL_MONSTER_MAX; i++)
 		{
 			if (_ChannelMonsterArray[i] != nullptr)
 			{
@@ -1083,7 +1083,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(en_GameObjectType GameObjectTy
 	case en_GameObjectType::OBJECT_ENVIRONMENT:
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
-		for (int32 i = 0; i < en_Channel::ENVIRONMENT_MAX; i++)
+		for (int32 i = 0; i < en_Channel::CHANNEL_ENVIRONMENT_MAX; i++)
 		{
 			if (_ChannelEnvironmentArray[i] != nullptr)
 			{
@@ -1119,7 +1119,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(en_GameObjectType GameObjectTy
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
 	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
 	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
-		for (int32 i = 0; i < en_Channel::ENVIRONMENT_MAX; i++)
+		for (int32 i = 0; i < en_Channel::CHANNEL_ITEM_MAX; i++)
 		{
 			if (_ChannelItemArray[i] != nullptr)
 			{
@@ -1128,7 +1128,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(en_GameObjectType GameObjectTy
 		}
 		break;
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
-		for (int32 i = 0; i < en_Channel::DUMMY_PLAYER_MAX; i++)
+		for (int32 i = 0; i < en_Channel::CHANNEL_DUMMY_PLAYER_MAX; i++)
 		{
 			if (_ChannelDummyPlayerArray[i] != nullptr)
 			{
@@ -1140,7 +1140,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(en_GameObjectType GameObjectTy
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE:
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
-		for (int32 i = 0; i < en_Channel::CRAFTING_TABLE_MAX; i++)
+		for (int32 i = 0; i < en_Channel::CHANNEL_CRAFTING_TABLE_MAX; i++)
 		{
 			if (_ChannelCraftingTableArray[i] != nullptr)
 			{
@@ -1151,7 +1151,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(en_GameObjectType GameObjectTy
 	case en_GameObjectType::OBJECT_CROP:
 	case en_GameObjectType::OBJECT_CROP_POTATO:
 	case en_GameObjectType::OBJECT_CROP_CORN:
-		for (int32 i = 0; i < en_Channel::CROP_MAX; i++)
+		for (int32 i = 0; i < en_Channel::CHANNEL_CROP_MAX; i++)
 		{
 			if (_ChannelCropArray[i] != nullptr)
 			{
@@ -1179,7 +1179,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 		case en_GameObjectType::OBJECT_THIEF_PLAYER:
 		case en_GameObjectType::OBJECT_ARCHER_PLAYER:
 			{
-				for (int32 i = 0; i < en_Channel::PLAYER_MAX; i++)
+				for (int32 i = 0; i < en_Channel::CHANNEL_PLAYER_MAX; i++)
 				{
 					if (_ChannelPlayerArray[i] != nullptr
 						&& _ChannelPlayerArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID
@@ -1192,7 +1192,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 			break;
 		case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 			{
-				for (int32 i = 0; i < en_Channel::DUMMY_PLAYER_MAX; i++)
+				for (int32 i = 0; i < en_Channel::CHANNEL_DUMMY_PLAYER_MAX; i++)
 				{
 					if (_ChannelDummyPlayerArray[i] != nullptr && _ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
 					{
@@ -1205,7 +1205,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 		case en_GameObjectType::OBJECT_SLIME:
 		case en_GameObjectType::OBJECT_BEAR:
 			{
-				for (int32 i = 0; i < en_Channel::MONSTER_MAX; i++)
+				for (int32 i = 0; i < en_Channel::CHANNEL_MONSTER_MAX; i++)
 				{
 					if (_ChannelMonsterArray[i] != nullptr && _ChannelMonsterArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
 					{
@@ -1218,7 +1218,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 		case en_GameObjectType::OBJECT_STONE:
 		case en_GameObjectType::OBJECT_TREE:
 			{
-				for (int32 i = 0; i < en_Channel::ENVIRONMENT_MAX; i++)
+				for (int32 i = 0; i < en_Channel::CHANNEL_ENVIRONMENT_MAX; i++)
 				{
 					if (_ChannelEnvironmentArray[i] != nullptr && _ChannelEnvironmentArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
 					{
@@ -1256,7 +1256,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 		case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
 		case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
 			{
-				for (int32 i = 0; i < en_Channel::ENVIRONMENT_MAX; i++)
+				for (int32 i = 0; i < en_Channel::CHANNEL_ITEM_MAX; i++)
 				{
 					if (_ChannelItemArray[i] != nullptr && _ChannelItemArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
 					{
@@ -1270,7 +1270,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 			{
-				for (int32 i = 0; i < en_Channel::CRAFTING_TABLE_MAX; i++)
+				for (int32 i = 0; i < en_Channel::CHANNEL_CRAFTING_TABLE_MAX; i++)
 				{
 					if (_ChannelCraftingTableArray[i] != nullptr && _ChannelCraftingTableArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
 					{
@@ -1283,7 +1283,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 		case en_GameObjectType::OBJECT_CROP_POTATO:
 		case en_GameObjectType::OBJECT_CROP_CORN:
 			{
-				for (int32 i = 0; i < en_Channel::CROP_MAX; i++)
+				for (int32 i = 0; i < en_Channel::CHANNEL_CROP_MAX; i++)
 				{
 					if (_ChannelCropArray[i] != nullptr && _ChannelCropArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
 					{
@@ -1313,7 +1313,7 @@ vector<CGameObject*> CChannel::FindAttackChannelObjects(vector<st_FieldOfViewInf
 		case en_GameObjectType::OBJECT_THIEF_PLAYER:
 		case en_GameObjectType::OBJECT_ARCHER_PLAYER:
 			{
-				for (int32 i = 0; i < en_Channel::PLAYER_MAX; i++)
+				for (int32 i = 0; i < en_Channel::CHANNEL_PLAYER_MAX; i++)
 				{
 					if (_ChannelPlayerArray[i] != nullptr
 						&& _ChannelPlayerArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID
@@ -1336,7 +1336,7 @@ vector<CGameObject*> CChannel::FindAttackChannelObjects(vector<st_FieldOfViewInf
 			break;
 		case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 			{
-				for (int32 i = 0; i < en_Channel::DUMMY_PLAYER_MAX; i++)
+				for (int32 i = 0; i < en_Channel::CHANNEL_DUMMY_PLAYER_MAX; i++)
 				{
 					if (_ChannelDummyPlayerArray[i] != nullptr && _ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
 					{
@@ -1357,7 +1357,7 @@ vector<CGameObject*> CChannel::FindAttackChannelObjects(vector<st_FieldOfViewInf
 		case en_GameObjectType::OBJECT_SLIME:
 		case en_GameObjectType::OBJECT_BEAR:
 			{
-				for (int32 i = 0; i < en_Channel::MONSTER_MAX; i++)
+				for (int32 i = 0; i < en_Channel::CHANNEL_MONSTER_MAX; i++)
 				{
 					if (_ChannelMonsterArray[i] != nullptr 
 						&& _ChannelMonsterArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID
@@ -1389,7 +1389,7 @@ vector<CGameObject*> CChannel::FindRangeAttackChannelObjects(CGameObject* Object
 {
 	vector<CGameObject*> FindObjects;
 
-	for (int32 i = 0; i < en_Channel::PLAYER_MAX; i++)
+	for (int32 i = 0; i < en_Channel::CHANNEL_PLAYER_MAX; i++)
 	{
 		if (_ChannelPlayerArray[i] != nullptr			
 			&& _ChannelPlayerArray[i]->_GameObjectInfo.ObjectId != Object->_GameObjectInfo.ObjectId
@@ -1405,7 +1405,7 @@ vector<CGameObject*> CChannel::FindRangeAttackChannelObjects(CGameObject* Object
 		}
 	}
 
-	for (int32 i = 0; i < en_Channel::DUMMY_PLAYER_MAX; i++)
+	for (int32 i = 0; i < en_Channel::CHANNEL_DUMMY_PLAYER_MAX; i++)
 	{
 		if (_ChannelDummyPlayerArray[i] != nullptr)
 		{
@@ -1418,7 +1418,7 @@ vector<CGameObject*> CChannel::FindRangeAttackChannelObjects(CGameObject* Object
 		}
 	}
 
-	for (int32 i = 0; i < en_Channel::MONSTER_MAX; i++)
+	for (int32 i = 0; i < en_Channel::CHANNEL_MONSTER_MAX; i++)
 	{
 		if (_ChannelMonsterArray[i] != nullptr			
 			&& _ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::READY_DEAD
@@ -1440,7 +1440,7 @@ bool CChannel::ChannelColliderCheck(CGameObject* Object)
 {	
 	// 플레이어들과 충돌하는지 검사
 	bool IsPlayerCollision = true;
-	for (int32 i = 0; i < en_Channel::PLAYER_MAX; i++)
+	for (int32 i = 0; i < en_Channel::CHANNEL_PLAYER_MAX; i++)
 	{
 		if (_ChannelPlayerArray[i] != nullptr
 			&& _ChannelPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE)
@@ -1450,15 +1450,14 @@ bool CChannel::ChannelColliderCheck(CGameObject* Object)
 				&& CRectCollision::IsCollision(Object->GetRectCollision(), _ChannelPlayerArray[i]->GetRectCollision()) == true)
 			{
 				// 충돌
-				IsPlayerCollision = false;
-				//G_Logger->WriteStdOut(en_Color::RED, L"%s와 %s 충돌\n", Object->_GameObjectInfo.ObjectName.c_str(), _ChannelPlayerArray[i]->_GameObjectInfo.ObjectName.c_str());
+				IsPlayerCollision = false;				
 				break;
 			}
 		}
 	}
 
 	bool IsDummyPlayerCollision = true;
-	for (int32 i = 0; i < en_Channel::DUMMY_PLAYER_MAX; i++)
+	for (int32 i = 0; i < en_Channel::CHANNEL_DUMMY_PLAYER_MAX; i++)
 	{
 		if (_ChannelDummyPlayerArray[i] != nullptr
 			&& _ChannelDummyPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE)
@@ -1474,7 +1473,7 @@ bool CChannel::ChannelColliderCheck(CGameObject* Object)
 	}
 
 	bool IsMonsterCollision = true;
-	for (int32 i = 0; i < en_Channel::MONSTER_MAX; i++)
+	for (int32 i = 0; i < en_Channel::CHANNEL_MONSTER_MAX; i++)
 	{
 		if (_ChannelMonsterArray[i] != nullptr)
 		{
@@ -1489,7 +1488,7 @@ bool CChannel::ChannelColliderCheck(CGameObject* Object)
 	}
 
 	bool IsCraftingTableCollision = true;
-	for (int32 i = 0; i < en_Channel::CRAFTING_TABLE_MAX; i++)
+	for (int32 i = 0; i < en_Channel::CHANNEL_CRAFTING_TABLE_MAX; i++)
 	{
 		if (_ChannelCraftingTableArray[i] != nullptr)
 		{
@@ -1504,7 +1503,7 @@ bool CChannel::ChannelColliderCheck(CGameObject* Object)
 	}
 
 	bool IsEnvironmentCollision = true;
-	for (int32 i = 0; i < en_Channel::ENVIRONMENT_MAX; i++)
+	for (int32 i = 0; i < en_Channel::CHANNEL_ENVIRONMENT_MAX; i++)
 	{
 		if (_ChannelEnvironmentArray[i] != nullptr)
 		{
@@ -1520,6 +1519,98 @@ bool CChannel::ChannelColliderCheck(CGameObject* Object)
 
 	bool IsCollision = (IsPlayerCollision) && (IsDummyPlayerCollision) && (IsMonsterCollision) && (IsCraftingTableCollision) && (IsEnvironmentCollision);
 	
+	return IsCollision;
+}
+
+bool CChannel::ChannelColliderCheck(int64& CheckObjectID, st_Vector2 CheckPosition)
+{
+	CRectCollision CheckRectCollision;
+	CheckRectCollision._LeftTop._X = CheckPosition._X - 0.4f;
+	CheckRectCollision._LeftTop._Y = CheckPosition._Y - 0.4f;
+	CheckRectCollision._RightDown._X = CheckPosition._X + 0.4f;
+	CheckRectCollision._RightDown._Y = CheckPosition._Y + 0.4f;
+
+	// 플레이어들과 충돌하는지 검사
+	bool IsPlayerCollision = true;
+	for (int32 i = 0; i < en_Channel::CHANNEL_PLAYER_MAX; i++)
+	{
+		if (_ChannelPlayerArray[i] != nullptr
+			&& _ChannelPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE)
+		{
+			if (CheckObjectID != _ChannelPlayerArray[i]->_GameObjectInfo.ObjectId
+				&& _ChannelPlayerArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelPlayerArray[i]->GetRectCollision()) == true)
+			{
+				// 충돌
+				IsPlayerCollision = false;
+				break;
+			}
+		}
+	}
+
+	bool IsDummyPlayerCollision = true;
+	for (int32 i = 0; i < en_Channel::CHANNEL_DUMMY_PLAYER_MAX; i++)
+	{
+		if (_ChannelDummyPlayerArray[i] != nullptr
+			&& _ChannelDummyPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE)
+		{
+			if (CheckObjectID != _ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectId
+				&& _ChannelDummyPlayerArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelDummyPlayerArray[i]->GetRectCollision()) == true)
+			{
+				IsDummyPlayerCollision = false;
+				break;
+			}
+		}
+	}
+
+	bool IsMonsterCollision = true;
+	for (int32 i = 0; i < en_Channel::CHANNEL_MONSTER_MAX; i++)
+	{
+		if (_ChannelMonsterArray[i] != nullptr)
+		{
+			if (CheckObjectID != _ChannelMonsterArray[i]->_GameObjectInfo.ObjectId
+				&& _ChannelMonsterArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelMonsterArray[i]->GetRectCollision()) == true)
+			{
+				IsMonsterCollision = false;
+				break;
+			}
+		}
+	}
+
+	bool IsCraftingTableCollision = true;
+	for (int32 i = 0; i < en_Channel::CHANNEL_CRAFTING_TABLE_MAX; i++)
+	{
+		if (_ChannelCraftingTableArray[i] != nullptr)
+		{
+			if (CheckObjectID != _ChannelCraftingTableArray[i]->_GameObjectInfo.ObjectId
+				&& _ChannelCraftingTableArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelCraftingTableArray[i]->GetRectCollision()) == true)
+			{
+				IsCraftingTableCollision = false;
+				break;
+			}
+		}
+	}
+
+	bool IsEnvironmentCollision = true;
+	for (int32 i = 0; i < en_Channel::CHANNEL_ENVIRONMENT_MAX; i++)
+	{
+		if (_ChannelEnvironmentArray[i] != nullptr)
+		{
+			if (CheckObjectID != _ChannelEnvironmentArray[i]->_GameObjectInfo.ObjectId
+				&& _ChannelEnvironmentArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelEnvironmentArray[i]->GetRectCollision()) == true)
+			{
+				IsEnvironmentCollision = false;
+				break;
+			}
+		}
+	}
+
+	bool IsCollision = (IsPlayerCollision) && (IsDummyPlayerCollision) && (IsMonsterCollision) && (IsCraftingTableCollision) && (IsEnvironmentCollision);
+
 	return IsCollision;
 }
 
@@ -1558,7 +1649,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 
 			EnterChannelGameObject->GetRectCollision()->CollisionUpdate();
 
-			if (_Map->CollisionCango(EnterChannelGameObject, SpawnPosition) == true)
+			if (_Map->MoveCollisionCango(EnterChannelGameObject, SpawnPosition, EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.Position) == true)
 			{
 				break;
 			}

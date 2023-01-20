@@ -68,6 +68,7 @@ public:
 	// 채널에 있는 오브젝트들과 검사해서 충돌 판단
 	//-----------------------------------------------------
 	bool ChannelColliderCheck(CGameObject* Object);
+	bool ChannelColliderCheck(int64& CheckObjectID, st_Vector2 CheckPosition);
 
 	//----------------------------------------------------
 	// 채널 입장
@@ -88,25 +89,25 @@ public:
 private:
 	enum en_Channel
 	{
-		PLAYER_MAX = 100,
-		DUMMY_PLAYER_MAX = 500,
-		NON_PLAYER_MAX = 50,
-		MONSTER_MAX = 100,
-		ENVIRONMENT_MAX = 100,
-		CRAFTING_TABLE_MAX = 100,
-		CROP_MAX = 100,
-		ITEM_MAX = 200
+		CHANNEL_PLAYER_MAX = 100,
+		CHANNEL_DUMMY_PLAYER_MAX = 500,
+		CHANNEL_NON_PLAYER_MAX = 50,
+		CHANNEL_MONSTER_MAX = 100,
+		CHANNEL_ENVIRONMENT_MAX = 100,
+		CHANNEL_CRAFTING_TABLE_MAX = 100,
+		CHANNEL_CROP_MAX = 100,
+		CHANNEL_ITEM_MAX = 200
 	};
 	
 	// 채널에서 관리중인 PC, NPC, Monster, Item	
-	CPlayer* _ChannelPlayerArray[PLAYER_MAX];
-	CPlayer* _ChannelDummyPlayerArray[DUMMY_PLAYER_MAX];
-	CNonPlayer* _ChannelNonPlayerArray[NON_PLAYER_MAX];
-	CMonster* _ChannelMonsterArray[MONSTER_MAX];
-	CEnvironment* _ChannelEnvironmentArray[ENVIRONMENT_MAX];
-	CCraftingTable* _ChannelCraftingTableArray[CRAFTING_TABLE_MAX];
-	CCrop* _ChannelCropArray[CROP_MAX];
-	CItem* _ChannelItemArray[ITEM_MAX];
+	CPlayer* _ChannelPlayerArray[CHANNEL_PLAYER_MAX];
+	CPlayer* _ChannelDummyPlayerArray[CHANNEL_DUMMY_PLAYER_MAX];
+	CNonPlayer* _ChannelNonPlayerArray[CHANNEL_NON_PLAYER_MAX];
+	CMonster* _ChannelMonsterArray[CHANNEL_MONSTER_MAX];
+	CEnvironment* _ChannelEnvironmentArray[CHANNEL_ENVIRONMENT_MAX];
+	CCraftingTable* _ChannelCraftingTableArray[CHANNEL_CRAFTING_TABLE_MAX];
+	CCrop* _ChannelCropArray[CHANNEL_CROP_MAX];
+	CItem* _ChannelItemArray[CHANNEL_ITEM_MAX];
 
 	CLockFreeStack<int32> _ChannelPlayerArrayIndexs;
 	CLockFreeStack<int32> _ChannelDummyPlayerArrayIndexs;
