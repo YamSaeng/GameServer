@@ -1,5 +1,6 @@
 #pragma once
 #include <xmmintrin.h>
+#include <array>
 
 class CGameObject;
 class CGameServerMessage;
@@ -551,6 +552,8 @@ enum class en_MapTileInfo : int8
 
 enum class en_GameObjectJobType : int16
 {	
+	GAMEOBJECT_JOB_TYPE_MOVE,
+	GAMEOBJECT_JOB_TYPE_MOVE_STOP,
 	GAMEOBJECT_JOB_TYPE_DEAFLUT_ATTACK,
 	GAMEOBJECT_JOB_TYPE_SELECT_SKILL_CHARACTERISTIC,
 	GAMEOBJECT_JOB_TYPE_SKILL_LEARN,
@@ -2299,6 +2302,7 @@ struct st_PositionInfo
 	en_CreatureState State;
 	st_Vector2Int CollisionPosition;
 	st_Vector2 Position;
+	st_Vector2 Direction;
 	en_MoveDir MoveDir;	
 };
 
@@ -2698,7 +2702,7 @@ struct st_Aggro
 
 struct st_MapInfo
 {
-	int64 MapID;
+	int16 MapID;
 	wstring MapName;
 	int32 MapSectorSize;
 	int8 ChannelCount;
