@@ -1132,24 +1132,13 @@ void CDummyClient::OnRecv(int64 ClientID, CMessage* Packet)
 		case en_PACKET_S2C_MOVE_STOP:
 		{			
 			int64 ObjectId;
-			int8 CreatureState;
-			int32 CollsitionPositionX;
-			int32 CollsitionPositionY;
-			int8 MoveDir;			
 			float PositionX;
-			float PositionY;
+			float PositionY;			
 			
-			*Packet >> ObjectId;			
-			*Packet >> CreatureState;
-			*Packet >> CollsitionPositionX;
-			*Packet >> CollsitionPositionY;
-			*Packet >> MoveDir;
+			*Packet >> ObjectId;						
 			*Packet >> PositionX;
 			*Packet >> PositionY;
-
-			RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionX = CollsitionPositionX;
-			RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.CollisionPositionY = CollsitionPositionY;
-			RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.MoveDir = (en_MoveDir)MoveDir;
+			
 			RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionX = PositionX;
 			RecvClient->MyCharacterGameObjectInfo.ObjectPositionInfo.PositionY = PositionY;
 
