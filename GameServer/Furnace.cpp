@@ -9,7 +9,7 @@ CFurnace::CFurnace()
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
 	_GameObjectInfo.ObjectWidth = 1;
-	_GameObjectInfo.ObjectHeight = 1;
+	_GameObjectInfo.ObjectHeight = 2;
 
 	_GameObjectInfo.ObjectName = L"¿ë±¤·Î";
 
