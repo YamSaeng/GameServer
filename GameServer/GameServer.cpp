@@ -16,6 +16,7 @@
 #include "Sawmill.h"
 #include "Day.h"
 #include "Math.h"
+#include "RectCollision.h"
 #include <WS2tcpip.h>
 #include <process.h>
 #include <atlbase.h>
@@ -557,12 +558,6 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_OFF_EQUIPMENT:
 		PacketProcReqOffEquipment(SessionID, Message);
 		break;
-	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_UI_MENU_TILE_BUY:
-		PacketProcReqUIMenuTileBuy(SessionID, Message);
-		break;
-	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_TILE_BUY:
-		PacketProcReqTileBuy(SessionID, Message);
-		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_SEED_FARMING:
 		PacketProcReqSeedFarming(SessionID, Message);
 		break;
@@ -901,43 +896,21 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 				break;
 			}
 
-			int8 MovePlayerCurrentState;
-			*Message >> MovePlayerCurrentState;
-			st_Vector2Int ClientPlayerPosition;
-			*Message >> ClientPlayerPosition._X;
-			*Message >> ClientPlayerPosition._Y;
-			int8 MovePlayerCurrentDir;
-			*Message >> MovePlayerCurrentDir;
-			float PositionX;
-			*Message >> PositionX;
-			float PositionY;
-			*Message >> PositionY;
+			float DirectionX;
+			*Message >> DirectionX;
+			float DirectionY;
+			*Message >> DirectionY;
 
-			// 클라가 움직일 방향값을 가져온다.
-			int8 ReqMoveDir;
-			*Message >> ReqMoveDir;
+			float GameObjectWorldPositionX;
+			*Message >> GameObjectWorldPositionX;
+			float GameObjectWorldPositionY;
+			*Message >> GameObjectWorldPositionY;
 
-			MyPlayer->_GameObjectInfo.ObjectPositionInfo.MoveDir = (en_MoveDir)ReqMoveDir;
+			int8 GameObjectState;
+			*Message >> GameObjectState;
 
-			if (MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::IDLE
-				|| MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::SPAWN_IDLE
-				|| MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::SPELL
-				|| MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::GATHERING
-				|| MyPlayer->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::ATTACK)
-			{
-				MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
-			}			
-
-			CMap* Map = G_MapManager->GetMap(1);
-
-			vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetFieldOfViewPlayers(MyPlayer, 1, false);
-
-			CMessage* ResMyMoveOtherPacket = MakePacketResMove(
-				MyPlayer->_GameObjectInfo.ObjectId,
-				true,
-				MyPlayer->_GameObjectInfo.ObjectPositionInfo);
-			SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResMyMoveOtherPacket);
-			ResMyMoveOtherPacket->Free();
+			st_GameObjectJob* MoveJob = MakeGameObjectJobMove(DirectionX, DirectionY, GameObjectWorldPositionX, GameObjectWorldPositionY, GameObjectState);
+			MyPlayer->_GameObjectJobQue.Enqueue(MoveJob);			
 		}
 		else
 		{
@@ -997,33 +970,15 @@ void CGameServer::PacketProcReqMoveStop(int64 SessionID, CMessage* Message)
 				}
 			}
 
-			MyPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-
-			int8  StopPlayerCurrentState;
-			*Message >> StopPlayerCurrentState;
-			int32 ClientCollisionPositionX;
-			*Message >> ClientCollisionPositionX;
-			int32 ClientCollisionPositionY;
-			*Message >> ClientCollisionPositionY;
-			int8 StopDir;
-			*Message >> StopDir;
 			float PositionX;
 			*Message >> PositionX;
 			float PositionY;
 			*Message >> PositionY;
+			int8 ObjectState;
+			*Message >> ObjectState;
 
-			float CheckPositionX = abs(MyPlayer->_GameObjectInfo.ObjectPositionInfo.Position._X - PositionX);
-			float CheckPositionY = abs(MyPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y - PositionY);
-
-			CMap* Map = G_MapManager->GetMap(1);
-
-			vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetFieldOfViewPlayers(MyPlayer, 1, false);
-
-			CMessage* ResMoveStopPacket = MakePacketResMoveStop(
-				MyPlayer->_GameObjectInfo.ObjectId,
-				MyPlayer->_GameObjectInfo.ObjectPositionInfo);
-			SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResMoveStopPacket);
-			ResMoveStopPacket->Free();
+			st_GameObjectJob* MoveStopJob = MakeGameObjectJobMoveStop(PositionX, PositionY, ObjectState);
+			MyPlayer->_GameObjectJobQue.Enqueue(MoveStopJob);			
 		} while (0);
 	}
 
@@ -1760,7 +1715,7 @@ void CGameServer::PacketProcReqItemSelect(int64 SessionId, CMessage* Message)
 			*Message >> SelectItemTileGridPositionX;
 			*Message >> SelectItemTileGridPositionY;
 						
-			CItem* SelectItem = MyPlayer->GetInventoryManager().SelectItem(0, SelectItemTileGridPositionX, SelectItemTileGridPositionY);
+			CItem* SelectItem = MyPlayer->GetInventoryManager()->SelectItem(0, SelectItemTileGridPositionX, SelectItemTileGridPositionY);
 
 			if (SelectItem != nullptr)
 			{
@@ -1826,9 +1781,9 @@ void CGameServer::PacketProcReqItemPlace(int64 SessionId, CMessage* Message)
 			int16 PlaceItemTilePositionY;
 			*Message >> PlaceItemTilePositionY;
 
-			CItem* PlaceItem = MyPlayer->GetInventoryManager().SwapItem(0, PlaceItemTilePositionX, PlaceItemTilePositionY);
+			CItem* PlaceItem = MyPlayer->GetInventoryManager()->SwapItem(0, PlaceItemTilePositionX, PlaceItemTilePositionY);
 
-			CMessage* ResPlaceItemPacket = MakePacketResPlaceItem(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, PlaceItem, MyPlayer->GetInventoryManager()._SelectItem);
+			CMessage* ResPlaceItemPacket = MakePacketResPlaceItem(Session->AccountId, MyPlayer->_GameObjectInfo.ObjectId, PlaceItem, MyPlayer->GetInventoryManager()->_SelectItem);
 			SendPacket(Session->SessionId, ResPlaceItemPacket);
 			ResPlaceItemPacket->Free();
 		} while (0);
@@ -1884,13 +1839,13 @@ void CGameServer::PacketProcReqItemRotate(int64 SessionID, CMessage* Message)
 				}
 			}
 
-			if (MyPlayer->GetInventoryManager()._SelectItem != nullptr)
+			if (MyPlayer->GetInventoryManager()->_SelectItem != nullptr)
 			{
-				int16 ItemWidth = MyPlayer->GetInventoryManager()._SelectItem->_ItemInfo.ItemWidth;
-				int16 ItemHeight = MyPlayer->GetInventoryManager()._SelectItem->_ItemInfo.ItemHeight;
+				int16 ItemWidth = MyPlayer->GetInventoryManager()->_SelectItem->_ItemInfo.ItemWidth;
+				int16 ItemHeight = MyPlayer->GetInventoryManager()->_SelectItem->_ItemInfo.ItemHeight;
 
-				MyPlayer->GetInventoryManager()._SelectItem->_ItemInfo.ItemWidth = ItemHeight;
-				MyPlayer->GetInventoryManager()._SelectItem->_ItemInfo.ItemHeight = ItemWidth;
+				MyPlayer->GetInventoryManager()->_SelectItem->_ItemInfo.ItemWidth = ItemHeight;
+				MyPlayer->GetInventoryManager()->_SelectItem->_ItemInfo.ItemHeight = ItemWidth;
 
 				CMessage* ResItemRotatePacket = MakePacketResItemRotate(MyPlayer->_AccountId, MyPlayer->_GameObjectInfo.ObjectId);
 				SendPacket(Session->SessionId, ResItemRotatePacket);
@@ -2151,7 +2106,7 @@ void CGameServer::PacketProcReqQuickSlotSave(int64 SessionId, CMessage* Message)
 				st_QuickSlotBarSlotInfo* FindQuickSlotInfo = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarIndex, QuickSlotBarSlotIndex);
 				if (FindQuickSlotInfo != nullptr)
 				{
-					CItem* FindItem = MyPlayer->GetInventoryManager().FindInventoryItem(0, (en_SmallItemCategory)ItemSmallCategory);
+					CItem* FindItem = MyPlayer->GetInventoryManager()->FindInventoryItem(0, (en_SmallItemCategory)ItemSmallCategory);
 					if (FindItem != nullptr)
 					{
 						FindQuickSlotInfo->QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_ITEM;
@@ -2570,7 +2525,7 @@ void CGameServer::PacketProcReqCraftingConfirm(int64 SessionId, CMessage* Messag
 			{
 				// 인벤토리에 재료템 목록을 가지고 옴
 				vector<CItem*> FindMaterialItem;
-				vector<CItem*> FindMaterials = MyPlayer->GetInventoryManager().FindAllInventoryItem(0, CraftingMaterialItemInfo.MaterialItemType);
+				vector<CItem*> FindMaterials = MyPlayer->GetInventoryManager()->FindAllInventoryItem(0, CraftingMaterialItemInfo.MaterialItemType);
 
 				if (FindMaterials.size() > 0)
 				{
@@ -2613,13 +2568,13 @@ void CGameServer::PacketProcReqCraftingConfirm(int64 SessionId, CMessage* Messag
 			int16 FindItemGridPositionX = -1;
 			int16 FindItemGridPositionY = -1;
 
-			CItem* FindItem = MyPlayer->GetInventoryManager().FindInventoryItem(0, (en_SmallItemCategory)ReqCraftingItemType);
+			CItem* FindItem = MyPlayer->GetInventoryManager()->FindInventoryItem(0, (en_SmallItemCategory)ReqCraftingItemType);
 			if (FindItem == nullptr)
 			{
 				// 가방에 완성한 제작템이 없을 경우 새로 생성해준다.
 				CItem* CraftingItem = G_ObjectManager->ItemCreate((en_SmallItemCategory)ReqCraftingItemType);
 
-				MyPlayer->GetInventoryManager().InsertItem(0, CraftingItem);
+				MyPlayer->GetInventoryManager()->InsertItem(0, CraftingItem);
 
 				FindItemGridPositionX = CraftingItem->_ItemInfo.ItemTileGridPositionX;
 				FindItemGridPositionY = CraftingItem->_ItemInfo.ItemTileGridPositionY;				
@@ -2694,7 +2649,7 @@ void CGameServer::PacketProcReqItemUse(int64 SessionId, CMessage* Message)
 			int16 UseItemTileGridPositionY;
 			*Message >> UseItemTileGridPositionY;
 			
-			CItem* UseItem = MyPlayer->GetInventoryManager().FindInventoryItem(0, (en_SmallItemCategory)UseItemSmallCategory);
+			CItem* UseItem = MyPlayer->GetInventoryManager()->FindInventoryItem(0, (en_SmallItemCategory)UseItemSmallCategory);
 			if (UseItem != nullptr)
 			{
 				switch (UseItem->_ItemInfo.ItemSmallCategory)
@@ -2794,143 +2749,6 @@ void CGameServer::PacketProcReqOffEquipment(int64 SessionID, CMessage* Message)
 	}
 
 	ReturnSession(Session);
-}
-
-void CGameServer::PacketProcReqUIMenuTileBuy(int64 SessionID, CMessage* Message)
-{
-	st_Session* Session = FindSession(SessionID);
-
-	if (Session)
-	{
-		do
-		{
-			int64 AccountId;
-			int64 PlayerDBId;
-
-			if (!Session->IsLogin)
-			{
-				Disconnect(Session->SessionId);
-				break;
-			}
-
-			*Message >> AccountId;
-
-			// AccountId가 맞는지 확인
-			if (Session->AccountId != AccountId)
-			{
-				Disconnect(Session->SessionId);
-				break;
-			}
-
-			*Message >> PlayerDBId;
-
-			// 게임에 입장한 캐릭터를 가져온다.
-			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
-
-			// 조종하고 있는 플레이어가 있는지 확인 
-			if (MyPlayer == nullptr)
-			{
-				Disconnect(Session->SessionId);
-				break;
-			}
-			else
-			{
-				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
-				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
-				{
-					Disconnect(Session->SessionId);
-					break;
-				}
-			}
-
-			// 요청한 플레이어 시야범위 안에 있는 타일 정보 전송
-			CMap* Map = G_MapManager->GetMap(1);
-			if (Map != nullptr)
-			{				
-				vector<st_TileMapInfo> MapTileInfos = Map->FindMapTileInfo(MyPlayer);
-
-				CMessage* ResMenuTileBuyPacket = MakePacketResMenuTileBuy(MapTileInfos);
-				SendPacket(Session->SessionId, ResMenuTileBuyPacket);
-				ResMenuTileBuyPacket->Free();
-			}
-		} while (0);
-	}
-
-	ReturnSession(Session);
-}
-
-void CGameServer::PacketProcReqTileBuy(int64 SessionID, CMessage* Message)
-{
-	st_Session* Session = FindSession(SessionID);
-
-	if (Session)
-	{
-		do
-		{
-			int64 AccountID;
-			int64 PlayerID;
-
-			if (!Session->IsLogin)
-			{
-				Disconnect(Session->SessionId);
-				break;
-			}
-
-			*Message >> AccountID;
-
-			// AccountId가 맞는지 확인
-			if (Session->AccountId != AccountID)
-			{
-				Disconnect(Session->SessionId);
-				break;
-			}
-
-			*Message >> PlayerID;
-
-			// 게임에 입장한 캐릭터를 가져온다.
-			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
-
-			// 조종하고 있는 플레이어가 있는지 확인 
-			if (MyPlayer == nullptr)
-			{
-				Disconnect(Session->SessionId);
-				break;
-			}
-			else
-			{
-				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
-				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerID)
-				{
-					Disconnect(Session->SessionId);
-					break;
-				}
-			}
-
-			int32 TilePositionX;
-			*Message >> TilePositionX;
-			int32 TilePositionY;
-			*Message >> TilePositionY;
-
-			st_Vector2Int TileBuyPosition;
-			TileBuyPosition._X = TilePositionX;
-			TileBuyPosition._Y = TilePositionY;
-
-			CMap* Map = G_MapManager->GetMap(1);
-			if (Map->ApplyTileUserAlloc(MyPlayer, TileBuyPosition) == true)
-			{
-				st_TileMapInfo TileMapInfo;
-				TileMapInfo.TilePosition._X = TilePositionX;
-				TileMapInfo.TilePosition._Y = TilePositionY;
-				TileMapInfo.AccountID = AccountID;
-				TileMapInfo.PlayerID = PlayerID;
-				TileMapInfo.MapTileType = en_MapTileInfo::MAP_TILE_USER_ALLOC;
-
-				CMessage* ResTileBuyMessage = MakePacketResTileBuy(TileMapInfo);
-				SendPacketFieldOfView(MyPlayer, ResTileBuyMessage);
-				ResTileBuyMessage->Free();
-			}			
-		} while (0);
-	}
 }
 
 void CGameServer::PacketProcReqSeedFarming(int64 SessionID, CMessage* Message)
@@ -4454,7 +4272,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 
 #pragma region 가방 아이템 정보 읽어오기			
 			// 인벤토리 생성
-			MyPlayer->GetInventoryManager().InventoryCreate(1, (int8)en_InventoryManager::INVENTORY_DEFAULT_WIDH_SIZE, (int8)en_InventoryManager::INVENTORY_DEFAULT_HEIGHT_SIZE);
+			MyPlayer->GetInventoryManager()->InventoryCreate(1, (int8)en_InventoryManager::INVENTORY_DEFAULT_WIDH_SIZE, (int8)en_InventoryManager::INVENTORY_DEFAULT_HEIGHT_SIZE);
 
 			*ResCharacterInfoMessage << (int8)en_InventoryManager::INVENTORY_DEFAULT_WIDH_SIZE;
 			*ResCharacterInfoMessage << (int8)en_InventoryManager::INVENTORY_DEFAULT_HEIGHT_SIZE;
@@ -4502,7 +4320,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 					NewItem->_ItemInfo.ItemCurrentDurability = ItemDurability;
 					NewItem->_ItemInfo.ItemEnchantPoint = ItemEnchantPoint;					
 
-					MyPlayer->GetInventoryManager().DBItemInsertItem(0, NewItem);
+					MyPlayer->GetInventoryManager()->DBItemInsertItem(0, NewItem);
 					InventoryItems.push_back(NewItem);
 				}
 			}
@@ -4514,8 +4332,33 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 			{
 				*ResCharacterInfoMessage << Item;
 			}
-
 #pragma endregion		
+
+#pragma region 골드 정보 읽어오기
+			// 캐릭터가 소유하고 있었던 골드 정보를 GoldTable에서 읽어온다.			
+			SP::CDBGameServerGoldGet CharacterGoldGet(*DBCharacterInfoGetConnection);
+			CharacterGoldGet.InAccountDBId(MyPlayer->_AccountId);
+			CharacterGoldGet.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
+
+			int64 GoldCoin = 0;
+			int16 SliverCoin = 0;
+			int16 BronzeCoin = 0;
+
+			CharacterGoldGet.OutGoldCoin(GoldCoin);
+			CharacterGoldGet.OutSliverCoin(SliverCoin);
+			CharacterGoldGet.OutBronzeCoin(BronzeCoin);
+
+			if (CharacterGoldGet.Execute() && CharacterGoldGet.Fetch())
+			{
+				// DB에서 읽어온 Gold를 Inventory에 저장한다.
+				MyPlayer->GetInventoryManager()->DBMoneyInsert(GoldCoin, SliverCoin, BronzeCoin);
+
+				// 골드 정보 담기
+				*ResCharacterInfoMessage << GoldCoin;
+				*ResCharacterInfoMessage << SliverCoin;
+				*ResCharacterInfoMessage << BronzeCoin;
+			}
+#pragma endregion	
 
 #pragma region 퀵슬롯 정보 가져와서 클라에 보내기
 			// 퀵슬롯 정보 초기화
@@ -4579,7 +4422,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 					NewQuickSlotBarSlot.QuickBarSkill = nullptr;
 				}
 
-				CItem* FindItem = MyPlayer->GetInventoryManager().FindInventoryItem(0, (en_SmallItemCategory)QuickSlotItemSmallCategory);
+				CItem* FindItem = MyPlayer->GetInventoryManager()->FindInventoryItem(0, (en_SmallItemCategory)QuickSlotItemSmallCategory);
 				if (FindItem != nullptr)
 				{
 					NewQuickSlotBarSlot.QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_ITEM;
@@ -4650,33 +4493,6 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 				*ResCharacterInfoMessage << EquipmentItemInfo;
 			}
 #pragma endregion
-
-
-#pragma region 골드 정보 읽어오기
-			// 캐릭터가 소유하고 있었던 골드 정보를 GoldTable에서 읽어온다.			
-			SP::CDBGameServerGoldGet CharacterGoldGet(*DBCharacterInfoGetConnection);
-			CharacterGoldGet.InAccountDBId(MyPlayer->_AccountId);
-			CharacterGoldGet.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
-
-			int64 GoldCoin = 0;
-			int16 SliverCoin = 0;
-			int16 BronzeCoin = 0;
-
-			CharacterGoldGet.OutGoldCoin(GoldCoin);
-			CharacterGoldGet.OutSliverCoin(SliverCoin);
-			CharacterGoldGet.OutBronzeCoin(BronzeCoin);
-
-			if (CharacterGoldGet.Execute() && CharacterGoldGet.Fetch())
-			{
-				// DB에서 읽어온 Gold를 Inventory에 저장한다.
-				MyPlayer->GetInventoryManager().DBMoneyInsert(GoldCoin, SliverCoin, BronzeCoin);
-
-				// 골드 정보 담기
-				*ResCharacterInfoMessage << GoldCoin;
-				*ResCharacterInfoMessage << SliverCoin;
-				*ResCharacterInfoMessage << BronzeCoin;				
-			}			
-#pragma endregion	
 
 #pragma region 조합템 정보 보내기			
 			vector<st_CraftingItemCategory> CraftingItemCategorys;
@@ -4899,7 +4715,7 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 	}
 
 	// 장비 정보 DB에 저장
-	CItem** EquipmentPartsItem = LeavePlayer->_Equipment.GetEquipmentParts();
+	/*CItem** EquipmentPartsItem = LeavePlayer->_Equipment.GetEquipmentParts();
 	for (int8 i = 1; i <= (int8)en_EquipmentParts::EQUIPMENT_PARTS_BOOT; i++)
 	{
 		if (EquipmentPartsItem[i] != nullptr)
@@ -4934,13 +4750,13 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 
 			OffEquipment.Execute();
 		}
-	}
+	}*/
 
 	// 가방 정보 DB에 저장	
-	CInventory** LeavePlayerInventorys = LeavePlayer->GetInventoryManager().GetInventoryManager();
+	CInventory** LeavePlayerInventorys = LeavePlayer->GetInventoryManager()->GetInventoryManager();
 
 	// 가방 DB 청소 후 새로 저장
-	for (int i = 0; i < LeavePlayer->GetInventoryManager().GetInventoryCount(); i++)
+	for (int i = 0; i < LeavePlayer->GetInventoryManager()->GetInventoryCount(); i++)
 	{
 		SP::CDBGameServerInventoryAllSlotInit InventoryAllSlotInit(*PlayerInfoSaveDBConnection);
 		InventoryAllSlotInit.InOwnerAccountID(LeavePlayer->_AccountId);
@@ -5057,6 +4873,8 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobLeaveChannelPlayer(CGameObject* 
 	LeaveChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_PLAYER_LEAVE;
 
 	CGameServerMessage* LeaveChannelMessage = CGameServerMessage::GameServerMessageAlloc();
+	LeaveChannelMessage->Clear();
+
 	*LeaveChannelMessage << &LeavePlayerObject;
 
 	if (PlayerIndexes != nullptr)
@@ -5070,6 +4888,42 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobLeaveChannelPlayer(CGameObject* 
 	LeaveChannelJob->GameObjectJobMessage = LeaveChannelMessage;
 
 	return LeaveChannelJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobMove(float DirectionX, float DirectionY, float PositionX, float PositionY, int8 GameObjectState)
+{
+	st_GameObjectJob* MoveJob = G_ObjectManager->GameObjectJobCreate();
+	MoveJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_MOVE;
+
+	CGameServerMessage* MoveMessage = CGameServerMessage::GameServerMessageAlloc();
+	MoveMessage->Clear();
+
+	*MoveMessage << DirectionX;
+	*MoveMessage << DirectionY;
+	*MoveMessage << PositionX;
+	*MoveMessage << PositionY;
+	*MoveMessage << GameObjectState;
+
+	MoveJob->GameObjectJobMessage = MoveMessage;
+
+	return MoveJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobMoveStop(float PositionX, float PositionY, int8 GameObjectState)
+{
+	st_GameObjectJob* MoveStopJob = G_ObjectManager->GameObjectJobCreate();
+	MoveStopJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_MOVE_STOP;
+
+	CGameServerMessage* MoveStopMessage = CGameServerMessage::GameServerMessageAlloc();
+	MoveStopMessage->Clear();
+
+	*MoveStopMessage << PositionX;
+	*MoveStopMessage << PositionY;
+	*MoveStopMessage << GameObjectState;
+
+	MoveStopJob->GameObjectJobMessage = MoveStopMessage;
+
+	return MoveStopJob;
 }
 
 st_GameObjectJob* CGameServer::MakeGameObjectJobDefaultAttack()
@@ -5502,49 +5356,6 @@ CGameServerMessage* CGameServer::MakePacketCraftingList(int64 AccountId, int64 P
 	}
 
 	return ResCraftingListMessage;
-}
-
-CGameServerMessage* CGameServer::MakePacketResMenuTileBuy(vector<st_TileMapInfo> AroundMapTile)
-{
-	CGameServerMessage* ResMenuTileBuyMessage = CGameServerMessage::GameServerMessageAlloc();
-	if (ResMenuTileBuyMessage == nullptr)
-	{
-		return nullptr;
-	}
-
-	ResMenuTileBuyMessage->Clear();
-
-	*ResMenuTileBuyMessage << (int16)en_PACKET_S2C_UI_MENU_TILE_BUY;
-	
-	int16 AroundMapTileCount = (int16)AroundMapTile.size();
-	*ResMenuTileBuyMessage << AroundMapTileCount;
-	
-	for (auto MapTileInfo : AroundMapTile)
-	{
-		*ResMenuTileBuyMessage << MapTileInfo;
-	}
-
-	return ResMenuTileBuyMessage;
-}
-
-CGameServerMessage* CGameServer::MakePacketResTileBuy(st_TileMapInfo TileMapInfo)
-{
-	CGameServerMessage* TileBuyMessage = CGameServerMessage::GameServerMessageAlloc();
-	if (TileBuyMessage == nullptr)
-	{
-		return nullptr;
-	}
-
-	TileBuyMessage->Clear();
-
-	*TileBuyMessage << (int16)en_PACKET_S2C_TILE_BUY;
-	*TileBuyMessage << (int8)TileMapInfo.MapTileType;
-	*TileBuyMessage << TileMapInfo.AccountID;
-	*TileBuyMessage << TileMapInfo.PlayerID;
-	*TileBuyMessage << TileMapInfo.TilePosition._X;
-	*TileBuyMessage << TileMapInfo.TilePosition._Y;			
-
-	return TileBuyMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketPing()
@@ -6010,7 +5821,7 @@ CGameServerMessage* CGameServer::MakePacketResEnterGame(bool EnterGameSuccess, s
 	return ResEnterGamePacket;
 }
 
-CGameServerMessage* CGameServer::MakePacketResDamage(int64 ObjectID, int64 TargetID, en_SkillType SkillType, int32 Damage, bool IsCritical)
+CGameServerMessage* CGameServer::MakePacketResDamage(int64 ObjectID, int64 TargetID, int16 SkillType, en_ResourceName EffectType, int32 Damage, int32 ChangeHP, bool IsCritical)
 {
 	CGameServerMessage* ResDamageMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResDamageMessage == nullptr)
@@ -6023,8 +5834,10 @@ CGameServerMessage* CGameServer::MakePacketResDamage(int64 ObjectID, int64 Targe
 	*ResDamageMessage << (int16)en_PACKET_S2C_COMMON_DAMAGE;
 	*ResDamageMessage << ObjectID;
 	*ResDamageMessage << TargetID;
-	*ResDamageMessage << (int16)SkillType;
+	*ResDamageMessage << SkillType;
+	*ResDamageMessage << (int16)EffectType;
 	*ResDamageMessage << Damage;
+	*ResDamageMessage << ChangeHP;
 	*ResDamageMessage << IsCritical;
 
 	return ResDamageMessage;
@@ -6264,7 +6077,7 @@ CGameServerMessage* CGameServer::MakePacketResChangeMonsterObjectState(int64 Obj
 	return ResObjectStatePacket;
 }
 
-CGameServerMessage* CGameServer::MakePacketResMove(int64 ObjectId, bool CanMove, st_PositionInfo PositionInfo)
+CGameServerMessage* CGameServer::MakePacketResMove(int64 ObjectId, float MoveDirectionX, float MoveDirectionY)
 {
 	CGameServerMessage* ResMoveMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResMoveMessage == nullptr)
@@ -6276,9 +6089,8 @@ CGameServerMessage* CGameServer::MakePacketResMove(int64 ObjectId, bool CanMove,
 
 	*ResMoveMessage << (int16)en_PACKET_S2C_MOVE;	
 	*ResMoveMessage << ObjectId;
-	*ResMoveMessage << CanMove;
-
-	*ResMoveMessage << PositionInfo;
+	*ResMoveMessage << MoveDirectionX;
+	*ResMoveMessage << MoveDirectionY;		
 
 	return ResMoveMessage;
 }
@@ -6303,7 +6115,7 @@ CGameServerMessage* CGameServer::MakePacketResMonsterMove(int64 ObjectId, en_Gam
 	return ResMonsterMoveMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResMoveStop(int64 ObjectId, st_PositionInfo PositionInto)
+CGameServerMessage* CGameServer::MakePacketResMoveStop(int64 ObjectId, float StopPositionX, float StopPositionY)
 {
 	CGameServerMessage* ResMoveStopPacket = CGameServerMessage::GameServerMessageAlloc();
 	if (ResMoveStopPacket == nullptr)
@@ -6315,7 +6127,8 @@ CGameServerMessage* CGameServer::MakePacketResMoveStop(int64 ObjectId, st_Positi
 
 	*ResMoveStopPacket << (int16)en_PACKET_S2C_MOVE_STOP;	
 	*ResMoveStopPacket << ObjectId;
-	*ResMoveStopPacket << PositionInto;
+	*ResMoveStopPacket << StopPositionX;
+	*ResMoveStopPacket << StopPositionY;	
 
 	return ResMoveStopPacket;
 }
@@ -6612,24 +6425,6 @@ CGameServerMessage* CGameServer::MakePacketResSkillLearn(bool IsSkillLearn, en_S
 	*ResSkillLearnMessage << SkillPoint;
 
 	return ResSkillLearnMessage;
-}
-
-CGameServerMessage* CGameServer::MakePacketEffect(int64 TargetObjectId, en_EffectType EffectType, float PrintEffectTime)
-{
-	CGameServerMessage* ResEffectMessage = CGameServerMessage::GameServerMessageAlloc();
-	if (ResEffectMessage == nullptr)
-	{
-		return nullptr;
-	}
-
-	ResEffectMessage->Clear();
-
-	*ResEffectMessage << (int16)en_PACKET_S2C_EFFECT;
-	*ResEffectMessage << TargetObjectId;
-	*ResEffectMessage << (int16)EffectType;
-	*ResEffectMessage << PrintEffectTime;
-
-	return ResEffectMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketBufDeBuf(int64 TargetObjectId, bool BufDeBuf, st_SkillInfo* SkillInfo)

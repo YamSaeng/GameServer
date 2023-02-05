@@ -212,15 +212,7 @@ private:
 	//------------------------------------------------------------------
 	// 장비 아이템 해제 요청 처리
 	//------------------------------------------------------------------
-	void PacketProcReqOffEquipment(int64 SessionID, CMessage* Message);
-	//------------------------------------------------------------------
-	// 사유지 구입 UI 요청 처리
-	//------------------------------------------------------------------
-	void PacketProcReqUIMenuTileBuy(int64 SessionID, CMessage* Message);
-	//------------------------------------------------------------------
-	// 사유지 구입 요청 처리
-	//------------------------------------------------------------------
-	void PacketProcReqTileBuy(int64 SessionID, CMessage* Message);
+	void PacketProcReqOffEquipment(int64 SessionID, CMessage* Message);	
 	//------------------------------------------------------------------
 	// 씨앗 심기 요청 처리
 	//------------------------------------------------------------------
@@ -320,6 +312,8 @@ private:
 	// 플레이어 채널 퇴장 잡 생성 함수
 	//------------------------------------------------------------------------------
 	st_GameObjectJob* MakeGameObjectJobLeaveChannelPlayer(CGameObject* LeavePlayerObject, int32* PlayerIndexes);
+	st_GameObjectJob* MakeGameObjectJobMove(float DirectionX, float DirectionY, float PositionX, float PositionY, int8 GameObjectState);
+	st_GameObjectJob* MakeGameObjectJobMoveStop(float PositionX, float PositionY, int8 GameObjectState);
 	//-------------------------------------------------
 	// 일반 공격 켜기 잡 생성 함수
 	//-------------------------------------------------
@@ -427,15 +421,7 @@ private:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 제작템 목록 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketCraftingList(int64 AccountId, int64 PlayerId, vector<st_CraftingItemCategory> CraftingItemList);		
-	//----------------------------------------------------------------------------------------------	
-	// 게임서버 메뉴 UI 타일 구입 응답 패킷 조합
-	//----------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResMenuTileBuy(vector<st_TileMapInfo> AroundMapTile);
-	//-----------------------------------------------------------------------------------------
-	// 게임서버 타일 구입 응답 패킷 조합
-	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResTileBuy(st_TileMapInfo TileMapInfo);
+	CGameServerMessage* MakePacketCraftingList(int64 AccountId, int64 PlayerId, vector<st_CraftingItemCategory> CraftingItemList);			
 	
 	//-------------------------------------------------
 	// 게임서버 핑 패킷 조합
@@ -554,10 +540,10 @@ public:
 	// 게임서버 입장 요청 응답 패킷 조합
 	//-------------------------------------------------------------
 	CGameServerMessage* MakePacketResEnterGame(bool EnterGameSuccess, st_GameObjectInfo* ObjectInfo, st_Vector2Int* SpawnPosition);
-	//----------------------------------------------------------------------------------------
-	// 게임서버 일반 데미지 응답 패킷 조합
-	//----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResDamage(int64 ObjectID, int64 TargetID, en_SkillType SkillType, int32 Damage, bool IsCritical);
+	//---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	// 게임서버 일반 데미지 응답 패킷 조합 ( 데미지 가한 대상 ID, 데미지 입은 대상 ID, 데미지를 입힌 기술 타입, 데미지 양, 데미지 입은 대상 변경된 HP 정보,  크리티컬 여부)
+	//---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResDamage(int64 ObjectID, int64 TargetID, int16 SkillType, en_ResourceName EffectType, int32 Damage, int32 ChangeHP, bool IsCritical);
 	//----------------------------------------------------------------------------------------
 	// 게임서버 채집 데미지 응답 패킷 조합
 	//----------------------------------------------------------------------------------------
@@ -606,7 +592,7 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 이동 요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResMove(int64 ObjectId, bool CanMove, st_PositionInfo PositionInfo);
+	CGameServerMessage* MakePacketResMove(int64 ObjectId, float MoveDirectionX, float MoveDirectionY);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 몬스터 이동 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -614,7 +600,7 @@ public:
 	//------------------------------------------------------------------------------------------------------
 	// 게임서버 이동 멈춤 요청 응답 패킷 조합
 	//------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResMoveStop(int64 ObjectId, st_PositionInfo PositionInto);
+	CGameServerMessage* MakePacketResMoveStop(int64 ObjectId, float StopPositionX, float StopPositionY);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 정찰 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -671,11 +657,7 @@ public:
 	//-------------------------------------------------------------------
 	// 게임서버 스킬 배우기 응답 패킷 조합
 	//-------------------------------------------------------------------
-	CGameServerMessage* MakePacketResSkillLearn(bool IsSkillLearn, en_SkillType LearnSkillType, int8 SkillMaxPoint, int8 SkillPoint);	
-	//-----------------------------------------------------------------------------------------
-	// 게임서버 이펙트 출력 패킷 조합
-	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketEffect(int64 TargetObjectId, en_EffectType EffectType, float PrintEffectTime);
+	CGameServerMessage* MakePacketResSkillLearn(bool IsSkillLearn, en_SkillType LearnSkillType, int8 SkillMaxPoint, int8 SkillPoint);		
 	//---------------------------------------------------------------------------------
 	// 게임서버 강화효과, 약화효과 패킷 조합
 	//---------------------------------------------------------------------------------

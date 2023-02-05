@@ -191,7 +191,6 @@
     <ClInclude Include="Macro.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="MapManager.h" />
-    <ClInclude Include="MapTile.h" />
     <ClInclude Include="Math.h" />
     <ClInclude Include="MemoryPoolTLS.h" />
     <ClInclude Include="Message.h" />
@@ -310,7 +309,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="MapManager.cpp" />
-    <ClCompile Include="MapTile.cpp" />
     <ClCompile Include="Message.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
