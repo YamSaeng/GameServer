@@ -370,33 +370,7 @@ namespace SP
 		void InRequireExperience(int64& RequireExperience) { BindParam(21, RequireExperience); }
 		void InTotalExperience(int64& TotalExperience) { BindParam(22, TotalExperience); }		
 		void InSkillMaxPoint(int8& SkillMaxPoint) { BindParam(23, SkillMaxPoint); }
-	};
-
-	// 타일 맵 정보 할당 및 해제
-	class CDBGameServerTileMapInfoSave : public CDBBind<6, 0>
-	{
-	public:
-		CDBGameServerTileMapInfoSave(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spTileMapInfoSave(?,?,?,?,?,?)}") {}
-		void InMapID(int16& MapID) { BindParam(0, MapID); }
-		void InMapTileAllocFree(bool& MapTileAllocFree) { BindParam(1, MapTileAllocFree); }
-		void InMapTileAccountID(int64& MapTileAccountID) { BindParam(2, MapTileAccountID); }
-		void InMapTilePlayerID(int64& MapTilePlayerID) { BindParam(3, MapTilePlayerID); }
-		void InMapTilePositionX(int32& MapTilePositionX) { BindParam(4, MapTilePositionX); }
-		void InMapTilePositionY(int32& MapTilePositionY) { BindParam(5, MapTilePositionY); }
-	};
-
-	// 타일 맵 할당 및 해제 정보 가져오기
-	class CDBGameServerGetTileMapInfoAllocFree : public CDBBind<1, 5>
-	{
-	public:
-		CDBGameServerGetTileMapInfoAllocFree(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spGetTileMapInfoAllocFree(?)}") {}
-		void InMapID(int16& MapID) { BindParam(0, MapID); }
-		void OutMapTileAllocFree(bool& MapTileAllocFree) { BindCol(0, MapTileAllocFree); }
-		void OutMapTileAccountID(int64& MapTileAccountID) { BindCol(1, MapTileAccountID); }
-		void OutMapTilePlayerID(int64& MapTilePlayerID) { BindCol(2, MapTilePlayerID); }
-		void OutMapTilePositionX(int32& MapTilePositionX) { BindCol(3, MapTilePositionX); }
-		void OutMapTilePositionY(int32& MapTilePositionY) { BindCol(4, MapTilePositionY); }
-	};
+	};	
 
 	// 장비 테이블 빈 껍데기 채우기
 	class CDBGameServerInitEquipment : public CDBBind<3, 0>

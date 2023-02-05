@@ -115,17 +115,7 @@
 		<Column name="LastPositionY" type="int" notnull="true"/>
 		<Column name="LastPositionX" type="int" notnull="true"/>
 		<Column name="CropCreateTime" type="DateTime" notnull="true"/>
-	</Table>
-
-	<!-- 지도 타일 테이블 -->
-	<Table name="MapTile" desc="MapTile Table">
-		<Column name="MapID" type="SmallInt" notnull="true"/>
-		<Column name="MapTileAllocFree" type="bit" notnull="true"/>
-		<Column name="MapTileAccountID" type="BigInt" notnull ="true"/>
-		<Column name="MapTilePlayerID" type="BigInt" notnull ="true"/>
-		<Column name="MapTilePositionX" type="int" notnull ="true"/>
-		<Column name="MapTilePositionY" type="int" notnull ="true"/>
-	</Table>
+	</Table>	
 
 	<!-- 장비 테이블 -->
 	<Table name="Equipment" desc="Equipment Table">
@@ -1126,38 +1116,7 @@
 			WHERE AccountDBId = (@AccountDBId)
 		  ]]>
 		</Body>
-	</Procedure>
-
-	<!-- 지도 타일 할당 및 해제 -->
-	<Procedure name="spTileMapInfoAllocFree">
-		<Param name="@MapID" type="SmallInt"/>
-		<Param name="@MapTileAllocFree" type="bit"/>
-		<Param name="@MapTileAccountID" type="BigInt"/>
-		<Param name="@MapTilePlayerID" type="BigInt"/>
-		<Param name="@MapTilePositionX" type="Int"/>
-		<Param name="@MapTilePositionY" type="Int"/>
-		<Body>
-			<![CDATA[
-		     SET NOCOUNT ON
-             UPDATE [dbo].[MapTile]
-             SET MapID = (@MapID), MapTileAllocFree = (@MapTileAllocFree), MapTileAccountID = (@MapTileAccountID), MapTilePlayerID = (@MapTilePlayerID)
-             WHERE MapTilePositionX = (@MapTilePositionX) AND MapTilePositionY = (@MapTilePositionY)
-		  ]]>
-		</Body>
-	</Procedure>
-
-	<!-- 지도 타일 정보 가져오기 -->
-	<Procedure name="spGetTileMapInfoAllocFree">
-		<Param name="@MapID" type="SmallInt"/>
-		<Body>
-			<![CDATA[
-			    SET NOCOUNT ON
-				SELECT MapTileAllocFree, MapTileAccountID, MapTilePlayerID, MapTilePositionX, MapTilePositionY
-                FROM [dbo].[MapTile]
-                WHERE MapID = (@MapID)
-			]]>
-		</Body>
-	</Procedure>
+	</Procedure>	
 
 	<!-- 장비 착용 프로시저 -->
 	<Procedure name="spOnEquipment">
