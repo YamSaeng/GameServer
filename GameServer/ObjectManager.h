@@ -18,7 +18,6 @@ class CSawmill;
 class CPotato;
 class CCorn;
 class CCropItem;
-class CMapTile;
 class CNonPlayer;
 
 class CObjectManager
@@ -51,8 +50,7 @@ private:
 	CMemoryPoolTLS<CFurnace>* _FurnaceMemoryPool;
 	CMemoryPoolTLS<CSawmill>* _SamillMemoryPool;	
 	CMemoryPoolTLS<CPotato>* _PotatoMemoryPool;
-	CMemoryPoolTLS<CCorn>* _CornMemoryPool;
-	CMemoryPoolTLS<CMapTile>* _MapTileMemoryPool;
+	CMemoryPoolTLS<CCorn>* _CornMemoryPool;	
 
 	int64 _GameServerObjectId;
 

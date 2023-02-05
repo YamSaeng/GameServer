@@ -11,7 +11,6 @@
 #include "Potato.h"
 #include "Corn.h"
 #include "NonPlayer.h"
-#include "MapTile.h"
 #include "ChannelManager.h"
 #include <atlbase.h>
 
@@ -129,10 +128,7 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 		break;
 	case en_GameObjectType::OBJECT_CROP_CORN:
 		NewObject = _CornMemoryPool->Alloc();
-		break;
-	case en_GameObjectType::OBJECT_TILE:
-		NewObject = _MapTileMemoryPool->Alloc();
-		break;
+		break;	
 	}
 
 	if (NewObject != nullptr)
@@ -183,10 +179,7 @@ void CObjectManager::ObjectReturn(CGameObject* ReturnObject)
 			break;
 		case en_GameObjectType::OBJECT_CROP_CORN:
 			_CornMemoryPool->Free((CCorn*)ReturnObject);
-			break;
-		case en_GameObjectType::OBJECT_TILE:
-			_MapTileMemoryPool->Free((CMapTile*)ReturnObject);
-			break;
+			break;		
 		}
 	}	
 	else
