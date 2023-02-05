@@ -41,7 +41,6 @@ public:
 	CGameServerMessage& operator << (st_CraftingMaterialItemInfo& CraftingMaterialItemInfo);
 
 	CGameServerMessage& operator << (st_CraftingTableRecipe& CraftingTable);
-	CGameServerMessage& operator << (st_TileMapInfo& TileMapInfo);
 
 	CGameServerMessage& operator << (CItem** Item);
 	CGameServerMessage& operator << (CItem* Item);

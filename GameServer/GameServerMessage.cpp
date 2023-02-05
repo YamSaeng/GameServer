@@ -287,16 +287,6 @@ CGameServerMessage& CGameServerMessage::operator<<(st_CraftingTableRecipe& Craft
     return *(this);
 }
 
-CGameServerMessage& CGameServerMessage::operator<<(st_TileMapInfo& TileMapInfo)
-{
-    *this << (int8)TileMapInfo.MapTileType;
-    *this << TileMapInfo.AccountID;
-    *this << TileMapInfo.PlayerID;
-    *this << TileMapInfo.TilePosition;
-
-    return *(this);
-}
-
 CGameServerMessage& CGameServerMessage::operator<<(CItem** Item)
 {
     memcpy(&_MessageBuf[_Rear], Item, sizeof(CItem*));
