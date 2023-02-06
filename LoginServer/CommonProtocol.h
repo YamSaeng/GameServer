@@ -106,16 +106,20 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// 게임서버 캐릭터 움직이기 요청
 	// int64 AccountId
 	// int32 PlayerDBId
-	// st_PositionInfo PositionInfo
-	// int8 Dir
+	// float DirectionX
+	// float DirectionY
+	// float MoveStartPositionX
+	// float MoveStartPositionY
+	// int8 MoveStartState
 	//------------------------------------------------------------
 	en_PACKET_C2S_MOVE,
 
 	//------------------------------------------------------------
 	// 게임서버 캐릭터 움직이기 요청 응답	
 	// int32 PlayerDBId
-	// bool CanGo
-	// st_PositionInfo PositionInfo
+	// float MoveStopPosition
+	// float MoveStopPosition
+	// int8 MoveStopState	
 	//------------------------------------------------------------
 	en_PACKET_S2C_MOVE,
 
@@ -666,14 +670,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int8 QuickSlotBarIndexA
 	// int8 QuickSlotBarSlotIndexA	
 	//------------------------------------------------------------
-	en_PACKET_S2C_QUICKSLOT_EMPTY,
-
-	//------------------------------------------------------------
-	// 게임서버 이펙트 출력 
-	// int64 ObjectId
-	// st_SkillInfo EffectSkillInfo
-	//------------------------------------------------------------
-	en_PACKET_S2C_EFFECT,
+	en_PACKET_S2C_QUICKSLOT_EMPTY,	
 
 	//------------------------------------------------------------
 	// 게임서버 제작템 목록
@@ -784,36 +781,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int8 MessageCount
 	// wstring Messages	
 	//-----------------------------------------------------------
-	en_PACKET_S2C_PERSONAL_MESSAGE,
-
-	//-----------------------------------------------------------
-	// 게임서버 UI 메뉴 타일 구입 요청
-	// int64 AccountID
-	// int64 PlayerID
-	//-----------------------------------------------------------
-	en_PACKET_C2S_UI_MENU_TILE_BUY,
-
-	//-----------------------------------------------------------
-	// 게임서버 UI 메뉴 타일 구입 요청 응답
-	//-----------------------------------------------------------
-	en_PACKET_S2C_UI_MENU_TILE_BUY,
-
-	//-----------------------------------------------------------
-	// 게임서버 타일 구입 요청
-	// int64 AccountID
-	// int64 PlayerID
-	// int32 TilePositionX
-	// int32 TilePositionY
-	//-----------------------------------------------------------
-	en_PACKET_C2S_TILE_BUY,
-
-	//-----------------------------------------------------------
-	// 게임서버 타일 구입 요청 응답   
-	// int64 TileObjectID
-	// int32 TilePositionX
-	// int32 TilePositionY
-	//-----------------------------------------------------------
-	en_PACKET_S2C_TILE_BUY,
+	en_PACKET_S2C_GLOBAL_MESSAGE,	
 
 	//-----------------------------------------------------------
 	// 게임서버 시간 요청 

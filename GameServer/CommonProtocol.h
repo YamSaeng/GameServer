@@ -106,16 +106,20 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// 게임서버 캐릭터 움직이기 요청
 	// int64 AccountId
 	// int32 PlayerDBId
-	// st_PositionInfo PositionInfo
-	// int8 Dir
+	// float DirectionX
+	// float DirectionY
+	// float MoveStartPositionX
+	// float MoveStartPositionY
+	// int8 MoveStartState
 	//------------------------------------------------------------
 	en_PACKET_C2S_MOVE,
 
 	//------------------------------------------------------------
 	// 게임서버 캐릭터 움직이기 요청 응답	
 	// int32 PlayerDBId
-	// bool CanGo
-	// st_PositionInfo PositionInfo
+	// float MoveStopPosition
+	// float MoveStopPosition
+	// int8 MoveStopState	
 	//------------------------------------------------------------
 	en_PACKET_S2C_MOVE,
 
@@ -811,7 +815,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int8 MessageCount
 	// wstring Messages	
 	//-----------------------------------------------------------
-	en_PACKET_S2C_PERSONAL_MESSAGE,	
+	en_PACKET_S2C_GLOBAL_MESSAGE,	
 
 	//-----------------------------------------------------------
 	// 게임서버 씨앗 심기 요청
