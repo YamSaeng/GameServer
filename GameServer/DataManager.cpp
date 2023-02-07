@@ -726,245 +726,53 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 	rapidjson::Document Document;
 	Document.Parse(FileStr);
 
-	for (auto& Filed : Document["PlayerWarriorCharacterStatus"].GetArray())
+	for (auto& Filed : Document["PlayerCharacterStatus"].GetArray())
 	{
 		string PlayerType = Filed["PlayerType"].GetString();
 
-		for (auto& PlayerWarriorCharacterFiled : Filed["PlayerWarriorCharacterLevelDataList"].GetArray())
+		for (auto& PlayerCharacterFiled : Filed["PlayerCharacterLevelDataList"].GetArray())
 		{
-			int Level = PlayerWarriorCharacterFiled["Level"].GetInt();
-			int MaxHP = PlayerWarriorCharacterFiled["MaxHP"].GetInt();
-			int MaxMP = PlayerWarriorCharacterFiled["MaxMP"].GetInt();
-			int MaxDP = PlayerWarriorCharacterFiled["MaxDP"].GetInt();
-			int AutoRecoveryHPPercent = PlayerWarriorCharacterFiled["AutoRecoveryHPPercent"].GetInt();
-			int AutoRecoveryMPPercent = PlayerWarriorCharacterFiled["AutoRecoveryMPPercent"].GetInt();
-			int MinMeleeAttackDamage = PlayerWarriorCharacterFiled["MinMeleeAttackDamage"].GetInt();
-			int MaxMeleeAttackDamage = PlayerWarriorCharacterFiled["MaxMeleeAttackDamage"].GetInt();
-			int16 MeleeAttackHitRate = (int16)PlayerWarriorCharacterFiled["MeleeAttackHitRate"].GetInt();
-			int16 MagicDamage = (int16)PlayerWarriorCharacterFiled["MagicDamage"].GetInt();
-			float MagicHitRate = (int16)PlayerWarriorCharacterFiled["MagicHitRate"].GetFloat();
-			int Defence = PlayerWarriorCharacterFiled["Defence"].GetInt();
-			int16 EvasionRate = PlayerWarriorCharacterFiled["EvasionRate"].GetInt();
-			int16 MeleeCriticalPoint = (int16)(PlayerWarriorCharacterFiled["MeleeCriticalPoint"].GetInt());
-			int16 MagicCriticalPoint = (int16)(PlayerWarriorCharacterFiled["MagicCriticalPoint"].GetInt());
-			float Speed = PlayerWarriorCharacterFiled["Speed"].GetFloat();
+			int Level = PlayerCharacterFiled["Level"].GetInt();
+			int MaxHP = PlayerCharacterFiled["MaxHP"].GetInt();
+			int MaxMP = PlayerCharacterFiled["MaxMP"].GetInt();
+			int MaxDP = PlayerCharacterFiled["MaxDP"].GetInt();
+			int AutoRecoveryHPPercent = PlayerCharacterFiled["AutoRecoveryHPPercent"].GetInt();
+			int AutoRecoveryMPPercent = PlayerCharacterFiled["AutoRecoveryMPPercent"].GetInt();
+			int MinMeleeAttackDamage = PlayerCharacterFiled["MinMeleeAttackDamage"].GetInt();
+			int MaxMeleeAttackDamage = PlayerCharacterFiled["MaxMeleeAttackDamage"].GetInt();
+			int16 MeleeAttackHitRate = (int16)PlayerCharacterFiled["MeleeAttackHitRate"].GetInt();
+			int16 MagicDamage = (int16)PlayerCharacterFiled["MagicDamage"].GetInt();
+			float MagicHitRate = (int16)PlayerCharacterFiled["MagicHitRate"].GetFloat();
+			int Defence = PlayerCharacterFiled["Defence"].GetInt();
+			int16 EvasionRate = PlayerCharacterFiled["EvasionRate"].GetInt();
+			int16 MeleeCriticalPoint = (int16)(PlayerCharacterFiled["MeleeCriticalPoint"].GetInt());
+			int16 MagicCriticalPoint = (int16)(PlayerCharacterFiled["MagicCriticalPoint"].GetInt());
+			float Speed = PlayerCharacterFiled["Speed"].GetFloat();
 
-			st_ObjectStatusData* WarriorStatusData = new st_ObjectStatusData();
+			st_ObjectStatusData* PlayerStatusData = new st_ObjectStatusData();
 
-			WarriorStatusData->PlayerType = en_GameObjectType::OBJECT_WARRIOR_PLAYER;
+			PlayerStatusData->PlayerType = en_GameObjectType::OBJECT_PLAYER;
 
-			WarriorStatusData->Level = Level;
-			WarriorStatusData->MaxHP = MaxHP;
-			WarriorStatusData->MaxMP = MaxMP;
-			WarriorStatusData->MaxDP = MaxDP;
-			WarriorStatusData->AutoRecoveryHPPercent = AutoRecoveryHPPercent;
-			WarriorStatusData->AutoRecoveryMPPercent = AutoRecoveryMPPercent;
-			WarriorStatusData->MinMeleeAttackDamage = MinMeleeAttackDamage;
-			WarriorStatusData->MaxMeleeAttackDamage = MaxMeleeAttackDamage;
-			WarriorStatusData->MeleeAttackHitRate = MeleeAttackHitRate;
-			WarriorStatusData->MagicDamage = MagicDamage;
-			WarriorStatusData->MagicHitRate = MagicHitRate;
-			WarriorStatusData->Defence = Defence;
-			WarriorStatusData->EvasionRate = EvasionRate;
-			WarriorStatusData->MeleeCriticalPoint = MeleeCriticalPoint;
-			WarriorStatusData->MagicCriticalPoint = MagicCriticalPoint;
-			WarriorStatusData->Speed = Speed;
+			PlayerStatusData->Level = Level;
+			PlayerStatusData->MaxHP = MaxHP;
+			PlayerStatusData->MaxMP = MaxMP;
+			PlayerStatusData->MaxDP = MaxDP;
+			PlayerStatusData->AutoRecoveryHPPercent = AutoRecoveryHPPercent;
+			PlayerStatusData->AutoRecoveryMPPercent = AutoRecoveryMPPercent;
+			PlayerStatusData->MinMeleeAttackDamage = MinMeleeAttackDamage;
+			PlayerStatusData->MaxMeleeAttackDamage = MaxMeleeAttackDamage;
+			PlayerStatusData->MeleeAttackHitRate = MeleeAttackHitRate;
+			PlayerStatusData->MagicDamage = MagicDamage;
+			PlayerStatusData->MagicHitRate = MagicHitRate;
+			PlayerStatusData->Defence = Defence;
+			PlayerStatusData->EvasionRate = EvasionRate;
+			PlayerStatusData->MeleeCriticalPoint = MeleeCriticalPoint;
+			PlayerStatusData->MagicCriticalPoint = MagicCriticalPoint;
+			PlayerStatusData->Speed = Speed;
 
-			_WarriorStatus.insert(pair<int32, st_ObjectStatusData*>(WarriorStatusData->Level, WarriorStatusData));
+			_PlayerStatus.insert(pair<int32, st_ObjectStatusData*>(PlayerStatusData->Level, PlayerStatusData));
 		}
-	}
-
-	for (auto& Filed : Document["PlayerShamanCharacterStatus"].GetArray())
-	{
-		string PlayerType = Filed["PlayerType"].GetString();
-
-		for (auto& PlayerShamanCharacterFiled : Filed["PlayerShamanCharacterLevelDataList"].GetArray())
-		{
-			int Level = PlayerShamanCharacterFiled["Level"].GetInt();
-			int MaxHP = PlayerShamanCharacterFiled["MaxHP"].GetInt();
-			int MaxMP = PlayerShamanCharacterFiled["MaxMP"].GetInt();
-			int MaxDP = PlayerShamanCharacterFiled["MaxDP"].GetInt();
-			int AutoRecoveryHPPercent = PlayerShamanCharacterFiled["AutoRecoveryHPPercent"].GetInt();
-			int AutoRecoveryMPPercent = PlayerShamanCharacterFiled["AutoRecoveryMPPercent"].GetInt();
-			int MinMeleeAttackDamage = PlayerShamanCharacterFiled["MinMeleeAttackDamage"].GetInt();
-			int MaxMeleeAttackDamage = PlayerShamanCharacterFiled["MaxMeleeAttackDamage"].GetInt();
-			int16 MeleeAttackHitRate = (int16)PlayerShamanCharacterFiled["MeleeAttackHitRate"].GetInt();
-			int16 MagicDamage = (int16)PlayerShamanCharacterFiled["MagicDamage"].GetInt();
-			float MagicHitRate = (int16)PlayerShamanCharacterFiled["MagicHitRate"].GetFloat();
-			int Defence = PlayerShamanCharacterFiled["Defence"].GetInt();
-			int16 EvasionRate = PlayerShamanCharacterFiled["EvasionRate"].GetInt();
-			int16 MeleeCriticalPoint = (int16)(PlayerShamanCharacterFiled["MeleeCriticalPoint"].GetInt());
-			int16 MagicCriticalPoint = (int16)(PlayerShamanCharacterFiled["MagicCriticalPoint"].GetInt());
-			float Speed = PlayerShamanCharacterFiled["Speed"].GetFloat();
-
-			st_ObjectStatusData* ShamanStatusData = new st_ObjectStatusData();
-
-			ShamanStatusData->PlayerType = en_GameObjectType::OBJECT_SHAMAN_PLAYER;
-
-			ShamanStatusData->Level = Level;
-			ShamanStatusData->MaxHP = MaxHP;
-			ShamanStatusData->MaxMP = MaxMP;
-			ShamanStatusData->MaxDP = MaxDP;
-			ShamanStatusData->AutoRecoveryHPPercent = AutoRecoveryHPPercent;
-			ShamanStatusData->AutoRecoveryMPPercent = AutoRecoveryMPPercent;
-			ShamanStatusData->MinMeleeAttackDamage = MinMeleeAttackDamage;
-			ShamanStatusData->MaxMeleeAttackDamage = MaxMeleeAttackDamage;
-			ShamanStatusData->MeleeAttackHitRate = MeleeAttackHitRate;
-			ShamanStatusData->MagicDamage = MagicDamage;
-			ShamanStatusData->MagicHitRate = MagicHitRate;
-			ShamanStatusData->Defence = Defence;
-			ShamanStatusData->EvasionRate = EvasionRate;
-			ShamanStatusData->MeleeCriticalPoint = MeleeCriticalPoint;
-			ShamanStatusData->MagicCriticalPoint = MagicCriticalPoint;
-			ShamanStatusData->Speed = Speed;
-
-			_ShamanStatus.insert(pair<int32, st_ObjectStatusData*>(ShamanStatusData->Level, ShamanStatusData));
-		}
-	}
-
-	for (auto& Filed : Document["PlayerTaioistCharacterStatus"].GetArray())
-	{
-		string PlayerType = Filed["PlayerType"].GetString();
-
-		for (auto& PlayerTaioistCharacterFiled : Filed["PlayerTaioistCharacterLevelDataList"].GetArray())
-		{
-			int Level = PlayerTaioistCharacterFiled["Level"].GetInt();
-			int MaxHP = PlayerTaioistCharacterFiled["MaxHP"].GetInt();
-			int MaxMP = PlayerTaioistCharacterFiled["MaxMP"].GetInt();
-			int MaxDP = PlayerTaioistCharacterFiled["MaxDP"].GetInt();
-			int AutoRecoveryHPPercent = PlayerTaioistCharacterFiled["AutoRecoveryHPPercent"].GetInt();
-			int AutoRecoveryMPPercent = PlayerTaioistCharacterFiled["AutoRecoveryMPPercent"].GetInt();
-			int MinMeleeAttackDamage = PlayerTaioistCharacterFiled["MinMeleeAttackDamage"].GetInt();
-			int MaxMeleeAttackDamage = PlayerTaioistCharacterFiled["MaxMeleeAttackDamage"].GetInt();
-			int16 MeleeAttackHitRate = (int16)PlayerTaioistCharacterFiled["MeleeAttackHitRate"].GetInt();
-			int16 MagicDamage = (int16)PlayerTaioistCharacterFiled["MagicDamage"].GetInt();
-			float MagicHitRate = (int16)PlayerTaioistCharacterFiled["MagicHitRate"].GetFloat();
-			int Defence = PlayerTaioistCharacterFiled["Defence"].GetInt();
-			int16 EvasionRate = PlayerTaioistCharacterFiled["EvasionRate"].GetInt();
-			int16 MeleeCriticalPoint = (int16)(PlayerTaioistCharacterFiled["MeleeCriticalPoint"].GetInt());
-			int16 MagicCriticalPoint = (int16)(PlayerTaioistCharacterFiled["MagicCriticalPoint"].GetInt());
-			float Speed = PlayerTaioistCharacterFiled["Speed"].GetFloat();
-
-			st_ObjectStatusData* TaioistStatusData = new st_ObjectStatusData();
-
-			TaioistStatusData->PlayerType = en_GameObjectType::OBJECT_TAIOIST_PLAYER;
-
-			TaioistStatusData->Level = Level;
-			TaioistStatusData->MaxHP = MaxHP;
-			TaioistStatusData->MaxMP = MaxMP;
-			TaioistStatusData->MaxDP = MaxDP;
-			TaioistStatusData->AutoRecoveryHPPercent = AutoRecoveryHPPercent;
-			TaioistStatusData->AutoRecoveryMPPercent = AutoRecoveryMPPercent;
-			TaioistStatusData->MinMeleeAttackDamage = MinMeleeAttackDamage;
-			TaioistStatusData->MaxMeleeAttackDamage = MaxMeleeAttackDamage;
-			TaioistStatusData->MeleeAttackHitRate = MeleeAttackHitRate;
-			TaioistStatusData->MagicDamage = MagicDamage;
-			TaioistStatusData->MagicHitRate = MagicHitRate;
-			TaioistStatusData->Defence = Defence;
-			TaioistStatusData->EvasionRate = EvasionRate;
-			TaioistStatusData->MeleeCriticalPoint = MeleeCriticalPoint;
-			TaioistStatusData->MagicCriticalPoint = MagicCriticalPoint;
-			TaioistStatusData->Speed = Speed;
-
-			_TaioistStatus.insert(pair<int32, st_ObjectStatusData*>(TaioistStatusData->Level, TaioistStatusData));
-		}
-	}
-
-	for (auto& Filed : Document["PlayerThiefCharacterStatus"].GetArray())
-	{
-		string PlayerType = Filed["PlayerType"].GetString();
-
-		for (auto& PlayerThiefCharacterFiled : Filed["PlayerThiefCharacterLevelDataList"].GetArray())
-		{
-			int Level = PlayerThiefCharacterFiled["Level"].GetInt();
-			int MaxHP = PlayerThiefCharacterFiled["MaxHP"].GetInt();
-			int MaxMP = PlayerThiefCharacterFiled["MaxMP"].GetInt();
-			int MaxDP = PlayerThiefCharacterFiled["MaxDP"].GetInt();
-			int AutoRecoveryHPPercent = PlayerThiefCharacterFiled["AutoRecoveryHPPercent"].GetInt();
-			int AutoRecoveryMPPercent = PlayerThiefCharacterFiled["AutoRecoveryMPPercent"].GetInt();
-			int MinMeleeAttackDamage = PlayerThiefCharacterFiled["MinMeleeAttackDamage"].GetInt();
-			int MaxMeleeAttackDamage = PlayerThiefCharacterFiled["MaxMeleeAttackDamage"].GetInt();
-			int16 MeleeAttackHitRate = (int16)PlayerThiefCharacterFiled["MeleeAttackHitRate"].GetInt();
-			int16 MagicDamage = (int16)PlayerThiefCharacterFiled["MagicDamage"].GetInt();
-			float MagicHitRate = (int16)PlayerThiefCharacterFiled["MagicHitRate"].GetFloat();
-			int Defence = PlayerThiefCharacterFiled["Defence"].GetInt();
-			int16 EvasionRate = PlayerThiefCharacterFiled["EvasionRate"].GetInt();
-			int16 MeleeCriticalPoint = (int16)(PlayerThiefCharacterFiled["MeleeCriticalPoint"].GetInt());
-			int16 MagicCriticalPoint = (int16)(PlayerThiefCharacterFiled["MagicCriticalPoint"].GetInt());
-			float Speed = PlayerThiefCharacterFiled["Speed"].GetFloat();
-
-			st_ObjectStatusData* ThiefStatusData = new st_ObjectStatusData();
-
-			ThiefStatusData->PlayerType = en_GameObjectType::OBJECT_TAIOIST_PLAYER;
-
-			ThiefStatusData->Level = Level;
-			ThiefStatusData->MaxHP = MaxHP;
-			ThiefStatusData->MaxMP = MaxMP;
-			ThiefStatusData->MaxDP = MaxDP;
-			ThiefStatusData->AutoRecoveryHPPercent = AutoRecoveryHPPercent;
-			ThiefStatusData->AutoRecoveryMPPercent = AutoRecoveryMPPercent;
-			ThiefStatusData->MinMeleeAttackDamage = MinMeleeAttackDamage;
-			ThiefStatusData->MaxMeleeAttackDamage = MaxMeleeAttackDamage;
-			ThiefStatusData->MeleeAttackHitRate = MeleeAttackHitRate;
-			ThiefStatusData->MagicDamage = MagicDamage;
-			ThiefStatusData->MagicHitRate = MagicHitRate;
-			ThiefStatusData->Defence = Defence;
-			ThiefStatusData->EvasionRate = EvasionRate;
-			ThiefStatusData->MeleeCriticalPoint = MeleeCriticalPoint;
-			ThiefStatusData->MagicCriticalPoint = MagicCriticalPoint;
-			ThiefStatusData->Speed = Speed;
-
-			_ThiefStatus.insert(pair<int32, st_ObjectStatusData*>(ThiefStatusData->Level, ThiefStatusData));
-		}
-	}
-
-	for (auto& Filed : Document["PlayerArcherCharacterStatus"].GetArray())
-	{
-		string PlayerType = Filed["PlayerType"].GetString();
-
-		for (auto& PlayerArcherCharacterFiled : Filed["PlayerArcherCharacterLevelDataList"].GetArray())
-		{
-			int Level = PlayerArcherCharacterFiled["Level"].GetInt();
-			int MaxHP = PlayerArcherCharacterFiled["MaxHP"].GetInt();
-			int MaxMP = PlayerArcherCharacterFiled["MaxMP"].GetInt();
-			int MaxDP = PlayerArcherCharacterFiled["MaxDP"].GetInt();
-			int AutoRecoveryHPPercent = PlayerArcherCharacterFiled["AutoRecoveryHPPercent"].GetInt();
-			int AutoRecoveryMPPercent = PlayerArcherCharacterFiled["AutoRecoveryMPPercent"].GetInt();
-			int MinMeleeAttackDamage = PlayerArcherCharacterFiled["MinMeleeAttackDamage"].GetInt();
-			int MaxMeleeAttackDamage = PlayerArcherCharacterFiled["MaxMeleeAttackDamage"].GetInt();
-			int16 MeleeAttackHitRate = (int16)PlayerArcherCharacterFiled["MeleeAttackHitRate"].GetInt();
-			int16 MagicDamage = (int16)PlayerArcherCharacterFiled["MagicDamage"].GetInt();
-			float MagicHitRate = (int16)PlayerArcherCharacterFiled["MagicHitRate"].GetFloat();
-			int Defence = PlayerArcherCharacterFiled["Defence"].GetInt();
-			int16 EvasionRate = PlayerArcherCharacterFiled["EvasionRate"].GetInt();
-			int16 MeleeCriticalPoint = (int16)(PlayerArcherCharacterFiled["MeleeCriticalPoint"].GetInt());
-			int16 MagicCriticalPoint = (int16)(PlayerArcherCharacterFiled["MagicCriticalPoint"].GetInt());
-			float Speed = PlayerArcherCharacterFiled["Speed"].GetFloat();
-
-			st_ObjectStatusData* ArcherStatusData = new st_ObjectStatusData();
-
-			ArcherStatusData->PlayerType = en_GameObjectType::OBJECT_TAIOIST_PLAYER;
-
-			ArcherStatusData->Level = Level;
-			ArcherStatusData->MaxHP = MaxHP;
-			ArcherStatusData->MaxMP = MaxMP;
-			ArcherStatusData->MaxDP = MaxDP;
-			ArcherStatusData->AutoRecoveryHPPercent = AutoRecoveryHPPercent;
-			ArcherStatusData->AutoRecoveryMPPercent = AutoRecoveryMPPercent;
-			ArcherStatusData->MinMeleeAttackDamage = MinMeleeAttackDamage;
-			ArcherStatusData->MaxMeleeAttackDamage = MaxMeleeAttackDamage;
-			ArcherStatusData->MeleeAttackHitRate = MeleeAttackHitRate;
-			ArcherStatusData->MagicDamage = MagicDamage;
-			ArcherStatusData->MagicHitRate = MagicHitRate;
-			ArcherStatusData->Defence = Defence;
-			ArcherStatusData->EvasionRate = EvasionRate;
-			ArcherStatusData->MeleeCriticalPoint = MeleeCriticalPoint;
-			ArcherStatusData->MagicCriticalPoint = MagicCriticalPoint;
-			ArcherStatusData->Speed = Speed;
-
-			_ArcherStatus.insert(pair<int32, st_ObjectStatusData*>(ArcherStatusData->Level, ArcherStatusData));
-		}
-	}
+	}	
 }
 
 void CDataManager::LoadDataLevel(wstring LoadFileName)
@@ -1003,7 +811,7 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 
 		string MonsterName = Filed["Name"].GetString();
 
-		en_GameObjectType MonsterType = en_GameObjectType::NORMAL;
+		en_GameObjectType MonsterType = en_GameObjectType::OBJECT_NON_TYPE;
 
 		if (MonsterName == "슬라임")
 		{
@@ -2236,7 +2044,7 @@ void CDataManager::LoadDataEnvironment(wstring LoadFileName)
 
 		string EnvironmentName = Filed["Name"].GetString();
 
-		en_GameObjectType EnvironmentType = en_GameObjectType::NORMAL;
+		en_GameObjectType EnvironmentType = en_GameObjectType::OBJECT_NON_TYPE;
 
 		if (EnvironmentName == "돌")
 		{
@@ -2302,7 +2110,7 @@ void CDataManager::LoadDataCrop(wstring LoadFileName)
 
 		string CropName = Filed["CropName"].GetString();
 
-		en_GameObjectType CropType = en_GameObjectType::NORMAL;
+		en_GameObjectType CropType = en_GameObjectType::OBJECT_NON_TYPE;
 
 		if (CropName == "감자")
 		{
@@ -2761,18 +2569,11 @@ st_ObjectStatusData* CDataManager::FindObjectStatusData(en_GameObjectType GameOb
 {
 	switch (GameObjectType)
 	{
-	case en_GameObjectType::NORMAL:
+	case en_GameObjectType::OBJECT_NON_TYPE:
 		return nullptr;
-	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-		return (*_WarriorStatus.find(Level)).second;
-	case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
-		return (*_ShamanStatus.find(Level)).second;
-	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
-		return (*_TaioistStatus.find(Level)).second;
-	case en_GameObjectType::OBJECT_THIEF_PLAYER:
-		return (*_ThiefStatus.find(Level)).second;
-	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
-		return (*_ArcherStatus.find(Level)).second;
+	case en_GameObjectType::OBJECT_PLAYER:
+	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
+		return (*_PlayerStatus.find(Level)).second;	
 	case en_GameObjectType::OBJECT_SLIME:
 		break;
 	case en_GameObjectType::OBJECT_BEAR:
@@ -2780,9 +2581,7 @@ st_ObjectStatusData* CDataManager::FindObjectStatusData(en_GameObjectType GameOb
 	case en_GameObjectType::OBJECT_STONE:
 		break;
 	case en_GameObjectType::OBJECT_TREE:
-		break;
-	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
-		return (*_WarriorStatus.find(Level)).second;
+		break;		
 	}
 }
 

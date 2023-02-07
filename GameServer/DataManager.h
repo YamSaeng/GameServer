@@ -11,11 +11,7 @@ public:
 	map<int16, st_ItemInfo*> _Items;		
 	map<int16, st_ItemInfo*> _GeneralMerchantItems;
 
-	map<int32, st_ObjectStatusData*> _WarriorStatus;
-	map<int32, st_ObjectStatusData*> _ShamanStatus;
-	map<int32, st_ObjectStatusData*> _TaioistStatus;
-	map<int32, st_ObjectStatusData*> _ThiefStatus;
-	map<int32, st_ObjectStatusData*> _ArcherStatus;
+	map<int32, st_ObjectStatusData*> _PlayerStatus;	
 
 	//------------------------------------------------------
 	// 몬스터 데이터
