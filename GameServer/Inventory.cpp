@@ -15,8 +15,11 @@ CInventory::~CInventory()
 		{
 			for (int X = 0; X < _InventoryWidth; X++)
 			{
-				G_ObjectManager->ObjectReturn(_Items[Y][X]->InventoryItem);
-				delete _Items[Y][X];
+				if (_Items[Y][X] != nullptr)
+				{
+					G_ObjectManager->ObjectReturn(_Items[Y][X]->InventoryItem);
+					delete _Items[Y][X];
+				}				
 			}
 
 			delete _Items[Y];
