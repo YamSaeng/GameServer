@@ -441,11 +441,7 @@ enum class en_ResourceName : int16
 {
 	CLIENT_UI_NAME_NONE = 0,
 
-	CLIENT_GAMEOBJECT_PLAYER_WARRIOR,
-	CLIENT_GAMEOBJECT_PLAYER_SHAMAN,
-	CLIENT_GAMEOBJECT_PLAYER_TAIOIST,
-	CLIENT_GAMEOBJECT_PLAYER_THIEF,
-	CLIENT_GAMEOBJECT_PLAYER_ARCHER,
+	CLIENT_GAMEOBJECT_PLAYER,	
 
 	CLIENT_GAMEOBJECT_MONSTER_SLIME,
 
@@ -2532,7 +2528,7 @@ struct st_ItemInfo
 		ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_NONE;
 		ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
 		ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
-		ItemObjectType = en_GameObjectType::NORMAL;
+		ItemObjectType = en_GameObjectType::OBJECT_NON_TYPE;
 		ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_NONE;
 		ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
 		ItemSkillType = en_SkillType::SKILL_TYPE_NONE;
