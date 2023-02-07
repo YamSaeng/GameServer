@@ -145,11 +145,7 @@ void CObjectManager::ObjectReturn(CGameObject* ReturnObject)
 	{
 		switch (ReturnObject->_GameObjectInfo.ObjectType)
 		{
-		case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-		case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
-		case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
-		case en_GameObjectType::OBJECT_THIEF_PLAYER:
-		case en_GameObjectType::OBJECT_ARCHER_PLAYER:
+		case en_GameObjectType::OBJECT_PLAYER:		
 		case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 			_PlayerMemoryPool->Free((CPlayer*)ReturnObject);
 			break;
