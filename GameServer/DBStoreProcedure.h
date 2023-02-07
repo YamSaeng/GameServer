@@ -14,41 +14,40 @@ namespace SP
 	};
 
 	// AccountID를 기준으로 클라가 소유하고 있는 캐릭터를 찾는다.
-	class CDBGameServerPlayersGet : public CDBBind<1, 29>
+	class CDBGameServerPlayersGet : public CDBBind<1, 28>
 	{
 	public:
 		CDBGameServerPlayersGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetPlayers(?)}") { }
 		void InAccountID(int64& AccountID) { BindParam(0, AccountID); }
 
 		void OutPlayerDBID(int64& PlayerDBID) { BindCol(0, PlayerDBID); }
-		template<int32 N> void OutPlayerName(WCHAR(&PlayerName)[N]) { BindCol(1, PlayerName); }
-		void OutPlayerObjectType(int16& ObjectType) { BindCol(2, ObjectType); }
-		void OutPlayerIndex(int8& PlayerIndex) { BindCol(3, PlayerIndex); }
-		void OutLevel(int32& Level) { BindCol(4, Level); }
-		void OutCurrentHP(int32& CurrentHP) { BindCol(5, CurrentHP); }
-		void OutMaxHP(int32& MaxHP) { BindCol(6, MaxHP); }
-		void OutCurrentMP(int32& CurrentMP) { BindCol(7, CurrentMP); }
-		void OutMaxMP(int32& MaxMP) { BindCol(8, MaxMP); }
-		void OutCurrentDP(int32& CurrentDP) { BindCol(9, CurrentDP); }
-		void OutMaxDP(int32& MaxDP) { BindCol(10, MaxDP); }
-		void OutAutoRecoveryHPPercent(int16& AutoRecoveryHPPercent) { BindCol(11, AutoRecoveryHPPercent); }
-		void OutAutoRecoveryMPPercent(int16& AutoRecoveryMPPercent) { BindCol(12, AutoRecoveryMPPercent); }
-		void OutMinMeleeAttackDamage(int32& MinMeleeAttackDamage) { BindCol(13, MinMeleeAttackDamage); }
-		void OutMaxMeleeAttackDamage(int32& MaxMeleeAttackDamage) { BindCol(14, MaxMeleeAttackDamage); }
-		void OutMeleeAttackHitRate(int16& MeleeAttackHitRate) { BindCol(15, MeleeAttackHitRate); }
-		void OutMagicDamage(int16& MagicDamage) { BindCol(16, MagicDamage); }
-		void OutMagicHitRate(float& MagicHitRate) { BindCol(17, MagicHitRate); }
-		void OutDefence(int32& Defence) { BindCol(18, Defence); }
-		void OutEvasionRate(int16& EvasionRate) { BindCol(19, EvasionRate); }
-		void OutMeleeCriticalPoint(int16& MeleeCriticalPoint) { BindCol(20, MeleeCriticalPoint); }
-		void OutMagicCriticalPointt(int16& MagicCriticalPoint) { BindCol(21, MagicCriticalPoint); }
-		void OutSpeed(float& Speed) { BindCol(22, Speed); }		
-		void OutLastPositionY(int32& LastPositionY) { BindCol(23, LastPositionY); }
-		void OutLastPositionX(int32& LastPositionX) { BindCol(24, LastPositionX); }
-		void OutCurrentExperience(int64& CurrentExperience) { BindCol(25, CurrentExperience); }
-		void OutRequireExperience(int64& RequireExperience) { BindCol(26, RequireExperience); }
-		void OutTotalExperience(int64& TotalExperience) { BindCol(27, TotalExperience); }		
-		void OutSkillMaxPoint(int8& SkillMaxPoint) { BindCol(28, SkillMaxPoint); }
+		template<int32 N> void OutPlayerName(WCHAR(&PlayerName)[N]) { BindCol(1, PlayerName); }		
+		void OutPlayerIndex(int8& PlayerIndex) { BindCol(2, PlayerIndex); }
+		void OutLevel(int32& Level) { BindCol(3, Level); }
+		void OutCurrentHP(int32& CurrentHP) { BindCol(4, CurrentHP); }
+		void OutMaxHP(int32& MaxHP) { BindCol(5, MaxHP); }
+		void OutCurrentMP(int32& CurrentMP) { BindCol(6, CurrentMP); }
+		void OutMaxMP(int32& MaxMP) { BindCol(7, MaxMP); }
+		void OutCurrentDP(int32& CurrentDP) { BindCol(8, CurrentDP); }
+		void OutMaxDP(int32& MaxDP) { BindCol(9, MaxDP); }
+		void OutAutoRecoveryHPPercent(int16& AutoRecoveryHPPercent) { BindCol(10, AutoRecoveryHPPercent); }
+		void OutAutoRecoveryMPPercent(int16& AutoRecoveryMPPercent) { BindCol(11, AutoRecoveryMPPercent); }
+		void OutMinMeleeAttackDamage(int32& MinMeleeAttackDamage) { BindCol(12, MinMeleeAttackDamage); }
+		void OutMaxMeleeAttackDamage(int32& MaxMeleeAttackDamage) { BindCol(13, MaxMeleeAttackDamage); }
+		void OutMeleeAttackHitRate(int16& MeleeAttackHitRate) { BindCol(14, MeleeAttackHitRate); }
+		void OutMagicDamage(int16& MagicDamage) { BindCol(15, MagicDamage); }
+		void OutMagicHitRate(float& MagicHitRate) { BindCol(16, MagicHitRate); }
+		void OutDefence(int32& Defence) { BindCol(17, Defence); }
+		void OutEvasionRate(int16& EvasionRate) { BindCol(18, EvasionRate); }
+		void OutMeleeCriticalPoint(int16& MeleeCriticalPoint) { BindCol(19, MeleeCriticalPoint); }
+		void OutMagicCriticalPointt(int16& MagicCriticalPoint) { BindCol(20, MagicCriticalPoint); }
+		void OutSpeed(float& Speed) { BindCol(21, Speed); }		
+		void OutLastPositionY(int32& LastPositionY) { BindCol(22, LastPositionY); }
+		void OutLastPositionX(int32& LastPositionX) { BindCol(23, LastPositionX); }
+		void OutCurrentExperience(int64& CurrentExperience) { BindCol(24, CurrentExperience); }
+		void OutRequireExperience(int64& RequireExperience) { BindCol(25, RequireExperience); }
+		void OutTotalExperience(int64& TotalExperience) { BindCol(26, TotalExperience); }		
+		void OutSkillMaxPoint(int8& SkillMaxPoint) { BindCol(27, SkillMaxPoint); }
 	};
 
 	// DB에 입력한 해당 캐릭터가 있는지 확인
@@ -60,39 +59,38 @@ namespace SP
 	};
 
 	// DB에 새로운 캐릭 저장
-	class CDBGameServerCreateCharacterPush : public CDBBind<29, 0>
+	class CDBGameServerCreateCharacterPush : public CDBBind<28, 0>
 	{
 	public:
-		CDBGameServerCreateCharacterPush(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spNewCharacterPush(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}") {}
+		CDBGameServerCreateCharacterPush(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spNewCharacterPush(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}") {}
 		void InAccountID(int64& AccountID) { BindParam(0, AccountID); }
-		void InPlayerName(wstring& PlayerName) { BindParam(1, PlayerName.c_str()); }
-		void InPlayerType(int16& PlayerType) { BindParam(2, PlayerType); }
-		void InPlayerIndex(int8& PlayerIndex) { BindParam(3, PlayerIndex); }
-		void InLevel(int32& Level) { BindParam(4, Level); }
-		void InCurrentHP(int32& CurrentHP) { BindParam(5, CurrentHP); }
-		void InMaxHP(int32& MaxHP) { BindParam(6, MaxHP); }
-		void InCurrentMP(int32& CurrentMP) { BindParam(7, CurrentMP); }
-		void InMaxMP(int32& MaxMP) { BindParam(8, MaxMP); }
-		void InCurrentDP(int32& CurrentDP) { BindParam(9, CurrentDP); }
-		void InMaxDP(int32& MaxDP) { BindParam(10, MaxDP); }
-		void InAutoRecoveryHPPercent(int16& AutoRecoveryHPPercent) { BindParam(11, AutoRecoveryHPPercent); }
-		void InAutoRecoveryMPPercent(int16& AutoRecoveryMPPercent) { BindParam(12, AutoRecoveryMPPercent); }
-		void InMinMeleeAttackDamage(int32& MinMeleeAttackDamage) { BindParam(13, MinMeleeAttackDamage); }
-		void InMaxMeleeAttackDamage(int32& MaxMeleeAttackDamage) { BindParam(14, MaxMeleeAttackDamage); }
-		void InMeleeAttackHitRate(int16& MeleeAttackHitRate) { BindParam(15, MeleeAttackHitRate); }
-		void InMagicDamage(int16& MagicDamage) { BindParam(16, MagicDamage); }
-		void InMagicHitRate(float& MagicHitRate) { BindParam(17, MagicHitRate); }
-		void InDefence(int32& Defence) { BindParam(18, Defence); }
-		void InEvasionRate(int16& EvasionRate) { BindParam(19, EvasionRate); }
-		void InMeleeCriticalPoint(int16& MeleeCriticalPoint) { BindParam(20, MeleeCriticalPoint); }
-		void InMagicCriticalPoint(int16& MagicCriticalPoint) { BindParam(21, MagicCriticalPoint); }
-		void InSpeed(float& Speed) { BindParam(22, Speed); }
-		void InLastPositionY(int32& LastPositionY) { BindParam(23, LastPositionY); }
-		void InLastPositionX(int32& LastPositionX) { BindParam(24, LastPositionX); }
-		void InCurrentExperence(int64& CurrentExperence) { BindParam(25, CurrentExperence); }
-		void InRequireExperience(int64& RequireExperience) { BindParam(26, RequireExperience); }
-		void InTotalExperience(int64& CurrentExperence) { BindParam(27, CurrentExperence); }		
-		void InSkillMaxPoint(int8& SkillMaxPoint) { BindParam(28, SkillMaxPoint); }
+		void InPlayerName(wstring& PlayerName) { BindParam(1, PlayerName.c_str()); }		
+		void InPlayerIndex(int8& PlayerIndex) { BindParam(2, PlayerIndex); }
+		void InLevel(int32& Level) { BindParam(3, Level); }
+		void InCurrentHP(int32& CurrentHP) { BindParam(4, CurrentHP); }
+		void InMaxHP(int32& MaxHP) { BindParam(5, MaxHP); }
+		void InCurrentMP(int32& CurrentMP) { BindParam(6, CurrentMP); }
+		void InMaxMP(int32& MaxMP) { BindParam(7, MaxMP); }
+		void InCurrentDP(int32& CurrentDP) { BindParam(8, CurrentDP); }
+		void InMaxDP(int32& MaxDP) { BindParam(9, MaxDP); }
+		void InAutoRecoveryHPPercent(int16& AutoRecoveryHPPercent) { BindParam(10, AutoRecoveryHPPercent); }
+		void InAutoRecoveryMPPercent(int16& AutoRecoveryMPPercent) { BindParam(11, AutoRecoveryMPPercent); }
+		void InMinMeleeAttackDamage(int32& MinMeleeAttackDamage) { BindParam(12, MinMeleeAttackDamage); }
+		void InMaxMeleeAttackDamage(int32& MaxMeleeAttackDamage) { BindParam(13, MaxMeleeAttackDamage); }
+		void InMeleeAttackHitRate(int16& MeleeAttackHitRate) { BindParam(14, MeleeAttackHitRate); }
+		void InMagicDamage(int16& MagicDamage) { BindParam(15, MagicDamage); }
+		void InMagicHitRate(float& MagicHitRate) { BindParam(16, MagicHitRate); }
+		void InDefence(int32& Defence) { BindParam(17, Defence); }
+		void InEvasionRate(int16& EvasionRate) { BindParam(18, EvasionRate); }
+		void InMeleeCriticalPoint(int16& MeleeCriticalPoint) { BindParam(19, MeleeCriticalPoint); }
+		void InMagicCriticalPoint(int16& MagicCriticalPoint) { BindParam(20, MagicCriticalPoint); }
+		void InSpeed(float& Speed) { BindParam(21, Speed); }
+		void InLastPositionY(int32& LastPositionY) { BindParam(22, LastPositionY); }
+		void InLastPositionX(int32& LastPositionX) { BindParam(23, LastPositionX); }
+		void InCurrentExperence(int64& CurrentExperence) { BindParam(24, CurrentExperence); }
+		void InRequireExperience(int64& RequireExperience) { BindParam(25, RequireExperience); }
+		void InTotalExperience(int64& CurrentExperence) { BindParam(26, CurrentExperence); }		
+		void InSkillMaxPoint(int8& SkillMaxPoint) { BindParam(27, SkillMaxPoint); }
 	};
 
 	// 캐릭터 DBid 얻기

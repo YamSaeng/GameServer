@@ -5,8 +5,7 @@
 	<Table name="Player" desc="Player Table">
 		<Column name="PlayerDBId" type="BigInt" notnull="true" identity="1,1"/>
 		<Column name="AccountDBId" type="BigInt" notnull="true"/>
-		<Column name="PlayerName" type="nvarchar(20)" notnull="true"/>
-		<Column name="PlayerType" type="SmallInt" notnull="true"/>
+		<Column name="PlayerName" type="nvarchar(20)" notnull="true"/>		
 		<Column name="PlayerIndex" type="TinyInt" notnull="true"/>
 		<Column name="Level" type="int" notnull="true"/>
 		<Column name="CurrentHP" type="int" notnull="true"/>
@@ -136,8 +135,7 @@
 			<![CDATA[
 	    SET NOCOUNT ON
         SELECT PlayerDBId,
-        PlayerName,
-        PlayerType,
+        PlayerName,        
         PlayerIndex,
         Level,
         CurrentHP,
@@ -183,8 +181,7 @@
 	<!-- 새로운 캐릭터 DB에 넣기 -->
 	<Procedure name="spNewCharacterPush">
 		<Param name="@AccountId" type="BigInt"/>
-		<Param name="@PlayerName" type="nvarchar(20)"/>
-		<Param name="@PlayerType" type="SmallInt"/>
+		<Param name="@PlayerName" type="nvarchar(20)"/>		
 		<Param name="@PlayerIndex" type="TinyInt"/>
 		<Param name="@Level" type="int"/>
 		<Param name="@CurrentHP" type="int"/>
@@ -217,8 +214,7 @@
         INSERT INTO [dbo].[Player]
         VALUES (
         (@AccountId),
-        (@PlayerName),
-        (@PlayerType),
+        (@PlayerName),        
         (@PlayerIndex),
         (@Level),
         (@CurrentHP),
