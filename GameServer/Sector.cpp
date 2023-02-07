@@ -19,11 +19,7 @@ void CSector::Insert(CGameObject* InsertGameObject)
 		
 	switch (InsertGameObject->_GameObjectInfo.ObjectType)
 	{
-	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-	case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
-	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
-	case en_GameObjectType::OBJECT_THIEF_PLAYER:
-	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
+	case en_GameObjectType::OBJECT_PLAYER:	
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 		_Players.insert((CPlayer*)InsertGameObject);
 		break;
@@ -81,11 +77,7 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 
 	switch (RemoveGameObject->_GameObjectInfo.ObjectType)
 	{
-	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-	case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
-	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
-	case en_GameObjectType::OBJECT_THIEF_PLAYER:
-	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
+	case en_GameObjectType::OBJECT_PLAYER:	
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 		_Players.erase((CPlayer*)RemoveGameObject);
 		break;
