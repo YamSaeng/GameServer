@@ -30,9 +30,7 @@ void CRectCollision::CollisionUpdate()
 	{
 		switch (_Owner->_GameObjectInfo.ObjectType)
 		{
-		case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-		case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
-		case en_GameObjectType::OBJECT_TAIOIST_PLAYER:		
+		case en_GameObjectType::OBJECT_PLAYER:				
 		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:		
 			_LeftTop._X = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._X - 0.4f;
 			_LeftTop._Y = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._Y - 0.4f;
