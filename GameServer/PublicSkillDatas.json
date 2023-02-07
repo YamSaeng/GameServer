@@ -10,7 +10,7 @@
               "SkillLevel": 1,
               "SkillMinDamage": 0,
               "SkillMaxDamage": 0,
-              "SkillCoolTime": 500,
+              "SkillCoolTime": 1000,
               "SkillCastingTime": 0,
               "SkillDurationTime": 0,
               "SkillDotTime": 0,
