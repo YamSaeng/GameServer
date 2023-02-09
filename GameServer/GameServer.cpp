@@ -6026,26 +6026,6 @@ CGameServerMessage* CGameServer::MakePacketResMove(int64 ObjectId, float MoveDir
 	return ResMoveMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResMonsterMove(int64 ObjectId, en_GameObjectType ObjectType, bool CanMove, st_PositionInfo PositionInfo, en_MonsterState MonsterState)
-{
-	CGameServerMessage* ResMonsterMoveMessage = CGameServerMessage::GameServerMessageAlloc();
-	if (ResMonsterMoveMessage == nullptr)
-	{
-		return nullptr;
-	}
-
-	ResMonsterMoveMessage->Clear();
-
-	*ResMonsterMoveMessage << (int16)en_PACKET_S2C_MONSTER_MOVE;
-	*ResMonsterMoveMessage << ObjectId;
-	*ResMonsterMoveMessage << (int16)ObjectType;
-	*ResMonsterMoveMessage << CanMove;
-	*ResMonsterMoveMessage << PositionInfo;
-	*ResMonsterMoveMessage << (int8)MonsterState;
-
-	return ResMonsterMoveMessage;
-}
-
 CGameServerMessage* CGameServer::MakePacketResMoveStop(int64 ObjectId, float StopPositionX, float StopPositionY)
 {
 	CGameServerMessage* ResMoveStopPacket = CGameServerMessage::GameServerMessageAlloc();
@@ -6062,26 +6042,6 @@ CGameServerMessage* CGameServer::MakePacketResMoveStop(int64 ObjectId, float Sto
 	*ResMoveStopPacket << StopPositionY;	
 
 	return ResMoveStopPacket;
-}
-
-CGameServerMessage* CGameServer::MakePacketPatrol(int64 ObjectId, en_GameObjectType ObjectType, bool CanMove, st_PositionInfo PositionInfo, en_MonsterState MonsterState)
-{
-	CGameServerMessage* ResPatrolPacket = CGameServerMessage::GameServerMessageAlloc();
-	if (ResPatrolPacket == nullptr)
-	{
-		return nullptr;
-	}
-
-	ResPatrolPacket->Clear();
-
-	*ResPatrolPacket << (int16)en_PACKET_S2C_MONSTER_PATROL;
-	*ResPatrolPacket << ObjectId;
-	*ResPatrolPacket << (int16)ObjectType;
-	*ResPatrolPacket << CanMove;
-	*ResPatrolPacket << PositionInfo;
-	*ResPatrolPacket << (int8)MonsterState;
-
-	return ResPatrolPacket;
 }
 
 CGameServerMessage* CGameServer::MakePacketItemMove(st_GameObjectInfo ItemMoveObjectInfo)

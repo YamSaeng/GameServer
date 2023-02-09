@@ -592,19 +592,11 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 이동 요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResMove(int64 ObjectId, float MoveDirectionX, float MoveDirectionY);
-	//-----------------------------------------------------------------------------------------
-	// 게임서버 몬스터 이동 패킷 조합
-	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResMonsterMove(int64 ObjectId, en_GameObjectType ObjectType, bool CanMove, st_PositionInfo PositionInfo, en_MonsterState MonsterState);
+	CGameServerMessage* MakePacketResMove(int64 ObjectId, float MoveDirectionX, float MoveDirectionY);	
 	//------------------------------------------------------------------------------------------------------
 	// 게임서버 이동 멈춤 요청 응답 패킷 조합
 	//------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResMoveStop(int64 ObjectId, float StopPositionX, float StopPositionY);
-	//-----------------------------------------------------------------------------------------
-	// 게임서버 정찰 패킷 조합
-	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketPatrol(int64 ObjectId, en_GameObjectType ObjectType, bool CanMove, st_PositionInfo PositionInfo, en_MonsterState MonsterState);
+	CGameServerMessage* MakePacketResMoveStop(int64 ObjectId, float StopPositionX, float StopPositionY);	
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 아이템 움직임 시작 패킷 조합
 	//-----------------------------------------------------------------------------------------
