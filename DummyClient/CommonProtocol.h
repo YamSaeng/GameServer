@@ -140,21 +140,6 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_MOVE_STOP,
 
 	//------------------------------------------------------------
-	// 게임서버 몬스터 움직임 
-	// int64 ObjectId
-	// en_GameObjectType ObjectType
-	// st_PositionInfo PositionInfo
-	//------------------------------------------------------------
-	en_PACKET_S2C_MONSTER_MOVE,
-
-	//------------------------------------------------------------
-	// 게임서버 오브젝트 순찰 
-	// int64 ObjectId
-	// st_PositionInfo PositionInfo
-	//------------------------------------------------------------
-	en_PACKET_S2C_MONSTER_PATROL,
-
-	//------------------------------------------------------------
 	// 게임서버 아이템 움직임 응답 
 	// st_GameObjectInfo ItemObjectInfo	
 	//------------------------------------------------------------
@@ -197,8 +182,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	//------------------------------------------------------------
 	// 게임서버 캐릭터 마법 요청
 	// int64 AccountId
-	// int64 PlayerDBId
-	// en_MoveDir Dir
+	// int64 PlayerDBId	
 	// en_SkillType SpellSkillType
 	//------------------------------------------------------------
 	en_PACKET_C2S_SPELL,
@@ -257,8 +241,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 
 	//------------------------------------------------------------
 	// 게임서버 캐릭터 애니메이션 출력
-	// int64 PlayerID
-	// en_MoveDir Dir
+	// int64 PlayerID	
 	// string AnimationName
 	//------------------------------------------------------------
 	en_PACKET_S2C_ANIMATION_PLAY,
@@ -359,8 +342,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 
 	//------------------------------------------------------------
 	// 게임서버 오브젝트 상태 변경 요청 응답
-	// int64 ObjectId
-	// en_MoveDir Direction
+	// int64 ObjectId	
 	// en_GameObjectType ObjectType
 	// en_CreatureState ObjectState	
 	//------------------------------------------------------------
@@ -368,8 +350,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 
 	//------------------------------------------------------------
 	// 게임서버 몬스터 오브젝트 상태 변경 요청 응답
-	// int64 ObjectId
-	// en_MoveDir Direction
+	// int64 ObjectId	
 	// en_GameObjectType ObjectType
 	// en_CreatureState ObjectState
 	// en_MonsterState MonsterState
@@ -704,7 +685,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int8 QuickSlotBarIndexA
 	// int8 QuickSlotBarSlotIndexA	
 	//------------------------------------------------------------
-	en_PACKET_S2C_QUICKSLOT_EMPTY,	
+	en_PACKET_S2C_QUICKSLOT_EMPTY,
 
 	//------------------------------------------------------------
 	// 게임서버 제작템 목록
@@ -815,7 +796,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int8 MessageCount
 	// wstring Messages	
 	//-----------------------------------------------------------
-	en_PACKET_S2C_GLOBAL_MESSAGE,	
+	en_PACKET_S2C_GLOBAL_MESSAGE,
 
 	//-----------------------------------------------------------
 	// 게임서버 씨앗 심기 요청
