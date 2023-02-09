@@ -3,7 +3,6 @@
 #include "Channel.h"
 #include "CommonProtocol.h"
 #include "GameObjectInfo.h"
-#include "LockFreeQue.h"
 #include "Math.h"
 
 class CSkill;
@@ -11,7 +10,6 @@ class CRectCollision;
 
 class CGameObject
 {
-private:
 public:
 	int32 _StatusAbnormal;	
 
@@ -47,7 +45,7 @@ public:
 
 	// 타겟
 	CGameObject* _Owner;
-
+	
 	// 강화효과
 	map<en_SkillType, CSkill*> _Bufs;
 	// 약화효과
@@ -75,7 +73,7 @@ public:
 	//------------------------------------------------
 	// 방향값을 받아서 앞쪽에 있는 위치를 반환한다.
 	//------------------------------------------------
-	st_Vector2Int GetFrontCellPosition(en_MoveDir Dir, int8 Distance);
+	st_Vector2 GetFrontPosition(int8 Distance);
 
 	//------------------------------------------------------------------------------------
 	// 내 주위 Distance안에 있는 위치들의 값을 반환한다.
@@ -190,4 +188,7 @@ protected:
 	virtual void UpdateDead();	
 
 	void CheckBufDeBufSkill();
+	
+private:
+	st_Vector2 _MousePosition;
 };

@@ -27,6 +27,8 @@ CGameObject::CGameObject()
 	_FieldOfViewUpdateTick = 0;	
 
 	_RectCollision = nullptr;	
+
+	_MousePosition = st_Vector2::Zero();
 }
 
 CGameObject::CGameObject(st_GameObjectInfo GameObjectInfo)
@@ -49,79 +51,8 @@ void CGameObject::PushedOutStatusAbnormalCheck()
 {
 	bool IsShamanIceWave = _StatusAbnormal & (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_WAVE;
 	if (IsShamanIceWave == true)
-	{
-		switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
-		{
-		case en_MoveDir::UP:
-			_GameObjectInfo.ObjectPositionInfo.Position._Y +=
-				(st_Vector2::Down()._Y * 4.0f * 0.02f);
-			break;
-		case en_MoveDir::DOWN:
-			_GameObjectInfo.ObjectPositionInfo.Position._Y +=
-				(st_Vector2::Up()._Y * 4.0f * 0.02f);
-			break;
-		case en_MoveDir::LEFT:
-			_GameObjectInfo.ObjectPositionInfo.Position._X +=
-				(st_Vector2::Right()._X * 4.0f * 0.02f);
-			break;
-		case en_MoveDir::RIGHT:
-			_GameObjectInfo.ObjectPositionInfo.Position._X +=
-				(st_Vector2::Left()._X * 4.0f * 0.02f);
-			break;
-		case en_MoveDir::LEFT_UP:
-			_GameObjectInfo.ObjectPositionInfo.Position._Y +=
-				(st_Vector2::Down()._Y * 4.0f * 0.02f);
-			_GameObjectInfo.ObjectPositionInfo.Position._X +=
-				(st_Vector2::Right()._X * 4.0f * 0.02f);
-			break;
-		case en_MoveDir::LEFT_DOWN:
-			_GameObjectInfo.ObjectPositionInfo.Position._Y +=
-				(st_Vector2::Up()._Y * 4.0f * 0.02f);
-			_GameObjectInfo.ObjectPositionInfo.Position._X +=
-				(st_Vector2::Right()._X * 4.0f * 0.02f);
-			break;
-		case en_MoveDir::RIGHT_UP:
-			_GameObjectInfo.ObjectPositionInfo.Position._Y +=
-				(st_Vector2::Down()._Y * 4.0f * 0.02f);
-			_GameObjectInfo.ObjectPositionInfo.Position._X +=
-				(st_Vector2::Left()._X * 4.0f * 0.02f);
-			break;
-		case en_MoveDir::RIGHT_DOWN:
-			_GameObjectInfo.ObjectPositionInfo.Position._Y +=
-				(st_Vector2::Up()._Y * 4.0f * 0.02f);
-			_GameObjectInfo.ObjectPositionInfo.Position._X +=
-				(st_Vector2::Left()._X * 4.0f * 0.02f);
-			break;
-		}
-
-		bool CanMove = _Channel->GetMap()->Cango(this, _GameObjectInfo.ObjectPositionInfo.Position._X, _GameObjectInfo.ObjectPositionInfo.Position._Y);
-		if (CanMove == true)
-		{
-			st_Vector2Int CollisionPosition;
-			CollisionPosition._X = (int32)_GameObjectInfo.ObjectPositionInfo.Position._X;
-			CollisionPosition._Y = (int32)_GameObjectInfo.ObjectPositionInfo.Position._Y;
-
-			if (CollisionPosition._X != _GameObjectInfo.ObjectPositionInfo.CollisionPosition._X
-				|| CollisionPosition._Y != _GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y)
-			{
-				_Channel->GetMap()->ApplyMove(this, CollisionPosition);
-			}
-		}
-		else
-		{
-			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-
-			PositionReset();
-
-			// 바뀐 좌표 값 시야범위 오브젝트들에게 전송
-			CMessage* ResMovePacket = G_ObjectManager->GameServer->MakePacketResMove(
-				_GameObjectInfo.ObjectId,
-				CanMove,
-				_GameObjectInfo.ObjectPositionInfo);
-
-			G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResMovePacket);
-			ResMovePacket->Free();
-		}
+	{		
+		
 	}
 }
 
@@ -143,6 +74,68 @@ void CGameObject::Update()
 
 		switch ((en_GameObjectJobType)GameObjectJob->GameObjectJobType)
 		{	
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_MOVE:
+			{
+				float DirectionX;
+				*GameObjectJob->GameObjectJobMessage >> DirectionX;
+				float DirectionY;
+				*GameObjectJob->GameObjectJobMessage >> DirectionY;
+				float PositionX;
+				*GameObjectJob->GameObjectJobMessage >> PositionX;
+				float PositionY;
+				*GameObjectJob->GameObjectJobMessage >> PositionY;
+				int8 GameObjectState;
+				*GameObjectJob->GameObjectJobMessage >> GameObjectState;
+
+				// 서버와 클라 위치 차이 구함
+				float CheckPositionX = abs(_GameObjectInfo.ObjectPositionInfo.Position._X - PositionX);
+				float CheckPositionY = abs(_GameObjectInfo.ObjectPositionInfo.Position._Y - PositionY);
+						
+				if (CheckPositionX < 1.0f && CheckPositionY < 1.0f)
+				{
+					_GameObjectInfo.ObjectPositionInfo.Direction._X = DirectionX;
+					_GameObjectInfo.ObjectPositionInfo.Direction._Y = DirectionY;
+
+					_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
+				}	
+				else if (CheckPositionX >= 1.0f || CheckPositionY >= 1.0f)
+				{
+					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldOfViewPlayers(this, 1, false);
+
+					CMessage* ResMoveStopPacket = G_ObjectManager->GameServer->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
+						_GameObjectInfo.ObjectPositionInfo.Position._X,
+						_GameObjectInfo.ObjectPositionInfo.Position._Y);
+					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIds, ResMoveStopPacket);
+					ResMoveStopPacket->Free();					
+				}
+			}
+			break;
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_MOVE_STOP:
+			{
+				float PositionX;
+				*GameObjectJob->GameObjectJobMessage >> PositionX;
+				float PositionY;
+				*GameObjectJob->GameObjectJobMessage >> PositionY;
+				int8 GameObjectState;
+				*GameObjectJob->GameObjectJobMessage >> GameObjectState;
+			
+				_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+
+				float CheckPositionX = abs(_GameObjectInfo.ObjectPositionInfo.Position._X - PositionX);
+				float CheckPositionY = abs(_GameObjectInfo.ObjectPositionInfo.Position._Y - PositionY);
+
+				if (CheckPositionX > 0.2f || CheckPositionY > 0.2f)
+				{
+					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldOfViewPlayers(this, 1, false);
+
+					CMessage* ResMoveStopPacket = G_ObjectManager->GameServer->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
+						_GameObjectInfo.ObjectPositionInfo.Position._X,
+						_GameObjectInfo.ObjectPositionInfo.Position._Y);
+					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIds, ResMoveStopPacket);
+					ResMoveStopPacket->Free();
+				}
+			}
+			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SELECT_SKILL_CHARACTERISTIC:
 			{
 				int8 SelectSkillCharacterIndex;
@@ -269,7 +262,7 @@ void CGameObject::Update()
 							}
 							else
 							{
-								CMessage* ResSkillCancelFailtPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_SKILL_CANCEL_FAIL_COOLTIME, Skill->GetSkillInfo()->SkillName.c_str());
+								CMessage* ResSkillCancelFailtPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSONAL_MESSAGE_SKILL_CANCEL_FAIL_COOLTIME, Skill->GetSkillInfo()->SkillName.c_str());
 								G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSkillCancelFailtPacket);
 								ResSkillCancelFailtPacket->Free();
 							}							
@@ -307,14 +300,14 @@ void CGameObject::Update()
 						}
 						else
 						{
-							CMessage* FarDistanceErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_FAR_DISTANCE);
+							CMessage* FarDistanceErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSONAL_MESSAGE_FAR_DISTANCE);
 							G_ObjectManager->GameServer->SendPacket(Player->_SessionId, FarDistanceErrorPacket);
 							FarDistanceErrorPacket->Free();
 						}
 					}
 					else
 					{
-						CMessage* NonSelectTargetPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT);
+						CMessage* NonSelectTargetPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT);
 						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, NonSelectTargetPacket);
 						NonSelectTargetPacket->Free();
 					}
@@ -371,7 +364,7 @@ void CGameObject::Update()
 									}
 									else
 									{
-										CMessage* NonSelectTargetErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT);
+										CMessage* NonSelectTargetErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT);
 										G_ObjectManager->GameServer->SendPacket(Player->_SessionId, NonSelectTargetErrorPacket);
 										NonSelectTargetErrorPacket->Free();
 									}									
@@ -392,8 +385,7 @@ void CGameObject::Update()
 											_SelectTarget->SetStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_PROTECTION_SHIELD_SMASH);
 
 											CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
-												_SelectTarget->_GameObjectInfo.ObjectType,
-												_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
+												_SelectTarget->_GameObjectInfo.ObjectType,												
 												FindMeleeSkill->GetSkillInfo()->SkillType,
 												true, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_PROTECTION_SHIELD_SMASH);
 											G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
@@ -408,7 +400,7 @@ void CGameObject::Update()
 									}
 									else
 									{
-										CMessage* NonSelectTargetErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT);
+										CMessage* NonSelectTargetErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT);
 										G_ObjectManager->GameServer->SendPacket(Player->_SessionId, NonSelectTargetErrorPacket);
 										NonSelectTargetErrorPacket->Free();
 									}									
@@ -424,7 +416,11 @@ void CGameObject::Update()
 										float Distance = st_Vector2::Distance(TargetPosition, MyPosition);
 										if (Distance <= 4.0f)
 										{
-											st_Vector2Int MyFrontCellPosition = GetFrontCellPosition(_GameObjectInfo.ObjectPositionInfo.MoveDir, 1);
+											st_Vector2 MyFrontPosition = GetFrontPosition(1);
+											st_Vector2Int MyFrontCellPosition;
+											MyFrontCellPosition._X = MyFrontPosition._X;
+											MyFrontCellPosition._Y = MyFrontPosition._Y;
+
 											if (_Channel != nullptr)
 											{
 												if (_Channel->GetMap()->ApplyMove(_SelectTarget, MyFrontCellPosition))
@@ -444,13 +440,14 @@ void CGameObject::Update()
 
 														_SelectTarget->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
-														CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
+														CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId, 
+															_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X,
+															_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y);
 														G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, SelectTargetMoveStopMessage);
 														SelectTargetMoveStopMessage->Free();
 
 														CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
-															_SelectTarget->_GameObjectInfo.ObjectType,
-															_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
+															_SelectTarget->_GameObjectInfo.ObjectType,															
 															FindMeleeSkill->GetSkillInfo()->SkillType,
 															true, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_CHOHONE);
 														G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
@@ -460,38 +457,12 @@ void CGameObject::Update()
 														G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
 														ResBufDeBufSkillPacket->Free();
 
-														CMessage* ResEffectPacket = G_ObjectManager->GameServer->MakePacketEffect(_SelectTarget->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_DEBUF_STUN, NewDeBufSkill->GetSkillInfo()->SkillDurationTime / 1000.0f);
-														G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResEffectPacket);
-														ResEffectPacket->Free();
-
-														switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
-														{
-														case en_MoveDir::UP:
-															_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X = _GameObjectInfo.ObjectPositionInfo.Position._X;
-															_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y = MyFrontCellPosition._Y + 0.5f;
-															break;
-														case en_MoveDir::DOWN:
-															_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X = _GameObjectInfo.ObjectPositionInfo.Position._X;
-															_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y = MyFrontCellPosition._Y + 0.5f;
-															break;
-														case en_MoveDir::LEFT:
-															_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X = MyFrontCellPosition._X + 0.5f;
-															_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y = _GameObjectInfo.ObjectPositionInfo.Position._Y;
-															break;
-														case en_MoveDir::RIGHT:
-															_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X = MyFrontCellPosition._X + 0.5f;
-															_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y = _GameObjectInfo.ObjectPositionInfo.Position._Y;
-															break;
-														}
-
-														CMessage* ResSyncPositionPacket = G_ObjectManager->GameServer->MakePacketResSyncPosition(_SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
-														G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResSyncPositionPacket);
-														ResSyncPositionPacket->Free();
+														// 상대방 위치값 재조정 해야함
 													}
 												}
 												else
 												{
-													CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_PLACE_BLOCK, FindMeleeSkill->GetSkillInfo()->SkillName.c_str());
+													CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::PERSONAL_MESSAGE_PLACE_BLOCK, FindMeleeSkill->GetSkillInfo()->SkillName.c_str());
 													G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResErrorPacket);
 													ResErrorPacket->Free();
 												}
@@ -502,7 +473,7 @@ void CGameObject::Update()
 									}	
 									else
 									{
-										CMessage* NonSelectTargetErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT);
+										CMessage* NonSelectTargetErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT);
 										G_ObjectManager->GameServer->SendPacket(Player->_SessionId, NonSelectTargetErrorPacket);
 										NonSelectTargetErrorPacket->Free();
 									}
@@ -514,30 +485,13 @@ void CGameObject::Update()
 									{
 										st_Vector2 TargetPosition = _SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position;
 										st_Vector2 MyPosition = _GameObjectInfo.ObjectPositionInfo.Position;
-										st_Vector2 Direction = TargetPosition - MyPosition;
-
-										en_MoveDir Dir = st_Vector2::GetMoveDir(Direction);
+										st_Vector2 Direction = TargetPosition - MyPosition;										
 
 										float Distance = st_Vector2::Distance(TargetPosition, MyPosition);
 										if (Distance <= 4.0f)
 										{
-											st_Vector2Int MovePosition;
-
-											switch (Dir)
-											{
-											case en_MoveDir::UP:
-												MovePosition = _SelectTarget->GetFrontCellPosition(en_MoveDir::DOWN, 1);
-												break;
-											case en_MoveDir::DOWN:
-												MovePosition = _SelectTarget->GetFrontCellPosition(en_MoveDir::UP, 1);
-												break;
-											case en_MoveDir::LEFT:
-												MovePosition = _SelectTarget->GetFrontCellPosition(en_MoveDir::RIGHT, 1);
-												break;
-											case en_MoveDir::RIGHT:
-												MovePosition = _SelectTarget->GetFrontCellPosition(en_MoveDir::LEFT, 1);
-												break;
-											}
+											// 내가 움직이고자 하는 위치를 구해야함
+											st_Vector2Int MovePosition = st_Vector2Int::Zero();
 
 											if (_Channel->GetMap()->ApplyMove(this, MovePosition))
 											{
@@ -554,13 +508,14 @@ void CGameObject::Update()
 
 												_SelectTarget->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
-												CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
+												CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId,
+													_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X,
+													_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y);
 												G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, SelectTargetMoveStopMessage);
 												SelectTargetMoveStopMessage->Free();
 
 												CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
-													_SelectTarget->_GameObjectInfo.ObjectType,
-													_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
+													_SelectTarget->_GameObjectInfo.ObjectType,													
 													FindMeleeSkill->GetSkillInfo()->SkillType,
 													true, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_SHAEHONE);
 												G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
@@ -568,60 +523,27 @@ void CGameObject::Update()
 
 												CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewDeBufSkill->GetSkillInfo());
 												G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
-												ResBufDeBufSkillPacket->Free();
+												ResBufDeBufSkillPacket->Free();																							
 
-												float EffectPrintTime = FindMeleeSkill->GetSkillInfo()->SkillDurationTime / 1000.0f;
-
-												// 이펙트 출력
-												CMessage* ResEffectPacket = G_ObjectManager->GameServer->MakePacketEffect(_SelectTarget->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_DEBUF_ROOT, EffectPrintTime);
-												G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResEffectPacket);
-												ResEffectPacket->Free();
-
-												switch (Dir)
-												{
-												case en_MoveDir::UP:
-													_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::UP;
-													_GameObjectInfo.ObjectPositionInfo.Position._X = _SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X;
-													_GameObjectInfo.ObjectPositionInfo.Position._Y = MovePosition._Y + 0.5f;
-													break;
-												case en_MoveDir::DOWN:
-													_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
-													_GameObjectInfo.ObjectPositionInfo.Position._X = _SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X;
-													_GameObjectInfo.ObjectPositionInfo.Position._Y = MovePosition._Y + 0.5f;
-													break;
-												case en_MoveDir::LEFT:
-													_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::LEFT;
-													_GameObjectInfo.ObjectPositionInfo.Position._X = MovePosition._X + 0.5f;
-													_GameObjectInfo.ObjectPositionInfo.Position._Y = _SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y;
-													break;
-												case en_MoveDir::RIGHT:
-													_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::RIGHT;
-													_GameObjectInfo.ObjectPositionInfo.Position._X = MovePosition._X + 0.5f;
-													_GameObjectInfo.ObjectPositionInfo.Position._Y = _SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y;
-													break;
-												}
-
-												CMessage* ResSyncPositionPacket = G_ObjectManager->GameServer->MakePacketResSyncPosition(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo);
-												G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResSyncPositionPacket);
-												ResSyncPositionPacket->Free();
+												// 내 위치를 재조정 해야함
 											}
 											else
 											{
-												CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_PLACE_BLOCK, FindMeleeSkill->GetSkillInfo()->SkillName.c_str());
+												CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::PERSONAL_MESSAGE_PLACE_BLOCK, FindMeleeSkill->GetSkillInfo()->SkillName.c_str());
 												G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResErrorPacket);
 												ResErrorPacket->Free();
 											}
 										}
 										else
 										{
-											CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_PLACE_DISTANCE, FindMeleeSkill->GetSkillInfo()->SkillName.c_str(), Distance);
+											CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::PERSONAL_MESSAGE_PLACE_DISTANCE, FindMeleeSkill->GetSkillInfo()->SkillName.c_str(), Distance);
 											G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResErrorPacket);
 											ResErrorPacket->Free();
 										}
 									}	
 									else
 									{
-										CMessage* NonSelectTargetErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT);
+										CMessage* NonSelectTargetErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT);
 										G_ObjectManager->GameServer->SendPacket(Player->_SessionId, NonSelectTargetErrorPacket);
 										NonSelectTargetErrorPacket->Free();
 									}
@@ -632,11 +554,7 @@ void CGameObject::Update()
 									CChannel* Channel = Player->GetChannel();
 									if (Channel != nullptr)
 									{
-										vector<CGameObject*> RangeAttackObjects = Channel->FindRangeAttackChannelObjects(Player, 2);
-										for (CGameObject* RangeAttackObject : RangeAttackObjects)
-										{
-											DamageTargets.push_back(RangeAttackObject);
-										}
+										// 주위 일정 거리 안에 오브젝트 찾아야함
 									}
 								}
 								break;
@@ -657,10 +575,7 @@ void CGameObject::Update()
 								DamageTarget->_GameObjectJobQue.Enqueue(DamageJob);
 							}
 
-							CMessage* AnimationPlayPacket = G_ObjectManager->GameServer->MakePacketResAnimationPlay(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo.MoveDir,
-								(*FindMeleeSkill->GetSkillInfo()->SkillAnimations.find(_GameObjectInfo.ObjectPositionInfo.MoveDir)).second);
-							G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, AnimationPlayPacket);
-							AnimationPlayPacket->Free();
+							// 애니메이션 출력							
 
 							// 쿨타임 시작
 							FindMeleeSkill->CoolTimeStart();
@@ -833,8 +748,7 @@ void CGameObject::Update()
 							ResBufDebufSkillPacket->Free();
 
 							// 상태이상 해제 알림
-							CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
-								_GameObjectInfo.ObjectPositionInfo.MoveDir,
+							CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,								
 								_GameObjectInfo.ObjectType,
 								_GameObjectInfo.ObjectPositionInfo.State);
 							G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResObjectStateChangePacket);
@@ -844,7 +758,7 @@ void CGameObject::Update()
 						{
 							if (CheckCantControlStatusAbnormal() > 0)
 							{
-								CMessage* ResStatusAbnormalSpellCancel = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSOANL_MESSAGE_STATUS_ABNORMAL_SPELL, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
+								CMessage* ResStatusAbnormalSpellCancel = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSOANL_MESSAGE_STATUS_ABNORMAL_SPELL, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
 								G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResStatusAbnormalSpellCancel);
 								ResStatusAbnormalSpellCancel->Free();
 								break;
@@ -871,11 +785,6 @@ void CGameObject::Update()
 								CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_GameObjectInfo.ObjectId, true, CharPoseBufSkill->GetSkillInfo());
 								G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
 								ResBufDeBufSkillPacket->Free();
-
-								// 돌격자세 이펙트 출력
-								CMessage* ResEffectPacket = G_ObjectManager->GameServer->MakePacketEffect(_GameObjectInfo.ObjectId, en_EffectType::EFFECT_CHARGE_POSE, 2.8f);
-								G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResEffectPacket);
-								ResEffectPacket->Free();
 							}
 							break;
 							case en_SkillType::SKILL_SPELL_ACTIVE_BUF_TELEPORT:
@@ -889,28 +798,10 @@ void CGameObject::Update()
 									{
 										DebufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
 									}
-								}
+								}								
 
-								en_MoveDir TelePortDir;
-
-								switch (_GameObjectInfo.ObjectPositionInfo.MoveDir)
-								{
-								case en_MoveDir::UP:
-									TelePortDir = en_MoveDir::DOWN;
-									break;
-								case en_MoveDir::DOWN:
-									TelePortDir = en_MoveDir::UP;
-									break;
-								case en_MoveDir::LEFT:
-									TelePortDir = en_MoveDir::RIGHT;
-									break;
-								case en_MoveDir::RIGHT:
-									TelePortDir = en_MoveDir::LEFT;
-									break;
-								}
-
-								st_Vector2Int MovePosition;
-								MovePosition = GetFrontCellPosition(TelePortDir, 5);
+								st_Vector2Int MovePosition;								
+								// 다섯칸 바라보고 있는 방향 반대 위치값 구해야함
 
 								GetChannel()->GetMap()->ApplyMove(this, MovePosition);
 
@@ -921,11 +812,6 @@ void CGameObject::Update()
 								CMessage* ResSyncPositionPacket = G_ObjectManager->GameServer->MakePacketResSyncPosition(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo);
 								G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResSyncPositionPacket);
 								ResSyncPositionPacket->Free();
-
-								// 시공 뒤틀림 이펙트 출력
-								CMessage* ResEffectPacket = G_ObjectManager->GameServer->MakePacketEffect(_GameObjectInfo.ObjectId, en_EffectType::EFFECT_BACK_TELEPORT, 0.5f);
-								G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResEffectPacket);
-								ResEffectPacket->Free();
 							}
 							break;
 							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:
@@ -948,8 +834,7 @@ void CGameObject::Update()
 									_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPELL;
 
 									// 주위 플레이어들에게 마법 시전 상태 알려줌
-									CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
-										_GameObjectInfo.ObjectPositionInfo.MoveDir,
+									CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,										
 										_GameObjectInfo.ObjectType,
 										_GameObjectInfo.ObjectPositionInfo.State);
 									G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResObjectStateChangePacket);
@@ -966,7 +851,7 @@ void CGameObject::Update()
 								}
 								else
 								{
-									CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
+									CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
 									G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResErrorPacket);
 									ResErrorPacket->Free();
 								}
@@ -993,8 +878,7 @@ void CGameObject::Update()
 											_SelectTarget->SetStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_WAVE);
 
 											CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
-												_SelectTarget->_GameObjectInfo.ObjectType,
-												_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
+												_SelectTarget->_GameObjectInfo.ObjectType,												
 												NewDebufSkill->GetSkillInfo()->SkillType,
 												true, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_WAVE);
 											G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
@@ -1008,7 +892,7 @@ void CGameObject::Update()
 								}
 								else
 								{
-									CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
+									CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
 									G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResErrorPacket);
 									ResErrorPacket->Free();
 								}
@@ -1032,13 +916,14 @@ void CGameObject::Update()
 										_SelectTarget->AddDebuf(NewSkill);
 										_SelectTarget->SetStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ROOT);
 
-										CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
+										CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId,
+											_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X,
+											_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y);
 										G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, SelectTargetMoveStopMessage);
 										SelectTargetMoveStopMessage->Free();
 
 										CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
-											_SelectTarget->_GameObjectInfo.ObjectType,
-											_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
+											_SelectTarget->_GameObjectInfo.ObjectType,											
 											FindSpellSkill->GetSkillInfo()->SkillType,
 											true, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ROOT);
 										G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
@@ -1046,16 +931,12 @@ void CGameObject::Update()
 
 										CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewSkill->GetSkillInfo());
 										G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
-										ResBufDeBufSkillPacket->Free();
-
-										CMessage* ResEffectPacket = G_ObjectManager->GameServer->MakePacketEffect(_SelectTarget->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_DEBUF_ROOT, 0.5f);
-										G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResEffectPacket);
-										ResEffectPacket->Free();
+										ResBufDeBufSkillPacket->Free();									
 									}
 								}
 								else
 								{
-									CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
+									CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
 									G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResErrorPacket);
 									ResErrorPacket->Free();
 								}
@@ -1076,7 +957,9 @@ void CGameObject::Update()
 										NewSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
 										NewSkill->StatusAbnormalDurationTimeStart();
 
-										CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId, _SelectTarget->_GameObjectInfo.ObjectPositionInfo);
+										CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId,
+											_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X,
+											_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y);
 										G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, SelectTargetMoveStopMessage);
 										SelectTargetMoveStopMessage->Free();
 
@@ -1084,8 +967,7 @@ void CGameObject::Update()
 										_SelectTarget->SetStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_DISCIPLINE_ROOT);
 
 										CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
-											_SelectTarget->_GameObjectInfo.ObjectType,
-											_SelectTarget->_GameObjectInfo.ObjectPositionInfo.MoveDir,
+											_SelectTarget->_GameObjectInfo.ObjectType,											
 											FindSpellSkill->GetSkillInfo()->SkillType,
 											true, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_DISCIPLINE_ROOT);
 										G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
@@ -1094,15 +976,11 @@ void CGameObject::Update()
 										CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewSkill->GetSkillInfo());
 										G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
 										ResBufDeBufSkillPacket->Free();
-
-										CMessage* ResEffectPacket = G_ObjectManager->GameServer->MakePacketEffect(_SelectTarget->_GameObjectInfo.ObjectId, en_EffectType::EFFECT_DEBUF_ROOT, 0.5f);
-										G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResEffectPacket);
-										ResEffectPacket->Free();
 									}
 								}
 								else
 								{
-									CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
+									CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
 									G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResErrorPacket);
 									ResErrorPacket->Free();
 								}
@@ -1115,7 +993,7 @@ void CGameObject::Update()
 					}
 					else
 					{
-						CMessage* SkillCoolTimeErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_SKILL_COOLTIME, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
+						CMessage* SkillCoolTimeErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::PERSONAL_MESSAGE_SKILL_COOLTIME, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
 						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, SkillCoolTimeErrorPacket);
 						SkillCoolTimeErrorPacket->Free();
 						break;
@@ -1185,16 +1063,16 @@ void CGameObject::Update()
 							&& Crop->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::READY_DEAD
 							&& Crop->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 						{
-							st_Vector2 DirNormalVector = (Crop->_GameObjectInfo.ObjectPositionInfo.Position - _GameObjectInfo.ObjectPositionInfo.Position).Normalize();
-							en_MoveDir Dir = st_Vector2::GetMoveDir(DirNormalVector);
+							st_Vector2 DirNormalVector = (Crop->_GameObjectInfo.ObjectPositionInfo.Position - _GameObjectInfo.ObjectPositionInfo.Position).Normalize();							
 
-							if (_GameObjectInfo.ObjectPositionInfo.MoveDir != Dir)
+							// 작물 채집할 때 같은 방향을 바라보고 있지 않으면 에러 메세지 출력
+							/*if (_GameObjectInfo.ObjectPositionInfo.MoveDir != Dir)
 							{
-								CMessage* DirErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_DIR_DIFFERENT, Crop->_GameObjectInfo.ObjectName.c_str());
+								CMessage* DirErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSONAL_MESSAGE_DIR_DIFFERENT, Crop->_GameObjectInfo.ObjectName.c_str());
 								G_ObjectManager->GameServer->SendPacket(Player->_SessionId, DirErrorPacket);
 								DirErrorPacket->Clear();
 								break;
-							}
+							}*/
 
 							float Distance = st_Vector2::Distance(_GameObjectInfo.ObjectPositionInfo.Position, Crop->_GameObjectInfo.ObjectPositionInfo.Position);
 							if (Distance < 1.2f)
@@ -1223,8 +1101,7 @@ void CGameObject::Update()
 
 								_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::GATHERING;
 
-								CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
-									_GameObjectInfo.ObjectPositionInfo.MoveDir,
+								CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,									
 									_GameObjectInfo.ObjectType,
 									_GameObjectInfo.ObjectPositionInfo.State);
 								G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResObjectStateChangePacket);
@@ -1235,7 +1112,7 @@ void CGameObject::Update()
 							}
 							else
 							{
-								CMessage* DirErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_GATHERING_DISTANCE, Crop->_GameObjectInfo.ObjectName.c_str());
+								CMessage* DirErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSONAL_MESSAGE_GATHERING_DISTANCE, Crop->_GameObjectInfo.ObjectName.c_str());
 								G_ObjectManager->GameServer->SendPacket(Player->_SessionId, DirErrorPacket);
 								DirErrorPacket->Clear();
 							}
@@ -1329,11 +1206,19 @@ void CGameObject::Update()
 				CGameObject* Attacker = _Channel->FindChannelObject(AttackerID, (en_GameObjectType)AttackerType);
 				if (Attacker != nullptr)
 				{
-					bool IsDead = OnDamaged(Attacker, Damage);
-
-					en_EffectType HitEffectType = en_EffectType::EFFECT_TYPE_NONE;
+					bool IsDead = OnDamaged(Attacker, Damage);					
 
 					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetFieldOfViewPlayers(this, 1, false);
+
+					CMessage* ResDamagePacket = G_ObjectManager->GameServer->MakePacketResDamage(_GameObjectInfo.ObjectId,
+						_GameObjectInfo.ObjectId,
+						SkillType,
+						en_ResourceName::CLIENT_EFFECT_ATTACK_TARGET_HIT,
+						Damage,
+						_GameObjectInfo.ObjectStatInfo.HP,
+						IsCritical);
+					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResDamagePacket);
+					ResDamagePacket->Free();					
 
 					// 데미지 시스템 메세지 전송	
 					CMessage* ResSkillSystemMessagePacket = G_ObjectManager->GameServer->MakePacketResDamageChattingBoxMessage(en_MessageType::MESSAGE_TYPE_DAMAGE_CHATTING,
@@ -1342,16 +1227,7 @@ void CGameObject::Update()
 						(en_SkillType)SkillType,
 						Damage);
 					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResSkillSystemMessagePacket);
-					ResSkillSystemMessagePacket->Free();
-
-					// 데미지 출력
-					CMessage* ResDamagePacket = G_ObjectManager->GameServer->MakePacketResDamage(Attacker->_GameObjectInfo.ObjectId,
-						_GameObjectInfo.ObjectId,
-						(en_SkillType)SkillType,
-						Damage,
-						IsCritical);
-					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResDamagePacket);
-					ResDamagePacket->Free();
+					ResSkillSystemMessagePacket->Free();					
 
 					// 변경된 체력 전송
 					CMessage* StatChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectStatInfo);
@@ -1414,14 +1290,6 @@ void CGameObject::Update()
 					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResSkillSystemMessagePacket);
 					ResSkillSystemMessagePacket->Free();
 
-					CMessage* ResDamagePacket = G_ObjectManager->GameServer->MakePacketResDamage(Healer->_GameObjectInfo.ObjectId,
-						_GameObjectInfo.ObjectId,
-						(en_SkillType)HealSkillType,
-						HealPoint,
-						false);
-					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResDamagePacket);
-					ResDamagePacket->Free();
-
 					CMessage* StatChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectStatInfo);
 					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, StatChangePacket);
 					StatChangePacket->Free();
@@ -1445,12 +1313,12 @@ void CGameObject::Update()
 					EquipmentUpdateMessage->Free();
 
 					// 가방에서 착용한 장비 없애기
-					Player->GetInventoryManager().InitItem(0, EquipmentItem->_ItemInfo.ItemTileGridPositionX, EquipmentItem->_ItemInfo.ItemTileGridPositionY);
+					Player->GetInventoryManager()->InitItem(0, EquipmentItem->_ItemInfo.ItemTileGridPositionX, EquipmentItem->_ItemInfo.ItemTileGridPositionY);
 
 					// 장비 해제한 아이템이 있을 경우 가방에 해당 아이템을 새로 넣음
 					if (ReturnEquipmentItem != nullptr)
 					{
-						Player->GetInventoryManager().InsertItem(0, ReturnEquipmentItem);
+						Player->GetInventoryManager()->InsertItem(0, ReturnEquipmentItem);
 
 						CMessage* ResItemToInventoryPacket = G_ObjectManager->GameServer->MakePacketResItemToInventory(Player->_GameObjectInfo.ObjectId,
 							ReturnEquipmentItem->_ItemInfo, false, ReturnEquipmentItem->_ItemInfo.ItemCount);
@@ -1482,7 +1350,7 @@ void CGameObject::Update()
 						OffEquipmentMessage->Free();
 
 						// 클라 인벤토리에 장비 해제한 아이템 넣음
-						Player->GetInventoryManager().InsertItem(0, ReturnEquipmentItem);
+						Player->GetInventoryManager()->InsertItem(0, ReturnEquipmentItem);
 
 						// 클라에게 알려줌
 						CMessage* ResItemToInventoryPacket = G_ObjectManager->GameServer->MakePacketResItemToInventory(Player->_GameObjectInfo.ObjectId,
@@ -1536,7 +1404,7 @@ void CGameObject::Update()
 				if (Player != nullptr)
 				{
 					// 가방에 버리고자 하는 아이템이 있는지 확인
-					CItem* FindDropItem = Player->GetInventoryManager().FindInventoryItem(0, (en_SmallItemCategory)DropItemType);
+					CItem* FindDropItem = Player->GetInventoryManager()->FindInventoryItem(0, (en_SmallItemCategory)DropItemType);
 					if (FindDropItem != nullptr)
 					{
 						// 아이템 개수가 맞는지 확인
@@ -1558,7 +1426,7 @@ void CGameObject::Update()
 
 							if (FindDropItem->_ItemInfo.ItemCount == 0)
 							{
-								Player->GetInventoryManager().InitItem(0, FindDropItem->_ItemInfo.ItemTileGridPositionX, FindDropItem->_ItemInfo.ItemTileGridPositionY);
+								Player->GetInventoryManager()->InitItem(0, FindDropItem->_ItemInfo.ItemTileGridPositionX, FindDropItem->_ItemInfo.ItemTileGridPositionY);
 							}
 						}
 					}
@@ -1589,12 +1457,12 @@ void CGameObject::Update()
 					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN:
 					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN:
 					{
-						Player->GetInventoryManager().InsertMoney(0, InsertItem);
+						Player->GetInventoryManager()->InsertMoney(0, InsertItem);
 
 						CMessage* ResMoneyToInventoryPacket = G_ObjectManager->GameServer->MakePacketResMoneyToInventory(Player->_GameObjectInfo.ObjectId,
-							Player->GetInventoryManager().GetGoldCoin(),
-							Player->GetInventoryManager().GetSliverCoin(),
-							Player->GetInventoryManager().GetBronzeCoin(),
+							Player->GetInventoryManager()->GetGoldCoin(),
+							Player->GetInventoryManager()->GetSliverCoin(),
+							Player->GetInventoryManager()->GetBronzeCoin(),
 							InsertItem->_ItemInfo,
 							ItemEach);
 						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResMoneyToInventoryPacket);
@@ -1603,13 +1471,13 @@ void CGameObject::Update()
 					break;
 					default:
 					{
-						CItem* FindItem = Player->GetInventoryManager().FindInventoryItem(0, InsertItem->_ItemInfo.ItemSmallCategory);
+						CItem* FindItem = Player->GetInventoryManager()->FindInventoryItem(0, InsertItem->_ItemInfo.ItemSmallCategory);
 						if (FindItem == nullptr)
 						{
 							CItem* NewItem = G_ObjectManager->GameServer->NewItemCrate(InsertItem->_ItemInfo);
-							Player->GetInventoryManager().InsertItem(0, NewItem);
+							Player->GetInventoryManager()->InsertItem(0, NewItem);
 
-							FindItem = Player->GetInventoryManager().GetItem(0, NewItem->_ItemInfo.ItemTileGridPositionX, NewItem->_ItemInfo.ItemTileGridPositionY);
+							FindItem = Player->GetInventoryManager()->GetItem(0, NewItem->_ItemInfo.ItemTileGridPositionX, NewItem->_ItemInfo.ItemTileGridPositionY);
 						}
 						else
 						{
@@ -1655,7 +1523,7 @@ void CGameObject::Update()
 				if (CraftingTable != nullptr && CraftingTableItemAddPlayer != nullptr)
 				{
 					// 넣을 아이템이 넣는 대상의 인벤토리에 있는지 확인
-					CItem* FindAddItem = CraftingTableItemAddPlayer->GetInventoryManager().FindInventoryItem(0, (en_SmallItemCategory)AddItemSmallCategory);
+					CItem* FindAddItem = CraftingTableItemAddPlayer->GetInventoryManager()->FindInventoryItem(0, (en_SmallItemCategory)AddItemSmallCategory);
 					if (FindAddItem != nullptr && FindAddItem->_ItemInfo.ItemCount > 0)
 					{
 						// 제작법을 가지고 옴
@@ -1700,7 +1568,7 @@ void CGameObject::Update()
 
 							if (FindAddItem->_ItemInfo.ItemCount == 0)
 							{
-								CraftingTableItemAddPlayer->GetInventoryManager().InitItem(0, FindAddItem->_ItemInfo.ItemTileGridPositionX, FindAddItem->_ItemInfo.ItemTileGridPositionY);
+								CraftingTableItemAddPlayer->GetInventoryManager()->InitItem(0, FindAddItem->_ItemInfo.ItemTileGridPositionX, FindAddItem->_ItemInfo.ItemTileGridPositionY);
 							}
 
 							CMessage* ResCraftingTableAddItemPacket = G_ObjectManager->GameServer->MakePacketResCraftingTableInput(_GameObjectInfo.ObjectId, CraftingTable->GetMaterialItems());
@@ -1709,7 +1577,7 @@ void CGameObject::Update()
 						}
 						else
 						{
-							CMessage* WrongItemInputMessage = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSOANL_MESSAGE_CRAFTING_TABLE_MATERIAL_WRONG_ITEM_ADD);
+							CMessage* WrongItemInputMessage = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSOANL_MESSAGE_CRAFTING_TABLE_MATERIAL_WRONG_ITEM_ADD);
 							G_ObjectManager->GameServer->SendPacket(CraftingTableItemAddPlayer->_SessionId, WrongItemInputMessage);
 							WrongItemInputMessage->Free();
 						}
@@ -1760,7 +1628,7 @@ void CGameObject::Update()
 					if (SubtractItemFind == true)
 					{
 						bool IsExistItem;
-						CItem* InsertItem = CraftingTableItemSubtractPlayer->GetInventoryManager().InsertItem(0, (en_SmallItemCategory)SubtractItemSmallCategory, SubtractItemCount, &IsExistItem);
+						CItem* InsertItem = CraftingTableItemSubtractPlayer->GetInventoryManager()->InsertItem(0, (en_SmallItemCategory)SubtractItemSmallCategory, SubtractItemCount, &IsExistItem);
 
 						CMessage* InsertItemToInventoryPacket = G_ObjectManager->GameServer->MakePacketResItemToInventory(CraftingTableItemSubtractPlayer->_GameObjectInfo.ObjectId,
 							InsertItem->_ItemInfo,
@@ -1831,7 +1699,7 @@ void CGameObject::Update()
 					if (SubtractItemFind == true)
 					{
 						bool IsExistItem;
-						CItem* InsertItem = CraftingTableItemSubtractPlayer->GetInventoryManager().InsertItem(0, (en_SmallItemCategory)SubtractItemSmallCategory, SubtractItemCount, &IsExistItem);
+						CItem* InsertItem = CraftingTableItemSubtractPlayer->GetInventoryManager()->InsertItem(0, (en_SmallItemCategory)SubtractItemSmallCategory, SubtractItemCount, &IsExistItem);
 
 						CMessage* InsertItemToInventoryPacket = G_ObjectManager->GameServer->MakePacketResItemToInventory(CraftingTableItemSubtractPlayer->_GameObjectInfo.ObjectId,
 							InsertItem->_ItemInfo,
@@ -1916,7 +1784,7 @@ void CGameObject::Update()
 										else
 										{
 											// 재료 부족 에러 메세지 띄우기
-											CMessage* CraftingStartErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_CRAFTING_TABLE_MATERIAL_COUNT_NOT_ENOUGH);
+											CMessage* CraftingStartErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSONAL_MESSAGE_CRAFTING_TABLE_MATERIAL_COUNT_NOT_ENOUGH);
 											G_ObjectManager->GameServer->SendPacket(((CPlayer*)CraftingStartObject)->_SessionId, CraftingStartErrorPacket);
 											CraftingStartErrorPacket->Free();
 										}
@@ -1931,7 +1799,7 @@ void CGameObject::Update()
 				}				
 				else
 				{
-					CMessage* CraftingStartErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_PersonalMessageType::PERSONAL_MESSAGE_CRAFTING_TABLE_OVERLAP_CRAFTING_START);
+					CMessage* CraftingStartErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSONAL_MESSAGE_CRAFTING_TABLE_OVERLAP_CRAFTING_START);
 					G_ObjectManager->GameServer->SendPacket(((CPlayer*)CraftingStartObject)->_SessionId, CraftingStartErrorPacket);
 					CraftingStartErrorPacket->Free();
 				}
@@ -2068,30 +1936,14 @@ st_PositionInfo CGameObject::GetPositionInfo()
 	return _GameObjectInfo.ObjectPositionInfo;
 }
 
-st_Vector2Int CGameObject::GetFrontCellPosition(en_MoveDir Dir, int8 Distance)
+st_Vector2 CGameObject::GetFrontPosition(int8 Distance)
 {
-	st_Vector2Int FrontPosition = _GameObjectInfo.ObjectPositionInfo.CollisionPosition;
+	st_Vector2 MouseDir = _MousePosition - _GameObjectInfo.ObjectPositionInfo.Position;
+	st_Vector2 MouseDirNormal = MouseDir.Normalize();
 
-	st_Vector2Int DirVector;
-	switch (Dir)
-	{
-	case en_MoveDir::UP:
-		DirVector = st_Vector2Int::Up() * Distance;
-		break;
-	case en_MoveDir::DOWN:
-		DirVector = st_Vector2Int::Down() * Distance;
-		break;
-	case en_MoveDir::LEFT:
-		DirVector = st_Vector2Int::Left() * Distance;
-		break;
-	case en_MoveDir::RIGHT:
-		DirVector = st_Vector2Int::Right() * Distance;
-		break;
-	}
+	st_Vector2 MouseFronPosition = MouseDirNormal * Distance;
 
-	FrontPosition = FrontPosition + DirVector;
-
-	return FrontPosition;
+	return _GameObjectInfo.ObjectPositionInfo.Position + MouseFronPosition;
 }
 
 vector<st_Vector2Int> CGameObject::GetAroundCellPositions(st_Vector2Int CellPosition, int8 Distance)
@@ -2231,11 +2083,7 @@ CRectCollision* CGameObject::GetRectCollision()
 
 bool CGameObject::IsPlayer()
 {
-	if (_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_WARRIOR_PLAYER
-		|| _GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_SHAMAN_PLAYER
-		|| _GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_TAIOIST_PLAYER
-		|| _GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_THIEF_PLAYER
-		|| _GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_ARCHER_PLAYER)
+	if (_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_PLAYER)		
 	{
 		return true;
 	}
