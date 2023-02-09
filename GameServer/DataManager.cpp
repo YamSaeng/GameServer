@@ -968,10 +968,6 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				int8 SkillDebufAttackSpeed = (int8)PublicAttackSkillListFiled["SkillDebufAttackSpeed"].GetInt();
 				int8 SkillDebufMovingSpeed = (int8)PublicAttackSkillListFiled["SkillDebufMovingSpeed"].GetInt();
 				int8 StatusAbnormalityProbability = (int8)PublicAttackSkillListFiled["StatusAbnormalityProbability"].GetInt();
-				string SkillUpAnimation = PublicAttackSkillListFiled["SkillUpAnimation"].GetString();
-				string SkillDownAnimation = PublicAttackSkillListFiled["SkillDownAnimation"].GetString();
-				string SkillLeftAnimation = PublicAttackSkillListFiled["SkillLeftAnimation"].GetString();
-				string SkillRightAnimation = PublicAttackSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = PublicAttackSkillListFiled["SkillExplanation"].GetString();
 
 				if (SkillType == "SKILL_DEFAULT_ATTACK")
@@ -994,10 +990,6 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				PublicAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 				PublicAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
 				PublicAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
-				PublicAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP,    (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-				PublicAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN,  (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-				PublicAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT,  (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-				PublicAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));				
 
 				_PublicAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)PublicAttackSkill->SkillType, PublicAttackSkill));
 			}					
@@ -1032,10 +1024,6 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				int64 SkillDotTime = PublicBufSkillListFiled["SkillDotTime"].GetInt64();
 				int SkillDistance = PublicBufSkillListFiled["SkillDistance"].GetInt();
 				float SkillTargetEffectTime = PublicBufSkillListFiled["SkillTargetEffectTime"].GetFloat();
-				string SkillUpAnimation = PublicBufSkillListFiled["SkillUpAnimation"].GetString();
-				string SkillDownAnimation = PublicBufSkillListFiled["SkillDownAnimation"].GetString();
-				string SkillLeftAnimation = PublicBufSkillListFiled["SkillLeftAnimation"].GetString();
-				string SkillRightAnimation = PublicBufSkillListFiled["SkillRightAnimation"].GetString();
 				string SkillExplation = PublicBufSkillListFiled["SkillExplanation"].GetString();
 
 				if (SkillType == "SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE")
@@ -1066,10 +1054,6 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				PublicBufSkill->SkillDotTime = SkillDotTime;
 				PublicBufSkill->SkillDistance = SkillDistance;
 				PublicBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				PublicBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-				PublicBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-				PublicBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-				PublicBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));				
 
 				_PublicBufSkillDatas.insert(pair<int16, st_BufSkillInfo*>((int16)PublicBufSkill->SkillType, PublicBufSkill));
 			}
@@ -1134,10 +1118,6 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 					int8 SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetInt();
 					int8 SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetInt();
 					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();
-					string SkillUpAnimation = AttackSkillFiled["SkillUpAnimation"].GetString();
-					string SkillDownAnimation = AttackSkillFiled["SkillDownAnimation"].GetString();
-					string SkillLeftAnimation = AttackSkillFiled["SkillLeftAnimation"].GetString();
-					string SkillRightAnimation = AttackSkillFiled["SkillRightAnimation"].GetString();
 					string NextComboSkill = AttackSkillFiled["NextComboSkill"].GetString();
 					string SkillExplation = AttackSkillFiled["SkillExplanation"].GetString();
 
@@ -1191,10 +1171,6 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 						FightAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
 					}
 
-					FightAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-					FightAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-					FightAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-					FightAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 					FightAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
 
 					_FightAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)FightAttackSkill->SkillType, FightAttackSkill));
@@ -1232,10 +1208,6 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 					int SkillDistance = BufSkillFiled["SkillDistance"].GetInt();
 					int32 SkillMotionTime = BufSkillFiled["SkillMotionTime"].GetInt();
 					float SkillTargetEffectTime = BufSkillFiled["SkillTargetEffectTime"].GetFloat();
-					string SkillUpAnimation = BufSkillFiled["SkillUpAnimation"].GetString();
-					string SkillDownAnimation = BufSkillFiled["SkillDownAnimation"].GetString();
-					string SkillLeftAnimation = BufSkillFiled["SkillLeftAnimation"].GetString();
-					string SkillRightAnimation = BufSkillFiled["SkillRightAnimation"].GetString();
 					string NextComboSkill = BufSkillFiled["NextComboSkill"].GetString();
 					string SkillExplation = BufSkillFiled["SkillExplanation"].GetString();
 
@@ -1268,10 +1240,6 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 					FightBufSkill->SkillDistance = SkillDistance;
 					FightBufSkill->SkillMotionTime = SkillMotionTime;
 					FightBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-					FightBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-					FightBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-					FightBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-					FightBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));					
 
 					_FightBufSkillDatas.insert(pair<int16, st_BufSkillInfo*>((int16)FightBufSkill->SkillType, FightBufSkill));
 				}
@@ -1318,10 +1286,6 @@ void CDataManager::LoadDataProtectionSkill(wstring LoadFileName)
 					int8 SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetInt();
 					int8 SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetInt();
 					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();
-					string SkillUpAnimation = AttackSkillFiled["SkillUpAnimation"].GetString();
-					string SkillDownAnimation = AttackSkillFiled["SkillDownAnimation"].GetString();
-					string SkillLeftAnimation = AttackSkillFiled["SkillLeftAnimation"].GetString();
-					string SkillRightAnimation = AttackSkillFiled["SkillRightAnimation"].GetString();
 					string NextComboSkill = AttackSkillFiled["NextComboSkill"].GetString();
 					string SkillExplation = AttackSkillFiled["SkillExplanation"].GetString();
 
@@ -1351,10 +1315,6 @@ void CDataManager::LoadDataProtectionSkill(wstring LoadFileName)
 						ProtectionAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
 					}
 
-					ProtectionAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-					ProtectionAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-					ProtectionAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-					ProtectionAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 					ProtectionAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
 
 					_ProtectionAttackSkillDatas.insert(pair<int16, st_AttackSkillInfo*>((int16)ProtectionAttackSkill->SkillType, ProtectionAttackSkill));
@@ -1409,10 +1369,6 @@ void CDataManager::LoadDataAssassinationSkill(wstring LoadFileName)
 					int8 SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetInt();
 					int64 SkillDamageOverTime = AttackSkillFiled["SkillDebufDamageOverTime"].GetInt64();
 					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();
-					string SkillUpAnimation = AttackSkillFiled["SkillUpAnimation"].GetString();
-					string SkillDownAnimation = AttackSkillFiled["SkillDownAnimation"].GetString();
-					string SkillLeftAnimation = AttackSkillFiled["SkillLeftAnimation"].GetString();
-					string SkillRightAnimation = AttackSkillFiled["SkillRightAnimation"].GetString();
 					string NextComboSkill = AttackSkillFiled["NextComboSkill"].GetString();
 					string SkillExplation = AttackSkillFiled["SkillExplanation"].GetString();
 
@@ -1449,10 +1405,6 @@ void CDataManager::LoadDataAssassinationSkill(wstring LoadFileName)
 					AssassinationAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 					AssassinationAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
 					AssassinationAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
-					AssassinationAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-					AssassinationAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-					AssassinationAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-					AssassinationAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 
 					if (NextComboSkill == "SKILL_TYPE_NONE")
 					{
@@ -1497,11 +1449,7 @@ void CDataManager::LoadDataAssassinationSkill(wstring LoadFileName)
 					int64 SkillDotTime = BufSkillFiled["SkillDotTime"].GetInt64();
 					int SkillDistance = BufSkillFiled["SkillDistance"].GetInt();
 					int32 SkillMotionTime = BufSkillFiled["SkillMotionTime"].GetInt();
-					float SkillTargetEffectTime = BufSkillFiled["SkillTargetEffectTime"].GetFloat();
-					string SkillUpAnimation = BufSkillFiled["SkillUpAnimation"].GetString();
-					string SkillDownAnimation = BufSkillFiled["SkillDownAnimation"].GetString();
-					string SkillLeftAnimation = BufSkillFiled["SkillLeftAnimation"].GetString();
-					string SkillRightAnimation = BufSkillFiled["SkillRightAnimation"].GetString();
+					float SkillTargetEffectTime = BufSkillFiled["SkillTargetEffectTime"].GetFloat();					
 					string NextComboSkill = BufSkillFiled["NextComboSkill"].GetString();
 					string SkillExplation = BufSkillFiled["SkillExplanation"].GetString();
 
@@ -1533,11 +1481,7 @@ void CDataManager::LoadDataAssassinationSkill(wstring LoadFileName)
 					AssassinationBufSkill->SkillDotTime = SkillDotTime;
 					AssassinationBufSkill->SkillDistance = SkillDistance;
 					AssassinationBufSkill->SkillMotionTime = SkillMotionTime;
-					AssassinationBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-					AssassinationBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-					AssassinationBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-					AssassinationBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-					AssassinationBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
+					AssassinationBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;					
 
 					_AssassinationBufSkillDatas.insert(pair<int16, st_BufSkillInfo*>((int16)AssassinationBufSkill->SkillType, AssassinationBufSkill));
 				}
@@ -1584,11 +1528,7 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 					float SkillTargetEffectTime = AttackSkillFiled["SkillTargetEffectTime"].GetFloat();
 					int8 SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetInt();
 					int8 SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetInt();
-					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();
-					string SkillUpAnimation = AttackSkillFiled["SkillUpAnimation"].GetString();
-					string SkillDownAnimation = AttackSkillFiled["SkillDownAnimation"].GetString();
-					string SkillLeftAnimation = AttackSkillFiled["SkillLeftAnimation"].GetString();
-					string SkillRightAnimation = AttackSkillFiled["SkillRightAnimation"].GetString();
+					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();					
 					string NextComboSkill = AttackSkillFiled["NextComboSkill"].GetString();
 					string SkillExplation = AttackSkillFiled["SkillExplanation"].GetString();
 
@@ -1632,11 +1572,7 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 					SpellAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 					SpellAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 					SpellAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
-					SpellAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
-					SpellAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-					SpellAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-					SpellAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-					SpellAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
+					SpellAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;					
 
 					if (NextComboSkill == "SKILL_TYPE_NONE")
 					{
@@ -1666,10 +1602,6 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 					int SkillDistance = BufSkillFiled["SkillDistance"].GetInt();
 					int32 SkillMotionTime = BufSkillFiled["SkillMotionTime"].GetInt();
 					float SkillTargetEffectTime = BufSkillFiled["SkillTargetEffectTime"].GetFloat();
-					string SkillUpAnimation = BufSkillFiled["SkillUpAnimation"].GetString();
-					string SkillDownAnimation = BufSkillFiled["SkillDownAnimation"].GetString();
-					string SkillLeftAnimation = BufSkillFiled["SkillLeftAnimation"].GetString();
-					string SkillRightAnimation = BufSkillFiled["SkillRightAnimation"].GetString();
 					string NextComboSkill = BufSkillFiled["NextComboSkill"].GetString();
 					string SkillExplation = BufSkillFiled["SkillExplanation"].GetString();
 
@@ -1688,11 +1620,7 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 					SpellBufSkill->SkillDotTime = SkillDotTime;
 					SpellBufSkill->SkillDistance = SkillDistance;
 					SpellBufSkill->SkillMotionTime = SkillMotionTime;
-					SpellBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-					SpellBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-					SpellBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-					SpellBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-					SpellBufSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
+					SpellBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;					
 
 					if (NextComboSkill == "SKILL_TYPE_NONE")
 					{
@@ -1745,11 +1673,7 @@ void CDataManager::LoadDataShootingSkill(wstring LoadFileName)
 					int64 SkillDebufTime = AttackSkillFiled["SkillDebufTime"].GetInt64();
 					int8 SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetInt();
 					int8 SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetInt();
-					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();
-					string SkillUpAnimation = AttackSkillFiled["SkillUpAnimation"].GetString();
-					string SkillDownAnimation = AttackSkillFiled["SkillDownAnimation"].GetString();
-					string SkillLeftAnimation = AttackSkillFiled["SkillLeftAnimation"].GetString();
-					string SkillRightAnimation = AttackSkillFiled["SkillRightAnimation"].GetString();
+					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();					
 					string NextComboSkill = AttackSkillFiled["NextComboSkill"].GetString();
 					string SkillExplation = AttackSkillFiled["SkillExplanation"].GetString();
 
@@ -1773,11 +1697,7 @@ void CDataManager::LoadDataShootingSkill(wstring LoadFileName)
 					ShootingAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 					ShootingAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 					ShootingAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
-					ShootingAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
-					ShootingAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-					ShootingAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-					ShootingAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-					ShootingAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
+					ShootingAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;					
 
 					if (NextComboSkill == "SKILL_TYPE_NONE")
 					{
@@ -1836,10 +1756,6 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 					int8 SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetInt();
 					int8 SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetInt();
 					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();
-					string SkillUpAnimation = AttackSkillFiled["SkillUpAnimation"].GetString();
-					string SkillDownAnimation = AttackSkillFiled["SkillDownAnimation"].GetString();
-					string SkillLeftAnimation = AttackSkillFiled["SkillLeftAnimation"].GetString();
-					string SkillRightAnimation = AttackSkillFiled["SkillRightAnimation"].GetString();
 					string NextComboSkill = AttackSkillFiled["NextComboSkill"].GetString();
 					string SkillExplation = AttackSkillFiled["SkillExplanation"].GetString();
 
@@ -1868,10 +1784,6 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 					DisciplineAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 					DisciplineAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
 					DisciplineAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
-					DisciplineAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-					DisciplineAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-					DisciplineAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-					DisciplineAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 
 					if (NextComboSkill == "SKILL_TYPE_NONE")
 					{
@@ -1899,10 +1811,6 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 					int SkillDistance = HealSkillFiled["SkillDistance"].GetInt();
 					int32 SkillMotionTime = HealSkillFiled["SkillMotionTime"].GetInt();
 					float SkillTargetEffectTime = HealSkillFiled["SkillTargetEffectTime"].GetFloat();
-					string SkillUpAnimation = HealSkillFiled["SkillUpAnimation"].GetString();
-					string SkillDownAnimation = HealSkillFiled["SkillDownAnimation"].GetString();
-					string SkillLeftAnimation = HealSkillFiled["SkillLeftAnimation"].GetString();
-					string SkillRightAnimation = HealSkillFiled["SkillRightAnimation"].GetString();
 					string NextComboSkill = HealSkillFiled["NextComboSkill"].GetString();
 					string SkillExplation = HealSkillFiled["SkillExplanation"].GetString();
 
@@ -1928,10 +1836,6 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 					DisciplineHealSkill->SkillDistance = SkillDistance;
 					DisciplineHealSkill->SkillMotionTime = SkillMotionTime;
 					DisciplineHealSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-					DisciplineHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-					DisciplineHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-					DisciplineHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-					DisciplineHealSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
 
 					if (NextComboSkill == "SKILL_TYPE_NONE")
 					{
@@ -1987,10 +1891,6 @@ void CDataManager::LoadDataMonsterSkill(wstring LoadFileName)
 				int8 SkillDebufAttackSpeed = (int8)SlimeActiveSkillFiled["SkillDebufAttackSpeed"].GetInt();
 				int8 SkillDebufMovingSpeed = (int8)SlimeActiveSkillFiled["SkillDebufMovingSpeed"].GetInt();
 				int8 StatusAbnormalityProbability = (int8)SlimeActiveSkillFiled["StatusAbnormalityProbability"].GetInt();
-				string SkillUpAnimation = SlimeActiveSkillFiled["SkillUpAnimation"].GetString();
-				string SkillDownAnimation = SlimeActiveSkillFiled["SkillDownAnimation"].GetString();
-				string SkillLeftAnimation = SlimeActiveSkillFiled["SkillLeftAnimation"].GetString();
-				string SkillRightAnimation = SlimeActiveSkillFiled["SkillRightAnimation"].GetString();
 				string NextComboSkill = SlimeActiveSkillFiled["NextComboSkill"].GetString();
 				string SkillExplation = SlimeActiveSkillFiled["SkillExplanation"].GetString();
 
@@ -2014,11 +1914,7 @@ void CDataManager::LoadDataMonsterSkill(wstring LoadFileName)
 				SlimeAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				SlimeAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 				SlimeAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
-				SlimeAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
-				SlimeAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::UP, (LPWSTR)CA2W(SkillUpAnimation.c_str())));
-				SlimeAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::DOWN, (LPWSTR)CA2W(SkillDownAnimation.c_str())));
-				SlimeAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::LEFT, (LPWSTR)CA2W(SkillLeftAnimation.c_str())));
-				SlimeAttackSkill->SkillAnimations.insert(pair<en_MoveDir, wstring>(en_MoveDir::RIGHT, (LPWSTR)CA2W(SkillRightAnimation.c_str())));
+				SlimeAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;				
 
 				if (NextComboSkill == "SKILL_TYPE_NONE")
 				{
