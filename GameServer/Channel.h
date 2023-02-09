@@ -58,16 +58,19 @@ public:
 	//-----------------------------------------------------
 	// 채널에 있는 공격 가능한 오브젝트들 찾기 ( 거리 기준 )
 	//-----------------------------------------------------
-	vector<CGameObject*> FindAttackChannelObjects(vector<st_FieldOfViewInfo>& FindObjectIDs, CGameObject* Object, int16 Distance);	
+	vector<CGameObject*> FindAttackChannelObjects(vector<st_FieldOfViewInfo>& FindObjectIDs, CGameObject* Object, st_Vector2 Direction, int16 Distance);	
 	//---------------------------------------------------------
 	// 채널에 있는 공격 가능한 오브젝트 찾기 ( 광역 범위 )
 	//---------------------------------------------------------
-	vector<CGameObject*> FindRangeAttackChannelObjects(CGameObject* Object, int16 Distance);
+	vector<CGameObject*> FindRangeAttackChannelObjects(CGameObject* Object, st_Vector2 Direciton, int16 Distance);
 
 	//-----------------------------------------------------
 	// 채널에 있는 오브젝트들과 검사해서 충돌 판단
 	//-----------------------------------------------------
 	bool ChannelColliderCheck(CGameObject* Object);
+	//-----------------------------------------------------
+	// 채널에 있는 오브젝트들과 검사해서 충돌 판단 ( 매개 변수로 받은 좌표를 기준으로 )
+	//-----------------------------------------------------
 	bool ChannelColliderCheck(int64& CheckObjectID, st_Vector2 CheckPosition);
 
 	//----------------------------------------------------
