@@ -23,7 +23,7 @@ struct st_AStarNodeInt
 		_G = G;
 		_Position._X = X;
 		_Position._Y = Y;
-	}
+	}	
 };
 
 class CMap
@@ -44,12 +44,7 @@ public:
 	//-----------------------------------------
 	// 맵 환경 오브젝트의 정보를 보관
 	//-----------------------------------------
-	en_MapObjectInfo** _CollisionMapInfos;
-
-	//-----------------------------------------
-	// 맵의 타일 정보를 보관 ( 할당되었는지 아닌지 )
-	//-----------------------------------------
-	st_TileMapInfo** _TileMapInfos;
+	en_MapObjectInfo** _CollisionMapInfos;	
 
 	//-------------------------------------
 	// 맵 타일에 존재하는 게임 오브젝트 정보
@@ -120,12 +115,10 @@ public:
 	//-------------------------------------------
 	CItem** FindItem(st_Vector2Int& ItemCellPosition);
 
-	//----------------------------------------------------------------------
-	// 요청한 오브젝트 시야 범위 안에 있는 타일 정보 반환
-	//----------------------------------------------------------------------
-	vector<st_TileMapInfo> FindMapTileInfo(CGameObject* Player);
-
-	bool Cango(CGameObject* Object);
+	//----------------------------------------------------------------------------
+	// 다음 번 위치로 갈 수 있는지 확인 ( 위치 계산 후 MoveCollisionCango로 전달 )
+	//----------------------------------------------------------------------------
+	bool Cango(CGameObject* Object, OUT st_Vector2* NextPosition);
 	//----------------------------------------------------------------------------
 	// 위치로 갈 수 있는지 확인
 	// CheckObjects = 벽을 제외한 오브젝트를 충돌 대상으로 여길 것인지에 대한 판단
@@ -142,19 +135,9 @@ public:
 	//---------------------------------------
 	// 맵에서 오브젝트 퇴장
 	//---------------------------------------
-	bool ApplyLeave(CGameObject* GameObject);
+	bool ApplyLeave(CGameObject* GameObject);	
 
-	//-----------------------------------------------------------------------------------------------
-	// 등록하고자 하는 사유지의 좌표값을 받아서 등록
-	//-----------------------------------------------------------------------------------------------
-	bool ApplyTileUserAlloc(CGameObject* ReqTileUserAllocObject, st_Vector2Int TileUserAllocPosition);
-	//-----------------------------------------------------------------------------------------------
-	// 해제하고자 하는 사유지의 좌표값을 받아서 해제
-	//-----------------------------------------------------------------------------------------------
-	bool ApplyTileUseFree(CGameObject* ReqTileUserFreeObject, st_Vector2Int TileUserFreePosition);	
-
-	vector<st_Vector2Int> FindPath(CGameObject* Object, st_Vector2Int StartCellPosition, st_Vector2Int DestCellPostion, bool CheckObjects = true, int32 MaxDistance = 10);
-	vector<st_Vector2Int> CompletePath(map<st_Vector2Int, st_Vector2Int> Parents, st_Vector2Int DestPosition);
+	vector<st_Vector2Int> FindPath(CGameObject* Object, st_Vector2Int StartCellPosition, st_Vector2Int DestCellPostion, bool CheckObjects = true, int32 MaxDistance = 8);	
 	bool FindPathNextPositionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool CheckObjects = true);
 
 	CChannelManager* GetChannelManager();

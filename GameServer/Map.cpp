@@ -26,7 +26,6 @@ CMap::CMap()
 	_SizeY = 0;
 
 	_CollisionMapInfos = nullptr;
-	_TileMapInfos = nullptr;
 	_ObjectsInfos = nullptr;
 	_SeedObjectInfos = nullptr;
 	_Items = nullptr;
@@ -135,92 +134,6 @@ void CMap::MapInit(int16 MapID, wstring MapName, int32 SectorSize, int8 ChannelC
 		MapObjectInfoDataConvertP += 2;
 	}
 #pragma endregion	
-
-#pragma region 맵 타일 정보 읽기
-	// DB에서 맵 타일 정보를 읽어옴
-	CDBConnection* GetTileMapInfoAllocFreeDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-	SP::CDBGameServerGetTileMapInfoAllocFree GetTileMapInfoAllocFree(*GetTileMapInfoAllocFreeDBConnection);
-
-	GetTileMapInfoAllocFree.InMapID(_MapID);
-
-	bool MapTileAllocFree;
-	int64 MapTileAccountID;
-	int64 MapTilePlayerID;
-	int32 MapTilePositionX;
-	int32 MapTilePositionY;
-
-	GetTileMapInfoAllocFree.OutMapTileAllocFree(MapTileAllocFree);
-	GetTileMapInfoAllocFree.OutMapTileAccountID(MapTileAccountID);
-	GetTileMapInfoAllocFree.OutMapTilePlayerID(MapTilePlayerID);
-	GetTileMapInfoAllocFree.OutMapTilePositionX(MapTilePositionX);
-	GetTileMapInfoAllocFree.OutMapTilePositionY(MapTilePositionY);
-
-	GetTileMapInfoAllocFree.Execute();
-
-	vector<st_TileMapInfo> TileMapInfos;
-
-	while (GetTileMapInfoAllocFree.Fetch())
-	{
-		st_TileMapInfo TileMapInfo;
-
-		if (MapTileAllocFree == true)
-		{
-			TileMapInfo.MapTileType = en_MapTileInfo::MAP_TILE_USER_ALLOC;
-
-			TileMapInfo.AccountID = MapTileAccountID;
-			TileMapInfo.PlayerID = MapTilePlayerID;
-			TileMapInfo.TilePosition._X = MapTilePositionX;
-			TileMapInfo.TilePosition._Y = MapTilePositionY;
-
-			TileMapInfos.push_back(TileMapInfo);
-		}
-	}
-
-	G_DBConnectionPool->Push(en_DBConnect::GAME, GetTileMapInfoAllocFreeDBConnection);
-
-	_TileMapInfos = new st_TileMapInfo * [YCount];
-
-	for (int i = 0; i < YCount; i++)
-	{
-		_TileMapInfos[i] = new st_TileMapInfo[XCount];
-	}
-
-	// DB TileMap 정보에 접근 타일 기록 읽어옴
-	wstring TileInfoInfoData = MapName + L"TileInfoData.txt";
-
-	char* TileInfoDataFileStr = FileUtils::LoadFile(TileInfoInfoData.c_str());
-	char* TileInfoDataMovingFileP = TileInfoDataFileStr;
-	char* TileInfoDataConvertP = TileInfoDataFileStr;
-
-	for (int Y = 0; Y < YCount; Y++)
-	{
-		for (int X = 0; X < XCount; X++)
-		{
-			if (*TileInfoDataConvertP == '\r')
-			{
-				break;
-			}
-
-			_TileMapInfos[Y][X].MapTileType = (en_MapTileInfo)(*TileInfoDataConvertP - 48);
-			_TileMapInfos[Y][X].AccountID = 0;
-			_TileMapInfos[Y][X].PlayerID = 0;
-
-			_TileMapInfos[Y][X].TilePosition._Y = _Down - Y;
-			_TileMapInfos[Y][X].TilePosition._X = X + _Left;
-
-			TileInfoDataConvertP++;
-		}
-
-		TileInfoDataConvertP += 2;
-	}
-
-	for (st_TileMapInfo TileMapInfo : TileMapInfos)
-	{
-		_TileMapInfos[TileMapInfo.TilePosition._Y][TileMapInfo.TilePosition._X].MapTileType = TileMapInfo.MapTileType;
-		_TileMapInfos[TileMapInfo.TilePosition._Y][TileMapInfo.TilePosition._X].AccountID = TileMapInfo.AccountID;
-		_TileMapInfos[TileMapInfo.TilePosition._Y][TileMapInfo.TilePosition._X].PlayerID = TileMapInfo.PlayerID;
-	}
-#pragma endregion
 
 	_ObjectsInfos = new CGameObject * *[YCount];
 
@@ -744,36 +657,7 @@ CItem** CMap::FindItem(st_Vector2Int& ItemCellPosition)
 	return _Items[Y][X];
 }
 
-vector<st_TileMapInfo> CMap::FindMapTileInfo(CGameObject* Player)
-{
-	vector<st_TileMapInfo> TileInfos;
-
-	int X = Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X - _Left;
-	int Y = _Down - Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y;
-
-	// 캐릭터 위치에서 상하좌우 20 크기 만큼 타일 정w보 반환
-	int LeftX = X - 20;
-	int UpY = Y + 20;
-	int RightX = X + 20;
-	int DownY = Y - 20;
-
-	for (; LeftX < RightX; LeftX++)
-	{
-		UpY = Y + 10;
-
-		for (; UpY > DownY; UpY--)
-		{
-			if (_TileMapInfos[UpY][LeftX].TilePosition._X >= 0 && _TileMapInfos[UpY][LeftX].TilePosition._Y >= 0)
-			{
-				TileInfos.push_back(_TileMapInfos[UpY][LeftX]);
-			}
-		}
-	}
-
-	return TileInfos;
-}
-
-bool CMap::Cango(CGameObject* Object)
+bool CMap::Cango(CGameObject* Object, OUT st_Vector2* NextPosition)
 {
 	st_Vector2Int CollisionPosition;
 	CollisionPosition._X = Object->_GameObjectInfo.ObjectPositionInfo.Position._X;
@@ -782,56 +666,17 @@ bool CMap::Cango(CGameObject* Object)
 	st_Vector2 CheckPosition; 
 	CheckPosition._X = Object->_GameObjectInfo.ObjectPositionInfo.Position._X;
 	CheckPosition._Y = Object->_GameObjectInfo.ObjectPositionInfo.Position._Y;
+	
+	st_Vector2 DirectionNormal = Object->_GameObjectInfo.ObjectPositionInfo.Direction.Normalize();
 
-	switch (Object->_GameObjectInfo.ObjectPositionInfo.MoveDir)
-	{
-	case en_MoveDir::UP:
-		CheckPosition._Y +=
-			(st_Vector2::Up()._Y * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
-		break;
-	case en_MoveDir::DOWN:
-		CheckPosition._Y +=
-			(st_Vector2::Down()._Y * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
-		break;
-	case en_MoveDir::LEFT:
-		CheckPosition._X +=
-			(st_Vector2::Left()._X * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
-		break;
-	case en_MoveDir::RIGHT:
-		CheckPosition._X +=
-			(st_Vector2::Right()._X * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
-		break;
-	case en_MoveDir::LEFT_UP:
-		CheckPosition._X +=
-			(st_Vector2::Left()._X * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
-		CheckPosition._Y +=
-			(st_Vector2::Up()._Y * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
-		break;
-	case en_MoveDir::LEFT_DOWN:
-		CheckPosition._X +=
-			(st_Vector2::Left()._X * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
-		CheckPosition._Y +=
-			(st_Vector2::Down()._Y * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
-		break;
-	case en_MoveDir::RIGHT_UP:
-		CheckPosition._X +=
-			(st_Vector2::Right()._X * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
-		CheckPosition._Y +=
-			(st_Vector2::Up()._Y * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
-		break;
-	case en_MoveDir::RIGHT_DOWN:
-		CheckPosition._X +=
-			(st_Vector2::Right()._X * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
-		CheckPosition._Y +=
-			(st_Vector2::Down()._Y * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
-		break;
-	}
+	CheckPosition._Y += (DirectionNormal._Y * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+	CheckPosition._X += (DirectionNormal._X * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 
 	bool NextPositionMoveCheck = MoveCollisionCango(Object, CollisionPosition, CheckPosition);
 	if (NextPositionMoveCheck == true)
 	{
-		Object->_GameObjectInfo.ObjectPositionInfo.Position._X = CheckPosition._X;
-		Object->_GameObjectInfo.ObjectPositionInfo.Position._Y = CheckPosition._Y;			
+		NextPosition->_X = CheckPosition._X;
+		NextPosition->_Y = CheckPosition._Y;
 	}
 
 	return NextPositionMoveCheck;
@@ -901,11 +746,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 
 	switch (GameObject->_GameObjectInfo.ObjectType)
 	{
-	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-	case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
-	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
-	case en_GameObjectType::OBJECT_THIEF_PLAYER:
-	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
+	case en_GameObjectType::OBJECT_PLAYER:	
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 	case en_GameObjectType::OBJECT_NON_PLAYER:
 	case en_GameObjectType::OBJECT_SLIME:
@@ -1075,11 +916,7 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 
 	switch (GameObject->_GameObjectInfo.ObjectType)
 	{
-	case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-	case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
-	case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
-	case en_GameObjectType::OBJECT_THIEF_PLAYER:
-	case en_GameObjectType::OBJECT_ARCHER_PLAYER:
+	case en_GameObjectType::OBJECT_PLAYER:	
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 	case en_GameObjectType::OBJECT_SLIME:
 	{
@@ -1142,56 +979,6 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 	return true;
 }
 
-bool CMap::ApplyTileUserAlloc(CGameObject* ReqTileUserAllocObject, st_Vector2Int TileUserAllocPosition)
-{
-	// 좌우 좌표 검사
-	if (TileUserAllocPosition._X < _Left || TileUserAllocPosition._X > _Right)
-	{
-		return false;
-	}
-
-	// 상하 좌표 검사
-	if (TileUserAllocPosition._Y < _Up || TileUserAllocPosition._Y > _Down)
-	{
-		return false;
-	}
-
-	int X = TileUserAllocPosition._X - _Left;
-	int Y = _Down - TileUserAllocPosition._Y;
-
-	if (_TileMapInfos[Y][X].MapTileType == en_MapTileInfo::MAP_TILE_USER_ALLOC
-		|| _TileMapInfos[Y][X].MapTileType == en_MapTileInfo::MAP_TILE_SYSTEM_ALLOC)
-	{
-		return false;
-	}
-
-	_TileMapInfos[Y][X].MapTileType = en_MapTileInfo::MAP_TILE_USER_ALLOC;
-
-	return true;
-}
-
-bool CMap::ApplyTileUseFree(CGameObject* ReqTileUserFreeObject, st_Vector2Int TileUserFreePosition)
-{
-	// 좌우 좌표 검사
-	if (TileUserFreePosition._X < _Left || TileUserFreePosition._X > _Right)
-	{
-		return false;
-	}
-
-	// 상하 좌표 검사
-	if (TileUserFreePosition._Y < _Up || TileUserFreePosition._Y > _Down)
-	{
-		return false;
-	}
-
-	int X = TileUserFreePosition._X - _Left;
-	int Y = _Down - TileUserFreePosition._Y;
-
-	_TileMapInfos[Y][X].MapTileType = en_MapTileInfo::MAP_TILE_USER_FREE;
-
-	return true;
-}
-
 vector<st_Vector2Int> CMap::FindPath(CGameObject* Object, st_Vector2Int StartCellPosition, st_Vector2Int DestCellPostion, bool CheckObjects, int32 MaxDistance)
 {
 	// 상 하 좌 우 좌상 좌하 우상 우하
@@ -1231,7 +1018,7 @@ vector<st_Vector2Int> CMap::FindPath(CGameObject* Object, st_Vector2Int StartCel
 	// AStar Node 생성
 	st_AStarNodeInt StartNode(abs(DestPosition._Y - StartPosition._Y) + abs(DestPosition._X - StartPosition._X), 0, StartPosition._X, StartPosition._Y);
 	// 큐에 삽입
-	OpenListQue.InsertHeap(StartNode._F, StartNode);
+	OpenListQue.InsertHeap(StartNode._F, StartNode);	
 
 	// 처음 위치 첫 부모로 설정
 	Parents.insert(pair<st_Vector2Int, st_Vector2Int>(StartPosition, StartPosition));
@@ -1282,7 +1069,7 @@ vector<st_Vector2Int> CMap::FindPath(CGameObject* Object, st_Vector2Int StartCel
 				}
 			}
 
-			// 상 하 좌 우 위치가 이미 방문 했었는지 확인한다.
+			// 이동하고자 하는 다음 위치를 이미 방문 했는지 확인한다.
 			if (CloseList[NextPosition._Y][NextPosition._X] == true)
 			{
 				continue;
@@ -1327,7 +1114,7 @@ vector<st_Vector2Int> CMap::FindPath(CGameObject* Object, st_Vector2Int StartCel
 		}
 	}
 
-	// 위에서 할당한 메모리를 삭제한다.
+	// CloseList, OpenList 정리
 	for (int32 i = 0; i < _SizeY; i++)
 	{
 		free(CloseList[i]);
@@ -1337,31 +1124,20 @@ vector<st_Vector2Int> CMap::FindPath(CGameObject* Object, st_Vector2Int StartCel
 	free(CloseList);
 	free(OpenList);
 
-	return CompletePath(Parents, DestPosition);
-}
+	vector<st_Vector2Int> CompletePathCells;
 
-vector<st_Vector2Int> CMap::CompletePath(map<st_Vector2Int, st_Vector2Int> Parents, st_Vector2Int DestPosition)
-{
-	// 반환해줄 배열
-	vector<st_Vector2Int> Cells;
-
-	int32 X = DestPosition._X;
-	int32 Y = DestPosition._Y;
-
-	st_Vector2Int Point;
-
-	// 부모 목록 중에서 목적지가 없으면
-	if (Parents.find(DestPosition) == Parents.end())
+	// 완성된 길 목록 중에서 목표 지점이 있는지 확인
+	if(Parents.find(DestPosition) == Parents.end())
 	{
+		// 완성 된 길 중 목표 지점이 없다면
+		// 
 		st_Vector2Int BestPosition;
-		int32 BestDistance;
-		memset(&BestDistance, 1, sizeof(int32));
+		int32 BestDistance; memset(&BestDistance, 1, sizeof(int32));
 
-		// 가지고 있는 위치 중에서 가장 가까운 위치를 찾고
-		// 해당 위치를 목적지로 삼는다.
+		// 가지고 있는 위치 중에서 가장 가까운 위치를 찾는다.		
 		for (auto Start = Parents.begin(); Start != Parents.end(); ++Start)
 		{
-			int32 Distance = abs(DestPosition._X - (*Start).first._X) + abs(DestPosition._Y - (*Start).first._Y);
+			int32 Distance = st_Vector2Int::Distance((*Start).first, DestPosition);
 			if (BestDistance > Distance)
 			{
 				BestPosition = (*Start).first;
@@ -1369,22 +1145,28 @@ vector<st_Vector2Int> CMap::CompletePath(map<st_Vector2Int, st_Vector2Int> Paren
 			}
 		}
 
+		// 해당 위치를 목적지로 삼는다.
 		DestPosition = BestPosition;
-	}
 
-	st_Vector2Int Position = DestPosition;
-	while ((*Parents.find(Position)).second != Position)
+		// 새로운 목적지를 기준으로 다시 길을 찾는다.
+		return FindPath(Object, StartCellPosition, DestPosition);
+	}	
+	else
 	{
-		Cells.push_back(Position);
-		Position = (*Parents.find(Position)).second;
-	}
+		st_Vector2Int Position = DestPosition;
+		while ((*Parents.find(Position)).second != Position)
+		{
+			CompletePathCells.push_back(Position);
+			Position = (*Parents.find(Position)).second;
+		}
 
-	// 시작점 담기
-	Cells.push_back(Position);
-	// 부모 위치 담은 배열 거꾸로 뒤집어서 반환
-	reverse(Cells.begin(), Cells.end());
+		// 시작점 담기
+		CompletePathCells.push_back(Position);
+		// 부모 위치 담은 배열 거꾸로 뒤집어서 반환
+		reverse(CompletePathCells.begin(), CompletePathCells.end());
 
-	return Cells;
+		return CompletePathCells;
+	}	
 }
 
 bool CMap::FindPathNextPositionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool CheckObjects)
