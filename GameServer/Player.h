@@ -44,7 +44,6 @@ public:
 	virtual void Start() override;
 	virtual void End() override;
 
-	virtual void PositionReset() override;	
 protected:
 	virtual bool UpdateSpawnIdle() override;
 	virtual void UpdateIdle() override;
