@@ -671,10 +671,6 @@ void CGameServer::PacketProcReqCreateCharacter(int64 SessionID, CMessage* Messag
 
 	if (Session)
 	{
-		// 클라에서 선택한 플레이어 오브젝트 타입
-		int16 ReqGameObjectType;
-		*Message >> ReqGameObjectType;
-
 		// 캐릭터 이름 길이
 		int16 CharacterNameLen;
 		*Message >> CharacterNameLen;
@@ -698,8 +694,7 @@ void CGameServer::PacketProcReqCreateCharacter(int64 SessionID, CMessage* Messag
 		CGameServerMessage* DBReqChatacerCreateMessage = CGameServerMessage::GameServerMessageAlloc();
 		DBReqChatacerCreateMessage->Clear();
 
-		*DBReqChatacerCreateMessage << Session->SessionId;
-		*DBReqChatacerCreateMessage << ReqGameObjectType;
+		*DBReqChatacerCreateMessage << Session->SessionId;		
 		*DBReqChatacerCreateMessage << CharacterCreateSlotIndex;
 
 		DBCharacterCreateJob->Message = DBReqChatacerCreateMessage;		
@@ -908,7 +903,7 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 
 			int8 GameObjectState;
 			*Message >> GameObjectState;
-
+			
 			st_GameObjectJob* MoveJob = MakeGameObjectJobMove(DirectionX, DirectionY, GameObjectWorldPositionX, GameObjectWorldPositionY, GameObjectState);
 			MyPlayer->_GameObjectJobQue.Enqueue(MoveJob);			
 		}
@@ -976,7 +971,7 @@ void CGameServer::PacketProcReqMoveStop(int64 SessionID, CMessage* Message)
 			*Message >> PositionY;
 			int8 ObjectState;
 			*Message >> ObjectState;
-
+		
 			st_GameObjectJob* MoveStopJob = MakeGameObjectJobMoveStop(PositionX, PositionY, ObjectState);
 			MyPlayer->_GameObjectJobQue.Enqueue(MoveStopJob);			
 		} while (0);
@@ -1037,10 +1032,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 			{
 				break;
 			}
-
-			int8 ReqMoveDir;
-			*Message >> ReqMoveDir;
-
+			
 			int8 QuickSlotBarIndex;
 			*Message >> QuickSlotBarIndex;
 			int8 QuickSlotBarSlotIndex;
@@ -1061,7 +1053,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 			if (ReqMeleeSkill != nullptr && ReqMeleeSkill->GetSkillInfo()->CanSkillUse == true)
 			{
 				CMap* Map = G_MapManager->GetMap(1);
-
+				
 				vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetFieldOfViewPlayers(MyPlayer, 1, false);
 				vector<st_FieldOfViewInfo> CurrentFieldOfViewAttackObjectIDs = Map->GetFieldOfViewAttackObjects(MyPlayer, 1);
 
@@ -1091,7 +1083,7 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 			}
 			else
 			{
-				CMessage* ResErrorPacket = MakePacketSkillError(en_PersonalMessageType::PERSONAL_MESSAGE_SKILL_COOLTIME, ReqMeleeSkill->GetSkillInfo()->SkillName.c_str());
+				CMessage* ResErrorPacket = MakePacketSkillError(en_GlobalMessageType::PERSONAL_MESSAGE_SKILL_COOLTIME, ReqMeleeSkill->GetSkillInfo()->SkillName.c_str());
 				SendPacket(MyPlayer->_SessionId, ResErrorPacket);
 				ResErrorPacket->Free();
 			}
@@ -1146,11 +1138,7 @@ void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
 					Disconnect(Session->SessionId);
 					break;
 				}
-			}			
-
-			// 공격한 방향
-			int8 ReqMoveDir;
-			*Message >> ReqMoveDir;
+			}						
 
 			int8 ReqSkillCharacteristicType;
 			*Message >> ReqSkillCharacteristicType;
@@ -2679,7 +2667,7 @@ void CGameServer::PacketProcReqItemUse(int64 SessionId, CMessage* Message)
 					break;
 				default:
 					{
-						CMessage* CommonErrorPacket = MakePacketCommonError(en_PersonalMessageType::PERSONAL_FAULT_ITEM_USE, UseItem->_ItemInfo.ItemName.c_str());
+						CMessage* CommonErrorPacket = MakePacketCommonError(en_GlobalMessageType::PERSONAL_FAULT_ITEM_USE, UseItem->_ItemInfo.ItemName.c_str());
 						SendPacket(Session->SessionId, CommonErrorPacket);
 						CommonErrorPacket->Free();
 					}
@@ -3194,13 +3182,11 @@ void CGameServer::PacketProcReqItemLooting(int64 SessionId, CMessage* Message)
 			}
 
 			st_PositionInfo ItemPosition;
-			int8 ItemState;
-			int8 ItemMoveDir;
+			int8 ItemState;			
 
 			*Message >> ItemState;
 			*Message >> ItemPosition.CollisionPosition._X;
-			*Message >> ItemPosition.CollisionPosition._Y;
-			*Message >> ItemMoveDir;
+			*Message >> ItemPosition.CollisionPosition._Y;			
 
 			st_Vector2Int ItemCellPosition;
 			ItemCellPosition._X = ItemPosition.CollisionPosition._X;
@@ -3725,8 +3711,7 @@ void CGameServer::PacketProcReqDBAccountCheck(CMessage* Message)
 			ClientPlayersGet.InAccountID(ClientAccountId);
 
 			int64 PlayerId;
-			WCHAR PlayerName[100] = { 0 };
-			int16 PlayerObjectType;
+			WCHAR PlayerName[100] = { 0 };			
 			int8 PlayerIndex;
 			int32 PlayerLevel;
 			int32 PlayerCurrentHP;
@@ -3755,8 +3740,7 @@ void CGameServer::PacketProcReqDBAccountCheck(CMessage* Message)
 			int8 PlayerSkillMaxPoint;
 
 			ClientPlayersGet.OutPlayerDBID(PlayerId);
-			ClientPlayersGet.OutPlayerName(PlayerName);
-			ClientPlayersGet.OutPlayerObjectType(PlayerObjectType);
+			ClientPlayersGet.OutPlayerName(PlayerName);			
 			ClientPlayersGet.OutPlayerIndex(PlayerIndex);
 			ClientPlayersGet.OutLevel(PlayerLevel);
 			ClientPlayersGet.OutCurrentHP(PlayerCurrentHP);
@@ -3793,8 +3777,7 @@ void CGameServer::PacketProcReqDBAccountCheck(CMessage* Message)
 				// 플레이어 정보 셋팅			
 				CPlayer* NewPlayerCharacter = G_ObjectManager->_PlayersArray[Session->MyPlayerIndexes[PlayerCount]];
 				NewPlayerCharacter->_GameObjectInfo.ObjectId = PlayerId;
-				NewPlayerCharacter->_GameObjectInfo.ObjectName = PlayerName;
-				NewPlayerCharacter->_GameObjectInfo.OwnerObjectType = (en_GameObjectType)PlayerObjectType;
+				NewPlayerCharacter->_GameObjectInfo.ObjectName = PlayerName;				
 				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.Level = PlayerLevel;
 				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.HP = PlayerCurrentHP;
 				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxHP = PlayerMaxHP;
@@ -3819,9 +3802,7 @@ void CGameServer::PacketProcReqDBAccountCheck(CMessage* Message)
 				NewPlayerCharacter->_GameObjectInfo.ObjectSkillPoint = PlayerSkillMaxPoint;
 				NewPlayerCharacter->_SpawnPosition._Y = PlayerLastPositionY;
 				NewPlayerCharacter->_SpawnPosition._X = PlayerLastPositionX;
-				NewPlayerCharacter->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-				NewPlayerCharacter->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
-				NewPlayerCharacter->_GameObjectInfo.ObjectType = (en_GameObjectType)PlayerObjectType;
+				NewPlayerCharacter->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;							
 				NewPlayerCharacter->_GameObjectInfo.OwnerObjectId = 0;
 				NewPlayerCharacter->_GameObjectInfo.PlayerSlotIndex = PlayerIndex;
 				NewPlayerCharacter->_SessionId = Session->SessionId;
@@ -3860,10 +3841,6 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 
 	if (Session != nullptr)
 	{
-		// 요청한 게임오브젝트 타입
-		int16 ReqGameObjectType;
-		*Message >> ReqGameObjectType;
-
 		// 요청한 캐릭터 슬롯 인덱스
 		int8 ReqCharacterCreateSlotIndex;
 		*Message >> ReqCharacterCreateSlotIndex;
@@ -3893,47 +3870,8 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 		{
 			// 요청한 캐릭터의 1레벨에 해당하는 데이터를 읽어온다.
 			st_ObjectStatusData NewCharacterStatus;
-			switch ((en_GameObjectType)ReqGameObjectType)
-			{
-			case en_GameObjectType::OBJECT_WARRIOR_PLAYER:
-			{
-				auto FindStatus = G_Datamanager->_WarriorStatus.find(1);
-				NewCharacterStatus = *(*FindStatus).second;
-			}
-			break;
-			case en_GameObjectType::OBJECT_SHAMAN_PLAYER:
-			{
-				auto FindStatus = G_Datamanager->_ShamanStatus.find(1);
-				NewCharacterStatus = *(*FindStatus).second;
-			}
-			break;
-			case en_GameObjectType::OBJECT_TAIOIST_PLAYER:
-			{
-				auto FindStatus = G_Datamanager->_TaioistStatus.find(1);
-				NewCharacterStatus = *(*FindStatus).second;
-			}
-			break;
-			case en_GameObjectType::OBJECT_THIEF_PLAYER:
-			{
-				auto FindStatus = G_Datamanager->_ThiefStatus.find(1);
-				NewCharacterStatus = *(*FindStatus).second;
-			}
-			break;
-			case en_GameObjectType::OBJECT_ARCHER_PLAYER:
-			{
-				auto FindStatus = G_Datamanager->_ArcherStatus.find(1);
-				NewCharacterStatus = *(*FindStatus).second;
-			}
-			break;
-			case en_GameObjectType::OBJECT_PLAYER_DUMMY:
-			{
-				auto FindStatus = G_Datamanager->_WarriorStatus.find(1);
-				NewCharacterStatus = *(*FindStatus).second;
-			}
-			break;
-			default:
-				break;
-			}
+			auto FindStatus = G_Datamanager->_PlayerStatus.find(1);
+			NewCharacterStatus = *(*FindStatus).second;
 
 			int32 CurrentDP = 0;
 
@@ -3941,8 +3879,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 			// DBConnection Pool에서 DB연결을 위해서 하나를 꺼내온다.
 			CDBConnection* NewCharacterPushDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 			// GameServerDB에 새로운 캐릭터 저장하는 프로시저 클래스
-
-			int16 PlayerType = ReqGameObjectType;
+			
 			int64 CurrentExperience = 0;
 
 			auto FindLevel = G_Datamanager->_LevelDatas.find(NewCharacterStatus.Level);
@@ -3954,8 +3891,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 
 			SP::CDBGameServerCreateCharacterPush NewCharacterPush(*NewCharacterPushDBConnection);
 			NewCharacterPush.InAccountID(Session->AccountId);
-			NewCharacterPush.InPlayerName(Session->CreateCharacterName);
-			NewCharacterPush.InPlayerType(PlayerType);
+			NewCharacterPush.InPlayerName(Session->CreateCharacterName);			
 			NewCharacterPush.InPlayerIndex(ReqCharacterCreateSlotIndex);
 			NewCharacterPush.InLevel(NewCharacterStatus.Level);
 			NewCharacterPush.InCurrentHP(NewCharacterStatus.MaxHP);
@@ -4007,7 +3943,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 					CPlayer* NewPlayerCharacter = (CPlayer*)G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_PLAYER);
 					NewPlayerCharacter->_GameObjectInfo.ObjectId = PlayerDBId;
 					NewPlayerCharacter->_GameObjectInfo.ObjectName = Session->CreateCharacterName;
-					NewPlayerCharacter->_GameObjectInfo.OwnerObjectType = en_GameObjectType::NORMAL;
+					NewPlayerCharacter->_GameObjectInfo.OwnerObjectType = en_GameObjectType::OBJECT_NON_TYPE;
 					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.Level = NewCharacterStatus.Level;
 					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
 					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
@@ -4032,9 +3968,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 					NewPlayerCharacter->_GameObjectInfo.ObjectSkillMaxPoint = NewCharacterSkillPoint;
 					NewPlayerCharacter->_SpawnPosition._Y = NewCharacterPositionY;
 					NewPlayerCharacter->_SpawnPosition._X = NewCharacterPositionX;
-					NewPlayerCharacter->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-					NewPlayerCharacter->_GameObjectInfo.ObjectPositionInfo.MoveDir = en_MoveDir::DOWN;
-					NewPlayerCharacter->_GameObjectInfo.ObjectType = (en_GameObjectType)PlayerType;
+					NewPlayerCharacter->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;					
 					NewPlayerCharacter->_GameObjectInfo.OwnerObjectId = 0;
 					NewPlayerCharacter->_GameObjectInfo.PlayerSlotIndex = ReqCharacterCreateSlotIndex;
 					NewPlayerCharacter->_SessionId = Session->SessionId;
@@ -4494,51 +4428,51 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 			}
 #pragma endregion
 
-#pragma region 조합템 정보 보내기			
-			vector<st_CraftingItemCategory> CraftingItemCategorys;
-
-			for (int8 Category = (int8)en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARCHITECTURE;
-				Category <= (int8)en_LargeItemCategory::ITEM_LARGE_CATEGORY_MATERIAL; ++Category)
-			{
-				auto FindCraftingIterator = G_Datamanager->_CraftingData.find(Category);
-				if (FindCraftingIterator == G_Datamanager->_CraftingData.end())
-				{
-					continue;
-				}
-
-				st_CraftingItemCategory* CraftingCategory = (*FindCraftingIterator).second;				
-				CraftingItemCategorys.push_back(*CraftingCategory);
-			}
-
-			*ResCharacterInfoMessage << (int8)CraftingItemCategorys.size();
-
-			for (st_CraftingItemCategory CraftingItemCategory : CraftingItemCategorys)
-			{
-				*ResCharacterInfoMessage << CraftingItemCategory;				
-			}						
-#pragma endregion
-
-			G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterInfoGetConnection);
-
-#pragma region 제작대 조합템 정보 보내기
-			vector<st_CraftingTableRecipe*> CraftingTables;
-
-			for (int16 CraftingTableType = (int16)en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE;
-				CraftingTableType <= (int16)en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL; CraftingTableType++)
-			{
-				auto FindFurnaceCraftingTable = G_Datamanager->_CraftingTableData.find(CraftingTableType);
-				st_CraftingTableRecipe* FurnaceCraftingTable = (*FindFurnaceCraftingTable).second;
-
-				CraftingTables.push_back(FurnaceCraftingTable);
-			}			
-
-			*ResCharacterInfoMessage << (int8)CraftingTables.size();
-
-			for (st_CraftingTableRecipe* CraftingTable : CraftingTables)
-			{
-				*ResCharacterInfoMessage << *CraftingTable;
-			}
-#pragma endregion
+//#pragma region 조합템 정보 보내기			
+//			vector<st_CraftingItemCategory> CraftingItemCategorys;
+//
+//			for (int8 Category = (int8)en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARCHITECTURE;
+//				Category <= (int8)en_LargeItemCategory::ITEM_LARGE_CATEGORY_MATERIAL; ++Category)
+//			{
+//				auto FindCraftingIterator = G_Datamanager->_CraftingData.find(Category);
+//				if (FindCraftingIterator == G_Datamanager->_CraftingData.end())
+//				{
+//					continue;
+//				}
+//
+//				st_CraftingItemCategory* CraftingCategory = (*FindCraftingIterator).second;				
+//				CraftingItemCategorys.push_back(*CraftingCategory);
+//			}
+//
+//			*ResCharacterInfoMessage << (int8)CraftingItemCategorys.size();
+//
+//			for (st_CraftingItemCategory CraftingItemCategory : CraftingItemCategorys)
+//			{
+//				*ResCharacterInfoMessage << CraftingItemCategory;				
+//			}						
+//#pragma endregion
+//
+//			G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterInfoGetConnection);
+//
+//#pragma region 제작대 조합템 정보 보내기
+//			vector<st_CraftingTableRecipe*> CraftingTables;
+//
+//			for (int16 CraftingTableType = (int16)en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE;
+//				CraftingTableType <= (int16)en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL; CraftingTableType++)
+//			{
+//				auto FindFurnaceCraftingTable = G_Datamanager->_CraftingTableData.find(CraftingTableType);
+//				st_CraftingTableRecipe* FurnaceCraftingTable = (*FindFurnaceCraftingTable).second;
+//
+//				CraftingTables.push_back(FurnaceCraftingTable);
+//			}			
+//
+//			*ResCharacterInfoMessage << (int8)CraftingTables.size();
+//
+//			for (st_CraftingTableRecipe* CraftingTable : CraftingTables)
+//			{
+//				*ResCharacterInfoMessage << *CraftingTable;
+//			}
+//#pragma endregion
 						
 #pragma region Day 시간 보내기			
 			st_Day DayInfo = _Day->GetDayInfo();
@@ -6000,7 +5934,7 @@ CGameServerMessage* CGameServer::MakePacketResCraftingTableCompleteItemSelect(in
 	return ResCraftingTableCompleteItemSelectMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResAnimationPlay(int64 ObjectId, en_MoveDir Dir, wstring AnimationName)
+CGameServerMessage* CGameServer::MakePacketResAnimationPlay(int64 ObjectId, wstring AnimationName)
 {
 	CGameServerMessage* ResAnimationPlayMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResAnimationPlayMessage == nullptr)
@@ -6011,8 +5945,7 @@ CGameServerMessage* CGameServer::MakePacketResAnimationPlay(int64 ObjectId, en_M
 	ResAnimationPlayMessage->Clear();
 
 	*ResAnimationPlayMessage << (int16)en_PACKET_S2C_ANIMATION_PLAY;
-	*ResAnimationPlayMessage << ObjectId;
-	*ResAnimationPlayMessage << (int8)Dir;
+	*ResAnimationPlayMessage << ObjectId;	
 
 	int16 AnimationNameLen = (int16)(AnimationName.length() * 2);
 	*ResAnimationPlayMessage << AnimationNameLen;
@@ -6038,7 +5971,7 @@ CGameServerMessage* CGameServer::MakePacketResChangeObjectStat(int64 ObjectId, s
 	return ResChangeObjectStatPacket;
 }
 
-CGameServerMessage* CGameServer::MakePacketResChangeObjectState(int64 ObjectId, en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState)
+CGameServerMessage* CGameServer::MakePacketResChangeObjectState(int64 ObjectId, en_GameObjectType ObjectType, en_CreatureState ObjectState)
 {
 	CGameServerMessage* ResObjectStatePacket = CGameServerMessage::GameServerMessageAlloc();
 	if (ResObjectStatePacket == nullptr)
@@ -6049,15 +5982,14 @@ CGameServerMessage* CGameServer::MakePacketResChangeObjectState(int64 ObjectId, 
 	ResObjectStatePacket->Clear();
 
 	*ResObjectStatePacket << (int16)en_PACKET_S2C_OBJECT_STATE_CHANGE;
-	*ResObjectStatePacket << ObjectId;
-	*ResObjectStatePacket << (int8)Direction;
+	*ResObjectStatePacket << ObjectId;	
 	*ResObjectStatePacket << (int16)ObjectType;
 	*ResObjectStatePacket << (int8)ObjectState;
 
 	return ResObjectStatePacket;
 }
 
-CGameServerMessage* CGameServer::MakePacketResChangeMonsterObjectState(int64 ObjectId, en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState, en_MonsterState MonsterState)
+CGameServerMessage* CGameServer::MakePacketResChangeMonsterObjectState(int64 ObjectId, en_GameObjectType ObjectType, en_CreatureState ObjectState, en_MonsterState MonsterState)
 {
 	CGameServerMessage* ResObjectStatePacket = CGameServerMessage::GameServerMessageAlloc();
 	if (ResObjectStatePacket == nullptr)
@@ -6068,8 +6000,7 @@ CGameServerMessage* CGameServer::MakePacketResChangeMonsterObjectState(int64 Obj
 	ResObjectStatePacket->Clear();
 
 	*ResObjectStatePacket << (int16)en_PACKET_S2C_MONSTER_OBJECT_STATE_CHANGE;
-	*ResObjectStatePacket << ObjectId;
-	*ResObjectStatePacket << (int8)Direction;
+	*ResObjectStatePacket << ObjectId;	
 	*ResObjectStatePacket << (int16)ObjectType;
 	*ResObjectStatePacket << (int8)ObjectState;
 	*ResObjectStatePacket << (int8)MonsterState;
@@ -6606,7 +6537,7 @@ CGameServerMessage* CGameServer::MakePacketCoolTime(int8 QuickSlotBarIndex, int8
 	return ResCoolTimeMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketSkillError(en_PersonalMessageType PersonalMessageType, const WCHAR* SkillName, int16 SkillDistance)
+CGameServerMessage* CGameServer::MakePacketSkillError(en_GlobalMessageType PersonalMessageType, const WCHAR* SkillName, int16 SkillDistance)
 {
 	CGameServerMessage* ResErrorMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResErrorMessage == nullptr)
@@ -6616,7 +6547,7 @@ CGameServerMessage* CGameServer::MakePacketSkillError(en_PersonalMessageType Per
 
 	ResErrorMessage->Clear();
 
-	*ResErrorMessage << (int16)en_PACKET_S2C_PERSONAL_MESSAGE;
+	*ResErrorMessage << (int16)en_PACKET_S2C_GLOBAL_MESSAGE;
 	*ResErrorMessage << (int8)1;
 
 	WCHAR ErrorMessage[100] = { 0 };
@@ -6625,25 +6556,25 @@ CGameServerMessage* CGameServer::MakePacketSkillError(en_PersonalMessageType Per
 
 	switch (PersonalMessageType)
 	{
-	case en_PersonalMessageType::PERSONAL_MESSAGE_SKILL_COOLTIME:
+	case en_GlobalMessageType::PERSONAL_MESSAGE_SKILL_COOLTIME:
 		wsprintf(ErrorMessage, L"[%s]의 재사용 대기시간이 완료되지 않았습니다.", SkillName);
 		break;
-	case en_PersonalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT:
+	case en_GlobalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT:
 		wsprintf(ErrorMessage, L"대상을 선택하고 [%s]을/를 사용해야 합니다.", SkillName);
 		break;
-	case en_PersonalMessageType::PERSONAL_MESSAGE_HEAL_NON_SELECT_OBJECT:
+	case en_GlobalMessageType::PERSONAL_MESSAGE_HEAL_NON_SELECT_OBJECT:
 		wsprintf(ErrorMessage, L"[%s] 대상을 선택하지 않아서 자신에게 사용합니다.", SkillName);
 		break;
-	case en_PersonalMessageType::PERSONAL_MESSAGE_PLACE_BLOCK:
+	case en_GlobalMessageType::PERSONAL_MESSAGE_PLACE_BLOCK:
 		wsprintf(ErrorMessage, L"이동할 위치가 막혀 있어서 [%s]을/를 사용할 수 없습니다.", SkillName);
 		break;
-	case en_PersonalMessageType::PERSONAL_MESSAGE_PLACE_DISTANCE:
+	case en_GlobalMessageType::PERSONAL_MESSAGE_PLACE_DISTANCE:
 		wsprintf(ErrorMessage, L"[%s] 대상과의 거리가 너무 멉니다. [거리 : %d ]", SkillName, SkillDistance);
 		break;
-	case en_PersonalMessageType::PERSONAL_MESSAGE_MYSELF_TARGET:
+	case en_GlobalMessageType::PERSONAL_MESSAGE_MYSELF_TARGET:
 		wsprintf(ErrorMessage, L"[%s]을/를 자신에게 사용 할 수 없습니다.", SkillName, SkillDistance);
 		break;
-	case en_PersonalMessageType::PERSONAL_MESSAGE_DIR_DIFFERENT:
+	case en_GlobalMessageType::PERSONAL_MESSAGE_DIR_DIFFERENT:
 		wsprintf(ErrorMessage, L"대상을 바라보아야 합니다.");
 		break;
 	}
@@ -6658,7 +6589,7 @@ CGameServerMessage* CGameServer::MakePacketSkillError(en_PersonalMessageType Per
 	return ResErrorMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketCommonError(en_PersonalMessageType PersonalMessageType, const WCHAR* Name)
+CGameServerMessage* CGameServer::MakePacketCommonError(en_GlobalMessageType PersonalMessageType, const WCHAR* Name)
 {
 	CGameServerMessage* ResCommonErrorMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResCommonErrorMessage == nullptr)
@@ -6668,7 +6599,7 @@ CGameServerMessage* CGameServer::MakePacketCommonError(en_PersonalMessageType Pe
 
 	ResCommonErrorMessage->Clear();
 
-	*ResCommonErrorMessage << (int16)en_PACKET_S2C_PERSONAL_MESSAGE;
+	*ResCommonErrorMessage << (int16)en_PACKET_S2C_GLOBAL_MESSAGE;
 	*ResCommonErrorMessage << (int8)1;
 
 	WCHAR ErrorMessage[100] = { 0 };
@@ -6677,52 +6608,52 @@ CGameServerMessage* CGameServer::MakePacketCommonError(en_PersonalMessageType Pe
 
 	switch (PersonalMessageType)
 	{	
-	case en_PersonalMessageType::PERSOANL_MESSAGE_STATUS_ABNORMAL_SPELL:
+	case en_GlobalMessageType::PERSOANL_MESSAGE_STATUS_ABNORMAL_SPELL:
 		wsprintf(ErrorMessage, L"상태이상에 걸려 [%s]를 사용 할 수 없습니다.", Name);
 		break;
-	case en_PersonalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT:
+	case en_GlobalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT:
 		wsprintf(ErrorMessage, L"대상을 선택하고 사용해야 합니다.");
 		break;
-	case en_PersonalMessageType::PERSONAL_MESSAGE_FAR_DISTANCE:
+	case en_GlobalMessageType::PERSONAL_MESSAGE_FAR_DISTANCE:
 		wsprintf(ErrorMessage, L"대상과의 거리가 너무 멉니다.");
 		break;
-	case en_PersonalMessageType::PERSONAL_MESSAGE_DIR_DIFFERENT:
+	case en_GlobalMessageType::PERSONAL_MESSAGE_DIR_DIFFERENT:
 		wsprintf(ErrorMessage, L"[%s]을 바라보아야 합니다.", Name);
 		break;
-	case en_PersonalMessageType::PERSONAL_MESSAGE_ATTACK_ANGLE:
+	case en_GlobalMessageType::PERSONAL_MESSAGE_ATTACK_ANGLE:
 		wsprintf(ErrorMessage, L"대상이 앞에 있어야 합니다.");
 		break;
-	case en_PersonalMessageType::PERSONAL_MESSAGE_GATHERING_DISTANCE:
+	case en_GlobalMessageType::PERSONAL_MESSAGE_GATHERING_DISTANCE:
 		wsprintf(ErrorMessage, L"[%s]을 채집하려면 좀 더 가까이 다가가야합니다.", Name);
 		break;
-	case en_PersonalMessageType::PERSONAL_MEESAGE_CRAFTING_TABLE_OVERLAP_SELECT:
+	case en_GlobalMessageType::PERSONAL_MEESAGE_CRAFTING_TABLE_OVERLAP_SELECT:
 		wsprintf(ErrorMessage, L"[%s]를 사용중입니다.", Name);
 		break;
-	case en_PersonalMessageType::PERSONAL_MESSAGE_CRAFTING_TABLE_OVERLAP_CRAFTING_START:
+	case en_GlobalMessageType::PERSONAL_MESSAGE_CRAFTING_TABLE_OVERLAP_CRAFTING_START:
 		wsprintf(ErrorMessage, L"제작 중인 아이템을 모두 제작하거나, 제작 멈춤을 누르고 제작을 다시 시작해야 합니다.");
 		break;
-	case en_PersonalMessageType::PERSONAL_MESSAGE_CRAFTING_TABLE_MATERIAL_COUNT_NOT_ENOUGH:
+	case en_GlobalMessageType::PERSONAL_MESSAGE_CRAFTING_TABLE_MATERIAL_COUNT_NOT_ENOUGH:
 		wsprintf(ErrorMessage, L"재료가 부족합니다.");
 		break;
-	case en_PersonalMessageType::PERSOANL_MESSAGE_CRAFTING_TABLE_MATERIAL_WRONG_ITEM_ADD:
+	case en_GlobalMessageType::PERSOANL_MESSAGE_CRAFTING_TABLE_MATERIAL_WRONG_ITEM_ADD:
 		wsprintf(ErrorMessage, L"선택된 제작법에 넣을 수 없는 재료입니다.");
 		break;
-	case en_PersonalMessageType::PERSONAL_FAULT_ITEM_USE:
+	case en_GlobalMessageType::PERSONAL_FAULT_ITEM_USE:
 		wsprintf(ErrorMessage, L"[%s]를 사용 할 수 없습니다.", Name);
 		break;
-	case en_PersonalMessageType::PERSOANL_MESSAGE_SEED_FARMING_EXIST:
+	case en_GlobalMessageType::PERSOANL_MESSAGE_SEED_FARMING_EXIST:
 		wsprintf(ErrorMessage, L"[%s]가 심어져 있어서 심을 수 없습니다.", Name);
 		break;
-	case en_PersonalMessageType::PERSONAL_MESSAGE_EXIST_PARTY_PLAYER:
+	case en_GlobalMessageType::PERSONAL_MESSAGE_EXIST_PARTY_PLAYER:
 		wsprintf(ErrorMessage, L"[%s]이 그룹 중이라서 초대 할 수 없습니다.", Name);
 		break;
-	case en_PersonalMessageType::PERSONAL_MESSAGE_PARTY_INVITE_REJECT:
+	case en_GlobalMessageType::PERSONAL_MESSAGE_PARTY_INVITE_REJECT:
 		wsprintf(ErrorMessage, L"[%s]가 그룹 초대를 거절 했습니다.", Name);
 		break;
-	case en_PersonalMessageType::PERSONAL_MESSAGE_PARTY_MAX:
+	case en_GlobalMessageType::PERSONAL_MESSAGE_PARTY_MAX:
 		wsprintf(ErrorMessage, L"그룹에 빈 자리가 없습니다.", Name);
 		break;
-	case en_PersonalMessageType::PERSONAL_MESSAGE_SKILL_CANCEL_FAIL_COOLTIME:
+	case en_GlobalMessageType::PERSONAL_MESSAGE_SKILL_CANCEL_FAIL_COOLTIME:
 		wsprintf(ErrorMessage, L"[%s]이 재사용 대기시간 중이라 취소 할 수 없습니다.", Name);
 		break;
 	}
@@ -6737,7 +6668,7 @@ CGameServerMessage* CGameServer::MakePacketCommonError(en_PersonalMessageType Pe
 	return ResCommonErrorMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketStatusAbnormal(int64 TargetId, en_GameObjectType ObjectType, en_MoveDir Dir, en_SkillType SkillType, bool SetStatusAbnormal, int32 StatusAbnormal)
+CGameServerMessage* CGameServer::MakePacketStatusAbnormal(int64 TargetId, en_GameObjectType ObjectType, en_SkillType SkillType, bool SetStatusAbnormal, int32 StatusAbnormal)
 {
 	CGameServerMessage* ResStatusAbnormal = CGameServerMessage::GameServerMessageAlloc();
 	if (ResStatusAbnormal == nullptr)
@@ -6749,8 +6680,7 @@ CGameServerMessage* CGameServer::MakePacketStatusAbnormal(int64 TargetId, en_Gam
 
 	*ResStatusAbnormal << (int16)en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_STATUS_ABNORMAL;
 	*ResStatusAbnormal << TargetId;
-	*ResStatusAbnormal << (int16)ObjectType;
-	*ResStatusAbnormal << (int8)Dir;
+	*ResStatusAbnormal << (int16)ObjectType;	
 	*ResStatusAbnormal << (int16)SkillType;
 	*ResStatusAbnormal << SetStatusAbnormal;
 	*ResStatusAbnormal << StatusAbnormal;

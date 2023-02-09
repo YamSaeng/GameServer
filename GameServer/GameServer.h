@@ -576,7 +576,7 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 애니메이션 출력 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResAnimationPlay(int64 ObjectId, en_MoveDir Dir, wstring AnimationName);
+	CGameServerMessage* MakePacketResAnimationPlay(int64 ObjectId, wstring AnimationName);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 오브젝트 스탯 변경 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -584,11 +584,11 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 오브젝트 상태 변경 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResChangeObjectState(int64 ObjectId, en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState);
+	CGameServerMessage* MakePacketResChangeObjectState(int64 ObjectId, en_GameObjectType ObjectType, en_CreatureState ObjectState);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 몬스터 오브젝트 상태 변경 패킷 조합 
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResChangeMonsterObjectState(int64 ObjectId, en_MoveDir Direction, en_GameObjectType ObjectType, en_CreatureState ObjectState, en_MonsterState MonsterState);
+	CGameServerMessage* MakePacketResChangeMonsterObjectState(int64 ObjectId, en_GameObjectType ObjectType, en_CreatureState ObjectState, en_MonsterState MonsterState);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 이동 요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -693,15 +693,15 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 스킬 에러 메세지 생성 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketSkillError(en_PersonalMessageType PersonalMessageType, const WCHAR* SkillName = nullptr, int16 SkillDistance = 0);
+	CGameServerMessage* MakePacketSkillError(en_GlobalMessageType PersonalMessageType, const WCHAR* SkillName = nullptr, int16 SkillDistance = 0);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 일반 에러 메세지 생성 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketCommonError(en_PersonalMessageType PersonalMessageType, const WCHAR* Name = nullptr);
+	CGameServerMessage* MakePacketCommonError(en_GlobalMessageType PersonalMessageType, const WCHAR* Name = nullptr);
 	//------------------------------------------------------------
 	// 게임 서버 상태이상 적용 패킷 조합
 	//------------------------------------------------------------
-	CGameServerMessage* MakePacketStatusAbnormal(int64 TargetId, en_GameObjectType ObjectType, en_MoveDir Dir, en_SkillType SkillType, bool SetStatusAbnormal, int32 StatusAbnormal);
+	CGameServerMessage* MakePacketStatusAbnormal(int64 TargetId, en_GameObjectType ObjectType, en_SkillType SkillType, bool SetStatusAbnormal, int32 StatusAbnormal);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 가방 아이템 업데이트
 	//-----------------------------------------------------------------------------------------
