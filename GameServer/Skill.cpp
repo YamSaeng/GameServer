@@ -27,7 +27,7 @@ CSkill::CSkill()
 	_ComboSkillType = en_SkillType::SKILL_TYPE_NONE;	
 
 	_CastingUserID = 0;
-	_CastingUserObjectType = en_GameObjectType::NORMAL;
+	_CastingUserObjectType = en_GameObjectType::OBJECT_NON_TYPE;
 }
 
 CSkill::~CSkill()
@@ -336,8 +336,7 @@ bool CSkill::Update()
 						// 전사 쇄혼비무 상태이상 해제
 						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_SHAEHONE_MASK);
 						CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId, 
-							_Owner->_GameObjectInfo.ObjectType, 
-							_Owner->_GameObjectInfo.ObjectPositionInfo.MoveDir,
+							_Owner->_GameObjectInfo.ObjectType, 							
 							_SkillInfo->SkillType, 
 							false, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_SHAEHONE_MASK);
 						G_ObjectManager->GameServer->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);					
@@ -354,8 +353,7 @@ bool CSkill::Update()
 						// 전사 초혼비무 상태이상 해제
 						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_CHOHONE_MASK);
 						CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId,
-							_Owner->_GameObjectInfo.ObjectType,
-							_Owner->_GameObjectInfo.ObjectPositionInfo.MoveDir,
+							_Owner->_GameObjectInfo.ObjectType,							
 							_SkillInfo->SkillType,
 							false, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_CHOHONE_MASK);
 						G_ObjectManager->GameServer->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);					
@@ -372,8 +370,7 @@ bool CSkill::Update()
 						// 주술사 속박 상태이상 해제
 						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ROOT_MASK);
 						CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId,
-							_Owner->_GameObjectInfo.ObjectType,
-							_Owner->_GameObjectInfo.ObjectPositionInfo.MoveDir,
+							_Owner->_GameObjectInfo.ObjectType,							
 							_SkillInfo->SkillType, false, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ROOT_MASK);
 						G_ObjectManager->GameServer->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);					
 						ResStatusAbnormalPacket->Free();
@@ -389,7 +386,7 @@ bool CSkill::Update()
 						// 주술사 얼음사슬 상태이상 해제
 						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_CHAIN_MASK);
 
-						float DebufMovingSpeed = _Owner->_GameObjectInfo.ObjectStatInfo.MaxSpeed * ((st_AttackSkillInfo*)_SkillInfo)->SkillDebufMovingSpeed * 0.01;
+						float DebufMovingSpeed = _Owner->_GameObjectInfo.ObjectStatInfo.MaxSpeed * ((st_AttackSkillInfo*)_SkillInfo)->SkillDebufMovingSpeed * 0.01f;
 
 						_Owner->_GameObjectInfo.ObjectStatInfo.Speed += DebufMovingSpeed;						
 
@@ -399,8 +396,7 @@ bool CSkill::Update()
 						ResChangeObjectStatPacket->Free();
 
 						CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId,
-							_Owner->_GameObjectInfo.ObjectType,
-							_Owner->_GameObjectInfo.ObjectPositionInfo.MoveDir,
+							_Owner->_GameObjectInfo.ObjectType,							
 							_SkillInfo->SkillType, false, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_CHAIN_MASK);
 						G_ObjectManager->GameServer->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);					
 						ResStatusAbnormalPacket->Free();
@@ -416,8 +412,7 @@ bool CSkill::Update()
 						// 주술사 냉기파동 상태이상 해제
 						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_WAVE_MASK);
 						CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId,
-							_Owner->_GameObjectInfo.ObjectType, 
-							_Owner->_GameObjectInfo.ObjectPositionInfo.MoveDir,
+							_Owner->_GameObjectInfo.ObjectType, 							
 							_SkillInfo->SkillType, false, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_WAVE_MASK);
 						G_ObjectManager->GameServer->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);					
 						ResStatusAbnormalPacket->Free();
@@ -433,8 +428,7 @@ bool CSkill::Update()
 						// 주술사 낙뢰 상태이상 해제
 						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE_MASK);
 						CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId, 
-							_Owner->_GameObjectInfo.ObjectType,
-							_Owner->_GameObjectInfo.ObjectPositionInfo.MoveDir,
+							_Owner->_GameObjectInfo.ObjectType,							
 							_SkillInfo->SkillType, false, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE_MASK);
 						G_ObjectManager->GameServer->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);					
 						ResStatusAbnormalPacket->Free();
@@ -450,8 +444,7 @@ bool CSkill::Update()
 						// 도사 속박 상태이상 해제
 						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_DISCIPLINE_ROOT_MASK);
 						CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId, 
-							_Owner->_GameObjectInfo.ObjectType,
-							_Owner->_GameObjectInfo.ObjectPositionInfo.MoveDir,
+							_Owner->_GameObjectInfo.ObjectType,							
 							_SkillInfo->SkillType, false, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_DISCIPLINE_ROOT_MASK);
 						G_ObjectManager->GameServer->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);					
 						ResStatusAbnormalPacket->Free();
