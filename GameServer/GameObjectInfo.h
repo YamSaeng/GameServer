@@ -118,18 +118,6 @@ enum class en_NonPlayerType : int8
 	NON_PLAYER_CHARACTER_일반_상인
 };
 
-enum class en_MoveDir : int8
-{
-	UP,
-	DOWN,
-	LEFT,
-	RIGHT,
-	LEFT_UP,
-	LEFT_DOWN,
-	RIGHT_UP,
-	RIGHT_DOWN
-};
-
 enum class en_CreatureState : int8
 {
 	SPAWN_READY,
@@ -2162,53 +2150,12 @@ struct st_Vector2
 		{
 			return st_Vector2::Zero();
 		}
-	}
-
-	static en_MoveDir GetMoveDir(st_Vector2 NormalVector)
-	{
-		NormalVector._X = round(NormalVector._X);
-		NormalVector._Y = round(NormalVector._Y);
-
-		if (NormalVector._X < 0)
-		{
-			return en_MoveDir::LEFT;
-		}
-
-		if (NormalVector._X > 0)
-		{
-			return en_MoveDir::RIGHT;
-		}
-
-		if (NormalVector._Y > 0)
-		{
-			return en_MoveDir::UP;
-		}
-
-		if (NormalVector._Y < 0)
-		{
-			return en_MoveDir::DOWN;
-		}
-	}
+	}	
 
 	float Dot(st_Vector2 InVector)
 	{		
 		return _X * InVector._X + _Y * InVector._Y;
-	}
-
-	static st_Vector2 GetForwardVector(en_MoveDir MoveDir)
-	{
-		switch (MoveDir)
-		{
-		case en_MoveDir::UP:
-			return st_Vector2(0, 1.0f);
-		case en_MoveDir::DOWN:
-			return st_Vector2(0, -1.0f);
-		case en_MoveDir::LEFT:
-			return st_Vector2(-1.0f, 0);
-		case en_MoveDir::RIGHT:
-			return st_Vector2(1.0f, 0);
-		}
-	}
+	}	
 
 	static float GetAngle(st_Vector2 TargetVector, st_Vector2 MyVector)
 	{
@@ -2237,38 +2184,16 @@ struct st_Vector2
 		}
 	}
 
-	static bool CheckFieldOfView(st_Vector2 TargetPosition, st_Vector2 CheckPosition, en_MoveDir Dir, int16 Angle)
+	static bool CheckFieldOfView(st_Vector2 TargetPosition, st_Vector2 CheckPosition, st_Vector2 DirectionVector, int16 Angle)
 	{
 		// 대상 방향 벡터 구하기
 		st_Vector2 TargetDirVector = TargetPosition - CheckPosition;
 		// 방향 벡터 정규화
 		st_Vector2 NormalizeDirVector = TargetDirVector.Normalize();
 				
-		float FovCos = cosf((Angle * 0.5f) * PI / 180.0f);
+		float FovCos = cosf((Angle * 0.5f) * PI / 180.0f);		
 
-		st_Vector2 ForwardVector;
-
-		switch (Dir)
-		{
-		case en_MoveDir::UP:
-			ForwardVector._X = 0;
-			ForwardVector._Y = 1.0f;
-			break;
-		case en_MoveDir::DOWN:
-			ForwardVector._X = 0;
-			ForwardVector._Y = -1.0f;
-			break;
-		case en_MoveDir::LEFT:
-			ForwardVector._X = -1.0f;
-			ForwardVector._Y = 0;
-			break;
-		case en_MoveDir::RIGHT:
-			ForwardVector._X = 1.0f;
-			ForwardVector._Y = 0;
-			break;
-		}
-
-		if (NormalizeDirVector.Dot(ForwardVector) >= FovCos)
+		if (NormalizeDirVector.Dot(DirectionVector) >= FovCos)
 		{
 			return true;
 		}
@@ -2342,30 +2267,7 @@ struct st_Vector2Int
 	static int16 Distance(st_Vector2Int TargetCellPosition, st_Vector2Int MyCellPosition)
 	{
 		return (int16)sqrt(pow(TargetCellPosition._X - MyCellPosition._X, 2) + pow(TargetCellPosition._Y - MyCellPosition._Y, 2));
-	}
-
-	static en_MoveDir GetMoveDir(st_Vector2Int NormalVector)
-	{
-		if (NormalVector._X > 0)
-		{
-			return en_MoveDir::RIGHT;
-		}
-
-		if (NormalVector._X < 0)
-		{
-			return en_MoveDir::LEFT;
-		}
-
-		if (NormalVector._Y > 0)
-		{
-			return en_MoveDir::UP;
-		}
-
-		if (NormalVector._Y < 0)
-		{
-			return en_MoveDir::DOWN;
-		}
-	}
+	}	
 };
 
 
@@ -2374,8 +2276,7 @@ struct st_PositionInfo
 	en_CreatureState State;
 	st_Vector2Int CollisionPosition;
 	st_Vector2 Position;
-	st_Vector2 Direction;
-	en_MoveDir MoveDir;	
+	st_Vector2 Direction;	
 };
 
 struct st_StatInfo
@@ -2611,8 +2512,7 @@ struct st_SkillInfo
 	int64 SkillRemainTime;   // 스킬 남은 시간
 	int32 SkillMotionTime;	 // 스킬 모션 시간
 	float SkillTargetEffectTime; // 스킬 이펙트 시간
-	en_SkillType NextComboSkill; // 다음 연속기 스킬
-	map<en_MoveDir, wstring> SkillAnimations; // 스킬 애니메이션	
+	en_SkillType NextComboSkill; // 다음 연속기 스킬	
 	wstring SkillExplanation; // 스킬 설명 	
 
 	st_SkillInfo()
