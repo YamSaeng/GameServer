@@ -13,7 +13,7 @@ CPlayer::CPlayer()
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 	_DefaultAttackTick = 0;
 
-	_FieldOfViewDistance = 10;	
+	_FieldOfViewDistance = 15;	
 
 	_NatureRecoveryTick = GetTickCount64() + 5000;
 	_FieldOfViewUpdateTick = GetTickCount64() + 50;
@@ -593,7 +593,7 @@ void CPlayer::CheckFieldOfViewObject()
 		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldOfViewObjects(this, false);
 		vector<st_FieldOfViewInfo> SpawnObjectIds;
 		vector<st_FieldOfViewInfo> DeSpawnObjectIds;
-
+				
 		if (CurrentFieldOfViewObjectIds.size() > 1)
 		{
 			sort(CurrentFieldOfViewObjectIds.begin(), CurrentFieldOfViewObjectIds.end());
