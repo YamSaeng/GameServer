@@ -584,11 +584,7 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 오브젝트 상태 변경 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResChangeObjectState(int64 ObjectId, en_GameObjectType ObjectType, en_CreatureState ObjectState);
-	//-----------------------------------------------------------------------------------------
-	// 게임서버 몬스터 오브젝트 상태 변경 패킷 조합 
-	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResChangeMonsterObjectState(int64 ObjectId, en_GameObjectType ObjectType, en_CreatureState ObjectState, en_MonsterState MonsterState);
+	CGameServerMessage* MakePacketResChangeObjectState(int64 ObjectId, en_GameObjectType ObjectType, en_CreatureState ObjectState);	
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 이동 요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------

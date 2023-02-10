@@ -5989,25 +5989,6 @@ CGameServerMessage* CGameServer::MakePacketResChangeObjectState(int64 ObjectId, 
 	return ResObjectStatePacket;
 }
 
-CGameServerMessage* CGameServer::MakePacketResChangeMonsterObjectState(int64 ObjectId, en_GameObjectType ObjectType, en_CreatureState ObjectState, en_MonsterState MonsterState)
-{
-	CGameServerMessage* ResObjectStatePacket = CGameServerMessage::GameServerMessageAlloc();
-	if (ResObjectStatePacket == nullptr)
-	{
-		return nullptr;
-	}
-
-	ResObjectStatePacket->Clear();
-
-	*ResObjectStatePacket << (int16)en_PACKET_S2C_MONSTER_OBJECT_STATE_CHANGE;
-	*ResObjectStatePacket << ObjectId;	
-	*ResObjectStatePacket << (int16)ObjectType;
-	*ResObjectStatePacket << (int8)ObjectState;
-	*ResObjectStatePacket << (int8)MonsterState;
-
-	return ResObjectStatePacket;
-}
-
 CGameServerMessage* CGameServer::MakePacketResMove(int64 ObjectId, float MoveDirectionX, float MoveDirectionY)
 {
 	CGameServerMessage* ResMoveMessage = CGameServerMessage::GameServerMessageAlloc();
