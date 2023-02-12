@@ -839,8 +839,8 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			int16 MeleeCriticalPoint = (int16)MonsterStatInfoFiled["MeleeCriticalPoint"].GetInt();
 			int16 MagicCriticalPoint = (int16)MonsterStatInfoFiled["MagicCriticalPoint"].GetInt();
 			float Speed = MonsterStatInfoFiled["Speed"].GetFloat();
-			int SearchCellDistance = MonsterStatInfoFiled["SearchCellDistance"].GetInt();
-			int ChaseCellDistance = MonsterStatInfoFiled["ChaseCellDistance"].GetInt();
+			int SearchDistance = MonsterStatInfoFiled["SearchDistance"].GetFloat();
+			int ChaseDistance = MonsterStatInfoFiled["ChaseDistance"].GetFloat();
 			int SearchTick = MonsterStatInfoFiled["SearchTick"].GetInt();
 			int PatrolTick = MonsterStatInfoFiled["PatrolTick"].GetInt();
 			int AttackTick = MonsterStatInfoFiled["AttackTick"].GetInt();
@@ -863,8 +863,8 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			MonsterData->MonsterStatInfo.MeleeCriticalPoint = MeleeCriticalPoint;
 			MonsterData->MonsterStatInfo.MagicCriticalPoint = MagicCriticalPoint;
 			MonsterData->MonsterStatInfo.Speed = Speed;
-			MonsterData->MonsterStatInfo.SearchCellDistance = SearchCellDistance;
-			MonsterData->MonsterStatInfo.ChaseCellDistance = ChaseCellDistance;
+			MonsterData->MonsterStatInfo.SearchDistance = SearchDistance;
+			MonsterData->MonsterStatInfo.ChaseDistance = ChaseDistance;
 			MonsterData->SearchTick = SearchTick;
 			MonsterData->PatrolTick = PatrolTick;
 			MonsterData->AttackTick = AttackTick;
