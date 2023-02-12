@@ -36,12 +36,13 @@ public:
 	
 	virtual void Start() override;
 	virtual void End() override;
-protected:
+protected:	
 	// 시전 중인 스킬
 	CSkill* _CurrentSkill;	
 
 	// 목표물
-	CGameObject* _Target;	
+	CGameObject* _Target;		
+
 	// 정찰 위치	
 	st_Vector2 _PatrolPoint;	
 	// 이동 위치	
@@ -50,11 +51,11 @@ protected:
 	//--------------------------
 	// Idle 상태에서 Search 거리
 	//--------------------------	
-	int32 _SearchCellDistance;
+	float _SearchDistance;
 	//--------------------------
 	// Moving 상태에서 추격 거리
 	//--------------------------
-	int32 _ChaseCellDistance;
+	float _ChaseDistance;
 
 	// 움직일때 공격 검사 거리
 	float _MovingAttackRange;
@@ -95,16 +96,20 @@ protected:
 	//---------------------------------------------------------------------------
 	// 어그로 목록 중 네트워크가 끊긴 타겟, 죽음 상태 타겟을 어그로 목록에서 정리
 	//---------------------------------------------------------------------------
-	void AggroTargetListCheck();
+	void AggroTargetListCheck();	
 	//------------------------------------------------------------
 	// 어그로 목록 중 어그로 수치가 가장 높은 대상을 타겟으로 정함
 	//------------------------------------------------------------
 	void SelectTarget();
+	//------------------------------------------------------------
+	// 선택한 목표물을 검사
+	//------------------------------------------------------------
+	void SelectTargetCheck();
 
 	//------------------------------------------------------
 	// 추적 대상 찾기
 	//------------------------------------------------------
-	CGameObject* FindTarget(en_MonsterAggroType* AggroType);
+	void FindTarget();
 	//------------------------
 	// Spawn Idle 상태 Update
 	//------------------------
@@ -144,9 +149,7 @@ protected:
 	//------------------------
 	virtual void UpdateDead() override;
 
-	void Move();
-
-	void SendMonsterChangeObjectState();		
+	void Move();	
 
 	bool TargetAttackCheck(float CheckDistance);
 };
