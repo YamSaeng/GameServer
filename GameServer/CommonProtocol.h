@@ -103,9 +103,18 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_CHARACTER_INFO,
 
 	//------------------------------------------------------------
+	// 게임서버 캐릭터가 바라보는 방향 저장
+	// int64 AccountID
+	// int64 PlayerID
+	// float DirectionX
+	// float DirectionY
+	//------------------------------------------------------------
+	en_PACKET_C2S_FACE_DIRECTION,
+	
+	//------------------------------------------------------------
 	// 게임서버 캐릭터 움직이기 요청
 	// int64 AccountId
-	// int32 PlayerDBId
+	// int64 PlayerDBId
 	// float DirectionX
 	// float DirectionY
 	// float MoveStartPositionX
@@ -116,7 +125,7 @@ enum en_GAME_SERVER_PACKET_TYPE
 
 	//------------------------------------------------------------
 	// 게임서버 캐릭터 움직이기 요청 응답	
-	// int32 PlayerDBId
+	// int64 PlayerDBId
 	// float MoveStopPosition
 	// float MoveStopPosition
 	// int8 MoveStopState	
