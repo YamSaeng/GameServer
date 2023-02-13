@@ -64,6 +64,8 @@ CGameServer::CGameServer()
 
 	_TimerJobThreadWakeCount = 0;
 	_TimerJobThreadTPS = 0;
+
+	_Day = nullptr;
 }
 
 CGameServer::~CGameServer()
@@ -468,6 +470,9 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_CHARACTER_INFO:
 		PacketProcReqCharacterInfo(SessionID, Message);
 		break;
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_FACE_DIRECTION:
+		PacketProcReqFaceDirection(SessionID, Message);
+		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_MOVE:
 		PacketProcReqMove(SessionID, Message);
 		break;
@@ -837,6 +842,59 @@ void CGameServer::PacketProcReqCharacterInfo(int64 SessionID, CMessage* Message)
 	}
 }
 
+void CGameServer::PacketProcReqFaceDirection(int64 SessionID, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionID);
+
+	if (Session)
+	{
+		if (!Session->IsLogin)
+		{
+			Disconnect(Session->SessionId);
+		}
+
+		int64 AccountId;
+		*Message >> AccountId;
+
+		if (Session->AccountId != AccountId)
+		{
+			Disconnect(Session->SessionId);
+		}
+
+		// PlayerDBId를 뽑는다.
+		int64 PlayerDBId;
+		*Message >> PlayerDBId;
+
+		// 게임에 입장한 캐릭터를 가져온다.
+		CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+		// 클라가 조종중인 캐릭터가 있는지 확인
+		if (MyPlayer == nullptr)
+		{
+			Disconnect(Session->SessionId);
+		}
+		else
+		{
+			// 조종중인 캐릭터가 있으면 ObjectId가 다른지 확인
+			if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+			{
+				Disconnect(Session->SessionId);
+			}
+		}
+
+		float FaceDirectionX;
+		*Message >> FaceDirectionX;
+
+		float FaceDirectionY;
+		*Message >> FaceDirectionY;
+
+		MyPlayer->_FieldOfDirection._X = FaceDirectionX;
+		MyPlayer->_FieldOfDirection._Y = FaceDirectionY;
+	}
+
+	ReturnSession(Session);
+}
+
 void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 {
 	st_Session* Session = FindSession(SessionID);
@@ -1052,10 +1110,8 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 			CSkill* ReqMeleeSkill = MyPlayer->_SkillBox.FindSkill((en_SkillCharacteristic)ReqCharacteristicType, (en_SkillType)ReqSkillType);
 			if (ReqMeleeSkill != nullptr && ReqMeleeSkill->GetSkillInfo()->CanSkillUse == true)
 			{
-				CMap* Map = G_MapManager->GetMap(1);
+				CMap* Map = G_MapManager->GetMap(1);			
 				
-				vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetFieldOfViewPlayers(MyPlayer, 1, false);
-				vector<st_FieldOfViewInfo> CurrentFieldOfViewAttackObjectIDs = Map->GetFieldOfViewAttackObjects(MyPlayer, 1);
 
 				// 타겟 위치 확인
 				switch (ReqMeleeSkill->GetSkillInfo()->SkillType)
@@ -1640,7 +1696,7 @@ void CGameServer::PacketProcReqChattingMessage(int64 SessionId, CMessage* Messag
 		
 		CMap* Map = G_MapManager->GetMap(1);
 
-		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetFieldOfViewPlayers(MyPlayer, 1, false);
+		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetAroundPlayers(MyPlayer, false);
 				
 		CMessage* ResChattingMessage = MakePacketResChattingBoxMessage(en_MessageType::MESSAGE_TYPE_CHATTING, st_Color::White(), ChattingMessage);
 		SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResChattingMessage);
@@ -5934,7 +5990,7 @@ CGameServerMessage* CGameServer::MakePacketResCraftingTableCompleteItemSelect(in
 	return ResCraftingTableCompleteItemSelectMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResAnimationPlay(int64 ObjectId, wstring AnimationName)
+CGameServerMessage* CGameServer::MakePacketResAnimationPlay(int64 ObjectId, en_GameObjectType ObjectType, wstring AnimationName)
 {
 	CGameServerMessage* ResAnimationPlayMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResAnimationPlayMessage == nullptr)
@@ -5989,7 +6045,7 @@ CGameServerMessage* CGameServer::MakePacketResChangeObjectState(int64 ObjectId, 
 	return ResObjectStatePacket;
 }
 
-CGameServerMessage* CGameServer::MakePacketResMove(int64 ObjectId, float MoveDirectionX, float MoveDirectionY)
+CGameServerMessage* CGameServer::MakePacketResMove(int64 ObjectId, float MoveDirectionX, float MoveDirectionY, float PositionX, float PositionY)
 {
 	CGameServerMessage* ResMoveMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResMoveMessage == nullptr)
@@ -6003,6 +6059,8 @@ CGameServerMessage* CGameServer::MakePacketResMove(int64 ObjectId, float MoveDir
 	*ResMoveMessage << ObjectId;
 	*ResMoveMessage << MoveDirectionX;
 	*ResMoveMessage << MoveDirectionY;		
+	*ResMoveMessage << PositionX;
+	*ResMoveMessage << PositionY;
 
 	return ResMoveMessage;
 }
