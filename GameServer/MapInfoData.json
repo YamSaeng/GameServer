@@ -3,7 +3,7 @@
     {
       "MapID": 1,
       "MapName": "Start_Field",
-      "MapSectorSize": 5,
+      "MapSectorSize": 10,
       "ChannelCount": 1
     }
   ]
