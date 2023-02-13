@@ -75,13 +75,17 @@ public:
 	//-----------------------------------------------------------------
 	vector<CSector*> GetAroundSectors(st_Vector2Int CellPosition, int32 Range = 1);
 	//------------------------------------------------------------------------------------------------------
-	// 오브젝트 시야 범위 안에 있는 오브젝트 아이디 목록 반환
+	// 오브젝트 시야 범위 안에 있는 모든 오브젝트 아이디 목록을 반환
 	//------------------------------------------------------------------------------------------------------
-	vector<st_FieldOfViewInfo> GetFieldOfViewObjects(CGameObject* Object, bool ExceptMe = true, int16 Range = 1);
+	vector<st_FieldOfViewInfo> GetFieldOfViewObjects(CGameObject* Object);
 	//---------------------------------------------------------------------------------
-	// 오브젝트 시야 범위 안에 있는 플레이어 아이디 목록 반환
+	// 오브젝트를 기준으로 일정 거리 안에 있는 플레이어 아이디 목록을 반환
 	//---------------------------------------------------------------------------------
-	vector<st_FieldOfViewInfo> GetFieldOfViewPlayers(CGameObject* Object, int16 Range, bool ExceptMe = true);
+	vector<st_FieldOfViewInfo> GetFieldAroundPlayers(CGameObject* Object, bool ExceptMe = true);
+	//--------------------------------------------------------------------------------------
+	// 내 시야 범위 플레이어 반환
+	//--------------------------------------------------------------------------------------
+	vector<CPlayer*> GetAroundPlayers(CGameObject* Object, bool ExceptMe = true);
 	//------------------------------------------------------------------------------------------------------------
 	// 오브젝트 시야 범위 안에 있는 공격 가능한 오브젝트 아이디 목록 반환
 	//------------------------------------------------------------------------------------------------------------
@@ -89,16 +93,12 @@ public:
 	//----------------------------------------------------------------------------------------
 	// 오브젝트 주위 몬스터 목록 반환
 	//----------------------------------------------------------------------------------------
-	vector<CMonster*> GetAroundMonster(CGameObject* Object, int16 Range, bool ExceptMe = true);
-	//--------------------------------------------------------------------------------------
-	// 내 시야 범위 플레이어 반환
-	//--------------------------------------------------------------------------------------
-	vector<CPlayer*> GetFieldOfViewPlayer(CGameObject* Object, int16 Range, bool ExceptMe = true);
+	vector<CMonster*> GetAroundMonster(CGameObject* Object, int16 Range, bool ExceptMe = true);	
 
 	//-------------------------------------------------------
 	// 내 근처 플레이어 반환
 	//-------------------------------------------------------
-	CGameObject* MonsterReqFindNearPlayer(CMonster* Monster, en_MonsterAggroType* AggroType, int32 Range, bool* CollisionCango);
+	CGameObject* MonsterReqFindNearPlayer(CMonster* Monster, en_MonsterAggroType* AggroType, bool* CollisionCango);
 
 	//-------------------------------------------
 	// 좌표 위치에 있는 오브젝트 반환

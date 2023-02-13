@@ -257,53 +257,27 @@ vector<CSector*> CMap::GetAroundSectors(st_Vector2Int CellPosition, int32 Range)
 	}
 }
 
-vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object, bool ExceptMe, int16 Range)
+vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object)
 {
 	vector<st_FieldOfViewInfo> FieldOfViewGameObjects;
 
-	vector<CSector*> Sectors = GetAroundSectors(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Range);
+	// 오브젝트 기준으로 주위 섹터를 가져옴
+	vector<CSector*> Sectors = GetAroundSectors(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, 1);
+
+	st_FieldOfViewInfo FieldOfViewInfo;
 
 	for (CSector* Sector : Sectors)
 	{
 		Sector->AcquireSectorLock();
 
-		st_FieldOfViewInfo FieldOfViewInfo;
-		// 주변 섹터 플레이어 정보
 		for (CPlayer* Player : Sector->GetPlayers())
-		{
-			if (Player->_NetworkState == en_ObjectNetworkState::LIVE)
+		{			
+			if (st_Vector2::CheckFieldOfView(Player->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->_FieldOfDirection, Object->_FieldOfAngle, Object->_FieldOfViewDistance))
 			{
 				FieldOfViewInfo.ObjectID = Player->_GameObjectInfo.ObjectId;
-				FieldOfViewInfo.SessionID = Player->_SessionId;
+				FieldOfViewInfo.SessionID = 0;
 				FieldOfViewInfo.ObjectType = Player->_GameObjectInfo.ObjectType;
 
-				float Distance = st_Vector2::Distance(Object->_GameObjectInfo.ObjectPositionInfo.Position, Player->_GameObjectInfo.ObjectPositionInfo.Position);
-
-				// 함수 호출한 오브젝트를 포함할 것인지에 대한 여부 true면 제외 false면 포함
-				if (ExceptMe == true && Distance <= Object->_FieldOfViewDistance)
-				{
-					if (Object->_GameObjectInfo.ObjectId != Player->_GameObjectInfo.ObjectId)
-					{
-						FieldOfViewGameObjects.push_back(FieldOfViewInfo);
-					}
-				}
-				else if (ExceptMe == false && Distance <= Object->_FieldOfViewDistance)
-				{
-					FieldOfViewGameObjects.push_back(FieldOfViewInfo);
-				}
-			}
-		}
-
-		// 주변 NPC 정보
-		for (CNonPlayer* NonPlayer : Sector->GetNonPlayers())
-		{
-			FieldOfViewInfo.ObjectID = NonPlayer->_GameObjectInfo.ObjectId;
-			FieldOfViewInfo.SessionID = 0;
-			FieldOfViewInfo.ObjectType = NonPlayer->_GameObjectInfo.ObjectType;
-
-			float Distance = st_Vector2::Distance(Object->_GameObjectInfo.ObjectPositionInfo.Position, NonPlayer->_GameObjectInfo.ObjectPositionInfo.Position);
-			if (Distance <= Object->_FieldOfViewDistance)
-			{
 				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
 			}
 		}
@@ -311,65 +285,12 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object, bool
 		// 주변 섹터 몬스터 정보
 		for (CMonster* Monster : Sector->GetMonsters())
 		{
-			FieldOfViewInfo.ObjectID = Monster->_GameObjectInfo.ObjectId;
-			FieldOfViewInfo.SessionID = 0;
-			FieldOfViewInfo.ObjectType = Monster->_GameObjectInfo.ObjectType;
-
-			float Distance = st_Vector2::Distance(Object->_GameObjectInfo.ObjectPositionInfo.Position, Monster->_GameObjectInfo.ObjectPositionInfo.Position);
-			if (Distance <= Object->_FieldOfViewDistance)
+			if (st_Vector2::CheckFieldOfView(Monster->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->_FieldOfDirection, Object->_FieldOfAngle, Object->_FieldOfViewDistance))
 			{
-				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
-			}
-		}
+				FieldOfViewInfo.ObjectID = Monster->_GameObjectInfo.ObjectId;
+				FieldOfViewInfo.SessionID = 0;
+				FieldOfViewInfo.ObjectType = Monster->_GameObjectInfo.ObjectType;
 
-		for (CEnvironment* Environment : Sector->GetEnvironment())
-		{
-			FieldOfViewInfo.ObjectID = Environment->_GameObjectInfo.ObjectId;
-			FieldOfViewInfo.SessionID = 0;
-			FieldOfViewInfo.ObjectType = Environment->_GameObjectInfo.ObjectType;
-
-			float Distance = st_Vector2::Distance(Object->_GameObjectInfo.ObjectPositionInfo.Position, Environment->_GameObjectInfo.ObjectPositionInfo.Position);
-			if (Distance <= Object->_FieldOfViewDistance)
-			{
-				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
-			}
-		}
-
-		for (CCraftingTable* CraftingTable : Sector->GetCraftingTable())
-		{
-			FieldOfViewInfo.ObjectID = CraftingTable->_GameObjectInfo.ObjectId;
-			FieldOfViewInfo.SessionID = 0;
-			FieldOfViewInfo.ObjectType = CraftingTable->_GameObjectInfo.ObjectType;
-
-			float Distance = st_Vector2::Distance(Object->_GameObjectInfo.ObjectPositionInfo.Position, CraftingTable->_GameObjectInfo.ObjectPositionInfo.Position);
-			if (Distance <= Object->_FieldOfViewDistance)
-			{
-				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
-			}
-		}
-
-		for (CItem* Item : Sector->GetItems())
-		{
-			FieldOfViewInfo.ObjectID = Item->_GameObjectInfo.ObjectId;
-			FieldOfViewInfo.SessionID = 0;
-			FieldOfViewInfo.ObjectType = Item->_GameObjectInfo.ObjectType;
-
-			float Distance = st_Vector2::Distance(Object->_GameObjectInfo.ObjectPositionInfo.Position, Item->_GameObjectInfo.ObjectPositionInfo.Position);
-			if (Distance <= Object->_FieldOfViewDistance)
-			{
-				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
-			}
-		}
-
-		for (CCrop* Crop : Sector->GetCrop())
-		{
-			FieldOfViewInfo.ObjectID = Crop->_GameObjectInfo.ObjectId;
-			FieldOfViewInfo.SessionID = 0;
-			FieldOfViewInfo.ObjectType = Crop->_GameObjectInfo.ObjectType;
-
-			float Distance = st_Vector2::Distance(Object->_GameObjectInfo.ObjectPositionInfo.Position, Crop->_GameObjectInfo.ObjectPositionInfo.Position);
-			if (Distance <= Object->_FieldOfViewDistance)
-			{
 				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
 			}
 		}
@@ -380,11 +301,11 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object, bool
 	return FieldOfViewGameObjects;
 }
 
-vector<st_FieldOfViewInfo> CMap::GetFieldOfViewPlayers(CGameObject* Object, int16 Range, bool ExceptMe)
+vector<st_FieldOfViewInfo> CMap::GetFieldAroundPlayers(CGameObject* Object, bool ExceptMe)
 {
 	vector<st_FieldOfViewInfo> FieldOfViewGamePlayers;
 
-	vector<CSector*> Sectors = GetAroundSectors(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Range);
+	vector<CSector*> Sectors = GetAroundSectors(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, 1);
 
 	st_FieldOfViewInfo FieldOfViewInfo;
 
@@ -421,6 +342,37 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewPlayers(CGameObject* Object, int1
 	}
 
 	return FieldOfViewGamePlayers;
+}
+
+vector<CPlayer*> CMap::GetAroundPlayers(CGameObject* Object, bool ExceptMe)
+{
+	vector<CPlayer*> FieldOfViewPlayers;
+
+	vector<CSector*> Sectors = GetAroundSectors(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, 1);
+
+	for (CSector* Sector : Sectors)
+	{
+		// 주변 섹터 플레이어 정보
+		for (CPlayer* Player : Sector->GetPlayers())
+		{
+			int16 Distance = st_Vector2Int::Distance(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
+
+			// 함수 호출한 오브젝트를 포함할 것인지에 대한 여부 true면 제외 false면 포함
+			if (ExceptMe == true && Distance <= Object->_FieldOfViewDistance)
+			{
+				if (Object->_GameObjectInfo.ObjectId != Player->_GameObjectInfo.ObjectId)
+				{
+					FieldOfViewPlayers.push_back(Player);
+				}
+			}
+			else if (ExceptMe == false && Distance <= Object->_FieldOfViewDistance)
+			{
+				FieldOfViewPlayers.push_back(Player);
+			}
+		}
+	}
+
+	return FieldOfViewPlayers;
 }
 
 vector<st_FieldOfViewInfo> CMap::GetFieldOfViewAttackObjects(CGameObject* Object, int16 Distance)
@@ -495,41 +447,10 @@ vector<CMonster*> CMap::GetAroundMonster(CGameObject* Object, int16 Range, bool 
 	return Monsters;
 }
 
-vector<CPlayer*> CMap::GetFieldOfViewPlayer(CGameObject* Object, int16 Range, bool ExceptMe)
-{
-	vector<CPlayer*> FieldOfViewPlayers;
-
-	vector<CSector*> Sectors = GetAroundSectors(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Range);
-
-	for (CSector* Sector : Sectors)
-	{
-		// 주변 섹터 플레이어 정보
-		for (CPlayer* Player : Sector->GetPlayers())
-		{
-			int16 Distance = st_Vector2Int::Distance(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
-
-			// 함수 호출한 오브젝트를 포함할 것인지에 대한 여부 true면 제외 false면 포함
-			if (ExceptMe == true && Distance <= Object->_FieldOfViewDistance)
-			{
-				if (Object->_GameObjectInfo.ObjectId != Player->_GameObjectInfo.ObjectId)
-				{
-					FieldOfViewPlayers.push_back(Player);
-				}
-			}
-			else if (ExceptMe == false && Distance <= Object->_FieldOfViewDistance)
-			{
-				FieldOfViewPlayers.push_back(Player);
-			}
-		}
-	}
-
-	return FieldOfViewPlayers;
-}
-
-CGameObject* CMap::MonsterReqFindNearPlayer(CMonster* Monster, en_MonsterAggroType* AggroType, int32 Range, bool* CollisionCango)
+CGameObject* CMap::MonsterReqFindNearPlayer(CMonster* Monster, en_MonsterAggroType* AggroType, bool* CollisionCango)
 {
 	// 주위 시야 범위 안에 있는 플레이어들을 받아온다.
-	vector<CPlayer*> Players = GetFieldOfViewPlayer(Monster, Range);
+	vector<CPlayer*> Players = GetAroundPlayers(Monster, 1);
 
 	// 받아온 플레이어 정보를 토대로 거리를 구해서 우선순위 큐에 담는다.
 	CHeap<int16, CPlayer*> Distances((int32)Players.size()); // 가까운 순서대로 
