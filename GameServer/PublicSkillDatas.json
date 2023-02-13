@@ -14,7 +14,7 @@
               "SkillCastingTime": 0,
               "SkillDurationTime": 0,
               "SkillDotTime": 0,
-              "SkillDistance": 1,
+              "SkillDistance": 2.0,
               "SkillTargetEffectTime": 2.0,
               "SkillDebufAttackSpeed": 0,
               "SkillDebufMovingSpeed": 0,
