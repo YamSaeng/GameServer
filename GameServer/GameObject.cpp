@@ -100,7 +100,7 @@ void CGameObject::Update()
 				}	
 				else if (CheckPositionX >= 1.0f || CheckPositionY >= 1.0f)
 				{
-					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldOfViewPlayers(this, 1, false);
+					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetAroundPlayers(this, false);
 
 					CMessage* ResMoveStopPacket = G_ObjectManager->GameServer->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
 						_GameObjectInfo.ObjectPositionInfo.Position._X,
@@ -126,7 +126,7 @@ void CGameObject::Update()
 
 				if (CheckPositionX > 0.2f || CheckPositionY > 0.2f)
 				{
-					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldOfViewPlayers(this, 1, false);
+					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetAroundPlayers(this, false);
 
 					CMessage* ResMoveStopPacket = G_ObjectManager->GameServer->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
 						_GameObjectInfo.ObjectPositionInfo.Position._X,
@@ -338,7 +338,7 @@ void CGameObject::Update()
 						{
 							_MeleeSkill = FindMeleeSkill;
 
-							vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetFieldOfViewPlayers(this, 1, false);						
+							vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetAroundPlayers(this, false);						
 
 							// 데미지 적용할 대상들
 							vector<CGameObject*> DamageTargets;
@@ -712,7 +712,7 @@ void CGameObject::Update()
 					CSkill* FindSpellSkill = Player->_SkillBox.FindSkill((en_SkillCharacteristic)SpellCharacteristicType, (en_SkillType)SpellSkillType);
 					if (FindSpellSkill != nullptr && FindSpellSkill->GetSkillInfo()->CanSkillUse == true)
 					{
-						vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetFieldOfViewPlayers(this, 1, false);
+						vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetAroundPlayers(this, false);
 
 						if (Player->_ComboSkill != nullptr)
 						{
@@ -1208,9 +1208,9 @@ void CGameObject::Update()
 				{
 					bool IsDead = OnDamaged(Attacker, Damage);					
 
-					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetFieldOfViewPlayers(this, 1, false);
+					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetAroundPlayers(this, false);
 
-					CMessage* ResDamagePacket = G_ObjectManager->GameServer->MakePacketResDamage(_GameObjectInfo.ObjectId,
+					CMessage* ResDamagePacket = G_ObjectManager->GameServer->MakePacketResDamage(AttackerID,
 						_GameObjectInfo.ObjectId,
 						SkillType,
 						en_ResourceName::CLIENT_EFFECT_ATTACK_TARGET_HIT,
@@ -1218,21 +1218,7 @@ void CGameObject::Update()
 						_GameObjectInfo.ObjectStatInfo.HP,
 						IsCritical);
 					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResDamagePacket);
-					ResDamagePacket->Free();					
-
-					// 데미지 시스템 메세지 전송	
-					CMessage* ResSkillSystemMessagePacket = G_ObjectManager->GameServer->MakePacketResDamageChattingBoxMessage(en_MessageType::MESSAGE_TYPE_DAMAGE_CHATTING,
-						Attacker->_GameObjectInfo.ObjectName,
-						_GameObjectInfo.ObjectName,
-						(en_SkillType)SkillType,
-						Damage);
-					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResSkillSystemMessagePacket);
-					ResSkillSystemMessagePacket->Free();					
-
-					// 변경된 체력 전송
-					CMessage* StatChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectStatInfo);
-					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, StatChangePacket);
-					StatChangePacket->Free();
+					ResDamagePacket->Free();	
 
 					if (IsDead == true)
 					{
@@ -1276,7 +1262,7 @@ void CGameObject::Update()
 				int16 HealSkillType;
 				*GameObjectJob->GameObjectJobMessage >> HealSkillType;
 
-				vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetFieldOfViewPlayers(this, 1, false);
+				vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetAroundPlayers(this, false);
 
 				CGameObject* Healer = _Channel->FindChannelObject(HealerID, en_GameObjectType::OBJECT_PLAYER);				
 				if (Healer != nullptr)
@@ -1948,7 +1934,7 @@ st_Vector2 CGameObject::GetFrontPosition(int8 Distance)
 
 vector<st_Vector2Int> CGameObject::GetAroundCellPositions(st_Vector2Int CellPosition, int8 Distance)
 {
-	vector<st_Vector2Int> AroundPosition;
+	vector<st_Vector2Int> AroundPosition;	
 
 	st_Vector2Int LeftTop(Distance * -1, Distance);
 	st_Vector2Int RightDown(Distance, Distance * -1);

@@ -32,8 +32,12 @@ public:
 	//---------------------------
 	st_Vector2Int _SpawnPosition;
 
-	// 시야 범위
-	int8 _FieldOfViewDistance;
+	// 시야 각
+	float _FieldOfAngle;
+	// 바라보는 방향
+	st_Vector2 _FieldOfDirection;	
+	// 시야 거리
+	float _FieldOfViewDistance;	
 
 	// 시야 범위 오브젝트
 	vector<st_FieldOfViewInfo> _FieldOfViewInfos;
