@@ -9,11 +9,18 @@
 
 CPlayer::CPlayer()
 {
+	_AccountId = 0;
+	_SessionId = 0;
+
 	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_PLAYER;
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 	_DefaultAttackTick = 0;
 
-	_FieldOfViewDistance = 15;	
+	_FieldOfDirection = st_Vector2::Right();
+
+	_FieldOfViewDistance = 15;		
+
+	_FieldOfAngle = 120;
 
 	_NatureRecoveryTick = GetTickCount64() + 5000;
 	_FieldOfViewUpdateTick = GetTickCount64() + 50;
@@ -91,9 +98,11 @@ void CPlayer::Update()
 
 				_NatureRecoveryTick = GetTickCount64() + 5000;
 
+				vector<st_FieldOfViewInfo> AroundPlayers = _Channel->GetMap()->GetAroundPlayers(this, false);
+
 				CMessage* ResObjectStatPacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId,
 					_GameObjectInfo.ObjectStatInfo);
-				G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResObjectStatPacket);
+				G_ObjectManager->GameServer->SendPacketFieldOfView(AroundPlayers, ResObjectStatPacket);
 				ResObjectStatPacket->Free();
 			}						
 		}
@@ -135,7 +144,7 @@ void CPlayer::Update()
 			float Distance = st_Vector2::Distance(_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position);
 			if (Distance < 2.0f)
 			{
-				if (st_Vector2::CheckFieldOfView(_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Direction, 90))
+				if (st_Vector2::CheckFieldOfView(_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Direction, _FieldOfAngle, _FieldOfViewDistance))
 				{
 					if (_DefaultAttackTick < GetTickCount64())
 					{
@@ -204,7 +213,7 @@ bool CPlayer::OnDamaged(CGameObject* Attacker, int32 Damage)
 
 			CMap* Map = G_MapManager->GetMap(1);
 
-			vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetFieldOfViewPlayers(this, 1, false);
+			vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetAroundPlayers(this, false);
 
 			CGameServerMessage* ResDeadStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId, 
 				_GameObjectInfo.ObjectType, _GameObjectInfo.ObjectPositionInfo.State);
@@ -292,10 +301,12 @@ void CPlayer::UpdateMoving()
 	{
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;		
 
+		vector<st_FieldOfViewInfo> AroundPlayers = _Channel->GetMap()->GetAroundPlayers(this, false);
+
 		CMessage* ResMoveStopPacket = G_ObjectManager->GameServer->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
 			_GameObjectInfo.ObjectPositionInfo.Position._X,
 			_GameObjectInfo.ObjectPositionInfo.Position._Y);			
-		G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResMoveStopPacket);
+		G_ObjectManager->GameServer->SendPacketFieldOfView(AroundPlayers, ResMoveStopPacket);
 		ResMoveStopPacket->Free();
 	}
 }
@@ -311,10 +322,12 @@ void CPlayer::UpdateSpell()
 	{
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
+		vector<st_FieldOfViewInfo> AroundPlayers = _Channel->GetMap()->GetAroundPlayers(this, false);
+
 		CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
 			_GameObjectInfo.ObjectType,
 			_GameObjectInfo.ObjectPositionInfo.State);
-		G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResObjectStateChangePacket);
+		G_ObjectManager->GameServer->SendPacketFieldOfView(AroundPlayers, ResObjectStateChangePacket);
 		ResObjectStateChangePacket->Free();
 
 		if (_SpellSkill != nullptr && _SelectTarget != nullptr)
@@ -589,8 +602,8 @@ void CPlayer::CheckFieldOfViewObject()
 	// 시야범위 객체 조사
 	if (_FieldOfViewUpdateTick < GetTickCount64() && _Channel != nullptr)
 	{
-		// 시야범위 오브젝트를 조사해서 저장
-		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldOfViewObjects(this, false);
+		// 시야범위 오브젝트를 조사해서 저장		
+		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldOfViewObjects(this);
 		vector<st_FieldOfViewInfo> SpawnObjectIds;
 		vector<st_FieldOfViewInfo> DeSpawnObjectIds;
 				
@@ -679,5 +692,5 @@ void CPlayer::CheckFieldOfViewObject()
 		}
 
 		_FieldOfViewInfos = CurrentFieldOfViewObjectIds;
-	}
+	}	
 }
