@@ -37,10 +37,7 @@ public:
 	// 바라보는 방향
 	st_Vector2 _FieldOfDirection;	
 	// 시야 거리
-	float _FieldOfViewDistance;	
-
-	// 시야 범위 오브젝트
-	vector<st_FieldOfViewInfo> _FieldOfViewInfos;
+	float _FieldOfViewDistance;		
 
 	//--------------------------------------------
 	// SpawnIdle 상태에서 Idle 상태로 돌아갈 Tick
@@ -127,6 +124,11 @@ public:
 	virtual void Start();
 	virtual void End();
 protected:
+	// 시야 범위 오브젝트 객체
+	vector<CGameObject*> _FieldOfViewObjects;
+	// 시야 범위 오브젝트
+	vector<st_FieldOfViewInfo> _FieldOfViewInfos;
+
 	CRectCollision* _RectCollision;
 
 	map<int64, st_Aggro> _AggroTargetList;
