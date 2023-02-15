@@ -334,8 +334,9 @@ enum class en_SkillMediumCategory : int8
 enum class en_SkillType : int16
 {
 	SKILL_TYPE_NONE = 0,
+	SKILL_GLOBAL_SKILL = 1,
 
-	SKILL_DEFAULT_ATTACK = 1,
+	SKILL_DEFAULT_ATTACK,
 	SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE,
 
 	SKILL_FIGHT_TWO_HAND_SWORD_MASTER,
@@ -378,6 +379,7 @@ enum class en_SkillType : int16
 enum class en_SkillCategory : int8
 {
 	SKILL_CATEGORY_NONE,
+	SKILL_CATEGORY_GLOBAL,
 	SKILL_CATEGORY_PASSIVE_SKILL,
 	SKILL_CATEGORY_ACTIVE_SKILL,
 	SKILL_CATEGORY_STATUS_ABNORMAL_SKILL,
@@ -389,7 +391,8 @@ enum class en_SkillKinds : int8
 	SKILL_KIND_NONE,
 	SKILL_KIND_MELEE_SKILL,
 	SKILL_KIND_SPELL_SKILL,
-	SKILL_KIND_RANGE_SKILL
+	SKILL_KIND_RANGE_SKILL,
+	SKILL_KIND_BUF_SKILL
 };
 
 enum class en_BufDeBufSkillKind : int8
@@ -732,6 +735,12 @@ enum class en_WallType : int8
 	WALL_TYPE_GOLD,
 	WALL_TYPE_STONE,
 	WALL_TYPE_IRON
+};
+
+enum class en_AnimationType : int8
+{
+	ANIMATION_TYPE_IDLE,
+	ANIMATION_TYPE_SWORD_MELEE_ATTACK
 };
 
 
@@ -2184,23 +2193,35 @@ struct st_Vector2
 		}
 	}
 
-	static bool CheckFieldOfView(st_Vector2 TargetPosition, st_Vector2 CheckPosition, st_Vector2 DirectionVector, int16 Angle)
+	// 목표물 위치, 내 위치, 내가 바라보는 방향값, 시야각 크기
+	static bool CheckFieldOfView(st_Vector2 TargetPosition, st_Vector2 CheckPosition,
+		st_Vector2 DirectionVector, float Angle, float Distance)
 	{
+		float TargetDistance = st_Vector2::Distance(TargetPosition, CheckPosition);
+
 		// 대상 방향 벡터 구하기
-		st_Vector2 TargetDirVector = TargetPosition - CheckPosition;
+		st_Vector2 TargetDirVector = TargetPosition - CheckPosition;		
 		// 방향 벡터 정규화
 		st_Vector2 NormalizeDirVector = TargetDirVector.Normalize();
-				
+		
+		// 입력받은 시야각의 절반값에 대한 cos 값을 구함
 		float FovCos = cosf((Angle * 0.5f) * PI / 180.0f);		
-
-		if (NormalizeDirVector.Dot(DirectionVector) >= FovCos)
+		
+		if (Distance >= TargetDistance)
 		{
-			return true;
+			if (NormalizeDirVector.Dot(DirectionVector) >= FovCos)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
 		}
 		else
 		{
 			return false;
-		}
+		}		
 	}
 };
 
@@ -2504,7 +2525,7 @@ struct st_SkillInfo
 	int8 SkillLevel;		 // 스킬 레벨
 	int8 SkillOverlapStep;   // 스킬 중첩 횟수
 	wstring SkillName;		 // 스킬 이름	
-	int32 SkillDistance;	 // 스킬 유효 거리
+	float SkillDistance;	 // 스킬 유효 거리
 	int32 SkillCoolTime;	 // 스킬 쿨타임		
 	int32 SkillCastingTime;  // 스킬 캐스팅 타임
 	int64 SkillDurationTime; // 스킬 지속 시간
@@ -2512,42 +2533,8 @@ struct st_SkillInfo
 	int64 SkillRemainTime;   // 스킬 남은 시간
 	int32 SkillMotionTime;	 // 스킬 모션 시간
 	float SkillTargetEffectTime; // 스킬 이펙트 시간
-	en_SkillType NextComboSkill; // 다음 연속기 스킬	
-	wstring SkillExplanation; // 스킬 설명 	
-
-	st_SkillInfo()
-	{
-		IsSkillLearn = false;
-		CanSkillUse = true;
-		SkillNumber = 0;
-		SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_NONE;
-		SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_NONE;
-		SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
-		SkillType = en_SkillType::SKILL_TYPE_NONE;
-		SkillMaxLevel = 0;
-		SkillLevel = 0;
-		SkillOverlapStep = 0;
-		SkillName = L"";
-		SkillDistance = 0;
-		SkillCoolTime = 0;		
-		SkillCastingTime = 0;
-		SkillDurationTime = 0;
-		SkillDotTime = 0;
-		SkillRemainTime = 0;
-		SkillMotionTime = 0;
-		SkillTargetEffectTime = 0;
-		NextComboSkill = en_SkillType::SKILL_TYPE_NONE;		
-		SkillExplanation = L"";
-	}
-};
-
-struct st_PassiveSkillInfo : public st_SkillInfo
-{
-	int32 SkillDamage;
-};
-
-struct st_AttackSkillInfo : public st_SkillInfo
-{
+	int32 SkillMinHealPoint; // 최소 치유량
+	int32 SkillMaxHealPoint; // 최대 치유량
 	int32 SkillMinDamage;		// 최소 공격력
 	int32 SkillMaxDamage;		// 최대 공격력	
 	bool SkillDebuf;			// 스킬 디버프 여부	
@@ -2558,36 +2545,6 @@ struct st_AttackSkillInfo : public st_SkillInfo
 	bool SkillDebufRoot;		// 스킬 이동불가 여부	
 	int64 SkillDamageOverTime;	// 스킬 도트 데미지 시간 간격
 	int8 StatusAbnormalityProbability; // 상태 이상 적용 확률
-
-	st_AttackSkillInfo()
-	{
-		SkillMinDamage = 0;
-		SkillMaxDamage = 0;
-		SkillDebuf = false;
-		SkillDebufAttackSpeed = 0;
-		SkillDebufMovingSpeed = 0;
-		SkillDebufStun = false;
-		SkillDebufPushAway = false;
-		SkillDebufRoot = false;
-		SkillDamageOverTime = 0;
-		StatusAbnormalityProbability = 0;
-	}
-};
-
-struct st_HealSkillInfo : public st_SkillInfo
-{
-	int32 SkillMinHealPoint; // 최소 치유량
-	int32 SkillMaxHealPoint; // 최대 치유량
-
-	st_HealSkillInfo()
-	{
-		SkillMinHealPoint = 0;
-		SkillMaxHealPoint = 0;
-	}
-};
-
-struct st_BufSkillInfo : public st_SkillInfo
-{
 	int32 IncreaseMinAttackPoint; // 증가하는 최소 근접 공격력
 	int32 IncreaseMaxAttackPoint; // 증가하는 최대 근접 공격력
 	int32 IncreaseMeleeAttackSpeedPoint; // 증가하는 근접 공격 속도
@@ -2601,9 +2558,41 @@ struct st_BufSkillInfo : public st_SkillInfo
 	int16 IncreaseMagicCriticalPoint; // 증가하는 마법 치명타율
 	float IncreaseSpeedPoint; // 증가하는 이동 속도	
 	int16 IncreaseStatusAbnormalityResistance; // 증가하는 상태이상저항값
+	en_SkillType NextComboSkill; // 다음 연속기 스킬		
 
-	st_BufSkillInfo()
+	st_SkillInfo()
 	{
+		IsSkillLearn = false;
+		CanSkillUse = true;
+		SkillNumber = 0;
+		SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_NONE;
+		SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_NONE;
+		SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
+		SkillType = en_SkillType::SKILL_TYPE_NONE;
+		SkillMaxLevel = 0;
+		SkillLevel = 1;
+		SkillOverlapStep = 0;
+		SkillName = L"";
+		SkillDistance = 0;
+		SkillCoolTime = 0;		
+		SkillCastingTime = 0;
+		SkillDurationTime = 0;
+		SkillDotTime = 0;
+		SkillRemainTime = 0;
+		SkillMotionTime = 0;
+		SkillTargetEffectTime = 0;
+		SkillMinHealPoint = 0;
+		SkillMaxHealPoint = 0;
+		SkillMinDamage = 0;
+		SkillMaxDamage = 0;
+		SkillDebuf = false;
+		SkillDebufAttackSpeed = 0;
+		SkillDebufMovingSpeed = 0;
+		SkillDebufStun = false;
+		SkillDebufPushAway = false;
+		SkillDebufRoot = false;
+		SkillDamageOverTime = 0;
+		StatusAbnormalityProbability = 0;
 		IncreaseMinAttackPoint = 0;
 		IncreaseMaxAttackPoint = 0;
 		IncreaseMeleeAttackSpeedPoint = 0;
@@ -2617,6 +2606,7 @@ struct st_BufSkillInfo : public st_SkillInfo
 		IncreaseMagicCriticalPoint = 0;
 		IncreaseSpeedPoint = 0;
 		IncreaseStatusAbnormalityResistance = 0;
+		NextComboSkill = en_SkillType::SKILL_TYPE_NONE;				
 	}
 };
 
