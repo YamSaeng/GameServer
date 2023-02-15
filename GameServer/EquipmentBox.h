@@ -4,7 +4,7 @@
 class CItem;
 class CPlayer;
 
-class CEquipment
+class CEquipmentBox
 {
 public:
 	int32 _WeaponMinDamage;
@@ -13,20 +13,14 @@ public:
 	int32 _WearArmorDefence;
 	int32 _BootArmorDefence;
 
-	CEquipment();
-	~CEquipment();
+	CEquipmentBox();
+	~CEquipmentBox();
 
 	CItem* ItemOnEquipment(CItem* OnEquipItem);
 	CItem* ItemOffEquipment(en_EquipmentParts OffEquipmentParts);	
 
-	CItem** GetEquipmentParts();
+	CItem* GetEquipmentParts(en_EquipmentParts EquipmentPart);
 private:
-	enum en_Equipment
-	{
-		EQUIPMENT_PARTS_MAX = 6
-	};
-
-	// 관리중인 장비 아이템
-	CItem* _EquipmentParts[en_Equipment::EQUIPMENT_PARTS_MAX];	
+	map<en_EquipmentParts, CItem*> _EquipmentParts;	
 };
 

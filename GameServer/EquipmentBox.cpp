@@ -1,9 +1,9 @@
 #include "pch.h"
-#include "Equipment.h"
+#include "EquipmentBox.h"
 #include "Item.h"
 #include "Player.h"
 
-CEquipment::CEquipment()
+CEquipmentBox::CEquipmentBox()
 {
 	_WeaponMinDamage = 0;
 	_WeaponMaxDamage = 0;
@@ -12,12 +12,12 @@ CEquipment::CEquipment()
 	_BootArmorDefence = 0;
 }
 
-CEquipment::~CEquipment()
+CEquipmentBox::~CEquipmentBox()
 {
 
 }
 
-CItem* CEquipment::ItemOnEquipment(CItem* OnEquipItem)
+CItem* CEquipmentBox::ItemOnEquipment(CItem* OnEquipItem)
 {
 	CItem* ReturnEquipItem = nullptr;
 
@@ -33,7 +33,7 @@ CItem* CEquipment::ItemOnEquipment(CItem* OnEquipItem)
 	return ReturnEquipItem;
 }
 
-CItem* CEquipment::ItemOffEquipment(en_EquipmentParts OffEquipmentParts)
+CItem* CEquipmentBox::ItemOffEquipment(en_EquipmentParts OffEquipmentParts)
 {	
 	CItem* ReturnEquipItem = nullptr;
 	_EquipmentParts[OffEquipmentParts]->_ItemInfo.ItemIsEquipped = false;
@@ -45,7 +45,15 @@ CItem* CEquipment::ItemOffEquipment(en_EquipmentParts OffEquipmentParts)
 	return ReturnEquipItem;
 }
 
-CItem** CEquipment::GetEquipmentParts()
+CItem* CEquipmentBox::GetEquipmentParts(en_EquipmentParts EquipmentPart)
 {
-	return _EquipmentParts;
+	auto EquipmentIter = _EquipmentParts.find(EquipmentPart);
+	if (EquipmentIter != _EquipmentParts.end())
+	{
+		return (*EquipmentIter).second;
+	}
+	else
+	{
+		return nullptr;
+	}	
 }
