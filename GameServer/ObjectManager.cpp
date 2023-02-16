@@ -18,6 +18,7 @@ CObjectManager::CObjectManager()
 {
 	_PlayerMemoryPool = new CMemoryPoolTLS<CPlayer>();
 	_NonPlayerMemoryPool = new CMemoryPoolTLS<CNonPlayer>();
+	_GoblinMemoryPool = new CMemoryPoolTLS<CGoblin>();
 	_SlimeMemoryPool = new CMemoryPoolTLS<CSlime>();
 	_BearMemoryPool = new CMemoryPoolTLS<CBear>();
 
@@ -39,11 +40,7 @@ CObjectManager::CObjectManager()
 	_CornMemoryPool = new CMemoryPoolTLS<CCorn>();
 
 	_SkillMemoryPool = new CMemoryPoolTLS<CSkill>();
-
-	_PassiveSkillInfoMemoryPool = new CMemoryPoolTLS<st_PassiveSkillInfo>();
-	_AttackSkillInfoMemoryPool = new CMemoryPoolTLS<st_AttackSkillInfo>();	
-	_HealSkillInfoMemoryPool = new CMemoryPoolTLS<st_HealSkillInfo>();
-	_BufSkillInfoMemoryPool = new CMemoryPoolTLS<st_BufSkillInfo>();
+	_SkillInfoMemoryPool = new CMemoryPoolTLS<st_SkillInfo>();	
 
 	_GameObjectJobMemoryPool = new CMemoryPoolTLS<st_GameObjectJob>();
 
@@ -79,6 +76,7 @@ CObjectManager::CObjectManager()
 CObjectManager::~CObjectManager()
 {
 	delete _PlayerMemoryPool;
+	delete _GoblinMemoryPool;
 	delete _SlimeMemoryPool;
 	delete _BearMemoryPool;
 	delete _WeaponMemoryPool;
@@ -104,6 +102,9 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 		break;
 	case en_GameObjectType::OBJECT_NON_PLAYER:
 		NewObject = _NonPlayerMemoryPool->Alloc();
+		break;
+	case en_GameObjectType::OBJECT_GOBLIN:
+		NewObject = _GoblinMemoryPool->Alloc();
 		break;
 	case en_GameObjectType::OBJECT_SLIME:
 		NewObject = _SlimeMemoryPool->Alloc();
@@ -151,6 +152,9 @@ void CObjectManager::ObjectReturn(CGameObject* ReturnObject)
 			break;
 		case en_GameObjectType::OBJECT_NON_PLAYER:
 			_NonPlayerMemoryPool->Free((CNonPlayer*)ReturnObject);
+			break;
+		case en_GameObjectType::OBJECT_GOBLIN:
+			_GoblinMemoryPool->Free((CGoblin*)ReturnObject);
 			break;
 		case en_GameObjectType::OBJECT_SLIME:
 			_SlimeMemoryPool->Free((CSlime*)ReturnObject);
@@ -309,180 +313,15 @@ void CObjectManager::ItemReturn(CItem* ReturnItem)
 
 st_SkillInfo* CObjectManager::SkillInfoCreate(en_SkillType SkillType, int8 SkillLevel)
 {
-	st_SkillInfo* NewSkillInfo = nullptr;
-
-	switch (SkillType)
-	{
-	case en_SkillType::SKILL_TYPE_NONE:
-		CRASH("None 스킬 데이터 찾기 요청");
-		break;
-	case en_SkillType::SKILL_FIGHT_TWO_HAND_SWORD_MASTER:
-		NewSkillInfo = _PassiveSkillInfoMemoryPool->Alloc();		
-		break;		
-	case en_SkillType::SKILL_DEFAULT_ATTACK:
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE:
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
-	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:
-	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
-	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:
-	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT:
-	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT:
-	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_ATTACK:
-	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP:	
-	case en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING:	
-		{
-			st_AttackSkillInfo* NewAttackSkillInfo = _AttackSkillInfoMemoryPool->Alloc();
-			st_AttackSkillInfo* FindAttackSkillData = (st_AttackSkillInfo*)G_Datamanager->FindSkillData(SkillType);
-			*NewAttackSkillInfo = *FindAttackSkillData;			
-			NewAttackSkillInfo->SkillLevel = SkillLevel;
-			
-			TCHAR SkillExplanationMessage[256] = L"0";
-
-			switch (NewAttackSkillInfo->SkillType)
-			{
-			case en_SkillType::SKILL_DEFAULT_ATTACK:
-				wsprintf(SkillExplanationMessage, NewAttackSkillInfo->SkillExplanation.c_str());
-				break;
-			case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
-			case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
-			case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:
-				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewAttackSkillInfo->SkillExplanation.c_str(), NewAttackSkillInfo->SkillDistance, NewAttackSkillInfo->SkillMinDamage, NewAttackSkillInfo->SkillMaxDamage);
-				break;
-			case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
-				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewAttackSkillInfo->SkillExplanation.c_str(), NewAttackSkillInfo->SkillMinDamage, NewAttackSkillInfo->SkillMaxDamage);
-				break;
-			case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE:
-			case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
-				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewAttackSkillInfo->SkillExplanation.c_str(), NewAttackSkillInfo->SkillDistance, NewAttackSkillInfo->SkillDurationTime / 1000.0f, NewAttackSkillInfo->SkillMinDamage, NewAttackSkillInfo->SkillMaxDamage);
-				break;
-			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:
-				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewAttackSkillInfo->SkillExplanation.c_str(), NewAttackSkillInfo->SkillDistance, NewAttackSkillInfo->SkillMinDamage, NewAttackSkillInfo->SkillMaxDamage);
-				break;
-			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:
-				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewAttackSkillInfo->SkillExplanation.c_str(), NewAttackSkillInfo->SkillDistance, NewAttackSkillInfo->SkillDurationTime / 1000.0f);
-				break;
-			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
-				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewAttackSkillInfo->SkillExplanation.c_str(), NewAttackSkillInfo->SkillDistance, NewAttackSkillInfo->SkillMinDamage, NewAttackSkillInfo->SkillMaxDamage, NewAttackSkillInfo->SkillDebufMovingSpeed, NewAttackSkillInfo->SkillDurationTime / 1000.0f);
-				break;
-			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:
-				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewAttackSkillInfo->SkillExplanation.c_str(), NewAttackSkillInfo->SkillDistance, NewAttackSkillInfo->SkillMinDamage, NewAttackSkillInfo->SkillMaxDamage);
-				break;
-			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
-				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewAttackSkillInfo->SkillExplanation.c_str(), NewAttackSkillInfo->SkillDistance, NewAttackSkillInfo->SkillMinDamage, NewAttackSkillInfo->SkillMaxDamage, NewAttackSkillInfo->SkillDurationTime / 1000.0f);
-				break;
-			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:
-				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewAttackSkillInfo->SkillExplanation.c_str(), NewAttackSkillInfo->SkillDistance, NewAttackSkillInfo->SkillMinDamage, NewAttackSkillInfo->SkillMaxDamage);
-				break;
-			case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
-				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewAttackSkillInfo->SkillExplanation.c_str(), NewAttackSkillInfo->SkillDistance, NewAttackSkillInfo->SkillMinDamage, NewAttackSkillInfo->SkillMaxDamage);
-				break;
-			case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:
-				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewAttackSkillInfo->SkillExplanation.c_str(), NewAttackSkillInfo->SkillDistance, NewAttackSkillInfo->SkillDurationTime / 1000.0f);
-				break;
-			}
-
-			NewAttackSkillInfo->SkillExplanation = SkillExplanationMessage;			
-
-			NewSkillInfo = NewAttackSkillInfo;
-		}
-		break;		
-	case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
-	case en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE:
-	case en_SkillType::SKILL_SPELL_ACTIVE_BUF_TELEPORT:
-	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_WEAPON_POISON:
-		{
-			st_BufSkillInfo* NewBufSkillInfo = _BufSkillInfoMemoryPool->Alloc();;
-			st_BufSkillInfo* FindBufSkillData = (st_BufSkillInfo*)G_Datamanager->FindSkillData(SkillType);
-			*NewBufSkillInfo = *FindBufSkillData;
-			NewBufSkillInfo->SkillLevel = SkillLevel;
-
-			TCHAR SkillExplanationMessage[256] = L"0";
-
-			switch (NewBufSkillInfo->SkillType)
-			{
-			case en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE:
-				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewBufSkillInfo->SkillExplanation.c_str(), NewBufSkillInfo->SkillDurationTime / 1000.0f);
-				break;
-			case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
-				_stprintf_s(SkillExplanationMessage, sizeof(TCHAR) * 256, NewBufSkillInfo->SkillExplanation.c_str(), NewBufSkillInfo->IncreaseMaxAttackPoint, NewBufSkillInfo->SkillDurationTime / 1000.0f);
-				break;
-			}
-
-			NewBufSkillInfo->SkillExplanation = SkillExplanationMessage;
-
-			NewSkillInfo = NewBufSkillInfo;
-		}
-		break;
-	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:
-	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:
-		return _HealSkillInfoMemoryPool->Alloc();
-	case en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK:
-		{
-			st_AttackSkillInfo* NewSlimeActivePoision = _AttackSkillInfoMemoryPool->Alloc();
-			st_AttackSkillInfo* FindSlimeData = (st_AttackSkillInfo*)G_Datamanager->FindSkillData(SkillType);
-			*NewSlimeActivePoision = *FindSlimeData;
-
-			NewSlimeActivePoision->SkillLevel = SkillLevel;
-
-			NewSkillInfo = NewSlimeActivePoision;
-		}	
-	}		
+	st_SkillInfo* NewSkillInfo = _SkillInfoMemoryPool->Alloc();
+	*NewSkillInfo = *G_Datamanager->FindSkillData(SkillType);
 
 	return NewSkillInfo;
 }
 
 void CObjectManager::SkillInfoReturn(en_SkillType SkillType, st_SkillInfo* ReturnSkillInfo)
 {
-	switch (SkillType)
-	{
-	case en_SkillType::SKILL_TYPE_NONE:
-		CRASH("None 스킬 데이터 찾기 요청");
-		break;
-	case en_SkillType::SKILL_FIGHT_TWO_HAND_SWORD_MASTER:
-		_PassiveSkillInfoMemoryPool->Free((st_PassiveSkillInfo*)ReturnSkillInfo);
-		break;
-	case en_SkillType::SKILL_DEFAULT_ATTACK:
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE:
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
-	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:
-	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
-	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:
-	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT:
-	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT:
-	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_ATTACK:
-	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP:
-	case en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING:
-		_AttackSkillInfoMemoryPool->Free((st_AttackSkillInfo*)ReturnSkillInfo);
-		break;
-	case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
-	case en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE:
-	case en_SkillType::SKILL_SPELL_ACTIVE_BUF_TELEPORT:
-	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_WEAPON_POISON:
-		_BufSkillInfoMemoryPool->Free((st_BufSkillInfo*)ReturnSkillInfo);
-		break;
-	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:
-	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:
-		_HealSkillInfoMemoryPool->Free((st_HealSkillInfo*)ReturnSkillInfo);
-		break;
-	}	
+	_SkillInfoMemoryPool->Free(ReturnSkillInfo);	
 }
 
 void CObjectManager::MapObjectSpawn(int64& MapID)
@@ -507,6 +346,9 @@ void CObjectManager::MapObjectSpawn(int64& MapID)
 				break;
 			case en_MapObjectInfo::TILE_MAP_STONE:
 				NewObject = ObjectCreate(en_GameObjectType::OBJECT_STONE);
+				break;
+			case en_MapObjectInfo::TILE_MAP_GOBLIN:
+				NewObject = ObjectCreate(en_GameObjectType::OBJECT_GOBLIN);
 				break;
 			case en_MapObjectInfo::TILE_MAP_SLIME:
 				NewObject = ObjectCreate(en_GameObjectType::OBJECT_SLIME);

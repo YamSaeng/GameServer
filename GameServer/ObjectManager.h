@@ -2,6 +2,7 @@
 #include "ChannelManager.h"
 #include "Player.h"
 #include "Bear.h"
+#include "Goblin.h"
 #include "Slime.h"
 #include "GameServer.h"
 #include "Environment.h"
@@ -43,6 +44,7 @@ private:
 
 	CMemoryPoolTLS<CPlayer>* _PlayerMemoryPool;	
 	CMemoryPoolTLS<CNonPlayer>* _NonPlayerMemoryPool;
+	CMemoryPoolTLS<CGoblin>* _GoblinMemoryPool;
 	CMemoryPoolTLS<CSlime>* _SlimeMemoryPool;
 	CMemoryPoolTLS<CBear>* _BearMemoryPool;
 	CMemoryPoolTLS<CTree>* _TreeMemoryPool;
@@ -55,10 +57,7 @@ private:
 	int64 _GameServerObjectId;
 
 	CMemoryPoolTLS<CSkill>* _SkillMemoryPool;
-	CMemoryPoolTLS<st_PassiveSkillInfo>* _PassiveSkillInfoMemoryPool;
-	CMemoryPoolTLS<st_AttackSkillInfo>* _AttackSkillInfoMemoryPool;	
-	CMemoryPoolTLS<st_HealSkillInfo>* _HealSkillInfoMemoryPool;
-	CMemoryPoolTLS<st_BufSkillInfo>* _BufSkillInfoMemoryPool;
+	CMemoryPoolTLS<st_SkillInfo>* _SkillInfoMemoryPool;	
 
 	CMemoryPoolTLS<st_GameObjectJob>* _GameObjectJobMemoryPool;
 public:
@@ -112,7 +111,7 @@ public:
 	//-----------------------------------------------
 	// 스킬 정보 생성
 	//-----------------------------------------------
-	st_SkillInfo* SkillInfoCreate(en_SkillType SkillType, int8 SkillLevel);
+	st_SkillInfo* SkillInfoCreate(en_SkillType SkillType, int8 SkillLevel = 1);
 	//-----------------------------------------------
 	// 스킬 정보 반납
 	//-----------------------------------------------
