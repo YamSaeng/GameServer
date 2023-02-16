@@ -25,49 +25,34 @@ public:
 	//------------------------------------------------------
 	// 공용 스킬 데이터
 	//------------------------------------------------------
-	map<int16, st_PassiveSkillInfo*> _PublicPassiveSkillDatas;
-	map<int16, st_AttackSkillInfo*> _PublicAttackSkillDatas;		
-	map<int16, st_BufSkillInfo*> _PublicBufSkillDatas;
+	map<int16, st_SkillInfo*> _PublicSkillDatas;	
 	//------------------------------------------------------
 	// 격투 스킬 데이터
 	//------------------------------------------------------
-	map<int16, st_PassiveSkillInfo*> _FightPassiveSkillDatas;
-	map<int16, st_AttackSkillInfo*> _FightAttackSkillDatas;		
-	map<int16, st_BufSkillInfo*> _FightBufSkillDatas;	
+	map<int16, st_SkillInfo*> _FightSkillDatas;	
 	//------------------------------------------------------
 	// 방어 스킬 데이터
 	//------------------------------------------------------
-	map<int16, st_PassiveSkillInfo*> _ProtectionPassiveSkillDatas;
-	map<int16, st_AttackSkillInfo*> _ProtectionAttackSkillDatas;
-	map<int16, st_BufSkillInfo*> _ProtectionBufSkillDatas;
+	map<int16, st_SkillInfo*> _ProtectionSkillDatas;	
 	//------------------------------------------------------
 	// 암살 스킬 데이터
 	//------------------------------------------------------
-	map<int16, st_PassiveSkillInfo*> _AssassinationPassiveSkillDatas;
-	map<int16, st_AttackSkillInfo*> _AssassinationAttackSkillDatas;	
-	map<int16, st_BufSkillInfo*> _AssassinationBufSkillDatas;	
+	map<int16, st_SkillInfo*> _AssassinationSkillDatas;	
 	//------------------------------------------------------
 	// 마법 스킬 데이터
 	//------------------------------------------------------
-	map<int16, st_PassiveSkillInfo*> _SpellPassiveSkillDatas;
-	map<int16, st_AttackSkillInfo*> _SpellAttackSkillDatas;	
-	map<int16, st_BufSkillInfo*> _SpellBufSkillDatas;
+	map<int16, st_SkillInfo*> _SpellSkillDatas;	
 	//------------------------------------------------------
 	// 사격 스킬 데이터
 	//------------------------------------------------------
-	map<int16, st_PassiveSkillInfo*> _ShootingPassiveSkillDatas;
-	map<int16, st_AttackSkillInfo*> _ShootingAttackSkillDatas;	
-	map<int16, st_BufSkillInfo*> _ShootingBufSkillDatas;
+	map<int16, st_SkillInfo*> _ShootingSkillDatas;	
 	//------------------------------------------------------
 	// 수양 스킬 데이터
 	//------------------------------------------------------
-	map<int16, st_PassiveSkillInfo*> _DisciplinePassiveSkillDatas;
-	map<int16, st_AttackSkillInfo*> _DisciplineAttackSkillDatas;	
-	map<int16, st_HealSkillInfo*> _DisciplineHealSkillDatas;
-	map<int16, st_BufSkillInfo*> _DisciplineBufSkillDatas;
+	map<int16, st_SkillInfo*> _DisciplineSkillDatas;	
 
 	// 슬라임 스킬 데이터
-	map<int16, st_AttackSkillInfo*> _SlimeAttackSkillDatas;
+	map<int16, st_SkillInfo*> _SlimeSkillDatas;	
 
 	//------------------------------------------------------
 	// 환경 데이터

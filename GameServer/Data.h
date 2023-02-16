@@ -33,8 +33,8 @@ struct st_ObjectStatusData
 	int16 MeleeCriticalPoint;
 	int16 MagicCriticalPoint;
 	float Speed;
-	int32 SearchCellDistance;
-	int32 ChaseCellDistance;
+	float SearchDistance;
+	float ChaseDistance;
 	float MovingAttackRange;
 	float AttackRange;
 };
