@@ -54,7 +54,10 @@ void CSkill::SetSkillInfo(en_SkillCategory SkillCategory, st_SkillInfo* SkillInf
 	if (_SkillInfo != nullptr)
 	{
 		switch (_SkillInfo->SkillType)
-		{
+		{	
+		case en_SkillType::SKILL_GLOBAL_SKILL:
+			_SkillKind = en_SkillKinds::SKILL_KIND_GLOBAL_SKILL;
+			break;
 		case en_SkillType::SKILL_DEFAULT_ATTACK:			
 		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
 		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
@@ -65,12 +68,9 @@ void CSkill::SetSkillInfo(en_SkillCategory SkillCategory, st_SkillInfo* SkillInf
 		case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT:
 		case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT:
 		case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_ATTACK:
-		case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP:
-		case en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK:
-		case en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_WEAPON_POISON:
+		case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP:				
 			_SkillKind = en_SkillKinds::SKILL_KIND_MELEE_SKILL;
-			break;
-		case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
+			break;		
 		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:
 		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:
 		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
@@ -79,14 +79,19 @@ void CSkill::SetSkillInfo(en_SkillCategory SkillCategory, st_SkillInfo* SkillInf
 		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:
 		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
 		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:
-		case en_SkillType::SKILL_SPELL_ACTIVE_BUF_TELEPORT:
 		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:
 		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:
-		case en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE:		
+		case en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK:
 			_SkillKind = en_SkillKinds::SKILL_KIND_SPELL_SKILL;
 			break;
 		case en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING:
 			_SkillKind = en_SkillKinds::SKILL_KIND_RANGE_SKILL;
+			break;
+		case en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE:
+		case en_SkillType::SKILL_SPELL_ACTIVE_BUF_TELEPORT:
+		case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
+		case en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_WEAPON_POISON:
+			_SkillKind = en_SkillKinds::SKILL_KIND_BUF_SKILL;
 			break;
 		}
 
@@ -259,6 +264,26 @@ bool CSkill::Update()
 {
 	switch (_SkillCategory)
 	{
+	case en_SkillCategory::SKILL_CATEGORY_GLOBAL:
+		{
+			if (_SkillInfo->CanSkillUse == false)
+			{
+				_SkillInfo->SkillRemainTime = _SkillCootimeTick - GetTickCount64();
+
+				if (_SkillInfo->SkillRemainTime < 0)
+				{
+					_SkillInfo->CanSkillUse = true;
+						
+					_SkillInfo->SkillRemainTime = 0;
+					_SkillCootimeTick = 0;					
+
+					CMessage* ResAttacketPacket = G_ObjectManager->GameServer->MakePacketResAttack(_Owner->_GameObjectInfo.ObjectId);
+					G_ObjectManager->GameServer->SendPacket(((CPlayer*)_Owner)->_SessionId, ResAttacketPacket);
+					ResAttacketPacket->Free();
+				}
+			}
+		}
+		break;
 	case en_SkillCategory::SKILL_CATEGORY_ACTIVE_SKILL:
 		{
 			// 스킬을 사용햇으면
@@ -284,15 +309,7 @@ bool CSkill::Update()
 			{
 				if (_SkillDotTick < GetTickCount64())
 				{
-					_SkillDotTick = _SkillInfo->SkillDotTime + GetTickCount64();
-
-					st_AttackSkillInfo* DotSkillInfo = (st_AttackSkillInfo*)_SkillInfo;
-
-					bool IsCritical = false;
-					int32 DotDamage = CMath::CalculateMeleeDamage(&IsCritical, _Owner->_GameObjectInfo.ObjectStatInfo.Defence,
-						DotSkillInfo->SkillMinDamage,
-						DotSkillInfo->SkillMaxDamage,
-						0);					
+					_SkillDotTick = _SkillInfo->SkillDotTime + GetTickCount64();					
 
 					switch (_SkillInfo->SkillType)
 					{
@@ -300,7 +317,9 @@ bool CSkill::Update()
 						{							
 							// 스킬 중첩 단계에 따라 데미지 적용							
 							st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_CastingUserID, _CastingUserObjectType,
-								IsCritical, DotDamage * DotSkillInfo->SkillOverlapStep, en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK);
+								_SkillInfo->SkillType,
+								_SkillInfo->SkillMinDamage,
+								_SkillInfo->SkillMaxDamage);
 							_Owner->_GameObjectJobQue.Enqueue(DamageJob);							
 						}
 						break;
@@ -386,7 +405,7 @@ bool CSkill::Update()
 						// 주술사 얼음사슬 상태이상 해제
 						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_CHAIN_MASK);
 
-						float DebufMovingSpeed = _Owner->_GameObjectInfo.ObjectStatInfo.MaxSpeed * ((st_AttackSkillInfo*)_SkillInfo)->SkillDebufMovingSpeed * 0.01f;
+						float DebufMovingSpeed = _Owner->_GameObjectInfo.ObjectStatInfo.MaxSpeed * _SkillInfo->SkillDebufMovingSpeed * 0.01f;
 
 						_Owner->_GameObjectInfo.ObjectStatInfo.Speed += DebufMovingSpeed;						
 
