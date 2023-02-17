@@ -11,34 +11,6 @@ struct st_GameObjectUIPositionData
 	float SpellBarPositionY;
 };
 
-struct st_ObjectStatusData
-{
-	en_GameObjectType PlayerType;
-	int32 Level;
-	int32 HP;
-	int32 MaxHP;
-	int32 MP;
-	int32 MaxMP;
-	int32 DP;
-	int32 MaxDP;
-	int16 AutoRecoveryHPPercent;
-	int16 AutoRecoveryMPPercent;
-	int32 MinMeleeAttackDamage;
-	int32 MaxMeleeAttackDamage;
-	int16 MeleeAttackHitRate;
-	int16 MagicDamage;
-	float MagicHitRate;
-	int32 Defence;
-	int16 EvasionRate;
-	int16 MeleeCriticalPoint;
-	int16 MagicCriticalPoint;
-	float Speed;
-	float SearchDistance;
-	float ChaseDistance;
-	float MovingAttackRange;
-	float AttackRange;
-};
-
 struct st_LevelData
 {
 	int32 Level;
@@ -57,7 +29,7 @@ struct st_DropData
 struct st_MonsterData
 {
 	string MonsterName;  // 몬스터 이름
-	st_ObjectStatusData MonsterStatInfo; // 몬스터 스탯 정보
+	st_StatInfo MonsterStatInfo; // 몬스터 스탯 정보
 	int32 SearchTick; // 탐색 속도
 	int32 PatrolTick; // 정찰 속도
 	int32 AttackTick; // 공격 속도

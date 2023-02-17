@@ -727,8 +727,6 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 
 	for (auto& Filed : Document["PlayerCharacterStatus"].GetArray())
 	{
-		string PlayerType = Filed["PlayerType"].GetString();
-
 		for (auto& PlayerCharacterFiled : Filed["PlayerCharacterLevelDataList"].GetArray())
 		{
 			int Level = PlayerCharacterFiled["Level"].GetInt();
@@ -748,28 +746,26 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			int16 MagicCriticalPoint = (int16)(PlayerCharacterFiled["MagicCriticalPoint"].GetInt());
 			float Speed = PlayerCharacterFiled["Speed"].GetFloat();
 
-			st_ObjectStatusData* PlayerStatusData = new st_ObjectStatusData();
+			st_StatInfo* PlayerStatus = new st_StatInfo();
 
-			PlayerStatusData->PlayerType = en_GameObjectType::OBJECT_PLAYER;
+			PlayerStatus->Level = Level;
+			PlayerStatus->MaxHP = MaxHP;
+			PlayerStatus->MaxMP = MaxMP;
+			PlayerStatus->MaxDP = MaxDP;
+			PlayerStatus->AutoRecoveryHPPercent = AutoRecoveryHPPercent;
+			PlayerStatus->AutoRecoveryMPPercent = AutoRecoveryMPPercent;
+			PlayerStatus->MinMeleeAttackDamage = MinMeleeAttackDamage;
+			PlayerStatus->MaxMeleeAttackDamage = MaxMeleeAttackDamage;
+			PlayerStatus->MeleeAttackHitRate = MeleeAttackHitRate;
+			PlayerStatus->MagicDamage = MagicDamage;
+			PlayerStatus->MagicHitRate = MagicHitRate;
+			PlayerStatus->Defence = Defence;
+			PlayerStatus->EvasionRate = EvasionRate;
+			PlayerStatus->MeleeCriticalPoint = MeleeCriticalPoint;
+			PlayerStatus->MagicCriticalPoint = MagicCriticalPoint;
+			PlayerStatus->Speed = Speed;
 
-			PlayerStatusData->Level = Level;
-			PlayerStatusData->MaxHP = MaxHP;
-			PlayerStatusData->MaxMP = MaxMP;
-			PlayerStatusData->MaxDP = MaxDP;
-			PlayerStatusData->AutoRecoveryHPPercent = AutoRecoveryHPPercent;
-			PlayerStatusData->AutoRecoveryMPPercent = AutoRecoveryMPPercent;
-			PlayerStatusData->MinMeleeAttackDamage = MinMeleeAttackDamage;
-			PlayerStatusData->MaxMeleeAttackDamage = MaxMeleeAttackDamage;
-			PlayerStatusData->MeleeAttackHitRate = MeleeAttackHitRate;
-			PlayerStatusData->MagicDamage = MagicDamage;
-			PlayerStatusData->MagicHitRate = MagicHitRate;
-			PlayerStatusData->Defence = Defence;
-			PlayerStatusData->EvasionRate = EvasionRate;
-			PlayerStatusData->MeleeCriticalPoint = MeleeCriticalPoint;
-			PlayerStatusData->MagicCriticalPoint = MagicCriticalPoint;
-			PlayerStatusData->Speed = Speed;
-
-			_PlayerStatus.insert(pair<int32, st_ObjectStatusData*>(PlayerStatusData->Level, PlayerStatusData));
+			_PlayerStatus.insert(pair<int32, st_StatInfo*>(PlayerStatus->Level, PlayerStatus));
 		}
 	}	
 }
@@ -816,10 +812,14 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 		{
 			MonsterType = en_GameObjectType::OBJECT_SLIME;
 		}
+		else if (MonsterName == "°íºí¸°")
+		{
+			MonsterType = en_GameObjectType::OBJECT_GOBLIN;
+		}
 		else if (MonsterName == "°õ")
 		{
 			MonsterType = en_GameObjectType::OBJECT_BEAR;
-		}
+		}		
 
 		MonsterData->MonsterName = MonsterName;
 
@@ -2380,7 +2380,7 @@ st_SkillInfo* CDataManager::FindSkillData(en_SkillType FindSkillType)
 	}	
 }
 
-st_ObjectStatusData* CDataManager::FindObjectStatusData(en_GameObjectType GameObjectType, int16 Level)
+st_StatInfo* CDataManager::FindObjectStatusData(en_GameObjectType GameObjectType, int16 Level)
 {
 	switch (GameObjectType)
 	{
@@ -2389,6 +2389,8 @@ st_ObjectStatusData* CDataManager::FindObjectStatusData(en_GameObjectType GameOb
 	case en_GameObjectType::OBJECT_PLAYER:
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 		return (*_PlayerStatus.find(Level)).second;	
+	case en_GameObjectType::OBJECT_GOBLIN:
+		break;
 	case en_GameObjectType::OBJECT_SLIME:
 		break;
 	case en_GameObjectType::OBJECT_BEAR:
@@ -2409,6 +2411,7 @@ int32 CDataManager::FindMonsterExperienceData(en_GameObjectType MonsterGameObjec
 {
 	switch (MonsterGameObjectType)
 	{		
+	case en_GameObjectType::OBJECT_GOBLIN:
 	case en_GameObjectType::OBJECT_SLIME:		
 	case en_GameObjectType::OBJECT_BEAR:		
 		return (*_Monsters.find(MonsterGameObjectType)).second->GetExpPoint;

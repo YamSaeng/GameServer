@@ -11,7 +11,7 @@ public:
 	map<int16, st_ItemInfo*> _Items;		
 	map<int16, st_ItemInfo*> _GeneralMerchantItems;
 
-	map<int32, st_ObjectStatusData*> _PlayerStatus;	
+	map<int32, st_StatInfo*> _PlayerStatus;
 
 	//------------------------------------------------------
 	// 몬스터 데이터
@@ -106,7 +106,7 @@ public:
 	void LoadDataOptionInfo(wstring LoadFileName);
 
 	st_SkillInfo* FindSkillData(en_SkillType FindSkillType);
-	st_ObjectStatusData* FindObjectStatusData(en_GameObjectType GameObjectType, int16 Level);
+	st_StatInfo* FindObjectStatusData(en_GameObjectType GameObjectType, int16 Level);
 	st_ItemInfo* FindItemData(en_SmallItemCategory FindItemCategory);	
 	int32 FindMonsterExperienceData(en_GameObjectType MonsterGameObjectType);
 };
