@@ -44,7 +44,7 @@
         }
       ]
     },
-    {      
+    {
       "Name": "°õ",
       "MonsterStatInfo": [
         {
@@ -85,6 +85,50 @@
           "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN",
           "MinCount": 5,
           "MaxCount": 20
+        }
+      ]
+    },
+    {
+      "Name": "°íºí¸°",
+      "MonsterStatInfo": [
+        {
+          "Level": 1,
+          "MaxHP": 200,
+          "MaxMP": 10,
+          "MinMeleeAttackDamage": 1,
+          "MaxMeleeAttackDamage": 10,
+          "MeleeAttackHitRate": 1500,
+          "MagicDamage": 0,
+          "MagicHitRate": 0,
+          "Defence": 0,
+          "EvasionRate": 0,
+          "MeleeCriticalPoint": 50,
+          "MagicCriticalPoint": 0,
+          "Speed": 3.0,
+          "SearchDistance": 8.0,
+          "ChaseDistance": 10.0,
+          "SearchTick": 500,
+          "PatrolTick": 2000,
+          "AttackTick": 1000,
+          "MovingAttackRange": 1.3,
+          "AttackRange": 1.5,
+          "GetDPPoint": 10,
+          "GetExpPoint": 20,
+          "ReSpawnTime": 5000
+        }
+      ],
+      "MonsterDropData": [
+        {
+          "Probability": 10,
+          "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_LEATHER",
+          "MinCount": 1,
+          "MaxCount": 5
+        },
+        {
+          "Probability": 30,
+          "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN",
+          "MinCount": 1,
+          "MaxCount": 10
         }
       ]
     }
