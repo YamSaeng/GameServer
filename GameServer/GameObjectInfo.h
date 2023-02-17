@@ -41,8 +41,8 @@ enum class en_GameObjectType : int16
 	OBJECT_NON_PLAYER,	
 
 	OBJECT_MONSTER,
-	OBJECT_SLIME,
 	OBJECT_GOBLIN,
+	OBJECT_SLIME,		
 	OBJECT_BEAR,
 
 	OBJECT_ENVIRONMENT,
@@ -2327,6 +2327,10 @@ struct st_StatInfo
 	int16 StatusAbnormalResistance;
 	float Speed;
 	float MaxSpeed;
+	float SearchDistance = 0;
+	float ChaseDistance = 0;
+	float MovingAttackRange = 0;
+	float AttackRange = 0;
 };
 
 struct st_Experience
