@@ -37,7 +37,7 @@ public:
 	// 바라보는 방향
 	st_Vector2 _FieldOfDirection;	
 	// 시야 거리
-	float _FieldOfViewDistance;		
+	float _FieldOfViewDistance;			
 
 	//--------------------------------------------
 	// SpawnIdle 상태에서 Idle 상태로 돌아갈 Tick
@@ -123,7 +123,12 @@ public:
 
 	virtual void Start();
 	virtual void End();
-protected:
+
+	vector<CGameObject*> GetFieldOfViewObjects();
+
+	void SetMeleeSkill(CSkill* MeleeSkill);	
+protected:	
+
 	// 시야 범위 오브젝트 객체
 	vector<CGameObject*> _FieldOfViewObjects;
 	// 시야 범위 오브젝트
