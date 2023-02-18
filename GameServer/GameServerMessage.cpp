@@ -112,11 +112,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_SkillInfo& SkillInfo)
     *this << SkillInfo.SkillCastingTime;
     *this << SkillInfo.SkillDurationTime;
     *this << SkillInfo.SkillDotTime;
-    *this << SkillInfo.SkillRemainTime;
-
-    int16 SkillExplanationLen = (int16)SkillInfo.SkillExplanation.length() * 2;
-    *this << SkillExplanationLen;
-    InsertData(SkillInfo.SkillExplanation.c_str(), SkillExplanationLen);    
+    *this << SkillInfo.SkillRemainTime;    
 
     return *(this);
 }
