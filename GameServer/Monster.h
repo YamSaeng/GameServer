@@ -8,9 +8,6 @@ class CPlayer;
 class CMonster : public CGameObject
 {
 public:
-	// 몬스터 스킬
-	CMonsterSkillBox _MonsterSkillBox;
-
 	// 몬스터 데이터 시트 Id
 	int32 _DataSheetId;
 
@@ -37,31 +34,20 @@ public:
 	virtual void Start() override;
 	virtual void End() override;
 protected:	
+	// 몬스터 스킬
+	CMonsterSkillBox _MonsterSkillBox;
+
 	// 시전 중인 스킬
 	CSkill* _CurrentSkill;	
 
 	// 목표물
-	CGameObject* _Target;		
+	CGameObject* _Target;			
 
 	// 정찰 위치	
 	st_Vector2 _PatrolPoint;	
+
 	// 이동 위치	
-	st_Vector2 _MovePoint;
-
-	//--------------------------
-	// Idle 상태에서 Search 거리
-	//--------------------------	
-	float _SearchDistance;
-	//--------------------------
-	// Moving 상태에서 추격 거리
-	//--------------------------
-	float _ChaseDistance;
-
-	// 움직일때 공격 검사 거리
-	float _MovingAttackRange;
-	// 공격할때 재 공격 검사 거리
-	float _AttackRange;
-	
+	st_Vector2 _MovePoint;	
 	//------------------------------------
 	// Idle 상태에서 Search를 실행할 Tick
 	//------------------------------------
@@ -125,7 +111,7 @@ protected:
 	virtual void UpdatePatrol() override;
 	//------------------------
 	// Moving 상태 Update
-	//------------------------
+	//------------------------	
 	void ReadMoving();
 	virtual void UpdateMoving() override;		
 	//--------------------------------------
