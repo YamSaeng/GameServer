@@ -110,7 +110,7 @@ void CItem::UpdateReadyMoving()
 {
 	_ChaseWaitTime = GetTickCount64() + 1000;
 
-	vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetFieldOfViewPlayers(this, 1, false);
+	vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
 
 	CMessage* S2CItemMoveMessage = G_ObjectManager->GameServer->MakePacketItemMove(_GameObjectInfo);
 	G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, S2CItemMoveMessage);
