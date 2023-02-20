@@ -1816,8 +1816,7 @@ void CDataManager::LoadDataMonsterSkill(wstring LoadFileName)
 				float SkillTargetEffectTime = SlimeActiveSkillFiled["SkillTargetEffectTime"].GetFloat();
 				int8 SkillDebufAttackSpeed = (int8)SlimeActiveSkillFiled["SkillDebufAttackSpeed"].GetInt();
 				int8 SkillDebufMovingSpeed = (int8)SlimeActiveSkillFiled["SkillDebufMovingSpeed"].GetInt();
-				int8 StatusAbnormalityProbability = (int8)SlimeActiveSkillFiled["StatusAbnormalityProbability"].GetInt();
-				string NextComboSkill = SlimeActiveSkillFiled["NextComboSkill"].GetString();				
+				int8 StatusAbnormalityProbability = (int8)SlimeActiveSkillFiled["StatusAbnormalityProbability"].GetInt();				
 
 				if (SkillType == "SKILL_SLIME_ACTIVE_POISION_ATTACK")
 				{
@@ -1838,16 +1837,65 @@ void CDataManager::LoadDataMonsterSkill(wstring LoadFileName)
 				SlimeAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 				SlimeAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 				SlimeAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
-				SlimeAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;				
-
-				if (NextComboSkill == "SKILL_TYPE_NONE")
-				{
-					SlimeAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-				}
+				SlimeAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;								
 
 				_SlimeSkillDatas.insert(pair<int16, st_SkillInfo*>((int16)SlimeAttackSkill->SkillType, SlimeAttackSkill));
 			}
 		}		
+
+		for (auto& GoblinMonsterSkills : Filed["GoblinSkillList"].GetArray())
+		{
+			for (auto& SlimePassiveSkillFiled : GoblinMonsterSkills["PassiveSkillList"].GetArray())
+			{
+
+			}
+
+			for (auto& SlimeActiveSkillFiled : GoblinMonsterSkills["ActiveSkillList"].GetArray())
+			{
+				st_SkillInfo* GoblinActiveSkill = new st_SkillInfo();
+				GoblinActiveSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_MONSTER_MELEE;
+				GoblinActiveSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
+
+				string SkillType = SlimeActiveSkillFiled["SkillType"].GetString();
+				string SkillName = SlimeActiveSkillFiled["SkillName"].GetString();
+				int SkillLevel = SlimeActiveSkillFiled["SkillLevel"].GetInt();
+				int SkillMinDamage = SlimeActiveSkillFiled["SkillMinDamage"].GetInt();
+				int SkillMaxDamage = SlimeActiveSkillFiled["SkillMaxDamage"].GetInt();
+				int SkillCoolTime = SlimeActiveSkillFiled["SkillCoolTime"].GetInt();
+				int SkillCastingTime = SlimeActiveSkillFiled["SkillCastingTime"].GetInt();
+				int64 SkillDurationTime = SlimeActiveSkillFiled["SkillDurationTime"].GetInt64();
+				int64 SkillDotTime = SlimeActiveSkillFiled["SkillDotTime"].GetInt64();
+				float SkillDistance = SlimeActiveSkillFiled["SkillDistance"].GetFloat();
+				int32 SkillMotionTime = SlimeActiveSkillFiled["SkillMotionTime"].GetInt();
+				float SkillTargetEffectTime = SlimeActiveSkillFiled["SkillTargetEffectTime"].GetFloat();
+				int8 SkillDebufAttackSpeed = (int8)SlimeActiveSkillFiled["SkillDebufAttackSpeed"].GetInt();
+				int8 SkillDebufMovingSpeed = (int8)SlimeActiveSkillFiled["SkillDebufMovingSpeed"].GetInt();
+				int8 StatusAbnormalityProbability = (int8)SlimeActiveSkillFiled["StatusAbnormalityProbability"].GetInt();				
+
+				if (SkillType == "SKILL_GOBLIN_ACTIVE_MELEE_DEFAULT_ATTACK")
+				{
+					GoblinActiveSkill->SkillType = en_SkillType::SKILL_GOBLIN_ACTIVE_MELEE_DEFAULT_ATTACK;
+				}
+
+				GoblinActiveSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_NONE;
+				GoblinActiveSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+				GoblinActiveSkill->SkillLevel = SkillLevel;
+				GoblinActiveSkill->SkillMinDamage = SkillMinDamage;
+				GoblinActiveSkill->SkillMaxDamage = SkillMaxDamage;
+				GoblinActiveSkill->SkillCoolTime = SkillCoolTime;
+				GoblinActiveSkill->SkillCastingTime = SkillCastingTime;
+				GoblinActiveSkill->SkillDurationTime = SkillDurationTime;
+				GoblinActiveSkill->SkillDotTime = SkillDotTime;
+				GoblinActiveSkill->SkillDistance = SkillDistance;
+				GoblinActiveSkill->SkillMotionTime = SkillMotionTime;
+				GoblinActiveSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+				GoblinActiveSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
+				GoblinActiveSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
+				GoblinActiveSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;				
+
+				_GoblinSkillDatas.insert(pair<int16, st_SkillInfo*>((int16)GoblinActiveSkill->SkillType, GoblinActiveSkill));
+			}
+		}
 	}
 }
 
@@ -2377,6 +2425,8 @@ st_SkillInfo* CDataManager::FindSkillData(en_SkillType FindSkillType)
 		return (*_ShootingSkillDatas.find((int16)FindSkillType)).second;
 	case en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK:
 		return (*_SlimeSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillType::SKILL_GOBLIN_ACTIVE_MELEE_DEFAULT_ATTACK:
+		return (*_GoblinSkillDatas.find((int16)FindSkillType)).second;
 	}	
 }
 
