@@ -164,6 +164,11 @@ void CMonster::End()
 	CGameObject::End();
 }
 
+CGameObject* CMonster::GetTarget()
+{
+	return _Target;
+}
+
 void CMonster::AggroTargetListCheck()
 {
 	for (auto AggroTargetIterator : _AggroTargetList)
@@ -263,7 +268,7 @@ void CMonster::SelectTargetCheck()
 				_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ATTACK;
 				_MonsterState = en_MonsterState::MONSTER_ATTACK;
 
-				_DefaultAttackTick = GetTickCount64() + _AttackTickPoint;
+				_DefaultAttackTick = 0;
 
 				vector<st_FieldOfViewInfo> CurrentFieldOfView = _Channel->GetMap()->GetFieldOfViewAttackObjects(this, 1);
 				if (CurrentFieldOfView.size() > 0)
@@ -516,84 +521,24 @@ void CMonster::UpdateAttack()
 		return;
 	}
 
-	// 몬스터가 가지고 있는 스킬 중에서 조건에 맞는 스킬 실행
-	for (auto MonsterSkill : _MonsterSkillBox.GetMonsterSkills())
-	{
-		st_SkillInfo* MonsterSkillInfo = MonsterSkill->GetSkillInfo();
-		if (MonsterSkillInfo != nullptr)
-		{
-			// 스킬이 사용 가능한지 확인
-			if (MonsterSkillInfo->CanSkillUse == true)
-			{
-				_SpellSkill = MonsterSkill;
-
-				_SpellTick = GetTickCount64() + MonsterSkill->GetSkillInfo()->SkillCastingTime;
-
-				float MonsterSkillCastingTime = MonsterSkill->GetSkillInfo()->SkillCastingTime / 1000.f;				
-
-				// 마법 시전 바 시작
-				CMessage* ResMagicPacket = G_ObjectManager->GameServer->MakePacketResMagic(_GameObjectInfo.ObjectId,
-					true, _SpellSkill->GetSkillInfo()->SkillType, MonsterSkillCastingTime);
-				G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResMagicPacket);
-				ResMagicPacket->Free();
-
-				_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPELL;
-
-				return;
-			}
-		}
-		else
-		{
-			CRASH("Monster SkillInfo nullptr")
-		}
-	}	
-
-	if (_DefaultAttackTick == 0)
-	{	
-		int Distance = st_Vector2Int::Distance(_Target->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, _GameObjectInfo.ObjectPositionInfo.CollisionPosition);
-		// float Distance = st_Vector2::Distance(_Target->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position);
-		// 타겟과의 거리가 공격 범위 안에 속하고 X==0 || Y ==0 일때( 대각선은 제한) 공격
-		bool CanUseAttack = (Distance <= _GameObjectInfo.ObjectStatInfo.AttackRange/* && (Direction._X == 0 || Direction._Y == 0)*/);
-		if (CanUseAttack == false)
-		{
-			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
-			_MonsterState = en_MonsterState::MONSTER_READY_MOVE;
-			return;
-		}
-
-		// 크리티컬 판단		
-		random_device Seed;
-		default_random_engine Eng(Seed());
-
-		float CriticalPoint = _GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint / 1000.0f;
-		bernoulli_distribution CriticalCheck(CriticalPoint);
-		bool IsCritical = CriticalCheck(Eng);
-
-		// 데미지 판단
-		mt19937 Gen(Seed());
-		uniform_int_distribution<int> DamageChoiceRandom(_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage, _GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage);
-		int32 ChoiceDamage = DamageChoiceRandom(Gen);
-		int32 FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
-
-		int32 MinDamage = 1;
-		int32 MaxDamage = 5;
-
-		st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_GameObjectInfo.ObjectId, 
-			_GameObjectInfo.ObjectType, 
-			en_SkillType::SKILL_SLIME_NORMAL,
-			MinDamage, MaxDamage);
-		_Target->_GameObjectJobQue.Enqueue(DamageJob);				
-
-		// 1.2초마다 공격
-		_DefaultAttackTick = GetTickCount64() + _AttackTickPoint;				
-	}
-
 	if (_DefaultAttackTick > GetTickCount64())
 	{
 		return;
 	}
 
-	_DefaultAttackTick = 0;
+	_DefaultAttackTick = GetTickCount64() + _AttackTickPoint;
+		
+	//타겟과의 거리가 공격 범위를 벗어나면 다시 추격
+	float Distance = st_Vector2::Distance(_Target->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position);	
+	bool CanUseAttack = (Distance <= _GameObjectInfo.ObjectStatInfo.AttackRange);
+	if (CanUseAttack == false)
+	{
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
+		_MonsterState = en_MonsterState::MONSTER_READY_MOVE;
+		return;
+	}
+
+	_MonsterSkillBox.SkillProcess(this, nullptr, en_SkillType::SKILL_GOBLIN_ACTIVE_MELEE_DEFAULT_ATTACK);
 }
 
 void CMonster::UpdateSpell()

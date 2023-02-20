@@ -33,6 +33,8 @@ public:
 	
 	virtual void Start() override;
 	virtual void End() override;
+
+	CGameObject* GetTarget();
 protected:	
 	// 몬스터 스킬
 	CMonsterSkillBox _MonsterSkillBox;
