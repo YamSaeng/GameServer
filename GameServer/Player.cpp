@@ -20,7 +20,7 @@ CPlayer::CPlayer()
 
 	_FieldOfViewDistance = 15;		
 
-	_FieldOfAngle = 120;
+	_FieldOfAngle = 210;
 
 	_NatureRecoveryTick = GetTickCount64() + 5000;
 	_FieldOfViewUpdateTick = GetTickCount64() + 50;
@@ -34,7 +34,7 @@ CPlayer::CPlayer()
 
 	_RectCollision = new CRectCollision(this);
 
-	_OnPlayerDefaultAttack = false;
+	_SkillBox.SetOwner(this);
 }
 
 CPlayer::~CPlayer()
@@ -52,13 +52,18 @@ void CPlayer::Update()
 	}	
 
 	// 주위 시야 오브젝트 점검
-	CheckFieldOfViewObject();
+	CheckFieldOfViewObject();	
 
 	// 스킬목록 업데이트
 	_SkillBox.Update();
 	
 	// 버프, 디버프 업데이트
 	CheckBufDeBufSkill();
+
+	if (_RectCollision != nullptr)
+	{
+		_RectCollision->Update();
+	}
 
 	if (_ComboSkill != nullptr)
 	{
@@ -98,7 +103,7 @@ void CPlayer::Update()
 
 				_NatureRecoveryTick = GetTickCount64() + 5000;
 
-				vector<st_FieldOfViewInfo> AroundPlayers = _Channel->GetMap()->GetAroundPlayers(this, false);
+				vector<st_FieldOfViewInfo> AroundPlayers = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
 
 				CMessage* ResObjectStatPacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId,
 					_GameObjectInfo.ObjectStatInfo);
@@ -132,70 +137,10 @@ void CPlayer::Update()
 		break;
 	case en_CreatureState::DEAD:
 		break;
-	}
+	}	
 
 	/*G_Logger->WriteStdOut(en_Color::RED, L"Dir X %0.1f Y %0.1f PositionX %0.1f PositionY %0.1f\n", _GameObjectInfo.ObjectPositionInfo.Direction._X,
-		_GameObjectInfo.ObjectPositionInfo.Direction._Y, _GameObjectInfo.ObjectPositionInfo.Position._X, _GameObjectInfo.ObjectPositionInfo.Position._Y);*/
-
-	if (_OnPlayerDefaultAttack)
-	{
-		if (_SelectTarget != nullptr)
-		{
-			float Distance = st_Vector2::Distance(_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position);
-			if (Distance < 2.0f)
-			{
-				if (st_Vector2::CheckFieldOfView(_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Direction, _FieldOfAngle, _FieldOfViewDistance))
-				{
-					if (_DefaultAttackTick < GetTickCount64())
-					{
-						CSkill* DefaultAttackSkill = _SkillBox.FindSkill(en_SkillCharacteristic::SKILL_CATEGORY_PUBLIC, en_SkillType::SKILL_DEFAULT_ATTACK);
-						if (DefaultAttackSkill != nullptr)
-						{
-							_DefaultAttackTick = GetTickCount64() + _GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate;
-
-							st_AttackSkillInfo* DefaultAttackSkillInfo = (st_AttackSkillInfo*)DefaultAttackSkill->GetSkillInfo();
-
-							bool IsCritical = true;
-							// 데미지 판단
-							int32 Damage = CMath::CalculateMeleeDamage(&IsCritical,
-								_SelectTarget->_GameObjectInfo.ObjectStatInfo.Defence,
-								_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage + _Equipment._WeaponMinDamage + DefaultAttackSkillInfo->SkillMinDamage,
-								_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage + _Equipment._WeaponMaxDamage + DefaultAttackSkillInfo->SkillMaxDamage,
-								_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint);
-
-							st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType, IsCritical, Damage, DefaultAttackSkill->GetSkillInfo()->SkillType);
-							_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
-
-							// 공격 애니메이션 출력
-
-							DefaultAttackSkill->CoolTimeStart();
-
-							// 쿨타임 표시 ( 퀵술롯 바에 등록되어 있는 같은 종류의 스킬을 모두 쿨타임 표시 시켜 준다 )
-							for (auto QuickSlotBarPosition : _QuickSlotManager.FindQuickSlotBar(DefaultAttackSkill->GetSkillInfo()->SkillType))
-							{
-								// 클라에게 쿨타임 표시
-								CMessage* ResCoolTimeStartPacket = G_ObjectManager->GameServer->MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
-									QuickSlotBarPosition.QuickSlotBarSlotIndex,
-									1.0f, DefaultAttackSkill);
-								G_ObjectManager->GameServer->SendPacket(_SessionId, ResCoolTimeStartPacket);
-								ResCoolTimeStartPacket->Free();
-							}
-						}
-					}
-				}
-				else
-				{
-					CMessage* ResDefaultAttackAngleErrPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSONAL_MESSAGE_ATTACK_ANGLE);
-					G_ObjectManager->GameServer->SendPacket(_SessionId, ResDefaultAttackAngleErrPacket);
-					ResDefaultAttackAngleErrPacket->Free();
-				}					
-			}
-			else
-			{
-				_OnPlayerDefaultAttack = false;
-			}
-		}
-	}
+		_GameObjectInfo.ObjectPositionInfo.Direction._Y, _GameObjectInfo.ObjectPositionInfo.Position._X, _GameObjectInfo.ObjectPositionInfo.Position._Y);*/	
 }
 
 bool CPlayer::OnDamaged(CGameObject* Attacker, int32 Damage)
@@ -213,7 +158,7 @@ bool CPlayer::OnDamaged(CGameObject* Attacker, int32 Damage)
 
 			CMap* Map = G_MapManager->GetMap(1);
 
-			vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetAroundPlayers(this, false);
+			vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetFieldAroundPlayers(this, false);
 
 			CGameServerMessage* ResDeadStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId, 
 				_GameObjectInfo.ObjectType, _GameObjectInfo.ObjectPositionInfo.State);
@@ -245,9 +190,140 @@ void CPlayer::End()
 
 	// 남아 있는 플레이어 잡 큐 처리
 	CGameObject::Update();
-
-	_GameObjectInfo.ObjectId = 0;
+	
 	_GameObjectInfo.ObjectName = L"";	
+}
+
+void CPlayer::RayCastingToFieldOfViewObjects()
+{
+	vector<CGameObject*> SpawnObjectInfos;
+	vector<CGameObject*> DeSpawnObjectInfos;	
+
+	for (CGameObject* FieldOfViewObject : _FieldOfViewObjects)
+	{
+		st_Vector2 FieldOfViewObjectDir = FieldOfViewObject->_GameObjectInfo.ObjectPositionInfo.Position - _GameObjectInfo.ObjectPositionInfo.Position;
+		st_Vector2 FieldOfViewRay = FieldOfViewObjectDir.Normalize();
+
+		// 레이캐스팅 검사할때 움직일 단위 x, y 값
+		st_Vector2 RayUnitStepSize;
+		RayUnitStepSize._X = sqrt(1 + (FieldOfViewRay._Y / FieldOfViewRay._X) * (FieldOfViewRay._Y / FieldOfViewRay._X));
+		RayUnitStepSize._Y = sqrt(1 + (FieldOfViewRay._X / FieldOfViewRay._Y) * (FieldOfViewRay._X / FieldOfViewRay._Y));
+
+		// 맵 좌표 위치 
+		st_Vector2Int MapCheck;
+		MapCheck._X = _GameObjectInfo.ObjectPositionInfo.Position._X;
+		MapCheck._Y = _GameObjectInfo.ObjectPositionInfo.Position._Y;
+
+		// 현재 위치에서 다음 위치의 Ray 길이
+		st_Vector2 RayLength1D;
+
+		// 탐색 방향
+		st_Vector2Int Step;
+
+		// 탐색 방향 정하고 다음 위치 Ray 길이 값 정하기
+		if (FieldOfViewRay._X < 0)
+		{
+			Step._X = -1;
+			RayLength1D._X = (_GameObjectInfo.ObjectPositionInfo.Position._X - float(MapCheck._X)) * RayUnitStepSize._X;
+		}
+		else
+		{
+			Step._X = 1;
+			RayLength1D._X = (float(MapCheck._X + 1) - _GameObjectInfo.ObjectPositionInfo.Position._X) * RayUnitStepSize._X;
+		}
+
+		if (FieldOfViewRay._Y < 0)
+		{
+			Step._Y = -1;
+			RayLength1D._Y = (_GameObjectInfo.ObjectPositionInfo.Position._Y - float(MapCheck._Y)) * RayUnitStepSize._Y;
+		}
+		else
+		{
+			Step._Y = 1;
+			RayLength1D._Y = (float(MapCheck._Y + 1) - _GameObjectInfo.ObjectPositionInfo.Position._Y) * RayUnitStepSize._Y;
+		}
+		
+		// 검사
+		bool WallFound = false;
+		bool TargetFound = false;
+		float MaxDistance = _FieldOfViewDistance;
+		float Distance = 0.0f;
+		// 벽을 찾거나 목표물을 찾거나 최대 광선 거리에 도착하면 나옴
+		while (!WallFound && !TargetFound && Distance < MaxDistance)
+		{
+			// 다음 타일 위치로 옮김
+			if (RayLength1D._X < RayLength1D._Y)
+			{
+				MapCheck._X += Step._X;
+				Distance = RayLength1D._X;
+				RayLength1D._X += RayUnitStepSize._X;
+			}
+			else
+			{
+				MapCheck._Y += Step._Y;
+				Distance = RayLength1D._Y;
+				RayLength1D._Y += RayUnitStepSize._Y;
+			}
+
+			// 맵에서 계산한 타일 위치 조사
+			CMap* Map = _Channel->GetMap();
+			if (MapCheck._X >= 0 && MapCheck._X < Map->_Right && MapCheck._Y >=0 && MapCheck._Y < Map->_Down)
+			{
+				int X = MapCheck._X - Map->_Left;
+				int Y = Map->_Down - MapCheck._Y;
+
+				CGameObject* GameObject = Map->_ObjectsInfos[Y][X];
+				if (GameObject != nullptr)
+				{
+					if (GameObject->_GameObjectInfo.ObjectId == FieldOfViewObject->_GameObjectInfo.ObjectId)
+					{
+						TargetFound = true;
+					}
+					else
+					{
+						switch (GameObject->_GameObjectInfo.ObjectType)
+						{
+						case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+							WallFound = true;
+							break;						
+						}
+					}					
+				}
+			}		
+		}	
+
+		// 목표물을 먼저 찾은 경우
+		if (TargetFound == true)
+		{
+			SpawnObjectInfos.push_back(FieldOfViewObject);
+		}
+
+		// 벽과 같은 시야에 가려지는 물체를 먼저 찾은 경우
+		if (WallFound == true)
+		{
+			DeSpawnObjectInfos.push_back(FieldOfViewObject);
+		}
+
+		st_RayCatingPosition RayCastingPosition;
+		RayCastingPosition.StartPosition = _GameObjectInfo.ObjectPositionInfo.Position;
+		RayCastingPosition.EndPosition = FieldOfViewObject->_GameObjectInfo.ObjectPositionInfo.Position;
+
+		_RayCastingPositions.push_back(RayCastingPosition);
+	}	
+
+	if (SpawnObjectInfos.size() > 0)
+	{
+		CMessage* ResOtherObjectSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectSpawn((int32)SpawnObjectInfos.size(), SpawnObjectInfos);
+		G_ObjectManager->GameServer->SendPacket(_SessionId, ResOtherObjectSpawnPacket);
+		ResOtherObjectSpawnPacket->Free();
+	}	
+
+	if (DeSpawnObjectInfos.size() > 0)
+	{
+		CMessage* ResOtherObjectDeSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn((int32)DeSpawnObjectInfos.size(), DeSpawnObjectInfos);
+		G_ObjectManager->GameServer->SendPacket(_SessionId, ResOtherObjectDeSpawnPacket);
+		ResOtherObjectDeSpawnPacket->Free();
+	}		
 }
 
 bool CPlayer::UpdateSpawnIdle()
@@ -285,8 +361,6 @@ void CPlayer::UpdateMoving()
 	{
 		_GameObjectInfo.ObjectPositionInfo.Position = NextPosition;
 
-		_RectCollision->CollisionUpdate();
-
 		st_Vector2Int CollisionPosition;
 		CollisionPosition._X = (int32)_GameObjectInfo.ObjectPositionInfo.Position._X;
 		CollisionPosition._Y = (int32)_GameObjectInfo.ObjectPositionInfo.Position._Y;
@@ -301,7 +375,7 @@ void CPlayer::UpdateMoving()
 	{
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;		
 
-		vector<st_FieldOfViewInfo> AroundPlayers = _Channel->GetMap()->GetAroundPlayers(this, false);
+		vector<st_FieldOfViewInfo> AroundPlayers = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
 
 		CMessage* ResMoveStopPacket = G_ObjectManager->GameServer->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
 			_GameObjectInfo.ObjectPositionInfo.Position._X,
@@ -322,7 +396,7 @@ void CPlayer::UpdateSpell()
 	{
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
-		vector<st_FieldOfViewInfo> AroundPlayers = _Channel->GetMap()->GetAroundPlayers(this, false);
+		vector<st_FieldOfViewInfo> AroundPlayers = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
 
 		CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
 			_GameObjectInfo.ObjectType,
@@ -332,47 +406,25 @@ void CPlayer::UpdateSpell()
 
 		if (_SpellSkill != nullptr && _SelectTarget != nullptr)
 		{
-			// 크리티컬 판단
-			random_device Seed;
-			default_random_engine Eng(Seed());
-
-			float CriticalPoint = _GameObjectInfo.ObjectStatInfo.MagicCriticalPoint / 1000.0f;
-			bernoulli_distribution CriticalCheck(CriticalPoint);
-			bool IsCritical = CriticalCheck(Eng);
-
-			int32 FinalDamage = 0;
-
-			mt19937 Gen(Seed());	
-
-			bool TargetIsDead = false;
+			st_SkillInfo* AttackSkillInfo = _SpellSkill->GetSkillInfo();
 
 			switch (_SpellSkill->GetSkillInfo()->SkillType)
 			{
 			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:
 				{
-					int32 MagicDamage = (int32)(_GameObjectInfo.ObjectStatInfo.MagicDamage * 0.6);
-
-					st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)_SpellSkill->GetSkillInfo();
-
-					uniform_int_distribution<int> DamageChoiceRandom(AttackSkillInfo->SkillMinDamage + MagicDamage, AttackSkillInfo->SkillMaxDamage + MagicDamage);
-					int32 ChoiceDamage = DamageChoiceRandom(Gen);
-					FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;				
-
-					st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType, IsCritical, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
-					_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);				
+					st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType,
+						AttackSkillInfo->SkillType,
+						AttackSkillInfo->SkillMinDamage,
+						AttackSkillInfo->SkillMaxDamage);
+					_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
 				}
 				break;			
 			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
-				{				
-					int32 MagicDamage = (int32)(_GameObjectInfo.ObjectStatInfo.MagicDamage * 0.6);
-
-					st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)_SpellSkill->GetSkillInfo();
-
-					uniform_int_distribution<int> DamageChoiceRandom(AttackSkillInfo->SkillMinDamage + MagicDamage, AttackSkillInfo->SkillMaxDamage + MagicDamage);
-					int32 ChoiceDamage = DamageChoiceRandom(Gen);
-					FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
-
-					st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType, IsCritical, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
+				{	
+					st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType,
+						AttackSkillInfo->SkillType,
+						AttackSkillInfo->SkillMinDamage,
+						AttackSkillInfo->SkillMaxDamage);
 					_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
 
 					if (AttackSkillInfo->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
@@ -398,7 +450,7 @@ void CPlayer::UpdateSpell()
 					{
 						CSkill* NewSkill = G_ObjectManager->SkillCreate();
 
-						st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(_SpellSkill->GetSkillInfo()->SkillType, _SpellSkill->GetSkillInfo()->SkillLevel);					
+						st_SkillInfo* NewAttackSkillInfo = G_ObjectManager->SkillInfoCreate(_SpellSkill->GetSkillInfo()->SkillType, _SpellSkill->GetSkillInfo()->SkillLevel);
 						NewSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
 						NewSkill->StatusAbnormalDurationTimeStart();
 
@@ -419,15 +471,10 @@ void CPlayer::UpdateSpell()
 				break;
 			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
 				{
-					int32 MagicDamage = static_cast<int32>(_GameObjectInfo.ObjectStatInfo.MagicDamage * 0.6f);
-
-					st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)_SpellSkill->GetSkillInfo();
-
-					uniform_int_distribution<int> DamageChoiceRandom(AttackSkillInfo->SkillMinDamage + MagicDamage, AttackSkillInfo->SkillMaxDamage + MagicDamage);
-					int32 ChoiceDamage = DamageChoiceRandom(Gen);
-					FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;
-
-					st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType, IsCritical, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
+					st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType,
+						AttackSkillInfo->SkillType,
+						AttackSkillInfo->SkillMinDamage,
+						AttackSkillInfo->SkillMaxDamage);
 					_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
 
 					bool IsLightningStrike = _StatusAbnormal & (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE;
@@ -435,7 +482,7 @@ void CPlayer::UpdateSpell()
 					{
 						CSkill* NewSkill = G_ObjectManager->SkillCreate();
 
-						st_AttackSkillInfo* NewAttackSkillInfo = (st_AttackSkillInfo*)G_ObjectManager->SkillInfoCreate(_SpellSkill->GetSkillInfo()->SkillType, _SpellSkill->GetSkillInfo()->SkillLevel);
+						st_SkillInfo* NewAttackSkillInfo = G_ObjectManager->SkillInfoCreate(_SpellSkill->GetSkillInfo()->SkillType, _SpellSkill->GetSkillInfo()->SkillLevel);
 						NewSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
 						NewSkill->StatusAbnormalDurationTimeStart();
 
@@ -465,52 +512,32 @@ void CPlayer::UpdateSpell()
 				break;
 			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:
 				{
-					int32 MagicDamage = static_cast<int32>(_GameObjectInfo.ObjectStatInfo.MagicDamage * 0.6f);
-
-					st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)_SpellSkill->GetSkillInfo();
-
-					uniform_int_distribution<int> DamageChoiceRandom(AttackSkillInfo->SkillMinDamage + MagicDamage, AttackSkillInfo->SkillMaxDamage + MagicDamage);
-					int32 ChoiceDamage = DamageChoiceRandom(Gen);
-					FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;				
-
-					st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType, IsCritical, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
+					st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType,
+						AttackSkillInfo->SkillType,
+						AttackSkillInfo->SkillMinDamage,
+						AttackSkillInfo->SkillMaxDamage);
 					_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);				
 				}
 				break;
 			case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
 				{
-					int32 MagicDamage = (int32)(_GameObjectInfo.ObjectStatInfo.MagicDamage * 0.6);
-
-					st_AttackSkillInfo* AttackSkillInfo = (st_AttackSkillInfo*)_SpellSkill->GetSkillInfo();
-
-					uniform_int_distribution<int> DamageChoiceRandom(AttackSkillInfo->SkillMinDamage + MagicDamage, AttackSkillInfo->SkillMaxDamage + MagicDamage);
-					int32 ChoiceDamage = DamageChoiceRandom(Gen);
-					FinalDamage = IsCritical ? ChoiceDamage * 2 : ChoiceDamage;				
-
-					st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType, IsCritical, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
+					st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType, 
+						AttackSkillInfo->SkillType,
+						AttackSkillInfo->SkillMinDamage,
+						AttackSkillInfo->SkillMaxDamage);
 					_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);				
 				}
 				break;			
 			case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:
-				{
-					st_HealSkillInfo* HealSkillInfo = (st_HealSkillInfo*)_SpellSkill->GetSkillInfo();
-
-					uniform_int_distribution<int> HealChoiceRandom(HealSkillInfo->SkillMinHealPoint, HealSkillInfo->SkillMaxHealPoint);
-					FinalDamage = HealChoiceRandom(Gen);
-
-					st_GameObjectJob* HealJob = G_ObjectManager->GameServer->MakeGameObjectJobHPHeal(this, false, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
-					_SelectTarget->_GameObjectJobQue.Enqueue(HealJob);								
+				{										
+					/*st_GameObjectJob* HealJob = G_ObjectManager->GameServer->MakeGameObjectJobHPHeal(this, false, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
+					_SelectTarget->_GameObjectJobQue.Enqueue(HealJob);	*/							
 				}
 				break;
 			case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:
 				{
-					st_HealSkillInfo* HealSkillInfo = (st_HealSkillInfo*)_SpellSkill->GetSkillInfo();
-
-					uniform_int_distribution<int> HealChoiceRandom(HealSkillInfo->SkillMinHealPoint, HealSkillInfo->SkillMaxHealPoint);
-					FinalDamage = HealChoiceRandom(Gen);
-
-					st_GameObjectJob* HealJob = G_ObjectManager->GameServer->MakeGameObjectJobHPHeal(this, false, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
-					_SelectTarget->_GameObjectJobQue.Enqueue(HealJob);				
+					/*st_GameObjectJob* HealJob = G_ObjectManager->GameServer->MakeGameObjectJobHPHeal(this, false, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
+					_SelectTarget->_GameObjectJobQue.Enqueue(HealJob);*/
 				}
 				break;
 			}					
@@ -543,7 +570,7 @@ void CPlayer::UpdateSpell()
 					ResCoolTimeStartPacket->Free();
 				}
 			}
-
+			
 			// 스펠창 끝
 			CMessage* ResMagicPacket = G_ObjectManager->GameServer->MakePacketResMagic(_GameObjectInfo.ObjectId, false);
 			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResMagicPacket);
@@ -692,5 +719,23 @@ void CPlayer::CheckFieldOfViewObject()
 		}
 
 		_FieldOfViewInfos = CurrentFieldOfViewObjectIds;
+
+		_FieldOfViewObjects.clear();
+
+		for (st_FieldOfViewInfo FieldOfViewInfo : _FieldOfViewInfos)
+		{
+			CGameObject* FindObject = _Channel->FindChannelObject(FieldOfViewInfo.ObjectID, FieldOfViewInfo.ObjectType);
+			if (FindObject != nullptr
+				&& (FindObject->_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_PLAYER
+					|| FindObject->_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_GOBLIN))
+			{
+				_FieldOfViewObjects.push_back(FindObject);
+			}
+		}
+
+		if (_FieldOfViewInfos.size() > 0)
+		{
+			RayCastingToFieldOfViewObjects();
+		}		
 	}	
 }

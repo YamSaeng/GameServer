@@ -1,6 +1,6 @@
 #pragma once
 #include "Creature.h"
-#include "Equipment.h"
+#include "EquipmentBox.h"
 #include "SkillBox.h"
 #include "QuickSlotManager.h"
 #include "InventoryManager.h"
@@ -18,22 +18,18 @@ public:
 
 	CPartyManager _PartyManager;
 
-	CEquipment _Equipment;		
+	CEquipmentBox _Equipment;		
 	
 	CSkillBox _SkillBox;
 	CQuickSlotManager _QuickSlotManager;
 
-	st_Experience _Experience;			
-
-	// 시야 범위 오브젝트
-	vector<st_FieldOfViewInfo> _FieldOfViewInfos;	
+	st_Experience _Experience;				
 	
 	// 연속기 스킬
 	CSkill* _ComboSkill;		
 
-	// 기본 공격 활성화 여부
-	bool _OnPlayerDefaultAttack;		
-
+	vector<st_RayCatingPosition> _RayCastingPositions;
+	
 	CPlayer();	
 	~CPlayer();		
 
@@ -44,6 +40,7 @@ public:
 	virtual void Start() override;
 	virtual void End() override;
 
+	void RayCastingToFieldOfViewObjects();
 protected:
 	virtual bool UpdateSpawnIdle() override;
 	virtual void UpdateIdle() override;
