@@ -894,9 +894,7 @@ void CGameObject::Update()
 							}							
 						}
 
-						Attacker->_SelectTarget = nullptr;
-
-						((CPlayer*)Attacker)->_OnPlayerDefaultAttack = false;
+						Attacker->_SelectTarget = nullptr;						
 					}					
 				}			
 			}
