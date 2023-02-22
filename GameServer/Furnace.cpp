@@ -2,24 +2,32 @@
 #include "Furnace.h"
 #include "ObjectManager.h"
 #include "DataManager.h"
+#include "RectCollision.h"
 
 CFurnace::CFurnace()
 {
 	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE;
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
-	_GameObjectInfo.ObjectWidth = 1;
+	_GameObjectInfo.ObjectWidth = 2;
 	_GameObjectInfo.ObjectHeight = 2;
 
 	_GameObjectInfo.ObjectName = L"¿ë±¤·Î";
 
 	auto FindFurnaceData = G_Datamanager->_CraftingTableData.find((int16)_GameObjectInfo.ObjectType);
 	_CraftingTableRecipe = *(*FindFurnaceData).second;	
+
+	_RectCollision = new CRectCollision(this);
 }
 
 void CFurnace::Update()
 {
 	CGameObject::Update();
+
+	if (_RectCollision != nullptr)
+	{
+		_RectCollision->Update();
+	}
 
 	switch (_GameObjectInfo.ObjectPositionInfo.State)
 	{
