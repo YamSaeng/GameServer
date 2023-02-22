@@ -409,6 +409,7 @@ void CObjectManager::ObjectItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_
 
 	switch ((en_GameObjectType)SpawnItemOwnerType)
 	{
+	case en_GameObjectType::OBJECT_GOBLIN:
 	case en_GameObjectType::OBJECT_SLIME:
 	case en_GameObjectType::OBJECT_BEAR:
 		{
