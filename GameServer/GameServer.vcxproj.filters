@@ -219,9 +219,6 @@
     <ClInclude Include="Item.h">
       <Filter>ContentServer\Content\Item</Filter>
     </ClInclude>
-    <ClInclude Include="DataManager.h">
-      <Filter>ContentServer\Content\Data</Filter>
-    </ClInclude>
     <ClInclude Include="Data.h">
       <Filter>ContentServer\Content\Data</Filter>
     </ClInclude>
@@ -275,7 +272,7 @@
     <ClInclude Include="GameServerMessage.h">
       <Filter>Message</Filter>
     </ClInclude>
-    <ClInclude Include="Equipment.h">
+    <ClInclude Include="EquipmentBox.h">
       <Filter>ContentServer\Content\Equiment</Filter>
     </ClInclude>
     <ClInclude Include="InventoryManager.h">
@@ -340,6 +337,12 @@
     </ClInclude>
     <ClInclude Include="GeneralMerchantNPC.h">
       <Filter>ContentServer\Content\GameObject\Creature\NonPlayer</Filter>
+    </ClInclude>
+    <ClInclude Include="Goblin.h">
+      <Filter>ContentServer\Content\GameObject\Creature\Monster</Filter>
+    </ClInclude>
+    <ClInclude Include="DataManager.h">
+      <Filter>ContentServer\Content\Data</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -432,7 +435,7 @@
     <ClCompile Include="GameServerMessage.cpp">
       <Filter>Message</Filter>
     </ClCompile>
-    <ClCompile Include="Equipment.cpp">
+    <ClCompile Include="EquipmentBox.cpp">
       <Filter>ContentServer\Content\Equiment</Filter>
     </ClCompile>
     <ClCompile Include="InventoryManager.cpp">
@@ -491,6 +494,9 @@
     </ClCompile>
     <ClCompile Include="GeneralMerchantNPC.cpp">
       <Filter>ContentServer\Content\GameObject\Creature\NonPlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="Goblin.cpp">
+      <Filter>ContentServer\Content\GameObject\Creature\Monster</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

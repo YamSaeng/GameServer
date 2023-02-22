@@ -317,11 +317,7 @@ private:
 	//------------------------------------------------------------------------------
 	st_GameObjectJob* MakeGameObjectJobLeaveChannelPlayer(CGameObject* LeavePlayerObject, int32* PlayerIndexes);
 	st_GameObjectJob* MakeGameObjectJobMove(float DirectionX, float DirectionY, float PositionX, float PositionY, int8 GameObjectState);
-	st_GameObjectJob* MakeGameObjectJobMoveStop(float PositionX, float PositionY, int8 GameObjectState);
-	//-------------------------------------------------
-	// 일반 공격 켜기 잡 생성 함수
-	//-------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobDefaultAttack();		
+	st_GameObjectJob* MakeGameObjectJobMoveStop(float PositionX, float PositionY, int8 GameObjectState);			
 	//-------------------------------------------------
 	// 스킬 특성 선택 잡 생성 함수
 	//-------------------------------------------------
@@ -475,7 +471,7 @@ public:
 	//-------------------------------------------------------------------------------
 	// 데미지 처리 잡 생성 함수
 	//-------------------------------------------------------------------------------
-	st_GameObjectJob* MakeGameObjectDamage(int64 AttackerID, en_GameObjectType AttackerType, bool IsCritical, int32 Damage, en_SkillType SkillType);	
+	st_GameObjectJob* MakeGameObjectDamage(int64& AttackerID, en_GameObjectType AttackerType, en_SkillType SkillType,  int32& SkillMinDamage, int32& SkillMaxDamage);	
 	//-------------------------------------------------------------------------------
 	// 기술 체력 회복 잡 생성 함수
 	//-------------------------------------------------------------------------------
@@ -555,7 +551,7 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 공격요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_SkillType SkillType, int32 Damage, bool IsCritical);
+	CGameServerMessage* MakePacketResAttack(int64 ObjectID);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 마법요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -580,7 +576,7 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 애니메이션 출력 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResAnimationPlay(int64 ObjectId, en_GameObjectType ObjectType, wstring AnimationName);
+	CGameServerMessage* MakePacketResAnimationPlay(int64 ObjectId, en_GameObjectType ObjectType, en_AnimationType AnimationType);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 오브젝트 스탯 변경 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -589,6 +585,10 @@ public:
 	// 게임서버 오브젝트 상태 변경 패킷 조합
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResChangeObjectState(int64 ObjectId, en_GameObjectType ObjectType, en_CreatureState ObjectState);	
+	//-----------------------------------------------------------------------------------------
+	// 게임서버 바라보는 방향 패킷 조합
+	//-----------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResFaceDirection(int64 ObjectID, float FaceDirectionX, float FaceDirectionY);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 이동 요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -770,6 +770,10 @@ public:
 	// 게임서버 그룹장 위임 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResPartyLeaderMandate(int64 PerviousPartyLeaderObjectID, int64 NewPartyLeaderObjectID);
+	//-----------------------------------------------------------------------------------------
+	// 게임서버 그룹장 위임 응답 패킷 조합
+	//-----------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResRayCasting(int64 ObjectID, vector<st_RayCatingPosition>& RayCastingPositions);
 
 
 	//---------------------------------------------------

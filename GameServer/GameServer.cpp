@@ -889,7 +889,7 @@ void CGameServer::PacketProcReqFaceDirection(int64 SessionID, CMessage* Message)
 		*Message >> FaceDirectionY;
 
 		MyPlayer->_FieldOfDirection._X = FaceDirectionX;
-		MyPlayer->_FieldOfDirection._Y = FaceDirectionY;
+		MyPlayer->_FieldOfDirection._Y = FaceDirectionY;		
 	}
 
 	ReturnSession(Session);
@@ -1102,47 +1102,8 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 			int16 ReqSkillType;
 			*Message >> ReqSkillType;
 
-			bool SkillUseSuccess = false;
-			bool GlobalSkillCooltime = true;
-
-			vector<CGameObject*> Targets;			
-
-			CSkill* ReqMeleeSkill = MyPlayer->_SkillBox.FindSkill((en_SkillCharacteristic)ReqCharacteristicType, (en_SkillType)ReqSkillType);
-			if (ReqMeleeSkill != nullptr && ReqMeleeSkill->GetSkillInfo()->CanSkillUse == true)
-			{
-				CMap* Map = G_MapManager->GetMap(1);			
-				
-
-				// 타겟 위치 확인
-				switch (ReqMeleeSkill->GetSkillInfo()->SkillType)
-				{
-				case en_SkillType::SKILL_DEFAULT_ATTACK:
-					{
-						st_GameObjectJob* DefaultAttackJob = MakeGameObjectJobDefaultAttack();
-						MyPlayer->_GameObjectJobQue.Enqueue(DefaultAttackJob);
-
-						SkillUseSuccess = true;								
-					}
-					break;
-				case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
-				case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
-				case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
-				case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE:
-				case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:
-				case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
-					{
-						st_GameObjectJob* MeleeAttackJob = MakeGameObjectJobMeleeAttack(ReqCharacteristicType, ReqSkillType);
-						MyPlayer->_GameObjectJobQue.Enqueue(MeleeAttackJob);
-					}
-					break;						
-				}					
-			}
-			else
-			{
-				CMessage* ResErrorPacket = MakePacketSkillError(en_GlobalMessageType::PERSONAL_MESSAGE_SKILL_COOLTIME, ReqMeleeSkill->GetSkillInfo()->SkillName.c_str());
-				SendPacket(MyPlayer->_SessionId, ResErrorPacket);
-				ResErrorPacket->Free();
-			}
+			st_GameObjectJob* MeleeAttackJob = MakeGameObjectJobMeleeAttack(ReqCharacteristicType, ReqSkillType);
+			MyPlayer->_GameObjectJobQue.Enqueue(MeleeAttackJob);
 		}
 	} while (0);
 
@@ -1696,7 +1657,7 @@ void CGameServer::PacketProcReqChattingMessage(int64 SessionId, CMessage* Messag
 		
 		CMap* Map = G_MapManager->GetMap(1);
 
-		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetAroundPlayers(MyPlayer, false);
+		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = Map->GetFieldAroundPlayers(MyPlayer, false);
 				
 		CMessage* ResChattingMessage = MakePacketResChattingBoxMessage(en_MessageType::MESSAGE_TYPE_CHATTING, st_Color::White(), ChattingMessage);
 		SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResChattingMessage);
@@ -3925,7 +3886,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 		if (!CharacterNameFind)
 		{
 			// 요청한 캐릭터의 1레벨에 해당하는 데이터를 읽어온다.
-			st_ObjectStatusData NewCharacterStatus;
+			st_StatInfo NewCharacterStatus;
 			auto FindStatus = G_Datamanager->_PlayerStatus.find(1);
 			NewCharacterStatus = *(*FindStatus).second;
 
@@ -4160,6 +4121,8 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 			CDBConnection* DBCharacterInfoGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 
 #pragma region 스킬 정보 읽어오기	
+			MyPlayer->_SkillBox.Init();
+
 			// 공용 스킬 만들기
 			CSkillCharacteristic* PublicCharacteristic = MyPlayer->_SkillBox.GetSkillCharacteristicPublic();
 			PublicCharacteristic->SkillCharacteristicInit(en_SkillCharacteristic::SKILL_CATEGORY_PUBLIC);
@@ -4916,14 +4879,6 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobMoveStop(float PositionX, float 
 	return MoveStopJob;
 }
 
-st_GameObjectJob* CGameServer::MakeGameObjectJobDefaultAttack()
-{
-	st_GameObjectJob* DefaultAttackJob = G_ObjectManager->GameObjectJobCreate();
-	DefaultAttackJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_DEAFLUT_ATTACK;
-
-	return DefaultAttackJob;
-}
-
 st_GameObjectJob* CGameServer::MakeGameObjectJobSelectSkillCharacteristic(int8 SelectCharacteristicIndex, int8 SelectChracteristicType)
 {
 	st_GameObjectJob* SelectSkillCharacteristicJob = G_ObjectManager->GameObjectJobCreate();
@@ -5527,7 +5482,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobComboSkillOff()
 	return ComboAttackOffJob;
 }
 
-st_GameObjectJob* CGameServer::MakeGameObjectDamage(int64 AttackerID, en_GameObjectType AttackerType, bool IsCritical, int32 Damage, en_SkillType SkillType)
+st_GameObjectJob* CGameServer::MakeGameObjectDamage(int64& AttackerID, en_GameObjectType AttackerType, en_SkillType SkillType, int32& SkillMinDamage, int32& SkillMaxDamage)
 {
 	st_GameObjectJob* DamageJob = G_ObjectManager->GameObjectJobCreate();
 	DamageJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_DAMAGE;
@@ -5536,10 +5491,10 @@ st_GameObjectJob* CGameServer::MakeGameObjectDamage(int64 AttackerID, en_GameObj
 	DamageMessage->Clear();
 	
 	*DamageMessage << AttackerID;
-	*DamageMessage << (int16)AttackerType;
-	*DamageMessage << IsCritical;
-	*DamageMessage << Damage;
+	*DamageMessage << (int16)AttackerType;	
 	*DamageMessage << (int16)SkillType;
+	*DamageMessage << SkillMinDamage;
+	*DamageMessage << SkillMaxDamage;
 
 	DamageJob->GameObjectJobMessage = DamageMessage;
 
@@ -5849,7 +5804,7 @@ CGameServerMessage* CGameServer::MakePacketResGatheringDamage(int64 TargetID)
 	return ResGatheringDamage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResAttack(int64 PlayerDBId, int64 TargetId, en_SkillType SkillType, int32 Damage, bool IsCritical)
+CGameServerMessage* CGameServer::MakePacketResAttack(int64 ObjectID)
 {
 	CGameServerMessage* ResAttackMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResAttackMessage == nullptr)
@@ -5860,11 +5815,7 @@ CGameServerMessage* CGameServer::MakePacketResAttack(int64 PlayerDBId, int64 Tar
 	ResAttackMessage->Clear();
 
 	*ResAttackMessage << (int16)en_PACKET_S2C_ATTACK;
-	*ResAttackMessage << PlayerDBId;
-	*ResAttackMessage << TargetId;
-	*ResAttackMessage << (int16)SkillType;
-	*ResAttackMessage << Damage;
-	*ResAttackMessage << IsCritical;
+	*ResAttackMessage << ObjectID;
 
 	return ResAttackMessage;
 }
@@ -5990,7 +5941,7 @@ CGameServerMessage* CGameServer::MakePacketResCraftingTableCompleteItemSelect(in
 	return ResCraftingTableCompleteItemSelectMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResAnimationPlay(int64 ObjectId, en_GameObjectType ObjectType, wstring AnimationName)
+CGameServerMessage* CGameServer::MakePacketResAnimationPlay(int64 ObjectId, en_GameObjectType ObjectType, en_AnimationType AnimationType)
 {
 	CGameServerMessage* ResAnimationPlayMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResAnimationPlayMessage == nullptr)
@@ -6002,10 +5953,8 @@ CGameServerMessage* CGameServer::MakePacketResAnimationPlay(int64 ObjectId, en_G
 
 	*ResAnimationPlayMessage << (int16)en_PACKET_S2C_ANIMATION_PLAY;
 	*ResAnimationPlayMessage << ObjectId;	
-
-	int16 AnimationNameLen = (int16)(AnimationName.length() * 2);
-	*ResAnimationPlayMessage << AnimationNameLen;
-	ResAnimationPlayMessage->InsertData(AnimationName.c_str(), AnimationNameLen);
+	*ResAnimationPlayMessage << (int16)ObjectType;
+	*ResAnimationPlayMessage << (int8)AnimationType;	
 
 	return ResAnimationPlayMessage;
 }
@@ -6043,6 +5992,24 @@ CGameServerMessage* CGameServer::MakePacketResChangeObjectState(int64 ObjectId, 
 	*ResObjectStatePacket << (int8)ObjectState;
 
 	return ResObjectStatePacket;
+}
+
+CGameServerMessage* CGameServer::MakePacketResFaceDirection(int64 ObjectID, float FaceDirectionX, float FaceDirectionY)
+{
+	CGameServerMessage* ResFaceDirectionPacket = CGameServerMessage::GameServerMessageAlloc();
+	if (ResFaceDirectionPacket == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResFaceDirectionPacket->Clear();
+
+	*ResFaceDirectionPacket << (int16)en_PACKET_S2C_FACE_DIRECTION;
+	*ResFaceDirectionPacket << ObjectID;
+	*ResFaceDirectionPacket << FaceDirectionX;
+	*ResFaceDirectionPacket << FaceDirectionY;
+
+	return ResFaceDirectionPacket;
 }
 
 CGameServerMessage* CGameServer::MakePacketResMove(int64 ObjectId, float MoveDirectionX, float MoveDirectionY, float PositionX, float PositionY)
@@ -6558,6 +6525,9 @@ CGameServerMessage* CGameServer::MakePacketSkillError(en_GlobalMessageType Perso
 	case en_GlobalMessageType::PERSONAL_MESSAGE_SKILL_COOLTIME:
 		wsprintf(ErrorMessage, L"[%s]의 재사용 대기시간이 완료되지 않았습니다.", SkillName);
 		break;
+	case en_GlobalMessageType::PERSONAL_MESSAGE_GLOBAL_SKILL_COOLTIME:
+		wsprintf(ErrorMessage, L"전역 재사용 대기시간이 완료되지 않았습니다.", SkillName);
+		break;
 	case en_GlobalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT:
 		wsprintf(ErrorMessage, L"대상을 선택하고 [%s]을/를 사용해야 합니다.", SkillName);
 		break;
@@ -7061,6 +7031,33 @@ CGameServerMessage* CGameServer::MakePacketResPartyLeaderMandate(int64 PerviousP
 	*ResPartyLeaderMandateMessage << NewPartyLeaderObjectID;
 
 	return ResPartyLeaderMandateMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketResRayCasting(int64 ObjectID, vector<st_RayCatingPosition>& RayCastingPositions)
+{
+	CGameServerMessage* ResRayCastingMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResRayCastingMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResRayCastingMessage->Clear();
+
+	*ResRayCastingMessage << (int16)en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_RAY_CASTING;
+	*ResRayCastingMessage << ObjectID;
+
+	int8 RayCastingPositionSize = (int8)RayCastingPositions.size();
+	*ResRayCastingMessage << RayCastingPositionSize;
+
+	for (auto RayCastingPosition : RayCastingPositions)
+	{
+		*ResRayCastingMessage << RayCastingPosition.StartPosition._X;
+		*ResRayCastingMessage << RayCastingPosition.StartPosition._Y;
+		*ResRayCastingMessage << RayCastingPosition.EndPosition._X;
+		*ResRayCastingMessage << RayCastingPosition.EndPosition._Y;
+	}
+
+	return ResRayCastingMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketReqCancel(en_GAME_SERVER_PACKET_TYPE PacketType)
