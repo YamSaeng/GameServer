@@ -1515,10 +1515,9 @@ bool CChannel::ChannelColliderCheck(CGameObject* Object)
 bool CChannel::ChannelColliderCheck(CGameObject* CheckObject, st_Vector2 CheckPosition)
 {
 	CRectCollision CheckRectCollision;
-	CheckRectCollision._LeftTop._X = CheckPosition._X - CheckObject->GetRectCollision()->_LeftTopX;
-	CheckRectCollision._LeftTop._Y = CheckPosition._Y - CheckObject->GetRectCollision()->_LeftTopY;
-	CheckRectCollision._RightDown._X = CheckPosition._X + CheckObject->GetRectCollision()->_RightDownX;
-	CheckRectCollision._RightDown._Y = CheckPosition._Y + CheckObject->GetRectCollision()->_RightDownY;
+	CheckRectCollision._Position._X = CheckPosition._X;
+	CheckRectCollision._Position._Y = CheckPosition._Y;	
+	CheckRectCollision._Size = CheckObject->GetRectCollision()->_Size;	
 
 	// 플레이어들과 충돌하는지 검사
 	bool IsPlayerCollision = true;
@@ -1635,9 +1634,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y = SpawnPosition._Y;
 
 			EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-			EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
-
-			EnterChannelGameObject->GetRectCollision()->CollisionUpdate();
+			EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;			
 
 			if (_Map->MoveCollisionCango(EnterChannelGameObject, SpawnPosition, EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.Position) == true)
 			{
@@ -1663,9 +1660,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 				EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 
 				EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-				EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
-
-				EnterChannelPlayer->GetRectCollision()->CollisionUpdate();
+				EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;				
 
 				// 플레이어 저장
 				_ChannelPlayerArrayIndexs.Pop(&EnterChannelPlayer->_ChannelArrayIndex);
@@ -1750,9 +1745,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			{
 				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
-
-				EnterChannelMonster->GetRectCollision()->CollisionUpdate();
+				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;				
 
 				EnterChannelMonster->Start();
 
@@ -1828,9 +1821,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			{
 				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
-
-				EnterChannelEnvironment->GetRectCollision()->CollisionUpdate();
+				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;				
 
 				EnterChannelEnvironment->Start();
 
@@ -1858,9 +1849,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			{
 				EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 				EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-				EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
-
-				EnterChannelCraftingTable->GetRectCollision()->CollisionUpdate();
+				EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;				
 
 				EnterChannelCraftingTable->Start();
 
