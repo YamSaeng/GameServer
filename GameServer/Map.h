@@ -135,10 +135,12 @@ public:
 	//---------------------------------------
 	// ∏ ø°º≠ ø¿∫Í¡ß∆Æ ≈¿Â
 	//---------------------------------------
-	bool ApplyLeave(CGameObject* GameObject);	
+	bool ApplyLeave(CGameObject* GameObject);		
 
-	vector<st_Vector2Int> FindPath(CGameObject* Object, st_Vector2Int StartCellPosition, st_Vector2Int DestCellPostion, bool CheckObjects = true, int32 MaxDistance = 8);	
-	bool FindPathNextPositionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool CheckObjects = true);
+	bool MonsterCango(CGameObject* Object, OUT st_Vector2* NextPosition);
+
+	vector<st_Vector2Int> FindPath(CGameObject* Object, st_Vector2Int StartCellPosition, st_Vector2Int DestCellPostion, bool CheckObjects = true, int32 MaxDistance = 8);		
+	bool FindPathNextPositionCango(CGameObject* Object, st_Vector2Int& NextPosition, bool CheckObjects = true);
 
 	CChannelManager* GetChannelManager();
 private:

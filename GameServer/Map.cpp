@@ -272,17 +272,18 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object)
 
 		for (CPlayer* Player : Sector->GetPlayers())
 		{			
-			if (st_Vector2::CheckFieldOfView(Player->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->_FieldOfDirection, Object->_FieldOfAngle, Object->_FieldOfViewDistance))
+			if (st_Vector2::CheckFieldOfView(Player->_GameObjectInfo.ObjectPositionInfo.Position,
+				Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->_FieldOfDirection, Object->_FieldOfAngle, Object->_FieldOfViewDistance)
+				&& Player->_GameObjectInfo.ObjectId != Object->_GameObjectInfo.ObjectId)
 			{
 				FieldOfViewInfo.ObjectID = Player->_GameObjectInfo.ObjectId;
 				FieldOfViewInfo.SessionID = 0;
 				FieldOfViewInfo.ObjectType = Player->_GameObjectInfo.ObjectType;
 
-				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
+				FieldOfViewGameObjects.push_back(FieldOfViewInfo);				
 			}
 		}
-
-		// 주변 섹터 몬스터 정보
+		
 		for (CMonster* Monster : Sector->GetMonsters())
 		{
 			if (st_Vector2::CheckFieldOfView(Monster->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->_FieldOfDirection, Object->_FieldOfAngle, Object->_FieldOfViewDistance))
@@ -290,6 +291,18 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object)
 				FieldOfViewInfo.ObjectID = Monster->_GameObjectInfo.ObjectId;
 				FieldOfViewInfo.SessionID = 0;
 				FieldOfViewInfo.ObjectType = Monster->_GameObjectInfo.ObjectType;
+
+				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
+			}
+		}
+
+		for (CCraftingTable* CraftingTable : Sector->GetCraftingTable())
+		{
+			if (st_Vector2::CheckFieldOfView(CraftingTable->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->_FieldOfDirection, Object->_FieldOfAngle, Object->_FieldOfViewDistance))
+			{
+				FieldOfViewInfo.ObjectID = CraftingTable->_GameObjectInfo.ObjectId;
+				FieldOfViewInfo.SessionID = 0;
+				FieldOfViewInfo.ObjectType = CraftingTable->_GameObjectInfo.ObjectType;
 
 				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
 			}
@@ -594,11 +607,8 @@ bool CMap::Cango(CGameObject* Object, OUT st_Vector2* NextPosition)
 	CheckPosition._X += (DirectionNormal._X * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 
 	bool NextPositionMoveCheck = MoveCollisionCango(Object, CollisionPosition, CheckPosition);
-	if (NextPositionMoveCheck == true)
-	{
-		NextPosition->_X = CheckPosition._X;
-		NextPosition->_Y = CheckPosition._Y;
-	}
+	NextPosition->_X = CheckPosition._X;
+	NextPosition->_Y = CheckPosition._Y;
 
 	return NextPositionMoveCheck;
 }
@@ -628,6 +638,7 @@ bool CMap::MoveCollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, 
 	case en_MapObjectInfo::TILE_MAP_NONE:
 	case en_MapObjectInfo::TILE_MAP_TREE:
 	case en_MapObjectInfo::TILE_MAP_STONE:
+	case en_MapObjectInfo::TILE_MAP_GOBLIN:
 	case en_MapObjectInfo::TILE_MAP_SLIME:
 	case en_MapObjectInfo::TILE_MAP_BEAR:	
 	case en_MapObjectInfo::TILE_MAP_POTATO:		
@@ -639,7 +650,7 @@ bool CMap::MoveCollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, 
 		IsCollisionMapInfo = false;
 	}
 
-	bool ObjectCheck = Object->GetChannel()->ChannelColliderCheck(Object->_GameObjectInfo.ObjectId, NextPosition);	
+	bool ObjectCheck = Object->GetChannel()->ChannelColliderCheck(Object, NextPosition);
 
 	return IsCollisionMapInfo && (!CheckObjects || ObjectCheck);
 }
@@ -670,6 +681,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	case en_GameObjectType::OBJECT_PLAYER:	
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 	case en_GameObjectType::OBJECT_NON_PLAYER:
+	case en_GameObjectType::OBJECT_GOBLIN:
 	case en_GameObjectType::OBJECT_SLIME:
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
@@ -712,6 +724,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 				}
 			}
 		}
+
 		break;
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
@@ -839,6 +852,7 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 	{
 	case en_GameObjectType::OBJECT_PLAYER:	
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
+	case en_GameObjectType::OBJECT_GOBLIN:
 	case en_GameObjectType::OBJECT_SLIME:
 	{
 		// 맵에서 제거
@@ -900,12 +914,34 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 	return true;
 }
 
+bool CMap::MonsterCango(CGameObject* Object, OUT st_Vector2* NextPosition)
+{
+	st_Vector2 CheckPosition;
+	CheckPosition._X = Object->_GameObjectInfo.ObjectPositionInfo.Position._X;
+	CheckPosition._Y = Object->_GameObjectInfo.ObjectPositionInfo.Position._Y;
+
+	st_Vector2 DirectionNormal = Object->_GameObjectInfo.ObjectPositionInfo.Direction.Normalize();
+
+	CheckPosition._Y += (DirectionNormal._Y * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+	CheckPosition._X += (DirectionNormal._X * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+
+	st_Vector2Int CheckCollisionPosition;
+	CheckCollisionPosition._X = CheckPosition._X;
+	CheckCollisionPosition._Y = CheckPosition._Y;
+		
+	bool NextPositionMoveCheck = FindPathNextPositionCango(Object, CheckCollisionPosition);
+	NextPosition->_X = CheckPosition._X;
+	NextPosition->_Y = CheckPosition._Y;
+
+	return NextPositionMoveCheck;
+}
+
 vector<st_Vector2Int> CMap::FindPath(CGameObject* Object, st_Vector2Int StartCellPosition, st_Vector2Int DestCellPostion, bool CheckObjects, int32 MaxDistance)
 {
-	// 상 하 좌 우 좌상 좌하 우상 우하
-	int32 DeltaY[8] = { 1, -1, 0, 0, 1, -1, 1, -1 };
-	int32 DeltaX[8] = { 0, 0, -1, 1, -1, -1, 1, 1 };
-	int32 Cost[8] = { 10,10,10,10,14,14,14,14 };
+	// 상 하 좌 우 
+	int32 DeltaY[4] = { 1, -1, 0, 0};
+	int32 DeltaX[4] = { 0, 0, -1, 1};
+	int32 Cost[4] = { 10,10,10,10};
 
 	// 시작점 도착점 좌표변환
 	st_Vector2Int StartPosition = StartCellPosition;
@@ -978,13 +1014,13 @@ vector<st_Vector2Int> CMap::FindPath(CGameObject* Object, st_Vector2Int StartCel
 				continue;
 			}
 
-			// 다음 위치가 목적지 좌표가 아닐 경우, 해당 위치로 갈 수 있는지 검사한다.
+			// 다음 위치가 목적지 좌표가 아닐 경우
 			if (NextPosition._Y != DestPosition._Y || NextPosition._X != DestPosition._X)
 			{
 				st_Vector2Int NextPositionVector = NextPosition;
-
-				// 갈 수 없으면 다음 위치를 검사한다.
-				if (FindPathNextPositionCango(Object, NextPositionVector, CheckObjects) == false)
+				
+				// 해당 위치로 갈 수 있는지 검사한다.
+				if (FindPathNextPositionCango(Object, NextPositionVector, CheckObjects) == false	)
 				{
 					continue;
 				}
@@ -1090,22 +1126,22 @@ vector<st_Vector2Int> CMap::FindPath(CGameObject* Object, st_Vector2Int StartCel
 	}	
 }
 
-bool CMap::FindPathNextPositionCango(CGameObject* Object, st_Vector2Int& CellPosition, bool CheckObjects)
+bool CMap::FindPathNextPositionCango(CGameObject* Object, st_Vector2Int& NextPosition, bool CheckObjects)
 {
 	// 좌우 좌표 검사
-	if (CellPosition._X < _Left || CellPosition._X > _Right)
+	if (NextPosition._X < _Left || NextPosition._X > _Right)
 	{
 		return false;
 	}
 
 	// 상하 좌표 검사
-	if (CellPosition._Y < _Up || CellPosition._Y > _Down)
+	if (NextPosition._Y < _Up || NextPosition._Y > _Down)
 	{
 		return false;
 	}
 
-	int X = CellPosition._X - _Left;
-	int Y = _Down - CellPosition._Y;
+	int X = NextPosition._X - _Left;
+	int Y = _Down - NextPosition._Y;
 
 	//G_Logger->WriteStdOut(en_Color::RED, L"X : %d Y : %d \n", X, Y);
 
@@ -1115,6 +1151,7 @@ bool CMap::FindPathNextPositionCango(CGameObject* Object, st_Vector2Int& CellPos
 	case en_MapObjectInfo::TILE_MAP_NONE:
 	case en_MapObjectInfo::TILE_MAP_TREE:
 	case en_MapObjectInfo::TILE_MAP_STONE:
+	case en_MapObjectInfo::TILE_MAP_GOBLIN:
 	case en_MapObjectInfo::TILE_MAP_SLIME:
 	case en_MapObjectInfo::TILE_MAP_BEAR:
 	case en_MapObjectInfo::TILE_MAP_POTATO:
@@ -1130,11 +1167,12 @@ bool CMap::FindPathNextPositionCango(CGameObject* Object, st_Vector2Int& CellPos
 
 	switch (Object->_GameObjectInfo.ObjectType)
 	{
+	case en_GameObjectType::OBJECT_GOBLIN:
 	case en_GameObjectType::OBJECT_SLIME:
 		// 오브젝트 위치 배열이 비워 있을 경우 true 반환
 		if (_ObjectsInfos[Y][X] == nullptr)
-		{
-			ObjectCheck = true;
+		{			
+			ObjectCheck = true;			
 		}
 		else
 		{
@@ -1154,7 +1192,7 @@ bool CMap::FindPathNextPositionCango(CGameObject* Object, st_Vector2Int& CellPos
 				{
 					ObjectCheck = false;
 				}
-			}
+			}			
 		}
 		break;
 	}
