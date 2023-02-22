@@ -5,22 +5,19 @@
         {
           "PublicAttackSkillList": [
             {
+              "SkillType": "SKILL_GLOBAL_SKILL",
+              "SkillName": "전역 쿨타임",
+              "SkillCoolTime": 500              
+            },
+            {
               "SkillType": "SKILL_DEFAULT_ATTACK",
               "SkillName": "일반공격",
-              "SkillLevel": 1,
               "SkillMinDamage": 0,
               "SkillMaxDamage": 0,
               "SkillCoolTime": 1000,
-              "SkillCastingTime": 0,
-              "SkillDurationTime": 0,
-              "SkillDotTime": 0,
               "SkillDistance": 2.0,
               "SkillTargetEffectTime": 2.0,
-              "SkillDebufAttackSpeed": 0,
-              "SkillDebufMovingSpeed": 0,
-              "StatusAbnormalityProbability": 0,              
-              "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "전방 대상에게 피해를 입힌다."             
+              "SkillExplanation": "전방 대상에게 피해를 입힌다."
             }
           ],
           "PublicTacTicSkillList": [
@@ -31,19 +28,6 @@
             {
               "SkillType": "SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE",
               "SkillName": "충격해제",
-              "SkillLevel": 1,
-              "IncreaseMinAttackPoint": 0,
-              "IncreaseMaxAttackPoint": 0,
-              "IncreaseMeleeAttackSpeedPoint": 0,
-              "IncreaseMeleeAttackHitRate": 0,
-              "IncreaseMagicAttackPoint": 0,
-              "IncreaseMagicCastingPoint": 0,
-              "IncreaseMagicAttackHitRate": 0,
-              "IncreaseDefencePoint": 0,
-              "IncreaseEvasionRate": 0,
-              "IncreaseMeleeCriticalPoint": 0,
-              "IncreaseMagicCriticalPoint": 0,
-              "IncreaseSpeedPoint": 0,
               "IncreaseStatusAbnormalityResistance": 1000,
               "SkillCoolTime": 30000,
               "SkillCastingTime": 0,

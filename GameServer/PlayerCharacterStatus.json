@@ -1,7 +1,6 @@
 {
   "PlayerCharacterStatus": [
     {
-      "PlayerType": "OBJECT_PLAYER",
       "PlayerCharacterLevelDataList": [
         {
           "Level": 1,
@@ -19,7 +18,7 @@
           "EvasionRate": 100,
           "MeleeCriticalPoint": 200,
           "MagicCriticalPoint": 0,
-          "Speed": 3.0          
+          "Speed": 3.0
         },
         {
           "Level": 2,
@@ -186,3 +185,4 @@
       ]
     }
   ]
+}
