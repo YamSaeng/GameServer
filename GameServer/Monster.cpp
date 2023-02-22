@@ -47,6 +47,11 @@ void CMonster::Update()
 	// 몬스터 스킬 업데이트
 	_MonsterSkillBox.Update();
 
+	if (_RectCollision != nullptr)
+	{
+		_RectCollision->Update();
+	}
+
 	// 움직일 수 없는 상태이상에 걸릴 경우 상태에 따른 업데이트 적용하지 않게함
 	if (CheckCantControlStatusAbnormal())
 	{
@@ -700,9 +705,7 @@ void CMonster::Move()
 	bool CanMove = _Channel->GetMap()->MonsterCango(this, &NextPosition);
 	if (CanMove == true)
 	{
-		_GameObjectInfo.ObjectPositionInfo.Position = NextPosition;
-
-		_RectCollision->CollisionUpdate();
+		_GameObjectInfo.ObjectPositionInfo.Position = NextPosition;		
 
 		st_Vector2Int CollisionPosition;
 		CollisionPosition._X = (int32)_GameObjectInfo.ObjectPositionInfo.Position._X;
