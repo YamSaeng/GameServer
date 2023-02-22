@@ -31,9 +31,12 @@ CGoblin::CGoblin()
 
 	_FieldOfViewDistance = 10;	
 
-	_MonsterSkillBox.Init(_GameObjectInfo.ObjectType);
-
-	_RectCollision = new CRectCollision(this);
+	_FieldOfAngle = 210;
+	
+	_RectCollision = new CRectCollision(this);	
+	
+	_MonsterSkillBox.SetOwner(this);
+	_MonsterSkillBox.Init(_GameObjectInfo.ObjectType);	
 }
 
 CGoblin::~CGoblin()
@@ -82,10 +85,7 @@ bool CGoblin::OnDamaged(CGameObject* Attacker, int32 Damage)
 
 void CGoblin::PositionReset()
 {
-	if (_RectCollision != nullptr)
-	{
-		_RectCollision->CollisionUpdate();
-	}	
+	
 }
 
 bool CGoblin::UpdateSpawnIdle()
