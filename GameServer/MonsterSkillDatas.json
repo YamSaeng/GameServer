@@ -24,8 +24,28 @@
               "SkillDebufAttackSpeed": 0,
               "SkillDebufMovingSpeed": 0,
               "StatusAbnormalityProbability": 0,              
-              "NextComboSkill": "SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK",
               "SkillExplanation": "%d 거리의 대상에게 %d초 동안 %d초 마다 1 ~ 5 만큼 데미지를 입힌다."
+            }
+          ]
+        }
+      ],
+      "GoblinSkillList": [
+        {
+          "PassiveSkillList": [
+            {
+
+            }
+          ],
+          "ActiveSkillList": [
+            {
+              "SkillType": "SKILL_GOBLIN_ACTIVE_MELEE_DEFAULT_ATTACK",
+              "SkillName": "고블린 일반 근접 공격",
+              "SkillMinDamage": 1,
+              "SkillMaxDamage": 5,
+              "SkillCoolTime": 1000,
+              "SkillCastingTime": 0,
+              "SkillDistance": 1.5,              
+              "SkillExplanation": "%0.1f 거리의 대상에게 데미지를 가한다."
             }
           ]
         }
