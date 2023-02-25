@@ -449,8 +449,7 @@ enum class en_ResourceName : int16
 	CLIENT_GAMEOBJECT_CRAFTING_TABLE_SWAMILL,
 
 	CLIENT_GAMEOBJECT_DAY,
-
-	CLIENT_GAMEOBJECT_ITEM_SLIME_GEL,
+	
 	CLIENT_GAMEOBJECT_ITEM_LEATHER,
 	CLIENT_GAMEOBJECT_ITEM_BRONZE_COIN,
 	CLIENT_GAMEOBJECT_ITEM_WOOD_LOG,
@@ -2295,6 +2294,11 @@ struct st_Vector2Int
 	}	
 };
 
+struct st_RayCatingPosition
+{
+	st_Vector2 StartPosition;
+	st_Vector2 EndPosition;
+};
 
 struct st_PositionInfo
 {
