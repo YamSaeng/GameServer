@@ -1,34 +1,6 @@
 {
   "MonsterSkills": [
     {
-      "SlimeSkillList": [
-        {
-          "PassiveSkillList": [
-            {
-
-            }
-          ],
-          "ActiveSkillList": [
-            {
-              "SkillType": "SKILL_SLIME_ACTIVE_POISION_ATTACK",
-              "SkillName": "슬라임 독",
-              "SkillMinDamage": 1,
-              "SkillMaxDamage": 5,
-              "SkillCoolTime": 20000,
-              "SkillCastingTime": 2000,
-              "SkillDurationTime": 10000,
-              "SkillDotTime": 1000,
-              "SkillDistance": 5,
-              "SkillMotionTime": 1000,
-              "SkillTargetEffectTime": 0.5,
-              "SkillDebufAttackSpeed": 0,
-              "SkillDebufMovingSpeed": 0,
-              "StatusAbnormalityProbability": 0,              
-              "SkillExplanation": "%d 거리의 대상에게 %d초 동안 %d초 마다 1 ~ 5 만큼 데미지를 입힌다."
-            }
-          ]
-        }
-      ],
       "GoblinSkillList": [
         {
           "PassiveSkillList": [
