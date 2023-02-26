@@ -26,9 +26,7 @@ void CSector::Insert(CGameObject* InsertGameObject)
 	case en_GameObjectType::OBJECT_NON_PLAYER:
 		_NonPlayers.insert((CNonPlayer*)InsertGameObject);
 		break;
-	case en_GameObjectType::OBJECT_GOBLIN:
-	case en_GameObjectType::OBJECT_SLIME:
-	case en_GameObjectType::OBJECT_BEAR:
+	case en_GameObjectType::OBJECT_GOBLIN:	
 		_Monsters.insert((CMonster*)InsertGameObject);
 		break;
 	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
@@ -85,9 +83,7 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 	case en_GameObjectType::OBJECT_NON_PLAYER:
 		_NonPlayers.erase((CNonPlayer*)RemoveGameObject);
 		break;
-	case en_GameObjectType::OBJECT_GOBLIN:
-	case en_GameObjectType::OBJECT_SLIME:
-	case en_GameObjectType::OBJECT_BEAR:
+	case en_GameObjectType::OBJECT_GOBLIN:	
 		_Monsters.erase((CMonster*)RemoveGameObject);
 		break;
 	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
