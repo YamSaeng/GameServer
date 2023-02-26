@@ -56,9 +56,13 @@ bool CGoblin::OnDamaged(CGameObject* Attacker, int32 Damage)
 	bool IsDead = CMonster::OnDamaged(Attacker, Damage);
 	if (IsDead == true)
 	{
+		_RectCollision->SetActive(false);
+
 		_DeadTick = GetTickCount64() + 1500;
 
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;		
+
+		_GameObjectInfo.ObjectPositionInfo.MoveDirection = st_Vector2::Zero();
 
 		vector<st_FieldOfViewInfo> AroundPlayers = _Channel->GetMap()->GetFieldAroundPlayers(this);
 
