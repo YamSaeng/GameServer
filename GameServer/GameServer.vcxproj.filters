@@ -244,12 +244,6 @@
     <ClInclude Include="Message.h">
       <Filter>Message</Filter>
     </ClInclude>
-    <ClInclude Include="Slime.h">
-      <Filter>ContentServer\Content\GameObject\Creature\Monster</Filter>
-    </ClInclude>
-    <ClInclude Include="Bear.h">
-      <Filter>ContentServer\Content\GameObject\Creature\Monster</Filter>
-    </ClInclude>
     <ClInclude Include="Inventory.h">
       <Filter>ContentServer\Content\Inventory</Filter>
     </ClInclude>
@@ -407,12 +401,6 @@
     </ClCompile>
     <ClCompile Include="Message.cpp">
       <Filter>Message</Filter>
-    </ClCompile>
-    <ClCompile Include="Slime.cpp">
-      <Filter>ContentServer\Content\GameObject\Creature\Monster</Filter>
-    </ClCompile>
-    <ClCompile Include="Bear.cpp">
-      <Filter>ContentServer\Content\GameObject\Creature\Monster</Filter>
     </ClCompile>
     <ClCompile Include="Inventory.cpp">
       <Filter>ContentServer\Content\Inventory</Filter>
