@@ -358,22 +358,7 @@ void CChannel::Update()
 					*GameObjectJob->GameObjectJobMessage >> &DeSpawnObject;					
 
 					// 나 포함해서 주위 시야범위 플레이어 조사
-					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Map->GetFieldAroundPlayers(DeSpawnObject, false);
-
-					switch (DeSpawnObject->_GameObjectInfo.ObjectType)
-					{
-					case en_GameObjectType::OBJECT_PLAYER:	
-					case en_GameObjectType::OBJECT_GOBLIN:
-					case en_GameObjectType::OBJECT_SLIME:	
-						// 충돌 감지 박스 비활성화
-						DeSpawnObject->GetRectCollision()->SetActive(false);
-						break;							
-					}					
-
-					// 주위 시야범위 플레이어들에게 해당 오브젝트를 소환해제 하라고 알림
-					CMessage* ResObjectDeSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(DeSpawnObject->_GameObjectInfo.ObjectId);
-					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResObjectDeSpawnPacket);
-					ResObjectDeSpawnPacket->Free();
+					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Map->GetFieldAroundPlayers(DeSpawnObject, false);				
 
 					_Map->ApplyLeave(DeSpawnObject);
 				}
@@ -431,9 +416,7 @@ void CChannel::Update()
 							CMonster* EnterChannelMonster = (CMonster*)EnterObject;
 
 							// 충돌 감지 박스 활성화
-							EnterChannelMonster->GetRectCollision()->SetActive(true);
-
-							EnterChannelMonster->_FieldOfViewPlayers = _Map->GetAroundPlayers(EnterChannelMonster, false);
+							EnterChannelMonster->GetRectCollision()->SetActive(true);							
 							
 							EnterChannel(EnterChannelMonster, &EnterChannelMonster->_SpawnPosition);
 						}
@@ -500,13 +483,7 @@ void CChannel::Update()
 							EnterChannel(Potato, &Potato->_SpawnPosition);
 						}
 						break;
-					}										
-
-					//G_Logger->WriteStdOut(en_Color::RED, L"ObjectID %d EnterChannel\n", EnterObject->_GameObjectInfo.ObjectId);
-
-					CMessage* SpawnObjectPacket = G_ObjectManager->GameServer->MakePacketResObjectSpawn(EnterObject);
-					G_ObjectManager->GameServer->SendPacketFieldOfView(EnterObject, SpawnObjectPacket);
-					SpawnObjectPacket->Free();					
+					}																		
 				}
 				break;
 			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_LEAVE:
@@ -1298,8 +1275,7 @@ vector<CGameObject*> CChannel::FindAttackChannelObjects(vector<st_FieldOfViewInf
 				{
 					if (_ChannelPlayerArray[i] != nullptr
 						&& _ChannelPlayerArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID
-						&& _ChannelPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE
-						&& _ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::READY_DEAD
+						&& _ChannelPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE						
 						&& _ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 					{	
 						if (st_Vector2::CheckFieldOfView(_ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, 
@@ -1346,8 +1322,7 @@ vector<CGameObject*> CChannel::FindAttackChannelObjects(vector<st_FieldOfViewInf
 				for (int32 i = 0; i < en_Channel::CHANNEL_MONSTER_MAX; i++)
 				{
 					if (_ChannelMonsterArray[i] != nullptr 
-						&& _ChannelMonsterArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID
-						&& _ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::READY_DEAD
+						&& _ChannelMonsterArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID						
 						&& _ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 					{
 						if (st_Vector2::CheckFieldOfView(_ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.Position,
@@ -1379,8 +1354,7 @@ vector<CGameObject*> CChannel::FindRangeAttackChannelObjects(CGameObject* Object
 	{
 		if (_ChannelPlayerArray[i] != nullptr			
 			&& _ChannelPlayerArray[i]->_GameObjectInfo.ObjectId != Object->_GameObjectInfo.ObjectId
-			&& _ChannelPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE
-			&& _ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::READY_DEAD
+			&& _ChannelPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE			
 			&& _ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 		{
 			float TargetDistance = st_Vector2::Distance(_ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
@@ -1406,8 +1380,7 @@ vector<CGameObject*> CChannel::FindRangeAttackChannelObjects(CGameObject* Object
 
 	for (int32 i = 0; i < en_Channel::CHANNEL_MONSTER_MAX; i++)
 	{
-		if (_ChannelMonsterArray[i] != nullptr
-			&& _ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::READY_DEAD
+		if (_ChannelMonsterArray[i] != nullptr			
 			&& _ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 		{
 			float TargetDistance = st_Vector2::Distance(_ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.Position,
@@ -2018,7 +1991,7 @@ void CChannel::ExperienceCalculate(CPlayer* TargetPlayer, en_GameObjectType Targ
 		TargetPlayer->_Experience.TotalExperience = LevelData.TotalExperience;
 	}
 
-	CGameServerMessage* ResMonsterGetExpMessage = G_ObjectManager->GameServer->MakePacketExperience(TargetMonsterObjectType,
+	CGameServerMessage* ResMonsterGetExpMessage = G_ObjectManager->GameServer->MakePacketExperience(
 		ExperiencePoint,
 		TargetPlayer->_Experience.CurrentExperience,
 		TargetPlayer->_Experience.RequireExperience,
