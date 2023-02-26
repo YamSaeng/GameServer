@@ -50,9 +50,7 @@ public:
 	// 수양 스킬 데이터
 	//------------------------------------------------------
 	map<int16, st_SkillInfo*> _DisciplineSkillDatas;	
-
-	// 슬라임 스킬 데이터
-	map<int16, st_SkillInfo*> _SlimeSkillDatas;	
+	
 	// 고블린 기술 데이터
 	map<int16, st_SkillInfo*> _GoblinSkillDatas;
 

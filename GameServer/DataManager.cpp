@@ -432,11 +432,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_LEATHER")
 			{
 				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER;
-			}
-			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL")
-			{
-				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL;
-			}
+			}			
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN")
 			{
 				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN;
@@ -808,17 +804,9 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 
 		en_GameObjectType MonsterType = en_GameObjectType::OBJECT_NON_TYPE;
 
-		if (MonsterName == "슬라임")
-		{
-			MonsterType = en_GameObjectType::OBJECT_SLIME;
-		}
-		else if (MonsterName == "고블린")
+		if (MonsterName == "고블린")
 		{
 			MonsterType = en_GameObjectType::OBJECT_GOBLIN;
-		}
-		else if (MonsterName == "곰")
-		{
-			MonsterType = en_GameObjectType::OBJECT_BEAR;
 		}		
 
 		MonsterData->MonsterName = MonsterName;
@@ -883,11 +871,7 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 
 			st_DropData DropData;
 
-			if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL")
-			{
-				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL;
-			}
-			else if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_LEATHER")
+			if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_LEATHER")
 			{
 				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER;
 			}
@@ -1788,89 +1772,35 @@ void CDataManager::LoadDataMonsterSkill(wstring LoadFileName)
 	Document.Parse(FileStr);
 
 	for (auto& Filed : Document["MonsterSkills"].GetArray())
-	{
-		for (auto& SlimeMonsterSkills : Filed["SlimeSkillList"].GetArray())
-		{
-			for (auto& SlimePassiveSkillFiled : SlimeMonsterSkills["PassiveSkillList"].GetArray())
-			{
-
-			}
-
-			for (auto& SlimeActiveSkillFiled : SlimeMonsterSkills["ActiveSkillList"].GetArray())
-			{
-				st_SkillInfo* SlimeAttackSkill = new st_SkillInfo();
-				SlimeAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_MONSTER_MELEE;
-				SlimeAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
-
-				string SkillType = SlimeActiveSkillFiled["SkillType"].GetString();
-				string SkillName = SlimeActiveSkillFiled["SkillName"].GetString();
-				int SkillLevel = SlimeActiveSkillFiled["SkillLevel"].GetInt();
-				int SkillMinDamage = SlimeActiveSkillFiled["SkillMinDamage"].GetInt();
-				int SkillMaxDamage = SlimeActiveSkillFiled["SkillMaxDamage"].GetInt();
-				int SkillCoolTime = SlimeActiveSkillFiled["SkillCoolTime"].GetInt();
-				int SkillCastingTime = SlimeActiveSkillFiled["SkillCastingTime"].GetInt();
-				int64 SkillDurationTime = SlimeActiveSkillFiled["SkillDurationTime"].GetInt64();
-				int64 SkillDotTime = SlimeActiveSkillFiled["SkillDotTime"].GetInt64();
-				float SkillDistance = SlimeActiveSkillFiled["SkillDistance"].GetFloat();
-				int32 SkillMotionTime = SlimeActiveSkillFiled["SkillMotionTime"].GetInt();
-				float SkillTargetEffectTime = SlimeActiveSkillFiled["SkillTargetEffectTime"].GetFloat();
-				int8 SkillDebufAttackSpeed = (int8)SlimeActiveSkillFiled["SkillDebufAttackSpeed"].GetInt();
-				int8 SkillDebufMovingSpeed = (int8)SlimeActiveSkillFiled["SkillDebufMovingSpeed"].GetInt();
-				int8 StatusAbnormalityProbability = (int8)SlimeActiveSkillFiled["StatusAbnormalityProbability"].GetInt();				
-
-				if (SkillType == "SKILL_SLIME_ACTIVE_POISION_ATTACK")
-				{
-					SlimeAttackSkill->SkillType = en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK;
-				}
-
-				SlimeAttackSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_NONE;
-				SlimeAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());				
-				SlimeAttackSkill->SkillLevel = SkillLevel;
-				SlimeAttackSkill->SkillMinDamage = SkillMinDamage;
-				SlimeAttackSkill->SkillMaxDamage = SkillMaxDamage;
-				SlimeAttackSkill->SkillCoolTime = SkillCoolTime;
-				SlimeAttackSkill->SkillCastingTime = SkillCastingTime;
-				SlimeAttackSkill->SkillDurationTime = SkillDurationTime;
-				SlimeAttackSkill->SkillDotTime = SkillDotTime;
-				SlimeAttackSkill->SkillDistance = SkillDistance;
-				SlimeAttackSkill->SkillMotionTime = SkillMotionTime;
-				SlimeAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
-				SlimeAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
-				SlimeAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
-				SlimeAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;								
-
-				_SlimeSkillDatas.insert(pair<int16, st_SkillInfo*>((int16)SlimeAttackSkill->SkillType, SlimeAttackSkill));
-			}
-		}		
-
+	{		
 		for (auto& GoblinMonsterSkills : Filed["GoblinSkillList"].GetArray())
 		{
-			for (auto& SlimePassiveSkillFiled : GoblinMonsterSkills["PassiveSkillList"].GetArray())
+			for (auto& GoblinPassiveSkillFiled : GoblinMonsterSkills["PassiveSkillList"].GetArray())
 			{
 
 			}
 
-			for (auto& SlimeActiveSkillFiled : GoblinMonsterSkills["ActiveSkillList"].GetArray())
+			for (auto& GoblinActiveSkillFiled : GoblinMonsterSkills["ActiveSkillList"].GetArray())
 			{
 				st_SkillInfo* GoblinActiveSkill = new st_SkillInfo();
 				GoblinActiveSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_MONSTER_MELEE;
 				GoblinActiveSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
 
-				string SkillType = SlimeActiveSkillFiled["SkillType"].GetString();
-				string SkillName = SlimeActiveSkillFiled["SkillName"].GetString();
-				int SkillLevel = SlimeActiveSkillFiled["SkillLevel"].GetInt();
-				int SkillMinDamage = SlimeActiveSkillFiled["SkillMinDamage"].GetInt();
-				int SkillMaxDamage = SlimeActiveSkillFiled["SkillMaxDamage"].GetInt();
-				int SkillCoolTime = SlimeActiveSkillFiled["SkillCoolTime"].GetInt();
-				int SkillCastingTime = SlimeActiveSkillFiled["SkillCastingTime"].GetInt();
-				int64 SkillDurationTime = SlimeActiveSkillFiled["SkillDurationTime"].GetInt64();
-				int64 SkillDotTime = SlimeActiveSkillFiled["SkillDotTime"].GetInt64();
-				float SkillDistance = SlimeActiveSkillFiled["SkillDistance"].GetFloat();
-				int32 SkillMotionTime = SlimeActiveSkillFiled["SkillMotionTime"].GetInt();
-				float SkillTargetEffectTime = SlimeActiveSkillFiled["SkillTargetEffectTime"].GetFloat();
-				int8 SkillDebufAttackSpeed = (int8)SlimeActiveSkillFiled["SkillDebufAttackSpeed"].GetInt();
-				int8 SkillDebufMovingSpeed = (int8)SlimeActiveSkillFiled["SkillDebufMovingSpeed"].GetInt();
-				int8 StatusAbnormalityProbability = (int8)SlimeActiveSkillFiled["StatusAbnormalityProbability"].GetInt();				
+				string SkillType = GoblinActiveSkillFiled["SkillType"].GetString();
+				string SkillName = GoblinActiveSkillFiled["SkillName"].GetString();
+				int SkillLevel = GoblinActiveSkillFiled["SkillLevel"].GetInt();
+				int SkillMinDamage = GoblinActiveSkillFiled["SkillMinDamage"].GetInt();
+				int SkillMaxDamage = GoblinActiveSkillFiled["SkillMaxDamage"].GetInt();
+				int SkillCoolTime = GoblinActiveSkillFiled["SkillCoolTime"].GetInt();
+				int SkillCastingTime = GoblinActiveSkillFiled["SkillCastingTime"].GetInt();
+				int64 SkillDurationTime = GoblinActiveSkillFiled["SkillDurationTime"].GetInt64();
+				int64 SkillDotTime = GoblinActiveSkillFiled["SkillDotTime"].GetInt64();
+				float SkillDistance = GoblinActiveSkillFiled["SkillDistance"].GetFloat();
+				int32 SkillMotionTime = GoblinActiveSkillFiled["SkillMotionTime"].GetInt();
+				float SkillTargetEffectTime = GoblinActiveSkillFiled["SkillTargetEffectTime"].GetFloat();
+				int8 SkillDebufAttackSpeed = (int8)GoblinActiveSkillFiled["SkillDebufAttackSpeed"].GetInt();
+				int8 SkillDebufMovingSpeed = (int8)GoblinActiveSkillFiled["SkillDebufMovingSpeed"].GetInt();
+				int8 StatusAbnormalityProbability = (int8)GoblinActiveSkillFiled["StatusAbnormalityProbability"].GetInt();				
 
 				if (SkillType == "SKILL_GOBLIN_ACTIVE_MELEE_DEFAULT_ATTACK")
 				{
@@ -2422,9 +2352,7 @@ st_SkillInfo* CDataManager::FindSkillData(en_SkillType FindSkillType)
 	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_WEAPON_POISON:
 		return (*_AssassinationSkillDatas.find((int16)FindSkillType)).second;
 	case en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING:
-		return (*_ShootingSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK:
-		return (*_SlimeSkillDatas.find((int16)FindSkillType)).second;
+		return (*_ShootingSkillDatas.find((int16)FindSkillType)).second;	
 	case en_SkillType::SKILL_GOBLIN_ACTIVE_MELEE_DEFAULT_ATTACK:
 		return (*_GoblinSkillDatas.find((int16)FindSkillType)).second;
 	}	
@@ -2440,11 +2368,7 @@ st_StatInfo* CDataManager::FindObjectStatusData(en_GameObjectType GameObjectType
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 		return (*_PlayerStatus.find(Level)).second;	
 	case en_GameObjectType::OBJECT_GOBLIN:
-		break;
-	case en_GameObjectType::OBJECT_SLIME:
-		break;
-	case en_GameObjectType::OBJECT_BEAR:
-		break;
+		break;	
 	case en_GameObjectType::OBJECT_STONE:
 		break;
 	case en_GameObjectType::OBJECT_TREE:
@@ -2461,9 +2385,7 @@ int32 CDataManager::FindMonsterExperienceData(en_GameObjectType MonsterGameObjec
 {
 	switch (MonsterGameObjectType)
 	{		
-	case en_GameObjectType::OBJECT_GOBLIN:
-	case en_GameObjectType::OBJECT_SLIME:		
-	case en_GameObjectType::OBJECT_BEAR:		
+	case en_GameObjectType::OBJECT_GOBLIN:	
 		return (*_Monsters.find(MonsterGameObjectType)).second->GetExpPoint;
 	}
 }
