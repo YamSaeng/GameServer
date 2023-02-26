@@ -131,8 +131,7 @@ enum class en_CreatureState : int8
 	ATTACK,
 	SPELL,
 	GATHERING,
-	CRAFTING,
-	READY_DEAD,
+	CRAFTING,	
 	DEAD
 };
 
@@ -2305,7 +2304,8 @@ struct st_PositionInfo
 	en_CreatureState State;
 	st_Vector2Int CollisionPosition;
 	st_Vector2 Position;
-	st_Vector2 Direction;	
+	st_Vector2 LookAtDireciton;
+	st_Vector2 MoveDirection;
 };
 
 struct st_StatInfo
