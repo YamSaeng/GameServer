@@ -109,12 +109,12 @@
           "ChaseDistance": 10.0,
           "SearchTick": 500,
           "PatrolTick": 2000,
-          "AttackTick": 600,
+          "AttackTick": 1000,
           "MovingAttackRange": 1.5,
           "AttackRange": 1.8,
           "GetDPPoint": 10,
           "GetExpPoint": 20,
-          "ReSpawnTime": 5000
+          "ReSpawnTime": 3000
         }
       ],
       "MonsterDropData": [

@@ -44,7 +44,7 @@
               "SkillMaxDamage": 5,
               "SkillCoolTime": 1000,
               "SkillCastingTime": 0,
-              "SkillDistance": 1.5,              
+              "SkillDistance": 1.8,              
               "SkillExplanation": "%0.1f 거리의 대상에게 데미지를 가한다."
             }
           ]
