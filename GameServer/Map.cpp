@@ -469,7 +469,7 @@ CGameObject* CMap::MonsterReqFindNearPlayer(CMonster* Monster, en_MonsterAggroTy
 	CHeap<int16, CPlayer*> Distances((int32)Players.size()); // 가까운 순서대로 
 	for (CPlayer* Player : Players)
 	{
-		if (Player->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::READY_DEAD && Player->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
+		if (Player->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 		{
 			Distances.InsertHeap(st_Vector2Int::Distance(Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Monster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition), Player);
 		}
@@ -601,7 +601,7 @@ bool CMap::Cango(CGameObject* Object, OUT st_Vector2* NextPosition)
 	CheckPosition._X = Object->_GameObjectInfo.ObjectPositionInfo.Position._X;
 	CheckPosition._Y = Object->_GameObjectInfo.ObjectPositionInfo.Position._Y;
 	
-	st_Vector2 DirectionNormal = Object->_GameObjectInfo.ObjectPositionInfo.Direction.Normalize();
+	st_Vector2 DirectionNormal = Object->_GameObjectInfo.ObjectPositionInfo.MoveDirection.Normalize();
 
 	CheckPosition._Y += (DirectionNormal._Y * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 	CheckPosition._X += (DirectionNormal._X * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
@@ -638,9 +638,7 @@ bool CMap::MoveCollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, 
 	case en_MapObjectInfo::TILE_MAP_NONE:
 	case en_MapObjectInfo::TILE_MAP_TREE:
 	case en_MapObjectInfo::TILE_MAP_STONE:
-	case en_MapObjectInfo::TILE_MAP_GOBLIN:
-	case en_MapObjectInfo::TILE_MAP_SLIME:
-	case en_MapObjectInfo::TILE_MAP_BEAR:	
+	case en_MapObjectInfo::TILE_MAP_GOBLIN:		
 	case en_MapObjectInfo::TILE_MAP_POTATO:		
 		IsCollisionMapInfo = true;
 		break;
@@ -681,8 +679,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	case en_GameObjectType::OBJECT_PLAYER:	
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 	case en_GameObjectType::OBJECT_NON_PLAYER:
-	case en_GameObjectType::OBJECT_GOBLIN:
-	case en_GameObjectType::OBJECT_SLIME:
+	case en_GameObjectType::OBJECT_GOBLIN:	
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 		{
@@ -852,8 +849,7 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 	{
 	case en_GameObjectType::OBJECT_PLAYER:	
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
-	case en_GameObjectType::OBJECT_GOBLIN:
-	case en_GameObjectType::OBJECT_SLIME:
+	case en_GameObjectType::OBJECT_GOBLIN:	
 	{
 		// 맵에서 제거
 		if (_ObjectsInfos[Y][X] == GameObject)
@@ -920,7 +916,7 @@ bool CMap::MonsterCango(CGameObject* Object, OUT st_Vector2* NextPosition)
 	CheckPosition._X = Object->_GameObjectInfo.ObjectPositionInfo.Position._X;
 	CheckPosition._Y = Object->_GameObjectInfo.ObjectPositionInfo.Position._Y;
 
-	st_Vector2 DirectionNormal = Object->_GameObjectInfo.ObjectPositionInfo.Direction.Normalize();
+	st_Vector2 DirectionNormal = Object->_GameObjectInfo.ObjectPositionInfo.MoveDirection.Normalize();
 
 	CheckPosition._Y += (DirectionNormal._Y * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 	CheckPosition._X += (DirectionNormal._X * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
@@ -1151,9 +1147,7 @@ bool CMap::FindPathNextPositionCango(CGameObject* Object, st_Vector2Int& NextPos
 	case en_MapObjectInfo::TILE_MAP_NONE:
 	case en_MapObjectInfo::TILE_MAP_TREE:
 	case en_MapObjectInfo::TILE_MAP_STONE:
-	case en_MapObjectInfo::TILE_MAP_GOBLIN:
-	case en_MapObjectInfo::TILE_MAP_SLIME:
-	case en_MapObjectInfo::TILE_MAP_BEAR:
+	case en_MapObjectInfo::TILE_MAP_GOBLIN:	
 	case en_MapObjectInfo::TILE_MAP_POTATO:
 		IsCollisionMapInfo = true;
 		break;
@@ -1167,8 +1161,7 @@ bool CMap::FindPathNextPositionCango(CGameObject* Object, st_Vector2Int& NextPos
 
 	switch (Object->_GameObjectInfo.ObjectType)
 	{
-	case en_GameObjectType::OBJECT_GOBLIN:
-	case en_GameObjectType::OBJECT_SLIME:
+	case en_GameObjectType::OBJECT_GOBLIN:	
 		// 오브젝트 위치 배열이 비워 있을 경우 true 반환
 		if (_ObjectsInfos[Y][X] == nullptr)
 		{			
@@ -1183,8 +1176,7 @@ bool CMap::FindPathNextPositionCango(CGameObject* Object, st_Vector2Int& NextPos
 			}
 			else // 안에 있는 오브젝트가 다른 오브젝트일 경우
 			{
-				if (_ObjectsInfos[Y][X]->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::READY_DEAD
-					|| _ObjectsInfos[Y][X]->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::DEAD)
+				if (_ObjectsInfos[Y][X]->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::DEAD)
 				{
 					ObjectCheck = true;
 				}
