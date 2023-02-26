@@ -409,9 +409,7 @@ void CChannel::Update()
 										
 					switch (EnterObject->_GameObjectInfo.ObjectType)
 					{
-					case en_GameObjectType::OBJECT_GOBLIN:
-					case en_GameObjectType::OBJECT_SLIME:
-					case en_GameObjectType::OBJECT_BEAR:
+					case en_GameObjectType::OBJECT_GOBLIN:					
 						{
 							CMonster* EnterChannelMonster = (CMonster*)EnterObject;
 
@@ -923,9 +921,7 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 		}
 		break;
 	case en_GameObjectType::OBJECT_MONSTER:
-	case en_GameObjectType::OBJECT_GOBLIN:
-	case en_GameObjectType::OBJECT_SLIME:
-	case en_GameObjectType::OBJECT_BEAR:
+	case en_GameObjectType::OBJECT_GOBLIN:	
 		{
 			for (int32 i = 0; i < en_Channel::CHANNEL_MONSTER_MAX; i++)
 			{
@@ -1036,9 +1032,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(en_GameObjectType GameObjectTy
 		}
 		break;
 	case en_GameObjectType::OBJECT_MONSTER:
-	case en_GameObjectType::OBJECT_GOBLIN:
-	case en_GameObjectType::OBJECT_SLIME:
-	case en_GameObjectType::OBJECT_BEAR:
+	case en_GameObjectType::OBJECT_GOBLIN:	
 		for (int32 i = 0; i < en_Channel::CHANNEL_MONSTER_MAX; i++)
 		{
 			if (_ChannelMonsterArray[i] != nullptr)
@@ -1164,9 +1158,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 			}
 			break;
 		case en_GameObjectType::OBJECT_MONSTER:
-		case en_GameObjectType::OBJECT_GOBLIN:
-		case en_GameObjectType::OBJECT_SLIME:
-		case en_GameObjectType::OBJECT_BEAR:
+		case en_GameObjectType::OBJECT_GOBLIN:		
 			{
 				for (int32 i = 0; i < en_Channel::CHANNEL_MONSTER_MAX; i++)
 				{
@@ -1315,9 +1307,7 @@ vector<CGameObject*> CChannel::FindAttackChannelObjects(vector<st_FieldOfViewInf
 			}
 			break;
 		case en_GameObjectType::OBJECT_MONSTER:
-		case en_GameObjectType::OBJECT_GOBLIN:
-		case en_GameObjectType::OBJECT_SLIME:
-		case en_GameObjectType::OBJECT_BEAR:
+		case en_GameObjectType::OBJECT_GOBLIN:		
 			{
 				for (int32 i = 0; i < en_Channel::CHANNEL_MONSTER_MAX; i++)
 				{
@@ -1708,9 +1698,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			}
 		}
 		break;
-	case en_GameObjectType::OBJECT_GOBLIN:
-	case en_GameObjectType::OBJECT_SLIME:
-	case en_GameObjectType::OBJECT_BEAR:
+	case en_GameObjectType::OBJECT_GOBLIN:	
 		{		
 			// 몬스터로 형변환	
 			CMonster* EnterChannelMonster = dynamic_cast<CMonster*>(EnterChannelGameObject);
@@ -1884,9 +1872,7 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 	case en_GameObjectType::OBJECT_NON_PLAYER:
 		_ChannelNonPlayerArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
 		break;
-	case en_GameObjectType::OBJECT_GOBLIN:
-	case en_GameObjectType::OBJECT_SLIME:
-	case en_GameObjectType::OBJECT_BEAR:		
+	case en_GameObjectType::OBJECT_GOBLIN:			
 		_ChannelMonsterArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
 		break;
 	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
