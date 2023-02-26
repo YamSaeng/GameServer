@@ -56,15 +56,17 @@ bool CGoblin::OnDamaged(CGameObject* Attacker, int32 Damage)
 	bool IsDead = CMonster::OnDamaged(Attacker, Damage);
 	if (IsDead == true)
 	{
-		_DeadReadyTick = GetTickCount64() + 1500;
+		_DeadTick = GetTickCount64() + 1500;
 
-		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::READY_DEAD;
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;		
 
-		CMessage* ResChangeStatePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
-			_GameObjectInfo.ObjectType,
-			_GameObjectInfo.ObjectPositionInfo.State);
-		G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResChangeStatePacket);
-		ResChangeStatePacket->Free();
+		vector<st_FieldOfViewInfo> AroundPlayers = _Channel->GetMap()->GetFieldAroundPlayers(this);
+
+		CMessage* ResMoveStopPacket = G_ObjectManager->GameServer->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
+			_GameObjectInfo.ObjectPositionInfo.Position._X,
+			_GameObjectInfo.ObjectPositionInfo.Position._Y);
+		G_ObjectManager->GameServer->SendPacketFieldOfView(AroundPlayers, ResMoveStopPacket);
+		ResMoveStopPacket->Free();
 
 		G_ObjectManager->ObjectItemSpawn(_Channel, Attacker->_GameObjectInfo.ObjectId,
 			Attacker->_GameObjectInfo.ObjectType,
@@ -111,11 +113,6 @@ void CGoblin::UpdateMoving()
 void CGoblin::UpdateAttack()
 {
 	CMonster::UpdateAttack();
-}
-
-void CGoblin::UpdateReadyDead()
-{
-	CMonster::UpdateReadyDead();
 }
 
 void CGoblin::UpdateDead()

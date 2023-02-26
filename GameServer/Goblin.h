@@ -16,8 +16,7 @@ protected:
 	virtual void UpdateIdle() override;
 	virtual void UpdatePatrol() override;
 	virtual void UpdateMoving() override;
-	virtual void UpdateAttack() override;
-	virtual void UpdateReadyDead() override;
+	virtual void UpdateAttack() override;	
 	virtual void UpdateDead() override;
 };
 
