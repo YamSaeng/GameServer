@@ -177,15 +177,16 @@ protected:
 	uint64 _FieldOfViewUpdateTick;
 
 	//------------------------------------
-	// Á×À½ ÁØºñ Æ½
-	//------------------------------------
-	uint64 _DeadReadyTick;	
-
-	//------------------------------------
 	// Á×À½ Æ½
 	//------------------------------------
 	uint64 _DeadTick;	
 
+	//------------------------------------
+	// Àç¼ÒÈ¯ Æ½
+	//------------------------------------
+	uint64 _ReSpawnTick;	
+
+	virtual void UpdateSpawnReady();
 	virtual bool UpdateSpawnIdle();
 	virtual void UpdateIdle();
 	virtual void UpdatePatrol();
@@ -194,8 +195,7 @@ protected:
 	virtual void UpdateAttack();
 	virtual void UpdateSpell();
 	virtual void UpdateGathering();
-	virtual void UpdateCrafting();
-	virtual void UpdateReadyDead();
+	virtual void UpdateCrafting();	
 	virtual void UpdateDead();	
 
 	void CheckBufDeBufSkill();

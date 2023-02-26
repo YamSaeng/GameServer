@@ -94,8 +94,10 @@ void CGameObject::Update()
 						
 				if (CheckPositionX < 1.0f && CheckPositionY < 1.0f)
 				{
-					_GameObjectInfo.ObjectPositionInfo.Direction._X = DirectionX;
-					_GameObjectInfo.ObjectPositionInfo.Direction._Y = DirectionY;
+					_GameObjectInfo.ObjectPositionInfo.LookAtDireciton._X = DirectionX;
+					_GameObjectInfo.ObjectPositionInfo.LookAtDireciton._Y = DirectionY;
+					_GameObjectInfo.ObjectPositionInfo.MoveDirection._X = DirectionX;
+					_GameObjectInfo.ObjectPositionInfo.MoveDirection._Y = DirectionY;
 
 					_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
 				}	
@@ -121,6 +123,7 @@ void CGameObject::Update()
 				*GameObjectJob->GameObjectJobMessage >> GameObjectState;
 			
 				_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+				_GameObjectInfo.ObjectPositionInfo.MoveDirection = st_Vector2::Zero();
 
 				float CheckPositionX = abs(_GameObjectInfo.ObjectPositionInfo.Position._X - PositionX);
 				float CheckPositionY = abs(_GameObjectInfo.ObjectPositionInfo.Position._Y - PositionY);
@@ -701,8 +704,7 @@ void CGameObject::Update()
 					CPlayer* Player = dynamic_cast<CPlayer*>(this);
 					if (Player != nullptr)
 					{
-						if (GatheringTarget != nullptr
-							&& Crop->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::READY_DEAD
+						if (GatheringTarget != nullptr							
 							&& Crop->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 						{
 							st_Vector2 DirNormalVector = (Crop->_GameObjectInfo.ObjectPositionInfo.Position - _GameObjectInfo.ObjectPositionInfo.Position).Normalize();							
@@ -873,6 +875,10 @@ void CGameObject::Update()
 					if (IsDead == true)
 					{
 						End();
+
+						CMessage* ResDieMessagePacket = G_ObjectManager->GameServer->MakePacketObjectDie(_GameObjectInfo.ObjectId);
+						G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResDieMessagePacket);
+						ResDieMessagePacket->Free();
 
 						if (Attacker->IsPlayer())
 						{
@@ -1754,6 +1760,11 @@ void CGameObject::SetMeleeSkill(CSkill* MeleeSkill)
 	_MeleeSkill = MeleeSkill;
 }
 
+void CGameObject::UpdateSpawnReady()
+{
+	
+}
+
 bool CGameObject::UpdateSpawnIdle()
 {
 	if (_SpawnIdleTick > GetTickCount64())
@@ -1795,10 +1806,6 @@ void CGameObject::UpdateGathering()
 }
 
 void CGameObject::UpdateCrafting()
-{
-}
-
-void CGameObject::UpdateReadyDead()
 {
 }
 
