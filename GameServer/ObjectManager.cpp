@@ -18,9 +18,7 @@ CObjectManager::CObjectManager()
 {
 	_PlayerMemoryPool = new CMemoryPoolTLS<CPlayer>();
 	_NonPlayerMemoryPool = new CMemoryPoolTLS<CNonPlayer>();
-	_GoblinMemoryPool = new CMemoryPoolTLS<CGoblin>();
-	_SlimeMemoryPool = new CMemoryPoolTLS<CSlime>();
-	_BearMemoryPool = new CMemoryPoolTLS<CBear>();
+	_GoblinMemoryPool = new CMemoryPoolTLS<CGoblin>();	
 
 	_ItemMemoryPool = new CMemoryPoolTLS<CItem>();
 	_WeaponMemoryPool = new CMemoryPoolTLS<CWeaponItem>();
@@ -76,9 +74,7 @@ CObjectManager::CObjectManager()
 CObjectManager::~CObjectManager()
 {
 	delete _PlayerMemoryPool;
-	delete _GoblinMemoryPool;
-	delete _SlimeMemoryPool;
-	delete _BearMemoryPool;
+	delete _GoblinMemoryPool;	
 	delete _WeaponMemoryPool;
 	delete _MaterialMemoryPool;
 	delete _ConsumableMemoryPool;
@@ -105,12 +101,6 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 		break;
 	case en_GameObjectType::OBJECT_GOBLIN:
 		NewObject = _GoblinMemoryPool->Alloc();
-		break;
-	case en_GameObjectType::OBJECT_SLIME:
-		NewObject = _SlimeMemoryPool->Alloc();
-		break;
-	case en_GameObjectType::OBJECT_BEAR:
-		NewObject = _BearMemoryPool->Alloc();
 		break;	
 	case en_GameObjectType::OBJECT_STONE:
 		NewObject = _StoneMemoryPool->Alloc();
@@ -155,13 +145,7 @@ void CObjectManager::ObjectReturn(CGameObject* ReturnObject)
 			break;
 		case en_GameObjectType::OBJECT_GOBLIN:
 			_GoblinMemoryPool->Free((CGoblin*)ReturnObject);
-			break;
-		case en_GameObjectType::OBJECT_SLIME:
-			_SlimeMemoryPool->Free((CSlime*)ReturnObject);
-			break;
-		case en_GameObjectType::OBJECT_BEAR:
-			_BearMemoryPool->Free((CBear*)ReturnObject);
-			break;
+			break;		
 		case en_GameObjectType::OBJECT_STONE:
 			_StoneMemoryPool->Free((CStone*)ReturnObject);
 			break;
@@ -349,12 +333,6 @@ void CObjectManager::MapObjectSpawn(int64& MapID)
 				break;
 			case en_MapObjectInfo::TILE_MAP_GOBLIN:
 				NewObject = ObjectCreate(en_GameObjectType::OBJECT_GOBLIN);
-				break;
-			case en_MapObjectInfo::TILE_MAP_SLIME:
-				NewObject = ObjectCreate(en_GameObjectType::OBJECT_SLIME);
-				break;
-			case en_MapObjectInfo::TILE_MAP_BEAR:
-				NewObject = ObjectCreate(en_GameObjectType::OBJECT_BEAR);
 				break;			
 			case en_MapObjectInfo::TILE_MAP_FURNACE:
 				NewObject = ObjectCreate(en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE);
@@ -409,9 +387,7 @@ void CObjectManager::ObjectItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_
 
 	switch ((en_GameObjectType)SpawnItemOwnerType)
 	{
-	case en_GameObjectType::OBJECT_GOBLIN:
-	case en_GameObjectType::OBJECT_SLIME:
-	case en_GameObjectType::OBJECT_BEAR:
+	case en_GameObjectType::OBJECT_GOBLIN:	
 		{
 			auto FindMonsterDropItem = G_Datamanager->_Monsters.find(ItemDataType);
 			st_MonsterData MonsterData = *(*FindMonsterDropItem).second;

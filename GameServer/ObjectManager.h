@@ -1,9 +1,7 @@
 #pragma once
 #include "ChannelManager.h"
 #include "Player.h"
-#include "Bear.h"
 #include "Goblin.h"
-#include "Slime.h"
 #include "GameServer.h"
 #include "Environment.h"
 
@@ -44,9 +42,7 @@ private:
 
 	CMemoryPoolTLS<CPlayer>* _PlayerMemoryPool;	
 	CMemoryPoolTLS<CNonPlayer>* _NonPlayerMemoryPool;
-	CMemoryPoolTLS<CGoblin>* _GoblinMemoryPool;
-	CMemoryPoolTLS<CSlime>* _SlimeMemoryPool;
-	CMemoryPoolTLS<CBear>* _BearMemoryPool;
+	CMemoryPoolTLS<CGoblin>* _GoblinMemoryPool;	
 	CMemoryPoolTLS<CTree>* _TreeMemoryPool;
 	CMemoryPoolTLS<CStone>* _StoneMemoryPool;	
 	CMemoryPoolTLS<CFurnace>* _FurnaceMemoryPool;
