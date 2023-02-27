@@ -16,12 +16,7 @@ public:
 	// 몬스터 죽이면 얻는 ExpPoint
 	int32 _GetExpPoint;	
 
-	en_MonsterState _MonsterState;
-
-	//-------------------------------------
-	// 몬스터 시야범위 플레이어 목록
-	//-------------------------------------
-	vector<CPlayer*> _FieldOfViewPlayers;
+	en_MonsterState _MonsterState;	    
 	
 	CMonster();
 	virtual ~CMonster();	
@@ -99,6 +94,10 @@ protected:
 	//------------------------------------------------------
 	void FindTarget();
 	//------------------------
+	// Spawn Ready 상태 Update
+	//------------------------
+	virtual void UpdateSpawnReady() override;
+	//------------------------
 	// Spawn Idle 상태 Update
 	//------------------------
 	virtual bool UpdateSpawnIdle() override;
@@ -127,11 +126,7 @@ protected:
 	//------------------------
 	// Spell 상태 Update
 	//------------------------
-	virtual void UpdateSpell() override;
-	//----------------------------
-	// Ready Dead 상태 Update
-	//----------------------------
-	virtual void UpdateReadyDead() override;
+	virtual void UpdateSpell() override;	
 	//------------------------
 	// Dead 상태 Update
 	//------------------------

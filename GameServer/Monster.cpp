@@ -20,7 +20,7 @@ CMonster::CMonster()
 	_MovePoint = st_Vector2::Zero();
 	_PatrolPoint = st_Vector2::Zero();
 
-	_DeadReadyTick = 0;
+	_DeadTick = 0;
 
 	_Target = nullptr;		
 }
@@ -35,8 +35,7 @@ void CMonster::Update()
 	CGameObject::Update();
 
 	if (_Target != nullptr && 
-		(_Target->_NetworkState == en_ObjectNetworkState::LEAVE 
-			|| _Target->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::READY_DEAD
+		(_Target->_NetworkState == en_ObjectNetworkState::LEAVE 			
 			|| _Target->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::DEAD))
 	{
 		_Target = nullptr;
@@ -60,6 +59,9 @@ void CMonster::Update()
 
 	switch (_GameObjectInfo.ObjectPositionInfo.State)
 	{
+	case en_CreatureState::SPAWN_READY:
+		UpdateSpawnReady();
+		break;
 	case en_CreatureState::SPAWN_IDLE:
 		UpdateSpawnIdle();
 		break;
@@ -95,10 +97,7 @@ void CMonster::Update()
 		break;
 	case en_CreatureState::ATTACK:
 		UpdateAttack();
-		break;			
-	case en_CreatureState::READY_DEAD:
-		UpdateReadyDead();
-		break;
+		break;				
 	case en_CreatureState::DEAD:
 		UpdateDead();
 		break;
@@ -121,8 +120,7 @@ void CMonster::PositionReset()
 bool CMonster::OnDamaged(CGameObject* Attacker, int32 Damage)
 {
 	if (_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE
-		|| _GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::RETURN_SPAWN_POSITION
-		|| _GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::READY_DEAD
+		|| _GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::RETURN_SPAWN_POSITION		
 		|| _GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 	{
 		CGameObject::OnDamaged(Attacker, Damage);
@@ -183,15 +181,14 @@ void CMonster::AggroTargetListCheck()
 		if (AggroTarget != nullptr)
 		{
 			// 어그로 목록에서 삭제할 조건 
-			if (AggroTarget->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::READY_DEAD
-				|| AggroTarget->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::DEAD
+			if (AggroTarget->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::DEAD
 				|| AggroTarget->_NetworkState == en_ObjectNetworkState::LEAVE
 				|| AggroTarget->_NetworkState == en_ObjectNetworkState::READY)
 			{
 				_AggroTargetList.erase(AggroTargetIterator.first);
 			}
 
-			int16 Distance = st_Vector2Int::Distance(AggroTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, _GameObjectInfo.ObjectPositionInfo.CollisionPosition);
+			float Distance = st_Vector2::Distance(AggroTarget->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position);
 
 			if (Distance > _FieldOfViewDistance)
 			{
@@ -222,16 +219,7 @@ void CMonster::SelectTargetCheck()
 {
 	switch (_GameObjectInfo.ObjectPositionInfo.State)
 	{
-	case en_CreatureState::RETURN_SPAWN_POSITION:
-		{
-			st_Vector2Int MonsterPosition = _GameObjectInfo.ObjectPositionInfo.CollisionPosition;
-			
-			if (st_Vector2Int::Distance(_SpawnPosition, _GameObjectInfo.ObjectPositionInfo.CollisionPosition) <= 2)
-			{
-				_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-				_MonsterState = en_MonsterState::MONSTER_IDLE;				
-			}
-		}
+	case en_CreatureState::RETURN_SPAWN_POSITION:			
 		break;
 	case en_CreatureState::PATROL:
 		if (_Target != nullptr)
@@ -264,8 +252,15 @@ void CMonster::SelectTargetCheck()
 				// 목표물을 다시 찾는다.
 				SelectTarget();
 
-				// ReadyMove로 바꿔서 목표물로 가는 위치를 새로 잡음
-				_MonsterState = en_MonsterState::MONSTER_READY_MOVE;
+				if (_Target != nullptr)
+				{
+					// ReadyMove로 바꿔서 목표물로 가는 위치를 새로 잡음
+					_MonsterState = en_MonsterState::MONSTER_READY_MOVE;
+				}
+				else
+				{
+					_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::RETURN_SPAWN_POSITION;
+				}				
 			}
 						
 			if (_Target != nullptr && TargetAttackCheck(_GameObjectInfo.ObjectStatInfo.MovingAttackRange) == true)
@@ -275,10 +270,12 @@ void CMonster::SelectTargetCheck()
 
 				_DefaultAttackTick = 0;
 
-				vector<st_FieldOfViewInfo> CurrentFieldOfView = _Channel->GetMap()->GetFieldOfViewAttackObjects(this, 1);
+				vector<st_FieldOfViewInfo> CurrentFieldOfView = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
 				if (CurrentFieldOfView.size() > 0)
 				{
-					CMessage* MonsterMoveStop = G_ObjectManager->GameServer->MakePacketResMoveStop(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo.Position._X, _GameObjectInfo.ObjectPositionInfo.Position._Y);
+					CMessage* MonsterMoveStop = G_ObjectManager->GameServer->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
+						_GameObjectInfo.ObjectPositionInfo.Position._X,
+						_GameObjectInfo.ObjectPositionInfo.Position._Y);
 					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfView, MonsterMoveStop);
 					MonsterMoveStop->Free();
 				}
@@ -332,6 +329,32 @@ void CMonster::FindTarget()
 		}
 
 		_AggroTargetList.insert(pair<int64, st_Aggro>(Target->_GameObjectInfo.ObjectId, Aggro));
+	}
+}
+
+void CMonster::UpdateSpawnReady()
+{
+	if (_ReSpawnTick < GetTickCount64())
+	{
+		CMap* Map = G_MapManager->GetMap(1);
+		if (Map != nullptr)
+		{
+			CGameObject* FindObject = Map->Find(_SpawnPosition);
+			if (FindObject == nullptr)
+			{
+				// 채널에서 퇴장
+				st_GameObjectJob* LeaveChannerMonsterJob = G_ObjectManager->GameServer->MakeGameObjectJobLeaveChannel(this);
+				_Channel->_ChannelJobQue.Enqueue(LeaveChannerMonsterJob);
+
+				// 채널에서 퇴장하고 다시 입장
+				st_GameObjectJob* EnterChannelMonsterJob = G_ObjectManager->GameServer->MakeGameObjectJobObjectEnterChannel(this);
+				_Channel->_ChannelJobQue.Enqueue(EnterChannelMonsterJob);
+			}
+			else
+			{
+				_ReSpawnTick = GetTickCount64() + _ReSpawnTime;
+			}
+		}
 	}
 }
 
@@ -406,13 +429,16 @@ void CMonster::ReadyPatrol()
 
 		// 정찰 위치로 향하는 방향값 구해서 저장
 		st_Vector2 DirectionPatrolPoint = _PatrolPoint - _GameObjectInfo.ObjectPositionInfo.Position;
-		_GameObjectInfo.ObjectPositionInfo.Direction = DirectionPatrolPoint.Normalize();
+		_GameObjectInfo.ObjectPositionInfo.LookAtDireciton = DirectionPatrolPoint.Normalize();
+		_GameObjectInfo.ObjectPositionInfo.MoveDirection = DirectionPatrolPoint.Normalize();
 
 		// 주위 플레이어들에게 정찰 시작 알림
 		vector<st_FieldOfViewInfo> CurrentFieldOfView = _Channel->GetMap()->GetFieldAroundPlayers(this);
 		if (CurrentFieldOfView.size() > 0)
 		{
-			CMessage* MonsterMoveStartPacket = G_ObjectManager->GameServer->MakePacketResMove(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo.Direction._X, _GameObjectInfo.ObjectPositionInfo.Direction._Y, 
+			CMessage* MonsterMoveStartPacket = G_ObjectManager->GameServer->MakePacketResMove(_GameObjectInfo.ObjectId,
+				_GameObjectInfo.ObjectPositionInfo.LookAtDireciton._X, _GameObjectInfo.ObjectPositionInfo.LookAtDireciton._Y,
+				_GameObjectInfo.ObjectPositionInfo.MoveDirection._X, _GameObjectInfo.ObjectPositionInfo.MoveDirection._Y,
 				_GameObjectInfo.ObjectPositionInfo.Position._X, _GameObjectInfo.ObjectPositionInfo.Position._Y);
 			G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfView, MonsterMoveStartPacket);
 			MonsterMoveStartPacket->Free();
@@ -460,14 +486,17 @@ void CMonster::ReadMoving()
 		_MonsterState = en_MonsterState::MONSTER_MOVE;
 
 		// 움직임 위치로 향하는 방향값 구해서 저장
-		st_Vector2 DirectionPatrolPoint = _MovePoint - _GameObjectInfo.ObjectPositionInfo.Position;
-		_GameObjectInfo.ObjectPositionInfo.Direction = DirectionPatrolPoint.Normalize();
+		st_Vector2 DirectionMovePoint = _MovePoint - _GameObjectInfo.ObjectPositionInfo.Position;
+		_GameObjectInfo.ObjectPositionInfo.LookAtDireciton = DirectionMovePoint.Normalize();
+		_GameObjectInfo.ObjectPositionInfo.MoveDirection = DirectionMovePoint.Normalize();
 
 		// 주위 플레이어들에게 움직임 시작 알림
 		vector<st_FieldOfViewInfo> CurrentFieldOfView = _Channel->GetMap()->GetFieldAroundPlayers(this);
 		if (CurrentFieldOfView.size() > 0)
 		{
-			CMessage* MonsterMoveStartPacket = G_ObjectManager->GameServer->MakePacketResMove(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo.Direction._X, _GameObjectInfo.ObjectPositionInfo.Direction._Y,
+			CMessage* MonsterMoveStartPacket = G_ObjectManager->GameServer->MakePacketResMove(_GameObjectInfo.ObjectId,
+				_GameObjectInfo.ObjectPositionInfo.LookAtDireciton._X, _GameObjectInfo.ObjectPositionInfo.LookAtDireciton._Y,
+				_GameObjectInfo.ObjectPositionInfo.MoveDirection._X, _GameObjectInfo.ObjectPositionInfo.MoveDirection._Y,
 				_GameObjectInfo.ObjectPositionInfo.Position._X, _GameObjectInfo.ObjectPositionInfo.Position._Y);
 			G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfView, MonsterMoveStartPacket);
 			MonsterMoveStartPacket->Free();
@@ -483,12 +512,15 @@ void CMonster::UpdateMoving()
 	vector<st_FieldOfViewInfo> CurrentFieldOfView = _Channel->GetMap()->GetFieldAroundPlayers(this);
 	if (CurrentFieldOfView.size() > 0)
 	{	
-		CMessage* MonsterMoveStartPacket = G_ObjectManager->GameServer->MakePacketResMove(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo.Direction._X, _GameObjectInfo.ObjectPositionInfo.Direction._Y,
+		CMessage* MonsterMoveStartPacket = G_ObjectManager->GameServer->MakePacketResMove(_GameObjectInfo.ObjectId,
+			_GameObjectInfo.ObjectPositionInfo.LookAtDireciton._X, _GameObjectInfo.ObjectPositionInfo.LookAtDireciton._Y,
+			_GameObjectInfo.ObjectPositionInfo.MoveDirection._X, _GameObjectInfo.ObjectPositionInfo.MoveDirection._Y,
 			_GameObjectInfo.ObjectPositionInfo.Position._X, _GameObjectInfo.ObjectPositionInfo.Position._Y);
 		G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfView, MonsterMoveStartPacket);
 		MonsterMoveStartPacket->Free();		
 
-		CMessage* ResFaceDirectionPacket = G_ObjectManager->GameServer->MakePacketResFaceDirection(_GameObjectInfo.ObjectId, _Target->_GameObjectInfo.ObjectPositionInfo.Position._X, _Target->_GameObjectInfo.ObjectPositionInfo.Position._Y);
+		CMessage* ResFaceDirectionPacket = G_ObjectManager->GameServer->MakePacketResFaceDirection(_GameObjectInfo.ObjectId,
+			_Target->_GameObjectInfo.ObjectPositionInfo.Position._X, _Target->_GameObjectInfo.ObjectPositionInfo.Position._Y);
 		G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfView, ResFaceDirectionPacket);
 		ResFaceDirectionPacket->Free();
 	}		
@@ -512,9 +544,8 @@ void CMonster::UpdateReturnSpawnPosition()
 	}
 		
 	st_Vector2 DirectionVector = PositionCheck(Path[1]) - _GameObjectInfo.ObjectPositionInfo.Position;
-	st_Vector2 NormalVector = DirectionVector.Normalize();
-
-	_GameObjectInfo.ObjectPositionInfo.Direction = NormalVector;	
+	_GameObjectInfo.ObjectPositionInfo.LookAtDireciton = DirectionVector.Normalize();
+	_GameObjectInfo.ObjectPositionInfo.MoveDirection = DirectionVector.Normalize();
 
 	Move();		
 }
@@ -569,16 +600,7 @@ void CMonster::UpdateSpell()
 			if (_Target != nullptr)
 			{
 				switch (_SpellSkill->GetSkillInfo()->SkillType)
-				{
-				case en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK:
-				{
-					float Distance = st_Vector2::Distance(_Target->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position);
-					if (Distance > _SpellSkill->GetSkillInfo()->SkillDistance)
-					{
-						IsSpellSuccess = false;
-					}
-				}
-				break;
+				{				
 				default:
 					break;
 				}
@@ -618,24 +640,7 @@ void CMonster::UpdateSpell()
 							{
 								// 시전 완료된 스킬이 상대방의 버프 목록에 없을 경우
 								switch (_SpellSkill->GetSkillInfo()->SkillType)
-								{
-								case en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK:
-									{
-										CSkill* SlimePoisionAttack = G_ObjectManager->SkillCreate();
-										st_SkillInfo* SlimePoisionSkillInfo = G_ObjectManager->SkillInfoCreate(en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK, _SpellSkill->GetSkillInfo()->SkillLevel);
-										SlimePoisionAttack->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_STATUS_ABNORMAL_SKILL, SlimePoisionSkillInfo);
-										SlimePoisionAttack->StatusAbnormalDurationTimeStart();
-										SlimePoisionAttack->SetCastingUserID(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType);
-
-										SlimePoisionAttack->GetSkillInfo()->SkillOverlapStep++;
-
-										_Target->AddDebuf(SlimePoisionAttack);
-
-										CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_Target->_GameObjectInfo.ObjectId, false, SlimePoisionAttack->GetSkillInfo());
-										G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
-										ResBufDeBufSkillPacket->Free();
-									}
-									break;
+								{								
 								default:
 									break;
 								}
@@ -651,51 +656,24 @@ void CMonster::UpdateSpell()
 	}
 }
 
-void CMonster::UpdateReadyDead()
-{		
+void CMonster::UpdateDead()
+{
 	// 죽음 준비 상태에 진입하면 지정해준 시간 만큼 대기 후 로직 진행
-	if (_DeadReadyTick < GetTickCount64())
+	if (_DeadTick < GetTickCount64())
 	{
-		_DeadTick = GetTickCount64() + _ReSpawnTime;
+		_ReSpawnTick = GetTickCount64() + _ReSpawnTime;
 
-		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
-		
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_READY;
+
 		if (_Channel == nullptr)
 		{
 			CRASH("퇴장하려는 채널이 존재하지 않음");
-		}		
+		}
 
-		// 몬스터가 있었던 자리를 비우고 소환해제
+		// 몬스터가 있었던 자리를 비움
 		st_GameObjectJob* DeSpawnMonsterChannelJob = G_ObjectManager->GameServer->MakeGameObjectJobObjectDeSpawnObjectChannel(this);
 		_Channel->_ChannelJobQue.Enqueue(DeSpawnMonsterChannelJob);
-	}		
-}
-
-void CMonster::UpdateDead()
-{
-	if (_DeadTick < GetTickCount64())
-	{
-		CMap* Map = G_MapManager->GetMap(1);
-		if (Map != nullptr)
-		{
-			CGameObject* FindObject = Map->Find(_SpawnPosition);
-			if (FindObject == nullptr)
-			{				
-				_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_READY;				
-				
-				// 채널에서 퇴장
-				st_GameObjectJob* LeaveChannerMonsterJob = G_ObjectManager->GameServer->MakeGameObjectJobLeaveChannel(this);
-				_Channel->_ChannelJobQue.Enqueue(LeaveChannerMonsterJob);				
-				// 채널에서 퇴장하고 다시 입장
-				st_GameObjectJob* EnterChannelMonsterJob = G_ObjectManager->GameServer->MakeGameObjectJobObjectEnterChannel(this);
-				_Channel->_ChannelJobQue.Enqueue(EnterChannelMonsterJob);				
-			}
-			else
-			{
-				_DeadTick = GetTickCount64() + _ReSpawnTime;
-			}
-		}
-	}	
+	}
 }
 
 void CMonster::Move()
@@ -726,6 +704,7 @@ void CMonster::Move()
 				float Distance = st_Vector2::Distance(_PatrolPoint, _GameObjectInfo.ObjectPositionInfo.Position);
 				if (Distance < 0.05f)
 				{				
+					_GameObjectInfo.ObjectPositionInfo.MoveDirection = st_Vector2::Zero();
 					// 다시 정찰 지점 얻을 수 있도록 함
 					_MonsterState = en_MonsterState::MONSTER_READY_PATROL;
 					_PatrolTick = GetTickCount64() + _PatrolTickPoint;
@@ -756,6 +735,19 @@ void CMonster::Move()
 						_GameObjectInfo.ObjectPositionInfo.Position._Y);
 					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIds, ResMoveStopPacket);
 					ResMoveStopPacket->Free();
+				}
+			}
+			break;
+		case en_CreatureState::RETURN_SPAWN_POSITION:
+			{
+				_GameObjectInfo.ObjectPositionInfo.MoveDirection = st_Vector2::Zero();
+
+				st_Vector2Int MonsterPosition = _GameObjectInfo.ObjectPositionInfo.CollisionPosition;
+
+				if (st_Vector2Int::Distance(_SpawnPosition, _GameObjectInfo.ObjectPositionInfo.CollisionPosition) <= 2)
+				{
+					_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+					_MonsterState = en_MonsterState::MONSTER_IDLE;
 				}
 			}
 			break;
@@ -799,7 +791,8 @@ bool CMonster::TargetAttackCheck(float CheckDistance)
 		st_Vector2 DirectionVector = _Target->_GameObjectInfo.ObjectPositionInfo.Position - _GameObjectInfo.ObjectPositionInfo.Position;
 		st_Vector2 NormalVector = DirectionVector.Normalize();
 		
-		_GameObjectInfo.ObjectPositionInfo.Direction = NormalVector;
+		_GameObjectInfo.ObjectPositionInfo.LookAtDireciton = NormalVector;
+		_GameObjectInfo.ObjectPositionInfo.MoveDirection = st_Vector2::Zero();
 		
 		return true;
 	}
