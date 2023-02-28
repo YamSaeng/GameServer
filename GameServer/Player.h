@@ -26,9 +26,7 @@ public:
 	st_Experience _Experience;				
 	
 	// 연속기 스킬
-	CSkill* _ComboSkill;		
-
-	vector<st_RayCatingPosition> _RayCastingPositions;
+	CSkill* _ComboSkill;			
 	
 	CPlayer();	
 	~CPlayer();		
@@ -40,16 +38,15 @@ public:
 	virtual void Start() override;
 	virtual void End() override;
 
-	void RayCastingToFieldOfViewObjects();
 protected:
 	virtual bool UpdateSpawnIdle() override;
 	virtual void UpdateIdle() override;
 	virtual void UpdateMoving() override;	
 	virtual void UpdateAttack() override;
 	virtual void UpdateSpell() override;	
-	virtual void UpdateGathering() override;
-	virtual void UpdateReadyDead() override;
+	virtual void UpdateGathering() override;	
 	virtual void UpdateDead() override;
 private:
 	void CheckFieldOfViewObject();	
+	void RayCastingToFieldOfViewObjects(vector<CGameObject*>* SpawnObjects, vector<CGameObject*>* DespawnObjects);
 };
