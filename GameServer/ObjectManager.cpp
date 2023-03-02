@@ -12,10 +12,12 @@
 #include "Corn.h"
 #include "NonPlayer.h"
 #include "ChannelManager.h"
+#include "Wall.h"
 #include <atlbase.h>
 
 CObjectManager::CObjectManager()
 {
+	_WallMemoryPool = new CMemoryPoolTLS<CWall>();
 	_PlayerMemoryPool = new CMemoryPoolTLS<CPlayer>();
 	_NonPlayerMemoryPool = new CMemoryPoolTLS<CNonPlayer>();
 	_GoblinMemoryPool = new CMemoryPoolTLS<CGoblin>();	
@@ -102,6 +104,14 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 	case en_GameObjectType::OBJECT_GOBLIN:
 		NewObject = _GoblinMemoryPool->Alloc();
 		break;	
+	case en_GameObjectType::OBJECT_LEFT_RIGHT_WALL:
+	case en_GameObjectType::OBJECT_UP_DOWN_WALL:
+	case en_GameObjectType::OBJECT_UP_TO_RIGHT_WALL:
+	case en_GameObjectType::OBJECT_UP_TO_LEFT_WALL:
+	case en_GameObjectType::OBJECT_DOWN_TO_RIGHT_WALL:
+	case en_GameObjectType::OBJECT_DOWN_TO_LEFT_WALL:
+		NewObject = _WallMemoryPool->Alloc();		
+		break;
 	case en_GameObjectType::OBJECT_STONE:
 		NewObject = _StoneMemoryPool->Alloc();
 		break;
@@ -124,6 +134,7 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 
 	if (NewObject != nullptr)
 	{
+		NewObject->Init(ObjectType);
 		NewObject->_GameObjectInfo.ObjectId = InterlockedIncrement64(&_GameServerObjectId);
 	}	
 
@@ -146,6 +157,14 @@ void CObjectManager::ObjectReturn(CGameObject* ReturnObject)
 		case en_GameObjectType::OBJECT_GOBLIN:
 			_GoblinMemoryPool->Free((CGoblin*)ReturnObject);
 			break;		
+		case en_GameObjectType::OBJECT_LEFT_RIGHT_WALL:
+		case en_GameObjectType::OBJECT_UP_DOWN_WALL:
+		case en_GameObjectType::OBJECT_UP_TO_LEFT_WALL:
+		case en_GameObjectType::OBJECT_UP_TO_RIGHT_WALL:
+		case en_GameObjectType::OBJECT_DOWN_TO_LEFT_WALL:
+		case en_GameObjectType::OBJECT_DOWN_TO_RIGHT_WALL:
+			_WallMemoryPool->Free((CWall*)ReturnObject);
+			break;
 		case en_GameObjectType::OBJECT_STONE:
 			_StoneMemoryPool->Free((CStone*)ReturnObject);
 			break;
@@ -204,8 +223,7 @@ CItem* CObjectManager::ItemCreate(en_SmallItemCategory NewItemSmallCategory)
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_MANA_RESTORATION_POTION_SMALL:
 		NewItem = _ConsumableMemoryPool->Alloc();
 		break;
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:	
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN:
@@ -265,8 +283,7 @@ void CObjectManager::ItemReturn(CItem* ReturnItem)
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_POTION_MANA_RESTORATION_POTION_SMALL:
 		_ConsumableMemoryPool->Free((CConsumable*)ReturnItem);
 		break;
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:	
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN:
@@ -306,65 +323,6 @@ st_SkillInfo* CObjectManager::SkillInfoCreate(en_SkillType SkillType, int8 Skill
 void CObjectManager::SkillInfoReturn(en_SkillType SkillType, st_SkillInfo* ReturnSkillInfo)
 {
 	_SkillInfoMemoryPool->Free(ReturnSkillInfo);	
-}
-
-void CObjectManager::MapObjectSpawn(int64& MapID)
-{
-	CMap* Map = G_MapManager->GetMap(MapID);
-
-	int32 SizeX = Map->_SizeX;
-	int32 SizeY = Map->_SizeY;
-
-	for (int Y = 0; Y < SizeY; Y++)
-	{
-		for (int X = 0; X < SizeX; X++)
-		{
-			CGameObject* NewObject = nullptr;
-
-			switch (Map->_CollisionMapInfos[Y][X])
-			{
-			case en_MapObjectInfo::TILE_MAP_NONE:				
-				break;
-			case en_MapObjectInfo::TILE_MAP_TREE:
-				NewObject = ObjectCreate(en_GameObjectType::OBJECT_TREE);
-				break;
-			case en_MapObjectInfo::TILE_MAP_STONE:
-				NewObject = ObjectCreate(en_GameObjectType::OBJECT_STONE);
-				break;
-			case en_MapObjectInfo::TILE_MAP_GOBLIN:
-				NewObject = ObjectCreate(en_GameObjectType::OBJECT_GOBLIN);
-				break;			
-			case en_MapObjectInfo::TILE_MAP_FURNACE:
-				NewObject = ObjectCreate(en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE);
-				break;
-			case en_MapObjectInfo::TILE_MAP_SAMILL:
-				NewObject = ObjectCreate(en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL);
-				break;
-			case en_MapObjectInfo::TILE_MAP_POTATO:
-				NewObject = ObjectCreate(en_GameObjectType::OBJECT_CROP_POTATO);
-				break;
-			case en_MapObjectInfo::TILE_MAP_GENERAL_MERCHANT:	
-				NewObject = ObjectCreate(en_GameObjectType::OBJECT_NON_PLAYER);
-				break;
-			}
-
-			if (NewObject != nullptr)
-			{
-				int SpawnPositionX = X + Map->_Left;
-				int SpawnPositionY = Map->_Down - Y;
-
-				st_Vector2Int NewPosition;
-				NewPosition._Y = SpawnPositionY;
-				NewPosition._X = SpawnPositionX;
-
-				NewObject->_SpawnPosition = NewPosition;
-				NewObject->_NetworkState = en_ObjectNetworkState::LIVE;
-							
-				CChannel* Channel = Map->GetChannelManager()->Find(1);
-				Channel->EnterChannel(NewObject, &NewObject->_SpawnPosition);
-			}
-		}
-	}
 }
 
 void CObjectManager::MapTileInfoSpawn(int64& MapID)

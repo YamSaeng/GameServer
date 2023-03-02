@@ -18,6 +18,7 @@ class CPotato;
 class CCorn;
 class CCropItem;
 class CNonPlayer;
+class CWall;
 
 class CObjectManager
 {
@@ -40,6 +41,7 @@ private:
 	CMemoryPoolTLS<CArchitectureItem>* _ArchitectureMemoryPool;
 	CMemoryPoolTLS<CCropItem>* _CropItemMemoryPool;
 
+	CMemoryPoolTLS<CWall>* _WallMemoryPool;
 	CMemoryPoolTLS<CPlayer>* _PlayerMemoryPool;	
 	CMemoryPoolTLS<CNonPlayer>* _NonPlayerMemoryPool;
 	CMemoryPoolTLS<CGoblin>* _GoblinMemoryPool;	
@@ -111,12 +113,7 @@ public:
 	//-----------------------------------------------
 	// 스킬 정보 반납
 	//-----------------------------------------------
-	void SkillInfoReturn(en_SkillType SkillType, st_SkillInfo* ReturnSkillInfo);	
-
-	//-----------------------------------
-	// 맵에 설정한 오브젝트 스폰
-	//-----------------------------------
-	void MapObjectSpawn(int64& MapID);
+	void SkillInfoReturn(en_SkillType SkillType, st_SkillInfo* ReturnSkillInfo);		
 
 	//-------------------------------------------
 	// 맵에 할당되어 있는 타일 정보 가져와서 스폰
