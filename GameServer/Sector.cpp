@@ -50,6 +50,12 @@ void CSector::Insert(CGameObject* InsertGameObject)
 	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
 		_Items.insert((CItem*)InsertGameObject);
 		break;
+	case en_GameObjectType::OBJECT_LEFT_RIGHT_WALL:
+	case en_GameObjectType::OBJECT_UP_DOWN_WALL:
+	case en_GameObjectType::OBJECT_UP_TO_LEFT_WALL:
+	case en_GameObjectType::OBJECT_UP_TO_RIGHT_WALL:
+	case en_GameObjectType::OBJECT_DOWN_TO_LEFT_WALL:
+	case en_GameObjectType::OBJECT_DOWN_TO_RIGHT_WALL:
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
 		_Environment.insert((CEnvironment*)InsertGameObject);
@@ -107,6 +113,12 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
 		_Items.erase((CItem*)RemoveGameObject);
 		break;
+	case en_GameObjectType::OBJECT_LEFT_RIGHT_WALL:
+	case en_GameObjectType::OBJECT_UP_DOWN_WALL:
+	case en_GameObjectType::OBJECT_UP_TO_LEFT_WALL:
+	case en_GameObjectType::OBJECT_UP_TO_RIGHT_WALL:
+	case en_GameObjectType::OBJECT_DOWN_TO_LEFT_WALL:
+	case en_GameObjectType::OBJECT_DOWN_TO_RIGHT_WALL:
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
 		_Environment.erase((CEnvironment*)RemoveGameObject);
