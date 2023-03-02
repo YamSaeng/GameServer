@@ -60,8 +60,7 @@ void CSkill::SetSkillInfo(en_SkillCategory SkillCategory, st_SkillInfo* SkillInf
 			break;
 		case en_SkillType::SKILL_DEFAULT_ATTACK:			
 		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
-		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
-		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:
+		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:		
 		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE:
 		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
 		case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
@@ -80,8 +79,7 @@ void CSkill::SetSkillInfo(en_SkillCategory SkillCategory, st_SkillInfo* SkillInf
 		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
 		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:
 		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:
-		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:
-		case en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK:
+		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:		
 			_SkillKind = en_SkillKinds::SKILL_KIND_SPELL_SKILL;
 			break;
 		case en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING:
@@ -108,8 +106,7 @@ void CSkill::SetSkillInfo(en_SkillCategory SkillCategory, st_SkillInfo* SkillInf
 			_BufDeBufSkillKind = en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_BUF;
 			break;
 		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
-		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
-		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:				
+		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:					
 			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_FIGHT;
 
 			_BufDeBufSkillKind = en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_NORMAL;
@@ -182,12 +179,7 @@ void CSkill::SetSkillInfo(en_SkillCategory SkillCategory, st_SkillInfo* SkillInf
 			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_ASSASSINATION;
 
 			_BufDeBufSkillKind = en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_DEBUF;
-			break;
-		case en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK:	
-			_IsDot = true;			
-
-			_BufDeBufSkillKind = en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_DEBUF;
-			break;
+			break;		
 		}
 	}
 }
@@ -277,8 +269,10 @@ bool CSkill::Update()
 					_SkillInfo->SkillRemainTime = 0;
 					_SkillCootimeTick = 0;					
 
+					vector<st_FieldOfViewInfo> CurrentFieldOfViewInfo = _Owner->GetChannel()->GetMap()->GetFieldAroundPlayers(_Owner, false);
+					
 					CMessage* ResAttacketPacket = G_ObjectManager->GameServer->MakePacketResAttack(_Owner->_GameObjectInfo.ObjectId);
-					G_ObjectManager->GameServer->SendPacket(((CPlayer*)_Owner)->_SessionId, ResAttacketPacket);
+					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewInfo, ResAttacketPacket);
 					ResAttacketPacket->Free();
 				}
 			}
@@ -311,19 +305,7 @@ bool CSkill::Update()
 				{
 					_SkillDotTick = _SkillInfo->SkillDotTime + GetTickCount64();					
 
-					switch (_SkillInfo->SkillType)
-					{
-					case en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK:
-						{							
-							// 스킬 중첩 단계에 따라 데미지 적용							
-							st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_CastingUserID, _CastingUserObjectType,
-								_SkillInfo->SkillType,
-								_SkillInfo->SkillMinDamage,
-								_SkillInfo->SkillMaxDamage);
-							_Owner->_GameObjectJobQue.Enqueue(DamageJob);							
-						}
-						break;
-					}
+					// 데미지 처리
 				}
 			}
 
@@ -473,17 +455,7 @@ bool CSkill::Update()
 						G_ObjectManager->GameServer->SendPacketFieldOfView(_Owner, ResBufDeBufOffPacket);					
 						ResBufDeBufOffPacket->Free();
 					}
-					break;
-				case en_SkillType::SKILL_SLIME_ACTIVE_POISION_ATTACK:
-					{
-						_IsDot = false;						
-
-						// 약화효과 스킬 아이콘 해제
-						CMessage* ResBufDeBufOffPacket = G_ObjectManager->GameServer->MakePacketBufDeBufOff(_Owner->_GameObjectInfo.ObjectId, false, _SkillInfo->SkillType);
-						G_ObjectManager->GameServer->SendPacketFieldOfView(_Owner, ResBufDeBufOffPacket);
-						ResBufDeBufOffPacket->Free();
-					}
-					break;
+					break;				
 				}
 
 				return true;
