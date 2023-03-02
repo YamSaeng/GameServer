@@ -102,7 +102,7 @@ private:
 		CHANNEL_ITEM_MAX = 200
 	};
 	
-	// 채널에서 관리중인 PC, NPC, Monster, Item	
+	// 채널에서 관리중인 PC, NPC, Monster, Item		
 	CPlayer* _ChannelPlayerArray[CHANNEL_PLAYER_MAX];
 	CPlayer* _ChannelDummyPlayerArray[CHANNEL_DUMMY_PLAYER_MAX];
 	CNonPlayer* _ChannelNonPlayerArray[CHANNEL_NON_PLAYER_MAX];

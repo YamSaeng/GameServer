@@ -895,7 +895,7 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 	CGameObject* FindObject = nullptr;	
 		
 	switch (GameObjectType)
-	{	
+	{			
 	case en_GameObjectType::OBJECT_PLAYER:	
 		{
 			for (int32 i = 0; i < en_Channel::CHANNEL_PLAYER_MAX; i++)
@@ -931,8 +931,13 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 				}
 			}
 		}
-		break;
-	case en_GameObjectType::OBJECT_ENVIRONMENT:
+		break;	
+	case en_GameObjectType::OBJECT_LEFT_RIGHT_WALL:
+	case en_GameObjectType::OBJECT_UP_DOWN_WALL:
+	case en_GameObjectType::OBJECT_UP_TO_LEFT_WALL:
+	case en_GameObjectType::OBJECT_UP_TO_RIGHT_WALL:
+	case en_GameObjectType::OBJECT_DOWN_TO_LEFT_WALL:
+	case en_GameObjectType::OBJECT_DOWN_TO_RIGHT_WALL:
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
 		{
@@ -1040,8 +1045,13 @@ vector<CGameObject*> CChannel::FindChannelObjects(en_GameObjectType GameObjectTy
 				FindObjects.push_back(_ChannelMonsterArray[i]);
 			}
 		}
-		break;
-	case en_GameObjectType::OBJECT_ENVIRONMENT:
+		break;	
+	case en_GameObjectType::OBJECT_LEFT_RIGHT_WALL:
+	case en_GameObjectType::OBJECT_UP_DOWN_WALL:
+	case en_GameObjectType::OBJECT_UP_TO_LEFT_WALL:
+	case en_GameObjectType::OBJECT_UP_TO_RIGHT_WALL:
+	case en_GameObjectType::OBJECT_DOWN_TO_LEFT_WALL:
+	case en_GameObjectType::OBJECT_DOWN_TO_RIGHT_WALL:
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
 		for (int32 i = 0; i < en_Channel::CHANNEL_ENVIRONMENT_MAX; i++)
@@ -1168,8 +1178,13 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 					}
 				}
 			}
-			break;
-		case en_GameObjectType::OBJECT_ENVIRONMENT:
+			break;		
+		case en_GameObjectType::OBJECT_LEFT_RIGHT_WALL:
+		case en_GameObjectType::OBJECT_UP_DOWN_WALL:
+		case en_GameObjectType::OBJECT_UP_TO_LEFT_WALL:
+		case en_GameObjectType::OBJECT_UP_TO_RIGHT_WALL:
+		case en_GameObjectType::OBJECT_DOWN_TO_LEFT_WALL:
+		case en_GameObjectType::OBJECT_DOWN_TO_RIGHT_WALL:
 		case en_GameObjectType::OBJECT_STONE:
 		case en_GameObjectType::OBJECT_TREE:
 			{
@@ -1774,6 +1789,12 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			}
 		}
 		break;
+	case en_GameObjectType::OBJECT_LEFT_RIGHT_WALL:
+	case en_GameObjectType::OBJECT_UP_DOWN_WALL:
+	case en_GameObjectType::OBJECT_UP_TO_LEFT_WALL:
+	case en_GameObjectType::OBJECT_UP_TO_RIGHT_WALL:
+	case en_GameObjectType::OBJECT_DOWN_TO_LEFT_WALL:
+	case en_GameObjectType::OBJECT_DOWN_TO_RIGHT_WALL:
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
 		{
@@ -1781,7 +1802,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			if (EnterChannelEnvironment != nullptr)
 			{
 				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
+				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X;
 				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;				
 
 				EnterChannelEnvironment->Start();
@@ -1898,6 +1919,12 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 
 		_ChannelItemArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
 		break;
+	case en_GameObjectType::OBJECT_LEFT_RIGHT_WALL:
+	case en_GameObjectType::OBJECT_UP_DOWN_WALL:
+	case en_GameObjectType::OBJECT_UP_TO_LEFT_WALL:
+	case en_GameObjectType::OBJECT_UP_TO_RIGHT_WALL:
+	case en_GameObjectType::OBJECT_DOWN_TO_LEFT_WALL:
+	case en_GameObjectType::OBJECT_DOWN_TO_RIGHT_WALL:
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
 		G_ObjectManager->ObjectReturn(LeaveChannelGameObject);
