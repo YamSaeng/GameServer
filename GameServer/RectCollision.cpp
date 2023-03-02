@@ -22,6 +22,15 @@ CRectCollision::CRectCollision(CGameObject* Owner)
 			_Size._X = 1.0f;
 			_Size._Y = 1.0f;
 			break;
+		case en_GameObjectType::OBJECT_LEFT_RIGHT_WALL:
+		case en_GameObjectType::OBJECT_UP_DOWN_WALL:
+		case en_GameObjectType::OBJECT_UP_TO_LEFT_WALL:
+		case en_GameObjectType::OBJECT_UP_TO_RIGHT_WALL:
+		case en_GameObjectType::OBJECT_DOWN_TO_LEFT_WALL:
+		case en_GameObjectType::OBJECT_DOWN_TO_RIGHT_WALL:
+			_Size._X = 1.0f;
+			_Size._Y = 1.0f;
+			break;
 		case en_GameObjectType::OBJECT_GOBLIN:
 			_Size._X = 1.0f;
 			_Size._Y = 1.0f;
