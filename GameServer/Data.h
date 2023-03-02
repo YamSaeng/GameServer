@@ -69,8 +69,13 @@ struct st_CropData
 
 struct st_MapInfoData
 {
-	int64 MapID;			// ¸Ê °íÀ¯ ID
-	string MapName;			// ¸Ê ÀÌ¸§
-	int32 MapSectorSize;	// ¸Ê SectorSize
-	int8 ChannelCount;		// Ã¤³Î °³¼ö
+	int16 MapID;
+	string MapName;
+	int32 MapSectorSize;
+	int8 ChannelCount;
+	int32 Left;
+	int32 Right;
+	int32 Up;
+	int32 Down;
+	map<en_GameObjectType, vector<st_Vector2Int>> GameObjectList;
 };

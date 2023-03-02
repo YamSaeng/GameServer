@@ -13,9 +13,7 @@ public:
 
 	map<int32, st_StatInfo*> _PlayerStatus;
 
-	//------------------------------------------------------
 	// 몬스터 데이터
-	//------------------------------------------------------
 	map<en_GameObjectType, st_MonsterData*> _Monsters;
 
 	st_MonsterAggroData _MonsterAggroData;
@@ -23,50 +21,33 @@ public:
 	//------------------------------------------------------
 	// 스킬 데이터		
 	//------------------------------------------------------
-	// 공용 스킬 데이터
-	//------------------------------------------------------
-	map<int16, st_SkillInfo*> _PublicSkillDatas;	
-	//------------------------------------------------------
-	// 격투 스킬 데이터
-	//------------------------------------------------------
-	map<int16, st_SkillInfo*> _FightSkillDatas;	
-	//------------------------------------------------------
-	// 방어 스킬 데이터
-	//------------------------------------------------------
-	map<int16, st_SkillInfo*> _ProtectionSkillDatas;	
-	//------------------------------------------------------
-	// 암살 스킬 데이터
-	//------------------------------------------------------
+	// 공용 스킬 데이터	
+	map<int16, st_SkillInfo*> _PublicSkillDatas;		
+	// 격투 스킬 데이터	
+	map<int16, st_SkillInfo*> _FightSkillDatas;		
+	// 방어 스킬 데이터	
+	map<int16, st_SkillInfo*> _ProtectionSkillDatas;		
+	// 암살 스킬 데이터	
 	map<int16, st_SkillInfo*> _AssassinationSkillDatas;	
-	//------------------------------------------------------
 	// 마법 스킬 데이터
-	//------------------------------------------------------
 	map<int16, st_SkillInfo*> _SpellSkillDatas;	
-	//------------------------------------------------------
 	// 사격 스킬 데이터
-	//------------------------------------------------------
 	map<int16, st_SkillInfo*> _ShootingSkillDatas;	
-	//------------------------------------------------------
 	// 수양 스킬 데이터
-	//------------------------------------------------------
 	map<int16, st_SkillInfo*> _DisciplineSkillDatas;	
 	
 	// 고블린 기술 데이터
 	map<int16, st_SkillInfo*> _GoblinSkillDatas;
-
-	//------------------------------------------------------
-	// 환경 데이터
-	//------------------------------------------------------
-	map<en_GameObjectType, st_EnvironmentData*> _Environments;
-	//------------------------------------------------------
-	// 작물 데이터
-	//------------------------------------------------------
+	
+	// 환경 데이터	
+	map<en_GameObjectType, st_EnvironmentData*> _Environments;	
+	// 작물 데이터	
 	map<en_GameObjectType, st_CropData*> _Crops;
 
 	map<int16, st_CraftingTableRecipe*> _CraftingTableData;
 	map<int8,  st_CraftingItemCategory*> _CraftingData;
 	map<int32, st_LevelData*> _LevelDatas;
-
+	
 	map<int64, st_MapInfoData*> _MapInfoDatas;
 
 	map<int8, st_OptionItemInfo*> _OptionItemInfoDatas;

@@ -1844,7 +1844,11 @@ void CDataManager::LoadDataEnvironment(wstring LoadFileName)
 
 		en_GameObjectType EnvironmentType = en_GameObjectType::OBJECT_NON_TYPE;
 
-		if (EnvironmentName == "µ¹")
+		if (EnvironmentName == "º®")
+		{
+			EnvironmentType = en_GameObjectType::OBJECT_LEFT_RIGHT_WALL;
+		}
+		else if (EnvironmentName == "µ¹")
 		{
 			EnvironmentType = en_GameObjectType::OBJECT_STONE;
 		}
@@ -2273,17 +2277,77 @@ void CDataManager::LoadDataMapInfo(wstring LoadFileName)
 	{
 		st_MapInfoData* MapInfoData = new st_MapInfoData();
 
-		int64 MapID = Filed["MapID"].GetInt64();
-		string MapName = Filed["MapName"].GetString();
-		int32 MapSectorSize = Filed["MapSectorSize"].GetInt();
-		int8 ChannelCount = (int8)Filed["ChannelCount"].GetInt();
+		for (auto& MapInfoListField : Filed["MapInfoList"].GetArray())
+		{
+			int16 MapID = (int16)MapInfoListField["MapID"].GetInt();
+			string MapName = MapInfoListField["MapName"].GetString();
+			int32 MapSectorSize = MapInfoListField["MapSectorSize"].GetInt();
+			int8 ChannelCount = (int8)MapInfoListField["ChannelCount"].GetInt();
+			int32 Left = MapInfoListField["Left"].GetInt();
+			int32 Right = MapInfoListField["Right"].GetInt();
+			int32 Up = MapInfoListField["Up"].GetInt();
+			int32 Down = MapInfoListField["Down"].GetInt();
 
-		MapInfoData->MapID = MapID;
-		MapInfoData->MapName = MapName;
-		MapInfoData->MapSectorSize = MapSectorSize;
-		MapInfoData->ChannelCount = ChannelCount;
+			for (auto& GameObjectListField : MapInfoListField["GameObjectList"].GetArray())
+			{
+				en_GameObjectType GameObjectType;
 
-		_MapInfoDatas.insert(pair<int64, st_MapInfoData*>(MapInfoData->MapID, MapInfoData));
+				string ObjectTypeName = GameObjectListField["ObjectType"].GetString();
+
+				if (ObjectTypeName == "OBJECT_LEFT_RIGHT_WALL")
+				{
+					GameObjectType = en_GameObjectType::OBJECT_LEFT_RIGHT_WALL;
+				}
+				else if (ObjectTypeName == "OBJECT_UP_DOWN_WALL")
+				{
+					GameObjectType = en_GameObjectType::OBJECT_UP_DOWN_WALL;
+				}
+				else if (ObjectTypeName == "OBJECT_UP_TO_LEFT_WALL")
+				{
+					GameObjectType = en_GameObjectType::OBJECT_UP_TO_LEFT_WALL;
+				}
+				else if (ObjectTypeName == "OBJECT_UP_TO_RIGHT_WALL")
+				{
+					GameObjectType = en_GameObjectType::OBJECT_UP_TO_RIGHT_WALL;
+				}
+				else if (ObjectTypeName == "OBJECT_DOWN_TO_LEFT_WALL")
+				{
+					GameObjectType = en_GameObjectType::OBJECT_DOWN_TO_LEFT_WALL;
+				}
+				else if (ObjectTypeName == "OBJECT_DOWN_TO_RIGHT_WALL")
+				{
+					GameObjectType = en_GameObjectType::OBJECT_DOWN_TO_RIGHT_WALL;
+				}
+
+				vector<st_Vector2Int> Positions;
+
+				for (auto& PositionListField : GameObjectListField["PositionList"].GetArray())
+				{
+					st_Vector2Int Position;
+
+					int32 XPosition = PositionListField["X"].GetInt();
+					int32 YPosition = PositionListField["Y"].GetInt();
+
+					Position._X = XPosition;
+					Position._Y = YPosition;
+
+					Positions.push_back(Position);
+				}
+
+				MapInfoData->GameObjectList.insert(pair<en_GameObjectType, vector<st_Vector2Int>>(GameObjectType, Positions));
+			}
+
+			MapInfoData->MapID = MapID;
+			MapInfoData->MapName = MapName;
+			MapInfoData->MapSectorSize = MapSectorSize;
+			MapInfoData->ChannelCount = ChannelCount;
+			MapInfoData->Left = Left;
+			MapInfoData->Right = Right;
+			MapInfoData->Up = Up;
+			MapInfoData->Down = Down;
+
+			_MapInfoDatas.insert(pair<int64, st_MapInfoData*>(MapInfoData->MapID, MapInfoData));
+		}		
 	}
 }
 
@@ -2369,10 +2433,15 @@ st_StatInfo* CDataManager::FindObjectStatusData(en_GameObjectType GameObjectType
 		return (*_PlayerStatus.find(Level)).second;	
 	case en_GameObjectType::OBJECT_GOBLIN:
 		break;	
+	case en_GameObjectType::OBJECT_LEFT_RIGHT_WALL:
+	case en_GameObjectType::OBJECT_UP_DOWN_WALL:
+	case en_GameObjectType::OBJECT_UP_TO_LEFT_WALL:
+	case en_GameObjectType::OBJECT_UP_TO_RIGHT_WALL:
+	case en_GameObjectType::OBJECT_DOWN_TO_LEFT_WALL:
+	case en_GameObjectType::OBJECT_DOWN_TO_RIGHT_WALL:
 	case en_GameObjectType::OBJECT_STONE:
-		break;
 	case en_GameObjectType::OBJECT_TREE:
-		break;		
+		return (*_PlayerStatus.find(Level)).second;			
 	}
 }
 
