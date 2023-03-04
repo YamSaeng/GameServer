@@ -3,6 +3,7 @@
 #include "MapManager.h"
 #include "ChannelManager.h"
 #include "DataManager.h"
+#include "ObjectManager.h"
 #include <atlbase.h>
 
 CMapManager::CMapManager()
@@ -25,9 +26,34 @@ void CMapManager::MapSave()
 		NewMapInfo.MapID = MapInfoIterator.second->MapID;
 		NewMapInfo.MapName = (LPWSTR)CA2W(MapInfoIterator.second->MapName.c_str());
 		NewMapInfo.MapSectorSize = MapInfoIterator.second->MapSectorSize;
-		NewMapInfo.ChannelCount = MapInfoIterator.second->ChannelCount;
+		NewMapInfo.ChannelCount = MapInfoIterator.second->ChannelCount;		
 
-		NewMap->MapInit(NewMapInfo.MapID, NewMapInfo.MapName, NewMapInfo.MapSectorSize, NewMapInfo.ChannelCount);
+		NewMap->_MapID = MapInfoIterator.second->MapID;
+		NewMap->_MapName = (LPWSTR)CA2W(MapInfoIterator.second->MapName.c_str());		
+		NewMap->_SectorSize = MapInfoIterator.second->MapSectorSize;		
+		NewMap->_ChannelCount = MapInfoIterator.second->ChannelCount;
+		NewMap->_Left = MapInfoIterator.second->Left;
+		NewMap->_Right = MapInfoIterator.second->Right;
+		NewMap->_Up = MapInfoIterator.second->Up;
+		NewMap->_Down = MapInfoIterator.second->Down;
+
+		NewMap->MapInit();
+		
+		for (auto MapGameObjectListIter : MapInfoIterator.second->GameObjectList)
+		{						
+			for (st_Vector2Int Position : MapGameObjectListIter.second)
+			{
+				CGameObject* NewObject = G_ObjectManager->ObjectCreate(MapGameObjectListIter.first);
+				if (NewObject != nullptr)
+				{
+					NewObject->_SpawnPosition = Position;
+					NewObject->_NetworkState = en_ObjectNetworkState::LIVE;
+
+					CChannel* Channel = NewMap->GetChannelManager()->Find(1);
+					Channel->EnterChannel(NewObject, &NewObject->_SpawnPosition);
+				}
+			}
+		}		
 
 		_Maps.insert(pair<int64, CMap*>(NewMap->_MapID, NewMap));
 	}
