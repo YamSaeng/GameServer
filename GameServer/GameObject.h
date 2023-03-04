@@ -120,6 +120,8 @@ public:
 	CRectCollision* GetRectCollision();
 	
 	bool IsPlayer();
+	
+	virtual void Init(en_GameObjectType GameObjectType);
 
 	virtual void Start();
 	virtual void End();

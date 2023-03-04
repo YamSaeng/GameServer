@@ -6,6 +6,7 @@
 #include "Furnace.h"
 #include "Crop.h"
 #include "EquipmentBox.h"
+#include "RectCollision.h"
 
 CGameObject::CGameObject()
 {
@@ -1729,6 +1730,16 @@ bool CGameObject::IsPlayer()
 	}
 
 	return false;
+}
+
+void CGameObject::Init(en_GameObjectType GameObjectType)
+{
+	_GameObjectInfo.ObjectType = GameObjectType;	
+
+	if (_RectCollision == nullptr)
+	{
+		_RectCollision = new CRectCollision(this);
+	}
 }
 
 void CGameObject::Start()
