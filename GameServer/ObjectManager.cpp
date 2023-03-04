@@ -104,12 +104,7 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 	case en_GameObjectType::OBJECT_GOBLIN:
 		NewObject = _GoblinMemoryPool->Alloc();
 		break;	
-	case en_GameObjectType::OBJECT_LEFT_RIGHT_WALL:
-	case en_GameObjectType::OBJECT_UP_DOWN_WALL:
-	case en_GameObjectType::OBJECT_UP_TO_RIGHT_WALL:
-	case en_GameObjectType::OBJECT_UP_TO_LEFT_WALL:
-	case en_GameObjectType::OBJECT_DOWN_TO_RIGHT_WALL:
-	case en_GameObjectType::OBJECT_DOWN_TO_LEFT_WALL:
+	case en_GameObjectType::OBJECT_WALL:
 		NewObject = _WallMemoryPool->Alloc();		
 		break;
 	case en_GameObjectType::OBJECT_STONE:
@@ -134,7 +129,7 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 
 	if (NewObject != nullptr)
 	{
-		NewObject->Init(ObjectType);
+		NewObject->Init(ObjectType);		
 		NewObject->_GameObjectInfo.ObjectId = InterlockedIncrement64(&_GameServerObjectId);
 	}	
 
@@ -157,12 +152,7 @@ void CObjectManager::ObjectReturn(CGameObject* ReturnObject)
 		case en_GameObjectType::OBJECT_GOBLIN:
 			_GoblinMemoryPool->Free((CGoblin*)ReturnObject);
 			break;		
-		case en_GameObjectType::OBJECT_LEFT_RIGHT_WALL:
-		case en_GameObjectType::OBJECT_UP_DOWN_WALL:
-		case en_GameObjectType::OBJECT_UP_TO_LEFT_WALL:
-		case en_GameObjectType::OBJECT_UP_TO_RIGHT_WALL:
-		case en_GameObjectType::OBJECT_DOWN_TO_LEFT_WALL:
-		case en_GameObjectType::OBJECT_DOWN_TO_RIGHT_WALL:
+		case en_GameObjectType::OBJECT_WALL:
 			_WallMemoryPool->Free((CWall*)ReturnObject);
 			break;
 		case en_GameObjectType::OBJECT_STONE:
