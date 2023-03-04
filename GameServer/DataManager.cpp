@@ -1846,7 +1846,7 @@ void CDataManager::LoadDataEnvironment(wstring LoadFileName)
 
 		if (EnvironmentName == "º®")
 		{
-			EnvironmentType = en_GameObjectType::OBJECT_LEFT_RIGHT_WALL;
+			EnvironmentType = en_GameObjectType::OBJECT_WALL;
 		}
 		else if (EnvironmentName == "µ¹")
 		{
@@ -2293,31 +2293,11 @@ void CDataManager::LoadDataMapInfo(wstring LoadFileName)
 				en_GameObjectType GameObjectType;
 
 				string ObjectTypeName = GameObjectListField["ObjectType"].GetString();
-
-				if (ObjectTypeName == "OBJECT_LEFT_RIGHT_WALL")
+				
+				if (ObjectTypeName == "OBJECT_WALL")
 				{
-					GameObjectType = en_GameObjectType::OBJECT_LEFT_RIGHT_WALL;
-				}
-				else if (ObjectTypeName == "OBJECT_UP_DOWN_WALL")
-				{
-					GameObjectType = en_GameObjectType::OBJECT_UP_DOWN_WALL;
-				}
-				else if (ObjectTypeName == "OBJECT_UP_TO_LEFT_WALL")
-				{
-					GameObjectType = en_GameObjectType::OBJECT_UP_TO_LEFT_WALL;
-				}
-				else if (ObjectTypeName == "OBJECT_UP_TO_RIGHT_WALL")
-				{
-					GameObjectType = en_GameObjectType::OBJECT_UP_TO_RIGHT_WALL;
-				}
-				else if (ObjectTypeName == "OBJECT_DOWN_TO_LEFT_WALL")
-				{
-					GameObjectType = en_GameObjectType::OBJECT_DOWN_TO_LEFT_WALL;
-				}
-				else if (ObjectTypeName == "OBJECT_DOWN_TO_RIGHT_WALL")
-				{
-					GameObjectType = en_GameObjectType::OBJECT_DOWN_TO_RIGHT_WALL;
-				}
+					GameObjectType = en_GameObjectType::OBJECT_WALL;
+				}				
 
 				vector<st_Vector2Int> Positions;
 
@@ -2433,12 +2413,7 @@ st_StatInfo* CDataManager::FindObjectStatusData(en_GameObjectType GameObjectType
 		return (*_PlayerStatus.find(Level)).second;	
 	case en_GameObjectType::OBJECT_GOBLIN:
 		break;	
-	case en_GameObjectType::OBJECT_LEFT_RIGHT_WALL:
-	case en_GameObjectType::OBJECT_UP_DOWN_WALL:
-	case en_GameObjectType::OBJECT_UP_TO_LEFT_WALL:
-	case en_GameObjectType::OBJECT_UP_TO_RIGHT_WALL:
-	case en_GameObjectType::OBJECT_DOWN_TO_LEFT_WALL:
-	case en_GameObjectType::OBJECT_DOWN_TO_RIGHT_WALL:
+	case en_GameObjectType::OBJECT_WALL:
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
 		return (*_PlayerStatus.find(Level)).second;			
