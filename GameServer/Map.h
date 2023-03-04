@@ -41,10 +41,9 @@ public:
 	int32 _SizeX;
 	int32 _SizeY;
 
-	//-----------------------------------------
-	// 맵 환경 오브젝트의 정보를 보관
-	//-----------------------------------------
-	en_MapObjectInfo** _CollisionMapInfos;	
+	int32 _SectorSize;
+
+	int8 _ChannelCount;	
 
 	//-------------------------------------
 	// 맵 타일에 존재하는 게임 오브젝트 정보
@@ -65,7 +64,7 @@ public:
 	CMap();
 	~CMap();
 
-	void MapInit(int16 MapID, wstring MapName, int32 SectorSize, int8 ChannelCount);
+	void MapInit();
 
 	CSector* GetSector(st_Vector2Int CellPosition);
 	CSector* GetSector(int32 IndexY, int32 IndexX);
@@ -145,8 +144,7 @@ public:
 	CChannelManager* GetChannelManager();
 private:
 	CChannelManager* _ChannelManager;
-	CSector** _Sectors;
-	int32 _SectorSize;
+	CSector** _Sectors;	
 
 	int32 _SectorCountX;
 	int32 _SectorCountY;

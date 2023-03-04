@@ -25,7 +25,6 @@ CMap::CMap()
 	_SizeX = 0;
 	_SizeY = 0;
 
-	_CollisionMapInfos = nullptr;
 	_ObjectsInfos = nullptr;
 	_SeedObjectInfos = nullptr;
 	_Items = nullptr;
@@ -58,82 +57,12 @@ CMap::~CMap()
 	}
 }
 
-void CMap::MapInit(int16 MapID, wstring MapName, int32 SectorSize, int8 ChannelCount)
-{
-	_MapID = MapID;
-	_MapName = MapName;
-
-	// 맵 오브젝트 정보 읽기
-#pragma region 맵 오브젝트 정보 읽기
-	wstring ObjectInfoData = MapName + L"ObjectInfoData.txt";
-
-	char* MapObjectInfoDataFileStr = FileUtils::LoadFile(ObjectInfoData.c_str());
-	char* MapObjectInfoDataMovingFileP = MapObjectInfoDataFileStr;
-	char* MapObjectInfoDataConvertP = MapObjectInfoDataFileStr;
-
-	int MapObjectInfoDataCount = 0;
-	while (true)
-	{
-		if (*MapObjectInfoDataMovingFileP == '\n')
-		{
-			if (MapObjectInfoDataCount == 0)
-			{
-				_Left = atoi(MapObjectInfoDataConvertP);
-				MapObjectInfoDataConvertP = MapObjectInfoDataMovingFileP;
-				MapObjectInfoDataCount++;
-			}
-			else if (MapObjectInfoDataCount == 1)
-			{
-				_Right = atoi(MapObjectInfoDataConvertP);
-				MapObjectInfoDataConvertP = MapObjectInfoDataMovingFileP;
-				MapObjectInfoDataCount++;
-			}
-			else if (MapObjectInfoDataCount == 2)
-			{
-				_Up = atoi(MapObjectInfoDataConvertP);
-				MapObjectInfoDataConvertP = MapObjectInfoDataMovingFileP;
-				MapObjectInfoDataCount++;
-			}
-			else if (MapObjectInfoDataCount == 3)
-			{
-				_Down = atoi(MapObjectInfoDataConvertP);
-				MapObjectInfoDataConvertP = MapObjectInfoDataMovingFileP + 1;
-				MapObjectInfoDataCount++;
-				break;
-			}
-		}
-
-		MapObjectInfoDataMovingFileP++;
-	}
-
+void CMap::MapInit()
+{	
 	int XCount = _Right - _Left + 1;
 	int YCount = _Down - _Up + 1;
 
-	int YCountXCount = YCount * XCount;
-
-	_CollisionMapInfos = new en_MapObjectInfo * [YCount];
-
-	for (int i = 0; i < YCount; i++)
-	{
-		_CollisionMapInfos[i] = new en_MapObjectInfo[XCount];
-	}
-
-	for (int Y = 0; Y < YCount; Y++)
-	{
-		for (int X = 0; X < XCount; X++)
-		{
-			if (*MapObjectInfoDataConvertP == '\r')
-			{
-				break;
-			}
-
-			_CollisionMapInfos[Y][X] = (en_MapObjectInfo)(*MapObjectInfoDataConvertP - 48);
-
-			MapObjectInfoDataConvertP++;
-		}
-		MapObjectInfoDataConvertP += 2;
-	}
-#pragma endregion	
+	int YCountXCount = YCount * XCount;	
 
 	_ObjectsInfos = new CGameObject * *[YCount];
 
@@ -177,9 +106,7 @@ void CMap::MapInit(int16 MapID, wstring MapName, int32 SectorSize, int8 ChannelC
 	_SizeY = _Down - _Up + 1;
 
 	_ChannelManager = new CChannelManager();
-	_ChannelManager->Init(this, ChannelCount);
-
-	_SectorSize = SectorSize;
+	_ChannelManager->Init(this, _ChannelCount);	
 
 	// 맵 크기를 토대로 섹터가 가로 세로 몇개씩 있는지 확인
 	_SectorCountY = (_SizeY + _SectorSize - 1) / _SectorSize;
@@ -296,6 +223,21 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object)
 			}
 		}
 
+		for (CEnvironment* Enviroment : Sector->GetEnvironment())
+		{
+			if (Enviroment->_GameObjectInfo.ObjectType != en_GameObjectType::OBJECT_WALL)
+			{
+				if (st_Vector2::CheckFieldOfView(Enviroment->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->_FieldOfDirection, Object->_FieldOfAngle, Object->_FieldOfViewDistance))
+				{
+					FieldOfViewInfo.ObjectID = Enviroment->_GameObjectInfo.ObjectId;
+					FieldOfViewInfo.SessionID = 0;
+					FieldOfViewInfo.ObjectType = Enviroment->_GameObjectInfo.ObjectType;
+
+					FieldOfViewGameObjects.push_back(FieldOfViewInfo);
+				}
+			}			
+		}
+
 		for (CCraftingTable* CraftingTable : Sector->GetCraftingTable())
 		{
 			if (st_Vector2::CheckFieldOfView(CraftingTable->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->_FieldOfDirection, Object->_FieldOfAngle, Object->_FieldOfViewDistance))
@@ -306,7 +248,7 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object)
 
 				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
 			}
-		}
+		}	
 
 		Sector->ReleaseSectorLock();
 	}
@@ -594,8 +536,8 @@ CItem** CMap::FindItem(st_Vector2Int& ItemCellPosition)
 bool CMap::Cango(CGameObject* Object, OUT st_Vector2* NextPosition)
 {
 	st_Vector2Int CollisionPosition;
-	CollisionPosition._X = Object->_GameObjectInfo.ObjectPositionInfo.Position._X;
-	CollisionPosition._Y = Object->_GameObjectInfo.ObjectPositionInfo.Position._Y;
+	CollisionPosition._X = (int32)Object->_GameObjectInfo.ObjectPositionInfo.Position._X;
+	CollisionPosition._Y = (int32)Object->_GameObjectInfo.ObjectPositionInfo.Position._Y;
 
 	st_Vector2 CheckPosition; 
 	CheckPosition._X = Object->_GameObjectInfo.ObjectPositionInfo.Position._X;
@@ -630,23 +572,20 @@ bool CMap::MoveCollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, 
 	int X = CellPosition._X - _Left;
 	int Y = _Down - CellPosition._Y;
 
+	bool IsCollisionMapInfo = true;
 	//G_Logger->WriteStdOut(en_Color::RED, L"X : %d Y : %d \n", X, Y);
 
-	bool IsCollisionMapInfo = false;
-	switch (_CollisionMapInfos[Y][X])
+	if (_ObjectsInfos[Y][X] != nullptr)
 	{
-	case en_MapObjectInfo::TILE_MAP_NONE:
-	case en_MapObjectInfo::TILE_MAP_TREE:
-	case en_MapObjectInfo::TILE_MAP_STONE:
-	case en_MapObjectInfo::TILE_MAP_GOBLIN:		
-	case en_MapObjectInfo::TILE_MAP_POTATO:		
-		IsCollisionMapInfo = true;
-		break;
-	case en_MapObjectInfo::TILE_MAP_WALL:
-	case en_MapObjectInfo::TILE_MAP_FURNACE:
-	case en_MapObjectInfo::TILE_MAP_SAMILL:
-		IsCollisionMapInfo = false;
-	}
+		switch (_ObjectsInfos[Y][X]->_GameObjectInfo.ObjectType)
+		{
+		case en_GameObjectType::OBJECT_WALL:
+		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
+			IsCollisionMapInfo = false;
+			break;		
+		}
+	}	
 
 	bool ObjectCheck = Object->GetChannel()->ChannelColliderCheck(Object, NextPosition);
 
@@ -680,6 +619,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 	case en_GameObjectType::OBJECT_NON_PLAYER:
 	case en_GameObjectType::OBJECT_GOBLIN:	
+	case en_GameObjectType::OBJECT_WALL:
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 		{
@@ -721,8 +661,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 				}
 			}
 		}
-
-		break;
+		break;			
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
 	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
@@ -850,27 +789,28 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 	case en_GameObjectType::OBJECT_PLAYER:	
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 	case en_GameObjectType::OBJECT_GOBLIN:	
-	{
-		// 맵에서 제거
-		if (_ObjectsInfos[Y][X] == GameObject)
+	case en_GameObjectType::OBJECT_WALL:
 		{
-			for (int16 WidthX = 0; WidthX < Width; WidthX++)
+			// 맵에서 제거
+			if (_ObjectsInfos[Y][X] == GameObject)
 			{
-				for (int16 HeightY = 0; HeightY < Height; HeightY++)
+				for (int16 WidthX = 0; WidthX < Width; WidthX++)
 				{
-					_ObjectsInfos[Y][X] = nullptr;
+					for (int16 HeightY = 0; HeightY < Height; HeightY++)
+					{
+						_ObjectsInfos[Y][X] = nullptr;
+					}
+				}
+			}
+			else
+			{
+				if (GameObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE)
+				{
+					//CRASH("ApplyLeave 삭제하려는 오브젝트가 저장되어 있는 오브젝트와 다름");
 				}
 			}
 		}
-		else
-		{
-			if (GameObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_IDLE)
-			{
-				//CRASH("ApplyLeave 삭제하려는 오브젝트가 저장되어 있는 오브젝트와 다름");
-			}
-		}
-	}
-	break;
+		break;			
 	case en_GameObjectType::OBJECT_CROP_CORN:
 	case en_GameObjectType::OBJECT_CROP_POTATO:
 	{
@@ -922,8 +862,8 @@ bool CMap::MonsterCango(CGameObject* Object, OUT st_Vector2* NextPosition)
 	CheckPosition._X += (DirectionNormal._X * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 
 	st_Vector2Int CheckCollisionPosition;
-	CheckCollisionPosition._X = CheckPosition._X;
-	CheckCollisionPosition._Y = CheckPosition._Y;
+	CheckCollisionPosition._X = (int32)CheckPosition._X;
+	CheckCollisionPosition._Y = (int32)CheckPosition._Y;
 		
 	bool NextPositionMoveCheck = FindPathNextPositionCango(Object, CheckCollisionPosition);
 	NextPosition->_X = CheckPosition._X;
@@ -1141,20 +1081,18 @@ bool CMap::FindPathNextPositionCango(CGameObject* Object, st_Vector2Int& NextPos
 
 	//G_Logger->WriteStdOut(en_Color::RED, L"X : %d Y : %d \n", X, Y);
 
-	bool IsCollisionMapInfo = false;
-	switch (_CollisionMapInfos[Y][X])
+	bool IsCollisionMapInfo = true;
+
+	if (_ObjectsInfos[Y][X] != nullptr)
 	{
-	case en_MapObjectInfo::TILE_MAP_NONE:
-	case en_MapObjectInfo::TILE_MAP_TREE:
-	case en_MapObjectInfo::TILE_MAP_STONE:
-	case en_MapObjectInfo::TILE_MAP_GOBLIN:	
-	case en_MapObjectInfo::TILE_MAP_POTATO:
-		IsCollisionMapInfo = true;
-		break;
-	case en_MapObjectInfo::TILE_MAP_WALL:
-	case en_MapObjectInfo::TILE_MAP_FURNACE:
-	case en_MapObjectInfo::TILE_MAP_SAMILL:
-		IsCollisionMapInfo = false;
+		switch (_ObjectsInfos[Y][X]->_GameObjectInfo.ObjectType)
+		{
+		case en_GameObjectType::OBJECT_WALL:
+		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
+			IsCollisionMapInfo = false;
+			break;
+		}
 	}
 
 	bool ObjectCheck = false;
