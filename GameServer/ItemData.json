@@ -275,17 +275,6 @@
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
-          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_SLIMEGEL",
-          "ItemObjectType": "OBJECT_ITEM_MATERIAL_SLIME_GEL",
-          "ItemExplain": "슬라임의 체액",
-          "ItemName": "슬라임젤리",
-          "ItemWidth": 1,
-          "ItemHeight": 1,
-          "ItemMaxDurability": 50,
-          "ItemMaxCount": 99
-        },
-        {
-          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
           "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN",
           "ItemObjectType": "OBJECT_ITEM_MATERIAL_BRONZE_COIN",
           "ItemExplain": "",
