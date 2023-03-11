@@ -78,17 +78,12 @@ void CGameServer::GameServerStart(const WCHAR* OpenIP, int32 Port)
 	CNetworkLib::Start(OpenIP, Port);
 
 	SYSTEM_INFO SI;
-	GetSystemInfo(&SI);
-
-	int64 MapID = 1;
+	GetSystemInfo(&SI);	
 
 	_Day = new CDay();
 
 	// 맵 정보를 읽어옴
-	G_MapManager->MapSave();
-
-	// 맵 오브젝트 스폰
-	G_ObjectManager->MapObjectSpawn(MapID);
+	G_MapManager->MapSave();	
 
 	// 맵 타일 정보 가져오기
 	G_ObjectManager->GameServer = this;
@@ -135,7 +130,7 @@ void CGameServer::LoginServerConnect(const WCHAR* ConnectIP, int32 Port)
 		else if (LoginServerConnectRet == 0)
 		{
 			break;
-		}
+		}		
 	}
 }
 
@@ -949,10 +944,10 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 				break;
 			}
 
-			float DirectionX;
-			*Message >> DirectionX;
-			float DirectionY;
-			*Message >> DirectionY;
+			float MoveDirectionX;
+			*Message >> MoveDirectionX;
+			float MoveDirectionY;
+			*Message >> MoveDirectionY;
 
 			float GameObjectWorldPositionX;
 			*Message >> GameObjectWorldPositionX;
@@ -962,7 +957,7 @@ void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 			int8 GameObjectState;
 			*Message >> GameObjectState;
 			
-			st_GameObjectJob* MoveJob = MakeGameObjectJobMove(DirectionX, DirectionY, GameObjectWorldPositionX, GameObjectWorldPositionY, GameObjectState);
+			st_GameObjectJob* MoveJob = MakeGameObjectJobMove(MoveDirectionX, MoveDirectionY, GameObjectWorldPositionX, GameObjectWorldPositionY, GameObjectState);
 			MyPlayer->_GameObjectJobQue.Enqueue(MoveJob);			
 		}
 		else
@@ -5976,7 +5971,7 @@ CGameServerMessage* CGameServer::MakePacketResChangeObjectStat(int64 ObjectId, s
 	return ResChangeObjectStatPacket;
 }
 
-CGameServerMessage* CGameServer::MakePacketResChangeObjectState(int64 ObjectId, en_GameObjectType ObjectType, en_CreatureState ObjectState)
+CGameServerMessage* CGameServer::MakePacketResChangeObjectState(int64 ObjectId, en_CreatureState ObjectState)
 {
 	CGameServerMessage* ResObjectStatePacket = CGameServerMessage::GameServerMessageAlloc();
 	if (ResObjectStatePacket == nullptr)
@@ -5987,8 +5982,7 @@ CGameServerMessage* CGameServer::MakePacketResChangeObjectState(int64 ObjectId, 
 	ResObjectStatePacket->Clear();
 
 	*ResObjectStatePacket << (int16)en_PACKET_S2C_OBJECT_STATE_CHANGE;
-	*ResObjectStatePacket << ObjectId;	
-	*ResObjectStatePacket << (int16)ObjectType;
+	*ResObjectStatePacket << ObjectId;		
 	*ResObjectStatePacket << (int8)ObjectState;
 
 	return ResObjectStatePacket;
@@ -6012,7 +6006,7 @@ CGameServerMessage* CGameServer::MakePacketResFaceDirection(int64 ObjectID, floa
 	return ResFaceDirectionPacket;
 }
 
-CGameServerMessage* CGameServer::MakePacketResMove(int64 ObjectId, float MoveDirectionX, float MoveDirectionY, float PositionX, float PositionY)
+CGameServerMessage* CGameServer::MakePacketResMove(int64& ObjectID, st_Vector2& LookAtDirection, st_Vector2& MoveDirection, st_Vector2& Position, int64 TargetID)
 {
 	CGameServerMessage* ResMoveMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResMoveMessage == nullptr)
@@ -6023,11 +6017,14 @@ CGameServerMessage* CGameServer::MakePacketResMove(int64 ObjectId, float MoveDir
 	ResMoveMessage->Clear();
 
 	*ResMoveMessage << (int16)en_PACKET_S2C_MOVE;	
-	*ResMoveMessage << ObjectId;
-	*ResMoveMessage << MoveDirectionX;
-	*ResMoveMessage << MoveDirectionY;		
-	*ResMoveMessage << PositionX;
-	*ResMoveMessage << PositionY;
+	*ResMoveMessage << ObjectID;	
+	*ResMoveMessage << LookAtDirection._X;
+	*ResMoveMessage << LookAtDirection._Y;
+	*ResMoveMessage << MoveDirection._X;
+	*ResMoveMessage << MoveDirection._Y;		
+	*ResMoveMessage << Position._X;
+	*ResMoveMessage << Position._Y;
+	*ResMoveMessage << TargetID;
 
 	return ResMoveMessage;
 }
@@ -6048,6 +6045,26 @@ CGameServerMessage* CGameServer::MakePacketResMoveStop(int64 ObjectId, float Sto
 	*ResMoveStopPacket << StopPositionY;	
 
 	return ResMoveStopPacket;
+}
+
+CGameServerMessage* CGameServer::MakePacketResToAttack(int64 ObjectID, int64 TargetID,  float StopPositionX, float StopPositionY, en_CreatureState State)
+{
+	CGameServerMessage* ResToAttackPacket = CGameServerMessage::GameServerMessageAlloc();
+	if (ResToAttackPacket == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResToAttackPacket->Clear();
+
+	*ResToAttackPacket << (int16)en_PACKET_S2C_TO_ATTACK;
+	*ResToAttackPacket << ObjectID;
+	*ResToAttackPacket << TargetID;
+	*ResToAttackPacket << StopPositionX;
+	*ResToAttackPacket << StopPositionY;
+	*ResToAttackPacket << (byte)State;
+
+	return ResToAttackPacket;
 }
 
 CGameServerMessage* CGameServer::MakePacketItemMove(st_GameObjectInfo ItemMoveObjectInfo)
@@ -6413,7 +6430,7 @@ CGameServerMessage* CGameServer::MakePacketComboSkillOff(vector<st_Vector2Int> C
 	return ResComboSkillMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketExperience(en_GameObjectType TargetObjectType, int64 GainExp, int64 CurrentExp, int64 RequireExp, int64 TotalExp)
+CGameServerMessage* CGameServer::MakePacketExperience(int64 GainExp, int64 CurrentExp, int64 RequireExp, int64 TotalExp)
 {
 	CGameServerMessage* ResExperienceMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResExperienceMessage == nullptr)
@@ -6423,8 +6440,7 @@ CGameServerMessage* CGameServer::MakePacketExperience(en_GameObjectType TargetOb
 
 	ResExperienceMessage->Clear();
 
-	*ResExperienceMessage << (int16)en_PACKET_S2C_EXPERIENCE;	
-	*ResExperienceMessage << (int16)TargetObjectType;
+	*ResExperienceMessage << (int16)en_PACKET_S2C_EXPERIENCE;		
 	*ResExperienceMessage << GainExp;
 	*ResExperienceMessage << CurrentExp;
 	*ResExperienceMessage << RequireExp;

@@ -584,7 +584,7 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 오브젝트 상태 변경 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResChangeObjectState(int64 ObjectId, en_GameObjectType ObjectType, en_CreatureState ObjectState);	
+	CGameServerMessage* MakePacketResChangeObjectState(int64 ObjectId, en_CreatureState ObjectState);	
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 바라보는 방향 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -592,11 +592,15 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 이동 요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResMove(int64 ObjectId, float MoveDirectionX, float MoveDirectionY, float PositionX, float PositionY);	
+	CGameServerMessage* MakePacketResMove(int64& ObjectID, st_Vector2& LookAtDirection, st_Vector2& MoveDirection, st_Vector2& Position, int64 TargetID = -1);
 	//------------------------------------------------------------------------------------------------------
 	// 게임서버 이동 멈춤 요청 응답 패킷 조합
 	//------------------------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResMoveStop(int64 ObjectId, float StopPositionX, float StopPositionY);	
+	//------------------------------------------------------------------------------------------------------
+	// 게임서버 캐릭터 공격 상태 전환 패킷 조합
+	//------------------------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketResToAttack(int64 ObjectID, int64 TargetID, float StopPositionX, float StopPositionY, en_CreatureState State);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 아이템 움직임 시작 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -669,7 +673,7 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 경험치 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketExperience(en_GameObjectType TargetObjectType, int64 GainExp, int64 CurrentExp, int64 RequireExp, int64 TotalExp);
+	CGameServerMessage* MakePacketExperience(int64 GainExp, int64 CurrentExp, int64 RequireExp, int64 TotalExp);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 스킬 취소 패킷 조합
 	//-----------------------------------------------------------------------------------------

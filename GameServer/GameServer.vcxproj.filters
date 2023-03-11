@@ -338,6 +338,9 @@
     <ClInclude Include="DataManager.h">
       <Filter>ContentServer\Content\Data</Filter>
     </ClInclude>
+    <ClInclude Include="Wall.h">
+      <Filter>ContentServer\Content\GameObject\Environment</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -486,6 +489,9 @@
     <ClCompile Include="Goblin.cpp">
       <Filter>ContentServer\Content\GameObject\Creature\Monster</Filter>
     </ClCompile>
+    <ClCompile Include="Wall.cpp">
+      <Filter>ContentServer\Content\GameObject\Environment</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="DBConfig.xml">
@@ -532,9 +538,6 @@
     <None Include="OptionData.json">
       <Filter>Util\Json,Xml\Data\OptionData</Filter>
     </None>
-    <None Include="MapInfoData.json">
-      <Filter>Util\Json,Xml\Data\MapData</Filter>
-    </None>
     <None Include="FightSkillDatas.json">
       <Filter>Util\Json,Xml\Data\SkillData</Filter>
     </None>
@@ -559,13 +562,8 @@
     <None Include="MerchantItemData.json">
       <Filter>Util\Json,Xml\Data\Item</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="Start_FieldObjectInfoData.txt">
+    <None Include="MapInfo.json">
       <Filter>Util\Json,Xml\Data\MapData</Filter>
-    </Text>
-    <Text Include="Start_FieldTileInfoData.txt">
-      <Filter>Util\Json,Xml\Data\MapData</Filter>
-    </Text>
+    </None>
   </ItemGroup>
 </Project>
