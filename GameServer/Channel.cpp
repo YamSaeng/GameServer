@@ -1876,7 +1876,9 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 	case en_GameObjectType::OBJECT_NON_PLAYER:
 		_ChannelNonPlayerArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
 		break;
-	case en_GameObjectType::OBJECT_GOBLIN:			
+	case en_GameObjectType::OBJECT_GOBLIN:	
+		G_ObjectManager->ObjectReturn(LeaveChannelGameObject);
+
 		_ChannelMonsterArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
 		break;
 	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
