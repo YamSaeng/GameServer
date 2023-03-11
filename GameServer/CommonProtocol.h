@@ -197,6 +197,15 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_ATTACK,
 
 	//------------------------------------------------------------
+	// 게임서버 캐릭터 공격 상태로 전환
+	// int64 ObjectID
+	// float StopPositionX
+	// float StopPositionY
+	// byte State
+	//------------------------------------------------------------
+	en_PACKET_S2C_TO_ATTACK,
+
+	//------------------------------------------------------------
 	// 게임서버 캐릭터 마법 요청
 	// int64 AccountId
 	// int64 PlayerDBId	
@@ -916,6 +925,14 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// int64 PartyLeaderMandatePlayerID
 	//-----------------------------------------------------------
 	en_PACKET_S2C_PARTY_LEADER_MANDATE,
+
+	//-----------------------------------------------------------
+	// 게임서버 레이캐스팅 응답
+	// int64 ObjectID
+	// int64 RayCastingStartPosition
+	// int64 RayCastingEndPosition
+	//-----------------------------------------------------------
+	en_PACKET_S2C_RAY_CASTING,
 
 	//-----------------------------------------------------------
 	// 게임서버 시간 요청 
