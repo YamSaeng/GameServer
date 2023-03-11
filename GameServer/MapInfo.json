@@ -508,6 +508,15 @@
                   "Y": 49
                 }
               ]
+            },
+            {
+              "ObjectType": "OBJECT_GOBLIN",
+              "PositionList": [
+                {
+                  "X": 35,
+                  "Y": 60
+                }
+              ]
             }
           ]
         }
