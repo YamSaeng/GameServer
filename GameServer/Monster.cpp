@@ -23,6 +23,8 @@ CMonster::CMonster()
 	_DeadTick = 0;
 
 	_Target = nullptr;		
+
+	_GameObjectInfo.ObjectPositionInfo.LookAtDireciton = st_Vector2::Right();
 }
 
 CMonster::~CMonster()
@@ -273,11 +275,13 @@ void CMonster::SelectTargetCheck()
 				vector<st_FieldOfViewInfo> CurrentFieldOfView = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
 				if (CurrentFieldOfView.size() > 0)
 				{
-					CMessage* MonsterMoveStop = G_ObjectManager->GameServer->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
+					CMessage* ResAttackPacket = G_ObjectManager->GameServer->MakePacketResToAttack(_GameObjectInfo.ObjectId,
+						_Target->_GameObjectInfo.ObjectId,
 						_GameObjectInfo.ObjectPositionInfo.Position._X,
-						_GameObjectInfo.ObjectPositionInfo.Position._Y);
-					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfView, MonsterMoveStop);
-					MonsterMoveStop->Free();
+						_GameObjectInfo.ObjectPositionInfo.Position._Y,
+						_GameObjectInfo.ObjectPositionInfo.State);
+					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfView, ResAttackPacket);
+					ResAttackPacket->Free();					
 				}
 			}
 		}
@@ -295,7 +299,7 @@ void CMonster::SelectTargetCheck()
 			}
 		}
 		break;
-	}
+	}	
 }
 
 void CMonster::FindTarget()
@@ -345,9 +349,12 @@ void CMonster::UpdateSpawnReady()
 				// 채널에서 퇴장
 				st_GameObjectJob* LeaveChannerMonsterJob = G_ObjectManager->GameServer->MakeGameObjectJobLeaveChannel(this);
 				_Channel->_ChannelJobQue.Enqueue(LeaveChannerMonsterJob);
+				
+				CGameObject* NewMonster = G_ObjectManager->ObjectCreate(_GameObjectInfo.ObjectType);
+				NewMonster->_SpawnPosition = _SpawnPosition;
 
 				// 채널에서 퇴장하고 다시 입장
-				st_GameObjectJob* EnterChannelMonsterJob = G_ObjectManager->GameServer->MakeGameObjectJobObjectEnterChannel(this);
+				st_GameObjectJob* EnterChannelMonsterJob = G_ObjectManager->GameServer->MakeGameObjectJobObjectEnterChannel(NewMonster);
 				_Channel->_ChannelJobQue.Enqueue(EnterChannelMonsterJob);
 			}
 			else
@@ -437,9 +444,9 @@ void CMonster::ReadyPatrol()
 		if (CurrentFieldOfView.size() > 0)
 		{
 			CMessage* MonsterMoveStartPacket = G_ObjectManager->GameServer->MakePacketResMove(_GameObjectInfo.ObjectId,
-				_GameObjectInfo.ObjectPositionInfo.LookAtDireciton._X, _GameObjectInfo.ObjectPositionInfo.LookAtDireciton._Y,
-				_GameObjectInfo.ObjectPositionInfo.MoveDirection._X, _GameObjectInfo.ObjectPositionInfo.MoveDirection._Y,
-				_GameObjectInfo.ObjectPositionInfo.Position._X, _GameObjectInfo.ObjectPositionInfo.Position._Y);
+				_GameObjectInfo.ObjectPositionInfo.LookAtDireciton,
+				_GameObjectInfo.ObjectPositionInfo.MoveDirection,
+				_GameObjectInfo.ObjectPositionInfo.Position);
 			G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfView, MonsterMoveStartPacket);
 			MonsterMoveStartPacket->Free();
 		}		
@@ -495,9 +502,10 @@ void CMonster::ReadMoving()
 		if (CurrentFieldOfView.size() > 0)
 		{
 			CMessage* MonsterMoveStartPacket = G_ObjectManager->GameServer->MakePacketResMove(_GameObjectInfo.ObjectId,
-				_GameObjectInfo.ObjectPositionInfo.LookAtDireciton._X, _GameObjectInfo.ObjectPositionInfo.LookAtDireciton._Y,
-				_GameObjectInfo.ObjectPositionInfo.MoveDirection._X, _GameObjectInfo.ObjectPositionInfo.MoveDirection._Y,
-				_GameObjectInfo.ObjectPositionInfo.Position._X, _GameObjectInfo.ObjectPositionInfo.Position._Y);
+				_GameObjectInfo.ObjectPositionInfo.LookAtDireciton,
+				_GameObjectInfo.ObjectPositionInfo.MoveDirection,
+				_GameObjectInfo.ObjectPositionInfo.Position,
+				_Target->_GameObjectInfo.ObjectId);
 			G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfView, MonsterMoveStartPacket);
 			MonsterMoveStartPacket->Free();
 		}
@@ -513,16 +521,12 @@ void CMonster::UpdateMoving()
 	if (CurrentFieldOfView.size() > 0)
 	{	
 		CMessage* MonsterMoveStartPacket = G_ObjectManager->GameServer->MakePacketResMove(_GameObjectInfo.ObjectId,
-			_GameObjectInfo.ObjectPositionInfo.LookAtDireciton._X, _GameObjectInfo.ObjectPositionInfo.LookAtDireciton._Y,
-			_GameObjectInfo.ObjectPositionInfo.MoveDirection._X, _GameObjectInfo.ObjectPositionInfo.MoveDirection._Y,
-			_GameObjectInfo.ObjectPositionInfo.Position._X, _GameObjectInfo.ObjectPositionInfo.Position._Y);
+			_GameObjectInfo.ObjectPositionInfo.LookAtDireciton,
+			_GameObjectInfo.ObjectPositionInfo.MoveDirection,
+			_GameObjectInfo.ObjectPositionInfo.Position,
+			_Target->_GameObjectInfo.ObjectId);
 		G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfView, MonsterMoveStartPacket);
 		MonsterMoveStartPacket->Free();		
-
-		CMessage* ResFaceDirectionPacket = G_ObjectManager->GameServer->MakePacketResFaceDirection(_GameObjectInfo.ObjectId,
-			_Target->_GameObjectInfo.ObjectPositionInfo.Position._X, _Target->_GameObjectInfo.ObjectPositionInfo.Position._Y);
-		G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfView, ResFaceDirectionPacket);
-		ResFaceDirectionPacket->Free();
 	}		
 
 	Move();	
@@ -572,9 +576,9 @@ void CMonster::UpdateAttack()
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
 		_MonsterState = en_MonsterState::MONSTER_READY_MOVE;
 		return;
-	}
+	}	
 
-	_MonsterSkillBox.SkillProcess(this, nullptr, en_SkillType::SKILL_GOBLIN_ACTIVE_MELEE_DEFAULT_ATTACK);
+	_MonsterSkillBox.SkillProcess(this, nullptr, en_SkillType::SKILL_GOBLIN_ACTIVE_MELEE_DEFAULT_ATTACK);	
 }
 
 void CMonster::UpdateSpell()
@@ -791,7 +795,7 @@ bool CMonster::TargetAttackCheck(float CheckDistance)
 		st_Vector2 DirectionVector = _Target->_GameObjectInfo.ObjectPositionInfo.Position - _GameObjectInfo.ObjectPositionInfo.Position;
 		st_Vector2 NormalVector = DirectionVector.Normalize();
 		
-		_GameObjectInfo.ObjectPositionInfo.LookAtDireciton = NormalVector;
+		_GameObjectInfo.ObjectPositionInfo.LookAtDireciton = NormalVector;		
 		_GameObjectInfo.ObjectPositionInfo.MoveDirection = st_Vector2::Zero();
 		
 		return true;
