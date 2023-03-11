@@ -43,10 +43,7 @@ void CCrop::Update()
 		break;
 	case en_CreatureState::IDLE:	
 		UpdateIdle();
-		break;
-	case en_CreatureState::READY_DEAD:
-		UpdateReadyDead();
-		break;
+		break;	
 	case en_CreatureState::DEAD:
 		UpdateDead();
 		break;
@@ -98,11 +95,11 @@ void CCrop::UpdateIdle()
 	}
 }
 
-void CCrop::UpdateReadyDead()
+void CCrop::UpdateDead()
 {
-	if (_DeadReadyTick < GetTickCount64())
+	if (_DeadTick < GetTickCount64())
 	{
-		_DeadTick = GetTickCount64() + 2000;
+		_ReSpawnTick = GetTickCount64() + 2000;
 
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
 
@@ -112,13 +109,10 @@ void CCrop::UpdateReadyDead()
 		}
 
 		st_GameObjectJob* DeSpawnCropChanelJob = G_ObjectManager->GameServer->MakeGameObjectJobObjectDeSpawnObjectChannel(this);
-		_Channel->_ChannelJobQue.Enqueue(DeSpawnCropChanelJob);		
+		_Channel->_ChannelJobQue.Enqueue(DeSpawnCropChanelJob);
 	}
-}
 
-void CCrop::UpdateDead()
-{
-	if (_DeadTick < GetTickCount64())
+	if (_ReSpawnTick < GetTickCount64())
 	{
 		st_GameObjectJob* LeaveChannelEnvironmentJob = G_ObjectManager->GameServer->MakeGameObjectJobLeaveChannel(this);
 		_Channel->_ChannelJobQue.Enqueue(LeaveChannelEnvironmentJob);

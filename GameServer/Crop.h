@@ -14,9 +14,8 @@ public:
 	virtual void Update() override;
 	
 	virtual bool OnDamaged(CGameObject* Attacker, int32 Damage) override;
-
-	virtual void UpdateIdle() override;
-	virtual void UpdateReadyDead() override;
+	
+	virtual void UpdateIdle() override;	
 	virtual void UpdateDead() override;
 private:
 	enum en_CropState
