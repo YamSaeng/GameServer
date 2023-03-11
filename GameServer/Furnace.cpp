@@ -15,9 +15,7 @@ CFurnace::CFurnace()
 	_GameObjectInfo.ObjectName = L"¿ë±¤·Î";
 
 	auto FindFurnaceData = G_Datamanager->_CraftingTableData.find((int16)_GameObjectInfo.ObjectType);
-	_CraftingTableRecipe = *(*FindFurnaceData).second;	
-
-	_RectCollision = new CRectCollision(this);
+	_CraftingTableRecipe = *(*FindFurnaceData).second;		
 }
 
 void CFurnace::Update()

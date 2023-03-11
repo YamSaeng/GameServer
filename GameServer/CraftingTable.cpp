@@ -6,9 +6,7 @@
 
 CCraftingTable::CCraftingTable()
 {
-	_SelectedCraftingTable = false;
-
-	_RectCollision = new CRectCollision(this);
+	_SelectedCraftingTable = false;	
 }
 
 void CCraftingTable::Start()

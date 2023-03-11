@@ -11,8 +11,7 @@ CPlayer::CPlayer()
 {
 	_AccountId = 0;
 	_SessionId = 0;
-
-	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_PLAYER;
+		
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 	_DefaultAttackTick = 0;
 
@@ -30,9 +29,7 @@ CPlayer::CPlayer()
 
 	_ComboSkill = nullptr;	
 
-	_SpellSkill = nullptr;		
-
-	_RectCollision = new CRectCollision(this);
+	_SpellSkill = nullptr;			
 
 	_SkillBox.SetOwner(this);
 }
@@ -162,7 +159,7 @@ bool CPlayer::OnDamaged(CGameObject* Attacker, int32 Damage)
 			vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
 
 			CGameServerMessage* ResDeadStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId, 
-				_GameObjectInfo.ObjectType, _GameObjectInfo.ObjectPositionInfo.State);
+				_GameObjectInfo.ObjectPositionInfo.State);
 			G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResDeadStateChangePacket);
 			ResDeadStateChangePacket->Free();
 
@@ -201,8 +198,7 @@ bool CPlayer::UpdateSpawnIdle()
 
 	if (ChangeToIdle)
 	{
-		CGameServerMessage* ChangeToIdlePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,			
-			_GameObjectInfo.ObjectType,
+		CGameServerMessage* ChangeToIdlePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,						
 			_GameObjectInfo.ObjectPositionInfo.State);
 		G_ObjectManager->GameServer->SendPacketFieldOfView(this, ChangeToIdlePacket);
 		ChangeToIdlePacket->Free();
@@ -267,8 +263,7 @@ void CPlayer::UpdateSpell()
 
 		vector<st_FieldOfViewInfo> AroundPlayers = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
 
-		CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
-			_GameObjectInfo.ObjectType,
+		CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,			
 			_GameObjectInfo.ObjectPositionInfo.State);
 		G_ObjectManager->GameServer->SendPacketFieldOfView(AroundPlayers, ResObjectStateChangePacket);
 		ResObjectStateChangePacket->Free();
@@ -462,8 +457,7 @@ void CPlayer::UpdateGathering()
 
 		_GatheringTarget->OnDamaged(this, 1);		
 
-		CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,			
-			_GameObjectInfo.ObjectType,
+		CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,						
 			_GameObjectInfo.ObjectPositionInfo.State);
 		G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResObjectStateChangePacket);
 

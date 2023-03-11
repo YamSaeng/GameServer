@@ -31,12 +31,10 @@ CGoblin::CGoblin()
 
 	_FieldOfViewDistance = 10;	
 
-	_FieldOfAngle = 210;
-	
-	_RectCollision = new CRectCollision(this);	
+	_FieldOfAngle = 210;	
 	
 	_MonsterSkillBox.SetOwner(this);
-	_MonsterSkillBox.Init(_GameObjectInfo.ObjectType);	
+	_MonsterSkillBox.Init(_GameObjectInfo.ObjectType);		
 }
 
 CGoblin::~CGoblin()
