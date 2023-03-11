@@ -2297,7 +2297,11 @@ void CDataManager::LoadDataMapInfo(wstring LoadFileName)
 				if (ObjectTypeName == "OBJECT_WALL")
 				{
 					GameObjectType = en_GameObjectType::OBJECT_WALL;
-				}				
+				}
+				else if(ObjectTypeName == "OBJECT_GOBLIN")
+				{
+					GameObjectType = en_GameObjectType::OBJECT_GOBLIN;
+				}
 
 				vector<st_Vector2Int> Positions;
 
