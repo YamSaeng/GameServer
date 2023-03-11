@@ -41,25 +41,6 @@ void CMonsterSkillBox::Init(en_GameObjectType MonsterObjctType)
 				_MonsterSkills.push_back(GoblinMonsterActiveSkill);
 			}
 		}
-		break;
-	case en_GameObjectType::OBJECT_SLIME:
-		{			
-			for (auto SlimeSkillIter : G_Datamanager->_SlimeSkillDatas)
-			{
-				CSkill* SlimeMonsterAttackSkill = G_ObjectManager->SkillCreate();
-				st_SkillInfo* SlimeAttackSkillInfo = G_ObjectManager->SkillInfoCreate(SlimeSkillIter.second->SkillType, 1);
-				*SlimeAttackSkillInfo = *SlimeSkillIter.second;
-
-				SlimeMonsterAttackSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_ACTIVE_SKILL, SlimeAttackSkillInfo);
-
-				_MonsterSkills.push_back(SlimeMonsterAttackSkill);
-			}
-		}
-		break;
-	case en_GameObjectType::OBJECT_BEAR:
-		{
-			
-		}
 		break;	
 	default:
 		CRASH("Monster ObjectType None");
@@ -114,7 +95,7 @@ void CMonsterSkillBox::SkillProcess(CGameObject* SkillMonster, CGameObject* Skil
 				CMessage* ResAnimationPlayPacket = G_ObjectManager->GameServer->MakePacketResAnimationPlay(SkillMonster->_GameObjectInfo.ObjectId,
 					SkillMonster->_GameObjectInfo.ObjectType, en_AnimationType::ANIMATION_TYPE_SWORD_MELEE_ATTACK);
 				G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewInfos, ResAnimationPlayPacket);
-				ResAnimationPlayPacket->Free();
+				ResAnimationPlayPacket->Free();				
 
 				switch (Skill->GetSkillInfo()->SkillType)
 				{
