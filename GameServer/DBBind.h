@@ -18,20 +18,19 @@
 // Value = ( 1 << (3 - 1)) | Value = ( 1 << (2 - 1)) | FullBits<1>::Value | FullBits<0>::Value
 // Value = ( 1 << (3 - 1)) | Value = ( 1 << (2 - 1)) | 1 | 0
 // -> [1][1][1]
-
-template<int32 Count>
-struct FullBits { enum { Value = (1 << (Count - 1)) | FullBits<Count - 1>::Value }; };
+template<int64 Count>
+struct FullBits { enum class Check : int64 { Value = ((int64)1 << (Count - 1)) | (int64)FullBits<Count - 1>::Check::Value }; };
 template<>
-struct FullBits<1> { enum { Value = 1 }; };
+struct FullBits<1> { enum class Check : int64 { Value = 1 }; };
 template<>
-struct FullBits<0> { enum { Value = 0 }; };
+struct FullBits<0> { enum class Check : int64 { Value = 0 }; };
 
 // ParamCount : 바인딩할 Param값의 개수 ( = 넣을 데이터 )
 // ColumnCount : 쿼리 질의 후 받을 Column 개수 ( = 뽑아올 데이터 )
 template<int32 ParamCount, int32 ColumnCount>
 class CDBBind
 {
-protected:
+protected:		
 	// DBConnection
 	CDBConnection& _DBConnection;
 	// 쿼리
@@ -65,8 +64,11 @@ public:
 
 	// 입력받은 _ParamCount, ColumnCount 만큼 BindParam, BindCol 했는지 확인한다.
 	bool Validate()
-	{
-		if (_ParamFlag == FullBits<ParamCount>::Value && _ColumnFlag == FullBits<ColumnCount>::Value)
+	{		
+		int64 ParamCountCheck = (int64)FullBits<ParamCount>::Check::Value;
+		int64 ColumnCountCheck = (int64)FullBits<ColumnCount>::Check::Value;
+
+		if (_ParamFlag == ParamCountCheck && _ColumnFlag == ColumnCountCheck)
 		{
 			return true;
 		}
