@@ -8,6 +8,10 @@
 		<Column name="PlayerName" type="nvarchar(20)" notnull="true"/>		
 		<Column name="PlayerIndex" type="TinyInt" notnull="true"/>
 		<Column name="Level" type="int" notnull="true"/>
+		<Column name="Str" type="int" notnull="true"/>
+		<Column name="Dex" type="int" notnull="true"/>
+		<Column name="Int" type="int" notnull="true"/>
+		<Column name="Luck" type="int" notnull="true"/>
 		<Column name="CurrentHP" type="int" notnull="true"/>
 		<Column name="MaxHP" type="int" notnull="true"/>
 		<Column name="CurrentMP" type="int" notnull="true"/>
@@ -138,6 +142,10 @@
         PlayerName,        
         PlayerIndex,
         Level,
+		Str,
+		Dex,
+		Int,
+		Luck,
         CurrentHP,
         MaxHP,
         CurrentMP, 
@@ -184,6 +192,10 @@
 		<Param name="@PlayerName" type="nvarchar(20)"/>		
 		<Param name="@PlayerIndex" type="TinyInt"/>
 		<Param name="@Level" type="int"/>
+		<Param name="@Str" type="int"/>
+		<Param name="@Dex" type="int"/>
+		<Param name="@Int" type="int"/>
+		<Param name="@Luck" type="int"/>
 		<Param name="@CurrentHP" type="int"/>
 		<Param name="@MaxHP" type="int"/>
 		<Param name="@CurrentMP" type="int"/>
@@ -217,6 +229,10 @@
         (@PlayerName),        
         (@PlayerIndex),
         (@Level),
+		(@Str),
+		(@Dex),
+		(@Int),
+		(@Luck),
         (@CurrentHP),
         (@MaxHP),
         (@CurrentMP),
@@ -1046,6 +1062,10 @@
 		<Param name="@AccountDBId" type="BigInt"/>
 		<Param name="@PlayerDBId" type="BigInt"/>
 		<Param name="@Level" type="Int"/>
+		<Param name="@Str" type="Int"/>
+		<Param name="@Dex" type="Int"/>
+		<Param name="@Int" type="Int"/>
+		<Param name="@Luck" type="Int"/>
 		<Param name="@MaxHP" type="Int"/>
 		<Param name="@MaxMP" type="Int"/>
 		<Param name="@MaxDP" type="Int"/>
@@ -1072,6 +1092,10 @@
 	    SET NOCOUNT ON
         UPDATE [dbo].[Player]
         SET Level = (@Level),
+		Str = (@Str),
+		Dex = (@Dex),
+		Int = (@Int),
+		Luck = (@Luck),
         MaxHP = (@MaxHP),
         MaxMP = (@MaxMP),
         AutoRecoveryHPPercent = (@AutoRecoveryHPPercent),
