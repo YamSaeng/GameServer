@@ -2294,6 +2294,10 @@ struct st_PositionInfo
 struct st_StatInfo
 {
 	int32 Level;
+	int32 Str;
+	int32 Dex;
+	int32 Int;
+	int32 Luck;
 	int32 HP;
 	int32 MaxHP;
 	int32 MP;
@@ -2306,7 +2310,7 @@ struct st_StatInfo
 	int32 MaxMeleeAttackDamage;
 	int16 MeleeAttackHitRate;
 	int16 MagicDamage;
-	float MagicHitRate;	
+	float MagicHitRate;
 	int32 Defence;
 	int16 EvasionRate;
 	int16 MeleeCriticalPoint;
