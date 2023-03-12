@@ -3726,6 +3726,10 @@ void CGameServer::PacketProcReqDBAccountCheck(CMessage* Message)
 			WCHAR PlayerName[100] = { 0 };			
 			int8 PlayerIndex;
 			int32 PlayerLevel;
+			int32 PlayerStr;
+			int32 PlayerDex;
+			int32 PlayerInt;
+			int32 PlayerLuck;
 			int32 PlayerCurrentHP;
 			int32 PlayerMaxHP;
 			int32 PlayerCurrentMP;
@@ -3755,6 +3759,10 @@ void CGameServer::PacketProcReqDBAccountCheck(CMessage* Message)
 			ClientPlayersGet.OutPlayerName(PlayerName);			
 			ClientPlayersGet.OutPlayerIndex(PlayerIndex);
 			ClientPlayersGet.OutLevel(PlayerLevel);
+			ClientPlayersGet.OutStr(PlayerStr);
+			ClientPlayersGet.OutDex(PlayerDex);
+			ClientPlayersGet.OutInt(PlayerInt);
+			ClientPlayersGet.OutLuck(PlayerLuck);
 			ClientPlayersGet.OutCurrentHP(PlayerCurrentHP);
 			ClientPlayersGet.OutMaxHP(PlayerMaxHP);
 			ClientPlayersGet.OutCurrentMP(PlayerCurrentMP);
@@ -3906,6 +3914,10 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 			NewCharacterPush.InPlayerName(Session->CreateCharacterName);			
 			NewCharacterPush.InPlayerIndex(ReqCharacterCreateSlotIndex);
 			NewCharacterPush.InLevel(NewCharacterStatus.Level);
+			NewCharacterPush.InStr(NewCharacterStatus.Str);
+			NewCharacterPush.InDex(NewCharacterStatus.Dex);
+			NewCharacterPush.InInt(NewCharacterStatus.Int);
+			NewCharacterPush.InLuck(NewCharacterStatus.Luck);
 			NewCharacterPush.InCurrentHP(NewCharacterStatus.MaxHP);
 			NewCharacterPush.InMaxHP(NewCharacterStatus.MaxHP);
 			NewCharacterPush.InCurrentMP(NewCharacterStatus.MaxMP);
@@ -4521,6 +4533,10 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 	LeavePlayerStatInfoSave.InAccountDBId(LeavePlayer->_AccountId);
 	LeavePlayerStatInfoSave.InPlayerDBId(LeavePlayer->_GameObjectInfo.ObjectId);
 	LeavePlayerStatInfoSave.InLevel(LeavePlayer->_GameObjectInfo.ObjectStatInfo.Level);
+	LeavePlayerStatInfoSave.InStr(LeavePlayer->_GameObjectInfo.ObjectStatInfo.Str);
+	LeavePlayerStatInfoSave.InDex(LeavePlayer->_GameObjectInfo.ObjectStatInfo.Dex);
+	LeavePlayerStatInfoSave.InInt(LeavePlayer->_GameObjectInfo.ObjectStatInfo.Int);
+	LeavePlayerStatInfoSave.InLuck(LeavePlayer->_GameObjectInfo.ObjectStatInfo.Luck);
 	LeavePlayerStatInfoSave.InMaxHP(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MaxHP);
 	LeavePlayerStatInfoSave.InMaxMP(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MaxMP);
 	LeavePlayerStatInfoSave.InMaxDP(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MaxDP);

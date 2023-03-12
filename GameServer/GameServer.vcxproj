@@ -371,7 +371,7 @@
     <None Include="ShootingSkillDatas.json" />
     <None Include="MonsterSkillDatas.json" />
     <None Include="SpellSkillDatas.json" />
-    <None Include="MapInfo.json" />
+    <None Include="MapInfoData.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

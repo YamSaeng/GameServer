@@ -562,7 +562,7 @@
     <None Include="MerchantItemData.json">
       <Filter>Util\Json,Xml\Data\Item</Filter>
     </None>
-    <None Include="MapInfo.json">
+    <None Include="MapInfoData.json">
       <Filter>Util\Json,Xml\Data\MapData</Filter>
     </None>
   </ItemGroup>
