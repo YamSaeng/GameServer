@@ -143,9 +143,6 @@ void CGameObject::Update()
 			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SELECT_SKILL_CHARACTERISTIC:
 			{
-				int8 SelectSkillCharacterIndex;
-				*GameObjectJob->GameObjectJobMessage >> SelectSkillCharacterIndex;
-
 				int8 SkillCharacteristicType;
 				*GameObjectJob->GameObjectJobMessage >> SkillCharacteristicType;
 
@@ -160,11 +157,11 @@ void CGameObject::Update()
 					}
 					else
 					{
-						Player->_SkillBox.CreateChracteristic(SelectSkillCharacterIndex, SkillCharacteristicType);
+						Player->_SkillBox.CreateChracteristic(SkillCharacteristicType);
 
-						CSkillCharacteristic* SkillCharacteristic = Player->_SkillBox.FindCharacteristic(SelectSkillCharacterIndex, SkillCharacteristicType);
+						CSkillCharacteristic* SkillCharacteristic = Player->_SkillBox.FindCharacteristic(SkillCharacteristicType);
 
-						CMessage* ResSkillCharacteristicPacket = G_ObjectManager->GameServer->MakePacketResSelectSkillCharacteristic(true, SelectSkillCharacterIndex,
+						CMessage* ResSkillCharacteristicPacket = G_ObjectManager->GameServer->MakePacketResSelectSkillCharacteristic(true,
 							SkillCharacteristicType,
 							SkillCharacteristic->GetPassiveSkill(), SkillCharacteristic->GetActiveSkill());
 						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSkillCharacteristicPacket);
@@ -180,10 +177,7 @@ void CGameObject::Update()
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SKILL_LEARN:
 			{
 				bool IsSkillLearn;
-				*GameObjectJob->GameObjectJobMessage >> IsSkillLearn;
-
-				int8 SkillCharacteristicIndex;
-				*GameObjectJob->GameObjectJobMessage >> SkillCharacteristicIndex;
+				*GameObjectJob->GameObjectJobMessage >> IsSkillLearn;				
 
 				int8 LearnSkillChracteristicType;
 				*GameObjectJob->GameObjectJobMessage >> LearnSkillChracteristicType;
@@ -203,7 +197,7 @@ void CGameObject::Update()
 							{
 								if (Player->_GameObjectInfo.ObjectSkillPoint > 0)
 								{
-									Player->_SkillBox.SkillLearn(IsSkillLearn, SkillCharacteristicIndex, LearnSkillType);
+									Player->_SkillBox.SkillLearn(IsSkillLearn, LearnSkillType);
 									Player->_GameObjectInfo.ObjectSkillPoint--;
 								}
 								else
@@ -252,7 +246,7 @@ void CGameObject::Update()
 											}
 										}
 
-										Player->_SkillBox.SkillLearn(IsSkillLearn, SkillCharacteristicIndex, LearnSkillType);
+										Player->_SkillBox.SkillLearn(IsSkillLearn, LearnSkillType);
 										Player->_GameObjectInfo.ObjectSkillPoint++;
 									}
 									else
@@ -394,8 +388,7 @@ void CGameObject::Update()
 							ResBufDebufSkillPacket->Free();
 
 							// 상태이상 해제 알림
-							CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,								
-								_GameObjectInfo.ObjectType,
+							CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,																
 								_GameObjectInfo.ObjectPositionInfo.State);
 							G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResObjectStateChangePacket);
 							ResObjectStateChangePacket->Free();
@@ -480,8 +473,7 @@ void CGameObject::Update()
 									_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPELL;
 
 									// 주위 플레이어들에게 마법 시전 상태 알려줌
-									CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,										
-										_GameObjectInfo.ObjectType,
+									CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
 										_GameObjectInfo.ObjectPositionInfo.State);
 									G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResObjectStateChangePacket);
 									ResObjectStateChangePacket->Free();
@@ -746,8 +738,7 @@ void CGameObject::Update()
 
 								_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::GATHERING;
 
-								CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,									
-									_GameObjectInfo.ObjectType,
+								CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
 									_GameObjectInfo.ObjectPositionInfo.State);
 								G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResObjectStateChangePacket);
 								ResObjectStateChangePacket->Free();
@@ -853,7 +844,12 @@ void CGameObject::Update()
 				{
 					bool IsCritical = true;
 					// 데미지 판단
-					int32 Damage = CMath::CalculateMeleeDamage(&IsCritical,
+					int32 Damage = CMath::CalculateDamage((en_SkillType)Skilltype,
+						Attacker->_GameObjectInfo.ObjectStatInfo.Str,
+						Attacker->_GameObjectInfo.ObjectStatInfo.Dex,
+						Attacker->_GameObjectInfo.ObjectStatInfo.Int,
+						Attacker->_GameObjectInfo.ObjectStatInfo.Luck,
+						&IsCritical,
 						_GameObjectInfo.ObjectStatInfo.Defence,
 						Attacker->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage + SkillMinDamage,
 						Attacker->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage + SkillMaxDamage,
