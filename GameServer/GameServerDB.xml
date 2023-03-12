@@ -78,7 +78,6 @@
 	<Table name="SkillCharacteristic" desc="SkillCharacteristic Table">
 		<Column name="AccountDBId" type="BigInt" notnull ="true"/>
 		<Column name="PlayerDBId" type="BigInt"  notnull ="true"/>
-		<Column name="SkillCharacteristicIndex" type="TinyInt" notnull="true"/>
 		<Column name="SkillCharacteristicType" type="nvarchar(50)" notnull="true"/>
 	</Table>
 
@@ -284,9 +283,7 @@
 				SET NOCOUNT ON
 				INSERT INTO [dbo].[Skill] VALUES ((@AccountID), (@PlayerID), (1), ('SKILL_CATEGORY_PUBLIC'), ('SKILL_DEFAULT_ATTACK'), (1))
 				INSERT INTO [dbo].[Skill] VALUES ((@AccountID), (@PlayerID), (1), ('SKILL_CATEGORY_PUBLIC'), ('SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE'), (1))			
-				INSERT INTO [dbo].[SkillCharacteristic] VALUES ((@AccountID), (@PlayerID), (0), ('SKILL_CATEGORY_NONE'))
-				INSERT INTO [dbo].[SkillCharacteristic] VALUES ((@AccountID), (@PlayerID), (1), ('SKILL_CATEGORY_NONE'))
-				INSERT INTO [dbo].[SkillCharacteristic] VALUES ((@AccountID), (@PlayerID), (2), ('SKILL_CATEGORY_NONE'))
+				INSERT INTO [dbo].[SkillCharacteristic] VALUES ((@AccountID), (@PlayerID), ('SKILL_CATEGORY_NONE'))
 				INSERT INTO [dbo].[Skill] VALUES ((@AccountID), (@PlayerID), (0), ('SKILL_CATEGORY_FIGHT'), ('SKILL_FIGHT_TWO_HAND_SWORD_MASTER'), (1)) INSERT INTO [dbo].[Skill] VALUES ((@AccountID), (@PlayerID), (0), ('SKILL_CATEGORY_FIGHT'), ('SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK'), (1))
 				INSERT INTO [dbo].[Skill] VALUES ((@AccountID), (@PlayerID), (0), ('SKILL_CATEGORY_FIGHT'), ('SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK'), (1)) INSERT INTO [dbo].[Skill] VALUES ((@AccountID), (@PlayerID), (0), ('SKILL_CATEGORY_FIGHT'), ('SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE'), (1))
 				INSERT INTO [dbo].[Skill] VALUES ((@AccountID), (@PlayerID), (0), ('SKILL_CATEGORY_FIGHT'), ('SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE'), (1))
@@ -608,17 +605,16 @@
 		<Body>
 			<![CDATA[
 			SET NOCOUNT ON
-			SELECT SkillCharacteristicIndex,
-			(CASE WHEN SkillCharacteristicType = 'SKILL_CATEGORY_NONE' THEN 0
-				  WHEN SkillCharacteristicType = 'SKILL_CATEGORY_PUBLIC' THEN 1
-				  WHEN SkillCharacteristicType = 'SKILL_CATEGORY_FIGHT' THEN 2
-				  WHEN SkillCharacteristicType = 'SKILL_CATEGORY_PROTECTION' THEN 3
-				  WHEN SkillCharacteristicType = 'SKILL_CATEGORY_SPELL' THEN 4
-				  WHEN SkillCharacteristicType = 'SKILL_CATEGORY_SHOOTING' THEN 5
-				  WHEN SkillCharacteristicType = 'SKILL_CATEGORY_DISCIPLINE' THEN 6
-				  WHEN SkillCharacteristicType = 'SKILL_CATEGORY_ASSASSINATION' THEN 7
-				  ELSE ' '
-				  END)
+			SELECT (CASE WHEN SkillCharacteristicType = 'SKILL_CATEGORY_NONE' THEN 0
+					     WHEN SkillCharacteristicType = 'SKILL_CATEGORY_PUBLIC' THEN 1
+						 WHEN SkillCharacteristicType = 'SKILL_CATEGORY_FIGHT' THEN 2
+						 WHEN SkillCharacteristicType = 'SKILL_CATEGORY_PROTECTION' THEN 3
+					     WHEN SkillCharacteristicType = 'SKILL_CATEGORY_SPELL' THEN 4
+					     WHEN SkillCharacteristicType = 'SKILL_CATEGORY_SHOOTING' THEN 5
+					     WHEN SkillCharacteristicType = 'SKILL_CATEGORY_DISCIPLINE' THEN 6
+					     WHEN SkillCharacteristicType = 'SKILL_CATEGORY_ASSASSINATION' THEN 7
+					     ELSE ' '
+					     END)
 			FROM [dbo].[SkillCharacteristic]
 			WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
 		]]>
@@ -629,7 +625,6 @@
 	<Procedure name="spGetSkillCharacteristicUpdate">
 		<Param name="@AccountDBId" type="BigInt"/>
 		<Param name="@PlayerDBId" type="BigInt"/>
-		<Param name="@SkillCharacteristicIndex" type="TinyInt"/>
 		<Param name="@SkillCharacteristicType" type="TinyInt"/>
 		<Body>
 			<![CDATA[
@@ -645,7 +640,7 @@
 													 WHEN @SkillCharacteristicType = 7 THEN 'SKILL_CATEGORY_ASSASSINATION'
 													 ELSE ' '
 													 END)
-				 WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId) AND SkillCharacteristicIndex = (@SkillCharacteristicIndex)
+				 WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
 		]]>
 		</Body>
 	</Procedure>
