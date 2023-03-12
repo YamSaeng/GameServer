@@ -5,10 +5,14 @@
       "MonsterStatInfo": [
         {
           "Level": 1,
+          "Str": 20,
+          "Dex": 10,
+          "Int": 2,
+          "Luck": 10,
           "MaxHP": 200,
           "MaxMP": 10,
-          "MinMeleeAttackDamage": 1,
-          "MaxMeleeAttackDamage": 10,
+          "MinMeleeAttackDamage": 0,
+          "MaxMeleeAttackDamage": 0,
           "MeleeAttackHitRate": 1500,
           "MagicDamage": 0,
           "MagicHitRate": 0,

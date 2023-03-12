@@ -759,7 +759,12 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			PlayerStatus->EvasionRate = EvasionRate;
 			PlayerStatus->MeleeCriticalPoint = MeleeCriticalPoint;
 			PlayerStatus->MagicCriticalPoint = MagicCriticalPoint;
-			PlayerStatus->Speed = Speed;
+			PlayerStatus->Speed = Speed;		
+
+			PlayerStatus->Str = 10;
+			PlayerStatus->Dex = 10;
+			PlayerStatus->Int = 10;
+			PlayerStatus->Luck = 10;
 
 			_PlayerStatus.insert(pair<int32, st_StatInfo*>(PlayerStatus->Level, PlayerStatus));
 		}
@@ -814,6 +819,10 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 		for (auto& MonsterStatInfoFiled : Filed["MonsterStatInfo"].GetArray())
 		{
 			int Level = MonsterStatInfoFiled["Level"].GetInt();
+			int Str = MonsterStatInfoFiled["Str"].GetInt();
+			int Dex = MonsterStatInfoFiled["Dex"].GetInt();
+			int Int = MonsterStatInfoFiled["Int"].GetInt();
+			int Luck = MonsterStatInfoFiled["Luck"].GetInt();
 			int MaxHP = MonsterStatInfoFiled["MaxHP"].GetInt();
 			int MaxMP = MonsterStatInfoFiled["MaxMP"].GetInt();
 			int MinMeleeAttackDamage = MonsterStatInfoFiled["MinMeleeAttackDamage"].GetInt();
@@ -838,6 +847,10 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			int64 ReSpawnTime = MonsterStatInfoFiled["ReSpawnTime"].GetInt64();
 
 			MonsterData->MonsterStatInfo.Level = Level;
+			MonsterData->MonsterStatInfo.Str = Str;
+			MonsterData->MonsterStatInfo.Dex = Dex;
+			MonsterData->MonsterStatInfo.Int = Int;
+			MonsterData->MonsterStatInfo.Luck = Luck;
 			MonsterData->MonsterStatInfo.MaxHP = MaxHP;
 			MonsterData->MonsterStatInfo.MaxMP = MaxMP;
 			MonsterData->MonsterStatInfo.MinMeleeAttackDamage = MinMeleeAttackDamage;
