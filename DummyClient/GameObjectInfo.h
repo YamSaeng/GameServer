@@ -13,8 +13,7 @@ enum class en_CreatureState : int8
 	RETURN_SPAWN_POSITION,
 	ATTACK,
 	SPELL,
-	GATHERING,
-	READY_DEAD,
+	GATHERING,	
 	DEAD
 };
 
@@ -26,12 +25,12 @@ enum class en_GameObjectType : int16
 	OBJECT_NON_PLAYER,
 
 	OBJECT_MONSTER,
-	OBJECT_SLIME,
-	OBJECT_BEAR,
+	OBJECT_GOBLIN,
 
 	OBJECT_ENVIRONMENT,
 	OBJECT_STONE,
 	OBJECT_TREE,
+
 	OBJECT_WALL,
 
 	OBJECT_ARCHITECTURE,
@@ -152,13 +151,15 @@ enum class en_SkillMediumCategory : int8
 enum class en_SkillType : int16
 {
 	SKILL_TYPE_NONE = 0,
-	SKILL_DEFAULT_ATTACK = 1,
+	SKILL_GLOBAL_SKILL = 1,
+
+	SKILL_DEFAULT_ATTACK,
+	SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE,
 
 	SKILL_FIGHT_TWO_HAND_SWORD_MASTER,
 
 	SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK,
 	SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK,
-	SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE,
 	SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE,
 	SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE,
 	SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE,
@@ -186,10 +187,7 @@ enum class en_SkillType : int16
 
 	SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING,
 
-	SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE,
-
-	SKILL_SLIME_NORMAL = 3000,
-	SKILL_BEAR_NORMAL
+	SKILL_GOBLIN_ACTIVE_MELEE_DEFAULT_ATTACK
 };
 
 enum class en_QuickSlotBar : int8
@@ -201,7 +199,7 @@ enum class en_QuickSlotBar : int8
 enum class en_MapObjectInfo : int8
 {
 	TILE_MAP_NONE = 0,
-	TILE_MAP_WALL,
+	TILE_MAP_INVISIBLE_WALL,
 	TILE_MAP_TREE,
 	TILE_MAP_STONE,
 	TILE_MAP_SLIME,
@@ -342,6 +340,7 @@ struct st_Vector2Int
 	static st_Vector2Int Down() { return st_Vector2Int(0, -1); }
 	static st_Vector2Int Left() { return st_Vector2Int(-1, 0); }
 	static st_Vector2Int Right() { return st_Vector2Int(1, 0); }
+	static st_Vector2Int Zero() { return st_Vector2Int(0, 0); }
 
 	st_Vector2Int operator +(st_Vector2Int& Vector)
 	{
@@ -378,14 +377,64 @@ struct st_Vector2Int
 	{
 		return (int16)sqrt(pow(TargetCellPosition._X - MyCellPosition._X, 2) + pow(TargetCellPosition._Y - MyCellPosition._Y, 2));
 	}	
+
+	// 벡터 크기 구하기
+	float Size(st_Vector2Int Vector)
+	{
+		return sqrt(SizeSquared());
+	}
+
+	float SizeSquared()
+	{
+		return _X * _X + _Y * _Y;
+	}
+
+	// 벡터 정규화
+	st_Vector2Int Normalize()
+	{
+		/*float VectorSize = Size(*this);
+
+		return st_Vector2(_X / VectorSize, _Y / VectorSize);*/
+		float SquaredSum = SizeSquared();
+
+		if (SquaredSum != 0)
+		{
+			const __m128 fOneHalf = _mm_set_ss(0.5f);
+			__m128 Y0, X0, X1, X2, FOver2;
+			float temp;
+
+			Y0 = _mm_set_ss(SquaredSum);
+			X0 = _mm_rsqrt_ss(Y0);	// 1/sqrt estimate (12 bits)
+			FOver2 = _mm_mul_ss(Y0, fOneHalf);
+
+			// 1st Newton-Raphson iteration
+			X1 = _mm_mul_ss(X0, X0);
+			X1 = _mm_sub_ss(fOneHalf, _mm_mul_ss(FOver2, X1));
+			X1 = _mm_add_ss(X0, _mm_mul_ss(X0, X1));
+
+			// 2nd Newton-Raphson iteration
+			X2 = _mm_mul_ss(X1, X1);
+			X2 = _mm_sub_ss(fOneHalf, _mm_mul_ss(FOver2, X2));
+			X2 = _mm_add_ss(X1, _mm_mul_ss(X1, X2));
+
+			_mm_store_ss(&temp, X2);
+
+			return st_Vector2Int(_X, _Y) * temp;
+		}
+		else
+		{
+			return st_Vector2Int::Zero();
+		}
+	}
 };
 
 struct st_PositionInfo
 {
-	en_CreatureState State;		
-	st_Vector2Int CollisionPosition;	
-	st_Vector2 Position;	
-	st_Vector2 Direction;
+	en_CreatureState State;
+	st_Vector2Int CollisionPosition;
+	st_Vector2 Position;
+	st_Vector2 LookAtDireciton;
+	st_Vector2 MoveDirection;
 };
 
 struct st_StatInfo
