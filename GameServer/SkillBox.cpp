@@ -5,12 +5,7 @@
 
 CSkillBox::CSkillBox()
 {
-	_GlobalCoolTimeSkill = nullptr;
-
-	for (int8 i = 0; i < (int8)en_SkillCharacteristicCount::SKILL_CHARACTERISTIC_MAX_COUNT; i++)
-	{
-		_SkillCharacteristics[i]._SkillBoxIndex = i;
-	}
+	_GlobalCoolTimeSkill = nullptr;	
 
 	_OwnerGameObject = nullptr;
 }
@@ -40,11 +35,11 @@ void CSkillBox::SetOwner(CGameObject* Owner)
 	_OwnerGameObject = Owner;
 }
 
-CSkillCharacteristic* CSkillBox::FindCharacteristic(int8 FindCharacteristicIndex, int8 FindCharacteristicType)
-{
-	if (_SkillCharacteristics[FindCharacteristicIndex]._SkillCharacteristic == (en_SkillCharacteristic)FindCharacteristicType)
+CSkillCharacteristic* CSkillBox::FindCharacteristic(int8 FindCharacteristicType)
+{	
+	if (_SkillCharacteristic._SkillCharacteristic == (en_SkillCharacteristic)FindCharacteristicType)
 	{
-		return &_SkillCharacteristics[FindCharacteristicIndex];
+		return &_SkillCharacteristic;
 	}
 	else
 	{
@@ -52,24 +47,14 @@ CSkillCharacteristic* CSkillBox::FindCharacteristic(int8 FindCharacteristicIndex
 	}	
 }
 
-void CSkillBox::CreateChracteristic(int8 ChracteristicIndex, int8 CharacteristicType)
+void CSkillBox::CreateChracteristic(int8 CharacteristicType)
 {
-	if (ChracteristicIndex > 2)
-	{
-		CRASH("Overflow")
-	}
-
-	_SkillCharacteristics[ChracteristicIndex].SkillCharacteristicInit((en_SkillCharacteristic)CharacteristicType);
+	_SkillCharacteristic.SkillCharacteristicInit((en_SkillCharacteristic)CharacteristicType);	
 }
 
-void CSkillBox::SkillLearn(bool IsSkillLearn, int8 ChracteristicIndex, int8 CharacteristicType)
+void CSkillBox::SkillLearn(bool IsSkillLearn, int8 CharacteristicType)
 {
-	if (ChracteristicIndex > 2)
-	{
-		CRASH("OVerflow");
-	}	
-
-	_SkillCharacteristics[ChracteristicIndex].SkillCharacteristicActive(IsSkillLearn, (en_SkillType)CharacteristicType, 1);
+	_SkillCharacteristic.SkillCharacteristicActive(IsSkillLearn, (en_SkillType)CharacteristicType, 1);	
 }
 
 CSkill* CSkillBox::FindSkill(en_SkillCharacteristic CharacteristicType, en_SkillType SkillType)
@@ -87,20 +72,14 @@ CSkill* CSkillBox::FindSkill(en_SkillCharacteristic CharacteristicType, en_Skill
 	case en_SkillCharacteristic::SKILL_CATEGORY_SHOOTING:		
 	case en_SkillCharacteristic::SKILL_CATEGORY_DISCIPLINE:		
 	case en_SkillCharacteristic::SKILL_CATEGORY_ASSASSINATION:
+		if (_SkillCharacteristic._SkillCharacteristic == CharacteristicType)
 		{
-			int8 CharacteristicIndex = 0;
-
-			for (int8 i = 0; i < 3; i++)
-			{
-				if (_SkillCharacteristics[i]._SkillCharacteristic == CharacteristicType)
-				{
-					CharacteristicIndex = i;
-					break;
-				}
-			}
-
-			FindSkill = _SkillCharacteristics[CharacteristicIndex].FindSkill(SkillType);
-		}		
+			FindSkill = _SkillCharacteristic.FindSkill(SkillType);
+		}
+		else
+		{
+			FindSkill = nullptr;
+		}
 		break;	
 	}	
 
@@ -112,24 +91,13 @@ void CSkillBox::Update()
 	_GlobalCoolTimeSkill->Update();
 
 	_SkillCharacteristicPublic.CharacteristicUpdate();
-
-	for (int8 i = 0; i < (int8)en_SkillCharacteristicCount::SKILL_CHARACTERISTIC_MAX_COUNT; i++)
-	{
-		if (_SkillCharacteristics[i]._SkillCharacteristic != en_SkillCharacteristic::SKILL_CATEGORY_NONE)
-		{
-			_SkillCharacteristics[i].CharacteristicUpdate();
-		}
-	}	
+	_SkillCharacteristic.CharacteristicUpdate();	
 }
 
 void CSkillBox::Empty()
 {
 	_SkillCharacteristicPublic.CharacteristicEmpty();
-
-	for (int i = 0; i < (int)en_SkillCharacteristicCount::SKILL_CHARACTERISTIC_MAX_COUNT; i++)
-	{
-		_SkillCharacteristics[i].CharacteristicEmpty();
-	}
+	_SkillCharacteristic.CharacteristicEmpty();	
 }
 
 vector<CSkill*> CSkillBox::GetGlobalSkills(en_SkillType ExceptSkillType, en_SkillKinds SkillKind)
@@ -151,20 +119,17 @@ vector<CSkill*> CSkillBox::GetGlobalSkills(en_SkillType ExceptSkillType, en_Skil
 	}
 
 	// 요청한 스킬과 같은 종류의 스킬을 스킬특성 창에서 찾음
-	for (int i = 0; i < (int)en_SkillCharacteristicCount::SKILL_CHARACTERISTIC_MAX_COUNT; i++)
+	vector<CSkill*> SkillCharacteristicActiveSkill = _SkillCharacteristic.GetActiveSkill();
+	for (CSkill* ActiveSkill : SkillCharacteristicActiveSkill)
 	{
-		vector<CSkill*> SkillCharacteristicActiveSkill = _SkillCharacteristics[i].GetActiveSkill();
-		for (CSkill* ActiveSkill : SkillCharacteristicActiveSkill)
+		if (ActiveSkill->GetSkillInfo()->IsSkillLearn == true
+			&& ActiveSkill->GetSkillInfo()->SkillType != ExceptSkillType
+			&& ActiveSkill->GetSkillKind() == SkillKind
+			&& ActiveSkill->GetSkillInfo()->CanSkillUse == true)
 		{
-			if (ActiveSkill->GetSkillInfo()->IsSkillLearn == true 
-				&& ActiveSkill->GetSkillInfo()->SkillType != ExceptSkillType
-				&& ActiveSkill->GetSkillKind() == SkillKind
-				&& ActiveSkill->GetSkillInfo()->CanSkillUse == true)
-			{
-				GlobalSkills.push_back(ActiveSkill);
-			}
+			GlobalSkills.push_back(ActiveSkill);
 		}
-	}	
+	}
 
 	return GlobalSkills;
 }
@@ -176,20 +141,12 @@ CSkillCharacteristic* CSkillBox::GetSkillCharacteristicPublic()
 
 CSkillCharacteristic* CSkillBox::GetSkillCharacteristics()
 {
-	return _SkillCharacteristics;
+	return &_SkillCharacteristic;
 }
 
 bool CSkillBox::CheckCharacteristic(en_SkillCharacteristic SkillCharacteristic)
 {	
-	for (int i = 0; i < 3; i++)
-	{
-		if (_SkillCharacteristics[i]._SkillCharacteristic == SkillCharacteristic)
-		{
-			return true;
-		}
-	}
-
-	return false;
+	return _SkillCharacteristic._SkillCharacteristic == SkillCharacteristic;	
 }
 
 void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en_SkillCharacteristic SkillCharacteristic, en_SkillType SkillType)
@@ -199,7 +156,7 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 	{
 		CPlayer* Player = dynamic_cast<CPlayer*>(SkillUser);
 		if (Player != nullptr)
-		{
+		{			
 			// 전역 재사용 시간이 완료 되었는지 확인
 			if (_GlobalCoolTimeSkill->GetSkillInfo()->CanSkillUse == true)
 			{
@@ -252,7 +209,7 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 
 										if (Skill->GetSkillInfo()->SkillDistance >= ChoHoneDistance)
 										{
-											st_Vector2 MyFrontPosition = SkillUser->_GameObjectInfo.ObjectPositionInfo.Position + SkillUser->_GameObjectInfo.ObjectPositionInfo.Direction;
+											st_Vector2 MyFrontPosition = SkillUser->_GameObjectInfo.ObjectPositionInfo.Position + SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton;
 
 											st_Vector2Int MyFrontIntPosition;
 											MyFrontIntPosition._X = MyFrontPosition._X;

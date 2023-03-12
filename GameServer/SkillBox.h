@@ -11,10 +11,10 @@ public:
 	void Init();	
 	void SetOwner(CGameObject* Owner);
 
-	CSkillCharacteristic* FindCharacteristic(int8 FindCharacteristicIndex, int8 FindCharacteristicType);
-	void CreateChracteristic(int8 ChracteristicIndex, int8 CharacteristicType);
+	CSkillCharacteristic* FindCharacteristic(int8 FindCharacteristicType);
+	void CreateChracteristic(int8 CharacteristicType);
 	
-	void SkillLearn(bool IsSkillLearn, int8 ChracteristicIndex, int8 CharacteristicType);
+	void SkillLearn(bool IsSkillLearn, int8 CharacteristicType);
 
 	CSkill* FindSkill(en_SkillCharacteristic CharacteristicType, en_SkillType SkillType);
 
@@ -31,13 +31,8 @@ public:
 
 	void SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en_SkillCharacteristic SkillCharacteristic, en_SkillType SkillType);
 private:
-	enum en_SkillCharacteristicCount
-	{
-		SKILL_CHARACTERISTIC_MAX_COUNT = 3
-	};
-
 	CSkillCharacteristic _SkillCharacteristicPublic;	
-	CSkillCharacteristic _SkillCharacteristics[SKILL_CHARACTERISTIC_MAX_COUNT];	
+	CSkillCharacteristic _SkillCharacteristic;	
 
 	CSkill* _GlobalCoolTimeSkill;
 	CGameObject* _OwnerGameObject;
