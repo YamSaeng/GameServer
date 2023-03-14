@@ -93,7 +93,7 @@ void CSkillCharacteristic::SkillCharacteristicInit(en_SkillCharacteristic SkillC
 	case en_SkillCharacteristic::SKILL_CATEGORY_SHOOTING:
 		{
 			int16 StartFightPassiveSkillType = (int16)en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING;
-			int16 EndFightPassiveSkillType = (int16)en_SkillType::SKILL_SLIME_NORMAL;
+			int16 EndFightPassiveSkillType = (int16)en_SkillType::SKILL_GOBLIN_ACTIVE_MELEE_DEFAULT_ATTACK;
 
 			for (int16 i = StartFightPassiveSkillType; i < EndFightPassiveSkillType; i++)
 			{
