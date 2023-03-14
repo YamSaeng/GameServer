@@ -291,119 +291,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			PotionItemInfo->ItemCraftingTime = ItemCraftingTime;
 
 			_Items.insert(pair<int16, st_ItemInfo*>((int16)PotionItemInfo->ItemSmallCategory, PotionItemInfo));
-		}
-
-		for (auto& SkillBookDataListFiled : Filed["SkillBookList"].GetArray())
-		{
-			string MediumCategory = SkillBookDataListFiled["ItemMediumCategory"].GetString();
-			string SmallCategory = SkillBookDataListFiled["ItemSmallCategory"].GetString();
-			string ItemObjectType = SkillBookDataListFiled["ItemObjectType"].GetString();
-			string ItemExplain = SkillBookDataListFiled["ItemExplain"].GetString();
-			string ItemName = SkillBookDataListFiled["ItemName"].GetString();
-			int32 ItemWidth = SkillBookDataListFiled["ItemWidth"].GetInt();
-			int32 ItemHeight = SkillBookDataListFiled["ItemHeight"].GetInt();
-			int32 ItemMaxDurability = SkillBookDataListFiled["ItemMaxDurability"].GetInt();
-			int32 ItemMaxCount = SkillBookDataListFiled["ItemMaxCount"].GetInt();			
-
-			st_ItemInfo* SkillBookItemInfo = new st_ItemInfo();
-			SkillBookItemInfo->ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_SKILLBOOK;
-
-			if (MediumCategory == "ITEM_MEDIUM_CATEGORY_NONE")
-			{
-				SkillBookItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_NONE;
-			}
-
-			if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_FIERCE_ATTACK")
-			{
-				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_FIERCE_ATTACK;
-				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
-				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_ATTACK;
-				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK;
-			}
-			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CONVERSION_ATTACK")
-			{
-				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CONVERSION_ATTACK;
-				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
-				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_ATTACK;
-				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK;
-			}
-			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SHAEHONE_ATTACK")
-			{
-				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SHAEHONE_ATTACK;
-				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
-				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_ATTACK;
-				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE;
-			}
-			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK")
-			{
-				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHOHONE_ATTACK;
-				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
-				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_ATTACK;
-				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE;
-			}
-			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SMASH_WAVE_ATTACK")
-			{
-				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_SMASH_WAVE_ATTACK;
-				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
-				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_ATTACK;				
-			}
-			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHARGE_POSE")
-			{
-				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_KNIGHT_CHARGE_POSE;
-				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
-				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_BUF;
-				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE;
-			}
-			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_FLAME_HARPOON")
-			{
-				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_FLAME_HARPOON;
-				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
-				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_ATTACK;
-				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON;
-			}
-			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HELL_FIRE")
-			{
-				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHAMAN_HELL_FIRE;
-				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
-				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_ATTACK;
-				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE;
-			}
-			else if (SmallCategory == "ITEM_SMALL_CATEOGRY_SKILLBOOK_TAIOIST_HEALING_LIGHT")
-			{
-				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEOGRY_SKILLBOOK_TAIOIST_HEALING_LIGHT;
-				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_TAOIST;
-				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_HEAL;
-				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT;
-			}
-			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_TAIOIST_HEALING_WIND")
-			{
-				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_TAIOIST_HEALING_WIND;
-				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_TAOIST;
-				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_HEAL;
-				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND;
-			}
-			else if (SmallCategory == "ITEM_SMALL_CATEGORY_SKILLBOOK_SHOCK_RELEASE")
-			{
-				SkillBookItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_SKILLBOOK_SHOCK_RELEASE;
-				SkillBookItemInfo->ItemSkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_PUBLIC;
-				SkillBookItemInfo->ItemSkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_BUF;
-				SkillBookItemInfo->ItemSkillType = en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE;
-			}
-
-			if (ItemObjectType == "OBJECT_ITEM_CONSUMABLE_SKILL_BOOK")
-			{
-				SkillBookItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK;
-			}
-			
-			SkillBookItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
-			SkillBookItemInfo->ItemName = (LPWSTR)CA2W(ItemName.c_str());
-			SkillBookItemInfo->ItemWidth = ItemWidth;
-			SkillBookItemInfo->ItemHeight = ItemHeight;			
-			SkillBookItemInfo->ItemMaxDurability = ItemMaxDurability;
-			SkillBookItemInfo->ItemMaxCount = ItemMaxCount;			
-
-			_Items.insert(pair<int16, st_ItemInfo*>((int16)SkillBookItemInfo->ItemSmallCategory, SkillBookItemInfo));
-		}
+		}		
 	}
 
 	for (auto& Filed : Document["Material"].GetArray())
@@ -1075,14 +963,22 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 					{
 						FightAttackSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK;
 					}
-					else if (SkillType == "SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE")
+					else if (SkillType == "SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK")
 					{
-						FightAttackSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE;
+						FightAttackSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK;
+					}	
+					else if (SkillType == "SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE")
+					{
+						FightAttackSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE;
 					}
-					else if (SkillType == "SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE")
+					else if (SkillType == "SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE")
 					{
-						FightAttackSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE;
-					}					
+						FightAttackSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE;
+					}
+					else if (SkillType == "SKILL_FIGHT_ACTIVE_ATTACK_COMBO_FLY_KNIFE")
+					{
+						FightAttackSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_COMBO_FLY_KNIFE;
+					}
 					else if (SkillType == "SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH")
 					{
 						FightAttackSkill->SkillType = en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH;
@@ -1230,7 +1126,11 @@ void CDataManager::LoadDataProtectionSkill(wstring LoadFileName)
 					if (SkillType == "SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH")
 					{
 						ProtectionAttackSkill->SkillType = en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH;
-					}					
+					}	
+					else if (SkillType == "SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE")
+					{
+						ProtectionAttackSkill->SkillType = en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE;
+					}
 
 					ProtectionAttackSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_PROTECTION;
 					ProtectionAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());					
@@ -2387,11 +2287,14 @@ st_SkillInfo* CDataManager::FindSkillData(en_SkillType FindSkillType)
 	case en_SkillType::SKILL_FIGHT_TWO_HAND_SWORD_MASTER:
 	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
 	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:	
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE:
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
-	case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK:	
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_COMBO_FLY_KNIFE:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:		
 		return (*_FightSkillDatas.find((int16)FindSkillType)).second;
 	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
+	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE:
 		return (*_ProtectionSkillDatas.find((int16)FindSkillType)).second;
 	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:		
 	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:		
