@@ -61,9 +61,12 @@ void CSkill::SetSkillInfo(en_SkillCategory SkillCategory, st_SkillInfo* SkillInf
 		case en_SkillType::SKILL_DEFAULT_ATTACK:			
 		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
 		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:		
-		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE:
-		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
+		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK:
+		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE:
+		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE:
+		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_COMBO_FLY_KNIFE:
 		case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
+		case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE:
 		case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT:
 		case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT:
 		case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_ATTACK:
@@ -107,12 +110,14 @@ void CSkill::SetSkillInfo(en_SkillCategory SkillCategory, st_SkillInfo* SkillInf
 			break;
 		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
 		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:					
+		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE:
+		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_COMBO_FLY_KNIFE:
 			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_FIGHT;
 
 			_BufDeBufSkillKind = en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_NORMAL;
 			break;
-		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE:
-		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
+		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK:
+		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE:		
 			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_FIGHT;
 
 			_BufDeBufSkillKind = en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_NORMAL_AND_DEBUF;
@@ -123,6 +128,7 @@ void CSkill::SetSkillInfo(en_SkillCategory SkillCategory, st_SkillInfo* SkillInf
 			_BufDeBufSkillKind = en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_BUF;
 			break;
 		case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
+		case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE:
 			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_PROTECTION;
 
 			_BufDeBufSkillKind = en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_NORMAL_AND_DEBUF;
@@ -318,7 +324,7 @@ bool CSkill::Update()
 				{
 				case en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE:
 					{
-						// 충격해제 버프 삭제
+						// 충격 해제 버프 삭제
 						CMessage* ResBufDeBufOffPacket = G_ObjectManager->GameServer->MakePacketBufDeBufOff(_Owner->_GameObjectInfo.ObjectId, true, _SkillInfo->SkillType);
 						G_ObjectManager->GameServer->SendPacketFieldOfView(_Owner, ResBufDeBufOffPacket);
 						ResBufDeBufOffPacket->Free();
@@ -326,20 +332,20 @@ bool CSkill::Update()
 					break;
 				case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
 					{					
-						// 돌격자세 버프 삭제
+						// 돌격 자세 버프 삭제
 						CMessage* ResBufDeBufOffPacket = G_ObjectManager->GameServer->MakePacketBufDeBufOff(_Owner->_GameObjectInfo.ObjectId, true, _SkillInfo->SkillType);
 						G_ObjectManager->GameServer->SendPacketFieldOfView(_Owner, ResBufDeBufOffPacket);
 						ResBufDeBufOffPacket->Free();
 					}
 					break;			
-				case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE:
+				case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK:
 					{
-						// 전사 쇄혼비무 상태이상 해제
-						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_SHAEHONE_MASK);
+						// 도약 공격 상태이상 해제
+						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_JUMPING_ATTACK_MASK);
 						CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId, 
 							_Owner->_GameObjectInfo.ObjectType, 							
 							_SkillInfo->SkillType, 
-							false, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_SHAEHONE_MASK);
+							false, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_JUMPING_ATTACK_MASK);
 						G_ObjectManager->GameServer->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);					
 						ResStatusAbnormalPacket->Free();
 
@@ -349,14 +355,14 @@ bool CSkill::Update()
 						ResBufDeBufOffPacket->Free();
 					}
 					break;
-				case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
+				case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE:
 					{
-						// 전사 초혼비무 상태이상 해제
-						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_CHOHONE_MASK);
+						// 포획 상태 이상 해제
+						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_PROTECTION_CAPTURE_MASK);
 						CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId,
 							_Owner->_GameObjectInfo.ObjectType,							
 							_SkillInfo->SkillType,
-							false, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_CHOHONE_MASK);
+							false, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_PROTECTION_CAPTURE_MASK);
 						G_ObjectManager->GameServer->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);					
 						ResStatusAbnormalPacket->Free();
 
@@ -368,7 +374,7 @@ bool CSkill::Update()
 					break;
 				case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:
 					{
-						// 주술사 속박 상태이상 해제
+						// 마법 속박 상태이상 해제
 						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ROOT_MASK);
 						CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId,
 							_Owner->_GameObjectInfo.ObjectType,							
@@ -384,7 +390,7 @@ bool CSkill::Update()
 					break;
 				case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
 					{
-						// 주술사 얼음사슬 상태이상 해제
+						// 마법 얼음사슬 상태이상 해제
 						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_CHAIN_MASK);
 
 						float DebufMovingSpeed = _Owner->_GameObjectInfo.ObjectStatInfo.MaxSpeed * _SkillInfo->SkillDebufMovingSpeed * 0.01f;
@@ -410,7 +416,7 @@ bool CSkill::Update()
 					break;
 				case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:
 					{
-						// 주술사 냉기파동 상태이상 해제
+						// 마법 냉기파동 상태이상 해제
 						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_WAVE_MASK);
 						CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId,
 							_Owner->_GameObjectInfo.ObjectType, 							
@@ -426,7 +432,7 @@ bool CSkill::Update()
 					break;
 				case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
 					{
-						// 주술사 낙뢰 상태이상 해제
+						// 마법 낙뢰 상태이상 해제
 						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE_MASK);
 						CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId, 
 							_Owner->_GameObjectInfo.ObjectType,							
@@ -442,7 +448,7 @@ bool CSkill::Update()
 					break;
 				case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:
 					{
-						// 도사 속박 상태이상 해제
+						// 수양 속박 상태이상 해제
 						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_DISCIPLINE_ROOT_MASK);
 						CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId, 
 							_Owner->_GameObjectInfo.ObjectType,							
