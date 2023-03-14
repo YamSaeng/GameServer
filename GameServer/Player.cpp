@@ -17,7 +17,7 @@ CPlayer::CPlayer()
 
 	_FieldOfDirection = st_Vector2::Right();
 
-	_FieldOfViewDistance = 15;		
+	_FieldOfViewDistance = 12;		
 
 	_FieldOfAngle = 210;
 
@@ -25,9 +25,7 @@ CPlayer::CPlayer()
 	_FieldOfViewUpdateTick = GetTickCount64() + 50;
 
 	_GameObjectInfo.ObjectWidth = 1;
-	_GameObjectInfo.ObjectHeight = 1;
-
-	_ComboSkill = nullptr;	
+	_GameObjectInfo.ObjectHeight = 1;	
 
 	_SpellSkill = nullptr;			
 
@@ -691,6 +689,7 @@ void CPlayer::RayCastingToFieldOfViewObjects(vector<CGameObject*>* SpawnObjects,
 						switch (GameObject->_GameObjectInfo.ObjectType)
 						{
 						case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+						case en_GameObjectType::OBJECT_WALL:
 							WallFound = true;
 							break;
 						}

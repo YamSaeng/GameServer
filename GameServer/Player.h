@@ -23,10 +23,7 @@ public:
 	CSkillBox _SkillBox;
 	CQuickSlotManager _QuickSlotManager;
 
-	st_Experience _Experience;				
-	
-	// 연속기 스킬
-	CSkill* _ComboSkill;			
+	st_Experience _Experience;							
 	
 	CPlayer();	
 	~CPlayer();		
