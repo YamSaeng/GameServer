@@ -3,6 +3,15 @@
 #include "DataManager.h"
 #include "ObjectManager.h"
 
+CCreature::CCreature()
+{
+	_ComboSkill = nullptr;
+}
+
+CCreature::~CCreature()
+{
+}
+
 CInventoryManager* CCreature::GetInventoryManager()
 {
     return &_Inventory;
