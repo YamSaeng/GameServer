@@ -14,7 +14,7 @@
                   "SkillLevel": 1,
                   "SkillMinDamage": 5,
                   "SkillMaxDamage": 10,
-                  "SkillCoolTime": 30000,
+                  "SkillCoolTime": 10000,
                   "SkillCastingTime": 0,
                   "SkillDurationTime": 0,
                   "SkillDotTime": 0,
@@ -23,9 +23,28 @@
                   "SkillTargetEffectTime": 2.0,
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
-                  "StatusAbnormalityProbability": 0,                  
+                  "StatusAbnormalityProbability": 0,
                   "NextComboSkill": "SKILL_TYPE_NONE",
                   "SkillExplanation": "2m내의 대상에게 %d ~ %d 만큼의 피해를 주고, 2초간 기절 상태로 만듭니다."
+                },
+                {
+                  "SkillType": "SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE",
+                  "SkillName": "포획",
+                  "SkillLevel": 1,
+                  "SkillMinDamage": 5,
+                  "SkillMaxDamage": 10,
+                  "SkillCoolTime": 30000,
+                  "SkillCastingTime": 0,
+                  "SkillDurationTime": 0,
+                  "SkillDotTime": 0,
+                  "SkillDistance": 8,
+                  "SkillMotionTime": 0,
+                  "SkillTargetEffectTime": 0,
+                  "SkillDebufAttackSpeed": 0,
+                  "SkillDebufMovingSpeed": 0,
+                  "StatusAbnormalityProbability": 0,
+                  "NextComboSkill": "SKILL_TYPE_NONE",
+                  "SkillExplanation": "8m내의 대상에게 %d ~ %d 만큼의 피해를 주고 끌어당긴다."
                 }
               ],
               "BufSkill": [
