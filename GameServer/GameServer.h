@@ -321,11 +321,11 @@ private:
 	//-------------------------------------------------
 	// 스킬 특성 선택 잡 생성 함수
 	//-------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobSelectSkillCharacteristic(int8 SelectCharacteristicIndex, int8 SelectChracteristicType);		
+	st_GameObjectJob* MakeGameObjectJobSelectSkillCharacteristic(int8 SelectChracteristicType);		
 	//------------------------------------------------------------------------------------------------------------------------------------
 	// 스킬 배우기 잡 생성 함수 
 	//------------------------------------------------------------------------------------------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobSkillLearn(bool IsSkillLearn, int8 LearnSkillCharacterIndex, int8 LearnSkillCharacteristicType, int16 LearnSkillType);
+	st_GameObjectJob* MakeGameObjectJobSkillLearn(bool IsSkillLearn, int8 LearnSkillCharacteristicType, int16 LearnSkillType);
 	//-------------------------------------------------
 	// 근접 기술 처리 잡 생성 함수
 	//-------------------------------------------------
@@ -645,7 +645,7 @@ public:
 	//------------------------------------------------------------------------------------------------------------
 	// 게임서버 스킬 특성 선택 응답 패킷 조합
 	//------------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResSelectSkillCharacteristic(bool IsSuccess, int8 SkillCharacteristicIndex, int8 SkillCharacteristicType, vector<CSkill*> PassiveSkills, vector<CSkill*> ActiveSkills);
+	CGameServerMessage* MakePacketResSelectSkillCharacteristic(bool IsSuccess, int8 SkillCharacteristicType, vector<CSkill*> PassiveSkills, vector<CSkill*> ActiveSkills);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 스킬 저장 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -653,7 +653,7 @@ public:
 	//-------------------------------------------------------------------
 	// 게임서버 스킬 배우기 응답 패킷 조합
 	//-------------------------------------------------------------------
-	CGameServerMessage* MakePacketResSkillLearn(bool IsSkillLearn, en_SkillType LearnSkillType, int8 SkillMaxPoint, int8 SkillPoint);		
+	CGameServerMessage* MakePacketResSkillLearn(bool IsSkillLearn, vector<en_SkillType> LearnSkillTypes, int8 SkillMaxPoint, int8 SkillPoint);		
 	//---------------------------------------------------------------------------------
 	// 게임서버 강화효과, 약화효과 패킷 조합
 	//---------------------------------------------------------------------------------

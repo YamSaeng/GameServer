@@ -1905,21 +1905,12 @@ void CGameServer::PacketProcReqSelectSkillCharacteristic(int64 SessionID, CMessa
 					Disconnect(Session->SessionId);
 					break;
 				}
-			}
-
-			int8 SelectCharacteristicIndex;
-			*Message >> SelectCharacteristicIndex;
+			}			
 
 			int8 SelectCharacteristicType;
 			*Message >> SelectCharacteristicType;
-
-			if (SelectCharacteristicIndex > 2)
-			{
-				Disconnect(Session->SessionId);
-				break;
-			}
-
-			st_GameObjectJob* SkillCharacteristicJob = MakeGameObjectJobSelectSkillCharacteristic(SelectCharacteristicIndex, SelectCharacteristicType);
+		
+			st_GameObjectJob* SkillCharacteristicJob = MakeGameObjectJobSelectSkillCharacteristic(SelectCharacteristicType);
 			MyPlayer->_GameObjectJobQue.Enqueue(SkillCharacteristicJob);	
 
 		} while (0);
@@ -1976,10 +1967,7 @@ void CGameServer::PacketProcReqLearnSkill(int64 SessionID, CMessage* Message)
 			}
 
 			bool IsSkillLearn;
-			*Message >> IsSkillLearn;
-
-			int8 LearnSkillCharacteristicIndex;
-			*Message >> LearnSkillCharacteristicIndex;
+			*Message >> IsSkillLearn;			
 
 			int8 LearnSkillCharacteristicType;
 			*Message >> LearnSkillCharacteristicType;
@@ -1987,7 +1975,7 @@ void CGameServer::PacketProcReqLearnSkill(int64 SessionID, CMessage* Message)
 			int16 LearnSkillType;
 			*Message >> LearnSkillType;
 
-			st_GameObjectJob* SkillLearnJob = MakeGameObjectJobSkillLearn(IsSkillLearn, LearnSkillCharacteristicIndex, LearnSkillCharacteristicType, LearnSkillType);
+			st_GameObjectJob* SkillLearnJob = MakeGameObjectJobSkillLearn(IsSkillLearn, LearnSkillCharacteristicType, LearnSkillType);
 			MyPlayer->_GameObjectJobQue.Enqueue(SkillLearnJob);
 		} while (0);
 	}
@@ -3722,38 +3710,38 @@ void CGameServer::PacketProcReqDBAccountCheck(CMessage* Message)
 			SP::CDBGameServerPlayersGet ClientPlayersGet(*GameServerDBConnection);
 			ClientPlayersGet.InAccountID(ClientAccountId);
 
-			int64 PlayerId;
+			int64 PlayerId = 0;
 			WCHAR PlayerName[100] = { 0 };			
-			int8 PlayerIndex;
-			int32 PlayerLevel;
-			int32 PlayerStr;
-			int32 PlayerDex;
-			int32 PlayerInt;
-			int32 PlayerLuck;
-			int32 PlayerCurrentHP;
-			int32 PlayerMaxHP;
-			int32 PlayerCurrentMP;
-			int32 PlayerMaxMP;
-			int32 PlayerCurrentDP;
-			int32 PlayerMaxDP;
-			int16 PlayerAutoRecoveyHPPercent;
-			int16 PlayerAutoRecoveyMPPercent;
-			int32 PlayerMinMeleeAttackDamage;
-			int32 PlayerMaxMeleeAttackDamage;
-			int16 PlayerMeleeAttackHitRate;
-			int16 PlayerMagicDamage;
-			float PlayerMagicHitRate;
-			int32 PlayerDefence;
-			int16 PlayerEvasionRate;
-			int16 PlayerMeleeCriticalPoint;
-			int16 PlayerMagicCriticalPoint;
-			float PlayerSpeed;
-			int32 PlayerLastPositionY;
-			int32 PlayerLastPositionX;
-			int64 PlayerCurrentExperience;
-			int64 PlayerRequireExperience;
-			int64 PlayerTotalExperience;									
-			int8 PlayerSkillMaxPoint;
+			int8 PlayerIndex = 0;
+			int32 PlayerLevel = 0;
+			int32 PlayerStr = 0;
+			int32 PlayerDex = 0;
+			int32 PlayerInt = 0;
+			int32 PlayerLuck = 0;
+			int32 PlayerCurrentHP = 0;
+			int32 PlayerMaxHP = 0;
+			int32 PlayerCurrentMP = 0;
+			int32 PlayerMaxMP = 0;
+			int32 PlayerCurrentDP = 0;
+			int32 PlayerMaxDP = 0;
+			int16 PlayerAutoRecoveyHPPercent = 0;
+			int16 PlayerAutoRecoveyMPPercent = 0;
+			int32 PlayerMinMeleeAttackDamage = 0;
+			int32 PlayerMaxMeleeAttackDamage = 0;
+			int16 PlayerMeleeAttackHitRate = 0;
+			int16 PlayerMagicDamage = 0;
+			float PlayerMagicHitRate = 0;
+			int32 PlayerDefence = 0;
+			int16 PlayerEvasionRate = 0;
+			int16 PlayerMeleeCriticalPoint = 0;
+			int16 PlayerMagicCriticalPoint = 0;
+			float PlayerSpeed = 0;
+			int32 PlayerLastPositionY = 0;
+			int32 PlayerLastPositionX = 0;
+			int64 PlayerCurrentExperience = 0;
+			int64 PlayerRequireExperience = 0;
+			int64 PlayerTotalExperience = 0;
+			int8 PlayerSkillMaxPoint = 0;
 
 			ClientPlayersGet.OutPlayerDBID(PlayerId);
 			ClientPlayersGet.OutPlayerName(PlayerName);			
@@ -4139,11 +4127,9 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 			SP::CDBGameServerSkillCharacteristicGet CharacterSkillCharacteristicGet(*DBCharacterInfoGetConnection);
 			CharacterSkillCharacteristicGet.InAccountDBId(MyPlayer->_AccountId);
 			CharacterSkillCharacteristicGet.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
-
-			int8 CharacteristicIndex = 0;
+			
 			int8 CharacteristicType = 0;
-
-			CharacterSkillCharacteristicGet.OutSkillCharacteristicIndex(CharacteristicIndex);
+			
 			CharacterSkillCharacteristicGet.OutSKillCharacteristicType(CharacteristicType);
 
 			CharacterSkillCharacteristicGet.Execute();
@@ -4153,9 +4139,9 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 				// 특성 생성
 				if (CharacteristicType != (int8)en_SkillCharacteristic::SKILL_CATEGORY_NONE)
 				{
-					MyPlayer->_SkillBox.CreateChracteristic(CharacteristicIndex, CharacteristicType);
+					MyPlayer->_SkillBox.CreateChracteristic(CharacteristicType);
 
-					CSkillCharacteristic* Characteristic = MyPlayer->_SkillBox.FindCharacteristic(CharacteristicIndex, CharacteristicType);
+					CSkillCharacteristic* Characteristic = MyPlayer->_SkillBox.FindCharacteristic(CharacteristicType);
 					if (Characteristic != nullptr)
 					{
 						// 스킬 특성 테이블에서 찾은 특성의 스킬이 있는지 확인
@@ -4178,10 +4164,44 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 						{
 							// 캐릭터 특성에서 스킬 활성화
 							if (IsSkillLearn == true)
-							{								
-								MyPlayer->_GameObjectInfo.ObjectSkillPoint--;
-
-								Characteristic->SkillCharacteristicActive(IsSkillLearn, (en_SkillType)SkillType, SkillLevel);
+							{													
+								switch ((en_SkillType)SkillType)
+								{								
+								case en_SkillType::SKILL_FIGHT_TWO_HAND_SWORD_MASTER:
+									break;
+								case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
+									Characteristic->SkillCharacteristicActive(IsSkillLearn,
+										(en_SkillType)SkillType, SkillLevel);
+									Characteristic->SkillCharacteristicActive(IsSkillLearn,
+										en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK, SkillLevel);
+									MyPlayer->_GameObjectInfo.ObjectSkillPoint--;
+									break;		
+								case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE:
+								case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
+								case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
+								case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
+								case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:
+								case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:
+								case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
+								case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:
+								case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
+								case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:
+								case en_SkillType::SKILL_SPELL_ACTIVE_BUF_TELEPORT:
+								case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
+								case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:
+								case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:
+								case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:
+								case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT:
+								case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT:
+								case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_ATTACK:
+								case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP:
+								case en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_WEAPON_POISON:
+								case en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING:
+									Characteristic->SkillCharacteristicActive(IsSkillLearn,
+										(en_SkillType)SkillType, SkillLevel);
+									MyPlayer->_GameObjectInfo.ObjectSkillPoint--;
+									break;
+								}
 							}			
 						}
 					}
@@ -4209,25 +4229,22 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 			// Public을 제외한 특성 스킬 가져오기
 			CSkillCharacteristic* SkillCharacteristics = MyPlayer->_SkillBox.GetSkillCharacteristics();			
 
-			for (int8 i = 0; i < 3; i++)
+			*ResCharacterInfoMessage << (int8)SkillCharacteristics->_SkillCharacteristic;
+
+			if (SkillCharacteristics->_SkillCharacteristic != en_SkillCharacteristic::SKILL_CATEGORY_NONE)
 			{
-				*ResCharacterInfoMessage << (int8)SkillCharacteristics[i]._SkillCharacteristic;
-
-				if (SkillCharacteristics[i]._SkillCharacteristic != en_SkillCharacteristic::SKILL_CATEGORY_NONE)
+				*ResCharacterInfoMessage << (int8)SkillCharacteristics->GetPassiveSkill().size();
+				for (CSkill* PassiveSkill : SkillCharacteristics->GetPassiveSkill())
 				{
-					*ResCharacterInfoMessage << (int8)SkillCharacteristics[i].GetPassiveSkill().size();
-					for (CSkill* PassiveSkill : SkillCharacteristics[i].GetPassiveSkill())
-					{
-						*ResCharacterInfoMessage << *PassiveSkill->GetSkillInfo();
-					}
+					*ResCharacterInfoMessage << *PassiveSkill->GetSkillInfo();
+				}
 
-					*ResCharacterInfoMessage << (int8)SkillCharacteristics[i].GetActiveSkill().size();
-					for (CSkill* ActiveSkill : SkillCharacteristics[i].GetActiveSkill())
-					{
-						*ResCharacterInfoMessage << *ActiveSkill->GetSkillInfo();
-					}
-				}				
-			}			
+				*ResCharacterInfoMessage << (int8)SkillCharacteristics->GetActiveSkill().size();
+				for (CSkill* ActiveSkill : SkillCharacteristics->GetActiveSkill())
+				{
+					*ResCharacterInfoMessage << *ActiveSkill->GetSkillInfo();
+				}
+			}
 #pragma endregion
 
 #pragma region 가방 아이템 정보 읽어오기			
@@ -4572,31 +4589,26 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 	SkillIntoSkillBox.InAccountDBId(LeavePlayer->_AccountId);
 	SkillIntoSkillBox.InPlayerDBId(LeavePlayer->_GameObjectInfo.ObjectId);
 
-	CSkillCharacteristic* SkillCharacteristics = LeavePlayer->_SkillBox.GetSkillCharacteristics();
-	for (int8 i = 0; i < 3; i++)
+	CSkillCharacteristic* SkillCharacteristic = LeavePlayer->_SkillBox.GetSkillCharacteristics();
+	int8 SkillCharacterType = (int8)SkillCharacteristic->_SkillCharacteristic;
+
+	SkillCharacteristicUpdate.InSkillCharacteristicType(SkillCharacterType);
+	SkillCharacteristicUpdate.Execute();
+
+	SkillIntoSkillBox.InCharacteristicType(SkillCharacterType);
+
+	vector<CSkill*> ActiveSkills = SkillCharacteristic->GetActiveSkill();
+	for (CSkill* ActiveSkill : ActiveSkills)
 	{
-		int8 SkillCharacterType = (int8)SkillCharacteristics[i]._SkillCharacteristic;
+		int16 ActiveSkillType = (int16)ActiveSkill->GetSkillInfo()->SkillType;
+		int8 ActiveSkillLevel = ActiveSkill->GetSkillInfo()->SkillLevel;
 
-		SkillCharacteristicUpdate.InSkillCharacteristicIndex(i);
-		SkillCharacteristicUpdate.InSkillCharacteristicType(SkillCharacterType);
+		SkillIntoSkillBox.InSkillLearn(ActiveSkill->GetSkillInfo()->IsSkillLearn);
+		SkillIntoSkillBox.InSkillType(ActiveSkillType);
+		SkillIntoSkillBox.InSkillLevel(ActiveSkillLevel);
 
-		SkillIntoSkillBox.InCharacteristicType(SkillCharacterType);
-		
-		vector<CSkill*> ActiveSkills = SkillCharacteristics[i].GetActiveSkill();
-		for (CSkill* ActiveSkill : ActiveSkills)
-		{
-			int16 ActiveSkillType = (int16)ActiveSkill->GetSkillInfo()->SkillType;
-			int8 ActiveSkillLevel = ActiveSkill->GetSkillInfo()->SkillLevel;
-
-			SkillIntoSkillBox.InSkillLearn(ActiveSkill->GetSkillInfo()->IsSkillLearn);
-			SkillIntoSkillBox.InSkillType(ActiveSkillType);
-			SkillIntoSkillBox.InSkillLevel(ActiveSkillLevel);
-
-			SkillIntoSkillBox.Execute();
-		}
-
-		SkillCharacteristicUpdate.Execute();
-	}
+		SkillIntoSkillBox.Execute();
+	}	
 
 	// 퀵슬롯 정보 업데이트
 	for (auto QuickSlotIterator : LeavePlayer->_QuickSlotManager.GetQuickSlotBar())
@@ -4890,15 +4902,14 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobMoveStop(float PositionX, float 
 	return MoveStopJob;
 }
 
-st_GameObjectJob* CGameServer::MakeGameObjectJobSelectSkillCharacteristic(int8 SelectCharacteristicIndex, int8 SelectChracteristicType)
+st_GameObjectJob* CGameServer::MakeGameObjectJobSelectSkillCharacteristic(int8 SelectChracteristicType)
 {
 	st_GameObjectJob* SelectSkillCharacteristicJob = G_ObjectManager->GameObjectJobCreate();
 	SelectSkillCharacteristicJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SELECT_SKILL_CHARACTERISTIC;
 
 	CGameServerMessage* SelectSkillCharacteristicJobMessage = CGameServerMessage::GameServerMessageAlloc();
 	SelectSkillCharacteristicJobMessage->Clear();
-
-	*SelectSkillCharacteristicJobMessage << SelectCharacteristicIndex;
+	
 	*SelectSkillCharacteristicJobMessage << SelectChracteristicType;
 
 	SelectSkillCharacteristicJob->GameObjectJobMessage = SelectSkillCharacteristicJobMessage;
@@ -4906,7 +4917,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobSelectSkillCharacteristic(int8 S
 	return SelectSkillCharacteristicJob;
 }
 
-st_GameObjectJob* CGameServer::MakeGameObjectJobSkillLearn(bool IsSkillLearn, int8 LearnSkillCharacterIndex, int8 LearnSkillCharacteristicType, int16 LearnSkillType)
+st_GameObjectJob* CGameServer::MakeGameObjectJobSkillLearn(bool IsSkillLearn, int8 LearnSkillCharacteristicType, int16 LearnSkillType)
 {
 	st_GameObjectJob* SkillLearnJob = G_ObjectManager->GameObjectJobCreate();
 	SkillLearnJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SKILL_LEARN;
@@ -4914,8 +4925,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobSkillLearn(bool IsSkillLearn, in
 	CGameServerMessage* SkillLearnJobMessage = CGameServerMessage::GameServerMessageAlloc();
 	SkillLearnJobMessage->Clear();
 
-	*SkillLearnJobMessage << IsSkillLearn;
-	*SkillLearnJobMessage << LearnSkillCharacterIndex;
+	*SkillLearnJobMessage << IsSkillLearn;	
 	*SkillLearnJobMessage << LearnSkillCharacteristicType;
 	*SkillLearnJobMessage << LearnSkillType;
 
@@ -6286,7 +6296,7 @@ CGameServerMessage* CGameServer::MakePacketResQuickSlotInit(int8 QuickSlotBarInd
 	return ResQuickSlotInitMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResSelectSkillCharacteristic(bool IsSuccess, int8 SkillCharacteristicIndex, int8 SkillCharacteristicType, vector<CSkill*> PassiveSkills, vector<CSkill*> ActiveSkills)
+CGameServerMessage* CGameServer::MakePacketResSelectSkillCharacteristic(bool IsSuccess, int8 SkillCharacteristicType, vector<CSkill*> PassiveSkills, vector<CSkill*> ActiveSkills)
 {
 	CGameServerMessage* ResSelectSkillCharacteristicMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResSelectSkillCharacteristicMessage == nullptr)
@@ -6297,8 +6307,7 @@ CGameServerMessage* CGameServer::MakePacketResSelectSkillCharacteristic(bool IsS
 	ResSelectSkillCharacteristicMessage->Clear();
 
 	*ResSelectSkillCharacteristicMessage << (int16)en_PACKET_S2C_SELECT_SKILL_CHARACTERISTIC;	
-	*ResSelectSkillCharacteristicMessage << IsSuccess;
-	*ResSelectSkillCharacteristicMessage << SkillCharacteristicIndex;
+	*ResSelectSkillCharacteristicMessage << IsSuccess;	
 	*ResSelectSkillCharacteristicMessage << SkillCharacteristicType;
 
 	int8 PassiveSkillCount = (int8)PassiveSkills.size();
@@ -6338,7 +6347,7 @@ CGameServerMessage* CGameServer::MakePacketResSkillToSkillBox(int64 TargetObject
 	return ResSkillToSkillBoxMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResSkillLearn(bool IsSkillLearn, en_SkillType LearnSkillType, int8 SkillMaxPoint, int8 SkillPoint)
+CGameServerMessage* CGameServer::MakePacketResSkillLearn(bool IsSkillLearn, vector<en_SkillType> LearnSkillTypes, int8 SkillMaxPoint, int8 SkillPoint)
 {
 	CGameServerMessage* ResSkillLearnMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResSkillLearnMessage == nullptr)
@@ -6350,7 +6359,15 @@ CGameServerMessage* CGameServer::MakePacketResSkillLearn(bool IsSkillLearn, en_S
 
 	*ResSkillLearnMessage << (int16)en_PACKET_S2C_LEARN_SKILL;
 	*ResSkillLearnMessage << IsSkillLearn;
-	*ResSkillLearnMessage << (int16)LearnSkillType;
+
+	int8 LearnSkillTypesSize = LearnSkillTypes.size();
+	*ResSkillLearnMessage << LearnSkillTypesSize;
+
+	for (en_SkillType LeanSkillType : LearnSkillTypes)
+	{
+		*ResSkillLearnMessage << (int16)LeanSkillType;
+	}
+
 	*ResSkillLearnMessage << SkillMaxPoint;
 	*ResSkillLearnMessage << SkillPoint;
 
