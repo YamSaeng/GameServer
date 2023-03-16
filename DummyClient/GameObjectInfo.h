@@ -202,9 +202,7 @@ enum class en_MapObjectInfo : int8
 	TILE_MAP_NONE = 0,
 	TILE_MAP_INVISIBLE_WALL,
 	TILE_MAP_TREE,
-	TILE_MAP_STONE,
-	TILE_MAP_SLIME,
-	TILE_MAP_BEAR
+	TILE_MAP_STONE	
 };
 
 enum class en_MapItemInfo : int8
