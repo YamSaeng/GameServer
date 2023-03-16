@@ -375,11 +375,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			if (ItemObjectType == "OBJECT_ITEM_MATERIAL_LEATHER")
 			{
 				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER;
-			}
-			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_SLIME_GEL")
-			{
-				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL;
-			}
+			}			
 			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_BRONZE_COIN")
 			{
 				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN;
