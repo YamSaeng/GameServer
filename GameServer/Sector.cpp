@@ -32,8 +32,7 @@ void CSector::Insert(CGameObject* InsertGameObject)
 	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:	
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:		
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
@@ -89,8 +88,7 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:	
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:		
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
