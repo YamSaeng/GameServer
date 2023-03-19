@@ -661,9 +661,10 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 				}
 			}
 		}
-		break;			
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
+		break;				
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
 	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_CORN:
 		{
@@ -813,38 +814,38 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 		break;			
 	case en_GameObjectType::OBJECT_CROP_CORN:
 	case en_GameObjectType::OBJECT_CROP_POTATO:
-	{
-		if (_SeedObjectInfos[Y][X] == GameObject)
 		{
-			for (int16 WidthX = 0; WidthX < Width; WidthX++)
+			if (_SeedObjectInfos[Y][X] == GameObject)
 			{
-				for (int16 HeightY = 0; HeightY < Height; HeightY++)
+				for (int16 WidthX = 0; WidthX < Width; WidthX++)
 				{
-					_SeedObjectInfos[Y][X] = nullptr;
+					for (int16 HeightY = 0; HeightY < Height; HeightY++)
+					{
+						_SeedObjectInfos[Y][X] = nullptr;
+					}
 				}
 			}
 		}
-	}
-	break;
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
+		break;	
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
 	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_CORN:
-	{
-		CItem* Item = (CItem*)GameObject;
-
-		for (int8 i = 0; i < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; i++)
 		{
-			if (_Items[Y][X][i] != nullptr &&
-				_Items[Y][X][i]->_ItemInfo.ItemSmallCategory == Item->_ItemInfo.ItemSmallCategory)
+			CItem* Item = (CItem*)GameObject;
+
+			for (int8 i = 0; i < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; i++)
 			{
-				_Items[Y][X][i] = nullptr;
-				break;
+				if (_Items[Y][X][i] != nullptr &&
+					_Items[Y][X][i]->_ItemInfo.ItemSmallCategory == Item->_ItemInfo.ItemSmallCategory)
+				{
+					_Items[Y][X][i] = nullptr;
+					break;
+				}
 			}
 		}
-	}
-	break;
+		break;
 	}
 
 	return true;
