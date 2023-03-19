@@ -191,22 +191,33 @@ void CGameObject::Update()
 					CSkill* Skill = Player->_SkillBox.FindSkill((en_SkillCharacteristic)LearnSkillChracteristicType, (en_SkillType)LearnSkillType);
 					if (Skill != nullptr)
 					{
+						vector<en_SkillType> LearnSkillTypes;
+
 						if (IsSkillLearn == true)
 						{
 							if (Skill->GetSkillInfo()->IsSkillLearn == false)
 							{
 								if (Player->_GameObjectInfo.ObjectSkillPoint > 0)
 								{
-									Player->_SkillBox.SkillLearn(IsSkillLearn, LearnSkillType);
+									Player->_SkillBox.SkillLearn(IsSkillLearn, (en_SkillType)LearnSkillType);
+								
+									LearnSkillTypes.push_back((en_SkillType)LearnSkillType);
+
+									if (Skill->GetSkillInfo()->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
+									{
+										Player->_SkillBox.SkillLearn(IsSkillLearn, Skill->GetSkillInfo()->NextComboSkill);
+										LearnSkillTypes.push_back(Skill->GetSkillInfo()->NextComboSkill);
+									}
+
 									Player->_GameObjectInfo.ObjectSkillPoint--;
 								}
 								else
 								{
 									IsSkillLearn = false;
-								}
+								}						
 							}
 
-							CMessage* ResSkillLearnPacket = G_ObjectManager->GameServer->MakePacketResSkillLearn(IsSkillLearn, (en_SkillType)LearnSkillType, Player->_GameObjectInfo.ObjectSkillMaxPoint, Player->_GameObjectInfo.ObjectSkillPoint);
+							CMessage* ResSkillLearnPacket = G_ObjectManager->GameServer->MakePacketResSkillLearn(IsSkillLearn, LearnSkillTypes, Player->_GameObjectInfo.ObjectSkillMaxPoint, Player->_GameObjectInfo.ObjectSkillPoint);
 							G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSkillLearnPacket);
 							ResSkillLearnPacket->Free();
 						}
@@ -216,6 +227,8 @@ void CGameObject::Update()
 							{
 								if (Skill->GetSkillInfo()->IsSkillLearn == true)
 								{
+									LearnSkillTypes.push_back(Skill->GetSkillInfo()->SkillType);
+
 									if (Player->_GameObjectInfo.ObjectSkillPoint < Player->_GameObjectInfo.ObjectSkillMaxPoint)
 									{
 										// 퀵슬롯에서 취소하고자 하는스킬을 찾고 퀵슬롯 등록 제거
@@ -246,7 +259,14 @@ void CGameObject::Update()
 											}
 										}
 
-										Player->_SkillBox.SkillLearn(IsSkillLearn, LearnSkillType);
+										Player->_SkillBox.SkillLearn(IsSkillLearn, (en_SkillType)LearnSkillType);
+
+										if (Skill->GetSkillInfo()->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
+										{
+											Player->_SkillBox.SkillLearn(IsSkillLearn, Skill->GetSkillInfo()->NextComboSkill);
+											LearnSkillTypes.push_back(Skill->GetSkillInfo()->NextComboSkill);
+										}
+
 										Player->_GameObjectInfo.ObjectSkillPoint++;
 									}
 									else
@@ -255,13 +275,13 @@ void CGameObject::Update()
 									}
 								}
 
-								CMessage* ResSkillLearnPacket = G_ObjectManager->GameServer->MakePacketResSkillLearn(IsSkillLearn, (en_SkillType)LearnSkillType, Player->_GameObjectInfo.ObjectSkillMaxPoint, Player->_GameObjectInfo.ObjectSkillPoint);
+								CMessage* ResSkillLearnPacket = G_ObjectManager->GameServer->MakePacketResSkillLearn(IsSkillLearn, LearnSkillTypes, Player->_GameObjectInfo.ObjectSkillMaxPoint, Player->_GameObjectInfo.ObjectSkillPoint);
 								G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSkillLearnPacket);
 								ResSkillLearnPacket->Free();
 							}
 							else
 							{
-								CMessage* ResSkillCancelFailtPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSONAL_MESSAGE_SKILL_CANCEL_FAIL_COOLTIME, Skill->GetSkillInfo()->SkillName.c_str());
+								CMessage* ResSkillCancelFailtPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_SKILL_CANCEL_FAIL_COOLTIME, Skill->GetSkillInfo()->SkillName.c_str());
 								G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSkillCancelFailtPacket);
 								ResSkillCancelFailtPacket->Free();
 							}							
@@ -330,11 +350,11 @@ void CGameObject::Update()
 			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_OFF:
 			{
-				CPlayer* Player = dynamic_cast<CPlayer*>(this);
+				CCreature* Creature = dynamic_cast<CCreature*>(this);
 
-				if (Player != nullptr && Player->_ComboSkill != nullptr)
+				if (Creature != nullptr && Creature->_ComboSkill != nullptr)
 				{
-					Player->_ComboSkill->ComboSkillOff();
+					Creature->_ComboSkill->ComboSkillOff();
 				}
 			}
 			break;
@@ -365,7 +385,7 @@ void CGameObject::Update()
 							for (auto DebufSkillIter : _DeBufs)
 							{
 								// 상태이상 해제
-								if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE
+								if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE
 									|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE
 									|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE)
 								{
@@ -397,7 +417,7 @@ void CGameObject::Update()
 						{
 							if (CheckCantControlStatusAbnormal() > 0)
 							{
-								CMessage* ResStatusAbnormalSpellCancel = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSOANL_MESSAGE_STATUS_ABNORMAL_SPELL, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
+								CMessage* ResStatusAbnormalSpellCancel = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_STATUS_ABNORMAL, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
 								G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResStatusAbnormalSpellCancel);
 								ResStatusAbnormalSpellCancel->Free();
 								break;
@@ -489,7 +509,7 @@ void CGameObject::Update()
 								}
 								else
 								{
-									CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
+									CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::GLOBAL_MESSAGE_NON_SELECT_OBJECT, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
 									G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResErrorPacket);
 									ResErrorPacket->Free();
 								}
@@ -530,7 +550,7 @@ void CGameObject::Update()
 								}
 								else
 								{
-									CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
+									CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::GLOBAL_MESSAGE_NON_SELECT_OBJECT, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
 									G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResErrorPacket);
 									ResErrorPacket->Free();
 								}
@@ -574,7 +594,7 @@ void CGameObject::Update()
 								}
 								else
 								{
-									CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
+									CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::GLOBAL_MESSAGE_NON_SELECT_OBJECT, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
 									G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResErrorPacket);
 									ResErrorPacket->Free();
 								}
@@ -618,7 +638,7 @@ void CGameObject::Update()
 								}
 								else
 								{
-									CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
+									CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::GLOBAL_MESSAGE_NON_SELECT_OBJECT, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
 									G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResErrorPacket);
 									ResErrorPacket->Free();
 								}
@@ -631,7 +651,7 @@ void CGameObject::Update()
 					}
 					else
 					{
-						CMessage* SkillCoolTimeErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::PERSONAL_MESSAGE_SKILL_COOLTIME, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
+						CMessage* SkillCoolTimeErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::GLOBAL_MESSAGE_SKILL_COOLTIME, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
 						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, SkillCoolTimeErrorPacket);
 						SkillCoolTimeErrorPacket->Free();
 						break;
@@ -705,7 +725,7 @@ void CGameObject::Update()
 							// 작물 채집할 때 같은 방향을 바라보고 있지 않으면 에러 메세지 출력
 							/*if (_GameObjectInfo.ObjectPositionInfo.MoveDir != Dir)
 							{
-								CMessage* DirErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSONAL_MESSAGE_DIR_DIFFERENT, Crop->_GameObjectInfo.ObjectName.c_str());
+								CMessage* DirErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_DIR_DIFFERENT, Crop->_GameObjectInfo.ObjectName.c_str());
 								G_ObjectManager->GameServer->SendPacket(Player->_SessionId, DirErrorPacket);
 								DirErrorPacket->Clear();
 								break;
@@ -748,7 +768,7 @@ void CGameObject::Update()
 							}
 							else
 							{
-								CMessage* DirErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSONAL_MESSAGE_GATHERING_DISTANCE, Crop->_GameObjectInfo.ObjectName.c_str());
+								CMessage* DirErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_GATHERING_DISTANCE, Crop->_GameObjectInfo.ObjectName.c_str());
 								G_ObjectManager->GameServer->SendPacket(Player->_SessionId, DirErrorPacket);
 								DirErrorPacket->Clear();
 							}
@@ -1010,7 +1030,7 @@ void CGameObject::Update()
 			{
 				for (auto DebufSkillIter : _DeBufs)
 				{
-					if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE
+					if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE
 						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE
 						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE
 						|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN
@@ -1214,7 +1234,7 @@ void CGameObject::Update()
 						}
 						else
 						{
-							CMessage* WrongItemInputMessage = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSOANL_MESSAGE_CRAFTING_TABLE_MATERIAL_WRONG_ITEM_ADD);
+							CMessage* WrongItemInputMessage = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_CRAFTING_TABLE_MATERIAL_WRONG_ITEM_ADD);
 							G_ObjectManager->GameServer->SendPacket(CraftingTableItemAddPlayer->_SessionId, WrongItemInputMessage);
 							WrongItemInputMessage->Free();
 						}
@@ -1421,7 +1441,7 @@ void CGameObject::Update()
 										else
 										{
 											// 재료 부족 에러 메세지 띄우기
-											CMessage* CraftingStartErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSONAL_MESSAGE_CRAFTING_TABLE_MATERIAL_COUNT_NOT_ENOUGH);
+											CMessage* CraftingStartErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_CRAFTING_TABLE_MATERIAL_COUNT_NOT_ENOUGH);
 											G_ObjectManager->GameServer->SendPacket(((CPlayer*)CraftingStartObject)->_SessionId, CraftingStartErrorPacket);
 											CraftingStartErrorPacket->Free();
 										}
@@ -1436,7 +1456,7 @@ void CGameObject::Update()
 				}				
 				else
 				{
-					CMessage* CraftingStartErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSONAL_MESSAGE_CRAFTING_TABLE_OVERLAP_CRAFTING_START);
+					CMessage* CraftingStartErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_CRAFTING_TABLE_OVERLAP_CRAFTING_START);
 					G_ObjectManager->GameServer->SendPacket(((CPlayer*)CraftingStartObject)->_SessionId, CraftingStartErrorPacket);
 					CraftingStartErrorPacket->Free();
 				}
@@ -1657,7 +1677,7 @@ int32 CGameObject::CheckCantControlStatusAbnormal()
 {
 	int32 StatusAbnormalCount = 0;
 
-	if (_StatusAbnormal & (int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_CHOHONE)
+	if (_StatusAbnormal & (int32)en_GameObjectStatusType::STATUS_ABNORMAL_PROTECTION_CAPTURE)
 	{
 		StatusAbnormalCount++;
 	}
@@ -1689,7 +1709,7 @@ int32 CGameObject::CheckCanControlStatusAbnormal()
 {
 	int32 StatusAbnormalCount = 0;
 
-	if (_StatusAbnormal & (int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_SHAEHONE)
+	if (_StatusAbnormal & (int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_JUMPING_ATTACK)
 	{
 		StatusAbnormalCount++;
 	}
