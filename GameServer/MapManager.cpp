@@ -41,18 +41,21 @@ void CMapManager::MapSave()
 		
 		for (auto MapGameObjectListIter : MapInfoIterator.second->GameObjectList)
 		{						
-			for (st_Vector2Int Position : MapGameObjectListIter.second)
+			if (MapGameObjectListIter.second.size() > 0)
 			{
-				CGameObject* NewObject = G_ObjectManager->ObjectCreate(MapGameObjectListIter.first);
-				if (NewObject != nullptr)
+				for (st_Vector2Int Position : MapGameObjectListIter.second)
 				{
-					NewObject->_SpawnPosition = Position;
-					NewObject->_NetworkState = en_ObjectNetworkState::LIVE;
+					CGameObject* NewObject = G_ObjectManager->ObjectCreate(MapGameObjectListIter.first);
+					if (NewObject != nullptr)
+					{
+						NewObject->_SpawnPosition = Position;
+						NewObject->_NetworkState = en_ObjectNetworkState::LIVE;
 
-					CChannel* Channel = NewMap->GetChannelManager()->Find(1);
-					Channel->EnterChannel(NewObject, &NewObject->_SpawnPosition);
+						CChannel* Channel = NewMap->GetChannelManager()->Find(1);
+						Channel->EnterChannel(NewObject, &NewObject->_SpawnPosition);
+					}
 				}
-			}
+			}			
 		}		
 
 		_Maps.insert(pair<int64, CMap*>(NewMap->_MapID, NewMap));
