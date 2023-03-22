@@ -2199,17 +2199,25 @@ void CDataManager::LoadDataMapInfo(wstring LoadFileName)
 
 			for (auto& GameObjectListField : MapInfoListField["GameObjectList"].GetArray())
 			{
-				en_GameObjectType GameObjectType;
+				en_GameObjectType GameObjectType = en_GameObjectType::OBJECT_NON_TYPE;
 
 				string ObjectTypeName = GameObjectListField["ObjectType"].GetString();
 				
-				if (ObjectTypeName == "OBJECT_WALL")
+				if (ObjectTypeName == "OBJECT_NON_PLAYER_GENERAL_MERCHANT")
+				{
+					GameObjectType = en_GameObjectType::OBJECT_NON_PLAYER_GENERAL_MERCHANT;
+				}
+				else if (ObjectTypeName == "OBJECT_WALL")
 				{
 					GameObjectType = en_GameObjectType::OBJECT_WALL;
 				}
 				else if(ObjectTypeName == "OBJECT_GOBLIN")
 				{
 					GameObjectType = en_GameObjectType::OBJECT_GOBLIN;
+				}
+				else if (ObjectTypeName == "OBJECT_STORAGE_SMALL_BOX")
+				{
+					GameObjectType = en_GameObjectType::OBJECT_STORAGE_SMALL_BOX;
 				}
 
 				vector<st_Vector2Int> Positions;
@@ -2220,6 +2228,11 @@ void CDataManager::LoadDataMapInfo(wstring LoadFileName)
 
 					int32 XPosition = PositionListField["X"].GetInt();
 					int32 YPosition = PositionListField["Y"].GetInt();
+
+					if (XPosition == 0 && YPosition == 0)
+					{
+						continue;
+					}
 
 					Position._X = XPosition;
 					Position._Y = YPosition;
