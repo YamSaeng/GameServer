@@ -10,16 +10,17 @@
 #include "Sawmill.h"
 #include "Potato.h"
 #include "Corn.h"
-#include "NonPlayer.h"
+#include "GeneralMerchantNPC.h"
 #include "ChannelManager.h"
 #include "Wall.h"
+#include "RectCollision.h"
 #include <atlbase.h>
 
 CObjectManager::CObjectManager()
 {
 	_WallMemoryPool = new CMemoryPoolTLS<CWall>();
 	_PlayerMemoryPool = new CMemoryPoolTLS<CPlayer>();
-	_NonPlayerMemoryPool = new CMemoryPoolTLS<CNonPlayer>();
+	_GeneralMerchantNPCMemoryPool = new CMemoryPoolTLS<CGeneralMerchantNPC>();
 	_GoblinMemoryPool = new CMemoryPoolTLS<CGoblin>();	
 
 	_ItemMemoryPool = new CMemoryPoolTLS<CItem>();
@@ -29,6 +30,9 @@ CObjectManager::CObjectManager()
 	_MaterialMemoryPool = new CMemoryPoolTLS<CMaterialItem>();
 	_ArchitectureMemoryPool = new CMemoryPoolTLS<CArchitectureItem>();
 	_CropItemMemoryPool = new CMemoryPoolTLS<CCropItem>();
+
+	_RectCollisionMemoryPool = new CMemoryPoolTLS<CRectCollision>();
+
 	_ConsumableMemoryPool = new CMemoryPoolTLS<CConsumable>();
 
 	_TreeMemoryPool = new CMemoryPoolTLS<CTree>();
@@ -98,8 +102,8 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 	case en_GameObjectType::OBJECT_PLAYER:
 		NewObject = _PlayerMemoryPool->Alloc();
 		break;
-	case en_GameObjectType::OBJECT_NON_PLAYER:
-		NewObject = _NonPlayerMemoryPool->Alloc();
+	case en_GameObjectType::OBJECT_NON_PLAYER_GENERAL_MERCHANT:
+		NewObject = _GeneralMerchantNPCMemoryPool->Alloc();
 		break;
 	case en_GameObjectType::OBJECT_GOBLIN:
 		NewObject = _GoblinMemoryPool->Alloc();
@@ -129,8 +133,8 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 
 	if (NewObject != nullptr)
 	{
-		NewObject->Init(ObjectType);		
 		NewObject->_GameObjectInfo.ObjectId = InterlockedIncrement64(&_GameServerObjectId);
+		NewObject->Init(ObjectType);				
 	}	
 
 	return NewObject;
@@ -146,8 +150,8 @@ void CObjectManager::ObjectReturn(CGameObject* ReturnObject)
 		case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 			_PlayerMemoryPool->Free((CPlayer*)ReturnObject);
 			break;
-		case en_GameObjectType::OBJECT_NON_PLAYER:
-			_NonPlayerMemoryPool->Free((CNonPlayer*)ReturnObject);
+		case en_GameObjectType::OBJECT_NON_PLAYER_GENERAL_MERCHANT:
+			_GeneralMerchantNPCMemoryPool->Free((CGeneralMerchantNPC*)ReturnObject);
 			break;
 		case en_GameObjectType::OBJECT_GOBLIN:
 			_GoblinMemoryPool->Free((CGoblin*)ReturnObject);
@@ -174,11 +178,26 @@ void CObjectManager::ObjectReturn(CGameObject* ReturnObject)
 			_CornMemoryPool->Free((CCorn*)ReturnObject);
 			break;		
 		}
+
+		if (ReturnObject->GetRectCollision() != nullptr)
+		{
+			RectCollisionReturn(ReturnObject->GetRectCollision());
+		}
 	}	
 	else
 	{
 		CRASH("빈 오브젝트를 반납하려고 시도");
 	}
+}
+
+CRectCollision* CObjectManager::RectCollisionCreate()
+{
+	return _RectCollisionMemoryPool->Alloc();
+}
+
+void CObjectManager::RectCollisionReturn(CRectCollision* RectCollision)
+{
+	_RectCollisionMemoryPool->Free(RectCollision);
 }
 
 CSkill* CObjectManager::SkillCreate()
@@ -320,7 +339,8 @@ void CObjectManager::MapTileInfoSpawn(int64& MapID)
 
 }
 
-void CObjectManager::ObjectItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_GameObjectType KillerObjectType, st_Vector2Int SpawnIntPosition, st_Vector2 SpawnPosition, en_GameObjectType SpawnItemOwnerType, en_GameObjectType ItemDataType)
+void CObjectManager::ObjectItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_GameObjectType KillerObjectType, 
+	st_Vector2Int SpawnIntPosition, st_Vector2 SpawnPosition, en_GameObjectType SpawnItemOwnerType)
 {
 	bool Find = false;
 	en_SmallItemCategory DropItemCategory;
@@ -333,11 +353,11 @@ void CObjectManager::ObjectItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_
 
 	int32 Sum = 0;
 
-	switch ((en_GameObjectType)SpawnItemOwnerType)
+	switch (SpawnItemOwnerType)
 	{
 	case en_GameObjectType::OBJECT_GOBLIN:	
 		{
-			auto FindMonsterDropItem = G_Datamanager->_Monsters.find(ItemDataType);
+			auto FindMonsterDropItem = G_Datamanager->_Monsters.find(SpawnItemOwnerType);
 			st_MonsterData MonsterData = *(*FindMonsterDropItem).second;
 
 			for (st_DropData DropItem : MonsterData.DropItems)
@@ -365,7 +385,7 @@ void CObjectManager::ObjectItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_
 	case en_GameObjectType::OBJECT_STONE:
 	case en_GameObjectType::OBJECT_TREE:
 		{
-			auto FindEnvironmentDropItem = G_Datamanager->_Environments.find(ItemDataType);
+			auto FindEnvironmentDropItem = G_Datamanager->_Environments.find(SpawnItemOwnerType);
 			st_EnvironmentData EnvironmentData = *(*FindEnvironmentDropItem).second;
 
 			for (st_DropData DropItem : EnvironmentData.DropItems)
@@ -393,7 +413,7 @@ void CObjectManager::ObjectItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_
 	case en_GameObjectType::OBJECT_CROP_POTATO:
 	case en_GameObjectType::OBJECT_CROP_CORN:
 		{
-			auto FindCropDropItemIter = G_Datamanager->_Crops.find(ItemDataType);
+			auto FindCropDropItemIter = G_Datamanager->_Crops.find(SpawnItemOwnerType);
 			st_CropData CropData = *(*FindCropDropItemIter).second;
 
 			for (st_DropData DropItem : CropData.DropItems)

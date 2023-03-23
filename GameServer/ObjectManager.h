@@ -17,8 +17,9 @@ class CSawmill;
 class CPotato;
 class CCorn;
 class CCropItem;
-class CNonPlayer;
+class CGeneralMerchantNPC;
 class CWall;
+class CRectCollision;
 
 class CObjectManager
 {
@@ -41,9 +42,11 @@ private:
 	CMemoryPoolTLS<CArchitectureItem>* _ArchitectureMemoryPool;
 	CMemoryPoolTLS<CCropItem>* _CropItemMemoryPool;
 
+	CMemoryPoolTLS<CRectCollision>* _RectCollisionMemoryPool;
+
 	CMemoryPoolTLS<CWall>* _WallMemoryPool;
 	CMemoryPoolTLS<CPlayer>* _PlayerMemoryPool;	
-	CMemoryPoolTLS<CNonPlayer>* _NonPlayerMemoryPool;
+	CMemoryPoolTLS<CGeneralMerchantNPC>* _GeneralMerchantNPCMemoryPool;
 	CMemoryPoolTLS<CGoblin>* _GoblinMemoryPool;	
 	CMemoryPoolTLS<CTree>* _TreeMemoryPool;
 	CMemoryPoolTLS<CStone>* _StoneMemoryPool;	
@@ -52,6 +55,7 @@ private:
 	CMemoryPoolTLS<CPotato>* _PotatoMemoryPool;
 	CMemoryPoolTLS<CCorn>* _CornMemoryPool;	
 
+	// 오브젝트에 부여할 고유 ID값
 	int64 _GameServerObjectId;
 
 	CMemoryPoolTLS<CSkill>* _SkillMemoryPool;
@@ -73,20 +77,19 @@ public:
 
 	CObjectManager();
 	~CObjectManager();
-
-	//----------------------------------------
-	// 플레이어 배열 인덱스 반납
-	//----------------------------------------
+		
+	// 플레이어 배열 인덱스 반납	
 	void PlayerIndexReturn(int32 PlayerIndex);
-
-	//-----------------------------------------------------
-	// 오브젝트 생성
-	//-----------------------------------------------------
-	CGameObject* ObjectCreate(en_GameObjectType ObjectType);
-	//------------------------------------------------------------------------
-	// 오브젝트 반납
-	//------------------------------------------------------------------------
+		
+	// 오브젝트 생성	
+	CGameObject* ObjectCreate(en_GameObjectType ObjectType);	
+	// 오브젝트 반납	
 	void ObjectReturn(CGameObject* ReturnObject);
+
+	// 사각 충돌체 생성
+	CRectCollision* RectCollisionCreate();
+	// 사각 충돌체 반납
+	void RectCollisionReturn(CRectCollision* RectCollision);
 
 	//--------------------
 	// 스킬 생성
@@ -123,7 +126,8 @@ public:
 	//------------------------------------------------------------------------------------------------
 	// 게임오브젝트에서 아이템 스폰
 	//------------------------------------------------------------------------------------------------
-	void ObjectItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_GameObjectType KillerObjectType, st_Vector2Int SpawnIntPosition, st_Vector2 SpawnPosition, en_GameObjectType SpawnItemOwnerType, en_GameObjectType ItemDataType);
+	void ObjectItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_GameObjectType KillerObjectType, st_Vector2Int SpawnIntPosition,
+		st_Vector2 SpawnPosition, en_GameObjectType SpawnItemOwnerType);
 	//------------------------------------------------------------------------------------------------
 	// 아이템 버리기
 	//------------------------------------------------------------------------------------------------
