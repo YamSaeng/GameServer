@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Channel.h"
 #include "Player.h"
-#include "NonPlayer.h"
+#include "GeneralMerchantNPC.h"
 #include "Message.h"
 #include "Monster.h"
 #include "Item.h"
@@ -116,7 +116,7 @@ void CChannel::Update()
 						else
 						{
 							// 그룹중이라면 그룹중이라고 메세지 보냄
-							CMessage* ResExistPartyPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSONAL_MESSAGE_EXIST_PARTY_PLAYER,
+							CMessage* ResExistPartyPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_EXIST_PARTY_PLAYER,
 								InvitePlayer->_GameObjectInfo.ObjectName.c_str());
 							G_ObjectManager->GameServer->SendPacket(PartyPlayer->_SessionId, ResExistPartyPacket);
 							ResExistPartyPacket->Free();
@@ -157,7 +157,7 @@ void CChannel::Update()
 							if (PartySize == CPartyManager::en_PartyManager::PARTY_MAX)
 							{
 								// 그룹에 빈 자리가 없을 경우
-								CMessage* ResExistPartyPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSONAL_MESSAGE_PARTY_MAX);
+								CMessage* ResExistPartyPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_PARTY_MAX);
 								G_ObjectManager->GameServer->SendPacket(PartyAcceptPlayer->_SessionId, ResExistPartyPacket);
 								ResExistPartyPacket->Free();
 							}
@@ -206,7 +206,7 @@ void CChannel::Update()
 						if (ReqPartyInvitePlayer != nullptr)
 						{
 							// 그룹중이라면 그룹중이라고 메세지 보냄
-							CMessage* ResExistPartyPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSONAL_MESSAGE_PARTY_INVITE_REJECT,
+							CMessage* ResExistPartyPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_PARTY_INVITE_REJECT,
 								PartyRejectPlayer->_GameObjectInfo.ObjectName.c_str());
 							G_ObjectManager->GameServer->SendPacket(ReqPartyInvitePlayer->_SessionId, ResExistPartyPacket);
 							ResExistPartyPacket->Free();
@@ -355,10 +355,7 @@ void CChannel::Update()
 			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_OBJECT_DESPAWN:
 				{
 					CGameObject* DeSpawnObject;
-					*GameObjectJob->GameObjectJobMessage >> &DeSpawnObject;					
-
-					// 나 포함해서 주위 시야범위 플레이어 조사
-					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Map->GetFieldAroundPlayers(DeSpawnObject, false);				
+					*GameObjectJob->GameObjectJobMessage >> &DeSpawnObject;										
 
 					_Map->ApplyLeave(DeSpawnObject);
 				}
@@ -369,10 +366,7 @@ void CChannel::Update()
 					*GameObjectJob->GameObjectJobMessage >> &EnterPlayer;
 
 					EnterPlayer->_SpawnIdleTick = GetTickCount64() + 5000;
-					EnterPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_IDLE;									
-
-					// 충돌 감지 활성화
-					EnterPlayer->GetRectCollision()->SetActive(true);
+					EnterPlayer->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPAWN_IDLE;													
 
 					EnterChannel(EnterPlayer, &EnterPlayer->_SpawnPosition);					
 
@@ -411,10 +405,7 @@ void CChannel::Update()
 					{
 					case en_GameObjectType::OBJECT_GOBLIN:					
 						{
-							CMonster* EnterChannelMonster = (CMonster*)EnterObject;
-
-							// 충돌 감지 박스 활성화
-							EnterChannelMonster->GetRectCollision()->SetActive(true);							
+							CMonster* EnterChannelMonster = (CMonster*)EnterObject;							
 							
 							EnterChannel(EnterChannelMonster, &EnterChannelMonster->_SpawnPosition);
 						}
@@ -422,9 +413,7 @@ void CChannel::Update()
 					case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
 					case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
 					case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
-					case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
-					case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
-					case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
+					case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:										
 					case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
 					case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 					case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
@@ -451,15 +440,19 @@ void CChannel::Update()
 							{
 								G_ObjectManager->ObjectReturn(Item);
 							}
+
+							vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Map->GetFieldAroundPlayers(Item);
+
+							CMessage* ItemSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectSpawn(Item);
+							G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ItemSpawnPacket);
+							ItemSpawnPacket->Free();
 						}
 						break;	
 					case en_GameObjectType::OBJECT_WALL:
 					case en_GameObjectType::OBJECT_STONE:
 					case en_GameObjectType::OBJECT_TREE:
 						{
-							CEnvironment* Entervironment = (CEnvironment*)EnterObject;
-
-							Entervironment->GetRectCollision()->SetActive(true);
+							CEnvironment* Entervironment = (CEnvironment*)EnterObject;							
 
 							EnterChannel(Entervironment, &Entervironment->_SpawnPosition);
 						}
@@ -468,9 +461,6 @@ void CChannel::Update()
 					case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 						{
 							CCraftingTable* CraftingTable = (CCraftingTable*)EnterObject;
-
-							CraftingTable->GetRectCollision()->SetActive(true);
-
 							EnterChannel(CraftingTable, &CraftingTable->_SpawnPosition);
 						}
 						break;
@@ -485,12 +475,12 @@ void CChannel::Update()
 					}																		
 				}
 				break;
-			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_LEAVE:
+			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_OBJECT_LEAVE:
 				{
 					CGameObject* LeaveGameObject;
-					*GameObjectJob->GameObjectJobMessage >> &LeaveGameObject;										
-
-					LeaveChannel(LeaveGameObject);
+					*GameObjectJob->GameObjectJobMessage >> &LeaveGameObject;															
+					
+					LeaveChannel(LeaveGameObject);				
 				}
 				break;
 			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_PLAYER_LEAVE:
@@ -705,7 +695,7 @@ void CChannel::Update()
 								else
 								{
 									// 사용중임
-									CMessage* CommonErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSONAL_MEESAGE_CRAFTING_TABLE_OVERLAP_SELECT, FindObject->_GameObjectInfo.ObjectName.c_str());
+									CMessage* CommonErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MEESAGE_CRAFTING_TABLE_OVERLAP_SELECT, FindObject->_GameObjectInfo.ObjectName.c_str());
 									G_ObjectManager->GameServer->SendPacket(Player->_SessionId, CommonErrorPacket);
 									CommonErrorPacket->Free();
 								}
@@ -760,7 +750,7 @@ void CChannel::Update()
 						}
 						else
 						{
-							CMessage* SeedFarmingExistError = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::PERSOANL_MESSAGE_SEED_FARMING_EXIST, Plant->_GameObjectInfo.ObjectName.c_str());
+							CMessage* SeedFarmingExistError = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_SEED_FARMING_EXIST, Plant->_GameObjectInfo.ObjectName.c_str());
 							G_ObjectManager->GameServer->SendPacket(Player->_SessionId, SeedFarmingExistError);
 							SeedFarmingExistError->Free();
 						}
@@ -910,6 +900,17 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 			}
 		}
 		break;
+	case en_GameObjectType::OBJECT_NON_PLAYER_GENERAL_MERCHANT:
+		{
+			for (int32 i = 0; i < en_Channel::CHANNEL_NON_PLAYER_MAX; i++)
+			{
+				if (_ChannelNonPlayerArray[i] != nullptr)
+				{
+					FindObject = _ChannelNonPlayerArray[i];
+				}
+			}
+		}
+		break;
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 		{
 			for (int32 i = 0; i < en_Channel::CHANNEL_DUMMY_PLAYER_MAX; i++)
@@ -953,12 +954,10 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
-	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE:
-	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE:	
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEALTH_RESTORATION_POTION_SMALL:
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_MANA_RESTORATION_POTION_SMALL:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL:	
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIVER_COIN:
@@ -1022,13 +1021,22 @@ vector<CGameObject*> CChannel::FindChannelObjects(en_GameObjectType GameObjectTy
 
 	switch (GameObjectType)
 	{
-	case en_GameObjectType::OBJECT_PLAYER:	
+	case en_GameObjectType::OBJECT_PLAYER:
 		for (int32 i = 0; i < en_Channel::CHANNEL_PLAYER_MAX; i++)
 		{
 			if (_ChannelPlayerArray[i] != nullptr
 				&& _ChannelPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE)
 			{
 				FindObjects.push_back(_ChannelPlayerArray[i]);
+			}
+		}
+		break;
+	case en_GameObjectType::OBJECT_NON_PLAYER_GENERAL_MERCHANT:
+		for (int32 i = 0; i < en_Channel::CHANNEL_NON_PLAYER_MAX; i++)
+		{
+			if (_ChannelNonPlayerArray[i] != nullptr)
+			{
+				FindObjects.push_back(_ChannelNonPlayerArray[i]);
 			}
 		}
 		break;
@@ -1060,12 +1068,10 @@ vector<CGameObject*> CChannel::FindChannelObjects(en_GameObjectType GameObjectTy
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
-	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE:
-	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE:	
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEALTH_RESTORATION_POTION_SMALL:
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_MANA_RESTORATION_POTION_SMALL:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL:	
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIVER_COIN:
@@ -1135,15 +1141,22 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 		switch (FieldOfViewInfo.ObjectType)
 		{			
 		case en_GameObjectType::OBJECT_PLAYER:		
+			for (int32 i = 0; i < en_Channel::CHANNEL_PLAYER_MAX; i++)
 			{
-				for (int32 i = 0; i < en_Channel::CHANNEL_PLAYER_MAX; i++)
+				if (_ChannelPlayerArray[i] != nullptr
+					&& _ChannelPlayerArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID
+					&& _ChannelPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE)
 				{
-					if (_ChannelPlayerArray[i] != nullptr
-						&& _ChannelPlayerArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID
-						&& _ChannelPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE)
-					{
-						FindObjects.push_back(_ChannelPlayerArray[i]);
-					}
+					FindObjects.push_back(_ChannelPlayerArray[i]);
+				}
+			}
+			break;
+		case en_GameObjectType::OBJECT_NON_PLAYER_GENERAL_MERCHANT:
+			for (int32 i = 0; i < en_Channel::CHANNEL_NON_PLAYER_MAX; i++)
+			{
+				if (_ChannelNonPlayerArray[i] != nullptr)
+				{
+					FindObjects.push_back(_ChannelNonPlayerArray[i]);
 				}
 			}
 			break;
@@ -1190,12 +1203,10 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 		case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
 		case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
 		case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
-		case en_GameObjectType::OBJECT_ITEM_CONSUMABLE:
-		case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
+		case en_GameObjectType::OBJECT_ITEM_CONSUMABLE:		
 		case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEALTH_RESTORATION_POTION_SMALL:
 		case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_MANA_RESTORATION_POTION_SMALL:
-		case en_GameObjectType::OBJECT_ITEM_MATERIAL:
-		case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
+		case en_GameObjectType::OBJECT_ITEM_MATERIAL:		
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIVER_COIN:
@@ -1501,6 +1512,21 @@ bool CChannel::ChannelColliderCheck(CGameObject* CheckObject, st_Vector2 CheckPo
 		}
 	}
 
+	bool IsNonPlayerCollision = true;
+	for (int32 i = 0; i < en_Channel::CHANNEL_NON_PLAYER_MAX; i++)
+	{
+		if (_ChannelNonPlayerArray[i] != nullptr)
+		{
+			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelNonPlayerArray[i]->_GameObjectInfo.ObjectId
+				&& _ChannelNonPlayerArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelNonPlayerArray[i]->GetRectCollision()) == true)
+			{				
+				IsPlayerCollision = false;
+				break;
+			}
+		}
+	}
+
 	bool IsDummyPlayerCollision = true;
 	for (int32 i = 0; i < en_Channel::CHANNEL_DUMMY_PLAYER_MAX; i++)
 	{
@@ -1626,6 +1652,9 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 				EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
 				EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;				
 
+				EnterChannelPlayer->SetRectCollision();
+				EnterChannelPlayer->GetRectCollision()->SetActive(true);
+
 				// 플레이어 저장
 				_ChannelPlayerArrayIndexs.Pop(&EnterChannelPlayer->_ChannelArrayIndex);
 				_ChannelPlayerArray[EnterChannelPlayer->_ChannelArrayIndex] = EnterChannelPlayer;				
@@ -1672,30 +1701,34 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			}
 		}	
 		break;
-	case en_GameObjectType::OBJECT_NON_PLAYER:
+	case en_GameObjectType::OBJECT_NON_PLAYER_GENERAL_MERCHANT:
 		{
-			CNonPlayer* NonPlayer = dynamic_cast<CNonPlayer*>(EnterChannelGameObject);
-			if (NonPlayer != nullptr)
-			{
-				NonPlayer->_SpawnPosition = SpawnPosition;
-				NonPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
+			CGeneralMerchantNPC* GeneralMerchantNPC = dynamic_cast<CGeneralMerchantNPC*>(EnterChannelGameObject);
+			if (GeneralMerchantNPC != nullptr)
+			{				
+				GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 
-				NonPlayer->_GameObjectInfo.ObjectPositionInfo.Position._X = NonPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-				NonPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y = NonPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
+				GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.Position._X = GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
+				GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.Position._Y = GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
+
+				GeneralMerchantNPC->SetRectCollision();
+				GeneralMerchantNPC->GetRectCollision()->SetActive(true);				
 
 				// 플레이어 저장
-				_ChannelNonPlayerArrayIndexs.Pop(&NonPlayer->_ChannelArrayIndex);
-				_ChannelNonPlayerArray[NonPlayer->_ChannelArrayIndex] = NonPlayer;
+				_ChannelNonPlayerArrayIndexs.Pop(&GeneralMerchantNPC->_ChannelArrayIndex);
+				_ChannelNonPlayerArray[GeneralMerchantNPC->_ChannelArrayIndex] = GeneralMerchantNPC;
 
-				IsEnterChannel = _Map->ApplyMove(NonPlayer, SpawnPosition);
+				IsEnterChannel = _Map->ApplyMove(GeneralMerchantNPC, SpawnPosition);
 
 				// 섹터에 저장
 				CSector* EnterSector = _Map->GetSector(SpawnPosition);
-				EnterSector->Insert(NonPlayer);
+				EnterSector->Insert(GeneralMerchantNPC);
+
+				GeneralMerchantNPC->MerchantNPCInit();
 			}		
 			else
 			{
-				CRASH("NonPlayer nullptr")
+				CRASH("GeneralMerchantNPC nullptr")
 			}
 		}
 		break;
@@ -1708,6 +1741,9 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
 				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;				
+
+				EnterChannelMonster->SetRectCollision();
+				EnterChannelMonster->GetRectCollision()->SetActive(true);
 
 				EnterChannelMonster->Start();
 
@@ -1731,9 +1767,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
-	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:		
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
@@ -1786,8 +1820,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
 				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;				
 
-				EnterChannelEnvironment->GetRectCollision()->SetActive(true);
-				EnterChannelEnvironment->GetRectCollision()->Update();
+				EnterChannelEnvironment->SetRectCollision();
+				EnterChannelEnvironment->GetRectCollision()->SetActive(true);				
 				EnterChannelEnvironment->Start();
 
 				// 환경 오브젝트 저장
@@ -1815,6 +1849,9 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 				EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 				EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
 				EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;				
+
+				EnterChannelCraftingTable->SetRectCollision();
+				EnterChannelCraftingTable->GetRectCollision()->SetActive(true);
 
 				EnterChannelCraftingTable->Start();
 
@@ -1873,7 +1910,7 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 		_ChannelDummyPlayerArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
 		break;
-	case en_GameObjectType::OBJECT_NON_PLAYER:
+	case en_GameObjectType::OBJECT_NON_PLAYER_GENERAL_MERCHANT:
 		_ChannelNonPlayerArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
 		break;
 	case en_GameObjectType::OBJECT_GOBLIN:	
@@ -1884,9 +1921,7 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
-	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_SKILL_BOOK:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIME_GEL:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:		
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
