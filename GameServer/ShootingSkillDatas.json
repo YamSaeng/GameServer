@@ -24,8 +24,7 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 0,                  
-                  "NextComboSkill": "SKILL_TYPE_NONE",
-                  "SkillExplanation": "%d 거리 안의 대상에게 %d ~ %d 만큼의 피해를 입힌다."
+                  "NextComboSkill": "SKILL_TYPE_NONE"
                 }
               ],
               "BufSkill": [

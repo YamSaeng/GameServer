@@ -24,8 +24,7 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 0,                  
-                  "NextComboSkill": "SKILL_TYPE_NONE",
-                  "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입힌다."
+                  "NextComboSkill": "SKILL_TYPE_NONE"
                 },
                 {
                   "SkillType": "SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT",
@@ -43,8 +42,7 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 100,                  
-                  "NextComboSkill": "SKILL_TYPE_NONE",
-                  "SkillExplanation": "%d 거리 안에 있는 대상을 %.1f초 동안 속박 시킨다."
+                  "NextComboSkill": "SKILL_TYPE_NONE"
                 }
               ],
               "HealSkill": [
@@ -61,8 +59,7 @@
                   "SkillDistance": 6,
                   "SkillMotionTime": 1000,
                   "SkillTargetEffectTime": 0.5,                  
-                  "NextComboSkill": "SKILL_TYPE_NONE",
-                  "SkillExplanation": "%d 거리 안에 있는 대상 %d ~ %d 만큼 회복시킨다."
+                  "NextComboSkill": "SKILL_TYPE_NONE"
                 },
                 {
                   "SkillType": "SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND",
@@ -77,8 +74,7 @@
                   "SkillDistance": 6,
                   "SkillMotionTime": 1000,
                   "SkillTargetEffectTime": 0.6,                  
-                  "NextComboSkill": "SKILL_TYPE_NONE",
-                  "SkillExplanation": "%d 거리 안에 있는 대상 %d ~ %d 만큼 회복시킨다."
+                  "NextComboSkill": "SKILL_TYPE_NONE"
                 }
               ],
               "BufSkill": [

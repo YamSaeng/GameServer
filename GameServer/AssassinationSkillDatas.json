@@ -25,8 +25,7 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 0,                  
-                  "NextComboSkill": "SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT",
-                  "SkillExplanation": "전방 대상에게 피해를 입힌다."
+                  "NextComboSkill": "SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT"                  
                 },
                 {
                   "SkillNumber": 1,
@@ -45,8 +44,7 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 0,                  
-                  "NextComboSkill": "SKILL_TYPE_NONE",
-                  "SkillExplanation": "전방 대상에게 피해를 입힌다."
+                  "NextComboSkill": "SKILL_TYPE_NONE"                  
                 },
                 {
                   "SkillNumber": 2,
@@ -65,8 +63,7 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 0,                  
-                  "NextComboSkill": "SKILL_TYPE_NONE",
-                  "SkillExplanation": "전방 1칸 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입힌다. 뒤에서 공격하면 피해를 100% 만큼 증가시킨다."
+                  "NextComboSkill": "SKILL_TYPE_NONE"                  
                 },
                 {
                   "SkillNumber": 3,
@@ -85,8 +82,7 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 0,                  
-                  "NextComboSkill": "SKILL_TYPE_NONE",
-                  "SkillExplanation": "선택한 대상의 뒤로 이동하고 %d ~ %d 만큼의 피해를 입히면서 1초 동안 기절시킨다."
+                  "NextComboSkill": "SKILL_TYPE_NONE"                  
                 }
               ],
               "BufSkill": [
@@ -115,8 +111,7 @@
                   "SkillDistance": 0,
                   "SkillMotionTime": 1000,
                   "SkillTargetEffectTime": 1.5,                  
-                  "NextComboSkill": "SKILL_TYPE_NONE",
-                  "SkillExplanation": "무기에 독을 발라 대상을 중독 시킨다."
+                  "NextComboSkill": "SKILL_TYPE_NONE"                  
                 }
               ]
             }

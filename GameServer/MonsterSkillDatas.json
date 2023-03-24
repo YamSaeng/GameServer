@@ -12,12 +12,11 @@
             {
               "SkillType": "SKILL_GOBLIN_ACTIVE_MELEE_DEFAULT_ATTACK",
               "SkillName": "고블린 일반 근접 공격",
-              "SkillMinDamage": 1,
-              "SkillMaxDamage": 5,
+              "SkillMinDamage": 0,
+              "SkillMaxDamage": 0,
               "SkillCoolTime": 1000,
               "SkillCastingTime": 0,
-              "SkillDistance": 1.8,              
-              "SkillExplanation": "%0.1f 거리의 대상에게 데미지를 가한다."
+              "SkillDistance": 1.8
             }
           ]
         }

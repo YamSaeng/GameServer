@@ -24,8 +24,7 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 0,                  
-                  "NextComboSkill": "SKILL_TYPE_NONE",
-                  "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입힌다."
+                  "NextComboSkill": "SKILL_TYPE_NONE"
                 },
                 {
                   "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_ROOT",
@@ -43,8 +42,7 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 100,                  
-                  "NextComboSkill": "SKILL_TYPE_NONE",
-                  "SkillExplanation": "%d 거리 안에 있는 대상을 %.1f초 동안 속박 시킨다."
+                  "NextComboSkill": "SKILL_TYPE_NONE"
                 },
                 {
                   "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN",
@@ -62,8 +60,7 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 3,
                   "StatusAbnormalityProbability": 100,                  
-                  "NextComboSkill": "SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE",
-                  "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입히고 %d%% 만큼 상대방의 속도를 %.1f초동안 줄인다."
+                  "NextComboSkill": "SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE"
                 },
                 {
                   "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE",
@@ -81,8 +78,7 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 100,                  
-                  "NextComboSkill": "SKILL_TYPE_NONE",
-                  "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입히고 밀어낸다."
+                  "NextComboSkill": "SKILL_TYPE_NONE"
                 },
                 {
                   "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE",
@@ -100,8 +96,7 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 100,                  
-                  "NextComboSkill": "SKILL_TYPE_NONE",
-                  "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입히고 %.1f초 동안 기절 시킨다."
+                  "NextComboSkill": "SKILL_TYPE_NONE"
                 },
                 {
                   "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE",
@@ -119,8 +114,7 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 0,                  
-                  "NextComboSkill": "SKILL_TYPE_NONE",
-                  "SkillExplanation": "%d 거리 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입힌다."
+                  "NextComboSkill": "SKILL_TYPE_NONE"
                 }
               ],
               "BufSkill": [
@@ -135,8 +129,7 @@
                   "SkillDistance": 4,
                   "SkillMotionTime": 1000,
                   "SkillTargetEffectTime": 0,                  
-                  "NextComboSkill": "SKILL_TYPE_NONE",
-                  "SkillExplanation": "이동 불가와 이동 속도 감소를 삭제하고 %d칸 뒤로 이동한다."
+                  "NextComboSkill": "SKILL_TYPE_NONE"
                 }
               ]
             }

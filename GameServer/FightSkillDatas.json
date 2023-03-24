@@ -24,9 +24,8 @@
                   "SkillTargetEffectTime": 0.5,
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
-                  "StatusAbnormalityProbability": 0,                                    
-                  "NextComboSkill": "SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK",
-                  "SkillExplanation": "전방 %d칸 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입히고, 회심의일격을 활성화 한다."
+                  "StatusAbnormalityProbability": 0,
+                  "NextComboSkill": "SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK"
                 },
                 {
                   "SkillNumber": 0,
@@ -44,9 +43,8 @@
                   "SkillTargetEffectTime": 0.5,
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
-                  "StatusAbnormalityProbability": 0,                  
-                  "NextComboSkill": "SKILL_TYPE_NONE",
-                  "SkillExplanation": "전방 %d칸 안에 있는 대상에게 %d ~ %d 만큼의 피해를 입힌다."
+                  "StatusAbnormalityProbability": 0,
+                  "NextComboSkill": "SKILL_TYPE_NONE"
                 },
                 {
                   "SkillNumber": 1,
@@ -64,9 +62,27 @@
                   "SkillTargetEffectTime": 1.1,
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
-                  "StatusAbnormalityProbability": 0,                  
-                  "NextComboSkill": "SKILL_TYPE_NONE",
-                  "SkillExplanation": "7미터 내의 대상에게 이동하면서 %.1f초만큼 이동불가 상태로 만들고 %d ~ %d 만큼의 피해를 입힌다."
+                  "StatusAbnormalityProbability": 0,
+                  "NextComboSkill": "SKILL_TYPE_NONE"
+                },
+                {
+                  "SkillNumber": 1,
+                  "SkillType": "SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE",
+                  "SkillName": "살기 파동",
+                  "SkillMaxLevel": 1,
+                  "SkillMinDamage": 30,
+                  "SkillMaxDamage": 50,
+                  "SkillCoolTime": 30000,
+                  "SkillCastingTime": 0,
+                  "SkillDurationTime": 0,
+                  "SkillDotTime": 0,
+                  "SkillDistance": 5,
+                  "SkillMotionTime": 0,
+                  "SkillTargetEffectTime": 0,
+                  "SkillDebufAttackSpeed": 0,
+                  "SkillDebufMovingSpeed": 0,
+                  "StatusAbnormalityProbability": 0,
+                  "NextComboSkill": "SKILL_TYPE_NONE"
                 },
                 {
                   "SkillNumber": 3,
@@ -85,8 +101,7 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 0,
-                  "NextComboSkill": "SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE",
-                  "SkillExplanation": "8미터 내의 대상에게 칼날을 날려 %d ~ %d 만큼의 피해를 입힌다."
+                  "NextComboSkill": "SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE"
                 },
                 {
                   "SkillNumber": 3,
@@ -105,8 +120,7 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 0,
-                  "NextComboSkill": "SKILL_TYPE_NONE",
-                  "SkillExplanation": "8미터 내의 대상에게 연속으로 칼날을 날려 %d ~ %d 만큼의 피해를 입힌다."
+                  "NextComboSkill": "SKILL_TYPE_NONE"
                 }
               ],
               "BufSkill": [
@@ -139,8 +153,7 @@
                   "SkillDownAnimation": "IDLE_FRONT",
                   "SkillLeftAnimation": "IDLE_LEFT",
                   "SkillRightAnimation": "IDLE_LEFT",
-                  "NextComboSkill": "SKILL_TYPE_NONE",
-                  "SkillExplanation": "공격력을 %d%% 만큼 %.1f 초 동안 증가시킨다."
+                  "NextComboSkill": "SKILL_TYPE_NONE"
                 }
               ]
             }            

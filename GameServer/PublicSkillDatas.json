@@ -16,8 +16,7 @@
               "SkillMaxDamage": 0,
               "SkillCoolTime": 1000,
               "SkillDistance": 2.0,
-              "SkillTargetEffectTime": 2.0,
-              "SkillExplanation": "전방 대상에게 피해를 입힌다."
+              "SkillTargetEffectTime": 2.0              
             }
           ],
           "PublicTacTicSkillList": [
@@ -35,8 +34,7 @@
               "SkillDotTime": 0,
               "SkillDistance": 0,
               "SkillTargetEffectTime": 0.5,              
-              "NextComboSkill": "SKILL_TYPE_NONE",
-              "SkillExplanation": "기절, 밀려남 상태이상을 해제하고 %.1f초 동안 상태이상 저항값을 1000만큼 증가시킨다."
+              "NextComboSkill": "SKILL_TYPE_NONE"
             }
           ]
         }
