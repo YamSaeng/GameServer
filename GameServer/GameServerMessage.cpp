@@ -104,6 +104,9 @@ CGameServerMessage& CGameServerMessage::operator<<(st_SkillInfo& SkillInfo)
     *this << (int8)SkillInfo.SkillMediumCategory;
     *this << (int16)SkillInfo.SkillType;
     *this << SkillInfo.SkillLevel;
+    *this << SkillInfo.SkillMinDamage;
+    *this << SkillInfo.SkillMaxDamage;
+
     *this << SkillInfo.SkillOverlapStep;
 
     int16 SkillNameLen = (int16)SkillInfo.SkillName.length() * 2;
