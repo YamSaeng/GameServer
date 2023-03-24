@@ -1738,6 +1738,15 @@ CRectCollision* CGameObject::GetRectCollision()
 	return _RectCollision;
 }
 
+void CGameObject::SetRectCollision()
+{
+	if (_RectCollision == nullptr)
+	{
+		_RectCollision = G_ObjectManager->RectCollisionCreate();
+		_RectCollision->Init(this);
+	}
+}
+
 bool CGameObject::IsPlayer()
 {
 	if (_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_PLAYER)		
@@ -1750,12 +1759,7 @@ bool CGameObject::IsPlayer()
 
 void CGameObject::Init(en_GameObjectType GameObjectType)
 {
-	_GameObjectInfo.ObjectType = GameObjectType;	
-
-	if (_RectCollision == nullptr)
-	{
-		_RectCollision = new CRectCollision(this);
-	}
+	_GameObjectInfo.ObjectType = GameObjectType;		
 }
 
 void CGameObject::Start()

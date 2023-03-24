@@ -37,7 +37,10 @@ public:
 	// 바라보는 방향
 	st_Vector2 _FieldOfDirection;	
 	// 시야 거리
-	float _FieldOfViewDistance;			
+	float _FieldOfViewDistance;				
+
+	// 플레이어 탐색 거리
+	float _PlayerSearchDistance;
 
 	//--------------------------------------------
 	// SpawnIdle 상태에서 Idle 상태로 돌아갈 Tick
@@ -116,8 +119,9 @@ public:
 	//--------------------------------------------
 	CChannel* GetChannel();
 	void SetChannel(CChannel* Channel);
-
+		
 	CRectCollision* GetRectCollision();
+	void SetRectCollision();
 	
 	bool IsPlayer();
 	
@@ -129,7 +133,7 @@ public:
 	vector<CGameObject*> GetFieldOfViewObjects();
 
 	void SetMeleeSkill(CSkill* MeleeSkill);	
-protected:	
+protected:		
 
 	// 시야 범위 오브젝트 객체
 	vector<CGameObject*> _FieldOfViewObjects;
