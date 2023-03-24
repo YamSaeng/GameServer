@@ -7,6 +7,9 @@ public:
 	CGeneralMerchantNPC();
 	~CGeneralMerchantNPC();
 
+	void Update();
+
+	void MerchantNPCInit();
 private:
 };
 

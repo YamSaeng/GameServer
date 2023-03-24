@@ -2,13 +2,33 @@
 #include "GeneralMerchantNPC.h"
 #include "DataManager.h"
 #include "ObjectManager.h"
+#include "RectCollision.h"
 
 CGeneralMerchantNPC::CGeneralMerchantNPC()
 {
-	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_NON_PLAYER;
-	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_NON_PLAYER_GENERAL_MERCHANT;	
 
-	_NonPlayerType = en_NonPlayerType::NON_PLAYER_CHARACTER_일반_상인;	
+	_NonPlayerType = en_NonPlayerType::NON_PLAYER_CHARACTER_일반_상인;		
+
+	_GameObjectInfo.ObjectName = L"잡화 상인";
+}
+
+CGeneralMerchantNPC::~CGeneralMerchantNPC()
+{
+
+}
+
+void CGeneralMerchantNPC::Update()
+{
+	if (_RectCollision != nullptr)
+	{
+		_RectCollision->Update();
+	}
+}
+
+void CGeneralMerchantNPC::MerchantNPCInit()
+{
+	GetInventoryManager()->InventoryCreate(1, (int8)en_InventoryManager::INVENTORY_DEFAULT_WIDH_SIZE, (int8)en_InventoryManager::INVENTORY_DEFAULT_HEIGHT_SIZE);
 
 	switch (_NonPlayerType)
 	{
@@ -21,10 +41,5 @@ CGeneralMerchantNPC::CGeneralMerchantNPC()
 			}
 		}
 		break;
-	}	
-}
-
-CGeneralMerchantNPC::~CGeneralMerchantNPC()
-{
-
+	}
 }
