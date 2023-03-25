@@ -29,10 +29,12 @@ CGoblin::CGoblin()
 
 	_ReSpawnTime = GoblinMonsterData.ReSpawnTime;
 
-	_FieldOfViewDistance = 10;	
+	_FieldOfViewDistance = 14;	
 
 	_FieldOfAngle = 210;	
 	
+	_PlayerSearchDistance = 3;
+
 	_MonsterSkillBox.SetOwner(this);
 	_MonsterSkillBox.Init(_GameObjectInfo.ObjectType);		
 }
@@ -74,7 +76,7 @@ bool CGoblin::OnDamaged(CGameObject* Attacker, int32 Damage)
 			Attacker->_GameObjectInfo.ObjectType,
 			_GameObjectInfo.ObjectPositionInfo.CollisionPosition,
 			_GameObjectInfo.ObjectPositionInfo.Position,
-			_GameObjectInfo.ObjectType, en_GameObjectType::OBJECT_GOBLIN);
+			_GameObjectInfo.ObjectType);
 
 		Attacker->_GameObjectInfo.ObjectStatInfo.DP += _GetDPPoint;
 
