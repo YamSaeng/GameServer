@@ -14,11 +14,7 @@ protected:
 	//------------------------
 	// Idle 상태 Update
 	//------------------------
-	virtual void UpdateIdle() override;
-	//---------------------------
-	// Ready Dead 상태 Update
-	//---------------------------
-	virtual void UpdateReadyDead() override;
+	virtual void UpdateIdle() override;	
 	//------------------------
 	// Dead 상태 Update
 	//------------------------

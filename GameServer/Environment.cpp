@@ -8,9 +8,7 @@
 
 CEnvironment::CEnvironment()
 {
-	_FieldOfViewDistance = 10;
-
-	_RectCollision = new CRectCollision(this);
+	_FieldOfViewDistance = 10;	
 }
 
 void CEnvironment::Start()
@@ -26,10 +24,7 @@ void CEnvironment::Update()
 	{
 	case en_CreatureState::IDLE:
 		UpdateIdle();
-		break;
-	case en_CreatureState::READY_DEAD:
-		UpdateReadyDead();
-		break;
+		break;	
 	case en_CreatureState::DEAD:
 		UpdateDead();
 		break;
@@ -49,12 +44,10 @@ void CEnvironment::UpdateIdle()
 
 }
 
-void CEnvironment::UpdateReadyDead()
+void CEnvironment::UpdateDead()
 {
-	if (_DeadReadyTick < GetTickCount64())
+	if (_DeadTick < GetTickCount64())
 	{
-		_DeadTick = GetTickCount64() + 5000;
-
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
 
 		if (_Channel == nullptr)
@@ -64,12 +57,9 @@ void CEnvironment::UpdateReadyDead()
 
 		st_GameObjectJob* LeaveChannelEnvironmentJob = G_ObjectManager->GameServer->MakeGameObjectJobLeaveChannel(this);
 		_Channel->_ChannelJobQue.Enqueue(LeaveChannelEnvironmentJob);
-	}	
-}
+	}
 
-void CEnvironment::UpdateDead()
-{
-	if (_DeadTick < GetTickCount64())
+	if (_ReSpawnTick < GetTickCount64())
 	{
 		CMap* Map = G_MapManager->GetMap(1);
 		if (Map != nullptr)
@@ -82,7 +72,7 @@ void CEnvironment::UpdateDead()
 			}
 			else
 			{
-				_DeadTick = GetTickCount64() + 5000;
+				_ReSpawnTick = GetTickCount64() + 5000;
 			}
 		}
 	}	
@@ -116,16 +106,15 @@ bool CStone::OnDamaged(CGameObject* Attacker, int32 Damage)
 
 	if (IsDead == true)
 	{
-		_DeadReadyTick = 0;
+		_DeadTick = 0;
 
-		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::READY_DEAD;
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
 
 		G_ObjectManager->ObjectItemSpawn(_Channel, Attacker->_GameObjectInfo.ObjectId,
 			Attacker->_GameObjectInfo.ObjectType,
 			_GameObjectInfo.ObjectPositionInfo.CollisionPosition,
 			_GameObjectInfo.ObjectPositionInfo.Position,
-			_GameObjectInfo.ObjectType,
-			en_GameObjectType::OBJECT_STONE);
+			_GameObjectInfo.ObjectType);
 	}
 
 	return IsDead;
@@ -163,13 +152,11 @@ bool CTree::OnDamaged(CGameObject* Attacker, int32 Damage)
 
 	if (IsDead == true)
 	{
-		_DeadReadyTick = GetTickCount64() + 1500;
+		_DeadTick = GetTickCount64() + 1500;
 
-		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::READY_DEAD;
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
 
-		CMessage* ResChangeStatePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
-			_GameObjectInfo.ObjectPositionInfo.MoveDir,
-			_GameObjectInfo.ObjectType,
+		CMessage* ResChangeStatePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,						
 			_GameObjectInfo.ObjectPositionInfo.State);
 		G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResChangeStatePacket);
 		ResChangeStatePacket->Free();
@@ -178,8 +165,7 @@ bool CTree::OnDamaged(CGameObject* Attacker, int32 Damage)
 			Attacker->_GameObjectInfo.ObjectType,
 			_GameObjectInfo.ObjectPositionInfo.CollisionPosition,
 			_GameObjectInfo.ObjectPositionInfo.Position,
-			_GameObjectInfo.ObjectType,
-			en_GameObjectType::OBJECT_TREE);
+			_GameObjectInfo.ObjectType);
 	}
 
 	return IsDead;
@@ -189,4 +175,3 @@ void CTree::UpdateIdle()
 {	
 	
 }
-
