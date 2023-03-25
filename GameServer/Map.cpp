@@ -210,6 +210,20 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object)
 				FieldOfViewGameObjects.push_back(FieldOfViewInfo);				
 			}
 		}
+
+		for (CNonPlayer* NonPlayer : Sector->GetNonPlayers())
+		{
+			if (st_Vector2::CheckFieldOfView(NonPlayer->_GameObjectInfo.ObjectPositionInfo.Position,
+				Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->_FieldOfDirection, Object->_FieldOfAngle, Object->_FieldOfViewDistance)
+				&& NonPlayer->_GameObjectInfo.ObjectId != Object->_GameObjectInfo.ObjectId)
+			{
+				FieldOfViewInfo.ObjectID = NonPlayer->_GameObjectInfo.ObjectId;
+				FieldOfViewInfo.SessionID = 0;
+				FieldOfViewInfo.ObjectType = NonPlayer->_GameObjectInfo.ObjectType;
+
+				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
+			}
+		}
 		
 		for (CMonster* Monster : Sector->GetMonsters())
 		{
@@ -408,12 +422,18 @@ CGameObject* CMap::MonsterReqFindNearPlayer(CMonster* Monster, en_MonsterAggroTy
 	vector<CPlayer*> Players = GetAroundPlayers(Monster, 1);
 
 	// 받아온 플레이어 정보를 토대로 거리를 구해서 우선순위 큐에 담는다.
-	CHeap<int16, CPlayer*> Distances((int32)Players.size()); // 가까운 순서대로 
+	CHeap<float, CPlayer*> Distances((int32)Players.size()); // 가까운 순서대로 
 	for (CPlayer* Player : Players)
 	{
 		if (Player->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 		{
-			Distances.InsertHeap(st_Vector2Int::Distance(Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Monster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition), Player);
+			float Distance = st_Vector2::Distance(Player->_GameObjectInfo.ObjectPositionInfo.Position, Monster->_GameObjectInfo.ObjectPositionInfo.Position);
+			if (Distance > Monster->_PlayerSearchDistance)
+			{
+				continue;
+			}
+
+			Distances.InsertHeap(Distance, Player);
 		}
 	}
 
@@ -617,7 +637,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	{
 	case en_GameObjectType::OBJECT_PLAYER:	
 	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
-	case en_GameObjectType::OBJECT_NON_PLAYER:
+	case en_GameObjectType::OBJECT_NON_PLAYER_GENERAL_MERCHANT:
 	case en_GameObjectType::OBJECT_GOBLIN:	
 	case en_GameObjectType::OBJECT_WALL:
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
