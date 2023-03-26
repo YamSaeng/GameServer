@@ -52,9 +52,9 @@ void CSkillBox::CreateChracteristic(int8 CharacteristicType)
 	_SkillCharacteristic.SkillCharacteristicInit((en_SkillCharacteristic)CharacteristicType);	
 }
 
-void CSkillBox::SkillLearn(bool IsSkillLearn, int8 CharacteristicType)
+void CSkillBox::SkillLearn(bool IsSkillLearn, en_SkillType LearnSkillType)
 {
-	_SkillCharacteristic.SkillCharacteristicActive(IsSkillLearn, (en_SkillType)CharacteristicType, 1);	
+	_SkillCharacteristic.SkillCharacteristicActive(IsSkillLearn, LearnSkillType, 1);
 }
 
 CSkill* CSkillBox::FindSkill(en_SkillCharacteristic CharacteristicType, en_SkillType SkillType)
@@ -151,6 +151,8 @@ bool CSkillBox::CheckCharacteristic(en_SkillCharacteristic SkillCharacteristic)
 
 void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en_SkillCharacteristic SkillCharacteristic, en_SkillType SkillType)
 {
+	bool IsNextCombo = false;
+
 	CSkill* Skill = FindSkill(SkillCharacteristic, SkillType);
 	if (Skill != nullptr)
 	{
@@ -187,20 +189,24 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 									vector<CGameObject*> FieldOfViewObjects = SkillUser->GetFieldOfViewObjects();
 									for (CGameObject* FieldOfViewObject : FieldOfViewObjects)
 									{
-										if (st_Vector2::CheckFieldOfView(FieldOfViewObject->_GameObjectInfo.ObjectPositionInfo.Position,
-											SkillUser->_GameObjectInfo.ObjectPositionInfo.Position,
-											SkillUser->_FieldOfDirection, SkillUser->_FieldOfAngle, Skill->GetSkillInfo()->SkillDistance))
+										if (FieldOfViewObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 										{
-											st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(SkillUser->_GameObjectInfo.ObjectId, SkillUser->_GameObjectInfo.ObjectType,
-												MeleeSkillInfo->SkillType,
-												MeleeSkillInfo->SkillMinDamage,
-												MeleeSkillInfo->SkillMaxDamage);
-											FieldOfViewObject->_GameObjectJobQue.Enqueue(DamageJob);
-										}
+											if (st_Vector2::CheckFieldOfView(FieldOfViewObject->_GameObjectInfo.ObjectPositionInfo.Position,
+												SkillUser->_GameObjectInfo.ObjectPositionInfo.Position,
+												SkillUser->_FieldOfDirection, SkillUser->_FieldOfAngle, Skill->GetSkillInfo()->SkillDistance))
+											{
+												IsNextCombo = true;
+												st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(SkillUser->_GameObjectInfo.ObjectId, SkillUser->_GameObjectInfo.ObjectType,
+													MeleeSkillInfo->SkillType,
+													MeleeSkillInfo->SkillMinDamage,
+													MeleeSkillInfo->SkillMaxDamage);
+												FieldOfViewObject->_GameObjectJobQue.Enqueue(DamageJob);
+											}
+										}										
 									}
 								}
 								break;
-							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
+							case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE:
 								{
 									if (SkillUser->_SelectTarget != nullptr)
 									{
@@ -242,7 +248,7 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 									}
 								}
 								break;
-							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE:
+							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK:
 								{
 									if (SkillUser->_SelectTarget != nullptr)
 									{
@@ -253,23 +259,34 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 
 									}
 								}
-								break;							
+								break;	
+							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE:
+							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_COMBO_FLY_KNIFE:
+								break;
 							}
 						}
 						break;
 					case en_SkillKinds::SKILL_KIND_SPELL_SKILL:
-						break;
-					default:
-						break;
+						break;					
 					}
 
-					if (Skill->GetSkillInfo()->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
+					if (IsNextCombo == true && Skill->GetSkillInfo()->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
 					{
 						CSkill* FindNextComboSkill = FindSkill(Skill->GetSkillInfo()->SkillCharacteristic, Skill->GetSkillInfo()->NextComboSkill);
 						if (FindNextComboSkill->GetSkillInfo()->CanSkillUse == true)
 						{
 							st_GameObjectJob* ComboSkillJob = G_ObjectManager->GameServer->MakeGameObjectJobComboSkillCreate(Skill);
 							SkillUser->_GameObjectJobQue.Enqueue(ComboSkillJob);
+						}
+					}
+
+					CCreature* Creature = dynamic_cast<CCreature*>(SkillUser);
+					if (Creature != nullptr)
+					{
+						if (Creature->_ComboSkill != nullptr)
+						{
+							st_GameObjectJob* ComboSkillOffJob = G_ObjectManager->GameServer->MakeGameObjectJobComboSkillOff();
+							SkillUser->_GameObjectJobQue.Enqueue(ComboSkillOffJob);
 						}
 					}
 
@@ -309,7 +326,7 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 				}
 				else
 				{
-					CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::PERSONAL_MESSAGE_SKILL_COOLTIME, Skill->GetSkillInfo()->SkillName.c_str());
+					CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::GLOBAL_MESSAGE_SKILL_COOLTIME, Skill->GetSkillInfo()->SkillName.c_str());
 					G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResErrorPacket);
 					ResErrorPacket->Free();
 				}

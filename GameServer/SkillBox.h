@@ -14,7 +14,7 @@ public:
 	CSkillCharacteristic* FindCharacteristic(int8 FindCharacteristicType);
 	void CreateChracteristic(int8 CharacteristicType);
 	
-	void SkillLearn(bool IsSkillLearn, int8 CharacteristicType);
+	void SkillLearn(bool IsSkillLearn, en_SkillType LearnSkillType);
 
 	CSkill* FindSkill(en_SkillCharacteristic CharacteristicType, en_SkillType SkillType);
 
