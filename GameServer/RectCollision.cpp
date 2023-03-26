@@ -7,18 +7,24 @@ CRectCollision::CRectCollision()
 
 }
 
-CRectCollision::CRectCollision(CGameObject* Owner)
+CRectCollision::~CRectCollision()
+{
+
+}
+
+void CRectCollision::Init(CGameObject* OwnerObject)
 {
 	_RectCollisionActive = true;
 
-	_Owner = Owner;	
+	_OwnerObject = OwnerObject;
 
-	if (_Owner != nullptr)
+	if (_OwnerObject != nullptr)
 	{
-		switch (_Owner->_GameObjectInfo.ObjectType)
+		switch (_OwnerObject->_GameObjectInfo.ObjectType)
 		{
 		case en_GameObjectType::OBJECT_PLAYER:
 		case en_GameObjectType::OBJECT_PLAYER_DUMMY:
+		case en_GameObjectType::OBJECT_NON_PLAYER_GENERAL_MERCHANT:
 			_Size._X = 1.0f;
 			_Size._Y = 1.0f;
 			break;
@@ -36,16 +42,10 @@ CRectCollision::CRectCollision(CGameObject* Owner)
 			break;
 		}
 	}
-}
-
-CRectCollision::~CRectCollision()
-{
-
-}
-
-void CRectCollision::Init()
-{
-
+	else
+	{
+		CRASH("OwnerObject null");
+	}
 }
 
 bool CRectCollision::IsCollision(CRectCollision* ARectCollision, CRectCollision* BRectCollision)
@@ -59,11 +59,20 @@ bool CRectCollision::IsCollision(CRectCollision* ARectCollision, CRectCollision*
 void CRectCollision::SetActive(bool _Active)
 {
 	_RectCollisionActive = _Active;
+
+	Update();
 }
 
 void CRectCollision::Update()
 {
-	_Position = _Owner->_GameObjectInfo.ObjectPositionInfo.Position;
+	if (_OwnerObject != nullptr)
+	{
+		_Position = _OwnerObject->_GameObjectInfo.ObjectPositionInfo.Position;
+	}
+	else
+	{
+		CRASH("OwnerObject null");
+	}	
 }
 
 bool CRectCollision::GetActive()

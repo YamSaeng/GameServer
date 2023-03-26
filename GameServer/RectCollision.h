@@ -9,11 +9,10 @@ public:
 	st_Vector2 _Position;
 	st_Vector2 _Size;	
 
-	CRectCollision();
-	CRectCollision(CGameObject* Owner);
+	CRectCollision();	
 	~CRectCollision();
 
-	void Init();
+	void Init(CGameObject* OwnerObject);
 
 	static bool IsCollision(CRectCollision* ARectCollision, CRectCollision* BRectCollision);
 
@@ -22,7 +21,7 @@ public:
 
 	void Update();
 private:
-	CGameObject* _Owner;
+	CGameObject* _OwnerObject;
 
 	bool _RectCollisionActive;
 };
