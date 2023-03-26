@@ -15,7 +15,7 @@ CPlayer::CPlayer()
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 	_DefaultAttackTick = 0;
 
-	_FieldOfDirection = st_Vector2::Right();
+	_FieldOfDirection = st_Vector2::Left();
 
 	_FieldOfViewDistance = 12;		
 
@@ -576,7 +576,8 @@ void CPlayer::CheckFieldOfViewObject()
 			CGameObject* FindObject = _Channel->FindChannelObject(FieldOfViewInfo.ObjectID, FieldOfViewInfo.ObjectType);
 			if (FindObject != nullptr
 				&& (FindObject->_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_PLAYER
-					|| FindObject->_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_GOBLIN))
+					|| FindObject->_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_GOBLIN
+					|| FindObject->_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_NON_PLAYER_GENERAL_MERCHANT))
 			{
 				_FieldOfViewObjects.push_back(FindObject);
 			}
