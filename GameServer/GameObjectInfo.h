@@ -129,6 +129,7 @@ enum class en_CreatureState : int8
 	SPELL,
 	GATHERING,
 	CRAFTING,	
+	ROOTING,
 	DEAD
 };
 
