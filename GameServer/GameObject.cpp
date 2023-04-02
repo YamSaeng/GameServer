@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "GameObject.h"
 #include "ObjectManager.h"
+#include "NetworkManager.h"
 #include "DataManager.h"
 #include "Skill.h"
 #include "Furnace.h"
@@ -106,10 +107,10 @@ void CGameObject::Update()
 				{
 					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
 
-					CMessage* ResMoveStopPacket = G_ObjectManager->GameServer->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
+					CMessage* ResMoveStopPacket = G_NetworkManager->GetGameServer()->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
 						_GameObjectInfo.ObjectPositionInfo.Position._X,
 						_GameObjectInfo.ObjectPositionInfo.Position._Y);
-					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIds, ResMoveStopPacket);
+					G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIds, ResMoveStopPacket);
 					ResMoveStopPacket->Free();					
 				}
 			}
@@ -133,10 +134,10 @@ void CGameObject::Update()
 				{
 					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
 
-					CMessage* ResMoveStopPacket = G_ObjectManager->GameServer->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
+					CMessage* ResMoveStopPacket = G_NetworkManager->GetGameServer()->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
 						_GameObjectInfo.ObjectPositionInfo.Position._X,
 						_GameObjectInfo.ObjectPositionInfo.Position._Y);
-					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIds, ResMoveStopPacket);
+					G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIds, ResMoveStopPacket);
 					ResMoveStopPacket->Free();
 				}
 			}
@@ -151,8 +152,8 @@ void CGameObject::Update()
 				{
 					if (Player->_SkillBox.CheckCharacteristic((en_SkillCharacteristic)SkillCharacteristicType) == true)
 					{
-						CMessage* ResReqCancel = G_ObjectManager->GameServer->MakePacketReqCancel(en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_SELECT_SKILL_CHARACTERISTIC);
-						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResReqCancel);
+						CMessage* ResReqCancel = G_NetworkManager->GetGameServer()->MakePacketReqCancel(en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_SELECT_SKILL_CHARACTERISTIC);
+						G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResReqCancel);
 						ResReqCancel->Free();
 					}
 					else
@@ -161,10 +162,10 @@ void CGameObject::Update()
 
 						CSkillCharacteristic* SkillCharacteristic = Player->_SkillBox.FindCharacteristic(SkillCharacteristicType);
 
-						CMessage* ResSkillCharacteristicPacket = G_ObjectManager->GameServer->MakePacketResSelectSkillCharacteristic(true,
+						CMessage* ResSkillCharacteristicPacket = G_NetworkManager->GetGameServer()->MakePacketResSelectSkillCharacteristic(true,
 							SkillCharacteristicType,
 							SkillCharacteristic->GetPassiveSkill(), SkillCharacteristic->GetActiveSkill());
-						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSkillCharacteristicPacket);
+						G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResSkillCharacteristicPacket);
 						ResSkillCharacteristicPacket->Free();
 					}
 				}			
@@ -217,8 +218,8 @@ void CGameObject::Update()
 								}						
 							}
 
-							CMessage* ResSkillLearnPacket = G_ObjectManager->GameServer->MakePacketResSkillLearn(IsSkillLearn, LearnSkillTypes, Player->_GameObjectInfo.ObjectSkillMaxPoint, Player->_GameObjectInfo.ObjectSkillPoint);
-							G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSkillLearnPacket);
+							CMessage* ResSkillLearnPacket = G_NetworkManager->GetGameServer()->MakePacketResSkillLearn(IsSkillLearn, LearnSkillTypes, Player->_GameObjectInfo.ObjectSkillMaxPoint, Player->_GameObjectInfo.ObjectSkillPoint);
+							G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResSkillLearnPacket);
 							ResSkillLearnPacket->Free();
 						}
 						else
@@ -249,9 +250,9 @@ void CGameObject::Update()
 
 													Skill->_QuickSlotBarPosition.erase(QuickSlotPositionIter);
 
-													CMessage* ResQuickSlotInitMessage = G_ObjectManager->GameServer->MakePacketResQuickSlotInit(QuickSlotBar->QuickSlotBarIndex,
+													CMessage* ResQuickSlotInitMessage = G_NetworkManager->GetGameServer()->MakePacketResQuickSlotInit(QuickSlotBar->QuickSlotBarIndex,
 														QuickSlotBar->QuickSlotBarSlotIndex);
-													G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResQuickSlotInitMessage);
+													G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResQuickSlotInitMessage);
 													ResQuickSlotInitMessage->Free();
 
 													break;
@@ -275,14 +276,14 @@ void CGameObject::Update()
 									}
 								}
 
-								CMessage* ResSkillLearnPacket = G_ObjectManager->GameServer->MakePacketResSkillLearn(IsSkillLearn, LearnSkillTypes, Player->_GameObjectInfo.ObjectSkillMaxPoint, Player->_GameObjectInfo.ObjectSkillPoint);
-								G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSkillLearnPacket);
+								CMessage* ResSkillLearnPacket = G_NetworkManager->GetGameServer()->MakePacketResSkillLearn(IsSkillLearn, LearnSkillTypes, Player->_GameObjectInfo.ObjectSkillMaxPoint, Player->_GameObjectInfo.ObjectSkillPoint);
+								G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResSkillLearnPacket);
 								ResSkillLearnPacket->Free();
 							}
 							else
 							{
-								CMessage* ResSkillCancelFailtPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_SKILL_CANCEL_FAIL_COOLTIME, Skill->GetSkillInfo()->SkillName.c_str());
-								G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSkillCancelFailtPacket);
+								CMessage* ResSkillCancelFailtPacket = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_SKILL_CANCEL_FAIL_COOLTIME, Skill->GetSkillInfo()->SkillName.c_str());
+								G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResSkillCancelFailtPacket);
 								ResSkillCancelFailtPacket->Free();
 							}							
 						}
@@ -336,9 +337,9 @@ void CGameObject::Update()
 
 						NewComboSkill->ComboSkillStart(ReqMeleeSkill->_QuickSlotBarPosition, FindComboSkill->GetSkillInfo()->SkillType);
 
-						CMessage* ResNextComboSkill = G_ObjectManager->GameServer->MakePacketComboSkillOn(ReqMeleeSkill->_QuickSlotBarPosition,
+						CMessage* ResNextComboSkill = G_NetworkManager->GetGameServer()->MakePacketComboSkillOn(ReqMeleeSkill->_QuickSlotBarPosition,
 							*FindComboSkill->GetSkillInfo());
-						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResNextComboSkill);
+						G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResNextComboSkill);
 						ResNextComboSkill->Free();
 					}
 				}	
@@ -376,7 +377,7 @@ void CGameObject::Update()
 
 						if (Player->_ComboSkill != nullptr)
 						{
-							st_GameObjectJob* ComboAttackOffJob = G_ObjectManager->GameServer->MakeGameObjectJobComboSkillOff();
+							st_GameObjectJob* ComboAttackOffJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobComboSkillOff();
 							_GameObjectJobQue.Enqueue(ComboAttackOffJob);
 						}
 
@@ -403,22 +404,22 @@ void CGameObject::Update()
 							AddBuf(NewBufSkill);
 
 							// 클라에게 버프 등록 알림
-							CMessage* ResBufDebufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_GameObjectInfo.ObjectId, true, NewBufSkill->GetSkillInfo());
-							G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDebufSkillPacket);
+							CMessage* ResBufDebufSkillPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBuf(_GameObjectInfo.ObjectId, true, NewBufSkill->GetSkillInfo());
+							G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDebufSkillPacket);
 							ResBufDebufSkillPacket->Free();
 
 							// 상태이상 해제 알림
-							CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,																
+							CMessage* ResObjectStateChangePacket = G_NetworkManager->GetGameServer()->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,																
 								_GameObjectInfo.ObjectPositionInfo.State);
-							G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResObjectStateChangePacket);
+							G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResObjectStateChangePacket);
 							ResObjectStateChangePacket->Free();
 						}
 						else
 						{
 							if (CheckCantControlStatusAbnormal() > 0)
 							{
-								CMessage* ResStatusAbnormalSpellCancel = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_STATUS_ABNORMAL, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
-								G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResStatusAbnormalSpellCancel);
+								CMessage* ResStatusAbnormalSpellCancel = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_STATUS_ABNORMAL, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
+								G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResStatusAbnormalSpellCancel);
 								ResStatusAbnormalSpellCancel->Free();
 								break;
 							}
@@ -441,8 +442,8 @@ void CGameObject::Update()
 								Player->AddBuf(CharPoseBufSkill);
 
 								// 클라에게 버프 등록 알려줌
-								CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_GameObjectInfo.ObjectId, true, CharPoseBufSkill->GetSkillInfo());
-								G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
+								CMessage* ResBufDeBufSkillPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBuf(_GameObjectInfo.ObjectId, true, CharPoseBufSkill->GetSkillInfo());
+								G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
 								ResBufDeBufSkillPacket->Free();
 							}
 							break;
@@ -468,8 +469,8 @@ void CGameObject::Update()
 								_GameObjectInfo.ObjectPositionInfo.Position._Y = _GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
 
 								// 시공 뒤틀림 위치 재조정
-								CMessage* ResSyncPositionPacket = G_ObjectManager->GameServer->MakePacketResSyncPosition(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo);
-								G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResSyncPositionPacket);
+								CMessage* ResSyncPositionPacket = G_NetworkManager->GetGameServer()->MakePacketResSyncPosition(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo);
+								G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResSyncPositionPacket);
 								ResSyncPositionPacket->Free();
 							}
 							break;
@@ -493,24 +494,24 @@ void CGameObject::Update()
 									_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPELL;
 
 									// 주위 플레이어들에게 마법 시전 상태 알려줌
-									CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
+									CMessage* ResObjectStateChangePacket = G_NetworkManager->GetGameServer()->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
 										_GameObjectInfo.ObjectPositionInfo.State);
-									G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResObjectStateChangePacket);
+									G_NetworkManager->GetGameServer()->SendPacketFieldOfView(this, ResObjectStateChangePacket);
 									ResObjectStateChangePacket->Free();
 
 									// 시전 시간 구하기
 									float SpellCastingTime = _SpellSkill->GetSkillInfo()->SkillCastingTime / 1000.0f;
 
 									// 마법 시전 바 시작
-									CMessage* ResMagicPacket = G_ObjectManager->GameServer->MakePacketResMagic(_GameObjectInfo.ObjectId,
+									CMessage* ResMagicPacket = G_NetworkManager->GetGameServer()->MakePacketResMagic(_GameObjectInfo.ObjectId,
 										true, _SpellSkill->GetSkillInfo()->SkillType, SpellCastingTime);
-									G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResMagicPacket);
+									G_NetworkManager->GetGameServer()->SendPacketFieldOfView(this, ResMagicPacket);
 									ResMagicPacket->Free();
 								}
 								else
 								{
-									CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::GLOBAL_MESSAGE_NON_SELECT_OBJECT, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
-									G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResErrorPacket);
+									CMessage* ResErrorPacket = G_NetworkManager->GetGameServer()->MakePacketSkillError(en_GlobalMessageType::GLOBAL_MESSAGE_NON_SELECT_OBJECT, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
+									G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResErrorPacket);
 									ResErrorPacket->Free();
 								}
 							}
@@ -535,23 +536,23 @@ void CGameObject::Update()
 											_SelectTarget->AddDebuf(NewDebufSkill);
 											_SelectTarget->SetStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_WAVE);
 
-											CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
+											CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
 												_SelectTarget->_GameObjectInfo.ObjectType,												
 												NewDebufSkill->GetSkillInfo()->SkillType,
 												true, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_WAVE);
-											G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
+											G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
 											ResStatusAbnormalPacket->Free();
 
-											CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewDebufSkill->GetSkillInfo());
-											G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
+											CMessage* ResBufDeBufSkillPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewDebufSkill->GetSkillInfo());
+											G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
 											ResBufDeBufSkillPacket->Free();
 										}
 									}
 								}
 								else
 								{
-									CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::GLOBAL_MESSAGE_NON_SELECT_OBJECT, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
-									G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResErrorPacket);
+									CMessage* ResErrorPacket = G_NetworkManager->GetGameServer()->MakePacketSkillError(en_GlobalMessageType::GLOBAL_MESSAGE_NON_SELECT_OBJECT, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
+									G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResErrorPacket);
 									ResErrorPacket->Free();
 								}
 							}
@@ -574,28 +575,28 @@ void CGameObject::Update()
 										_SelectTarget->AddDebuf(NewSkill);
 										_SelectTarget->SetStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ROOT);
 
-										CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId,
+										CMessage* SelectTargetMoveStopMessage = G_NetworkManager->GetGameServer()->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId,
 											_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X,
 											_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y);
-										G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, SelectTargetMoveStopMessage);
+										G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, SelectTargetMoveStopMessage);
 										SelectTargetMoveStopMessage->Free();
 
-										CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
+										CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
 											_SelectTarget->_GameObjectInfo.ObjectType,											
 											FindSpellSkill->GetSkillInfo()->SkillType,
 											true, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ROOT);
-										G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
+										G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
 										ResStatusAbnormalPacket->Free();
 
-										CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewSkill->GetSkillInfo());
-										G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
+										CMessage* ResBufDeBufSkillPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewSkill->GetSkillInfo());
+										G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
 										ResBufDeBufSkillPacket->Free();									
 									}
 								}
 								else
 								{
-									CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::GLOBAL_MESSAGE_NON_SELECT_OBJECT, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
-									G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResErrorPacket);
+									CMessage* ResErrorPacket = G_NetworkManager->GetGameServer()->MakePacketSkillError(en_GlobalMessageType::GLOBAL_MESSAGE_NON_SELECT_OBJECT, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
+									G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResErrorPacket);
 									ResErrorPacket->Free();
 								}
 							}
@@ -615,31 +616,31 @@ void CGameObject::Update()
 										NewSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
 										NewSkill->StatusAbnormalDurationTimeStart();
 
-										CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId,
+										CMessage* SelectTargetMoveStopMessage = G_NetworkManager->GetGameServer()->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId,
 											_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X,
 											_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y);
-										G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, SelectTargetMoveStopMessage);
+										G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, SelectTargetMoveStopMessage);
 										SelectTargetMoveStopMessage->Free();
 
 										_SelectTarget->AddDebuf(NewSkill);
 										_SelectTarget->SetStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_DISCIPLINE_ROOT);
 
-										CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
+										CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
 											_SelectTarget->_GameObjectInfo.ObjectType,											
 											FindSpellSkill->GetSkillInfo()->SkillType,
 											true, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_DISCIPLINE_ROOT);
-										G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
+										G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
 										ResStatusAbnormalPacket->Free();
 
-										CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewSkill->GetSkillInfo());
-										G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
+										CMessage* ResBufDeBufSkillPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewSkill->GetSkillInfo());
+										G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
 										ResBufDeBufSkillPacket->Free();
 									}
 								}
 								else
 								{
-									CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::GLOBAL_MESSAGE_NON_SELECT_OBJECT, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
-									G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResErrorPacket);
+									CMessage* ResErrorPacket = G_NetworkManager->GetGameServer()->MakePacketSkillError(en_GlobalMessageType::GLOBAL_MESSAGE_NON_SELECT_OBJECT, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
+									G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResErrorPacket);
 									ResErrorPacket->Free();
 								}
 							}
@@ -651,8 +652,8 @@ void CGameObject::Update()
 					}
 					else
 					{
-						CMessage* SkillCoolTimeErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::GLOBAL_MESSAGE_SKILL_COOLTIME, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
-						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, SkillCoolTimeErrorPacket);
+						CMessage* SkillCoolTimeErrorPacket = G_NetworkManager->GetGameServer()->MakePacketSkillError(en_GlobalMessageType::GLOBAL_MESSAGE_SKILL_COOLTIME, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
+						G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, SkillCoolTimeErrorPacket);
 						SkillCoolTimeErrorPacket->Free();
 						break;
 					}
@@ -666,10 +667,10 @@ void CGameObject::Update()
 						for (auto QuickSlotBarPosition : Player->_QuickSlotManager.FindQuickSlotBar(FindSpellSkill->GetSkillInfo()->SkillType))
 						{
 							// 클라에게 쿨타임 표시
-							CMessage* ResCoolTimeStartPacket = G_ObjectManager->GameServer->MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
+							CMessage* ResCoolTimeStartPacket = G_NetworkManager->GetGameServer()->MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
 								QuickSlotBarPosition.QuickSlotBarSlotIndex,
 								1.0f, FindSpellSkill);
-							G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
+							G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
 							ResCoolTimeStartPacket->Free();
 						}
 
@@ -683,10 +684,10 @@ void CGameObject::Update()
 
 							for (st_Vector2Int QuickSlotPosition : GlobalSkill->_QuickSlotBarPosition)
 							{
-								CMessage* ResCoolTimeStartPacket = G_ObjectManager->GameServer->MakePacketCoolTime((int8)QuickSlotPosition._Y,
+								CMessage* ResCoolTimeStartPacket = G_NetworkManager->GetGameServer()->MakePacketCoolTime((int8)QuickSlotPosition._Y,
 									(int8)QuickSlotPosition._X,
 									1.0f, nullptr, FindSpellSkill->GetSkillInfo()->SkillMotionTime);
-								G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
+								G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
 								ResCoolTimeStartPacket->Free();
 							}
 						}
@@ -700,8 +701,8 @@ void CGameObject::Update()
 			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SPELL_CANCEL:
 			{
-				CMessage* ResMagicCancelPacket = G_ObjectManager->GameServer->MakePacketMagicCancel(_GameObjectInfo.ObjectId);
-				G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResMagicCancelPacket);
+				CMessage* ResMagicCancelPacket = G_NetworkManager->GetGameServer()->MakePacketMagicCancel(_GameObjectInfo.ObjectId);
+				G_NetworkManager->GetGameServer()->SendPacketFieldOfView(this, ResMagicCancelPacket);
 				ResMagicCancelPacket->Free();
 			}
 			break;
@@ -725,8 +726,8 @@ void CGameObject::Update()
 							// 작물 채집할 때 같은 방향을 바라보고 있지 않으면 에러 메세지 출력
 							/*if (_GameObjectInfo.ObjectPositionInfo.MoveDir != Dir)
 							{
-								CMessage* DirErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_DIR_DIFFERENT, Crop->_GameObjectInfo.ObjectName.c_str());
-								G_ObjectManager->GameServer->SendPacket(Player->_SessionId, DirErrorPacket);
+								CMessage* DirErrorPacket = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_DIR_DIFFERENT, Crop->_GameObjectInfo.ObjectName.c_str());
+								G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, DirErrorPacket);
 								DirErrorPacket->Clear();
 								break;
 							}*/
@@ -739,16 +740,16 @@ void CGameObject::Update()
 								switch (GatheringTarget->_GameObjectInfo.ObjectType)
 								{
 								case en_GameObjectType::OBJECT_STONE:
-									ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"돌 채집");
+									ResGatheringPacket = G_NetworkManager->GetGameServer()->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"돌 채집");
 									break;
 								case en_GameObjectType::OBJECT_TREE:
-									ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"나무 벌목");
+									ResGatheringPacket = G_NetworkManager->GetGameServer()->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"나무 벌목");
 									break;
 								case en_GameObjectType::OBJECT_CROP_CORN:
-									ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"옥수수 수확");
+									ResGatheringPacket = G_NetworkManager->GetGameServer()->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"옥수수 수확");
 									break;
 								case en_GameObjectType::OBJECT_CROP_POTATO:
-									ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"감자 수확");
+									ResGatheringPacket = G_NetworkManager->GetGameServer()->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"감자 수확");
 									break;
 								}
 
@@ -758,18 +759,18 @@ void CGameObject::Update()
 
 								_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::GATHERING;
 
-								CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
+								CMessage* ResObjectStateChangePacket = G_NetworkManager->GetGameServer()->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
 									_GameObjectInfo.ObjectPositionInfo.State);
-								G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResObjectStateChangePacket);
+								G_NetworkManager->GetGameServer()->SendPacketFieldOfView(this, ResObjectStateChangePacket);
 								ResObjectStateChangePacket->Free();
 
-								G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResGatheringPacket);
+								G_NetworkManager->GetGameServer()->SendPacketFieldOfView(this, ResGatheringPacket);
 								ResGatheringPacket->Free();
 							}
 							else
 							{
-								CMessage* DirErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_GATHERING_DISTANCE, Crop->_GameObjectInfo.ObjectName.c_str());
-								G_ObjectManager->GameServer->SendPacket(Player->_SessionId, DirErrorPacket);
+								CMessage* DirErrorPacket = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_GATHERING_DISTANCE, Crop->_GameObjectInfo.ObjectName.c_str());
+								G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, DirErrorPacket);
 								DirErrorPacket->Clear();
 							}
 						}
@@ -783,8 +784,8 @@ void CGameObject::Update()
 			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_GATHERING_CANCEL:
 			{
-				CMessage* ResGatheringCancelPacket = G_ObjectManager->GameServer->MakePacketGatheringCancel(_GameObjectInfo.ObjectId);
-				G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResGatheringCancelPacket);
+				CMessage* ResGatheringCancelPacket = G_NetworkManager->GetGameServer()->MakePacketGatheringCancel(_GameObjectInfo.ObjectId);
+				G_NetworkManager->GetGameServer()->SendPacketFieldOfView(this, ResGatheringCancelPacket);
 				ResGatheringCancelPacket->Free();
 			}
 			break;
@@ -879,14 +880,14 @@ void CGameObject::Update()
 
 					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
 
-					CMessage* ResDamagePacket = G_ObjectManager->GameServer->MakePacketResDamage(AttackerID,
+					CMessage* ResDamagePacket = G_NetworkManager->GetGameServer()->MakePacketResDamage(AttackerID,
 						_GameObjectInfo.ObjectId,
 						Skilltype,
 						en_ResourceName::CLIENT_EFFECT_ATTACK_TARGET_HIT,
 						Damage,
 						_GameObjectInfo.ObjectStatInfo.HP,
 						IsCritical);
-					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResDamagePacket);
+					G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResDamagePacket);
 					ResDamagePacket->Free();										
 				}			
 			}
@@ -908,16 +909,16 @@ void CGameObject::Update()
 				if (Healer != nullptr)
 				{
 					// 시스템 메세지 전송	
-					CMessage* ResSkillSystemMessagePacket = G_ObjectManager->GameServer->MakePacketResDamageChattingBoxMessage(en_MessageType::MESSAGE_TYPE_DAMAGE_CHATTING,
+					CMessage* ResSkillSystemMessagePacket = G_NetworkManager->GetGameServer()->MakePacketResDamageChattingBoxMessage(en_MessageType::MESSAGE_TYPE_DAMAGE_CHATTING,
 						Healer->_GameObjectInfo.ObjectName,
 						_GameObjectInfo.ObjectName,
 						(en_SkillType)HealSkillType,
 						HealPoint);
-					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResSkillSystemMessagePacket);
+					G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResSkillSystemMessagePacket);
 					ResSkillSystemMessagePacket->Free();
 
-					CMessage* StatChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectStatInfo);
-					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, StatChangePacket);
+					CMessage* StatChangePacket = G_NetworkManager->GetGameServer()->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectStatInfo);
+					G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, StatChangePacket);
 					StatChangePacket->Free();
 				}				
 			}
@@ -934,8 +935,8 @@ void CGameObject::Update()
 				{
 					CItem* ReturnEquipmentItem = Player->_Equipment.ItemOnEquipment(EquipmentItem);
 
-					CMessage* EquipmentUpdateMessage = G_ObjectManager->GameServer->MakePacketOnEquipment(_GameObjectInfo.ObjectId, EquipmentItem->_ItemInfo);
-					G_ObjectManager->GameServer->SendPacket(Player->_SessionId, EquipmentUpdateMessage);
+					CMessage* EquipmentUpdateMessage = G_NetworkManager->GetGameServer()->MakePacketOnEquipment(_GameObjectInfo.ObjectId, EquipmentItem->_ItemInfo);
+					G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, EquipmentUpdateMessage);
 					EquipmentUpdateMessage->Free();
 
 					// 가방에서 착용한 장비 없애기
@@ -946,9 +947,9 @@ void CGameObject::Update()
 					{
 						Player->GetInventoryManager()->InsertItem(0, ReturnEquipmentItem);
 
-						CMessage* ResItemToInventoryPacket = G_ObjectManager->GameServer->MakePacketResItemToInventory(Player->_GameObjectInfo.ObjectId,
+						CMessage* ResItemToInventoryPacket = G_NetworkManager->GetGameServer()->MakePacketResItemToInventory(Player->_GameObjectInfo.ObjectId,
 							ReturnEquipmentItem->_ItemInfo, false, ReturnEquipmentItem->_ItemInfo.ItemCount);
-						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResItemToInventoryPacket);
+						G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResItemToInventoryPacket);
 						ResItemToInventoryPacket->Free();
 					}
 				}		
@@ -971,17 +972,17 @@ void CGameObject::Update()
 					if (ReturnEquipmentItem != nullptr)
 					{
 						// 클라 장비창에서 장비 해제
-						CMessage* OffEquipmentMessage = G_ObjectManager->GameServer->MakePacketOffEquipment(Player->_GameObjectInfo.ObjectId, ReturnEquipmentItem->_ItemInfo.ItemEquipmentPart);
-						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, OffEquipmentMessage);
+						CMessage* OffEquipmentMessage = G_NetworkManager->GetGameServer()->MakePacketOffEquipment(Player->_GameObjectInfo.ObjectId, ReturnEquipmentItem->_ItemInfo.ItemEquipmentPart);
+						G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, OffEquipmentMessage);
 						OffEquipmentMessage->Free();
 
 						// 클라 인벤토리에 장비 해제한 아이템 넣음
 						Player->GetInventoryManager()->InsertItem(0, ReturnEquipmentItem);
 
 						// 클라에게 알려줌
-						CMessage* ResItemToInventoryPacket = G_ObjectManager->GameServer->MakePacketResItemToInventory(Player->_GameObjectInfo.ObjectId,
+						CMessage* ResItemToInventoryPacket = G_NetworkManager->GetGameServer()->MakePacketResItemToInventory(Player->_GameObjectInfo.ObjectId,
 							ReturnEquipmentItem->_ItemInfo, false, ReturnEquipmentItem->_ItemInfo.ItemCount);
-						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResItemToInventoryPacket);
+						G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResItemToInventoryPacket);
 						ResItemToInventoryPacket->Free();
 					}
 					else
@@ -1013,8 +1014,8 @@ void CGameObject::Update()
 				_GameObjectInfo.ObjectStatInfo.HP = _GameObjectInfo.ObjectStatInfo.MaxHP;
 				_GameObjectInfo.ObjectStatInfo.MP = _GameObjectInfo.ObjectStatInfo.MaxMP;
 
-				CMessage* StatChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectStatInfo);
-				G_ObjectManager->GameServer->SendPacketFieldOfView(this, StatChangePacket);
+				CMessage* StatChangePacket = G_NetworkManager->GetGameServer()->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectStatInfo);
+				G_NetworkManager->GetGameServer()->SendPacketFieldOfView(this, StatChangePacket);
 				StatChangePacket->Free();
 			}
 			break;
@@ -1046,8 +1047,8 @@ void CGameObject::Update()
 								FindDropItem->_ItemInfo.ItemCount = 0;
 							}
 
-							CMessage* DropItemUpdatePacket = G_ObjectManager->GameServer->MakePacketInventoryItemUpdate(Player->_GameObjectInfo.ObjectId, FindDropItem->_ItemInfo);
-							G_ObjectManager->GameServer->SendPacket(Player->_SessionId, DropItemUpdatePacket);
+							CMessage* DropItemUpdatePacket = G_NetworkManager->GetGameServer()->MakePacketInventoryItemUpdate(Player->_GameObjectInfo.ObjectId, FindDropItem->_ItemInfo);
+							G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, DropItemUpdatePacket);
 							DropItemUpdatePacket->Free();
 
 							if (FindDropItem->_ItemInfo.ItemCount == 0)
@@ -1085,13 +1086,13 @@ void CGameObject::Update()
 						{
 							Player->GetInventoryManager()->InsertMoney(0, InsertItem);
 
-							CMessage* ResMoneyToInventoryPacket = G_ObjectManager->GameServer->MakePacketResMoneyToInventory(Player->_GameObjectInfo.ObjectId,
+							CMessage* ResMoneyToInventoryPacket = G_NetworkManager->GetGameServer()->MakePacketResMoneyToInventory(Player->_GameObjectInfo.ObjectId,
 								Player->GetInventoryManager()->GetGoldCoin(),
 								Player->GetInventoryManager()->GetSliverCoin(),
 								Player->GetInventoryManager()->GetBronzeCoin(),
 								InsertItem->_ItemInfo,
 								ItemEach);
-							G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResMoneyToInventoryPacket);
+							G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResMoneyToInventoryPacket);
 							ResMoneyToInventoryPacket->Free();
 						}
 						break;
@@ -1100,7 +1101,7 @@ void CGameObject::Update()
 							CItem* FindItem = Player->GetInventoryManager()->FindInventoryItem(0, InsertItem->_ItemInfo.ItemSmallCategory);
 							if (FindItem == nullptr)
 							{
-								CItem* NewItem = G_ObjectManager->GameServer->NewItemCrate(InsertItem->_ItemInfo);
+								CItem* NewItem = G_NetworkManager->GetGameServer()->NewItemCrate(InsertItem->_ItemInfo);
 								Player->GetInventoryManager()->InsertItem(0, NewItem);
 
 								FindItem = Player->GetInventoryManager()->GetItem(0, NewItem->_ItemInfo.ItemTileGridPositionX, NewItem->_ItemInfo.ItemTileGridPositionY);
@@ -1111,18 +1112,18 @@ void CGameObject::Update()
 								FindItem->_ItemInfo.ItemCount += ItemEach;
 							}
 
-							CMessage* ResItemToInventoryPacket = G_ObjectManager->GameServer->MakePacketResItemToInventory(Player->_GameObjectInfo.ObjectId,
+							CMessage* ResItemToInventoryPacket = G_NetworkManager->GetGameServer()->MakePacketResItemToInventory(Player->_GameObjectInfo.ObjectId,
 								FindItem->_ItemInfo, IsExistItem, ItemEach);
-							G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResItemToInventoryPacket);
+							G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResItemToInventoryPacket);
 							ResItemToInventoryPacket->Free();
 						}
 						break;
 					}
 
-					st_GameObjectJob* DeSpawnMonsterChannelJob = G_ObjectManager->GameServer->MakeGameObjectJobObjectDeSpawnObjectChannel(InsertItem);
+					st_GameObjectJob* DeSpawnMonsterChannelJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobObjectDeSpawnObjectChannel(InsertItem);
 					_Channel->_ChannelJobQue.Enqueue(DeSpawnMonsterChannelJob);
 
-					st_GameObjectJob* LeaveChannerMonsterJob = G_ObjectManager->GameServer->MakeGameObjectJobLeaveChannel(InsertItem);
+					st_GameObjectJob* LeaveChannerMonsterJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobLeaveChannel(InsertItem);
 					_Channel->_ChannelJobQue.Enqueue(LeaveChannerMonsterJob);
 				}
 				else
@@ -1187,9 +1188,9 @@ void CGameObject::Update()
 								FindAddItem->_ItemInfo.ItemCount = 0;
 							}
 
-							CMessage* ResInventoryItemUpdatePacket = G_ObjectManager->GameServer->MakePacketInventoryItemUpdate(CraftingTableItemAddPlayer->_GameObjectInfo.ObjectId,
+							CMessage* ResInventoryItemUpdatePacket = G_NetworkManager->GetGameServer()->MakePacketInventoryItemUpdate(CraftingTableItemAddPlayer->_GameObjectInfo.ObjectId,
 								FindAddItem->_ItemInfo);
-							G_ObjectManager->GameServer->SendPacket(CraftingTableItemAddPlayer->_SessionId, ResInventoryItemUpdatePacket);
+							G_NetworkManager->GetGameServer()->SendPacket(CraftingTableItemAddPlayer->_SessionId, ResInventoryItemUpdatePacket);
 							ResInventoryItemUpdatePacket->Free();
 
 							if (FindAddItem->_ItemInfo.ItemCount == 0)
@@ -1197,14 +1198,14 @@ void CGameObject::Update()
 								CraftingTableItemAddPlayer->GetInventoryManager()->InitItem(0, FindAddItem->_ItemInfo.ItemTileGridPositionX, FindAddItem->_ItemInfo.ItemTileGridPositionY);
 							}
 
-							CMessage* ResCraftingTableAddItemPacket = G_ObjectManager->GameServer->MakePacketResCraftingTableInput(_GameObjectInfo.ObjectId, CraftingTable->GetMaterialItems());
-							G_ObjectManager->GameServer->SendPacket(CraftingTableItemAddPlayer->_SessionId, ResCraftingTableAddItemPacket);
+							CMessage* ResCraftingTableAddItemPacket = G_NetworkManager->GetGameServer()->MakePacketResCraftingTableInput(_GameObjectInfo.ObjectId, CraftingTable->GetMaterialItems());
+							G_NetworkManager->GetGameServer()->SendPacket(CraftingTableItemAddPlayer->_SessionId, ResCraftingTableAddItemPacket);
 							ResCraftingTableAddItemPacket->Free();
 						}
 						else
 						{
-							CMessage* WrongItemInputMessage = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_CRAFTING_TABLE_MATERIAL_WRONG_ITEM_ADD);
-							G_ObjectManager->GameServer->SendPacket(CraftingTableItemAddPlayer->_SessionId, WrongItemInputMessage);
+							CMessage* WrongItemInputMessage = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_CRAFTING_TABLE_MATERIAL_WRONG_ITEM_ADD);
+							G_NetworkManager->GetGameServer()->SendPacket(CraftingTableItemAddPlayer->_SessionId, WrongItemInputMessage);
 							WrongItemInputMessage->Free();
 						}
 					}
@@ -1256,19 +1257,19 @@ void CGameObject::Update()
 						bool IsExistItem;
 						CItem* InsertItem = CraftingTableItemSubtractPlayer->GetInventoryManager()->InsertItem(0, (en_SmallItemCategory)SubtractItemSmallCategory, SubtractItemCount, &IsExistItem);
 
-						CMessage* InsertItemToInventoryPacket = G_ObjectManager->GameServer->MakePacketResItemToInventory(CraftingTableItemSubtractPlayer->_GameObjectInfo.ObjectId,
+						CMessage* InsertItemToInventoryPacket = G_NetworkManager->GetGameServer()->MakePacketResItemToInventory(CraftingTableItemSubtractPlayer->_GameObjectInfo.ObjectId,
 							InsertItem->_ItemInfo,
 							IsExistItem,
 							SubtractItemCount);
-						G_ObjectManager->GameServer->SendPacket(CraftingTableItemSubtractPlayer->_SessionId, InsertItemToInventoryPacket);
+						G_NetworkManager->GetGameServer()->SendPacket(CraftingTableItemSubtractPlayer->_SessionId, InsertItemToInventoryPacket);
 						InsertItemToInventoryPacket->Free();
 
-						CMessage* ResCraftingTableMaterialItemListPacket = G_ObjectManager->GameServer->MakePacketResCraftingTableMaterialItemList(
+						CMessage* ResCraftingTableMaterialItemListPacket = G_NetworkManager->GetGameServer()->MakePacketResCraftingTableMaterialItemList(
 							_GameObjectInfo.ObjectId,
 							_GameObjectInfo.ObjectType,
 							CraftingTable->_SelectCraftingItemType,
 							CraftingTable->GetMaterialItems());
-						G_ObjectManager->GameServer->SendPacket(CraftingTableItemSubtractPlayer->_SessionId, ResCraftingTableMaterialItemListPacket);
+						G_NetworkManager->GetGameServer()->SendPacket(CraftingTableItemSubtractPlayer->_SessionId, ResCraftingTableMaterialItemListPacket);
 						ResCraftingTableMaterialItemListPacket->Free();
 					}
 				}				
@@ -1327,18 +1328,18 @@ void CGameObject::Update()
 						bool IsExistItem;
 						CItem* InsertItem = CraftingTableItemSubtractPlayer->GetInventoryManager()->InsertItem(0, (en_SmallItemCategory)SubtractItemSmallCategory, SubtractItemCount, &IsExistItem);
 
-						CMessage* InsertItemToInventoryPacket = G_ObjectManager->GameServer->MakePacketResItemToInventory(CraftingTableItemSubtractPlayer->_GameObjectInfo.ObjectId,
+						CMessage* InsertItemToInventoryPacket = G_NetworkManager->GetGameServer()->MakePacketResItemToInventory(CraftingTableItemSubtractPlayer->_GameObjectInfo.ObjectId,
 							InsertItem->_ItemInfo,
 							IsExistItem,
 							SubtractItemCount);
-						G_ObjectManager->GameServer->SendPacket(CraftingTableItemSubtractPlayer->_SessionId, InsertItemToInventoryPacket);
+						G_NetworkManager->GetGameServer()->SendPacket(CraftingTableItemSubtractPlayer->_SessionId, InsertItemToInventoryPacket);
 						InsertItemToInventoryPacket->Free();
 
-						CMessage* ResCraftingTableMaterialItemListPacket = G_ObjectManager->GameServer->MakePacketResCraftingTableCompleteItemList(
+						CMessage* ResCraftingTableMaterialItemListPacket = G_NetworkManager->GetGameServer()->MakePacketResCraftingTableCompleteItemList(
 							_GameObjectInfo.ObjectId,
 							_GameObjectInfo.ObjectType,
 							CraftingTable->GetCompleteItems());
-						G_ObjectManager->GameServer->SendPacket(CraftingTableItemSubtractPlayer->_SessionId, ResCraftingTableMaterialItemListPacket);
+						G_NetworkManager->GetGameServer()->SendPacket(CraftingTableItemSubtractPlayer->_SessionId, ResCraftingTableMaterialItemListPacket);
 						ResCraftingTableMaterialItemListPacket->Free();
 					}
 				}				
@@ -1399,10 +1400,10 @@ void CGameObject::Update()
 											CraftingCompleteItem->CraftingStart();
 
 											CPlayer* Player = (CPlayer*)CraftingTable->_SelectedObject;
-											CMessage* ResCraftingstartPacket = G_ObjectManager->GameServer->MakePacketResCraftingStart(
+											CMessage* ResCraftingstartPacket = G_NetworkManager->GetGameServer()->MakePacketResCraftingStart(
 												_GameObjectInfo.ObjectId,
 												CraftingCompleteItem->_ItemInfo);
-											G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCraftingstartPacket);
+											G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResCraftingstartPacket);
 
 											// 용광로 제작 상태 진입
 											CraftingTable->CraftingStart();
@@ -1410,8 +1411,8 @@ void CGameObject::Update()
 										else
 										{
 											// 재료 부족 에러 메세지 띄우기
-											CMessage* CraftingStartErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_CRAFTING_TABLE_MATERIAL_COUNT_NOT_ENOUGH);
-											G_ObjectManager->GameServer->SendPacket(((CPlayer*)CraftingStartObject)->_SessionId, CraftingStartErrorPacket);
+											CMessage* CraftingStartErrorPacket = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_CRAFTING_TABLE_MATERIAL_COUNT_NOT_ENOUGH);
+											G_NetworkManager->GetGameServer()->SendPacket(((CPlayer*)CraftingStartObject)->_SessionId, CraftingStartErrorPacket);
 											CraftingStartErrorPacket->Free();
 										}
 
@@ -1425,8 +1426,8 @@ void CGameObject::Update()
 				}				
 				else
 				{
-					CMessage* CraftingStartErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_CRAFTING_TABLE_OVERLAP_CRAFTING_START);
-					G_ObjectManager->GameServer->SendPacket(((CPlayer*)CraftingStartObject)->_SessionId, CraftingStartErrorPacket);
+					CMessage* CraftingStartErrorPacket = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_CRAFTING_TABLE_OVERLAP_CRAFTING_START);
+					G_NetworkManager->GetGameServer()->SendPacket(((CPlayer*)CraftingStartObject)->_SessionId, CraftingStartErrorPacket);
 					CraftingStartErrorPacket->Free();
 				}
 			}
@@ -1445,10 +1446,10 @@ void CGameObject::Update()
 					{
 						CraftingStopItem->CraftingStop();
 
-						CMessage* CraftingTableCraftingStopPacket = G_ObjectManager->GameServer->MakePacketResCraftingStop(
+						CMessage* CraftingTableCraftingStopPacket = G_NetworkManager->GetGameServer()->MakePacketResCraftingStop(
 							_GameObjectInfo.ObjectId,
 							CraftingStopItem->_ItemInfo);
-						G_ObjectManager->GameServer->SendPacket(((CPlayer*)CraftingStoptObject)->_SessionId, CraftingTableCraftingStopPacket);
+						G_NetworkManager->GetGameServer()->SendPacket(((CPlayer*)CraftingStoptObject)->_SessionId, CraftingTableCraftingStopPacket);
 						CraftingTableCraftingStopPacket->Free();
 					}
 				}	
