@@ -17,6 +17,7 @@ protected:
 	virtual void UpdatePatrol() override;
 	virtual void UpdateMoving() override;
 	virtual void UpdateAttack() override;	
+	virtual void UpdateRooting() override;
 	virtual void UpdateDead() override;
 };
 

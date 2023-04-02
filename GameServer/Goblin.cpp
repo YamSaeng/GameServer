@@ -58,19 +58,44 @@ bool CGoblin::OnDamaged(CGameObject* Attacker, int32 Damage)
 	{
 		_RectCollision->SetActive(false);
 
+		if (IsDead == true)
+		{
+			CPlayer* AttackerPlayer = dynamic_cast<CPlayer*>(Attacker);
+			if (AttackerPlayer != nullptr)
+			{
+				if (AttackerPlayer->GetChannel() != nullptr)
+				{
+					AttackerPlayer->GetChannel()->ExperienceCalculate(AttackerPlayer, _GameObjectInfo.ObjectType, G_Datamanager->FindMonsterExperienceData(_GameObjectInfo.ObjectType));
+				}
+				else
+				{
+					CRASH("Channel nullptr")
+				}
+			}
+			else
+			{
+				CRASH("Exp Get Not Player")
+			}
+			
+			if (Attacker->_SelectTarget != nullptr && Attacker->_SelectTarget->_GameObjectInfo.ObjectId == _GameObjectInfo.ObjectId)
+			{
+				Attacker->_SelectTarget = nullptr;
+			}			
+		}
+
 		_DeadTick = GetTickCount64() + 1500;
 
-		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;		
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ROOTING;		
 
-		_GameObjectInfo.ObjectPositionInfo.MoveDirection = st_Vector2::Zero();
+		_GameObjectInfo.ObjectPositionInfo.MoveDirection = st_Vector2::Zero();	
+
+		End();
 
 		vector<st_FieldOfViewInfo> AroundPlayers = _Channel->GetMap()->GetFieldAroundPlayers(this);
-
-		CMessage* ResMoveStopPacket = G_ObjectManager->GameServer->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
-			_GameObjectInfo.ObjectPositionInfo.Position._X,
-			_GameObjectInfo.ObjectPositionInfo.Position._Y);
-		G_ObjectManager->GameServer->SendPacketFieldOfView(AroundPlayers, ResMoveStopPacket);
-		ResMoveStopPacket->Free();
+		
+		CMessage* ResDieMessagePacket = G_ObjectManager->GameServer->MakePacketObjectDie(_GameObjectInfo.ObjectId);
+		G_ObjectManager->GameServer->SendPacketFieldOfView(AroundPlayers, ResDieMessagePacket);
+		ResDieMessagePacket->Free();				
 
 		G_ObjectManager->ObjectItemSpawn(_Channel, Attacker->_GameObjectInfo.ObjectId,
 			Attacker->_GameObjectInfo.ObjectType,
@@ -117,6 +142,11 @@ void CGoblin::UpdateMoving()
 void CGoblin::UpdateAttack()
 {
 	CMonster::UpdateAttack();
+}
+
+void CGoblin::UpdateRooting()
+{
+	CMonster::UpdateRooting();
 }
 
 void CGoblin::UpdateDead()
