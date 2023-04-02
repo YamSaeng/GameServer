@@ -121,9 +121,7 @@ public:
 	void SetChannel(CChannel* Channel);
 		
 	CRectCollision* GetRectCollision();
-	void SetRectCollision();
-	
-	bool IsPlayer();
+	void SetRectCollision();	
 	
 	virtual void Init(en_GameObjectType GameObjectType);
 
@@ -202,6 +200,7 @@ protected:
 	virtual void UpdateSpell();
 	virtual void UpdateGathering();
 	virtual void UpdateCrafting();	
+	virtual void UpdateRooting();
 	virtual void UpdateDead();	
 
 	void CheckBufDeBufSkill();

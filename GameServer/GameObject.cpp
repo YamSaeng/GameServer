@@ -887,38 +887,7 @@ void CGameObject::Update()
 						_GameObjectInfo.ObjectStatInfo.HP,
 						IsCritical);
 					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResDamagePacket);
-					ResDamagePacket->Free();	
-
-					if (IsDead == true)
-					{
-						End();
-
-						CMessage* ResDieMessagePacket = G_ObjectManager->GameServer->MakePacketObjectDie(_GameObjectInfo.ObjectId);
-						G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResDieMessagePacket);
-						ResDieMessagePacket->Free();
-
-						if (Attacker->IsPlayer())
-						{
-							CPlayer* AttackerPlayer = dynamic_cast<CPlayer*>(Attacker);
-							if (AttackerPlayer != nullptr)
-							{
-								if (AttackerPlayer->GetChannel() != nullptr)
-								{
-									AttackerPlayer->GetChannel()->ExperienceCalculate(AttackerPlayer, _GameObjectInfo.ObjectType, G_Datamanager->FindMonsterExperienceData(_GameObjectInfo.ObjectType));
-								}								
-								else
-								{
-									CRASH("Channel nullptr")
-								}
-							}
-							else
-							{
-								CRASH("Exp Get Not Player")
-							}							
-						}
-
-						Attacker->_SelectTarget = nullptr;						
-					}					
+					ResDamagePacket->Free();										
 				}			
 			}
 			break;	
@@ -1113,41 +1082,41 @@ void CGameObject::Update()
 					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN:
 					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN:
 					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN:
-					{
-						Player->GetInventoryManager()->InsertMoney(0, InsertItem);
+						{
+							Player->GetInventoryManager()->InsertMoney(0, InsertItem);
 
-						CMessage* ResMoneyToInventoryPacket = G_ObjectManager->GameServer->MakePacketResMoneyToInventory(Player->_GameObjectInfo.ObjectId,
-							Player->GetInventoryManager()->GetGoldCoin(),
-							Player->GetInventoryManager()->GetSliverCoin(),
-							Player->GetInventoryManager()->GetBronzeCoin(),
-							InsertItem->_ItemInfo,
-							ItemEach);
-						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResMoneyToInventoryPacket);
-						ResMoneyToInventoryPacket->Free();
-					}
-					break;
+							CMessage* ResMoneyToInventoryPacket = G_ObjectManager->GameServer->MakePacketResMoneyToInventory(Player->_GameObjectInfo.ObjectId,
+								Player->GetInventoryManager()->GetGoldCoin(),
+								Player->GetInventoryManager()->GetSliverCoin(),
+								Player->GetInventoryManager()->GetBronzeCoin(),
+								InsertItem->_ItemInfo,
+								ItemEach);
+							G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResMoneyToInventoryPacket);
+							ResMoneyToInventoryPacket->Free();
+						}
+						break;
 					default:
-					{
-						CItem* FindItem = Player->GetInventoryManager()->FindInventoryItem(0, InsertItem->_ItemInfo.ItemSmallCategory);
-						if (FindItem == nullptr)
 						{
-							CItem* NewItem = G_ObjectManager->GameServer->NewItemCrate(InsertItem->_ItemInfo);
-							Player->GetInventoryManager()->InsertItem(0, NewItem);
+							CItem* FindItem = Player->GetInventoryManager()->FindInventoryItem(0, InsertItem->_ItemInfo.ItemSmallCategory);
+							if (FindItem == nullptr)
+							{
+								CItem* NewItem = G_ObjectManager->GameServer->NewItemCrate(InsertItem->_ItemInfo);
+								Player->GetInventoryManager()->InsertItem(0, NewItem);
 
-							FindItem = Player->GetInventoryManager()->GetItem(0, NewItem->_ItemInfo.ItemTileGridPositionX, NewItem->_ItemInfo.ItemTileGridPositionY);
-						}
-						else
-						{
-							IsExistItem = true;
-							FindItem->_ItemInfo.ItemCount += ItemEach;
-						}
+								FindItem = Player->GetInventoryManager()->GetItem(0, NewItem->_ItemInfo.ItemTileGridPositionX, NewItem->_ItemInfo.ItemTileGridPositionY);
+							}
+							else
+							{
+								IsExistItem = true;
+								FindItem->_ItemInfo.ItemCount += ItemEach;
+							}
 
-						CMessage* ResItemToInventoryPacket = G_ObjectManager->GameServer->MakePacketResItemToInventory(Player->_GameObjectInfo.ObjectId,
-							FindItem->_ItemInfo, IsExistItem, ItemEach);
-						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResItemToInventoryPacket);
-						ResItemToInventoryPacket->Free();
-					}
-					break;
+							CMessage* ResItemToInventoryPacket = G_ObjectManager->GameServer->MakePacketResItemToInventory(Player->_GameObjectInfo.ObjectId,
+								FindItem->_ItemInfo, IsExistItem, ItemEach);
+							G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResItemToInventoryPacket);
+							ResItemToInventoryPacket->Free();
+						}
+						break;
 					}
 
 					st_GameObjectJob* DeSpawnMonsterChannelJob = G_ObjectManager->GameServer->MakeGameObjectJobObjectDeSpawnObjectChannel(InsertItem);
@@ -1747,16 +1716,6 @@ void CGameObject::SetRectCollision()
 	}
 }
 
-bool CGameObject::IsPlayer()
-{
-	if (_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_PLAYER)		
-	{
-		return true;
-	}
-
-	return false;
-}
-
 void CGameObject::Init(en_GameObjectType GameObjectType)
 {
 	_GameObjectInfo.ObjectType = GameObjectType;		
@@ -1837,6 +1796,10 @@ void CGameObject::UpdateGathering()
 }
 
 void CGameObject::UpdateCrafting()
+{
+}
+
+void CGameObject::UpdateRooting()
 {
 }
 
