@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Player.h"
 #include "ObjectManager.h"
+#include "NetworkManager.h"
 #include "DataManager.h"
 #include "Skill.h"
 #include "SkillBox.h"
@@ -100,9 +101,9 @@ void CPlayer::Update()
 
 				vector<st_FieldOfViewInfo> AroundPlayers = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
 
-				CMessage* ResObjectStatPacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId,
+				CMessage* ResObjectStatPacket = G_NetworkManager->GetGameServer()->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId,
 					_GameObjectInfo.ObjectStatInfo);
-				G_ObjectManager->GameServer->SendPacketFieldOfView(AroundPlayers, ResObjectStatPacket);
+				G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, ResObjectStatPacket);
 				ResObjectStatPacket->Free();
 			}						
 		}
@@ -156,9 +157,9 @@ bool CPlayer::OnDamaged(CGameObject* Attacker, int32 Damage)
 
 			vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
 
-			CGameServerMessage* ResDeadStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId, 
+			CGameServerMessage* ResDeadStateChangePacket = G_NetworkManager->GetGameServer()->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId, 
 				_GameObjectInfo.ObjectPositionInfo.State);
-			G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResDeadStateChangePacket);
+			G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResDeadStateChangePacket);
 			ResDeadStateChangePacket->Free();
 
 			return true;
@@ -196,9 +197,9 @@ bool CPlayer::UpdateSpawnIdle()
 
 	if (ChangeToIdle)
 	{
-		CGameServerMessage* ChangeToIdlePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,						
+		CGameServerMessage* ChangeToIdlePacket = G_NetworkManager->GetGameServer()->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,						
 			_GameObjectInfo.ObjectPositionInfo.State);
-		G_ObjectManager->GameServer->SendPacketFieldOfView(this, ChangeToIdlePacket);
+		G_NetworkManager->GetGameServer()->SendPacketFieldOfView(this, ChangeToIdlePacket);
 		ChangeToIdlePacket->Free();
 	}
 
@@ -240,10 +241,10 @@ void CPlayer::UpdateMoving()
 
 		vector<st_FieldOfViewInfo> AroundPlayers = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
 
-		CMessage* ResMoveStopPacket = G_ObjectManager->GameServer->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
+		CMessage* ResMoveStopPacket = G_NetworkManager->GetGameServer()->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
 			_GameObjectInfo.ObjectPositionInfo.Position._X,
 			_GameObjectInfo.ObjectPositionInfo.Position._Y);			
-		G_ObjectManager->GameServer->SendPacketFieldOfView(AroundPlayers, ResMoveStopPacket);
+		G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, ResMoveStopPacket);
 		ResMoveStopPacket->Free();
 	}
 }
@@ -261,9 +262,9 @@ void CPlayer::UpdateSpell()
 
 		vector<st_FieldOfViewInfo> AroundPlayers = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
 
-		CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,			
+		CMessage* ResObjectStateChangePacket = G_NetworkManager->GetGameServer()->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,			
 			_GameObjectInfo.ObjectPositionInfo.State);
-		G_ObjectManager->GameServer->SendPacketFieldOfView(AroundPlayers, ResObjectStateChangePacket);
+		G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, ResObjectStateChangePacket);
 		ResObjectStateChangePacket->Free();
 
 		if (_SpellSkill != nullptr && _SelectTarget != nullptr)
@@ -274,7 +275,7 @@ void CPlayer::UpdateSpell()
 			{
 			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:
 				{
-					st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType,
+					st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType,
 						AttackSkillInfo->SkillType,
 						AttackSkillInfo->SkillMinDamage,
 						AttackSkillInfo->SkillMaxDamage);
@@ -283,7 +284,7 @@ void CPlayer::UpdateSpell()
 				break;			
 			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
 				{	
-					st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType,
+					st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType,
 						AttackSkillInfo->SkillType,
 						AttackSkillInfo->SkillMinDamage,
 						AttackSkillInfo->SkillMaxDamage);
@@ -294,7 +295,7 @@ void CPlayer::UpdateSpell()
 						CSkill* FindNextComboSkill = _SkillBox.FindSkill(AttackSkillInfo->SkillCharacteristic, AttackSkillInfo->NextComboSkill);
 						if (FindNextComboSkill->GetSkillInfo()->CanSkillUse == true)
 						{
-							st_GameObjectJob* ComboAttackCreateJob = G_ObjectManager->GameServer->MakeGameObjectJobComboSkillCreate(_SpellSkill); G_ObjectManager->GameObjectJobCreate();
+							st_GameObjectJob* ComboAttackCreateJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobComboSkillCreate(_SpellSkill); G_ObjectManager->GameObjectJobCreate();
 							_GameObjectJobQue.Enqueue(ComboAttackCreateJob);
 						}					
 					}									
@@ -302,9 +303,9 @@ void CPlayer::UpdateSpell()
 					float DebufMovingSpeed = _SelectTarget->_GameObjectInfo.ObjectStatInfo.MaxSpeed * AttackSkillInfo->SkillDebufMovingSpeed * 0.01f;
 					_SelectTarget->_GameObjectInfo.ObjectStatInfo.Speed -= DebufMovingSpeed;
 
-					CMessage* ResObjectStatChange = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId,
+					CMessage* ResObjectStatChange = G_NetworkManager->GetGameServer()->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId,
 						_GameObjectInfo.ObjectStatInfo);
-					G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResObjectStatChange);
+					G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_FieldOfViewInfos, ResObjectStatChange);
 					ResObjectStatChange->Free();
 
 					bool IsShamanIceChain = _StatusAbnormal & (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_CHAIN;
@@ -319,21 +320,21 @@ void CPlayer::UpdateSpell()
 						_SelectTarget->AddDebuf(NewSkill);
 						_SelectTarget->SetStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_CHAIN);
 
-						CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
+						CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
 							_SelectTarget->_GameObjectInfo.ObjectType,							
 							_SpellSkill->GetSkillInfo()->SkillType, true, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_CHAIN);
-						G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResStatusAbnormalPacket);
+						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_FieldOfViewInfos, ResStatusAbnormalPacket);
 						ResStatusAbnormalPacket->Free();
 
-						CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewSkill->GetSkillInfo());
-						G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResBufDeBufSkillPacket);
+						CMessage* ResBufDeBufSkillPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewSkill->GetSkillInfo());
+						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_FieldOfViewInfos, ResBufDeBufSkillPacket);
 						ResBufDeBufSkillPacket->Free();
 					}				
 				}
 				break;
 			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
 				{
-					st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType,
+					st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType,
 						AttackSkillInfo->SkillType,
 						AttackSkillInfo->SkillMinDamage,
 						AttackSkillInfo->SkillMaxDamage);
@@ -351,21 +352,21 @@ void CPlayer::UpdateSpell()
 						_SelectTarget->AddDebuf(NewSkill);
 						_SelectTarget->SetStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE);
 
-						CMessage* SelectTargetMoveStopMessage = G_ObjectManager->GameServer->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId,
+						CMessage* SelectTargetMoveStopMessage = G_NetworkManager->GetGameServer()->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId,
 							_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X,
 							_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y);
-						G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, SelectTargetMoveStopMessage);
+						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_FieldOfViewInfos, SelectTargetMoveStopMessage);
 						SelectTargetMoveStopMessage->Free();
 
-						CMessage* ResStatusAbnormalPacket = G_ObjectManager->GameServer->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
+						CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
 							_SelectTarget->_GameObjectInfo.ObjectType,							
 							_SpellSkill->GetSkillInfo()->SkillType,
 							true, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE);
-						G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResStatusAbnormalPacket);
+						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_FieldOfViewInfos, ResStatusAbnormalPacket);
 						ResStatusAbnormalPacket->Free();
 
-						CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewSkill->GetSkillInfo());
-						G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResBufDeBufSkillPacket);
+						CMessage* ResBufDeBufSkillPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewSkill->GetSkillInfo());
+						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_FieldOfViewInfos, ResBufDeBufSkillPacket);
 						ResBufDeBufSkillPacket->Free();
 					}			
 
@@ -374,7 +375,7 @@ void CPlayer::UpdateSpell()
 				break;
 			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:
 				{
-					st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType,
+					st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType,
 						AttackSkillInfo->SkillType,
 						AttackSkillInfo->SkillMinDamage,
 						AttackSkillInfo->SkillMaxDamage);
@@ -383,7 +384,7 @@ void CPlayer::UpdateSpell()
 				break;
 			case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
 				{
-					st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType, 
+					st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType, 
 						AttackSkillInfo->SkillType,
 						AttackSkillInfo->SkillMinDamage,
 						AttackSkillInfo->SkillMaxDamage);
@@ -392,13 +393,13 @@ void CPlayer::UpdateSpell()
 				break;			
 			case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:
 				{										
-					/*st_GameObjectJob* HealJob = G_ObjectManager->GameServer->MakeGameObjectJobHPHeal(this, false, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
+					/*st_GameObjectJob* HealJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobHPHeal(this, false, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
 					_SelectTarget->_GameObjectJobQue.Enqueue(HealJob);	*/							
 				}
 				break;
 			case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:
 				{
-					/*st_GameObjectJob* HealJob = G_ObjectManager->GameServer->MakeGameObjectJobHPHeal(this, false, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
+					/*st_GameObjectJob* HealJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobHPHeal(this, false, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
 					_SelectTarget->_GameObjectJobQue.Enqueue(HealJob);*/
 				}
 				break;
@@ -409,10 +410,10 @@ void CPlayer::UpdateSpell()
 			for (auto QuickSlotBarPosition : _QuickSlotManager.FindQuickSlotBar(_SpellSkill->GetSkillInfo()->SkillType))
 			{
 				// 클라에게 쿨타임 표시
-				CMessage* ResCoolTimeStartPacket = G_ObjectManager->GameServer->MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
+				CMessage* ResCoolTimeStartPacket = G_NetworkManager->GetGameServer()->MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
 					QuickSlotBarPosition.QuickSlotBarSlotIndex,
 					1.0f, _SpellSkill);
-				G_ObjectManager->GameServer->SendPacket(_SessionId, ResCoolTimeStartPacket);
+				G_NetworkManager->GetGameServer()->SendPacket(_SessionId, ResCoolTimeStartPacket);
 				ResCoolTimeStartPacket->Free();
 			}
 
@@ -425,17 +426,17 @@ void CPlayer::UpdateSpell()
 
 				for (st_Vector2Int QuickSlotPosition : GlobalSkill->_QuickSlotBarPosition)
 				{
-					CMessage* ResCoolTimeStartPacket = G_ObjectManager->GameServer->MakePacketCoolTime((int8)QuickSlotPosition._Y,
+					CMessage* ResCoolTimeStartPacket = G_NetworkManager->GetGameServer()->MakePacketCoolTime((int8)QuickSlotPosition._Y,
 						(int8)QuickSlotPosition._X,
 						1.0f, nullptr, _SpellSkill->GetSkillInfo()->SkillMotionTime);
-					G_ObjectManager->GameServer->SendPacket(_SessionId, ResCoolTimeStartPacket);
+					G_NetworkManager->GetGameServer()->SendPacket(_SessionId, ResCoolTimeStartPacket);
 					ResCoolTimeStartPacket->Free();
 				}
 			}
 			
 			// 스펠창 끝
-			CMessage* ResMagicPacket = G_ObjectManager->GameServer->MakePacketResMagic(_GameObjectInfo.ObjectId, false);
-			G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResMagicPacket);
+			CMessage* ResMagicPacket = G_NetworkManager->GetGameServer()->MakePacketResMagic(_GameObjectInfo.ObjectId, false);
+			G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_FieldOfViewInfos, ResMagicPacket);
 			ResMagicPacket->Free();			
 		}
 	}
@@ -455,22 +456,22 @@ void CPlayer::UpdateGathering()
 
 		_GatheringTarget->OnDamaged(this, 1);		
 
-		CMessage* ResObjectStateChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,						
+		CMessage* ResObjectStateChangePacket = G_NetworkManager->GetGameServer()->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,						
 			_GameObjectInfo.ObjectPositionInfo.State);
-		G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResObjectStateChangePacket);
+		G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_FieldOfViewInfos, ResObjectStateChangePacket);
 
-		CMessage* ResObjectStatChangePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(_GatheringTarget->_GameObjectInfo.ObjectId,
+		CMessage* ResObjectStatChangePacket = G_NetworkManager->GetGameServer()->MakePacketResChangeObjectStat(_GatheringTarget->_GameObjectInfo.ObjectId,
 			_GatheringTarget->_GameObjectInfo.ObjectStatInfo);
-		G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResObjectStatChangePacket);
+		G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_FieldOfViewInfos, ResObjectStatChangePacket);
 		ResObjectStatChangePacket->Free();
 
-		CMessage* ResGatheringDamagePacket = G_ObjectManager->GameServer->MakePacketResGatheringDamage(_GatheringTarget->_GameObjectInfo.ObjectId);
-		G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResGatheringDamagePacket);
+		CMessage* ResGatheringDamagePacket = G_NetworkManager->GetGameServer()->MakePacketResGatheringDamage(_GatheringTarget->_GameObjectInfo.ObjectId);
+		G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_FieldOfViewInfos, ResGatheringDamagePacket);
 		ResGatheringDamagePacket->Free();
 
 		// 채집창 끝
-		CMessage* ResGatheringPacket = G_ObjectManager->GameServer->MakePacketResGathering(_GameObjectInfo.ObjectId, false, L"");
-		G_ObjectManager->GameServer->SendPacketFieldOfView(_FieldOfViewInfos, ResGatheringPacket);
+		CMessage* ResGatheringPacket = G_NetworkManager->GetGameServer()->MakePacketResGathering(_GameObjectInfo.ObjectId, false, L"");
+		G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_FieldOfViewInfos, ResGatheringPacket);
 		ResGatheringPacket->Free();		
 	}
 }
@@ -479,7 +480,7 @@ void CPlayer::UpdateDead()
 {
 	if (_DeadTick < GetTickCount64())
 	{
-		st_GameObjectJob* DeSpawnPlayerJob = G_ObjectManager->GameServer->MakeGameObjectJobObjectDeSpawnObjectChannel(this);
+		st_GameObjectJob* DeSpawnPlayerJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobObjectDeSpawnObjectChannel(this);
 		_Channel->_ChannelJobQue.Enqueue(DeSpawnPlayerJob);
 	}
 }
@@ -588,16 +589,16 @@ void CPlayer::CheckFieldOfViewObject()
 		if (SpawnObjectInfos.size() > 0)
 		{
 			// 스폰해야 할 대상들을 나에게 스폰하라고 알림
-			CMessage* ResOtherObjectSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectSpawn((int32)SpawnObjectInfos.size(), SpawnObjectInfos);
-			G_ObjectManager->GameServer->SendPacket(_SessionId, ResOtherObjectSpawnPacket);
+			CMessage* ResOtherObjectSpawnPacket = G_NetworkManager->GetGameServer()->MakePacketResObjectSpawn((int32)SpawnObjectInfos.size(), SpawnObjectInfos);
+			G_NetworkManager->GetGameServer()->SendPacket(_SessionId, ResOtherObjectSpawnPacket);
 			ResOtherObjectSpawnPacket->Free();
 		}
 
 		// 소환해제해야 할 대상을 나에게 스폰 해제하라고 알림
 		if (DeSpawnObjectInfos.size() > 0)
 		{
-			CMessage* ResOtherObjectDeSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn((int32)DeSpawnObjectInfos.size(), DeSpawnObjectInfos);
-			G_ObjectManager->GameServer->SendPacket(_SessionId, ResOtherObjectDeSpawnPacket);
+			CMessage* ResOtherObjectDeSpawnPacket = G_NetworkManager->GetGameServer()->MakePacketResObjectDeSpawn((int32)DeSpawnObjectInfos.size(), DeSpawnObjectInfos);
+			G_NetworkManager->GetGameServer()->SendPacket(_SessionId, ResOtherObjectDeSpawnPacket);
 			ResOtherObjectDeSpawnPacket->Free();
 		}
 	}	
