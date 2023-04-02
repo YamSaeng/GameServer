@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Furnace.h"
+#include "NetworkManager.h"
 #include "ObjectManager.h"
 #include "DataManager.h"
 #include "RectCollision.h"
@@ -91,10 +92,10 @@ void CFurnace::UpdateCrafting()
 
 							if (_SelectedObject != nullptr)
 							{
-								CMessage* ResCraftingStartPacket = G_ObjectManager->GameServer->MakePacketResCraftingStart(
+								CMessage* ResCraftingStartPacket = G_NetworkManager->GetGameServer()->MakePacketResCraftingStart(
 									_GameObjectInfo.ObjectId,
 									CraftingCompleteItem->_ItemInfo);
-								G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCraftingStartPacket);
+								G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResCraftingStartPacket);
 							}
 						}
 						else
@@ -122,20 +123,20 @@ void CFurnace::UpdateCrafting()
 						if (_SelectedObject != nullptr)
 						{
 							// 용광로 보유 재료 목록 갱신
-							CMessage* ResCraftingTableMaterialItemListPacket = G_ObjectManager->GameServer->MakePacketResCraftingTableMaterialItemList(
+							CMessage* ResCraftingTableMaterialItemListPacket = G_NetworkManager->GetGameServer()->MakePacketResCraftingTableMaterialItemList(
 								_GameObjectInfo.ObjectId,
 								_GameObjectInfo.ObjectType,
 								CraftingCompleteItem->_ItemInfo.ItemSmallCategory,
 								_MaterialItems);
-							G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCraftingTableMaterialItemListPacket);
+							G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResCraftingTableMaterialItemListPacket);
 							ResCraftingTableMaterialItemListPacket->Free();
 
 							// 용광로 보유 제작 완료 아이템 목록 갱신
-							CMessage* ResCrafintgTableCompleteItemListPacket = G_ObjectManager->GameServer->MakePacketResCraftingTableCompleteItemList(
+							CMessage* ResCrafintgTableCompleteItemListPacket = G_NetworkManager->GetGameServer()->MakePacketResCraftingTableCompleteItemList(
 								_GameObjectInfo.ObjectId,
 								_GameObjectInfo.ObjectType,
 								_CompleteItems);
-							G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCrafintgTableCompleteItemListPacket);
+							G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResCrafintgTableCompleteItemListPacket);
 							ResCrafintgTableCompleteItemListPacket->Free();
 						}
 					}
