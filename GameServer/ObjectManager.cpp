@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "ObjectManager.h"
 #include "DataManager.h"
+#include "NetworkManager.h"
 #include "GameServerMessage.h"
 #include "Item.h"
 #include "Skill.h"
@@ -453,7 +454,7 @@ void CObjectManager::ObjectItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_
 		NewItem->_SpawnPosition = SpawnIntPosition;
 		NewItem->_GameObjectInfo.ObjectPositionInfo.Position = SpawnPosition;			
 
-		st_GameObjectJob* EnterChannelItemJob = GameServer->MakeGameObjectJobObjectEnterChannel(NewItem);
+		st_GameObjectJob* EnterChannelItemJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobObjectEnterChannel(NewItem);
 		SpawnChannel->_ChannelJobQue.Enqueue(EnterChannelItemJob);
 	}
 }
@@ -472,7 +473,7 @@ void CObjectManager::ObjectItemDropToSpawn(CGameObject* DropOwnerObject, CChanne
 		NewItem->_SpawnPosition = DropOwnerObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition;
 		NewItem->_GameObjectInfo.ObjectPositionInfo.Position = DropOwnerObject->_GameObjectInfo.ObjectPositionInfo.Position;
 
-		st_GameObjectJob* EnterChannelItemJob = GameServer->MakeGameObjectJobObjectEnterChannel(NewItem);
+		st_GameObjectJob* EnterChannelItemJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobObjectEnterChannel(NewItem);
 		SpawnChannel->_ChannelJobQue.Enqueue(EnterChannelItemJob);		
 	}	
 }

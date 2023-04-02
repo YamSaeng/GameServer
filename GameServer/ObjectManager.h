@@ -2,7 +2,6 @@
 #include "ChannelManager.h"
 #include "Player.h"
 #include "Goblin.h"
-#include "GameServer.h"
 #include "Environment.h"
 
 class CItem;
@@ -63,8 +62,6 @@ private:
 
 	CMemoryPoolTLS<st_GameObjectJob>* _GameObjectJobMemoryPool;
 public:
-	CGameServer* GameServer;
-	
 	array<CPlayer*, static_cast<size_t>(en_ObjectCount::OBJECT_MANAGER_PLAYER_MAX)> _PlayersArray = { nullptr };
 	array<CItem*, static_cast<size_t>(en_ObjectCount::OBJECT_MANAGER_ITEM_MAX)> _ItemsArray = { nullptr };
 	array<CEnvironment*, static_cast<size_t>(en_ObjectCount::OBJECT_MANAGER_ENVIRONMENT_MAX)> _EnvironmentsArray = { nullptr };
