@@ -447,6 +447,7 @@ void CObjectManager::ObjectItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_
 		NewItem->_ItemInfo.ItemCount = DropItemCount;		
 
 		NewItem->_GameObjectInfo.ObjectType = NewItem->_ItemInfo.ItemObjectType;
+		NewItem->_GameObjectInfo.ObjectName = NewItem->_ItemInfo.ItemName;
 		NewItem->_GameObjectInfo.OwnerObjectId = KillerId;
 		NewItem->_GameObjectInfo.OwnerObjectType = (en_GameObjectType)KillerObjectType;
 		NewItem->_SpawnPosition = SpawnIntPosition;
