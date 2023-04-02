@@ -3,6 +3,7 @@
 #include "Player.h"
 #include "DataManager.h"
 #include "ObjectManager.h"
+#include "NetworkManager.h"
 #include "MapManager.h"
 #include "ChannelManager.h"
 #include "Skill.h"
@@ -275,12 +276,12 @@ void CMonster::SelectTargetCheck()
 				vector<st_FieldOfViewInfo> CurrentFieldOfView = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
 				if (CurrentFieldOfView.size() > 0)
 				{
-					CMessage* ResAttackPacket = G_ObjectManager->GameServer->MakePacketResToAttack(_GameObjectInfo.ObjectId,
+					CMessage* ResAttackPacket = G_NetworkManager->GetGameServer()->MakePacketResToAttack(_GameObjectInfo.ObjectId,
 						_Target->_GameObjectInfo.ObjectId,
 						_GameObjectInfo.ObjectPositionInfo.Position._X,
 						_GameObjectInfo.ObjectPositionInfo.Position._Y,
 						_GameObjectInfo.ObjectPositionInfo.State);
-					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfView, ResAttackPacket);
+					G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfView, ResAttackPacket);
 					ResAttackPacket->Free();					
 				}
 			}
@@ -347,14 +348,14 @@ void CMonster::UpdateSpawnReady()
 			if (FindObject == nullptr)
 			{
 				// 채널에서 퇴장
-				st_GameObjectJob* LeaveChannerMonsterJob = G_ObjectManager->GameServer->MakeGameObjectJobLeaveChannel(this);
+				st_GameObjectJob* LeaveChannerMonsterJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobLeaveChannel(this);
 				_Channel->_ChannelJobQue.Enqueue(LeaveChannerMonsterJob);
 				
 				CGameObject* NewMonster = G_ObjectManager->ObjectCreate(_GameObjectInfo.ObjectType);
 				NewMonster->_SpawnPosition = _SpawnPosition;
 
 				// 채널에서 퇴장하고 다시 입장
-				st_GameObjectJob* EnterChannelMonsterJob = G_ObjectManager->GameServer->MakeGameObjectJobObjectEnterChannel(NewMonster);
+				st_GameObjectJob* EnterChannelMonsterJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobObjectEnterChannel(NewMonster);
 				_Channel->_ChannelJobQue.Enqueue(EnterChannelMonsterJob);
 			}
 			else
@@ -443,11 +444,11 @@ void CMonster::ReadyPatrol()
 		vector<st_FieldOfViewInfo> CurrentFieldOfView = _Channel->GetMap()->GetFieldAroundPlayers(this);
 		if (CurrentFieldOfView.size() > 0)
 		{
-			CMessage* MonsterMoveStartPacket = G_ObjectManager->GameServer->MakePacketResMove(_GameObjectInfo.ObjectId,
+			CMessage* MonsterMoveStartPacket = G_NetworkManager->GetGameServer()->MakePacketResMove(_GameObjectInfo.ObjectId,
 				_GameObjectInfo.ObjectPositionInfo.LookAtDireciton,
 				_GameObjectInfo.ObjectPositionInfo.MoveDirection,
 				_GameObjectInfo.ObjectPositionInfo.Position);
-			G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfView, MonsterMoveStartPacket);
+			G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfView, MonsterMoveStartPacket);
 			MonsterMoveStartPacket->Free();
 		}		
 	} while (0);
@@ -501,12 +502,12 @@ void CMonster::ReadMoving()
 		vector<st_FieldOfViewInfo> CurrentFieldOfView = _Channel->GetMap()->GetFieldAroundPlayers(this);
 		if (CurrentFieldOfView.size() > 0)
 		{
-			CMessage* MonsterMoveStartPacket = G_ObjectManager->GameServer->MakePacketResMove(_GameObjectInfo.ObjectId,
+			CMessage* MonsterMoveStartPacket = G_NetworkManager->GetGameServer()->MakePacketResMove(_GameObjectInfo.ObjectId,
 				_GameObjectInfo.ObjectPositionInfo.LookAtDireciton,
 				_GameObjectInfo.ObjectPositionInfo.MoveDirection,
 				_GameObjectInfo.ObjectPositionInfo.Position,
 				_Target->_GameObjectInfo.ObjectId);
-			G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfView, MonsterMoveStartPacket);
+			G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfView, MonsterMoveStartPacket);
 			MonsterMoveStartPacket->Free();
 		}
 	}	
@@ -520,12 +521,12 @@ void CMonster::UpdateMoving()
 	vector<st_FieldOfViewInfo> CurrentFieldOfView = _Channel->GetMap()->GetFieldAroundPlayers(this);
 	if (CurrentFieldOfView.size() > 0)
 	{	
-		CMessage* MonsterMoveStartPacket = G_ObjectManager->GameServer->MakePacketResMove(_GameObjectInfo.ObjectId,
+		CMessage* MonsterMoveStartPacket = G_NetworkManager->GetGameServer()->MakePacketResMove(_GameObjectInfo.ObjectId,
 			_GameObjectInfo.ObjectPositionInfo.LookAtDireciton,
 			_GameObjectInfo.ObjectPositionInfo.MoveDirection,
 			_GameObjectInfo.ObjectPositionInfo.Position,
 			_Target->_GameObjectInfo.ObjectId);
-		G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfView, MonsterMoveStartPacket);
+		G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfView, MonsterMoveStartPacket);
 		MonsterMoveStartPacket->Free();		
 	}		
 
@@ -597,8 +598,8 @@ void CMonster::UpdateSpell()
 			_SpellSkill->CoolTimeStart();
 
 			// 스펠창 끝
-			CMessage* ResMagicPacket = G_ObjectManager->GameServer->MakePacketResMagic(_GameObjectInfo.ObjectId, false);
-			G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResMagicPacket);
+			CMessage* ResMagicPacket = G_NetworkManager->GetGameServer()->MakePacketResMagic(_GameObjectInfo.ObjectId, false);
+			G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResMagicPacket);
 			ResMagicPacket->Free();
 
 			if (_Target != nullptr)
@@ -631,8 +632,8 @@ void CMonster::UpdateSpell()
 
 									DeBufSkill->StatusAbnormalDurationTimeStart();
 
-									CMessage* ResBufDeBufSkillPacket = G_ObjectManager->GameServer->MakePacketBufDeBuf(_Target->_GameObjectInfo.ObjectId, false, DeBufSkill->GetSkillInfo());
-									G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
+									CMessage* ResBufDeBufSkillPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBuf(_Target->_GameObjectInfo.ObjectId, false, DeBufSkill->GetSkillInfo());
+									G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
 									ResBufDeBufSkillPacket->Free();
 								}
 								else
@@ -680,7 +681,7 @@ void CMonster::UpdateDead()
 		}
 
 		// 몬스터가 있었던 자리를 비움
-		st_GameObjectJob* DeSpawnMonsterChannelJob = G_ObjectManager->GameServer->MakeGameObjectJobObjectDeSpawnObjectChannel(this);
+		st_GameObjectJob* DeSpawnMonsterChannelJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobObjectDeSpawnObjectChannel(this);
 		_Channel->_ChannelJobQue.Enqueue(DeSpawnMonsterChannelJob);
 	}
 }
@@ -721,10 +722,10 @@ void CMonster::Move()
 					// 주위 플레이어 들에게 멈췄다고 알려줌
 					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldAroundPlayers(this);
 
-					CMessage* ResMoveStopPacket = G_ObjectManager->GameServer->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
+					CMessage* ResMoveStopPacket = G_NetworkManager->GetGameServer()->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
 						_GameObjectInfo.ObjectPositionInfo.Position._X,
 						_GameObjectInfo.ObjectPositionInfo.Position._Y);
-					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIds, ResMoveStopPacket);
+					G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIds, ResMoveStopPacket);
 					ResMoveStopPacket->Free();
 				}
 			}
@@ -739,10 +740,10 @@ void CMonster::Move()
 					// 주위 플레이어 들에게 멈췄다고 알려줌
 					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldAroundPlayers(this);
 
-					CMessage* ResMoveStopPacket = G_ObjectManager->GameServer->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
+					CMessage* ResMoveStopPacket = G_NetworkManager->GetGameServer()->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
 						_GameObjectInfo.ObjectPositionInfo.Position._X,
 						_GameObjectInfo.ObjectPositionInfo.Position._Y);
-					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIds, ResMoveStopPacket);
+					G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIds, ResMoveStopPacket);
 					ResMoveStopPacket->Free();
 				}
 			}
@@ -783,10 +784,10 @@ void CMonster::Move()
 		// 주위 플레이어 들에게 멈췄다고 알려줌
 		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldAroundPlayers(this);
 
-		CMessage* ResMoveStopPacket = G_ObjectManager->GameServer->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
+		CMessage* ResMoveStopPacket = G_NetworkManager->GetGameServer()->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
 			_GameObjectInfo.ObjectPositionInfo.Position._X,
 			_GameObjectInfo.ObjectPositionInfo.Position._Y);
-		G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIds, ResMoveStopPacket);
+		G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIds, ResMoveStopPacket);
 		ResMoveStopPacket->Free();
 	}	
 }
