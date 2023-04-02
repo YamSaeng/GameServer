@@ -3,6 +3,8 @@
 #include "DataManager.h"
 #include "ObjectManager.h"
 #include "MapManager.h"
+#include "NetworkManager.h"
+#include "ChannelManager.h"
 #include "RectCollision.h"
 #include <atlbase.h>
 
@@ -55,7 +57,7 @@ void CEnvironment::UpdateDead()
 			CRASH("퇴장하려는 채널이 존재하지 않음");
 		}
 
-		st_GameObjectJob* LeaveChannelEnvironmentJob = G_ObjectManager->GameServer->MakeGameObjectJobLeaveChannel(this);
+		st_GameObjectJob* LeaveChannelEnvironmentJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobLeaveChannel(this);
 		_Channel->_ChannelJobQue.Enqueue(LeaveChannelEnvironmentJob);
 	}
 
@@ -67,7 +69,7 @@ void CEnvironment::UpdateDead()
 			CGameObject* FindObject = Map->Find(_SpawnPosition);
 			if (FindObject == nullptr)
 			{
-				st_GameObjectJob* ObjectEnterChannelJob = G_ObjectManager->GameServer->MakeGameObjectJobObjectEnterChannel(this);
+				st_GameObjectJob* ObjectEnterChannelJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobObjectEnterChannel(this);
 				Map->GetChannelManager()->Find(1)->_ChannelJobQue.Enqueue(ObjectEnterChannelJob);
 			}
 			else
@@ -156,9 +158,9 @@ bool CTree::OnDamaged(CGameObject* Attacker, int32 Damage)
 
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
 
-		CMessage* ResChangeStatePacket = G_ObjectManager->GameServer->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,						
+		CMessage* ResChangeStatePacket = G_NetworkManager->GetGameServer()->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
 			_GameObjectInfo.ObjectPositionInfo.State);
-		G_ObjectManager->GameServer->SendPacketFieldOfView(this, ResChangeStatePacket);
+		G_NetworkManager->GetGameServer()->SendPacketFieldOfView(this, ResChangeStatePacket);
 		ResChangeStatePacket->Free();
 		
 		G_ObjectManager->ObjectItemSpawn(_Channel, Attacker->_GameObjectInfo.ObjectId,
