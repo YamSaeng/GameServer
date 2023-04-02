@@ -2271,6 +2271,40 @@ struct st_Vector2Int
 	{
 		return (int16)sqrt(pow(TargetCellPosition._X - MyCellPosition._X, 2) + pow(TargetCellPosition._Y - MyCellPosition._Y, 2));
 	}	
+
+	st_Vector2Int Direction()
+	{
+		st_Vector2Int Dir;
+
+		if (_X > 0)
+		{
+			Dir._X = 1;
+		}
+		else if (_X < 0)
+		{
+			Dir._X = -1;
+		}
+		else
+		{
+			Dir._X = 0;
+		}
+
+		if (_Y > 0)
+		{
+			Dir._Y = 1;
+		}
+		else if (_Y < 0)
+		{
+			Dir._Y = -1;
+		}
+		else
+		{
+			Dir._Y = 0;
+		}
+
+
+		return Dir;
+	}
 };
 
 struct st_RayCatingPosition
