@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "MonsterSkillBox.h"
 #include "DataManager.h"
+#include "NetworkManager.h"
 #include "ObjectManager.h"
 #include "Skill.h"
 
@@ -92,9 +93,9 @@ void CMonsterSkillBox::SkillProcess(CGameObject* SkillMonster, CGameObject* Skil
 			{
 				vector<st_FieldOfViewInfo> CurrentFieldOfViewInfos = SkillMonster->GetChannel()->GetMap()->GetFieldAroundPlayers(SkillMonster);
 
-				CMessage* ResAnimationPlayPacket = G_ObjectManager->GameServer->MakePacketResAnimationPlay(SkillMonster->_GameObjectInfo.ObjectId,
+				CMessage* ResAnimationPlayPacket = G_NetworkManager->GetGameServer()->MakePacketResAnimationPlay(SkillMonster->_GameObjectInfo.ObjectId,
 					SkillMonster->_GameObjectInfo.ObjectType, en_AnimationType::ANIMATION_TYPE_SWORD_MELEE_ATTACK);
-				G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewInfos, ResAnimationPlayPacket);
+				G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewInfos, ResAnimationPlayPacket);
 				ResAnimationPlayPacket->Free();				
 
 				switch (Skill->GetSkillInfo()->SkillType)
@@ -108,11 +109,11 @@ void CMonsterSkillBox::SkillProcess(CGameObject* SkillMonster, CGameObject* Skil
 							SkillMonster->_GameObjectInfo.ObjectPositionInfo.Position,
 							SkillMonster->_FieldOfDirection, SkillMonster->_FieldOfAngle, Skill->GetSkillInfo()->SkillDistance))
 						{
-							st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(SkillMonster->_GameObjectInfo.ObjectId, SkillMonster->_GameObjectInfo.ObjectType,
+							/*st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(SkillMonster->_GameObjectInfo.ObjectId, SkillMonster->_GameObjectInfo.ObjectType,
 								Skill->GetSkillInfo()->SkillType,
 								Skill->GetSkillInfo()->SkillMinDamage,
 								Skill->GetSkillInfo()->SkillMaxDamage);
-							MonsterTarget->_GameObjectJobQue.Enqueue(DamageJob);
+							MonsterTarget->_GameObjectJobQue.Enqueue(DamageJob);*/
 						}						
 					}
 					break;				
@@ -123,5 +124,5 @@ void CMonsterSkillBox::SkillProcess(CGameObject* SkillMonster, CGameObject* Skil
 				_MonsterGlobalCoolTimeSkill->CoolTimeStart();
 			}
 		}
-	}
+	}	
 }
