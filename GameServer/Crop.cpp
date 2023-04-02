@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Crop.h"
-#include "ObjectManager.h"
+#include "NetworkManager.h"
 #include "DataManager.h"
 
 CCrop::CCrop()
@@ -108,13 +108,13 @@ void CCrop::UpdateDead()
 			CRASH("퇴장하려는 채널이 존재하지 않음");
 		}
 
-		st_GameObjectJob* DeSpawnCropChanelJob = G_ObjectManager->GameServer->MakeGameObjectJobObjectDeSpawnObjectChannel(this);
+		st_GameObjectJob* DeSpawnCropChanelJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobObjectDeSpawnObjectChannel(this);
 		_Channel->_ChannelJobQue.Enqueue(DeSpawnCropChanelJob);
 	}
 
 	if (_ReSpawnTick < GetTickCount64())
 	{
-		st_GameObjectJob* LeaveChannelEnvironmentJob = G_ObjectManager->GameServer->MakeGameObjectJobLeaveChannel(this);
+		st_GameObjectJob* LeaveChannelEnvironmentJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobLeaveChannel(this);
 		_Channel->_ChannelJobQue.Enqueue(LeaveChannelEnvironmentJob);
 	}
 }
