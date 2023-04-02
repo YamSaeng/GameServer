@@ -2,6 +2,7 @@
 #include "SkillBox.h"
 #include "Skill.h"
 #include "ObjectManager.h"
+#include "NetworkManager.h"
 
 CSkillBox::CSkillBox()
 {
@@ -167,9 +168,9 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 				{
 					vector<st_FieldOfViewInfo> AroundPlayers = SkillUser->GetChannel()->GetMap()->GetFieldAroundPlayers(SkillUser, false);
 
-					CMessage* ResAnimationPlayPacket = G_ObjectManager->GameServer->MakePacketResAnimationPlay(SkillUser->_GameObjectInfo.ObjectId,
+					CMessage* ResAnimationPlayPacket = G_NetworkManager->GetGameServer()->MakePacketResAnimationPlay(SkillUser->_GameObjectInfo.ObjectId,
 						SkillUser->_GameObjectInfo.ObjectType, en_AnimationType::ANIMATION_TYPE_SWORD_MELEE_ATTACK);
-					G_ObjectManager->GameServer->SendPacketFieldOfView(AroundPlayers, ResAnimationPlayPacket);
+					G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, ResAnimationPlayPacket);
 					ResAnimationPlayPacket->Free();
 
 					SkillUser->SetMeleeSkill(Skill);
@@ -189,14 +190,15 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 									vector<CGameObject*> FieldOfViewObjects = SkillUser->GetFieldOfViewObjects();
 									for (CGameObject* FieldOfViewObject : FieldOfViewObjects)
 									{
-										if (FieldOfViewObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
+										if (FieldOfViewObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD
+											&& FieldOfViewObject ->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::ROOTING)
 										{
 											if (st_Vector2::CheckFieldOfView(FieldOfViewObject->_GameObjectInfo.ObjectPositionInfo.Position,
 												SkillUser->_GameObjectInfo.ObjectPositionInfo.Position,
 												SkillUser->_FieldOfDirection, SkillUser->_FieldOfAngle, Skill->GetSkillInfo()->SkillDistance))
 											{
 												IsNextCombo = true;
-												st_GameObjectJob* DamageJob = G_ObjectManager->GameServer->MakeGameObjectDamage(SkillUser->_GameObjectInfo.ObjectId, SkillUser->_GameObjectInfo.ObjectType,
+												st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(SkillUser->_GameObjectInfo.ObjectId, SkillUser->_GameObjectInfo.ObjectType,
 													MeleeSkillInfo->SkillType,
 													MeleeSkillInfo->SkillMinDamage,
 													MeleeSkillInfo->SkillMaxDamage);
@@ -232,10 +234,10 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 														SkillUser->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X = MyFrontPosition._X;
 														SkillUser->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y = MyFrontPosition._Y;
 
-														CMessage* SelectTargetStopPacket = G_ObjectManager->GameServer->MakePacketResMoveStop(SkillUser->_SelectTarget->_GameObjectInfo.ObjectId,
+														CMessage* SelectTargetStopPacket = G_NetworkManager->GetGameServer()->MakePacketResMoveStop(SkillUser->_SelectTarget->_GameObjectInfo.ObjectId,
 															MyFrontPosition._X,
 															MyFrontPosition._Y);
-														G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, SelectTargetStopPacket);
+														G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, SelectTargetStopPacket);
 														SelectTargetStopPacket->Free();
 													}
 												}
@@ -250,14 +252,38 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 								break;
 							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK:
 								{
-									if (SkillUser->_SelectTarget != nullptr)
+									CPlayer* Player = dynamic_cast<CPlayer*>(SkillUser);
+									if (Player != nullptr)
 									{
+										if (Player->_SelectTarget != nullptr)
+										{										
+											st_Vector2Int JumpingPositionDir = Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition
+												- Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition;
 
-									}
-									else
-									{
+											st_Vector2Int JumpingPosition = JumpingPositionDir.Direction();
+											JumpingPosition._X = JumpingPosition._X * -1.0f;
+											JumpingPosition._Y = JumpingPosition._Y * -1.0f;
+											
+											st_Vector2Int NewPosition;
+											NewPosition._X = Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + JumpingPosition._X;
+											NewPosition._Y = Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + JumpingPosition._Y;											
 
-									}
+											CMessage* SyncPositionPacket = G_NetworkManager->GetGameServer()->MakePacketResSyncPosition(Player->_GameObjectInfo.ObjectId, Player->_GameObjectInfo.ObjectPositionInfo);
+											G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, SyncPositionPacket);
+											SyncPositionPacket->Free();
+											/*G_Logger->WriteStdOut(en_Color::RED, L"OriPosition X : %d Y : %d Jump Position X : %d Y : %d\n", 
+												Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X,
+												Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y, 
+												NewPosition._X,
+												NewPosition._Y);*/
+										}
+										else
+										{
+											CMessage* NonSelectTargetPacket = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_NON_SELECT_OBJECT);
+											G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, NonSelectTargetPacket);
+											NonSelectTargetPacket->Free();
+										}
+									}									
 								}
 								break;	
 							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE:
@@ -275,7 +301,7 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 						CSkill* FindNextComboSkill = FindSkill(Skill->GetSkillInfo()->SkillCharacteristic, Skill->GetSkillInfo()->NextComboSkill);
 						if (FindNextComboSkill->GetSkillInfo()->CanSkillUse == true)
 						{
-							st_GameObjectJob* ComboSkillJob = G_ObjectManager->GameServer->MakeGameObjectJobComboSkillCreate(Skill);
+							st_GameObjectJob* ComboSkillJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobComboSkillCreate(Skill);
 							SkillUser->_GameObjectJobQue.Enqueue(ComboSkillJob);
 						}
 					}
@@ -285,7 +311,7 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 					{
 						if (Creature->_ComboSkill != nullptr)
 						{
-							st_GameObjectJob* ComboSkillOffJob = G_ObjectManager->GameServer->MakeGameObjectJobComboSkillOff();
+							st_GameObjectJob* ComboSkillOffJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobComboSkillOff();
 							SkillUser->_GameObjectJobQue.Enqueue(ComboSkillOffJob);
 						}
 					}
@@ -296,10 +322,10 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 					for (auto QuickSlotBarPosition : Player->_QuickSlotManager.FindQuickSlotBar(Skill->GetSkillInfo()->SkillType))
 					{
 						// 클라에게 쿨타임 표시
-						CMessage* ResCoolTimeStartPacket = G_ObjectManager->GameServer->MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
+						CMessage* ResCoolTimeStartPacket = G_NetworkManager->GetGameServer()->MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
 							QuickSlotBarPosition.QuickSlotBarSlotIndex,
 							1.0f, Skill);
-						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
+						G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
 						ResCoolTimeStartPacket->Free();
 					}
 
@@ -316,18 +342,18 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 
 						for (st_Vector2Int QuickSlotPosition : GlobalSkill->_QuickSlotBarPosition)
 						{
-							CMessage* ResCoolTimeStartPacket = G_ObjectManager->GameServer->MakePacketCoolTime((int8)QuickSlotPosition._Y,
+							CMessage* ResCoolTimeStartPacket = G_NetworkManager->GetGameServer()->MakePacketCoolTime((int8)QuickSlotPosition._Y,
 								(int8)QuickSlotPosition._X,
 								1.0f, nullptr, _GlobalCoolTimeSkill->GetSkillInfo()->SkillCoolTime);
-							G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
+							G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
 							ResCoolTimeStartPacket->Free();
 						}
 					}
 				}
 				else
 				{
-					CMessage* ResErrorPacket = G_ObjectManager->GameServer->MakePacketSkillError(en_GlobalMessageType::GLOBAL_MESSAGE_SKILL_COOLTIME, Skill->GetSkillInfo()->SkillName.c_str());
-					G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResErrorPacket);
+					CMessage* ResErrorPacket = G_NetworkManager->GetGameServer()->MakePacketSkillError(en_GlobalMessageType::GLOBAL_MESSAGE_SKILL_COOLTIME, Skill->GetSkillInfo()->SkillName.c_str());
+					G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResErrorPacket);
 					ResErrorPacket->Free();
 				}
 			}			
