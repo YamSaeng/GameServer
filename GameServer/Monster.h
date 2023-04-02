@@ -128,6 +128,10 @@ protected:
 	//------------------------
 	virtual void UpdateSpell() override;	
 	//------------------------
+	// Rooting 상태 Update
+	//------------------------
+	virtual void UpdateRooting() override;
+	//------------------------
 	// Dead 상태 Update
 	//------------------------
 	virtual void UpdateDead() override;

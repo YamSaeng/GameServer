@@ -432,7 +432,7 @@ void CMonster::ReadyPatrol()
 
 		// 정찰 위치를 저장한다
 		_MonsterState = en_MonsterState::MONSTER_PATROL;
-		_PatrolPoint = PositionCheck(Path[1]);
+		_PatrolPoint = PositionCheck(Path[1]);		
 
 		// 정찰 위치로 향하는 방향값 구해서 저장
 		st_Vector2 DirectionPatrolPoint = _PatrolPoint - _GameObjectInfo.ObjectPositionInfo.Position;
@@ -658,6 +658,11 @@ void CMonster::UpdateSpell()
 			}
 		}			
 	}
+}
+
+void CMonster::UpdateRooting()
+{
+
 }
 
 void CMonster::UpdateDead()
