@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Item.h"
-#include "ObjectManager.h"
+#include "NetworkManager.h"
 #include "GameServerMessage.h"
 #include <math.h>
 
@@ -112,8 +112,8 @@ void CItem::UpdateReadyMoving()
 
 	vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
 
-	CMessage* S2CItemMoveMessage = G_ObjectManager->GameServer->MakePacketItemMove(_GameObjectInfo);
-	G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, S2CItemMoveMessage);
+	CMessage* S2CItemMoveMessage = G_NetworkManager->GetGameServer()->MakePacketItemMove(_GameObjectInfo);
+	G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, S2CItemMoveMessage);
 	S2CItemMoveMessage->Free();
 
 	_ItemState = en_ItemState::ITEM_MOVE;
@@ -149,7 +149,7 @@ void CItem::UpdateMoving()
 		}
 		else
 		{
-			st_GameObjectJob* ItemSaveJob = G_ObjectManager->GameServer->MakeGameObjectJobItemSave(this);
+			st_GameObjectJob* ItemSaveJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobItemSave(this);
 			_Owner->_GameObjectJobQue.Enqueue(ItemSaveJob);
 
 			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;				
