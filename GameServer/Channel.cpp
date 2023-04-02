@@ -12,6 +12,7 @@
 #include "Map.h"
 #include "Potato.h"
 #include "ObjectManager.h"
+#include "NetworkManager.h"
 #include "DataManager.h"
 #include "RectCollision.h"
 
@@ -109,16 +110,16 @@ void CChannel::Update()
 						// 그룹초대 대상이 그룹중이 아닌지 확인
 						if (InvitePlayer->_PartyManager._IsParty == false)
 						{
-							CMessage* ResPartyInvitePacket = G_ObjectManager->GameServer->MakePacketResPartyInvite(PartyPlayer->_GameObjectInfo.ObjectId, PartyPlayer->_GameObjectInfo.ObjectName);
-							G_ObjectManager->GameServer->SendPacket(InvitePlayer->_SessionId, ResPartyInvitePacket);
+							CMessage* ResPartyInvitePacket = G_NetworkManager->GetGameServer()->MakePacketResPartyInvite(PartyPlayer->_GameObjectInfo.ObjectId, PartyPlayer->_GameObjectInfo.ObjectName);
+							G_NetworkManager->GetGameServer()->SendPacket(InvitePlayer->_SessionId, ResPartyInvitePacket);
 							ResPartyInvitePacket->Free();							
 						}		
 						else
 						{
 							// 그룹중이라면 그룹중이라고 메세지 보냄
-							CMessage* ResExistPartyPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_EXIST_PARTY_PLAYER,
+							CMessage* ResExistPartyPacket = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_EXIST_PARTY_PLAYER,
 								InvitePlayer->_GameObjectInfo.ObjectName.c_str());
-							G_ObjectManager->GameServer->SendPacket(PartyPlayer->_SessionId, ResExistPartyPacket);
+							G_NetworkManager->GetGameServer()->SendPacket(PartyPlayer->_SessionId, ResExistPartyPacket);
 							ResExistPartyPacket->Free();
 						}
 					}
@@ -157,8 +158,8 @@ void CChannel::Update()
 							if (PartySize == CPartyManager::en_PartyManager::PARTY_MAX)
 							{
 								// 그룹에 빈 자리가 없을 경우
-								CMessage* ResExistPartyPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_PARTY_MAX);
-								G_ObjectManager->GameServer->SendPacket(PartyAcceptPlayer->_SessionId, ResExistPartyPacket);
+								CMessage* ResExistPartyPacket = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_PARTY_MAX);
+								G_NetworkManager->GetGameServer()->SendPacket(PartyAcceptPlayer->_SessionId, ResExistPartyPacket);
 								ResExistPartyPacket->Free();
 							}
 							else
@@ -171,10 +172,10 @@ void CChannel::Update()
 								PartyAcceptPlayer->_PartyManager.PartyInvite(PartyReqPlayer);
 
 								vector<CPlayer*> PartyPlayers = PartyReqPlayer->_PartyManager.GetPartyPlayerArray();
-								CGameServerMessage* ResPartyAcceptPacket = G_ObjectManager->GameServer->MakePacketResPartyAccept(PartyPlayers);
+								CGameServerMessage* ResPartyAcceptPacket = G_NetworkManager->GetGameServer()->MakePacketResPartyAccept(PartyPlayers);
 								for (CPlayer* PartyPlayer : PartyPlayers)
 								{
-									G_ObjectManager->GameServer->SendPacket(PartyPlayer->_SessionId, ResPartyAcceptPacket);
+									G_NetworkManager->GetGameServer()->SendPacket(PartyPlayer->_SessionId, ResPartyAcceptPacket);
 								}
 
 								ResPartyAcceptPacket->Free();
@@ -206,9 +207,9 @@ void CChannel::Update()
 						if (ReqPartyInvitePlayer != nullptr)
 						{
 							// 그룹중이라면 그룹중이라고 메세지 보냄
-							CMessage* ResExistPartyPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_PARTY_INVITE_REJECT,
+							CMessage* ResExistPartyPacket = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_PARTY_INVITE_REJECT,
 								PartyRejectPlayer->_GameObjectInfo.ObjectName.c_str());
-							G_ObjectManager->GameServer->SendPacket(ReqPartyInvitePlayer->_SessionId, ResExistPartyPacket);
+							G_NetworkManager->GetGameServer()->SendPacket(ReqPartyInvitePlayer->_SessionId, ResExistPartyPacket);
 							ResExistPartyPacket->Free();
 						}
 						else
@@ -242,8 +243,8 @@ void CChannel::Update()
 								{
 									PartyPlayer->_PartyManager.PartyQuited(PartyQuitPlayerID);
 
-									CMessage* ResPartyPlaryerOneQuitPacket = G_ObjectManager->GameServer->MakePacketResPartyQuit(false, PartyQuitPlayerID);
-									G_ObjectManager->GameServer->SendPacket(PartyPlayer->_SessionId, ResPartyPlaryerOneQuitPacket);
+									CMessage* ResPartyPlaryerOneQuitPacket = G_NetworkManager->GetGameServer()->MakePacketResPartyQuit(false, PartyQuitPlayerID);
+									G_NetworkManager->GetGameServer()->SendPacket(PartyPlayer->_SessionId, ResPartyPlaryerOneQuitPacket);
 									ResPartyPlaryerOneQuitPacket->Free();
 								}
 							}							
@@ -252,8 +253,8 @@ void CChannel::Update()
 							PartyQuitPlayer->_PartyManager.PartyQuit();
 
 							// 탈퇴 요청 플레이어에게 그룹 탈퇴 패킷 전송
-							CMessage* ResPartyQuitPacket = G_ObjectManager->GameServer->MakePacketResPartyQuit(true, PartyQuitPlayerID);
-							G_ObjectManager->GameServer->SendPacket(PartyQuitPlayer->_SessionId, ResPartyQuitPacket);
+							CMessage* ResPartyQuitPacket = G_NetworkManager->GetGameServer()->MakePacketResPartyQuit(true, PartyQuitPlayerID);
+							G_NetworkManager->GetGameServer()->SendPacket(PartyQuitPlayer->_SessionId, ResPartyQuitPacket);
 							ResPartyQuitPacket->Free();
 						}
 						else
@@ -292,16 +293,16 @@ void CChannel::Update()
 								{
 									PartyPlayer->_PartyManager.PartyQuited(PartyBanishPlayer->_GameObjectInfo.ObjectId);
 
-									CMessage* ResPartyBanishPacekt = G_ObjectManager->GameServer->MakePacketResPartyBanish(PartyBanishPlayerID);
-									G_ObjectManager->GameServer->SendPacket(PartyPlayer->_SessionId, ResPartyBanishPacekt);
+									CMessage* ResPartyBanishPacekt = G_NetworkManager->GetGameServer()->MakePacketResPartyBanish(PartyBanishPlayerID);
+									G_NetworkManager->GetGameServer()->SendPacket(PartyPlayer->_SessionId, ResPartyBanishPacekt);
 									ResPartyBanishPacekt->Free();
 								}								
 							}
 
 							PartyBanishPlayer->_PartyManager.PartyAllQuit();
 
-							CMessage* ResPartyQuitPacket = G_ObjectManager->GameServer->MakePacketResPartyQuit(true, PartyBanishPlayerID);
-							G_ObjectManager->GameServer->SendPacket(PartyBanishPlayer->_SessionId, ResPartyQuitPacket);
+							CMessage* ResPartyQuitPacket = G_NetworkManager->GetGameServer()->MakePacketResPartyQuit(true, PartyBanishPlayerID);
+							G_NetworkManager->GetGameServer()->SendPacket(PartyBanishPlayer->_SessionId, ResPartyQuitPacket);
 							ResPartyQuitPacket->Free();
 						}
 						else
@@ -338,9 +339,9 @@ void CChannel::Update()
 								ReqPartyLeader->_PartyManager._IsPartyLeader = false;
 								NewPartyLeader->_PartyManager._IsPartyLeader = true;
 
-								CMessage* ResPartyLeaderMandatePacket = G_ObjectManager->GameServer->MakePacketResPartyLeaderMandate(ReqPartyLeader->_GameObjectInfo.ObjectId, NewPartyLeader->_GameObjectInfo.ObjectId);
-								G_ObjectManager->GameServer->SendPacket(ReqPartyLeader->_SessionId, ResPartyLeaderMandatePacket);
-								G_ObjectManager->GameServer->SendPacket(NewPartyLeader->_SessionId, ResPartyLeaderMandatePacket);
+								CMessage* ResPartyLeaderMandatePacket = G_NetworkManager->GetGameServer()->MakePacketResPartyLeaderMandate(ReqPartyLeader->_GameObjectInfo.ObjectId, NewPartyLeader->_GameObjectInfo.ObjectId);
+								G_NetworkManager->GetGameServer()->SendPacket(ReqPartyLeader->_SessionId, ResPartyLeaderMandatePacket);
+								G_NetworkManager->GetGameServer()->SendPacket(NewPartyLeader->_SessionId, ResPartyLeaderMandatePacket);
 								ResPartyLeaderMandatePacket->Free();
 							}
 						}
@@ -371,13 +372,13 @@ void CChannel::Update()
 					EnterChannel(EnterPlayer, &EnterPlayer->_SpawnPosition);					
 
 					// 나한테 나 생성하라고 알려줌
-					CMessage* ResEnterGamePacket = G_ObjectManager->GameServer->MakePacketResEnterGame(true, &EnterPlayer->_GameObjectInfo, &EnterPlayer->_SpawnPosition);
-					G_ObjectManager->GameServer->SendPacket(EnterPlayer->_SessionId, ResEnterGamePacket);
+					CMessage* ResEnterGamePacket = G_NetworkManager->GetGameServer()->MakePacketResEnterGame(true, &EnterPlayer->_GameObjectInfo, &EnterPlayer->_SpawnPosition);
+					G_NetworkManager->GetGameServer()->SendPacket(EnterPlayer->_SessionId, ResEnterGamePacket);
 					ResEnterGamePacket->Free();
 
 					if (EnterPlayer->_GameObjectInfo.ObjectType != en_GameObjectType::OBJECT_PLAYER_DUMMY)
 					{
-						st_GameServerJob* DBCharacterInfoSendJob = G_ObjectManager->GameServer->_GameServerJobMemoryPool->Alloc();
+						st_GameServerJob* DBCharacterInfoSendJob = G_NetworkManager->GetGameServer()->_GameServerJobMemoryPool->Alloc();
 						DBCharacterInfoSendJob->Type = en_GameServerJobType::DATA_BASE_CHARACTER_INFO_SEND;
 
 						CGameServerMessage* ReqDBCharacterInfoMessage = CGameServerMessage::GameServerMessageAlloc();
@@ -387,8 +388,8 @@ void CChannel::Update()
 
 						DBCharacterInfoSendJob->Message = ReqDBCharacterInfoMessage;
 
-						G_ObjectManager->GameServer->_GameServerUserDBThreadMessageQue.Enqueue(DBCharacterInfoSendJob);
-						SetEvent(G_ObjectManager->GameServer->_UserDataBaseWakeEvent);
+						G_NetworkManager->GetGameServer()->_GameServerUserDBThreadMessageQue.Enqueue(DBCharacterInfoSendJob);
+						SetEvent(G_NetworkManager->GetGameServer()->_UserDataBaseWakeEvent);
 					}	
 					else
 					{
@@ -443,8 +444,8 @@ void CChannel::Update()
 
 							vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Map->GetFieldAroundPlayers(Item);
 
-							CMessage* ItemSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectSpawn(Item);
-							G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ItemSpawnPacket);
+							CMessage* ItemSpawnPacket = G_NetworkManager->GetGameServer()->MakePacketResObjectSpawn(Item);
+							G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ItemSpawnPacket);
 							ItemSpawnPacket->Free();
 						}
 						break;	
@@ -493,8 +494,8 @@ void CChannel::Update()
 					// 나 포함해서 주위 시야범위 플레이어 조사
 					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Map->GetFieldAroundPlayers(LeaveGameObject, false);
 
-					CMessage* ResObjectDeSpawnPacket = G_ObjectManager->GameServer->MakePacketResObjectDeSpawn(LeaveGameObject->_GameObjectInfo.ObjectId);
-					G_ObjectManager->GameServer->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResObjectDeSpawnPacket);
+					CMessage* ResObjectDeSpawnPacket = G_NetworkManager->GetGameServer()->MakePacketResObjectDeSpawn(LeaveGameObject->_GameObjectInfo.ObjectId);
+					G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResObjectDeSpawnPacket);
 					ResObjectDeSpawnPacket->Free();
 
 					LeaveGameObject->_NetworkState = en_ObjectNetworkState::LEAVE;
@@ -535,10 +536,10 @@ void CChannel::Update()
 
 						Player->_SelectTarget = FindObject;
 
-						CMessage* ResMousePositionObjectInfo = G_ObjectManager->GameServer->MakePacketResLeftMousePositionObjectInfo(Player->_SessionId,
+						CMessage* ResMousePositionObjectInfo = G_NetworkManager->GetGameServer()->MakePacketResLeftMousePositionObjectInfo(Player->_SessionId,
 							PreviousChiceObject, FindObject->_GameObjectInfo.ObjectId,
 							FindObject->_Bufs, FindObject->_DeBufs);
-						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResMousePositionObjectInfo);
+						G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResMousePositionObjectInfo);
 						ResMousePositionObjectInfo->Free();
 					}
 				}
@@ -566,10 +567,10 @@ void CChannel::Update()
 
 						CraftingTable->_SelectCraftingItemType = (en_SmallItemCategory)LeftMouseItemCategory;
 
-						CMessage* ResCraftingTableCompleteItemSelectPacket = G_ObjectManager->GameServer->MakePacketResCraftingTableCompleteItemSelect(CraftingTableGO->_GameObjectInfo.ObjectId,
+						CMessage* ResCraftingTableCompleteItemSelectPacket = G_NetworkManager->GetGameServer()->MakePacketResCraftingTableCompleteItemSelect(CraftingTableGO->_GameObjectInfo.ObjectId,
 							CraftingTable->_SelectCraftingItemType,
 							CraftingTable->GetMaterialItems());
-						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCraftingTableCompleteItemSelectPacket);
+						G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResCraftingTableCompleteItemSelectPacket);
 						ResCraftingTableCompleteItemSelectPacket->Free();
 					}
 				}
@@ -600,8 +601,8 @@ void CChannel::Update()
 
 							CraftingTable->_SelectCraftingItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;							
 
-							CMessage* ResCraftingTableNonSelectMessage = G_ObjectManager->GameServer->MakePacketResCraftingTableNonSelect(CraftingTable->_GameObjectInfo.ObjectId, CraftingTable->_GameObjectInfo.ObjectType);
-							G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCraftingTableNonSelectMessage);
+							CMessage* ResCraftingTableNonSelectMessage = G_NetworkManager->GetGameServer()->MakePacketResCraftingTableNonSelect(CraftingTable->_GameObjectInfo.ObjectId, CraftingTable->_GameObjectInfo.ObjectType);
+							G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResCraftingTableNonSelectMessage);
 							ResCraftingTableNonSelectMessage->Free();
 						}
 						else
@@ -653,8 +654,8 @@ void CChannel::Update()
 
 											FindCraftingTable->_SelectCraftingItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
 
-											CMessage* ResCraftingTableNonSelectMessage = G_ObjectManager->GameServer->MakePacketResCraftingTableNonSelect(FindCraftingTable->_GameObjectInfo.ObjectId, FindCraftingTable->_GameObjectInfo.ObjectType);
-											G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCraftingTableNonSelectMessage);
+											CMessage* ResCraftingTableNonSelectMessage = G_NetworkManager->GetGameServer()->MakePacketResCraftingTableNonSelect(FindCraftingTable->_GameObjectInfo.ObjectId, FindCraftingTable->_GameObjectInfo.ObjectType);
+											G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResCraftingTableNonSelectMessage);
 											ResCraftingTableNonSelectMessage->Free();
 										}
 									}
@@ -668,10 +669,10 @@ void CChannel::Update()
 									{
 										for (CItem* CraftingTableItem : CraftingTable->GetCraftingTableRecipe().CraftingTableCompleteItems)
 										{
-											CMessage* ResCraftingTableSelectPacket = G_ObjectManager->GameServer->MakePacketResCraftingTableCraftRemainTime(
+											CMessage* ResCraftingTableSelectPacket = G_NetworkManager->GetGameServer()->MakePacketResCraftingTableCraftRemainTime(
 												CraftingTable->_GameObjectInfo.ObjectId,
 												CraftingTableItem->_ItemInfo);
-											G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCraftingTableSelectPacket);
+											G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResCraftingTableSelectPacket);
 											ResCraftingTableSelectPacket->Free();
 										}
 									}
@@ -679,24 +680,24 @@ void CChannel::Update()
 									// 완성된 제작품이 있을 경우 목록을 보내준다.
 									if (CraftingTable->GetCompleteItems().size() > 0)
 									{
-										CMessage* ResCrafintgTableCompleteItemListPacket = G_ObjectManager->GameServer->MakePacketResCraftingTableCompleteItemList(
+										CMessage* ResCrafintgTableCompleteItemListPacket = G_NetworkManager->GetGameServer()->MakePacketResCraftingTableCompleteItemList(
 											CraftingTable->_GameObjectInfo.ObjectId,
 											CraftingTable->_GameObjectInfo.ObjectType,
 											CraftingTable->GetCompleteItems());
-										G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResCrafintgTableCompleteItemListPacket);
+										G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResCrafintgTableCompleteItemListPacket);
 										ResCrafintgTableCompleteItemListPacket->Free();
 									}
 
-									CMessage* ResRightMousePositionObjectInfoPacket = G_ObjectManager->GameServer->MakePacketResRightMousePositionObjectInfo(Player->_GameObjectInfo.ObjectId,
+									CMessage* ResRightMousePositionObjectInfoPacket = G_NetworkManager->GetGameServer()->MakePacketResRightMousePositionObjectInfo(Player->_GameObjectInfo.ObjectId,
 										FindObject->_GameObjectInfo.ObjectId, FindObject->_GameObjectInfo.ObjectType);
-									G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResRightMousePositionObjectInfoPacket);
+									G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResRightMousePositionObjectInfoPacket);
 									ResRightMousePositionObjectInfoPacket->Free();
 								}
 								else
 								{
 									// 사용중임
-									CMessage* CommonErrorPacket = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MEESAGE_CRAFTING_TABLE_OVERLAP_SELECT, FindObject->_GameObjectInfo.ObjectName.c_str());
-									G_ObjectManager->GameServer->SendPacket(Player->_SessionId, CommonErrorPacket);
+									CMessage* CommonErrorPacket = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MEESAGE_CRAFTING_TABLE_OVERLAP_SELECT, FindObject->_GameObjectInfo.ObjectName.c_str());
+									G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, CommonErrorPacket);
 									CommonErrorPacket->Free();
 								}
 							}
@@ -744,21 +745,21 @@ void CChannel::Update()
 
 							EnterChannel(SeedObject, &ReqPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);							
 
-							CMessage* ResSeedFarmingPacket = G_ObjectManager->GameServer->MakePacketSeedFarming(SeedItem->_ItemInfo, SeedObject->_GameObjectInfo.ObjectId);
-							G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSeedFarmingPacket);
+							CMessage* ResSeedFarmingPacket = G_NetworkManager->GetGameServer()->MakePacketSeedFarming(SeedItem->_ItemInfo, SeedObject->_GameObjectInfo.ObjectId);
+							G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResSeedFarmingPacket);
 							ResSeedFarmingPacket->Free();
 						}
 						else
 						{
-							CMessage* SeedFarmingExistError = G_ObjectManager->GameServer->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_SEED_FARMING_EXIST, Plant->_GameObjectInfo.ObjectName.c_str());
-							G_ObjectManager->GameServer->SendPacket(Player->_SessionId, SeedFarmingExistError);
+							CMessage* SeedFarmingExistError = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_SEED_FARMING_EXIST, Plant->_GameObjectInfo.ObjectName.c_str());
+							G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, SeedFarmingExistError);
 							SeedFarmingExistError->Free();
 						}
 
 						SeedItem->_ItemInfo.ItemCount -= 1;
 
-						CMessage* ResSeedItemUpdatePacket = G_ObjectManager->GameServer->MakePacketInventoryItemUpdate(Player->_GameObjectInfo.ObjectId, SeedItem->_ItemInfo);
-						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResSeedItemUpdatePacket);
+						CMessage* ResSeedItemUpdatePacket = G_NetworkManager->GetGameServer()->MakePacketInventoryItemUpdate(Player->_GameObjectInfo.ObjectId, SeedItem->_ItemInfo);
+						G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResSeedItemUpdatePacket);
 						ResSeedItemUpdatePacket->Free();
 					}		
 					else
@@ -783,10 +784,10 @@ void CChannel::Update()
 					CCrop* Plant = (CCrop*)FindChannelObject(PlantObjectID, (en_GameObjectType)PlantObjectType);
 					if (Plant != nullptr)
 					{
-						CMessage* ResPlantGrowthCheckPacket = G_ObjectManager->GameServer->MakePacketPlantGrowthStep(Plant->_GameObjectInfo.ObjectId,
+						CMessage* ResPlantGrowthCheckPacket = G_NetworkManager->GetGameServer()->MakePacketPlantGrowthStep(Plant->_GameObjectInfo.ObjectId,
 							Plant->_GameObjectInfo.ObjectCropStep,
 							Plant->_CropGrowthRatio);
-						G_ObjectManager->GameServer->SendPacket(Player->_SessionId, ResPlantGrowthCheckPacket);
+						G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResPlantGrowthCheckPacket);
 						ResPlantGrowthCheckPacket->Free();
 					}
 				}
@@ -2002,8 +2003,8 @@ void CChannel::ExperienceCalculate(CPlayer* TargetPlayer, en_GameObjectType Targ
 		TargetPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
 		TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxSpeed = NewCharacterStatus.Speed;
 
-		CGameServerMessage* ResObjectStatChangeMessage = G_ObjectManager->GameServer->MakePacketResChangeObjectStat(TargetPlayer->_GameObjectInfo.ObjectId, TargetPlayer->_GameObjectInfo.ObjectStatInfo);
-		G_ObjectManager->GameServer->SendPacket(TargetPlayer->_SessionId, ResObjectStatChangeMessage);
+		CGameServerMessage* ResObjectStatChangeMessage = G_NetworkManager->GetGameServer()->MakePacketResChangeObjectStat(TargetPlayer->_GameObjectInfo.ObjectId, TargetPlayer->_GameObjectInfo.ObjectStatInfo);
+		G_NetworkManager->GetGameServer()->SendPacket(TargetPlayer->_SessionId, ResObjectStatChangeMessage);
 		ResObjectStatChangeMessage->Free();
 
 		auto FindLevelData = G_Datamanager->_LevelDatas.find(TargetPlayer->_GameObjectInfo.ObjectStatInfo.Level);
@@ -2019,11 +2020,11 @@ void CChannel::ExperienceCalculate(CPlayer* TargetPlayer, en_GameObjectType Targ
 		TargetPlayer->_Experience.TotalExperience = LevelData.TotalExperience;
 	}
 
-	CGameServerMessage* ResMonsterGetExpMessage = G_ObjectManager->GameServer->MakePacketExperience(
+	CGameServerMessage* ResMonsterGetExpMessage = G_NetworkManager->GetGameServer()->MakePacketExperience(
 		ExperiencePoint,
 		TargetPlayer->_Experience.CurrentExperience,
 		TargetPlayer->_Experience.RequireExperience,
 		TargetPlayer->_Experience.TotalExperience);
-	G_ObjectManager->GameServer->SendPacket(TargetPlayer->_SessionId, ResMonsterGetExpMessage);
+	G_NetworkManager->GetGameServer()->SendPacket(TargetPlayer->_SessionId, ResMonsterGetExpMessage);
 	ResMonsterGetExpMessage->Free();	
 }
