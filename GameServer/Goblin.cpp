@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Goblin.h"
 #include "ObjectManager.h"
+#include "NetworkManager.h"
 #include "DataManager.h"
 #include "RectCollision.h"
 
@@ -93,8 +94,8 @@ bool CGoblin::OnDamaged(CGameObject* Attacker, int32 Damage)
 
 		vector<st_FieldOfViewInfo> AroundPlayers = _Channel->GetMap()->GetFieldAroundPlayers(this);
 		
-		CMessage* ResDieMessagePacket = G_ObjectManager->GameServer->MakePacketObjectDie(_GameObjectInfo.ObjectId);
-		G_ObjectManager->GameServer->SendPacketFieldOfView(AroundPlayers, ResDieMessagePacket);
+		CMessage* ResDieMessagePacket = G_NetworkManager->GetGameServer()->MakePacketObjectDie(_GameObjectInfo.ObjectId);
+		G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, ResDieMessagePacket);
 		ResDieMessagePacket->Free();				
 
 		G_ObjectManager->ObjectItemSpawn(_Channel, Attacker->_GameObjectInfo.ObjectId,
