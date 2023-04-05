@@ -4,12 +4,14 @@
 #include "DataManager.h"
 #include "MapManager.h"
 #include "ObjectManager.h"
+#include "NetworkManager.h"
 
 CDBConnectionPool* G_DBConnectionPool = nullptr;
 CLog* G_Logger = nullptr;
 CDataManager* G_Datamanager = nullptr;
 CMapManager* G_MapManager = nullptr;
 CObjectManager* G_ObjectManager = nullptr;
+CNetworkManager* G_NetworkManager = nullptr;
 
 //------------------------------------------------
 // 각종 전역 클래스 (Manager) 관리
@@ -26,6 +28,8 @@ public:
 		G_Logger = new CLog();
 		G_ObjectManager = new CObjectManager();
 		G_Datamanager = new CDataManager();
+		G_NetworkManager = new CNetworkManager();
+
 		// 아이템 데이터 파싱
 		G_Datamanager->LoadDataItem(L"ItemData.json");
 		
