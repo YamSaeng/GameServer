@@ -19,6 +19,7 @@ class CCropItem;
 class CGeneralMerchantNPC;
 class CWall;
 class CRectCollision;
+class CSwordBlade;
 
 class CObjectManager
 {
@@ -52,7 +53,9 @@ private:
 	CMemoryPoolTLS<CFurnace>* _FurnaceMemoryPool;
 	CMemoryPoolTLS<CSawmill>* _SamillMemoryPool;	
 	CMemoryPoolTLS<CPotato>* _PotatoMemoryPool;
-	CMemoryPoolTLS<CCorn>* _CornMemoryPool;	
+	CMemoryPoolTLS<CCorn>* _CornMemoryPool;
+
+	CMemoryPoolTLS<CSwordBlade>* _SwordBladePool;
 
 	// 오브젝트에 부여할 고유 ID값
 	int64 _GameServerObjectId;

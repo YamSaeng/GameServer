@@ -15,6 +15,7 @@
 #include "ChannelManager.h"
 #include "Wall.h"
 #include "RectCollision.h"
+#include "SwordBlade.h"
 #include <atlbase.h>
 
 CObjectManager::CObjectManager()
@@ -43,6 +44,8 @@ CObjectManager::CObjectManager()
 	
 	_PotatoMemoryPool = new CMemoryPoolTLS<CPotato>();
 	_CornMemoryPool = new CMemoryPoolTLS<CCorn>();
+
+	_SwordBladePool = new CMemoryPoolTLS<CSwordBlade>();
 
 	_SkillMemoryPool = new CMemoryPoolTLS<CSkill>();
 	_SkillInfoMemoryPool = new CMemoryPoolTLS<st_SkillInfo>();	
@@ -130,6 +133,9 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 	case en_GameObjectType::OBJECT_CROP_CORN:
 		NewObject = _CornMemoryPool->Alloc();
 		break;	
+	case en_GameObjectType::OBJECT_SKILL_SWORD_BLADE:
+		NewObject = _SwordBladePool->Alloc();
+		break;
 	}
 
 	if (NewObject != nullptr)
@@ -178,6 +184,9 @@ void CObjectManager::ObjectReturn(CGameObject* ReturnObject)
 		case en_GameObjectType::OBJECT_CROP_CORN:
 			_CornMemoryPool->Free((CCorn*)ReturnObject);
 			break;		
+		case en_GameObjectType::OBJECT_SKILL_SWORD_BLADE:
+			_SwordBladePool->Free((CSwordBlade*)ReturnObject);
+			break;
 		}
 
 		if (ReturnObject->GetRectCollision() != nullptr)
