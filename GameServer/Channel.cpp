@@ -405,10 +405,16 @@ void CChannel::Update()
 					switch (EnterObject->_GameObjectInfo.ObjectType)
 					{
 					case en_GameObjectType::OBJECT_GOBLIN:					
-						{
-							CMonster* EnterChannelMonster = (CMonster*)EnterObject;							
-							
-							EnterChannel(EnterChannelMonster, &EnterChannelMonster->_SpawnPosition);
+					case en_GameObjectType::OBJECT_WALL:
+					case en_GameObjectType::OBJECT_STONE:
+					case en_GameObjectType::OBJECT_TREE:
+					case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+					case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
+					case en_GameObjectType::OBJECT_CROP_POTATO:
+					case en_GameObjectType::OBJECT_CROP_CORN:
+					case en_GameObjectType::OBJECT_SKILL_SWORD_BLADE:
+						{				
+							EnterChannel(EnterObject, &EnterObject->_SpawnPosition);
 						}
 						break;
 					case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
@@ -448,31 +454,7 @@ void CChannel::Update()
 							G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ItemSpawnPacket);
 							ItemSpawnPacket->Free();
 						}
-						break;	
-					case en_GameObjectType::OBJECT_WALL:
-					case en_GameObjectType::OBJECT_STONE:
-					case en_GameObjectType::OBJECT_TREE:
-						{
-							CEnvironment* Entervironment = (CEnvironment*)EnterObject;							
-
-							EnterChannel(Entervironment, &Entervironment->_SpawnPosition);
-						}
-						break;
-					case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
-					case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
-						{
-							CCraftingTable* CraftingTable = (CCraftingTable*)EnterObject;
-							EnterChannel(CraftingTable, &CraftingTable->_SpawnPosition);
-						}
-						break;
-					case en_GameObjectType::OBJECT_CROP_POTATO:
-					case en_GameObjectType::OBJECT_CROP_CORN:
-						{
-							CPotato* Potato = (CPotato*)EnterObject;
-
-							EnterChannel(Potato, &Potato->_SpawnPosition);
-						}
-						break;
+						break;											
 					}																		
 				}
 				break;
