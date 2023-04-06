@@ -18,6 +18,7 @@ private:
 	set<CMonster*> _Monsters;
 	set<CItem*> _Items;
 	set<CEnvironment*> _Environment;	
+	set<CGameObject*> _SkillObjects;
 	set<CCraftingTable*> _CraftingTables;
 	set<CCrop*> _Crops;
 
@@ -40,6 +41,7 @@ public:
 	set<CMonster*> GetMonsters();
 	set<CItem*> GetItems();
 	set<CEnvironment*> GetEnvironment();
+	set<CGameObject*> GetSkillObject();
 	set<CCraftingTable*> GetCraftingTable();
 	set<CCrop*> GetCrop();
 
