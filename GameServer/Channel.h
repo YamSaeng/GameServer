@@ -98,6 +98,7 @@ private:
 		CHANNEL_MONSTER_MAX = 100,
 		CHANNEL_ENVIRONMENT_MAX = 300,
 		CHANNEL_CRAFTING_TABLE_MAX = 100,
+		CHANNEL_SKILL_OBJECT_MAX = 100,
 		CHANNEL_CROP_MAX = 100,
 		CHANNEL_ITEM_MAX = 200
 	};
@@ -109,8 +110,9 @@ private:
 	CMonster* _ChannelMonsterArray[CHANNEL_MONSTER_MAX];
 	CEnvironment* _ChannelEnvironmentArray[CHANNEL_ENVIRONMENT_MAX];
 	CCraftingTable* _ChannelCraftingTableArray[CHANNEL_CRAFTING_TABLE_MAX];
+	CGameObject* _ChannelSkillObjectArray[CHANNEL_SKILL_OBJECT_MAX];
 	CCrop* _ChannelCropArray[CHANNEL_CROP_MAX];
-	CItem* _ChannelItemArray[CHANNEL_ITEM_MAX];
+	CItem* _ChannelItemArray[CHANNEL_ITEM_MAX];	
 
 	CLockFreeStack<int32> _ChannelPlayerArrayIndexs;
 	CLockFreeStack<int32> _ChannelDummyPlayerArrayIndexs;
@@ -118,6 +120,7 @@ private:
 	CLockFreeStack<int32> _ChannelMonsterArrayIndexs;
 	CLockFreeStack<int32> _ChannelEnvironmentArrayIndexs;
 	CLockFreeStack<int32> _ChannelCraftingTableArrayIndexs;
+	CLockFreeStack<int32> _ChannelSkillObjectArrayIndexs;
 	CLockFreeStack<int32> _ChannelCropArrayIndexs;
 	CLockFreeStack<int32> _ChannelItemArrayIndexs;	
 	

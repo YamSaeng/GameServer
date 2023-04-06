@@ -11,6 +11,7 @@
 #include "Crop.h"
 #include "Map.h"
 #include "Potato.h"
+#include "SwordBlade.h"
 #include "ObjectManager.h"
 #include "NetworkManager.h"
 #include "DataManager.h"
@@ -52,6 +53,12 @@ CChannel::CChannel()
 	{
 		_ChannelCraftingTableArray[Crafting] = nullptr;
 		_ChannelCraftingTableArrayIndexs.Push(Crafting);
+	}
+
+	for (int32 SkillObjectCount = CHANNEL_SKILL_OBJECT_MAX - 1; SkillObjectCount >= 0; --SkillObjectCount)
+	{
+		_ChannelSkillObjectArray[SkillObjectCount] = nullptr;
+		_ChannelSkillObjectArrayIndexs.Push(SkillObjectCount);
 	}
 
 	for (int32 CropCount = CHANNEL_CROP_MAX - 1; CropCount >= 0; --CropCount)
@@ -821,6 +828,14 @@ void CChannel::Update()
 		}
 	}
 
+	for (int16 i = 0; i < CHANNEL_SKILL_OBJECT_MAX; i++)
+	{
+		if (_ChannelSkillObjectArray[i] != nullptr)
+		{
+			_ChannelSkillObjectArray[i]->Update();
+		}
+	}
+
 	for (int16 i = 0; i < CHANNEL_CRAFTING_TABLE_MAX; i++)
 	{
 		if (_ChannelCraftingTableArray[i] != nullptr)
@@ -930,38 +945,13 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 			}
 		}
 		break;
-	case en_GameObjectType::OBJECT_ITEM:
-	case en_GameObjectType::OBJECT_ITEM_WEAPON:
-	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
-	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE:	
-	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEALTH_RESTORATION_POTION_SMALL:
-	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_MANA_RESTORATION_POTION_SMALL:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL:	
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIVER_COIN:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_GOLD_COIN:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
-	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
-	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
+	case en_GameObjectType::OBJECT_SKILL_SWORD_BLADE:
 		{
-			for (int32 i = 0; i < en_Channel::CHANNEL_ITEM_MAX; i++)
+			for (int32 i = 0; i < en_Channel::CHANNEL_SKILL_OBJECT_MAX; i++)
 			{
-				if (_ChannelItemArray[i] != nullptr && _ChannelItemArray[i]->_GameObjectInfo.ObjectId == ObjectID)
+				if (_ChannelSkillObjectArray[i] != nullptr && _ChannelSkillObjectArray[i]->_GameObjectInfo.ObjectId == ObjectID)
 				{
-					FindObject = _ChannelItemArray[i];
+					FindObject = _ChannelSkillObjectArray[i];
 				}
 			}
 		}
@@ -989,6 +979,42 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 				if (_ChannelCropArray[i] != nullptr && _ChannelCropArray[i]->_GameObjectInfo.ObjectId == ObjectID)
 				{
 					FindObject = _ChannelCropArray[i];
+				}
+			}
+		}
+		break;
+	case en_GameObjectType::OBJECT_ITEM:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEALTH_RESTORATION_POTION_SMALL:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_MANA_RESTORATION_POTION_SMALL:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIVER_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_GOLD_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
+	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
+	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
+		{
+			for (int32 i = 0; i < en_Channel::CHANNEL_ITEM_MAX; i++)
+			{
+				if (_ChannelItemArray[i] != nullptr && _ChannelItemArray[i]->_GameObjectInfo.ObjectId == ObjectID)
+				{
+					FindObject = _ChannelItemArray[i];
 				}
 			}
 		}
@@ -1746,55 +1772,10 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 				CRASH("EnterChannelMonster nullptr")
 			}
 		}
-		break;
-	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:		
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
-	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
-	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
-		{
-			// 아이템으로 형변환
-			CItem* EnterChannelItem = dynamic_cast<CItem*>(EnterChannelGameObject);
-			if (EnterChannelItem != nullptr)
-			{
-				EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-
-				// 맵 정보에 보관			
-				IsEnterChannel = _Map->ApplyMove(EnterChannelItem, SpawnPosition, false, false);
-
-				// 중복되지 않는 아이템의 경우에만 채널에 해당 아이템을 채널과 섹터에 저장
-				if (IsEnterChannel == true)
-				{
-					// 아이템 저장
-					_ChannelItemArrayIndexs.Pop(&EnterChannelItem->_ChannelArrayIndex);
-					_ChannelItemArray[EnterChannelItem->_ChannelArrayIndex] = EnterChannelItem;
-
-					// 섹터 얻어서 해당 섹터에도 저장
-					CSector* EnterSector = _Map->GetSector(SpawnPosition);
-					EnterSector->Insert(EnterChannelItem);
-				}
-			}	
-			else
-			{
-				CRASH("EnterChannelItem nullptr")
-			}
-		}
-		break;
+		break;	
 	case en_GameObjectType::OBJECT_WALL:	
 	case en_GameObjectType::OBJECT_STONE:
-	case en_GameObjectType::OBJECT_TREE:
+	case en_GameObjectType::OBJECT_TREE:	
 		{
 			CEnvironment* EnterChannelEnvironment = dynamic_cast<CEnvironment*>(EnterChannelGameObject);
 			if (EnterChannelEnvironment != nullptr)
@@ -1820,6 +1801,28 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			else
 			{
 				CRASH("EnterChannelEnvironment nullptr")
+			}
+		}
+		break;
+	case en_GameObjectType::OBJECT_SKILL_SWORD_BLADE:
+		{
+			CSwordBlade* SwordBlade = dynamic_cast<CSwordBlade*>(EnterChannelGameObject);
+			if (SwordBlade)
+			{
+				SwordBlade->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
+				SwordBlade->_GameObjectInfo.ObjectPositionInfo.Position._X = SwordBlade->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
+				SwordBlade->_GameObjectInfo.ObjectPositionInfo.Position._Y = SwordBlade->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
+				
+				SwordBlade->SetRectCollision();
+				SwordBlade->GetRectCollision()->SetActive(true);
+
+				_ChannelCraftingTableArrayIndexs.Pop(&SwordBlade->_ChannelArrayIndex);
+				_ChannelSkillObjectArray[SwordBlade->_ChannelArrayIndex] = SwordBlade;
+
+				_Map->ApplyMove(SwordBlade, SpawnPosition);
+
+				CSector* EnterSector = _Map->GetSector(SpawnPosition);
+				EnterSector->Insert(SwordBlade);
 			}
 		}
 		break;
@@ -1876,6 +1879,51 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			}			
 		}
 		break;
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
+	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
+	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
+		{
+			// 아이템으로 형변환
+			CItem* EnterChannelItem = dynamic_cast<CItem*>(EnterChannelGameObject);
+			if (EnterChannelItem != nullptr)
+			{
+				EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
+
+				// 맵 정보에 보관			
+				IsEnterChannel = _Map->ApplyMove(EnterChannelItem, SpawnPosition, false, false);
+
+				// 중복되지 않는 아이템의 경우에만 채널에 해당 아이템을 채널과 섹터에 저장
+				if (IsEnterChannel == true)
+				{
+					// 아이템 저장
+					_ChannelItemArrayIndexs.Pop(&EnterChannelItem->_ChannelArrayIndex);
+					_ChannelItemArray[EnterChannelItem->_ChannelArrayIndex] = EnterChannelItem;
+
+					// 섹터 얻어서 해당 섹터에도 저장
+					CSector* EnterSector = _Map->GetSector(SpawnPosition);
+					EnterSector->Insert(EnterChannelItem);
+				}
+			}
+			else
+			{
+				CRASH("EnterChannelItem nullptr")
+			}
+		}
+		break;
 	}
 
 	return IsEnterChannel;
@@ -1900,11 +1948,33 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 		G_ObjectManager->ObjectReturn(LeaveChannelGameObject);
 
 		_ChannelMonsterArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
+		break;	
+	case en_GameObjectType::OBJECT_WALL:
+	case en_GameObjectType::OBJECT_STONE:
+	case en_GameObjectType::OBJECT_TREE:
+		G_ObjectManager->ObjectReturn(LeaveChannelGameObject);
+
+		_ChannelEnvironmentArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
+		break;
+	case en_GameObjectType::OBJECT_SKILL_SWORD_BLADE:
+		G_ObjectManager->ObjectReturn(LeaveChannelGameObject);
+
+		_ChannelSkillObjectArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
+		break;
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
+		_ChannelCraftingTableArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
+		break;
+	case en_GameObjectType::OBJECT_CROP_POTATO:
+	case en_GameObjectType::OBJECT_CROP_CORN:
+		G_ObjectManager->ObjectReturn(LeaveChannelGameObject);
+
+		_ChannelCropArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
 		break;
 	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:		
+	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
@@ -1921,23 +1991,6 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 		G_ObjectManager->ItemReturn((CItem*)LeaveChannelGameObject);
 
 		_ChannelItemArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
-		break;
-	case en_GameObjectType::OBJECT_WALL:
-	case en_GameObjectType::OBJECT_STONE:
-	case en_GameObjectType::OBJECT_TREE:
-		G_ObjectManager->ObjectReturn(LeaveChannelGameObject);
-
-		_ChannelEnvironmentArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
-		break;
-	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
-	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
-		_ChannelCraftingTableArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
-		break;
-	case en_GameObjectType::OBJECT_CROP_POTATO:
-	case en_GameObjectType::OBJECT_CROP_CORN:
-		G_ObjectManager->ObjectReturn(LeaveChannelGameObject);
-
-		_ChannelCropArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
 		break;
 	}	
 }
