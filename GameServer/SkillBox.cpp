@@ -3,6 +3,7 @@
 #include "Skill.h"
 #include "ObjectManager.h"
 #include "NetworkManager.h"
+#include "SwordBlade.h"
 
 CSkillBox::CSkillBox()
 {
@@ -208,6 +209,114 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 									}
 								}
 								break;
+							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK:
+								{
+									CPlayer* Player = dynamic_cast<CPlayer*>(SkillUser);
+									if (Player != nullptr)
+									{
+										if (Player->_SelectTarget != nullptr)
+										{
+											float Distance = st_Vector2::Distance(Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position,
+												Player->_GameObjectInfo.ObjectPositionInfo.Position);
+											if (Distance < Skill->GetSkillInfo()->SkillDistance)
+											{
+												st_Vector2Int JumpingPositionDir = Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition
+													- Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition;
+
+												st_Vector2Int JumpingPosition = JumpingPositionDir.Direction();
+												JumpingPosition._X = JumpingPosition._X * -1.0f;
+												JumpingPosition._Y = JumpingPosition._Y * -1.0f;
+
+												st_Vector2Int NewCollisionPosition;
+												NewCollisionPosition._X = Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + JumpingPosition._X;
+												NewCollisionPosition._Y = Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + JumpingPosition._Y;
+
+												st_Vector2 NewPosition;
+												NewPosition._X = NewCollisionPosition._X + 0.5f;
+												NewPosition._Y = NewCollisionPosition._Y + 0.5f;
+
+												bool IsCollision = Player->GetChannel()->ChannelColliderCheck(Player, NewPosition);
+												if (IsCollision == true)
+												{
+													st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(SkillUser->_GameObjectInfo.ObjectId, 
+														SkillUser->_GameObjectInfo.ObjectType,
+														MeleeSkillInfo->SkillType,
+														MeleeSkillInfo->SkillMinDamage,
+														MeleeSkillInfo->SkillMaxDamage);
+													Player->_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
+
+													Player->_GameObjectInfo.ObjectPositionInfo.Position = NewPosition;
+
+													st_Vector2Int CollisionPosition;
+													CollisionPosition._X = (int32)Player->_GameObjectInfo.ObjectPositionInfo.Position._X;
+													CollisionPosition._Y = (int32)Player->_GameObjectInfo.ObjectPositionInfo.Position._Y;
+
+													if (CollisionPosition._X != Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X
+														|| CollisionPosition._Y != Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y)
+													{
+														Player->GetChannel()->GetMap()->ApplyMove(Player, CollisionPosition);
+													}
+
+													CMessage* SyncPositionPacket = G_NetworkManager->GetGameServer()->MakePacketResSyncPosition(Player->_GameObjectInfo.ObjectId, Player->_GameObjectInfo.ObjectPositionInfo);
+													G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, SyncPositionPacket);
+													SyncPositionPacket->Free();
+												}
+												else
+												{
+													G_Logger->WriteStdOut(en_Color::RED, L"충돌해서 해당 좌표로 이동 못함\n");
+												}
+											}
+											else
+											{
+												CMessage* DistanceFarPacket = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_FAR_DISTANCE);
+												G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, DistanceFarPacket);
+												DistanceFarPacket->Free();
+											}
+										}
+										else
+										{
+											CMessage* NonSelectTargetPacket = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_NON_SELECT_OBJECT);
+											G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, NonSelectTargetPacket);
+											NonSelectTargetPacket->Free();
+										}
+									}
+								}
+								break;
+							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE:
+								{									
+									vector<st_FieldOfViewInfo> FieldOfViewInfos = SkillUser->GetChannel()->GetMap()->GetFieldOfViewAttackObjects(SkillUser, 1);
+									for (auto FieldOfViewInfo : FieldOfViewInfos)
+									{
+										CGameObject* FindObject = SkillUser->GetChannel()->FindChannelObject(FieldOfViewInfo.ObjectID, FieldOfViewInfo.ObjectType);
+										
+										float Distance = st_Vector2::Distance(FindObject->_GameObjectInfo.ObjectPositionInfo.Position, SkillUser->_GameObjectInfo.ObjectPositionInfo.Position);
+										if (Distance < Skill->GetSkillInfo()->SkillDistance)
+										{
+											st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(SkillUser->_GameObjectInfo.ObjectId,
+												SkillUser->_GameObjectInfo.ObjectType,
+												MeleeSkillInfo->SkillType,
+												MeleeSkillInfo->SkillMinDamage,
+												MeleeSkillInfo->SkillMaxDamage);
+											FindObject->_GameObjectJobQue.Enqueue(DamageJob);
+										}
+									}									
+								}
+								break;
+							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE:
+								{
+									CSwordBlade* NewSwordBlade = dynamic_cast<CSwordBlade*>(G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_SKILL_SWORD_BLADE));
+									if (NewSwordBlade != nullptr)
+									{
+										NewSwordBlade->_SpawnPosition = SkillUser->_GameObjectInfo.ObjectPositionInfo.CollisionPosition;
+										NewSwordBlade->_GameObjectInfo.ObjectPositionInfo.Position = SkillUser->_GameObjectInfo.ObjectPositionInfo.Position + SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton;
+										NewSwordBlade->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton = SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton;
+										NewSwordBlade->_GameObjectInfo.ObjectPositionInfo.MoveDirection = SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton;
+
+										st_GameObjectJob* EnterChannelSwordBladeJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobObjectEnterChannel(NewSwordBlade);
+										SkillUser->GetChannel()->_ChannelJobQue.Enqueue(EnterChannelSwordBladeJob);
+									}
+								}
+								break;
 							case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE:
 								{
 									if (SkillUser->_SelectTarget != nullptr)
@@ -249,46 +358,7 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 
 									}
 								}
-								break;
-							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK:
-								{
-									CPlayer* Player = dynamic_cast<CPlayer*>(SkillUser);
-									if (Player != nullptr)
-									{
-										if (Player->_SelectTarget != nullptr)
-										{										
-											st_Vector2Int JumpingPositionDir = Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition
-												- Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition;
-
-											st_Vector2Int JumpingPosition = JumpingPositionDir.Direction();
-											JumpingPosition._X = JumpingPosition._X * -1.0f;
-											JumpingPosition._Y = JumpingPosition._Y * -1.0f;
-											
-											st_Vector2Int NewPosition;
-											NewPosition._X = Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + JumpingPosition._X;
-											NewPosition._Y = Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + JumpingPosition._Y;											
-
-											CMessage* SyncPositionPacket = G_NetworkManager->GetGameServer()->MakePacketResSyncPosition(Player->_GameObjectInfo.ObjectId, Player->_GameObjectInfo.ObjectPositionInfo);
-											G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, SyncPositionPacket);
-											SyncPositionPacket->Free();
-											/*G_Logger->WriteStdOut(en_Color::RED, L"OriPosition X : %d Y : %d Jump Position X : %d Y : %d\n", 
-												Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X,
-												Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y, 
-												NewPosition._X,
-												NewPosition._Y);*/
-										}
-										else
-										{
-											CMessage* NonSelectTargetPacket = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_NON_SELECT_OBJECT);
-											G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, NonSelectTargetPacket);
-											NonSelectTargetPacket->Free();
-										}
-									}									
-								}
-								break;	
-							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE:
-							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_COMBO_FLY_KNIFE:
-								break;
+								break;															
 							}
 						}
 						break;
