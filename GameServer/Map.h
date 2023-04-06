@@ -123,7 +123,7 @@ public:
 	// CheckObjects = 벽을 제외한 오브젝트를 충돌 대상으로 여길 것인지에 대한 판단
 	// ( true : 해당위치에 오브젝트가 있는지 확인해서 있으면 충돌체로 판단한다. )
 	//----------------------------------------------------------------------------
-	bool MoveCollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, st_Vector2& NextPosition, bool CheckObjects = true);	
+	bool MoveCollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, st_Vector2& NextPosition, bool CheckObjects = true);		
 
 	//------------------------------------------------------------------------------------------------------------------------
 	// 목적지 좌표값을 받아서 해당 좌표로 갈 수 있는지 없는지 판단

@@ -227,7 +227,9 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object)
 		
 		for (CMonster* Monster : Sector->GetMonsters())
 		{
-			if (st_Vector2::CheckFieldOfView(Monster->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->_FieldOfDirection, Object->_FieldOfAngle, Object->_FieldOfViewDistance))
+			if (st_Vector2::CheckFieldOfView(Monster->_GameObjectInfo.ObjectPositionInfo.Position, 
+				Object->_GameObjectInfo.ObjectPositionInfo.Position,
+				Object->_FieldOfDirection, Object->_FieldOfAngle, Object->_FieldOfViewDistance))
 			{
 				FieldOfViewInfo.ObjectID = Monster->_GameObjectInfo.ObjectId;
 				FieldOfViewInfo.SessionID = 0;
@@ -250,6 +252,18 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object)
 					FieldOfViewGameObjects.push_back(FieldOfViewInfo);
 				}
 			}			
+		}		
+
+		for (CGameObject* SkillObject : Sector->GetSkillObject())
+		{
+			if (st_Vector2::CheckFieldOfView(SkillObject->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->_FieldOfDirection, Object->_FieldOfAngle, Object->_FieldOfViewDistance))
+			{
+				FieldOfViewInfo.ObjectID = SkillObject->_GameObjectInfo.ObjectId;
+				FieldOfViewInfo.SessionID = 0;
+				FieldOfViewInfo.ObjectType = SkillObject->_GameObjectInfo.ObjectType;
+
+				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
+			}
 		}
 
 		for (CCraftingTable* CraftingTable : Sector->GetCraftingTable())
