@@ -95,9 +95,7 @@ void CGameObject::Update()
 				float CheckPositionY = abs(_GameObjectInfo.ObjectPositionInfo.Position._Y - PositionY);
 						
 				if (CheckPositionX < 1.0f && CheckPositionY < 1.0f)
-				{
-					_GameObjectInfo.ObjectPositionInfo.LookAtDireciton._X = DirectionX;
-					_GameObjectInfo.ObjectPositionInfo.LookAtDireciton._Y = DirectionY;
+				{					
 					_GameObjectInfo.ObjectPositionInfo.MoveDirection._X = DirectionX;
 					_GameObjectInfo.ObjectPositionInfo.MoveDirection._Y = DirectionY;
 
