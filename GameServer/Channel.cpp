@@ -1496,15 +1496,13 @@ bool CChannel::ChannelColliderCheck(CGameObject* Object)
 	return IsCollision;
 }
 
-bool CChannel::ChannelColliderCheck(CGameObject* CheckObject, st_Vector2 CheckPosition)
+bool CChannel::ChannelColliderCheck(CGameObject* CheckObject, st_Vector2 CheckPosition, CGameObject* CollisionObject)
 {
 	CRectCollision CheckRectCollision;
 	CheckRectCollision._Position._X = CheckPosition._X;
 	CheckRectCollision._Position._Y = CheckPosition._Y;	
 	CheckRectCollision._Size = CheckObject->GetRectCollision()->_Size;	
-
-	// 플레이어들과 충돌하는지 검사
-	bool IsPlayerCollision = true;
+		
 	for (int32 i = 0; i < en_Channel::CHANNEL_PLAYER_MAX; i++)
 	{
 		if (_ChannelPlayerArray[i] != nullptr
@@ -1513,15 +1511,13 @@ bool CChannel::ChannelColliderCheck(CGameObject* CheckObject, st_Vector2 CheckPo
 			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelPlayerArray[i]->_GameObjectInfo.ObjectId
 				&& _ChannelPlayerArray[i]->GetRectCollision()->GetActive() == true
 				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelPlayerArray[i]->GetRectCollision()) == true)
-			{
-				// 충돌
-				IsPlayerCollision = false;
-				break;
+			{						
+				CollisionObject = _ChannelPlayerArray[i];
+				return false;
 			}
 		}
 	}
-
-	bool IsNonPlayerCollision = true;
+		
 	for (int32 i = 0; i < en_Channel::CHANNEL_NON_PLAYER_MAX; i++)
 	{
 		if (_ChannelNonPlayerArray[i] != nullptr)
@@ -1529,14 +1525,13 @@ bool CChannel::ChannelColliderCheck(CGameObject* CheckObject, st_Vector2 CheckPo
 			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelNonPlayerArray[i]->_GameObjectInfo.ObjectId
 				&& _ChannelNonPlayerArray[i]->GetRectCollision()->GetActive() == true
 				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelNonPlayerArray[i]->GetRectCollision()) == true)
-			{				
-				IsPlayerCollision = false;
-				break;
+			{		
+				CollisionObject = _ChannelNonPlayerArray[i];
+				return false;
 			}
 		}
 	}
-
-	bool IsDummyPlayerCollision = true;
+	
 	for (int32 i = 0; i < en_Channel::CHANNEL_DUMMY_PLAYER_MAX; i++)
 	{
 		if (_ChannelDummyPlayerArray[i] != nullptr
@@ -1545,14 +1540,13 @@ bool CChannel::ChannelColliderCheck(CGameObject* CheckObject, st_Vector2 CheckPo
 			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectId
 				&& _ChannelDummyPlayerArray[i]->GetRectCollision()->GetActive() == true
 				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelDummyPlayerArray[i]->GetRectCollision()) == true)
-			{
-				IsDummyPlayerCollision = false;
-				break;
+			{				
+				CollisionObject = _ChannelDummyPlayerArray[i];
+				return false;
 			}
 		}
 	}
-
-	bool IsMonsterCollision = true;
+		
 	for (int32 i = 0; i < en_Channel::CHANNEL_MONSTER_MAX; i++)
 	{
 		if (_ChannelMonsterArray[i] != nullptr)
@@ -1560,14 +1554,13 @@ bool CChannel::ChannelColliderCheck(CGameObject* CheckObject, st_Vector2 CheckPo
 			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelMonsterArray[i]->_GameObjectInfo.ObjectId
 				&& _ChannelMonsterArray[i]->GetRectCollision()->GetActive() == true
 				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelMonsterArray[i]->GetRectCollision()) == true)
-			{
-				IsMonsterCollision = false;
-				break;
+			{				
+				CollisionObject = _ChannelMonsterArray[i];
+				return false;
 			}
 		}
 	}
-
-	bool IsCraftingTableCollision = true;
+		
 	for (int32 i = 0; i < en_Channel::CHANNEL_CRAFTING_TABLE_MAX; i++)
 	{
 		if (_ChannelCraftingTableArray[i] != nullptr)
@@ -1575,14 +1568,13 @@ bool CChannel::ChannelColliderCheck(CGameObject* CheckObject, st_Vector2 CheckPo
 			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelCraftingTableArray[i]->_GameObjectInfo.ObjectId
 				&& _ChannelCraftingTableArray[i]->GetRectCollision()->GetActive() == true
 				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelCraftingTableArray[i]->GetRectCollision()) == true)
-			{
-				IsCraftingTableCollision = false;
-				break;
+			{				
+				CollisionObject = _ChannelCraftingTableArray[i];
+				return false;
 			}
 		}
 	}
-
-	bool IsEnvironmentCollision = true;
+		
 	for (int32 i = 0; i < en_Channel::CHANNEL_ENVIRONMENT_MAX; i++)
 	{
 		if (_ChannelEnvironmentArray[i] != nullptr)
@@ -1590,16 +1582,14 @@ bool CChannel::ChannelColliderCheck(CGameObject* CheckObject, st_Vector2 CheckPo
 			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelEnvironmentArray[i]->_GameObjectInfo.ObjectId
 				&& _ChannelEnvironmentArray[i]->GetRectCollision()->GetActive() == true
 				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelEnvironmentArray[i]->GetRectCollision()) == true)
-			{
-				IsEnvironmentCollision = false;
-				break;
+			{				
+				CollisionObject = _ChannelEnvironmentArray[i];
+				return false;
 			}
 		}
 	}
 
-	bool IsCollision = (IsPlayerCollision) && (IsDummyPlayerCollision) && (IsMonsterCollision) && (IsCraftingTableCollision) && (IsEnvironmentCollision);
-
-	return IsCollision;
+	return true;
 }
 
 bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* ObjectSpawnPosition)
@@ -1809,9 +1799,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			CSwordBlade* SwordBlade = dynamic_cast<CSwordBlade*>(EnterChannelGameObject);
 			if (SwordBlade)
 			{
-				SwordBlade->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-				SwordBlade->_GameObjectInfo.ObjectPositionInfo.Position._X = SwordBlade->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-				SwordBlade->_GameObjectInfo.ObjectPositionInfo.Position._Y = SwordBlade->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
+				SwordBlade->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;				
 				
 				SwordBlade->SetRectCollision();
 				SwordBlade->GetRectCollision()->SetActive(true);

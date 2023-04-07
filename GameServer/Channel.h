@@ -71,7 +71,7 @@ public:
 	//-----------------------------------------------------
 	// 채널에 있는 오브젝트들과 검사해서 충돌 판단 ( 매개 변수로 받은 좌표를 기준으로 )
 	//-----------------------------------------------------
-	bool ChannelColliderCheck(CGameObject* CheckObject, st_Vector2 CheckPosition);
+	bool ChannelColliderCheck(CGameObject* CheckObject, st_Vector2 CheckPosition, CGameObject* CollisionObject);
 
 	//----------------------------------------------------
 	// 채널 입장
