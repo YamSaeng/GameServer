@@ -589,41 +589,39 @@ bool CMap::Cango(CGameObject* Object, OUT st_Vector2* NextPosition)
 	return NextPositionMoveCheck;
 }
 
-bool CMap::MoveCollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, st_Vector2& NextPosition, bool CheckObjects)
+bool CMap::MoveCollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, st_Vector2& NextPosition, bool CheckObjects, CGameObject* CollisionObject)
 {
+	// 채널이 할당되어 있는지 확인
+	if (Object->GetChannel() == nullptr)
+	{
+		CRASH("ApplyMove GameObject Channel nullptr")
+			return false;
+	}
+
+	// 게임오브젝트가 속한 채널이 들고 있는 맵과 현재 맵이 같은지 확인
+	if (Object->GetChannel()->GetMap() != this)
+	{
+		CRASH("ApplyMove GameObject의 채널이 가지고 있는 맵과 지금 맵이 다름")
+			return false;
+	}
+
 	// 좌우 좌표 검사
-	if (CellPosition._X < _Left || CellPosition._X > _Right)
+	if (CellPosition._X < _Left 
+		|| CellPosition._X > _Right)
 	{
 		return false;
 	}
 
 	// 상하 좌표 검사
-	if (CellPosition._Y < _Up || CellPosition._Y > _Down)
+	if (CellPosition._Y < _Up
+		|| CellPosition._Y > _Down)
 	{
 		return false;
-	}
-
-	int X = CellPosition._X - _Left;
-	int Y = _Down - CellPosition._Y;
-
-	bool IsCollisionMapInfo = true;
-	//G_Logger->WriteStdOut(en_Color::RED, L"X : %d Y : %d \n", X, Y);
-
-	if (_ObjectsInfos[Y][X] != nullptr)
-	{
-		switch (_ObjectsInfos[Y][X]->_GameObjectInfo.ObjectType)
-		{
-		case en_GameObjectType::OBJECT_WALL:
-		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
-		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
-			IsCollisionMapInfo = false;
-			break;		
-		}
 	}	
 
-	bool ObjectCheck = Object->GetChannel()->ChannelColliderCheck(Object, NextPosition);
+	bool ObjectCheck = Object->GetChannel()->ChannelColliderCheck(Object, NextPosition, CollisionObject);
 
-	return IsCollisionMapInfo && (!CheckObjects || ObjectCheck);
+	return (!CheckObjects || ObjectCheck);
 }
 
 
@@ -642,6 +640,20 @@ bool CMap::ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool 
 	{
 		CRASH("ApplyMove GameObject의 채널이 가지고 있는 맵과 지금 맵이 다름")
 			return false;
+	}
+
+	// 좌우 좌표 검사
+	if (GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X < _Left
+		|| GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X > _Right)
+	{
+		return false;
+	}
+
+	// 상하 좌표 검사
+	if (GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y < _Up
+		|| GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y > _Down)
+	{
+		return false;
 	}
 
 	// 위치 정보 가지고 온다.
@@ -883,6 +895,46 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 	}
 
 	return true;
+}
+
+bool CMap::ApplySkillObjectMove(CGameObject* SkillObject, st_Vector2Int& DestPosition)
+{
+	if (SkillObject->GetChannel() == nullptr)
+	{
+		G_Logger->WriteStdOut(en_Color::RED, L"ApplyLeave Channel is nullptr");
+		return false;
+	}
+
+	if (SkillObject->GetChannel()->GetMap() != this)
+	{
+		G_Logger->WriteStdOut(en_Color::RED, L"ApplyLeave Channel _Map Error");
+		return false;
+	}
+
+	// 좌우 좌표 검사
+	if (SkillObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X < _Left || SkillObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X > _Right)
+	{
+		return false;
+	}
+
+	// 상하 좌표 검사
+	if (SkillObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y < _Up || SkillObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y > _Down)
+	{
+		return false;
+	}	
+
+	CSector* CurrentSector = GetSector(SkillObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
+	CSector* NextSector = GetSector(DestPosition);
+	if (CurrentSector != NextSector)
+	{
+		CurrentSector->Remove(SkillObject);
+		NextSector->Insert(SkillObject);
+	}
+
+	SkillObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X = DestPosition._X;
+	SkillObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y = DestPosition._Y;
+
+	return false;
 }
 
 bool CMap::MonsterCango(CGameObject* Object, OUT st_Vector2* NextPosition)
