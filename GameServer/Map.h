@@ -13,7 +13,7 @@ struct st_AStarNodeInt
 {
 	int32 _F;
 	int32 _G;
-	st_Vector2Int _Position;	
+	Vector2Int _Position;	
 
 	st_AStarNodeInt() {}
 
@@ -21,8 +21,8 @@ struct st_AStarNodeInt
 	{
 		_F = F;
 		_G = G;
-		_Position._X = X;
-		_Position._Y = Y;
+		_Position.X = X;
+		_Position.Y = Y;
 	}	
 };
 
@@ -66,13 +66,13 @@ public:
 
 	void MapInit();
 
-	CSector* GetSector(st_Vector2Int CellPosition);
+	CSector* GetSector(Vector2Int CellPosition);
 	CSector* GetSector(int32 IndexY, int32 IndexX);
 
 	//-----------------------------------------------------------------
 	// 내 주위 섹터 반환
 	//-----------------------------------------------------------------
-	vector<CSector*> GetAroundSectors(st_Vector2Int CellPosition, int32 Range = 1);
+	vector<CSector*> GetAroundSectors(Vector2Int CellPosition, int32 Range = 1);
 	//------------------------------------------------------------------------------------------------------
 	// 오브젝트 시야 범위 안에 있는 모든 오브젝트 아이디 목록을 반환
 	//------------------------------------------------------------------------------------------------------
@@ -102,46 +102,46 @@ public:
 	//-------------------------------------------
 	// 좌표 위치에 있는 오브젝트 반환
 	//-------------------------------------------
-	CGameObject* Find(st_Vector2Int& CellPosition);
+	CGameObject* Find(Vector2Int& CellPosition);
 
 	//--------------------------------------------------
 	// 좌표 위치에 있는 식물 오브젝트 반환
 	//--------------------------------------------------
-	CGameObject* FindPlant(st_Vector2Int& PlantPosition);
+	CGameObject* FindPlant(Vector2Int& PlantPosition);
 
 	//-------------------------------------------
 	// 좌표 위치에 있는 아이템들을 반환
 	//-------------------------------------------
-	CItem** FindItem(st_Vector2Int& ItemCellPosition);
+	CItem** FindItem(Vector2Int& ItemCellPosition);
 
 	//----------------------------------------------------------------------------
 	// 다음 번 위치로 갈 수 있는지 확인 ( 위치 계산 후 MoveCollisionCango로 전달 )
 	//----------------------------------------------------------------------------
-	bool Cango(CGameObject* Object, OUT st_Vector2* NextPosition);
+	bool Cango(CGameObject* Object, OUT Vector2* NextPosition);
 	//----------------------------------------------------------------------------
 	// 위치로 갈 수 있는지 확인
 	// CheckObjects = 벽을 제외한 오브젝트를 충돌 대상으로 여길 것인지에 대한 판단
 	// ( true : 해당위치에 오브젝트가 있는지 확인해서 있으면 충돌체로 판단한다. )
 	//----------------------------------------------------------------------------
-	bool MoveCollisionCango(CGameObject* Object, st_Vector2Int& CellPosition, st_Vector2& NextPosition, bool CheckObjects = true, CGameObject* CollisionObject = nullptr);		
+	bool MoveCollisionCango(CGameObject* Object, Vector2Int& CellPosition, Vector2& NextPosition, bool CheckObjects = true, CGameObject* CollisionObject = nullptr);
 
 	//------------------------------------------------------------------------------------------------------------------------
 	// 목적지 좌표값을 받아서 해당 좌표로 갈 수 있는지 없는지 판단
 	// CheckObject = 벽을 제외한 해당 위치에 있는 오브젝트를 충돌 대상으로 여길 것인지에 대한 여부
 	// ApplyCollision = 해당 함수를 호출 해준 오브젝트를 충돌 대상으로 여길 것인지에 대한 여부
 	//------------------------------------------------------------------------------------------------------------------------
-	bool ApplyMove(CGameObject* GameObject, st_Vector2Int& DestPosition, bool CheckObject = true, bool Applycollision = true);
+	bool ApplyMove(CGameObject* GameObject, Vector2Int& DestPosition, bool CheckObject = true, bool Applycollision = true);
 	//---------------------------------------
 	// 맵에서 오브젝트 퇴장
 	//---------------------------------------
 	bool ApplyLeave(CGameObject* GameObject);		
 
-	bool ApplySkillObjectMove(CGameObject* SkillObject, st_Vector2Int& DestPosition);
+	bool ApplySkillObjectMove(CGameObject* SkillObject, Vector2Int& DestPosition, CGameObject** CollisionObject = nullptr);
 
-	bool MonsterCango(CGameObject* Object, OUT st_Vector2* NextPosition);
+	bool MonsterCango(CGameObject* Object, OUT Vector2* NextPosition);
 
-	vector<st_Vector2Int> FindPath(CGameObject* Object, st_Vector2Int StartCellPosition, st_Vector2Int DestCellPostion, bool CheckObjects = true, int32 MaxDistance = 8);		
-	bool FindPathNextPositionCango(CGameObject* Object, st_Vector2Int& NextPosition, bool CheckObjects = true);
+	vector<Vector2Int> FindPath(CGameObject* Object, Vector2Int StartCellPosition, Vector2Int DestCellPostion, bool CheckObjects = true, int32 MaxDistance = 8);		
+	bool FindPathNextPositionCango(CGameObject* Object, Vector2Int& NextPosition, bool CheckObjects = true);
 
 	CChannelManager* GetChannelManager();
 private:
