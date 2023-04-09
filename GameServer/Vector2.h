@@ -4,6 +4,8 @@
 
 struct Vector2
 {
+	static Vector2 UnitX;
+	static Vector2 UnitY;
 	static Vector2 Up;
 	static Vector2 Down;
 	static Vector2 Left;
@@ -189,6 +191,8 @@ struct Vector2
 
 struct Vector2Int
 {
+	static Vector2Int UnitX;
+	static Vector2Int UnitY;
 	static Vector2Int Up;
 	static Vector2Int Down;
 	static Vector2Int Left;
