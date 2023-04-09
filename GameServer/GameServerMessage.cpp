@@ -48,22 +48,22 @@ CGameServerMessage& CGameServerMessage::operator<<(st_GameObjectInfo& GameObject
 CGameServerMessage& CGameServerMessage::operator<<(st_PositionInfo& PositionInfo)
 {
     *this << (int8)PositionInfo.State;
-    *this << PositionInfo.CollisionPosition._X;
-    *this << PositionInfo.CollisionPosition._Y;      
-    *this << PositionInfo.Position._X;
-    *this << PositionInfo.Position._Y;
-    *this << PositionInfo.LookAtDireciton._X;
-    *this << PositionInfo.LookAtDireciton._Y;
-    *this << PositionInfo.MoveDirection._X;
-    *this << PositionInfo.MoveDirection._Y;
+    *this << PositionInfo.CollisionPosition.X;
+    *this << PositionInfo.CollisionPosition.Y;      
+    *this << PositionInfo.Position.X;
+    *this << PositionInfo.Position.Y;
+    *this << PositionInfo.LookAtDireciton.X;
+    *this << PositionInfo.LookAtDireciton.Y;
+    *this << PositionInfo.MoveDirection.X;
+    *this << PositionInfo.MoveDirection.Y;
 
     return *(this);
 }
 
-CGameServerMessage& CGameServerMessage::operator<<(st_Vector2Int& CellPositionInfo)
+CGameServerMessage& CGameServerMessage::operator<<(Vector2Int& CellPositionInfo)
 {
-    *this << CellPositionInfo._X;
-    *this << CellPositionInfo._Y;
+    *this << CellPositionInfo.X;
+    *this << CellPositionInfo.Y;
 
     return *(this);
 }
@@ -350,10 +350,10 @@ CGameServerMessage& CGameServerMessage::operator<<(st_Session** Session)
     return *(this);
 }
 
-CGameServerMessage& CGameServerMessage::operator>>(st_Vector2Int& CellPositionInfo)
+CGameServerMessage& CGameServerMessage::operator>>(Vector2Int& CellPositionInfo)
 {
-    *this >> CellPositionInfo._X;
-    *this >> CellPositionInfo._Y;
+    *this >> CellPositionInfo.X;
+    *this >> CellPositionInfo.Y;
 
     return *(this);
 }
