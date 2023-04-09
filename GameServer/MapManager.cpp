@@ -43,7 +43,7 @@ void CMapManager::MapSave()
 		{						
 			if (MapGameObjectListIter.second.size() > 0)
 			{
-				for (st_Vector2Int Position : MapGameObjectListIter.second)
+				for (Vector2Int Position : MapGameObjectListIter.second)
 				{
 					CGameObject* NewObject = G_ObjectManager->ObjectCreate(MapGameObjectListIter.first);
 					if (NewObject != nullptr)
