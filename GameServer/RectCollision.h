@@ -6,8 +6,8 @@ class CGameObject;
 class CRectCollision
 {
 public:	
-	st_Vector2 _Position;
-	st_Vector2 _Size;	
+	Vector2 _Position;
+	Vector2 _Size;
 
 	CRectCollision();	
 	~CRectCollision();

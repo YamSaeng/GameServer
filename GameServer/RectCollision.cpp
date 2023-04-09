@@ -25,20 +25,24 @@ void CRectCollision::Init(CGameObject* OwnerObject)
 		case en_GameObjectType::OBJECT_PLAYER:
 		case en_GameObjectType::OBJECT_PLAYER_DUMMY:
 		case en_GameObjectType::OBJECT_NON_PLAYER_GENERAL_MERCHANT:
-			_Size._X = 1.0f;
-			_Size._Y = 1.0f;
+			_Size.X = 1.0f;
+			_Size.Y = 1.0f;
 			break;
 		case en_GameObjectType::OBJECT_WALL:
-			_Size._X = 1.0f;
-			_Size._Y = 1.0f;
+			_Size.X = 1.0f;
+			_Size.Y = 1.0f;
 			break;
 		case en_GameObjectType::OBJECT_GOBLIN:
-			_Size._X = 1.0f;
-			_Size._Y = 1.0f;
+			_Size.X = 1.0f;
+			_Size.Y = 1.0f;
 			break;
 		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
-			_Size._X = 2.0f;
-			_Size._Y = 2.0f;
+			_Size.X = 2.0f;
+			_Size.Y = 2.0f;
+			break;
+		case en_GameObjectType::OBJECT_SKILL_SWORD_BLADE:
+			_Size.X = 1.0f;
+			_Size.Y = 0.5f;
 			break;
 		}
 	}
@@ -50,10 +54,10 @@ void CRectCollision::Init(CGameObject* OwnerObject)
 
 bool CRectCollision::IsCollision(CRectCollision* ARectCollision, CRectCollision* BRectCollision)
 {
-	return (ARectCollision->_Position._X < BRectCollision->_Position._X + BRectCollision->_Size._X
-		&& ARectCollision->_Position._X + ARectCollision->_Size._X > BRectCollision->_Position._X
-		&& ARectCollision->_Position._Y > BRectCollision->_Position._Y - BRectCollision->_Size._Y
-		&& ARectCollision->_Position._Y - ARectCollision->_Size._Y < BRectCollision->_Position._Y);
+	return (ARectCollision->_Position.X < BRectCollision->_Position.X + BRectCollision->_Size.X
+		&& ARectCollision->_Position.X + ARectCollision->_Size.X > BRectCollision->_Position.X
+		&& ARectCollision->_Position.Y > BRectCollision->_Position.Y - BRectCollision->_Size.Y
+		&& ARectCollision->_Position.Y - ARectCollision->_Size.Y < BRectCollision->_Position.Y);
 }
 
 void CRectCollision::SetActive(bool _Active)
