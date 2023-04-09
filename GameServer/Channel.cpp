@@ -1274,7 +1274,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 	return FindObjects;
 }
 
-vector<CGameObject*> CChannel::FindAttackChannelObjects(vector<st_FieldOfViewInfo>& FindObjectIDs, CGameObject* Object, st_Vector2 Direction, int16 Distance)
+vector<CGameObject*> CChannel::FindAttackChannelObjects(vector<st_FieldOfViewInfo>& FindObjectIDs, CGameObject* Object, Vector2 Direction, int16 Distance)
 {
 	vector<CGameObject*> FindObjects;
 
@@ -1291,12 +1291,12 @@ vector<CGameObject*> CChannel::FindAttackChannelObjects(vector<st_FieldOfViewInf
 						&& _ChannelPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE						
 						&& _ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 					{	
-						if (st_Vector2::CheckFieldOfView(_ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, 
+						if (Vector2::CheckFieldOfView(_ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, 
 							Object->_GameObjectInfo.ObjectPositionInfo.Position, 
 							Direction, Object->_FieldOfAngle, Object->_FieldOfViewDistance))
 						{
 							// 시야각 안에 오브젝트가 존재
-							float TargetDistance = st_Vector2::Distance(_ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
+							float TargetDistance = Vector2::Distance(_ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
 							if (TargetDistance <= Distance)
 							{
 								FindObjects.push_back(_ChannelPlayerArray[i]);
@@ -1312,12 +1312,12 @@ vector<CGameObject*> CChannel::FindAttackChannelObjects(vector<st_FieldOfViewInf
 				{
 					if (_ChannelDummyPlayerArray[i] != nullptr && _ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID)
 					{
-						if (st_Vector2::CheckFieldOfView(_ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position,
+						if (Vector2::CheckFieldOfView(_ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position,
 							Object->_GameObjectInfo.ObjectPositionInfo.Position, 
 							Direction, Object->_FieldOfAngle, Object->_FieldOfViewDistance))
 						{
 							// 시야각 안에 오브젝트가 존재
-							float TargetDistance = st_Vector2::Distance(_ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
+							float TargetDistance = Vector2::Distance(_ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
 							if (TargetDistance <= Distance)
 							{
 								FindObjects.push_back(_ChannelDummyPlayerArray[i]);
@@ -1336,12 +1336,12 @@ vector<CGameObject*> CChannel::FindAttackChannelObjects(vector<st_FieldOfViewInf
 						&& _ChannelMonsterArray[i]->_GameObjectInfo.ObjectId == FieldOfViewInfo.ObjectID						
 						&& _ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 					{
-						if (st_Vector2::CheckFieldOfView(_ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.Position,
+						if (Vector2::CheckFieldOfView(_ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.Position,
 							Object->_GameObjectInfo.ObjectPositionInfo.Position, 
 							Direction, Object->_FieldOfAngle, Object->_FieldOfViewDistance))
 						{
 							// 시야각 안에 오브젝트가 존재
-							float TargetDistance = st_Vector2::Distance(_ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
+							float TargetDistance = Vector2::Distance(_ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
 							if (TargetDistance <= Distance)
 							{
 								FindObjects.push_back(_ChannelMonsterArray[i]);
@@ -1357,7 +1357,7 @@ vector<CGameObject*> CChannel::FindAttackChannelObjects(vector<st_FieldOfViewInf
 	return FindObjects;
 }
 		
-vector<CGameObject*> CChannel::FindRangeAttackChannelObjects(CGameObject* Object, st_Vector2 Direciton, int16 Distance)
+vector<CGameObject*> CChannel::FindRangeAttackChannelObjects(CGameObject* Object, Vector2 Direciton, int16 Distance)
 {
 	vector<CGameObject*> FindObjects;
 
@@ -1368,7 +1368,7 @@ vector<CGameObject*> CChannel::FindRangeAttackChannelObjects(CGameObject* Object
 			&& _ChannelPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE			
 			&& _ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 		{
-			float TargetDistance = st_Vector2::Distance(_ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
+			float TargetDistance = Vector2::Distance(_ChannelPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
 			if (TargetDistance <= Distance)
 			{
 				FindObjects.push_back(_ChannelPlayerArray[i]);
@@ -1381,7 +1381,7 @@ vector<CGameObject*> CChannel::FindRangeAttackChannelObjects(CGameObject* Object
 		if (_ChannelDummyPlayerArray[i] != nullptr)
 		{
 			// 거리 안에 오브젝트가 존재
-			float TargetDistance = st_Vector2::Distance(_ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
+			float TargetDistance = Vector2::Distance(_ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
 			if (TargetDistance <= Distance)
 			{
 				FindObjects.push_back(_ChannelDummyPlayerArray[i]);
@@ -1394,10 +1394,10 @@ vector<CGameObject*> CChannel::FindRangeAttackChannelObjects(CGameObject* Object
 		if (_ChannelMonsterArray[i] != nullptr			
 			&& _ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 		{
-			float TargetDistance = st_Vector2::Distance(_ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.Position,
+			float TargetDistance = Vector2::Distance(_ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.Position,
 				Object->_GameObjectInfo.ObjectPositionInfo.Position);
 
-			bool 공격판단 = st_Vector2::CheckFieldOfView(_ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.Position,
+			bool 공격판단 = Vector2::CheckFieldOfView(_ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.Position,
 				Object->_GameObjectInfo.ObjectPositionInfo.Position,
 				Direciton, Object->_FieldOfAngle, Object->_FieldOfViewDistance);
 
@@ -1411,11 +1411,11 @@ vector<CGameObject*> CChannel::FindRangeAttackChannelObjects(CGameObject* Object
 	return FindObjects;
 }
 
-bool CChannel::ChannelColliderCheck(CGameObject* CheckObject, st_Vector2 CheckPosition, CGameObject* CollisionObject)
+bool CChannel::ChannelColliderCheck(CGameObject* CheckObject, Vector2 CheckPosition, CGameObject** CollisionObject)
 {
 	CRectCollision CheckRectCollision;
-	CheckRectCollision._Position._X = CheckPosition._X;
-	CheckRectCollision._Position._Y = CheckPosition._Y;	
+	CheckRectCollision._Position.X = CheckPosition.X;
+	CheckRectCollision._Position.Y = CheckPosition.Y;	
 	CheckRectCollision._Size = CheckObject->GetRectCollision()->_Size;	
 		
 	for (int32 i = 0; i < en_Channel::CHANNEL_PLAYER_MAX; i++)
@@ -1427,7 +1427,7 @@ bool CChannel::ChannelColliderCheck(CGameObject* CheckObject, st_Vector2 CheckPo
 				&& _ChannelPlayerArray[i]->GetRectCollision()->GetActive() == true
 				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelPlayerArray[i]->GetRectCollision()) == true)
 			{						
-				CollisionObject = _ChannelPlayerArray[i];
+				*CollisionObject = _ChannelPlayerArray[i];
 				return false;
 			}
 		}
@@ -1441,7 +1441,7 @@ bool CChannel::ChannelColliderCheck(CGameObject* CheckObject, st_Vector2 CheckPo
 				&& _ChannelNonPlayerArray[i]->GetRectCollision()->GetActive() == true
 				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelNonPlayerArray[i]->GetRectCollision()) == true)
 			{		
-				CollisionObject = _ChannelNonPlayerArray[i];
+				*CollisionObject = _ChannelNonPlayerArray[i];
 				return false;
 			}
 		}
@@ -1456,7 +1456,7 @@ bool CChannel::ChannelColliderCheck(CGameObject* CheckObject, st_Vector2 CheckPo
 				&& _ChannelDummyPlayerArray[i]->GetRectCollision()->GetActive() == true
 				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelDummyPlayerArray[i]->GetRectCollision()) == true)
 			{				
-				CollisionObject = _ChannelDummyPlayerArray[i];
+				*CollisionObject = _ChannelDummyPlayerArray[i];
 				return false;
 			}
 		}
@@ -1470,7 +1470,7 @@ bool CChannel::ChannelColliderCheck(CGameObject* CheckObject, st_Vector2 CheckPo
 				&& _ChannelMonsterArray[i]->GetRectCollision()->GetActive() == true
 				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelMonsterArray[i]->GetRectCollision()) == true)
 			{				
-				CollisionObject = _ChannelMonsterArray[i];
+				*CollisionObject = _ChannelMonsterArray[i];
 				return false;
 			}
 		}
@@ -1484,7 +1484,7 @@ bool CChannel::ChannelColliderCheck(CGameObject* CheckObject, st_Vector2 CheckPo
 				&& _ChannelCraftingTableArray[i]->GetRectCollision()->GetActive() == true
 				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelCraftingTableArray[i]->GetRectCollision()) == true)
 			{				
-				CollisionObject = _ChannelCraftingTableArray[i];
+				*CollisionObject = _ChannelCraftingTableArray[i];
 				return false;
 			}
 		}
@@ -1498,7 +1498,7 @@ bool CChannel::ChannelColliderCheck(CGameObject* CheckObject, st_Vector2 CheckPo
 				&& _ChannelEnvironmentArray[i]->GetRectCollision()->GetActive() == true
 				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelEnvironmentArray[i]->GetRectCollision()) == true)
 			{				
-				CollisionObject = _ChannelEnvironmentArray[i];
+				*CollisionObject = _ChannelEnvironmentArray[i];
 				return false;
 			}
 		}
@@ -1507,7 +1507,7 @@ bool CChannel::ChannelColliderCheck(CGameObject* CheckObject, st_Vector2 CheckPo
 	return true;
 }
 
-bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* ObjectSpawnPosition)
+bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* ObjectSpawnPosition)
 {
 	bool IsEnterChannel = false;
 	// 채널 입장
@@ -1520,7 +1520,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 	random_device RD;
 	mt19937 Gen(RD());
 
-	st_Vector2Int SpawnPosition;		
+	Vector2Int SpawnPosition;		
 	EnterChannelGameObject->SetChannel(this);
 
 	if (EnterChannelGameObject->_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_PLAYER_DUMMY)
@@ -1531,14 +1531,14 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			uniform_int_distribution<int> RandomXPosition(0, 89);
 			uniform_int_distribution<int> RandomYPosition(0, 73);
 
-			SpawnPosition._X = RandomXPosition(Gen);
-			SpawnPosition._Y = RandomYPosition(Gen);
+			SpawnPosition.X = RandomXPosition(Gen);
+			SpawnPosition.Y = RandomYPosition(Gen);
 
-			EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X = SpawnPosition._X;
-			EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y = SpawnPosition._Y;
+			EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X = SpawnPosition.X;
+			EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y = SpawnPosition.Y;
 
-			EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-			EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;			
+			EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.Position.X = EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
+			EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;			
 
 			if (_Map->MoveCollisionCango(EnterChannelGameObject, SpawnPosition, EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.Position) == true)
 			{
@@ -1563,8 +1563,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 				EnterChannelPlayer->_SpawnPosition = SpawnPosition;
 				EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 
-				EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-				EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;				
+				EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position.X = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
+				EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;				
 
 				EnterChannelPlayer->SetRectCollision();
 				EnterChannelPlayer->GetRectCollision()->SetActive(true);
@@ -1595,8 +1595,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 				EnterChannelDummyPlayer->_SpawnPosition = SpawnPosition;
 				EnterChannelDummyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 
-				EnterChannelDummyPlayer->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelDummyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-				EnterChannelDummyPlayer->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelDummyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
+				EnterChannelDummyPlayer->_GameObjectInfo.ObjectPositionInfo.Position.X = EnterChannelDummyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
+				EnterChannelDummyPlayer->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelDummyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;
 
 				// 플레이어 저장
 				_ChannelDummyPlayerArrayIndexs.Pop(&EnterChannelDummyPlayer->_ChannelArrayIndex);
@@ -1622,8 +1622,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			{				
 				GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 
-				GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.Position._X = GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-				GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.Position._Y = GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
+				GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.Position.X = GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
+				GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.Position.Y = GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;
 
 				GeneralMerchantNPC->SetRectCollision();
 				GeneralMerchantNPC->GetRectCollision()->SetActive(true);				
@@ -1653,8 +1653,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			if (EnterChannelMonster != nullptr)
 			{
 				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;				
+				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position.X = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
+				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;				
 
 				EnterChannelMonster->SetRectCollision();
 				EnterChannelMonster->GetRectCollision()->SetActive(true);
@@ -1686,8 +1686,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			if (EnterChannelEnvironment != nullptr)
 			{
 				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;				
+				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position.X = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
+				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;				
 
 				EnterChannelEnvironment->SetRectCollision();
 				EnterChannelEnvironment->GetRectCollision()->SetActive(true);				
@@ -1736,8 +1736,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			if (EnterChannelCraftingTable != nullptr)
 			{
 				EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-				EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.Position._X = EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-				EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.Position._Y = EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;				
+				EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.Position.X = EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
+				EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;				
 
 				EnterChannelCraftingTable->SetRectCollision();
 				EnterChannelCraftingTable->GetRectCollision()->SetActive(true);
@@ -1765,8 +1765,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* 
 			if (CropObject != nullptr)
 			{
 				CropObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-				CropObject->_GameObjectInfo.ObjectPositionInfo.Position._X = CropObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-				CropObject->_GameObjectInfo.ObjectPositionInfo.Position._Y = CropObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
+				CropObject->_GameObjectInfo.ObjectPositionInfo.Position.X = CropObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
+				CropObject->_GameObjectInfo.ObjectPositionInfo.Position.Y = CropObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;
 
 				_ChannelCropArrayIndexs.Pop(&CropObject->_ChannelArrayIndex);
 				_ChannelCropArray[CropObject->_ChannelArrayIndex] = CropObject;

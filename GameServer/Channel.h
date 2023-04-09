@@ -10,7 +10,6 @@ class CEnvironment;
 class CPlayer;
 class CNonPlayer;
 class CMap;
-struct st_Vector2Int;
 struct st_GameObjectJob;
 
 class CChannel
@@ -58,23 +57,23 @@ public:
 	//-----------------------------------------------------
 	// 채널에 있는 공격 가능한 오브젝트들 찾기 ( 거리 기준 )
 	//-----------------------------------------------------
-	vector<CGameObject*> FindAttackChannelObjects(vector<st_FieldOfViewInfo>& FindObjectIDs, CGameObject* Object, st_Vector2 Direction, int16 Distance);	
+	vector<CGameObject*> FindAttackChannelObjects(vector<st_FieldOfViewInfo>& FindObjectIDs, CGameObject* Object, Vector2 Direction, int16 Distance);
 	//---------------------------------------------------------
 	// 채널에 있는 공격 가능한 오브젝트 찾기 ( 광역 범위 )
 	//---------------------------------------------------------
-	vector<CGameObject*> FindRangeAttackChannelObjects(CGameObject* Object, st_Vector2 Direciton, int16 Distance);
+	vector<CGameObject*> FindRangeAttackChannelObjects(CGameObject* Object, Vector2 Direciton, int16 Distance);
 	
 	//-----------------------------------------------------
 	// 채널에 있는 오브젝트들과 검사해서 충돌 판단 ( 매개 변수로 받은 좌표를 기준으로 )
 	//-----------------------------------------------------
-	bool ChannelColliderCheck(CGameObject* CheckObject, st_Vector2 CheckPosition, CGameObject* CollisionObject = nullptr);
+	bool ChannelColliderCheck(CGameObject* CheckObject, Vector2 CheckPosition, CGameObject** CollisionObject = nullptr);
 
 	//----------------------------------------------------
 	// 채널 입장
 	// - Object를 채널에 입장시키면서 자료구조에 저장한 후
 	// - Map에도 해당 오브젝트의 위치를 기록한다.
 	//----------------------------------------------------
-	bool EnterChannel(CGameObject* EnterChannelGameObject, st_Vector2Int* ObjectSpawnPosition = nullptr);
+	bool EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* ObjectSpawnPosition = nullptr);
 	//----------------------------------------------------
 	// 채널 나가기
 	// - Object가 채널에 속해 있는 Index를 반납
