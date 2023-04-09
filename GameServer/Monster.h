@@ -41,10 +41,10 @@ protected:
 	CGameObject* _Target;			
 
 	// 정찰 위치	
-	st_Vector2 _PatrolPoint;	
+	Vector2 _PatrolPoint;
 
 	// 이동 위치	
-	st_Vector2 _MovePoint;	
+	Vector2 _MovePoint;
 	//------------------------------------
 	// Idle 상태에서 Search를 실행할 Tick
 	//------------------------------------
@@ -74,7 +74,7 @@ protected:
 	//-------------------------------------
 	// 몬스터가 정찰할 위치
 	//-------------------------------------
-	vector<st_Vector2Int> _PatrolPositions;			
+	vector<Vector2Int> _PatrolPositions;			
 		
 	//---------------------------------------------------------------------------
 	// 어그로 목록 중 네트워크가 끊긴 타겟, 죽음 상태 타겟을 어그로 목록에서 정리
