@@ -539,7 +539,7 @@ public:
 	//-------------------------------------------------------------
 	// 게임서버 입장 요청 응답 패킷 조합
 	//-------------------------------------------------------------
-	CGameServerMessage* MakePacketResEnterGame(bool EnterGameSuccess, st_GameObjectInfo* ObjectInfo, st_Vector2Int* SpawnPosition);
+	CGameServerMessage* MakePacketResEnterGame(bool EnterGameSuccess, st_GameObjectInfo* ObjectInfo, Vector2Int* SpawnPosition);
 	//---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	// 게임서버 일반 데미지 응답 패킷 조합 ( 데미지 가한 대상 ID, 데미지 입은 대상 ID, 데미지를 입힌 기술 타입, 데미지 양, 데미지 입은 대상 변경된 HP 정보,  크리티컬 여부)
 	//---------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -592,7 +592,7 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 이동 요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResMove(int64& ObjectID, st_Vector2& LookAtDirection, st_Vector2& MoveDirection, st_Vector2& Position, int64 TargetID = -1);
+	CGameServerMessage* MakePacketResMove(int64& ObjectID, Vector2& LookAtDirection, Vector2& MoveDirection, Vector2& Position, int64 TargetID = -1);
 	//------------------------------------------------------------------------------------------------------
 	// 게임서버 이동 멈춤 요청 응답 패킷 조합
 	//------------------------------------------------------------------------------------------------------
@@ -665,11 +665,11 @@ public:
 	//--------------------------------------------------------------------------------------------------------
 	// 게임서버 연속기 스킬 켜기 패킷 조합
 	//--------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketComboSkillOn(vector<st_Vector2Int> ComboSkillQuickSlotPositions, st_SkillInfo ComboSkillInfo);
+	CGameServerMessage* MakePacketComboSkillOn(vector<Vector2Int> ComboSkillQuickSlotPositions, st_SkillInfo ComboSkillInfo);
 	//--------------------------------------------------------------------------------------------------------
 	// 게임서버 연속기 스킬 끄기 패킷 조합
 	//--------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketComboSkillOff(vector<st_Vector2Int> ComboSkillQuickSlotPositions, st_SkillInfo ComboSkillInfo, en_SkillType OffComboSkillType);
+	CGameServerMessage* MakePacketComboSkillOff(vector<Vector2Int> ComboSkillQuickSlotPositions, st_SkillInfo ComboSkillInfo, en_SkillType OffComboSkillType);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 경험치 패킷 조합
 	//-----------------------------------------------------------------------------------------

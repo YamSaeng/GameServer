@@ -192,11 +192,13 @@
     <ClInclude Include="Map.h" />
     <ClInclude Include="MapManager.h" />
     <ClInclude Include="Math.h" />
+    <ClInclude Include="Matrix2x2.h" />
     <ClInclude Include="MemoryPoolTLS.h" />
     <ClInclude Include="Message.h" />
     <ClInclude Include="Monster.h" />
     <ClInclude Include="MonsterSkillBox.h" />
     <ClInclude Include="NetworkLib.h" />
+    <ClInclude Include="NetworkManager.h" />
     <ClInclude Include="NonPlayer.h" />
     <ClInclude Include="ObjectManager.h" />
     <ClInclude Include="ObjectPoolFreeList.h" />
@@ -219,7 +221,9 @@
     <ClInclude Include="SkillBox.h" />
     <ClInclude Include="SkillCharacteristic.h" />
     <ClInclude Include="StorageBox.h" />
+    <ClInclude Include="SwordBlade.h" />
     <ClInclude Include="Type.h" />
+    <ClInclude Include="Vector2.h" />
     <ClInclude Include="Wall.h" />
     <ClInclude Include="XmlParser.h" />
   </ItemGroup>
@@ -309,6 +313,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="MapManager.cpp" />
+    <ClCompile Include="Matrix2x2.cpp" />
     <ClCompile Include="Message.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -323,6 +328,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="NetworkManager.cpp" />
     <ClCompile Include="NonPlayer.cpp" />
     <ClCompile Include="ObjectManager.cpp" />
     <ClCompile Include="PartyManager.cpp" />
@@ -338,6 +344,8 @@
     <ClCompile Include="SkillBox.cpp" />
     <ClCompile Include="SkillCharacteristic.cpp" />
     <ClCompile Include="StorageBox.cpp" />
+    <ClCompile Include="SwordBlade.cpp" />
+    <ClCompile Include="Vector2.cpp" />
     <ClCompile Include="Wall.cpp" />
     <ClCompile Include="XmlParser.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

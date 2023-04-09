@@ -7,6 +7,7 @@
 #include "DataManager.h"
 #include "ChannelManager.h"
 #include "ObjectManager.h"
+#include "NetworkManager.h"
 #include "Inventory.h"
 #include "GameServerMessage.h"
 #include "Skill.h"
@@ -85,8 +86,8 @@ void CGameServer::GameServerStart(const WCHAR* OpenIP, int32 Port)
 	// 맵 정보를 읽어옴
 	G_MapManager->MapSave();	
 
-	// 맵 타일 정보 가져오기
-	G_ObjectManager->GameServer = this;
+	// 네트워크 매니저에 게임서버 할당
+	G_NetworkManager->SetGameServer(this);	
 
 	// 유저 데이터 베이스 쓰레드 시작
 	for (int32 i = 0; i < 3; i++)
@@ -883,8 +884,11 @@ void CGameServer::PacketProcReqFaceDirection(int64 SessionID, CMessage* Message)
 		float FaceDirectionY;
 		*Message >> FaceDirectionY;
 
-		MyPlayer->_FieldOfDirection._X = FaceDirectionX;
-		MyPlayer->_FieldOfDirection._Y = FaceDirectionY;		
+		MyPlayer->_FieldOfDirection.X = FaceDirectionX;
+		MyPlayer->_FieldOfDirection.Y = FaceDirectionY;	
+
+		MyPlayer->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton.X = FaceDirectionX;
+		MyPlayer->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton.Y = FaceDirectionY;
 	}
 
 	ReturnSession(Session);
@@ -2057,9 +2061,9 @@ void CGameServer::PacketProcReqQuickSlotSave(int64 SessionId, CMessage* Message)
 					CSkill* FindSkill = MyPlayer->_SkillBox.FindSkill((en_SkillCharacteristic)QuickSlotSkillCharacteristicType, (en_SkillType)QuickSlotSkillType);
 					if (FindSkill != nullptr)
 					{
-						st_Vector2Int QuickslotPosition;
-						QuickslotPosition._Y = QuickSlotBarIndex;
-						QuickslotPosition._X = QuickSlotBarSlotIndex;
+						Vector2Int QuickslotPosition;
+						QuickslotPosition.Y = QuickSlotBarIndex;
+						QuickslotPosition.X = QuickSlotBarSlotIndex;
 
 						FindQuickSlotInfo->QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_SKILL;
 						FindQuickSlotInfo->QuickBarSkill = FindSkill;
@@ -2189,9 +2193,9 @@ void CGameServer::PacketProcReqQuickSlotSwap(int64 SessionId, CMessage* Message)
 			st_QuickSlotBarSlotInfo* FindBQuickslotInfo = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarSwapIndexB, QuickSlotBarSlotSwapIndexB);
 			if (FindBQuickslotInfo != nullptr)
 			{
-				st_Vector2Int QuickSlotPosition;
-				QuickSlotPosition._Y = QuickSlotBarSwapIndexA;
-				QuickSlotPosition._X = QuickSlotBarSlotSwapIndexA;
+				Vector2Int QuickSlotPosition;
+				QuickSlotPosition.Y = QuickSlotBarSwapIndexA;
+				QuickSlotPosition.X = QuickSlotBarSlotSwapIndexA;
 
 				CSkill* BSkill = nullptr;
 
@@ -2203,9 +2207,9 @@ void CGameServer::PacketProcReqQuickSlotSwap(int64 SessionId, CMessage* Message)
 						QuickSlotPositionIter != BSkill->_QuickSlotBarPosition.end();
 						++QuickSlotPositionIter)
 					{
-						st_Vector2Int QuickSlotPosition = *QuickSlotPositionIter;
+						Vector2Int QuickSlotPosition = *QuickSlotPositionIter;
 
-						if (QuickSlotPosition._Y == QuickSlotBarSwapIndexB && QuickSlotPosition._X == QuickSlotBarSlotSwapIndexB)
+						if (QuickSlotPosition.Y == QuickSlotBarSwapIndexB && QuickSlotPosition.X == QuickSlotBarSlotSwapIndexB)
 						{
 							BSkill->_QuickSlotBarPosition.erase(QuickSlotPositionIter);
 							break;
@@ -2247,9 +2251,9 @@ void CGameServer::PacketProcReqQuickSlotSwap(int64 SessionId, CMessage* Message)
 			st_QuickSlotBarSlotInfo* FindAQuickslotInfo = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarSwapIndexA, QuickSlotBarSlotSwapIndexA);
 			if (FindAQuickslotInfo != nullptr)
 			{
-				st_Vector2Int QuickSlotPosition;
-				QuickSlotPosition._Y = QuickSlotBarSwapIndexB;
-				QuickSlotPosition._X = QuickSlotBarSlotSwapIndexB;
+				Vector2Int QuickSlotPosition;
+				QuickSlotPosition.Y = QuickSlotBarSwapIndexB;
+				QuickSlotPosition.X = QuickSlotBarSlotSwapIndexB;
 
 				if (FindAQuickslotInfo->QuickBarSkill != nullptr)
 				{
@@ -2259,9 +2263,9 @@ void CGameServer::PacketProcReqQuickSlotSwap(int64 SessionId, CMessage* Message)
 						QuickSlotPositionIter != ASkill->_QuickSlotBarPosition.end();
 						++QuickSlotPositionIter)
 					{
-						st_Vector2Int QuickSlotPosition = *QuickSlotPositionIter;
+						Vector2Int QuickSlotPosition = *QuickSlotPositionIter;
 
-						if (QuickSlotPosition._Y == QuickSlotBarSwapIndexA && QuickSlotPosition._X == QuickSlotBarSlotSwapIndexA)
+						if (QuickSlotPosition.Y == QuickSlotBarSwapIndexA && QuickSlotPosition.X == QuickSlotBarSlotSwapIndexA)
 						{
 							ASkill->_QuickSlotBarPosition.erase(QuickSlotPositionIter);
 							break;
@@ -2385,9 +2389,9 @@ void CGameServer::PacketProcReqQuickSlotInit(int64 SessionId, CMessage* Message)
 						QuickSlotPositionIter != QuickSlotInitSkill->_QuickSlotBarPosition.end();
 						++QuickSlotPositionIter)
 					{
-						st_Vector2Int QuickSlotPosition = *QuickSlotPositionIter;
+						Vector2Int QuickSlotPosition = *QuickSlotPositionIter;
 
-						if (QuickSlotPosition._Y == QuickSlotBarIndex && QuickSlotPosition._X == QuickSlotBarSlotIndex)
+						if (QuickSlotPosition.Y == QuickSlotBarIndex && QuickSlotPosition.X == QuickSlotBarSlotIndex)
 						{
 							QuickSlotInitSkill->_QuickSlotBarPosition.erase(QuickSlotPositionIter);
 							break;
@@ -2667,7 +2671,7 @@ void CGameServer::PacketProcReqItemUse(int64 SessionId, CMessage* Message)
 					break;
 				default:
 					{
-						CMessage* CommonErrorPacket = MakePacketCommonError(en_GlobalMessageType::PERSONAL_FAULT_ITEM_USE, UseItem->_ItemInfo.ItemName.c_str());
+						CMessage* CommonErrorPacket = MakePacketCommonError(en_GlobalMessageType::GLOBAL_FAULT_ITEM_USE, UseItem->_ItemInfo.ItemName.c_str());
 						SendPacket(Session->SessionId, CommonErrorPacket);
 						CommonErrorPacket->Free();
 					}
@@ -3185,12 +3189,12 @@ void CGameServer::PacketProcReqItemLooting(int64 SessionId, CMessage* Message)
 			int8 ItemState;			
 
 			*Message >> ItemState;
-			*Message >> ItemPosition.CollisionPosition._X;
-			*Message >> ItemPosition.CollisionPosition._Y;			
+			*Message >> ItemPosition.CollisionPosition.X;
+			*Message >> ItemPosition.CollisionPosition.Y;			
 
-			st_Vector2Int ItemCellPosition;
-			ItemCellPosition._X = ItemPosition.CollisionPosition._X;
-			ItemCellPosition._Y = ItemPosition.CollisionPosition._Y;
+			Vector2Int ItemCellPosition;
+			ItemCellPosition.X = ItemPosition.CollisionPosition.X;
+			ItemCellPosition.Y = ItemPosition.CollisionPosition.Y;
 
 			int64 MapID = 1;
 			// 루팅 위치에 아이템들을 가져온다.
@@ -3808,8 +3812,8 @@ void CGameServer::PacketProcReqDBAccountCheck(CMessage* Message)
 				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxSpeed = PlayerSpeed;
 				NewPlayerCharacter->_GameObjectInfo.ObjectSkillMaxPoint = PlayerSkillMaxPoint;
 				NewPlayerCharacter->_GameObjectInfo.ObjectSkillPoint = PlayerSkillMaxPoint;
-				NewPlayerCharacter->_SpawnPosition._Y = PlayerLastPositionY;
-				NewPlayerCharacter->_SpawnPosition._X = PlayerLastPositionX;
+				NewPlayerCharacter->_SpawnPosition.Y = PlayerLastPositionY;
+				NewPlayerCharacter->_SpawnPosition.X = PlayerLastPositionX;
 				NewPlayerCharacter->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;							
 				NewPlayerCharacter->_GameObjectInfo.OwnerObjectId = 0;
 				NewPlayerCharacter->_GameObjectInfo.PlayerSlotIndex = PlayerIndex;
@@ -3978,8 +3982,8 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxSpeed = NewCharacterStatus.Speed;
 					NewPlayerCharacter->_GameObjectInfo.ObjectSkillPoint = NewCharacterSkillPoint;
 					NewPlayerCharacter->_GameObjectInfo.ObjectSkillMaxPoint = NewCharacterSkillPoint;
-					NewPlayerCharacter->_SpawnPosition._Y = NewCharacterPositionY;
-					NewPlayerCharacter->_SpawnPosition._X = NewCharacterPositionX;
+					NewPlayerCharacter->_SpawnPosition.Y = NewCharacterPositionY;
+					NewPlayerCharacter->_SpawnPosition.X = NewCharacterPositionX;
 					NewPlayerCharacter->_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;					
 					NewPlayerCharacter->_GameObjectInfo.OwnerObjectId = 0;
 					NewPlayerCharacter->_GameObjectInfo.PlayerSlotIndex = ReqCharacterCreateSlotIndex;
@@ -4115,7 +4119,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 
 			CDBConnection* DBCharacterInfoGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 
-#pragma region 스킬 정보 읽어오기	
+#pragma region 스킬 정보 읽어오기				
 			MyPlayer->_SkillBox.Init();
 
 			// 공용 스킬 만들기
@@ -4176,10 +4180,17 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 										en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK, SkillLevel);
 									MyPlayer->_GameObjectInfo.ObjectSkillPoint--;
 									break;		
-								case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SHAHONE:
-								case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CHOHONE:
+								case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE:
+								case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_COMBO_FLY_KNIFE:
+									Characteristic->SkillCharacteristicActive(IsSkillLearn,
+										(en_SkillType)SkillType, SkillLevel);
+									MyPlayer->_GameObjectInfo.ObjectSkillPoint--;
+									break;
+								case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK:
+								case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE:
 								case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
 								case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
+								case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE:
 								case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:
 								case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:
 								case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
@@ -4385,9 +4396,9 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 				CSkill* FindSkill = MyPlayer->_SkillBox.FindSkill((en_SkillCharacteristic)QuickSlotCharacteristicType,(en_SkillType)QuickSlotSkillType);
 				if (FindSkill != nullptr)
 				{
-					st_Vector2Int SkillQuickslotPosition;
-					SkillQuickslotPosition._Y = QuickSlotBarIndex;
-					SkillQuickslotPosition._X = QuickSlotBarSlotIndex;
+					Vector2Int SkillQuickslotPosition;
+					SkillQuickslotPosition.Y = QuickSlotBarIndex;
+					SkillQuickslotPosition.X = QuickSlotBarSlotIndex;
 
 					NewQuickSlotBarSlot.QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_SKILL;
 					NewQuickSlotBarSlot.QuickBarSkill = FindSkill;
@@ -4569,8 +4580,8 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 	LeavePlayerStatInfoSave.InMeleeCriticalPoint(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint);
 	LeavePlayerStatInfoSave.InMagicCriticalPoint(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint);
 	LeavePlayerStatInfoSave.InSpeed(LeavePlayer->_GameObjectInfo.ObjectStatInfo.Speed);
-	LeavePlayerStatInfoSave.InLastPositionY(LeavePlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y);
-	LeavePlayerStatInfoSave.InLastPositionX(LeavePlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X);
+	LeavePlayerStatInfoSave.InLastPositionY(LeavePlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y);
+	LeavePlayerStatInfoSave.InLastPositionX(LeavePlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X);
 	LeavePlayerStatInfoSave.InCurrentExperience(LeavePlayer->_Experience.CurrentExperience);
 	LeavePlayerStatInfoSave.InRequireExperience(LeavePlayer->_Experience.RequireExperience);
 	LeavePlayerStatInfoSave.InTotalExperience(LeavePlayer->_Experience.TotalExperience);	
@@ -5465,7 +5476,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobRightMouseObjectInfo(CGameObject
 st_GameObjectJob* CGameServer::MakeGameObjectJobLeaveChannel(CGameObject* LeaveChannelObject)
 {
 	st_GameObjectJob* LeaveChannelJob = G_ObjectManager->GameObjectJobCreate();
-	LeaveChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_LEAVE;
+	LeaveChannelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_OBJECT_LEAVE;
 
 	CGameServerMessage* LeaveChannelMessage = CGameServerMessage::GameServerMessageAlloc();
 	LeaveChannelMessage->Clear();
@@ -5761,7 +5772,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobPartyBanish(CGameObject* ReqPart
 	return PartyBanishJob;
 }
 
-CGameServerMessage* CGameServer::MakePacketResEnterGame(bool EnterGameSuccess, st_GameObjectInfo* ObjectInfo, st_Vector2Int* SpawnPosition)
+CGameServerMessage* CGameServer::MakePacketResEnterGame(bool EnterGameSuccess, st_GameObjectInfo* ObjectInfo, Vector2Int* SpawnPosition)
 {
 	CGameServerMessage* ResEnterGamePacket = CGameServerMessage::GameServerMessageAlloc();
 	if (ResEnterGamePacket == nullptr)
@@ -6032,7 +6043,7 @@ CGameServerMessage* CGameServer::MakePacketResFaceDirection(int64 ObjectID, floa
 	return ResFaceDirectionPacket;
 }
 
-CGameServerMessage* CGameServer::MakePacketResMove(int64& ObjectID, st_Vector2& LookAtDirection, st_Vector2& MoveDirection, st_Vector2& Position, int64 TargetID)
+CGameServerMessage* CGameServer::MakePacketResMove(int64& ObjectID, Vector2& LookAtDirection, Vector2& MoveDirection, Vector2& Position, int64 TargetID)
 {
 	CGameServerMessage* ResMoveMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResMoveMessage == nullptr)
@@ -6044,12 +6055,12 @@ CGameServerMessage* CGameServer::MakePacketResMove(int64& ObjectID, st_Vector2& 
 
 	*ResMoveMessage << (int16)en_PACKET_S2C_MOVE;	
 	*ResMoveMessage << ObjectID;	
-	*ResMoveMessage << LookAtDirection._X;
-	*ResMoveMessage << LookAtDirection._Y;
-	*ResMoveMessage << MoveDirection._X;
-	*ResMoveMessage << MoveDirection._Y;		
-	*ResMoveMessage << Position._X;
-	*ResMoveMessage << Position._Y;
+	*ResMoveMessage << LookAtDirection.X;
+	*ResMoveMessage << LookAtDirection.Y;
+	*ResMoveMessage << MoveDirection.X;
+	*ResMoveMessage << MoveDirection.Y;		
+	*ResMoveMessage << Position.X;
+	*ResMoveMessage << Position.Y;
 	*ResMoveMessage << TargetID;
 
 	return ResMoveMessage;
@@ -6410,7 +6421,7 @@ CGameServerMessage* CGameServer::MakePacketBufDeBufOff(int64 TargetObjectId, boo
 	return ResBufDeBufOffMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketComboSkillOn(vector<st_Vector2Int> ComboSkillQuickSlotPositions, st_SkillInfo ComboSkillInfo)
+CGameServerMessage* CGameServer::MakePacketComboSkillOn(vector<Vector2Int> ComboSkillQuickSlotPositions, st_SkillInfo ComboSkillInfo)
 {
 	CGameServerMessage* ResComboSkillMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResComboSkillMessage == nullptr)
@@ -6427,16 +6438,16 @@ CGameServerMessage* CGameServer::MakePacketComboSkillOn(vector<st_Vector2Int> Co
 	int8 ComboSkillQuickSlotBarIndexSize = (int8)ComboSkillQuickSlotPositions.size();
 	*ResComboSkillMessage << ComboSkillQuickSlotBarIndexSize;
 
-	for (st_Vector2Int ComboSkillQuickSlotPosition : ComboSkillQuickSlotPositions)
+	for (Vector2Int ComboSkillQuickSlotPosition : ComboSkillQuickSlotPositions)
 	{
-		*ResComboSkillMessage << (int8)ComboSkillQuickSlotPosition._Y;
-		*ResComboSkillMessage << (int8)ComboSkillQuickSlotPosition._X;
+		*ResComboSkillMessage << (int8)ComboSkillQuickSlotPosition.Y;
+		*ResComboSkillMessage << (int8)ComboSkillQuickSlotPosition.X;
 	}
 
 	return ResComboSkillMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketComboSkillOff(vector<st_Vector2Int> ComboSkillQuickSlotPositions, st_SkillInfo ComboSkillInfo, en_SkillType OffComboSkillType)
+CGameServerMessage* CGameServer::MakePacketComboSkillOff(vector<Vector2Int> ComboSkillQuickSlotPositions, st_SkillInfo ComboSkillInfo, en_SkillType OffComboSkillType)
 {
 	CGameServerMessage* ResComboSkillMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResComboSkillMessage == nullptr)
@@ -6454,10 +6465,10 @@ CGameServerMessage* CGameServer::MakePacketComboSkillOff(vector<st_Vector2Int> C
 	int8 ComboSkillQuickSlotBarIndexSize = (int8)ComboSkillQuickSlotPositions.size();
 	*ResComboSkillMessage << ComboSkillQuickSlotBarIndexSize;
 
-	for (st_Vector2Int ComboSkillQuickSlotPosition : ComboSkillQuickSlotPositions)
+	for (Vector2Int ComboSkillQuickSlotPosition : ComboSkillQuickSlotPositions)
 	{
-		*ResComboSkillMessage << (int8)ComboSkillQuickSlotPosition._Y;
-		*ResComboSkillMessage << (int8)ComboSkillQuickSlotPosition._X;
+		*ResComboSkillMessage << (int8)ComboSkillQuickSlotPosition.Y;
+		*ResComboSkillMessage << (int8)ComboSkillQuickSlotPosition.X;
 	}	
 
 	return ResComboSkillMessage;
@@ -6571,28 +6582,28 @@ CGameServerMessage* CGameServer::MakePacketSkillError(en_GlobalMessageType Perso
 
 	switch (PersonalMessageType)
 	{
-	case en_GlobalMessageType::PERSONAL_MESSAGE_SKILL_COOLTIME:
+	case en_GlobalMessageType::GLOBAL_MESSAGE_SKILL_COOLTIME:
 		wsprintf(ErrorMessage, L"[%s]의 재사용 대기시간이 완료되지 않았습니다.", SkillName);
 		break;
-	case en_GlobalMessageType::PERSONAL_MESSAGE_GLOBAL_SKILL_COOLTIME:
+	case en_GlobalMessageType::GLOBAL_MESSAGE_GLOBAL_SKILL_COOLTIME:
 		wsprintf(ErrorMessage, L"전역 재사용 대기시간이 완료되지 않았습니다.", SkillName);
 		break;
-	case en_GlobalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT:
+	case en_GlobalMessageType::GLOBAL_MESSAGE_NON_SELECT_OBJECT:
 		wsprintf(ErrorMessage, L"대상을 선택하고 [%s]을/를 사용해야 합니다.", SkillName);
 		break;
-	case en_GlobalMessageType::PERSONAL_MESSAGE_HEAL_NON_SELECT_OBJECT:
+	case en_GlobalMessageType::GLOBAL_MESSAGE_HEAL_NON_SELECT_OBJECT:
 		wsprintf(ErrorMessage, L"[%s] 대상을 선택하지 않아서 자신에게 사용합니다.", SkillName);
 		break;
-	case en_GlobalMessageType::PERSONAL_MESSAGE_PLACE_BLOCK:
+	case en_GlobalMessageType::GLOBAL_MESSAGE_PLACE_BLOCK:
 		wsprintf(ErrorMessage, L"이동할 위치가 막혀 있어서 [%s]을/를 사용할 수 없습니다.", SkillName);
 		break;
-	case en_GlobalMessageType::PERSONAL_MESSAGE_PLACE_DISTANCE:
+	case en_GlobalMessageType::GLOBAL_MESSAGE_PLACE_DISTANCE:
 		wsprintf(ErrorMessage, L"[%s] 대상과의 거리가 너무 멉니다. [거리 : %d ]", SkillName, SkillDistance);
 		break;
-	case en_GlobalMessageType::PERSONAL_MESSAGE_MYSELF_TARGET:
+	case en_GlobalMessageType::GLOBAL_MESSAGE_MYSELF_TARGET:
 		wsprintf(ErrorMessage, L"[%s]을/를 자신에게 사용 할 수 없습니다.", SkillName, SkillDistance);
 		break;
-	case en_GlobalMessageType::PERSONAL_MESSAGE_DIR_DIFFERENT:
+	case en_GlobalMessageType::GLOBAL_MESSAGE_DIR_DIFFERENT:
 		wsprintf(ErrorMessage, L"대상을 바라보아야 합니다.");
 		break;
 	}
@@ -6626,54 +6637,54 @@ CGameServerMessage* CGameServer::MakePacketCommonError(en_GlobalMessageType Pers
 
 	switch (PersonalMessageType)
 	{	
-	case en_GlobalMessageType::PERSOANL_MESSAGE_STATUS_ABNORMAL_SPELL:
+	case en_GlobalMessageType::GLOBAL_MESSAGE_STATUS_ABNORMAL:
 		wsprintf(ErrorMessage, L"상태이상에 걸려 [%s]를 사용 할 수 없습니다.", Name);
-		break;
-	case en_GlobalMessageType::PERSONAL_MESSAGE_NON_SELECT_OBJECT:
-		wsprintf(ErrorMessage, L"대상을 선택하고 사용해야 합니다.");
-		break;
-	case en_GlobalMessageType::PERSONAL_MESSAGE_FAR_DISTANCE:
-		wsprintf(ErrorMessage, L"대상과의 거리가 너무 멉니다.");
-		break;
-	case en_GlobalMessageType::PERSONAL_MESSAGE_DIR_DIFFERENT:
-		wsprintf(ErrorMessage, L"[%s]을 바라보아야 합니다.", Name);
-		break;
-	case en_GlobalMessageType::PERSONAL_MESSAGE_ATTACK_ANGLE:
-		wsprintf(ErrorMessage, L"대상이 앞에 있어야 합니다.");
-		break;
-	case en_GlobalMessageType::PERSONAL_MESSAGE_GATHERING_DISTANCE:
-		wsprintf(ErrorMessage, L"[%s]을 채집하려면 좀 더 가까이 다가가야합니다.", Name);
-		break;
-	case en_GlobalMessageType::PERSONAL_MEESAGE_CRAFTING_TABLE_OVERLAP_SELECT:
-		wsprintf(ErrorMessage, L"[%s]를 사용중입니다.", Name);
-		break;
-	case en_GlobalMessageType::PERSONAL_MESSAGE_CRAFTING_TABLE_OVERLAP_CRAFTING_START:
-		wsprintf(ErrorMessage, L"제작 중인 아이템을 모두 제작하거나, 제작 멈춤을 누르고 제작을 다시 시작해야 합니다.");
-		break;
-	case en_GlobalMessageType::PERSONAL_MESSAGE_CRAFTING_TABLE_MATERIAL_COUNT_NOT_ENOUGH:
-		wsprintf(ErrorMessage, L"재료가 부족합니다.");
-		break;
-	case en_GlobalMessageType::PERSOANL_MESSAGE_CRAFTING_TABLE_MATERIAL_WRONG_ITEM_ADD:
-		wsprintf(ErrorMessage, L"선택된 제작법에 넣을 수 없는 재료입니다.");
-		break;
-	case en_GlobalMessageType::PERSONAL_FAULT_ITEM_USE:
-		wsprintf(ErrorMessage, L"[%s]를 사용 할 수 없습니다.", Name);
-		break;
-	case en_GlobalMessageType::PERSOANL_MESSAGE_SEED_FARMING_EXIST:
-		wsprintf(ErrorMessage, L"[%s]가 심어져 있어서 심을 수 없습니다.", Name);
-		break;
-	case en_GlobalMessageType::PERSONAL_MESSAGE_EXIST_PARTY_PLAYER:
-		wsprintf(ErrorMessage, L"[%s]이 그룹 중이라서 초대 할 수 없습니다.", Name);
-		break;
-	case en_GlobalMessageType::PERSONAL_MESSAGE_PARTY_INVITE_REJECT:
-		wsprintf(ErrorMessage, L"[%s]가 그룹 초대를 거절 했습니다.", Name);
-		break;
-	case en_GlobalMessageType::PERSONAL_MESSAGE_PARTY_MAX:
-		wsprintf(ErrorMessage, L"그룹에 빈 자리가 없습니다.", Name);
-		break;
-	case en_GlobalMessageType::PERSONAL_MESSAGE_SKILL_CANCEL_FAIL_COOLTIME:
+		break;	
+	case en_GlobalMessageType::GLOBAL_MESSAGE_SKILL_CANCEL_FAIL_COOLTIME:
 		wsprintf(ErrorMessage, L"[%s]이 재사용 대기시간 중이라 취소 할 수 없습니다.", Name);
 		break;
+	case en_GlobalMessageType::GLOBAL_MESSAGE_NON_SELECT_OBJECT:
+		wsprintf(ErrorMessage, L"대상을 선택하고 사용해야 합니다.");
+		break;
+	case en_GlobalMessageType::GLOBAL_MESSAGE_FAR_DISTANCE:
+		wsprintf(ErrorMessage, L"대상과의 거리가 너무 멉니다.");
+		break;
+	case en_GlobalMessageType::GLOBAL_MESSAGE_ATTACK_ANGLE:
+		wsprintf(ErrorMessage, L"대상이 앞에 있어야 합니다.");
+		break;
+	case en_GlobalMessageType::GLOBAL_MESSAGE_DIR_DIFFERENT:
+		wsprintf(ErrorMessage, L"[%s]을 바라보아야 합니다.", Name);
+		break;	
+	case en_GlobalMessageType::GLOBAL_MESSAGE_GATHERING_DISTANCE:
+		wsprintf(ErrorMessage, L"[%s]을 채집하려면 좀 더 가까이 다가가야합니다.", Name);
+		break;
+	case en_GlobalMessageType::GLOBAL_MEESAGE_CRAFTING_TABLE_OVERLAP_SELECT:
+		wsprintf(ErrorMessage, L"[%s]를 사용중입니다.", Name);
+		break;
+	case en_GlobalMessageType::GLOBAL_MESSAGE_CRAFTING_TABLE_OVERLAP_CRAFTING_START:
+		wsprintf(ErrorMessage, L"제작 중인 아이템을 모두 제작하거나, 제작 멈춤을 누르고 제작을 다시 시작해야 합니다.");
+		break;
+	case en_GlobalMessageType::GLOBAL_MESSAGE_CRAFTING_TABLE_MATERIAL_COUNT_NOT_ENOUGH:
+		wsprintf(ErrorMessage, L"재료가 부족합니다.");
+		break;
+	case en_GlobalMessageType::GLOBAL_MESSAGE_CRAFTING_TABLE_MATERIAL_WRONG_ITEM_ADD:
+		wsprintf(ErrorMessage, L"선택된 제작법에 넣을 수 없는 재료입니다.");
+		break;
+	case en_GlobalMessageType::GLOBAL_MESSAGE_SEED_FARMING_EXIST:
+		wsprintf(ErrorMessage, L"[%s]가 심어져 있어서 심을 수 없습니다.", Name);
+		break;
+	case en_GlobalMessageType::GLOBAL_MESSAGE_EXIST_PARTY_PLAYER:
+		wsprintf(ErrorMessage, L"[%s]이 그룹 중이라서 초대 할 수 없습니다.", Name);
+		break;
+	case en_GlobalMessageType::GLOBAL_MESSAGE_PARTY_INVITE_REJECT:
+		wsprintf(ErrorMessage, L"[%s]가 그룹 초대를 거절 했습니다.", Name);
+		break;
+	case en_GlobalMessageType::GLOBAL_MESSAGE_PARTY_MAX:
+		wsprintf(ErrorMessage, L"그룹에 빈 자리가 없습니다.", Name);
+		break;
+	case en_GlobalMessageType::GLOBAL_FAULT_ITEM_USE:
+		wsprintf(ErrorMessage, L"[%s]를 사용 할 수 없습니다.", Name);
+		break;			
 	}
 
 	wstring ErrorMessageString = ErrorMessage;
@@ -7100,10 +7111,10 @@ CGameServerMessage* CGameServer::MakePacketResRayCasting(int64 ObjectID, vector<
 
 	for (auto RayCastingPosition : RayCastingPositions)
 	{
-		*ResRayCastingMessage << RayCastingPosition.StartPosition._X;
-		*ResRayCastingMessage << RayCastingPosition.StartPosition._Y;
-		*ResRayCastingMessage << RayCastingPosition.EndPosition._X;
-		*ResRayCastingMessage << RayCastingPosition.EndPosition._Y;
+		*ResRayCastingMessage << RayCastingPosition.StartPosition.X;
+		*ResRayCastingMessage << RayCastingPosition.StartPosition.Y;
+		*ResRayCastingMessage << RayCastingPosition.EndPosition.X;
+		*ResRayCastingMessage << RayCastingPosition.EndPosition.Y;
 	}
 
 	return ResRayCastingMessage;
@@ -7195,7 +7206,7 @@ void CGameServer::SendPacketFieldOfView(CGameObject* Object, CMessage* Message)
 	{
 		for (CPlayer* Player : AroundSector->GetPlayers())
 		{
-			int16 Distance = st_Vector2Int::Distance(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
+			int16 Distance = Vector2Int::Distance(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
 
 			if (Distance <= Object->_FieldOfViewDistance)
 			{

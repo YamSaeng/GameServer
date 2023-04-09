@@ -136,6 +136,9 @@
     <Filter Include="ContentServer\Content\QuickSlotBar">
       <UniqueIdentifier>{f784ae9e-5bca-4c1e-8f88-545e6f15b532}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ContentServer\Content\Network">
+      <UniqueIdentifier>{5f9a7b99-1197-473e-b68c-1b7b5b0bb359}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Type.h">
@@ -341,6 +344,18 @@
     <ClInclude Include="Wall.h">
       <Filter>ContentServer\Content\GameObject\Environment</Filter>
     </ClInclude>
+    <ClInclude Include="NetworkManager.h">
+      <Filter>ContentServer\Content\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="SwordBlade.h">
+      <Filter>ContentServer\Content\GameObject\Environment</Filter>
+    </ClInclude>
+    <ClInclude Include="Matrix2x2.h">
+      <Filter>ContentServer\Content\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector2.h">
+      <Filter>ContentServer\Content\Math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -491,6 +506,18 @@
     </ClCompile>
     <ClCompile Include="Wall.cpp">
       <Filter>ContentServer\Content\GameObject\Environment</Filter>
+    </ClCompile>
+    <ClCompile Include="NetworkManager.cpp">
+      <Filter>ContentServer\Content\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="SwordBlade.cpp">
+      <Filter>ContentServer\Content\GameObject\Environment</Filter>
+    </ClCompile>
+    <ClCompile Include="Matrix2x2.cpp">
+      <Filter>ContentServer\Content\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector2.cpp">
+      <Filter>ContentServer\Content\Math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
