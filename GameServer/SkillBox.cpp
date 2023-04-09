@@ -194,7 +194,7 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 										if (FieldOfViewObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD
 											&& FieldOfViewObject ->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::ROOTING)
 										{
-											if (st_Vector2::CheckFieldOfView(FieldOfViewObject->_GameObjectInfo.ObjectPositionInfo.Position,
+											if (Vector2::CheckFieldOfView(FieldOfViewObject->_GameObjectInfo.ObjectPositionInfo.Position,
 												SkillUser->_GameObjectInfo.ObjectPositionInfo.Position,
 												SkillUser->_FieldOfDirection, SkillUser->_FieldOfAngle, Skill->GetSkillInfo()->SkillDistance))
 											{
@@ -216,24 +216,23 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 									{
 										if (Player->_SelectTarget != nullptr)
 										{
-											float Distance = st_Vector2::Distance(Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position,
+											float Distance = Vector2::Distance(Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position,
 												Player->_GameObjectInfo.ObjectPositionInfo.Position);
 											if (Distance < Skill->GetSkillInfo()->SkillDistance)
 											{
-												st_Vector2Int JumpingPositionDir = Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition
+												Vector2Int JumpingPositionDir = Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition
 													- Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition;
 
-												st_Vector2Int JumpingPosition = JumpingPositionDir.Direction();
-												JumpingPosition._X = JumpingPosition._X * -1.0f;
-												JumpingPosition._Y = JumpingPosition._Y * -1.0f;
+												Vector2Int JumpingPosition = JumpingPositionDir.Direction();
+												JumpingPosition *= -1;												
 
-												st_Vector2Int NewCollisionPosition;
-												NewCollisionPosition._X = Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + JumpingPosition._X;
-												NewCollisionPosition._Y = Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + JumpingPosition._Y;
+												Vector2Int NewCollisionPosition;
+												NewCollisionPosition.X = Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + JumpingPosition.X;
+												NewCollisionPosition.Y = Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + JumpingPosition.Y;
 
-												st_Vector2 NewPosition;
-												NewPosition._X = NewCollisionPosition._X + 0.5f;
-												NewPosition._Y = NewCollisionPosition._Y + 0.5f;
+												Vector2 NewPosition;
+												NewPosition.X = NewCollisionPosition.X + 0.5f;
+												NewPosition.Y = NewCollisionPosition.Y + 0.5f;
 
 												bool IsCollision = Player->GetChannel()->ChannelColliderCheck(Player, NewPosition);
 												if (IsCollision == true)
@@ -247,12 +246,12 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 
 													Player->_GameObjectInfo.ObjectPositionInfo.Position = NewPosition;
 
-													st_Vector2Int CollisionPosition;
-													CollisionPosition._X = (int32)Player->_GameObjectInfo.ObjectPositionInfo.Position._X;
-													CollisionPosition._Y = (int32)Player->_GameObjectInfo.ObjectPositionInfo.Position._Y;
+													Vector2Int CollisionPosition;
+													CollisionPosition.X = (int32)Player->_GameObjectInfo.ObjectPositionInfo.Position.X;
+													CollisionPosition.Y = (int32)Player->_GameObjectInfo.ObjectPositionInfo.Position.Y;
 
-													if (CollisionPosition._X != Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._X
-														|| CollisionPosition._Y != Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y)
+													if (CollisionPosition.X != Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X
+														|| CollisionPosition.Y != Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y)
 													{
 														Player->GetChannel()->GetMap()->ApplyMove(Player, CollisionPosition);
 													}
@@ -289,7 +288,7 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 									{
 										CGameObject* FindObject = SkillUser->GetChannel()->FindChannelObject(FieldOfViewInfo.ObjectID, FieldOfViewInfo.ObjectType);
 										
-										float Distance = st_Vector2::Distance(FindObject->_GameObjectInfo.ObjectPositionInfo.Position, SkillUser->_GameObjectInfo.ObjectPositionInfo.Position);
+										float Distance = Vector2::Distance(FindObject->_GameObjectInfo.ObjectPositionInfo.Position, SkillUser->_GameObjectInfo.ObjectPositionInfo.Position);
 										if (Distance < Skill->GetSkillInfo()->SkillDistance)
 										{
 											st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(SkillUser->_GameObjectInfo.ObjectId,
@@ -307,10 +306,15 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 									CSwordBlade* NewSwordBlade = dynamic_cast<CSwordBlade*>(G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_SKILL_SWORD_BLADE));
 									if (NewSwordBlade != nullptr)
 									{
+										NewSwordBlade->_Owner = SkillUser;
+
 										NewSwordBlade->_SpawnPosition = SkillUser->_GameObjectInfo.ObjectPositionInfo.CollisionPosition;
 										NewSwordBlade->_GameObjectInfo.ObjectPositionInfo.Position = SkillUser->_GameObjectInfo.ObjectPositionInfo.Position + SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton;
 										NewSwordBlade->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton = SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton;
 										NewSwordBlade->_GameObjectInfo.ObjectPositionInfo.MoveDirection = SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton;
+
+										NewSwordBlade->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = Skill->GetSkillInfo()->SkillMinDamage;
+										NewSwordBlade->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = Skill->GetSkillInfo()->SkillMaxDamage;
 
 										st_GameObjectJob* EnterChannelSwordBladeJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobObjectEnterChannel(NewSwordBlade);
 										SkillUser->GetChannel()->_ChannelJobQue.Enqueue(EnterChannelSwordBladeJob);
@@ -321,16 +325,16 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 								{
 									if (SkillUser->_SelectTarget != nullptr)
 									{
-										st_Vector2 TargetPosition = SkillUser->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position;
-										float ChoHoneDistance = st_Vector2::Distance(TargetPosition, SkillUser->_GameObjectInfo.ObjectPositionInfo.Position);
+										Vector2 TargetPosition = SkillUser->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position;
+										float ChoHoneDistance = Vector2::Distance(TargetPosition, SkillUser->_GameObjectInfo.ObjectPositionInfo.Position);
 
 										if (Skill->GetSkillInfo()->SkillDistance >= ChoHoneDistance)
 										{
-											st_Vector2 MyFrontPosition = SkillUser->_GameObjectInfo.ObjectPositionInfo.Position + SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton;
+											Vector2 MyFrontPosition = SkillUser->_GameObjectInfo.ObjectPositionInfo.Position + SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton;
 
-											st_Vector2Int MyFrontIntPosition;
-											MyFrontIntPosition._X = MyFrontPosition._X;
-											MyFrontIntPosition._Y = MyFrontPosition._Y;
+											Vector2Int MyFrontIntPosition;
+											MyFrontIntPosition.X = MyFrontPosition.X;
+											MyFrontIntPosition.Y = MyFrontPosition.Y;
 
 											if (SkillUser->GetChannel() != nullptr)
 											{
@@ -340,12 +344,12 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 
 													if (SkillUser->GetChannel()->GetMap()->ApplyMove(SkillUser->_SelectTarget, MyFrontIntPosition))
 													{
-														SkillUser->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X = MyFrontPosition._X;
-														SkillUser->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y = MyFrontPosition._Y;
+														SkillUser->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position.X = MyFrontPosition.X;
+														SkillUser->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position.Y = MyFrontPosition.Y;
 
 														CMessage* SelectTargetStopPacket = G_NetworkManager->GetGameServer()->MakePacketResMoveStop(SkillUser->_SelectTarget->_GameObjectInfo.ObjectId,
-															MyFrontPosition._X,
-															MyFrontPosition._Y);
+															MyFrontPosition.X,
+															MyFrontPosition.Y);
 														G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, SelectTargetStopPacket);
 														SelectTargetStopPacket->Free();
 													}
@@ -410,10 +414,10 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 					{
 						GlobalSkill->GlobalCoolTimeStart(Skill->GetSkillInfo()->SkillMotionTime);
 
-						for (st_Vector2Int QuickSlotPosition : GlobalSkill->_QuickSlotBarPosition)
+						for (Vector2Int QuickSlotPosition : GlobalSkill->_QuickSlotBarPosition)
 						{
-							CMessage* ResCoolTimeStartPacket = G_NetworkManager->GetGameServer()->MakePacketCoolTime((int8)QuickSlotPosition._Y,
-								(int8)QuickSlotPosition._X,
+							CMessage* ResCoolTimeStartPacket = G_NetworkManager->GetGameServer()->MakePacketCoolTime((int8)QuickSlotPosition.Y,
+								(int8)QuickSlotPosition.X,
 								1.0f, nullptr, _GlobalCoolTimeSkill->GetSkillInfo()->SkillCoolTime);
 							G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
 							ResCoolTimeStartPacket->Free();
