@@ -350,7 +350,7 @@ void CObjectManager::MapTileInfoSpawn(int64& MapID)
 }
 
 void CObjectManager::ObjectItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_GameObjectType KillerObjectType, 
-	st_Vector2Int SpawnIntPosition, st_Vector2 SpawnPosition, en_GameObjectType SpawnItemOwnerType)
+	Vector2Int SpawnIntPosition, Vector2 SpawnPosition, en_GameObjectType SpawnItemOwnerType)
 {
 	bool Find = false;
 	en_SmallItemCategory DropItemCategory;

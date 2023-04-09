@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include "ChannelManager.h"
 #include "Player.h"
 #include "Goblin.h"
@@ -126,8 +127,8 @@ public:
 	//------------------------------------------------------------------------------------------------
 	// 게임오브젝트에서 아이템 스폰
 	//------------------------------------------------------------------------------------------------
-	void ObjectItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_GameObjectType KillerObjectType, st_Vector2Int SpawnIntPosition,
-		st_Vector2 SpawnPosition, en_GameObjectType SpawnItemOwnerType);
+	void ObjectItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_GameObjectType KillerObjectType, Vector2Int SpawnIntPosition,
+		Vector2 SpawnPosition, en_GameObjectType SpawnItemOwnerType);
 	//------------------------------------------------------------------------------------------------
 	// 아이템 버리기
 	//------------------------------------------------------------------------------------------------
