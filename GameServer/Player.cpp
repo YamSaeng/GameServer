@@ -16,14 +16,14 @@ CPlayer::CPlayer()
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 	_DefaultAttackTick = 0;
 
-	_FieldOfDirection = st_Vector2::Left();
+	_FieldOfDirection = Vector2::Left;
 
 	_FieldOfViewDistance = 12;		
 
 	_FieldOfAngle = 210;
 
 	_NatureRecoveryTick = GetTickCount64() + 5000;
-	_FieldOfViewUpdateTick = GetTickCount64() + 50;
+	_FieldOfViewUpdateTick = GetTickCount64() + 100;
 
 	_GameObjectInfo.ObjectWidth = 1;
 	_GameObjectInfo.ObjectHeight = 1;	
@@ -153,7 +153,7 @@ bool CPlayer::OnDamaged(CGameObject* Attacker, int32 Damage)
 
 			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
 
-			_GameObjectInfo.ObjectPositionInfo.MoveDirection = st_Vector2::Zero();			
+			_GameObjectInfo.ObjectPositionInfo.MoveDirection = Vector2::Zero;			
 
 			vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
 
@@ -213,7 +213,7 @@ void CPlayer::UpdateIdle()
 
 void CPlayer::UpdateMoving()
 {	
-	st_Vector2 NextPosition;
+	Vector2 NextPosition;
 
 	bool CanMove = _Channel->GetMap()->Cango(this, &NextPosition);
 
@@ -225,12 +225,12 @@ void CPlayer::UpdateMoving()
 	{
 		_GameObjectInfo.ObjectPositionInfo.Position = NextPosition;
 
-		st_Vector2Int CollisionPosition;
-		CollisionPosition._X = (int32)_GameObjectInfo.ObjectPositionInfo.Position._X;
-		CollisionPosition._Y = (int32)_GameObjectInfo.ObjectPositionInfo.Position._Y;
+		Vector2Int CollisionPosition;
+		CollisionPosition.X = (int32)_GameObjectInfo.ObjectPositionInfo.Position.X;
+		CollisionPosition.Y = (int32)_GameObjectInfo.ObjectPositionInfo.Position.Y;
 
-		if (CollisionPosition._X != _GameObjectInfo.ObjectPositionInfo.CollisionPosition._X
-			|| CollisionPosition._Y != _GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y)
+		if (CollisionPosition.X != _GameObjectInfo.ObjectPositionInfo.CollisionPosition.X
+			|| CollisionPosition.Y != _GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y)
 		{
 			_Channel->GetMap()->ApplyMove(this, CollisionPosition);
 		}
@@ -242,8 +242,8 @@ void CPlayer::UpdateMoving()
 		vector<st_FieldOfViewInfo> AroundPlayers = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
 
 		CMessage* ResMoveStopPacket = G_NetworkManager->GetGameServer()->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
-			_GameObjectInfo.ObjectPositionInfo.Position._X,
-			_GameObjectInfo.ObjectPositionInfo.Position._Y);			
+			_GameObjectInfo.ObjectPositionInfo.Position.X,
+			_GameObjectInfo.ObjectPositionInfo.Position.Y);			
 		G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, ResMoveStopPacket);
 		ResMoveStopPacket->Free();
 	}
@@ -353,8 +353,8 @@ void CPlayer::UpdateSpell()
 						_SelectTarget->SetStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE);
 
 						CMessage* SelectTargetMoveStopMessage = G_NetworkManager->GetGameServer()->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId,
-							_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X,
-							_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y);
+							_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position.X,
+							_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position.Y);
 						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_FieldOfViewInfos, SelectTargetMoveStopMessage);
 						SelectTargetMoveStopMessage->Free();
 
@@ -424,10 +424,10 @@ void CPlayer::UpdateSpell()
 			{
 				GlobalSkill->GlobalCoolTimeStart(_SpellSkill->GetSkillInfo()->SkillMotionTime);
 
-				for (st_Vector2Int QuickSlotPosition : GlobalSkill->_QuickSlotBarPosition)
+				for (Vector2Int QuickSlotPosition : GlobalSkill->_QuickSlotBarPosition)
 				{
-					CMessage* ResCoolTimeStartPacket = G_NetworkManager->GetGameServer()->MakePacketCoolTime((int8)QuickSlotPosition._Y,
-						(int8)QuickSlotPosition._X,
+					CMessage* ResCoolTimeStartPacket = G_NetworkManager->GetGameServer()->MakePacketCoolTime((int8)QuickSlotPosition.Y,
+						(int8)QuickSlotPosition.X,
 						1.0f, nullptr, _SpellSkill->GetSkillInfo()->SkillMotionTime);
 					G_NetworkManager->GetGameServer()->SendPacket(_SessionId, ResCoolTimeStartPacket);
 					ResCoolTimeStartPacket->Free();
@@ -490,6 +490,8 @@ void CPlayer::CheckFieldOfViewObject()
 	// 시야범위 객체 조사
 	if (_FieldOfViewUpdateTick < GetTickCount64() && _Channel != nullptr)
 	{
+		_FieldOfViewUpdateTick = GetTickCount64() + 100;
+
 		// 시야범위 오브젝트를 조사해서 저장		
 		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldOfViewObjects(this);
 		vector<st_FieldOfViewInfo> SpawnObjectIds;
@@ -578,7 +580,8 @@ void CPlayer::CheckFieldOfViewObject()
 			if (FindObject != nullptr
 				&& (FindObject->_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_PLAYER
 					|| FindObject->_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_GOBLIN
-					|| FindObject->_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_NON_PLAYER_GENERAL_MERCHANT))
+					|| FindObject->_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_NON_PLAYER_GENERAL_MERCHANT
+					|| FindObject->_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_SKILL_SWORD_BLADE))
 			{
 				_FieldOfViewObjects.push_back(FindObject);
 			}
@@ -608,46 +611,46 @@ void CPlayer::RayCastingToFieldOfViewObjects(vector<CGameObject*>* SpawnObjects,
 {
 	for (CGameObject* FieldOfViewObject : _FieldOfViewObjects)
 	{
-		st_Vector2 FieldOfViewObjectDir = FieldOfViewObject->_GameObjectInfo.ObjectPositionInfo.Position - _GameObjectInfo.ObjectPositionInfo.Position;
-		st_Vector2 FieldOfViewRay = FieldOfViewObjectDir.Normalize();
+		Vector2 FieldOfViewObjectDir = FieldOfViewObject->_GameObjectInfo.ObjectPositionInfo.Position - _GameObjectInfo.ObjectPositionInfo.Position;
+		Vector2 FieldOfViewRay = FieldOfViewObjectDir.Normalize();
 
 		// 레이캐스팅 검사할때 움직일 단위 x, y 값
-		st_Vector2 RayUnitStepSize;
-		RayUnitStepSize._X = sqrt(1 + (FieldOfViewRay._Y / FieldOfViewRay._X) * (FieldOfViewRay._Y / FieldOfViewRay._X));
-		RayUnitStepSize._Y = sqrt(1 + (FieldOfViewRay._X / FieldOfViewRay._Y) * (FieldOfViewRay._X / FieldOfViewRay._Y));
+		Vector2 RayUnitStepSize;
+		RayUnitStepSize.X = sqrt(1 + (FieldOfViewRay.Y / FieldOfViewRay.X) * (FieldOfViewRay.Y / FieldOfViewRay.X));
+		RayUnitStepSize.Y = sqrt(1 + (FieldOfViewRay.X / FieldOfViewRay.Y) * (FieldOfViewRay.X / FieldOfViewRay.Y));
 
 		// 맵 좌표 위치 
-		st_Vector2Int MapCheck;
-		MapCheck._X = _GameObjectInfo.ObjectPositionInfo.Position._X;
-		MapCheck._Y = _GameObjectInfo.ObjectPositionInfo.Position._Y;
+		Vector2Int MapCheck;
+		MapCheck.X = _GameObjectInfo.ObjectPositionInfo.Position.X;
+		MapCheck.Y = _GameObjectInfo.ObjectPositionInfo.Position.Y;
 
 		// 현재 위치에서 다음 위치의 Ray 길이
-		st_Vector2 RayLength1D;
+		Vector2 RayLength1D;
 
 		// 탐색 방향
-		st_Vector2Int Step;
+		Vector2Int Step;
 
 		// 탐색 방향 정하고 다음 위치 Ray 길이 값 정하기
-		if (FieldOfViewRay._X < 0)
+		if (FieldOfViewRay.X < 0)
 		{
-			Step._X = -1;
-			RayLength1D._X = (_GameObjectInfo.ObjectPositionInfo.Position._X - float(MapCheck._X)) * RayUnitStepSize._X;
+			Step.X = -1;
+			RayLength1D.X = (_GameObjectInfo.ObjectPositionInfo.Position.X - float(MapCheck.X)) * RayUnitStepSize.X;
 		}
 		else
 		{
-			Step._X = 1;
-			RayLength1D._X = (float(MapCheck._X + 1) - _GameObjectInfo.ObjectPositionInfo.Position._X) * RayUnitStepSize._X;
+			Step.X = 1;
+			RayLength1D.X = (float(MapCheck.X + 1) - _GameObjectInfo.ObjectPositionInfo.Position.X) * RayUnitStepSize.X;
 		}
 
-		if (FieldOfViewRay._Y < 0)
+		if (FieldOfViewRay.Y < 0)
 		{
-			Step._Y = -1;
-			RayLength1D._Y = (_GameObjectInfo.ObjectPositionInfo.Position._Y - float(MapCheck._Y)) * RayUnitStepSize._Y;
+			Step.Y = -1;
+			RayLength1D.Y = (_GameObjectInfo.ObjectPositionInfo.Position.Y - float(MapCheck.Y)) * RayUnitStepSize.Y;
 		}
 		else
 		{
-			Step._Y = 1;
-			RayLength1D._Y = (float(MapCheck._Y + 1) - _GameObjectInfo.ObjectPositionInfo.Position._Y) * RayUnitStepSize._Y;
+			Step.Y = 1;
+			RayLength1D.Y = (float(MapCheck.Y + 1) - _GameObjectInfo.ObjectPositionInfo.Position.Y) * RayUnitStepSize.Y;
 		}
 
 		// 검사
@@ -659,25 +662,25 @@ void CPlayer::RayCastingToFieldOfViewObjects(vector<CGameObject*>* SpawnObjects,
 		while (!WallFound && !TargetFound && Distance < MaxDistance)
 		{
 			// 다음 타일 위치로 옮김
-			if (RayLength1D._X < RayLength1D._Y)
+			if (RayLength1D.X < RayLength1D.Y)
 			{
-				MapCheck._X += Step._X;
-				Distance = RayLength1D._X;
-				RayLength1D._X += RayUnitStepSize._X;
+				MapCheck.X += Step.X;
+				Distance = RayLength1D.X;
+				RayLength1D.X += RayUnitStepSize.X;
 			}
 			else
 			{
-				MapCheck._Y += Step._Y;
-				Distance = RayLength1D._Y;
-				RayLength1D._Y += RayUnitStepSize._Y;
+				MapCheck.Y += Step.Y;
+				Distance = RayLength1D.Y;
+				RayLength1D.Y += RayUnitStepSize.Y;
 			}
 
 			// 맵에서 계산한 타일 위치 조사
 			CMap* Map = _Channel->GetMap();
-			if (MapCheck._X >= 0 && MapCheck._X < Map->_Right && MapCheck._Y >= 0 && MapCheck._Y < Map->_Down)
+			if (MapCheck.X >= 0 && MapCheck.X < Map->_Right && MapCheck.Y >= 0 && MapCheck.Y < Map->_Down)
 			{
-				int X = MapCheck._X - Map->_Left;
-				int Y = Map->_Down - MapCheck._Y;
+				int X = MapCheck.X - Map->_Left;
+				int Y = Map->_Down - MapCheck.Y;
 
 				CGameObject* GameObject = Map->_ObjectsInfos[Y][X];
 				if (GameObject != nullptr)

@@ -8,8 +8,6 @@
 #include "GameServerMessage.h"
 #include "PartyManager.h"
 
-struct st_TimerJob;
-
 class CPlayer : public CCreature
 {
 public:			
