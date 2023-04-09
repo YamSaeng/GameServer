@@ -206,19 +206,27 @@ struct Vector2Int
 	Vector2Int() { X = 0; Y = 0; };
 	Vector2Int(int32 x, int32 y) { X = x; Y = y; }
 
-	Vector2Int operator +(Vector2Int& Vector)
+	Vector2Int operator +(Vector2Int& Vector) const
 	{
 		return Vector2Int(X + Vector.X, Y + Vector.Y);
 	}
 
-	Vector2Int operator -(Vector2Int& Vector)
+	Vector2Int operator -(Vector2Int& Vector) const
 	{
 		return Vector2Int(X - Vector.X, Y - Vector.Y);
 	}
 
-	Vector2Int operator *(int16 Value)
+	Vector2Int operator *(int16 Value) const
 	{
 		return Vector2Int(X * Value, Y * Value);
+	}	
+
+	Vector2Int operator*=(int16 Value)
+	{
+		X *= Value;
+		Y *= Value;
+
+		return *this;
 	}
 
 	bool operator == (Vector2Int CellPosition)
