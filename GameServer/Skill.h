@@ -7,10 +7,10 @@ class CSkill
 {
 public:		
 	// 스킬이 퀵슬롯바에 등록되어 있는 위치
-	vector<st_Vector2Int> _QuickSlotBarPosition;	
+	vector<Vector2Int> _QuickSlotBarPosition;	
 
 	// 연속기 스킬이 활성화되어 있는 위치
-	vector<st_Vector2Int> _ComboSkillQuickSlotBarIndex;	
+	vector<Vector2Int> _ComboSkillQuickSlotBarIndex;	
 	
 	CSkill();	
 	~CSkill();
@@ -35,7 +35,7 @@ public:
 	// 상태이상 지속 시간 시작
 	void StatusAbnormalDurationTimeStart();
 	// 연속기 스킬 시작
-	void ComboSkillStart(vector<st_Vector2Int> ComboSkillQuickSlotIndex, en_SkillType ComboSkilltype);
+	void ComboSkillStart(vector<Vector2Int> ComboSkillQuickSlotIndex, en_SkillType ComboSkilltype);
 	// 물리 스킬 시작
 	void ReqMeleeSkillInit(int64 AttackEndTick);
 	// 마법 스킬 시작

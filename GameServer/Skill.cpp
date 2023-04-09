@@ -224,7 +224,7 @@ void CSkill::StatusAbnormalDurationTimeStart()
 	_SkillInfo->SkillRemainTime = _SkillDurationTick - GetTickCount64();
 }
 
-void CSkill::ComboSkillStart(vector<st_Vector2Int> ComboSkillQuickSlotIndex, en_SkillType ComboSkilltype)
+void CSkill::ComboSkillStart(vector<Vector2Int> ComboSkillQuickSlotIndex, en_SkillType ComboSkilltype)
 {
 	_ComboSkillQuickSlotBarIndex = ComboSkillQuickSlotIndex;
 
