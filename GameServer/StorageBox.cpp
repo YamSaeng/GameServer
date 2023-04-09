@@ -3,7 +3,7 @@
 
 CStorageBox::CStorageBox()
 {
-	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_STORAGE_BOX;
+	_GameObjectInfo.ObjectType = en_GameObjectType::OBJECT_STORAGE_SMALL_BOX;
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
 	_FieldOfViewDistance = 10;
@@ -30,7 +30,7 @@ CItem* CStorageBox::StorageBoxGetItem(int8 TilePositionX, int8 TilePositionY)
 	return _StorageBoxInventory.GetItem(0, TilePositionX, TilePositionY);
 }
 
-st_Vector2Int CStorageBox::StorageBoxFindEmptySpace(CItem* Item)
+Vector2Int CStorageBox::StorageBoxFindEmptySpace(CItem* Item)
 {
 	return _StorageBoxInventory.FindEmptySpace(0, Item);
 }
