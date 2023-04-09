@@ -105,7 +105,7 @@ void CMonsterSkillBox::SkillProcess(CGameObject* SkillMonster, CGameObject* Skil
 						CMonster* Monster = dynamic_cast<CMonster*>(SkillMonster);
 						CGameObject* MonsterTarget = Monster->GetTarget();
 						
-						if (st_Vector2::CheckFieldOfView(MonsterTarget->_GameObjectInfo.ObjectPositionInfo.Position,
+						if (Vector2::CheckFieldOfView(MonsterTarget->_GameObjectInfo.ObjectPositionInfo.Position,
 							SkillMonster->_GameObjectInfo.ObjectPositionInfo.Position,
 							SkillMonster->_FieldOfDirection, SkillMonster->_FieldOfAngle, Skill->GetSkillInfo()->SkillDistance))
 						{
