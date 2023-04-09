@@ -57,7 +57,7 @@ void CInventoryManager::InsertMoney(int8 SelectInventoryIndex, CItem* InsertMone
 		int16 SliverCoinCount = 0;
 		int64 GoldCoinCount = 0;
 
-		st_Vector2Int GridPosition;
+		Vector2Int GridPosition;
 
 		switch (InsertMoneyItem->_ItemInfo.ItemSmallCategory)
 		{
@@ -104,13 +104,13 @@ void CInventoryManager::InsertItem(int8 SelectInventoryIndex, CItem* InsertNewIt
 {
 	if (InsertNewItem != nullptr)
 	{
-		st_Vector2Int GridPosition = _Inventorys[SelectInventoryIndex]->FindEmptySpace(InsertNewItem);
-		if (GridPosition._X == -1 && GridPosition._Y == -1)
+		Vector2Int GridPosition = _Inventorys[SelectInventoryIndex]->FindEmptySpace(InsertNewItem);
+		if (GridPosition.X == -1 && GridPosition.Y == -1)
 		{
 			return;
 		}
 
-		_Inventorys[SelectInventoryIndex]->PlaceItem(InsertNewItem, GridPosition._X, GridPosition._Y);
+		_Inventorys[SelectInventoryIndex]->PlaceItem(InsertNewItem, GridPosition.X, GridPosition.Y);
 	}	
 	else
 	{
@@ -189,7 +189,7 @@ CItem* CInventoryManager::GetItem(int8 SelectInventoryIndex, int8 TilePositionX,
 	return _Inventorys[SelectInventoryIndex]->GetItem(TilePositionX, TilePositionY);
 }
 
-st_Vector2Int CInventoryManager::FindEmptySpace(int8 SelectInventoryIndex, CItem* ItemInfo)
+Vector2Int CInventoryManager::FindEmptySpace(int8 SelectInventoryIndex, CItem* ItemInfo)
 {
 	return _Inventorys[SelectInventoryIndex]->FindEmptySpace(ItemInfo);
 }

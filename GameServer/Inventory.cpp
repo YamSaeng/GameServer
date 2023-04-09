@@ -95,11 +95,11 @@ CItem* CInventory::GetItem(int8 X, int8 Y)
 	return _Items[X][Y]->InventoryItem;
 }
 
-st_Vector2Int CInventory::FindEmptySpace(CItem* ItemInfo)
+Vector2Int CInventory::FindEmptySpace(CItem* ItemInfo)
 {	
-	st_Vector2Int FindTilePosition;
-	FindTilePosition._X = -1;
-	FindTilePosition._Y = -1;
+	Vector2Int FindTilePosition;
+	FindTilePosition.X = -1;
+	FindTilePosition.Y = -1;
 
 	int SearchingHeight = _InventoryHeight - ItemInfo->_ItemInfo.ItemHeight + 1;
 	int SearchingWidth = _InventoryWidth - ItemInfo->_ItemInfo.ItemWidth + 1;
@@ -110,8 +110,8 @@ st_Vector2Int CInventory::FindEmptySpace(CItem* ItemInfo)
 		{
 			if (CheckEmptySpace(X, Y, ItemInfo->_ItemInfo.ItemWidth, ItemInfo->_ItemInfo.ItemHeight) == true)
 			{
-				FindTilePosition._X = X;
-				FindTilePosition._Y = Y;
+				FindTilePosition.X = X;
+				FindTilePosition.Y = Y;
 				
 				return FindTilePosition;
 			}
@@ -215,11 +215,11 @@ void CInventory::InitItem(int16 TilePositionX, int16 TilePositionY)
 	}	
 }
 
-st_Vector2Int CInventory::CalculatePositionOnGrid(CItem* Item, int8 TilePositionX, int8 TilePositionY)
+Vector2Int CInventory::CalculatePositionOnGrid(CItem* Item, int8 TilePositionX, int8 TilePositionY)
 {
-	st_Vector2Int TilePosition;
-	TilePosition._X = TilePositionX * en_Inventory::TILE_SIZE_WIDTH + en_Inventory::TILE_SIZE_WIDTH * Item->_ItemInfo.ItemWidth / 2;
-	TilePosition._Y = -(TilePositionY * en_Inventory::TILE_SIZE_HEIGHT + en_Inventory::TILE_SIZE_HEIGHT * Item->_ItemInfo.ItemHeight / 2);
+	Vector2Int TilePosition;
+	TilePosition.X = TilePositionX * en_Inventory::TILE_SIZE_WIDTH + en_Inventory::TILE_SIZE_WIDTH * Item->_ItemInfo.ItemWidth / 2;
+	TilePosition.Y = -(TilePositionY * en_Inventory::TILE_SIZE_HEIGHT + en_Inventory::TILE_SIZE_HEIGHT * Item->_ItemInfo.ItemHeight / 2);
 
 	return TilePosition;
 }

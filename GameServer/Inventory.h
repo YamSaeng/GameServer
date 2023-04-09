@@ -38,7 +38,7 @@ public:
 	//--------------------------------------------------
 	// 인벤토리에서 비어 있는 공간을 찾아낸다.
 	//--------------------------------------------------
-	st_Vector2Int FindEmptySpace(CItem* ItemInfo);
+	Vector2Int FindEmptySpace(CItem* ItemInfo);
 
 	//---------------------------------------------------
 	// 인벤토리에 아이템이 차지할 위치가 비어 있는지 확인
@@ -64,7 +64,7 @@ public:
 	//----------------------------------------------------------------------------------------
 	// 아이템의 Grid 인벤토리 위치를 계산한다.
 	//----------------------------------------------------------------------------------------
-	st_Vector2Int CalculatePositionOnGrid(CItem* Item, int8 TilePositionX, int8 TilePositionY);
+	Vector2Int CalculatePositionOnGrid(CItem* Item, int8 TilePositionX, int8 TilePositionY);
 
 	//---------------------------------------------------------------------------
 	// 범위 체크
