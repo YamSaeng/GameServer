@@ -2220,11 +2220,11 @@ void CDataManager::LoadDataMapInfo(wstring LoadFileName)
 					GameObjectType = en_GameObjectType::OBJECT_STORAGE_SMALL_BOX;
 				}
 
-				vector<st_Vector2Int> Positions;
+				vector<Vector2Int> Positions;
 
 				for (auto& PositionListField : GameObjectListField["PositionList"].GetArray())
 				{
-					st_Vector2Int Position;
+					Vector2Int Position;
 
 					int32 XPosition = PositionListField["X"].GetInt();
 					int32 YPosition = PositionListField["Y"].GetInt();
@@ -2234,13 +2234,13 @@ void CDataManager::LoadDataMapInfo(wstring LoadFileName)
 						continue;
 					}
 
-					Position._X = XPosition;
-					Position._Y = YPosition;
+					Position.X = XPosition;
+					Position.Y = YPosition;
 
 					Positions.push_back(Position);
 				}
 
-				MapInfoData->GameObjectList.insert(pair<en_GameObjectType, vector<st_Vector2Int>>(GameObjectType, Positions));
+				MapInfoData->GameObjectList.insert(pair<en_GameObjectType, vector<Vector2Int>>(GameObjectType, Positions));
 			}
 
 			MapInfoData->MapID = MapID;
