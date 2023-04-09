@@ -30,12 +30,12 @@ public:
 	//---------------------------
 	// 오브젝트가 스폰될 위치
 	//---------------------------
-	st_Vector2Int _SpawnPosition;
+	Vector2Int _SpawnPosition;
 
 	// 시야 각
 	float _FieldOfAngle;
 	// 바라보는 방향
-	st_Vector2 _FieldOfDirection;	
+	Vector2 _FieldOfDirection;
 	// 시야 거리
 	float _FieldOfViewDistance;				
 
@@ -68,21 +68,16 @@ public:
 	virtual void Update();
 	virtual bool OnDamaged(CGameObject* Attacker, int32 DamagePoint);
 	virtual void OnHeal(CGameObject* Healer, int32 HealPoint);	
-
-	st_Vector2 PositionCheck(st_Vector2Int& CheckPosition);
+	
+	Vector2 PositionCheck(Vector2Int& CheckPosition);
 	virtual void PositionReset();
 
 	st_PositionInfo GetPositionInfo();		
-
-	//------------------------------------------------
-	// 방향값을 받아서 앞쪽에 있는 위치를 반환한다.
-	//------------------------------------------------
-	st_Vector2 GetFrontPosition(int8 Distance);
-
+	
 	//------------------------------------------------------------------------------------
 	// 내 주위 Distance안에 있는 위치들의 값을 반환한다.
 	//------------------------------------------------------------------------------------
-	vector<st_Vector2Int> GetAroundCellPositions(st_Vector2Int CellPosition, int8 Distance);
+	vector<Vector2Int> GetAroundCellPositions(Vector2Int CellPosition, int8 Distance);
 
 	void SetOwner(CGameObject* Target);
 	CGameObject* GetTarget();
@@ -205,6 +200,5 @@ protected:
 
 	void CheckBufDeBufSkill();
 	
-private:
-	st_Vector2 _MousePosition;
+private:	
 };

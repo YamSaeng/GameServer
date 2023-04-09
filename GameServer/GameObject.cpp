@@ -29,9 +29,7 @@ CGameObject::CGameObject()
 	_NatureRecoveryTick = 0;
 	_FieldOfViewUpdateTick = 0;	
 
-	_RectCollision = nullptr;		
-
-	_MousePosition = st_Vector2::Zero();	
+	_RectCollision = nullptr;			
 }
 
 CGameObject::CGameObject(st_GameObjectInfo GameObjectInfo)
@@ -91,13 +89,13 @@ void CGameObject::Update()
 				*GameObjectJob->GameObjectJobMessage >> GameObjectState;
 
 				// 서버와 클라 위치 차이 구함
-				float CheckPositionX = abs(_GameObjectInfo.ObjectPositionInfo.Position._X - PositionX);
-				float CheckPositionY = abs(_GameObjectInfo.ObjectPositionInfo.Position._Y - PositionY);
+				float CheckPositionX = abs(_GameObjectInfo.ObjectPositionInfo.Position.X - PositionX);
+				float CheckPositionY = abs(_GameObjectInfo.ObjectPositionInfo.Position.Y - PositionY);
 						
 				if (CheckPositionX < 1.0f && CheckPositionY < 1.0f)
 				{					
-					_GameObjectInfo.ObjectPositionInfo.MoveDirection._X = DirectionX;
-					_GameObjectInfo.ObjectPositionInfo.MoveDirection._Y = DirectionY;
+					_GameObjectInfo.ObjectPositionInfo.MoveDirection.X = DirectionX;
+					_GameObjectInfo.ObjectPositionInfo.MoveDirection.Y = DirectionY;
 
 					_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
 				}	
@@ -106,8 +104,8 @@ void CGameObject::Update()
 					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
 
 					CMessage* ResMoveStopPacket = G_NetworkManager->GetGameServer()->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
-						_GameObjectInfo.ObjectPositionInfo.Position._X,
-						_GameObjectInfo.ObjectPositionInfo.Position._Y);
+						_GameObjectInfo.ObjectPositionInfo.Position.X,
+						_GameObjectInfo.ObjectPositionInfo.Position.Y);
 					G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIds, ResMoveStopPacket);
 					ResMoveStopPacket->Free();					
 				}
@@ -123,18 +121,18 @@ void CGameObject::Update()
 				*GameObjectJob->GameObjectJobMessage >> GameObjectState;
 			
 				_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
-				_GameObjectInfo.ObjectPositionInfo.MoveDirection = st_Vector2::Zero();
+				_GameObjectInfo.ObjectPositionInfo.MoveDirection = Vector2::Zero;
 
-				float CheckPositionX = abs(_GameObjectInfo.ObjectPositionInfo.Position._X - PositionX);
-				float CheckPositionY = abs(_GameObjectInfo.ObjectPositionInfo.Position._Y - PositionY);
+				float CheckPositionX = abs(_GameObjectInfo.ObjectPositionInfo.Position.X - PositionX);
+				float CheckPositionY = abs(_GameObjectInfo.ObjectPositionInfo.Position.Y - PositionY);
 
 				if (CheckPositionX > 0.2f || CheckPositionY > 0.2f)
 				{
 					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
 
 					CMessage* ResMoveStopPacket = G_NetworkManager->GetGameServer()->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
-						_GameObjectInfo.ObjectPositionInfo.Position._X,
-						_GameObjectInfo.ObjectPositionInfo.Position._Y);
+						_GameObjectInfo.ObjectPositionInfo.Position.X,
+						_GameObjectInfo.ObjectPositionInfo.Position.Y);
 					G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIds, ResMoveStopPacket);
 					ResMoveStopPacket->Free();
 				}
@@ -238,9 +236,9 @@ void CGameObject::Update()
 												QuickSlotPositionIter != Skill->_QuickSlotBarPosition.end();
 												++QuickSlotPositionIter)
 											{
-												st_Vector2Int QuickSlotPosition = *QuickSlotPositionIter;
+												Vector2Int QuickSlotPosition = *QuickSlotPositionIter;
 
-												if (QuickSlotPosition._Y == QuickSlotBar->QuickSlotBarIndex && QuickSlotPosition._X == QuickSlotBar->QuickSlotBarSlotIndex)
+												if (QuickSlotPosition.Y == QuickSlotBar->QuickSlotBarIndex && QuickSlotPosition.X == QuickSlotBar->QuickSlotBarSlotIndex)
 												{
 													QuickSlotBar->QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_NONE;
 													QuickSlotBar->QuickBarSkill = nullptr;
@@ -458,13 +456,13 @@ void CGameObject::Update()
 									}
 								}								
 
-								st_Vector2Int MovePosition;								
+								Vector2Int MovePosition;								
 								// 다섯칸 바라보고 있는 방향 반대 위치값 구해야함
 
 								GetChannel()->GetMap()->ApplyMove(this, MovePosition);
 
-								_GameObjectInfo.ObjectPositionInfo.Position._X = _GameObjectInfo.ObjectPositionInfo.CollisionPosition._X + 0.5f;
-								_GameObjectInfo.ObjectPositionInfo.Position._Y = _GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y + 0.5f;
+								_GameObjectInfo.ObjectPositionInfo.Position.X = _GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
+								_GameObjectInfo.ObjectPositionInfo.Position.Y = _GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;
 
 								// 시공 뒤틀림 위치 재조정
 								CMessage* ResSyncPositionPacket = G_NetworkManager->GetGameServer()->MakePacketResSyncPosition(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo);
@@ -574,8 +572,8 @@ void CGameObject::Update()
 										_SelectTarget->SetStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ROOT);
 
 										CMessage* SelectTargetMoveStopMessage = G_NetworkManager->GetGameServer()->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId,
-											_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X,
-											_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y);
+											_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position.X,
+											_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position.Y);
 										G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, SelectTargetMoveStopMessage);
 										SelectTargetMoveStopMessage->Free();
 
@@ -615,8 +613,8 @@ void CGameObject::Update()
 										NewSkill->StatusAbnormalDurationTimeStart();
 
 										CMessage* SelectTargetMoveStopMessage = G_NetworkManager->GetGameServer()->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId,
-											_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._X,
-											_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position._Y);
+											_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position.X,
+											_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position.Y);
 										G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, SelectTargetMoveStopMessage);
 										SelectTargetMoveStopMessage->Free();
 
@@ -680,10 +678,10 @@ void CGameObject::Update()
 						{
 							GlobalSkill->GlobalCoolTimeStart(FindSpellSkill->GetSkillInfo()->SkillMotionTime);
 
-							for (st_Vector2Int QuickSlotPosition : GlobalSkill->_QuickSlotBarPosition)
+							for (Vector2Int QuickSlotPosition : GlobalSkill->_QuickSlotBarPosition)
 							{
-								CMessage* ResCoolTimeStartPacket = G_NetworkManager->GetGameServer()->MakePacketCoolTime((int8)QuickSlotPosition._Y,
-									(int8)QuickSlotPosition._X,
+								CMessage* ResCoolTimeStartPacket = G_NetworkManager->GetGameServer()->MakePacketCoolTime((int8)QuickSlotPosition.Y,
+									(int8)QuickSlotPosition.X,
 									1.0f, nullptr, FindSpellSkill->GetSkillInfo()->SkillMotionTime);
 								G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
 								ResCoolTimeStartPacket->Free();
@@ -719,7 +717,7 @@ void CGameObject::Update()
 						if (GatheringTarget != nullptr							
 							&& Crop->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 						{
-							st_Vector2 DirNormalVector = (Crop->_GameObjectInfo.ObjectPositionInfo.Position - _GameObjectInfo.ObjectPositionInfo.Position).Normalize();							
+							Vector2 DirNormalVector = (Crop->_GameObjectInfo.ObjectPositionInfo.Position - _GameObjectInfo.ObjectPositionInfo.Position).Normalize();
 
 							// 작물 채집할 때 같은 방향을 바라보고 있지 않으면 에러 메세지 출력
 							/*if (_GameObjectInfo.ObjectPositionInfo.MoveDir != Dir)
@@ -730,7 +728,7 @@ void CGameObject::Update()
 								break;
 							}*/
 
-							float Distance = st_Vector2::Distance(_GameObjectInfo.ObjectPositionInfo.Position, Crop->_GameObjectInfo.ObjectPositionInfo.Position);
+							float Distance = Vector2::Distance(_GameObjectInfo.ObjectPositionInfo.Position, Crop->_GameObjectInfo.ObjectPositionInfo.Position);
 							if (Distance < 1.2f)
 							{
 								CMessage* ResGatheringPacket = nullptr;
@@ -1513,40 +1511,40 @@ void CGameObject::OnHeal(CGameObject* Healer, int32 HealPoint)
 	}
 }
 
-st_Vector2 CGameObject::PositionCheck(st_Vector2Int& CheckPosition)
+Vector2 CGameObject::PositionCheck(Vector2Int& CheckPosition)
 {
-	st_Vector2 ResultPosition;
+	Vector2 ResultPosition;
 
-	if (CheckPosition._Y > 0)
+	if (CheckPosition.Y > 0)
 	{
-		ResultPosition._Y =
-			CheckPosition._Y + 0.5f;
+		ResultPosition.Y =
+			CheckPosition.Y + 0.5f;
 	}
-	else if (CheckPosition._Y == 0)
+	else if (CheckPosition.Y == 0)
 	{
-		ResultPosition._Y =
-			CheckPosition._Y;
+		ResultPosition.Y =
+			CheckPosition.Y;
 	}
-	else if (CheckPosition._Y < 0)
+	else if (CheckPosition.Y < 0)
 	{
-		ResultPosition._Y =
-			CheckPosition._Y - 0.5f;
+		ResultPosition.Y =
+			CheckPosition.Y - 0.5f;
 	}
 
-	if (CheckPosition._X > 0)
+	if (CheckPosition.X > 0)
 	{
-		ResultPosition._X =
-			CheckPosition._X + 0.5f;
+		ResultPosition.X =
+			CheckPosition.X + 0.5f;
 	}
-	else if (CheckPosition._X == 0)
+	else if (CheckPosition.X == 0)
 	{
-		ResultPosition._X =
-			CheckPosition._X;
+		ResultPosition.X =
+			CheckPosition.X;
 	}
-	else if (CheckPosition._X < 0)
+	else if (CheckPosition.X < 0)
 	{
-		ResultPosition._X =
-			CheckPosition._X - 0.5f;
+		ResultPosition.X =
+			CheckPosition.X - 0.5f;
 	}
 
 	return ResultPosition;
@@ -1561,36 +1559,26 @@ st_PositionInfo CGameObject::GetPositionInfo()
 	return _GameObjectInfo.ObjectPositionInfo;
 }
 
-st_Vector2 CGameObject::GetFrontPosition(int8 Distance)
+vector<Vector2Int> CGameObject::GetAroundCellPositions(Vector2Int CellPosition, int8 Distance)
 {
-	st_Vector2 MouseDir = _MousePosition - _GameObjectInfo.ObjectPositionInfo.Position;
-	st_Vector2 MouseDirNormal = MouseDir.Normalize();
+	vector<Vector2Int> AroundPosition;	
 
-	st_Vector2 MouseFronPosition = MouseDirNormal * Distance;
+	Vector2Int LeftTop(Distance * -1, Distance);
+	Vector2Int RightDown(Distance, Distance * -1);
 
-	return _GameObjectInfo.ObjectPositionInfo.Position + MouseFronPosition;
-}
+	Vector2Int LeftTopPosition = CellPosition + LeftTop;
+	Vector2Int RightDownPosition = CellPosition + RightDown;
 
-vector<st_Vector2Int> CGameObject::GetAroundCellPositions(st_Vector2Int CellPosition, int8 Distance)
-{
-	vector<st_Vector2Int> AroundPosition;	
-
-	st_Vector2Int LeftTop(Distance * -1, Distance);
-	st_Vector2Int RightDown(Distance, Distance * -1);
-
-	st_Vector2Int LeftTopPosition = CellPosition + LeftTop;
-	st_Vector2Int RightDownPosition = CellPosition + RightDown;
-
-	for (int32 Y = LeftTopPosition._Y; Y >= RightDownPosition._Y; Y--)
+	for (int32 Y = LeftTopPosition.Y; Y >= RightDownPosition.Y; Y--)
 	{
-		for (int32 X = LeftTopPosition._X; X <= RightDownPosition._X; X++)
+		for (int32 X = LeftTopPosition.X; X <= RightDownPosition.X; X++)
 		{
-			if (X == CellPosition._X && Y == CellPosition._Y)
+			if (X == CellPosition.X && Y == CellPosition.Y)
 			{
 				continue;
 			}
 
-			AroundPosition.push_back(st_Vector2Int(X, Y));
+			AroundPosition.push_back(Vector2Int(X, Y));
 		}
 	}
 
