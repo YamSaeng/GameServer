@@ -97,7 +97,7 @@ void CItem::UpdateIdle()
 
 	if (_Owner != nullptr)
 	{
-		float TargetDistance = st_Vector2::Distance(_Owner->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position);
+		float TargetDistance = Vector2::Distance(_Owner->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position);
 		if (TargetDistance <= 5.0f)
 		{
 			_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
@@ -123,26 +123,26 @@ void CItem::UpdateMoving()
 {
 	if (_ChaseWaitTime < GetTickCount64())
 	{
-		float TargetDistance = st_Vector2::Distance(_Owner->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position);
+		float TargetDistance = Vector2::Distance(_Owner->_GameObjectInfo.ObjectPositionInfo.Position, _GameObjectInfo.ObjectPositionInfo.Position);
 
 		if (TargetDistance > 0.5f)
 		{
-			float num = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._X - _GameObjectInfo.ObjectPositionInfo.Position._X;
-			float num2 = _Owner->_GameObjectInfo.ObjectPositionInfo.Position._Y - _GameObjectInfo.ObjectPositionInfo.Position._Y;
+			float num = _Owner->_GameObjectInfo.ObjectPositionInfo.Position.X - _GameObjectInfo.ObjectPositionInfo.Position.X;
+			float num2 = _Owner->_GameObjectInfo.ObjectPositionInfo.Position.Y - _GameObjectInfo.ObjectPositionInfo.Position.Y;
 
 			float num4 = num * num + num2 * num2;
 
 			float num5 = (float)sqrt(num4);
 
-			_GameObjectInfo.ObjectPositionInfo.Position._X = _GameObjectInfo.ObjectPositionInfo.Position._X + num / num5 * _Owner->_GameObjectInfo.ObjectStatInfo.Speed * 2.0f * 0.02f;
-			_GameObjectInfo.ObjectPositionInfo.Position._Y = _GameObjectInfo.ObjectPositionInfo.Position._Y + num2 / num5 * _Owner->_GameObjectInfo.ObjectStatInfo.Speed * 2.0f * 0.02f;
+			_GameObjectInfo.ObjectPositionInfo.Position.X = _GameObjectInfo.ObjectPositionInfo.Position.X + num / num5 * _Owner->_GameObjectInfo.ObjectStatInfo.Speed * 2.0f * 0.02f;
+			_GameObjectInfo.ObjectPositionInfo.Position.Y = _GameObjectInfo.ObjectPositionInfo.Position.Y + num2 / num5 * _Owner->_GameObjectInfo.ObjectStatInfo.Speed * 2.0f * 0.02f;
 
-			st_Vector2Int CollisionPosition;
-			CollisionPosition._X = _GameObjectInfo.ObjectPositionInfo.Position._X;
-			CollisionPosition._Y = _GameObjectInfo.ObjectPositionInfo.Position._Y;
+			Vector2Int CollisionPosition;
+			CollisionPosition.X = _GameObjectInfo.ObjectPositionInfo.Position.X;
+			CollisionPosition.Y = _GameObjectInfo.ObjectPositionInfo.Position.Y;
 
-			if (CollisionPosition._X != _GameObjectInfo.ObjectPositionInfo.CollisionPosition._X
-				|| CollisionPosition._Y != _GameObjectInfo.ObjectPositionInfo.CollisionPosition._Y)
+			if (CollisionPosition.X != _GameObjectInfo.ObjectPositionInfo.CollisionPosition.X
+				|| CollisionPosition.Y != _GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y)
 			{
 				_Channel->GetMap()->ApplyMove(this, CollisionPosition, false, false);
 			}			
