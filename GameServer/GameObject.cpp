@@ -802,7 +802,7 @@ void CGameObject::Update()
 						int32 Damage;
 						*GameObjectJob->GameObjectJobMessage >> Damage;
 
-						FindAggroTargetIterator->second.AggroPoint += (Damage * (0.8 + G_Datamanager->_MonsterAggroData.MonsterAggroAttacker));
+						FindAggroTargetIterator->second.AggroPoint += (Damage * (0.8f + G_Datamanager->_MonsterAggroData.MonsterAggroAttacker));
 					}
 					break;
 					case en_AggroCategory::AGGRO_CATEGORY_HEAL:
@@ -861,7 +861,7 @@ void CGameObject::Update()
 				{
 					bool IsCritical = true;
 					// 데미지 판단
-					int32 Damage = CMath::CalculateDamage((en_SkillType)Skilltype,
+					/*int32 Damage = CMath::CalculateDamage((en_SkillType)Skilltype,
 						Attacker->_GameObjectInfo.ObjectStatInfo.Str,
 						Attacker->_GameObjectInfo.ObjectStatInfo.Dex,
 						Attacker->_GameObjectInfo.ObjectStatInfo.Int,
@@ -884,7 +884,7 @@ void CGameObject::Update()
 						_GameObjectInfo.ObjectStatInfo.HP,
 						IsCritical);
 					G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResDamagePacket);
-					ResDamagePacket->Free();										
+					ResDamagePacket->Free();	*/									
 				}			
 			}
 			break;	
@@ -1691,16 +1691,12 @@ void CGameObject::SetChannel(CChannel* Channel)
 
 CRectCollision* CGameObject::GetRectCollision()
 {
-	return _RectCollision;
-}
-
-void CGameObject::SetRectCollision()
-{
 	if (_RectCollision == nullptr)
 	{
 		_RectCollision = G_ObjectManager->RectCollisionCreate();
-		_RectCollision->Init(this);
 	}
+
+	return _RectCollision;
 }
 
 void CGameObject::Init(en_GameObjectType GameObjectType)

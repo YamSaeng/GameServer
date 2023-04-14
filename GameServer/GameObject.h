@@ -115,8 +115,7 @@ public:
 	CChannel* GetChannel();
 	void SetChannel(CChannel* Channel);
 		
-	CRectCollision* GetRectCollision();
-	void SetRectCollision();	
+	CRectCollision* GetRectCollision();	
 	
 	virtual void Init(en_GameObjectType GameObjectType);
 
