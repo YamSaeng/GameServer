@@ -16,6 +16,7 @@
 #include "NetworkManager.h"
 #include "DataManager.h"
 #include "RectCollision.h"
+#include "Matrix2x2.h"
 
 CChannel::CChannel()
 {	
@@ -1566,8 +1567,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 				EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position.X = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
 				EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;				
 
-				EnterChannelPlayer->SetRectCollision();
 				EnterChannelPlayer->GetRectCollision()->SetActive(true);
+				EnterChannelPlayer->GetRectCollision()->Init(EnterChannelPlayer, Vector2::Zero);				
 
 				// 플레이어 저장
 				_ChannelPlayerArrayIndexs.Pop(&EnterChannelPlayer->_ChannelArrayIndex);
@@ -1625,8 +1626,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 				GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.Position.X = GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
 				GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.Position.Y = GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;
 
-				GeneralMerchantNPC->SetRectCollision();
-				GeneralMerchantNPC->GetRectCollision()->SetActive(true);				
+				GeneralMerchantNPC->GetRectCollision()->SetActive(true);
+				GeneralMerchantNPC->GetRectCollision()->Init(GeneralMerchantNPC, Vector2::Zero);				
 
 				// 플레이어 저장
 				_ChannelNonPlayerArrayIndexs.Pop(&GeneralMerchantNPC->_ChannelArrayIndex);
@@ -1655,9 +1656,9 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position.X = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
 				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;				
-
-				EnterChannelMonster->SetRectCollision();
+								
 				EnterChannelMonster->GetRectCollision()->SetActive(true);
+				EnterChannelMonster->GetRectCollision()->Init(EnterChannelMonster, Vector2::Zero);
 
 				EnterChannelMonster->Start();
 
@@ -1688,9 +1689,9 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position.X = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
 				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;				
-
-				EnterChannelEnvironment->SetRectCollision();
-				EnterChannelEnvironment->GetRectCollision()->SetActive(true);				
+								
+				EnterChannelEnvironment->GetRectCollision()->SetActive(true);	
+				EnterChannelEnvironment->GetRectCollision()->Init(EnterChannelEnvironment, Vector2::Zero);
 				EnterChannelEnvironment->Start();
 
 				// 환경 오브젝트 저장
@@ -1715,9 +1716,9 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 			if (SwordBlade)
 			{
 				SwordBlade->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;				
-				
-				SwordBlade->SetRectCollision();
+								
 				SwordBlade->GetRectCollision()->SetActive(true);
+				SwordBlade->GetRectCollision()->Init(SwordBlade, SwordBlade->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton);
 
 				_ChannelCraftingTableArrayIndexs.Pop(&SwordBlade->_ChannelArrayIndex);
 				_ChannelSkillObjectArray[SwordBlade->_ChannelArrayIndex] = SwordBlade;
@@ -1738,8 +1739,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 				EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 				EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.Position.X = EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
 				EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;				
-
-				EnterChannelCraftingTable->SetRectCollision();
+								
 				EnterChannelCraftingTable->GetRectCollision()->SetActive(true);
 
 				EnterChannelCraftingTable->Start();
