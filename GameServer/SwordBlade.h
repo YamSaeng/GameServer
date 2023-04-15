@@ -7,6 +7,9 @@ public:
 	CSwordBlade();
 	~CSwordBlade();
 
-private:
+	virtual void Update() override;
+
+	void Move();	
+private:	
 };
 
