@@ -471,7 +471,10 @@ void CChannel::Update()
 					CGameObject* LeaveGameObject;
 					*GameObjectJob->GameObjectJobMessage >> &LeaveGameObject;															
 					
-					LeaveChannel(LeaveGameObject);				
+					if (LeaveGameObject != nullptr)
+					{
+						LeaveChannel(LeaveGameObject);
+					}					
 				}
 				break;
 			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_PLAYER_LEAVE:
@@ -831,7 +834,8 @@ void CChannel::Update()
 
 	for (int16 i = 0; i < CHANNEL_SKILL_OBJECT_MAX; i++)
 	{
-		if (_ChannelSkillObjectArray[i] != nullptr)
+		if (_ChannelSkillObjectArray[i] != nullptr
+			&& _ChannelSkillObjectArray[i]->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 		{
 			_ChannelSkillObjectArray[i]->Update();
 		}
