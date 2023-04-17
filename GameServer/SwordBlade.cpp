@@ -7,7 +7,11 @@ CSwordBlade::CSwordBlade()
 {
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 
-	_GameObjectInfo.ObjectStatInfo.Speed = 20.0f;
+	_GameObjectInfo.ObjectName = L"Ä®³¯";
+
+	_GameObjectInfo.ObjectStatInfo.Speed = 10.0f;
+
+	_FieldOfViewDistance = 10.0f;
 }
 
 CSwordBlade::~CSwordBlade()
@@ -56,5 +60,11 @@ void CSwordBlade::Move()
 
 		st_GameObjectJob* LeaveChannelJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobLeaveChannel(this);
 		_Channel->_ChannelJobQue.Enqueue(LeaveChannelJob);
+
+		vector<st_FieldOfViewInfo> AroundPlayers = _Channel->GetMap()->GetFieldAroundPlayers(this);
+
+		CMessage* ResOtherObjectDeSpawnPacket = G_NetworkManager->GetGameServer()->MakePacketResObjectDeSpawn(_GameObjectInfo.ObjectId);
+		G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, ResOtherObjectDeSpawnPacket);
+		ResOtherObjectDeSpawnPacket->Free();
 	}
 }
