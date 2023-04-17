@@ -311,7 +311,7 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 										NewSwordBlade->_SpawnPosition = SkillUser->_GameObjectInfo.ObjectPositionInfo.CollisionPosition;
 										NewSwordBlade->_GameObjectInfo.ObjectPositionInfo.Position = SkillUser->_GameObjectInfo.ObjectPositionInfo.Position + SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton;
 										NewSwordBlade->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton = SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton;
-										NewSwordBlade->_GameObjectInfo.ObjectPositionInfo.MoveDirection = SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton;
+										NewSwordBlade->_GameObjectInfo.ObjectPositionInfo.MoveDirection = SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton;						
 
 										NewSwordBlade->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = Skill->GetSkillInfo()->SkillMinDamage;
 										NewSwordBlade->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = Skill->GetSkillInfo()->SkillMaxDamage;
@@ -433,4 +433,76 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 			}			
 		}		
 	}
+}
+
+int32 CSkillBox::CalculateDamage(en_SkillType SkillType, int32& Str, int32& Dex, int32& Int, int32& Luck, bool* InOutCritical, int32 TargetDefence, int32 MinDamage, int32 MaxDamage, int16 CriticalPoint)
+{
+	random_device Seed;
+	default_random_engine Eng(Seed());
+
+	mt19937 Gen(Seed());
+	uniform_int_distribution<int> DamageChoiceRandom(MinDamage, MaxDamage);
+
+	int32 ChoiceRandomDamage = DamageChoiceRandom(Gen);
+
+	int32 CriticalDamage = 0;
+
+	if (*InOutCritical == true)
+	{
+		// 크리티컬 판단
+		float CriticalPointCheck = CriticalPoint / 1000.0f;
+		bernoulli_distribution CriticalCheck(CriticalPointCheck);
+		bool IsCritical = CriticalCheck(Eng);
+
+		*InOutCritical = IsCritical;
+
+		CriticalDamage = IsCritical ? ChoiceRandomDamage * 2 : ChoiceRandomDamage;
+	}
+	else
+	{
+		CriticalDamage = ChoiceRandomDamage;
+	}
+
+	int32 FinalDamage = 0;
+
+	switch (SkillType)
+	{
+	case en_SkillType::SKILL_DEFAULT_ATTACK:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_COMBO_FLY_KNIFE:
+	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
+	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_ATTACK:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_WEAPON_POISON:
+	case en_SkillType::SKILL_GOBLIN_ACTIVE_MELEE_DEFAULT_ATTACK:
+
+		FinalDamage = (int32)((CriticalDamage + Str / 2) * (1 - ((float)TargetDefence / (100.0f + (float)TargetDefence))));
+
+		break;
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:
+	case en_SkillType::SKILL_SPELL_ACTIVE_BUF_TELEPORT:
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
+
+		FinalDamage = (int32)((CriticalDamage + Int / 2) * (1 - ((float)TargetDefence / (100.0f + (float)TargetDefence))));
+
+		break;
+	case en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING:
+		break;
+	}
+
+	float DefenceRate = (float)pow(((float)(200 - 1)) / 20, 2) * 0.01f;
+	int32 FinalDamage = (int32)(CriticalDamage * DefenceRate);
+
+	return FinalDamage;
 }
