@@ -199,23 +199,24 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object)
 
 		for (CPlayer* Player : Sector->GetPlayers())
 		{			
-			if (Vector2::CheckFieldOfView(Player->_GameObjectInfo.ObjectPositionInfo.Position,
-				Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->_FieldOfDirection, Object->_FieldOfAngle, Object->_FieldOfViewDistance)
-				&& Player->_GameObjectInfo.ObjectId != Object->_GameObjectInfo.ObjectId)
+			if (Player->_GameObjectInfo.ObjectId != Object->_GameObjectInfo.ObjectId)				
 			{
-				FieldOfViewInfo.ObjectID = Player->_GameObjectInfo.ObjectId;
-				FieldOfViewInfo.SessionID = 0;
-				FieldOfViewInfo.ObjectType = Player->_GameObjectInfo.ObjectType;
+				float Distance = Vector2::Distance(Player->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
+				if (Distance < Object->_FieldOfViewDistance)
+				{
+					FieldOfViewInfo.ObjectID = Player->_GameObjectInfo.ObjectId;
+					FieldOfViewInfo.SessionID = 0;
+					FieldOfViewInfo.ObjectType = Player->_GameObjectInfo.ObjectType;
 
-				FieldOfViewGameObjects.push_back(FieldOfViewInfo);				
-			}
+					FieldOfViewGameObjects.push_back(FieldOfViewInfo);
+				}
+			}			
 		}
 
 		for (CNonPlayer* NonPlayer : Sector->GetNonPlayers())
 		{
-			if (Vector2::CheckFieldOfView(NonPlayer->_GameObjectInfo.ObjectPositionInfo.Position,
-				Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->_FieldOfDirection, Object->_FieldOfAngle, Object->_FieldOfViewDistance)
-				&& NonPlayer->_GameObjectInfo.ObjectId != Object->_GameObjectInfo.ObjectId)
+			float Distance = Vector2::Distance(NonPlayer->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
+			if (Distance < Object->_FieldOfViewDistance)
 			{
 				FieldOfViewInfo.ObjectID = NonPlayer->_GameObjectInfo.ObjectId;
 				FieldOfViewInfo.SessionID = 0;
@@ -227,9 +228,8 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object)
 		
 		for (CMonster* Monster : Sector->GetMonsters())
 		{
-			if (Vector2::CheckFieldOfView(Monster->_GameObjectInfo.ObjectPositionInfo.Position, 
-				Object->_GameObjectInfo.ObjectPositionInfo.Position,
-				Object->_FieldOfDirection, Object->_FieldOfAngle, Object->_FieldOfViewDistance))
+			float Distance = Vector2::Distance(Monster->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
+			if (Distance < Object->_FieldOfViewDistance)
 			{
 				FieldOfViewInfo.ObjectID = Monster->_GameObjectInfo.ObjectId;
 				FieldOfViewInfo.SessionID = 0;
@@ -243,7 +243,8 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object)
 		{
 			if (Enviroment->_GameObjectInfo.ObjectType != en_GameObjectType::OBJECT_WALL)
 			{
-				if (Vector2::CheckFieldOfView(Enviroment->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->_FieldOfDirection, Object->_FieldOfAngle, Object->_FieldOfViewDistance))
+				float Distance = Vector2::Distance(Enviroment->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
+				if (Distance < Object->_FieldOfViewDistance)
 				{
 					FieldOfViewInfo.ObjectID = Enviroment->_GameObjectInfo.ObjectId;
 					FieldOfViewInfo.SessionID = 0;
@@ -256,19 +257,24 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object)
 
 		for (CGameObject* SkillObject : Sector->GetSkillObject())
 		{
-			if (Vector2::CheckFieldOfView(SkillObject->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->_FieldOfDirection, Object->_FieldOfAngle, Object->_FieldOfViewDistance))
+			if (SkillObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 			{
-				FieldOfViewInfo.ObjectID = SkillObject->_GameObjectInfo.ObjectId;
-				FieldOfViewInfo.SessionID = 0;
-				FieldOfViewInfo.ObjectType = SkillObject->_GameObjectInfo.ObjectType;
+				float Distance = Vector2::Distance(SkillObject->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
+				if (Distance < Object->_FieldOfViewDistance)
+				{
+					FieldOfViewInfo.ObjectID = SkillObject->_GameObjectInfo.ObjectId;
+					FieldOfViewInfo.SessionID = 0;
+					FieldOfViewInfo.ObjectType = SkillObject->_GameObjectInfo.ObjectType;
 
-				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
-			}
+					FieldOfViewGameObjects.push_back(FieldOfViewInfo);
+				}
+			}			
 		}
 
 		for (CCraftingTable* CraftingTable : Sector->GetCraftingTable())
 		{
-			if (Vector2::CheckFieldOfView(CraftingTable->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position, Object->_FieldOfDirection, Object->_FieldOfAngle, Object->_FieldOfViewDistance))
+			float Distance = Vector2::Distance(CraftingTable->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
+			if (Distance < Object->_FieldOfViewDistance)
 			{
 				FieldOfViewInfo.ObjectID = CraftingTable->_GameObjectInfo.ObjectId;
 				FieldOfViewInfo.SessionID = 0;
@@ -575,12 +581,24 @@ bool CMap::Cango(CGameObject* Object, OUT Vector2* NextPosition)
 
 	Vector2 CheckPosition; 
 	CheckPosition.X = Object->_GameObjectInfo.ObjectPositionInfo.Position.X;
-	CheckPosition.Y = Object->_GameObjectInfo.ObjectPositionInfo.Position.Y;
+	CheckPosition.Y = Object->_GameObjectInfo.ObjectPositionInfo.Position.Y;	
 	
 	Vector2 DirectionNormal = Object->_GameObjectInfo.ObjectPositionInfo.MoveDirection.Normalize();
 
 	CheckPosition.Y += (DirectionNormal.Y * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 	CheckPosition.X += (DirectionNormal.X * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+
+	if (CheckPosition.X < _Left
+		|| CheckPosition.X > _Right)
+	{
+		return false;
+	}
+
+	if (CheckPosition.Y < _Up
+		|| CheckPosition.Y > _Down)
+	{
+		return false;
+	}
 
 	bool NextPositionMoveCheck = MoveCollisionCango(Object, CollisionPosition, CheckPosition);
 	NextPosition->X = CheckPosition.X;
@@ -603,28 +621,12 @@ bool CMap::MoveCollisionCango(CGameObject* Object, Vector2Int& CellPosition, Vec
 	{
 		CRASH("ApplyMove GameObject의 채널이 가지고 있는 맵과 지금 맵이 다름")
 			return false;
-	}
-
-	// 좌우 좌표 검사
-	if (CellPosition.X < _Left 
-		|| CellPosition.X > _Right)
-	{
-		return false;
-	}
-
-	// 상하 좌표 검사
-	if (CellPosition.Y < _Up
-		|| CellPosition.Y > _Down)
-	{
-		return false;
 	}	
 
 	bool ObjectCheck = Object->GetChannel()->ChannelColliderCheck(Object, NextPosition, &CollisionObject);
 
 	return (!CheckObjects || ObjectCheck);
 }
-
-
 
 bool CMap::ApplyMove(CGameObject* GameObject, Vector2Int& DestPosition, bool CheckObject, bool Applycollision)
 {
@@ -641,21 +643,6 @@ bool CMap::ApplyMove(CGameObject* GameObject, Vector2Int& DestPosition, bool Che
 		CRASH("ApplyMove GameObject의 채널이 가지고 있는 맵과 지금 맵이 다름")
 			return false;
 	}
-
-	// 좌우 좌표 검사
-	if (GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X < _Left
-		|| GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X > _Right)
-	{
-		return false;
-	}
-
-	// 상하 좌표 검사
-	if (GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y < _Up
-		|| GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y > _Down)
-	{
-		return false;
-	}
-
 	// 위치 정보 가지고 온다.
 	st_PositionInfo PositionInfo = GameObject->_GameObjectInfo.ObjectPositionInfo;
 
@@ -897,6 +884,40 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 	return true;
 }
 
+bool CMap::CanMoveSkillGo(CGameObject* SkillObject, OUT Vector2* NextPosition, OUT CGameObject** CollisionObject)
+{
+	Vector2Int CollisionPosition;
+	CollisionPosition.X = (int32)SkillObject->_GameObjectInfo.ObjectPositionInfo.Position.X;
+	CollisionPosition.Y = (int32)SkillObject->_GameObjectInfo.ObjectPositionInfo.Position.Y;
+
+	Vector2 CheckPosition;
+	CheckPosition.X = SkillObject->_GameObjectInfo.ObjectPositionInfo.Position.X;
+	CheckPosition.Y = SkillObject->_GameObjectInfo.ObjectPositionInfo.Position.Y;
+
+	Vector2 DirectionNormal = SkillObject->_GameObjectInfo.ObjectPositionInfo.MoveDirection.Normalize();
+
+	CheckPosition.Y += (DirectionNormal.Y * SkillObject->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+	CheckPosition.X += (DirectionNormal.X * SkillObject->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+
+	if (CheckPosition.X < _Left
+		|| CheckPosition.X > _Right)
+	{
+		return false;
+	}
+
+	if (CheckPosition.Y < _Up
+		|| CheckPosition.Y > _Down)
+	{
+		return false;
+	}
+
+	bool NextPositionMoveCheck = ApplySkillObjectMove(SkillObject, CollisionPosition, CollisionObject);
+	NextPosition->X = CheckPosition.X;
+	NextPosition->Y = CheckPosition.Y;
+
+	return NextPositionMoveCheck;
+}
+
 bool CMap::ApplySkillObjectMove(CGameObject* SkillObject, Vector2Int& DestPosition, CGameObject** CollisionObject)
 {
 	if (SkillObject->GetChannel() == nullptr)
@@ -908,18 +929,6 @@ bool CMap::ApplySkillObjectMove(CGameObject* SkillObject, Vector2Int& DestPositi
 	if (SkillObject->GetChannel()->GetMap() != this)
 	{
 		G_Logger->WriteStdOut(en_Color::RED, L"ApplyLeave Channel _Map Error");
-		return false;
-	}
-
-	// 좌우 좌표 검사
-	if (SkillObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X < _Left || SkillObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X > _Right)
-	{
-		return false;
-	}
-
-	// 상하 좌표 검사
-	if (SkillObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y < _Up || SkillObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y > _Down)
-	{
 		return false;
 	}	
 
@@ -936,7 +945,7 @@ bool CMap::ApplySkillObjectMove(CGameObject* SkillObject, Vector2Int& DestPositi
 	
 	CGameObject* ColObject = nullptr;
 
-	bool IsCollision = SkillObject->GetChannel()->ChannelColliderCheck(SkillObject, SkillObject->_GameObjectInfo.ObjectPositionInfo.Position, &ColObject);
+	bool IsCollision = SkillObject->GetChannel()->ChannelColliderOOBCheck(SkillObject, &ColObject);
 	
 	*CollisionObject = ColObject;
 

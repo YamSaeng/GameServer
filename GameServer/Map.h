@@ -136,6 +136,10 @@ public:
 	//---------------------------------------
 	bool ApplyLeave(CGameObject* GameObject);		
 
+	//-------------------------------------------------------------------------------------------------------------------
+	// SkillObject가 다음 번 위치로 갈 수 있는지 확인 ( 충돌할 경우 충돌한 대상 가져옴 )
+	//-------------------------------------------------------------------------------------------------------------------
+	bool CanMoveSkillGo(CGameObject* SkillObject, OUT Vector2* NextPosition, OUT CGameObject** CollisionObject = nullptr);
 	bool ApplySkillObjectMove(CGameObject* SkillObject, Vector2Int& DestPosition, CGameObject** CollisionObject = nullptr);
 
 	bool MonsterCango(CGameObject* Object, OUT Vector2* NextPosition);
