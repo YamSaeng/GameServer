@@ -120,11 +120,7 @@ private:
 	// 캐릭터 정보 요청 처리
 	//-------------------------------------------------------------
 	void PacketProcReqCharacterInfo(int64 SessionID, CMessage* Message);
-
-	//-------------------------------------------------------------
-	// 캐릭터 바라보는 방향 정보 저장 처리
-	//-------------------------------------------------------------
-	void PacketProcReqFaceDirection(int64 SessionID, CMessage* Message);
+	
 	//---------------------------------------------------------
 	// 이동 요청 처리
 	//---------------------------------------------------------
@@ -329,7 +325,7 @@ private:
 	//-------------------------------------------------
 	// 근접 기술 처리 잡 생성 함수
 	//-------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobMeleeAttack(int8 MeleeCharacteristicType, int16 MeleeSkillType);
+	st_GameObjectJob* MakeGameObjectJobMeleeAttack(int8 MeleeCharacteristicType, int16 MeleeSkillType, float AttackDirectionX, float AttackDirectionY);
 	//------------------------------------------------
 	// 마법 시작 잡 생성 함수
 	//------------------------------------------------

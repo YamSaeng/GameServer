@@ -465,10 +465,7 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_CHARACTER_INFO:
 		PacketProcReqCharacterInfo(SessionID, Message);
-		break;
-	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_FACE_DIRECTION:
-		PacketProcReqFaceDirection(SessionID, Message);
-		break;
+		break;	
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_MOVE:
 		PacketProcReqMove(SessionID, Message);
 		break;
@@ -838,62 +835,6 @@ void CGameServer::PacketProcReqCharacterInfo(int64 SessionID, CMessage* Message)
 	}
 }
 
-void CGameServer::PacketProcReqFaceDirection(int64 SessionID, CMessage* Message)
-{
-	st_Session* Session = FindSession(SessionID);
-
-	if (Session)
-	{
-		if (!Session->IsLogin)
-		{
-			Disconnect(Session->SessionId);
-		}
-
-		int64 AccountId;
-		*Message >> AccountId;
-
-		if (Session->AccountId != AccountId)
-		{
-			Disconnect(Session->SessionId);
-		}
-
-		// PlayerDBId를 뽑는다.
-		int64 PlayerDBId;
-		*Message >> PlayerDBId;
-
-		// 게임에 입장한 캐릭터를 가져온다.
-		CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
-
-		// 클라가 조종중인 캐릭터가 있는지 확인
-		if (MyPlayer == nullptr)
-		{
-			Disconnect(Session->SessionId);
-		}
-		else
-		{
-			// 조종중인 캐릭터가 있으면 ObjectId가 다른지 확인
-			if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
-			{
-				Disconnect(Session->SessionId);
-			}
-		}
-
-		float FaceDirectionX;
-		*Message >> FaceDirectionX;
-
-		float FaceDirectionY;
-		*Message >> FaceDirectionY;
-
-		MyPlayer->_FieldOfDirection.X = FaceDirectionX;
-		MyPlayer->_FieldOfDirection.Y = FaceDirectionY;	
-
-		MyPlayer->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton.X = FaceDirectionX;
-		MyPlayer->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton.Y = FaceDirectionY;
-	}
-
-	ReturnSession(Session);
-}
-
 void CGameServer::PacketProcReqMove(int64 SessionID, CMessage* Message)
 {
 	st_Session* Session = FindSession(SessionID);
@@ -1101,7 +1042,13 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 			int16 ReqSkillType;
 			*Message >> ReqSkillType;
 
-			st_GameObjectJob* MeleeAttackJob = MakeGameObjectJobMeleeAttack(ReqCharacteristicType, ReqSkillType);
+			float AttackDirectionX;
+			*Message >> AttackDirectionX;
+
+			float AttackDirecitonY;
+			*Message >> AttackDirecitonY;
+
+			st_GameObjectJob* MeleeAttackJob = MakeGameObjectJobMeleeAttack(ReqCharacteristicType, ReqSkillType, AttackDirectionX, AttackDirecitonY);
 			MyPlayer->_GameObjectJobQue.Enqueue(MeleeAttackJob);
 		}
 	} while (0);
@@ -4945,7 +4892,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobSkillLearn(bool IsSkillLearn, in
 	return SkillLearnJob;
 }
 
-st_GameObjectJob* CGameServer::MakeGameObjectJobMeleeAttack(int8 MeleeCharacteristicType, int16 MeleeSkillType)
+st_GameObjectJob* CGameServer::MakeGameObjectJobMeleeAttack(int8 MeleeCharacteristicType, int16 MeleeSkillType, float AttackDirectionX, float AttackDirectionY)
 {
 	st_GameObjectJob* MeleeAttackJob = G_ObjectManager->GameObjectJobCreate();
 	MeleeAttackJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SKILL_MELEE_ATTACK;
@@ -4955,6 +4902,8 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobMeleeAttack(int8 MeleeCharacteri
 
 	*MeleeAttackJobMessage << MeleeCharacteristicType;
 	*MeleeAttackJobMessage << MeleeSkillType;
+	*MeleeAttackJobMessage << AttackDirectionX;
+	*MeleeAttackJobMessage << AttackDirectionY;
 
 	MeleeAttackJob->GameObjectJobMessage = MeleeAttackJobMessage;
 
