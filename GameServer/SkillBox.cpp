@@ -4,6 +4,7 @@
 #include "ObjectManager.h"
 #include "NetworkManager.h"
 #include "SwordBlade.h"
+#include "RectCollision.h"
 
 CSkillBox::CSkillBox()
 {
@@ -151,7 +152,7 @@ bool CSkillBox::CheckCharacteristic(en_SkillCharacteristic SkillCharacteristic)
 	return _SkillCharacteristic._SkillCharacteristic == SkillCharacteristic;	
 }
 
-void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en_SkillCharacteristic SkillCharacteristic, en_SkillType SkillType)
+void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en_SkillCharacteristic SkillCharacteristic, en_SkillType SkillType, float AttackDirectionX, float AttackDirectionY)
 {
 	bool IsNextCombo = false;
 
@@ -161,6 +162,8 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 		CPlayer* Player = dynamic_cast<CPlayer*>(SkillUser);
 		if (Player != nullptr)
 		{			
+			CRectCollision* SkillCollision = nullptr;
+
 			// 전역 재사용 시간이 완료 되었는지 확인
 			if (_GlobalCoolTimeSkill->GetSkillInfo()->CanSkillUse == true)
 			{
@@ -187,26 +190,35 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 							case en_SkillType::SKILL_DEFAULT_ATTACK:
 							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
 							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
-								{
-									vector<CGameObject*> FieldOfViewObjects = SkillUser->GetFieldOfViewObjects();
-									for (CGameObject* FieldOfViewObject : FieldOfViewObjects)
+								{	
+									Vector2 AttackDirection;
+									AttackDirection.X = AttackDirectionX;
+									AttackDirection.Y = AttackDirectionY;
+
+									SkillCollision = G_ObjectManager->RectCollisionCreate();
+
+									SkillCollision->Init(en_CollisionPosition::COLLISION_POSITION_DEFAULT, Skill->GetSkillInfo()->SkillType,
+										SkillUser->_GameObjectInfo.ObjectPositionInfo.Position + AttackDirection,
+										Vector2(AttackDirectionX, AttackDirectionY));
+
+									vector<CGameObject*> CollisionObjects;
+									bool IsAttack = SkillUser->GetChannel()->ChannelColliderOBBCheckAroundObject(SkillCollision, 
+										SkillUser->GetFieldOfViewObjects(), CollisionObjects, SkillUser->_GameObjectInfo.ObjectId);
+									if (IsAttack == true)
 									{
-										if (FieldOfViewObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD
-											&& FieldOfViewObject ->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::ROOTING)
+										IsNextCombo = true;
+										st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(SkillUser->_GameObjectInfo.ObjectId, SkillUser->_GameObjectInfo.ObjectType,
+											MeleeSkillInfo->SkillType,
+											MeleeSkillInfo->SkillMinDamage,
+											MeleeSkillInfo->SkillMaxDamage);
+
+										for (CGameObject* CollisionObject : CollisionObjects)
 										{
-											if (Vector2::CheckFieldOfView(FieldOfViewObject->_GameObjectInfo.ObjectPositionInfo.Position,
-												SkillUser->_GameObjectInfo.ObjectPositionInfo.Position,
-												SkillUser->_FieldOfDirection, SkillUser->_FieldOfAngle, Skill->GetSkillInfo()->SkillDistance))
-											{
-												IsNextCombo = true;
-												st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(SkillUser->_GameObjectInfo.ObjectId, SkillUser->_GameObjectInfo.ObjectType,
-													MeleeSkillInfo->SkillType,
-													MeleeSkillInfo->SkillMinDamage,
-													MeleeSkillInfo->SkillMaxDamage);
-												FieldOfViewObject->_GameObjectJobQue.Enqueue(DamageJob);
-											}
+											if(CollisionObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD
+												&& CollisionObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::ROOTING)
+											CollisionObject->_GameObjectJobQue.Enqueue(DamageJob);
 										}										
-									}
+									}									
 								}
 								break;
 							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK:
@@ -220,6 +232,8 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 												Player->_GameObjectInfo.ObjectPositionInfo.Position);
 											if (Distance < Skill->GetSkillInfo()->SkillDistance)
 											{
+												SkillCollision = G_ObjectManager->RectCollisionCreate();												
+
 												Vector2Int JumpingPositionDir = Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition
 													- Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition;
 
@@ -245,6 +259,10 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 													Player->_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
 
 													Player->_GameObjectInfo.ObjectPositionInfo.Position = NewPosition;
+
+													SkillCollision->Init(en_CollisionPosition::COLLISION_POSITION_MIDDLE, Skill->GetSkillInfo()->SkillType,
+														Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position,
+														Vector2::Zero);
 
 													Vector2Int CollisionPosition;
 													CollisionPosition.X = (int32)Player->_GameObjectInfo.ObjectPositionInfo.Position.X;
@@ -282,23 +300,31 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 								}
 								break;
 							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE:
-								{									
-									vector<st_FieldOfViewInfo> FieldOfViewInfos = SkillUser->GetChannel()->GetMap()->GetFieldOfViewAttackObjects(SkillUser, 1);
-									for (auto FieldOfViewInfo : FieldOfViewInfos)
+								{					
+									SkillCollision = G_ObjectManager->RectCollisionCreate();
+
+									SkillCollision->Init(en_CollisionPosition::COLLISION_POSITION_MIDDLE, Skill->GetSkillInfo()->SkillType,
+										SkillUser->_GameObjectInfo.ObjectPositionInfo.Position,
+										Vector2::Zero);
+
+									vector<CGameObject*> CollisionObjects;
+									bool IsAttack = SkillUser->GetChannel()->ChannelColliderOBBCheckAroundObject(SkillCollision,
+										SkillUser->GetFieldOfViewObjects(), CollisionObjects, SkillUser->_GameObjectInfo.ObjectId);
+									if (IsAttack == true)
 									{
-										CGameObject* FindObject = SkillUser->GetChannel()->FindChannelObject(FieldOfViewInfo.ObjectID, FieldOfViewInfo.ObjectType);
-										
-										float Distance = Vector2::Distance(FindObject->_GameObjectInfo.ObjectPositionInfo.Position, SkillUser->_GameObjectInfo.ObjectPositionInfo.Position);
-										if (Distance < Skill->GetSkillInfo()->SkillDistance)
+										IsNextCombo = true;
+										st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(SkillUser->_GameObjectInfo.ObjectId, SkillUser->_GameObjectInfo.ObjectType,
+											MeleeSkillInfo->SkillType,
+											MeleeSkillInfo->SkillMinDamage,
+											MeleeSkillInfo->SkillMaxDamage);
+
+										for (CGameObject* CollisionObject : CollisionObjects)
 										{
-											st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(SkillUser->_GameObjectInfo.ObjectId,
-												SkillUser->_GameObjectInfo.ObjectType,
-												MeleeSkillInfo->SkillType,
-												MeleeSkillInfo->SkillMinDamage,
-												MeleeSkillInfo->SkillMaxDamage);
-											FindObject->_GameObjectJobQue.Enqueue(DamageJob);
+											if (CollisionObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD
+												&& CollisionObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::ROOTING)
+												CollisionObject->_GameObjectJobQue.Enqueue(DamageJob);
 										}
-									}									
+									}						
 								}
 								break;
 							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE:
@@ -306,12 +332,14 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 									CSwordBlade* NewSwordBlade = dynamic_cast<CSwordBlade*>(G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_SKILL_SWORD_BLADE));
 									if (NewSwordBlade != nullptr)
 									{
+										Vector2 NewSwordBladeDirection(AttackDirectionX, AttackDirectionY);
+
 										NewSwordBlade->_Owner = SkillUser;
 
 										NewSwordBlade->_SpawnPosition = SkillUser->_GameObjectInfo.ObjectPositionInfo.CollisionPosition;
 										NewSwordBlade->_GameObjectInfo.ObjectPositionInfo.Position = SkillUser->_GameObjectInfo.ObjectPositionInfo.Position + SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton;
-										NewSwordBlade->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton = SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton;
-										NewSwordBlade->_GameObjectInfo.ObjectPositionInfo.MoveDirection = SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton;						
+										NewSwordBlade->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton = NewSwordBladeDirection;
+										NewSwordBlade->_GameObjectInfo.ObjectPositionInfo.MoveDirection = NewSwordBladeDirection;
 
 										NewSwordBlade->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = Skill->GetSkillInfo()->SkillMinDamage;
 										NewSwordBlade->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = Skill->GetSkillInfo()->SkillMaxDamage;
@@ -370,6 +398,15 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 						break;					
 					}
 
+					if (SkillCollision != nullptr)
+					{
+						CMessage* RectCollisionSpawnPacket = G_NetworkManager->GetGameServer()->MakePacketRectCollisionSpawn(SkillCollision);
+						G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, RectCollisionSpawnPacket);
+						RectCollisionSpawnPacket->Free();
+
+						G_ObjectManager->RectCollisionReturn(SkillCollision);
+					}					
+
 					if (IsNextCombo == true && Skill->GetSkillInfo()->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
 					{
 						CSkill* FindNextComboSkill = FindSkill(Skill->GetSkillInfo()->SkillCharacteristic, Skill->GetSkillInfo()->NextComboSkill);
@@ -422,7 +459,7 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 							G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
 							ResCoolTimeStartPacket->Free();
 						}
-					}
+					}					
 				}
 				else
 				{
@@ -502,7 +539,7 @@ int32 CSkillBox::CalculateDamage(en_SkillType SkillType, int32& Str, int32& Dex,
 	}
 
 	float DefenceRate = (float)pow(((float)(200 - 1)) / 20, 2) * 0.01f;
-	int32 FinalDamage = (int32)(CriticalDamage * DefenceRate);
+	FinalDamage = (int32)(CriticalDamage * DefenceRate);
 
 	return FinalDamage;
 }

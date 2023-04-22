@@ -29,7 +29,9 @@ public:
 
 	bool CheckCharacteristic(en_SkillCharacteristic SkillCharacteristic);
 
-	void SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en_SkillCharacteristic SkillCharacteristic, en_SkillType SkillType);
+	void SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, 
+		en_SkillCharacteristic SkillCharacteristic, en_SkillType SkillType,
+		float AttackDirectionX, float AttackDirectionY);
 		
 	int32 CalculateDamage(en_SkillType SkillType,
 		int32& Str, int32& Dex, int32& Int, int32& Luck,
