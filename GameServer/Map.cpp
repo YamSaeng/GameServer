@@ -364,57 +364,6 @@ vector<CPlayer*> CMap::GetAroundPlayers(CGameObject* Object, bool ExceptMe)
 	return FieldOfViewPlayers;
 }
 
-vector<st_FieldOfViewInfo> CMap::GetFieldOfViewAttackObjects(CGameObject* Object, int16 Distance)
-{
-	vector<st_FieldOfViewInfo> FieldOfViewGameObjects;
-
-	vector<CSector*> Sectors = GetAroundSectors(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Distance);
-
-	for (CSector* Sector : Sectors)
-	{
-		Sector->AcquireSectorLock();
-
-		st_FieldOfViewInfo FieldOfViewInfo;
-		for (CPlayer* Player : Sector->GetPlayers())
-		{
-			if (Player->_NetworkState == en_ObjectNetworkState::LIVE)
-			{
-				FieldOfViewInfo.ObjectID = Player->_GameObjectInfo.ObjectId;
-				FieldOfViewInfo.SessionID = Player->_SessionId;
-				FieldOfViewInfo.ObjectType = Player->_GameObjectInfo.ObjectType;
-
-				float Distance = Vector2::Distance(Object->_GameObjectInfo.ObjectPositionInfo.Position, Player->_GameObjectInfo.ObjectPositionInfo.Position);
-
-				if (Distance <= Object->_FieldOfViewDistance)
-				{
-					if (Object->_GameObjectInfo.ObjectId != Player->_GameObjectInfo.ObjectId)
-					{
-						FieldOfViewGameObjects.push_back(FieldOfViewInfo);
-					}
-				}
-			}
-		}
-
-		for (CMonster* Monster : Sector->GetMonsters())
-		{
-			FieldOfViewInfo.ObjectID = Monster->_GameObjectInfo.ObjectId;
-			FieldOfViewInfo.SessionID = 0;
-			FieldOfViewInfo.ObjectType = Monster->_GameObjectInfo.ObjectType;
-
-			int16 Distance = Vector2Int::Distance(Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, Monster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
-
-			if (Distance <= Object->_FieldOfViewDistance)
-			{
-				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
-			}
-		}
-
-		Sector->ReleaseSectorLock();
-	}
-
-	return FieldOfViewGameObjects;
-}
-
 vector<CMonster*> CMap::GetAroundMonster(CGameObject* Object, int16 Range, bool ExceptMe)
 {
 	vector<CMonster*> Monsters;
