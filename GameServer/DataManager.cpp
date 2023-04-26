@@ -959,13 +959,13 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 					{
 						FightAttackSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK;
 					}
-					else if (SkillType == "SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK")
+					else if (SkillType == "SKILL_FIGHT_ACTIVE_ATTACK_WRATH_ATTACK")
 					{
-						FightAttackSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK;
-					}	
-					else if (SkillType == "SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE")
+						FightAttackSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_WRATH_ATTACK;
+					}
+					else if (SkillType == "SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE")
 					{
-						FightAttackSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE;
+						FightAttackSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE;
 					}
 					else if (SkillType == "SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE")
 					{
@@ -975,10 +975,14 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 					{
 						FightAttackSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_COMBO_FLY_KNIFE;
 					}
-					else if (SkillType == "SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH")
+					else if (SkillType == "SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK")
 					{
-						FightAttackSkill->SkillType = en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH;
-					}
+						FightAttackSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK;
+					}	
+					else if (SkillType == "SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE")
+					{
+						FightAttackSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE;
+					}					
 
 					FightAttackSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_FIGHT;
 					FightAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());					
@@ -998,6 +1002,14 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 					if (NextComboSkill == "SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK")
 					{
 						FightAttackSkill->NextComboSkill = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK;
+					}
+					else if (NextComboSkill == "SKILL_FIGHT_ACTIVE_ATTACK_WRATH_ATTACK")
+					{
+						FightAttackSkill->NextComboSkill = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_WRATH_ATTACK;
+					}
+					else if (NextComboSkill == "SKILL_FIGHT_ACTIVE_ATTACK_COMBO_FLY_KNIFE")
+					{
+						FightAttackSkill->NextComboSkill = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_COMBO_FLY_KNIFE;
 					}
 					else if (NextComboSkill == "SKILL_TYPE_NONE")
 					{
@@ -1040,12 +1052,15 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 					int64 SkillDotTime = BufSkillFiled["SkillDotTime"].GetInt64();
 					float SkillDistance = BufSkillFiled["SkillDistance"].GetFloat();
 					int32 SkillMotionTime = BufSkillFiled["SkillMotionTime"].GetInt();
-					float SkillTargetEffectTime = BufSkillFiled["SkillTargetEffectTime"].GetFloat();
-					string NextComboSkill = BufSkillFiled["NextComboSkill"].GetString();					
+					float SkillTargetEffectTime = BufSkillFiled["SkillTargetEffectTime"].GetFloat();					
 
 					if (SkillType == "SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE")
 					{
 						FightBufSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE;
+					}
+					else if (SkillType == "SKILL_FIGHT_ACTIVE_BUF_COUNTER_ARMOR")
+					{
+						FightBufSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_BUF_COUNTER_ARMOR;
 					}
 
 					FightBufSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_FIGHT;
@@ -1119,10 +1134,30 @@ void CDataManager::LoadDataProtectionSkill(wstring LoadFileName)
 					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();
 					string NextComboSkill = AttackSkillFiled["NextComboSkill"].GetString();					
 
-					if (SkillType == "SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH")
+					if (SkillType == "SKILL_PROTECTION_ACTIVE_ATTACK_POWERFUL_ATTACK")
+					{
+						ProtectionAttackSkill->SkillType = en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_POWERFUL_ATTACK;
+					}
+					else if (SkillType == "SKILL_PROTECTION_ACTIVE_ATTACK_SHARP_ATTACK")
+					{
+						ProtectionAttackSkill->SkillType = en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHARP_ATTACK;
+					}
+					else if (SkillType == "SKILL_PROTECTION_ACTIVE_ATTACK_LAST_ATTACK")
+					{
+						ProtectionAttackSkill->SkillType = en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_LAST_ATTACK;
+					}
+					else if (SkillType == "SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH")
 					{
 						ProtectionAttackSkill->SkillType = en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH;
-					}	
+					}
+					else if (SkillType == "SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_COUNTER")
+					{
+						ProtectionAttackSkill->SkillType = en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_COUNTER;
+					}
+					else if (SkillType == "SKILL_PROTECTION_ACTIVE_ATTACK_SWORD_STORM")
+					{
+						ProtectionAttackSkill->SkillType = en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SWORD_STORM;
+					}
 					else if (SkillType == "SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE")
 					{
 						ProtectionAttackSkill->SkillType = en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE;
@@ -1143,7 +1178,15 @@ void CDataManager::LoadDataProtectionSkill(wstring LoadFileName)
 					ProtectionAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 					ProtectionAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
 
-					if (NextComboSkill == "SKILL_TYPE_NONE")
+					if (NextComboSkill == "SKILL_PROTECTION_ACTIVE_ATTACK_SHARP_ATTACK")
+					{
+						ProtectionAttackSkill->NextComboSkill = en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHARP_ATTACK;
+					}
+					else if (NextComboSkill == "SKILL_PROTECTION_ACTIVE_ATTACK_CRASH_ATTACK")
+					{
+						ProtectionAttackSkill->NextComboSkill = en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_LAST_ATTACK;
+					}
+					else if (NextComboSkill == "SKILL_TYPE_NONE")
 					{
 						ProtectionAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
 					}
@@ -1155,7 +1198,71 @@ void CDataManager::LoadDataProtectionSkill(wstring LoadFileName)
 
 				for (auto& BufSkillFiled : ActiveSkillListFiled["BufSkill"].GetArray())
 				{
+					st_SkillInfo* ProtectionBufSkill = new st_SkillInfo();
+					ProtectionBufSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_WARRIOR;
+					ProtectionBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_FIGHT_ACTIVE_BUF;
 
+					int8 SkillNumber = (int8)BufSkillFiled["SkillNumber"].GetInt();
+					string SkillType = BufSkillFiled["SkillType"].GetString();
+					string SkillName = BufSkillFiled["SkillName"].GetString();
+					int SkillMaxLevel = BufSkillFiled["SkillMaxLevel"].GetInt();
+
+					int IncreaseMinAttackPoint = BufSkillFiled["IncreaseMinAttackPoint"].GetInt();
+					int IncreaseMaxAttackPoint = BufSkillFiled["IncreaseMaxAttackPoint"].GetInt();
+					int IncreaseMeleeAttackSpeedPoint = BufSkillFiled["IncreaseMeleeAttackSpeedPoint"].GetInt();
+					int16 IncreaseMeleeAttackHitRate = (int16)BufSkillFiled["IncreaseMeleeAttackHitRate"].GetInt();
+					int16 IncreaseMagicAttackPoint = (int16)BufSkillFiled["IncreaseMagicAttackPoint"].GetInt();
+					int16 IncreaseMagicCastingPoint = (int16)BufSkillFiled["IncreaseMagicCastingPoint"].GetInt();
+					int16 IncreaseMagicAttackHitRate = (int16)BufSkillFiled["IncreaseMagicAttackHitRate"].GetInt();
+					int IncreaseDefencePoint = BufSkillFiled["IncreaseDefencePoint"].GetInt();
+					int16 IncreaseEvasionRate = (int16)BufSkillFiled["IncreaseEvasionRate"].GetInt();
+					int16 IncreaseMeleeCriticalPoint = (int16)BufSkillFiled["IncreaseMeleeCriticalPoint"].GetInt();
+					int16 IncreaseMagicCriticalPoint = (int16)BufSkillFiled["IncreaseMagicCriticalPoint"].GetInt();
+					float IncreaseSpeedPoint = BufSkillFiled["IncreaseSpeedPoint"].GetFloat();
+					int16 IncreaseStatusAbnormalityResistance = (int16)BufSkillFiled["IncreaseStatusAbnormalityResistance"].GetInt();
+
+					int SkillCoolTime = BufSkillFiled["SkillCoolTime"].GetInt();
+					int SkillCastingTime = BufSkillFiled["SkillCastingTime"].GetInt();
+					int64 SkillDurationTime = BufSkillFiled["SkillDurationTime"].GetInt64();
+					int64 SkillDotTime = BufSkillFiled["SkillDotTime"].GetInt64();
+					float SkillDistance = BufSkillFiled["SkillDistance"].GetFloat();
+					int32 SkillMotionTime = BufSkillFiled["SkillMotionTime"].GetInt();
+					float SkillTargetEffectTime = BufSkillFiled["SkillTargetEffectTime"].GetFloat();					
+
+					if (SkillType == "SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE")
+					{
+						ProtectionBufSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE;
+					}
+					else if (SkillType == "SKILL_FIGHT_ACTIVE_BUF_COUNTER_ARMOR")
+					{
+						ProtectionBufSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_BUF_COUNTER_ARMOR;
+					}
+
+					ProtectionBufSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_FIGHT;
+					ProtectionBufSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
+					ProtectionBufSkill->SkillMaxLevel = SkillMaxLevel;
+					ProtectionBufSkill->IncreaseMinAttackPoint = IncreaseMinAttackPoint;
+					ProtectionBufSkill->IncreaseMaxAttackPoint = IncreaseMaxAttackPoint;
+					ProtectionBufSkill->IncreaseMeleeAttackSpeedPoint = IncreaseMeleeAttackSpeedPoint;
+					ProtectionBufSkill->IncreaseMeleeAttackHitRate = IncreaseMeleeAttackHitRate;
+					ProtectionBufSkill->IncreaseMagicAttackPoint = IncreaseMagicAttackPoint;
+					ProtectionBufSkill->IncreaseMagicCastingPoint = IncreaseMagicCastingPoint;
+					ProtectionBufSkill->IncreaseMagicAttackHitRate = IncreaseMagicAttackHitRate;
+					ProtectionBufSkill->IncreaseDefencePoint = IncreaseDefencePoint;
+					ProtectionBufSkill->IncreaseEvasionRate = IncreaseEvasionRate;
+					ProtectionBufSkill->IncreaseMeleeCriticalPoint = IncreaseMeleeCriticalPoint;
+					ProtectionBufSkill->IncreaseMagicCriticalPoint = IncreaseMagicCriticalPoint;
+					ProtectionBufSkill->IncreaseSpeedPoint = IncreaseSpeedPoint;
+					ProtectionBufSkill->IncreaseStatusAbnormalityResistance = IncreaseStatusAbnormalityResistance;
+					ProtectionBufSkill->SkillCoolTime = SkillCoolTime;
+					ProtectionBufSkill->SkillCastingTime = SkillCastingTime;
+					ProtectionBufSkill->SkillDurationTime = SkillDurationTime;
+					ProtectionBufSkill->SkillDotTime = SkillDotTime;
+					ProtectionBufSkill->SkillDistance = SkillDistance;
+					ProtectionBufSkill->SkillMotionTime = SkillMotionTime;
+					ProtectionBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;
+
+					_ProtectionSkillDatas.insert(pair<int16, st_SkillInfo*>((int16)ProtectionBufSkill->SkillType, ProtectionBufSkill));
 				}
 			}
 		}
@@ -1216,6 +1323,26 @@ void CDataManager::LoadDataAssassinationSkill(wstring LoadFileName)
 					{
 						AssassinationAttackSkill->SkillType = en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_ATTACK;
 					}
+					else if (SkillType == "SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_CUT")
+					{
+						AssassinationAttackSkill->SkillType = en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_CUT;
+					}
+					else if (SkillType == "SKILL_ASSASSINATION_ACTIVE_ATTACK_ADVANCE_CUT")
+					{
+						AssassinationAttackSkill->SkillType = en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_ADVANCE_CUT;
+					}
+					else if (SkillType == "SKILL_ASSASSINATION_ACTIVE_ATTACK_POISON_INJECTION")
+					{
+						AssassinationAttackSkill->SkillType = en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_POISON_INJECTION;
+					}
+					else if (SkillType == "SKILL_ASSASSINATION_ACTIVE_ATTACK_POISON_STUN")
+					{
+						AssassinationAttackSkill->SkillType = en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_POISON_STUN;
+					}
+					else if (SkillType == "SKILL_ASSASSINATION_ACTIVE_ATTACK_ASSASSINATION")
+					{
+						AssassinationAttackSkill->SkillType = en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_ASSASSINATION;
+					}
 					else if (SkillType == "SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP")
 					{
 						AssassinationAttackSkill->SkillType = en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP;
@@ -1244,6 +1371,10 @@ void CDataManager::LoadDataAssassinationSkill(wstring LoadFileName)
 					else if (NextComboSkill == "SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT")
 					{
 						AssassinationAttackSkill->NextComboSkill = en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT;
+					}
+					else if (NextComboSkill == "SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_CUT")
+					{
+						AssassinationAttackSkill->NextComboSkill = en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_CUT;
 					}
 
 					_AssassinationSkillDatas.insert(pair<int16, st_SkillInfo*>((int16)AssassinationAttackSkill->SkillType, AssassinationAttackSkill));
@@ -1280,12 +1411,15 @@ void CDataManager::LoadDataAssassinationSkill(wstring LoadFileName)
 					int64 SkillDotTime = BufSkillFiled["SkillDotTime"].GetInt64();
 					float SkillDistance = BufSkillFiled["SkillDistance"].GetFloat();
 					int32 SkillMotionTime = BufSkillFiled["SkillMotionTime"].GetInt();
-					float SkillTargetEffectTime = BufSkillFiled["SkillTargetEffectTime"].GetFloat();					
-					string NextComboSkill = BufSkillFiled["NextComboSkill"].GetString();					
+					float SkillTargetEffectTime = BufSkillFiled["SkillTargetEffectTime"].GetFloat();										
 
-					if (SkillType == "SKILL_ASSASSINATION_ACTIVE_BUF_WEAPON_POISON")
+					if (SkillType == "SKILL_ASSASSINATION_ACTIVE_BUF_STEALTH")
 					{
-						AssassinationBufSkill->SkillType = en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_WEAPON_POISON;
+						AssassinationBufSkill->SkillType = en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_STEALTH;
+					}
+					else if (SkillType == "SKILL_ASSASSINATION_ACTIVE_BUF_SIXTH_SENSE_MAXIMIZE")
+					{
+						AssassinationBufSkill->SkillType = en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_SIXTH_SENSE_MAXIMIZE;
 					}
 
 					AssassinationBufSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_FIGHT;
@@ -1362,11 +1496,11 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 
 					if (SkillType == "SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON")
 					{
-						SpellAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON;
+						SpellAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_BOLT;
 					}
-					else if (SkillType == "SKILL_SPELL_ACTIVE_ATTACK_ROOT")
+					else if (SkillType == "SKILL_SPELL_ACTIVE_ATTACK_FLAME_BLAZE")
 					{
-						SpellAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT;
+						SpellAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_BLAZE;
 					}
 					else if (SkillType == "SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN")
 					{
@@ -1375,6 +1509,18 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 					else if (SkillType == "SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE")
 					{
 						SpellAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE;
+					}
+					else if (SkillType == "SKILL_SPELL_ACTIVE_ATTACK_ROOT")
+					{
+						SpellAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT;
+					}					
+					else if (SkillType == "SKILL_SPELL_ACTIVE_ATTACK_SLEEP")
+					{
+						SpellAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_SLEEP;
+					}
+					else if (SkillType == "SKILL_SPELL_ACTIVE_ATTACK_WINTER_BINDING")
+					{
+						SpellAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_WINTER_BINDING;
 					}
 					else if (SkillType == "SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE")
 					{
@@ -1405,6 +1551,10 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 					{
 						SpellAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
 					}
+					else if (NextComboSkill == "SKILL_SPELL_ACTIVE_ATTACK_FLAME_BLAZE")
+					{
+						SpellAttackSkill->NextComboSkill = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_BLAZE;
+					}
 					else if (NextComboSkill == "SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE")
 					{
 						SpellAttackSkill->NextComboSkill = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE;
@@ -1428,12 +1578,15 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 					int64 SkillDotTime = BufSkillFiled["SkillDotTime"].GetInt64();
 					float SkillDistance = BufSkillFiled["SkillDistance"].GetFloat();
 					int32 SkillMotionTime = BufSkillFiled["SkillMotionTime"].GetInt();
-					float SkillTargetEffectTime = BufSkillFiled["SkillTargetEffectTime"].GetFloat();
-					string NextComboSkill = BufSkillFiled["NextComboSkill"].GetString();					
+					float SkillTargetEffectTime = BufSkillFiled["SkillTargetEffectTime"].GetFloat();								
 
-					if (SkillType == "SKILL_SPELL_ACTIVE_BUF_TELEPORT")
+					if (SkillType == "SKILL_SPELL_ACTIVE_BUF_BACK_TELEPORT")
 					{
-						SpellBufSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_BUF_TELEPORT;
+						SpellBufSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_BUF_BACK_TELEPORT;
+					}
+					else if(SkillType == "SKILL_SPELL_ACTIVE_BUF_ILLUSION")
+					{
+						SpellBufSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_BUF_ILLUSION;
 					}
 
 					SpellBufSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_SPELL;
@@ -1445,12 +1598,7 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 					SpellBufSkill->SkillDotTime = SkillDotTime;
 					SpellBufSkill->SkillDistance = SkillDistance;
 					SpellBufSkill->SkillMotionTime = SkillMotionTime;
-					SpellBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;					
-
-					if (NextComboSkill == "SKILL_TYPE_NONE")
-					{
-						SpellBufSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-					}
+					SpellBufSkill->SkillTargetEffectTime = SkillTargetEffectTime;				
 
 					_SpellSkillDatas.insert(pair<int16, st_SkillInfo*>((int16)SpellBufSkill->SkillType, SpellBufSkill));
 				}
@@ -1498,8 +1646,7 @@ void CDataManager::LoadDataShootingSkill(wstring LoadFileName)
 					int64 SkillDebufTime = AttackSkillFiled["SkillDebufTime"].GetInt64();
 					int8 SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetInt();
 					int8 SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetInt();
-					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();					
-					string NextComboSkill = AttackSkillFiled["NextComboSkill"].GetString();					
+					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();										
 
 					if (SkillType == "SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING")
 					{
@@ -1520,12 +1667,7 @@ void CDataManager::LoadDataShootingSkill(wstring LoadFileName)
 					ShootingAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 					ShootingAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 					ShootingAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
-					ShootingAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;					
-
-					if (NextComboSkill == "SKILL_TYPE_NONE")
-					{
-						ShootingAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
-					}
+					ShootingAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;										
 
 					_ShootingSkillDatas.insert(pair<int16, st_SkillInfo*>((int16)ShootingAttackSkill->SkillType, ShootingAttackSkill));
 				}
@@ -1585,9 +1727,17 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 					{
 						DisciplineAttackSkill->SkillType = en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE;
 					}
+					else if (SkillType == "SKILL_DISCIPLINE_ACTIVE_ATTACK_THUNDER_BOLT")
+					{
+						DisciplineAttackSkill->SkillType = en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_THUNDER_BOLT;
+					}
 					else if (SkillType == "SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT")
 					{
 						DisciplineAttackSkill->SkillType = en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT;
+					}
+					else if (SkillType == "SKILL_DISCIPLINE_ACTIVE_ATTACK_JUDGMENT")
+					{
+						DisciplineAttackSkill->SkillType = en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_JUDGMENT;
 					}
 
 					DisciplineAttackSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_DISCIPLINE;
@@ -1609,6 +1759,10 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 					if (NextComboSkill == "SKILL_TYPE_NONE")
 					{
 						DisciplineAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+					}
+					else if (NextComboSkill == "SKILL_DISCIPLINE_ACTIVE_ATTACK_THUNDER_BOLT")
+					{
+						DisciplineAttackSkill->NextComboSkill = en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_THUNDER_BOLT;
 					}
 
 					_DisciplineSkillDatas.insert(pair<int16, st_SkillInfo*>((int16)DisciplineAttackSkill->SkillType, DisciplineAttackSkill));
@@ -1638,9 +1792,25 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 					{
 						DisciplineHealSkill->SkillType = en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT;
 					}
+					else if (SkillType == "SKILL_DISCIPLINE_ACTIVE_HEAL_RECOVERY_LIGHT")
+					{
+						DisciplineHealSkill->SkillType = en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_RECOVERY_LIGHT;
+					}
+					else if (SkillType == "SKILL_DISCIPLINE_ACTIVE_HEAL_VITALITY_LIGHT")
+					{
+						DisciplineHealSkill->SkillType = en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_VITALITY_LIGHT;
+					}
+					else if (SkillType == "SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_GRACE")
+					{
+						DisciplineHealSkill->SkillType = en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_GRACE;
+					}
 					else if (SkillType == "SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND")
 					{
 						DisciplineHealSkill->SkillType = en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND;
+					}
+					else if (SkillType == "SKILL_DISCIPLINE_ACTIVE_HEAL_RECOVERY_WIND")
+					{
+						DisciplineHealSkill->SkillType = en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_RECOVERY_WIND;
 					}
 
 					DisciplineHealSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_DISCIPLINE;
@@ -2296,33 +2466,59 @@ st_SkillInfo* CDataManager::FindSkillData(en_SkillType FindSkillType)
 	case en_SkillType::SKILL_FIGHT_TWO_HAND_SWORD_MASTER:
 	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
 	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:	
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK:	
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_WRATH_ATTACK:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:
 	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE:
 	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_COMBO_FLY_KNIFE:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK:	
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE:	
 	case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:		
+	case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_COUNTER_ARMOR:
 		return (*_FightSkillDatas.find((int16)FindSkillType)).second;
+	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_POWERFUL_ATTACK:
+	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHARP_ATTACK:
+	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_LAST_ATTACK:
 	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
+	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_COUNTER:
+	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SWORD_STORM:
 	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE:
+	case en_SkillType::SKILL_PROTECTION_ACTIVE_BUF_FURY:
+	case en_SkillType::SKILL_PROTECTION_ACTIVE_DOUBLE_ARMOR:	
 		return (*_ProtectionSkillDatas.find((int16)FindSkillType)).second;
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:		
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:		
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_BOLT:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_BLAZE:
 	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:		
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:		
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:		
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:			
-	case en_SkillType::SKILL_SPELL_ACTIVE_BUF_TELEPORT:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_SLEEP:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_WINTER_BINDING:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:
+	case en_SkillType::SKILL_SPELL_ACTIVE_BUF_BACK_TELEPORT:
+	case en_SkillType::SKILL_SPELL_ACTIVE_BUF_ILLUSION:	
 		return (*_SpellSkillDatas.find((int16)FindSkillType)).second;			
-	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:		
-	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:		
-	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:		
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_THUNDER_BOLT:
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_JUDGMENT:
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_RECOVERY_LIGHT:
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_VITALITY_LIGHT:
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_GRACE:
 	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_RECOVERY_WIND:
 		return (*_DisciplineSkillDatas.find((int16)FindSkillType)).second;
 	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT:
 	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT:
 	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_ATTACK:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_CUT:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_ADVANCE_CUT:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_POISON_INJECTION:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_POISON_STUN:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_ASSASSINATION:
 	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP:
-	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_WEAPON_POISON:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_STEALTH:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_SIXTH_SENSE_MAXIMIZE:
 		return (*_AssassinationSkillDatas.find((int16)FindSkillType)).second;
 	case en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING:
 		return (*_ShootingSkillDatas.find((int16)FindSkillType)).second;	
