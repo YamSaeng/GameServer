@@ -9,8 +9,8 @@
             {
               "AttackSkill": [
                 {
-                  "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON",
-                  "SkillName": "불꽃작살",
+                  "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_FLAME_BOLT",
+                  "SkillName": "불꽃 화살",
                   "SkillLevel": 1,
                   "SkillMinDamage": 25,
                   "SkillMaxDamage": 35,
@@ -23,30 +23,30 @@
                   "SkillTargetEffectTime": 0.4,
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
-                  "StatusAbnormalityProbability": 0,                  
+                  "StatusAbnormalityProbability": 0,
                   "NextComboSkill": "SKILL_TYPE_NONE"
                 },
                 {
-                  "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_ROOT",
-                  "SkillName": "주술사 속박",
+                  "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_FLAME_BLAZE",
+                  "SkillName": "작렬",
                   "SkillLevel": 1,
-                  "SkillMinDamage": 0,
-                  "SkillMaxDamage": 0,
-                  "SkillCoolTime": 30000,
-                  "SkillCastingTime": 0,
-                  "SkillDurationTime": 10000,
+                  "SkillMinDamage": 25,
+                  "SkillMaxDamage": 35,
+                  "SkillCoolTime": 500,
+                  "SkillCastingTime": 1500,
+                  "SkillDurationTime": 0,
                   "SkillDotTime": 0,
                   "SkillDistance": 6,
                   "SkillMotionTime": 1000,
-                  "SkillTargetEffectTime": 10.0,
+                  "SkillTargetEffectTime": 0.4,
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
-                  "StatusAbnormalityProbability": 100,                  
+                  "StatusAbnormalityProbability": 0,
                   "NextComboSkill": "SKILL_TYPE_NONE"
                 },
                 {
                   "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN",
-                  "SkillName": "얼음사슬",
+                  "SkillName": "얼음 사슬",
                   "SkillLevel": 1,
                   "SkillMinDamage": 20,
                   "SkillMaxDamage": 30,
@@ -59,12 +59,12 @@
                   "SkillTargetEffectTime": 4,
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 3,
-                  "StatusAbnormalityProbability": 100,                  
+                  "StatusAbnormalityProbability": 100,
                   "NextComboSkill": "SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE"
                 },
                 {
                   "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE",
-                  "SkillName": "냉기파동",
+                  "SkillName": "냉기 파동",
                   "SkillLevel": 1,
                   "SkillMinDamage": 20,
                   "SkillMaxDamage": 30,
@@ -77,7 +77,61 @@
                   "SkillTargetEffectTime": 1,
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
-                  "StatusAbnormalityProbability": 100,                  
+                  "StatusAbnormalityProbability": 100,
+                  "NextComboSkill": "SKILL_TYPE_NONE"
+                },
+                {
+                  "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_ROOT",
+                  "SkillName": "속박",
+                  "SkillLevel": 1,
+                  "SkillMinDamage": 0,
+                  "SkillMaxDamage": 0,
+                  "SkillCoolTime": 30000,
+                  "SkillCastingTime": 0,
+                  "SkillDurationTime": 10000,
+                  "SkillDotTime": 0,
+                  "SkillDistance": 6,
+                  "SkillMotionTime": 1000,
+                  "SkillTargetEffectTime": 10.0,
+                  "SkillDebufAttackSpeed": 0,
+                  "SkillDebufMovingSpeed": 0,
+                  "StatusAbnormalityProbability": 100,
+                  "NextComboSkill": "SKILL_TYPE_NONE"
+                },
+                {
+                  "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_SLEEP",
+                  "SkillName": "수면",
+                  "SkillLevel": 1,
+                  "SkillMinDamage": 0,
+                  "SkillMaxDamage": 0,
+                  "SkillCoolTime": 30000,
+                  "SkillCastingTime": 0,
+                  "SkillDurationTime": 10000,
+                  "SkillDotTime": 0,
+                  "SkillDistance": 6,
+                  "SkillMotionTime": 1000,
+                  "SkillTargetEffectTime": 10.0,
+                  "SkillDebufAttackSpeed": 0,
+                  "SkillDebufMovingSpeed": 0,
+                  "StatusAbnormalityProbability": 100,
+                  "NextComboSkill": "SKILL_TYPE_NONE"
+                },
+                {
+                  "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_WINTER_BINDING",
+                  "SkillName": "겨울의 속박",
+                  "SkillLevel": 1,
+                  "SkillMinDamage": 0,
+                  "SkillMaxDamage": 0,
+                  "SkillCoolTime": 30000,
+                  "SkillCastingTime": 0,
+                  "SkillDurationTime": 10000,
+                  "SkillDotTime": 0,
+                  "SkillDistance": 6,
+                  "SkillMotionTime": 1000,
+                  "SkillTargetEffectTime": 10.0,
+                  "SkillDebufAttackSpeed": 0,
+                  "SkillDebufMovingSpeed": 0,
+                  "StatusAbnormalityProbability": 100,
                   "NextComboSkill": "SKILL_TYPE_NONE"
                 },
                 {
@@ -95,12 +149,12 @@
                   "SkillTargetEffectTime": 0.5,
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
-                  "StatusAbnormalityProbability": 100,                  
+                  "StatusAbnormalityProbability": 100,
                   "NextComboSkill": "SKILL_TYPE_NONE"
                 },
                 {
                   "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE",
-                  "SkillName": "지옥의화염",
+                  "SkillName": "지옥의 화염",
                   "SkillLevel": 1,
                   "SkillMinDamage": 100,
                   "SkillMaxDamage": 150,
@@ -113,7 +167,7 @@
                   "SkillTargetEffectTime": 0.5,
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
-                  "StatusAbnormalityProbability": 0,                  
+                  "StatusAbnormalityProbability": 0,
                   "NextComboSkill": "SKILL_TYPE_NONE"
                 }
               ],
@@ -128,8 +182,19 @@
                   "SkillDotTime": 0,
                   "SkillDistance": 4,
                   "SkillMotionTime": 1000,
-                  "SkillTargetEffectTime": 0,                  
-                  "NextComboSkill": "SKILL_TYPE_NONE"
+                  "SkillTargetEffectTime": 0                  
+                },
+                {
+                  "SkillType": "SKILL_SPELL_ACTIVE_BUF_ILLUSION",
+                  "SkillName": "환영",
+                  "SkillLevel": 1,
+                  "SkillCoolTime": 120000,
+                  "SkillCastingTime": 0,
+                  "SkillDurationTime": 0,
+                  "SkillDotTime": 0,
+                  "SkillDistance": 0,
+                  "SkillMotionTime": 1000,
+                  "SkillTargetEffectTime": 0
                 }
               ]
             }
