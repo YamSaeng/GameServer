@@ -926,6 +926,17 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_RAY_CASTING,
 
 	//-----------------------------------------------------------
+	// 게임서버 충돌체 정보
+	// float PositionX
+	// float PositionY
+	// float DirectionX
+	// float DirectionY
+	// float SizeX
+	// float SizeY
+	//-----------------------------------------------------------
+	en_PACKET_S2C_COLLISION,
+
+	//-----------------------------------------------------------
 	// 게임서버 시간 요청 
 	// int64 AccountID
 	// int64 PlayerID
