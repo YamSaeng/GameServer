@@ -835,12 +835,18 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				PublicSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_ATTACK;
 
 				string SkillType = PublicAttackSkillListFiled["SkillType"].GetString();
+				string SkillKind = PublicAttackSkillListFiled["SkillKind"].GetString();
 				string SkillName = PublicAttackSkillListFiled["SkillName"].GetString();
 				int SkillMinDamage = PublicAttackSkillListFiled["SkillMinDamage"].GetInt();
 				int SkillMaxDamage = PublicAttackSkillListFiled["SkillMaxDamage"].GetInt();
 				int SkillCoolTime = PublicAttackSkillListFiled["SkillCoolTime"].GetInt();
 				float SkillDistance = PublicAttackSkillListFiled["SkillDistance"].GetFloat();
 				float SkillTargetEffectTime = PublicAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();				
+
+				if (SkillKind == "SKILL_KIND_MELEE_SKILL")
+				{
+					PublicSkill->SkillKind = en_SkillKinds::SKILL_KIND_MELEE_SKILL;
+				}
 
 				if (SkillType == "SKILL_DEFAULT_ATTACK")
 				{
@@ -869,12 +875,18 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				PublicBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_PUBLIC_ACTIVE_BUF;
 
 				string SkillType = PublicBufSkillListFiled["SkillType"].GetString();
+				string SkillKind = PublicBufSkillListFiled["SkillKind"].GetString();
 				string SkillName = PublicBufSkillListFiled["SkillName"].GetString();
 				int16 IncreaseStatusAbnormalityResistance = (int16)PublicBufSkillListFiled["IncreaseStatusAbnormalityResistance"].GetInt();
 
 				int SkillCoolTime = PublicBufSkillListFiled["SkillCoolTime"].GetInt();
 				int64 SkillDurationTime = PublicBufSkillListFiled["SkillDurationTime"].GetInt64();
 				float SkillTargetEffectTime = PublicBufSkillListFiled["SkillTargetEffectTime"].GetFloat();				
+
+				if (SkillKind == "SKILL_KIND_BUF_SKILL")
+				{
+					PublicBufSkill->SkillKind = en_SkillKinds::SKILL_KIND_BUF_SKILL;
+				}
 
 				if (SkillType == "SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE")
 				{
@@ -934,6 +946,7 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 					st_SkillInfo* FightAttackSkill = new st_SkillInfo();
 
 					int8 SkillNumber = (int8)AttackSkillFiled["SkillNumber"].GetInt();
+					string SkillKind = AttackSkillFiled["SkillKind"].GetString();
 					string SkillType = AttackSkillFiled["SkillType"].GetString();
 					string SkillName = AttackSkillFiled["SkillName"].GetString();
 					int8 SkillMaxLevel = AttackSkillFiled["SkillMaxLevel"].GetInt();
@@ -950,6 +963,15 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 					int8 SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetInt();
 					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();
 					string NextComboSkill = AttackSkillFiled["NextComboSkill"].GetString();					
+
+					if (SkillKind == "SKILL_KIND_MELEE_SKILL")
+					{
+						FightAttackSkill->SkillKind = en_SkillKinds::SKILL_KIND_MELEE_SKILL;
+					}
+					else if (SkillKind == "SKILL_KIND_MELEE_DEBUF_SKILL")
+					{
+						FightAttackSkill->SkillKind = en_SkillKinds::SKILL_KIND_MELEE_DEBUF_SKILL;
+					}					
 
 					if (SkillType == "SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK")
 					{
@@ -1029,6 +1051,7 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 
 					int8 SkillNumber = (int8)BufSkillFiled["SkillNumber"].GetInt();
 					string SkillType = BufSkillFiled["SkillType"].GetString();
+					string SkillKind = BufSkillFiled["SkillKind"].GetString();
 					string SkillName = BufSkillFiled["SkillName"].GetString();
 					int SkillMaxLevel = BufSkillFiled["SkillMaxLevel"].GetInt();
 
@@ -1053,6 +1076,11 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 					float SkillDistance = BufSkillFiled["SkillDistance"].GetFloat();
 					int32 SkillMotionTime = BufSkillFiled["SkillMotionTime"].GetInt();
 					float SkillTargetEffectTime = BufSkillFiled["SkillTargetEffectTime"].GetFloat();					
+
+					if (SkillKind == "SKILL_KIND_BUF_SKILL")
+					{
+						FightBufSkill->SkillKind = en_SkillKinds::SKILL_KIND_BUF_SKILL;
+					}
 
 					if (SkillType == "SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE")
 					{
@@ -1118,6 +1146,7 @@ void CDataManager::LoadDataProtectionSkill(wstring LoadFileName)
 
 					int8 SkillNumber = (int8)AttackSkillFiled["SkillNumber"].GetInt();
 					string SkillType = AttackSkillFiled["SkillType"].GetString();
+					string SkillKind = AttackSkillFiled["SkillKind"].GetString();
 					string SkillName = AttackSkillFiled["SkillName"].GetString();
 					int8 SkillMaxLevel = AttackSkillFiled["SkillMaxLevel"].GetInt();
 					int SkillMinDamage = AttackSkillFiled["SkillMinDamage"].GetInt();
@@ -1133,6 +1162,15 @@ void CDataManager::LoadDataProtectionSkill(wstring LoadFileName)
 					int8 SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetInt();
 					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();
 					string NextComboSkill = AttackSkillFiled["NextComboSkill"].GetString();					
+
+					if (SkillKind == "SKILL_KIND_MELEE_SKILL")
+					{
+						ProtectionAttackSkill->SkillKind = en_SkillKinds::SKILL_KIND_MELEE_SKILL;
+					}
+					else if (SkillKind == "SKILL_KIND_MELEE_DEBUF_SKILL")
+					{
+						ProtectionAttackSkill->SkillKind = en_SkillKinds::SKILL_KIND_MELEE_DEBUF_SKILL;
+					}
 
 					if (SkillType == "SKILL_PROTECTION_ACTIVE_ATTACK_POWERFUL_ATTACK")
 					{
@@ -1204,6 +1242,7 @@ void CDataManager::LoadDataProtectionSkill(wstring LoadFileName)
 
 					int8 SkillNumber = (int8)BufSkillFiled["SkillNumber"].GetInt();
 					string SkillType = BufSkillFiled["SkillType"].GetString();
+					string SkillKind = BufSkillFiled["SkillKind"].GetString();
 					string SkillName = BufSkillFiled["SkillName"].GetString();
 					int SkillMaxLevel = BufSkillFiled["SkillMaxLevel"].GetInt();
 
@@ -1229,13 +1268,18 @@ void CDataManager::LoadDataProtectionSkill(wstring LoadFileName)
 					int32 SkillMotionTime = BufSkillFiled["SkillMotionTime"].GetInt();
 					float SkillTargetEffectTime = BufSkillFiled["SkillTargetEffectTime"].GetFloat();					
 
-					if (SkillType == "SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE")
+					if (SkillKind == "SKILL_KIND_BUF_SKILL")
 					{
-						ProtectionBufSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE;
+						ProtectionBufSkill->SkillKind = en_SkillKinds::SKILL_KIND_BUF_SKILL;
 					}
-					else if (SkillType == "SKILL_FIGHT_ACTIVE_BUF_COUNTER_ARMOR")
+
+					if (SkillType == "SKILL_PROTECTION_ACTIVE_BUF_FURY")
 					{
-						ProtectionBufSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_BUF_COUNTER_ARMOR;
+						ProtectionBufSkill->SkillType = en_SkillType::SKILL_PROTECTION_ACTIVE_BUF_FURY;
+					}
+					else if (SkillType == "SKILL_PROTECTION_ACTIVE_DOUBLE_ARMOR")
+					{
+						ProtectionBufSkill->SkillType = en_SkillType::SKILL_PROTECTION_ACTIVE_DOUBLE_ARMOR;
 					}
 
 					ProtectionBufSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_FIGHT;
@@ -1294,6 +1338,7 @@ void CDataManager::LoadDataAssassinationSkill(wstring LoadFileName)
 					AssassinationAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_ASSASSINATION_ACTIVE_ATTACK;
 
 					string SkillType = AttackSkillFiled["SkillType"].GetString();
+					string SkillKind = AttackSkillFiled["SkillKind"].GetString();
 					string SkillName = AttackSkillFiled["SkillName"].GetString();
 					int SkillLevel = AttackSkillFiled["SkillLevel"].GetInt();
 					int SkillMinDamage = AttackSkillFiled["SkillMinDamage"].GetInt();
@@ -1310,6 +1355,15 @@ void CDataManager::LoadDataAssassinationSkill(wstring LoadFileName)
 					int64 SkillDamageOverTime = AttackSkillFiled["SkillDebufDamageOverTime"].GetInt64();
 					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();
 					string NextComboSkill = AttackSkillFiled["NextComboSkill"].GetString();					
+
+					if (SkillKind == "SKILL_KIND_MELEE_SKILL")
+					{
+						AssassinationAttackSkill->SkillKind = en_SkillKinds::SKILL_KIND_MELEE_SKILL;
+					}
+					else if (SkillKind == "SKILL_KIND_MELEE_DEBUF_SKILL")
+					{
+						AssassinationAttackSkill->SkillKind = en_SkillKinds::SKILL_KIND_MELEE_DEBUF_SKILL;
+					}
 
 					if (SkillType == "SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT")
 					{
@@ -1388,6 +1442,7 @@ void CDataManager::LoadDataAssassinationSkill(wstring LoadFileName)
 
 					int8 SkillNumber = (int8)BufSkillFiled["SkillNumber"].GetInt();
 					string SkillType = BufSkillFiled["SkillType"].GetString();
+					string SkillKind = BufSkillFiled["SkillKind"].GetString();
 					string SkillName = BufSkillFiled["SkillName"].GetString();
 					int SkillMaxLevel = BufSkillFiled["SkillMaxLevel"].GetInt();
 
@@ -1412,6 +1467,11 @@ void CDataManager::LoadDataAssassinationSkill(wstring LoadFileName)
 					float SkillDistance = BufSkillFiled["SkillDistance"].GetFloat();
 					int32 SkillMotionTime = BufSkillFiled["SkillMotionTime"].GetInt();
 					float SkillTargetEffectTime = BufSkillFiled["SkillTargetEffectTime"].GetFloat();										
+
+					if (SkillKind == "SKILL_KIND_BUF_SKILL")
+					{
+						AssassinationBufSkill->SkillKind = en_SkillKinds::SKILL_KIND_BUF_SKILL;
+					}
 
 					if (SkillType == "SKILL_ASSASSINATION_ACTIVE_BUF_STEALTH")
 					{
@@ -1478,6 +1538,7 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 					SpellAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_ATTACK;
 
 					string SkillType = AttackSkillFiled["SkillType"].GetString();
+					string SkillKind = AttackSkillFiled["SkillKind"].GetString();
 					string SkillName = AttackSkillFiled["SkillName"].GetString();
 					int SkillLevel = AttackSkillFiled["SkillLevel"].GetInt();
 					int SkillMinDamage = AttackSkillFiled["SkillMinDamage"].GetInt();
@@ -1493,6 +1554,19 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 					int8 SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetInt();
 					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();					
 					string NextComboSkill = AttackSkillFiled["NextComboSkill"].GetString();					
+
+					if (SkillKind == "SKILL_KIND_SPELL_SKILL")
+					{
+						SpellAttackSkill->SkillKind = en_SkillKinds::SKILL_KIND_SPELL_SKILL;
+					}
+					else if (SkillKind == "SKILL_KIND_DEBUF_SKILL")
+					{
+						SpellAttackSkill->SkillKind = en_SkillKinds::SKILL_KIND_DEBUF_SKILL;
+					}
+					else if (SkillKind == "SKILL_KIND_SPELL_DEBUF_SKILL")
+					{
+						SpellAttackSkill->SkillKind = en_SkillKinds::SKILL_KIND_SPELL_DEBUF_SKILL;
+					}
 
 					if (SkillType == "SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON")
 					{
@@ -1570,6 +1644,7 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 					SpellBufSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_BUF;
 
 					string SkillType = BufSkillFiled["SkillType"].GetString();
+					string SkillKind = BufSkillFiled["SkillKind"].GetString();
 					string SkillName = BufSkillFiled["SkillName"].GetString();
 					int SkillLevel = BufSkillFiled["SkillLevel"].GetInt();
 					int SkillCoolTime = BufSkillFiled["SkillCoolTime"].GetInt();
@@ -1579,6 +1654,11 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 					float SkillDistance = BufSkillFiled["SkillDistance"].GetFloat();
 					int32 SkillMotionTime = BufSkillFiled["SkillMotionTime"].GetInt();
 					float SkillTargetEffectTime = BufSkillFiled["SkillTargetEffectTime"].GetFloat();								
+
+					if (SkillKind == "SKILL_KIND_BUF_SKILL")
+					{
+						SpellBufSkill->SkillKind = en_SkillKinds::SKILL_KIND_BUF_SKILL;
+					}
 
 					if (SkillType == "SKILL_SPELL_ACTIVE_BUF_BACK_TELEPORT")
 					{
@@ -1632,6 +1712,7 @@ void CDataManager::LoadDataShootingSkill(wstring LoadFileName)
 					ShootingAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SHOOTING_ACTIVE_ATTACK;
 
 					string SkillType = AttackSkillFiled["SkillType"].GetString();
+					string SkillKind = AttackSkillFiled["SkillKind"].GetString();
 					string SkillName = AttackSkillFiled["SkillName"].GetString();
 					int SkillLevel = AttackSkillFiled["SkillLevel"].GetInt();
 					int SkillMinDamage = AttackSkillFiled["SkillMinDamage"].GetInt();
@@ -1647,6 +1728,11 @@ void CDataManager::LoadDataShootingSkill(wstring LoadFileName)
 					int8 SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetInt();
 					int8 SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetInt();
 					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();										
+
+					if (SkillKind == "SKILL_KIND_RANGE_SKILL")
+					{
+						ShootingAttackSkill->SkillKind = en_SkillKinds::SKILL_KIND_RANGE_SKILL;
+					}
 
 					if (SkillType == "SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING")
 					{
@@ -1706,6 +1792,7 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 					DisciplineAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_ATTACK;
 
 					string SkillType = AttackSkillFiled["SkillType"].GetString();
+					string SkillKind = AttackSkillFiled["SkillKind"].GetString();
 					string SkillName = AttackSkillFiled["SkillName"].GetString();
 					int SkillLevel = AttackSkillFiled["SkillLevel"].GetInt();
 					int SkillMinDamage = AttackSkillFiled["SkillMinDamage"].GetInt();
@@ -1722,6 +1809,19 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 					int8 SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetInt();
 					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();
 					string NextComboSkill = AttackSkillFiled["NextComboSkill"].GetString();					
+
+					if (SkillKind == "SKILL_KIND_SPELL_SKILL")
+					{
+						DisciplineAttackSkill->SkillKind == en_SkillKinds::SKILL_KIND_SPELL_SKILL;
+					}
+					else if (SkillKind == "SKILL_KIND_DEBUF_SKILL")
+					{
+						DisciplineAttackSkill->SkillKind == en_SkillKinds::SKILL_KIND_DEBUF_SKILL;
+					}
+					else if (SkillKind == "SKILL_KIND_SPELL_DEBUF_SKILL")
+					{
+						DisciplineAttackSkill->SkillKind == en_SkillKinds::SKILL_KIND_SPELL_DEBUF_SKILL;
+					}
 
 					if (SkillType == "SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE")
 					{
