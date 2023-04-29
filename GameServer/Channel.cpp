@@ -1416,11 +1416,101 @@ vector<CGameObject*> CChannel::FindRangeAttackChannelObjects(CGameObject* Object
 	return FindObjects;
 }
 
-bool CChannel::ChannelColliderCheck(CGameObject* CheckObject, Vector2 CheckPosition, CGameObject** CollisionObject)
+bool CChannel::ChannelColliderCheck(CGameObject* CheckObject, Vector2 CheckPosition)
 {
 	CRectCollision CheckRectCollision;
-	CheckRectCollision._Position.X = CheckPosition.X;
-	CheckRectCollision._Position.Y = CheckPosition.Y;	
+	CheckRectCollision._LeftTop.X = CheckPosition.X;
+	CheckRectCollision._LeftTop.Y = CheckPosition.Y;
+	CheckRectCollision._Size = CheckObject->GetRectCollision()->_Size;
+
+	for (int32 i = 0; i < en_Channel::CHANNEL_PLAYER_MAX; i++)
+	{
+		if (_ChannelPlayerArray[i] != nullptr
+			&& _ChannelPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE)
+		{
+			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelPlayerArray[i]->_GameObjectInfo.ObjectId
+				&& _ChannelPlayerArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelPlayerArray[i]->GetRectCollision()) == true)
+			{				
+				return false;
+			}
+		}
+	}
+
+	for (int32 i = 0; i < en_Channel::CHANNEL_NON_PLAYER_MAX; i++)
+	{
+		if (_ChannelNonPlayerArray[i] != nullptr)
+		{
+			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelNonPlayerArray[i]->_GameObjectInfo.ObjectId
+				&& _ChannelNonPlayerArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelNonPlayerArray[i]->GetRectCollision()) == true)
+			{				
+				return false;
+			}
+		}
+	}
+
+	for (int32 i = 0; i < en_Channel::CHANNEL_DUMMY_PLAYER_MAX; i++)
+	{
+		if (_ChannelDummyPlayerArray[i] != nullptr
+			&& _ChannelDummyPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE)
+		{
+			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectId
+				&& _ChannelDummyPlayerArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelDummyPlayerArray[i]->GetRectCollision()) == true)
+			{				
+				return false;
+			}
+		}
+	}
+
+	for (int32 i = 0; i < en_Channel::CHANNEL_MONSTER_MAX; i++)
+	{
+		if (_ChannelMonsterArray[i] != nullptr)
+		{
+			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelMonsterArray[i]->_GameObjectInfo.ObjectId
+				&& _ChannelMonsterArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelMonsterArray[i]->GetRectCollision()) == true)
+			{				
+				return false;
+			}
+		}
+	}
+
+	for (int32 i = 0; i < en_Channel::CHANNEL_CRAFTING_TABLE_MAX; i++)
+	{
+		if (_ChannelCraftingTableArray[i] != nullptr)
+		{
+			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelCraftingTableArray[i]->_GameObjectInfo.ObjectId
+				&& _ChannelCraftingTableArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelCraftingTableArray[i]->GetRectCollision()) == true)
+			{				
+				return false;
+			}
+		}
+	}
+
+	for (int32 i = 0; i < en_Channel::CHANNEL_ENVIRONMENT_MAX; i++)
+	{
+		if (_ChannelEnvironmentArray[i] != nullptr)
+		{
+			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelEnvironmentArray[i]->_GameObjectInfo.ObjectId
+				&& _ChannelEnvironmentArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelEnvironmentArray[i]->GetRectCollision()) == true)
+			{				
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+bool CChannel::ChannelColliderSingleCheck(CGameObject* CheckObject, Vector2 CheckPosition, CGameObject** CollisionObject)
+{
+	CRectCollision CheckRectCollision;
+	CheckRectCollision._LeftTop.X = CheckPosition.X;
+	CheckRectCollision._LeftTop.Y = CheckPosition.Y;
 	CheckRectCollision._Size = CheckObject->GetRectCollision()->_Size;	
 		
 	for (int32 i = 0; i < en_Channel::CHANNEL_PLAYER_MAX; i++)
@@ -1512,6 +1602,178 @@ bool CChannel::ChannelColliderCheck(CGameObject* CheckObject, Vector2 CheckPosit
 	return true;
 }
 
+bool CChannel::ChannelColliderMultipleCheck(CGameObject* CheckObject, Vector2 CheckPosition, vector<CGameObject*>* CollisionObjects)
+{
+	for (int32 i = 0; i < en_Channel::CHANNEL_PLAYER_MAX; i++)
+	{
+		if (_ChannelPlayerArray[i] != nullptr
+			&& _ChannelPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE)
+		{
+			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelPlayerArray[i]->_GameObjectInfo.ObjectId				
+				&& _ChannelPlayerArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsOBBCollision(CheckObject->GetRectCollision(), _ChannelPlayerArray[i]->GetRectCollision()) == true)
+			{
+				CollisionObjects->push_back(_ChannelPlayerArray[i]);				
+			}
+		}
+	}	
+
+	for (int32 i = 0; i < en_Channel::CHANNEL_DUMMY_PLAYER_MAX; i++)
+	{
+		if (_ChannelDummyPlayerArray[i] != nullptr
+			&& _ChannelDummyPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE)
+		{
+			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectId
+				&& _ChannelDummyPlayerArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsOBBCollision(CheckObject->GetRectCollision(), _ChannelDummyPlayerArray[i]->GetRectCollision()) == true)
+			{
+				CollisionObjects->push_back(_ChannelDummyPlayerArray[i]);								
+			}
+		}
+	}
+
+	for (int32 i = 0; i < en_Channel::CHANNEL_MONSTER_MAX; i++)
+	{
+		if (_ChannelMonsterArray[i] != nullptr)
+		{
+			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelMonsterArray[i]->_GameObjectInfo.ObjectId
+				&& _ChannelMonsterArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsOBBCollision(CheckObject->GetRectCollision(), _ChannelMonsterArray[i]->GetRectCollision()) == true)
+			{
+				CollisionObjects->push_back(_ChannelDummyPlayerArray[i]);				
+			}
+		}
+	}	
+
+	if (CollisionObjects->size() > 0)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool CChannel::ChannelColliderOBBCheck(CGameObject* CheckObject, int64 ExceptionID, CGameObject** CollisionObject)
+{	
+	for (int32 i = 0; i < en_Channel::CHANNEL_PLAYER_MAX; i++)
+	{
+		if (_ChannelPlayerArray[i] != nullptr
+			&& _ChannelPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE)
+		{
+			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelPlayerArray[i]->_GameObjectInfo.ObjectId
+				&& ExceptionID != _ChannelPlayerArray[i]->_GameObjectInfo.ObjectId
+				&& _ChannelPlayerArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsOBBCollision(CheckObject->GetRectCollision(), _ChannelPlayerArray[i]->GetRectCollision()) == true)
+			{
+				*CollisionObject = _ChannelPlayerArray[i];
+				return false;
+			}
+		}
+	}
+
+	for (int32 i = 0; i < en_Channel::CHANNEL_NON_PLAYER_MAX; i++)
+	{
+		if (_ChannelNonPlayerArray[i] != nullptr)
+		{
+			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelNonPlayerArray[i]->_GameObjectInfo.ObjectId
+				&& _ChannelNonPlayerArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsOBBCollision(CheckObject->GetRectCollision(), _ChannelNonPlayerArray[i]->GetRectCollision()) == true)
+			{
+				*CollisionObject = _ChannelNonPlayerArray[i];
+				return false;
+			}
+		}
+	}
+
+	for (int32 i = 0; i < en_Channel::CHANNEL_DUMMY_PLAYER_MAX; i++)
+	{
+		if (_ChannelDummyPlayerArray[i] != nullptr
+			&& _ChannelDummyPlayerArray[i]->_NetworkState == en_ObjectNetworkState::LIVE)
+		{
+			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectId
+				&& _ChannelDummyPlayerArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsOBBCollision(CheckObject->GetRectCollision(), _ChannelDummyPlayerArray[i]->GetRectCollision()) == true)
+			{
+				*CollisionObject = _ChannelDummyPlayerArray[i];
+				return false;
+			}
+		}
+	}
+
+	for (int32 i = 0; i < en_Channel::CHANNEL_MONSTER_MAX; i++)
+	{
+		if (_ChannelMonsterArray[i] != nullptr)
+		{
+			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelMonsterArray[i]->_GameObjectInfo.ObjectId				
+				&& _ChannelMonsterArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsOBBCollision(CheckObject->GetRectCollision(), _ChannelMonsterArray[i]->GetRectCollision()) == true)
+			{				
+				*CollisionObject = _ChannelMonsterArray[i];
+				G_Logger->WriteStdOut(en_Color::RED, L"[%s] X : %0.1f Y : %0.1f Angle : %0.1f [%s] X : %0.1f Y : %0.1f 충돌 \n",
+					CheckObject->_GameObjectInfo.ObjectName.c_str(),
+					CheckObject->_GameObjectInfo.ObjectPositionInfo.Position.X,
+					CheckObject->_GameObjectInfo.ObjectPositionInfo.Position.Y,
+					CheckObject->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton.AngleToDegree(),
+					_ChannelMonsterArray[i]->_GameObjectInfo.ObjectName.c_str(),
+					_ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.Position.X,
+					_ChannelMonsterArray[i]->_GameObjectInfo.ObjectPositionInfo.Position.Y);
+				return false;
+			}
+		}
+	}
+
+	for (int32 i = 0; i < en_Channel::CHANNEL_CRAFTING_TABLE_MAX; i++)
+	{
+		if (_ChannelCraftingTableArray[i] != nullptr)
+		{
+			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelCraftingTableArray[i]->_GameObjectInfo.ObjectId
+				&& _ChannelCraftingTableArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsOBBCollision(CheckObject->GetRectCollision(), _ChannelCraftingTableArray[i]->GetRectCollision()) == true)
+			{
+				*CollisionObject = _ChannelCraftingTableArray[i];
+				return false;
+			}
+		}
+	}
+
+	for (int32 i = 0; i < en_Channel::CHANNEL_ENVIRONMENT_MAX; i++)
+	{
+		if (_ChannelEnvironmentArray[i] != nullptr)
+		{
+			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelEnvironmentArray[i]->_GameObjectInfo.ObjectId
+				&& _ChannelEnvironmentArray[i]->GetRectCollision()->GetActive() == true
+				&& CRectCollision::IsOBBCollision(CheckObject->GetRectCollision(), _ChannelEnvironmentArray[i]->GetRectCollision()) == true)
+			{
+				*CollisionObject = _ChannelEnvironmentArray[i];
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+bool CChannel::ChannelColliderOBBCheckAroundObject(CRectCollision* CheckCollision, vector<CGameObject*> AroundObjects, vector<CGameObject*>& CollisionObjects, int64 ExceptionObjectID)
+{	
+	if (CheckCollision == nullptr)
+	{
+		return false;
+	}
+
+	for (CGameObject* AroundObject : AroundObjects)
+	{
+		if (AroundObject != nullptr
+			&& AroundObject->_GameObjectInfo.ObjectId != ExceptionObjectID
+			&& AroundObject->GetRectCollision()->GetActive() == true
+			&& CRectCollision::IsOBBCollision(CheckCollision, AroundObject->GetRectCollision()) == true)
+		{
+			CollisionObjects.push_back(AroundObject);
+		}
+	}	
+
+	return true;
+}
+
 bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* ObjectSpawnPosition)
 {
 	bool IsEnterChannel = false;
@@ -1572,7 +1834,10 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 				EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;				
 
 				EnterChannelPlayer->GetRectCollision()->SetActive(true);
-				EnterChannelPlayer->GetRectCollision()->Init(EnterChannelPlayer, Vector2::Zero);				
+				EnterChannelPlayer->GetRectCollision()->Init(en_CollisionPosition::COLLISION_POSITION_DEFAULT, EnterChannelPlayer->_GameObjectInfo.ObjectType, 
+					EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position,
+					Vector2::Zero,
+					EnterChannelPlayer);
 
 				// 플레이어 저장
 				_ChannelPlayerArrayIndexs.Pop(&EnterChannelPlayer->_ChannelArrayIndex);
@@ -1631,7 +1896,10 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 				GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.Position.Y = GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;
 
 				GeneralMerchantNPC->GetRectCollision()->SetActive(true);
-				GeneralMerchantNPC->GetRectCollision()->Init(GeneralMerchantNPC, Vector2::Zero);				
+				GeneralMerchantNPC->GetRectCollision()->Init(en_CollisionPosition::COLLISION_POSITION_DEFAULT, GeneralMerchantNPC->_GameObjectInfo.ObjectType,
+					GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.Position,
+					Vector2::Zero,
+					GeneralMerchantNPC);
 
 				// 플레이어 저장
 				_ChannelNonPlayerArrayIndexs.Pop(&GeneralMerchantNPC->_ChannelArrayIndex);
@@ -1662,7 +1930,10 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;				
 								
 				EnterChannelMonster->GetRectCollision()->SetActive(true);
-				EnterChannelMonster->GetRectCollision()->Init(EnterChannelMonster, Vector2::Zero);
+				EnterChannelMonster->GetRectCollision()->Init(en_CollisionPosition::COLLISION_POSITION_DEFAULT, EnterChannelMonster->_GameObjectInfo.ObjectType,
+					EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position,
+					Vector2::Zero,
+					EnterChannelMonster);
 
 				EnterChannelMonster->Start();
 
@@ -1695,7 +1966,10 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;				
 								
 				EnterChannelEnvironment->GetRectCollision()->SetActive(true);	
-				EnterChannelEnvironment->GetRectCollision()->Init(EnterChannelEnvironment, Vector2::Zero);
+				EnterChannelEnvironment->GetRectCollision()->Init(en_CollisionPosition::COLLISION_POSITION_DEFAULT, EnterChannelEnvironment->_GameObjectInfo.ObjectType,
+					EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position,
+					Vector2::Zero,
+					EnterChannelEnvironment);
 				EnterChannelEnvironment->Start();
 
 				// 환경 오브젝트 저장
@@ -1722,7 +1996,9 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 				SwordBlade->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;				
 								
 				SwordBlade->GetRectCollision()->SetActive(true);
-				SwordBlade->GetRectCollision()->Init(SwordBlade, SwordBlade->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton);
+				SwordBlade->GetRectCollision()->Init(en_CollisionPosition::COLLISION_POSITION_DEFAULT, SwordBlade->_GameObjectInfo.ObjectType,
+					SwordBlade->_GameObjectInfo.ObjectPositionInfo.Position,
+					SwordBlade->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton, SwordBlade);
 
 				_ChannelCraftingTableArrayIndexs.Pop(&SwordBlade->_ChannelArrayIndex);
 				_ChannelSkillObjectArray[SwordBlade->_ChannelArrayIndex] = SwordBlade;

@@ -10,6 +10,7 @@ class CEnvironment;
 class CPlayer;
 class CNonPlayer;
 class CMap;
+class CRectCollision;
 struct st_GameObjectJob;
 
 class CChannel
@@ -64,9 +65,17 @@ public:
 	vector<CGameObject*> FindRangeAttackChannelObjects(CGameObject* Object, Vector2 Direciton, int16 Distance);
 	
 	//-----------------------------------------------------
-	// 채널에 있는 오브젝트들과 검사해서 충돌 판단 ( 매개 변수로 받은 좌표를 기준으로 )
-	//-----------------------------------------------------
-	bool ChannelColliderCheck(CGameObject* CheckObject, Vector2 CheckPosition, CGameObject** CollisionObject = nullptr);
+	// 채널에 있는 오브젝트들과 충돌하는지 판단
+	//-----------------------------------------------------	
+	bool ChannelColliderCheck(CGameObject* CheckObject, Vector2 CheckPosition);
+	// 충돌 대상을 하나 반환
+	bool ChannelColliderSingleCheck(CGameObject* CheckObject, Vector2 CheckPosition, CGameObject** CollisionObject = nullptr);
+	// 충돌한 모든 대상을 반환
+	bool ChannelColliderMultipleCheck(CGameObject* CheckObject, Vector2 CheckPosition, vector<CGameObject*>* CollisionObjects);
+	// OBB 알고리즘로 충돌대상 확인
+	bool ChannelColliderOBBCheck(CGameObject* CheckObject, int64 ExceptionID = 0, CGameObject** CollisionObject = nullptr);
+	// 매개변수로 받는 AorundObjects에서 충돌하는 대상이 있는지 확인
+	bool ChannelColliderOBBCheckAroundObject(CRectCollision* CheckCollision,  vector<CGameObject*> AroundObjects, vector<CGameObject*>& CollisionObjects, int64 ExceptionObjectID);
 
 	//----------------------------------------------------
 	// 채널 입장
