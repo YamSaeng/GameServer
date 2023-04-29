@@ -20,10 +20,7 @@ CSkill::CSkill()
 		
 	_IsDot = false;
 
-	_SkillCategory = en_SkillCategory::SKILL_CATEGORY_NONE;
-	_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_NONE;
-	_SkillKind = en_SkillKinds::SKILL_KIND_NONE;
-	_BufDeBufSkillKind = en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_NONE;
+	_SkillCategory = en_SkillCategory::SKILL_CATEGORY_NONE;		
 	_ComboSkillType = en_SkillType::SKILL_TYPE_NONE;	
 
 	_CastingUserID = 0;
@@ -49,145 +46,7 @@ void CSkill::SetSkillInfo(en_SkillCategory SkillCategory, st_SkillInfo* SkillInf
 {
 	_SkillCategory = SkillCategory;
 	_SkillInfo = SkillInfo;
-	_PreviousSkillInfo = PreviousSkillInfo;
-
-	if (_SkillInfo != nullptr)
-	{
-		switch (_SkillInfo->SkillType)
-		{	
-		case en_SkillType::SKILL_GLOBAL_SKILL:
-			_SkillKind = en_SkillKinds::SKILL_KIND_GLOBAL_SKILL;
-			break;
-		case en_SkillType::SKILL_DEFAULT_ATTACK:			
-		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
-		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:		
-		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK:
-		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE:
-		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE:
-		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_COMBO_FLY_KNIFE:
-		case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
-		case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE:
-		case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT:
-		case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT:
-		case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_ATTACK:
-		case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP:				
-			_SkillKind = en_SkillKinds::SKILL_KIND_MELEE_SKILL;
-			break;		
-		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:
-		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:
-		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
-		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:
-		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
-		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:
-		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
-		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:
-		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:
-		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:		
-			_SkillKind = en_SkillKinds::SKILL_KIND_SPELL_SKILL;
-			break;
-		case en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING:
-			_SkillKind = en_SkillKinds::SKILL_KIND_RANGE_SKILL;
-			break;
-		case en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE:
-		case en_SkillType::SKILL_SPELL_ACTIVE_BUF_TELEPORT:
-		case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
-		case en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_WEAPON_POISON:
-			_SkillKind = en_SkillKinds::SKILL_KIND_BUF_SKILL;
-			break;
-		}
-
-		switch (_SkillInfo->SkillType)
-		{
-		case en_SkillType::SKILL_DEFAULT_ATTACK:
-			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_PUBLIC;
-
-			_BufDeBufSkillKind = en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_NORMAL;
-			break;
-		case en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE:
-			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_PUBLIC;
-
-			_BufDeBufSkillKind = en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_BUF;
-			break;
-		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
-		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:					
-		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE:
-		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_COMBO_FLY_KNIFE:
-			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_FIGHT;
-
-			_BufDeBufSkillKind = en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_NORMAL;
-			break;
-		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK:
-		case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE:		
-			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_FIGHT;
-
-			_BufDeBufSkillKind = en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_NORMAL_AND_DEBUF;
-			break;
-		case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
-			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_FIGHT;
-
-			_BufDeBufSkillKind = en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_BUF;
-			break;
-		case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
-		case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE:
-			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_PROTECTION;
-
-			_BufDeBufSkillKind = en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_NORMAL_AND_DEBUF;
-			break;		
-		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:				
-		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:		
-			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_SPELL;
-
-			_BufDeBufSkillKind = en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_NORMAL;
-			break;
-		case en_SkillType::SKILL_SPELL_ACTIVE_BUF_TELEPORT:
-			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_SPELL;
-
-			_BufDeBufSkillKind = en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_BUF;
-			break;
-		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
-		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:
-		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
-			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_SPELL;
-
-			_BufDeBufSkillKind = en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_NORMAL_AND_DEBUF;
-			break;
-		case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:
-			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_SPELL;
-
-			_BufDeBufSkillKind = en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_DEBUF;
-			break;
-		case en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING:
-			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_SHOOTING;
-
-			_BufDeBufSkillKind = en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_NORMAL;
-			break;
-		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:		
-		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:
-		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:
-			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_DISCIPLINE;
-
-			_BufDeBufSkillKind = en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_NORMAL;
-			break;			
-		case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:
-			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_DISCIPLINE;
-
-			_BufDeBufSkillKind = en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_DEBUF;
-			break;
-		case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT:
-		case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT:
-		case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_ATTACK:
-		case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP:		
-			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_ASSASSINATION;
-
-			_BufDeBufSkillKind = en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_NORMAL;
-			break;
-		case en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_WEAPON_POISON:
-			_SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_ASSASSINATION;
-
-			_BufDeBufSkillKind = en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_DEBUF;
-			break;		
-		}
-	}
+	_PreviousSkillInfo = PreviousSkillInfo;	
 }
 
 void CSkill::SetCastingUserID(int64 CastingUserID, en_GameObjectType CastingUserObjectType)
@@ -241,16 +100,6 @@ void CSkill::ReqMeleeSkillInit(int64 AttackEndTick)
 void CSkill::ReqMagicSkillInit(float MagicHitRate)
 {
 	_MagicTick = GetTickCount64() + (int64)(500 * MagicHitRate);
-}
-
-en_SkillKinds CSkill::GetSkillKind()
-{
-	return _SkillKind;
-}
-
-en_BufDeBufSkillKind CSkill::GetBufDeBufSkillKind()
-{
-	return _BufDeBufSkillKind;
 }
 
 void CSkill::ComboSkillOff()
@@ -342,12 +191,13 @@ bool CSkill::Update()
 					{
 						// 도약 공격 상태이상 해제
 						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_JUMPING_ATTACK_MASK);
-						CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId, 
-							_Owner->_GameObjectInfo.ObjectType, 							
-							_SkillInfo->SkillType, 
-							false, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_JUMPING_ATTACK_MASK);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);					
-						ResStatusAbnormalPacket->Free();
+						CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId,
+							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.X,
+							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.Y,
+							_SkillInfo,
+							false, (int64)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_JUMPING_ATTACK_MASK);
+						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);
+						ResStatusAbnormalPacket->Free();						
 
 						// 약화효과 스킬 아이콘 해제
 						CMessage* ResBufDeBufOffPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBufOff(_Owner->_GameObjectInfo.ObjectId, false, _SkillInfo->SkillType);
@@ -360,11 +210,12 @@ bool CSkill::Update()
 						// 포획 상태 이상 해제
 						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_PROTECTION_CAPTURE_MASK);
 						CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId,
-							_Owner->_GameObjectInfo.ObjectType,							
-							_SkillInfo->SkillType,
-							false, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_PROTECTION_CAPTURE_MASK);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);					
-						ResStatusAbnormalPacket->Free();
+							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.X,
+							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.Y,
+							_SkillInfo,
+							false, (int64)en_GameObjectStatusType::STATUS_ABNORMAL_PROTECTION_CAPTURE_MASK);
+						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);
+						ResStatusAbnormalPacket->Free();					
 
 						// 약화효과 스킬 아이콘 해제
 						CMessage* ResBufDeBufOffPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBufOff(_Owner->_GameObjectInfo.ObjectId, false, _SkillInfo->SkillType);
@@ -377,10 +228,12 @@ bool CSkill::Update()
 						// 마법 속박 상태이상 해제
 						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ROOT_MASK);
 						CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId,
-							_Owner->_GameObjectInfo.ObjectType,							
-							_SkillInfo->SkillType, false, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ROOT_MASK);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);					
-						ResStatusAbnormalPacket->Free();
+							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.X,
+							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.Y,
+							_SkillInfo,
+							false, (int64)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ROOT_MASK);
+						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);
+						ResStatusAbnormalPacket->Free();					
 
 						// 약화효과 스킬 아이콘 해제
 						CMessage* ResBufDeBufOffPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBufOff(_Owner->_GameObjectInfo.ObjectId, false, _SkillInfo->SkillType);
@@ -403,10 +256,12 @@ bool CSkill::Update()
 						ResChangeObjectStatPacket->Free();
 
 						CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId,
-							_Owner->_GameObjectInfo.ObjectType,							
-							_SkillInfo->SkillType, false, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_CHAIN_MASK);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);					
-						ResStatusAbnormalPacket->Free();
+							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.X,
+							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.Y,
+							_SkillInfo,
+							false, (int64)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_CHAIN_MASK);
+						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);
+						ResStatusAbnormalPacket->Free();					
 
 						// 약화효과 스킬 아이콘 해제
 						CMessage* ResBufDeBufOffPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBufOff(_Owner->_GameObjectInfo.ObjectId, false, _SkillInfo->SkillType);
@@ -419,10 +274,12 @@ bool CSkill::Update()
 						// 마법 냉기파동 상태이상 해제
 						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_WAVE_MASK);
 						CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId,
-							_Owner->_GameObjectInfo.ObjectType, 							
-							_SkillInfo->SkillType, false, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_WAVE_MASK);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);					
-						ResStatusAbnormalPacket->Free();
+							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.X,
+							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.Y,
+							_SkillInfo,
+							false, (int64)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_WAVE_MASK);
+						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);
+						ResStatusAbnormalPacket->Free();					
 
 						// 약화효과 스킬 아이콘 해제
 						CMessage* ResBufDeBufOffPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBufOff(_Owner->_GameObjectInfo.ObjectId, false, _SkillInfo->SkillType);
@@ -434,10 +291,12 @@ bool CSkill::Update()
 					{
 						// 마법 낙뢰 상태이상 해제
 						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE_MASK);
-						CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId, 
-							_Owner->_GameObjectInfo.ObjectType,							
-							_SkillInfo->SkillType, false, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE_MASK);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);					
+						CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId,
+							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.X,
+							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.Y,
+							_SkillInfo,
+							false, (int64)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE_MASK);
+						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);
 						ResStatusAbnormalPacket->Free();
 
 						// 약화효과 스킬 아이콘 해제
@@ -450,11 +309,13 @@ bool CSkill::Update()
 					{
 						// 수양 속박 상태이상 해제
 						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_DISCIPLINE_ROOT_MASK);
-						CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId, 
-							_Owner->_GameObjectInfo.ObjectType,							
-							_SkillInfo->SkillType, false, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_DISCIPLINE_ROOT_MASK);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);					
-						ResStatusAbnormalPacket->Free();
+						CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId,
+							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.X,
+							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.Y,
+							_SkillInfo,
+							false, (int64)en_GameObjectStatusType::STATUS_ABNORMAL_DISCIPLINE_ROOT_MASK);
+						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);
+						ResStatusAbnormalPacket->Free();						
 
 						// 약화효과 스킬 아이콘 해제
 						CMessage* ResBufDeBufOffPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBufOff(_Owner->_GameObjectInfo.ObjectId, false, _SkillInfo->SkillType);

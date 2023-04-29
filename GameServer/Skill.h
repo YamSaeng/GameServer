@@ -41,9 +41,6 @@ public:
 	// 마법 스킬 시작
 	void ReqMagicSkillInit(float MagicHitRate);
 
-	en_SkillKinds GetSkillKind();
-	en_BufDeBufSkillKind GetBufDeBufSkillKind();
-
 	void ComboSkillOff();
 
 	bool Update();		
@@ -77,13 +74,7 @@ private:
 	bool _IsDot;		
 		
 	// 스킬 분류 ( Active, Passive , StatusAbnormal, Combo ) 
-	en_SkillCategory _SkillCategory;	
-	// 스킬 속성
-	en_SkillCharacteristic _SkillCharacteristic;
-	// 스킬 분류 ( Melee, Magic, Range )
-	en_SkillKinds _SkillKind;
-	// 스킬 분류 ( Buf, DeBuf )
-	en_BufDeBufSkillKind _BufDeBufSkillKind;	
+	en_SkillCategory _SkillCategory;			
 	// 연속기 스킬타입
 	en_SkillType _ComboSkillType;		
 };
