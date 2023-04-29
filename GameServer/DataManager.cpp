@@ -843,7 +843,11 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				float SkillDistance = PublicAttackSkillListFiled["SkillDistance"].GetFloat();
 				float SkillTargetEffectTime = PublicAttackSkillListFiled["SkillTargetEffectTime"].GetFloat();				
 
-				if (SkillKind == "SKILL_KIND_MELEE_SKILL")
+				if (SkillKind == "SKILL_KIND_NONE")
+				{
+					PublicSkill->SkillKind = en_SkillKinds::SKILL_KIND_NONE;
+				}
+				else if (SkillKind == "SKILL_KIND_MELEE_SKILL")
 				{
 					PublicSkill->SkillKind = en_SkillKinds::SKILL_KIND_MELEE_SKILL;
 				}
@@ -1568,7 +1572,7 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 						SpellAttackSkill->SkillKind = en_SkillKinds::SKILL_KIND_SPELL_DEBUF_SKILL;
 					}
 
-					if (SkillType == "SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON")
+					if (SkillType == "SKILL_SPELL_ACTIVE_ATTACK_FLAME_BOLT")
 					{
 						SpellAttackSkill->SkillType = en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_BOLT;
 					}
