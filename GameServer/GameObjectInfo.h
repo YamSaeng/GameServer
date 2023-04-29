@@ -426,17 +426,14 @@ enum class en_SkillKinds : int8
 	SKILL_KIND_MELEE_SKILL,
 	SKILL_KIND_SPELL_SKILL,
 	SKILL_KIND_RANGE_SKILL,
-	SKILL_KIND_BUF_SKILL
-};
-
-enum class en_BufDeBufSkillKind : int8
-{
-	BUF_DEBUF_SKILL_KIND_NONE,
-	BUF_DEBUF_SKILL_KIND_NORMAL,
-	BUF_DEBUF_SKILL_KIND_BUF,
-	BUF_DEBUF_SKILL_KIND_DEBUF,
-	BUF_DEBUF_SKILL_KIND_NORMAL_AND_BUF,
-	BUF_DEBUF_SKILL_KIND_NORMAL_AND_DEBUF
+	SKILL_KIND_BUF_SKILL,
+	SKILL_KIND_DEBUF_SKILL,
+	SKILL_KIND_MELEE_BUF_SKILL,
+	SKILL_KIND_MELEE_DEBUF_SKILL,
+	SKILL_KIND_SPELL_BUF_SKILL,
+	SKILL_KIND_SPELL_DEBUF_SKILL,
+	SKILL_KIND_RANGE_BUF_SKILL,
+	SKILL_KIND_RANGE_DEBUF_SKILL
 };
 
 enum class en_SkillCharacteristic : int8
@@ -2333,6 +2330,7 @@ struct st_SkillInfo
 {
 	bool IsSkillLearn;       // 스킬을 배웠는지에 대한 여부
 	bool CanSkillUse;		 // 스킬을 사용 할 수 있는지 여부
+	en_SkillKinds SkillKind; // 스킬 데미지 타입 종류 ( 물리, 마법, 원거리 )	
 	en_SkillCharacteristic SkillCharacteristic; // 스킬 특성
 	en_SkillLargeCategory SkillLargeCategory; // 스킬 대분류
 	en_SkillMediumCategory SkillMediumCategory; // 스킬 중분류
