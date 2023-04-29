@@ -171,7 +171,7 @@
                 {
                   "SkillNumber": 3,
                   "SkillType": "SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP",
-                  "SkillKind": "SKILL_KIND_MELEE_SKILL",
+                  "SkillKind": "SKILL_KIND_MELEE_DEBUF_SKILL",
                   "SkillName": "¾Ï½À",
                   "SkillLevel": 1,
                   "SkillMinDamage": 30,

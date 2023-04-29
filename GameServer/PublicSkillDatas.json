@@ -6,13 +6,14 @@
           "PublicAttackSkillList": [
             {
               "SkillType": "SKILL_GLOBAL_SKILL",
+              "SkillKind": "SKILL_KIND_NONE",
               "SkillName": "전역 쿨타임",
-              "SkillCoolTime": 500              
+              "SkillCoolTime": 500
             },
             {
               "SkillType": "SKILL_DEFAULT_ATTACK",
-              "SkillName": "일반공격",
               "SkillKind": "SKILL_KIND_MELEE_SKILL",
+              "SkillName": "일반공격",
               "SkillMinDamage": 10,
               "SkillMaxDamage": 20,
               "SkillCoolTime": 1000,
@@ -27,8 +28,8 @@
           "PublicBufSkillList": [
             {
               "SkillType": "SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE",
-              "SkillName": "충격해제",
               "SkillKind": "SKILL_KIND_BUF_SKILL",
+              "SkillName": "충격해제",
               "IncreaseStatusAbnormalityResistance": 1000,
               "SkillCoolTime": 30000,
               "SkillCastingTime": 0,

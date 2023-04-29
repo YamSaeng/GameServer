@@ -182,7 +182,8 @@
               ],
               "BufSkill": [
                 {
-                  "SkillType": "SKILL_SPELL_ACTIVE_BUF_TELEPORT",
+                  "SkillType": "SKILL_SPELL_ACTIVE_BUF_BACK_TELEPORT",
+                  "SkillKind": "SKILL_KIND_BUF_SKILL",
                   "SkillName": "시공의뒤틀림",
                   "SkillLevel": 1,
                   "SkillCoolTime": 10000,
@@ -191,10 +192,11 @@
                   "SkillDotTime": 0,
                   "SkillDistance": 4,
                   "SkillMotionTime": 1000,
-                  "SkillTargetEffectTime": 0                  
+                  "SkillTargetEffectTime": 0
                 },
                 {
                   "SkillType": "SKILL_SPELL_ACTIVE_BUF_ILLUSION",
+                  "SkillKind": "SKILL_KIND_BUF_SKILL",
                   "SkillName": "환영",
                   "SkillLevel": 1,
                   "SkillCoolTime": 120000,
