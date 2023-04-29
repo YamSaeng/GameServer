@@ -11,6 +11,7 @@
                 {
                   "SkillNumber": 0,
                   "SkillType": "SKILL_PROTECTION_ACTIVE_ATTACK_POWERFUL_ATTACK",
+                  "SkillKind": "SKILL_KIND_MELEE_SKILL",
                   "SkillName": "강한 일격",
                   "SkillMaxLevel": 1,
                   "SkillMinDamage": 2,
@@ -30,6 +31,7 @@
                 {
                   "SkillNumber": 0,
                   "SkillType": "SKILL_PROTECTION_ACTIVE_ATTACK_SHARP_ATTACK",
+                  "SkillKind": "SKILL_KIND_MELEE_SKILL",
                   "SkillName": "예리한 일격",
                   "SkillMaxLevel": 1,
                   "SkillMinDamage": 2,
@@ -44,11 +46,12 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 0,
-                  "NextComboSkill": "SKILL_PROTECTION_ACTIVE_ATTACK_CRASH_ATTACK"
+                  "NextComboSkill": "SKILL_PROTECTION_ACTIVE_ATTACK_LAST_ATTACK"
                 },
                 {
                   "SkillNumber": 0,
                   "SkillType": "SKILL_PROTECTION_ACTIVE_ATTACK_LAST_ATTACK",
+                  "SkillKind": "SKILL_KIND_MELEE_DEBUF_SKILL",
                   "SkillName": "필사의 일격",
                   "SkillMaxLevel": 1,
                   "SkillMinDamage": 2,
@@ -67,6 +70,7 @@
                 },
                 {
                   "SkillType": "SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH",
+                  "SkillKind": "SKILL_KIND_MELEE_DEBUF_SKILL",
                   "SkillName": "방패 강타",
                   "SkillLevel": 1,
                   "SkillMinDamage": 5,
@@ -85,6 +89,7 @@
                 },
                 {
                   "SkillType": "SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_COUNTER",
+                  "SkillKind": "SKILL_KIND_MELEE_DEBUF_SKILL",
                   "SkillName": "방패 반격",
                   "SkillLevel": 1,
                   "SkillMinDamage": 5,
@@ -103,6 +108,7 @@
                 },
                 {
                   "SkillType": "SKILL_PROTECTION_ACTIVE_ATTACK_SWORD_STORM",
+                  "SkillKind": "SKILL_KIND_MELEE_DEBUF_SKILL",
                   "SkillName": "검풍",
                   "SkillLevel": 1,
                   "SkillMinDamage": 5,
@@ -121,6 +127,7 @@
                 },
                 {
                   "SkillType": "SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE",
+                  "SkillKind": "SKILL_KIND_MELEE_DEBUF_SKILL",
                   "SkillName": "포획",
                   "SkillLevel": 1,
                   "SkillMinDamage": 5,
@@ -142,6 +149,7 @@
                 {
                   "SkillNumber": 4,
                   "SkillType": "SKILL_PROTECTION_ACTIVE_BUF_FURY",
+                  "SkillKind": "SKILL_KIND_BUF_SKILL",
                   "SkillName": "격앙",
                   "SkillMaxLevel": 1,
                   "IncreaseMinAttackPoint": 50,
@@ -159,19 +167,16 @@
                   "IncreaseStatusAbnormalityResistance": 0,
                   "SkillCoolTime": 90000,
                   "SkillCastingTime": 0,
-                  "SkillDurationTime": 10000,
+                  "SkillDurationTime": 30000,
                   "SkillDotTime": 0,
                   "SkillDistance": 0,
                   "SkillMotionTime": 1000,
-                  "SkillTargetEffectTime": 2.7,
-                  "SkillUpAnimation": "IDLE_BACK",
-                  "SkillDownAnimation": "IDLE_FRONT",
-                  "SkillLeftAnimation": "IDLE_LEFT",
-                  "SkillRightAnimation": "IDLE_LEFT",
+                  "SkillTargetEffectTime": 2.7
                 },
                 {
                   "SkillNumber": 4,
                   "SkillType": "SKILL_PROTECTION_ACTIVE_DOUBLE_ARMOR",
+                  "SkillKind": "SKILL_KIND_BUF_SKILL",
                   "SkillName": "이중 갑옷",
                   "SkillMaxLevel": 1,
                   "IncreaseMinAttackPoint": 50,
@@ -193,11 +198,7 @@
                   "SkillDotTime": 0,
                   "SkillDistance": 0,
                   "SkillMotionTime": 1000,
-                  "SkillTargetEffectTime": 2.7,
-                  "SkillUpAnimation": "IDLE_BACK",
-                  "SkillDownAnimation": "IDLE_FRONT",
-                  "SkillLeftAnimation": "IDLE_LEFT",
-                  "SkillRightAnimation": "IDLE_LEFT",
+                  "SkillTargetEffectTime": 2.7
                 }
               ]
             }

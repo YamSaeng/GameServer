@@ -11,6 +11,7 @@
                 {
                   "SkillNumber": 0,
                   "SkillType": "SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT",
+                  "SkillKind": "SKILL_KIND_MELEE_SKILL",
                   "SkillName": "빠른베기",
                   "SkillLevel": 1,
                   "SkillMinDamage": 30,
@@ -18,7 +19,7 @@
                   "SkillCoolTime": 3000,
                   "SkillCastingTime": 0,
                   "SkillDurationTime": 0,
-                  "SkillDotTime": 0,                  
+                  "SkillDotTime": 0,
                   "SkillDistance": 1,
                   "SkillMotionTime": 7000,
                   "SkillTargetEffectTime": 0,
@@ -30,6 +31,7 @@
                 {
                   "SkillNumber": 1,
                   "SkillType": "SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT",
+                  "SkillKind": "SKILL_KIND_MELEE_SKILL",
                   "SkillName": "신속베기",
                   "SkillLevel": 1,
                   "SkillMinDamage": 30,
@@ -49,6 +51,7 @@
                 {
                   "SkillNumber": 2,
                   "SkillType": "SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_ATTACK",
+                  "SkillKind": "SKILL_KIND_MELEE_SKILL",
                   "SkillName": "기습",
                   "SkillLevel": 1,
                   "SkillMinDamage": 30,
@@ -68,6 +71,7 @@
                 {
                   "SkillNumber": 2,
                   "SkillType": "SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_CUT",
+                  "SkillKind": "SKILL_KIND_MELEE_SKILL",
                   "SkillName": "후면 베기",
                   "SkillLevel": 1,
                   "SkillMinDamage": 30,
@@ -87,6 +91,7 @@
                 {
                   "SkillNumber": 2,
                   "SkillType": "SKILL_ASSASSINATION_ACTIVE_ATTACK_ADVANCE_CUT",
+                  "SkillKind": "SKILL_KIND_MELEE_SKILL",
                   "SkillName": "진격 베기",
                   "SkillLevel": 1,
                   "SkillMinDamage": 30,
@@ -106,6 +111,7 @@
                 {
                   "SkillNumber": 3,
                   "SkillType": "SKILL_ASSASSINATION_ACTIVE_ATTACK_POISON_INJECTION",
+                  "SkillKind": "SKILL_KIND_MELEE_DEBUF_SKILL",
                   "SkillName": "독 주입",
                   "SkillLevel": 1,
                   "SkillMinDamage": 30,
@@ -125,6 +131,7 @@
                 {
                   "SkillNumber": 3,
                   "SkillType": "SKILL_ASSASSINATION_ACTIVE_ATTACK_POISON_STUN",
+                  "SkillKind": "SKILL_KIND_MELEE_DEBUF_SKILL",
                   "SkillName": "기절시키기",
                   "SkillLevel": 1,
                   "SkillMinDamage": 30,
@@ -144,13 +151,14 @@
                 {
                   "SkillNumber": 3,
                   "SkillType": "SKILL_ASSASSINATION_ACTIVE_ATTACK_ASSASSINATION",
+                  "SkillKind": "SKILL_KIND_MELEE_SKILL",
                   "SkillName": "암살",
                   "SkillLevel": 1,
                   "SkillMinDamage": 30,
                   "SkillMaxDamage": 40,
                   "SkillCoolTime": 20000,
                   "SkillCastingTime": 0,
-                  "SkillDurationTime": 1000,
+                  "SkillDurationTime": 2000,
                   "SkillDotTime": 0,
                   "SkillDistance": 6,
                   "SkillMotionTime": 1000,
@@ -163,6 +171,7 @@
                 {
                   "SkillNumber": 3,
                   "SkillType": "SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP",
+                  "SkillKind": "SKILL_KIND_MELEE_SKILL",
                   "SkillName": "암습",
                   "SkillLevel": 1,
                   "SkillMinDamage": 30,
@@ -184,6 +193,7 @@
                 {
                   "SkillNumber": 4,
                   "SkillType": "SKILL_ASSASSINATION_ACTIVE_BUF_STEALTH",
+                  "SkillKind": "SKILL_KIND_BUF_SKILL",
                   "SkillName": "은신",
                   "SkillMaxLevel": 1,
                   "IncreaseMinAttackPoint": 0,
@@ -205,11 +215,12 @@
                   "SkillDotTime": 0,
                   "SkillDistance": 0,
                   "SkillMotionTime": 1000,
-                  "SkillTargetEffectTime": 1.5,
+                  "SkillTargetEffectTime": 1.5
                 },
                 {
                   "SkillNumber": 4,
                   "SkillType": "SKILL_ASSASSINATION_ACTIVE_BUF_SIXTH_SENSE_MAXIMIZE",
+                  "SkillKind": "SKILL_KIND_BUF_SKILL",
                   "SkillName": "육감 극대화",
                   "SkillMaxLevel": 1,
                   "IncreaseMinAttackPoint": 0,
@@ -231,7 +242,7 @@
                   "SkillDotTime": 0,
                   "SkillDistance": 0,
                   "SkillMotionTime": 0,
-                  "SkillTargetEffectTime": 1.5,
+                  "SkillTargetEffectTime": 1.5
                 }
               ]
             }

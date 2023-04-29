@@ -10,6 +10,7 @@
               "AttackSkill": [
                 {
                   "SkillType": "SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING",
+                  "SkillKind": "SKILL_KIND_RANGE_SKILL",
                   "SkillName": "РњАн",
                   "SkillLevel": 1,
                   "SkillMinDamage": 25,
@@ -23,7 +24,7 @@
                   "SkillTargetEffectTime": 0,
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
-                  "StatusAbnormalityProbability": 0,                  
+                  "StatusAbnormalityProbability": 0,
                   "NextComboSkill": "SKILL_TYPE_NONE"
                 }
               ],

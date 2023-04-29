@@ -11,6 +11,7 @@
                 {
                   "SkillNumber": 0,
                   "SkillType": "SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK",
+                  "SkillKind": "SKILL_KIND_MELEE_SKILL",
                   "SkillName": "맹렬한 일격",
                   "SkillMaxLevel": 1,
                   "SkillMinDamage": 2,
@@ -30,6 +31,7 @@
                 {
                   "SkillNumber": 0,
                   "SkillType": "SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK",
+                  "SkillKind": "SKILL_KIND_MELEE_SKILL",
                   "SkillName": "회심의 일격",
                   "SkillMaxLevel": 1,
                   "SkillMinDamage": 2,
@@ -49,6 +51,7 @@
                 {
                   "SkillNumber": 0,
                   "SkillType": "SKILL_FIGHT_ACTIVE_ATTACK_WRATH_ATTACK",
+                  "SkillKind": "SKILL_KIND_MELEE_DEBUF_SKILL",
                   "SkillName": "분노의 일격",
                   "SkillMaxLevel": 1,
                   "SkillMinDamage": 2,
@@ -68,6 +71,7 @@
                 {
                   "SkillNumber": 1,
                   "SkillType": "SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE",
+                  "SkillKind": "SKILL_KIND_MELEE_SKILL",
                   "SkillName": "분쇄 파동",
                   "SkillMaxLevel": 1,
                   "SkillMinDamage": 10,
@@ -87,6 +91,7 @@
                 {
                   "SkillNumber": 2,
                   "SkillType": "SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE",
+                  "SkillKind": "SKILL_KIND_MELEE_SKILL",
                   "SkillName": "칼날 날리기",
                   "SkillMaxLevel": 1,
                   "SkillMinDamage": 10,
@@ -106,6 +111,7 @@
                 {
                   "SkillNumber": 2,
                   "SkillType": "SKILL_FIGHT_ACTIVE_ATTACK_COMBO_FLY_KNIFE",
+                  "SkillKind": "SKILL_KIND_MELEE_SKILL",
                   "SkillName": "칼날 연속 날리기",
                   "SkillMaxLevel": 1,
                   "SkillMinDamage": 15,
@@ -125,6 +131,7 @@
                 {
                   "SkillNumber": 3,
                   "SkillType": "SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK",
+                  "SkillKind": "SKILL_KIND_MELEE_DEBUF_SKILL",
                   "SkillName": "도약 공격",
                   "SkillMaxLevel": 1,
                   "SkillMinDamage": 10,
@@ -144,6 +151,7 @@
                 {
                   "SkillNumber": 4,
                   "SkillType": "SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE",
+                  "SkillKind": "SKILL_KIND_MELEE_DEBUF_SKILL",
                   "SkillName": "살기 파동",
                   "SkillMaxLevel": 1,
                   "SkillMinDamage": 30,
@@ -165,6 +173,7 @@
                 {
                   "SkillNumber": 0,
                   "SkillType": "SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE",
+                  "SkillKind": "SKILL_KIND_BUF_SKILL",
                   "SkillName": "돌격자세",
                   "SkillMaxLevel": 1,
                   "IncreaseMinAttackPoint": 50,
@@ -186,12 +195,13 @@
                   "SkillDotTime": 0,
                   "SkillDistance": 0,
                   "SkillMotionTime": 1000,
-                  "SkillTargetEffectTime": 2.7               
+                  "SkillTargetEffectTime": 2.7
                 },
                 {
                   "SkillNumber": 1,
                   "SkillType": "SKILL_FIGHT_ACTIVE_BUF_COUNTER_ARMOR",
-                  "SkillName": "반격 갑옷",
+                  "SkillKind": "SKILL_KIND_BUF_SKILL",
+                  "SkillName": "복수의 갑옷",
                   "SkillMaxLevel": 1,
                   "IncreaseMinAttackPoint": 0,
                   "IncreaseMaxAttackPoint": 0,
