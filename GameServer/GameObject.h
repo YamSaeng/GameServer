@@ -11,7 +11,7 @@ class CRectCollision;
 class CGameObject
 {
 public:
-	int32 _StatusAbnormal;	
+	int64 _StatusAbnormal;	
 
 	int32 _ObjectManagerArrayIndex;
 	int32 _ChannelArrayIndex;
@@ -97,17 +97,17 @@ public:
 	//--------------------------------------------------
 	// 상태이상 값 설정 및 해제
 	//--------------------------------------------------
-	void SetStatusAbnormal(int32 StatusAbnormalValue);
-	void ReleaseStatusAbnormal(int32 StatusAbnormalValue);
+	void SetStatusAbnormal(int64 StatusAbnormalValue);
+	void ReleaseStatusAbnormal(int64 StatusAbnormalValue);
 		
 	//--------------------------------------------
 	// 제어 할 수 없는 상태이상 체크
 	//--------------------------------------------
-	int32 CheckCantControlStatusAbnormal();
+	int64 CheckCantControlStatusAbnormal();
 	//--------------------------------------------
 	// 제어 할 수 있는 상태이상 체크
 	//--------------------------------------------
-	int32 CheckCanControlStatusAbnormal();
+	int64 CheckCanControlStatusAbnormal();
 
 	//--------------------------------------------
 	// 채널 가져오기 및 설정
@@ -125,8 +125,9 @@ public:
 	vector<CGameObject*> GetFieldOfViewObjects();
 
 	void SetMeleeSkill(CSkill* MeleeSkill);	
-protected:		
 
+	vector<st_FieldOfViewInfo> GetFieldOfViewInfo();
+protected:		
 	// 시야 범위 오브젝트 객체
 	vector<CGameObject*> _FieldOfViewObjects;
 	// 시야 범위 오브젝트
