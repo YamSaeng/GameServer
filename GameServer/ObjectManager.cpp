@@ -151,6 +151,11 @@ void CObjectManager::ObjectReturn(CGameObject* ReturnObject)
 {
 	if (ReturnObject != nullptr)
 	{
+		if (ReturnObject->GetRectCollision() != nullptr)
+		{
+			RectCollisionReturn(ReturnObject->GetRectCollision());
+		}
+
 		switch (ReturnObject->_GameObjectInfo.ObjectType)
 		{
 		case en_GameObjectType::OBJECT_PLAYER:		
@@ -187,12 +192,7 @@ void CObjectManager::ObjectReturn(CGameObject* ReturnObject)
 		case en_GameObjectType::OBJECT_SKILL_SWORD_BLADE:
 			_SwordBladePool->Free((CSwordBlade*)ReturnObject);
 			break;
-		}
-
-		if (ReturnObject->GetRectCollision() != nullptr)
-		{
-			RectCollisionReturn(ReturnObject->GetRectCollision());
-		}
+		}		
 	}	
 	else
 	{
