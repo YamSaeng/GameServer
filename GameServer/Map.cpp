@@ -572,7 +572,7 @@ bool CMap::MoveCollisionCango(CGameObject* Object, Vector2Int& CellPosition, Vec
 			return false;
 	}	
 
-	bool ObjectCheck = Object->GetChannel()->ChannelColliderCheck(Object, NextPosition, &CollisionObject);
+	bool ObjectCheck = Object->GetChannel()->ChannelColliderSingleCheck(Object, NextPosition, &CollisionObject);
 
 	return (!CheckObjects || ObjectCheck);
 }
@@ -833,7 +833,7 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 	return true;
 }
 
-bool CMap::CanMoveSkillGo(CGameObject* SkillObject, OUT Vector2* NextPosition, OUT CGameObject** CollisionObject)
+bool CMap::CanMoveSkillGo(CGameObject* SkillObject, OUT Vector2* NextPosition, int64 ExceptionID, OUT CGameObject** CollisionObject)
 {
 	Vector2Int CollisionPosition;
 	CollisionPosition.X = (int32)SkillObject->_GameObjectInfo.ObjectPositionInfo.Position.X;
@@ -860,14 +860,14 @@ bool CMap::CanMoveSkillGo(CGameObject* SkillObject, OUT Vector2* NextPosition, O
 		return false;
 	}
 
-	bool NextPositionMoveCheck = ApplySkillObjectMove(SkillObject, CollisionPosition, CollisionObject);
+	bool NextPositionMoveCheck = ApplySkillObjectMove(SkillObject, CollisionPosition, ExceptionID, CollisionObject);
 	NextPosition->X = CheckPosition.X;
 	NextPosition->Y = CheckPosition.Y;
 
 	return NextPositionMoveCheck;
 }
 
-bool CMap::ApplySkillObjectMove(CGameObject* SkillObject, Vector2Int& DestPosition, CGameObject** CollisionObject)
+bool CMap::ApplySkillObjectMove(CGameObject* SkillObject, Vector2Int& DestPosition, int64 ExceptionID, CGameObject** CollisionObject)
 {
 	if (SkillObject->GetChannel() == nullptr)
 	{
@@ -894,7 +894,7 @@ bool CMap::ApplySkillObjectMove(CGameObject* SkillObject, Vector2Int& DestPositi
 	
 	CGameObject* ColObject = nullptr;
 
-	bool IsCollision = SkillObject->GetChannel()->ChannelColliderOOBCheck(SkillObject, &ColObject);
+	bool IsCollision = SkillObject->GetChannel()->ChannelColliderOBBCheck(SkillObject, ExceptionID, &ColObject);
 	
 	*CollisionObject = ColObject;
 
@@ -1184,4 +1184,17 @@ bool CMap::FindPathNextPositionCango(CGameObject* Object, Vector2Int& NextPositi
 CChannelManager* CMap::GetChannelManager()
 {
 	return _ChannelManager;
+}
+
+Vector2 CMap::GetMovePositionNearTarget(CGameObject* Object, CGameObject* Target)
+{
+	Vector2Int TargetDir = Target->_GameObjectInfo.ObjectPositionInfo.CollisionPosition - Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition;
+	Vector2Int NearDir = TargetDir.Direction();
+	NearDir *= -1;
+
+	Vector2Int NearCollisionPosition;
+	NearCollisionPosition.X = Target->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + NearDir.X;
+	NearCollisionPosition.Y = Target->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + NearDir.Y;
+
+	return Vector2(NearCollisionPosition.X + 0.5f, NearCollisionPosition.Y + 0.5f);
 }

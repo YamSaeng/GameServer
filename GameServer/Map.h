@@ -135,8 +135,8 @@ public:
 	//-------------------------------------------------------------------------------------------------------------------
 	// SkillObject가 다음 번 위치로 갈 수 있는지 확인 ( 충돌할 경우 충돌한 대상 가져옴 )
 	//-------------------------------------------------------------------------------------------------------------------
-	bool CanMoveSkillGo(CGameObject* SkillObject, OUT Vector2* NextPosition, OUT CGameObject** CollisionObject = nullptr);
-	bool ApplySkillObjectMove(CGameObject* SkillObject, Vector2Int& DestPosition, CGameObject** CollisionObject = nullptr);
+	bool CanMoveSkillGo(CGameObject* SkillObject, OUT Vector2* NextPosition, int64 ExceptionID = 0, OUT CGameObject** CollisionObject = nullptr);
+	bool ApplySkillObjectMove(CGameObject* SkillObject, Vector2Int& DestPosition, int64 ExceptionID = 0, CGameObject** CollisionObject = nullptr);
 
 	bool MonsterCango(CGameObject* Object, OUT Vector2* NextPosition);
 
@@ -144,6 +144,8 @@ public:
 	bool FindPathNextPositionCango(CGameObject* Object, Vector2Int& NextPosition, bool CheckObjects = true);
 
 	CChannelManager* GetChannelManager();
+
+	Vector2 GetMovePositionNearTarget(CGameObject* Object, CGameObject* Target);
 private:
 	CChannelManager* _ChannelManager;
 	CSector** _Sectors;	
