@@ -14,6 +14,8 @@ public:
 
 	Vector2 _MiddlePosition;
 
+	Vector2 _Position;
+
 	Vector2 _LeftTop;
 	Vector2 _RightTop;
 	Vector2 _LeftDown;

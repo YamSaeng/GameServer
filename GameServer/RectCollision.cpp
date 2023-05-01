@@ -62,6 +62,8 @@ void CRectCollision::Init(en_CollisionPosition CollisionPosition, en_SkillType S
 
 	_OwnerObject = OwnerObject;
 
+	_Position = InitPosition;
+
 	_LeftTop = InitPosition;
 
 	_Direction = Direction;
@@ -105,10 +107,10 @@ bool CRectCollision::IsCollision(CRectCollision* ARectCollision, CRectCollision*
 }
 
 bool CRectCollision::IsOBBCollision(CRectCollision* ARectCollision, CRectCollision* BRectCollision)
-{
+{	
 	Vector2 OBBUnit;
-	OBBUnit.X = (ARectCollision->_LeftTop.X + ARectCollision->_Size.X / 2) - (BRectCollision->_LeftTop.X + BRectCollision->_Size.X / 2);
-	OBBUnit.Y = (ARectCollision->_LeftTop.Y - ARectCollision->_Size.Y / 2) - (BRectCollision->_LeftTop.Y - BRectCollision->_Size.Y / 2);
+	OBBUnit.X = (ARectCollision->_Position.X + ARectCollision->_Size.X / 2) - (BRectCollision->_LeftTop.X + BRectCollision->_Size.X / 2);
+	OBBUnit.Y = (ARectCollision->_Position.Y - ARectCollision->_Size.Y / 2) - (BRectCollision->_LeftTop.Y - BRectCollision->_Size.Y / 2);
 
 	float Angle = ARectCollision->_Direction.AngleToDegree();
 
@@ -162,6 +164,7 @@ void CRectCollision::PositionUpdate()
 {
 	if (_OwnerObject != nullptr)
 	{
+		_Position = _OwnerObject->_GameObjectInfo.ObjectPositionInfo.Position;
 		_LeftTop = _OwnerObject->_GameObjectInfo.ObjectPositionInfo.Position;
 	}
 
