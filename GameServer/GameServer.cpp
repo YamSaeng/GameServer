@@ -4116,50 +4116,9 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 							// 캐릭터 특성에서 스킬 활성화
 							if (IsSkillLearn == true)
 							{													
-								switch ((en_SkillType)SkillType)
-								{								
-								case en_SkillType::SKILL_FIGHT_TWO_HAND_SWORD_MASTER:
-									break;
-								case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
-									Characteristic->SkillCharacteristicActive(IsSkillLearn,
-										(en_SkillType)SkillType, SkillLevel);
-									Characteristic->SkillCharacteristicActive(IsSkillLearn,
-										en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK, SkillLevel);
-									MyPlayer->_GameObjectInfo.ObjectSkillPoint--;
-									break;		
-								case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE:
-								case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_COMBO_FLY_KNIFE:
-									Characteristic->SkillCharacteristicActive(IsSkillLearn,
-										(en_SkillType)SkillType, SkillLevel);
-									MyPlayer->_GameObjectInfo.ObjectSkillPoint--;
-									break;
-								case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK:
-								case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE:
-								case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
-								case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
-								case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE:
-								case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:
-								case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:
-								case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
-								case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:
-								case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
-								case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:
-								case en_SkillType::SKILL_SPELL_ACTIVE_BUF_TELEPORT:
-								case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
-								case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:
-								case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:
-								case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:
-								case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT:
-								case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT:
-								case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_ATTACK:
-								case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP:
-								case en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_WEAPON_POISON:
-								case en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING:
-									Characteristic->SkillCharacteristicActive(IsSkillLearn,
-										(en_SkillType)SkillType, SkillLevel);
-									MyPlayer->_GameObjectInfo.ObjectSkillPoint--;
-									break;
-								}
+								Characteristic->SkillCharacteristicActive(IsSkillLearn,
+									(en_SkillType)SkillType, SkillLevel);
+								MyPlayer->_GameObjectInfo.ObjectSkillPoint--;								
 							}			
 						}
 					}
@@ -6069,6 +6028,33 @@ CGameServerMessage* CGameServer::MakePacketItemMove(st_GameObjectInfo ItemMoveOb
 	return ResItemMovePacket;
 }
 
+CGameServerMessage* CGameServer::MakePacketRectCollisionSpawn(CRectCollision* RectCollision)
+{
+	if (RectCollision == nullptr)
+	{
+		CRASH("RectCollision null")
+	}
+
+	CGameServerMessage* RectCollisionSpawnPacket = CGameServerMessage::GameServerMessageAlloc();
+	if (RectCollisionSpawnPacket == nullptr)
+	{
+		return nullptr;
+	}
+
+	RectCollisionSpawnPacket->Clear();
+
+	*RectCollisionSpawnPacket << (int16)en_PACKET_S2C_COLLISION;
+
+	*RectCollisionSpawnPacket << RectCollision->_Position.X;
+	*RectCollisionSpawnPacket << RectCollision->_Position.Y;
+	*RectCollisionSpawnPacket << RectCollision->_Direction.X;
+	*RectCollisionSpawnPacket << RectCollision->_Direction.Y;
+	*RectCollisionSpawnPacket << RectCollision->_Size.X;
+	*RectCollisionSpawnPacket << RectCollision->_Size.Y;
+
+	return RectCollisionSpawnPacket;
+}
+
 CGameServerMessage* CGameServer::MakePacketResObjectSpawn(CGameObject* SpawnObject)
 {
 	CGameServerMessage* ResSpawnPacket = CGameServerMessage::GameServerMessageAlloc();
@@ -6599,7 +6585,7 @@ CGameServerMessage* CGameServer::MakePacketCommonError(en_GlobalMessageType Pers
 		wsprintf(ErrorMessage, L"대상과의 거리가 너무 멉니다.");
 		break;
 	case en_GlobalMessageType::GLOBAL_MESSAGE_ATTACK_ANGLE:
-		wsprintf(ErrorMessage, L"대상이 앞에 있어야 합니다.");
+		wsprintf(ErrorMessage, L"무기의 방향을 선택한 대상으로 두어야합니다.");
 		break;
 	case en_GlobalMessageType::GLOBAL_MESSAGE_DIR_DIFFERENT:
 		wsprintf(ErrorMessage, L"[%s]을 바라보아야 합니다.", Name);
@@ -6646,7 +6632,7 @@ CGameServerMessage* CGameServer::MakePacketCommonError(en_GlobalMessageType Pers
 	return ResCommonErrorMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketStatusAbnormal(int64 TargetId, en_GameObjectType ObjectType, en_SkillType SkillType, bool SetStatusAbnormal, int32 StatusAbnormal)
+CGameServerMessage* CGameServer::MakePacketStatusAbnormal(int64 TargetId, float PositionX, float PositionY, st_SkillInfo* SatusAbnormalSkillInfo, bool SetStatusAbnormal, int64 StatusAbnormal)
 {
 	CGameServerMessage* ResStatusAbnormal = CGameServerMessage::GameServerMessageAlloc();
 	if (ResStatusAbnormal == nullptr)
@@ -6658,8 +6644,8 @@ CGameServerMessage* CGameServer::MakePacketStatusAbnormal(int64 TargetId, en_Gam
 
 	*ResStatusAbnormal << (int16)en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_STATUS_ABNORMAL;
 	*ResStatusAbnormal << TargetId;
-	*ResStatusAbnormal << (int16)ObjectType;	
-	*ResStatusAbnormal << (int16)SkillType;
+	*ResStatusAbnormal << PositionX;
+	*ResStatusAbnormal << PositionY;
 	*ResStatusAbnormal << SetStatusAbnormal;
 	*ResStatusAbnormal << StatusAbnormal;
 

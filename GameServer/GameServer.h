@@ -602,6 +602,10 @@ public:
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketItemMove(st_GameObjectInfo ItemMoveObjectInfo);
 	//-----------------------------------------------------------------------------------------
+	// 게임서버 사각 충돌체 월드 소환 패킷 조합
+	//-----------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketRectCollisionSpawn(CRectCollision* RectCollision);
+	//-----------------------------------------------------------------------------------------
 	// 게임서버 오브젝트 스폰 패킷 조합 ( 단일 대상 )
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResObjectSpawn(CGameObject* SpawnObject);
@@ -693,7 +697,7 @@ public:
 	//------------------------------------------------------------
 	// 게임 서버 상태이상 적용 패킷 조합
 	//------------------------------------------------------------
-	CGameServerMessage* MakePacketStatusAbnormal(int64 TargetId, en_GameObjectType ObjectType, en_SkillType SkillType, bool SetStatusAbnormal, int32 StatusAbnormal);
+	CGameServerMessage* MakePacketStatusAbnormal(int64 TargetId, float PositionX, float PositionY, st_SkillInfo* SatusAbnormalSkillInfo, bool SetStatusAbnormal, int64 StatusAbnormal);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 가방 아이템 업데이트
 	//-----------------------------------------------------------------------------------------

@@ -519,6 +519,7 @@
     <ClCompile Include="Vector2.cpp">
       <Filter>ContentServer\Content\Math</Filter>
     </ClCompile>
+    <ClCompile Include="Math.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="DBConfig.xml">
