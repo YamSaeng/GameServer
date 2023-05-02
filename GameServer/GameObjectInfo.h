@@ -2330,6 +2330,7 @@ struct st_SkillInfo
 {
 	bool IsSkillLearn;       // 스킬을 배웠는지에 대한 여부
 	bool CanSkillUse;		 // 스킬을 사용 할 수 있는지 여부
+	en_GameObjectStatusType SkillStatusAbnormal; // 스킬의 상태이상 적용 값
 	en_SkillKinds SkillKind; // 스킬 데미지 타입 종류 ( 물리, 마법, 원거리 )	
 	en_SkillCharacteristic SkillCharacteristic; // 스킬 특성
 	en_SkillLargeCategory SkillLargeCategory; // 스킬 대분류
@@ -2380,6 +2381,8 @@ struct st_SkillInfo
 		IsSkillLearn = false;
 		CanSkillUse = true;
 		SkillNumber = 0;
+		SkillStatusAbnormal = en_GameObjectStatusType::STATUS_ABNORMAL_NONE;
+		SkillKind = en_SkillKinds::SKILL_KIND_NONE;
 		SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_NONE;
 		SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_NONE;
 		SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
