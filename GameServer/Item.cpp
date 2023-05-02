@@ -14,6 +14,8 @@ CItem::CItem()
 	_FieldOfViewDistance = 10;
 
 	_ChaseWaitTime = 0;	
+
+	_RectCollision = nullptr;
 }
 
 CItem::~CItem()
