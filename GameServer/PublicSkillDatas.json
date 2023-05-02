@@ -8,12 +8,14 @@
               "SkillType": "SKILL_GLOBAL_SKILL",
               "SkillKind": "SKILL_KIND_NONE",
               "SkillName": "전역 쿨타임",
+              "SkillStatusAbnormal": "STATUS_ABNORMAL_NONE",
               "SkillCoolTime": 500
             },
             {
               "SkillType": "SKILL_DEFAULT_ATTACK",
               "SkillKind": "SKILL_KIND_MELEE_SKILL",
               "SkillName": "일반공격",
+              "SkillStatusAbnormal": "STATUS_ABNORMAL_NONE",
               "SkillMinDamage": 10,
               "SkillMaxDamage": 20,
               "SkillCoolTime": 1000,
