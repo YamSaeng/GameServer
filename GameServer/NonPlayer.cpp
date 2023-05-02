@@ -5,7 +5,7 @@
 
 CNonPlayer::CNonPlayer()
 {
-	
+	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
 }
 
 CNonPlayer::~CNonPlayer()
