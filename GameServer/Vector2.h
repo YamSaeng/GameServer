@@ -81,6 +81,7 @@ struct Vector2
 		return X * X + Y * Y;
 	}
 
+	// 정규화
 	Vector2 Normalize()
 	{
 		float SquaredSum = SizeSquared();
@@ -115,16 +116,24 @@ struct Vector2
 		}
 	}
 
+	// 내적
 	float Dot(Vector2 Vector)
 	{
 		return X * Vector.X + Y * Vector.Y;
 	}
 
+	float ABSDot(Vector2 Vector)
+	{
+		return abs(X * Vector.X + Y * Vector.Y);
+	}
+
+	// 크기
 	float Size(Vector2 Vector)
 	{
 		return sqrt(SizeSquared());
 	}
 	
+	// 두 벡터간 거리
 	static float Distance(Vector2 TargetCellPosition, Vector2 MyCellPosition)
 	{
 		return sqrt(((TargetCellPosition.X - MyCellPosition.X) * (TargetCellPosition.X - MyCellPosition.X))
@@ -154,6 +163,27 @@ struct Vector2
 		float Angle = ACosf * 180.0f / Math::PI;
 
 		return Angle;
+	}
+
+	FORCEINLINE static bool IsBehind(Vector2 MyPosition, Vector2 TargetPosition, Vector2 TargetLookAtPosition)
+	{
+		Vector2 Dir = MyPosition - TargetPosition;
+		Vector2 DirNor = Dir.Normalize();
+
+		float Dot = TargetLookAtPosition.Dot(DirNor);		
+
+		float Degree = Vector2::AngleBetweenVector(DirNor, TargetLookAtPosition);		
+		
+		// 전방
+		if (Degree > 0 && Degree < 90.0f)
+		{
+			return false;
+		}		
+		// 뒤
+		else if (Degree > 90.0f && Degree < 180.0f)
+		{
+			return true;
+		}
 	}
 
 	// 목표물 위치, 내 위치, 내가 바라보는 방향값, 시야각 크기
