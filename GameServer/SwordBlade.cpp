@@ -39,7 +39,7 @@ void CSwordBlade::Move()
 	CGameObject* CollisionObject = nullptr;
 	Vector2 NextPosition;	
 
-	bool IsCollision = _Channel->GetMap()->CanMoveSkillGo(this, &NextPosition, &CollisionObject);
+	bool IsCollision = _Channel->GetMap()->CanMoveSkillGo(this, &NextPosition, _Owner->_GameObjectInfo.ObjectId, &CollisionObject);
 	if (IsCollision == true)
 	{
 		_GameObjectInfo.ObjectPositionInfo.Position = NextPosition;
