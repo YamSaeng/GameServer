@@ -114,7 +114,7 @@ vector<CSkill*> CSkillBox::GetGlobalSkills(en_SkillType ExceptSkillType, en_Skil
 	{
 		if (PublicActiveSkill->GetSkillInfo()->SkillType != en_SkillType::SKILL_DEFAULT_ATTACK
 			&& PublicActiveSkill->GetSkillInfo()->SkillType != ExceptSkillType
-			&& PublicActiveSkill->GetSkillKind() == SkillKind
+			&& PublicActiveSkill->GetSkillInfo()->SkillKind == SkillKind
 			&& PublicActiveSkill->GetSkillInfo()->CanSkillUse == true)
 		{
 			GlobalSkills.push_back(PublicActiveSkill);
@@ -127,7 +127,7 @@ vector<CSkill*> CSkillBox::GetGlobalSkills(en_SkillType ExceptSkillType, en_Skil
 	{
 		if (ActiveSkill->GetSkillInfo()->IsSkillLearn == true
 			&& ActiveSkill->GetSkillInfo()->SkillType != ExceptSkillType
-			&& ActiveSkill->GetSkillKind() == SkillKind
+			&& ActiveSkill->GetSkillInfo()->SkillKind == SkillKind
 			&& ActiveSkill->GetSkillInfo()->CanSkillUse == true)
 		{
 			GlobalSkills.push_back(ActiveSkill);
@@ -152,6 +152,168 @@ bool CSkillBox::CheckCharacteristic(en_SkillCharacteristic SkillCharacteristic)
 	return _SkillCharacteristic._SkillCharacteristic == SkillCharacteristic;	
 }
 
+bool CSkillBox::SetStatusAbnormal(CGameObject* SkillUser, CGameObject* Target, en_GameObjectStatusType StatusType, en_SkillType SkillType, int8 SkillLevel)
+{
+	vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = SkillUser->GetChannel()->GetMap()->GetFieldAroundPlayers(SkillUser, false);
+
+	CSkill* StatusAbnormalSkill = G_ObjectManager->SkillCreate();
+	if (StatusAbnormalSkill != nullptr)
+	{
+		// 새로운 상태이상 스킬 적용
+		auto StatusAbnormalSkillIter = Target->_DeBufs.find(SkillType);
+		if (StatusAbnormalSkillIter == Target->_DeBufs.end())
+		{
+			st_SkillInfo* NewSkillInfo = G_ObjectManager->SkillInfoCreate(SkillType);
+			if (NewSkillInfo != nullptr)
+			{
+				StatusAbnormalSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_STATUS_ABNORMAL_SKILL, NewSkillInfo);
+				StatusAbnormalSkill->StatusAbnormalDurationTimeStart();
+
+				Target->AddDebuf(StatusAbnormalSkill);
+				Target->SetStatusAbnormal((int64)StatusType);
+
+				CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(Target->_GameObjectInfo.ObjectId,
+					Target->_GameObjectInfo.ObjectPositionInfo.Position.X,
+					Target->_GameObjectInfo.ObjectPositionInfo.Position.Y,
+					StatusAbnormalSkill->GetSkillInfo(),
+					true, (int64)StatusType);
+				G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResStatusAbnormalPacket);
+				ResStatusAbnormalPacket->Free();
+
+				CMessage* ResBufDebufSkillPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBuf(Target->_GameObjectInfo.ObjectId, false, StatusAbnormalSkill->GetSkillInfo());
+				G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDebufSkillPacket);
+				ResBufDebufSkillPacket->Free();
+			}			
+		}
+		else
+		{
+			// 상대방 약화효과에 적용할 상태이상 스킬이 있을 경우
+			CSkill* FindDebufSkill = (*StatusAbnormalSkillIter).second;
+			if (FindDebufSkill != nullptr)
+			{
+				switch (FindDebufSkill->GetSkillInfo()->SkillType)
+				{
+				case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_POISON_INJECTION:
+					{
+						FindDebufSkill->GetSkillInfo()->SkillOverlapStep++;
+						FindDebufSkill->StatusAbnormalDurationTimeStart();
+
+						CMessage* ResBufDebufSkillPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBuf(Target->_GameObjectInfo.ObjectId, false, FindDebufSkill->GetSkillInfo());
+						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDebufSkillPacket);
+						ResBufDebufSkillPacket->Free();
+					}					
+					break;
+				default:
+					{
+						FindDebufSkill->StatusAbnormalDurationTimeStart();
+
+						CMessage* ResBufDebufSkillPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBuf(Target->_GameObjectInfo.ObjectId, false, FindDebufSkill->GetSkillInfo());
+						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDebufSkillPacket);
+						ResBufDebufSkillPacket->Free();
+					}					
+					break;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	return false;	
+}
+
+bool CSkillBox::SelectTargetSkillUse(CGameObject* SkillUser, CSkill* Skill)
+{
+	if (SkillUser != nullptr)
+	{
+		if (SkillUser->_SelectTarget != nullptr)
+		{
+			float Distance = Vector2::Distance(SkillUser->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position,
+				SkillUser->_GameObjectInfo.ObjectPositionInfo.Position);
+
+			bool IsBehind = Vector2::IsBehind(SkillUser->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position,
+				SkillUser->_GameObjectInfo.ObjectPositionInfo.Position, SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton);
+			if (IsBehind == false && Distance < Skill->GetSkillInfo()->SkillDistance)
+			{
+				return true;
+			}
+			else if (IsBehind == false && Distance > Skill->GetSkillInfo()->SkillDistance)
+			{
+				CPlayer* Player = dynamic_cast<CPlayer*>(SkillUser);
+				if (Player != nullptr)
+				{
+					CMessage* DistanceFarPacket = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_FAR_DISTANCE);
+					G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, DistanceFarPacket);
+					DistanceFarPacket->Free();
+				}
+
+				return false;
+			}
+			else if (IsBehind == true)
+			{
+				CPlayer* Player = dynamic_cast<CPlayer*>(SkillUser);
+				if (Player != nullptr)
+				{
+					CMessage* DistanceFarPacket = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_ATTACK_ANGLE);
+					G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, DistanceFarPacket);
+					DistanceFarPacket->Free();
+				}
+
+				return false;
+			}						
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		return false;
+	}
+}
+
+vector<CGameObject*> CSkillBox::CollisionSkillUse(CGameObject* SkillUser, CSkill* Skill, en_CollisionPosition CollisionPositionType, Vector2 CollisionCreatePosition, Vector2 CollisionCreateDir)
+{	
+	vector<CGameObject*> CollisionObjects;
+
+	if (SkillUser != nullptr)
+	{
+		if (Skill != nullptr)
+		{
+			CRectCollision* SkillCollision = G_ObjectManager->RectCollisionCreate();
+			if (SkillCollision != nullptr)
+			{	
+				switch (CollisionPositionType)
+				{
+				case en_CollisionPosition::COLLISION_POSITION_DEFAULT:
+					SkillCollision->Init(en_CollisionPosition::COLLISION_POSITION_DEFAULT, Skill->GetSkillInfo()->SkillType,
+						CollisionCreatePosition + CollisionCreateDir,
+						CollisionCreateDir);
+					break;
+				case en_CollisionPosition::COLLISION_POSITION_MIDDLE:
+					SkillCollision->Init(en_CollisionPosition::COLLISION_POSITION_MIDDLE, Skill->GetSkillInfo()->SkillType,
+						CollisionCreatePosition,
+						Vector2::Zero);
+					break;				
+				}			
+
+				SkillUser->GetChannel()->ChannelColliderOBBCheckAroundObject(SkillCollision, SkillUser->GetFieldOfViewObjects(), CollisionObjects, SkillUser->_GameObjectInfo.ObjectId);				
+
+				CPlayer* Player = dynamic_cast<CPlayer*>(SkillUser);
+				if (Player != nullptr)
+				{
+					CMessage* CollisionSpawnPacket = G_NetworkManager->GetGameServer()->MakePacketRectCollisionSpawn(SkillCollision);
+					G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, CollisionSpawnPacket);
+					CollisionSpawnPacket->Free();
+				}				
+			}			
+		}		
+	}
+
+	return CollisionObjects;
+}
+
 void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en_SkillCharacteristic SkillCharacteristic, en_SkillType SkillType, float AttackDirectionX, float AttackDirectionY)
 {
 	bool IsNextCombo = false;
@@ -167,6 +329,9 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 			// 전역 재사용 시간이 완료 되었는지 확인
 			if (_GlobalCoolTimeSkill->GetSkillInfo()->CanSkillUse == true)
 			{
+				SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton.X = AttackDirectionX;
+				SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton.Y = AttackDirectionY;
+
 				// 기술을 사용 할 수 있는지 확인			
 				if (Skill->GetSkillInfo()->CanSkillUse == true)
 				{
@@ -179,153 +344,27 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 
 					SkillUser->SetMeleeSkill(Skill);
 
-					switch (Skill->GetSkillKind())
+					vector<CGameObject*> CollisionObjects;
+
+					switch (Skill->GetSkillInfo()->SkillKind)
 					{
 					case en_SkillKinds::SKILL_KIND_MELEE_SKILL:
 						{
-							st_SkillInfo* MeleeSkillInfo = Skill->GetSkillInfo();
-
 							switch (Skill->GetSkillInfo()->SkillType)
 							{
 							case en_SkillType::SKILL_DEFAULT_ATTACK:
 							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
 							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
-								{	
-									Vector2 AttackDirection;
-									AttackDirection.X = AttackDirectionX;
-									AttackDirection.Y = AttackDirectionY;
-
-									SkillCollision = G_ObjectManager->RectCollisionCreate();
-
-									SkillCollision->Init(en_CollisionPosition::COLLISION_POSITION_DEFAULT, Skill->GetSkillInfo()->SkillType,
-										SkillUser->_GameObjectInfo.ObjectPositionInfo.Position + AttackDirection,
-										Vector2(AttackDirectionX, AttackDirectionY));
-
-									vector<CGameObject*> CollisionObjects;
-									bool IsAttack = SkillUser->GetChannel()->ChannelColliderOBBCheckAroundObject(SkillCollision, 
-										SkillUser->GetFieldOfViewObjects(), CollisionObjects, SkillUser->_GameObjectInfo.ObjectId);
-									if (IsAttack == true)
-									{
-										IsNextCombo = true;
-										st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(SkillUser->_GameObjectInfo.ObjectId, SkillUser->_GameObjectInfo.ObjectType,
-											MeleeSkillInfo->SkillType,
-											MeleeSkillInfo->SkillMinDamage,
-											MeleeSkillInfo->SkillMaxDamage);
-
-										for (CGameObject* CollisionObject : CollisionObjects)
-										{
-											if(CollisionObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD
-												&& CollisionObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::ROOTING)
-											CollisionObject->_GameObjectJobQue.Enqueue(DamageJob);
-										}										
-									}									
-								}
-								break;
-							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK:
-								{
-									CPlayer* Player = dynamic_cast<CPlayer*>(SkillUser);
-									if (Player != nullptr)
-									{
-										if (Player->_SelectTarget != nullptr)
-										{
-											float Distance = Vector2::Distance(Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position,
-												Player->_GameObjectInfo.ObjectPositionInfo.Position);
-											if (Distance < Skill->GetSkillInfo()->SkillDistance)
-											{
-												SkillCollision = G_ObjectManager->RectCollisionCreate();												
-
-												Vector2Int JumpingPositionDir = Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition
-													- Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition;
-
-												Vector2Int JumpingPosition = JumpingPositionDir.Direction();
-												JumpingPosition *= -1;												
-
-												Vector2Int NewCollisionPosition;
-												NewCollisionPosition.X = Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + JumpingPosition.X;
-												NewCollisionPosition.Y = Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + JumpingPosition.Y;
-
-												Vector2 NewPosition;
-												NewPosition.X = NewCollisionPosition.X + 0.5f;
-												NewPosition.Y = NewCollisionPosition.Y + 0.5f;
-
-												bool IsCollision = Player->GetChannel()->ChannelColliderCheck(Player, NewPosition);
-												if (IsCollision == true)
-												{
-													st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(SkillUser->_GameObjectInfo.ObjectId, 
-														SkillUser->_GameObjectInfo.ObjectType,
-														MeleeSkillInfo->SkillType,
-														MeleeSkillInfo->SkillMinDamage,
-														MeleeSkillInfo->SkillMaxDamage);
-													Player->_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
-
-													Player->_GameObjectInfo.ObjectPositionInfo.Position = NewPosition;
-
-													SkillCollision->Init(en_CollisionPosition::COLLISION_POSITION_MIDDLE, Skill->GetSkillInfo()->SkillType,
-														Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position,
-														Vector2::Zero);
-
-													Vector2Int CollisionPosition;
-													CollisionPosition.X = (int32)Player->_GameObjectInfo.ObjectPositionInfo.Position.X;
-													CollisionPosition.Y = (int32)Player->_GameObjectInfo.ObjectPositionInfo.Position.Y;
-
-													if (CollisionPosition.X != Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X
-														|| CollisionPosition.Y != Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y)
-													{
-														Player->GetChannel()->GetMap()->ApplyMove(Player, CollisionPosition);
-													}
-
-													CMessage* SyncPositionPacket = G_NetworkManager->GetGameServer()->MakePacketResSyncPosition(Player->_GameObjectInfo.ObjectId, Player->_GameObjectInfo.ObjectPositionInfo);
-													G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, SyncPositionPacket);
-													SyncPositionPacket->Free();
-												}
-												else
-												{
-													G_Logger->WriteStdOut(en_Color::RED, L"충돌해서 해당 좌표로 이동 못함\n");
-												}
-											}
-											else
-											{
-												CMessage* DistanceFarPacket = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_FAR_DISTANCE);
-												G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, DistanceFarPacket);
-												DistanceFarPacket->Free();
-											}
-										}
-										else
-										{
-											CMessage* NonSelectTargetPacket = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_NON_SELECT_OBJECT);
-											G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, NonSelectTargetPacket);
-											NonSelectTargetPacket->Free();
-										}
-									}
-								}
-								break;
-							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE:
-								{					
-									SkillCollision = G_ObjectManager->RectCollisionCreate();
-
-									SkillCollision->Init(en_CollisionPosition::COLLISION_POSITION_MIDDLE, Skill->GetSkillInfo()->SkillType,
-										SkillUser->_GameObjectInfo.ObjectPositionInfo.Position,
-										Vector2::Zero);
-
-									vector<CGameObject*> CollisionObjects;
-									bool IsAttack = SkillUser->GetChannel()->ChannelColliderOBBCheckAroundObject(SkillCollision,
-										SkillUser->GetFieldOfViewObjects(), CollisionObjects, SkillUser->_GameObjectInfo.ObjectId);
-									if (IsAttack == true)
-									{
-										IsNextCombo = true;
-										st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(SkillUser->_GameObjectInfo.ObjectId, SkillUser->_GameObjectInfo.ObjectType,
-											MeleeSkillInfo->SkillType,
-											MeleeSkillInfo->SkillMinDamage,
-											MeleeSkillInfo->SkillMaxDamage);
-
-										for (CGameObject* CollisionObject : CollisionObjects)
-										{
-											if (CollisionObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD
-												&& CollisionObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::ROOTING)
-												CollisionObject->_GameObjectJobQue.Enqueue(DamageJob);
-										}
-									}						
-								}
+							case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT:
+							case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT:
+								CollisionObjects = CollisionSkillUse(SkillUser, Skill,
+									en_CollisionPosition::COLLISION_POSITION_DEFAULT,
+									SkillUser->_GameObjectInfo.ObjectPositionInfo.Position, Vector2(AttackDirectionX, AttackDirectionY));
+								break;						
+							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:
+								CollisionObjects = CollisionSkillUse(SkillUser, Skill,
+									en_CollisionPosition::COLLISION_POSITION_MIDDLE,
+									SkillUser->_GameObjectInfo.ObjectPositionInfo.Position, Vector2::Zero);
 								break;
 							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE:
 								{
@@ -349,62 +388,290 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 									}
 								}
 								break;
-							case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE:
+							case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_ATTACK:
+							case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_CUT:
 								{
-									if (SkillUser->_SelectTarget != nullptr)
+									if (SelectTargetSkillUse(SkillUser, Skill))
 									{
-										Vector2 TargetPosition = SkillUser->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position;
-										float ChoHoneDistance = Vector2::Distance(TargetPosition, SkillUser->_GameObjectInfo.ObjectPositionInfo.Position);
+										CollisionObjects.push_back(SkillUser->_SelectTarget);
 
-										if (Skill->GetSkillInfo()->SkillDistance >= ChoHoneDistance)
+										bool IsBehind = Vector2::IsBehind(SkillUser->_GameObjectInfo.ObjectPositionInfo.Position,
+											SkillUser->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position, SkillUser->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton);
+										if (IsBehind == true)
 										{
-											Vector2 MyFrontPosition = SkillUser->_GameObjectInfo.ObjectPositionInfo.Position + SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton;
-
-											Vector2Int MyFrontIntPosition;
-											MyFrontIntPosition.X = MyFrontPosition.X;
-											MyFrontIntPosition.Y = MyFrontPosition.Y;
-
-											if (SkillUser->GetChannel() != nullptr)
-											{
-												if (SkillUser->GetChannel()->GetMap() != nullptr)
-												{
-													vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = SkillUser->GetChannel()->GetMap()->GetFieldAroundPlayers(SkillUser, false);
-
-													if (SkillUser->GetChannel()->GetMap()->ApplyMove(SkillUser->_SelectTarget, MyFrontIntPosition))
-													{
-														SkillUser->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position.X = MyFrontPosition.X;
-														SkillUser->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position.Y = MyFrontPosition.Y;
-
-														CMessage* SelectTargetStopPacket = G_NetworkManager->GetGameServer()->MakePacketResMoveStop(SkillUser->_SelectTarget->_GameObjectInfo.ObjectId,
-															MyFrontPosition.X,
-															MyFrontPosition.Y);
-														G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, SelectTargetStopPacket);
-														SelectTargetStopPacket->Free();
-													}
-												}
-											}
+											
 										}
-									}
-									else
-									{
-
-									}
+									}									
 								}
-								break;															
+								break;
+							case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_ADVANCE_CUT:
+								{
+									if (SelectTargetSkillUse(SkillUser, Skill))
+									{
+										CollisionObjects.push_back(SkillUser->_SelectTarget);
+
+										Vector2 NewPosition = Player->GetChannel()->GetMap()->GetMovePositionNearTarget(Player, Player->_SelectTarget);
+
+										bool IsCollision = Player->GetChannel()->ChannelColliderCheck(Player, NewPosition);
+										if (IsCollision == true)
+										{
+											Player->_GameObjectInfo.ObjectPositionInfo.Position = NewPosition;
+
+											Vector2Int CollisionPosition;
+											CollisionPosition.X = (int32)Player->_GameObjectInfo.ObjectPositionInfo.Position.X;
+											CollisionPosition.Y = (int32)Player->_GameObjectInfo.ObjectPositionInfo.Position.Y;
+
+											if (CollisionPosition.X != Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X
+												|| CollisionPosition.Y != Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y)
+											{
+												Player->GetChannel()->GetMap()->ApplyMove(Player, CollisionPosition);
+											}
+
+											CMessage* SyncPositionPacket = G_NetworkManager->GetGameServer()->MakePacketResSyncPosition(Player->_GameObjectInfo.ObjectId, Player->_GameObjectInfo.ObjectPositionInfo);
+											G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, SyncPositionPacket);
+											SyncPositionPacket->Free();
+										}
+									}									
+								}
+								break;							
+							case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_ASSASSINATION:
+								if (SelectTargetSkillUse(SkillUser, Skill))
+								{
+									CollisionObjects.push_back(SkillUser->_SelectTarget);
+								}
+								break;						
 							}
 						}
 						break;
 					case en_SkillKinds::SKILL_KIND_SPELL_SKILL:
-						break;					
-					}
+						{
+							st_SkillInfo* MeleeSkillInfo = Skill->GetSkillInfo();
 
-					if (SkillCollision != nullptr)
+							switch (Skill->GetSkillInfo()->SkillType)
+							{
+							case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
+								break;
+							case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_COUNTER_ARMOR:
+								break;
+							case en_SkillType::SKILL_PROTECTION_ACTIVE_BUF_FURY:
+								break;
+							case en_SkillType::SKILL_PROTECTION_ACTIVE_DOUBLE_ARMOR:
+								break;
+							case en_SkillType::SKILL_SPELL_ACTIVE_BUF_BACK_TELEPORT:
+								break;
+							case en_SkillType::SKILL_SPELL_ACTIVE_BUF_ILLUSION:
+								break;
+							case en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_STEALTH:
+								break;
+							case en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_SIXTH_SENSE_MAXIMIZE:
+								break;
+							case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
+								break;
+							case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_THUNDER_BOLT:
+								break;
+							case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:
+								break;
+							case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_JUDGMENT:
+								break;
+							case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:
+								break;
+							case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_RECOVERY_LIGHT:
+								break;
+							case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_VITALITY_LIGHT:
+								break;
+							case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_GRACE:
+								break;
+							case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:
+								break;
+							case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_RECOVERY_WIND:
+								break;
+							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_BOLT:
+								break;
+							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_BLAZE:								
+								break;
+							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:								
+								break;
+							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:								
+								break;
+							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:
+								break;
+							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_SLEEP:
+								break;
+							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_WINTER_BINDING:
+								break;
+							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
+								break;
+							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:
+								break;
+							}
+						}
+						break;			
+					case en_SkillKinds::SKILL_KIND_MELEE_DEBUF_SKILL:
+						{
+							switch (Skill->GetSkillInfo()->SkillType)
+							{
+							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_WRATH_ATTACK:
+								if (SelectTargetSkillUse(SkillUser, Skill))
+								{
+									CollisionObjects.push_back(SkillUser->_SelectTarget);
+								}
+								break;
+							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK:
+								{
+									CPlayer* Player = dynamic_cast<CPlayer*>(SkillUser);
+									if (Player != nullptr)
+									{
+										if (Player->_SelectTarget != nullptr)
+										{
+											float Distance = Vector2::Distance(Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position,
+												Player->_GameObjectInfo.ObjectPositionInfo.Position);
+											if (Distance < Skill->GetSkillInfo()->SkillDistance)
+											{
+												Vector2 NewPosition = Player->GetChannel()->GetMap()->GetMovePositionNearTarget(Player, Player->_SelectTarget);
+
+												Player->_GameObjectInfo.ObjectPositionInfo.Position = NewPosition;
+
+												Vector2Int CollisionPosition;
+												CollisionPosition.X = (int32)Player->_GameObjectInfo.ObjectPositionInfo.Position.X;
+												CollisionPosition.Y = (int32)Player->_GameObjectInfo.ObjectPositionInfo.Position.Y;
+
+												if (CollisionPosition.X != Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X
+													|| CollisionPosition.Y != Player->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y)
+												{
+													Player->GetChannel()->GetMap()->ApplyMove(Player, CollisionPosition);
+												}
+
+												CMessage* SyncPositionPacket = G_NetworkManager->GetGameServer()->MakePacketResSyncPosition(Player->_GameObjectInfo.ObjectId, Player->_GameObjectInfo.ObjectPositionInfo);
+												G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, SyncPositionPacket);
+												SyncPositionPacket->Free();
+
+												CollisionObjects = CollisionSkillUse(SkillUser, Skill, en_CollisionPosition::COLLISION_POSITION_MIDDLE,
+													Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position, Vector2::Zero);
+											}
+											else
+											{
+												CMessage* DistanceFarPacket = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_FAR_DISTANCE);
+												G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, DistanceFarPacket);
+												DistanceFarPacket->Free();
+											}
+										}
+										else
+										{
+											CMessage* NonSelectTargetPacket = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_NON_SELECT_OBJECT);
+											G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, NonSelectTargetPacket);
+											NonSelectTargetPacket->Free();
+										}
+									}
+								}
+								break;
+							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE:
+								CollisionObjects = CollisionSkillUse(SkillUser, Skill,
+									en_CollisionPosition::COLLISION_POSITION_MIDDLE,
+									SkillUser->_GameObjectInfo.ObjectPositionInfo.Position, Vector2::Zero);
+								break;
+							case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_LAST_ATTACK:
+								if (SelectTargetSkillUse(SkillUser, Skill))
+								{
+									CollisionObjects.push_back(SkillUser->_SelectTarget);
+								}
+								break;
+							case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
+								if (SelectTargetSkillUse(SkillUser, Skill))
+								{
+									CollisionObjects.push_back(SkillUser->_SelectTarget);
+								}
+								break;
+							case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_COUNTER:
+								if (SelectTargetSkillUse(SkillUser, Skill))
+								{
+									CollisionObjects.push_back(SkillUser->_SelectTarget);
+								}
+								break;
+							case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SWORD_STORM:
+								CollisionObjects = CollisionSkillUse(SkillUser, Skill,
+									en_CollisionPosition::COLLISION_POSITION_DEFAULT,
+									SkillUser->_GameObjectInfo.ObjectPositionInfo.Position, Vector2(AttackDirectionX, AttackDirectionY));
+								break;
+							case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE:
+								{
+									if (SelectTargetSkillUse(SkillUser, Skill))
+									{
+										CollisionObjects.push_back(SkillUser->_SelectTarget);
+
+										Vector2 MyFrontPosition =
+											SkillUser->_GameObjectInfo.ObjectPositionInfo.Position + SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton;
+
+										Vector2Int MyFrontIntPosition;
+										MyFrontIntPosition.X = MyFrontPosition.X;
+										MyFrontIntPosition.Y = MyFrontPosition.Y;
+
+										bool IsCollision = Player->GetChannel()->ChannelColliderCheck(Player->_SelectTarget, MyFrontPosition);
+										if (IsCollision == true)
+										{
+											Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position = MyFrontPosition;
+
+											Vector2Int CollisionPosition;
+											CollisionPosition.X = (int32)Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position.X;
+											CollisionPosition.Y = (int32)Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position.Y;
+
+											if (CollisionPosition.X != Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X
+												|| CollisionPosition.Y != Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y)
+											{
+												Player->GetChannel()->GetMap()->ApplyMove(Player->_SelectTarget, CollisionPosition);
+											}
+
+											CMessage* SyncPositionPacket = G_NetworkManager->GetGameServer()->MakePacketResSyncPosition(Player->_SelectTarget->_GameObjectInfo.ObjectId, Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo);
+											G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, SyncPositionPacket);
+											SyncPositionPacket->Free();
+										}
+									}
+								}
+								break;
+							case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_POISON_INJECTION:
+								if (SelectTargetSkillUse(SkillUser, Skill))
+								{
+									CollisionObjects.push_back(SkillUser->_SelectTarget);
+								}
+								break;
+							case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_POISON_STUN:
+								if (SelectTargetSkillUse(SkillUser, Skill))
+								{
+									CollisionObjects.push_back(SkillUser->_SelectTarget);
+								}
+								break;
+							case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP:
+								if (SelectTargetSkillUse(SkillUser, Skill))
+								{
+									CollisionObjects.push_back(SkillUser->_SelectTarget);
+								}
+								break;
+							}
+						}
+						break;
+					}			
+
+					st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(SkillUser->_GameObjectInfo.ObjectId,
+						SkillUser->_GameObjectInfo.ObjectType,
+						Skill->GetSkillInfo()->SkillType,
+						Skill->GetSkillInfo()->SkillMinDamage,
+						Skill->GetSkillInfo()->SkillMaxDamage);
+
+					if (CollisionObjects.size() > 0)
 					{
-						CMessage* RectCollisionSpawnPacket = G_NetworkManager->GetGameServer()->MakePacketRectCollisionSpawn(SkillCollision);
-						G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, RectCollisionSpawnPacket);
-						RectCollisionSpawnPacket->Free();
+						for (CGameObject* CollisionObject : CollisionObjects)
+						{
+							if (DamageJob != nullptr
+								&& CollisionObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD
+								&& CollisionObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::ROOTING)
+							{
+								CollisionObject->_GameObjectJobQue.Enqueue(DamageJob);
+							}
 
-						G_ObjectManager->RectCollisionReturn(SkillCollision);
+							if (Skill->GetSkillInfo()->SkillStatusAbnormal != en_GameObjectStatusType::STATUS_ABNORMAL_NONE)
+							{
+								SetStatusAbnormal(SkillUser, CollisionObject, Skill->GetSkillInfo()->SkillStatusAbnormal, Skill->GetSkillInfo()->SkillType, Skill->GetSkillInfo()->SkillLevel);
+							}
+						}
 					}					
 
 					if (IsNextCombo == true && Skill->GetSkillInfo()->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
@@ -444,7 +711,7 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 					_GlobalCoolTimeSkill->CoolTimeStart();
 
 					// 요청한 스킬과 기본 공격 스킬을 제외하고 스킬 창에서 가져옴
-					vector<CSkill*> GlobalSkills = Player->_SkillBox.GetGlobalSkills(Skill->GetSkillInfo()->SkillType, Skill->GetSkillKind());
+					vector<CSkill*> GlobalSkills = Player->_SkillBox.GetGlobalSkills(Skill->GetSkillInfo()->SkillType, Skill->GetSkillInfo()->SkillKind);
 
 					// 전역 쿨타임 적용
 					for (CSkill* GlobalSkill : GlobalSkills)
@@ -507,29 +774,42 @@ int32 CSkillBox::CalculateDamage(en_SkillType SkillType, int32& Str, int32& Dex,
 	case en_SkillType::SKILL_DEFAULT_ATTACK:
 	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
 	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK:
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_WRATH_ATTACK:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:
 	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE:
 	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_COMBO_FLY_KNIFE:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK:
+	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE:	
+	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_POWERFUL_ATTACK:
+	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHARP_ATTACK:
+	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_LAST_ATTACK:
 	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
+	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_COUNTER:
 	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE:
 	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT:
 	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT:
 	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_ATTACK:
-	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP:
-	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_WEAPON_POISON:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_CUT:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_ADVANCE_CUT:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_POISON_INJECTION:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_POISON_STUN:
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_ASSASSINATION:	
+	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP:	
 	case en_SkillType::SKILL_GOBLIN_ACTIVE_MELEE_DEFAULT_ATTACK:
 
 		FinalDamage = (int32)((CriticalDamage + Str / 2) * (1 - ((float)TargetDefence / (100.0f + (float)TargetDefence))));
 
 		break;
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_BOLT:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_BLAZE:
 	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
 	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_WINTER_BINDING:
 	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:
-	case en_SkillType::SKILL_SPELL_ACTIVE_BUF_TELEPORT:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:	
 	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_THUNDER_BOLT:
+	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_JUDGMENT:
 
 		FinalDamage = (int32)((CriticalDamage + Int / 2) * (1 - ((float)TargetDefence / (100.0f + (float)TargetDefence))));
 

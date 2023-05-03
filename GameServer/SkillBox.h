@@ -29,6 +29,15 @@ public:
 
 	bool CheckCharacteristic(en_SkillCharacteristic SkillCharacteristic);
 
+	// 상태이상 값 적용
+	bool SetStatusAbnormal(CGameObject* SkillUser, CGameObject* Target, en_GameObjectStatusType StatusType, en_SkillType SkillType,int8 SkillLevel);
+	
+	// 선택한 대상에게 스킬을 사용 할 수 있는지 확인
+	bool SelectTargetSkillUse(CGameObject* SkillUser, CSkill* Skill);	
+	// 충돌체 생성해서 충돌하는 대상 반환
+	vector<CGameObject*> CollisionSkillUse(CGameObject* SkillUser, CSkill* Skill, en_CollisionPosition CollisionPositionType, 
+		Vector2 CollisionCreatePosition, Vector2 CollisionCreateDir);
+
 	void SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, 
 		en_SkillCharacteristic SkillCharacteristic, en_SkillType SkillType,
 		float AttackDirectionX, float AttackDirectionY);
