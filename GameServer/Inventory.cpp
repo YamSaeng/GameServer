@@ -358,7 +358,7 @@ vector<st_ItemInfo> CInventory::DBInventorySaveReturnItems()
 				// 아이템 반납 진행
 				ReturnItem.push_back(_Items[X][Y]->InventoryItem->_ItemInfo);
 				// 사용 다한 아이템 메모리 반납
-				G_ObjectManager->ObjectReturn((CGameObject*)_Items[X][Y]);	
+				G_ObjectManager->ObjectReturn(_Items[X][Y]->InventoryItem);	
 
 				// 아이템 공간 크기 가져옴
 				int16 InitWidth = _Items[X][Y]->InventoryItem->_ItemInfo.ItemWidth;
