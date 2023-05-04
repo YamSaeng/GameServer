@@ -29,9 +29,19 @@ struct Vector2
 		return Vector2(X + Vector.X, Y + Vector.Y);
 	}
 
+	Vector2 operator+(Vector2&& Vector) const
+	{
+		return Vector2(X + Vector.X, Y + Vector.Y);
+	}
+
 	Vector2 operator-(Vector2& Vector) const
 	{
 		return Vector2(X - Vector.X, Y - Vector.Y);
+	}
+
+	Vector2 operator*(Vector2& Vector) const
+	{
+		return Vector2(X * Vector.X, Y * Vector.Y);
 	}
 
 	Vector2 operator*(float Sclar) const
