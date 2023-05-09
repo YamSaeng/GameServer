@@ -299,6 +299,12 @@ void CGameObject::Update()
 				int16 MeleeSkillType;
 				*GameObjectJob->GameObjectJobMessage >> MeleeSkillType;
 
+				float WeaponPositionX;
+				*GameObjectJob->GameObjectJobMessage >> WeaponPositionX;
+
+				float WeaponPositionY;
+				*GameObjectJob->GameObjectJobMessage >> WeaponPositionY;
+
 				float MeleeAttackDirectionX;
 				*GameObjectJob->GameObjectJobMessage >> MeleeAttackDirectionX;
 
@@ -308,7 +314,7 @@ void CGameObject::Update()
 				CPlayer* Player = dynamic_cast<CPlayer*>(this);
 				if(Player != nullptr)
 				{
-					Player->_SkillBox.SkillProcess(Player, nullptr, (en_SkillCharacteristic)MeleeChracteristicType, (en_SkillType)MeleeSkillType, MeleeAttackDirectionX, MeleeAttackDirectionY);					
+					Player->_SkillBox.SkillProcess(Player, nullptr, (en_SkillCharacteristic)MeleeChracteristicType, (en_SkillType)MeleeSkillType, WeaponPositionX, WeaponPositionY, MeleeAttackDirectionX, MeleeAttackDirectionY);
 				}	
 				else
 				{
