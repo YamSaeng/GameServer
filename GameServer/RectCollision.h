@@ -8,6 +8,8 @@ class CRectCollision
 public:
 	en_CollisionPosition _CollisionPosition;
 		
+	// 생성 위치 크기 좌표
+	Vector2 _CreatePositionSize;
 	Vector2 _Size;
 
 	Vector2 _Direction;
@@ -25,7 +27,7 @@ public:
 	~CRectCollision();
 
 	void Init(en_CollisionPosition CollisionPosition, en_GameObjectType ObjectType, Vector2 InitPosition, Vector2 Direction, CGameObject* OwnerObject = nullptr);
-	void Init(en_CollisionPosition CollisionPosition, en_SkillType SkillType, Vector2 InitPosition, Vector2 Direction, CGameObject* OwnerObject = nullptr);
+	void Init(en_CollisionPosition CollisionPosition, en_SkillType SkillType, Vector2 InitPosition, Vector2 Direction, Vector2 CreatePositionSize = Vector2::Zero, CGameObject* OwnerObject = nullptr);
 
 	static bool IsCollision(CRectCollision* ARectCollision, CRectCollision* BRectCollision);
 	static bool IsOBBCollision(CRectCollision* ARectCollision, CRectCollision* BRectCollision);
@@ -43,6 +45,6 @@ public:
 private:
 	CGameObject* _OwnerObject;
 
-	bool _RectCollisionActive;
+	bool _RectCollisionActive;	
 };
 

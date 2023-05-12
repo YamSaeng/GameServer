@@ -16,13 +16,7 @@ CRectCollision::~CRectCollision()
 
 void CRectCollision::Init(en_CollisionPosition CollisionPosition, en_GameObjectType ObjectType, Vector2 InitPosition, Vector2 Direction, CGameObject* OwnerObject)
 {
-	_RectCollisionActive = true;
-
-	_OwnerObject = OwnerObject;
-
-	_LeftTop = InitPosition;
-
-	_Direction = Direction;
+	_RectCollisionActive = true;	
 
 	switch (ObjectType)
 	{
@@ -50,32 +44,32 @@ void CRectCollision::Init(en_CollisionPosition CollisionPosition, en_GameObjectT
 		break;
 	}	
 
-	PositionUpdate();
-	RotateUpdate();
-}
-
-void CRectCollision::Init(en_CollisionPosition CollisionPosition, en_SkillType SkillType, Vector2 InitPosition, Vector2 Direction, CGameObject* OwnerObject)
-{
-	_RectCollisionActive = true;
-
-	_CollisionPosition = CollisionPosition;
-
 	_OwnerObject = OwnerObject;
-
-	_Position = InitPosition;
 
 	_LeftTop = InitPosition;
 
 	_Direction = Direction;
 
+	_CreatePositionSize = Vector2::Zero;
+
+	_CollisionPosition = CollisionPosition;
+
+	PositionUpdate();
+	RotateUpdate();
+}
+
+void CRectCollision::Init(en_CollisionPosition CollisionPosition, en_SkillType SkillType, Vector2 InitPosition, Vector2 Direction, Vector2 CreatePositionSize, CGameObject* OwnerObject)
+{
+	_RectCollisionActive = true;
+
 	switch (SkillType)
-	{	
+	{
 	case en_SkillType::SKILL_DEFAULT_ATTACK:
 	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
 	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
-		_Size.X = 1.2f;
+		_Size.X = 2.0f;
 		_Size.Y = 1.4f;
-		break;		
+		break;
 	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:
 		_Size.X = 3.0f;
 		_Size.Y = 3.0f;
@@ -89,13 +83,25 @@ void CRectCollision::Init(en_CollisionPosition CollisionPosition, en_SkillType S
 		_Size.Y = 3.0f;
 		break;
 	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SWORD_STORM:
-		_Size.X = 3.0f;
-		_Size.Y = 1.5f;
+		_Size.X = 4.0f;
+		_Size.Y = 1.7f;
 		break;
-	}
+	}	
+
+	_CreatePositionSize = CreatePositionSize;
+
+	_CollisionPosition = CollisionPosition;
+
+	_OwnerObject = OwnerObject;
+
+	_Position = InitPosition;
+
+	_LeftTop = InitPosition;
+
+	_Direction = Direction;	
 
 	PositionUpdate();
-	RotateUpdate();
+	RotateUpdate();	
 }
 
 bool CRectCollision::IsCollision(CRectCollision* ARectCollision, CRectCollision* BRectCollision)
@@ -108,47 +114,60 @@ bool CRectCollision::IsCollision(CRectCollision* ARectCollision, CRectCollision*
 
 bool CRectCollision::IsOBBCollision(CRectCollision* ARectCollision, CRectCollision* BRectCollision)
 {	
-	Vector2 OBBUnit;
-	OBBUnit.X = (ARectCollision->_Position.X + ARectCollision->_Size.X / 2) - (BRectCollision->_LeftTop.X + BRectCollision->_Size.X / 2);
-	OBBUnit.Y = (ARectCollision->_Position.Y - ARectCollision->_Size.Y / 2) - (BRectCollision->_LeftTop.Y - BRectCollision->_Size.Y / 2);
+	Vector2 AMiddlePosition;
+	AMiddlePosition.X = ((ARectCollision->_LeftTop.X * ARectCollision->_RightDown.Y - ARectCollision->_LeftTop.Y * ARectCollision->_RightDown.X) * (ARectCollision->_LeftDown.X - ARectCollision->_RightTop.X) - (ARectCollision->_LeftTop.X - ARectCollision->_RightDown.X) * (ARectCollision->_LeftDown.X * ARectCollision->_RightTop.Y - ARectCollision->_LeftDown.Y * ARectCollision->_RightTop.X)) / ((ARectCollision->_LeftTop.X - ARectCollision->_RightDown.X) * (ARectCollision->_LeftDown.Y - ARectCollision->_RightTop.Y) - (ARectCollision->_LeftTop.Y - ARectCollision->_RightDown.Y) * (ARectCollision->_LeftDown.X - ARectCollision->_RightTop.X));
+	AMiddlePosition.Y = ((ARectCollision->_LeftTop.X * ARectCollision->_RightDown.Y - ARectCollision->_LeftTop.Y * ARectCollision->_RightDown.X) * (ARectCollision->_LeftDown.Y - ARectCollision->_RightTop.Y) - (ARectCollision->_LeftTop.Y - ARectCollision->_RightDown.Y) * (ARectCollision->_LeftDown.X * ARectCollision->_RightTop.Y - ARectCollision->_LeftDown.Y * ARectCollision->_RightTop.X)) / ((ARectCollision->_LeftTop.X - ARectCollision->_RightDown.X) * (ARectCollision->_LeftDown.Y - ARectCollision->_RightTop.Y) - (ARectCollision->_LeftTop.Y - ARectCollision->_RightDown.Y) * (ARectCollision->_LeftDown.X - ARectCollision->_RightTop.X));
 
-	float Angle = ARectCollision->_Direction.AngleToDegree();
+	Vector2 BMiddlePosition;
+	BMiddlePosition.X = ((BRectCollision->_LeftTop.X * BRectCollision->_RightDown.Y - BRectCollision->_LeftTop.Y * BRectCollision->_RightDown.X) * (BRectCollision->_LeftDown.X - BRectCollision->_RightTop.X) - (BRectCollision->_LeftTop.X - BRectCollision->_RightDown.X) * (BRectCollision->_LeftDown.X * BRectCollision->_RightTop.Y - BRectCollision->_LeftDown.Y * BRectCollision->_RightTop.X)) / ((BRectCollision->_LeftTop.X - BRectCollision->_RightDown.X) * (BRectCollision->_LeftDown.Y - BRectCollision->_RightTop.Y) - (BRectCollision->_LeftTop.Y - BRectCollision->_RightDown.Y) * (BRectCollision->_LeftDown.X - BRectCollision->_RightTop.X));
+	BMiddlePosition.Y = ((BRectCollision->_LeftTop.X * BRectCollision->_RightDown.Y - BRectCollision->_LeftTop.Y * BRectCollision->_RightDown.X) * (BRectCollision->_LeftDown.Y - BRectCollision->_RightTop.Y) - (BRectCollision->_LeftTop.Y - BRectCollision->_RightDown.Y) * (BRectCollision->_LeftDown.X * BRectCollision->_RightTop.Y - BRectCollision->_LeftDown.Y * BRectCollision->_RightTop.X)) / ((BRectCollision->_LeftTop.X - BRectCollision->_RightDown.X) * (BRectCollision->_LeftDown.Y - BRectCollision->_RightTop.Y) - (BRectCollision->_LeftTop.Y - BRectCollision->_RightDown.Y) * (BRectCollision->_LeftDown.X - BRectCollision->_RightTop.X));
 
-	Vector2 StandardVector[4] = { GetHeightVector(ARectCollision), GetHeightVector(BRectCollision),
-	GetWidthVector(ARectCollision), GetWidthVector(BRectCollision) };	
+	Vector2 ABCenterVector;
+	ABCenterVector = AMiddlePosition - BMiddlePosition;	
+
+	Vector2 StandardVector[4] = { GetWidthVector(ARectCollision), GetHeightVector(ARectCollision), GetWidthVector(BRectCollision) , GetHeightVector(BRectCollision) };
 
 	Vector2 StandardVectorNormal;
+
+	float ARectAngle = ARectCollision->_Direction.AngleToDegree();
+	float BRectAngle = BRectCollision->_Direction.AngleToDegree();
 
 	for (int i = 0; i < 4; i++)
 	{
 		float Sum = 0;
 		StandardVectorNormal = StandardVector[i].Normalize();
-		for (int j = 0; j < 4; j++)
-		{
-			Sum += StandardVector[j].Dot(StandardVectorNormal);
-		}
 
-		if (OBBUnit.Dot(StandardVectorNormal) > Sum)
-		{			
+		float ARectWidthDot = StandardVector[0].ABSDot(StandardVectorNormal);
+		float ARectHeightDot = StandardVector[1].ABSDot(StandardVectorNormal);
+		float BRectWidthDot = StandardVector[2].ABSDot(StandardVectorNormal);
+		float BRectHeightDot = StandardVector[3].ABSDot(StandardVectorNormal);						
+
+		Sum = ARectWidthDot + ARectHeightDot + BRectWidthDot + BRectHeightDot;		
+
+		float Distance = ABCenterVector.ABSDot(StandardVectorNormal);			
+		if (Distance > Sum)
+		{
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 
 Vector2 CRectCollision::GetHeightVector(CRectCollision* RectCollision)
 {
-	Vector2 HeightVector;
-	HeightVector.X = RectCollision->_Size.Y	* cos(Math::DegreeToRadian(RectCollision->_Direction.AngleToDegree() - 90)) / 2.0f;
-	HeightVector.Y = RectCollision->_Size.Y	* sin(Math::DegreeToRadian(RectCollision->_Direction.AngleToDegree() - 90)) / 2.0f;
+	Vector2 HeightVector;	
+
+	HeightVector.X = RectCollision->_Size.Y * cos(Math::DegreeToRadian(RectCollision->_Direction.AngleToDegree() - 90)) / 2.0f;
+	HeightVector.Y = RectCollision->_Size.Y * sin(Math::DegreeToRadian(RectCollision->_Direction.AngleToDegree() - 90)) / 2.0f;
 
 	return HeightVector;
 }
 
 Vector2 CRectCollision::GetWidthVector(CRectCollision* RectCollision)
 {
-	Vector2 WidthVector;
+	Vector2 WidthVector;	
+	
 	WidthVector.X = RectCollision->_Size.X * cos(Math::DegreeToRadian(RectCollision->_Direction.AngleToDegree())) / 2.0f;
 	WidthVector.Y = RectCollision->_Size.X * sin(Math::DegreeToRadian(RectCollision->_Direction.AngleToDegree())) / 2.0f;
 
@@ -164,17 +183,10 @@ void CRectCollision::PositionUpdate()
 {
 	if (_OwnerObject != nullptr)
 	{
-		_Position = _OwnerObject->_GameObjectInfo.ObjectPositionInfo.Position;
-		_LeftTop = _OwnerObject->_GameObjectInfo.ObjectPositionInfo.Position;
-	}
-
-	switch (_CollisionPosition)
-	{
-	case en_CollisionPosition::COLLISION_POSITION_MIDDLE:
-		_LeftTop.X = _LeftTop.X - abs(0.5f * (_Size.X - 1));
-		_LeftTop.Y = _LeftTop.Y + abs(0.5f * (_Size.Y - 1));		
-		break;
-	}
+		_Position = _OwnerObject->_GameObjectInfo.ObjectPositionInfo.Position;		
+	}	
+	
+	_LeftTop = _Position;
 
 	_LeftDown.X = _LeftTop.X;
 	_LeftDown.Y = _LeftTop.Y - _Size.Y;
@@ -185,8 +197,18 @@ void CRectCollision::PositionUpdate()
 	_RightDown.X = _LeftTop.X + _Size.X;
 	_RightDown.Y = _LeftTop.Y - _Size.Y;	
 
-	_MiddlePosition.X = _LeftTop.X + _Size.X / 2.0f;
-	_MiddlePosition.Y = _LeftTop.Y - _Size.Y / 2.0f;
+	switch (_CollisionPosition)
+	{
+	case en_CollisionPosition::COLLISION_POSITION_OBJECT:
+	case en_CollisionPosition::COLLISION_POSITION_SKILL_MIDDLE:
+		_MiddlePosition.X = ((_LeftTop.X * _RightDown.Y - _LeftTop.Y * _RightDown.X) * (_LeftDown.X - _RightTop.X) - (_LeftTop.X - _RightDown.X) * (_LeftDown.X * _RightTop.Y - _LeftDown.Y * _RightTop.X)) / ((_LeftTop.X - _RightDown.X) * (_LeftDown.Y - _RightTop.Y) - (_LeftTop.Y - _RightDown.Y) * (_LeftDown.X - _RightTop.X));
+		_MiddlePosition.Y = ((_LeftTop.X * _RightDown.Y - _LeftTop.Y * _RightDown.X) * (_LeftDown.Y - _RightTop.Y) - (_LeftTop.Y - _RightDown.Y) * (_LeftDown.X * _RightTop.Y - _LeftDown.Y * _RightTop.X)) / ((_LeftTop.X - _RightDown.X) * (_LeftDown.Y - _RightTop.Y) - (_LeftTop.Y - _RightDown.Y) * (_LeftDown.X - _RightTop.X));
+		break;
+	case en_CollisionPosition::COLLISION_POSITION_SKILL_FRONT:
+		_MiddlePosition.X = _Position.X + _CreatePositionSize.X * 0.5f;
+		_MiddlePosition.Y = _Position.Y - _CreatePositionSize.Y * 0.5f;
+		break;
+	}
 }
 
 void CRectCollision::RotateUpdate()
@@ -207,15 +229,15 @@ void CRectCollision::RotateUpdate()
 
 	// 중심 좌표 기준으로 회전
 	Vector2 LeftTopRot = RotationMatrix * (_LeftTop - _MiddlePosition);
-	Vector2 LeftDown = RotationMatrix * (_LeftDown - _MiddlePosition);
-	Vector2 RightTop = RotationMatrix * (_RightTop - _MiddlePosition);
-	Vector2 RightDown = RotationMatrix * (_RightDown - _MiddlePosition);
+	Vector2 LeftDownRot = RotationMatrix * (_LeftDown - _MiddlePosition);
+	Vector2 RightTopRot = RotationMatrix * (_RightTop - _MiddlePosition);
+	Vector2 RightDownRot = RotationMatrix * (_RightDown - _MiddlePosition);	
 
 	// 중심 좌표로 이동
-	_LeftTop = LeftTopRot + _MiddlePosition;
-	_LeftDown = LeftDown + _MiddlePosition;
-	_RightTop = RightTop + _MiddlePosition;
-	_RightDown = RightDown + _MiddlePosition;
+	_LeftTop   = LeftTopRot + _MiddlePosition;
+	_LeftDown  = LeftDownRot + _MiddlePosition;
+	_RightTop  = RightTopRot + _MiddlePosition;
+	_RightDown = RightDownRot + _MiddlePosition;			
 }
 
 void CRectCollision::Update()
