@@ -1042,13 +1042,19 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 			int16 ReqSkillType;
 			*Message >> ReqSkillType;
 
+			float WeaponPositionX;
+			*Message >> WeaponPositionX;
+
+			float WeaponPositionY;
+			*Message >> WeaponPositionY;
+
 			float AttackDirectionX;
 			*Message >> AttackDirectionX;
 
 			float AttackDirecitonY;
 			*Message >> AttackDirecitonY;
 
-			st_GameObjectJob* MeleeAttackJob = MakeGameObjectJobMeleeAttack(ReqCharacteristicType, ReqSkillType, AttackDirectionX, AttackDirecitonY);
+			st_GameObjectJob* MeleeAttackJob = MakeGameObjectJobMeleeAttack(ReqCharacteristicType, ReqSkillType, WeaponPositionX, WeaponPositionY, AttackDirectionX, AttackDirecitonY);
 			MyPlayer->_GameObjectJobQue.Enqueue(MeleeAttackJob);
 		}
 	} while (0);
@@ -4851,7 +4857,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobSkillLearn(bool IsSkillLearn, in
 	return SkillLearnJob;
 }
 
-st_GameObjectJob* CGameServer::MakeGameObjectJobMeleeAttack(int8 MeleeCharacteristicType, int16 MeleeSkillType, float AttackDirectionX, float AttackDirectionY)
+st_GameObjectJob* CGameServer::MakeGameObjectJobMeleeAttack(int8 MeleeCharacteristicType, int16 MeleeSkillType, float WeaponPositionX, float WeaponPositionY, float AttackDirectionX, float AttackDirectionY)
 {
 	st_GameObjectJob* MeleeAttackJob = G_ObjectManager->GameObjectJobCreate();
 	MeleeAttackJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SKILL_MELEE_ATTACK;
@@ -4861,6 +4867,8 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobMeleeAttack(int8 MeleeCharacteri
 
 	*MeleeAttackJobMessage << MeleeCharacteristicType;
 	*MeleeAttackJobMessage << MeleeSkillType;
+	*MeleeAttackJobMessage << WeaponPositionX;
+	*MeleeAttackJobMessage << WeaponPositionY;
 	*MeleeAttackJobMessage << AttackDirectionX;
 	*MeleeAttackJobMessage << AttackDirectionY;
 
@@ -6045,10 +6053,13 @@ CGameServerMessage* CGameServer::MakePacketRectCollisionSpawn(CRectCollision* Re
 
 	*RectCollisionSpawnPacket << (int16)en_PACKET_S2C_COLLISION;
 
+	*RectCollisionSpawnPacket << (byte)RectCollision->_CollisionPosition;
 	*RectCollisionSpawnPacket << RectCollision->_Position.X;
 	*RectCollisionSpawnPacket << RectCollision->_Position.Y;
 	*RectCollisionSpawnPacket << RectCollision->_Direction.X;
 	*RectCollisionSpawnPacket << RectCollision->_Direction.Y;
+	*RectCollisionSpawnPacket << RectCollision->_CreatePositionSize.X;
+	*RectCollisionSpawnPacket << RectCollision->_CreatePositionSize.Y;	
 	*RectCollisionSpawnPacket << RectCollision->_Size.X;
 	*RectCollisionSpawnPacket << RectCollision->_Size.Y;
 
@@ -6646,6 +6657,7 @@ CGameServerMessage* CGameServer::MakePacketStatusAbnormal(int64 TargetId, float 
 	*ResStatusAbnormal << TargetId;
 	*ResStatusAbnormal << PositionX;
 	*ResStatusAbnormal << PositionY;
+	*ResStatusAbnormal << SatusAbnormalSkillInfo;
 	*ResStatusAbnormal << SetStatusAbnormal;
 	*ResStatusAbnormal << StatusAbnormal;
 

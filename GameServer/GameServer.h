@@ -325,7 +325,7 @@ private:
 	//-------------------------------------------------
 	// 근접 기술 처리 잡 생성 함수
 	//-------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobMeleeAttack(int8 MeleeCharacteristicType, int16 MeleeSkillType, float AttackDirectionX, float AttackDirectionY);
+	st_GameObjectJob* MakeGameObjectJobMeleeAttack(int8 MeleeCharacteristicType, int16 MeleeSkillType, float WeaponPositionX, float WeaponPositionY, float AttackDirectionX, float AttackDirectionY);
 	//------------------------------------------------
 	// 마법 시작 잡 생성 함수
 	//------------------------------------------------
