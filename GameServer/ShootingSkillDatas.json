@@ -13,6 +13,7 @@
                   "SkillKind": "SKILL_KIND_RANGE_SKILL",
                   "SkillName": "РњАн",
                   "SkillStatusAbnormal": "STATUS_ABNORMAL_NONE",
+                  "SkillStatusAbnormalMask": "STATUS_ABNORMAL_NONE",
                   "SkillLevel": 1,
                   "SkillMinDamage": 25,
                   "SkillMaxDamage": 35,
