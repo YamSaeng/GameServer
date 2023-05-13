@@ -166,7 +166,7 @@
                   "SkillMaxDamage": 50,
                   "SkillCoolTime": 60000,
                   "SkillCastingTime": 0,
-                  "SkillDurationTime": 0,
+                  "SkillDurationTime": 20000,
                   "SkillDotTime": 0,
                   "SkillDistance": 5,
                   "SkillMotionTime": 0,
