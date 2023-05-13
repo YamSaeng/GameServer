@@ -954,6 +954,7 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 					string SkillType = AttackSkillFiled["SkillType"].GetString();
 					string SkillName = AttackSkillFiled["SkillName"].GetString();
 					string SkillStatusAbnormal = AttackSkillFiled["SkillStatusAbnormal"].GetString();
+					string SkillStatusAbnormalMask = AttackSkillFiled["SkillStatusAbnormalMask"].GetString();
 					int8 SkillMaxLevel = AttackSkillFiled["SkillMaxLevel"].GetInt();
 					int SkillMinDamage = AttackSkillFiled["SkillMinDamage"].GetInt();
 					int SkillMaxDamage = AttackSkillFiled["SkillMaxDamage"].GetInt();
@@ -984,6 +985,23 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 					else if (SkillStatusAbnormal == "STATUS_ABNORMAL_FIGHT_FIERCING_WAVE")
 					{
 						FightAttackSkill->SkillStatusAbnormal = en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_FIERCING_WAVE;
+					}
+
+					if (SkillStatusAbnormalMask == "STATUS_ABNORMAL_NONE")
+					{
+						FightAttackSkill->SkillStatusAbnormalMask = en_GameObjectStatusType::STATUS_ABNORMAL_NONE;
+					}
+					else if (SkillStatusAbnormalMask == "STATUS_ABNORMAL_FIGHT_WRATH_ATTACK_MASK")
+					{
+						FightAttackSkill->SkillStatusAbnormalMask = en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_WRATH_ATTACK_MASK;
+					}
+					else if (SkillStatusAbnormalMask == "STATUS_ABNORMAL_FIGHT_JUMPING_ATTACK_MASK")
+					{
+						FightAttackSkill->SkillStatusAbnormalMask = en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_JUMPING_ATTACK_MASK;
+					}
+					else if (SkillStatusAbnormalMask == "STATUS_ABNORMAL_FIGHT_FIERCING_WAVE_MASK")
+					{
+						FightAttackSkill->SkillStatusAbnormalMask = en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_FIERCING_WAVE_MASK;
 					}
 
 					if (SkillKind == "SKILL_KIND_MELEE_SKILL")
@@ -1171,6 +1189,7 @@ void CDataManager::LoadDataProtectionSkill(wstring LoadFileName)
 					string SkillKind = AttackSkillFiled["SkillKind"].GetString();
 					string SkillName = AttackSkillFiled["SkillName"].GetString();
 					string SkillStatusAbnormal = AttackSkillFiled["SkillStatusAbnormal"].GetString();
+					string SkillStatusAbnormalMask = AttackSkillFiled["SkillStatusAbnormalMask"].GetString();
 					int8 SkillMaxLevel = AttackSkillFiled["SkillMaxLevel"].GetInt();
 					int SkillMinDamage = AttackSkillFiled["SkillMinDamage"].GetInt();
 					int SkillMaxDamage = AttackSkillFiled["SkillMaxDamage"].GetInt();
@@ -1209,6 +1228,31 @@ void CDataManager::LoadDataProtectionSkill(wstring LoadFileName)
 					else if (SkillStatusAbnormal == "STATUS_ABNORMAL_PROTECTION_CAPTURE")
 					{
 						ProtectionAttackSkill->SkillStatusAbnormal = en_GameObjectStatusType::STATUS_ABNORMAL_PROTECTION_CAPTURE;
+					}
+
+					if (SkillStatusAbnormalMask == "STATUS_ABNORMAL_NONE")
+					{
+						ProtectionAttackSkill->SkillStatusAbnormalMask = en_GameObjectStatusType::STATUS_ABNORMAL_NONE;
+					}
+					else if (SkillStatusAbnormalMask == "STATUS_ABNORMAL_PROTECTION_LAST_MASK")
+					{
+						ProtectionAttackSkill->SkillStatusAbnormalMask = en_GameObjectStatusType::STATUS_ABNORMAL_PROTECTION_LAST_MASK;
+					}					
+					else if (SkillStatusAbnormalMask == "STATUS_ABNORMAL_PROTECTION_SHIELD_SMASH_MASK")
+					{
+						ProtectionAttackSkill->SkillStatusAbnormalMask = en_GameObjectStatusType::STATUS_ABNORMAL_PROTECTION_SHIELD_SMASH_MASK;
+					}
+					else if (SkillStatusAbnormalMask == "STATUS_ABNORMAL_PROTECTION_SHIELD_COUNTER_MASK")
+					{
+						ProtectionAttackSkill->SkillStatusAbnormalMask = en_GameObjectStatusType::STATUS_ABNORMAL_PROTECTION_SHIELD_COUNTER_MASK;
+					}
+					else if (SkillStatusAbnormalMask == "STATUS_ABNORMAL_PROTECTION_SWORD_STORM_MASK")
+					{
+						ProtectionAttackSkill->SkillStatusAbnormalMask = en_GameObjectStatusType::STATUS_ABNORMAL_PROTECTION_SWORD_STORM_MASK;
+					}
+					else if (SkillStatusAbnormalMask == "STATUS_ABNORMAL_PROTECTION_CAPTURE_MASK")
+					{
+						ProtectionAttackSkill->SkillStatusAbnormalMask = en_GameObjectStatusType::STATUS_ABNORMAL_PROTECTION_CAPTURE_MASK;
 					}
 
 					if (SkillKind == "SKILL_KIND_MELEE_SKILL")
@@ -1389,6 +1433,7 @@ void CDataManager::LoadDataAssassinationSkill(wstring LoadFileName)
 					string SkillKind = AttackSkillFiled["SkillKind"].GetString();
 					string SkillName = AttackSkillFiled["SkillName"].GetString();
 					string SkillStatusAbnormal = AttackSkillFiled["SkillStatusAbnormal"].GetString();
+					string SkillStatusAbnormalMask = AttackSkillFiled["SkillStatusAbnormalMask"].GetString();
 					int SkillLevel = AttackSkillFiled["SkillLevel"].GetInt();
 					int SkillMinDamage = AttackSkillFiled["SkillMinDamage"].GetInt();
 					int SkillMaxDamage = AttackSkillFiled["SkillMaxDamage"].GetInt();
@@ -1420,6 +1465,23 @@ void CDataManager::LoadDataAssassinationSkill(wstring LoadFileName)
 					else if (SkillStatusAbnormal == "STATUS_ABNORMAL_ASSASSINATION_BACK_STEP")
 					{
 						AssassinationAttackSkill->SkillStatusAbnormal = en_GameObjectStatusType::STATUS_ABNORMAL_ASSASSINATION_BACK_STEP;
+					}					
+
+					if (SkillStatusAbnormalMask == "STATUS_ABNORMAL_NONE")
+					{
+						AssassinationAttackSkill->SkillStatusAbnormalMask = en_GameObjectStatusType::STATUS_ABNORMAL_NONE;
+					}
+					else if (SkillStatusAbnormalMask == "STATUS_ABNORMAL_ASSASSINATION_POISON_INJECTION_MASK")
+					{
+						AssassinationAttackSkill->SkillStatusAbnormalMask = en_GameObjectStatusType::STATUS_ABNORMAL_ASSASSINATION_POISON_INJECTION_MASK;
+					}
+					else if (SkillStatusAbnormalMask == "STATUS_ABNORMAL_ASSASSINATION_POISON_STUN_MASK")
+					{
+						AssassinationAttackSkill->SkillStatusAbnormalMask = en_GameObjectStatusType::STATUS_ABNORMAL_ASSASSINATION_POISON_STUN_MASK;
+					}
+					else if (SkillStatusAbnormalMask == "STATUS_ABNORMAL_ASSASSINATION_BACK_STEP_MASK")
+					{
+						AssassinationAttackSkill->SkillStatusAbnormalMask = en_GameObjectStatusType::STATUS_ABNORMAL_ASSASSINATION_BACK_STEP_MASK;
 					}					
 
 					if (SkillKind == "SKILL_KIND_MELEE_SKILL")
@@ -1602,11 +1664,12 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 					st_SkillInfo* SpellAttackSkill = new st_SkillInfo();
 					SpellAttackSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_SHMAN;
 					SpellAttackSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_SPELL_ACTIVE_ATTACK;
-
+					
 					string SkillType = AttackSkillFiled["SkillType"].GetString();
 					string SkillKind = AttackSkillFiled["SkillKind"].GetString();
 					string SkillName = AttackSkillFiled["SkillName"].GetString();
 					string SkillStatusAbnormal = AttackSkillFiled["SkillStatusAbnormal"].GetString();
+					string SkillStatusAbnormalMask = AttackSkillFiled["SkillStatusAbnormalMask"].GetString();
 					int SkillLevel = AttackSkillFiled["SkillLevel"].GetInt();
 					int SkillMinDamage = AttackSkillFiled["SkillMinDamage"].GetInt();
 					int SkillMaxDamage = AttackSkillFiled["SkillMaxDamage"].GetInt();
@@ -1649,6 +1712,35 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 					else if (SkillStatusAbnormal == "STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE")
 					{
 						SpellAttackSkill->SkillStatusAbnormal = en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE;
+					}
+
+					if (SkillStatusAbnormalMask == "STATUS_ABNORMAL_NONE")
+					{
+						SpellAttackSkill->SkillStatusAbnormalMask = en_GameObjectStatusType::STATUS_ABNORMAL_NONE;
+					}
+					else if (SkillStatusAbnormalMask == "STATUS_ABNORMAL_SPELL_ICE_CHAIN_MASK")
+					{
+						SpellAttackSkill->SkillStatusAbnormalMask = en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_CHAIN_MASK;
+					}
+					else if (SkillStatusAbnormalMask == "STATUS_ABNORMAL_SPELL_ICE_WAVE_MASK")
+					{
+						SpellAttackSkill->SkillStatusAbnormalMask = en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_WAVE_MASK;
+					}
+					else if (SkillStatusAbnormalMask == "STATUS_ABNORMAL_SPELL_ROOT_MASK")
+					{
+						SpellAttackSkill->SkillStatusAbnormalMask = en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ROOT_MASK;
+					}
+					else if (SkillStatusAbnormalMask == "STATUS_ABNORMAL_SPELL_SLEEP_MASK")
+					{
+						SpellAttackSkill->SkillStatusAbnormalMask = en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_SLEEP_MASK;
+					}
+					else if (SkillStatusAbnormalMask == "STATUS_ABNORMAL_SPELL_WINTER_BINDING_MASK")
+					{
+						SpellAttackSkill->SkillStatusAbnormalMask = en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_WINTER_BINDING_MASK;
+					}
+					else if (SkillStatusAbnormalMask == "STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE_MASK")
+					{
+						SpellAttackSkill->SkillStatusAbnormalMask = en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE_MASK;
 					}
 
 					if (SkillKind == "SKILL_KIND_SPELL_SKILL")
@@ -1811,6 +1903,7 @@ void CDataManager::LoadDataShootingSkill(wstring LoadFileName)
 					string SkillKind = AttackSkillFiled["SkillKind"].GetString();
 					string SkillName = AttackSkillFiled["SkillName"].GetString();
 					string SkillStatusAbnormal = AttackSkillFiled["SkillStatusAbnormal"].GetString();
+					string SkillStatusAbnormalMask = AttackSkillFiled["SkillStatusAbnormalMask"].GetString();
 					int SkillLevel = AttackSkillFiled["SkillLevel"].GetInt();
 					int SkillMinDamage = AttackSkillFiled["SkillMinDamage"].GetInt();
 					int SkillMaxDamage = AttackSkillFiled["SkillMaxDamage"].GetInt();
@@ -1829,7 +1922,12 @@ void CDataManager::LoadDataShootingSkill(wstring LoadFileName)
 					if (SkillStatusAbnormal == "STATUS_ABNORMAL_NONE")
 					{
 						ShootingAttackSkill->SkillStatusAbnormal = en_GameObjectStatusType::STATUS_ABNORMAL_NONE;
-					}					
+					}	
+
+					if (SkillStatusAbnormalMask == "STATUS_ABNORMAL_NONE")
+					{
+						ShootingAttackSkill->SkillStatusAbnormalMask = en_GameObjectStatusType::STATUS_ABNORMAL_NONE;
+					}
 
 					if (SkillKind == "SKILL_KIND_RANGE_SKILL")
 					{
@@ -1897,6 +1995,7 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 					string SkillKind = AttackSkillFiled["SkillKind"].GetString();
 					string SkillName = AttackSkillFiled["SkillName"].GetString();
 					string SkillStatusAbnormal = AttackSkillFiled["SkillStatusAbnormal"].GetString();
+					string SkillStatusAbnormalMask = AttackSkillFiled["SkillStatusAbnormalMask"].GetString();
 					int SkillLevel = AttackSkillFiled["SkillLevel"].GetInt();
 					int SkillMinDamage = AttackSkillFiled["SkillMinDamage"].GetInt();
 					int SkillMaxDamage = AttackSkillFiled["SkillMaxDamage"].GetInt();
@@ -1924,6 +2023,19 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 					else if (SkillStatusAbnormal == "STATUS_ABNORMAL_DISCIPLINE_JUDGMENT")
 					{
 						DisciplineAttackSkill->SkillStatusAbnormal = en_GameObjectStatusType::STATUS_ABNORMAL_DISCIPLINE_JUDGMENT;
+					}
+
+					if (SkillStatusAbnormalMask == "STATUS_ABNORMAL_NONE")
+					{
+						DisciplineAttackSkill->SkillStatusAbnormalMask = en_GameObjectStatusType::STATUS_ABNORMAL_NONE;
+					}					
+					else if (SkillStatusAbnormalMask == "STATUS_ABNORMAL_DISCIPLINE_ROOT_MASK")
+					{
+						DisciplineAttackSkill->SkillStatusAbnormalMask = en_GameObjectStatusType::STATUS_ABNORMAL_DISCIPLINE_ROOT_MASK;
+					}
+					else if (SkillStatusAbnormalMask == "STATUS_ABNORMAL_DISCIPLINE_JUDGMENT_MASK")
+					{
+						DisciplineAttackSkill->SkillStatusAbnormalMask = en_GameObjectStatusType::STATUS_ABNORMAL_DISCIPLINE_JUDGMENT_MASK;
 					}
 
 					if (SkillKind == "SKILL_KIND_SPELL_SKILL")
