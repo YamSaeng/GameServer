@@ -169,161 +169,19 @@ bool CSkill::Update()
 			{
 				_SkillInfo->SkillRemainTime = 0;
 
-				switch (_SkillInfo->SkillType)
+				if (_SkillInfo->SkillStatusAbnormal != en_GameObjectStatusType::STATUS_ABNORMAL_NONE)
 				{
-				case en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE:
-					{
-						// 충격 해제 버프 삭제
-						CMessage* ResBufDeBufOffPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBufOff(_Owner->_GameObjectInfo.ObjectId, true, _SkillInfo->SkillType);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResBufDeBufOffPacket);
-						ResBufDeBufOffPacket->Free();
-					}
-					break;
-				case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
-					{					
-						// 돌격 자세 버프 삭제
-						CMessage* ResBufDeBufOffPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBufOff(_Owner->_GameObjectInfo.ObjectId, true, _SkillInfo->SkillType);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResBufDeBufOffPacket);
-						ResBufDeBufOffPacket->Free();
-					}
-					break;			
-				case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK:
-					{
-						// 도약 공격 상태이상 해제
-						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_JUMPING_ATTACK_MASK);
-						CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId,
-							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.X,
-							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.Y,
-							_SkillInfo,
-							false, (int64)en_GameObjectStatusType::STATUS_ABNORMAL_FIGHT_JUMPING_ATTACK_MASK);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);
-						ResStatusAbnormalPacket->Free();						
-
-						// 약화효과 스킬 아이콘 해제
-						CMessage* ResBufDeBufOffPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBufOff(_Owner->_GameObjectInfo.ObjectId, false, _SkillInfo->SkillType);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResBufDeBufOffPacket);					
-						ResBufDeBufOffPacket->Free();
-					}
-					break;
-				case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE:
-					{
-						// 포획 상태 이상 해제
-						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_PROTECTION_CAPTURE_MASK);
-						CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId,
-							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.X,
-							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.Y,
-							_SkillInfo,
-							false, (int64)en_GameObjectStatusType::STATUS_ABNORMAL_PROTECTION_CAPTURE_MASK);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);
-						ResStatusAbnormalPacket->Free();					
-
-						// 약화효과 스킬 아이콘 해제
-						CMessage* ResBufDeBufOffPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBufOff(_Owner->_GameObjectInfo.ObjectId, false, _SkillInfo->SkillType);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResBufDeBufOffPacket);					
-						ResBufDeBufOffPacket->Free();
-					}
-					break;
-				case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:
-					{
-						// 마법 속박 상태이상 해제
-						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ROOT_MASK);
-						CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId,
-							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.X,
-							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.Y,
-							_SkillInfo,
-							false, (int64)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ROOT_MASK);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);
-						ResStatusAbnormalPacket->Free();					
-
-						// 약화효과 스킬 아이콘 해제
-						CMessage* ResBufDeBufOffPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBufOff(_Owner->_GameObjectInfo.ObjectId, false, _SkillInfo->SkillType);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResBufDeBufOffPacket);					
-						ResBufDeBufOffPacket->Free();
-					}
-					break;
-				case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
-					{
-						// 마법 얼음사슬 상태이상 해제
-						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_CHAIN_MASK);
-
-						float DebufMovingSpeed = _Owner->_GameObjectInfo.ObjectStatInfo.MaxSpeed * _SkillInfo->SkillDebufMovingSpeed * 0.01f;
-
-						_Owner->_GameObjectInfo.ObjectStatInfo.Speed += DebufMovingSpeed;						
-
-						CMessage* ResChangeObjectStatPacket = G_NetworkManager->GetGameServer()->MakePacketResChangeObjectStat(_Owner->_GameObjectInfo.ObjectId,
-							_Owner->_GameObjectInfo.ObjectStatInfo);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResChangeObjectStatPacket);
-						ResChangeObjectStatPacket->Free();
-
-						CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId,
-							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.X,
-							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.Y,
-							_SkillInfo,
-							false, (int64)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_CHAIN_MASK);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);
-						ResStatusAbnormalPacket->Free();					
-
-						// 약화효과 스킬 아이콘 해제
-						CMessage* ResBufDeBufOffPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBufOff(_Owner->_GameObjectInfo.ObjectId, false, _SkillInfo->SkillType);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResBufDeBufOffPacket);					
-						ResBufDeBufOffPacket->Free();
-					}
-					break;
-				case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:
-					{
-						// 마법 냉기파동 상태이상 해제
-						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_WAVE_MASK);
-						CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId,
-							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.X,
-							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.Y,
-							_SkillInfo,
-							false, (int64)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_WAVE_MASK);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);
-						ResStatusAbnormalPacket->Free();					
-
-						// 약화효과 스킬 아이콘 해제
-						CMessage* ResBufDeBufOffPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBufOff(_Owner->_GameObjectInfo.ObjectId, false, _SkillInfo->SkillType);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResBufDeBufOffPacket);					
-						ResBufDeBufOffPacket->Free();
-					}
-					break;
-				case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
-					{
-						// 마법 낙뢰 상태이상 해제
-						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE_MASK);
-						CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId,
-							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.X,
-							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.Y,
-							_SkillInfo,
-							false, (int64)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE_MASK);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);
-						ResStatusAbnormalPacket->Free();
-
-						// 약화효과 스킬 아이콘 해제
-						CMessage* ResBufDeBufOffPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBufOff(_Owner->_GameObjectInfo.ObjectId, false, _SkillInfo->SkillType);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResBufDeBufOffPacket);					
-						ResBufDeBufOffPacket->Free();
-					}
-					break;
-				case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:
-					{
-						// 수양 속박 상태이상 해제
-						_Owner->ReleaseStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_DISCIPLINE_ROOT_MASK);
-						CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId,
-							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.X,
-							_Owner->_GameObjectInfo.ObjectPositionInfo.Position.Y,
-							_SkillInfo,
-							false, (int64)en_GameObjectStatusType::STATUS_ABNORMAL_DISCIPLINE_ROOT_MASK);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResStatusAbnormalPacket);
-						ResStatusAbnormalPacket->Free();						
-
-						// 약화효과 스킬 아이콘 해제
-						CMessage* ResBufDeBufOffPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBufOff(_Owner->_GameObjectInfo.ObjectId, false, _SkillInfo->SkillType);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResBufDeBufOffPacket);					
-						ResBufDeBufOffPacket->Free();
-					}
-					break;				
+					_Owner->ReleaseStatusAbnormal((int64)_SkillInfo->SkillStatusAbnormalMask);
+					CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId,
+						_Owner->_GameObjectInfo.ObjectPositionInfo.Position.X,
+						_Owner->_GameObjectInfo.ObjectPositionInfo.Position.Y,
+						_SkillInfo,
+						false, (int64)_SkillInfo->SkillStatusAbnormalMask);
 				}
+
+				CMessage* ResBufDeBufOffPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBufOff(_Owner->_GameObjectInfo.ObjectId, true, _SkillInfo->SkillType);
+				G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResBufDeBufOffPacket);
+				ResBufDeBufOffPacket->Free();
 
 				return true;
 			}
