@@ -23,9 +23,9 @@ void CSwordBlade::Update()
 	if (_RectCollision != nullptr)
 	{
 		_RectCollision->Update();
-	}	
 
-	Move();
+		Move();
+	}		
 }
 
 void CSwordBlade::Move()
