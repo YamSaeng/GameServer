@@ -15,7 +15,7 @@ CGameObject::CGameObject()
 
 	_ObjectManagerArrayIndex = -1;
 	_ChannelArrayIndex = -1;
-	_NetworkState = en_ObjectNetworkState::READY;
+	_NetworkState = en_ObjectNetworkState::OBJECT_NETWORK_STATE_READY;
 	_GameObjectInfo.OwnerObjectId = 0;
 	
 	_Channel = nullptr;
@@ -35,7 +35,7 @@ CGameObject::CGameObject()
 CGameObject::CGameObject(st_GameObjectInfo GameObjectInfo)
 {
 	_GameObjectInfo = GameObjectInfo;
-	_NetworkState = en_ObjectNetworkState::READY;
+	_NetworkState = en_ObjectNetworkState::OBJECT_NETWORK_STATE_READY;
 	_GameObjectInfo.OwnerObjectId = 0;
 }
 
@@ -59,7 +59,7 @@ void CGameObject::PushedOutStatusAbnormalCheck()
 
 void CGameObject::Update()
 {
-	if (_NetworkState == en_ObjectNetworkState::LEAVE)
+	if (_NetworkState == en_ObjectNetworkState::OBJECT_NETWORK_STATE_LEAVE)
 	{
 		return;
 	}
@@ -91,23 +91,30 @@ void CGameObject::Update()
 				// 서버와 클라 위치 차이 구함
 				float CheckPositionX = abs(_GameObjectInfo.ObjectPositionInfo.Position.X - PositionX);
 				float CheckPositionY = abs(_GameObjectInfo.ObjectPositionInfo.Position.Y - PositionY);
-						
+				
+				vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
+
 				if (CheckPositionX < 1.0f && CheckPositionY < 1.0f)
 				{					
 					_GameObjectInfo.ObjectPositionInfo.MoveDirection.X = DirectionX;
 					_GameObjectInfo.ObjectPositionInfo.MoveDirection.Y = DirectionY;
 
-					_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;
+					_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::MOVING;					
+
+					CMessage* ResMovePacket = G_NetworkManager->GetGameServer()->MakePacketResMove(_GameObjectInfo.ObjectId,
+						_GameObjectInfo.ObjectPositionInfo.LookAtDireciton,
+						_GameObjectInfo.ObjectPositionInfo.MoveDirection,
+						_GameObjectInfo.ObjectPositionInfo.Position);
+					G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIds, ResMovePacket);
+					ResMovePacket->Free();
 				}	
 				else if (CheckPositionX >= 1.0f || CheckPositionY >= 1.0f)
 				{
-					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
-
 					CMessage* ResMoveStopPacket = G_NetworkManager->GetGameServer()->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
 						_GameObjectInfo.ObjectPositionInfo.Position.X,
 						_GameObjectInfo.ObjectPositionInfo.Position.Y);
 					G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIds, ResMoveStopPacket);
-					ResMoveStopPacket->Free();					
+					ResMoveStopPacket->Free();
 				}
 			}
 			break;
@@ -126,16 +133,13 @@ void CGameObject::Update()
 				float CheckPositionX = abs(_GameObjectInfo.ObjectPositionInfo.Position.X - PositionX);
 				float CheckPositionY = abs(_GameObjectInfo.ObjectPositionInfo.Position.Y - PositionY);
 
-				if (CheckPositionX > 0.2f || CheckPositionY > 0.2f)
-				{
-					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
+				vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldAroundPlayers(this);
 
-					CMessage* ResMoveStopPacket = G_NetworkManager->GetGameServer()->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
-						_GameObjectInfo.ObjectPositionInfo.Position.X,
-						_GameObjectInfo.ObjectPositionInfo.Position.Y);
-					G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIds, ResMoveStopPacket);
-					ResMoveStopPacket->Free();
-				}
+				CMessage* ResMoveStopPacket = G_NetworkManager->GetGameServer()->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
+					_GameObjectInfo.ObjectPositionInfo.Position.X,
+					_GameObjectInfo.ObjectPositionInfo.Position.Y);
+				G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIds, ResMoveStopPacket);
+				ResMoveStopPacket->Free();				
 			}
 			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SELECT_SKILL_CHARACTERISTIC:
