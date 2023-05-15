@@ -189,9 +189,10 @@ enum class en_StateChange : int16
 
 enum class en_ObjectNetworkState : int8
 {
-	READY,	
-	LIVE,
-	LEAVE
+	OBJECT_NETWORK_STATE_READY,	
+	OBJECT_NETWORK_STATE_LIVE,
+	OBJECT_NETWORK_STATE_CHARACTER_SELECT,
+	OBJECT_NETWORK_STATE_LEAVE
 };
 
 enum class en_InventoryManager : int8
@@ -669,14 +670,15 @@ enum class en_GameObjectJobType : int16
 	GAMEOBJECT_JOB_TYPE_ITEM_MP_HEAL,
 
 	GAMEOBJECT_JOB_TYPE_ON_EQUIPMENT,	
-	GAMEOBJECT_JOB_TYPE_OFF_EQUIPMENT,
+	GAMEOBJECT_JOB_TYPE_OFF_EQUIPMENT,	
 
 	GAMEOBJECT_JOB_TYPE_CHANNEL_PARTY_INVITE,
 	GAMEOBJECT_JOB_TYPE_CHANNEL_PARTY_INVITE_ACCEPT,
 	GAMEOBJECT_JOB_TYPE_CHANNEL_PARTY_INVITE_REJECT,
 	GAMEOBJECT_JOB_TYPE_CHANNEL_PARTY_QUIT,
 	GAMEOBJECT_JOB_TYPE_CHANNEL_PARTY_BANISH,
-	GAMEOBJECT_JOB_TYPE_CHANNEL_PARTY_LEADER_MANDATE,
+	GAMEOBJECT_JOB_TYPE_CHANNEL_PARTY_LEADER_MANDATE,	
+	GAMEOBJECT_JOB_TYPE_CHANNEL_MENU,
 	GAMEOBJECT_JOB_TYPE_CHANNEL_OBJECT_SPAWN,
 	GAMEOBJECT_JOB_TYPE_CHANNEL_OBJECT_DESPAWN,
 	GAMEOBJECT_JOB_TYPE_CHANNEL_PLAYER_ENTER,
@@ -779,6 +781,12 @@ enum class en_CollisionPosition : int8
 	COLLISION_POSITION_OBJECT,
 	COLLISION_POSITION_SKILL_MIDDLE,
 	COLLISION_POSITION_SKILL_FRONT
+};
+
+enum class en_MenuType : int8
+{
+	MENU_TYPE_NONE,
+	MENU_TYPE_CHARACTER_CHOICE
 };
 
 
@@ -2331,8 +2339,9 @@ struct st_ItemInfo
 struct st_SkillInfo
 {
 	bool IsSkillLearn;       // 스킬을 배웠는지에 대한 여부
-	bool CanSkillUse;		 // 스킬을 사용 할 수 있는지 여부
+	bool CanSkillUse;		 // 스킬을 사용 할 수 있는지 여부	
 	en_GameObjectStatusType SkillStatusAbnormal; // 스킬의 상태이상 적용 값
+	en_GameObjectStatusType SkillStatusAbnormalMask; // 스킬의 상태이상 해제 적용 값
 	en_SkillKinds SkillKind; // 스킬 데미지 타입 종류 ( 물리, 마법, 원거리 )	
 	en_SkillCharacteristic SkillCharacteristic; // 스킬 특성
 	en_SkillLargeCategory SkillLargeCategory; // 스킬 대분류
