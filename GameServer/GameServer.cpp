@@ -577,6 +577,9 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_PARTY_BANISH:
 		PacketProcReqPartyBanish(SessionID, Message);
 		break;
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_MENU:
+		PacketProcReqMenu(SessionID, Message);
+		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_CS_GAME_REQ_HEARTBEAT:
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_PONG:
@@ -3112,6 +3115,65 @@ void CGameServer::PacketProcReqPartyBanish(int64 SessionID, CMessage* Message)
 	ReturnSession(Session);
 }
 
+void CGameServer::PacketProcReqMenu(int64 SessionID, CMessage* Message)
+{
+	// 그룹 추방 요청 처리
+	st_Session* Session = FindSession(SessionID);
+
+	if (Session)
+	{
+		do
+		{
+			int64 AccountId;
+			int64 PlayerDBId;
+
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountId;
+
+			// AccountId가 맞는지 확인
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> PlayerDBId;
+
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			// 조종하고 있는 플레이어가 있는지 확인 
+			if (MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			int8 MenuType;
+			*Message >> MenuType;
+
+			st_GameObjectJob* MenuJob = MakeGameObjectMenu(MenuType, MyPlayer);
+			MyPlayer->GetChannel()->_ChannelJobQue.Enqueue(MenuJob);
+		} while (0);
+	}
+
+	ReturnSession(Session);
+}
+
 void CGameServer::PacketProcReqItemLooting(int64 SessionId, CMessage* Message)
 {
 	// 아이템 줍기 처리
@@ -4451,7 +4513,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 
 			SendPacket(MyPlayer->_SessionId, ResCharacterInfoMessage);			
 
-			MyPlayer->_NetworkState = en_ObjectNetworkState::LIVE;			
+			MyPlayer->_NetworkState = en_ObjectNetworkState::OBJECT_NETWORK_STATE_LIVE;			
 
 		} while (0);
 	}
@@ -5065,6 +5127,30 @@ CGameServerMessage* CGameServer::MakePacketResLogin(bool& Status, int8& PlayerCo
 	}
 
 	return LoginMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketMyCharacterInfos(int8& CharacterCount, int32* MyPlayerIndexes)
+{
+	CGameServerMessage* CharacterInfoMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (CharacterInfoMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	CharacterInfoMessage->Clear();
+
+	*CharacterInfoMessage << (int16)en_PACKET_S2C_GAME_CHARACTER_INFOS;
+	*CharacterInfoMessage << CharacterCount;
+
+	for (int i = 0; i < SESSION_CHARACTER_MAX; i++)
+	{
+		if (G_ObjectManager->_PlayersArray[MyPlayerIndexes[i]] != nullptr)
+		{
+			*CharacterInfoMessage << G_ObjectManager->_PlayersArray[MyPlayerIndexes[i]]->_GameObjectInfo;
+		}
+	}
+
+	return CharacterInfoMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketResCreateCharacter(bool IsSuccess, st_GameObjectInfo& CreateCharacterObjectInfo)
@@ -5686,6 +5772,24 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobPartyBanish(CGameObject* ReqPart
 	PartyBanishJob->GameObjectJobMessage = PartyInviteMessage;
 
 	return PartyBanishJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectMenu(int8 MenuType, CGameObject* MenuReqGameObject)
+{
+	st_GameObjectJob* MenuJob = G_ObjectManager->GameObjectJobCreate();
+	MenuJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_MENU;
+
+	CGameServerMessage* MenuJobMessage = CGameServerMessage::GameServerMessageAlloc();
+	MenuJobMessage->Clear();
+
+	*MenuJobMessage << MenuType;	
+	*MenuJobMessage << &MenuReqGameObject;
+
+	MenuJob->GameObjectJobMessage = MenuJobMessage;
+
+	return MenuJob;
+
+	return nullptr;
 }
 
 CGameServerMessage* CGameServer::MakePacketResEnterGame(bool EnterGameSuccess, st_GameObjectInfo* ObjectInfo, Vector2Int* SpawnPosition)
@@ -7038,6 +7142,22 @@ CGameServerMessage* CGameServer::MakePacketResPartyLeaderMandate(int64 PerviousP
 	*ResPartyLeaderMandateMessage << NewPartyLeaderObjectID;
 
 	return ResPartyLeaderMandateMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketResMenu(int8 MenuType)
+{
+	CGameServerMessage* ResMenuMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResMenuMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResMenuMessage->Clear();
+
+	*ResMenuMessage << (int16)en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_MENU;
+	*ResMenuMessage << MenuType;	
+
+	return ResMenuMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketResRayCasting(int64 ObjectID, vector<st_RayCatingPosition>& RayCastingPositions)
