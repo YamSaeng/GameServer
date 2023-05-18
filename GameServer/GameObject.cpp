@@ -141,6 +141,24 @@ void CGameObject::Update()
 				G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIds, ResMoveStopPacket);
 				ResMoveStopPacket->Free();				
 			}
+			break;	
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_LOOK_AT_DIRECTION:
+			{
+				float LookAtDirectionX;
+				*GameObjectJob->GameObjectJobMessage >> LookAtDirectionX;
+
+				float LookAtDirectionY;
+				*GameObjectJob->GameObjectJobMessage >> LookAtDirectionY;
+
+				_GameObjectInfo.ObjectPositionInfo.LookAtDireciton.X = LookAtDirectionX;
+				_GameObjectInfo.ObjectPositionInfo.LookAtDireciton.Y = LookAtDirectionY;
+
+				vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldAroundPlayers(this);
+
+				CMessage* ResLookAtDirection = G_NetworkManager->GetGameServer()->MakePacketResFaceDirection(_GameObjectInfo.ObjectId, LookAtDirectionX, LookAtDirectionY);
+				G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIds, ResLookAtDirection);
+				ResLookAtDirection->Free();
+			}
 			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SELECT_SKILL_CHARACTERISTIC:
 			{
