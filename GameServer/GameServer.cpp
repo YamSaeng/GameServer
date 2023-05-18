@@ -466,6 +466,9 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_CHARACTER_INFO:
 		PacketProcReqCharacterInfo(SessionID, Message);
 		break;	
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_FACE_DIRECTION:
+		PacketProcReqLookAtDirection(SessionID, Message);
+		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_MOVE:
 		PacketProcReqMove(SessionID, Message);
 		break;
@@ -975,6 +978,68 @@ void CGameServer::PacketProcReqMoveStop(int64 SessionID, CMessage* Message)
 		
 			st_GameObjectJob* MoveStopJob = MakeGameObjectJobMoveStop(PositionX, PositionY, ObjectState);
 			MyPlayer->_GameObjectJobQue.Enqueue(MoveStopJob);			
+		} while (0);
+	}
+
+	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcReqLookAtDirection(int64 SessionID, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionID);
+
+	if (Session)
+	{
+		do
+		{
+			// 클라가 로그인중인지 확인
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			// AccountId를 뽑고
+			int64 AccountId;
+			*Message >> AccountId;
+
+			// 클라에 들어있는 AccountId와 뽑은 AccoountId가 다른지 확인
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			// PlayerDBId를 뽑는다.
+			int64 PlayerDBId;
+			*Message >> PlayerDBId;
+
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			// 클라가 조종중인 캐릭터가 있는지 확인
+			if (MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				// 조종중인 캐릭터가 있으면 ObjectId가 다른지 확인
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			float DirectionX;
+			*Message >> DirectionX;
+			float DirectionY;
+			*Message >> DirectionY;			
+
+			st_GameObjectJob* LookAtDirectionJob = MakeGameObjectJobLookAtDirection(DirectionX, DirectionY);
+			MyPlayer->_GameObjectJobQue.Enqueue(LookAtDirectionJob);
 		} while (0);
 	}
 
@@ -4885,6 +4950,22 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobMoveStop(float PositionX, float 
 	MoveStopJob->GameObjectJobMessage = MoveStopMessage;
 
 	return MoveStopJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobLookAtDirection(float DirectionX, float DirectionY)
+{
+	st_GameObjectJob* LookAtDirectionJob = G_ObjectManager->GameObjectJobCreate();
+	LookAtDirectionJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_LOOK_AT_DIRECTION;
+
+	CGameServerMessage* LookAtDirectionMessage = CGameServerMessage::GameServerMessageAlloc();
+	LookAtDirectionMessage->Clear();
+
+	*LookAtDirectionMessage << DirectionX;
+	*LookAtDirectionMessage << DirectionY;	
+
+	LookAtDirectionJob->GameObjectJobMessage = LookAtDirectionMessage;
+
+	return LookAtDirectionJob;
 }
 
 st_GameObjectJob* CGameServer::MakeGameObjectJobSelectSkillCharacteristic(int8 SelectChracteristicType)

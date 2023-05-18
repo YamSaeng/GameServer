@@ -120,6 +120,7 @@ private:
 	// 캐릭터 정보 요청 처리
 	//-------------------------------------------------------------
 	void PacketProcReqCharacterInfo(int64 SessionID, CMessage* Message);
+
 	
 	//---------------------------------------------------------
 	// 이동 요청 처리
@@ -129,6 +130,10 @@ private:
 	// 이동 멈춤 처리
 	//------------------------------------------------------------
 	void PacketProcReqMoveStop(int64 SessionID, CMessage* Message);
+	//------------------------------------------------------------
+	// 바라보는 방향 처리
+	//------------------------------------------------------------
+	void PacketProcReqLookAtDirection(int64 SessionID, CMessage* Message);
 	//---------------------------------------------------------------
 	// 공격 요청 처리
 	//---------------------------------------------------------------
@@ -318,6 +323,7 @@ private:
 	st_GameObjectJob* MakeGameObjectJobLeaveChannelPlayer(CGameObject* LeavePlayerObject, int32* PlayerIndexes);
 	st_GameObjectJob* MakeGameObjectJobMove(float DirectionX, float DirectionY, float PositionX, float PositionY, int8 GameObjectState);
 	st_GameObjectJob* MakeGameObjectJobMoveStop(float PositionX, float PositionY, int8 GameObjectState);			
+	st_GameObjectJob* MakeGameObjectJobLookAtDirection(float DirectionX, float DirectionY);
 	//-------------------------------------------------
 	// 스킬 특성 선택 잡 생성 함수
 	//-------------------------------------------------
