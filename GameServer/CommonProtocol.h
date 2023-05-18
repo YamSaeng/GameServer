@@ -110,6 +110,15 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_CHARACTER_INFO,	
 	
 	//------------------------------------------------------------
+	// 오브젝트가 바라보는 방향 저장
+	// int64 AccountID
+	// int64 PlayerDBID
+	// float DirectionX
+	// float DirectionY
+	//------------------------------------------------------------
+	en_PACKET_C2S_FACE_DIRECTION,
+
+	//------------------------------------------------------------
 	// 게임서버 캐릭터가 바라보는 방향 전송	
 	// int64 PlayerID
 	// float DirectionX
