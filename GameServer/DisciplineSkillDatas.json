@@ -100,7 +100,7 @@
               "HealSkill": [
                 {
                   "SkillType": "SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT",
-                  "SkillKind": "SKILL_KIND_SPELL_SKILL",
+                  "SkillKind": "SKILL_KIND_HEAL_SKILL",
                   "SkillName": "Ä¡À¯ÀÇ ºû",
                   "SkillMaxLevel": 1,
                   "SkillMinHeal": 100,
@@ -116,7 +116,7 @@
                 },
                 {
                   "SkillType": "SKILL_DISCIPLINE_ACTIVE_HEAL_RECOVERY_LIGHT",
-                  "SkillKind": "SKILL_KIND_SPELL_SKILL",
+                  "SkillKind": "SKILL_KIND_HEAL_SKILL",
                   "SkillName": "ÄèÀ¯ÀÇ ºû",
                   "SkillMaxLevel": 1,
                   "SkillMinHeal": 200,
@@ -132,7 +132,7 @@
                 },
                 {
                   "SkillType": "SKILL_DISCIPLINE_ACTIVE_HEAL_VITALITY_LIGHT",
-                  "SkillKind": "SKILL_KIND_SPELL_SKILL",
+                  "SkillKind": "SKILL_KIND_HEAL_BUF_SKILL",
                   "SkillName": "Àç»ýÀÇ ºû",
                   "SkillMaxLevel": 1,
                   "SkillMinHeal": 10,
@@ -148,7 +148,7 @@
                 },
                 {
                   "SkillType": "SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_GRACE",
-                  "SkillKind": "SKILL_KIND_SPELL_SKILL",
+                  "SkillKind": "SKILL_KIND_HEAL_SKILL",
                   "SkillName": "Ä¡À¯ÀÇ ÀºÃÑ",
                   "SkillMaxLevel": 1,
                   "SkillMinHeal": 600,
@@ -164,7 +164,7 @@
                 },
                 {
                   "SkillType": "SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND",
-                  "SkillKind": "SKILL_KIND_SPELL_SKILL",
+                  "SkillKind": "SKILL_KIND_HEAL_SKILL",
                   "SkillName": "Ä¡À¯ÀÇ ¹Ù¶÷",
                   "SkillMaxLevel": 1,
                   "SkillMinHeal": 200,
@@ -180,7 +180,7 @@
                 },
                 {
                   "SkillType": "SKILL_DISCIPLINE_ACTIVE_HEAL_RECOVERY_WIND",
-                  "SkillKind": "SKILL_KIND_SPELL_SKILL",
+                  "SkillKind": "SKILL_KIND_HEAL_SKILL",
                   "SkillName": "ÄèÀ¯ÀÇ ¹Ù¶÷",
                   "SkillMaxLevel": 1,
                   "SkillMinHeal": 400,
