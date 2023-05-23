@@ -951,8 +951,8 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 					float SkillDistance = AttackSkillFiled["SkillDistance"].GetFloat();
 					int32 SkillMotionTime = AttackSkillFiled["SkillMotionTime"].GetInt();
 					float SkillTargetEffectTime = AttackSkillFiled["SkillTargetEffectTime"].GetFloat();
-					int8 SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetInt();
-					int8 SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetInt();
+					float SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetFloat();
+					float SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetFloat();
 					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();
 					string NextComboSkill = AttackSkillFiled["NextComboSkill"].GetString();					
 
@@ -1188,8 +1188,8 @@ void CDataManager::LoadDataProtectionSkill(wstring LoadFileName)
 					float SkillDistance = AttackSkillFiled["SkillDistance"].GetFloat();
 					int32 SkillMotionTime = AttackSkillFiled["SkillMotionTime"].GetInt();
 					float SkillTargetEffectTime = AttackSkillFiled["SkillTargetEffectTime"].GetFloat();
-					int8 SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetInt();
-					int8 SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetInt();
+					float SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetFloat();
+					float SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetFloat();
 					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();
 					string NextComboSkill = AttackSkillFiled["NextComboSkill"].GetString();					
 
@@ -1434,8 +1434,8 @@ void CDataManager::LoadDataAssassinationSkill(wstring LoadFileName)
 					float SkillDistance = AttackSkillFiled["SkillDistance"].GetFloat();
 					int32 SkillMotionTime = AttackSkillFiled["SkillMotionTime"].GetInt();
 					float SkillTargetEffectTime = AttackSkillFiled["SkillTargetEffectTime"].GetFloat();
-					int8 SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetInt();
-					int8 SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetInt();
+					float SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetFloat();
+					float SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetFloat();
 					int64 SkillDamageOverTime = AttackSkillFiled["SkillDebufDamageOverTime"].GetInt64();
 					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();
 					string NextComboSkill = AttackSkillFiled["NextComboSkill"].GetString();					
@@ -1672,8 +1672,8 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 					float SkillDistance = AttackSkillFiled["SkillDistance"].GetFloat();
 					int32 SkillMotionTime = AttackSkillFiled["SkillMotionTime"].GetInt();
 					float SkillTargetEffectTime = AttackSkillFiled["SkillTargetEffectTime"].GetFloat();
-					int8 SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetInt();
-					int8 SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetInt();
+					float SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetFloat();
+					float SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetFloat();
 					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();					
 					string NextComboSkill = AttackSkillFiled["NextComboSkill"].GetString();					
 
@@ -1909,8 +1909,8 @@ void CDataManager::LoadDataShootingSkill(wstring LoadFileName)
 					int32 SkillMotionTime = AttackSkillFiled["SkillMotionTime"].GetInt();
 					float SkillTargetEffectTime = AttackSkillFiled["SkillTargetEffectTime"].GetFloat();
 					int64 SkillDebufTime = AttackSkillFiled["SkillDebufTime"].GetInt64();
-					int8 SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetInt();
-					int8 SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetInt();
+					float SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetFloat();
+					float SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetFloat();
 					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();										
 
 					if (SkillStatusAbnormal == "STATUS_ABNORMAL_NONE")
@@ -2003,8 +2003,8 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 					int32 SkillMotionTime = AttackSkillFiled["SkillMotionTime"].GetInt();
 					float SkillTargetEffectTime = AttackSkillFiled["SkillTargetEffectTime"].GetFloat();
 					int64 SkillDebufTime = AttackSkillFiled["SkillDebufTime"].GetInt64();
-					int8 SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetInt();
-					int8 SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetInt();
+					float SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetFloat();
+					float SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetFloat();
 					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();
 					string NextComboSkill = AttackSkillFiled["NextComboSkill"].GetString();					
 
@@ -2100,6 +2100,7 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 					DisciplineHealSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_DISCIPLINE_ACTIVE_HEAL;
 
 					string SkillType = HealSkillFiled["SkillType"].GetString();
+					string SkillKind = HealSkillFiled["SkillKind"].GetString();
 					string SkillName = HealSkillFiled["SkillName"].GetString();
 					int8 SkillMaxLevel = (int8)HealSkillFiled["SkillMaxLevel"].GetInt();
 					int SkillMinHeal = HealSkillFiled["SkillMinHeal"].GetInt();
@@ -2136,6 +2137,15 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 					else if (SkillType == "SKILL_DISCIPLINE_ACTIVE_HEAL_RECOVERY_WIND")
 					{
 						DisciplineHealSkill->SkillType = en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_RECOVERY_WIND;
+					}
+
+					if (SkillKind == "SKILL_KIND_HEAL_SKILL")
+					{
+						DisciplineHealSkill->SkillKind = en_SkillKinds::SKILL_KIND_HEAL_SKILL;
+					}
+					else if (SkillKind == "SKILL_KIND_HEAL_BUF_SKILL")
+					{
+						DisciplineHealSkill->SkillKind = en_SkillKinds::SKILL_KIND_HEAL_BUF_SKILL;
 					}
 
 					DisciplineHealSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_DISCIPLINE;
@@ -2179,33 +2189,33 @@ void CDataManager::LoadDataMonsterSkill(wstring LoadFileName)
 	{		
 		for (auto& GoblinMonsterSkills : Filed["GoblinSkillList"].GetArray())
 		{
-			for (auto& GoblinPassiveSkillFiled : GoblinMonsterSkills["PassiveSkillList"].GetArray())
+			for (auto& PassiveSkillFiled : GoblinMonsterSkills["PassiveSkillList"].GetArray())
 			{
 
 			}
 
-			for (auto& GoblinActiveSkillFiled : GoblinMonsterSkills["ActiveSkillList"].GetArray())
+			for (auto& AttackSkillFiled : GoblinMonsterSkills["ActiveSkillList"].GetArray())
 			{
 				st_SkillInfo* GoblinActiveSkill = new st_SkillInfo();
 				GoblinActiveSkill->SkillLargeCategory = en_SkillLargeCategory::SKILL_LARGE_CATEGORY_MONSTER_MELEE;
 				GoblinActiveSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
 
-				string SkillType = GoblinActiveSkillFiled["SkillType"].GetString();
-				string SkillName = GoblinActiveSkillFiled["SkillName"].GetString();
-				int8 SkillMaxLevel = (int8)GoblinActiveSkillFiled["SkillMaxLevel"].GetInt();
-				bool SkillIsDamage = GoblinActiveSkillFiled["SkillIsDamage"].GetBool();
-				int SkillMinDamage = GoblinActiveSkillFiled["SkillMinDamage"].GetInt();
-				int SkillMaxDamage = GoblinActiveSkillFiled["SkillMaxDamage"].GetInt();
-				int SkillCoolTime = GoblinActiveSkillFiled["SkillCoolTime"].GetInt();
-				int SkillCastingTime = GoblinActiveSkillFiled["SkillCastingTime"].GetInt();
-				int64 SkillDurationTime = GoblinActiveSkillFiled["SkillDurationTime"].GetInt64();
-				int64 SkillDotTime = GoblinActiveSkillFiled["SkillDotTime"].GetInt64();
-				float SkillDistance = GoblinActiveSkillFiled["SkillDistance"].GetFloat();
-				int32 SkillMotionTime = GoblinActiveSkillFiled["SkillMotionTime"].GetInt();
-				float SkillTargetEffectTime = GoblinActiveSkillFiled["SkillTargetEffectTime"].GetFloat();
-				int8 SkillDebufAttackSpeed = (int8)GoblinActiveSkillFiled["SkillDebufAttackSpeed"].GetInt();
-				int8 SkillDebufMovingSpeed = (int8)GoblinActiveSkillFiled["SkillDebufMovingSpeed"].GetInt();
-				int8 StatusAbnormalityProbability = (int8)GoblinActiveSkillFiled["StatusAbnormalityProbability"].GetInt();				
+				string SkillType = AttackSkillFiled["SkillType"].GetString();
+				string SkillName = AttackSkillFiled["SkillName"].GetString();
+				int8 SkillMaxLevel = (int8)AttackSkillFiled["SkillMaxLevel"].GetInt();
+				bool SkillIsDamage = AttackSkillFiled["SkillIsDamage"].GetBool();
+				int SkillMinDamage = AttackSkillFiled["SkillMinDamage"].GetInt();
+				int SkillMaxDamage = AttackSkillFiled["SkillMaxDamage"].GetInt();
+				int SkillCoolTime = AttackSkillFiled["SkillCoolTime"].GetInt();
+				int SkillCastingTime = AttackSkillFiled["SkillCastingTime"].GetInt();
+				int64 SkillDurationTime = AttackSkillFiled["SkillDurationTime"].GetInt64();
+				int64 SkillDotTime = AttackSkillFiled["SkillDotTime"].GetInt64();
+				float SkillDistance = AttackSkillFiled["SkillDistance"].GetFloat();
+				int32 SkillMotionTime = AttackSkillFiled["SkillMotionTime"].GetInt();
+				float SkillTargetEffectTime = AttackSkillFiled["SkillTargetEffectTime"].GetFloat();
+				float SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetFloat();
+				float SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetFloat();
+				int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();				
 
 				if (SkillType == "SKILL_GOBLIN_ACTIVE_MELEE_DEFAULT_ATTACK")
 				{
