@@ -88,14 +88,14 @@ struct Vector2
 
 	float SizeSquared()
 	{
-		return X * X + Y * Y;
+		return (X * X) + (Y * Y);
 	}
 
 	// 정규화
 	Vector2 Normalize()
 	{
 		float SquaredSum = SizeSquared();
-
+		
 		if (SquaredSum != 0)
 		{
 			const __m128 fOneHalf = _mm_set_ss(0.5f);
@@ -138,7 +138,7 @@ struct Vector2
 	}
 
 	// 크기
-	float Size(Vector2 Vector)
+	float Size()
 	{
 		return sqrt(SizeSquared());
 	}
