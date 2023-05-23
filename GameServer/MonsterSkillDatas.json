@@ -12,6 +12,8 @@
             {
               "SkillType": "SKILL_GOBLIN_ACTIVE_MELEE_DEFAULT_ATTACK",
               "SkillName": "고블린 일반 근접 공격",
+              "SkillMaxLevel": 1,
+              "SkillIsDamage": true,
               "SkillMinDamage": 0,
               "SkillMaxDamage": 0,
               "SkillCoolTime": 1000,
