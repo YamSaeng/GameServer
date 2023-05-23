@@ -837,6 +837,7 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				string SkillType = PublicAttackSkillListFiled["SkillType"].GetString();
 				string SkillKind = PublicAttackSkillListFiled["SkillKind"].GetString();
 				string SkillName = PublicAttackSkillListFiled["SkillName"].GetString();
+				bool SkillIsDamage = PublicAttackSkillListFiled["SkillIsDamage"].GetBool();
 				int SkillMinDamage = PublicAttackSkillListFiled["SkillMinDamage"].GetInt();
 				int SkillMaxDamage = PublicAttackSkillListFiled["SkillMaxDamage"].GetInt();
 				int SkillCoolTime = PublicAttackSkillListFiled["SkillCoolTime"].GetInt();
@@ -862,7 +863,8 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				}
 
 				PublicSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_PUBLIC;
-				PublicSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());				
+				PublicSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());	
+				PublicSkill->SkillIsDamage = SkillIsDamage;
 				PublicSkill->SkillMinDamage = SkillMinDamage;
 				PublicSkill->SkillMaxDamage = SkillMaxDamage;
 				PublicSkill->SkillCoolTime = SkillCoolTime;
@@ -923,24 +925,7 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 		{
 			for (auto& PassiveSkillListFiled : FightSkillListFiled["PassiveSkillList"].GetArray())
 			{
-				st_SkillInfo* FightPassiveSkill = new st_SkillInfo();
 
-				int8 SkillNumber = (int8)PassiveSkillListFiled["SkillNumber"].GetInt();
-				string SkillType = PassiveSkillListFiled["SkillType"].GetString();
-				string SkillName = PassiveSkillListFiled["SkillName"].GetString();
-				int8 SkillMaxLevel = PassiveSkillListFiled["SkillMaxLevel"].GetInt();				
-
-				FightPassiveSkill->SkillNumber = SkillNumber;
-				FightPassiveSkill->SkillMaxLevel = SkillMaxLevel;
-				FightPassiveSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());				
-				FightPassiveSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_FIGHT;
-
-				if (SkillType == "SKILL_FIGHT_TWO_HAND_SWORD_MASTER")
-				{
-					FightPassiveSkill->SkillType = en_SkillType::SKILL_FIGHT_TWO_HAND_SWORD_MASTER;
-				}					
-
-				_FightSkillDatas.insert(pair<int16, st_SkillInfo*>((int16)FightPassiveSkill->SkillType, FightPassiveSkill));
 			}
 
 			for (auto& ActiveSkillListFiled : FightSkillListFiled["ActiveSkillList"].GetArray())
@@ -955,7 +940,8 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 					string SkillName = AttackSkillFiled["SkillName"].GetString();
 					string SkillStatusAbnormal = AttackSkillFiled["SkillStatusAbnormal"].GetString();
 					string SkillStatusAbnormalMask = AttackSkillFiled["SkillStatusAbnormalMask"].GetString();
-					int8 SkillMaxLevel = AttackSkillFiled["SkillMaxLevel"].GetInt();
+					int8 SkillMaxLevel = (int8)AttackSkillFiled["SkillMaxLevel"].GetInt();
+					bool SkillIsDamage = AttackSkillFiled["SkillIsDamage"].GetBool();
 					int SkillMinDamage = AttackSkillFiled["SkillMinDamage"].GetInt();
 					int SkillMaxDamage = AttackSkillFiled["SkillMaxDamage"].GetInt();
 					int SkillCoolTime = AttackSkillFiled["SkillCoolTime"].GetInt();
@@ -1048,7 +1034,8 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 
 					FightAttackSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_FIGHT;
 					FightAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());					
-					FightAttackSkill->SkillMaxLevel = SkillMaxLevel;					
+					FightAttackSkill->SkillMaxLevel = SkillMaxLevel;	
+					FightAttackSkill->SkillIsDamage = SkillIsDamage;
 					FightAttackSkill->SkillMinDamage = SkillMinDamage;
 					FightAttackSkill->SkillMaxDamage = SkillMaxDamage;
 					FightAttackSkill->SkillCoolTime = SkillCoolTime;
@@ -1093,7 +1080,7 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 					string SkillType = BufSkillFiled["SkillType"].GetString();
 					string SkillKind = BufSkillFiled["SkillKind"].GetString();
 					string SkillName = BufSkillFiled["SkillName"].GetString();
-					int SkillMaxLevel = BufSkillFiled["SkillMaxLevel"].GetInt();
+					int8 SkillMaxLevel = (int8)BufSkillFiled["SkillMaxLevel"].GetInt();
 
 					int IncreaseMinAttackPoint = BufSkillFiled["IncreaseMinAttackPoint"].GetInt();
 					int IncreaseMaxAttackPoint = BufSkillFiled["IncreaseMaxAttackPoint"].GetInt();
@@ -1190,7 +1177,8 @@ void CDataManager::LoadDataProtectionSkill(wstring LoadFileName)
 					string SkillName = AttackSkillFiled["SkillName"].GetString();
 					string SkillStatusAbnormal = AttackSkillFiled["SkillStatusAbnormal"].GetString();
 					string SkillStatusAbnormalMask = AttackSkillFiled["SkillStatusAbnormalMask"].GetString();
-					int8 SkillMaxLevel = AttackSkillFiled["SkillMaxLevel"].GetInt();
+					int8 SkillMaxLevel = (int8)AttackSkillFiled["SkillMaxLevel"].GetInt();
+					bool SkillIsDamage = AttackSkillFiled["SkillIsDamage"].GetBool();
 					int SkillMinDamage = AttackSkillFiled["SkillMinDamage"].GetInt();
 					int SkillMaxDamage = AttackSkillFiled["SkillMaxDamage"].GetInt();
 					int SkillCoolTime = AttackSkillFiled["SkillCoolTime"].GetInt();
@@ -1296,6 +1284,7 @@ void CDataManager::LoadDataProtectionSkill(wstring LoadFileName)
 					ProtectionAttackSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_PROTECTION;
 					ProtectionAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());					
 					ProtectionAttackSkill->SkillMaxLevel = SkillMaxLevel;
+					ProtectionAttackSkill->SkillIsDamage = SkillIsDamage;
 					ProtectionAttackSkill->SkillMinDamage = SkillMinDamage;
 					ProtectionAttackSkill->SkillMaxDamage = SkillMaxDamage;
 					ProtectionAttackSkill->SkillCoolTime = SkillCoolTime;
@@ -1336,7 +1325,7 @@ void CDataManager::LoadDataProtectionSkill(wstring LoadFileName)
 					string SkillType = BufSkillFiled["SkillType"].GetString();
 					string SkillKind = BufSkillFiled["SkillKind"].GetString();
 					string SkillName = BufSkillFiled["SkillName"].GetString();
-					int SkillMaxLevel = BufSkillFiled["SkillMaxLevel"].GetInt();
+					int8 SkillMaxLevel = (int8)BufSkillFiled["SkillMaxLevel"].GetInt();
 
 					int IncreaseMinAttackPoint = BufSkillFiled["IncreaseMinAttackPoint"].GetInt();
 					int IncreaseMaxAttackPoint = BufSkillFiled["IncreaseMaxAttackPoint"].GetInt();
@@ -1434,7 +1423,8 @@ void CDataManager::LoadDataAssassinationSkill(wstring LoadFileName)
 					string SkillName = AttackSkillFiled["SkillName"].GetString();
 					string SkillStatusAbnormal = AttackSkillFiled["SkillStatusAbnormal"].GetString();
 					string SkillStatusAbnormalMask = AttackSkillFiled["SkillStatusAbnormalMask"].GetString();
-					int SkillLevel = AttackSkillFiled["SkillLevel"].GetInt();
+					int8 SkillMaxLevel = (int8)AttackSkillFiled["SkillMaxLevel"].GetInt();
+					bool SkillIsDamage = AttackSkillFiled["SkillIsDamage"].GetBool();
 					int SkillMinDamage = AttackSkillFiled["SkillMinDamage"].GetInt();
 					int SkillMaxDamage = AttackSkillFiled["SkillMaxDamage"].GetInt();
 					int SkillCoolTime = AttackSkillFiled["SkillCoolTime"].GetInt();
@@ -1532,7 +1522,8 @@ void CDataManager::LoadDataAssassinationSkill(wstring LoadFileName)
 
 					AssassinationAttackSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_ASSASSINATION;
 					AssassinationAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());					
-					AssassinationAttackSkill->SkillLevel = SkillLevel;
+					AssassinationAttackSkill->SkillMaxLevel = SkillMaxLevel;
+					AssassinationAttackSkill->SkillIsDamage = SkillIsDamage;
 					AssassinationAttackSkill->SkillMinDamage = SkillMinDamage;
 					AssassinationAttackSkill->SkillMaxDamage = SkillMaxDamage;
 					AssassinationAttackSkill->SkillCoolTime = SkillCoolTime;
@@ -1572,7 +1563,7 @@ void CDataManager::LoadDataAssassinationSkill(wstring LoadFileName)
 					string SkillType = BufSkillFiled["SkillType"].GetString();
 					string SkillKind = BufSkillFiled["SkillKind"].GetString();
 					string SkillName = BufSkillFiled["SkillName"].GetString();
-					int SkillMaxLevel = BufSkillFiled["SkillMaxLevel"].GetInt();
+					int8 SkillMaxLevel = (int8)BufSkillFiled["SkillMaxLevel"].GetInt();
 
 					int IncreaseMinAttackPoint = BufSkillFiled["IncreaseMinAttackPoint"].GetInt();
 					int IncreaseMaxAttackPoint = BufSkillFiled["IncreaseMaxAttackPoint"].GetInt();
@@ -1670,7 +1661,8 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 					string SkillName = AttackSkillFiled["SkillName"].GetString();
 					string SkillStatusAbnormal = AttackSkillFiled["SkillStatusAbnormal"].GetString();
 					string SkillStatusAbnormalMask = AttackSkillFiled["SkillStatusAbnormalMask"].GetString();
-					int SkillLevel = AttackSkillFiled["SkillLevel"].GetInt();
+					int8 SkillMaxLevel = (int8)AttackSkillFiled["SkillMaxLevel"].GetInt();
+					bool SkillIsDamage = AttackSkillFiled["SkillIsDamage"].GetBool();
 					int SkillMinDamage = AttackSkillFiled["SkillMinDamage"].GetInt();
 					int SkillMaxDamage = AttackSkillFiled["SkillMaxDamage"].GetInt();
 					int SkillCoolTime = AttackSkillFiled["SkillCoolTime"].GetInt();
@@ -1795,7 +1787,8 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 
 					SpellAttackSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_SPELL;
 					SpellAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());					
-					SpellAttackSkill->SkillLevel = SkillLevel;
+					SpellAttackSkill->SkillMaxLevel = SkillMaxLevel;
+					SpellAttackSkill->SkillIsDamage = SkillIsDamage;
 					SpellAttackSkill->SkillMinDamage = SkillMinDamage;
 					SpellAttackSkill->SkillMaxDamage = SkillMaxDamage;
 					SpellAttackSkill->SkillCoolTime = SkillCoolTime;
@@ -1834,7 +1827,7 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 					string SkillType = BufSkillFiled["SkillType"].GetString();
 					string SkillKind = BufSkillFiled["SkillKind"].GetString();
 					string SkillName = BufSkillFiled["SkillName"].GetString();
-					int SkillLevel = BufSkillFiled["SkillLevel"].GetInt();
+					int8 SkillMaxLevel = (int8)BufSkillFiled["SkillMaxLevel"].GetInt();
 					int SkillCoolTime = BufSkillFiled["SkillCoolTime"].GetInt();
 					int SkillCastingTime = BufSkillFiled["SkillCastingTime"].GetInt();
 					int64 SkillDurationTime = BufSkillFiled["SkillDurationTime"].GetInt64();
@@ -1859,7 +1852,7 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 
 					SpellBufSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_SPELL;
 					SpellBufSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());					
-					SpellBufSkill->SkillLevel = SkillLevel;
+					SpellBufSkill->SkillMaxLevel = SkillMaxLevel;
 					SpellBufSkill->SkillCoolTime = SkillCoolTime;
 					SpellBufSkill->SkillCastingTime = SkillCastingTime;
 					SpellBufSkill->SkillDurationTime = SkillDurationTime;
@@ -1904,7 +1897,8 @@ void CDataManager::LoadDataShootingSkill(wstring LoadFileName)
 					string SkillName = AttackSkillFiled["SkillName"].GetString();
 					string SkillStatusAbnormal = AttackSkillFiled["SkillStatusAbnormal"].GetString();
 					string SkillStatusAbnormalMask = AttackSkillFiled["SkillStatusAbnormalMask"].GetString();
-					int SkillLevel = AttackSkillFiled["SkillLevel"].GetInt();
+					int8 SkillMaxLevel = (int8)AttackSkillFiled["SkillMaxLevel"].GetInt();
+					bool SkillIsDamage = AttackSkillFiled["SkillIsDamage"].GetBool();
 					int SkillMinDamage = AttackSkillFiled["SkillMinDamage"].GetInt();
 					int SkillMaxDamage = AttackSkillFiled["SkillMaxDamage"].GetInt();
 					int SkillCoolTime = AttackSkillFiled["SkillCoolTime"].GetInt();
@@ -1941,7 +1935,8 @@ void CDataManager::LoadDataShootingSkill(wstring LoadFileName)
 
 					ShootingAttackSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_SHOOTING;
 					ShootingAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());					
-					ShootingAttackSkill->SkillLevel = SkillLevel;
+					ShootingAttackSkill->SkillMaxLevel = SkillMaxLevel;
+					ShootingAttackSkill->SkillIsDamage = SkillIsDamage;
 					ShootingAttackSkill->SkillMinDamage = SkillMinDamage;
 					ShootingAttackSkill->SkillMaxDamage = SkillMaxDamage;
 					ShootingAttackSkill->SkillCoolTime = SkillCoolTime;
@@ -1996,7 +1991,8 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 					string SkillName = AttackSkillFiled["SkillName"].GetString();
 					string SkillStatusAbnormal = AttackSkillFiled["SkillStatusAbnormal"].GetString();
 					string SkillStatusAbnormalMask = AttackSkillFiled["SkillStatusAbnormalMask"].GetString();
-					int SkillLevel = AttackSkillFiled["SkillLevel"].GetInt();
+					int8 SkillMaxLevel = (int8)AttackSkillFiled["SkillMaxLevel"].GetInt();
+					bool SkillIsDamage = AttackSkillFiled["SkillIsDamage"].GetBool();
 					int SkillMinDamage = AttackSkillFiled["SkillMinDamage"].GetInt();
 					int SkillMaxDamage = AttackSkillFiled["SkillMaxDamage"].GetInt();
 					int SkillCoolTime = AttackSkillFiled["SkillCoolTime"].GetInt();
@@ -2070,7 +2066,8 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 
 					DisciplineAttackSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_DISCIPLINE;
 					DisciplineAttackSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());					
-					DisciplineAttackSkill->SkillLevel = SkillLevel;
+					DisciplineAttackSkill->SkillMaxLevel = SkillMaxLevel;
+					DisciplineAttackSkill->SkillIsDamage = SkillIsDamage;
 					DisciplineAttackSkill->SkillMinDamage = SkillMinDamage;
 					DisciplineAttackSkill->SkillMaxDamage = SkillMaxDamage;
 					DisciplineAttackSkill->SkillCoolTime = SkillCoolTime;
@@ -2104,7 +2101,7 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 
 					string SkillType = HealSkillFiled["SkillType"].GetString();
 					string SkillName = HealSkillFiled["SkillName"].GetString();
-					int SkillLevel = HealSkillFiled["SkillLevel"].GetInt();
+					int8 SkillMaxLevel = (int8)HealSkillFiled["SkillMaxLevel"].GetInt();
 					int SkillMinHeal = HealSkillFiled["SkillMinHeal"].GetInt();
 					int SkillMaxHeal = HealSkillFiled["SkillMaxHeal"].GetInt();
 					int SkillCoolTime = HealSkillFiled["SkillCoolTime"].GetInt();
@@ -2143,7 +2140,7 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 
 					DisciplineHealSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_DISCIPLINE;
 					DisciplineHealSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());					
-					DisciplineHealSkill->SkillLevel = SkillLevel;
+					DisciplineHealSkill->SkillMaxLevel = SkillMaxLevel;
 					DisciplineHealSkill->SkillMinHealPoint = SkillMinHeal;
 					DisciplineHealSkill->SkillMaxHealPoint = SkillMaxHeal;
 					DisciplineHealSkill->SkillCoolTime = SkillCoolTime;
@@ -2195,7 +2192,8 @@ void CDataManager::LoadDataMonsterSkill(wstring LoadFileName)
 
 				string SkillType = GoblinActiveSkillFiled["SkillType"].GetString();
 				string SkillName = GoblinActiveSkillFiled["SkillName"].GetString();
-				int SkillLevel = GoblinActiveSkillFiled["SkillLevel"].GetInt();
+				int8 SkillMaxLevel = (int8)GoblinActiveSkillFiled["SkillMaxLevel"].GetInt();
+				bool SkillIsDamage = GoblinActiveSkillFiled["SkillIsDamage"].GetBool();
 				int SkillMinDamage = GoblinActiveSkillFiled["SkillMinDamage"].GetInt();
 				int SkillMaxDamage = GoblinActiveSkillFiled["SkillMaxDamage"].GetInt();
 				int SkillCoolTime = GoblinActiveSkillFiled["SkillCoolTime"].GetInt();
@@ -2216,7 +2214,8 @@ void CDataManager::LoadDataMonsterSkill(wstring LoadFileName)
 
 				GoblinActiveSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_NONE;
 				GoblinActiveSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());
-				GoblinActiveSkill->SkillLevel = SkillLevel;
+				GoblinActiveSkill->SkillMaxLevel = SkillMaxLevel;
+				GoblinActiveSkill->SkillIsDamage = SkillIsDamage;
 				GoblinActiveSkill->SkillMinDamage = SkillMinDamage;
 				GoblinActiveSkill->SkillMaxDamage = SkillMaxDamage;
 				GoblinActiveSkill->SkillCoolTime = SkillCoolTime;
