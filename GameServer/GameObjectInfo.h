@@ -83,6 +83,7 @@ enum class en_GameObjectType : int16
 	OBJECT_SKILL,
 	OBJECT_SKILL_SWORD_BLADE,
 	OBJECT_SKILL_FLAME_BOLT,
+	OBJECT_SKILL_DIVINE_BOLT,
 
 	OBJECT_ITEM,
 	OBJECT_ITEM_WEAPON,
@@ -427,6 +428,7 @@ enum class en_SkillKinds : int8
 	SKILL_KIND_GLOBAL_SKILL,
 	SKILL_KIND_MELEE_SKILL,
 	SKILL_KIND_SPELL_SKILL,
+	SKILL_KIND_HEAL_SKILL,
 	SKILL_KIND_RANGE_SKILL,
 	SKILL_KIND_BUF_SKILL,
 	SKILL_KIND_DEBUF_SKILL,
@@ -434,6 +436,7 @@ enum class en_SkillKinds : int8
 	SKILL_KIND_MELEE_DEBUF_SKILL,
 	SKILL_KIND_SPELL_BUF_SKILL,
 	SKILL_KIND_SPELL_DEBUF_SKILL,
+	SKILL_KIND_HEAL_BUF_SKILL,
 	SKILL_KIND_RANGE_BUF_SKILL,
 	SKILL_KIND_RANGE_DEBUF_SKILL
 };
@@ -486,6 +489,7 @@ enum class en_ResourceName : int16
 
 	CLIENT_GAMEOBJECT_SKILL_SWORD_BLADE,
 	CLIENT_GAMEOBJECT_SKILL_FLAME_BOLT,
+	CLIENT_GAMEOBJECT_SKILL_DIVINE_BOLT,
 
 	CLIENT_GAMEOBJECT_CRAFTING_TABLE_FURNACE,
 	CLIENT_GAMEOBJECT_CRAFTING_TABLE_SAWMILL,
@@ -2368,11 +2372,12 @@ struct st_SkillInfo
 	float SkillTargetEffectTime; // 스킬 이펙트 시간
 	int32 SkillMinHealPoint; // 최소 치유량
 	int32 SkillMaxHealPoint; // 최대 치유량
+	bool SkillIsDamage;		 // 피해량 적용 여부
 	int32 SkillMinDamage;		// 최소 공격력
 	int32 SkillMaxDamage;		// 최대 공격력	
 	bool SkillDebuf;			// 스킬 디버프 여부	
-	int8 SkillDebufAttackSpeed; // 스킬 공격속도 감소 수치
-	int8 SkillDebufMovingSpeed; // 스킬 이동속도 감소 수치
+	float SkillDebufAttackSpeed; // 스킬 공격속도 감소 수치
+	float SkillDebufMovingSpeed; // 스킬 이동속도 감소 수치
 	bool SkillDebufStun;		// 스킬 스턴 여부
 	bool SkillDebufPushAway;	// 스킬 밀려남 여부
 	bool SkillDebufRoot;		// 스킬 이동불가 여부	
@@ -2418,6 +2423,7 @@ struct st_SkillInfo
 		SkillTargetEffectTime = 0;
 		SkillMinHealPoint = 0;
 		SkillMaxHealPoint = 0;
+		SkillIsDamage = false;
 		SkillMinDamage = 0;
 		SkillMaxDamage = 0;
 		SkillDebuf = false;
