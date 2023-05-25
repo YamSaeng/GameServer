@@ -12,6 +12,8 @@
 #include "Map.h"
 #include "Potato.h"
 #include "SwordBlade.h"
+#include "FlameBolt.h"
+#include "DivineBolt.h"
 #include "ObjectManager.h"
 #include "NetworkManager.h"
 #include "DataManager.h"
@@ -435,60 +437,7 @@ void CChannel::Update()
 					CGameObject* EnterObject;
 					*GameObjectJob->GameObjectJobMessage >> &EnterObject;										
 										
-					switch (EnterObject->_GameObjectInfo.ObjectType)
-					{
-					case en_GameObjectType::OBJECT_GOBLIN:					
-					case en_GameObjectType::OBJECT_WALL:
-					case en_GameObjectType::OBJECT_STONE:
-					case en_GameObjectType::OBJECT_TREE:
-					case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
-					case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
-					case en_GameObjectType::OBJECT_CROP_POTATO:
-					case en_GameObjectType::OBJECT_CROP_CORN:
-					case en_GameObjectType::OBJECT_SKILL_SWORD_BLADE:
-						{				
-							EnterChannel(EnterObject, &EnterObject->_SpawnPosition);
-						}
-						break;
-					case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
-					case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
-					case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
-					case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:										
-					case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
-					case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
-					case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
-					case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
-					case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
-					case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
-					case en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL:
-					case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET:
-					case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
-					case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
-					case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
-					case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
-					case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
-						{
-							CItem* Item = (CItem*)EnterObject;
-
-							bool IsItemEnterChannel = EnterChannel(EnterObject, &EnterObject->_SpawnPosition);
-							if (IsItemEnterChannel == true)
-							{			
-								Item->SetDestoryTime(30000);
-								Item->ItemSetTarget(Item->_GameObjectInfo.OwnerObjectType, Item->_GameObjectInfo.OwnerObjectId);
-							}
-							else
-							{
-								G_ObjectManager->ObjectReturn(Item);
-							}
-
-							vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Map->GetFieldAroundPlayers(Item);
-
-							CMessage* ItemSpawnPacket = G_NetworkManager->GetGameServer()->MakePacketResObjectSpawn(Item);
-							G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ItemSpawnPacket);
-							ItemSpawnPacket->Free();
-						}
-						break;											
-					}																		
+					EnterChannel(EnterObject, &EnterObject->_SpawnPosition);
 				}
 				break;
 			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_OBJECT_LEAVE:
@@ -976,6 +925,8 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 		}
 		break;
 	case en_GameObjectType::OBJECT_SKILL_SWORD_BLADE:
+	case en_GameObjectType::OBJECT_SKILL_FLAME_BOLT:
+	case en_GameObjectType::OBJECT_SKILL_DIVINE_BOLT:
 		{
 			for (int32 i = 0; i < en_Channel::CHANNEL_SKILL_OBJECT_MAX; i++)
 			{
@@ -1857,7 +1808,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 		{
 			CGeneralMerchantNPC* GeneralMerchantNPC = dynamic_cast<CGeneralMerchantNPC*>(EnterChannelGameObject);
 			if (GeneralMerchantNPC != nullptr)
-			{				
+			{	
+				GeneralMerchantNPC->_SpawnPosition = SpawnPosition;
 				GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 
 				GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.Position.X = GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
@@ -1893,7 +1845,9 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 			CMonster* EnterChannelMonster = dynamic_cast<CMonster*>(EnterChannelGameObject);
 			if (EnterChannelMonster != nullptr)
 			{
+				EnterChannelMonster->_SpawnPosition = SpawnPosition;
 				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
+
 				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position.X = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
 				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;				
 								
@@ -1929,9 +1883,11 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 			CEnvironment* EnterChannelEnvironment = dynamic_cast<CEnvironment*>(EnterChannelGameObject);
 			if (EnterChannelEnvironment != nullptr)
 			{
+				EnterChannelEnvironment->_SpawnPosition = SpawnPosition;
 				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
+
 				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position.X = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
-				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;				
+				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;
 								
 				EnterChannelEnvironment->GetRectCollision()->SetActive(true);	
 				EnterChannelEnvironment->GetRectCollision()->Init(en_CollisionPosition::COLLISION_POSITION_OBJECT, EnterChannelEnvironment->_GameObjectInfo.ObjectType,
@@ -1959,8 +1915,9 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 	case en_GameObjectType::OBJECT_SKILL_SWORD_BLADE:
 		{
 			CSwordBlade* SwordBlade = dynamic_cast<CSwordBlade*>(EnterChannelGameObject);
-			if (SwordBlade)
+			if (SwordBlade != nullptr)
 			{
+				SwordBlade->_SpawnPosition = SpawnPosition;
 				SwordBlade->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;				
 								
 				SwordBlade->GetRectCollision()->SetActive(true);
@@ -1968,7 +1925,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 					SwordBlade->_GameObjectInfo.ObjectPositionInfo.Position,
 					SwordBlade->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton, SwordBlade);
 
-				_ChannelCraftingTableArrayIndexs.Pop(&SwordBlade->_ChannelArrayIndex);
+				_ChannelSkillObjectArrayIndexs.Pop(&SwordBlade->_ChannelArrayIndex);
 				_ChannelSkillObjectArray[SwordBlade->_ChannelArrayIndex] = SwordBlade;
 
 				_Map->ApplyMove(SwordBlade, SpawnPosition);
@@ -1978,55 +1935,105 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 			}
 		}
 		break;
+	case en_GameObjectType::OBJECT_SKILL_FLAME_BOLT:
+		{
+			CFlameBolt* FlameBolt = dynamic_cast<CFlameBolt*>(EnterChannelGameObject);
+			if (FlameBolt != nullptr)
+			{
+				FlameBolt->_SpawnPosition = SpawnPosition;
+				FlameBolt->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
+
+				FlameBolt->GetRectCollision()->SetActive(true);
+				FlameBolt->GetRectCollision()->Init(en_CollisionPosition::COLLISION_POSITION_OBJECT, FlameBolt->_GameObjectInfo.ObjectType,
+					FlameBolt->_GameObjectInfo.ObjectPositionInfo.Position,
+					FlameBolt->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton, FlameBolt);
+
+				_ChannelSkillObjectArrayIndexs.Pop(&FlameBolt->_ChannelArrayIndex);
+				_ChannelSkillObjectArray[FlameBolt->_ChannelArrayIndex] = FlameBolt;
+
+				_Map->ApplyMove(FlameBolt, SpawnPosition);
+
+				CSector* EnterSector = _Map->GetSector(SpawnPosition);
+				EnterSector->Insert(FlameBolt);
+			}
+		}
+		break;
+	case en_GameObjectType::OBJECT_SKILL_DIVINE_BOLT:
+		{
+			CDivineBolt* DivineBolt = dynamic_cast<CDivineBolt*>(EnterChannelGameObject);
+			if (DivineBolt != nullptr)
+			{
+				DivineBolt->_SpawnPosition = SpawnPosition;
+				DivineBolt->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
+
+				DivineBolt->GetRectCollision()->SetActive(true);
+				DivineBolt->GetRectCollision()->Init(en_CollisionPosition::COLLISION_POSITION_OBJECT, DivineBolt->_GameObjectInfo.ObjectType,
+					DivineBolt->_GameObjectInfo.ObjectPositionInfo.Position,
+					DivineBolt->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton, DivineBolt);
+
+				_ChannelSkillObjectArrayIndexs.Pop(&DivineBolt->_ChannelArrayIndex);
+				_ChannelSkillObjectArray[DivineBolt->_ChannelArrayIndex] = DivineBolt;
+
+				_Map->ApplyMove(DivineBolt, SpawnPosition);
+
+				CSector* EnterSector = _Map->GetSector(SpawnPosition);
+				EnterSector->Insert(DivineBolt);
+			}
+		}
+		break;
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
 		{
-			CCraftingTable* EnterChannelCraftingTable = dynamic_cast<CCraftingTable*>(EnterChannelGameObject);
-			if (EnterChannelCraftingTable != nullptr)
+			CCraftingTable* CraftingTable = dynamic_cast<CCraftingTable*>(EnterChannelGameObject);
+			if (CraftingTable != nullptr)
 			{
-				EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-				EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.Position.X = EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
-				EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelCraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;				
-								
-				EnterChannelCraftingTable->GetRectCollision()->SetActive(true);
+				CraftingTable->_SpawnPosition = SpawnPosition;
+				CraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 
-				EnterChannelCraftingTable->Start();
+				CraftingTable->_GameObjectInfo.ObjectPositionInfo.Position.X = CraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
+				CraftingTable->_GameObjectInfo.ObjectPositionInfo.Position.Y = CraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;											
+				
+				CraftingTable->GetRectCollision()->SetActive(true);
 
-				_ChannelCraftingTableArrayIndexs.Pop(&EnterChannelCraftingTable->_ChannelArrayIndex);
-				_ChannelCraftingTableArray[EnterChannelCraftingTable->_ChannelArrayIndex] = EnterChannelCraftingTable;
+				CraftingTable->Start();
 
-				IsEnterChannel = _Map->ApplyMove(EnterChannelCraftingTable, SpawnPosition);
+				_ChannelCraftingTableArrayIndexs.Pop(&CraftingTable->_ChannelArrayIndex);
+				_ChannelCraftingTableArray[CraftingTable->_ChannelArrayIndex] = CraftingTable;
+
+				IsEnterChannel = _Map->ApplyMove(CraftingTable, SpawnPosition);
 
 				CSector* Entersector = _Map->GetSector(SpawnPosition);
-				Entersector->Insert(EnterChannelCraftingTable);
+				Entersector->Insert(CraftingTable);
 			}
 			else
 			{
-				CRASH("EnterChannelCraftingTable nullptr")
+				CRASH("CraftingTable nullptr")
 			}
 		}
 		break;
 	case en_GameObjectType::OBJECT_CROP_POTATO:
 	case en_GameObjectType::OBJECT_CROP_CORN:
 		{
-			CCrop* CropObject = dynamic_cast<CCrop*>(EnterChannelGameObject);
-			if (CropObject != nullptr)
+			CCrop* Crop = dynamic_cast<CCrop*>(EnterChannelGameObject);
+			if (Crop != nullptr)
 			{
-				CropObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-				CropObject->_GameObjectInfo.ObjectPositionInfo.Position.X = CropObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
-				CropObject->_GameObjectInfo.ObjectPositionInfo.Position.Y = CropObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;
+				Crop->_SpawnPosition = SpawnPosition;
+				Crop->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 
-				_ChannelCropArrayIndexs.Pop(&CropObject->_ChannelArrayIndex);
-				_ChannelCropArray[CropObject->_ChannelArrayIndex] = CropObject;
+				Crop->_GameObjectInfo.ObjectPositionInfo.Position.X = Crop->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
+				Crop->_GameObjectInfo.ObjectPositionInfo.Position.Y = Crop->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;
 
-				IsEnterChannel = _Map->ApplyMove(CropObject, SpawnPosition, true, false);
+				_ChannelCropArrayIndexs.Pop(&Crop->_ChannelArrayIndex);
+				_ChannelCropArray[Crop->_ChannelArrayIndex] = Crop;
+
+				IsEnterChannel = _Map->ApplyMove(Crop, SpawnPosition, true, false);
 
 				CSector* EnterSector = _Map->GetSector(SpawnPosition);
-				EnterSector->Insert(CropObject);
+				EnterSector->Insert(Crop);
 			}
 			else
 			{
-				CRASH("CropObject nullptr")
+				CRASH("Crop nullptr")
 			}			
 		}
 		break;
@@ -2049,29 +2056,43 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
 		{
 			// 아이템으로 형변환
-			CItem* EnterChannelItem = dynamic_cast<CItem*>(EnterChannelGameObject);
-			if (EnterChannelItem != nullptr)
+			CItem* Item = dynamic_cast<CItem*>(EnterChannelGameObject);
+			if (Item != nullptr)
 			{
-				EnterChannelItem->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
+				Item->_SpawnPosition = SpawnPosition;
+				Item->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 
 				// 맵 정보에 보관			
-				IsEnterChannel = _Map->ApplyMove(EnterChannelItem, SpawnPosition, false, false);
+				IsEnterChannel = _Map->ApplyMove(Item, SpawnPosition, false, false);
 
 				// 중복되지 않는 아이템의 경우에만 채널에 해당 아이템을 채널과 섹터에 저장
 				if (IsEnterChannel == true)
 				{
+					Item->SetDestoryTime(30000);
+					Item->ItemSetTarget(Item->_GameObjectInfo.OwnerObjectType, Item->_GameObjectInfo.OwnerObjectId);
+
 					// 아이템 저장
-					_ChannelItemArrayIndexs.Pop(&EnterChannelItem->_ChannelArrayIndex);
-					_ChannelItemArray[EnterChannelItem->_ChannelArrayIndex] = EnterChannelItem;
+					_ChannelItemArrayIndexs.Pop(&Item->_ChannelArrayIndex);
+					_ChannelItemArray[Item->_ChannelArrayIndex] = Item;
 
 					// 섹터 얻어서 해당 섹터에도 저장
 					CSector* EnterSector = _Map->GetSector(SpawnPosition);
-					EnterSector->Insert(EnterChannelItem);
+					EnterSector->Insert(Item);
+
+					vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Map->GetFieldAroundPlayers(Item);
+
+					CMessage* ItemSpawnPacket = G_NetworkManager->GetGameServer()->MakePacketResObjectSpawn(Item);
+					G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ItemSpawnPacket);
+					ItemSpawnPacket->Free();
+				}
+				else
+				{
+					G_ObjectManager->ObjectReturn(Item);
 				}
 			}
 			else
 			{
-				CRASH("EnterChannelItem nullptr")
+				CRASH("Item nullptr")
 			}
 		}
 		break;
@@ -2108,6 +2129,8 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 		_ChannelEnvironmentArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
 		break;
 	case en_GameObjectType::OBJECT_SKILL_SWORD_BLADE:
+	case en_GameObjectType::OBJECT_SKILL_FLAME_BOLT:
+	case en_GameObjectType::OBJECT_SKILL_DIVINE_BOLT:
 		G_ObjectManager->ObjectReturn(LeaveChannelGameObject);
 
 		_ChannelSkillObjectArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
