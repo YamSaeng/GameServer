@@ -21,6 +21,8 @@ class CGeneralMerchantNPC;
 class CWall;
 class CRectCollision;
 class CSwordBlade;
+class CFlameBolt;
+class CDivineBolt;
 
 class CObjectManager
 {
@@ -57,6 +59,8 @@ private:
 	CMemoryPoolTLS<CCorn>* _CornMemoryPool;
 
 	CMemoryPoolTLS<CSwordBlade>* _SwordBladePool;
+	CMemoryPoolTLS<CFlameBolt>* _FlameBoltPool;
+	CMemoryPoolTLS<CDivineBolt>* _DivineBoltPool;
 
 	// 오브젝트에 부여할 고유 ID값
 	int64 _GameServerObjectId;

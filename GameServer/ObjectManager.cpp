@@ -16,6 +16,8 @@
 #include "Wall.h"
 #include "RectCollision.h"
 #include "SwordBlade.h"
+#include "FlameBolt.h"
+#include "DivineBolt.h"
 #include <atlbase.h>
 
 CObjectManager::CObjectManager()
@@ -46,6 +48,8 @@ CObjectManager::CObjectManager()
 	_CornMemoryPool = new CMemoryPoolTLS<CCorn>();
 
 	_SwordBladePool = new CMemoryPoolTLS<CSwordBlade>();
+	_FlameBoltPool = new CMemoryPoolTLS<CFlameBolt>();
+	_DivineBoltPool = new CMemoryPoolTLS<CDivineBolt>();
 
 	_SkillMemoryPool = new CMemoryPoolTLS<CSkill>();
 	_SkillInfoMemoryPool = new CMemoryPoolTLS<st_SkillInfo>();	
@@ -136,6 +140,12 @@ CGameObject* CObjectManager::ObjectCreate(en_GameObjectType ObjectType)
 	case en_GameObjectType::OBJECT_SKILL_SWORD_BLADE:
 		NewObject = _SwordBladePool->Alloc();
 		break;
+	case en_GameObjectType::OBJECT_SKILL_FLAME_BOLT:
+		NewObject = _FlameBoltPool->Alloc();
+		break;
+	case en_GameObjectType::OBJECT_SKILL_DIVINE_BOLT:
+		NewObject = _DivineBoltPool->Alloc();
+		break;
 	}
 
 	if (NewObject != nullptr)
@@ -191,6 +201,12 @@ void CObjectManager::ObjectReturn(CGameObject* ReturnObject)
 			break;		
 		case en_GameObjectType::OBJECT_SKILL_SWORD_BLADE:
 			_SwordBladePool->Free((CSwordBlade*)ReturnObject);
+			break;
+		case en_GameObjectType::OBJECT_SKILL_FLAME_BOLT:
+			_FlameBoltPool->Free((CFlameBolt*)ReturnObject);
+			break;
+		case en_GameObjectType::OBJECT_SKILL_DIVINE_BOLT:
+			_DivineBoltPool->Free((CDivineBolt*)ReturnObject);
 			break;
 		}		
 	}	
