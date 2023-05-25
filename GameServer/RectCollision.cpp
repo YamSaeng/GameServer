@@ -41,6 +41,14 @@ void CRectCollision::Init(en_CollisionPosition CollisionPosition, en_GameObjectT
 	case en_GameObjectType::OBJECT_SKILL_SWORD_BLADE:
 		_Size.X = 1.0f;
 		_Size.Y = 0.5f;
+		break;		
+	case en_GameObjectType::OBJECT_SKILL_FLAME_BOLT:
+		_Size.X = 1.0f;
+		_Size.Y = 0.7f;
+		break;
+	case en_GameObjectType::OBJECT_SKILL_DIVINE_BOLT:
+		_Size.X = 1.0f;
+		_Size.Y = 0.7f;
 		break;
 	}	
 
@@ -85,6 +93,14 @@ void CRectCollision::Init(en_CollisionPosition CollisionPosition, en_SkillType S
 	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SWORD_STORM:
 		_Size.X = 4.0f;
 		_Size.Y = 1.7f;
+		break;
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_BOLT:
+		_Size.X = 2.0f;
+		_Size.X = 2.0f;
+		break;
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_WINTER_BINDING:
+		_Size.X = 5.0f;
+		_Size.Y = 5.0f;
 		break;
 	}	
 
@@ -184,27 +200,54 @@ void CRectCollision::PositionUpdate()
 	if (_OwnerObject != nullptr)
 	{
 		_Position = _OwnerObject->_GameObjectInfo.ObjectPositionInfo.Position;		
-	}	
+	}		
 	
-	_LeftTop = _Position;
-
-	_LeftDown.X = _LeftTop.X;
-	_LeftDown.Y = _LeftTop.Y - _Size.Y;
-
-	_RightTop.X = _LeftTop.X + _Size.X;
-	_RightTop.Y = _LeftTop.Y;
-
-	_RightDown.X = _LeftTop.X + _Size.X;
-	_RightDown.Y = _LeftTop.Y - _Size.Y;	
-
 	switch (_CollisionPosition)
 	{
-	case en_CollisionPosition::COLLISION_POSITION_OBJECT:
-	case en_CollisionPosition::COLLISION_POSITION_SKILL_MIDDLE:
+	case en_CollisionPosition::COLLISION_POSITION_OBJECT:	
+		_LeftTop = _Position;
+
+		_LeftDown.X = _LeftTop.X;
+		_LeftDown.Y = _LeftTop.Y - _Size.Y;
+
+		_RightTop.X = _LeftTop.X + _Size.X;
+		_RightTop.Y = _LeftTop.Y;
+
+		_RightDown.X = _LeftTop.X + _Size.X;
+		_RightDown.Y = _LeftTop.Y - _Size.Y;
+
 		_MiddlePosition.X = ((_LeftTop.X * _RightDown.Y - _LeftTop.Y * _RightDown.X) * (_LeftDown.X - _RightTop.X) - (_LeftTop.X - _RightDown.X) * (_LeftDown.X * _RightTop.Y - _LeftDown.Y * _RightTop.X)) / ((_LeftTop.X - _RightDown.X) * (_LeftDown.Y - _RightTop.Y) - (_LeftTop.Y - _RightDown.Y) * (_LeftDown.X - _RightTop.X));
 		_MiddlePosition.Y = ((_LeftTop.X * _RightDown.Y - _LeftTop.Y * _RightDown.X) * (_LeftDown.Y - _RightTop.Y) - (_LeftTop.Y - _RightDown.Y) * (_LeftDown.X * _RightTop.Y - _LeftDown.Y * _RightTop.X)) / ((_LeftTop.X - _RightDown.X) * (_LeftDown.Y - _RightTop.Y) - (_LeftTop.Y - _RightDown.Y) * (_LeftDown.X - _RightTop.X));
 		break;
+	case en_CollisionPosition::COLLISION_POSITION_SKILL_MIDDLE:
+		_MiddlePosition.X = _Position.X + _CreatePositionSize.X / 2.0f;
+		_MiddlePosition.Y = _Position.Y - _CreatePositionSize.Y / 2.0f;
+
+		_LeftTop.X = _MiddlePosition.X - _Size.X / 2.0f;
+		_LeftTop.Y = _MiddlePosition.Y + _Size.Y / 2.0f;		
+
+		_LeftDown.X = _LeftTop.X;
+		_LeftDown.Y = _LeftTop.Y - _Size.Y;
+
+		_RightTop.X = _LeftTop.X + _Size.X;
+		_RightTop.Y = _LeftTop.Y;
+
+		_RightDown.X = _LeftTop.X + _Size.X;
+		_RightDown.Y = _LeftTop.Y - _Size.Y;
+
+		break;	
 	case en_CollisionPosition::COLLISION_POSITION_SKILL_FRONT:
+		_LeftTop = _Position;
+
+		_LeftDown.X = _LeftTop.X;
+		_LeftDown.Y = _LeftTop.Y - _Size.Y;
+
+		_RightTop.X = _LeftTop.X + _Size.X;
+		_RightTop.Y = _LeftTop.Y;
+
+		_RightDown.X = _LeftTop.X + _Size.X;
+		_RightDown.Y = _LeftTop.Y - _Size.Y;
+
 		_MiddlePosition.X = _Position.X + _CreatePositionSize.X * 0.5f;
 		_MiddlePosition.Y = _Position.Y - _CreatePositionSize.Y * 0.5f;
 		break;
