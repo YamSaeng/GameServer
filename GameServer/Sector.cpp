@@ -35,6 +35,8 @@ void CSector::Insert(CGameObject* InsertGameObject)
 		_Environment.insert((CEnvironment*)InsertGameObject);
 		break;
 	case en_GameObjectType::OBJECT_SKILL_SWORD_BLADE:
+	case en_GameObjectType::OBJECT_SKILL_FLAME_BOLT:
+	case en_GameObjectType::OBJECT_SKILL_DIVINE_BOLT:
 		_SkillObjects.insert(InsertGameObject);
 		break;
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
@@ -94,6 +96,8 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 		_Environment.erase((CEnvironment*)RemoveGameObject);
 		break;	
 	case en_GameObjectType::OBJECT_SKILL_SWORD_BLADE:
+	case en_GameObjectType::OBJECT_SKILL_FLAME_BOLT:
+	case en_GameObjectType::OBJECT_SKILL_DIVINE_BOLT:
 		_SkillObjects.erase(RemoveGameObject);
 		break;
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
