@@ -9,7 +9,7 @@ CSwordBlade::CSwordBlade()
 
 	_GameObjectInfo.ObjectName = L"Ä®³¯";
 
-	_GameObjectInfo.ObjectStatInfo.Speed = 10.0f;
+	_GameObjectInfo.ObjectStatInfo.Speed = 12.0f;
 
 	_FieldOfViewDistance = 10.0f;
 }
@@ -23,7 +23,7 @@ void CSwordBlade::Update()
 	if (_RectCollision != nullptr)
 	{
 		_RectCollision->Update();
-
+		
 		Move();
 	}		
 }
@@ -54,7 +54,8 @@ void CSwordBlade::Move()
 				_Owner->_GameObjectInfo.ObjectType,
 				en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE,
 				_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage,
-				_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage);
+				_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage,
+				false);
 			CollisionObject->_GameObjectJobQue.Enqueue(DamageJob);			
 		}
 

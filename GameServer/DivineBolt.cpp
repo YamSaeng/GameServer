@@ -9,7 +9,7 @@ CDivineBolt::CDivineBolt()
 
 	_GameObjectInfo.ObjectName = L"신성한 화살";
 
-	_GameObjectInfo.ObjectStatInfo.Speed = 12.0f;
+	_GameObjectInfo.ObjectStatInfo.Speed = 15.0f;
 
 	_FieldOfViewDistance = 10.0f;
 }
