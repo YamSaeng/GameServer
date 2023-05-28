@@ -4,6 +4,8 @@
 #include "ObjectManager.h"
 #include "NetworkManager.h"
 #include "SwordBlade.h"
+#include "FlameBolt.h"
+#include "DivineBolt.h"
 #include "RectCollision.h"
 
 CSkillBox::CSkillBox()
@@ -23,7 +25,7 @@ void CSkillBox::Init()
 	_GlobalCoolTimeSkill = G_ObjectManager->SkillCreate();
 	if (_GlobalCoolTimeSkill != nullptr)
 	{	
-		_GlobalCoolTimeSkill->SetOwner(_OwnerGameObject);
+		_GlobalCoolTimeSkill->SetTarget(_OwnerGameObject);
 
 		st_SkillInfo* GlobalCoolTimeSkillInfo = G_ObjectManager->SkillInfoCreate(en_SkillType::SKILL_GLOBAL_SKILL, 1);
 		if (GlobalCoolTimeSkillInfo != nullptr)
@@ -273,30 +275,37 @@ bool CSkillBox::SelectTargetSkillUse(CGameObject* SkillUser, CSkill* Skill)
 	}
 }
 
-vector<CGameObject*> CSkillBox::CollisionSkillUse(CGameObject* SkillUser, CSkill* Skill, en_CollisionPosition CollisionPositionType, Vector2 CollisionCreatePosition, Vector2 CollisionCreateDir)
+vector<CGameObject*> CSkillBox::CollisionSkillUse(CGameObject* SkillUser, CSkill* Skill, en_CollisionPosition CollisionPositionType, Vector2 CollisionCreatePosition, Vector2 CollisionCreateDir, Vector2 CreatePositionSize)
 {	
 	vector<CGameObject*> CollisionObjects;
 
 	if (SkillUser != nullptr)
 	{
 		if (Skill != nullptr)
-		{
+		{						
 			CRectCollision* SkillCollision = G_ObjectManager->RectCollisionCreate();
 			if (SkillCollision != nullptr)
 			{	
 				switch (CollisionPositionType)
 				{
-				case en_CollisionPosition::COLLISION_POSITION_DEFAULT:
-					SkillCollision->Init(en_CollisionPosition::COLLISION_POSITION_DEFAULT, Skill->GetSkillInfo()->SkillType,
-						CollisionCreatePosition + CollisionCreateDir,
+				case en_CollisionPosition::COLLISION_POSITION_OBJECT:
+					SkillCollision->Init(en_CollisionPosition::COLLISION_POSITION_OBJECT, Skill->GetSkillInfo()->SkillType,
+						CollisionCreatePosition,
 						CollisionCreateDir);
 					break;
-				case en_CollisionPosition::COLLISION_POSITION_MIDDLE:
-					SkillCollision->Init(en_CollisionPosition::COLLISION_POSITION_MIDDLE, Skill->GetSkillInfo()->SkillType,
+				case en_CollisionPosition::COLLISION_POSITION_SKILL_MIDDLE:
+					SkillCollision->Init(en_CollisionPosition::COLLISION_POSITION_SKILL_MIDDLE, Skill->GetSkillInfo()->SkillType,
 						CollisionCreatePosition,
-						Vector2::Zero);
+						Vector2::Zero,
+						SkillUser->GetRectCollision()->_Size);
 					break;				
-				}			
+				case en_CollisionPosition::COLLISION_POSITION_SKILL_FRONT:
+					SkillCollision->Init(en_CollisionPosition::COLLISION_POSITION_SKILL_FRONT, Skill->GetSkillInfo()->SkillType,
+						CollisionCreatePosition,
+						CollisionCreateDir,
+						CreatePositionSize);
+					break;
+				}							
 
 				SkillUser->GetChannel()->ChannelColliderOBBCheckAroundObject(SkillCollision, SkillUser->GetFieldOfViewObjects(), CollisionObjects, SkillUser->_GameObjectInfo.ObjectId);				
 
@@ -307,14 +316,74 @@ vector<CGameObject*> CSkillBox::CollisionSkillUse(CGameObject* SkillUser, CSkill
 					G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, CollisionSpawnPacket);
 					CollisionSpawnPacket->Free();
 				}				
-			}			
+			}	
+
+			G_ObjectManager->RectCollisionReturn(SkillCollision);
 		}		
 	}
 
 	return CollisionObjects;
 }
 
-void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en_SkillCharacteristic SkillCharacteristic, en_SkillType SkillType, float AttackDirectionX, float AttackDirectionY)
+void CSkillBox::ShockReleaseUse(CGameObject* User, CSkill* ShockReleaseSkill)
+{
+	for (auto DebufSkillIter : User->_DeBufs)
+	{
+		// 기절 상태이상 해제
+		if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_WRATH_ATTACK
+			|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_LAST_ATTACK
+			|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH
+			|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_COUNTER
+			|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SWORD_STORM			
+			|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE
+			|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE
+			|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_POISON_STUN
+			|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP)
+		{
+			DebufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
+		}
+	}
+
+	// 충격해제 버프 생성
+	CSkill* NewBufSkill = G_ObjectManager->SkillCreate();
+	st_SkillInfo* NewShockReleaseSkillInfo = G_ObjectManager->SkillInfoCreate(ShockReleaseSkill->GetSkillInfo()->SkillType, ShockReleaseSkill->GetSkillInfo()->SkillLevel);
+	NewBufSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_STATUS_ABNORMAL_SKILL, NewShockReleaseSkillInfo);
+	NewBufSkill->StatusAbnormalDurationTimeStart();
+
+	// 충격해제 버프 등록
+	User->AddBuf(NewBufSkill);
+
+	vector<st_FieldOfViewInfo> AroundPlayers = User->GetChannel()->GetMap()->GetFieldAroundPlayers(User, false);
+
+	// 클라에게 버프 등록 알림
+	CMessage* ResBufDebufSkillPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBuf(User->_GameObjectInfo.ObjectId, true, NewBufSkill->GetSkillInfo());
+	G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, ResBufDebufSkillPacket);
+	ResBufDebufSkillPacket->Free();
+
+	// 상태이상 해제 알림
+	CMessage* ResObjectStateChangePacket = G_NetworkManager->GetGameServer()->MakePacketResChangeObjectState(User->_GameObjectInfo.ObjectId,
+		User->_GameObjectInfo.ObjectPositionInfo.State);
+	G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, ResObjectStateChangePacket);
+	ResObjectStateChangePacket->Free();
+}
+
+void CSkillBox::MoveStatusAbnormalRelease(CGameObject* User)
+{
+	// 이동 불가와 이동 속도 감소 효과를 모두 삭제
+	for (auto DebufSkillIter : User->_DeBufs)
+	{
+		if (DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK
+			|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE
+			|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN
+			|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT
+			|| DebufSkillIter.second->GetSkillInfo()->SkillType == en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT)
+		{
+			DebufSkillIter.second->GetSkillInfo()->SkillRemainTime = 0;
+		}
+	}
+}
+
+void CSkillBox::SkillProcess(CGameObject* SkillUser, en_SkillCharacteristic SkillCharacteristic, en_SkillType SkillType, float WeaponPositionX, float WeaponPositionY, float AttackDirectionX, float AttackDirectionY)
 {
 	bool IsNextCombo = false;
 
@@ -331,10 +400,13 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 			{
 				SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton.X = AttackDirectionX;
 				SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton.Y = AttackDirectionY;
-
+				
 				// 기술을 사용 할 수 있는지 확인			
 				if (Skill->GetSkillInfo()->CanSkillUse == true)
 				{
+					bool IsDamage = false;
+					bool IsBackAttack = false;
+
 					vector<st_FieldOfViewInfo> AroundPlayers = SkillUser->GetChannel()->GetMap()->GetFieldAroundPlayers(SkillUser, false);
 
 					CMessage* ResAnimationPlayPacket = G_NetworkManager->GetGameServer()->MakePacketResAnimationPlay(SkillUser->_GameObjectInfo.ObjectId,
@@ -358,12 +430,12 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 							case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT:
 							case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT:
 								CollisionObjects = CollisionSkillUse(SkillUser, Skill,
-									en_CollisionPosition::COLLISION_POSITION_DEFAULT,
-									SkillUser->_GameObjectInfo.ObjectPositionInfo.Position, Vector2(AttackDirectionX, AttackDirectionY));
+									en_CollisionPosition::COLLISION_POSITION_SKILL_FRONT,
+									SkillUser->_GameObjectInfo.ObjectPositionInfo.Position, Vector2(AttackDirectionX, AttackDirectionY), SkillUser->GetRectCollision()->_Size);
 								break;						
 							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:
 								CollisionObjects = CollisionSkillUse(SkillUser, Skill,
-									en_CollisionPosition::COLLISION_POSITION_MIDDLE,
+									en_CollisionPosition::COLLISION_POSITION_SKILL_MIDDLE,
 									SkillUser->_GameObjectInfo.ObjectPositionInfo.Position, Vector2::Zero);
 								break;
 							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE:
@@ -395,12 +467,8 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 									{
 										CollisionObjects.push_back(SkillUser->_SelectTarget);
 
-										bool IsBehind = Vector2::IsBehind(SkillUser->_GameObjectInfo.ObjectPositionInfo.Position,
-											SkillUser->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position, SkillUser->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton);
-										if (IsBehind == true)
-										{
-											
-										}
+										IsBackAttack = Vector2::IsBehind(SkillUser->_GameObjectInfo.ObjectPositionInfo.Position,
+											SkillUser->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position, SkillUser->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton);										
 									}									
 								}
 								break;
@@ -448,64 +516,83 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 							st_SkillInfo* MeleeSkillInfo = Skill->GetSkillInfo();
 
 							switch (Skill->GetSkillInfo()->SkillType)
-							{
-							case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
-								break;
-							case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_COUNTER_ARMOR:
-								break;
-							case en_SkillType::SKILL_PROTECTION_ACTIVE_BUF_FURY:
-								break;
-							case en_SkillType::SKILL_PROTECTION_ACTIVE_DOUBLE_ARMOR:
-								break;
-							case en_SkillType::SKILL_SPELL_ACTIVE_BUF_BACK_TELEPORT:
-								break;
-							case en_SkillType::SKILL_SPELL_ACTIVE_BUF_ILLUSION:
-								break;
-							case en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_STEALTH:
-								break;
-							case en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_SIXTH_SENSE_MAXIMIZE:
-								break;
+							{							
 							case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
+								{
+									CDivineBolt* DivineBolt = dynamic_cast<CDivineBolt*>(G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_SKILL_DIVINE_BOLT));
+									if (DivineBolt != nullptr)
+									{
+										Vector2 DivineBoltDirection(SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton.X, SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton.Y);
+
+										DivineBolt->_Owner = SkillUser;
+
+										DivineBolt->_SpawnPosition = SkillUser->_GameObjectInfo.ObjectPositionInfo.CollisionPosition;
+										DivineBolt->_GameObjectInfo.ObjectPositionInfo.Position = SkillUser->_GameObjectInfo.ObjectPositionInfo.Position + SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton;
+										DivineBolt->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton = DivineBoltDirection;
+										DivineBolt->_GameObjectInfo.ObjectPositionInfo.MoveDirection = DivineBoltDirection;
+
+										DivineBolt->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = Skill->GetSkillInfo()->SkillMinDamage;
+										DivineBolt->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = Skill->GetSkillInfo()->SkillMaxDamage;
+
+										st_GameObjectJob* EnterChannelDivineBoltJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobObjectEnterChannel(DivineBolt);
+										SkillUser->GetChannel()->_ChannelJobQue.Enqueue(EnterChannelDivineBoltJob);
+									}
+								}
+								break;														
+							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_BOLT:			
+								{
+									CFlameBolt* FlameBolt = dynamic_cast<CFlameBolt*>(G_ObjectManager->ObjectCreate(en_GameObjectType::OBJECT_SKILL_FLAME_BOLT));
+									if (FlameBolt != nullptr)
+									{
+										Vector2 FlameBoltDirection(SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton.X, SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton.Y);
+
+										FlameBolt->_Owner = SkillUser;
+
+										FlameBolt->_SpawnPosition = SkillUser->_GameObjectInfo.ObjectPositionInfo.CollisionPosition;
+										FlameBolt->_GameObjectInfo.ObjectPositionInfo.Position = SkillUser->_GameObjectInfo.ObjectPositionInfo.Position + SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton;
+										FlameBolt->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton = FlameBoltDirection;
+										FlameBolt->_GameObjectInfo.ObjectPositionInfo.MoveDirection = FlameBoltDirection;
+
+										FlameBolt->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = Skill->GetSkillInfo()->SkillMinDamage;
+										FlameBolt->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = Skill->GetSkillInfo()->SkillMaxDamage;
+
+										st_GameObjectJob* EnterChannelFlameBoltJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobObjectEnterChannel(FlameBolt);
+										SkillUser->GetChannel()->_ChannelJobQue.Enqueue(EnterChannelFlameBoltJob);
+									}
+								}
 								break;
-							case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_THUNDER_BOLT:
+							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_BLAZE:
+								if (SelectTargetSkillUse(SkillUser, Skill))
+								{
+									CollisionObjects.push_back(SkillUser->_SelectTarget);
+								}
+								break;								
+							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:
+								if (SelectTargetSkillUse(SkillUser, Skill))
+								{
+									CollisionObjects.push_back(SkillUser->_SelectTarget);
+								}
 								break;
-							case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:
-								break;
-							case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_JUDGMENT:
-								break;
+							}
+						}
+						break;			
+					case en_SkillKinds::SKILL_KIND_HEAL_SKILL:
+						{
+							switch (Skill->GetSkillInfo()->SkillType)
+							{
 							case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:
 								break;
 							case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_RECOVERY_LIGHT:
-								break;
-							case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_VITALITY_LIGHT:
-								break;
+								break;							
 							case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_GRACE:
 								break;
 							case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:
 								break;
 							case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_RECOVERY_WIND:
 								break;
-							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_BOLT:
-								break;
-							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_BLAZE:								
-								break;
-							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:								
-								break;
-							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:								
-								break;
-							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:
-								break;
-							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_SLEEP:
-								break;
-							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_WINTER_BINDING:
-								break;
-							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
-								break;
-							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:
-								break;
 							}
-						}
-						break;			
+						}					
+						break;
 					case en_SkillKinds::SKILL_KIND_MELEE_DEBUF_SKILL:
 						{
 							switch (Skill->GetSkillInfo()->SkillType)
@@ -527,8 +614,8 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 												Player->_GameObjectInfo.ObjectPositionInfo.Position);
 											if (Distance < Skill->GetSkillInfo()->SkillDistance)
 											{
+												// 이동할 위치를 구하고 적용
 												Vector2 NewPosition = Player->GetChannel()->GetMap()->GetMovePositionNearTarget(Player, Player->_SelectTarget);
-
 												Player->_GameObjectInfo.ObjectPositionInfo.Position = NewPosition;
 
 												Vector2Int CollisionPosition;
@@ -541,11 +628,13 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 													Player->GetChannel()->GetMap()->ApplyMove(Player, CollisionPosition);
 												}
 
+												// 주위 유저들에게 새로 이동한 위치를 알려줌
 												CMessage* SyncPositionPacket = G_NetworkManager->GetGameServer()->MakePacketResSyncPosition(Player->_GameObjectInfo.ObjectId, Player->_GameObjectInfo.ObjectPositionInfo);
 												G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, SyncPositionPacket);
 												SyncPositionPacket->Free();
 
-												CollisionObjects = CollisionSkillUse(SkillUser, Skill, en_CollisionPosition::COLLISION_POSITION_MIDDLE,
+												// 데미지 판정을 위해 충돌체 생성
+												CollisionObjects = CollisionSkillUse(SkillUser, Skill, en_CollisionPosition::COLLISION_POSITION_SKILL_MIDDLE,
 													Player->_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position, Vector2::Zero);
 											}
 											else
@@ -566,7 +655,7 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 								break;
 							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE:
 								CollisionObjects = CollisionSkillUse(SkillUser, Skill,
-									en_CollisionPosition::COLLISION_POSITION_MIDDLE,
+									en_CollisionPosition::COLLISION_POSITION_SKILL_MIDDLE,
 									SkillUser->_GameObjectInfo.ObjectPositionInfo.Position, Vector2::Zero);
 								break;
 							case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_LAST_ATTACK:
@@ -589,8 +678,8 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 								break;
 							case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SWORD_STORM:
 								CollisionObjects = CollisionSkillUse(SkillUser, Skill,
-									en_CollisionPosition::COLLISION_POSITION_DEFAULT,
-									SkillUser->_GameObjectInfo.ObjectPositionInfo.Position, Vector2(AttackDirectionX, AttackDirectionY));
+									en_CollisionPosition::COLLISION_POSITION_SKILL_FRONT,
+									SkillUser->_GameObjectInfo.ObjectPositionInfo.Position, Vector2(AttackDirectionX, AttackDirectionY), SkillUser->GetRectCollision()->_Size);
 								break;
 							case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE:
 								{
@@ -648,13 +737,134 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 							}
 						}
 						break;
+					case en_SkillKinds::SKILL_KIND_SPELL_DEBUF_SKILL:
+						{
+							switch (Skill->GetSkillInfo()->SkillType)
+							{
+							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
+								if (SelectTargetSkillUse(SkillUser, Skill))
+								{
+									CollisionObjects.push_back(SkillUser->_SelectTarget);
+								}
+								break;
+							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:
+								if (SelectTargetSkillUse(SkillUser, Skill))
+								{
+									CollisionObjects.push_back(SkillUser->_SelectTarget);
+								}
+								break;
+							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ROOT:
+								if (SelectTargetSkillUse(SkillUser, Skill))
+								{
+									CollisionObjects.push_back(SkillUser->_SelectTarget);
+								}
+								break;
+							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_SLEEP:
+								if (SelectTargetSkillUse(SkillUser, Skill))
+								{
+									CollisionObjects.push_back(SkillUser->_SelectTarget);
+								}
+								break;
+							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_WINTER_BINDING:
+								CollisionObjects = CollisionSkillUse(SkillUser, Skill,
+									en_CollisionPosition::COLLISION_POSITION_SKILL_MIDDLE,
+									SkillUser->_GameObjectInfo.ObjectPositionInfo.Position, Vector2::Zero);
+								break;
+							case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
+								if (SelectTargetSkillUse(SkillUser, Skill))
+								{
+									CollisionObjects.push_back(SkillUser->_SelectTarget);
+								}
+								break;
+							case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_THUNDER_BOLT:
+								if (SelectTargetSkillUse(SkillUser, Skill))
+								{
+									CollisionObjects.push_back(SkillUser->_SelectTarget);
+								}
+								break;
+							case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT:
+								if (SelectTargetSkillUse(SkillUser, Skill))
+								{
+									CollisionObjects.push_back(SkillUser->_SelectTarget);
+								}
+								break;
+							case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_JUDGMENT:
+								if (SelectTargetSkillUse(SkillUser, Skill))
+								{
+									CollisionObjects.push_back(SkillUser->_SelectTarget);
+								}
+								break;
+							}
+						}
+						break;
+					case en_SkillKinds::SKILL_KIND_BUF_SKILL:
+						{
+							switch (Skill->GetSkillInfo()->SkillType)
+							{
+							case en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE:
+								ShockReleaseUse(Player, Skill);
+								break;
+							case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE:
+							case en_SkillType::SKILL_FIGHT_ACTIVE_BUF_COUNTER_ARMOR:
+							case en_SkillType::SKILL_PROTECTION_ACTIVE_BUF_FURY:
+							case en_SkillType::SKILL_PROTECTION_ACTIVE_DOUBLE_ARMOR:
+							case en_SkillType::SKILL_SPELL_ACTIVE_BUF_ILLUSION:								
+							case en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_STEALTH:								
+							case en_SkillType::SKILL_ASSASSINATION_ACTIVE_BUF_SIXTH_SENSE_MAXIMIZE:								
+								{							
+									CSkill* BufSkill = G_ObjectManager->SkillCreate();
+									
+									st_SkillInfo* BufSkillInfo = G_ObjectManager->SkillInfoCreate(Skill->GetSkillInfo()->SkillType, Skill->GetSkillInfo()->SkillLevel);
+									BufSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_STATUS_ABNORMAL_SKILL, BufSkillInfo);
+									BufSkill->StatusAbnormalDurationTimeStart();
+									
+									Player->AddBuf(BufSkill);
+									
+									CMessage* ResBufDeBufSkillPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBuf(SkillUser->_GameObjectInfo.ObjectId, true, BufSkill->GetSkillInfo());
+									G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, ResBufDeBufSkillPacket);
+									ResBufDeBufSkillPacket->Free();
+								}
+								break;							
+							case en_SkillType::SKILL_SPELL_ACTIVE_BUF_BACK_TELEPORT:
+								{
+									Vector2Int MovePosition;									
+
+									SkillUser->GetChannel()->GetMap()->ApplyMove(SkillUser, MovePosition);
+
+									SkillUser->_GameObjectInfo.ObjectPositionInfo.Position.X = SkillUser->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
+									SkillUser->_GameObjectInfo.ObjectPositionInfo.Position.Y = SkillUser->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;
+
+									// 시공 뒤틀림 위치 재조정
+									CMessage* ResSyncPositionPacket = G_NetworkManager->GetGameServer()->MakePacketResSyncPosition(SkillUser->_GameObjectInfo.ObjectId, SkillUser->_GameObjectInfo.ObjectPositionInfo);
+									G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, ResSyncPositionPacket);
+									ResSyncPositionPacket->Free();
+								}
+								break;							
+							}
+						}
+						break;
+					case en_SkillKinds::SKILL_KIND_HEAL_BUF_SKILL:
+						{
+							switch (Skill->GetSkillInfo()->SkillType)
+							{
+							case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_VITALITY_LIGHT:
+								break;
+							}
+						}					
+						break;
 					}			
 
-					st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(SkillUser->_GameObjectInfo.ObjectId,
-						SkillUser->_GameObjectInfo.ObjectType,
-						Skill->GetSkillInfo()->SkillType,
-						Skill->GetSkillInfo()->SkillMinDamage,
-						Skill->GetSkillInfo()->SkillMaxDamage);
+					st_GameObjectJob* DamageJob = nullptr;
+
+					if (Skill->GetSkillInfo()->SkillIsDamage == true)
+					{
+						DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(SkillUser->_GameObjectInfo.ObjectId,
+							SkillUser->_GameObjectInfo.ObjectType,
+							Skill->GetSkillInfo()->SkillType,
+							Skill->GetSkillInfo()->SkillMinDamage,
+							Skill->GetSkillInfo()->SkillMaxDamage,
+							IsBackAttack);
+					}				
 
 					if (CollisionObjects.size() > 0)
 					{
@@ -739,7 +949,7 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, en
 	}
 }
 
-int32 CSkillBox::CalculateDamage(en_SkillType SkillType, int32& Str, int32& Dex, int32& Int, int32& Luck, bool* InOutCritical, int32 TargetDefence, int32 MinDamage, int32 MaxDamage, int16 CriticalPoint)
+int32 CSkillBox::CalculateDamage(en_SkillType SkillType, int32& Str, int32& Dex, int32& Int, int32& Luck, bool* InOutCritical, bool IsBackAttack, int32 TargetDefence, int32 MinDamage, int32 MaxDamage, int16 CriticalPoint)
 {
 	random_device Seed;
 	default_random_engine Eng(Seed());
@@ -820,6 +1030,11 @@ int32 CSkillBox::CalculateDamage(en_SkillType SkillType, int32& Str, int32& Dex,
 
 	float DefenceRate = (float)pow(((float)(200 - 1)) / 20, 2) * 0.01f;
 	FinalDamage = (int32)(CriticalDamage * DefenceRate);
+
+	if (IsBackAttack == true)
+	{
+		FinalDamage *= 2.0f;
+	}
 
 	return FinalDamage;
 }

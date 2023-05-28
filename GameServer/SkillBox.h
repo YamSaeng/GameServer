@@ -36,15 +36,20 @@ public:
 	bool SelectTargetSkillUse(CGameObject* SkillUser, CSkill* Skill);	
 	// 충돌체 생성해서 충돌하는 대상 반환
 	vector<CGameObject*> CollisionSkillUse(CGameObject* SkillUser, CSkill* Skill, en_CollisionPosition CollisionPositionType, 
-		Vector2 CollisionCreatePosition, Vector2 CollisionCreateDir);
+		Vector2 CollisionCreatePosition, Vector2 CollisionCreateDir, Vector2 CreatePositionSize = Vector2::Zero);
 
-	void SkillProcess(CGameObject* SkillUser, CGameObject* SkillUserd, 
+	void ShockReleaseUse(CGameObject* User, CSkill* ShockReleaseSkill);
+	void MoveStatusAbnormalRelease(CGameObject* User);
+
+	void SkillProcess(CGameObject* SkillUser,
 		en_SkillCharacteristic SkillCharacteristic, en_SkillType SkillType,
+		float WeaponPositionX, float WeaponPositionY,
 		float AttackDirectionX, float AttackDirectionY);
 		
 	int32 CalculateDamage(en_SkillType SkillType,
 		int32& Str, int32& Dex, int32& Int, int32& Luck,
 		bool* InOutCritical,
+		bool IsBackAttack,
 		int32 TargetDefence,
 		int32 MinDamage, int32 MaxDamage,
 		int16 CriticalPoint);
