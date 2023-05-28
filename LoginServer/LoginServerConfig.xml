@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ServerConfig>
 	<Server name="GameServer">
-		<Option IP="0.0.0.0" PORT="7777"/>
+		<Option IP="0.0.0.0" PORT="8888"/>
 	</Server>
 	<Server name="LoginServer">
-		<Option IP="0.0.0.0" PORT="7778"/>
+		<Option IP="0.0.0.0" PORT="8889"/>
 	</Server>
 </ServerConfig>
