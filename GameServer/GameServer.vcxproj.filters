@@ -139,6 +139,9 @@
     <Filter Include="ContentServer\Content\Network">
       <UniqueIdentifier>{5f9a7b99-1197-473e-b68c-1b7b5b0bb359}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ContentServer\Content\SkillBox\Skill\SkillObject">
+      <UniqueIdentifier>{56523c36-ada6-47e3-8be5-eed55deaf9ec}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Type.h">
@@ -347,14 +350,20 @@
     <ClInclude Include="NetworkManager.h">
       <Filter>ContentServer\Content\Network</Filter>
     </ClInclude>
-    <ClInclude Include="SwordBlade.h">
-      <Filter>ContentServer\Content\GameObject\Environment</Filter>
-    </ClInclude>
     <ClInclude Include="Matrix2x2.h">
       <Filter>ContentServer\Content\Math</Filter>
     </ClInclude>
     <ClInclude Include="Vector2.h">
       <Filter>ContentServer\Content\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="SwordBlade.h">
+      <Filter>ContentServer\Content\SkillBox\Skill\SkillObject</Filter>
+    </ClInclude>
+    <ClInclude Include="FlameBolt.h">
+      <Filter>ContentServer\Content\SkillBox\Skill\SkillObject</Filter>
+    </ClInclude>
+    <ClInclude Include="DivineBolt.h">
+      <Filter>ContentServer\Content\SkillBox\Skill\SkillObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -510,9 +519,6 @@
     <ClCompile Include="NetworkManager.cpp">
       <Filter>ContentServer\Content\Network</Filter>
     </ClCompile>
-    <ClCompile Include="SwordBlade.cpp">
-      <Filter>ContentServer\Content\GameObject\Environment</Filter>
-    </ClCompile>
     <ClCompile Include="Matrix2x2.cpp">
       <Filter>ContentServer\Content\Math</Filter>
     </ClCompile>
@@ -520,6 +526,15 @@
       <Filter>ContentServer\Content\Math</Filter>
     </ClCompile>
     <ClCompile Include="Math.cpp" />
+    <ClCompile Include="SwordBlade.cpp">
+      <Filter>ContentServer\Content\SkillBox\Skill\SkillObject</Filter>
+    </ClCompile>
+    <ClCompile Include="FlameBolt.cpp">
+      <Filter>ContentServer\Content\SkillBox\Skill\SkillObject</Filter>
+    </ClCompile>
+    <ClCompile Include="DivineBolt.cpp">
+      <Filter>ContentServer\Content\SkillBox\Skill\SkillObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="DBConfig.xml">

@@ -481,7 +481,7 @@ public:
 	//-------------------------------------------------------------------------------
 	// 데미지 처리 잡 생성 함수
 	//-------------------------------------------------------------------------------
-	st_GameObjectJob* MakeGameObjectDamage(int64& AttackerID, en_GameObjectType AttackerType, en_SkillType SkillType,  int32& SkillMinDamage, int32& SkillMaxDamage);	
+	st_GameObjectJob* MakeGameObjectDamage(int64& AttackerID, en_GameObjectType AttackerType, en_SkillType SkillType,  int32& SkillMinDamage, int32& SkillMaxDamage, bool IsBackAttack);	
 	//-------------------------------------------------------------------------------
 	// 기술 체력 회복 잡 생성 함수
 	//-------------------------------------------------------------------------------

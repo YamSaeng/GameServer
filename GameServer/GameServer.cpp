@@ -5597,7 +5597,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobComboSkillOff()
 	return ComboAttackOffJob;
 }
 
-st_GameObjectJob* CGameServer::MakeGameObjectDamage(int64& AttackerID, en_GameObjectType AttackerType, en_SkillType SkillType, int32& SkillMinDamage, int32& SkillMaxDamage)
+st_GameObjectJob* CGameServer::MakeGameObjectDamage(int64& AttackerID, en_GameObjectType AttackerType, en_SkillType SkillType, int32& SkillMinDamage, int32& SkillMaxDamage, bool IsBackAttack)
 {
 	st_GameObjectJob* DamageJob = G_ObjectManager->GameObjectJobCreate();
 	DamageJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_DAMAGE;
@@ -5608,8 +5608,9 @@ st_GameObjectJob* CGameServer::MakeGameObjectDamage(int64& AttackerID, en_GameOb
 	*DamageMessage << AttackerID;
 	*DamageMessage << (int16)AttackerType;	
 	*DamageMessage << (int16)SkillType;
-	*DamageMessage << SkillMinDamage;
+	*DamageMessage << SkillMinDamage; 
 	*DamageMessage << SkillMaxDamage;
+	*DamageMessage << IsBackAttack;
 
 	DamageJob->GameObjectJobMessage = DamageMessage;
 

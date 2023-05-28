@@ -169,9 +169,11 @@
     <ClInclude Include="DBModel.h" />
     <ClInclude Include="DBStoreProcedure.h" />
     <ClInclude Include="DBSynchronizer.h" />
+    <ClInclude Include="DivineBolt.h" />
     <ClInclude Include="Environment.h" />
     <ClInclude Include="EquipmentBox.h" />
     <ClInclude Include="FileUtils.h" />
+    <ClInclude Include="FlameBolt.h" />
     <ClInclude Include="Furnace.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameObjectInfo.h" />
@@ -276,6 +278,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="DivineBolt.cpp" />
     <ClCompile Include="Environment.cpp" />
     <ClCompile Include="EquipmentBox.cpp" />
     <ClCompile Include="FileUtils.cpp">
@@ -284,6 +287,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="FlameBolt.cpp" />
     <ClCompile Include="Furnace.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameServer.cpp">
