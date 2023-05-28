@@ -19,13 +19,12 @@ public:
 	st_SkillInfo* GetSkillInfo();
 
 	// 스킬을 소유하고 있는 객체를 설정
-	void SetOwner(CGameObject* Owner);
+	void SetTarget(CGameObject* Target);
 	// 스킬 정보 셋팅
 	void SetSkillInfo(en_SkillCategory SkillCategory, st_SkillInfo* SkillInfo = nullptr, st_SkillInfo* PreviousSkillInfo = nullptr);
 	
 	void SetCastingUserID(int64 CastingUserID, en_GameObjectType CastingUserObjectType);
 	int64 GetCastingUserID();
-
 
 	// 쿨타임 시작
 	void CoolTimeStart();
@@ -46,7 +45,7 @@ public:
 	bool Update();		
 private:			
 	// 스킬이 적용되고 있는 대상
-	CGameObject* _Owner;	
+	CGameObject* _Target;	
 	// 스킬을 시전한 대상 ID
 	int64 _CastingUserID;
 	// 스킬을 시전한 대상의 ObjectType

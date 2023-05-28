@@ -4,7 +4,7 @@
 
 CSkill::CSkill()
 {
-	_Owner = nullptr;
+	_Target = nullptr;
 
 	_SkillInfo = nullptr;		
 	_PreviousSkillInfo = nullptr;
@@ -37,9 +37,9 @@ st_SkillInfo* CSkill::GetSkillInfo()
 	return _SkillInfo;
 }
 
-void CSkill::SetOwner(CGameObject* Owner)
+void CSkill::SetTarget(CGameObject* Target)
 {
-	_Owner = Owner;
+	_Target = Target;
 }
 
 void CSkill::SetSkillInfo(en_SkillCategory SkillCategory, st_SkillInfo* SkillInfo, st_SkillInfo* PreviousSkillInfo)
@@ -75,12 +75,23 @@ void CSkill::GlobalCoolTimeStart(int32 GlobalCoolTime)
 }
 
 void CSkill::StatusAbnormalDurationTimeStart()
-{
+{	
 	_SkillDurationTick = _SkillInfo->SkillDurationTime + GetTickCount64();
 
 	_SkillDotTick = _SkillInfo->SkillDotTime + GetTickCount64();
 
 	_SkillInfo->SkillRemainTime = _SkillDurationTick - GetTickCount64();
+
+	switch (_SkillInfo->SkillType)
+	{
+	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE:
+	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
+		{
+			float DebufSlowSpeed = _Target->_GameObjectInfo.ObjectStatInfo.MaxSpeed * _SkillInfo->SkillDebufMovingSpeed;
+			_Target->_GameObjectInfo.ObjectStatInfo.Speed -= DebufSlowSpeed;
+		}
+		break;	
+	}
 }
 
 void CSkill::ComboSkillStart(vector<Vector2Int> ComboSkillQuickSlotIndex, en_SkillType ComboSkilltype)
@@ -124,9 +135,9 @@ bool CSkill::Update()
 					_SkillInfo->SkillRemainTime = 0;
 					_SkillCootimeTick = 0;					
 
-					vector<st_FieldOfViewInfo> CurrentFieldOfViewInfo = _Owner->GetChannel()->GetMap()->GetFieldAroundPlayers(_Owner, false);
+					vector<st_FieldOfViewInfo> CurrentFieldOfViewInfo = _Target->GetChannel()->GetMap()->GetFieldAroundPlayers(_Target, false);
 					
-					CMessage* ResAttacketPacket = G_NetworkManager->GetGameServer()->MakePacketResAttack(_Owner->_GameObjectInfo.ObjectId);
+					CMessage* ResAttacketPacket = G_NetworkManager->GetGameServer()->MakePacketResAttack(_Target->_GameObjectInfo.ObjectId);
 					G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewInfo, ResAttacketPacket);
 					ResAttacketPacket->Free();
 				}
@@ -171,16 +182,16 @@ bool CSkill::Update()
 
 				if (_SkillInfo->SkillStatusAbnormal != en_GameObjectStatusType::STATUS_ABNORMAL_NONE)
 				{
-					_Owner->ReleaseStatusAbnormal((int64)_SkillInfo->SkillStatusAbnormalMask);
-					CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_Owner->_GameObjectInfo.ObjectId,
-						_Owner->_GameObjectInfo.ObjectPositionInfo.Position.X,
-						_Owner->_GameObjectInfo.ObjectPositionInfo.Position.Y,
+					_Target->ReleaseStatusAbnormal((int64)_SkillInfo->SkillStatusAbnormalMask);
+					CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_Target->_GameObjectInfo.ObjectId,
+						_Target->_GameObjectInfo.ObjectPositionInfo.Position.X,
+						_Target->_GameObjectInfo.ObjectPositionInfo.Position.Y,
 						_SkillInfo,
 						false, (int64)_SkillInfo->SkillStatusAbnormalMask);
 				}
 
-				CMessage* ResBufDeBufOffPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBufOff(_Owner->_GameObjectInfo.ObjectId, false, _SkillInfo->SkillType);
-				G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Owner, ResBufDeBufOffPacket);
+				CMessage* ResBufDeBufOffPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBufOff(_Target->_GameObjectInfo.ObjectId, false, _SkillInfo->SkillType);
+				G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Target, ResBufDeBufOffPacket);
 				ResBufDeBufOffPacket->Free();
 
 				return true;
@@ -197,7 +208,7 @@ bool CSkill::Update()
 				*_PreviousSkillInfo,
 				_ComboSkillType);	
 
-			G_NetworkManager->GetGameServer()->SendPacket(((CPlayer*)_Owner)->_SessionId, ResNextComboSkillOff);
+			G_NetworkManager->GetGameServer()->SendPacket(((CPlayer*)_Target)->_SessionId, ResNextComboSkillOff);
 			ResNextComboSkillOff->Free();
 
 			_ComboSkillQuickSlotBarIndex.clear();
