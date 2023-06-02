@@ -36,7 +36,7 @@ public:
 	bool SelectTargetSkillUse(CGameObject* SkillUser, CSkill* Skill);	
 	// 충돌체 생성해서 충돌하는 대상 반환
 	vector<CGameObject*> CollisionSkillUse(CGameObject* SkillUser, CSkill* Skill, en_CollisionPosition CollisionPositionType, 
-		Vector2 CollisionCreatePosition, Vector2 CollisionCreateDir, Vector2 CreatePositionSize = Vector2::Zero);
+		Vector2 CollisionCreatePosition, Vector2 CollisionCreateDir);
 
 	void ShockReleaseUse(CGameObject* User, CSkill* ShockReleaseSkill);
 	void MoveStatusAbnormalRelease(CGameObject* User);

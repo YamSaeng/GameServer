@@ -275,7 +275,7 @@ bool CSkillBox::SelectTargetSkillUse(CGameObject* SkillUser, CSkill* Skill)
 	}
 }
 
-vector<CGameObject*> CSkillBox::CollisionSkillUse(CGameObject* SkillUser, CSkill* Skill, en_CollisionPosition CollisionPositionType, Vector2 CollisionCreatePosition, Vector2 CollisionCreateDir, Vector2 CreatePositionSize)
+vector<CGameObject*> CSkillBox::CollisionSkillUse(CGameObject* SkillUser, CSkill* Skill, en_CollisionPosition CollisionPositionType, Vector2 CollisionCreatePosition, Vector2 CollisionCreateDir)
 {	
 	vector<CGameObject*> CollisionObjects;
 
@@ -296,14 +296,12 @@ vector<CGameObject*> CSkillBox::CollisionSkillUse(CGameObject* SkillUser, CSkill
 				case en_CollisionPosition::COLLISION_POSITION_SKILL_MIDDLE:
 					SkillCollision->Init(en_CollisionPosition::COLLISION_POSITION_SKILL_MIDDLE, Skill->GetSkillInfo()->SkillType,
 						CollisionCreatePosition,
-						Vector2::Zero,
-						SkillUser->GetRectCollision()->_Size);
+						Vector2::Zero);
 					break;				
 				case en_CollisionPosition::COLLISION_POSITION_SKILL_FRONT:
 					SkillCollision->Init(en_CollisionPosition::COLLISION_POSITION_SKILL_FRONT, Skill->GetSkillInfo()->SkillType,
 						CollisionCreatePosition,
-						CollisionCreateDir,
-						CreatePositionSize);
+						CollisionCreateDir);
 					break;
 				}							
 
@@ -431,7 +429,7 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, en_SkillCharacteristic Skil
 							case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT:
 								CollisionObjects = CollisionSkillUse(SkillUser, Skill,
 									en_CollisionPosition::COLLISION_POSITION_SKILL_FRONT,
-									SkillUser->_GameObjectInfo.ObjectPositionInfo.Position, Vector2(AttackDirectionX, AttackDirectionY), SkillUser->GetRectCollision()->_Size);
+									SkillUser->_GameObjectInfo.ObjectPositionInfo.Position, Vector2(AttackDirectionX, AttackDirectionY));
 								break;						
 							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:
 								CollisionObjects = CollisionSkillUse(SkillUser, Skill,
@@ -679,7 +677,7 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, en_SkillCharacteristic Skil
 							case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SWORD_STORM:
 								CollisionObjects = CollisionSkillUse(SkillUser, Skill,
 									en_CollisionPosition::COLLISION_POSITION_SKILL_FRONT,
-									SkillUser->_GameObjectInfo.ObjectPositionInfo.Position, Vector2(AttackDirectionX, AttackDirectionY), SkillUser->GetRectCollision()->_Size);
+									SkillUser->_GameObjectInfo.ObjectPositionInfo.Position, Vector2(AttackDirectionX, AttackDirectionY));
 								break;
 							case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE:
 								{
