@@ -1482,13 +1482,8 @@ bool CChannel::ChannelColliderCheck(CGameObject* CheckObject, Vector2 CheckPosit
 	return true;
 }
 
-bool CChannel::ChannelColliderSingleCheck(CGameObject* CheckObject, Vector2 CheckPosition, CGameObject** CollisionObject)
-{
-	CRectCollision CheckRectCollision;
-	CheckRectCollision._LeftTop.X = CheckPosition.X;
-	CheckRectCollision._LeftTop.Y = CheckPosition.Y;
-	CheckRectCollision._Size = CheckObject->GetRectCollision()->_Size;	
-		
+bool CChannel::ChannelColliderSingleCheck(CGameObject* CheckObject, CRectCollision* CheckRectCollision, CGameObject** CollisionObject)
+{	
 	for (int32 i = 0; i < en_Channel::CHANNEL_PLAYER_MAX; i++)
 	{
 		if (_ChannelPlayerArray[i] != nullptr
@@ -1496,7 +1491,7 @@ bool CChannel::ChannelColliderSingleCheck(CGameObject* CheckObject, Vector2 Chec
 		{
 			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelPlayerArray[i]->_GameObjectInfo.ObjectId
 				&& _ChannelPlayerArray[i]->GetRectCollision()->GetActive() == true
-				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelPlayerArray[i]->GetRectCollision()) == true)
+				&& CRectCollision::IsCollision(CheckRectCollision, _ChannelPlayerArray[i]->GetRectCollision()) == true)
 			{						
 				*CollisionObject = _ChannelPlayerArray[i];
 				return false;
@@ -1510,7 +1505,7 @@ bool CChannel::ChannelColliderSingleCheck(CGameObject* CheckObject, Vector2 Chec
 		{
 			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelNonPlayerArray[i]->_GameObjectInfo.ObjectId
 				&& _ChannelNonPlayerArray[i]->GetRectCollision()->GetActive() == true
-				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelNonPlayerArray[i]->GetRectCollision()) == true)
+				&& CRectCollision::IsCollision(CheckObject->GetRectCollision(), _ChannelNonPlayerArray[i]->GetRectCollision()) == true)
 			{		
 				*CollisionObject = _ChannelNonPlayerArray[i];
 				return false;
@@ -1525,7 +1520,7 @@ bool CChannel::ChannelColliderSingleCheck(CGameObject* CheckObject, Vector2 Chec
 		{
 			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelDummyPlayerArray[i]->_GameObjectInfo.ObjectId
 				&& _ChannelDummyPlayerArray[i]->GetRectCollision()->GetActive() == true
-				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelDummyPlayerArray[i]->GetRectCollision()) == true)
+				&& CRectCollision::IsCollision(CheckObject->GetRectCollision(), _ChannelDummyPlayerArray[i]->GetRectCollision()) == true)
 			{				
 				*CollisionObject = _ChannelDummyPlayerArray[i];
 				return false;
@@ -1539,7 +1534,7 @@ bool CChannel::ChannelColliderSingleCheck(CGameObject* CheckObject, Vector2 Chec
 		{
 			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelMonsterArray[i]->_GameObjectInfo.ObjectId
 				&& _ChannelMonsterArray[i]->GetRectCollision()->GetActive() == true
-				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelMonsterArray[i]->GetRectCollision()) == true)
+				&& CRectCollision::IsCollision(CheckRectCollision, _ChannelMonsterArray[i]->GetRectCollision()) == true)
 			{				
 				*CollisionObject = _ChannelMonsterArray[i];
 				return false;
@@ -1553,7 +1548,7 @@ bool CChannel::ChannelColliderSingleCheck(CGameObject* CheckObject, Vector2 Chec
 		{
 			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelCraftingTableArray[i]->_GameObjectInfo.ObjectId
 				&& _ChannelCraftingTableArray[i]->GetRectCollision()->GetActive() == true
-				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelCraftingTableArray[i]->GetRectCollision()) == true)
+				&& CRectCollision::IsCollision(CheckRectCollision, _ChannelCraftingTableArray[i]->GetRectCollision()) == true)
 			{				
 				*CollisionObject = _ChannelCraftingTableArray[i];
 				return false;
@@ -1567,7 +1562,7 @@ bool CChannel::ChannelColliderSingleCheck(CGameObject* CheckObject, Vector2 Chec
 		{
 			if (CheckObject->_GameObjectInfo.ObjectId != _ChannelEnvironmentArray[i]->_GameObjectInfo.ObjectId
 				&& _ChannelEnvironmentArray[i]->GetRectCollision()->GetActive() == true
-				&& CRectCollision::IsCollision(&CheckRectCollision, _ChannelEnvironmentArray[i]->GetRectCollision()) == true)
+				&& CRectCollision::IsCollision(CheckRectCollision, _ChannelEnvironmentArray[i]->GetRectCollision()) == true)
 			{				
 				*CollisionObject = _ChannelEnvironmentArray[i];
 				return false;
@@ -1726,7 +1721,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 			EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.Position.X = EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
 			EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;			
 
-			if (_Map->MoveCollisionCango(EnterChannelGameObject, SpawnPosition, EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.Position) == true)
+			if (_Map->MoveCollisionCango(EnterChannelGameObject, SpawnPosition) == true)
 			{
 				break;
 			}

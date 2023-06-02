@@ -52,7 +52,7 @@ public:
 	//------------------------------------------------------------------------------
 	vector<CGameObject*> FindChannelObjects(en_GameObjectType GameObjectType);	
 	//------------------------------------------------------------------------------
-	// 채널에 있는 오브젝트들 찾기
+	// 채널에 있는 오브젝트들 찾기 ( 시야 범위 안에서 )
 	//------------------------------------------------------------------------------
 	vector<CGameObject*> FindChannelObjects(vector<st_FieldOfViewInfo>& FindObjectIDs);
 	//-----------------------------------------------------
@@ -69,7 +69,7 @@ public:
 	//-----------------------------------------------------	
 	bool ChannelColliderCheck(CGameObject* CheckObject, Vector2 CheckPosition);
 	// 충돌 대상을 하나 반환
-	bool ChannelColliderSingleCheck(CGameObject* CheckObject, Vector2 CheckPosition, CGameObject** CollisionObject = nullptr);
+	bool ChannelColliderSingleCheck(CGameObject* CheckObject, CRectCollision* CheckRectCollision, CGameObject** CollisionObject = nullptr);
 	// 충돌한 모든 대상을 반환
 	bool ChannelColliderMultipleCheck(CGameObject* CheckObject, Vector2 CheckPosition, vector<CGameObject*>* CollisionObjects);
 	// OBB 알고리즘로 충돌대상 확인
