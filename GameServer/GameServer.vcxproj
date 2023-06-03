@@ -215,6 +215,7 @@
     <ClInclude Include="rapidxml_print.hpp" />
     <ClInclude Include="rapidxml_utils.hpp" />
     <ClInclude Include="RectCollision.h" />
+    <ClInclude Include="RigidBody2D.h" />
     <ClInclude Include="RingBuffer.h" />
     <ClInclude Include="Sawmill.h" />
     <ClInclude Include="Sector.h" />
@@ -343,6 +344,7 @@
     <ClCompile Include="QuickSlotBar.cpp" />
     <ClCompile Include="QuickSlotManager.cpp" />
     <ClCompile Include="RectCollision.cpp" />
+    <ClCompile Include="RigidBody2D.cpp" />
     <ClCompile Include="Sawmill.cpp" />
     <ClCompile Include="Sector.cpp" />
     <ClCompile Include="Skill.cpp" />

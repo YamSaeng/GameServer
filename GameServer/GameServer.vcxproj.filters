@@ -365,6 +365,9 @@
     <ClInclude Include="DivineBolt.h">
       <Filter>ContentServer\Content\SkillBox\Skill\SkillObject</Filter>
     </ClInclude>
+    <ClInclude Include="RigidBody2D.h">
+      <Filter>ContentServer\Content\Collision</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -534,6 +537,9 @@
     </ClCompile>
     <ClCompile Include="DivineBolt.cpp">
       <Filter>ContentServer\Content\SkillBox\Skill\SkillObject</Filter>
+    </ClCompile>
+    <ClCompile Include="RigidBody2D.cpp">
+      <Filter>ContentServer\Content\Collision</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

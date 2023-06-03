@@ -6243,9 +6243,7 @@ CGameServerMessage* CGameServer::MakePacketRectCollisionSpawn(CRectCollision* Re
 	*RectCollisionSpawnPacket << RectCollision->_Position.X;
 	*RectCollisionSpawnPacket << RectCollision->_Position.Y;
 	*RectCollisionSpawnPacket << RectCollision->_Direction.X;
-	*RectCollisionSpawnPacket << RectCollision->_Direction.Y;
-	*RectCollisionSpawnPacket << RectCollision->_CreatePositionSize.X;
-	*RectCollisionSpawnPacket << RectCollision->_CreatePositionSize.Y;	
+	*RectCollisionSpawnPacket << RectCollision->_Direction.Y;		
 	*RectCollisionSpawnPacket << RectCollision->_Size.X;
 	*RectCollisionSpawnPacket << RectCollision->_Size.Y;
 
