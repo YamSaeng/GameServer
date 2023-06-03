@@ -852,28 +852,28 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, en_SkillCharacteristic Skil
 						break;
 					}			
 
-					st_GameObjectJob* DamageJob = nullptr;
-
-					if (Skill->GetSkillInfo()->SkillIsDamage == true)
-					{
-						DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(SkillUser->_GameObjectInfo.ObjectId,
-							SkillUser->_GameObjectInfo.ObjectType,
-							Skill->GetSkillInfo()->SkillType,
-							Skill->GetSkillInfo()->SkillMinDamage,
-							Skill->GetSkillInfo()->SkillMaxDamage,
-							IsBackAttack);
-					}				
+					st_GameObjectJob* DamageJob = nullptr;					
 
 					if (CollisionObjects.size() > 0)
 					{
 						for (CGameObject* CollisionObject : CollisionObjects)
 						{
-							if (DamageJob != nullptr
-								&& CollisionObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD
-								&& CollisionObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::ROOTING)
+							if (Skill->GetSkillInfo()->SkillIsDamage == true)
 							{
-								CollisionObject->_GameObjectJobQue.Enqueue(DamageJob);
-							}
+								DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(SkillUser->_GameObjectInfo.ObjectId,
+									SkillUser->_GameObjectInfo.ObjectType,
+									Skill->GetSkillInfo()->SkillType,
+									Skill->GetSkillInfo()->SkillMinDamage,
+									Skill->GetSkillInfo()->SkillMaxDamage,
+									IsBackAttack);
+
+								if (DamageJob != nullptr
+									&& CollisionObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD
+									&& CollisionObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::ROOTING)
+								{
+									CollisionObject->_GameObjectJobQue.Enqueue(DamageJob);
+								}
+							}							
 
 							if (Skill->GetSkillInfo()->SkillStatusAbnormal != en_GameObjectStatusType::STATUS_ABNORMAL_NONE)
 							{
