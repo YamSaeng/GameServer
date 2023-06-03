@@ -8,6 +8,7 @@ class CSector;
 class CPlayer;
 class CMonster;
 class CChannelManager;
+class CRectCollision;
 
 struct st_AStarNodeInt
 {
@@ -113,13 +114,13 @@ public:
 	//----------------------------------------------------------------------------
 	// 다음 번 위치로 갈 수 있는지 확인 ( 위치 계산 후 MoveCollisionCango로 전달 )
 	//----------------------------------------------------------------------------
-	bool Cango(CGameObject* Object, OUT Vector2* NextPosition);
+	bool Cango(CGameObject* Object);
 	//----------------------------------------------------------------------------
 	// 위치로 갈 수 있는지 확인
 	// CheckObjects = 벽을 제외한 오브젝트를 충돌 대상으로 여길 것인지에 대한 판단
 	// ( true : 해당위치에 오브젝트가 있는지 확인해서 있으면 충돌체로 판단한다. )
 	//----------------------------------------------------------------------------
-	bool MoveCollisionCango(CGameObject* Object, Vector2Int& CellPosition, Vector2& NextPosition, bool CheckObjects = true, CGameObject* CollisionObject = nullptr);
+	bool MoveCollisionCango(CGameObject* Object, Vector2Int& CellPosition, CRectCollision* CheckRectCollsion = nullptr, bool CheckObjects = true, CGameObject* CollisionObject = nullptr);
 
 	//------------------------------------------------------------------------------------------------------------------------
 	// 목적지 좌표값을 받아서 해당 좌표로 갈 수 있는지 없는지 판단

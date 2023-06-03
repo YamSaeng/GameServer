@@ -305,7 +305,7 @@ vector<st_FieldOfViewInfo> CMap::GetFieldAroundPlayers(CGameObject* Object, bool
 		// 주변 섹터 플레이어 정보
 		for (CPlayer* Player : Sector->GetPlayers())
 		{
-			if (Player->_NetworkState == en_ObjectNetworkState::LIVE)
+			if (Player->_NetworkState == en_ObjectNetworkState::OBJECT_NETWORK_STATE_LIVE)
 			{
 				FieldOfViewInfo.ObjectID = Player->_GameObjectInfo.ObjectId;
 				FieldOfViewInfo.SessionID = Player->_SessionId;
@@ -522,7 +522,7 @@ CItem** CMap::FindItem(Vector2Int& ItemCellPosition)
 	return _Items[Y][X];
 }
 
-bool CMap::Cango(CGameObject* Object, OUT Vector2* NextPosition)
+bool CMap::Cango(CGameObject* Object)
 {
 	Vector2Int CollisionPosition;
 	CollisionPosition.X = (int32)Object->_GameObjectInfo.ObjectPositionInfo.Position.X;
@@ -535,7 +535,7 @@ bool CMap::Cango(CGameObject* Object, OUT Vector2* NextPosition)
 	Vector2 DirectionNormal = Object->_GameObjectInfo.ObjectPositionInfo.MoveDirection.Normalize();
 
 	CheckPosition.Y += (DirectionNormal.Y * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
-	CheckPosition.X += (DirectionNormal.X * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+	CheckPosition.X += (DirectionNormal.X * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);	
 
 	if (CheckPosition.X < _Left
 		|| CheckPosition.X > _Right)
@@ -549,14 +549,26 @@ bool CMap::Cango(CGameObject* Object, OUT Vector2* NextPosition)
 		return false;
 	}
 
-	bool NextPositionMoveCheck = MoveCollisionCango(Object, CollisionPosition, CheckPosition);
-	NextPosition->X = CheckPosition.X;
-	NextPosition->Y = CheckPosition.Y;
+	CRectCollision CheckRectCollision = *Object->GetRectCollision();
+	CheckRectCollision._Position = CheckPosition;
+	CheckRectCollision.NotSetPositionUpdate();
+
+	bool NextPositionMoveCheck = MoveCollisionCango(Object, CollisionPosition, &CheckRectCollision);
+
+	if (NextPositionMoveCheck == true)
+	{
+		Object->_GameObjectInfo.ObjectPositionInfo.Position = CheckPosition;
+
+		if (Object->GetRectCollision() != nullptr)
+		{
+			Object->GetRectCollision()->Update();
+		}		
+	}		
 
 	return NextPositionMoveCheck;
 }
 
-bool CMap::MoveCollisionCango(CGameObject* Object, Vector2Int& CellPosition, Vector2& NextPosition, bool CheckObjects, CGameObject* CollisionObject)
+bool CMap::MoveCollisionCango(CGameObject* Object, Vector2Int& CellPosition, CRectCollision* CheckRectCollsion, bool CheckObjects, CGameObject* CollisionObject)
 {
 	// 채널이 할당되어 있는지 확인
 	if (Object->GetChannel() == nullptr)
@@ -572,7 +584,7 @@ bool CMap::MoveCollisionCango(CGameObject* Object, Vector2Int& CellPosition, Vec
 			return false;
 	}	
 
-	bool ObjectCheck = Object->GetChannel()->ChannelColliderSingleCheck(Object, NextPosition, &CollisionObject);
+	bool ObjectCheck = Object->GetChannel()->ChannelColliderSingleCheck(Object, CheckRectCollsion, &CollisionObject);
 
 	return (!CheckObjects || ObjectCheck);
 }
