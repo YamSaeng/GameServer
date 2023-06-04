@@ -52,9 +52,7 @@
 		<Column name="OwnerPlayerDBId" type="BigInt" notnull="true"/>
 		<Column name="ItemIsEquipped" type="bit"/>
 		<Column name="ItemTileGridPositionX" type="SmallInt"/>
-		<Column name="ItemTileGridPositionY" type="SmallInt"/>
-		<Column name="ItemLargeCategory" type="nvarchar(50)" notnull="true"/>
-		<Column name="ItemMediumCategory" type="nvarchar(50)" notnull="true"/>
+		<Column name="ItemTileGridPositionY" type="SmallInt"/>		
 		<Column name="ItemSmallCategory" type="nvarchar(80)" notnull="true"/>
 		<Column name="ItemCount" type="SmallInt" notnull="true"/>
 		<Column name="ItemDurability" type="int" notnull="true"/>
@@ -100,9 +98,7 @@
 		<Column name="QuickSlotKey" type="SmallInt"/>
 		<Column name="CharacteristicType" type="nvarchar(50)" notnull ="true"/>
 		<Column name="SkillType" type="nvarchar(50)"/>
-		<Column name="SkillLevel" type="TinyInt"/>
-		<Column name="ItemLargeCategory" type="nvarchar(50)"/>
-		<Column name="ItemMediumCategory" type="nvarchar(50)"/>
+		<Column name="SkillLevel" type="TinyInt"/>		
 		<Column name="ItemSmallCategory" type="nvarchar(80)"/>
 		<Column name="ItemCount" type="SmallInt"/>
 	</Table>
@@ -123,9 +119,7 @@
 	<Table name="Equipment" desc="Equipment Table">
 		<Column name="EquipmentAccountDBId" type="BigInt" notnull="true"/>
 		<Column name="EquipmentPlayerDBId" type="BigInt" notnull="true"/>
-		<Column name="EquipmentParts" type="nvarchar(40)" notnull="true"/>
-		<Column name="EquipmentLargeCategory" type="nvarchar(50)" notnull="true"/>
-		<Column name="EquipmentMediumCategory" type="nvarchar(50)" notnull="true"/>
+		<Column name="EquipmentParts" type="nvarchar(40)" notnull="true"/>		
 		<Column name="EquipmentSmallCategory" type="nvarchar(50)" notnull="true"/>
 		<Column name="EquipmentDurability" type="int" notnull="true"/>
 		<Column name="EquipmentEnchantPoint" type="TinyInt" notnull="true"/>
@@ -338,13 +332,13 @@
 				INSERT INTO [dbo].[Skill] VALUES ((@AccountID), (@PlayerID), (0), ('SKILL_CATEGORY_ASSASSINATION'), ('SKILL_ASSASSINATION_ACTIVE_BUF_SIXTH_SENSE_MAXIMIZE'), (1)) 
 				INSERT INTO [dbo].[Skill] VALUES ((@AccountID), (@PlayerID), (0), ('SKILL_CATEGORY_SHOOTING'), ('SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING'), (1)) 				
 				UPDATE [dbo].[Inventory]
-				SET ItemLargeCategory = ('ITEM_LARGE_CATEGORY_WEAPON'), ItemMediumCategory = ('ITEM_MEDIUM_CATEGORY_SWORD'), ItemSmallCategory = ('ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD'), ItemCount = (1), ItemDurability = (150), ItemEnchantPoint = (1)
+				SET ItemSmallCategory = ('ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD'), ItemCount = (1), ItemDurability = (150), ItemEnchantPoint = (1)
 				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (0) AND ItemTileGridPositionY = (0)								
 				UPDATE [dbo].[Inventory]
-				SET ItemLargeCategory = ('ITEM_LARGE_CATEGORY_ARMOR'), ItemMediumCategory = ('ITEM_MEDIUM_CATEGORY_WEAR'), ItemSmallCategory = ('ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER'), ItemCount = (1), ItemDurability = (150), ItemEnchantPoint = (1)
+				SET ItemSmallCategory = ('ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER'), ItemCount = (1), ItemDurability = (150), ItemEnchantPoint = (1)
 				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (1) AND ItemTileGridPositionY = (0)	
 				UPDATE [dbo].[Inventory]
-				SET ItemLargeCategory = ('ITEM_LARGE_CATEGORY_POTION'), ItemMediumCategory = ('ITEM_MEDIUM_CATEGORY_HEAL'), ItemSmallCategory = ('ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL'), ItemCount = (5), ItemDurability = (10), ItemEnchantPoint = (0)
+				SET ItemSmallCategory = ('ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL'), ItemCount = (5), ItemDurability = (10), ItemEnchantPoint = (0)
 				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (3) AND ItemTileGridPositionY = (0)								
 			]]>
 		</Body>
@@ -429,30 +423,7 @@
 			<![CDATA[
 	    SET NOCOUNT ON
         SELECT ItemIsEquipped,
-		ItemTileGridPositionX, ItemTileGridPositionY,
-		(CASE WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_ARCHITECTURE' THEN 1
-	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_WEAPON' THEN 2
-	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_ARMOR' THEN 3
-	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_TOOL' THEN 4
-	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_FOOD' THEN 5
-	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_POTION' THEN 6
-	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_MATERIAL' THEN 7
-	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_CROP' THEN 8
-	          ELSE ' '
-	          END), 
-	    (CASE WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE' THEN 1
-	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_SWORD' THEN 2
-	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_SHIELD' THEN 3
-	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_HAT' THEN 4
-	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_WEAR' THEN 5
-	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_GLOVE' THEN 6
-	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_BOOT' THEN 7
-	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_HEAL' THEN 8
-	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_MANA' THEN 9
-	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_CROP_SEED' THEN 10
-	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_CROP_FRUIT' THEN 11
-	          ELSE ' '
-	          END), 
+		ItemTileGridPositionX, ItemTileGridPositionY,		
 		(CASE WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD' THEN 1
 	          WHEN ItemSmallCategory = 'ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD' THEN 2
 	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_TOOL_FARMING_SHOVEL' THEN 3			  
@@ -500,7 +471,7 @@
 	    SET NOCOUNT ON
         UPDATE [dbo].[Inventory]
         SET ItemIsEquipped = 0,
-		ItemLargeCategory = ' ', ItemMediumCategory = ' ', ItemSmallCategory = ' ',		
+		ItemSmallCategory = ' ',		
 		ItemCount = 0, ItemDurability = 0, ItemEnchantPoint = 0		 
         WHERE ItemTileGridPositionX = (@ItemTileGridPositionX) AND ItemTileGridPositionY = (@ItemTileGridPositionY) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
       ]]>
@@ -513,9 +484,7 @@
 		<Param name="@OwnerPlayerDBId" type="BigInt"/>
 		<Param name="@ItemIsEquipped" type="bit"/>
 		<Param name="@ItemTileGridPositionX" type="SmallInt"/>
-		<Param name="@ItemTileGridPositionY" type="SmallInt"/>
-		<Param name="@ItemLargeCategory" type="TinyInt"/>
-		<Param name="@ItemMediumCategory" type="TinyInt"/>
+		<Param name="@ItemTileGridPositionY" type="SmallInt"/>		
 		<Param name="@ItemSmallCategory" type="SmallInt"/>
 		<Param name="@ItemCount" type="SmallInt"/>
 		<Param name="@ItemDurability" type="int"/>
@@ -524,30 +493,7 @@
 			<![CDATA[
 		SET NOCOUNT ON
 		UPDATE [dbo].[Inventory]
-		SET ItemIsEquipped = (@ItemIsEquipped),		
-		ItemLargeCategory = (CASE WHEN @ItemLargeCategory = 1 THEN 'ITEM_LARGE_CATEGORY_ARCHITECTURE'
-	                              WHEN @ItemLargeCategory = 2 THEN 'ITEM_LARGE_CATEGORY_WEAPON'
-	                              WHEN @ItemLargeCategory = 3 THEN 'ITEM_LARGE_CATEGORY_ARMOR'
-	                              WHEN @ItemLargeCategory = 4 THEN 'ITEM_LARGE_CATEGORY_TOOL'
-	                              WHEN @ItemLargeCategory = 5 THEN 'ITEM_LARGE_CATEGORY_FOOD'
-	                              WHEN @ItemLargeCategory = 6 THEN 'ITEM_LARGE_CATEGORY_POTION'	                              
-	                              WHEN @ItemLargeCategory = 7 THEN 'ITEM_LARGE_CATEGORY_MATERIAL'
-	                              WHEN @ItemLargeCategory = 8 THEN 'ITEM_LARGE_CATEGORY_CROP'
-	                              ELSE ' '
-                         	      END),
-		ItemMediumCategory = (CASE WHEN @ItemMediumCategory = 1 THEN 'ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE'
-	                               WHEN @ItemMediumCategory = 2 THEN 'ITEM_MEDIUM_CATEGORY_SWORD'
-	                               WHEN @ItemMediumCategory = 3 THEN 'ITEM_MEDIUM_CATEGORY_SHIELD'
-	                               WHEN @ItemMediumCategory = 4 THEN 'ITEM_MEDIUM_CATEGORY_HAT'
-	                               WHEN @ItemMediumCategory = 5 THEN 'ITEM_MEDIUM_CATEGORY_WEAR'
-	                               WHEN @ItemMediumCategory = 6 THEN 'ITEM_MEDIUM_CATEGORY_GLOVE'
-	                               WHEN @ItemMediumCategory = 7 THEN 'ITEM_MEDIUM_CATEGORY_BOOT'
-	                               WHEN @ItemMediumCategory = 8 THEN 'ITEM_MEDIUM_CATEGORY_HEAL'
-	                               WHEN @ItemMediumCategory = 9 THEN 'ITEM_MEDIUM_CATEGORY_MANA'
-	                               WHEN @ItemMediumCategory = 10 THEN 'ITEM_MEDIUM_CATEGORY_CROP_SEED'
-	                               WHEN @ItemMediumCategory = 11 THEN 'ITEM_MEDIUM_CATEGORY_CROP_FRUIT'
-	                               ELSE ' '
-	                               END),
+		SET ItemIsEquipped = (@ItemIsEquipped),				
 		ItemSmallCategory = (CASE WHEN @ItemSmallCategory = 1 THEN 'ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD'
 	                              WHEN @ItemSmallCategory = 2 THEN 'ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD'
 								  WHEN @ItemSmallCategory = 3 THEN 'ITEM_SMALL_CATEGORY_TOOL_FARMING_SHOVEL'
@@ -601,7 +547,7 @@
                      while @height < @InventoryHeight BEGIN
                              UPDATE [dbo].[Inventory]
                              SET ItemIsEquipped = 0,   					         
-  						     ItemLargeCategory = ' ', ItemMediumCategory = ' ', ItemSmallCategory = ' ',
+  						     ItemSmallCategory = ' ',
   						     ItemCount = 0, ItemDurability = 0, ItemEnchantPoint = 0
                              WHERE OwnerAccountDBId = @OwnerAccountDBId AND OwnerPlayerDBId = @OwnerPlayerDBId AND ItemTileGridPositionX = @width AND ItemTileGridPositionY = @height        
                             SET @height = @height + 1
@@ -844,9 +790,7 @@
 		(@QuickSlotKey),
 		'SKILL_CATEGORY_NONE',
 		'SKILL_TYPE_NONE',
-		0,
-		'ITEM_LARGE_CATEGORY_NONE',
-		'ITEM_MEDIUM_CATEGORY_NONE',
+		0,		
 		'ITEM_SMALL_CATEGORY_NONE',
 		0)
       ]]>
@@ -862,9 +806,7 @@
 		<Param name="@QuickSlotKey" type="SmallInt"/>
 		<Param name="@CharacteristicType" type="TinyInt"/>
 		<Param name="@SkillType" type="SmallInt"/>
-		<Param name="@SkillLevel" type="TinyInt"/>
-		<Param name="@ItemLargeCategory" type="TinyInt"/>
-		<Param name="@ItemMediumCategory" type="TinyInt"/>
+		<Param name="@SkillLevel" type="TinyInt"/>		
 		<Param name="@ItemSmallCategory" type="SmallInt"/>
 		<Param name="@ItemCount" type="SmallInt"/>
 		<Body>
@@ -940,32 +882,7 @@
 	                          WHEN @SkillType = 56 THEN 'SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING'
 	                          ELSE ' '
 	                          END),
-		SkillLevel = (@SkillLevel),
-		ItemLargeCategory = (CASE WHEN @ItemLargeCategory = 0 THEN 'ITEM_LARGE_CATEGORY_NONE'
-								  WHEN @ItemLargeCategory = 1 THEN 'ITEM_LARGE_CATEGORY_ARCHITECTURE'
-	                              WHEN @ItemLargeCategory = 2 THEN 'ITEM_LARGE_CATEGORY_WEAPON'
-	                              WHEN @ItemLargeCategory = 3 THEN 'ITEM_LARGE_CATEGORY_ARMOR'
-	                              WHEN @ItemLargeCategory = 4 THEN 'ITEM_LARGE_CATEGORY_TOOL'
-	                              WHEN @ItemLargeCategory = 5 THEN 'ITEM_LARGE_CATEGORY_FOOD'
-	                              WHEN @ItemLargeCategory = 6 THEN 'ITEM_LARGE_CATEGORY_POTION'	                              
-	                              WHEN @ItemLargeCategory = 7 THEN 'ITEM_LARGE_CATEGORY_MATERIAL'
-	                              WHEN @ItemLargeCategory = 8 THEN 'ITEM_LARGE_CATEGORY_CROP'
-	                              ELSE ' '
-                         	      END),
-		ItemMediumCategory = (CASE WHEN @ItemMediumCategory = 0 THEN 'ITEM_MEDIUM_CATEGORY_NONE'
-		                           WHEN @ItemMediumCategory = 1 THEN 'ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE'
-	                               WHEN @ItemMediumCategory = 2 THEN 'ITEM_MEDIUM_CATEGORY_SWORD'
-	                               WHEN @ItemMediumCategory = 3 THEN 'ITEM_MEDIUM_CATEGORY_SHIELD'
-	                               WHEN @ItemMediumCategory = 4 THEN 'ITEM_MEDIUM_CATEGORY_HAT'
-	                               WHEN @ItemMediumCategory = 5 THEN 'ITEM_MEDIUM_CATEGORY_WEAR'
-	                               WHEN @ItemMediumCategory = 6 THEN 'ITEM_MEDIUM_CATEGORY_GLOVE'
-	                               WHEN @ItemMediumCategory = 7 THEN 'ITEM_MEDIUM_CATEGORY_BOOT'
-	                               WHEN @ItemMediumCategory = 8 THEN 'ITEM_MEDIUM_CATEGORY_HEAL'
-	                               WHEN @ItemMediumCategory = 9 THEN 'ITEM_MEDIUM_CATEGORY_MANA'
-	                               WHEN @ItemMediumCategory = 10 THEN 'ITEM_MEDIUM_CATEGORY_CROP_SEED'
-	                               WHEN @ItemMediumCategory = 11 THEN 'ITEM_MEDIUM_CATEGORY_CROP_FRUIT'
-	                               ELSE ' '
-	                               END),
+		SkillLevel = (@SkillLevel),		
 		ItemSmallCategory = (CASE WHEN @ItemSmallCategory = 0 THEN 'ITEM_SMALL_CATEGORY_NONE'
 		                          WHEN @ItemSmallCategory = 1 THEN 'ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD'
 	                              WHEN @ItemSmallCategory = 2 THEN 'ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD'
@@ -1079,32 +996,7 @@
 					 WHEN SkillType = 'SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING' THEN 56
 					 ELSE ' '
 					 END),
-		SkillLevel, 
-		(CASE WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_NONE' THEN 0
-			  WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_ARCHITECTURE1' THEN 1
-	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_WEAPON' THEN 2
-	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_ARMOR' THEN 3
-	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_TOOL' THEN 4
-	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_FOOD' THEN 5
-	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_POTION' THEN 6
-	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_MATERIAL' THEN 7
-	          WHEN ItemLargeCategory = 'ITEM_LARGE_CATEGORY_CROP' THEN 8
-	          ELSE ' '
-              END),
-		(CASE WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_NONE' THEN 0
-		      WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE' THEN 1
-	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_SWORD' THEN 2
-	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_SHIELD' THEN 3
-	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_HAT' THEN 4
-	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_WEAR' THEN 5
-	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_GLOVE' THEN 6
-	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_BOOT' THEN 7
-	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_HEAL' THEN 8
-	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_MANA' THEN 9
-	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_CROP_SEED' THEN 10
-	          WHEN ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_CROP_FRUIT' THEN 11
-	          ELSE ' '
-	          END),
+		SkillLevel,		
 		(CASE WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_NONE' THEN 0
 		      WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD' THEN 1
 	          WHEN ItemSmallCategory = 'ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD' THEN 2
@@ -1152,7 +1044,7 @@
 			<![CDATA[
 	    SET NOCOUNT ON
         UPDATE [dbo].[QuickSlotBar]
-        SET CharacteristicType = 'SKILL_CATEGORY_NONE', SkillType = 'SKILL_TYPE_NONE', SkillLevel = 0, ItemLargeCategory = 'ITEM_LARGE_CATEGORY_NONE', ItemMediumCategory = 'ITEM_MEDIUM_CATEGORY_NONE', ItemSmallCategory = 'ITEM_SMALL_CATEGORY_NONE', ItemCount = 0
+        SET CharacteristicType = 'SKILL_CATEGORY_NONE', SkillType = 'SKILL_TYPE_NONE', SkillLevel = 0, ItemSmallCategory = 'ITEM_SMALL_CATEGORY_NONE', ItemCount = 0
         WHERE QuickSlotBarIndex = (@QuickSlotBarIndex) AND QuickSlotBarSlotIndex = (@QuickSlotBarSlotIndex) AND AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
 		</Body>
@@ -1239,9 +1131,7 @@
 	<Procedure name="spOnEquipment">
 		<Param name="@EquipmentAccountDBId" type="BigInt"/>
 		<Param name="@EquipmentPlayerDBId" type="BigInt"/>
-		<Param name="@EquipmentParts" type="TinyInt"/>
-		<Param name="@EquipmentLargeCategory" type="TinyInt"/>
-		<Param name="@EquipmentMediumCategory" type="TinyInt"/>
+		<Param name="@EquipmentParts" type="TinyInt"/>		
 		<Param name="@EquipmentSmallCategory" type="SmallInt"/>
 		<Param name="@EquipmentDurability" type="Int"/>
 		<Param name="@EquipmentEnchantPoint" type="TinyInt"/>
@@ -1250,20 +1140,7 @@
 	    SET NOCOUNT ON     
 		UPDATE [dbo].[Equipment]
 		SET EquipmentAccountDBId = (@EquipmentAccountDBId),
-		    EquipmentPlayerDBId  = (@EquipmentPlayerDBId),			
-	        EquipmentLargeCategory = (CASE WHEN @EquipmentLargeCategory = 2 THEN 'ITEM_LARGE_CATEGORY_WEAPON'
-										   WHEN @EquipmentLargeCategory = 3 THEN 'ITEM_LARGE_CATEGORY_ARMOR'
-										   WHEN @EquipmentLargeCategory = 4 THEN 'ITEM_LARGE_CATEGORY_TOOL'
-										   ELSE ' '
-							               END),
-	        EquipmentMediumCategory = (CASE WHEN @EquipmentMediumCategory = 2 THEN 'ITEM_MEDIUM_CATEGORY_SWORD'
-											WHEN @EquipmentMediumCategory = 3 THEN 'ITEM_MEDIUM_CATEGORY_SHIELD'
-											WHEN @EquipmentMediumCategory = 4 THEN 'ITEM_MEDIUM_CATEGORY_HAT'
-											WHEN @EquipmentMediumCategory = 5 THEN 'ITEM_MEDIUM_CATEGORY_WEAR'
-											WHEN @EquipmentMediumCategory = 6 THEN 'ITEM_MEDIUM_CATEGORY_GLOVE'
-											WHEN @EquipmentMediumCategory = 7 THEN 'ITEM_MEDIUM_CATEGORY_BOOT'
-											ELSE ' '
-							                END),
+		    EquipmentPlayerDBId  = (@EquipmentPlayerDBId),				        
 		    EquipmentSmallCategory = (CASE  WHEN @EquipmentSmallCategory = 1 THEN 'ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD'
 										    WHEN @EquipmentSmallCategory = 2 THEN 'ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD'
 										    WHEN @EquipmentSmallCategory = 3 THEN 'ITEM_SMALL_CATEGORY_TOOL_FARMING_SHOVEL'
@@ -1293,9 +1170,7 @@
 		<Body>
 			<![CDATA[
 			    UPDATE [dbo].[Equipment]
-		        SET EquipmentLargeCategory = ' ',
-	                EquipmentMediumCategory = ' ',
-		            EquipmentSmallCategory = ' ',
+		        SET EquipmentSmallCategory = ' ',
 		            EquipmentDurability = 0,
 		            EquipmentEnchantPoint = 0
 			    WHERE EquipmentAccountDBId =  (@EquipmentAccountDBId) AND EquipmentPlayerDBId = (@EquipmentPlayerDBId)
@@ -1326,9 +1201,7 @@
 		               WHEN @EquipmentParts = 4 THEN 'EQUIPMENT_PARTS_RIGHT_HAND'
 		               WHEN @EquipmentParts = 5 THEN 'EQUIPMENT_PARTS_BOOT'
 					   ELSE ' '
-					   END), 
-				 'ITEM_LARGE_CATEGORY_NONE',
-				 'ITEM_MEDIUM_CATEGORY_NONE',
+					   END), 				 
 				 'ITEM_SMALL_CATEGORY_NONE', 0, 0)
             ]]>
 		</Body>
@@ -1348,32 +1221,7 @@
 					  WHEN EquipmentParts = 'EQUIPMENT_PARTS_RIGHT_HAND' THEN 4
 					  WHEN EquipmentParts = 'EQUIPMENT_PARTS_BOOT' THEN 5
 					  ELSE ' '
-					  END),
-		(CASE WHEN EquipmentLargeCategory = 'ITEM_LARGE_CATEGORY_NONE' THEN 0
-			  WHEN EquipmentLargeCategory = 'ITEM_LARGE_CATEGORY_ARCHITECTURE' THEN 1
-	          WHEN EquipmentLargeCategory = 'ITEM_LARGE_CATEGORY_WEAPON' THEN 2
-	          WHEN EquipmentLargeCategory = 'ITEM_LARGE_CATEGORY_ARMOR' THEN 3
-	          WHEN EquipmentLargeCategory = 'ITEM_LARGE_CATEGORY_TOOL' THEN 4
-	          WHEN EquipmentLargeCategory = 'ITEM_LARGE_CATEGORY_FOOD' THEN 5
-	          WHEN EquipmentLargeCategory = 'ITEM_LARGE_CATEGORY_POTION' THEN 6
-	          WHEN EquipmentLargeCategory = 'ITEM_LARGE_CATEGORY_MATERIAL' THEN 7
-	          WHEN EquipmentLargeCategory = 'ITEM_LARGE_CATEGORY_CROP' THEN 8
-	          ELSE ' '
-	          END), 
-	    (CASE WHEN EquipmentMediumCategory = 'ITEM_MEDIUM_CATEGORY_NONE' THEN 0
-			  WHEN EquipmentMediumCategory = 'ITEM_MEDIUM_CATEGORY_CRAFTING_TABLE' THEN 1
-	          WHEN EquipmentMediumCategory = 'ITEM_MEDIUM_CATEGORY_SWORD' THEN 2
-	          WHEN EquipmentMediumCategory = 'ITEM_MEDIUM_CATEGORY_SHIELD' THEN 3
-	          WHEN EquipmentMediumCategory = 'ITEM_MEDIUM_CATEGORY_HAT' THEN 4
-	          WHEN EquipmentMediumCategory = 'ITEM_MEDIUM_CATEGORY_WEAR' THEN 5
-	          WHEN EquipmentMediumCategory = 'ITEM_MEDIUM_CATEGORY_GLOVE' THEN 6
-	          WHEN EquipmentMediumCategory = 'ITEM_MEDIUM_CATEGORY_BOOT' THEN 7
-	          WHEN EquipmentMediumCategory = 'ITEM_MEDIUM_CATEGORY_HEAL' THEN 8
-	          WHEN EquipmentMediumCategory = 'ITEM_MEDIUM_CATEGORY_MANA' THEN 9
-	          WHEN EquipmentMediumCategory = 'ITEM_MEDIUM_CATEGORY_CROP_SEED' THEN 10
-	          WHEN EquipmentMediumCategory = 'ITEM_MEDIUM_CATEGORY_CROP_FRUIT' THEN 11
-	          ELSE ' '
-	          END), 			  
+					  END),			  
 		(CASE WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_NONE' THEN 0
 			  WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD' THEN 1
 	          WHEN EquipmentSmallCategory = 'ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD' THEN 2
