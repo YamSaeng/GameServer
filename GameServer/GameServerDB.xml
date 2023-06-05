@@ -409,7 +409,7 @@
         INSERT INTO [dbo].[Inventory]
         VALUES ((@OwnerAccountDBId), (@OwnerPlayerDBId),
 		0, (@ItemTileGridPositionX), (@ItemTileGridPositionY), 
-		' ',' ',' ', 
+		' ', 
 		0, 0, 0)
       ]]>
 		</Body>
@@ -424,9 +424,12 @@
 	    SET NOCOUNT ON
         SELECT ItemIsEquipped,
 		ItemTileGridPositionX, ItemTileGridPositionY,		
-		(CASE WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD' THEN 1
-	          WHEN ItemSmallCategory = 'ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD' THEN 2
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_TOOL_FARMING_SHOVEL' THEN 3			  
+		(CASE WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_WEAPON_DAGGER_WOOD' THEN 1
+			  WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD' THEN 2
+			  WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_WEAPON_GREAT_SWORD_WOOD' THEN 3
+	          WHEN ItemSmallCategory = 'ITEM_SAMLL_CATEGORY_WEAPON_SHIELD_WOOD' THEN 4
+	          WHEN ItemSmallCategory = 'ITEM_SAMLL_CATEGORY_WEAPON_BOW_WOOD' THEN 5
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_TOOL_FARMING_SHOVEL' THEN 6
 	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER' THEN 100
 	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER' THEN 101
 	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER' THEN 102
@@ -494,9 +497,12 @@
 		SET NOCOUNT ON
 		UPDATE [dbo].[Inventory]
 		SET ItemIsEquipped = (@ItemIsEquipped),				
-		ItemSmallCategory = (CASE WHEN @ItemSmallCategory = 1 THEN 'ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD'
-	                              WHEN @ItemSmallCategory = 2 THEN 'ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD'
-								  WHEN @ItemSmallCategory = 3 THEN 'ITEM_SMALL_CATEGORY_TOOL_FARMING_SHOVEL'
+		ItemSmallCategory = (CASE WHEN @ItemSmallCategory = 1 THEN 'ITEM_SMALL_CATEGORY_WEAPON_DAGGER_WOOD'
+								  WHEN @ItemSmallCategory = 2 THEN 'ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD'
+								  WHEN @ItemSmallCategory = 3 THEN 'ITEM_SMALL_CATEGORY_WEAPON_GREAT_SWORD_WOOD'
+								  WHEN @ItemSmallCategory = 4 THEN 'ITEM_SAMLL_CATEGORY_WEAPON_SHIELD_WOOD'
+								  WHEN @ItemSmallCategory = 5 THEN 'ITEM_SAMLL_CATEGORY_WEAPON_BOW_WOOD'
+								  WHEN @ItemSmallCategory = 6 THEN 'ITEM_SMALL_CATEGORY_TOOL_FARMING_SHOVEL'	 				  								  
 	                              WHEN @ItemSmallCategory = 100 THEN 'ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER'
 	                              WHEN @ItemSmallCategory = 101 THEN 'ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER'
 	                              WHEN @ItemSmallCategory = 102 THEN 'ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER'
@@ -884,9 +890,12 @@
 	                          END),
 		SkillLevel = (@SkillLevel),		
 		ItemSmallCategory = (CASE WHEN @ItemSmallCategory = 0 THEN 'ITEM_SMALL_CATEGORY_NONE'
-		                          WHEN @ItemSmallCategory = 1 THEN 'ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD'
-	                              WHEN @ItemSmallCategory = 2 THEN 'ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD'
-								  WHEN @ItemSmallCategory = 3 THEN 'ITEM_SMALL_CATEGORY_TOOL_FARMING_SHOVEL'
+		                          WHEN @ItemSmallCategory = 1 THEN 'ITEM_SMALL_CATEGORY_WEAPON_DAGGER_WOOD'
+	                              WHEN @ItemSmallCategory = 2 THEN 'ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD'
+								  WHEN @ItemSmallCategory = 3 THEN 'ITEM_SMALL_CATEGORY_WEAPON_GREAT_SWORD_WOOD'
+								  WHEN @ItemSmallCategory = 4 THEN 'ITEM_SAMLL_CATEGORY_WEAPON_SHIELD_WOOD'
+								  WHEN @ItemSmallCategory = 5 THEN 'ITEM_SAMLL_CATEGORY_WEAPON_BOW_WOOD'
+								  WHEN @ItemSmallCategory = 6 THEN 'ITEM_SMALL_CATEGORY_TOOL_FARMING_SHOVEL'
 	                              WHEN @ItemSmallCategory = 100 THEN 'ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER'
 	                              WHEN @ItemSmallCategory = 101 THEN 'ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER'
 	                              WHEN @ItemSmallCategory = 102 THEN 'ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER'
@@ -998,9 +1007,12 @@
 					 END),
 		SkillLevel,		
 		(CASE WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_NONE' THEN 0
-		      WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD' THEN 1
-	          WHEN ItemSmallCategory = 'ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD' THEN 2
-			  WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_TOOL_FARMING_SHOVEL' THEN 3
+		      WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_WEAPON_DAGGER_WOOD' THEN 1
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD' THEN 2
+			  WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_WEAPON_GREAT_SWORD_WOOD' THEN 3
+			  WHEN ItemSmallCategory = 'ITEM_SAMLL_CATEGORY_WEAPON_SHIELD_WOOD' THEN 4
+			  WHEN ItemSmallCategory = 'ITEM_SAMLL_CATEGORY_WEAPON_BOW_WOOD' THEN 5
+			  WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_TOOL_FARMING_SHOVEL' THEN 6
 	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER' THEN 100
 	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER' THEN 101
 	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER' THEN 102
@@ -1141,9 +1153,12 @@
 		UPDATE [dbo].[Equipment]
 		SET EquipmentAccountDBId = (@EquipmentAccountDBId),
 		    EquipmentPlayerDBId  = (@EquipmentPlayerDBId),				        
-		    EquipmentSmallCategory = (CASE  WHEN @EquipmentSmallCategory = 1 THEN 'ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD'
-										    WHEN @EquipmentSmallCategory = 2 THEN 'ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD'
-										    WHEN @EquipmentSmallCategory = 3 THEN 'ITEM_SMALL_CATEGORY_TOOL_FARMING_SHOVEL'
+		    EquipmentSmallCategory = (CASE  WHEN @EquipmentSmallCategory = 1 THEN 'ITEM_SMALL_CATEGORY_WEAPON_DAGGER_WOOD'
+											WHEN @EquipmentSmallCategory = 2 THEN 'ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD'
+											WHEN @EquipmentSmallCategory = 3 THEN 'ITEM_SMALL_CATEGORY_WEAPON_GREAT_SWORD_WOOD'
+											WHEN @EquipmentSmallCategory = 4 THEN 'ITEM_SAMLL_CATEGORY_WEAPON_SHIELD_WOOD'
+											WHEN @EquipmentSmallCategory = 5 THEN 'ITEM_SAMLL_CATEGORY_WEAPON_BOW_WOOD'										    
+										    WHEN @EquipmentSmallCategory = 6 THEN 'ITEM_SMALL_CATEGORY_TOOL_FARMING_SHOVEL'
 										    WHEN @EquipmentSmallCategory = 100 THEN 'ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER'
 											WHEN @EquipmentSmallCategory = 101 THEN 'ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER'
 											WHEN @EquipmentSmallCategory = 102 THEN 'ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER'
@@ -1223,9 +1238,12 @@
 					  ELSE ' '
 					  END),			  
 		(CASE WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_NONE' THEN 0
-			  WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD' THEN 1
-	          WHEN EquipmentSmallCategory = 'ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD' THEN 2
-			  WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_TOOL_FARMING_SHOVEL' THEN 3
+			  WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_WEAPON_DAGGER_WOOD' THEN 1
+			  WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD' THEN 2
+			  WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_WEAPON_GREAT_SWORD_WOOD' THEN 3
+			  WHEN EquipmentSmallCategory = 'ITEM_SAMLL_CATEGORY_WEAPON_SHIELD_WOOD' THEN 4
+			  WHEN EquipmentSmallCategory = 'ITEM_SAMLL_CATEGORY_WEAPON_BOW_WOOD' THEN 5
+			  WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_TOOL_FARMING_SHOVEL' THEN 6
 	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER' THEN 100
 	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER' THEN 101
 	          WHEN EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER' THEN 102	          			  

@@ -322,7 +322,7 @@ namespace SP
 		void OutQuickSlotCharacteristicType(int8& CharacteristicType) { BindCol(3, CharacteristicType); }
 		void OutQuickSlotSkillType(int16& SkillType) { BindCol(4, SkillType); }
 		void OutQuickSlotSkillLevel(int8& SkillLevel) { BindCol(5, SkillLevel); }		
-		void OutQuickSlotItemLargeCategory(int8& ItemLargeCategory) { BindCol(6, ItemLargeCategory); }		
+		void OutQuickSlotItemSmallCategory(int16& ItemSmallCategory) { BindCol(6, ItemSmallCategory); }
 		void OutQuickSlotItemCount(int16& ItemCount) { BindCol(7, ItemCount); }
 	};	
 
