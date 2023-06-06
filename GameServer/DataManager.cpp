@@ -993,6 +993,8 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 					int64 SkillDurationTime = AttackSkillFiled["SkillDurationTime"].GetInt64();
 					int64 SkillDotTime = AttackSkillFiled["SkillDotTime"].GetInt64();
 					float SkillDistance = AttackSkillFiled["SkillDistance"].GetFloat();
+					float SkillRangeX = AttackSkillFiled["SkillRangeX"].GetFloat();
+					float SkillRangeY = AttackSkillFiled["SkillRangeY"].GetFloat();
 					int32 SkillMotionTime = AttackSkillFiled["SkillMotionTime"].GetInt();
 					float SkillTargetEffectTime = AttackSkillFiled["SkillTargetEffectTime"].GetFloat();
 					float SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetFloat();
@@ -1088,6 +1090,8 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 					FightAttackSkill->SkillDotTime = SkillDotTime;
 					FightAttackSkill->SkillMotionTime = SkillMotionTime;
 					FightAttackSkill->SkillDistance = SkillDistance;
+					FightAttackSkill->SkillRangeX = SkillRangeX;
+					FightAttackSkill->SkillRangeY = SkillRangeY;
 					FightAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 					FightAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 					FightAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;					
@@ -1230,6 +1234,8 @@ void CDataManager::LoadDataProtectionSkill(wstring LoadFileName)
 					int64 SkillDurationTime = AttackSkillFiled["SkillDurationTime"].GetInt64();
 					int64 SkillDotTime = AttackSkillFiled["SkillDotTime"].GetInt64();
 					float SkillDistance = AttackSkillFiled["SkillDistance"].GetFloat();
+					float SkillRangeX = AttackSkillFiled["SkillRangeX"].GetFloat();
+					float SkillRangeY = AttackSkillFiled["SkillRangeY"].GetFloat();
 					int32 SkillMotionTime = AttackSkillFiled["SkillMotionTime"].GetInt();
 					float SkillTargetEffectTime = AttackSkillFiled["SkillTargetEffectTime"].GetFloat();
 					float SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetFloat();
@@ -1337,6 +1343,8 @@ void CDataManager::LoadDataProtectionSkill(wstring LoadFileName)
 					ProtectionAttackSkill->SkillDotTime = SkillDotTime;
 					ProtectionAttackSkill->SkillMotionTime = SkillMotionTime;
 					ProtectionAttackSkill->SkillDistance = SkillDistance;
+					ProtectionAttackSkill->SkillRangeX = SkillRangeX;
+					ProtectionAttackSkill->SkillRangeY = SkillRangeY;
 					ProtectionAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 					ProtectionAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
 					ProtectionAttackSkill->SkillDebufMovingSpeed = SkillDebufMovingSpeed;
@@ -1476,6 +1484,8 @@ void CDataManager::LoadDataAssassinationSkill(wstring LoadFileName)
 					int64 SkillDurationTime = AttackSkillFiled["SkillDurationTime"].GetInt64();
 					int64 SkillDotTime = AttackSkillFiled["SkillDotTime"].GetInt64();
 					float SkillDistance = AttackSkillFiled["SkillDistance"].GetFloat();
+					float SkillRangeX = AttackSkillFiled["SkillRangeX"].GetFloat();
+					float SkillRangeY = AttackSkillFiled["SkillRangeY"].GetFloat();
 					int32 SkillMotionTime = AttackSkillFiled["SkillMotionTime"].GetInt();
 					float SkillTargetEffectTime = AttackSkillFiled["SkillTargetEffectTime"].GetFloat();
 					float SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetFloat();
@@ -1575,6 +1585,8 @@ void CDataManager::LoadDataAssassinationSkill(wstring LoadFileName)
 					AssassinationAttackSkill->SkillDurationTime = SkillDurationTime;
 					AssassinationAttackSkill->SkillDotTime = SkillDotTime;
 					AssassinationAttackSkill->SkillDistance = SkillDistance;
+					AssassinationAttackSkill->SkillRangeX = SkillRangeX;
+					AssassinationAttackSkill->SkillRangeY = SkillRangeY;
 					AssassinationAttackSkill->SkillMotionTime = SkillMotionTime;
 					AssassinationAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 					AssassinationAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
@@ -1714,6 +1726,8 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 					int64 SkillDurationTime = AttackSkillFiled["SkillDurationTime"].GetInt64();
 					int64 SkillDotTime = AttackSkillFiled["SkillDotTime"].GetInt64();
 					float SkillDistance = AttackSkillFiled["SkillDistance"].GetFloat();
+					float SkillRangeX = AttackSkillFiled["SkillRangeX"].GetFloat();
+					float SkillRangeY = AttackSkillFiled["SkillRangeY"].GetFloat();
 					int32 SkillMotionTime = AttackSkillFiled["SkillMotionTime"].GetInt();
 					float SkillTargetEffectTime = AttackSkillFiled["SkillTargetEffectTime"].GetFloat();
 					float SkillDebufAttackSpeed = (int8)AttackSkillFiled["SkillDebufAttackSpeed"].GetFloat();
@@ -1840,6 +1854,8 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 					SpellAttackSkill->SkillDurationTime = SkillDurationTime;
 					SpellAttackSkill->SkillDotTime = SkillDotTime;
 					SpellAttackSkill->SkillDistance = SkillDistance;
+					SpellAttackSkill->SkillRangeX = SkillRangeX;
+					SpellAttackSkill->SkillRangeY = SkillRangeY;
 					SpellAttackSkill->SkillMotionTime = SkillMotionTime;
 					SpellAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 					SpellAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
@@ -1950,6 +1966,8 @@ void CDataManager::LoadDataShootingSkill(wstring LoadFileName)
 					int64 SkillDurationTime = AttackSkillFiled["SkillDurationTime"].GetInt64();
 					int64 SkillDotTime = AttackSkillFiled["SkillDotTime"].GetInt64();
 					float SkillDistance = AttackSkillFiled["SkillDistance"].GetFloat();
+					float SkillRangeX = AttackSkillFiled["SkillRangeX"].GetFloat();
+					float SkillRangeY = AttackSkillFiled["SkillRangeY"].GetFloat();
 					int32 SkillMotionTime = AttackSkillFiled["SkillMotionTime"].GetInt();
 					float SkillTargetEffectTime = AttackSkillFiled["SkillTargetEffectTime"].GetFloat();
 					int64 SkillDebufTime = AttackSkillFiled["SkillDebufTime"].GetInt64();
@@ -1988,6 +2006,8 @@ void CDataManager::LoadDataShootingSkill(wstring LoadFileName)
 					ShootingAttackSkill->SkillDurationTime = SkillDurationTime;
 					ShootingAttackSkill->SkillDotTime = SkillDotTime;
 					ShootingAttackSkill->SkillDistance = SkillDistance;
+					ShootingAttackSkill->SkillRangeX = SkillRangeX;
+					ShootingAttackSkill->SkillRangeY = SkillRangeY;
 					ShootingAttackSkill->SkillMotionTime = SkillMotionTime;
 					ShootingAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 					ShootingAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
@@ -2044,6 +2064,8 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 					int64 SkillDurationTime = AttackSkillFiled["SkillDurationTime"].GetInt64();
 					int64 SkillDotTime = AttackSkillFiled["SkillDotTime"].GetInt64();
 					float SkillDistance = AttackSkillFiled["SkillDistance"].GetFloat();
+					float SkillRangeX = AttackSkillFiled["SkillRangeX"].GetFloat();
+					float SkillRangeY = AttackSkillFiled["SkillRangeY"].GetFloat();
 					int32 SkillMotionTime = AttackSkillFiled["SkillMotionTime"].GetInt();
 					float SkillTargetEffectTime = AttackSkillFiled["SkillTargetEffectTime"].GetFloat();
 					int64 SkillDebufTime = AttackSkillFiled["SkillDebufTime"].GetInt64();
@@ -2119,6 +2141,8 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 					DisciplineAttackSkill->SkillDurationTime = SkillDurationTime;
 					DisciplineAttackSkill->SkillDotTime = SkillDotTime;
 					DisciplineAttackSkill->SkillDistance = SkillDistance;
+					DisciplineAttackSkill->SkillRangeX = SkillRangeX;
+					DisciplineAttackSkill->SkillRangeY = SkillRangeY;
 					DisciplineAttackSkill->SkillMotionTime = SkillMotionTime;
 					DisciplineAttackSkill->SkillTargetEffectTime = SkillTargetEffectTime;
 					DisciplineAttackSkill->SkillDebufAttackSpeed = SkillDebufAttackSpeed;
