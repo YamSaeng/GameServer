@@ -87,9 +87,12 @@ enum class en_GameObjectType : int16
 
 	OBJECT_ITEM,
 	OBJECT_ITEM_WEAPON,
-	OBJECT_ITEM_WEAPON_WOOD_SWORD,
+	OBJECT_ITEM_WEAPON_WOOD_DAGGER,
+	OBJECT_ITEM_WEAPON_WOOD_LONG_SWORD,
+	OBJECT_ITEM_WEAPON_WOOD_GREAT_SWORD,
 	OBJECT_ITEM_WEAPON_WOOD_SHIELD,
-
+	OBJECT_ITEM_WEAPON_WOOD_BOW,
+	
 	OBJECT_ITEM_TOOL,
 	OBJECT_ITEM_TOOL_FARMING_SHOVEL,
 
@@ -255,10 +258,11 @@ enum class en_SmallItemCategory : int16
 {
 	ITEM_SMALL_CATEGORY_NONE = 0,
 
-	ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD = 1,
-	ITEM_SMALL_CATEGORY_WEAPON_DAGGER_WOOD,
-	ITEM_SMALL_CATEGORY_WEAPON_GERAT_WOOD,	
+	ITEM_SMALL_CATEGORY_WEAPON_DAGGER_WOOD = 1,
+	ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD,	
+	ITEM_SMALL_CATEGORY_WEAPON_GREAT_SWORD_WOOD,	
 	ITEM_SAMLL_CATEGORY_WEAPON_SHIELD_WOOD,
+	ITEM_SAMLL_CATEGORY_WEAPON_BOW_WOOD,
 
 	ITEM_SMALL_CATEGORY_TOOL_FARMING_SHOVEL,
 
@@ -464,8 +468,7 @@ enum en_EquipmentParts
 	EQUIPMENT_PARTS_HEAD,
 	EQUIPMENT_PARTS_BODY,
 	EQUIPMENT_PARTS_LEFT_HAND,
-	EQUIPMENT_PARTS_RIGHT_HAND,
-	EQUIPMENT_PARTS_BOTH_HAND,
+	EQUIPMENT_PARTS_RIGHT_HAND,	
 	EQUIPMENT_PARTS_BOOT
 };
 
@@ -498,6 +501,12 @@ enum class en_ResourceName : int16
 
 	CLIENT_GAMEOBJECT_CRAFTING_TABLE_FURNACE,
 	CLIENT_GAMEOBJECT_CRAFTING_TABLE_SAWMILL,
+
+	CLIENT_WEAPON_DAGGER_WOOD,
+	CLIENT_WEAPON_LONG_SWORD_WOOD,
+	CLIENT_WEAPON_GREAT_SWORD_WOOD,
+	CLIENT_WEAPON_SHIELD_WOOD,
+	CLIENT_WEAPON_BOW_WOOD,
 
 	CLIENT_GAMEOBJECT_STORAGE_BOX_SMALL,
 
@@ -556,6 +565,7 @@ enum class en_ResourceName : int16
 	CLIENT_UI_DAMAGE,
 
 	CLIENT_UI_EQUIPMENT_BOX,
+	CLIENT_UI_EQUIPMENT_ITEM,
 
 	CLIENT_UI_SKILL_BOX,
 	CLIENT_UI_SKILL_EXPLANATION,
@@ -2249,6 +2259,8 @@ struct st_ItemInfo
 	bool ItemIsEquipped;			          // 아이템을 착용할 수 있는지			
 	int16 ItemWidth;			     		  // 아이템 너비
 	int16 ItemHeight;						  // 아이템 높이	
+	float ItemCollisionX;					  // 장비 아이템 감지 박스 X 크기
+	float ItemCollisionY;					  // 장비 아이템 감지 박스 Y 크기
 	int16 ItemTileGridPositionX;			  // 인벤토리 위치 X
 	int16 ItemTileGridPositionY;			  // 인벤토리 위치 Y
 	en_UIObjectInfo OwnerCraftingTable;		  // 아이템이 제작 가능한 아이템이라면 아이템이 속한 제작대
@@ -2368,6 +2380,8 @@ struct st_SkillInfo
 	int8 SkillOverlapStep;   // 스킬 중첩 횟수
 	wstring SkillName;		 // 스킬 이름	
 	float SkillDistance;	 // 스킬 유효 거리
+	float SkillRangeX;		 // 스킬 범위 X 크기
+	float SkillRangeY;		 // 스킬 범위 Y 크기
 	int32 SkillCoolTime;	 // 스킬 쿨타임		
 	int32 SkillCastingTime;  // 스킬 캐스팅 타임
 	int64 SkillDurationTime; // 스킬 지속 시간
