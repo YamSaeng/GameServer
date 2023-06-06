@@ -22,6 +22,8 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string ItemEquipmentPart = WeaponListFiled["ItemEquipmentPart"].GetString();
 			int32 ItemWidth = WeaponListFiled["ItemWidth"].GetInt();
 			int32 ItemHeight = WeaponListFiled["ItemHeight"].GetInt();
+			float ItemCollisionX = WeaponListFiled["ItemCollisionX"].GetFloat();
+			float ItemCollisionY = WeaponListFiled["ItemCollisionY"].GetFloat();
 			int32 ItemMinDamage = WeaponListFiled["ItemMinDamage"].GetInt();
 			int32 ItemMaxDamage = WeaponListFiled["ItemMaxDamage"].GetInt();
 			int32 ItemMaxDurability = WeaponListFiled["ItemMaxDurability"].GetInt();
@@ -32,31 +34,67 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 
 			WeaponItemInfo->ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
 
-			if (MediumCategory == "ITEM_MEDIUM_CATEGORY_SWORD")
+			if (MediumCategory == "ITEM_MEDIUM_CATEGORY_WEAPON_DAGGER")
 			{
-				WeaponItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_SWORD;				
+				WeaponItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_WEAPON_DAGGER;
 			}
-			else if (MediumCategory == "ITEM_MEDIUM_CATEGORY_SHIELD")
+			else if (MediumCategory == "ITEM_MEDIUM_CATEGORY_WEAPON_LONG_SWORD")
 			{
-				WeaponItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_SHIELD;
-			}			
-
-			if (SmallCategory == "ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD")
-			{
-				WeaponItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD;
+				WeaponItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_WEAPON_LONG_SWORD;
 			}
-			else if (SmallCategory == "ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD")
+			else if (MediumCategory == "ITEM_MEDIUM_CATEGORY_WEAPON_GREAT_SWORD")
 			{
-				WeaponItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD;
-			}			
+				WeaponItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_WEAPON_GREAT_SWORD;
+			}
+			else if (MediumCategory == "ITEM_MEDIUM_CATEGORY_WEAPON_SHIELD")
+			{
+				WeaponItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_WEAPON_SHIELD;
+			}
+			else if (MediumCategory == "ITEM_MEDIUM_CATEGORY_WEAPON_BOW")
+			{
+				WeaponItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_WEAPON_BOW;
+			}
 
-			if (ItemObjectType == "OBJECT_ITEM_WEAPON_WOOD_SWORD")
+			if (SmallCategory == "ITEM_SMALL_CATEGORY_WEAPON_DAGGER_WOOD")
 			{
-				WeaponItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD;
+				WeaponItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_DAGGER_WOOD;
+			}
+			else if (SmallCategory == "ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD")
+			{
+				WeaponItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD;
+			}
+			else if (SmallCategory == "ITEM_SMALL_CATEGORY_WEAPON_GREAT_SWORD_WOOD")
+			{
+				WeaponItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_GREAT_SWORD_WOOD;
+			}	
+			else if (SmallCategory == "ITEM_SAMLL_CATEGORY_WEAPON_SHIELD_WOOD")
+			{
+				WeaponItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_SHIELD_WOOD;
+			}
+			else if (SmallCategory == "ITEM_SAMLL_CATEGORY_WEAPON_BOW_WOOD")
+			{
+				WeaponItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_BOW_WOOD;
+			}
+
+			if (ItemObjectType == "OBJECT_ITEM_WEAPON_WOOD_DAGGER")
+			{
+				WeaponItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_DAGGER;
+			}
+			else if (ItemObjectType == "OBJECT_ITEM_WEAPON_WOOD_LONG_SWORD")
+			{
+				WeaponItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_LONG_SWORD;
+			}
+			else if (ItemObjectType == "OBJECT_ITEM_WEAPON_WOOD_GREAT_SWORD")
+			{
+				WeaponItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_GREAT_SWORD;
 			}
 			else if (ItemObjectType == "OBJECT_ITEM_WEAPON_WOOD_SHIELD")
 			{
 				WeaponItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SHIELD;
+			}
+			else if (ItemObjectType == "OBJECT_ITEM_WEAPON_WOOD_BOW")
+			{
+				WeaponItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_BOW;
 			}			
 						
 			WeaponItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
@@ -77,6 +115,8 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 
 			WeaponItemInfo->ItemWidth = ItemWidth;
 			WeaponItemInfo->ItemHeight = ItemHeight;
+			WeaponItemInfo->ItemCollisionX = ItemCollisionX;
+			WeaponItemInfo->ItemCollisionY = ItemCollisionY;
 			WeaponItemInfo->ItemMinDamage = ItemMinDamage;
 			WeaponItemInfo->ItemMaxDamage = ItemMaxDamage;			
 			WeaponItemInfo->ItemMaxDurability = ItemMaxDurability;
@@ -108,17 +148,21 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 
 			ArmorItemInfo->ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARMOR;
 
-			if (MediumCategory == "ITEM_MEDIUM_CATEGORY_HAT")
+			if (MediumCategory == "ITEM_MEDIUM_CATEGORY_ARMOR_HAT")
 			{
-				ArmorItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_HAT;
+				ArmorItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_ARMOR_HAT;
 			}
-			else if (MediumCategory == "ITEM_MEDIUM_CATEGORY_WEAR")
+			else if (MediumCategory == "ITEM_MEDIUM_CATEGORY_ARMOR_WEAR")
 			{
-				ArmorItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_WEAR;
+				ArmorItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_ARMOR_WEAR;
 			}
-			else if (MediumCategory == "ITEM_MEDIUM_CATEGORY_BOOT")
+			else if (MediumCategory == "ITEM_MEDIUM_CATEGORY_ARMOR_GLOVE")
 			{
-				ArmorItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_BOOT;
+				ArmorItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_ARMOR_GLOVE;
+			}
+			else if (MediumCategory == "ITEM_MEDIUM_CATEGORY_ARMOR_BOOT")
+			{
+				ArmorItemInfo->ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_ARMOR_BOOT;
 			}
 
 			if (SmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER")
@@ -2443,19 +2487,51 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 				CommonCraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL;
 				CommonCraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_COMMON;
 			}
-			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD")
+			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_WEAPON_DAGGER_WOOD")
 			{
-				CommonCraftingCompleteItem = G_ObjectManager->ItemCreate(en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD);
+				CommonCraftingCompleteItem = G_ObjectManager->ItemCreate(en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_DAGGER_WOOD);
 				CommonCraftingCompleteItem->_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
-				CommonCraftingCompleteItem->_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_SWORD;
-				CommonCraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD;
+				CommonCraftingCompleteItem->_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_WEAPON_LONG_SWORD;
+				CommonCraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_DAGGER_WOOD;
+				CommonCraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_COMMON;
+			}
+			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD")
+			{
+				CommonCraftingCompleteItem = G_ObjectManager->ItemCreate(en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD);
+				CommonCraftingCompleteItem->_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
+				CommonCraftingCompleteItem->_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_WEAPON_LONG_SWORD;
+				CommonCraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD;
+				CommonCraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_COMMON;
+			}
+			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_WEAPON_GREAT_SWORD_WOOD")
+			{
+				CommonCraftingCompleteItem = G_ObjectManager->ItemCreate(en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_GREAT_SWORD_WOOD);
+				CommonCraftingCompleteItem->_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
+				CommonCraftingCompleteItem->_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_WEAPON_LONG_SWORD;
+				CommonCraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_GREAT_SWORD_WOOD;
+				CommonCraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_COMMON;
+			}
+			else if (CraftingCompleteItemSmallCategory == "ITEM_SAMLL_CATEGORY_WEAPON_SHIELD_WOOD")
+			{
+				CommonCraftingCompleteItem = G_ObjectManager->ItemCreate(en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_SHIELD_WOOD);
+				CommonCraftingCompleteItem->_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
+				CommonCraftingCompleteItem->_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_WEAPON_LONG_SWORD;
+				CommonCraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_SHIELD_WOOD;
+				CommonCraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_COMMON;
+			}
+			else if (CraftingCompleteItemSmallCategory == "ITEM_SAMLL_CATEGORY_WEAPON_BOW_WOOD")
+			{
+				CommonCraftingCompleteItem = G_ObjectManager->ItemCreate(en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_BOW_WOOD);
+				CommonCraftingCompleteItem->_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_WEAPON;
+				CommonCraftingCompleteItem->_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_WEAPON_LONG_SWORD;
+				CommonCraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_BOW_WOOD;
 				CommonCraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_COMMON;
 			}
 			else if (CraftingCompleteItemSmallCategory == "ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER")
 			{
 				CommonCraftingCompleteItem = G_ObjectManager->ItemCreate(en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER);
 				CommonCraftingCompleteItem->_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARMOR;
-				CommonCraftingCompleteItem->_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_WEAR;
+				CommonCraftingCompleteItem->_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_ARMOR_WEAR;
 				CommonCraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER;
 				CommonCraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_COMMON;
 			}
@@ -2463,7 +2539,7 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 			{
 				CommonCraftingCompleteItem = G_ObjectManager->ItemCreate(en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER);
 				CommonCraftingCompleteItem->_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARMOR;
-				CommonCraftingCompleteItem->_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_WEAR;
+				CommonCraftingCompleteItem->_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_ARMOR_WEAR;
 				CommonCraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER;
 				CommonCraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_COMMON;
 			}
@@ -2471,7 +2547,7 @@ void CDataManager::LoadDataCrafting(wstring LoadFileName)
 			{
 				CommonCraftingCompleteItem = G_ObjectManager->ItemCreate(en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER);
 				CommonCraftingCompleteItem->_ItemInfo.ItemLargeCategory = en_LargeItemCategory::ITEM_LARGE_CATEGORY_ARMOR;
-				CommonCraftingCompleteItem->_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_WEAR;
+				CommonCraftingCompleteItem->_ItemInfo.ItemMediumCategory = en_MediumItemCategory::ITEM_MEDIUM_CATEGORY_ARMOR_WEAR;
 				CommonCraftingCompleteItem->_ItemInfo.ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER;
 				CommonCraftingCompleteItem->_ItemInfo.OwnerCraftingTable = en_UIObjectInfo::UI_OBJECT_INFO_CRAFTING_TABLE_COMMON;
 			}
