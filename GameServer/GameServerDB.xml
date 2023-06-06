@@ -331,15 +331,26 @@
 				INSERT INTO [dbo].[Skill] VALUES ((@AccountID), (@PlayerID), (0), ('SKILL_CATEGORY_ASSASSINATION'), ('SKILL_ASSASSINATION_ACTIVE_BUF_STEALTH'), (1)) 
 				INSERT INTO [dbo].[Skill] VALUES ((@AccountID), (@PlayerID), (0), ('SKILL_CATEGORY_ASSASSINATION'), ('SKILL_ASSASSINATION_ACTIVE_BUF_SIXTH_SENSE_MAXIMIZE'), (1)) 
 				INSERT INTO [dbo].[Skill] VALUES ((@AccountID), (@PlayerID), (0), ('SKILL_CATEGORY_SHOOTING'), ('SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING'), (1)) 				
+				
+				INSERT INTO [dbo].[Equipment] VALUES ((@AccountID), (@PlayerID), ('EQUIPMENT_PARTS_HEAD'), ('ITEM_SMALL_CATEGORY_NONE'), (0), (0)) 				
+				INSERT INTO [dbo].[Equipment] VALUES ((@AccountID), (@PlayerID), ('EQUIPMENT_PARTS_BODY'), ('ITEM_SMALL_CATEGORY_NONE'), (0), (0)) 				
+				INSERT INTO [dbo].[Equipment] VALUES ((@AccountID), (@PlayerID), ('EQUIPMENT_PARTS_LEFT_HAND'), ('ITEM_SMALL_CATEGORY_NONE'), (0), (0)) 				
+				INSERT INTO [dbo].[Equipment] VALUES ((@AccountID), (@PlayerID), ('EQUIPMENT_PARTS_RIGHT_HAND'), ('ITEM_SMALL_CATEGORY_NONE'), (0), (0)) 				
+				INSERT INTO [dbo].[Equipment] VALUES ((@AccountID), (@PlayerID), ('EQUIPMENT_PARTS_BOTH_HAND'), ('ITEM_SMALL_CATEGORY_NONE'), (0), (0)) 				
+				INSERT INTO [dbo].[Equipment] VALUES ((@AccountID), (@PlayerID), ('EQUIPMENT_PARTS_BOOT'), ('ITEM_SMALL_CATEGORY_NONE'), (0), (0)) 				
+				
 				UPDATE [dbo].[Inventory]
 				SET ItemSmallCategory = ('ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD'), ItemCount = (1), ItemDurability = (150), ItemEnchantPoint = (1)
 				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (0) AND ItemTileGridPositionY = (0)								
 				UPDATE [dbo].[Inventory]
+				SET ItemSmallCategory = ('ITEM_SMALL_CATEGORY_WEAPON_DAGGER_WOOD'), ItemCount = (1), ItemDurability = (150), ItemEnchantPoint = (1)
+				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (1) AND ItemTileGridPositionY = (0)								
+				UPDATE [dbo].[Inventory]
 				SET ItemSmallCategory = ('ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER'), ItemCount = (1), ItemDurability = (150), ItemEnchantPoint = (1)
-				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (1) AND ItemTileGridPositionY = (0)	
+				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (2) AND ItemTileGridPositionY = (0)	
 				UPDATE [dbo].[Inventory]
 				SET ItemSmallCategory = ('ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL'), ItemCount = (5), ItemDurability = (10), ItemEnchantPoint = (0)
-				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (3) AND ItemTileGridPositionY = (0)								
+				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (4) AND ItemTileGridPositionY = (0)								
 			]]>
 		</Body>
 	</Procedure>
@@ -1185,17 +1196,17 @@
 		<Body>
 			<![CDATA[
 			    UPDATE [dbo].[Equipment]
-		        SET EquipmentSmallCategory = ' ',
+		        SET EquipmentSmallCategory = 'ITEM_SMALL_CATEGORY_NONE',
 		            EquipmentDurability = 0,
 		            EquipmentEnchantPoint = 0
 			    WHERE EquipmentAccountDBId =  (@EquipmentAccountDBId) AND EquipmentPlayerDBId = (@EquipmentPlayerDBId)
 				                               AND EquipmentParts = (CASE WHEN @EquipmentParts = 1 THEN 'EQUIPMENT_PARTS_HEAD'
-		                                       WHEN @EquipmentParts = 2 THEN 'EQUIPMENT_PARTS_BODY'
-		                                       WHEN @EquipmentParts = 3 THEN 'EQUIPMENT_PARTS_LEFT_HAND'
-		                                       WHEN @EquipmentParts = 4 THEN 'EQUIPMENT_PARTS_RIGHT_HAND'
-		                                       WHEN @EquipmentParts = 5 THEN 'EQUIPMENT_PARTS_BOOT'
-							                   ELSE ' '
-							                   END)				
+																		  WHEN @EquipmentParts = 2 THEN 'EQUIPMENT_PARTS_BODY'
+																		  WHEN @EquipmentParts = 3 THEN 'EQUIPMENT_PARTS_LEFT_HAND'
+																		  WHEN @EquipmentParts = 4 THEN 'EQUIPMENT_PARTS_RIGHT_HAND'
+																		  WHEN @EquipmentParts = 5 THEN 'EQUIPMENT_PARTS_BOOT'
+																		  ELSE ' '
+																		  END)				
 			]]>
 		</Body>
 	</Procedure>

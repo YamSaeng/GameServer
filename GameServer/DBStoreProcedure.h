@@ -304,8 +304,8 @@ namespace SP
 		void InCharacteristicType(int8& ChracteristicType) { BindParam(5, ChracteristicType); }
 		void InSkillType(int16& SkillType) { BindParam(6, SkillType); }
 		void InSkillLevel(int8& SkillLevel) { BindParam(7, SkillLevel); }				
-		void InItemSmallCategory(int16& ItemSmallCategory) { BindParam(10, ItemSmallCategory); }
-		void InItemCount(int16& ItemCount) { BindParam(11, ItemCount); }
+		void InItemSmallCategory(int16& ItemSmallCategory) { BindParam(8, ItemSmallCategory); }
+		void InItemCount(int16& ItemCount) { BindParam(9, ItemCount); }
 	};
 
 	// QuickSlotBarTable에 있는 QuickSlotBar 정보 모두 긁어온다.
@@ -390,7 +390,7 @@ namespace SP
 		void InAccountDBID(int64& AccountDBID) { BindParam(0, AccountDBID); }
 		void InPlayerDBID(int64& AccountDBID) { BindParam(1, AccountDBID); }
 		void InEquipmentParts(int8& EquipmentParts) { BindParam(2, EquipmentParts); }
-		void InEquipmentLargeCategory(int8& EquipmentLargeCategory) { BindParam(3, EquipmentLargeCategory); }
+		void InEquipmentSmallCategory(int16& EquipmentSmallCategory) { BindParam(3, EquipmentSmallCategory); }
 		void InEquipmentDurability(int32& EquipmentDurability) { BindParam(4, EquipmentDurability); }
 		void InEquipmentEnchantPoint(int8& EquipmentEnchantPoint) { BindParam(5, EquipmentEnchantPoint); }
 	};
