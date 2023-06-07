@@ -1,8 +1,10 @@
 
 #include "pch.h"
 #include "RectCollision.h"
-#include "GameObject.h"
+#include "Creature.h"
+#include "EquipmentBox.h"
 #include "Matrix2x2.h"
+#include "Skill.h"
 
 CRectCollision::CRectCollision()
 {
@@ -62,7 +64,7 @@ void CRectCollision::Init(en_CollisionPosition CollisionPosition, en_GameObjectT
 	RotateUpdate();
 }
 
-void CRectCollision::Init(en_CollisionPosition CollisionPosition, en_SkillType SkillType, Vector2 InitPosition, Vector2 Direction, CGameObject* OwnerObject)
+void CRectCollision::SkillRectInit(en_CollisionPosition CollisionPosition, CSkill* Skill, Vector2 InitPosition, Vector2 Direction, CGameObject* OwnerObject)
 {
 	_RectCollisionActive = true;
 
@@ -70,62 +72,38 @@ void CRectCollision::Init(en_CollisionPosition CollisionPosition, en_SkillType S
 
 	_OwnerObject = OwnerObject;
 
-	_Direction = Direction;
+	_Direction = Direction;			
 
-	switch (SkillType)
+	CCreature* Creature = dynamic_cast<CCreature*>(_OwnerObject);	
+
+	switch (_CollisionPosition)
+	{		
+	case en_CollisionPosition::COLLISION_POSITION_SKILL_MIDDLE:
+		_Position = InitPosition;
+		
+		break;
+	case en_CollisionPosition::COLLISION_POSITION_SKILL_FRONT:
+		_Position = InitPosition + _Direction;
+
+		break;	
+	}
+
+	if (Creature != nullptr)
 	{
-	case en_SkillType::SKILL_DEFAULT_ATTACK:
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
-		
-		_Position = InitPosition + (_Direction * 2.0f);
-
-		_Size.X = 2.0f;
-		_Size.Y = 1.4f;
-		break;
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:
-
-		_Position = InitPosition;
-
-		_Size.X = 3.0f;
-		_Size.Y = 3.0f;
-		break;
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE:
-
-		_Position = InitPosition;
-
-		_Size.X = 5.0f;
-		_Size.Y = 5.0f;
-		break;
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK:
-		
-		_Position = InitPosition;
-		
-		_Size.X = 3.0f;
-		_Size.Y = 3.0f;
-		break;
-	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SWORD_STORM:
-
-		_Position = InitPosition;
-
-		_Size.X = 4.0f;
-		_Size.Y = 1.7f;
-		break;
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_BOLT:
-
-		_Position = InitPosition;
-
-		_Size.X = 2.0f;
-		_Size.X = 2.0f;
-		break;
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_WINTER_BINDING:
-
-		_Position = InitPosition;
-
-		_Size.X = 5.0f;
-		_Size.Y = 5.0f;
-		break;
-	}			
+		CEquipmentBox* Equipment = Creature->GetEquipment();
+		if (Equipment != nullptr)
+		{
+			CItem* RightHandItem = Equipment->GetEquipmentParts(en_EquipmentParts::EQUIPMENT_PARTS_RIGHT_HAND);
+			if (RightHandItem != nullptr)
+			{
+				if (RightHandItem->_ItemInfo.ItemSmallCategory != en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE)
+				{
+					_Size.X = RightHandItem->_ItemInfo.ItemCollisionX + Skill->GetSkillInfo()->SkillRangeX;
+					_Size.Y = RightHandItem->_ItemInfo.ItemCollisionY + Skill->GetSkillInfo()->SkillRangeY;
+				}
+			}
+		}
+	}		
 
 	PositionUpdate();
 	RotateUpdate();	
@@ -208,10 +186,19 @@ void CRectCollision::SetActive(bool _Active)
 
 void CRectCollision::PositionUpdate()
 {
-	if (_OwnerObject != nullptr)
-	{
-		_Position = _OwnerObject->_GameObjectInfo.ObjectPositionInfo.Position;		
-	}			
+	switch (_CollisionPosition)
+	{	
+	case en_CollisionPosition::COLLISION_POSITION_OBJECT:
+		if (_OwnerObject != nullptr)
+		{
+			_Position = _OwnerObject->_GameObjectInfo.ObjectPositionInfo.Position;
+		}
+		break;
+	case en_CollisionPosition::COLLISION_POSITION_SKILL_MIDDLE:
+		break;
+	case en_CollisionPosition::COLLISION_POSITION_SKILL_FRONT:
+		break;	
+	}	
 	
 	_LeftTop.X = _Position.X - _Size.X / 2.0f;
 	_LeftTop.Y = _Position.Y + _Size.Y / 2.0f;
