@@ -17,6 +17,11 @@ CInventoryManager* CCreature::GetInventoryManager()
     return &_Inventory;
 }
 
+CEquipmentBox* CCreature::GetEquipment()
+{
+	return &_Equipment;
+}
+
 void CCreature::NPCInit(en_NonPlayerType NonPlayerType)
 {
 	switch (NonPlayerType)

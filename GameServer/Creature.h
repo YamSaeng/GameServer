@@ -1,6 +1,7 @@
 #pragma once
 #include "GameObject.h"
 #include "InventoryManager.h"
+#include "EquipmentBox.h"
 
 class CCreature : public CGameObject
 {
@@ -12,6 +13,7 @@ public:
 	// 가방 반환
 	//--------------------------------------------
 	CInventoryManager* GetInventoryManager();
+	CEquipmentBox* GetEquipment();
 
 	//--------------------------------------------
 	// NPC 초기화
@@ -22,5 +24,6 @@ public:
 	CSkill* _ComboSkill;
 protected:
 	CInventoryManager _Inventory;
+	CEquipmentBox _Equipment;
 };
 
