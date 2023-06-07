@@ -242,8 +242,11 @@ CItem* CObjectManager::ItemCreate(en_SmallItemCategory NewItemSmallCategory)
 
 	switch (NewItemSmallCategory)
 	{
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:
-	case en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD:	
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_DAGGER_WOOD:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_GREAT_SWORD_WOOD:
+	case en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_SHIELD_WOOD:
+	case en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_BOW_WOOD:
 		NewItem = _WeaponMemoryPool->Alloc();
 		break;
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER:
@@ -302,8 +305,11 @@ void CObjectManager::ItemReturn(CItem* ReturnItem)
 {
 	switch (ReturnItem->_ItemInfo.ItemSmallCategory)
 	{
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:
-	case en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD:	
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_DAGGER_WOOD:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_GREAT_SWORD_WOOD:
+	case en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_SHIELD_WOOD:
+	case en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_BOW_WOOD:
 		_WeaponMemoryPool->Free((CWeaponItem*)ReturnItem);
 		break;
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER:
