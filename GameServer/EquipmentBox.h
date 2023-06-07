@@ -20,6 +20,8 @@ public:
 	CItem* ItemOffEquipment(en_EquipmentParts OffEquipmentParts);	
 
 	CItem* GetEquipmentParts(en_EquipmentParts EquipmentPart);
+
+	map<en_EquipmentParts, CItem*> GetEquipments();
 private:
 	map<en_EquipmentParts, CItem*> _EquipmentParts;	
 };

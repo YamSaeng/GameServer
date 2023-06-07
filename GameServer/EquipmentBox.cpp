@@ -57,3 +57,8 @@ CItem* CEquipmentBox::GetEquipmentParts(en_EquipmentParts EquipmentPart)
 		return nullptr;
 	}	
 }
+
+map<en_EquipmentParts, CItem*> CEquipmentBox::GetEquipments()
+{
+	return _EquipmentParts;
+}
