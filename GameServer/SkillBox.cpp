@@ -289,19 +289,21 @@ vector<CGameObject*> CSkillBox::CollisionSkillUse(CGameObject* SkillUser, CSkill
 				switch (CollisionPositionType)
 				{
 				case en_CollisionPosition::COLLISION_POSITION_OBJECT:
-					SkillCollision->Init(en_CollisionPosition::COLLISION_POSITION_OBJECT, Skill->GetSkillInfo()->SkillType,
+					SkillCollision->SkillRectInit(en_CollisionPosition::COLLISION_POSITION_OBJECT, Skill,
 						CollisionCreatePosition,
 						CollisionCreateDir);
 					break;
 				case en_CollisionPosition::COLLISION_POSITION_SKILL_MIDDLE:
-					SkillCollision->Init(en_CollisionPosition::COLLISION_POSITION_SKILL_MIDDLE, Skill->GetSkillInfo()->SkillType,
+					SkillCollision->SkillRectInit(en_CollisionPosition::COLLISION_POSITION_SKILL_MIDDLE, Skill,
 						CollisionCreatePosition,
-						Vector2::Zero);
+						Vector2::Zero,
+						SkillUser);
 					break;				
 				case en_CollisionPosition::COLLISION_POSITION_SKILL_FRONT:
-					SkillCollision->Init(en_CollisionPosition::COLLISION_POSITION_SKILL_FRONT, Skill->GetSkillInfo()->SkillType,
+					SkillCollision->SkillRectInit(en_CollisionPosition::COLLISION_POSITION_SKILL_FRONT, Skill,
 						CollisionCreatePosition,
-						CollisionCreateDir);
+						CollisionCreateDir,
+						SkillUser);
 					break;
 				}							
 
