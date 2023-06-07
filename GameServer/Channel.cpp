@@ -936,8 +936,7 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 				}
 			}
 		}
-		break;
-	case en_GameObjectType::OBJECT_ARCHITECTURE:
+		break;	
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE:
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 	case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
@@ -950,8 +949,7 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 				}
 			}
 		}
-		break;
-	case en_GameObjectType::OBJECT_CROP:
+		break;	
 	case en_GameObjectType::OBJECT_CROP_POTATO:		
 	case en_GameObjectType::OBJECT_CROP_CORN:
 		{
@@ -963,18 +961,18 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 				}
 			}
 		}
-		break;
-	case en_GameObjectType::OBJECT_ITEM:
-	case en_GameObjectType::OBJECT_ITEM_WEAPON:
-	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR:
+		break;	
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_DAGGER:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_LONG_SWORD:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_GREAT_SWORD:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SHIELD:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_BOW:	
+	case en_GameObjectType::OBJECT_ITEM_TOOL_FARMING_SHOVEL:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
-	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE:
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEALTH_RESTORATION_POTION_SMALL:
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_MANA_RESTORATION_POTION_SMALL:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIVER_COIN:
@@ -989,7 +987,9 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
 	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
+	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_CORN:
 	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
+	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_CORN:
 		{
 			for (int32 i = 0; i < en_Channel::CHANNEL_ITEM_MAX; i++)
 			{
@@ -1051,17 +1051,17 @@ vector<CGameObject*> CChannel::FindChannelObjects(en_GameObjectType GameObjectTy
 			}
 		}
 		break;	
-	case en_GameObjectType::OBJECT_ITEM:
-	case en_GameObjectType::OBJECT_ITEM_WEAPON:
-	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
-	case en_GameObjectType::OBJECT_ITEM_ARMOR:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_DAGGER:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_LONG_SWORD:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_GREAT_SWORD:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SHIELD:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_BOW:
+	case en_GameObjectType::OBJECT_ITEM_TOOL_FARMING_SHOVEL:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
-	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE:	
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEALTH_RESTORATION_POTION_SMALL:
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_MANA_RESTORATION_POTION_SMALL:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL:	
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIVER_COIN:
@@ -1076,7 +1076,9 @@ vector<CGameObject*> CChannel::FindChannelObjects(en_GameObjectType GameObjectTy
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
 	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
+	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_CORN:
 	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
+	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_CORN:
 		for (int32 i = 0; i < en_Channel::CHANNEL_ITEM_MAX; i++)
 		{
 			if (_ChannelItemArray[i] != nullptr)
@@ -1160,8 +1162,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 					}
 				}
 			}
-			break;
-		case en_GameObjectType::OBJECT_MONSTER:
+			break;		
 		case en_GameObjectType::OBJECT_GOBLIN:		
 			{
 				for (int32 i = 0; i < en_Channel::CHANNEL_MONSTER_MAX; i++)
@@ -1186,17 +1187,17 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 				}
 			}
 			break;
-		case en_GameObjectType::OBJECT_ITEM:
-		case en_GameObjectType::OBJECT_ITEM_WEAPON:
-		case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
-		case en_GameObjectType::OBJECT_ITEM_ARMOR:
+		case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_DAGGER:
+		case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_LONG_SWORD:
+		case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_GREAT_SWORD:
+		case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SHIELD:
+		case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_BOW:
+		case en_GameObjectType::OBJECT_ITEM_TOOL_FARMING_SHOVEL:
 		case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
 		case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
 		case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
-		case en_GameObjectType::OBJECT_ITEM_CONSUMABLE:		
 		case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEALTH_RESTORATION_POTION_SMALL:
 		case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_MANA_RESTORATION_POTION_SMALL:
-		case en_GameObjectType::OBJECT_ITEM_MATERIAL:		
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIVER_COIN:
@@ -1211,7 +1212,9 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
 		case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
+		case en_GameObjectType::OBJECT_ITEM_CROP_SEED_CORN:
 		case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
+		case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_CORN:
 			{
 				for (int32 i = 0; i < en_Channel::CHANNEL_ITEM_MAX; i++)
 				{
@@ -1221,8 +1224,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 					}
 				}
 			}
-			break;
-		case en_GameObjectType::OBJECT_ARCHITECTURE:
+			break;		
 		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE:
 		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
 		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_SAWMILL:
@@ -1235,8 +1237,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 					}
 				}
 			}
-			break;
-		case en_GameObjectType::OBJECT_CROP:
+			break;		
 		case en_GameObjectType::OBJECT_CROP_POTATO:
 		case en_GameObjectType::OBJECT_CROP_CORN:
 			{
@@ -2032,12 +2033,21 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 			}			
 		}
 		break;
-	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_DAGGER:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_LONG_SWORD:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_GREAT_SWORD:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SHIELD:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_BOW:
+	case en_GameObjectType::OBJECT_ITEM_TOOL_FARMING_SHOVEL:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEALTH_RESTORATION_POTION_SMALL:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_MANA_RESTORATION_POTION_SMALL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIVER_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_GOLD_COIN:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
@@ -2048,7 +2058,9 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
 	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
+	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_CORN:
 	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
+	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_CORN:
 		{
 			// 아이템으로 형변환
 			CItem* Item = dynamic_cast<CItem*>(EnterChannelGameObject);
@@ -2140,12 +2152,21 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 
 		_ChannelCropArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
 		break;
-	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_DAGGER:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_LONG_SWORD:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_GREAT_SWORD:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SHIELD:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_BOW:
+	case en_GameObjectType::OBJECT_ITEM_TOOL_FARMING_SHOVEL:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEALTH_RESTORATION_POTION_SMALL:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_MANA_RESTORATION_POTION_SMALL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIVER_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_GOLD_COIN:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
@@ -2156,7 +2177,9 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
 	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
+	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_CORN:
 	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
+	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_CORN:
 		G_ObjectManager->ItemReturn((CItem*)LeaveChannelGameObject);
 
 		_ChannelItemArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
