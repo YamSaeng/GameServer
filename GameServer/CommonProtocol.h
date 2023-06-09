@@ -186,14 +186,15 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_GATHERING_DAMAGE,
 
 	//------------------------------------------------------------
-	// 게임서버 캐릭터 공격 요청
+	// 게임서버 캐릭터 기술 처리 요청
 	// int64 AccountId
 	// int32 PlayerDBId
-	// int8 Dir
-	// en_AttackRange RangeAttack;
-	// int8 RangeDistance;
+	// int8 SkillcharacteristicType
+	// int16 SkillType
+	// float SkillDirectionX
+	// float SkillDirectionY
 	//------------------------------------------------------------	
-	en_PACKET_C2S_ATTACK,
+	en_PACKET_C2S_SKILL_PROCESS,
 
 	//------------------------------------------------------------
 	// 게임서버 캐릭터 공격 요청 응답
@@ -211,37 +212,29 @@ enum en_GAME_SERVER_PACKET_TYPE
 	// byte State
 	//------------------------------------------------------------
 	en_PACKET_S2C_TO_ATTACK,
-
+	
 	//------------------------------------------------------------
-	// 게임서버 캐릭터 마법 요청
-	// int64 AccountId
-	// int64 PlayerDBId	
-	// en_SkillType SpellSkillType
-	//------------------------------------------------------------
-	en_PACKET_C2S_SPELL,
-
-	//------------------------------------------------------------
-	// 게임서버 캐릭터 마법 요청 응답	
+	// 게임서버 캐릭터 기술 캐스팅 시작 응답	
 	// int64 PlayerDBId
 	// bool SpellStart
 	// en_SkillType SpellSkillType
 	// float SpellTime
 	//------------------------------------------------------------
-	en_PACKET_S2C_SPELL,
+	en_PACKET_S2C_SKILL_CASTING_START,
 
 	//------------------------------------------------------------
-	// 게임서버 캐릭터 마법 취소 요청
+	// 게임서버 캐릭터 기술 시전 취소 요청
 	// int64 AccountId
 	// int64 PlayerId	
 	//------------------------------------------------------------
-	en_PACKET_C2S_MAGIC_CANCEL,
+	en_PACKET_C2S_SKILL_CASTING_CANCEL,
 
 	//------------------------------------------------------------
-	// 게임서버 캐릭터 마법 취소 요청 응답
+	// 게임서버 캐릭터 기술 시전 취소 요청 응답
 	// int64 AccountId
 	// int64 PlayerId	
 	//------------------------------------------------------------
-	en_PACKET_S2C_MAGIC_CANCEL,
+	en_PACKET_S2C_SKILL_CASTING_CANCEL,
 
 	//------------------------------------------------------------
 	// 게임서버 채집 요청
