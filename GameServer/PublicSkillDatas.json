@@ -33,7 +33,7 @@
           "PublicBufSkillList": [
             {
               "SkillType": "SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE",
-              "SkillKind": "SKILL_KIND_BUF_SKILL",
+              "SkillKind": "SKILL_KIND_SPELL_SKILL",
               "SkillName": "충격해제",
               "IncreaseStatusAbnormalityResistance": 1000,
               "SkillCoolTime": 30000,

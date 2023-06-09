@@ -107,11 +107,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			else if (ItemEquipmentPart == "EQUIPMENT_PARTS_RIGHT_HAND")
 			{
 				WeaponItemInfo->ItemEquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_RIGHT_HAND;
-			}
-			else if (ItemEquipmentPart == "EQUIPMENT_PARTS_BOTH_HAND")
-			{
-				WeaponItemInfo->ItemEquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_BOTH_HAND;
-			}
+			}			
 
 			WeaponItemInfo->ItemWidth = ItemWidth;
 			WeaponItemInfo->ItemHeight = ItemHeight;
@@ -265,11 +261,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			else if (ItemEquipmentPart == "EQUIPMENT_PARTS_RIGHT_HAND")
 			{
 				ToolItemInfo->ItemEquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_RIGHT_HAND;
-			}
-			else if (ItemEquipmentPart == "EQUIPMENT_PARTS_BOTH_HAND")
-			{
-				ToolItemInfo->ItemEquipmentPart = en_EquipmentParts::EQUIPMENT_PARTS_BOTH_HAND;
-			}
+			}			
 
 			ToolItemInfo->ItemWidth = ItemWidth;
 			ToolItemInfo->ItemHeight = ItemHeight;
@@ -933,9 +925,9 @@ void CDataManager::LoadDataPublicSkill(wstring LoadFileName)
 				int64 SkillDurationTime = PublicBufSkillListFiled["SkillDurationTime"].GetInt64();
 				float SkillTargetEffectTime = PublicBufSkillListFiled["SkillTargetEffectTime"].GetFloat();				
 
-				if (SkillKind == "SKILL_KIND_BUF_SKILL")
+				if (SkillKind == "SKILL_KIND_SPELL_SKILL")
 				{
-					PublicBufSkill->SkillKind = en_SkillKinds::SKILL_KIND_BUF_SKILL;
+					PublicBufSkill->SkillKind = en_SkillKinds::SKILL_KIND_SPELL_SKILL;
 				}
 
 				if (SkillType == "SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE")
@@ -1040,11 +1032,7 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 					{
 						FightAttackSkill->SkillKind = en_SkillKinds::SKILL_KIND_MELEE_SKILL;
 					}
-					else if (SkillKind == "SKILL_KIND_MELEE_DEBUF_SKILL")
-					{
-						FightAttackSkill->SkillKind = en_SkillKinds::SKILL_KIND_MELEE_DEBUF_SKILL;
-					}					
-
+				
 					if (SkillType == "SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK")
 					{
 						FightAttackSkill->SkillType = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK;
@@ -1152,9 +1140,9 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 					int32 SkillMotionTime = BufSkillFiled["SkillMotionTime"].GetInt();
 					float SkillTargetEffectTime = BufSkillFiled["SkillTargetEffectTime"].GetFloat();					
 
-					if (SkillKind == "SKILL_KIND_BUF_SKILL")
+					if (SkillKind == "SKILL_KIND_SPELL_SKILL")
 					{
-						FightBufSkill->SkillKind = en_SkillKinds::SKILL_KIND_BUF_SKILL;
+						FightBufSkill->SkillKind = en_SkillKinds::SKILL_KIND_SPELL_SKILL;
 					}
 
 					if (SkillType == "SKILL_FIGHT_ACTIVE_BUF_CHARGE_POSE")
@@ -1296,11 +1284,7 @@ void CDataManager::LoadDataProtectionSkill(wstring LoadFileName)
 					if (SkillKind == "SKILL_KIND_MELEE_SKILL")
 					{
 						ProtectionAttackSkill->SkillKind = en_SkillKinds::SKILL_KIND_MELEE_SKILL;
-					}
-					else if (SkillKind == "SKILL_KIND_MELEE_DEBUF_SKILL")
-					{
-						ProtectionAttackSkill->SkillKind = en_SkillKinds::SKILL_KIND_MELEE_DEBUF_SKILL;
-					}
+					}					
 
 					if (SkillType == "SKILL_PROTECTION_ACTIVE_ATTACK_POWERFUL_ATTACK")
 					{
@@ -1401,9 +1385,9 @@ void CDataManager::LoadDataProtectionSkill(wstring LoadFileName)
 					int32 SkillMotionTime = BufSkillFiled["SkillMotionTime"].GetInt();
 					float SkillTargetEffectTime = BufSkillFiled["SkillTargetEffectTime"].GetFloat();					
 
-					if (SkillKind == "SKILL_KIND_BUF_SKILL")
+					if (SkillKind == "SKILL_KIND_SPELL_SKILL")
 					{
-						ProtectionBufSkill->SkillKind = en_SkillKinds::SKILL_KIND_BUF_SKILL;
+						ProtectionBufSkill->SkillKind = en_SkillKinds::SKILL_KIND_SPELL_SKILL;
 					}
 
 					if (SkillType == "SKILL_PROTECTION_ACTIVE_BUF_FURY")
@@ -1531,11 +1515,7 @@ void CDataManager::LoadDataAssassinationSkill(wstring LoadFileName)
 					if (SkillKind == "SKILL_KIND_MELEE_SKILL")
 					{
 						AssassinationAttackSkill->SkillKind = en_SkillKinds::SKILL_KIND_MELEE_SKILL;
-					}
-					else if (SkillKind == "SKILL_KIND_MELEE_DEBUF_SKILL")
-					{
-						AssassinationAttackSkill->SkillKind = en_SkillKinds::SKILL_KIND_MELEE_DEBUF_SKILL;
-					}
+					}					
 
 					if (SkillType == "SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT")
 					{
@@ -1643,9 +1623,9 @@ void CDataManager::LoadDataAssassinationSkill(wstring LoadFileName)
 					int32 SkillMotionTime = BufSkillFiled["SkillMotionTime"].GetInt();
 					float SkillTargetEffectTime = BufSkillFiled["SkillTargetEffectTime"].GetFloat();										
 
-					if (SkillKind == "SKILL_KIND_BUF_SKILL")
+					if (SkillKind == "SKILL_KIND_SPELL_SKILL")
 					{
-						AssassinationBufSkill->SkillKind = en_SkillKinds::SKILL_KIND_BUF_SKILL;
+						AssassinationBufSkill->SkillKind = en_SkillKinds::SKILL_KIND_SPELL_SKILL;
 					}
 
 					if (SkillType == "SKILL_ASSASSINATION_ACTIVE_BUF_STEALTH")
@@ -1796,15 +1776,7 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 					if (SkillKind == "SKILL_KIND_SPELL_SKILL")
 					{
 						SpellAttackSkill->SkillKind = en_SkillKinds::SKILL_KIND_SPELL_SKILL;
-					}
-					else if (SkillKind == "SKILL_KIND_DEBUF_SKILL")
-					{
-						SpellAttackSkill->SkillKind = en_SkillKinds::SKILL_KIND_DEBUF_SKILL;
-					}
-					else if (SkillKind == "SKILL_KIND_SPELL_DEBUF_SKILL")
-					{
-						SpellAttackSkill->SkillKind = en_SkillKinds::SKILL_KIND_SPELL_DEBUF_SKILL;
-					}
+					}					
 
 					if (SkillType == "SKILL_SPELL_ACTIVE_ATTACK_FLAME_BOLT")
 					{
@@ -1896,9 +1868,9 @@ void CDataManager::LoadDataSpellSkill(wstring LoadFileName)
 					int32 SkillMotionTime = BufSkillFiled["SkillMotionTime"].GetInt();
 					float SkillTargetEffectTime = BufSkillFiled["SkillTargetEffectTime"].GetFloat();								
 
-					if (SkillKind == "SKILL_KIND_BUF_SKILL")
+					if (SkillKind == "SKILL_KIND_SPELL_SKILL")
 					{
-						SpellBufSkill->SkillKind = en_SkillKinds::SKILL_KIND_BUF_SKILL;
+						SpellBufSkill->SkillKind = en_SkillKinds::SKILL_KIND_SPELL_SKILL;
 					}
 
 					if (SkillType == "SKILL_SPELL_ACTIVE_BUF_BACK_TELEPORT")
@@ -2103,15 +2075,7 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 					if (SkillKind == "SKILL_KIND_SPELL_SKILL")
 					{
 						DisciplineAttackSkill->SkillKind == en_SkillKinds::SKILL_KIND_SPELL_SKILL;
-					}
-					else if (SkillKind == "SKILL_KIND_DEBUF_SKILL")
-					{
-						DisciplineAttackSkill->SkillKind == en_SkillKinds::SKILL_KIND_DEBUF_SKILL;
-					}
-					else if (SkillKind == "SKILL_KIND_SPELL_DEBUF_SKILL")
-					{
-						DisciplineAttackSkill->SkillKind == en_SkillKinds::SKILL_KIND_SPELL_DEBUF_SKILL;
-					}
+					}					
 
 					if (SkillType == "SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE")
 					{
@@ -2210,11 +2174,7 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 					if (SkillKind == "SKILL_KIND_HEAL_SKILL")
 					{
 						DisciplineHealSkill->SkillKind = en_SkillKinds::SKILL_KIND_HEAL_SKILL;
-					}
-					else if (SkillKind == "SKILL_KIND_HEAL_BUF_SKILL")
-					{
-						DisciplineHealSkill->SkillKind = en_SkillKinds::SKILL_KIND_HEAL_BUF_SKILL;
-					}
+					}					
 
 					DisciplineHealSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_DISCIPLINE;
 					DisciplineHealSkill->SkillName = (LPWSTR)CA2W(SkillName.c_str());					

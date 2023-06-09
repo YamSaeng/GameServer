@@ -61,7 +61,7 @@
                 {
                   "SkillNumber": 0,
                   "SkillType": "SKILL_PROTECTION_ACTIVE_ATTACK_LAST_ATTACK",
-                  "SkillKind": "SKILL_KIND_MELEE_DEBUF_SKILL",
+                  "SkillKind": "SKILL_KIND_MELEE_SKILL",
                   "SkillName": "« ªÁ¿« ¿œ∞›",
                   "SkillStatusAbnormal": "STATUS_ABNORMAL_PROTECTION_LAST_ATTACK",
                   "SkillStatusAbnormalMask": "STATUS_ABNORMAL_PROTECTION_LAST_MASK",
@@ -85,7 +85,7 @@
                 },
                 {
                   "SkillType": "SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH",
-                  "SkillKind": "SKILL_KIND_MELEE_DEBUF_SKILL",
+                  "SkillKind": "SKILL_KIND_MELEE_SKILL",
                   "SkillName": "πÊ∆– ∞≠≈∏",
                   "SkillStatusAbnormal": "STATUS_ABNORMAL_PROTECTION_SHIELD_SMASH",
                   "SkillStatusAbnormalMask": "STATUS_ABNORMAL_PROTECTION_SHIELD_SMASH_MASK",
@@ -109,7 +109,7 @@
                 },
                 {
                   "SkillType": "SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_COUNTER",
-                  "SkillKind": "SKILL_KIND_MELEE_DEBUF_SKILL",
+                  "SkillKind": "SKILL_KIND_MELEE_SKILL",
                   "SkillName": "πÊ∆– π›∞›",
                   "SkillStatusAbnormal": "STATUS_ABNORMAL_PROTECTION_SHIELD_COUNTER",
                   "SkillStatusAbnormalMask": "STATUS_ABNORMAL_PROTECTION_SHIELD_COUNTER_MASK",
@@ -133,7 +133,7 @@
                 },
                 {
                   "SkillType": "SKILL_PROTECTION_ACTIVE_ATTACK_SWORD_STORM",
-                  "SkillKind": "SKILL_KIND_MELEE_DEBUF_SKILL",
+                  "SkillKind": "SKILL_KIND_MELEE_SKILL",
                   "SkillName": "∞À«≥",
                   "SkillStatusAbnormal": "STATUS_ABNORMAL_PROTECTION_SWORD_STORM",
                   "SkillStatusAbnormalMask": "STATUS_ABNORMAL_PROTECTION_SWORD_STORM_MASK",
@@ -157,7 +157,7 @@
                 },
                 {
                   "SkillType": "SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE",
-                  "SkillKind": "SKILL_KIND_MELEE_DEBUF_SKILL",
+                  "SkillKind": "SKILL_KIND_MELEE_SKILL",
                   "SkillName": "∆˜»π",
                   "SkillStatusAbnormal": "STATUS_ABNORMAL_PROTECTION_CAPTURE",
                   "SkillStatusAbnormalMask": "STATUS_ABNORMAL_PROTECTION_CAPTURE_MASK",
@@ -184,7 +184,7 @@
                 {
                   "SkillNumber": 4,
                   "SkillType": "SKILL_PROTECTION_ACTIVE_BUF_FURY",
-                  "SkillKind": "SKILL_KIND_BUF_SKILL",
+                  "SkillKind": "SKILL_KIND_SPELL_SKILL",
                   "SkillName": "∞›æ”",
                   "SkillMaxLevel": 1,
                   "IncreaseMinAttackPoint": 50,
@@ -211,7 +211,7 @@
                 {
                   "SkillNumber": 4,
                   "SkillType": "SKILL_PROTECTION_ACTIVE_DOUBLE_ARMOR",
-                  "SkillKind": "SKILL_KIND_BUF_SKILL",
+                  "SkillKind": "SKILL_KIND_SPELL_SKILL",
                   "SkillName": "¿Ã¡ﬂ ∞©ø ",
                   "SkillMaxLevel": 1,
                   "IncreaseMinAttackPoint": 50,

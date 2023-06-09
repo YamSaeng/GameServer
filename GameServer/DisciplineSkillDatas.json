@@ -58,7 +58,7 @@
                 },
                 {
                   "SkillType": "SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT",
-                  "SkillKind": "SKILL_KIND_DEBUF_SKILL",
+                  "SkillKind": "SKILL_KIND_SPELL_SKILL",
                   "SkillName": "¼Ó¹Ú",
                   "SkillStatusAbnormal": "STATUS_ABNORMAL_DISCIPLINE_ROOT",
                   "SkillStatusAbnormalMask": "STATUS_ABNORMAL_DISCIPLINE_ROOT_MASK",
@@ -82,7 +82,7 @@
                 },
                 {
                   "SkillType": "SKILL_DISCIPLINE_ACTIVE_ATTACK_JUDGMENT",
-                  "SkillKind": "SKILL_KIND_SPELL_DEBUF_SKILL",
+                  "SkillKind": "SKILL_KIND_SPELL_SKILL",
                   "SkillName": "Ãµ¹ú",
                   "SkillStatusAbnormal": "STATUS_ABNORMAL_DISCIPLINE_JUDGMENT",
                   "SkillStatusAbnormalMask": "STATUS_ABNORMAL_DISCIPLINE_JUDGMENT_MASK",

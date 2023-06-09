@@ -58,7 +58,7 @@
                 },
                 {
                   "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN",
-                  "SkillKind": "SKILL_KIND_SPELL_DEBUF_SKILL",
+                  "SkillKind": "SKILL_KIND_SPELL_SKILL",
                   "SkillName": "얼음 사슬",
                   "SkillStatusAbnormal": "STATUS_ABNORMAL_SPELL_ICE_CHAIN",
                   "SkillStatusAbnormalMask": "STATUS_ABNORMAL_SPELL_ICE_CHAIN_MASK",
@@ -82,7 +82,7 @@
                 },
                 {
                   "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE",
-                  "SkillKind": "SKILL_KIND_SPELL_DEBUF_SKILL",
+                  "SkillKind": "SKILL_KIND_SPELL_SKILL",
                   "SkillName": "냉기 파동",
                   "SkillStatusAbnormal": "STATUS_ABNORMAL_SPELL_ICE_WAVE",
                   "SkillStatusAbnormalMask": "STATUS_ABNORMAL_SPELL_ICE_WAVE_MASK",
@@ -106,7 +106,7 @@
                 },
                 {
                   "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_ROOT",
-                  "SkillKind": "SKILL_KIND_DEBUF_SKILL",
+                  "SkillKind": "SKILL_KIND_SPELL_SKILL",
                   "SkillName": "속박",
                   "SkillStatusAbnormal": "STATUS_ABNORMAL_SPELL_ROOT",
                   "SkillStatusAbnormalMask": "STATUS_ABNORMAL_SPELL_ROOT_MASK",
@@ -130,7 +130,7 @@
                 },
                 {
                   "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_SLEEP",
-                  "SkillKind": "SKILL_KIND_DEBUF_SKILL",
+                  "SkillKind": "SKILL_KIND_SPELL_SKILL",
                   "SkillName": "수면",
                   "SkillStatusAbnormal": "STATUS_ABNORMAL_SPELL_SLEEP",
                   "SkillStatusAbnormalMask": "STATUS_ABNORMAL_SPELL_SLEEP_MASK",
@@ -154,7 +154,7 @@
                 },
                 {
                   "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_WINTER_BINDING",
-                  "SkillKind": "SKILL_KIND_SPELL_DEBUF_SKILL",
+                  "SkillKind": "SKILL_KIND_SPELL_SKILL",
                   "SkillName": "겨울의 속박",
                   "SkillStatusAbnormal": "STATUS_ABNORMAL_SPELL_WINTER_BINDING",
                   "SkillStatusAbnormalMask": "STATUS_ABNORMAL_SPELL_WINTER_BINDING_MASK",
@@ -178,7 +178,7 @@
                 },
                 {
                   "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE",
-                  "SkillKind": "SKILL_KIND_SPELL_DEBUF_SKILL",
+                  "SkillKind": "SKILL_KIND_SPELL_SKILL",
                   "SkillName": "낙뢰",
                   "SkillStatusAbnormal": "STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE",
                   "SkillStatusAbnormalMask": "STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE_MASK",
@@ -228,7 +228,7 @@
               "BufSkill": [
                 {
                   "SkillType": "SKILL_SPELL_ACTIVE_BUF_BACK_TELEPORT",
-                  "SkillKind": "SKILL_KIND_BUF_SKILL",
+                  "SkillKind": "SKILL_KIND_SPELL_SKILL",
                   "SkillName": "시공의뒤틀림",
                   "SkillMaxLevel": 1,
                   "SkillCoolTime": 10000,
@@ -241,7 +241,7 @@
                 },
                 {
                   "SkillType": "SKILL_SPELL_ACTIVE_BUF_ILLUSION",
-                  "SkillKind": "SKILL_KIND_BUF_SKILL",
+                  "SkillKind": "SKILL_KIND_SPELL_SKILL",
                   "SkillName": "환영",
                   "SkillMaxLevel": 1,
                   "SkillCoolTime": 120000,
