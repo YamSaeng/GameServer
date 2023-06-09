@@ -41,10 +41,11 @@ public:
 	void ShockReleaseUse(CGameObject* User, CSkill* ShockReleaseSkill);
 	void MoveStatusAbnormalRelease(CGameObject* User);
 
-	void SkillProcess(CGameObject* SkillUser,
+	void SkillIsCasting(CGameObject* SkillUser,
 		en_SkillCharacteristic SkillCharacteristic, en_SkillType SkillType,
-		float WeaponPositionX, float WeaponPositionY,
 		float AttackDirectionX, float AttackDirectionY);
+
+	void SkillProcess(CGameObject* SkillUser, CSkill* Skill);
 		
 	int32 CalculateDamage(en_SkillType SkillType,
 		int32& Str, int32& Dex, int32& Int, int32& Luck,

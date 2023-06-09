@@ -88,7 +88,7 @@ void CSkill::StatusAbnormalDurationTimeStart()
 	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
 		{
 			float DebufSlowSpeed = _Target->_GameObjectInfo.ObjectStatInfo.MaxSpeed * _SkillInfo->SkillDebufMovingSpeed;
-			_Target->_GameObjectInfo.ObjectStatInfo.Speed -= DebufSlowSpeed;
+			_Target->_GameObjectInfo.ObjectStatInfo.Speed -= DebufSlowSpeed;			
 		}
 		break;	
 	}
