@@ -20,8 +20,7 @@ CGameObject::CGameObject()
 	
 	_Channel = nullptr;
 
-	_MeleeSkill = nullptr;
-	_SpellSkill = nullptr;
+	_CastingSkill = nullptr;
 
 	_Owner = nullptr;
 	_SelectTarget = nullptr;	
@@ -313,37 +312,47 @@ void CGameObject::Update()
 				}
 			}
 			break;		
-		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SKILL_MELEE_ATTACK:
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SKILL_PROCESS:
 			{
-				int8 MeleeChracteristicType;
-				*GameObjectJob->GameObjectJobMessage >> MeleeChracteristicType;
+				int8 SkillChracteristicType;
+				*GameObjectJob->GameObjectJobMessage >> SkillChracteristicType;
 
-				int16 MeleeSkillType;
-				*GameObjectJob->GameObjectJobMessage >> MeleeSkillType;
+				int16 SkillType;
+				*GameObjectJob->GameObjectJobMessage >> SkillType;
 
-				float WeaponPositionX;
-				*GameObjectJob->GameObjectJobMessage >> WeaponPositionX;
+				float SkillDirectionX;
+				*GameObjectJob->GameObjectJobMessage >> SkillDirectionX;
 
-				float WeaponPositionY;
-				*GameObjectJob->GameObjectJobMessage >> WeaponPositionY;
-
-				float MeleeAttackDirectionX;
-				*GameObjectJob->GameObjectJobMessage >> MeleeAttackDirectionX;
-
-				float MeleeAttackDirectionY;
-				*GameObjectJob->GameObjectJobMessage >> MeleeAttackDirectionY;
+				float SkillDirectionY;
+				*GameObjectJob->GameObjectJobMessage >> SkillDirectionY;
 
 				CPlayer* Player = dynamic_cast<CPlayer*>(this);
-				if(Player != nullptr)
+				if (Player != nullptr)
 				{
-					Player->_SkillBox.SkillProcess(Player, (en_SkillCharacteristic)MeleeChracteristicType, (en_SkillType)MeleeSkillType, WeaponPositionX, WeaponPositionY, MeleeAttackDirectionX, MeleeAttackDirectionY);
-				}	
+					Player->_SkillBox.SkillIsCasting(this, (en_SkillCharacteristic)SkillChracteristicType, (en_SkillType)SkillType, SkillDirectionX, SkillDirectionY);
+
+					// 활성화된 연속기 기술 끄기
+					if (Player->_ComboSkill != nullptr)
+					{
+						st_GameObjectJob* ComboAttackOffJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobComboSkillOff();
+						_GameObjectJobQue.Enqueue(ComboAttackOffJob);
+					}
+				}
 				else
 				{
 					CRASH("Player Casting Fail");
 				}
 			}
-			break;		
+			break;	
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SKILL_CASTING_CANCEL:
+			{
+				vector<st_FieldOfViewInfo> AroundPlayers = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
+
+				CMessage* ResMagicCancelPacket = G_NetworkManager->GetGameServer()->MakePacketSkillCastingCancel(_GameObjectInfo.ObjectId);
+				G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, ResMagicCancelPacket);
+				ResMagicCancelPacket->Free();
+			}
+			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_CREATE:
 			{				
 				CSkill* ReqMeleeSkill;
@@ -388,127 +397,72 @@ void CGameObject::Update()
 					Creature->_ComboSkill->ComboSkillOff();
 				}
 			}
-			break;
-		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SPELL_START:
+			break;						
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_GATHERING_START:
+			if (_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::GATHERING)
 			{
-				int8 SpellCharacteristicType;
-				*GameObjectJob->GameObjectJobMessage >> SpellCharacteristicType;
+				CGameObject* GatheringTarget;
+				*GameObjectJob->GameObjectJobMessage >> &GatheringTarget;
 
-				int16 SpellSkillType;
-				*GameObjectJob->GameObjectJobMessage >> SpellSkillType;
+				CCrop* Crop = (CCrop*)GatheringTarget;
 
 				CPlayer* Player = dynamic_cast<CPlayer*>(this);
 				if (Player != nullptr)
 				{
-					CSkill* FindSpellSkill = Player->_SkillBox.FindSkill((en_SkillCharacteristic)SpellCharacteristicType, (en_SkillType)SpellSkillType);
-					if (FindSpellSkill != nullptr && FindSpellSkill->GetSkillInfo()->CanSkillUse == true)
+					if (GatheringTarget != nullptr
+						&& Crop->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 					{
-						vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = _Channel->GetMap()->GetFieldAroundPlayers(this, false);						
+						Vector2 DirNormalVector = (Crop->_GameObjectInfo.ObjectPositionInfo.Position - _GameObjectInfo.ObjectPositionInfo.Position).Normalize();
 
-						if (FindSpellSkill->GetSkillInfo()->SkillType == en_SkillType::SKILL_PUBLIC_ACTIVE_BUF_SHOCK_RELEASE)
+						// 작물 채집할 때 같은 방향을 바라보고 있지 않으면 에러 메세지 출력
+						/*if (_GameObjectInfo.ObjectPositionInfo.MoveDir != Dir)
 						{
-							Player->_SkillBox.SkillProcess(Player, FindSpellSkill->GetSkillInfo()->SkillCharacteristic, FindSpellSkill->GetSkillInfo()->SkillType, 0, 0, 0, 0);							
+							CMessage* DirErrorPacket = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_DIR_DIFFERENT, Crop->_GameObjectInfo.ObjectName.c_str());
+							G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, DirErrorPacket);
+							DirErrorPacket->Clear();
+							break;
+						}*/
+
+						float Distance = Vector2::Distance(_GameObjectInfo.ObjectPositionInfo.Position, Crop->_GameObjectInfo.ObjectPositionInfo.Position);
+						if (Distance < 1.2f)
+						{
+							CMessage* ResGatheringPacket = nullptr;
+
+							switch (GatheringTarget->_GameObjectInfo.ObjectType)
+							{
+							case en_GameObjectType::OBJECT_STONE:
+								ResGatheringPacket = G_NetworkManager->GetGameServer()->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"돌 채집");
+								break;
+							case en_GameObjectType::OBJECT_TREE:
+								ResGatheringPacket = G_NetworkManager->GetGameServer()->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"나무 벌목");
+								break;
+							case en_GameObjectType::OBJECT_CROP_CORN:
+								ResGatheringPacket = G_NetworkManager->GetGameServer()->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"옥수수 수확");
+								break;
+							case en_GameObjectType::OBJECT_CROP_POTATO:
+								ResGatheringPacket = G_NetworkManager->GetGameServer()->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"감자 수확");
+								break;
+							}
+
+							_GatheringTarget = GatheringTarget;
+
+							_GatheringTick = GetTickCount64() + 1000;
+
+							_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::GATHERING;
+
+							CMessage* ResObjectStateChangePacket = G_NetworkManager->GetGameServer()->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
+								_GameObjectInfo.ObjectPositionInfo.State);
+							G_NetworkManager->GetGameServer()->SendPacketFieldOfView(this, ResObjectStateChangePacket);
+							ResObjectStateChangePacket->Free();
+
+							G_NetworkManager->GetGameServer()->SendPacketFieldOfView(this, ResGatheringPacket);
+							ResGatheringPacket->Free();
 						}
 						else
 						{
-							if (CheckCantControlStatusAbnormal() > 0)
-							{
-								CMessage* ResStatusAbnormalSpellCancel = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_STATUS_ABNORMAL, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
-								G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResStatusAbnormalSpellCancel);
-								ResStatusAbnormalSpellCancel->Free();
-								break;
-							}
-
-							switch (FindSpellSkill->GetSkillInfo()->SkillKind)
-							{
-							case en_SkillKinds::SKILL_KIND_BUF_SKILL:
-								Player->_SkillBox.SkillProcess(Player, FindSpellSkill->GetSkillInfo()->SkillCharacteristic, FindSpellSkill->GetSkillInfo()->SkillType, 0, 0, 0, 0);
-								break;		
-							case en_SkillKinds::SKILL_KIND_SPELL_DEBUF_SKILL:
-							case en_SkillKinds::SKILL_KIND_SPELL_SKILL:
-								{
-									// 시전 시간 구하기
-									float SpellCastingTime = FindSpellSkill->GetSkillInfo()->SkillCastingTime / 1000.0f;
-
-									if (SpellCastingTime == 0)
-									{
-										Player->_SkillBox.SkillProcess(Player, FindSpellSkill->GetSkillInfo()->SkillCharacteristic, FindSpellSkill->GetSkillInfo()->SkillType, 0, 0, 0, 0);
-
-										break;
-									}
-
-									// 시전 중인 마법 기술 저장
-									_SpellSkill = FindSpellSkill;
-
-									// 시전 시간 설정
-									_SpellTick = GetTickCount64() + _SpellSkill->GetSkillInfo()->SkillCastingTime;
-
-									// 마법 시전 상태로 변경
-									_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPELL;
-
-									// 주위 플레이어들에게 마법 시전 상태 알려줌
-									CMessage* ResObjectStateChangePacket = G_NetworkManager->GetGameServer()->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
-										_GameObjectInfo.ObjectPositionInfo.State);
-									G_NetworkManager->GetGameServer()->SendPacketFieldOfView(this, ResObjectStateChangePacket);
-									ResObjectStateChangePacket->Free();									
-
-									// 마법 시전 바 시작
-									CMessage* ResMagicPacket = G_NetworkManager->GetGameServer()->MakePacketResMagic(_GameObjectInfo.ObjectId,
-										true, _SpellSkill->GetSkillInfo()->SkillType, SpellCastingTime);
-									G_NetworkManager->GetGameServer()->SendPacketFieldOfView(this, ResMagicPacket);
-									ResMagicPacket->Free();
-								}
-								break;
-							}						
-						}
-
-						// 활성화된 연속기 기술 끄기
-						if (Player->_ComboSkill != nullptr)
-						{
-							st_GameObjectJob* ComboAttackOffJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobComboSkillOff();
-							_GameObjectJobQue.Enqueue(ComboAttackOffJob);
-						}
-					}
-					else
-					{
-						CMessage* SkillCoolTimeErrorPacket = G_NetworkManager->GetGameServer()->MakePacketSkillError(en_GlobalMessageType::GLOBAL_MESSAGE_SKILL_COOLTIME, FindSpellSkill->GetSkillInfo()->SkillName.c_str());
-						G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, SkillCoolTimeErrorPacket);
-						SkillCoolTimeErrorPacket->Free();
-						break;
-					}
-
-					// 즉시 시전 마법 기술의 경우 쿨타임 시작
-					if (FindSpellSkill->GetSkillInfo()->SkillCastingTime == 0)
-					{
-						FindSpellSkill->CoolTimeStart();
-
-						// 쿨타임 표시 ( 퀵술롯 바에 등록되어 있는 같은 종류의 스킬을 모두 쿨타임 표시 시켜 준다 )
-						for (auto QuickSlotBarPosition : Player->_QuickSlotManager.FindQuickSlotBar(FindSpellSkill->GetSkillInfo()->SkillType))
-						{
-							// 클라에게 쿨타임 표시
-							CMessage* ResCoolTimeStartPacket = G_NetworkManager->GetGameServer()->MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
-								QuickSlotBarPosition.QuickSlotBarSlotIndex,
-								1.0f, FindSpellSkill);
-							G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
-							ResCoolTimeStartPacket->Free();
-						}
-
-						// 요청한 스킬과 기본 공격 스킬을 제외하고 스킬 창에서 가져옴
-						vector<CSkill*> GlobalSkills = Player->_SkillBox.GetGlobalSkills(FindSpellSkill->GetSkillInfo()->SkillType, FindSpellSkill->GetSkillInfo()->SkillKind);
-
-						// 전역 쿨타임 적용
-						for (CSkill* GlobalSkill : GlobalSkills)
-						{
-							GlobalSkill->GlobalCoolTimeStart(FindSpellSkill->GetSkillInfo()->SkillMotionTime);
-
-							for (Vector2Int QuickSlotPosition : GlobalSkill->_QuickSlotBarPosition)
-							{
-								CMessage* ResCoolTimeStartPacket = G_NetworkManager->GetGameServer()->MakePacketCoolTime((int8)QuickSlotPosition.Y,
-									(int8)QuickSlotPosition.X,
-									1.0f, nullptr, FindSpellSkill->GetSkillInfo()->SkillMotionTime);
-								G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
-								ResCoolTimeStartPacket->Free();
-							}
+							CMessage* DirErrorPacket = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_GATHERING_DISTANCE, Crop->_GameObjectInfo.ObjectName.c_str());
+							G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, DirErrorPacket);
+							DirErrorPacket->Clear();
 						}
 					}
 				}
@@ -516,91 +470,6 @@ void CGameObject::Update()
 				{
 					CRASH("Player Casting Fail");
 				}
-			}
-			break;
-		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SPELL_CANCEL:
-			{
-				vector<st_FieldOfViewInfo> AroundPlayers = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
-
-				CMessage* ResMagicCancelPacket = G_NetworkManager->GetGameServer()->MakePacketMagicCancel(_GameObjectInfo.ObjectId);
-				G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, ResMagicCancelPacket);
-				ResMagicCancelPacket->Free();
-			}
-			break;
-		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_GATHERING_START:
-			{
-				if (_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::GATHERING)
-				{
-					CGameObject* GatheringTarget;
-					*GameObjectJob->GameObjectJobMessage >> &GatheringTarget;				
-
-					CCrop* Crop = (CCrop*)GatheringTarget;
-
-					CPlayer* Player = dynamic_cast<CPlayer*>(this);
-					if (Player != nullptr)
-					{
-						if (GatheringTarget != nullptr							
-							&& Crop->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
-						{
-							Vector2 DirNormalVector = (Crop->_GameObjectInfo.ObjectPositionInfo.Position - _GameObjectInfo.ObjectPositionInfo.Position).Normalize();
-
-							// 작물 채집할 때 같은 방향을 바라보고 있지 않으면 에러 메세지 출력
-							/*if (_GameObjectInfo.ObjectPositionInfo.MoveDir != Dir)
-							{
-								CMessage* DirErrorPacket = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_DIR_DIFFERENT, Crop->_GameObjectInfo.ObjectName.c_str());
-								G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, DirErrorPacket);
-								DirErrorPacket->Clear();
-								break;
-							}*/
-
-							float Distance = Vector2::Distance(_GameObjectInfo.ObjectPositionInfo.Position, Crop->_GameObjectInfo.ObjectPositionInfo.Position);
-							if (Distance < 1.2f)
-							{
-								CMessage* ResGatheringPacket = nullptr;
-
-								switch (GatheringTarget->_GameObjectInfo.ObjectType)
-								{
-								case en_GameObjectType::OBJECT_STONE:
-									ResGatheringPacket = G_NetworkManager->GetGameServer()->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"돌 채집");
-									break;
-								case en_GameObjectType::OBJECT_TREE:
-									ResGatheringPacket = G_NetworkManager->GetGameServer()->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"나무 벌목");
-									break;
-								case en_GameObjectType::OBJECT_CROP_CORN:
-									ResGatheringPacket = G_NetworkManager->GetGameServer()->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"옥수수 수확");
-									break;
-								case en_GameObjectType::OBJECT_CROP_POTATO:
-									ResGatheringPacket = G_NetworkManager->GetGameServer()->MakePacketResGathering(_GameObjectInfo.ObjectId, true, L"감자 수확");
-									break;
-								}
-
-								_GatheringTarget = GatheringTarget;
-
-								_GatheringTick = GetTickCount64() + 1000;
-
-								_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::GATHERING;
-
-								CMessage* ResObjectStateChangePacket = G_NetworkManager->GetGameServer()->MakePacketResChangeObjectState(_GameObjectInfo.ObjectId,
-									_GameObjectInfo.ObjectPositionInfo.State);
-								G_NetworkManager->GetGameServer()->SendPacketFieldOfView(this, ResObjectStateChangePacket);
-								ResObjectStateChangePacket->Free();
-
-								G_NetworkManager->GetGameServer()->SendPacketFieldOfView(this, ResGatheringPacket);
-								ResGatheringPacket->Free();
-							}
-							else
-							{
-								CMessage* DirErrorPacket = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_GATHERING_DISTANCE, Crop->_GameObjectInfo.ObjectName.c_str());
-								G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, DirErrorPacket);
-								DirErrorPacket->Clear();
-							}
-						}
-					}
-					else
-					{
-						CRASH("Player Casting Fail");
-					}
-				}				
 			}
 			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_GATHERING_CANCEL:
@@ -772,7 +641,7 @@ void CGameObject::Update()
 				CPlayer* Player = dynamic_cast<CPlayer*>(this);
 				if (Player != nullptr)
 				{
-					CItem* ReturnEquipmentItem = Player->_Equipment.ItemOnEquipment(EquipmentItem);
+					CItem* ReturnEquipmentItem = Player->GetEquipment()->ItemOnEquipment(EquipmentItem);
 
 					CMessage* EquipmentUpdateMessage = G_NetworkManager->GetGameServer()->MakePacketOnEquipment(_GameObjectInfo.ObjectId, EquipmentItem->_ItemInfo);
 					G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, EquipmentUpdateMessage);
@@ -806,7 +675,7 @@ void CGameObject::Update()
 				CPlayer* Player = dynamic_cast<CPlayer*>(this);
 				if (Player != nullptr)
 				{
-					CItem* ReturnEquipmentItem = Player->_Equipment.ItemOffEquipment((en_EquipmentParts)EquipmentParts);
+					CItem* ReturnEquipmentItem = Player->GetEquipment()->ItemOffEquipment((en_EquipmentParts)EquipmentParts);
 
 					if (ReturnEquipmentItem != nullptr)
 					{
@@ -1601,9 +1470,16 @@ vector<CGameObject*> CGameObject::GetFieldOfViewObjects()
 	return _FieldOfViewObjects;
 }
 
-void CGameObject::SetMeleeSkill(CSkill* MeleeSkill)
+void CGameObject::SetSkillCastingSkill(CSkill* CastingSkill)
 {
-	_MeleeSkill = MeleeSkill;
+	if (CastingSkill != nullptr)
+	{
+		_CastingSkill = CastingSkill;
+
+		_SpellTick = GetTickCount64() + CastingSkill->GetSkillInfo()->SkillCastingTime;
+
+		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::SPELL;
+	}	
 }
 
 vector<st_FieldOfViewInfo> CGameObject::GetFieldOfViewInfo()

@@ -122,9 +122,9 @@ public:
 	virtual void Start();
 	virtual void End();
 
-	vector<CGameObject*> GetFieldOfViewObjects();
+	vector<CGameObject*> GetFieldOfViewObjects();		
 
-	void SetMeleeSkill(CSkill* MeleeSkill);	
+	void SetSkillCastingSkill(CSkill* CastingSkill);	
 
 	vector<st_FieldOfViewInfo> GetFieldOfViewInfo();
 protected:		
@@ -141,12 +141,9 @@ protected:
 
 	// 게임오브젝트가 속한 채널	
 	CChannel* _Channel;
-
-	// 시전 중인 근접 기술
-	CSkill* _MeleeSkill;
 	
-	// 시전 중인 마법스킬	
-	CSkill* _SpellSkill;
+	// 시전 중인 기술	
+	CSkill* _CastingSkill;
 
 	//-------------------------
 	// 재생력 Tick
