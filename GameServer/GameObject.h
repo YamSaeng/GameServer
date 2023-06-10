@@ -124,6 +124,7 @@ public:
 
 	vector<CGameObject*> GetFieldOfViewObjects();		
 
+	CSkill* GetSkillCastingSkill();
 	void SetSkillCastingSkill(CSkill* CastingSkill);	
 
 	vector<st_FieldOfViewInfo> GetFieldOfViewInfo();

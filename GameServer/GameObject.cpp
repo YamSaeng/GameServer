@@ -346,6 +346,8 @@ void CGameObject::Update()
 			break;	
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SKILL_CASTING_CANCEL:
 			{
+				_CastingSkill = nullptr;
+
 				vector<st_FieldOfViewInfo> AroundPlayers = _Channel->GetMap()->GetFieldAroundPlayers(this, false);
 
 				CMessage* ResMagicCancelPacket = G_NetworkManager->GetGameServer()->MakePacketSkillCastingCancel(_GameObjectInfo.ObjectId);
@@ -1468,6 +1470,11 @@ void CGameObject::End()
 vector<CGameObject*> CGameObject::GetFieldOfViewObjects()
 {
 	return _FieldOfViewObjects;
+}
+
+CSkill* CGameObject::GetSkillCastingSkill()
+{
+	return _CastingSkill;
 }
 
 void CGameObject::SetSkillCastingSkill(CSkill* CastingSkill)
