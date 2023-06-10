@@ -475,14 +475,11 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_MOVE_STOP:
 		PacketProcReqMoveStop(SessionID, Message);
 		break;
-	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_ATTACK:
-		PacketProcReqMelee(SessionID, Message);
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_SKILL_PROCESS:
+		PacketProcReqSkillProcess(SessionID, Message);
 		break;
-	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_SPELL:
-		PacketProcReqMagic(SessionID, Message);
-		break;
-	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_MAGIC_CANCEL:
-		PacketProcReqMagicCancel(SessionID, Message);
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_SKILL_CASTING_CANCEL:
+		PacketProcReqSkillCastingCancel(SessionID, Message);
 		break;	
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_LEFT_MOUSE_OBJECT_INFO:
 		PacketProcReqLeftMouseObjectInfo(SessionID, Message);
@@ -1046,7 +1043,7 @@ void CGameServer::PacketProcReqLookAtDirection(int64 SessionID, CMessage* Messag
 	ReturnSession(Session);
 }
 
-void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
+void CGameServer::PacketProcReqSkillProcess(int64 SessionID, CMessage* Message)
 {
 	st_Session* Session = FindSession(SessionID);
 
@@ -1108,91 +1105,23 @@ void CGameServer::PacketProcReqMelee(int64 SessionID, CMessage* Message)
 			*Message >> ReqCharacteristicType;			
 
 			int16 ReqSkillType;
-			*Message >> ReqSkillType;
+			*Message >> ReqSkillType;			
 
-			float WeaponPositionX;
-			*Message >> WeaponPositionX;
+			float SkillDirectionX;
+			*Message >> SkillDirectionX;
 
-			float WeaponPositionY;
-			*Message >> WeaponPositionY;
+			float SkillDirecitonY;
+			*Message >> SkillDirecitonY;
 
-			float AttackDirectionX;
-			*Message >> AttackDirectionX;
-
-			float AttackDirecitonY;
-			*Message >> AttackDirecitonY;
-
-			st_GameObjectJob* MeleeAttackJob = MakeGameObjectJobMeleeAttack(ReqCharacteristicType, ReqSkillType, WeaponPositionX, WeaponPositionY, AttackDirectionX, AttackDirecitonY);
-			MyPlayer->_GameObjectJobQue.Enqueue(MeleeAttackJob);
+			st_GameObjectJob* SkillProcessJob = MakeGameObjectJobSkillProcess(ReqCharacteristicType, ReqSkillType, SkillDirectionX, SkillDirecitonY);
+			MyPlayer->_GameObjectJobQue.Enqueue(SkillProcessJob);
 		}
 	} while (0);
 
 	ReturnSession(Session);
 }
 
-void CGameServer::PacketProcReqMagic(int64 SessionId, CMessage* Message)
-{
-	st_Session* Session = FindSession(SessionId);
-
-	if (Session)
-	{
-		do
-		{
-			int64 AccountId;
-			int64 ObjectId;
-
-			// 로그인중인지 확인
-			if (!Session->IsLogin)
-			{
-				Disconnect(Session->SessionId);
-				break;
-			}
-
-			*Message >> AccountId;
-
-			// AccountId 확인
-			if (Session->AccountId != AccountId)
-			{
-				Disconnect(Session->SessionId);
-				break;
-			}
-
-			*Message >> ObjectId;
-			// 게임에 입장한 캐릭터를 가져온다.
-			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
-
-			// 입장한 캐릭터가 있는지 확인
-			if (MyPlayer == nullptr)
-			{
-				Disconnect(Session->SessionId);
-				break;
-			}
-			else
-			{
-				// 조종하고 있는 캐릭의 ObjectId와 클라가 전송한 ObjectId가 같은지 확인
-				if (MyPlayer->_GameObjectInfo.ObjectId != ObjectId)
-				{
-					Disconnect(Session->SessionId);
-					break;
-				}
-			}						
-
-			int8 ReqSkillCharacteristicType;
-			*Message >> ReqSkillCharacteristicType;
-
-			// 스킬 종류
-			int16 ReqSkillType;
-			*Message >> ReqSkillType;			
-
-			st_GameObjectJob* SpellStartJob = MakeGameObjectJobSpellStart(ReqSkillCharacteristicType, ReqSkillType);
-			MyPlayer->_GameObjectJobQue.Enqueue(SpellStartJob);			
-		} while (0);
-	}
-
-	ReturnSession(Session);
-}
-
-void CGameServer::PacketProcReqMagicCancel(int64 SessionId, CMessage* Message)
+void CGameServer::PacketProcReqSkillCastingCancel(int64 SessionId, CMessage* Message)
 {
 	st_Session* Session = FindSession(SessionId);
 
@@ -1236,8 +1165,8 @@ void CGameServer::PacketProcReqMagicCancel(int64 SessionId, CMessage* Message)
 				}
 			}
 
-			st_GameObjectJob* SpellCancelJob = MakeGameObjectJobSpellCancel();
-			MyPlayer->_GameObjectJobQue.Enqueue(SpellCancelJob);
+			st_GameObjectJob* SkillCastingCancelJob = MakeGameObjectJobSkillCastingCancel();
+			MyPlayer->_GameObjectJobQue.Enqueue(SkillCastingCancelJob);
 		}
 	} while (0);
 
@@ -2667,8 +2596,8 @@ void CGameServer::PacketProcReqItemUse(int64 SessionId, CMessage* Message)
 			{
 				switch (UseItem->_ItemInfo.ItemSmallCategory)
 				{
-				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_SWORD_WOOD:
-				case en_SmallItemCategory::ITEM_SAMLL_CATEGORY_WEAPON_WOOD_SHIELD:
+				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD:
+				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_DAGGER_WOOD:
 				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_HAT_LEATHER:
 				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER:
 				case en_SmallItemCategory::ITEM_SMALL_CATEGORY_ARMOR_BOOT_LEATHER:
@@ -4313,9 +4242,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 						
 			bool ItemEquipped = false;			
 			int16 ItemTilePositionX = 0;
-			int16 ItemTilePositionY = 0;
-			int8 ItemLargeCategory = 0;
-			int8 ItemMediumCategory = 0;
+			int16 ItemTilePositionY = 0;			
 			int16 ItemSmallCategory = 0;			
 			int16 ItemCount = 0;	
 			int32 ItemDurability = 0;
@@ -4323,9 +4250,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 			
 			CharacterInventoryItem.OutItemIsEquipped(ItemEquipped);			
 			CharacterInventoryItem.OutItemTileGridPositionX(ItemTilePositionX);
-			CharacterInventoryItem.OutItemTileGridPositionY(ItemTilePositionY);
-			CharacterInventoryItem.OutItemLargeCategory(ItemLargeCategory);
-			CharacterInventoryItem.OutItemMediumCategory(ItemMediumCategory);
+			CharacterInventoryItem.OutItemTileGridPositionY(ItemTilePositionY);			
 			CharacterInventoryItem.OutItemSmallCategory(ItemSmallCategory);			
 			CharacterInventoryItem.OutItemCount(ItemCount);
 			CharacterInventoryItem.OutItemDurability(ItemDurability);
@@ -4403,9 +4328,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 			int16 QuickSlotKey;			
 			int8 QuickSlotCharacteristicType;
 			int16 QuickSlotSkillType;
-			int8 QuickSlotSkillLevel;
-			int8 QuickSlotItemLargeCategory;
-			int8 QuickSlotItemMediumCategory;
+			int8 QuickSlotSkillLevel;			
 			int16 QuickSlotItemSmallCategory;
 			int16 QuickSlotItemCount;
 
@@ -4414,9 +4337,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 			QuickSlotBarGet.OutQuickSlotKey(QuickSlotKey);	
 			QuickSlotBarGet.OutQuickSlotCharacteristicType(QuickSlotCharacteristicType);
 			QuickSlotBarGet.OutQuickSlotSkillType(QuickSlotSkillType);
-			QuickSlotBarGet.OutQuickSlotSkillLevel(QuickSlotSkillLevel);
-			QuickSlotBarGet.OutQuickSlotItemLargeCategory(QuickSlotItemLargeCategory);
-			QuickSlotBarGet.OutQuickSlotItemMediumCategory(QuickSlotItemMediumCategory);
+			QuickSlotBarGet.OutQuickSlotSkillLevel(QuickSlotSkillLevel);			
 			QuickSlotBarGet.OutQuickSlotItemSmallCategory(QuickSlotItemSmallCategory);
 			QuickSlotBarGet.OutQuickSlotItemCount(QuickSlotItemCount);
 
@@ -4483,16 +4404,12 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 			EquipmentGet.InAccountDBID(MyPlayer->_AccountId);
 			EquipmentGet.InPlayerDBID(MyPlayer->_GameObjectInfo.ObjectId);
 
-			int8 EquipmentParts;
-			int8 EquipmentLargeItemCategory = 0;
-			int8 EquipmentMediumCategory = 0;
+			int8 EquipmentParts;			
 			int16 EquipmentSmallCategory = 0;
 			int32 EquipmentDurability = 0;
 			int8 EquipmentEnchantPoint = 0;
 
-			EquipmentGet.OutEquipmentParts(EquipmentParts);
-			EquipmentGet.OutEquipmentLargeCategory(EquipmentLargeItemCategory);
-			EquipmentGet.OutEquipmentMediumCateogry(EquipmentMediumCategory);
+			EquipmentGet.OutEquipmentParts(EquipmentParts);			
 			EquipmentGet.OutEquipmentSmallCategory(EquipmentSmallCategory);
 			EquipmentGet.OutEquipmentDurability(EquipmentDurability);
 			EquipmentGet.OutEquipmentEnchantPoint(EquipmentEnchantPoint);
@@ -4507,7 +4424,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 					NewEquipmentItem->_ItemInfo.ItemCurrentDurability = EquipmentDurability;
 					NewEquipmentItem->_ItemInfo.ItemEnchantPoint = EquipmentEnchantPoint;					
 
-					MyPlayer->_Equipment.ItemOnEquipment(NewEquipmentItem);	
+					MyPlayer->GetEquipment()->ItemOnEquipment(NewEquipmentItem);
 
 					Equipments.push_back(NewEquipmentItem->_ItemInfo);
 				}				
@@ -4687,9 +4604,7 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 										
 					int8 SaveQuickSlotInfoSkillChracteristicType = (int8)SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillCharacteristic;
 					int16 SaveQuickSlotInfoSkillSkillType = (int16)SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillType;
-
-					int8 SaveItemLargeCategory = 0;
-					int8 SaveItemMediumCategory = 0;
+										
 					int16 SaveItemSmallCategory = 0;
 					int16 SaveItemCount = 0;
 
@@ -4700,9 +4615,7 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 					QuickSlotDBUpdate.InQuickSlotKey(SaveQuickSlotInfo->QuickSlotKey);		
 					QuickSlotDBUpdate.InCharacteristicType(SaveQuickSlotInfoSkillChracteristicType);
 					QuickSlotDBUpdate.InSkillType(SaveQuickSlotInfoSkillSkillType);
-					QuickSlotDBUpdate.InSkillLevel(SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillLevel);
-					QuickSlotDBUpdate.InItemLargeCategory(SaveItemLargeCategory);
-					QuickSlotDBUpdate.InItemMediumCategory(SaveItemMediumCategory);
+					QuickSlotDBUpdate.InSkillLevel(SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillLevel);					
 					QuickSlotDBUpdate.InItemSmallCategory(SaveItemSmallCategory);
 					QuickSlotDBUpdate.InItemCount(SaveItemCount);
 
@@ -4715,9 +4628,7 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 					
 					int16 SaveQuickSlotInfoSkillSkillType = 0;
 					int8 SkillLevel = 0;
-
-					int8 SaveItemLargeCategory = (int8)SaveQuickSlotInfo->QuickBarItem->_ItemInfo.ItemLargeCategory;
-					int8 SaveItemMediumCategory = (int8)SaveQuickSlotInfo->QuickBarItem->_ItemInfo.ItemMediumCategory;
+					
 					int16 SaveItemSmallCategory = (int16)SaveQuickSlotInfo->QuickBarItem->_ItemInfo.ItemSmallCategory;
 					int16 SaveItemCount = SaveQuickSlotInfo->QuickBarItem->_ItemInfo.ItemCount;
 
@@ -4728,8 +4639,7 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 					QuickSlotDBUpdate.InQuickSlotKey(SaveQuickSlotInfo->QuickSlotKey);					
 					QuickSlotDBUpdate.InSkillType(SaveQuickSlotInfoSkillSkillType);
 					QuickSlotDBUpdate.InSkillLevel(SkillLevel);
-					QuickSlotDBUpdate.InItemLargeCategory(SaveItemLargeCategory);
-					QuickSlotDBUpdate.InItemMediumCategory(SaveItemMediumCategory);
+					
 					QuickSlotDBUpdate.InItemSmallCategory(SaveItemSmallCategory);
 					QuickSlotDBUpdate.InItemCount(SaveItemCount);
 
@@ -4741,26 +4651,22 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 	}
 
 	// 장비 정보 DB에 저장
-	/*CItem** EquipmentPartsItem = LeavePlayer->_Equipment.GetEquipmentParts();
-	for (int8 i = 1; i <= (int8)en_EquipmentParts::EQUIPMENT_PARTS_BOOT; i++)
+	map<en_EquipmentParts, CItem*> Equipments = LeavePlayer->GetEquipment()->GetEquipments();
+	for (auto Equipment : Equipments)
 	{
-		if (EquipmentPartsItem[i] != nullptr)
+		if (Equipment.second != nullptr)
 		{
 			SP::CDBGameServerOnEquipment SaveEquipmentInfo(*PlayerInfoSaveDBConnection);
-			
-			int8 EquipmentParts = (int8)EquipmentPartsItem[i]->_ItemInfo.ItemEquipmentPart;
-			int8 EquipmentLargeCategory = (int8)EquipmentPartsItem[i]->_ItemInfo.ItemLargeCategory;
-			int8 EquipmentMediumCategory = (int8)EquipmentPartsItem[i]->_ItemInfo.ItemMediumCategory;
-			int16 EquipmentSmallCategory = (int16)EquipmentPartsItem[i]->_ItemInfo.ItemSmallCategory;
+
+			int8 EquipmentParts = (int8)Equipment.second->_ItemInfo.ItemEquipmentPart;
+			int16 EquipmentSmallCategory = (int16)Equipment.second->_ItemInfo.ItemSmallCategory;
 
 			SaveEquipmentInfo.InAccountDBID(LeavePlayer->_AccountId);
 			SaveEquipmentInfo.InPlayerDBID(LeavePlayer->_GameObjectInfo.ObjectId);
 			SaveEquipmentInfo.InEquipmentParts(EquipmentParts);
-			SaveEquipmentInfo.InEquipmentLargeCategory(EquipmentLargeCategory);
-			SaveEquipmentInfo.InEquipmentMediumCategory(EquipmentMediumCategory);
 			SaveEquipmentInfo.InEquipmentSmallCategory(EquipmentSmallCategory);
-			SaveEquipmentInfo.InEquipmentDurability(EquipmentPartsItem[i]->_ItemInfo.ItemCurrentDurability);
-			SaveEquipmentInfo.InEquipmentEnchantPoint(EquipmentPartsItem[i]->_ItemInfo.ItemEnchantPoint);
+			SaveEquipmentInfo.InEquipmentDurability(Equipment.second->_ItemInfo.ItemCurrentDurability);
+			SaveEquipmentInfo.InEquipmentEnchantPoint(Equipment.second->_ItemInfo.ItemEnchantPoint);
 
 			SaveEquipmentInfo.Execute();
 		}
@@ -4768,7 +4674,7 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 		{
 			SP::CDBGameServerOffEquipment OffEquipment(*PlayerInfoSaveDBConnection);
 
-			int8 EquipmentParts = i;
+			int8 EquipmentParts = (int8)Equipment.first;
 
 			OffEquipment.InAccountDBID(LeavePlayer->_AccountId);
 			OffEquipment.InPlayerDBID(LeavePlayer->_GameObjectInfo.ObjectId);
@@ -4776,7 +4682,7 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 
 			OffEquipment.Execute();
 		}
-	}*/
+	}		
 
 	// 가방 정보 DB에 저장	
 	CInventory** LeavePlayerInventorys = LeavePlayer->GetInventoryManager()->GetInventoryManager();
@@ -4801,16 +4707,12 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 			vector<st_ItemInfo> PlayerInventoryItems = LeavePlayerInventorys[i]->DBInventorySaveReturnItems();
 
 			for (st_ItemInfo InventoryItem : PlayerInventoryItems)
-			{				
-				int8 InventoryItemLargeCategory = (int8)InventoryItem.ItemLargeCategory;
-				int8 InventoryItemMediumCategory = (int8)InventoryItem.ItemMediumCategory;
+			{					
 				int16 InventoryItemSmallCategory = (int16)InventoryItem.ItemSmallCategory;
 
 				LeavePlayerInventoryItemSave.InIsEquipped(InventoryItem.ItemIsEquipped);				
 				LeavePlayerInventoryItemSave.InItemTileGridPositionX(InventoryItem.ItemTileGridPositionX);
-				LeavePlayerInventoryItemSave.InItemTileGridPositionY(InventoryItem.ItemTileGridPositionY);
-				LeavePlayerInventoryItemSave.InItemLargeCategory(InventoryItemLargeCategory);
-				LeavePlayerInventoryItemSave.InItemMediumCategory(InventoryItemMediumCategory);
+				LeavePlayerInventoryItemSave.InItemTileGridPositionY(InventoryItem.ItemTileGridPositionY);				
 				LeavePlayerInventoryItemSave.InItemSmallCategory(InventoryItemSmallCategory);				
 				LeavePlayerInventoryItemSave.InItemCount(InventoryItem.ItemCount);				
 				LeavePlayerInventoryItemSave.InItemDurability(InventoryItem.ItemCurrentDurability);
@@ -5000,50 +4902,32 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobSkillLearn(bool IsSkillLearn, in
 	return SkillLearnJob;
 }
 
-st_GameObjectJob* CGameServer::MakeGameObjectJobMeleeAttack(int8 MeleeCharacteristicType, int16 MeleeSkillType, float WeaponPositionX, float WeaponPositionY, float AttackDirectionX, float AttackDirectionY)
+st_GameObjectJob* CGameServer::MakeGameObjectJobSkillProcess(int8 SkillCharacteristicType, int16 SkillType, float SkillDirectionX, float SkillDirectionY)
 {
 	st_GameObjectJob* MeleeAttackJob = G_ObjectManager->GameObjectJobCreate();
-	MeleeAttackJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SKILL_MELEE_ATTACK;
+	MeleeAttackJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SKILL_PROCESS;
 
 	CGameServerMessage* MeleeAttackJobMessage = CGameServerMessage::GameServerMessageAlloc();
 	MeleeAttackJobMessage->Clear();
 
-	*MeleeAttackJobMessage << MeleeCharacteristicType;
-	*MeleeAttackJobMessage << MeleeSkillType;
-	*MeleeAttackJobMessage << WeaponPositionX;
-	*MeleeAttackJobMessage << WeaponPositionY;
-	*MeleeAttackJobMessage << AttackDirectionX;
-	*MeleeAttackJobMessage << AttackDirectionY;
+	*MeleeAttackJobMessage << SkillCharacteristicType;
+	*MeleeAttackJobMessage << SkillType;
+	*MeleeAttackJobMessage << SkillDirectionX;
+	*MeleeAttackJobMessage << SkillDirectionY;
 
 	MeleeAttackJob->GameObjectJobMessage = MeleeAttackJobMessage;
 
 	return MeleeAttackJob;
 }
 
-st_GameObjectJob* CGameServer::MakeGameObjectJobSpellStart(int8 SpellCharacteristicType, int16 StartSpellSkilltype)
+st_GameObjectJob* CGameServer::MakeGameObjectJobSkillCastingCancel()
 {
-	st_GameObjectJob* SpellStartJob = G_ObjectManager->GameObjectJobCreate();
-	SpellStartJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SPELL_START;
+	st_GameObjectJob* SkillCastingCancelJob = G_ObjectManager->GameObjectJobCreate();
+	SkillCastingCancelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SKILL_CASTING_CANCEL;
 
-	CGameServerMessage* SpellStartMessage = CGameServerMessage::GameServerMessageAlloc();
-	SpellStartMessage->Clear();
+	SkillCastingCancelJob->GameObjectJobMessage = nullptr;
 
-	*SpellStartMessage << SpellCharacteristicType;
-	*SpellStartMessage << StartSpellSkilltype;
-
-	SpellStartJob->GameObjectJobMessage = SpellStartMessage;
-
-	return SpellStartJob;
-}
-
-st_GameObjectJob* CGameServer::MakeGameObjectJobSpellCancel()
-{
-	st_GameObjectJob* SpellCancelJob = G_ObjectManager->GameObjectJobCreate();
-	SpellCancelJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SPELL_CANCEL;
-
-	SpellCancelJob->GameObjectJobMessage = nullptr;
-
-	return SpellCancelJob;
+	return SkillCastingCancelJob;
 }
 
 st_GameObjectJob* CGameServer::MakeGameObjectJobGatheringStart(CGameObject* GatheringObject)
@@ -5954,23 +5838,23 @@ CGameServerMessage* CGameServer::MakePacketResAttack(int64 ObjectID)
 	return ResAttackMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResMagic(int64 ObjectId, bool SpellStart, en_SkillType SkillType, float SpellTime)
+CGameServerMessage* CGameServer::MakePacketSkillCastingStart(int64 ObjectId, bool SpellStart, en_SkillType SkillType, float SpellTime)
 {
-	CGameServerMessage* ResMagicMessage = CGameServerMessage::GameServerMessageAlloc();
-	if (ResMagicMessage == nullptr)
+	CGameServerMessage* ResSkillCastingStartMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResSkillCastingStartMessage == nullptr)
 	{
 		return nullptr;
 	}
 
-	ResMagicMessage->Clear();
+	ResSkillCastingStartMessage->Clear();
 
-	*ResMagicMessage << (int16)en_PACKET_S2C_SPELL;
-	*ResMagicMessage << ObjectId;
-	*ResMagicMessage << SpellStart;
-	*ResMagicMessage << (int16)SkillType;
-	*ResMagicMessage << SpellTime;
+	*ResSkillCastingStartMessage << (int16)en_PACKET_S2C_SKILL_CASTING_START;
+	*ResSkillCastingStartMessage << ObjectId;
+	*ResSkillCastingStartMessage << SpellStart;
+	*ResSkillCastingStartMessage << (int16)SkillType;
+	*ResSkillCastingStartMessage << SpellTime;
 
-	return ResMagicMessage;
+	return ResSkillCastingStartMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketResGathering(int64 ObjectID, bool GatheringStart, wstring GatheringName)
@@ -6623,20 +6507,20 @@ CGameServerMessage* CGameServer::MakePacketExperience(int64 GainExp, int64 Curre
 	return ResExperienceMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketMagicCancel(int64 PlayerId)
+CGameServerMessage* CGameServer::MakePacketSkillCastingCancel(int64 PlayerId)
 {
-	CGameServerMessage* ResMagicCancelMessage = CGameServerMessage::GameServerMessageAlloc();
-	if (ResMagicCancelMessage == nullptr)
+	CGameServerMessage* ResSkillCastingCancelMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResSkillCastingCancelMessage == nullptr)
 	{
 		return nullptr;
 	}
 
-	ResMagicCancelMessage->Clear();
+	ResSkillCastingCancelMessage->Clear();
 
-	*ResMagicCancelMessage << (int16)en_PACKET_S2C_MAGIC_CANCEL;	
-	*ResMagicCancelMessage << PlayerId;
+	*ResSkillCastingCancelMessage << (int16)en_PACKET_S2C_SKILL_CASTING_CANCEL;	
+	*ResSkillCastingCancelMessage << PlayerId;
 
-	return ResMagicCancelMessage;
+	return ResSkillCastingCancelMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketGatheringCancel(int64 ObjectID)

@@ -135,17 +135,13 @@ private:
 	//------------------------------------------------------------
 	void PacketProcReqLookAtDirection(int64 SessionID, CMessage* Message);
 	//---------------------------------------------------------------
-	// 공격 요청 처리
+	// 기술 처리 요청 처리
 	//---------------------------------------------------------------
-	void PacketProcReqMelee(int64 SessionID, CMessage* Message);
+	void PacketProcReqSkillProcess(int64 SessionID, CMessage* Message);	
 	//---------------------------------------------------------
-	// 마법 요청 처리
+	// 기술 시전 요청 취소 처리
 	//---------------------------------------------------------
-	void PacketProcReqMagic(int64 SessionId, CMessage* Message);
-	//---------------------------------------------------------
-	// 마법 요청 취소 처리
-	//---------------------------------------------------------
-	void PacketProcReqMagicCancel(int64 SessionId, CMessage* Message);
+	void PacketProcReqSkillCastingCancel(int64 SessionId, CMessage* Message);
 	//----------------------------------------------------------------------------
 	// 채집 요청 처리
 	//----------------------------------------------------------------------------
@@ -325,25 +321,21 @@ private:
 	st_GameObjectJob* MakeGameObjectJobMoveStop(float PositionX, float PositionY, int8 GameObjectState);			
 	st_GameObjectJob* MakeGameObjectJobLookAtDirection(float DirectionX, float DirectionY);
 	//-------------------------------------------------
-	// 스킬 특성 선택 잡 생성 함수
+	// 기술 특성 선택 잡 생성 함수
 	//-------------------------------------------------
 	st_GameObjectJob* MakeGameObjectJobSelectSkillCharacteristic(int8 SelectChracteristicType);		
 	//------------------------------------------------------------------------------------------------------------------------------------
-	// 스킬 배우기 잡 생성 함수 
+	// 기술 배우기 잡 생성 함수 
 	//------------------------------------------------------------------------------------------------------------------------------------
 	st_GameObjectJob* MakeGameObjectJobSkillLearn(bool IsSkillLearn, int8 LearnSkillCharacteristicType, int16 LearnSkillType);
 	//-------------------------------------------------
-	// 근접 기술 처리 잡 생성 함수
+	// 기술 처리 잡 생성 함수
 	//-------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobMeleeAttack(int8 MeleeCharacteristicType, int16 MeleeSkillType, float WeaponPositionX, float WeaponPositionY, float AttackDirectionX, float AttackDirectionY);
+	st_GameObjectJob* MakeGameObjectJobSkillProcess(int8 SkillCharacteristicType, int16 SkillType, float SkillDirectionX, float SkillDirectionY);	
 	//------------------------------------------------
-	// 마법 시작 잡 생성 함수
+	// 시전 취소 잡 생성 함수
 	//------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobSpellStart(int8 SpellCharacteristicType, int16 StartSpellSkilltype);
-	//------------------------------------------------
-	// 마법 공격 취소 잡 생성 함수
-	//------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobSpellCancel();
+	st_GameObjectJob* MakeGameObjectJobSkillCastingCancel();
 	//------------------------------------------------
 	// 채집 시작 잡 생성 함수
 	//------------------------------------------------
@@ -567,9 +559,9 @@ public:
 	//-----------------------------------------------------------------------------------------
 	CGameServerMessage* MakePacketResAttack(int64 ObjectID);
 	//-----------------------------------------------------------------------------------------
-	// 게임서버 마법요청 응답 패킷 조합
+	// 게임서버 기술 시전 시작 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResMagic(int64 ObjectId, bool SpellStart, en_SkillType SkillType = en_SkillType::SKILL_TYPE_NONE, float SpellTime = 0.0f);
+	CGameServerMessage* MakePacketSkillCastingStart(int64 ObjectId, bool SpellStart, en_SkillType SkillType = en_SkillType::SKILL_TYPE_NONE, float SpellTime = 0.0f);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 채집요청 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -695,7 +687,7 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 스킬 취소 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketMagicCancel(int64 PlayerId);
+	CGameServerMessage* MakePacketSkillCastingCancel(int64 PlayerId);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 채집 취소 패킷 조합
 	//-----------------------------------------------------------------------------------------
