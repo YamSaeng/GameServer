@@ -408,7 +408,12 @@ void CSkillBox::SkillIsCasting(CGameObject* SkillUser, en_SkillCharacteristic Sk
 				}
 				else
 				{
-					// 시전 중인 기술 저장 및 시전 시간 설정
+					if (SkillUser->GetSkillCastingSkill() != nullptr)
+					{
+						return;
+					}
+
+					// 시전 중인 기술 저장 및	시전 시간 설정
 					SkillUser->SetSkillCastingSkill(Skill);						
 
 					// 기술 시전 바 시작
