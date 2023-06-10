@@ -6,6 +6,8 @@
 #include "Skill.h"
 #include "SkillBox.h"
 #include "MapManager.h"
+#include "FlameBolt.h"
+#include "DivineBolt.h"
 #include "RectCollision.h"
 
 CPlayer::CPlayer()
@@ -28,7 +30,7 @@ CPlayer::CPlayer()
 	_GameObjectInfo.ObjectWidth = 1;
 	_GameObjectInfo.ObjectHeight = 1;	
 
-	_SpellSkill = nullptr;			
+	_CastingSkill = nullptr;			
 
 	_SkillBox.SetOwner(this);
 }
@@ -42,7 +44,7 @@ void CPlayer::Update()
 {
 	CGameObject::Update();
 
-	if (_NetworkState == en_ObjectNetworkState::LEAVE)
+	if (_NetworkState == en_ObjectNetworkState::OBJECT_NETWORK_STATE_LEAVE)
 	{
 		return;
 	}	
@@ -54,12 +56,7 @@ void CPlayer::Update()
 	_SkillBox.Update();
 	
 	// 버프, 디버프 업데이트
-	CheckBufDeBufSkill();
-
-	if (_RectCollision != nullptr)
-	{
-		_RectCollision->Update();
-	}
+	CheckBufDeBufSkill();	
 
 	if (_ComboSkill != nullptr)
 	{
@@ -213,18 +210,9 @@ void CPlayer::UpdateIdle()
 
 void CPlayer::UpdateMoving()
 {	
-	Vector2 NextPosition;
-
-	bool CanMove = _Channel->GetMap()->Cango(this, &NextPosition);
-
-	/*G_Logger->WriteStdOut(en_Color::BLUE, L"Dir X : %0.1f Y : %0.1f \n",
-		_GameObjectInfo.ObjectPositionInfo.Direction._X,
-		_GameObjectInfo.ObjectPositionInfo.Direction._Y);*/	
-
+	bool CanMove = _Channel->GetMap()->Cango(this);
 	if (CanMove == true)
 	{
-		_GameObjectInfo.ObjectPositionInfo.Position = NextPosition;
-
 		Vector2Int CollisionPosition;
 		CollisionPosition.X = (int32)_GameObjectInfo.ObjectPositionInfo.Position.X;
 		CollisionPosition.Y = (int32)_GameObjectInfo.ObjectPositionInfo.Position.Y;
@@ -267,177 +255,9 @@ void CPlayer::UpdateSpell()
 		G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, ResObjectStateChangePacket);
 		ResObjectStateChangePacket->Free();
 
-		if (_SpellSkill != nullptr && _SelectTarget != nullptr)
+		if (_CastingSkill != nullptr)
 		{
-			st_SkillInfo* AttackSkillInfo = _SpellSkill->GetSkillInfo();
-
-			switch (_SpellSkill->GetSkillInfo()->SkillType)
-			{
-			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_HARPOON:
-				{
-					st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType,
-						AttackSkillInfo->SkillType,
-						AttackSkillInfo->SkillMinDamage,
-						AttackSkillInfo->SkillMaxDamage);
-					_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
-				}
-				break;			
-			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
-				{	
-					st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType,
-						AttackSkillInfo->SkillType,
-						AttackSkillInfo->SkillMinDamage,
-						AttackSkillInfo->SkillMaxDamage);
-					_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
-
-					if (AttackSkillInfo->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
-					{
-						CSkill* FindNextComboSkill = _SkillBox.FindSkill(AttackSkillInfo->SkillCharacteristic, AttackSkillInfo->NextComboSkill);
-						if (FindNextComboSkill->GetSkillInfo()->CanSkillUse == true)
-						{
-							st_GameObjectJob* ComboAttackCreateJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobComboSkillCreate(_SpellSkill); G_ObjectManager->GameObjectJobCreate();
-							_GameObjectJobQue.Enqueue(ComboAttackCreateJob);
-						}					
-					}									
-					
-					float DebufMovingSpeed = _SelectTarget->_GameObjectInfo.ObjectStatInfo.MaxSpeed * AttackSkillInfo->SkillDebufMovingSpeed * 0.01f;
-					_SelectTarget->_GameObjectInfo.ObjectStatInfo.Speed -= DebufMovingSpeed;
-
-					CMessage* ResObjectStatChange = G_NetworkManager->GetGameServer()->MakePacketResChangeObjectStat(_GameObjectInfo.ObjectId,
-						_GameObjectInfo.ObjectStatInfo);
-					G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_FieldOfViewInfos, ResObjectStatChange);
-					ResObjectStatChange->Free();
-
-					bool IsShamanIceChain = _StatusAbnormal & (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_CHAIN;
-					if (IsShamanIceChain == false)
-					{
-						CSkill* NewSkill = G_ObjectManager->SkillCreate();
-
-						st_SkillInfo* NewAttackSkillInfo = G_ObjectManager->SkillInfoCreate(_SpellSkill->GetSkillInfo()->SkillType, _SpellSkill->GetSkillInfo()->SkillLevel);
-						NewSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
-						NewSkill->StatusAbnormalDurationTimeStart();
-
-						_SelectTarget->AddDebuf(NewSkill);
-						_SelectTarget->SetStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_CHAIN);
-
-						CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
-							_SelectTarget->_GameObjectInfo.ObjectType,							
-							_SpellSkill->GetSkillInfo()->SkillType, true, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_ICE_CHAIN);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_FieldOfViewInfos, ResStatusAbnormalPacket);
-						ResStatusAbnormalPacket->Free();
-
-						CMessage* ResBufDeBufSkillPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewSkill->GetSkillInfo());
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_FieldOfViewInfos, ResBufDeBufSkillPacket);
-						ResBufDeBufSkillPacket->Free();
-					}				
-				}
-				break;
-			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
-				{
-					st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType,
-						AttackSkillInfo->SkillType,
-						AttackSkillInfo->SkillMinDamage,
-						AttackSkillInfo->SkillMaxDamage);
-					_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);
-
-					bool IsLightningStrike = _StatusAbnormal & (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE;
-					if (IsLightningStrike == false)
-					{
-						CSkill* NewSkill = G_ObjectManager->SkillCreate();
-
-						st_SkillInfo* NewAttackSkillInfo = G_ObjectManager->SkillInfoCreate(_SpellSkill->GetSkillInfo()->SkillType, _SpellSkill->GetSkillInfo()->SkillLevel);
-						NewSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_STATUS_ABNORMAL_SKILL, NewAttackSkillInfo);
-						NewSkill->StatusAbnormalDurationTimeStart();
-
-						_SelectTarget->AddDebuf(NewSkill);
-						_SelectTarget->SetStatusAbnormal((int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE);
-
-						CMessage* SelectTargetMoveStopMessage = G_NetworkManager->GetGameServer()->MakePacketResMoveStop(_SelectTarget->_GameObjectInfo.ObjectId,
-							_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position.X,
-							_SelectTarget->_GameObjectInfo.ObjectPositionInfo.Position.Y);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_FieldOfViewInfos, SelectTargetMoveStopMessage);
-						SelectTargetMoveStopMessage->Free();
-
-						CMessage* ResStatusAbnormalPacket = G_NetworkManager->GetGameServer()->MakePacketStatusAbnormal(_SelectTarget->_GameObjectInfo.ObjectId,
-							_SelectTarget->_GameObjectInfo.ObjectType,							
-							_SpellSkill->GetSkillInfo()->SkillType,
-							true, (int32)en_GameObjectStatusType::STATUS_ABNORMAL_SPELL_LIGHTNING_STRIKE);
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_FieldOfViewInfos, ResStatusAbnormalPacket);
-						ResStatusAbnormalPacket->Free();
-
-						CMessage* ResBufDeBufSkillPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBuf(_SelectTarget->_GameObjectInfo.ObjectId, false, NewSkill->GetSkillInfo());
-						G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_FieldOfViewInfos, ResBufDeBufSkillPacket);
-						ResBufDeBufSkillPacket->Free();
-					}			
-
-					float EffectPrintTime = _SpellSkill->GetSkillInfo()->SkillDurationTime / 1000.0f;
-				}
-				break;
-			case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:
-				{
-					st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType,
-						AttackSkillInfo->SkillType,
-						AttackSkillInfo->SkillMinDamage,
-						AttackSkillInfo->SkillMaxDamage);
-					_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);				
-				}
-				break;
-			case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
-				{
-					st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectType, 
-						AttackSkillInfo->SkillType,
-						AttackSkillInfo->SkillMinDamage,
-						AttackSkillInfo->SkillMaxDamage);
-					_SelectTarget->_GameObjectJobQue.Enqueue(DamageJob);				
-				}
-				break;			
-			case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_LIGHT:
-				{										
-					/*st_GameObjectJob* HealJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobHPHeal(this, false, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
-					_SelectTarget->_GameObjectJobQue.Enqueue(HealJob);	*/							
-				}
-				break;
-			case en_SkillType::SKILL_DISCIPLINE_ACTIVE_HEAL_HEALING_WIND:
-				{
-					/*st_GameObjectJob* HealJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobHPHeal(this, false, FinalDamage, _SpellSkill->GetSkillInfo()->SkillType);
-					_SelectTarget->_GameObjectJobQue.Enqueue(HealJob);*/
-				}
-				break;
-			}					
-
-			_SpellSkill->CoolTimeStart();
-
-			for (auto QuickSlotBarPosition : _QuickSlotManager.FindQuickSlotBar(_SpellSkill->GetSkillInfo()->SkillType))
-			{
-				// 클라에게 쿨타임 표시
-				CMessage* ResCoolTimeStartPacket = G_NetworkManager->GetGameServer()->MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
-					QuickSlotBarPosition.QuickSlotBarSlotIndex,
-					1.0f, _SpellSkill);
-				G_NetworkManager->GetGameServer()->SendPacket(_SessionId, ResCoolTimeStartPacket);
-				ResCoolTimeStartPacket->Free();
-			}
-
-			vector<CSkill*> GlobalSkills = _SkillBox.GetGlobalSkills(_SpellSkill->GetSkillInfo()->SkillType, _SpellSkill->GetSkillKind());
-			
-			// 전역 쿨타임 적용
-			for (CSkill* GlobalSkill : GlobalSkills)
-			{
-				GlobalSkill->GlobalCoolTimeStart(_SpellSkill->GetSkillInfo()->SkillMotionTime);
-
-				for (Vector2Int QuickSlotPosition : GlobalSkill->_QuickSlotBarPosition)
-				{
-					CMessage* ResCoolTimeStartPacket = G_NetworkManager->GetGameServer()->MakePacketCoolTime((int8)QuickSlotPosition.Y,
-						(int8)QuickSlotPosition.X,
-						1.0f, nullptr, _SpellSkill->GetSkillInfo()->SkillMotionTime);
-					G_NetworkManager->GetGameServer()->SendPacket(_SessionId, ResCoolTimeStartPacket);
-					ResCoolTimeStartPacket->Free();
-				}
-			}
-			
-			// 스펠창 끝
-			CMessage* ResMagicPacket = G_NetworkManager->GetGameServer()->MakePacketResMagic(_GameObjectInfo.ObjectId, false);
-			G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_FieldOfViewInfos, ResMagicPacket);
-			ResMagicPacket->Free();			
+			_SkillBox.SkillProcess(this, _CastingSkill);				
 		}
 	}
 }
@@ -577,14 +397,10 @@ void CPlayer::CheckFieldOfViewObject()
 		for (st_FieldOfViewInfo FieldOfViewInfo : _FieldOfViewInfos)
 		{
 			CGameObject* FindObject = _Channel->FindChannelObject(FieldOfViewInfo.ObjectID, FieldOfViewInfo.ObjectType);
-			if (FindObject != nullptr
-				&& (FindObject->_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_PLAYER
-					|| FindObject->_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_GOBLIN
-					|| FindObject->_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_NON_PLAYER_GENERAL_MERCHANT
-					|| FindObject->_GameObjectInfo.ObjectType == en_GameObjectType::OBJECT_SKILL_SWORD_BLADE))
+			if (FindObject != nullptr)
 			{
 				_FieldOfViewObjects.push_back(FindObject);
-			}
+			}			
 		}
 
 		RayCastingToFieldOfViewObjects(&SpawnObjectInfos, &DeSpawnObjectInfos);

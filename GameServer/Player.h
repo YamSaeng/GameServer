@@ -1,6 +1,5 @@
 #pragma once
 #include "Creature.h"
-#include "EquipmentBox.h"
 #include "SkillBox.h"
 #include "QuickSlotManager.h"
 #include "InventoryManager.h"
@@ -14,9 +13,7 @@ public:
 	int64 _SessionId;
 	int64 _AccountId;	
 
-	CPartyManager _PartyManager;
-
-	CEquipmentBox _Equipment;		
+	CPartyManager _PartyManager;		
 	
 	CSkillBox _SkillBox;
 	CQuickSlotManager _QuickSlotManager;
