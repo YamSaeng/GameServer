@@ -99,6 +99,7 @@ CGameServerMessage& CGameServerMessage::operator<<(st_SkillInfo& SkillInfo)
 {
     *this << SkillInfo.CanSkillUse;
     *this << SkillInfo.IsSkillLearn;   
+    *this << (int8)SkillInfo.SkillKind;
     *this << (int8)SkillInfo.SkillCharacteristic;
     *this << (int8)SkillInfo.SkillLargeCategory;
     *this << (int8)SkillInfo.SkillMediumCategory;
