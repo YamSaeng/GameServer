@@ -48,12 +48,21 @@ void CSector::Insert(CGameObject* InsertGameObject)
 	case en_GameObjectType::OBJECT_CROP_CORN:
 		_Crops.insert((CCrop*)InsertGameObject);
 		break;
-	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_DAGGER:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_LONG_SWORD:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_GREAT_SWORD:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SHIELD:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_BOW:
+	case en_GameObjectType::OBJECT_ITEM_TOOL_FARMING_SHOVEL:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEALTH_RESTORATION_POTION_SMALL:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_MANA_RESTORATION_POTION_SMALL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIVER_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_GOLD_COIN:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
@@ -64,7 +73,9 @@ void CSector::Insert(CGameObject* InsertGameObject)
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
 	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
+	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_CORN:
 	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
+	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_CORN:
 		_Items.insert((CItem*)InsertGameObject);
 		break;
 	default:
@@ -109,12 +120,21 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 	case en_GameObjectType::OBJECT_CROP_CORN:
 		_Crops.erase((CCrop*)RemoveGameObject);
 		break;
-	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SWORD:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_DAGGER:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_LONG_SWORD:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_GREAT_SWORD:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_SHIELD:
+	case en_GameObjectType::OBJECT_ITEM_WEAPON_WOOD_BOW:
+	case en_GameObjectType::OBJECT_ITEM_TOOL_FARMING_SHOVEL:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_ARMOR:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_HELMET:
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEALTH_RESTORATION_POTION_SMALL:
+	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_MANA_RESTORATION_POTION_SMALL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIVER_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_GOLD_COIN:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
@@ -125,7 +145,9 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_NUGGET:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_IRON_INGOT:
 	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_POTATO:
+	case en_GameObjectType::OBJECT_ITEM_CROP_SEED_CORN:
 	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
+	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_CORN:
 		_Items.erase((CItem*)RemoveGameObject);
 		break;
 	}
