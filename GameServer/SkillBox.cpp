@@ -852,7 +852,7 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CSkill* Skill)
 						{
 							DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(SkillUser->_GameObjectInfo.ObjectId,
 								SkillUser->_GameObjectInfo.ObjectType,
-								Skill->GetSkillInfo()->SkillType,
+								Skill->GetSkillInfo()->SkillKind,
 								Skill->GetSkillInfo()->SkillMinDamage,
 								Skill->GetSkillInfo()->SkillMaxDamage,
 								IsBackAttack);
@@ -936,7 +936,7 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CSkill* Skill)
 	}
 }
 
-int32 CSkillBox::CalculateDamage(en_SkillType SkillType, int32& Str, int32& Dex, int32& Int, int32& Luck, bool* InOutCritical, bool IsBackAttack, int32 TargetDefence, int32 MinDamage, int32 MaxDamage, int16 CriticalPoint)
+int32 CSkillBox::CalculateDamage(int8 SkillKind, int32& Str, int32& Dex, int32& Int, int32& Luck, bool* InOutCritical, bool IsBackAttack, int32 TargetDefence, int32 MinDamage, int32 MaxDamage, int16 CriticalPoint)
 {
 	random_device Seed;
 	default_random_engine Eng(Seed());
@@ -966,53 +966,16 @@ int32 CSkillBox::CalculateDamage(en_SkillType SkillType, int32& Str, int32& Dex,
 
 	int32 FinalDamage = 0;
 
-	switch (SkillType)
+	switch ((en_SkillKinds)SkillKind)
 	{
-	case en_SkillType::SKILL_DEFAULT_ATTACK:
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_WRATH_ATTACK:
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE:
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_COMBO_FLY_KNIFE:
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_JUMPING_ATTACK:
-	case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_PIERCING_WAVE:	
-	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_POWERFUL_ATTACK:
-	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHARP_ATTACK:
-	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_LAST_ATTACK:
-	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH:
-	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_COUNTER:
-	case en_SkillType::SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE:
-	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT:
-	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT:
-	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_ATTACK:
-	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_CUT:
-	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_ADVANCE_CUT:
-	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_POISON_INJECTION:
-	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_POISON_STUN:
-	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_ASSASSINATION:	
-	case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP:	
-	case en_SkillType::SKILL_GOBLIN_ACTIVE_MELEE_DEFAULT_ATTACK:
-
+	case en_SkillKinds::SKILL_KIND_MELEE_SKILL:
 		FinalDamage = (int32)((CriticalDamage + Str / 2) * (1 - ((float)TargetDefence / (100.0f + (float)TargetDefence))));
-
 		break;
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_BOLT:
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_FLAME_BLAZE:
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN:
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE:
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_WINTER_BINDING:
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE:
-	case en_SkillType::SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE:	
-	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
-	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_THUNDER_BOLT:
-	case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_JUDGMENT:
-
+	case en_SkillKinds::SKILL_KIND_SPELL_SKILL:
 		FinalDamage = (int32)((CriticalDamage + Int / 2) * (1 - ((float)TargetDefence / (100.0f + (float)TargetDefence))));
-
 		break;
-	case en_SkillType::SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING:
-		break;
+	case en_SkillKinds::SKILL_KIND_RANGE_SKILL:
+		break;	
 	}
 
 	float DefenceRate = (float)pow(((float)(200 - 1)) / 20, 2) * 0.01f;

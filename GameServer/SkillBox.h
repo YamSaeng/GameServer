@@ -47,7 +47,7 @@ public:
 
 	void SkillProcess(CGameObject* SkillUser, CSkill* Skill);
 		
-	int32 CalculateDamage(en_SkillType SkillType,
+	int32 CalculateDamage(int8 SkillKind,
 		int32& Str, int32& Dex, int32& Int, int32& Luck,
 		bool* InOutCritical,
 		bool IsBackAttack,
