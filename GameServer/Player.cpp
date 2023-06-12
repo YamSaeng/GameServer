@@ -257,7 +257,9 @@ void CPlayer::UpdateSpell()
 
 		if (_CastingSkill != nullptr)
 		{
-			_SkillBox.SkillProcess(this, _CastingSkill);				
+			_SkillBox.SkillProcess(this, _CastingSkill);	
+
+			_CastingSkill = nullptr;
 		}
 	}
 }
