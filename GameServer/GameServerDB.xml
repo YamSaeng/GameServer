@@ -335,8 +335,7 @@
 				INSERT INTO [dbo].[Equipment] VALUES ((@AccountID), (@PlayerID), ('EQUIPMENT_PARTS_HEAD'), ('ITEM_SMALL_CATEGORY_NONE'), (0), (0)) 				
 				INSERT INTO [dbo].[Equipment] VALUES ((@AccountID), (@PlayerID), ('EQUIPMENT_PARTS_BODY'), ('ITEM_SMALL_CATEGORY_NONE'), (0), (0)) 				
 				INSERT INTO [dbo].[Equipment] VALUES ((@AccountID), (@PlayerID), ('EQUIPMENT_PARTS_LEFT_HAND'), ('ITEM_SMALL_CATEGORY_NONE'), (0), (0)) 				
-				INSERT INTO [dbo].[Equipment] VALUES ((@AccountID), (@PlayerID), ('EQUIPMENT_PARTS_RIGHT_HAND'), ('ITEM_SMALL_CATEGORY_NONE'), (0), (0)) 				
-				INSERT INTO [dbo].[Equipment] VALUES ((@AccountID), (@PlayerID), ('EQUIPMENT_PARTS_BOTH_HAND'), ('ITEM_SMALL_CATEGORY_NONE'), (0), (0)) 				
+				INSERT INTO [dbo].[Equipment] VALUES ((@AccountID), (@PlayerID), ('EQUIPMENT_PARTS_RIGHT_HAND'), ('ITEM_SMALL_CATEGORY_NONE'), (0), (0)) 								
 				INSERT INTO [dbo].[Equipment] VALUES ((@AccountID), (@PlayerID), ('EQUIPMENT_PARTS_BOOT'), ('ITEM_SMALL_CATEGORY_NONE'), (0), (0)) 				
 				
 				UPDATE [dbo].[Inventory]
@@ -1162,9 +1161,7 @@
 			<![CDATA[
 	    SET NOCOUNT ON     
 		UPDATE [dbo].[Equipment]
-		SET EquipmentAccountDBId = (@EquipmentAccountDBId),
-		    EquipmentPlayerDBId  = (@EquipmentPlayerDBId),				        
-		    EquipmentSmallCategory = (CASE  WHEN @EquipmentSmallCategory = 1 THEN 'ITEM_SMALL_CATEGORY_WEAPON_DAGGER_WOOD'
+		SET EquipmentSmallCategory = (CASE  WHEN @EquipmentSmallCategory = 1 THEN 'ITEM_SMALL_CATEGORY_WEAPON_DAGGER_WOOD'
 											WHEN @EquipmentSmallCategory = 2 THEN 'ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD'
 											WHEN @EquipmentSmallCategory = 3 THEN 'ITEM_SMALL_CATEGORY_WEAPON_GREAT_SWORD_WOOD'
 											WHEN @EquipmentSmallCategory = 4 THEN 'ITEM_SAMLL_CATEGORY_WEAPON_SHIELD_WOOD'
@@ -1177,7 +1174,8 @@
 											END),
 		    EquipmentDurability = (@EquipmentDurability),
 		    EquipmentEnchantPoint = (@EquipmentEnchantPoint)
-			WHERE EquipmentParts =  (CASE WHEN @EquipmentParts = 1 THEN 'EQUIPMENT_PARTS_HEAD'
+			WHERE EquipmentAccountDBId = (@EquipmentAccountDBId) AND EquipmentPlayerDBId = (@EquipmentPlayerDBId)	 
+											AND EquipmentParts =  (CASE WHEN @EquipmentParts = 1 THEN 'EQUIPMENT_PARTS_HEAD'
 		                                       WHEN @EquipmentParts = 2 THEN 'EQUIPMENT_PARTS_BODY'
 		                                       WHEN @EquipmentParts = 3 THEN 'EQUIPMENT_PARTS_LEFT_HAND'
 		                                       WHEN @EquipmentParts = 4 THEN 'EQUIPMENT_PARTS_RIGHT_HAND'
