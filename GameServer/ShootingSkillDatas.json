@@ -30,10 +30,38 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 0,
-                  "NextComboSkill": "SKILL_TYPE_NONE"
+                  "NextComboSkill": "SKILL_TYPE_NONE",
+                  "RollBackSkill": "SKILL_TYPE_NONE"
                 }
               ],
               "BufSkill": [
+                {
+                  "SkillNumber": 4,
+                  "SkillType": "SKILL_SHOOTING_ACTIVE_BUF_FOCUS_EVASION",
+                  "SkillKind": "SKILL_KIND_SPELL_SKILL",
+                  "SkillName": "집중 회피",
+                  "SkillMaxLevel": 1,
+                  "IncreaseMinAttackPoint": 0,
+                  "IncreaseMaxAttackPoint": 0,
+                  "IncreaseMeleeAttackSpeedPoint": 0,
+                  "IncreaseMeleeAttackHitRate": 0,
+                  "IncreaseMagicAttackPoint": 0,
+                  "IncreaseMagicCastingPoint": 0,
+                  "IncreaseMagicAttackHitRate": 0,
+                  "IncreaseDefencePoint": 0,
+                  "IncreaseEvasionRate": 1000,
+                  "IncreaseMeleeCriticalPoint": 0,
+                  "IncreaseMagicCriticalPoint": 0,
+                  "IncreaseSpeedPoint": 0,
+                  "IncreaseStatusAbnormalityResistance": 0,
+                  "SkillCoolTime": 30000,
+                  "SkillCastingTime": 0,
+                  "SkillDurationTime": 3000,
+                  "SkillDotTime": 0,
+                  "SkillDistance": 0,
+                  "SkillMotionTime": 0,
+                  "SkillTargetEffectTime": 1.5
+                }
               ]
             }
           ]

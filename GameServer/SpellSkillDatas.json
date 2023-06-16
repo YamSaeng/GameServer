@@ -30,7 +30,8 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 0,
-                  "NextComboSkill": "SKILL_TYPE_NONE"
+                  "NextComboSkill": "SKILL_TYPE_NONE",
+                  "RollBackSkill": "SKILL_TYPE_NONE"
                 },
                 {
                   "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_FLAME_BLAZE",
@@ -54,7 +55,8 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 0,
-                  "NextComboSkill": "SKILL_TYPE_NONE"
+                  "NextComboSkill": "SKILL_TYPE_NONE",
+                  "RollBackSkill": "SKILL_SPELL_ACTIVE_ATTACK_FLAME_BOLT"
                 },
                 {
                   "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN",
@@ -66,7 +68,7 @@
                   "SkillIsDamage": true,
                   "SkillMinDamage": 20,
                   "SkillMaxDamage": 30,
-                  "SkillCoolTime": 5000,
+                  "SkillCoolTime": 1000,
                   "SkillCastingTime": 1200,
                   "SkillDurationTime": 3000,
                   "SkillDotTime": 0,
@@ -78,7 +80,8 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0.5,
                   "StatusAbnormalityProbability": 100,
-                  "NextComboSkill": "SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE"
+                  "NextComboSkill": "SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE",
+                  "RollBackSkill": "SKILL_TYPE_NONE"
                 },
                 {
                   "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_ICE_WAVE",
@@ -90,7 +93,7 @@
                   "SkillIsDamage": true,
                   "SkillMinDamage": 20,
                   "SkillMaxDamage": 30,
-                  "SkillCoolTime": 10000,
+                  "SkillCoolTime": 1000,
                   "SkillCastingTime": 0,
                   "SkillDurationTime": 1000,
                   "SkillDotTime": 0,
@@ -102,7 +105,8 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 100,
-                  "NextComboSkill": "SKILL_TYPE_NONE"
+                  "NextComboSkill": "SKILL_TYPE_NONE",
+                  "RollBackSkill": "SKILL_SPELL_ACTIVE_ATTACK_ICE_CHAIN"
                 },
                 {
                   "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_ROOT",
@@ -114,7 +118,7 @@
                   "SkillIsDamage": false,
                   "SkillMinDamage": 0,
                   "SkillMaxDamage": 0,
-                  "SkillCoolTime": 30000,
+                  "SkillCoolTime": 1000,
                   "SkillCastingTime": 0,
                   "SkillDurationTime": 10000,
                   "SkillDotTime": 0,
@@ -126,7 +130,8 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 100,
-                  "NextComboSkill": "SKILL_TYPE_NONE"
+                  "NextComboSkill": "SKILL_TYPE_NONE",
+                  "RollBackSkill": "SKILL_TYPE_NONE"
                 },
                 {
                   "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_SLEEP",
@@ -138,7 +143,7 @@
                   "SkillIsDamage": false,
                   "SkillMinDamage": 0,
                   "SkillMaxDamage": 0,
-                  "SkillCoolTime": 15000,
+                  "SkillCoolTime": 1000,
                   "SkillCastingTime": 0,
                   "SkillDurationTime": 20000,
                   "SkillDotTime": 0,
@@ -150,7 +155,8 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 100,
-                  "NextComboSkill": "SKILL_TYPE_NONE"
+                  "NextComboSkill": "SKILL_TYPE_NONE",
+                  "RollBackSkill": "SKILL_TYPE_NONE"
                 },
                 {
                   "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_WINTER_BINDING",
@@ -162,7 +168,7 @@
                   "SkillIsDamage": false,
                   "SkillMinDamage": 0,
                   "SkillMaxDamage": 0,
-                  "SkillCoolTime": 60000,
+                  "SkillCoolTime": 1000,
                   "SkillCastingTime": 0,
                   "SkillDurationTime": 10000,
                   "SkillDotTime": 0,
@@ -174,7 +180,8 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 100,
-                  "NextComboSkill": "SKILL_TYPE_NONE"
+                  "NextComboSkill": "SKILL_TYPE_NONE",
+                  "RollBackSkill": "SKILL_TYPE_NONE"
                 },
                 {
                   "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_LIGHTNING_STRIKE",
@@ -186,7 +193,7 @@
                   "SkillIsDamage": true,
                   "SkillMinDamage": 50,
                   "SkillMaxDamage": 100,
-                  "SkillCoolTime": 10000,
+                  "SkillCoolTime": 1000,
                   "SkillCastingTime": 500,
                   "SkillDurationTime": 2000,
                   "SkillDotTime": 0,
@@ -198,7 +205,8 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 100,
-                  "NextComboSkill": "SKILL_TYPE_NONE"
+                  "NextComboSkill": "SKILL_TYPE_NONE",
+                  "RollBackSkill": "SKILL_TYPE_NONE"
                 },
                 {
                   "SkillType": "SKILL_SPELL_ACTIVE_ATTACK_HEL_FIRE",
@@ -210,7 +218,7 @@
                   "SkillIsDamage": true,
                   "SkillMinDamage": 100,
                   "SkillMaxDamage": 150,
-                  "SkillCoolTime": 18000,
+                  "SkillCoolTime": 1000,
                   "SkillCastingTime": 2000,
                   "SkillDurationTime": 0,
                   "SkillDotTime": 0,
@@ -222,7 +230,8 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 0,
-                  "NextComboSkill": "SKILL_TYPE_NONE"
+                  "NextComboSkill": "SKILL_TYPE_NONE",
+                  "RollBackSkill": "SKILL_TYPE_NONE"
                 }
               ],
               "BufSkill": [
@@ -231,7 +240,7 @@
                   "SkillKind": "SKILL_KIND_SPELL_SKILL",
                   "SkillName": "시공의뒤틀림",
                   "SkillMaxLevel": 1,
-                  "SkillCoolTime": 10000,
+                  "SkillCoolTime": 1000,
                   "SkillCastingTime": 0,
                   "SkillDurationTime": 0,
                   "SkillDotTime": 0,
@@ -244,7 +253,7 @@
                   "SkillKind": "SKILL_KIND_SPELL_SKILL",
                   "SkillName": "환영",
                   "SkillMaxLevel": 1,
-                  "SkillCoolTime": 120000,
+                  "SkillCoolTime": 1000,
                   "SkillCastingTime": 0,
                   "SkillDurationTime": 10000,
                   "SkillDotTime": 0,

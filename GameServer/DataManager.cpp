@@ -993,6 +993,7 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 					float SkillDebufMovingSpeed = (int8)AttackSkillFiled["SkillDebufMovingSpeed"].GetFloat();
 					int8 StatusAbnormalityProbability = (int8)AttackSkillFiled["StatusAbnormalityProbability"].GetInt();
 					string NextComboSkill = AttackSkillFiled["NextComboSkill"].GetString();					
+					string RollBackSkill = AttackSkillFiled["RollBackSkill"].GetString();
 
 					if (SkillStatusAbnormal == "STATUS_ABNORMAL_NONE")
 					{
@@ -1099,6 +1100,15 @@ void CDataManager::LoadDataFightSkill(wstring LoadFileName)
 					else if (NextComboSkill == "SKILL_TYPE_NONE")
 					{
 						FightAttackSkill->NextComboSkill = en_SkillType::SKILL_TYPE_NONE;
+					}					
+
+					if (RollBackSkill == "SKILL_TYPE_NONE")
+					{
+						FightAttackSkill->RollBackSkill = en_SkillType::SKILL_TYPE_NONE;
+					}
+					else if (RollBackSkill == "SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK")
+					{
+						FightAttackSkill->RollBackSkill = en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK;
 					}
 
 					FightAttackSkill->StatusAbnormalityProbability = StatusAbnormalityProbability;
@@ -2074,7 +2084,7 @@ void CDataManager::LoadDataDisCiplineSkill(wstring LoadFileName)
 
 					if (SkillKind == "SKILL_KIND_SPELL_SKILL")
 					{
-						DisciplineAttackSkill->SkillKind == en_SkillKinds::SKILL_KIND_SPELL_SKILL;
+						DisciplineAttackSkill->SkillKind = en_SkillKinds::SKILL_KIND_SPELL_SKILL;
 					}					
 
 					if (SkillType == "SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE")

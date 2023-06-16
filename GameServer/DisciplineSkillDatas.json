@@ -30,7 +30,8 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 0,
-                  "NextComboSkill": "SKILL_DISCIPLINE_ACTIVE_ATTACK_THUNDER_BOLT"
+                  "NextComboSkill": "SKILL_DISCIPLINE_ACTIVE_ATTACK_THUNDER_BOLT",
+                  "RollBackSkill": "SKILL_TYPE_NONE"
                 },
                 {
                   "SkillType": "SKILL_DISCIPLINE_ACTIVE_ATTACK_THUNDER_BOLT",
@@ -54,7 +55,8 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 0,
-                  "NextComboSkill": "SKILL_TYPE_NONE"
+                  "NextComboSkill": "SKILL_TYPE_NONE",
+                  "RollBackSkill": "SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE"
                 },
                 {
                   "SkillType": "SKILL_DISCIPLINE_ACTIVE_ATTACK_ROOT",
@@ -78,7 +80,8 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 100,
-                  "NextComboSkill": "SKILL_TYPE_NONE"
+                  "NextComboSkill": "SKILL_TYPE_NONE",
+                  "RollBackSkill": "SKILL_TYPE_NONE"
                 },
                 {
                   "SkillType": "SKILL_DISCIPLINE_ACTIVE_ATTACK_JUDGMENT",
@@ -102,7 +105,8 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 0,
-                  "NextComboSkill": "SKILL_TYPE_NONE"
+                  "NextComboSkill": "SKILL_TYPE_NONE",
+                  "RollBackSkill": "SKILL_TYPE_NONE"
                 }
               ],
               "HealSkill": [

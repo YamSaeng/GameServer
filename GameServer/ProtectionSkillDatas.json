@@ -31,7 +31,8 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 0,
-                  "NextComboSkill": "SKILL_PROTECTION_ACTIVE_ATTACK_SHARP_ATTACK"
+                  "NextComboSkill": "SKILL_PROTECTION_ACTIVE_ATTACK_SHARP_ATTACK",
+                  "RollBackSkill": "SKILL_TYPE_NONE"
                 },
                 {
                   "SkillNumber": 0,
@@ -56,7 +57,8 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 0,
-                  "NextComboSkill": "SKILL_PROTECTION_ACTIVE_ATTACK_LAST_ATTACK"
+                  "NextComboSkill": "SKILL_PROTECTION_ACTIVE_ATTACK_LAST_ATTACK",
+                  "RollBackSkill": "SKILL_PROTECTION_ACTIVE_ATTACK_POWERFUL_ATTACK"
                 },
                 {
                   "SkillNumber": 0,
@@ -81,7 +83,8 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 0,
-                  "NextComboSkill": "SKILL_TYPE_NONE"
+                  "NextComboSkill": "SKILL_TYPE_NONE",
+                  "RollBackSkill": "SKILL_PROTECTION_ACTIVE_ATTACK_POWERFUL_ATTACK"
                 },
                 {
                   "SkillType": "SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_SMASH",
@@ -105,7 +108,8 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 0,
-                  "NextComboSkill": "SKILL_TYPE_NONE"
+                  "NextComboSkill": "SKILL_TYPE_NONE",
+                  "RollBackSkill": "SKILL_TYPE_NONE"
                 },
                 {
                   "SkillType": "SKILL_PROTECTION_ACTIVE_ATTACK_SHIELD_COUNTER",
@@ -129,7 +133,8 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 0,
-                  "NextComboSkill": "SKILL_TYPE_NONE"
+                  "NextComboSkill": "SKILL_TYPE_NONE",
+                  "RollBackSkill": "SKILL_TYPE_NONE"
                 },
                 {
                   "SkillType": "SKILL_PROTECTION_ACTIVE_ATTACK_SWORD_STORM",
@@ -153,7 +158,8 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0,
                   "StatusAbnormalityProbability": 0,
-                  "NextComboSkill": "SKILL_TYPE_NONE"
+                  "NextComboSkill": "SKILL_TYPE_NONE",
+                  "RollBackSkill": "SKILL_TYPE_NONE"
                 },
                 {
                   "SkillType": "SKILL_PROTECTION_ACTIVE_ATTACK_CAPTURE",
@@ -177,7 +183,8 @@
                   "SkillDebufAttackSpeed": 0,
                   "SkillDebufMovingSpeed": 0.5,
                   "StatusAbnormalityProbability": 0,
-                  "NextComboSkill": "SKILL_TYPE_NONE"
+                  "NextComboSkill": "SKILL_TYPE_NONE",
+                  "RollBackSkill": "SKILL_TYPE_NONE"
                 }
               ],
               "BufSkill": [
