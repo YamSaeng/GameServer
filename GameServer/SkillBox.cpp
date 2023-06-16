@@ -10,6 +10,8 @@
 
 CSkillBox::CSkillBox()
 {
+	_ComboSkill = nullptr;
+
 	_GlobalCoolTimeSkill = nullptr;	
 
 	_OwnerGameObject = nullptr;
@@ -94,6 +96,16 @@ CSkill* CSkillBox::FindSkill(en_SkillCharacteristic CharacteristicType, en_Skill
 void CSkillBox::Update()
 {
 	_GlobalCoolTimeSkill->Update();
+
+	if (_ComboSkill != nullptr)
+	{
+		if (_ComboSkill->Update() == true)
+		{
+			G_ObjectManager->SkillReturn(_ComboSkill);
+
+			_ComboSkill = nullptr;
+		}
+	}
 
 	_SkillCharacteristicPublic.CharacteristicUpdate();
 	_SkillCharacteristic.CharacteristicUpdate();	
@@ -270,6 +282,14 @@ bool CSkillBox::SelectTargetSkillUse(CGameObject* SkillUser, CSkill* Skill)
 		}
 		else
 		{
+			CPlayer* Player = dynamic_cast<CPlayer*>(SkillUser);
+			if (Player != nullptr)
+			{
+				CMessage* NoneSelectTargetPacket = G_NetworkManager->GetGameServer()->MakePacketCommonError(en_GlobalMessageType::GLOBAL_MESSAGE_NON_SELECT_OBJECT);
+				G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, NoneSelectTargetPacket);
+				NoneSelectTargetPacket->Free();
+			}
+
 			return false;
 		}
 	}
@@ -387,7 +407,7 @@ void CSkillBox::MoveStatusAbnormalRelease(CGameObject* User)
 	}
 }
 
-void CSkillBox::SkillIsCasting(CGameObject* SkillUser, en_SkillCharacteristic SkillCharacteristic, en_SkillType SkillType, float AttackDirectionX, float AttackDirectionY)
+void CSkillBox::SkillIsCasting(CGameObject* SkillUser, en_SkillCharacteristic SkillCharacteristic, en_SkillType SkillType, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, float AttackDirectionX, float AttackDirectionY)
 {
 	CSkill* Skill = FindSkill(SkillCharacteristic, SkillType);
 	if (Skill != nullptr)
@@ -395,6 +415,9 @@ void CSkillBox::SkillIsCasting(CGameObject* SkillUser, en_SkillCharacteristic Sk
 		// 전역 재사용 시간이 완료 되었는지 확인
 		if (_GlobalCoolTimeSkill->GetSkillInfo()->CanSkillUse == true)
 		{
+			_SkillUseQuickSlotPosition.QuickSlotBarIndex = QuickSlotBarIndex;
+			_SkillUseQuickSlotPosition.QuickSlotBarSlotIndex = QuickSlotBarSlotIndex;			
+
 			SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton.X = AttackDirectionX;
 			SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton.Y = AttackDirectionY;
 
@@ -430,6 +453,7 @@ void CSkillBox::SkillIsCasting(CGameObject* SkillUser, en_SkillCharacteristic Sk
 void CSkillBox::SkillProcess(CGameObject* SkillUser, CSkill* Skill)
 {
 	bool IsNextCombo = false;
+	bool IsGlobalCoolTime = true;
 
 	CPlayer* Player = dynamic_cast<CPlayer*>(SkillUser);
 	if (Player != nullptr)
@@ -454,6 +478,8 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CSkill* Skill)
 
 				vector<CGameObject*> CollisionObjects;
 
+				bool IsSkillProcessSuccess = true;
+
 				switch (Skill->GetSkillInfo()->SkillKind)
 				{
 				case en_SkillKinds::SKILL_KIND_MELEE_SKILL:
@@ -461,8 +487,13 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CSkill* Skill)
 						switch (Skill->GetSkillInfo()->SkillType)
 						{
 						case en_SkillType::SKILL_DEFAULT_ATTACK:
-						case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
-						case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
+							IsGlobalCoolTime = false;
+
+							CollisionObjects = CollisionSkillUse(SkillUser, Skill,
+								en_CollisionPosition::COLLISION_POSITION_SKILL_FRONT,
+								SkillUser->_GameObjectInfo.ObjectPositionInfo.Position, Player->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton);
+							break;
+						case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:												
 						case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_QUICK_CUT:
 						case en_SkillType::SKILL_ASSASSINATION_ACTIVE_ATTACK_FAST_CUT:
 							IsNextCombo = true;
@@ -470,6 +501,33 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CSkill* Skill)
 							CollisionObjects = CollisionSkillUse(SkillUser, Skill,
 								en_CollisionPosition::COLLISION_POSITION_SKILL_FRONT,
 								SkillUser->_GameObjectInfo.ObjectPositionInfo.Position, Player->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton);
+							break;						
+						case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
+							if (_ComboSkill != nullptr && _ComboSkill->GetSkillInfo()->SkillType == en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK)
+							{
+								IsNextCombo = true;
+
+								CollisionObjects = CollisionSkillUse(SkillUser, Skill,
+									en_CollisionPosition::COLLISION_POSITION_SKILL_FRONT,
+									SkillUser->_GameObjectInfo.ObjectPositionInfo.Position, Player->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton);
+							}			
+							else
+							{
+								IsSkillProcessSuccess = false;
+							}
+							break;
+						case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_WRATH_ATTACK:
+							if (_ComboSkill != nullptr && _ComboSkill->GetSkillInfo()->SkillType == en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_WRATH_ATTACK)
+							{
+								if (SelectTargetSkillUse(SkillUser, Skill))
+								{
+									CollisionObjects.push_back(SkillUser->_SelectTarget);
+								}
+							}	
+							else
+							{
+								IsSkillProcessSuccess = false;
+							}
 							break;
 						case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_SMASH_WAVE:
 							CollisionObjects = CollisionSkillUse(SkillUser, Skill,
@@ -842,89 +900,89 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CSkill* Skill)
 					break;
 				}
 
-				st_GameObjectJob* DamageJob = nullptr;
 
-				if (CollisionObjects.size() > 0)
+				if (IsSkillProcessSuccess == true)
 				{
-					for (CGameObject* CollisionObject : CollisionObjects)
-					{
-						if (Skill->GetSkillInfo()->SkillIsDamage == true)
-						{
-							DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(SkillUser->_GameObjectInfo.ObjectId,
-								SkillUser->_GameObjectInfo.ObjectType,
-								Skill->GetSkillInfo()->SkillKind,
-								Skill->GetSkillInfo()->SkillMinDamage,
-								Skill->GetSkillInfo()->SkillMaxDamage,
-								IsBackAttack);
+					st_GameObjectJob* DamageJob = nullptr;
 
-							if (DamageJob != nullptr
-								&& CollisionObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD
-								&& CollisionObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::ROOTING)
+					if (CollisionObjects.size() > 0)
+					{
+						for (CGameObject* CollisionObject : CollisionObjects)
+						{
+							if (Skill->GetSkillInfo()->SkillIsDamage == true)
 							{
-								CollisionObject->_GameObjectJobQue.Enqueue(DamageJob);
+								DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(SkillUser->_GameObjectInfo.ObjectId,
+									SkillUser->_GameObjectInfo.ObjectType,
+									Skill->GetSkillInfo()->SkillKind,
+									Skill->GetSkillInfo()->SkillMinDamage,
+									Skill->GetSkillInfo()->SkillMaxDamage,
+									IsBackAttack);
+
+								if (DamageJob != nullptr
+									&& CollisionObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD
+									&& CollisionObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::ROOTING)
+								{
+									CollisionObject->_GameObjectJobQue.Enqueue(DamageJob);
+								}
+							}
+
+							if (Skill->GetSkillInfo()->SkillStatusAbnormal != en_GameObjectStatusType::STATUS_ABNORMAL_NONE)
+							{
+								SetStatusAbnormal(SkillUser, CollisionObject, Skill->GetSkillInfo()->SkillStatusAbnormal, Skill->GetSkillInfo()->SkillType, Skill->GetSkillInfo()->SkillLevel);
 							}
 						}
-
-						if (Skill->GetSkillInfo()->SkillStatusAbnormal != en_GameObjectStatusType::STATUS_ABNORMAL_NONE)
-						{
-							SetStatusAbnormal(SkillUser, CollisionObject, Skill->GetSkillInfo()->SkillStatusAbnormal, Skill->GetSkillInfo()->SkillType, Skill->GetSkillInfo()->SkillLevel);
-						}
 					}
-				}
 
-				if (IsNextCombo == true && Skill->GetSkillInfo()->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
-				{
-					CSkill* FindNextComboSkill = FindSkill(Skill->GetSkillInfo()->SkillCharacteristic, Skill->GetSkillInfo()->NextComboSkill);
-					if (FindNextComboSkill->GetSkillInfo()->CanSkillUse == true)
-					{
-						st_GameObjectJob* ComboSkillJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobComboSkillCreate(Skill);
-						SkillUser->_GameObjectJobQue.Enqueue(ComboSkillJob);
-					}
-				}
+					Skill->CoolTimeStart();
 
-				CCreature* Creature = dynamic_cast<CCreature*>(SkillUser);
-				if (Creature != nullptr)
-				{
-					if (Creature->_ComboSkill != nullptr)
-					{
-						st_GameObjectJob* ComboSkillOffJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobComboSkillOff();
-						SkillUser->_GameObjectJobQue.Enqueue(ComboSkillOffJob);
-					}
-				}
-
-				Skill->CoolTimeStart();
-
-				// 쿨타임 표시 ( 퀵술롯 바에 등록되어 있는 같은 종류의 스킬을 모두 쿨타임 표시 시켜 준다 )
-				for (auto QuickSlotBarPosition : Player->_QuickSlotManager.FindQuickSlotBar(Skill->GetSkillInfo()->SkillType))
-				{
 					// 클라에게 쿨타임 표시
-					CMessage* ResCoolTimeStartPacket = G_NetworkManager->GetGameServer()->MakePacketCoolTime(QuickSlotBarPosition.QuickSlotBarIndex,
-						QuickSlotBarPosition.QuickSlotBarSlotIndex,
+					CMessage* ResCoolTimeStartPacket = G_NetworkManager->GetGameServer()->MakePacketCoolTime(Player->_QuickSlotManager.FindQuickSlotBar(Skill->GetSkillInfo()->SkillType),
 						1.0f, Skill);
 					G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
 					ResCoolTimeStartPacket->Free();
-				}
 
-				// 전역 쿨타임 시작
-				_GlobalCoolTimeSkill->CoolTimeStart();
-
-				// 요청한 스킬과 기본 공격 스킬을 제외하고 스킬 창에서 가져옴
-				vector<CSkill*> GlobalSkills = Player->_SkillBox.GetGlobalSkills(Skill->GetSkillInfo()->SkillType, Skill->GetSkillInfo()->SkillKind);
-
-				// 전역 쿨타임 적용
-				for (CSkill* GlobalSkill : GlobalSkills)
-				{
-					GlobalSkill->GlobalCoolTimeStart(Skill->GetSkillInfo()->SkillMotionTime);
-
-					for (Vector2Int QuickSlotPosition : GlobalSkill->_QuickSlotBarPosition)
+					// 연속기 기술 비활성화
+					if (_ComboSkill != nullptr)
 					{
-						CMessage* ResCoolTimeStartPacket = G_NetworkManager->GetGameServer()->MakePacketCoolTime((int8)QuickSlotPosition.Y,
-							(int8)QuickSlotPosition.X,
-							1.0f, nullptr, _GlobalCoolTimeSkill->GetSkillInfo()->SkillCoolTime);
-						G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
-						ResCoolTimeStartPacket->Free();
+						ComboSkillOff();
 					}
-				}
+
+					if (IsNextCombo == true && Skill->GetSkillInfo()->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
+					{
+						CSkill* FindNextComboSkill = FindSkill(Skill->GetSkillInfo()->SkillCharacteristic, Skill->GetSkillInfo()->NextComboSkill);
+						if (FindNextComboSkill->GetSkillInfo()->CanSkillUse == true)
+						{
+							st_GameObjectJob* ComboSkillCreateJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobComboSkillCreate(
+								Skill->GetSkillInfo()->SkillCharacteristic,
+								Skill->GetSkillInfo()->SkillType,
+								FindNextComboSkill->GetSkillInfo()->SkillCharacteristic,
+								FindNextComboSkill->GetSkillInfo()->SkillType,
+								_SkillUseQuickSlotPosition.QuickSlotBarIndex,
+								_SkillUseQuickSlotPosition.QuickSlotBarSlotIndex);
+							_OwnerGameObject->_GameObjectJobQue.Enqueue(ComboSkillCreateJob);
+						}
+					}
+
+					if (IsGlobalCoolTime == true)
+					{
+						// 전역 쿨타임 시작
+						_GlobalCoolTimeSkill->CoolTimeStart();
+
+						// 요청한 스킬과 기본 공격 스킬을 제외하고 스킬 창에서 가져옴
+						vector<CSkill*> GlobalSkills = Player->_SkillBox.GetGlobalSkills(Skill->GetSkillInfo()->SkillType, Skill->GetSkillInfo()->SkillKind);
+
+						// 전역 쿨타임 적용
+						for (CSkill* GlobalSkill : GlobalSkills)
+						{
+							GlobalSkill->GlobalCoolTimeStart(Skill->GetSkillInfo()->SkillMotionTime);
+
+							CMessage* ResCoolTimeStartPacket = G_NetworkManager->GetGameServer()->MakePacketCoolTime(GlobalSkill->_QuickSlotBarPosition,
+								1.0f, nullptr, _GlobalCoolTimeSkill->GetSkillInfo()->SkillCoolTime);
+							G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResCoolTimeStartPacket);
+							ResCoolTimeStartPacket->Free();
+						}
+					}
+				}				
 			}
 			else
 			{
@@ -933,6 +991,100 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CSkill* Skill)
 				ResErrorPacket->Free();
 			}
 		}
+	}
+}
+
+CSkill* CSkillBox::ComboSkillCreate(CSkill* ComboSkill)
+{
+	if (ComboSkill != nullptr)
+	{	
+		// 연속기 기술 생성
+		CSkill* NewComboSkill = G_ObjectManager->SkillCreate();
+		if (NewComboSkill != nullptr)
+		{
+			NewComboSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_COMBO_SKILL, ComboSkill->GetSkillInfo());
+
+			_ComboSkill = NewComboSkill;
+
+			NewComboSkill->ComboSkillStart(ComboSkill->_ComboSkillQuickSlotBarPosition);
+			NewComboSkill->SetTarget(_OwnerGameObject);			
+		}		
+
+		return NewComboSkill;
+	}
+
+	return nullptr;
+}
+
+void CSkillBox::ComboSkillOff()
+{
+	if (_ComboSkill != nullptr)
+	{
+		_ComboSkill->ComboSkillOff();
+
+		vector<st_QuickSlotOffInfo> ComboSkillQuickSlotOffPositions;				
+
+		CPlayer* Player = dynamic_cast<CPlayer*>(_OwnerGameObject);
+		if (Player != nullptr)
+		{
+			for (auto QuickSlotBarPosition : _ComboSkill->_ComboSkillQuickSlotBarPosition)
+			{
+				st_QuickSlotBarSlotInfo* QuickSlotBarInfo = Player->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarPosition.QuickSlotBarIndex, QuickSlotBarPosition.QuickSlotBarSlotIndex);
+				if (QuickSlotBarInfo != nullptr)
+				{
+					st_QuickSlotOffInfo ComboSkillQuickSlotOffPosition;
+
+					switch (QuickSlotBarInfo->QuickBarSkill->GetSkillInfo()->SkillType)
+					{
+					case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
+						switch (_ComboSkill->GetSkillInfo()->SkillType)
+						{
+						case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
+							ComboSkillQuickSlotOffPosition.QuickSlotBarIndex = QuickSlotBarInfo->QuickSlotBarIndex;
+							ComboSkillQuickSlotOffPosition.QuickSlotBarSlotIndex = QuickSlotBarInfo->QuickSlotBarSlotIndex;
+							ComboSkillQuickSlotOffPosition.RollBackSkillType = _ComboSkill->GetSkillInfo()->RollBackSkill;
+
+							ComboSkillQuickSlotOffPositions.push_back(ComboSkillQuickSlotOffPosition);
+							break;
+						case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_WRATH_ATTACK:
+							ComboSkillQuickSlotOffPosition.QuickSlotBarIndex = QuickSlotBarInfo->QuickSlotBarIndex;
+							ComboSkillQuickSlotOffPosition.QuickSlotBarSlotIndex = QuickSlotBarInfo->QuickSlotBarSlotIndex;
+							ComboSkillQuickSlotOffPosition.RollBackSkillType = _ComboSkill->GetSkillInfo()->RollBackSkill;
+
+							ComboSkillQuickSlotOffPositions.push_back(ComboSkillQuickSlotOffPosition);
+							break;	
+						}
+						break;											
+					case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
+						ComboSkillQuickSlotOffPosition.QuickSlotBarIndex = QuickSlotBarInfo->QuickSlotBarIndex;
+						ComboSkillQuickSlotOffPosition.QuickSlotBarSlotIndex = QuickSlotBarInfo->QuickSlotBarSlotIndex;
+						ComboSkillQuickSlotOffPosition.RollBackSkillType = QuickSlotBarInfo->QuickBarSkill->GetSkillInfo()->SkillType;
+
+						ComboSkillQuickSlotOffPositions.push_back(ComboSkillQuickSlotOffPosition);						
+						break;
+					}
+				}
+			}
+			
+			if (ComboSkillQuickSlotOffPositions.size() > 0)
+			{				
+				CMessage* ResNextComboSkillOff = G_NetworkManager->GetGameServer()->MakePacketComboSkillOff(_ComboSkill->GetSkillInfo()->SkillType, ComboSkillQuickSlotOffPositions);
+				G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResNextComboSkillOff);
+				ResNextComboSkillOff->Free();
+			}
+			else
+			{
+				CMessage* ResNextComboSkillOff = G_NetworkManager->GetGameServer()->MakePacketComboSkillOff(en_SkillType::SKILL_TYPE_NONE, ComboSkillQuickSlotOffPositions);
+				G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResNextComboSkillOff);
+				ResNextComboSkillOff->Free();
+			}
+		}		
+
+		_ComboSkill->_ComboSkillQuickSlotBarPosition.clear();		
+
+		G_ObjectManager->SkillReturn(_ComboSkill);
+
+		_ComboSkill = nullptr;
 	}
 }
 

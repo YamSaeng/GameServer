@@ -43,10 +43,14 @@ public:
 
 	void SkillIsCasting(CGameObject* SkillUser,
 		en_SkillCharacteristic SkillCharacteristic, en_SkillType SkillType,
+		int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex,
 		float AttackDirectionX, float AttackDirectionY);
 
 	void SkillProcess(CGameObject* SkillUser, CSkill* Skill);
 		
+	CSkill* ComboSkillCreate(CSkill* ComboSkillInfo);
+	void ComboSkillOff();
+
 	int32 CalculateDamage(int8 SkillKind,
 		int32& Str, int32& Dex, int32& Int, int32& Luck,
 		bool* InOutCritical,
@@ -59,6 +63,10 @@ private:
 	CSkillCharacteristic _SkillCharacteristicPublic;	
 	CSkillCharacteristic _SkillCharacteristic;	
 
+	CSkill* _ComboSkill;
+
 	CSkill* _GlobalCoolTimeSkill;
-	CGameObject* _OwnerGameObject;
+	CGameObject* _OwnerGameObject;	
+
+	st_QuickSlotBarPosition _SkillUseQuickSlotPosition;
 };
