@@ -6,8 +6,7 @@ CSkill::CSkill()
 {
 	_Target = nullptr;
 
-	_SkillInfo = nullptr;		
-	_PreviousSkillInfo = nullptr;
+	_SkillInfo = nullptr;			
 
 	_SkillCootimeTick = 0;
 	_SkillDurationTick = 0;
@@ -20,8 +19,7 @@ CSkill::CSkill()
 		
 	_IsDot = false;
 
-	_SkillCategory = en_SkillCategory::SKILL_CATEGORY_NONE;		
-	_ComboSkillType = en_SkillType::SKILL_TYPE_NONE;	
+	_SkillCategory = en_SkillCategory::SKILL_CATEGORY_NONE;			
 
 	_CastingUserID = 0;
 	_CastingUserObjectType = en_GameObjectType::OBJECT_NON_TYPE;
@@ -42,11 +40,10 @@ void CSkill::SetTarget(CGameObject* Target)
 	_Target = Target;
 }
 
-void CSkill::SetSkillInfo(en_SkillCategory SkillCategory, st_SkillInfo* SkillInfo, st_SkillInfo* PreviousSkillInfo)
+void CSkill::SetSkillInfo(en_SkillCategory SkillCategory, st_SkillInfo* SkillInfo)
 {
 	_SkillCategory = SkillCategory;
-	_SkillInfo = SkillInfo;
-	_PreviousSkillInfo = PreviousSkillInfo;	
+	_SkillInfo = SkillInfo;	
 }
 
 void CSkill::SetCastingUserID(int64 CastingUserID, en_GameObjectType CastingUserObjectType)
@@ -94,13 +91,10 @@ void CSkill::StatusAbnormalDurationTimeStart()
 	}
 }
 
-void CSkill::ComboSkillStart(vector<Vector2Int> ComboSkillQuickSlotIndex, en_SkillType ComboSkilltype)
+void CSkill::ComboSkillStart(vector<st_QuickSlotBarPosition> ComboSkillQuickSlotIndex)
 {
-	_ComboSkillQuickSlotBarIndex = ComboSkillQuickSlotIndex;
-
+	_ComboSkillQuickSlotBarPosition = ComboSkillQuickSlotIndex;
 	_ComboSkillTick = GetTickCount64() + 3000;
-
-	_ComboSkillType = ComboSkilltype;
 }
 
 void CSkill::ReqMeleeSkillInit(int64 AttackEndTick)
@@ -203,15 +197,60 @@ bool CSkill::Update()
 		break;
 	case en_SkillCategory::SKILL_CATEGORY_COMBO_SKILL:
 		if (_ComboSkillTick < GetTickCount64())
-		{			
-			CMessage* ResNextComboSkillOff = G_NetworkManager->GetGameServer()->MakePacketComboSkillOff(_ComboSkillQuickSlotBarIndex,
-				*_PreviousSkillInfo,
-				_ComboSkillType);	
+		{	
+			CPlayer* Player = dynamic_cast<CPlayer*>(_Target);
+			if (Player != nullptr)
+			{
+				for (auto QuickSlotBarPosition : _ComboSkillQuickSlotBarPosition)
+				{
+					st_QuickSlotBarSlotInfo* QuickSlotBarInfo = Player->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarPosition.QuickSlotBarIndex, QuickSlotBarPosition.QuickSlotBarSlotIndex);
+					if (QuickSlotBarInfo != nullptr)
+					{
+						switch (QuickSlotBarInfo->QuickBarSkill->GetSkillInfo()->SkillType)
+						{
+						case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FIERCE_ATTACK:
+							switch (_SkillInfo->SkillType)
+							{
+							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:								
+								{
+									CMessage* ResNextComboSkillOff = G_NetworkManager->GetGameServer()->MakePacketComboSkillOff(_ComboSkillQuickSlotBarPosition,
+										_SkillInfo->SkillType,
+										_SkillInfo->RollBackSkill);
+									G_NetworkManager->GetGameServer()->SendPacket(((CPlayer*)_Target)->_SessionId, ResNextComboSkillOff);
+									ResNextComboSkillOff->Free();
+								}
+								break;
+							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_WRATH_ATTACK:
+								{
+									CMessage* ResNextComboSkillOff = G_NetworkManager->GetGameServer()->MakePacketComboSkillOff(_ComboSkillQuickSlotBarPosition,
+										_SkillInfo->SkillType,
+										_SkillInfo->RollBackSkill);
+									G_NetworkManager->GetGameServer()->SendPacket(((CPlayer*)_Target)->_SessionId, ResNextComboSkillOff);
+									ResNextComboSkillOff->Free();
+								}
+								break;
+							}
+							break;
+						case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_CONVERSION_ATTACK:
+							switch (_SkillInfo->SkillType)
+							{
+							case en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_WRATH_ATTACK:
+								{
+									CMessage* ResNextComboSkillOff = G_NetworkManager->GetGameServer()->MakePacketComboSkillOff(_ComboSkillQuickSlotBarPosition,
+										_SkillInfo->SkillType,
+										_SkillInfo->RollBackSkill);
+									G_NetworkManager->GetGameServer()->SendPacket(((CPlayer*)_Target)->_SessionId, ResNextComboSkillOff);
+									ResNextComboSkillOff->Free();
+								}
+								break;
+							}
+							break;						
+						}						
+					}
+				}			
+			}			
 
-			G_NetworkManager->GetGameServer()->SendPacket(((CPlayer*)_Target)->_SessionId, ResNextComboSkillOff);
-			ResNextComboSkillOff->Free();
-
-			_ComboSkillQuickSlotBarIndex.clear();
+			_ComboSkillQuickSlotBarPosition.clear();
 			return true;
 		}
 		break;		

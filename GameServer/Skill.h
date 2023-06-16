@@ -7,10 +7,10 @@ class CSkill
 {
 public:		
 	// 스킬이 퀵슬롯바에 등록되어 있는 위치
-	vector<Vector2Int> _QuickSlotBarPosition;	
+	vector<st_QuickSlotBarPosition> _QuickSlotBarPosition;
 
 	// 연속기 스킬이 활성화되어 있는 위치
-	vector<Vector2Int> _ComboSkillQuickSlotBarIndex;	
+	vector<st_QuickSlotBarPosition> _ComboSkillQuickSlotBarPosition;
 	
 	CSkill();	
 	~CSkill();
@@ -21,7 +21,7 @@ public:
 	// 스킬을 소유하고 있는 객체를 설정
 	void SetTarget(CGameObject* Target);
 	// 스킬 정보 셋팅
-	void SetSkillInfo(en_SkillCategory SkillCategory, st_SkillInfo* SkillInfo = nullptr, st_SkillInfo* PreviousSkillInfo = nullptr);
+	void SetSkillInfo(en_SkillCategory SkillCategory, st_SkillInfo* SkillInfo = nullptr);
 	
 	void SetCastingUserID(int64 CastingUserID, en_GameObjectType CastingUserObjectType);
 	int64 GetCastingUserID();
@@ -34,7 +34,7 @@ public:
 	// 상태이상 지속 시간 시작
 	void StatusAbnormalDurationTimeStart();
 	// 연속기 스킬 시작
-	void ComboSkillStart(vector<Vector2Int> ComboSkillQuickSlotIndex, en_SkillType ComboSkilltype);
+	void ComboSkillStart(vector<st_QuickSlotBarPosition> ComboSkillQuickSlotIndex);
 	// 물리 스킬 시작
 	void ReqMeleeSkillInit(int64 AttackEndTick);
 	// 마법 스킬 시작
@@ -51,10 +51,7 @@ private:
 	// 스킬을 시전한 대상의 ObjectType
 	en_GameObjectType _CastingUserObjectType;
 	// 스킬 정보
-	st_SkillInfo* _SkillInfo;
-	// 연속기 스킬에 사용하는 스킬 정보로
-	// 연속기 스킬 활성화 이전 스킬의 정보를 담는다.
-	st_SkillInfo* _PreviousSkillInfo;
+	st_SkillInfo* _SkillInfo;		
 	// 스킬 쿨타임 틱
 	int64 _SkillCootimeTick;
 	// 스킬 상태이상 적용 틱
@@ -75,6 +72,6 @@ private:
 	// 스킬 분류 ( Active, Passive , StatusAbnormal, Combo ) 
 	en_SkillCategory _SkillCategory;			
 	// 연속기 스킬타입
-	en_SkillType _ComboSkillType;		
+	en_SkillType _ComboSkillType;	
 };
 
