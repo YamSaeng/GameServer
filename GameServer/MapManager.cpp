@@ -49,7 +49,7 @@ void CMapManager::MapSave()
 					if (NewObject != nullptr)
 					{
 						NewObject->_SpawnPosition = Position;
-						NewObject->_NetworkState = en_ObjectNetworkState::LIVE;
+						NewObject->_NetworkState = en_ObjectNetworkState::OBJECT_NETWORK_STATE_LIVE;
 
 						CChannel* Channel = NewMap->GetChannelManager()->Find(1);
 						Channel->EnterChannel(NewObject, &NewObject->_SpawnPosition);
