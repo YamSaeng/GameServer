@@ -1113,7 +1113,7 @@ void CGameServer::PacketProcReqSkillProcess(int64 SessionID, CMessage* Message)
 			float SkillDirecitonY;
 			*Message >> SkillDirecitonY;
 
-			st_GameObjectJob* SkillProcessJob = MakeGameObjectJobSkillProcess(ReqCharacteristicType, ReqSkillType, SkillDirectionX, SkillDirecitonY);
+			st_GameObjectJob* SkillProcessJob = MakeGameObjectJobSkillProcess(QuickSlotBarIndex, QuickSlotBarSlotIndex, ReqCharacteristicType, ReqSkillType, SkillDirectionX, SkillDirecitonY);
 			MyPlayer->_GameObjectJobQue.Enqueue(SkillProcessJob);
 		}
 	} while (0);
@@ -2011,15 +2011,16 @@ void CGameServer::PacketProcReqQuickSlotSave(int64 SessionId, CMessage* Message)
 					CSkill* FindSkill = MyPlayer->_SkillBox.FindSkill((en_SkillCharacteristic)QuickSlotSkillCharacteristicType, (en_SkillType)QuickSlotSkillType);
 					if (FindSkill != nullptr)
 					{
-						Vector2Int QuickslotPosition;
-						QuickslotPosition.Y = QuickSlotBarIndex;
-						QuickslotPosition.X = QuickSlotBarSlotIndex;
+						st_QuickSlotBarPosition QuickSlotPosition;
+						
+						QuickSlotPosition.QuickSlotBarIndex = QuickSlotBarIndex;
+						QuickSlotPosition.QuickSlotBarSlotIndex = QuickSlotBarSlotIndex;
 
 						FindQuickSlotInfo->QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_SKILL;
 						FindQuickSlotInfo->QuickBarSkill = FindSkill;
 						FindQuickSlotInfo->QuickBarItem = nullptr;
 
-						FindSkill->_QuickSlotBarPosition.push_back(QuickslotPosition);
+						FindSkill->_QuickSlotBarPosition.push_back(QuickSlotPosition);
 					}
 					else
 					{
@@ -2143,9 +2144,9 @@ void CGameServer::PacketProcReqQuickSlotSwap(int64 SessionId, CMessage* Message)
 			st_QuickSlotBarSlotInfo* FindBQuickslotInfo = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarSwapIndexB, QuickSlotBarSlotSwapIndexB);
 			if (FindBQuickslotInfo != nullptr)
 			{
-				Vector2Int QuickSlotPosition;
-				QuickSlotPosition.Y = QuickSlotBarSwapIndexA;
-				QuickSlotPosition.X = QuickSlotBarSlotSwapIndexA;
+				st_QuickSlotBarPosition QuickSlotPosition;
+				QuickSlotPosition.QuickSlotBarIndex= QuickSlotBarSwapIndexA;
+				QuickSlotPosition.QuickSlotBarSlotIndex = QuickSlotBarSlotSwapIndexA;
 
 				CSkill* BSkill = nullptr;
 
@@ -2157,9 +2158,9 @@ void CGameServer::PacketProcReqQuickSlotSwap(int64 SessionId, CMessage* Message)
 						QuickSlotPositionIter != BSkill->_QuickSlotBarPosition.end();
 						++QuickSlotPositionIter)
 					{
-						Vector2Int QuickSlotPosition = *QuickSlotPositionIter;
+						st_QuickSlotBarPosition QuickSlotErasePosition = *QuickSlotPositionIter;
 
-						if (QuickSlotPosition.Y == QuickSlotBarSwapIndexB && QuickSlotPosition.X == QuickSlotBarSlotSwapIndexB)
+						if (QuickSlotErasePosition.QuickSlotBarIndex == QuickSlotBarSwapIndexB && QuickSlotErasePosition.QuickSlotBarSlotIndex == QuickSlotBarSlotSwapIndexB)
 						{
 							BSkill->_QuickSlotBarPosition.erase(QuickSlotPositionIter);
 							break;
@@ -2201,9 +2202,9 @@ void CGameServer::PacketProcReqQuickSlotSwap(int64 SessionId, CMessage* Message)
 			st_QuickSlotBarSlotInfo* FindAQuickslotInfo = MyPlayer->_QuickSlotManager.FindQuickSlotBar(QuickSlotBarSwapIndexA, QuickSlotBarSlotSwapIndexA);
 			if (FindAQuickslotInfo != nullptr)
 			{
-				Vector2Int QuickSlotPosition;
-				QuickSlotPosition.Y = QuickSlotBarSwapIndexB;
-				QuickSlotPosition.X = QuickSlotBarSlotSwapIndexB;
+				st_QuickSlotBarPosition QuickSlotPosition;
+				QuickSlotPosition.QuickSlotBarIndex = QuickSlotBarSwapIndexB;
+				QuickSlotPosition.QuickSlotBarSlotIndex = QuickSlotBarSlotSwapIndexB;
 
 				if (FindAQuickslotInfo->QuickBarSkill != nullptr)
 				{
@@ -2213,9 +2214,9 @@ void CGameServer::PacketProcReqQuickSlotSwap(int64 SessionId, CMessage* Message)
 						QuickSlotPositionIter != ASkill->_QuickSlotBarPosition.end();
 						++QuickSlotPositionIter)
 					{
-						Vector2Int QuickSlotPosition = *QuickSlotPositionIter;
+						st_QuickSlotBarPosition QuickSlotErasePosition = *QuickSlotPositionIter;
 
-						if (QuickSlotPosition.Y == QuickSlotBarSwapIndexA && QuickSlotPosition.X == QuickSlotBarSlotSwapIndexA)
+						if (QuickSlotErasePosition.QuickSlotBarIndex == QuickSlotBarSwapIndexA && QuickSlotErasePosition.QuickSlotBarSlotIndex == QuickSlotBarSlotSwapIndexA)
 						{
 							ASkill->_QuickSlotBarPosition.erase(QuickSlotPositionIter);
 							break;
@@ -2339,9 +2340,9 @@ void CGameServer::PacketProcReqQuickSlotInit(int64 SessionId, CMessage* Message)
 						QuickSlotPositionIter != QuickSlotInitSkill->_QuickSlotBarPosition.end();
 						++QuickSlotPositionIter)
 					{
-						Vector2Int QuickSlotPosition = *QuickSlotPositionIter;
+						st_QuickSlotBarPosition QuickSlotPosition = *QuickSlotPositionIter;
 
-						if (QuickSlotPosition.Y == QuickSlotBarIndex && QuickSlotPosition.X == QuickSlotBarSlotIndex)
+						if (QuickSlotPosition.QuickSlotBarIndex == QuickSlotBarIndex && QuickSlotPosition.QuickSlotBarSlotIndex == QuickSlotBarSlotIndex)
 						{
 							QuickSlotInitSkill->_QuickSlotBarPosition.erase(QuickSlotPositionIter);
 							break;
@@ -4356,9 +4357,9 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 				CSkill* FindSkill = MyPlayer->_SkillBox.FindSkill((en_SkillCharacteristic)QuickSlotCharacteristicType,(en_SkillType)QuickSlotSkillType);
 				if (FindSkill != nullptr)
 				{
-					Vector2Int SkillQuickslotPosition;
-					SkillQuickslotPosition.Y = QuickSlotBarIndex;
-					SkillQuickslotPosition.X = QuickSlotBarSlotIndex;
+					st_QuickSlotBarPosition SkillQuickslotPosition;
+					SkillQuickslotPosition.QuickSlotBarIndex = QuickSlotBarIndex;
+					SkillQuickslotPosition.QuickSlotBarSlotIndex = QuickSlotBarSlotIndex;
 
 					NewQuickSlotBarSlot.QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_SKILL;
 					NewQuickSlotBarSlot.QuickBarSkill = FindSkill;
@@ -4902,7 +4903,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobSkillLearn(bool IsSkillLearn, in
 	return SkillLearnJob;
 }
 
-st_GameObjectJob* CGameServer::MakeGameObjectJobSkillProcess(int8 SkillCharacteristicType, int16 SkillType, float SkillDirectionX, float SkillDirectionY)
+st_GameObjectJob* CGameServer::MakeGameObjectJobSkillProcess(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, int8 SkillCharacteristicType, int16 SkillType, float SkillDirectionX, float SkillDirectionY)
 {
 	st_GameObjectJob* MeleeAttackJob = G_ObjectManager->GameObjectJobCreate();
 	MeleeAttackJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SKILL_PROCESS;
@@ -4910,6 +4911,8 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobSkillProcess(int8 SkillCharacter
 	CGameServerMessage* MeleeAttackJobMessage = CGameServerMessage::GameServerMessageAlloc();
 	MeleeAttackJobMessage->Clear();
 
+	*MeleeAttackJobMessage << QuickSlotBarIndex;
+	*MeleeAttackJobMessage << QuickSlotBarSlotIndex;
 	*MeleeAttackJobMessage << SkillCharacteristicType;
 	*MeleeAttackJobMessage << SkillType;
 	*MeleeAttackJobMessage << SkillDirectionX;
@@ -5455,33 +5458,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobLeaveChannel(CGameObject* LeaveC
 	return LeaveChannelJob;
 }
 
-
-st_GameObjectJob* CGameServer::MakeGameObjectJobComboSkillCreate(CSkill* ComboSkill)
-{
-	st_GameObjectJob* ComboAttackCreateJob = G_ObjectManager->GameObjectJobCreate();
-	ComboAttackCreateJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_CREATE;
-
-	CGameServerMessage* ComboAttackCreateMessage = CGameServerMessage::GameServerMessageAlloc();
-	ComboAttackCreateMessage->Clear();
-
-	*ComboAttackCreateMessage << &ComboSkill;
-
-	ComboAttackCreateJob->GameObjectJobMessage = ComboAttackCreateMessage;
-
-	return ComboAttackCreateJob;
-}
-
-st_GameObjectJob* CGameServer::MakeGameObjectJobComboSkillOff()
-{
-	st_GameObjectJob* ComboAttackOffJob = G_ObjectManager->GameObjectJobCreate();
-	ComboAttackOffJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_OFF;
-
-	ComboAttackOffJob->GameObjectJobMessage = nullptr;
-
-	return ComboAttackOffJob;
-}
-
-st_GameObjectJob* CGameServer::MakeGameObjectDamage(int64& AttackerID, en_GameObjectType AttackerType, en_SkillType SkillType, int32& SkillMinDamage, int32& SkillMaxDamage, bool IsBackAttack)
+st_GameObjectJob* CGameServer::MakeGameObjectDamage(int64& AttackerID, en_GameObjectType AttackerType, en_SkillKinds SkillKind, int32& SkillMinDamage, int32& SkillMaxDamage, bool IsBackAttack)
 {
 	st_GameObjectJob* DamageJob = G_ObjectManager->GameObjectJobCreate();
 	DamageJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_DAMAGE;
@@ -5491,7 +5468,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectDamage(int64& AttackerID, en_GameOb
 	
 	*DamageMessage << AttackerID;
 	*DamageMessage << (int16)AttackerType;	
-	*DamageMessage << (int16)SkillType;
+	*DamageMessage << (int8)SkillKind;
 	*DamageMessage << SkillMinDamage; 
 	*DamageMessage << SkillMaxDamage;
 	*DamageMessage << IsBackAttack;
@@ -5784,7 +5761,7 @@ CGameServerMessage* CGameServer::MakePacketResEnterGame(bool EnterGameSuccess, s
 	return ResEnterGamePacket;
 }
 
-CGameServerMessage* CGameServer::MakePacketResDamage(int64 ObjectID, int64 TargetID, int16 SkillType, en_ResourceName EffectType, int32 Damage, int32 ChangeHP, bool IsCritical)
+CGameServerMessage* CGameServer::MakePacketResDamage(int64 ObjectID, int64 TargetID, int8 SkillKind, en_ResourceName EffectType, int32 Damage, bool IsCritical)
 {
 	CGameServerMessage* ResDamageMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResDamageMessage == nullptr)
@@ -5797,10 +5774,9 @@ CGameServerMessage* CGameServer::MakePacketResDamage(int64 ObjectID, int64 Targe
 	*ResDamageMessage << (int16)en_PACKET_S2C_COMMON_DAMAGE;
 	*ResDamageMessage << ObjectID;
 	*ResDamageMessage << TargetID;
-	*ResDamageMessage << SkillType;
+	*ResDamageMessage << SkillKind;
 	*ResDamageMessage << (int16)EffectType;
 	*ResDamageMessage << Damage;
-	*ResDamageMessage << ChangeHP;
 	*ResDamageMessage << IsCritical;
 
 	return ResDamageMessage;
@@ -6435,7 +6411,7 @@ CGameServerMessage* CGameServer::MakePacketBufDeBufOff(int64 TargetObjectId, boo
 	return ResBufDeBufOffMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketComboSkillOn(vector<Vector2Int> ComboSkillQuickSlotPositions, st_SkillInfo ComboSkillInfo)
+CGameServerMessage* CGameServer::MakePacketComboSkillOn(vector<st_QuickSlotBarPosition> ComboSkillQuickSlotPositions, en_SkillType ComboSkilltype)
 {
 	CGameServerMessage* ResComboSkillMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResComboSkillMessage == nullptr)
@@ -6447,45 +6423,99 @@ CGameServerMessage* CGameServer::MakePacketComboSkillOn(vector<Vector2Int> Combo
 
 	*ResComboSkillMessage << (int16)en_PACKET_S2C_COMBO_SKILL_ON;
 
-	*ResComboSkillMessage << ComboSkillInfo;
+	*ResComboSkillMessage << (int16)ComboSkilltype;
 
 	int8 ComboSkillQuickSlotBarIndexSize = (int8)ComboSkillQuickSlotPositions.size();
 	*ResComboSkillMessage << ComboSkillQuickSlotBarIndexSize;
 
-	for (Vector2Int ComboSkillQuickSlotPosition : ComboSkillQuickSlotPositions)
+	for (st_QuickSlotBarPosition ComboSkillQuickSlotPosition : ComboSkillQuickSlotPositions)
 	{
-		*ResComboSkillMessage << (int8)ComboSkillQuickSlotPosition.Y;
-		*ResComboSkillMessage << (int8)ComboSkillQuickSlotPosition.X;
+		*ResComboSkillMessage << ComboSkillQuickSlotPosition.QuickSlotBarIndex;
+		*ResComboSkillMessage << ComboSkillQuickSlotPosition.QuickSlotBarSlotIndex;
 	}
 
 	return ResComboSkillMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketComboSkillOff(vector<Vector2Int> ComboSkillQuickSlotPositions, st_SkillInfo ComboSkillInfo, en_SkillType OffComboSkillType)
+CGameServerMessage* CGameServer::MakePacketComboSkillOff(vector<st_QuickSlotBarPosition> ComboSkillQuickSlotPositions, en_SkillType OffComboSkillType, en_SkillType RollBackSkillType)
 {
-	CGameServerMessage* ResComboSkillMessage = CGameServerMessage::GameServerMessageAlloc();
-	if (ResComboSkillMessage == nullptr)
+	CGameServerMessage* ResComboSkillOffMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResComboSkillOffMessage == nullptr)
 	{
 		return nullptr;
 	}
 
-	ResComboSkillMessage->Clear();
+	ResComboSkillOffMessage->Clear();
 
-	*ResComboSkillMessage << (int16)en_PACKET_S2C_COMBO_SKILL_OFF;
+	*ResComboSkillOffMessage << (int16)en_PACKET_S2C_COMBO_SKILL_OFF;
 
-	*ResComboSkillMessage << ComboSkillInfo;
-	*ResComboSkillMessage << (int16)OffComboSkillType;
+	*ResComboSkillOffMessage << (int8)1;
 
-	int8 ComboSkillQuickSlotBarIndexSize = (int8)ComboSkillQuickSlotPositions.size();
-	*ResComboSkillMessage << ComboSkillQuickSlotBarIndexSize;
+	*ResComboSkillOffMessage << (int16)OffComboSkillType;	
+	*ResComboSkillOffMessage << (int16)RollBackSkillType;	
 
-	for (Vector2Int ComboSkillQuickSlotPosition : ComboSkillQuickSlotPositions)
+	int8 ComboSkillQuickSlotBarOffIndexSize = (int8)ComboSkillQuickSlotPositions.size();
+	*ResComboSkillOffMessage << ComboSkillQuickSlotBarOffIndexSize;
+
+	for (st_QuickSlotBarPosition ComboSkillQuickSlotPosition : ComboSkillQuickSlotPositions)
 	{
-		*ResComboSkillMessage << (int8)ComboSkillQuickSlotPosition.Y;
-		*ResComboSkillMessage << (int8)ComboSkillQuickSlotPosition.X;
+		*ResComboSkillOffMessage << ComboSkillQuickSlotPosition.QuickSlotBarIndex;
+		*ResComboSkillOffMessage << ComboSkillQuickSlotPosition.QuickSlotBarSlotIndex;
 	}	
 
-	return ResComboSkillMessage;
+	return ResComboSkillOffMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketComboSkillOff(en_SkillType OffSkillType, vector<st_QuickSlotOffInfo> ComboSkillQuickSlotPositions)
+{
+	CGameServerMessage* ResComboSkillOffMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResComboSkillOffMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResComboSkillOffMessage->Clear();
+
+	*ResComboSkillOffMessage << (int16)en_PACKET_S2C_COMBO_SKILL_OFF;
+
+	*ResComboSkillOffMessage << (int8)2;
+
+	*ResComboSkillOffMessage << (int16)OffSkillType;
+
+	if (ComboSkillQuickSlotPositions.size() > 0)
+	{
+		int8 ComboSkillQuickSlotOffPositionsSize = (int8)ComboSkillQuickSlotPositions.size();
+		*ResComboSkillOffMessage << ComboSkillQuickSlotOffPositionsSize;
+
+		for (st_QuickSlotOffInfo ComboSkillQuickSlotOffInfo : ComboSkillQuickSlotPositions)
+		{
+			*ResComboSkillOffMessage << ComboSkillQuickSlotOffInfo.QuickSlotBarIndex;
+			*ResComboSkillOffMessage << ComboSkillQuickSlotOffInfo.QuickSlotBarSlotIndex;
+			*ResComboSkillOffMessage << (int16)ComboSkillQuickSlotOffInfo.RollBackSkillType;
+		}
+	}	
+
+	return ResComboSkillOffMessage;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectJobComboSkillCreate(en_SkillCharacteristic PreviousSkillCharacteristic, en_SkillType PreviousSkillType, en_SkillCharacteristic ComboSkillCharacteristic, en_SkillType ComboSkillType, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex)
+{
+	st_GameObjectJob* ComboSkillCreateJob = G_ObjectManager->GameObjectJobCreate();
+	ComboSkillCreateJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_COMBO_SKILL_CREATE;
+
+	CGameServerMessage* ComboSkillCreateMessage = CGameServerMessage::GameServerMessageAlloc();
+	ComboSkillCreateMessage->Clear();
+
+	*ComboSkillCreateMessage << (int8)PreviousSkillCharacteristic;
+	*ComboSkillCreateMessage << (int16)PreviousSkillType;
+	*ComboSkillCreateMessage << (int8)ComboSkillCharacteristic;
+	*ComboSkillCreateMessage << (int16)ComboSkillType;
+	*ComboSkillCreateMessage << QuickSlotBarIndex;
+	*ComboSkillCreateMessage << QuickSlotBarSlotIndex;
+
+	ComboSkillCreateJob->GameObjectJobMessage = ComboSkillCreateMessage;
+
+	return ComboSkillCreateJob;
 }
 
 CGameServerMessage* CGameServer::MakePacketExperience(int64 GainExp, int64 CurrentExp, int64 RequireExp, int64 TotalExp)
@@ -6539,7 +6569,7 @@ CGameServerMessage* CGameServer::MakePacketGatheringCancel(int64 ObjectID)
 	return ResMagicCancelMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketCoolTime(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, float SkillCoolTimeSpeed, CSkill* QuickSlotSkill, int32 CoolTime)
+CGameServerMessage* CGameServer::MakePacketCoolTime(vector<st_QuickSlotBarPosition> QuickSlotBarPositions, float SkillCoolTimeSpeed, CSkill* QuickSlotSkill, int32 CoolTime)
 {
 	CGameServerMessage* ResCoolTimeMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResCoolTimeMessage == nullptr)
@@ -6550,8 +6580,7 @@ CGameServerMessage* CGameServer::MakePacketCoolTime(int8 QuickSlotBarIndex, int8
 	ResCoolTimeMessage->Clear();
 
 	*ResCoolTimeMessage << (int16)en_PACKET_S2C_COOLTIME_START;
-	*ResCoolTimeMessage << QuickSlotBarIndex;
-	*ResCoolTimeMessage << QuickSlotBarSlotIndex;
+
 	*ResCoolTimeMessage << SkillCoolTimeSpeed;
 
 	bool EmptySkill;
@@ -6573,6 +6602,15 @@ CGameServerMessage* CGameServer::MakePacketCoolTime(int8 QuickSlotBarIndex, int8
 		*ResCoolTimeMessage << EmptySkill;
 		*ResCoolTimeMessage << CoolTime;
 	}
+
+	int8 QuickSlotBarPositionSize = (int8)QuickSlotBarPositions.size();
+	*ResCoolTimeMessage << QuickSlotBarPositionSize;
+
+	for (st_QuickSlotBarPosition QuickSlotBarPosition : QuickSlotBarPositions)
+	{
+		*ResCoolTimeMessage << QuickSlotBarPosition.QuickSlotBarIndex;
+		*ResCoolTimeMessage << QuickSlotBarPosition.QuickSlotBarSlotIndex;
+	}		
 
 	return ResCoolTimeMessage;
 }

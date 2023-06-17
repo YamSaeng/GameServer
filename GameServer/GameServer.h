@@ -331,11 +331,11 @@ private:
 	//-------------------------------------------------
 	// 기술 처리 잡 생성 함수
 	//-------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobSkillProcess(int8 SkillCharacteristicType, int16 SkillType, float SkillDirectionX, float SkillDirectionY);	
+	st_GameObjectJob* MakeGameObjectJobSkillProcess(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, int8 SkillCharacteristicType, int16 SkillType, float SkillDirectionX, float SkillDirectionY);	
 	//------------------------------------------------
 	// 시전 취소 잡 생성 함수
 	//------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobSkillCastingCancel();
+	st_GameObjectJob* MakeGameObjectJobSkillCastingCancel();	
 	//------------------------------------------------
 	// 채집 시작 잡 생성 함수
 	//------------------------------------------------
@@ -461,19 +461,11 @@ public:
 	//-------------------------------------------------------------------------------
 	// 플레이어 제외 오브젝트 채널 퇴장 잡 생성 함수
 	//-------------------------------------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobLeaveChannel(CGameObject* LeaveChannelObject);
-	//--------------------------------------------------------------------------------------------------------------------------
-	// 연속기 공격 켜기 잡 생성 함수
-	//--------------------------------------------------------------------------------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobComboSkillCreate(CSkill* ComboSkill);
-	//------------------------------------------------
-	// 연속기 공격 끄기 잡 생성 함수
-	//------------------------------------------------
-	st_GameObjectJob* MakeGameObjectJobComboSkillOff();
+	st_GameObjectJob* MakeGameObjectJobLeaveChannel(CGameObject* LeaveChannelObject);	
 	//-------------------------------------------------------------------------------
 	// 데미지 처리 잡 생성 함수
 	//-------------------------------------------------------------------------------
-	st_GameObjectJob* MakeGameObjectDamage(int64& AttackerID, en_GameObjectType AttackerType, en_SkillType SkillType,  int32& SkillMinDamage, int32& SkillMaxDamage, bool IsBackAttack);	
+	st_GameObjectJob* MakeGameObjectDamage(int64& AttackerID, en_GameObjectType AttackerType, en_SkillKinds SkillKind,  int32& SkillMinDamage, int32& SkillMaxDamage, bool IsBackAttack);	
 	//-------------------------------------------------------------------------------
 	// 기술 체력 회복 잡 생성 함수
 	//-------------------------------------------------------------------------------
@@ -547,9 +539,9 @@ public:
 	//-------------------------------------------------------------
 	CGameServerMessage* MakePacketResEnterGame(bool EnterGameSuccess, st_GameObjectInfo* ObjectInfo, Vector2Int* SpawnPosition);
 	//---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	// 게임서버 일반 데미지 응답 패킷 조합 ( 데미지 가한 대상 ID, 데미지 입은 대상 ID, 데미지를 입힌 기술 타입, 데미지 양, 데미지 입은 대상 변경된 HP 정보,  크리티컬 여부)
+	// 게임서버 일반 데미지 응답 패킷 조합 ( 데미지 가한 대상 ID, 데미지 입은 대상 ID, 데미지를 입힌 기술 타입, 데미지 양, 크리티컬 여부)
 	//---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResDamage(int64 ObjectID, int64 TargetID, int16 SkillType, en_ResourceName EffectType, int32 Damage, int32 ChangeHP, bool IsCritical);
+	CGameServerMessage* MakePacketResDamage(int64 ObjectID, int64 TargetID, int8 SkillKind, en_ResourceName EffectType, int32 Damage, bool IsCritical);
 	//----------------------------------------------------------------------------------------
 	// 게임서버 채집 데미지 응답 패킷 조합
 	//----------------------------------------------------------------------------------------
@@ -675,11 +667,19 @@ public:
 	//--------------------------------------------------------------------------------------------------------
 	// 게임서버 연속기 스킬 켜기 패킷 조합
 	//--------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketComboSkillOn(vector<Vector2Int> ComboSkillQuickSlotPositions, st_SkillInfo ComboSkillInfo);
+	CGameServerMessage* MakePacketComboSkillOn(vector<st_QuickSlotBarPosition> ComboSkillQuickSlotPositions, en_SkillType ComboSkilltype);
 	//--------------------------------------------------------------------------------------------------------
 	// 게임서버 연속기 스킬 끄기 패킷 조합
 	//--------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketComboSkillOff(vector<Vector2Int> ComboSkillQuickSlotPositions, st_SkillInfo ComboSkillInfo, en_SkillType OffComboSkillType);
+	CGameServerMessage* MakePacketComboSkillOff(vector<st_QuickSlotBarPosition> ComboSkillQuickSlotPositions, en_SkillType OffComboSkillType, en_SkillType RollBackSkillType);
+	//--------------------------------------------------------------------------------------------------------
+	// 게임서버 연속기 스킬 끄기 패킷 조합
+	//--------------------------------------------------------------------------------------------------------
+	CGameServerMessage* MakePacketComboSkillOff(en_SkillType OffSkillType, vector<st_QuickSlotOffInfo> ComboSkillQuickSlotPositions);
+	//-------------------------------------------------------------------
+	// 연속기 기술 생성
+	//-------------------------------------------------------------------
+	st_GameObjectJob* MakeGameObjectJobComboSkillCreate(en_SkillCharacteristic PreviousSkillCharacteristic, en_SkillType PreviousSkillType, en_SkillCharacteristic ComboSkillCharacteristic, en_SkillType ComboSkillType, int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 경험치 패킷 조합
 	//-----------------------------------------------------------------------------------------
@@ -695,7 +695,7 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 재사용대기시간 출력 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketCoolTime(int8 QuickSlotBarIndex, int8 QuickSlotBarSlotIndex, float SkillCoolTimeSpeed, CSkill* QuickSlotSkill = nullptr, int32 CoolTime = 0);
+	CGameServerMessage* MakePacketCoolTime(vector<st_QuickSlotBarPosition> QuickSlotBarPositions, float SkillCoolTimeSpeed, CSkill* QuickSlotSkill = nullptr, int32 CoolTime = 0);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 스킬 에러 메세지 생성 패킷 조합
 	//-----------------------------------------------------------------------------------------
