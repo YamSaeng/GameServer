@@ -52,7 +52,7 @@ void CDivineBolt::Move()
 		{
 			st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(_Owner->_GameObjectInfo.ObjectId,
 				_Owner->_GameObjectInfo.ObjectType,
-				en_SkillType::SKILL_FIGHT_ACTIVE_ATTACK_FLY_KNIFE,
+				en_SkillKinds::SKILL_KIND_SPELL_SKILL,
 				_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage,
 				_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage,
 				false);
