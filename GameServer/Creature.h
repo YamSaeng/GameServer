@@ -19,9 +19,7 @@ public:
 	// NPC 초기화
 	//--------------------------------------------
 	void NPCInit(en_NonPlayerType NonPlayerType);
-
-	// 연속기 스킬
-	CSkill* _ComboSkill;
+	
 protected:
 	CInventoryManager _Inventory;
 	CEquipmentBox _Equipment;

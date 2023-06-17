@@ -5,7 +5,7 @@
 
 CCreature::CCreature()
 {
-	_ComboSkill = nullptr;
+	
 }
 
 CCreature::~CCreature()
