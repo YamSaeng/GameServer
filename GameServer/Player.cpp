@@ -58,16 +58,6 @@ void CPlayer::Update()
 	// 버프, 디버프 업데이트
 	CheckBufDeBufSkill();	
 
-	if (_ComboSkill != nullptr)
-	{
-		bool ReturnComboSkill = _ComboSkill->Update();
-		if (ReturnComboSkill)
-		{
-			G_ObjectManager->SkillReturn(_ComboSkill);
-			_ComboSkill = nullptr;
-		}
-	}
-
 	if (_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 	{
 		if (_NatureRecoveryTick < GetTickCount64())
