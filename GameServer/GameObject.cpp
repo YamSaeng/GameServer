@@ -257,9 +257,9 @@ void CGameObject::Update()
 												QuickSlotPositionIter != Skill->_QuickSlotBarPosition.end();
 												++QuickSlotPositionIter)
 											{
-												Vector2Int QuickSlotPosition = *QuickSlotPositionIter;
+												st_QuickSlotBarPosition QuickSlotPosition = *QuickSlotPositionIter;
 
-												if (QuickSlotPosition.Y == QuickSlotBar->QuickSlotBarIndex && QuickSlotPosition.X == QuickSlotBar->QuickSlotBarSlotIndex)
+												if (QuickSlotPosition.QuickSlotBarIndex == QuickSlotBar->QuickSlotBarIndex && QuickSlotPosition.QuickSlotBarSlotIndex == QuickSlotBar->QuickSlotBarSlotIndex)
 												{
 													QuickSlotBar->QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_NONE;
 													QuickSlotBar->QuickBarSkill = nullptr;
@@ -314,6 +314,12 @@ void CGameObject::Update()
 			break;		
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SKILL_PROCESS:
 			{
+				int8 QuickSlotBarIndex;
+				*GameObjectJob->GameObjectJobMessage >> QuickSlotBarIndex;
+
+				int8 QuickSlotBarSlotIndex;
+				*GameObjectJob->GameObjectJobMessage >> QuickSlotBarSlotIndex;
+
 				int8 SkillChracteristicType;
 				*GameObjectJob->GameObjectJobMessage >> SkillChracteristicType;
 
@@ -329,14 +335,7 @@ void CGameObject::Update()
 				CPlayer* Player = dynamic_cast<CPlayer*>(this);
 				if (Player != nullptr)
 				{
-					Player->_SkillBox.SkillIsCasting(this, (en_SkillCharacteristic)SkillChracteristicType, (en_SkillType)SkillType, SkillDirectionX, SkillDirectionY);
-
-					// 활성화된 연속기 기술 끄기
-					if (Player->_ComboSkill != nullptr)
-					{
-						st_GameObjectJob* ComboAttackOffJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobComboSkillOff();
-						_GameObjectJobQue.Enqueue(ComboAttackOffJob);
-					}
+					Player->_SkillBox.SkillIsCasting(this, (en_SkillCharacteristic)SkillChracteristicType, (en_SkillType)SkillType, QuickSlotBarIndex, QuickSlotBarSlotIndex, SkillDirectionX, SkillDirectionY);
 				}
 				else
 				{
@@ -344,6 +343,92 @@ void CGameObject::Update()
 				}
 			}
 			break;	
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_COMBO_SKILL_CREATE:
+			{				
+				int8 PreviousSkillCharacteristic;
+				*GameObjectJob->GameObjectJobMessage >> PreviousSkillCharacteristic;
+
+				int16 PreviousSkillType;
+				*GameObjectJob->GameObjectJobMessage >> PreviousSkillType;
+
+				int8 ComboSkillCharacteristic;
+				*GameObjectJob->GameObjectJobMessage >> ComboSkillCharacteristic;
+
+				int16 ComboSkillType;
+				*GameObjectJob->GameObjectJobMessage >> ComboSkillType;
+
+				int8 QuickSlotBarIndex;
+				*GameObjectJob->GameObjectJobMessage >> QuickSlotBarIndex;
+
+				int8 QuickSlotBarSlotIndex;
+				*GameObjectJob->GameObjectJobMessage >> QuickSlotBarSlotIndex;
+
+				switch (_GameObjectInfo.ObjectType)
+				{
+				case en_GameObjectType::OBJECT_PLAYER:
+					{
+						CPlayer* Player = dynamic_cast<CPlayer*>(this);
+						if (Player != nullptr)
+						{	
+							// 맹렬한 일격
+							CSkill* PreviousSkill = Player->_SkillBox.FindSkill((en_SkillCharacteristic)PreviousSkillCharacteristic, (en_SkillType)PreviousSkillType);
+
+							// 퀵슬롯 위치 ( 요청 위치 + 기술이 등록된 위치 )
+							CSkill* ComboSkill = Player->_SkillBox.FindSkill((en_SkillCharacteristic)ComboSkillCharacteristic, (en_SkillType)ComboSkillType);
+							if (ComboSkill != nullptr)
+							{
+								// 맹렬한 일격이 등록되어 있는 위치
+								vector<st_QuickSlotBarPosition> QuickSlotBarPositions = PreviousSkill->_QuickSlotBarPosition;								
+								vector<st_QuickSlotBarPosition> ComboSkillQuickSlotBarPositions = PreviousSkill->_ComboSkillQuickSlotBarPosition;
+
+								bool ReqQuickSlotBarPositionExist = false;								
+
+								// 연속기 기술 요청한 위치
+								st_QuickSlotBarPosition ReqComboSkillQuickSlotBarPosition;
+								ReqComboSkillQuickSlotBarPosition.QuickSlotBarIndex = QuickSlotBarIndex;
+								ReqComboSkillQuickSlotBarPosition.QuickSlotBarSlotIndex = QuickSlotBarSlotIndex;
+
+								// 요청한 위치가 이미 있는지 확인
+								for (st_QuickSlotBarPosition QuickSlotBarPosition : QuickSlotBarPositions)
+								{
+									if (QuickSlotBarPosition == ReqComboSkillQuickSlotBarPosition)
+									{
+										ReqQuickSlotBarPositionExist = true;
+										break;
+									}
+								}
+
+								for (st_QuickSlotBarPosition ComboSkillQuickSlotBarPosition : ComboSkillQuickSlotBarPositions)
+								{
+									if (ComboSkillQuickSlotBarPosition == ReqComboSkillQuickSlotBarPosition)
+									{
+										ReqQuickSlotBarPositionExist = true;
+										break;
+									}
+								}
+
+								QuickSlotBarPositions.insert(QuickSlotBarPositions.end(), ComboSkillQuickSlotBarPositions.begin(), ComboSkillQuickSlotBarPositions.end());
+
+								if (ReqQuickSlotBarPositionExist == false)
+								{
+									QuickSlotBarPositions.push_back(ReqComboSkillQuickSlotBarPosition);
+								}																
+
+								ComboSkill->_ComboSkillQuickSlotBarPosition = QuickSlotBarPositions;
+
+								CSkill* NewComboSkill = Player->_SkillBox.ComboSkillCreate(ComboSkill);
+
+								CMessage* ResComboSkillOnPacket = G_NetworkManager->GetGameServer()->MakePacketComboSkillOn(NewComboSkill->_ComboSkillQuickSlotBarPosition,
+									NewComboSkill->GetSkillInfo()->SkillType);
+								G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResComboSkillOnPacket);
+								ResComboSkillOnPacket->Free();
+							}							
+						}
+					}
+					break;				
+				}
+			}
+			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_SKILL_CASTING_CANCEL:
 			{
 				_CastingSkill = nullptr;
@@ -354,52 +439,7 @@ void CGameObject::Update()
 				G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, ResMagicCancelPacket);
 				ResMagicCancelPacket->Free();
 			}
-			break;
-		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_CREATE:
-			{				
-				CSkill* ReqMeleeSkill;
-				*GameObjectJob->GameObjectJobMessage >> &ReqMeleeSkill;
-
-				CPlayer* Player = dynamic_cast<CPlayer*>(this);
-				if (Player != nullptr)
-				{
-					// 연속기 스킬이 스킬창에서 찾는다.
-					CSkill* FindComboSkill = Player->_SkillBox.FindSkill(ReqMeleeSkill->GetSkillInfo()->SkillCharacteristic, ReqMeleeSkill->GetSkillInfo()->NextComboSkill);
-					if (FindComboSkill != nullptr)
-					{
-						// 연속기 스킬 생성
-						CSkill* NewComboSkill = G_ObjectManager->SkillCreate();
-						// 정보를 저장
-						NewComboSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_COMBO_SKILL, FindComboSkill->GetSkillInfo(), ReqMeleeSkill->GetSkillInfo());
-						NewComboSkill->SetTarget(Player);
-
-						// 연속기 스킬 정보 입력
-						Player->_ComboSkill = NewComboSkill;
-
-						NewComboSkill->ComboSkillStart(ReqMeleeSkill->_QuickSlotBarPosition, FindComboSkill->GetSkillInfo()->SkillType);
-
-						CMessage* ResNextComboSkill = G_NetworkManager->GetGameServer()->MakePacketComboSkillOn(ReqMeleeSkill->_QuickSlotBarPosition,
-							*FindComboSkill->GetSkillInfo());
-						G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResNextComboSkill);
-						ResNextComboSkill->Free();
-					}
-				}	
-				else
-				{
-					CRASH("Player Casting Fail");
-				}
-			}
-			break;
-		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_OFF:
-			{
-				CCreature* Creature = dynamic_cast<CCreature*>(this);
-
-				if (Creature != nullptr && Creature->_ComboSkill != nullptr)
-				{
-					Creature->_ComboSkill->ComboSkillOff();
-				}
-			}
-			break;						
+			break;							
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_GATHERING_START:
 			if (_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::GATHERING)
 			{
@@ -543,8 +583,8 @@ void CGameObject::Update()
 				int16 AttackerType;
 				*GameObjectJob->GameObjectJobMessage >> AttackerType;				
 
-				int16 Skilltype;
-				*GameObjectJob->GameObjectJobMessage >> Skilltype;
+				int8 SkillKind;
+				*GameObjectJob->GameObjectJobMessage >> SkillKind;
 
 				int32 SkillMinDamage;                         
 				*GameObjectJob->GameObjectJobMessage >> SkillMinDamage;
@@ -568,7 +608,7 @@ void CGameObject::Update()
 							CPlayer* AttackerPlayer = dynamic_cast<CPlayer*>(Attacker);
 							if (AttackerPlayer != nullptr)
 							{
-								Damage = AttackerPlayer->_SkillBox.CalculateDamage((en_SkillType)Skilltype,
+								Damage = AttackerPlayer->_SkillBox.CalculateDamage(SkillKind,
 									Attacker->_GameObjectInfo.ObjectStatInfo.Str,
 									Attacker->_GameObjectInfo.ObjectStatInfo.Dex,
 									Attacker->_GameObjectInfo.ObjectStatInfo.Int,
@@ -592,10 +632,9 @@ void CGameObject::Update()
 
 					CMessage* ResDamagePacket = G_NetworkManager->GetGameServer()->MakePacketResDamage(AttackerID,
 						_GameObjectInfo.ObjectId,
-						Skilltype,
+						SkillKind,
 						en_ResourceName::CLIENT_EFFECT_ATTACK_TARGET_HIT,
-						Damage,
-						_GameObjectInfo.ObjectStatInfo.HP,
+						Damage,						
 						IsCritical);
 					G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResDamagePacket);
 					ResDamagePacket->Free();										
