@@ -415,8 +415,14 @@ enum class en_SkillType : int16
 	SKILL_ASSASSINATION_ACTIVE_ATTACK_BACK_STEP,
 	SKILL_ASSASSINATION_ACTIVE_BUF_STEALTH,
 	SKILL_ASSASSINATION_ACTIVE_BUF_SIXTH_SENSE_MAXIMIZE,
+	SKILL_ASSASSINATION_ACTIVE_BUF_FOCUS_EVASION,
 
 	SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING,
+	SKILL_SHOOTING_ACTIVE_ATTACK_CONTINUOUS_FIRE,
+	SKILL_SHOOTING_ACTIVE_ATTACK_NOOSE_ARROW,
+	SKILL_SHOOTING_ACTIVE_ATTACK_ASSAULT_ARROW,
+	SKILL_SHOOTING_ACTIVE_ATTACK_IMPULSE_ARROW,
+	SKILL_SHOOTING_ACTIVE_BUF_FOCUS_EVASION,		
 
 	SKILL_GOBLIN_ACTIVE_MELEE_DEFAULT_ATTACK
 };
@@ -672,9 +678,8 @@ enum class en_GameObjectJobType : int16
 	GAMEOBJECT_JOB_TYPE_SELECT_SKILL_CHARACTERISTIC,
 	GAMEOBJECT_JOB_TYPE_SKILL_LEARN,
 	GAMEOBJECT_JOB_TYPE_SKILL_PROCESS,
-	GAMEOBJECT_JOB_TYPE_SKILL_CASTING_CANCEL,
-	GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_CREATE,
-	GAMEOBJECT_JOB_TYPE_COMBO_ATTACK_OFF,
+	GAMEOBJECT_JOB_TYPE_SKILL_CASTING_CANCEL,		
+	GAMEOBJECT_JOB_TYPE_COMBO_SKILL_CREATE,
 
 	GAMEOBJECT_JOB_TYPE_GATHERING_START,
 	GAMEOBJECT_JOB_TYPE_GATHERING_CANCEL,	
@@ -2375,7 +2380,7 @@ struct st_SkillInfo
 	wstring SkillName;		 // 스킬 이름	
 	float SkillDistance;	 // 스킬 유효 거리
 	float SkillRangeX;		 // 스킬 범위 X 크기
-	float SkillRangeY;		 // 스킬 범위 Y 크기
+	float SkillRangeY;		 // 스킬 범위 Y 크기	
 	int32 SkillCoolTime;	 // 스킬 쿨타임		
 	int32 SkillCastingTime;  // 스킬 캐스팅 타임
 	int64 SkillDurationTime; // 스킬 지속 시간
@@ -2410,6 +2415,7 @@ struct st_SkillInfo
 	float IncreaseSpeedPoint; // 증가하는 이동 속도	
 	int16 IncreaseStatusAbnormalityResistance; // 증가하는 상태이상저항값
 	en_SkillType NextComboSkill; // 다음 연속기 스킬		
+	en_SkillType RollBackSkill; // 연속기 스킬일 경우 되돌려질 스킬
 
 	st_SkillInfo()
 	{
@@ -2427,6 +2433,8 @@ struct st_SkillInfo
 		SkillOverlapStep = 0;
 		SkillName = L"";
 		SkillDistance = 0;
+		SkillRangeX = 0;
+		SkillRangeY = 0;		
 		SkillCoolTime = 0;		
 		SkillCastingTime = 0;
 		SkillDurationTime = 0;
@@ -2460,7 +2468,8 @@ struct st_SkillInfo
 		IncreaseMagicCriticalPoint = 0;
 		IncreaseSpeedPoint = 0;
 		IncreaseStatusAbnormalityResistance = 0;
-		NextComboSkill = en_SkillType::SKILL_TYPE_NONE;				
+		NextComboSkill = en_SkillType::SKILL_TYPE_NONE;	
+		RollBackSkill = en_SkillType::SKILL_TYPE_NONE;
 	}
 };
 
@@ -2481,7 +2490,26 @@ struct st_QuickSlotBarPosition
 {
 	int8 QuickSlotBarIndex;
 	int8 QuickSlotBarSlotIndex;
+
+	bool operator == (st_QuickSlotBarPosition QuickSlotInfo)
+	{
+		if (QuickSlotBarIndex == QuickSlotInfo.QuickSlotBarIndex
+			&& QuickSlotBarSlotIndex == QuickSlotInfo.QuickSlotBarSlotIndex)
+		{
+			return true;
+		}
+
+		return false;
+	}
 };
+
+struct st_QuickSlotOffInfo
+{
+	int8 QuickSlotBarIndex;
+	int8 QuickSlotBarSlotIndex;
+	en_SkillType RollBackSkillType;
+};
+
 
 
 // 제작대 제작품 정보
