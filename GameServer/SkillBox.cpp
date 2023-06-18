@@ -803,18 +803,33 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CSkill* Skill)
 							}
 							break;
 						case en_SkillType::SKILL_SPELL_ACTIVE_BUF_BACK_TELEPORT:
-							{
-								Vector2Int MovePosition;
+							{				
+								Vector2 MovePosition;
+								MovePosition = SkillUser->_GameObjectInfo.ObjectPositionInfo.Position + (-SkillUser->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton * Skill->GetSkillInfo()->SkillDistance);
+								
+								Vector2Int CollisionPosition;
+								CollisionPosition.X = (int32)MovePosition.X;
+								CollisionPosition.Y = (int32)MovePosition.Y;
 
-								SkillUser->GetChannel()->GetMap()->ApplyMove(SkillUser, MovePosition);
+								CChannel* Channel = SkillUser->GetChannel();
+								if (Channel != nullptr)
+								{
+									CRectCollision CheckRectCollision = *SkillUser->GetRectCollision();
+									CheckRectCollision._Position = MovePosition;
+									CheckRectCollision.NotSetPositionUpdate();
 
-								SkillUser->_GameObjectInfo.ObjectPositionInfo.Position.X = SkillUser->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
-								SkillUser->_GameObjectInfo.ObjectPositionInfo.Position.Y = SkillUser->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;
+									bool MoveCheck = Channel->GetMap()->MoveCollisionCango(SkillUser, CollisionPosition, &CheckRectCollision);
+									if (MoveCheck == true)
+									{
+										SkillUser->_GameObjectInfo.ObjectPositionInfo.Position = MovePosition;
+										SkillUser->GetRectCollision()->Update();
 
-								// 시공 뒤틀림 위치 재조정
-								CMessage* ResSyncPositionPacket = G_NetworkManager->GetGameServer()->MakePacketResSyncPosition(SkillUser->_GameObjectInfo.ObjectId, SkillUser->_GameObjectInfo.ObjectPositionInfo);
-								G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, ResSyncPositionPacket);
-								ResSyncPositionPacket->Free();
+										// 시공 뒤틀림 위치 재조정
+										CMessage* ResSyncPositionPacket = G_NetworkManager->GetGameServer()->MakePacketResSyncPosition(SkillUser->_GameObjectInfo.ObjectId, SkillUser->_GameObjectInfo.ObjectPositionInfo);
+										G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, ResSyncPositionPacket);
+										ResSyncPositionPacket->Free();
+									}
+								}												
 							}
 							break;
 						case en_SkillType::SKILL_DISCIPLINE_ACTIVE_ATTACK_DIVINE_STRIKE:
