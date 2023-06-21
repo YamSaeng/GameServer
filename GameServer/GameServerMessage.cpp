@@ -179,7 +179,6 @@ CGameServerMessage& CGameServerMessage::operator<<(st_QuickSlotBarSlotInfo& Quic
     *this << QuickSlotBarSlotInfo.PlayerDBId;
     *this << QuickSlotBarSlotInfo.QuickSlotBarIndex;
     *this << QuickSlotBarSlotInfo.QuickSlotBarSlotIndex;
-    *this << QuickSlotBarSlotInfo.QuickSlotKey;   
     
     bool EmptyQuickSlotSkillInfo;
     if (QuickSlotBarSlotInfo.QuickBarSkill == nullptr)
@@ -384,20 +383,6 @@ CGameServerMessage& CGameServerMessage::operator>>(st_SkillInfo& SkillInfo)
     *this >> SkillInfo.SkillDurationTime;
     *this >> SkillInfo.SkillDotTime;
     *this >> SkillInfo.SkillRemainTime;    
-
-    return *(this);
-}
-
-CGameServerMessage& CGameServerMessage::operator>>(st_QuickSlotBarSlotInfo& Value)
-{
-    *this >> Value.AccountDBId;
-    *this >> Value.PlayerDBId;
-    *this >> Value.QuickSlotBarIndex;
-    *this >> Value.QuickSlotBarSlotIndex;
-    *this >> Value.QuickSlotKey;        
-
-    st_SkillInfo* SkillInfo = Value.QuickBarSkill->GetSkillInfo();
-    *this >> *SkillInfo;
 
     return *(this);
 }
