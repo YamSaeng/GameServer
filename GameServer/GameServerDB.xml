@@ -95,7 +95,6 @@
 		<Column name="PlayerDBId" type="BigInt" notnull ="true"/>
 		<Column name="QuickSlotBarIndex" type="TinyInt" notnull ="true"/>
 		<Column name="QuickSlotBarSlotIndex" type="TinyInt" notnull ="true"/>
-		<Column name="QuickSlotKey" type="SmallInt"/>
 		<Column name="CharacteristicType" type="nvarchar(50)" notnull ="true"/>
 		<Column name="SkillType" type="nvarchar(50)"/>
 		<Column name="SkillLevel" type="TinyInt"/>		
@@ -125,6 +124,14 @@
 		<Column name="EquipmentEnchantPoint" type="TinyInt" notnull="true"/>
 	</Table>
 
+	<!-- 단축키 테이블 -->
+	<Table name="QuickSlotKey" desc="QuickSlotKey Table">
+		<Column name="QuickSlotKeyAccountDBId" type="BigInt" notnull="true"/>
+		<Column name="QuickSlotKeyPlayerDBId" type="BigInt" notnull="true"/>
+		<Column name="QuickSlotKey" type="nvarchar(40)" notnull="true"/>
+		<Column name="QuickSlotKeyCode" type="nvarchar(40)" notnull="true"/>		
+	</Table>	
+	
 	<!-- AccountID를 기준으로 클라가 소유하고 있는 캐릭터를 찾는다. -->
 	<Procedure name="spGetPlayers">
 		<Param name="@AccountId" type="BigInt"/>
@@ -332,6 +339,39 @@
 				INSERT INTO [dbo].[Skill] VALUES ((@AccountID), (@PlayerID), (0), ('SKILL_CATEGORY_ASSASSINATION'), ('SKILL_ASSASSINATION_ACTIVE_BUF_SIXTH_SENSE_MAXIMIZE'), (1)) 
 				INSERT INTO [dbo].[Skill] VALUES ((@AccountID), (@PlayerID), (0), ('SKILL_CATEGORY_SHOOTING'), ('SKILL_SHOOTING_ACTIVE_ATTACK_SNIFING'), (1)) 				
 				
+				INSERT INTO [dbo].[QuickSlotBar] VALUES ((@AccountID), (@PlayerID), (0), (0), ('SKILL_CATEGORY_NONE'), ('SKILL_TYPE_NONE'), (0), ('ITEM_SMALL_CATEGORY_NONE'), (0))
+				INSERT INTO [dbo].[QuickSlotBar] VALUES ((@AccountID), (@PlayerID), (0), (1), ('SKILL_CATEGORY_NONE'), ('SKILL_TYPE_NONE'), (0), ('ITEM_SMALL_CATEGORY_NONE'), (0))
+				INSERT INTO [dbo].[QuickSlotBar] VALUES ((@AccountID), (@PlayerID), (0), (2), ('SKILL_CATEGORY_NONE'), ('SKILL_TYPE_NONE'), (0), ('ITEM_SMALL_CATEGORY_NONE'), (0))
+				INSERT INTO [dbo].[QuickSlotBar] VALUES ((@AccountID), (@PlayerID), (0), (3), ('SKILL_CATEGORY_NONE'), ('SKILL_TYPE_NONE'), (0), ('ITEM_SMALL_CATEGORY_NONE'), (0))
+				INSERT INTO [dbo].[QuickSlotBar] VALUES ((@AccountID), (@PlayerID), (0), (4), ('SKILL_CATEGORY_NONE'), ('SKILL_TYPE_NONE'), (0), ('ITEM_SMALL_CATEGORY_NONE'), (0))
+				
+				INSERT INTO [dbo].[QuickSlotBar] VALUES ((@AccountID), (@PlayerID), (1), (0), ('SKILL_CATEGORY_NONE'), ('SKILL_TYPE_NONE'), (0), ('ITEM_SMALL_CATEGORY_NONE'), (0))
+				INSERT INTO [dbo].[QuickSlotBar] VALUES ((@AccountID), (@PlayerID), (1), (1), ('SKILL_CATEGORY_NONE'), ('SKILL_TYPE_NONE'), (0), ('ITEM_SMALL_CATEGORY_NONE'), (0))
+				INSERT INTO [dbo].[QuickSlotBar] VALUES ((@AccountID), (@PlayerID), (1), (2), ('SKILL_CATEGORY_NONE'), ('SKILL_TYPE_NONE'), (0), ('ITEM_SMALL_CATEGORY_NONE'), (0))
+				INSERT INTO [dbo].[QuickSlotBar] VALUES ((@AccountID), (@PlayerID), (1), (3), ('SKILL_CATEGORY_NONE'), ('SKILL_TYPE_NONE'), (0), ('ITEM_SMALL_CATEGORY_NONE'), (0))
+				INSERT INTO [dbo].[QuickSlotBar] VALUES ((@AccountID), (@PlayerID), (1), (4), ('SKILL_CATEGORY_NONE'), ('SKILL_TYPE_NONE'), (0), ('ITEM_SMALL_CATEGORY_NONE'), (0))
+				
+				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_MOVE_UP'), ('KEY_CODE_W'))
+				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_MOVE_DOWN'), ('KEY_CODE_S'))
+				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_MOVE_LEFT'), ('KEY_CODE_A'))
+				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_MOVE_RIGHT'), ('KEY_CODE_D'))		
+				
+				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_UI_INVENTORY'), ('KEY_CODE_I'))
+				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_UI_SKILL_BOX'), ('KEY_CODE_K'))
+				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_UI_EQUIPMENT_BOX'), ('KEY_CODE_E'))				
+				
+				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_ONE_ONE'), ('KEY_CODE_ONE'))
+				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_ONE_TWO'), ('KEY_CODE_TWO'))
+				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_ONE_THREE'), ('KEY_CODE_THREE'))
+				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_ONE_FOUR'), ('KEY_CODE_FOUR'))
+				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_ONE_FIVE'), ('KEY_CODE_FIVE'))				
+				
+				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_TWO_ONE'), ('KEY_CODE_SIX'))
+				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_TWO_TWO'), ('KEY_CODE_SEVEN'))
+				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_TWO_THREE'), ('KEY_CODE_EIGHT'))
+				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_TWO_FOUR'), ('KEY_CODE_NINE'))
+				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_TWO_FIVE'), ('KEY_CODE_ZERO'))				
+				
 				INSERT INTO [dbo].[Equipment] VALUES ((@AccountID), (@PlayerID), ('EQUIPMENT_PARTS_HEAD'), ('ITEM_SMALL_CATEGORY_NONE'), (0), (0)) 				
 				INSERT INTO [dbo].[Equipment] VALUES ((@AccountID), (@PlayerID), ('EQUIPMENT_PARTS_BODY'), ('ITEM_SMALL_CATEGORY_NONE'), (0), (0)) 				
 				INSERT INTO [dbo].[Equipment] VALUES ((@AccountID), (@PlayerID), ('EQUIPMENT_PARTS_LEFT_HAND'), ('ITEM_SMALL_CATEGORY_NONE'), (0), (0)) 				
@@ -354,7 +394,7 @@
 		</Body>
 	</Procedure>
 
-	<!-- 골드 테이블 생성-->
+	<!-- 골드 테이블 생성 -->
 	<Procedure name="spGoldTableCreate">
 		<Param name="@AccountDBId" type="BigInt"/>
 		<Param name="@PlayerDBId" type="BigInt"/>
@@ -407,7 +447,7 @@
 		</Body>
 	</Procedure>
 
-	<!-- 인벤토리 테이블 빈껍데기 아이템 정보 생성-->
+	<!-- 인벤토리 테이블 빈껍데기 아이템 정보 생성 -->
 	<Procedure name="spItemToInventoryInit">
 		<Param name="@ItemTileGridPositionX" type ="SmallInt"/>
 		<Param name="@ItemTileGridPositionY" type ="SmallInt"/>
@@ -425,7 +465,7 @@
 		</Body>
 	</Procedure>
 
-	<!-- 인벤토리 테이블에 있는 아이템 가지고 옴-->
+	<!-- 인벤토리 테이블에 있는 아이템 가지고 옴 -->
 	<Procedure name="spGetItemTableInfoToInventory">
 		<Param name="@AccountDBId" type="BigInt"/>
 		<Param name="@PlayerDBId" type="BigInt"/>
@@ -574,7 +614,7 @@
 		</Body>
 	</Procedure>
 
-	<!-- 스킬 특성 테이블에 있는 스킬 특성 정보 가져 오기-->
+	<!-- 스킬 특성 테이블에 있는 스킬 특성 정보 가져 오기 -->
 	<Procedure name="spGetSkillCharacteristicGet">
 		<Param name="@AccountDBId" type="BigInt"/>
 		<Param name="@PlayerDBId" type="BigInt"/>
@@ -597,7 +637,7 @@
 		</Body>
 	</Procedure>
 
-	<!-- 스킬 특성 테이블에 스킬 특성 업데이트 하기-->
+	<!-- 스킬 특성 테이블에 스킬 특성 업데이트 하기 -->
 	<Procedure name="spGetSkillCharacteristicUpdate">
 		<Param name="@AccountDBId" type="BigInt"/>
 		<Param name="@PlayerDBId" type="BigInt"/>
@@ -789,37 +829,12 @@
 		</Body>
 	</Procedure>
 
-	<!-- 퀵슬롯바 테이블에 새로운 퀵슬롯바 슬롯 생성 -->
-	<Procedure name="CDBGameServerQuickSlotBarSlotCreate">
-		<Param name="@AccountDBId" type="BigInt"/>
-		<Param name="@PlayerDBId" type="BigInt"/>
-		<Param name="@QuickSlotBarIndex" type="TinyInt"/>
-		<Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
-		<Param name="@QuickSlotKey" type="SmallInt"/>
-		<Body>
-			<![CDATA[   
-	    SET NOCOUNT ON
-        INSERT INTO [dbo].[QuickSlotBar] 
-		VALUES ((@AccountDBId), 
-		(@PlayerDBId),
-		(@QuickSlotBarIndex), (@QuickSlotBarSlotIndex),
-		(@QuickSlotKey),
-		'SKILL_CATEGORY_NONE',
-		'SKILL_TYPE_NONE',
-		0,		
-		'ITEM_SMALL_CATEGORY_NONE',
-		0)
-      ]]>
-		</Body>
-	</Procedure>
-
-	<!-- 퀵슬롯바 테이블에 새로운 퀵슬롯바 슬롯 저장 -->
+	<!-- 퀵슬롯바 테이블 퀵슬롯 업데이트 -->
 	<Procedure name="spQuickSlotBarSlotUpdate">
 		<Param name="@AccountDBId" type="BigInt"/>
 		<Param name="@PlayerDBId" type="BigInt"/>
 		<Param name="@QuickSlotBarIndex" type="TinyInt"/>
-		<Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>
-		<Param name="@QuickSlotKey" type="SmallInt"/>
+		<Param name="@QuickSlotBarSlotIndex" type="TinyInt"/>		
 		<Param name="@CharacteristicType" type="TinyInt"/>
 		<Param name="@SkillType" type="SmallInt"/>
 		<Param name="@SkillLevel" type="TinyInt"/>		
@@ -829,8 +844,7 @@
 			<![CDATA[
 	    SET NOCOUNT ON
         UPDATE [dbo].[QuickSlotBar] 
-		SET QuickSlotKey = (@QuickSlotKey),
-		CharacteristicType = (CASE WHEN @CharacteristicType = 0 THEN 'SKILL_CATEGORY_NONE'
+		SET CharacteristicType = (CASE WHEN @CharacteristicType = 0 THEN 'SKILL_CATEGORY_NONE'
 								   WHEN @CharacteristicType = 1 THEN 'SKILL_CATEGORY_PUBLIC'
 								   WHEN @CharacteristicType = 2 THEN 'SKILL_CATEGORY_FIGHT'
 								   WHEN @CharacteristicType = 3 THEN 'SKILL_CATEGORY_PROTECTION'
@@ -945,8 +959,7 @@
 		<Body>
 			<![CDATA[
 	    SET NOCOUNT ON
-        SELECT QuickSlotBarIndex, QuickSlotBarSlotIndex,
-		QuickSlotKey, 	
+        SELECT QuickSlotBarIndex, QuickSlotBarSlotIndex,		
 		(CASE WHEN CharacteristicType = 'SKILL_CATEGORY_NONE' THEN 0
 			  WHEN CharacteristicType = 'SKILL_CATEGORY_PUBLIC' THEN 1
 			  WHEN CharacteristicType = 'SKILL_CATEGORY_FIGHT' THEN 2
@@ -1056,7 +1069,7 @@
 		</Body>
 	</Procedure>
 
-	<!-- 퀵슬롯바 테이블에서 퀵슬롯바 슬롯 초기화-->
+	<!-- 퀵슬롯바 테이블에서 퀵슬롯바 슬롯 초기화 -->
 	<Procedure name="spQuickSlotInit">
 		<Param name="@AccountDBId" type="BigInt"/>
 		<Param name="@PlayerDBId" type="BigInt"/>
@@ -1072,6 +1085,76 @@
 		</Body>
 	</Procedure>
 
+	<!-- 퀵슬롯 키 테이블에서 퀵슬롯 키 정보 가져오기 -->
+	<Procedure name="spGetQuickSlotKey">
+		<Param name="@AccountDBId" type="BigInt"/>
+		<Param name="@PlayerDBId" type="BigInt"/>
+		<Body>
+			<![CDATA[
+				SET NOCOUNT ON
+				SELECT (CASE WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_MOVE_UP' THEN 1
+							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_MOVE_DOWN' THEN 2
+							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_MOVE_LEFT' THEN 3
+							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_MOVE_RIGHT' THEN 4							 
+							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_UI_INVENTORY' THEN 5
+							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_UI_SKILL_BOX' THEN 6
+							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_UI_EQUIPMENT_BOX' THEN 7							 
+							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_ONE_ONE' THEN 8
+							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_ONE_TWO' THEN 9
+							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_ONE_THREE' THEN 10
+							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_ONE_FOUR' THEN 11
+							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_ONE_FIVE' THEN 12							 
+							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_TWO_ONE' THEN 13
+							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_TWO_TWO' THEN 14
+							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_TWO_THREE' THEN 15
+							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_TWO_FOUR' THEN 16
+							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_TWO_FIVE' THEN 17
+							 ELSE ' '
+							 END),
+					   (CASE WHEN QuickSlotKeyCode = 'KEY_CODE_W' THEN 1
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_S' THEN 2
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_A' THEN 3
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_D' THEN 4							 
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_I' THEN 5
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_E' THEN 6
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_K' THEN 7							 
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_ZERO' THEN 8
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_ONE' THEN 9
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_TWO' THEN 10
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_THREE' THEN 11
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_FOUR' THEN 12							 
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_FIVE' THEN 13
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_SIX' THEN 14
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_SEVEN' THEN 15
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_EIGHT' THEN 16
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_NINE' THEN 17
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_Q' THEN 18
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_R' THEN 19
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_T' THEN 20
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_Y' THEN 21
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_U' THEN 22
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_O' THEN 23
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_P' THEN 24
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_F' THEN 25
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_G' THEN 26
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_H' THEN 27
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_J' THEN 28
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_L' THEN 29
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_Z' THEN 30
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_X' THEN 31
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_C' THEN 32
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_V' THEN 33
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_B' THEN 34
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_N' THEN 35
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_M' THEN 36
+							 ELSE ' '
+							 END)
+				FROM [dbo].[QuickSlotKey]
+				WHERE QuickSlotKeyAccountDBId = (@AccountDBId) AND QuickSlotKeyPlayerDBId = (@PlayerDBId)
+			]]>
+		</Body>
+	</Procedure>
+		
 	<!-- 접속 종료시 플레이어 정보 DB에 기록 -->
 	<Procedure name="spPlayerLeaveInfoSave">
 		<Param name="@AccountDBId" type="BigInt"/>
@@ -1136,7 +1219,7 @@
 		</Body>
 	</Procedure>
 
-	<!--토큰 정보 있는지 확인 -->
+	<!-- 토큰 정보 있는지 확인 -->
 	<Procedure name="spIsToken">
 		<Param name="@AccountDBId" type="BigInt"/>
 		<Body>
@@ -1208,7 +1291,8 @@
 			]]>
 		</Body>
 	</Procedure>
-	<!-- 장비 테이블 빈껍데기 아이템 정보 생성-->
+	
+	<!-- 장비 테이블 빈껍데기 아이템 정보 생성 -->
 	<Procedure name="spEquipmentItemInit">
 		<Param name="@EquipmentAccountDBId" type="BigInt"/>
 		<Param name="@EquipmentPlayerDBId" type="BigInt"/>
@@ -1265,4 +1349,5 @@
 			]]>
 		</Body>
 	</Procedure>
+	
 </GameServerDB>
