@@ -211,7 +211,7 @@ void CPlayer::UpdateMoving()
 			|| CollisionPosition.Y != _GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y)
 		{
 			_Channel->GetMap()->ApplyMove(this, CollisionPosition);
-		}
+		}		
 	}
 	else
 	{

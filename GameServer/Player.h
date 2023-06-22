@@ -3,6 +3,7 @@
 #include "SkillBox.h"
 #include "QuickSlotManager.h"
 #include "InventoryManager.h"
+#include "QuickSlotKey.h"
 #include "LockFreeQue.h"
 #include "GameServerMessage.h"
 #include "PartyManager.h"
@@ -11,8 +12,9 @@ class CPlayer : public CCreature
 {
 public:			
 	int64 _SessionId;
-	int64 _AccountId;	
+	int64 _AccountId;
 
+	CQuickSlotKey _QuickSlotKey;
 	CPartyManager _PartyManager;		
 	
 	CSkillBox _SkillBox;
