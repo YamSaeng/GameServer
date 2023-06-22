@@ -21,8 +21,7 @@ void CQuickSlotBar::Init()
 		st_QuickSlotBarSlotInfo* QuickSlotBarSlotInfo = new st_QuickSlotBarSlotInfo();
 		QuickSlotBarSlotInfo->QuickSlotBarType = en_QuickSlotBarType::QUICK_SLOT_BAR_TYPE_NONE;
 		QuickSlotBarSlotInfo->QuickSlotBarIndex = _QuickSlotBarIndex;
-		QuickSlotBarSlotInfo->QuickSlotBarSlotIndex = SlotIndex;
-		QuickSlotBarSlotInfo->QuickSlotKey = SlotIndex + 1;		
+		QuickSlotBarSlotInfo->QuickSlotBarSlotIndex = SlotIndex;			
 		QuickSlotBarSlotInfo->QuickBarSkill = nullptr;
 
 		_QuickSlotBarSlotInfos.insert(pair<int8, st_QuickSlotBarSlotInfo*>(SlotIndex, QuickSlotBarSlotInfo));
@@ -61,4 +60,9 @@ void CQuickSlotBar::QuickSlotBarEmpty()
 	}
 
 	_QuickSlotBarSlotInfos.clear();
+}
+
+map<int8, st_QuickSlotBarSlotInfo*> CQuickSlotBar::GetQuickSlotBarInfo()
+{
+	return _QuickSlotBarSlotInfos;
 }
