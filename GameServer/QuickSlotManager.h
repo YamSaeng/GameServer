@@ -16,8 +16,8 @@ public:
 	void UpdateQuickSlotBar(st_QuickSlotBarSlotInfo& QuickSlotBarSlotInfo);
 
 	// Äü½½·Ô¹Ù ½½·Ô ½º¿Ò
-	void SwapQuickSlot(st_QuickSlotBarSlotInfo& SwapAQuickSlotInfo, st_QuickSlotBarSlotInfo& SwapBQuickSlotInfo);
-	
+	void SwapQuickSlot(st_QuickSlotBarSlotInfo& SwapAQuickSlotInfo, st_QuickSlotBarSlotInfo& SwapBQuickSlotInfo);	
+
 	// Äü½½·Ô¹Ù¿¡¼­ Äü½½·Ô À§Ä¡ Á¤º¸·Î Äü½½·Ô Ã£±â
 	st_QuickSlotBarSlotInfo* FindQuickSlotBar(int8 QuickSlotBarIndex, int8 QuickSlotbarSlotIndex);
 	// Äü½½·Ô¹Ù¿¡ µî·ÏµÇ¾î ÀÖ´Â ½ºÅ³À» Ã£¾Æ¼­ ¸ðµÎ ¹ÝÈ¯
