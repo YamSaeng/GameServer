@@ -209,6 +209,7 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="Potato.h" />
     <ClInclude Include="QuickSlotBar.h" />
+    <ClInclude Include="QuickSlotKey.h" />
     <ClInclude Include="QuickSlotManager.h" />
     <ClInclude Include="rapidxml.hpp" />
     <ClInclude Include="rapidxml_iterators.hpp" />
@@ -342,6 +343,7 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Potato.cpp" />
     <ClCompile Include="QuickSlotBar.cpp" />
+    <ClCompile Include="QuickSlotKey.cpp" />
     <ClCompile Include="QuickSlotManager.cpp" />
     <ClCompile Include="RectCollision.cpp" />
     <ClCompile Include="RigidBody2D.cpp" />

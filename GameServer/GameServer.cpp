@@ -2246,10 +2246,7 @@ void CGameServer::PacketProcReqQuickSlotSwap(int64 SessionId, CMessage* Message)
 			else
 			{
 				CRASH("퀵슬롯 정보를 찾을 수 없음");
-			}
-
-			SwapAQuickSlotBarInfo.QuickSlotKey = FindAQuickslotInfo->QuickSlotKey;
-			SwapBQuickSlotBarInfo.QuickSlotKey = FindBQuickslotInfo->QuickSlotKey;			
+			}						
 
 			MyPlayer->_QuickSlotManager.SwapQuickSlot(SwapBQuickSlotBarInfo, SwapAQuickSlotBarInfo);
 
@@ -4033,44 +4030,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 
 					GoldTableCreate.Execute();
 
-					G_DBConnectionPool->Push(en_DBConnect::GAME, DBNewGoldTableCreateConnection);					
-
-					int16 DefaultKey = (int16)UnityEngine::Alpha1;
-
-					// DB에 퀵슬롯바 생성
-					for (int8 SlotIndex = 0; SlotIndex < (int8)en_QuickSlotBar::QUICK_SLOT_BAR_SIZE; ++SlotIndex)
-					{
-						CDBConnection* DBQuickSlotCreateConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-						SP::CDBGameServerQuickSlotBarSlotCreate QuickSlotBarSlotCreate(*DBQuickSlotCreateConnection);
-
-						int8 QuickSlotBarIndex = SlotIndex;
-						int8 QuickSlotBarSlotIndex;
-						int16 QuickSlotBarKey = 0;						
-
-						for (int8 i = 0; i < (int8)en_QuickSlotBar::QUICK_SLOT_BAR_SLOT_SIZE; ++i)
-						{
-							QuickSlotBarSlotIndex = i;
-
-							if (DefaultKey == (int16)UnityEngine::Colon)
-							{
-								DefaultKey = (int16)UnityEngine::Alpha0;
-							}
-
-							QuickSlotBarKey = DefaultKey;
-
-							QuickSlotBarSlotCreate.InAccountDBId(Session->AccountId);
-							QuickSlotBarSlotCreate.InPlayerDBId(PlayerDBId);
-							QuickSlotBarSlotCreate.InQuickSlotBarIndex(SlotIndex);
-							QuickSlotBarSlotCreate.InQuickSlotBarSlotIndex(QuickSlotBarSlotIndex);
-							QuickSlotBarSlotCreate.InQuickSlotKey(QuickSlotBarKey);										
-
-							QuickSlotBarSlotCreate.Execute();
-
-							DefaultKey++;
-						}
-
-						G_DBConnectionPool->Push(en_DBConnect::GAME, DBQuickSlotCreateConnection);
-					}
+					G_DBConnectionPool->Push(en_DBConnect::GAME, DBNewGoldTableCreateConnection);
 
 					// 플레이어 기본 정보 설정
 					PlayerDefaultSetting(Session->AccountId, NewPlayerCharacter->_GameObjectInfo, ReqCharacterCreateSlotIndex);								
@@ -4128,6 +4088,36 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 #pragma endregion
 
 			CDBConnection* DBCharacterInfoGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+			
+			SP::CDBGameSerGetQuickSlotKey QuickSlotKeyGet(*DBCharacterInfoGetConnection);
+			QuickSlotKeyGet.InAccountDBId(MyPlayer->_AccountId);
+			QuickSlotKeyGet.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
+
+			int16 UserQuickSlotKey;
+			int16 QuickSlotKeyCode;
+
+			QuickSlotKeyGet.OutQuickSlotKey(UserQuickSlotKey);
+			QuickSlotKeyGet.OutQuickSlotKeyCode(QuickSlotKeyCode);
+
+			QuickSlotKeyGet.Execute();
+
+			*ResCharacterInfoMessage << (int16)en_UserQuickSlot::USER_KEY_QUICK_SLOT_TWO_FIVE;
+
+			vector<st_BindingKey> QuickSlotBindingKeys;
+
+			while (QuickSlotKeyGet.Fetch())
+			{
+				*ResCharacterInfoMessage << UserQuickSlotKey;
+				*ResCharacterInfoMessage << QuickSlotKeyCode;
+
+				st_BindingKey QuickSlotBindingKey;
+				QuickSlotBindingKey.UserQuickSlot = (en_UserQuickSlot)UserQuickSlotKey;
+				QuickSlotBindingKey.KeyCode = (en_KeyCode)QuickSlotKeyCode;
+
+				QuickSlotBindingKeys.push_back(QuickSlotBindingKey);
+			}			
+
+			MyPlayer->_QuickSlotKey.QuickSlotKeyInit(QuickSlotBindingKeys);
 
 #pragma region 스킬 정보 읽어오기				
 			MyPlayer->_SkillBox.Init();
@@ -4325,8 +4315,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 			QuickSlotBarGet.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
 
 			int8 QuickSlotBarIndex;
-			int8 QuickSlotBarSlotIndex;
-			int16 QuickSlotKey;			
+			int8 QuickSlotBarSlotIndex;						
 			int8 QuickSlotCharacteristicType;
 			int16 QuickSlotSkillType;
 			int8 QuickSlotSkillLevel;			
@@ -4335,7 +4324,6 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 
 			QuickSlotBarGet.OutQuickSlotBarIndex(QuickSlotBarIndex);
 			QuickSlotBarGet.OutQuickSlotBarItemIndex(QuickSlotBarSlotIndex);
-			QuickSlotBarGet.OutQuickSlotKey(QuickSlotKey);	
 			QuickSlotBarGet.OutQuickSlotCharacteristicType(QuickSlotCharacteristicType);
 			QuickSlotBarGet.OutQuickSlotSkillType(QuickSlotSkillType);
 			QuickSlotBarGet.OutQuickSlotSkillLevel(QuickSlotSkillLevel);			
@@ -4352,7 +4340,6 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 				NewQuickSlotBarSlot.PlayerDBId = MyPlayer->_GameObjectInfo.ObjectId;
 				NewQuickSlotBarSlot.QuickSlotBarIndex = QuickSlotBarIndex;
 				NewQuickSlotBarSlot.QuickSlotBarSlotIndex = QuickSlotBarSlotIndex;
-				NewQuickSlotBarSlot.QuickSlotKey = QuickSlotKey;				
 
 				CSkill* FindSkill = MyPlayer->_SkillBox.FindSkill((en_SkillCharacteristic)QuickSlotCharacteristicType,(en_SkillType)QuickSlotSkillType);
 				if (FindSkill != nullptr)
@@ -4581,7 +4568,7 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 	// 퀵슬롯 정보 업데이트
 	for (auto QuickSlotIterator : LeavePlayer->_QuickSlotManager.GetQuickSlotBar())
 	{
-		for (auto QuickSlotBarSlotIterator : QuickSlotIterator.second->_QuickSlotBarSlotInfos)
+		for (auto QuickSlotBarSlotIterator : QuickSlotIterator.second->GetQuickSlotBarInfo())
 		{
 			st_QuickSlotBarSlotInfo* SaveQuickSlotInfo = QuickSlotBarSlotIterator.second;
 
@@ -4613,7 +4600,6 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 					QuickSlotDBUpdate.InPlayerDBId(LeavePlayer->_GameObjectInfo.ObjectId);
 					QuickSlotDBUpdate.InQuickSlotBarIndex(SaveQuickSlotInfo->QuickSlotBarIndex);
 					QuickSlotDBUpdate.InQuickSlotBarSlotIndex(SaveQuickSlotInfo->QuickSlotBarSlotIndex);
-					QuickSlotDBUpdate.InQuickSlotKey(SaveQuickSlotInfo->QuickSlotKey);		
 					QuickSlotDBUpdate.InCharacteristicType(SaveQuickSlotInfoSkillChracteristicType);
 					QuickSlotDBUpdate.InSkillType(SaveQuickSlotInfoSkillSkillType);
 					QuickSlotDBUpdate.InSkillLevel(SaveQuickSlotInfo->QuickBarSkill->GetSkillInfo()->SkillLevel);					
@@ -4636,8 +4622,7 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 					QuickSlotDBUpdate.InAccountDBId(LeavePlayer->_AccountId);
 					QuickSlotDBUpdate.InPlayerDBId(LeavePlayer->_GameObjectInfo.ObjectId);
 					QuickSlotDBUpdate.InQuickSlotBarIndex(SaveQuickSlotInfo->QuickSlotBarIndex);
-					QuickSlotDBUpdate.InQuickSlotBarSlotIndex(SaveQuickSlotInfo->QuickSlotBarSlotIndex);
-					QuickSlotDBUpdate.InQuickSlotKey(SaveQuickSlotInfo->QuickSlotKey);					
+					QuickSlotDBUpdate.InQuickSlotBarSlotIndex(SaveQuickSlotInfo->QuickSlotBarSlotIndex);									
 					QuickSlotDBUpdate.InSkillType(SaveQuickSlotInfoSkillSkillType);
 					QuickSlotDBUpdate.InSkillLevel(SkillLevel);
 					

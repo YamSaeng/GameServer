@@ -368,6 +368,9 @@
     <ClInclude Include="RigidBody2D.h">
       <Filter>ContentServer\Content\Collision</Filter>
     </ClInclude>
+    <ClInclude Include="QuickSlotKey.h">
+      <Filter>ContentServer\Content\QuickSlotBar</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -540,6 +543,9 @@
     </ClCompile>
     <ClCompile Include="RigidBody2D.cpp">
       <Filter>ContentServer\Content\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="QuickSlotKey.cpp">
+      <Filter>ContentServer\Content\QuickSlotBar</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
