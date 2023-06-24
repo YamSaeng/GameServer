@@ -1987,9 +1987,7 @@ void CGameServer::PacketProcReqQuickSlotSave(int64 SessionId, CMessage* Message)
 			int8 QuickSlotBarIndex;
 			*Message >> QuickSlotBarIndex;
 			int8 QuickSlotBarSlotIndex;
-			*Message >> QuickSlotBarSlotIndex;
-			int16 QuickSlotKey;
-			*Message >> QuickSlotKey;
+			*Message >> QuickSlotBarSlotIndex;			
 			bool IsSkilQuickSlot;
 			*Message >> IsSkilQuickSlot;
 
@@ -4088,36 +4086,6 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 #pragma endregion
 
 			CDBConnection* DBCharacterInfoGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-			
-			SP::CDBGameSerGetQuickSlotKey QuickSlotKeyGet(*DBCharacterInfoGetConnection);
-			QuickSlotKeyGet.InAccountDBId(MyPlayer->_AccountId);
-			QuickSlotKeyGet.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
-
-			int16 UserQuickSlotKey;
-			int16 QuickSlotKeyCode;
-
-			QuickSlotKeyGet.OutQuickSlotKey(UserQuickSlotKey);
-			QuickSlotKeyGet.OutQuickSlotKeyCode(QuickSlotKeyCode);
-
-			QuickSlotKeyGet.Execute();
-
-			*ResCharacterInfoMessage << (int16)en_UserQuickSlot::USER_KEY_QUICK_SLOT_TWO_FIVE;
-
-			vector<st_BindingKey> QuickSlotBindingKeys;
-
-			while (QuickSlotKeyGet.Fetch())
-			{
-				*ResCharacterInfoMessage << UserQuickSlotKey;
-				*ResCharacterInfoMessage << QuickSlotKeyCode;
-
-				st_BindingKey QuickSlotBindingKey;
-				QuickSlotBindingKey.UserQuickSlot = (en_UserQuickSlot)UserQuickSlotKey;
-				QuickSlotBindingKey.KeyCode = (en_KeyCode)QuickSlotKeyCode;
-
-				QuickSlotBindingKeys.push_back(QuickSlotBindingKey);
-			}			
-
-			MyPlayer->_QuickSlotKey.QuickSlotKeyInit(QuickSlotBindingKeys);
 
 #pragma region 스킬 정보 읽어오기				
 			MyPlayer->_SkillBox.Init();
@@ -4383,6 +4351,36 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 			{
 				*ResCharacterInfoMessage << QuickSlotBarSlotInfo;
 			}
+
+			SP::CDBGameSerGetQuickSlotKey QuickSlotKeyGet(*DBCharacterInfoGetConnection);
+			QuickSlotKeyGet.InAccountDBId(MyPlayer->_AccountId);
+			QuickSlotKeyGet.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
+
+			int16 UserQuickSlotKey;
+			int16 QuickSlotKeyCode;
+
+			QuickSlotKeyGet.OutQuickSlotKey(UserQuickSlotKey);
+			QuickSlotKeyGet.OutQuickSlotKeyCode(QuickSlotKeyCode);
+
+			QuickSlotKeyGet.Execute();
+
+			*ResCharacterInfoMessage << (int16)en_UserQuickSlot::USER_KEY_QUICK_SLOT_TWO_FIVE;
+
+			vector<st_BindingKey> QuickSlotBindingKeys;
+
+			while (QuickSlotKeyGet.Fetch())
+			{
+				*ResCharacterInfoMessage << UserQuickSlotKey;
+				*ResCharacterInfoMessage << QuickSlotKeyCode;
+
+				st_BindingKey QuickSlotBindingKey;
+				QuickSlotBindingKey.UserQuickSlot = (en_UserQuickSlot)UserQuickSlotKey;
+				QuickSlotBindingKey.KeyCode = (en_KeyCode)QuickSlotKeyCode;
+
+				QuickSlotBindingKeys.push_back(QuickSlotBindingKey);
+			}
+
+			MyPlayer->_QuickSlotKey.QuickSlotKeyInit(QuickSlotBindingKeys);
 
 #pragma endregion
 
