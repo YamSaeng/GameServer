@@ -3902,9 +3902,9 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 			auto FindLevel = G_Datamanager->_LevelDatas.find(NewCharacterStatus.Level);
 			st_LevelData LevelData = *(*FindLevel).second;
 
-			int32 NewCharacterPositionY = 26;
-			int32 NewCharacterPositionX = 17;
-			int8 NewCharacterSkillPoint = 1;
+			int32 NewCharacterPositionY = 50;
+			int32 NewCharacterPositionX = 25;
+			int8 NewCharacterSkillPoint = 100;
 
 			SP::CDBGameServerCreateCharacterPush NewCharacterPush(*NewCharacterPushDBConnection);
 			NewCharacterPush.InAccountID(Session->AccountId);
@@ -5988,7 +5988,7 @@ CGameServerMessage* CGameServer::MakePacketResFaceDirection(int64 ObjectID, floa
 	return ResFaceDirectionPacket;
 }
 
-CGameServerMessage* CGameServer::MakePacketResMove(int64& ObjectID, Vector2& LookAtDirection, Vector2& MoveDirection, Vector2& Position, int64 TargetID)
+CGameServerMessage* CGameServer::MakePacketResMove(int64& ObjectID, Vector2& LookAtDirection, Vector2& MoveDirection, Vector2& Position, en_CreatureState State, int64 TargetID)
 {
 	CGameServerMessage* ResMoveMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResMoveMessage == nullptr)
@@ -6006,6 +6006,7 @@ CGameServerMessage* CGameServer::MakePacketResMove(int64& ObjectID, Vector2& Loo
 	*ResMoveMessage << MoveDirection.Y;		
 	*ResMoveMessage << Position.X;
 	*ResMoveMessage << Position.Y;
+	*ResMoveMessage << (int8)State;
 	*ResMoveMessage << TargetID;
 
 	return ResMoveMessage;
