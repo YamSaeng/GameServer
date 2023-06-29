@@ -180,9 +180,12 @@ bool CSkillBox::SetStatusAbnormal(CGameObject* SkillUser, CGameObject* Target, e
 			if (NewSkillInfo != nullptr)
 			{
 				StatusAbnormalSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_STATUS_ABNORMAL_SKILL, NewSkillInfo);
-				StatusAbnormalSkill->StatusAbnormalDurationTimeStart();
+				StatusAbnormalSkill->SetTarget(Target);								
 
 				Target->AddDebuf(StatusAbnormalSkill);
+
+				StatusAbnormalSkill->StatusAbnormalDurationTimeStart();
+
 				Target->SetStatusAbnormal((int64)StatusType);
 
 				CMessage* ResObjectStatChange = G_NetworkManager->GetGameServer()->MakePacketResChangeObjectStat(Target->_GameObjectInfo.ObjectId,
@@ -883,10 +886,12 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CSkill* Skill)
 								CSkill* BufSkill = G_ObjectManager->SkillCreate();
 
 								st_SkillInfo* BufSkillInfo = G_ObjectManager->SkillInfoCreate(Skill->GetSkillInfo()->SkillType, Skill->GetSkillInfo()->SkillLevel);
-								BufSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_STATUS_ABNORMAL_SKILL, BufSkillInfo);
-								BufSkill->StatusAbnormalDurationTimeStart();
+								BufSkill->SetSkillInfo(en_SkillCategory::SKILL_CATEGORY_BUF_SKILL, BufSkillInfo);
+								BufSkill->SetTarget(Player);
 
 								Player->AddBuf(BufSkill);
+
+								BufSkill->BufTimeStart();								
 
 								CMessage* ResBufDeBufSkillPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBuf(SkillUser->_GameObjectInfo.ObjectId, true, BufSkill->GetSkillInfo());
 								G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, ResBufDeBufSkillPacket);
