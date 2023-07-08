@@ -1851,7 +1851,23 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 				EnterChannelMonster->GetRectCollision()->Init(en_CollisionPosition::COLLISION_POSITION_OBJECT, EnterChannelMonster->_GameObjectInfo.ObjectType,
 					EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position,
 					Vector2::Zero,
-					EnterChannelMonster);
+					EnterChannelMonster);				
+				
+				auto MonsterData = G_Datamanager->_Monsters.find(EnterChannelMonster->_GameObjectInfo.ObjectType);
+				if (MonsterData != G_Datamanager->_Monsters.end())
+				{
+					for (en_SmallItemCategory EquipmentItemType : MonsterData->second->EquipmentItems)
+					{
+						if (EquipmentItemType != en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE)
+						{
+							CItem* NewItem = G_ObjectManager->ItemCreate(EquipmentItemType);
+							if (NewItem != nullptr)
+							{
+								EnterChannelMonster->GetEquipment()->ItemOnEquipment(NewItem);
+							}
+						}
+					}
+				}
 
 				EnterChannelMonster->Start();
 
