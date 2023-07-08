@@ -18,7 +18,7 @@ void CMonsterSkillBox::Init(en_GameObjectType MonsterObjctType)
 	_MonsterGlobalCoolTimeSkill = G_ObjectManager->SkillCreate();
 	if (_MonsterGlobalCoolTimeSkill != nullptr)
 	{
-		_MonsterGlobalCoolTimeSkill->SetOwner(_OwnerGameObject);
+		_MonsterGlobalCoolTimeSkill->SetTarget(_OwnerGameObject);
 
 		st_SkillInfo* GlobalCoolTimeSkillInfo = G_ObjectManager->SkillInfoCreate(en_SkillType::SKILL_GLOBAL_SKILL, 1);
 		if (GlobalCoolTimeSkillInfo != nullptr)
@@ -109,11 +109,12 @@ void CMonsterSkillBox::SkillProcess(CGameObject* SkillMonster, CGameObject* Skil
 							SkillMonster->_GameObjectInfo.ObjectPositionInfo.Position,
 							SkillMonster->_FieldOfDirection, SkillMonster->_FieldOfAngle, Skill->GetSkillInfo()->SkillDistance))
 						{
-							/*st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(SkillMonster->_GameObjectInfo.ObjectId, SkillMonster->_GameObjectInfo.ObjectType,
-								Skill->GetSkillInfo()->SkillType,
+							st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(SkillMonster->_GameObjectInfo.ObjectId, 
+								SkillMonster->_GameObjectInfo.ObjectType,
+								Skill->GetSkillInfo()->SkillKind,
 								Skill->GetSkillInfo()->SkillMinDamage,
-								Skill->GetSkillInfo()->SkillMaxDamage);
-							MonsterTarget->_GameObjectJobQue.Enqueue(DamageJob);*/
+								Skill->GetSkillInfo()->SkillMaxDamage, false);
+							MonsterTarget->_GameObjectJobQue.Enqueue(DamageJob);
 						}						
 					}
 					break;				
@@ -125,4 +126,57 @@ void CMonsterSkillBox::SkillProcess(CGameObject* SkillMonster, CGameObject* Skil
 			}
 		}
 	}	
+}
+
+int32 CMonsterSkillBox::CalculateDamage(int8 SkillKind, int32& Str, int32& Dex, int32& Int, int32& Luck, bool* InOutCritical, bool IsBackAttack, int32 TargetDefence, int32 MinDamage, int32 MaxDamage, int16 CriticalPoint)
+{
+	random_device Seed;
+	default_random_engine Eng(Seed());
+
+	mt19937 Gen(Seed());
+	uniform_int_distribution<int> DamageChoiceRandom(MinDamage, MaxDamage);
+
+	int32 ChoiceRandomDamage = DamageChoiceRandom(Gen);
+
+	int32 CriticalDamage = 0;
+
+	if (*InOutCritical == true)
+	{
+		// 크리티컬 판단
+		float CriticalPointCheck = CriticalPoint / 1000.0f;
+		bernoulli_distribution CriticalCheck(CriticalPointCheck);
+		bool IsCritical = CriticalCheck(Eng);
+
+		*InOutCritical = IsCritical;
+
+		CriticalDamage = IsCritical ? ChoiceRandomDamage * 2 : ChoiceRandomDamage;
+	}
+	else
+	{
+		CriticalDamage = ChoiceRandomDamage;
+	}
+
+	int32 FinalDamage = 0;
+
+	switch ((en_SkillKinds)SkillKind)
+	{
+	case en_SkillKinds::SKILL_KIND_MELEE_SKILL:
+		FinalDamage = (int32)((CriticalDamage + Str / 2) * (1 - ((float)TargetDefence / (100.0f + (float)TargetDefence))));
+		break;
+	case en_SkillKinds::SKILL_KIND_SPELL_SKILL:
+		FinalDamage = (int32)((CriticalDamage + Int / 2) * (1 - ((float)TargetDefence / (100.0f + (float)TargetDefence))));
+		break;
+	case en_SkillKinds::SKILL_KIND_RANGE_SKILL:
+		break;
+	}
+
+	float DefenceRate = (float)pow(((float)(200 - 1)) / 20, 2) * 0.01f;
+	FinalDamage = (int32)(CriticalDamage * DefenceRate);
+
+	if (IsBackAttack == true)
+	{
+		FinalDamage *= 2.0f;
+	}
+
+	return FinalDamage;
 }
