@@ -184,8 +184,9 @@ vector<CSector*> CMap::GetAroundSectors(Vector2Int CellPosition, int32 Range)
 	}
 }
 
-vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object)
+vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CPlayer* Object)
 {
+	vector<CGameObject*> FieldOfViewGameObjectInfos;
 	vector<st_FieldOfViewInfo> FieldOfViewGameObjects;
 
 	// 오브젝트 기준으로 주위 섹터를 가져옴
@@ -193,6 +194,7 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object)
 
 	st_FieldOfViewInfo FieldOfViewInfo;
 
+	// 오브젝트 시야 범위 안에 있는 오브젝트들을 담음
 	for (CSector* Sector : Sectors)
 	{
 		Sector->AcquireSectorLock();
@@ -204,11 +206,7 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object)
 				float Distance = Vector2::Distance(Player->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
 				if (Distance < Object->_FieldOfViewDistance)
 				{
-					FieldOfViewInfo.ObjectID = Player->_GameObjectInfo.ObjectId;
-					FieldOfViewInfo.SessionID = 0;
-					FieldOfViewInfo.ObjectType = Player->_GameObjectInfo.ObjectType;
-
-					FieldOfViewGameObjects.push_back(FieldOfViewInfo);
+					FieldOfViewGameObjectInfos.push_back(Player);					
 				}
 			}			
 		}
@@ -218,11 +216,7 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object)
 			float Distance = Vector2::Distance(NonPlayer->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
 			if (Distance < Object->_FieldOfViewDistance)
 			{
-				FieldOfViewInfo.ObjectID = NonPlayer->_GameObjectInfo.ObjectId;
-				FieldOfViewInfo.SessionID = 0;
-				FieldOfViewInfo.ObjectType = NonPlayer->_GameObjectInfo.ObjectType;
-
-				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
+				FieldOfViewGameObjectInfos.push_back(NonPlayer);
 			}
 		}
 		
@@ -231,11 +225,7 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object)
 			float Distance = Vector2::Distance(Monster->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
 			if (Distance < Object->_FieldOfViewDistance)
 			{
-				FieldOfViewInfo.ObjectID = Monster->_GameObjectInfo.ObjectId;
-				FieldOfViewInfo.SessionID = 0;
-				FieldOfViewInfo.ObjectType = Monster->_GameObjectInfo.ObjectType;
-
-				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
+				FieldOfViewGameObjectInfos.push_back(Monster);
 			}
 		}
 
@@ -246,24 +236,21 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object)
 				float Distance = Vector2::Distance(Enviroment->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
 				if (Distance < Object->_FieldOfViewDistance)
 				{
-					FieldOfViewInfo.ObjectID = Enviroment->_GameObjectInfo.ObjectId;
-					FieldOfViewInfo.SessionID = 0;
-					FieldOfViewInfo.ObjectType = Enviroment->_GameObjectInfo.ObjectType;
-
-					FieldOfViewGameObjects.push_back(FieldOfViewInfo);
+					FieldOfViewGameObjectInfos.push_back(Enviroment);
 				}
 			}			
 		}		
 
+		// SkillObject의 경우 벽 뒤에 가려져 있는지 추가적으로 검사하지는 않음
+		// _ObjectsInfos에 저장하지 않기 때문에 주위 섹터에서 시야 범위 안에 있을 경우 담아준다.
 		for (CGameObject* SkillObject : Sector->GetSkillObject())
 		{
 			if (SkillObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
 			{
 				float Distance = Vector2::Distance(SkillObject->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
 				if (Distance < Object->_FieldOfViewDistance)
-				{
+				{					
 					FieldOfViewInfo.ObjectID = SkillObject->_GameObjectInfo.ObjectId;
-					FieldOfViewInfo.SessionID = 0;
 					FieldOfViewInfo.ObjectType = SkillObject->_GameObjectInfo.ObjectType;
 
 					FieldOfViewGameObjects.push_back(FieldOfViewInfo);
@@ -276,15 +263,120 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CGameObject* Object)
 			float Distance = Vector2::Distance(CraftingTable->_GameObjectInfo.ObjectPositionInfo.Position, Object->_GameObjectInfo.ObjectPositionInfo.Position);
 			if (Distance < Object->_FieldOfViewDistance)
 			{
-				FieldOfViewInfo.ObjectID = CraftingTable->_GameObjectInfo.ObjectId;
-				FieldOfViewInfo.SessionID = 0;
-				FieldOfViewInfo.ObjectType = CraftingTable->_GameObjectInfo.ObjectType;
-
-				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
+				FieldOfViewGameObjectInfos.push_back(CraftingTable);
 			}
 		}	
 
 		Sector->ReleaseSectorLock();
+	}
+
+	// 시야 범위 안에 있는 오브젝트들이 벽에 가려져 있는지 확인
+	for (CGameObject* FieldOfViewObject : FieldOfViewGameObjectInfos)
+	{
+		Vector2 FieldOfViewObjectDir = FieldOfViewObject->_GameObjectInfo.ObjectPositionInfo.Position - Object->_GameObjectInfo.ObjectPositionInfo.Position;
+		Vector2 FieldOfViewRay = FieldOfViewObjectDir.Normalize();
+
+		// 레이캐스팅 검사할때 움직일 단위 x, y 값
+		Vector2 RayUnitStepSize;
+		RayUnitStepSize.X = sqrt(1 + (FieldOfViewRay.Y / FieldOfViewRay.X) * (FieldOfViewRay.Y / FieldOfViewRay.X));
+		RayUnitStepSize.Y = sqrt(1 + (FieldOfViewRay.X / FieldOfViewRay.Y) * (FieldOfViewRay.X / FieldOfViewRay.Y));
+
+		// 맵 좌표 위치 
+		Vector2Int MapCheck;
+		MapCheck.X = Object->_GameObjectInfo.ObjectPositionInfo.Position.X;
+		MapCheck.Y = Object->_GameObjectInfo.ObjectPositionInfo.Position.Y;
+
+		// 현재 위치에서 다음 위치의 Ray 길이
+		Vector2 RayLength1D;
+
+		// 탐색 방향
+		Vector2Int Step;
+
+		// 탐색 방향 정하고 다음 위치 Ray 길이 값 정하기
+		if (FieldOfViewRay.X < 0)
+		{
+			Step.X = -1;
+			RayLength1D.X = (Object->_GameObjectInfo.ObjectPositionInfo.Position.X - float(MapCheck.X)) * RayUnitStepSize.X;
+		}
+		else
+		{
+			Step.X = 1;
+			RayLength1D.X = (float(MapCheck.X + 1) - Object->_GameObjectInfo.ObjectPositionInfo.Position.X) * RayUnitStepSize.X;
+		}
+
+		if (FieldOfViewRay.Y < 0)
+		{
+			Step.Y = -1;
+			RayLength1D.Y = (Object->_GameObjectInfo.ObjectPositionInfo.Position.Y - float(MapCheck.Y)) * RayUnitStepSize.Y;
+		}
+		else
+		{
+			Step.Y = 1;
+			RayLength1D.Y = (float(MapCheck.Y + 1) - Object->_GameObjectInfo.ObjectPositionInfo.Position.Y) * RayUnitStepSize.Y;
+		}
+
+		// 검사
+		bool WallFound = false;
+		bool TargetFound = false;
+		float MaxDistance = Object->_FieldOfViewDistance;
+		float Distance = 0.0f;
+
+		// 벽을 찾거나 목표물을 찾거나 최대 광선 거리에 도착하면 나옴
+		while (!WallFound && !TargetFound && Distance < MaxDistance)
+		{
+			// 다음 타일 위치로 옮김
+			if (RayLength1D.X < RayLength1D.Y)
+			{
+				MapCheck.X += Step.X;
+				Distance = RayLength1D.X;
+				RayLength1D.X += RayUnitStepSize.X;
+			}
+			else
+			{
+				MapCheck.Y += Step.Y;
+				Distance = RayLength1D.Y;
+				RayLength1D.Y += RayUnitStepSize.Y;
+			}
+
+			// 맵에서 계산한 타일 위치 조사			
+			if (MapCheck.X >= 0 && MapCheck.X < _Right && MapCheck.Y >= 0 && MapCheck.Y < _Down)
+			{
+				int X = MapCheck.X - _Left;
+				int Y = _Down - MapCheck.Y;
+
+				CGameObject* GameObject = _ObjectsInfos[Y][X];
+				if (GameObject != nullptr)
+				{
+					if (GameObject->_GameObjectInfo.ObjectId == FieldOfViewObject->_GameObjectInfo.ObjectId)
+					{
+						TargetFound = true;
+					}
+					else
+					{
+						switch (GameObject->_GameObjectInfo.ObjectType)
+						{
+						case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
+						case en_GameObjectType::OBJECT_WALL:
+							WallFound = true;
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		// 목표물을 먼저 찾은 경우
+		if (TargetFound == true)
+		{
+			if (FieldOfViewObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD
+				&& FieldOfViewObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_READY)
+			{
+				FieldOfViewInfo.ObjectID = FieldOfViewObject->_GameObjectInfo.ObjectId;
+				FieldOfViewInfo.ObjectType = FieldOfViewObject->_GameObjectInfo.ObjectType;
+
+				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
+			}
+		}		
 	}
 
 	return FieldOfViewGameObjects;
@@ -923,6 +1015,18 @@ bool CMap::MonsterCango(CGameObject* Object, OUT Vector2* NextPosition)
 
 	CheckPosition.Y += (DirectionNormal.Y * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
 	CheckPosition.X += (DirectionNormal.X * Object->_GameObjectInfo.ObjectStatInfo.Speed * 0.02f);
+	
+	if (CheckPosition.X < _Left
+		|| CheckPosition.X > _Right)
+	{
+		return false;
+	}
+
+	if (CheckPosition.Y < _Up
+		|| CheckPosition.Y > _Down)
+	{
+		return false;
+	}
 
 	Vector2Int CheckCollisionPosition;
 	CheckCollisionPosition.X = (int32)CheckPosition.X;
