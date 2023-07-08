@@ -655,7 +655,7 @@ enum class en_KeyCode : int16
 	KEY_CODE_ENTER
 };
 
-enum en_EquipmentParts
+enum class en_EquipmentParts : int8
 {
 	EQUIPMENT_PARTS_NONE,
 	EQUIPMENT_PARTS_HEAD,
@@ -1090,7 +1090,7 @@ struct st_GameObjectInfo
 	en_GameObjectType OwnerObjectType;
 	int16 ObjectWidth;
 	int16 ObjectHeight;
-	int8 PlayerSlotIndex;
+	int8 PlayerSlotIndex;		
 };
 
 struct st_Color

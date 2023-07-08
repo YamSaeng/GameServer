@@ -103,7 +103,8 @@ void CGameObject::Update()
 					CMessage* ResMovePacket = G_NetworkManager->GetGameServer()->MakePacketResMove(_GameObjectInfo.ObjectId,
 						_GameObjectInfo.ObjectPositionInfo.LookAtDireciton,
 						_GameObjectInfo.ObjectPositionInfo.MoveDirection,
-						_GameObjectInfo.ObjectPositionInfo.Position);
+						_GameObjectInfo.ObjectPositionInfo.Position,
+						_GameObjectInfo.ObjectPositionInfo.State);
 					G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIds, ResMovePacket);
 					ResMovePacket->Free();
 				}	
@@ -219,13 +220,7 @@ void CGameObject::Update()
 								{
 									Player->_SkillBox.SkillLearn(IsSkillLearn, (en_SkillType)LearnSkillType);
 								
-									LearnSkillTypes.push_back((en_SkillType)LearnSkillType);
-
-									if (Skill->GetSkillInfo()->NextComboSkill != en_SkillType::SKILL_TYPE_NONE)
-									{
-										Player->_SkillBox.SkillLearn(IsSkillLearn, Skill->GetSkillInfo()->NextComboSkill);
-										LearnSkillTypes.push_back(Skill->GetSkillInfo()->NextComboSkill);
-									}
+									LearnSkillTypes.push_back((en_SkillType)LearnSkillType);									
 
 									Player->_GameObjectInfo.ObjectSkillPoint--;
 								}
@@ -622,8 +617,25 @@ void CGameObject::Update()
 							}
 						}
 						break;
-					case en_GameObjectType::OBJECT_GOBLIN:
-						break;					
+					case en_GameObjectType::OBJECT_GOBLIN:						
+						{
+							CGoblin* AttackerGoblin = dynamic_cast<CGoblin*>(Attacker);
+							if (AttackerGoblin != nullptr)
+							{
+								Damage = AttackerGoblin->_MonsterSkillBox.CalculateDamage(SkillKind,
+									Attacker->_GameObjectInfo.ObjectStatInfo.Str,
+									Attacker->_GameObjectInfo.ObjectStatInfo.Dex,
+									Attacker->_GameObjectInfo.ObjectStatInfo.Int,
+									Attacker->_GameObjectInfo.ObjectStatInfo.Luck,
+									&IsCritical,
+									IsBackAttack,
+									_GameObjectInfo.ObjectStatInfo.Defence,
+									Attacker->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage + SkillMinDamage,
+									Attacker->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage + SkillMaxDamage,
+									Attacker->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint);
+							}
+						}
+						break;						
 					}								
 
 					bool IsDead = OnDamaged(Attacker, Damage);
@@ -1350,8 +1362,6 @@ CGameObject* CGameObject::GetTarget()
 
 void CGameObject::AddBuf(CSkill* Buf)
 {
-	Buf->SetTarget(this);
-
 	_Bufs.insert(pair<en_SkillType, CSkill*>(Buf->GetSkillInfo()->SkillType, Buf));
 }
 
@@ -1362,8 +1372,6 @@ void CGameObject::DeleteBuf(en_SkillType DeleteBufSkillType)
 
 void CGameObject::AddDebuf(CSkill* DeBuf)
 {
-	DeBuf->SetTarget(this);
-
 	_DeBufs.insert(pair<en_SkillType, CSkill*>(DeBuf->GetSkillInfo()->SkillType, DeBuf));
 }
 
@@ -1513,7 +1521,7 @@ vector<CGameObject*> CGameObject::GetFieldOfViewObjects()
 
 CSkill* CGameObject::GetSkillCastingSkill()
 {
-	return _CastingSkill;
+		return _CastingSkill;
 }
 
 void CGameObject::SetSkillCastingSkill(CSkill* CastingSkill)
