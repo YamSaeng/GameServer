@@ -13,6 +13,8 @@ public:
 	int32 _WearArmorDefence;
 	int32 _BootArmorDefence;
 
+	int8 _EquipmentCount;
+
 	CEquipmentBox();
 	~CEquipmentBox();
 

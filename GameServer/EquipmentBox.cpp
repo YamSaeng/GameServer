@@ -10,6 +10,14 @@ CEquipmentBox::CEquipmentBox()
 	_HeadArmorDefence = 0;
 	_WearArmorDefence = 0;
 	_BootArmorDefence = 0;
+
+	_EquipmentCount = 0;
+
+	_EquipmentParts.insert(pair<en_EquipmentParts, CItem*>(en_EquipmentParts::EQUIPMENT_PARTS_HEAD, nullptr));
+	_EquipmentParts.insert(pair<en_EquipmentParts, CItem*>(en_EquipmentParts::EQUIPMENT_PARTS_BODY, nullptr));
+	_EquipmentParts.insert(pair<en_EquipmentParts, CItem*>(en_EquipmentParts::EQUIPMENT_PARTS_LEFT_HAND, nullptr));
+	_EquipmentParts.insert(pair<en_EquipmentParts, CItem*>(en_EquipmentParts::EQUIPMENT_PARTS_RIGHT_HAND, nullptr));	
+	_EquipmentParts.insert(pair<en_EquipmentParts, CItem*>(en_EquipmentParts::EQUIPMENT_PARTS_BOOT, nullptr));
 }
 
 CEquipmentBox::~CEquipmentBox()
@@ -30,6 +38,8 @@ CItem* CEquipmentBox::ItemOnEquipment(CItem* OnEquipItem)
 	_EquipmentParts[OnEquipItem->_ItemInfo.ItemEquipmentPart] = OnEquipItem;
 	_EquipmentParts[OnEquipItem->_ItemInfo.ItemEquipmentPart]->_ItemInfo.ItemIsEquipped = true;
 
+	_EquipmentCount++;
+
 	return ReturnEquipItem;
 }
 
@@ -41,6 +51,8 @@ CItem* CEquipmentBox::ItemOffEquipment(en_EquipmentParts OffEquipmentParts)
 	ReturnEquipItem = _EquipmentParts[OffEquipmentParts];
 
 	_EquipmentParts[OffEquipmentParts] = nullptr;
+
+	_EquipmentCount--;
 
 	return ReturnEquipItem;
 }
