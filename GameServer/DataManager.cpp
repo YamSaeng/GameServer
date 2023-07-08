@@ -795,6 +795,60 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			MonsterData->ReSpawnTime = ReSpawnTime;
 		}
 
+		for (auto& EquipmentFiled : Filed["MonsterEquipmentData"].GetArray())
+		{
+			string Head = EquipmentFiled["Head"].GetString();
+			string Body = EquipmentFiled["Body"].GetString();
+			string LeftHand = EquipmentFiled["LeftHand"].GetString();
+			string RightHand = EquipmentFiled["RightHand"].GetString();
+			string Boot = EquipmentFiled["Boot"].GetString();
+			
+			en_SmallItemCategory HeadEquipmentItemType;
+			en_SmallItemCategory BodyEquipmentItemType;
+			en_SmallItemCategory LeftHandEquipmentItemType;
+			en_SmallItemCategory RightHandEquipmentItemType;
+			en_SmallItemCategory BootEquipmentItemType;
+
+			if (Head == "ITEM_SMALL_CATEGORY_NONE")
+			{
+				HeadEquipmentItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
+			}
+
+			MonsterData->EquipmentItems.push_back(HeadEquipmentItemType);
+
+			if (Body == "ITEM_SMALL_CATEGORY_NONE")
+			{
+				BodyEquipmentItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
+			}
+
+			MonsterData->EquipmentItems.push_back(BodyEquipmentItemType);
+
+			if (LeftHand == "ITEM_SMALL_CATEGORY_NONE")
+			{
+				LeftHandEquipmentItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
+			}
+
+			MonsterData->EquipmentItems.push_back(LeftHandEquipmentItemType);
+
+			if (RightHand == "ITEM_SMALL_CATEGORY_NONE")
+			{
+				RightHandEquipmentItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
+			}
+			else if (RightHand == "ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD")
+			{
+				RightHandEquipmentItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD;
+			}
+
+			MonsterData->EquipmentItems.push_back(RightHandEquipmentItemType);
+
+			if (Boot == "ITEM_SMALL_CATEGORY_NONE")
+			{
+				BootEquipmentItemType = en_SmallItemCategory::ITEM_SMALL_CATEGORY_NONE;
+			}			
+
+			MonsterData->EquipmentItems.push_back(BootEquipmentItemType);
+		}
+
 		for (auto& DropDataFiled : Filed["MonsterDropData"].GetArray())
 		{
 			int Probability = DropDataFiled["Probability"].GetInt();
