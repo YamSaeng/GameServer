@@ -304,7 +304,8 @@ void CPlayer::CheckFieldOfViewObject()
 	{
 		_FieldOfViewUpdateTick = GetTickCount64() + 100;
 
-		// 시야범위 오브젝트를 조사해서 저장		
+		// 시야범위 오브젝트를 조사해서 저장	
+		// 기준 대상 시야 범위 안에 있고, 벽에 가려지지 않은 대상
 		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldOfViewObjects(this);
 		vector<st_FieldOfViewInfo> SpawnObjectIds;
 		vector<st_FieldOfViewInfo> DeSpawnObjectIds;
@@ -333,6 +334,9 @@ void CPlayer::CheckFieldOfViewObject()
 
 		vector<CGameObject*> SpawnObjectInfos;
 		vector<CGameObject*> DeSpawnObjectInfos;
+				
+		// SpawnObjectIds에 있는 ID 목록들은 새로 시야 뷰에 들어온 오브젝트들을 의미함
+		// DeSpawnObjectIds에 있는 ID 목록들은 시야 뷰에서 사라진 오브젝트들을 의미함				
 
 		// 한번 더 검사
 		if (SpawnObjectIds.size() > 0)
@@ -350,8 +354,13 @@ void CPlayer::CheckFieldOfViewObject()
 						SpawnObjectInfos.push_back(FindObject);
 					}
 				}
-			}			
+			}
 		}
+
+		_FieldOfViewInfos = CurrentFieldOfViewObjectIds;
+
+		_FieldOfViewObjects.clear();
+		_FieldOfViewObjects = SpawnObjectInfos;		
 
 		// 한번 더 검사
 		if (DeSpawnObjectIds.size() > 0)
@@ -380,22 +389,7 @@ void CPlayer::CheckFieldOfViewObject()
 					}
 				}
 			}			
-		}
-
-		_FieldOfViewInfos = CurrentFieldOfViewObjectIds;
-
-		_FieldOfViewObjects.clear();
-
-		for (st_FieldOfViewInfo FieldOfViewInfo : _FieldOfViewInfos)
-		{
-			CGameObject* FindObject = _Channel->FindChannelObject(FieldOfViewInfo.ObjectID, FieldOfViewInfo.ObjectType);
-			if (FindObject != nullptr)
-			{
-				_FieldOfViewObjects.push_back(FindObject);
-			}			
-		}
-
-		RayCastingToFieldOfViewObjects(&SpawnObjectInfos, &DeSpawnObjectInfos);
+		}			
 
 		if (SpawnObjectInfos.size() > 0)
 		{
@@ -412,119 +406,5 @@ void CPlayer::CheckFieldOfViewObject()
 			G_NetworkManager->GetGameServer()->SendPacket(_SessionId, ResOtherObjectDeSpawnPacket);
 			ResOtherObjectDeSpawnPacket->Free();
 		}
-	}	
-}
-
-void CPlayer::RayCastingToFieldOfViewObjects(vector<CGameObject*>* SpawnObjects, vector<CGameObject*>* DespawnObjects)
-{
-	for (CGameObject* FieldOfViewObject : _FieldOfViewObjects)
-	{
-		Vector2 FieldOfViewObjectDir = FieldOfViewObject->_GameObjectInfo.ObjectPositionInfo.Position - _GameObjectInfo.ObjectPositionInfo.Position;
-		Vector2 FieldOfViewRay = FieldOfViewObjectDir.Normalize();
-
-		// 레이캐스팅 검사할때 움직일 단위 x, y 값
-		Vector2 RayUnitStepSize;
-		RayUnitStepSize.X = sqrt(1 + (FieldOfViewRay.Y / FieldOfViewRay.X) * (FieldOfViewRay.Y / FieldOfViewRay.X));
-		RayUnitStepSize.Y = sqrt(1 + (FieldOfViewRay.X / FieldOfViewRay.Y) * (FieldOfViewRay.X / FieldOfViewRay.Y));
-
-		// 맵 좌표 위치 
-		Vector2Int MapCheck;
-		MapCheck.X = _GameObjectInfo.ObjectPositionInfo.Position.X;
-		MapCheck.Y = _GameObjectInfo.ObjectPositionInfo.Position.Y;
-
-		// 현재 위치에서 다음 위치의 Ray 길이
-		Vector2 RayLength1D;
-
-		// 탐색 방향
-		Vector2Int Step;
-
-		// 탐색 방향 정하고 다음 위치 Ray 길이 값 정하기
-		if (FieldOfViewRay.X < 0)
-		{
-			Step.X = -1;
-			RayLength1D.X = (_GameObjectInfo.ObjectPositionInfo.Position.X - float(MapCheck.X)) * RayUnitStepSize.X;
-		}
-		else
-		{
-			Step.X = 1;
-			RayLength1D.X = (float(MapCheck.X + 1) - _GameObjectInfo.ObjectPositionInfo.Position.X) * RayUnitStepSize.X;
-		}
-
-		if (FieldOfViewRay.Y < 0)
-		{
-			Step.Y = -1;
-			RayLength1D.Y = (_GameObjectInfo.ObjectPositionInfo.Position.Y - float(MapCheck.Y)) * RayUnitStepSize.Y;
-		}
-		else
-		{
-			Step.Y = 1;
-			RayLength1D.Y = (float(MapCheck.Y + 1) - _GameObjectInfo.ObjectPositionInfo.Position.Y) * RayUnitStepSize.Y;
-		}
-
-		// 검사
-		bool WallFound = false;
-		bool TargetFound = false;
-		float MaxDistance = _FieldOfViewDistance;
-		float Distance = 0.0f;
-		// 벽을 찾거나 목표물을 찾거나 최대 광선 거리에 도착하면 나옴
-		while (!WallFound && !TargetFound && Distance < MaxDistance)
-		{
-			// 다음 타일 위치로 옮김
-			if (RayLength1D.X < RayLength1D.Y)
-			{
-				MapCheck.X += Step.X;
-				Distance = RayLength1D.X;
-				RayLength1D.X += RayUnitStepSize.X;
-			}
-			else
-			{
-				MapCheck.Y += Step.Y;
-				Distance = RayLength1D.Y;
-				RayLength1D.Y += RayUnitStepSize.Y;
-			}
-
-			// 맵에서 계산한 타일 위치 조사
-			CMap* Map = _Channel->GetMap();
-			if (MapCheck.X >= 0 && MapCheck.X < Map->_Right && MapCheck.Y >= 0 && MapCheck.Y < Map->_Down)
-			{
-				int X = MapCheck.X - Map->_Left;
-				int Y = Map->_Down - MapCheck.Y;
-
-				CGameObject* GameObject = Map->_ObjectsInfos[Y][X];
-				if (GameObject != nullptr)
-				{
-					if (GameObject->_GameObjectInfo.ObjectId == FieldOfViewObject->_GameObjectInfo.ObjectId)
-					{
-						TargetFound = true;
-					}
-					else
-					{
-						switch (GameObject->_GameObjectInfo.ObjectType)
-						{
-						case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
-						case en_GameObjectType::OBJECT_WALL:
-							WallFound = true;
-							break;
-						}
-					}
-				}
-			}
-		}
-
-		// 목표물을 먼저 찾은 경우
-		if (TargetFound == true)
-		{
-			if (FieldOfViewObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD
-				&& FieldOfViewObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::SPAWN_READY)
-			{
-				SpawnObjects->push_back(FieldOfViewObject);
-			}			
-		}
-
-		// 벽과 같은 시야에 가려지는 물체를 먼저 찾은 경우
-		if (WallFound == true)
-		{
-			DespawnObjects->push_back(FieldOfViewObject);
-		}		
 	}	
 }

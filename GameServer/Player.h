@@ -42,5 +42,4 @@ protected:
 	virtual void UpdateDead() override;
 private:
 	void CheckFieldOfViewObject();	
-	void RayCastingToFieldOfViewObjects(vector<CGameObject*>* SpawnObjects, vector<CGameObject*>* DespawnObjects);
 };
