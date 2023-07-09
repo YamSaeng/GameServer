@@ -71,6 +71,15 @@ void CSkill::GlobalCoolTimeStart(int32 GlobalCoolTime)
 	_SkillInfo->SkillRemainTime = _SkillCootimeTick - GetTickCount64();
 }
 
+void CSkill::BufTimeStart()
+{
+	_SkillDurationTick = _SkillInfo->SkillDurationTime + GetTickCount64();
+
+	_SkillDotTick = _SkillInfo->SkillDotTime + GetTickCount64();
+
+	_SkillInfo->SkillRemainTime = _SkillDurationTick - GetTickCount64();	
+}
+
 void CSkill::StatusAbnormalDurationTimeStart()
 {	
 	_SkillDurationTick = _SkillInfo->SkillDurationTime + GetTickCount64();
@@ -155,6 +164,32 @@ bool CSkill::Update()
 					_SkillCootimeTick = 0;
 				}
 			}
+		}
+		break;
+	case en_SkillCategory::SKILL_CATEGORY_BUF_SKILL:
+		{
+			if (_IsDot == true)
+			{
+				if (_SkillDotTick < GetTickCount64())
+				{
+					_SkillDotTick = _SkillInfo->SkillDotTime + GetTickCount64();
+
+				}
+			}
+
+			if (_SkillInfo->SkillRemainTime <= 0)
+			{
+				_SkillInfo->SkillRemainTime = 0;				
+
+				CMessage* ResBufDeBufOffPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBufOff(_Target->_GameObjectInfo.ObjectId, true, _SkillInfo->SkillType);
+				G_NetworkManager->GetGameServer()->SendPacketFieldOfView(_Target, ResBufDeBufOffPacket);
+				ResBufDeBufOffPacket->Free();
+
+				return true;
+			}
+
+			// 강화효과 스킬 지속시간 재기
+			_SkillInfo->SkillRemainTime = _SkillDurationTick - GetTickCount64();
 		}
 		break;
 	case en_SkillCategory::SKILL_CATEGORY_STATUS_ABNORMAL_SKILL:

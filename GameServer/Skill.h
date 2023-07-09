@@ -31,6 +31,8 @@ public:
 	// 전역 쿨타임 시작
 	void GlobalCoolTimeStart(int32 GlobalCoolTime);
 
+	// 강화효과 시작
+	void BufTimeStart();
 	// 상태이상 지속 시간 시작
 	void StatusAbnormalDurationTimeStart();
 	// 연속기 스킬 시작
