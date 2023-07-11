@@ -10,7 +10,9 @@
           ],
           "ActiveSkillList": [
             {
+              "SkillNumber": 0,
               "SkillType": "SKILL_GOBLIN_ACTIVE_MELEE_DEFAULT_ATTACK",
+              "SkillKind": "SKILL_KIND_MELEE_SKILL",
               "SkillName": "고블린 일반 근접 공격",
               "SkillMaxLevel": 1,
               "SkillIsDamage": true,
