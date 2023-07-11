@@ -128,9 +128,7 @@ public:
 	void SetSkillCastingSkill(CSkill* CastingSkill);	
 
 	vector<st_FieldOfViewInfo> GetFieldOfViewInfo();
-protected:		
-	// 시야 범위 오브젝트 객체
-	vector<CGameObject*> _FieldOfViewObjects;
+protected:			
 	// 시야 범위 오브젝트
 	vector<st_FieldOfViewInfo> _FieldOfViewInfos;
 

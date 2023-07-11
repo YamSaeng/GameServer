@@ -1514,14 +1514,9 @@ void CGameObject::End()
 	CheckBufDeBufSkill();
 }
 
-vector<CGameObject*> CGameObject::GetFieldOfViewObjects()
-{
-	return _FieldOfViewObjects;
-}
-
 CSkill* CGameObject::GetSkillCastingSkill()
 {
-		return _CastingSkill;
+	return _CastingSkill;
 }
 
 void CGameObject::SetSkillCastingSkill(CSkill* CastingSkill)
