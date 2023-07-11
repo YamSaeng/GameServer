@@ -6132,6 +6132,24 @@ CGameServerMessage* CGameServer::MakePacketResObjectSpawn(int32 ObjectInfosCount
 		if (ObjectInfos[i] != nullptr)
 		{			
 			*ResSpawnPacket << ObjectInfos[i]->_GameObjectInfo;
+
+			CCreature* SpawnCreature = dynamic_cast<CCreature*>(ObjectInfos[i]);
+			if (SpawnCreature != nullptr)
+			{
+				CEquipmentBox* SpawnCreatureEquipmentBox = SpawnCreature->GetEquipment();
+				if (SpawnCreatureEquipmentBox != nullptr)
+				{
+					*ResSpawnPacket << SpawnCreatureEquipmentBox->_EquipmentCount;
+
+					for (auto EquipemtPart : SpawnCreatureEquipmentBox->GetEquipments())
+					{		
+						if (EquipemtPart.second != nullptr)
+						{
+							*ResSpawnPacket << EquipemtPart.second;
+						}						
+					}
+				}
+			}
 		}		
 	}
 
