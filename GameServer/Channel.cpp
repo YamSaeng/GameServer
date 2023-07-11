@@ -1668,14 +1668,25 @@ bool CChannel::ChannelColliderOBBCheck(CGameObject* CheckObject, int64 Exception
 	return true;
 }
 
-bool CChannel::ChannelColliderOBBCheckAroundObject(CRectCollision* CheckCollision, vector<CGameObject*> AroundObjects, vector<CGameObject*>& CollisionObjects, int64 ExceptionObjectID)
+bool CChannel::ChannelColliderOBBCheckAroundObject(CRectCollision* CheckCollision, vector<st_FieldOfViewInfo> AroundObjects, vector<CGameObject*>& CollisionObjects, int64 ExceptionObjectID)
 {	
 	if (CheckCollision == nullptr)
 	{
 		return false;
 	}
 
-	for (CGameObject* AroundObject : AroundObjects)
+	vector<CGameObject*> FindAroundObjects;
+
+	for (st_FieldOfViewInfo AroundObject : AroundObjects)
+	{
+		CGameObject* FindObject = FindChannelObject(AroundObject.ObjectID, AroundObject.ObjectType);
+		if (FindObject != nullptr)
+		{
+			FindAroundObjects.push_back(FindObject);
+		}
+	}
+
+	for (CGameObject* AroundObject : FindAroundObjects)
 	{
 		if (AroundObject != nullptr
 			&& AroundObject->_GameObjectInfo.ObjectId != ExceptionObjectID

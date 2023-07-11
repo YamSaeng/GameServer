@@ -75,7 +75,7 @@ public:
 	// OBB 알고리즘로 충돌대상 확인
 	bool ChannelColliderOBBCheck(CGameObject* CheckObject, int64 ExceptionID = 0, CGameObject** CollisionObject = nullptr);
 	// 매개변수로 받는 AorundObjects에서 충돌하는 대상이 있는지 확인
-	bool ChannelColliderOBBCheckAroundObject(CRectCollision* CheckCollision,  vector<CGameObject*> AroundObjects, vector<CGameObject*>& CollisionObjects, int64 ExceptionObjectID);
+	bool ChannelColliderOBBCheckAroundObject(CRectCollision* CheckCollision, vector<st_FieldOfViewInfo> AroundObjects, vector<CGameObject*>& CollisionObjects, int64 ExceptionObjectID);
 
 	//----------------------------------------------------
 	// 채널 입장
