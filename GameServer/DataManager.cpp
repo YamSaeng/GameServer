@@ -2293,6 +2293,7 @@ void CDataManager::LoadDataMonsterSkill(wstring LoadFileName)
 				GoblinActiveSkill->SkillMediumCategory = en_SkillMediumCategory::SKILL_MEDIUM_CATEGORY_NONE;
 
 				string SkillType = AttackSkillFiled["SkillType"].GetString();
+				string SkillKind = AttackSkillFiled["SkillKind"].GetString();
 				string SkillName = AttackSkillFiled["SkillName"].GetString();
 				int8 SkillMaxLevel = (int8)AttackSkillFiled["SkillMaxLevel"].GetInt();
 				bool SkillIsDamage = AttackSkillFiled["SkillIsDamage"].GetBool();
@@ -2312,6 +2313,11 @@ void CDataManager::LoadDataMonsterSkill(wstring LoadFileName)
 				if (SkillType == "SKILL_GOBLIN_ACTIVE_MELEE_DEFAULT_ATTACK")
 				{
 					GoblinActiveSkill->SkillType = en_SkillType::SKILL_GOBLIN_ACTIVE_MELEE_DEFAULT_ATTACK;
+				}
+
+				if (SkillKind == "SKILL_KIND_MELEE_SKILL")
+				{
+					GoblinActiveSkill->SkillKind = en_SkillKinds::SKILL_KIND_MELEE_SKILL;
 				}
 
 				GoblinActiveSkill->SkillCharacteristic = en_SkillCharacteristic::SKILL_CATEGORY_NONE;
