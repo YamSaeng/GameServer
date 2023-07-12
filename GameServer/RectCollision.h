@@ -39,6 +39,9 @@ public:
 	void RotateUpdate();
 
 	void Update();
+
+	// 소유 대상이 죽을 경우 크기 등 변경
+	void DeadPositionUpdate();
 private:
 	CGameObject* _OwnerObject;
 

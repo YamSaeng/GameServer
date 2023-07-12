@@ -263,6 +263,20 @@ void CRectCollision::Update()
 	RotateUpdate();
 }
 
+void CRectCollision::DeadPositionUpdate()
+{	
+	if (_OwnerObject != nullptr)
+	{
+		switch (_OwnerObject->_GameObjectInfo.ObjectType)
+		{
+		case en_GameObjectType::OBJECT_GOBLIN:
+			_Size.X = 1.0f;
+			_Size.Y = 0.7f;			
+			break;		
+		}
+	}	
+}
+
 bool CRectCollision::GetActive()
 {
 	return _RectCollisionActive;
