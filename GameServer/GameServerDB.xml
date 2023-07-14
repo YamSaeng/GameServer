@@ -370,7 +370,9 @@
 				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_TWO_TWO'), ('KEY_CODE_SEVEN'))
 				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_TWO_THREE'), ('KEY_CODE_EIGHT'))
 				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_TWO_FOUR'), ('KEY_CODE_NINE'))
-				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_TWO_FIVE'), ('KEY_CODE_ZERO'))				
+				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_TWO_FIVE'), ('KEY_CODE_ZERO'))	
+				
+				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_INTERACTION'), ('KEY_CODE_F'))	
 				
 				INSERT INTO [dbo].[Equipment] VALUES ((@AccountID), (@PlayerID), ('EQUIPMENT_PARTS_HEAD'), ('ITEM_SMALL_CATEGORY_NONE'), (0), (0)) 				
 				INSERT INTO [dbo].[Equipment] VALUES ((@AccountID), (@PlayerID), ('EQUIPMENT_PARTS_BODY'), ('ITEM_SMALL_CATEGORY_NONE'), (0), (0)) 				
@@ -380,16 +382,19 @@
 				
 				UPDATE [dbo].[Inventory]
 				SET ItemSmallCategory = ('ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD'), ItemCount = (1), ItemDurability = (150), ItemEnchantPoint = (1)
-				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (0) AND ItemTileGridPositionY = (0)								
+				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (0) AND ItemTileGridPositionY = (0)
+				UPDATE [dbo].[Inventory]
+				SET ItemSmallCategory = ('ITEM_SAMLL_CATEGORY_WEAPON_BOW_WOOD'), ItemCount = (1), ItemDurability = (150), ItemEnchantPoint = (1)
+				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (1) AND ItemTileGridPositionY = (0)
 				UPDATE [dbo].[Inventory]
 				SET ItemSmallCategory = ('ITEM_SMALL_CATEGORY_WEAPON_DAGGER_WOOD'), ItemCount = (1), ItemDurability = (150), ItemEnchantPoint = (1)
-				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (1) AND ItemTileGridPositionY = (0)								
+				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (2) AND ItemTileGridPositionY = (0)								
 				UPDATE [dbo].[Inventory]
 				SET ItemSmallCategory = ('ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER'), ItemCount = (1), ItemDurability = (150), ItemEnchantPoint = (1)
-				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (2) AND ItemTileGridPositionY = (0)	
+				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (3) AND ItemTileGridPositionY = (0)	
 				UPDATE [dbo].[Inventory]
 				SET ItemSmallCategory = ('ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL'), ItemCount = (5), ItemDurability = (10), ItemEnchantPoint = (0)
-				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (4) AND ItemTileGridPositionY = (0)								
+				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (5) AND ItemTileGridPositionY = (0)								
 			]]>
 		</Body>
 	</Procedure>
@@ -1109,6 +1114,7 @@
 							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_TWO_THREE' THEN 15
 							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_TWO_FOUR' THEN 16
 							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_TWO_FIVE' THEN 17
+							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_INTERACTION' THEN 18
 							 ELSE ' '
 							 END),
 					   (CASE WHEN QuickSlotKeyCode = 'KEY_CODE_W' THEN 1
