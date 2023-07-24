@@ -4364,7 +4364,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 
 			QuickSlotKeyGet.Execute();
 
-			*ResCharacterInfoMessage << (int16)en_UserQuickSlot::USER_KEY_QUICK_SLOT_TWO_FIVE;
+			*ResCharacterInfoMessage << (int16)en_UserQuickSlot::USER_KEY_QUICK_SLOT_INTERACTION;
 
 			vector<st_BindingKey> QuickSlotBindingKeys;
 
@@ -6198,7 +6198,7 @@ CGameServerMessage* CGameServer::MakePacketResObjectDeSpawn(int32 DeSpawnObjectC
 	return ResDeSpawnPacket;
 }
 
-CGameServerMessage* CGameServer::MakePacketObjectDie(int64 DieObjectId)
+CGameServerMessage* CGameServer::MakePacketObjectDie(int64 DieObjectId, en_CreatureState DieObjectState)
 {
 	CGameServerMessage* ResDiePacket = CGameServerMessage::GameServerMessageAlloc();
 	if (ResDiePacket == nullptr)
@@ -6210,6 +6210,7 @@ CGameServerMessage* CGameServer::MakePacketObjectDie(int64 DieObjectId)
 
 	*ResDiePacket << (int16)en_PACKET_S2C_DIE;
 	*ResDiePacket << DieObjectId;
+	*ResDiePacket << (int8)DieObjectState;
 
 	return ResDiePacket;
 }
