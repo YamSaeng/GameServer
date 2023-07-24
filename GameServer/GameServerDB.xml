@@ -1228,6 +1228,7 @@
 							 WHEN QuickSlotKeyCode = 'KEY_CODE_CAPSLOCK' THEN 109
 							 WHEN QuickSlotKeyCode = 'KEY_CODE_CTRL_CAPSLOCK' THEN 110
 							 WHEN QuickSlotKeyCode = 'KEY_CODE_ALT_CAPSLOCK' THEN 111
+							 WHEN QuickSlotKeyCode = 'KEY_CODE_TAB' THEN 114
 							 ELSE ' '
 							 END)
 				FROM [dbo].[QuickSlotKey]
