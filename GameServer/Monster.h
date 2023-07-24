@@ -1,11 +1,11 @@
 #pragma once
-#include "GameObject.h"
+#include "Creature.h"
 #include "MonsterSkillBox.h"
 #include "Data.h"
 
 class CPlayer;
 
-class CMonster : public CGameObject
+class CMonster : public CCreature
 {
 public:
 	// 몬스터 데이터 시트 Id
@@ -18,6 +18,9 @@ public:
 
 	en_MonsterState _MonsterState;	    
 	
+	// 몬스터 스킬
+	CMonsterSkillBox _MonsterSkillBox;
+
 	CMonster();
 	virtual ~CMonster();	
 
@@ -30,9 +33,7 @@ public:
 	virtual void End() override;
 
 	CGameObject* GetTarget();
-protected:	
-	// 몬스터 스킬
-	CMonsterSkillBox _MonsterSkillBox;
+protected:		
 
 	// 시전 중인 스킬
 	CSkill* _CurrentSkill;	
