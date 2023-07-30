@@ -128,8 +128,8 @@
 	<Table name="QuickSlotKey" desc="QuickSlotKey Table">
 		<Column name="QuickSlotKeyAccountDBId" type="BigInt" notnull="true"/>
 		<Column name="QuickSlotKeyPlayerDBId" type="BigInt" notnull="true"/>
-		<Column name="QuickSlotKey" type="nvarchar(40)" notnull="true"/>
-		<Column name="QuickSlotKeyCode" type="nvarchar(40)" notnull="true"/>		
+		<Column name="QuickSlotKey" type="nvarchar(50)" notnull="true"/>
+		<Column name="QuickSlotKeyCode" type="nvarchar(50)" notnull="true"/>		
 	</Table>	
 	
 	<!-- AccountID를 기준으로 클라가 소유하고 있는 캐릭터를 찾는다. -->
@@ -372,7 +372,9 @@
 				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_TWO_FOUR'), ('KEY_CODE_NINE'))
 				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_TWO_FIVE'), ('KEY_CODE_ZERO'))	
 				
-				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_INTERACTION'), ('KEY_CODE_F'))	
+				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_FIND_AROUND_OBJECT'), ('KEY_CODE_TAB'))
+				
+				INSERT INTO [dbo].[QuickSlotKey] VALUES ((@AccountID), (@PlayerID), ('USER_KEY_QUICK_SLOT_INTERACTION'), ('KEY_CODE_F'))
 				
 				INSERT INTO [dbo].[Equipment] VALUES ((@AccountID), (@PlayerID), ('EQUIPMENT_PARTS_HEAD'), ('ITEM_SMALL_CATEGORY_NONE'), (0), (0)) 				
 				INSERT INTO [dbo].[Equipment] VALUES ((@AccountID), (@PlayerID), ('EQUIPMENT_PARTS_BODY'), ('ITEM_SMALL_CATEGORY_NONE'), (0), (0)) 				
@@ -1114,7 +1116,8 @@
 							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_TWO_THREE' THEN 15
 							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_TWO_FOUR' THEN 16
 							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_TWO_FIVE' THEN 17
-							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_INTERACTION' THEN 18
+							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_FIND_AROUND_OBJECT' THEN 18
+							 WHEN QuickSlotKey = 'USER_KEY_QUICK_SLOT_INTERACTION' THEN 19
 							 ELSE ' '
 							 END),
 					   (CASE WHEN QuickSlotKeyCode = 'KEY_CODE_W' THEN 1
