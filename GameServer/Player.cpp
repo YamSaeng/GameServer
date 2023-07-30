@@ -16,9 +16,11 @@ CPlayer::CPlayer()
 	_SessionId = 0;
 		
 	_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::IDLE;
+	_GameObjectInfo.ObjectPositionInfo.LookAtDireciton = Vector2::Right;
+
 	_DefaultAttackTick = 0;
 
-	_FieldOfDirection = Vector2::Left;
+	_FieldOfDirection = Vector2::Right;
 
 	_FieldOfViewDistance = 12;		
 
@@ -357,10 +359,7 @@ void CPlayer::CheckFieldOfViewObject()
 			}
 		}
 
-		_FieldOfViewInfos = CurrentFieldOfViewObjectIds;
-
-		_FieldOfViewObjects.clear();
-		_FieldOfViewObjects = SpawnObjectInfos;		
+		_FieldOfViewInfos = CurrentFieldOfViewObjectIds;		
 
 		// 한번 더 검사
 		if (DeSpawnObjectIds.size() > 0)
@@ -373,8 +372,8 @@ void CPlayer::CheckFieldOfViewObject()
 
 					// 추가적으로 검사
 					// 소환해제 해야할 대상이 죽음 준비 상태 또는 죽음 상태일 경우에는 알아서 소환해제 되기 때문에
-					// 죽음 준비 상태 그리고 죽음 상태가 아닐 경우에만 소환해제 하도록 설정					
-					
+					// 죽음 준비 상태 그리고 죽음 상태가 아닐 경우에만 소환해제 하도록 설정										
+
 					// 하지만 플레이어의 시야를 대상이 벗어난다면 바로 디스폰 해줘야함
 					if (FindObject != nullptr						
 						&& FindObject->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD
