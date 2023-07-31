@@ -958,6 +958,21 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_MENU,
 
 	//-----------------------------------------------------------
+	// 게임서버 상호작용 요청 
+	// int64 PlayerID
+	// int64 AccountID
+	// int16 InteractionType
+	// int64 ObjectID
+	//-----------------------------------------------------------
+	en_PACKET_C2S_INTERACTION,
+
+	//-----------------------------------------------------------
+	// 게임서버 상호작용 요청 응답		
+	// int16 InteractionType
+	//-----------------------------------------------------------
+	en_PACKET_S2C_INTERACTION,
+
+	//-----------------------------------------------------------
 	// 게임서버 레이캐스팅 응답
 	// int64 ObjectID
 	// int64 RayCastingStartPosition
