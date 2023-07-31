@@ -57,8 +57,6 @@ bool CGoblin::OnDamaged(CGameObject* Attacker, int32 Damage)
 	bool IsDead = CMonster::OnDamaged(Attacker, Damage);
 	if (IsDead == true)
 	{
-		_RectCollision->SetActive(false);
-
 		if (IsDead == true)
 		{
 			CPlayer* AttackerPlayer = dynamic_cast<CPlayer*>(Attacker);
@@ -84,19 +82,21 @@ bool CGoblin::OnDamaged(CGameObject* Attacker, int32 Damage)
 			}			
 		}
 
-		_DeadTick = GetTickCount64() + 1500;
+		_DeadTick = GetTickCount64() + 3000;
 
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::ROOTING;		
 
-		_GameObjectInfo.ObjectPositionInfo.MoveDirection = st_Vector2::Zero();	
+		_GameObjectInfo.ObjectPositionInfo.MoveDirection = Vector2::Zero;			
+
+		_RectCollision->DeadPositionUpdate();
 
 		End();
 
 		vector<st_FieldOfViewInfo> AroundPlayers = _Channel->GetMap()->GetFieldAroundPlayers(this);
 		
-		CMessage* ResDieMessagePacket = G_NetworkManager->GetGameServer()->MakePacketObjectDie(_GameObjectInfo.ObjectId);
+		CMessage* ResDieMessagePacket = G_NetworkManager->GetGameServer()->MakePacketObjectDie(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo.State);
 		G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, ResDieMessagePacket);
-		ResDieMessagePacket->Free();				
+		ResDieMessagePacket->Free();
 
 		G_ObjectManager->ObjectItemSpawn(_Channel, Attacker->_GameObjectInfo.ObjectId,
 			Attacker->_GameObjectInfo.ObjectType,
