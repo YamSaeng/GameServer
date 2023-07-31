@@ -226,7 +226,7 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CPlayer* Object)
 			if (Distance < Object->_FieldOfViewDistance)
 			{
 				FieldOfViewGameObjectInfos.push_back(Monster);
-			}
+			}			
 		}
 
 		for (CEnvironment* Enviroment : Sector->GetEnvironment())
@@ -256,6 +256,17 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CPlayer* Object)
 					FieldOfViewGameObjects.push_back(FieldOfViewInfo);
 				}
 			}			
+		}
+
+		for (CItem* Item : Sector->GetItems())
+		{
+			if (Item->_GameObjectInfo.ObjectPositionInfo.State != en_CreatureState::DEAD)
+			{
+				FieldOfViewInfo.ObjectID = Item->_GameObjectInfo.ObjectId;
+				FieldOfViewInfo.ObjectType = Item->_GameObjectInfo.ObjectType;
+
+				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
+			}
 		}
 
 		for (CCraftingTable* CraftingTable : Sector->GetCraftingTable())
@@ -359,6 +370,8 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CPlayer* Object)
 						case en_GameObjectType::OBJECT_WALL:
 							WallFound = true;
 							break;
+						default:							
+							break;
 						}
 					}
 				}
@@ -375,8 +388,8 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CPlayer* Object)
 				FieldOfViewInfo.ObjectType = FieldOfViewObject->_GameObjectInfo.ObjectType;
 
 				FieldOfViewGameObjects.push_back(FieldOfViewInfo);
-			}
-		}		
+			}			
+		}	
 	}
 
 	return FieldOfViewGameObjects;
@@ -649,7 +662,25 @@ bool CMap::Cango(CGameObject* Object)
 
 	if (NextPositionMoveCheck == true)
 	{
-		Object->_GameObjectInfo.ObjectPositionInfo.Position = CheckPosition;
+		// 이동할 좌표 위치에 다른 오브젝트 대상이 있을 경우 움직이지 않는다.
+		// 대상 위치로 옮기면 레이 캐스팅 검사를 할 수 없음
+		Vector2Int CollisionPosition;
+		CollisionPosition.X = (int32)CheckPosition.X;
+		CollisionPosition.Y = (int32)CheckPosition.Y;
+
+		if (CollisionPosition.X != Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X
+			|| CollisionPosition.Y != Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y)
+		{
+			int X = CollisionPosition.X - _Left;
+			int Y = _Down - CollisionPosition.Y;
+
+			if (_ObjectsInfos[Y][X] != nullptr)
+			{
+				return false;
+			}
+		}
+
+		Object->_GameObjectInfo.ObjectPositionInfo.Position = CheckPosition;		
 
 		if (Object->GetRectCollision() != nullptr)
 		{
@@ -1005,7 +1036,7 @@ bool CMap::ApplySkillObjectMove(CGameObject* SkillObject, Vector2Int& DestPositi
 	return IsCollision;
 }
 
-bool CMap::MonsterCango(CGameObject* Object, OUT Vector2* NextPosition)
+bool CMap::MonsterCango(CGameObject* Object)
 {
 	Vector2 CheckPosition;
 	CheckPosition.X = Object->_GameObjectInfo.ObjectPositionInfo.Position.X;
@@ -1033,8 +1064,15 @@ bool CMap::MonsterCango(CGameObject* Object, OUT Vector2* NextPosition)
 	CheckCollisionPosition.Y = (int32)CheckPosition.Y;
 		
 	bool NextPositionMoveCheck = FindPathNextPositionCango(Object, CheckCollisionPosition);
-	NextPosition->X = CheckPosition.X;
-	NextPosition->Y = CheckPosition.Y;
+	if (NextPositionMoveCheck == true)
+	{
+		Object->_GameObjectInfo.ObjectPositionInfo.Position = CheckPosition;
+
+		if (Object->GetRectCollision() != nullptr)
+		{
+			Object->GetRectCollision()->Update();
+		}
+	}
 
 	return NextPositionMoveCheck;
 }

@@ -139,7 +139,7 @@ public:
 	bool CanMoveSkillGo(CGameObject* SkillObject, OUT Vector2* NextPosition, int64 ExceptionID = 0, OUT CGameObject** CollisionObject = nullptr);
 	bool ApplySkillObjectMove(CGameObject* SkillObject, Vector2Int& DestPosition, int64 ExceptionID = 0, CGameObject** CollisionObject = nullptr);
 
-	bool MonsterCango(CGameObject* Object, OUT Vector2* NextPosition);
+	bool MonsterCango(CGameObject* Object);
 
 	vector<Vector2Int> FindPath(CGameObject* Object, Vector2Int StartCellPosition, Vector2Int DestCellPostion, bool CheckObjects = true, int32 MaxDistance = 8);		
 	bool FindPathNextPositionCango(CGameObject* Object, Vector2Int& NextPosition, bool CheckObjects = true);
