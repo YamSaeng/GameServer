@@ -38,7 +38,7 @@ void CMonster::Update()
 	CGameObject::Update();
 
 	if (_Target != nullptr && 
-		(_Target->_NetworkState == en_ObjectNetworkState::LEAVE 			
+		(_Target->_NetworkState == en_ObjectNetworkState::OBJECT_NETWORK_STATE_LEAVE 			
 			|| _Target->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::DEAD))
 	{
 		_Target = nullptr;
@@ -47,12 +47,7 @@ void CMonster::Update()
 	// 강화, 약화효과 업데이트
 	CheckBufDeBufSkill();		
 	// 몬스터 스킬 업데이트
-	_MonsterSkillBox.Update();
-
-	if (_RectCollision != nullptr)
-	{
-		_RectCollision->Update();
-	}
+	_MonsterSkillBox.Update();	
 
 	// 움직일 수 없는 상태이상에 걸릴 경우 상태에 따른 업데이트 적용하지 않게함
 	if (CheckCantControlStatusAbnormal())
@@ -185,8 +180,8 @@ void CMonster::AggroTargetListCheck()
 		{
 			// 어그로 목록에서 삭제할 조건 
 			if (AggroTarget->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::DEAD
-				|| AggroTarget->_NetworkState == en_ObjectNetworkState::LEAVE
-				|| AggroTarget->_NetworkState == en_ObjectNetworkState::READY)
+				|| AggroTarget->_NetworkState == en_ObjectNetworkState::OBJECT_NETWORK_STATE_LEAVE
+				|| AggroTarget->_NetworkState == en_ObjectNetworkState::OBJECT_NETWORK_STATE_READY)
 			{
 				_AggroTargetList.erase(AggroTargetIterator.first);
 			}
@@ -401,6 +396,24 @@ void CMonster::ReadyPatrol()
 		return;
 	}	
 
+	if (CheckCanControlStatusAbnormal())
+	{
+		_GameObjectInfo.ObjectPositionInfo.MoveDirection = Vector2::Zero;
+		// 다시 정찰 지점 얻을 수 있도록 함		
+		_PatrolTick = GetTickCount64() + _PatrolTickPoint;
+
+		// 주위 플레이어 들에게 멈췄다고 알려줌
+		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldAroundPlayers(this);
+
+		CMessage* ResMoveStopPacket = G_NetworkManager->GetGameServer()->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
+			_GameObjectInfo.ObjectPositionInfo.Position.X,
+			_GameObjectInfo.ObjectPositionInfo.Position.Y);
+		G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIds, ResMoveStopPacket);
+		ResMoveStopPacket->Free();
+
+		return;
+	}
+
 	random_device Seed;
 	mt19937 Gen(Seed());
 
@@ -447,7 +460,8 @@ void CMonster::ReadyPatrol()
 			CMessage* MonsterMoveStartPacket = G_NetworkManager->GetGameServer()->MakePacketResMove(_GameObjectInfo.ObjectId,
 				_GameObjectInfo.ObjectPositionInfo.LookAtDireciton,
 				_GameObjectInfo.ObjectPositionInfo.MoveDirection,
-				_GameObjectInfo.ObjectPositionInfo.Position);
+				_GameObjectInfo.ObjectPositionInfo.Position,
+				_GameObjectInfo.ObjectPositionInfo.State);
 			G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfView, MonsterMoveStartPacket);
 			MonsterMoveStartPacket->Free();
 		}		
@@ -461,6 +475,24 @@ void CMonster::UpdatePatrol()
 
 void CMonster::ReadMoving()
 {
+	if (CheckCanControlStatusAbnormal())
+	{
+		_GameObjectInfo.ObjectPositionInfo.MoveDirection = Vector2::Zero;
+		// 다시 정찰 지점 얻을 수 있도록 함		
+		_PatrolTick = GetTickCount64() + _PatrolTickPoint;
+
+		// 주위 플레이어 들에게 멈췄다고 알려줌
+		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIds = _Channel->GetMap()->GetFieldAroundPlayers(this);
+
+		CMessage* ResMoveStopPacket = G_NetworkManager->GetGameServer()->MakePacketResMoveStop(_GameObjectInfo.ObjectId,
+			_GameObjectInfo.ObjectPositionInfo.Position.X,
+			_GameObjectInfo.ObjectPositionInfo.Position.Y);
+		G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIds, ResMoveStopPacket);
+		ResMoveStopPacket->Free();
+
+		return;
+	}
+
 	do
 	{
 		// 벽이나 다른 몬스터에게 부딪혓을 경우 잠시 동안 대기 한후 다시 진행 
@@ -506,6 +538,7 @@ void CMonster::ReadMoving()
 				_GameObjectInfo.ObjectPositionInfo.LookAtDireciton,
 				_GameObjectInfo.ObjectPositionInfo.MoveDirection,
 				_GameObjectInfo.ObjectPositionInfo.Position,
+				_GameObjectInfo.ObjectPositionInfo.State,
 				_Target->_GameObjectInfo.ObjectId);
 			G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfView, MonsterMoveStartPacket);
 			MonsterMoveStartPacket->Free();
@@ -517,19 +550,6 @@ void CMonster::UpdateMoving()
 {
 	Vector2 FaceDirection = _Target->_GameObjectInfo.ObjectPositionInfo.Position - _GameObjectInfo.ObjectPositionInfo.Position;
 	_FieldOfDirection = FaceDirection.Normalize();
-
-	vector<st_FieldOfViewInfo> CurrentFieldOfView = _Channel->GetMap()->GetFieldAroundPlayers(this);
-	if (CurrentFieldOfView.size() > 0)
-	{	
-		CMessage* MonsterMoveStartPacket = G_NetworkManager->GetGameServer()->MakePacketResMove(_GameObjectInfo.ObjectId,
-			_GameObjectInfo.ObjectPositionInfo.LookAtDireciton,
-			_GameObjectInfo.ObjectPositionInfo.MoveDirection,
-			_GameObjectInfo.ObjectPositionInfo.Position,
-			_Target->_GameObjectInfo.ObjectId);
-		G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfView, MonsterMoveStartPacket);
-		MonsterMoveStartPacket->Free();		
-	}		
-
 	Move();	
 }
 
@@ -592,19 +612,19 @@ void CMonster::UpdateSpell()
 
 		vector<st_FieldOfViewInfo> CurrentFieldOfViewObjectIDs = GetChannel()->GetMap()->GetFieldAroundPlayers(this, false);
 
-		if (_SpellSkill != nullptr)
+		if (_CastingSkill != nullptr)
 		{
 			// 시전한 스킬 쿨타임 시작
-			_SpellSkill->CoolTimeStart();
+			_CastingSkill->CoolTimeStart();
 
 			// 스펠창 끝
-			CMessage* ResMagicPacket = G_NetworkManager->GetGameServer()->MakePacketResMagic(_GameObjectInfo.ObjectId, false);
+			CMessage* ResMagicPacket = G_NetworkManager->GetGameServer()->MakePacketSkillCastingStart(_GameObjectInfo.ObjectId, false);
 			G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResMagicPacket);
 			ResMagicPacket->Free();
 
 			if (_Target != nullptr)
 			{
-				switch (_SpellSkill->GetSkillInfo()->SkillType)
+				switch (_CastingSkill->GetSkillInfo()->SkillType)
 				{				
 				default:
 					break;
@@ -612,49 +632,7 @@ void CMonster::UpdateSpell()
 
 				if (IsSpellSuccess == true)
 				{
-					// 일반, 버프, 디버프 처리			
-					switch (_SpellSkill->GetBufDeBufSkillKind())
-					{
-					case en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_NORMAL:						
-						break;
-					case en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_BUF:
-						break;
-					case en_BufDeBufSkillKind::BUF_DEBUF_SKILL_KIND_DEBUF:
-						{
-							auto DeBufsIter = _Target->_DeBufs.find(_SpellSkill->GetSkillInfo()->SkillType);
-							if (DeBufsIter != _Target->_DeBufs.end())
-							{
-								// 시전 완료된 스킬이 상대방의 디버프 목록에 있을 경우
-								CSkill* DeBufSkill = DeBufsIter->second;
-								if (DeBufSkill != nullptr)
-								{
-									DeBufSkill->GetSkillInfo()->SkillOverlapStep++;
-
-									DeBufSkill->StatusAbnormalDurationTimeStart();
-
-									CMessage* ResBufDeBufSkillPacket = G_NetworkManager->GetGameServer()->MakePacketBufDeBuf(_Target->_GameObjectInfo.ObjectId, false, DeBufSkill->GetSkillInfo());
-									G_NetworkManager->GetGameServer()->SendPacketFieldOfView(CurrentFieldOfViewObjectIDs, ResBufDeBufSkillPacket);
-									ResBufDeBufSkillPacket->Free();
-								}
-								else
-								{
-									CRASH("DeBufSkill nullptr")
-								}
-							}
-							else
-							{
-								// 시전 완료된 스킬이 상대방의 버프 목록에 없을 경우
-								switch (_SpellSkill->GetSkillInfo()->SkillType)
-								{								
-								default:
-									break;
-								}
-							}
-						}
-						break;
-					default:
-						break;
-					}
+					
 				}
 			}
 		}			
@@ -690,11 +668,9 @@ void CMonster::Move()
 {	
 	Vector2 NextPosition;
 
-	bool CanMove = _Channel->GetMap()->MonsterCango(this, &NextPosition);
+	bool CanMove = _Channel->GetMap()->MonsterCango(this);
 	if (CanMove == true)
 	{
-		_GameObjectInfo.ObjectPositionInfo.Position = NextPosition;		
-
 		Vector2Int CollisionPosition;
 		CollisionPosition.X = (int32)_GameObjectInfo.ObjectPositionInfo.Position.X;
 		CollisionPosition.Y = (int32)_GameObjectInfo.ObjectPositionInfo.Position.Y;
