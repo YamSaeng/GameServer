@@ -1,0 +1,52 @@
+{
+  "DropItems": [
+    {
+      "GoblinDropItems": [
+        {
+          "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN",
+          "Probability": 70,
+          "MinCount": 1,
+          "MaxCount": 10
+        },
+        {
+          "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_FABRIC",
+          "Probability": 30,
+          "MinCount": 1,
+          "MaxCount": 10
+        }
+      ],
+      "StoneDropItems": [
+        {
+          "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_STONE",
+          "Probability": 90,
+          "MinCount": 5,
+          "MaxCount": 15
+        }
+      ],
+      "TreeDropItems": [
+        {
+          "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG",
+          "Probability": 90,
+          "MinCount": 5,
+          "MaxCount": 15
+        }
+      ],
+      "PotatoDropItems": [
+        {
+          "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO",
+          "Probability": 99,
+          "MinCount": 1,
+          "MaxCount": 3
+        }
+      ],
+      "CornDropItems": [
+        {
+          "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_CROP_FRUIT_CORN",
+          "Probability": 99,
+          "MinCount": 1,
+          "MaxCount": 10
+        }
+      ]
+    }
+  ]
+}
