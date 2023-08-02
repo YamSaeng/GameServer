@@ -847,32 +847,7 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			}			
 
 			MonsterData->EquipmentItems.push_back(BootEquipmentItemType);
-		}
-
-		for (auto& DropDataFiled : Filed["MonsterDropData"].GetArray())
-		{
-			int Probability = DropDataFiled["Probability"].GetInt();
-			string DropItemSmallCategory = DropDataFiled["DropItemSmallCategory"].GetString();
-			int8 MinCount = (int8)(DropDataFiled["MinCount"].GetInt());
-			int16 MaxCount = (int16)(DropDataFiled["MaxCount"].GetInt());
-
-			st_DropData DropData;
-
-			if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_LEATHER")
-			{
-				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER;
-			}
-			else if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN")
-			{
-				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN;
-			}
-
-			DropData.Probability = Probability;
-			DropData.MinCount = MinCount;
-			DropData.MaxCount = MaxCount;
-
-			MonsterData->DropItems.push_back(DropData);
-		}
+		}		
 
 		_Monsters.insert(pair<en_GameObjectType, st_MonsterData*>(MonsterType, MonsterData));
 	}
@@ -2382,32 +2357,7 @@ void CDataManager::LoadDataEnvironment(wstring LoadFileName)
 			EnvironmentData->Level = Level;
 			EnvironmentData->MaxHP = MaxHP;
 			EnvironmentData->RecoveryTime = RecoveryTime;
-		}
-
-		for (auto& DropDataFiled : Filed["EnvironmentDropData"].GetArray())
-		{
-			int Probability = DropDataFiled["Probability"].GetInt();
-			string DropItemSmallCategory = DropDataFiled["DropItemSmallCategory"].GetString();
-			int8 MinCount = (int8)(DropDataFiled["MinCount"].GetInt());
-			int16 MaxCount = (int16)(DropDataFiled["MaxCount"].GetInt());
-
-			st_DropData DropData;
-
-			if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_STONE")
-			{
-				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE;
-			}
-			else if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG")
-			{
-				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG;
-			}
-
-			DropData.Probability = Probability;
-			DropData.MinCount = MinCount;
-			DropData.MaxCount = MaxCount;
-
-			EnvironmentData->DropItems.push_back(DropData);
-		}
+		}		
 
 		_Environments.insert(pair<en_GameObjectType, st_EnvironmentData*>(EnvironmentType, EnvironmentData));
 	}
@@ -2444,32 +2394,7 @@ void CDataManager::LoadDataCrop(wstring LoadFileName)
 			int MaxHP = CropStatInfoFiled["MaxHP"].GetInt();
 
 			CropData->MaxHP = MaxHP;
-		}
-
-		for (auto& CropDropDataFiled : Filed["CropDropData"].GetArray())
-		{
-			int Probability = CropDropDataFiled["Probability"].GetInt();
-			string DropItemSmallCategory = CropDropDataFiled["DropItemSmallCategory"].GetString();
-			int8 MinCount = (int8)(CropDropDataFiled["MinCount"].GetInt());
-			int16 MaxCount = (int16)(CropDropDataFiled["MaxCount"].GetInt());
-
-			st_DropData DropData;
-
-			if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO")
-			{
-				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO;
-			}
-			else if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_CROP_FRUIT_CORN")
-			{
-				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_FRUIT_CORN;
-			}
-
-			DropData.Probability = Probability;
-			DropData.MinCount = MinCount;
-			DropData.MaxCount = MaxCount;
-
-			CropData->DropItems.push_back(DropData);
-		}
+		}		
 
 		_Crops.insert(pair<en_GameObjectType, st_CropData*>(CropType, CropData));
 	}
@@ -2916,6 +2841,137 @@ void CDataManager::LoadDataOptionInfo(wstring LoadFileName)
 		}
 
 		_OptionItemInfoDatas.insert(pair<int8, st_OptionItemInfo*>((int8)OptionItemInfo->OptionType, OptionItemInfo));
+	}
+}
+
+void CDataManager::LoadDataDropItem(wstring LoadFileName)
+{
+	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());
+
+	rapidjson::Document Document;
+	Document.Parse(FileStr);
+
+	for (auto& Filed : Document["DropItems"].GetArray())
+	{
+		vector<st_DropData> GoblinDropItems;
+		for (auto& GoblinFiled : Filed["GoblinDropItems"].GetArray())
+		{
+			string DropItemSmallCategory = GoblinFiled["DropItemSmallCategory"].GetString();
+			int Probability = GoblinFiled["Probability"].GetInt();
+			int8 MinCount = (int8)(GoblinFiled["MinCount"].GetInt());
+			int16 MaxCount = (int16)(GoblinFiled["MaxCount"].GetInt());
+
+			st_DropData DropData;
+
+			if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_FABRIC")
+			{
+				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_FABRIC;
+			}
+			else if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN")
+			{
+				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN;
+			}
+
+			DropData.Probability = Probability;
+			DropData.MinCount = MinCount;
+			DropData.MaxCount = MaxCount;
+
+			GoblinDropItems.push_back(DropData);
+		}
+
+		vector<st_DropData> StoneDropItmes;
+		for (auto& StoneFiled : Filed["StoneDropItems"].GetArray())
+		{
+			string DropItemSmallCategory = StoneFiled["DropItemSmallCategory"].GetString();
+			int Probability = StoneFiled["Probability"].GetInt();
+			int8 MinCount = (int8)(StoneFiled["MinCount"].GetInt());
+			int16 MaxCount = (int16)(StoneFiled["MaxCount"].GetInt());
+
+			st_DropData DropData;
+
+			if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_STONE")
+			{
+				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE;
+			}			
+
+			DropData.Probability = Probability;
+			DropData.MinCount = MinCount;
+			DropData.MaxCount = MaxCount;
+
+			StoneDropItmes.push_back(DropData);
+		}
+
+		vector<st_DropData> TreeDropItmes;
+		for (auto& TreeFiled : Filed["TreeDropItems"].GetArray())
+		{
+			string DropItemSmallCategory = TreeFiled["DropItemSmallCategory"].GetString();
+			int Probability = TreeFiled["Probability"].GetInt();
+			int8 MinCount = (int8)(TreeFiled["MinCount"].GetInt());
+			int16 MaxCount = (int16)(TreeFiled["MaxCount"].GetInt());
+
+			st_DropData DropData;
+
+			if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG")
+			{
+				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG;
+			}
+
+			DropData.Probability = Probability;
+			DropData.MinCount = MinCount;
+			DropData.MaxCount = MaxCount;
+
+			TreeDropItmes.push_back(DropData);
+		}		
+
+		vector<st_DropData> PotatoDropItmes;
+		for (auto& PotatoFiled : Filed["PotatoDropItems"].GetArray())
+		{
+			string DropItemSmallCategory = PotatoFiled["DropItemSmallCategory"].GetString();
+			int Probability = PotatoFiled["Probability"].GetInt();
+			int8 MinCount = (int8)(PotatoFiled["MinCount"].GetInt());
+			int16 MaxCount = (int16)(PotatoFiled["MaxCount"].GetInt());
+
+			st_DropData DropData;
+
+			if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO")
+			{
+				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO;
+			}
+
+			DropData.Probability = Probability;
+			DropData.MinCount = MinCount;
+			DropData.MaxCount = MaxCount;
+
+			PotatoDropItmes.push_back(DropData);
+		}
+
+		vector<st_DropData> CornDropItmes;
+		for (auto& CornFiled : Filed["CornDropItems"].GetArray())
+		{
+			string DropItemSmallCategory = CornFiled["DropItemSmallCategory"].GetString();
+			int Probability = CornFiled["Probability"].GetInt();
+			int8 MinCount = (int8)(CornFiled["MinCount"].GetInt());
+			int16 MaxCount = (int16)(CornFiled["MaxCount"].GetInt());
+
+			st_DropData DropData;
+
+			if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_CROP_FRUIT_CORN")
+			{
+				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_CROP_FRUIT_CORN;
+			}
+
+			DropData.Probability = Probability;
+			DropData.MinCount = MinCount;
+			DropData.MaxCount = MaxCount;
+
+			CornDropItmes.push_back(DropData);
+		}
+
+		_DropItems.insert(pair<en_GameObjectType, vector<st_DropData>>(en_GameObjectType::OBJECT_GOBLIN, GoblinDropItems));
+		_DropItems.insert(pair<en_GameObjectType, vector<st_DropData>>(en_GameObjectType::OBJECT_STONE, StoneDropItmes));
+		_DropItems.insert(pair<en_GameObjectType, vector<st_DropData>>(en_GameObjectType::OBJECT_TREE, TreeDropItmes));
+		_DropItems.insert(pair<en_GameObjectType, vector<st_DropData>>(en_GameObjectType::OBJECT_CROP_POTATO, PotatoDropItmes));
+		_DropItems.insert(pair<en_GameObjectType, vector<st_DropData>>(en_GameObjectType::OBJECT_CROP_CORN, CornDropItmes));
 	}
 }
 

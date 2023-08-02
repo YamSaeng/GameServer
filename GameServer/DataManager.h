@@ -13,6 +13,8 @@ public:
 
 	map<int32, st_StatInfo*> _PlayerStatus;
 
+	map<en_GameObjectType, vector<st_DropData>> _DropItems;
+
 	// 몬스터 데이터
 	map<en_GameObjectType, st_MonsterData*> _Monsters;
 
@@ -85,6 +87,8 @@ public:
 	void LoadDataMerchant(wstring LoadFileName);
 	void LoadDataMapInfo(wstring LoadFileName);
 	void LoadDataOptionInfo(wstring LoadFileName);
+
+	void LoadDataDropItem(wstring LoadFileName);
 
 	st_SkillInfo* FindSkillData(en_SkillType FindSkillType);
 	st_StatInfo* FindObjectStatusData(en_GameObjectType GameObjectType, int16 Level);
