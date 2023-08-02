@@ -7,14 +7,6 @@
           "Level": 1,
           "MaxHP": 3
         }
-      ],
-      "EnvironmentDropData": [
-        {
-          "Probability": 90,
-          "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_STONE",
-          "MinCount": 5,
-          "MaxCount": 15
-        }
       ]
     },
     {      
@@ -23,14 +15,6 @@
         {
           "Level": 1,
           "MaxHP": 3
-        }
-      ],
-      "EnvironmentDropData": [
-        {
-          "Probability": 90,
-          "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG",
-          "MinCount": 5,
-          "MaxCount": 15
         }
       ]
     }

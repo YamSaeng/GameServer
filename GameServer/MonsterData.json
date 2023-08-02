@@ -11,8 +11,8 @@
           "Luck": 10,
           "MaxHP": 200,
           "MaxMP": 10,
-          "MinMeleeAttackDamage": 5,
-          "MaxMeleeAttackDamage": 10,
+          "MinMeleeAttackDamage": 0,
+          "MaxMeleeAttackDamage": 0,
           "MeleeAttackHitRate": 1500,
           "MagicDamage": 0,
           "MagicHitRate": 0,
@@ -41,21 +41,7 @@
           "RightHand": "ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD",
           "Boot": "ITEM_SMALL_CATEGORY_NONE"
         }        
-      ],
-      "MonsterDropData": [
-        {
-          "Probability": 90,
-          "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN",
-          "MinCount": 1,
-          "MaxCount": 10
-        },
-        {
-          "Probability": 10,
-          "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD",
-          "MinCount": 1,
-          "MaxCount": 1
-        }
-      ]
+      ]      
     }
   ]
 }

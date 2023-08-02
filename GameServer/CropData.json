@@ -6,14 +6,6 @@
         {
           "MaxHP": 1
         }
-      ],
-      "CropDropData": [
-        {
-          "Probability": 99,
-          "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO",
-          "MinCount": 1,
-          "MaxCount": 3
-        }
       ]
     },
     {
@@ -21,14 +13,6 @@
       "CropStatInfo": [
         {
           "MaxHP": 1
-        }
-      ],
-      "CropDropData": [
-        {
-          "Probability": 99,
-          "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_CROP_FRUIT_CORN",
-          "MinCount": 1,
-          "MaxCount": 10
         }
       ]
     }
