@@ -34,7 +34,6 @@ struct st_MonsterData
 	int32 PatrolTick; // 정찰 속도
 	int32 AttackTick; // 공격 속도
 	vector<en_SmallItemCategory> EquipmentItems; // 기본 착용 장비 목록
-	vector<st_DropData> DropItems; // 몬스터가 드랍하는 아이템 정보
 	int64 ReSpawnTime;
 	int16 GetDPPoint;
 	int32 GetExpPoint;
@@ -58,14 +57,12 @@ struct st_EnvironmentData
 	int32 Level;
 	int32 MaxHP;
 	int64 RecoveryTime;
-	vector<st_DropData> DropItems;
 };
 
 struct st_CropData
 {
 	string CropName;
 	int32 MaxHP;
-	vector<st_DropData> DropItems;
 };
 
 struct st_MapInfoData
