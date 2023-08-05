@@ -757,6 +757,52 @@ void CGameObject::Update()
 				}
 			}
 			break;
+		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_INTERACTION:
+			{
+				int16 InteractionType;
+				*GameObjectJob->GameObjectJobMessage >> InteractionType;
+
+				int16 ObjectType;
+				*GameObjectJob->GameObjectJobMessage >> ObjectType;
+
+				int64 ObjectID;
+				*GameObjectJob->GameObjectJobMessage >> ObjectID;
+
+				switch ((en_InteractionType)InteractionType)
+				{
+				case en_InteractionType::INTERACTION_TYPE_ROOTING:
+					{
+						if (_Channel != nullptr)
+						{
+							CGameObject* InteractionObject = _Channel->FindChannelObject(ObjectID, (en_GameObjectType)ObjectType);
+							if (InteractionObject != nullptr)
+							{
+								CCreature* InteractionCreatureObject = dynamic_cast<CCreature*>(InteractionObject);
+								if (InteractionCreatureObject != nullptr)
+								{
+									CInventory** GoblinInventorys = InteractionCreatureObject->GetInventoryManager()->GetInventoryManager();
+									for (int i = 0; i < InteractionCreatureObject->GetInventoryManager()->GetInventoryCount(); i++)
+									{
+										vector<st_ItemInfo> GoblinInventoryItems = GoblinInventorys[i]->DBInventorySaveReturnItems();
+
+										CPlayer* Player = dynamic_cast<CPlayer*>(this);
+										if (Player != nullptr)
+										{
+											CMessage* ResInteractionRootingPacket = G_NetworkManager->GetGameServer()->MakePacketResInteractionRooting(InteractionObject->_GameObjectInfo.ObjectId, GoblinInventoryItems);
+											G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResInteractionRootingPacket);
+										}
+									}
+								}
+							}
+						}
+					}
+					break;
+				default:
+					break;
+				}
+
+			}
+			break;
 		case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_FULL_RECOVERY:
 			{
 				for (auto DebufSkillIter : _DeBufs)
