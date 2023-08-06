@@ -981,6 +981,7 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_FABRIC:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
@@ -1070,6 +1071,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(en_GameObjectType GameObjectTy
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_FABRIC:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
@@ -1206,6 +1208,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
+		case en_GameObjectType::OBJECT_ITEM_MATERIAL_FABRIC:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
@@ -1864,6 +1867,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 					Vector2::Zero,
 					EnterChannelMonster);				
 				
+				EnterChannelMonster->NPCInventoryCreate();
+
 				auto MonsterData = G_Datamanager->_Monsters.find(EnterChannelMonster->_GameObjectInfo.ObjectType);
 				if (MonsterData != G_Datamanager->_Monsters.end())
 				{
@@ -1878,7 +1883,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 							}
 						}
 					}
-				}
+				}				
 
 				EnterChannelMonster->Start();
 
@@ -2079,6 +2084,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_FABRIC:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
@@ -2198,6 +2204,7 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_FABRIC:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
