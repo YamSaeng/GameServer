@@ -96,13 +96,7 @@ bool CGoblin::OnDamaged(CGameObject* Attacker, int32 Damage)
 		
 		CMessage* ResDieMessagePacket = G_NetworkManager->GetGameServer()->MakePacketObjectDie(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo.State);
 		G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, ResDieMessagePacket);
-		ResDieMessagePacket->Free();
-
-		G_ObjectManager->ObjectItemSpawn(_Channel, Attacker->_GameObjectInfo.ObjectId,
-			Attacker->_GameObjectInfo.ObjectType,
-			_GameObjectInfo.ObjectPositionInfo.CollisionPosition,
-			_GameObjectInfo.ObjectPositionInfo.Position,
-			_GameObjectInfo.ObjectType);
+		ResDieMessagePacket->Free();		
 
 		Attacker->_GameObjectInfo.ObjectStatInfo.DP += _GetDPPoint;
 
