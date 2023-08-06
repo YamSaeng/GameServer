@@ -20,6 +20,7 @@ public:
 	//--------------------------------------------
 	void NPCInit(en_NonPlayerType NonPlayerType);
 	
+	void NPCInventoryCreate();
 protected:
 	CInventoryManager _Inventory;
 	CEquipmentBox _Equipment;
