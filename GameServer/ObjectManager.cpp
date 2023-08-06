@@ -269,6 +269,7 @@ CItem* CObjectManager::ItemCreate(en_SmallItemCategory NewItemSmallCategory)
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_FABRIC:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT:
@@ -332,6 +333,7 @@ void CObjectManager::ItemReturn(CItem* ReturnItem)
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_FABRIC:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT:
@@ -371,123 +373,49 @@ void CObjectManager::MapTileInfoSpawn(int64& MapID)
 
 }
 
-void CObjectManager::ObjectItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_GameObjectType KillerObjectType, 
+void CObjectManager::WorldItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_GameObjectType KillerObjectType, 
 	Vector2Int SpawnIntPosition, Vector2 SpawnPosition, en_GameObjectType SpawnItemOwnerType)
 {
-	bool Find = false;
-	en_SmallItemCategory DropItemCategory;
-	int16 DropItemCount = 0;	
+	auto DropItemIter = G_Datamanager->_DropItems.find(SpawnItemOwnerType);
+	if (DropItemIter != G_Datamanager->_DropItems.end())
+	{		
+		en_SmallItemCategory DropItemCategory;
+		int16 DropItemCount = 0;
 
-	random_device RD;
-	mt19937 Gen(RD());
-	uniform_real_distribution<float> RandomDropPoint(0, 1); // 0.0 ~ 1.0
-	float RandomPoint = 100 * RandomDropPoint(Gen);
+		random_device RD;
+		mt19937 Gen(RD());
+		uniform_real_distribution<float> RandomDropPoint(0, 1); // 0.0 ~ 1.0
+		float RandomPoint = 100 * RandomDropPoint(Gen);
 
-	int32 Sum = 0;
+		int32 Sum = 0;		
 
-	switch (SpawnItemOwnerType)
-	{
-	case en_GameObjectType::OBJECT_GOBLIN:	
+		vector<st_DropData> DropItems = (*DropItemIter).second;
+		for (st_DropData DropItem : DropItems)
 		{
-			auto FindMonsterDropItem = G_Datamanager->_Monsters.find(SpawnItemOwnerType);
-			st_MonsterData MonsterData = *(*FindMonsterDropItem).second;
+			Sum += DropItem.Probability;
 
-			for (st_DropData DropItem : MonsterData.DropItems)
+			if (Sum >= RandomPoint)
 			{
-				Sum += DropItem.Probability;
+				uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
+				DropItemCount = RandomDropItemCount(Gen);
+				DropItemCategory = DropItem.DropItemSmallCategory;
 
-				if (Sum >= RandomPoint)
-				{
-					Find = true;
-					// 드랍 확정 되면 해당 아이템 읽어오기
-					auto FindDropItemInfo = G_Datamanager->_Items.find((int16)DropItem.DropItemSmallCategory);
-					if (FindDropItemInfo == G_Datamanager->_Items.end())
-					{
-						CRASH("DropItemInfo를 찾지 못함");
-					}
+				// 아이템 생성
+				CItem* WorldDripItem = ItemCreate(DropItemCategory);
+				WorldDripItem->_ItemInfo.ItemCount = DropItemCount;
 
-					uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
-					DropItemCount = RandomDropItemCount(Gen);
-					DropItemCategory = DropItem.DropItemSmallCategory;
-					break;
-				}
+				WorldDripItem->_GameObjectInfo.ObjectType = WorldDripItem->_ItemInfo.ItemObjectType;
+				WorldDripItem->_GameObjectInfo.ObjectName = WorldDripItem->_ItemInfo.ItemName;
+				WorldDripItem->_GameObjectInfo.OwnerObjectId = KillerId;
+				WorldDripItem->_GameObjectInfo.OwnerObjectType = (en_GameObjectType)KillerObjectType;
+				WorldDripItem->_SpawnPosition = SpawnIntPosition;
+				WorldDripItem->_GameObjectInfo.ObjectPositionInfo.Position = SpawnPosition;
+
+				st_GameObjectJob* EnterChannelItemJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobObjectEnterChannel(WorldDripItem);
+				SpawnChannel->_ChannelJobQue.Enqueue(EnterChannelItemJob);				
 			}
-		}
-		break;
-	case en_GameObjectType::OBJECT_STONE:
-	case en_GameObjectType::OBJECT_TREE:
-		{
-			auto FindEnvironmentDropItem = G_Datamanager->_Environments.find(SpawnItemOwnerType);
-			st_EnvironmentData EnvironmentData = *(*FindEnvironmentDropItem).second;
-
-			for (st_DropData DropItem : EnvironmentData.DropItems)
-			{
-				Sum += DropItem.Probability;
-
-				if (Sum >= RandomPoint)
-				{
-					Find = true;
-					// 드랍 확정 되면 해당 아이템 읽어오기
-					auto FindDropItemInfo = G_Datamanager->_Items.find((int16)DropItem.DropItemSmallCategory);
-					if (FindDropItemInfo == G_Datamanager->_Items.end())
-					{
-						CRASH("DropItemInfo를 찾지 못함");
-					}					
-
-					uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
-					DropItemCount = RandomDropItemCount(Gen);
-					DropItemCategory = DropItem.DropItemSmallCategory;
-					break;
-				}
-			}
-		}
-		break;
-	case en_GameObjectType::OBJECT_CROP_POTATO:
-	case en_GameObjectType::OBJECT_CROP_CORN:
-		{
-			auto FindCropDropItemIter = G_Datamanager->_Crops.find(SpawnItemOwnerType);
-			st_CropData CropData = *(*FindCropDropItemIter).second;
-
-			for (st_DropData DropItem : CropData.DropItems)
-			{
-				Sum += DropItem.Probability;
-
-				if (Sum >= RandomPoint)
-				{
-					Find = true;
-					// 드랍 확정 되면 해당 아이템 읽어오기
-					auto FindDropItemInfo = G_Datamanager->_Items.find((int16)DropItem.DropItemSmallCategory);
-					if (FindDropItemInfo == G_Datamanager->_Items.end())
-					{
-						CRASH("DropItemInfo를 찾지 못함");
-					}					
-
-					uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
-					DropItemCount = RandomDropItemCount(Gen);
-					DropItemCategory = DropItem.DropItemSmallCategory;
-					break;
-				}
-			}
-		}
-		break;
-	}
-
-	if (Find == true)
-	{
-		// 아이템 생성
-		CItem* NewItem = ItemCreate(DropItemCategory);
-		NewItem->_ItemInfo.ItemCount = DropItemCount;		
-
-		NewItem->_GameObjectInfo.ObjectType = NewItem->_ItemInfo.ItemObjectType;
-		NewItem->_GameObjectInfo.ObjectName = NewItem->_ItemInfo.ItemName;
-		NewItem->_GameObjectInfo.OwnerObjectId = KillerId;
-		NewItem->_GameObjectInfo.OwnerObjectType = (en_GameObjectType)KillerObjectType;
-		NewItem->_SpawnPosition = SpawnIntPosition;
-		NewItem->_GameObjectInfo.ObjectPositionInfo.Position = SpawnPosition;			
-
-		st_GameObjectJob* EnterChannelItemJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobObjectEnterChannel(NewItem);
-		SpawnChannel->_ChannelJobQue.Enqueue(EnterChannelItemJob);
-	}
+		}		
+	}		
 }
 
 void CObjectManager::ObjectItemDropToSpawn(CGameObject* DropOwnerObject, CChannel* SpawnChannel, en_SmallItemCategory DropItemType, int32 DropItemCount)

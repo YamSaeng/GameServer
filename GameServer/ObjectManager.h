@@ -131,7 +131,7 @@ public:
 	//------------------------------------------------------------------------------------------------
 	// 게임오브젝트에서 아이템 스폰
 	//------------------------------------------------------------------------------------------------
-	void ObjectItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_GameObjectType KillerObjectType, Vector2Int SpawnIntPosition,
+	void WorldItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_GameObjectType KillerObjectType, Vector2Int SpawnIntPosition,
 		Vector2 SpawnPosition, en_GameObjectType SpawnItemOwnerType);
 	//------------------------------------------------------------------------------------------------
 	// 아이템 버리기
