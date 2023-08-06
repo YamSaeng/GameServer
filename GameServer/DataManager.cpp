@@ -385,6 +385,10 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			{
 				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_YARN;
 			}
+			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_FABRIC")
+			{
+				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_FABRIC;
+			}
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL")
 			{
 				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL;
@@ -439,6 +443,10 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_YARN")
 			{
 				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN;
+			}
+			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_FABRIC")
+			{
+				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_FABRIC;
 			}
 			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_CHAR_COAL")
 			{
