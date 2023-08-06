@@ -67,6 +67,7 @@ void CSector::Insert(CGameObject* InsertGameObject)
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_FABRIC:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
@@ -139,6 +140,7 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_YARN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_FABRIC:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_CHAR_COAL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_NUGGET:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COPPER_INGOT:
