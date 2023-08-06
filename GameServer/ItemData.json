@@ -42,7 +42,7 @@
           "ItemObjectType": "OBJECT_ITEM_WEAPON_WOOD_GREAT_SWORD",
           "ItemExplain": "나무로 만든 대검",
           "ItemName": "나무 대검",
-          "ItemEquipmentPart": "EQUIPMENT_PARTS_BOTH_HAND",
+          "ItemEquipmentPart": "EQUIPMENT_PARTS_RIGHT_HAND",
           "ItemWidth": 1,
           "ItemHeight": 4,
           "ItemCollisionX": 1.5,
@@ -147,7 +147,7 @@
           "ItemObjectType": "OBJECT_ITEM_WEAPON_FARMING_TOOL_SHOVEL",
           "ItemExplain": "땅을 개간 할 수 있는 도구",
           "ItemName": "삽",
-          "ItemEquipmentPart": "EQUIPMENT_PARTS_BOTH_HAND",
+          "ItemEquipmentPart": "EQUIPMENT_PARTS_RIGHT_HAND",
           "ItemWidth": 1,
           "ItemHeight": 2,
           "ItemMinDamage": 1,
@@ -222,7 +222,7 @@
           "ItemExplain": "",
           "ItemName": "은전",
           "ItemWidth": 1,
-          "ItemHeight": 1,          
+          "ItemHeight": 1,
           "ItemMaxCount": 99
         },
         {
@@ -232,7 +232,7 @@
           "ItemExplain": "",
           "ItemName": "금전",
           "ItemWidth": 1,
-          "ItemHeight": 1,          
+          "ItemHeight": 1,
           "ItemMaxCount": 99
         },
         {
@@ -275,6 +275,18 @@
           "ItemObjectType": "OBJECT_ITEM_MATERIAL_YARN",
           "ItemExplain": "통나무를 가공해서 만든 실",
           "ItemName": "실",
+          "ItemWidth": 1,
+          "ItemHeight": 1,
+          "ItemMaxDurability": 50,
+          "ItemMaxCount": 99,
+          "ItemCraftingTime": 3000
+        },
+        {
+          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_FABRIC",
+          "ItemObjectType": "OBJECT_ITEM_MATERIAL_FABRIC",
+          "ItemExplain": "천으로 만든 옷감",
+          "ItemName": "옷감",
           "ItemWidth": 1,
           "ItemHeight": 1,
           "ItemMaxDurability": 50,
