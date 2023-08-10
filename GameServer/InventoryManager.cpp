@@ -17,10 +17,7 @@ CInventoryManager::~CInventoryManager()
 			delete _Inventorys[i];
 			_Inventorys[i] = nullptr;
 		}
-	}
-
-	delete _Inventorys;
-	_Inventorys = nullptr;
+	}	
 }
 
 int8 CInventoryManager::GetInventoryCount()
@@ -28,7 +25,7 @@ int8 CInventoryManager::GetInventoryCount()
 	return _InventoryCount;
 }
 
-CInventory** CInventoryManager::GetInventoryManager()
+vector<CInventory*> CInventoryManager::GetInventoryManager()
 {
 	return _Inventorys;
 }
@@ -41,11 +38,9 @@ void CInventoryManager::InventoryCreate(int8 InventoryCount, int8 Width, int8 He
 	_SliverCoinCount = 0;
 	_GoldCoinCount = 0;
 	
-	_Inventorys = new CInventory*[_InventoryCount];
-
 	for (int i = 0; i < InventoryCount; i++)
 	{
-		_Inventorys[i] = new CInventory;
+		_Inventorys.push_back(new CInventory);		
 		_Inventorys[i]->Init(Width, Height);
 	}	
 }

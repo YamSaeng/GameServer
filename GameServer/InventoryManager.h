@@ -16,7 +16,7 @@ public:
 	//-----------------------------------------------------------------
 	// 包府吝牢 Inventory 格废 馆券
 	//-----------------------------------------------------------------
-	CInventory** GetInventoryManager();
+	vector<CInventory*> GetInventoryManager();
 
 	//-----------------------------------------------------------------
 	// Inventory 积己
@@ -92,6 +92,6 @@ private:
 	int16 _SliverCoinCount;
 	int64 _GoldCoinCount;
 
-	// 包府窍绰 Inventory 格废
-	CInventory** _Inventorys;
+	// 包府窍绰 Inventory 格废	
+	vector<CInventory*> _Inventorys;
 };
