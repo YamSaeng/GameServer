@@ -374,6 +374,7 @@
     <None Include="CraftingTableData.json" />
     <None Include="CropData.json" />
     <None Include="DisciplineSkillDatas.json" />
+    <None Include="DropItemDatas.json" />
     <None Include="EnvironmentData.json" />
     <None Include="FightSkillDatas.json" />
     <None Include="MerchantItemData.json" />

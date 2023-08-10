@@ -142,6 +142,9 @@
     <Filter Include="ContentServer\Content\SkillBox\Skill\SkillObject">
       <UniqueIdentifier>{56523c36-ada6-47e3-8be5-eed55deaf9ec}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Util\Json,Xml\Drop">
+      <UniqueIdentifier>{6d6a25ae-e7ff-4725-9f02-8c86aeb7d149}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Type.h">
@@ -619,6 +622,9 @@
     </None>
     <None Include="MapInfoData.json">
       <Filter>Util\Json,Xml\Data\MapData</Filter>
+    </None>
+    <None Include="DropItemDatas.json">
+      <Filter>Util\Json,Xml\Drop</Filter>
     </None>
   </ItemGroup>
 </Project>

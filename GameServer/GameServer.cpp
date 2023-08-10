@@ -580,6 +580,9 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_MENU:
 		PacketProcReqMenu(SessionID, Message);
 		break;
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_INTERACTION:
+		PacketProcReqInteraction(SessionID, Message);
+		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_CS_GAME_REQ_HEARTBEAT:
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_PONG:
@@ -3164,6 +3167,70 @@ void CGameServer::PacketProcReqMenu(int64 SessionID, CMessage* Message)
 	ReturnSession(Session);
 }
 
+void CGameServer::PacketProcReqInteraction(int64 SessionID, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionID);
+
+	if (Session)
+	{
+		do
+		{
+			int64 AccountId;
+			int64 PlayerDBId;
+
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountId;
+
+			// AccountId가 맞는지 확인
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> PlayerDBId;
+
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			// 조종하고 있는 플레이어가 있는지 확인 
+			if (MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerDBId)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			int8 InteractionType;
+			*Message >> InteractionType;
+
+			int16 ObjectType;
+			*Message >> ObjectType;
+
+			int64 ObjectID;
+			*Message >> ObjectID;
+
+			st_GameObjectJob* InteractionJob = MakeGameObjectJobInteraction(InteractionType, ObjectType, ObjectID);
+			MyPlayer->_GameObjectJobQue.Enqueue(InteractionJob);
+		} while (0);
+	}
+
+	ReturnSession(Session);
+}
+
 void CGameServer::PacketProcReqItemLooting(int64 SessionId, CMessage* Message)
 {
 	// 아이템 줍기 처리
@@ -4669,7 +4736,7 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 	}		
 
 	// 가방 정보 DB에 저장	
-	CInventory** LeavePlayerInventorys = LeavePlayer->GetInventoryManager()->GetInventoryManager();
+	vector<CInventory*> LeavePlayerInventorys = LeavePlayer->GetInventoryManager()->GetInventoryManager();	
 
 	// 가방 DB 청소 후 새로 저장
 	for (int i = 0; i < LeavePlayer->GetInventoryManager()->GetInventoryCount(); i++)
@@ -5713,9 +5780,24 @@ st_GameObjectJob* CGameServer::MakeGameObjectMenu(int8 MenuType, CGameObject* Me
 
 	MenuJob->GameObjectJobMessage = MenuJobMessage;
 
-	return MenuJob;
+	return MenuJob;	
+}
 
-	return nullptr;
+st_GameObjectJob* CGameServer::MakeGameObjectJobInteraction(int16 InteractionType, int16 ObjectType, int64 ObjectID)
+{
+	st_GameObjectJob* InteractionJob = G_ObjectManager->GameObjectJobCreate();
+	InteractionJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_INTERACTION;
+
+	CGameServerMessage* InteractionJobMessage = CGameServerMessage::GameServerMessageAlloc();
+	InteractionJobMessage->Clear();
+
+	*InteractionJobMessage << InteractionType;
+	*InteractionJobMessage << ObjectType;
+	*InteractionJobMessage << ObjectID;
+
+	InteractionJob->GameObjectJobMessage = InteractionJobMessage;
+
+	return InteractionJob;
 }
 
 CGameServerMessage* CGameServer::MakePacketResEnterGame(bool EnterGameSuccess, st_GameObjectInfo* ObjectInfo, Vector2Int* SpawnPosition)
@@ -7163,6 +7245,31 @@ CGameServerMessage* CGameServer::MakePacketResMenu(int8 MenuType)
 	*ResMenuMessage << MenuType;	
 
 	return ResMenuMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketResInteractionRooting(int64 RootingObjectID, vector<st_ItemInfo> RootingItems)
+{
+	CGameServerMessage* ResInteractionRootingMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResInteractionRootingMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResInteractionRootingMessage->Clear();
+
+	*ResInteractionRootingMessage << (int16)en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_INTERACTION;
+	*ResInteractionRootingMessage << RootingObjectID;
+
+	int8 RootingItemsCount = (int8)RootingItems.size();
+	*ResInteractionRootingMessage << RootingItemsCount;
+	
+	for (st_ItemInfo RootingItem : RootingItems)
+	{
+		*ResInteractionRootingMessage << RootingItem;
+	}
+
+
+	return ResInteractionRootingMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketResRayCasting(int64 ObjectID, vector<st_RayCatingPosition>& RayCastingPositions)
