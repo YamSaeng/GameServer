@@ -780,15 +780,16 @@ void CGameObject::Update()
 								CCreature* InteractionCreatureObject = dynamic_cast<CCreature*>(InteractionObject);
 								if (InteractionCreatureObject != nullptr)
 								{
-									CInventory** GoblinInventorys = InteractionCreatureObject->GetInventoryManager()->GetInventoryManager();
+									vector<CInventory*> InteractionObjectInventorys = InteractionCreatureObject->GetInventoryManager()->GetInventoryManager();
+										
 									for (int i = 0; i < InteractionCreatureObject->GetInventoryManager()->GetInventoryCount(); i++)
 									{
-										vector<st_ItemInfo> GoblinInventoryItems = GoblinInventorys[i]->DBInventorySaveReturnItems();
+										vector<st_ItemInfo> GoblinInventoryItems = InteractionObjectInventorys[i]->DBInventorySaveReturnItems();
 
 										CPlayer* Player = dynamic_cast<CPlayer*>(this);
 										if (Player != nullptr)
 										{
-											CMessage* ResInteractionRootingPacket = G_NetworkManager->GetGameServer()->MakePacketResInteractionRooting(InteractionObject->_GameObjectInfo.ObjectId, GoblinInventoryItems);
+											CMessage* ResInteractionRootingPacket = G_NetworkManager->GetGameServer()->MakePacketResInteractionRooting(InteractionObject->_GameObjectInfo.ObjectId, en_InteractionType::INTERACTION_TYPE_ROOTING, GoblinInventoryItems);
 											G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResInteractionRootingPacket);
 										}
 									}
@@ -887,16 +888,12 @@ void CGameObject::Update()
 
 					switch (((CItem*)Item)->_ItemInfo.ItemSmallCategory)
 					{
-					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN:
-					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN:
-					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN:
+					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COIN:					
 						{
 							Player->GetInventoryManager()->InsertMoney(0, InsertItem);
 
 							CMessage* ResMoneyToInventoryPacket = G_NetworkManager->GetGameServer()->MakePacketResMoneyToInventory(Player->_GameObjectInfo.ObjectId,
-								Player->GetInventoryManager()->GetGoldCoin(),
-								Player->GetInventoryManager()->GetSliverCoin(),
-								Player->GetInventoryManager()->GetBronzeCoin(),
+								Player->GetInventoryManager()->GetCoin(),								
 								InsertItem->_ItemInfo,
 								ItemEach);
 							G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResMoneyToInventoryPacket);
