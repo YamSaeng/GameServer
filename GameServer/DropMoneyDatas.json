@@ -1,0 +1,9 @@
+{
+  "DropMoneyTable": [
+    {
+      "Level": 1,
+      "MoneyAmountMin": 5,
+      "MoneyAmountMax": 10
+    }    
+  ]
+}
