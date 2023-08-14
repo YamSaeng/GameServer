@@ -61,7 +61,8 @@ public:
 		// 작물 데이터 파싱
 		G_Datamanager->LoadDataCrop(L"CropData.json");
 		// 드랍 데이터 파싱
-		G_Datamanager->LoadDataDropItem(L"DropItemDatas.json");
+		G_Datamanager->LoadDataDropItem(L"DropItemDatas.json");		
+		G_Datamanager->LoadDataDropMoney(L"DropMoneyDatas.json");
 		// 제작템 데이터 파싱
 		G_Datamanager->LoadDataCrafting(L"CraftingData.json");
 		// 제작대 제작법 데이터 파싱
