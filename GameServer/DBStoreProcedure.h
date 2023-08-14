@@ -179,28 +179,24 @@ namespace SP
 	};
 
 	// GoldTable¿¡ Gold ÀúÀå
-	class CDBGameServerGoldPush : public CDBBind<5, 0>
+	class CDBGameServerGoldPush : public CDBBind<3, 0>
 	{
 	public:
-		CDBGameServerGoldPush(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGoldSave(?,?,?,?,?)}") {}
+		CDBGameServerGoldPush(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGoldSave(?,?,?)}") {}
 		void InAccoountId(int64& AccountDBId) { BindParam(0, AccountDBId); }
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
-		void InGoldCoin(int64& GoldCoin) { BindParam(2, GoldCoin); }
-		void InSliverCoin(int16& SliverCoin) { BindParam(3, SliverCoin); }
-		void InBronzeCoin(int16& BronzeCoin) { BindParam(4, BronzeCoin); }
+		void InCoin(int64& Coin) { BindParam(2, Coin); }
 	};
 
 	// GoldTable¿¡ ÀÖ´Â Gold ±Ü¾î¿È
-	class CDBGameServerGoldGet : public CDBBind<2, 3>
+	class CDBGameServerGoldGet : public CDBBind<2, 1>
 	{
 	public:
 		CDBGameServerGoldGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetGoldTableInfoToInventory(?,?)}") {}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
 
-		void OutGoldCoin(int64& GoldCoin) { BindCol(0, GoldCoin); }
-		void OutSliverCoin(int16& SliverCoin) { BindCol(1, SliverCoin); }
-		void OutBronzeCoin(int16& BronzeCoin) { BindCol(2, BronzeCoin); }
+		void OutCoin(int64& Coin) { BindCol(0, Coin); }		
 	};
 
 	// InventoryTable¿¡ ÀÖ´Â Item ¸ðµÎ ±Ü¾î¿È

@@ -63,9 +63,7 @@
 	<Table name="Gold" desc="Gold Table">
 		<Column name="AccountDBId" type="BigInt" notnull="true"/>
 		<Column name="PlayerDBId" type="BigInt" notnull="true"/>
-		<Column name="GoldCoin" type="BigInt" notnull="true"/>
-		<Column name="SliverCoin" type="SmallInt" notnull="true"/>
-		<Column name="BronzeCoin" type="SmallInt" notnull="true"/>
+		<Column name="Coin" type="BigInt" notnull="true"/>		
 		<Index type="clustered">
 			<PrimaryKey/>
 			<Column name="PlayerDBId"/>
@@ -417,14 +415,12 @@
 	<Procedure name="spGoldSave">
 		<Param name="@AccountDBId" type="BigInt"/>
 		<Param name="@PlayerDBId" type="BigInt"/>
-		<Param name="@GoldCount" type="BigInt"/>
-		<Param name="@SliverCount" type="SmallInt"/>
-		<Param name="@BronzeCount" type="SmallInt"/>
+		<Param name="@Coin" type="BigInt"/>		
 		<Body>
 			<![CDATA[
 	    SET NOCOUNT ON
         UPDATE [dbo].[Gold]
-        SET GoldCoin = (@GoldCount), SliverCoin = (@SliverCount), BronzeCoin = (@BronzeCount)
+        SET Coin = (@Coin)
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
 		</Body>
@@ -437,7 +433,7 @@
 		<Body>
 			<![CDATA[
 	    SET NOCOUNT ON
-        SELECT GoldCoin, SliverCoin, BronzeCoin
+        SELECT Coin
         FROM [dbo].[Gold]
         WHERE AccountDBId = (@AccountDBId) AND PlayerDBId = (@PlayerDBId)
       ]]>
@@ -493,23 +489,21 @@
 	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL' THEN 200
 	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_POTION_MANA_RESTORATION_POTION_SMALL' THEN 201	          
 	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_LEATHER' THEN 2000	          
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN' THEN 2001
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN' THEN 2002
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN' THEN 2003
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_STONE' THEN 2004
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG' THEN 2005
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK' THEN 2006
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_YARN' THEN 2007
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_FABRIC' THEN 2008			  
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL' THEN 2009
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET' THEN 2010
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT' THEN 2011
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET' THEN 2012
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT' THEN 2013
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CROP_SEED_POTATO' THEN 2014
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO' THEN 2015
-			  WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CROP_SEED_CORN' THEN 2016
-			  WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CROP_FRUIT_CORN' THEN 2017
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_COIN' THEN 2001	          
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_STONE' THEN 2002
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG' THEN 2003
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK' THEN 2004
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_YARN' THEN 2005
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_FABRIC' THEN 2006			  
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL' THEN 2007
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET' THEN 2008
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT' THEN 2009
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET' THEN 2010
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT' THEN 2011
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CROP_SEED_POTATO' THEN 2012
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO' THEN 2013
+			  WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CROP_SEED_CORN' THEN 2014
+			  WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CROP_FRUIT_CORN' THEN 2015
 			  WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE' THEN 5001
 	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL' THEN 5002
 	          ELSE ' '
@@ -567,23 +561,21 @@
 	                              WHEN @ItemSmallCategory = 200 THEN 'ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL'
 	                              WHEN @ItemSmallCategory = 201 THEN 'ITEM_SMALL_CATEGORY_POTION_MANA_RESTORATION_POTION_SMALL'	                              
 	                              WHEN @ItemSmallCategory = 2000 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_LEATHER'	                              
-	                              WHEN @ItemSmallCategory = 2001 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN'
-	                              WHEN @ItemSmallCategory = 2002 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN'
-	                              WHEN @ItemSmallCategory = 2003 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN'
-	                              WHEN @ItemSmallCategory = 2004 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_STONE'
-	                              WHEN @ItemSmallCategory = 2005 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG'
-	                              WHEN @ItemSmallCategory = 2006 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK'
-	                              WHEN @ItemSmallCategory = 2007 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_YARN'
-	                              WHEN @ItemSmallCategory = 2008 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_FABRIC'
-	                              WHEN @ItemSmallCategory = 2009 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL'
-	                              WHEN @ItemSmallCategory = 2010 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET'
-	                              WHEN @ItemSmallCategory = 2011 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT'
-	                              WHEN @ItemSmallCategory = 2012 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET'
-	                              WHEN @ItemSmallCategory = 2013 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT'
-	                              WHEN @ItemSmallCategory = 2014 THEN 'ITEM_SMALL_CATEGORY_CROP_SEED_POTATO'
-	                              WHEN @ItemSmallCategory = 2015 THEN 'ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO'
-								  WHEN @ItemSmallCategory = 2016 THEN 'ITEM_SMALL_CATEGORY_CROP_SEED_CORN'
-	                              WHEN @ItemSmallCategory = 2017 THEN 'ITEM_SMALL_CATEGORY_CROP_FRUIT_CORN'
+	                              WHEN @ItemSmallCategory = 2001 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_COIN'	                              
+	                              WHEN @ItemSmallCategory = 2002 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_STONE'
+	                              WHEN @ItemSmallCategory = 2003 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG'
+	                              WHEN @ItemSmallCategory = 2004 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK'
+	                              WHEN @ItemSmallCategory = 2005 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_YARN'
+	                              WHEN @ItemSmallCategory = 2006 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_FABRIC'
+	                              WHEN @ItemSmallCategory = 2007 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL'
+	                              WHEN @ItemSmallCategory = 2008 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET'
+	                              WHEN @ItemSmallCategory = 2009 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT'
+	                              WHEN @ItemSmallCategory = 2010 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET'
+	                              WHEN @ItemSmallCategory = 2011 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT'
+	                              WHEN @ItemSmallCategory = 2012 THEN 'ITEM_SMALL_CATEGORY_CROP_SEED_POTATO'
+	                              WHEN @ItemSmallCategory = 2013 THEN 'ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO'
+								  WHEN @ItemSmallCategory = 2014 THEN 'ITEM_SMALL_CATEGORY_CROP_SEED_CORN'
+	                              WHEN @ItemSmallCategory = 2015 THEN 'ITEM_SMALL_CATEGORY_CROP_FRUIT_CORN'
 	                              WHEN @ItemSmallCategory = 5001 THEN 'ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE'
 	                              WHEN @ItemSmallCategory = 5002 THEN 'ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL'
 	                              ELSE ' '
@@ -935,23 +927,21 @@
 	                              WHEN @ItemSmallCategory = 200 THEN 'ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL'
 	                              WHEN @ItemSmallCategory = 201 THEN 'ITEM_SMALL_CATEGORY_POTION_MANA_RESTORATION_POTION_SMALL'	                              
 	                              WHEN @ItemSmallCategory = 2000 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_LEATHER'	                              
-	                              WHEN @ItemSmallCategory = 2001 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN'
-	                              WHEN @ItemSmallCategory = 2002 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN'
-	                              WHEN @ItemSmallCategory = 2003 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN'
-	                              WHEN @ItemSmallCategory = 2004 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_STONE'
-	                              WHEN @ItemSmallCategory = 2005 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG'
-	                              WHEN @ItemSmallCategory = 2006 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK'
-	                              WHEN @ItemSmallCategory = 2007 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_YARN'
-								  WHEN @ItemSmallCategory = 2008 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_FABRIC'
-	                              WHEN @ItemSmallCategory = 2009 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL'
-	                              WHEN @ItemSmallCategory = 2010 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET'
-	                              WHEN @ItemSmallCategory = 2011 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT'
-	                              WHEN @ItemSmallCategory = 2012 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET'
-	                              WHEN @ItemSmallCategory = 2013 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT'
-	                              WHEN @ItemSmallCategory = 2014 THEN 'ITEM_SMALL_CATEGORY_CROP_SEED_POTATO'
-	                              WHEN @ItemSmallCategory = 2015 THEN 'ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO'
-								  WHEN @ItemSmallCategory = 2016 THEN 'ITEM_SMALL_CATEGORY_CROP_SEED_CORN'
-	                              WHEN @ItemSmallCategory = 2017 THEN 'ITEM_SMALL_CATEGORY_CROP_FRUIT_CORN'
+	                              WHEN @ItemSmallCategory = 2001 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_COIN'	                              
+	                              WHEN @ItemSmallCategory = 2002 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_STONE'
+	                              WHEN @ItemSmallCategory = 2003 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG'
+	                              WHEN @ItemSmallCategory = 2004 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK'
+	                              WHEN @ItemSmallCategory = 2005 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_YARN'
+								  WHEN @ItemSmallCategory = 2006 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_FABRIC'
+	                              WHEN @ItemSmallCategory = 2007 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL'
+	                              WHEN @ItemSmallCategory = 2008 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET'
+	                              WHEN @ItemSmallCategory = 2009 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT'
+	                              WHEN @ItemSmallCategory = 2010 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET'
+	                              WHEN @ItemSmallCategory = 2011 THEN 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT'
+	                              WHEN @ItemSmallCategory = 2012 THEN 'ITEM_SMALL_CATEGORY_CROP_SEED_POTATO'
+	                              WHEN @ItemSmallCategory = 2013 THEN 'ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO'
+								  WHEN @ItemSmallCategory = 2014 THEN 'ITEM_SMALL_CATEGORY_CROP_SEED_CORN'
+	                              WHEN @ItemSmallCategory = 2015 THEN 'ITEM_SMALL_CATEGORY_CROP_FRUIT_CORN'
 	                              WHEN @ItemSmallCategory = 5001 THEN 'ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE'
 	                              WHEN @ItemSmallCategory = 5002 THEN 'ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL'
 	                              ELSE ' '
@@ -1052,23 +1042,21 @@
 	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL' THEN 200
 	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_POTION_MANA_RESTORATION_POTION_SMALL' THEN 201	          
 	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_LEATHER' THEN 2000	          
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN' THEN 2001
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN' THEN 2002
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN' THEN 2003
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_STONE' THEN 2004
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG' THEN 2005
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK' THEN 2006
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_YARN' THEN 2007
-			  WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_FABRIC' THEN 2008
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL' THEN 2009
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET' THEN 2010
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT' THEN 2011
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET' THEN 2012
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT' THEN 2013
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CROP_SEED_POTATO' THEN 2014
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO' THEN 2015
-			  WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CROP_SEED_CORN' THEN 2016
-	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CROP_FRUIT_CORN' THEN 2017
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_COIN' THEN 2001	          
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_STONE' THEN 2002
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG' THEN 2003
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK' THEN 2004
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_YARN' THEN 2005
+			  WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_FABRIC' THEN 2006
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_CHAR_COAL' THEN 2007
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_NUGGET' THEN 2008
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_COPPER_INGOT' THEN 2009
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_NUGGET' THEN 2010
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_MATERIAL_IRON_INGOT' THEN 2011
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CROP_SEED_POTATO' THEN 2012
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CROP_FRUIT_POTATO' THEN 2013
+			  WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CROP_SEED_CORN' THEN 2014
+	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CROP_FRUIT_CORN' THEN 2015
 	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CRAFTING_TABLE_FURANCE' THEN 5001
 	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL' THEN 5002
 	          ELSE ' '
