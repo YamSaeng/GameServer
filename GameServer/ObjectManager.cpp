@@ -262,9 +262,7 @@ CItem* CObjectManager::ItemCreate(en_SmallItemCategory NewItemSmallCategory)
 		NewItem = _ConsumableMemoryPool->Alloc();
 		break;
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:	
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COIN:	
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
@@ -326,9 +324,7 @@ void CObjectManager::ItemReturn(CItem* ReturnItem)
 		_ConsumableMemoryPool->Free((CConsumable*)ReturnItem);
 		break;
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER:	
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN:
-	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN:
+	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COIN:	
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_LOG:
 	case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_WOOD_FLANK:
