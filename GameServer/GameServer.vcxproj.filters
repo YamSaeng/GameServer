@@ -626,5 +626,8 @@
     <None Include="DropItemDatas.json">
       <Filter>Util\Json,Xml\Drop</Filter>
     </None>
+    <None Include="DropMoneyDatas.json">
+      <Filter>Util\Json,Xml\Drop</Filter>
+    </None>
   </ItemGroup>
 </Project>

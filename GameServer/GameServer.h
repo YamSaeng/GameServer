@@ -727,7 +727,7 @@ public:
 	//------------------------------------------------------------------------------------------------------------------------------------------------------
 	// 게임서버 가방 돈 저장 요청 응답 패킷 조합
 	//------------------------------------------------------------------------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResMoneyToInventory(int64 TargetObjectID, int64 GoldCoinCount, int16 SliverCoinCount, int16 BronzeCoinCount, st_ItemInfo ItemInfo, int16 ItemEach);
+	CGameServerMessage* MakePacketResMoneyToInventory(int64 TargetObjectID, int64 Coin, st_ItemInfo ItemInfo, int16 ItemEach);
 	//-----------------------------------------------------------------------------------------------
 	// 게임서버 제작대 재료 아이템 목록 패킷 조합
 	//-----------------------------------------------------------------------------------------------
@@ -799,7 +799,7 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 루팅 상호작용 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResInteractionRooting(int64 RootingObjectID, vector<st_ItemInfo> RootingItems);
+	CGameServerMessage* MakePacketResInteractionRooting(int64 RootingObjectID, en_InteractionType InteractionType, vector<st_ItemInfo> RootingItems);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 그룹장 위임 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------

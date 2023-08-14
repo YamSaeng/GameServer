@@ -4318,23 +4318,17 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 			CharacterGoldGet.InAccountDBId(MyPlayer->_AccountId);
 			CharacterGoldGet.InPlayerDBId(MyPlayer->_GameObjectInfo.ObjectId);
 
-			int64 GoldCoin = 0;
-			int16 SliverCoin = 0;
-			int16 BronzeCoin = 0;
+			int64 Coin = 0;			
 
-			CharacterGoldGet.OutGoldCoin(GoldCoin);
-			CharacterGoldGet.OutSliverCoin(SliverCoin);
-			CharacterGoldGet.OutBronzeCoin(BronzeCoin);
+			CharacterGoldGet.OutCoin(Coin);			
 
 			if (CharacterGoldGet.Execute() && CharacterGoldGet.Fetch())
 			{
 				// DB에서 읽어온 Gold를 Inventory에 저장한다.
-				MyPlayer->GetInventoryManager()->DBMoneyInsert(GoldCoin, SliverCoin, BronzeCoin);
+				MyPlayer->GetInventoryManager()->DBMoneyInsert(Coin);
 
 				// 골드 정보 담기
-				*ResCharacterInfoMessage << GoldCoin;
-				*ResCharacterInfoMessage << SliverCoin;
-				*ResCharacterInfoMessage << BronzeCoin;
+				*ResCharacterInfoMessage << Coin;				
 			}
 #pragma endregion	
 
@@ -6899,7 +6893,7 @@ CGameServerMessage* CGameServer::MakePacketResItemToInventory(int64 TargetObject
 	return ResItemToInventoryMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResMoneyToInventory(int64 TargetObjectID, int64 GoldCoinCount, int16 SliverCoinCount, int16 BronzeCoinCount, st_ItemInfo ItemInfo, int16 ItemEach)
+CGameServerMessage* CGameServer::MakePacketResMoneyToInventory(int64 TargetObjectID, int64 Coin, st_ItemInfo ItemInfo, int16 ItemEach)
 {
 	CGameServerMessage* ResMoneyToInventoryMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResMoneyToInventoryMessage == nullptr)
@@ -6913,9 +6907,7 @@ CGameServerMessage* CGameServer::MakePacketResMoneyToInventory(int64 TargetObjec
 
 	*ResMoneyToInventoryMessage << TargetObjectID;
 	*ResMoneyToInventoryMessage << true;
-	*ResMoneyToInventoryMessage << GoldCoinCount;
-	*ResMoneyToInventoryMessage << SliverCoinCount;
-	*ResMoneyToInventoryMessage << BronzeCoinCount;
+	*ResMoneyToInventoryMessage << Coin;	
 	*ResMoneyToInventoryMessage << ItemInfo;
 	*ResMoneyToInventoryMessage << ItemEach;
 	*ResMoneyToInventoryMessage << true;
@@ -7247,7 +7239,7 @@ CGameServerMessage* CGameServer::MakePacketResMenu(int8 MenuType)
 	return ResMenuMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResInteractionRooting(int64 RootingObjectID, vector<st_ItemInfo> RootingItems)
+CGameServerMessage* CGameServer::MakePacketResInteractionRooting(int64 RootingObjectID, en_InteractionType InteractionType, vector<st_ItemInfo> RootingItems)
 {
 	CGameServerMessage* ResInteractionRootingMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResInteractionRootingMessage == nullptr)
@@ -7259,6 +7251,8 @@ CGameServerMessage* CGameServer::MakePacketResInteractionRooting(int64 RootingOb
 
 	*ResInteractionRootingMessage << (int16)en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_INTERACTION;
 	*ResInteractionRootingMessage << RootingObjectID;
+
+	*ResInteractionRootingMessage << (int8)InteractionType;
 
 	int8 RootingItemsCount = (int8)RootingItems.size();
 	*ResInteractionRootingMessage << RootingItemsCount;
