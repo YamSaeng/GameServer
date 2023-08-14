@@ -357,18 +357,10 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			{
 				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_LEATHER;
 			}			
-			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN")
+			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_COIN")
 			{
-				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN;
-			}
-			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN")
-			{
-				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN;
-			}
-			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN")
-			{
-				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN;
-			}
+				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COIN;
+			}			
 			else if (SmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_STONE")
 			{
 				MaterialItemInfo->ItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_STONE;
@@ -416,18 +408,10 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			{
 				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER;
 			}			
-			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_BRONZE_COIN")
+			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_COIN")
 			{
-				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN;
-			}
-			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_SLIVER_COIN")
-			{
-				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIVER_COIN;
-			}
-			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_GOLD_COIN")
-			{
-				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_GOLD_COIN;
-			}
+				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_COIN;
+			}			
 			else if (ItemObjectType == "OBJECT_ITEM_MATERIAL_STONE")
 			{
 				MaterialItemInfo->ItemObjectType = en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE;
@@ -2875,9 +2859,9 @@ void CDataManager::LoadDataDropItem(wstring LoadFileName)
 			{
 				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_FABRIC;
 			}
-			else if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN")
+			else if (DropItemSmallCategory == "ITEM_SMALL_CATEGORY_MATERIAL_COIN")
 			{
-				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN;
+				DropData.DropItemSmallCategory = en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COIN;
 			}
 
 			DropData.Probability = Probability;
@@ -2980,6 +2964,27 @@ void CDataManager::LoadDataDropItem(wstring LoadFileName)
 		_DropItems.insert(pair<en_GameObjectType, vector<st_DropData>>(en_GameObjectType::OBJECT_TREE, TreeDropItmes));
 		_DropItems.insert(pair<en_GameObjectType, vector<st_DropData>>(en_GameObjectType::OBJECT_CROP_POTATO, PotatoDropItmes));
 		_DropItems.insert(pair<en_GameObjectType, vector<st_DropData>>(en_GameObjectType::OBJECT_CROP_CORN, CornDropItmes));
+	}
+}
+
+void CDataManager::LoadDataDropMoney(wstring LoadFileName)
+{
+	char* FileStr = FileUtils::LoadFile(LoadFileName.c_str());
+
+	rapidjson::Document Document;
+	Document.Parse(FileStr);
+
+	for (auto& Filed : Document["DropMoneyTable"].GetArray())
+	{
+		int8 Level = (int8)Filed["Level"].GetInt();
+		int32 MoneyAmountMin = Filed["MoneyAmountMin"].GetInt();
+		int32 MoneyAmountMax = Filed["MoneyAmountMax"].GetInt();
+
+		Vector2Int Money;
+		Money.X = MoneyAmountMin;
+		Money.Y = MoneyAmountMax;
+
+		_DropMoneys.insert(pair<int8, Vector2Int>(Level,Money));
 	}
 }
 
