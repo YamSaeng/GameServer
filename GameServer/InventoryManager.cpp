@@ -33,10 +33,8 @@ vector<CInventory*> CInventoryManager::GetInventoryManager()
 void CInventoryManager::InventoryCreate(int8 InventoryCount, int8 Width, int8 Height)
 {
 	_InventoryCount = InventoryCount;
-
-	_BronzeCoinCount = 0;
-	_SliverCoinCount = 0;
-	_GoldCoinCount = 0;
+	
+	_Coin = 0;
 	
 	for (int i = 0; i < InventoryCount; i++)
 	{
@@ -48,50 +46,8 @@ void CInventoryManager::InventoryCreate(int8 InventoryCount, int8 Width, int8 He
 void CInventoryManager::InsertMoney(int8 SelectInventoryIndex, CItem* InsertMoneyItem)
 {
 	if (InsertMoneyItem != nullptr)
-	{
-		int16 SliverCoinCount = 0;
-		int64 GoldCoinCount = 0;
-
-		Vector2Int GridPosition;
-
-		switch (InsertMoneyItem->_ItemInfo.ItemSmallCategory)
-		{
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN:
-			_BronzeCoinCount += (int8)(InsertMoneyItem->_ItemInfo.ItemCount);
-			SliverCoinCount = (int8)(_BronzeCoinCount / 100);
-
-			if (SliverCoinCount > 0)
-			{
-				_BronzeCoinCount = (int8)(_BronzeCoinCount - (SliverCoinCount * 100));
-			}
-			else
-			{
-				_BronzeCoinCount += (int8)(SliverCoinCount * 100);
-			}
-
-			_SliverCoinCount += SliverCoinCount;
-			break;
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN:
-			_SliverCoinCount += (byte)(InsertMoneyItem->_ItemInfo.ItemCount);
-			GoldCoinCount = (byte)(_SliverCoinCount / 100);
-
-			if (GoldCoinCount > 0)
-			{
-				_SliverCoinCount = (byte)(_SliverCoinCount - (GoldCoinCount * 100));
-			}
-			else
-			{
-				_SliverCoinCount += (byte)(GoldCoinCount * 100);
-			}
-
-			_GoldCoinCount += GoldCoinCount;
-			break;
-		case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN:
-			_GoldCoinCount += (int8)(InsertMoneyItem->_ItemInfo.ItemCount);
-			break;		
-		default:
-			break;
-		}
+	{			
+		_Coin += InsertMoneyItem->_ItemInfo.ItemCount;		
 	}
 }
 
@@ -150,11 +106,9 @@ void CInventoryManager::DBItemInsertItem(int8 SelectInventoryIndex, CItem* NewIt
 	}	
 }
 
-void CInventoryManager::DBMoneyInsert(int64 GoldCoin, int16 SliverCoin, int16 BronzeCoin)
+void CInventoryManager::DBMoneyInsert(int16 Coin)
 {
-	_GoldCoinCount = GoldCoin;
-	_SliverCoinCount = SliverCoin;
-	_BronzeCoinCount = BronzeCoin;
+	_Coin = Coin;	
 }
 
 CItem* CInventoryManager::SelectItem(int8 SelectInventoryIndex, int8 TilePositionX, int8 TilePositionY)
@@ -215,18 +169,7 @@ vector<CItem*> CInventoryManager::FindAllInventoryItem(int8 SelectInventoryIndex
 	return _Inventorys[SelectInventoryIndex]->FindAllInventoryItem(FindItemSmallItemCategory);
 }
 
-int64 CInventoryManager::GetGoldCoin()
+int16 CInventoryManager::GetCoin()
 {
-	return _GoldCoinCount;
+	return _Coin;
 }
-
-int16 CInventoryManager::GetSliverCoin()
-{
-	return _SliverCoinCount;
-}
-
-int16 CInventoryManager::GetBronzeCoin()
-{
-	return _BronzeCoinCount;
-}
-

@@ -40,7 +40,7 @@ public:
 	// DB에 기록된 아이템 인벤토리에 넣기
 	//--------------------------------------------------------------
 	void DBItemInsertItem(int8 SelectInventoryIndex, CItem* NewItem);
-	void DBMoneyInsert(int64 GoldCoin, int16 SliverCoin, int16 BronzeCoin);
+	void DBMoneyInsert(int16 Coin);
 
 	//----------------------------------------------------------------------------------------
 	// 아이템 선택
@@ -80,17 +80,13 @@ public:
 	//--------------------------------------
 	// 돈 반환
 	//--------------------------------------
-	int64 GetGoldCoin();
-	int16 GetSliverCoin();
-	int16 GetBronzeCoin();
+	int16 GetCoin();	
 private:
 	// 관리하는 Inventory 개수
 	int8 _InventoryCount;
 
-	// 보유하고 있는 동전, 은전, 금전
-	int16 _BronzeCoinCount;
-	int16 _SliverCoinCount;
-	int64 _GoldCoinCount;
+	// 보유하고 돈
+	int16 _Coin;	
 
 	// 관리하는 Inventory 목록	
 	vector<CInventory*> _Inventorys;
