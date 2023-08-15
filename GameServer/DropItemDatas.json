@@ -1,13 +1,7 @@
 {
   "DropItems": [
     {
-      "GoblinDropItems": [
-        {
-          "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN",
-          "Probability": 70,
-          "MinCount": 1,
-          "MaxCount": 10
-        },
+      "GoblinDropItems": [        
         {
           "DropItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_FABRIC",
           "Probability": 30,
