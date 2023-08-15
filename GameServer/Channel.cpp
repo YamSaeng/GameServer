@@ -973,10 +973,8 @@ CGameObject* CChannel::FindChannelObject(int64 ObjectID, en_GameObjectType GameO
 	case en_GameObjectType::OBJECT_ITEM_ARMOR_LEATHER_BOOT:
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEALTH_RESTORATION_POTION_SMALL:
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_MANA_RESTORATION_POTION_SMALL:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIVER_COIN:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_GOLD_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:	
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COIN:	
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
@@ -1064,9 +1062,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(en_GameObjectType GameObjectTy
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEALTH_RESTORATION_POTION_SMALL:
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_MANA_RESTORATION_POTION_SMALL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIVER_COIN:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_GOLD_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COIN:	
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
@@ -1201,9 +1197,7 @@ vector<CGameObject*> CChannel::FindChannelObjects(vector<st_FieldOfViewInfo>& Fi
 		case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEALTH_RESTORATION_POTION_SMALL:
 		case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_MANA_RESTORATION_POTION_SMALL:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
-		case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
-		case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIVER_COIN:
-		case en_GameObjectType::OBJECT_ITEM_MATERIAL_GOLD_COIN:
+		case en_GameObjectType::OBJECT_ITEM_MATERIAL_COIN:		
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 		case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
@@ -2077,9 +2071,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEALTH_RESTORATION_POTION_SMALL:
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_MANA_RESTORATION_POTION_SMALL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIVER_COIN:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_GOLD_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COIN:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
@@ -2197,9 +2189,7 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_HEALTH_RESTORATION_POTION_SMALL:
 	case en_GameObjectType::OBJECT_ITEM_CONSUMABLE_MANA_RESTORATION_POTION_SMALL:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_SLIVER_COIN:
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_GOLD_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COIN:	
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_LOG:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_WOOD_FLANK:
