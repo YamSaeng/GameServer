@@ -406,7 +406,7 @@
 		<Body>
 			<![CDATA[
 	    SET NOCOUNT ON
-        INSERT INTO [dbo].[Gold] VALUES ((@AccountDBId),(@PlayerDBId),(0),(0),(0))
+        INSERT INTO [dbo].[Gold] VALUES ((@AccountDBId),(@PlayerDBId),(0))
       ]]>
 		</Body>
 	</Procedure>
