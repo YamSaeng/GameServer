@@ -7,7 +7,7 @@
 		<Column name="AccountDBId" type="BigInt" notnull="true"/>
 		<Column name="PlayerName" type="nvarchar(20)" notnull="true"/>		
 		<Column name="PlayerIndex" type="TinyInt" notnull="true"/>
-		<Column name="Level" type="int" notnull="true"/>
+		<Column name="Level" type="TinyInt" notnull="true"/>
 		<Column name="Str" type="int" notnull="true"/>
 		<Column name="Dex" type="int" notnull="true"/>
 		<Column name="Int" type="int" notnull="true"/>
@@ -189,7 +189,7 @@
 		<Param name="@AccountId" type="BigInt"/>
 		<Param name="@PlayerName" type="nvarchar(20)"/>		
 		<Param name="@PlayerIndex" type="TinyInt"/>
-		<Param name="@Level" type="int"/>
+		<Param name="@Level" type="TinyInt"/>
 		<Param name="@Str" type="int"/>
 		<Param name="@Dex" type="int"/>
 		<Param name="@Int" type="int"/>
@@ -1236,7 +1236,7 @@
 	<Procedure name="spPlayerLeaveInfoSave">
 		<Param name="@AccountDBId" type="BigInt"/>
 		<Param name="@PlayerDBId" type="BigInt"/>
-		<Param name="@Level" type="Int"/>
+		<Param name="@Level" type="TinyInt"/>
 		<Param name="@Str" type="Int"/>
 		<Param name="@Dex" type="Int"/>
 		<Param name="@Int" type="Int"/>

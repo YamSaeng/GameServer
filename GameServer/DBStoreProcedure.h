@@ -70,7 +70,7 @@ namespace SP
 		void InAccountID(int64& AccountID) { BindParam(0, AccountID); }
 		void InPlayerName(wstring& PlayerName) { BindParam(1, PlayerName.c_str()); }		
 		void InPlayerIndex(int8& PlayerIndex) { BindParam(2, PlayerIndex); }
-		void InLevel(int32& Level) { BindParam(3, Level); }
+		void InLevel(int8& Level) { BindParam(3, Level); }
 		void InStr(int32& Str) { BindParam(4, Str); }
 		void InDex(int32& Dex) { BindParam(5, Dex); }
 		void InInt(int32& Int) { BindParam(6, Int); }
@@ -337,7 +337,7 @@ namespace SP
 		CDBGameServerLeavePlayerStatInfoSave(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spPlayerLeaveInfoSave(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}"){}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
-		void InLevel(int32& Level) { BindParam(2, Level); }
+		void InLevel(int8& Level) { BindParam(2, Level); }
 		void InStr(int32& Str) { BindParam(3, Str); }
 		void InDex(int32& Dex) { BindParam(4, Dex); }
 		void InInt(int32& Int) { BindParam(5, Int); }
