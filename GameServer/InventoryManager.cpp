@@ -43,12 +43,9 @@ void CInventoryManager::InventoryCreate(int8 InventoryCount, int8 Width, int8 He
 	}	
 }
 
-void CInventoryManager::InsertMoney(int8 SelectInventoryIndex, CItem* InsertMoneyItem)
+void CInventoryManager::InsertMoney(int8 SelectInventoryIndex, int64 Coin)
 {
-	if (InsertMoneyItem != nullptr)
-	{			
-		_Coin += InsertMoneyItem->_ItemInfo.ItemCount;		
-	}
+	_Coin += Coin;
 }
 
 void CInventoryManager::InsertItem(int8 SelectInventoryIndex, CItem* InsertNewItem)
