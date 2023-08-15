@@ -1045,7 +1045,7 @@ struct st_PositionInfo
 
 struct st_StatInfo
 {
-	int32 Level;
+	int8 Level;
 	int32 Str;
 	int32 Dex;
 	int32 Int;
