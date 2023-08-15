@@ -637,7 +637,7 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 	{
 		for (auto& PlayerCharacterFiled : Filed["PlayerCharacterLevelDataList"].GetArray())
 		{
-			int Level = PlayerCharacterFiled["Level"].GetInt();
+			int8 Level = (int8)PlayerCharacterFiled["Level"].GetInt();
 			int MaxHP = PlayerCharacterFiled["MaxHP"].GetInt();
 			int MaxMP = PlayerCharacterFiled["MaxMP"].GetInt();
 			int MaxDP = PlayerCharacterFiled["MaxDP"].GetInt();
@@ -678,7 +678,7 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			PlayerStatus->Int = 10;
 			PlayerStatus->Luck = 10;
 
-			_PlayerStatus.insert(pair<int32, st_StatInfo*>(PlayerStatus->Level, PlayerStatus));
+			_PlayerStatus.insert(pair<int8, st_StatInfo*>(PlayerStatus->Level, PlayerStatus));
 		}
 	}	
 }
@@ -3063,7 +3063,7 @@ st_SkillInfo* CDataManager::FindSkillData(en_SkillType FindSkillType)
 	}	
 }
 
-st_StatInfo* CDataManager::FindObjectStatusData(en_GameObjectType GameObjectType, int16 Level)
+st_StatInfo* CDataManager::FindObjectStatusData(en_GameObjectType GameObjectType, int8 Level)
 {
 	switch (GameObjectType)
 	{

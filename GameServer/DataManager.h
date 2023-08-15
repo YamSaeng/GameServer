@@ -11,7 +11,7 @@ public:
 	map<int16, st_ItemInfo*> _Items;		
 	map<int16, st_ItemInfo*> _GeneralMerchantItems;
 
-	map<int32, st_StatInfo*> _PlayerStatus;
+	map<int8, st_StatInfo*> _PlayerStatus;
 
 	map<en_GameObjectType, vector<st_DropData>> _DropItems;
 	map<int8, Vector2Int> _DropMoneys;
@@ -93,7 +93,7 @@ public:
 	void LoadDataDropMoney(wstring LoadFileName);
 
 	st_SkillInfo* FindSkillData(en_SkillType FindSkillType);
-	st_StatInfo* FindObjectStatusData(en_GameObjectType GameObjectType, int16 Level);
+	st_StatInfo* FindObjectStatusData(en_GameObjectType GameObjectType, int8 Level);
 	st_ItemInfo* FindItemData(en_SmallItemCategory FindItemCategory);	
 	int32 FindMonsterExperienceData(en_GameObjectType MonsterGameObjectType);
 };
