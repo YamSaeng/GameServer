@@ -207,30 +207,10 @@
         },
         {
           "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
-          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_BRONZE_COIN",
-          "ItemObjectType": "OBJECT_ITEM_MATERIAL_BRONZE_COIN",
+          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_COIN",
+          "ItemObjectType": "OBJECT_ITEM_MATERIAL_COIN",
           "ItemExplain": "",
-          "ItemName": "동전",
-          "ItemWidth": 1,
-          "ItemHeight": 1,
-          "ItemMaxCount": 99
-        },
-        {
-          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
-          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_SLIVER_COIN",
-          "ItemObjectType": "OBJECT_ITEM_MATERIAL_SLIVER_COIN",
-          "ItemExplain": "",
-          "ItemName": "은전",
-          "ItemWidth": 1,
-          "ItemHeight": 1,
-          "ItemMaxCount": 99
-        },
-        {
-          "ItemMediumCategory": "ITEM_MEDIUM_CATEGORY_NONE",
-          "ItemSmallCategory": "ITEM_SMALL_CATEGORY_MATERIAL_GOLD_COIN",
-          "ItemObjectType": "OBJECT_ITEM_MATERIAL_GOLD_COIN",
-          "ItemExplain": "",
-          "ItemName": "금전",
+          "ItemName": "돈",
           "ItemWidth": 1,
           "ItemHeight": 1,
           "ItemMaxCount": 99
