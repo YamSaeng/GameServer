@@ -916,6 +916,7 @@ enum class en_GameObjectJobType : int16
 	GAMEOBJECT_JOB_TYPE_CHANNEL_CRAFTING_TABLE_SELECT_ITEM,
 	GAMEOBJECT_JOB_TYPE_CHANNEL_CRAFTING_TABLE_NON_SELECT,
 	GAMEOBJECT_JOB_TYPE_CHANNEL_RIGHT_MOUSE_OBJECT_INFO,
+	GAMEOBJECT_JOB_TYPE_CHANNEL_LEFT_MOUSE_DRAG_OBJECTS_SELECT,
 	GAMEOBJECT_JOB_TYPE_CHANNEL_SEED_FARMING,
 	GAMEOBJECT_JOB_TYPE_CHANNEL_PLANT_GROWTH_CHECK,	
 
@@ -1006,6 +1007,7 @@ enum class en_CollisionPosition : int8
 {
 	COLLISION_POSITION_NONE,
 	COLLISION_POSITION_OBJECT,
+	COLLISION_COMMON_MIDDLE,
 	COLLISION_POSITION_SKILL_MIDDLE,
 	COLLISION_POSITION_SKILL_FRONT
 };
@@ -1158,13 +1160,16 @@ struct st_ItemInfo
 {
 	int64 ItemDBId;							  // 아이템 DB에 저장되어 있는 ID		
 	int64 InventoryItemNumber;				  // 아이템이 인벤토리에 속할때 구분할 숫자	
-	bool ItemIsEquipped;			          // 아이템을 착용할 수 있는지			
+	bool ItemIsEquipped;			          // 아이템을 착용할 수 있는지		
+	bool ItemIsSearching;					  // 탐색이 완료 된 아이템인지 여부
 	int16 ItemWidth;			     		  // 아이템 너비
 	int16 ItemHeight;						  // 아이템 높이	
 	float ItemCollisionX;					  // 장비 아이템 감지 박스 X 크기
 	float ItemCollisionY;					  // 장비 아이템 감지 박스 Y 크기
 	int16 ItemTileGridPositionX;			  // 인벤토리 위치 X
 	int16 ItemTileGridPositionY;			  // 인벤토리 위치 Y
+	int32 ItemSearchingTime;				  // 아이템 탐색 시간
+	int64 ItemSearchingRemainTime;			  // 아이템 탐색 남은 시간
 	en_UIObjectInfo OwnerCraftingTable;		  // 아이템이 제작 가능한 아이템이라면 아이템이 속한 제작대
 	en_LargeItemCategory ItemLargeCategory;   // 아이템 대분류
 	en_MediumItemCategory ItemMediumCategory; // 아이템 중분류
@@ -1196,6 +1201,7 @@ struct st_ItemInfo
 	st_ItemInfo()
 	{
 		ItemDBId = 0;
+		ItemIsSearching = true;
 		InventoryItemNumber = 0;		
 		ItemWidth = 0;
 		ItemHeight = 0;		
@@ -1224,6 +1230,9 @@ struct st_ItemInfo
 
 		ItemCraftingTime = 0;
 		ItemCraftingRemainTime = 0;
+
+		ItemSearchingTime = 0;
+		ItemSearchingRemainTime = 0;
 
 		ItemMinDamage = 0;
 		ItemMaxDamage = 0;
