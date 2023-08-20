@@ -314,6 +314,23 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_LEFT_MOUSE_OBJECT_INFO,
 
 	//------------------------------------------------------------
+	// 게임서버 왼쪽 마우스 드래그 다중 선택 요청
+	// int64 AccountID
+	// int64 PlayerID
+	// float MouseDragStartPositionX
+	// float MouseDragStartPositionY
+	// float MouseDragEndPositionX
+	// float MouseDragEndPositionY
+	//------------------------------------------------------------
+	en_PACKET_C2S_LEFT_MOUSE_DRAG_OBJECTS_SELECT,
+
+	//------------------------------------------------------------
+	// 게임서버 왼쪽 마우스 드래그 다중 선택 요청 응답
+	// long ObjectIds
+	//------------------------------------------------------------
+	en_PACKET_S2C_LEFT_MOUSE_DRAG_OBJECTS_SELECT,
+
+	//------------------------------------------------------------
 	// 게임서버 왼쪽 UI 마우스 정보 요청 
 	// int64 AccountID
 	// int64 PlayerID
