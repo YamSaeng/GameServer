@@ -487,6 +487,9 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_LEFT_MOUSE_UI_OBJECT_INFO:
 		PacketProcReqLeftMouseUIObjectInfo(SessionID, Message);
 		break;
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_LEFT_DRAG_OBJECTS_SELECT:
+		PacketProcReqLeftMouseDragObjectsSelect(SessionID, Message);
+		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_RIGHT_MOUSE_OBJECT_INFO:
 		PacketProcReqRightMouseObjectInfo(SessionID, Message);
 		break;	
@@ -1430,6 +1433,70 @@ void CGameServer::PacketProcReqLeftMouseUIObjectInfo(int64 SessionID, CMessage* 
 				}				
 				break;		
 			}
+		}
+	} while (0);
+
+	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcReqLeftMouseDragObjectsSelect(int64 SessionID, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionID);
+
+	do
+	{
+		if (Session)
+		{
+			int64 AccountId;
+			int64 PlayerId;
+
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountId;
+
+			if (Session->AccountId != AccountId)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> PlayerId;
+
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			if (MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerId)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			float MouseDragStartPositionX;
+			*Message >> MouseDragStartPositionX;
+
+			float MouseDragStartPositionY;
+			*Message >> MouseDragStartPositionY;
+
+			float MouseDragEndPositionX;
+			*Message >> MouseDragEndPositionX;
+
+			float MouseDragEndPositionY;
+			*Message >> MouseDragEndPositionY;
+
+			st_GameObjectJob* MouseDragObjectsSelectJob = MakeGameObjectLeftMouseDragObjectsSelect(PlayerId, MouseDragStartPositionX, MouseDragStartPositionY, MouseDragEndPositionX, MouseDragEndPositionY);
+			MyPlayer->GetChannel()->_ChannelJobQue.Enqueue(MouseDragObjectsSelectJob);			
 		}
 	} while (0);
 
@@ -5485,6 +5552,25 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobRightMouseObjectInfo(CGameObject
 	RightMouseObjectInfoJob->GameObjectJobMessage = RightMouseObjectInfoMessage;
 
 	return RightMouseObjectInfoJob;
+}
+
+st_GameObjectJob* CGameServer::MakeGameObjectLeftMouseDragObjectsSelect(int64 TargetID, float MouseDragStartPositionX, float MouseDragStartPositionY, float MouseDragEndPositionX, float MouseDragEndPositionY)
+{
+	st_GameObjectJob* LeftDragObjectsSelectJob = G_ObjectManager->GameObjectJobCreate();
+	LeftDragObjectsSelectJob->GameObjectJobType = en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_LEFT_MOUSE_DRAG_OBJECTS_SELECT;
+
+	CGameServerMessage* LeftDragObjectsSelectMessage = CGameServerMessage::GameServerMessageAlloc();
+	LeftDragObjectsSelectMessage->Clear();
+
+	*LeftDragObjectsSelectMessage << TargetID;
+	*LeftDragObjectsSelectMessage << MouseDragStartPositionX;
+	*LeftDragObjectsSelectMessage << MouseDragStartPositionY;
+	*LeftDragObjectsSelectMessage << MouseDragEndPositionX;
+	*LeftDragObjectsSelectMessage << MouseDragEndPositionY;
+
+	LeftDragObjectsSelectJob->GameObjectJobMessage = LeftDragObjectsSelectMessage;
+
+	return LeftDragObjectsSelectJob;
 }
 
 st_GameObjectJob* CGameServer::MakeGameObjectJobLeaveChannel(CGameObject* LeaveChannelObject)

@@ -159,6 +159,10 @@ private:
 	//----------------------------------------------------------------------------
 	void PacketProcReqLeftMouseUIObjectInfo(int64 SessionID, CMessage* Message);
 	//----------------------------------------------------------------------------
+	// 왼쪽 마우스 드래그 오브젝트 선택
+	//----------------------------------------------------------------------------
+	void PacketProcReqLeftMouseDragObjectsSelect(int64 SessionID, CMessage* Message);
+	//----------------------------------------------------------------------------
 	// 오른쪽 마우스 클릭 위치 오브젝트 정보 요청 처리
 	//----------------------------------------------------------------------------
 	void PacketProcReqRightMouseObjectInfo(int64 SessionId, CMessage* Message);	
@@ -462,6 +466,10 @@ public:
 	// 채널에서 제작대 제작 아이템 선택 잡 생성 함수
 	//-------------------------------------------------------------------------------
 	st_GameObjectJob* MakeGameObjectJobRightMouseObjectInfo(CGameObject* ReqPlayer, int64& FindObjectID, int16& FindObjectType);
+	//-------------------------------------------------------------------------------
+	// 채널에서 마우스 드래그 다중 오브젝트 선택 잡 생성 함수
+	//-------------------------------------------------------------------------------
+	st_GameObjectJob* MakeGameObjectLeftMouseDragObjectsSelect(int64 TargetID, float MouseDragStartPositionX, float MouseDragStartPositionY, float MouseDragEndPositionX, float MouseDragEndPositionY);
 	//-------------------------------------------------------------------------------
 	// 플레이어 제외 오브젝트 채널 퇴장 잡 생성 함수
 	//-------------------------------------------------------------------------------
