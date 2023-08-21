@@ -22,8 +22,9 @@ public:
 	CRectCollision();
 	~CRectCollision();
 
-	void Init(en_CollisionPosition CollisionPosition, en_GameObjectType ObjectType, Vector2 InitPosition, Vector2 Direction, CGameObject* OwnerObject = nullptr);
+	void ObjectRectInit(en_CollisionPosition CollisionPosition, en_GameObjectType ObjectType, Vector2 InitPosition, Vector2 Direction, CGameObject* OwnerObject = nullptr);
 	void SkillRectInit(en_CollisionPosition CollisionPosition, CSkill* Skill, Vector2 InitPosition, Vector2 Direction,  CGameObject* OwnerObject = nullptr);
+	void LeftTopRightDownRectInit(Vector2 LeftTopPosition, Vector2 RightDownPosition);	
 
 	static bool IsCollision(CRectCollision* ARectCollision, CRectCollision* BRectCollision);
 	static bool IsOBBCollision(CRectCollision* ARectCollision, CRectCollision* BRectCollision);

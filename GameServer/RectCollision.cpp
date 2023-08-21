@@ -16,7 +16,7 @@ CRectCollision::~CRectCollision()
 
 }
 
-void CRectCollision::Init(en_CollisionPosition CollisionPosition, en_GameObjectType ObjectType, Vector2 InitPosition, Vector2 Direction, CGameObject* OwnerObject)
+void CRectCollision::ObjectRectInit(en_CollisionPosition CollisionPosition, en_GameObjectType ObjectType, Vector2 InitPosition, Vector2 Direction, CGameObject* OwnerObject)
 {
 	_RectCollisionActive = true;	
 
@@ -107,6 +107,24 @@ void CRectCollision::SkillRectInit(en_CollisionPosition CollisionPosition, CSkil
 
 	PositionUpdate();
 	RotateUpdate();	
+}
+
+void CRectCollision::LeftTopRightDownRectInit(Vector2 LeftTopPosition, Vector2 RightDownPosition)
+{
+	_RectCollisionActive = true;
+
+	_CollisionPosition = en_CollisionPosition::COLLISION_COMMON_MIDDLE;
+
+	_Size.X = RightDownPosition.X - LeftTopPosition.X;
+	_Size.Y = LeftTopPosition.Y - RightDownPosition.Y;
+
+	_Position.X = LeftTopPosition.X + _Size.X / 2.0f;
+	_Position.Y = RightDownPosition.Y + _Size.Y / 2.0f;
+
+	_Direction = Vector2::Zero;
+
+	PositionUpdate();
+	RotateUpdate();
 }
 
 bool CRectCollision::IsCollision(CRectCollision* ARectCollision, CRectCollision* BRectCollision)
