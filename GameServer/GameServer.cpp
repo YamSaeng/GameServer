@@ -487,7 +487,7 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_LEFT_MOUSE_UI_OBJECT_INFO:
 		PacketProcReqLeftMouseUIObjectInfo(SessionID, Message);
 		break;
-	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_LEFT_DRAG_OBJECTS_SELECT:
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_LEFT_MOUSE_DRAG_OBJECTS_SELECT:
 		PacketProcReqLeftMouseDragObjectsSelect(SessionID, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_RIGHT_MOUSE_OBJECT_INFO:
@@ -6053,6 +6053,29 @@ CGameServerMessage* CGameServer::MakePacketResLeftMousePositionObjectInfo(int64 
 	}
 
 	return ResMousePositionObjectInfoPacket;
+}
+
+CGameServerMessage* CGameServer::MakePacketResLeftMouseDragObjectsSelect(vector<int64> DragObjects)
+{
+	CGameServerMessage* ResLeftMouseDragObjectsSelectMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResLeftMouseDragObjectsSelectMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResLeftMouseDragObjectsSelectMessage->Clear();
+
+	*ResLeftMouseDragObjectsSelectMessage << (int16)en_PACKET_S2C_LEFT_MOUSE_DRAG_OBJECTS_SELECT;
+	
+	int8 DragObjectsCount = (int8)DragObjects.size();
+	*ResLeftMouseDragObjectsSelectMessage << DragObjectsCount;
+
+	for (auto DragObjectID : DragObjects)
+	{
+		*ResLeftMouseDragObjectsSelectMessage << DragObjectID;
+	}
+
+	return ResLeftMouseDragObjectsSelectMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketResCraftingTableCompleteItemSelect(int64 CraftingTableObjectID, en_SmallItemCategory SelectCompleteType, map<en_SmallItemCategory, CItem*> MaterialItems)
