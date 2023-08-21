@@ -785,11 +785,14 @@ void CGameObject::Update()
 									for (int i = 0; i < InteractionCreatureObject->GetInventoryManager()->GetInventoryCount(); i++)
 									{
 										vector<st_ItemInfo> GoblinInventoryItems = InteractionObjectInventorys[i]->DBInventorySaveReturnItems();
+										int16 Coin = InteractionCreatureObject->GetInventoryManager()->GetCoin();
 
 										CPlayer* Player = dynamic_cast<CPlayer*>(this);
 										if (Player != nullptr)
 										{
-											CMessage* ResInteractionRootingPacket = G_NetworkManager->GetGameServer()->MakePacketResInteractionRooting(InteractionObject->_GameObjectInfo.ObjectId, en_InteractionType::INTERACTION_TYPE_ROOTING, GoblinInventoryItems);
+											CMessage* ResInteractionRootingPacket = G_NetworkManager->GetGameServer()->MakePacketResInteractionRooting(InteractionObject->_GameObjectInfo.ObjectId,
+												en_InteractionType::INTERACTION_TYPE_ROOTING, 
+												GoblinInventoryItems, Coin);
 											G_NetworkManager->GetGameServer()->SendPacket(Player->_SessionId, ResInteractionRootingPacket);
 										}
 									}
@@ -890,7 +893,7 @@ void CGameObject::Update()
 					{
 					case en_SmallItemCategory::ITEM_SMALL_CATEGORY_MATERIAL_COIN:					
 						{
-							Player->GetInventoryManager()->InsertMoney(0, InsertItem);
+							Player->GetInventoryManager()->InsertMoney(0, ItemEach);
 
 							CMessage* ResMoneyToInventoryPacket = G_NetworkManager->GetGameServer()->MakePacketResMoneyToInventory(Player->_GameObjectInfo.ObjectId,
 								Player->GetInventoryManager()->GetCoin(),								
