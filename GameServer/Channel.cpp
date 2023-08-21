@@ -674,6 +674,64 @@ void CChannel::Update()
 					}
 				}
 				break;
+			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_LEFT_MOUSE_DRAG_OBJECTS_SELECT:
+				{
+					int64 TargetID;
+					*GameObjectJob->GameObjectJobMessage >> TargetID;
+
+					float MouseDragStartPositionX;
+					*GameObjectJob->GameObjectJobMessage >> MouseDragStartPositionX;
+
+					float MouseDragStartPositionY;
+					*GameObjectJob->GameObjectJobMessage >> MouseDragStartPositionY;
+
+					float MouseDragEndPositionX;
+					*GameObjectJob->GameObjectJobMessage >> MouseDragEndPositionX;
+
+					float MouseDragEndPositionY;
+					*GameObjectJob->GameObjectJobMessage >> MouseDragEndPositionY;					
+					
+					Vector2 LeftTop;
+					LeftTop.X = MouseDragStartPositionX;
+					LeftTop.Y = MouseDragStartPositionY;
+
+					Vector2 RightDown;
+					RightDown.X = MouseDragEndPositionX;
+					RightDown.Y = MouseDragEndPositionY;
+
+					CRectCollision* MouseDragRect = G_ObjectManager->RectCollisionCreate();
+					MouseDragRect->LeftTopRightDownRectInit(LeftTop, RightDown);
+
+					CGameObject* TargetObject = FindChannelObject(TargetID, en_GameObjectType::OBJECT_PLAYER);
+					if (TargetObject != nullptr)
+					{
+						CPlayer* TargetPlayer = dynamic_cast<CPlayer*>(TargetObject);
+						if (TargetPlayer != nullptr)
+						{
+							vector<int64> MouseDragObjects;
+
+							vector<CGameObject*> PlayerObjects = FindChannelObjects(en_GameObjectType::OBJECT_PLAYER);
+							for (CGameObject* PlayerObject : PlayerObjects)
+							{
+								if (CRectCollision::IsOBBCollision(MouseDragRect, PlayerObject->GetRectCollision()) == true)
+								{
+									MouseDragObjects.push_back(PlayerObject->_GameObjectInfo.ObjectId);
+								}
+							}
+
+							CMessage* CollisionSpawnPacket = G_NetworkManager->GetGameServer()->MakePacketRectCollisionSpawn(MouseDragRect);
+							G_NetworkManager->GetGameServer()->SendPacket(TargetPlayer->_SessionId, CollisionSpawnPacket);
+							CollisionSpawnPacket->Free();
+
+							CMessage* ResLeftMouseDragObjectsSelectPacket = G_NetworkManager->GetGameServer()->MakePacketResLeftMouseDragObjectsSelect(MouseDragObjects);
+							G_NetworkManager->GetGameServer()->SendPacket(TargetPlayer->_SessionId, ResLeftMouseDragObjectsSelectPacket);
+							ResLeftMouseDragObjectsSelectPacket->Free();
+
+							G_ObjectManager->RectCollisionReturn(MouseDragRect);
+						}
+					}
+				}			
+				break;
 			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_SEED_FARMING:
 				{
 					// 심고자 하는 씨앗 위치에 다른 오브젝트가 심어져 있는지 확인
@@ -1757,7 +1815,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 				EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;				
 
 				EnterChannelPlayer->GetRectCollision()->SetActive(true);
-				EnterChannelPlayer->GetRectCollision()->Init(en_CollisionPosition::COLLISION_POSITION_OBJECT, EnterChannelPlayer->_GameObjectInfo.ObjectType,
+				EnterChannelPlayer->GetRectCollision()->ObjectRectInit(en_CollisionPosition::COLLISION_POSITION_OBJECT, EnterChannelPlayer->_GameObjectInfo.ObjectType,
 					EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position,
 					Vector2::Zero,
 					EnterChannelPlayer);
@@ -1820,7 +1878,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 				GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.Position.Y = GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;
 
 				GeneralMerchantNPC->GetRectCollision()->SetActive(true);
-				GeneralMerchantNPC->GetRectCollision()->Init(en_CollisionPosition::COLLISION_POSITION_OBJECT, GeneralMerchantNPC->_GameObjectInfo.ObjectType,
+				GeneralMerchantNPC->GetRectCollision()->ObjectRectInit(en_CollisionPosition::COLLISION_POSITION_OBJECT, GeneralMerchantNPC->_GameObjectInfo.ObjectType,
 					GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.Position,
 					Vector2::Zero,
 					GeneralMerchantNPC);
@@ -1856,7 +1914,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;				
 								
 				EnterChannelMonster->GetRectCollision()->SetActive(true);
-				EnterChannelMonster->GetRectCollision()->Init(en_CollisionPosition::COLLISION_POSITION_OBJECT, EnterChannelMonster->_GameObjectInfo.ObjectType,
+				EnterChannelMonster->GetRectCollision()->ObjectRectInit(en_CollisionPosition::COLLISION_POSITION_OBJECT, EnterChannelMonster->_GameObjectInfo.ObjectType,
 					EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position,
 					Vector2::Zero,
 					EnterChannelMonster);				
@@ -1912,7 +1970,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;
 								
 				EnterChannelEnvironment->GetRectCollision()->SetActive(true);	
-				EnterChannelEnvironment->GetRectCollision()->Init(en_CollisionPosition::COLLISION_POSITION_OBJECT, EnterChannelEnvironment->_GameObjectInfo.ObjectType,
+				EnterChannelEnvironment->GetRectCollision()->ObjectRectInit(en_CollisionPosition::COLLISION_POSITION_OBJECT, EnterChannelEnvironment->_GameObjectInfo.ObjectType,
 					EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position,
 					Vector2::Zero,
 					EnterChannelEnvironment);
@@ -1943,7 +2001,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 				SwordBlade->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;				
 								
 				SwordBlade->GetRectCollision()->SetActive(true);
-				SwordBlade->GetRectCollision()->Init(en_CollisionPosition::COLLISION_POSITION_OBJECT, SwordBlade->_GameObjectInfo.ObjectType,
+				SwordBlade->GetRectCollision()->ObjectRectInit(en_CollisionPosition::COLLISION_POSITION_OBJECT, SwordBlade->_GameObjectInfo.ObjectType,
 					SwordBlade->_GameObjectInfo.ObjectPositionInfo.Position,
 					SwordBlade->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton, SwordBlade);
 
@@ -1966,7 +2024,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 				FlameBolt->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 
 				FlameBolt->GetRectCollision()->SetActive(true);
-				FlameBolt->GetRectCollision()->Init(en_CollisionPosition::COLLISION_POSITION_OBJECT, FlameBolt->_GameObjectInfo.ObjectType,
+				FlameBolt->GetRectCollision()->ObjectRectInit(en_CollisionPosition::COLLISION_POSITION_OBJECT, FlameBolt->_GameObjectInfo.ObjectType,
 					FlameBolt->_GameObjectInfo.ObjectPositionInfo.Position,
 					FlameBolt->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton, FlameBolt);
 
@@ -1989,7 +2047,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 				DivineBolt->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
 
 				DivineBolt->GetRectCollision()->SetActive(true);
-				DivineBolt->GetRectCollision()->Init(en_CollisionPosition::COLLISION_POSITION_OBJECT, DivineBolt->_GameObjectInfo.ObjectType,
+				DivineBolt->GetRectCollision()->ObjectRectInit(en_CollisionPosition::COLLISION_POSITION_OBJECT, DivineBolt->_GameObjectInfo.ObjectType,
 					DivineBolt->_GameObjectInfo.ObjectPositionInfo.Position,
 					DivineBolt->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton, DivineBolt);
 
