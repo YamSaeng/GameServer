@@ -19,6 +19,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string ItemObjectType = WeaponListFiled["ItemObjectType"].GetString();
 			string ItemExplain = WeaponListFiled["ItemExplain"].GetString();
 			string ItemName = WeaponListFiled["ItemName"].GetString();
+			int ItemSearchingTime = WeaponListFiled["ItemSearchingTime"].GetInt();
 			string ItemEquipmentPart = WeaponListFiled["ItemEquipmentPart"].GetString();
 			int32 ItemWidth = WeaponListFiled["ItemWidth"].GetInt();
 			int32 ItemHeight = WeaponListFiled["ItemHeight"].GetInt();
@@ -99,6 +100,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 						
 			WeaponItemInfo->ItemExplain = (LPWSTR)CA2W(ItemExplain.c_str());
 			WeaponItemInfo->ItemName = (LPWSTR)CA2W(ItemName.c_str());
+			WeaponItemInfo->ItemSearchingTime = ItemSearchingTime;
 
 			if (ItemEquipmentPart == "EQUIPMENT_PARTS_LEFT_HAND")
 			{	
