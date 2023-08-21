@@ -7348,7 +7348,7 @@ CGameServerMessage* CGameServer::MakePacketResMenu(int8 MenuType)
 	return ResMenuMessage;
 }
 
-CGameServerMessage* CGameServer::MakePacketResInteractionRooting(int64 RootingObjectID, en_InteractionType InteractionType, vector<st_ItemInfo> RootingItems)
+CGameServerMessage* CGameServer::MakePacketResInteractionRooting(int64 RootingObjectID, en_InteractionType InteractionType, vector<st_ItemInfo> RootingItems, int16 Coin)
 {
 	CGameServerMessage* ResInteractionRootingMessage = CGameServerMessage::GameServerMessageAlloc();
 	if (ResInteractionRootingMessage == nullptr)
@@ -7371,6 +7371,7 @@ CGameServerMessage* CGameServer::MakePacketResInteractionRooting(int64 RootingOb
 		*ResInteractionRootingMessage << RootingItem;
 	}
 
+	*ResInteractionRootingMessage << Coin;
 
 	return ResInteractionRootingMessage;
 }

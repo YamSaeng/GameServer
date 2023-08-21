@@ -811,7 +811,7 @@ public:
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 루팅 상호작용 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
-	CGameServerMessage* MakePacketResInteractionRooting(int64 RootingObjectID, en_InteractionType InteractionType, vector<st_ItemInfo> RootingItems);
+	CGameServerMessage* MakePacketResInteractionRooting(int64 RootingObjectID, en_InteractionType InteractionType, vector<st_ItemInfo> RootingItems, int16 Coin);
 	//-----------------------------------------------------------------------------------------
 	// 게임서버 그룹장 위임 응답 패킷 조합
 	//-----------------------------------------------------------------------------------------
