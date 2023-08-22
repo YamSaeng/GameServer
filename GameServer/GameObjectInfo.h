@@ -1201,7 +1201,7 @@ struct st_ItemInfo
 	st_ItemInfo()
 	{
 		ItemDBId = 0;
-		ItemIsSearching = true;
+		ItemIsSearching = false;
 		InventoryItemNumber = 0;		
 		ItemWidth = 0;
 		ItemHeight = 0;		
