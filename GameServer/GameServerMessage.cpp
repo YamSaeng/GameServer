@@ -154,7 +154,9 @@ CGameServerMessage& CGameServerMessage::operator<<(st_ItemInfo& ItemInfo)
     *this << ItemInfo.ItemDefence;
     *this << ItemInfo.ItemMaxCount;
 
-    *this << ItemInfo.ItemCount;    
+    *this << ItemInfo.ItemCount;  
+    
+    *this << ItemInfo.ItemIsSearching;
 
     *this << ItemInfo.ItemIsEquipped;
 
