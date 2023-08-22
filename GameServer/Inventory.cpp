@@ -176,7 +176,13 @@ void CInventory::PlaceItem(CItem* PlaceItemInfo, int16 PositionX, int16 Position
 {
 	// 넣을 아이템의 위치를 설정한다.
 	PlaceItemInfo->_ItemInfo.ItemTileGridPositionX = PositionX;
-	PlaceItemInfo->_ItemInfo.ItemTileGridPositionY = PositionY;
+	PlaceItemInfo->_ItemInfo.ItemTileGridPositionY = PositionY;	
+
+	Vector2Int ItemPosition;
+	ItemPosition.X = PlaceItemInfo->_ItemInfo.ItemTileGridPositionX;
+	ItemPosition.Y = PlaceItemInfo->_ItemInfo.ItemTileGridPositionY;
+
+	_ItemPositions.push_back(ItemPosition);
 
 	// 아이템의 넓이만큼 시작 위치에서 슬롯에 채워넣는다.
 	for (int X = 0; X < PlaceItemInfo->_ItemInfo.ItemWidth; X++)
@@ -196,6 +202,21 @@ void CInventory::InitItem(int16 TilePositionX, int16 TilePositionY)
 {
 	if (_Items[TilePositionX][TilePositionY] != nullptr)
 	{
+		Vector2Int InitPoisition;
+		InitPoisition.X = TilePositionX;
+		InitPoisition.Y = TilePositionY;
+
+		for (auto ItemPositionIter = _ItemPositions.begin();
+			ItemPositionIter != _ItemPositions.end();
+			++ItemPositionIter)
+		{
+			Vector2Int ItemPosition = *ItemPositionIter;
+			if (ItemPosition == InitPoisition)
+			{
+				_ItemPositions.erase(ItemPositionIter);
+			}
+		}		
+
 		st_InventoryItem* InitInventoryItem = _Items[TilePositionX][TilePositionY];
 		
 		int16 InitTileWidth = InitInventoryItem->InventoryItem->_ItemInfo.ItemWidth;
@@ -308,6 +329,11 @@ CItem* CInventory::FindInventoryItem(en_SmallItemCategory FindItemSmallItemCateg
 	return nullptr;
 }
 
+CItem* CInventory::FindInventoryItem(Vector2Int ItemPosition)
+{
+	return _Items[ItemPosition.X][ItemPosition.Y]->InventoryItem;
+}
+
 vector<CItem*> CInventory::FindAllInventoryItem(en_SmallItemCategory FindItemSmallItemCategory)
 {
 	bool FindItemCheck = true;
@@ -339,6 +365,22 @@ vector<CItem*> CInventory::FindAllInventoryItem(en_SmallItemCategory FindItemSma
 	}
 
 	return FindItems;
+}
+
+vector<st_ItemInfo> CInventory::FindAllInventoryItem()
+{
+	vector<st_ItemInfo> AllInventoryItems;
+
+	for (Vector2Int ItemPosition : _ItemPositions)
+	{
+		CItem* InventoryItem = FindInventoryItem(ItemPosition);
+		if (InventoryItem != nullptr)
+		{
+			AllInventoryItems.push_back(InventoryItem->_ItemInfo);
+		}
+	}
+
+	return AllInventoryItems;
 }
 
 vector<st_ItemInfo> CInventory::DBInventorySaveReturnItems()
