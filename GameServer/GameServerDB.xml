@@ -55,6 +55,7 @@
 		<Column name="ItemTileGridPositionY" type="SmallInt"/>		
 		<Column name="ItemSmallCategory" type="nvarchar(80)" notnull="true"/>
 		<Column name="ItemCount" type="SmallInt" notnull="true"/>
+		<Column name="ItemIsSearching" type="bit" notnull="true"/>
 		<Column name="ItemDurability" type="int" notnull="true"/>
 		<Column name="ItemEnchantPoint" type="TinyInt" notnull="true"/>
 	</Table>
@@ -381,19 +382,19 @@
 				INSERT INTO [dbo].[Equipment] VALUES ((@AccountID), (@PlayerID), ('EQUIPMENT_PARTS_BOOT'), ('ITEM_SMALL_CATEGORY_NONE'), (0), (0)) 				
 				
 				UPDATE [dbo].[Inventory]
-				SET ItemSmallCategory = ('ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD'), ItemCount = (1), ItemDurability = (150), ItemEnchantPoint = (1)
+				SET ItemSmallCategory = ('ITEM_SMALL_CATEGORY_WEAPON_LONG_SWORD_WOOD'), ItemCount = (1), ItemIsSearching = (1), ItemDurability = (150), ItemEnchantPoint = (1)
 				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (0) AND ItemTileGridPositionY = (0)
 				UPDATE [dbo].[Inventory]
-				SET ItemSmallCategory = ('ITEM_SAMLL_CATEGORY_WEAPON_BOW_WOOD'), ItemCount = (1), ItemDurability = (150), ItemEnchantPoint = (1)
+				SET ItemSmallCategory = ('ITEM_SAMLL_CATEGORY_WEAPON_BOW_WOOD'), ItemCount = (1), ItemIsSearching = (1), ItemDurability = (150), ItemEnchantPoint = (1)
 				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (1) AND ItemTileGridPositionY = (0)
 				UPDATE [dbo].[Inventory]
-				SET ItemSmallCategory = ('ITEM_SMALL_CATEGORY_WEAPON_DAGGER_WOOD'), ItemCount = (1), ItemDurability = (150), ItemEnchantPoint = (1)
+				SET ItemSmallCategory = ('ITEM_SMALL_CATEGORY_WEAPON_DAGGER_WOOD'), ItemCount = (1), ItemIsSearching = (1), ItemDurability = (150), ItemEnchantPoint = (1)
 				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (2) AND ItemTileGridPositionY = (0)								
 				UPDATE [dbo].[Inventory]
-				SET ItemSmallCategory = ('ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER'), ItemCount = (1), ItemDurability = (150), ItemEnchantPoint = (1)
+				SET ItemSmallCategory = ('ITEM_SMALL_CATEGORY_ARMOR_WEAR_LEATHER'), ItemCount = (1), ItemIsSearching = (1), ItemDurability = (150), ItemEnchantPoint = (1)
 				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (3) AND ItemTileGridPositionY = (0)	
 				UPDATE [dbo].[Inventory]
-				SET ItemSmallCategory = ('ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL'), ItemCount = (5), ItemDurability = (10), ItemEnchantPoint = (0)
+				SET ItemSmallCategory = ('ITEM_SMALL_CATEGORY_POTION_HEALTH_RESTORATION_POTION_SMALL'), ItemCount = (5), ItemIsSearching = (1), ItemDurability = (10), ItemEnchantPoint = (0)
 				WHERE OwnerAccountDBId = (@AccountID) AND OwnerPlayerDBId = (@PlayerID) And ItemTileGridPositionX = (5) AND ItemTileGridPositionY = (0)								
 			]]>
 		</Body>
@@ -463,7 +464,7 @@
         VALUES ((@OwnerAccountDBId), (@OwnerPlayerDBId),
 		0, (@ItemTileGridPositionX), (@ItemTileGridPositionY), 
 		' ', 
-		0, 0, 0)
+		0, 0, 0, 0)
       ]]>
 		</Body>
 	</Procedure>
@@ -508,7 +509,7 @@
 	          WHEN ItemSmallCategory = 'ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL' THEN 5002
 	          ELSE ' '
 	          END),
-		ItemCount, ItemDurability, ItemEnchantPoint
+		ItemCount, ItemIsSearching, ItemDurability, ItemEnchantPoint
         FROM [dbo].[Inventory]
         WHERE OwnerAccountDBId = (@AccountDBId) AND OwnerPlayerDBId = (@PlayerDBId)
       ]]>
@@ -527,7 +528,7 @@
         UPDATE [dbo].[Inventory]
         SET ItemIsEquipped = 0,
 		ItemSmallCategory = ' ',		
-		ItemCount = 0, ItemDurability = 0, ItemEnchantPoint = 0		 
+		ItemCount = 0, ItemIsSearching = 0, ItemDurability = 0, ItemEnchantPoint = 0		 
         WHERE ItemTileGridPositionX = (@ItemTileGridPositionX) AND ItemTileGridPositionY = (@ItemTileGridPositionY) AND OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId)
       ]]>
 		</Body>
@@ -542,6 +543,7 @@
 		<Param name="@ItemTileGridPositionY" type="SmallInt"/>		
 		<Param name="@ItemSmallCategory" type="SmallInt"/>
 		<Param name="@ItemCount" type="SmallInt"/>
+		<Param name="@ItemIsSearching" type="bit"/>
 		<Param name="@ItemDurability" type="int"/>
 		<Param name="@ItemEnchantPoint" type="TinyInt"/>
 		<Body>
@@ -580,7 +582,7 @@
 	                              WHEN @ItemSmallCategory = 5002 THEN 'ITEM_SMALL_CATEGORY_CRAFTING_TABLE_SAWMILL'
 	                              ELSE ' '
 	                              END),
-		ItemCount = (@ItemCount), ItemDurability = (@ItemDurability), ItemEnchantPoint = (@ItemEnchantPoint)
+		ItemCount = (@ItemCount), ItemIsSearching = (@ItemIsSearching), ItemDurability = (@ItemDurability), ItemEnchantPoint = (@ItemEnchantPoint)
 		WHERE OwnerAccountDBId = (@OwnerAccountDBId) AND OwnerPlayerDBId = (@OwnerPlayerDBId) And ItemTileGridPositionX = (@ItemTileGridPositionX) AND ItemTileGridPositionY = (@ItemTileGridPositionY)
 		]]>
 		</Body>
@@ -605,7 +607,7 @@
                              UPDATE [dbo].[Inventory]
                              SET ItemIsEquipped = 0,   					         
   						     ItemSmallCategory = ' ',
-  						     ItemCount = 0, ItemDurability = 0, ItemEnchantPoint = 0
+  						     ItemCount = 0, ItemIsSearching = 0, ItemDurability = 0, ItemEnchantPoint = 0
                              WHERE OwnerAccountDBId = @OwnerAccountDBId AND OwnerPlayerDBId = @OwnerPlayerDBId AND ItemTileGridPositionX = @width AND ItemTileGridPositionY = @height        
                             SET @height = @height + 1
                      END

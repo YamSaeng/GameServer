@@ -154,10 +154,10 @@ namespace SP
 	};
 
 	// 인벤토리 아이템 넣기 프로시저
-	class CDBGameServerInventoryPlace : public CDBBind<9, 0>
+	class CDBGameServerInventoryPlace : public CDBBind<10, 0>
 	{
 	public:
-		CDBGameServerInventoryPlace(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spInventoryItemPlace(?,?,?,?,?,?,?,?,?)}") {}
+		CDBGameServerInventoryPlace(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spInventoryItemPlace(?,?,?,?,?,?,?,?,?,?)}") {}
 		void InOwnerAccountId(int64& OwnerAccountId) { BindParam(0, OwnerAccountId); }
 		void InOwnerPlayerId(int64& OwnerPlayerId) { BindParam(1, OwnerPlayerId); }		
 		void InIsEquipped(bool& IsEquipped) { BindParam(2, IsEquipped); }		
@@ -165,8 +165,9 @@ namespace SP
 		void InItemTileGridPositionY(int16& TileGridPositionY) { BindParam(4, TileGridPositionY); }		
 		void InItemSmallCategory(int16& ItemType) { BindParam(5, ItemType); }		
 		void InItemCount(int16& ItemCount) { BindParam(6, ItemCount); }				
-		void InItemDurability(int32& ItemDurability) { BindParam(7, ItemDurability); }
-		void InItemEnchantPoint(int8& ItemEnchantPoint) { BindParam(8, ItemEnchantPoint); }
+		void InItemIsSearching(bool& IsSearching) { BindParam(7, IsSearching); }
+		void InItemDurability(int32& ItemDurability) { BindParam(8, ItemDurability); }
+		void InItemEnchantPoint(int8& ItemEnchantPoint) { BindParam(9, ItemEnchantPoint); }
 	};
 
 	// GoldTable 생성
@@ -200,7 +201,7 @@ namespace SP
 	};
 
 	// InventoryTable에 있는 Item 모두 긁어옴
-	class CDBGameServerInventoryItemGet : public CDBBind<2, 7>
+	class CDBGameServerInventoryItemGet : public CDBBind<2, 8>
 	{
 	public:
 		CDBGameServerInventoryItemGet(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL dbo.spGetItemTableInfoToInventory(?,?)}") {}
@@ -212,8 +213,9 @@ namespace SP
 		void OutItemTileGridPositionY(int16& TileGridPositionY) { BindCol(2, TileGridPositionY); }		
 		void OutItemSmallCategory(int16& ItemSmallCategory) { BindCol(3, ItemSmallCategory); }				
 		void OutItemCount(int16& itemCount) { BindCol(4, itemCount); }		
-		void OutItemDurability(int32& ItemDurability) { BindCol(5, ItemDurability); }
-		void OutItemEnchantPoint(int8& ItemEnchantPoint) { BindCol(6, ItemEnchantPoint); }
+		void OutItemIsSearching(bool& IsSearching) { BindCol(5, IsSearching); }
+		void OutItemDurability(int32& ItemDurability) { BindCol(6, ItemDurability); }
+		void OutItemEnchantPoint(int8& ItemEnchantPoint) { BindCol(7, ItemEnchantPoint); }
 	};
 
 	// 캐릭터 새로 생성시 기본적인 정보 셋팅
