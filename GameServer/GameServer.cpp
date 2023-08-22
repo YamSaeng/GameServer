@@ -4338,6 +4338,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 			int16 ItemTilePositionY = 0;			
 			int16 ItemSmallCategory = 0;			
 			int16 ItemCount = 0;	
+			bool ItemIsSearching = false;
 			int32 ItemDurability = 0;
 			int8 ItemEnchantPoint = 0;
 			
@@ -4346,6 +4347,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 			CharacterInventoryItem.OutItemTileGridPositionY(ItemTilePositionY);			
 			CharacterInventoryItem.OutItemSmallCategory(ItemSmallCategory);			
 			CharacterInventoryItem.OutItemCount(ItemCount);
+			CharacterInventoryItem.OutItemIsSearching(ItemIsSearching);
 			CharacterInventoryItem.OutItemDurability(ItemDurability);
 			CharacterInventoryItem.OutItemEnchantPoint(ItemEnchantPoint);		
 
@@ -4362,6 +4364,7 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 					NewItem->_ItemInfo.ItemTileGridPositionX = ItemTilePositionX;
 					NewItem->_ItemInfo.ItemTileGridPositionY = ItemTilePositionY;
 					NewItem->_ItemInfo.ItemCount = ItemCount;
+					NewItem->_ItemInfo.ItemIsSearching = ItemIsSearching;
 					NewItem->_ItemInfo.ItemCurrentDurability = ItemDurability;
 					NewItem->_ItemInfo.ItemEnchantPoint = ItemEnchantPoint;					
 
@@ -4826,7 +4829,8 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 				LeavePlayerInventoryItemSave.InItemTileGridPositionX(InventoryItem.ItemTileGridPositionX);
 				LeavePlayerInventoryItemSave.InItemTileGridPositionY(InventoryItem.ItemTileGridPositionY);				
 				LeavePlayerInventoryItemSave.InItemSmallCategory(InventoryItemSmallCategory);				
-				LeavePlayerInventoryItemSave.InItemCount(InventoryItem.ItemCount);				
+				LeavePlayerInventoryItemSave.InItemCount(InventoryItem.ItemCount);	
+				LeavePlayerInventoryItemSave.InItemIsSearching(InventoryItem.ItemIsSearching);
 				LeavePlayerInventoryItemSave.InItemDurability(InventoryItem.ItemCurrentDurability);
 				LeavePlayerInventoryItemSave.InItemEnchantPoint(InventoryItem.ItemEnchantPoint);
 
