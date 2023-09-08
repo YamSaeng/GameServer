@@ -71,23 +71,26 @@ CGameServerMessage& CGameServerMessage::operator<<(Vector2Int& CellPositionInfo)
 CGameServerMessage& CGameServerMessage::operator<<(st_StatInfo& StatInfo)
 {
     *this << StatInfo.Level;
+    *this << StatInfo.Str;
+    *this << StatInfo.Int;
+    *this << StatInfo.Dex;
+    *this << StatInfo.Luck;
     *this << StatInfo.HP;
     *this << StatInfo.MaxHP;
     *this << StatInfo.MP;
     *this << StatInfo.MaxMP;
-    *this << StatInfo.DP;
-    *this << StatInfo.MaxDP;
     *this << StatInfo.AutoRecoveryHPPercent;
     *this << StatInfo.AutoRecoveryMPPercent;
-    *this << StatInfo.MinMeleeAttackDamage;
-    *this << StatInfo.MaxMeleeAttackDamage;
-    *this << StatInfo.MeleeAttackHitRate;
-    *this << StatInfo.MagicDamage;
-    *this << StatInfo.MagicHitRate;
+    *this << StatInfo.MinAttackPoint;
+    *this << StatInfo.MaxAttackPoint;    
+    *this << StatInfo.SpiritPoint;
+    *this << StatInfo.AttackHitRate;
+    *this << StatInfo.SpellCastingRate;
     *this << StatInfo.Defence;
     *this << StatInfo.EvasionRate;
-    *this << StatInfo.MeleeCriticalPoint;
-    *this << StatInfo.MagicCriticalPoint;
+    *this << StatInfo.AttackCriticalPoint;
+    *this << StatInfo.SpellCriticalPoint;
+    *this << StatInfo.AttackCriticalResistance;
     *this << StatInfo.StatusAbnormalResistance;
     *this << StatInfo.Speed;  
     *this << StatInfo.MaxSpeed;
