@@ -35,7 +35,6 @@ struct st_MonsterData
 	int32 AttackTick; // 공격 속도
 	vector<en_SmallItemCategory> EquipmentItems; // 기본 착용 장비 목록
 	int64 ReSpawnTime;
-	int16 GetDPPoint;
 	int32 GetExpPoint;
 };
 
