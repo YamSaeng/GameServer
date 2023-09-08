@@ -32,19 +32,19 @@ namespace SP
 		void OutMaxHP(int32& MaxHP) { BindCol(9, MaxHP); }
 		void OutCurrentMP(int32& CurrentMP) { BindCol(10, CurrentMP); }
 		void OutMaxMP(int32& MaxMP) { BindCol(11, MaxMP); }
-		void OutCurrentDP(int32& CurrentDP) { BindCol(12, CurrentDP); }
-		void OutMaxDP(int32& MaxDP) { BindCol(13, MaxDP); }
-		void OutAutoRecoveryHPPercent(int16& AutoRecoveryHPPercent) { BindCol(14, AutoRecoveryHPPercent); }
-		void OutAutoRecoveryMPPercent(int16& AutoRecoveryMPPercent) { BindCol(15, AutoRecoveryMPPercent); }
-		void OutMinMeleeAttackDamage(int32& MinMeleeAttackDamage) { BindCol(16, MinMeleeAttackDamage); }
-		void OutMaxMeleeAttackDamage(int32& MaxMeleeAttackDamage) { BindCol(17, MaxMeleeAttackDamage); }
-		void OutMeleeAttackHitRate(int16& MeleeAttackHitRate) { BindCol(18, MeleeAttackHitRate); }
-		void OutMagicDamage(int16& MagicDamage) { BindCol(19, MagicDamage); }
-		void OutMagicHitRate(float& MagicHitRate) { BindCol(20, MagicHitRate); }
-		void OutDefence(int32& Defence) { BindCol(21, Defence); }
-		void OutEvasionRate(int16& EvasionRate) { BindCol(22, EvasionRate); }
-		void OutMeleeCriticalPoint(int16& MeleeCriticalPoint) { BindCol(23, MeleeCriticalPoint); }
-		void OutMagicCriticalPointt(int16& MagicCriticalPoint) { BindCol(24, MagicCriticalPoint); }
+		void OutAutoRecoveryHPPercent(int16& AutoRecoveryHPPercent) { BindCol(12, AutoRecoveryHPPercent); }
+		void OutAutoRecoveryMPPercent(int16& AutoRecoveryMPPercent) { BindCol(13, AutoRecoveryMPPercent); }
+		void OutMinAttackPoint(int32& MinAttackPoint) { BindCol(14, MinAttackPoint); }
+		void OutMaxAttackPoint(int32& MaxAttackPoint) { BindCol(15, MaxAttackPoint); }
+		void OutSpiritPoint(int16& SpiritPoint) { BindCol(16, SpiritPoint); }
+		void OutAttackHitRate(int16& MeleeAttackHitRate) { BindCol(17, MeleeAttackHitRate); }		
+		void OutSpellCastingRate(float& CastingRate) { BindCol(18, CastingRate); }
+		void OutDefence(int32& Defence) { BindCol(19, Defence); }
+		void OutEvasionRate(int16& EvasionRate) { BindCol(20, EvasionRate); }
+		void OutAttackCriticalPoint(int16& AttackCriticalPoint) { BindCol(21, AttackCriticalPoint); }
+		void OutSpellCriticalPoint(int16& SpellCriticalPoint) { BindCol(22, SpellCriticalPoint); }
+		void OutAttackCriticalResistance(int16& AttackCriticalResistance) { BindCol(23, AttackCriticalResistance); }
+		void OutStatusAbnormalResistance(int16& StatusAbnormalResistance) { BindCol(24, StatusAbnormalResistance); }
 		void OutSpeed(float& Speed) { BindCol(25, Speed); }		
 		void OutLastPositionY(int32& LastPositionY) { BindCol(26, LastPositionY); }
 		void OutLastPositionX(int32& LastPositionX) { BindCol(27, LastPositionX); }
@@ -79,19 +79,19 @@ namespace SP
 		void InMaxHP(int32& MaxHP) { BindParam(9, MaxHP); }
 		void InCurrentMP(int32& CurrentMP) { BindParam(10, CurrentMP); }
 		void InMaxMP(int32& MaxMP) { BindParam(11, MaxMP); }
-		void InCurrentDP(int32& CurrentDP) { BindParam(12, CurrentDP); }
-		void InMaxDP(int32& MaxDP) { BindParam(13, MaxDP); }
-		void InAutoRecoveryHPPercent(int16& AutoRecoveryHPPercent) { BindParam(14, AutoRecoveryHPPercent); }
-		void InAutoRecoveryMPPercent(int16& AutoRecoveryMPPercent) { BindParam(15, AutoRecoveryMPPercent); }
-		void InMinMeleeAttackDamage(int32& MinMeleeAttackDamage) { BindParam(16, MinMeleeAttackDamage); }
-		void InMaxMeleeAttackDamage(int32& MaxMeleeAttackDamage) { BindParam(17, MaxMeleeAttackDamage); }
-		void InMeleeAttackHitRate(int16& MeleeAttackHitRate) { BindParam(18, MeleeAttackHitRate); }
-		void InMagicDamage(int16& MagicDamage) { BindParam(19, MagicDamage); }
-		void InMagicHitRate(float& MagicHitRate) { BindParam(20, MagicHitRate); }
-		void InDefence(int32& Defence) { BindParam(21, Defence); }
-		void InEvasionRate(int16& EvasionRate) { BindParam(22, EvasionRate); }
-		void InMeleeCriticalPoint(int16& MeleeCriticalPoint) { BindParam(23, MeleeCriticalPoint); }
-		void InMagicCriticalPoint(int16& MagicCriticalPoint) { BindParam(24, MagicCriticalPoint); }
+		void InAutoRecoveryHPPercent(int16& AutoRecoveryHPPercent) { BindParam(12, AutoRecoveryHPPercent); }
+		void InAutoRecoveryMPPercent(int16& AutoRecoveryMPPercent) { BindParam(13, AutoRecoveryMPPercent); }
+		void InMinAttackPoint(int32& MinAttackPoint) { BindParam(14, MinAttackPoint); }
+		void InMaxAttackPoint(int32& MaxAttackPoint) { BindParam(15, MaxAttackPoint); }
+		void InSpiritPoint(int16& SpiritPoint) { BindParam(16, SpiritPoint); }
+		void InAttackHitRate(int16& AttackHitRate) { BindParam(17, AttackHitRate); }		
+		void InSpellCastingRate(float& SpellCastingRate) { BindParam(18, SpellCastingRate); }
+		void InDefence(int32& Defence) { BindParam(19, Defence); }
+		void InEvasionRate(int16& EvasionRate) { BindParam(20, EvasionRate); }
+		void InAttackCriticalPoint(int16& AttackCriticalPoint) { BindParam(21, AttackCriticalPoint); }
+		void InSpellCriticalPoint(int16& SpellCriticalPoint) { BindParam(22, SpellCriticalPoint); }
+		void InAttackCriticalResistance(int16& AttackCriticalResistance) { BindParam(23, AttackCriticalResistance); }
+		void InSpellCriticalResistance(int16& SpellCriticalResistance) { BindParam(24, SpellCriticalResistance); }
 		void InSpeed(float& Speed) { BindParam(25, Speed); }
 		void InLastPositionY(int32& LastPositionY) { BindParam(26, LastPositionY); }
 		void InLastPositionX(int32& LastPositionX) { BindParam(27, LastPositionX); }
@@ -333,10 +333,10 @@ namespace SP
 	};
 
 	// 접속 종료시 플레이어 정보 DB에 기록
-	class CDBGameServerLeavePlayerStatInfoSave : public CDBBind<28, 0>
+	class CDBGameServerLeavePlayerStatInfoSave : public CDBBind<29, 0>
 	{
 	public:
-		CDBGameServerLeavePlayerStatInfoSave(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spPlayerLeaveInfoSave(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}"){}
+		CDBGameServerLeavePlayerStatInfoSave(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spPlayerLeaveInfoSave(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}"){}
 		void InAccountDBId(int64& AccountDBId) { BindParam(0, AccountDBId); }
 		void InPlayerDBId(int64& PlayerDBId) { BindParam(1, PlayerDBId); }
 		void InLevel(int8& Level) { BindParam(2, Level); }
@@ -346,25 +346,26 @@ namespace SP
 		void InLuck(int32& Luck) { BindParam(6, Luck); }
 		void InMaxHP(int32& MaxHP) { BindParam(7, MaxHP); }
 		void InMaxMP(int32& MaxMP) { BindParam(8, MaxMP); }
-		void InMaxDP(int32& MaxDP) { BindParam(9, MaxDP); }
-		void InAutoRecoveryHPPercent(int16& AutoRecoveryHPPercent) { BindParam(10, AutoRecoveryHPPercent); }
-		void InAutoRecoveryMPPercent(int16& AutoRecoveryMPPercent) { BindParam(11, AutoRecoveryMPPercent); }
-		void InMinMeleeAttackDamage(int32& MinMeleeAttackDamage) { BindParam(12, MinMeleeAttackDamage); }
-		void InMaxMeleeAttackDamage(int32& MaxMeleeAttackDamage) { BindParam(13, MaxMeleeAttackDamage); }
-		void InMeleeAttackHitRate(int16& MeleeAttackHitRate) { BindParam(14, MeleeAttackHitRate); }
-		void InMagicDamage(int16& MagicDamage) { BindParam(15, MagicDamage); }
-		void InMagicHitRate(float& MagicHitRate) { BindParam(16, MagicHitRate); }
-		void InDefence(int32& Defence) { BindParam(17, Defence); }
-		void InEvasionRate(int16& EvasionRate) { BindParam(18, EvasionRate); }
-		void InMeleeCriticalPoint(int16& MeleeCriticalPoint) { BindParam(19, MeleeCriticalPoint); }
-		void InMagicCriticalPoint(int16& MagicCriticalPoint) { BindParam(20, MagicCriticalPoint); }
-		void InSpeed(float& Speed) { BindParam(21, Speed); }
-		void InLastPositionY(int32& LastPositionY) { BindParam(22, LastPositionY); }
-		void InLastPositionX(int32& LastPositionX) { BindParam(23, LastPositionX); }
-		void InCurrentExperience(int64& CurrentExperience) { BindParam(24, CurrentExperience); }
-		void InRequireExperience(int64& RequireExperience) { BindParam(25, RequireExperience); }
-		void InTotalExperience(int64& TotalExperience) { BindParam(26, TotalExperience); }		
-		void InSkillMaxPoint(int8& SkillMaxPoint) { BindParam(27, SkillMaxPoint); }
+		void InAutoRecoveryHPPercent(int16& AutoRecoveryHPPercent) { BindParam(9, AutoRecoveryHPPercent); }
+		void InAutoRecoveryMPPercent(int16& AutoRecoveryMPPercent) { BindParam(10, AutoRecoveryMPPercent); }
+		void InMinAttackPoint(int32& MinMeleeAttackDamage) { BindParam(11, MinMeleeAttackDamage); }
+		void InMaxAttackPoint(int32& MaxMeleeAttackDamage) { BindParam(12, MaxMeleeAttackDamage); }
+		void InSpiritPoint(int16& MagicDamage) { BindParam(13, MagicDamage); }
+		void InAttackHitRate(int16& MeleeAttackHitRate) { BindParam(14, MeleeAttackHitRate); }		
+		void InSpellCastingRate(float& MagicHitRate) { BindParam(15, MagicHitRate); }
+		void InDefence(int32& Defence) { BindParam(16, Defence); }
+		void InEvasionRate(int16& EvasionRate) { BindParam(17, EvasionRate); }
+		void InAttackCriticalPoint(int16& MeleeCriticalPoint) { BindParam(18, MeleeCriticalPoint); }
+		void InSpellCriticalPoint(int16& MagicCriticalPoint) { BindParam(19, MagicCriticalPoint); }
+		void InAttackCriticalResistance(int16& AttackCriticalResistance) { BindParam(20, AttackCriticalResistance); }
+		void InStatusAbnormalResistance(int16& StatusAbnormalResistance) { BindParam(21, StatusAbnormalResistance); }
+		void InSpeed(float& Speed) { BindParam(22, Speed); }
+		void InLastPositionY(int32& LastPositionY) { BindParam(23, LastPositionY); }
+		void InLastPositionX(int32& LastPositionX) { BindParam(24, LastPositionX); }
+		void InCurrentExperience(int64& CurrentExperience) { BindParam(25, CurrentExperience); }
+		void InRequireExperience(int64& RequireExperience) { BindParam(26, RequireExperience); }
+		void InTotalExperience(int64& TotalExperience) { BindParam(27, TotalExperience); }		
+		void InSkillMaxPoint(int8& SkillMaxPoint) { BindParam(28, SkillMaxPoint); }
 	};	
 
 	// 장비 테이블 빈 껍데기 채우기

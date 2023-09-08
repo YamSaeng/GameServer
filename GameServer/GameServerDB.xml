@@ -16,19 +16,19 @@
 		<Column name="MaxHP" type="int" notnull="true"/>
 		<Column name="CurrentMP" type="int" notnull="true"/>
 		<Column name="MaxMP" type="int" notnull="true"/>
-		<Column name="CurrentDP" type="int" notnull="true"/>
-		<Column name="MaxDP" type="int" notnull="true"/>		
 		<Column name="AutoRecoveryHPPercent" type="SmallInt" notnull="true"/>
 		<Column name="AutoRecoveryMPPercent" type="SmallInt" notnull="true"/>
-		<Column name="MinMeleeAttackDamage" type="int" notnull="true"/>
-		<Column name="MaxMeleeAttackDamage" type="int" notnull="true"/>
-		<Column name="MeleeAttackHitRate" type="SmallInt" notnull="true"/>
-		<Column name="MagicDamage" type="SmallInt" notnull="true"/>
-		<Column name="MagicHitRate" type="float" notnull="true"/>
+		<Column name="MinAttackPoint" type="int" notnull="true"/>
+		<Column name="MaxAttackPoint" type="int" notnull="true"/>
+		<Column name="SpiritPoint" type="SmallInt" notnull="true"/>
+		<Column name="AttackHitRate" type="SmallInt" notnull="true"/>		
+		<Column name="SpellCastingRate" type="float" notnull="true"/>
 		<Column name="Defence" type="int" notnull="true"/>
 		<Column name="EvasionRate" type="SmallInt" notnull="true"/>
-		<Column name="MeleeCriticalPoint" type="SmallInt" notnull="true"/>
-		<Column name="MagicCriticalPoint" type="SmallInt" notnull="true"/>
+		<Column name="AttackCriticalPoint" type="SmallInt" notnull="true"/>
+		<Column name="SpellCriticalPoint" type="SmallInt" notnull="true"/>		
+		<Column name="AttackCriticalResistance" type="SmallInt" notnull="true"/>		
+		<Column name="StatusAbnormalResistance" type="SmallInt" notnull="true"/>		
 		<Column name="Speed" type="float" notnull="true"/>
 		<Column name="LastPositionY" type="int" notnull="true"/>
 		<Column name="LastPositionX" type="int" notnull="true"/>
@@ -149,19 +149,19 @@
         MaxHP,
         CurrentMP, 
         MaxMP,
-        CurrentDP,
-        MaxDP,
         AutoRecoveryHPPercent,
         AutoRecoveryMPPercent,
-        MinMeleeAttackDamage,
-        MaxMeleeAttackDamage,
-        MeleeAttackHitRate,
-        MagicDamage,
-        MagicHitRate,
+        MinAttackPoint,
+        MaxAttackPoint,
+		SpiritPoint,
+        AttackHitRate,        
+        SpellCastingRate,
         Defence,
         EvasionRate,
-        MeleeCriticalPoint,
-        MagicCriticalPoint,
+        AttackCriticalPoint,
+        SpellCriticalPoint,
+		AttackCriticalResistance,
+		StatusAbnormalResistance,
         Speed, 
         LastPositionY,
         LastPositionX,
@@ -199,19 +199,19 @@
 		<Param name="@MaxHP" type="int"/>
 		<Param name="@CurrentMP" type="int"/>
 		<Param name="@MaxMP" type="int"/>
-		<Param name="@CurrentDP" type="int"/>
-		<Param name="@MaxDP" type="int"/>
 		<Param name="@AutoRecoveryHPPercent" type="SmallInt"/>
 		<Param name="@AutoRecoveryMPPercent" type="SmallInt"/>
-		<Param name="@MinMeleeAttackDamage" type="int"/>
-		<Param name="@MaxMeleeAttackDamage" type="int"/>
-		<Param name="@MeleeAttackHitRate" type="SmallInt"/>
-		<Param name="@MagicDamage" type="SmallInt"/>
-		<Param name="@MagicHitRate" type="float"/>
+		<Param name="@MinAttackPoint" type="int"/>
+		<Param name="@MaxAttackPoint" type="int"/>
+		<Param name="@AttackHitRate" type="SmallInt"/>
+		<Param name="@SpiritPoint" type="SmallInt"/>
+		<Param name="@SpellCastingRate" type="float"/>
 		<Param name="@Defence" type="int"/>
 		<Param name="@EvasionRate" type="SmallInt"/>
-		<Param name="@MeleeCriticalPoint" type="SmallInt"/>
-		<Param name="@MagicCriticalPoint" type="SmallInt"/>
+		<Param name="@AttackCriticalPoint" type="SmallInt"/>
+		<Param name="@SpellCriticalPoint" type="SmallInt"/>
+		<Param name="@AttackCriticalResistance" type="SmallInt"/>
+		<Param name="@StatusAbnormalResistance" type="SmallInt"/>
 		<Param name="@Speed" type="float"/>
 		<Param name="@LastPositionY" type="int"/>
 		<Param name="@LastPositionX" type="int"/>
@@ -236,19 +236,19 @@
         (@MaxHP),
         (@CurrentMP),
         (@MaxMP),
-        (@CurrentDP),
-        (@MaxDP),
         (@AutoRecoveryHPPercent),
         (@AutoRecoveryMPPercent),
-        (@MinMeleeAttackDamage),
-        (@MaxMeleeAttackDamage),
-        (@MeleeAttackHitRate),
-        (@MagicDamage),
-        (@MagicHitRate),
+        (@MinAttackPoint),
+        (@MaxAttackPoint),
+		(@SpiritPoint),
+        (@AttackHitRate),        
+        (@SpellCastingRate),
         (@Defence),
         (@EvasionRate),
-        (@MeleeCriticalPoint),
-        (@MagicCriticalPoint),
+        (@AttackCriticalPoint),
+        (@SpellCriticalPoint),
+        (@AttackCriticalResistance),
+        (@StatusAbnormalResistance),
         (@Speed),
         (@LastPositionY),
         (@LastPositionX),
@@ -1245,18 +1245,19 @@
 		<Param name="@Luck" type="Int"/>
 		<Param name="@MaxHP" type="Int"/>
 		<Param name="@MaxMP" type="Int"/>
-		<Param name="@MaxDP" type="Int"/>
 		<Param name="@AutoRecoveryHPPercent" type="SmallInt"/>
 		<Param name="@AutoRecoveryMPPercent" type="SmallInt"/>
-		<Param name="@MinMeleeAttackDamage" type="int"/>
-		<Param name="@MaxMeleeAttackDamage" type="int"/>
-		<Param name="@MeleeAttackHitRate" type="SmallInt"/>
-		<Param name="@MagicDamage" type="SmallInt"/>
-		<Param name="@MagicHitRate" type="float"/>
+		<Param name="@MinAttackPoint" type="int"/>
+		<Param name="@MaxAttackPoint" type="int"/>
+		<Param name="@SpiritPoint" type="SmallInt"/>
+		<Param name="@AttackHitRate" type="SmallInt"/>		
+		<Param name="@SpellCastingRate" type="float"/>
 		<Param name="@Defence" type="int"/>
 		<Param name="@EvasionRate" type="SmallInt"/>
-		<Param name="@MeleeCriticalPoint" type="SmallInt"/>
-		<Param name="@MagicCriticalPoint" type="SmallInt"/>
+		<Param name="@AttackCriticalPoint" type="SmallInt"/>
+		<Param name="@SpellCriticalPoint" type="SmallInt"/>
+		<Param name="@AttackCriticalResistance" type="SmallInt"/>
+		<Param name="@StatusAbnormalResistance" type="SmallInt"/>
 		<Param name="@Speed" type="float"/>
 		<Param name="@LastPositionY" type="Int"/>
 		<Param name="@LastPositionX" type="Int"/>
@@ -1277,15 +1278,17 @@
         MaxMP = (@MaxMP),
         AutoRecoveryHPPercent = (@AutoRecoveryHPPercent),
         AutoRecoveryMPPercent = (@AutoRecoveryMPPercent),
-        MinMeleeAttackDamage = (@MinMeleeAttackDamage),
-        MaxMeleeAttackDamage = (@MaxMeleeAttackDamage),
-        MeleeAttackHitRate = (@MeleeAttackHitRate),
-        MagicDamage = (@MagicDamage),
-        MagicHitRate = (@MagicHitRate),
+        MinAttackPoint = (@MinAttackPoint),
+        MaxAttackPoint = (@MaxAttackPoint),
+		SpiritPoint = (@SpiritPoint),
+        AttackHitRate = (@AttackHitRate),        
+        SpellCastingRate = (@SpellCastingRate),
         Defence = (@Defence),
         EvasionRate = (@EvasionRate),
-        MeleeCriticalPoint = (@MeleeCriticalPoint),
-        MagicCriticalPoint = (@MagicCriticalPoint),
+        AttackCriticalPoint = (@AttackCriticalPoint),
+        SpellCriticalPoint = (@SpellCriticalPoint),
+        AttackCriticalResistance = (@AttackCriticalResistance),
+        StatusAbnormalResistance = (@StatusAbnormalResistance),
         Speed = (@Speed),
         LastPositionY = (@LastPositionY), 
         LastPositionX = (@LastPositionX),
