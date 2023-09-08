@@ -1048,30 +1048,42 @@ struct st_PositionInfo
 struct st_StatInfo
 {
 	int8 Level;
-	int32 Str;
-	int32 Dex;
-	int32 Int;
-	int32 Luck;
-	int32 HP;
-	int32 MaxHP;
-	int32 MP;
-	int32 MaxMP;
-	int32 DP;
-	int32 MaxDP;
-	int16 AutoRecoveryHPPercent;
-	int16 AutoRecoveryMPPercent;
-	int32 MinMeleeAttackDamage;
-	int32 MaxMeleeAttackDamage;
-	int16 MeleeAttackHitRate;
-	int16 MagicDamage;
-	float MagicHitRate;
-	int32 Defence;
-	int16 EvasionRate;
-	int16 MeleeCriticalPoint;
-	int16 MagicCriticalPoint;
-	int16 StatusAbnormalResistance;
-	float Speed;
-	float MaxSpeed;
+	
+	int32 Str; // 무력
+	int32 Int; // 지력
+	int32 Dex; // 민첩
+	int32 Luck; // 행운
+
+	int32 HP; // 현재 체력
+	int32 MaxHP; // 최대 체력
+	int32 MP; // 현재 마력
+	int32 MaxMP; // 최대 마력 
+
+	int16 AutoRecoveryHPPercent; // 체력 자동 회복 비율
+	int16 AutoRecoveryMPPercent; // 마력 자동 회복 비율
+
+	int32 MinAttackPoint; // 최소 공격력
+	int32 MaxAttackPoint; // 최대 공격력
+
+	int16 SpiritPoint; // 정신력
+
+	int16 AttackHitRate; // 공격 속도
+	float SpellCastingRate; // 시전 속도
+	
+	int32 Defence;  // 방어력
+
+	int16 EvasionRate; // 회피율
+
+	int16 AttackCriticalPoint; // 물리 치명타율
+	int16 SpellCriticalPoint;  // 주문 치명타율
+
+	int16 AttackCriticalResistance; // 물리 치명타 저항율
+
+	int16 StatusAbnormalResistance; // 상태이상 저항률
+
+	float Speed; // 속도
+	float MaxSpeed; // 최대 속도
+
 	float SearchDistance = 0;
 	float ChaseDistance = 0;
 	float MovingAttackRange = 0;
