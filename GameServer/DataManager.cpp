@@ -637,50 +637,152 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 
 	for (auto& Filed : Document["PlayerCharacterStatus"].GetArray())
 	{
-		for (auto& PlayerCharacterFiled : Filed["PlayerCharacterLevelDataList"].GetArray())
+		for (auto& WarriorIncreaseStatusFiled : Filed["WarriorTypeLevelUpIncreaseStatus"].GetArray())
 		{
-			int8 Level = (int8)PlayerCharacterFiled["Level"].GetInt();
-			int MaxHP = PlayerCharacterFiled["MaxHP"].GetInt();
-			int MaxMP = PlayerCharacterFiled["MaxMP"].GetInt();
-			int MaxDP = PlayerCharacterFiled["MaxDP"].GetInt();
-			int AutoRecoveryHPPercent = PlayerCharacterFiled["AutoRecoveryHPPercent"].GetInt();
-			int AutoRecoveryMPPercent = PlayerCharacterFiled["AutoRecoveryMPPercent"].GetInt();
-			int MinMeleeAttackDamage = PlayerCharacterFiled["MinMeleeAttackDamage"].GetInt();
-			int MaxMeleeAttackDamage = PlayerCharacterFiled["MaxMeleeAttackDamage"].GetInt();
-			int16 MeleeAttackHitRate = (int16)PlayerCharacterFiled["MeleeAttackHitRate"].GetInt();
-			int16 MagicDamage = (int16)PlayerCharacterFiled["MagicDamage"].GetInt();
-			float MagicHitRate = (int16)PlayerCharacterFiled["MagicHitRate"].GetFloat();
-			int Defence = PlayerCharacterFiled["Defence"].GetInt();
-			int16 EvasionRate = PlayerCharacterFiled["EvasionRate"].GetInt();
-			int16 MeleeCriticalPoint = (int16)(PlayerCharacterFiled["MeleeCriticalPoint"].GetInt());
-			int16 MagicCriticalPoint = (int16)(PlayerCharacterFiled["MagicCriticalPoint"].GetInt());
-			float Speed = PlayerCharacterFiled["Speed"].GetFloat();
+			int8 Level = (int8)WarriorIncreaseStatusFiled["Level"].GetInt();
 
-			st_StatInfo* PlayerStatus = new st_StatInfo();
+			int16 Str = (int16)WarriorIncreaseStatusFiled["Str"].GetInt();
+			int16 Dex = (int16)WarriorIncreaseStatusFiled["Dex"].GetInt();
+			int16 Int = (int16)WarriorIncreaseStatusFiled["Int"].GetInt();
+			int16 Luck = (int16)WarriorIncreaseStatusFiled["Luck"].GetInt();
 
-			PlayerStatus->Level = Level;
-			PlayerStatus->MaxHP = MaxHP;
-			PlayerStatus->MaxMP = MaxMP;
-			PlayerStatus->MaxDP = MaxDP;
-			PlayerStatus->AutoRecoveryHPPercent = AutoRecoveryHPPercent;
-			PlayerStatus->AutoRecoveryMPPercent = AutoRecoveryMPPercent;
-			PlayerStatus->MinMeleeAttackDamage = MinMeleeAttackDamage;
-			PlayerStatus->MaxMeleeAttackDamage = MaxMeleeAttackDamage;
-			PlayerStatus->MeleeAttackHitRate = MeleeAttackHitRate;
-			PlayerStatus->MagicDamage = MagicDamage;
-			PlayerStatus->MagicHitRate = MagicHitRate;
-			PlayerStatus->Defence = Defence;
-			PlayerStatus->EvasionRate = EvasionRate;
-			PlayerStatus->MeleeCriticalPoint = MeleeCriticalPoint;
-			PlayerStatus->MagicCriticalPoint = MagicCriticalPoint;
-			PlayerStatus->Speed = Speed;		
+			int16 Con = (int16)WarriorIncreaseStatusFiled["Con"].GetInt();
+			int16 Def = (int16)WarriorIncreaseStatusFiled["Def"].GetInt();
+			int16 HP = (int16)WarriorIncreaseStatusFiled["HP"].GetInt();
 
-			PlayerStatus->Str = 10;
-			PlayerStatus->Dex = 10;
-			PlayerStatus->Int = 10;
-			PlayerStatus->Luck = 10;
+			int AutoRecoveryHPPercent = WarriorIncreaseStatusFiled["AutoRecoveryHPPercent"].GetInt();
+			int AutoRecoveryMPPercent = WarriorIncreaseStatusFiled["AutoRecoveryMPPercent"].GetInt();
+			int16 Stamina = (int16)WarriorIncreaseStatusFiled["Stamina"].GetInt();
 
-			_PlayerStatus.insert(pair<int8, st_StatInfo*>(PlayerStatus->Level, PlayerStatus));
+			float Speed = WarriorIncreaseStatusFiled["Speed"].GetFloat();
+
+			st_StatInfo* WarriorLevelStatus = new st_StatInfo();
+
+			WarriorLevelStatus->Level = Level;
+			WarriorLevelStatus->Str = Str;
+			WarriorLevelStatus->Dex = Dex;
+			WarriorLevelStatus->Int = Int;
+			WarriorLevelStatus->Luck = Luck;
+			WarriorLevelStatus->Con = Con;
+			WarriorLevelStatus->Defence = Def;
+			WarriorLevelStatus->HP = HP;
+			WarriorLevelStatus->Stamina = Stamina;
+			WarriorLevelStatus->AutoRecoveryHPPercent = AutoRecoveryHPPercent;
+			WarriorLevelStatus->AutoRecoveryMPPercent = AutoRecoveryMPPercent;
+			WarriorLevelStatus->Speed = Speed;
+
+			_WarriorStatus.insert(pair<int8, st_StatInfo*>(WarriorLevelStatus->Level, WarriorLevelStatus));
+		}
+
+		for (auto& ThiefIncreaseStatusFiled : Filed["ThiefTypeLevelUpIncreaseStatus"].GetArray())
+		{
+			int8 Level = (int8)ThiefIncreaseStatusFiled["Level"].GetInt();
+
+			int16 Str = (int16)ThiefIncreaseStatusFiled["Str"].GetInt();
+			int16 Dex = (int16)ThiefIncreaseStatusFiled["Dex"].GetInt();
+			int16 Int = (int16)ThiefIncreaseStatusFiled["Int"].GetInt();
+			int16 Luck = (int16)ThiefIncreaseStatusFiled["Luck"].GetInt();
+
+			int16 Con = (int16)ThiefIncreaseStatusFiled["Con"].GetInt();			
+			int16 Def = (int16)ThiefIncreaseStatusFiled["Def"].GetInt();
+			int16 HP = (int16)ThiefIncreaseStatusFiled["HP"].GetInt();		
+
+			int AutoRecoveryHPPercent = ThiefIncreaseStatusFiled["AutoRecoveryHPPercent"].GetInt();
+			int AutoRecoveryMPPercent = ThiefIncreaseStatusFiled["AutoRecoveryMPPercent"].GetInt();	
+			int16 Stamina = (int16)ThiefIncreaseStatusFiled["Stamina"].GetInt();
+			
+			float Speed = ThiefIncreaseStatusFiled["Speed"].GetFloat();
+
+			st_StatInfo* ThiefLevelStatus = new st_StatInfo();
+
+			ThiefLevelStatus->Level = Level;	
+			ThiefLevelStatus->Str = Str;
+			ThiefLevelStatus->Dex = Dex;
+			ThiefLevelStatus->Int = Int;
+			ThiefLevelStatus->Luck = Luck;
+			ThiefLevelStatus->Con = Con;
+			ThiefLevelStatus->Defence = Def;
+			ThiefLevelStatus->HP = HP;
+			ThiefLevelStatus->Stamina = Stamina;
+			ThiefLevelStatus->AutoRecoveryHPPercent = AutoRecoveryHPPercent;
+			ThiefLevelStatus->AutoRecoveryMPPercent = AutoRecoveryMPPercent;												
+			ThiefLevelStatus->Speed = Speed;					
+
+			_ThiefStatus.insert(pair<int8, st_StatInfo*>(ThiefLevelStatus->Level, ThiefLevelStatus));
+		}
+
+		for (auto& MageIncreaseStatusFiled : Filed["MageTypeLevelUpIncreaseStatus"].GetArray())
+		{
+			int8 Level = (int8)MageIncreaseStatusFiled["Level"].GetInt();
+
+			int16 Str = (int16)MageIncreaseStatusFiled["Str"].GetInt();
+			int16 Dex = (int16)MageIncreaseStatusFiled["Dex"].GetInt();
+			int16 Int = (int16)MageIncreaseStatusFiled["Int"].GetInt();
+			int16 Luck = (int16)MageIncreaseStatusFiled["Luck"].GetInt();
+
+			int16 Con = (int16)MageIncreaseStatusFiled["Con"].GetInt();
+			int16 Def = (int16)MageIncreaseStatusFiled["Def"].GetInt();
+			int16 HP = (int16)MageIncreaseStatusFiled["HP"].GetInt();
+
+			int AutoRecoveryHPPercent = MageIncreaseStatusFiled["AutoRecoveryHPPercent"].GetInt();
+			int AutoRecoveryMPPercent = MageIncreaseStatusFiled["AutoRecoveryMPPercent"].GetInt();
+			int16 Stamina = (int16)MageIncreaseStatusFiled["Stamina"].GetInt();
+
+			float Speed = MageIncreaseStatusFiled["Speed"].GetFloat();
+
+			st_StatInfo* MageLevelStatus = new st_StatInfo();
+
+			MageLevelStatus->Level = Level;
+			MageLevelStatus->Str = Str;
+			MageLevelStatus->Dex = Dex;
+			MageLevelStatus->Int = Int;
+			MageLevelStatus->Luck = Luck;
+			MageLevelStatus->Con = Con;
+			MageLevelStatus->Defence = Def;
+			MageLevelStatus->HP = HP;
+			MageLevelStatus->Stamina = Stamina;
+			MageLevelStatus->AutoRecoveryHPPercent = AutoRecoveryHPPercent;
+			MageLevelStatus->AutoRecoveryMPPercent = AutoRecoveryMPPercent;
+			MageLevelStatus->Speed = Speed;
+
+			_MageStatus.insert(pair<int8, st_StatInfo*>(MageLevelStatus->Level, MageLevelStatus));
+		}
+
+		for (auto& HunterIncreaseStatusFiled : Filed["HunterTypeLevelUpIncreaseStatus"].GetArray())
+		{
+			int8 Level = (int8)HunterIncreaseStatusFiled["Level"].GetInt();
+
+			int16 Str = (int16)HunterIncreaseStatusFiled["Str"].GetInt();
+			int16 Dex = (int16)HunterIncreaseStatusFiled["Dex"].GetInt();
+			int16 Int = (int16)HunterIncreaseStatusFiled["Int"].GetInt();
+			int16 Luck = (int16)HunterIncreaseStatusFiled["Luck"].GetInt();
+
+			int16 Con = (int16)HunterIncreaseStatusFiled["Con"].GetInt();
+			int16 Def = (int16)HunterIncreaseStatusFiled["Def"].GetInt();
+			int16 HP = (int16)HunterIncreaseStatusFiled["HP"].GetInt();
+
+			int AutoRecoveryHPPercent = HunterIncreaseStatusFiled["AutoRecoveryHPPercent"].GetInt();
+			int AutoRecoveryMPPercent = HunterIncreaseStatusFiled["AutoRecoveryMPPercent"].GetInt();
+			int16 Stamina = (int16)HunterIncreaseStatusFiled["Stamina"].GetInt();
+
+			float Speed = HunterIncreaseStatusFiled["Speed"].GetFloat();
+
+			st_StatInfo* HunterLevelStatus = new st_StatInfo();
+
+			HunterLevelStatus->Level = Level;
+			HunterLevelStatus->Str = Str;
+			HunterLevelStatus->Dex = Dex;
+			HunterLevelStatus->Int = Int;
+			HunterLevelStatus->Luck = Luck;
+			HunterLevelStatus->Con = Con;
+			HunterLevelStatus->Defence = Def;
+			HunterLevelStatus->HP = HP;
+			HunterLevelStatus->Stamina = Stamina;
+			HunterLevelStatus->AutoRecoveryHPPercent = AutoRecoveryHPPercent;
+			HunterLevelStatus->AutoRecoveryMPPercent = AutoRecoveryMPPercent;
+			HunterLevelStatus->Speed = Speed;
+
+			_MageStatus.insert(pair<int8, st_StatInfo*>(HunterLevelStatus->Level, HunterLevelStatus));
 		}
 	}	
 }
@@ -739,15 +841,15 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			int Luck = MonsterStatInfoFiled["Luck"].GetInt();
 			int MaxHP = MonsterStatInfoFiled["MaxHP"].GetInt();
 			int MaxMP = MonsterStatInfoFiled["MaxMP"].GetInt();
-			int MinMeleeAttackDamage = MonsterStatInfoFiled["MinMeleeAttackDamage"].GetInt();
-			int MaxMeleeAttackDamage = MonsterStatInfoFiled["MaxMeleeAttackDamage"].GetInt();
-			int16 MeleeAttackHitRate = MonsterStatInfoFiled["MeleeAttackHitRate"].GetInt();
-			int16 MagicDamage = (int16)MonsterStatInfoFiled["MagicDamage"].GetInt();
-			float MagicHitRate = (int16)MonsterStatInfoFiled["MagicHitRate"].GetFloat();
+			int MinAttackPoint = MonsterStatInfoFiled["MinAttackPoint"].GetInt();
+			int MaxAttackPoint = MonsterStatInfoFiled["MaxAttackPoint"].GetInt();
+			int16 SpiritPoint = (int16)MonsterStatInfoFiled["SpiritPoint"].GetInt();
+			int16 AttackHitRate = MonsterStatInfoFiled["AttackHitRate"].GetInt();			
+			float SpellCastingRate = (int16)MonsterStatInfoFiled["SpellCastingRate"].GetFloat();
 			int Defence = MonsterStatInfoFiled["Defence"].GetInt();
 			int16 EvasionRate = (int16)MonsterStatInfoFiled["EvasionRate"].GetInt();
-			int16 MeleeCriticalPoint = (int16)MonsterStatInfoFiled["MeleeCriticalPoint"].GetInt();
-			int16 MagicCriticalPoint = (int16)MonsterStatInfoFiled["MagicCriticalPoint"].GetInt();
+			int16 AttackCriticalPoint = (int16)MonsterStatInfoFiled["AttackCriticalPoint"].GetInt();
+			int16 SpellCriticalPoint = (int16)MonsterStatInfoFiled["SpellCriticalPoint"].GetInt();
 			float Speed = MonsterStatInfoFiled["Speed"].GetFloat();
 			float SearchDistance = MonsterStatInfoFiled["SearchDistance"].GetFloat();
 			float ChaseDistance = MonsterStatInfoFiled["ChaseDistance"].GetFloat();
@@ -755,8 +857,7 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			int PatrolTick = MonsterStatInfoFiled["PatrolTick"].GetInt();
 			int AttackTick = MonsterStatInfoFiled["AttackTick"].GetInt();
 			float MovingAttackRange = MonsterStatInfoFiled["MovingAttackRange"].GetFloat();
-			float AttackRange = MonsterStatInfoFiled["AttackRange"].GetFloat();
-			int16 GetDPPoint = (int16)MonsterStatInfoFiled["GetDPPoint"].GetInt();
+			float AttackRange = MonsterStatInfoFiled["AttackRange"].GetFloat();			
 			int GetExpPoint = MonsterStatInfoFiled["GetExpPoint"].GetInt();
 			int64 ReSpawnTime = MonsterStatInfoFiled["ReSpawnTime"].GetInt64();
 
@@ -767,15 +868,15 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			MonsterData->MonsterStatInfo.Luck = Luck;
 			MonsterData->MonsterStatInfo.MaxHP = MaxHP;
 			MonsterData->MonsterStatInfo.MaxMP = MaxMP;
-			MonsterData->MonsterStatInfo.MinMeleeAttackDamage = MinMeleeAttackDamage;
-			MonsterData->MonsterStatInfo.MaxMeleeAttackDamage = MaxMeleeAttackDamage;
-			MonsterData->MonsterStatInfo.MeleeAttackHitRate = MeleeAttackHitRate;
-			MonsterData->MonsterStatInfo.MagicDamage = MagicDamage;
-			MonsterData->MonsterStatInfo.MagicHitRate = MagicHitRate;
+			MonsterData->MonsterStatInfo.MinAttackPoint = MinAttackPoint;
+			MonsterData->MonsterStatInfo.MaxAttackPoint = MaxAttackPoint;
+			MonsterData->MonsterStatInfo.SpiritPoint = SpiritPoint;
+			MonsterData->MonsterStatInfo.AttackHitRate = AttackHitRate;
+			MonsterData->MonsterStatInfo.SpellCastingRate = SpellCastingRate;
 			MonsterData->MonsterStatInfo.Defence = Defence;
 			MonsterData->MonsterStatInfo.EvasionRate = EvasionRate;
-			MonsterData->MonsterStatInfo.MeleeCriticalPoint = MeleeCriticalPoint;
-			MonsterData->MonsterStatInfo.MagicCriticalPoint = MagicCriticalPoint;
+			MonsterData->MonsterStatInfo.AttackCriticalPoint = AttackCriticalPoint;
+			MonsterData->MonsterStatInfo.SpellCriticalPoint = SpellCriticalPoint;
 			MonsterData->MonsterStatInfo.Speed = Speed;
 			MonsterData->MonsterStatInfo.SearchDistance = SearchDistance;
 			MonsterData->MonsterStatInfo.ChaseDistance = ChaseDistance;
@@ -784,7 +885,6 @@ void CDataManager::LoadDataMonster(wstring LoadFileName)
 			MonsterData->AttackTick = AttackTick;
 			MonsterData->MonsterStatInfo.MovingAttackRange = MovingAttackRange;
 			MonsterData->MonsterStatInfo.AttackRange = AttackRange;			
-			MonsterData->GetDPPoint = GetDPPoint;
 			MonsterData->GetExpPoint = GetExpPoint;
 			MonsterData->ReSpawnTime = ReSpawnTime;
 		}
