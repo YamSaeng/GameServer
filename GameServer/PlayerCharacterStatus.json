@@ -1,186 +1,296 @@
 {
   "PlayerCharacterStatus": [
     {
-      "PlayerCharacterLevelDataList": [
+      "WarriorTypeLevelUpIncreaseStatus": [
         {
           "Level": 1,
-          "MaxHP": 300,
-          "MaxMP": 200,
-          "MaxDP": 4000,
+          "Str": 23,
+          "Dex": 20,
+          "Int": 20,
+          "Luck": 25,
+          "Con": 22,
+          "Def": 40,
+          "HP": 60,
           "AutoRecoveryHPPercent": 2,
           "AutoRecoveryMPPercent": 1,
-          "MinMeleeAttackDamage": 20,
-          "MaxMeleeAttackDamage": 40,
-          "MeleeAttackHitRate": 1000,
-          "MagicDamage": 0,
-          "MagicHitRate": 0,
-          "Defence": 0,
-          "EvasionRate": 100,
-          "MeleeCriticalPoint": 200,
-          "MagicCriticalPoint": 0,
+          "Stamina": 100,
           "Speed": 3.0
         },
         {
           "Level": 2,
-          "MaxHP": 320,
-          "MaxMP": 210,
-          "MaxDP": 4000,
-          "AutoRecoveryHPPercent": 2,
-          "AutoRecoveryMPPercent": 1,
-          "MinMeleeAttackDamage": 21,
-          "MaxMeleeAttackDamage": 40,
-          "MeleeAttackHitRate": 1000,
-          "MagicDamage": 0,
-          "MagicHitRate": 0,
-          "Defence": 0,
-          "EvasionRate": 100,
-          "MeleeCriticalPoint": 200,
-          "MagicCriticalPoint": 0,
-          "Speed": 3.0
+          "Str": 1,
+          "Dex": 1,
+          "Con": 1,
+          "HP": 17
         },
         {
           "Level": 3,
-          "MaxHP": 340,
-          "MaxMP": 220,
-          "MaxDP": 4000,
-          "AutoRecoveryHPPercent": 2,
-          "AutoRecoveryMPPercent": 1,
-          "MinMeleeAttackDamage": 22,
-          "MaxMeleeAttackDamage": 40,
-          "MeleeAttackHitRate": 1000,
-          "MagicDamage": 0,
-          "MagicHitRate": 0,
-          "Defence": 0,
-          "EvasionRate": 100,
-          "MeleeCriticalPoint": 200,
-          "MagicCriticalPoint": 0,
-          "Speed": 3.0
+          "Str": 1,
+          "HP": 17
         },
         {
           "Level": 4,
-          "MaxHP": 360,
-          "MaxMP": 230,
-          "MaxDP": 4000,
-          "AutoRecoveryHPPercent": 2,
-          "AutoRecoveryMPPercent": 1,
-          "MinMeleeAttackDamage": 23,
-          "MaxMeleeAttackDamage": 40,
-          "MeleeAttackHitRate": 1000,
-          "MagicDamage": 0,
-          "MagicHitRate": 0,
-          "Defence": 0,
-          "EvasionRate": 100,
-          "MeleeCriticalPoint": 200,
-          "MagicCriticalPoint": 0,
-          "Speed": 3.0
+          "Str": 2,
+          "Dex": 1,
+          "Con": 1,
+          "Int": 1,
+          "HP": 17
         },
         {
           "Level": 5,
-          "MaxHP": 380,
-          "MaxMP": 240,
-          "MaxDP": 4000,
-          "AutoRecoveryHPPercent": 2,
-          "AutoRecoveryMPPercent": 1,
-          "MinMeleeAttackDamage": 25,
-          "MaxMeleeAttackDamage": 50,
-          "MeleeAttackHitRate": 1000,
-          "MagicDamage": 0,
-          "MagicHitRate": 0,
-          "Defence": 0,
-          "EvasionRate": 100,
-          "MeleeCriticalPoint": 210,
-          "MagicCriticalPoint": 0,
-          "Speed": 3.0
+          "Str": 1,
+          "Dex": 1,
+          "Con": 1,
+          "HP": 17
         },
         {
           "Level": 6,
-          "MaxHP": 420,
-          "MaxMP": 260,
-          "MaxDP": 4000,
-          "AutoRecoveryHPPercent": 3,
-          "AutoRecoveryMPPercent": 2,
-          "MinMeleeAttackDamage": 26,
-          "MaxMeleeAttackDamage": 50,
-          "MeleeAttackHitRate": 1000,
-          "MagicDamage": 0,
-          "MagicHitRate": 0,
-          "Defence": 0,
-          "EvasionRate": 100,
-          "MeleeCriticalPoint": 210,
-          "MagicCriticalPoint": 0,
-          "Speed": 3.0
+          "Str": 1,
+          "HP": 17
         },
         {
           "Level": 7,
-          "MaxHP": 440,
-          "MaxMP": 270,
-          "MaxDP": 4000,
-          "AutoRecoveryHPPercent": 3,
-          "AutoRecoveryMPPercent": 2,
-          "MinMeleeAttackDamage": 27,
-          "MaxMeleeAttackDamage": 50,
-          "MeleeAttackHitRate": 1000,
-          "MagicDamage": 0,
-          "MagicHitRate": 0,
-          "Defence": 0,
-          "EvasionRate": 100,
-          "MeleeCriticalPoint": 210,
-          "MagicCriticalPoint": 0,
-          "Speed": 3.0
+          "Str": 2,
+          "Dex": 1,
+          "Con": 1,
+          "HP": 17
         },
         {
           "Level": 8,
-          "MaxHP": 460,
-          "MaxMP": 280,
-          "MaxDP": 4000,
-          "AutoRecoveryHPPercent": 3,
-          "AutoRecoveryMPPercent": 2,
-          "MinMeleeAttackDamage": 28,
-          "MaxMeleeAttackDamage": 50,
-          "MeleeAttackHitRate": 1000,
-          "MagicDamage": 0,
-          "MagicHitRate": 0,
-          "Defence": 0,
-          "EvasionRate": 100,
-          "MeleeCriticalPoint": 210,
-          "MagicCriticalPoint": 0,
-          "Speed": 3.0
+          "Str": 1,
+          "Dex": 1,
+          "HP": 17
         },
         {
           "Level": 9,
-          "MaxHP": 480,
-          "MaxMP": 290,
-          "MaxDP": 4000,
-          "AutoRecoveryHPPercent": 3,
-          "AutoRecoveryMPPercent": 2,
-          "MinMeleeAttackDamage": 29,
-          "MaxMeleeAttackDamage": 50,
-          "MeleeAttackHitRate": 1000,
-          "MagicDamage": 0,
-          "MagicHitRate": 0,
-          "Defence": 0,
-          "EvasionRate": 100,
-          "MeleeCriticalPoint": 210,
-          "MagicCriticalPoint": 0,
-          "Speed": 3.0
+          "Str": 1,
+          "Dex": 1,
+          "Con": 1,
+          "HP": 17
         },
         {
           "Level": 10,
-          "MaxHP": 500,
-          "MaxMP": 300,
-          "MaxDP": 4000,
-          "AutoRecoveryHPPercent": 4,
-          "AutoRecoveryMPPercent": 3,
-          "MinMeleeAttackDamage": 30,
-          "MaxMeleeAttackDamage": 60,
-          "MeleeAttackHitRate": 1000,
-          "MagicDamage": 0,
-          "MagicHitRate": 0,
-          "Defence": 0,
-          "EvasionRate": 100,
-          "MeleeCriticalPoint": 220,
-          "MagicCriticalPoint": 0,
+          "Str": 2,
+          "Con": 1,
+          "Int": 1,
+          "HP": 17
+        }
+      ],
+      "ThiefTypeLevelUpIncreaseStatus": [
+        {
+          "Level": 1,
+          "Str": 21,
+          "Dex": 23,
+          "Int": 20,
+          "Luck": 25,
+          "Con": 21,
+          "Def": 48,
+          "HP": 55,
+          "AutoRecoveryHPPercent": 2,
+          "AutoRecoveryMPPercent": 1,
+          "Stamina": 100,
           "Speed": 3.0
+        },
+        {
+          "Level": 2,
+          "Str": 1,
+          "Dex": 1,
+          "Con": 1,
+          "HP": 17
+        },
+        {
+          "Level": 3,
+          "Dex": 1,
+          "HP": 17
+        },
+        {
+          "Level": 4,
+          "Str": 1,
+          "Dex": 2,
+          "Con": 1,
+          "Int": 1,
+          "HP": 17
+        },
+        {
+          "Level": 5,
+          "Str": 1,
+          "Dex": 1,
+          "Con": 1,
+          "HP": 17
+        },
+        {
+          "Level": 6,
+          "Dex": 1,
+          "HP": 17
+        },
+        {
+          "Level": 7,
+          "Str": 1,
+          "Dex": 2,
+          "Con": 1,
+          "HP": 17
+        },
+        {
+          "Level": 8,
+          "Str": 1,
+          "Dex": 1,
+          "HP": 17
+        },
+        {
+          "Level": 9,
+          "Str": 1,
+          "Dex": 1,
+          "Con": 1,
+          "HP": 17
+        },
+        {
+          "Level": 10,
+          "Dex": 2,
+          "Con": 1,
+          "Int": 1,
+          "HP": 17
+        }
+      ],
+      "MageTypeLevelUpIncreaseStatus": [
+        {
+          "Level": 1,
+          "Str": 20,
+          "Dex": 20,
+          "Int": 23,
+          "Luck": 25,
+          "Con": 20,
+          "Def": 40,
+          "HP": 52,
+          "AutoRecoveryHPPercent": 2,
+          "AutoRecoveryMPPercent": 1,
+          "Stamina": 100,
+          "Speed": 3.0
+        },
+        {
+          "Level": 2,
+          "Int": 1,          
+          "Con": 1,
+          "HP": 17
+        },
+        {
+          "Level": 3,
+          "Int": 1,
+          "HP": 17
+        },
+        {
+          "Level": 4,
+          "Int": 2,          
+          "Con": 1,          
+          "HP": 17
+        },
+        {
+          "Level": 5,
+          "Int": 1,          
+          "Con": 1,
+          "HP": 17
+        },
+        {
+          "Level": 6,
+          "Int": 1,
+          "HP": 17
+        },
+        {
+          "Level": 7,          
+          "Int": 2,
+          "Con": 1,
+          "HP": 17
+        },
+        {
+          "Level": 8,
+          "Int": 1,          
+          "HP": 17
+        },
+        {
+          "Level": 9,
+          "Int": 1,          
+          "Con": 1,
+          "HP": 17
+        },
+        {
+          "Level": 10,
+          "Int": 2,
+          "Con": 1,          
+          "HP": 17
+        }
+      ],
+      "HunterTypeLevelUpIncreaseStatus": [
+        {
+          "Level": 1,
+          "Str": 22,
+          "Dex": 19,
+          "Int": 19,
+          "Luck": 25,
+          "Con": 24,
+          "Def": 40,
+          "HP": 86,
+          "AutoRecoveryHPPercent": 2,
+          "AutoRecoveryMPPercent": 1,
+          "Stamina": 100,
+          "Speed": 3.0
+        },
+        {
+          "Level": 2,
+          "Str": 1,
+          "Dex": 1,
+          "Con": 1,
+          "HP": 17
+        },
+        {
+          "Level": 3,
+          "Dex": 1,
+          "HP": 17
+        },
+        {
+          "Level": 4,
+          "Str": 1,
+          "Dex": 2,
+          "Con": 1,
+          "Int": 1,
+          "HP": 17
+        },
+        {
+          "Level": 5,
+          "Str": 1,
+          "Dex": 1,
+          "Con": 1,
+          "HP": 17
+        },
+        {
+          "Level": 6,
+          "Dex": 1,
+          "HP": 17
+        },
+        {
+          "Level": 7,
+          "Str": 1,
+          "Dex": 2,
+          "Con": 1,
+          "HP": 17
+        },
+        {
+          "Level": 8,
+          "Str": 1,
+          "Dex": 1,
+          "HP": 17
+        },
+        {
+          "Level": 9,
+          "Str": 1,
+          "Dex": 1,
+          "Con": 1,
+          "HP": 17
+        },
+        {
+          "Level": 10,
+          "Dex": 2,
+          "Con": 1,
+          "Int": 1,
+          "HP": 17
         }
       ]
     }
