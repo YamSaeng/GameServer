@@ -95,8 +95,7 @@ public:
 	void LoadDataDropItem(wstring LoadFileName);
 	void LoadDataDropMoney(wstring LoadFileName);
 
-	st_SkillInfo* FindSkillData(en_SkillType FindSkillType);
-	st_StatInfo* FindObjectStatusData(en_GameObjectType GameObjectType, int8 Level);
+	st_SkillInfo* FindSkillData(en_SkillType FindSkillType);	
 	st_ItemInfo* FindItemData(en_SmallItemCategory FindItemCategory);	
 	int32 FindMonsterExperienceData(en_GameObjectType MonsterGameObjectType);
 };

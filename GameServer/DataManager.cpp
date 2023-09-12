@@ -647,8 +647,12 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			int16 Luck = (int16)WarriorIncreaseStatusFiled["Luck"].GetInt();
 
 			int16 Con = (int16)WarriorIncreaseStatusFiled["Con"].GetInt();
+			int16 Wis = (int16)WarriorIncreaseStatusFiled["Wis"].GetInt();
+
 			int16 Def = (int16)WarriorIncreaseStatusFiled["Def"].GetInt();
+
 			int16 HP = (int16)WarriorIncreaseStatusFiled["HP"].GetInt();
+			int16 MP = (int16)WarriorIncreaseStatusFiled["MP"].GetInt();
 
 			int AutoRecoveryHPPercent = WarriorIncreaseStatusFiled["AutoRecoveryHPPercent"].GetInt();
 			int AutoRecoveryMPPercent = WarriorIncreaseStatusFiled["AutoRecoveryMPPercent"].GetInt();
@@ -664,8 +668,10 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			WarriorLevelStatus->Int = Int;
 			WarriorLevelStatus->Luck = Luck;
 			WarriorLevelStatus->Con = Con;
+			WarriorLevelStatus->Wis = Wis;
 			WarriorLevelStatus->Defence = Def;
 			WarriorLevelStatus->HP = HP;
+			WarriorLevelStatus->MP = MP;
 			WarriorLevelStatus->Stamina = Stamina;
 			WarriorLevelStatus->AutoRecoveryHPPercent = AutoRecoveryHPPercent;
 			WarriorLevelStatus->AutoRecoveryMPPercent = AutoRecoveryMPPercent;
@@ -683,9 +689,13 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			int16 Int = (int16)ThiefIncreaseStatusFiled["Int"].GetInt();
 			int16 Luck = (int16)ThiefIncreaseStatusFiled["Luck"].GetInt();
 
-			int16 Con = (int16)ThiefIncreaseStatusFiled["Con"].GetInt();			
+			int16 Con = (int16)ThiefIncreaseStatusFiled["Con"].GetInt();		
+			int16 Wis = (int16)ThiefIncreaseStatusFiled["Wis"].GetInt();
+
 			int16 Def = (int16)ThiefIncreaseStatusFiled["Def"].GetInt();
+
 			int16 HP = (int16)ThiefIncreaseStatusFiled["HP"].GetInt();		
+			int16 MP = (int16)ThiefIncreaseStatusFiled["MP"].GetInt();
 
 			int AutoRecoveryHPPercent = ThiefIncreaseStatusFiled["AutoRecoveryHPPercent"].GetInt();
 			int AutoRecoveryMPPercent = ThiefIncreaseStatusFiled["AutoRecoveryMPPercent"].GetInt();	
@@ -701,8 +711,10 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			ThiefLevelStatus->Int = Int;
 			ThiefLevelStatus->Luck = Luck;
 			ThiefLevelStatus->Con = Con;
+			ThiefLevelStatus->Wis = Wis;
 			ThiefLevelStatus->Defence = Def;
 			ThiefLevelStatus->HP = HP;
+			ThiefLevelStatus->MP = MP;	
 			ThiefLevelStatus->Stamina = Stamina;
 			ThiefLevelStatus->AutoRecoveryHPPercent = AutoRecoveryHPPercent;
 			ThiefLevelStatus->AutoRecoveryMPPercent = AutoRecoveryMPPercent;												
@@ -721,8 +733,12 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			int16 Luck = (int16)MageIncreaseStatusFiled["Luck"].GetInt();
 
 			int16 Con = (int16)MageIncreaseStatusFiled["Con"].GetInt();
+			int16 Wis = (int16)MageIncreaseStatusFiled["Wis"].GetInt();
+
 			int16 Def = (int16)MageIncreaseStatusFiled["Def"].GetInt();
+
 			int16 HP = (int16)MageIncreaseStatusFiled["HP"].GetInt();
+			int16 MP = (int16)MageIncreaseStatusFiled["MP"].GetInt();
 
 			int AutoRecoveryHPPercent = MageIncreaseStatusFiled["AutoRecoveryHPPercent"].GetInt();
 			int AutoRecoveryMPPercent = MageIncreaseStatusFiled["AutoRecoveryMPPercent"].GetInt();
@@ -738,8 +754,10 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			MageLevelStatus->Int = Int;
 			MageLevelStatus->Luck = Luck;
 			MageLevelStatus->Con = Con;
+			MageLevelStatus->Wis = Wis;
 			MageLevelStatus->Defence = Def;
 			MageLevelStatus->HP = HP;
+			MageLevelStatus->MP = MP;
 			MageLevelStatus->Stamina = Stamina;
 			MageLevelStatus->AutoRecoveryHPPercent = AutoRecoveryHPPercent;
 			MageLevelStatus->AutoRecoveryMPPercent = AutoRecoveryMPPercent;
@@ -758,8 +776,12 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			int16 Luck = (int16)HunterIncreaseStatusFiled["Luck"].GetInt();
 
 			int16 Con = (int16)HunterIncreaseStatusFiled["Con"].GetInt();
+			int16 Wis = (int16)HunterIncreaseStatusFiled["Wis"].GetInt();
+
 			int16 Def = (int16)HunterIncreaseStatusFiled["Def"].GetInt();
+
 			int16 HP = (int16)HunterIncreaseStatusFiled["HP"].GetInt();
+			int16 MP = (int16)HunterIncreaseStatusFiled["MP"].GetInt();
 
 			int AutoRecoveryHPPercent = HunterIncreaseStatusFiled["AutoRecoveryHPPercent"].GetInt();
 			int AutoRecoveryMPPercent = HunterIncreaseStatusFiled["AutoRecoveryMPPercent"].GetInt();
@@ -775,8 +797,10 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 			HunterLevelStatus->Int = Int;
 			HunterLevelStatus->Luck = Luck;
 			HunterLevelStatus->Con = Con;
+			HunterLevelStatus->Wis = Wis;
 			HunterLevelStatus->Defence = Def;
 			HunterLevelStatus->HP = HP;
+			HunterLevelStatus->MP = MP;
 			HunterLevelStatus->Stamina = Stamina;
 			HunterLevelStatus->AutoRecoveryHPPercent = AutoRecoveryHPPercent;
 			HunterLevelStatus->AutoRecoveryMPPercent = AutoRecoveryMPPercent;
@@ -3163,24 +3187,6 @@ st_SkillInfo* CDataManager::FindSkillData(en_SkillType FindSkillType)
 	case en_SkillType::SKILL_GOBLIN_ACTIVE_MELEE_DEFAULT_ATTACK:
 		return (*_GoblinSkillDatas.find((int16)FindSkillType)).second;
 	}	
-}
-
-st_StatInfo* CDataManager::FindObjectStatusData(en_GameObjectType GameObjectType, int8 Level)
-{
-	switch (GameObjectType)
-	{
-	case en_GameObjectType::OBJECT_NON_TYPE:
-		return nullptr;
-	case en_GameObjectType::OBJECT_PLAYER:
-	case en_GameObjectType::OBJECT_PLAYER_DUMMY:
-		return (*_PlayerStatus.find(Level)).second;	
-	case en_GameObjectType::OBJECT_GOBLIN:
-		break;	
-	case en_GameObjectType::OBJECT_WALL:
-	case en_GameObjectType::OBJECT_STONE:
-	case en_GameObjectType::OBJECT_TREE:
-		return (*_PlayerStatus.find(Level)).second;			
-	}
 }
 
 st_ItemInfo* CDataManager::FindItemData(en_SmallItemCategory FindItemCategory)
