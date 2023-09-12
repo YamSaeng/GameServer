@@ -808,6 +808,49 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 
 			_MageStatus.insert(pair<int8, st_StatInfo*>(HunterLevelStatus->Level, HunterLevelStatus));
 		}
+
+		for (auto& MainCharacterIncreaseStatusFiled : Filed["MainCharacterLevelUpIncreaseStatus"].GetArray())
+		{
+			int8 Level = (int8)MainCharacterIncreaseStatusFiled["Level"].GetInt();
+
+			int16 Str = (int16)MainCharacterIncreaseStatusFiled["Str"].GetInt();
+			int16 Dex = (int16)MainCharacterIncreaseStatusFiled["Dex"].GetInt();
+			int16 Int = (int16)MainCharacterIncreaseStatusFiled["Int"].GetInt();
+			int16 Luck = (int16)MainCharacterIncreaseStatusFiled["Luck"].GetInt();
+
+			int16 Con = (int16)MainCharacterIncreaseStatusFiled["Con"].GetInt();
+			int16 Wis = (int16)MainCharacterIncreaseStatusFiled["Wis"].GetInt();
+
+			int16 Def = (int16)MainCharacterIncreaseStatusFiled["Def"].GetInt();
+
+			int16 HP = (int16)MainCharacterIncreaseStatusFiled["HP"].GetInt();
+			int16 MP = (int16)MainCharacterIncreaseStatusFiled["MP"].GetInt();
+
+			int AutoRecoveryHPPercent = MainCharacterIncreaseStatusFiled["AutoRecoveryHPPercent"].GetInt();
+			int AutoRecoveryMPPercent = MainCharacterIncreaseStatusFiled["AutoRecoveryMPPercent"].GetInt();
+			int16 Stamina = (int16)MainCharacterIncreaseStatusFiled["Stamina"].GetInt();
+
+			float Speed = MainCharacterIncreaseStatusFiled["Speed"].GetFloat();
+
+			st_StatInfo* HunterLevelStatus = new st_StatInfo();
+
+			HunterLevelStatus->Level = Level;
+			HunterLevelStatus->Str = Str;
+			HunterLevelStatus->Dex = Dex;
+			HunterLevelStatus->Int = Int;
+			HunterLevelStatus->Luck = Luck;
+			HunterLevelStatus->Con = Con;
+			HunterLevelStatus->Wis = Wis;
+			HunterLevelStatus->Defence = Def;
+			HunterLevelStatus->HP = HP;
+			HunterLevelStatus->MP = MP;
+			HunterLevelStatus->Stamina = Stamina;
+			HunterLevelStatus->AutoRecoveryHPPercent = AutoRecoveryHPPercent;
+			HunterLevelStatus->AutoRecoveryMPPercent = AutoRecoveryMPPercent;
+			HunterLevelStatus->Speed = Speed;
+
+			_MageStatus.insert(pair<int8, st_StatInfo*>(HunterLevelStatus->Level, HunterLevelStatus));
+		}
 	}	
 }
 
