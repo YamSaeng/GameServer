@@ -7,48 +7,98 @@
     },
     {
       "Level": 2,
-      "RequireExperience": 700,
-      "TotalExperience": 1100
+      "RequireExperience": 900,
+      "TotalExperience": 1300
     },
     {
       "Level": 3,
-      "RequireExperience": 1000,
-      "TotalExperience": 2100
+      "RequireExperience": 1400,
+      "TotalExperience": 2700
     },
     {
       "Level": 4,
-      "RequireExperience": 1300,
-      "TotalExperience": 3400
+      "RequireExperience": 2100,
+      "TotalExperience": 4800
     },
     {
       "Level": 5,
-      "RequireExperience": 1600,
-      "TotalExperience": 5000
+      "RequireExperience": 2800,
+      "TotalExperience": 7600
     },
     {
       "Level": 6,
-      "RequireExperience": 1800,
-      "TotalExperience": 6800
+      "RequireExperience": 3600,
+      "TotalExperience": 11200
     },
     {
       "Level": 7,
-      "RequireExperience": 2000,
-      "TotalExperience": 8800
+      "RequireExperience": 4500,
+      "TotalExperience": 15700
     },
     {
       "Level": 8,
-      "RequireExperience": 2200,
-      "TotalExperience": 11000
+      "RequireExperience": 5400,
+      "TotalExperience": 21100
     },
     {
       "Level": 9,
-      "RequireExperience": 2400,
-      "TotalExperience": 13400
+      "RequireExperience": 6500,
+      "TotalExperience": 27600
     },
     {
       "Level": 10,
-      "RequireExperience": 2600,
-      "TotalExperience": 16000
+      "RequireExperience": 7600,
+      "TotalExperience": 35200
+    },
+    {
+      "Level": 11,
+      "RequireExperience": 8800,
+      "TotalExperience": 44000
+    },
+    {
+      "Level": 12,
+      "RequireExperience": 10100,
+      "TotalExperience": 54100
+    },
+    {
+      "Level": 13,
+      "RequireExperience": 11400,
+      "TotalExperience": 65500
+    },
+    {
+      "Level": 14,
+      "RequireExperience": 12900,
+      "TotalExperience": 78400
+    },
+    {
+      "Level": 15,
+      "RequireExperience": 14400,
+      "TotalExperience": 92800
+    },
+    {
+      "Level": 16,
+      "RequireExperience": 16000,
+      "TotalExperience": 108800
+    },
+    {
+      "Level": 17,
+      "RequireExperience": 17700,
+      "TotalExperience": 126500
+    },
+    {
+      "Level": 18,
+      "RequireExperience": 19400,
+      "TotalExperience": 145900
+    },
+    {
+      "Level": 19,
+      "RequireExperience": 21300,
+      "TotalExperience": 167200
+    },
+    {
+      "Level": 20,
+      "RequireExperience": 23200,
+      "TotalExperience": 190400
     }
   ]
 }
