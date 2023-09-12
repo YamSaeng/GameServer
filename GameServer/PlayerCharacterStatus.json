@@ -9,8 +9,10 @@
           "Int": 20,
           "Luck": 25,
           "Con": 22,
+          "Wis": 20,
           "Def": 40,
           "HP": 60,
+          "MP": 55,
           "AutoRecoveryHPPercent": 2,
           "AutoRecoveryMPPercent": 1,
           "Stamina": 100,
@@ -21,6 +23,7 @@
           "Str": 1,
           "Dex": 1,
           "Con": 1,
+          "Wis": 1,
           "HP": 17
         },
         {
@@ -46,6 +49,7 @@
         {
           "Level": 6,
           "Str": 1,
+          "Wis": 1,
           "HP": 17
         },
         {
@@ -66,6 +70,7 @@
           "Str": 1,
           "Dex": 1,
           "Con": 1,
+          "Wis": 1,
           "HP": 17
         },
         {
@@ -84,8 +89,10 @@
           "Int": 20,
           "Luck": 25,
           "Con": 21,
+          "Wis": 20,
           "Def": 48,
           "HP": 55,
+          "MP": 60,
           "AutoRecoveryHPPercent": 2,
           "AutoRecoveryMPPercent": 1,
           "Stamina": 100,
@@ -101,6 +108,7 @@
         {
           "Level": 3,
           "Dex": 1,
+          "Wis": 1,
           "HP": 17
         },
         {
@@ -121,6 +129,7 @@
         {
           "Level": 6,
           "Dex": 1,
+          "Wis": 1,
           "HP": 17
         },
         {
@@ -141,6 +150,7 @@
           "Str": 1,
           "Dex": 1,
           "Con": 1,
+          "Wis": 1,
           "HP": 17
         },
         {
@@ -159,8 +169,10 @@
           "Int": 23,
           "Luck": 25,
           "Con": 20,
+          "Wis": 22,
           "Def": 40,
           "HP": 52,
+          "MP": 165,
           "AutoRecoveryHPPercent": 2,
           "AutoRecoveryMPPercent": 1,
           "Stamina": 100,
@@ -168,8 +180,9 @@
         },
         {
           "Level": 2,
-          "Int": 1,          
+          "Int": 1,
           "Con": 1,
+          "Wis": 2,
           "HP": 17
         },
         {
@@ -179,42 +192,44 @@
         },
         {
           "Level": 4,
-          "Int": 2,          
-          "Con": 1,          
+          "Int": 2,
+          "Con": 1,
           "HP": 17
         },
         {
           "Level": 5,
-          "Int": 1,          
+          "Int": 1,
           "Con": 1,
           "HP": 17
         },
         {
           "Level": 6,
           "Int": 1,
+          "Wis": 2,
           "HP": 17
         },
         {
-          "Level": 7,          
+          "Level": 7,
           "Int": 2,
           "Con": 1,
           "HP": 17
         },
         {
           "Level": 8,
-          "Int": 1,          
+          "Int": 1,
           "HP": 17
         },
         {
           "Level": 9,
-          "Int": 1,          
+          "Int": 1,
           "Con": 1,
+          "Wis": 2,
           "HP": 17
         },
         {
           "Level": 10,
           "Int": 2,
-          "Con": 1,          
+          "Con": 1,
           "HP": 17
         }
       ],
@@ -226,8 +241,10 @@
           "Int": 19,
           "Luck": 25,
           "Con": 24,
+          "Wis": 20,
           "Def": 40,
           "HP": 86,
+          "MP": 84,
           "AutoRecoveryHPPercent": 2,
           "AutoRecoveryMPPercent": 1,
           "Stamina": 100,
@@ -238,6 +255,7 @@
           "Str": 1,
           "Dex": 1,
           "Con": 1,
+          "Wis": 1,
           "HP": 17
         },
         {
@@ -263,6 +281,7 @@
         {
           "Level": 6,
           "Dex": 1,
+          "Wis": 1,
           "HP": 17
         },
         {
@@ -283,6 +302,7 @@
           "Str": 1,
           "Dex": 1,
           "Con": 1,
+          "Wis": 1,
           "HP": 17
         },
         {
@@ -290,6 +310,78 @@
           "Dex": 2,
           "Con": 1,
           "Int": 1,
+          "HP": 17
+        }
+      ],
+      "MainCharacterLevelUpIncreaseStatus": [
+        {
+          "Level": 1,
+          "Str": 10,
+          "Dex": 10,
+          "Int": 10,
+          "Luck": 10,
+          "Con": 10,
+          "Wis": 10,
+          "Def": 40,
+          "HP": 50,
+          "MP": 50,
+          "AutoRecoveryHPPercent": 2,
+          "AutoRecoveryMPPercent": 1,
+          "Stamina": 100,
+          "Speed": 3.0
+        },
+        {
+          "Level": 2,          
+          "Con": 1,
+          "Wis": 1,
+          "HP": 17
+        },
+        {
+          "Level": 3,
+          "Con": 1,
+          "Wis": 1,
+          "HP": 17
+        },
+        {
+          "Level": 4,
+          "Con": 1,
+          "Wis": 1,
+          "HP": 17
+        },
+        {
+          "Level": 5,
+          "Con": 1,
+          "Wis": 1,
+          "HP": 17
+        },
+        {
+          "Level": 6,
+          "Con": 1,
+          "Wis": 1,
+          "HP": 17
+        },
+        {
+          "Level": 7,
+          "Con": 1,
+          "Wis": 1,
+          "HP": 17
+        },
+        {
+          "Level": 8,
+          "Con": 1,
+          "Wis": 1,
+          "HP": 17
+        },
+        {
+          "Level": 9,
+          "Con": 1,
+          "Wis": 1,
+          "HP": 17
+        },
+        {
+          "Level": 10,
+          "Con": 1,
+          "Wis": 1,
           "HP": 17
         }
       ]
