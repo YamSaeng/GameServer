@@ -34,6 +34,9 @@ void CSector::Insert(CGameObject* InsertGameObject)
 	case en_GameObjectType::OBJECT_TREE:
 		_Environment.insert((CEnvironment*)InsertGameObject);
 		break;
+	case en_GameObjectType::OBJECT_BUILDING_GOVERNMENT_OFFICE:
+		_Buildings.insert(InsertGameObject);
+		break;
 	case en_GameObjectType::OBJECT_SKILL_SWORD_BLADE:
 	case en_GameObjectType::OBJECT_SKILL_FLAME_BOLT:
 	case en_GameObjectType::OBJECT_SKILL_DIVINE_BOLT:
@@ -105,6 +108,9 @@ void CSector::Remove(CGameObject* RemoveGameObject)
 	case en_GameObjectType::OBJECT_TREE:
 		_Environment.erase((CEnvironment*)RemoveGameObject);
 		break;	
+	case en_GameObjectType::OBJECT_BUILDING_GOVERNMENT_OFFICE:
+		_Buildings.erase(RemoveGameObject);
+		break;
 	case en_GameObjectType::OBJECT_SKILL_SWORD_BLADE:
 	case en_GameObjectType::OBJECT_SKILL_FLAME_BOLT:
 	case en_GameObjectType::OBJECT_SKILL_DIVINE_BOLT:
@@ -176,6 +182,11 @@ set<CItem*> CSector::GetItems()
 set<CEnvironment*> CSector::GetEnvironment()
 {
 	return _Environment;
+}
+
+set<CGameObject*> CSector::GetBuildings()
+{
+	return _Buildings;
 }
 
 set<CGameObject*> CSector::GetSkillObject()
