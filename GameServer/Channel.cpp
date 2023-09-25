@@ -11,6 +11,7 @@
 #include "Crop.h"
 #include "Map.h"
 #include "Potato.h"
+#include "GovernmentOffice.h"
 #include "SwordBlade.h"
 #include "FlameBolt.h"
 #include "DivineBolt.h"
@@ -44,6 +45,12 @@ CChannel::CChannel()
 	{
 		_ChannelMonsterArray[MonsterCount] = nullptr;
 		_ChannelMonsterArrayIndexs.Push(MonsterCount);
+	}
+
+	for (int32 BuildingCount = CHANNEL_BUILDING_MAX - 1; BuildingCount >= 0; --BuildingCount)
+	{
+		_ChannelBuildingArray[BuildingCount] = nullptr;		
+		_ChannelBuildArrayIndexs.Push(BuildingCount);
 	}
 
 	for (int32 Environment = CHANNEL_ENVIRONMENT_MAX - 1; Environment >= 0; --Environment)
@@ -116,14 +123,14 @@ void CChannel::Update()
 					// 그룹에 몇명있는지 조사
 					int8 PartySize = (int8)PartyPlayer->_PartyManager.GetPartyPlayerArray().size();
 					if (PartySize == 0) // 0 명일 경우
-					{						
+					{
 						// 그룹초대 대상이 그룹중이 아닌지 확인
 						if (InvitePlayer->_PartyManager._IsParty == false)
 						{
 							CMessage* ResPartyInvitePacket = G_NetworkManager->GetGameServer()->MakePacketResPartyInvite(PartyPlayer->_GameObjectInfo.ObjectId, PartyPlayer->_GameObjectInfo.ObjectName);
 							G_NetworkManager->GetGameServer()->SendPacket(InvitePlayer->_SessionId, ResPartyInvitePacket);
-							ResPartyInvitePacket->Free();							
-						}		
+							ResPartyInvitePacket->Free();
+						}
 						else
 						{
 							// 그룹중이라면 그룹중이라고 메세지 보냄
@@ -142,9 +149,9 @@ void CChannel::Update()
 							for (CPlayer* PartyPlayer : PartyPlayers)
 							{
 								PartyPlayer->_PartyManager.PartyInvite(InvitePlayer);
-							}							
+							}
 						}
-					}									
+					}
 				}
 				break;			
 			case en_GameObjectJobType::GAMEOBJECT_JOB_TYPE_CHANNEL_PARTY_INVITE_ACCEPT:
@@ -1799,6 +1806,9 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 		SpawnPosition = *ObjectSpawnPosition;
 	}
 	
+	EnterChannelGameObject->_SpawnPosition = SpawnPosition;
+	EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
+
 	// 입장한 오브젝트의 타입에 따라
 	switch ((en_GameObjectType)EnterChannelGameObject->_GameObjectInfo.ObjectType)
 	{
@@ -1808,9 +1818,6 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 			CPlayer* EnterChannelPlayer = dynamic_cast<CPlayer*>(EnterChannelGameObject);
 			if (EnterChannelPlayer != nullptr)
 			{
-				EnterChannelPlayer->_SpawnPosition = SpawnPosition;
-				EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-
 				EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position.X = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
 				EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;				
 
@@ -1843,9 +1850,6 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 			CPlayer* EnterChannelDummyPlayer = dynamic_cast<CPlayer*>(EnterChannelGameObject);
 			if (EnterChannelDummyPlayer != nullptr)
 			{
-				EnterChannelDummyPlayer->_SpawnPosition = SpawnPosition;
-				EnterChannelDummyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-
 				EnterChannelDummyPlayer->_GameObjectInfo.ObjectPositionInfo.Position.X = EnterChannelDummyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
 				EnterChannelDummyPlayer->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelDummyPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;
 
@@ -1871,9 +1875,6 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 			CGeneralMerchantNPC* GeneralMerchantNPC = dynamic_cast<CGeneralMerchantNPC*>(EnterChannelGameObject);
 			if (GeneralMerchantNPC != nullptr)
 			{	
-				GeneralMerchantNPC->_SpawnPosition = SpawnPosition;
-				GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-
 				GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.Position.X = GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
 				GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.Position.Y = GeneralMerchantNPC->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;
 
@@ -1907,9 +1908,6 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 			CMonster* EnterChannelMonster = dynamic_cast<CMonster*>(EnterChannelGameObject);
 			if (EnterChannelMonster != nullptr)
 			{
-				EnterChannelMonster->_SpawnPosition = SpawnPosition;
-				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-
 				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position.X = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
 				EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;				
 								
@@ -1917,7 +1915,7 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 				EnterChannelMonster->GetRectCollision()->ObjectRectInit(en_CollisionPosition::COLLISION_POSITION_OBJECT, EnterChannelMonster->_GameObjectInfo.ObjectType,
 					EnterChannelMonster->_GameObjectInfo.ObjectPositionInfo.Position,
 					Vector2::Zero,
-					EnterChannelMonster);				
+					EnterChannelMonster);
 				
 				EnterChannelMonster->NPCInventoryCreate();
 
@@ -1963,9 +1961,6 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 			CEnvironment* EnterChannelEnvironment = dynamic_cast<CEnvironment*>(EnterChannelGameObject);
 			if (EnterChannelEnvironment != nullptr)
 			{
-				EnterChannelEnvironment->_SpawnPosition = SpawnPosition;
-				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-
 				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position.X = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
 				EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelEnvironment->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;
 								
@@ -1992,14 +1987,39 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 			}
 		}
 		break;
+	case en_GameObjectType::OBJECT_BUILDING_GOVERNMENT_OFFICE:
+		{
+			CGovernmentOffice* EnterChannelGovernmentOffice = dynamic_cast<CGovernmentOffice*>(EnterChannelGameObject);
+			if (EnterChannelGovernmentOffice != nullptr)
+			{
+				EnterChannelGovernmentOffice->_GameObjectInfo.ObjectPositionInfo.Position.X = EnterChannelGovernmentOffice->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
+				EnterChannelGovernmentOffice->_GameObjectInfo.ObjectPositionInfo.Position.Y = EnterChannelGovernmentOffice->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;
+
+				EnterChannelGovernmentOffice->GetRectCollision()->SetActive(true);
+				EnterChannelGovernmentOffice->GetRectCollision()->ObjectRectInit(en_CollisionPosition::COLLISION_POSITION_OBJECT, EnterChannelGovernmentOffice->_GameObjectInfo.ObjectType,
+					EnterChannelGovernmentOffice->_GameObjectInfo.ObjectPositionInfo.Position,
+					EnterChannelGovernmentOffice->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton, EnterChannelGovernmentOffice);
+				EnterChannelGovernmentOffice->Start();
+
+				_ChannelBuildArrayIndexs.Pop(&EnterChannelGovernmentOffice->_ChannelArrayIndex);
+				_ChannelBuildingArray[EnterChannelGovernmentOffice->_ChannelArrayIndex] = EnterChannelGovernmentOffice;
+
+				IsEnterChannel = _Map->ApplyMove(EnterChannelGovernmentOffice, SpawnPosition);
+
+				CSector* EnterSector = _Map->GetSector(SpawnPosition);
+				EnterSector->Insert(EnterChannelGovernmentOffice);
+			}
+			else
+			{
+
+			}
+		}
+		break;
 	case en_GameObjectType::OBJECT_SKILL_SWORD_BLADE:
 		{
 			CSwordBlade* SwordBlade = dynamic_cast<CSwordBlade*>(EnterChannelGameObject);
 			if (SwordBlade != nullptr)
 			{
-				SwordBlade->_SpawnPosition = SpawnPosition;
-				SwordBlade->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;				
-								
 				SwordBlade->GetRectCollision()->SetActive(true);
 				SwordBlade->GetRectCollision()->ObjectRectInit(en_CollisionPosition::COLLISION_POSITION_OBJECT, SwordBlade->_GameObjectInfo.ObjectType,
 					SwordBlade->_GameObjectInfo.ObjectPositionInfo.Position,
@@ -2020,9 +2040,6 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 			CFlameBolt* FlameBolt = dynamic_cast<CFlameBolt*>(EnterChannelGameObject);
 			if (FlameBolt != nullptr)
 			{
-				FlameBolt->_SpawnPosition = SpawnPosition;
-				FlameBolt->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-
 				FlameBolt->GetRectCollision()->SetActive(true);
 				FlameBolt->GetRectCollision()->ObjectRectInit(en_CollisionPosition::COLLISION_POSITION_OBJECT, FlameBolt->_GameObjectInfo.ObjectType,
 					FlameBolt->_GameObjectInfo.ObjectPositionInfo.Position,
@@ -2043,9 +2060,6 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 			CDivineBolt* DivineBolt = dynamic_cast<CDivineBolt*>(EnterChannelGameObject);
 			if (DivineBolt != nullptr)
 			{
-				DivineBolt->_SpawnPosition = SpawnPosition;
-				DivineBolt->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-
 				DivineBolt->GetRectCollision()->SetActive(true);
 				DivineBolt->GetRectCollision()->ObjectRectInit(en_CollisionPosition::COLLISION_POSITION_OBJECT, DivineBolt->_GameObjectInfo.ObjectType,
 					DivineBolt->_GameObjectInfo.ObjectPositionInfo.Position,
@@ -2067,9 +2081,6 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 			CCraftingTable* CraftingTable = dynamic_cast<CCraftingTable*>(EnterChannelGameObject);
 			if (CraftingTable != nullptr)
 			{
-				CraftingTable->_SpawnPosition = SpawnPosition;
-				CraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-
 				CraftingTable->_GameObjectInfo.ObjectPositionInfo.Position.X = CraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
 				CraftingTable->_GameObjectInfo.ObjectPositionInfo.Position.Y = CraftingTable->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;											
 				
@@ -2097,9 +2108,6 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 			CCrop* Crop = dynamic_cast<CCrop*>(EnterChannelGameObject);
 			if (Crop != nullptr)
 			{
-				Crop->_SpawnPosition = SpawnPosition;
-				Crop->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-
 				Crop->_GameObjectInfo.ObjectPositionInfo.Position.X = Crop->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X + 0.5f;
 				Crop->_GameObjectInfo.ObjectPositionInfo.Position.Y = Crop->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y + 0.5f;
 
@@ -2149,9 +2157,6 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 			CItem* Item = dynamic_cast<CItem*>(EnterChannelGameObject);
 			if (Item != nullptr)
 			{
-				Item->_SpawnPosition = SpawnPosition;
-				Item->_GameObjectInfo.ObjectPositionInfo.CollisionPosition = SpawnPosition;
-
 				// 맵 정보에 보관			
 				IsEnterChannel = _Map->ApplyMove(Item, SpawnPosition, false, false);
 
@@ -2217,6 +2222,11 @@ void CChannel::LeaveChannel(CGameObject* LeaveChannelGameObject)
 		G_ObjectManager->ObjectReturn(LeaveChannelGameObject);
 
 		_ChannelEnvironmentArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
+		break;
+	case en_GameObjectType::OBJECT_BUILDING_GOVERNMENT_OFFICE:
+		G_ObjectManager->ObjectReturn(LeaveChannelGameObject);
+
+		_ChannelBuildArrayIndexs.Push(LeaveChannelGameObject->_ChannelArrayIndex);
 		break;
 	case en_GameObjectType::OBJECT_SKILL_SWORD_BLADE:
 	case en_GameObjectType::OBJECT_SKILL_FLAME_BOLT:
@@ -2284,8 +2294,8 @@ void CChannel::ExperienceCalculate(CPlayer* TargetPlayer, en_GameObjectType Targ
 		st_StatInfo NewCharacterStatus;
 		st_LevelData LevelData;
 
-		auto FindStatus = G_Datamanager->_PlayerStatus.find(TargetPlayer->_GameObjectInfo.ObjectStatInfo.Level);
-		if (FindStatus == G_Datamanager->_PlayerStatus.end())
+		auto FindStatus = G_Datamanager->_WarriorStatus.find(TargetPlayer->_GameObjectInfo.ObjectStatInfo.Level);
+		if (FindStatus == G_Datamanager->_WarriorStatus.end())
 		{
 			CRASH("레벨 스테이터스 찾지 못함");
 		}
@@ -2296,19 +2306,19 @@ void CChannel::ExperienceCalculate(CPlayer* TargetPlayer, en_GameObjectType Targ
 		TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
 		TargetPlayer->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
 		TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
-		TargetPlayer->_GameObjectInfo.ObjectStatInfo.DP = NewCharacterStatus.DP;
-		TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
 		TargetPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
 		TargetPlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
-		TargetPlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
-		TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
-		TargetPlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
-		TargetPlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
-		TargetPlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
+		TargetPlayer->_GameObjectInfo.ObjectStatInfo.MinAttackPoint = NewCharacterStatus.MinAttackPoint;
+		TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxAttackPoint = NewCharacterStatus.MaxAttackPoint;
+		TargetPlayer->_GameObjectInfo.ObjectStatInfo.SpiritPoint = NewCharacterStatus.SpiritPoint;
+		TargetPlayer->_GameObjectInfo.ObjectStatInfo.AttackHitRate = NewCharacterStatus.AttackHitRate;		
+		TargetPlayer->_GameObjectInfo.ObjectStatInfo.SpellCastingRate = NewCharacterStatus.SpellCastingRate;
 		TargetPlayer->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
 		TargetPlayer->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
-		TargetPlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
-		TargetPlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
+		TargetPlayer->_GameObjectInfo.ObjectStatInfo.AttackCriticalPoint = NewCharacterStatus.AttackCriticalPoint;
+		TargetPlayer->_GameObjectInfo.ObjectStatInfo.SpellCriticalPoint = NewCharacterStatus.SpellCriticalPoint;
+		TargetPlayer->_GameObjectInfo.ObjectStatInfo.AttackCriticalResistance = NewCharacterStatus.AttackCriticalResistance;
+		TargetPlayer->_GameObjectInfo.ObjectStatInfo.StatusAbnormalResistance = NewCharacterStatus.StatusAbnormalResistance;
 		TargetPlayer->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
 		TargetPlayer->_GameObjectInfo.ObjectStatInfo.MaxSpeed = NewCharacterStatus.Speed;
 

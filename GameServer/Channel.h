@@ -100,6 +100,7 @@ private:
 		CHANNEL_DUMMY_PLAYER_MAX = 500,
 		CHANNEL_NON_PLAYER_MAX = 50,
 		CHANNEL_MONSTER_MAX = 100,
+		CHANNEL_BUILDING_MAX = 200,
 		CHANNEL_ENVIRONMENT_MAX = 300,
 		CHANNEL_CRAFTING_TABLE_MAX = 100,
 		CHANNEL_SKILL_OBJECT_MAX = 100,
@@ -112,6 +113,7 @@ private:
 	CPlayer* _ChannelDummyPlayerArray[CHANNEL_DUMMY_PLAYER_MAX];
 	CNonPlayer* _ChannelNonPlayerArray[CHANNEL_NON_PLAYER_MAX];
 	CMonster* _ChannelMonsterArray[CHANNEL_MONSTER_MAX];
+	CGameObject* _ChannelBuildingArray[CHANNEL_BUILDING_MAX];
 	CEnvironment* _ChannelEnvironmentArray[CHANNEL_ENVIRONMENT_MAX];
 	CCraftingTable* _ChannelCraftingTableArray[CHANNEL_CRAFTING_TABLE_MAX];
 	CGameObject* _ChannelSkillObjectArray[CHANNEL_SKILL_OBJECT_MAX];
@@ -122,6 +124,7 @@ private:
 	CLockFreeStack<int32> _ChannelDummyPlayerArrayIndexs;
 	CLockFreeStack<int32> _ChannelNonPlayerArrayIndexs;
 	CLockFreeStack<int32> _ChannelMonsterArrayIndexs;
+	CLockFreeStack<int32> _ChannelBuildArrayIndexs;
 	CLockFreeStack<int32> _ChannelEnvironmentArrayIndexs;
 	CLockFreeStack<int32> _ChannelCraftingTableArrayIndexs;
 	CLockFreeStack<int32> _ChannelSkillObjectArrayIndexs;
