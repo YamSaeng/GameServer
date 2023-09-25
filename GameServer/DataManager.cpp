@@ -21,7 +21,7 @@ void CDataManager::LoadDataItem(wstring LoadFileName)
 			string ItemName = WeaponListFiled["ItemName"].GetString();
 			int ItemSearchingTime = WeaponListFiled["ItemSearchingTime"].GetInt();
 			string ItemEquipmentPart = WeaponListFiled["ItemEquipmentPart"].GetString();
-			int32 ItemWidth = WeaponListFiled["ItemWidth"].GetInt();
+			int32 ItemWidth = WeaponListFiled["ItemWidth"].GetInt();	
 			int32 ItemHeight = WeaponListFiled["ItemHeight"].GetInt();
 			float ItemCollisionX = WeaponListFiled["ItemCollisionX"].GetFloat();
 			float ItemCollisionY = WeaponListFiled["ItemCollisionY"].GetFloat();
@@ -832,24 +832,24 @@ void CDataManager::LoadDataPlayerCharacterStatus(wstring LoadFileName)
 
 			float Speed = MainCharacterIncreaseStatusFiled["Speed"].GetFloat();
 
-			st_StatInfo* HunterLevelStatus = new st_StatInfo();
+			st_StatInfo* MainCharacterLevelStatus = new st_StatInfo();
 
-			HunterLevelStatus->Level = Level;
-			HunterLevelStatus->Str = Str;
-			HunterLevelStatus->Dex = Dex;
-			HunterLevelStatus->Int = Int;
-			HunterLevelStatus->Luck = Luck;
-			HunterLevelStatus->Con = Con;
-			HunterLevelStatus->Wis = Wis;
-			HunterLevelStatus->Defence = Def;
-			HunterLevelStatus->HP = HP;
-			HunterLevelStatus->MP = MP;
-			HunterLevelStatus->Stamina = Stamina;
-			HunterLevelStatus->AutoRecoveryHPPercent = AutoRecoveryHPPercent;
-			HunterLevelStatus->AutoRecoveryMPPercent = AutoRecoveryMPPercent;
-			HunterLevelStatus->Speed = Speed;
+			MainCharacterLevelStatus->Level = Level;
+			MainCharacterLevelStatus->Str = Str;
+			MainCharacterLevelStatus->Dex = Dex;
+			MainCharacterLevelStatus->Int = Int;
+			MainCharacterLevelStatus->Luck = Luck;
+			MainCharacterLevelStatus->Con = Con;
+			MainCharacterLevelStatus->Wis = Wis;
+			MainCharacterLevelStatus->Defence = Def;
+			MainCharacterLevelStatus->HP = HP;
+			MainCharacterLevelStatus->MP = MP;
+			MainCharacterLevelStatus->Stamina = Stamina;
+			MainCharacterLevelStatus->AutoRecoveryHPPercent = AutoRecoveryHPPercent;
+			MainCharacterLevelStatus->AutoRecoveryMPPercent = AutoRecoveryMPPercent;
+			MainCharacterLevelStatus->Speed = Speed;
 
-			_MageStatus.insert(pair<int8, st_StatInfo*>(HunterLevelStatus->Level, HunterLevelStatus));
+			_MainCharacterStatus.insert(pair<int8, st_StatInfo*>(MainCharacterLevelStatus->Level, MainCharacterLevelStatus));
 		}
 	}	
 }

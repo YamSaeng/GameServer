@@ -15,6 +15,7 @@ public:
 	map<int8, st_StatInfo*> _ThiefStatus;
 	map<int8, st_StatInfo*> _MageStatus;
 	map<int8, st_StatInfo*> _HunterStatus;
+	map<int8, st_StatInfo*> _MainCharacterStatus;
 
 	map<en_GameObjectType, vector<st_DropData>> _DropItems;
 	map<int8, Vector2Int> _DropMoneys;
