@@ -1772,9 +1772,6 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 		return false;
 	}
 
-	random_device RD;
-	mt19937 Gen(RD());
-
 	Vector2Int SpawnPosition;		
 	EnterChannelGameObject->SetChannel(this);
 
@@ -1783,11 +1780,8 @@ bool CChannel::EnterChannel(CGameObject* EnterChannelGameObject, Vector2Int* Obj
 		// 더미를 대상으로 랜덤 좌표 받아서 채널에 입장
 		while (true)
 		{
-			uniform_int_distribution<int> RandomXPosition(0, 89);
-			uniform_int_distribution<int> RandomYPosition(0, 73);
-
-			SpawnPosition.X = RandomXPosition(Gen);
-			SpawnPosition.Y = RandomYPosition(Gen);
+			SpawnPosition.X = Math::RandomNumberInt(0, 89);
+			SpawnPosition.Y = Math::RandomNumberInt(0, 73);
 
 			EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X = SpawnPosition.X;
 			EnterChannelGameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y = SpawnPosition.Y;
