@@ -131,6 +131,14 @@
 		<Column name="QuickSlotKeyCode" type="nvarchar(50)" notnull="true"/>		
 	</Table>	
 	
+	<!-- 타일 테이블 -->
+	<Table name="Tile" desc="Tile Table">
+		<Column name="IsTileCccupation" type="bit" notnull="true"/>
+		<Column name="TileOwner" type="BigInt" notnull="true"/>
+		<Column name="TilePositionY" type="int" notnull="true"/>
+		<Column name="TilePositionX" type="int" notnull="true"/>
+	</Table>
+	
 	<!-- AccountID를 기준으로 클라가 소유하고 있는 캐릭터를 찾는다. -->
 	<Procedure name="spGetPlayers">
 		<Param name="@AccountId" type="BigInt"/>
