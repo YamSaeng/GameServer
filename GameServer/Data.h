@@ -75,4 +75,5 @@ struct st_MapInfoData
 	int32 Up;
 	int32 Down;
 	map<en_GameObjectType, vector<Vector2Int>> GameObjectList;
+	map<en_TileInfo, vector<Vector2Int>> TileList;
 };
