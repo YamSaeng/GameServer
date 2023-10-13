@@ -693,18 +693,22 @@ void CGameServer::PacketProcReqCreateCharacter(int64 SessionID, CMessage* Messag
 
 		// 클라에서 선택한 플레이어 인덱스
 		byte CharacterCreateSlotIndex;
-		*Message >> CharacterCreateSlotIndex;
+		*Message >> CharacterCreateSlotIndex;		
+
+		int8 SkillChracteristicType;
+		*Message >> SkillChracteristicType;
 
 		st_GameServerJob* DBCharacterCreateJob = _GameServerJobMemoryPool->Alloc();
 		DBCharacterCreateJob->Type = en_GameServerJobType::DATA_BASE_CHARACTER_CHECK;
 
-		CGameServerMessage* DBReqChatacerCreateMessage = CGameServerMessage::GameServerMessageAlloc();
-		DBReqChatacerCreateMessage->Clear();
+		CGameServerMessage* DBReqCharaterCreateMessage = CGameServerMessage::GameServerMessageAlloc();
+		DBReqCharaterCreateMessage->Clear();
 
-		*DBReqChatacerCreateMessage << Session->SessionId;		
-		*DBReqChatacerCreateMessage << CharacterCreateSlotIndex;
+		*DBReqCharaterCreateMessage << Session->SessionId;		
+		*DBReqCharaterCreateMessage << CharacterCreateSlotIndex;	
+		*DBReqCharaterCreateMessage << SkillChracteristicType;		
 
-		DBCharacterCreateJob->Message = DBReqChatacerCreateMessage;		
+		DBCharacterCreateJob->Message = DBReqCharaterCreateMessage;		
 
 		_GameServerUserDBThreadMessageQue.Enqueue(DBCharacterCreateJob);
 		SetEvent(_UserDataBaseWakeEvent);		
@@ -3854,7 +3858,7 @@ void CGameServer::PacketProcReqDBAccountCheck(CMessage* Message)
 			ClientPlayersGet.InAccountID(ClientAccountId);
 
 			int64 PlayerId = 0;
-			WCHAR PlayerName[100] = { 0 };			
+			WCHAR PlayerName[100] = { 0 };
 			int8 PlayerIndex = 0;
 			int32 PlayerLevel = 0;
 			int32 PlayerStr = 0;
@@ -3865,19 +3869,19 @@ void CGameServer::PacketProcReqDBAccountCheck(CMessage* Message)
 			int32 PlayerMaxHP = 0;
 			int32 PlayerCurrentMP = 0;
 			int32 PlayerMaxMP = 0;
-			int32 PlayerCurrentDP = 0;
-			int32 PlayerMaxDP = 0;
 			int16 PlayerAutoRecoveyHPPercent = 0;
 			int16 PlayerAutoRecoveyMPPercent = 0;
-			int32 PlayerMinMeleeAttackDamage = 0;
-			int32 PlayerMaxMeleeAttackDamage = 0;
-			int16 PlayerMeleeAttackHitRate = 0;
-			int16 PlayerMagicDamage = 0;
-			float PlayerMagicHitRate = 0;
+			int32 PlayerMinAttackPoint = 0;
+			int32 PlayerMaxAttackPoint = 0;			
+			int16 PlayerSpiritPoint = 0;
+			int16 PlayerAttackHitRate = 0;
+			float PlayerSpellCastingRate = 0;
 			int32 PlayerDefence = 0;
 			int16 PlayerEvasionRate = 0;
-			int16 PlayerMeleeCriticalPoint = 0;
-			int16 PlayerMagicCriticalPoint = 0;
+			int16 PlayerAttackCriticalPoint = 0;
+			int16 PlayerSpellCriticalPoint = 0;
+			int16 PlayerAttackCriticalResistance = 0;
+			int16 PlayerStatusCriticalResistance = 0;
 			float PlayerSpeed = 0;
 			int32 PlayerLastPositionY = 0;
 			int32 PlayerLastPositionX = 0;
@@ -3898,19 +3902,19 @@ void CGameServer::PacketProcReqDBAccountCheck(CMessage* Message)
 			ClientPlayersGet.OutMaxHP(PlayerMaxHP);
 			ClientPlayersGet.OutCurrentMP(PlayerCurrentMP);
 			ClientPlayersGet.OutMaxMP(PlayerMaxMP);
-			ClientPlayersGet.OutCurrentDP(PlayerCurrentDP);
-			ClientPlayersGet.OutMaxDP(PlayerMaxDP);
 			ClientPlayersGet.OutAutoRecoveryHPPercent(PlayerAutoRecoveyHPPercent);
 			ClientPlayersGet.OutAutoRecoveryMPPercent(PlayerAutoRecoveyMPPercent);
-			ClientPlayersGet.OutMinMeleeAttackDamage(PlayerMinMeleeAttackDamage);
-			ClientPlayersGet.OutMaxMeleeAttackDamage(PlayerMaxMeleeAttackDamage);
-			ClientPlayersGet.OutMeleeAttackHitRate(PlayerMeleeAttackHitRate);
-			ClientPlayersGet.OutMagicDamage(PlayerMagicDamage);
-			ClientPlayersGet.OutMagicHitRate(PlayerMagicHitRate);
+			ClientPlayersGet.OutMinAttackPoint(PlayerMinAttackPoint);
+			ClientPlayersGet.OutMaxAttackPoint(PlayerMaxAttackPoint);
+			ClientPlayersGet.OutAttackHitRate(PlayerAttackHitRate);
+			ClientPlayersGet.OutSpiritPoint(PlayerSpiritPoint);
+			ClientPlayersGet.OutSpellCastingRate(PlayerSpellCastingRate);
 			ClientPlayersGet.OutDefence(PlayerDefence);
 			ClientPlayersGet.OutEvasionRate(PlayerEvasionRate);
-			ClientPlayersGet.OutMeleeCriticalPoint(PlayerMeleeCriticalPoint);
-			ClientPlayersGet.OutMagicCriticalPointt(PlayerMagicCriticalPoint);
+			ClientPlayersGet.OutAttackCriticalPoint(PlayerAttackCriticalPoint);
+			ClientPlayersGet.OutSpellCriticalPoint(PlayerSpellCriticalPoint);
+			ClientPlayersGet.OutAttackCriticalResistance(PlayerAttackCriticalResistance);
+			ClientPlayersGet.OutStatusAbnormalResistance(PlayerStatusCriticalResistance);
 			ClientPlayersGet.OutSpeed(PlayerSpeed);
 			ClientPlayersGet.OutLastPositionY(PlayerLastPositionY);
 			ClientPlayersGet.OutLastPositionX(PlayerLastPositionX);
@@ -3934,19 +3938,17 @@ void CGameServer::PacketProcReqDBAccountCheck(CMessage* Message)
 				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxHP = PlayerMaxHP;
 				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MP = PlayerCurrentMP;
 				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxMP = PlayerMaxMP;
-				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.DP = PlayerCurrentDP;
-				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxDP = PlayerMaxDP;
 				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = PlayerAutoRecoveyHPPercent;
 				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = PlayerAutoRecoveyMPPercent;
-				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = PlayerMinMeleeAttackDamage;
-				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = PlayerMaxMeleeAttackDamage;
-				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = PlayerMeleeAttackHitRate;
-				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MagicDamage = PlayerMagicDamage;
-				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MagicHitRate = PlayerMagicHitRate;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MinAttackPoint = PlayerMinAttackPoint;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxAttackPoint = PlayerMaxAttackPoint;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.SpiritPoint = PlayerSpiritPoint;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.AttackHitRate = PlayerAttackHitRate;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.SpellCastingRate = PlayerSpellCastingRate;
 				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.Defence = PlayerDefence;
 				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.EvasionRate = PlayerEvasionRate;
-				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = PlayerMeleeCriticalPoint;
-				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = PlayerMagicCriticalPoint;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.AttackCriticalPoint = PlayerAttackCriticalPoint;
+				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.SpellCriticalPoint = PlayerSpellCriticalPoint;
 				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.Speed = PlayerSpeed;
 				NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxSpeed = PlayerSpeed;
 				NewPlayerCharacter->_GameObjectInfo.ObjectSkillMaxPoint = PlayerSkillMaxPoint;
@@ -3996,24 +3998,25 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 		int8 ReqCharacterCreateSlotIndex;
 		*Message >> ReqCharacterCreateSlotIndex;
 
+		int8 ReqSkillCharacteristic;
+		*Message >> ReqSkillCharacteristic;
+
 #pragma region 생성할 캐릭터가 DB에 있는지 확인
-		// 요청한 클라의 생성할 캐릭터의 이름을 가져온다.
+		// 클라에서 생성할 유저의 이름을 가져온다.
 		wstring CreateCharacterName = Session->CreateCharacterName;
 
-		// GameServerDB에 해당 캐릭터가 이미 있는지 확인한다.
-		CDBConnection* FindCharacterNameGameServerDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+		// GameServerDB에 해당 유저가 이미 있는지 확인한다.
+		CDBConnection* UserNameCreateGameServerDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
 		// GameServerDB에 캐릭터 이름이 있는지 확인하는 프로시저 클래스
-		SP::CDBGameServerCharacterNameGet CharacterNameGet(*FindCharacterNameGameServerDBConnection);
+		SP::CDBGameServerCharacterNameGet CharacterNameGet(*UserNameCreateGameServerDBConnection);
 		CharacterNameGet.InCharacterName(CreateCharacterName);
 
 		// DB 요청 실행
 		CharacterNameGet.Execute();
 
 		// 결과 받기
-		bool CharacterNameFind = CharacterNameGet.Fetch();
-
-		// DBConnection 반납
-		G_DBConnectionPool->Push(en_DBConnect::GAME, FindCharacterNameGameServerDBConnection);
+		bool CharacterNameFind = CharacterNameGet.Fetch();		
+		
 #pragma endregion		
 #pragma region 캐릭터 생성 후 클라에 캐릭터 생성 응답 보내기
 		// 캐릭터가 존재하지 않을 경우
@@ -4021,14 +4024,9 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 		{
 			// 요청한 캐릭터의 1레벨에 해당하는 데이터를 읽어온다.
 			st_StatInfo NewCharacterStatus;
-			auto FindStatus = G_Datamanager->_PlayerStatus.find(1);
+			auto FindStatus = G_Datamanager->_WarriorStatus.find(1);
 			NewCharacterStatus = *(*FindStatus).second;
-
-			int32 CurrentDP = 0;
-
-			// 앞서 읽어온 캐릭터 정보를 토대로 DB에 저장
-			// DBConnection Pool에서 DB연결을 위해서 하나를 꺼내온다.
-			CDBConnection* NewCharacterPushDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+			
 			// GameServerDB에 새로운 캐릭터 저장하는 프로시저 클래스
 			
 			int64 CurrentExperience = 0;
@@ -4039,8 +4037,23 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 			int32 NewCharacterPositionY = 50;
 			int32 NewCharacterPositionX = 25;
 			int8 NewCharacterSkillPoint = 100;
+						
+			NewCharacterStatus.MaxHP = NewCharacterStatus.HP + (NewCharacterStatus.Con * 10);
+			NewCharacterStatus.MaxMP = NewCharacterStatus.MP + (NewCharacterStatus.Wis * 15);
+			NewCharacterStatus.AutoRecoveryHPPercent = 2;
+			NewCharacterStatus.AutoRecoveryMPPercent = 1;
 
-			SP::CDBGameServerCreateCharacterPush NewCharacterPush(*NewCharacterPushDBConnection);
+			NewCharacterStatus.MinAttackPoint = NewCharacterStatus.Str;
+			NewCharacterStatus.MaxAttackPoint = NewCharacterStatus.Str;
+			NewCharacterStatus.SpiritPoint = NewCharacterStatus.Int * 2;
+			NewCharacterStatus.AttackHitRate = 1000;
+			NewCharacterStatus.SpellCastingRate = 1.0f;
+			NewCharacterStatus.EvasionRate = 0;
+			NewCharacterStatus.AttackCriticalPoint = NewCharacterStatus.Dex * 0.05f * 100;
+			NewCharacterStatus.SpellCriticalPoint = NewCharacterStatus.Int * 0.01f * 100;	
+			NewCharacterStatus.MaxSpeed = NewCharacterStatus.Speed;
+
+			SP::CDBGameServerCreateCharacterPush NewCharacterPush(*UserNameCreateGameServerDBConnection);
 			NewCharacterPush.InAccountID(Session->AccountId);
 			NewCharacterPush.InPlayerName(Session->CreateCharacterName);			
 			NewCharacterPush.InPlayerIndex(ReqCharacterCreateSlotIndex);
@@ -4053,19 +4066,19 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 			NewCharacterPush.InMaxHP(NewCharacterStatus.MaxHP);
 			NewCharacterPush.InCurrentMP(NewCharacterStatus.MaxMP);
 			NewCharacterPush.InMaxMP(NewCharacterStatus.MaxMP);
-			NewCharacterPush.InCurrentDP(CurrentDP);
-			NewCharacterPush.InMaxDP(NewCharacterStatus.MaxDP);
 			NewCharacterPush.InAutoRecoveryHPPercent(NewCharacterStatus.AutoRecoveryHPPercent);
 			NewCharacterPush.InAutoRecoveryMPPercent(NewCharacterStatus.AutoRecoveryMPPercent);
-			NewCharacterPush.InMinMeleeAttackDamage(NewCharacterStatus.MinMeleeAttackDamage);
-			NewCharacterPush.InMaxMeleeAttackDamage(NewCharacterStatus.MaxMeleeAttackDamage);
-			NewCharacterPush.InMeleeAttackHitRate(NewCharacterStatus.MeleeAttackHitRate);
-			NewCharacterPush.InMagicDamage(NewCharacterStatus.MagicDamage);
-			NewCharacterPush.InMagicHitRate(NewCharacterStatus.MagicHitRate);
+			NewCharacterPush.InMinAttackPoint(NewCharacterStatus.MinAttackPoint);
+			NewCharacterPush.InMaxAttackPoint(NewCharacterStatus.MaxAttackPoint);
+			NewCharacterPush.InSpiritPoint(NewCharacterStatus.SpiritPoint);
+			NewCharacterPush.InAttackHitRate(NewCharacterStatus.AttackHitRate);			
+			NewCharacterPush.InSpellCastingRate(NewCharacterStatus.SpellCastingRate);
 			NewCharacterPush.InDefence(NewCharacterStatus.Defence);
 			NewCharacterPush.InEvasionRate(NewCharacterStatus.EvasionRate);
-			NewCharacterPush.InMeleeCriticalPoint(NewCharacterStatus.MeleeCriticalPoint);
-			NewCharacterPush.InMagicCriticalPoint(NewCharacterStatus.MagicCriticalPoint);
+			NewCharacterPush.InAttackCriticalPoint(NewCharacterStatus.AttackCriticalPoint);
+			NewCharacterPush.InSpellCriticalPoint(NewCharacterStatus.SpellCriticalPoint);
+			NewCharacterPush.InAttackCriticalResistance(NewCharacterStatus.AttackCriticalResistance);
+			NewCharacterPush.InSpellCriticalResistance(NewCharacterStatus.AttackCriticalResistance);
 			NewCharacterPush.InSpeed(NewCharacterStatus.Speed);
 			NewCharacterPush.InLastPositionY(NewCharacterPositionY);
 			NewCharacterPush.InLastPositionX(NewCharacterPositionX);
@@ -4077,11 +4090,9 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 			// DB 요청 실행
 			bool SaveNewCharacterQuery = NewCharacterPush.Execute();
 			if (SaveNewCharacterQuery == true)
-			{
-				// 앞서 저장한 캐릭터의 DBId를 AccountId를 이용해 얻어온다.
-				CDBConnection* PlayerDBIDGetDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+			{				
 				// GameServerDB에 생성한 캐릭터의 PlayerDBId를 읽어오는 프로시저 클래스
-				SP::CDBGameServerPlayerDBIDGet PlayerDBIDGet(*PlayerDBIDGetDBConnection);
+				SP::CDBGameServerPlayerDBIDGet PlayerDBIDGet(*UserNameCreateGameServerDBConnection);
 				PlayerDBIDGet.InAccountID(Session->AccountId);
 				PlayerDBIDGet.InPlayerSlotIndex(ReqCharacterCreateSlotIndex);
 
@@ -4100,23 +4111,25 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 					NewPlayerCharacter->_GameObjectInfo.ObjectName = Session->CreateCharacterName;
 					NewPlayerCharacter->_GameObjectInfo.OwnerObjectType = en_GameObjectType::OBJECT_NON_TYPE;
 					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.Level = NewCharacterStatus.Level;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.Str = NewCharacterStatus.Str;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.Dex = NewCharacterStatus.Dex;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.Int = NewCharacterStatus.Int;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.Luck = NewCharacterStatus.Luck;
 					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.HP = NewCharacterStatus.MaxHP;
 					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxHP = NewCharacterStatus.MaxHP;
 					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MP = NewCharacterStatus.MaxMP;
 					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxMP = NewCharacterStatus.MaxMP;
-					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.DP = CurrentDP;
-					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxDP = NewCharacterStatus.MaxDP;
 					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent = NewCharacterStatus.AutoRecoveryHPPercent;
 					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent = NewCharacterStatus.AutoRecoveryMPPercent;
-					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = NewCharacterStatus.MinMeleeAttackDamage;
-					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = NewCharacterStatus.MaxMeleeAttackDamage;
-					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate = NewCharacterStatus.MeleeAttackHitRate;
-					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MagicDamage = NewCharacterStatus.MagicDamage;
-					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MagicHitRate = NewCharacterStatus.MagicHitRate;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MinAttackPoint = NewCharacterStatus.MinAttackPoint;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxAttackPoint = NewCharacterStatus.MaxAttackPoint;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.SpiritPoint = NewCharacterStatus.SpiritPoint;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.AttackHitRate = NewCharacterStatus.AttackHitRate;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.SpellCastingRate = NewCharacterStatus.SpellCastingRate;
 					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.Defence = NewCharacterStatus.Defence;
 					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.EvasionRate = NewCharacterStatus.EvasionRate;
-					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint = NewCharacterStatus.MeleeCriticalPoint;
-					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint = NewCharacterStatus.MagicCriticalPoint;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.AttackCriticalPoint = NewCharacterStatus.AttackCriticalPoint;
+					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.SpellCriticalPoint = NewCharacterStatus.SpellCriticalPoint;
 					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.Speed = NewCharacterStatus.Speed;
 					NewPlayerCharacter->_GameObjectInfo.ObjectStatInfo.MaxSpeed = NewCharacterStatus.Speed;
 					NewPlayerCharacter->_GameObjectInfo.ObjectSkillPoint = NewCharacterSkillPoint;
@@ -4132,37 +4145,33 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 					NewPlayerCharacter->_Experience.RequireExperience = LevelData.RequireExperience;
 					NewPlayerCharacter->_Experience.TotalExperience = LevelData.TotalExperience;
 
+					NewPlayerCharacter->_SkillBox.CreateChracteristic(ReqSkillCharacteristic);
+
 					G_ObjectManager->_PlayersArray[Session->MyPlayerIndexes[ReqCharacterCreateSlotIndex]] = NewPlayerCharacter;
 
 					// DB에 새로운 인벤토리 생성
 					for (int16 Y = 0; Y < (int8)en_InventoryManager::INVENTORY_DEFAULT_HEIGHT_SIZE; Y++)
 					{
 						for (int16 X = 0; X < (int8)en_InventoryManager::INVENTORY_DEFAULT_WIDH_SIZE; X++)
-						{
-							CDBConnection* DBItemToInventoryConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-							SP::CDBGameServerItemCreateToInventory ItemToInventory(*DBItemToInventoryConnection);							
+						{							
+							SP::CDBGameServerItemCreateToInventory ItemToInventory(*UserNameCreateGameServerDBConnection);
 
 							ItemToInventory.InItemTileGridPositionX(X);
 							ItemToInventory.InItemTileGridPositionY(Y);							
 							ItemToInventory.InOwnerAccountId(Session->AccountId);
 							ItemToInventory.InOwnerPlayerId(PlayerDBId);
 
-							ItemToInventory.Execute();
-
-							G_DBConnectionPool->Push(en_DBConnect::GAME, DBItemToInventoryConnection);
+							ItemToInventory.Execute();							
 						}
 					}
 
-					// 골드 테이블 새로 생성
-					CDBConnection* DBNewGoldTableCreateConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
-					SP::CDBGameServerGoldTableCreatePush GoldTableCreate(*DBNewGoldTableCreateConnection);
+					// 골드 테이블 새로 생성					
+					SP::CDBGameServerGoldTableCreatePush GoldTableCreate(*UserNameCreateGameServerDBConnection);
 
 					GoldTableCreate.InAccountDBId(Session->AccountId);
 					GoldTableCreate.InPlayerDBId(PlayerDBId);
 
-					GoldTableCreate.Execute();
-
-					G_DBConnectionPool->Push(en_DBConnect::GAME, DBNewGoldTableCreateConnection);
+					GoldTableCreate.Execute();					
 
 					// 플레이어 기본 정보 설정
 					PlayerDefaultSetting(Session->AccountId, NewPlayerCharacter->_GameObjectInfo, ReqCharacterCreateSlotIndex);								
@@ -4171,17 +4180,12 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 					CMessage* ResCreateCharacterMessage = MakePacketResCreateCharacter(!CharacterNameFind, NewPlayerCharacter->_GameObjectInfo);
 					SendPacket(Session->SessionId, ResCreateCharacterMessage);
 					ResCreateCharacterMessage->Free();
-				}
-
-				G_DBConnectionPool->Push(en_DBConnect::GAME, PlayerDBIDGetDBConnection);
+				}				
 			}
 			else
 			{
 
-			}
-
-			// DBConnection 반납
-			G_DBConnectionPool->Push(en_DBConnect::GAME, NewCharacterPushDBConnection);
+			}			
 		}
 		else
 		{
@@ -4189,6 +4193,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 		}
 #pragma endregion
 
+		G_DBConnectionPool->Push(en_DBConnect::GAME, UserNameCreateGameServerDBConnection);
 	}
 
 	ReturnSession(Session);
@@ -4626,6 +4631,11 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 	*Message >> &LeaveSession;
 		
 	CPlayer* LeavePlayer = G_ObjectManager->_PlayersArray[LeaveSession->MyPlayerIndex];	
+	
+	if (LeavePlayer->_AccountId == 0)
+	{
+		return;
+	}
 
 	// 캐릭터 정보 DB에 저장
 	CDBConnection* PlayerInfoSaveDBConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
@@ -4640,18 +4650,19 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 	LeavePlayerStatInfoSave.InLuck(LeavePlayer->_GameObjectInfo.ObjectStatInfo.Luck);
 	LeavePlayerStatInfoSave.InMaxHP(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MaxHP);
 	LeavePlayerStatInfoSave.InMaxMP(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MaxMP);
-	LeavePlayerStatInfoSave.InMaxDP(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MaxDP);
 	LeavePlayerStatInfoSave.InAutoRecoveryHPPercent(LeavePlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryHPPercent);
 	LeavePlayerStatInfoSave.InAutoRecoveryMPPercent(LeavePlayer->_GameObjectInfo.ObjectStatInfo.AutoRecoveryMPPercent);
-	LeavePlayerStatInfoSave.InMinMeleeAttackDamage(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage);
-	LeavePlayerStatInfoSave.InMaxMeleeAttackDamage(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage);
-	LeavePlayerStatInfoSave.InMeleeAttackHitRate(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MeleeAttackHitRate);
-	LeavePlayerStatInfoSave.InMagicDamage(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MagicDamage);
-	LeavePlayerStatInfoSave.InMagicHitRate(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MagicHitRate);
+	LeavePlayerStatInfoSave.InMinAttackPoint(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MinAttackPoint);
+	LeavePlayerStatInfoSave.InMaxAttackPoint(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MaxAttackPoint);
+	LeavePlayerStatInfoSave.InSpiritPoint(LeavePlayer->_GameObjectInfo.ObjectStatInfo.SpiritPoint);
+	LeavePlayerStatInfoSave.InAttackHitRate(LeavePlayer->_GameObjectInfo.ObjectStatInfo.AttackHitRate);
+	LeavePlayerStatInfoSave.InSpellCastingRate(LeavePlayer->_GameObjectInfo.ObjectStatInfo.SpellCastingRate);
 	LeavePlayerStatInfoSave.InDefence(LeavePlayer->_GameObjectInfo.ObjectStatInfo.Defence);
 	LeavePlayerStatInfoSave.InEvasionRate(LeavePlayer->_GameObjectInfo.ObjectStatInfo.EvasionRate);
-	LeavePlayerStatInfoSave.InMeleeCriticalPoint(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint);
-	LeavePlayerStatInfoSave.InMagicCriticalPoint(LeavePlayer->_GameObjectInfo.ObjectStatInfo.MagicCriticalPoint);
+	LeavePlayerStatInfoSave.InAttackCriticalPoint(LeavePlayer->_GameObjectInfo.ObjectStatInfo.AttackCriticalPoint);
+	LeavePlayerStatInfoSave.InSpellCriticalPoint(LeavePlayer->_GameObjectInfo.ObjectStatInfo.SpellCriticalPoint);
+	LeavePlayerStatInfoSave.InAttackCriticalResistance(LeavePlayer->_GameObjectInfo.ObjectStatInfo.AttackCriticalResistance);
+	LeavePlayerStatInfoSave.InStatusAbnormalResistance(LeavePlayer->_GameObjectInfo.ObjectStatInfo.StatusAbnormalResistance);
 	LeavePlayerStatInfoSave.InSpeed(LeavePlayer->_GameObjectInfo.ObjectStatInfo.Speed);
 	LeavePlayerStatInfoSave.InLastPositionY(LeavePlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y);
 	LeavePlayerStatInfoSave.InLastPositionX(LeavePlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X);

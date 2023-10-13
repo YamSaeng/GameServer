@@ -145,6 +145,9 @@
     <Filter Include="Util\Json,Xml\Drop">
       <UniqueIdentifier>{6d6a25ae-e7ff-4725-9f02-8c86aeb7d149}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ContentServer\Content\GameObject\Building">
+      <UniqueIdentifier>{1556ac3d-e6e5-4339-bde8-cfbf3c6981e3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Type.h">
@@ -374,6 +377,9 @@
     <ClInclude Include="QuickSlotKey.h">
       <Filter>ContentServer\Content\QuickSlotBar</Filter>
     </ClInclude>
+    <ClInclude Include="GovernmentOffice.h">
+      <Filter>ContentServer\Content\GameObject\Building</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -549,6 +555,9 @@
     </ClCompile>
     <ClCompile Include="QuickSlotKey.cpp">
       <Filter>ContentServer\Content\QuickSlotBar</Filter>
+    </ClCompile>
+    <ClCompile Include="GovernmentOffice.cpp">
+      <Filter>ContentServer\Content\GameObject\Building</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

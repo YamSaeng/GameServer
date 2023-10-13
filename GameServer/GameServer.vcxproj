@@ -183,6 +183,7 @@
     <ClInclude Include="GeneralMerchantNPC.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="Goblin.h" />
+    <ClInclude Include="GovernmentOffice.h" />
     <ClInclude Include="Heap.h" />
     <ClInclude Include="Inventory.h" />
     <ClInclude Include="InventoryManager.h" />
@@ -302,6 +303,7 @@
     <ClCompile Include="GeneralMerchantNPC.cpp" />
     <ClCompile Include="Global.cpp" />
     <ClCompile Include="Goblin.cpp" />
+    <ClCompile Include="GovernmentOffice.cpp" />
     <ClCompile Include="Inventory.cpp" />
     <ClCompile Include="InventoryManager.cpp" />
     <ClCompile Include="Item.cpp">
