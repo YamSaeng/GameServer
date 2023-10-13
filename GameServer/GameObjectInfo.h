@@ -1027,6 +1027,17 @@ enum class en_InteractionType : int8
 	INTERACTION_TYPE_ROOTING
 };
 
+enum class en_TileInfo
+{
+	TILE_INFO_NONE,
+
+	TILE_INFO_EMPTY_TILE,
+	TILE_INFO_SYSTEM_WALL,
+	TILE_INFO_GOVERNMENTOFFICE_TILE,
+	TILE_INFO_WEAPON_STORE_TILE,
+	TILE_INFO_ARMOR_STORE_TILE
+};
+
 struct st_BindingKey
 {
 	en_UserQuickSlot UserQuickSlot;
