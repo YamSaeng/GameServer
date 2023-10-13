@@ -9,6 +9,40 @@ public:
 	static constexpr float InvPI = { 0.31830988618f };
 	static constexpr float HalfPI = { 1.57079632679f };		
 
+	FORCEINLINE static int32 RandomNumberInt(int32 MinNumber, int32 MaxNumber)
+	{
+		random_device RandomSeed;
+		mt19937 Gen(RandomSeed());
+
+		uniform_int_distribution<int> RandomNumberCreate(MinNumber, MaxNumber);
+		
+		int32 RandomNumber = RandomNumberCreate(Gen);
+
+		return RandomNumber;
+	}
+
+	FORCEINLINE static float RandomNumberFloat(float MinNumber, float MaxNumber)
+	{
+		random_device RandomSeed;
+		mt19937 Gen(RandomSeed());
+
+		uniform_real_distribution<float> RandomNumberCreate(MinNumber, MaxNumber);
+
+		float RandomNumber = RandomNumberCreate(Gen);
+
+		return RandomNumber;
+	}
+
+	FORCEINLINE static bool IsSuccess(float Probability)
+	{
+		random_device RandomSeed;
+		mt19937 Gen(RandomSeed());
+
+		bernoulli_distribution Check(Probability);
+
+		return Check(Gen);
+	}
+
 	// 각도 -> 라디안
 	FORCEINLINE static float DegreeToRadian(float Degree)
 	{
@@ -91,6 +125,6 @@ public:
 		{
 			GetSinCosRadian(Sin, Cos, Math::DegreeToRadian(Degree));
 		}
-	}
+	}	
 };
 
