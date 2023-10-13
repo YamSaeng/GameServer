@@ -975,6 +975,21 @@ enum en_GAME_SERVER_PACKET_TYPE
 	en_PACKET_S2C_PARTY_LEADER_MANDATE,
 
 	//-----------------------------------------------------------
+	// 게임서버 지도 타일 정보 요청
+	// int64 PlayerID
+	// int64 AccountID
+	// short WorldMapInfo
+	//-----------------------------------------------------------
+	en_PACKET_C2S_MAP_TILE_INFO,
+
+	//-----------------------------------------------------------
+	// 게임서버 지도 타일 정보 요청 응답
+	// en_TileInfo TileInfo
+	// Vector2Int[] TilePositions
+	//-----------------------------------------------------------
+	en_PACKET_S2C_MAP_TILE_INFO,
+
+	//-----------------------------------------------------------
 	// 게임서버 메뉴 요청
 	// int64 PlayerID
 	// int64 AccountID
