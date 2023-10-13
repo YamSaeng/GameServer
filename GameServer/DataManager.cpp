@@ -2943,11 +2943,11 @@ void CDataManager::LoadDataMapInfo(wstring LoadFileName)
 					GameObjectType = en_GameObjectType::OBJECT_STORAGE_SMALL_BOX;
 				}
 
-				vector<Vector2Int> Positions;
+				vector<Vector2Int> ObjectPositions;
 
 				for (auto& PositionListField : GameObjectListField["PositionList"].GetArray())
 				{
-					Vector2Int Position;
+					Vector2Int ObjectPosition;
 
 					int32 XPosition = PositionListField["X"].GetInt();
 					int32 YPosition = PositionListField["Y"].GetInt();
@@ -2957,13 +2957,47 @@ void CDataManager::LoadDataMapInfo(wstring LoadFileName)
 						continue;
 					}
 
-					Position.X = XPosition;
-					Position.Y = YPosition;
+					ObjectPosition.X = XPosition;
+					ObjectPosition.Y = YPosition;
 
-					Positions.push_back(Position);
+					ObjectPositions.push_back(ObjectPosition);
 				}
 
-				MapInfoData->GameObjectList.insert(pair<en_GameObjectType, vector<Vector2Int>>(GameObjectType, Positions));
+				MapInfoData->GameObjectList.insert(pair<en_GameObjectType, vector<Vector2Int>>(GameObjectType, ObjectPositions));
+			}
+
+			for (auto& TileInfoListField : MapInfoListField["TileInfoList"].GetArray())
+			{
+				en_TileInfo TileInfo = en_TileInfo::TILE_INFO_NONE;
+
+				string TileInfoStr = TileInfoListField["TileInfo"].GetString();
+
+				if (TileInfoStr == "TILE_INFO_EMPTY_TILE")
+				{
+					TileInfo = en_TileInfo::TILE_INFO_EMPTY_TILE;
+				}
+
+				vector<Vector2Int> TilePositions;
+
+				for (auto& PositionListField : TileInfoListField["PositionList"].GetArray())
+				{
+					Vector2Int TilePosition;
+
+					int32 XPosition = PositionListField["X"].GetInt();
+					int32 YPosition = PositionListField["Y"].GetInt();
+
+					if (XPosition == 0 && YPosition == 0)
+					{
+						continue;
+					}
+
+					TilePosition.X = XPosition;
+					TilePosition.Y = YPosition;
+
+					TilePositions.push_back(TilePosition);
+				}
+
+				MapInfoData->TileList.insert(pair<en_TileInfo, vector<Vector2Int>>(TileInfo, TilePositions));
 			}
 
 			MapInfoData->MapID = MapID;
