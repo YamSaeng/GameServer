@@ -32,6 +32,10 @@ void CRectCollision::ObjectRectInit(en_CollisionPosition CollisionPosition, en_G
 		_Size.X = 1.0f;
 		_Size.Y = 1.0f;
 		break;
+	case en_GameObjectType::OBJECT_BUILDING_GOVERNMENT_OFFICE:
+		_Size.X = 6.0f;
+		_Size.Y = 5.0f;
+		break;
 	case en_GameObjectType::OBJECT_GOBLIN:
 		_Size.X = 1.0f;
 		_Size.Y = 1.0f;
