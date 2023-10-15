@@ -611,9 +611,9 @@ void CGameObject::Update()
 									&IsCritical,
 									IsBackAttack,
 									_GameObjectInfo.ObjectStatInfo.Defence,
-									Attacker->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage + SkillMinDamage,
-									Attacker->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage + SkillMaxDamage,
-									Attacker->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint);
+									Attacker->_GameObjectInfo.ObjectStatInfo.MinAttackPoint + SkillMinDamage,
+									Attacker->_GameObjectInfo.ObjectStatInfo.MaxAttackPoint + SkillMaxDamage,
+									Attacker->_GameObjectInfo.ObjectStatInfo.AttackCriticalPoint);
 							}
 						}
 						break;
@@ -630,9 +630,9 @@ void CGameObject::Update()
 									&IsCritical,
 									IsBackAttack,
 									_GameObjectInfo.ObjectStatInfo.Defence,
-									Attacker->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage + SkillMinDamage,
-									Attacker->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage + SkillMaxDamage,
-									Attacker->_GameObjectInfo.ObjectStatInfo.MeleeCriticalPoint);
+									Attacker->_GameObjectInfo.ObjectStatInfo.MinAttackPoint + SkillMinDamage,
+									Attacker->_GameObjectInfo.ObjectStatInfo.MaxAttackPoint + SkillMaxDamage,
+									Attacker->_GameObjectInfo.ObjectStatInfo.AttackCriticalPoint);
 							}
 						}
 						break;						
@@ -784,7 +784,7 @@ void CGameObject::Update()
 										
 									for (int i = 0; i < InteractionCreatureObject->GetInventoryManager()->GetInventoryCount(); i++)
 									{
-										vector<st_ItemInfo> GoblinInventoryItems = InteractionObjectInventorys[i]->DBInventorySaveReturnItems();
+										vector<st_ItemInfo> GoblinInventoryItems = InteractionObjectInventorys[i]->FindAllInventoryItem();
 										int16 Coin = InteractionCreatureObject->GetInventoryManager()->GetCoin();
 
 										CPlayer* Player = dynamic_cast<CPlayer*>(this);

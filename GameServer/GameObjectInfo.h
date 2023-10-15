@@ -1041,8 +1041,8 @@ enum class en_TileInfo
 
 enum class en_WorldMapInfo : int8
 {
-	WORLD_MAP_INFO_NONE,
-	WORLD_MAP_INFO_MAIN_FIELD
+	WORLD_MAP_NONE,
+	WORLD_MAP_MAIN_FIELD
 };
 
 struct st_BindingKey
