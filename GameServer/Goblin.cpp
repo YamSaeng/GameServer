@@ -25,7 +25,6 @@ CGoblin::CGoblin()
 	_PatrolTickPoint = GoblinMonsterData.PatrolTick;
 	_AttackTickPoint = GoblinMonsterData.AttackTick;
 
-	_GetDPPoint = GoblinMonsterData.GetDPPoint;
 	_GetExpPoint = GoblinMonsterData.GetExpPoint;
 
 	_ReSpawnTime = GoblinMonsterData.ReSpawnTime;
@@ -96,14 +95,7 @@ bool CGoblin::OnDamaged(CGameObject* Attacker, int32 Damage)
 		
 		CMessage* ResDieMessagePacket = G_NetworkManager->GetGameServer()->MakePacketObjectDie(_GameObjectInfo.ObjectId, _GameObjectInfo.ObjectPositionInfo.State);
 		G_NetworkManager->GetGameServer()->SendPacketFieldOfView(AroundPlayers, ResDieMessagePacket);
-		ResDieMessagePacket->Free();		
-
-		Attacker->_GameObjectInfo.ObjectStatInfo.DP += _GetDPPoint;
-
-		if (Attacker->_GameObjectInfo.ObjectStatInfo.DP >= Attacker->_GameObjectInfo.ObjectStatInfo.MaxDP)
-		{
-			Attacker->_GameObjectInfo.ObjectStatInfo.DP = Attacker->_GameObjectInfo.ObjectStatInfo.MaxDP;
-		}
+		ResDieMessagePacket->Free();				
 	}
 
 	return IsDead;
