@@ -1038,6 +1038,13 @@ enum class en_TileInfo
 	TILE_INFO_ARMOR_STORE_TILE
 };
 
+
+enum class en_WorldMapInfo : int8
+{
+	WORLD_MAP_INFO_NONE,
+	WORLD_MAP_INFO_MAIN_FIELD
+};
+
 struct st_BindingKey
 {
 	en_UserQuickSlot UserQuickSlot;
