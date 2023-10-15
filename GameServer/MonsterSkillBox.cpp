@@ -130,22 +130,15 @@ void CMonsterSkillBox::SkillProcess(CGameObject* SkillMonster, CGameObject* Skil
 
 int32 CMonsterSkillBox::CalculateDamage(int8 SkillKind, int32& Str, int32& Dex, int32& Int, int32& Luck, bool* InOutCritical, bool IsBackAttack, int32 TargetDefence, int32 MinDamage, int32 MaxDamage, int16 CriticalPoint)
 {
-	random_device Seed;
-	default_random_engine Eng(Seed());
-
-	mt19937 Gen(Seed());
-	uniform_int_distribution<int> DamageChoiceRandom(MinDamage, MaxDamage);
-
-	int32 ChoiceRandomDamage = DamageChoiceRandom(Gen);
+	int32 ChoiceRandomDamage = Math::RandomNumberInt(MinDamage, MaxDamage);
 
 	int32 CriticalDamage = 0;
 
 	if (*InOutCritical == true)
 	{
 		// 크리티컬 판단
-		float CriticalPointCheck = CriticalPoint / 1000.0f;
-		bernoulli_distribution CriticalCheck(CriticalPointCheck);
-		bool IsCritical = CriticalCheck(Eng);
+		float CriticalPointCheck = CriticalPoint / 1000.0f;		
+		bool IsCritical = Math::IsSuccess(CriticalPointCheck);
 
 		*InOutCritical = IsCritical;
 
