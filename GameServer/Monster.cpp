@@ -412,18 +412,14 @@ void CMonster::ReadyPatrol()
 		ResMoveStopPacket->Free();
 
 		return;
-	}
-
-	random_device Seed;
-	mt19937 Gen(Seed());
+	}	
 
 	do
 	{
 		// 몬스터를 생성할때 정해준 스폰 위치를 기준으로 저장해둔 정찰 위치 중
 		// 랜덤으로 정찰 위치를 얻는다.
-		int8 MaxPatrolIndex = (int8)_PatrolPositions.size();
-		uniform_int_distribution<int> RandomPatrolPoint(0, MaxPatrolIndex - 1);
-		int8 RandomIndex = RandomPatrolPoint(Gen);
+		int8 MaxPatrolIndex = (int8)_PatrolPositions.size();		
+		int8 RandomIndex = Math::RandomNumberInt(0, MaxPatrolIndex - 1);
 
 		// 앞서 얻은 정찰위치까지의 길을 찾는다.
 		Vector2Int MonsterPosition;
