@@ -44,10 +44,7 @@ void CCreature::NPCInventoryCreate()
 {
 	if (_Inventory.GetInventoryManager().size() == 0)
 	{
-		_Inventory.InventoryCreate(1, 10, 10);
-
-		random_device RD;
-		mt19937 Gen(RD());
+		_Inventory.InventoryCreate(1, 10, 10);		
 
 		auto FindDropItem = G_Datamanager->_DropItems.find(_GameObjectInfo.ObjectType);
 		if (FindDropItem != G_Datamanager->_DropItems.end())
@@ -55,8 +52,7 @@ void CCreature::NPCInventoryCreate()
 			en_SmallItemCategory DropItemCategory;
 			int16 DropItemCount = 0;
 
-			uniform_real_distribution<float> RandomDropPoint(0, 1); // 0.0 ~ 1.0
-			float RandomPoint = 100 * RandomDropPoint(Gen);
+			float RandomPoint = 100 * Math::RandomNumberFloat(0, 1.0f);
 
 			int32 Sum = 0;
 
@@ -66,9 +62,8 @@ void CCreature::NPCInventoryCreate()
 				Sum += DropItem.Probability;
 
 				if (Sum >= RandomPoint)
-				{
-					uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
-					DropItemCount = RandomDropItemCount(Gen);
+				{					
+					DropItemCount = Math::RandomNumberInt(DropItem.MinCount, DropItem.MaxCount);
 					DropItemCategory = DropItem.DropItemSmallCategory;
 
 					CItem* NewInventoryItem = G_ObjectManager->ItemCreate(DropItem.DropItemSmallCategory);
@@ -90,11 +85,9 @@ void CCreature::NPCInventoryCreate()
 		auto FindDropMoneyData = G_Datamanager->_DropMoneys.find(_GameObjectInfo.ObjectStatInfo.Level);
 		if (FindDropMoneyData != G_Datamanager->_DropMoneys.end())
 		{
-			Vector2Int Money = (*FindDropMoneyData).second;
+			Vector2Int Money = (*FindDropMoneyData).second;			
 
-			uniform_int_distribution<int> RandomMoney(Money.X, Money.Y);
-
-			int RandomMoneyPoint = RandomMoney(Gen);
+			int RandomMoneyPoint = Math::RandomNumberInt(Money.X, Money.Y);
 			_Inventory.InsertMoney(0, RandomMoneyPoint);
 		}
 	}	
