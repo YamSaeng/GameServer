@@ -334,7 +334,7 @@ vector<CGameObject*> CSkillBox::CollisionSkillUse(CGameObject* SkillUser, CSkill
 					break;
 				}							
 
-				SkillUser->GetChannel()->ChannelColliderOBBCheckAroundObject(SkillCollision, SkillUser->GetFieldOfViewObjects(), CollisionObjects, SkillUser->_GameObjectInfo.ObjectId);				
+				SkillUser->GetChannel()->ChannelColliderOBBCheckAroundObject(SkillCollision, SkillUser->GetFieldOfViewInfo(), CollisionObjects, SkillUser->_GameObjectInfo.ObjectId);
 
 				CPlayer* Player = dynamic_cast<CPlayer*>(SkillUser);
 				if (Player != nullptr)
@@ -549,8 +549,8 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CSkill* Skill)
 									NewSwordBlade->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton = Player->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton;
 									NewSwordBlade->_GameObjectInfo.ObjectPositionInfo.MoveDirection = Player->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton;
 
-									NewSwordBlade->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = Skill->GetSkillInfo()->SkillMinDamage;
-									NewSwordBlade->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = Skill->GetSkillInfo()->SkillMaxDamage;
+									NewSwordBlade->_GameObjectInfo.ObjectStatInfo.MinAttackPoint = Skill->GetSkillInfo()->SkillMinDamage;
+									NewSwordBlade->_GameObjectInfo.ObjectStatInfo.MaxAttackPoint = Skill->GetSkillInfo()->SkillMaxDamage;
 
 									st_GameObjectJob* EnterChannelSwordBladeJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobObjectEnterChannel(NewSwordBlade);
 									SkillUser->GetChannel()->_ChannelJobQue.Enqueue(EnterChannelSwordBladeJob);
@@ -750,8 +750,8 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CSkill* Skill)
 									FlameBolt->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton = FlameBoltDirection;
 									FlameBolt->_GameObjectInfo.ObjectPositionInfo.MoveDirection = FlameBoltDirection;
 
-									FlameBolt->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = Skill->GetSkillInfo()->SkillMinDamage;
-									FlameBolt->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = Skill->GetSkillInfo()->SkillMaxDamage;
+									FlameBolt->_GameObjectInfo.ObjectStatInfo.MinAttackPoint = Skill->GetSkillInfo()->SkillMinDamage;
+									FlameBolt->_GameObjectInfo.ObjectStatInfo.MaxAttackPoint = Skill->GetSkillInfo()->SkillMaxDamage;
 
 									st_GameObjectJob* EnterChannelFlameBoltJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobObjectEnterChannel(FlameBolt);
 									SkillUser->GetChannel()->_ChannelJobQue.Enqueue(EnterChannelFlameBoltJob);
@@ -849,8 +849,8 @@ void CSkillBox::SkillProcess(CGameObject* SkillUser, CSkill* Skill)
 									DivineBolt->_GameObjectInfo.ObjectPositionInfo.LookAtDireciton = DivineBoltDirection;
 									DivineBolt->_GameObjectInfo.ObjectPositionInfo.MoveDirection = DivineBoltDirection;
 
-									DivineBolt->_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage = Skill->GetSkillInfo()->SkillMinDamage;
-									DivineBolt->_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage = Skill->GetSkillInfo()->SkillMaxDamage;
+									DivineBolt->_GameObjectInfo.ObjectStatInfo.MinAttackPoint = Skill->GetSkillInfo()->SkillMinDamage;
+									DivineBolt->_GameObjectInfo.ObjectStatInfo.MaxAttackPoint = Skill->GetSkillInfo()->SkillMaxDamage;
 
 									st_GameObjectJob* EnterChannelDivineBoltJob = G_NetworkManager->GetGameServer()->MakeGameObjectJobObjectEnterChannel(DivineBolt);
 									SkillUser->GetChannel()->_ChannelJobQue.Enqueue(EnterChannelDivineBoltJob);
@@ -1109,23 +1109,16 @@ void CSkillBox::ComboSkillOff()
 }
 
 int32 CSkillBox::CalculateDamage(int8 SkillKind, int32& Str, int32& Dex, int32& Int, int32& Luck, bool* InOutCritical, bool IsBackAttack, int32 TargetDefence, int32 MinDamage, int32 MaxDamage, int16 CriticalPoint)
-{
-	random_device Seed;
-	default_random_engine Eng(Seed());
-
-	mt19937 Gen(Seed());
-	uniform_int_distribution<int> DamageChoiceRandom(MinDamage, MaxDamage);
-
-	int32 ChoiceRandomDamage = DamageChoiceRandom(Gen);
+{	
+	int32 ChoiceRandomDamage = Math::RandomNumberInt(MinDamage, MaxDamage);
 
 	int32 CriticalDamage = 0;
 
 	if (*InOutCritical == true)
 	{
 		// 크리티컬 판단
-		float CriticalPointCheck = CriticalPoint / 1000.0f;
-		bernoulli_distribution CriticalCheck(CriticalPointCheck);
-		bool IsCritical = CriticalCheck(Eng);
+		float CriticalPointCheck = CriticalPoint / 1000.0f;		
+		bool IsCritical = Math::IsSuccess(CriticalPointCheck);
 
 		*InOutCritical = IsCritical;
 
