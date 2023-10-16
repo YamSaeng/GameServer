@@ -32,6 +32,8 @@ public:
 
 	CGameServerMessage& operator << (st_ItemInfo& ItemInfo);
 
+	CGameServerMessage& operator << (st_TileInfo& TileInfo);
+
 	CGameServerMessage& operator << (st_QuickSlotBarSlotInfo& QuickSlotBarSlotInfo);
 	
 	CGameServerMessage& operator << (st_Color& Color);

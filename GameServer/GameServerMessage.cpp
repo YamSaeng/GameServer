@@ -177,6 +177,14 @@ CGameServerMessage& CGameServerMessage::operator<<(st_ItemInfo& ItemInfo)
     return *(this);
 }
 
+CGameServerMessage& CGameServerMessage::operator<<(st_TileInfo& TileInfo)
+{
+    *this << TileInfo.IsOccupation;
+    *this << TileInfo.OwnerObjectID;
+    *this << TileInfo.Position.X;
+    *this << TileInfo.Position.Y;
+}
+
 CGameServerMessage& CGameServerMessage::operator<<(st_QuickSlotBarSlotInfo& QuickSlotBarSlotInfo)
 {
     *this << (int8)QuickSlotBarSlotInfo.QuickSlotBarType;
