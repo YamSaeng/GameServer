@@ -377,11 +377,8 @@ void CObjectManager::WorldItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_G
 	{		
 		en_SmallItemCategory DropItemCategory;
 		int16 DropItemCount = 0;
-
-		random_device RD;
-		mt19937 Gen(RD());
-		uniform_real_distribution<float> RandomDropPoint(0, 1); // 0.0 ~ 1.0
-		float RandomPoint = 100 * RandomDropPoint(Gen);
+				
+		float RandomPoint = 100 * Math::RandomNumberFloat(0, 1.0f);
 
 		int32 Sum = 0;		
 
@@ -391,9 +388,8 @@ void CObjectManager::WorldItemSpawn(CChannel* SpawnChannel, int64 KillerId, en_G
 			Sum += DropItem.Probability;
 
 			if (Sum >= RandomPoint)
-			{
-				uniform_int_distribution<int> RandomDropItemCount(DropItem.MinCount, DropItem.MaxCount);
-				DropItemCount = RandomDropItemCount(Gen);
+			{				
+				DropItemCount = Math::RandomNumberInt(DropItem.MinCount, DropItem.MaxCount);
 				DropItemCategory = DropItem.DropItemSmallCategory;
 
 				// 아이템 생성
