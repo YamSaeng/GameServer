@@ -28,7 +28,6 @@
           "AttackTick": 1000,
           "MovingAttackRange": 1.5,
           "AttackRange": 1.8,
-          "GetDPPoint": 10,
           "GetExpPoint": 20,
           "ReSpawnTime": 3000
         }
