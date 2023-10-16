@@ -4179,7 +4179,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 					// 캐릭터 생성 응답 보냄
 					CMessage* ResCreateCharacterMessage = MakePacketResCreateCharacter(!CharacterNameFind, NewPlayerCharacter->_GameObjectInfo);
 					SendPacket(Session->SessionId, ResCreateCharacterMessage);
-					ResCreateCharacterMessage->Free();										
+					ResCreateCharacterMessage->Free();							
 				}				
 			}
 			else
@@ -7433,10 +7433,10 @@ CGameServerMessage* CGameServer::MakePacketResTileInfo(vector<st_TileInfo> Tiles
 	int8 TileCount = (int8)Tiles.size();
 	*ResTileInfoMessage << TileCount;
 	
-	for (int i = 0; i < TileCount; i++)
+	for (auto Tile : Tiles)
 	{
-		
-	}
+		*ResTileInfoMessage << Tile;
+	}	
 
 	return ResTileInfoMessage;
 }
