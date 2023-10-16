@@ -30,7 +30,7 @@ void CItem::Update()
 	}
 
 	// 타겟의 상태가 LEAVE면 타겟을 없애준다.
-	if (_Owner && _Owner->_NetworkState == en_ObjectNetworkState::LEAVE)
+	if (_Owner && _Owner->_NetworkState == en_ObjectNetworkState::OBJECT_NETWORK_STATE_LEAVE)
 	{
 		_Owner = nullptr;
 	}

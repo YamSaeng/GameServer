@@ -112,7 +112,7 @@ bool CStone::OnDamaged(CGameObject* Attacker, int32 Damage)
 
 		_GameObjectInfo.ObjectPositionInfo.State = en_CreatureState::DEAD;
 
-		G_ObjectManager->ObjectItemSpawn(_Channel, Attacker->_GameObjectInfo.ObjectId,
+		G_ObjectManager->WorldItemSpawn(_Channel, Attacker->_GameObjectInfo.ObjectId,
 			Attacker->_GameObjectInfo.ObjectType,
 			_GameObjectInfo.ObjectPositionInfo.CollisionPosition,
 			_GameObjectInfo.ObjectPositionInfo.Position,
@@ -163,7 +163,7 @@ bool CTree::OnDamaged(CGameObject* Attacker, int32 Damage)
 		G_NetworkManager->GetGameServer()->SendPacketFieldOfView(this, ResChangeStatePacket);
 		ResChangeStatePacket->Free();
 		
-		G_ObjectManager->ObjectItemSpawn(_Channel, Attacker->_GameObjectInfo.ObjectId,
+		G_ObjectManager->WorldItemSpawn(_Channel, Attacker->_GameObjectInfo.ObjectId,
 			Attacker->_GameObjectInfo.ObjectType,
 			_GameObjectInfo.ObjectPositionInfo.CollisionPosition,
 			_GameObjectInfo.ObjectPositionInfo.Position,

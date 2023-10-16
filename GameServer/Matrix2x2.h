@@ -24,7 +24,7 @@ public:
 		return Cols[Index];
 	}
 
-	FORCEINLINE Vector2 operator*(Vector2& Vector) const
+	FORCEINLINE Vector2 operator*(const Vector2& Vector) const
 	{
 		Matrix2x2 transposedMatrix = Transpose();
 		return Vector2(transposedMatrix[0].Dot(Vector),transposedMatrix[1].Dot(Vector));

@@ -53,8 +53,8 @@ void CDivineBolt::Move()
 			st_GameObjectJob* DamageJob = G_NetworkManager->GetGameServer()->MakeGameObjectDamage(_Owner->_GameObjectInfo.ObjectId,
 				_Owner->_GameObjectInfo.ObjectType,
 				en_SkillKinds::SKILL_KIND_SPELL_SKILL,
-				_GameObjectInfo.ObjectStatInfo.MinMeleeAttackDamage,
-				_GameObjectInfo.ObjectStatInfo.MaxMeleeAttackDamage,
+				_GameObjectInfo.ObjectStatInfo.MinAttackPoint,
+				_GameObjectInfo.ObjectStatInfo.MaxAttackPoint,
 				false);
 			CollisionObject->_GameObjectJobQue.Enqueue(DamageJob);
 		}
