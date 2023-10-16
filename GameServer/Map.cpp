@@ -60,7 +60,7 @@ CMap::~CMap()
 void CMap::MapInit()
 {	
 	int XCount = _Right - _Left + 1;
-	int YCount = _Down - _Up + 1;	
+	int YCount = _Up - _Down  + 1;	
 
 	_TileInfos = new st_TileInfo *[YCount];	
 
@@ -108,8 +108,7 @@ void CMap::MapInit()
 	}
 
 	_SizeX = _Right - _Left + 1;
-	_SizeY = _Down - _Up + 1;
-
+	_SizeY = _Up - _Down + 1;
 	_ChannelManager = new CChannelManager();
 	_ChannelManager->Init(this, _ChannelCount);	
 
@@ -138,7 +137,7 @@ void CMap::MapInit()
 CSector* CMap::GetSector(Vector2Int CellPosition)
 {
 	int X = (CellPosition.X - _Left) / _SectorSize;
-	int Y = (_Down - CellPosition.Y) / _SectorSize;
+	int Y = (_Up - CellPosition.Y) / _SectorSize;
 
 	return GetSector(Y, X);
 }
@@ -578,13 +577,13 @@ CGameObject* CMap::Find(Vector2Int& CellPosition)
 	}
 
 	// 상하 좌표 검사
-	if (CellPosition.Y < _Up || CellPosition.Y > _Down)
+	if (CellPosition.Y < _Down || CellPosition.Y > _Up)
 	{
 		return nullptr;
 	}
 
 	int X = CellPosition.X - _Left;
-	int Y = _Down - CellPosition.Y;
+	int Y = _Up - CellPosition.Y;
 
 	return _ObjectsInfos[Y][X];
 }
@@ -598,13 +597,13 @@ CGameObject* CMap::FindPlant(Vector2Int& PlantPosition)
 	}
 
 	// 상하 좌표 검사
-	if (PlantPosition.Y < _Up || PlantPosition.Y > _Down)
+	if (PlantPosition.Y < _Down || PlantPosition.Y > _Up)
 	{
 		return nullptr;
 	}
 
 	int X = PlantPosition.X - _Left;
-	int Y = _Down - PlantPosition.Y;
+	int Y = _Up - PlantPosition.Y;
 
 	return _SeedObjectInfos[Y][X];
 }
@@ -627,7 +626,7 @@ CItem** CMap::FindItem(Vector2Int& ItemCellPosition)
 	}
 
 	int XCount = _Right - _Left + 1;
-	int YCount = _Down - _Up + 1;
+	int YCount = _Up - _Down + 1;
 
 	return _Items[Y][X];
 }
@@ -653,8 +652,8 @@ bool CMap::Cango(CGameObject* Object)
 		return false;
 	}
 
-	if (CheckPosition.Y < _Up
-		|| CheckPosition.Y > _Down)
+	if (CheckPosition.Y < _Down
+		|| CheckPosition.Y > _Up)
 	{
 		return false;
 	}
@@ -677,7 +676,7 @@ bool CMap::Cango(CGameObject* Object)
 			|| CollisionPosition.Y != Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y)
 		{
 			int X = CollisionPosition.X - _Left;
-			int Y = _Down - CollisionPosition.Y;
+			int Y = _Up - CollisionPosition.Y;
 
 			if (_ObjectsInfos[Y][X] != nullptr)
 			{
@@ -756,7 +755,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, Vector2Int& DestPosition, bool Che
 			if (Applycollision == true)
 			{
 				int X = PositionInfo.CollisionPosition.X - _Left;
-				int Y = _Down - PositionInfo.CollisionPosition.Y;
+				int Y = _Up - PositionInfo.CollisionPosition.Y;
 
 				// 기존위치 데이터는 날리고
 				if (_ObjectsInfos[Y][X] == GameObject)
@@ -766,7 +765,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, Vector2Int& DestPosition, bool Che
 
 				// 목적지 위치 구해주고
 				X = DestPosition.X - _Left;
-				Y = _Down - DestPosition.Y;
+				Y = _Up - DestPosition.Y;
 
 				// 목적지에 넣어준다.
 				_ObjectsInfos[Y][X] = GameObject;
@@ -794,11 +793,11 @@ bool CMap::ApplyMove(CGameObject* GameObject, Vector2Int& DestPosition, bool Che
 
 			// 이동 하기전 있었던 좌표 계산
 			int32 PreviousX = ItemObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X - _Left;
-			int32 PreviousY = _Down - ItemObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y;
+			int32 PreviousY = _Up - ItemObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y;
 
 			// 이동하고자 하는 좌표 계산
 			int32 X = DestPosition.X - _Left;
-			int32 Y = _Down - DestPosition.Y;
+			int32 Y = _Up - DestPosition.Y;
 
 			// 기존 위치에서 움직이는 대상은 제거하고
 			for (int8 i = 0; i < (int8)en_MapItemInfo::MAP_ITEM_COUNT_MAX; i++)
@@ -850,7 +849,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, Vector2Int& DestPosition, bool Che
 			CCrop* CropObject = (CCrop*)GameObject;
 
 			int32 X = DestPosition.X - _Left;
-			int32 Y = _Down - DestPosition.Y;
+			int32 Y = _Up - DestPosition.Y;
 
 			_SeedObjectInfos[Y][X] = GameObject;
 		}
@@ -892,7 +891,7 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 	}
 
 	// 상하 좌표 검사
-	if (GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y < _Up || GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y > _Down)
+	if (GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y < _Down || GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y > _Up)
 	{
 		return false;
 	}
@@ -902,7 +901,7 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 	Sector->Remove(GameObject);
 
 	int X = GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X - _Left;
-	int Y = _Down - GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y;
+	int Y = _Up - GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y;
 
 	int Width = GameObject->_GameObjectInfo.ObjectWidth;
 	int Height = GameObject->_GameObjectInfo.ObjectHeight;
@@ -994,8 +993,8 @@ bool CMap::CanMoveSkillGo(CGameObject* SkillObject, OUT Vector2* NextPosition, i
 		return false;
 	}
 
-	if (CheckPosition.Y < _Up
-		|| CheckPosition.Y > _Down)
+	if (CheckPosition.Y < _Down
+		|| CheckPosition.Y > _Up)
 	{
 		return false;
 	}
@@ -1058,8 +1057,8 @@ bool CMap::MonsterCango(CGameObject* Object)
 		return false;
 	}
 
-	if (CheckPosition.Y < _Up
-		|| CheckPosition.Y > _Down)
+	if (CheckPosition.Y < _Down
+		|| CheckPosition.Y > _Up)
 	{
 		return false;
 	}
@@ -1281,13 +1280,13 @@ bool CMap::FindPathNextPositionCango(CGameObject* Object, Vector2Int& NextPositi
 	}
 
 	// 상하 좌표 검사
-	if (NextPosition.Y < _Up || NextPosition.Y > _Down)
+	if (NextPosition.Y < _Down || NextPosition.Y > _Up)
 	{
 		return false;
 	}
 
 	int X = NextPosition.X - _Left;
-	int Y = _Down - NextPosition.Y;
+	int Y = _Up - NextPosition.Y;
 
 	//G_Logger->WriteStdOut(en_Color::RED, L"X : %d Y : %d \n", X, Y);
 
@@ -1363,8 +1362,40 @@ st_TileInfo CMap::GetTileInfo(Vector2Int Position)
 	return _TileInfos[Position.X][Position.Y];
 }
 
+void CMap::SetTileInfo(int8 XRange, int8 YRange, bool IsOccupdation, int64 OwnerObjectID)
+{
+	int32 TilePositionX;
+	int32 TilePositionY;
+
+	Vector2Int TileStartPosition;
+
+	while (1)
+	{
+		TilePositionX = Math::RandomNumberInt(0, 90);
+		TilePositionY = Math::RandomNumberInt(0, 74);
+		
+		TileStartPosition.Y = TilePositionY + 10;
+		TileStartPosition.X = TilePositionX - 10;
+
+		if (TileStartPosition.X > _Left && TileStartPosition.X + XRange < _Right
+			&& TileStartPosition.Y  > _Down && TileStartPosition.Y + YRange < _Up)
+		{
+			break;
+		}
+	}	
+
+	for (int Y = TileStartPosition.Y; Y < TileStartPosition.Y + YRange; Y++)
+	{
+		for (int X = TileStartPosition.X; X < TileStartPosition.X + XRange; X++)
+		{
+			_TileInfos[Y][X].IsOccupation = IsOccupdation;
+			_TileInfos[Y][X].OwnerObjectID = OwnerObjectID;
+		}
+	}
+}
+
 void CMap::SetTileInfo(bool IsOccupdation, int64 OwnerObjectID, Vector2Int Position)
 {
 	_TileInfos[Position.X][Position.Y].IsOccupation = IsOccupdation;
-	_TileInfos[Position.X][Position.Y].OnwerObjectID = OwnerObjectID;
+	_TileInfos[Position.X][Position.Y].OwnerObjectID = OwnerObjectID;
 }
