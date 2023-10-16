@@ -60,9 +60,14 @@ CMap::~CMap()
 void CMap::MapInit()
 {	
 	int XCount = _Right - _Left + 1;
-	int YCount = _Down - _Up + 1;
+	int YCount = _Down - _Up + 1;	
 
-	int YCountXCount = YCount * XCount;	
+	_TileInfos = new st_TileInfo *[YCount];	
+
+	for (int i = 0; i < YCount; i++)
+	{
+		_TileInfos[i] = new st_TileInfo[XCount];			
+	}
 
 	_ObjectsInfos = new CGameObject * *[YCount];
 
@@ -779,7 +784,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, Vector2Int& DestPosition, bool Che
 			}
 		}
 		break;				
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COIN:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:
@@ -944,7 +949,7 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 			}
 		}
 		break;	
-	case en_GameObjectType::OBJECT_ITEM_MATERIAL_BRONZE_COIN:
+	case en_GameObjectType::OBJECT_ITEM_MATERIAL_COIN:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_LEATHER:
 	case en_GameObjectType::OBJECT_ITEM_MATERIAL_STONE:
 	case en_GameObjectType::OBJECT_ITEM_CROP_FRUIT_POTATO:

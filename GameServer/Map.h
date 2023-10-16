@@ -30,6 +30,8 @@ struct st_AStarNodeInt
 class CMap
 {
 public:
+	en_WorldMapInfo _MapInfo;
+
 	int16 _MapID;
 
 	wstring _MapName;
@@ -44,23 +46,7 @@ public:
 
 	int32 _SectorSize;
 
-	int8 _ChannelCount;	
-
-	//-------------------------------------
-	// 맵 타일에 존재하는 게임 오브젝트 정보
-	//-------------------------------------
-	CGameObject*** _ObjectsInfos;
-
-	//-------------------------------------
-	// 맵 타일에 존재하는 씨앗 오브젝트 정보
-	//-------------------------------------
-	CGameObject*** _SeedObjectInfos;
-
-	//-----------------------------------------------------------
-	// 맵 타일에 존재하는 아이템 정보
-	// 한 타일에 존재 할 수 있는 아이템의 종류는 20개로 제한한다.
-	//-----------------------------------------------------------
-	CItem**** _Items;
+	int8 _ChannelCount;		
 
 	CMap();
 	~CMap();
@@ -150,6 +136,19 @@ public:
 private:
 	CChannelManager* _ChannelManager;
 	CSector** _Sectors;	
+
+	// 맵 타일 정보
+	st_TileInfo** _TileInfos;
+
+	// 맵 타일에 존재하는 게임 오브젝트 정보	
+	CGameObject*** _ObjectsInfos;
+
+	// 맵 타일에 존재하는 씨앗 오브젝트 정보	
+	CGameObject*** _SeedObjectInfos;
+
+	// 맵 타일에 존재하는 아이템 정보
+	// 한 타일에 존재 할 수 있는 아이템의 종류는 20개로 제한한다.	
+	CItem**** _Items;
 
 	int32 _SectorCountX;
 	int32 _SectorCountY;
