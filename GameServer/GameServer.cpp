@@ -4179,7 +4179,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 					// 캐릭터 생성 응답 보냄
 					CMessage* ResCreateCharacterMessage = MakePacketResCreateCharacter(!CharacterNameFind, NewPlayerCharacter->_GameObjectInfo);
 					SendPacket(Session->SessionId, ResCreateCharacterMessage);
-					ResCreateCharacterMessage->Free();
+					ResCreateCharacterMessage->Free();										
 				}				
 			}
 			else
@@ -7416,6 +7416,29 @@ CGameServerMessage* CGameServer::MakePacketResRayCasting(int64 ObjectID, vector<
 	}
 
 	return ResRayCastingMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketResTileInfo(vector<st_TileInfo> Tiles)
+{
+	CGameServerMessage* ResTileInfoMessage = CGameServerMessage::GameServerMessageAlloc();
+	if (ResTileInfoMessage == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResTileInfoMessage->Clear();
+
+	*ResTileInfoMessage << (int16)en_GAME_SERVER_PACKET_TYPE::en_PACKET_S2C_MAP_TILE_INFO;
+
+	int8 TileCount = (int8)Tiles.size();
+	*ResTileInfoMessage << TileCount;
+	
+	for (int i = 0; i < TileCount; i++)
+	{
+		
+	}
+
+	return ResTileInfoMessage;
 }
 
 CGameServerMessage* CGameServer::MakePacketReqCancel(en_GAME_SERVER_PACKET_TYPE PacketType)
