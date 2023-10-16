@@ -133,6 +133,9 @@ public:
 	CChannelManager* GetChannelManager();
 
 	Vector2 GetMovePositionNearTarget(CGameObject* Object, CGameObject* Target);
+
+	st_TileInfo GetTileInfo(Vector2Int Position);
+	void SetTileInfo(bool IsOccupdation, int64 OwnerObjectID, Vector2Int Position);	
 private:
 	CChannelManager* _ChannelManager;
 	CSector** _Sectors;	

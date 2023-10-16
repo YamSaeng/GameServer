@@ -1357,3 +1357,14 @@ Vector2 CMap::GetMovePositionNearTarget(CGameObject* Object, CGameObject* Target
 
 	return Vector2(NearCollisionPosition.X + 0.5f, NearCollisionPosition.Y + 0.5f);
 }
+
+st_TileInfo CMap::GetTileInfo(Vector2Int Position)
+{
+	return _TileInfos[Position.X][Position.Y];
+}
+
+void CMap::SetTileInfo(bool IsOccupdation, int64 OwnerObjectID, Vector2Int Position)
+{
+	_TileInfos[Position.X][Position.Y].IsOccupation = IsOccupdation;
+	_TileInfos[Position.X][Position.Y].OnwerObjectID = OwnerObjectID;
+}
