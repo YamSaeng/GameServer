@@ -416,4 +416,16 @@ namespace SP
 		void OutEquipmentDurability(int32& EquipmentDurability) { BindCol(2, EquipmentDurability); }
 		void OutEquipmentEnchantPoint(int8& EquipmentEnchantPoint) { BindCol(3, EquipmentEnchantPoint); }
 	};
+
+	// 타일 정보 업데이트
+	class CDBGameServerTileUpdate : public CDBBind<4, 0>
+	{
+	public:
+		CDBGameServerTileUpdate(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spTileUpdate(?,?,?,?)}") {}
+
+		void InIsTileOccupation(bool& IsTileOccupation) { BindParam(0, IsTileOccupation); }
+		void InTileOwnerObjectID(int64& TileOwnerObjectID) { BindParam(1, TileOwnerObjectID); }
+		void InTilePositionY(int16& TilePositionY) { BindParam(2, TilePositionY); }
+		void InTilePositionX(int16& TilePositionX) { BindParam(3, TilePositionX); }
+	};
 }

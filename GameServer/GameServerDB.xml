@@ -133,8 +133,8 @@
 	
 	<!-- 타일 테이블 -->
 	<Table name="Tile" desc="Tile Table">
-		<Column name="IsTileCccupation" type="bit" notnull="true"/>
-		<Column name="TileOwner" type="BigInt" notnull="true"/>
+		<Column name="IsTileOccupation" type="bit" notnull="true"/>
+		<Column name="TileOwnerObjectID" type="BigInt" notnull="true"/>
 		<Column name="TilePositionY" type="int" notnull="true"/>
 		<Column name="TilePositionX" type="int" notnull="true"/>
 	</Table>
@@ -1439,5 +1439,20 @@
 			]]>
 		</Body>
 	</Procedure>
-	
+
+	<!-- 타일 정보 업데이트 -->
+	<Procedure name="spTileUpdate">
+		<Param name="@IsTileOccupation" type="bit"/>
+		<Param name="@TileOwnerObjectID" type="BigInt"/>
+		<Param name="@TilePositionY" type="SmallInt"/>
+		<Param name="@TilePositionX" type="SmallInt"/>
+		<Body>
+			<![CDATA[	
+			SET NOCOUNT ON
+			UPDATE [dbo].[Tile]
+			SET IsTileOccupation = @IsTileOccupation, TileOwnerObjectID = @TileOwnerObjectID
+			WHERE TilePositionY = (@TilePositionY) AND TilePositionX = (@TilePositionX)
+			]]>
+		</Body>
+	</Procedure>	
 </GameServerDB>
