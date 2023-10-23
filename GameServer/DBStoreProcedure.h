@@ -417,6 +417,20 @@ namespace SP
 		void OutEquipmentEnchantPoint(int8& EquipmentEnchantPoint) { BindCol(3, EquipmentEnchantPoint); }
 	};
 
+	// 유저 가입시 타일 정보 범위 업데이트
+	class CDBGameServerTileRangeUpdate : public CDBBind<6, 0>
+	{
+	public:
+		CDBGameServerTileRangeUpdate(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spTileRangeUpdate(?,?,?,?,?,?)}") {}
+		
+		void InIsTileOccupation(bool& TileOccupation) { BindParam(0, TileOccupation); }
+		void InTileOwnerObjectID(int64& TileOwnerObjectID) { BindParam(1, TileOwnerObjectID); }
+		void InStartTilePositionY(int16& TilePositionY) { BindParam(2, TilePositionY); }
+		void InStartTilePositionX(int16& TilePositionX) { BindParam(3, TilePositionX); }
+		void InTileRangeY(int16& TileRangeY) { BindParam(4, TileRangeY); }
+		void InTileRangeX(int16& TileRangeX) { BindParam(5, TileRangeX); }
+	};
+
 	// 타일 정보 업데이트
 	class CDBGameServerTileUpdate : public CDBBind<4, 0>
 	{

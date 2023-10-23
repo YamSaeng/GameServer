@@ -1454,5 +1454,35 @@
 			WHERE TilePositionY = (@TilePositionY) AND TilePositionX = (@TilePositionX)
 			]]>
 		</Body>
-	</Procedure>	
+	</Procedure>
+	
+	<!-- 타일 정보 범위 업데이트 -->
+	<Procedure name="spTileRangeUpdate">
+		<Param name="@IsTileOccupation" type="bit"/>
+		<Param name="@TileOwnerObjectID" type="BigInt"/>
+		<Param name="@StartTilePositionY" type="SmallInt"/>
+		<Param name="@StartTilePositionX" type="SmallInt"/>
+		<Param name="@TileRangeY" type ="SmallInt"/>
+		<Param name="@TileRangeX" type ="SmallInt"/>
+		<Body>
+			<![CDATA[
+			SET NOCOUNT ON
+				DECLARE @x int
+				DECLARE @y int
+				SET @y = @StartTilePositionY
+				SET @x = @StartTilePositionX				
+				while @y < @TileRangeY BEGIN
+						SET @x = 0 
+						while @x < @TileRangeX BEGIN
+								UPDATE [dbo].[Tile]
+								SET IsTileOccupation = @IsTileOccupation,
+									TileOwnerObjectID = @TileOwnerObjectID
+								WHERE TilePositionY = @StartTilePositionY AND TilePositionX = @StartTilePositionX
+								SET @y = @y + 1
+						END
+					SET @x = @x + 1
+				END
+			]]>
+		</Body>		
+	</Procedure>
 </GameServerDB>
