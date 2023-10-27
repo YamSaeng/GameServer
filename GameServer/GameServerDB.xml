@@ -1478,9 +1478,9 @@
 								SET IsTileOccupation = @IsTileOccupation,
 									TileOwnerObjectID = @TileOwnerObjectID
 								WHERE TilePositionY = @StartTilePositionY AND TilePositionX = @StartTilePositionX
-								SET @y = @y + 1
+								SET @x = @x + 1
 						END
-					SET @x = @x + 1
+					SET @y = @y + 1
 				END
 			]]>
 		</Body>		
@@ -1493,6 +1493,33 @@
 				SET NOCOUNT ON
 				SELECT *
 				FROM [dbo].[Tile]
+			]]>
+		</Body>
+	</Procedure>
+	
+	<!-- 타일 정보 범위 가져오기 -->
+	<Procedure name="spGetRangeTileInfos">		
+		<Param name="@StartTilePositionY" type="SmallInt"/>
+		<Param name="@StartTilePositionX" type="SmallInt"/>
+		<Param name="@TileRangeY" type ="SmallInt"/>
+		<Param name="@TileRangeX" type ="SmallInt"/>
+		<Body>
+			<![CDATA[
+				SET NOCOUNT ON
+					DECLARE @x SmallInt
+					DECLARE @y SmallInt
+					SET @y = 0
+					SET @x = 0
+					while @y < @TileRangeY BEGIN
+							SET @x = 0
+							while @x < @TileRangeX BEGIN
+								SELECT *
+								FROM [dbo].[Tile]
+								WHERE TilePositionY = @StartTilePositionY + @y AND TilePositionX = @StartTilePositionX + @x
+								SET @x = @x + 1
+							END
+						SET @y = @y + 1
+					END
 			]]>
 		</Body>
 	</Procedure>

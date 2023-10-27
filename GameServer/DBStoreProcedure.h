@@ -454,4 +454,21 @@ namespace SP
 		void OutTilePositionY(int16& TilePositionY) { BindCol(2, TilePositionY); }
 		void OutTilePositionX(int16& TilePositionX) { BindCol(3, TilePositionX); }
 	};
+
+	// 타일 정보 범위 가져오기
+	class CDBGameServerGetRangeTileInfos : public CDBBind<4, 4>
+	{
+	public:
+		CDBGameServerGetRangeTileInfos(CDBConnection& DBConnection) : CDBBind(DBConnection, L"{CALL spGetRangeTileInfos(?,?,?,?)}") {}
+		
+		void InStartTilePositionY(int16& StartTilePositionY) { BindParam(0, StartTilePositionY); }
+		void InStartTilePositionX(int16& StarttilePositionX) { BindParam(1, StarttilePositionX); }
+		void InTileRangeY(int16& StarttilePositionX) { BindParam(2, StarttilePositionX); }
+		void InTileRangeX(int16& StarttilePositionX) { BindParam(3, StarttilePositionX); }
+
+		void OutIsTileOccupation(bool& IsTileOccupation) { BindCol(0, IsTileOccupation); }
+		void OutIsTileOwnerObjectID(int64& TileOwnerObjectID) { BindCol(1, TileOwnerObjectID); }
+		void OutTilePositionY(int16& TilePositionY) { BindCol(2, TilePositionY); }
+		void OutTilePositionX(int16& TilePositionX) { BindCol(3, TilePositionX); }
+	};
 }
