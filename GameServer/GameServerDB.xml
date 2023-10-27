@@ -1485,4 +1485,15 @@
 			]]>
 		</Body>		
 	</Procedure>
+	
+	<!-- 타일 정보 전부 가져오기 -->
+	<Procedure name="spGetTileInfos">
+		<Body>
+			<![CDATA[
+				SET NOCOUNT ON
+				SELECT *
+				FROM [dbo].[Tile]
+			]]>
+		</Body>
+	</Procedure>
 </GameServerDB>
