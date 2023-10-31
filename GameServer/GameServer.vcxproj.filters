@@ -148,6 +148,9 @@
     <Filter Include="ContentServer\Content\GameObject\Building">
       <UniqueIdentifier>{1556ac3d-e6e5-4339-bde8-cfbf3c6981e3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Util\Json,Xml\Data\Building">
+      <UniqueIdentifier>{aef6c306-efdd-483d-abe8-8eb7cc8e53bb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Type.h">
@@ -637,6 +640,9 @@
     </None>
     <None Include="DropMoneyDatas.json">
       <Filter>Util\Json,Xml\Drop</Filter>
+    </None>
+    <None Include="BuildingData.json">
+      <Filter>Util\Json,Xml\Data\Building</Filter>
     </None>
   </ItemGroup>
 </Project>

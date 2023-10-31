@@ -105,6 +105,12 @@ void CGameServer::GameServerStart(const WCHAR* OpenIP, int32 Port)
 	// 로직 쓰레드 시작
 	_LogicThread = (HANDLE)_beginthreadex(NULL, 0, LogicThreadProc, this, 0, NULL);
 
+	st_GameServerJob* WorldMapTileInfoLoadJob = _GameServerJobMemoryPool->Alloc();
+	WorldMapTileInfoLoadJob->Type = en_GameServerJobType::DATA_BASE_MAP_TILE_INFO_LOAD;
+
+	_GameServerWorldDBThreadMessageQue.Enqueue(WorldMapTileInfoLoadJob);	
+	SetEvent(_WorldDataBaseWakeEvent);			
+
 	CloseHandle(_WorldDataBaseThread);
 	CloseHandle(_TimerJobThread);
 	CloseHandle(_LogicThread);
@@ -207,6 +213,9 @@ unsigned __stdcall CGameServer::WorldDataBaseThreadProc(void* Argument)
 
 			switch (Job->Type)
 			{	
+			case en_GameServerJobType::DATA_BASE_MAP_TILE_INFO_LOAD:				
+				Instance->WorldMapTileInfoLoad();
+				break;
 			default:
 				break;
 			}
@@ -4179,7 +4188,7 @@ void CGameServer::PacketProcReqDBCreateCharacterNameCheck(CMessage* Message)
 					// 캐릭터 생성 응답 보냄
 					CMessage* ResCreateCharacterMessage = MakePacketResCreateCharacter(!CharacterNameFind, NewPlayerCharacter->_GameObjectInfo);
 					SendPacket(Session->SessionId, ResCreateCharacterMessage);
-					ResCreateCharacterMessage->Free();							
+					ResCreateCharacterMessage->Free();
 				}				
 			}
 			else
@@ -4612,12 +4621,13 @@ void CGameServer::PacketProcReqDBCharacterInfoSend(CMessage* Message)
 			*ResCharacterInfoMessage << DayInfo.DayTimeCheck;
 			*ResCharacterInfoMessage << DayInfo.DayRatio;
 			*ResCharacterInfoMessage << (int8)DayInfo.DayType;
-
-#pragma endregion
+#pragma endregion					
 
 			SendPacket(MyPlayer->_SessionId, ResCharacterInfoMessage);			
 
-			MyPlayer->_NetworkState = en_ObjectNetworkState::OBJECT_NETWORK_STATE_LIVE;			
+			MyPlayer->_NetworkState = en_ObjectNetworkState::OBJECT_NETWORK_STATE_LIVE;	
+
+			G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterInfoGetConnection);
 
 		} while (0);
 	}
@@ -4885,6 +4895,47 @@ void CGameServer::PacketProcReqDBLeavePlayerInfoSave(CGameServerMessage* Message
 	InterlockedDecrement64(&_SessionCount);
 	// 세션 인덱스 반납	
 	_SessionArrayIndexs.Push(GET_SESSIONINDEX(LeaveSession->SessionId));	
+}
+
+void CGameServer::WorldMapTileInfoLoad()
+{
+	CDBConnection* DBCharacterInfoGetConnection = G_DBConnectionPool->Pop(en_DBConnect::GAME);
+
+	// 월드 타일 정보 가져오기
+	SP::CDBGameServerGetTileInfos GetTileInfos(*DBCharacterInfoGetConnection);
+
+	bool IsTileOccupation;
+	int64 TileOwnerObjectID;
+	int16 TilePositionY;
+	int16 TilePositionX;
+
+	GetTileInfos.OutIsTileOccupation(IsTileOccupation);
+	GetTileInfos.OutIsTileOwnerObjectID(TileOwnerObjectID);
+	GetTileInfos.OutTilePositionY(TilePositionY);
+	GetTileInfos.OutTilePositionX(TilePositionX);
+
+	GetTileInfos.Execute();
+
+	vector<st_TileInfo> TileInfos;
+
+	while (GetTileInfos.Fetch())
+	{
+		st_TileInfo TileInfo;
+		TileInfo.IsOccupation = IsTileOccupation;
+		TileInfo.OwnerObjectID = TileOwnerObjectID;
+		TileInfo.Position.Y = TilePositionY;
+		TileInfo.Position.X = TilePositionX;
+
+		TileInfos.push_back(TileInfo);
+	}	
+
+	CMap* Map = G_MapManager->GetMap(1);
+	if (Map != nullptr)
+	{
+		Map->SetTileInfos(TileInfos);
+	}
+
+	G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterInfoGetConnection);
 }
 
 void CGameServer::PacketProcTimerPing(int64 SessionId)

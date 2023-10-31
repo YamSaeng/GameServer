@@ -372,6 +372,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="AssassinationSkillDatas.json" />
+    <None Include="BuildingData.json" />
     <None Include="CraftingData.json" />
     <None Include="CraftingTableData.json" />
     <None Include="CropData.json" />
