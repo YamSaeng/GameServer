@@ -1362,6 +1362,43 @@ st_TileInfo CMap::GetTileInfo(Vector2Int Position)
 	return _TileInfos[Position.X][Position.Y];
 }
 
+vector<st_TileInfo> CMap::GetTileInfos(Vector2Int CenterPosition, int16 RangeX, int16 RangeY)
+{
+	vector<st_TileInfo> AroundTileInfos;
+
+	Vector2Int LeftTopPosition;
+	LeftTopPosition.X = CenterPosition.X - RangeX / 2;
+	LeftTopPosition.Y = CenterPosition.Y + RangeY / 2;
+
+	if (LeftTopPosition.X < 0)
+	{
+		LeftTopPosition.X = 0;
+	}
+
+	if (LeftTopPosition.Y > _Up)
+	{
+		LeftTopPosition.Y = _Up;
+	}
+
+	for (int16 HeightY = LeftTopPosition.Y; HeightY > LeftTopPosition.Y - RangeY; HeightY--)
+	{
+		for (int16 WidthX = LeftTopPosition.X; WidthX < LeftTopPosition.X + RangeX; WidthX++)
+		{
+			AroundTileInfos.push_back(_TileInfos[HeightY][WidthX]);
+		}
+	}
+
+	return AroundTileInfos;
+}
+
+void CMap::SetTileInfos(vector<st_TileInfo> TileInfos)
+{
+	for (st_TileInfo const TileInfo : TileInfos)
+	{
+		_TileInfos[TileInfo.Position.Y][TileInfo.Position.X] = TileInfo;		
+	}
+}
+
 void CMap::SetTileInfo(int8 XRange, int8 YRange, bool IsOccupdation, int64 OwnerObjectID)
 {
 	int32 TilePositionX;

@@ -134,7 +134,11 @@ public:
 
 	Vector2 GetMovePositionNearTarget(CGameObject* Object, CGameObject* Target);
 
-	st_TileInfo GetTileInfo(Vector2Int Position);
+	st_TileInfo GetTileInfo(Vector2Int Position);	
+	vector<st_TileInfo> GetTileInfos(Vector2Int CenterPosition, int16 RangeX, int16 RangeY);
+
+	void SetTileInfos(vector<st_TileInfo> TileInfos);
+
 	void SetTileInfo(int8 XRange, int8 YRange, bool IsOccupdation, int64 OwnerObjectID);
 	void SetTileInfo(bool IsOccupdation, int64 OwnerObjectID, Vector2Int Position);	
 private:
