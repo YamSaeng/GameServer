@@ -776,7 +776,7 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 
 			if (FindName == false)
 			{
-				CMessage* ResEnterGamePacket = MakePacketResEnterGame(FindName, nullptr, nullptr);
+				CMessage* ResEnterGamePacket = MakePacketResEnterGame(FindName, nullptr, nullptr, nullptr);
 				SendPacket(Session->SessionId, ResEnterGamePacket);
 				ResEnterGamePacket->Free();
 				break;
@@ -5946,7 +5946,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobInteraction(int16 InteractionTyp
 	return InteractionJob;
 }
 
-CGameServerMessage* CGameServer::MakePacketResEnterGame(bool EnterGameSuccess, st_GameObjectInfo* ObjectInfo, Vector2Int* SpawnPosition)
+CGameServerMessage* CGameServer::MakePacketResEnterGame(bool EnterGameSuccess, st_GameObjectInfo* ObjectInfo, Vector2Int* SpawnPosition, vector<st_TileInfo>* AroundTileInfos)
 {
 	CGameServerMessage* ResEnterGamePacket = CGameServerMessage::GameServerMessageAlloc();
 	if (ResEnterGamePacket == nullptr)
@@ -5968,6 +5968,17 @@ CGameServerMessage* CGameServer::MakePacketResEnterGame(bool EnterGameSuccess, s
 	{
 		*ResEnterGamePacket << *SpawnPosition;
 	}
+
+	if (AroundTileInfos->size() > 0)
+	{
+		int16 AroundTileInfosCount = (int16)AroundTileInfos->size();
+		*ResEnterGamePacket << AroundTileInfosCount;
+
+		for (st_TileInfo AroundTileInfo : *AroundTileInfos)
+		{
+			*ResEnterGamePacket << AroundTileInfo;
+		}
+	}	
 
 	return ResEnterGamePacket;
 }
