@@ -564,9 +564,12 @@ void CGameServer::PacketProc(int64 SessionID, CMessage* Message)
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_INVENTORY_ITEM_USE:
 		PacketProcReqItemUse(SessionID, Message);
-		break;
+		break;	
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_OFF_EQUIPMENT:
 		PacketProcReqOffEquipment(SessionID, Message);
+		break;
+	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_BUILDING:
+		PacketProcReqBuildingInstall(SessionID, Message);
 		break;
 	case en_GAME_SERVER_PACKET_TYPE::en_PACKET_C2S_SEED_FARMING:
 		PacketProcReqSeedFarming(SessionID, Message);
@@ -2766,6 +2769,84 @@ void CGameServer::PacketProcReqOffEquipment(int64 SessionID, CMessage* Message)
 
 			st_GameObjectJob* OffEquipmentParts = MakeGameObjectJobOffEquipment(EquipmentParts);
 			MyPlayer->_GameObjectJobQue.Enqueue(OffEquipmentParts);
+		} while (0);
+	}
+
+	ReturnSession(Session);
+}
+
+void CGameServer::PacketProcReqBuildingInstall(int64 SessionID, CMessage* Message)
+{
+	st_Session* Session = FindSession(SessionID);
+
+	if (Session)
+	{
+		do
+		{
+			int64 AccountID;
+			int64 PlayerID;
+
+			if (!Session->IsLogin)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> AccountID;
+
+			// AccountId가 맞는지 확인
+			if (Session->AccountId != AccountID)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+
+			*Message >> PlayerID;
+
+			// 게임에 입장한 캐릭터를 가져온다.
+			CPlayer* MyPlayer = G_ObjectManager->_PlayersArray[Session->MyPlayerIndex];
+
+			// 조종하고 있는 플레이어가 있는지 확인 
+			if (MyPlayer == nullptr)
+			{
+				Disconnect(Session->SessionId);
+				break;
+			}
+			else
+			{
+				// 조종하고 있는 플레이어와 전송받은 PlayerId가 같은지 확인
+				if (MyPlayer->_GameObjectInfo.ObjectId != PlayerID)
+				{
+					Disconnect(Session->SessionId);
+					break;
+				}
+			}
+
+			short BuildingTileCount;
+			*Message >> BuildingTileCount;
+
+			vector<st_TileInfo> TileInfos;			
+			
+			for (short i = 0; i < BuildingTileCount; i++)
+			{
+				st_TileInfo TileInfo;
+				
+				*Message >> TileInfo.IsOccupation;
+				*Message >> TileInfo.OwnerObjectID;
+				*Message >> TileInfo.Position.X;
+				*Message >> TileInfo.Position.Y;
+
+				TileInfos.push_back(TileInfo);
+			}
+
+			if (TileInfos.size() > 0)
+			{
+				CMap* MainMap = G_MapManager->GetMap(1);
+				if (MainMap != nullptr)
+				{
+					MainMap->BuildingInstall(TileInfos);
+				}
+			}
 		} while (0);
 	}
 

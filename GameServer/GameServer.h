@@ -219,6 +219,10 @@ private:
 	//------------------------------------------------------------------
 	void PacketProcReqOffEquipment(int64 SessionID, CMessage* Message);	
 	//------------------------------------------------------------------
+	// 건축 요청 처리
+	//------------------------------------------------------------------
+	void PacketProcReqBuildingInstall(int64 SessionID, CMessage* Message);	
+	//------------------------------------------------------------------
 	// 씨앗 심기 요청 처리
 	//------------------------------------------------------------------
 	void PacketProcReqSeedFarming(int64 SessionID, CMessage* Message);
