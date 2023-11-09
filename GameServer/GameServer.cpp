@@ -2844,7 +2844,13 @@ void CGameServer::PacketProcReqBuildingInstall(int64 SessionID, CMessage* Messag
 				CMap* MainMap = G_MapManager->GetMap(1);
 				if (MainMap != nullptr)
 				{
-					MainMap->BuildingInstall(TileInfos);
+					bool BuildingInstallSuccess = MainMap->BuildingInstall(TileInfos);
+					if (!BuildingInstallSuccess)
+					{
+						CMessage* ResBuildingInstallPacket = MakePacketResBuildingInstall(!BuildingInstallSuccess, TileInfos);
+						SendPacket(Session->SessionId, ResBuildingInstallPacket);
+						ResBuildingInstallPacket->Free();
+					}
 				}
 			}
 		} while (0);
@@ -5561,6 +5567,33 @@ CGameServerMessage* CGameServer::MakePacketCraftingList(int64 AccountId, int64 P
 	}
 
 	return ResCraftingListMessage;
+}
+
+CGameServerMessage* CGameServer::MakePacketResBuildingInstall(bool BuildingSuccess, vector<st_TileInfo> BuildingTileInfos)
+{
+	CGameServerMessage* ResBuildingInstallPacket = CGameServerMessage::GameServerMessageAlloc();
+	if (ResBuildingInstallPacket == nullptr)
+	{
+		return nullptr;
+	}
+
+	ResBuildingInstallPacket->Clear();
+
+	*ResBuildingInstallPacket << (int16)en_PACKET_S2C_BUILDING;
+	*ResBuildingInstallPacket << BuildingSuccess;
+
+	if (BuildingSuccess == true)
+	{
+		int16 BuildingTileCount = (int16)BuildingTileInfos.size();
+		*ResBuildingInstallPacket << BuildingTileCount;
+
+		for (st_TileInfo BuildingTileInfo : BuildingTileInfos)
+		{
+			*ResBuildingInstallPacket << BuildingTileInfo;
+		}
+	}
+
+	return nullptr;
 }
 
 CGameServerMessage* CGameServer::MakePacketPing()
