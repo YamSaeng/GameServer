@@ -413,10 +413,14 @@ void CChannel::Update()
 
 					EnterChannel(EnterPlayer, &EnterPlayer->_SpawnPosition);					
 
-					// 나한테 나 생성하라고 알려줌
-					CMessage* ResEnterGamePacket = G_NetworkManager->GetGameServer()->MakePacketResEnterGame(true, &EnterPlayer->_GameObjectInfo, &EnterPlayer->_SpawnPosition);
-					G_NetworkManager->GetGameServer()->SendPacket(EnterPlayer->_SessionId, ResEnterGamePacket);
-					ResEnterGamePacket->Free();
+					vector<st_TileInfo> AroundTileInfos = _Map->GetTileInfos(EnterPlayer->_GameObjectInfo.ObjectPositionInfo.CollisionPosition, 10, 10);
+					if (AroundTileInfos.size() > 0)
+					{
+						// 나한테 나 생성하라고 알려줌
+						CMessage* ResEnterGamePacket = G_NetworkManager->GetGameServer()->MakePacketResEnterGame(true, &EnterPlayer->_GameObjectInfo, &EnterPlayer->_SpawnPosition, &AroundTileInfos);
+						G_NetworkManager->GetGameServer()->SendPacket(EnterPlayer->_SessionId, ResEnterGamePacket);
+						ResEnterGamePacket->Free();
+					}				
 
 					if (EnterPlayer->_GameObjectInfo.ObjectType != en_GameObjectType::OBJECT_PLAYER_DUMMY)
 					{
