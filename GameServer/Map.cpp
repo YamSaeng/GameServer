@@ -60,14 +60,14 @@ CMap::~CMap()
 void CMap::MapInit()
 {	
 	int XCount = _Right - _Left + 1;
-	int YCount = _Up - _Down  + 1;	
-
-	_TileInfos = new st_TileInfo *[YCount];	
+	int YCount = _Up - _Down  + 1;			
 
 	for (int i = 0; i < YCount; i++)
 	{
-		_TileInfos[i] = new st_TileInfo[XCount];			
-	}
+		vector<st_TileInfo> TileInfos;		
+
+		_TileInfos.push_back(TileInfos);		
+	}	
 
 	_ObjectsInfos = new CGameObject * *[YCount];
 
@@ -1359,7 +1359,7 @@ Vector2 CMap::GetMovePositionNearTarget(CGameObject* Object, CGameObject* Target
 
 st_TileInfo CMap::GetTileInfo(Vector2Int Position)
 {
-	return _TileInfos[Position.X][Position.Y];
+	return _TileInfos[Position.Y][Position.X];
 }
 
 vector<st_TileInfo> CMap::GetTileInfos(Vector2Int CenterPosition, int16 RangeX, int16 RangeY)
@@ -1383,7 +1383,7 @@ vector<st_TileInfo> CMap::GetTileInfos(Vector2Int CenterPosition, int16 RangeX, 
 	for (int16 HeightY = LeftTopPosition.Y; HeightY > LeftTopPosition.Y - RangeY; HeightY--)
 	{
 		for (int16 WidthX = LeftTopPosition.X; WidthX < LeftTopPosition.X + RangeX; WidthX++)
-		{
+		{		
 			AroundTileInfos.push_back(_TileInfos[HeightY][WidthX]);
 		}
 	}
@@ -1395,8 +1395,48 @@ void CMap::SetTileInfos(vector<st_TileInfo> TileInfos)
 {
 	for (st_TileInfo const TileInfo : TileInfos)
 	{
-		_TileInfos[TileInfo.Position.Y][TileInfo.Position.X] = TileInfo;		
+		_TileInfos[TileInfo.Position.Y].push_back(TileInfo);			
 	}
+}
+
+bool CMap::BuildingInstall(vector<st_TileInfo> BuildingTileInfos)
+{
+	bool IsBuildingSuccess = false;	
+
+	for (st_TileInfo BuildingTileInfo : BuildingTileInfos)
+	{
+		vector<st_TileInfo> MapTileInfos = _TileInfos[BuildingTileInfo.Position.Y];
+
+		for (st_TileInfo MapTileInfo : MapTileInfos)
+		{
+			if (BuildingTileInfo.Position == MapTileInfo.Position)
+			{
+				IsBuildingSuccess &= BuildingTileInfo.IsOccupation;
+				break;
+			}
+		}
+	}
+
+	// 매개변수로 받은 타일 위치를 모두 검사해 설치가 가능하면 정보 저장
+	if (IsBuildingSuccess == false)
+	{
+		for (st_TileInfo BuildingTileInfo : BuildingTileInfos)
+		{
+			vector<st_TileInfo> MapTileInfos = _TileInfos[BuildingTileInfo.Position.Y];
+
+			for (st_TileInfo MapTileInfo : MapTileInfos)
+			{
+				if (BuildingTileInfo.Position == MapTileInfo.Position)
+				{
+					_TileInfos[BuildingTileInfo.Position.Y][BuildingTileInfo.Position.X].IsOccupation = BuildingTileInfo.IsOccupation;
+					_TileInfos[BuildingTileInfo.Position.Y][BuildingTileInfo.Position.X].OwnerObjectID = BuildingTileInfo.OwnerObjectID;					
+					break;
+				}
+			}
+		}
+	}
+
+	return IsBuildingSuccess;
 }
 
 void CMap::SetTileInfo(int8 XRange, int8 YRange, bool IsOccupdation, int64 OwnerObjectID)
