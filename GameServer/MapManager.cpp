@@ -16,7 +16,7 @@ CMapManager::~CMapManager()
 
 }
 
-void CMapManager::MapSave()
+void CMapManager::MapSave(vector<st_TileInfo>& TileInfos)
 {
 	for (auto MapInfoIterator : G_Datamanager->_MapInfoDatas)
 	{
@@ -37,7 +37,9 @@ void CMapManager::MapSave()
 		NewMap->_Up = MapInfoIterator.second->Up;
 		NewMap->_Down = MapInfoIterator.second->Down;
 
+		NewMap->_MapInfo = en_WorldMapInfo::WORLD_MAP_MAIN_FIELD;
 		NewMap->MapInit();
+		NewMap->SetTileInfos(TileInfos);
 		
 		for (auto MapGameObjectListIter : MapInfoIterator.second->GameObjectList)
 		{						

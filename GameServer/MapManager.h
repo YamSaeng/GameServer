@@ -8,7 +8,7 @@ public:
 	CMapManager();
 	~CMapManager();
 
-	void MapSave();
+	void MapSave(vector<st_TileInfo>& TileInfos);
 
 	CMap* GetMap(int64 MapID);
 
