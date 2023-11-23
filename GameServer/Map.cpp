@@ -25,7 +25,6 @@ CMap::CMap()
 	_SizeX = 0;
 	_SizeY = 0;
 
-	_ObjectsInfos = nullptr;
 	_SeedObjectInfos = nullptr;
 	_Items = nullptr;
 
@@ -69,16 +68,12 @@ void CMap::MapInit()
 		_TileInfos.push_back(TileInfos);		
 	}	
 
-	_ObjectsInfos = new CGameObject * *[YCount];
-
-	for (int i = 0; i < YCount; i++)
+	for (int32 i = 0; i < YCount; i++)
 	{
-		_ObjectsInfos[i] = new CGameObject * [XCount];
-		for (int j = 0; j < XCount; j++)
-		{
-			_ObjectsInfos[i][j] = nullptr;
-		}
-	}
+		vector<CGameObject*> ObjectInfos;
+
+		_ObjectInfos.push_back(ObjectInfos);
+	}	
 
 	_SeedObjectInfos = new CGameObject * *[YCount];
 
@@ -354,12 +349,9 @@ vector<st_FieldOfViewInfo> CMap::GetFieldOfViewObjects(CPlayer* Object)
 			}
 
 			// 맵에서 계산한 타일 위치 조사			
-			if (MapCheck.X >= 0 && MapCheck.X < _Right && MapCheck.Y >= 0 && MapCheck.Y < _Down)
+			if (MapCheck.X >= 0 && MapCheck.X < _Right && MapCheck.Y >= 0 && MapCheck.Y < _Up)
 			{
-				int X = MapCheck.X - _Left;
-				int Y = _Down - MapCheck.Y;
-
-				CGameObject* GameObject = _ObjectsInfos[Y][X];
+				CGameObject* GameObject = _ObjectInfos[MapCheck.Y][MapCheck.X];
 				if (GameObject != nullptr)
 				{
 					if (GameObject->_GameObjectInfo.ObjectId == FieldOfViewObject->_GameObjectInfo.ObjectId)
@@ -580,12 +572,9 @@ CGameObject* CMap::Find(Vector2Int& CellPosition)
 	if (CellPosition.Y < _Down || CellPosition.Y > _Up)
 	{
 		return nullptr;
-	}
+	}	
 
-	int X = CellPosition.X - _Left;
-	int Y = _Up - CellPosition.Y;
-
-	return _ObjectsInfos[Y][X];
+	return _ObjectInfos[CellPosition.Y][CellPosition.X];
 }
 
 CGameObject* CMap::FindPlant(Vector2Int& PlantPosition)
@@ -675,10 +664,7 @@ bool CMap::Cango(CGameObject* Object)
 		if (CollisionPosition.X != Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X
 			|| CollisionPosition.Y != Object->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y)
 		{
-			int X = CollisionPosition.X - _Left;
-			int Y = _Up - CollisionPosition.Y;
-
-			if (_ObjectsInfos[Y][X] != nullptr)
+			if (_ObjectInfos[CollisionPosition.Y][CollisionPosition.X] != nullptr)
 			{
 				return false;
 			}
@@ -754,21 +740,14 @@ bool CMap::ApplyMove(CGameObject* GameObject, Vector2Int& DestPosition, bool Che
 			// 호출해준 대상을 충돌체로 여긴다면
 			if (Applycollision == true)
 			{
-				int X = PositionInfo.CollisionPosition.X - _Left;
-				int Y = _Up - PositionInfo.CollisionPosition.Y;
-
-				// 기존위치 데이터는 날리고
-				if (_ObjectsInfos[Y][X] == GameObject)
+				// 기존위치 데이터는 날리고				
+				if (_ObjectInfos[PositionInfo.CollisionPosition.Y][PositionInfo.CollisionPosition.X] == GameObject)
 				{
-					_ObjectsInfos[Y][X] = nullptr;
-				}
-
-				// 목적지 위치 구해주고
-				X = DestPosition.X - _Left;
-				Y = _Up - DestPosition.Y;
+					_ObjectInfos[PositionInfo.CollisionPosition.Y][PositionInfo.CollisionPosition.X] = nullptr;
+				}			
 
 				// 목적지에 넣어준다.
-				_ObjectsInfos[Y][X] = GameObject;
+				_ObjectInfos[DestPosition.Y][DestPosition.X] = GameObject;				
 
 				int16 Width = GameObject->_GameObjectInfo.ObjectWidth;
 				int16 Height = GameObject->_GameObjectInfo.ObjectHeight;
@@ -777,7 +756,7 @@ bool CMap::ApplyMove(CGameObject* GameObject, Vector2Int& DestPosition, bool Che
 				{
 					for (int16 HeightY = 0; HeightY < Height; HeightY++)
 					{
-						_ObjectsInfos[Y + HeightY][X + WidthX] = GameObject;
+						_ObjectInfos[DestPosition.Y + HeightY][DestPosition.X + WidthX] = GameObject;
 					}
 				}
 			}
@@ -900,8 +879,8 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 	CSector* Sector = GetSector(GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition);
 	Sector->Remove(GameObject);
 
-	int X = GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X - _Left;
-	int Y = _Up - GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y;
+	int X = GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.X;
+	int Y = GameObject->_GameObjectInfo.ObjectPositionInfo.CollisionPosition.Y;
 
 	int Width = GameObject->_GameObjectInfo.ObjectWidth;
 	int Height = GameObject->_GameObjectInfo.ObjectHeight;
@@ -914,13 +893,13 @@ bool CMap::ApplyLeave(CGameObject* GameObject)
 	case en_GameObjectType::OBJECT_WALL:
 		{
 			// 맵에서 제거
-			if (_ObjectsInfos[Y][X] == GameObject)
+			if (_ObjectInfos[Y][X] == GameObject)
 			{
 				for (int16 WidthX = 0; WidthX < Width; WidthX++)
 				{
 					for (int16 HeightY = 0; HeightY < Height; HeightY++)
 					{
-						_ObjectsInfos[Y][X] = nullptr;
+						_ObjectInfos[Y][X] = nullptr;
 					}
 				}
 			}
@@ -1285,16 +1264,16 @@ bool CMap::FindPathNextPositionCango(CGameObject* Object, Vector2Int& NextPositi
 		return false;
 	}
 
-	int X = NextPosition.X - _Left;
-	int Y = _Up - NextPosition.Y;
+	int X = NextPosition.X;
+	int Y = NextPosition.Y;
 
 	//G_Logger->WriteStdOut(en_Color::RED, L"X : %d Y : %d \n", X, Y);
 
 	bool IsCollisionMapInfo = true;
 
-	if (_ObjectsInfos[Y][X] != nullptr)
+	if (_ObjectInfos[Y][X] != nullptr)
 	{
-		switch (_ObjectsInfos[Y][X]->_GameObjectInfo.ObjectType)
+		switch (_ObjectInfos[Y][X]->_GameObjectInfo.ObjectType)
 		{
 		case en_GameObjectType::OBJECT_WALL:
 		case en_GameObjectType::OBJECT_ARCHITECTURE_CRAFTING_TABLE_FURNACE:
@@ -1310,20 +1289,20 @@ bool CMap::FindPathNextPositionCango(CGameObject* Object, Vector2Int& NextPositi
 	{
 	case en_GameObjectType::OBJECT_GOBLIN:	
 		// 오브젝트 위치 배열이 비워 있을 경우 true 반환
-		if (_ObjectsInfos[Y][X] == nullptr)
+		if (_ObjectInfos[Y][X] == nullptr)
 		{			
 			ObjectCheck = true;			
 		}
 		else
 		{
 			// 비워 있지는 않지만 안에 있는 오브젝트가 이동하고자 하는 오브젝트일 경우
-			if (_ObjectsInfos[Y][X]->_GameObjectInfo.ObjectId == Object->_GameObjectInfo.ObjectId)
+			if (_ObjectInfos[Y][X]->_GameObjectInfo.ObjectId == Object->_GameObjectInfo.ObjectId)
 			{
 				ObjectCheck = true;
 			}
 			else // 안에 있는 오브젝트가 다른 오브젝트일 경우
 			{
-				if (_ObjectsInfos[Y][X]->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::DEAD)
+				if (_ObjectInfos[Y][X]->_GameObjectInfo.ObjectPositionInfo.State == en_CreatureState::DEAD)
 				{
 					ObjectCheck = true;
 				}
@@ -1391,15 +1370,20 @@ vector<st_TileInfo> CMap::GetTileInfos(Vector2Int CenterPosition, int16 RangeX, 
 	return AroundTileInfos;
 }
 
-void CMap::SetTileInfos(vector<st_TileInfo> TileInfos)
+void CMap::SetTileInfos(vector<st_TileInfo>& TileInfos)
 {
 	for (st_TileInfo const TileInfo : TileInfos)
 	{
-		_TileInfos[TileInfo.Position.Y].push_back(TileInfo);			
+		_TileInfos[TileInfo.Position.Y].push_back(TileInfo);
+	}
+
+	for (st_TileInfo const TileInfo : TileInfos)
+	{
+		_ObjectInfos[TileInfo.Position.Y].push_back(nullptr);
 	}
 }
 
-bool CMap::BuildingInstall(vector<st_TileInfo> BuildingTileInfos)
+bool CMap::BuildingInstall(vector<st_TileInfo>& BuildingTileInfos)
 {
 	bool IsBuildingSuccess = false;	
 

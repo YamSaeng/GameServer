@@ -137,8 +137,8 @@ public:
 	st_TileInfo GetTileInfo(Vector2Int Position);	
 	vector<st_TileInfo> GetTileInfos(Vector2Int CenterPosition, int16 RangeX, int16 RangeY);
 
-	void SetTileInfos(vector<st_TileInfo> TileInfos);
-	bool BuildingInstall(vector<st_TileInfo> BuildingTileInfos);
+	void SetTileInfos(vector<st_TileInfo>& TileInfos);
+	bool BuildingInstall(vector<st_TileInfo>& BuildingTileInfos);
 
 	void SetTileInfo(int8 XRange, int8 YRange, bool IsOccupdation, int64 OwnerObjectID);
 	void SetTileInfo(bool IsOccupdation, int64 OwnerObjectID, Vector2Int Position);	
@@ -146,10 +146,11 @@ private:
 	CChannelManager* _ChannelManager;
 	CSector** _Sectors;	
 
+	// 맵 타일 정보
 	vector<vector<st_TileInfo>> _TileInfos;	
 
 	// 맵 타일에 존재하는 게임 오브젝트 정보	
-	CGameObject*** _ObjectsInfos;
+	vector<vector<CGameObject*>> _ObjectInfos;		
 
 	// 맵 타일에 존재하는 씨앗 오브젝트 정보	
 	CGameObject*** _SeedObjectInfos;
