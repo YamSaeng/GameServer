@@ -81,10 +81,7 @@ void CGameServer::GameServerStart(const WCHAR* OpenIP, int32 Port)
 	SYSTEM_INFO SI;
 	GetSystemInfo(&SI);	
 
-	_Day = new CDay();
-
-	// 맵 정보를 읽어옴
-	G_MapManager->MapSave();	
+	_Day = new CDay();		
 
 	// 네트워크 매니저에 게임서버 할당
 	G_NetworkManager->SetGameServer(this);	
@@ -779,7 +776,7 @@ void CGameServer::PacketProcReqEnterGame(int64 SessionID, CMessage* Message)
 
 			if (FindName == false)
 			{
-				CMessage* ResEnterGamePacket = MakePacketResEnterGame(FindName, nullptr, nullptr, nullptr);
+				CMessage* ResEnterGamePacket = MakePacketResEnterGame(FindName, nullptr, nullptr);
 				SendPacket(Session->SessionId, ResEnterGamePacket);
 				ResEnterGamePacket->Free();
 				break;
@@ -2849,7 +2846,7 @@ void CGameServer::PacketProcReqBuildingInstall(int64 SessionID, CMessage* Messag
 					{
 						CMessage* ResBuildingInstallPacket = MakePacketResBuildingInstall(!BuildingInstallSuccess, TileInfos);
 						SendPacket(Session->SessionId, ResBuildingInstallPacket);
-						ResBuildingInstallPacket->Free();
+						ResBuildingInstallPacket->Free();						
 					}
 				}
 			}
@@ -5016,11 +5013,8 @@ void CGameServer::WorldMapTileInfoLoad()
 		TileInfos.push_back(TileInfo);
 	}	
 
-	CMap* Map = G_MapManager->GetMap(1);
-	if (Map != nullptr)
-	{
-		Map->SetTileInfos(TileInfos);
-	}
+	// 맵 정보 저장
+	G_MapManager->MapSave(TileInfos);
 
 	G_DBConnectionPool->Push(en_DBConnect::GAME, DBCharacterInfoGetConnection);
 }
@@ -6060,7 +6054,7 @@ st_GameObjectJob* CGameServer::MakeGameObjectJobInteraction(int16 InteractionTyp
 	return InteractionJob;
 }
 
-CGameServerMessage* CGameServer::MakePacketResEnterGame(bool EnterGameSuccess, st_GameObjectInfo* ObjectInfo, Vector2Int* SpawnPosition, vector<st_TileInfo>* AroundTileInfos)
+CGameServerMessage* CGameServer::MakePacketResEnterGame(bool EnterGameSuccess, st_GameObjectInfo* ObjectInfo, vector<st_TileInfo>* AroundTileInfos)
 {
 	CGameServerMessage* ResEnterGamePacket = CGameServerMessage::GameServerMessageAlloc();
 	if (ResEnterGamePacket == nullptr)
@@ -6076,11 +6070,6 @@ CGameServerMessage* CGameServer::MakePacketResEnterGame(bool EnterGameSuccess, s
 	if (ObjectInfo != nullptr)
 	{
 		*ResEnterGamePacket << *ObjectInfo;
-	}
-
-	if (SpawnPosition != nullptr)
-	{
-		*ResEnterGamePacket << *SpawnPosition;
 	}
 
 	if (AroundTileInfos->size() > 0)

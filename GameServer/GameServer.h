@@ -566,7 +566,7 @@ public:
 	//-------------------------------------------------------------
 	// 게임서버 입장 요청 응답 패킷 조합
 	//-------------------------------------------------------------
-	CGameServerMessage* MakePacketResEnterGame(bool EnterGameSuccess, st_GameObjectInfo* ObjectInfo, Vector2Int* SpawnPosition, vector<st_TileInfo>* AroundTileInfos);
+	CGameServerMessage* MakePacketResEnterGame(bool EnterGameSuccess, st_GameObjectInfo* ObjectInfo, vector<st_TileInfo>* AroundTileInfos);
 	//---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	// 게임서버 일반 데미지 응답 패킷 조합 ( 데미지 가한 대상 ID, 데미지 입은 대상 ID, 데미지를 입힌 기술 타입, 데미지 양, 크리티컬 여부)
 	//---------------------------------------------------------------------------------------------------------------------------------------------------------------------
